@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:200,400,700" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="docs/wp.min.css">
+    <title>ranjs</title>
+    <style>
+        span.ran:after {
+            content: 'ranjs';
+            font-weight: 400;
+            color: dodgerblue;
+        }
+    </style>
+</head>
+<body>
+<input type="checkbox" id="menu">
+<label for="menu" id="open">☰</label>
+<aside>
+    <div class="logo">ranjs</div>
+    <nav>
+        <div>
+            <a href="#what_is_this">what is this?</a>
+
+            <input type="checkbox" id="s1-how_to_use">
+            <label for="s1-how_to_use">how can I use it?</label>
+            <div class="s1">
+                <a href="#htu-browser">browser</a>
+                <a href="#htu-node">node</a>
+            </div>
+
+            <input type='checkbox' id='s1-ran'></input><label for='s1-ran'>api</label><div class='s1'><input type='checkbox' id='s2-ran.dist'></input><label for='s2-ran.dist'>dist</label><div class='s2'><a href='#api-ran.dist.uniform'>uniform</a><a href='#api-ran.dist.exponential'>exponential</a><a href='#api-ran.dist.normal'>normal</a><a href='#api-ran.dist.lognormal'>lognormal</a><a href='#api-ran.dist.pareto'>pareto</a><a href='#api-ran.dist.boundedPareto'>boundedPareto</a><a href='#api-ran.dist.weibull'>weibull</a><a href='#api-ran.dist.gamma'>gamma</a><a href='#api-ran.dist.inverseGamma'>inverseGamma</a><a href='#api-ran.dist.generalizedGamma'>generalizedGamma</a><a href='#api-ran.dist.erlang'>erlang</a><a href='#api-ran.dist.chi2'>chi2</a><a href='#api-ran.dist.maxwellBoltzmann'>maxwellBoltzmann</a><a href='#api-ran.dist.poisson'>poisson</a><input type='checkbox' id='s3-ran.dist.Alias'></input><label for='s3-ran.dist.Alias'>Alias</label><div class='s3'><a href='#api-ran.dist.Alias.reset'>reset</a><a href='#api-ran.dist.Alias.sample'>sample</a></div></div></div>
+        </div>
+    </nav>
+</aside>
+<main>
+    <h1 id="what_is_this">What is this?</h1>
+    <span class="ran"></span> is a random generator library.
+    <h1 id='how_to_use'>How can I use it?</h1>
+    <h2 id="htu-browser">Browser</h2>
+    Just include the minified js source in the header:
+    <pre>&lt;script type="text/javascript" src="ran.min.js"&gt;&lt;/script&gt;</pre>
+    <h2 id="htu-node">Node</h2>
+    TODO
+    <h1 id="api">API</h1>
+    <h2 id='api-ran'>ran</h2>Module for generating various random numbers.
+<br><h2 id='api-ran.dist'>ran.dist</h2>A collection of generators for well-known distributions. 
+<br><h3 id='api-ran.dist.uniform'>uniform</h3>
+<div class='card'><pre>ran.dist.uniform(min, max[, n])</pre>
+<br>Generates some uniformly distributed random values. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>min</i></td><td><code>number</code></td><td>Lower boundary.</td></tr><tr><td><i>max</i></td><td><code>number</code></td><td>Upper boundary.</td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of values to return. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single value or array of random values.</td></tr></table></div><br><h3 id='api-ran.dist.exponential'>exponential</h3>
+<div class='card'><pre>ran.dist.exponential(lambda[, n])</pre>
+<br>Generates some exponentially distributed random values. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>lambda</i></td><td><code>number</code></td><td>Rate parameter.</td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of values to return. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single value or array of random values.</td></tr></table></div><br><h3 id='api-ran.dist.normal'>normal</h3>
+<div class='card'><pre>ran.dist.normal(mu, sigma[, n])</pre>
+<br>Generates some normally distributed random values. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>mu</i></td><td><code>number</code></td><td>Location parameter (mean).</td></tr><tr><td><i>sigma</i></td><td><code>number</code></td><td>Squared scale parameter (variance).</td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of values to return. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single value or array of random values.</td></tr></table></div><br><h3 id='api-ran.dist.lognormal'>lognormal</h3>
+<div class='card'><pre>ran.dist.lognormal(mu, sigma[, n])</pre>
+<br>Generates some log-normally distributed random values. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>mu</i></td><td><code>number</code></td><td>Location parameter.</td></tr><tr><td><i>sigma</i></td><td><code>number</code></td><td>Scale parameter.</td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of values to return. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single value or array of random values.</td></tr></table></div><br><h3 id='api-ran.dist.pareto'>pareto</h3>
+<div class='card'><pre>ran.dist.pareto(xmin, alpha[, n])</pre>
+<br>Generates some Pareto distributed random values. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>xmin</i></td><td><code>number</code></td><td>Scale parameter.</td></tr><tr><td><i>alpha</i></td><td><code>number</code></td><td>Shape parameter.</td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of values to return. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single value or array of random values.</td></tr></table></div><br><h3 id='api-ran.dist.boundedPareto'>boundedPareto</h3>
+<div class='card'><pre>ran.dist.boundedPareto(xmin, xmax, alpha[, n])</pre>
+<br>Generates some bounded Pareto distributed random values. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>xmin</i></td><td><code>number</code></td><td>Lower boundary.</td></tr><tr><td><i>xmax</i></td><td><code>number</code></td><td>Upper boundary.</td></tr><tr><td><i>alpha</i></td><td><code>number</code></td><td>Shape parameter.</td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of values to return. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single value or array of random values.</td></tr></table></div><br><h3 id='api-ran.dist.weibull'>weibull</h3>
+<div class='card'><pre>ran.dist.weibull(lambda, k[, n])</pre>
+<br>Generates some Weibull distributed random values. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>lambda</i></td><td><code>number</code></td><td>Scale parameter.</td></tr><tr><td><i>k</i></td><td><code>number</code></td><td>Shape parameter.</td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of values to return. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single value or array of random values.</td></tr></table></div><br><h3 id='api-ran.dist.gamma'>gamma</h3>
+<div class='card'><pre>ran.dist.gamma(alpha, beta[, n])</pre>
+<br>Generates some gamma distributed random values according to the rate parametrization. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>alpha</i></td><td><code>number</code></td><td>Shape parameter.</td></tr><tr><td><i>beta</i></td><td><code>number</code></td><td>Rate parameter.</td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of values to return. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single value or array of random values.</td></tr></table></div><br><h3 id='api-ran.dist.inverseGamma'>inverseGamma</h3>
+<div class='card'><pre>ran.dist.inverseGamma(k, theta[, n])</pre>
+<br>Generates some inverse-gamma distributed random variables. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>k</i></td><td><code>number</code></td><td>Shape parameter.</td></tr><tr><td><i>theta</i></td><td><code>number</code></td><td>Scale parameter.</td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of values to return. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single value or array of random values.</td></tr></table></div><br><h3 id='api-ran.dist.generalizedGamma'>generalizedGamma</h3>
+<div class='card'><pre>ran.dist.generalizedGamma(a, d, p[, n])</pre>
+<br>Generates some generalized gamma distributed random variables. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>a</i></td><td><code>number</code></td><td>Scale parameter.</td></tr><tr><td><i>d</i></td><td><code>number</code></td><td>Shape parameter.</td></tr><tr><td><i>p</i></td><td><code>number</code></td><td>Shape parameter.</td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of values to return. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single value or array of random values.</td></tr></table></div><br><h3 id='api-ran.dist.erlang'>erlang</h3>
+<div class='card'><pre>ran.dist.erlang(k, lambda[, n])</pre>
+<br>Generates some Erlang distributed random variables. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>k</i></td><td><code>number</code></td><td>Shape parameter. It is rounded to the nearest integer.</td></tr><tr><td><i>lambda</i></td><td><code>number</code></td><td>Rate parameter.</td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of values to return. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single value or array of random values.</td></tr></table></div><br><h3 id='api-ran.dist.chi2'>chi2</h3>
+<div class='card'><pre>ran.dist.chi2(v[, n])</pre>
+<br>Generates some chi square distributed random variables. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>v</i></td><td><code>number</code></td><td>Degrees of freedom. It is rounded to the nearest integer.</td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of values to return. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single value or array of random values.</td></tr></table></div><br><h3 id='api-ran.dist.maxwellBoltzmann'>maxwellBoltzmann</h3>
+<div class='card'><pre>ran.dist.maxwellBoltzmann(a[, n])</pre>
+<br>Generates some Maxwell-Boltzmann distributed random variables. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>a</i></td><td><code>number</code></td><td>The parameter of the distribution (a = sqrt(kT/m)).</td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of values to return. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single value or array of random values.</td></tr></table></div><br><h3 id='api-ran.dist.poisson'>poisson</h3>
+<div class='card'><pre>ran.dist.poisson(lambda[, n])</pre>
+<br>Generates some Poisson distributed random values. FIXME use different methods for small/large lambda 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>lambda</i></td><td><code>number</code></td><td>Mean of the distribution.</td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of values to return. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single value or array of random values.</td></tr></table></div><br><h2 id='api-ran.dist.Alias'>Alias</h2>Class implementing the alias table method for custom distribution. 
+<br><h3 id='api-ran.dist.Alias.reset'>reset</h3>
+<div class='card'><pre>ran.dist.Alias.reset(w)</pre>
+<br>Resets alias table weights. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>w</i></td><td><code>Array</code></td><td>Array of weights to reset the alias table to.</td></tr></table>
+</div><br><h3 id='api-ran.dist.Alias.sample'>sample</h3>
+<div class='card'><pre>ran.dist.Alias.sample([n])</pre>
+<br>Samples some values from the alias table. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>n</i></td><td><code>number</code></td><td>Number of values to return. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single value or array of random values.</td></tr></table></div><br>
+    <label for="menu" id="exit"></label>
+</main>
+</body>
+</html>

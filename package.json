@@ -1,0 +1,35 @@
+{
+  "name": "ranjs",
+  "version": "0.0.1",
+  "description": "Library for generating various random variables",
+  "main": "ran.min.js",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "jstat": "^1.6.3",
+    "mathjs": "^3.14.1",
+    "mocha": "^3.4.2",
+    "uglify-js": "^3.0.20"
+  },
+  "scripts": {
+    "test": "mocha --recursive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://synesenom@github.com/synesenom/ran.git"
+  },
+  "keywords": [
+    "random",
+    "generator",
+    "distributions",
+    "css",
+    "svg"
+  ],
+  "author": "Enys Mones <enys.mones@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/synesenom/ran/issues"
+  },
+  "homepage": "https://synesenom.github.io/ran/"
+}
