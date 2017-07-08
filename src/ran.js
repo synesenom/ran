@@ -1,20 +1,13 @@
 /**
  * Module for generating various random numbers.
  * @module ran
- *
- * @todo add some more distributions: https://en.wikipedia.org/wiki/List_of_probability_distributions
- * @todo add processes: https://en.wikipedia.org/wiki/Stochastic_process
  */
-// UMD
 (function (global, factory) {
     if (typeof exports === "object" && typeof module !== "undefined") {
-        // Common JS
         factory(exports);
     } else if (typeof define === 'function' && define['amd']) {
-        // AMD
         define(['exports'], factory);
     } else {
-        // Browser
         factory((global.ran = global['ran'] || {}));
     }
 } (this, (function (exports) { "use strict";
@@ -200,6 +193,7 @@
      * @namespace dist
      * @memberOf ran
      */
+    // TODO distributions to add: https://en.wikipedia.org/wiki/List_of_probability_distributions
     var dist = (function(){
         /**
          * Generates some uniformly distributed random values.
@@ -460,10 +454,10 @@
          *
          * @class Alias
          * @memberOf ran.dist
-         * @param {Array} weights Array of weights to init the alias table with.
+         * @param {Array} probs Array of weights to init the alias table with.
          * @constructor
          */
-        function Alias(weights) {
+        function Alias(probs) {
             var _n = 0;
             var _prob = [0];
             var _alias = [0];
@@ -535,7 +529,7 @@
                     _alias[s] = s;
                 }
             };
-            this.reset(weights);
+            this.reset(probs);
 
             /**
              * Samples some values from the alias table.
@@ -580,7 +574,32 @@
         };
     })();
 
+    // TODO next()
+    // TODO trend()
+    // TODO noise()
+    // TODO mean(power)
+    // TODO correlation()
+    // TODO Processes to add: https://en.wikipedia.org/wiki/Stochastic_process
+    var process = (function() {
+        function Brown() {
+
+        }
+
+        function Wiener(mu, sigma) {
+
+        }
+
+        function OrsteinUhlenbeck() {
+
+        }
+
+        function Gaussian() {
+
+        }
+    })();
+
     // Exports
+    // TODO add process
     exports._special = special;
     exports.dist = dist;
 })));
