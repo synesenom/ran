@@ -7,7 +7,7 @@ var special = require('../src/ran')._special;
 
 var LAPS = 1000;
 
-describe('dice', function() {
+describe('ran', function() {
     describe('dist', function() {
         /// Continuous distributions ///
         describe('uniform', function () {
