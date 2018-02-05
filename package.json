@@ -7,9 +7,9 @@
     "test": "test"
   },
   "devDependencies": {
-    "jstat": "^1.6.3",
-    "mathjs": "^3.14.1",
-    "mocha": "^3.4.2",
+    "jstat": "^1.7.1",
+    "mathjs": "^3.20.1",
+    "mocha": "^3.5.3",
     "uglify-js": "^3.0.20"
   },
   "scripts": {

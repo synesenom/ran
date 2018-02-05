@@ -86,6 +86,8 @@ class DocBlock:
         name = self.id()
         if 'memberOf' in self._block:
             return self._block['memberOf'][0][0]['name'] + "." + name
+        elif 'methodOf' in self._block:
+            return self._block['methodOf'][0][0]['name'] + "." + name
         else:
             if 'module' in self._block:
                 return name

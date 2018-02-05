@@ -7,17 +7,14 @@
     <link rel="stylesheet" type="text/css" href="wp.min.css">
     <title>ranjs</title>
     <style>
-        span.ran:after {
-            content: 'ranjs';
+        span.dice:after {
+            content: 'dice.js';
             font-weight: 400;
             color: dodgerblue;
         }
     </style>
 </head>
 <body>
-<!-- Github banner -->
-<a href="https://github.com/synesenom/ranjs"><img style="position: fixed; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
-
 <input type="checkbox" id="menu">
 <label for="menu" id="open">☰</label>
 <aside>
@@ -33,25 +30,47 @@
                 <a href="#htu-node">node</a>
             </div>
 
-            <input type='checkbox' id='s1-ran'></input><label for='s1-ran'>api</label><div class='s1'><input type='checkbox' id='s2-ran.dist'></input><label for='s2-ran.dist'>dist</label><div class='s2'><a href='#api-ran.dist.uniform'>uniform</a><a href='#api-ran.dist.exponential'>exponential</a><a href='#api-ran.dist.normal'>normal</a><a href='#api-ran.dist.lognormal'>lognormal</a><a href='#api-ran.dist.pareto'>pareto</a><a href='#api-ran.dist.boundedPareto'>boundedPareto</a><a href='#api-ran.dist.weibull'>weibull</a><a href='#api-ran.dist.gamma'>gamma</a><a href='#api-ran.dist.inverseGamma'>inverseGamma</a><a href='#api-ran.dist.generalizedGamma'>generalizedGamma</a><a href='#api-ran.dist.erlang'>erlang</a><a href='#api-ran.dist.chi2'>chi2</a><a href='#api-ran.dist.maxwellBoltzmann'>maxwellBoltzmann</a><a href='#api-ran.dist.poisson'>poisson</a><input type='checkbox' id='s3-ran.dist.Alias'></input><label for='s3-ran.dist.Alias'>Alias</label><div class='s3'><a href='#api-ran.dist.Alias.reset'>reset</a><a href='#api-ran.dist.Alias.sample'>sample</a></div></div></div>
+            <input type="checkbox" id="s1-api">
+            <label for="s1-api">api</label>
+            <div class="s1">
+                <input type='checkbox' id='s1-ran'></input><label for='s1-ran'>ran</label><div class='s1'><input type='checkbox' id='s2-ran.core'></input><label for='s2-ran.core'>core</label><div class='s2'><a href='#api-ran.core.float'>float</a><a href='#api-ran.core.int'>int</a><a href='#api-ran.core.choice'>choice</a><a href='#api-ran.core.shuffle'>shuffle</a><a href='#api-ran.core.coin'>coin</a></div><input type='checkbox' id='s2-ran.dist'></input><label for='s2-ran.dist'>dist</label><div class='s2'><a href='#api-ran.dist.uniform'>uniform</a><a href='#api-ran.dist.exponential'>exponential</a><a href='#api-ran.dist.normal'>normal</a><a href='#api-ran.dist.lognormal'>lognormal</a><a href='#api-ran.dist.pareto'>pareto</a><a href='#api-ran.dist.boundedPareto'>boundedPareto</a><a href='#api-ran.dist.weibull'>weibull</a><a href='#api-ran.dist.gamma'>gamma</a><a href='#api-ran.dist.inverseGamma'>inverseGamma</a><a href='#api-ran.dist.generalizedGamma'>generalizedGamma</a><a href='#api-ran.dist.erlang'>erlang</a><a href='#api-ran.dist.chi2'>chi2</a><a href='#api-ran.dist.maxwellBoltzmann'>maxwellBoltzmann</a><a href='#api-ran.dist.poisson'>poisson</a><input type='checkbox' id='s3-ran.dist.Alias'></input><label for='s3-ran.dist.Alias'>Alias</label><div class='s3'><a href='#api-ran.dist.Alias.reset'>reset</a><a href='#api-ran.dist.Alias.sample'>sample</a></div></div></div>
+            </div>
         </div>
     </nav>
 </aside>
 <main>
     <h1 id="what_is_this">What is this?</h1>
-    <span class="ran"></span> is a random generator library.
+    <span class="dice"></span> is a random generator library.
     <h1 id='how_to_use'>How can I use it?</h1>
     <h2 id="htu-browser">Browser</h2>
-    Just include the <a href="https://raw.githubusercontent.com/synesenom/ran/master/ran.min.js">minified js</a> source in the header:
+    Just include the minified js source in the header:
     <pre>&lt;script type="text/javascript" src="ran.min.js"&gt;&lt;/script&gt;</pre>
     <h2 id="htu-node">Node</h2>
-    <h3>Install</h3>
-    <pre>npm install ranjs</pre>
-    <h3>Usage</h3>
-    <pre>var ran = require('ranjs');</pre>
+    TODO
     <h1 id="api">API</h1>
     <h2 id='api-ran'>ran</h2>Module for generating various random numbers.
-<br><h2 id='api-ran.dist'>ran.dist</h2>A collection of generators for well-known distributions. 
+<br><h2 id='api-ran.core'>ran.core</h2>Core random generators and manipulators. 
+<br><h3 id='api-ran.core.float'>float</h3>
+<div class='card'><pre>ran.core.float([min[, max[, n]]])</pre>
+<br>Generates some uniformly distributed random floats in (min, max). If min > max, a random float in (max, min) is generated. If no parameters are passed, generates a single random float between 0 and 1. If only min is specified, generates a single random float between 0 and min. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>min</i></td><td><code>number</code></td><td>Lower boundary, or upper if max is not given. <code>optional</code></td></tr><tr><td><i>max</i></td><td><code>number</code></td><td>Upper boundary. <code>optional</code></td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of floats to generate. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single float or array of random floats.</td></tr></table></div><br><h3 id='api-ran.core.int'>int</h3>
+<div class='card'><pre>ran.core.int(min[, max[, n]])</pre>
+<br>Generates some uniformly distributed random integers in (min, max). If min > max, a random integer in (max, min) is generated. If only min is specified, generates a single random integer between 0 and min. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>min</i></td><td><code>number</code></td><td>Lower boundary, or upper if max is not specified.</td></tr><tr><td><i>max</i></td><td><code>number</code></td><td>Upper boundary. <code>optional</code></td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of integers to generate. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single integer or array of random integers.</td></tr></table></div><br><h3 id='api-ran.core.choice'>choice</h3>
+<div class='card'><pre>ran.core.choice(values[, n])</pre>
+<br>Samples some elements with replacement from an array with uniform distribution. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>values</i></td><td><code>Array</code></td><td>Array to sample from.</td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of elements to sample. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>object</code> <code>Array</code></i></td><td>Single element or array of sampled elements. If array is invalid, null pointer is returned.</td></tr></table></div><br><h3 id='api-ran.core.shuffle'>shuffle</h3>
+<div class='card'><pre>ran.core.shuffle(values)</pre>
+<br>Shuffles an array in-place using the Fisher--Yates algorithm. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>values</i></td><td><code>Array</code></td><td>Array to shuffle. @return {Array} The shuffled array.</td></tr></table>
+</div><br><h3 id='api-ran.core.coin'>coin</h3>
+<div class='card'><pre>ran.core.coin(head, tail[, p[, n]])</pre>
+<br>Flips a biased coin several times and returns the associated head/tail value or array of values. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>head</i></td><td><code>object</code></td><td>Head value.</td></tr><tr><td><i>tail</i></td><td><code>object</code></td><td>Tail value.</td></tr><tr><td><i>p</i></td><td><code>number</code></td><td>Bias (probability of head). If not specified, 0.5 is used. <code>optional</code></td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of coins to flip. <code>optional</code></td></tr></table>
+<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>object</code> <code>Array</code></i></td><td>Object of head/tail value or an array of head/tail values.</td></tr></table></div><br><h2 id='api-ran.dist'>ran.dist</h2>A collection of generators for well-known distributions. 
 <br><h3 id='api-ran.dist.uniform'>uniform</h3>
 <div class='card'><pre>ran.dist.uniform(min, max[, n])</pre>
 <br>Generates some uniformly distributed random values. 

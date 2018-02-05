@@ -16,7 +16,7 @@
      * If min > max, a random number in (max, min) is generated.
      *
      * @method r
-     * @memberOf ran
+     * @methodOf ran
      * @param {number} min Lower boundary.
      * @param {number} max Upper boundary.
      * @returns {number} Random number.
@@ -30,7 +30,7 @@
      * Runs a generator once or several times to return a single value or an array of values.
      *
      * @method some
-     * @memberOf ran
+     * @methodOf ran
      * @param {function} generator Random generator to use.
      * @param {number=} k Number of values to generate.
      * @returns {(number|string|Array)} Single value or array of generated values.
@@ -188,6 +188,139 @@
     })();
 
     /**
+     * Core random generators and manipulators.
+     *
+     * @namespace core
+     * @memberOf ran
+     */
+    var core = (function() {
+        /**
+         * Generates some uniformly distributed random floats in (min, max).
+         * If min > max, a random float in (max, min) is generated.
+         * If no parameters are passed, generates a single random float between 0 and 1.
+         * If only min is specified, generates a single random float between 0 and min.
+         *
+         * @method float
+         * @methodOf ran.core
+         * @param {number=} min Lower boundary, or upper if max is not given.
+         * @param {number=} max Upper boundary.
+         * @param {number=} n Number of floats to generate.
+         * @returns {(number|Array)} Single float or array of random floats.
+         */
+        function float(min, max, n) {
+            if (arguments.length === 0)
+                return _r(0, 1);
+            if (arguments.length === 1)
+                return _r(0, min);
+            return _some(function () {
+                return _r(min, max);
+            }, n);
+        }
+
+        /**
+         * Generates some uniformly distributed random integers in (min, max).
+         * If min > max, a random integer in (max, min) is generated.
+         * If only min is specified, generates a single random integer between 0 and min.
+         *
+         * @method int
+         * @methodOf ran.core
+         * @param {number} min Lower boundary, or upper if max is not specified.
+         * @param {number=} max Upper boundary.
+         * @param {number=} n Number of integers to generate.
+         * @returns {(number|Array)} Single integer or array of random integers.
+         */
+        function int(min, max, n) {
+            if (arguments.length === 1)
+                return Math.floor(_r(0, min + 1));
+            return _some(function () {
+                return Math.floor(_r(min, max + 1));
+            }, n);
+        }
+
+        /**
+         * Samples some elements with replacement from an array with uniform distribution.
+         *
+         * @method choice
+         * @methodOf ran.core
+         * @param {Array} values Array to sample from.
+         * @param {number=} n Number of elements to sample.
+         * @returns {(object|Array)} Single element or array of sampled elements.
+         * If array is invalid, null pointer is returned.
+         */
+        function choice(values, n) {
+            if (values === null || values === undefined || values.length === 0)
+                return null;
+            return _some(function () {
+                return values[Math.floor(_r(0, values.length))];
+            }, n);
+        }
+
+        /**
+         * Samples some characters with replacement from a string with uniform distribution.
+         *
+         * @method char
+         * @methodOf char.core
+         * @param {string} string String to sample characters from.
+         * @param {number=} n Number of characters to sample.
+         * @returns {(string|Array)} Random character if k is not given or less than 2, an array of random characters otherwise.
+         */
+        function char(string, n) {
+            if (string === null || string === undefined || string.length === 0)
+                return "";
+            return _some(function () {
+                return string.charAt(Math.floor(_r(0, string.length)));
+            }, n);
+        }
+
+        /**
+         * Shuffles an array in-place using the Fisher--Yates algorithm.
+         *
+         * @method shuffle
+         * @methodOf ran.core
+         * @param {Array} values Array to shuffle.
+         * @return {Array} The shuffled array.
+         */
+        function shuffle(values) {
+            var i, tmp, l = values.length;
+            while (l) {
+                i = Math.floor(Math.random() * l--);
+                tmp = values[l];
+                values[l] = values[i];
+                values[i] = tmp;
+            }
+            return values;
+        }
+
+        /**
+         * Flips a biased coin several times and returns the associated head/tail value or array of values.
+         *
+         * @method coin
+         * @methodOf ran.core
+         * @param {object} head Head value.
+         * @param {object} tail Tail value.
+         * @param {number=} p Bias (probability of head). If not specified, 0.5 is used.
+         * @param {number=} n Number of coins to flip.
+         * @returns {(object|Array)} Object of head/tail value or an array of head/tail values.
+         */
+        function coin(head, tail, p, n) {
+            var prob = p ? p : 0.5;
+            return _some(function () {
+                return Math.random() < prob ? head : tail;
+            }, n);
+        }
+
+        // Public methods
+        return {
+            float: float,
+            int: int,
+            choice: choice,
+            char: char,
+            shuffle: shuffle,
+            coin: coin
+        };
+    })();
+
+    /**
      * A collection of generators for well-known distributions.
      *
      * @namespace dist
@@ -199,7 +332,7 @@
          * Generates some uniformly distributed random values.
          *
          * @method uniform
-         * @memberOf ran.dist
+         * @methodOf ran.dist
          * @param {number} min Lower boundary.
          * @param {number} max Upper boundary.
          * @param {number=} n Number of values to return.
@@ -215,7 +348,7 @@
          * Generates some exponentially distributed random values.
          *
          * @method exponential
-         * @memberOf ran.dist
+         * @methodOf ran.dist
          * @param {number} lambda Rate parameter.
          * @param {number=} n Number of values to return.
          * @returns {number|Array} Single value or array of random values.
@@ -230,7 +363,7 @@
          * Generates some normally distributed random values.
          *
          * @method normal
-         * @memberOf ran.dist
+         * @methodOf ran.dist
          * @param {number} mu Location parameter (mean).
          * @param {number} sigma Squared scale parameter (variance).
          * @param {number=} n Number of values to return.
@@ -248,7 +381,7 @@
          * Generates some log-normally distributed random values.
          *
          * @method lognormal
-         * @memberOf ran.dist
+         * @methodOf ran.dist
          * @param {number} mu Location parameter.
          * @param {number} sigma Scale parameter.
          * @param {number=} n Number of values to return.
@@ -266,7 +399,7 @@
          * Generates some Pareto distributed random values.
          *
          * @method pareto
-         * @memberOf ran.dist
+         * @methodOf ran.dist
          * @param {number} xmin Scale parameter.
          * @param {number} alpha Shape parameter.
          * @param {number=} n Number of values to return.
@@ -282,7 +415,7 @@
          * Generates some bounded Pareto distributed random values.
          *
          * @method boundedPareto
-         * @memberOf ran.dist
+         * @methodOf ran.dist
          * @param {number} xmin Lower boundary.
          * @param {number} xmax Upper boundary.
          * @param {number} alpha Shape parameter.
@@ -301,7 +434,7 @@
          * Generates some Weibull distributed random values.
          *
          * @method weibull
-         * @memberOf ran.dist
+         * @methodOf ran.dist
          * @param {number} lambda Scale parameter.
          * @param {number} k Shape parameter.
          * @param {number=} n Number of values to return.
@@ -317,7 +450,7 @@
          * Generates some gamma distributed random values according to the rate parametrization.
          *
          * @method gamma
-         * @memberOf ran.dist
+         * @methodOf ran.dist
          * @param {number} alpha Shape parameter.
          * @param {number} beta Rate parameter.
          * @param {number=} n Number of values to return.
@@ -354,7 +487,7 @@
          * Generates some inverse-gamma distributed random variables.
          *
          * @method inverseGamma
-         * @memberOf ran.dist
+         * @methodOf ran.dist
          * @param {number} k Shape parameter.
          * @param {number} theta Scale parameter.
          * @param {number=} n Number of values to return.
@@ -370,7 +503,7 @@
          * Generates some generalized gamma distributed random variables.
          *
          * @method generalizedGamma
-         * @memberOf ran.dist
+         * @methodOf ran.dist
          * @param {number} a Scale parameter.
          * @param {number} d Shape parameter.
          * @param {number} p Shape parameter.
@@ -390,7 +523,7 @@
          * Generates some Erlang distributed random variables.
          *
          * @method erlang
-         * @memberOf ran.dist
+         * @methodOf ran.dist
          * @param {number} k Shape parameter. It is rounded to the nearest integer.
          * @param {number} lambda Rate parameter.
          * @param {number=} n Number of values to return.
@@ -404,7 +537,7 @@
          * Generates some chi square distributed random variables.
          *
          * @method chi2
-         * @memberOf ran.dist
+         * @methodOf ran.dist
          * @param {number} v Degrees of freedom. It is rounded to the nearest integer.
          * @param {number=} n Number of values to return.
          * @returns {(number|Array)} Single value or array of random values.
@@ -417,7 +550,7 @@
          * Generates some Maxwell-Boltzmann distributed random variables.
          *
          * @method maxwellBoltzmann
-         * @memberOf ran.dist
+         * @methodOf ran.dist
          * @param {number} a The parameter of the distribution (a = sqrt(kT/m)).
          * @param {number=} n Number of values to return.
          * @returns {(number|Array)} Single value or array of random values.
@@ -431,7 +564,7 @@
          * FIXME use different methods for small/large lambda
          *
          * @method poisson
-         * @memberOf ran.dist
+         * @methodOf ran.dist
          * @param {number} lambda Mean of the distribution.
          * @param {number=} n Number of values to return.
          * @returns {(number|Array)} Single value or array of random values.
@@ -466,7 +599,7 @@
              * Resets alias table weights.
              *
              * @method reset
-             * @memberOf ran.dist.Alias
+             * @methodOf ran.dist.Alias
              * @param {Array} w Array of weights to reset the alias table to.
              */
             this.reset = function(w) {
@@ -535,7 +668,7 @@
              * Samples some values from the alias table.
              *
              * @method sample
-             * @memberOf ran.dist.Alias
+             * @methodOf ran.dist.Alias
              * @param {number=} n Number of values to return.
              * @returns {(number|Array)} Single value or array of random values.
              */
@@ -601,5 +734,6 @@
     // Exports
     // TODO add process
     exports._special = special;
+    exports.core = core;
     exports.dist = dist;
 })));
