@@ -202,7 +202,7 @@ describe('ran', function() {
                     // Distribution is uniform
                     return utils.chi_test(values, function(x) {
                         return x == head ? p : 1-p;
-                    }, 0);
+                    }, 1);
                 });
             });
         });

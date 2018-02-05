@@ -170,6 +170,9 @@ class DocBuilder:
         def _codify(text):
             return re.sub(r'\{(.*)\}', r'<code>\1</code>', text)
 
+        def _linkify(text):
+            return re.sub(r'\[(.*)\]\{@link (.*)\}', r'<a href="\2" target="_blank">\1</a>', text)
+
         def _tagify(text, tag, attr={}):
             ltag = "<" + tag
             for k, v in attr.items():
@@ -220,7 +223,7 @@ class DocBuilder:
             Creates the HTML content for a method block.
 
             :param b: Block to make content for.
-            :return: HTML conten for the method block.
+            :return: HTML content for the method block.
             """
             name = "<h3 id='api-%s'>%s</h3>\n" % (b.path(), b.id())
 
@@ -247,7 +250,7 @@ class DocBuilder:
             html += _tagify(b.path() + "(" + code + ")", "pre") + "\n"
 
             # Add description
-            html += "<br>" + _codify(b['desc']) + "\n"
+            html += "<br>" + _codify(_linkify(b['desc'])) + "\n"
 
             # Add parameter description
             if len(params) > 0:
@@ -270,13 +273,13 @@ class DocBuilder:
                 retdesc = _tagify(
                     _tagify("<th class='fifth'>return</th><th>description</th>", "tr"),
                     "thead") + _tagify("<td><i>%s</i></td><td>%s</td>"
-                                             % (' '.join(_tagify(rt, "code") for rt in ret[0]['type']['types']),
-                                                ret[0]['desc']), "tr")
+                                       % (' '.join(_tagify(rt, "code") for rt in ret[0]['type']['types']),
+                                          ret[0]['desc']), "tr")
                 html += _tagify(retdesc, "table")
 
             # Add override
             if b['override']:
-                html += "<br>" + "Overrides: " + _codify(b['override'][0][0]['name'])
+                html += "<br>" + "Overrides: " + _codify(_linkify(b['override'][0][0]['name']))
 
             return name + _tagify(html, "div", {'class': 'card'}) + "<br>"
 
@@ -307,7 +310,7 @@ class DocBuilder:
                 if t in ['module', 'namespace']:
                     main += "<h2 id='api-%s'>%s</h2>%s\n" % (block.path(), block.path(), block['desc']) + "<br>"
                 if t == 'class':
-                    main += "<h2 id='api-%s'>%s</h2>%s\n" % (block.path(), block.id(), block['desc']) + "<br>"
+                    main += "<h2 id='api-%s'>%s</h2>%s\n" % (block.path(), block.id(), _linkify(block['desc'])) + "<br>"
                 if t == 'method':
                     main += _method(block)
 
