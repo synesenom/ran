@@ -452,6 +452,9 @@
                 }, n);
             }
 
+            // TODO binomial (http://www.aip.de/groups/soe/local/numres/bookcpdf/c7-3.pdf)
+        // TODO
+
             /**
              * Generates some [bounded Pareto]{@link https://en.wikipedia.org/wiki/Pareto_distribution#Bounded_Pareto_distribution}
              * distributed random values.
@@ -760,6 +763,10 @@
         }
 
         function Gaussian() {
+
+        }
+
+        function GaltonWatson() {
 
         }
     })();
