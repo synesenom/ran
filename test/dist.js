@@ -1,9 +1,6 @@
 var assert = require('assert');
 var utils = require('../test/test-utils').test_uils;
-var math = require('mathjs');
-var jstat = require('jstat');
 var dist = require('../src/ran').dist;
-var special = require('../src/ran').special;
 
 var LAPS = 1000;
 var MAX_AVG_DIFF = 1e-3;
@@ -43,7 +40,7 @@ describe('ran', function() {
                 utils.trials(function() {
                     var bernoulli = new dist.Bernoulli(Math.random());
                     return utils.diff_disc(bernoulli.pmf, bernoulli.cdf, 0, 1) < MAX_AVG_DIFF;
-                }, true);
+                });
             });
         });
 
@@ -58,13 +55,14 @@ describe('ran', function() {
                 });
             });
             it('integral of pdf should give cdf', function () {
+                this.timeout(0);
                 utils.trials(function() {
                     const xmin = Math.random()*10 + 1;
                     const xmax = xmin + Math.random()*20 + 2;
                     const alpha = Math.random()*5 + 1;
                     var boundedPareto = new dist.BoundedPareto(xmin, xmax, alpha);
                     return utils.diff_cont(boundedPareto.pdf, boundedPareto.cdf, xmin-10, xmax+10, 0.01) < MAX_AVG_DIFF;
-                }, true);
+                });
             });
         });
 
@@ -82,7 +80,7 @@ describe('ran', function() {
                     const k = Math.round(Math.random()*10) + 1;
                     var chi2 = new dist.Chi2(k);
                     return utils.diff_cont(chi2.pdf, chi2.cdf, 0, 10, 0.01) < MAX_AVG_DIFF;
-                }, true);
+                });
             });
         });
 
@@ -102,7 +100,7 @@ describe('ran', function() {
                     const lambda = Math.random()*3 + 0.1;
                     var erlang = new dist.Erlang(k, lambda);
                     return utils.diff_cont(erlang.pdf, erlang.cdf, 0, 10, 0.01) < MAX_AVG_DIFF;
-                }, true);
+                });
             });
         });
 
@@ -120,7 +118,7 @@ describe('ran', function() {
                     const lambda = Math.random()*10 + 0.1;
                     var exponential = new dist.Exponential(lambda);
                     return utils.diff_cont(exponential.pdf, exponential.cdf, 0, 10, 0.01) < MAX_AVG_DIFF;
-                }, true);
+                });
             });
         });
 
@@ -140,7 +138,7 @@ describe('ran', function() {
                     const beta = Math.random()*3 + 0.5;
                     var gamma = new dist.Gamma(alpha, beta);
                     return utils.diff_cont(gamma.pdf, gamma.cdf, 0, 10, 0.01) < MAX_AVG_DIFF;
-                }, true);
+                });
             });
         });
 
@@ -162,7 +160,7 @@ describe('ran', function() {
                     const p = Math.random()*3 + 1;
                     var generalizedGamma = new dist.GeneralizedGamma(a, d, p);
                     return utils.diff_cont(generalizedGamma.pdf, generalizedGamma.cdf, 0, 10, 0.01) < MAX_AVG_DIFF;
-                }, true);
+                });
             });
         });
 
@@ -182,7 +180,7 @@ describe('ran', function() {
                     const beta = Math.random()*3 + 0.5;
                     var inverseGamma = new dist.InverseGamma(alpha, beta);
                     return utils.diff_cont(inverseGamma.pdf, inverseGamma.cdf, 0, 10, 0.01) < MAX_AVG_DIFF;
-                }, true);
+                });
             });
         });
 
@@ -202,7 +200,7 @@ describe('ran', function() {
                     const sigma = Math.random()*3 + 0.1;
                     var lognormal = dist.Lognormal(mu, sigma);
                     return utils.diff_cont(lognormal.pdf, lognormal.cdf, 0, 10, 0.01) < MAX_AVG_DIFF;
-                }, true);
+                });
             });
         });
 
@@ -222,7 +220,7 @@ describe('ran', function() {
                     const sigma = Math.random()*10 + 0.1;
                     var normal = dist.Normal(mu, sigma);
                     return utils.diff_cont(normal.pdf, normal.cdf, -100, 100, 0.01) < MAX_AVG_DIFF;
-                }, true);
+                });
             });
         });
 
@@ -241,8 +239,8 @@ describe('ran', function() {
                     const xmin = Math.random()*10 + 0.1;
                     const alpha = Math.random()*5 + 0.1;
                     var pareto = new dist.Pareto(xmin, alpha);
-                    return utils.diff_cont(pareto.pdf, pareto.cdf, 0, 100, 0.1) < MAX_AVG_DIFF;
-                }, true);
+                    return utils.diff_cont(pareto.pdf, pareto.cdf, 0, 10, 0.1) < MAX_AVG_DIFF;
+                });
             });
         });
 
@@ -259,7 +257,7 @@ describe('ran', function() {
                     const lambda = Math.random()*10 + 1;
                     var poisson = new dist.Poisson(lambda);
                     return utils.diff_disc(poisson.pmf, poisson.cdf, 0, 100) < MAX_AVG_DIFF;
-                }, true);
+                });
             });
         });
 
@@ -279,7 +277,7 @@ describe('ran', function() {
                     const xmax = xmin + Math.random()*50;
                     var uniform = new dist.Uniform(xmin, xmax);
                     return utils.diff_cont(uniform.pdf, uniform.cdf, -100, 100, 0.1) < MAX_AVG_DIFF;
-                }, true);
+                });
             });
         });
 
@@ -299,7 +297,7 @@ describe('ran', function() {
                     const k = Math.random()*10 + 0.5;
                     var weibull = new dist.Weibull(lambda, k);
                     return utils.diff_cont(weibull.pdf, weibull.cdf, 0, 20, 0.01) < MAX_AVG_DIFF;
-                }, true);
+                });
             });
         });
     });
