@@ -2,6 +2,15 @@
  * Module for generating various random numbers.
  * @module ran
  */
+// TODO test PDFs by using in test function and integrating
+// TODO test CDFs by using in test functions
+// TODO binomial (http://www.aip.de/groups/soe/local/numres/bookcpdf/c7-3.pdf)
+// TODO speed bounded pareto up! Only pre-calculate heavy stuff
+// TODO speed up things by pre-computing constants
+// TODO subclass discrete and continuous distributions from parent distribution
+// TODO simplify equations
+// TODO speed up initial pre-computations
+// TODO speed up Poisson by using different algorithms for low/high lambda
 (function (global, factory) {
     if (typeof exports === "object" && typeof module !== "undefined") {
         factory(exports);
@@ -50,7 +59,7 @@
     }
 
     /**
-     * Some special functions.
+     * Module containing some special functions.
      *
      * @namespace special
      * @memberOf ran
@@ -79,7 +88,7 @@
          * Gamma function, using the Lanczos approximation.
          *
          * @method gamma
-         * @memberOf ran.special
+         * @methodOf ran.special
          * @param {number} z Value to evaluate Gamma function at.
          * @returns {number} Gamma function value.
          * @private
@@ -122,8 +131,8 @@
          * Lower incomplete gamma function, using the series expansion and continued fraction approximations.
          *
          * @method gammaLowerIncomplete
-         * @memberOf ran.special
-         * @param {number} a Parameter of the integrand in the integral definition.
+         * @methodOf ran.special
+         * @param {number} s Parameter of the integrand in the integral definition.
          * @param {number} x Lower boundary of the integral.
          * @returns {number} Value of the lower incomplete gamma function.
          * @private
@@ -183,9 +192,51 @@
             };
         })();
 
+        /**
+         * Error function.
+         *
+         * @method erf
+         * @methodOf ran.special
+         * @param {number} x Value to evaluate the error function at.
+         * @returns {number} Error function value.
+         * @private
+         */
+        var erf = (function() {
+            // Coefficients
+            var _p = [
+                -1.26551223,
+                1.00002368,
+                0.37409196,
+                0.09678418,
+                -0.18628806,
+                0.27886807,
+                -1.13520398,
+                1.48851587,
+                -0.82215223,
+                0.17087277
+            ];
+
+            function _erf(x) {
+                var t = 1 / (1 + 0.5*Math.abs(x));
+                var tp = 1;
+                var sum = 0;
+                _p.forEach(function(p, i) {
+                    sum += p * tp;
+                    tp *= t;
+                });
+                var tau = t * Math.exp(sum - x*x);
+
+                return x < 0 ? tau - 1 : 1 - tau;
+            }
+
+            return _erf;
+        })();
+
+        // Exposed methods
         return {
             gamma: gamma,
-            gammaLowerIncomplete: gammaLowerIncomplete
+            gammaLowerIncomplete: gammaLowerIncomplete,
+            erf: erf
         };
     })();
 
@@ -323,13 +374,158 @@
     })();
 
     /**
-     * A collection of generators for well-known distributions.
+     * A collection of random number generators for well-known distributions.
      *
      * @namespace dist
      * @memberOf ran
      */
-        // TODO distributions to add: https://en.wikipedia.org/wiki/List_of_probability_distributions
+    // TODO distributions to add: https://en.wikipedia.org/wiki/List_of_probability_distributions
+    // TODO use trapezoid rule for integration
+    // TODO add unit test for PDF vs CDF
     var dist = (function () {
+            /**
+             * Generates a normally distributed value.
+             *
+             * @method _normal
+             * @memberOf ran.dist
+             * @param mu {number} Distribution mean.
+             * @param sigma {number} Distribution standard deviation.
+             * @returns {number} Random variate.
+             * @private
+             */
+            function _normal(mu, sigma) {
+                var u = Math.random(),
+                    v = Math.random();
+                return sigma * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) + mu;
+            }
+
+            /**
+             * Generates a gamma distributed value.
+             *
+             * @method _gamma
+             * @memberOf ran.dist
+             * @param alpha {number} Shape parameter.
+             * @param beta {number} Rate parameter.
+             * @returns {number} Random variate.
+             * @private
+             */
+            function _gamma(alpha, beta) {
+                if (alpha > 1) {
+                    var d = alpha - 1 / 3;
+                    var c = 1 / Math.sqrt(9 * d),
+                        Z, V, U;
+                    while (true) {
+                        Z = _normal(0, 1);
+                        if (Z > -1 / c) {
+                            V = Math.pow(1 + c * Z, 3);
+                            U = Math.random();
+                            if (Math.log(U) < 0.5 * Z * Z + d * (1 - V + Math.log(V)))
+                                return d * V / beta;
+                        }
+                    }
+                } else {
+                    return _gamma(alpha + 1, beta) * Math.pow(Math.random(), 1 / alpha);
+                }
+            }
+
+            /**
+             * Generator for discrete distributions.
+             *
+             * @class _DiscreteDistribution
+             * @memberOf ran.dist
+             * @param generator {Function} Method to generate random value. Must accept one argument containing the
+             * distribution parameters.
+             * @param pmf {Function} The probability mass function. Must accept two arguments: an integer and the
+             * array of distribution parameters.
+             * @param cdf {Function=} The cumulative distribution function. Must accept two arguments: an integer and the
+             * array of distribution parameters. If not specified, it is approximated from the pmf.
+             * @returns {object} A distribution with the supported methods.
+             * @private
+             */
+            function _DiscreteDistribution(generator, pmf, cdf) {
+                var _PRECOMPUTE_MAX = 1000;
+
+                return function () {
+                    var args = arguments;
+
+                    // Pre-compute some cdf thresholds
+                    var _cdfPrecomputed = [pmf(0, args)];
+                    for (var i = 1; i < _PRECOMPUTE_MAX; i++) {
+                        _cdfPrecomputed.push(_cdfPrecomputed[i - 1] + pmf(i, args));
+                    }
+
+                    // Public methods
+                    return {
+                        pmf: function (x) {
+                            return pmf(x, args);
+                        },
+                        sample: function (n) {
+                            return _some(function () {
+                                return generator(args);
+                            }, n);
+                        },
+                        cdf: cdf ? function (x) {
+                            return cdf(x, args);
+                        } : function (x) {
+                            return _cdfPrecomputed[parseInt(x)];
+                        }
+                    };
+                };
+            }
+
+            /**
+             * Generator for continuous distributions.
+             *
+             * @class _DiscreteDistribution
+             * @memberOf ran.dist
+             * @param generator {Function} Method to generate random value. Must accept one argument containing the
+             * distribution parameters.
+             * @param pdf {Function} The probability density function. Must accept two arguments: an integer and the
+             * array of distribution parameters.
+             * @param cdf {Function=} The cumulative distribution function. Must accept two arguments: an integer and the
+             * array of distribution parameters. If not specified, it is approximated from the pdf.
+             * @returns {object} A distribution with the supported methods.
+             * @private
+             */
+            function _ContinuousDistribution(generator, pdf, cdf) {
+                var _MAX_PRECALC = 100;
+
+                return function () {
+                    var args = arguments;
+
+                    // Pre-compute some cdf thresholds
+                    var _dx = 1e-3;
+                    var _cdfBinned = [pdf(0, args)];
+                    for (var i = 1; i < _MAX_PRECALC / _dx; i++) {
+                        _cdfBinned.push(_cdfBinned[i - 1] + pdf(i * _dx, args) * _dx);
+                    }
+
+                    function _refineCdf(x) {
+                        var dx = 1e-4;
+                        var res = _cdfBinned[parseInt(Math.floor(x / _dx))];
+                        for (var j = parseInt(Math.floor(x / _dx)) + dx; j < x; j += dx) {
+                            res += pdf(j, args) * dx;
+                        }
+                        return res;
+                    }
+
+                    // Public methods
+                    return {
+                        pdf: function (x) {
+                            return pdf(x, args);
+                        },
+                        sample: function (n) {
+                            return _some(function () {
+                                return generator(args);
+                            }, n);
+                        },
+                        cdf: cdf ? function (x) {
+                            return cdf(x, args);
+                        } : _refineCdf
+                    };
+                };
+            }
+
             /**
              * Class implementing the [alias table method]{@link http://www.keithschwarz.com/darts-dice-coins} for
              * custom distribution.
@@ -436,310 +632,272 @@
                 };
             }
 
+            var Custom = _DiscreteDistribution(function(args){
+
+            }, function(x, args) {
+
+            }, function(x, args) {
+
+            });
+
             /**
-             * Generates some [Bernoulli distributed]{@link https://en.wikipedia.org/wiki/Bernoulli_distribution}
-             * random values.
+             * Generator for [Bernoulli distribution]{@link https://en.wikipedia.org/wiki/Bernoulli_distribution}.
              *
-             * @method bernoulli
-             * @methodOf ran.dist
+             * @class Bernoulli
+             * @memberOf ran.dist
              * @param {number} p Parameter of the distribution.
-             * @param {number=} n Number of values to return, of more than one.
-             * @returns {(number|Array)} Single value or array of random values.
+             * @constructor
              */
-            function bernoulli(p, n) {
-                return _some(function () {
-                    return Math.random() < p ? 1 : 0;
-                }, n);
-            }
-
-            // TODO binomial (http://www.aip.de/groups/soe/local/numres/bookcpdf/c7-3.pdf)
-        // TODO
+            var Bernoulli = _DiscreteDistribution(function (args) {
+                return Math.random() < args[0] ? 1 : 0;
+            }, function (x, args) {
+                return parseInt(x) === 1 ? args[0] : 1 - args[0];
+            }, function (x, args) {
+                return x < 0 ? 0 : (parseInt(x) >= 1 ? 1 : 1 - args[0]);
+            });
 
             /**
-             * Generates some [bounded Pareto]{@link https://en.wikipedia.org/wiki/Pareto_distribution#Bounded_Pareto_distribution}
-             * distributed random values.
+             * Generator for [bounded Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution#Bounded_Pareto_distribution}.
              *
-             * @method boundedPareto
-             * @methodOf ran.dist
+             * @class BoundedPareto
+             * @memberOf ran.dist
              * @param {number} xmin Lower boundary.
              * @param {number} xmax Upper boundary.
              * @param {number} alpha Shape parameter.
-             * @param {number=} n Number of values to return, of more than one.
-             * @returns {(number|Array)} Single value or array of random values.
+             * @constructor
              */
-            function boundedPareto(xmin, xmax, alpha, n) {
-                var l = Math.pow(xmin, alpha);
-                var h = Math.pow(xmax, alpha);
-                return _some(function () {
-                    return Math.pow((h + Math.random() * (l - h)) / (l * h), -1 / alpha);
-                }, n);
-            }
+            var BoundedPareto = _ContinuousDistribution(function (args) {
+                var l = Math.pow(args[0], args[2]);
+                var h = Math.pow(args[1], args[2]);
+                return Math.pow((h + Math.random() * (l - h)) / (l * h), -1 / args[2]);
+            }, function (x, args) {
+                return (x < args[0] || x > args[1]) ? 0
+                    : args[2] * Math.pow(args[0] / x, args[2]) / (x * (1 - Math.pow(args[0] / args[1], args[2])));
+            }, function (x, args) {
+                var l = Math.pow(args[0], args[2]);
+                var h = Math.pow(args[1], args[2]);
+                return x < args[0] ? 0 : (x > args[1] ? 1 : (1 - l * Math.pow(x, -args[2])) / (1 - l / h));
+            });
 
             /**
-             * Generates some [chi square distributed]{@link https://en.wikipedia.org/wiki/Chi-squared_distribution}
-             * random variables.
+             * Generator for [chi square distribution]{@link https://en.wikipedia.org/wiki/Chi-squared_distribution}.
              *
-             * @method chi2
-             * @methodOf ran.dist
-             * @param {number} v Degrees of freedom. It is rounded to the nearest integer.
-             * @param {number=} n Number of values to return, of more than one.
-             * @returns {(number|Array)} Single value or array of random values.
+             * @class Chi2
+             * @memberOf ran.dist
+             * @param {number} k Degrees of freedom. If not an integer, is rounded to the nearest one.
+             * @constructor
              */
-            function chi2(v, n) {
-                return gamma(Math.round(v) / 2, 2, n);
-            }
+            var Chi2 = function (k) {
+                return Gamma(Math.round(k) / 2, 0.5);
+            };
 
             /**
-             * Generates some [Erlang distributed]{@link https://en.wikipedia.org/wiki/Erlang_distribution} random
-             * variables.
+             * Generator for [Erlang distribution]{@link https://en.wikipedia.org/wiki/Erlang_distribution}.
              *
-             * @method erlang
-             * @methodOf ran.dist
+             * @class Erlang
+             * @memberOf ran.dist
              * @param {number} k Shape parameter. It is rounded to the nearest integer.
              * @param {number} lambda Rate parameter.
-             * @param {number=} n Number of values to return, of more than one.
-             * @returns {(number|Array)} Single value or array of random values.
+             * @constructor
              */
-            function erlang(k, lambda, n) {
-                return gamma(Math.round(k), lambda, n);
-            }
+            var Erlang = function (k, lambda) {
+                return Gamma(Math.round(k), lambda);
+            };
 
             /**
-             * Generates some [exponentially distributed]{@link https://en.wikipedia.org/wiki/Exponential_distribution}
-             * random values.
+             * Generator for [exponentially distribution]{@link https://en.wikipedia.org/wiki/Exponential_distribution}.
              *
-             * @method exponential
-             * @methodOf ran.dist
+             * @class Exponential
+             * @memberOf ran.dist
              * @param {number} lambda Rate parameter.
-             * @param {number=} n Number of values to return, of more than one.
-             * @returns {number|Array} Single value or array of random values.
+             * @constructor
              */
-            function exponential(lambda, n) {
-                return _some(function () {
-                    return -Math.log(Math.random()) / lambda;
-                }, n);
-            }
+            var Exponential = _ContinuousDistribution(function (args) {
+                return -Math.log(Math.random()) / args[0];
+            }, function (x, args) {
+                return args[0] * Math.exp(-args[0] * x);
+            }, function (x, args) {
+                return 1 - Math.exp(-args[0] * x);
+            });
 
             /**
-             * Generates some [gamma distributed]{@link https://en.wikipedia.org/wiki/Gamma_distribution} random values
-             * according to the rate parametrization.
+             * Generator for [gamma distribution]{@link https://en.wikipedia.org/wiki/Gamma_distribution} following
+             * the shape/rate parametrization.
              *
-             * @method gamma
-             * @methodOf ran.dist
+             * @class Gamma
+             * @memberOf ran.dist
              * @param {number} alpha Shape parameter.
              * @param {number} beta Rate parameter.
-             * @param {number=} n Number of values to return, of more than one.
-             * @returns {(number|Array)} Single value or array of random values.
+             * @constructor
              */
-            var gamma = (function () {
-                function _gamma(alpha, beta) {
-                    if (alpha > 1) {
-                        var d = alpha - 1 / 3;
-                        var c = 1 / Math.sqrt(9 * d),
-                            Z, V, U;
-                        while (true) {
-                            Z = normal(0, 1);
-                            if (Z > -1 / c) {
-                                V = Math.pow(1 + c * Z, 3);
-                                U = Math.random();
-                                if (Math.log(U) < 0.5 * Z * Z + d * (1 - V + Math.log(V)))
-                                    return d * V / beta;
-                            }
-                        }
-                    } else {
-                        return _gamma(alpha + 1, beta) * Math.pow(Math.random(), 1 / alpha);
-                    }
-                }
-
-                return function (alpha, beta, n) {
-                    return _some(function () {
-                        return _gamma(alpha, beta);
-                    }, n);
-                };
-            })();
+            var Gamma = _ContinuousDistribution(function (args) {
+                return _gamma(args[0], args[1]);
+            }, function (x, args) {
+                return x <= .0 ? 0 : Math.pow(args[1], args[0]) * Math.exp((args[0] - 1) * Math.log(x) - args[1] * x) / special.gamma(args[0]);
+            }, function (x, args) {
+                return special.gammaLowerIncomplete(args[0], args[1] * x) / special.gamma(args[0]);
+            });
 
             /**
-             * Generates some [generalized gamma distributed]{@link https://en.wikipedia.org/wiki/Generalized_gamma_distribution}
-             * random variables.
+             * Generator for [generalized gamma distribution]{@link https://en.wikipedia.org/wiki/Generalized_gamma_distribution}.
              *
-             * @method generalizedGamma
-             * @methodOf ran.dist
+             * @class GeneralizedGamma
+             * @memberOf ran.dist
              * @param {number} a Scale parameter.
              * @param {number} d Shape parameter.
              * @param {number} p Shape parameter.
-             * @param {number=} n Number of values to return, of more than one.
-             * @returns {(number|Array)} Single value or array of random values.
+             * @constructor
              */
-            function generalizedGamma(a, d, p, n) {
-                var k = d / p,
-                    theta = 1 / Math.pow(a, p),
-                    q = 1 / p;
-                return _some(function () {
-                    return Math.pow(gamma(k, theta), q);
-                }, n);
-            }
+            var GeneralizedGamma = _ContinuousDistribution(function (args) {
+                return Math.pow(_gamma(args[1] / args[2], 1 / Math.pow(args[0], args[2])), 1 / args[2]);
+            }, function (x, args) {
+                return x <= .0 ? 0 : (args[2] / Math.pow(args[0], args[1])) * Math.exp((args[1] - 1) * Math.log(x) - Math.pow(x / args[0], args[2])) / special.gamma(args[1] / args[2]);
+            }, function (x, args) {
+                return special.gammaLowerIncomplete(args[1] / args[2], Math.pow(x / args[0], args[2])) / special.gamma(args[1] / args[2]);
+            });
 
             /**
-             * Generates some [inverse-gamma distributed]{@link https://en.wikipedia.org/wiki/Inverse-gamma_distribution}
-             * random variables.
+             * Generator for [inverse gamma distribution]{@link https://en.wikipedia.org/wiki/Inverse-gamma_distribution}.
              *
-             * @method inverseGamma
-             * @methodOf ran.dist
-             * @param {number} k Shape parameter.
-             * @param {number} theta Scale parameter.
-             * @param {number=} n Number of values to return, of more than one.
-             * @returns {(number|Array)} Single value or array of random values.
+             * @class InverseGamma
+             * @memberOf ran.dist
+             * @param {number} alpha Shape parameter.
+             * @param {number} beta Scale parameter.
+             * @constructor
              */
-            function inverseGamma(k, theta, n) {
-                return _some(function () {
-                    return 1 / gamma(k, 1 / theta);
-                }, n);
-            }
+            var InverseGamma = _ContinuousDistribution(function (args) {
+                return 1 / _gamma(args[0], args[1]);
+            }, function (x, args) {
+                return x <= .0 ? 0 : Math.pow(args[1], args[0]) * Math.pow(x, -1 - args[0]) * Math.exp(-args[1] / x) / special.gamma(args[0]);
+            }, function (x, args) {
+                return 1 - special.gammaLowerIncomplete(args[0], args[1] / x) / special.gamma(args[0]);
+            });
 
             /**
-             * Generates some [log-normally distributed]{@link https://en.wikipedia.org/wiki/Log-normal_distribution}
-             * random values.
+             * Generator for [lognormal distribution]{@link https://en.wikipedia.org/wiki/Log-normal_distribution}.
              *
-             * @method lognormal
-             * @methodOf ran.dist
+             * @class Lognormal
+             * @memberOf ran.dist
              * @param {number} mu Location parameter.
              * @param {number} sigma Scale parameter.
-             * @param {number=} n Number of values to return, of more than one.
-             * @returns {(number|Array)} Single value or array of random values.
+             * @constructor
              */
-            function lognormal(mu, sigma, n) {
-                return _some(function () {
-                    var u = Math.random(),
-                        v = Math.random();
-                    return Math.exp(sigma * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) + mu);
-                }, n);
-            }
+            var Lognormal = _ContinuousDistribution(function (args) {
+                    return Math.exp(args[0] + args[1]*_normal(0, 1));
+                }, function (x, args) {
+                    return x <= .0 ? 0 : Math.exp(-0.5 * Math.pow((Math.log(x) - args[0]) / args[1], 2)) / (x * args[1] * Math.sqrt(2 * Math.PI));
+                }, function(x, args) {
+                    return x <= .0 ? 0 : 0.5 * (1 + special.erf((Math.log(x) - args[0]) / (args[1] * Math.SQRT2)));
+                });
 
             /**
-             * Generates some [Maxwell-Boltzmann distributed]{@link https://en.wikipedia.org/wiki/Maxwell%E2%80%93Boltzmann_distribution}
-             * random variables.
+             * Generator for [normal distribution]{@link https://en.wikipedia.org/wiki/Normal_distribution}.
              *
-             * @method maxwellBoltzmann
-             * @methodOf ran.dist
-             * @param {number} a The parameter of the distribution (a = sqrt(kT/m)).
-             * @param {number=} n Number of values to return, of more than one.
-             * @returns {(number|Array)} Single value or array of random values.
-             */
-            function maxwellBoltzmann(a, n) {
-                return gamma(1.5, 2 * a * a, n);
-            }
-
-            /**
-             * Generates some [normally distributed]{@link https://en.wikipedia.org/wiki/Normal_distribution} random
-             * values.
-             *
-             * @method normal
-             * @methodOf ran.dist
+             * @class Normal
+             * @memberOf ran.dist
              * @param {number} mu Location parameter (mean).
              * @param {number} sigma Squared scale parameter (variance).
-             * @param {number=} n Number of values to return, of more than one.
-             * @returns {(number|Array)} Single value or array of random values.
+             * @constructor
              */
-            function normal(mu, sigma, n) {
-                return _some(function () {
-                    var u = Math.random(),
-                        v = Math.random();
-                    return sigma * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) + mu;
-                }, n);
-            }
+            var Normal = _ContinuousDistribution(function (args) {
+                return _normal(args[0], args[1]);
+            }, function (x, args) {
+                return Math.exp(-0.5 * Math.pow((x - args[0]) / args[1], 2)) / (Math.sqrt(2 * Math.PI) * args[1]);
+            }, function(x, args) {
+                return 0.5 * (1 + special.erf((x - args[0]) / (args[1]*Math.SQRT2)));
+            });
 
             /**
-             * Generates some [Pareto distributed]{@link https://en.wikipedia.org/wiki/Pareto_distribution} random
-             * values.
+             * Generator for [Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution}.
              *
-             * @method pareto
-             * @methodOf ran.dist
+             * @class Pareto
+             * @memberOf ran.dist
              * @param {number} xmin Scale parameter.
              * @param {number} alpha Shape parameter.
-             * @param {number=} n Number of values to return, of more than one.
-             * @returns {(number|Array)} Single value or array of random values.
+             * @constructor
              */
-            function pareto(xmin, alpha, n) {
-                return _some(function () {
-                    return xmin / Math.pow(Math.random(), 1 / alpha);
-                }, n);
-            }
+            var Pareto = _ContinuousDistribution(function (args) {
+                    return args[0] / Math.pow(Math.random(), 1 / args[1]);
+                }, function (x, args) {
+                    return x < args[0] ? 0 : args[1] * Math.pow(args[0]/x, args[1]) / x;
+                }, function (x, args) {
+                    return x < args[0] ? 0 : 1 - Math.pow(args[0]/x, args[1]);
+                });
 
             /**
-             * Generates some [Poisson distributed]{@link https://en.wikipedia.org/wiki/Poisson_distribution} random
-             * values.
+             * Generator for [Poisson distribution]{@link https://en.wikipedia.org/wiki/Poisson_distribution}.
              *
-             * @method poisson
-             * @methodOf ran.dist
+             * @class poisson
+             * @memberOf ran.dist
              * @param {number} lambda Mean of the distribution.
-             * @param {number=} n Number of values to return, of more than one.
-             * @returns {(number|Array)} Single value or array of random values.
+             * @constructor
              */
-            function poisson(lambda, n) {
-                return _some(function () {
-                    var l = Math.exp(-lambda),
-                        k = 0,
-                        p = 1;
-                    do {
-                        k++;
-                        p *= Math.random();
-                    } while (p > l);
-                    return k - 1;
-                }, n);
-            }
+            var Poisson = _DiscreteDistribution(function (args) {
+                var l = Math.exp(-args[0]),
+                    k = 0,
+                    p = 1;
+                do {
+                    k++;
+                    p *= Math.random();
+                } while (p > l);
+                return k - 1;
+            }, function (x, args) {
+                return x < 0 ? 0 : Math.pow(args[0], x) * Math.exp(-args[0]) / special.gamma(x + 1);
+            }, function (x, args) {
+                return x < 0 ? 0 : 1 - special.gammaLowerIncomplete(x+1, args[0]) / special.gamma(x+1);
+            });
 
             /**
-             * Generates some [uniformly distributed]{@link https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)}
-             * random values.
+             * Generator for [uniformly distributed]{@link https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)}.
              *
-             * @method uniform
-             * @methodOf ran.dist
+             * @class Uniform
+             * @memberOf ran.dist
              * @param {number} min Lower boundary.
              * @param {number} max Upper boundary.
-             * @param {number=} n Number of values to return, of more than one.
-             * @returns {(number|Array)} Single value or array of random values.
+             * @constructor
              */
-            function uniform(min, max, n) {
-                return _some(function () {
-                    return Math.random() * (max - min) + min;
-                }, n);
-            }
+            var Uniform = _ContinuousDistribution(function (args) {
+                return Math.random() * (args[1] - args[0]) + args[0];
+            }, function (x, args) {
+                return (x < args[0] || x > args[1]) ? 0 : 1 / (args[1] - args[0]);
+            }, function (x, args) {
+                return x < args[0] ? 0 : (x > args[1] ? 1 : (x - args[0]) / (args[1] - args[0]));
+            });
 
             /**
-             * Generates some [Weibull distributed]{@link https://en.wikipedia.org/wiki/Weibull_distribution} random
-             * values.
+             * Generator for [Weibull distributed]{@link https://en.wikipedia.org/wiki/Weibull_distribution}.
              *
-             * @method weibull
-             * @methodOf ran.dist
+             * @class Weibull
+             * @memberOf ran.dist
              * @param {number} lambda Scale parameter.
              * @param {number} k Shape parameter.
-             * @param {number=} n Number of values to return, of more than one.
-             * @returns {(number|Array)} Single value or array of random values.
+             * @constructor
              */
-            function weibull(lambda, k, n) {
-                return _some(function () {
-                    return lambda * Math.pow(-Math.log(Math.random()), 1 / k);
-                }, n);
-            }
+            var Weibull = new _ContinuousDistribution(function (args) {
+                return args[0] * Math.pow(-Math.log(Math.random()), 1 / args[1]);
+            }, function (x, args) {
+                return x < 0 ? 0 : (args[1] / args[0]) * Math.exp((args[1]-1)*Math.log(x/args[0]) - Math.pow(x/args[0], args[1]));
+            }, function (x, args) {
+                return x < 0 ? 0 : 1 - Math.exp(-Math.pow(x / args[0], args[1]));
+            });
 
             // Public methods
             return {
                 Alias: Alias,
-                bernoulli: bernoulli,
-                boundedPareto: boundedPareto,
-                chi2: chi2,
-                erlang: erlang,
-                exponential: exponential,
-                gamma: gamma,
-                generalizedGamma: generalizedGamma,
-                inverseGamma: inverseGamma,
-                lognormal: lognormal,
-                maxwellBoltzmann: maxwellBoltzmann,
-                normal: normal,
-                pareto: pareto,
-                poisson: poisson,
-                uniform: uniform,
-                weibull: weibull
+                Bernoulli: Bernoulli,
+                BoundedPareto: BoundedPareto,
+                Chi2: Chi2,
+                Erlang: Erlang,
+                Exponential: Exponential,
+                Gamma: Gamma,
+                GeneralizedGamma: GeneralizedGamma,
+                InverseGamma: InverseGamma,
+                Lognormal: Lognormal,
+                Normal: Normal,
+                Pareto: Pareto,
+                Poisson: Poisson,
+                Uniform: Uniform,
+                Weibull: Weibull
             };
         })();
 
@@ -773,7 +931,7 @@
 
     // Exports
     // TODO add process
-    exports._special = special;
+    exports.special = special;
     exports.core = core;
     exports.dist = dist;
 })));

@@ -194,7 +194,7 @@ class DocBuilder:
                 return ""
 
             # If method or variable, just add link
-            if b.type() in ['method', 'var']:
+            if b.type() in ['class', 'method', 'var']:
                 return "<a href='#api-%s'>%s</a>" % (b.path(), b.id())
 
             # If class, add third level group
@@ -309,9 +309,7 @@ class DocBuilder:
                 t = block.type()
                 if t in ['module', 'namespace']:
                     main += "<h2 id='api-%s'>%s</h2>%s\n" % (block.path(), block.path(), block['desc']) + "<br>"
-                if t == 'class':
-                    main += "<h2 id='api-%s'>%s</h2>%s\n" % (block.path(), block.id(), _linkify(block['desc'])) + "<br>"
-                if t == 'method':
+                if t in ['class', 'method']:
                     main += _method(block)
 
             # Put sorted children in the stack
