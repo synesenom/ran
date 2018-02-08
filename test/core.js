@@ -53,7 +53,7 @@ describe('ran', function() {
                 utils.trials(function() {
                     var min = Math.floor(Math.random() * 200 - 100);
                     var max = Math.floor(Math.random() * 200 - 100);
-                    var k = Math.floor(Math.random() * 40 - 20);
+                    var k = Math.floor(Math.random() * 20 - 10);
                     var values = [];
                     for (var lap=0; lap<LAPS; lap++) {
                         var r = core.int(min, max, k);
@@ -183,7 +183,7 @@ describe('ran', function() {
             it('should return head with some probability', function() {
                 utils.trials(function() {
                     var p = Math.random();
-                    var k = Math.floor(Math.random() * 200);
+                    var k = Math.floor(Math.random() * 10);
                     var head = parseInt(Math.random()* 20);
                     var tail = parseInt(Math.random()* 20);
                     var values = [];

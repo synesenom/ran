@@ -2,15 +2,12 @@
  * Module for generating various random numbers.
  * @module ran
  */
-// TODO test PDFs by using in test function and integrating
-// TODO test CDFs by using in test functions
 // TODO binomial (http://www.aip.de/groups/soe/local/numres/bookcpdf/c7-3.pdf)
-// TODO speed bounded pareto up! Only pre-calculate heavy stuff
 // TODO speed up things by pre-computing constants
 // TODO subclass discrete and continuous distributions from parent distribution
 // TODO simplify equations
-// TODO speed up initial pre-computations
 // TODO speed up Poisson by using different algorithms for low/high lambda
+// TODO generate alias table with _DiscreteDistribution
 (function (global, factory) {
     if (typeof exports === "object" && typeof module !== "undefined") {
         factory(exports);
@@ -643,14 +640,6 @@
                 };
             }
 
-            var Custom = _DiscreteDistribution(function(args){
-
-            }, function(x, args) {
-
-            }, function(x, args) {
-
-            });
-
             /**
              * Generator for [Bernoulli distribution]{@link https://en.wikipedia.org/wiki/Bernoulli_distribution}.
              *
@@ -659,13 +648,15 @@
              * @param {number} p Parameter of the distribution.
              * @constructor
              */
-            var Bernoulli = _DiscreteDistribution(function (args) {
-                return Math.random() < args[0] ? 1 : 0;
-            }, function (x, args) {
-                return parseInt(x) === 1 ? args[0] : 1 - args[0];
-            }, function (x, args) {
-                return x < 0 ? 0 : (parseInt(x) >= 1 ? 1 : 1 - args[0]);
-            });
+            var Bernoulli = function(p) {
+                return _DiscreteDistribution(function () {
+                    return Math.random() < p ? 1 : 0;
+                }, function (x) {
+                    return parseInt(x) === 1 ? p : 1 - p;
+                }, function (x) {
+                    return x < 0 ? 0 : (parseInt(x) >= 1 ? 1 : 1 - p);
+                })();
+            };
 
             /**
              * Generator for [bounded Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution#Bounded_Pareto_distribution}.
@@ -677,18 +668,21 @@
              * @param {number} alpha Shape parameter.
              * @constructor
              */
-            var BoundedPareto = _ContinuousDistribution(function (args) {
-                var l = Math.pow(args[0], args[2]);
-                var h = Math.pow(args[1], args[2]);
-                return Math.pow((h + Math.random() * (l - h)) / (l * h), -1 / args[2]);
-            }, function (x, args) {
-                return (x < args[0] || x > args[1]) ? 0
-                    : args[2] * Math.pow(args[0] / x, args[2]) / (x * (1 - Math.pow(args[0] / args[1], args[2])));
-            }, function (x, args) {
-                var l = Math.pow(args[0], args[2]);
-                var h = Math.pow(args[1], args[2]);
-                return x < args[0] ? 0 : (x > args[1] ? 1 : (1 - l * Math.pow(x, -args[2])) / (1 - l / h));
-            });
+            var BoundedPareto = function(xmin, xmax, alpha) {
+                // Pre-compute constants
+                var l = Math.pow(xmin, alpha);
+                var h = Math.pow(xmax, alpha);
+                var c1 = (1 - Math.pow(xmin / xmax, alpha));
+
+                return new _ContinuousDistribution(function () {
+                    return Math.pow((h + Math.random() * (l - h)) / (l * h), -1 / alpha);
+                }, function (x) {
+                    return (x < xmin || x > xmax) ? 0
+                        : alpha * Math.pow(xmin / x, alpha) / (x * c1);
+                }, function (x) {
+                    return x < xmin ? 0 : (x > xmax ? 1 : (1 - l * Math.pow(x, -alpha)) / (1 - l / h));
+                })();
+            };
 
             /**
              * Generator for [chi square distribution]{@link https://en.wikipedia.org/wiki/Chi-squared_distribution}.
@@ -723,13 +717,15 @@
              * @param {number} lambda Rate parameter.
              * @constructor
              */
-            var Exponential = _ContinuousDistribution(function (args) {
-                return -Math.log(Math.random()) / args[0];
-            }, function (x, args) {
-                return args[0] * Math.exp(-args[0] * x);
-            }, function (x, args) {
-                return 1 - Math.exp(-args[0] * x);
-            });
+            var Exponential = function(lambda) {
+                return new _ContinuousDistribution(function () {
+                    return -Math.log(Math.random()) / lambda;
+                }, function (x) {
+                    return lambda * Math.exp(-lambda * x);
+                }, function (x) {
+                    return 1 - Math.exp(-lambda * x);
+                })();
+            };
 
             /**
              * Generator for [gamma distribution]{@link https://en.wikipedia.org/wiki/Gamma_distribution} following
@@ -741,13 +737,19 @@
              * @param {number} beta Rate parameter.
              * @constructor
              */
-            var Gamma = _ContinuousDistribution(function (args) {
-                return _gamma(args[0], args[1]);
-            }, function (x, args) {
-                return x <= .0 ? 0 : Math.pow(args[1], args[0]) * Math.exp((args[0] - 1) * Math.log(x) - args[1] * x) / special.gamma(args[0]);
-            }, function (x, args) {
-                return special.gammaLowerIncomplete(args[0], args[1] * x) / special.gamma(args[0]);
-            });
+            var Gamma = function(alpha, beta) {
+                // Pre-compute constants
+                var c1 = Math.pow(beta, alpha);
+                var c2 = special.gamma(alpha);
+
+                return new _ContinuousDistribution(function () {
+                    return _gamma(alpha, beta);
+                }, function (x) {
+                    return x <= .0 ? 0 : c1 * Math.exp((alpha - 1) * Math.log(x) - beta * x) / c2;
+                }, function (x) {
+                    return special.gammaLowerIncomplete(alpha, beta * x) / c2;
+                })();
+            };
 
             /**
              * Generator for [generalized gamma distribution]{@link https://en.wikipedia.org/wiki/Generalized_gamma_distribution}.
@@ -759,13 +761,20 @@
              * @param {number} p Shape parameter.
              * @constructor
              */
-            var GeneralizedGamma = _ContinuousDistribution(function (args) {
-                return Math.pow(_gamma(args[1] / args[2], 1 / Math.pow(args[0], args[2])), 1 / args[2]);
-            }, function (x, args) {
-                return x <= .0 ? 0 : (args[2] / Math.pow(args[0], args[1])) * Math.exp((args[1] - 1) * Math.log(x) - Math.pow(x / args[0], args[2])) / special.gamma(args[1] / args[2]);
-            }, function (x, args) {
-                return special.gammaLowerIncomplete(args[1] / args[2], Math.pow(x / args[0], args[2])) / special.gamma(args[1] / args[2]);
-            });
+            var GeneralizedGamma = function(a, d, p) {
+                // Pre-compute constants
+                var c1 = special.gamma(d / p);
+                var c2 = (p / Math.pow(a, d));
+                var c3 = 1 / Math.pow(a, p);
+
+                return new _ContinuousDistribution(function () {
+                    return Math.pow(_gamma(d / p, c3), 1 / p);
+                }, function (x) {
+                    return x <= .0 ? 0 : c2 * Math.exp((d - 1) * Math.log(x) - Math.pow(x / a, p)) / c1;
+                }, function (x) {
+                    return special.gammaLowerIncomplete(d / p, Math.pow(x / a, p)) / c1;
+                })();
+            };
 
             /**
              * Generator for [inverse gamma distribution]{@link https://en.wikipedia.org/wiki/Inverse-gamma_distribution}.
@@ -776,13 +785,19 @@
              * @param {number} beta Scale parameter.
              * @constructor
              */
-            var InverseGamma = _ContinuousDistribution(function (args) {
-                return 1 / _gamma(args[0], args[1]);
-            }, function (x, args) {
-                return x <= .0 ? 0 : Math.pow(args[1], args[0]) * Math.pow(x, -1 - args[0]) * Math.exp(-args[1] / x) / special.gamma(args[0]);
-            }, function (x, args) {
-                return 1 - special.gammaLowerIncomplete(args[0], args[1] / x) / special.gamma(args[0]);
-            });
+            var InverseGamma = function(alpha, beta) {
+                // Pre-compute constants
+                var c1 = special.gamma(alpha);
+                var c2 = Math.pow(beta, alpha) / c1;
+
+                return new _ContinuousDistribution(function () {
+                    return 1 / _gamma(alpha, beta);
+                }, function (x) {
+                    return x <= .0 ? 0 : c2 * Math.pow(x, -1 - alpha) * Math.exp(-beta / x);
+                }, function (x) {
+                    return 1 - special.gammaLowerIncomplete(alpha, beta / x) / c1;
+                })();
+            };
 
             /**
              * Generator for [lognormal distribution]{@link https://en.wikipedia.org/wiki/Log-normal_distribution}.
@@ -793,13 +808,20 @@
              * @param {number} sigma Scale parameter.
              * @constructor
              */
-            var Lognormal = _ContinuousDistribution(function (args) {
-                    return Math.exp(args[0] + args[1]*_normal(0, 1));
-                }, function (x, args) {
-                    return x <= .0 ? 0 : Math.exp(-0.5 * Math.pow((Math.log(x) - args[0]) / args[1], 2)) / (x * args[1] * Math.sqrt(2 * Math.PI));
-                }, function(x, args) {
-                    return x <= .0 ? 0 : 0.5 * (1 + special.erf((Math.log(x) - args[0]) / (args[1] * Math.SQRT2)));
-                });
+                // TODO this is broken, fix it!
+            var Lognormal = function(mu, sigma) {
+                // Pre-compute constants
+                var c1 = sigma * Math.SQRT2;
+                var c2 = sigma * Math.sqrt(2 * Math.PI);
+
+                return new _ContinuousDistribution(function () {
+                    return Math.exp(mu + sigma*_normal(0, 1));
+                }, function (x) {
+                    return x <= .0 ? 0 : Math.exp(-0.5 * Math.pow((Math.log(x) - mu) / sigma, 2)) / (x * c2);
+                }, function(x) {
+                    return x <= .0 ? 0 : 0.5 * (1 + special.erf((Math.log(x) - mu) / c1));
+                })();
+            };
 
             /**
              * Generator for [normal distribution]{@link https://en.wikipedia.org/wiki/Normal_distribution}.
@@ -810,13 +832,19 @@
              * @param {number} sigma Squared scale parameter (variance).
              * @constructor
              */
-            var Normal = _ContinuousDistribution(function (args) {
-                return _normal(args[0], args[1]);
-            }, function (x, args) {
-                return Math.exp(-0.5 * Math.pow((x - args[0]) / args[1], 2)) / (Math.sqrt(2 * Math.PI) * args[1]);
-            }, function(x, args) {
-                return 0.5 * (1 + special.erf((x - args[0]) / (args[1]*Math.SQRT2)));
-            });
+            var Normal = function(mu, sigma) {
+                // Pre-compute constants
+                var c1 = sigma * Math.SQRT2;
+                var c2 = sigma * Math.sqrt(2 * Math.PI);
+
+                return new _ContinuousDistribution(function () {
+                    return _normal(mu, sigma);
+                }, function (x) {
+                    return Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2)) / c2;
+                }, function (x) {
+                    return 0.5 * (1 + special.erf((x - mu) / c1));
+                })();
+            };
 
             /**
              * Generator for [Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution}.
@@ -827,13 +855,15 @@
              * @param {number} alpha Shape parameter.
              * @constructor
              */
-            var Pareto = _ContinuousDistribution(function (args) {
-                    return args[0] / Math.pow(Math.random(), 1 / args[1]);
-                }, function (x, args) {
-                    return x < args[0] ? 0 : args[1] * Math.pow(args[0]/x, args[1]) / x;
-                }, function (x, args) {
-                    return x < args[0] ? 0 : 1 - Math.pow(args[0]/x, args[1]);
-                });
+            var Pareto = function(xmin, alpha) {
+                return new _ContinuousDistribution(function () {
+                    return xmin / Math.pow(Math.random(), 1 / alpha);
+                }, function (x) {
+                    return x < xmin ? 0 : alpha * Math.pow(xmin/x, alpha) / x;
+                }, function (x) {
+                    return x < xmin ? 0 : 1 - Math.pow(xmin/x, alpha);
+                })();
+            };
 
             /**
              * Generator for [Poisson distribution]{@link https://en.wikipedia.org/wiki/Poisson_distribution}.
@@ -843,37 +873,44 @@
              * @param {number} lambda Mean of the distribution.
              * @constructor
              */
-            var Poisson = _DiscreteDistribution(function (args) {
-                var l = Math.exp(-args[0]),
-                    k = 0,
-                    p = 1;
-                do {
-                    k++;
-                    p *= Math.random();
-                } while (p > l);
-                return k - 1;
-            }, function (x, args) {
-                return x < 0 ? 0 : Math.pow(args[0], x) * Math.exp(-args[0]) / special.gamma(x + 1);
-            }, function (x, args) {
-                return x < 0 ? 0 : 1 - special.gammaLowerIncomplete(x+1, args[0]) / special.gamma(x+1);
-            });
+            var Poisson = function(lambda) {
+                return new _DiscreteDistribution(function () {
+                    var l = Math.exp(-lambda),
+                        k = 0,
+                        p = 1;
+                    do {
+                        k++;
+                        p *= Math.random();
+                    } while (p > l);
+                    return k - 1;
+                }, function (x) {
+                    return x < 0 ? 0 : Math.pow(lambda, x) * Math.exp(-lambda) / special.gamma(x + 1);
+                }, function (x) {
+                    return x < 0 ? 0 : 1 - special.gammaLowerIncomplete(x+1, lambda) / special.gamma(x+1);
+                })();
+            };
 
             /**
              * Generator for [uniformly distributed]{@link https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)}.
              *
              * @class Uniform
              * @memberOf ran.dist
-             * @param {number} min Lower boundary.
-             * @param {number} max Upper boundary.
+             * @param {number} xmin Lower boundary.
+             * @param {number} xmax Upper boundary.
              * @constructor
              */
-            var Uniform = _ContinuousDistribution(function (args) {
-                return Math.random() * (args[1] - args[0]) + args[0];
-            }, function (x, args) {
-                return (x < args[0] || x > args[1]) ? 0 : 1 / (args[1] - args[0]);
-            }, function (x, args) {
-                return x < args[0] ? 0 : (x > args[1] ? 1 : (x - args[0]) / (args[1] - args[0]));
-            });
+            var Uniform = function(xmin, xmax) {
+                // Pre-compute constants
+                var c1 = xmax - xmin;
+                
+                return new _ContinuousDistribution(function () {
+                    return Math.random() * c1 + xmin;
+                }, function (x) {
+                    return (x < xmin || x > xmax) ? 0 : 1 / c1;
+                }, function (x) {
+                    return x < xmin ? 0 : (x > xmax ? 1 : (x - xmin) / c1);
+                })();
+            };
 
             /**
              * Generator for [Weibull distributed]{@link https://en.wikipedia.org/wiki/Weibull_distribution}.
@@ -884,13 +921,15 @@
              * @param {number} k Shape parameter.
              * @constructor
              */
-            var Weibull = new _ContinuousDistribution(function (args) {
-                return args[0] * Math.pow(-Math.log(Math.random()), 1 / args[1]);
-            }, function (x, args) {
-                return x < 0 ? 0 : (args[1] / args[0]) * Math.exp((args[1]-1)*Math.log(x/args[0]) - Math.pow(x/args[0], args[1]));
-            }, function (x, args) {
-                return x < 0 ? 0 : 1 - Math.exp(-Math.pow(x / args[0], args[1]));
-            });
+            var Weibull = function(lambda, k) {
+                return new _ContinuousDistribution(function () {
+                    return lambda * Math.pow(-Math.log(Math.random()), 1 / k);
+                }, function (x) {
+                    return x < 0 ? 0 : (k / lambda) * Math.exp((k-1)*Math.log(x/lambda) - Math.pow(x/lambda, k));
+                }, function (x) {
+                    return x < 0 ? 0 : 1 - Math.exp(-Math.pow(x / lambda, k));
+                })();
+            };
 
             // Public methods
             return {
