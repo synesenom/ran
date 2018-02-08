@@ -431,8 +431,8 @@
             /**
              * Generator for discrete distributions.
              *
-             * @class _DiscreteDistribution
-             * @memberOf ran.dist
+             * @method _DiscreteDistribution
+             * @methodOf ran.dist
              * @param generator {Function} Method to generate random value. Must accept one argument containing the
              * distribution parameters.
              * @param pmf {Function} The probability mass function. Must accept two arguments: an integer and the
@@ -443,31 +443,36 @@
              * @private
              */
             function _DiscreteDistribution(generator, pmf, cdf) {
-                var _PRECOMPUTE_MAX = 1000;
-
                 return function () {
                     var args = arguments;
 
-                    // Pre-compute some cdf thresholds
-                    var _cdfPrecomputed = [pmf(0, args)];
-                    for (var i = 1; i < _PRECOMPUTE_MAX; i++) {
-                        _cdfPrecomputed.push(_cdfPrecomputed[i - 1] + pmf(i, args));
-                    }
+                    // Pre-compute cdf if not specified
+                    var _cdf = (function() {
+                        if (cdf !== undefined) {
+                            return function(x) {
+                                return cdf(x, args);
+                            };
+                        } else {
+                            var _cdfPrecomputed = [pmf(0, args)];
+                            for (var i = 1; i < 1000; i++) {
+                                _cdfPrecomputed.push(_cdfPrecomputed[i - 1] + pmf(i, args));
+                            }
+                            return function(x) {
+                                return _cdfPrecomputed[x];
+                            };
+                        }
+                    })();
 
                     // Public methods
                     return {
                         pmf: function (x) {
                             return pmf(x, args);
                         },
+                        cdf: _cdf,
                         sample: function (n) {
                             return _some(function () {
                                 return generator(args);
                             }, n);
-                        },
-                        cdf: cdf ? function (x) {
-                            return cdf(x, args);
-                        } : function (x) {
-                            return _cdfPrecomputed[parseInt(x)];
                         }
                     };
                 };
@@ -476,8 +481,8 @@
             /**
              * Generator for continuous distributions.
              *
-             * @class _DiscreteDistribution
-             * @memberOf ran.dist
+             * @method _ContinuousDistribution
+             * @methodOf ran.dist
              * @param generator {Function} Method to generate random value. Must accept one argument containing the
              * distribution parameters.
              * @param pdf {Function} The probability density function. Must accept two arguments: an integer and the
@@ -488,40 +493,46 @@
              * @private
              */
             function _ContinuousDistribution(generator, pdf, cdf) {
-                var _MAX_PRECALC = 100;
-
                 return function () {
                     var args = arguments;
 
-                    // Pre-compute some cdf thresholds
-                    var _dx = 1e-3;
-                    var _cdfBinned = [pdf(0, args)];
-                    for (var i = 1; i < _MAX_PRECALC / _dx; i++) {
-                        _cdfBinned.push(_cdfBinned[i - 1] + pdf(i * _dx, args) * _dx);
-                    }
+                    // Pre-compute cdf if not specified
+                    var _cdf = (function() {
+                        if (cdf !== undefined) {
+                            return function(x) {
+                                return cdf(x, args);
+                            };
+                        } else {
+                            var _dx = 1e-3;
+                            var _cdfPrecomputed = [pdf(0, args)];
+                            for (var i = 0; i < 100 / _dx; i++) {
+                                // TODO use simpson
+                                _cdfPrecomputed.push(_cdfPrecomputed[i - 1] + pdf(i * _dx, args) * _dx);
+                            }
 
-                    function _refineCdf(x) {
-                        var dx = 1e-4;
-                        var res = _cdfBinned[parseInt(Math.floor(x / _dx))];
-                        for (var j = parseInt(Math.floor(x / _dx)) + dx; j < x; j += dx) {
-                            res += pdf(j, args) * dx;
+                            return function(x) {
+                                var dx = 1e-4;
+                                var res = _cdfPrecomputed[parseInt(Math.floor(x / _dx))];
+                                for (var j = parseInt(Math.floor(x / _dx)) + dx; j < x; j += dx) {
+                                    // TODO use simpson
+                                    res += pdf(j, args) * dx;
+                                }
+                                return res;
+                            }
                         }
-                        return res;
-                    }
+                    })();
 
                     // Public methods
                     return {
                         pdf: function (x) {
                             return pdf(x, args);
                         },
+                        cdf: _cdf,
                         sample: function (n) {
                             return _some(function () {
                                 return generator(args);
                             }, n);
-                        },
-                        cdf: cdf ? function (x) {
-                            return cdf(x, args);
-                        } : _refineCdf
+                        }
                     };
                 };
             }

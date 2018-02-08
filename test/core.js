@@ -179,13 +179,13 @@ describe('ran', function() {
             });
         });
 
-        /*describe('coin', function() {
+        describe('coin', function() {
             it('should return head with some probability', function() {
                 utils.trials(function() {
                     var p = Math.random();
                     var k = Math.floor(Math.random() * 200);
-                    var head = "head";
-                    var tail = "tail";
+                    var head = parseInt(Math.random()* 20);
+                    var tail = parseInt(Math.random()* 20);
                     var values = [];
                     for (var lap=0; lap<LAPS; lap++) {
                         var r = core.coin(head, tail, p, k);
@@ -197,13 +197,11 @@ describe('ran', function() {
                     }
 
                     // Distribution is uniform
-                    // TODO fix unit test
                     return utils.chi_test(values, function(x) {
-                        console.log(x);
-                        return x == head ? p : 1-p;
+                        return x === head ? p : 1-p;
                     }, 1);
                 });
             });
-        });*/
+        });
     });
 });
