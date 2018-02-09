@@ -7,7 +7,6 @@
 // TODO subclass discrete and continuous distributions from parent distribution
 // TODO simplify equations
 // TODO speed up Poisson by using different algorithms for low/high lambda
-// TODO generate alias table with _DiscreteDistribution
 (function (global, factory) {
     if (typeof exports === "object" && typeof module !== "undefined") {
         factory(exports);
@@ -376,9 +375,6 @@
      * @namespace dist
      * @memberOf ran
      */
-    // TODO distributions to add: https://en.wikipedia.org/wiki/List_of_probability_distributions
-    // TODO use trapezoid rule for integration
-    // TODO add unit test for PDF vs CDF
     var dist = (function () {
             /**
              * Generates a normally distributed value.
@@ -535,112 +531,6 @@
             }
 
             /**
-             * Class implementing the [alias table method]{@link http://www.keithschwarz.com/darts-dice-coins} for
-             * custom distribution.
-             *
-             * @class Alias
-             * @memberOf ran.dist
-             * @param {Array} probs Array of weights to init the alias table with.
-             * @constructor
-             */
-            function Alias(probs) {
-                var _n = 0;
-                var _prob = [0];
-                var _alias = [0];
-
-                /**
-                 * Resets alias table weights.
-                 *
-                 * @method reset
-                 * @methodOf ran.dist.Alias
-                 * @param {Array} w Array of weights to reset the alias table to.
-                 */
-                this.reset = function (w) {
-                    // Single element
-                    if (w.length < 1) {
-                        _prob = [0];
-                        _alias = [0];
-                        return;
-                    }
-                    // Get sum (for normalization)
-                    _n = w.length;
-                    var sum = 0;
-                    for (var i = 0; i < _n; i++)
-                        sum += w[i];
-
-                    // Fill up small and large work lists
-                    var p = [];
-                    var small = [];
-                    var large = [];
-                    for (i = 0; i < _n; i++) {
-                        p.push(_n * w[i] / sum);
-                        if (p[i] < 1.0)
-                            small.push(i);
-                        else
-                            large.push(i);
-                    }
-
-                    // Init tables
-                    _prob = [];
-                    _alias = [];
-                    for (i = 0; i < _n; i++) {
-                        _prob.push(1.0);
-                        _alias.push(i);
-                    }
-
-                    // Fill up alias table
-                    var s = 0,
-                        l = 0;
-                    while (small.length > 0 && large.length > 0) {
-                        s = small.shift();
-                        l = large.shift();
-
-                        _prob[s] = p[s];
-                        _alias[s] = l;
-
-                        p[l] += p[s] - 1.0;
-                        if (p[l] < 1.0)
-                            small.push(l);
-                        else
-                            large.push(l);
-                    }
-                    while (large.length > 0) {
-                        l = large.shift();
-                        _prob[l] = 1.0;
-                        _alias[l] = l;
-                    }
-                    while (small.length > 0) {
-                        s = small.shift();
-                        _prob[s] = 1.0;
-                        _alias[s] = s;
-                    }
-                };
-                this.reset(probs);
-
-                /**
-                 * Samples some values from the alias table.
-                 *
-                 * @method sample
-                 * @methodOf ran.dist.Alias
-                 * @param {number=} n Number of values to return.
-                 * @returns {(number|Array)} Single value or array of random values.
-                 */
-                this.sample = function (n) {
-                    return _some(function () {
-                        if (_n <= 1) {
-                            return 0;
-                        }
-
-                        var i = Math.floor(Math.random() * _n);
-                        if (Math.random() < _prob[i])
-                            return i;
-                        else
-                            return _alias[i];
-                    }, n);
-                };
-            }
-
-            /**
              * Generator for [Bernoulli distribution]{@link https://en.wikipedia.org/wiki/Bernoulli_distribution}.
              *
              * @class Bernoulli
@@ -694,6 +584,101 @@
              */
             var Chi2 = function (k) {
                 return Gamma(Math.round(k) / 2, 0.5);
+            };
+
+            /**
+             * Generator for custom distribution, using the
+             * [alias table method]{@link http://www.keithschwarz.com/darts-dice-coins} method.
+             *
+             * @class Alias
+             * @memberOf ran.dist
+             * @param {Array} weights Weights for the distribution (doesn't need to be normalized).
+             * @constructor
+             */
+            var Custom = function(weights) {
+                // Pre-compute tables
+                var n = weights.length;
+                var prob = [0];
+                var alias = [0];
+                if (weights.length > 1) {
+                    // Get sum (for normalization)
+                    var sum = 0;
+                    for (var i = 0; i < n; i++)
+                        sum += weights[i];
+
+                    // Fill up small and large work lists
+                    var p = [];
+                    var small = [];
+                    var large = [];
+                    for (i = 0; i < n; i++) {
+                        p.push(n * weights[i] / sum);
+                        if (p[i] < 1.0)
+                            small.push(i);
+                        else
+                            large.push(i);
+                    }
+
+                    // Init tables
+                    prob = [];
+                    alias = [];
+                    for (i = 0; i < n; i++) {
+                        prob.push(1.0);
+                        alias.push(i);
+                    }
+
+                    // Fill up alias table
+                    var s = 0,
+                        l = 0;
+                    while (small.length > 0 && large.length > 0) {
+                        s = small.shift();
+                        l = large.shift();
+
+                        prob[s] = p[s];
+                        alias[s] = l;
+
+                        p[l] += p[s] - 1.0;
+                        if (p[l] < 1.0)
+                            small.push(l);
+                        else
+                            large.push(l);
+                    }
+                    while (large.length > 0) {
+                        l = large.shift();
+                        prob[l] = 1.0;
+                        alias[l] = l;
+                    }
+                    while (small.length > 0) {
+                        s = small.shift();
+                        prob[s] = 1.0;
+                        alias[s] = s;
+                    }
+                }
+
+                // Build pmf and cdf
+                var pmf = [weights[0]/sum];
+                var cdf = [weights[0]/sum];
+                for (i=1; i<weights.length; i++) {
+                    pmf.push(weights[i] / sum);
+                    cdf.push(cdf[i-1] + weights[i] / sum);
+                }
+
+                // Create generator
+                return new _DiscreteDistribution(function() {
+                    if (n <= 1) {
+                        return 0;
+                    }
+                    var i = Math.floor(Math.random() * n);
+                    if (Math.random() < prob[i])
+                        return i;
+                    else
+                        return alias[i];
+                }, function(x) {
+                    var xi = parseInt(x);
+                    return (xi < 0 || xi >= weights.length) ? 0 : pmf[xi];
+                }, function(x) {
+                    var xi = parseInt(x);
+                    return xi < 0 ? 0 : (xi >= weights.length ? 1 : cdf[xi]);
+                })();
             };
 
             /**
@@ -808,7 +793,6 @@
              * @param {number} sigma Scale parameter.
              * @constructor
              */
-                // TODO this is broken, fix it!
             var Lognormal = function(mu, sigma) {
                 // Pre-compute constants
                 var c1 = sigma * Math.SQRT2;
@@ -891,7 +875,7 @@
             };
 
             /**
-             * Generator for [uniformly distributed]{@link https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)}.
+             * Generator for [uniform distribution]{@link https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)}.
              *
              * @class Uniform
              * @memberOf ran.dist
@@ -913,7 +897,7 @@
             };
 
             /**
-             * Generator for [Weibull distributed]{@link https://en.wikipedia.org/wiki/Weibull_distribution}.
+             * Generator for [Weibull distribution]{@link https://en.wikipedia.org/wiki/Weibull_distribution}.
              *
              * @class Weibull
              * @memberOf ran.dist
@@ -933,10 +917,10 @@
 
             // Public methods
             return {
-                Alias: Alias,
                 Bernoulli: Bernoulli,
                 BoundedPareto: BoundedPareto,
                 Chi2: Chi2,
+                Custom: Custom,
                 Erlang: Erlang,
                 Exponential: Exponential,
                 Gamma: Gamma,

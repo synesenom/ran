@@ -88,7 +88,7 @@ var test_utils = (function() {
     function diff_disc(pmf, cdf, a, b) {
         var dy = 0;
         var int = 0;
-        for (var x=a; x<=b; x++) {
+        for (var x=a; x<b; x++) {
             int += pmf(x);
             dy += Math.abs(cdf(x) - int);
         }

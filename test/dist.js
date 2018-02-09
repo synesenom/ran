@@ -8,9 +8,9 @@ var MAX_AVG_DIFF = 1e-3;
 describe('ran', function() {
     describe('dist', function() {
         describe('custom', function () {
-            it('should return an array of customly distributed values', function () {
+            it('should return an array of custom distributed values', function () {
                 utils.trials(function() {
-                    const k = parseInt(Math.random()*10 + 3);
+                    const k = parseInt(Math.random()*0 + 3);
                     var weights = [];
                     var sum = 0;
                     for (var i=0; i<k; i++) {
@@ -18,13 +18,20 @@ describe('ran', function() {
                         weights.push(w);
                         sum += w;
                     }
-                    var ran = new dist.Alias(weights);
-                    for (i=0; i<k; i++) {
-                        weights[i] /= sum;
+                    var custom = dist.Custom(weights);
+                    return utils.chi_test(custom.sample(LAPS), custom.pmf, k-1);
+                });
+            });
+            it('sum of pmf should give cdf', function () {
+                utils.trials(function () {
+                    const k = parseInt(Math.random()*20 + 3);
+                    var weights = [];
+                    for (var i=0; i<k; i++) {
+                        var w = Math.random() * 10;
+                        weights.push(w);
                     }
-                    return utils.chi_test(ran.sample(LAPS), function (x) {
-                        return weights[x];
-                    }, k-1);
+                    var custom = dist.Custom(weights);
+                    return utils.diff_disc(custom.pmf, custom.cdf, 0, weights.length) < MAX_AVG_DIFF;
                 });
             });
         });

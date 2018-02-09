@@ -33,7 +33,7 @@
             <input type="checkbox" id="s1-api">
             <label for="s1-api">api</label>
             <div class="s1">
-                <input type='checkbox' id='s1-ran'></input><label for='s1-ran'>ran</label><div class='s1'><input type='checkbox' id='s2-ran.core'></input><label for='s2-ran.core'>core</label><div class='s2'><a href='#api-ran.core.float'>float</a><a href='#api-ran.core.int'>int</a><a href='#api-ran.core.choice'>choice</a><a href='#api-ran.core.shuffle'>shuffle</a><a href='#api-ran.core.coin'>coin</a></div><input type='checkbox' id='s2-ran.dist'></input><label for='s2-ran.dist'>dist</label><div class='s2'><a href='#api-ran.dist.Alias'>Alias</a><a href='#api-ran.dist.Bernoulli'>Bernoulli</a><a href='#api-ran.dist.BoundedPareto'>BoundedPareto</a><a href='#api-ran.dist.Chi2'>Chi2</a><a href='#api-ran.dist.Erlang'>Erlang</a><a href='#api-ran.dist.Exponential'>Exponential</a><a href='#api-ran.dist.Gamma'>Gamma</a><a href='#api-ran.dist.GeneralizedGamma'>GeneralizedGamma</a><a href='#api-ran.dist.InverseGamma'>InverseGamma</a><a href='#api-ran.dist.Lognormal'>Lognormal</a><a href='#api-ran.dist.Normal'>Normal</a><a href='#api-ran.dist.Pareto'>Pareto</a><a href='#api-ran.dist.poisson'>poisson</a><a href='#api-ran.dist.Uniform'>Uniform</a><a href='#api-ran.dist.Weibull'>Weibull</a></div></div>
+                <input type='checkbox' id='s1-ran'></input><label for='s1-ran'>ran</label><div class='s1'><input type='checkbox' id='s2-ran.core'></input><label for='s2-ran.core'>core</label><div class='s2'><a href='#api-ran.core.float'>float</a><a href='#api-ran.core.int'>int</a><a href='#api-ran.core.choice'>choice</a><a href='#api-ran.core.shuffle'>shuffle</a><a href='#api-ran.core.coin'>coin</a></div><input type='checkbox' id='s2-ran.dist'></input><label for='s2-ran.dist'>dist</label><div class='s2'><a href='#api-ran.dist.Bernoulli'>Bernoulli</a><a href='#api-ran.dist.BoundedPareto'>BoundedPareto</a><a href='#api-ran.dist.Chi2'>Chi2</a><a href='#api-ran.dist.Alias'>Alias</a><a href='#api-ran.dist.Erlang'>Erlang</a><a href='#api-ran.dist.Exponential'>Exponential</a><a href='#api-ran.dist.Gamma'>Gamma</a><a href='#api-ran.dist.GeneralizedGamma'>GeneralizedGamma</a><a href='#api-ran.dist.InverseGamma'>InverseGamma</a><a href='#api-ran.dist.Lognormal'>Lognormal</a><a href='#api-ran.dist.Normal'>Normal</a><a href='#api-ran.dist.Pareto'>Pareto</a><a href='#api-ran.dist.poisson'>poisson</a><a href='#api-ran.dist.Uniform'>Uniform</a><a href='#api-ran.dist.Weibull'>Weibull</a></div></div>
             </div>
         </div>
     </nav>
@@ -71,19 +71,7 @@
 <br>Flips a biased coin several times and returns the associated head/tail value or array of values. 
 <br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>head</i></td><td><code>object</code></td><td>Head value.</td></tr><tr><td><i>tail</i></td><td><code>object</code></td><td>Tail value.</td></tr><tr><td><i>p</i></td><td><code>number</code></td><td>Bias (probability of head). If not specified, 0.5 is used. <code>optional</code></td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of coins to flip. <code>optional</code></td></tr></table>
 <table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>object</code> <code>Array</code></i></td><td>Object of head/tail value or an array of head/tail values.</td></tr></table></div><br><h2 id='api-ran.dist'>ran.dist</h2>A collection of random number generators for well-known distributions. 
-<br><h3 id='api-ran.dist.Alias'>Alias</h3>
-<div class='card'><pre>ran.dist.Alias(probs)</pre>
-<br>Class implementing the <a href="http://www.keithschwarz.com/darts-dice-coins" target="_blank">alias table method</a> for custom distribution. 
-<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>probs</i></td><td><code>Array</code></td><td>Array of weights to init the alias table with.</td></tr></table>
-</div><br><h3 id='api-ran.dist.Alias.reset'>reset</h3>
-<div class='card'><pre>ran.dist.Alias.reset(w)</pre>
-<br>Resets alias table weights. 
-<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>w</i></td><td><code>Array</code></td><td>Array of weights to reset the alias table to.</td></tr></table>
-</div><br><h3 id='api-ran.dist.Alias.sample'>sample</h3>
-<div class='card'><pre>ran.dist.Alias.sample([n])</pre>
-<br>Samples some values from the alias table. 
-<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>n</i></td><td><code>number</code></td><td>Number of values to return. <code>optional</code></td></tr></table>
-<table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>number</code> <code>Array</code></i></td><td>Single value or array of random values.</td></tr></table></div><br><h3 id='api-ran.dist.Bernoulli'>Bernoulli</h3>
+<br><h3 id='api-ran.dist.Bernoulli'>Bernoulli</h3>
 <div class='card'><pre>ran.dist.Bernoulli(p)</pre>
 <br>Generator for <a href="https://en.wikipedia.org/wiki/Bernoulli_distribution" target="_blank">Bernoulli distribution</a>. 
 <br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>p</i></td><td><code>number</code></td><td>Parameter of the distribution.</td></tr></table>
@@ -95,6 +83,10 @@
 <div class='card'><pre>ran.dist.Chi2(k)</pre>
 <br>Generator for <a href="https://en.wikipedia.org/wiki/Chi-squared_distribution" target="_blank">chi square distribution</a>. 
 <br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>k</i></td><td><code>number</code></td><td>Degrees of freedom. If not an integer, is rounded to the nearest one.</td></tr></table>
+</div><br><h3 id='api-ran.dist.Alias'>Alias</h3>
+<div class='card'><pre>ran.dist.Alias(weights)</pre>
+<br>Generator for custom distribution, using the <a href="http://www.keithschwarz.com/darts-dice-coins" target="_blank">alias table method</a> method. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>weights</i></td><td><code>Array</code></td><td>Weights for the distribution (doesn't need to be normalized).</td></tr></table>
 </div><br><h3 id='api-ran.dist.Erlang'>Erlang</h3>
 <div class='card'><pre>ran.dist.Erlang(k, lambda)</pre>
 <br>Generator for <a href="https://en.wikipedia.org/wiki/Erlang_distribution" target="_blank">Erlang distribution</a>. 
@@ -133,11 +125,11 @@
 <br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>lambda</i></td><td><code>number</code></td><td>Mean of the distribution.</td></tr></table>
 </div><br><h3 id='api-ran.dist.Uniform'>Uniform</h3>
 <div class='card'><pre>ran.dist.Uniform(xmin, xmax)</pre>
-<br>Generator for <a href="https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)" target="_blank">uniformly distributed</a>. 
+<br>Generator for <a href="https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)" target="_blank">uniform distribution</a>. 
 <br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>xmin</i></td><td><code>number</code></td><td>Lower boundary.</td></tr><tr><td><i>xmax</i></td><td><code>number</code></td><td>Upper boundary.</td></tr></table>
 </div><br><h3 id='api-ran.dist.Weibull'>Weibull</h3>
 <div class='card'><pre>ran.dist.Weibull(lambda, k)</pre>
-<br>Generator for <a href="https://en.wikipedia.org/wiki/Weibull_distribution" target="_blank">Weibull distributed</a>. 
+<br>Generator for <a href="https://en.wikipedia.org/wiki/Weibull_distribution" target="_blank">Weibull distribution</a>. 
 <br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>lambda</i></td><td><code>number</code></td><td>Scale parameter.</td></tr><tr><td><i>k</i></td><td><code>number</code></td><td>Shape parameter.</td></tr></table>
 </div><br>
     <label for="menu" id="exit"></label>
