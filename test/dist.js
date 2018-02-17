@@ -1,4 +1,3 @@
-var assert = require('assert');
 var utils = require('../test/test-utils').test_utils;
 var dist = require('../src/ran').dist;
 

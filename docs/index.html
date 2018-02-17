@@ -35,7 +35,7 @@
             <input type="checkbox" id="s1-api">
             <label for="s1-api">api</label>
             <div class="s1">
-                <input type='checkbox' id='s1-ran'></input><label for='s1-ran'>ran</label><div class='s1'><input type='checkbox' id='s2-ran.core'></input><label for='s2-ran.core'>core</label><div class='s2'><a href='#api-ran.core.float'>float</a><a href='#api-ran.core.int'>int</a><a href='#api-ran.core.choice'>choice</a><a href='#api-ran.core.shuffle'>shuffle</a><a href='#api-ran.core.coin'>coin</a></div><input type='checkbox' id='s2-ran.dist'></input><label for='s2-ran.dist'>dist</label><div class='s2'><a href='#api-ran.dist.Bernoulli'>Bernoulli</a><a href='#api-ran.dist.BoundedPareto'>BoundedPareto</a><a href='#api-ran.dist.Chi2'>Chi2</a><a href='#api-ran.dist.Alias'>Alias</a><a href='#api-ran.dist.Erlang'>Erlang</a><a href='#api-ran.dist.Exponential'>Exponential</a><a href='#api-ran.dist.Gamma'>Gamma</a><a href='#api-ran.dist.GeneralizedGamma'>GeneralizedGamma</a><a href='#api-ran.dist.InverseGamma'>InverseGamma</a><a href='#api-ran.dist.Lognormal'>Lognormal</a><a href='#api-ran.dist.Normal'>Normal</a><a href='#api-ran.dist.Pareto'>Pareto</a><a href='#api-ran.dist.poisson'>poisson</a><a href='#api-ran.dist.Uniform'>Uniform</a><a href='#api-ran.dist.Weibull'>Weibull</a></div></div>
+                <input type='checkbox' id='s1-ran'></input><label for='s1-ran'>ran</label><div class='s1'><input type='checkbox' id='s2-ran.core'></input><label for='s2-ran.core'>core</label><div class='s2'><a href='#api-ran.core.float'>float</a><a href='#api-ran.core.int'>int</a><a href='#api-ran.core.choice'>choice</a><a href='#api-ran.core.shuffle'>shuffle</a><a href='#api-ran.core.coin'>coin</a></div><input type='checkbox' id='s2-ran.dist'></input><label for='s2-ran.dist'>dist</label><div class='s2'><a href='#api-ran.dist.Distribution'>Distribution</a><a href='#api-ran.dist.Bernoulli'>Bernoulli</a><a href='#api-ran.dist.BoundedPareto'>BoundedPareto</a><a href='#api-ran.dist.Chi2'>Chi2</a><a href='#api-ran.dist.Alias'>Alias</a><a href='#api-ran.dist.Erlang'>Erlang</a><a href='#api-ran.dist.Exponential'>Exponential</a><a href='#api-ran.dist.Gamma'>Gamma</a><a href='#api-ran.dist.GeneralizedGamma'>GeneralizedGamma</a><a href='#api-ran.dist.InverseGamma'>InverseGamma</a><a href='#api-ran.dist.Lognormal'>Lognormal</a><a href='#api-ran.dist.Normal'>Normal</a><a href='#api-ran.dist.Pareto'>Pareto</a><a href='#api-ran.dist.poisson'>poisson</a><a href='#api-ran.dist.Uniform'>Uniform</a><a href='#api-ran.dist.Weibull'>Weibull</a></div></div>
             </div>
         </div>
     </nav>
@@ -74,7 +74,38 @@
 <br>Flips a biased coin several times and returns the associated head/tail value or array of values. 
 <br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>head</i></td><td><code>object</code></td><td>Head value.</td></tr><tr><td><i>tail</i></td><td><code>object</code></td><td>Tail value.</td></tr><tr><td><i>p</i></td><td><code>number</code></td><td>Bias (probability of head). If not specified, 0.5 is used. <code>optional</code></td></tr><tr><td><i>n</i></td><td><code>number</code></td><td>Number of coins to flip. <code>optional</code></td></tr></table>
 <table><thead><tr><th class='fifth'>return</th><th>description</th></tr></thead><tr><td><i><code>object</code> <code>Array</code></i></td><td>Object of head/tail value or an array of head/tail values.</td></tr></table></div><br><h2 id='api-ran.dist'>ran.dist</h2>A collection of random number generators for well-known distributions. 
-<br><h3 id='api-ran.dist.Bernoulli'>Bernoulli</h3>
+<br><h3 id='api-ran.dist.Distribution'>Distribution</h3>
+<div class='card'><pre>ran.dist.Distribution()</pre>
+<br>The general distribution generator, all generators are created using this class. The methods listed for this class are available for all distribution generators. 
+</div><br><h3 id='api-ran.dist.Distribution.sample'>sample</h3>
+<div class='card'><pre>ran.dist.Distribution.sample(n)</pre>
+<br>Generates some random variate. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>n</i></td><td><code>number</code></td><td>Number of variates to generate.</td></tr></table>
+</div><br><h3 id='api-ran.dist.Distribution.pmf'>pmf</h3>
+<div class='card'><pre>ran.dist.Distribution.pmf(x)</pre>
+<br>The probability mass function. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>x</i></td><td><code>number</code></td><td>Value to evaluate distribution at.</td></tr></table>
+</div><br><h3 id='api-ran.dist.Distribution.pdf'>pdf</h3>
+<div class='card'><pre>ran.dist.Distribution.pdf(x)</pre>
+<br>Probability density function. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>x</i></td><td><code>number</code></td><td>Value to evaluate distribution at.</td></tr></table>
+</div><br><h3 id='api-ran.dist.Distribution.cdf'>cdf</h3>
+<div class='card'><pre>ran.dist.Distribution.cdf(x)</pre>
+<br>The cumulative distribution function. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>x</i></td><td><code>number</code></td><td>Value to evaluate CDF at.</td></tr></table>
+</div><br><h3 id='api-ran.dist.Distribution.survival'>survival</h3>
+<div class='card'><pre>ran.dist.Distribution.survival(x)</pre>
+<br>The survival function. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>x</i></td><td><code>number</code></td><td>Value to evaluate survival function at.</td></tr></table>
+</div><br><h3 id='api-ran.dist.Distribution.hazard'>hazard</h3>
+<div class='card'><pre>ran.dist.Distribution.hazard(x)</pre>
+<br>The hazard function. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>x</i></td><td><code>number</code></td><td>Value to evaluate the hazard at.</td></tr></table>
+</div><br><h3 id='api-ran.dist.Distribution.cumulativeHazard'>cumulativeHazard</h3>
+<div class='card'><pre>ran.dist.Distribution.cumulativeHazard(x)</pre>
+<br>The cumulative hazard function. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>x</i></td><td><code>number</code></td><td>Value to evaluate cumulative hazard at.</td></tr></table>
+</div><br><h3 id='api-ran.dist.Bernoulli'>Bernoulli</h3>
 <div class='card'><pre>ran.dist.Bernoulli(p)</pre>
 <br>Generator for <a href="https://en.wikipedia.org/wiki/Bernoulli_distribution" target="_blank">Bernoulli distribution</a>. 
 <br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>p</i></td><td><code>number</code></td><td>Parameter of the distribution.</td></tr></table>

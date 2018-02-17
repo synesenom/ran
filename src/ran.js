@@ -10,7 +10,6 @@
 // TODO add hypergeometric https://en.wikipedia.org/wiki/Hypergeometric_distribution
 // TODO add poisson binomial https://en.wikipedia.org/wiki/Poisson_binomial_distribution
 // TODO simplify equations
-// TODO speed up Poisson by using different algorithms for low/high lambda
 (function (global, factory) {
     if (typeof exports === "object" && typeof module !== "undefined") {
         factory(exports);
@@ -624,10 +623,75 @@
                     return 1 - methods.cdf(x);
                 };
 
+                // Hazard functions
+                methods.hazard = function(x) {
+                    return pdf(x) / methods.survival(x);
+                };
+                methods.cumulativeHazard = function(x) {
+                    return -Math.log(methods.survival(x));
+                };
+
                 // Return available methods
                 return methods;
             };
         }
+
+        /**
+         * The general distribution generator, all generators are created using this class.
+         * The methods listed for this class are available for all distribution generators.
+         *
+         * @class Distribution
+         * @memberOf ran.dist
+         */
+        /**
+         * Generates some random variate.
+         *
+         * @method sample
+         * @methodOf ran.dist.Distribution
+         * @param {number} n Number of variates to generate.
+         */
+        /**
+         * The probability mass function.
+         *
+         * @method pmf
+         * @methodOf ran.dist.Distribution
+         * @param {number} x Value to evaluate distribution at.
+         */
+        /**
+         * Probability density function.
+         *
+         * @method pdf
+         * @methodOf ran.dist.Distribution
+         * @param {number} x Value to evaluate distribution at.
+         */
+        /**
+         * The cumulative distribution function.
+         *
+         * @method cdf
+         * @methodOf ran.dist.Distribution
+         * @param {number} x Value to evaluate CDF at.
+         */
+        /**
+         * The survival function.
+         *
+         * @method survival
+         * @methodOf ran.dist.Distribution
+         * @param {number} x Value to evaluate survival function at.
+         */
+        /**
+         * The hazard function.
+         *
+         * @method hazard
+         * @methodOf ran.dist.Distribution
+         * @param {number} x Value to evaluate the hazard at.
+         */
+        /**
+         * The cumulative hazard function.
+         *
+         * @method cumulativeHazard
+         * @methodOf ran.dist.Distribution
+         * @param {number} x Value to evaluate cumulative hazard at.
+         */
 
         /**
          * Generator for [Bernoulli distribution]{@link https://en.wikipedia.org/wiki/Bernoulli_distribution}.
