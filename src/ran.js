@@ -692,6 +692,15 @@
          * @methodOf ran.dist.Distribution
          * @param {number} x Value to evaluate cumulative hazard at.
          */
+        /**
+         * Tests if an array of values are from the specified distribution.
+         * For discrete distributions it uses the chi square test, whereas for continuous distributions
+         * the Kolmogorov-Smirnov test is used.
+         *
+         * @method test
+         * @methodOf ran.dist.Distribution
+         * @param {Array} values Array of values to test.
+         */
 
         /**
          * Generator for [Bernoulli distribution]{@link https://en.wikipedia.org/wiki/Bernoulli_distribution}.
