@@ -63,7 +63,7 @@ var GENERATORS = {
     },
     Poisson: {
         g: function() {
-            return dist.Poisson(utils.param.rate());
+            return dist.Poisson(utils.param.rate() * 10);
         }
     },
     Uniform: {
