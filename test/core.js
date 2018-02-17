@@ -1,5 +1,5 @@
 var assert = require('assert');
-var utils = require('../test/test-utils').test_uils;
+var utils = require('../test/test-utils').test_utils;
 var core = require('../src/ran').core;
 
 var TRIALS = 1;

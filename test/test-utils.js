@@ -25,6 +25,24 @@ var test_utils = (function() {
     var CHI_TABLE_HIGH = [366.844, 421.900, 476.606, 531.026, 585.207, 639.183, 692.982, 746.625, 800.131, 853.514, 906.786,
         959.957, 1013.036, 1066.031, 1118.948];
 
+    var param = {
+        degree: function() {
+            return parseInt(Math.random() * 4 + 1);
+        },
+        prob: function() {
+            return Math.random();
+        },
+        scale: function() {
+            return Math.random() * 5 + 0.1;
+        },
+        rate: function() {
+            return Math.random() * 5 + 0.1;
+        },
+        shape: function() {
+            return Math.random() * 5 + 0.1;
+        }
+    };
+
     /**
      * Performs a Kolmogorov-Smirnov test with significance level of 99%.
      *
@@ -122,6 +140,7 @@ var test_utils = (function() {
     }
 
     return {
+        param: param,
         ks_test: ks_test,
         chi_test: chi_test,
         trials: trials,
@@ -132,4 +151,4 @@ var test_utils = (function() {
 
 // Export if we have module
 if (typeof module !== "undefined" && typeof module.exports === "object")
-    module.exports.test_uils = test_utils;
+    module.exports.test_utils = test_utils;
