@@ -127,6 +127,44 @@
         })();
 
         /**
+         * Logarithm of the gamma function.
+         *
+         * @method gammaLn
+         * @methodOf ran.special
+         * @param {number} z Value to evaluate log(gamma) at.
+         * @returns {number} The log(gamma) value.
+         * @private
+         */
+        // TODO test if function works
+        // TODO add incomplete beta
+        // TODO where log(gamma) is needed, use this instead of gamma
+        var gammaLn = (function() {
+            var _p = [
+                76.18009172947146,
+                -86.50532032941677,
+                24.01409824083091,
+                -1.231739572450155,
+                .1208650973866179e-2,
+                -.5395239384953e-5
+            ];
+
+            function _gammaLn(z) {
+                var x = z;
+                var y = z;
+                var tmp = x + 5.5;
+                tmp = (x + 0.5) * Math.log(tmp) - tmp;
+                var ser = 1.000000000190015;
+                for (var j=0; j<6; j++) {
+                    y++;
+                    ser += _p[j] / y;
+                }
+                return tmp + Math.log(2.5066282746310005 * ser/x);
+            }
+            
+            return _gammaLn;
+        })();
+
+        /**
          * Lower incomplete gamma function, using the series expansion and continued fraction approximations.
          *
          * @method gammaLowerIncomplete
@@ -235,6 +273,7 @@
         return {
             gamma: gamma,
             gammaLowerIncomplete: gammaLowerIncomplete,
+            gammaLn: gammaLn,
             erf: erf
         };
     })();
@@ -717,6 +756,21 @@
                 return parseInt(x) === 1 ? p : 1 - p;
             }, function (x) {
                 return x < 0 ? 0 : (parseInt(x) >= 1 ? 1 : 1 - p);
+            })();
+        };
+
+        var Beta = function(alpha, beta) {
+            // Pre-compute constants
+            var c1 = special.gamma(alpha) * special.gamma(beta) / special.gamma(alpha + beta);
+
+            return _Distribution("continuous", function () {
+                var x = _gamma(alpha, 1);
+                var y = _gamma(beta, 1);
+                return x / (x + y);
+            }, function (x) {
+                return Math.pow(x, alpha-1) * Math.pow(1-x, beta-1) / c1;
+            }, function (x) {
+                // TODO implement regularized incomplete beta
             })();
         };
 

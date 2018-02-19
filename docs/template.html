@@ -5,12 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:200,400,700" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="wp.min.css">
-    <title>ranjs</title>
+    <title>{{NAME}}</title>
     <style>
-        span.dice:after {
-            content: 'dice.js';
+        span.hl {
             font-weight: 400;
             color: dodgerblue;
+        }
+        aside .sponsors {
+            width: 100%;
+            position: absolute;
+            left: 0;
+            bottom: 0;
+        }
+        aside .sponsors .title {
+            width: 60%;
+            position: relative;
+            float: left;
+            margin: 10px 20px;
+            opacity: 0.4;
+        }
+        aside .sponsors img {
+            width: 120px;
+            position: relative;
+            float: left;
+            margin: 0 10px 20px 20px;
+            opacity: 0.3;
+        }
+        aside .sponsors img:hover {
+            opacity: 1;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -18,7 +41,7 @@
 <input type="checkbox" id="menu">
 <label for="menu" id="open">☰</label>
 <aside>
-    <div class="logo">ranjs</div>
+    <div class="logo">{{NAME}}</div>
     <nav>
         <div>
             <a href="#what_is_this">what is this?</a>
@@ -39,17 +62,25 @@
             </div>
         </div>
     </nav>
+
+    <div class="sponsors">
+        <div class="title">built with:</div>
+        <a href="https://www.jetbrains.com/webstorm/"><img src="img/ws-logo.png"></a>
+    </div>
 </aside>
 <main>
     <h1 id="what_is_this">what is this?</h1>
-    <span class="dice"></span> is a random generator library.
+    <span class="hl">{{NAME}}</span> is a library for generating various random variables in a robust and fast way.
+
     <h1 id='how_to_use'>how do I use it?</h1>
     <h2 id="htu-browser">Browser</h2>
-    <pre>&lt;script type="text/javascript" src="ran.min.js"&gt;&lt;/script&gt;</pre>
+    <pre>&lt;script type="text/javascript" src="{{NAME_SIMPLIFIED}}.min.js"&gt;&lt;/script&gt;</pre>
     <h2 id="htu-node">Node</h2>
-    <pre>npm install ranjs</pre>
+    <pre>npm install {{NAME}}</pre>
+
     <h1 id='demo'>can I try it?</h1>
     Sure, just take a look at the observable demo notebook <a href="https://beta.observablehq.com/@synesenom/ranjs-demo">here</a>.
+
     <h1 id="api">api</h1>
     {{API_CONTENT}}
     <label for="menu" id="exit"></label>

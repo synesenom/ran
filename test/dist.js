@@ -9,6 +9,11 @@ var GENERATORS = {
             return dist.Bernoulli(utils.param.prob());
         }
     },
+    Beta: {
+        g: function() {
+            return dist.Beta(utils.param.scale(), utils.param.scale());
+        }
+    },
     BoundedPareto: {
         g: function() {
             var xmin = utils.param.scale();
@@ -121,6 +126,21 @@ describe('ran', function() {
                 });
             });
         });
+
+        /*describe('beta', function () {
+            it('should return an array of beta distributed values', function () {
+                utils.trials(function() {
+                    var beta = GENERATORS.Beta.g();
+                    return utils.ks_test(beta.sample(LAPS), beta.cdf);
+                });
+            });
+            it('integral of pdf should give cdf', function () {
+                utils.trials(function () {
+                    var beta = GENERATORS.Beta.g();
+                    return utils.diff_cont(beta.pdf, beta.cdf, 0, 10, 0.01) < MAX_AVG_DIFF;
+                });
+            });
+        });*/
 
         describe('boundedPareto', function () {
             it('should return an array of bounded Pareto distributed values', function () {

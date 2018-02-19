@@ -160,10 +160,11 @@ class DocBuilder:
             json.dump(self._build(to_str), f, indent=2)
         return self
 
-    def html(self, filename):
+    def html(self, name, filename):
         """
         Returns the HTML export of the documentation tree using whiteprint.css.
 
+        :param name: Name of the module.
         :param filename: Name of the HTML file where the tree should be exported.
         :returns: Reference to the DocBuilder for chaining.
         """
@@ -318,6 +319,8 @@ class DocBuilder:
         with open(filename, 'w') as f:
             with open("docs/template.html", 'r') as temp:
                 f.write(temp.read()
+                        .replace('{{NAME}}', name)
+                        .replace('{{NAME_SIMPLIFIED}}', name.replace('-', ''))
                         .replace('{{API_MENU}}', menu)
                         .replace('{{API_CONTENT}}', main))
 
