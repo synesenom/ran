@@ -36,7 +36,7 @@
             <input type="checkbox" id="s1-api">
             <label for="s1-api">api</label>
             <div class="s1">
-                <input type='checkbox' id='s1-ran'></input><label for='s1-ran'>ran</label><div class='s1'><input type='checkbox' id='s2-ran.core'></input><label for='s2-ran.core'>core</label><div class='s2'><a href='#api-ran.core.float'>float</a><a href='#api-ran.core.int'>int</a><a href='#api-ran.core.choice'>choice</a><a href='#api-ran.core.shuffle'>shuffle</a><a href='#api-ran.core.coin'>coin</a></div><input type='checkbox' id='s2-ran.dist'></input><label for='s2-ran.dist'>dist</label><div class='s2'><a href='#api-ran.dist.Distribution'>Distribution</a><a href='#api-ran.dist.Bernoulli'>Bernoulli</a><a href='#api-ran.dist.BoundedPareto'>BoundedPareto</a><a href='#api-ran.dist.Chi2'>Chi2</a><a href='#api-ran.dist.Alias'>Alias</a><a href='#api-ran.dist.Erlang'>Erlang</a><a href='#api-ran.dist.Exponential'>Exponential</a><a href='#api-ran.dist.Gamma'>Gamma</a><a href='#api-ran.dist.GeneralizedGamma'>GeneralizedGamma</a><a href='#api-ran.dist.InverseGamma'>InverseGamma</a><a href='#api-ran.dist.Lognormal'>Lognormal</a><a href='#api-ran.dist.Normal'>Normal</a><a href='#api-ran.dist.Pareto'>Pareto</a><a href='#api-ran.dist.poisson'>poisson</a><a href='#api-ran.dist.Uniform'>Uniform</a><a href='#api-ran.dist.Weibull'>Weibull</a></div></div>
+                <input type='checkbox' id='s1-ran'></input><label for='s1-ran'>ran</label><div class='s1'><input type='checkbox' id='s2-ran.core'></input><label for='s2-ran.core'>core</label><div class='s2'><a href='#api-ran.core.float'>float</a><a href='#api-ran.core.int'>int</a><a href='#api-ran.core.choice'>choice</a><a href='#api-ran.core.shuffle'>shuffle</a><a href='#api-ran.core.coin'>coin</a></div><input type='checkbox' id='s2-ran.dist'></input><label for='s2-ran.dist'>dist</label><div class='s2'><a href='#api-ran.dist.Distribution'>Distribution</a><a href='#api-ran.dist.Bernoulli'>Bernoulli</a><a href='#api-ran.dist.Beta'>Beta</a><a href='#api-ran.dist.BoundedPareto'>BoundedPareto</a><a href='#api-ran.dist.Chi2'>Chi2</a><a href='#api-ran.dist.Alias'>Alias</a><a href='#api-ran.dist.Erlang'>Erlang</a><a href='#api-ran.dist.Exponential'>Exponential</a><a href='#api-ran.dist.Gamma'>Gamma</a><a href='#api-ran.dist.GeneralizedGamma'>GeneralizedGamma</a><a href='#api-ran.dist.InverseGamma'>InverseGamma</a><a href='#api-ran.dist.Lognormal'>Lognormal</a><a href='#api-ran.dist.Normal'>Normal</a><a href='#api-ran.dist.Pareto'>Pareto</a><a href='#api-ran.dist.poisson'>poisson</a><a href='#api-ran.dist.Uniform'>Uniform</a><a href='#api-ran.dist.Weibull'>Weibull</a></div></div>
             </div>
         </div>
     </nav>
@@ -121,6 +121,10 @@
 <div class='card'><pre>ran.dist.Bernoulli(p)</pre>
 <br>Generator for <a href="https://en.wikipedia.org/wiki/Bernoulli_distribution" target="_blank">Bernoulli distribution</a>. 
 <br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>p</i></td><td><code>number</code></td><td>Parameter of the distribution.</td></tr></table>
+</div><br><h3 id='api-ran.dist.Beta'>Beta</h3>
+<div class='card'><pre>ran.dist.Beta(alpha, beta)</pre>
+<br>Generator for <a href="https://en.wikipedia.org/wiki/Beta_distribution" target="_blank">beta distribution</a>. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>alpha</i></td><td><code>number</code></td><td>First shape parameter.</td></tr><tr><td><i>beta</i></td><td><code>number</code></td><td>Second shape parameter.</td></tr></table>
 </div><br><h3 id='api-ran.dist.BoundedPareto'>BoundedPareto</h3>
 <div class='card'><pre>ran.dist.BoundedPareto(xmin, xmax, alpha)</pre>
 <br>Generator for <a href="https://en.wikipedia.org/wiki/Pareto_distribution#Bounded_Pareto_distribution" target="_blank">bounded Pareto distribution</a>. 

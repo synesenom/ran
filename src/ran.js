@@ -817,9 +817,18 @@
             })();
         };
 
+        /**
+         * Generator for [beta distribution]{@link https://en.wikipedia.org/wiki/Beta_distribution}.
+         *
+         * @class Beta
+         * @memberOf ran.dist
+         * @param {number} alpha First shape parameter.
+         * @param {number} beta Second shape parameter.
+         * @constructor
+         */
         var Beta = function(alpha, beta) {
             // Pre-compute constants
-            var c1 = special.gamma(alpha) * special.gamma(beta) / special.gamma(alpha + beta);
+            var c1 = Math.exp(special.gammaLn(alpha) + special.gammaLn(beta) - special.gammaLn(alpha + beta));
 
             return _Distribution("continuous", function () {
                 var x = _gamma(alpha, 1);
@@ -828,7 +837,7 @@
             }, function (x) {
                 return Math.pow(x, alpha-1) * Math.pow(1-x, beta-1) / c1;
             }, function (x) {
-                // TODO implement regularized incomplete beta
+                return x <= 0 ? 0 : x >=1 ? 1 : special.betaIncomplete(alpha, beta, x);
             })();
         };
         /**
@@ -1170,7 +1179,7 @@
                         var v = Math.random();
                         var y = alpha - beta * x;
                         var lhs = y + Math.log(v/Math.pow(1.0 + Math.exp(y), 2));
-                        var rhs = k + n * Math.log(lambda) - special.gammaLn(n+1);//Math.log(special.gamma(n + 1));
+                        var rhs = k + n * Math.log(lambda) - special.gammaLn(n+1);
                         if (lhs <= rhs)
                             return n;
                     }
@@ -1228,6 +1237,7 @@
         // Public methods
         return {
             Bernoulli: Bernoulli,
+            Beta: Beta,
             BoundedPareto: BoundedPareto,
             Chi2: Chi2,
             Custom: Custom,
