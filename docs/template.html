@@ -11,30 +11,6 @@
             font-weight: 400;
             color: dodgerblue;
         }
-        aside .sponsors {
-            width: 100%;
-            position: absolute;
-            left: 0;
-            bottom: 0;
-        }
-        aside .sponsors .title {
-            width: 60%;
-            position: relative;
-            float: left;
-            margin: 10px 20px;
-            opacity: 0.4;
-        }
-        aside .sponsors img {
-            width: 120px;
-            position: relative;
-            float: left;
-            margin: 0 10px 20px 20px;
-            opacity: 0.3;
-        }
-        aside .sponsors img:hover {
-            opacity: 1;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -55,6 +31,8 @@
 
             <a href="#demo">can I try it?</a>
 
+            <a href="#acknowledgments">acknowledgments</a>
+
             <input type="checkbox" id="s1-api">
             <label for="s1-api">api</label>
             <div class="s1">
@@ -62,11 +40,6 @@
             </div>
         </div>
     </nav>
-
-    <div class="sponsors">
-        <div class="title">built with:</div>
-        <a href="https://www.jetbrains.com/webstorm/"><img src="img/ws-logo.png"></a>
-    </div>
 </aside>
 <main>
     <h1 id="what_is_this">what is this?</h1>
@@ -80,6 +53,10 @@
 
     <h1 id='demo'>can I try it?</h1>
     Sure, just take a look at the observable demo notebook <a href="https://beta.observablehq.com/@synesenom/ranjs-demo">here</a>.
+
+    <h1 id="acknowledgments">acknowledgments</h1>
+    The library was built with <a href="https://www.jetbrains.com/webstorm/">WebStorm</a> using Jetbrain's generous open
+    source license.
 
     <h1 id="api">api</h1>
     {{API_CONTENT}}

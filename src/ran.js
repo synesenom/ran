@@ -655,8 +655,7 @@
                 };
 
                 // Cumulative density and related functions
-                methods.cdf = cdf !== undefined
-                    ? cdf
+                methods.cdf = cdf !== undefined ? cdf
                     : type === "discrete" ? _cdfEstimatorDiscrete : _cdfEstimatorContinuous;
                 methods.survival = function(x) {
                     return 1 - methods.cdf(x);
@@ -773,7 +772,6 @@
                 // TODO implement regularized incomplete beta
             })();
         };
-
         /**
          * Generator for [bounded Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution#Bounded_Pareto_distribution}.
          *
