@@ -112,8 +112,8 @@
                     y = Math.PI / (Math.sin(Math.PI * z) * _gamma(1 - z));
                 } else {
                     z--;
-                    var x = 0.99999999999980993;
-                    var l = _p.length;
+                    var x = 0.99999999999980993,
+                        l = _p.length;
                     _p.forEach(function (p, i) {
                         x += p / (z + i + 1);
                         var t = z + l - 0.5;
@@ -135,7 +135,6 @@
          * @returns {number} The log(gamma) value.
          * @private
          */
-        // TODO test if function works
         // TODO add incomplete beta
         // TODO where log(gamma) is needed, use this instead of gamma
         var gammaLn = (function() {
@@ -148,20 +147,18 @@
                 -.5395239384953e-5
             ];
 
-            function _gammaLn(z) {
-                var x = z;
-                var y = z;
-                var tmp = x + 5.5;
+            return function(z) {
+                var x = z,
+                    y = z,
+                    tmp = x + 5.5;
                 tmp = (x + 0.5) * Math.log(tmp) - tmp;
                 var ser = 1.000000000190015;
-                for (var j=0; j<6; j++) {
+                for (var j = 0; j < 6; j++) {
                     y++;
                     ser += _p[j] / y;
                 }
-                return tmp + Math.log(2.5066282746310005 * ser/x);
-            }
-            
-            return _gammaLn;
+                return tmp + Math.log(2.5066282746310005 * ser / x);
+            };
         })();
 
         /**
@@ -178,13 +175,13 @@
             var _DELTA = 1e-30;
 
             // Lower incomplete gamma generator using the series expansion
-            function _gli_series(s, x) {
+            function _gliSeries(s, x) {
                 if (x < 0) {
                     return 0;
                 } else {
                     var si = s,
-                        y = 1 / s;
-                    var f = 1 / s;
+                        y = 1 / s,
+                        f = 1 / s;
                     for (var i = 0; i < _MAX_ITER; i++) {
                         si++;
                         y *= x / si;
@@ -197,13 +194,13 @@
             }
 
             // Upper incomplete gamma generator using the continued fraction expansion
-            function _gui_continued_fraction(s, x) {
+            function _guiContinuedFraction(s, x) {
                 var b = x + 1 - s,
-                    c = 1 / _DELTA;
-                var d = 1 / b;
-                var f = d,
+                    c = 1 / _DELTA,
+                    d = 1 / b,
+                    f = d,
                     fi, y;
-                for (var i = 1; i <= _MAX_ITER; i++) {
+                for (var i = 1; i < _MAX_ITER; i++) {
                     fi = i * (s - i);
                     b += 2;
                     d = fi * d + b;
@@ -223,9 +220,72 @@
 
             return function (s, x) {
                 if (x < s + 1)
-                    return _gli_series(s, x);
+                    return _gliSeries(s, x);
                 else
-                    return gamma(s) - _gui_continued_fraction(s, x);
+                    return gamma(s) - _guiContinuedFraction(s, x);
+            };
+        })();
+
+        /**
+         * Incomplete beta function, using the continued fraction approximations.
+         *
+         * @method betaIncomplete
+         * @methodOf ran.special
+         * @param {number} a First parameter of the function.
+         * @param {number} b Second parameter of the function.
+         * @param {number} x Lower boundary of the integral.
+         * @returns {number} Value of the incomplete beta function.
+         * @private
+         */
+        var betaIncomplete = (function() {
+            var _FPMIN = 1e-30;
+
+            // Incomplete beta generator using the continued fraction expansion
+            function _biContinuedFraction(a, b, x) {
+                var qab = a + b,
+                    qap = a + 1,
+                    qam = a - 1,
+                    c = 1,
+                    d = 1 - qab * x / qap;
+                if (Math.abs(d) < _FPMIN)
+                    d = _FPMIN;
+                d = 1 / d;
+                var h = d;
+
+                for (var i = 1; i < _MAX_ITER; i++) {
+                    var m2 = 2 * i,
+                        aa = i * (b - i) * x / ((qam + m2) * (a + m2));
+                    d = 1 + aa * d;
+                    if (Math.abs(d) < _FPMIN)
+                        d = _FPMIN;
+                    c = 1 + aa / c;
+                    if (Math.abs(c) < _FPMIN)
+                        c = _FPMIN;
+                    d = 1 / d;
+                    h *= d * c;
+                    aa = -(a + i) * (qab + i) * x / ((a + m2) * (qap + m2));
+                    d = 1 + aa * d;
+                    if (Math.abs(d) < _FPMIN)
+                        d = _FPMIN;
+                    c = 1 + aa / c;
+                    if (Math.abs(c) < _FPMIN)
+                        c = _FPMIN;
+                    d = 1 / d;
+                    var del = d * c;
+                    h *= del;
+                    if (Math.abs(del - 1) < _EPSILON)
+                        break;
+                }
+                return h;
+            }
+
+            return function(a, b, x) {
+                var bt = (x <= 0 || x >= 1)
+                    ? 0
+                    : Math.exp(gammaLn(a + b) - gammaLn(a) - gammaLn(b) + a * Math.log(x) + b * Math.log(1 - x));
+                return x < (a + 1) / (a + b + 2)
+                    ? bt * _biContinuedFraction(a, b, x) / a
+                    : 1 - bt * _biContinuedFraction(b, a, 1 - x) / b;
             };
         })();
 
@@ -253,27 +313,26 @@
                 0.17087277
             ];
 
-            function _erf(x) {
+            return function(x) {
                 var t = 1 / (1 + 0.5 * Math.abs(x));
                 var tp = 1;
                 var sum = 0;
-                _p.forEach(function (p, i) {
+                _p.forEach(function (p) {
                     sum += p * tp;
                     tp *= t;
                 });
                 var tau = t * Math.exp(sum - x * x);
 
                 return x < 0 ? tau - 1 : 1 - tau;
-            }
-
-            return _erf;
+            };
         })();
 
         // Exposed methods
         return {
             gamma: gamma,
-            gammaLowerIncomplete: gammaLowerIncomplete,
             gammaLn: gammaLn,
+            gammaLowerIncomplete: gammaLowerIncomplete,
+            betaIncomplete: betaIncomplete,
             erf: erf
         };
     })();
@@ -1111,7 +1170,7 @@
                         var v = Math.random();
                         var y = alpha - beta * x;
                         var lhs = y + Math.log(v/Math.pow(1.0 + Math.exp(y), 2));
-                        var rhs = k + n * Math.log(lambda) - Math.log(special.gamma(n + 1));
+                        var rhs = k + n * Math.log(lambda) - special.gammaLn(n+1);//Math.log(special.gamma(n + 1));
                         if (lhs <= rhs)
                             return n;
                     }
