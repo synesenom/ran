@@ -14,6 +14,11 @@ var GENERATORS = {
             return dist.Beta(utils.param.scale(), utils.param.scale());
         }
     },
+    Binomial: {
+        g: function() {
+            return dist.Binomial(parseInt(utils.param.scale() * 100), utils.param.prob());
+        }
+    },
     BoundedPareto: {
         g: function() {
             var xmin = utils.param.scale();
@@ -138,6 +143,21 @@ describe('ran', function() {
                 utils.trials(function () {
                     var beta = GENERATORS.Beta.g();
                     return utils.diff_cont(beta.pdf, beta.cdf, 0, 1, 0.01) < MAX_AVG_DIFF;
+                });
+            });
+        });
+
+        describe('binomial', function () {
+            it('should return an array of binomial distributed values', function () {
+                utils.trials(function() {
+                    var binomial = GENERATORS.Binomial.g();
+                    return utils.chi_test(binomial.sample(LAPS), binomial.pmf, 2);
+                });
+            });
+            it('integral of pdf should give cdf', function () {
+                utils.trials(function () {
+                    var binomial = GENERATORS.Binomial.g();
+                    return utils.diff_disc(binomial.pmf, binomial.cdf, 0, 100) < MAX_AVG_DIFF;
                 });
             });
         });

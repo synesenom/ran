@@ -9,7 +9,6 @@
 // TODO add discrete uniform
 // TODO add hypergeometric https://en.wikipedia.org/wiki/Hypergeometric_distribution
 // TODO add poisson binomial https://en.wikipedia.org/wiki/Poisson_binomial_distribution
-// TODO simplify equations
 (function (global, factory) {
     if (typeof exports === "object" && typeof module !== "undefined") {
         factory(exports);
@@ -840,6 +839,30 @@
                 return x <= 0 ? 0 : x >=1 ? 1 : special.betaIncomplete(alpha, beta, x);
             })();
         };
+
+        /**
+         * Generator for [binomial distribution]{@link https://en.wikipedia.org/wiki/Binomial_distribution}.
+         *
+         * @class Binomial
+         * @memberOf ran.dist
+         * @param {number} n Number of trials.
+         * @param {number} p Success probability.
+         * @constructor
+         */
+        var Binomial = function(n, p) {
+            // Define functions
+            function _pmf(x) {
+                var xi = parseInt(x);
+                return xi < 0 ? 0 : xi > n ? 0 : Math.exp(special.gammaLn(n + 1) - special.gammaLn(xi + 1) - special.gammaLn(n - xi + 1)
+                    + xi * Math.log(p) + (n - xi) * Math.log(1 - p));
+            }
+
+            // Use an alias table with pre-computed weights
+            return Custom(new Array(n).fill(0).map(function(d, i) {
+                return _pmf(i);
+            }));
+        };
+
         /**
          * Generator for [bounded Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution#Bounded_Pareto_distribution}.
          *
@@ -966,10 +989,10 @@
                     return alias[i];
             }, function (x) {
                 var xi = parseInt(x);
-                return (xi < 0 || xi >= weights.length) ? 0 : pmf[xi];
+                return xi < 0 || xi >= weights.length ? 0 : pmf[xi];
             }, function (x) {
                 var xi = parseInt(x);
-                return xi < 0 ? 0 : (xi >= weights.length ? 1 : cdf[xi]);
+                return xi < 0 ? 0 : xi >= weights.length ? 1 : cdf[xi];
             })();
         };
 
@@ -1187,9 +1210,11 @@
             }
 
             return new _Distribution("discrete", gen, function (x) {
-                return x < 0 ? 0 : Math.pow(lambda, x) * Math.exp(-lambda) / special.gamma(x + 1);
+                var xi = parseInt(x);
+                return xi < 0 ? 0 : Math.pow(lambda, xi) * Math.exp(-lambda) / special.gamma(xi + 1);
             }, function (x) {
-                return x < 0 ? 0 : 1 - special.gammaLowerIncomplete(x + 1, lambda) / special.gamma(x + 1);
+                var xi = parseInt(x);
+                return xi < 0 ? 0 : 1 - special.gammaLowerIncomplete(xi + 1, lambda) / special.gamma(xi + 1);
             })();
         };
 
@@ -1238,6 +1263,7 @@
         return {
             Bernoulli: Bernoulli,
             Beta: Beta,
+            Binomial: Binomial,
             BoundedPareto: BoundedPareto,
             Chi2: Chi2,
             Custom: Custom,
