@@ -2,7 +2,6 @@
  * Module for generating various random numbers.
  * @module ran
  */
-// TODO add binomial (http://www.aip.de/groups/soe/local/numres/bookcpdf/c7-3.pdf)
 // TODO add rademacher https://en.wikipedia.org/wiki/Rademacher_distribution
 // TODO add beta binomial https://en.wikipedia.org/wiki/Beta-binomial_distribution
 // TODO add degenerate https://en.wikipedia.org/wiki/Degenerate_distribution
@@ -849,6 +848,7 @@
          * @param {number} p Success probability.
          * @constructor
          */
+            // TODO update generative method to this: http://www.aip.de/groups/soe/local/numres/bookcpdf/c7-3.pdf
         var Binomial = function(n, p) {
             // Define functions
             function _pmf(x) {
@@ -1219,24 +1219,50 @@
         };
 
         /**
-         * Generator for [uniform distribution]{@link https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)}.
+         * Generator for continuous
+         * [uniform distribution]{@link https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)}.
          *
-         * @class Uniform
+         * @class UniformContinuous
          * @memberOf ran.dist
          * @param {number} xmin Lower boundary.
          * @param {number} xmax Upper boundary.
          * @constructor
          */
-        var Uniform = function (xmin, xmax) {
+        var UniformContinuous = function (xmin, xmax) {
             // Pre-compute constants
             var c1 = xmax - xmin;
 
             return new _Distribution("continuous", function () {
                 return Math.random() * c1 + xmin;
             }, function (x) {
-                return (x < xmin || x > xmax) ? 0 : 1 / c1;
+                return x < xmin || x > xmax ? 0 : 1 / c1;
             }, function (x) {
-                return x < xmin ? 0 : (x > xmax ? 1 : (x - xmin) / c1);
+                return x < xmin ? 0 : x > xmax ? 1 : (x - xmin) / c1;
+            })();
+        };
+
+        /**
+         * Generator for discrete
+         * [uniform distribution]{@link https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)}.
+         *
+         * @class UniformDiscrete
+         * @memberOf ran.dist
+         * @param {number} xmin Lower boundary.
+         * @param {number} xmax Upper boundary.
+         * @constructor
+         */
+        var UniformDiscrete = function (xmin, xmax) {
+            // Pre-compute contsants
+            var c1 = xmax - xmin + 1;
+
+            return new _Distribution("discrete", function() {
+                return parseInt(Math.random() * c1) + xmin;
+            }, function(x) {
+                var xi = parseInt(x);
+                return xi < xmin || xi > xmax ? 0 : 1 / c1;
+            }, function(x) {
+                var xi = parseInt(x);
+                return xi < xmin ? 0 : xi > xmax ? 1 : (1 + xi - xmin) / c1;
             })();
         };
 
@@ -1276,7 +1302,8 @@
             Normal: Normal,
             Pareto: Pareto,
             Poisson: Poisson,
-            Uniform: Uniform,
+            UniformContinuous: UniformContinuous,
+            UniformDiscrete: UniformDiscrete,
             Weibull: Weibull
         };
     })();

@@ -75,10 +75,16 @@ var GENERATORS = {
             return dist.Poisson(utils.param.rate() * 10);
         }
     },
-    Uniform: {
+    UniformContinuous: {
         g: function() {
             var xmin = utils.param.scale();
-            return dist.Uniform(xmin, xmin + utils.param.rate());
+            return dist.UniformContinuous(xmin, xmin + utils.param.rate());
+        }
+    },
+    UniformDiscrete: {
+        g: function() {
+            var xmin = parseInt(utils.param.scale()*40);
+            return dist.UniformDiscrete(xmin, xmin + parseInt(50*utils.param.scale()));
         }
     },
     Weibull: {
@@ -327,17 +333,32 @@ describe('ran', function() {
             });
         });
 
-        describe('uniform', function () {
+        describe('uniform continuous', function () {
             it('should return an array of uniformly distributed values', function () {
                 utils.trials(function() {
-                    var uniform = GENERATORS.Uniform.g();
+                    var uniform = GENERATORS.UniformContinuous.g();
                     return utils.ks_test(uniform.sample(LAPS), uniform.cdf);
                 });
             });
             it('integral of pdf should give cdf', function () {
                 utils.trials(function () {
-                    var uniform = GENERATORS.Uniform.g();
+                    var uniform = GENERATORS.UniformContinuous.g();
                     return utils.diff_cont(uniform.pdf, uniform.cdf, -100, 100, 0.1) < MAX_AVG_DIFF;
+                });
+            });
+        });
+
+        describe('uniform discrete', function () {
+            it('should return an array of Poisson distributed values', function () {
+                utils.trials(function() {
+                    var uniform = GENERATORS.UniformDiscrete.g();
+                    return utils.chi_test(uniform.sample(LAPS), uniform.pmf, 1);
+                });
+            });
+            it('sum of pmf should give cdf', function () {
+                utils.trials(function () {
+                    var uniform = GENERATORS.UniformDiscrete.g();
+                    return utils.diff_disc(uniform.pmf, uniform.cdf, 0, 100) < MAX_AVG_DIFF;
                 });
             });
         });
