@@ -36,7 +36,7 @@
             <input type="checkbox" id="s1-api">
             <label for="s1-api">api</label>
             <div class="s1">
-                <input type='checkbox' id='s1-ran'></input><label for='s1-ran'>ran</label><div class='s1'><input type='checkbox' id='s2-ran.core'></input><label for='s2-ran.core'>core</label><div class='s2'><a href='#api-ran.core.float'>float</a><a href='#api-ran.core.int'>int</a><a href='#api-ran.core.choice'>choice</a><a href='#api-ran.core.shuffle'>shuffle</a><a href='#api-ran.core.coin'>coin</a></div><input type='checkbox' id='s2-ran.dist'></input><label for='s2-ran.dist'>dist</label><div class='s2'><a href='#api-ran.dist.Distribution'>Distribution</a><a href='#api-ran.dist.Bernoulli'>Bernoulli</a><a href='#api-ran.dist.Beta'>Beta</a><a href='#api-ran.dist.Binomial'>Binomial</a><a href='#api-ran.dist.BoundedPareto'>BoundedPareto</a><a href='#api-ran.dist.Chi2'>Chi2</a><a href='#api-ran.dist.Alias'>Alias</a><a href='#api-ran.dist.Erlang'>Erlang</a><a href='#api-ran.dist.Exponential'>Exponential</a><a href='#api-ran.dist.Gamma'>Gamma</a><a href='#api-ran.dist.GeneralizedGamma'>GeneralizedGamma</a><a href='#api-ran.dist.InverseGamma'>InverseGamma</a><a href='#api-ran.dist.Lognormal'>Lognormal</a><a href='#api-ran.dist.Normal'>Normal</a><a href='#api-ran.dist.Pareto'>Pareto</a><a href='#api-ran.dist.poisson'>poisson</a><a href='#api-ran.dist.UniformContinuous'>UniformContinuous</a><a href='#api-ran.dist.UniformDiscrete'>UniformDiscrete</a><a href='#api-ran.dist.Weibull'>Weibull</a></div></div>
+                <input type='checkbox' id='s1-ran'></input><label for='s1-ran'>ran</label><div class='s1'><input type='checkbox' id='s2-ran.core'></input><label for='s2-ran.core'>core</label><div class='s2'><a href='#api-ran.core.float'>float</a><a href='#api-ran.core.int'>int</a><a href='#api-ran.core.choice'>choice</a><a href='#api-ran.core.shuffle'>shuffle</a><a href='#api-ran.core.coin'>coin</a></div><input type='checkbox' id='s2-ran.dist'></input><label for='s2-ran.dist'>dist</label><div class='s2'><a href='#api-ran.dist.Distribution'>Distribution</a><a href='#api-ran.dist.Bernoulli'>Bernoulli</a><a href='#api-ran.dist.Beta'>Beta</a><a href='#api-ran.dist.Binomial'>Binomial</a><a href='#api-ran.dist.BoundedPareto'>BoundedPareto</a><a href='#api-ran.dist.Chi2'>Chi2</a><a href='#api-ran.dist.Custom'>Custom</a><a href='#api-ran.dist.Degenerate'>Degenerate</a><a href='#api-ran.dist.Erlang'>Erlang</a><a href='#api-ran.dist.Exponential'>Exponential</a><a href='#api-ran.dist.Gamma'>Gamma</a><a href='#api-ran.dist.GeneralizedGamma'>GeneralizedGamma</a><a href='#api-ran.dist.InverseGamma'>InverseGamma</a><a href='#api-ran.dist.Lognormal'>Lognormal</a><a href='#api-ran.dist.Normal'>Normal</a><a href='#api-ran.dist.Pareto'>Pareto</a><a href='#api-ran.dist.poisson'>poisson</a><a href='#api-ran.dist.UniformContinuous'>UniformContinuous</a><a href='#api-ran.dist.UniformDiscrete'>UniformDiscrete</a><a href='#api-ran.dist.Weibull'>Weibull</a></div></div>
             </div>
         </div>
     </nav>
@@ -137,10 +137,14 @@
 <div class='card'><pre>ran.dist.Chi2(k)</pre>
 <br>Generator for <a href="https://en.wikipedia.org/wiki/Chi-squared_distribution" target="_blank">chi square distribution</a>. 
 <br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>k</i></td><td><code>number</code></td><td>Degrees of freedom. If not an integer, is rounded to the nearest one.</td></tr></table>
-</div><br><h3 id='api-ran.dist.Alias'>Alias</h3>
-<div class='card'><pre>ran.dist.Alias(weights)</pre>
+</div><br><h3 id='api-ran.dist.Custom'>Custom</h3>
+<div class='card'><pre>ran.dist.Custom(weights)</pre>
 <br>Generator for custom distribution, using the <a href="http://www.keithschwarz.com/darts-dice-coins" target="_blank">alias table method</a> method. 
 <br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>weights</i></td><td><code>Array</code></td><td>Weights for the distribution (doesn't need to be normalized).</td></tr></table>
+</div><br><h3 id='api-ran.dist.Degenerate'>Degenerate</h3>
+<div class='card'><pre>ran.dist.Degenerate(x0)</pre>
+<br>Generator for the <a href="https://en.wikipedia.org/wiki/Degenerate_distribution" target="_blank">degenerate distribution</a>. 
+<br><table><thead><tr><th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th></tr></thead><tr><td><i>x0</i></td><td><code>number</code></td><td>Location of the distribution.</td></tr></table>
 </div><br><h3 id='api-ran.dist.Erlang'>Erlang</h3>
 <div class='card'><pre>ran.dist.Erlang(k, lambda)</pre>
 <br>Generator for <a href="https://en.wikipedia.org/wiki/Erlang_distribution" target="_blank">Erlang distribution</a>. 

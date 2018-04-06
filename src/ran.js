@@ -4,8 +4,6 @@
  */
 // TODO add rademacher https://en.wikipedia.org/wiki/Rademacher_distribution
 // TODO add beta binomial https://en.wikipedia.org/wiki/Beta-binomial_distribution
-// TODO add degenerate https://en.wikipedia.org/wiki/Degenerate_distribution
-// TODO add discrete uniform
 // TODO add hypergeometric https://en.wikipedia.org/wiki/Hypergeometric_distribution
 // TODO add poisson binomial https://en.wikipedia.org/wiki/Poisson_binomial_distribution
 (function (global, factory) {
@@ -905,7 +903,7 @@
          * Generator for custom distribution, using the
          * [alias table method]{@link http://www.keithschwarz.com/darts-dice-coins} method.
          *
-         * @class Alias
+         * @class Custom
          * @memberOf ran.dist
          * @param {Array} weights Weights for the distribution (doesn't need to be normalized).
          * @constructor
@@ -993,6 +991,24 @@
             }, function (x) {
                 var xi = parseInt(x);
                 return xi < 0 ? 0 : xi >= weights.length ? 1 : cdf[xi];
+            })();
+        };
+
+        /**
+         * Generator for the [degenerate distribution]{@link https://en.wikipedia.org/wiki/Degenerate_distribution}.
+         *
+         * @class Degenerate
+         * @memberOf ran.dist
+         * @param {number} x0 Location of the distribution.
+         * @constructor
+         */
+        var Degenerate = function(x0) {
+            return new _Distribution("continuous", function() {
+                return x0;
+            }, function (x) {
+                return x === x0 ? 1 : 0;
+            }, function (x) {
+                return x < x0 ? 0 : x > x0 ? 1 : 0.5;
             })();
         };
 
@@ -1293,6 +1309,7 @@
             BoundedPareto: BoundedPareto,
             Chi2: Chi2,
             Custom: Custom,
+            Degenerate: Degenerate,
             Erlang: Erlang,
             Exponential: Exponential,
             Gamma: Gamma,
