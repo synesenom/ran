@@ -1325,6 +1325,361 @@
         };
     })();
 
+    /**
+     * A collection of various Monte Carlo methods.
+     *
+     * @namespace mc
+     * @memberOf ran
+     */
+    var mc = (function() {
+        /**
+         * Class implementing a multidimensional proposal distribution.
+         * Proposal functions are used to sample new state from the current one.
+         *
+         * @class _Proposal
+         * @memberOf ran.mc
+         * @param {number} dimension Number of dimensions of the state.
+         * @param {Array} s0 Initial values of the proposal scales. If not specified a vector of 1s is generated.
+         * @constructor
+         * @private
+         */
+        var _Proposal = (function (dimension, s0) {
+            // TODO Extend it to arbitrary proposals
+            // TODO save current transition probability to calculate ratio faster
+            /**
+             * Scale parameters of the proposals.
+             *
+             * @var {Array} _scales
+             * @memberOf ran.mc._Proposal
+             * @private
+             */
+            var _scales = s0 || new Array(dimension).fill(1);
+
+            /**
+             * The array of proposal distributions.
+             *
+             * @var {Array} _g
+             * @memberOf ran.mc._Proposal
+             * @private
+             */
+            var _g = new Array(dimension).fill(0).map(function () {
+                return new ran.dist.Normal(0, 1);
+            });
+
+            /**
+             * Updates one of the proposal distributions.
+             * Either increases or decreases the scale (deviation) parameters. Only one proposal is updated at once.
+             * Depending on the widen parameter, scale values are increased or decreased by 10%.
+             *
+             * @method update
+             * @memberOf ran.mc._Proposal
+             * @param {boolean} widen Whether the proposals should be widened or tightened.
+             */
+            function update(widen) {
+                // Pick random dimension
+                var i = parseInt(Math.random() * dimension);
+
+                // Update proposal function according to acceptance rate
+                _scales[i] = widen ? _scales[i] * 1.1 : _scales[i] * 0.9;
+                _g[i] = new ran.dist.Normal(0, _scales[i]);
+            }
+
+            /**
+             * Samples a new state vector based on a current position.
+             *
+             * @method jump
+             * @memberOf ran.mc._Proposal
+             * @param {Array} x Current state vector.
+             * @returns {Array} Next proposed state vector.
+             */
+            function jump(x) {
+                return x.map(function (d, i) {
+                    return d + _g[i].sample();
+                });
+            }
+
+            /**
+             * Returns the proposal probability ratio between two states. This is equal to the ratio of the transition
+             * probabilities:
+             *
+             * r = g(x1 | x2) / g(x2 | x1),
+             *
+             * where x1 and x2 are the old and new states.
+             *
+             * @method ratio
+             * @memberOf ran.mc._Proposal
+             * @param {Array} x1 Old state.
+             * @param {Array} x2 New state.
+             * @returns {number} Probability ratio.
+             */
+            function ratio(x1, x2) {
+                return 1;
+            }
+
+            /**
+             * Returns the proposal scale values.
+             *
+             * @method scales
+             * @memberOf ran.mc._Proposal
+             * @returns {Array} Array of scale values.
+             */
+            function scales() {
+                return _scales;
+            }
+
+            // Public methods
+            return {
+                update: update,
+                sample: jump,
+                ratio: ratio,
+                scales: scales
+            };
+        });
+
+        /**
+         * Class managing acceptance related calculations.
+         * Acceptance is estimated based on the last observations with some window size.
+         *
+         * @class _Acceptance
+         * @memberOf ran.mc
+         * @param {number} maxLength Maximum allowed length of the window size.
+         * @constructor
+         * @private
+         */
+        var _Acceptance = (function (maxLength) {
+            /**
+             * The history of previous acceptance values. Either 0 (rejected) or 1 (accepted).
+             *
+             * @var {Array} _history
+             * @memberOf ran.mc._Acceptance
+             * @private
+             */
+            var _history = [];
+
+            /**
+             * Updates the acceptance history.
+             *
+             * @method update
+             * @memberOf ran.mc._Acceptance
+             * @param {number} accepted Whether the new state was accepted (1) or rejected (0).
+             */
+            function update(accepted) {
+                if (_history.length >= maxLength) {
+                    _history.shift();
+                }
+                _history.push(accepted);
+            }
+
+            /**
+             * Measures acceptance ratio based on the current historical values.
+             *
+             * @method measure
+             * @memberOf ran.mc._Acceptance
+             * @returns {number} Estimated acceptance ratio.
+             */
+            function measure() {
+                return _history.length > 0 ? _history.reduce(function (total, d) {
+                    return total + d;
+                }, 0) / _history.length : 0.5;
+            }
+
+            // Public methods
+            return {
+                update: update,
+                measure: measure
+            };
+        });
+
+        /**
+         * Class implementing the Metropolis algorithm.
+         *
+         * @class Metropolis
+         * @memberOf ran.mc
+         * @param {Function} density The function proportional to the density to estimate.
+         * @param {Array} x0 Initial value of the state.
+         * @param {number} dimension Number of dimensions.
+         * @param {Object?} config Object containing optional configuration settings. Possible properties:
+         *                         {x0}: Array containing the initial state. Default is a vector of random numbers between
+         *                               0 and 1.
+         *                         {min}: Array containing the lower boundary of the state. Default is unset.
+         *                         {max}: Array containing the upper boundary of the state. Default is unset.
+         *                         {scales}: Array containing the initial value of the proposal scales. Default is a vector
+         *                                   of 1s.
+         * @constructor
+         */
+        var Metropolis = (function (density, dimension, config) {
+            var _density = density;
+            var _x = (config && config.x0) || new Array(dimension).fill(0).map(Math.random);
+            var _min = config && config.min;
+            var _max = config && config.max;
+            var _proposal = new _Proposal(dimension, config && config.scales);
+            var _acceptance = new _Acceptance(100);
+            var _lastDensity = _density(_x);
+
+            /**
+             * Returns the current state of the estimator. The returned object can be used to initialize another estimator
+             * by passing it as the {config} parameter.
+             *
+             * @method _state
+             * @memberOf ran.mc.Metropolis
+             * @returns {Object} Object containing the current internal state of the estimator.
+             * @private
+             */
+            function _state() {
+                return {
+                    min: _min,
+                    max: _max,
+                    x0: _x,
+                    scales: _proposal.scales()
+                }
+            }
+
+            /**
+             * Runs a single iteration of the state update.
+             *
+             * @method _iterate
+             * @memberOf ran.mc.Metropolis
+             * @returns {number} Number indicating the acceptance status. 1 if accepted, 0 otherwise.
+             * @private
+             */
+            function _iterate() {
+                // Pick new state
+                var x1 = _proposal.sample(_x);
+
+                // Check boundaries
+                if (_min) {
+                    for (var i = 0; i < x1.length; i++) {
+                        if (x1[i] < _min[i]) {
+                            return 0;
+                        }
+                    }
+                }
+                if (_max) {
+                    for (i = 0; i < x1.length; i++) {
+                        if (x1[i] > _max[i]) {
+                            return 0;
+                        }
+                    }
+                }
+
+                // Check if new state should be accepted
+                var _newDensity = _density(x1);
+                if (Math.random() < _proposal.ratio(_x, x1) * _newDensity / _lastDensity) {
+                    // Update state and last probability
+                    _x = x1;
+                    _lastDensity = _newDensity;
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+
+            /**
+             * Adjust parameters.
+             *
+             * @method _adjust
+             * @memberOf ran.mc.Metropolis
+             * @private
+             */
+            function _adjust() {
+                // Adjust proposal distributions
+                _proposal.update(_acceptance.measure() > 0.5);
+            }
+
+            /**
+             * Runs the burn-in phase in batches. During burn-in, no state samples are recorded, only proposal adjustment is
+             * performed. Every call of this method is stopped once the maximum number of batches is reached or an
+             * acceptance rate of 50% is reached within 1%.
+             *
+             * @method burnIn
+             * @memberOf ran.mc.Metropolis
+             * @param {Function=} callback Function to call at each batch of iterations. It is called each time the proposals
+             * are updated (at each batch of state updates). Must accept two arguments: the relative number of batches until
+             * the maximum iterations and the current acceptance rate and the current auto-correlation of the density over
+             * consecutive steps.
+             * @param {number=} maxBatches Maximum number of batches to run. One batch consists of 10K state jump. Default
+             * value is 100.
+             * @returns {Object} Object containing two properties: {state} which is the current internal state of the
+             * estimator (can be used to initialize another estimated by passing it as the {config} parameter) and {result}
+             * which is the final acceptance ratio.
+             */
+            function burnIn(callback, maxBatches) {
+                // Run until acceptance rate is around 50% or max iterations are reached
+                var bMax = maxBatches || 100;
+                for (var batch = 0; batch <= bMax; batch++) {
+                    // Do some iterations
+                    for (var j = 0; j < 1e4; j++) {
+                        _acceptance.update(_iterate());
+                    }
+
+                    // Adjust parameters
+                    _adjust();
+                    var a = _acceptance.measure();
+
+                    // Call optional callback
+                    callback && callback(batch / bMax, a);
+
+                    // If acceptance rate is near 50%, stop burn-in
+                    if (Math.abs(a - 0.5) < 0.01) {
+                        break;
+                    }
+                }
+
+                return {
+                    state: _state(),
+                    result: a
+                };
+            }
+
+            /**
+             * Collects a batch of samples from the distribution to estimate.
+             *
+             * @method sample
+             * @memberOf ran.mc.Metropolis
+             * @param {Function=} progress Callback to call at each percentage of the total samples. Must accept one
+             * parameter that is the fraction of samples collected so far.
+             * @param {number=} size Number of samples to collect.
+             * @returns {Object} Object containing two properties: {state} which is the current internal state of the
+             * estimator (can be used to initialize another estimated by passing it as the {config} parameter) and {result}
+             * which is the array of sampled states.
+             */
+            function sample(progress, size) {
+                var iMax = size || 1e6;
+                var batchSize = iMax / 100;
+                var samples = [];
+                for (var i=0; i<iMax; i++) {
+                    // Iterate and update acceptance
+                    _acceptance.update(_iterate());
+
+                    // Adjust occasionally, also send progress status
+                    if (i % batchSize === 0) {
+                        _adjust();
+                        progress && progress(i / batchSize);
+                    }
+
+                    // Collect sample
+                    samples.push(_x);
+                }
+
+                return {
+                    state: _state(),
+                    result: samples
+                };
+            }
+
+            // Pubic methods
+            return {
+                burnIn: burnIn,
+                sample: sample
+            };
+        });
+
+        // Classes
+        return {
+            Metropolis: Metropolis
+        };
+    })();
+
     // TODO next()
     // TODO trend()
     // TODO noise()
@@ -1358,4 +1713,5 @@
     exports.special = special;
     exports.core = core;
     exports.dist = dist;
+    exports.mc = mc;
 })));

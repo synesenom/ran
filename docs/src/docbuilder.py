@@ -169,7 +169,7 @@ class DocBuilder:
         :returns: Reference to the DocBuilder for chaining.
         """
         def _codify(text):
-            return re.sub(r'\{(.*)\}', r'<code>\1</code>', text)
+            return re.sub(r'\{(.*?)\}', r'<code>\1</code>', text)
 
         def _linkify(text):
             return re.sub(r'\[(.*)\]\{@link (.*)\}', r'<a href="\2" target="_blank">\1</a>', text)
@@ -261,7 +261,7 @@ class DocBuilder:
                 for p in params:
                     entry = "<td><i>%s</i></td><td>%s</td>"\
                                % (p['name'], ' '.join(_tagify(pt, "code") for pt in p['type']['types']))
-                    pdesc = p['desc']
+                    pdesc = _codify(p['desc'])
                     for opt in ['optional', 'nullable', 'non nullable']:
                         if opt in p['type']['options']:
                             pdesc += " " + _tagify(opt, "code")
@@ -276,7 +276,7 @@ class DocBuilder:
                     "thead") + _tagify("<td><i>%s</i></td><td>%s</td>"
                                        % (' '.join(_tagify(rt, "code") for rt in ret[0]['type']['types']),
                                           ret[0]['desc']), "tr")
-                html += _tagify(retdesc, "table")
+                html += _tagify(_codify(retdesc), "table")
 
             # Add override
             if b['override']:
