@@ -1,13 +1,14 @@
 [![Build Status](https://travis-ci.org/synesenom/ran.svg?branch=master)](https://travis-ci.org/synesenom/ran)
 
-Library for generating various random variables in a robust and fast way. Beyond random variate generation, the library
-also provides different useful statistical functions for the distributions such as survival and hazard functions.
-Each generator also comes with a test method that can be used to check if some values are sampled from a specific
-distribution.
+# ranjs
+Library for generating various random variables in a robust and fast way. Beyond random variate generation, `ranjs` provides the following:
+- Useful statistical functions such as survival or hazard functions.
+- Test method for each generator that can be used to check if some values are sampled from a specific distribution.
+- Monte Carlo methods for estimating unknown probability distributions (only Metropolis at the moment).
+Each generator also comes with a test method that can be used to
 
 
 # Install
-
 ## Browser
 Just include the [minified version](https://raw.githubusercontent.com/synesenom/ran/master/ran.min.js) and add
 
@@ -15,8 +16,8 @@ Just include the [minified version](https://raw.githubusercontent.com/synesenom/
 <script type="text/javascript" src="ran.min.js"></script>
 ```
 
-## Node
 
+## Node
 ```
 npm install ranjs
 ```
@@ -49,5 +50,4 @@ A demo observable notebook is available [here](https://beta.observablehq.com/@sy
 
 
 # API
-
 [https://synesenom.github.io/ran/](https://synesenom.github.io/ran/)
