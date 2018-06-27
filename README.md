@@ -1,11 +1,11 @@
 [![Build Status](https://travis-ci.org/synesenom/ran.svg?branch=master)](https://travis-ci.org/synesenom/ran)
+[![npm version](https://badge.fury.io/js/ranjs.svg)](https://www.npmjs.com/package/ranjs)
 
 # ranjs
-Library for generating various random variables in a robust and fast way. Beyond random variate generation, `ranjs` provides the following:
-- Useful statistical functions such as survival or hazard functions.
-- Test method for each generator that can be used to check if some values are sampled from a specific distribution.
-- Monte Carlo methods for estimating unknown probability distributions (only Metropolis at the moment).
-Each generator also comes with a test method that can be used to
+Library for generating various random variables in a robust and fast way. Beyond random variate generation, `ranjs` provides the following:  
+- Useful statistical functions such as survival or hazard functions.  
+- Test method for each generator that can be used to check if some values are sampled from a specific distribution.  
+- Monte Carlo methods for estimating unknown probability distributions (only Metropolis at the moment).  
 
 
 # Install
