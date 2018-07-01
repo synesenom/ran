@@ -283,7 +283,7 @@ describe('ran', function() {
             it('integral of pdf should give cdf', function () {
                 utils.trials(function () {
                     var lognormal = GENERATORS.Lognormal.g();
-                    return utils.diff_cont(lognormal.pdf, lognormal.cdf, 0, 10, 0.01) < MAX_AVG_DIFF;
+                    return utils.diff_cont(lognormal.pdf, lognormal.cdf, 0, 5, 0.01) < MAX_AVG_DIFF;
                 });
             });
         });

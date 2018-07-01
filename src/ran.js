@@ -1189,43 +1189,42 @@
          * @constructor
          */
         var Poisson = function (lambda) {
-            var gen;
-            // Small lambda, Knuth's method
-            if (lambda < 30) {
-                gen = function() {
-                    var l = Math.exp(-lambda),
-                        k = 0,
-                        p = 1;
-                    do {
-                        k++;
-                        p *= Math.random();
-                    } while (p > l);
-                    return k - 1;
+            return new _Distribution("discrete", (function() {
+                if (lambda < 30) {
+                    // Small lambda, Knuth's method
+                    return function() {
+                        var l = Math.exp(-lambda),
+                            k = 0,
+                            p = 1;
+                        do {
+                            k++;
+                            p *= Math.random();
+                        } while (p > l);
+                        return k - 1;
+                    };
+                } else {
+                    // Large lambda, normal approximation
+                    var c = 0.767 - 3.36/lambda;
+                    var beta = Math.PI / Math.sqrt(3 * lambda);
+                    var alpha = beta * lambda;
+                    var k = Math.log(c) - lambda - Math.log(beta);
+                    return function() {
+                        while (true) {
+                            var r = Math.random();
+                            var x = (alpha - Math.log((1 - r)/r)) / beta;
+                            var n = Math.floor(x + 0.5);
+                            if (n < 0)
+                                continue;
+                            var v = Math.random();
+                            var y = alpha - beta * x;
+                            var lhs = y + Math.log(v/Math.pow(1.0 + Math.exp(y), 2));
+                            var rhs = k + n * Math.log(lambda) - special.gammaLn(n+1);
+                            if (lhs <= rhs)
+                                return n;
+                        }
+                    };
                 }
-            } else {
-                // Large lambda, normal approximation
-                var c = 0.767 - 3.36/lambda;
-                var beta = Math.PI / Math.sqrt(3 * lambda);
-                var alpha = beta * lambda;
-                var k = Math.log(c) - lambda - Math.log(beta);
-                gen = function() {
-                    while (true) {
-                        var r = Math.random();
-                        var x = (alpha - Math.log((1 - r)/r)) / beta;
-                        var n = Math.floor(x + 0.5);
-                        if (n < 0)
-                            continue;
-                        var v = Math.random();
-                        var y = alpha - beta * x;
-                        var lhs = y + Math.log(v/Math.pow(1.0 + Math.exp(y), 2));
-                        var rhs = k + n * Math.log(lambda) - special.gammaLn(n+1);
-                        if (lhs <= rhs)
-                            return n;
-                    }
-                }
-            }
-
-            return new _Distribution("discrete", gen, function (x) {
+            })(), function (x) {
                 var xi = parseInt(x);
                 return xi < 0 ? 0 : Math.pow(lambda, xi) * Math.exp(-lambda) / special.gamma(xi + 1);
             }, function (x) {
@@ -1709,7 +1708,6 @@
     })();
 
     // Exports
-    // TODO add process
     exports.special = special;
     exports.core = core;
     exports.dist = dist;
