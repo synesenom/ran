@@ -97,10 +97,10 @@ var test_utils = (function() {
      */
     function trials(test, complete) {
         var success = 0;
-        for (var t = 0; t < 7; t++) {
+        for (var t = 0; t < 10; t++) {
             success += test() ? 1 : 0;
         }
-        assert.equal(success >= (complete ? 7 : 4), true);
+        assert.equal(success >= (complete ? 10 : 6), true);
     }
 
     function diff_disc(pmf, cdf, a, b) {

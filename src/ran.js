@@ -846,19 +846,58 @@
          * @param {number} p Success probability.
          * @constructor
          */
-            // TODO update generative method to this: http://www.aip.de/groups/soe/local/numres/bookcpdf/c7-3.pdf
         var Binomial = function(n, p) {
-            // Define functions
-            function _pmf(x) {
+            // Pre-compute constants
+            var pp = p <= 0.5 ? p : 1 - p,
+                mean = n * pp;
+
+            return _Distribution("discrete", (function () {
+                if (n < 25) {
+                    return function() {
+                        var b = 0;
+                        for (var i = 1; i <= n; i++)
+                            if (Math.random() < pp) b++;
+                        return pp === p ? b : n - b;
+                    };
+                } else if (mean < 1.) {
+                    var lambda = Math.exp(-mean);
+                    return function() {
+                        var t = 1.0;
+                        for (var i = 0; i <= n; i++) {
+                            t *= Math.random();
+                            if (t < lambda) break;
+                        }
+                        var b = i <= n ? i : n;
+                        return pp === p ? b : n - b;
+                    };
+                } else {
+                    var en = n,
+                        g = special.gammaLn(en + 1),
+                        pc = 1 - pp,
+                        pLog = Math.log(pp),
+                        pcLog = Math.log(pc),
+                        sq = Math.sqrt(2.0 * mean * pc);
+                    return function() {
+                        do {
+                            do {
+                                var y = Math.tan(Math.PI * Math.random()),
+                                    em = sq * y + mean;
+                            } while (em < 0.0 || em >= (en + 1.0));
+                            em = Math.floor(em);
+                            var t = 1.2 * sq * (1.0 + y * y) * Math.exp(g - special.gammaLn(em + 1.0)
+                                - special.gammaLn(en - em + 1.0) + em * pLog + (en - em) * pcLog);
+                        } while (Math.random() > t);
+                        return pp === p ? em : n - em;
+                    };
+                }
+            })(), function (x) {
                 var xi = parseInt(x);
                 return xi < 0 ? 0 : xi > n ? 0 : Math.exp(special.gammaLn(n + 1) - special.gammaLn(xi + 1) - special.gammaLn(n - xi + 1)
                     + xi * Math.log(p) + (n - xi) * Math.log(1 - p));
-            }
-
-            // Use an alias table with pre-computed weights
-            return Custom(new Array(n).fill(0).map(function(d, i) {
-                return _pmf(i);
-            }));
+            }, function (x) {
+                var xi = parseInt(x);
+                return xi <= 0 ? 0 : xi > n ? 1 : special.betaIncomplete(n - xi, 1 + xi, 1 - p);
+            })();
         };
 
         /**
@@ -1490,7 +1529,8 @@
         });
 
         /**
-         * Class implementing the Metropolis algorithm.
+         * Class implementing the [Metropolis]{@link https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm}
+         * algorithm.
          *
          * @class Metropolis
          * @memberOf ran.mc
