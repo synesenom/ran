@@ -1363,13 +1363,13 @@
              * @private
              */
             var _g = new Array(dimension).fill(0).map(function () {
-                return new ran.dist.Normal(0, 1);
+                return new dist.Normal(0, 1);
             });
 
             /**
              * Updates one of the proposal distributions.
              * Either increases or decreases the scale (deviation) parameters. Only one proposal is updated at once.
-             * Depending on the widen parameter, scale values are increased or decreased by 10%.
+             * Depending on the widen parameter, scale values are increased or decreased by 20%.
              *
              * @method update
              * @memberOf ran.mc._Proposal
@@ -1380,8 +1380,8 @@
                 var i = parseInt(Math.random() * dimension);
 
                 // Update proposal function according to acceptance rate
-                _scales[i] = widen ? _scales[i] * 1.1 : _scales[i] * 0.9;
-                _g[i] = new ran.dist.Normal(0, _scales[i]);
+                _scales[i] = widen ? _scales[i] * 1.2 : _scales[i] * 0.8;
+                _g[i] = new dist.Normal(0, _scales[i]);
             }
 
             /**
@@ -1496,7 +1496,6 @@
          * @class Metropolis
          * @memberOf ran.mc
          * @param {Function} density The function proportional to the density to estimate.
-         * @param {Array} x0 Initial value of the state.
          * @param {number} dimension Number of dimensions.
          * @param {Object?} config Object containing optional configuration settings. Possible properties:
          *                         {x0}: Array containing the initial state. Default is a vector of random numbers between
@@ -1599,9 +1598,9 @@
              * consecutive steps.
              * @param {number=} maxBatches Maximum number of batches to run. One batch consists of 10K state jump. Default
              * value is 100.
-             * @returns {Object} Object containing two properties: {state} which is the current internal state of the
-             * estimator (can be used to initialize another estimated by passing it as the {config} parameter) and {result}
-             * which is the final acceptance ratio.
+             * @returns {Object} Object containing three properties: {state} which is the current internal state of the
+             * estimator (can be used to initialize another estimated by passing it as the {config} parameter), {result}
+             * which is the final acceptance ratio and the number of batch iterations performed ({iterations}).
              */
             function burnIn(callback, maxBatches) {
                 // Run until acceptance rate is around 50% or max iterations are reached
@@ -1627,7 +1626,8 @@
 
                 return {
                     state: _state(),
-                    result: a
+                    result: a,
+                    iterations: batch-1
                 };
             }
 
