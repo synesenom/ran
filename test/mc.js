@@ -3,7 +3,7 @@ var utils = require('../test/test-utils').test_utils;
 var dist = require('../src/ran').dist;
 var mc = require('../src/ran').mc;
 
-describe('ran', function() {
+/*describe('ran', function() {
    describe('mc', function() {
        describe('Metropolis', function() {
            describe('burnIn', function() {
@@ -22,4 +22,4 @@ describe('ran', function() {
            });
        });
    });
-});
+});*/
