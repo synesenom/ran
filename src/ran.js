@@ -1534,7 +1534,7 @@
          *
          * @class Metropolis
          * @memberOf ran.mc
-         * @param {Function} density The function proportional to the density to estimate.
+         * @param {Function} logDensity The logarithm of the density function to estimate.
          * @param {number} dimension Number of dimensions.
          * @param {Object?} config Object containing optional configuration settings. Possible properties:
          *                         {x0}: Array containing the initial state. Default is a vector of random numbers between
@@ -1545,14 +1545,14 @@
          *                                   of 1s.
          * @constructor
          */
-        var Metropolis = (function (density, dimension, config) {
-            var _density = density;
+        var Metropolis = (function (logDensity, dimension, config) {
+            var _logDensity = logDensity;
             var _x = (config && config.x0) || new Array(dimension).fill(0).map(Math.random);
             var _min = config && config.min;
             var _max = config && config.max;
             var _proposal = new _Proposal(dimension, config && config.scales);
             var _acceptance = new _Acceptance(100);
-            var _lastDensity = _density(_x);
+            var _lastLnP = _logDensity(_x);
 
             /**
              * Returns the current state of the estimator. The returned object can be used to initialize another estimator
@@ -1601,11 +1601,11 @@
                 }
 
                 // Check if new state should be accepted
-                var _newDensity = _density(x1);
-                if (Math.random() < _proposal.ratio(_x, x1) * _newDensity / _lastDensity) {
+                var _newLnP = _logDensity(x1);
+                if (Math.random() < _proposal.ratio(_x, x1) * Math.exp(_newLnP - _lastLnP)) {
                     // Update state and last probability
                     _x = x1;
-                    _lastDensity = _newDensity;
+                    _lastLnP = _newLnP;
                     return 1;
                 } else {
                     return 0;
