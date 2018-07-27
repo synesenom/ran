@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.5.0/d3.min.js"></script>
+    <script src="dashboard-utils.min.js"></script>
+    <script src="../../ran.min.js"></script>
+    <title>univariate | mc</title>
+</head>
+<body>
+<script>
+    // Add charts
+    var hist = new du.widgets.LineChart("hist")
+        .colors({real: "royalblue", estimate: "crimson"})
+        .width(400)
+        .height(300)
+        .margins(50)
+        .render();
+    var line = new du.widgets.LineChart("metrics")
+        .x(400)
+        .width(700)
+        .height(300)
+        .margins(50)
+        .yTickFormat(function(x) {
+            return x;
+        })
+        .render();
+
+    // Start sampling
+    var worker = new Worker('worker.js');
+    worker.postMessage({});
+    worker.onmessage = function(e) {
+        hist.data(e.data.p)
+            .render(10);
+        line.data(e.data.m)
+            .render(0);
+    };
+    worker.onerror = function(e) {
+        console.log(e.message);
+    }
+</script>
+</body>
+</html>

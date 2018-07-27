@@ -17,6 +17,18 @@
 } (this, (function (exports) {
     "use strict";
 
+    function _sum(arr, pow) {
+        if (pow && pow !== 1) {
+            return arr.reduce(function (sum, d) {
+                return sum + Math.pow(d, pow);
+            }, 0);
+        } else {
+            return arr.reduce(function (sum, d) {
+                return sum + d;
+            }, 0);
+        }
+    }
+
     /**
      * The main random number generator.
      * If min > max, a random number in (max, min) is generated.
@@ -424,7 +436,7 @@
          * @method shuffle
          * @methodOf ran.core
          * @param {Array} values Array to shuffle.
-         * @return {Array} The shuffled array.
+         * @returns {Array} The shuffled array.
          */
         function shuffle(values) {
             var i, tmp, l = values.length;
@@ -1371,6 +1383,59 @@
      */
     var mc = (function() {
         /**
+         * Calculates the Gelman-Rubin diagnostics for a set of samples.
+         *
+         * @method gr
+         * @memberOf ran.mc
+         * @param {Array} samples Array of samples, where each sample is an array of states.
+         * @param {number=} maxLength Maximum length of the diagnostic function. Default value is 1000.
+         * @returns {Array} Array of G-R diagnostic versus iteration number for each state variable.
+         */
+        var gr = (function() {
+            /**
+             * Calculates the G-R diagnostic for a single set of samples and a specified state dimension.
+             *
+             * @method _gri
+             * @memberOf ran.mc.gr
+             * @param {Array} samples Array of samples.
+             * @param {number} dim Index of the state dimension to consider.
+             * @returns {number} The G-R diagnostic.
+             * @private
+             */
+            function _gri(samples, dim) {
+                // Calculate sample statistics
+                var m = [],
+                    s = [];
+                samples.forEach(function (d) {
+                    var di = d.map(function (x) {
+                        return x[dim];
+                    });
+                    var mi = _sum(di) / di.length;
+                    var si = (_sum(di, 2) - di.length * mi * mi) / (di.length - 1);
+                    m.push(mi);
+                    s.push(si);
+                });
+
+                // Calculate within and between variances
+                var w = _sum(s) / samples.length;
+                var mm = _sum(m) / samples.length;
+                var b = (_sum(m, 2) - samples.length * mm * mm) * samples[0].length / (samples.length - 1);
+                var v = ((samples[0].length - 1) * w + b) / samples[0].length;
+                return Math.sqrt(v / w);
+            }
+
+            return function(samples, maxLength) {
+                return samples[0][0].map(function(s, j) {
+                    return new Array(maxLength || 1000).fill(0).map(function(d, i) {
+                        return _gri(samples.map(function(dd) {
+                            return dd.slice(0, i+2);
+                        }), j);
+                    });
+                });
+            };
+        })();
+
+        /**
          * Class implementing a multidimensional proposal distribution.
          * Proposal functions are used to sample new state from the current one.
          *
@@ -1412,14 +1477,17 @@
              * @method update
              * @memberOf ran.mc._Proposal
              * @param {boolean} widen Whether the proposals should be widened or tightened.
+             * @returns {Array} Array of scale values after the update.
              */
             function update(widen) {
                 // Pick random dimension
                 var i = parseInt(Math.random() * dimension);
 
                 // Update proposal function according to acceptance rate
-                _scales[i] = widen ? _scales[i] * 1.2 : _scales[i] * 0.8;
+                _scales[i] = widen ? _scales[i] * 1.1 : _scales[i] * 0.9;
                 _g[i] = new dist.Normal(0, _scales[i]);
+
+                return _scales;
             }
 
             /**
@@ -1454,79 +1522,57 @@
                 return 1;
             }
 
-            /**
-             * Returns the proposal scale values.
-             *
-             * @method scales
-             * @memberOf ran.mc._Proposal
-             * @returns {Array} Array of scale values.
-             */
-            function scales() {
-                return _scales;
-            }
-
             // Public methods
             return {
                 update: update,
                 sample: jump,
-                ratio: ratio,
-                scales: scales
+                ratio: ratio
             };
         });
 
         /**
-         * Class managing acceptance related calculations.
-         * Acceptance is estimated based on the last observations with some window size.
+         * Calculates the auto correlation function for historical state data.
          *
-         * @class _Acceptance
+         * @method _ac
          * @memberOf ran.mc
-         * @param {number} maxLength Maximum allowed length of the window size.
-         * @constructor
+         * @param {Array} Array containing historical state data.
+         * @returns {Array} Array of auto correlation functions for each state variable.
          * @private
          */
-        var _Acceptance = (function (maxLength) {
+        var _ac = (function() {
             /**
-             * The history of previous acceptance values. Either 0 (rejected) or 1 (accepted).
+             * Calculates auto correlation for a single variable.
              *
-             * @var {Array} _history
-             * @memberOf ran.mc._Acceptance
+             * @method _aci
+             * @memberOf ran.mc._ac
+             * @param {Array} h Array of single variables representing the history of one state variable.
+             * @returns {Array} The auto correlation function.
              * @private
              */
-            var _history = [];
-
-            /**
-             * Updates the acceptance history.
-             *
-             * @method update
-             * @memberOf ran.mc._Acceptance
-             * @param {number} accepted Whether the new state was accepted (1) or rejected (0).
-             */
-            function update(accepted) {
-                if (_history.length >= maxLength) {
-                    _history.shift();
+            function _aci(h) {
+                // Get average
+                var m = _sum(h) / h.length,
+                    m2 = _sum(h, 2);
+                var rho = new Array(100).fill(0);
+                for (var i = 0; i < h.length; i++) {
+                    for (var r = 0; r < rho.length; r++) {
+                        if (i - r > 0) {
+                            rho[r] += (h[i] - m) * (h[i - r] - m);
+                        }
+                    }
                 }
-                _history.push(accepted);
+
+                return rho.map(function (d) {
+                    return d / (m2 - h.length * m * m);
+                });
             }
 
-            /**
-             * Measures acceptance ratio based on the current historical values.
-             *
-             * @method measure
-             * @memberOf ran.mc._Acceptance
-             * @returns {number} Estimated acceptance ratio.
-             */
-            function measure() {
-                return _history.length > 0 ? _history.reduce(function (total, d) {
-                    return total + d;
-                }, 0) / _history.length : 0.5;
-            }
-
-            // Public methods
-            return {
-                update: update,
-                measure: measure
+            return function(history) {
+                return history.map(function(d) {
+                    return _aci(d);
+                });
             };
-        });
+        })();
 
         /**
          * Class implementing the [Metropolis]{@link https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm}
@@ -1536,41 +1582,199 @@
          * @memberOf ran.mc
          * @param {Function} logDensity The logarithm of the density function to estimate.
          * @param {number} dimension Number of dimensions.
-         * @param {Object?} config Object containing optional configuration settings. Possible properties:
-         *                         {x0}: Array containing the initial state. Default is a vector of random numbers between
-         *                               0 and 1.
-         *                         {min}: Array containing the lower boundary of the state. Default is unset.
-         *                         {max}: Array containing the upper boundary of the state. Default is unset.
-         *                         {scales}: Array containing the initial value of the proposal scales. Default is a vector
-         *                                   of 1s.
+         * @param {Object?} initialState Object containing the initial state of the sampler. Can be used to continue
+         *                               sampling from a pre-trained sampler. Possible properties:
+         *                               {x}: Array containing the initial state. Default is a vector of random numbers
+         *                                    between 0 and 1.
+         *                               {min}: Array containing the lower boundary of the state. Default is unset.
+         *                               {max}: Array containing the upper boundary of the state. Default is unset.
+         *                               {scales}: Array containing the initial value of the proposal scales. Default is
+         *                                         a vector of 1s.
          * @constructor
          */
-        var Metropolis = (function (logDensity, dimension, config) {
-            var _logDensity = logDensity;
-            var _x = (config && config.x0) || new Array(dimension).fill(0).map(Math.random);
-            var _min = config && config.min;
-            var _max = config && config.max;
-            var _proposal = new _Proposal(dimension, config && config.scales);
-            var _acceptance = new _Acceptance(100);
-            var _lastLnP = _logDensity(_x);
-
+        var Metropolis = (function (logDensity, dimension, initialState) {
             /**
-             * Returns the current state of the estimator. The returned object can be used to initialize another estimator
-             * by passing it as the {config} parameter.
+             * Current state of the sampler.
+             * This contains all necessary information to continue an interrupted sampling.
              *
-             * @method _state
+             * @var {Object} _state
              * @memberOf ran.mc.Metropolis
-             * @returns {Object} Object containing the current internal state of the estimator.
+             * @property x Array of last state variables.
+             * @property min Array of lower boundaries.
+             * @property max Array of upper boundaries.
+             * @property proposals Array of the scale parameters of the proposal functions.
              * @private
              */
-            function _state() {
+            var _state = {
+                x: (initialState && initialState.x) || new Array(dimension).fill(0).map(Math.random),
+                min: initialState && initialState.min || null,
+                max: initialState && initialState.max || null,
+                proposals: initialState && initialState.proposals || null
+            };
+
+            /**
+             * The proposal functions for the sampler.
+             *
+             * @var {Object} _proposal
+             * @memberOf ran.mc.Metropolis
+             * @private
+             */
+            var _proposal = new _Proposal(dimension, _state.proposals);
+
+            /**
+             * The last recorded log density.
+             *
+             * @var {number} _lastLnP
+             * @memberOf ran.mc.Metropolis
+             * @private
+             */
+            var _lastLnP = logDensity(_state.x);
+
+            /**
+             * Sampling rate. Only every n-th states are recorded during sampling, where n is the sampling rate.
+             *
+             * @var {number} _samplingRate
+             * @memberOf ran.mc.Metropolis
+             * @private
+             */
+            var _samplingRate = 1;
+
+            /**
+             * Class representing the statistics of the state variables.
+             *
+             * @class _stats
+             * @memberOf ran.mc.Metropolis
+             * @private
+             */
+            var _stats = (function() {
+                var _n = 0,
+                    _m1 = new Array(dimension).fill(0),
+                    _m2 = new Array(dimension).fill(0);
+
+                // Exposed methods
                 return {
-                    min: _min,
-                    max: _max,
-                    x0: _x,
-                    scales: _proposal.scales()
-                }
-            }
+                    /**
+                     * Returns the variable statistics for each dimension.
+                     *
+                     * @method get
+                     * @memberOf ran.mc.Metropolis._stats
+                     * @returns {{mean: Array, std: Array, cv: Array}}
+                     */
+                    get: function() {
+                        var s = _m2.map(function(d, i) {
+                            return Math.sqrt(d - _m1[i] * _m1[i]);
+                        });
+                        var cv = s.map(function(d, i) {
+                            return d / _m1[i];
+                        });
+                        return {
+                            mean: _m1,
+                            std: s,
+                            cv: cv
+                        };
+                    },
+
+                    /**
+                     * Updates the state statistics.
+                     *
+                     * @method update
+                     * @memberOf ran.mc.Metropolis._stats
+                     * @param {Array} x Current state to update statistics with.
+                     */
+                    update: function(x) {
+                        _m1 = _m1.map(function(d, i) {
+                            return (_n * d + x[i]) / (_n + 1);
+                        });
+                        _m2 = _m2.map(function(d, i) {
+                            return (_n * d + x[i] * x[i]) / (_n + 1);
+                        });
+                        _n++;
+                    }
+                };
+            })();
+
+            /**
+             * Class representing the acceptance rate.
+             *
+             * @class _acceptance
+             * @memberOf ran.mc.Metropolis
+             * @private
+             */
+            var _acceptance = (function() {
+                var _arr = [];
+
+                return {
+                    /**
+                     * Returns the acceptance rate based on the last 1000 iterations.
+                     *
+                     * @method get
+                     * @memberOf ran.mc.Metropolis._acceptance
+                     * @returns {number} Estimated acceptance rate.
+                     */
+                    get: function() {
+                        return _sum(_arr) / _arr.length;
+                    },
+
+                    /**
+                     * Updates acceptance history.
+                     *
+                     * @method update
+                     * @memberOf ran.mc.Metropolis._acceptance
+                     * @param {number} a Last acceptance, 1 if state was accepted, 0 otherwise.
+                     */
+                    update: function(a) {
+                        _arr.push(a);
+                        if (_arr.length > 1000) {
+                            _arr.shift();
+                        }
+                    }
+                };
+            })();
+
+            /**
+             * Class representing the latest historical data of the states.
+             *
+             * @class _history
+             * @memberOf ran.mc.Metropolis
+             * @private
+             */
+            var _history = (function() {
+                var _arr = new Array(dimension).fill([]);
+
+                return {
+                    /**
+                     * Returns the historical state data.
+                     *
+                     * @method get
+                     * @memberOf ran.mc.Metropolis._history
+                     * @returns {Array} Array of last 1000 states.
+                     */
+                    get: function() {
+                        return _arr;
+                    },
+
+                    /**
+                     * Updates historical data. Only the last 1000 states are stored.
+                     *
+                     * @method update
+                     * @memberOf ran.mc.Metropolis._history
+                     * @param {number} x Last state to update history with.
+                     */
+                    update: function(x) {
+                        // Add new state
+                        _arr.forEach(function(d, j) {
+                            d.push(x[j]);
+                        });
+
+                        // Remove old state
+                        if (_arr[0].length >= 1000) {
+                            _arr.forEach(function(d) {
+                                d.shift();
+                            });
+                        }
+                    }
+                };
+            })();
 
             /**
              * Runs a single iteration of the state update.
@@ -1582,38 +1786,42 @@
              */
             function _iterate() {
                 // Pick new state
-                var x1 = _proposal.sample(_x);
+                var x1 = _proposal.sample(_state.x);
 
                 // Check boundaries
-                if (_min) {
+                if (_state.min) {
                     for (var i = 0; i < x1.length; i++) {
-                        if (x1[i] < _min[i]) {
+                        if (x1[i] < _state.min[i]) {
                             return 0;
                         }
                     }
                 }
-                if (_max) {
+                if (_state.max) {
                     for (i = 0; i < x1.length; i++) {
-                        if (x1[i] > _max[i]) {
+                        if (x1[i] > _state.max[i]) {
                             return 0;
                         }
                     }
                 }
 
                 // Check if new state should be accepted
-                var _newLnP = _logDensity(x1);
-                if (Math.random() < _proposal.ratio(_x, x1) * Math.exp(_newLnP - _lastLnP)) {
+                var _newLnP = logDensity(x1);
+                if (Math.random() < _proposal.ratio(_state.x, x1) * Math.exp(_newLnP - _lastLnP)) {
                     // Update state and last probability
-                    _x = x1;
+                    _state.x = x1;
                     _lastLnP = _newLnP;
+                    _history.update(_state.x);
+                    _stats.update(_state.x);
                     return 1;
                 } else {
+                    _history.update(_state.x);
+                    _stats.update(_state.x);
                     return 0;
                 }
             }
 
             /**
-             * Adjust parameters.
+             * Adjusts internal parameters such as proposals and sampling rate.
              *
              * @method _adjust
              * @memberOf ran.mc.Metropolis
@@ -1621,13 +1829,79 @@
              */
             function _adjust() {
                 // Adjust proposal distributions
-                _proposal.update(_acceptance.measure() > 0.5);
+                _state.proposals = _proposal.update(_acceptance.get() > 0.5);
+
+                // Adjust sampling rate
+                // Get highest zero point
+                var z = _ac(_history.get()).reduce(function(first, d) {
+                    for (var i=0; i<d.length-1; i++) {
+                        if (d[i] >= 0 && d[i+1] < 0) {
+                            return Math.max(first, i);
+                        }
+                    }
+                }, 0);
+                // Change sampling rate if zero point is different
+                if (z > _samplingRate) {
+                    _samplingRate++;
+                } else if (z < _samplingRate) {
+                    _samplingRate--;
+                }
             }
 
             /**
-             * Runs the burn-in phase in batches. During burn-in, no state samples are recorded, only proposal adjustment is
-             * performed. Every call of this method is stopped once the maximum number of batches is reached or an
-             * acceptance rate of 50% is reached within 1%.
+             * Returns the current state of the estimator. The returned object can be used to initialize another estimator
+             * by passing it as the initial state parameter.
+             *
+             * @method state
+             * @memberOf ran.mc.Metropolis
+             * @returns {Object} Object containing the current internal state of the estimator.
+             */
+            function state() {
+                return {
+                    x: _state.x.slice(),
+                    min: _state.min,
+                    max: _state.max,
+                    proposals: _state.proposals.slice()
+                };
+            }
+
+            /**
+             * Returns the state variable statistics.
+             *
+             * @method stats
+             * @memberOf ran.mc.Metropolis
+             * @returns {{mean: Array, std: Array, cv: Array}} Object containing the arrays of statistics for each state
+             * variable. Statistics calculated are: mean, standard deviation and coefficient of variation.
+             */
+            function stats() {
+                return _stats.get();
+            }
+
+            /**
+             * Returns the current acceptance ratio based on the last 1000 iterations.
+             * 
+             * @method ar
+             * @memberOf ran.mc.Metropolis
+             * @returns {number} Current acceptance ratio.
+             */
+            function ar() {
+                return _acceptance.get();
+            }
+
+            /**
+             * Returns the current auto correlation function for each state variable based on the last 1000 iterations.
+             *
+             * @method ac
+             * @memberOf ran.mc.Metropolis
+             * @returns {Array} Array of auto correlation function for each state variable.
+             */
+            function ac() {
+                return _ac(_history.get());
+            }
+
+            /**
+             * Runs the burn-in phase in batches. During burn-in, some internal parameters such as proposal scales and
+             * sampling rate are adjusted.
              *
              * @method burnIn
              * @memberOf ran.mc.Metropolis
@@ -1635,11 +1909,8 @@
              * are updated (at each batch of state updates). Must accept two arguments: the relative number of batches until
              * the maximum iterations and the current acceptance rate and the current auto-correlation of the density over
              * consecutive steps.
-             * @param {number=} maxBatches Maximum number of batches to run. One batch consists of 10K state jump. Default
+             * @param {number=} maxBatches Maximum number of batches to run. One batch consists of 100 state jump. Default
              * value is 100.
-             * @returns {Object} Object containing three properties: {state} which is the current internal state of the
-             * estimator (can be used to initialize another estimated by passing it as the {config} parameter), {result}
-             * which is the final acceptance ratio and the number of batch iterations performed ({iterations}).
              */
             function burnIn(callback, maxBatches) {
                 // Run until acceptance rate is around 50% or max iterations are reached
@@ -1652,69 +1923,59 @@
 
                     // Adjust parameters
                     _adjust();
-                    var a = _acceptance.measure();
 
                     // Call optional callback
-                    callback && callback(batch / bMax, a);
-
-                    // If acceptance rate is near 50%, stop burn-in
-                    if (Math.abs(a - 0.5) < 0.01) {
-                        break;
-                    }
+                    callback && callback(batch / bMax, _acceptance.get());
                 }
-
-                return {
-                    state: _state(),
-                    result: a,
-                    iterations: batch-1
-                };
             }
 
             /**
              * Collects a batch of samples from the distribution to estimate.
+             * During sampling, no measurement or adjustment is carried out (that is, proposals and sampling rate remain
+             * unchanged), only pure sampling is performed.
              *
              * @method sample
              * @memberOf ran.mc.Metropolis
              * @param {Function=} progress Callback to call at each percentage of the total samples. Must accept one
              * parameter that is the fraction of samples collected so far.
              * @param {number=} size Number of samples to collect.
-             * @returns {Object} Object containing two properties: {state} which is the current internal state of the
-             * estimator (can be used to initialize another estimated by passing it as the {config} parameter) and {result}
-             * which is the array of sampled states.
+             * @returns {Array} Array of the samples states.
              */
             function sample(progress, size) {
                 var iMax = size || 1e6;
                 var batchSize = iMax / 100;
                 var samples = [];
                 for (var i=0; i<iMax; i++) {
-                    // Iterate and update acceptance
-                    _acceptance.update(_iterate());
+                    _iterate();
 
                     // Adjust occasionally, also send progress status
                     if (i % batchSize === 0) {
-                        _adjust();
                         progress && progress(i / batchSize);
                     }
 
                     // Collect sample
-                    samples.push(_x);
+                    if (i % _samplingRate === 0) {
+                        samples.push(_state.x);
+                    }
                 }
 
-                return {
-                    state: _state(),
-                    result: samples
-                };
+                return samples;
             }
 
             // Pubic methods
             return {
                 burnIn: burnIn,
-                sample: sample
+                sample: sample,
+                state: state,
+                stats: stats,
+                ar: ar,
+                ac: ac
             };
         });
 
-        // Classes
+        // Public methods and classes
         return {
+            gr: gr,
             Metropolis: Metropolis
         };
     })();
