@@ -5,19 +5,44 @@
     <script src="../d3.v4.min.js"></script>
     <script src="../dashboard-utils.min.js"></script>
     <script src="../../ran.min.js"></script>
+    <style>
+        html, body {
+        }
+        canvas {
+            position: absolute;
+            left: 0;
+            top: 0;
+            background-color: orange;
+        }
+        #trends {
+            width: 100%;
+            height: 100px;
+            background-color: blue;
+            z-index: 2;
+        }
+        #xhist {
+            width: 100px;
+            height: 500px;
+            background-color: pink;
+        }
+    </style>
     <title>univariate | mc</title>
 </head>
 <body>
+<canvas></canvas>
+<svg id="trends"></svg>
+<svg id="xhist"></svg>
 <script>
+    // Adjust size of canvas
+    d3.select('canvas').attr('width', window.innerWidth + 'px');
+    d3.select('canvas').attr('height', window.innerHeight + 'px');
+
     // Add charts
-    var hist = new du.widgets.LineChart("hist")
+    /*var hist = new du.widgets.LineChart("hist")
         .colors({real: "royalblue", estimate: "crimson"})
         .width(400)
         .height(300)
         .margins(50)
-        .yTickFormat(function(x) {
-            return x.toFixed(3);
-        })
         .render();
     var line = new du.widgets.LineChart("metrics")
         .x(400)
@@ -25,7 +50,7 @@
         .height(300)
         .margins(50)
         .yTickFormat(function(x) {
-            return x.toFixed(1);
+            return x;
         })
         .render();
 
@@ -35,12 +60,12 @@
     worker.onmessage = function(e) {
         hist.data(e.data.p)
             .render(10);
-        line.data(e.data.d)
+        line.data(e.data.m)
             .render(0);
     };
     worker.onerror = function(e) {
         console.log(e.message);
-    }
+    }*/
 </script>
 </body>
 </html>

@@ -1484,7 +1484,7 @@
                 var i = parseInt(Math.random() * dimension);
 
                 // Update proposal function according to acceptance rate
-                _scales[i] = widen ? _scales[i] * 1.1 : _scales[i] * 0.9;
+                _scales[i] = widen ? _scales[i] * (1 + Math.random()*0.2) : _scales[i] * (1 - Math.random()*0.2);
                 _g[i] = new dist.Normal(0, _scales[i]);
 
                 return _scales;
@@ -1575,24 +1575,125 @@
         })();
 
         /**
+         *
+         * Source: R. M. Neal: Slice sampling. The Annals of Statistics, 31 (3): pp 705-767, 2003.
+         * @type {Function}
+         */
+        var Slice = (function(logDensity, config) {
+            var _min = config && typeof config.min !== 'undefined' ? config.min[0] : null;
+            var _max = config && typeof config.max !== 'undefined' ? config.max[0] : null;
+            var _x = Math.random();
+            var _e = new dist.Exponential(1);
+
+            function _accept(x, z, l, r) {
+                var L = l,
+                    R = r,
+                    D = false;
+
+                while (R - L > 1.1) {
+                    var M = (L + R) / 2;
+                    if ((_x < M && x >= M) || (_x >= M && x < M)) {
+                        D = true;
+                    }
+
+                    if (x < M) {
+                        R = M;
+                    } else {
+                        L = M;
+                    }
+
+                    if (D && z >= logDensity(L) && z >= logDensity(R)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            function _iterate() {
+                // Pick slice height
+                var z = logDensity(_x) - _e.sample(),
+                    L = _x - Math.random(),
+                    R = L + 1;
+
+                // Find slice interval
+                while ((!_min || L >= _min) && (!_max || R <= _max) && (z < logDensity(L) || z < logDensity(R))) {
+                    if (Math.random() < 0.5) {
+                        L -= R - L;
+                    } else {
+                        R += R - L;
+                    }
+                }
+
+                // Truncate by boundaries
+                if (typeof _min === 'number') {
+                    L = Math.max(L, _min);
+                }
+                if (typeof _max === 'number') {
+                    R = Math.min(R, _max);
+                }
+
+                // Shrink interval
+                var x = _r(L, R);
+                while (z > logDensity(x) || !_accept(x, z, L, R)) {
+                    if (x < _x) {
+                        L = x;
+                    } else {
+                        R = x;
+                    }
+                    x = _r(L, R);
+                }
+
+                // Update and return sample
+                _x = x;
+                return x;
+            }
+
+            // Placeholder
+            function burnIn() {
+                return null;
+            }
+
+            function sample(size) {
+                return new Array(size || 1e6).fill(0).map(function() {
+                    return [_iterate()];
+                });
+            }
+
+            // Public methods
+            return {
+                burnIn: burnIn,
+                sample: sample
+            };
+        });
+
+        /**
          * Class implementing the [Metropolis]{@link https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm}
          * algorithm.
          *
          * @class Metropolis
          * @memberOf ran.mc
          * @param {Function} logDensity The logarithm of the density function to estimate.
-         * @param {number} dimension Number of dimensions.
-         * @param {Object?} initialState Object containing the initial state of the sampler. Can be used to continue
+         * @param {Object?} config Object containing the configurations of the sampler. Can be used to continue
          *                               sampling from a pre-trained sampler. Possible properties:
+         *                               {dim}: Number of state variables (dimension). Default is 1.
          *                               {x}: Array containing the initial state. Default is a vector of random numbers
          *                                    between 0 and 1.
          *                               {min}: Array containing the lower boundary of the state. Default is unset.
          *                               {max}: Array containing the upper boundary of the state. Default is unset.
          *                               {scales}: Array containing the initial value of the proposal scales. Default is
          *                                         a vector of 1s.
+         *                               {samplingRate}: Every n-th state is sampled where n is the sampling rate. Default
+         *                                               is 1.
          * @constructor
+         * TODO update this
          */
-        var Metropolis = (function (logDensity, dimension, initialState) {
+        var Metropolis = (function (logDensity, config, initialState) {
+            var _dim = config && typeof config.dim === 'number' ? config.dim : 1;
+            var _min = config && typeof config.min !== 'undefined' ? config.min : null;
+            var _max = config && typeof config.max !== 'undefined' ? config.max : null;
+
+            // TODO implement asymmetric proposal
             /**
              * Current state of the sampler.
              * This contains all necessary information to continue an interrupted sampling.
@@ -1600,16 +1701,14 @@
              * @var {Object} _state
              * @memberOf ran.mc.Metropolis
              * @property x Array of last state variables.
-             * @property min Array of lower boundaries.
-             * @property max Array of upper boundaries.
              * @property proposals Array of the scale parameters of the proposal functions.
+             * @property samplingRate Only every n-th states are recorded during sampling, where n is the sampling rate.
              * @private
              */
             var _state = {
-                x: (initialState && initialState.x) || new Array(dimension).fill(0).map(Math.random),
-                min: initialState && initialState.min || null,
-                max: initialState && initialState.max || null,
-                proposals: initialState && initialState.proposals || null
+                x: (initialState && initialState.x) || new Array((initialState && initialState.dim) || 1).fill(0).map(Math.random),
+                proposals: initialState && initialState.proposals || null,
+                samplingRate: initialState && initialState.samplingRate || 1
             };
 
             /**
@@ -1619,7 +1718,7 @@
              * @memberOf ran.mc.Metropolis
              * @private
              */
-            var _proposal = new _Proposal(dimension, _state.proposals);
+            var _proposal = new _Proposal(_dim, _state.proposals);
 
             /**
              * The last recorded log density.
@@ -1631,15 +1730,6 @@
             var _lastLnP = logDensity(_state.x);
 
             /**
-             * Sampling rate. Only every n-th states are recorded during sampling, where n is the sampling rate.
-             *
-             * @var {number} _samplingRate
-             * @memberOf ran.mc.Metropolis
-             * @private
-             */
-            var _samplingRate = 1;
-
-            /**
              * Class representing the statistics of the state variables.
              *
              * @class _stats
@@ -1648,8 +1738,8 @@
              */
             var _stats = (function() {
                 var _n = 0,
-                    _m1 = new Array(dimension).fill(0),
-                    _m2 = new Array(dimension).fill(0);
+                    _m1 = new Array(_dim).fill(0),
+                    _m2 = new Array(_dim).fill(0);
 
                 // Exposed methods
                 return {
@@ -1724,7 +1814,7 @@
                      */
                     update: function(a) {
                         _arr.push(a);
-                        if (_arr.length > 1000) {
+                        if (_arr.length > 1e4) {
                             _arr.shift();
                         }
                     }
@@ -1739,7 +1829,7 @@
              * @private
              */
             var _history = (function() {
-                var _arr = new Array(dimension).fill([]);
+                var _arr = new Array(_dim).fill([]);
 
                 return {
                     /**
@@ -1767,7 +1857,7 @@
                         });
 
                         // Remove old state
-                        if (_arr[0].length >= 1000) {
+                        if (_arr[0].length >= 1e4) {
                             _arr.forEach(function(d) {
                                 d.shift();
                             });
@@ -1789,16 +1879,16 @@
                 var x1 = _proposal.sample(_state.x);
 
                 // Check boundaries
-                if (_state.min) {
+                if (_min) {
                     for (var i = 0; i < x1.length; i++) {
-                        if (x1[i] < _state.min[i]) {
+                        if (x1[i] < _min[i]) {
                             return 0;
                         }
                     }
                 }
-                if (_state.max) {
+                if (_max) {
                     for (i = 0; i < x1.length; i++) {
-                        if (x1[i] > _state.max[i]) {
+                        if (x1[i] > _max[i]) {
                             return 0;
                         }
                     }
@@ -1829,7 +1919,7 @@
              */
             function _adjust() {
                 // Adjust proposal distributions
-                _state.proposals = _proposal.update(_acceptance.get() > 0.5);
+                _state.proposals = _proposal.update(_acceptance.get() > 0.234);
 
                 // Adjust sampling rate
                 // Get highest zero point
@@ -1841,16 +1931,16 @@
                     }
                 }, 0);
                 // Change sampling rate if zero point is different
-                if (z > _samplingRate) {
-                    _samplingRate++;
-                } else if (z < _samplingRate) {
-                    _samplingRate--;
+                if (z > _state.samplingRate) {
+                    _state.samplingRate++;
+                } else if (z < _state.samplingRate) {
+                    _state.samplingRate--;
                 }
             }
 
             /**
              * Returns the current state of the estimator. The returned object can be used to initialize another estimator
-             * by passing it as the initial state parameter.
+             * by passing it as the config parameter.
              *
              * @method state
              * @memberOf ran.mc.Metropolis
@@ -1859,9 +1949,8 @@
             function state() {
                 return {
                     x: _state.x.slice(),
-                    min: _state.min,
-                    max: _state.max,
-                    proposals: _state.proposals.slice()
+                    proposals: _state.proposals.slice(),
+                    samplingRate: _state.samplingRate
                 };
             }
 
@@ -1936,13 +2025,13 @@
              *
              * @method sample
              * @memberOf ran.mc.Metropolis
+             * @param {number=} size Number of samples to collect.
              * @param {Function=} progress Callback to call at each percentage of the total samples. Must accept one
              * parameter that is the fraction of samples collected so far.
-             * @param {number=} size Number of samples to collect.
              * @returns {Array} Array of the samples states.
              */
-            function sample(progress, size) {
-                var iMax = size || 1e6;
+            function sample(size, progress) {
+                var iMax = _state.samplingRate * (size || 1e6);
                 var batchSize = iMax / 100;
                 var samples = [];
                 for (var i=0; i<iMax; i++) {
@@ -1954,7 +2043,7 @@
                     }
 
                     // Collect sample
-                    if (i % _samplingRate === 0) {
+                    if (i % _state.samplingRate === 0) {
                         samples.push(_state.x);
                     }
                 }
@@ -1973,9 +2062,21 @@
             };
         });
 
+        // TODO rejection sampling with log-concave dist
+        // TODO slice sampling
+        // TODO Gibbs sampling
+        // TODO NUTS
+        // TODO adaptive Metropolis
+        // TODO
+
+        // TODO Hamiltonian
+        // TODO Adjust Euclidean metric from covariance in burn-in
+        // TODO step size sampled randomly
+
         // Public methods and classes
         return {
             gr: gr,
+            Slice: Slice,
             Metropolis: Metropolis
         };
     })();
