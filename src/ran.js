@@ -15,8 +15,6 @@
         factory((global.ran = global['ran'] || {}));
     }
 } (this, (function (exports) {
-    "use strict";
-
     /**
      * Sums the element of an array.
      *
@@ -2180,27 +2178,12 @@
     // TODO mean(power)
     // TODO correlation()
     // TODO Processes to add: https://en.wikipedia.org/wiki/Stochastic_process
-    let process = (function () {
-        function Brown() {
-
-        }
-
-        function Wiener(mu, sigma) {
-
-        }
-
-        function OrsteinUhlenbeck() {
-
-        }
-
-        function Gaussian() {
-
-        }
-
-        function GaltonWatson() {
-
-        }
-    })();
+    // TODO Brown
+    // TODO Wiener
+    // TODO Orstein-Uhlenbeck
+    // TODO Gaussian
+    // TODO Galton-Watson
+    let process = {};
 
     // Exports
     exports.special = special;
