@@ -15,6 +15,8 @@
         factory((global.ran = global['ran'] || {}));
     }
 } (this, (function (exports) {
+    "use strict";
+
     /**
      * Sums the element of an array.
      *
