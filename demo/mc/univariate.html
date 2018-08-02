@@ -9,8 +9,12 @@
 </head>
 <body>
 <script>
+    let normal = new ran.dist.Bernoulli(0, 1);
+    let sample = normal.sample(10);
+    console.log(normal.test(sample));
+
     // Add charts
-    var hist = new du.widgets.LineChart("hist")
+    const hist = new du.widgets.LineChart("hist")
         .colors({real: "royalblue", estimate: "crimson"})
         .width(400)
         .height(300)
@@ -19,7 +23,7 @@
             return x.toFixed(3);
         })
         .render();
-    var line = new du.widgets.LineChart("metrics")
+    const line = new du.widgets.LineChart("metrics")
         .x(400)
         .width(700)
         .height(300)
@@ -30,7 +34,7 @@
         .render();
 
     // Start sampling
-    var worker = new Worker('worker.js');
+    const worker = new Worker('worker.js');
     worker.postMessage({});
     worker.onmessage = function(e) {
         hist.data(e.data.p)

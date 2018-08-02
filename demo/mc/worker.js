@@ -1,6 +1,6 @@
 function collect(samples, hist) {
     Object.entries(samples.reduce(function (h, d) {
-        var i = Math.floor(d[0]);
+        let i = Math.floor(d[0]);
         if (!h.hasOwnProperty(i)) {
             h[i] = 1;
         } else {
@@ -58,25 +58,25 @@ self.addEventListener("message", function(event) {
     importScripts("../../ran.min.js");
 
     // Use a bimodal density with long tails
-    var alpha = 0.3;
-    var density = function(x) {
+    const alpha = 0.3;
+    const BATCH_SIZE = 1e3;
+    const density = function(x) {
         return alpha * new ran.dist.Weibull(10, 2).pdf(x) + (1 - alpha) * new ran.dist.Normal(60, 20).pdf(x);
     };
 
-    var mc = new ran.mc.Slice(function(x) {
+    const mc = new ran.mc.Metropolis(function(x) {
         return Math.log(density(x));
     }, {
         min: [0]
     });
 
-    mc.burnIn();
-    var BATCH_SIZE = 1e2;
-    var xMax = 0;
-    var total = 0;
-    var hist = {};
-    var laps = 200;
-    var run = function() {
-        var result = mc.sample(BATCH_SIZE);
+    mc.burnIn(null, 20);
+    let xMax = 0;
+    let total = 0;
+    let hist = {};
+    let laps = 100;
+    let run = function() {
+        let result = mc.sample(BATCH_SIZE);
         total += result.length;
         xMax = Math.max(xMax, result.reduce(function (max, d) {
             max = Math.max(max, d);

@@ -1,7 +1,7 @@
-var assert = require('assert');
-var utils = require('../test/test-utils').test_utils;
-var dist = require('../src/ran').dist;
-var mc = require('../src/ran').mc;
+const assert = require('assert');
+const utils = require('../test/test-utils').test_utils;
+const dist = require('../src/ran').dist;
+const mc = require('../src/ran').mc;
 
 /*describe('ran', function() {
    describe('mc', function() {

@@ -1,7 +1,7 @@
-var assert = require('assert');
+const assert = require('assert');
 
-var test_utils = (function() {
-    var CHI_TABLE_LOW = [0, 7.879, 10.597, 12.838, 14.860, 16.750, 18.548, 20.278, 21.955, 23.589, 25.188, 26.757, 28.300,
+let test_utils = (function() {
+    const CHI_TABLE_LOW = [0, 7.879, 10.597, 12.838, 14.860, 16.750, 18.548, 20.278, 21.955, 23.589, 25.188, 26.757, 28.300,
         29.819, 31.319, 32.801, 34.267, 35.718, 37.156, 38.582, 39.997, 41.401, 42.796, 44.181, 45.559, 46.928, 48.290,
         49.645, 50.993, 52.336, 53.672, 55.003, 56.328, 57.648, 58.964, 60.275, 61.581, 62.883, 64.181, 65.476, 66.766,
         68.053, 69.336, 70.616, 71.893, 73.166, 74.437, 75.704, 76.969, 78.231, 79.490, 80.747, 82.001, 83.253, 84.502,
@@ -22,10 +22,10 @@ var test_utils = (function() {
         283.390, 284.511, 285.632, 286.753, 287.874, 288.994, 290.114, 291.234, 292.353, 293.472, 294.591, 295.710,
         296.828, 297.947, 299.065, 300.182, 301.300, 302.417, 303.534, 304.651, 305.767, 306.883, 307.999, 309.115,
         310.231, 311.346];
-    var CHI_TABLE_HIGH = [366.844, 421.900, 476.606, 531.026, 585.207, 639.183, 692.982, 746.625, 800.131, 853.514, 906.786,
+    const CHI_TABLE_HIGH = [366.844, 421.900, 476.606, 531.026, 585.207, 639.183, 692.982, 746.625, 800.131, 853.514, 906.786,
         959.957, 1013.036, 1066.031, 1118.948];
 
-    var param = {
+    let param = {
         degree: function() {
             return parseInt(Math.random() * 4 + 1);
         },
@@ -50,11 +50,11 @@ var test_utils = (function() {
      * @param model Theoretical cumulative distribution function.
      */
     function ks_test(values, model) {
-        var D = 0;
+        let D = 0;
         values.sort(function (a, b) {
             return a - b;
         });
-        for (var i = 0; i < values.length; i++) {
+        for (let i = 0; i < values.length; i++) {
             D = Math.max(D, Math.abs((i + 1) / values.length - model(values[i])));
         }
         return D <= 1.628 / Math.sqrt(values.length);
@@ -69,23 +69,23 @@ var test_utils = (function() {
      */
     function chi_test(values, model, c) {
         // Calculate distribution first
-        var p = {};
-        for (var i = 0; i < values.length; i++) {
+        let p = {};
+        for (let i = 0; i < values.length; i++) {
             if (!p[values[i]])
                 p[values[i]] = 0;
             p[values[i]]++;
         }
 
         // Calculate chi-square
-        var chi2 = 0;
-        for (var x in p) {
-            var m = model(parseInt(x)) * values.length;
+        let chi2 = 0;
+        for (let x in p) {
+            let m = model(parseInt(x)) * values.length;
             chi2 += Math.pow(p[x] - m, 2) / m;
         }
 
         // Find critical value
-        var df = Math.max(1, Object.keys(p).length - c - 1);
-        var crit = df <= 250 ? CHI_TABLE_LOW[df] : CHI_TABLE_HIGH[Math.floor(df / 50)];
+        let df = Math.max(1, Object.keys(p).length - c - 1);
+        let crit = df <= 250 ? CHI_TABLE_LOW[df] : CHI_TABLE_HIGH[Math.floor(df / 50)];
         return chi2 <= crit;
     }
 
@@ -96,17 +96,17 @@ var test_utils = (function() {
      * @param complete Whether all trials should succeed.
      */
     function trials(test, complete) {
-        var success = 0;
-        for (var t = 0; t < 10; t++) {
+        let success = 0;
+        for (let t = 0; t < 10; t++) {
             success += test() ? 1 : 0;
         }
         assert.equal(success >= (complete ? 10 : 6), true);
     }
 
     function diff_disc(pmf, cdf, a, b) {
-        var dy = 0;
-        var int = 0;
-        for (var x=a; x<b; x++) {
+        let dy = 0;
+        let int = 0;
+        for (let x=a; x<b; x++) {
             int += pmf(x);
             dy += Math.abs(cdf(x) - int);
         }
@@ -114,9 +114,9 @@ var test_utils = (function() {
     }
 
     function simpson(func, a, b, n) {
-        var h = (b - a) / n;
-        var s = func(a) + func(b);
-        for (var i=1; i<n; i+=2) {
+        let h = (b - a) / n;
+        let s = func(a) + func(b);
+        for (let i=1; i<n; i+=2) {
             s += 4 * func(a + i * h);
         }
         for (i=2; i<n-1; i+=2) {
@@ -126,10 +126,10 @@ var test_utils = (function() {
     }
 
     function diff_cont(pdf, cdf, a, b, dx) {
-        var n = 0;
-        var dy = 0;
-        var int = 0;
-        for (var x=a; x<b-dx; x+=dx) {
+        let n = 0;
+        let dy = 0;
+        let int = 0;
+        for (let x=a; x<b-dx; x+=dx) {
             int += simpson(pdf, x, x+dx, 100);
             dy += Math.abs(cdf(x+dx) - int);
             n++;

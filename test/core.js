@@ -1,9 +1,9 @@
-var assert = require('assert');
-var utils = require('../test/test-utils').test_utils;
-var core = require('../src/ran').core;
+const assert = require('assert');
+const utils = require('../test/test-utils').test_utils;
+const core = require('../src/ran').core;
 
-var TRIALS = 1;
-var LAPS = 1000;
+const TRIALS = 1;
+const LAPS = 1000;
 
 function add(dist, value) {
     if (!dist.hasOwnProperty(value))
@@ -17,12 +17,12 @@ describe('ran', function() {
         describe('float', function () {
             it('should return an array of floats uniformly distributed in (min, max)', function() {
                 utils.trials(function() {
-                    var min = Math.random() * 200 - 100;
-                    var max = Math.random() * 200 - 100;
-                    var k = Math.floor(Math.random() * 40 - 20);
-                    var values = [];
-                    for (var lap=0; lap<LAPS; lap++) {
-                        var r = core.float(min, max, k);
+                    const min = Math.random() * 200 - 100;
+                    const max = Math.random() * 200 - 100;
+                    const k = Math.floor(Math.random() * 40 - 20);
+                    const values = [];
+                    for (let lap=0; lap<LAPS; lap++) {
+                        let r = core.float(min, max, k);
                         if (k < 2)
                             r = [r];
                         r.forEach(function (ri) {
@@ -51,15 +51,15 @@ describe('ran', function() {
         describe('int', function() {
             it('should return an array of integers uniformly distributed in (min, max)', function() {
                 utils.trials(function() {
-                    var min = Math.floor(Math.random() * 200 - 100);
-                    var max = Math.floor(Math.random() * 200 - 100);
-                    var k = Math.floor(Math.random() * 20 - 10);
-                    var values = [];
-                    for (var lap=0; lap<LAPS; lap++) {
-                        var r = core.int(min, max, k);
+                    const min = Math.floor(Math.random() * 200 - 100);
+                    const max = Math.floor(Math.random() * 200 - 100);
+                    const k = Math.floor(Math.random() * 20 - 10);
+                    const values = [];
+                    for (let lap=0; lap<LAPS; lap++) {
+                        let r = core.int(min, max, k);
                         if (k < 2)
                             r = [r];
-                        for (var i=0; i<r.length; i++) {
+                        for (let i=0; i<r.length; i++) {
                             values.push(r[i]);
 
                             // Value is in range
@@ -78,11 +78,11 @@ describe('ran', function() {
 
             it('should return an integer uniformly distributed in (min, max)', function() {
                 utils.trials(function() {
-                    var min = Math.floor(Math.random() * 200 - 100);
-                    var max = Math.floor(Math.random() * 200 - 100);
-                    var values = [];
-                    for (var lap=0; lap<LAPS; lap++) {
-                        var r = core.int(min, max);
+                    const min = Math.floor(Math.random() * 200 - 100);
+                    const max = Math.floor(Math.random() * 200 - 100);
+                    const values = [];
+                    for (let lap=0; lap<LAPS; lap++) {
+                        let r = core.int(min, max);
                         values.push(r);
 
                         // Value is in range
@@ -102,12 +102,12 @@ describe('ran', function() {
 
         describe('choice', function() {
             it('should return some random elements of an array', function() {
-                for (var trial=0; trial<TRIALS; trial++) {
-                    var values = ['a', 'b', 'c'];
-                    var freqs = {};
-                    var k = Math.floor(Math.random() * 200 - 100);
-                    for (var lap=0; lap<LAPS; lap++) {
-                        var r = core.choice(values, k);
+                for (let trial=0; trial<TRIALS; trial++) {
+                    const values = ['a', 'b', 'c'];
+                    const freqs = {};
+                    const k = Math.floor(Math.random() * 200 - 100);
+                    for (let lap=0; lap<LAPS; lap++) {
+                        let r = core.choice(values, k);
                         if (k < 2)
                             r = [r];
                         r.forEach(function (ri) {
@@ -118,13 +118,13 @@ describe('ran', function() {
                         // Length is correct
                         assert.equal(k < 2 ? 1 : k, r.length);
                     }
-                    for (var i in values) {
+                    for (let i in values) {
                         // Distribution is uniform
                         if (values.hasOwnProperty(i)) {
                             assert.equal(true, freqs[values[i]] > 0);
                         }
                     }
-                    for (i in freqs) {
+                    for (let i in freqs) {
                         assert.equal(values.indexOf(i) > -1, true)
                     }
                 }
@@ -133,11 +133,11 @@ describe('ran', function() {
 
         describe('char', function() {
             it('should return some random characters of a string', function() {
-                for (var trial=0; trial<TRIALS; trial++) {
-                    var string = "abcdefghijkl51313#^!#?><;!-_=+.,/:{}()";
-                    var k = Math.floor(Math.random() * 200 - 100);
-                    for (var lap=0; lap<LAPS; lap++) {
-                        var r = core.char(string, k);
+                for (let trial=0; trial<TRIALS; trial++) {
+                    const string = "abcdefghijkl51313#^!#?><;!-_=+.,/:{}()";
+                    const k = Math.floor(Math.random() * 200 - 100);
+                    for (let lap=0; lap<LAPS; lap++) {
+                        let r = core.char(string, k);
                         if (k < 2)
                             r = [r];
                         r.forEach(function (ri) {
@@ -153,15 +153,15 @@ describe('ran', function() {
 
         describe('shuffle', function() {
             it('should shuffle an array', function() {
-                for (var trial=0; trial<TRIALS; trial++) {
-                    var values = [];
-                    var pos = [];
-                    for (var i=0; i<10; i++) {
+                for (let trial=0; trial<TRIALS; trial++) {
+                    const values = [];
+                    const pos = [];
+                    for (let i=0; i<10; i++) {
                         values.push(i);
                         pos.push({});
                     }
 
-                    for (var lap=0; lap<LAPS; lap++) {
+                    for (let lap=0; lap<LAPS; lap++) {
                         core.shuffle(values);
                         values.forEach(function(v, i) {
                             add(pos[v], i);
@@ -170,7 +170,7 @@ describe('ran', function() {
 
                     // Check if all positions have been visited at least once
                     pos.forEach(function(p) {
-                        for (i in p)
+                        for (let i in p)
                             if (p.hasOwnProperty(i)) {
                                 assert.equal(true, p[i] > 0);
                             }
@@ -182,13 +182,13 @@ describe('ran', function() {
         describe('coin', function() {
             it('should return head with some probability', function() {
                 utils.trials(function() {
-                    var p = Math.random();
-                    var k = Math.floor(Math.random() * 10);
-                    var head = parseInt(Math.random()* 20);
-                    var tail = parseInt(Math.random()* 20);
-                    var values = [];
-                    for (var lap=0; lap<LAPS; lap++) {
-                        var r = core.coin(head, tail, p, k);
+                    const p = Math.random();
+                    const k = Math.floor(Math.random() * 10);
+                    const head = parseInt(Math.random()* 20);
+                    const tail = parseInt(Math.random()* 20);
+                    const values = [];
+                    for (let lap=0; lap<LAPS; lap++) {
+                        let r = core.coin(head, tail, p, k);
                         if (k < 2)
                             r = [r];
                         r.forEach(function (ri) {

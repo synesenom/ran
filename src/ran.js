@@ -17,13 +17,23 @@
 } (this, (function (exports) {
     "use strict";
 
-    function _sum(arr, pow) {
-        if (pow && pow !== 1) {
-            return arr.reduce(function (sum, d) {
+    /**
+     * Sums the element of an array.
+     *
+     * @method _sum
+     * @memberOf ran
+     * @param {Array} arr Array of numbers to sum over.
+     * @param {number=} pow Power to raise each element before summing up. Default is 1.
+     * @return {number} The sum.
+     * @private
+     */
+    function _sum(arr, pow = 1) {
+        if (pow !== 1) {
+            return arr.reduce((sum, d) => {
                 return sum + Math.pow(d, pow);
             }, 0);
         } else {
-            return arr.reduce(function (sum, d) {
+            return arr.reduce((sum, d) => {
                 return sum + d;
             }, 0);
         }
@@ -54,14 +64,11 @@
      * @returns {(number|string|Array)} Single value or array of generated values.
      * @private
      */
-    function _some(generator, k) {
-        if (k === null || k === undefined || k < 2)
+    function _some(generator, k = 1) {
+        if (k < 2)
             return generator();
         else {
-            var values = new Array(k);
-            for (var i = 0; i < k; i++)
-                values[i] = generator();
-            return values;
+            return Array.from({length: k}, () => generator());
         }
     }
 
@@ -72,24 +79,24 @@
      * @memberOf ran
      * @private
      */
-    var special = (function () {
+    let special = (function () {
         /**
          * Maximum number of iterations in function approximations.
          *
-         * @var {number} _MAX_ITER
+         * @const {number} _MAX_ITER
          * @memberOf ran.special
          * @private
          */
-        var _MAX_ITER = 100;
+        const _MAX_ITER = 100;
 
         /**
          * Error tolerance in function approximations.
          *
-         * @var {number} _EPSILON
+         * @const {number} _EPSILON
          * @memberOf ran.special
          * @private
          */
-        var _EPSILON = 1e-10;
+        const _EPSILON = 1e-10;
 
         /**
          * Gamma function, using the Lanczos approximation.
@@ -100,9 +107,9 @@
          * @returns {number} Gamma function value.
          * @private
          */
-        var gamma = (function () {
+        let gamma = (function () {
             // Coefficients
-            var _p = [
+            const _p = [
                 676.5203681218851,
                 -1259.1392167224028,
                 771.32342877765313,
@@ -115,16 +122,16 @@
 
             // Lanczos approximation
             function _gamma(z) {
-                var y = 0;
+                let y = 0;
                 if (z < 0.5) {
                     y = Math.PI / (Math.sin(Math.PI * z) * _gamma(1 - z));
                 } else {
                     z--;
-                    var x = 0.99999999999980993,
+                    let x = 0.99999999999980993,
                         l = _p.length;
-                    _p.forEach(function (p, i) {
+                    _p.forEach((p, i) => {
                         x += p / (z + i + 1);
-                        var t = z + l - 0.5;
+                        let t = z + l - 0.5;
                         y = Math.sqrt(2 * Math.PI) * Math.pow(t, (z + 0.5)) * Math.exp(-t) * x;
                     });
                 }
@@ -143,10 +150,8 @@
          * @returns {number} The log(gamma) value.
          * @private
          */
-        // TODO add incomplete beta
-        // TODO where log(gamma) is needed, use this instead of gamma
-        var gammaLn = (function() {
-            var _p = [
+        let gammaLn = (function() {
+            const _p = [
                 76.18009172947146,
                 -86.50532032941677,
                 24.01409824083091,
@@ -156,12 +161,12 @@
             ];
 
             return function(z) {
-                var x = z,
+                let x = z,
                     y = z,
                     tmp = x + 5.5;
                 tmp = (x + 0.5) * Math.log(tmp) - tmp;
-                var ser = 1.000000000190015;
-                for (var j = 0; j < 6; j++) {
+                let ser = 1.000000000190015;
+                for (let j = 0; j < 6; j++) {
                     y++;
                     ser += _p[j] / y;
                 }
@@ -179,18 +184,18 @@
          * @returns {number} Value of the lower incomplete gamma function.
          * @private
          */
-        var gammaLowerIncomplete = (function () {
-            var _DELTA = 1e-30;
+        let gammaLowerIncomplete = (function () {
+            const _DELTA = 1e-30;
 
             // Lower incomplete gamma generator using the series expansion
             function _gliSeries(s, x) {
                 if (x < 0) {
                     return 0;
                 } else {
-                    var si = s,
+                    let si = s,
                         y = 1 / s,
                         f = 1 / s;
-                    for (var i = 0; i < _MAX_ITER; i++) {
+                    for (let i = 0; i < _MAX_ITER; i++) {
                         si++;
                         y *= x / si;
                         f += y;
@@ -203,12 +208,12 @@
 
             // Upper incomplete gamma generator using the continued fraction expansion
             function _guiContinuedFraction(s, x) {
-                var b = x + 1 - s,
+                let b = x + 1 - s,
                     c = 1 / _DELTA,
                     d = 1 / b,
                     f = d,
                     fi, y;
-                for (var i = 1; i < _MAX_ITER; i++) {
+                for (let i = 1; i < _MAX_ITER; i++) {
                     fi = i * (s - i);
                     b += 2;
                     d = fi * d + b;
@@ -245,12 +250,12 @@
          * @returns {number} Value of the incomplete beta function.
          * @private
          */
-        var betaIncomplete = (function() {
-            var _FPMIN = 1e-30;
+        let betaIncomplete = (function() {
+            const _FPMIN = 1e-30;
 
             // Incomplete beta generator using the continued fraction expansion
             function _biContinuedFraction(a, b, x) {
-                var qab = a + b,
+                let qab = a + b,
                     qap = a + 1,
                     qam = a - 1,
                     c = 1,
@@ -258,10 +263,10 @@
                 if (Math.abs(d) < _FPMIN)
                     d = _FPMIN;
                 d = 1 / d;
-                var h = d;
+                let h = d;
 
-                for (var i = 1; i < _MAX_ITER; i++) {
-                    var m2 = 2 * i,
+                for (let i = 1; i < _MAX_ITER; i++) {
+                    let m2 = 2 * i,
                         aa = i * (b - i) * x / ((qam + m2) * (a + m2));
                     d = 1 + aa * d;
                     if (Math.abs(d) < _FPMIN)
@@ -279,7 +284,7 @@
                     if (Math.abs(c) < _FPMIN)
                         c = _FPMIN;
                     d = 1 / d;
-                    var del = d * c;
+                    let del = d * c;
                     h *= del;
                     if (Math.abs(del - 1) < _EPSILON)
                         break;
@@ -288,7 +293,7 @@
             }
 
             return function(a, b, x) {
-                var bt = (x <= 0 || x >= 1)
+                let bt = (x <= 0 || x >= 1)
                     ? 0
                     : Math.exp(gammaLn(a + b) - gammaLn(a) - gammaLn(b) + a * Math.log(x) + b * Math.log(1 - x));
                 return x < (a + 1) / (a + b + 2)
@@ -306,9 +311,9 @@
          * @returns {number} Error function value.
          * @private
          */
-        var erf = (function () {
+        let erf = (function () {
             // Coefficients
-            var _p = [
+            const _p = [
                 -1.26551223,
                 1.00002368,
                 0.37409196,
@@ -322,14 +327,14 @@
             ];
 
             return function(x) {
-                var t = 1 / (1 + 0.5 * Math.abs(x));
-                var tp = 1;
-                var sum = 0;
-                _p.forEach(function (p) {
+                let t = 1 / (1 + 0.5 * Math.abs(x)),
+                    tp = 1,
+                    sum = 0;
+                _p.forEach(p => {
                     sum += p * tp;
                     tp *= t;
                 });
-                var tau = t * Math.exp(sum - x * x);
+                let tau = t * Math.exp(sum - x * x);
 
                 return x < 0 ? tau - 1 : 1 - tau;
             };
@@ -351,7 +356,7 @@
      * @namespace core
      * @memberOf ran
      */
-    var core = (function () {
+    let core = (function () {
         /**
          * Generates some uniformly distributed random floats in (min, max).
          * If min > max, a random float in (max, min) is generated.
@@ -370,9 +375,7 @@
                 return _r(0, 1);
             if (arguments.length === 1)
                 return _r(0, min);
-            return _some(function () {
-                return _r(min, max);
-            }, n);
+            return _some(() => _r(min, max), n);
         }
 
         /**
@@ -390,9 +393,7 @@
         function int(min, max, n) {
             if (arguments.length === 1)
                 return Math.floor(_r(0, min + 1));
-            return _some(function () {
-                return Math.floor(_r(min, max + 1));
-            }, n);
+            return _some(() => Math.floor(_r(min, max + 1)), n);
         }
 
         /**
@@ -408,9 +409,7 @@
         function choice(values, n) {
             if (values === null || values === undefined || values.length === 0)
                 return null;
-            return _some(function () {
-                return values[Math.floor(_r(0, values.length))];
-            }, n);
+            return _some(() => values[Math.floor(_r(0, values.length))], n);
         }
 
         /**
@@ -425,9 +424,7 @@
         function char(string, n) {
             if (string === null || string === undefined || string.length === 0)
                 return "";
-            return _some(function () {
-                return string.charAt(Math.floor(_r(0, string.length)));
-            }, n);
+            return _some(() => string.charAt(Math.floor(_r(0, string.length))), n);
         }
 
         /**
@@ -439,7 +436,7 @@
          * @returns {Array} The shuffled array.
          */
         function shuffle(values) {
-            var i, tmp, l = values.length;
+            let i, tmp, l = values.length;
             while (l) {
                 i = Math.floor(Math.random() * l--);
                 tmp = values[l];
@@ -461,10 +458,8 @@
          * @returns {(object|Array)} Object of head/tail value or an array of head/tail values.
          */
         function coin(head, tail, p, n) {
-            var prob = p ? p : 0.5;
-            return _some(function () {
-                return Math.random() < prob ? head : tail;
-            }, n);
+            let prob = p ? p : 0.5;
+            return _some(() => Math.random() < prob ? head : tail, n);
         }
 
         // Public methods
@@ -484,7 +479,7 @@
      * @namespace dist
      * @memberOf ran
      */
-    var dist = (function () {
+    let dist = (function () {
         /**
          * Table containing critical values for the chi square test at 95% of confidence for low degrees of freedom.
          *
@@ -492,7 +487,7 @@
          * @memberOf ran.dist
          * @private
          */
-        var _CHI_TABLE_LO = [0, 7.879, 10.597, 12.838, 14.860, 16.750, 18.548, 20.278, 21.955, 23.589, 25.188, 26.757, 28.300,
+        const _CHI_TABLE_LO = [0, 7.879, 10.597, 12.838, 14.860, 16.750, 18.548, 20.278, 21.955, 23.589, 25.188, 26.757, 28.300,
             29.819, 31.319, 32.801, 34.267, 35.718, 37.156, 38.582, 39.997, 41.401, 42.796, 44.181, 45.559, 46.928, 48.290,
             49.645, 50.993, 52.336, 53.672, 55.003, 56.328, 57.648, 58.964, 60.275, 61.581, 62.883, 64.181, 65.476, 66.766,
             68.053, 69.336, 70.616, 71.893, 73.166, 74.437, 75.704, 76.969, 78.231, 79.490, 80.747, 82.001, 83.253, 84.502,
@@ -513,6 +508,7 @@
             283.390, 284.511, 285.632, 286.753, 287.874, 288.994, 290.114, 291.234, 292.353, 293.472, 294.591, 295.710,
             296.828, 297.947, 299.065, 300.182, 301.300, 302.417, 303.534, 304.651, 305.767, 306.883, 307.999, 309.115,
             310.231, 311.346];
+
         /**
          * Table containing critical values for the chi square test at 95% of confidence for high degrees of freedom.
          *
@@ -520,7 +516,7 @@
          * @memberOf ran.dist
          * @private
          */
-        var _CHI_TABLE_HI = [366.844, 421.900, 476.606, 531.026, 585.207, 639.183, 692.982, 746.625, 800.131, 853.514, 906.786,
+        const _CHI_TABLE_HI = [366.844, 421.900, 476.606, 531.026, 585.207, 639.183, 692.982, 746.625, 800.131, 853.514, 906.786,
             959.957, 1013.036, 1066.031, 1118.948];
 
         /**
@@ -534,7 +530,7 @@
          * @private
          */
         function _normal(mu, sigma) {
-            var u = Math.random(),
+            let u = Math.random(),
                 v = Math.random();
             return sigma * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) + mu;
         }
@@ -551,8 +547,8 @@
          */
         function _gamma(alpha, beta) {
             if (alpha > 1) {
-                var d = alpha - 1 / 3;
-                var c = 1 / Math.sqrt(9 * d),
+                let d = alpha - 1 / 3,
+                    c = 1 / Math.sqrt(9 * d),
                     Z, V, U;
                 while (true) {
                     Z = _normal(0, 1);
@@ -578,8 +574,8 @@
          * @private
          */
         function _cdfEstimatorDiscrete(pmf) {
-            var _cdf = [pmf(0, args)];
-            for (var i = 1; i < 1000; i++) {
+            let _cdf = [pmf(0, args)];
+            for (let i = 1; i < 1000; i++) {
                 _cdf.push(_cdf[i - 1] + pmf(i, args));
             }
             return function (x) {
@@ -601,22 +597,22 @@
          */
         function _chiTest(values, pmf, c) {
             // Calculate observed distribution
-            var p = {};
+            let p = {};
             values.forEach(function(v) {
                 p[v] = p[v] ? p[v]+1 : 1;
             });
 
             // Calculate chi-square sum
-            var chi2 = 0;
-            var n = values.length;
-            for (var x in p) {
-                var m = pmf(parseInt(x)) * n;
+            let chi2 = 0,
+                n = values.length;
+            for (let x in p) {
+                let m = pmf(parseInt(x)) * n;
                 chi2 += Math.pow(p[x] - m, 2) / m;
             }
 
             // Get critical value
-            var df = Math.max(1, Object.keys(p).length - c - 1);
-            var crit = df <= 250 ? _CHI_TABLE_LO[df] : _CHI_TABLE_HI[Math.floor(df / 50)];
+            let df = Math.max(1, Object.keys(p).length - c - 1),
+                crit = df <= 250 ? _CHI_TABLE_LO[df] : _CHI_TABLE_HI[Math.floor(df / 50)];
 
             // Return comparison results
             return {
@@ -635,17 +631,17 @@
          * @private
          */
         function _cdfEstimatorContinuous(pdf) {
-            var _dx = 1e-3;
-            var _cdf = [pdf(0, args)];
-            for (var i = 0; i < 100 / _dx; i++) {
+            let _dx = 1e-3,
+                _cdf = [pdf(0, args)];
+            for (let i = 0; i < 100 / _dx; i++) {
                 // TODO use simpson
                 _cdf.push(_cdf[i - 1] + pdf(i * _dx, args) * _dx);
             }
 
             return function (x) {
-                var dx = 1e-4;
-                var res = _cdf[parseInt(Math.floor(x / _dx))];
-                for (var j = parseInt(Math.floor(x / _dx)) + dx; j < x; j += dx) {
+                let dx = 1e-4,
+                    res = _cdf[parseInt(Math.floor(x / _dx))];
+                for (let j = parseInt(Math.floor(x / _dx)) + dx; j < x; j += dx) {
                     // TODO use simpson
                     res += pdf(j, args) * dx;
                 }
@@ -666,13 +662,11 @@
          */
         function _ksTest(values, cdf) {
             // Sort values for estimated CDF
-            values.sort(function (a, b) {
-                return a - b;
-            });
+            values.sort((a, b) => a - b);
 
             // Calculate D value
-            var D = 0;
-            for (var i = 0; i < values.length; i++) {
+            let D = 0;
+            for (let i = 0; i < values.length; i++) {
                 D = Math.max(D, Math.abs((i + 1) / values.length - cdf(values[i])));
             }
 
@@ -684,63 +678,47 @@
         }
 
         /**
-         * Generator for discrete/continuous distributions.
+         * Base class for discrete/continuous distributions.
          *
-         * @method _Distribution
+         * @class _Distribution
          * @methodOf ran.dist
-         * @param type {string} Distribution type, either 'discrete' or 'continuous'.
-         * @param generator {Function} Method to generate random value. Must accept one argument containing the
-         * distribution parameters.
-         * @param pdf {Function} The probability mass (or density) function. Must accept one parameter.
-         * @param cdf {Function=} The cumulative distribution function. Must accept one parameter.
-         * If not specified, it is approximated from the pdf.
-         * @returns {object} A distribution with the supported methods.
+         * @constructor
          * @private
          */
-        function _Distribution(type, generator, pdf, cdf) {
-            return function () {
-                // Some parameters
-                var c = arguments.length;
+        class _Distribution {
+            constructor(type, k) {
+                this.type = type;
+                this.k = k;
+                this.p = [];
+                this.c = [];
+            }
+            
+            _generator() {}
+            pdf() {}
+            cdf() {}
 
-                // Universal methods
-                var methods = {
-                    sample: function (n) {
-                        return _some(function () {
-                            return generator();
-                        }, n);
-                    }
-                };
+            sample(n) {
+                return _some(() => this._generator(), n);
+            }
 
-                // Probability mass/density and related functions
-                if (type === "discrete") {
-                    methods.pmf = pdf;
-                } else {
-                    methods.pdf = pdf;
-                }
-                methods.test = function(x) {
-                    return type === "discrete" ? _chiTest(x, pdf, c) : _ksTest(x, cdf);
-                };
+            test(x) {
+                return this.type === "discrete"
+                    ? _chiTest(x, y => this.pdf(y), this.k)
+                    : _ksTest(x, y => this.cdf(y));
+            }
 
-                // Cumulative density and related functions
-                methods.cdf = cdf !== undefined ? cdf
-                    : type === "discrete" ? _cdfEstimatorDiscrete : _cdfEstimatorContinuous;
-                methods.survival = function(x) {
-                    return 1 - methods.cdf(x);
-                };
+            survival(x) {
+                return 1 - this.cdf(x);
+            }
 
-                // Hazard functions
-                methods.hazard = function(x) {
-                    return pdf(x) / methods.survival(x);
-                };
-                methods.cumulativeHazard = function(x) {
-                    return -Math.log(methods.survival(x));
-                };
+            hazard(x) {
+                return this.pdf(x) / this.survival(x);
+            }
 
-                // Return available methods
-                return methods;
-            };
+            cumulativeHazard(x) {
+                return -Math.log(this.survival(x));
+            }
         }
-
         /**
          * The general distribution generator, all generators are created using this class.
          * The methods listed for this class are available for all distribution generators.
@@ -815,15 +793,24 @@
          * @param {number} p Parameter of the distribution.
          * @constructor
          */
-        var Bernoulli = function (p) {
-            return _Distribution("discrete", function () {
-                return Math.random() < p ? 1 : 0;
-            }, function (x) {
-                return parseInt(x) === 1 ? p : 1 - p;
-            }, function (x) {
-                return x < 0 ? 0 : (parseInt(x) >= 1 ? 1 : 1 - p);
-            })();
-        };
+        class Bernoulli extends _Distribution {
+            constructor(p) {
+                super("discrete", arguments.length);
+                this.p = {p: p};
+            }
+
+            _generator() {
+                return Math.random() < this.p.p ? 1 : 0;
+            }
+
+            pdf(x) {
+                return parseInt(x) === 1 ? this.p.p : 1 - this.p.p;
+            }
+
+            cdf(x) {
+                return x < 0 ? 0 : (parseInt(x) >= 1 ? 1 : 1 - this.p.p);
+            }
+        }
 
         /**
          * Generator for [beta distribution]{@link https://en.wikipedia.org/wiki/Beta_distribution}.
@@ -834,20 +821,27 @@
          * @param {number} beta Second shape parameter.
          * @constructor
          */
-        var Beta = function(alpha, beta) {
-            // Pre-compute constants
-            var c1 = Math.exp(special.gammaLn(alpha) + special.gammaLn(beta) - special.gammaLn(alpha + beta));
+        class Beta extends _Distribution {
+            constructor(alpha, beta) {
+                super("continuous", arguments.length);
+                this.p = {alpha: alpha, beta: beta};
+                this.c = [Math.exp(special.gammaLn(alpha) + special.gammaLn(beta) - special.gammaLn(alpha + beta))];
+            }
 
-            return _Distribution("continuous", function () {
-                var x = _gamma(alpha, 1);
-                var y = _gamma(beta, 1);
+            _generator() {
+                let x = _gamma(this.p.alpha, 1),
+                    y = _gamma(this.p.beta, 1);
                 return x / (x + y);
-            }, function (x) {
-                return Math.pow(x, alpha-1) * Math.pow(1-x, beta-1) / c1;
-            }, function (x) {
-                return x <= 0 ? 0 : x >=1 ? 1 : special.betaIncomplete(alpha, beta, x);
-            })();
-        };
+            }
+
+            pdf(x) {
+                return Math.pow(x, this.p.alpha-1) * Math.pow(1-x, this.p.beta-1) / this.c[0];
+            }
+
+            cdf(x) {
+                return x <= 0 ? 0 : x >=1 ? 1 : special.betaIncomplete(this.p.alpha, this.p.beta, x);
+            }
+        }
 
         /**
          * Generator for [binomial distribution]{@link https://en.wikipedia.org/wiki/Binomial_distribution}.
@@ -858,59 +852,61 @@
          * @param {number} p Success probability.
          * @constructor
          */
-        var Binomial = function(n, p) {
-            // Pre-compute constants
-            var pp = p <= 0.5 ? p : 1 - p,
-                mean = n * pp;
+        class Binomial extends _Distribution {
+            constructor(n, p) {
+                super("continuous", arguments.length);
+                let pp = p <= 0.5 ? p : 1 - p;
+                this.p = {n: n, p: p};
+                this.c = [pp, n * pp];
+            }
 
-            return _Distribution("discrete", (function () {
-                if (n < 25) {
-                    return function() {
-                        var b = 0;
-                        for (var i = 1; i <= n; i++)
-                            if (Math.random() < pp) b++;
-                        return pp === p ? b : n - b;
-                    };
-                } else if (mean < 1.) {
-                    var lambda = Math.exp(-mean);
-                    return function() {
-                        var t = 1.0;
-                        for (var i = 0; i <= n; i++) {
-                            t *= Math.random();
-                            if (t < lambda) break;
-                        }
-                        var b = i <= n ? i : n;
-                        return pp === p ? b : n - b;
-                    };
+            _generator() {
+                if (this.p.n < 25) {
+                    let b = 0;
+                    for (let i = 1; i <= this.p.n; i++)
+                        if (Math.random() < this.c[0]) b++;
+                    return this.c[0] === this.p.p ? b : this.p.n - b;
+                } else if (this.c[1] < 1.) {
+                    let lambda = Math.exp(-this.c[1]),
+                        t = 1.0,
+                        i = 0;
+                    for (i = 0; i <= this.p.n; i++) {
+                        t *= Math.random();
+                        if (t < lambda) break;
+                    }
+                    let b = i <= this.p.n ? i : this.p.n;
+                    return this.c[0] === this.p.p ? b : this.p.n - b;
                 } else {
-                    var en = n,
+                    let en = this.p.n,
                         g = special.gammaLn(en + 1),
-                        pc = 1 - pp,
-                        pLog = Math.log(pp),
+                        pc = 1 - this.c[0],
+                        pLog = Math.log(this.c[0]),
                         pcLog = Math.log(pc),
-                        sq = Math.sqrt(2.0 * mean * pc);
-                    return function() {
+                        sq = Math.sqrt(2.0 * this.c[1] * pc);
+                    let y, em, t;
+                    do {
                         do {
-                            do {
-                                var y = Math.tan(Math.PI * Math.random()),
-                                    em = sq * y + mean;
-                            } while (em < 0.0 || em >= (en + 1.0));
-                            em = Math.floor(em);
-                            var t = 1.2 * sq * (1.0 + y * y) * Math.exp(g - special.gammaLn(em + 1.0)
-                                - special.gammaLn(en - em + 1.0) + em * pLog + (en - em) * pcLog);
-                        } while (Math.random() > t);
-                        return pp === p ? em : n - em;
-                    };
+                            y = Math.tan(Math.PI * Math.random());
+                            em = sq * y + this.c[1];
+                        } while (em < 0.0 || em >= (en + 1.0));
+                        em = Math.floor(em);
+                        t = 1.2 * sq * (1.0 + y * y) * Math.exp(g - special.gammaLn(em + 1.0)
+                            - special.gammaLn(en - em + 1.0) + em * pLog + (en - em) * pcLog);
+                    } while (Math.random() > t);
+                    return this.c[0] === this.p.p ? em : this.p.n - em;
                 }
-            })(), function (x) {
-                var xi = parseInt(x);
-                return xi < 0 ? 0 : xi > n ? 0 : Math.exp(special.gammaLn(n + 1) - special.gammaLn(xi + 1) - special.gammaLn(n - xi + 1)
-                    + xi * Math.log(p) + (n - xi) * Math.log(1 - p));
-            }, function (x) {
-                var xi = parseInt(x);
-                return xi <= 0 ? 0 : xi > n ? 1 : special.betaIncomplete(n - xi, 1 + xi, 1 - p);
-            })();
-        };
+            }
+
+            pdf(x) {
+                let xi = parseInt(x);
+                return xi < 0 ? 0 : xi > this.p.n ? 0 : Math.exp(special.gammaLn(this.p.n + 1) - special.gammaLn(xi + 1) - special.gammaLn(this.p.n - xi + 1)
+                    + xi * Math.log(this.p.p) + (this.p.n - xi) * Math.log(1 - this.p.p));
+            }
+
+            cdf(x) {
+                let xi = parseInt(x);
+                return xi <= 0 ? 0 : xi > this.p.n ? 1 : special.betaIncomplete(this.p.n - xi, 1 + xi, 1 - this.p.p);           }
+        }
 
         /**
          * Generator for [bounded Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution#Bounded_Pareto_distribution}.
@@ -922,33 +918,26 @@
          * @param {number} alpha Shape parameter.
          * @constructor
          */
-        var BoundedPareto = function (xmin, xmax, alpha) {
-            // Pre-compute constants
-            var l = Math.pow(xmin, alpha);
-            var h = Math.pow(xmax, alpha);
-            var c1 = (1 - Math.pow(xmin / xmax, alpha));
+        class BoundedPareto extends _Distribution {
+            constructor(xmin, xmax, alpha) {
+                super("continuous", arguments.length);
+                this.p = {xmin: xmin, xmax: xmax, alpha: alpha};
+                this.c = [Math.pow(xmin, alpha), Math.pow(xmax, alpha), (1 - Math.pow(xmin / xmax, alpha))];
+            }
 
-            return new _Distribution("continuous", function () {
-                return Math.pow((h + Math.random() * (l - h)) / (l * h), -1 / alpha);
-            }, function (x) {
-                return (x < xmin || x > xmax) ? 0
-                    : alpha * Math.pow(xmin / x, alpha) / (x * c1);
-            }, function (x) {
-                return x < xmin ? 0 : (x > xmax ? 1 : (1 - l * Math.pow(x, -alpha)) / (1 - l / h));
-            })();
-        };
+            _generator() {
+                return Math.pow((this.c[1] + Math.random() * (this.c[0] - this.c[1])) / (this.c[0] * this.c[1]), -1 / this.p.alpha);
+            }
 
-        /**
-         * Generator for [chi square distribution]{@link https://en.wikipedia.org/wiki/Chi-squared_distribution}.
-         *
-         * @class Chi2
-         * @memberOf ran.dist
-         * @param {number} k Degrees of freedom. If not an integer, is rounded to the nearest one.
-         * @constructor
-         */
-        var Chi2 = function (k) {
-            return Gamma(Math.round(k) / 2, 0.5);
-        };
+            pdf(x) {
+                return (x < this.p.xmin || x > this.p.xmax) ? 0
+                    : this.p.alpha * Math.pow(this.p.xmin / x, this.p.alpha) / (x * this.c[2]);
+            }
+
+            cdf(x) {
+                return x < this.p.xmin ? 0 : (x > this.p.xmax ? 1 : (1 - this.c[0] * Math.pow(x, -this.p.alpha)) / (1 - this.c[0] / this.c[1]));
+            }
+        }
 
         /**
          * Generator for custom distribution, using the
@@ -959,91 +948,102 @@
          * @param {Array} weights Weights for the distribution (doesn't need to be normalized).
          * @constructor
          */
-        var Custom = function (weights) {
-            // Pre-compute tables
-            var n = weights.length;
-            var prob = [0];
-            var alias = [0];
-            if (weights.length > 1) {
-                // Get sum (for normalization)
-                var sum = 0;
-                for (var i = 0; i < n; i++)
-                    sum += weights[i];
+        class Custom extends _Distribution {
+            constructor(weights) {
+                super("discrete", arguments.length);
+                this.p = {n: weights.length, weights: weights};
 
-                // Fill up small and large work lists
-                var p = [];
-                var small = [];
-                var large = [];
-                for (i = 0; i < n; i++) {
-                    p.push(n * weights[i] / sum);
-                    if (p[i] < 1.0)
-                        small.push(i);
-                    else
-                        large.push(i);
+                // Pre-compute tables
+                let n = weights.length,
+                    prob = [0],
+                    alias = [0],
+                    sum = 0;
+                if (weights.length > 1) {
+                    // Get sum (for normalization)
+                    for (let i = 0; i < n; i++)
+                        sum += weights[i];
+
+                    // Fill up small and large work lists
+                    let p = [],
+                        small = [],
+                        large = [];
+                    for (let i = 0; i < n; i++) {
+                        p.push(n * weights[i] / sum);
+                        if (p[i] < 1.0)
+                            small.push(i);
+                        else
+                            large.push(i);
+                    }
+
+                    // Init tables
+                    prob = [];
+                    alias = [];
+                    for (let i = 0; i < n; i++) {
+                        prob.push(1.0);
+                        alias.push(i);
+                    }
+
+                    // Fill up alias table
+                    let s = 0,
+                        l = 0;
+                    while (small.length > 0 && large.length > 0) {
+                        s = small.shift();
+                        l = large.shift();
+
+                        prob[s] = p[s];
+                        alias[s] = l;
+
+                        p[l] += p[s] - 1.0;
+                        if (p[l] < 1.0)
+                            small.push(l);
+                        else
+                            large.push(l);
+                    }
+                    while (large.length > 0) {
+                        l = large.shift();
+                        prob[l] = 1.0;
+                        alias[l] = l;
+                    }
+                    while (small.length > 0) {
+                        s = small.shift();
+                        prob[s] = 1.0;
+                        alias[s] = s;
+                    }
                 }
 
-                // Init tables
-                prob = [];
-                alias = [];
-                for (i = 0; i < n; i++) {
-                    prob.push(1.0);
-                    alias.push(i);
+                // Build pmf and cdf
+                let pmf = [weights[0] / sum],
+                    cdf = [weights[0] / sum];
+                for (let i = 1; i < weights.length; i++) {
+                    pmf.push(weights[i] / sum);
+                    cdf.push(cdf[i - 1] + weights[i] / sum);
                 }
 
-                // Fill up alias table
-                var s = 0,
-                    l = 0;
-                while (small.length > 0 && large.length > 0) {
-                    s = small.shift();
-                    l = large.shift();
-
-                    prob[s] = p[s];
-                    alias[s] = l;
-
-                    p[l] += p[s] - 1.0;
-                    if (p[l] < 1.0)
-                        small.push(l);
-                    else
-                        large.push(l);
-                }
-                while (large.length > 0) {
-                    l = large.shift();
-                    prob[l] = 1.0;
-                    alias[l] = l;
-                }
-                while (small.length > 0) {
-                    s = small.shift();
-                    prob[s] = 1.0;
-                    alias[s] = s;
-                }
+                // Assign to constants
+                this.c = [prob, alias, pmf, cdf];
             }
 
-            // Build pmf and cdf
-            var pmf = [weights[0] / sum];
-            var cdf = [weights[0] / sum];
-            for (i = 1; i < weights.length; i++) {
-                pmf.push(weights[i] / sum);
-                cdf.push(cdf[i - 1] + weights[i] / sum);
-            }
-
-            // Create generator
-            return new _Distribution("discrete", function () {
-                if (n <= 1) {
+            _generator() {
+                if (this.p.n <= 1) {
                     return 0;
                 }
-                var i = Math.floor(Math.random() * n);
-                if (Math.random() < prob[i])
+                let i = Math.floor(Math.random() * this.p.n);
+                if (Math.random() < this.c[0][i])
                     return i;
                 else
-                    return alias[i];
-            }, function (x) {
-                var xi = parseInt(x);
-                return xi < 0 || xi >= weights.length ? 0 : pmf[xi];
-            }, function (x) {
-                var xi = parseInt(x);
-                return xi < 0 ? 0 : xi >= weights.length ? 1 : cdf[xi];
-            })();
-        };
+                    return this.c[1][i];
+            }
+
+            pdf(x) {
+                let xi = parseInt(x);
+                return xi < 0 || xi >= this.p.weights.length ? 0 : this.c[2][xi];
+            }
+
+            cdf(x) {
+                let xi = parseInt(x);
+                return xi < 0 ? 0 : xi >= this.p.weights.length ? 1 : this.c[3][xi];
+            }
+        }
 
         /**
          * Generator for the [degenerate distribution]{@link https://en.wikipedia.org/wiki/Degenerate_distribution}.
@@ -1053,28 +1053,24 @@
          * @param {number} x0 Location of the distribution.
          * @constructor
          */
-        var Degenerate = function(x0) {
-            return new _Distribution("continuous", function() {
-                return x0;
-            }, function (x) {
-                return x === x0 ? 1 : 0;
-            }, function (x) {
-                return x < x0 ? 0 : x > x0 ? 1 : 0.5;
-            })();
-        };
+        class Degenerate extends _Distribution {
+            constructor(x0) {
+                super("continuous", arguments.length);
+                this.p = {x0: x0};
+            }
 
-        /**
-         * Generator for [Erlang distribution]{@link https://en.wikipedia.org/wiki/Erlang_distribution}.
-         *
-         * @class Erlang
-         * @memberOf ran.dist
-         * @param {number} k Shape parameter. It is rounded to the nearest integer.
-         * @param {number} lambda Rate parameter.
-         * @constructor
-         */
-        var Erlang = function (k, lambda) {
-            return Gamma(Math.round(k), lambda);
-        };
+            _generator() {
+                return this.p.x0;
+            }
+
+            pdf(x) {
+                return x === this.p.x0 ? 1 : 0;
+            }
+
+            cdf(x) {
+                return x < this.p.x0 ? 0 : x > this.p.x0 ? 1 : 0.5;
+            }
+        }
 
         /**
          * Generator for [exponentially distribution]{@link https://en.wikipedia.org/wiki/Exponential_distribution}.
@@ -1084,15 +1080,24 @@
          * @param {number} lambda Rate parameter.
          * @constructor
          */
-        var Exponential = function (lambda) {
-            return new _Distribution("continuous", function () {
-                return -Math.log(Math.random()) / lambda;
-            }, function (x) {
-                return lambda * Math.exp(-lambda * x);
-            }, function (x) {
-                return 1 - Math.exp(-lambda * x);
-            })();
-        };
+        class Exponential extends _Distribution {
+            constructor(lambda) {
+                super("continuous", arguments.length);
+                this.p = {lambda: lambda};
+            }
+
+            _generator() {
+                return -Math.log(Math.random()) / this.p.lambda;
+            }
+
+            pdf(x) {
+                return this.p.lambda * Math.exp(-this.p.lambda * x);
+            }
+
+            cdf(x) {
+                return 1 - Math.exp(-this.p.lambda * x);
+            }
+        }
 
         /**
          * Generator for [gamma distribution]{@link https://en.wikipedia.org/wiki/Gamma_distribution} following
@@ -1104,19 +1109,54 @@
          * @param {number} beta Rate parameter.
          * @constructor
          */
-        var Gamma = function (alpha, beta) {
-            // Pre-compute constants
-            var c1 = Math.pow(beta, alpha);
-            var c2 = special.gamma(alpha);
+        class Gamma extends _Distribution {
+            constructor(alpha, beta) {
+                super("continuous", arguments.length);
+                this.p = {alpha: alpha, beta: beta};
+                this.c = [Math.pow(beta, alpha), special.gamma(alpha)];
+            }
 
-            return new _Distribution("continuous", function () {
-                return _gamma(alpha, beta);
-            }, function (x) {
-                return x <= .0 ? 0 : c1 * Math.exp((alpha - 1) * Math.log(x) - beta * x) / c2;
-            }, function (x) {
-                return special.gammaLowerIncomplete(alpha, beta * x) / c2;
-            })();
-        };
+            _generator() {
+                return _gamma(this.p.alpha, this.p.beta);
+            }
+
+            pdf(x) {
+                return x <= .0 ? 0 : this.c[0] * Math.exp((this.p.alpha - 1) * Math.log(x) - this.p.beta * x) / this.c[1];
+            }
+
+            cdf(x) {
+                return special.gammaLowerIncomplete(this.p.alpha, this.p.beta * x) / this.c[1];
+            }
+        }
+
+        /**
+         * Generator for [Erlang distribution]{@link https://en.wikipedia.org/wiki/Erlang_distribution}.
+         *
+         * @class Erlang
+         * @memberOf ran.dist
+         * @param {number} k Shape parameter. It is rounded to the nearest integer.
+         * @param {number} lambda Rate parameter.
+         * @constructor
+         */
+        class Erlang extends Gamma {
+            constructor(k, lambda) {
+                super(Math.round(k), lambda);
+            }
+        }
+
+        /**
+         * Generator for [chi square distribution]{@link https://en.wikipedia.org/wiki/Chi-squared_distribution}.
+         *
+         * @class Chi2
+         * @memberOf ran.dist
+         * @param {number} k Degrees of freedom. If not an integer, is rounded to the nearest one.
+         * @constructor
+         */
+        class Chi2 extends Gamma {
+            constructor(k) {
+                super(Math.round(k) / 2, 0.5);
+            }
+        }
 
         /**
          * Generator for [generalized gamma distribution]{@link https://en.wikipedia.org/wiki/Generalized_gamma_distribution}.
@@ -1128,20 +1168,25 @@
          * @param {number} p Shape parameter.
          * @constructor
          */
-        var GeneralizedGamma = function (a, d, p) {
-            // Pre-compute constants
-            var c1 = special.gamma(d / p);
-            var c2 = (p / Math.pow(a, d));
-            var c3 = 1 / Math.pow(a, p);
+        class GeneralizedGamma extends _Distribution {
+            constructor(a, d, p) {
+                super("continuous", arguments.length);
+                this.p = {a: a, d: d, p: p};
+                this.c = [special.gamma(d / p), (p / Math.pow(a, d)), 1 / Math.pow(a, p)];
+            }
 
-            return new _Distribution("continuous", function () {
-                return Math.pow(_gamma(d / p, c3), 1 / p);
-            }, function (x) {
-                return x <= .0 ? 0 : c2 * Math.exp((d - 1) * Math.log(x) - Math.pow(x / a, p)) / c1;
-            }, function (x) {
-                return special.gammaLowerIncomplete(d / p, Math.pow(x / a, p)) / c1;
-            })();
-        };
+            _generator() {
+                return Math.pow(_gamma(this.p.d / this.p.p, this.c[2]), 1 / this.p.p);
+            }
+
+            pdf(x) {
+                return x <= .0 ? 0 : this.c[1] * Math.exp((this.p.d - 1) * Math.log(x) - Math.pow(x / this.p.a, this.p.p)) / this.c[0];
+            }
+
+            cdf(x) {
+                return special.gammaLowerIncomplete(this.p.d / this.p.p, Math.pow(x / this.p.a, this.p.p)) / this.c[0];
+            }
+        }
 
         /**
          * Generator for [inverse gamma distribution]{@link https://en.wikipedia.org/wiki/Inverse-gamma_distribution}.
@@ -1152,19 +1197,25 @@
          * @param {number} beta Scale parameter.
          * @constructor
          */
-        var InverseGamma = function (alpha, beta) {
-            // Pre-compute constants
-            var c1 = special.gamma(alpha);
-            var c2 = Math.pow(beta, alpha) / c1;
+        class InverseGamma extends _Distribution {
+            constructor(alpha, beta) {
+                super("continuous", arguments.length);
+                this.p = {alpha: alpha, beta: beta};
+                this.c = [Math.pow(beta, alpha) / special.gamma(alpha), special.gamma(alpha)];
+            }
 
-            return new _Distribution("continuous", function () {
-                return 1 / _gamma(alpha, beta);
-            }, function (x) {
-                return x <= .0 ? 0 : c2 * Math.pow(x, -1 - alpha) * Math.exp(-beta / x);
-            }, function (x) {
-                return 1 - special.gammaLowerIncomplete(alpha, beta / x) / c1;
-            })();
-        };
+            _generator() {
+                return 1 / _gamma(this.p.alpha, this.p.beta);
+            }
+
+            pdf(x) {
+                return x <= .0 ? 0 : this.c[0] * Math.pow(x, -1 - this.p.alpha) * Math.exp(-this.p.beta / x);
+            }
+
+            cdf(x) {
+                return 1 - special.gammaLowerIncomplete(this.p.alpha, this.p.beta / x) / this.c[1];
+            }
+        }
 
         /**
          * Generator for [lognormal distribution]{@link https://en.wikipedia.org/wiki/Log-normal_distribution}.
@@ -1175,19 +1226,25 @@
          * @param {number} sigma Scale parameter.
          * @constructor
          */
-        var Lognormal = function (mu, sigma) {
-            // Pre-compute constants
-            var c1 = sigma * Math.SQRT2;
-            var c2 = sigma * Math.sqrt(2 * Math.PI);
+        class Lognormal extends _Distribution {
+            constructor(mu, sigma) {
+                super("continuous", arguments.length);
+                this.p = {mu: mu, sigma: sigma};
+                this.c = [sigma * Math.sqrt(2 * Math.PI), sigma * Math.SQRT2];
+            }
 
-            return new _Distribution("continuous", function () {
-                return Math.exp(mu + sigma * _normal(0, 1));
-            }, function (x) {
-                return x <= .0 ? 0 : Math.exp(-0.5 * Math.pow((Math.log(x) - mu) / sigma, 2)) / (x * c2);
-            }, function (x) {
-                return x <= .0 ? 0 : 0.5 * (1 + special.erf((Math.log(x) - mu) / c1));
-            })();
-        };
+            _generator() {
+                return Math.exp(this.p.mu + this.p.sigma * _normal(0, 1));
+            }
+
+            pdf(x) {
+                return x <= .0 ? 0 : Math.exp(-0.5 * Math.pow((Math.log(x) - this.p.mu) / this.p.sigma, 2)) / (x * this.c[0]);
+            }
+
+            cdf(x) {
+                return x <= .0 ? 0 : 0.5 * (1 + special.erf((Math.log(x) - this.p.mu) / this.c[1]));
+            }
+        }
 
         /**
          * Generator for [normal distribution]{@link https://en.wikipedia.org/wiki/Normal_distribution}.
@@ -1198,19 +1255,25 @@
          * @param {number} sigma Squared scale parameter (variance).
          * @constructor
          */
-        var Normal = function (mu, sigma) {
-            // Pre-compute constants
-            var c1 = sigma * Math.SQRT2;
-            var c2 = sigma * Math.sqrt(2 * Math.PI);
+        class Normal extends _Distribution {
+            constructor(mu, sigma) {
+                super("continuous", arguments.length);
+                this.p = {mu: mu, sigma: sigma};
+                this.c = [sigma * Math.sqrt(2 * Math.PI), sigma * Math.SQRT2];
+            }
 
-            return new _Distribution("continuous", function () {
-                return _normal(mu, sigma);
-            }, function (x) {
-                return Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2)) / c2;
-            }, function (x) {
-                return 0.5 * (1 + special.erf((x - mu) / c1));
-            })();
-        };
+            _generator() {
+                return _normal(this.p.mu, this.p.sigma);
+            }
+
+            pdf(x) {
+                return Math.exp(-0.5 * Math.pow((x - this.p.mu) / this.p.sigma, 2)) / this.c[0];
+            }
+
+            cdf(x) {
+                return 0.5 * (1 + special.erf((x - this.p.mu) / this.c[1]));
+            }
+        }
 
         /**
          * Generator for [Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution}.
@@ -1221,15 +1284,24 @@
          * @param {number} alpha Shape parameter.
          * @constructor
          */
-        var Pareto = function (xmin, alpha) {
-            return new _Distribution("continuous", function () {
-                return xmin / Math.pow(Math.random(), 1 / alpha);
-            }, function (x) {
-                return x < xmin ? 0 : alpha * Math.pow(xmin / x, alpha) / x;
-            }, function (x) {
-                return x < xmin ? 0 : 1 - Math.pow(xmin / x, alpha);
-            })();
-        };
+        class Pareto extends _Distribution {
+            constructor(xmin, alpha) {
+                super("continuous", arguments.length);
+                this.p = {xmin: xmin, alpha: alpha};
+            }
+
+            _generator() {
+                return this.p.xmin / Math.pow(Math.random(), 1 / this.p.alpha);
+            }
+
+            pdf(x) {
+                return x < this.p.xmin ? 0 : this.p.alpha * Math.pow(this.p.xmin / x, this.p.alpha) / x;
+            }
+
+            cdf(x) {
+                return x < this.p.xmin ? 0 : 1 - Math.pow(this.p.xmin / x, this.p.alpha);
+            }
+        }
 
         /**
          * Generator for [Poisson distribution]{@link https://en.wikipedia.org/wiki/Poisson_distribution}.
@@ -1239,50 +1311,55 @@
          * @param {number} lambda Mean of the distribution.
          * @constructor
          */
-        var Poisson = function (lambda) {
-            return new _Distribution("discrete", (function() {
-                if (lambda < 30) {
+        class Poisson extends _Distribution {
+            constructor(lambda) {
+                super("discrete", arguments.length);
+                this.p = {lambda: lambda};
+            }
+
+            _generator() {
+                if (this.p.lambda < 30) {
                     // Small lambda, Knuth's method
-                    return function() {
-                        var l = Math.exp(-lambda),
-                            k = 0,
-                            p = 1;
-                        do {
-                            k++;
-                            p *= Math.random();
-                        } while (p > l);
-                        return k - 1;
-                    };
+                    let l = Math.exp(-this.p.lambda),
+                        k = 0,
+                        p = 1;
+                    do {
+                        k++;
+                        p *= Math.random();
+                    } while (p > l);
+                    return k - 1;
                 } else {
                     // Large lambda, normal approximation
-                    var c = 0.767 - 3.36/lambda;
-                    var beta = Math.PI / Math.sqrt(3 * lambda);
-                    var alpha = beta * lambda;
-                    var k = Math.log(c) - lambda - Math.log(beta);
-                    return function() {
-                        while (true) {
-                            var r = Math.random();
-                            var x = (alpha - Math.log((1 - r)/r)) / beta;
-                            var n = Math.floor(x + 0.5);
-                            if (n < 0)
-                                continue;
-                            var v = Math.random();
-                            var y = alpha - beta * x;
-                            var lhs = y + Math.log(v/Math.pow(1.0 + Math.exp(y), 2));
-                            var rhs = k + n * Math.log(lambda) - special.gammaLn(n+1);
-                            if (lhs <= rhs)
-                                return n;
-                        }
-                    };
+                    let c = 0.767 - 3.36/this.p.lambda,
+                        beta = Math.PI / Math.sqrt(3 * this.p.lambda),
+                        alpha = beta * this.p.lambda,
+                        k = Math.log(c) - this.p.lambda - Math.log(beta);
+                    while (true) {
+                        let r = Math.random(),
+                            x = (alpha - Math.log((1 - r)/r)) / beta,
+                            n = Math.floor(x + 0.5);
+                        if (n < 0)
+                            continue;
+                        let v = Math.random(),
+                            y = alpha - beta * x,
+                            lhs = y + Math.log(v/Math.pow(1.0 + Math.exp(y), 2)),
+                            rhs = k + n * Math.log(this.p.lambda) - special.gammaLn(n+1);
+                        if (lhs <= rhs)
+                            return n;
+                    }
                 }
-            })(), function (x) {
-                var xi = parseInt(x);
-                return xi < 0 ? 0 : Math.pow(lambda, xi) * Math.exp(-lambda) / special.gamma(xi + 1);
-            }, function (x) {
-                var xi = parseInt(x);
-                return xi < 0 ? 0 : 1 - special.gammaLowerIncomplete(xi + 1, lambda) / special.gamma(xi + 1);
-            })();
-        };
+            }
+
+            pdf(x) {
+                let xi = parseInt(x);
+                return xi < 0 ? 0 : Math.pow(this.p.lambda, xi) * Math.exp(-this.p.lambda) / special.gamma(xi + 1);
+            }
+
+            cdf(x) {
+                let xi = parseInt(x);
+                return xi < 0 ? 0 : 1 - special.gammaLowerIncomplete(xi + 1, this.p.lambda) / special.gamma(xi + 1);
+            }
+        }
 
         /**
          * Generator for continuous
@@ -1294,18 +1371,25 @@
          * @param {number} xmax Upper boundary.
          * @constructor
          */
-        var UniformContinuous = function (xmin, xmax) {
-            // Pre-compute constants
-            var c1 = xmax - xmin;
+        class UniformContinuous extends _Distribution {
+            constructor(xmin, xmax) {
+                super("continuous", arguments.length);
+                this.p = {xmin: xmin, xmax: xmax};
+                this.c = [xmax - xmin];
+            }
 
-            return new _Distribution("continuous", function () {
-                return Math.random() * c1 + xmin;
-            }, function (x) {
-                return x < xmin || x > xmax ? 0 : 1 / c1;
-            }, function (x) {
-                return x < xmin ? 0 : x > xmax ? 1 : (x - xmin) / c1;
-            })();
-        };
+            _generator() {
+                return Math.random() * this.c[0] + this.p.xmin;
+            }
+
+            pdf(x) {
+                return x < this.p.xmin || x > this.p.xmax ? 0 : 1 / this.c[0];
+            }
+
+            cdf(x) {
+                return x < this.p.xmin ? 0 : x > this.p.xmax ? 1 : (x - this.p.xmin) / this.c[0];
+            }
+        }
 
         /**
          * Generator for discrete
@@ -1317,20 +1401,27 @@
          * @param {number} xmax Upper boundary.
          * @constructor
          */
-        var UniformDiscrete = function (xmin, xmax) {
-            // Pre-compute contsants
-            var c1 = xmax - xmin + 1;
+        class UniformDiscrete extends _Distribution {
+            constructor(xmin, xmax) {
+                super("discrete", arguments.length);
+                this.p = {xmin: xmin, xmax: xmax};
+                this.c = [xmax - xmin + 1];
+            }
 
-            return new _Distribution("discrete", function() {
-                return parseInt(Math.random() * c1) + xmin;
-            }, function(x) {
-                var xi = parseInt(x);
-                return xi < xmin || xi > xmax ? 0 : 1 / c1;
-            }, function(x) {
-                var xi = parseInt(x);
-                return xi < xmin ? 0 : xi > xmax ? 1 : (1 + xi - xmin) / c1;
-            })();
-        };
+            _generator() {
+                return parseInt(Math.random() * this.c[0]) + this.p.xmin;
+            }
+
+            pdf(x) {
+                let xi = parseInt(x);
+                return xi < this.p.xmin || xi > this.p.xmax ? 0 : 1 / this.c[0];
+            }
+
+            cdf(x) {
+                let xi = parseInt(x);
+                return xi < this.p.xmin ? 0 : xi > this.p.xmax ? 1 : (1 + xi - this.p.xmin) / this.c[0];
+            }
+        }
 
         /**
          * Generator for [Weibull distribution]{@link https://en.wikipedia.org/wiki/Weibull_distribution}.
@@ -1341,17 +1432,26 @@
          * @param {number} k Shape parameter.
          * @constructor
          */
-        var Weibull = function (lambda, k) {
-            return new _Distribution("continuous", function () {
-                return lambda * Math.pow(-Math.log(Math.random()), 1 / k);
-            }, function (x) {
-                return x < 0 ? 0 : (k / lambda) * Math.exp((k - 1) * Math.log(x / lambda) - Math.pow(x / lambda, k));
-            }, function (x) {
-                return x < 0 ? 0 : 1 - Math.exp(-Math.pow(x / lambda, k));
-            })();
-        };
+        class Weibull extends _Distribution {
+            constructor(lambda, k) {
+                super("continuous", arguments.length);
+                this.p = {lambda: lambda, k: k};
+            }
 
-        // Public methods
+            _generator() {
+                return this.p.lambda * Math.pow(-Math.log(Math.random()), 1 / this.p.k);
+            }
+
+            pdf(x) {
+                return x < 0 ? 0 : (this.p.k / this.p.lambda) * Math.exp((this.p.k - 1) * Math.log(x / this.p.lambda) - Math.pow(x / this.p.lambda, this.p.k));
+            }
+
+            cdf(x) {
+                return x < 0 ? 0 : 1 - Math.exp(-Math.pow(x / this.p.lambda, this.p.k));
+            }
+        }
+
+        // Public classes
         return {
             Bernoulli: Bernoulli,
             Beta: Beta,
@@ -1381,7 +1481,7 @@
      * @namespace mc
      * @memberOf ran
      */
-    var mc = (function() {
+    let mc = (function() {
         /**
          * Calculates the Gelman-Rubin diagnostics for a set of samples.
          *
@@ -1391,7 +1491,7 @@
          * @param {number=} maxLength Maximum length of the diagnostic function. Default value is 1000.
          * @returns {Array} Array of G-R diagnostic versus iteration number for each state variable.
          */
-        var gr = (function() {
+        let gr = (function() {
             /**
              * Calculates the G-R diagnostic for a single set of samples and a specified state dimension.
              *
@@ -1404,23 +1504,23 @@
              */
             function _gri(samples, dim) {
                 // Calculate sample statistics
-                var m = [],
+                let m = [],
                     s = [];
                 samples.forEach(function (d) {
-                    var di = d.map(function (x) {
+                    let di = d.map(function (x) {
                         return x[dim];
                     });
-                    var mi = _sum(di) / di.length;
-                    var si = (_sum(di, 2) - di.length * mi * mi) / (di.length - 1);
+                    let mi = _sum(di) / di.length,
+                        si = (_sum(di, 2) - di.length * mi * mi) / (di.length - 1);
                     m.push(mi);
                     s.push(si);
                 });
 
                 // Calculate within and between variances
-                var w = _sum(s) / samples.length;
-                var mm = _sum(m) / samples.length;
-                var b = (_sum(m, 2) - samples.length * mm * mm) * samples[0].length / (samples.length - 1);
-                var v = ((samples[0].length - 1) * w + b) / samples[0].length;
+                let w = _sum(s) / samples.length,
+                    mm = _sum(m) / samples.length,
+                    b = (_sum(m, 2) - samples.length * mm * mm) * samples[0].length / (samples.length - 1),
+                    v = ((samples[0].length - 1) * w + b) / samples[0].length;
                 return Math.sqrt(v / w);
             }
 
@@ -1446,7 +1546,7 @@
          * @constructor
          * @private
          */
-        var _Proposal = (function (dimension, s0) {
+        let _Proposal = (function (dimension, s0) {
             // TODO Extend it to arbitrary proposals
             // TODO save current transition probability to calculate ratio faster
             /**
@@ -1456,7 +1556,7 @@
              * @memberOf ran.mc._Proposal
              * @private
              */
-            var _scales = s0 || new Array(dimension).fill(1);
+            let _scales = s0 || new Array(dimension).fill(1);
 
             /**
              * The array of proposal distributions.
@@ -1465,7 +1565,7 @@
              * @memberOf ran.mc._Proposal
              * @private
              */
-            var _g = new Array(dimension).fill(0).map(function () {
+            let _g = new Array(dimension).fill(0).map(function () {
                 return new dist.Normal(0, 1);
             });
 
@@ -1481,7 +1581,7 @@
              */
             function update(widen) {
                 // Pick random dimension
-                var i = parseInt(Math.random() * dimension);
+                let i = parseInt(Math.random() * dimension);
 
                 // Update proposal function according to acceptance rate
                 _scales[i] = widen ? _scales[i] * (1 + Math.random()*0.2) : _scales[i] * (1 - Math.random()*0.2);
@@ -1514,11 +1614,9 @@
              *
              * @method ratio
              * @memberOf ran.mc._Proposal
-             * @param {Array} x1 Old state.
-             * @param {Array} x2 New state.
              * @returns {number} Probability ratio.
              */
-            function ratio(x1, x2) {
+            function ratio() {
                 return 1;
             }
 
@@ -1539,7 +1637,7 @@
          * @returns {Array} Array of auto correlation functions for each state variable.
          * @private
          */
-        var _ac = (function() {
+        let _ac = (function() {
             /**
              * Calculates auto correlation for a single variable.
              *
@@ -1551,11 +1649,11 @@
              */
             function _aci(h) {
                 // Get average
-                var m = _sum(h) / h.length,
-                    m2 = _sum(h, 2);
-                var rho = new Array(100).fill(0);
-                for (var i = 0; i < h.length; i++) {
-                    for (var r = 0; r < rho.length; r++) {
+                let m = _sum(h) / h.length,
+                    m2 = _sum(h, 2),
+                    rho = new Array(100).fill(0);
+                for (let i = 0; i < h.length; i++) {
+                    for (let r = 0; r < rho.length; r++) {
                         if (i - r > 0) {
                             rho[r] += (h[i] - m) * (h[i - r] - m);
                         }
@@ -1575,26 +1673,29 @@
         })();
 
         /**
+         * Class implementing the [slice sampling]{@link https://en.wikipedia.org/wiki/Slice_sampling} algorithm.
          *
          * Source: R. M. Neal: Slice sampling. The Annals of Statistics, 31 (3): pp 705-767, 2003.
          * @type {Function}
          */
-        var Slice = (function(logDensity, config) {
-            var _min = config && typeof config.min !== 'undefined' ? config.min[0] : null;
-            var _max = config && typeof config.max !== 'undefined' ? config.max[0] : null;
-            var _x = Math.random();
-            var _e = new dist.Exponential(1);
+        let Slice = (function(logDensity, config) {
+            let _min = config && typeof config.min !== 'undefined' ? config.min : null,
+                _max = config && typeof config.max !== 'undefined' ? config.max : null,
+                _x = Math.random(),
+                _e = new dist.Exponential(1);
+
+            function _boundary(x) {
+                return (!_min || x >= _min[0]) && (!_max || x >= _max[0]);
+            }
 
             function _accept(x, z, l, r) {
-                var L = l,
+                let L = l,
                     R = r,
                     D = false;
 
                 while (R - L > 1.1) {
-                    var M = (L + R) / 2;
-                    if ((_x < M && x >= M) || (_x >= M && x < M)) {
-                        D = true;
-                    }
+                    let M = (L + R) / 2;
+                    D = (_x < M && x >= M) || (_x >= M && x < M);
 
                     if (x < M) {
                         R = M;
@@ -1612,12 +1713,12 @@
 
             function _iterate() {
                 // Pick slice height
-                var z = logDensity(_x) - _e.sample(),
+                let z = logDensity(_x) - _e.sample(),
                     L = _x - Math.random(),
                     R = L + 1;
 
                 // Find slice interval
-                while ((!_min || L >= _min) && (!_max || R <= _max) && (z < logDensity(L) || z < logDensity(R))) {
+                while ((z < logDensity(L) || z < logDensity(R))) {
                     if (Math.random() < 0.5) {
                         L -= R - L;
                     } else {
@@ -1625,17 +1726,9 @@
                     }
                 }
 
-                // Truncate by boundaries
-                if (typeof _min === 'number') {
-                    L = Math.max(L, _min);
-                }
-                if (typeof _max === 'number') {
-                    R = Math.min(R, _max);
-                }
-
                 // Shrink interval
-                var x = _r(L, R);
-                while (z > logDensity(x) || !_accept(x, z, L, R)) {
+                let x = _r(L, R);
+                while (!_boundary(x) || z > logDensity(x) || !_accept(x, z, L, R)) {
                     if (x < _x) {
                         L = x;
                     } else {
@@ -1646,7 +1739,7 @@
 
                 // Update and return sample
                 _x = x;
-                return x;
+                return _x;
             }
 
             // Placeholder
@@ -1688,10 +1781,10 @@
          * @constructor
          * TODO update this
          */
-        var Metropolis = (function (logDensity, config, initialState) {
-            var _dim = config && typeof config.dim === 'number' ? config.dim : 1;
-            var _min = config && typeof config.min !== 'undefined' ? config.min : null;
-            var _max = config && typeof config.max !== 'undefined' ? config.max : null;
+        let Metropolis = (function (logDensity, config, initialState) {
+            let _dim = config && typeof config.dim === 'number' ? config.dim : 1,
+                _min = config && typeof config.min !== 'undefined' ? config.min : null,
+                _max = config && typeof config.max !== 'undefined' ? config.max : null;
 
             // TODO implement asymmetric proposal
             /**
@@ -1705,8 +1798,8 @@
              * @property samplingRate Only every n-th states are recorded during sampling, where n is the sampling rate.
              * @private
              */
-            var _state = {
-                x: (initialState && initialState.x) || new Array((initialState && initialState.dim) || 1).fill(0).map(Math.random),
+            let _state = {
+                x: (initialState && initialState.x) || Array.from({length: (initialState && initialState.dim) || 1}, Math.random),
                 proposals: initialState && initialState.proposals || null,
                 samplingRate: initialState && initialState.samplingRate || 1
             };
@@ -1718,7 +1811,7 @@
              * @memberOf ran.mc.Metropolis
              * @private
              */
-            var _proposal = new _Proposal(_dim, _state.proposals);
+            let _proposal = new _Proposal(_dim, _state.proposals);
 
             /**
              * The last recorded log density.
@@ -1727,7 +1820,7 @@
              * @memberOf ran.mc.Metropolis
              * @private
              */
-            var _lastLnP = logDensity(_state.x);
+            let _lastLnP = logDensity(_state.x);
 
             /**
              * Class representing the statistics of the state variables.
@@ -1736,8 +1829,8 @@
              * @memberOf ran.mc.Metropolis
              * @private
              */
-            var _stats = (function() {
-                var _n = 0,
+            let _stats = (function() {
+                let _n = 0,
                     _m1 = new Array(_dim).fill(0),
                     _m2 = new Array(_dim).fill(0);
 
@@ -1751,10 +1844,10 @@
                      * @returns {{mean: Array, std: Array, cv: Array}}
                      */
                     get: function() {
-                        var s = _m2.map(function(d, i) {
+                        let s = _m2.map(function(d, i) {
                             return Math.sqrt(d - _m1[i] * _m1[i]);
                         });
-                        var cv = s.map(function(d, i) {
+                        let cv = s.map(function(d, i) {
                             return d / _m1[i];
                         });
                         return {
@@ -1790,8 +1883,8 @@
              * @memberOf ran.mc.Metropolis
              * @private
              */
-            var _acceptance = (function() {
-                var _arr = [];
+            let _acceptance = (function() {
+                let _arr = [];
 
                 return {
                     /**
@@ -1828,8 +1921,8 @@
              * @memberOf ran.mc.Metropolis
              * @private
              */
-            var _history = (function() {
-                var _arr = new Array(_dim).fill([]);
+            let _history = (function() {
+                let _arr = new Array(_dim).fill([]);
 
                 return {
                     /**
@@ -1876,18 +1969,18 @@
              */
             function _iterate() {
                 // Pick new state
-                var x1 = _proposal.sample(_state.x);
+                let x1 = _proposal.sample(_state.x);
 
                 // Check boundaries
                 if (_min) {
-                    for (var i = 0; i < x1.length; i++) {
+                    for (let i = 0; i < x1.length; i++) {
                         if (x1[i] < _min[i]) {
                             return 0;
                         }
                     }
                 }
                 if (_max) {
-                    for (i = 0; i < x1.length; i++) {
+                    for (let i = 0; i < x1.length; i++) {
                         if (x1[i] > _max[i]) {
                             return 0;
                         }
@@ -1895,7 +1988,7 @@
                 }
 
                 // Check if new state should be accepted
-                var _newLnP = logDensity(x1);
+                let _newLnP = logDensity(x1);
                 if (Math.random() < _proposal.ratio(_state.x, x1) * Math.exp(_newLnP - _lastLnP)) {
                     // Update state and last probability
                     _state.x = x1;
@@ -1923,8 +2016,8 @@
 
                 // Adjust sampling rate
                 // Get highest zero point
-                var z = _ac(_history.get()).reduce(function(first, d) {
-                    for (var i=0; i<d.length-1; i++) {
+                let z = _ac(_history.get()).reduce(function(first, d) {
+                    for (let i=0; i<d.length-1; i++) {
                         if (d[i] >= 0 && d[i+1] < 0) {
                             return Math.max(first, i);
                         }
@@ -2003,10 +2096,10 @@
              */
             function burnIn(callback, maxBatches) {
                 // Run until acceptance rate is around 50% or max iterations are reached
-                var bMax = maxBatches || 100;
-                for (var batch = 0; batch <= bMax; batch++) {
+                let bMax = maxBatches || 100;
+                for (let batch = 0; batch <= bMax; batch++) {
                     // Do some iterations
-                    for (var j = 0; j < 1e4; j++) {
+                    for (let j = 0; j < 1e4; j++) {
                         _acceptance.update(_iterate());
                     }
 
@@ -2031,10 +2124,10 @@
              * @returns {Array} Array of the samples states.
              */
             function sample(size, progress) {
-                var iMax = _state.samplingRate * (size || 1e6);
-                var batchSize = iMax / 100;
-                var samples = [];
-                for (var i=0; i<iMax; i++) {
+                let iMax = _state.samplingRate * (size || 1e6),
+                    batchSize = iMax / 100,
+                    samples = [];
+                for (let i=0; i<iMax; i++) {
                     _iterate();
 
                     // Adjust occasionally, also send progress status
@@ -2087,7 +2180,7 @@
     // TODO mean(power)
     // TODO correlation()
     // TODO Processes to add: https://en.wikipedia.org/wiki/Stochastic_process
-    var process = (function () {
+    let process = (function () {
         function Brown() {
 
         }
