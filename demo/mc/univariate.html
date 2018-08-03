@@ -9,10 +9,6 @@
 </head>
 <body>
 <script>
-    let normal = new ran.dist.Bernoulli(0, 1);
-    let sample = normal.sample(10);
-    console.log(normal.test(sample));
-
     // Add charts
     const hist = new du.widgets.LineChart("hist")
         .colors({real: "royalblue", estimate: "crimson"})

@@ -23,7 +23,7 @@
      * @method _sum
      * @memberOf ran
      * @param {Array} arr Array of numbers to sum over.
-     * @param {number=} pow Power to raise each element before summing up. Default is 1.
+     * @param {number=} pow Power to raise each element before summing up.
      * @return {number} The sum.
      * @private
      */
@@ -45,8 +45,8 @@
      *
      * @method _r
      * @methodOf ran
-     * @param {number} min Lower boundary.
-     * @param {number} max Upper boundary.
+     * @param {number} min Lower boundary. Default is 0.
+     * @param {number} max Upper boundary. Default is 1.
      * @returns {number} Random number.
      * @private
      */
@@ -87,7 +87,7 @@
          * @memberOf ran.special
          * @private
          */
-        const _MAX_ITER = 100;
+        const _MAX_ITERATIONS = 100;
 
         /**
          * Error tolerance in function approximations.
@@ -151,6 +151,7 @@
          * @private
          */
         let gammaLn = (function() {
+            // Coefficients
             const _p = [
                 76.18009172947146,
                 -86.50532032941677,
@@ -195,7 +196,7 @@
                     let si = s,
                         y = 1 / s,
                         f = 1 / s;
-                    for (let i = 0; i < _MAX_ITER; i++) {
+                    for (let i = 0; i < _MAX_ITERATIONS; i++) {
                         si++;
                         y *= x / si;
                         f += y;
@@ -213,7 +214,7 @@
                     d = 1 / b,
                     f = d,
                     fi, y;
-                for (let i = 1; i < _MAX_ITER; i++) {
+                for (let i = 1; i < _MAX_ITERATIONS; i++) {
                     fi = i * (s - i);
                     b += 2;
                     d = fi * d + b;
@@ -232,10 +233,7 @@
             }
 
             return function (s, x) {
-                if (x < s + 1)
-                    return _gliSeries(s, x);
-                else
-                    return gamma(s) - _guiContinuedFraction(s, x);
+                return x < s + 1 ? _gliSeries(s, x) : gamma(s) - _guiContinuedFraction(s, x);
             };
         })();
 
@@ -265,7 +263,7 @@
                 d = 1 / d;
                 let h = d;
 
-                for (let i = 1; i < _MAX_ITER; i++) {
+                for (let i = 1; i < _MAX_ITERATIONS; i++) {
                     let m2 = 2 * i,
                         aa = i * (b - i) * x / ((qam + m2) * (a + m2));
                     d = 1 + aa * d;
@@ -419,11 +417,12 @@
          * @methodOf char.core
          * @param {string} string String to sample characters from.
          * @param {number=} n Number of characters to sample.
-         * @returns {(string|Array)} Random character if k is not given or less than 2, an array of random characters otherwise.
+         * @returns {(string|Array)} Random character if n is not given or less than 2, an array of random characters
+         * otherwise. If string is empty, null is returned.
          */
         function char(string, n) {
             if (string === null || string === undefined || string.length === 0)
-                return "";
+                return null;
             return _some(() => string.charAt(Math.floor(_r(0, string.length))), n);
         }
 
@@ -458,7 +457,7 @@
          * @returns {(object|Array)} Object of head/tail value or an array of head/tail values.
          */
         function coin(head, tail, p, n) {
-            let prob = p ? p : 0.5;
+            let prob = typeof p === 'number' ? p : 0.5;
             return _some(() => Math.random() < prob ? head : tail, n);
         }
 
@@ -565,25 +564,6 @@
         }
 
         /**
-         * Estimates the CDF by summing up the PMF.
-         *
-         * @method _cdfEstimatorDiscrete
-         * @methodOf ran.dist
-         * @param pmf {Function} Probability mass function to builds CDF on.
-         * @returns {Function} The estimated CDF.
-         * @private
-         */
-        function _cdfEstimatorDiscrete(pmf) {
-            let _cdf = [pmf(0, args)];
-            for (let i = 1; i < 1000; i++) {
-                _cdf.push(_cdf[i - 1] + pmf(i, args));
-            }
-            return function (x) {
-                return _cdf[x];
-            };
-        }
-
-        /**
          * Performs a chi square test for an array of values and a probability mass function.
          *
          * @method _chiTest
@@ -622,34 +602,6 @@
         }
 
         /**
-         * Estimates the CDF by integrating the PDF.
-         *
-         * @method _cdfEstimatorContinuous
-         * @methodOf ran.dist
-         * @param pdf {Function} Probability density function to builds CDF on.
-         * @returns {Function} The estimated CDF.
-         * @private
-         */
-        function _cdfEstimatorContinuous(pdf) {
-            let _dx = 1e-3,
-                _cdf = [pdf(0, args)];
-            for (let i = 0; i < 100 / _dx; i++) {
-                // TODO use simpson
-                _cdf.push(_cdf[i - 1] + pdf(i * _dx, args) * _dx);
-            }
-
-            return function (x) {
-                let dx = 1e-4,
-                    res = _cdf[parseInt(Math.floor(x / _dx))];
-                for (let j = parseInt(Math.floor(x / _dx)) + dx; j < x; j += dx) {
-                    // TODO use simpson
-                    res += pdf(j, args) * dx;
-                }
-                return res;
-            }
-        }
-
-        /**
          * Performs a Kolmogorov-Smirnov test for an array of values and a cumulative distribution function.
          *
          * @method _ksTest
@@ -678,14 +630,14 @@
         }
 
         /**
-         * Base class for discrete/continuous distributions.
+         * The general distribution generator, all generators are created using this class.
+         * The methods listed for this class are available for all distribution generators.
          *
-         * @class _Distribution
-         * @methodOf ran.dist
+         * @class Distribution
+         * @memberOf ran.dist
          * @constructor
-         * @private
          */
-        class _Distribution {
+        class Distribution {
             constructor(type, k) {
                 this.type = type;
                 this.k = k;
@@ -694,96 +646,115 @@
             }
             
             _generator() {}
-            pdf() {}
-            cdf() {}
 
+            /**
+             * Generates some random variate.
+             *
+             * @method sample
+             * @methodOf ran.dist.Distribution
+             * @param {number} n Number of variates to generate. If not specified, a single value is returned.
+             * @returns {(number|Array)} Single sample or an array of samples.
+             */
             sample(n) {
                 return _some(() => this._generator(), n);
             }
 
-            test(x) {
-                return this.type === "discrete"
-                    ? _chiTest(x, y => this.pdf(y), this.k)
-                    : _ksTest(x, y => this.cdf(y));
-            }
+            /**
+             * Probability density function. In case of discrete distributions,this is the probability mass function.
+             *
+             * @method pdf
+             * @methodOf ran.dist.Distribution
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             */
+            pdf(x) {}
 
+            /**
+             * The [cumulative distribution function]{@link https://en.wikipedia.org/wiki/Cumulative_distribution_function}.
+             *
+             * @method cdf
+             * @methodOf ran.dist.Distribution
+             * @param {number} x Value to evaluate CDF at.
+             * @returns {number} The cumulative distribution value.
+             */
+            cdf(x) {}
+
+            /**
+             * The [survival function]{@link https://en.wikipedia.org/wiki/Survival_function}.
+             *
+             * @method survival
+             * @methodOf ran.dist.Distribution
+             * @param {number} x Value to evaluate survival function at.
+             * @returns {number} The survival value.
+             */
             survival(x) {
                 return 1 - this.cdf(x);
             }
 
+            /**
+             * The hazard function.
+             *
+             * @method hazard
+             * @methodOf ran.dist.Distribution
+             * @param {number} x Value to evaluate the hazard at.
+             * @returns {number} The hazard value.
+             */
             hazard(x) {
                 return this.pdf(x) / this.survival(x);
             }
 
+            /**
+             * The cumulative hazard function.
+             *
+             * @method cumulativeHazard
+             * @methodOf ran.dist.Distribution
+             * @param {number} x Value to evaluate cumulative hazard at.
+             * @returns {number} The cumulative hazard.
+             */
             cumulativeHazard(x) {
                 return -Math.log(this.survival(x));
             }
+
+            /**
+             * The logarithmic probability density function. For discrete distributions, this is the logarithm of the
+             * probability mass function.
+             *
+             * @method logPdf
+             * @methodOf ran.dist.Distribution
+             * @param {number} x Value to evaluate the log pdf at.
+             * @return {number} The logarithmic probability density (or mass).
+             */
+            lnPdf(x) {
+                return Math.log(this.pdf(x));
+            }
+
+            /**
+             * The log-likelihood of the current distribution based on some data.
+             *
+             * @method L
+             * @methodOf ran.dist.Distribution
+             * @param {Array} data Array of numbers to calculate log-likelihood for.
+             * @return {number} The value of log-likelihood.
+             */
+            L(data) {
+                return data.reduce((sum, d) => sum + Math.log(this.pdf(d)), 0);
+            }
+
+            /**
+             * Tests if an array of values are from the specified distribution.
+             * For discrete distributions it uses the chi square test, whereas for continuous distributions
+             * the Kolmogorov-Smirnov test is used.
+             *
+             * @method test
+             * @methodOf ran.dist.Distribution
+             * @param {Array} values Array of values to test.
+             */
+            test(values) {
+                return this.type === "discrete"
+                    ? _chiTest(values, x => this.pdf(x), this.k)
+                    : _ksTest(values, x => this.cdf(x));
+            }
         }
-        /**
-         * The general distribution generator, all generators are created using this class.
-         * The methods listed for this class are available for all distribution generators.
-         *
-         * @class Distribution
-         * @memberOf ran.dist
-         */
-        /**
-         * Generates some random variate.
-         *
-         * @method sample
-         * @methodOf ran.dist.Distribution
-         * @param {number} n Number of variates to generate.
-         */
-        /**
-         * The probability mass function.
-         *
-         * @method pmf
-         * @methodOf ran.dist.Distribution
-         * @param {number} x Value to evaluate distribution at.
-         */
-        /**
-         * Probability density function.
-         *
-         * @method pdf
-         * @methodOf ran.dist.Distribution
-         * @param {number} x Value to evaluate distribution at.
-         */
-        /**
-         * The cumulative distribution function.
-         *
-         * @method cdf
-         * @methodOf ran.dist.Distribution
-         * @param {number} x Value to evaluate CDF at.
-         */
-        /**
-         * The survival function.
-         *
-         * @method survival
-         * @methodOf ran.dist.Distribution
-         * @param {number} x Value to evaluate survival function at.
-         */
-        /**
-         * The hazard function.
-         *
-         * @method hazard
-         * @methodOf ran.dist.Distribution
-         * @param {number} x Value to evaluate the hazard at.
-         */
-        /**
-         * The cumulative hazard function.
-         *
-         * @method cumulativeHazard
-         * @methodOf ran.dist.Distribution
-         * @param {number} x Value to evaluate cumulative hazard at.
-         */
-        /**
-         * Tests if an array of values are from the specified distribution.
-         * For discrete distributions it uses the chi square test, whereas for continuous distributions
-         * the Kolmogorov-Smirnov test is used.
-         *
-         * @method test
-         * @methodOf ran.dist.Distribution
-         * @param {Array} values Array of values to test.
-         */
 
         /**
          * Generator for [Bernoulli distribution]{@link https://en.wikipedia.org/wiki/Bernoulli_distribution}.
@@ -793,7 +764,7 @@
          * @param {number} p Parameter of the distribution.
          * @constructor
          */
-        class Bernoulli extends _Distribution {
+        class Bernoulli extends Distribution {
             constructor(p) {
                 super("discrete", arguments.length);
                 this.p = {p: p};
@@ -821,7 +792,7 @@
          * @param {number} beta Second shape parameter.
          * @constructor
          */
-        class Beta extends _Distribution {
+        class Beta extends Distribution {
             constructor(alpha, beta) {
                 super("continuous", arguments.length);
                 this.p = {alpha: alpha, beta: beta};
@@ -852,7 +823,7 @@
          * @param {number} p Success probability.
          * @constructor
          */
-        class Binomial extends _Distribution {
+        class Binomial extends Distribution {
             constructor(n, p) {
                 super("continuous", arguments.length);
                 let pp = p <= 0.5 ? p : 1 - p;
@@ -918,7 +889,7 @@
          * @param {number} alpha Shape parameter.
          * @constructor
          */
-        class BoundedPareto extends _Distribution {
+        class BoundedPareto extends Distribution {
             constructor(xmin, xmax, alpha) {
                 super("continuous", arguments.length);
                 this.p = {xmin: xmin, xmax: xmax, alpha: alpha};
@@ -948,7 +919,7 @@
          * @param {Array} weights Weights for the distribution (doesn't need to be normalized).
          * @constructor
          */
-        class Custom extends _Distribution {
+        class Custom extends Distribution {
             constructor(weights) {
                 super("discrete", arguments.length);
                 this.p = {n: weights.length, weights: weights};
@@ -1053,7 +1024,7 @@
          * @param {number} x0 Location of the distribution.
          * @constructor
          */
-        class Degenerate extends _Distribution {
+        class Degenerate extends Distribution {
             constructor(x0) {
                 super("continuous", arguments.length);
                 this.p = {x0: x0};
@@ -1080,7 +1051,7 @@
          * @param {number} lambda Rate parameter.
          * @constructor
          */
-        class Exponential extends _Distribution {
+        class Exponential extends Distribution {
             constructor(lambda) {
                 super("continuous", arguments.length);
                 this.p = {lambda: lambda};
@@ -1109,7 +1080,7 @@
          * @param {number} beta Rate parameter.
          * @constructor
          */
-        class Gamma extends _Distribution {
+        class Gamma extends Distribution {
             constructor(alpha, beta) {
                 super("continuous", arguments.length);
                 this.p = {alpha: alpha, beta: beta};
@@ -1168,7 +1139,7 @@
          * @param {number} p Shape parameter.
          * @constructor
          */
-        class GeneralizedGamma extends _Distribution {
+        class GeneralizedGamma extends Distribution {
             constructor(a, d, p) {
                 super("continuous", arguments.length);
                 this.p = {a: a, d: d, p: p};
@@ -1197,7 +1168,7 @@
          * @param {number} beta Scale parameter.
          * @constructor
          */
-        class InverseGamma extends _Distribution {
+        class InverseGamma extends Distribution {
             constructor(alpha, beta) {
                 super("continuous", arguments.length);
                 this.p = {alpha: alpha, beta: beta};
@@ -1226,7 +1197,7 @@
          * @param {number} sigma Scale parameter.
          * @constructor
          */
-        class Lognormal extends _Distribution {
+        class Lognormal extends Distribution {
             constructor(mu, sigma) {
                 super("continuous", arguments.length);
                 this.p = {mu: mu, sigma: sigma};
@@ -1255,7 +1226,7 @@
          * @param {number} sigma Squared scale parameter (variance).
          * @constructor
          */
-        class Normal extends _Distribution {
+        class Normal extends Distribution {
             constructor(mu, sigma) {
                 super("continuous", arguments.length);
                 this.p = {mu: mu, sigma: sigma};
@@ -1284,7 +1255,7 @@
          * @param {number} alpha Shape parameter.
          * @constructor
          */
-        class Pareto extends _Distribution {
+        class Pareto extends Distribution {
             constructor(xmin, alpha) {
                 super("continuous", arguments.length);
                 this.p = {xmin: xmin, alpha: alpha};
@@ -1311,7 +1282,7 @@
          * @param {number} lambda Mean of the distribution.
          * @constructor
          */
-        class Poisson extends _Distribution {
+        class Poisson extends Distribution {
             constructor(lambda) {
                 super("discrete", arguments.length);
                 this.p = {lambda: lambda};
@@ -1371,7 +1342,7 @@
          * @param {number} xmax Upper boundary.
          * @constructor
          */
-        class UniformContinuous extends _Distribution {
+        class UniformContinuous extends Distribution {
             constructor(xmin, xmax) {
                 super("continuous", arguments.length);
                 this.p = {xmin: xmin, xmax: xmax};
@@ -1401,7 +1372,7 @@
          * @param {number} xmax Upper boundary.
          * @constructor
          */
-        class UniformDiscrete extends _Distribution {
+        class UniformDiscrete extends Distribution {
             constructor(xmin, xmax) {
                 super("discrete", arguments.length);
                 this.p = {xmin: xmin, xmax: xmax};
@@ -1432,7 +1403,7 @@
          * @param {number} k Shape parameter.
          * @constructor
          */
-        class Weibull extends _Distribution {
+        class Weibull extends Distribution {
             constructor(lambda, k) {
                 super("continuous", arguments.length);
                 this.p = {lambda: lambda, k: k};
