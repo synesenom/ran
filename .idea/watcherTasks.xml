@@ -14,8 +14,9 @@
         <array />
       </option>
       <option name="outputFromStdout" value="false" />
-      <option name="program" value="/usr/local/bin/uglifyjs" />
-      <option name="scopeName" value="Current File" />
+      <option name="program" value="$PROJECT_DIR$/node_modules/uglify-js-es6/bin/uglifyjs" />
+      <option name="runOnExternalChanges" value="true" />
+      <option name="scopeName" value="Project Files" />
       <option name="trackOnlyRoot" value="true" />
       <option name="workingDir" value="$FileDir$" />
       <envs />

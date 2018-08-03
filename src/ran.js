@@ -1555,7 +1555,7 @@
                 let i = parseInt(Math.random() * dimension);
 
                 // Update proposal function according to acceptance rate
-                _scales[i] = widen ? _scales[i] * (1 + Math.random()*0.2) : _scales[i] * (1 - Math.random()*0.2);
+                _scales[i] = widen ? _scales[i] * 2 : _scales[i] * 0.5;
                 _g[i] = new dist.Normal(0, _scales[i]);
 
                 return _scales;
@@ -1571,7 +1571,7 @@
              */
             function jump(x) {
                 return x.map(function (d, i) {
-                    return d + _g[i].sample();
+                    return d + (Math.random() < 0.5 ? _g[i].sample() : 0);
                 });
             }
 
@@ -1604,7 +1604,7 @@
          *
          * @method _ac
          * @memberOf ran.mc
-         * @param {Array} Array containing historical state data.
+         * @param {Array} history Array containing historical state data.
          * @returns {Array} Array of auto correlation functions for each state variable.
          * @private
          */
@@ -1893,7 +1893,7 @@
              * @private
              */
             let _history = (function() {
-                let _arr = new Array(_dim).fill([]);
+                let _arr = Array.from({length: _dim}, () => []);
 
                 return {
                     /**
@@ -1997,7 +1997,7 @@
                 // Change sampling rate if zero point is different
                 if (z > _state.samplingRate) {
                     _state.samplingRate++;
-                } else if (z < _state.samplingRate) {
+                } else if (z < _state.samplingRate && _state.samplingRate > 1) {
                     _state.samplingRate--;
                 }
             }
@@ -2049,6 +2049,7 @@
              * @returns {Array} Array of auto correlation function for each state variable.
              */
             function ac() {
+                console.log(_history.get());
                 return _ac(_history.get());
             }
 
