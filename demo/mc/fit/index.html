@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="../../d3.v4.min.js"></script>
+    <script src="../../dashboard-utils.min.js"></script>
+    <script src="../../../ran.min.js"></script>
+    <title>fit | mc</title>
+</head>
+<body>
+<script>
+    // Add chart
+    const hist = new du.widgets.LineChart("hist")
+        .colors({theory: "grey", data: "royalblue", model: "crimson"})
+        .width(window.innerWidth)
+        .height(window.innerWidth / 2)
+        .margins(50)
+        .fontSize(16)
+        .yTickFormat(function(x) {
+            return x.toFixed(3);
+        })
+        .render();
+
+    // Add progress bar
+    const progressBar = new du.widgets.ProgressBar("progressBar")
+        .x(10)
+        .y(window.innerWidth / 2)
+        .width(window.innerWidth - 20)
+        .height(20)
+        .fontSize(16)
+        .label("Generating data")
+        .percentage(0)
+        .thickness(3)
+        .align("left")
+        .render();
+
+    // Generate data
+    const SCALE = 44125;
+    const model = "Normal";
+    const params = [5, 2];
+    const g = new ran.dist[model](...params);
+    const worker = new Worker('worker.js');
+    let plots = [{
+        name: "theory",
+        values: new Array(1000).fill(0).map((d, i) => ({x: i/100, y: SCALE*g.pdf(i/100)}))
+    }];
+    worker.postMessage({model: model, params: params});
+    worker.onmessage = function(e) {
+        switch (e.data.type) {
+            case "generate":
+                plots.push({name: "data", values: e.data.res});
+                hist.data(plots)
+                    .render();
+                break;
+            case "burn-in":
+                progressBar.label("Burn-in")
+                    .percentage(event.data.res)
+                    .render();
+                break;
+            case "sampling":
+                progressBar.label("Sampling")
+                    .percentage(event.data.res)
+                    .render();
+                break;
+            case "fit":
+                plots.push({name: "model", values: e.data.res});
+                hist.data(plots)
+                    .render();
+                break;
+        }
+    };
+    worker.onerror = function(e) {
+        console.log(e.message);
+    }
+</script>
+</body>
+</html>

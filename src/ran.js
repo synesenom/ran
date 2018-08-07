@@ -73,6 +73,332 @@
     }
 
     /**
+     * Namespaces containing various linear algebra classes and methods.
+     *
+     * @namespace linalg
+     * @memberOf ran
+     * @private
+     */
+    let linalg = (function() {
+        /**
+         * Class representing a real vector.
+         * The vector is initialized as a 3 dimensional unit vector (1, 0, 0).
+         *
+         * @class Vector
+         * @memberOf ran.linalg
+         * @constructor
+         * @private
+         */
+        /**
+         * Class representing a real vector.
+         * The vector is initialized as a unit vector of the specified dimension pointing in the
+         * direction of the X (first) axis.
+         *
+         * @class Vector
+         * @memberOf ran.linalg
+         * @param {number} dim The dimension of the vector.
+         * @constructor
+         * @private
+         */
+        /**
+         * Class representing a real vector.
+         * The vector is initialized by the elements of the specified array.
+         *
+         * @class Vector
+         * @memberOf ran.linalg
+         * @param {Array} elems The array containing the vector elements.
+         * @constructor
+         * @private
+         */
+        /**
+         * Class representing a real vector.
+         * The vector is copied from the specified vector.
+         *
+         * @class Vector
+         * @memberOf ran.linalg
+         * @param {ran.linalg.Vector} dim The vector to copy elements from.
+         * @constructor
+         * @private
+         */
+        class Vector {
+            constructor(arg) {
+                if (typeof arg === 'number') {
+                    this._v = new Array(arg).fill(0);
+                    this._v[0] = 1;
+                } else if (Array.isArray(arg)) {
+                    this._v = arg;
+                } else if (typeof arg === 'object' && Array.isArray(arg.v)) {
+                    this._v = arg.v;
+                } else {
+                    this._v = [1, 0, 0];
+                }
+            }
+
+            /**
+             * The array containing the vector elements.
+             *
+             * @property {Array} v
+             * @memberOf ran.linalg.Vector
+             */
+            set v(x) {
+                this._v = x;
+            }
+
+            get v() {
+                return this._v.slice();
+            }
+
+            /**
+             * Read-only property representing the dimension of the vector.
+             *
+             * @property {number} dim
+             * @memberOf ran.linalg.Vector
+             * @readonly
+             */
+            get dim() {
+                return this._v.length;
+            }
+
+            /**
+             * Multiplies this vector with a scalar.
+             *
+             * @method mult
+             * @memberOf ran.linalg.Vector
+             * @param {number} s Scalar to multiply vector with.
+             * @returns {ran.linalg.Vector} The scaled vector.
+             */
+            mult(s) {
+                return new Vector(this._v.map(d => d * s));
+            }
+
+            /**
+             * Adds another vector to this vector.
+             *
+             * @method add
+             * @memberOf ran.linalg.Vector
+             * @param {ran.linalg.Vector} vec The vector to add.
+             * @returns {ran.linalg.Vector} The sum vector.
+             */
+            add(vec) {
+                return new Vector(this._v.map((d, i) => d + vec.v[i]));
+            }
+
+            /**
+             * Calculates the dot product with another vector.
+             *
+             * @method dot
+             * @memberOf ran.linalg.Vector
+             * @param {ran.linalg.Vector} vec Vector to multiply with.
+             * @returns {number} The dot product.
+             */
+            dot(vec) {
+                return this._v.reduce((sum, d, i) => sum + d * vec.v[i], 0);
+            }
+        }
+
+        /**
+         * Class representing a real square matrix.
+         * The matrix is initialized as a 3x3 identity matrix.
+         *
+         * @class Matrix
+         * @memberOf ran.linalg
+         * @constructor
+         * @private
+         */
+        /**
+         * Class representing a real square matrix.
+         * The matrix is initialized as an identity matrix of the specified dimension.
+         *
+         * @class Matrix
+         * @memberOf ran.linalg
+         * @param {number} dim The linear dimension of the matrix.
+         * @constructor
+         * @private
+         */
+        /**
+         * Class representing a real square matrix.
+         * The matrix is by the elements of the specified array.
+         *
+         * @class Matrix
+         * @memberOf ran.linalg
+         * @param {Array[]} elems The array of arrays containing the matrix elements.
+         * @constructor
+         * @private
+         */
+        /**
+         * Class representing a real square matrix.
+         * The matrix is copied from the specified matrix.
+         *
+         * @class Matrix
+         * @memberOf ran.linalg
+         * @param {ran.linalg.Matrix} dim The matrix to copy elements from.
+         * @constructor
+         * @private
+         */
+        class Matrix {
+            constructor(arg) {
+                if (typeof arg === 'number') {
+                    this._m = Array.from({length: arg}, () => new Array(arg).fill(0));
+                    for (let i = 0; i < arg; i++) {
+                        this._m[i][i] = 1;
+                    }
+                } else if (Array.isArray(arg)) {
+                    this._m = arg;
+                } else if (typeof arg === 'object' && Array.isArray(arg.m)) {
+                    this._m = arg.m;
+                } else {
+                    this._m = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+                }
+            }
+
+            /**
+             * Array of array containing the matrix elements.
+             *
+             * @property {Array[]} m
+             * @memberOf ran.linalg.Matrix
+             */
+            set m(x) {
+                this._m = x;
+            }
+
+            get m() {
+                return this._m.map(d => d.slice());
+            }
+
+            /**
+             * Property representing the linear dimension of the matrix.
+             *
+             * @property {number} dim
+             * @memberOf ran.linalg.Matrix
+             */
+            get dim() {
+                return this._m.length;
+            }
+
+            /**
+             * Returns or sets an element of the matrix.
+             *
+             * @method ij
+             * @memberOf ran.linalg.Matrix
+             * @param {number} i Row index of the element.
+             * @param {number} j Column index of the element.
+             * @param {number=} s The new value of the element at the {i}-th row and {j}-th column. If not specified,
+             * the element at {(i, j)} is returned.
+             */
+            ij(i, j, s) {
+                if (s !== undefined) {
+                    this._m[i][j] = s;
+                } else {
+                    return this._m[i][j];
+                }
+            }
+
+            /**
+             * Returns the transpose of the matrix.
+             *
+             * @method t
+             * @memberOf ran.linalg.Matrix
+             * @returns {ran.linalg.Matrix} The transposed matrix.
+             */
+            t() {
+                let n = this.dim,
+                    r = new Matrix(n);
+                for (let i=0; i<n; i++) {
+                    for (let j=0; j<n; j++) {
+                        r.ij(i, j, this.m[j][i]);
+                    }
+                }
+                return r;
+            }
+
+            /**
+             * Multiplies the matrix with a scalar.
+             *
+             * @method scale
+             * @memberOf ran.linalg.Matrix
+             * @param {number} s The scalar to multiply matrix with.
+             * @returns {ran.linalg.Matrix} The scaled matrix.
+             */
+            scale(s) {
+                return new Matrix(this._m.map(d => d.map(dd => dd*s)));
+            }
+
+            /**
+             * Multiplies the matrix with another matrix (from the right).
+             *
+             * @method mult
+             * @memberOf ran.linalg.Matrix
+             * @param {ran.linalg.Matrix} mat Matrix to multiply current matrix with.
+             * @returns {ran.linalg.Matrix} The product matrix.
+             */
+            mult(mat) {
+                let n = this.dim;
+                let r = new Matrix(n);
+                for (let i=0; i<n; i++) {
+                    for (let j=0; j<n; j++) {
+                        let rij = 0;
+                        for (let k=0; k<n; k++) {
+                            rij += this.ij(i, k) * mat.ij(k, j);
+                        }
+                        r.ij(i, j, rij);
+                    }
+                }
+                return r;
+            }
+
+            /**
+             * Multiplies a vector with the matrix (acts this matrix on a vector).
+             *
+             * @method act
+             * @memberOf ran.linalg.Matrix
+             * @param {ran.linalg.Vector} vec Vector to act matrix on.
+             * @returns {ran.linalg.Vector} The mapped vector.
+             */
+            act(vec) {
+                return new Vector(this._m.map(d => vec.dot(new Vector(d))));
+            }
+
+            /**
+             * Performs the LDL decomposition of the matrix.
+             *
+             * @method ldl
+             * @memberOf ran.linalg.Matrix
+             * @returns {{D: ran.linalg.Matrix, L: ran.linalg.Matrix}} Object containing the D and L matrices.
+             */
+            ldl() {
+                // Init D, L
+                let n = this.dim,
+                    D = new Matrix(n),
+                    L = new Matrix(n);
+
+                // Perform decomposition
+                for (let j=0; j<n; j++) {
+                    // Update D
+                    let dj = this.ij(j, j);
+                    for (let k=0; k<j; k++) {
+                        dj -= D.ij(k, k) * L.ij(j, k)*L.ij(j, k);
+                    }
+                    D.ij(j, j, dj);
+
+                    // Update L
+                    for (let i=n-1; i>j; i--) {
+                        let lij = this.ij(i, j);
+                        for (let k=0; k<j; k++) {
+                            lij -= D.ij(k, k) * L.ij(i, k)*L.ij(j, k);
+                        }
+                        L.ij(i, j, lij / dj);
+                    }
+                }
+
+                return {
+                    D: D,
+                    L: L
+                };
+            }
+        }
+    })();
+
+    /**
      * Module containing some special functions.
      *
      * @namespace special
@@ -644,7 +970,7 @@
                 this.p = [];
                 this.c = [];
             }
-            
+
             _generator() {}
 
             /**
@@ -1513,7 +1839,7 @@
          * @class _Proposal
          * @memberOf ran.mc
          * @param {number} dimension Number of dimensions of the state.
-         * @param {Array} s0 Initial values of the proposal scales. If not specified a vector of 1s is generated.
+         * @param {number} s0 Initial value of the proposal scale. Default value is 1.
          * @constructor
          * @private
          */
@@ -1521,13 +1847,13 @@
             // TODO Extend it to arbitrary proposals
             // TODO save current transition probability to calculate ratio faster
             /**
-             * Scale parameters of the proposals.
+             * Scale parameter of the proposals.
              *
-             * @var {Array} _scales
+             * @var {number} _scale
              * @memberOf ran.mc._Proposal
              * @private
              */
-            let _scales = s0 || new Array(dimension).fill(1);
+            let _scale = s0 || 1;
 
             /**
              * The array of proposal distributions.
@@ -1536,9 +1862,7 @@
              * @memberOf ran.mc._Proposal
              * @private
              */
-            let _g = new Array(dimension).fill(0).map(function () {
-                return new dist.Normal(0, 1);
-            });
+            let _g = Array.from({length: dimension}, () => new dist.Normal(0, 1));
 
             /**
              * Updates one of the proposal distributions.
@@ -1548,17 +1872,12 @@
              * @method update
              * @memberOf ran.mc._Proposal
              * @param {boolean} widen Whether the proposals should be widened or tightened.
-             * @returns {Array} Array of scale values after the update.
+             * @returns {number} The new scale value after the update.
              */
             function update(widen) {
-                // Pick random dimension
-                let i = parseInt(Math.random() * dimension);
-
-                // Update proposal function according to acceptance rate
-                _scales[i] = widen ? _scales[i] * 2 : _scales[i] * 0.5;
-                _g[i] = new dist.Normal(0, _scales[i]);
-
-                return _scales;
+                // Update proposal scale
+                _scale = widen ? _scale * 1.2 : _scale * 0.8;
+                return _scale;
             }
 
             /**
@@ -1570,9 +1889,7 @@
              * @returns {Array} Next proposed state vector.
              */
             function jump(x) {
-                return x.map(function (d, i) {
-                    return d + (Math.random() < 0.5 ? _g[i].sample() : 0);
-                });
+                return x.map((d, i) => d + _scale*_g[i].sample());
             }
 
             /**
@@ -1599,15 +1916,6 @@
             };
         });
 
-        /**
-         * Calculates the auto correlation function for historical state data.
-         *
-         * @method _ac
-         * @memberOf ran.mc
-         * @param {Array} history Array containing historical state data.
-         * @returns {Array} Array of auto correlation functions for each state variable.
-         * @private
-         */
         let _ac = (function() {
             /**
              * Calculates auto correlation for a single variable.
@@ -1636,6 +1944,15 @@
                 });
             }
 
+            /**
+             * Calculates the auto correlation function for historical state data.
+             *
+             * @method _ac
+             * @memberOf ran.mc
+             * @param {Array} history Array containing historical state data.
+             * @returns {Array} Array of auto correlation functions for each state variable.
+             * @private
+             */
             return function(history) {
                 return history.map(function(d) {
                     return _aci(d);
@@ -1770,7 +2087,7 @@
              * @private
              */
             let _state = {
-                x: (initialState && initialState.x) || Array.from({length: (initialState && initialState.dim) || 1}, Math.random),
+                x: (initialState && initialState.x) || Array.from({length: _dim}, Math.random),
                 proposals: initialState && initialState.proposals || null,
                 samplingRate: initialState && initialState.samplingRate || 1
             };
@@ -1783,6 +2100,9 @@
              * @private
              */
             let _proposal = new _Proposal(_dim, _state.proposals);
+
+            // TODO make proposal internal
+            let _proposals = Array.from({length: _dim}, () => new dist.Normal(0, 1));
 
             /**
              * The last recorded log density.
@@ -1989,7 +2309,7 @@
                 // Get highest zero point
                 let z = _ac(_history.get()).reduce(function(first, d) {
                     for (let i=0; i<d.length-1; i++) {
-                        if (d[i] >= 0 && d[i+1] < 0) {
+                        if (Math.abs(d[i]) <= 0.05) {
                             return Math.max(first, i);
                         }
                     }
@@ -2013,7 +2333,7 @@
             function state() {
                 return {
                     x: _state.x.slice(),
-                    proposals: _state.proposals.slice(),
+                    proposals: _state.proposals,
                     samplingRate: _state.samplingRate
                 };
             }
@@ -2032,7 +2352,7 @@
 
             /**
              * Returns the current acceptance ratio based on the last 1000 iterations.
-             * 
+             *
              * @method ar
              * @memberOf ran.mc.Metropolis
              * @returns {number} Current acceptance ratio.
@@ -2049,7 +2369,6 @@
              * @returns {Array} Array of auto correlation function for each state variable.
              */
             function ac() {
-                console.log(_history.get());
                 return _ac(_history.get());
             }
 
