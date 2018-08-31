@@ -12,11 +12,12 @@ self.addEventListener("message", function(event) {
     // Generate data
     const DATA_SIZE = 1e4;
     const RESOLUTION = 10;
-    const SAMPLE_SIZE = 1e3;
+    const SAMPLE_SIZE = 1e4;
     const SCALE = 44125;
     const model = event.data.model;
     const g = new ran.dist[model](... event.data.params);
-    const dataSamples = g.sample(DATA_SIZE);
+    const dataSamples = g.sample(DATA_SIZE)
+        .filter(d => d > 2 && d < 7);
     const data = Object.entries(dataSamples
         .reduce((h, d) => {
             let i = Math.floor(10 * d) / 10;
@@ -34,30 +35,34 @@ self.addEventListener("message", function(event) {
     // Create model
     const deviation = beta(data, x => SCALE*g.pdf(x));
     const likelihood = function (p) {
-        const m = new ran.dist[model](... p.map((d, i) => d * event.data.params[i]));
+        const m = new ran.dist[model](... p);
         return -0.5 * deviation * data.reduce((sum, d) => {
             return sum + Math.pow(d.y - SCALE*m.pdf(d.x), 2)
         }, 0);
     };
-    const mc = new ran.mc.Metropolis(likelihood, {
-        dim: event.data.params.length,
-        min: [0]
+    /*const likelihood = function(p) {
+        const m = new ran.dist[model](... p);
+        let ll = m.L(dataSamples);
+        //console.log(ll, p[0], p[1]);
+        return ll;
+    };*/
+    const rwm = new ran.mc.RWM(likelihood, {
+        dim: event.data.params.length
+    }, {
+        x: event.data.params
     });
 
     // Burn-in
-    mc.burnIn((i, a) => {
-        console.log(a);
-        postMessage({type: "burn-in", res: 100*i});
+    rwm.warmUp(i => {
+        postMessage({type: "burn-in", res: i});
     }, 100);
-    console.log(mc.state());
-    console.log(mc.ac());
-    return;
 
     // Sample
-    let samples = mc.sample(SAMPLE_SIZE, i => {
+    let samples = rwm.sample(i => {
         postMessage({type: "sampling", res: i});
-    });
-    let modelSamples = samples.map((d) => new ran.dist[model](...d.map((dd, i) => dd * event.data.params[i])));
+    }, SAMPLE_SIZE);
+
+    let modelSamples = samples.map((d) => new ran.dist[model](...d));
     let curve = new Array(1000)
         .fill(0)
         .map((d, i) => {
@@ -65,8 +70,8 @@ self.addEventListener("message", function(event) {
                 return SCALE*p.pdf(i / 100);
             }).sort((a, b) => a - b);
             let m = d3.mean(y);
-            let lo = d3.quantile(y, 0.01);
-            let hi = d3.quantile(y, 0.99);
+            let lo = d3.quantile(y, 0.001);
+            let hi = d3.quantile(y, 0.999);
             return {
                 x: i / 100,
                 y: m,

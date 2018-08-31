@@ -43,6 +43,9 @@ class _JS:
         'named_value_desc': {
             'param': "@param",
             'property': "@property",
+        },
+        'text': {
+            'example': "@example"
         }
     }
 

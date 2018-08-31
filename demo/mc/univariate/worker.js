@@ -55,7 +55,7 @@ function send(real, estimate) {
 
 self.addEventListener("message", function(event) {
     "use strict";
-    importScripts("../../ran.min.js");
+    importScripts("../../../ran.min.js");
 
     // Use a bimodal density with long tails
     const alpha = 0.3;
@@ -70,7 +70,8 @@ self.addEventListener("message", function(event) {
         min: [0]
     });
 
-    mc.burnIn(null, 20);
+    mc.burnIn();
+    mc.ac();
     let xMax = 0;
     let total = 0;
     let hist = {};

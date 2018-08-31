@@ -77,48 +77,18 @@
      *
      * @namespace linalg
      * @memberOf ran
-     * @private
      */
     let linalg = (function() {
         /**
          * Class representing a real vector.
-         * The vector is initialized as a 3 dimensional unit vector (1, 0, 0).
          *
          * @class Vector
          * @memberOf ran.linalg
+         * @param {(number|Array|ran.linalg.Vector)=} arg The constructor argument. If it is a number, it sets the
+         * dimension of the vector. If it is an array, the vector is initialized with the array elements. If it is
+         * another vector, it is copied to this vector. If not specified, a 3D vector is created directing in the X
+         * axis.
          * @constructor
-         * @private
-         */
-        /**
-         * Class representing a real vector.
-         * The vector is initialized as a unit vector of the specified dimension pointing in the
-         * direction of the X (first) axis.
-         *
-         * @class Vector
-         * @memberOf ran.linalg
-         * @param {number} dim The dimension of the vector.
-         * @constructor
-         * @private
-         */
-        /**
-         * Class representing a real vector.
-         * The vector is initialized by the elements of the specified array.
-         *
-         * @class Vector
-         * @memberOf ran.linalg
-         * @param {Array} elems The array containing the vector elements.
-         * @constructor
-         * @private
-         */
-        /**
-         * Class representing a real vector.
-         * The vector is copied from the specified vector.
-         *
-         * @class Vector
-         * @memberOf ran.linalg
-         * @param {ran.linalg.Vector} dim The vector to copy elements from.
-         * @constructor
-         * @private
          */
         class Vector {
             constructor(arg) {
@@ -135,28 +105,20 @@
             }
 
             /**
-             * The array containing the vector elements.
+             * Returns the vector as an array.
              *
-             * @property {Array} v
+             * @method v
              * @memberOf ran.linalg.Vector
-             */
-            set v(x) {
-                this._v = x;
-            }
-
-            get v() {
-                return this._v.slice();
-            }
-
-            /**
-             * Read-only property representing the dimension of the vector.
+             * @returns {Array} The vector as an array.
+             * @example
              *
-             * @property {number} dim
-             * @memberOf ran.linalg.Vector
-             * @readonly
+             * let vec = new ran.linalg.Vector(3)
+             * vec.v()
+             * // => [1, 0, 0]
+             *
              */
-            get dim() {
-                return this._v.length;
+            v() {
+                return this._v;
             }
 
             /**
@@ -166,6 +128,12 @@
              * @memberOf ran.linalg.Vector
              * @param {number} s Scalar to multiply vector with.
              * @returns {ran.linalg.Vector} The scaled vector.
+             * @example
+             *
+             * let vec = new ran.linalg.Vector([1, 2, 3])
+             * vec.mult(2)
+             * // => (2, 4, 6)
+             *
              */
             mult(s) {
                 return new Vector(this._v.map(d => d * s));
@@ -178,9 +146,17 @@
              * @memberOf ran.linalg.Vector
              * @param {ran.linalg.Vector} vec The vector to add.
              * @returns {ran.linalg.Vector} The sum vector.
+             * @example
+             *
+             * let v = new ran.linalg.Vector([1, 2, 3])
+             * let w = new ran.linalg.Vector([4, 5, 6])
+             * v.add(w)
+             * // => (5, 7, 9)
+             *
              */
             add(vec) {
-                return new Vector(this._v.map((d, i) => d + vec.v[i]));
+                let v = vec.v();
+                return new Vector(this._v.map((d, i) => d + v[i]));
             }
 
             /**
@@ -192,48 +168,21 @@
              * @returns {number} The dot product.
              */
             dot(vec) {
-                return this._v.reduce((sum, d, i) => sum + d * vec.v[i], 0);
+                let v = vec.v();
+                return this._v.reduce((sum, d, i) => sum + d * v[i], 0);
             }
         }
 
         /**
          * Class representing a real square matrix.
-         * The matrix is initialized as a 3x3 identity matrix.
          *
          * @class Matrix
          * @memberOf ran.linalg
+         * @param {(number|Array|ran.linalg.Matrix)=} arg The constructor argument. If it is a number, it sets the
+         * linear dimension of the matrix. If it is an array of arrays, the matrix is initialized with the array
+         * elements. If it is another matrix, it is copied to this matrix. If not specified, a 3x3 identity matrix is
+         * created.
          * @constructor
-         * @private
-         */
-        /**
-         * Class representing a real square matrix.
-         * The matrix is initialized as an identity matrix of the specified dimension.
-         *
-         * @class Matrix
-         * @memberOf ran.linalg
-         * @param {number} dim The linear dimension of the matrix.
-         * @constructor
-         * @private
-         */
-        /**
-         * Class representing a real square matrix.
-         * The matrix is by the elements of the specified array.
-         *
-         * @class Matrix
-         * @memberOf ran.linalg
-         * @param {Array[]} elems The array of arrays containing the matrix elements.
-         * @constructor
-         * @private
-         */
-        /**
-         * Class representing a real square matrix.
-         * The matrix is copied from the specified matrix.
-         *
-         * @class Matrix
-         * @memberOf ran.linalg
-         * @param {ran.linalg.Matrix} dim The matrix to copy elements from.
-         * @constructor
-         * @private
          */
         class Matrix {
             constructor(arg) {
@@ -252,27 +201,14 @@
             }
 
             /**
-             * Array of array containing the matrix elements.
+             * Returns the matrix as an array of arrays.
              *
-             * @property {Array[]} m
+             * @method m
              * @memberOf ran.linalg.Matrix
+             * @returns {Array[]} The matrix in an array of array representation.
              */
-            set m(x) {
-                this._m = x;
-            }
-
-            get m() {
+            m() {
                 return this._m.map(d => d.slice());
-            }
-
-            /**
-             * Property representing the linear dimension of the matrix.
-             *
-             * @property {number} dim
-             * @memberOf ran.linalg.Matrix
-             */
-            get dim() {
-                return this._m.length;
             }
 
             /**
@@ -296,19 +232,36 @@
             /**
              * Returns the transpose of the matrix.
              *
+             * @example
+             * let M = new ran.linalg.Matrix(2);
+             * M.ij(0, 1) = 3;
+             * // M = [[1, 3], [0, 1]]
+             *
              * @method t
              * @memberOf ran.linalg.Matrix
              * @returns {ran.linalg.Matrix} The transposed matrix.
              */
             t() {
-                let n = this.dim,
+                let n = this._m.length,
                     r = new Matrix(n);
-                for (let i=0; i<n; i++) {
-                    for (let j=0; j<n; j++) {
-                        r.ij(i, j, this.m[j][i]);
+                for (let i = 0; i < n; i++) {
+                    for (let j = 0; j < n; j++) {
+                        r.ij(i, j, this._m[j][i]);
                     }
                 }
                 return r;
+            }
+
+            /**
+             * Performs an operation on the matrix element-wise.
+             *
+             * @method f
+             * @memberOf ran.linalg.Matrix
+             * @param {Function} func Function to apply on each element.
+             * @returns {ran.linalg.Matrix} The transformed matrix.
+             */
+            f(func) {
+                return new Matrix(this._m.map(row => row.map(d => func(d))));
             }
 
             /**
@@ -320,7 +273,20 @@
              * @returns {ran.linalg.Matrix} The scaled matrix.
              */
             scale(s) {
-                return new Matrix(this._m.map(d => d.map(dd => dd*s)));
+                return this.f(x => x*s);
+            }
+
+            /**
+             * Adds another matrix to the current matrix.
+             *
+             * @method add
+             * @memberOf ran.linalg.Matrix
+             * @param {ran.linalg.Matrix} mat The matrix to add.
+             * @returns {ran.linalg.Matrix} The sum of the two matrices.
+             */
+            add(mat) {
+                let m = mat.m();
+                return new Matrix(this._m.map((row, i) => row.map((d, j) => d + m[i][j])));
             }
 
             /**
@@ -332,13 +298,14 @@
              * @returns {ran.linalg.Matrix} The product matrix.
              */
             mult(mat) {
-                let n = this.dim;
+                let m = mat.m();
+                let n = this._m.length;
                 let r = new Matrix(n);
                 for (let i=0; i<n; i++) {
                     for (let j=0; j<n; j++) {
                         let rij = 0;
                         for (let k=0; k<n; k++) {
-                            rij += this.ij(i, k) * mat.ij(k, j);
+                            rij += this.ij(i, k) * m[k][j];
                         }
                         r.ij(i, j, rij);
                     }
@@ -363,11 +330,12 @@
              *
              * @method ldl
              * @memberOf ran.linalg.Matrix
-             * @returns {{D: ran.linalg.Matrix, L: ran.linalg.Matrix}} Object containing the D and L matrices.
+             * @returns {Object} Object containing two properties: {D} and {L} representing the corresponding matrices
+             * in the LDL decomposition.
              */
             ldl() {
                 // Init D, L
-                let n = this.dim,
+                let n = this._m.length,
                     D = new Matrix(n),
                     L = new Matrix(n);
 
@@ -396,6 +364,11 @@
                 };
             }
         }
+
+        return {
+            Vector: Vector,
+            Matrix: Matrix
+        };
     })();
 
     /**
@@ -409,7 +382,7 @@
         /**
          * Maximum number of iterations in function approximations.
          *
-         * @const {number} _MAX_ITER
+         * @var {number} _MAX_ITER
          * @memberOf ran.special
          * @private
          */
@@ -418,7 +391,7 @@
         /**
          * Error tolerance in function approximations.
          *
-         * @const {number} _EPSILON
+         * @var {number} _EPSILON
          * @memberOf ran.special
          * @private
          */
@@ -978,7 +951,7 @@
              *
              * @method sample
              * @methodOf ran.dist.Distribution
-             * @param {number} n Number of variates to generate. If not specified, a single value is returned.
+             * @param {number=} n Number of variates to generate. If not specified, a single value is returned.
              * @returns {(number|Array)} Single sample or an array of samples.
              */
             sample(n) {
@@ -1032,12 +1005,12 @@
             /**
              * The cumulative hazard function.
              *
-             * @method cumulativeHazard
+             * @method cHazard
              * @methodOf ran.dist.Distribution
              * @param {number} x Value to evaluate cumulative hazard at.
              * @returns {number} The cumulative hazard.
              */
-            cumulativeHazard(x) {
+            cHazard(x) {
                 return -Math.log(this.survival(x));
             }
 
@@ -1603,7 +1576,7 @@
         /**
          * Generator for [Poisson distribution]{@link https://en.wikipedia.org/wiki/Poisson_distribution}.
          *
-         * @class poisson
+         * @class Poisson
          * @memberOf ran.dist
          * @param {number} lambda Mean of the distribution.
          * @constructor
@@ -1773,21 +1746,167 @@
     })();
 
     /**
+     * Namespace containing various statistical methods and metrics.
+     *
+     * @namespace stat
+     * @memberOf ran
+     */
+    let stat = (function() {
+        /**
+         * Class representing a covariance matrix.
+         * The elements are accumulated sequentially and the covariance is computed from historical values.
+         *
+         * @class Cov
+         * @memberOf ran.stat
+         * @param {number} dimension The linear dimension of the covariance. Default is 1.
+         * @constructor
+         */
+        class Cov {
+            constructor(dimension = 1) {
+                this.dim = dimension;
+                this.n = 0;
+                this.x = new Array(this.dim).fill(0);
+                this.xy = Array.from({length: this.dim}, () => new Array(this.dim).fill(0));
+            }
+
+            /**
+             * Resets the covariance to zero.
+             *
+             * @method reset
+             * @memberOf ran.stat.Cov
+             */
+            reset() {
+                this.n = 0;
+                this.x = new Array(this.dim).fill(0);
+                this.xy = Array.from({length: this.dim}, () => new Array(this.dim).fill(0));
+            }
+
+            /**
+             * Updates the covariance with a new observation.
+             *
+             * @method update
+             * @memberOf ran.stat.Cov
+             * @param {Array} x The array containing the components of the new observation.
+             */
+            update(x) {
+                this.x = this.x.map((d, i) => (this.n * d + x[i]) / (this.n + 1));
+                this.xy = this.xy.map((row, i) => row.map((d, j) => (this.n * d + x[i]*x[j]) / (this.n + 1)));
+                this.n++;
+            }
+
+            /**
+             * Computes the current value of the covariance matrix.
+             *
+             * @method compute
+             * @memberOf ran.stat.Cov
+             * @returns {ran.linalg.Matrix} The covariance matrix.
+             */
+            compute() {
+                return new linalg.Matrix(
+                    this.xy.map((row, i) => row.map((d, j) => (d - this.x[i]*this.x[j])))
+                );
+            }
+        }
+
+        /**
+         * Class representing an auto-correlation vector.
+         * The elements are accumulated sequentially and the auto-correlation is computed from historical values.
+         *
+         * @class AC
+         * @memberOf ran.stat
+         * @param {number} dimension The dimension of the auto-correlation. Default is 1.
+         * @param {number} range The maximum lag used in the calculation of the correlation. Default is 100.
+         * @param {number} maxSize The maximum historical data that is stored to compute the correlation. All
+         * observations older than this number are dropped. Default is 10K.
+         * @constructor
+         */
+        class AC {
+            constructor(dimension = 1, range = 100, maxSize = 1e4) {
+                this.dim = dimension;
+                this.range = range;
+                this.maxSize = maxSize;
+                this.history = Array.from({length: dimension}, () => []);
+            }
+
+            /**
+             * Calculates the auto-correlation from a single historical data.
+             *
+             * @method _aci
+             * @memberOf ran.stat.AC
+             * @param {Array} h Array containing the history of a single variable.
+             * @returns {number[]} The auto-correlation vs lag function.
+             * @private
+             */
+            _aci(h) {
+                // Get average
+                let m = h.reduce((s, d) => s + d) / h.length,
+                    m2 = h.reduce((s, d) => s + d*d),
+                    rho = new Array(this.range).fill(0);
+                for (let i = 0; i < h.length; i++) {
+                    for (let r = 0; r < rho.length; r++) {
+                        if (i - r > 0) {
+                            rho[r] += (h[i] - m) * (h[i - r] - m);
+                        }
+                    }
+                }
+
+                return rho.map(function (d) {
+                    return d / (m2 - h.length * m * m);
+                });
+            }
+
+            /**
+             * Resets the auto-correlation history.
+             *
+             * @method reset
+             * @memberOf ran.stat.AC
+             */
+            reset() {
+                this.history = Array.from({length: this.dim}, () => []);
+            }
+
+            /**
+             * Updates the internal history that is used for the calculation of the correlation function.
+             * Also drops old observations.
+             *
+             * @method update
+             * @memberOf ran.stat.AC
+             * @param {Array} x Array of new variables to update history with.
+             */
+            update(x) {
+                this.history.forEach((d, i) => d.push(x[i]));
+                if (this.history[0].length >= this.maxSize) {
+                    this.history.forEach(d => d.shift());
+                }
+            }
+
+            /**
+             * Computes the auto-correlation function based on the current historical data.
+             *
+             * @method compute
+             * @memberOf ran.stat.AC
+             * @returns {Array[]} Array containing the correlation function (correlation vs lag) for each component.
+             */
+            compute() {
+                return this.history.map(d => this._aci(d));
+            }
+        }
+        
+        return {
+            Cov: Cov,
+            AC: AC
+        };
+    })();
+
+    /**
      * A collection of various Monte Carlo methods.
      *
      * @namespace mc
      * @memberOf ran
      */
     let mc = (function() {
-        /**
-         * Calculates the Gelman-Rubin diagnostics for a set of samples.
-         *
-         * @method gr
-         * @memberOf ran.mc
-         * @param {Array} samples Array of samples, where each sample is an array of states.
-         * @param {number=} maxLength Maximum length of the diagnostic function. Default value is 1000.
-         * @returns {Array} Array of G-R diagnostic versus iteration number for each state variable.
-         */
+        const MAX_HISTORY = 1e4;
+
         let gr = (function() {
             /**
              * Calculates the G-R diagnostic for a single set of samples and a specified state dimension.
@@ -1821,6 +1940,15 @@
                 return Math.sqrt(v / w);
             }
 
+            /**
+             * Calculates the Gelman-Rubin diagnostics for a set of samples.
+             *
+             * @method gr
+             * @memberOf ran.mc
+             * @param {Array} samples Array of samples, where each sample is an array of states.
+             * @param {number=} maxLength Maximum length of the diagnostic function. Default value is 1000.
+             * @returns {Array} Array of G-R diagnostic versus iteration number for each state variable.
+             */
             return function(samples, maxLength) {
                 return samples[0][0].map(function(s, j) {
                     return new Array(maxLength || 1000).fill(0).map(function(d, i) {
@@ -1833,138 +1961,12 @@
         })();
 
         /**
-         * Class implementing a multidimensional proposal distribution.
-         * Proposal functions are used to sample new state from the current one.
-         *
-         * @class _Proposal
-         * @memberOf ran.mc
-         * @param {number} dimension Number of dimensions of the state.
-         * @param {number} s0 Initial value of the proposal scale. Default value is 1.
-         * @constructor
-         * @private
-         */
-        let _Proposal = (function (dimension, s0) {
-            // TODO Extend it to arbitrary proposals
-            // TODO save current transition probability to calculate ratio faster
-            /**
-             * Scale parameter of the proposals.
-             *
-             * @var {number} _scale
-             * @memberOf ran.mc._Proposal
-             * @private
-             */
-            let _scale = s0 || 1;
-
-            /**
-             * The array of proposal distributions.
-             *
-             * @var {Array} _g
-             * @memberOf ran.mc._Proposal
-             * @private
-             */
-            let _g = Array.from({length: dimension}, () => new dist.Normal(0, 1));
-
-            /**
-             * Updates one of the proposal distributions.
-             * Either increases or decreases the scale (deviation) parameters. Only one proposal is updated at once.
-             * Depending on the widen parameter, scale values are increased or decreased by 20%.
-             *
-             * @method update
-             * @memberOf ran.mc._Proposal
-             * @param {boolean} widen Whether the proposals should be widened or tightened.
-             * @returns {number} The new scale value after the update.
-             */
-            function update(widen) {
-                // Update proposal scale
-                _scale = widen ? _scale * 1.2 : _scale * 0.8;
-                return _scale;
-            }
-
-            /**
-             * Samples a new state vector based on a current position.
-             *
-             * @method jump
-             * @memberOf ran.mc._Proposal
-             * @param {Array} x Current state vector.
-             * @returns {Array} Next proposed state vector.
-             */
-            function jump(x) {
-                return x.map((d, i) => d + _scale*_g[i].sample());
-            }
-
-            /**
-             * Returns the proposal probability ratio between two states. This is equal to the ratio of the transition
-             * probabilities:
-             *
-             * r = g(x1 | x2) / g(x2 | x1),
-             *
-             * where x1 and x2 are the old and new states.
-             *
-             * @method ratio
-             * @memberOf ran.mc._Proposal
-             * @returns {number} Probability ratio.
-             */
-            function ratio() {
-                return 1;
-            }
-
-            // Public methods
-            return {
-                update: update,
-                sample: jump,
-                ratio: ratio
-            };
-        });
-
-        let _ac = (function() {
-            /**
-             * Calculates auto correlation for a single variable.
-             *
-             * @method _aci
-             * @memberOf ran.mc._ac
-             * @param {Array} h Array of single variables representing the history of one state variable.
-             * @returns {Array} The auto correlation function.
-             * @private
-             */
-            function _aci(h) {
-                // Get average
-                let m = _sum(h) / h.length,
-                    m2 = _sum(h, 2),
-                    rho = new Array(100).fill(0);
-                for (let i = 0; i < h.length; i++) {
-                    for (let r = 0; r < rho.length; r++) {
-                        if (i - r > 0) {
-                            rho[r] += (h[i] - m) * (h[i - r] - m);
-                        }
-                    }
-                }
-
-                return rho.map(function (d) {
-                    return d / (m2 - h.length * m * m);
-                });
-            }
-
-            /**
-             * Calculates the auto correlation function for historical state data.
-             *
-             * @method _ac
-             * @memberOf ran.mc
-             * @param {Array} history Array containing historical state data.
-             * @returns {Array} Array of auto correlation functions for each state variable.
-             * @private
-             */
-            return function(history) {
-                return history.map(function(d) {
-                    return _aci(d);
-                });
-            };
-        })();
-
-        /**
          * Class implementing the [slice sampling]{@link https://en.wikipedia.org/wiki/Slice_sampling} algorithm.
          *
          * Source: R. M. Neal: Slice sampling. The Annals of Statistics, 31 (3): pp 705-767, 2003.
-         * @type {Function}
+         *
+         * @class Slice
+         * @memberOf ran.mc
          */
         let Slice = (function(logDensity, config) {
             let _min = config && typeof config.min !== 'undefined' ? config.min : null,
@@ -2049,402 +2051,389 @@
         });
 
         /**
-         * Class implementing the [Metropolis]{@link https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm}
-         * algorithm.
+         * Class implementing a Markov chain Monte Carlo sampler. MCMC samplers can be used to approximate integrals
+         * by efficiently sampling a density that cannot be normalized or sampled directly.
          *
-         * @class Metropolis
+         * @class MCMC
          * @memberOf ran.mc
          * @param {Function} logDensity The logarithm of the density function to estimate.
-         * @param {Object?} config Object containing the configurations of the sampler. Can be used to continue
-         *                               sampling from a pre-trained sampler. Possible properties:
-         *                               {dim}: Number of state variables (dimension). Default is 1.
-         *                               {x}: Array containing the initial state. Default is a vector of random numbers
-         *                                    between 0 and 1.
-         *                               {min}: Array containing the lower boundary of the state. Default is unset.
-         *                               {max}: Array containing the upper boundary of the state. Default is unset.
-         *                               {scales}: Array containing the initial value of the proposal scales. Default is
-         *                                         a vector of 1s.
-         *                               {samplingRate}: Every n-th state is sampled where n is the sampling rate. Default
-         *                                               is 1.
+         * @param {Object=} config Object describing some configurations. Supported properties:
+         * <ul>
+         *     <li>{dim}: Dimension of the state space to sample. Default is 1.</li>
+         *     <li>{maxHistory}: Maximum length of history for aggregated computations. Default is 1000.</li>
+         * </ul>
+         * @param {Object=} initialState The initial internal state of the sampler. Supported properties: {x} (the
+         * starting state), {samplingRate} (sampling rate) and {internal} for the child class' own internal parameters.
          * @constructor
-         * TODO update this
          */
-        let Metropolis = (function (logDensity, config, initialState) {
-            let _dim = config && typeof config.dim === 'number' ? config.dim : 1,
-                _min = config && typeof config.min !== 'undefined' ? config.min : null,
-                _max = config && typeof config.max !== 'undefined' ? config.max : null;
+        class MCMC {
+            constructor(logDensity, config = {}, initialState = {}) {
+                this.dim = config.dim || 1;
+                this.maxHistory = config.maxHistory || MAX_HISTORY;
+                this.lnp = logDensity;
+                this.x = initialState.x || Array.from({length: self.dim}, Math.random);
+                this.samplingRate = initialState.samplingRate || 1;
+                this.internal = initialState.internal || {};
+                this.history = (function(self) {
+                    let _arr = Array.from({length: self.dim}, () => []);
 
-            // TODO implement asymmetric proposal
-            /**
-             * Current state of the sampler.
-             * This contains all necessary information to continue an interrupted sampling.
-             *
-             * @var {Object} _state
-             * @memberOf ran.mc.Metropolis
-             * @property x Array of last state variables.
-             * @property proposals Array of the scale parameters of the proposal functions.
-             * @property samplingRate Only every n-th states are recorded during sampling, where n is the sampling rate.
-             * @private
-             */
-            let _state = {
-                x: (initialState && initialState.x) || Array.from({length: _dim}, Math.random),
-                proposals: initialState && initialState.proposals || null,
-                samplingRate: initialState && initialState.samplingRate || 1
-            };
+                    return {
+                        get() {
+                            return _arr;
+                        },
+                        update(x) {
+                            // Add new state
+                            _arr.forEach((d, j) => d.push(x[j]));
 
-            /**
-             * The proposal functions for the sampler.
-             *
-             * @var {Object} _proposal
-             * @memberOf ran.mc.Metropolis
-             * @private
-             */
-            let _proposal = new _Proposal(_dim, _state.proposals);
-
-            // TODO make proposal internal
-            let _proposals = Array.from({length: _dim}, () => new dist.Normal(0, 1));
-
-            /**
-             * The last recorded log density.
-             *
-             * @var {number} _lastLnP
-             * @memberOf ran.mc.Metropolis
-             * @private
-             */
-            let _lastLnP = logDensity(_state.x);
-
-            /**
-             * Class representing the statistics of the state variables.
-             *
-             * @class _stats
-             * @memberOf ran.mc.Metropolis
-             * @private
-             */
-            let _stats = (function() {
-                let _n = 0,
-                    _m1 = new Array(_dim).fill(0),
-                    _m2 = new Array(_dim).fill(0);
-
-                // Exposed methods
-                return {
-                    /**
-                     * Returns the variable statistics for each dimension.
-                     *
-                     * @method get
-                     * @memberOf ran.mc.Metropolis._stats
-                     * @returns {{mean: Array, std: Array, cv: Array}}
-                     */
-                    get: function() {
-                        let s = _m2.map(function(d, i) {
-                            return Math.sqrt(d - _m1[i] * _m1[i]);
-                        });
-                        let cv = s.map(function(d, i) {
-                            return d / _m1[i];
-                        });
-                        return {
-                            mean: _m1,
-                            std: s,
-                            cv: cv
-                        };
-                    },
-
-                    /**
-                     * Updates the state statistics.
-                     *
-                     * @method update
-                     * @memberOf ran.mc.Metropolis._stats
-                     * @param {Array} x Current state to update statistics with.
-                     */
-                    update: function(x) {
-                        _m1 = _m1.map(function(d, i) {
-                            return (_n * d + x[i]) / (_n + 1);
-                        });
-                        _m2 = _m2.map(function(d, i) {
-                            return (_n * d + x[i] * x[i]) / (_n + 1);
-                        });
-                        _n++;
-                    }
-                };
-            })();
-
-            /**
-             * Class representing the acceptance rate.
-             *
-             * @class _acceptance
-             * @memberOf ran.mc.Metropolis
-             * @private
-             */
-            let _acceptance = (function() {
-                let _arr = [];
-
-                return {
-                    /**
-                     * Returns the acceptance rate based on the last 1000 iterations.
-                     *
-                     * @method get
-                     * @memberOf ran.mc.Metropolis._acceptance
-                     * @returns {number} Estimated acceptance rate.
-                     */
-                    get: function() {
-                        return _sum(_arr) / _arr.length;
-                    },
-
-                    /**
-                     * Updates acceptance history.
-                     *
-                     * @method update
-                     * @memberOf ran.mc.Metropolis._acceptance
-                     * @param {number} a Last acceptance, 1 if state was accepted, 0 otherwise.
-                     */
-                    update: function(a) {
-                        _arr.push(a);
-                        if (_arr.length > 1e4) {
-                            _arr.shift();
+                            // Remove old state
+                            if (_arr[0].length >= self.maxHistory) {
+                                _arr.forEach(d => d.shift());
+                            }
                         }
-                    }
-                };
-            })();
+                    };
+                })(this);
+                this.acceptance = (function(self) {
+                    let _arr = [];
 
-            /**
-             * Class representing the latest historical data of the states.
-             *
-             * @class _history
-             * @memberOf ran.mc.Metropolis
-             * @private
-             */
-            let _history = (function() {
-                let _arr = Array.from({length: _dim}, () => []);
-
-                return {
-                    /**
-                     * Returns the historical state data.
-                     *
-                     * @method get
-                     * @memberOf ran.mc.Metropolis._history
-                     * @returns {Array} Array of last 1000 states.
-                     */
-                    get: function() {
-                        return _arr;
-                    },
-
-                    /**
-                     * Updates historical data. Only the last 1000 states are stored.
-                     *
-                     * @method update
-                     * @memberOf ran.mc.Metropolis._history
-                     * @param {number} x Last state to update history with.
-                     */
-                    update: function(x) {
-                        // Add new state
-                        _arr.forEach(function(d, j) {
-                            d.push(x[j]);
-                        });
-
-                        // Remove old state
-                        if (_arr[0].length >= 1e4) {
-                            _arr.forEach(function(d) {
-                                d.shift();
-                            });
+                    return {
+                        compute() {
+                            return _sum(_arr) / _arr.length;
+                        },
+                        update(a) {
+                            _arr.push(a);
+                            if (_arr.length > self.maxHistory) {
+                                _arr.shift();
+                            }
                         }
-                    }
-                };
-            })();
-
-            /**
-             * Runs a single iteration of the state update.
-             *
-             * @method _iterate
-             * @memberOf ran.mc.Metropolis
-             * @returns {number} Number indicating the acceptance status. 1 if accepted, 0 otherwise.
-             * @private
-             */
-            function _iterate() {
-                // Pick new state
-                let x1 = _proposal.sample(_state.x);
-
-                // Check boundaries
-                if (_min) {
-                    for (let i = 0; i < x1.length; i++) {
-                        if (x1[i] < _min[i]) {
-                            return 0;
-                        }
-                    }
-                }
-                if (_max) {
-                    for (let i = 0; i < x1.length; i++) {
-                        if (x1[i] > _max[i]) {
-                            return 0;
-                        }
-                    }
-                }
-
-                // Check if new state should be accepted
-                let _newLnP = logDensity(x1);
-                if (Math.random() < _proposal.ratio(_state.x, x1) * Math.exp(_newLnP - _lastLnP)) {
-                    // Update state and last probability
-                    _state.x = x1;
-                    _lastLnP = _newLnP;
-                    _history.update(_state.x);
-                    _stats.update(_state.x);
-                    return 1;
-                } else {
-                    _history.update(_state.x);
-                    _stats.update(_state.x);
-                    return 0;
-                }
+                    };
+                })(this);
             }
 
             /**
-             * Adjusts internal parameters such as proposals and sampling rate.
+             * Returns the internal variables of the class. Must be overridden.
+             *
+             * @method _internal
+             * @memberOf ran.mc.MCMC
+             * @returns {object} Object containing the internal variables.
+             * @private
+             */
+            _internal() {
+                throw Error("MCMC._internal() is not implemented");
+            }
+
+            /**
+             * Performs a single iteration. Must be overridden.
+             *
+             * @method _iter
+             * @memberOf ran.mc.MCMC
+             * @param {Array} x Current state of the Markov chain.
+             * @param {boolean} warmUp Whether iteration takes place during warm-up or not. Default is false.
+             * @returns {{x: Array, accepted: boolean}} Object containing the new state ({x}) and whether it is a
+             * genuinely new state or not ({accepted}).
+             * @private
+             */
+            _iter(x, warmUp = false) {
+                throw Error("MCMC._iter() is not implemented");
+            }
+
+            /**
+             * Adjusts internal parameters. Must be overridden.
              *
              * @method _adjust
-             * @memberOf ran.mc.Metropolis
+             * @memberOf ran.mc.MCMC
+             * @param {Object} i Object containing the result of the last iteration.
              * @private
              */
-            function _adjust() {
-                // Adjust proposal distributions
-                _state.proposals = _proposal.update(_acceptance.get() > 0.234);
-
-                // Adjust sampling rate
-                // Get highest zero point
-                let z = _ac(_history.get()).reduce(function(first, d) {
-                    for (let i=0; i<d.length-1; i++) {
-                        if (Math.abs(d[i]) <= 0.05) {
-                            return Math.max(first, i);
-                        }
-                    }
-                }, 0);
-                // Change sampling rate if zero point is different
-                if (z > _state.samplingRate) {
-                    _state.samplingRate++;
-                } else if (z < _state.samplingRate && _state.samplingRate > 1) {
-                    _state.samplingRate--;
-                }
+            _adjust(i) {
+                throw Error("MCMC._adjust() is not implemented");
             }
 
             /**
-             * Returns the current state of the estimator. The returned object can be used to initialize another estimator
-             * by passing it as the config parameter.
+             * Returns the current state of the sampler. The return value of this method can be passed to a sampler of
+             * the same type to continue a previously warmed up sampler.
              *
              * @method state
-             * @memberOf ran.mc.Metropolis
-             * @returns {Object} Object containing the current internal state of the estimator.
+             * @memberOf ran.mc.MCMC
+             * @returns {Object} Object containing all relevant parameters of the sampler.
              */
-            function state() {
+            state() {
                 return {
-                    x: _state.x.slice(),
-                    proposals: _state.proposals,
-                    samplingRate: _state.samplingRate
+                    x: this.x,
+                    samplingRate: this.samplingRate,
+                    internals: this._internal()
                 };
             }
 
             /**
-             * Returns the state variable statistics.
+             * Computes basic statistics of the sampled state variables based on historical data. Returns mean,
+             * standard deviation and coefficient of variation.
              *
-             * @method stats
-             * @memberOf ran.mc.Metropolis
-             * @returns {{mean: Array, std: Array, cv: Array}} Object containing the arrays of statistics for each state
-             * variable. Statistics calculated are: mean, standard deviation and coefficient of variation.
+             * @method statistics
+             * @memberOf ran.mc.MCMC
+             * @returns {Object[]} Array containing objects for each dimension. Objects contain mean, std and cv.
              */
-            function stats() {
-                return _stats.get();
+            statistics() {
+                return this.history.get().map(h => {
+                    let m = h.reduce((sum, d) => sum + d, 0) / h.length,
+                        s = h.reduce((sum, d) => sum + (d - m) * (d - m), 0) / h.length;
+                    return {
+                        mean: m,
+                        std: s,
+                        cv: s / m
+                    };
+                });
             }
 
             /**
-             * Returns the current acceptance ratio based on the last 1000 iterations.
+             * Computes acceptance rate based on historical data.
              *
              * @method ar
-             * @memberOf ran.mc.Metropolis
-             * @returns {number} Current acceptance ratio.
+             * @memberOf ran.mc.MCMC
+             * @returns {number} The acceptance rate in the last several iterations.
              */
-            function ar() {
-                return _acceptance.get();
+            ar() {
+                return this.acceptance.compute();
             }
 
             /**
-             * Returns the current auto correlation function for each state variable based on the last 1000 iterations.
+             * Computes the auto-correlation function for each dimension based on historical data.
              *
              * @method ac
-             * @memberOf ran.mc.Metropolis
-             * @returns {Array} Array of auto correlation function for each state variable.
+             * @memberOf ran.mc.MCMC
+             * @returns {number[][]} Array containing the correlation function (correlation versus lag) for each
+             * dimension).
              */
-            function ac() {
-                return _ac(_history.get());
+            ac() {
+                //return this._ac.compute();
+                return this.history.get().map(h => {
+                    // Get average
+                    let m = h.reduce((s, d) => s + d) / h.length,
+                        m2 = h.reduce((s, d) => s + d * d),
+                        rho = new Array(100).fill(0);
+                    for (let i = 0; i < h.length; i++) {
+                        for (let r = 0; r < rho.length; r++) {
+                            if (i - r > 0) {
+                                rho[r] += (h[i] - m) * (h[i - r] - m);
+                            }
+                        }
+                    }
+
+                    // Return auto-correlation for each dimension
+                    return rho.map(function (d) {
+                        return d / (m2 - h.length * m * m);
+                    });
+                });
             }
 
             /**
-             * Runs the burn-in phase in batches. During burn-in, some internal parameters such as proposal scales and
-             * sampling rate are adjusted.
+             * Performs a single iteration.
              *
-             * @method burnIn
-             * @memberOf ran.mc.Metropolis
-             * @param {Function=} callback Function to call at each batch of iterations. It is called each time the proposals
-             * are updated (at each batch of state updates). Must accept two arguments: the relative number of batches until
-             * the maximum iterations and the current acceptance rate and the current auto-correlation of the density over
-             * consecutive steps.
-             * @param {number=} maxBatches Maximum number of batches to run. One batch consists of 100 state jump. Default
-             * value is 100.
+             * @method iterate
+             * @memberOf ran.mc.MCMC
+             * @param {Function=} callback Callback to trigger after the iteration.
+             * @param {boolean} warmUp Whether iteration takes place during warm-up or not. Default is false.
+             * @returns {Object} Object containing the new state ({x}) and whether it is a
+             * genuinely new state or not ({accepted}).
              */
-            function burnIn(callback, maxBatches) {
-                // Run until acceptance rate is around 50% or max iterations are reached
-                let bMax = maxBatches || 100;
-                for (let batch = 0; batch <= bMax; batch++) {
+            iterate(callback = null, warmUp = false) {
+                // Get new state
+                let i = this._iter(this.state.x, warmUp);
+
+                // Update accumulators
+                this.history.update(i.x);
+                this.acceptance.update(i.accepted);
+                
+                // Update state
+                this.x = i.x;
+
+                // Callback
+                callback && callback(i.x, i.accepted);
+
+                return i;
+            }
+
+            /**
+             * Carries our the initial warm-up phase of the sampler. During this phase, internal parameters may change
+             * and therefore sampling does not take place. Instead, all relevant variables are adjusted.
+             *
+             * @method warmUp
+             * @memberOf ran.mc.MCMC
+             * @param {Function} callback Callback function to call when an integer percentage of the warm-up is done.
+             * The percentage of the finished batches is passed as a parameter.
+             * @param {number} maxBatches Maximum number of batches for warm-up. Each batch consists of 10K iterations.
+             * Default values i 100.
+             */
+            warmUp(callback, maxBatches = 100) {
+                // Run specified batches
+                for (let batch = 0; batch <= maxBatches; batch++) {
                     // Do some iterations
                     for (let j = 0; j < 1e4; j++) {
-                        _acceptance.update(_iterate());
+                        this._adjust(this.iterate(null, true));
+                        //this._ac.update(this.x);
                     }
 
-                    // Adjust parameters
-                    _adjust();
+                    // Adjust sampling rate
+                    // Get highest zero point
+                    let z = this.ac().reduce((first, d) => {
+                        for (let i=0; i<d.length-1; i++) {
+                            if (Math.abs(d[i]) <= 0.05) {
+                                return Math.max(first, i);
+                            }
+                        }
+                    }, 0);
+                    // Change sampling rate if zero point is different
+                    if (z > this.samplingRate) {
+                        this.samplingRate++;
+                    } else if (z < this.samplingRate && this.samplingRate > 1) {
+                        this.samplingRate--;
+                    }
 
                     // Call optional callback
-                    callback && callback(batch / bMax, _acceptance.get());
+                    callback && callback(100 * batch / maxBatches);
                 }
             }
 
             /**
-             * Collects a batch of samples from the distribution to estimate.
-             * During sampling, no measurement or adjustment is carried out (that is, proposals and sampling rate remain
-             * unchanged), only pure sampling is performed.
+             * Performs the sampling of the target density. Note that during sampling, no parameter adjustment is
+             * taking place.
              *
              * @method sample
-             * @memberOf ran.mc.Metropolis
-             * @param {number=} size Number of samples to collect.
-             * @param {Function=} progress Callback to call at each percentage of the total samples. Must accept one
-             * parameter that is the fraction of samples collected so far.
-             * @returns {Array} Array of the samples states.
+             * @memberOf ran.mc.MCMC
+             * @param {Function} callback Callback function to call when an integer percentage of the samples is
+             * collected. The percentage of the samples already collected is passed as a parameter.
+             * @param {number} size Size of the sampled set. Default is 1000.
+             * @returns {Array}
              */
-            function sample(size, progress) {
-                let iMax = _state.samplingRate * (size || 1e6),
+            sample(callback, size = 1000) {
+                // Calculate total iterations
+                let iMax = this.samplingRate * size,
                     batchSize = iMax / 100,
                     samples = [];
+
+                // Start sampling
                 for (let i=0; i<iMax; i++) {
-                    _iterate();
+                    this.iterate();
 
                     // Adjust occasionally, also send progress status
                     if (i % batchSize === 0) {
-                        progress && progress(i / batchSize);
+                        callback && callback(i / batchSize);
                     }
 
                     // Collect sample
-                    if (i % _state.samplingRate === 0) {
-                        samples.push(_state.x);
+                    if (i % this.samplingRate === 0) {
+                        samples.push(this.x);
                     }
                 }
 
                 return samples;
             }
+        }
 
-            // Pubic methods
-            return {
-                burnIn: burnIn,
-                sample: sample,
-                state: state,
-                stats: stats,
-                ar: ar,
-                ac: ac
-            };
-        });
+        /**
+         * Class implementing the (random walk) [Metropolis]{@link https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm}
+         * algorithm.
+         * Proposals are updated according to the Metropolis-Within-Gibbs procedure as described in:
+         * Jeffrey S Rosenthal: Optimal Proposal Distributions and Adaptive MCMC, in Handbook of Markov Chain Monte Carlo.
+         *
+         * @class RWM
+         * @memberOf ran.mc
+         * @param {Function} logDensity The logarithm of the density function to estimate.
+         * @param {Object=} config MCMC configurations.
+         * @param {Object=} initialState Initial state of the RWM sampler.
+         * @constructor
+         */
+        class RWM extends MCMC {
+            constructor(logDensity, config, initialState) {
+                super(logDensity, config, initialState);
+
+                // Last density value
+                this.lastLnp = this.lnp(this.x);
+
+                // Proposal distributions
+                this.proposal = (function(self) {
+                    let _q = new ran.dist.Normal(0, 1),
+                        _acceptance = new Array(self.dim).fill(0),
+                        _sigma = self.internal.proposal || new Array(self.dim).fill(1),
+                        _ls = _sigma.map(d => Math.log(d)),
+                        _n = 0,
+                        _batch = 0,
+                        _index = 0;
+
+                    return {
+                        jump(x, single) {
+                            return single
+                                ? x.map((d, i) => d + (i === _index ? _q.sample() * _sigma[_index] : 0))
+                                : x.map((d, i) => d + _q.sample() * _sigma[i]);
+                        },
+
+                        update(accepted) {
+                            // Update acceptance for current proposal
+                            accepted && _acceptance[_index]++;
+                            _n++;
+
+                            // If batch is finished, update proposal
+                            if (_n === 100) {
+                                // Update proposal
+                                if (_acceptance[_index] / 100 > 0.44) {
+                                    _ls[_index] += Math.min(0.01, Math.pow(_batch, -0.5));
+                                } else {
+                                    _ls[_index] -= Math.min(0.01, Math.pow(_batch, -0.5));
+                                }
+                                _sigma[_index] = Math.exp(_ls[_index]);
+
+                                // Reset counters and accumulators
+                                _n = 0;
+                                _acceptance[_index] = 0;
+                                _index = (_index + 1) % self.dim;
+                                if (_index === 0) {
+                                    _batch++;
+                                }
+                            }
+                        },
+
+                        scales() {
+                            return _sigma.slice();
+                        }
+                    };
+                })(this);
+            }
+
+            // Internal variables
+            _internal() {
+                return {
+                    proposal: this.proposal.scales()
+                };
+            }
+
+            // Iterator
+            _iter(x, warmUp) {
+                let x1 = this.proposal.jump(this.x, warmUp);
+
+                let newLnp = this.lnp(x1),
+                    accepted = Math.random() < Math.exp(newLnp - this.lastLnp);
+                if (accepted) {
+                    this.lastLnp = newLnp;
+                } else {
+                    x1 = this.x;
+                }
+
+                return {
+                    x: x1,
+                    accepted: accepted
+                };
+            }
+
+            // Adjustment
+            _adjust(i) {
+                this.proposal.update(i.accepted);
+            }
+        }
+
+        class HMC extends MCMC {
+            constructor(logDensity, dLogDensity, config, initialState) {
+                super(logDensity, config, initialState);
+            }
+        }
 
         // TODO rejection sampling with log-concave dist
         // TODO slice sampling
@@ -2461,7 +2450,7 @@
         return {
             gr: gr,
             Slice: Slice,
-            Metropolis: Metropolis
+            RWM: RWM
         };
     })();
 
@@ -2476,10 +2465,11 @@
     // TODO Orstein-Uhlenbeck
     // TODO Gaussian
     // TODO Galton-Watson
-    let process = {};
 
     // Exports
     exports.special = special;
+    exports.stat = stat;
+    exports.linalg = linalg;
     exports.core = core;
     exports.dist = dist;
     exports.mc = mc;

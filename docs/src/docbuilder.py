@@ -179,7 +179,7 @@ class DocBuilder:
             for k, v in attr.items():
                 ltag += " " + k + "='" + v + "'"
             ltag += ">"
-            return ltag + text + "</" + tag + ">"
+            return ltag + text + ("</" + tag + ">" if text != '' else '')
 
         def _menu(n):
             """
@@ -194,30 +194,35 @@ class DocBuilder:
             if b is None or b['private'] or b['ignore']:
                 return ""
 
-            # If method or variable, just add link
-            if b.type() in ['class', 'method', 'var']:
-                return "<a href='#api-%s'>%s</a>" % (b.path(), b.id())
-
-            # If class, add third level group
-            if b.type() == 'class':
-                ret = _tagify('', 'input', {'id': 's3-' + b.path(), 'type': 'checkbox'}) \
-                      + _tagify(b.id(), 'label', {'for': 's3-' + b.path()})
-                sub = ''.join(_menu(c) for c in reversed(self._children(n)))
-                return ret + _tagify(sub, 'div', {'class': 's3'})
+            # If module, add first level group
+            if b.type() == 'module':
+                return _tagify(
+                    ''.join([_menu(c) for c in reversed(self._children(n))]),
+                    'ul', {'class': 'sections'}
+                )
 
             # If namespace, add second level group
             if b.type() == 'namespace':
-                ret = _tagify('', 'input', {'id': 's2-' + b.path(), 'type': 'checkbox'})\
-                       + _tagify(b.id(), 'label', {'for': 's2-' + b.path()})
-                sub = ''.join(_menu(c) for c in reversed(self._children(n)))
-                return ret + _tagify(sub, 'div', {'class': 's2'})
+                return _tagify(
+                    _tagify(b.id(), 'label', {'id': "toc-" + b.id(), 'for': b.id()})
+                    + _tagify('', 'input', {'type': 'checkbox', 'id': b.id()})
+                    + _tagify(''.join([_menu(c) for c in reversed(self._children(n))]), 'ul', {'class': 'methods'}),
+                    'li'
+                )
 
-            # If module, add first level group
-            if b.type() == 'module':
-                ret = _tagify('', 'input', {'id': 's1-' + b.path(), 'type': 'checkbox'}) \
-                      + _tagify(b.id(), 'label', {'for': 's1-' + b.path()})
-                sub = ''.join(_menu(c) for c in reversed(self._children(n)))
-                return ret + _tagify(sub, 'div', {'class': 's1'})
+            if b.type() in ['class']:
+                b_id = '.'.join(b.path().split('.')[1:])
+                return _tagify(
+                    _tagify(b.id(), 'a', {'id': "toc-" + b_id, 'href': '#' + b_id}),
+                    'li'
+                ) + ''.join([_menu(c) for c in reversed(self._children(n))])
+
+            if b.type() in ['method']:
+                b_id = '.'.join(b.path().split('.')[1:])
+                return _tagify(
+                    _tagify('.'.join(b.path().split('.')[2:]), 'a', {'id': "toc-" + b_id, 'href': '#' + b_id}),
+                    'li'
+                )
 
         def _method(b):
             """
@@ -226,10 +231,7 @@ class DocBuilder:
             :param b: Block to make content for.
             :return: HTML content for the method block.
             """
-            name = "<h3 id='api-%s'>%s</h3>\n" % (b.path(), b.id())
-
-            # Build content
-            html = ""
+            content = ""
 
             # Code
             code = ""
@@ -248,41 +250,45 @@ class DocBuilder:
 
                 # Add closing brackets
                 code += ''.join("]" for p in params if 'optional' in p['type']['options'])
-            html += _tagify(b.path() + "(" + code + ")", "pre") + "\n"
+            content += _tagify('.'.join(b.path().split('.')[1:]) + "(" + code + ")", "pre",
+                               {'class': 'title', 'id': '.'.join(b.path().split('.')[1:])})
 
-            # Add description
-            html += "<br>" + _codify(_linkify(b['desc'])) + "\n"
+            # Description
+            content += _tagify(_codify(_linkify(b['desc'])), 'div', {'class': 'desc'})
 
-            # Add parameter description
+            # Parameters
             if len(params) > 0:
+                content += _tagify('Parameters', 'h2')
                 argdesc = _tagify(
-                    _tagify("<th class='fifth'>arg</th><th class='fifth'>type</th><th>description</th>", "tr"),
+                    _tagify(
+                        _tagify('name', 'th', {'class': 'param-name'})
+                        + _tagify('type', 'th', {'class': 'param-type'})
+                        + _tagify('description', 'th', {'class': 'param-desc'}),
+                        "tr"),
                     "thead")
+                rows = ""
                 for p in params:
-                    entry = "<td><i>%s</i></td><td>%s</td>"\
-                               % (p['name'], ' '.join(_tagify(pt, "code") for pt in p['type']['types']))
-                    pdesc = _codify(p['desc'])
-                    for opt in ['optional', 'nullable', 'non nullable']:
-                        if opt in p['type']['options']:
-                            pdesc += " " + _tagify(opt, "code")
-                    argdesc += _tagify(entry + _tagify(pdesc, "td"), "tr")
-                html += "<br>" + _tagify(argdesc, "table") + "\n"
+                    entry = "<td><i>%s</i></td><td class='param-type'>%s</td>"\
+                               % (p['name'], ' '.join(_tagify(pt.split('.')[-1], "code") for pt in p['type']['types']))
+                    rows += _tagify(entry + _tagify(_codify(p['desc']), "td"), "tr")
+                content += _tagify(argdesc + _tagify(rows, 'tbody'), "table")
 
-            # Add return description
+            # Returns
             ret = b['returns']
             if len(ret) > 0:
-                retdesc = _tagify(
-                    _tagify("<th class='fifth'>return</th><th>description</th>", "tr"),
-                    "thead") + _tagify("<td><i>%s</i></td><td>%s</td>"
-                                       % (' '.join(_tagify(rt, "code") for rt in ret[0]['type']['types']),
-                                          ret[0]['desc']), "tr")
-                html += _tagify(_codify(retdesc), "table")
+                content += _tagify('Returns', 'h2')
+                content += _tagify(
+                    _tagify(' '.join(_tagify(rt.split('.')[-1], "code") for rt in ret[0]['type']['types']), 'div', {'class': 'return-type'})
+                    + _tagify(_codify(ret[0]['desc']), 'div', {'class': 'return-desc'}), 'div', {'class': 'returns'})
 
-            # Add override
-            if b['override']:
-                html += "<br>" + "Overrides: " + _codify(_linkify(b['override'][0][0]['name']))
+            # Example
+            examples = b['example']
+            if len(examples) > 0:
+                content += _tagify('Example', 'h2')
+                content += _tagify(_tagify(examples[0]['desc'].strip(), 'code', {'class': 'js example'}), 'pre')
 
-            return name + _tagify(html, "div", {'class': 'card'}) + "<br>"
+            # Return card
+            return _tagify(content, 'div', {'class': 'card'})
 
         # Build tree
         tree = self._build()
@@ -290,6 +296,7 @@ class DocBuilder:
         # Traverse tree
         menu = ""
         main = ""
+        search_list = []
         stack = [tree[tree.keys()[0]]]
         while len(stack) > 0:
             # Get next node
@@ -307,14 +314,16 @@ class DocBuilder:
                     menu += _menu(node)
 
                 # Build main content
-                t = block.type()
-                if t in ['module', 'namespace']:
-                    main += "<h2 id='api-%s'>%s</h2>%s\n" % (block.path(), block.path(), block['desc']) + "<br>"
-                if t in ['class', 'method']:
+                if block.type() in ['class', 'method']:
+                    search_list.append('.'.join(block.path().split('.')[1:]))
                     main += _method(block)
 
             # Put sorted children in the stack
             stack.extend(self._children(node))
+
+        # Add search list
+        main += _tagify('const SEARCH_LIST = [' + ','.join(["'%s'" % x for x in search_list]) + ']',
+                        'script')
 
         with open(filename, 'w') as f:
             with open("docs/template.html", 'r') as temp:
