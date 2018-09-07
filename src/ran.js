@@ -2302,7 +2302,7 @@
              * @param {Function} callback Callback function to call when an integer percentage of the samples is
              * collected. The percentage of the samples already collected is passed as a parameter.
              * @param {number=} size Size of the sampled set. Default is 1000.
-             * @returns {Array}
+             * @returns {Array} Array containing the collected samples.
              */
             sample(callback, size = 1000) {
                 // Calculate total iterations
