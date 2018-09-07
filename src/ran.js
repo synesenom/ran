@@ -2351,7 +2351,7 @@
 
                 // Proposal distributions
                 this.proposal = (function(self) {
-                    let _q = new ran.dist.Normal(0, 1),
+                    let _q = new dist.Normal(0, 1),
                         _acceptance = new Array(self.dim).fill(0),
                         _sigma = self.internal.proposal || new Array(self.dim).fill(1),
                         _ls = _sigma.map(d => Math.log(d)),
