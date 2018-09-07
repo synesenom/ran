@@ -2231,7 +2231,7 @@
              * @method iterate
              * @memberOf ran.mc.MCMC
              * @param {Function=} callback Callback to trigger after the iteration.
-             * @param {boolean} warmUp Whether iteration takes place during warm-up or not. Default is false.
+             * @param {boolean=} warmUp Whether iteration takes place during warm-up or not. Default is false.
              * @returns {Object} Object containing the new state ({x}) and whether it is a
              * genuinely new state or not ({accepted}).
              */
@@ -2260,7 +2260,7 @@
              * @memberOf ran.mc.MCMC
              * @param {Function} callback Callback function to call when an integer percentage of the warm-up is done.
              * The percentage of the finished batches is passed as a parameter.
-             * @param {number} maxBatches Maximum number of batches for warm-up. Each batch consists of 10K iterations.
+             * @param {number=} maxBatches Maximum number of batches for warm-up. Each batch consists of 10K iterations.
              * Default values i 100.
              */
             warmUp(callback, maxBatches = 100) {
@@ -2301,7 +2301,7 @@
              * @memberOf ran.mc.MCMC
              * @param {Function} callback Callback function to call when an integer percentage of the samples is
              * collected. The percentage of the samples already collected is passed as a parameter.
-             * @param {number} size Size of the sampled set. Default is 1000.
+             * @param {number=} size Size of the sampled set. Default is 1000.
              * @returns {Array}
              */
             sample(callback, size = 1000) {
