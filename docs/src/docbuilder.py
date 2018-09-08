@@ -258,7 +258,7 @@ class DocBuilder:
 
             # Parameters
             if len(params) > 0:
-                content += _tagify('Parameters', 'h2')
+                content += _tagify('Parameters', 'h3')
                 argdesc = _tagify(
                     _tagify(
                         _tagify('name', 'th', {'class': 'param-name'})
@@ -276,7 +276,7 @@ class DocBuilder:
             # Returns
             ret = b['returns']
             if len(ret) > 0:
-                content += _tagify('Returns', 'h2')
+                content += _tagify('Returns', 'h3')
                 content += _tagify(
                     _tagify(' '.join(_tagify(rt.split('.')[-1], "code") for rt in ret[0]['type']['types']), 'div', {'class': 'return-type'})
                     + _tagify(_codify(ret[0]['desc']), 'div', {'class': 'return-desc'}), 'div', {'class': 'returns'})
@@ -284,7 +284,7 @@ class DocBuilder:
             # Example
             examples = b['example']
             if len(examples) > 0:
-                content += _tagify('Example', 'h2')
+                content += _tagify('Example', 'h3')
                 content += _tagify(_tagify(examples[0]['desc'].strip(), 'code', {'class': 'js example'}), 'pre')
 
             # Return card

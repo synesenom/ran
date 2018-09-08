@@ -23,7 +23,26 @@
     </div>
     {{API_MENU}}
 </aside>
-<main>{{API_CONTENT}}</main>
+<main>
+    <h1>what is this?</h1>
+    <p>
+        A small library for robust generation of various random variates, testing data against distributions, calculating different statistical properties, or sampling unknown distributions using advanced MCMC methods.
+    </p>
+
+    <h1>install in node</h1>
+    <pre class="install"><code class="bash">node install --save ranjs</code></pre>
+
+    <h1>use in browser</h1>
+    <pre class="install"><code class="html">&lt;script type="text/javascript" src="ran.min.js"&gt;&lt;/script&gt;</code></pre>
+
+    <!--<h1>demo</h1>
+    <p>
+        <a href="https://beta.observablehq.com/@synesenom/ranjs-demo">https://beta.observablehq.com/@synesenom/ranjs-demo</a>
+    </p>-->
+
+    <h1>documentation</h1>
+    {{API_CONTENT}}
+</main>
 <script>
     let toc = (function(index) {
         let sections = index.reduce((table, d) => {
