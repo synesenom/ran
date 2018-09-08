@@ -1116,6 +1116,8 @@
             }
 
             _generator() {}
+            _pdf() {}
+            _cdf() {}
 
             /**
              * Generates some random variate.
@@ -1153,7 +1155,9 @@
              * // => 0.07407407407407407
              *
              */
-            pdf(x) {}
+            pdf(x) {
+                return this._pdf(x);
+            }
 
             /**
              * The [cumulative distribution function]{@link https://en.wikipedia.org/wiki/Cumulative_distribution_function}.
@@ -1169,7 +1173,9 @@
              * // => 0.8888888888888888
              *
              */
-            cdf(x) {}
+            cdf(x) {
+                return this._cdf(x);
+            }
 
             /**
              * The [survival function]{@link https://en.wikipedia.org/wiki/Survival_function}.
@@ -1186,7 +1192,7 @@
              *
              */
             survival(x) {
-                return 1 - this.cdf(x);
+                return 1 - this._cdf(x);
             }
 
             /**
@@ -1204,7 +1210,7 @@
              *
              */
             hazard(x) {
-                return this.pdf(x) / this.survival(x);
+                return this._pdf(x) / this.survival(x);
             }
 
             /**
@@ -1241,7 +1247,7 @@
              *
              */
             lnPdf(x) {
-                return Math.log(this.pdf(x));
+                return Math.log(this._pdf(x));
             }
 
             /**
@@ -1293,8 +1299,8 @@
              */
             test(values) {
                 return this.type === "discrete"
-                    ? _chiTest(values, x => this.pdf(x), this.k)
-                    : _ksTest(values, x => this.cdf(x));
+                    ? _chiTest(values, x => this._pdf(x), this.k)
+                    : _ksTest(values, x => this._cdf(x));
             }
         }
 
@@ -1316,20 +1322,20 @@
                 return Math.random() < this.p.p ? 1 : 0;
             }
 
-            /**
-             * Probability density function.
-             *
-             * @method pdf
-             * @memberOf ran.dist.Bernoulli
-             * @param {number} x Value to evaluate distribution at.
-             * @returns {number} The probability density or probability mass.
-             * @ignore
-             */
-            pdf(x) {
+            _pdf(x) {
                 return parseInt(x) === 1 ? this.p.p : 1 - this.p.p;
             }
 
-            cdf(x) {
+            /**
+             * The cumulative distribution function.
+             *
+             * @method cdf
+             * @memberOf ran.dist.Bernoulli
+             * @param {number} x Value to evaluate CDF at.
+             * @returns {number} The cumulative distribution value.
+             * @ignore
+             */
+            _cdf(x) {
                 return x < 0 ? 0 : (parseInt(x) >= 1 ? 1 : 1 - this.p.p);
             }
         }
@@ -1356,20 +1362,11 @@
                 return x / (x + y);
             }
 
-            /**
-             * Probability density function.
-             *
-             * @method pdf
-             * @memberOf ran.dist.Beta
-             * @param {number} x Value to evaluate distribution at.
-             * @returns {number} The probability density or probability mass.
-             * @ignore
-             */
-            pdf(x) {
+            _pdf(x) {
                 return Math.pow(x, this.p.alpha-1) * Math.pow(1-x, this.p.beta-1) / this.c[0];
             }
 
-            cdf(x) {
+            _cdf(x) {
                 return x <= 0 ? 0 : x >=1 ? 1 : special.betaIncomplete(this.p.alpha, this.p.beta, x);
             }
         }
@@ -1428,22 +1425,13 @@
                 }
             }
 
-            /**
-             * Probability density function.
-             *
-             * @method pdf
-             * @memberOf ran.dist.Binomial
-             * @param {number} x Value to evaluate distribution at.
-             * @returns {number} The probability density or probability mass.
-             * @ignore
-             */
-            pdf(x) {
+            _pdf(x) {
                 let xi = parseInt(x);
                 return xi < 0 ? 0 : xi > this.p.n ? 0 : Math.exp(special.gammaLn(this.p.n + 1) - special.gammaLn(xi + 1) - special.gammaLn(this.p.n - xi + 1)
                     + xi * Math.log(this.p.p) + (this.p.n - xi) * Math.log(1 - this.p.p));
             }
 
-            cdf(x) {
+            _cdf(x) {
                 let xi = parseInt(x);
                 return xi <= 0 ? 0 : xi > this.p.n ? 1 : special.betaIncomplete(this.p.n - xi, 1 + xi, 1 - this.p.p);           }
         }
@@ -1469,21 +1457,12 @@
                 return Math.pow((this.c[1] + Math.random() * (this.c[0] - this.c[1])) / (this.c[0] * this.c[1]), -1 / this.p.alpha);
             }
 
-            /**
-             * Probability density function.
-             *
-             * @method pdf
-             * @memberOf ran.dist.BoundedPareto
-             * @param {number} x Value to evaluate distribution at.
-             * @returns {number} The probability density or probability mass.
-             * @ignore
-             */
-            pdf(x) {
+            _pdf(x) {
                 return (x < this.p.xmin || x > this.p.xmax) ? 0
                     : this.p.alpha * Math.pow(this.p.xmin / x, this.p.alpha) / (x * this.c[2]);
             }
 
-            cdf(x) {
+            _cdf(x) {
                 return x < this.p.xmin ? 0 : (x > this.p.xmax ? 1 : (1 - this.c[0] * Math.pow(x, -this.p.alpha)) / (1 - this.c[0] / this.c[1]));
             }
         }
@@ -1583,21 +1562,12 @@
                     return this.c[1][i];
             }
 
-            /**
-             * Probability density function.
-             *
-             * @method pdf
-             * @memberOf ran.dist.Custom
-             * @param {number} x Value to evaluate distribution at.
-             * @returns {number} The probability density or probability mass.
-             * @ignore
-             */
-            pdf(x) {
+            _pdf(x) {
                 let xi = parseInt(x);
                 return xi < 0 || xi >= this.p.weights.length ? 0 : this.c[2][xi];
             }
 
-            cdf(x) {
+            _cdf(x) {
                 let xi = parseInt(x);
                 return xi < 0 ? 0 : xi >= this.p.weights.length ? 1 : this.c[3][xi];
             }
@@ -1621,20 +1591,11 @@
                 return this.p.x0;
             }
 
-            /**
-             * Probability density function.
-             *
-             * @method pdf
-             * @memberOf ran.dist.Degenerate
-             * @param {number} x Value to evaluate distribution at.
-             * @returns {number} The probability density or probability mass.
-             * @ignore
-             */
-            pdf(x) {
+            _pdf(x) {
                 return x === this.p.x0 ? 1 : 0;
             }
 
-            cdf(x) {
+            _cdf(x) {
                 return x < this.p.x0 ? 0 : x > this.p.x0 ? 1 : 0.5;
             }
         }
@@ -1657,20 +1618,11 @@
                 return -Math.log(Math.random()) / this.p.lambda;
             }
 
-            /**
-             * Probability density function.
-             *
-             * @method pdf
-             * @memberOf ran.dist.Exponential
-             * @param {number} x Value to evaluate distribution at.
-             * @returns {number} The probability density or probability mass.
-             * @ignore
-             */
-            pdf(x) {
+            _pdf(x) {
                 return this.p.lambda * Math.exp(-this.p.lambda * x);
             }
 
-            cdf(x) {
+            _cdf(x) {
                 return 1 - Math.exp(-this.p.lambda * x);
             }
         }
@@ -1696,20 +1648,11 @@
                 return _gamma(this.p.alpha, this.p.beta);
             }
 
-            /**
-             * Probability density function.
-             *
-             * @method pdf
-             * @memberOf ran.dist.Gamma
-             * @param {number} x Value to evaluate distribution at.
-             * @returns {number} The probability density or probability mass.
-             * @ignore
-             */
-            pdf(x) {
+            _pdf(x) {
                 return x <= .0 ? 0 : this.c[0] * Math.exp((this.p.alpha - 1) * Math.log(x) - this.p.beta * x) / this.c[1];
             }
 
-            cdf(x) {
+            _cdf(x) {
                 return special.gammaLowerIncomplete(this.p.alpha, this.p.beta * x) / this.c[1];
             }
         }
@@ -1764,20 +1707,11 @@
                 return Math.pow(_gamma(this.p.d / this.p.p, this.c[2]), 1 / this.p.p);
             }
 
-            /**
-             * Probability density function.
-             *
-             * @method pdf
-             * @memberOf ran.dist.GeneralizedGamma
-             * @param {number} x Value to evaluate distribution at.
-             * @returns {number} The probability density or probability mass.
-             * @ignore
-             */
-            pdf(x) {
+            _pdf(x) {
                 return x <= .0 ? 0 : this.c[1] * Math.exp((this.p.d - 1) * Math.log(x) - Math.pow(x / this.p.a, this.p.p)) / this.c[0];
             }
 
-            cdf(x) {
+            _cdf(x) {
                 return special.gammaLowerIncomplete(this.p.d / this.p.p, Math.pow(x / this.p.a, this.p.p)) / this.c[0];
             }
         }
@@ -1802,20 +1736,11 @@
                 return 1 / _gamma(this.p.alpha, this.p.beta);
             }
 
-            /**
-             * Probability density function.
-             *
-             * @method pdf
-             * @memberOf ran.dist.InverseGamma
-             * @param {number} x Value to evaluate distribution at.
-             * @returns {number} The probability density or probability mass.
-             * @ignore
-             */
-            pdf(x) {
+            _pdf(x) {
                 return x <= .0 ? 0 : this.c[0] * Math.pow(x, -1 - this.p.alpha) * Math.exp(-this.p.beta / x);
             }
 
-            cdf(x) {
+            _cdf(x) {
                 return 1 - special.gammaLowerIncomplete(this.p.alpha, this.p.beta / x) / this.c[1];
             }
         }
@@ -1840,20 +1765,11 @@
                 return Math.exp(this.p.mu + this.p.sigma * _normal(0, 1));
             }
 
-            /**
-             * Probability density function.
-             *
-             * @method pdf
-             * @memberOf ran.dist.Lognormal
-             * @param {number} x Value to evaluate distribution at.
-             * @returns {number} The probability density or probability mass.
-             * @ignore
-             */
-            pdf(x) {
+            _pdf(x) {
                 return x <= .0 ? 0 : Math.exp(-0.5 * Math.pow((Math.log(x) - this.p.mu) / this.p.sigma, 2)) / (x * this.c[0]);
             }
 
-            cdf(x) {
+            _cdf(x) {
                 return x <= .0 ? 0 : 0.5 * (1 + special.erf((Math.log(x) - this.p.mu) / this.c[1]));
             }
         }
@@ -1878,20 +1794,11 @@
                 return _normal(this.p.mu, this.p.sigma);
             }
 
-            /**
-             * Probability density function.
-             *
-             * @method pdf
-             * @memberOf ran.dist.Normal
-             * @param {number} x Value to evaluate distribution at.
-             * @returns {number} The probability density or probability mass.
-             * @ignore
-             */
-            pdf(x) {
+            _pdf(x) {
                 return Math.exp(-0.5 * Math.pow((x - this.p.mu) / this.p.sigma, 2)) / this.c[0];
             }
 
-            cdf(x) {
+            _cdf(x) {
                 return 0.5 * (1 + special.erf((x - this.p.mu) / this.c[1]));
             }
         }
@@ -1915,20 +1822,11 @@
                 return this.p.xmin / Math.pow(Math.random(), 1 / this.p.alpha);
             }
 
-            /**
-             * Probability density function.
-             *
-             * @method pdf
-             * @memberOf ran.dist.Pareto
-             * @param {number} x Value to evaluate distribution at.
-             * @returns {number} The probability density or probability mass.
-             * @ignore
-             */
-            pdf(x) {
+            _pdf(x) {
                 return x < this.p.xmin ? 0 : this.p.alpha * Math.pow(this.p.xmin / x, this.p.alpha) / x;
             }
 
-            cdf(x) {
+            _cdf(x) {
                 return x < this.p.xmin ? 0 : 1 - Math.pow(this.p.xmin / x, this.p.alpha);
             }
         }
@@ -1980,21 +1878,12 @@
                 }
             }
 
-            /**
-             * Probability density function.
-             *
-             * @method pdf
-             * @memberOf ran.dist.Poisson
-             * @param {number} x Value to evaluate distribution at.
-             * @returns {number} The probability density or probability mass.
-             * @ignore
-             */
-            pdf(x) {
+            _pdf(x) {
                 let xi = parseInt(x);
                 return xi < 0 ? 0 : Math.pow(this.p.lambda, xi) * Math.exp(-this.p.lambda) / special.gamma(xi + 1);
             }
 
-            cdf(x) {
+            _cdf(x) {
                 let xi = parseInt(x);
                 return xi < 0 ? 0 : 1 - special.gammaLowerIncomplete(xi + 1, this.p.lambda) / special.gamma(xi + 1);
             }
@@ -2021,20 +1910,11 @@
                 return Math.random() * this.c[0] + this.p.xmin;
             }
 
-            /**
-             * Probability density function.
-             *
-             * @method pdf
-             * @memberOf ran.dist.UniformContinuous
-             * @param {number} x Value to evaluate distribution at.
-             * @returns {number} The probability density or probability mass.
-             * @ignore
-             */
-            pdf(x) {
+            _pdf(x) {
                 return x < this.p.xmin || x > this.p.xmax ? 0 : 1 / this.c[0];
             }
 
-            cdf(x) {
+            _cdf(x) {
                 return x < this.p.xmin ? 0 : x > this.p.xmax ? 1 : (x - this.p.xmin) / this.c[0];
             }
         }
@@ -2060,21 +1940,12 @@
                 return parseInt(Math.random() * this.c[0]) + this.p.xmin;
             }
 
-            /**
-             * Probability density function.
-             *
-             * @method pdf
-             * @memberOf ran.dist.UniformDiscrete
-             * @param {number} x Value to evaluate distribution at.
-             * @returns {number} The probability density or probability mass.
-             * @ignore
-             */
-            pdf(x) {
+            _pdf(x) {
                 let xi = parseInt(x);
                 return xi < this.p.xmin || xi > this.p.xmax ? 0 : 1 / this.c[0];
             }
 
-            cdf(x) {
+            _cdf(x) {
                 let xi = parseInt(x);
                 return xi < this.p.xmin ? 0 : xi > this.p.xmax ? 1 : (1 + xi - this.p.xmin) / this.c[0];
             }
@@ -2099,20 +1970,11 @@
                 return this.p.lambda * Math.pow(-Math.log(Math.random()), 1 / this.p.k);
             }
 
-            /**
-             * Probability density function.
-             *
-             * @method pdf
-             * @memberOf ran.dist.Weibull
-             * @param {number} x Value to evaluate distribution at.
-             * @returns {number} The probability density or probability mass.
-             * @ignore
-             */
-            pdf(x) {
+            _pdf(x) {
                 return x < 0 ? 0 : (this.p.k / this.p.lambda) * Math.exp((this.p.k - 1) * Math.log(x / this.p.lambda) - Math.pow(x / this.p.lambda, this.p.k));
             }
 
-            cdf(x) {
+            _cdf(x) {
                 return x < 0 ? 0 : 1 - Math.exp(-Math.pow(x / this.p.lambda, this.p.k));
             }
         }
@@ -2479,13 +2341,37 @@
                 this.x = initialState.x || Array.from({length: self.dim}, Math.random);
                 this.samplingRate = initialState.samplingRate || 1;
                 this.internal = initialState.internal || {};
+
+                /**
+                 * State history of the sampler.
+                 *
+                 * @namespace history
+                 * @memberOf ran.mc.MCMC
+                 * @private
+                 */
                 this.history = (function(self) {
                     let _arr = Array.from({length: self.dim}, () => []);
 
                     return {
+                        /**
+                         * Returns the current history.
+                         *
+                         * @method get
+                         * @memberOf ran.mc.MCMC.history
+                         * @return {Array} Current history.
+                         * @private
+                         */
                         get() {
                             return _arr;
                         },
+
+                        /**
+                         * Updates state history with new data.
+                         *
+                         * @method update
+                         * @memberOf ran.mc.MCMC.history
+                         * @param {Array} x Last state to update history with.
+                         */
                         update(x) {
                             // Add new state
                             _arr.forEach((d, j) => d.push(x[j]));
@@ -2497,13 +2383,36 @@
                         }
                     };
                 })(this);
+
+                /**
+                 * Acceptance ratio.
+                 *
+                 * @namespace acceptance
+                 * @memberOf ran.mc.MCMC
+                 * @private
+                 */
                 this.acceptance = (function(self) {
                     let _arr = [];
 
                     return {
+                        /**
+                         * Computes acceptance for the current historical data.
+                         *
+                         * @method compute
+                         * @memberOf ran.mc.MCMC.acceptance
+                         * @return {number} Acceptance ratio.
+                         */
                         compute() {
                             return _sum(_arr) / _arr.length;
                         },
+
+                        /**
+                         * Updates acceptance history with new data.
+                         *
+                         * @method update
+                         * @memberOf ran.mc.MCMC.acceptance
+                         * @param {number} a Acceptance: 1 if last state was accepted, 0 otherwise.
+                         */
                         update(a) {
                             _arr.push(a);
                             if (_arr.length > self.maxHistory) {
@@ -2754,7 +2663,13 @@
                 // Last density value
                 this.lastLnp = this.lnp(this.x);
 
-                // Proposal distributions
+                /**
+                 * Proposal distributions.
+                 *
+                 * @namespace proposal
+                 * @memberOf ran.mc.RWM
+                 * @private
+                 */
                 this.proposal = (function(self) {
                     let _q = new dist.Normal(0, 1),
                         _acceptance = new Array(self.dim).fill(0),
@@ -2765,14 +2680,30 @@
                         _index = 0;
 
                     return {
+                        /**
+                         * Samples new state.
+                         * 
+                         * @method jump
+                         * @memberOf ran.mc.RWM.proposal
+                         * @param {Array} x Current state.
+                         * @param {boolean} single Whether only a single dimension should be updated.
+                         * @return {Array} New state.
+                         */
                         jump(x, single) {
                             return single
                                 ? x.map((d, i) => d + (i === _index ? _q.sample() * _sigma[_index] : 0))
                                 : x.map((d, i) => d + _q.sample() * _sigma[i]);
                         },
 
+                        /**
+                         * Updates proposal distributions.
+                         *
+                         * @method update
+                         * @memberOf ran.mc.RWM.proposal
+                         * @param {boolean} accepted Whether last state was accepted.
+                         */
                         update(accepted) {
-                            // Update acceptance for current proposal
+                            // Update acceptance for current dimension
                             accepted && _acceptance[_index]++;
                             _n++;
 
@@ -2796,6 +2727,13 @@
                             }
                         },
 
+                        /**
+                         * Returns the current scales of the proposals.
+                         *
+                         * @method scales
+                         * @memberOf ran.mc.RWM.proposal
+                         * @return {Array} Array of proposal scales.
+                         */
                         scales() {
                             return _sigma.slice();
                         }
