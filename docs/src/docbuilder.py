@@ -191,7 +191,7 @@ class DocBuilder:
             b = n['node']
 
             # Skip private and ignored blocks
-            if b is None or b['private'] or b['ignore']:
+            if b is None or b['private'] or b['ignore'] or b['override']:
                 return ""
 
             # If module, add first level group

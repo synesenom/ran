@@ -89,6 +89,14 @@
          * another vector, it is copied to this vector. If not specified, a 3D vector is created directing in the X
          * axis.
          * @constructor
+         * @example
+         *
+         * let vec1 = new ran.linalg.Vector()
+         * let vec2 = new ran.linalg.Vector(3)
+         * let vec3 = new ran.linalg.Vector([1, 0, 0])
+         * let vec4 = new ran.linalg.Vector(vec1)
+         * // => (1, 0, 0) for all
+         *
          */
         class Vector {
             constructor(arg) {
@@ -114,7 +122,7 @@
              *
              * let vec = new ran.linalg.Vector(3)
              * vec.v()
-             * // => [1, 0, 0]
+             * // => [ 1, 0, 0 ]
              *
              */
             v() {
@@ -166,6 +174,13 @@
              * @memberOf ran.linalg.Vector
              * @param {ran.linalg.Vector} vec Vector to multiply with.
              * @returns {number} The dot product.
+             * @example
+             *
+             * let v = new ran.linalg.Vector([1, 2, 3])
+             * let w = new ran.linalg.Vector([4, 5, 6])
+             * v.dot(w)
+             * // => 32
+             *
              */
             dot(vec) {
                 let v = vec.v();
@@ -183,6 +198,18 @@
          * elements. If it is another matrix, it is copied to this matrix. If not specified, a 3x3 identity matrix is
          * created.
          * @constructor
+         * @example
+         *
+         * let M1 = new ran.linalg.Matrix()
+         * let M2 = new ran.linalg.Matrix(3)
+         * let M3 = new ran.linalg.Matrix([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+         * let M4 = new ran.linalg.Matrix(M1)
+         * //    ┌         ┐
+         * //    │ 1  0  0 │
+         * // => │ 0  1  0 │ for all
+         * //    │ 0  0  1 │
+         * //    └         ┘
+         *
          */
         class Matrix {
             constructor(arg) {
@@ -206,6 +233,14 @@
              * @method m
              * @memberOf ran.linalg.Matrix
              * @returns {Array[]} The matrix in an array of array representation.
+             * @example
+             *
+             * let M = new ran.linalg.Matrix()
+             * M.m()
+             * // => [ [ 1, 0, 0 ]
+             * //      [ 0, 1, 0 ]
+             * //      [ 0, 0, 1 ] ]
+             *
              */
             m() {
                 return this._m.map(d => d.slice());
@@ -220,6 +255,23 @@
              * @param {number} j Column index of the element.
              * @param {number=} s The new value of the element at the {i}-th row and {j}-th column. If not specified,
              * the element at {(i, j)} is returned.
+             * @example
+             *
+             * let M = new ran.linalg.Matrix()
+             *
+             * M.ij(1, 1)
+             * // => 1
+             *
+             * M.ij(1, 2)
+             * // => 0
+             *
+             * M.ij(1, 2, 5)
+             * //    ┌         ┐
+             * //    │ 1  0  0 │
+             * // => │ 0  1  0 │
+             * //    │ 0  5  1 │
+             * //    └         ┘
+             *
              */
             ij(i, j, s) {
                 if (s !== undefined) {
@@ -232,14 +284,18 @@
             /**
              * Returns the transpose of the matrix.
              *
-             * @example
-             * let M = new ran.linalg.Matrix(2);
-             * M.ij(0, 1) = 3;
-             * // M = [[1, 3], [0, 1]]
-             *
              * @method t
              * @memberOf ran.linalg.Matrix
              * @returns {ran.linalg.Matrix} The transposed matrix.
+             * @example
+             *
+             * let M = new ran.linalg.Matrix([[1, 2], [3, 4]])
+             * M.t()
+             * //    ┌      ┐
+             * // => │ 1  3 │
+             * //    │ 2  4 │
+             * //    └      ┘
+             *
              */
             t() {
                 let n = this._m.length,
@@ -259,6 +315,15 @@
              * @memberOf ran.linalg.Matrix
              * @param {Function} func Function to apply on each element.
              * @returns {ran.linalg.Matrix} The transformed matrix.
+             * @example
+             *
+             * let M = new ran.linalg.Matrix([[1, 2], [3, 4]])
+             * M.f(d => d * d)
+             * //    ┌      ┐
+             * // => │ 1  4 │
+             * //    │ 9 16 │
+             * //    └      ┘
+             *
              */
             f(func) {
                 return new Matrix(this._m.map(row => row.map(d => func(d))));
@@ -271,6 +336,15 @@
              * @memberOf ran.linalg.Matrix
              * @param {number} s The scalar to multiply matrix with.
              * @returns {ran.linalg.Matrix} The scaled matrix.
+             * @example
+             *
+             * let M = new ran.linalg.Matrix([[1, 2], [3, 4]])
+             * M.scale(2)
+             * //    ┌      ┐
+             * // => │ 2  4 │
+             * //    │ 6  8 │
+             * //    └      ┘
+             *
              */
             scale(s) {
                 return this.f(x => x*s);
@@ -283,6 +357,16 @@
              * @memberOf ran.linalg.Matrix
              * @param {ran.linalg.Matrix} mat The matrix to add.
              * @returns {ran.linalg.Matrix} The sum of the two matrices.
+             * @example
+             *
+             * let M = new ran.linalg.Matrix([[1, 2], [3, 4]])
+             * let N = new ran.linalg.Matrix([[5, 6], [7, 8]])
+             * M.add(N)
+             * //    ┌        ┐
+             * // => │  6   8 │
+             * //    │ 10  12 │
+             * //    └        ┘
+             *
              */
             add(mat) {
                 let m = mat.m();
@@ -296,6 +380,16 @@
              * @memberOf ran.linalg.Matrix
              * @param {ran.linalg.Matrix} mat Matrix to multiply current matrix with.
              * @returns {ran.linalg.Matrix} The product matrix.
+             * @example
+             *
+             * let M = new ran.linalg.Matrix([[1, 2], [3, 4]])
+             * let N = new ran.linalg.Matrix([[5, 6], [7, 8]])
+             * M.mult(N)
+             * //    ┌        ┐
+             * // => │ 19  22 │
+             * //    │ 43  50 │
+             * //    └        ┘
+             *
              */
             mult(mat) {
                 let m = mat.m();
@@ -320,6 +414,12 @@
              * @memberOf ran.linalg.Matrix
              * @param {ran.linalg.Vector} vec Vector to act matrix on.
              * @returns {ran.linalg.Vector} The mapped vector.
+             * @example
+             *
+             * let M = new ran.linalg.Matrix([[1, 2], [3, 4]])
+             * let v = new ran.linalg.Vector([5, 6])
+             * M.act(v)
+             * // => (17, 39)
              */
             act(vec) {
                 return new Vector(this._m.map(d => vec.dot(new Vector(d))));
@@ -332,6 +432,16 @@
              * @memberOf ran.linalg.Matrix
              * @returns {Object} Object containing two properties: {D} and {L} representing the corresponding matrices
              * in the LDL decomposition.
+             * @example
+             *
+             * let M = new Matrix([[4, 12, -16], [12, 37, -43], [-16, -43, 98]])
+             * M.ldl()
+             * //        ┌          ┐       ┌         ┐
+             * //        │  1  0  0 │       │ 4  0  0 │
+             * // => L = │  3  1  0 │,  D = │ 0  1  0 │
+             * //        │ -4  5  1 │       │ 0  0  9 │
+             * //        └          ┘       └         ┘
+             *
              */
             ldl() {
                 // Init D, L
@@ -365,6 +475,7 @@
             }
         }
 
+        // Exposed classes
         return {
             Vector: Vector,
             Matrix: Matrix
@@ -666,6 +777,24 @@
          * @param {number=} max Upper boundary.
          * @param {number=} n Number of floats to generate.
          * @returns {(number|Array)} Single float or array of random floats.
+         * @example
+         *
+         * ran.core.float()
+         * // => 0.278014086611011
+         *
+         * ran.core.float(2)
+         * // => 1.7201255276155272
+         *
+         * ran.core.float(2, 3)
+         * // => 2.3693449236256185
+         *
+         * ran.core.float(2, 3, 5)
+         * // => [ 2.4310443387740093,
+         * //      2.934333354639414,
+         * //      2.7689523358767127,
+         * //      2.291137165632517,
+         * //      2.5040591952427906 ]
+         *
          */
         function float(min, max, n) {
             if (arguments.length === 0)
@@ -686,6 +815,17 @@
          * @param {number=} max Upper boundary.
          * @param {number=} n Number of integers to generate.
          * @returns {(number|Array)} Single integer or array of random integers.
+         * @example
+         *
+         * ran.core.int(10)
+         * // => 2
+         * 
+         * ran.core.int(10, 20)
+         * //=> 12
+         *
+         * ran.core.int(10, 20, 5)
+         * // => [ 12, 13, 10, 14, 14 ]
+         *
          */
         function int(min, max, n) {
             if (arguments.length === 1)
@@ -702,6 +842,13 @@
          * @param {number=} n Number of elements to sample.
          * @returns {(object|Array)} Single element or array of sampled elements.
          * If array is invalid, null pointer is returned.
+         * @example
+         *
+         * ran.core.choice([1, 2, 3, 4, 5])
+         * // => 2
+         *
+         * ran.core.choice([1, 2, 3, 4, 5], 5)
+         * // => [ 1, 5, 4, 4, 1 ]
          */
         function choice(values, n) {
             if (values === null || values === undefined || values.length === 0)
@@ -718,6 +865,14 @@
          * @param {number=} n Number of characters to sample.
          * @returns {(string|Array)} Random character if n is not given or less than 2, an array of random characters
          * otherwise. If string is empty, null is returned.
+         * @example
+         *
+         * ran.core.char('abcde')
+         * // => 'd'
+         *
+         * ran.core.char('abcde', 5)
+         * // => [ 'd', 'c', 'a', 'a', 'd' ]
+         *
          */
         function char(string, n) {
             if (string === null || string === undefined || string.length === 0)
@@ -732,6 +887,11 @@
          * @memberOf ran.core
          * @param {Array} values Array to shuffle.
          * @returns {Array} The shuffled array.
+         * @example
+         *
+         * ran.core.shuffle([1, 2, 3])
+         * // => [ 2, 3, 1 ]
+         *
          */
         function shuffle(values) {
             let i, tmp, l = values.length;
@@ -754,6 +914,16 @@
          * @param {number=} p Bias (probability of head). If not specified, 0.5 is used.
          * @param {number=} n Number of coins to flip.
          * @returns {(object|Array)} Object of head/tail value or an array of head/tail values.
+         * @example
+         *
+         * ran.core.coin('a', {b: 2})
+         * // => { b: 2 }
+         *
+         * ran.core.coin('a', {b: 2}, 0.9)
+         * // => 'a'
+         *
+         * ran.core.coin('a', {b: 2}, 0.9, 9)
+         * // => [ { b: 2 }, 'a', 'a', 'a', 'a', 'a', 'a', { b: 2 }, 'a' ]
          */
         function coin(head, tail, p, n) {
             let prob = typeof p === 'number' ? p : 0.5;
@@ -929,8 +1099,9 @@
         }
 
         /**
-         * The general distribution generator, all generators are created using this class.
-         * The methods listed for this class are available for all distribution generators.
+         * The general distribution generator, all generators are created using this class. The methods listed for this
+         * class are available for all distribution generators. All examples provided for this class are using a Pareto
+         * distribution.
          *
          * @class Distribution
          * @memberOf ran.dist
@@ -953,6 +1124,16 @@
              * @memberOf ran.dist.Distribution
              * @param {number=} n Number of variates to generate. If not specified, a single value is returned.
              * @returns {(number|Array)} Single sample or an array of samples.
+             * @example
+             *
+             * let pareto = new ran.dist.Pareto(1, 2)
+             * pareto.sample(5)
+             * // => [ 5.619011325146519,
+             * //      1.3142187491180493,
+             * //      1.0513159445581859,
+             * //      1.8124951360943067,
+             * //      1.1694087449301402 ]
+             *
              */
             sample(n) {
                 return _some(() => this._generator(), n);
@@ -965,6 +1146,12 @@
              * @memberOf ran.dist.Distribution
              * @param {number} x Value to evaluate distribution at.
              * @returns {number} The probability density or probability mass.
+             * @example
+             *
+             * let pareto = new ran.dist.Pareto(1, 2)
+             * pareto.pdf(3)
+             * // => 0.07407407407407407
+             *
              */
             pdf(x) {}
 
@@ -975,6 +1162,12 @@
              * @memberOf ran.dist.Distribution
              * @param {number} x Value to evaluate CDF at.
              * @returns {number} The cumulative distribution value.
+             * @example
+             *
+             * let pareto = new ran.dist.Pareto(1, 2)
+             * pareto.cdf(3)
+             * // => 0.8888888888888888
+             *
              */
             cdf(x) {}
 
@@ -985,6 +1178,12 @@
              * @memberOf ran.dist.Distribution
              * @param {number} x Value to evaluate survival function at.
              * @returns {number} The survival value.
+             * @example
+             *
+             * let pareto = new ran.dist.Pareto(1, 2)
+             * pareto.survival(3)
+             * // => 0.11111111111111116
+             *
              */
             survival(x) {
                 return 1 - this.cdf(x);
@@ -997,6 +1196,12 @@
              * @memberOf ran.dist.Distribution
              * @param {number} x Value to evaluate the hazard at.
              * @returns {number} The hazard value.
+             * @example
+             *
+             * let pareto = new ran.dist.Pareto(1, 2)
+             * pareto.hazard(3)
+             * // => 0.6666666666666663
+             *
              */
             hazard(x) {
                 return this.pdf(x) / this.survival(x);
@@ -1009,6 +1214,12 @@
              * @memberOf ran.dist.Distribution
              * @param {number} x Value to evaluate cumulative hazard at.
              * @returns {number} The cumulative hazard.
+             * @example
+             *
+             * let pareto = new ran.dist.Pareto(1, 2)
+             * pareto.cHazard(3)
+             * // => 2.197224577336219
+             *
              */
             cHazard(x) {
                 return -Math.log(this.survival(x));
@@ -1022,6 +1233,12 @@
              * @memberOf ran.dist.Distribution
              * @param {number} x Value to evaluate the log pdf at.
              * @return {number} The logarithmic probability density (or mass).
+             * @example
+             *
+             * let pareto = new ran.dist.Pareto(1, 2)
+             * pareto.lnPdf(3)
+             * // => -2.6026896854443837
+             *
              */
             lnPdf(x) {
                 return Math.log(this.pdf(x));
@@ -1034,6 +1251,19 @@
              * @memberOf ran.dist.Distribution
              * @param {Array} data Array of numbers to calculate log-likelihood for.
              * @return {number} The value of log-likelihood.
+             * @example
+             *
+             * let pareto = new ran.dist.Pareto(1, 2)
+             * let uniform = new ran.dist.UniformContinuous(1, 10);
+             *
+             * let sample1 = pareto.sample(100)
+             * pareto.L(sample1)
+             * // => -104.55926409382
+             *
+             * sample2 = uniform.sample(100)
+             * pareto.L(sample2)
+             * // => -393.1174868780569
+             *
              */
             L(data) {
                 return data.reduce((sum, d) => sum + this.lnPdf(d), 0);
@@ -1047,6 +1277,19 @@
              * @method test
              * @memberOf ran.dist.Distribution
              * @param {Array} values Array of values to test.
+             * @example
+             *
+             * let pareto = new ran.dist.Pareto(1, 2)
+             * let uniform = new ran.dist.UniformContinuous(1, 10);
+             *
+             * let sample1 = pareto.sample(100)
+             * pareto.test(sample1)
+             * // => { statistics: 0.08632443341496943, passed: true }
+             *
+             * sample2 = uniform.sample(100)
+             * pareto.test(sample2)
+             * // => { statistics: 0.632890888159255, passed: false }
+             *
              */
             test(values) {
                 return this.type === "discrete"
@@ -1073,6 +1316,15 @@
                 return Math.random() < this.p.p ? 1 : 0;
             }
 
+            /**
+             * Probability density function.
+             *
+             * @method pdf
+             * @memberOf ran.dist.Bernoulli
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             * @ignore
+             */
             pdf(x) {
                 return parseInt(x) === 1 ? this.p.p : 1 - this.p.p;
             }
@@ -1104,6 +1356,15 @@
                 return x / (x + y);
             }
 
+            /**
+             * Probability density function.
+             *
+             * @method pdf
+             * @memberOf ran.dist.Beta
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             * @ignore
+             */
             pdf(x) {
                 return Math.pow(x, this.p.alpha-1) * Math.pow(1-x, this.p.beta-1) / this.c[0];
             }
@@ -1167,6 +1428,15 @@
                 }
             }
 
+            /**
+             * Probability density function.
+             *
+             * @method pdf
+             * @memberOf ran.dist.Binomial
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             * @ignore
+             */
             pdf(x) {
                 let xi = parseInt(x);
                 return xi < 0 ? 0 : xi > this.p.n ? 0 : Math.exp(special.gammaLn(this.p.n + 1) - special.gammaLn(xi + 1) - special.gammaLn(this.p.n - xi + 1)
@@ -1199,6 +1469,15 @@
                 return Math.pow((this.c[1] + Math.random() * (this.c[0] - this.c[1])) / (this.c[0] * this.c[1]), -1 / this.p.alpha);
             }
 
+            /**
+             * Probability density function.
+             *
+             * @method pdf
+             * @memberOf ran.dist.BoundedPareto
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             * @ignore
+             */
             pdf(x) {
                 return (x < this.p.xmin || x > this.p.xmax) ? 0
                     : this.p.alpha * Math.pow(this.p.xmin / x, this.p.alpha) / (x * this.c[2]);
@@ -1304,6 +1583,15 @@
                     return this.c[1][i];
             }
 
+            /**
+             * Probability density function.
+             *
+             * @method pdf
+             * @memberOf ran.dist.Custom
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             * @ignore
+             */
             pdf(x) {
                 let xi = parseInt(x);
                 return xi < 0 || xi >= this.p.weights.length ? 0 : this.c[2][xi];
@@ -1333,6 +1621,15 @@
                 return this.p.x0;
             }
 
+            /**
+             * Probability density function.
+             *
+             * @method pdf
+             * @memberOf ran.dist.Degenerate
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             * @ignore
+             */
             pdf(x) {
                 return x === this.p.x0 ? 1 : 0;
             }
@@ -1360,6 +1657,15 @@
                 return -Math.log(Math.random()) / this.p.lambda;
             }
 
+            /**
+             * Probability density function.
+             *
+             * @method pdf
+             * @memberOf ran.dist.Exponential
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             * @ignore
+             */
             pdf(x) {
                 return this.p.lambda * Math.exp(-this.p.lambda * x);
             }
@@ -1390,6 +1696,15 @@
                 return _gamma(this.p.alpha, this.p.beta);
             }
 
+            /**
+             * Probability density function.
+             *
+             * @method pdf
+             * @memberOf ran.dist.Gamma
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             * @ignore
+             */
             pdf(x) {
                 return x <= .0 ? 0 : this.c[0] * Math.exp((this.p.alpha - 1) * Math.log(x) - this.p.beta * x) / this.c[1];
             }
@@ -1449,6 +1764,15 @@
                 return Math.pow(_gamma(this.p.d / this.p.p, this.c[2]), 1 / this.p.p);
             }
 
+            /**
+             * Probability density function.
+             *
+             * @method pdf
+             * @memberOf ran.dist.GeneralizedGamma
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             * @ignore
+             */
             pdf(x) {
                 return x <= .0 ? 0 : this.c[1] * Math.exp((this.p.d - 1) * Math.log(x) - Math.pow(x / this.p.a, this.p.p)) / this.c[0];
             }
@@ -1478,6 +1802,15 @@
                 return 1 / _gamma(this.p.alpha, this.p.beta);
             }
 
+            /**
+             * Probability density function.
+             *
+             * @method pdf
+             * @memberOf ran.dist.InverseGamma
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             * @ignore
+             */
             pdf(x) {
                 return x <= .0 ? 0 : this.c[0] * Math.pow(x, -1 - this.p.alpha) * Math.exp(-this.p.beta / x);
             }
@@ -1507,6 +1840,15 @@
                 return Math.exp(this.p.mu + this.p.sigma * _normal(0, 1));
             }
 
+            /**
+             * Probability density function.
+             *
+             * @method pdf
+             * @memberOf ran.dist.Lognormal
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             * @ignore
+             */
             pdf(x) {
                 return x <= .0 ? 0 : Math.exp(-0.5 * Math.pow((Math.log(x) - this.p.mu) / this.p.sigma, 2)) / (x * this.c[0]);
             }
@@ -1536,6 +1878,15 @@
                 return _normal(this.p.mu, this.p.sigma);
             }
 
+            /**
+             * Probability density function.
+             *
+             * @method pdf
+             * @memberOf ran.dist.Normal
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             * @ignore
+             */
             pdf(x) {
                 return Math.exp(-0.5 * Math.pow((x - this.p.mu) / this.p.sigma, 2)) / this.c[0];
             }
@@ -1564,6 +1915,15 @@
                 return this.p.xmin / Math.pow(Math.random(), 1 / this.p.alpha);
             }
 
+            /**
+             * Probability density function.
+             *
+             * @method pdf
+             * @memberOf ran.dist.Pareto
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             * @ignore
+             */
             pdf(x) {
                 return x < this.p.xmin ? 0 : this.p.alpha * Math.pow(this.p.xmin / x, this.p.alpha) / x;
             }
@@ -1620,6 +1980,15 @@
                 }
             }
 
+            /**
+             * Probability density function.
+             *
+             * @method pdf
+             * @memberOf ran.dist.Poisson
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             * @ignore
+             */
             pdf(x) {
                 let xi = parseInt(x);
                 return xi < 0 ? 0 : Math.pow(this.p.lambda, xi) * Math.exp(-this.p.lambda) / special.gamma(xi + 1);
@@ -1653,7 +2022,13 @@
             }
 
             /**
-             * @override ran.dist.Distribution.pdf
+             * Probability density function.
+             *
+             * @method pdf
+             * @memberOf ran.dist.UniformContinuous
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             * @ignore
              */
             pdf(x) {
                 return x < this.p.xmin || x > this.p.xmax ? 0 : 1 / this.c[0];
@@ -1685,6 +2060,15 @@
                 return parseInt(Math.random() * this.c[0]) + this.p.xmin;
             }
 
+            /**
+             * Probability density function.
+             *
+             * @method pdf
+             * @memberOf ran.dist.UniformDiscrete
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             * @ignore
+             */
             pdf(x) {
                 let xi = parseInt(x);
                 return xi < this.p.xmin || xi > this.p.xmax ? 0 : 1 / this.c[0];
@@ -1715,6 +2099,15 @@
                 return this.p.lambda * Math.pow(-Math.log(Math.random()), 1 / this.p.k);
             }
 
+            /**
+             * Probability density function.
+             *
+             * @method pdf
+             * @memberOf ran.dist.Weibull
+             * @param {number} x Value to evaluate distribution at.
+             * @returns {number} The probability density or probability mass.
+             * @ignore
+             */
             pdf(x) {
                 return x < 0 ? 0 : (this.p.k / this.p.lambda) * Math.exp((this.p.k - 1) * Math.log(x / this.p.lambda) - Math.pow(x / this.p.lambda, this.p.k));
             }
@@ -1894,7 +2287,8 @@
                 return this.history.map(d => this._aci(d));
             }
         }
-        
+
+        // Exposed classes
         return {
             Cov: Cov,
             AC: AC

@@ -112,7 +112,7 @@ class DocLine:
         """
 
         # Clean line
-        cleaned_line = re.sub(r'\s+', ' ', line.strip())
+        cleaned_line = line.strip()#re.sub(r'\s+', ' ', line.strip())
 
         # Detect category and tag
         category, tag = self._detect(cleaned_line)
