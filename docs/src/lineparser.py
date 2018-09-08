@@ -163,6 +163,9 @@ class DocLine:
             parsed_line['desc'] = self._extract(cleaned_line, kw, 3, True)
             return parsed_line
 
+        if category == 'text':
+            return parsed_line
+
         return None
 
     def get(self):

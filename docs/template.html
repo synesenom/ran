@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:200,400,700" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="wp.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Cutive+Mono" rel="stylesheet">    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" href="styles/atelier-lakeside-light.css">
+    <script src="highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
     <title>{{NAME}}</title>
     <style>
         span.hl {
@@ -14,53 +17,56 @@
     </style>
 </head>
 <body>
-<input type="checkbox" id="menu">
-<label for="menu" id="open">☰</label>
 <aside>
-    <div class="logo">{{NAME}}</div>
-    <nav>
-        <div>
-            <a href="#what_is_this">what is this?</a>
-
-            <input type="checkbox" id="s1-how_to_use">
-            <label for="s1-how_to_use">how do I use it?</label>
-            <div class="s1">
-                <a href="#htu-browser">browser</a>
-                <a href="#htu-node">node</a>
-            </div>
-
-            <a href="#demo">can I try it?</a>
-
-            <a href="#acknowledgments">acknowledgments</a>
-
-            <input type="checkbox" id="s1-api">
-            <label for="s1-api">api</label>
-            <div class="s1">
-                {{API_MENU}}
-            </div>
-        </div>
-    </nav>
+    <div class="search-bar">
+        <input id="search" type="search" placeholder="search">
+    </div>
+    {{API_MENU}}
 </aside>
-<main>
-    <h1 id="what_is_this">what is this?</h1>
-    <span class="hl">{{NAME}}</span> is a library for generating various random variables in a robust and fast way.
+<main>{{API_CONTENT}}</main>
+<script>
+    let toc = (function(index) {
+        let sections = index.reduce((table, d) => {
+            let entry = d.split('.');
+            let name = entry.shift();
+            table[name] = {
+                n: 0,
+                el: document.getElementById("toc-" + name)
+            };
+            return table;
+        }, {});
+        let entries = index.reduce((table, d) => {
+            let name = d.split('.');
+            let section = name.shift();
+            table[name.join('.')] = {
+                sec: sections[section],
+                el: document.getElementById("toc-" + d)
+            };
+            sections[section].t++;
+            return table;
+        }, {});
+        let idx = Object.keys(entries);
 
-    <h1 id='how_to_use'>how do I use it?</h1>
-    <h2 id="htu-browser">Browser</h2>
-    <pre>&lt;script type="text/javascript" src="{{NAME_SIMPLIFIED}}.min.js"&gt;&lt;/script&gt;</pre>
-    <h2 id="htu-node">Node</h2>
-    <pre>npm install {{NAME}}</pre>
+        function show(keyword) {
+            Object.keys(sections).forEach(d => sections[d].n = 0);
+            idx.forEach(d => {
+                let on = d.toLowerCase().indexOf(keyword) > -1;
+                entries[d].el.style.display = on ? "block" : "none";
+                entries[d].sec.n += on ? 1 : 0;
+            });
+            Object.values(sections).forEach(d => {
+                d.el.style.display = d.n > 0 ? "block" : "none";
+            });
+        }
 
-    <h1 id='demo'>can I try it?</h1>
-    Sure, just take a look at the observable demo notebook <a href="https://beta.observablehq.com/@synesenom/ranjs-demo">here</a>.
+        return {
+            show: show
+        };
+    })(SEARCH_LIST);
 
-    <h1 id="acknowledgments">acknowledgments</h1>
-    The library was built with <a href="https://www.jetbrains.com/webstorm/">WebStorm</a> using Jetbrain's generous open
-    source license.
-
-    <h1 id="api">api</h1>
-    {{API_CONTENT}}
-    <label for="menu" id="exit"></label>
-</main>
+    document.getElementById("search").addEventListener("input", function() {
+        toc.show(this.value);
+    });
+</script>
 </body>
 </html>

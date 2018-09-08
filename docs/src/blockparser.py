@@ -94,6 +94,17 @@ class DocBlock:
             else:
                 raise self.MissingMemberOfError(self._index, self._file)
 
+    def parent(self):
+        if 'memberOf' in self._block:
+            return self._block['memberOf'][0][0]['name'].split('.')[-1]
+        elif 'methodOf' in self._block:
+            return self._block['methodOf'][0][0]['name'].split('.')[-1]
+        else:
+            if 'module' in self._block:
+                return None
+            else:
+                raise self.MissingMemberOfError(self._index, self._file)
+
     def line(self):
         """
         Returns the line index of the block.
@@ -136,6 +147,10 @@ class DocBlock:
                     'type': v[0]['type'],
                      'desc': ' '.join(x['desc'] for x in v)
                      } for v in self._block[item]]
+
+        if item in js.TAGS['text']:
+            return [{'desc': '\n'.join(x['desc'] for x in v if 'desc' in x)}
+                    for v in self._block[item]]
 
         if item not in self._block:
             return None
@@ -236,5 +251,6 @@ class BlockParser:
                 return self._read_block(filename, fp)
             else:
                 return False
+
 
 BlockParser = BlockParser()
