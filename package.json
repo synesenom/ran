@@ -11,7 +11,8 @@
     "mathjs": "^3.20.2",
     "mocha": "^5.2.0",
     "uglify-js": "^3.4.9",
-    "uglify-js-es6": "^2.8.9"
+    "uglify-js-es6": "^2.8.9",
+    "validate-npm-package-name": "^3.0.0"
   },
   "scripts": {
     "test": "mocha --recursive"
