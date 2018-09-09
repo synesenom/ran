@@ -10,6 +10,9 @@
     "jstat": "^1.7.1",
     "mathjs": "^5.1.1",
     "mocha": "^5.2.0",
+    "mocha-lcov-reporter": "^1.3.0",
+    "istanbul": "^0.4.5",
+    "coveralls": "^3.0.2",
     "uglify-js-es6": "^2.8.9",
     "nodemon": "^1.18.4"
   },
@@ -17,7 +20,8 @@
     "docs": "python docs/src/parser.py",
     "build": "node_modules/uglify-js-es6/bin/uglifyjs src/ran.js --output ran.min.js",
     "dev": "node_modules/nodemon/bin/nodemon.js -x 'npm run build' -w src/ran.js",
-    "test": "mocha --recursive"
+    "test": "mocha --recursive",
+    "cover": "istanbul cover _mocha"
   },
   "repository": {
     "type": "git",

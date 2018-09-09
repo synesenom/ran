@@ -105,8 +105,8 @@
                     this._v[0] = 1;
                 } else if (Array.isArray(arg)) {
                     this._v = arg;
-                } else if (typeof arg === 'object' && Array.isArray(arg.v)) {
-                    this._v = arg.v;
+                } else if (typeof arg === 'object' && Array.isArray(arg._v)) {
+                    this._v = arg._v;
                 } else {
                     this._v = [1, 0, 0];
                 }
@@ -267,8 +267,8 @@
                     }
                 } else if (Array.isArray(arg)) {
                     this._m = arg;
-                } else if (typeof arg === 'object' && Array.isArray(arg.m)) {
-                    this._m = arg.m;
+                } else if (typeof arg === 'object' && Array.isArray(arg._m)) {
+                    this._m = arg._m;
                 } else {
                     this._m = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
                 }
@@ -861,7 +861,7 @@
          *
          * ran.core.int(10)
          * // => 2
-         * 
+         *
          * ran.core.int(10, 20)
          * //=> 12
          *
@@ -2605,7 +2605,7 @@
                 // Update accumulators
                 this.history.update(i.x);
                 this.acceptance.update(i.accepted);
-                
+
                 // Update state
                 this.x = i.x;
 
@@ -2731,7 +2731,7 @@
                     return {
                         /**
                          * Samples new state.
-                         * 
+                         *
                          * @method jump
                          * @memberOf ran.mc.RWM.proposal
                          * @param {Array} x Current state.
@@ -2859,9 +2859,8 @@
     // TODO Galton-Watson
 
     // Exports
-    exports.special = special;
-    exports.ts = ts;
     exports.la = la;
+    exports.ts = ts;
     exports.core = core;
     exports.dist = dist;
     exports.mc = mc;
