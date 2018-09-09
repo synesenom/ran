@@ -2652,7 +2652,7 @@
          * @class RWM
          * @memberOf ran.mc
          * @param {Function} logDensity The logarithm of the density function to estimate.
-         * @param {Object=} config MCMC configurations.
+         * @param {Object=} config RWM configurations.
          * @param {Object=} initialState Initial state of the RWM sampler.
          * @constructor
          */
@@ -2772,11 +2772,11 @@
             }
         }
 
-        class HMC extends MCMC {
+        /*class HMC extends MCMC {
             constructor(logDensity, dLogDensity, config, initialState) {
                 super(logDensity, config, initialState);
             }
-        }
+        }*/
 
         // TODO rejection sampling with log-concave dist
         // TODO slice sampling
@@ -2792,7 +2792,7 @@
         // Public methods and classes
         return {
             gr: gr,
-            Slice: Slice,
+            //Slice: Slice,
             RWM: RWM
         };
     })();

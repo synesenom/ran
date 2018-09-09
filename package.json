@@ -8,9 +8,9 @@
   },
   "devDependencies": {
     "jstat": "^1.7.1",
-    "mathjs": "^3.20.2",
-    "mocha": "^3.5.3",
-    "uglify-js": "^3.4.6",
+    "mathjs": "^5.1.1",
+    "mocha": "^5.2.0",
+    "uglify-js": "^3.4.9",
     "uglify-js-es6": "^2.8.9"
   },
   "scripts": {
