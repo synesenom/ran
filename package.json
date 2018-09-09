@@ -21,7 +21,7 @@
     "build": "node_modules/uglify-js-es6/bin/uglifyjs src/ran.js --output ran.min.js",
     "dev": "node_modules/nodemon/bin/nodemon.js -x 'npm run build' -w src/ran.js",
     "test": "mocha --recursive",
-    "cover": "istanbul cover _mocha"
+    "cover": "istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "repository": {
     "type": "git",
