@@ -35,7 +35,7 @@ a:hover {
 
 aside {
     position: absolute;
-    width: calc(300px - 2px);
+    width: calc(200px - 2px);
     top: 0;
     bottom: 0;
     overflow-y: scroll;
@@ -100,10 +100,12 @@ aside .sections input:checked + .methods {
 aside .methods {
     display: block;
     list-style: none;
-    padding: 0 0 0 5px;
+    padding: 0;
+    border-left: 1px solid #ddd;
 }
 
 aside .methods li {
+
 }
 
 aside .methods a,
@@ -112,7 +114,7 @@ aside .methods a:visited {
     text-decoration: none;
     color: #bbb;
     font-family: 'Courier', monospace;
-    font-size: 1em;
+    font-size: 0.8em;
     padding: 4px 8px;
     border: none;
 }
@@ -124,7 +126,7 @@ aside .methods a:hover {
 
 main {
     position: absolute;
-    width: calc(100% - 310px);
+    width: calc(100% - 210px);
     right: 0;
     top: 0;
     bottom: 0;
@@ -217,6 +219,12 @@ td {
     padding: 20px 25px;
     background-color: #f5f5f5;
     border-left: 4px solid royalblue;
+    overflow-x: scroll;
+}
+
+.card .title::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
 .card .desc {
@@ -235,4 +243,10 @@ td {
     width: calc(100% - 100px);
     float: right;
     padding-top: 3px;
+}
+.card .return-desc ul li {
+    margin-top: 10px;
+}
+.card .return-desc ul li:first-child {
+    margin-top: 0;
 }

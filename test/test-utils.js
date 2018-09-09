@@ -89,6 +89,12 @@ let test_utils = (function() {
         return chi2 <= crit;
     }
 
+    function repeat(test, times) {
+        for (let i=0; i<times; i++) {
+            test();
+        }
+    }
+
     /**
      * Performs 10 tests and checks if at least 6 was successful.
      *
@@ -143,6 +149,7 @@ let test_utils = (function() {
         param: param,
         ks_test: ks_test,
         chi_test: chi_test,
+        repeat: repeat,
         trials: trials,
         diff_disc: diff_disc,
         diff_cont: diff_cont

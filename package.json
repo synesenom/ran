@@ -1,7 +1,7 @@
 {
   "name": "ranjs",
   "version": "1.7.4",
-  "description": "Library for generating various random variables",
+  "description": "Library for generating various random variables.",
   "main": "ran.min.js",
   "directories": {
     "test": "test"
@@ -10,10 +10,13 @@
     "jstat": "^1.7.1",
     "mathjs": "^5.1.1",
     "mocha": "^5.2.0",
-    "uglify-js": "^3.4.9",
-    "uglify-js-es6": "^2.8.9"
+    "uglify-js-es6": "^2.8.9",
+    "nodemon": "^1.18.4"
   },
   "scripts": {
+    "docs": "python docs/src/parser.py",
+    "build": "node_modules/uglify-js-es6/bin/uglifyjs src/ran.js --output ran.min.js",
+    "dev": "node_modules/nodemon/bin/nodemon.js -x 'npm run build' -w src/ran.js",
     "test": "mocha --recursive"
   },
   "repository": {
@@ -23,10 +26,13 @@
   "keywords": [
     "random",
     "generator",
-    "distributions"
+    "distributions",
+    "mcmc",
+    "statistics",
+    "test"
   ],
   "author": "Enys Mones <enys.mones@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/synesenom/ran/issues"
   },

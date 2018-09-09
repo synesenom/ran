@@ -75,27 +75,27 @@
     /**
      * Namespaces containing various linear algebra classes and methods.
      *
-     * @namespace linalg
+     * @namespace la
      * @memberOf ran
      */
-    let linalg = (function() {
+    let la = (function() {
         /**
          * Class representing a real vector.
          *
          * @class Vector
-         * @memberOf ran.linalg
-         * @param {(number|Array|ran.linalg.Vector)=} arg The constructor argument. If it is a number, it sets the
+         * @memberOf ran.la
+         * @param {(number|Array|ran.la.Vector)=} arg The constructor argument. If it is a number, it sets the
          * dimension of the vector. If it is an array, the vector is initialized with the array elements. If it is
          * another vector, it is copied to this vector. If not specified, a 3D vector is created directing in the X
          * axis.
          * @constructor
          * @example
          *
-         * let vec1 = new ran.linalg.Vector()
-         * let vec2 = new ran.linalg.Vector(3)
-         * let vec3 = new ran.linalg.Vector([1, 0, 0])
-         * let vec4 = new ran.linalg.Vector(vec1)
-         * // => (1, 0, 0) for all
+         * let vec1 = new ran.la.Vector()
+         * let vec2 = new ran.la.Vector(3)
+         * let vec3 = new ran.la.Vector([1, 0, 0])
+         * let vec4 = new ran.la.Vector(vec1)
+         * // => ( 1, 0, 0 )
          *
          */
         class Vector {
@@ -116,11 +116,11 @@
              * Returns the vector as an array.
              *
              * @method v
-             * @memberOf ran.linalg.Vector
+             * @memberOf ran.la.Vector
              * @returns {Array} The vector as an array.
              * @example
              *
-             * let vec = new ran.linalg.Vector(3)
+             * let vec = new ran.la.Vector(3)
              * vec.v()
              * // => [ 1, 0, 0 ]
              *
@@ -130,20 +130,67 @@
             }
 
             /**
-             * Multiplies this vector with a scalar.
+             * Returns or sets an element of the vector.
              *
-             * @method mult
-             * @memberOf ran.linalg.Vector
-             * @param {number} s Scalar to multiply vector with.
-             * @returns {ran.linalg.Vector} The scaled vector.
+             * @method i
+             * @memberOf ran.la.Vector
+             * @param {number} i Index of the element.
+             * @param {number=} e The new value of the {i}-th element. If not specified, the value at {i} is returned.
              * @example
              *
-             * let vec = new ran.linalg.Vector([1, 2, 3])
-             * vec.mult(2)
-             * // => (2, 4, 6)
+             * let v = new ran.la.Vector()
+             *
+             * v.i(0)
+             * // => 1
+             *
+             * v.i(1)
+             * // => 0
+             *
+             * v.i(1, 2)
+             * // => ( 1, 2, 0 )
              *
              */
-            mult(s) {
+            i(i, e) {
+                if (e !== undefined) {
+                    this._v[i] = e;
+                } else {
+                    return this._v[i];
+                }
+            }
+
+            /**
+             * Performs an operation on the vector element-wise.
+             *
+             * @method f
+             * @memberOf ran.la.Vector
+             * @param {Function} func Function to apply on each element.
+             * @returns {ran.la.Vector} The transformed matrix.
+             * @example
+             *
+             * let v = new ran.la.Vector([1, 2, 3])
+             * v.f(d => d * d)
+             * // => ( 1, 4, 9 )
+             *
+             */
+            f(func) {
+                return new Vector(this._v.map(d => func(d)));
+            }
+
+            /**
+             * Multiplies this vector with a scalar.
+             *
+             * @method scale
+             * @memberOf ran.la.Vector
+             * @param {number} s Scalar to multiply vector with.
+             * @returns {ran.la.Vector} The scaled vector.
+             * @example
+             *
+             * let vec = new ran.la.Vector([1, 2, 3])
+             * vec.scale(2)
+             * // => ( 2, 4, 6 )
+             *
+             */
+            scale(s) {
                 return new Vector(this._v.map(d => d * s));
             }
 
@@ -151,15 +198,15 @@
              * Adds another vector to this vector.
              *
              * @method add
-             * @memberOf ran.linalg.Vector
-             * @param {ran.linalg.Vector} vec The vector to add.
-             * @returns {ran.linalg.Vector} The sum vector.
+             * @memberOf ran.la.Vector
+             * @param {ran.la.Vector} vec The vector to add.
+             * @returns {ran.la.Vector} The sum vector.
              * @example
              *
-             * let v = new ran.linalg.Vector([1, 2, 3])
-             * let w = new ran.linalg.Vector([4, 5, 6])
+             * let v = new ran.la.Vector([1, 2, 3])
+             * let w = new ran.la.Vector([4, 5, 6])
              * v.add(w)
-             * // => (5, 7, 9)
+             * // => ( 5, 7, 9 )
              *
              */
             add(vec) {
@@ -171,13 +218,13 @@
              * Calculates the dot product with another vector.
              *
              * @method dot
-             * @memberOf ran.linalg.Vector
-             * @param {ran.linalg.Vector} vec Vector to multiply with.
+             * @memberOf ran.la.Vector
+             * @param {ran.la.Vector} vec Vector to multiply with.
              * @returns {number} The dot product.
              * @example
              *
-             * let v = new ran.linalg.Vector([1, 2, 3])
-             * let w = new ran.linalg.Vector([4, 5, 6])
+             * let v = new ran.la.Vector([1, 2, 3])
+             * let w = new ran.la.Vector([4, 5, 6])
              * v.dot(w)
              * // => 32
              *
@@ -192,18 +239,18 @@
          * Class representing a real square matrix.
          *
          * @class Matrix
-         * @memberOf ran.linalg
-         * @param {(number|Array|ran.linalg.Matrix)=} arg The constructor argument. If it is a number, it sets the
+         * @memberOf ran.la
+         * @param {(number|Array|ran.la.Matrix)=} arg The constructor argument. If it is a number, it sets the
          * linear dimension of the matrix. If it is an array of arrays, the matrix is initialized with the array
          * elements. If it is another matrix, it is copied to this matrix. If not specified, a 3x3 identity matrix is
          * created.
          * @constructor
          * @example
          *
-         * let M1 = new ran.linalg.Matrix()
-         * let M2 = new ran.linalg.Matrix(3)
-         * let M3 = new ran.linalg.Matrix([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-         * let M4 = new ran.linalg.Matrix(M1)
+         * let M1 = new ran.la.Matrix()
+         * let M2 = new ran.la.Matrix(3)
+         * let M3 = new ran.la.Matrix([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+         * let M4 = new ran.la.Matrix(M1)
          * //    ┌         ┐
          * //    │ 1  0  0 │
          * // => │ 0  1  0 │ for all
@@ -231,11 +278,11 @@
              * Returns the matrix as an array of arrays.
              *
              * @method m
-             * @memberOf ran.linalg.Matrix
+             * @memberOf ran.la.Matrix
              * @returns {Array[]} The matrix in an array of array representation.
              * @example
              *
-             * let M = new ran.linalg.Matrix()
+             * let M = new ran.la.Matrix()
              * M.m()
              * // => [ [ 1, 0, 0 ]
              * //      [ 0, 1, 0 ]
@@ -250,14 +297,14 @@
              * Returns or sets an element of the matrix.
              *
              * @method ij
-             * @memberOf ran.linalg.Matrix
+             * @memberOf ran.la.Matrix
              * @param {number} i Row index of the element.
              * @param {number} j Column index of the element.
-             * @param {number=} s The new value of the element at the {i}-th row and {j}-th column. If not specified,
-             * the element at {(i, j)} is returned.
+             * @param {number=} e The new value of the element at the {i}-th row and {j}-th column. If not specified,
+             * the value at {(i, j)} is returned.
              * @example
              *
-             * let M = new ran.linalg.Matrix()
+             * let M = new ran.la.Matrix()
              *
              * M.ij(1, 1)
              * // => 1
@@ -273,51 +320,24 @@
              * //    └         ┘
              *
              */
-            ij(i, j, s) {
-                if (s !== undefined) {
-                    this._m[i][j] = s;
+            ij(i, j, e) {
+                if (e !== undefined) {
+                    this._m[i][j] = e;
                 } else {
                     return this._m[i][j];
                 }
             }
 
             /**
-             * Returns the transpose of the matrix.
-             *
-             * @method t
-             * @memberOf ran.linalg.Matrix
-             * @returns {ran.linalg.Matrix} The transposed matrix.
-             * @example
-             *
-             * let M = new ran.linalg.Matrix([[1, 2], [3, 4]])
-             * M.t()
-             * //    ┌      ┐
-             * // => │ 1  3 │
-             * //    │ 2  4 │
-             * //    └      ┘
-             *
-             */
-            t() {
-                let n = this._m.length,
-                    r = new Matrix(n);
-                for (let i = 0; i < n; i++) {
-                    for (let j = 0; j < n; j++) {
-                        r.ij(i, j, this._m[j][i]);
-                    }
-                }
-                return r;
-            }
-
-            /**
              * Performs an operation on the matrix element-wise.
              *
              * @method f
-             * @memberOf ran.linalg.Matrix
+             * @memberOf ran.la.Matrix
              * @param {Function} func Function to apply on each element.
-             * @returns {ran.linalg.Matrix} The transformed matrix.
+             * @returns {ran.la.Matrix} The transformed matrix.
              * @example
              *
-             * let M = new ran.linalg.Matrix([[1, 2], [3, 4]])
+             * let M = new ran.la.Matrix([[1, 2], [3, 4]])
              * M.f(d => d * d)
              * //    ┌      ┐
              * // => │ 1  4 │
@@ -333,12 +353,12 @@
              * Multiplies the matrix with a scalar.
              *
              * @method scale
-             * @memberOf ran.linalg.Matrix
+             * @memberOf ran.la.Matrix
              * @param {number} s The scalar to multiply matrix with.
-             * @returns {ran.linalg.Matrix} The scaled matrix.
+             * @returns {ran.la.Matrix} The scaled matrix.
              * @example
              *
-             * let M = new ran.linalg.Matrix([[1, 2], [3, 4]])
+             * let M = new ran.la.Matrix([[1, 2], [3, 4]])
              * M.scale(2)
              * //    ┌      ┐
              * // => │ 2  4 │
@@ -354,13 +374,13 @@
              * Adds another matrix to the current matrix.
              *
              * @method add
-             * @memberOf ran.linalg.Matrix
-             * @param {ran.linalg.Matrix} mat The matrix to add.
-             * @returns {ran.linalg.Matrix} The sum of the two matrices.
+             * @memberOf ran.la.Matrix
+             * @param {ran.la.Matrix} mat The matrix to add.
+             * @returns {ran.la.Matrix} The sum of the two matrices.
              * @example
              *
-             * let M = new ran.linalg.Matrix([[1, 2], [3, 4]])
-             * let N = new ran.linalg.Matrix([[5, 6], [7, 8]])
+             * let M = new ran.la.Matrix([[1, 2], [3, 4]])
+             * let N = new ran.la.Matrix([[5, 6], [7, 8]])
              * M.add(N)
              * //    ┌        ┐
              * // => │  6   8 │
@@ -377,13 +397,13 @@
              * Multiplies the matrix with another matrix (from the right).
              *
              * @method mult
-             * @memberOf ran.linalg.Matrix
-             * @param {ran.linalg.Matrix} mat Matrix to multiply current matrix with.
-             * @returns {ran.linalg.Matrix} The product matrix.
+             * @memberOf ran.la.Matrix
+             * @param {ran.la.Matrix} mat Matrix to multiply current matrix with.
+             * @returns {ran.la.Matrix} The product matrix.
              * @example
              *
-             * let M = new ran.linalg.Matrix([[1, 2], [3, 4]])
-             * let N = new ran.linalg.Matrix([[5, 6], [7, 8]])
+             * let M = new ran.la.Matrix([[1, 2], [3, 4]])
+             * let N = new ran.la.Matrix([[5, 6], [7, 8]])
              * M.mult(N)
              * //    ┌        ┐
              * // => │ 19  22 │
@@ -399,7 +419,7 @@
                     for (let j=0; j<n; j++) {
                         let rij = 0;
                         for (let k=0; k<n; k++) {
-                            rij += this.ij(i, k) * m[k][j];
+                            rij += this._m[i][k] * m[k][j];
                         }
                         r.ij(i, j, rij);
                     }
@@ -408,28 +428,50 @@
             }
 
             /**
+             * Returns the transpose of the matrix.
+             *
+             * @method t
+             * @memberOf ran.la.Matrix
+             * @returns {ran.la.Matrix} The transposed matrix.
+             * @example
+             *
+             * let M = new ran.la.Matrix([[1, 2], [3, 4]])
+             * M.t()
+             * //    ┌      ┐
+             * // => │ 1  3 │
+             * //    │ 2  4 │
+             * //    └      ┘
+             *
+             */
+            t() {
+                return new Matrix(this._m[0].map((col, i) => this._m.map(row => row[i])));
+            }
+
+            /**
              * Multiplies a vector with the matrix (acts this matrix on a vector).
              *
              * @method act
-             * @memberOf ran.linalg.Matrix
-             * @param {ran.linalg.Vector} vec Vector to act matrix on.
-             * @returns {ran.linalg.Vector} The mapped vector.
+             * @memberOf ran.la.Matrix
+             * @param {ran.la.Vector} vec Vector to act matrix on.
+             * @returns {ran.la.Vector} The mapped vector.
              * @example
              *
-             * let M = new ran.linalg.Matrix([[1, 2], [3, 4]])
-             * let v = new ran.linalg.Vector([5, 6])
+             * let M = new ran.la.Matrix([[1, 2], [3, 4]])
+             * let v = new ran.la.Vector([5, 6])
              * M.act(v)
-             * // => (17, 39)
+             * // => ( 17, 39 )
+             *
              */
             act(vec) {
                 return new Vector(this._m.map(d => vec.dot(new Vector(d))));
             }
 
             /**
-             * Performs the LDL decomposition of the matrix.
+             * Performs the [LDL decomposition]{@link https://en.wikipedia.org/wiki/Cholesky_decomposition} of the
+             * matrix.
              *
              * @method ldl
-             * @memberOf ran.linalg.Matrix
+             * @memberOf ran.la.Matrix
              * @returns {Object} Object containing two properties: {D} and {L} representing the corresponding matrices
              * in the LDL decomposition.
              * @example
@@ -1196,7 +1238,7 @@
             }
 
             /**
-             * The hazard function.
+             * The [hazard function]{@link https://en.wikipedia.org/wiki/Failure_rate}.
              *
              * @method hazard
              * @memberOf ran.dist.Distribution
@@ -1214,7 +1256,7 @@
             }
 
             /**
-             * The cumulative hazard function.
+             * The [cumulative hazard function]{@link https://en.wikipedia.org/wiki/Survival_analysis#Hazard_function_and_cumulative_hazard_function}.
              *
              * @method cHazard
              * @memberOf ran.dist.Distribution
@@ -1232,13 +1274,13 @@
             }
 
             /**
-             * The logarithmic probability density function. For discrete distributions, this is the logarithm of the
-             * probability mass function.
+             * The [logarithmic probability density function]{@link https://en.wikipedia.org/wiki/Log_probability}.
+             * For discrete distributions, this is the logarithm of the probability mass function.
              *
              * @method logPdf
              * @memberOf ran.dist.Distribution
              * @param {number} x Value to evaluate the log pdf at.
-             * @return {number} The logarithmic probability density (or mass).
+             * @returns {number} The logarithmic probability density (or mass).
              * @example
              *
              * let pareto = new ran.dist.Pareto(1, 2)
@@ -1251,7 +1293,8 @@
             }
 
             /**
-             * The log-likelihood of the current distribution based on some data.
+             * The [log-likelihood]{@link https://en.wikipedia.org/wiki/Likelihood_function#Log-likelihood} of the
+             * current distribution based on some data.
              *
              * @method L
              * @memberOf ran.dist.Distribution
@@ -1276,13 +1319,19 @@
             }
 
             /**
-             * Tests if an array of values are from the specified distribution.
-             * For discrete distributions it uses the chi square test, whereas for continuous distributions
-             * the Kolmogorov-Smirnov test is used.
+             * Tests if an array of values is sampled from the specified distribution. For discrete distributions this
+             * method uses &chi;<sup>2</sup> test, whereas for continuous distributions it uses the Kolmogorov-Smirnov test.
              *
              * @method test
              * @memberOf ran.dist.Distribution
              * @param {Array} values Array of values to test.
+             * @returns {Object} Object with two properties representing the result of the test:
+             * <ul>
+             *     <li>{statistics}: The &chi;<sup>2</sup> or D statistics depending on whether the distribution is discrete or
+             *     continuous.</li>
+             *     <li>{passed}: Whether the sample passed the null hypothesis that it is sampled from the current
+             *     distribution.</li>
+             * </ul>
              * @example
              *
              * let pareto = new ran.dist.Pareto(1, 2)
@@ -1469,7 +1518,7 @@
 
         /**
          * Generator for custom distribution, using the
-         * [alias table method]{@link http://www.keithschwarz.com/darts-dice-coins} method.
+         * [alias table method]{@link http://www.keithschwarz.com/darts-dice-coins}.
          *
          * @class Custom
          * @memberOf ran.dist
@@ -2004,18 +2053,18 @@
     })();
 
     /**
-     * Namespace containing various statistical methods and metrics.
+     * Namespace containing various exposed methods related to time series
      *
-     * @namespace stat
+     * @namespace ts
      * @memberOf ran
      */
-    let stat = (function() {
+    let ts = (function() {
         /**
-         * Class representing a covariance matrix.
+         * Class representing the aggregate covariance matrix of a time series.
          * The elements are accumulated sequentially and the covariance is computed from historical values.
          *
          * @class Cov
-         * @memberOf ran.stat
+         * @memberOf ran.ts
          * @param {number} dimension The linear dimension of the covariance. Default is 1.
          * @constructor
          */
@@ -2031,7 +2080,7 @@
              * Resets the covariance to zero.
              *
              * @method reset
-             * @memberOf ran.stat.Cov
+             * @memberOf ran.ts.Cov
              */
             reset() {
                 this.n = 0;
@@ -2043,7 +2092,7 @@
              * Updates the covariance with a new observation.
              *
              * @method update
-             * @memberOf ran.stat.Cov
+             * @memberOf ran.ts.Cov
              * @param {Array} x The array containing the components of the new observation.
              */
             update(x) {
@@ -2056,11 +2105,11 @@
              * Computes the current value of the covariance matrix.
              *
              * @method compute
-             * @memberOf ran.stat.Cov
-             * @returns {ran.linalg.Matrix} The covariance matrix.
+             * @memberOf ran.ts.Cov
+             * @returns {ran.la.Matrix} The covariance matrix.
              */
             compute() {
-                return new linalg.Matrix(
+                return new la.Matrix(
                     this.xy.map((row, i) => row.map((d, j) => (d - this.x[i]*this.x[j])))
                 );
             }
@@ -2071,7 +2120,7 @@
          * The elements are accumulated sequentially and the auto-correlation is computed from historical values.
          *
          * @class AC
-         * @memberOf ran.stat
+         * @memberOf ran.ts
          * @param {number} dimension The dimension of the auto-correlation. Default is 1.
          * @param {number} range The maximum lag used in the calculation of the correlation. Default is 100.
          * @param {number} maxSize The maximum historical data that is stored to compute the correlation. All
@@ -2090,7 +2139,7 @@
              * Calculates the auto-correlation from a single historical data.
              *
              * @method _aci
-             * @memberOf ran.stat.AC
+             * @memberOf ran.ts.AC
              * @param {Array} h Array containing the history of a single variable.
              * @returns {number[]} The auto-correlation vs lag function.
              * @private
@@ -2117,7 +2166,7 @@
              * Resets the auto-correlation history.
              *
              * @method reset
-             * @memberOf ran.stat.AC
+             * @memberOf ran.ts.AC
              */
             reset() {
                 this.history = Array.from({length: this.dim}, () => []);
@@ -2128,7 +2177,7 @@
              * Also drops old observations.
              *
              * @method update
-             * @memberOf ran.stat.AC
+             * @memberOf ran.ts.AC
              * @param {Array} x Array of new variables to update history with.
              */
             update(x) {
@@ -2142,7 +2191,7 @@
              * Computes the auto-correlation function based on the current historical data.
              *
              * @method compute
-             * @memberOf ran.stat.AC
+             * @memberOf ran.ts.AC
              * @returns {Array[]} Array containing the correlation function (correlation vs lag) for each component.
              */
             compute() {
@@ -2811,8 +2860,8 @@
 
     // Exports
     exports.special = special;
-    exports.stat = stat;
-    exports.linalg = linalg;
+    exports.ts = ts;
+    exports.la = la;
     exports.core = core;
     exports.dist = dist;
     exports.mc = mc;

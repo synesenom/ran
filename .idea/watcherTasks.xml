@@ -1,24 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="ProjectTasksOptions">
-    <TaskOptions isEnabled="true">
-      <option name="arguments" value="$FileName$ -m -o ../$FileNameWithoutExtension$.min.js" />
-      <option name="checkSyntaxErrors" value="true" />
-      <option name="description" />
-      <option name="exitCodeBehavior" value="ERROR" />
-      <option name="fileExtension" value="js" />
-      <option name="immediateSync" value="true" />
-      <option name="name" value="UglifyJS" />
-      <option name="output" value="$FileNameWithoutExtension$.min.js" />
-      <option name="outputFilters">
-        <array />
-      </option>
-      <option name="outputFromStdout" value="false" />
-      <option name="program" value="$PROJECT_DIR$/node_modules/uglify-js-es6/bin/uglifyjs" />
-      <option name="scopeName" value="Module 'ran'" />
-      <option name="trackOnlyRoot" value="true" />
-      <option name="workingDir" value="$FileDir$" />
-      <envs />
-    </TaskOptions>
-  </component>
+  <component name="ProjectTasksOptions" suppressed-tasks="Babel" />
 </project>
