@@ -1,95 +1,102 @@
 const utils = require('../test/test-utils').test_utils;
 const dist = require('../src/ran').dist;
+const core = require('../src/ran').core;
 
 const LAPS = 1000;
 const MAX_AVG_DIFF = 1e-3;
+// TODO fix pdf - cdf comparison and increase range for Lognormal
 const GENERATORS = {
     Bernoulli: {
         g: function() {
-            return new dist.Bernoulli(utils.param.prob());
+            return new dist.Bernoulli(core.float());
         }
     },
     Beta: {
         g: function() {
-            return new dist.Beta(utils.param.scale(), utils.param.scale());
+            return new dist.Beta(core.float(0.1, 5), core.float(0.1, 5));
         }
     },
     Binomial: {
         g: function() {
-            return new dist.Binomial(parseInt(utils.param.scale() * 100), utils.param.prob());
+            return new dist.Binomial(core.int(10, 100), core.float());
         }
     },
     BoundedPareto: {
         g: function() {
-            const xmin = utils.param.scale();
-            return new dist.BoundedPareto(xmin, xmin+utils.param.scale(), utils.param.shape());
+            const xmin = core.float(0.1, 5);
+            return new dist.BoundedPareto(xmin, xmin + core.float(1, 5), core.float(0.1, 3));
         }
     },
     Chi2: {
         g: function() {
-            return new dist.Chi2(utils.param.degree());
+            return new dist.Chi2(core.int(1, 10));
+        }
+    },
+    Custom: {
+        g: function() {
+            return new dist.Custom(Array.from({length: core.int(10, 1000)}, Math.random));
         }
     },
     Erlang: {
         g: function() {
-            return new dist.Erlang(utils.param.degree(), utils.param.rate());
+            return new dist.Erlang(core.int(1, 10), core.float(0.1, 5));
         }
     },
     Exponential: {
         g: function() {
-            return new dist.Exponential(utils.param.rate());
+            return new dist.Exponential(core.float(0.1, 5));
         }
     },
     Gamma: {
         g: function() {
-            return new dist.Gamma(utils.param.shape(), utils.param.rate());
+            return new dist.Gamma(core.float(0.1, 10), core.float(0.1, 3));
         }
     },
     GeneralizedGamma: {
         g: function() {
-            return new dist.GeneralizedGamma(utils.param.rate(), utils.param.shape(), utils.param.scale());
+            return new dist.GeneralizedGamma(core.float(0.1, 10), core.float(0.1, 5), core.float(0.1, 10));
         }
     },
     InverseGamma: {
         g: function() {
-            return new dist.InverseGamma(utils.param.shape(), utils.param.scale());
+            return new dist.InverseGamma(core.float(0.1, 5), core.float(0.1, 3));
         }
     },
     Lognormal: {
         g: function() {
-            return new dist.Lognormal(utils.param.scale(), utils.param.shape());
+            return new dist.Lognormal(core.float(-2, 2), core.float(0.1, 5));
         }
     },
     Normal: {
         g: function() {
-            return new dist.Normal(utils.param.scale(), utils.param.shape());
+            return new dist.Normal(core.float(-5, 5), core.float(0.1, 10));
         }
     },
     Pareto: {
         g: function() {
-            return new dist.Pareto(utils.param.scale(), utils.param.shape());
+            return new dist.Pareto(core.float(0.1, 5), core.float(0.1, 10));
         }
     },
     Poisson: {
         g: function() {
-            return new dist.Poisson(utils.param.rate() * 10);
+            return new dist.Poisson(core.float(0.1, 20));
         }
     },
     UniformContinuous: {
         g: function() {
-            const xmin = utils.param.scale();
-            return new dist.UniformContinuous(xmin, xmin + utils.param.rate());
+            const xmin = core.float(10);
+            return new dist.UniformContinuous(xmin, xmin + core.float(0.1, 100));
         }
     },
     UniformDiscrete: {
         g: function() {
-            const xmin = parseInt(utils.param.scale()*40);
-            return new dist.UniformDiscrete(xmin, xmin + parseInt(50*utils.param.scale()));
+            const xmin = core.int(10);
+            return new dist.UniformDiscrete(xmin, xmin + core.int(10, 100));
         }
     },
     Weibull: {
         g: function() {
-            return new dist.Weibull(utils.param.scale(), utils.param.shape());
+            return new dist.Weibull(core.float(0.1, 10), core.float(0.1, 10));
         }
     }
 };
@@ -193,14 +200,8 @@ describe('dist', function() {
     describe('Custom', function () {
         it('should return an array of custom distributed values', function () {
             utils.trials(function () {
-                const k = parseInt(Math.random() * 5 + 3);
-                let weights = [];
-                for (let i = 0; i < k; i++) {
-                    let w = Math.random() * 10;
-                    weights.push(w);
-                }
-                const custom = new dist.Custom(weights);
-                return utils.chi_test(custom.sample(LAPS), x => custom.pdf(x), k - 1);
+                const custom = GENERATORS.Custom.g();
+                return utils.chi_test(custom.sample(LAPS), x => custom.pdf(x), 0);
             });
         });
         it('sum of pmf should give cdf', function () {

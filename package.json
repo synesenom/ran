@@ -20,7 +20,8 @@
     "docs": "python docs/src/parser.py",
     "build": "node_modules/uglify-js-es6/bin/uglifyjs src/ran.js --output ran.min.js",
     "dev": "node_modules/nodemon/bin/nodemon.js -x 'npm run build' -w src/ran.js",
-    "test": "istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    "test": "istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
+    "test:raw": "mocha --recursive"
   },
   "repository": {
     "type": "git",
