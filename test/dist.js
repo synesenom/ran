@@ -2,7 +2,7 @@ const utils = require('../test/test-utils').test_utils;
 const dist = require('../src/ran').dist;
 const core = require('../src/ran').core;
 
-const LAPS = 1000;
+const LAPS = 100;
 const MAX_AVG_DIFF = 1e-3;
 // TODO fix pdf - cdf comparison and increase range for Lognormal
 const GENERATORS = {
@@ -34,7 +34,7 @@ const GENERATORS = {
     },
     Custom: {
         g: function() {
-            return new dist.Custom(Array.from({length: core.int(10, 1000)}, Math.random));
+            return new dist.Custom(Array.from({length: core.int(10, 100)}, Math.random));
         }
     },
     Erlang: {
