@@ -1,6 +1,6 @@
 const assert = require('assert');
 const utils = require('../test/test-utils').test_utils;
-const core = require('../src/ran').core;
+const core = require('../src/index').core;
 
 const TRIALS = 1;
 const LAPS = 1000;
@@ -13,10 +13,10 @@ function add(dist, value) {
 }
 
 describe('core', function() {
-    describe('float', function () {
+    describe('.float', function () {
         it('should return a random float in [0, 1)', () => {
             utils.trials(() => {
-                const values = Array.from({length: 10*LAPS}, () => core.float());
+                const values = Array.from({length: LAPS}, () => core.float());
                 return utils.ks_test(values, function (x) {
                     return x;
                 });
@@ -26,7 +26,7 @@ describe('core', function() {
         it('should return a random float', () => {
             utils.trials(() => {
                 const max = Math.random() * 200;
-                const values = Array.from({length: 10*LAPS}, () => core.float(max));
+                const values = Array.from({length: LAPS}, () => core.float(max));
                 return utils.ks_test(values, function (x) {
                     return x / max;
                 });
@@ -66,11 +66,11 @@ describe('core', function() {
         });
     });
 
-    describe('int', function () {
+    describe('.int', function () {
         it('should return a random integer', () => {
             utils.trials(() => {
                 const max = Math.floor(Math.random() * 100);
-                const values = Array.from({length: 10*LAPS}, () => core.int(max));
+                const values = Array.from({length: LAPS}, () => core.int(max));
                 return utils.chi_test(values, function () {
                     return 1 / Math.abs(max + 1);
                 }, 1);
@@ -128,7 +128,7 @@ describe('core', function() {
         });
     });
 
-    describe('choice', function () {
+    describe('.choice', function () {
         it('should return null', () => {
             assert.equal(core.choice(), null);
             assert.equal(core.choice(null), null);
@@ -165,7 +165,7 @@ describe('core', function() {
         });
     });
 
-    describe('char', function () {
+    describe('.char', function () {
         it('should return null', () => {
             assert.equal(core.char(), null);
             assert.equal(core.char(null), null);
@@ -191,7 +191,7 @@ describe('core', function() {
         });
     });
 
-    describe('shuffle', function () {
+    describe('.shuffle', function () {
         it('should shuffle an array', function () {
             for (let trial = 0; trial < TRIALS; trial++) {
                 const values = [];
@@ -219,7 +219,7 @@ describe('core', function() {
         });
     });
 
-    describe('coin', function () {
+    describe('.coin', function () {
         it('should return head with some probability', function () {
             utils.trials(function () {
                 const p = Math.random();

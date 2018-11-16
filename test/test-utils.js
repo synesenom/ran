@@ -139,13 +139,25 @@ let test_utils = (function() {
         return dy/n;
     }
 
+    function diff_mesh(pdf, cdf, mesh) {
+        let dy = 0;
+        let int = 0;
+        mesh.forEach(x => {
+            int += pdf(x);
+            dy += Math.abs(cdf(x) - int);
+            //console.log(int, cdf(x), dy);
+        });
+        return dy;
+    }
+
     return {
         ks_test: ks_test,
         chi_test: chi_test,
         repeat: repeat,
         trials: trials,
         diff_disc: diff_disc,
-        diff_cont: diff_cont
+        diff_cont: diff_cont,
+        diff_mesh: diff_mesh
     };
 })();
 

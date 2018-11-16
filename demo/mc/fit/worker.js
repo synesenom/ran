@@ -7,7 +7,7 @@ function beta(data, model) {
 
 self.addEventListener("message", function(event) {
     "use strict";
-    importScripts("../../../ran.min.js", "../../d3.v4.min.js");
+    importScripts("../../../dist/ran.min.js", "../../d3.v4.min.js");
 
     // Generate data
     const DATA_SIZE = 1e4;

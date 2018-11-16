@@ -2,26 +2,27 @@
   "name": "ranjs",
   "version": "1.7.4",
   "description": "Library for generating various random variables.",
-  "main": "ran.min.js",
+  "main": "src/index.js",
   "directories": {
     "test": "test"
   },
   "devDependencies": {
+    "coveralls": "^3.0.2",
+    "istanbul": "^0.4.5",
     "jstat": "^1.7.1",
     "mathjs": "^5.1.1",
     "mocha": "^5.2.0",
     "mocha-lcov-reporter": "^1.3.0",
-    "istanbul": "^0.4.5",
-    "coveralls": "^3.0.2",
-    "uglify-js-es6": "^2.8.9",
-    "nodemon": "^1.18.4"
+    "nodemon": "^1.18.4",
+    "webpack": "^4.25.1",
+    "webpack-cli": "^3.1.2"
   },
   "scripts": {
     "docs": "python docs/src/parser.py",
-    "build": "node_modules/uglify-js-es6/bin/uglifyjs src/ran.js --output ran.min.js",
+    "build": "webpack",
     "dev": "node_modules/nodemon/bin/nodemon.js -x 'npm run build' -w src/ran.js",
     "test": "istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
-    "test:raw": "mocha --recursive"
+    "cover": "istanbul cover _mocha"
   },
   "repository": {
     "type": "git",

@@ -1,6 +1,6 @@
 const assert = require('assert');
 const utils = require('../test/test-utils').test_utils;
-const la = require('../src/ran').la;
+const la = require('../src/index').la;
 
 const EPSILON = 1e-10;
 
@@ -23,25 +23,29 @@ describe('la', () => {
             }, 100);
         });
 
-        it('should return the vector as an array', () => {
-            utils.repeat(() => {
-                let n = 1 + Math.floor(Math.random() * 100);
-                let arr = Array.from({length: n}, () => Math.random());
-                assert.deepEqual(
-                    new la.Vector(arr).v(),
-                    arr
-                );
-            }, 100);
+        describe('.v', () => {
+            it('should return the vector as an array', () => {
+                utils.repeat(() => {
+                    let n = 1 + Math.floor(Math.random() * 100);
+                    let arr = Array.from({length: n}, () => Math.random());
+                    assert.deepEqual(
+                        new la.Vector(arr).v(),
+                        arr
+                    );
+                }, 100);
+            });
         });
 
-        it('should return the i-th element of a vector', () => {
-            let n = 2 + Math.floor(Math.random() * 100);
-            let arr = Array.from({length: n}, () => Math.random());
-            let v = new la.Vector(arr);
-            utils.repeat(() => {
-                let i = Math.floor(Math.random() * n);
-                assert.deepEqual(v.i(i), arr[i]);
-            }, 100);
+        describe('.i', () => {
+            it('should return the i-th element of a vector', () => {
+                let n = 2 + Math.floor(Math.random() * 100);
+                let arr = Array.from({length: n}, () => Math.random());
+                let v = new la.Vector(arr);
+                utils.repeat(() => {
+                    let i = Math.floor(Math.random() * n);
+                    assert.deepEqual(v.i(i), arr[i]);
+                }, 100);
+            });
         });
 
         it('should set the i-th element of a vector', () => {

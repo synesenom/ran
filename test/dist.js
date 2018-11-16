@@ -1,10 +1,9 @@
 const utils = require('../test/test-utils').test_utils;
-const dist = require('../src/ran').dist;
-const core = require('../src/ran').core;
+const dist = require('../src/index').dist;
+const core = require('../src/index').core;
 
 const LAPS = 100;
 const MAX_AVG_DIFF = 1e-3;
-// TODO fix pdf - cdf comparison and increase range for Lognormal
 const GENERATORS = {
     Bernoulli: {
         g: function() {
@@ -16,25 +15,10 @@ const GENERATORS = {
             return new dist.Beta(core.float(0.1, 5), core.float(0.1, 5));
         }
     },
-    Binomial: {
-        g: function() {
-            return new dist.Binomial(core.int(10, 100), core.float());
-        }
-    },
     BoundedPareto: {
         g: function() {
             const xmin = core.float(0.1, 5);
             return new dist.BoundedPareto(xmin, xmin + core.float(1, 5), core.float(0.1, 3));
-        }
-    },
-    Chi2: {
-        g: function() {
-            return new dist.Chi2(core.int(1, 10));
-        }
-    },
-    Custom: {
-        g: function() {
-            return new dist.Custom(Array.from({length: core.int(10, 100)}, Math.random));
         }
     },
     Erlang: {
@@ -79,7 +63,7 @@ const GENERATORS = {
     },
     Poisson: {
         g: function() {
-            return new dist.Poisson(core.float(0.1, 20));
+            return new dist.Poisson(core.float(0.1, 100));
         }
     },
     UniformContinuous: {
@@ -100,6 +84,7 @@ const GENERATORS = {
         }
     }
 };
+
 
 describe('dist', function() {
     describe('Distribution', () => {
@@ -153,16 +138,33 @@ describe('dist', function() {
     });
 
     describe('Binomial', function () {
-        it('should return an array of binomial distributed values', function () {
-            utils.trials(function () {
-                const binomial = GENERATORS.Binomial.g();
-                return utils.chi_test(binomial.sample(LAPS), x => binomial.pdf(x), 2);
+        describe('.sample', () => {
+            it('should return an array of binomial distributed values (low n)', function () {
+                utils.trials(function () {
+                    const binomial = new dist.Binomial(core.int(2, 24), core.float());
+                    return utils.chi_test(binomial.sample(LAPS), x => binomial.pdf(x), 2);
+                });
+            });
+            it('should return an array of binomial distributed values (low mean)', function () {
+                utils.trials(function () {
+                    const binomial = new dist.Binomial(core.int(30, 100), core.float()/105);
+                    return utils.chi_test(binomial.sample(LAPS), x => binomial.pdf(x), 2);
+                });
+            });
+            it('should return an array of binomial distributed values (high n)', function () {
+                utils.trials(function () {
+                    const binomial = new dist.Binomial(core.int(100, 200), core.float());
+                    return utils.chi_test(binomial.sample(LAPS), x => binomial.pdf(x), 2);
+                });
             });
         });
-        it('integral of pdf should give cdf', function () {
-            utils.trials(function () {
-                const binomial = GENERATORS.Binomial.g();
-                return utils.diff_disc(x => binomial.pdf(x), x => binomial.cdf(x), 0, 100) < MAX_AVG_DIFF;
+
+        describe('.cdf', () => {
+            it('integral of pdf should give cdf', function () {
+                utils.trials(function () {
+                    const binomial = new dist.Binomial(core.int(100, 200), core.float());
+                    return utils.diff_disc(x => binomial.pdf(x), x => binomial.cdf(x), 0, 200) < MAX_AVG_DIFF;
+                });
             });
         });
     });
@@ -185,57 +187,72 @@ describe('dist', function() {
     describe('Chi2', function () {
         it('should return an array of chi square distributed values', function () {
             utils.trials(function () {
-                const chi2 = GENERATORS.Chi2.g();
+                const chi2 = new dist.Chi2(core.int(1, 10));
                 return utils.ks_test(chi2.sample(LAPS), x => chi2.cdf(x));
             });
         });
         it('integral of pdf should give cdf', function () {
             utils.trials(function () {
-                const chi2 = GENERATORS.Chi2.g();
+                const chi2 = new dist.Chi2(core.int(1, 10));
                 return utils.diff_cont(x => chi2.pdf(x), x => chi2.cdf(x), 0, 10, 0.01) < MAX_AVG_DIFF;
             });
         });
     });
 
-    describe('Custom', function () {
-        it('should return an array of custom distributed values', function () {
-            utils.trials(function () {
-                const custom = GENERATORS.Custom.g();
+    describe('Custom', () => {
+        it('should return an array of custom distributed values', () => {
+            utils.trials(() => {
+                const custom = new dist.Custom(Array.from({length: core.int(10, 100)}, Math.random));
                 return utils.chi_test(custom.sample(LAPS), x => custom.pdf(x), 0);
             });
         });
-        it('sum of pmf should give cdf', function () {
-            utils.trials(function () {
-                const k = parseInt(Math.random() * 5 + 3);
-                let weights = [];
-                for (let i = 0; i < k; i++) {
-                    let w = Math.random() * 10;
-                    weights.push(w);
-                }
+        it('sum of pmf should give cdf', () => {
+            utils.trials(() => {
+                const weights = Array.from({length: core.int(10, 100)}, Math.random);
                 const custom = new dist.Custom(weights);
                 return utils.diff_disc(x => custom.pdf(x), x => custom.cdf(x), 0, weights.length) < MAX_AVG_DIFF;
             });
         });
     });
 
-    describe('Erlang', function () {
-        it('should return an array of Erlang distributed values', function () {
-            utils.trials(function () {
+    describe('Degenerate', () => {
+        it('should return an array of degenerate distributed values', () => {
+            utils.trials(() => {
+                const x0 = core.float(-10, 10);
+                const degenerate = new dist.Degenerate(x0);
+                const samples = degenerate.sample(LAPS);
+                return samples.reduce((s, d) => s && d === x0, true);
+            });
+        });
+        it('sum of pmf should give cdf', () => {
+            utils.trials(() => {
+                const x0 = core.float(-10, 10);
+                const degenerate = new dist.Degenerate(x0);
+                return utils.diff_mesh(x => degenerate.pdf(x), x => degenerate.cdf(x),
+                    Array.from({length: 201}, (d, i) => x0 + (i-100) / 10)
+                ) < MAX_AVG_DIFF;
+            });
+        });
+    });
+
+    describe('Erlang', () => {
+        it('should return an array of Erlang distributed values', () => {
+            utils.trials(() => {
                 const erlang = GENERATORS.Erlang.g();
                 return utils.ks_test(erlang.sample(LAPS), x => erlang.cdf(x));
             });
         });
-        it('integral of pdf should give cdf', function () {
-            utils.trials(function () {
+        it('integral of pdf should give cdf', () => {
+            utils.trials(() => {
                 const erlang = GENERATORS.Erlang.g();
                 return utils.diff_cont(x => erlang.pdf(x), x => erlang.cdf(x), 0, 10, 0.01) < MAX_AVG_DIFF;
             });
         });
     });
 
-    describe('Exponential', function () {
-        it('should return an array of exponentially distributed values', function () {
-            utils.trials(function () {
+    describe('Exponential', () => {
+        it('should return an array of exponentially distributed values', () => {
+            utils.trials(() => {
                 const exponential = GENERATORS.Exponential.g();
                 return utils.ks_test(exponential.sample(LAPS), x => exponential.cdf(x));
             });
