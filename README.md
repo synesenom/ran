@@ -1,7 +1,13 @@
-[![Build Status](https://travis-ci.org/synesenom/ran.svg?branch=master)](https://travis-ci.org/synesenom/ran)
-[![npm version](https://badge.fury.io/js/ranjs.svg)](https://www.npmjs.com/package/ranjs)
+[![npm](https://img.shields.io/npm/v/ranjs.svg)](https://www.npmjs.com/package/ranjs)
+[![Bundlephobia](https://img.shields.io/bundlephobia/min/ranjs.svg)](https://bundlephobia.com/result?p=ranjs@latest)
+[![Bundlephobia](https://img.shields.io/bundlephobia/minzip/ranjs.svg)](https://bundlephobia.com/result?p=ranjs@latest)
+[![Build Status](https://img.shields.io/travis/synesenom/ran/master.svg)](https://travis-ci.org/synesenom/ran)
+[![npm](https://img.shields.io/npm/dm/ranjs.svg)](https://www.npmjs.com/package/ranjs)
+[![David](https://img.shields.io/david/synesenom/ranjs.svg)](https://david-dm.org/synesenom/ran)
+[![David](https://img.shields.io/david/dev/synesenom/ranjs.svg)](https://david-dm.org/synesenom/ran)
 [![Inline docs](http://inch-ci.org/github/synesenom/ran.svg?branch=master)](http://inch-ci.org/github/synesenom/ran)
-[![Coverage Status](https://coveralls.io/repos/github/synesenom/ran/badge.svg)](https://coveralls.io/github/synesenom/ran)
+[![Coveralls](https://img.shields.io/coveralls/github/synesenom/ran.svg)](https://coveralls.io/github/synesenom/ran)
+[![License](https://img.shields.io/npm/l/ranjs.svg)](https://www.npmjs.com/package/ranjs)
 
 # ranjs
 Library for generating various random variables in a robust and fast way. Beyond random variate generation, `ranjs` provides the following:  

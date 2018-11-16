@@ -26,7 +26,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://synesenom@github.com/synesenom/ran.git"
+    "url": "https://github.com/synesenom/ran"
   },
   "keywords": [
     "random",
@@ -41,8 +41,5 @@
   "bugs": {
     "url": "https://github.com/synesenom/ran/issues"
   },
-  "homepage": "https://synesenom.github.io/ran/",
-  "dependencies": {
-    "npm": "^6.4.1"
-  }
+  "homepage": "https://synesenom.github.io/ran/"
 }
