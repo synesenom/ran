@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.org/synesenom/ran.svg?branch=master)](https://travis-ci.org/synesenom/ran)
 [![npm version](https://badge.fury.io/js/ranjs.svg)](https://www.npmjs.com/package/ranjs)
 [![Inline docs](http://inch-ci.org/github/synesenom/ran.svg?branch=master)](http://inch-ci.org/github/synesenom/ran)
+[![Coverage Status](https://coveralls.io/repos/github/synesenom/ran/badge.svg)](https://coveralls.io/github/synesenom/ran)
 
 # ranjs
 Library for generating various random variables in a robust and fast way. Beyond random variate generation, `ranjs` provides the following:  
