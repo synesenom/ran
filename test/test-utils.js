@@ -83,12 +83,6 @@ let test_utils = (function() {
         return chi2 <= crit;
     }
 
-    function repeat(test, times) {
-        for (let i=0; i<times; i++) {
-            test();
-        }
-    }
-
     /**
      * Performs 10 tests and checks if at least 6 was successful.
      *
@@ -100,6 +94,7 @@ let test_utils = (function() {
         for (let t = 0; t < 10; t++) {
             success += test() ? 1 : 0;
         }
+        console.log(success);
         assert.equal(success >= (complete ? 10 : 6), true);
     }
 
@@ -119,7 +114,7 @@ let test_utils = (function() {
         for (let i=1; i<n; i+=2) {
             s += 4 * func(a + i * h);
         }
-        for (i=2; i<n-1; i+=2) {
+        for (let i=2; i<n-1; i+=2) {
             s += 2 * func(a + i * h);
         }
         return s * h / 3;
@@ -153,7 +148,6 @@ let test_utils = (function() {
     return {
         ks_test: ks_test,
         chi_test: chi_test,
-        repeat: repeat,
         trials: trials,
         diff_disc: diff_disc,
         diff_cont: diff_cont,

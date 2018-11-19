@@ -46,11 +46,6 @@ const GENERATORS = {
             return new dist.InverseGamma(core.float(0.1, 5), core.float(0.1, 3));
         }
     },
-    Lognormal: {
-        g: function() {
-            return new dist.Lognormal(core.float(-2, 2), core.float(0.1, 5));
-        }
-    },
     Normal: {
         g: function() {
             return new dist.Normal(core.float(-5, 5), core.float(0.1, 10));
@@ -153,7 +148,7 @@ describe('dist', function() {
             });
             it('should return an array of binomial distributed values (high n)', function () {
                 utils.trials(function () {
-                    const binomial = new dist.Binomial(core.int(100, 200), core.float());
+                    const binomial = new dist.Binomial(core.int(100, 150), core.float());
                     return utils.chi_test(binomial.sample(LAPS), x => binomial.pdf(x), 2);
                 });
             });
@@ -313,14 +308,14 @@ describe('dist', function() {
     describe('Lognormal', function () {
         it('should return an array of log-normally distributed values', function () {
             utils.trials(function () {
-                const lognormal = GENERATORS.Lognormal.g();
+                const lognormal = new dist.Lognormal(core.float(-2, 2), core.float(0.1, 5));
                 return utils.ks_test(lognormal.sample(LAPS), x => lognormal.cdf(x));
             });
         });
         it('integral of pdf should give cdf', function () {
             utils.trials(function () {
-                const lognormal = GENERATORS.Lognormal.g();
-                return utils.diff_cont(x => lognormal.pdf(x), x => lognormal.cdf(x), 0, 5, 0.01) < MAX_AVG_DIFF;
+                const lognormal = new dist.Lognormal(core.float(-2, 2), core.float(0.1, 5));
+                return utils.diff_cont(x => lognormal.pdf(x), x => lognormal.cdf(x), 0, 5, 0.001) < MAX_AVG_DIFF;
             });
         });
     });

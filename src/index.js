@@ -1459,7 +1459,7 @@
                 } else if (this.c[1] < 1.) {
                     let lambda = Math.exp(-this.c[1]),
                         t = 1.0,
-                        i = 0;
+                        i;
                     for (i = 0; i <= this.p.n; i++) {
                         t *= Math.random();
                         if (t < lambda) break;
@@ -2072,6 +2072,19 @@
      * @memberOf ran
      */
     let ts = (function() {
+        class Aggregator {
+            constructor(dimension = 1) {
+                this.dim = dimension;
+                this.n = 0;
+                this.history = [];
+            }
+
+            reset() {
+                this.n = 0;
+                this.history = Array.from({length: this.dim}, () => []);
+            }
+        }
+
         /**
          * Class representing the aggregate covariance matrix of a time series.
          * The elements are accumulated sequentially and the covariance is computed from historical values.
