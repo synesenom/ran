@@ -98,6 +98,12 @@ let test_utils = (function() {
         assert.equal(success >= (complete ? 10 : 6), true);
     }
 
+    function repeat(test, times) {
+        for (let i=0; i<times; i++) {
+            test();
+        }
+    }
+
     function diff_disc(pmf, cdf, a, b) {
         let dy = 0;
         let int = 0;
@@ -149,6 +155,7 @@ let test_utils = (function() {
         ks_test: ks_test,
         chi_test: chi_test,
         trials: trials,
+        repeat: repeat,
         diff_disc: diff_disc,
         diff_cont: diff_cont,
         diff_mesh: diff_mesh
