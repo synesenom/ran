@@ -2,10 +2,6 @@
  * Module for generating various random numbers.
  * @module ran
  */
-// TODO add rademacher https://en.wikipedia.org/wiki/Rademacher_distribution
-// TODO add beta binomial https://en.wikipedia.org/wiki/Beta-binomial_distribution
-// TODO add hypergeometric https://en.wikipedia.org/wiki/Hypergeometric_distribution
-// TODO add poisson binomial https://en.wikipedia.org/wiki/Poisson_binomial_distribution
 (function (global, factory) {
     if (typeof exports === "object" && typeof module !== "undefined") {
         factory(exports);
@@ -135,7 +131,7 @@
              * @method i
              * @memberOf ran.la.Vector
              * @param {number} i Index of the element.
-             * @param {number=} e The new value of the {i}-th element. If not specified, the value at {i} is returned.
+             * @param {number=} e The new value of the i-th element. If not specified, the value at i is returned.
              * @example
              *
              * let v = new ran.la.Vector()
@@ -284,8 +280,8 @@
              *
              * let M = new ran.la.Matrix()
              * M.m()
-             * // => [ [ 1, 0, 0 ]
-             * //      [ 0, 1, 0 ]
+             * // => [ [ 1, 0, 0 ],
+             * //      [ 0, 1, 0 ],
              * //      [ 0, 0, 1 ] ]
              *
              */
@@ -300,8 +296,8 @@
              * @memberOf ran.la.Matrix
              * @param {number} i Row index of the element.
              * @param {number} j Column index of the element.
-             * @param {number=} e The new value of the element at the {i}-th row and {j}-th column. If not specified,
-             * the value at {(i, j)} is returned.
+             * @param {number=} e The new value of the element at the i-th row and j-th column. If not specified,
+             * the value at (i, j) is returned.
              * @example
              *
              * let M = new ran.la.Matrix()
@@ -550,15 +546,6 @@
          */
         const _EPSILON = 1e-10;
 
-        /**
-         * Gamma function, using the Lanczos approximation.
-         *
-         * @method gamma
-         * @memberOf ran.special
-         * @param {number} z Value to evaluate Gamma function at.
-         * @returns {number} Gamma function value.
-         * @private
-         */
         let gamma = (function () {
             // Coefficients
             const _p = [
@@ -572,7 +559,15 @@
                 1.5056327351493116e-7
             ];
 
-            // Lanczos approximation
+            /**
+             * Gamma function, using the Lanczos approximation.
+             *
+             * @method gamma
+             * @memberOf ran.special
+             * @param {number} z Value to evaluate Gamma function at.
+             * @returns {number} Gamma function value.
+             * @private
+             */
             function _gamma(z) {
                 let y = 0;
                 if (z < 0.5) {
@@ -593,15 +588,6 @@
             return _gamma;
         })();
 
-        /**
-         * Logarithm of the gamma function.
-         *
-         * @method gammaLn
-         * @memberOf ran.special
-         * @param {number} z Value to evaluate log(gamma) at.
-         * @returns {number} The log(gamma) value.
-         * @private
-         */
         let gammaLn = (function() {
             // Coefficients
             const _p = [
@@ -613,6 +599,15 @@
                 -.5395239384953e-5
             ];
 
+            /**
+             * Logarithm of the gamma function.
+             *
+             * @method gammaLn
+             * @memberOf ran.special
+             * @param {number} z Value to evaluate log(gamma) at.
+             * @returns {number} The log(gamma) value.
+             * @private
+             */
             return function(z) {
                 let x = z,
                     y = z,
@@ -627,16 +622,6 @@
             };
         })();
 
-        /**
-         * Lower incomplete gamma function, using the series expansion and continued fraction approximations.
-         *
-         * @method gammaLowerIncomplete
-         * @memberOf ran.special
-         * @param {number} s Parameter of the integrand in the integral definition.
-         * @param {number} x Lower boundary of the integral.
-         * @returns {number} Value of the lower incomplete gamma function.
-         * @private
-         */
         let gammaLowerIncomplete = (function () {
             const _DELTA = 1e-30;
 
@@ -684,22 +669,21 @@
                 return Math.exp(-x) * Math.pow(x, s) * f;
             }
 
+            /**
+             * Lower incomplete gamma function, using the series expansion and continued fraction approximations.
+             *
+             * @method gammaLowerIncomplete
+             * @memberOf ran.special
+             * @param {number} s Parameter of the integrand in the integral definition.
+             * @param {number} x Lower boundary of the integral.
+             * @returns {number} Value of the lower incomplete gamma function.
+             * @private
+             */
             return function (s, x) {
                 return x < s + 1 ? _gliSeries(s, x) : gamma(s) - _guiContinuedFraction(s, x);
             };
         })();
 
-        /**
-         * Incomplete beta function, using the continued fraction approximations.
-         *
-         * @method betaIncomplete
-         * @memberOf ran.special
-         * @param {number} a First parameter of the function.
-         * @param {number} b Second parameter of the function.
-         * @param {number} x Lower boundary of the integral.
-         * @returns {number} Value of the incomplete beta function.
-         * @private
-         */
         let betaIncomplete = (function() {
             const _FPMIN = 1e-30;
 
@@ -742,6 +726,17 @@
                 return h;
             }
 
+            /**
+             * Incomplete beta function, using the continued fraction approximations.
+             *
+             * @method betaIncomplete
+             * @memberOf ran.special
+             * @param {number} a First parameter of the function.
+             * @param {number} b Second parameter of the function.
+             * @param {number} x Lower boundary of the integral.
+             * @returns {number} Value of the incomplete beta function.
+             * @private
+             */
             return function(a, b, x) {
                 let bt = (x <= 0 || x >= 1)
                     ? 0
@@ -752,15 +747,6 @@
             };
         })();
 
-        /**
-         * Error function.
-         *
-         * @method erf
-         * @memberOf ran.special
-         * @param {number} x Value to evaluate the error function at.
-         * @returns {number} Error function value.
-         * @private
-         */
         let erf = (function () {
             // Coefficients
             const _p = [
@@ -776,6 +762,15 @@
                 0.17087277
             ];
 
+            /**
+             * Error function.
+             *
+             * @method erf
+             * @memberOf ran.special
+             * @param {number} x Value to evaluate the error function at.
+             * @returns {number} Error function value.
+             * @private
+             */
             return function(x) {
                 let t = 1 / (1 + 0.5 * Math.abs(x)),
                     tp = 1,
@@ -1104,8 +1099,10 @@
             let chi2 = 0,
                 n = values.length;
             for (let x in p) {
-                let m = pmf(parseInt(x)) * n;
-                chi2 += Math.pow(p[x] - m, 2) / m;
+                if (p.hasOwnProperty(x)) {
+                    let m = pmf(parseInt(x)) * n;
+                    chi2 += Math.pow(p[x] - m, 2) / m;
+                }
             }
 
             // Get critical value
@@ -1167,10 +1164,30 @@
             _generator() {
                 throw Error('Distribution._generator is not implemented');
             }
-            _pdf() {
+
+            /**
+             * The probability distribution or probability mass function.
+             *
+             * @method _pdf
+             * @memberOf ran.dist.Distribution
+             * @param {number } x Value to evaluate the distribution/mass function at.
+             * @returns {number} The probability density or probability at the specified value.
+             * @private
+             */
+            _pdf(x) {
                 throw Error('Distribution._pdf is not implemented');
             }
-            _cdf() {
+
+            /**
+             * The probability distribution function.
+             *
+             * @method _cdf
+             * @memberOf ran.dist.Distribution
+             * @param {number } x Value to evaluate the probability distribution at.
+             * @returns {number} The value of the probability function at the specified value.
+             * @private
+             */
+            _cdf(x) {
                 throw Error('Distribution._cdf is not implemented');
             }
 
@@ -1215,7 +1232,9 @@
             }
 
             /**
-             * The [cumulative distribution function]{@link https://en.wikipedia.org/wiki/Cumulative_distribution_function}.
+             * The [cumulative distribution function]{@link https://en.wikipedia.org/wiki/Cumulative_distribution_function}:
+             *
+             * $$F(x) = \int_{-\infty}^x f(t) \,\mathrm{d}t.$$
              *
              * @method cdf
              * @memberOf ran.dist.Distribution
@@ -1233,7 +1252,9 @@
             }
 
             /**
-             * The [survival function]{@link https://en.wikipedia.org/wiki/Survival_function}.
+             * The [survival function]{@link https://en.wikipedia.org/wiki/Survival_function}:
+             *
+             * $$S(x) = 1 - F(x).$$
              *
              * @method survival
              * @memberOf ran.dist.Distribution
@@ -1251,7 +1272,9 @@
             }
 
             /**
-             * The [hazard function]{@link https://en.wikipedia.org/wiki/Failure_rate}.
+             * The [hazard function]{@link https://en.wikipedia.org/wiki/Failure_rate}:
+             *
+             * $$\lambda(x) = \frac{f(x)}{S(x)}.$$
              *
              * @method hazard
              * @memberOf ran.dist.Distribution
@@ -1269,7 +1292,9 @@
             }
 
             /**
-             * The [cumulative hazard function]{@link https://en.wikipedia.org/wiki/Survival_analysis#Hazard_function_and_cumulative_hazard_function}.
+             * The [cumulative hazard function]{@link https://en.wikipedia.org/wiki/Survival_analysis#Hazard_function_and_cumulative_hazard_function}:
+             *
+             * $$\Lambda(x) = \int_0^x \lambda(t) \,\mathrm{d}t.$$
              *
              * @method cHazard
              * @memberOf ran.dist.Distribution
@@ -1307,7 +1332,12 @@
 
             /**
              * The [log-likelihood]{@link https://en.wikipedia.org/wiki/Likelihood_function#Log-likelihood} of the
-             * current distribution based on some data.
+             * current distribution based on some data. More precisely:
+             *
+             * $$\ln L(\theta | X) = \sum_{x \in X} \ln f(x; \theta),$$
+             *
+             * where \(X\) is the set of observations (sample) and \(\theta\) is the parameter vector of the
+             * distribution.
              *
              * @method L
              * @memberOf ran.dist.Distribution
@@ -1333,14 +1363,14 @@
 
             /**
              * Tests if an array of values is sampled from the specified distribution. For discrete distributions this
-             * method uses &chi;<sup>2</sup> test, whereas for continuous distributions it uses the Kolmogorov-Smirnov test.
+             * method uses \(\chi^2\) test, whereas for continuous distributions it uses the Kolmogorov-Smirnov test.
              *
              * @method test
              * @memberOf ran.dist.Distribution
              * @param {Array} values Array of values to test.
              * @returns {Object} Object with two properties representing the result of the test:
              * <ul>
-             *     <li>{statistics}: The &chi;<sup>2</sup> or D statistics depending on whether the distribution is discrete or
+             *     <li>{statistics}: The \(\chi^2\) or D statistics depending on whether the distribution is discrete or
              *     continuous.</li>
              *     <li>{passed}: Whether the sample passed the null hypothesis that it is sampled from the current
              *     distribution.</li>
@@ -1366,12 +1396,74 @@
             }
         }
 
+        // TODO Benford https://en.wikipedia.org/wiki/Benford%27s_law#Generalization_to_digits_beyond_the_first | F. Benford. The law of anomalous numbers. Proceedings of the American Philosophical Society, 78(4) pp 551-572 (1938)
+        // TODO Beta-binomial (https://en.wikipedia.org/wiki/Beta-binomial_distribution)
+        // TODO Beta-pascal
+        // TODO Discrete Weibull
+        // TODO Gamma-Poisson
+        // TODO Geometric
+        // TODO Hypergeometric (https://en.wikipedia.org/wiki/Hypergeometric_distribution)
+        // TODO Poisson-binomial (https://en.wikipedia.org/wiki/Poisson_binomial_distribution)
+        // TODO Logarithm
+        // TODO Negative hypergeometric
+        // TODO Pascal (negative binomial)
+        // TODO Polya
+        // TODO Power series
+        // TODO Rectangular
+        // TODO Zeta
+        // TODO Zipf https://en.wikipedia.org/wiki/Zipf%27s_law |
+        // TODO Arcsin
+        // TODO Arctangent
+        // TODO Chi
+        // TODO Doubly non-central F
+        // TODO Doubly non-central t
+        // TODO Error (exponential power)
+        // TODO Exponential power
+        // TODO Gumbel
+        // TODO Frechet
+        // TODO F
+        // TODO Gamma-normal
+        // TODO Generalized Pareto
+        // TODO Gompertz
+        // TODO Hyperbolic-secant
+        // TODO Hyperexponential
+        // TODO Hypoexponential
+        // TODO IDB
+        // TODO Inveretd beta
+        // TODO Kolmogorov-Smirnov
+        // TODO Laplace
+        // TODO Log gamma
+        // TODO Log logistic
+        // TODO Logistic
+        // TODO Logistic-exponential
+        // TODO Lomax
+        // TODO Minimax
+        // TODO Muth
+        // TODO Noncentral beta
+        // TODO Noncentral chi-square
+        // TODO Noncentral F
+        // TODO Noncentral t
+        // TODO Rademacher (https://en.wikipedia.org/wiki/Rademacher_distribution)
+        // TODO Rayleight
+        // TODO Standard Cauchy
+        // TODO Standard power
+        // TODO Standard triangular
+        // TODO t
+        // TODO triangular
+        // TODO two-sided power
+        // TODO von Mises
+        // TODO Wald
+
         /**
-         * Generator for [Bernoulli distribution]{@link https://en.wikipedia.org/wiki/Bernoulli_distribution}.
+         * Generator for the [Bernoulli distribution]{@link https://en.wikipedia.org/wiki/Bernoulli_distribution}:
+         *
+         * $$f(k; p) = \begin{cases}p &\quad\text{if $k = 1$}\\1 - p &\quad\text{if $k = 0$}\\\end{cases}$$
+         *
+         * where \(p \in [0, 1]\). Support: \(k \in \{0, 1\}\).
          *
          * @class Bernoulli
          * @memberOf ran.dist
-         * @param {number} p Parameter of the distribution.
+         * @param {number} p Probability of the outcome 1.
          * @constructor
          */
         class Bernoulli extends Distribution {
@@ -1388,22 +1480,19 @@
                 return parseInt(x) === 1 ? this.p.p : 1 - this.p.p;
             }
 
-            /**
-             * The cumulative distribution function.
-             *
-             * @method cdf
-             * @memberOf ran.dist.Bernoulli
-             * @param {number} x Value to evaluate CDF at.
-             * @returns {number} The cumulative distribution value.
-             * @ignore
-             */
             _cdf(x) {
                 return x < 0 ? 0 : (parseInt(x) >= 1 ? 1 : 1 - this.p.p);
             }
         }
 
         /**
-         * Generator for [beta distribution]{@link https://en.wikipedia.org/wiki/Beta_distribution}.
+         * Generator for the [beta distribution]{@link https://en.wikipedia.org/wiki/Beta_distribution}:
+         *
+         * $$f(x; \alpha, \beta) = \frac{x^{\alpha - 1}(1 - x)^{\beta - 1}}{\mathrm{B}(\alpha, \beta)},$$
+         *
+         * with \(\alpha, \beta \in \mathbb{R}^+\) and \(\mathrm{B}(\alpha, \beta)\) is the beta function.
+         * Support: \(x \in [0, 1]\).
+         *
          *
          * @class Beta
          * @memberOf ran.dist
@@ -1434,12 +1523,16 @@
         }
 
         /**
-         * Generator for [binomial distribution]{@link https://en.wikipedia.org/wiki/Binomial_distribution}.
+         * Generator for the [binomial distribution]{@link https://en.wikipedia.org/wiki/Binomial_distribution}:
+         *
+         * $$f(k; n, p) = \begin{pmatrix}n \\ k \\ \end{pmatrix} p^k (1 - p)^{n - k},$$
+         *
+         * with \(n \in \mathbb{N}_0\) and \(p \in [0, 1]\). Support: \(k \in \{0, ..., n\}\).
          *
          * @class Binomial
          * @memberOf ran.dist
          * @param {number} n Number of trials.
-         * @param {number} p Success probability.
+         * @param {number} p Probability of success.
          * @constructor
          */
         class Binomial extends Distribution {
@@ -1495,24 +1588,28 @@
 
             _cdf(x) {
                 let xi = parseInt(x);
-                return xi <= 0 ? 0 : xi > this.p.n ? 1 : special.betaIncomplete(this.p.n - xi, 1 + xi, 1 - this.p.p);           }
+                return xi < 0 ? 0 : xi >= this.p.n ? 1 : special.betaIncomplete(this.p.n - xi, 1 + xi, 1 - this.p.p);           }
         }
 
         /**
-         * Generator for [bounded Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution#Bounded_Pareto_distribution}.
+         * Generator for [bounded Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution#Bounded_Pareto_distribution}:
+         *
+         * $$f(x; L, H, \alpha) = \frac{\alpha L^\alpha x^{-\alpha - 1}}{1 - \big(\frac{L}{H}\big)^\alpha},$$
+         *
+         * with \(L, H \in \mathbb{R}^+\), \(H > L\) and \(\alpha \in \mathbb{R}^+\). Support: \(x \in [L, H]\).
          *
          * @class BoundedPareto
          * @memberOf ran.dist
-         * @param {number} xmin Lower boundary.
-         * @param {number} xmax Upper boundary.
+         * @param {number} L Lower boundary.
+         * @param {number} H Upper boundary.
          * @param {number} alpha Shape parameter.
          * @constructor
          */
         class BoundedPareto extends Distribution {
-            constructor(xmin, xmax, alpha) {
+            constructor(L, H, alpha) {
                 super("continuous", arguments.length);
-                this.p = {xmin: xmin, xmax: xmax, alpha: alpha};
-                this.c = [Math.pow(xmin, alpha), Math.pow(xmax, alpha), (1 - Math.pow(xmin / xmax, alpha))];
+                this.p = {L: L, H: H, alpha: alpha};
+                this.c = [Math.pow(L, alpha), Math.pow(H, alpha), (1 - Math.pow(L / H, alpha))];
             }
 
             _generator() {
@@ -1520,18 +1617,56 @@
             }
 
             _pdf(x) {
-                return (x < this.p.xmin || x > this.p.xmax) ? 0
-                    : this.p.alpha * Math.pow(this.p.xmin / x, this.p.alpha) / (x * this.c[2]);
+                return (x < this.p.L || x > this.p.H) ? 0
+                    : this.p.alpha * Math.pow(this.p.L / x, this.p.alpha) / (x * this.c[2]);
             }
 
             _cdf(x) {
-                return x < this.p.xmin ? 0 : (x > this.p.xmax ? 1 : (1 - this.c[0] * Math.pow(x, -this.p.alpha)) / (1 - this.c[0] / this.c[1]));
+                return x < this.p.L ? 0 : (x > this.p.H ? 1 : (1 - this.c[0] * Math.pow(x, -this.p.alpha)) / (1 - this.c[0] / this.c[1]));
+            }
+        }
+
+        /**
+         * Generator for [Cauchy distribution]{@link https://en.wikipedia.org/wiki/Cauchy_distribution}:
+         *
+         * $$f(x; x_0, \gamma) = \frac{1}{\pi\gamma\bigg[1 + \Big(\frac{x - x_0}{\gamma}\Big)^2\bigg]}$$
+         *
+         * where \(x_0 \in \mathbb{R}\) and \(\gamma \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}\).
+         *
+         * @class Cauchy
+         * @memberOf ran.dist
+         * @param {number} x0 Location parameter.
+         * @param {number} gamma Scale parameter.
+         * @constructor
+         */
+        class Cauchy extends Distribution {
+            constructor(x0, gamma) {
+                super('continuous', arguments.length);
+                this.p = {x0: x0, gamma: gamma};
+                this.c = [Math.PI * this.p.gamma];
+            }
+
+            _generator() {
+                return this.p.x0 + this.p.gamma * (Math.tan(Math.PI*(Math.random() - 0.5)));
+            }
+
+            _pdf(x) {
+                let y = (x - this.p.x0) / this.p.gamma;
+                return 1 / (this.c[0] * (1 + y*y));
+            }
+
+            _cdf(x) {
+                return 0.5 + Math.atan2(x - this.p.x0, this.p.gamma) / Math.PI;
             }
         }
 
         /**
          * Generator for custom distribution, using the
-         * [alias table method]{@link http://www.keithschwarz.com/darts-dice-coins}.
+         * [alias table method]{@link http://www.keithschwarz.com/darts-dice-coins}:
+         *
+         * $$f(k; \{w\}) = \frac{w_k}{\sum_j w_j},$$
+         *
+         * where \(w_k \in \mathbb{R}^+\). Support: \(k \in \mathbb{N}_0\).
          *
          * @class Custom
          * @memberOf ran.dist
@@ -1636,7 +1771,11 @@
         }
 
         /**
-         * Generator for the [degenerate distribution]{@link https://en.wikipedia.org/wiki/Degenerate_distribution}.
+         * Generator for the [degenerate distribution]{@link https://en.wikipedia.org/wiki/Degenerate_distribution}:
+         *
+         * $$f(x; x_0) = \begin{cases}1 &\quad\text{if $x = x_0$}\\0 &\quad\text{otherwise}\\\end{cases},$$
+         *
+         * where \(x_0 \in \mathbb{R}\). Support: \(x \in \mathbb{R}\).
          *
          * @class Degenerate
          * @memberOf ran.dist
@@ -1663,7 +1802,11 @@
         }
 
         /**
-         * Generator for [exponentially distribution]{@link https://en.wikipedia.org/wiki/Exponential_distribution}.
+         * Generator for [exponentially distribution]{@link https://en.wikipedia.org/wiki/Exponential_distribution}:
+         *
+         * $$f(x; \lambda) = \lambda e^{-\lambda x},$$
+         *
+         * with \(\lambda \in \mathbb{R}^+\). Support: \(x \in [0, \infty)\).
          *
          * @class Exponential
          * @memberOf ran.dist
@@ -1690,8 +1833,12 @@
         }
 
         /**
-         * Generator for [gamma distribution]{@link https://en.wikipedia.org/wiki/Gamma_distribution} following
-         * the shape/rate parametrization.
+         * Generator for [gamma distribution]{@link https://en.wikipedia.org/wiki/Gamma_distribution} using the
+         * shape/rate parametrization:
+         *
+         * $$f(x; \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{\alpha - 1} e^{-\beta x},$$
+         *
+         * where \(\alpha, \beta \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
          *
          * @class Gamma
          * @memberOf ran.dist
@@ -1720,7 +1867,11 @@
         }
 
         /**
-         * Generator for [Erlang distribution]{@link https://en.wikipedia.org/wiki/Erlang_distribution}.
+         * Generator for [Erlang distribution]{@link https://en.wikipedia.org/wiki/Erlang_distribution}:
+         *
+         * $$f(x; k, \lambda) = \frac{\lambda^k x^{k - 1} e^{-\lambda x}}{(k - 1)!},$$
+         *
+         * where \(k \in \mathbb{N}^+\) and \(\lambda \in \mathbb{R}^+\). Support: \(x \in [0, \infty)\).
          *
          * @class Erlang
          * @memberOf ran.dist
@@ -1735,7 +1886,11 @@
         }
 
         /**
-         * Generator for [chi square distribution]{@link https://en.wikipedia.org/wiki/Chi-squared_distribution}.
+         * Generator for [chi square distribution]{@link https://en.wikipedia.org/wiki/Chi-squared_distribution}:
+         *
+         * $$f(x; k) = \frac{1}{2^{k/2} \Gamma(k/2)} x^{k/2 - 1} e^{-x/2},$$
+         *
+         * where \(k \in \mathbb{N}^+\). Support: \(x \in \mathbb{R}^+\).
          *
          * @class Chi2
          * @memberOf ran.dist
@@ -1749,7 +1904,11 @@
         }
 
         /**
-         * Generator for [generalized gamma distribution]{@link https://en.wikipedia.org/wiki/Generalized_gamma_distribution}.
+         * Generator for [generalized gamma distribution]{@link https://en.wikipedia.org/wiki/Generalized_gamma_distribution}:
+         *
+         * $$f(x; a, d, p) = \frac{p/a^d}{\Gamma(d/p)} x^{d - 1} e^{-(x/a)^p},$$
+         *
+         * where \(a, d, p \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
          *
          * @class GeneralizedGamma
          * @memberOf ran.dist
@@ -1779,7 +1938,11 @@
         }
 
         /**
-         * Generator for [inverse gamma distribution]{@link https://en.wikipedia.org/wiki/Inverse-gamma_distribution}.
+         * Generator for [inverse gamma distribution]{@link https://en.wikipedia.org/wiki/Inverse-gamma_distribution}:
+         *
+         * $$f(x; \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{-\alpha - 1} e^{-\beta/x},$$
+         *
+         * where \(\alpha, \beta \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
          *
          * @class InverseGamma
          * @memberOf ran.dist
@@ -1808,7 +1971,11 @@
         }
 
         /**
-         * Generator for [lognormal distribution]{@link https://en.wikipedia.org/wiki/Log-normal_distribution}.
+         * Generator for [lognormal distribution]{@link https://en.wikipedia.org/wiki/Log-normal_distribution}:
+         *
+         * $$f(x; \mu, \sigma) = \frac{1}{x \sigma \sqrt{2 \pi}}e^{-\frac{(\ln x - \mu)^2}{2\sigma^2}},$$
+         *
+         * where \(\mu \in \mathbb{R}\) and \(\sigma \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
          *
          * @class Lognormal
          * @memberOf ran.dist
@@ -1837,7 +2004,11 @@
         }
 
         /**
-         * Generator for [normal distribution]{@link https://en.wikipedia.org/wiki/Normal_distribution}.
+         * Generator for [normal distribution]{@link https://en.wikipedia.org/wiki/Normal_distribution}:
+         *
+         * $$f(x; \mu, \sigma) = \frac{1}{\sqrt{2 \pi \sigma^2}} e^{-\frac{(x - \mu)^2}{2\sigma^2}},$$
+         *
+         * with \(\mu \in \mathbb{R}\) and \(\sigma \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}\).
          *
          * @class Normal
          * @memberOf ran.dist
@@ -1866,7 +2037,11 @@
         }
 
         /**
-         * Generator for [Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution}.
+         * Generator for [Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution}:
+         *
+         * $$f(x; x_\mathrm{min}, \alpha) = \frac{\alpha x_\mathrm{min}^\alpha}{x^{\alpha + 1}},$$
+         *
+         * with \(x_\mathrm{min}, \alpha \in \mathbb{R}^+\). Support: \(x \in [x_\mathrm{min}, \infty)\).
          *
          * @class Pareto
          * @memberOf ran.dist
@@ -1894,7 +2069,11 @@
         }
 
         /**
-         * Generator for [Poisson distribution]{@link https://en.wikipedia.org/wiki/Poisson_distribution}.
+         * Generator for [Poisson distribution]{@link https://en.wikipedia.org/wiki/Poisson_distribution}:
+         *
+         * $$f(k; \lambda) = \frac{\lambda^k e^{-\lambda}}{k!},$$
+         *
+         * with \(\lambda \in \mathbb{R}^+\). Support: \(k \in \mathbb{N}_0\).
          *
          * @class Poisson
          * @memberOf ran.dist
@@ -1953,7 +2132,12 @@
 
         /**
          * Generator for continuous
-         * [uniform distribution]{@link https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)}.
+         * [uniform distribution]{@link https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)}:
+         *
+         * $$f(x; x_\mathrm{min}, x_\mathrm{max}) = \frac{1}{x_\mathrm{max} - x_\mathrm{min}},$$
+         *
+         * with \(x_\mathrm{min}, x_\mathrm{max} \in \mathbb{R}\) and \(x_\mathrm{min} < x_\mathrm{max}\).
+         * Support: \(x \in [x_\mathrm{min}, x_\mathrm{max}]\).
          *
          * @class UniformContinuous
          * @memberOf ran.dist
@@ -1983,7 +2167,11 @@
 
         /**
          * Generator for discrete
-         * [uniform distribution]{@link https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)}.
+         * [uniform distribution]{@link https://en.wikipedia.org/wiki/Discrete_uniform_distribution}:
+         *
+         * $$f(k; x_\mathrm{min}, x_\mathrm{max}) = \frac{1}{x_\mathrm{max} - x_\mathrm{min} + 1},$$
+         *
+         * with \(x_\mathrm{min}, x_\mathrm{max} \in \mathbb{Z}\) and \(x_\mathrm{min} < x_\mathrm{max}\). Support: \(k \in \{x_\mathrm{min}, ..., x_\mathrm{max}\}\).
          *
          * @class UniformDiscrete
          * @memberOf ran.dist
@@ -2043,25 +2231,26 @@
 
         // Public classes
         return {
-            Bernoulli: Bernoulli,
-            Beta: Beta,
-            Binomial: Binomial,
-            BoundedPareto: BoundedPareto,
-            Chi2: Chi2,
-            Custom: Custom,
-            Degenerate: Degenerate,
-            Erlang: Erlang,
-            Exponential: Exponential,
-            Gamma: Gamma,
-            GeneralizedGamma: GeneralizedGamma,
-            InverseGamma: InverseGamma,
-            Lognormal: Lognormal,
-            Normal: Normal,
-            Pareto: Pareto,
-            Poisson: Poisson,
-            UniformContinuous: UniformContinuous,
-            UniformDiscrete: UniformDiscrete,
-            Weibull: Weibull
+            Bernoulli,
+            Beta,
+            Binomial,
+            BoundedPareto,
+            Cauchy,
+            Chi2,
+            Custom,
+            Degenerate,
+            Erlang,
+            Exponential,
+            Gamma,
+            GeneralizedGamma,
+            InverseGamma,
+            Lognormal,
+            Normal,
+            Pareto,
+            Poisson,
+            UniformContinuous,
+            UniformDiscrete,
+            Weibull
         };
     })();
 

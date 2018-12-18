@@ -169,10 +169,10 @@ class DocBuilder:
         :returns: Reference to the DocBuilder for chaining.
         """
         def _codify(text):
-            return re.sub(r'\{(.*?)\}', r'<code>\1</code>', text)
+            return text #re.sub(r'\{(.*?)\}', r'<code>\1</code>', text)
 
         def _linkify(text):
-            return re.sub(r'\[(.*)\]\{@link (.*)\}', r'<a href="\2" target="_blank">\1</a>', text)
+            return re.sub(r'\[(.*)\]\{@link (.*?)\}', r'<a href="\2" target="_blank">\1</a>', text)
 
         def _tagify(text, tag, attr={}):
             ltag = "<" + tag

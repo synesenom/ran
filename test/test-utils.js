@@ -94,7 +94,6 @@ let test_utils = (function() {
         for (let t = 0; t < 10; t++) {
             success += test() ? 1 : 0;
         }
-        console.log(success);
         assert.equal(success >= (complete ? 10 : 6), true);
     }
 
@@ -110,7 +109,9 @@ let test_utils = (function() {
         for (let x=a; x<b; x++) {
             int += pmf(x);
             dy += Math.abs(cdf(x) - int);
+            console.log(cdf(x), int);
         }
+        console.log(dy);
         return dy;
     }
 
@@ -151,14 +152,31 @@ let test_utils = (function() {
         return dy;
     }
 
+    function differentiate(func, x0, dx) {
+        let d = 0.5 * dx;
+        return (func(x0 + d) - func(x0 - d)) / dx;
+    }
+
+    function sum(arr) {
+        return arr.reduce((acc, d) => d + acc, 0);
+    }
+
+    function cdf2pdf(dist, range, laps) {
+        return sum(Array.from({length: laps}, () => {
+            let x0 = range[0] + Math.random() * (range[1] - range[0]);
+            return Math.abs(dist.pdf(x0) - differentiate(x => dist.cdf(x), x0, 0.0001));
+        })) / laps;
+    }
+
     return {
-        ks_test: ks_test,
-        chi_test: chi_test,
-        trials: trials,
-        repeat: repeat,
-        diff_disc: diff_disc,
-        diff_cont: diff_cont,
-        diff_mesh: diff_mesh
+        ks_test,
+        chi_test,
+        trials,
+        repeat,
+        diff_disc,
+        diff_cont,
+        diff_mesh,
+        cdf2pdf
     };
 })();
 
