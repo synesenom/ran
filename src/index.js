@@ -1091,8 +1091,8 @@
         function _chiTest(values, pmf, c) {
             // Calculate observed distribution
             let p = {};
-            values.forEach(function(v) {
-                p[v] = p[v] ? p[v]+1 : 1;
+            values.forEach(function (v) {
+                p[v] = p[v] ? p[v] + 1 : 1;
             });
 
             // Calculate chi-square sum
@@ -1431,8 +1431,6 @@
         // TODO Doubly non-central t
         // TODO Error (exponential power)
         // TODO Exponential power
-        // TODO Gumbel
-        // TODO Frechet
         // TODO F
         // TODO Gamma-normal
         // TODO Generalized Pareto
@@ -1456,7 +1454,7 @@
         // TODO Noncentral F
         // TODO Noncentral t
         // TODO Rademacher (https://en.wikipedia.org/wiki/Rademacher_distribution)
-        // TODO Rayleight
+        // TODO Rayleigh
         // TODO Standard Cauchy
         // TODO Standard power
         // TODO Standard triangular
@@ -1526,11 +1524,11 @@
             }
 
             _pdf(x) {
-                return Math.pow(x, this.p.alpha-1) * Math.pow(1-x, this.p.beta-1) / this.c[0];
+                return Math.pow(x, this.p.alpha - 1) * Math.pow(1 - x, this.p.beta - 1) / this.c[0];
             }
 
             _cdf(x) {
-                return x <= 0 ? 0 : x >=1 ? 1 : special.betaIncomplete(this.p.alpha, this.p.beta, x);
+                return x <= 0 ? 0 : x >= 1 ? 1 : special.betaIncomplete(this.p.alpha, this.p.beta, x);
             }
         }
 
@@ -1600,7 +1598,8 @@
 
             _cdf(x) {
                 let xi = parseInt(x);
-                return xi < 0 ? 0 : xi >= this.p.n ? 1 : special.betaIncomplete(this.p.n - xi, 1 + xi, 1 - this.p.p);           }
+                return xi < 0 ? 0 : xi >= this.p.n ? 1 : special.betaIncomplete(this.p.n - xi, 1 + xi, 1 - this.p.p);
+            }
         }
 
         /**
@@ -1659,12 +1658,12 @@
             }
 
             _generator() {
-                return this.p.x0 + this.p.gamma * (Math.tan(Math.PI*(Math.random() - 0.5)));
+                return this.p.x0 + this.p.gamma * (Math.tan(Math.PI * (Math.random() - 0.5)));
             }
 
             _pdf(x) {
                 let y = (x - this.p.x0) / this.p.gamma;
-                return 1 / (this.c[0] * (1 + y*y));
+                return 1 / (this.c[0] * (1 + y * y));
             }
 
             _cdf(x) {
@@ -1845,6 +1844,44 @@
         }
 
         /**
+         * Generator for [Fréchet distribution]{@link https://en.wikipedia.org/wiki/Fréchet_distribution}:
+         *
+         * $$f(x; \alpha, s, m) = \frac{\alpha z^{-1 -\alpha} e^{-z^{-\alpha}}}{s},$$
+         *
+         * with \(z = \frac{x - m}{s}\). and \(\alpha, s \in \mathbb{R}^+\), \(m \in \mathbb{R}\). Support: \(x \in \mathbb{R}, x > m\).
+         *
+         * @class Frechet
+         * @memberOf ran.dist
+         * @param {number} alpha Shape parameter.
+         * @param {number} s Scale parameter.
+         * @param {number} m Location parameter.
+         * @constructor
+         */
+        class Frechet extends Distribution {
+            constructor(alpha, s, m) {
+                super('continuous', arguments.length);
+                this.p = {alpha: alpha, s: s, m: m};
+            }
+
+            _generator() {
+                return this.p.m + this.p.s * Math.pow(-Math.log(Math.random()), -1 / this.p.alpha);
+            }
+
+            _pdf(x) {
+                if (x <= this.p.m) {
+                    return 0;
+                } else {
+                    let z = (x - this.p.m) / this.p.s;
+                    return this.p.alpha * Math.pow(z, -1 - this.p.alpha) * Math.exp(-Math.pow(z, -this.p.alpha)) / this.p.s;
+                }
+            }
+
+            _cdf(x) {
+                return x <= this.p.m ? 0 : Math.exp(-Math.pow((x - this.p.m) / this.p.s, -this.p.alpha));
+            }
+        }
+
+        /**
          * Generator for [gamma distribution]{@link https://en.wikipedia.org/wiki/Gamma_distribution} using the
          * shape/rate parametrization:
          *
@@ -1875,6 +1912,38 @@
 
             _cdf(x) {
                 return special.gammaLowerIncomplete(this.p.alpha, this.p.beta * x) / this.c[1];
+            }
+        }
+
+        /**
+         * Generator for [Gompertz distribution]{@link https://en.wikipedia.org/wiki/Gompertz_distribution}:
+         *
+         * $$f(x; \eta, b) = b \eta e^{\eta + bx - \eta e^{bx}} ,$$
+         *
+         * with \(\eta, b \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+ \cup \{0\}\).
+         *
+         * @class Gompertz
+         * @memberOf ran.dist
+         * @param {number} eta Shape parameter.
+         * @param {number} beta Scale parameter.
+         * @constructor
+         */
+        class Gompertz extends Distribution {
+            constructor(eta, b) {
+                super('continuous', arguments.length);
+                this.p = {eta: eta, b: b};
+            }
+
+            _generator() {
+                return Math.log(1 - Math.log(Math.random()) / this.p.eta) / this.p.b;
+            }
+
+            _pdf(x) {
+                return x < 0 ? 0 : this.p.b * this.p.eta * Math.exp(this.p.eta + this.p.b * x - this.p.eta * Math.exp(this.p.b * x));
+            }
+
+            _cdf(x) {
+                return x < 0 ? 0 : 1 - Math.exp(-this.p.eta * (Math.exp(this.p.b * x) - 1));
             }
         }
 
@@ -2144,20 +2213,20 @@
                     return k - 1;
                 } else {
                     // Large lambda, normal approximation
-                    let c = 0.767 - 3.36/this.p.lambda,
+                    let c = 0.767 - 3.36 / this.p.lambda,
                         beta = Math.PI / Math.sqrt(3 * this.p.lambda),
                         alpha = beta * this.p.lambda,
                         k = Math.log(c) - this.p.lambda - Math.log(beta);
                     while (true) {
                         let r = Math.random(),
-                            x = (alpha - Math.log((1 - r)/r)) / beta,
+                            x = (alpha - Math.log((1 - r) / r)) / beta,
                             n = Math.floor(x + 0.5);
                         if (n < 0)
                             continue;
                         let v = Math.random(),
                             y = alpha - beta * x,
-                            lhs = y + Math.log(v/Math.pow(1.0 + Math.exp(y), 2)),
-                            rhs = k + n * Math.log(this.p.lambda) - special.gammaLn(n+1);
+                            lhs = y + Math.log(v / Math.pow(1.0 + Math.exp(y), 2)),
+                            rhs = k + n * Math.log(this.p.lambda) - special.gammaLn(n + 1);
                         if (lhs <= rhs)
                             return n;
                     }
@@ -2290,8 +2359,10 @@
             Degenerate,
             Erlang,
             Exponential,
+            Frechet,
             Gamma,
             GeneralizedGamma,
+            Gompertz,
             Gumbel,
             InverseGamma,
             Lognormal,

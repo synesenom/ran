@@ -237,6 +237,22 @@ describe('dist', function() {
         });
     });
 
+    describe('Frechet', () => {
+        const p = () => [core.float(0.1, 5), core.float(0.1, 5), core.float(-5, 5)];
+        it('should return an array of Frechet distributed values', () => {
+            utils.trials(() => {
+                const frechet = new dist.Frechet(...p());
+                return utils.ks_test(frechet.sample(LAPS), x => frechet.cdf(x));
+            });
+        });
+        it('integral of pdf should give cdf', () => {
+            utils.trials(() => {
+                const frechet = new dist.Frechet(...p());
+                return utils.cdf2pdf(frechet, [p()[2]+0.5, 10], LAPS_2) < EPSILON;
+            });
+        });
+    });
+
     describe('Gamma', () => {
         const p = () => [core.float(0.1, 10), core.float(0.1, 3)];
         it('should return an array of gamma distributed values', () => {
@@ -265,6 +281,22 @@ describe('dist', function() {
             utils.trials(() => {
                 const generalizedGamma = new dist.GeneralizedGamma(...p());
                 return utils.cdf2pdf(generalizedGamma, [0.01, 10], LAPS_2) < EPSILON;
+            });
+        });
+    });
+
+    describe('Gompertz', () => {
+        const p = () => [core.float(0.1, 5), core.float(0.1, 5), core.float(-5, 5)];
+        it('should return an array of Gompertz distributed values', () => {
+            utils.trials(() => {
+                const gompertz = new dist.Gompertz(...p());
+                return utils.ks_test(gompertz.sample(LAPS), x => gompertz.cdf(x));
+            });
+        });
+        it('integral of pdf should give cdf', () => {
+            utils.trials(() => {
+                const gompertz = new dist.Gompertz(...p());
+                return utils.cdf2pdf(gompertz, [p()[2]+0.5, 10], LAPS_2) < EPSILON;
             });
         });
     });
