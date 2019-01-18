@@ -232,7 +232,7 @@
         }
 
         /**
-         * Class representing a real square matrix.
+         * Class representing an immutable real square matrix.
          *
          * @class Matrix
          * @memberOf ran.la
@@ -249,7 +249,7 @@
          * let M4 = new ran.la.Matrix(M1)
          * //    ┌         ┐
          * //    │ 1  0  0 │
-         * // => │ 0  1  0 │ for all
+         * // => │ 0  1  0 │
          * //    │ 0  0  1 │
          * //    └         ┘
          *
@@ -950,7 +950,7 @@
          * @param {object} tail Tail value.
          * @param {number=} p Bias (probability of head). Default is 0.5.
          * @param {number=} n Number of coins to flip. Default is 1.
-         * @returns {(object|Array)} Object of head/tail value or an array of head/tail values.
+         * @returns {(object|Array)} Single head/tail value or an array of head/tail values.
          * @example
          *
          * ran.core.coin('a', {b: 2})
@@ -1145,8 +1145,8 @@
         }
 
         /**
-         * The general distribution generator, all generators are created using this class. The methods listed for this
-         * class are available for all distribution generators. All examples provided for this class are using a Pareto
+         * The distribution generator base class, all distribution generators extend this class. The methods listed here
+         * are available for all distribution generators. The examples provided for this class are using a Pareto
          * distribution.
          *
          * @class Distribution
@@ -1214,7 +1214,7 @@
             }
 
             /**
-             * Probability density function. In case of discrete distributions,this is the probability mass function.
+             * [Probability density function]{@link https://en.wikipedia.org/wiki/Probability_density_function}. In case of discrete distributions, it is the [probability mass function]{@link https://en.wikipedia.org/wiki/Probability_mass_function}.
              *
              * @method pdf
              * @memberOf ran.dist.Distribution
@@ -1234,7 +1234,13 @@
             /**
              * The [cumulative distribution function]{@link https://en.wikipedia.org/wiki/Cumulative_distribution_function}:
              *
-             * $$F(x) = \int_{-\infty}^x f(t) \,\mathrm{d}t.$$
+             * $$F(x) = \int_{-\infty}^x f(t) \,\mathrm{d}t,$$
+             *
+             * if the distribution is continuous and
+             *
+             * $$F(x) = \sum_{x_i < x} f(x_i),$$
+             *
+             * if it is discrete. The functions \(f(t)\) and \(f(x_i)\) denote the probability density and mass functions.
              *
              * @method cdf
              * @memberOf ran.dist.Distribution
@@ -1254,7 +1260,9 @@
             /**
              * The [survival function]{@link https://en.wikipedia.org/wiki/Survival_function}:
              *
-             * $$S(x) = 1 - F(x).$$
+             * $$S(x) = 1 - F(x),$$
+             *
+             * where \(F(x)\) denotes the cumulative distribution function.
              *
              * @method survival
              * @memberOf ran.dist.Distribution
@@ -1274,7 +1282,9 @@
             /**
              * The [hazard function]{@link https://en.wikipedia.org/wiki/Failure_rate}:
              *
-             * $$\lambda(x) = \frac{f(x)}{S(x)}.$$
+             * $$\lambda(x) = \frac{f(x)}{S(x)},$$
+             *
+             * where \(f(x)\) and \(S(x)\) are the probability density (or mass) function and the survival function, respectively.
              *
              * @method hazard
              * @memberOf ran.dist.Distribution
@@ -1294,7 +1304,9 @@
             /**
              * The [cumulative hazard function]{@link https://en.wikipedia.org/wiki/Survival_analysis#Hazard_function_and_cumulative_hazard_function}:
              *
-             * $$\Lambda(x) = \int_0^x \lambda(t) \,\mathrm{d}t.$$
+             * $$\Lambda(x) = \int_0^x \lambda(t) \,\mathrm{d}t,$$
+             *
+             * where \(\lambda(x)\) is the hazard function.
              *
              * @method cHazard
              * @memberOf ran.dist.Distribution
@@ -1337,7 +1349,7 @@
              * $$\ln L(\theta | X) = \sum_{x \in X} \ln f(x; \theta),$$
              *
              * where \(X\) is the set of observations (sample) and \(\theta\) is the parameter vector of the
-             * distribution.
+             * distribution. The function \(f(x)\) denotes the probability density/mass function.
              *
              * @method L
              * @memberOf ran.dist.Distribution
@@ -1806,7 +1818,7 @@
          *
          * $$f(x; \lambda) = \lambda e^{-\lambda x},$$
          *
-         * with \(\lambda \in \mathbb{R}^+\). Support: \(x \in [0, \infty)\).
+         * with \(\lambda \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+ \cup \{0\}\).
          *
          * @class Exponential
          * @memberOf ran.dist
@@ -1867,11 +1879,44 @@
         }
 
         /**
+         * Generator for [Gumbel distribution]{@link https://en.wikipedia.org/wiki/Gumbel_distribution}:
+         *
+         * $$f(x; \mu, \beta) = \frac{1}{\beta} e^{-(z + e^-z)},$$
+         *
+         * with \(z = \frac{x - \mu}{\beta}\) and \(\mu \in \mathbb{R}\), \(\beta \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}\).
+         *
+         * @class Gumbel
+         * @memberOf ran.dist
+         * @param {number} mu Location parameter.
+         * @param {number} beta Scale parameter.
+         * @constructor
+         */
+        class Gumbel extends Distribution {
+            constructor(mu, beta) {
+                super('continuous', arguments.length);
+                this.p = {mu: mu, beta: beta};
+            }
+
+            _generator() {
+                return this.p.mu - this.p.beta * Math.log(-Math.log(Math.random()));
+            }
+
+            _pdf(x) {
+                let z = (x - this.p.mu) / this.p.beta;
+                return Math.exp(-(z + Math.exp(-z))) / this.p.beta;
+            }
+
+            _cdf(x) {
+                return Math.exp(-Math.exp(-(x - this.p.mu) / this.p.beta));
+            }
+        }
+
+        /**
          * Generator for [Erlang distribution]{@link https://en.wikipedia.org/wiki/Erlang_distribution}:
          *
          * $$f(x; k, \lambda) = \frac{\lambda^k x^{k - 1} e^{-\lambda x}}{(k - 1)!},$$
          *
-         * where \(k \in \mathbb{N}^+\) and \(\lambda \in \mathbb{R}^+\). Support: \(x \in [0, \infty)\).
+         * where \(k \in \mathbb{N}^+\) and \(\lambda \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+ \cup \{0\}\).
          *
          * @class Erlang
          * @memberOf ran.dist
@@ -2202,7 +2247,11 @@
         }
 
         /**
-         * Generator for [Weibull distribution]{@link https://en.wikipedia.org/wiki/Weibull_distribution}.
+         * Generator for [Weibull distribution]{@link https://en.wikipedia.org/wiki/Weibull_distribution}:
+         *
+         * $$f(x; \lambda, k) = \frac{k}{\lambda}\bigg(\frac{x}{\lambda}\bigg)^{k - 1} e^{-(x / \lambda)^k},$$
+         *
+         * with \(\lambda, k \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+ \cup \{0\}\).
          *
          * @class Weibull
          * @memberOf ran.dist
@@ -2243,6 +2292,7 @@
             Exponential,
             Gamma,
             GeneralizedGamma,
+            Gumbel,
             InverseGamma,
             Lognormal,
             Normal,
@@ -2275,8 +2325,11 @@
         }
 
         /**
-         * Class representing the aggregate covariance matrix of a time series.
-         * The elements are accumulated sequentially and the covariance is computed from historical values.
+         * Class representing the aggregate [covariance matrix]{@link https://en.wikipedia.org/wiki/Covariance_matrix} of a time series:
+         *
+         * $$C_{ij} = \mathbb{E}\big[\big(X_i - \mathbb{E}[X_i]\big)\big(X_j - \mathbb{E}[X_j]\big)\big],$$
+         *
+         * where \(\mathbb{E}\) denotes the expected value and \(X_i, X_j\) are the i-th and j-th variables in the time series. The elements are accumulated sequentially and the covariance is computed from historical values.
          *
          * @class Cov
          * @memberOf ran.ts
@@ -2331,8 +2384,11 @@
         }
 
         /**
-         * Class representing an auto-correlation vector.
-         * The elements are accumulated sequentially and the auto-correlation is computed from historical values.
+         * Class representing an [auto-correlation]{@link https://en.wikipedia.org/wiki/Autocorrelation} function:
+         *
+         * $$R_i(\tau) = \mathbb{E}[X_i(t) X_i(t + \tau)],$$
+         *
+         * where \(X_i(t)\) is the time series corresponding to the i-th variable and \(\tau\) denotes the lag. The elements are accumulated sequentially and the auto-correlation is computed from historical values.
          *
          * @class AC
          * @memberOf ran.ts
@@ -2407,7 +2463,7 @@
              *
              * @method compute
              * @memberOf ran.ts.AC
-             * @returns {Array[]} Array containing the correlation function (correlation vs lag) for each component.
+             * @returns {Array[]} Array containing the auto-correlation function (correlation vs lag) for each component.
              */
             compute() {
                 return this.history.map(d => this._aci(d));
@@ -2471,8 +2527,8 @@
             }
 
             /**
-             * Calculates the [Gelman-Rubin]{@link https://projecteuclid.org/euclid.ss/1177011136} diagnostics for a set
-             * of samples.
+             * Calculates the [Gelman-Rubin]{@link http://www.stat.columbia.edu/~gelman/research/published/brooksgelman2.pdf} diagnostics for a set
+             * of samples. The statistics can be used to monitor the convergence of an MCMC model.
              *
              * @method gr
              * @memberOf ran.mc
@@ -2575,7 +2631,7 @@
         });
 
         /**
-         * Class implementing a Markov chain Monte Carlo sampler. MCMC samplers can be used to approximate integrals
+         * Base class implementing a general Markov chain Monte Carlo sampler. All MCMC sampler is extended from this class. MCMC samplers can be used to approximate integrals
          * by efficiently sampling a density that cannot be normalized or sampled directly.
          *
          * @class MCMC
@@ -2741,7 +2797,7 @@
              *
              * @method statistics
              * @memberOf ran.mc.MCMC
-             * @returns {Object[]} Array containing objects for each dimension. Objects contain mean, std and cv.
+             * @returns {Object[]} Array containing objects for each dimension. Objects contain <code>mean</code>, <code>std</code> and <code>cv</code>.
              */
             statistics() {
                 return this.history.get().map(h => {
@@ -2771,8 +2827,8 @@
              *
              * @method ac
              * @memberOf ran.mc.MCMC
-             * @returns {number[][]} Array containing the correlation function (correlation versus lag) for each
-             * dimension).
+             * @returns {number[]} Array containing the correlation function (correlation versus lag) for each
+             * dimension.
              */
             ac() {
                 //return this._ac.compute();
@@ -2803,8 +2859,8 @@
              * @memberOf ran.mc.MCMC
              * @param {Function=} callback Callback to trigger after the iteration.
              * @param {boolean=} warmUp Whether iteration takes place during warm-up or not. Default is false.
-             * @returns {Object} Object containing the new state ({x}) and whether it is a
-             * genuinely new state or not ({accepted}).
+             * @returns {Object} Object containing the new state (<code>x</code>) and whether it is a
+             * genuinely new state or not (<code>accepted</code>).
              */
             iterate(callback = null, warmUp = false) {
                 // Get new state
@@ -2832,7 +2888,7 @@
              * @param {Function} callback Callback function to call when an integer percentage of the warm-up is done.
              * The percentage of the finished batches is passed as a parameter.
              * @param {number=} maxBatches Maximum number of batches for warm-up. Each batch consists of 10K iterations.
-             * Default values i 100.
+             * Default value is 100.
              */
             warmUp(callback, maxBatches = 100) {
                 // Run specified batches
@@ -2903,8 +2959,7 @@
         /**
          * Class implementing the (random walk) [Metropolis]{@link https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm}
          * algorithm.
-         * Proposals are updated according to the Metropolis-Within-Gibbs procedure as described in:
-         * Jeffrey S Rosenthal: Optimal Proposal Distributions and Adaptive MCMC, in Handbook of Markov Chain Monte Carlo.
+         * Proposals are updated according to the [Metropolis-Within-Gibbs procedure]{@link http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.161.2424}:
          *
          * @class RWM
          * @memberOf ran.mc
@@ -3040,7 +3095,6 @@
         // TODO Gibbs sampling
         // TODO NUTS
         // TODO adaptive Metropolis
-        // TODO
 
         // TODO Hamiltonian
         // TODO Adjust Euclidean metric from covariance in burn-in

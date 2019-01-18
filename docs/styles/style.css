@@ -25,11 +25,11 @@ a,
 a:visited{
     text-decoration: none;
     color: royalblue;
-    border-bottom: 2px solid white;
+    border-bottom: 3px solid transparent;
     transition: border-bottom .2s;
 }
 a:hover {
-    border-bottom: 2px solid royalblue;
+    border-bottom: 3px solid royalblue;
     transition: border-bottom .2s;
 }
 

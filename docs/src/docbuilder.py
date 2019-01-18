@@ -172,7 +172,7 @@ class DocBuilder:
             return text #re.sub(r'\{(.*?)\}', r'<code>\1</code>', text)
 
         def _linkify(text):
-            return re.sub(r'\[(.*)\]\{@link (.*?)\}', r'<a href="\2" target="_blank">\1</a>', text)
+            return re.sub(r'\[(.*?)\]\{@link (.*?)\}', r'<a href="\2" target="_blank">\1</a>', text)
 
         def _tagify(text, tag, attr={}):
             ltag = "<" + tag
@@ -270,7 +270,10 @@ class DocBuilder:
                 for p in params:
                     entry = "<td><i>%s</i></td><td class='param-type'>%s</td>"\
                                % (p['name'], ' '.join(_tagify(pt.split('.')[-1], "code") for pt in p['type']['types']))
-                    rows += _tagify(entry + _tagify(_codify(p['desc']), "td"), "tr")
+                    desc = p['desc']
+                    if 'optional' in p['type']['options']:
+                        desc += ' ' + _tagify('optional', 'code')
+                    rows += _tagify(entry + _tagify(_codify(desc), "td"), "tr")
                 content += _tagify(argdesc + _tagify(rows, 'tbody'), "table")
 
             # Returns

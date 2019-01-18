@@ -237,34 +237,50 @@ describe('dist', function() {
         });
     });
 
-    describe('Gamma', function () {
+    describe('Gamma', () => {
         const p = () => [core.float(0.1, 10), core.float(0.1, 3)];
-        it('should return an array of gamma distributed values', function () {
-            utils.trials(function () {
+        it('should return an array of gamma distributed values', () => {
+            utils.trials(() => {
                 const gamma = new dist.Gamma(...p());
                 return utils.ks_test(gamma.sample(LAPS), x => gamma.cdf(x));
             });
         });
-        it('integral of pdf should give cdf', function () {
-            utils.trials(function () {
+        it('integral of pdf should give cdf', () => {
+            utils.trials(() => {
                 const gamma = new dist.Gamma(...p());
                 return utils.cdf2pdf(gamma, [0.01, 10], LAPS_2) < EPSILON;
             });
         });
     });
 
-    describe('GeneralizedGamma', function () {
+    describe('GeneralizedGamma', () =>{
         const p = () => [core.float(0.1, 10), core.float(0.1, 5), core.float(0.1, 10)];
-        it('should return an array of generalized gamma distributed values', function () {
-            utils.trials(function () {
+        it('should return an array of generalized gamma distributed values', () => {
+            utils.trials(() => {
                 const generalizedGamma = new dist.GeneralizedGamma(...p());
                 return utils.ks_test(generalizedGamma.sample(LAPS), x => generalizedGamma.cdf(x));
             });
         });
-        it('integral of pdf should give cdf', function () {
-            utils.trials(function () {
+        it('integral of pdf should give cdf', () => {
+            utils.trials(() => {
                 const generalizedGamma = new dist.GeneralizedGamma(...p());
                 return utils.cdf2pdf(generalizedGamma, [0.01, 10], LAPS_2) < EPSILON;
+            });
+        });
+    });
+
+    describe('Gumbel', () => {
+        const p = () => [core.float(-3, 3), core.float(0.1, 5)];
+        it('should return an array of Gumbel distributed values', () => {
+            utils.trials(() => {
+                const gumbel = new dist.Gumbel(...p());
+                return utils.ks_test(gumbel.sample(LAPS), x => gumbel.cdf(x));
+            });
+        });
+        it('integral of pdf should give cdf', () => {
+            utils.trials(() => {
+                const gumbel = new dist.Gumbel(...p());
+                return utils.cdf2pdf(gumbel, [0.01, 10], LAPS_2) < EPSILON;
             });
         });
     });
