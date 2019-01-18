@@ -33,6 +33,25 @@ describe('dist', function() {
         });
     });
 
+    describe('Arcsine', function () {
+        const p = () => {
+            const xmin = core.float(10);
+            return [xmin, xmin + core.float(0.1, 100)];
+        };
+        it('should return an array of arcsine distributed values', function () {
+            utils.trials(function () {
+                const arcsine = new dist.Arcsine(...p());
+                return utils.ks_test(arcsine.sample(LAPS), x => arcsine.cdf(x));
+            });
+        });
+        it('integral of pdf should give cdf', function () {
+            utils.trials(function () {
+                const arcsine = new dist.Arcsine(...p());
+                return utils.cdf2pdf(arcsine, [0.01, 10], LAPS_2) < EPSILON;
+            });
+        });
+    });
+
     describe('Bernoulli', function () {
         const p = () => [core.float()];
         it('should return an array of Bernoulli distributed values', function () {

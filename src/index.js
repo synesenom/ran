@@ -46,7 +46,7 @@
      * @returns {number} Random number.
      * @private
      */
-    function _r(min, max) {
+    function _r(min = 0, max = 1) {
         return min < max ? Math.random() * (max - min) + min : Math.random() * (min - max) + max;
     }
 
@@ -507,16 +507,16 @@
                 }
 
                 return {
-                    D: D,
-                    L: L
+                    D,
+                    L
                 };
             }
         }
 
         // Exposed classes
         return {
-            Vector: Vector,
-            Matrix: Matrix
+            Vector,
+            Matrix
         };
     })();
 
@@ -785,13 +785,18 @@
             };
         })();
 
+        function beta(x, y) {
+            return Math.exp(gammaLn(x) + gammaLn(y) - gammaLn(x + y))
+        }
+
         // Exposed methods
         return {
-            gamma: gamma,
-            gammaLn: gammaLn,
-            gammaLowerIncomplete: gammaLowerIncomplete,
-            betaIncomplete: betaIncomplete,
-            erf: erf
+            beta,
+            betaIncomplete,
+            erf,
+            gamma,
+            gammaLn,
+            gammaLowerIncomplete
         };
     })();
 
@@ -835,9 +840,9 @@
          */
         function float(min, max, n) {
             if (arguments.length === 0)
-                return _r(0, 1);
+                return Math.random();
             if (arguments.length === 1)
-                return _r(0, min);
+                return Math.random() * min;
             return _some(() => _r(min, max), n);
         }
 
@@ -866,7 +871,7 @@
          */
         function int(min, max, n) {
             if (arguments.length === 1)
-                return Math.floor(_r(0, min + 1));
+                return Math.floor(Math.random() * (min + 1));
             return _some(() => Math.floor(_r(min, max + 1)), n);
         }
 
@@ -890,7 +895,7 @@
         function choice(values, n) {
             if (values === null || values === undefined || values.length === 0)
                 return null;
-            return _some(() => values[Math.floor(_r(0, values.length))], n);
+            return _some(() => values[Math.floor(Math.random() * values.length)], n);
         }
 
         /**
@@ -914,7 +919,7 @@
         function char(string, n) {
             if (string === null || string === undefined || string.length === 0)
                 return null;
-            return _some(() => string.charAt(Math.floor(_r(0, string.length))), n);
+            return _some(() => string.charAt(Math.floor(Math.random() * string.length)), n);
         }
 
         /**
@@ -968,12 +973,12 @@
 
         // Public methods
         return {
-            float: float,
-            int: int,
-            choice: choice,
-            char: char,
-            shuffle: shuffle,
-            coin: coin
+            float,
+            int,
+            choice,
+            char,
+            shuffle,
+            coin
         };
     })();
 
@@ -1434,7 +1439,6 @@
         // TODO F
         // TODO Gamma-normal
         // TODO Generalized Pareto
-        // TODO Gompertz
         // TODO Hyperbolic-secant
         // TODO Hyperexponential
         // TODO Hypoexponential
@@ -1465,6 +1469,40 @@
         // TODO Wald
 
         /**
+         * Generator for the [generalized arcsine distribution]{@link https://en.wikipedia.org/wiki/Arcsine_distribution#Arbitrary_bounded_support}:
+         *
+         * $$f(x; a, b) = \frac{1}{\pi \sqrt{(x -a) (b - x)}},$$
+         *
+         * where \(a, b \in \mathbb{R}\) and \(a < b\). Support: \(x \in [a, b]\).
+         *
+         * @class Arcsine
+         * @memberOf ran.dist
+         * @param {number} a Lower boundary.
+         * @param {number} b Upper boundary.
+         * @constructor
+         */
+        class Arcsine extends Distribution {
+            constructor(a, b) {
+                super('continuous', arguments.length);
+                this.p = {a, b};
+                this.c = [1 / Math.PI, b - a];
+            }
+
+            _generator() {
+                let s = Math.sin(0.5 * Math.PI * Math.random());
+                return (s * s) * this.c[1] + this.p.a;
+            }
+
+            _pdf(x) {
+                return x >= this.p.a && x < this.p.b ? this.c[0] / Math.sqrt((x - this.p.a) * (this.p.b - x)) : 0;
+            }
+
+            _cdf(x) {
+                return x >= this.p.a && x < this.p.b ? 2 * this.c[0] * Math.asin(Math.sqrt((x - this.p.a) / (this.p.b - this.p.a))) : 0;
+            }
+        }
+
+        /**
          * Generator for the [Bernoulli distribution]{@link https://en.wikipedia.org/wiki/Bernoulli_distribution}:
          *
          * $$f(k; p) = \begin{cases}p &\quad\text{if $k = 1$}\\1 - p &\quad\text{if $k = 0$}\\\end{cases}$$
@@ -1479,7 +1517,7 @@
         class Bernoulli extends Distribution {
             constructor(p) {
                 super("discrete", arguments.length);
-                this.p = {p: p};
+                this.p = {p};
             }
 
             _generator() {
@@ -1513,8 +1551,8 @@
         class Beta extends Distribution {
             constructor(alpha, beta) {
                 super("continuous", arguments.length);
-                this.p = {alpha: alpha, beta: beta};
-                this.c = [Math.exp(special.gammaLn(alpha) + special.gammaLn(beta) - special.gammaLn(alpha + beta))];
+                this.p = {alpha, beta};
+                this.c = [special.beta(alpha, beta)];
             }
 
             _generator() {
@@ -1549,7 +1587,7 @@
             constructor(n, p) {
                 super("continuous", arguments.length);
                 let pp = p <= 0.5 ? p : 1 - p;
-                this.p = {n: n, p: p};
+                this.p = {n, p};
                 this.c = [pp, n * pp];
             }
 
@@ -1603,7 +1641,7 @@
         }
 
         /**
-         * Generator for [bounded Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution#Bounded_Pareto_distribution}:
+         * Generator for the [bounded Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution#Bounded_Pareto_distribution}:
          *
          * $$f(x; L, H, \alpha) = \frac{\alpha L^\alpha x^{-\alpha - 1}}{1 - \big(\frac{L}{H}\big)^\alpha},$$
          *
@@ -1619,7 +1657,7 @@
         class BoundedPareto extends Distribution {
             constructor(L, H, alpha) {
                 super("continuous", arguments.length);
-                this.p = {L: L, H: H, alpha: alpha};
+                this.p = {L, H, alpha};
                 this.c = [Math.pow(L, alpha), Math.pow(H, alpha), (1 - Math.pow(L / H, alpha))];
             }
 
@@ -1653,7 +1691,7 @@
         class Cauchy extends Distribution {
             constructor(x0, gamma) {
                 super('continuous', arguments.length);
-                this.p = {x0: x0, gamma: gamma};
+                this.p = {x0, gamma};
                 this.c = [Math.PI * this.p.gamma];
             }
 
@@ -1672,7 +1710,7 @@
         }
 
         /**
-         * Generator for custom distribution, using the
+         * Generator for a custom distribution, using the
          * [alias table method]{@link http://www.keithschwarz.com/darts-dice-coins}:
          *
          * $$f(k; \{w\}) = \frac{w_k}{\sum_j w_j},$$
@@ -1687,7 +1725,7 @@
         class Custom extends Distribution {
             constructor(weights) {
                 super("discrete", arguments.length);
-                this.p = {n: weights.length, weights: weights};
+                this.p = {n: weights.length, weights};
 
                 // Pre-compute tables
                 let n = weights.length,
@@ -1796,7 +1834,7 @@
         class Degenerate extends Distribution {
             constructor(x0) {
                 super("continuous", arguments.length);
-                this.p = {x0: x0};
+                this.p = {x0};
             }
 
             _generator() {
@@ -1813,7 +1851,7 @@
         }
 
         /**
-         * Generator for [exponentially distribution]{@link https://en.wikipedia.org/wiki/Exponential_distribution}:
+         * Generator for the [exponential distribution]{@link https://en.wikipedia.org/wiki/Exponential_distribution}:
          *
          * $$f(x; \lambda) = \lambda e^{-\lambda x},$$
          *
@@ -1827,7 +1865,7 @@
         class Exponential extends Distribution {
             constructor(lambda) {
                 super("continuous", arguments.length);
-                this.p = {lambda: lambda};
+                this.p = {lambda};
             }
 
             _generator() {
@@ -1844,7 +1882,7 @@
         }
 
         /**
-         * Generator for [Fréchet distribution]{@link https://en.wikipedia.org/wiki/Fréchet_distribution}:
+         * Generator for the [Fréchet distribution]{@link https://en.wikipedia.org/wiki/Fréchet_distribution}:
          *
          * $$f(x; \alpha, s, m) = \frac{\alpha z^{-1 -\alpha} e^{-z^{-\alpha}}}{s},$$
          *
@@ -1860,7 +1898,7 @@
         class Frechet extends Distribution {
             constructor(alpha, s, m) {
                 super('continuous', arguments.length);
-                this.p = {alpha: alpha, s: s, m: m};
+                this.p = {alpha, s, m};
             }
 
             _generator() {
@@ -1882,7 +1920,7 @@
         }
 
         /**
-         * Generator for [gamma distribution]{@link https://en.wikipedia.org/wiki/Gamma_distribution} using the
+         * Generator for the [gamma distribution]{@link https://en.wikipedia.org/wiki/Gamma_distribution} using the
          * shape/rate parametrization:
          *
          * $$f(x; \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{\alpha - 1} e^{-\beta x},$$
@@ -1898,7 +1936,7 @@
         class Gamma extends Distribution {
             constructor(alpha, beta) {
                 super("continuous", arguments.length);
-                this.p = {alpha: alpha, beta: beta};
+                this.p = {alpha, beta};
                 this.c = [Math.pow(beta, alpha), special.gamma(alpha)];
             }
 
@@ -1916,7 +1954,7 @@
         }
 
         /**
-         * Generator for [Gompertz distribution]{@link https://en.wikipedia.org/wiki/Gompertz_distribution}:
+         * Generator for the [Gompertz distribution]{@link https://en.wikipedia.org/wiki/Gompertz_distribution}:
          *
          * $$f(x; \eta, b) = b \eta e^{\eta + bx - \eta e^{bx}} ,$$
          *
@@ -1931,7 +1969,7 @@
         class Gompertz extends Distribution {
             constructor(eta, b) {
                 super('continuous', arguments.length);
-                this.p = {eta: eta, b: b};
+                this.p = {eta, b};
             }
 
             _generator() {
@@ -1948,7 +1986,7 @@
         }
 
         /**
-         * Generator for [Gumbel distribution]{@link https://en.wikipedia.org/wiki/Gumbel_distribution}:
+         * Generator for the [Gumbel distribution]{@link https://en.wikipedia.org/wiki/Gumbel_distribution}:
          *
          * $$f(x; \mu, \beta) = \frac{1}{\beta} e^{-(z + e^-z)},$$
          *
@@ -1963,7 +2001,7 @@
         class Gumbel extends Distribution {
             constructor(mu, beta) {
                 super('continuous', arguments.length);
-                this.p = {mu: mu, beta: beta};
+                this.p = {mu, beta};
             }
 
             _generator() {
@@ -1981,7 +2019,7 @@
         }
 
         /**
-         * Generator for [Erlang distribution]{@link https://en.wikipedia.org/wiki/Erlang_distribution}:
+         * Generator for the [Erlang distribution]{@link https://en.wikipedia.org/wiki/Erlang_distribution}:
          *
          * $$f(x; k, \lambda) = \frac{\lambda^k x^{k - 1} e^{-\lambda x}}{(k - 1)!},$$
          *
@@ -2000,7 +2038,7 @@
         }
 
         /**
-         * Generator for [chi square distribution]{@link https://en.wikipedia.org/wiki/Chi-squared_distribution}:
+         * Generator for the [\(\chi^2\) distribution]{@link https://en.wikipedia.org/wiki/Chi-squared_distribution}:
          *
          * $$f(x; k) = \frac{1}{2^{k/2} \Gamma(k/2)} x^{k/2 - 1} e^{-x/2},$$
          *
@@ -2018,7 +2056,7 @@
         }
 
         /**
-         * Generator for [generalized gamma distribution]{@link https://en.wikipedia.org/wiki/Generalized_gamma_distribution}:
+         * Generator for the [generalized gamma distribution]{@link https://en.wikipedia.org/wiki/Generalized_gamma_distribution}:
          *
          * $$f(x; a, d, p) = \frac{p/a^d}{\Gamma(d/p)} x^{d - 1} e^{-(x/a)^p},$$
          *
@@ -2034,7 +2072,7 @@
         class GeneralizedGamma extends Distribution {
             constructor(a, d, p) {
                 super("continuous", arguments.length);
-                this.p = {a: a, d: d, p: p};
+                this.p = {a, d, p};
                 this.c = [special.gamma(d / p), (p / Math.pow(a, d)), 1 / Math.pow(a, p)];
             }
 
@@ -2052,7 +2090,7 @@
         }
 
         /**
-         * Generator for [inverse gamma distribution]{@link https://en.wikipedia.org/wiki/Inverse-gamma_distribution}:
+         * Generator for the [inverse gamma distribution]{@link https://en.wikipedia.org/wiki/Inverse-gamma_distribution}:
          *
          * $$f(x; \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{-\alpha - 1} e^{-\beta/x},$$
          *
@@ -2067,7 +2105,7 @@
         class InverseGamma extends Distribution {
             constructor(alpha, beta) {
                 super("continuous", arguments.length);
-                this.p = {alpha: alpha, beta: beta};
+                this.p = {alpha, beta};
                 this.c = [Math.pow(beta, alpha) / special.gamma(alpha), special.gamma(alpha)];
             }
 
@@ -2085,7 +2123,7 @@
         }
 
         /**
-         * Generator for [lognormal distribution]{@link https://en.wikipedia.org/wiki/Log-normal_distribution}:
+         * Generator for the [lognormal distribution]{@link https://en.wikipedia.org/wiki/Log-normal_distribution}:
          *
          * $$f(x; \mu, \sigma) = \frac{1}{x \sigma \sqrt{2 \pi}}e^{-\frac{(\ln x - \mu)^2}{2\sigma^2}},$$
          *
@@ -2100,7 +2138,7 @@
         class Lognormal extends Distribution {
             constructor(mu, sigma) {
                 super("continuous", arguments.length);
-                this.p = {mu: mu, sigma: sigma};
+                this.p = {mu, sigma};
                 this.c = [sigma * Math.sqrt(2 * Math.PI), sigma * Math.SQRT2];
             }
 
@@ -2118,7 +2156,7 @@
         }
 
         /**
-         * Generator for [normal distribution]{@link https://en.wikipedia.org/wiki/Normal_distribution}:
+         * Generator for the [normal distribution]{@link https://en.wikipedia.org/wiki/Normal_distribution}:
          *
          * $$f(x; \mu, \sigma) = \frac{1}{\sqrt{2 \pi \sigma^2}} e^{-\frac{(x - \mu)^2}{2\sigma^2}},$$
          *
@@ -2133,7 +2171,7 @@
         class Normal extends Distribution {
             constructor(mu, sigma) {
                 super("continuous", arguments.length);
-                this.p = {mu: mu, sigma: sigma};
+                this.p = {mu, sigma};
                 this.c = [sigma * Math.sqrt(2 * Math.PI), sigma * Math.SQRT2];
             }
 
@@ -2151,7 +2189,7 @@
         }
 
         /**
-         * Generator for [Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution}:
+         * Generator for the [Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution}:
          *
          * $$f(x; x_\mathrm{min}, \alpha) = \frac{\alpha x_\mathrm{min}^\alpha}{x^{\alpha + 1}},$$
          *
@@ -2166,7 +2204,7 @@
         class Pareto extends Distribution {
             constructor(xmin, alpha) {
                 super("continuous", arguments.length);
-                this.p = {xmin: xmin, alpha: alpha};
+                this.p = {xmin, alpha};
             }
 
             _generator() {
@@ -2183,7 +2221,7 @@
         }
 
         /**
-         * Generator for [Poisson distribution]{@link https://en.wikipedia.org/wiki/Poisson_distribution}:
+         * Generator for the [Poisson distribution]{@link https://en.wikipedia.org/wiki/Poisson_distribution}:
          *
          * $$f(k; \lambda) = \frac{\lambda^k e^{-\lambda}}{k!},$$
          *
@@ -2197,7 +2235,7 @@
         class Poisson extends Distribution {
             constructor(lambda) {
                 super("discrete", arguments.length);
-                this.p = {lambda: lambda};
+                this.p = {lambda};
             }
 
             _generator() {
@@ -2245,7 +2283,7 @@
         }
 
         /**
-         * Generator for continuous
+         * Generator for the continuous
          * [uniform distribution]{@link https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)}:
          *
          * $$f(x; x_\mathrm{min}, x_\mathrm{max}) = \frac{1}{x_\mathrm{max} - x_\mathrm{min}},$$
@@ -2262,7 +2300,7 @@
         class UniformContinuous extends Distribution {
             constructor(xmin, xmax) {
                 super("continuous", arguments.length);
-                this.p = {xmin: xmin, xmax: xmax};
+                this.p = {xmin, xmax};
                 this.c = [xmax - xmin];
             }
 
@@ -2280,7 +2318,7 @@
         }
 
         /**
-         * Generator for discrete
+         * Generator for the discrete
          * [uniform distribution]{@link https://en.wikipedia.org/wiki/Discrete_uniform_distribution}:
          *
          * $$f(k; x_\mathrm{min}, x_\mathrm{max}) = \frac{1}{x_\mathrm{max} - x_\mathrm{min} + 1},$$
@@ -2296,7 +2334,7 @@
         class UniformDiscrete extends Distribution {
             constructor(xmin, xmax) {
                 super("discrete", arguments.length);
-                this.p = {xmin: xmin, xmax: xmax};
+                this.p = {xmin, xmax};
                 this.c = [xmax - xmin + 1];
             }
 
@@ -2316,7 +2354,7 @@
         }
 
         /**
-         * Generator for [Weibull distribution]{@link https://en.wikipedia.org/wiki/Weibull_distribution}:
+         * Generator for the [Weibull distribution]{@link https://en.wikipedia.org/wiki/Weibull_distribution}:
          *
          * $$f(x; \lambda, k) = \frac{k}{\lambda}\bigg(\frac{x}{\lambda}\bigg)^{k - 1} e^{-(x / \lambda)^k},$$
          *
@@ -2331,7 +2369,7 @@
         class Weibull extends Distribution {
             constructor(lambda, k) {
                 super("continuous", arguments.length);
-                this.p = {lambda: lambda, k: k};
+                this.p = {lambda, k};
             }
 
             _generator() {
@@ -2349,6 +2387,7 @@
 
         // Public classes
         return {
+            Arcsine,
             Bernoulli,
             Beta,
             Binomial,
