@@ -6,43 +6,29 @@ const LAPS = 100;
 const LAPS_2 = 10000;
 const MAX_AVG_DIFF = 1e-3;
 const EPSILON = 1e-6;
-const GENERATORS = {
-    UniformContinuous: {
-        g: function() {
-            ;
-        }
-    },
-    UniformDiscrete: {
-        g: function() {
-            const xmin = core.int(10);
-            return new dist.UniformDiscrete(xmin, xmin + core.int(10, 100));
-        }
-    },
-    Weibull: {
-        g: function() {
-            return new dist.Weibull(core.float(0.1, 10), core.float(0.1, 10));
-        }
-    }
-};
 
 
 describe('dist', function() {
     describe('Distribution', () => {
         it('should test a discrete distribution', () => {
+            const p1 = () => [core.float(0.1, 10)],
+                p2 = () => [core.int(0, 10), core.int(20, 40)];
             utils.trials(function () {
-                const poisson = GENERATORS.Poisson.g();
-                const uniform = GENERATORS.UniformDiscrete.g();
-                return poisson.test(poisson.sample(LAPS)).passed
-                    && !poisson.test(uniform.sample(LAPS)).passed;
+                const poisson = new dist.Poisson(...p1());
+                const uniform = new dist.UniformDiscrete(...p2());
+                return poisson.test(poisson.sample(10 * LAPS)).passed
+                    && !poisson.test(uniform.sample(10 * LAPS)).passed;
             });
         });
 
         it('should test a continuous distribution', () => {
+            const p1 = () => [core.float(0.1, 5), core.float(0.1, 10)],
+                p2 = () => [core.float(0, 10), core.float(10.1, 100)];
             utils.trials(function () {
-                const pareto = GENERATORS.Pareto.g();
-                const uniform = GENERATORS.UniformContinuous.g();
-                return pareto.test(pareto.sample(LAPS)).passed
-                    && !pareto.test(uniform.sample(LAPS)).passed;
+                const pareto = new dist.Pareto(...p1());
+                const uniform = new dist.UniformContinuous(...p2());
+                return pareto.test(pareto.sample(10 * LAPS)).passed
+                    && !pareto.test(uniform.sample(10 * LAPS)).passed;
             });
         });
     });
@@ -113,7 +99,7 @@ describe('dist', function() {
         });
 
         describe('high n', () => {
-            const p = () => [core.int(100, 150), core.float()];
+            const p = () => [core.int(100, 120), core.float()];
             it('should return an array of binomial distributed values', function () {
                 utils.trials(function () {
                     const binomial = new dist.Binomial(...p());
@@ -383,37 +369,39 @@ describe('dist', function() {
         it('integral of pdf should give cdf', function () {
             utils.trials(function () {
                 const uniform = new dist.UniformContinuous(...p());
-                return utils.diff_cont(x => uniform.pdf(x), x => uniform.cdf(x), -100, 100, 0.1) < MAX_AVG_DIFF;
+                return utils.cdf2pdf(uniform, [0.01, 10], LAPS_2) < EPSILON;
             });
         });
     });
 
     describe('UniformDiscrete', function () {
+        const p = () => [core.int(10), core.int(11, 20)];
         it('should return an array of Poisson distributed values', function () {
             utils.trials(function () {
-                const uniform = GENERATORS.UniformDiscrete.g();
+                const uniform = new dist.UniformDiscrete(...p());
                 return utils.chi_test(uniform.sample(LAPS), x => uniform.pdf(x), 1);
             });
         });
         it('sum of pmf should give cdf', function () {
             utils.trials(function () {
-                const uniform = GENERATORS.UniformDiscrete.g();
+                const uniform = new dist.UniformDiscrete(...p());
                 return utils.diff_disc(x => uniform.pdf(x), x => uniform.cdf(x), 0, 100) < MAX_AVG_DIFF;
             });
         });
     });
 
     describe('Weibull', function () {
+        const p = () => [core.float(0.1, 10), core.float(0.1, 10)];
         it('should return an array of Weibull distributed values', function () {
             utils.trials(function () {
-                const weibull = GENERATORS.Weibull.g();
+                const weibull = new  dist.Weibull(...p());
                 return utils.ks_test(weibull.sample(LAPS), x => weibull.cdf(x));
             });
         });
         it('integral of pdf should give cdf', function () {
             utils.trials(function () {
-                const weibull = GENERATORS.Weibull.g();
-                return utils.diff_cont(x => weibull.pdf(x), x => weibull.cdf(x), 0, 10, 0.01) < MAX_AVG_DIFF;
+                const weibull = new  dist.Weibull(...p());
+                return utils.cdf2pdf(weibull, [0.01, 10], LAPS_2) < EPSILON;
             });
         });
     });

@@ -109,9 +109,9 @@ let test_utils = (function() {
         for (let x=a; x<b; x++) {
             int += pmf(x);
             dy += Math.abs(cdf(x) - int);
-            console.log(cdf(x), int);
+            //console.log(cdf(x), int);
         }
-        console.log(dy);
+        //console.log(dy);
         return dy;
     }
 
@@ -125,20 +125,6 @@ let test_utils = (function() {
             s += 2 * func(a + i * h);
         }
         return s * h / 3;
-    }
-
-    function diff_cont(pdf, cdf, a, b, dx) {
-        let n = 0;
-        let dy = 0;
-        let int = 0;
-        for (let x=a; x<b-dx; x+=dx) {
-            int += simpson(pdf, x, x+dx, 100);
-            dy += Math.abs(cdf(x+dx) - int);
-            n++;
-            //console.log(cdf(x+dx), int);
-        }
-        //console.log(dy/n);
-        return dy/n;
     }
 
     function diff_mesh(pdf, cdf, mesh) {
@@ -164,7 +150,7 @@ let test_utils = (function() {
     function cdf2pdf(dist, range, laps) {
         return sum(Array.from({length: laps}, () => {
             let x0 = range[0] + Math.random() * (range[1] - range[0]);
-            return Math.abs(dist.pdf(x0) - differentiate(x => dist.cdf(x), x0, 0.0001));
+            return Math.abs(dist.pdf(x0) - differentiate(x => dist.cdf(x), x0, 0.00001));
         })) / laps;
     }
 
@@ -174,7 +160,6 @@ let test_utils = (function() {
         trials,
         repeat,
         diff_disc,
-        diff_cont,
         diff_mesh,
         cdf2pdf
     };
