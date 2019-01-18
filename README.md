@@ -5,7 +5,6 @@
 [![David](https://img.shields.io/david/synesenom/ranjs.svg)](https://david-dm.org/synesenom/ran)
 [![David](https://img.shields.io/david/dev/synesenom/ranjs.svg)](https://david-dm.org/synesenom/ran)
 [![Inline docs](http://inch-ci.org/github/synesenom/ran.svg?branch=master)](http://inch-ci.org/github/synesenom/ran)
-[![Coveralls](https://img.shields.io/coveralls/github/synesenom/ran.svg)](https://coveralls.io/github/synesenom/ran)
 [![License](https://img.shields.io/npm/l/ranjs.svg)](https://www.npmjs.com/package/ranjs)
 
 # ranjs
