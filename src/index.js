@@ -684,6 +684,17 @@
             };
         })();
 
+        /**
+         * Incomplete beta function, using the continued fraction approximations.
+         *
+         * @method betaIncomplete
+         * @memberOf ran.special
+         * @param {number} a First parameter of the function.
+         * @param {number} b Second parameter of the function.
+         * @param {number} x Lower boundary of the integral.
+         * @returns {number} Value of the incomplete beta function.
+         * @private
+         */
         let betaIncomplete = (function() {
             const _FPMIN = 1e-30;
 
@@ -726,17 +737,6 @@
                 return h;
             }
 
-            /**
-             * Incomplete beta function, using the continued fraction approximations.
-             *
-             * @method betaIncomplete
-             * @memberOf ran.special
-             * @param {number} a First parameter of the function.
-             * @param {number} b Second parameter of the function.
-             * @param {number} x Lower boundary of the integral.
-             * @returns {number} Value of the incomplete beta function.
-             * @private
-             */
             return function(a, b, x) {
                 let bt = (x <= 0 || x >= 1)
                     ? 0
@@ -1429,8 +1429,6 @@
         // TODO Rectangular
         // TODO Zeta
         // TODO Zipf https://en.wikipedia.org/wiki/Zipf%27s_law |
-        // TODO Arcsin
-        // TODO Arctangent
         // TODO Chi
         // TODO Doubly non-central F
         // TODO Doubly non-central t
@@ -1878,6 +1876,39 @@
 
             _cdf(x) {
                 return 1 - Math.exp(-this.p.lambda * x);
+            }
+        }
+
+        /**
+         * Generator for the [F distribution]{@link https://en.wikipedia.org/wiki/F-distribution}:
+         *
+         * $$f(x; d_1, d_2) = \frac{\sqrt{\frac{(d_1 x)^{d_1} d_2^{d_2}}{(d_1x + d_2)^{d_1 + d_2}}}}{x \mathrm{B}\big(\frac{d_1}{2}, \frac{d_2}{2}\big)},$$
+         *
+         * with \(d_1, d_2 \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
+         *
+         * @class F
+         * @memberOf ran.dist
+         * @param {number} d1 First degree of freedom.
+         * @param {number} d2 Second degree of freedom.
+         * @constructor
+         */
+        class F extends Distribution {
+            constructor(d1, d2) {
+                super('continuous', arguments.length);
+                this.p = {d1, d2};
+                this.c = [special.beta(d1 / 2, d2 / 2), Math.pow(d2, d2)];
+            }
+
+            _generator() {
+                return this.p.d2 * _gamma(this.p.d1 / 2, 1) / (this.p.d1 * _gamma(this.p.d2 / 2, 1));
+            }
+
+            _pdf(x) {
+                return x > 0 ? Math.sqrt(Math.pow(this.p.d1*x, this.p.d1) * this.c[1] / Math.pow(this.p.d1 * x + this.p.d2, this.p.d1 + this.p.d2)) / (x * this.c[0]) : 0;
+            }
+
+            _cdf(x) {
+                return x > 0 ? special.betaIncomplete(this.p.d1 / 2, this.p.d2 / 2, this.p.d1 * x / (this.p.d1*x + this.p.d2)) : 0;
             }
         }
 
@@ -2398,6 +2429,7 @@
             Degenerate,
             Erlang,
             Exponential,
+            F,
             Frechet,
             Gamma,
             GeneralizedGamma,

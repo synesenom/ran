@@ -256,6 +256,22 @@ describe('dist', function() {
         });
     });
 
+    describe('F', () => {
+        const p = () => [core.float(0.1, 5), core.float(0.1, 5)];
+        it('should return an array of F distributed values', () => {
+            utils.trials(() => {
+                const f = new dist.F(...p());
+                return utils.ks_test(f.sample(LAPS), x => f.cdf(x));
+            });
+        });
+        it('integral of pdf should give cdf', () => {
+            utils.trials(() => {
+                const f = new dist.F(...p());
+                return utils.cdf2pdf(f, [p()[2]+0.5, 10], LAPS_2) < EPSILON;
+            });
+        });
+    });
+
     describe('Frechet', () => {
         const p = () => [core.float(0.1, 5), core.float(0.1, 5), core.float(-5, 5)];
         it('should return an array of Frechet distributed values', () => {
