@@ -151,6 +151,10 @@ function run(options) {
   });
 
   child.on('exit', function (code, signal) {
+    if (child && child.stdin) {
+      process.stdin.unpipe(child.stdin);
+    }
+
     if (code === 127) {
       utils.log.error('failed to start process, "' + cmd.executable +
         '" exec not found');
@@ -243,9 +247,9 @@ function run(options) {
         process.stdin.unpipe(child.stdin);
       }
 
-      if (utils.isWindows) {
-        // For the on('exit', ...) handler above the following looks like a
-        // crash, so we set the killedAfterChange flag
+      // For the on('exit', ...) handler above the following looks like a
+      // crash, so we set the killedAfterChange flag if a restart is planned
+      if (!noRestart) {
         killedAfterChange = true;
       }
 
@@ -333,11 +337,11 @@ function kill(child, signal, callback) {
     const sig = signal.replace('SIG', '');
     psTree(child.pid, function (err, kids) {
       if (psTree.hasPS) {
-        spawn('kill', ['-s', sig, child.pid].concat(kids.map(p => p.PID)))
+        spawn('kill', ['-s', sig, child.pid].concat(kids))
           .on('close', callback);
       } else {
         // make sure we kill from smallest to largest
-        const pids = kids.map(p => p.PID).concat(child.pid).sort();
+        const pids = kids.concat(child.pid).sort();
         pids.forEach(pid => {
           exec('kill -' + signals[signal] + ' ' + pid, () => { });
         });

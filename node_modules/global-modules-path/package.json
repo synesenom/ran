@@ -1,6 +1,6 @@
 {
   "name": "global-modules-path",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Returns path to globally installed package",
   "main": "./lib/index.js",
   "scripts": {
