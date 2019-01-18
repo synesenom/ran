@@ -1434,7 +1434,6 @@
         // TODO Doubly non-central t
         // TODO Error (exponential power)
         // TODO Exponential power
-        // TODO F
         // TODO Gamma-normal
         // TODO Generalized Pareto
         // TODO Hyperbolic-secant
@@ -1565,6 +1564,40 @@
 
             _cdf(x) {
                 return x <= 0 ? 0 : x >= 1 ? 1 : special.betaIncomplete(this.p.alpha, this.p.beta, x);
+            }
+        }
+
+        /**
+         * Generator for the [beta prime distribution]{@link https://en.wikipedia.org/wiki/Beta_prime_distribution}:
+         *
+         * $$f(x; \alpha, \beta) = \frac{x^{\alpha - 1}(1 - x)^{-\alpha - \beta}}{\mathrm{B}(\alpha, \beta)},$$
+         *
+         * with \(\alpha, \beta \in \mathbb{R}^+\) and \(\mathrm{B}(\alpha, \beta)\) is the beta function.
+         * Support: \(x \in \mathbb{R}^+\).
+         *
+         *
+         * @class BetaPrime
+         * @memberOf ran.dist
+         * @param {number} alpha First shape parameter.
+         * @param {number} beta Second shape parameter.
+         * @constructor
+         */
+        class BetaPrime extends Distribution {
+            constructor(alpha, beta) {
+                super('continuous', arguments.length);
+                this.p = {alpha, beta};
+            }
+
+            _generator() {
+                return _gamma(this.p.alpha, 1) / _gamma(this.p.beta, 1);
+            }
+
+            _pdf(x) {
+                return x > 0 ? Math.pow(x, this.p.alpha - 1) * Math.pow(1 + x, -this.p.alpha - this.p.beta) / special.beta(this.p.alpha, this.p.beta) : 0;
+            }
+
+            _cdf(x) {
+                return x > 0 ? special.betaIncomplete(this.p.alpha, this.p.beta, x / (1 + x)) : 0;
             }
         }
 
@@ -2421,6 +2454,7 @@
             Arcsine,
             Bernoulli,
             Beta,
+            BetaPrime,
             Binomial,
             BoundedPareto,
             Cauchy,

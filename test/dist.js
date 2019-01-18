@@ -69,7 +69,7 @@ describe('dist', function() {
     });
 
     describe('Beta', function () {
-        const p = () => [core.float(0.1, 2), core.float(0.1, 2)];
+        const p = () => [core.float(0.1, 3), core.float(0.1, 3)];
         it('should return an array of beta distributed values', function () {
             utils.trials(function () {
                 const beta = new dist.Beta(...p());
@@ -80,6 +80,22 @@ describe('dist', function() {
             utils.trials(function () {
                 const beta = new dist.Beta(...p());
                 return utils.cdf2pdf(beta,  [0.01, 0.99], LAPS_2) < EPSILON;
+            });
+        });
+    });
+
+    describe('BetaPrime', function () {
+        const p = () => [core.float(0.1, 3), core.float(0.1, 3)];
+        it('should return an array of beta prime distributed values', function () {
+            utils.trials(function () {
+                const betaPrime = new dist.BetaPrime(...p());
+                return utils.ks_test(betaPrime.sample(LAPS), x => betaPrime.cdf(x));
+            });
+        });
+        it('integral of pdf should give cdf', function () {
+            utils.trials(function () {
+                const betaPrime = new dist.BetaPrime(...p());
+                return utils.cdf2pdf(betaPrime,  [0.01, 10], LAPS_2) < EPSILON;
             });
         });
     });
