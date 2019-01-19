@@ -2,7 +2,7 @@ const utils = require('../test/test-utils').test_utils;
 const dist = require('../src/index').dist;
 const core = require('../src/index').core;
 
-const LAPS = 10000;
+const LAPS = 100;
 const LAPS_2 = 1000;
 const MAX_AVG_DIFF = 1e-3;
 const EPSILON = 1e-6;
