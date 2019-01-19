@@ -1420,9 +1420,9 @@
         // TODO Gamma-Poisson
         // TODO Geometric
         // TODO Hypergeometric (https://en.wikipedia.org/wiki/Hypergeometric_distribution)
-        // TODO Poisson-binomial (https://en.wikipedia.org/wiki/Poisson_binomial_distribution)
         // TODO Logarithm
         // TODO Negative hypergeometric
+        // TODO Poisson-binomial (https://en.wikipedia.org/wiki/Poisson_binomial_distribution)
         // TODO Pascal (negative binomial)
         // TODO Polya
         // TODO Power series
@@ -1440,13 +1440,12 @@
         // TODO Hyperexponential
         // TODO Hypoexponential
         // TODO IDB
-        // TODO Inveretd beta
-        // TODO Kolmogorov-Smirnov
+        // TODO Inverse Gausian
+        // TODO Inverted beta
         // TODO Log gamma
-        // TODO Log logistic
-        // TODO Logistic
         // TODO Logistic-exponential
         // TODO Lomax
+        // TODO Makeham
         // TODO Minimax
         // TODO Muth
         // TODO Noncentral beta
@@ -1464,6 +1463,7 @@
         // TODO von Mises
         // TODO Wald
 
+        // TODO make standard generators for frequently used standard distributions
         /**
          * Generator for the [generalized arcsine distribution]{@link https://en.wikipedia.org/wiki/Arcsine_distribution#Arbitrary_bounded_support}:
          *
@@ -1473,18 +1473,19 @@
          *
          * @class Arcsine
          * @memberOf ran.dist
-         * @param {number} a Lower boundary.
-         * @param {number} b Upper boundary.
+         * @param {number=} a Lower boundary. Default value is 0.
+         * @param {number=} b Upper boundary. Default value is 1.
          * @constructor
          */
         class Arcsine extends Distribution {
-            constructor(a, b) {
+            constructor(a = 0, b = 1) {
                 super('continuous', arguments.length);
                 this.p = {a, b};
                 this.c = [1 / Math.PI, b - a];
             }
 
             _generator() {
+                // Inverse transform sampling
                 let s = Math.sin(0.5 * Math.PI * Math.random());
                 return (s * s) * this.c[1] + this.p.a;
             }
@@ -1507,16 +1508,17 @@
          *
          * @class Bernoulli
          * @memberOf ran.dist
-         * @param {number} p Probability of the outcome 1.
+         * @param {number=} p Probability of the outcome 1. Default value is 0.5.
          * @constructor
          */
         class Bernoulli extends Distribution {
-            constructor(p) {
+            constructor(p = 0.5) {
                 super("discrete", arguments.length);
                 this.p = {p};
             }
 
             _generator() {
+                // Direct sampling
                 return Math.random() < this.p.p ? 1 : 0;
             }
 
@@ -1540,18 +1542,19 @@
          *
          * @class Beta
          * @memberOf ran.dist
-         * @param {number} alpha First shape parameter.
-         * @param {number} beta Second shape parameter.
+         * @param {number=} alpha First shape parameter. Default value is 2.
+         * @param {number=} beta Second shape parameter. Default value is 2.
          * @constructor
          */
         class Beta extends Distribution {
-            constructor(alpha, beta) {
+            constructor(alpha = 2, beta = 2) {
                 super("continuous", arguments.length);
                 this.p = {alpha, beta};
                 this.c = [special.beta(alpha, beta)];
             }
 
             _generator() {
+                // Direct sampling from gamma
                 let x = _gamma(this.p.alpha, 1),
                     y = _gamma(this.p.beta, 1);
                 return x / (x + y);
@@ -1577,17 +1580,18 @@
          *
          * @class BetaPrime
          * @memberOf ran.dist
-         * @param {number} alpha First shape parameter.
-         * @param {number} beta Second shape parameter.
+         * @param {number=} alpha First shape parameter. Default value is 2.
+         * @param {number=} beta Second shape parameter. Default value is 2.
          * @constructor
          */
         class BetaPrime extends Distribution {
-            constructor(alpha, beta) {
+            constructor(alpha = 2, beta = 2) {
                 super('continuous', arguments.length);
                 this.p = {alpha, beta};
             }
 
             _generator() {
+                // Direct sampling from gamma
                 return _gamma(this.p.alpha, 1) / _gamma(this.p.beta, 1);
             }
 
@@ -1609,12 +1613,12 @@
          *
          * @class Binomial
          * @memberOf ran.dist
-         * @param {number} n Number of trials.
-         * @param {number} p Probability of success.
+         * @param {number=} n Number of trials. Default value is 100.
+         * @param {number=} p Probability of success. Default value is 0.5.
          * @constructor
          */
         class Binomial extends Distribution {
-            constructor(n, p) {
+            constructor(n = 100, p = 0.5) {
                 super("continuous", arguments.length);
                 let pp = p <= 0.5 ? p : 1 - p;
                 this.p = {n, p};
@@ -1622,6 +1626,7 @@
             }
 
             _generator() {
+                // Direct sampling
                 if (this.p.n < 25) {
                     let b = 0;
                     for (let i = 1; i <= this.p.n; i++)
@@ -1679,19 +1684,20 @@
          *
          * @class BoundedPareto
          * @memberOf ran.dist
-         * @param {number} L Lower boundary.
-         * @param {number} H Upper boundary.
-         * @param {number} alpha Shape parameter.
+         * @param {number=} L Lower boundary. Default value is 1.
+         * @param {number=} H Upper boundary. Default value is 10.
+         * @param {number=} alpha Shape parameter. Default value is 1.
          * @constructor
          */
         class BoundedPareto extends Distribution {
-            constructor(L, H, alpha) {
+            constructor(L = 1, H = 10, alpha = 1) {
                 super("continuous", arguments.length);
                 this.p = {L, H, alpha};
                 this.c = [Math.pow(L, alpha), Math.pow(H, alpha), (1 - Math.pow(L / H, alpha))];
             }
 
             _generator() {
+                // Inverse transform sampling
                 return Math.pow((this.c[1] + Math.random() * (this.c[0] - this.c[1])) / (this.c[0] * this.c[1]), -1 / this.p.alpha);
             }
 
@@ -1714,18 +1720,19 @@
          *
          * @class Cauchy
          * @memberOf ran.dist
-         * @param {number} x0 Location parameter.
-         * @param {number} gamma Scale parameter.
+         * @param {number=} x0 Location parameter. Default value is 0.
+         * @param {number=} gamma Scale parameter. Default value is 1.
          * @constructor
          */
         class Cauchy extends Distribution {
-            constructor(x0, gamma) {
+            constructor(x0 = 0, gamma = 1) {
                 super('continuous', arguments.length);
                 this.p = {x0, gamma};
                 this.c = [Math.PI * this.p.gamma];
             }
 
             _generator() {
+                // Inverse transform sampling
                 return this.p.x0 + this.p.gamma * (Math.tan(Math.PI * (Math.random() - 0.5)));
             }
 
@@ -1828,6 +1835,7 @@
             }
 
             _generator() {
+                // Direct sampling
                 if (this.p.n <= 1) {
                     return 0;
                 }
@@ -1858,16 +1866,17 @@
          *
          * @class Degenerate
          * @memberOf ran.dist
-         * @param {number} x0 Location of the distribution.
+         * @param {number=} x0 Location of the distribution. Default value is 0.
          * @constructor
          */
         class Degenerate extends Distribution {
-            constructor(x0) {
+            constructor(x0 = 0) {
                 super("continuous", arguments.length);
                 this.p = {x0};
             }
 
             _generator() {
+                // Direct sampling
                 return this.p.x0;
             }
 
@@ -1889,16 +1898,17 @@
          *
          * @class Exponential
          * @memberOf ran.dist
-         * @param {number} lambda Rate parameter.
+         * @param {number=} lambda Rate parameter. Default value is 1.
          * @constructor
          */
         class Exponential extends Distribution {
-            constructor(lambda) {
+            constructor(lambda = 1) {
                 super("continuous", arguments.length);
                 this.p = {lambda};
             }
 
             _generator() {
+                // Inverse transform sampling
                 return -Math.log(Math.random()) / this.p.lambda;
             }
 
@@ -1920,18 +1930,19 @@
          *
          * @class F
          * @memberOf ran.dist
-         * @param {number} d1 First degree of freedom.
-         * @param {number} d2 Second degree of freedom.
+         * @param {number=} d1 First degree of freedom. Default value is 2.
+         * @param {number=} d2 Second degree of freedom. Default value is 2.
          * @constructor
          */
         class F extends Distribution {
-            constructor(d1, d2) {
+            constructor(d1 = 2, d2 = 2) {
                 super('continuous', arguments.length);
                 this.p = {d1, d2};
                 this.c = [special.beta(d1 / 2, d2 / 2), Math.pow(d2, d2)];
             }
 
             _generator() {
+                // Direct sampling from gamma
                 return this.p.d2 * _gamma(this.p.d1 / 2, 1) / (this.p.d1 * _gamma(this.p.d2 / 2, 1));
             }
 
@@ -1953,18 +1964,19 @@
          *
          * @class Frechet
          * @memberOf ran.dist
-         * @param {number} alpha Shape parameter.
-         * @param {number} s Scale parameter.
-         * @param {number} m Location parameter.
+         * @param {number=} alpha Shape parameter. Default value is 1.
+         * @param {number=} s Scale parameter. Default value is 1.
+         * @param {number=} m Location parameter. Default value is 0.
          * @constructor
          */
         class Frechet extends Distribution {
-            constructor(alpha, s, m) {
+            constructor(alpha = 1, s = 1, m = 0) {
                 super('continuous', arguments.length);
                 this.p = {alpha, s, m};
             }
 
             _generator() {
+                // Inverse transform sampling
                 return this.p.m + this.p.s * Math.pow(-Math.log(Math.random()), -1 / this.p.alpha);
             }
 
@@ -1992,18 +2004,19 @@
          *
          * @class Gamma
          * @memberOf ran.dist
-         * @param {number} alpha Shape parameter.
-         * @param {number} beta Rate parameter.
+         * @param {number=} alpha Shape parameter. Default value is 1.
+         * @param {number=} beta Rate parameter. Default value is 1.
          * @constructor
          */
         class Gamma extends Distribution {
-            constructor(alpha, beta) {
+            constructor(alpha = 1, beta = 1) {
                 super("continuous", arguments.length);
                 this.p = {alpha, beta};
                 this.c = [Math.pow(beta, alpha), special.gamma(alpha)];
             }
 
             _generator() {
+                // Direct sampling
                 return _gamma(this.p.alpha, this.p.beta);
             }
 
@@ -2025,17 +2038,18 @@
          *
          * @class Gompertz
          * @memberOf ran.dist
-         * @param {number} eta Shape parameter.
-         * @param {number} beta Scale parameter.
+         * @param {number=} eta Shape parameter. Default value is 1.
+         * @param {number=} beta Scale parameter. Default value is 1.
          * @constructor
          */
         class Gompertz extends Distribution {
-            constructor(eta, b) {
+            constructor(eta = 1, b = 1) {
                 super('continuous', arguments.length);
                 this.p = {eta, b};
             }
 
             _generator() {
+                // Inverse transform sampling
                 return Math.log(1 - Math.log(Math.random()) / this.p.eta) / this.p.b;
             }
 
@@ -2057,17 +2071,18 @@
          *
          * @class Gumbel
          * @memberOf ran.dist
-         * @param {number} mu Location parameter.
-         * @param {number} beta Scale parameter.
+         * @param {number=} mu Location parameter. Default value is 0.
+         * @param {number=} beta Scale parameter. Default value is 1.
          * @constructor
          */
         class Gumbel extends Distribution {
-            constructor(mu, beta) {
+            constructor(mu = 0, beta = 1) {
                 super('continuous', arguments.length);
                 this.p = {mu, beta};
             }
 
             _generator() {
+                // Inverse transform sampling
                 return this.p.mu - this.p.beta * Math.log(-Math.log(Math.random()));
             }
 
@@ -2090,12 +2105,13 @@
          *
          * @class Erlang
          * @memberOf ran.dist
-         * @param {number} k Shape parameter. It is rounded to the nearest integer.
-         * @param {number} lambda Rate parameter.
+         * @param {number=} k Shape parameter. It is rounded to the nearest integer. Default value is 1.
+         * @param {number=} lambda Rate parameter. Default value is 1.
          * @constructor
          */
         class Erlang extends Gamma {
-            constructor(k, lambda) {
+            // Special case of gamma
+            constructor(k = 1, lambda = 1) {
                 super(Math.round(k), lambda);
             }
         }
@@ -2109,11 +2125,12 @@
          *
          * @class Chi2
          * @memberOf ran.dist
-         * @param {number} k Degrees of freedom. If not an integer, is rounded to the nearest one.
+         * @param {number=} k Degrees of freedom. If not an integer, is rounded to the nearest one. Default value is 2.
          * @constructor
          */
         class Chi2 extends Gamma {
-            constructor(k) {
+            // Special case of gamma
+            constructor(k = 2) {
                 super(Math.round(k) / 2, 0.5);
             }
         }
@@ -2127,19 +2144,20 @@
          *
          * @class GeneralizedGamma
          * @memberOf ran.dist
-         * @param {number} a Scale parameter.
-         * @param {number} d Shape parameter.
-         * @param {number} p Shape parameter.
+         * @param {number=} a Scale parameter. Default value is 1.
+         * @param {number=} d Shape parameter. Default value is 1.
+         * @param {number=} p Shape parameter. Default value is 1.
          * @constructor
          */
         class GeneralizedGamma extends Distribution {
-            constructor(a, d, p) {
+            constructor(a = 1, d = 1, p = 1) {
                 super("continuous", arguments.length);
                 this.p = {a, d, p};
                 this.c = [special.gamma(d / p), (p / Math.pow(a, d)), 1 / Math.pow(a, p)];
             }
 
             _generator() {
+                // Direct sampling from gamma
                 return Math.pow(_gamma(this.p.d / this.p.p, this.c[2]), 1 / this.p.p);
             }
 
@@ -2161,18 +2179,19 @@
          *
          * @class InverseGamma
          * @memberOf ran.dist
-         * @param {number} alpha Shape parameter.
-         * @param {number} beta Scale parameter.
+         * @param {number=} alpha Shape parameter. Default value is 1.
+         * @param {number=} beta Scale parameter. Default value is 1.
          * @constructor
          */
         class InverseGamma extends Distribution {
-            constructor(alpha, beta) {
+            constructor(alpha = 1, beta = 1) {
                 super("continuous", arguments.length);
                 this.p = {alpha, beta};
                 this.c = [Math.pow(beta, alpha) / special.gamma(alpha), special.gamma(alpha)];
             }
 
             _generator() {
+                // Direct sampling from gamma
                 return 1 / _gamma(this.p.alpha, this.p.beta);
             }
 
@@ -2194,17 +2213,18 @@
          *
          * @class Laplace
          * @memberOf ran.dist
-         * @param {number} mu Location parameter.
-         * @param {number} b Scale parameter.
+         * @param {number=} mu Location parameter. Default value is 0.
+         * @param {number=} b Scale parameter. Default value is 1.
          * @constructor
          */
         class Laplace extends Distribution {
-            constructor(mu, b) {
+            constructor(mu = 0, b = 1) {
                 super('continuous', arguments.length);
                 this.p = {mu, b};
             }
 
             _generator() {
+                // Direct sampling from uniform
                 return this.p.b * Math.log(Math.random() / Math.random()) + this.p.mu;
             }
 
@@ -2218,14 +2238,60 @@
             }
         }
 
+        /**
+         * Generator for the [log-Cauchy distribution]{@link https://en.wikipedia.org/wiki/Log-Cauchy_distribution}:
+         *
+         * $$f(x; \mu, \sigma) = \frac{1}{\pi x}\bigg[\frac{\sigma}{(\ln x - \mu)^2 + \sigma^2}\bigg],$$
+         *
+         * with \(\mu \in \mathbb{R}\) and \(\sigma \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
+         *
+         * @class LogCauchy
+         * @memberOf ran.dist
+         * @param {number=} mu Location parameter. Default value is 0.
+         * @param {number=} sigma Scale parameter. Default value is 1.
+         * @constructor
+         */
+        class LogCauchy extends Distribution {
+            constructor(mu = 0, sigma = 1) {
+                super('continuous', arguments.length);
+                this.p = {mu, sigma};
+            }
+
+            _generator() {
+                return Math.exp(this.p.mu + this.p.sigma * Math.tan(Math.PI * (Math.random() - 0.5)));
+            }
+
+            _pdf(x) {
+                return x > 0 ? this.p.sigma / (x * Math.PI * (this.p.sigma * this.p.sigma + Math.pow(Math.log(x) - this.p.mu, 2))) : 0;
+            }
+
+            _cdf(x) {
+                return x > 0 ? 0.5 + Math.atan2(Math.log(x) - this.p.mu, this.p.sigma) / Math.PI : 0;
+            }
+        }
+
+        /**
+         * Generator for the [logistic distribution]{@link https://en.wikipedia.org/wiki/Logistic_distribution}:
+         *
+         * $$f(x; \mu, s) = \frac{e^{-z}}{s (1 + e^{-z})^2},$$
+         *
+         * with \(z = \frac{x - \mu}{s}\), \(\mu \in \mathbb{R}\) and \(s \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}\).
+         *
+         * @class Logistic
+         * @memberOf ran.dist
+         * @param {number=} mu Location parameter. Default value is 0.
+         * @param {number=} s Scale parameter. Default value is 1.
+         * @constructor
+         */
         class Logistic extends Distribution {
-            constructor(mu, s) {
+            constructor(mu = 0, s = 1) {
                 super('continuous', arguments.length);
                 this.p = {mu, s};
             }
 
             _generator() {
-                return this.p.s * Math.log(1 / Math.random() - 1) + this.p.mu;
+                // Inverse transform sampling
+                return this.p.mu - this.p.s * Math.log(1 / Math.random() - 1);
             }
 
             _pdf(x) {
@@ -2239,6 +2305,60 @@
         }
 
         /**
+         * Generator for the [shifted log-logistic distribution]{@link https://en.wikipedia.org/wiki/Shifted_log-logistic_distribution}:
+         *
+         * $$f(x; \mu, s) = \frac{e^{-z}}{s (1 + e^{-z})^2},$$
+         *
+         * with \(z = \frac{x - \mu}{\sigma}\), \(\mu, \xi \in \mathbb{R}\) and \(\sigma \in \mathbb{R}^+\). Support: \(x \ge \mu-\sigma/\xi\) if \(\xi > 0\), \(x \le \mu-\sigma/\xi\) if \(\xi < 0\), \(x \in \mathbb{R}\) otherwise.
+         *
+         * @class LogLogistic
+         * @memberOf ran.dist
+         * @param {number=} mu Location parameter. Default value is 0.
+         * @param {number=} sigma Scale parameter. Default value is 1.
+         * @param {number=} xi Shape parameter. Default value is 1.
+         * @constructor
+         */
+        class LogLogistic extends Distribution {
+            constructor(mu = 0, sigma = 1, xi = 1) {
+                super('continuous', arguments.length);
+                this.p = {mu, sigma, xi};
+            }
+
+            _generator() {
+                // Inverse transform sampling
+                return this.p.mu + this.p.sigma * (Math.pow(1 / Math.random() - 1, -this.p.xi) - 1) / this.p.xi;
+            }
+
+            _pdf(x) {
+                let z = (x - this.p.mu) / this.p.sigma,
+                    p = Math.pow(1 + this.p.xi * z, -(1/this.p.xi + 1)) / (this.p.sigma * Math.pow(1 + Math.pow(1 + this.p.xi * z, -1/this.p.xi), 2));
+                if (this.p.xi === 0) {
+                    return p;
+                } else {
+                    if (this.p.xi > 0) {
+                        return x >= this.p.mu - this.p.sigma / this.p.xi ? p : 0;
+                    } else {
+                        return x <= this.p.mu - this.p.sigma / this.p.xi ? p : 0;
+                    }
+                }
+            }
+
+            _cdf(x) {
+                let z = (x - this.p.mu) / this.p.sigma,
+                    c = 1 / (1 + Math.pow(1 + this.p.xi * z, -1/this.p.xi));
+                if (this.p.xi === 0) {
+                    return c;
+                } else {
+                    if (this.p.xi > 0) {
+                        return x >= this.p.mu - this.p.sigma / this.p.xi ? c : 0;
+                    } else {
+                        return x <= this.p.mu - this.p.sigma / this.p.xi ? c : 0;
+                    }
+                }
+            }
+        }
+
+        /**
          * Generator for the [lognormal distribution]{@link https://en.wikipedia.org/wiki/Log-normal_distribution}:
          *
          * $$f(x; \mu, \sigma) = \frac{1}{x \sigma \sqrt{2 \pi}}e^{-\frac{(\ln x - \mu)^2}{2\sigma^2}},$$
@@ -2247,18 +2367,19 @@
          *
          * @class Lognormal
          * @memberOf ran.dist
-         * @param {number} mu Location parameter.
-         * @param {number} sigma Scale parameter.
+         * @param {number=} mu Location parameter. Default value is 0.
+         * @param {number=} sigma Scale parameter. Default value is 1.
          * @constructor
          */
         class Lognormal extends Distribution {
-            constructor(mu, sigma) {
+            constructor(mu = 0, sigma = 1) {
                 super("continuous", arguments.length);
                 this.p = {mu, sigma};
                 this.c = [sigma * Math.sqrt(2 * Math.PI), sigma * Math.SQRT2];
             }
 
             _generator() {
+                // Direct sampling from normal
                 return Math.exp(this.p.mu + this.p.sigma * _normal(0, 1));
             }
 
@@ -2280,18 +2401,19 @@
          *
          * @class Normal
          * @memberOf ran.dist
-         * @param {number} mu Location parameter (mean).
-         * @param {number} sigma Squared scale parameter (variance).
+         * @param {number=} mu Location parameter (mean). Default value is 0.
+         * @param {number=} sigma Squared scale parameter (variance). Default value is 1.
          * @constructor
          */
         class Normal extends Distribution {
-            constructor(mu, sigma) {
+            constructor(mu = 0, sigma = 1) {
                 super("continuous", arguments.length);
                 this.p = {mu, sigma};
                 this.c = [sigma * Math.sqrt(2 * Math.PI), sigma * Math.SQRT2];
             }
 
             _generator() {
+                // Direct sampling
                 return _normal(this.p.mu, this.p.sigma);
             }
 
@@ -2313,17 +2435,18 @@
          *
          * @class Pareto
          * @memberOf ran.dist
-         * @param {number} xmin Scale parameter.
-         * @param {number} alpha Shape parameter.
+         * @param {number=} xmin Scale parameter. Default value is 1.
+         * @param {number=} alpha Shape parameter. Default value is 1.
          * @constructor
          */
         class Pareto extends Distribution {
-            constructor(xmin, alpha) {
+            constructor(xmin = 1, alpha = 1) {
                 super("continuous", arguments.length);
                 this.p = {xmin, alpha};
             }
 
             _generator() {
+                // Inverse transform sampling
                 return this.p.xmin / Math.pow(Math.random(), 1 / this.p.alpha);
             }
 
@@ -2345,16 +2468,17 @@
          *
          * @class Poisson
          * @memberOf ran.dist
-         * @param {number} lambda Mean of the distribution.
+         * @param {number=} lambda Mean of the distribution. Default value is 1.
          * @constructor
          */
         class Poisson extends Distribution {
-            constructor(lambda) {
+            constructor(lambda = 1) {
                 super("discrete", arguments.length);
                 this.p = {lambda};
             }
 
             _generator() {
+                // Direct sampling
                 if (this.p.lambda < 30) {
                     // Small lambda, Knuth's method
                     let l = Math.exp(-this.p.lambda),
@@ -2409,18 +2533,19 @@
          *
          * @class UniformContinuous
          * @memberOf ran.dist
-         * @param {number} xmin Lower boundary.
-         * @param {number} xmax Upper boundary.
+         * @param {number=} xmin Lower boundary. Default value is 0.
+         * @param {number=} xmax Upper boundary. Default value is 1.
          * @constructor
          */
         class UniformContinuous extends Distribution {
-            constructor(xmin, xmax) {
+            constructor(xmin = 0, xmax = 1) {
                 super("continuous", arguments.length);
                 this.p = {xmin, xmax};
                 this.c = [xmax - xmin];
             }
 
             _generator() {
+                // Direct sampling
                 return Math.random() * this.c[0] + this.p.xmin;
             }
 
@@ -2443,18 +2568,19 @@
          *
          * @class UniformDiscrete
          * @memberOf ran.dist
-         * @param {number} xmin Lower boundary.
-         * @param {number} xmax Upper boundary.
+         * @param {number=} xmin Lower boundary. Default value is 0.
+         * @param {number=} xmax Upper boundary. Default value is 100.
          * @constructor
          */
         class UniformDiscrete extends Distribution {
-            constructor(xmin, xmax) {
+            constructor(xmin = 0, xmax = 100) {
                 super("discrete", arguments.length);
                 this.p = {xmin, xmax};
                 this.c = [xmax - xmin + 1];
             }
 
             _generator() {
+                // Direct sampling
                 return parseInt(Math.random() * this.c[0]) + this.p.xmin;
             }
 
@@ -2478,17 +2604,18 @@
          *
          * @class Weibull
          * @memberOf ran.dist
-         * @param {number} lambda Scale parameter.
-         * @param {number} k Shape parameter.
+         * @param {number=} lambda Scale parameter. Default value is 1.
+         * @param {number=} k Shape parameter. Default value is 1.
          * @constructor
          */
         class Weibull extends Distribution {
-            constructor(lambda, k) {
+            constructor(lambda = 1, k = 1) {
                 super("continuous", arguments.length);
                 this.p = {lambda, k};
             }
 
             _generator() {
+                // Inverse transform sampling
                 return this.p.lambda * Math.pow(-Math.log(Math.random()), 1 / this.p.k);
             }
 
@@ -2523,7 +2650,9 @@
             Gumbel,
             InverseGamma,
             Laplace,
+            LogCauchy,
             Logistic,
+            LogLogistic,
             Lognormal,
             Normal,
             Pareto,

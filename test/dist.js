@@ -446,6 +446,25 @@ describe('dist', function() {
         });
     });
 
+    describe('LogCauchy', () => {
+        const p = () => [core.float(-5, 5), core.float(0.1, 5)];
+        it('should return an array of log-Cauchy distributed values', () => {
+            utils.trials(() => {
+                const logcauchy = new dist.LogCauchy(...p());
+                return utils.ks_test(logcauchy.sample(LAPS), x => logcauchy.cdf(x));
+            });
+        });
+
+        it('differentiating cdf should give pdf', () => {
+            utils.trials(() => {
+                return utils.cdf2pdf(
+                    new dist.LogCauchy(...p()),
+                    [-10, 10], LAPS_2
+                ) < EPSILON;
+            });
+        });
+    });
+
     describe('Logistic', () => {
         const p = () => [core.float(-5, 5), core.float(0.1, 5)];
         it('should return an array of logistic distributed values', () => {
@@ -454,10 +473,30 @@ describe('dist', function() {
                 return utils.ks_test(logistic.sample(LAPS), x => logistic.cdf(x));
             });
         });
+
         it('differentiating cdf should give pdf', () => {
             utils.trials(() => {
                 return utils.cdf2pdf(
                     new dist.Logistic(...p()),
+                    [-10, 10], LAPS_2
+                ) < EPSILON;
+            });
+        });
+    });
+
+    describe('LogLogistic', () => {
+        const p = () => [core.float(-5, 5), core.float(0.1, 5), core.float(-5, 5)];
+        it('should return an array of log-logistic distributed values', () => {
+            utils.trials(() => {
+                const loglogistic = new dist.LogLogistic(...p());
+                return utils.ks_test(loglogistic.sample(LAPS), x => loglogistic.cdf(x));
+            });
+        });
+
+        it('differentiating cdf should give pdf', () => {
+            utils.trials(() => {
+                return utils.cdf2pdf(
+                    new dist.LogLogistic(...p()),
                     [-10, 10], LAPS_2
                 ) < EPSILON;
             });
