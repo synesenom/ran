@@ -1442,7 +1442,6 @@
         // TODO IDB
         // TODO Inveretd beta
         // TODO Kolmogorov-Smirnov
-        // TODO Laplace
         // TODO Log gamma
         // TODO Log logistic
         // TODO Logistic
@@ -2187,6 +2186,59 @@
         }
 
         /**
+         * Generator for the [Laplace distribution]{@link https://en.wikipedia.org/wiki/Laplace_distribution}:
+         *
+         * $$f(x; \mu, b) = \frac{1}{2b}e^{-\frac{|x - \mu|}{b}},$$
+         *
+         * where \(\mu \in \mathbb{R}\) and \(b \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}\).
+         *
+         * @class Laplace
+         * @memberOf ran.dist
+         * @param {number} mu Location parameter.
+         * @param {number} b Scale parameter.
+         * @constructor
+         */
+        class Laplace extends Distribution {
+            constructor(mu, b) {
+                super('continuous', arguments.length);
+                this.p = {mu, b};
+            }
+
+            _generator() {
+                return this.p.b * Math.log(Math.random() / Math.random()) + this.p.mu;
+            }
+
+            _pdf(x) {
+                return 0.5 * Math.exp(-Math.abs(x - this.p.mu) / this.p.b) / this.p.b;
+            }
+
+            _cdf(x) {
+                let z = Math.exp((x - this.p.mu) / this.p.b);
+                return x < this.p.mu ? 0.5 * z : 1 - 0.5 / z;
+            }
+        }
+
+        class Logistic extends Distribution {
+            constructor(mu, s) {
+                super('continuous', arguments.length);
+                this.p = {mu, s};
+            }
+
+            _generator() {
+                return this.p.s * Math.log(1 / Math.random() - 1) + this.p.mu;
+            }
+
+            _pdf(x) {
+                let z = Math.exp(-(x - this.p.mu) / this.p.s);
+                return z / (this.p.s * Math.pow(1 + z, 2));
+            }
+
+            _cdf(x) {
+                return 1 / (1 + Math.exp(-(x - this.p.mu) / this.p.s));
+            }
+        }
+
+        /**
          * Generator for the [lognormal distribution]{@link https://en.wikipedia.org/wiki/Log-normal_distribution}:
          *
          * $$f(x; \mu, \sigma) = \frac{1}{x \sigma \sqrt{2 \pi}}e^{-\frac{(\ln x - \mu)^2}{2\sigma^2}},$$
@@ -2470,6 +2522,8 @@
             Gompertz,
             Gumbel,
             InverseGamma,
+            Laplace,
+            Logistic,
             Lognormal,
             Normal,
             Pareto,

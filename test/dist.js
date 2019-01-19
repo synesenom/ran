@@ -46,8 +46,11 @@ describe('dist', function() {
         });
         it('integral of pdf should give cdf', function () {
             utils.trials(function () {
-                const arcsine = new dist.Arcsine(...p());
-                return utils.cdf2pdf(arcsine, [0.01, 10], LAPS_2) < EPSILON;
+                return utils.cdf2pdf(
+                    new dist.Arcsine(...p()),
+                    [0.01, 10],
+                    LAPS_2
+                ) < EPSILON;
             });
         });
     });
@@ -78,8 +81,11 @@ describe('dist', function() {
         });
         it('integral of pdf should give cdf', function () {
             utils.trials(function () {
-                const beta = new dist.Beta(...p());
-                return utils.cdf2pdf(beta,  [0.01, 0.99], LAPS_2) < EPSILON;
+                return utils.cdf2pdf(
+                    new dist.Beta(...p()),
+                    [0.01, 0.99],
+                    LAPS_2
+                ) < EPSILON;
             });
         });
     });
@@ -94,8 +100,11 @@ describe('dist', function() {
         });
         it('integral of pdf should give cdf', function () {
             utils.trials(function () {
-                const betaPrime = new dist.BetaPrime(...p());
-                return utils.cdf2pdf(betaPrime,  [0.01, 10], LAPS_2) < EPSILON;
+                return utils.cdf2pdf(
+                    new dist.BetaPrime(...p()),
+                    [0.01, 10],
+                    LAPS_2
+                ) < EPSILON;
             });
         });
     });
@@ -163,8 +172,11 @@ describe('dist', function() {
         });
         it('integral of pdf should give cdf', function () {
             utils.trials(function () {
-                const boundedPareto = new dist.BoundedPareto(...p());
-                return utils.cdf2pdf(boundedPareto,  [-5, 5], LAPS_2) < EPSILON;
+                return utils.cdf2pdf(
+                    new dist.BoundedPareto(...p()),
+                    [-5, 5],
+                    LAPS_2
+                ) < EPSILON;
             });
         });
     });
@@ -180,8 +192,11 @@ describe('dist', function() {
 
         it('differentiating cdf should give pdf', () => {
             utils.trials(() => {
-                const cauchy = new dist.Cauchy(...p());
-                return utils.cdf2pdf(cauchy,  [-5, 5], LAPS_2) < EPSILON;
+                return utils.cdf2pdf(
+                    new dist.Cauchy(...p()),
+                    [-5, 5],
+                    LAPS_2
+                ) < EPSILON;
             });
         });
     });
@@ -196,8 +211,11 @@ describe('dist', function() {
         });
         it('integral of pdf should give cdf', function () {
             utils.trials(function () {
-                const chi2 = new dist.Chi2(...p());
-                return utils.cdf2pdf(chi2, [0.01, 10], LAPS_2) < EPSILON;
+                return utils.cdf2pdf(
+                    new dist.Chi2(...p()),
+                    [0.01, 10],
+                    LAPS_2
+                ) < EPSILON;
             });
         });
     });
@@ -250,8 +268,11 @@ describe('dist', function() {
         });
         it('integral of pdf should give cdf', () => {
             utils.trials(() => {
-                const erlang = new dist.Erlang(...p());
-                return utils.cdf2pdf(erlang, [0.01, 10], LAPS_2) < EPSILON;
+                return utils.cdf2pdf(
+                    new dist.Erlang(...p()),
+                    [0.01, 10],
+                    LAPS_2
+                ) < EPSILON;
             });
         });
     });
@@ -266,8 +287,11 @@ describe('dist', function() {
         });
         it('integral of pdf should give cdf', function () {
             utils.trials(function () {
-                const exponential = new dist.Exponential(...p());
-                return utils.cdf2pdf(exponential, [0.01, 10], LAPS_2) < EPSILON;
+                return utils.cdf2pdf(
+                    new dist.Exponential(...p()),
+                    [0.01, 10],
+                    LAPS_2
+                ) < EPSILON;
             });
         });
     });
@@ -282,8 +306,11 @@ describe('dist', function() {
         });
         it('integral of pdf should give cdf', () => {
             utils.trials(() => {
-                const f = new dist.F(...p());
-                return utils.cdf2pdf(f, [p()[2]+0.5, 10], LAPS_2) < EPSILON;
+                return utils.cdf2pdf(
+                    new dist.F(...p()),
+                    [p()[2]+0.5, 10],
+                    LAPS_2
+                ) < EPSILON;
             });
         });
     });
@@ -298,8 +325,11 @@ describe('dist', function() {
         });
         it('integral of pdf should give cdf', () => {
             utils.trials(() => {
-                const frechet = new dist.Frechet(...p());
-                return utils.cdf2pdf(frechet, [p()[2]+0.5, 10], LAPS_2) < EPSILON;
+                return utils.cdf2pdf(
+                    new dist.Frechet(...p()),
+                    [p()[2]+0.5, 10],
+                    LAPS_2
+                ) < EPSILON;
             });
         });
     });
@@ -314,8 +344,11 @@ describe('dist', function() {
         });
         it('integral of pdf should give cdf', () => {
             utils.trials(() => {
-                const gamma = new dist.Gamma(...p());
-                return utils.cdf2pdf(gamma, [0.01, 10], LAPS_2) < EPSILON;
+                return utils.cdf2pdf(
+                    new dist.Gamma(...p()),
+                    [0.01, 10],
+                    LAPS_2
+                ) < EPSILON;
             });
         });
     });
@@ -330,8 +363,11 @@ describe('dist', function() {
         });
         it('integral of pdf should give cdf', () => {
             utils.trials(() => {
-                const generalizedGamma = new dist.GeneralizedGamma(...p());
-                return utils.cdf2pdf(generalizedGamma, [0.01, 10], LAPS_2) < EPSILON;
+                return utils.cdf2pdf(
+                    new dist.GeneralizedGamma(...p()),
+                    [0.01, 10],
+                    LAPS_2
+                ) < EPSILON;
             });
         });
     });
@@ -346,8 +382,11 @@ describe('dist', function() {
         });
         it('integral of pdf should give cdf', () => {
             utils.trials(() => {
-                const gompertz = new dist.Gompertz(...p());
-                return utils.cdf2pdf(gompertz, [p()[2]+0.5, 10], LAPS_2) < EPSILON;
+                return utils.cdf2pdf(
+                    new dist.Gompertz(...p()),
+                    [p()[2]+0.5, 10],
+                    LAPS_2
+                ) < EPSILON;
             });
         });
     });
@@ -362,8 +401,11 @@ describe('dist', function() {
         });
         it('integral of pdf should give cdf', () => {
             utils.trials(() => {
-                const gumbel = new dist.Gumbel(...p());
-                return utils.cdf2pdf(gumbel, [0.01, 10], LAPS_2) < EPSILON;
+                return utils.cdf2pdf(
+                    new dist.Gumbel(...p()),
+                        [0.01, 10],
+                        LAPS_2
+                    ) < EPSILON;
             });
         });
     });
@@ -381,6 +423,42 @@ describe('dist', function() {
                 return utils.cdf2pdf(
                     new dist.InverseGamma(...p()),
                     [0, 10], LAPS_2
+                ) < EPSILON;
+            });
+        });
+    });
+
+    describe('Laplace', () => {
+        const p = () => [core.float(-2, 2), core.float(0.1, 5)];
+        it('should return an array of Laplace distributed values', () => {
+            utils.trials(() => {
+                const laplace = new dist.Laplace(...p());
+                return utils.ks_test(laplace.sample(LAPS), x => laplace.cdf(x));
+            });
+        });
+        it('differentiating cdf should give pdf', () => {
+            utils.trials(() => {
+                return utils.cdf2pdf(
+                    new dist.Laplace(...p()),
+                    [0, 10], LAPS_2
+                ) < EPSILON;
+            });
+        });
+    });
+
+    describe('Logistic', () => {
+        const p = () => [core.float(-5, 5), core.float(0.1, 5)];
+        it('should return an array of logistic distributed values', () => {
+            utils.trials(() => {
+                const logistic = new dist.Logistic(...p());
+                return utils.ks_test(logistic.sample(LAPS), x => logistic.cdf(x));
+            });
+        });
+        it('differentiating cdf should give pdf', () => {
+            utils.trials(() => {
+                return utils.cdf2pdf(
+                    new dist.Logistic(...p()),
+                    [-10, 10], LAPS_2
                 ) < EPSILON;
             });
         });
@@ -432,8 +510,11 @@ describe('dist', function() {
         });
         it('integral of pdf should give cdf', function () {
             utils.trials(function () {
-                const pareto = new dist.Pareto(...p());
-                return utils.cdf2pdf(pareto, [0.01, 10], LAPS_2) < EPSILON;
+                return utils.cdf2pdf(
+                    new dist.Pareto(...p()),
+                    [0.01, 10],
+                    LAPS_2
+                ) < EPSILON;
             });
         });
     });
@@ -467,8 +548,11 @@ describe('dist', function() {
         });
         it('integral of pdf should give cdf', function () {
             utils.trials(function () {
-                const uniform = new dist.UniformContinuous(...p());
-                return utils.cdf2pdf(uniform, [0.01, 10], LAPS_2) < EPSILON;
+                return utils.cdf2pdf(
+                    new dist.UniformContinuous(...p()),
+                    [0.01, 10],
+                    LAPS_2
+                ) < EPSILON;
             });
         });
     });
@@ -499,8 +583,11 @@ describe('dist', function() {
         });
         it('integral of pdf should give cdf', function () {
             utils.trials(function () {
-                const weibull = new  dist.Weibull(...p());
-                return utils.cdf2pdf(weibull, [0.01, 10], LAPS_2) < EPSILON;
+                return utils.cdf2pdf(
+                    new dist.Weibull(...p()),
+                    [0.01, 10],
+                    LAPS_2
+                ) < EPSILON;
             });
         });
     });
