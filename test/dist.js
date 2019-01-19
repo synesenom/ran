@@ -574,6 +574,25 @@ describe('dist', function() {
         });
     });
 
+    describe('Rayleigh', function () {
+        const p = () => [core.float(0.1, 5)];
+        it('should return an array of Pareto distributed values', function () {
+            utils.trials(function () {
+                const rayleigh = new dist.Rayleigh(...p());
+                return utils.ks_test(rayleigh.sample(LAPS), x => rayleigh.cdf(x));
+            });
+        });
+        it('integral of pdf should give cdf', function () {
+            utils.trials(function () {
+                return utils.cdf2pdf(
+                    new dist.Rayleigh(...p()),
+                    [0.01, 10],
+                    LAPS_2
+                ) < EPSILON;
+            });
+        });
+    });
+
     describe('UniformContinuous', function () {
         const p = () => {
             const xmin = core.float(10);

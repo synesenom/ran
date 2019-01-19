@@ -2628,6 +2628,24 @@
             }
         }
 
+        /**
+         * Generator for the [Rayleigh distribution]{@link https://en.wikipedia.org/wiki/Rayleigh_distribution}:
+         *
+         * $$f(x; \sigma) = \frac{x}{\sigma} e^{-\frac{x^2}{2\sigma^2}},$$
+         *
+         * with \(\sigma \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+ \cup \{0\}\).
+         *
+         * @class Rayleigh
+         * @memberOf ran.dist
+         * @param {number} sigma Scale parameter. Default value is 1.
+         * @constructor
+         */
+        class Rayleigh extends Weibull {
+            constructor(sigma = 1) {
+                super(sigma * Math.SQRT2, 2);
+            }
+        }
+
         // Public classes
         return {
             Arcsine,
@@ -2657,6 +2675,7 @@
             Normal,
             Pareto,
             Poisson,
+            Rayleigh,
             UniformContinuous,
             UniformDiscrete,
             Weibull
