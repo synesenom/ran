@@ -2,7 +2,7 @@ const utils = require('../test/test-utils').test_utils;
 const dist = require('../src/index').dist;
 const core = require('../src/index').core;
 
-const LAPS = 100;
+const LAPS = 10000;
 const LAPS_2 = 1000;
 const MAX_AVG_DIFF = 1e-3;
 const EPSILON = 1e-6;
@@ -422,6 +422,24 @@ describe('dist', function() {
             utils.trials(() => {
                 return utils.cdf2pdf(
                     new dist.InverseGamma(...p()),
+                    [0, 10], LAPS_2
+                ) < EPSILON;
+            });
+        });
+    });
+
+    describe('InverseGaussian', () => {
+        const p = () => [core.float(0.1, 5), core.float(0.1, 5)];
+        it('should return an array of inverse Gaussian distributed values', () => {
+            utils.trials(() => {
+                const inverseGaussian = new dist.InverseGaussian(...p());
+                return utils.ks_test(inverseGaussian.sample(LAPS), x => inverseGaussian.cdf(x));
+            });
+        });
+        it('differentiating cdf should give pdf', () => {
+            utils.trials(() => {
+                return utils.cdf2pdf(
+                    new dist.InverseGaussian(...p()),
                     [0, 10], LAPS_2
                 ) < EPSILON;
             });

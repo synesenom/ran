@@ -1041,12 +1041,12 @@
          *
          * @method _normal
          * @memberOf ran.dist
-         * @param mu {number} Distribution mean.
-         * @param sigma {number} Distribution standard deviation.
+         * @param mu {number=} Distribution mean. Default value is 0.
+         * @param sigma {number=} Distribution standard deviation. Default value is 1.
          * @returns {number} Random variate.
          * @private
          */
-        function _normal(mu, sigma) {
+        function _normal(mu = 0, sigma = 1) {
             let u = Math.random(),
                 v = Math.random();
             return sigma * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) + mu;
@@ -1413,7 +1413,6 @@
             }
         }
 
-        // TODO Benford https://en.wikipedia.org/wiki/Benford%27s_law#Generalization_to_digits_beyond_the_first | F. Benford. The law of anomalous numbers. Proceedings of the American Philosophical Society, 78(4) pp 551-572 (1938)
         // TODO Beta-binomial (https://en.wikipedia.org/wiki/Beta-binomial_distribution)
         // TODO Beta-pascal
         // TODO Discrete Weibull
@@ -1426,7 +1425,6 @@
         // TODO Pascal (negative binomial)
         // TODO Polya
         // TODO Power series
-        // TODO Rectangular
         // TODO Zeta
         // TODO Zipf https://en.wikipedia.org/wiki/Zipf%27s_law |
         // TODO Chi
@@ -1445,13 +1443,11 @@
         // TODO Log gamma
         // TODO Logistic-exponential
         // TODO Makeham
-        // TODO Minimax
         // TODO Muth
         // TODO Noncentral beta
         // TODO Noncentral chi-square
         // TODO Noncentral F
         // TODO Noncentral t
-        // TODO Rademacher (https://en.wikipedia.org/wiki/Rademacher_distribution)
         // TODO t
         // TODO triangular
         // TODO two-sided power
@@ -2131,6 +2127,49 @@
         }
 
         /**
+         * Generator for the Wald or [inverse Gaussian distribution]{@link https://en.wikipedia.org/wiki/Inverse_Gaussian_distribution}:
+         *
+         * $$f(x; \lambda, \mu) = \bigg[\frac{\lambda}{2 \pi x^3}\bigg]^{1/2} e^{\frac{-\lambda (x - \mu)^2}{2 \mu^2 x}},$$
+         *
+         * with \(\lambda, \mu \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
+         *
+         * @class InverseGaussian
+         * @memberOf ran.dist
+         * @param {number} lambda Shape parameter. Default value is 1.
+         * @param {number} mu Mean of the distribution. Default value is 1.
+         * @constructor
+         */
+        class InverseGaussian extends Distribution {
+            constructor(lambda = 1, mu = 1) {
+                super('continuous', arguments.length);
+                this.p = {lambda, mu};
+                this.c = [0.5 * this.p.mu / this.p.lambda, Math.exp(2 * lambda / mu)];
+            }
+
+            static _phi(x) {
+                return 0.5 * (1 + special.erf(x / Math.SQRT2));
+            }
+
+            _generator() {
+                // Direct sampling
+                let nu = _normal(),
+                    y = nu * nu,
+                    x = this.p.mu + this.c[0] * this.p.mu * y - this.c[0] * Math.sqrt(this.p.mu * y * (4 * this.p.lambda + this.p.mu * y));
+                return Math.random() > this.p.mu / (this.p.mu + x) ? this.p.mu * this.p.mu / x : x;
+            }
+
+            _pdf(x) {
+                return x > 0 ? Math.sqrt(this.p.lambda / (2 * Math.PI * Math.pow(x, 3))) * Math.exp(-this.p.lambda * Math.pow(x - this.p.mu, 2) / (2 * this.p.mu * this.p.mu * x)) : 0;
+            }
+
+            _cdf(x) {
+                let s = Math.sqrt(this.p.lambda / x),
+                    t = x / this.p.mu;
+                return x > 0 ? InverseGaussian._phi(s * (t - 1)) + this.c[1] * InverseGaussian._phi(-s * (t + 1)) : 0;
+            }
+        }
+
+        /**
          * Generator for the [generalized gamma distribution]{@link https://en.wikipedia.org/wiki/Generalized_gamma_distribution}:
          *
          * $$f(x; a, d, p) = \frac{p/a^d}{\Gamma(d/p)} x^{d - 1} e^{-(x/a)^p},$$
@@ -2730,6 +2769,7 @@
             Gompertz,
             Gumbel,
             InverseGamma,
+            InverseGaussian,
             Laplace,
             LogCauchy,
             Logistic,
