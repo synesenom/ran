@@ -1514,7 +1514,8 @@
             }
 
             _pdf(x) {
-                return parseInt(x) === 1 ? this.p.p : 1 - this.p.p;
+                let xi = parseInt(x);
+                return xi === 1 ? this.p.p : xi === 0 ? 1 - this.p.p : 0;
             }
 
             _cdf(x) {
@@ -1552,7 +1553,7 @@
             }
 
             _pdf(x) {
-                return Math.pow(x, this.p.alpha - 1) * Math.pow(1 - x, this.p.beta - 1) / this.c[0];
+                return x > 0 && x < 1 ? Math.pow(x, this.p.alpha - 1) * Math.pow(1 - x, this.p.beta - 1) / this.c[0] : 0;
             }
 
             _cdf(x) {
@@ -1838,13 +1839,21 @@
             }
 
             _pdf(x) {
-                let xi = parseInt(x);
-                return (xi < 0 || xi >= this.p.weights.length) ? 0 : this.c[2][xi];
+                if (this.p.n <= 1) {
+                    return 1;
+                } else {
+                    let xi = parseInt(x);
+                    return (xi < 0 || xi >= this.p.weights.length) ? 0 : this.c[2][xi];
+                }
             }
 
             _cdf(x) {
-                let xi = parseInt(x);
-                return xi < 0 ? 0 : xi >= this.p.weights.length ? 1 : this.c[3][xi];
+                if (this.p.n <= 1) {
+                    return 1;
+                } else {
+                    let xi = parseInt(x);
+                    return xi < 0 ? 0 : xi >= this.p.weights.length ? 1 : this.c[3][xi];
+                }
             }
         }
 
@@ -1947,7 +1956,7 @@
         }
 
         /**
-         * Generator for the [Fréchet distribution]{@link https://en.wikipedia.org/wiki/Fréchet_distribution}:
+         * Generator for the [Frechet distribution]{@link https://en.wikipedia.org/wiki/Frechet_distribution}:
          *
          * $$f(x; \alpha, s, m) = \frac{\alpha z^{-1 -\alpha} e^{-z^{-\alpha}}}{s},$$
          *
@@ -2012,7 +2021,7 @@
             }
 
             _pdf(x) {
-                return x <= .0 ? 0 : this.c[0] * Math.exp((this.p.alpha - 1) * Math.log(x) - this.p.beta * x) / this.c[1];
+                return x > 0 ? this.c[0] * Math.exp((this.p.alpha - 1) * Math.log(x) - this.p.beta * x) / this.c[1] : 0;
             }
 
             _cdf(x) {
@@ -2196,7 +2205,7 @@
             }
 
             _pdf(x) {
-                return x <= 0 ? 0 : this.c[1] * Math.exp((this.p.d - 1) * Math.log(x) - Math.pow(x / this.p.a, this.p.p)) / this.c[0];
+                return x > 0 ? this.c[1] * Math.exp((this.p.d - 1) * Math.log(x) - Math.pow(x / this.p.a, this.p.p)) / this.c[0] : 0;
             }
 
             _cdf(x) {
@@ -2230,11 +2239,11 @@
             }
 
             _pdf(x) {
-                return x <= .0 ? 0 : this.c[0] * Math.pow(x, -1 - this.p.alpha) * Math.exp(-this.p.beta / x);
+                return x > 0 ? this.c[0] * Math.pow(x, -1 - this.p.alpha) * Math.exp(-this.p.beta / x) : 0;
             }
 
             _cdf(x) {
-                return 1 - special.gammaLowerIncomplete(this.p.alpha, this.p.beta / x) / this.c[1];
+                return x > 0 ? 1 - special.gammaLowerIncomplete(this.p.alpha, this.p.beta / x) / this.c[1] : 0;
             }
         }
 
@@ -2419,11 +2428,11 @@
             }
 
             _pdf(x) {
-                return x <= .0 ? 0 : Math.exp(-0.5 * Math.pow((Math.log(x) - this.p.mu) / this.p.sigma, 2)) / (x * this.c[0]);
+                return x > 0 ? Math.exp(-0.5 * Math.pow((Math.log(x) - this.p.mu) / this.p.sigma, 2)) / (x * this.c[0]) : 0;
             }
 
             _cdf(x) {
-                return x <= .0 ? 0 : 0.5 * (1 + special.erf((Math.log(x) - this.p.mu) / this.c[1]));
+                return x > 0 ? 0.5 * (1 + special.erf((Math.log(x) - this.p.mu) / this.c[1])) : 0;
             }
         }
 
@@ -2748,6 +2757,19 @@
             }
         }
 
+        /**
+         * Generator of an invalid (not implemented) distribution. Only for testing purposes.
+         *
+         * @class _InvalidDistribution
+         * @memberOf ran.dist
+         * @private
+         */
+        class _InvalidDistribution extends Distribution {
+            constructor() {
+                super('discrete', arguments.length);
+            }
+        }
+
         // Public classes
         return {
             Arcsine,
@@ -2783,7 +2805,8 @@
             Rayleigh,
             UniformContinuous,
             UniformDiscrete,
-            Weibull
+            Weibull,
+            _InvalidDistribution
         };
     })();
 
