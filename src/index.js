@@ -1453,10 +1453,6 @@
         // TODO Noncentral F
         // TODO Noncentral t
         // TODO Rademacher (https://en.wikipedia.org/wiki/Rademacher_distribution)
-        // TODO Rayleigh
-        // TODO Standard Cauchy
-        // TODO Standard power
-        // TODO Standard triangular
         // TODO t
         // TODO triangular
         // TODO two-sided power
@@ -2258,6 +2254,7 @@
             }
 
             _generator() {
+                // Inverse transform sampling
                 return Math.exp(this.p.mu + this.p.sigma * Math.tan(Math.PI * (Math.random() - 0.5)));
             }
 
@@ -2389,6 +2386,39 @@
 
             _cdf(x) {
                 return x <= .0 ? 0 : 0.5 * (1 + special.erf((Math.log(x) - this.p.mu) / this.c[1]));
+            }
+        }
+
+        /**
+         * Generator for the [Lomax distribution]{@link https://en.wikipedia.org/wiki/Lomax_distribution}:
+         *
+         * $$f(x; \lambda, \alpha) = \frac{\alpha}{\lambda}\bigg[1 + \frac{x}{\lambda}\bigg]^{-(\alpha - 1)},$$
+         *
+         * with \(\lambda, \alpha \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+ \cup \{0\}\).
+         *
+         * @class Lomax
+         * @memberOf ran.dist
+         * @param {number=} lambda Scale parameter. Default value is 1.
+         * @param {number=} alpha Shape parameter. Default value is 1.
+         * @constructor
+         */
+        class Lomax extends Distribution {
+            constructor(lambda = 1, alpha = 1) {
+                super('continuous', arguments.length);
+                this.p = {lambda, alpha};
+            }
+
+            _generator() {
+                // Inverse transform sampling
+                return this.p.lambda * (Math.pow(1 - Math.random(), -1/this.p.alpha) - 1);
+            }
+
+            _pdf(x) {
+                return x < 0 ? 0 : this.p.alpha * Math.pow(1 + x/this.p.lambda, -1 - this.p.alpha) / this.p.lambda ;
+            }
+
+            _cdf(x) {
+                return x < 0 ? 0 : 1 - Math.pow(1 + x/this.p.lambda, -this.p.alpha);
             }
         }
 
@@ -2641,6 +2671,7 @@
          * @constructor
          */
         class Rayleigh extends Weibull {
+            // Special case of Weibull
             constructor(sigma = 1) {
                 super(sigma * Math.SQRT2, 2);
             }
@@ -2672,6 +2703,7 @@
             Logistic,
             LogLogistic,
             Lognormal,
+            Lomax,
             Normal,
             Pareto,
             Poisson,

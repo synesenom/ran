@@ -521,6 +521,24 @@ describe('dist', function() {
         });
     });
 
+    describe('Lomax', () => {
+        const p = () => [core.float(0.1, 5), core.float(0.1, 5)];
+        it('should return an array of Lomax distributed values', () => {
+            utils.trials(() => {
+                const lomax = new dist.Lomax(...p());
+                return utils.ks_test(lomax.sample(LAPS), x => lomax.cdf(x));
+            });
+        });
+        it('differentiating cdf should give pdf', () => {
+            utils.trials(() => {
+                return utils.cdf2pdf(
+                    new dist.Lomax(...p()),
+                    [0, 10], LAPS_2
+                ) < EPSILON;
+            });
+        });
+    });
+
     describe('Normal', function () {
         const p = () => [core.float(-5, 5), core.float(0.1, 10)];
         it('should return an array of normally distributed values', function () {
