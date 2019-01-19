@@ -3,7 +3,7 @@ const dist = require('../src/index').dist;
 const core = require('../src/index').core;
 
 const LAPS = 100;
-const LAPS_2 = 10000;
+const LAPS_2 = 1000;
 const MAX_AVG_DIFF = 1e-3;
 const EPSILON = 1e-6;
 
@@ -534,6 +534,24 @@ describe('dist', function() {
                 return utils.cdf2pdf(
                     new dist.Lomax(...p()),
                     [0, 10], LAPS_2
+                ) < EPSILON;
+            });
+        });
+    });
+
+    describe('Minimax', () => {
+        const p = () => [core.float(0.1, 5), core.float(0.1, 5)];
+        it('should return an array of Minimax distributed values', () => {
+            utils.trials(() => {
+                const minimax = new dist.Minimax(...p());
+                return utils.ks_test(minimax.sample(LAPS), x => minimax.cdf(x));
+            });
+        });
+        it('differentiating cdf should give pdf', () => {
+            utils.trials(() => {
+                return utils.cdf2pdf(
+                    new dist.Minimax(...p()),
+                    [0.01, 0.99], LAPS_2
                 ) < EPSILON;
             });
         });

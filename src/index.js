@@ -1444,7 +1444,6 @@
         // TODO Inverted beta
         // TODO Log gamma
         // TODO Logistic-exponential
-        // TODO Lomax
         // TODO Makeham
         // TODO Minimax
         // TODO Muth
@@ -1538,12 +1537,12 @@
          *
          * @class Beta
          * @memberOf ran.dist
-         * @param {number=} alpha First shape parameter. Default value is 2.
-         * @param {number=} beta Second shape parameter. Default value is 2.
+         * @param {number=} alpha First shape parameter. Default value is 1.
+         * @param {number=} beta Second shape parameter. Default value is 1.
          * @constructor
          */
         class Beta extends Distribution {
-            constructor(alpha = 2, beta = 2) {
+            constructor(alpha = 1, beta = 1) {
                 super("continuous", arguments.length);
                 this.p = {alpha, beta};
                 this.c = [special.beta(alpha, beta)];
@@ -2158,7 +2157,7 @@
             }
 
             _pdf(x) {
-                return x <= .0 ? 0 : this.c[1] * Math.exp((this.p.d - 1) * Math.log(x) - Math.pow(x / this.p.a, this.p.p)) / this.c[0];
+                return x <= 0 ? 0 : this.c[1] * Math.exp((this.p.d - 1) * Math.log(x) - Math.pow(x / this.p.a, this.p.p)) / this.c[0];
             }
 
             _cdf(x) {
@@ -2410,7 +2409,7 @@
 
             _generator() {
                 // Inverse transform sampling
-                return this.p.lambda * (Math.pow(1 - Math.random(), -1/this.p.alpha) - 1);
+                return this.p.lambda * (Math.pow(Math.random(), -1/this.p.alpha) - 1);
             }
 
             _pdf(x) {
@@ -2419,6 +2418,39 @@
 
             _cdf(x) {
                 return x < 0 ? 0 : 1 - Math.pow(1 + x/this.p.lambda, -this.p.alpha);
+            }
+        }
+
+        /**
+         * Generator for the [Minimax distribution]{@link http://stats-www.open.ac.uk/TechnicalReports/minimax.pdf} (as defined in <i>M. C. Jones, The Minimax Distribution: A Beta-Type Distribution With Some Tractability Advantages. The Open University, UK., pp: 1-21.</i>):
+         *
+         * $$f(x; \alpha, \beta) = \alpha \beta x^{\alpha-1} (1 - x^\alpha)^{\beta - 1},$$
+         *
+         * with \(\alpha, \beta \in \mathbb{R}^+\). Support: \(x \in (0, 1)\).
+         *
+         * @class Minimax
+         * @memberOf ran.dist
+         * @param {number=} alpha First shape parameter. Default value is 1.
+         * @param {number=} beta Second shape parameter. Default value is 1.
+         * @constructor
+         */
+        class Minimax extends Distribution {
+            constructor(alpha = 1, beta = 1) {
+                super('continuous', arguments.length);
+                this.p = {alpha, beta};
+            }
+
+            _generator() {
+                // Inverse transform sampling
+                return Math.pow(1 - Math.pow(1 - Math.random(), 1 / this.p.beta), 1 / this.p.alpha);
+            }
+
+            _pdf(x) {
+                return x > 0 && x < 1 ? this.p.alpha * this.p.beta * Math.pow(x, this.p.alpha - 1) * Math.pow(1 - Math.pow(x, this.p.alpha), this.p.beta - 1) : 0;
+            }
+
+            _cdf(x) {
+                return x > 0 && x < 1 ? 1 - Math.pow(1 - Math.pow(x, this.p.alpha), this.p.beta) : 0;
             }
         }
 
@@ -2704,6 +2736,7 @@
             LogLogistic,
             Lognormal,
             Lomax,
+            Minimax,
             Normal,
             Pareto,
             Poisson,
