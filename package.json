@@ -16,19 +16,26 @@
     "nodemon": "^1.18.4",
     "webpack": "^4.25.1",
     "webpack-cli": "^3.1.2",
-    "@babel/core": "^7.2.2",
-    "@babel/preset-env": "^7.2.3",
-    "@babel/node": "^7.2.2",
-    "@babel/register": "^7.0.0"
+    "babel-core": "^6.26.3",
+    "babel-plugin-istanbul": "^5.1.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0",
+    "nyc": "^13.1.0"
   },
   "scripts": {
+    "test": "./node_modules/.bin/_mocha --require babel-core/register",
     "docs": "python docs/src/parser.py",
     "build": "webpack",
     "dev": "node_modules/nodemon/bin/nodemon.js -x 'npm run build' -w src/ran.js",
-    "test": "./node_modules/.bin/_mocha --require @babel/register",
     "test2": "istanbul cover _mocha --report lcovonly -- -R spec",
     "test-old": "istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
-    "cover": "istanbul cover _mocha"
+    "coveralls": "istanbul cover ./node_modules/.bin/_mocha --require @babel/register",
+    "cover": "nyc npm run test -- --grep @nycinvalid --invert && nyc report --reporter=text-lconv | coveralls"
+  },
+  "nyc": {
+    "exclude": [
+      "test"
+    ]
   },
   "repository": {
     "type": "git",
