@@ -9,6 +9,7 @@ from blockparser import BlockParser
 import json
 import string
 import re
+import glob
 
 
 class Path:
@@ -116,6 +117,19 @@ class DocBuilder:
                 else:
                     if block:
                         self._blocks.append(block)
+        return self
+
+    def parse_dir(self, dirname):
+        BlockParser.reset()
+        for filename in glob.glob('{}/*.js'.format(dirname)):
+            with open(filename, 'r') as f:
+                while True:
+                    block = BlockParser.next_block(filename, f)
+                    if block is None:
+                        break
+                    else:
+                        if block:
+                            self._blocks.append(block)
         return self
 
     def _build(self, converter=None):

@@ -1,3 +1,4 @@
+require = require('esm')(module);
 const assert = require('assert');
 const utils = require('../test/test-utils').test_utils;
 const core = require('../src/index').core;
