@@ -1,10 +1,8 @@
-/*const utils = require('../test/test-utils').test_utils;
-const dist = require('../src/index').dist;
-const core = require('../src/index').core;
-const assert = require('assert');*/
 import assert from 'assert';
 import utils from './test-utils';
-import { core, dist } from '../src/index';
+import core from '../src/core';
+import dist from '../src/dist';
+import { describe, it } from 'mocha';
 
 const LAPS = 100;
 const LAPS_2 = 1000;

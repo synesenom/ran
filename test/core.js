@@ -1,6 +1,6 @@
 import assert from 'assert';
 import utils from './test-utils';
-import { core } from '../src/index';
+import core from '../src/core';
 
 const TRIALS = 1;
 const LAPS = 1000;

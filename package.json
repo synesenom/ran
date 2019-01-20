@@ -27,7 +27,7 @@
     "docs": "python docs/src/parser.py",
     "build": "webpack",
     "cover": "istanbul cover ./node_modules/.bin/_mocha --require @babel/register",
-    "coveralls": "./node_modules/.bin/nyc npm run test -- --grep @nycinvalid --invert && ./node_modules/.bin/nyc report --reporter=text-lconv | ./node_modules/.bin/coveralls"
+    "coveralls": "./node_modules/.bin/nyc npm run test -- --grep @nycinvalid --invert && ./node_modules/.bin/nyc report --reporter=text-lcov | ./node_modules/.bin/coveralls"
   },
   "nyc": {
     "exclude": [
