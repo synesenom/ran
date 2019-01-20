@@ -16,13 +16,17 @@
     "nodemon": "^1.18.4",
     "webpack": "^4.25.1",
     "webpack-cli": "^3.1.2",
-    "esm": "^3.1.1"
+    "@babel/core": "^7.2.2",
+    "@babel/node": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/register": "^7.0.0"
   },
   "scripts": {
     "docs": "python docs/src/parser.py",
     "build": "webpack",
     "dev": "node_modules/nodemon/bin/nodemon.js -x 'npm run build' -w src/ran.js",
-    "test": "istanbul cover _mocha --report lcovonly -- -R spec",
+    "test": "./node_modules/.bin/_mocha --compilers js:@babel/register",
+    "test2": "istanbul cover _mocha --report lcovonly -- -R spec",
     "test-old": "istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
     "cover": "istanbul cover _mocha"
   },

@@ -1,8 +1,10 @@
-require = require('esm')(module);
-const utils = require('../test/test-utils').test_utils;
+/*const utils = require('../test/test-utils').test_utils;
 const dist = require('../src/index').dist;
 const core = require('../src/index').core;
-const assert = require('assert');
+const assert = require('assert');*/
+import assert from 'assert';
+import utils from './test-utils';
+import { core, dist } from '../src/index';
 
 const LAPS = 100;
 const LAPS_2 = 1000;
@@ -783,7 +785,7 @@ describe('dist', () => {
         });
 
         describe('large lambda', () => {
-            const p = () => [core.float(31, 50)];
+            const p = () => [core.float(31, 100)];
             it('should return an array of Poisson distributed values', () => {
                 utils.trials(() => {
                     const poisson = new dist.Poisson(...p());

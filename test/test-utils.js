@@ -1,4 +1,4 @@
-const assert = require('assert');
+import assert from 'assert';
 
 let test_utils = (function() {
     // Critical values for P = 0.01
@@ -167,5 +167,6 @@ let test_utils = (function() {
 })();
 
 // Export if we have module
-if (typeof module !== "undefined" && typeof module.exports === "object")
-    module.exports.test_utils = test_utils;
+/*if (typeof module !== "undefined" && typeof module.exports === "object")
+    module.exports.test_utils = test_utils;*/
+export default test_utils;

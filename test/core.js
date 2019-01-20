@@ -1,7 +1,6 @@
-require = require('esm')(module);
-const assert = require('assert');
-const utils = require('../test/test-utils').test_utils;
-const core = require('../src/index').core;
+import assert from 'assert';
+import utils from './test-utils';
+import { core } from '../src/index';
 
 const TRIALS = 1;
 const LAPS = 1000;

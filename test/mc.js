@@ -1,8 +1,10 @@
-require = require('esm')(module);
-const assert = require('assert');
+/*const assert = require('assert');
 const utils = require('../test/test-utils').test_utils;
 const dist = require('../src/index').dist;
-const mc = require('../src/index').mc;
+const mc = require('../src/index').mc;*/
+import assert from 'assert';
+import utils from './test-utils';
+import { dist, mc } from '../src/index';
 
 /*describe('ran', function() {
    describe('mc', function() {

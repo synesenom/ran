@@ -1,7 +1,9 @@
-require = require('esm')(module);
-const assert = require('assert');
+/*const assert = require('assert');
 const utils = require('../test/test-utils').test_utils;
-const la = require('../src/index').la;
+const la = require('../src/index').la;*/
+import assert from 'assert';
+import utils from './test-utils';
+import { la } from '../src/index';
 
 const EPSILON = 1e-10;
 
