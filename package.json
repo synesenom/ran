@@ -26,11 +26,8 @@
     "test": "./node_modules/.bin/_mocha --require babel-core/register",
     "docs": "python docs/src/parser.py",
     "build": "webpack",
-    "dev": "node_modules/nodemon/bin/nodemon.js -x 'npm run build' -w src/ran.js",
-    "test2": "istanbul cover _mocha --report lcovonly -- -R spec",
-    "test-old": "istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
-    "coveralls": "istanbul cover ./node_modules/.bin/_mocha --require @babel/register",
-    "cover": "nyc npm run test -- --grep @nycinvalid --invert && nyc report --reporter=text-lconv | coveralls"
+    "cover": "istanbul cover ./node_modules/.bin/_mocha --require @babel/register",
+    "coveralls": "./node_modules/.bin/nyc npm run test -- --grep @nycinvalid --invert && ./node_modules/.bin/nyc report --reporter=text-lconv | ./node_modules/.bin/coveralls"
   },
   "nyc": {
     "exclude": [
