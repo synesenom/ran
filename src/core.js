@@ -1,4 +1,19 @@
-import { r, some } from './utils';
+import { some } from './utils';
+
+/**
+ * The main random number generator.
+ * If min > max, a random number in (max, min) is generated.
+ *
+ * @method r
+ * @memberOf ran.core
+ * @param {number} min Lower boundary.
+ * @param {number} max Upper boundary.
+ * @returns {number} Random number.
+ * @private
+ */
+export function r(min, max) {
+    return min < max ? Math.random() * (max - min) + min : Math.random() * (min - max) + max;
+}
 
 /**
  * Core random generators and manipulators.

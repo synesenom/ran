@@ -20,20 +20,6 @@ export function _sum(arr, pow = 1) {
     }
 }
 
-/**
- * The main random number generator.
- * If min > max, a random number in (max, min) is generated.
- *
- * @method r
- * @memberOf ran
- * @param {number} min Lower boundary. Default is 0.
- * @param {number} max Upper boundary. Default is 1.
- * @returns {number} Random number.
- * @private
- */
-export function r(min = 0, max = 1) {
-    return min < max ? Math.random() * (max - min) + min : Math.random() * (min - max) + max;
-}
 
 /**
  * Runs a generator once or several times to return a single value or an array of values.

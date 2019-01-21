@@ -162,17 +162,6 @@ export default (function () {
         };
     })();
 
-    /**
-     * Incomplete beta function, using the continued fraction approximations.
-     *
-     * @method betaIncomplete
-     * @memberOf ran.special
-     * @param {number} a First parameter of the function.
-     * @param {number} b Second parameter of the function.
-     * @param {number} x Lower boundary of the integral.
-     * @returns {number} Value of the incomplete beta function.
-     * @private
-     */
     let betaIncomplete = (function() {
         const _FPMIN = 1e-30;
 
@@ -215,6 +204,17 @@ export default (function () {
             return h;
         }
 
+        /**
+         * Incomplete beta function, using the continued fraction approximations.
+         *
+         * @method betaIncomplete
+         * @memberOf ran.special
+         * @param {number} a First parameter of the function.
+         * @param {number} b Second parameter of the function.
+         * @param {number} x Lower boundary of the integral.
+         * @returns {number} Value of the incomplete beta function.
+         * @private
+         */
         return function(a, b, x) {
             let bt = (x <= 0 || x >= 1)
                 ? 0

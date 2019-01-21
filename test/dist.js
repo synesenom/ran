@@ -1,11 +1,10 @@
 import assert from 'assert';
+import { describe, it } from 'mocha';
 import utils from './test-utils';
 import core from '../src/core';
 import dist from '../src/dist';
-import { describe, it } from 'mocha';
 
 const LAPS = 100;
-const LAPS_2 = 1000;
 const MAX_AVG_DIFF = 1e-3;
 const EPSILON = 1e-6;
 
@@ -134,7 +133,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.Arcsine(...p()),
                     [0.01, 10],
-                    LAPS_2
+                    LAPS
                 ) < EPSILON;
             });
         });
@@ -171,7 +170,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.Beta(...p()),
                     [-1, 2],
-                    LAPS_2
+                    LAPS
                 ) < EPSILON;
             });
         });
@@ -191,7 +190,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.BetaPrime(...p()),
                     [-5, 10],
-                    LAPS_2
+                    LAPS
                 ) < EPSILON;
             });
         });
@@ -267,7 +266,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.BoundedPareto(...p()),
                     [-5, 5],
-                    LAPS_2
+                    LAPS
                 ) < EPSILON;
             });
         });
@@ -287,7 +286,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.Cauchy(...p()),
                     [-5, 5],
-                    LAPS_2
+                    LAPS
                 ) < EPSILON;
             });
         });
@@ -307,7 +306,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.Chi2(...p()),
                     [0.01, 10],
-                    LAPS_2
+                    LAPS
                 ) < EPSILON;
             });
         });
@@ -387,7 +386,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.Erlang(...p()),
                     [0.01, 10],
-                    LAPS_2
+                    LAPS
                 ) < EPSILON;
             });
         });
@@ -407,7 +406,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.Exponential(...p()),
                     [0.01, 10],
-                    LAPS_2
+                    LAPS
                 ) < EPSILON;
             });
         });
@@ -427,7 +426,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.F(...p()),
                     [0.01, 10],
-                    LAPS_2
+                    LAPS
                 ) < EPSILON;
             });
         });
@@ -447,7 +446,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.Frechet(...p()),
                     [p()[2]+0.5, 10],
-                    LAPS_2
+                    LAPS
                 ) < EPSILON;
             });
         });
@@ -467,7 +466,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.Gamma(...p()),
                     [-2, 10],
-                    LAPS_2
+                    LAPS
                 ) < EPSILON;
             });
         });
@@ -487,7 +486,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.GeneralizedGamma(...p()),
                     [0.1, 10],
-                    LAPS_2
+                    LAPS
                 ) < EPSILON;
             });
         });
@@ -507,7 +506,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.Gompertz(...p()),
                     [p()[2]+0.5, 10],
-                    LAPS_2
+                    LAPS
                 ) < EPSILON;
             });
         });
@@ -527,7 +526,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.Gumbel(...p()),
                         [0.01, 10],
-                        LAPS_2
+                        LAPS
                     ) < EPSILON;
             });
         });
@@ -546,7 +545,7 @@ describe('dist', () => {
             utils.trials(() => {
                 return utils.cdf2pdf(
                     new dist.InverseGamma(...p()),
-                    [-2, 10], LAPS_2
+                    [-2, 10], LAPS
                 ) < EPSILON;
             });
         });
@@ -565,7 +564,7 @@ describe('dist', () => {
             utils.trials(() => {
                 return utils.cdf2pdf(
                     new dist.InverseGaussian(...p()),
-                    [0, 10], LAPS_2
+                    [0, 10], LAPS
                 ) < EPSILON;
             });
         });
@@ -584,7 +583,7 @@ describe('dist', () => {
             utils.trials(() => {
                 return utils.cdf2pdf(
                     new dist.Laplace(...p()),
-                    [0, 10], LAPS_2
+                    [0, 10], LAPS
                 ) < EPSILON;
             });
         });
@@ -603,7 +602,7 @@ describe('dist', () => {
             utils.trials(() => {
                 return utils.cdf2pdf(
                     new dist.LogCauchy(...p()),
-                    [-10, 10], LAPS_2
+                    [-10, 10], LAPS
                 ) < EPSILON;
             });
         });
@@ -622,7 +621,7 @@ describe('dist', () => {
             utils.trials(() => {
                 return utils.cdf2pdf(
                     new dist.Logistic(...p()),
-                    [-10, 10], LAPS_2
+                    [-10, 10], LAPS
                 ) < EPSILON;
             });
         });
@@ -642,7 +641,7 @@ describe('dist', () => {
                 utils.trials(() => {
                     return utils.cdf2pdf(
                         new dist.LogLogistic(...p()),
-                        [-10, 10], LAPS_2
+                        [-10, 10], LAPS
                     ) < EPSILON;
                 });
             });
@@ -661,7 +660,7 @@ describe('dist', () => {
                 utils.trials(() => {
                     return utils.cdf2pdf(
                         new dist.LogLogistic(...p()),
-                        [-10, 10], LAPS_2
+                        [-10, 10], LAPS
                     ) < EPSILON;
                 });
             });
@@ -681,7 +680,7 @@ describe('dist', () => {
             utils.trials(() => {
                 return utils.cdf2pdf(
                     new dist.Lognormal(...p()),
-                    [-2, 10], LAPS_2
+                    [-2, 10], LAPS
                 ) < EPSILON;
             });
         });
@@ -700,7 +699,7 @@ describe('dist', () => {
             utils.trials(() => {
                 return utils.cdf2pdf(
                     new dist.Lomax(...p()),
-                    [-2, 10], LAPS_2
+                    [-2, 10], LAPS
                 ) < EPSILON;
             });
         });
@@ -719,7 +718,7 @@ describe('dist', () => {
             utils.trials(() => {
                 return utils.cdf2pdf(
                     new dist.Minimax(...p()),
-                    [-1, 2], LAPS_2
+                    [-1, 2], LAPS
                 ) < EPSILON;
             });
         });
@@ -738,7 +737,7 @@ describe('dist', () => {
             utils.trials(() => {
                 return utils.cdf2pdf(
                     new dist.Normal(...p()),
-                    [0, 10], LAPS_2
+                    [0, 10], LAPS
                 ) < EPSILON;
             });
         });
@@ -758,7 +757,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.Pareto(...p()),
                     [0.01, 10],
-                    LAPS_2
+                    LAPS
                 ) < EPSILON;
             });
         });
@@ -814,7 +813,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.Rayleigh(...p()),
                     [0.01, 10],
-                    LAPS_2
+                    LAPS
                 ) < EPSILON;
             });
         });
@@ -837,7 +836,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.UniformContinuous(...p()),
                     [-50, 150],
-                    LAPS_2
+                    LAPS
                 ) < EPSILON;
             });
         });
@@ -874,7 +873,7 @@ describe('dist', () => {
                 return utils.cdf2pdf(
                     new dist.Weibull(...p()),
                     [-5, 10],
-                    LAPS_2
+                    LAPS
                 ) < EPSILON;
             });
         });

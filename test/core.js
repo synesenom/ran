@@ -1,4 +1,5 @@
 import assert from 'assert';
+import { describe, it } from 'mocha';
 import utils from './test-utils';
 import core from '../src/core';
 
@@ -12,8 +13,8 @@ function add(dist, value) {
         dist[value]++;
 }
 
-describe('core', function() {
-    describe('.float', function () {
+describe('core', () => {
+    describe('.float', () => {
         it('should return a random float in [0, 1)', () => {
             utils.trials(() => {
                 const values = Array.from({length: LAPS}, () => core.float());
@@ -33,8 +34,8 @@ describe('core', function() {
             });
         });
 
-        it('should return an array of floats uniformly distributed in (min, max)', function () {
-            utils.trials(function () {
+        it('should return an array of floats uniformly distributed in (min, max)', () => {
+            utils.trials(() => {
                 const min = Math.random() * 200 - 100;
                 const max = Math.random() * 200 - 100;
                 const k = Math.floor(Math.random() * 40 - 20);
@@ -66,7 +67,7 @@ describe('core', function() {
         });
     });
 
-    describe('.int', function () {
+    describe('.int', () => {
         it('should return a random integer', () => {
             utils.trials(() => {
                 const max = Math.floor(Math.random() * 100);
@@ -77,8 +78,8 @@ describe('core', function() {
             });
         });
 
-        it('should return an array of integers uniformly distributed in (min, max)', function () {
-            utils.trials(function () {
+        it('should return an array of integers uniformly distributed in (min, max)', () => {
+            utils.trials(() => {
                 const min = Math.floor(Math.random() * 200 - 100);
                 const max = Math.floor(Math.random() * 200 - 100);
                 const k = Math.floor(Math.random() * 20 - 10);
@@ -98,14 +99,14 @@ describe('core', function() {
                 }
 
                 // Distribution is uniform
-                return utils.chi_test(values, function () {
+                return utils.chi_test(values, () => {
                     return 1 / Math.abs(max - min + 1);
                 }, 1);
             });
         });
 
-        it('should return an integer uniformly distributed in (min, max)', function () {
-            utils.trials(function () {
+        it('should return an integer uniformly distributed in (min, max)', () => {
+            utils.trials(() => {
                 const min = Math.floor(Math.random() * 200 - 100);
                 const max = Math.floor(Math.random() * 200 - 100);
                 const values = [];
@@ -121,21 +122,21 @@ describe('core', function() {
                 }
 
                 // Distribution is uniform
-                return utils.chi_test(values, function () {
+                return utils.chi_test(values, () => {
                     return 1 / Math.abs(max - min + 1);
                 }, 1);
             });
         });
     });
 
-    describe('.choice', function () {
+    describe('.choice', () => {
         it('should return null', () => {
             assert.equal(core.choice(), null);
             assert.equal(core.choice(null), null);
             assert.equal(core.choice([]), null);
         });
 
-        it('should return some random elements of an array', function () {
+        it('should return some random elements of an array', () => {
             for (let trial = 0; trial < TRIALS; trial++) {
                 const values = ['a', 'b', 'c'];
                 const freqs = {};
@@ -165,14 +166,14 @@ describe('core', function() {
         });
     });
 
-    describe('.char', function () {
+    describe('.char', () => {
         it('should return null', () => {
             assert.equal(core.char(), null);
             assert.equal(core.char(null), null);
             assert.equal(core.char(''), null);
         });
 
-        it('should return some random characters of a string', function () {
+        it('should return some random characters of a string', () => {
             for (let trial = 0; trial < TRIALS; trial++) {
                 const string = "abcdefghijkl51313#^!#?><;!-_=+.,/:{}()";
                 const k = Math.floor(Math.random() * 200 - 100);
@@ -191,8 +192,8 @@ describe('core', function() {
         });
     });
 
-    describe('.shuffle', function () {
-        it('should shuffle an array', function () {
+    describe('.shuffle', () => {
+        it('should shuffle an array', () => {
             for (let trial = 0; trial < TRIALS; trial++) {
                 const values = [];
                 const pos = [];
@@ -219,9 +220,9 @@ describe('core', function() {
         });
     });
 
-    describe('.coin', function () {
-        it('should return head with some probability', function () {
-            utils.trials(function () {
+    describe('.coin', () => {
+        it('should return head with some probability', () => {
+            utils.trials(() => {
                 const p = Math.random();
                 const k = Math.floor(Math.random() * 10);
                 const head = parseInt(Math.random() * 20);
@@ -239,6 +240,26 @@ describe('core', function() {
                 // Distribution is uniform
                 return utils.chi_test(values, function (x) {
                     return x === head ? p : 1 - p;
+                }, 1);
+            });
+        });
+
+        it('should return head with probability = 0.5', () => {
+            utils.trials(() => {
+                const head = parseInt(Math.random() * 20);
+                const tail = parseInt(Math.random() * 20);
+                const values = [];
+                for (let lap = 0; lap < LAPS; lap++) {
+                    let r = core.coin(head, tail);
+                    r = [r];
+                    r.forEach(function (ri) {
+                        values.push(ri);
+                    });
+                }
+
+                // Distribution is uniform
+                return utils.chi_test(values, () => {
+                    return 0.5;
                 }, 1);
             });
         });
