@@ -45,5 +45,5 @@ crashlytics-build.properties
 fabric.properties
 
 # Node
-node_modules
+node_modules/*
 package-lock.json
