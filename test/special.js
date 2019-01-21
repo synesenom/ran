@@ -34,9 +34,12 @@ describe('special', () => {
     it('gammaLowerIncomplete(s, x) / x^s -> 1/s as x -> inf', () => {
         for (let i=0; i<LAPS; i++) {
             let s = Math.random() * 100,
-                x = 1e-4 + Math.random() / 10000,
+                x = 1e-5 * (1 + Math.random()),
+                xs = Math.pow(x, s),
                 gli = special.gammaLowerIncomplete(s, x);
-            assert(Math.abs(gli) === 0 || Math.abs(gli / Math.pow(x, s) * s - 1) < 0.01, true);
+            if (xs > 1e-100) {
+                assert(Math.abs(gli / Math.pow(x, s) * s - 1) < 0.01, true);
+            }
         }
     });
 });

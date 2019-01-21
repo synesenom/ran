@@ -61,7 +61,7 @@ export default (function() {
          * @method i
          * @memberOf ran.la.Vector
          * @param {number} i Index of the element.
-         * @param {number=} e The new value of the i-th element. If not specified, the value at i is returned.
+         * @param {number=} value The new value of the i-th element. If not specified, the value at i is returned.
          * @example
          *
          * let v = new ran.la.Vector()
@@ -76,9 +76,9 @@ export default (function() {
          * // => ( 1, 2, 0 )
          *
          */
-        i(i, e) {
-            if (e !== undefined) {
-                this._v[i] = e;
+        i(i, value) {
+            if (value !== undefined) {
+                this._v[i] = value;
             } else {
                 return this._v[i];
             }
@@ -226,7 +226,7 @@ export default (function() {
          * @memberOf ran.la.Matrix
          * @param {number} i Row index of the element.
          * @param {number} j Column index of the element.
-         * @param {number=} e The new value of the element at the i-th row and j-th column. If not specified,
+         * @param {number=} value The new value of the element at the i-th row and j-th column. If not specified,
          * the value at (i, j) is returned.
          * @example
          *
@@ -246,9 +246,9 @@ export default (function() {
          * //    └         ┘
          *
          */
-        ij(i, j, e) {
-            if (e !== undefined) {
-                this._m[i][j] = e;
+        ij(i, j, value) {
+            if (value !== undefined) {
+                this._m[i][j] = value;
             } else {
                 return this._m[i][j];
             }

@@ -180,14 +180,14 @@ export default (function () {
      */
     class Distribution {
         constructor(type, k) {
-            this.type = type;
+            this._type = type;
             this.k = k;
             this.p = [];
             this.c = [];
         }
 
         _generator() {
-            throw Error('Distribution._generator is not implemented');
+            throw Error('Distribution._generator() is not implemented');
         }
 
         /**
@@ -200,7 +200,7 @@ export default (function () {
          * @private
          */
         _pdf(x) {
-            throw Error('Distribution._pdf is not implemented');
+            throw Error('Distribution._pdf() is not implemented');
         }
 
         /**
@@ -213,7 +213,34 @@ export default (function () {
          * @private
          */
         _cdf(x) {
-            throw Error('Distribution._cdf is not implemented');
+            throw Error('Distribution._cdf() is not implemented');
+        }
+
+        /**
+         * Returns the type of the distribution (either discrete or continuous).
+         *
+         * @method type
+         * @memberOf ran.dist.Distribution
+         * @returns {string} Distribution type.
+         */
+        type() {
+            return this._type;
+        }
+
+        /**
+         * Returns the support of the probability distribution (based on the current parameters). Note that the support
+         * for the probability distribution is not necessarily the same as the support of the cumulative distribution.
+         *
+         * @method support
+         * @memberOf ran.dist.Distribution
+         * @returns {{value: number, closed: boolean}[]} An array of objects describing the lower and upper boundary of
+         * the support. Each object contains a <code>value: number</code> and a <code>closed: boolean</code> property
+         * with the value of the boundary and whether it is closed, respectively. If <code>value</code> is null, the
+         * boundary is (+/-) infinity (for upper and lower boundaries). When <code>value</code> is null,
+         * <code>closed</code> is always false.
+         */
+        support() {
+            throw Error('Distribution.support() is not implemented');
         }
 
         /**
@@ -427,7 +454,7 @@ export default (function () {
          *
          */
         test(values) {
-            return this.type === "discrete"
+            return this._type === "discrete"
                 ? _chiTest(values, x => this._pdf(x), this.k)
                 : _ksTest(values, x => this._cdf(x));
         }
@@ -508,6 +535,16 @@ export default (function () {
         _cdf(x) {
             return x >= this.p.a && x < this.p.b ? 2 * this.c[0] * Math.asin(Math.sqrt((x - this.p.a) / (this.p.b - this.p.a))) : 0;
         }
+
+        support() {
+            return [{
+                value: this.p.a,
+                closed: true
+            }, {
+                value: this.p.b,
+                closed: true
+            }];
+        }
     }
 
     /**
@@ -540,6 +577,16 @@ export default (function () {
 
         _cdf(x) {
             return x < 0 ? 0 : (parseInt(x) >= 1 ? 1 : 1 - this.p.p);
+        }
+
+        support() {
+            return [{
+                value: 0,
+                closed: true
+            }, {
+                value: 1,
+                closed: true
+            }];
         }
     }
 
@@ -579,6 +626,16 @@ export default (function () {
         _cdf(x) {
             return x <= 0 ? 0 : x >= 1 ? 1 : special.betaIncomplete(this.p.alpha, this.p.beta, x);
         }
+
+        support() {
+            return [{
+                value: 0,
+                closed: this.p.alpha >= 1
+            }, {
+                value: 1,
+                closed: this.p.beta >= 1
+            }];
+        }
     }
 
     /**
@@ -613,6 +670,16 @@ export default (function () {
 
         _cdf(x) {
             return x > 0 ? special.betaIncomplete(this.p.alpha, this.p.beta, x / (1 + x)) : 0;
+        }
+
+        support() {
+            return [{
+                value: 0,
+                closed: this.p.alpha >= 1
+            }, {
+                value: null,
+                closed: false
+            }];
         }
     }
 
@@ -685,6 +752,16 @@ export default (function () {
             let xi = parseInt(x);
             return xi < 0 ? 0 : xi >= this.p.n ? 1 : special.betaIncomplete(this.p.n - xi, 1 + xi, 1 - this.p.p);
         }
+
+        support() {
+            return [{
+                value: 0,
+                closed: true
+            }, {
+                value: this.p.n,
+                closed: true
+            }];
+        }
     }
 
     /**
@@ -721,6 +798,16 @@ export default (function () {
         _cdf(x) {
             return x < this.p.L ? 0 : (x > this.p.H ? 1 : (1 - this.c[0] * Math.pow(x, -this.p.alpha)) / (1 - this.c[0] / this.c[1]));
         }
+
+        support() {
+            return [{
+                value: this.p.L,
+                closed: true
+            }, {
+                value: this.p.H,
+                closed: true
+            }];
+        }
     }
 
     /**
@@ -755,6 +842,16 @@ export default (function () {
 
         _cdf(x) {
             return 0.5 + Math.atan2(x - this.p.x0, this.p.gamma) / Math.PI;
+        }
+
+        support() {
+            return [{
+                value: null,
+                closed: false
+            }, {
+                value: null,
+                closed: false
+            }];
         }
     }
 
@@ -875,6 +972,16 @@ export default (function () {
                 return xi < 0 ? 0 : xi >= this.p.weights.length ? 1 : this.c[3][xi];
             }
         }
+
+        support() {
+            return [{
+                value: 0,
+                closed: true
+            }, {
+                value: this.p.n,
+                closed: true
+            }];
+        }
     }
 
     /**
@@ -907,6 +1014,16 @@ export default (function () {
         _cdf(x) {
             return x < this.p.x0 ? 0 : 1;
         }
+
+        support() {
+            return [{
+                value: this.p.x0,
+                closed: true
+            }, {
+                value: this.p.x0,
+                closed: true
+            }];
+        }
     }
 
     /**
@@ -933,11 +1050,21 @@ export default (function () {
         }
 
         _pdf(x) {
-            return this.p.lambda * Math.exp(-this.p.lambda * x);
+            return x < 0 ? 0 : this.p.lambda * Math.exp(-this.p.lambda * x);
         }
 
         _cdf(x) {
-            return 1 - Math.exp(-this.p.lambda * x);
+            return x < 0 ? 0 : 1 - Math.exp(-this.p.lambda * x);
+        }
+
+        support() {
+            return [{
+                value: 0,
+                closed: true
+            }, {
+                value: null,
+                closed: false
+            }];
         }
     }
 
@@ -972,6 +1099,16 @@ export default (function () {
 
         _cdf(x) {
             return x > 0 ? special.betaIncomplete(this.p.d1 / 2, this.p.d2 / 2, this.p.d1 * x / (this.p.d1*x + this.p.d2)) : 0;
+        }
+
+        support() {
+            return [{
+                value: 0,
+                closed: this.p.d1 !== 1
+            }, {
+                value: null,
+                closed: false
+            }];
         }
     }
 
@@ -1012,6 +1149,16 @@ export default (function () {
         _cdf(x) {
             return x <= this.p.m ? 0 : Math.exp(-Math.pow((x - this.p.m) / this.p.s, -this.p.alpha));
         }
+
+        support() {
+            return [{
+                value: this.p.m,
+                closed: false
+            }, {
+                value: null,
+                closed: false
+            }];
+        }
     }
 
     /**
@@ -1047,6 +1194,61 @@ export default (function () {
         _cdf(x) {
             return special.gammaLowerIncomplete(this.p.alpha, this.p.beta * x) / this.c[1];
         }
+
+        support() {
+            return [{
+                value: 0,
+                closed: true
+            }, {
+                value: null,
+                closed: false
+            }];
+        }
+    }
+
+    /**
+     * Generator for the [generalized gamma distribution]{@link https://en.wikipedia.org/wiki/Generalized_gamma_distribution}:
+     *
+     * $$f(x; a, d, p) = \frac{p/a^d}{\Gamma(d/p)} x^{d - 1} e^{-(x/a)^p},$$
+     *
+     * where \(a, d, p \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
+     *
+     * @class GeneralizedGamma
+     * @memberOf ran.dist
+     * @param {number=} a Scale parameter. Default value is 1.
+     * @param {number=} d Shape parameter. Default value is 1.
+     * @param {number=} p Shape parameter. Default value is 1.
+     * @constructor
+     */
+    class GeneralizedGamma extends Distribution {
+        constructor(a = 1, d = 1, p = 1) {
+            super("continuous", arguments.length);
+            this.p = {a, d, p};
+            this.c = [special.gamma(d / p), (p / Math.pow(a, d)), 1 / Math.pow(a, p)];
+        }
+
+        _generator() {
+            // Direct sampling from gamma
+            return Math.pow(_gamma(this.p.d / this.p.p, this.c[2]), 1 / this.p.p);
+        }
+
+        _pdf(x) {
+            return x > 0 ? this.c[1] * Math.exp((this.p.d - 1) * Math.log(x) - Math.pow(x / this.p.a, this.p.p)) / this.c[0] : 0;
+        }
+
+        _cdf(x) {
+            return x > 0 ? special.gammaLowerIncomplete(this.p.d / this.p.p, Math.pow(x / this.p.a, this.p.p)) / this.c[0] : 0;
+        }
+
+        support() {
+            return [{
+                value: 0,
+                closed: this.p.d >= 1
+            }, {
+                value: null,
+                closed: false
+            }];
+        }
     }
 
     /**
@@ -1079,6 +1281,16 @@ export default (function () {
 
         _cdf(x) {
             return x < 0 ? 0 : 1 - Math.exp(-this.p.eta * (Math.exp(this.p.b * x) - 1));
+        }
+
+        support() {
+            return [{
+                value: 0,
+                closed: true
+            }, {
+                value: null,
+                closed: false
+            }];
         }
     }
 
@@ -1113,6 +1325,16 @@ export default (function () {
 
         _cdf(x) {
             return Math.exp(-Math.exp(-(x - this.p.mu) / this.p.beta));
+        }
+
+        support() {
+            return [{
+                value: null,
+                closed: false
+            }, {
+                value: null,
+                closed: false
+            }];
         }
     }
 
@@ -1196,40 +1418,15 @@ export default (function () {
                 t = x / this.p.mu;
             return x > 0 ? InverseGaussian._phi(s * (t - 1)) + this.c[1] * InverseGaussian._phi(-s * (t + 1)) : 0;
         }
-    }
 
-    /**
-     * Generator for the [generalized gamma distribution]{@link https://en.wikipedia.org/wiki/Generalized_gamma_distribution}:
-     *
-     * $$f(x; a, d, p) = \frac{p/a^d}{\Gamma(d/p)} x^{d - 1} e^{-(x/a)^p},$$
-     *
-     * where \(a, d, p \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
-     *
-     * @class GeneralizedGamma
-     * @memberOf ran.dist
-     * @param {number=} a Scale parameter. Default value is 1.
-     * @param {number=} d Shape parameter. Default value is 1.
-     * @param {number=} p Shape parameter. Default value is 1.
-     * @constructor
-     */
-    class GeneralizedGamma extends Distribution {
-        constructor(a = 1, d = 1, p = 1) {
-            super("continuous", arguments.length);
-            this.p = {a, d, p};
-            this.c = [special.gamma(d / p), (p / Math.pow(a, d)), 1 / Math.pow(a, p)];
-        }
-
-        _generator() {
-            // Direct sampling from gamma
-            return Math.pow(_gamma(this.p.d / this.p.p, this.c[2]), 1 / this.p.p);
-        }
-
-        _pdf(x) {
-            return x > 0 ? this.c[1] * Math.exp((this.p.d - 1) * Math.log(x) - Math.pow(x / this.p.a, this.p.p)) / this.c[0] : 0;
-        }
-
-        _cdf(x) {
-            return special.gammaLowerIncomplete(this.p.d / this.p.p, Math.pow(x / this.p.a, this.p.p)) / this.c[0];
+        support() {
+            return [{
+                value: 0,
+                closed: true
+            }, {
+                value: null,
+                closed: false
+            }];
         }
     }
 
@@ -1265,6 +1462,16 @@ export default (function () {
         _cdf(x) {
             return x > 0 ? 1 - special.gammaLowerIncomplete(this.p.alpha, this.p.beta / x) / this.c[1] : 0;
         }
+
+        support() {
+            return [{
+                value: 0,
+                closed: false
+            }, {
+                value: null,
+                closed: false
+            }];
+        }
     }
 
     /**
@@ -1299,6 +1506,16 @@ export default (function () {
             let z = Math.exp((x - this.p.mu) / this.p.b);
             return x < this.p.mu ? 0.5 * z : 1 - 0.5 / z;
         }
+
+        support() {
+            return [{
+                value: null,
+                closed: false
+            }, {
+                value: null,
+                closed: false
+            }];
+        }
     }
 
     /**
@@ -1331,6 +1548,16 @@ export default (function () {
 
         _cdf(x) {
             return x > 0 ? 0.5 + Math.atan2(Math.log(x) - this.p.mu, this.p.sigma) / Math.PI : 0;
+        }
+
+        support() {
+            return [{
+                value: 0,
+                closed: false
+            }, {
+                value: null,
+                closed: false
+            }];
         }
     }
 
@@ -1365,6 +1592,16 @@ export default (function () {
 
         _cdf(x) {
             return 1 / (1 + Math.exp(-(x - this.p.mu) / this.p.s));
+        }
+
+        support() {
+            return [{
+                value: null,
+                closed: false
+            }, {
+                value: null,
+                closed: false
+            }];
         }
     }
 
@@ -1420,6 +1657,22 @@ export default (function () {
                 }
             }
         }
+
+        support() {
+            return this.p.xi === 0 ? [{
+                value: null,
+                closed: false
+            }, {
+                value: null,
+                closed: false
+            }] : [{
+                value: this.p.xi > 0 ? this.p.mu - this.p.sigma / this.p.xi : null,
+                closed: this.p.xi > 0
+            }, {
+                value: this.p.x < 0 ? this.p.mu - this.p.sigma / this.p.xi : null,
+                closed: this.p.xi < 0
+            }];
+        }
     }
 
     /**
@@ -1454,6 +1707,16 @@ export default (function () {
         _cdf(x) {
             return x > 0 ? 0.5 * (1 + special.erf((Math.log(x) - this.p.mu) / this.c[1])) : 0;
         }
+
+        support() {
+            return [{
+                value: 0,
+                closed: false
+            }, {
+                value: null,
+                closed: false
+            }];
+        }
     }
 
     /**
@@ -1487,6 +1750,16 @@ export default (function () {
         _cdf(x) {
             return x < 0 ? 0 : 1 - Math.pow(1 + x/this.p.lambda, -this.p.alpha);
         }
+
+        support() {
+            return [{
+                value: 0,
+                closed: true
+            }, {
+                value: null,
+                closed: false
+            }];
+        }
     }
 
     /**
@@ -1519,6 +1792,16 @@ export default (function () {
 
         _cdf(x) {
             return x > 0 && x < 1 ? 1 - Math.pow(1 - Math.pow(x, this.p.alpha), this.p.beta) : 0;
+        }
+
+        support() {
+            return [{
+                value: 0,
+                closed: false
+            }, {
+                value: 0,
+                closed: false
+            }];
         }
     }
 
@@ -1554,6 +1837,16 @@ export default (function () {
         _cdf(x) {
             return 0.5 * (1 + special.erf((x - this.p.mu) / this.c[1]));
         }
+
+        support() {
+            return [{
+                value: null,
+                closed: false
+            }, {
+                value: null,
+                closed: false
+            }];
+        }
     }
 
     /**
@@ -1587,6 +1880,16 @@ export default (function () {
         _cdf(x) {
             return x < this.p.xmin ? 0 : 1 - Math.pow(this.p.xmin / x, this.p.alpha);
         }
+
+        support() {
+            return [{
+                value: this.p.xmin,
+                closed: true
+            }, {
+                value: null,
+                closed: false
+            }];
+        }
     }
 
     /**
@@ -1609,7 +1912,7 @@ export default (function () {
 
         _generator() {
             // Direct sampling
-            if (this.p.lambda < 30) {
+            if (this.p.lambda < 50) {
                 // Small lambda, Knuth's method
                 let l = Math.exp(-this.p.lambda),
                     k = 0,
@@ -1650,6 +1953,16 @@ export default (function () {
             let xi = parseInt(x);
             return xi < 0 ? 0 : 1 - special.gammaLowerIncomplete(xi + 1, this.p.lambda) / special.gamma(xi + 1);
         }
+
+        support() {
+            return [{
+                value: 0,
+                closed: true
+            }, {
+                value: null,
+                closed: false
+            }];
+        }
     }
 
     /**
@@ -1685,6 +1998,16 @@ export default (function () {
 
         _cdf(x) {
             return x < this.p.xmin ? 0 : x > this.p.xmax ? 1 : (x - this.p.xmin) / this.c[0];
+        }
+
+        support() {
+            return [{
+                value: this.p.xmin,
+                closed: true
+            }, {
+                value: this.p.xmax,
+                closed: true
+            }];
         }
     }
 
@@ -1723,6 +2046,16 @@ export default (function () {
             let xi = parseInt(x);
             return xi < this.p.xmin ? 0 : xi > this.p.xmax ? 1 : (1 + xi - this.p.xmin) / this.c[0];
         }
+
+        support() {
+            return [{
+                value: this.p.xmin,
+                closed: true
+            }, {
+                value: this.p.xmax,
+                closed: true
+            }];
+        }
     }
 
     /**
@@ -1755,6 +2088,16 @@ export default (function () {
 
         _cdf(x) {
             return x < 0 ? 0 : 1 - Math.exp(-Math.pow(x / this.p.lambda, this.p.k));
+        }
+
+        support() {
+            return [{
+                value: 0,
+                closed: true
+            }, {
+                value: null,
+                closed: false
+            }];
         }
     }
 

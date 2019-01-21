@@ -56,9 +56,9 @@ let test_utils = (function() {
      * Performs a chi-square test with significance level of 0.001. That is, there is a 0.1% chance
      * that the sample follows the distribution and we still reject it.
      *
-     * @param values Sample of discrete random values.
-     * @param model Theoretical cumulative mass function.
-     * @param c Number of model parameters.
+     * @param {number[]} values Sample of discrete random values.
+     * @param {Function} model Theoretical cumulative mass function.
+     * @param {number} c Number of model parameters.
      */
     function chi_test(values, model, c) {
         // Calculate distribution first
@@ -79,7 +79,6 @@ let test_utils = (function() {
         // Find critical value
         let df = Math.max(1, Object.keys(p).length - c - 1);
         let crit = df <= 250 ? CHI_TABLE_LOW[df] : CHI_TABLE_HIGH[Math.ceil(df / 50)];
-        //console.log(df, chi2, crit);
         return chi2 <= crit;
     }
 
