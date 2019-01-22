@@ -32,6 +32,9 @@
   "nyc": {
     "exclude": [
       "test"
+    ],
+    "include": [
+      "src/*.js"
     ]
   },
   "repository": {

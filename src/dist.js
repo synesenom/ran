@@ -115,23 +115,22 @@ export default (function () {
      */
     function _chiTest(values, pmf, c) {
         // Calculate observed distribution
-        let p = {};
+        let p = new Map();
         values.forEach(function (v) {
-            p[v] = p[v] ? p[v] + 1 : 1;
+            p.set(v, p.has(v) ? p.get(v) + 1 : 1);
         });
 
         // Calculate chi-square sum
         let chi2 = 0,
             n = values.length;
-        for (let x in p) {
-            if (p.hasOwnProperty(x)) {
-                let m = pmf(parseInt(x)) * n;
-                chi2 += Math.pow(p[x] - m, 2) / m;
-            }
-        }
+
+        p.forEach((px, x) => {
+            let m = pmf(parseInt(x)) * n;
+            chi2 += Math.pow(px - m, 2) / m;
+        });
 
         // Get critical value
-        let df = Math.max(1, Object.keys(p).length - c - 1),
+        let df = Math.max(1, p.size - c - 1),
             crit = df <= 250 ? _CHI_TABLE_LO[df] : _CHI_TABLE_HI[Math.floor(df / 50)];
 
         // Return comparison results
@@ -561,7 +560,7 @@ export default (function () {
      */
     class Bernoulli extends Distribution {
         constructor(p = 0.5) {
-            super("discrete", arguments.length);
+            super('discrete', arguments.length);
             this.p = {p};
         }
 
@@ -607,7 +606,7 @@ export default (function () {
      */
     class Beta extends Distribution {
         constructor(alpha = 1, beta = 1) {
-            super("continuous", arguments.length);
+            super('continuous', arguments.length);
             this.p = {alpha, beta};
             this.c = [special.beta(alpha, beta)];
         }
@@ -698,7 +697,7 @@ export default (function () {
      */
     class Binomial extends Distribution {
         constructor(n = 100, p = 0.5) {
-            super("continuous", arguments.length);
+            super('discrete', arguments.length);
             let pp = p <= 0.5 ? p : 1 - p;
             this.p = {n, p};
             this.c = [pp, n * pp];
@@ -707,11 +706,13 @@ export default (function () {
         _generator() {
             // Direct sampling
             if (this.p.n < 25) {
+                // Small n
                 let b = 0;
                 for (let i = 1; i <= this.p.n; i++)
                     if (Math.random() < this.c[0]) b++;
                 return this.c[0] === this.p.p ? b : this.p.n - b;
             } else if (this.c[1] < 1.) {
+                // Small mean
                 let lambda = Math.exp(-this.c[1]),
                     t = 1.0,
                     i;
@@ -722,6 +723,7 @@ export default (function () {
                 let b = Math.min(i, this.p.n);
                 return this.c[0] === this.p.p ? b : this.p.n - b;
             } else {
+                // Rest of the cases
                 let en = this.p.n,
                     g = special.gammaLn(en + 1),
                     pc = 1 - this.c[0],
@@ -780,7 +782,7 @@ export default (function () {
      */
     class BoundedPareto extends Distribution {
         constructor(L = 1, H = 10, alpha = 1) {
-            super("continuous", arguments.length);
+            super('continuous', arguments.length);
             this.p = {L, H, alpha};
             this.c = [Math.pow(L, alpha), Math.pow(H, alpha), (1 - Math.pow(L / H, alpha))];
         }
@@ -865,12 +867,13 @@ export default (function () {
      *
      * @class Custom
      * @memberOf ran.dist
-     * @param {Array} weights Weights for the distribution (doesn't need to be normalized).
+     * @param {number[]} weights Weights for the distribution (doesn't need to be normalized). Default value is an array
+     * with a single value of 1.
      * @constructor
      */
     class Custom extends Distribution {
-        constructor(weights) {
-            super("discrete", arguments.length);
+        constructor(weights = [1]) {
+            super('discrete', arguments.length);
             this.p = {n: weights.length, weights};
 
             // Pre-compute tables
@@ -956,20 +959,20 @@ export default (function () {
         }
 
         _pdf(x) {
+            let xi = parseInt(x);
             if (this.p.n <= 1) {
-                return 1;
+                return xi !== 0 ? 0 : 1;
             } else {
-                let xi = parseInt(x);
-                return (xi < 0 || xi >= this.p.weights.length) ? 0 : this.c[2][xi];
+                return (xi < 0 || xi >= this.p.n) ? 0 : this.c[2][xi];
             }
         }
 
         _cdf(x) {
+            let xi = parseInt(x);
             if (this.p.n <= 1) {
-                return 1;
+                return xi < 0 ? 0 : 1;
             } else {
-                let xi = parseInt(x);
-                return xi < 0 ? 0 : xi >= this.p.weights.length ? 1 : this.c[3][xi];
+                return xi < 0 ? 0 : xi >= this.p.n ? 1 : this.c[3][xi];
             }
         }
 
@@ -978,7 +981,7 @@ export default (function () {
                 value: 0,
                 closed: true
             }, {
-                value: this.p.n,
+                value: Math.max(0, this.p.n - 1),
                 closed: true
             }];
         }
@@ -998,7 +1001,7 @@ export default (function () {
      */
     class Degenerate extends Distribution {
         constructor(x0 = 0) {
-            super("continuous", arguments.length);
+            super('continuous', arguments.length);
             this.p = {x0};
         }
 
@@ -1040,7 +1043,7 @@ export default (function () {
      */
     class Exponential extends Distribution {
         constructor(lambda = 1) {
-            super("continuous", arguments.length);
+            super('continuous', arguments.length);
             this.p = {lambda};
         }
 
@@ -1177,7 +1180,7 @@ export default (function () {
      */
     class Gamma extends Distribution {
         constructor(alpha = 1, beta = 1) {
-            super("continuous", arguments.length);
+            super('continuous', arguments.length);
             this.p = {alpha, beta};
             this.c = [Math.pow(beta, alpha), special.gamma(alpha)];
         }
@@ -1222,7 +1225,7 @@ export default (function () {
      */
     class GeneralizedGamma extends Distribution {
         constructor(a = 1, d = 1, p = 1) {
-            super("continuous", arguments.length);
+            super('continuous', arguments.length);
             this.p = {a, d, p};
             this.c = [special.gamma(d / p), (p / Math.pow(a, d)), 1 / Math.pow(a, p)];
         }
@@ -1378,6 +1381,50 @@ export default (function () {
     }
 
     /**
+     * Generator for the [inverse gamma distribution]{@link https://en.wikipedia.org/wiki/Inverse-gamma_distribution}:
+     *
+     * $$f(x; \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{-\alpha - 1} e^{-\beta/x},$$
+     *
+     * where \(\alpha, \beta \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
+     *
+     * @class InverseGamma
+     * @memberOf ran.dist
+     * @param {number=} alpha Shape parameter. Default value is 1.
+     * @param {number=} beta Scale parameter. Default value is 1.
+     * @constructor
+     */
+    class InverseGamma extends Distribution {
+        constructor(alpha = 1, beta = 1) {
+            super('continuous', arguments.length);
+            this.p = {alpha, beta};
+            this.c = [Math.pow(beta, alpha) / special.gamma(alpha), special.gamma(alpha)];
+        }
+
+        _generator() {
+            // Direct sampling from gamma
+            return 1 / _gamma(this.p.alpha, this.p.beta);
+        }
+
+        _pdf(x) {
+            return x > 0 ? this.c[0] * Math.pow(x, -1 - this.p.alpha) * Math.exp(-this.p.beta / x) : 0;
+        }
+
+        _cdf(x) {
+            return x > 0 ? 1 - special.gammaLowerIncomplete(this.p.alpha, this.p.beta / x) / this.c[1] : 0;
+        }
+
+        support() {
+            return [{
+                value: 0,
+                closed: false
+            }, {
+                value: null,
+                closed: false
+            }];
+        }
+    }
+
+    /**
      * Generator for the Wald or [inverse Gaussian distribution]{@link https://en.wikipedia.org/wiki/Inverse_Gaussian_distribution}:
      *
      * $$f(x; \lambda, \mu) = \bigg[\frac{\lambda}{2 \pi x^3}\bigg]^{1/2} e^{\frac{-\lambda (x - \mu)^2}{2 \mu^2 x}},$$
@@ -1423,50 +1470,6 @@ export default (function () {
             return [{
                 value: 0,
                 closed: true
-            }, {
-                value: null,
-                closed: false
-            }];
-        }
-    }
-
-    /**
-     * Generator for the [inverse gamma distribution]{@link https://en.wikipedia.org/wiki/Inverse-gamma_distribution}:
-     *
-     * $$f(x; \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{-\alpha - 1} e^{-\beta/x},$$
-     *
-     * where \(\alpha, \beta \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
-     *
-     * @class InverseGamma
-     * @memberOf ran.dist
-     * @param {number=} alpha Shape parameter. Default value is 1.
-     * @param {number=} beta Scale parameter. Default value is 1.
-     * @constructor
-     */
-    class InverseGamma extends Distribution {
-        constructor(alpha = 1, beta = 1) {
-            super("continuous", arguments.length);
-            this.p = {alpha, beta};
-            this.c = [Math.pow(beta, alpha) / special.gamma(alpha), special.gamma(alpha)];
-        }
-
-        _generator() {
-            // Direct sampling from gamma
-            return 1 / _gamma(this.p.alpha, this.p.beta);
-        }
-
-        _pdf(x) {
-            return x > 0 ? this.c[0] * Math.pow(x, -1 - this.p.alpha) * Math.exp(-this.p.beta / x) : 0;
-        }
-
-        _cdf(x) {
-            return x > 0 ? 1 - special.gammaLowerIncomplete(this.p.alpha, this.p.beta / x) / this.c[1] : 0;
-        }
-
-        support() {
-            return [{
-                value: 0,
-                closed: false
             }, {
                 value: null,
                 closed: false
@@ -1627,15 +1630,20 @@ export default (function () {
 
         _generator() {
             // Inverse transform sampling
-            return this.p.mu + this.p.sigma * (Math.pow(1 / Math.random() - 1, -this.p.xi) - 1) / this.p.xi;
+            if (this.p.xi === 0) {
+                return this.p.mu - this.p.sigma * Math.log(1 / Math.random() - 1);
+            } else {
+                return this.p.mu + this.p.sigma * (Math.pow(1 / Math.random() - 1, -this.p.xi) - 1) / this.p.xi;
+            }
         }
 
         _pdf(x) {
-            let z = (x - this.p.mu) / this.p.sigma,
-                p = Math.pow(1 + this.p.xi * z, -(1/this.p.xi + 1)) / (this.p.sigma * Math.pow(1 + Math.pow(1 + this.p.xi * z, -1/this.p.xi), 2));
             if (this.p.xi === 0) {
-                return p;
+                let z = Math.exp(-(x - this.p.mu) / this.p.sigma);
+                return z / (this.p.sigma * Math.pow(1 + z, 2));
             } else {
+                let z = (x - this.p.mu) / this.p.sigma,
+                    p = Math.pow(1 + this.p.xi * z, -(1/this.p.xi + 1)) / (this.p.sigma * Math.pow(1 + Math.pow(1 + this.p.xi * z, -1/this.p.xi), 2));
                 if (this.p.xi > 0) {
                     return x >= this.p.mu - this.p.sigma / this.p.xi ? p : 0;
                 } else {
@@ -1645,11 +1653,11 @@ export default (function () {
         }
 
         _cdf(x) {
-            let z = (x - this.p.mu) / this.p.sigma,
-                c = 1 / (1 + Math.pow(1 + this.p.xi * z, -1/this.p.xi));
             if (this.p.xi === 0) {
-                return c;
+                return 1 / (1 + Math.exp(-(x - this.p.mu) / this.p.sigma));
             } else {
+                let z = (x - this.p.mu) / this.p.sigma,
+                    c = 1 / (1 + Math.pow(1 + this.p.xi * z, -1/this.p.xi));
                 if (this.p.xi > 0) {
                     return x >= this.p.mu - this.p.sigma / this.p.xi ? c : 0;
                 } else {
@@ -1690,7 +1698,7 @@ export default (function () {
      */
     class Lognormal extends Distribution {
         constructor(mu = 0, sigma = 1) {
-            super("continuous", arguments.length);
+            super('continuous', arguments.length);
             this.p = {mu, sigma};
             this.c = [sigma * Math.sqrt(2 * Math.PI), sigma * Math.SQRT2];
         }
@@ -1820,7 +1828,7 @@ export default (function () {
      */
     class Normal extends Distribution {
         constructor(mu = 0, sigma = 1) {
-            super("continuous", arguments.length);
+            super('continuous', arguments.length);
             this.p = {mu, sigma};
             this.c = [sigma * Math.sqrt(2 * Math.PI), sigma * Math.SQRT2];
         }
@@ -1864,7 +1872,7 @@ export default (function () {
      */
     class Pareto extends Distribution {
         constructor(xmin = 1, alpha = 1) {
-            super("continuous", arguments.length);
+            super('continuous', arguments.length);
             this.p = {xmin, alpha};
         }
 
@@ -1906,13 +1914,13 @@ export default (function () {
      */
     class Poisson extends Distribution {
         constructor(lambda = 1) {
-            super("discrete", arguments.length);
+            super('discrete', arguments.length);
             this.p = {lambda};
         }
 
         _generator() {
             // Direct sampling
-            if (this.p.lambda < 50) {
+            if (this.p.lambda < 30) {
                 // Small lambda, Knuth's method
                 let l = Math.exp(-this.p.lambda),
                     k = 0,
@@ -1982,7 +1990,7 @@ export default (function () {
      */
     class UniformContinuous extends Distribution {
         constructor(xmin = 0, xmax = 1) {
-            super("continuous", arguments.length);
+            super('continuous', arguments.length);
             this.p = {xmin, xmax};
             this.c = [xmax - xmin];
         }
@@ -2027,7 +2035,7 @@ export default (function () {
      */
     class UniformDiscrete extends Distribution {
         constructor(xmin = 0, xmax = 100) {
-            super("discrete", arguments.length);
+            super('discrete', arguments.length);
             this.p = {xmin, xmax};
             this.c = [xmax - xmin + 1];
         }
@@ -2073,7 +2081,7 @@ export default (function () {
      */
     class Weibull extends Distribution {
         constructor(lambda = 1, k = 1) {
-            super("continuous", arguments.length);
+            super('continuous', arguments.length);
             this.p = {lambda, k};
         }
 

@@ -72,13 +72,16 @@ let test_utils = (function() {
         // Calculate chi-square
         let chi2 = 0;
         for (let x in p) {
-            let m = model(parseInt(x)) * values.length;
-            chi2 += Math.pow(p[x] - m, 2) / m;
+            if (p.hasOwnProperty(x)) {
+                let m = model(parseInt(x)) * values.length;
+                chi2 += Math.pow(p[x] - m, 2) / m;
+            }
         }
 
         // Find critical value
         let df = Math.max(1, Object.keys(p).length - c - 1);
         let crit = df <= 250 ? CHI_TABLE_LOW[df] : CHI_TABLE_HIGH[Math.ceil(df / 50)];
+        //console.log(df, crit, chi2);
         return chi2 <= crit;
     }
 
@@ -108,7 +111,7 @@ let test_utils = (function() {
         for (let x=a; x<b; x++) {
             int += pmf(x);
             dy += Math.abs(cdf(x) - int);
-            //console.log(cdf(x), int);
+            //console.log(x, int, cdf(x));
         }
         //console.log(dy);
         return dy;
