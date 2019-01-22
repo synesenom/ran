@@ -28,8 +28,7 @@
     "docs": "python docs/src/parser.py",
     "build": "webpack",
     "coverage": "nyc --reporter=text --reporter=html _mocha --require babel-core/register --timeout=3000",
-    "coveralls": "nyc --reporter=text-lcov _mocha --require babel-core/register --timeout=3000 | coveralls",
-    "coveralls-0": "./node_modules/.bin/nyc npm run test -- --grep @nycinvalid --invert && ./node_modules/.bin/nyc report --reporter=text-lcov | ./node_modules/.bin/coveralls"
+    "coveralls": "nyc --reporter=text-lcov _mocha --require babel-core/register --timeout=3000 | coveralls"
   },
   "nyc": {
     "exclude": [

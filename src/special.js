@@ -133,12 +133,14 @@ export default (function () {
                 fi = i * (s - i);
                 b += 2;
                 d = fi * d + b;
-                if (Math.abs(d) < _DELTA)
-                    d = _DELTA;
+                //if (Math.abs(d) < _DELTA)
+                //    d = _DELTA;
+                d = Math.max(Math.abs(d), _DELTA);
                 d = 1 / d;
                 c = b + fi / c;
-                if (Math.abs(c) < _DELTA)
-                    c = _DELTA;
+                //if (Math.abs(c) < _DELTA)
+                //    c = _DELTA;
+                c = Math.max(Math.abs(c), _DELTA);
                 y = c * d;
                 f *= y;
                 if (Math.abs(y - 1) < _EPSILON)
@@ -172,8 +174,9 @@ export default (function () {
                 qam = a - 1,
                 c = 1,
                 d = 1 - qab * x / qap;
-            if (Math.abs(d) < _FPMIN)
-                d = _FPMIN;
+            //if (Math.abs(d) < _FPMIN)
+            //    d = _FPMIN;
+            d = Math.max(Math.abs(d), _FPMIN);
             d = 1 / d;
             let h = d;
 
@@ -181,20 +184,24 @@ export default (function () {
                 let m2 = 2 * i,
                     aa = i * (b - i) * x / ((qam + m2) * (a + m2));
                 d = 1 + aa * d;
-                if (Math.abs(d) < _FPMIN)
-                    d = _FPMIN;
+                //if (Math.abs(d) < _FPMIN)
+                //    d = _FPMIN;
+                d = Math.max(Math.abs(d), _FPMIN);
                 c = 1 + aa / c;
-                if (Math.abs(c) < _FPMIN)
-                    c = _FPMIN;
+                //if (Math.abs(c) < _FPMIN)
+                //    c = _FPMIN;
+                c = Math.max(Math.abs(c), _FPMIN);
                 d = 1 / d;
                 h *= d * c;
                 aa = -(a + i) * (qab + i) * x / ((a + m2) * (qap + m2));
                 d = 1 + aa * d;
-                if (Math.abs(d) < _FPMIN)
-                    d = _FPMIN;
+                //if (Math.abs(d) < _FPMIN)
+                //    d = _FPMIN;
+                d = Math.max(Math.abs(d), _FPMIN);
                 c = 1 + aa / c;
-                if (Math.abs(c) < _FPMIN)
-                    c = _FPMIN;
+                //if (Math.abs(c) < _FPMIN)
+                //    c = _FPMIN;
+                c = Math.max(Math.abs(c), _FPMIN);
                 d = 1 / d;
                 let del = d * c;
                 h *= del;

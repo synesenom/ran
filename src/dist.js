@@ -12,7 +12,7 @@ export default (function () {
     /**
      * Table containing critical values for the chi square test at 99% of confidence for low degrees of freedom.
      *
-     * @var {Array} _CHI_TABLE_LO
+     * @var {number[]} _CHI_TABLE_LO
      * @memberOf ran.dist
      * @private
      */
@@ -47,7 +47,7 @@ export default (function () {
     /**
      * Table containing critical values for the chi square test at 95% of confidence for high degrees of freedom.
      *
-     * @var {Array} _CHI_TABLE_HI
+     * @var {number[]} _CHI_TABLE_HI
      * @memberOf ran.dist
      * @private
      */
@@ -106,7 +106,7 @@ export default (function () {
      *
      * @method _chiTest
      * @memberOf ran.dist
-     * @param values {Array} Array of values to perform test for.
+     * @param values {number[]} Array of values to perform test for.
      * @param pmf {Function} Probability mass function to perform test against.
      * @param c {number} Number of parameters for the distribution.
      * @returns {{statistics: number, passed: boolean}} Test results, containing the raw chi square statistics and a
@@ -145,7 +145,7 @@ export default (function () {
      *
      * @method _ksTest
      * @memberOf ran.dist
-     * @param values {Array} Array of values to perform test for.
+     * @param values {number[]} Array of values to perform test for.
      * @param cdf {Function} Cumulative distribution function to perform test against.
      * @returns {{statistics: number, passed: boolean}} Test results, containing the raw K-S statistics and a
      * boolean to tell whether the distribution passed the test.
@@ -248,7 +248,7 @@ export default (function () {
          * @method sample
          * @memberOf ran.dist.Distribution
          * @param {number=} n Number of variates to generate. If not specified, a single value is returned.
-         * @returns {(number|Array)} Single sample or an array of samples.
+         * @returns {(number|number[])} Single sample or an array of samples.
          * @example
          *
          * let pareto = new ran.dist.Pareto(1, 2)
@@ -404,7 +404,7 @@ export default (function () {
          *
          * @method L
          * @memberOf ran.dist.Distribution
-         * @param {Array} data Array of numbers to calculate log-likelihood for.
+         * @param {number[]} data Array of numbers to calculate log-likelihood for.
          * @return {number} The value of log-likelihood.
          * @example
          *
@@ -430,7 +430,7 @@ export default (function () {
          *
          * @method test
          * @memberOf ran.dist.Distribution
-         * @param {Array} values Array of values to test.
+         * @param {number[]} values Array of values to test.
          * @returns {Object} Object with two properties representing the result of the test:
          * <ul>
          *     <li>{statistics}: The \(\chi^2\) or D statistics depending on whether the distribution is discrete or
@@ -1937,11 +1937,12 @@ export default (function () {
                     alpha = beta * this.p.lambda,
                     k = Math.log(c) - this.p.lambda - Math.log(beta);
                 while (true) {
-                    let r = Math.random(),
-                        x = (alpha - Math.log((1 - r) / r)) / beta,
+                    let r, x, n;
+                    do {
+                        r = Math.random();
+                        x = (alpha - Math.log((1 - r) / r)) / beta;
                         n = Math.floor(x + 0.5);
-                    if (n < 0)
-                        continue;
+                    } while (n < 0);
                     let v = Math.random(),
                         y = alpha - beta * x,
                         lhs = y + Math.log(v / Math.pow(1.0 + Math.exp(y), 2)),
