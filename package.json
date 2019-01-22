@@ -20,21 +20,26 @@
     "babel-plugin-istanbul": "^5.1.0",
     "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
+    "istanbul": "^0.4.5",
     "nyc": "^13.1.0"
   },
   "scripts": {
     "test": "./node_modules/.bin/_mocha --require babel-core/register",
     "docs": "python docs/src/parser.py",
     "build": "webpack",
-    "coverage": "./node_modules/.bin/nyc npm run test -- --grep @nycinvalid --invert && ./node_modules/.bin/nyc report --reporter=html",
-    "coveralls": "./node_modules/.bin/nyc npm run test -- --grep @nycinvalid --invert && ./node_modules/.bin/nyc report --reporter=text-lcov | ./node_modules/.bin/coveralls"
+    "coverage": "nyc --reporter=text --reporter=html _mocha --require babel-core/register --timeout=3000",
+    "coveralls": "nyc --reporter=text-lcov _mocha --require babel-core/register --timeout=3000 | coveralls",
+    "coveralls-0": "./node_modules/.bin/nyc npm run test -- --grep @nycinvalid --invert && ./node_modules/.bin/nyc report --reporter=text-lcov | ./node_modules/.bin/coveralls"
   },
   "nyc": {
     "exclude": [
       "test"
     ],
     "include": [
-      "src/*.js"
+      "src/core.js",
+      "src/dist.js",
+      "src/la.js",
+      "src/special.js"
     ]
   },
   "repository": {
