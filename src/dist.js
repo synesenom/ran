@@ -1502,6 +1502,50 @@ export default (function () {
   }
 
   /**
+   * Generator for the [Kumaraswamy distribution]{@link https://en.wikipedia.org/wiki/Kumaraswamy_distribution} (also
+   * known as Minimax distribution):
+   *
+   * $$f(x; a, b) = a b x^{a-1} (1 - x^a)^{b - 1},$$
+   *
+   * with \(a, b \in \mathbb{R}^+\). Support: \(x \in (0, 1)\).
+   *
+   * @class Minimax
+   * @memberOf ran.dist
+   * @param {number=} alpha First shape parameter. Default value is 1.
+   * @param {number=} beta Second shape parameter. Default value is 1.
+   * @constructor
+   */
+  class Kumaraswamy extends Distribution {
+    constructor (a = 1, b = 1) {
+      super('continuous', arguments.length)
+      this.p = { a, b }
+    }
+
+    _generator () {
+      // Inverse transform sampling
+      return Math.pow(1 - Math.pow(1 - Math.random(), 1 / this.p.b), 1 / this.p.a)
+    }
+
+    _pdf (x) {
+      return x > 0 && x < 1 ? this.p.a * this.p.b * Math.pow(x, this.p.a - 1) * Math.pow(1 - Math.pow(x, this.p.a), this.p.b - 1) : 0
+    }
+
+    _cdf (x) {
+      return x > 0 && x < 1 ? 1 - Math.pow(1 - Math.pow(x, this.p.a), this.p.b) : 0
+    }
+
+    support () {
+      return [{
+        value: 0,
+        closed: false
+      }, {
+        value: 0,
+        closed: false
+      }]
+    }
+  }
+
+  /**
    * Generator for the [Laplace distribution]{@link https://en.wikipedia.org/wiki/Laplace_distribution}:
    *
    * $$f(x; \mu, b) = \frac{1}{2b}e^{-\frac{|x - \mu|}{b}},$$
@@ -1791,49 +1835,6 @@ export default (function () {
         closed: true
       }, {
         value: null,
-        closed: false
-      }]
-    }
-  }
-
-  /**
-   * Generator for the [Minimax distribution]{@link http://stats-www.open.ac.uk/TechnicalReports/minimax.pdf} (as defined in <i>M. C. Jones, The Minimax Distribution: A Beta-Type Distribution With Some Tractability Advantages. The Open University, UK., pp: 1-21.</i>):
-   *
-   * $$f(x; \alpha, \beta) = \alpha \beta x^{\alpha-1} (1 - x^\alpha)^{\beta - 1},$$
-   *
-   * with \(\alpha, \beta \in \mathbb{R}^+\). Support: \(x \in (0, 1)\).
-   *
-   * @class Minimax
-   * @memberOf ran.dist
-   * @param {number=} alpha First shape parameter. Default value is 1.
-   * @param {number=} beta Second shape parameter. Default value is 1.
-   * @constructor
-   */
-  class Minimax extends Distribution {
-    constructor (alpha = 1, beta = 1) {
-      super('continuous', arguments.length)
-      this.p = { alpha, beta }
-    }
-
-    _generator () {
-      // Inverse transform sampling
-      return Math.pow(1 - Math.pow(1 - Math.random(), 1 / this.p.beta), 1 / this.p.alpha)
-    }
-
-    _pdf (x) {
-      return x > 0 && x < 1 ? this.p.alpha * this.p.beta * Math.pow(x, this.p.alpha - 1) * Math.pow(1 - Math.pow(x, this.p.alpha), this.p.beta - 1) : 0
-    }
-
-    _cdf (x) {
-      return x > 0 && x < 1 ? 1 - Math.pow(1 - Math.pow(x, this.p.alpha), this.p.beta) : 0
-    }
-
-    support () {
-      return [{
-        value: 0,
-        closed: false
-      }, {
-        value: 0,
         closed: false
       }]
     }
@@ -2198,13 +2199,13 @@ export default (function () {
     Gumbel,
     InverseGamma,
     InverseGaussian,
+    Kumaraswamy,
     Laplace,
     LogCauchy,
     Logistic,
     LogLogistic,
     Lognormal,
     Lomax,
-    Minimax,
     Normal,
     Pareto,
     Poisson,

@@ -312,7 +312,7 @@ describe('dist', () => {
         name: 'Lomax',
         p: () => [core.float(0.1, 5), core.float(0.1, 5)]
     }, {
-        name: 'Minimax',
+        name: 'Kumaraswamy',
         p: () => [core.float(0.1, 5), core.float(0.1, 5)]
     }, {
         name: 'Normal',
