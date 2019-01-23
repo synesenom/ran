@@ -1,9 +1,9 @@
-import core from './core';
-import la from './la';
-import dist from './dist';
-import ts from './ts';
-import mc from './mc';
-export {la, ts, core, dist, mc};
+import core from './core'
+import la from './la'
+import dist from './dist'
+import ts from './ts'
+import mc from './mc'
+export { la, ts, core, dist, mc }
 
 // TODO next()
 // TODO trend()

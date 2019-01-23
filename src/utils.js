@@ -8,16 +8,16 @@
  * @return {number} The sum.
  * @private
  */
-export function _sum(arr, pow = 1) {
-    if (pow !== 1) {
-        return arr.reduce((sum, d) => {
-            return sum + Math.pow(d, pow);
-        }, 0);
-    } else {
-        return arr.reduce((sum, d) => {
-            return sum + d;
-        }, 0);
-    }
+export function _sum (arr, pow = 1) {
+  if (pow !== 1) {
+    return arr.reduce((sum, d) => {
+      return sum + Math.pow(d, pow)
+    }, 0)
+  } else {
+    return arr.reduce((sum, d) => {
+      return sum + d
+    }, 0)
+  }
 }
 
 /**
@@ -31,8 +31,8 @@ export function _sum(arr, pow = 1) {
  * @returns {number} Random number.
  * @private
  */
-export function r(min, max) {
-    return min < max ? Math.random() * (max - min) + min : Math.random() * (min - max) + max;
+export function r (min, max) {
+  return min < max ? Math.random() * (max - min) + min : Math.random() * (min - max) + max
 }
 
 /**
@@ -45,10 +45,10 @@ export function r(min, max) {
  * @returns {(number|string|Array)} Single value or array of generated values.
  * @private
  */
-export function some(generator, k = 1) {
-    if (k < 2)
-        return generator();
-    else {
-        return Array.from({length: k}, () => generator());
-    }
+export function some (generator, k = 1) {
+  if (k < 2) {
+    return generator()
+  } else {
+    return Array.from({ length: k }, () => generator())
+  }
 }
