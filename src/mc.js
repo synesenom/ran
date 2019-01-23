@@ -1,4 +1,5 @@
 import { _sum } from './utils';
+import { dist } from './dist';
 
 /**
  * A collection of various Monte Carlo methods.
@@ -70,7 +71,7 @@ export default (function() {
         };
     })();
 
-    // TODO
+/*
     let Slice = (function(logDensity, config) {
         let _min = config && typeof config.min !== 'undefined' ? config.min : null,
             _max = config && typeof config.max !== 'undefined' ? config.max : null,
@@ -152,6 +153,7 @@ export default (function() {
             sample: sample
         };
     });
+*/
 
     /**
      * Base class implementing a general Markov chain Monte Carlo sampler. All MCMC sampler is extended from this class. MCMC samplers can be used to approximate integrals
@@ -174,7 +176,7 @@ export default (function() {
             this.dim = config.dim || 1;
             this.maxHistory = config.maxHistory || _MAX_HISTORY;
             this.lnp = logDensity;
-            this.x = initialState.x || Array.from({length: self.dim}, Math.random);
+            this.x = initialState.x || Array.from({length: this.dim}, Math.random);
             this.samplingRate = initialState.samplingRate || 1;
             this.internal = initialState.internal || {};
 
@@ -264,11 +266,11 @@ export default (function() {
          *
          * @method _internal
          * @memberOf ran.mc.MCMC
-         * @returns {object} Object containing the internal variables.
+         * @returns {Object} Object containing the internal variables.
          * @private
          */
         _internal() {
-            throw Error("MCMC._internal() is not implemented");
+            throw Error('MCMC._internal() is not implemented');
         }
 
         /**
@@ -276,14 +278,14 @@ export default (function() {
          *
          * @method _iter
          * @memberOf ran.mc.MCMC
-         * @param {Array} x Current state of the Markov chain.
-         * @param {boolean} warmUp Whether iteration takes place during warm-up or not. Default is false.
+         * @param {number[]} x Current state of the Markov chain.
+         * @param {boolean=} warmUp Whether iteration takes place during warm-up or not. Default is false.
          * @returns {{x: Array, accepted: boolean}} Object containing the new state ({x}) and whether it is a
          * genuinely new state or not ({accepted}).
          * @private
          */
-        _iter(x, warmUp = false) {
-            throw Error("MCMC._iter() is not implemented");
+        _iter() {
+            throw Error('MCMC._iter() is not implemented');
         }
 
         /**
@@ -294,8 +296,8 @@ export default (function() {
          * @param {Object} i Object containing the result of the last iteration.
          * @private
          */
-        _adjust(i) {
-            throw Error("MCMC._adjust() is not implemented");
+        _adjust() {
+            throw Error('MCMC._adjust() is not implemented');
         }
 
         /**

@@ -271,7 +271,7 @@ export default (function () {
     })();
 
     function beta(x, y) {
-        return Math.exp(gammaLn(x) + gammaLn(y) - gammaLn(x + y))
+        return Math.exp(gammaLn(x) + gammaLn(y) - gammaLn(x + y));
     }
 
     // Exposed methods

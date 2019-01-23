@@ -10,6 +10,15 @@ import special from './special';
  */
 export default (function () {
     /**
+     * Maximum number of trials in generators.
+     *
+     * @var {number} _MAX_TRIALS
+     * @memberOf ran.dist
+     * @private
+     */
+    const _MAX_TRIALS = 1000;
+
+    /**
      * Table containing critical values for the chi square test at 99% of confidence for low degrees of freedom.
      *
      * @var {number[]} _CHI_TABLE_LO
@@ -87,7 +96,8 @@ export default (function () {
             let d = alpha - 1 / 3,
                 c = 1 / Math.sqrt(9 * d),
                 Z, V, U;
-            while (true) {
+            //while (true) {
+            for (let trials = 0; trials<_MAX_TRIALS; trials++) {
                 Z = _normal(0, 1);
                 if (Z > -1 / c) {
                     V = Math.pow(1 + c * Z, 3);
@@ -198,7 +208,7 @@ export default (function () {
          * @returns {number} The probability density or probability at the specified value.
          * @private
          */
-        _pdf(x) {
+        _pdf() {
             throw Error('Distribution._pdf() is not implemented');
         }
 
@@ -207,11 +217,11 @@ export default (function () {
          *
          * @method _cdf
          * @memberOf ran.dist.Distribution
-         * @param {number } x Value to evaluate the probability distribution at.
+         * @param {number=} x Value to evaluate the probability distribution at.
          * @returns {number} The value of the probability function at the specified value.
          * @private
          */
-        _cdf(x) {
+        _cdf() {
             throw Error('Distribution._cdf() is not implemented');
         }
 
@@ -453,12 +463,13 @@ export default (function () {
          *
          */
         test(values) {
-            return this._type === "discrete"
+            return this._type === 'discrete'
                 ? _chiTest(values, x => this._pdf(x), this.k)
                 : _ksTest(values, x => this._cdf(x));
         }
     }
 
+    // TODO Bates
     // TODO Beta-binomial (https://en.wikipedia.org/wiki/Beta-binomial_distribution)
     // TODO Beta-pascal
     // TODO Discrete Weibull
@@ -480,16 +491,19 @@ export default (function () {
     // TODO Exponential power
     // TODO Gamma-normal
     // TODO Generalized Pareto
+    // TODO Geometric
     // TODO Hyperbolic-secant
     // TODO Hyperexponential
     // TODO Hypoexponential
     // TODO IDB
     // TODO Inverse Gausian
     // TODO Inverted beta
+    // TODO Irwin-Hall
     // TODO Log gamma
     // TODO Logistic-exponential
     // TODO Makeham
     // TODO Muth
+    // TODO Negative binomial
     // TODO Noncentral beta
     // TODO Noncentral chi-square
     // TODO Noncentral F
@@ -1936,7 +1950,8 @@ export default (function () {
                     beta = Math.PI / Math.sqrt(3 * this.p.lambda),
                     alpha = beta * this.p.lambda,
                     k = Math.log(c) - this.p.lambda - Math.log(beta);
-                while (true) {
+                //while (true) {
+                for (let trials = 0; trials<_MAX_TRIALS; trials++) {
                     let r, x, n;
                     do {
                         r = Math.random();

@@ -7,7 +7,7 @@ import la from './la';
  * @memberOf ran
  */
 export default (function() {
-    class Aggregator {
+    /*class Aggregator {
         constructor(dimension = 1) {
             this.dim = dimension;
             this.n = 0;
@@ -18,7 +18,7 @@ export default (function() {
             this.n = 0;
             this.history = Array.from({length: this.dim}, () => []);
         }
-    }
+    }*/
 
     /**
      * Class representing the aggregate [covariance matrix]{@link https://en.wikipedia.org/wiki/Covariance_matrix} of a time series:

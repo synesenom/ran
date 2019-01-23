@@ -21,9 +21,11 @@
     "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
     "istanbul": "^0.4.5",
-    "nyc": "^13.1.0"
+    "nyc": "^13.1.0",
+    "eslint": "^5.12.1"
   },
   "scripts": {
+    "lint": "eslint src/*.js",
     "test": "./node_modules/.bin/_mocha --require babel-core/register",
     "docs": "python docs/src/parser.py",
     "build": "webpack",
