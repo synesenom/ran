@@ -1,3 +1,5 @@
+import la from './la';
+
 /**
  * Namespace containing various exposed methods related to time series
  *
@@ -68,7 +70,7 @@ export default (function() {
          *
          * @method compute
          * @memberOf ran.ts.Cov
-         * @returns {ran.la.Matrix} The covariance matrix.
+         * @returns {la.Matrix} The covariance matrix.
          */
         compute() {
             return new la.Matrix(
@@ -160,7 +162,11 @@ export default (function() {
          * @returns {Array[]} Array containing the auto-correlation function (correlation vs lag) for each component.
          */
         compute() {
-            return this.history.map(d => this._aci(d));
+            if (this.history.reduce((acc, d) => acc + d.length, 0) > 0) {
+                return this.history.map(d => this._aci(d));
+            } else {
+                return Array.from({length: this.dim}, () => Array.from({length: this.range}, () => undefined));
+            }
         }
     }
 
