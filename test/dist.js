@@ -1,8 +1,8 @@
 import assert from 'assert';
 import { describe, it } from 'mocha';
 import utils from './test-utils';
-import core from '../src/core';
-import dist from '../src/dist';
+import { float, int } from '../src/core';
+import * as dist from '../src/dist';
 
 const LAPS = 1000;
 const MAX_AVG_DIFF = 1e-3;
@@ -208,141 +208,141 @@ describe('dist', () => {
     // Ordinary distributions
     [{
         name: 'Arcsine',
-        p: () => [core.float(10), core.float(10.1, 100)]
+        p: () => [float(10), float(10.1, 100)]
     }, {
         name: 'Bernoulli',
-        p: () => [core.float()]
+        p: () => [float()]
     }, {
         name: 'Beta',
-        p: () => [core.float(0.1, 3), core.float(0.1, 3)]
+        p: () => [float(0.1, 3), float(0.1, 3)]
     }, {
         name: 'BetaPrime',
-        p: () => [core.float(0.1, 3), core.float(0.1, 3)]
+        p: () => [float(0.1, 3), float(0.1, 3)]
     }, {
         name: 'Binomial',
         cases: [{
             desc: 'small n',
-            p: () => [core.int(10, 20), core.float()]
+            p: () => [int(10, 20), float()]
         }, {
             desc: 'small mean',
-            p: () => [core.int(30, 100), core.float() / 105]
+            p: () => [int(30, 100), float() / 105]
         }, {
             desc: 'large n, mean',
-            p: () => [core.int(30, 100), core.float()]
+            p: () => [int(30, 100), float()]
         }]
     }, {
         name: 'BoundedPareto',
-        p: () => [core.float(0.1, 5), core.float(5.1, 5), core.float(0.1, 3)]
+        p: () => [float(0.1, 5), float(5.1, 5), float(0.1, 3)]
     }, {
         name: 'Cauchy',
-        p: () => [core.float(), core.float(0.5, 2)]
+        p: () => [float(), float(0.5, 2)]
     }, {
         name: 'Chi2',
-        p: () => [core.int(1, 10)]
+        p: () => [int(1, 10)]
     }, {
         name: 'Custom',
         cases: [{
             desc: 'small n',
-            p: () => [Array.from({length: core.int(0, 1)}, Math.random)],
+            p: () => [Array.from({length: int(0, 1)}, Math.random)],
             skip: ['test-foreign']
         }, {
             desc: 'moderate n',
-            p: () => [Array.from({length: core.int(10, 100)}, Math.random)]
+            p: () => [Array.from({length: int(10, 100)}, Math.random)]
         }, {
             desc: 'large n',
-            p: () => [Array.from({length: core.int(101, 120)}, Math.random)],
+            p: () => [Array.from({length: int(101, 120)}, Math.random)],
             skip: ['test-foreign']
         }]
     }, {
         name: 'Erlang',
-        p: () => [core.int(1, 10), core.float(0.1, 5)]
+        p: () => [int(1, 10), float(0.1, 5)]
     }, {
         name: 'Exponential',
-        p: () => [core.float(0.1, 5)]
+        p: () => [float(0.1, 5)]
     }, {
         name: 'F',
-        p: () => [core.float(0.1, 5), core.float(0.1, 5)]
+        p: () => [float(0.1, 5), float(0.1, 5)]
     }, {
         name: 'Frechet',
-        p: () => [core.float(0.1, 5), core.float(0.1, 5), core.float(-5, 5)]
+        p: () => [float(0.1, 5), float(0.1, 5), float(-5, 5)]
     }, {
         name: 'Gamma',
-        p: () => [core.float(0.1, 10), core.float(0.1, 3)]
+        p: () => [float(0.1, 10), float(0.1, 3)]
     }, {
         name: 'GeneralizedGamma',
-        p: () => [core.float(0.1, 10), core.float(0.1, 5), core.float(0.1, 10)]
+        p: () => [float(0.1, 10), float(0.1, 5), float(0.1, 10)]
     }, {
         name: 'Gompertz',
-        p: () => [core.float(0.1, 5), core.float(0.1, 5), core.float(-5, 5)]
+        p: () => [float(0.1, 5), float(0.1, 5), float(-5, 5)]
     }, {
         name: 'Gumbel',
-        p: () => [core.float(-3, 3), core.float(0.1, 5)]
+        p: () => [float(-3, 3), float(0.1, 5)]
     }, {
         name: 'InverseGamma',
-        p: () => [core.float(0.1, 5), core.float(0.1, 3)]
+        p: () => [float(0.1, 5), float(0.1, 3)]
     }, {
         name: 'InverseGaussian',
-        p: () => [core.float(0.1, 5), core.float(0.1, 5)]
+        p: () => [float(0.1, 5), float(0.1, 5)]
     }, {
         name: 'Laplace',
-        p: () => [core.float(-2, 2), core.float(0.1, 5)]
+        p: () => [float(-2, 2), float(0.1, 5)]
     }, {
         name: 'LogCauchy',
-        p: () => [core.float(-5, 5), core.float(0.1, 5)]
+        p: () => [float(-5, 5), float(0.1, 5)]
     }, {
         name: 'Logistic',
-        p: () => [core.float(-5, 5), core.float(0.1, 5)]
+        p: () => [float(-5, 5), float(0.1, 5)]
     }, {
         // TODO zero shape parameter
         name: 'LogLogistic',
         cases: [{
             desc: 'positive shape parameter',
-            p: () => [core.float(-5, 5), core.float(0.1, 5), core.float(0.1, 5)]
+            p: () => [float(-5, 5), float(0.1, 5), float(0.1, 5)]
         }, {
             desc: 'negative shape parameter',
-            p: () => [core.float(-5, 5), core.float(0.1, 5), core.float(-5, -0.1)]
+            p: () => [float(-5, 5), float(0.1, 5), float(-5, -0.1)]
         }, {
             desc: 'zero shape parameter',
-            p: () => [core.float(-5, 5), core.float(0.1, 5), 0]
+            p: () => [float(-5, 5), float(0.1, 5), 0]
         }]
     }, {
         name: 'Lognormal',
-        p: () => [core.float(-2, 2), core.float(0.1, 5)]
+        p: () => [float(-2, 2), float(0.1, 5)]
     }, {
         name: 'Lomax',
-        p: () => [core.float(0.1, 5), core.float(0.1, 5)]
+        p: () => [float(0.1, 5), float(0.1, 5)]
     }, {
         name: 'Kumaraswamy',
-        p: () => [core.float(0.1, 5), core.float(0.1, 5)]
+        p: () => [float(0.1, 5), float(0.1, 5)]
     }, {
         name: 'Normal',
-        p: () => [core.float(-5, 5), core.float(0.1, 10)]
+        p: () => [float(-5, 5), float(0.1, 10)]
     }, {
         name: 'Pareto',
-        p: () => [core.float(0.1, 5), core.float(0.1, 10)]
+        p: () => [float(0.1, 5), float(0.1, 10)]
     }, {
         name: 'Poisson',
         cases: [{
             desc: 'low mean',
-            p: () => [core.float(5, 20)]
+            p: () => [float(5, 20)]
         }, {
             desc: 'high mean',
-            p: () => [core.float(31, 50)]
+            p: () => [float(31, 50)]
         }]
     }, {
         name: 'Rayleigh',
-        p: () => [core.float(0.1, 5)]
+        p: () => [float(0.1, 5)]
     }, {
         name: 'UniformContinuous',
-        p: () => [core.float(10), core.float(10.1, 100)],
+        p: () => [float(10), float(10.1, 100)],
         skip: ['test-foreign']
     }, {
         name: 'UniformDiscrete',
-        p: () => [core.int(10), core.int(11, 100)],
+        p: () => [int(10), int(11, 100)],
         skip: ['test-foreign']
     }, {
         name: 'Weibull',
-        p: () => [core.float(0.1, 10), core.float(0.1, 10)]
+        p: () => [float(0.1, 10), float(0.1, 10)]
     }].forEach(d => {
         describe(d.name, () => {
             if (typeof d.cases === 'undefined') {
@@ -394,7 +394,7 @@ describe('dist', () => {
     });
 
     describe('Degenerate', () => {
-        const p = () => [core.float(-10, 10)];
+        const p = () => [float(-10, 10)];
         describe('.sample()', () => {
             it('should generate values with Degenerate distribution', () => {
                 utils.trials(() => {

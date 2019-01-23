@@ -4,8 +4,8 @@
  * @namespace la
  * @memberOf ran
  */
-export default (function () {
-  /**
+
+/**
    * Class representing a real vector.
    *
    * @class Vector
@@ -24,21 +24,21 @@ export default (function () {
    * // => ( 1, 0, 0 )
    *
    */
-  class Vector {
-    constructor (arg) {
-      if (typeof arg === 'number') {
-        this._v = new Array(arg).fill(0)
-        this._v[0] = 1
-      } else if (Array.isArray(arg)) {
-        this._v = arg
-      } else if (typeof arg === 'object' && Array.isArray(arg._v)) {
-        this._v = arg._v
-      } else {
-        this._v = [1, 0, 0]
-      }
+export class Vector {
+  constructor (arg) {
+    if (typeof arg === 'number') {
+      this._v = new Array(arg).fill(0)
+      this._v[0] = 1
+    } else if (Array.isArray(arg)) {
+      this._v = arg
+    } else if (typeof arg === 'object' && Array.isArray(arg._v)) {
+      this._v = arg._v
+    } else {
+      this._v = [1, 0, 0]
     }
+  }
 
-    /**
+  /**
      * Returns the vector as an array.
      *
      * @method v
@@ -51,11 +51,11 @@ export default (function () {
      * // => [ 1, 0, 0 ]
      *
      */
-    v () {
-      return this._v
-    }
+  v () {
+    return this._v
+  }
 
-    /**
+  /**
      * Returns or sets an element of the vector.
      *
      * @method i
@@ -76,15 +76,15 @@ export default (function () {
      * // => ( 1, 2, 0 )
      *
      */
-    i (i, value) {
-      if (value !== undefined) {
-        this._v[i] = value
-      } else {
-        return this._v[i]
-      }
+  i (i, value) {
+    if (value !== undefined) {
+      this._v[i] = value
+    } else {
+      return this._v[i]
     }
+  }
 
-    /**
+  /**
      * Performs an operation on the vector element-wise.
      *
      * @method f
@@ -98,11 +98,11 @@ export default (function () {
      * // => ( 1, 4, 9 )
      *
      */
-    f (func) {
-      return new Vector(this._v.map(d => func(d)))
-    }
+  f (func) {
+    return new Vector(this._v.map(d => func(d)))
+  }
 
-    /**
+  /**
      * Multiplies this vector with a scalar.
      *
      * @method scale
@@ -116,11 +116,11 @@ export default (function () {
      * // => ( 2, 4, 6 )
      *
      */
-    scale (s) {
-      return new Vector(this._v.map(d => d * s))
-    }
+  scale (s) {
+    return new Vector(this._v.map(d => d * s))
+  }
 
-    /**
+  /**
      * Adds another vector to this vector.
      *
      * @method add
@@ -135,12 +135,12 @@ export default (function () {
      * // => ( 5, 7, 9 )
      *
      */
-    add (vec) {
-      let v = vec.v()
-      return new Vector(this._v.map((d, i) => d + v[i]))
-    }
+  add (vec) {
+    let v = vec.v()
+    return new Vector(this._v.map((d, i) => d + v[i]))
+  }
 
-    /**
+  /**
      * Calculates the dot product with another vector.
      *
      * @method dot
@@ -155,13 +155,13 @@ export default (function () {
      * // => 32
      *
      */
-    dot (vec) {
-      let v = vec.v()
-      return this._v.reduce((sum, d, i) => sum + d * v[i], 0)
-    }
+  dot (vec) {
+    let v = vec.v()
+    return this._v.reduce((sum, d, i) => sum + d * v[i], 0)
   }
+}
 
-  /**
+/**
    * Class representing an immutable real square matrix.
    *
    * @class Matrix
@@ -184,23 +184,23 @@ export default (function () {
    * //    └         ┘
    *
    */
-  class Matrix {
-    constructor (arg) {
-      if (typeof arg === 'number') {
-        this._m = Array.from({ length: arg }, () => new Array(arg).fill(0))
-        for (let i = 0; i < arg; i++) {
-          this._m[i][i] = 1
-        }
-      } else if (Array.isArray(arg)) {
-        this._m = arg
-      } else if (typeof arg === 'object' && Array.isArray(arg._m)) {
-        this._m = arg._m
-      } else {
-        this._m = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+export class Matrix {
+  constructor (arg) {
+    if (typeof arg === 'number') {
+      this._m = Array.from({ length: arg }, () => new Array(arg).fill(0))
+      for (let i = 0; i < arg; i++) {
+        this._m[i][i] = 1
       }
+    } else if (Array.isArray(arg)) {
+      this._m = arg
+    } else if (typeof arg === 'object' && Array.isArray(arg._m)) {
+      this._m = arg._m
+    } else {
+      this._m = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
     }
+  }
 
-    /**
+  /**
      * Returns the matrix as an array of arrays.
      *
      * @method m
@@ -215,11 +215,11 @@ export default (function () {
      * //      [ 0, 0, 1 ] ]
      *
      */
-    m () {
-      return this._m.map(d => d.slice())
-    }
+  m () {
+    return this._m.map(d => d.slice())
+  }
 
-    /**
+  /**
      * Returns or sets an element of the matrix.
      *
      * @method ij
@@ -246,15 +246,15 @@ export default (function () {
      * //    └         ┘
      *
      */
-    ij (i, j, value) {
-      if (value !== undefined) {
-        this._m[i][j] = value
-      } else {
-        return this._m[i][j]
-      }
+  ij (i, j, value) {
+    if (value !== undefined) {
+      this._m[i][j] = value
+    } else {
+      return this._m[i][j]
     }
+  }
 
-    /**
+  /**
      * Performs an operation on the matrix element-wise.
      *
      * @method f
@@ -271,11 +271,11 @@ export default (function () {
      * //    └      ┘
      *
      */
-    f (func) {
-      return new Matrix(this._m.map(row => row.map(d => func(d))))
-    }
+  f (func) {
+    return new Matrix(this._m.map(row => row.map(d => func(d))))
+  }
 
-    /**
+  /**
      * Multiplies the matrix with a scalar.
      *
      * @method scale
@@ -292,11 +292,11 @@ export default (function () {
      * //    └      ┘
      *
      */
-    scale (s) {
-      return this.f(x => x * s)
-    }
+  scale (s) {
+    return this.f(x => x * s)
+  }
 
-    /**
+  /**
      * Adds another matrix to the current matrix.
      *
      * @method add
@@ -314,12 +314,12 @@ export default (function () {
      * //    └        ┘
      *
      */
-    add (mat) {
-      let m = mat.m()
-      return new Matrix(this._m.map((row, i) => row.map((d, j) => d + m[i][j])))
-    }
+  add (mat) {
+    let m = mat.m()
+    return new Matrix(this._m.map((row, i) => row.map((d, j) => d + m[i][j])))
+  }
 
-    /**
+  /**
      * Multiplies the matrix with another matrix (from the right).
      *
      * @method mult
@@ -337,23 +337,23 @@ export default (function () {
      * //    └        ┘
      *
      */
-    mult (mat) {
-      let m = mat.m()
-      let n = this._m.length
-      let r = new Matrix(n)
-      for (let i = 0; i < n; i++) {
-        for (let j = 0; j < n; j++) {
-          let rij = 0
-          for (let k = 0; k < n; k++) {
-            rij += this._m[i][k] * m[k][j]
-          }
-          r.ij(i, j, rij)
+  mult (mat) {
+    let m = mat.m()
+    let n = this._m.length
+    let r = new Matrix(n)
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        let rij = 0
+        for (let k = 0; k < n; k++) {
+          rij += this._m[i][k] * m[k][j]
         }
+        r.ij(i, j, rij)
       }
-      return r
     }
+    return r
+  }
 
-    /**
+  /**
      * Returns the transpose of the matrix.
      *
      * @method t
@@ -369,11 +369,11 @@ export default (function () {
      * //    └      ┘
      *
      */
-    t () {
-      return new Matrix(this._m[0].map((col, i) => this._m.map(row => row[i])))
-    }
+  t () {
+    return new Matrix(this._m[0].map((col, i) => this._m.map(row => row[i])))
+  }
 
-    /**
+  /**
      * Multiplies a vector with the matrix (acts this matrix on a vector).
      *
      * @method act
@@ -388,11 +388,11 @@ export default (function () {
      * // => ( 17, 39 )
      *
      */
-    act (vec) {
-      return new Vector(this._m.map(d => vec.dot(new Vector(d))))
-    }
+  act (vec) {
+    return new Vector(this._m.map(d => vec.dot(new Vector(d))))
+  }
 
-    /**
+  /**
      * Performs the [LDL decomposition]{@link https://en.wikipedia.org/wiki/Cholesky_decomposition} of the
      * matrix.
      *
@@ -411,40 +411,33 @@ export default (function () {
      * //        └          ┘       └         ┘
      *
      */
-    ldl () {
-      // Init D, L
-      let n = this._m.length
+  ldl () {
+    // Init D, L
+    let n = this._m.length
 
-      let D = new Matrix(n)
+    let D = new Matrix(n)
 
-      let L = new Matrix(n)
+    let L = new Matrix(n)
 
-      // Perform decomposition
-      for (let j = 0; j < n; j++) {
-        // Update D
-        let dj = this.ij(j, j)
-        for (let k = 0; k < j; k++) {
-          dj -= D.ij(k, k) * L.ij(j, k) * L.ij(j, k)
-        }
-        D.ij(j, j, dj)
-
-        // Update L
-        for (let i = n - 1; i > j; i--) {
-          let lij = this.ij(i, j)
-          for (let k = 0; k < j; k++) {
-            lij -= D.ij(k, k) * L.ij(i, k) * L.ij(j, k)
-          }
-          L.ij(i, j, lij / dj)
-        }
+    // Perform decomposition
+    for (let j = 0; j < n; j++) {
+      // Update D
+      let dj = this.ij(j, j)
+      for (let k = 0; k < j; k++) {
+        dj -= D.ij(k, k) * L.ij(j, k) * L.ij(j, k)
       }
+      D.ij(j, j, dj)
 
-      return { D, L }
+      // Update L
+      for (let i = n - 1; i > j; i--) {
+        let lij = this.ij(i, j)
+        for (let k = 0; k < j; k++) {
+          lij -= D.ij(k, k) * L.ij(i, k) * L.ij(j, k)
+        }
+        L.ij(i, j, lij / dj)
+      }
     }
-  }
 
-  // Exposed classes
-  return {
-    Vector,
-    Matrix
+    return { D, L }
   }
-})()
+}

@@ -1,5 +1,5 @@
 import { _sum } from './utils'
-import dist from './dist'
+import { Normal } from './dist'
 
 /**
  * A collection of various Monte Carlo methods.
@@ -81,7 +81,7 @@ export default (function () {
           let _min = config && typeof config.min !== 'undefined' ? config.min : null,
               _max = config && typeof config.max !== 'undefined' ? config.max : null,
               _x = Math.random(),
-              _e = new dist.Exponential(1);
+              _e = new Exponential(1);
 
           function _boundary(x) {
               return (!_min || x >= _min[0]) && (!_max || x >= _max[0]);
@@ -520,7 +520,7 @@ export default (function () {
        * @private
        */
       this.proposal = (function (self) {
-        let _q = new dist.Normal(0, 1)
+        let _q = new Normal(0, 1)
 
         let _acceptance = new Array(self.dim).fill(0)
 

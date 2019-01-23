@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { describe, it } from 'mocha';
-import special from '../src/special';
+import * as special from '../src/special';
 import utils from './test-utils';
 
 const LAPS = 100;

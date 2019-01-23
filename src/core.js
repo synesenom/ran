@@ -6,8 +6,8 @@ import { r, some } from './utils'
  * @namespace core
  * @memberOf ran
  */
-export default (function () {
-  /**
+
+/**
    * Generates some uniformly distributed random floats in (min, max).
    * If min > max, a random float in (max, min) is generated.
    * If no parameters are passed, generates a single random float between 0 and 1.
@@ -38,13 +38,13 @@ export default (function () {
    * //      2.5040591952427906 ]
    *
    */
-  function float (min, max, n) {
-    if (arguments.length === 0) { return Math.random() }
-    if (arguments.length === 1) { return Math.random() * min }
-    return some(() => r(min, max), n)
-  }
+export function float (min, max, n) {
+  if (arguments.length === 0) { return Math.random() }
+  if (arguments.length === 1) { return Math.random() * min }
+  return some(() => r(min, max), n)
+}
 
-  /**
+/**
    * Generates some uniformly distributed random integers in (min, max).
    * If min > max, a random integer in (max, min) is generated.
    * If only min is specified, generates a single random integer between 0 and min.
@@ -67,12 +67,12 @@ export default (function () {
    * // => [ 12, 13, 10, 14, 14 ]
    *
    */
-  function int (min, max, n) {
-    if (arguments.length === 1) { return Math.floor(Math.random() * (min + 1)) }
-    return some(() => Math.floor(r(min, max + 1)), n)
-  }
+export function int (min, max, n) {
+  if (arguments.length === 1) { return Math.floor(Math.random() * (min + 1)) }
+  return some(() => Math.floor(r(min, max + 1)), n)
+}
 
-  /**
+/**
    * Samples some elements with replacement from an array with uniform distribution.
    *
    * @method choice
@@ -89,12 +89,12 @@ export default (function () {
    * ran.core.choice([1, 2, 3, 4, 5], 5)
    * // => [ 1, 5, 4, 4, 1 ]
    */
-  function choice (values, n) {
-    if (values === null || values === undefined || values.length === 0) { return null }
-    return some(() => values[Math.floor(Math.random() * values.length)], n)
-  }
+export function choice (values, n) {
+  if (values === null || values === undefined || values.length === 0) { return null }
+  return some(() => values[Math.floor(Math.random() * values.length)], n)
+}
 
-  /**
+/**
    * Samples some characters with replacement from a string with uniform distribution.
    *
    * @method char
@@ -112,12 +112,12 @@ export default (function () {
    * // => [ 'd', 'c', 'a', 'a', 'd' ]
    *
    */
-  function char (string, n) {
-    if (string === null || string === undefined || string.length === 0) { return null }
-    return some(() => string.charAt(Math.floor(Math.random() * string.length)), n)
-  }
+export function char (string, n) {
+  if (string === null || string === undefined || string.length === 0) { return null }
+  return some(() => string.charAt(Math.floor(Math.random() * string.length)), n)
+}
 
-  /**
+/**
    * Shuffles an array in-place using the Fisher--Yates algorithm.
    *
    * @method shuffle
@@ -130,18 +130,18 @@ export default (function () {
    * // => [ 2, 3, 1 ]
    *
    */
-  function shuffle (values) {
-    let i; let tmp; let l = values.length
-    while (l) {
-      i = Math.floor(Math.random() * l--)
-      tmp = values[l]
-      values[l] = values[i]
-      values[i] = tmp
-    }
-    return values
+export function shuffle (values) {
+  let i; let tmp; let l = values.length
+  while (l) {
+    i = Math.floor(Math.random() * l--)
+    tmp = values[l]
+    values[l] = values[i]
+    values[i] = tmp
   }
+  return values
+}
 
-  /**
+/**
    * Flips a biased coin several times and returns the associated head/tail value or array of values.
    *
    * @method coin
@@ -162,17 +162,6 @@ export default (function () {
    * ran.core.coin('a', {b: 2}, 0.9, 9)
    * // => [ { b: 2 }, 'a', 'a', 'a', 'a', 'a', 'a', { b: 2 }, 'a' ]
    */
-  function coin (head, tail, p = 0.5, n = 1) {
-    return some(() => Math.random() < p ? head : tail, n)
-  }
-
-  // Public methods
-  return {
-    float,
-    int,
-    choice,
-    char,
-    shuffle,
-    coin
-  }
-})()
+export function coin (head, tail, p = 0.5, n = 1) {
+  return some(() => Math.random() < p ? head : tail, n)
+}

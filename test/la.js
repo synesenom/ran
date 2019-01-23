@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { describe, it } from 'mocha';
 import utils from './test-utils';
-import la from '../src/la';
+import * as la from '../src/la';
 
 const EPSILON = 1e-10;
 

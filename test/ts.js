@@ -1,7 +1,7 @@
 import assert from 'assert';
 import { describe, it } from 'mocha';
 import utils from './test-utils';
-import ts from '../src/ts';
+import * as ts from '../src/ts';
 
 const LAPS = 2;
 
