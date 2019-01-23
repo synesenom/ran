@@ -47,3 +47,7 @@ fabric.properties
 # Node
 node_modules/*
 package-lock.json
+
+# Coverage
+.nyc_output
+coverage
