@@ -1,3 +1,4 @@
+import { _sum } from './utils';
 
 /**
  * A collection of various Monte Carlo methods.
