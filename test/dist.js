@@ -210,6 +210,9 @@ describe('dist', () => {
         name: 'Arcsine',
         p: () => [float(10), float(10.1, 100)]
     }, {
+      name: 'Bates',
+      p: () => [int(5, 10), float(10), float(10.1, 20)]
+    }, {
         name: 'Bernoulli',
         p: () => [float()]
     }, {
@@ -284,6 +287,9 @@ describe('dist', () => {
         name: 'InverseGaussian',
         p: () => [float(0.1, 5), float(0.1, 5)]
     }, {
+        name: 'IrwinHall',
+      p:() => [int(5, 10)]
+    }, {
         name: 'Laplace',
         p: () => [float(-2, 2), float(0.1, 5)]
     }, {
@@ -293,7 +299,6 @@ describe('dist', () => {
         name: 'Logistic',
         p: () => [float(-5, 5), float(0.1, 5)]
     }, {
-        // TODO zero shape parameter
         name: 'LogLogistic',
         cases: [{
             desc: 'positive shape parameter',

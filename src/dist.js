@@ -1,5 +1,7 @@
-import { some } from './utils'
+import { sum, neumaier, some } from './utils'
 import * as special from './special'
+
+// TODO If a parameter is invalid, return undefined for generator and pdf/cdf
 
 /**
  * A collection of random number generators for well-known distributions.
@@ -7,22 +9,23 @@ import * as special from './special'
  * @namespace dist
  * @memberOf ran
  */
+
 /**
-   * Maximum number of trials in generators.
-   *
-   * @var {number} _MAX_TRIALS
-   * @memberOf ran.dist
-   * @private
-   */
+ * Maximum number of trials in generators.
+ *
+ * @var {number} _MAX_TRIALS
+ * @memberOf ran.dist
+ * @private
+ */
 const _MAX_TRIALS = 1000
 
 /**
-   * Table containing critical values for the chi square test at 99% of confidence for low degrees of freedom.
-   *
-   * @var {number[]} _CHI_TABLE_LO
-   * @memberOf ran.dist
-   * @private
-   */
+ * Table containing critical values for the chi square test at 99% of confidence for low degrees of freedom.
+ *
+ * @var {number[]} _CHI_TABLE_LO
+ * @memberOf ran.dist
+ * @private
+ */
 const _CHI_TABLE_LO = [0,
   6.635, 9.210, 11.345, 13.277, 15.086, 16.812, 18.475, 20.090, 21.666, 23.209,
   24.725, 26.217, 27.688, 29.141, 30.578, 32.000, 33.409, 34.805, 36.191, 37.566,
@@ -52,27 +55,27 @@ const _CHI_TABLE_LO = [0,
 ]
 
 /**
-   * Table containing critical values for the chi square test at 95% of confidence for high degrees of freedom.
-   *
-   * @var {number[]} _CHI_TABLE_HI
-   * @memberOf ran.dist
-   * @private
-   */
+ * Table containing critical values for the chi square test at 95% of confidence for high degrees of freedom.
+ *
+ * @var {number[]} _CHI_TABLE_HI
+ * @memberOf ran.dist
+ * @private
+ */
 const _CHI_TABLE_HI = [
   359.906, 414.474, 468.724, 522.717, 576.493, 630.084, 683.516, 736.807, 789.974, 843.029,
   895.984, 948.848, 1001.630, 1054.334, 1106.969
 ]
 
 /**
-   * Generates a normally distributed value.
-   *
-   * @method _normal
-   * @memberOf ran.dist
-   * @param mu {number=} Distribution mean. Default value is 0.
-   * @param sigma {number=} Distribution standard deviation. Default value is 1.
-   * @returns {number} Random variate.
-   * @private
-   */
+ * Generates a normally distributed value.
+ *
+ * @method _normal
+ * @memberOf ran.dist
+ * @param mu {number=} Distribution mean. Default value is 0.
+ * @param sigma {number=} Distribution standard deviation. Default value is 1.
+ * @returns {number} Random variate.
+ * @private
+ */
 function _normal (mu = 0, sigma = 1) {
   let u = Math.random()
 
@@ -81,15 +84,15 @@ function _normal (mu = 0, sigma = 1) {
 }
 
 /**
-   * Generates a gamma distributed value.
-   *
-   * @method _gamma
-   * @memberOf ran.dist
-   * @param alpha {number} Shape parameter.
-   * @param beta {number} Rate parameter.
-   * @returns {number} Random variate.
-   * @private
-   */
+ * Generates a gamma distributed value.
+ *
+ * @method _gamma
+ * @memberOf ran.dist
+ * @param alpha {number} Shape parameter.
+ * @param beta {number} Rate parameter.
+ * @returns {number} Random variate.
+ * @private
+ */
 function _gamma (alpha, beta) {
   if (alpha > 1) {
     let d = alpha - 1 / 3
@@ -433,7 +436,7 @@ class Distribution {
      *
      */
   L (data) {
-    return data.reduce((sum, d) => sum + this.lnPdf(d), 0)
+    return data.reduce((acc, d) => acc + this.lnPdf(d), 0)
   }
 
   /**
@@ -554,6 +557,60 @@ export class Arcsine extends Distribution {
   }
 
   support () {
+    return [{
+      value: this.p.a,
+      closed: true
+    }, {
+      value: this.p.b,
+      closed: true
+    }]
+  }
+}
+
+/**
+ * Generator for the [Bates distribution]{@link https://en.wikipedia.org/wiki/Bates_distribution}:
+ *
+ * $$f(x; n, a, b) = \frac{n}{(n - 1)!} \sum_{k = 0}^{\lfloor nx \rfloor} (-1)^k \begin{pmatrix}n \\ k \\ \end{pmatrix} (nx - k)^{n - 1},$$
+ *
+ * with \(n \in \mathbb{N}_0\) and \(a, b \in \mathbb{R}, a < b\). Support: \(x \in [a, b]\).
+ *
+ * @class Bates
+ * @memberOf ran.dist
+ * @param {number=} n Number of uniform variates to sum. Default value is 10.
+ * @param {number=} a Lower boundary of the uniform variate. Default value is 0.
+ * @param {number=} b Upper boundary of the uniform variate. Default value is 1.
+ * @constructor
+ */
+export class Bates extends Distribution {
+  constructor (n  = 10, a = 0, b = 1) {
+    super('continuous', arguments.length)
+    this.p = { n, a: 0, b: 1 }
+    this.c = Array.from({ length: n + 1}, (d, k) => special.gammaLn(k + 1) + special.gammaLn(n - k + 1))
+  }
+
+  _generator () {
+    return sum(Array.from({ length: this.p.n }, () => (this.p.b - this.p.a) * Math.random() + this.p.a)) / this.p.n
+  }
+
+  _pdf(x) {
+    let nx = this.p.n * x
+    return x >= this.p.a && x <= this.p.b ? this.p.n * neumaier(Array.from({ length: Math.floor(nx) + 1 }, (d, k) => {
+      let z = (this.p.n - 1) * Math.log(nx - k) + Math.log(this.p.n) - this.c[k],
+        s = k % 2 === 0 ? 1 : -1
+      return s * Math.exp(z)
+    })) : 0
+  }
+
+  _cdf(x) {
+    let nx = this.p.n * x
+    return x < this.p.a ? 0 : x >= this.p.b ? 1 : neumaier(Array.from({ length: Math.floor(nx) + 1 }, (d, k) => {
+      let z = this.p.n * Math.log(nx - k) - this.c[k],
+        s = k % 2 === 0 ? 1 : -1
+      return s * Math.exp(z)
+    }))
+  }
+
+  support() {
     return [{
       value: this.p.a,
       closed: true
@@ -908,10 +965,10 @@ export class Custom extends Distribution {
 
     let alias = [0]
 
-    let sum = 0
+    let total = 0
     if (weights.length > 1) {
       // Get sum (for normalization)
-      for (let i = 0; i < n; i++) { sum += weights[i] }
+      for (let i = 0; i < n; i++) { total += weights[i] }
 
       // Fill up small and large work lists
       let p = []
@@ -920,7 +977,7 @@ export class Custom extends Distribution {
 
       let large = []
       for (let i = 0; i < n; i++) {
-        p.push(n * weights[i] / sum)
+        p.push(n * weights[i] / total)
         if (p[i] < 1.0) { small.push(i) } else { large.push(i) }
       }
 
@@ -959,12 +1016,12 @@ export class Custom extends Distribution {
     }
 
     // Build pmf and cdf
-    let pmf = [weights[0] / sum]
+    let pmf = [weights[0] / total]
 
-    let cdf = [weights[0] / sum]
+    let cdf = [weights[0] / total]
     for (let i = 1; i < weights.length; i++) {
-      pmf.push(weights[i] / sum)
-      cdf.push(cdf[i - 1] + weights[i] / sum)
+      pmf.push(weights[i] / total)
+      cdf.push(cdf[i - 1] + weights[i] / total)
     }
 
     // Assign to constants
@@ -1503,19 +1560,70 @@ export class InverseGaussian extends Distribution {
 }
 
 /**
-   * Generator for the [Kumaraswamy distribution]{@link https://en.wikipedia.org/wiki/Kumaraswamy_distribution} (also
-   * known as Minimax distribution):
-   *
-   * $$f(x; a, b) = a b x^{a-1} (1 - x^a)^{b - 1},$$
-   *
-   * with \(a, b \in \mathbb{R}^+\). Support: \(x \in (0, 1)\).
-   *
-   * @class Minimax
-   * @memberOf ran.dist
-   * @param {number=} alpha First shape parameter. Default value is 1.
-   * @param {number=} beta Second shape parameter. Default value is 1.
-   * @constructor
-   */
+ * Generator for the [Irwin-Hall distribution]{@link https://en.wikipedia.org/wiki/Irwin%E2%80%93Hall_distribution}:
+ *
+ * $$f(x; n) = \frac{1}{(n - 1)!} \sum_{k = 0}^{\lfloor x\rfloor} (-1)^k \begin{pmatrix}n \\ k \\ \end{pmatrix} (x - k)^{n - 1},$$
+ *
+ * with \(n \in \mathbb{N}_0\). Support: \(x \in [0, n]\).
+ *
+ * @class IrwinHall
+ * @memberOf ran.dist
+ * @param {number=} n Number of uniform variates to sum. Default value is 1.
+ * @constructor
+ */
+// TODO improve summation in pdf/cdf
+export class IrwinHall extends Distribution {
+  constructor (n = 1) {
+    super('continuous', arguments.length)
+    this.p = { n }
+    this.c = Array.from({ length: n + 1}, (d, k) => special.gammaLn(k + 1) + special.gammaLn(n - k + 1))
+  }
+
+  _generator () {
+    return sum(Array.from({ length: this.p.n }, Math.random))
+  }
+
+  _pdf(x) {
+    return x >= 0 && x <= this.p.n ? neumaier(Array.from({ length: Math.floor(x) + 1 }, (d, k) => {
+      let z = (this.p.n - 1) * Math.log(x - k) + Math.log(this.p.n) - this.c[k],
+        s = k % 2 === 0 ? 1 : -1
+      return s * Math.exp(z)
+    })) : 0
+  }
+
+  _cdf(x) {
+    return x < 0 ? 0 : x >= this.p.n ? 1 : neumaier(Array.from({ length: Math.floor(x) + 1 }, (d, k) => {
+      let z = this.p.n * Math.log(x - k) - this.c[k],
+        s = k % 2 === 0 ? 1 : -1
+      return s * Math.exp(z)
+    }))
+  }
+
+  support() {
+    return [{
+      value: 0,
+      closed: true
+    }, {
+      value: this.p.n,
+      closed: true
+    }]
+  }
+}
+
+/**
+ * Generator for the [Kumaraswamy distribution]{@link https://en.wikipedia.org/wiki/Kumaraswamy_distribution} (also
+ * known as Minimax distribution):
+ *
+ * $$f(x; a, b) = a b x^{a-1} (1 - x^a)^{b - 1},$$
+ *
+ * with \(a, b \in \mathbb{R}^+\). Support: \(x \in (0, 1)\).
+ *
+ * @class Kumaraswamy
+ * @memberOf ran.dist
+ * @param {number=} alpha First shape parameter. Default value is 1.
+ * @param {number=} beta Second shape parameter. Default value is 1.
+ * @constructor
+ */
 export class Kumaraswamy extends Distribution {
   constructor (a = 1, b = 1) {
     super('continuous', arguments.length)

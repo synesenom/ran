@@ -1,14 +1,22 @@
 /**
- * Sums the element of an array.
+ * Module containing some hidden utility functions.
  *
- * @method _sum
+ * @module utils
  * @memberOf ran
- * @param {Array} arr Array of numbers to sum over.
- * @param {number=} pow Power to raise each element before summing up.
- * @return {number} The sum.
  * @private
  */
-export function _sum (arr, pow = 1) {
+
+/**
+ * Sums the element of an array.
+ *
+ * @method sum
+ * @memberOf ran.utils.
+ * @param {number[]} arr Array of numbers to sum over.
+ * @param {number=} pow Power to raise each element before summing up.
+ * @returns {number} The sum of the elements in the array.
+ * @private
+ */
+export function sum (arr, pow = 1) {
   if (pow !== 1) {
     return arr.reduce((sum, d) => {
       return sum + Math.pow(d, pow)
@@ -18,6 +26,29 @@ export function _sum (arr, pow = 1) {
       return sum + d
     }, 0)
   }
+}
+
+/**
+ * Sums the element of an array using the robust (but slower) [Neumaier method]{@link https://www.mat.univie.ac.at/~neum/scan/01.pdf}.
+ *
+ * @method neumaier
+ * @memberOf ran.utils.
+ * @param {number[]} arr Array to sum.
+ * @returns {number} The sum of the elements in the array.
+ */
+export function neumaier(arr) {
+  let s = arr[0],
+    c = 0
+  for (let i=1; i<arr.length; i++) {
+    let t = s + arr[i]
+    if (Math.abs(s) > Math.abs(arr[i])) {
+      c += (s - t) + arr[i]
+    } else {
+      c += (arr[i] - t) + s
+    }
+    s = t
+  }
+  return s + c
 }
 
 /**
@@ -39,7 +70,7 @@ export function r (min, max) {
  * Runs a generator once or several times to return a single value or an array of values.
  *
  * @method some
- * @memberOf ran
+ * @memberOf ran.utils
  * @param {function} generator Random generator to use.
  * @param {number=} k Number of values to generate.
  * @returns {(number|string|Array)} Single value or array of generated values.
