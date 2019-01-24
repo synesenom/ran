@@ -1,6 +1,6 @@
 {
   "name": "ranjs",
-  "version": "1.7.5",
+  "version": "1.7.6",
   "description": "Library for generating various random variables.",
   "main": "src/index.js",
   "directories": {
