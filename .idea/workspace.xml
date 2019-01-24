@@ -2,9 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2dce2d99-d55c-4cdc-9490-9c9d46ff6d0c" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/discrete.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/discrete.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dist.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/dist.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/dist/" />
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -31,8 +32,8 @@
       <file leaf-file-name="dist.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/dist.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="585">
-              <caret line="240" column="44" selection-start-line="240" selection-start-column="44" selection-end-line="240" selection-end-column="44" />
+            <state relative-caret-position="675">
+              <caret line="342" selection-start-line="342" selection-end-line="342" />
               <folding>
                 <element signature="e#0#28#0" expanded="true" />
               </folding>
@@ -52,23 +53,14 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="distribution.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/dist/distribution.js">
+      <file leaf-file-name="discrete.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/dist/discrete.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="446">
-              <caret line="277" column="12" selection-start-line="277" selection-start-column="12" selection-end-line="277" selection-end-column="12" />
+            <state relative-caret-position="285">
+              <caret line="19" column="54" selection-start-line="19" selection-start-column="54" selection-end-line="19" selection-end-column="54" />
               <folding>
-                <element signature="e#0#31#0" expanded="true" />
+                <element signature="e#0#41#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/.gitignore">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="8" column="6" selection-start-line="8" selection-start-column="6" selection-end-line="8" selection-end-column="6" />
             </state>
           </provider>
         </entry>
@@ -142,14 +134,14 @@
         <option value="$PROJECT_DIR$/src/dist/base.js" />
         <option value="$PROJECT_DIR$/src/dist/test.js" />
         <option value="$PROJECT_DIR$/src/dist/standard.js" />
-        <option value="$PROJECT_DIR$/src/dist/discrete.js" />
         <option value="$PROJECT_DIR$/docs/src/docbuilder.py" />
         <option value="$PROJECT_DIR$/src/dist/distribution.js" />
-        <option value="$PROJECT_DIR$/test/dist.js" />
         <option value="$PROJECT_DIR$/src/dist/continuous.js" />
         <option value="$PROJECT_DIR$/src/ts.js" />
         <option value="$PROJECT_DIR$/src/dist.js" />
         <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/test/dist.js" />
+        <option value="$PROJECT_DIR$/src/dist/discrete.js" />
       </list>
     </option>
   </component>
@@ -214,6 +206,12 @@
             <path>
               <item name="ran" type="b2602c69:ProjectViewProjectNode" />
               <item name="ran" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="dist" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ran" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ran" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
@@ -270,7 +268,7 @@
       <option name="presentableId" value="Default" />
       <updated>1548048943070</updated>
       <workItem from="1548048944290" duration="50738000" />
-      <workItem from="1548196990787" duration="40571000" />
+      <workItem from="1548196990787" duration="41214000" />
     </task>
     <servers />
   </component>
@@ -286,7 +284,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="91309000" />
+    <option name="totallyTimeSpent" value="91952000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="993" y="24" width="927" height="1056" extended-state="4" />
@@ -623,19 +621,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/discrete.js">
+    <entry file="file://$PROJECT_DIR$/src/ts.js">
       <provider selected="true" editor-type-id="text-editor">
         <state>
-          <caret column="29" selection-start-column="29" selection-end-column="29" />
+          <caret column="9" selection-start-column="9" selection-end-column="9" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/dist.js">
+    <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="585">
-          <caret line="240" column="44" selection-start-line="240" selection-start-column="44" selection-end-line="240" selection-end-column="44" />
+        <state relative-caret-position="120">
+          <caret line="8" column="6" lean-forward="true" selection-start-line="8" selection-start-column="6" selection-end-line="8" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/distribution.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="837">
+          <caret line="277" column="12" selection-start-line="277" selection-start-column="12" selection-end-line="277" selection-end-column="12" />
           <folding>
-            <element signature="e#0#28#0" expanded="true" />
+            <element signature="e#0#31#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -650,19 +655,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/ts.js">
+    <entry file="file://$PROJECT_DIR$/test/dist.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="9" selection-start-column="9" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/distribution.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="446">
-          <caret line="277" column="12" selection-start-line="277" selection-start-column="12" selection-end-line="277" selection-end-column="12" />
+        <state relative-caret-position="675">
+          <caret line="342" selection-start-line="342" selection-end-line="342" />
           <folding>
-            <element signature="e#0#31#0" expanded="true" />
+            <element signature="e#0#28#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -674,10 +672,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
+    <entry file="file://$PROJECT_DIR$/src/dist/discrete.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="6" selection-start-line="8" selection-start-column="6" selection-end-line="8" selection-end-column="6" />
+        <state relative-caret-position="285">
+          <caret line="19" column="54" selection-start-line="19" selection-start-column="54" selection-end-line="19" selection-end-column="54" />
+          <folding>
+            <element signature="e#0#41#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

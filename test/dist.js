@@ -338,6 +338,9 @@ describe('dist', () => {
             p: () => [float(31, 50)]
         }]
     }, {
+      name: 'Rademacher',
+      p: () => []
+    }, {
         name: 'Rayleigh',
         p: () => [float(0.1, 5)]
     }, {

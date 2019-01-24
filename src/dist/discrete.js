@@ -17,7 +17,7 @@ export class _InvalidDistribution extends Distribution {
 /**
  * Generator for the [Bernoulli distribution]{@link https://en.wikipedia.org/wiki/Bernoulli_distribution}:
  *
- * $$f(k; p) = \begin{cases}p &\quad\text{if $k = 1$}\\1 - p &\quad\text{if $k = 0$}\\\end{cases}$$
+ * $$f(k; p) = \begin{cases}p &\quad\text{if $k = 1$},\\1 - p &\quad\text{if $k = 0$}\\\end{cases},$$
  *
  * where \(p \in [0, 1]\). Support: \(k \in \{0, 1\}\).
  *
@@ -353,6 +353,47 @@ export class Poisson extends Distribution {
     }, {
       value: null,
       closed: false
+    }]
+  }
+}
+
+/**
+ * Generator for the [Rademacher distribution]{@link https://en.wikipedia.org/wiki/Rademacher_distribution}:
+ *
+ * $$f(k) = \begin{cases}1/2 &\quad\text{if $k = -1$},\\1/2 &\quad\text{if $k = 1$},\\0 &\quad\text{otherwise}.\\\end{cases}$$
+ *
+ * Support: \(k \in \{-1, 1\}\).
+ *
+ * @class Rademacher
+ * @memberOf ran.dist
+ * @constructor
+ */
+export class Rademacher extends Distribution {
+  constructor () {
+    super('discrete', arguments.length)
+  }
+
+  _generator () {
+    return Math.random () > 0.5 ? -1 : 1
+  }
+
+  _pdf (x) {
+    let xi = Math.round(x)
+    return xi === -1 || xi === 1 ? 0.5 : 0
+  }
+
+  _cdf (x) {
+    let xi = Math.round(x)
+    return xi < -1 ? 0 : xi >= 1 ? 1 : 0.5
+  }
+
+  support () {
+    return [{
+      value: -1,
+      closed: true
+    }, {
+      value: 1,
+      closed: true
     }]
   }
 }
