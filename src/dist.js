@@ -7,7 +7,6 @@ export * from './dist/discrete'
 // TODO Birnbaum-Saunders                     (requires inverse erf)
 // TODO Boltzmann                             (special case of Custom)
 // TODO Borel                                 (generation unknown)
-// TODO Burr / Singh-Maddala                  (can be directly implemented)
 // TODO Chi                                   (can be directly implemented using normal variates)
 // TODO Dagum                                 (can be directly implemented)
 // TODO Discrete Weibull                      (can be directly implemented)
