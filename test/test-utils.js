@@ -152,8 +152,8 @@ let test_utils = (function() {
     function cdf2pdf(dist, range, laps) {
         return sum(Array.from({length: laps}, () => {
             let x0 = range[0] + Math.random() * (range[1] - range[0]);
-            //console.log(dist.pdf(x0), differentiate(x => dist.cdf(x), x0, 0.00001));
-            return Math.abs(dist.pdf(x0) - differentiate(x => dist.cdf(x), x0, 0.00001));
+            //console.log(dist.pdf(x0), differentiate(x => dist.cdf(x), x0, 1e-5));
+            return Math.abs(dist.pdf(x0) - differentiate(x => dist.cdf(x), x0, 1e-5));
         })) / laps;
     }
 

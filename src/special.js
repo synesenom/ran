@@ -223,7 +223,7 @@ let betaIncomplete = (function () {
   }
 
   /**
-     * Incomplete beta function, using the continued fraction approximations.
+     * Regularized incomplete beta function, using the continued fraction approximations.
      *
      * @method betaIncomplete
      * @memberOf ran.special

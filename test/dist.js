@@ -237,6 +237,9 @@ describe('dist', () => {
         name: 'BoundedPareto',
         p: () => [float(0.1, 5), float(5.1, 5), float(0.1, 3)]
     }, {
+      name: 'Burr',
+      p: () => [float(0.1, 5), float(0.1, 5)]
+    }, {
         name: 'Cauchy',
         p: () => [float(), float(0.5, 2)]
     }, {

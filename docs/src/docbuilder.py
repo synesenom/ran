@@ -10,6 +10,7 @@ import json
 import string
 import re
 import glob
+from os.path import isdir
 
 
 class Path:
@@ -120,16 +121,23 @@ class DocBuilder:
         return self
 
     def parse_dir(self, dirname):
-        BlockParser.reset()
-        for filename in glob.glob('{}/*.js'.format(dirname)):
-            with open(filename, 'r') as f:
+        def parse_file(f):
+            with open(f, 'r') as fp:
                 while True:
-                    block = BlockParser.next_block(filename, f)
+                    block = BlockParser.next_block(source, fp)
                     if block is None:
                         break
                     else:
                         if block:
                             self._blocks.append(block)
+
+        BlockParser.reset()
+        for source in glob.glob('{}/*'.format(dirname)):
+            if isdir(source):
+                for filename in glob.glob('{}/*.js'.format(source)):
+                    parse_file(filename)
+            else:
+                parse_file(source)
         return self
 
     def _build(self, converter=None):
