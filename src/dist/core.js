@@ -1,5 +1,5 @@
 import { some } from '../utils'
-import { chiTest, ksTest } from './test'
+import { chi2, kolmogorovSmirnov } from './tests'
 // TODO If a parameter is invalid, return undefined for generator and pdf/cdf
 
 /**
@@ -8,6 +8,56 @@ import { chiTest, ksTest } from './test'
  * @namespace dist
  * @memberOf ran
  */
+
+
+/**
+ * Generates a normally distributed value.
+ *
+ * @method normal
+ * @memberOf ran.dist
+ * @param mu {number=} Distribution mean. Default value is 0.
+ * @param sigma {number=} Distribution standard deviation. Default value is 1.
+ * @returns {number} Random variate.
+ * @private
+ */
+export function normal (mu = 0, sigma = 1) {
+  let u = Math.random()
+
+  let v = Math.random()
+  return sigma * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) + mu
+}
+
+/**
+ * Generates a gamma distributed value.
+ *
+ * @method gamma
+ * @memberOf ran.dist
+ * @param alpha {number} Shape parameter.
+ * @param beta {number} Rate parameter.
+ * @returns {number} Random variate.
+ * @private
+ */
+export function gamma (alpha, beta) {
+  if (alpha > 1) {
+    let d = alpha - 1 / 3
+
+    let c = 1 / Math.sqrt(9 * d)
+
+    let Z; let V; let U
+
+    // Max 1000 trials
+    for (let trials = 0; trials < 1000; trials++) {
+      Z = normal(0, 1)
+      if (Z > -1 / c) {
+        V = Math.pow(1 + c * Z, 3)
+        U = Math.random()
+        if (Math.log(U) < 0.5 * Z * Z + d * (1 - V + Math.log(V))) { return d * V / beta }
+      }
+    }
+  } else {
+    return gamma(alpha + 1, beta) * Math.pow(Math.random(), 1 / alpha)
+  }
+}
 
 /**
  * The distribution generator base class, all distribution generators extend this class. The methods listed here
@@ -18,10 +68,11 @@ import { chiTest, ksTest } from './test'
  * @memberOf ran.dist
  * @constructor
  */
-export default class Distribution {
+export class Distribution {
   constructor (type, k) {
     this._type = type
     this.k = k
+    this.s = []
     this.p = []
     this.c = []
   }
@@ -39,7 +90,7 @@ export default class Distribution {
    * @returns {number} The probability density or probability at the specified value.
    * @private
    */
-  _pdf () {
+  _pdf (x) {
     throw Error('Distribution._pdf() is not implemented')
   }
 
@@ -52,7 +103,7 @@ export default class Distribution {
    * @returns {number} The value of the probability function at the specified value.
    * @private
    */
-  _cdf () {
+  _cdf (x) {
     throw Error('Distribution._cdf() is not implemented')
   }
 
@@ -120,7 +171,9 @@ export default class Distribution {
    *
    */
   pdf (x) {
-    return this._pdf(x)
+    // Convert to integer if discrete
+    let z = this._type === 'discrete' ? Math.round(x) : x;
+    return this._pdf(z)
   }
 
   /**
@@ -146,7 +199,9 @@ export default class Distribution {
    *
    */
   cdf (x) {
-    return this._cdf(x)
+    // Convert to integer if discrete
+    let z = this._type === 'discrete' ? Math.round(x) : x;
+    return this._cdf(z)
   }
 
   /**
@@ -295,7 +350,7 @@ export default class Distribution {
    */
   test (values) {
     return this._type === 'discrete'
-      ? chiTest(values, x => this._pdf(x), this.k)
-      : ksTest(values, x => this._cdf(x))
+      ? chi2(values, x => this._pdf(x), this.k)
+      : kolmogorovSmirnov(values, x => this._cdf(x))
   }
 }

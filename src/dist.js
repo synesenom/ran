@@ -1,5 +1,4 @@
-export * from './dist/continuous'
-export * from './dist/discrete'
+export * from './dist/distributions'
 
 // TODO Benford                               (can be directly implemented)
 // TODO Beta-binomial                         (generation unknown)
@@ -34,7 +33,6 @@ export * from './dist/discrete'
 // TODO Negative hypergeometric               (can be directly implemented)
 // TODO Student's t                           (requires hypergeometric function)
 // TODO triangular                            (can be directly implemented)
-// TODO Rademacher                            (can be directly implemented)
 // TODO Raised cosine                         (generation unknown)
 // TODO Reciprocal                            (can be directly implemented)
 // TODO Skellam                               (requires modified Bessel, cdf unkown)

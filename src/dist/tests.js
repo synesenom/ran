@@ -48,7 +48,7 @@ const _CHI_TABLE_HI = [
 /**
  * Performs a chi square test for an array of values and a probability mass function.
  *
- * @method chiTest
+ * @method chi2
  * @memberOf ran.dist
  * @param values {number[]} Array of values to perform test for.
  * @param pmf {Function} Probability mass function to perform test against.
@@ -57,7 +57,7 @@ const _CHI_TABLE_HI = [
  * boolean to tell whether the distribution passed the test.
  * @private
  */
-export function chiTest (values, pmf, c) {
+export function chi2 (values, pmf, c) {
   // Calculate observed distribution
   let p = new Map()
   values.forEach(function (v) {
@@ -89,7 +89,7 @@ export function chiTest (values, pmf, c) {
 /**
  * Performs a Kolmogorov-Smirnov test for an array of values and a cumulative distribution function.
  *
- * @method ksTest
+ * @method kolmogorovSmirnov
  * @memberOf ran.dist
  * @param values {number[]} Array of values to perform test for.
  * @param cdf {Function} Cumulative distribution function to perform test against.
@@ -97,7 +97,7 @@ export function chiTest (values, pmf, c) {
  * boolean to tell whether the distribution passed the test.
  * @private
  */
-export function ksTest (values, cdf) {
+export function kolmogorovSmirnov (values, cdf) {
   // Sort values for estimated CDF
   values.sort((a, b) => a - b)
 
