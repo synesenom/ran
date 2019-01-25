@@ -9,7 +9,6 @@ import { chi2, kolmogorovSmirnov } from './tests'
  * @memberOf ran
  */
 
-
 /**
  * Generates a normally distributed value.
  *
@@ -75,6 +74,14 @@ export class Distribution {
     this.p = []
   }
 
+  /**
+   * Generates a single random variate.
+   *
+   * @method _generator
+   * @memberOf ran.dist.Distribution
+   * @returns {number} A single random variate.
+   * @private
+   */
   _generator () {
     throw Error('Distribution._generator() is not implemented')
   }
@@ -129,7 +136,7 @@ export class Distribution {
    * <code>closed</code> is always false.
    */
   support () {
-    return this.s;
+    return this.s
   }
 
   /**
@@ -173,16 +180,12 @@ export class Distribution {
     let z = this._type === 'discrete' ? Math.round(x) : x
 
     // Check against support
-    if (this.s) {
-      let min = this.s[0]
-      if (min.value !== null && ((min.closed && z < min.value) || (!min.closed && z <= min.value))) {
-        return 0
-      }
+    if (this.s[0].value !== null && ((this.s[0].closed && z < this.s[0].value) || (!this.s[0].closed && z <= this.s[0].value))) {
+      return 0
+    }
 
-      let max = this.s[1]
-      if (max.value !== null && ((max.closed && z > max.value) || (!max.closed && z >= max.value))) {
-        return 0
-      }
+    if (this.s[1].value !== null && ((this.s[1].closed && z > this.s[1].value) || (!this.s[1].closed && z >= this.s[1].value))) {
+      return 0
     }
 
     // Return value
@@ -216,16 +219,12 @@ export class Distribution {
     let z = this._type === 'discrete' ? Math.round(x) : x
 
     // Check against support
-    if (this.s) {
-      let min = this.s[0]
-      if (min.value !== null && z < min.value) {
-        return 0
-      }
+    if (this.s[0].value !== null && ((this.s[0].closed && z < this.s[0].value) || (!this.s[0].closed && z <= this.s[0].value))) {
+      return 0
+    }
 
-      let max = this.s[1]
-      if (max.value !== null && z >= max.value) {
-        return 1
-      }
+    if (this.s[1].value !== null && z >= this.s[1].value) {
+      return 1
     }
 
     // Return value

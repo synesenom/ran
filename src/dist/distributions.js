@@ -39,7 +39,7 @@ export class Arcsine extends Distribution {
   constructor (a = 0, b = 1) {
     super('continuous', arguments.length)
     this.p = { a, b }
-    this.s  =[{
+    this.s = [{
       value: a,
       closed: true
     }, {
@@ -81,7 +81,7 @@ export class Arcsine extends Distribution {
 export class Bates extends Distribution {
   constructor (n = 10, a = 0, b = 1) {
     super('continuous', arguments.length)
-    this.p = { n, a, b }
+    this.p = { n: Math.round(n), a, b }
     this.s = [{
       value: a,
       closed: true
@@ -89,7 +89,7 @@ export class Bates extends Distribution {
       value: b,
       closed: true
     }]
-    this.c = Array.from({ length: n + 1 }, (d, k) => special.gammaLn(k + 1) + special.gammaLn(n - k + 1))
+    this.c = Array.from({ length: this.p.n + 1 }, (d, k) => special.gammaLn(k + 1) + special.gammaLn(this.p.n - k + 1))
   }
 
   _generator () {
@@ -267,15 +267,15 @@ export class Binomial extends Distribution {
   constructor (n = 100, p = 0.5) {
     super('discrete', arguments.length)
     let pp = p <= 0.5 ? p : 1 - p
-    this.p = { n, p }
+    this.p = { n: Math.round(n), p }
     this.s = [{
       value: 0,
       closed: true
     }, {
-      value: n,
+      value: this.p.n,
       closed: true
     }]
-    this.c = [pp, n * pp]
+    this.c = [pp, this.p.n * pp]
   }
 
   _generator () {
@@ -410,7 +410,7 @@ export class Burr extends Distribution {
     return Math.pow(Math.pow(1 - Math.random(), -1 / this.p.k) - 1, 1 / this.p.c)
   }
 
-  _pdf(x) {
+  _pdf (x) {
     return this.p.c * this.p.k * Math.pow(x, this.p.c - 1) / Math.pow(1 + Math.pow(x, this.p.c), this.p.k + 1)
   }
 
@@ -483,7 +483,7 @@ export class Custom extends Distribution {
       value: 0,
       closed: true
     }, {
-      value: Math.max(0, n - 1),
+      value: Math.max(0, weights.length - 1),
       closed: true
     }]
 
@@ -583,7 +583,6 @@ export class Custom extends Distribution {
   }
 }
 
-
 /**
  * Generator for the [degenerate distribution]{@link https://en.wikipedia.org/wiki/Degenerate_distribution}:
  *
@@ -678,15 +677,15 @@ export class Exponential extends Distribution {
 export class F extends Distribution {
   constructor (d1 = 2, d2 = 2) {
     super('continuous', arguments.length)
-    this.p = { d1, d2 }
+    this.p = { d1: Math.round(d1), d2: Math.round(d2) }
     this.s = [{
       value: 0,
-      closed: d1 !== 1
+      closed: this.p.d1 !== 1
     }, {
       value: null,
       closed: false
     }]
-    this.c = [special.beta(d1 / 2, d2 / 2), Math.pow(d2, d2)]
+    this.c = [special.beta(this.p.d1 / 2, this.p.d2 / 2), Math.pow(this.p.d2, this.p.d2)]
   }
 
   _generator () {
@@ -788,6 +787,45 @@ export class Gamma extends Distribution {
 }
 
 /**
+ * Generator for the [\(\chi^2\) distribution]{@link https://en.wikipedia.org/wiki/Chi-squared_distribution}:
+ *
+ * $$f(x; k) = \frac{1}{2^{k/2} \Gamma(k/2)} x^{k/2 - 1} e^{-x/2},$$
+ *
+ * where \(k \in \mathbb{N}^+\). Support: \(x \in \mathbb{R}^+\).
+ *
+ * @class Chi2
+ * @memberOf ran.dist
+ * @param {number=} k Degrees of freedom. If not an integer, is rounded to the nearest one. Default value is 2.
+ * @constructor
+ */
+export class Chi2 extends Gamma {
+  // Special case of gamma
+  constructor (k = 2) {
+    super(Math.round(k) / 2, 0.5)
+  }
+}
+
+/**
+ * Generator for the [Erlang distribution]{@link https://en.wikipedia.org/wiki/Erlang_distribution}:
+ *
+ * $$f(x; k, \lambda) = \frac{\lambda^k x^{k - 1} e^{-\lambda x}}{(k - 1)!},$$
+ *
+ * where \(k \in \mathbb{N}^+\) and \(\lambda \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+ \cup \{0\}\).
+ *
+ * @class Erlang
+ * @memberOf ran.dist
+ * @param {number=} k Shape parameter. It is rounded to the nearest integer. Default value is 1.
+ * @param {number=} lambda Rate parameter. Default value is 1.
+ * @constructor
+ */
+export class Erlang extends Gamma {
+  // Special case of gamma
+  constructor (k = 1, lambda = 1) {
+    super(Math.round(k), lambda)
+  }
+}
+
+/**
  * Generator for the [generalized gamma distribution]{@link https://en.wikipedia.org/wiki/Generalized_gamma_distribution}:
  *
  * $$f(x; a, d, p) = \frac{p/a^d}{\Gamma(d/p)} x^{d - 1} e^{-(x/a)^p},$$
@@ -826,6 +864,46 @@ export class GeneralizedGamma extends Distribution {
 
   _cdf (x) {
     return special.gammaLowerIncomplete(this.p.d / this.p.p, Math.pow(x / this.p.a, this.p.p)) / this.c[0]
+  }
+}
+
+/**
+ * Generator for the [geometric distribution]{@link https://en.wikipedia.org/wiki/Geometric_distribution} (the number of
+ * failures before the first success definition):
+ *
+ * $$f(k; p) = (1 - p)^k p,$$
+ *
+ * with \(p \in (0, 1]\). Support: \(k \in \{0, 1, 2, ...\}\).
+ *
+ * @class Geometric
+ * @memberOf ran.dist
+ * @param {number} p Probability of success. Default value is 0.5.
+ * @constructor
+ */
+export class Geometric extends Distribution {
+  constructor (p = 0.5) {
+    super('discrete', arguments.length)
+    this.p = { p }
+    this.s = [{
+      value: 0,
+      closed: true
+    }, {
+      value: null,
+      closed: false
+    }]
+  }
+
+  _generator () {
+    // Inverse transform sampling
+    return Math.floor(Math.log(Math.random()) / Math.log(1 - this.p.p))
+  }
+
+  _pdf (x) {
+    return this.p.p * Math.pow(1 - this.p.p, x)
+  }
+
+  _cdf (x) {
+    return 1 - Math.pow(1 - this.p.p, x + 1)
   }
 }
 
@@ -911,41 +989,41 @@ export class Gumbel extends Distribution {
 }
 
 /**
- * Generator for the [Erlang distribution]{@link https://en.wikipedia.org/wiki/Erlang_distribution}:
+ * Generator for the [inverse \(\chi^2\) distribution]{@link https://en.wikipedia.org/wiki/Inverse-chi-squared_distribution}:
  *
- * $$f(x; k, \lambda) = \frac{\lambda^k x^{k - 1} e^{-\lambda x}}{(k - 1)!},$$
+ * $$f(x; \nu) = \frac{2^{-\nu/2}}{\Gamma(\nu / 2)} x^{-\nu/2 - 1} e^{-1/(2x)},$$
  *
- * where \(k \in \mathbb{N}^+\) and \(\lambda \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+ \cup \{0\}\).
+ * with \(\nu \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
  *
- * @class Erlang
+ * @class InverseChi2
  * @memberOf ran.dist
- * @param {number=} k Shape parameter. It is rounded to the nearest integer. Default value is 1.
- * @param {number=} lambda Rate parameter. Default value is 1.
+ * @param {number=} nu Degrees of freedom. Default value is 1.
  * @constructor
  */
-export class Erlang extends Gamma {
-  // Special case of gamma
-  constructor (k = 1, lambda = 1) {
-    super(Math.round(k), lambda)
+export class InverseChi2 extends Distribution {
+  constructor (nu = 1) {
+    super('continuous', arguments.length)
+    this.p = { nu: Math.round(nu) }
+    this.s = [{
+      value: 0,
+      closed: false
+    }, {
+      value: null,
+      closed: false
+    }]
   }
-}
 
-/**
- * Generator for the [\(\chi^2\) distribution]{@link https://en.wikipedia.org/wiki/Chi-squared_distribution}:
- *
- * $$f(x; k) = \frac{1}{2^{k/2} \Gamma(k/2)} x^{k/2 - 1} e^{-x/2},$$
- *
- * where \(k \in \mathbb{N}^+\). Support: \(x \in \mathbb{R}^+\).
- *
- * @class Chi2
- * @memberOf ran.dist
- * @param {number=} k Degrees of freedom. If not an integer, is rounded to the nearest one. Default value is 2.
- * @constructor
- */
-export class Chi2 extends Gamma {
-  // Special case of gamma
-  constructor (k = 2) {
-    super(Math.round(k) / 2, 0.5)
+  _generator() {
+    // Direct sampling
+    return 1 / gamma(Math.round(this.p.nu) / 2, 0.5)
+  }
+
+  _pdf (x) {
+    return Math.pow(2, -this.p.nu / 2) * Math.pow(x, -this.p.nu / 2 - 1) * Math.exp(-0.5 / x) / special.gamma(this.p.nu / 2)
+  }
+
+  _cdf (x) {
+    return 1 - special.gammaLowerIncomplete(this.p.nu / 2, 0.5 / x) / special.gamma(this.p.nu / 2)
   }
 }
 
@@ -999,8 +1077,8 @@ export class InverseGamma extends Distribution {
  *
  * @class InverseGaussian
  * @memberOf ran.dist
- * @param {number} lambda Shape parameter. Default value is 1.
- * @param {number} mu Mean of the distribution. Default value is 1.
+ * @param {number=} lambda Shape parameter. Default value is 1.
+ * @param {number=} mu Mean of the distribution. Default value is 1.
  * @constructor
  */
 export class InverseGaussian extends Distribution {
@@ -1059,7 +1137,7 @@ export class InverseGaussian extends Distribution {
 export class IrwinHall extends Distribution {
   constructor (n = 1) {
     super('continuous', arguments.length)
-    this.p = { n }
+    this.p = { n: Math.round(n) }
     this.s = [{
       value: 0,
       closed: true
@@ -1406,6 +1484,24 @@ export class Lomax extends Distribution {
 }
 
 /**
+ * Generator for the [Maxwell-Boltzmann distribution]{@link https://en.wikipedia.org/wiki/Maxwell%E2%80%93Boltzmann_distribution}:
+ *
+ * $$f(x; a) = \sqrt{\frac{2}{\pi}}\frac{x^2 e^{-x^2 / (2a^2)}}{a^3},$$
+ *
+ * with \(a \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
+ *
+ * @class MaxwellBoltzmann
+ * @memberOf ran.dist
+ * @param {number=} a Scale parameter. Default value is 1.
+ * @constructor
+ */
+export class MaxwellBoltzmann extends Gamma {
+  constructor (a = 1) {
+    super(1.5, 2 * a * a)
+  }
+}
+
+/**
  * Generator for the [normal distribution]{@link https://en.wikipedia.org/wiki/Normal_distribution}:
  *
  * $$f(x; \mu, \sigma) = \frac{1}{\sqrt{2 \pi \sigma^2}} e^{-\frac{(x - \mu)^2}{2\sigma^2}},$$
@@ -1587,7 +1683,7 @@ export class Rademacher extends Distribution {
   }
 
   _generator () {
-    return Math.random () > 0.5 ? -1 : 1
+    return Math.random() > 0.5 ? -1 : 1
   }
 
   _pdf (x) {
@@ -1659,7 +1755,7 @@ export class UniformContinuous extends Distribution {
 export class UniformDiscrete extends Distribution {
   constructor (xmin = 0, xmax = 100) {
     super('discrete', arguments.length)
-    this.p = { xmin, xmax }
+    this.p = { xmin: Math.round(xmin), xmax: Math.round(xmax) }
     this.s = [{
       value: this.p.xmin,
       closed: true
@@ -1667,7 +1763,7 @@ export class UniformDiscrete extends Distribution {
       value: this.p.xmax,
       closed: true
     }]
-    this.c = [xmax - xmin + 1]
+    this.c = [this.p.xmax - this.p.xmin + 1]
   }
 
   _generator () {

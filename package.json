@@ -27,6 +27,7 @@
   },
   "scripts": {
     "lint": "eslint src/*.js",
+    "standard": "./node_modules/.bin/standard --fix src/**/*.js",
     "test": "./node_modules/.bin/_mocha --require babel-core/register",
     "docs": "python docs/src/parser.py",
     "build": "webpack",

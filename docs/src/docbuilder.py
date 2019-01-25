@@ -294,7 +294,7 @@ class DocBuilder:
                                % (p['name'], ' '.join(_tagify(pt.split('.')[-1], "code") for pt in p['type']['types']))
                     desc = p['desc']
                     if 'optional' in p['type']['options']:
-                        desc += ' ' + _tagify('optional', 'code')
+                        desc = _tagify('optional', 'code') + ' ' + desc
                     rows += _tagify(entry + _tagify(_codify(desc), "td"), "tr")
                 content += _tagify(argdesc + _tagify(rows, 'tbody'), "table")
 

@@ -267,11 +267,17 @@ describe('dist', () => {
         name: 'GeneralizedGamma',
         p: () => [float(0.1, 10), float(0.1, 5), float(0.1, 10)]
     }, {
+      name: 'Geometric',
+      p: () => [float(0.1, 1)]
+    }, {
         name: 'Gompertz',
         p: () => [float(0.1, 5), float(0.1, 5), float(-5, 5)]
     }, {
         name: 'Gumbel',
         p: () => [float(-3, 3), float(0.1, 5)]
+    }, {
+      name: 'InverseChi2',
+      p: () => [int(1, 10)]
     }, {
         name: 'InverseGamma',
         p: () => [float(0.1, 5), float(0.1, 3)]
@@ -311,6 +317,9 @@ describe('dist', () => {
     }, {
         name: 'Kumaraswamy',
         p: () => [float(0.1, 5), float(0.1, 5)]
+    }, {
+      name: 'MaxwellBoltzmann',
+      p: () => [float(0.1, 10)]
     }, {
         name: 'Normal',
         p: () => [float(-5, 5), float(0.1, 10)]
