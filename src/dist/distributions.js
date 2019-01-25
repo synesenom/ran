@@ -12,6 +12,13 @@ import { sum, neumaier } from '../utils'
 export class _InvalidDistribution extends Distribution {
   constructor () {
     super('discrete', arguments.length)
+    this.s = [{
+      value: null,
+      closed: false
+    }, {
+      value: null,
+      closed: false
+    }]
   }
 }
 
@@ -32,6 +39,13 @@ export class Arcsine extends Distribution {
   constructor (a = 0, b = 1) {
     super('continuous', arguments.length)
     this.p = { a, b }
+    this.s  =[{
+      value: a,
+      closed: true
+    }, {
+      value: b,
+      closed: true
+    }]
     this.c = [1 / Math.PI, b - a]
   }
 
@@ -42,21 +56,11 @@ export class Arcsine extends Distribution {
   }
 
   _pdf (x) {
-    return x >= this.p.a && x < this.p.b ? this.c[0] / Math.sqrt((x - this.p.a) * (this.p.b - x)) : 0
+    return this.c[0] / Math.sqrt((x - this.p.a) * (this.p.b - x))
   }
 
   _cdf (x) {
-    return x >= this.p.a && x < this.p.b ? 2 * this.c[0] * Math.asin(Math.sqrt((x - this.p.a) / (this.p.b - this.p.a))) : 0
-  }
-
-  support () {
-    return [{
-      value: this.p.a,
-      closed: true
-    }, {
-      value: this.p.b,
-      closed: true
-    }]
+    return 2 * this.c[0] * Math.asin(Math.sqrt((x - this.p.a) / (this.p.b - this.p.a)))
   }
 }
 
@@ -78,6 +82,13 @@ export class Bates extends Distribution {
   constructor (n = 10, a = 0, b = 1) {
     super('continuous', arguments.length)
     this.p = { n, a, b }
+    this.s = [{
+      value: a,
+      closed: true
+    }, {
+      value: b,
+      closed: true
+    }]
     this.c = Array.from({ length: n + 1 }, (d, k) => special.gammaLn(k + 1) + special.gammaLn(n - k + 1))
   }
 
@@ -90,34 +101,24 @@ export class Bates extends Distribution {
     let y = (x - this.p.a) / (this.p.b - this.p.a)
 
     let nx = this.p.n * y
-    return x >= this.p.a && x <= this.p.b ? this.p.n * neumaier(Array.from({ length: Math.floor(nx) + 1 }, (d, k) => {
+    return this.p.n * neumaier(Array.from({ length: Math.floor(nx) + 1 }, (d, k) => {
       let z = (this.p.n - 1) * Math.log(nx - k) + Math.log(this.p.n) - this.c[k]
 
       let s = k % 2 === 0 ? 1 : -1
       return s * Math.exp(z)
-    })) / (this.p.b - this.p.a) : 0
+    })) / (this.p.b - this.p.a)
   }
 
   _cdf (x) {
     let y = (x - this.p.a) / (this.p.b - this.p.a)
 
     let nx = this.p.n * y
-    return x < this.p.a ? 0 : x >= this.p.b ? 1 : neumaier(Array.from({ length: Math.floor(nx) + 1 }, (d, k) => {
+    return neumaier(Array.from({ length: Math.floor(nx) + 1 }, (d, k) => {
       let z = this.p.n * Math.log(nx - k) - this.c[k]
 
       let s = k % 2 === 0 ? 1 : -1
       return s * Math.exp(z)
     }))
-  }
-
-  support () {
-    return [{
-      value: this.p.a,
-      closed: true
-    }, {
-      value: this.p.b,
-      closed: true
-    }]
   }
 }
 
@@ -137,6 +138,13 @@ export class Bernoulli extends Distribution {
   constructor (p = 0.5) {
     super('discrete', arguments.length)
     this.p = { p }
+    this.s = [{
+      value: 0,
+      closed: true
+    }, {
+      value: 1,
+      closed: true
+    }]
   }
 
   _generator () {
@@ -149,17 +157,7 @@ export class Bernoulli extends Distribution {
   }
 
   _cdf (x) {
-    return x < 0 ? 0 : (parseInt(x) >= 1 ? 1 : 1 - this.p.p)
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: true
-    }, {
-      value: 1,
-      closed: true
-    }]
+    return 1 - this.p.p
   }
 }
 
@@ -182,6 +180,13 @@ export class Beta extends Distribution {
   constructor (alpha = 1, beta = 1) {
     super('continuous', arguments.length)
     this.p = { alpha, beta }
+    this.s = [{
+      value: 0,
+      closed: alpha >= 1
+    }, {
+      value: 1,
+      closed: beta >= 1
+    }]
     this.c = [special.beta(alpha, beta)]
   }
 
@@ -194,21 +199,11 @@ export class Beta extends Distribution {
   }
 
   _pdf (x) {
-    return x > 0 && x < 1 ? Math.pow(x, this.p.alpha - 1) * Math.pow(1 - x, this.p.beta - 1) / this.c[0] : 0
+    return Math.pow(x, this.p.alpha - 1) * Math.pow(1 - x, this.p.beta - 1) / this.c[0]
   }
 
   _cdf (x) {
-    return x <= 0 ? 0 : x >= 1 ? 1 : special.betaIncomplete(this.p.alpha, this.p.beta, x)
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: this.p.alpha >= 1
-    }, {
-      value: 1,
-      closed: this.p.beta >= 1
-    }]
+    return special.betaIncomplete(this.p.alpha, this.p.beta, x)
   }
 }
 
@@ -232,6 +227,13 @@ export class BetaPrime extends Distribution {
   constructor (alpha = 2, beta = 2) {
     super('continuous', arguments.length)
     this.p = { alpha, beta }
+    this.s = [{
+      value: 0,
+      closed: alpha >= 1
+    }, {
+      value: null,
+      closed: false
+    }]
   }
 
   _generator () {
@@ -240,21 +242,11 @@ export class BetaPrime extends Distribution {
   }
 
   _pdf (x) {
-    return x > 0 ? Math.pow(x, this.p.alpha - 1) * Math.pow(1 + x, -this.p.alpha - this.p.beta) / special.beta(this.p.alpha, this.p.beta) : 0
+    return Math.pow(x, this.p.alpha - 1) * Math.pow(1 + x, -this.p.alpha - this.p.beta) / special.beta(this.p.alpha, this.p.beta)
   }
 
   _cdf (x) {
-    return x > 0 ? special.betaIncomplete(this.p.alpha, this.p.beta, x / (1 + x)) : 0
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: this.p.alpha >= 1
-    }, {
-      value: null,
-      closed: false
-    }]
+    return special.betaIncomplete(this.p.alpha, this.p.beta, x / (1 + x))
   }
 }
 
@@ -276,6 +268,13 @@ export class Binomial extends Distribution {
     super('discrete', arguments.length)
     let pp = p <= 0.5 ? p : 1 - p
     this.p = { n, p }
+    this.s = [{
+      value: 0,
+      closed: true
+    }, {
+      value: n,
+      closed: true
+    }]
     this.c = [pp, n * pp]
   }
 
@@ -328,22 +327,12 @@ export class Binomial extends Distribution {
   }
 
   _pdf (x) {
-    return x < 0 ? 0 : x > this.p.n ? 0 : Math.exp(special.gammaLn(this.p.n + 1) - special.gammaLn(x + 1) - special.gammaLn(this.p.n - x + 1) +
+    return Math.exp(special.gammaLn(this.p.n + 1) - special.gammaLn(x + 1) - special.gammaLn(this.p.n - x + 1) +
       x * Math.log(this.p.p) + (this.p.n - x) * Math.log(1 - this.p.p))
   }
 
   _cdf (x) {
-    return x < 0 ? 0 : x >= this.p.n ? 1 : special.betaIncomplete(this.p.n - x, 1 + x, 1 - this.p.p)
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: true
-    }, {
-      value: this.p.n,
-      closed: true
-    }]
+    return special.betaIncomplete(this.p.n - x, 1 + x, 1 - this.p.p)
   }
 }
 
@@ -365,6 +354,13 @@ export class BoundedPareto extends Distribution {
   constructor (L = 1, H = 10, alpha = 1) {
     super('continuous', arguments.length)
     this.p = { L, H, alpha }
+    this.s = [{
+      value: L,
+      closed: true
+    }, {
+      value: H,
+      closed: true
+    }]
     this.c = [Math.pow(L, alpha), Math.pow(H, alpha), (1 - Math.pow(L / H, alpha))]
   }
 
@@ -374,22 +370,11 @@ export class BoundedPareto extends Distribution {
   }
 
   _pdf (x) {
-    return (x < this.p.L || x > this.p.H) ? 0
-      : this.p.alpha * Math.pow(this.p.L / x, this.p.alpha) / (x * this.c[2])
+    return this.p.alpha * Math.pow(this.p.L / x, this.p.alpha) / (x * this.c[2])
   }
 
   _cdf (x) {
-    return x < this.p.L ? 0 : (x > this.p.H ? 1 : (1 - this.c[0] * Math.pow(x, -this.p.alpha)) / (1 - this.c[0] / this.c[1]))
-  }
-
-  support () {
-    return [{
-      value: this.p.L,
-      closed: true
-    }, {
-      value: this.p.H,
-      closed: true
-    }]
+    return (1 - this.c[0] * Math.pow(x, -this.p.alpha)) / (1 - this.c[0] / this.c[1])
   }
 }
 
@@ -411,6 +396,13 @@ export class Burr extends Distribution {
   constructor (c = 1, k = 1) {
     super('continuous', arguments.length)
     this.p = { c, k }
+    this.s = [{
+      value: 0,
+      closed: false
+    }, {
+      value: null,
+      closed: false
+    }]
   }
 
   _generator () {
@@ -419,21 +411,11 @@ export class Burr extends Distribution {
   }
 
   _pdf(x) {
-    return x > 0 ? this.p.c * this.p.k * Math.pow(x, this.p.c - 1) / Math.pow(1 + Math.pow(x, this.p.c), this.p.k + 1) : 0
+    return this.p.c * this.p.k * Math.pow(x, this.p.c - 1) / Math.pow(1 + Math.pow(x, this.p.c), this.p.k + 1)
   }
 
   _cdf (x) {
-    return x > 0 ? 1 - Math.pow(1 + Math.pow(x, this.p.c), -this.p.k) : 0
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: false
-    }, {
-      value: null,
-      closed: false
-    }]
+    return 1 - Math.pow(1 + Math.pow(x, this.p.c), -this.p.k)
   }
 }
 
@@ -454,6 +436,13 @@ export class Cauchy extends Distribution {
   constructor (x0 = 0, gamma = 1) {
     super('continuous', arguments.length)
     this.p = { x0, gamma }
+    this.s = [{
+      value: null,
+      closed: false
+    }, {
+      value: null,
+      closed: false
+    }]
     this.c = [Math.PI * this.p.gamma]
   }
 
@@ -469,16 +458,6 @@ export class Cauchy extends Distribution {
 
   _cdf (x) {
     return 0.5 + Math.atan2(x - this.p.x0, this.p.gamma) / Math.PI
-  }
-
-  support () {
-    return [{
-      value: null,
-      closed: false
-    }, {
-      value: null,
-      closed: false
-    }]
   }
 }
 
@@ -500,6 +479,13 @@ export class Custom extends Distribution {
   constructor (weights = [1]) {
     super('discrete', arguments.length)
     this.p = { n: weights.length, weights }
+    this.s = [{
+      value: 0,
+      closed: true
+    }, {
+      value: Math.max(0, n - 1),
+      closed: true
+    }]
 
     // Pre-compute tables
     let n = weights.length
@@ -584,7 +570,7 @@ export class Custom extends Distribution {
     if (this.p.n <= 1) {
       return x !== 0 ? 0 : 1
     } else {
-      return (x < 0 || x >= this.p.n) ? 0 : this.c[2][x]
+      return this.c[2][x]
     }
   }
 
@@ -592,18 +578,8 @@ export class Custom extends Distribution {
     if (this.p.n <= 1) {
       return x < 0 ? 0 : 1
     } else {
-      return x < 0 ? 0 : x >= this.p.n ? 1 : this.c[3][x]
+      return this.c[3][x]
     }
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: true
-    }, {
-      value: Math.max(0, this.p.n - 1),
-      closed: true
-    }]
   }
 }
 
@@ -624,6 +600,13 @@ export class Degenerate extends Distribution {
   constructor (x0 = 0) {
     super('continuous', arguments.length)
     this.p = { x0 }
+    this.s = [{
+      value: x0,
+      closed: true
+    }, {
+      value: x0,
+      closed: true
+    }]
   }
 
   _generator () {
@@ -637,16 +620,6 @@ export class Degenerate extends Distribution {
 
   _cdf (x) {
     return x < this.p.x0 ? 0 : 1
-  }
-
-  support () {
-    return [{
-      value: this.p.x0,
-      closed: true
-    }, {
-      value: this.p.x0,
-      closed: true
-    }]
   }
 }
 
@@ -666,6 +639,13 @@ export class Exponential extends Distribution {
   constructor (lambda = 1) {
     super('continuous', arguments.length)
     this.p = { lambda }
+    this.s = [{
+      value: 0,
+      closed: true
+    }, {
+      value: null,
+      closed: false
+    }]
   }
 
   _generator () {
@@ -674,21 +654,11 @@ export class Exponential extends Distribution {
   }
 
   _pdf (x) {
-    return x < 0 ? 0 : this.p.lambda * Math.exp(-this.p.lambda * x)
+    return this.p.lambda * Math.exp(-this.p.lambda * x)
   }
 
   _cdf (x) {
-    return x < 0 ? 0 : 1 - Math.exp(-this.p.lambda * x)
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: true
-    }, {
-      value: null,
-      closed: false
-    }]
+    return 1 - Math.exp(-this.p.lambda * x)
   }
 }
 
@@ -709,6 +679,13 @@ export class F extends Distribution {
   constructor (d1 = 2, d2 = 2) {
     super('continuous', arguments.length)
     this.p = { d1, d2 }
+    this.s = [{
+      value: 0,
+      closed: d1 !== 1
+    }, {
+      value: null,
+      closed: false
+    }]
     this.c = [special.beta(d1 / 2, d2 / 2), Math.pow(d2, d2)]
   }
 
@@ -718,21 +695,11 @@ export class F extends Distribution {
   }
 
   _pdf (x) {
-    return x > 0 ? Math.sqrt(Math.pow(this.p.d1 * x, this.p.d1) * this.c[1] / Math.pow(this.p.d1 * x + this.p.d2, this.p.d1 + this.p.d2)) / (x * this.c[0]) : 0
+    return Math.sqrt(Math.pow(this.p.d1 * x, this.p.d1) * this.c[1] / Math.pow(this.p.d1 * x + this.p.d2, this.p.d1 + this.p.d2)) / (x * this.c[0])
   }
 
   _cdf (x) {
-    return x > 0 ? special.betaIncomplete(this.p.d1 / 2, this.p.d2 / 2, this.p.d1 * x / (this.p.d1 * x + this.p.d2)) : 0
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: this.p.d1 !== 1
-    }, {
-      value: null,
-      closed: false
-    }]
+    return special.betaIncomplete(this.p.d1 / 2, this.p.d2 / 2, this.p.d1 * x / (this.p.d1 * x + this.p.d2))
   }
 }
 
@@ -754,6 +721,13 @@ export class Frechet extends Distribution {
   constructor (alpha = 1, s = 1, m = 0) {
     super('continuous', arguments.length)
     this.p = { alpha, s, m }
+    this.s = [{
+      value: m,
+      closed: false
+    }, {
+      value: null,
+      closed: false
+    }]
   }
 
   _generator () {
@@ -762,26 +736,12 @@ export class Frechet extends Distribution {
   }
 
   _pdf (x) {
-    if (x <= this.p.m) {
-      return 0
-    } else {
-      let z = (x - this.p.m) / this.p.s
-      return this.p.alpha * Math.pow(z, -1 - this.p.alpha) * Math.exp(-Math.pow(z, -this.p.alpha)) / this.p.s
-    }
+    let z = (x - this.p.m) / this.p.s
+    return this.p.alpha * Math.pow(z, -1 - this.p.alpha) * Math.exp(-Math.pow(z, -this.p.alpha)) / this.p.s
   }
 
   _cdf (x) {
-    return x <= this.p.m ? 0 : Math.exp(-Math.pow((x - this.p.m) / this.p.s, -this.p.alpha))
-  }
-
-  support () {
-    return [{
-      value: this.p.m,
-      closed: false
-    }, {
-      value: null,
-      closed: false
-    }]
+    return Math.exp(-Math.pow((x - this.p.m) / this.p.s, -this.p.alpha))
   }
 }
 
@@ -803,6 +763,13 @@ export class Gamma extends Distribution {
   constructor (alpha = 1, beta = 1) {
     super('continuous', arguments.length)
     this.p = { alpha, beta }
+    this.s = [{
+      value: 0,
+      closed: true
+    }, {
+      value: null,
+      closed: false
+    }]
     this.c = [Math.pow(beta, alpha), special.gamma(alpha)]
   }
 
@@ -812,21 +779,11 @@ export class Gamma extends Distribution {
   }
 
   _pdf (x) {
-    return x > 0 ? this.c[0] * Math.exp((this.p.alpha - 1) * Math.log(x) - this.p.beta * x) / this.c[1] : 0
+    return this.c[0] * Math.exp((this.p.alpha - 1) * Math.log(x) - this.p.beta * x) / this.c[1]
   }
 
   _cdf (x) {
     return special.gammaLowerIncomplete(this.p.alpha, this.p.beta * x) / this.c[1]
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: true
-    }, {
-      value: null,
-      closed: false
-    }]
   }
 }
 
@@ -848,6 +805,13 @@ export class GeneralizedGamma extends Distribution {
   constructor (a = 1, d = 1, p = 1) {
     super('continuous', arguments.length)
     this.p = { a, d, p }
+    this.s = [{
+      value: 0,
+      closed: d >= 1
+    }, {
+      value: null,
+      closed: false
+    }]
     this.c = [special.gamma(d / p), (p / Math.pow(a, d)), 1 / Math.pow(a, p)]
   }
 
@@ -857,21 +821,11 @@ export class GeneralizedGamma extends Distribution {
   }
 
   _pdf (x) {
-    return x > 0 ? this.c[1] * Math.exp((this.p.d - 1) * Math.log(x) - Math.pow(x / this.p.a, this.p.p)) / this.c[0] : 0
+    return this.c[1] * Math.exp((this.p.d - 1) * Math.log(x) - Math.pow(x / this.p.a, this.p.p)) / this.c[0]
   }
 
   _cdf (x) {
-    return x > 0 ? special.gammaLowerIncomplete(this.p.d / this.p.p, Math.pow(x / this.p.a, this.p.p)) / this.c[0] : 0
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: this.p.d >= 1
-    }, {
-      value: null,
-      closed: false
-    }]
+    return special.gammaLowerIncomplete(this.p.d / this.p.p, Math.pow(x / this.p.a, this.p.p)) / this.c[0]
   }
 }
 
@@ -892,6 +846,13 @@ export class Gompertz extends Distribution {
   constructor (eta = 1, b = 1) {
     super('continuous', arguments.length)
     this.p = { eta, b }
+    this.s = [{
+      value: 0,
+      closed: true
+    }, {
+      value: null,
+      closed: false
+    }]
   }
 
   _generator () {
@@ -900,21 +861,11 @@ export class Gompertz extends Distribution {
   }
 
   _pdf (x) {
-    return x < 0 ? 0 : this.p.b * this.p.eta * Math.exp(this.p.eta + this.p.b * x - this.p.eta * Math.exp(this.p.b * x))
+    return this.p.b * this.p.eta * Math.exp(this.p.eta + this.p.b * x - this.p.eta * Math.exp(this.p.b * x))
   }
 
   _cdf (x) {
-    return x < 0 ? 0 : 1 - Math.exp(-this.p.eta * (Math.exp(this.p.b * x) - 1))
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: true
-    }, {
-      value: null,
-      closed: false
-    }]
+    return 1 - Math.exp(-this.p.eta * (Math.exp(this.p.b * x) - 1))
   }
 }
 
@@ -935,6 +886,13 @@ export class Gumbel extends Distribution {
   constructor (mu = 0, beta = 1) {
     super('continuous', arguments.length)
     this.p = { mu, beta }
+    this.s = [{
+      value: null,
+      closed: false
+    }, {
+      value: null,
+      closed: false
+    }]
   }
 
   _generator () {
@@ -949,16 +907,6 @@ export class Gumbel extends Distribution {
 
   _cdf (x) {
     return Math.exp(-Math.exp(-(x - this.p.mu) / this.p.beta))
-  }
-
-  support () {
-    return [{
-      value: null,
-      closed: false
-    }, {
-      value: null,
-      closed: false
-    }]
   }
 }
 
@@ -1018,6 +966,13 @@ export class InverseGamma extends Distribution {
   constructor (alpha = 1, beta = 1) {
     super('continuous', arguments.length)
     this.p = { alpha, beta }
+    this.s = [{
+      value: 0,
+      closed: false
+    }, {
+      value: null,
+      closed: false
+    }]
     this.c = [Math.pow(beta, alpha) / special.gamma(alpha), special.gamma(alpha)]
   }
 
@@ -1027,21 +982,11 @@ export class InverseGamma extends Distribution {
   }
 
   _pdf (x) {
-    return x > 0 ? this.c[0] * Math.pow(x, -1 - this.p.alpha) * Math.exp(-this.p.beta / x) : 0
+    return this.c[0] * Math.pow(x, -1 - this.p.alpha) * Math.exp(-this.p.beta / x)
   }
 
   _cdf (x) {
-    return x > 0 ? 1 - special.gammaLowerIncomplete(this.p.alpha, this.p.beta / x) / this.c[1] : 0
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: false
-    }, {
-      value: null,
-      closed: false
-    }]
+    return 1 - special.gammaLowerIncomplete(this.p.alpha, this.p.beta / x) / this.c[1]
   }
 }
 
@@ -1062,6 +1007,13 @@ export class InverseGaussian extends Distribution {
   constructor (lambda = 1, mu = 1) {
     super('continuous', arguments.length)
     this.p = { lambda, mu }
+    this.s = [{
+      value: 0,
+      closed: true
+    }, {
+      value: null,
+      closed: false
+    }]
     this.c = [0.5 * this.p.mu / this.p.lambda, Math.exp(2 * lambda / mu)]
   }
 
@@ -1080,24 +1032,14 @@ export class InverseGaussian extends Distribution {
   }
 
   _pdf (x) {
-    return x > 0 ? Math.sqrt(this.p.lambda / (2 * Math.PI * Math.pow(x, 3))) * Math.exp(-this.p.lambda * Math.pow(x - this.p.mu, 2) / (2 * this.p.mu * this.p.mu * x)) : 0
+    return Math.sqrt(this.p.lambda / (2 * Math.PI * Math.pow(x, 3))) * Math.exp(-this.p.lambda * Math.pow(x - this.p.mu, 2) / (2 * this.p.mu * this.p.mu * x))
   }
 
   _cdf (x) {
     let s = Math.sqrt(this.p.lambda / x)
 
     let t = x / this.p.mu
-    return x > 0 ? InverseGaussian._phi(s * (t - 1)) + this.c[1] * InverseGaussian._phi(-s * (t + 1)) : 0
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: true
-    }, {
-      value: null,
-      closed: false
-    }]
+    return InverseGaussian._phi(s * (t - 1)) + this.c[1] * InverseGaussian._phi(-s * (t + 1))
   }
 }
 
@@ -1118,6 +1060,13 @@ export class IrwinHall extends Distribution {
   constructor (n = 1) {
     super('continuous', arguments.length)
     this.p = { n }
+    this.s = [{
+      value: 0,
+      closed: true
+    }, {
+      value: n,
+      closed: true
+    }]
     this.c = Array.from({ length: n + 1 }, (d, k) => special.gammaLn(k + 1) + special.gammaLn(n - k + 1))
   }
 
@@ -1127,31 +1076,21 @@ export class IrwinHall extends Distribution {
   }
 
   _pdf (x) {
-    return x >= 0 && x <= this.p.n ? neumaier(Array.from({ length: Math.floor(x) + 1 }, (d, k) => {
+    return neumaier(Array.from({ length: Math.floor(x) + 1 }, (d, k) => {
       let z = (this.p.n - 1) * Math.log(x - k) + Math.log(this.p.n) - this.c[k]
-
-      let s = k % 2 === 0 ? 1 : -1
-      return s * Math.exp(z)
-    })) : 0
-  }
-
-  _cdf (x) {
-    return x < 0 ? 0 : x >= this.p.n ? 1 : neumaier(Array.from({ length: Math.floor(x) + 1 }, (d, k) => {
-      let z = this.p.n * Math.log(x - k) - this.c[k]
 
       let s = k % 2 === 0 ? 1 : -1
       return s * Math.exp(z)
     }))
   }
 
-  support () {
-    return [{
-      value: 0,
-      closed: true
-    }, {
-      value: this.p.n,
-      closed: true
-    }]
+  _cdf (x) {
+    return neumaier(Array.from({ length: Math.floor(x) + 1 }, (d, k) => {
+      let z = this.p.n * Math.log(x - k) - this.c[k]
+
+      let s = k % 2 === 0 ? 1 : -1
+      return s * Math.exp(z)
+    }))
   }
 }
 
@@ -1173,6 +1112,13 @@ export class Kumaraswamy extends Distribution {
   constructor (a = 1, b = 1) {
     super('continuous', arguments.length)
     this.p = { a, b }
+    this.s = [{
+      value: 0,
+      closed: false
+    }, {
+      value: 1,
+      closed: false
+    }]
   }
 
   _generator () {
@@ -1181,21 +1127,11 @@ export class Kumaraswamy extends Distribution {
   }
 
   _pdf (x) {
-    return x > 0 && x < 1 ? this.p.a * this.p.b * Math.pow(x, this.p.a - 1) * Math.pow(1 - Math.pow(x, this.p.a), this.p.b - 1) : 0
+    return this.p.a * this.p.b * Math.pow(x, this.p.a - 1) * Math.pow(1 - Math.pow(x, this.p.a), this.p.b - 1)
   }
 
   _cdf (x) {
-    return x > 0 && x < 1 ? 1 - Math.pow(1 - Math.pow(x, this.p.a), this.p.b) : 0
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: false
-    }, {
-      value: 0,
-      closed: false
-    }]
+    return 1 - Math.pow(1 - Math.pow(x, this.p.a), this.p.b)
   }
 }
 
@@ -1216,6 +1152,13 @@ export class Laplace extends Distribution {
   constructor (mu = 0, b = 1) {
     super('continuous', arguments.length)
     this.p = { mu, b }
+    this.s = [{
+      value: null,
+      closed: false
+    }, {
+      value: null,
+      closed: false
+    }]
   }
 
   _generator () {
@@ -1230,16 +1173,6 @@ export class Laplace extends Distribution {
   _cdf (x) {
     let z = Math.exp((x - this.p.mu) / this.p.b)
     return x < this.p.mu ? 0.5 * z : 1 - 0.5 / z
-  }
-
-  support () {
-    return [{
-      value: null,
-      closed: false
-    }, {
-      value: null,
-      closed: false
-    }]
   }
 }
 
@@ -1260,6 +1193,13 @@ export class LogCauchy extends Distribution {
   constructor (mu = 0, sigma = 1) {
     super('continuous', arguments.length)
     this.p = { mu, sigma }
+    this.s = [{
+      value: 0,
+      closed: false
+    }, {
+      value: null,
+      closed: false
+    }]
   }
 
   _generator () {
@@ -1268,21 +1208,11 @@ export class LogCauchy extends Distribution {
   }
 
   _pdf (x) {
-    return x > 0 ? this.p.sigma / (x * Math.PI * (this.p.sigma * this.p.sigma + Math.pow(Math.log(x) - this.p.mu, 2))) : 0
+    return this.p.sigma / (x * Math.PI * (this.p.sigma * this.p.sigma + Math.pow(Math.log(x) - this.p.mu, 2)))
   }
 
   _cdf (x) {
-    return x > 0 ? 0.5 + Math.atan2(Math.log(x) - this.p.mu, this.p.sigma) / Math.PI : 0
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: false
-    }, {
-      value: null,
-      closed: false
-    }]
+    return 0.5 + Math.atan2(Math.log(x) - this.p.mu, this.p.sigma) / Math.PI
   }
 }
 
@@ -1303,6 +1233,13 @@ export class Logistic extends Distribution {
   constructor (mu = 0, s = 1) {
     super('continuous', arguments.length)
     this.p = { mu, s }
+    this.s = [{
+      value: null,
+      closed: false
+    }, {
+      value: null,
+      closed: false
+    }]
   }
 
   _generator () {
@@ -1317,16 +1254,6 @@ export class Logistic extends Distribution {
 
   _cdf (x) {
     return 1 / (1 + Math.exp(-(x - this.p.mu) / this.p.s))
-  }
-
-  support () {
-    return [{
-      value: null,
-      closed: false
-    }, {
-      value: null,
-      closed: false
-    }]
   }
 }
 
@@ -1348,11 +1275,25 @@ export class LogLogistic extends Distribution {
   constructor (mu = 0, sigma = 1, xi = 1) {
     super('continuous', arguments.length)
     this.p = { mu, sigma, xi }
+    this.s = xi === 0 ? [{
+      value: null,
+      closed: false
+    }, {
+      value: null,
+      closed: false
+    }] : [{
+      value: xi > 0 ? mu - sigma / xi : null,
+      closed: xi > 0
+    }, {
+      value: xi < 0 ? mu - sigma / xi : null,
+      closed: xi < 0
+    }]
   }
 
   _generator () {
     // Inverse transform sampling
     if (this.p.xi === 0) {
+      // Fall back to logistic
       return this.p.mu - this.p.sigma * Math.log(1 / Math.random() - 1)
     } else {
       return this.p.mu + this.p.sigma * (Math.pow(1 / Math.random() - 1, -this.p.xi) - 1) / this.p.xi
@@ -1361,49 +1302,25 @@ export class LogLogistic extends Distribution {
 
   _pdf (x) {
     if (this.p.xi === 0) {
+      // Fall back to logistic
       let z = Math.exp(-(x - this.p.mu) / this.p.sigma)
       return z / (this.p.sigma * Math.pow(1 + z, 2))
     } else {
       let z = (x - this.p.mu) / this.p.sigma
 
-      let p = Math.pow(1 + this.p.xi * z, -(1 / this.p.xi + 1)) / (this.p.sigma * Math.pow(1 + Math.pow(1 + this.p.xi * z, -1 / this.p.xi), 2))
-      if (this.p.xi > 0) {
-        return x >= this.p.mu - this.p.sigma / this.p.xi ? p : 0
-      } else {
-        return x <= this.p.mu - this.p.sigma / this.p.xi ? p : 0
-      }
+      return Math.pow(1 + this.p.xi * z, -(1 / this.p.xi + 1)) / (this.p.sigma * Math.pow(1 + Math.pow(1 + this.p.xi * z, -1 / this.p.xi), 2))
     }
   }
 
   _cdf (x) {
     if (this.p.xi === 0) {
+      // Fall back to logistic
       return 1 / (1 + Math.exp(-(x - this.p.mu) / this.p.sigma))
     } else {
       let z = (x - this.p.mu) / this.p.sigma
 
-      let c = 1 / (1 + Math.pow(1 + this.p.xi * z, -1 / this.p.xi))
-      if (this.p.xi > 0) {
-        return x >= this.p.mu - this.p.sigma / this.p.xi ? c : 0
-      } else {
-        return x <= this.p.mu - this.p.sigma / this.p.xi ? c : 0
-      }
+      return 1 / (1 + Math.pow(1 + this.p.xi * z, -1 / this.p.xi))
     }
-  }
-
-  support () {
-    return this.p.xi === 0 ? [{
-      value: null,
-      closed: false
-    }, {
-      value: null,
-      closed: false
-    }] : [{
-      value: this.p.xi > 0 ? this.p.mu - this.p.sigma / this.p.xi : null,
-      closed: this.p.xi > 0
-    }, {
-      value: this.p.x < 0 ? this.p.mu - this.p.sigma / this.p.xi : null,
-      closed: this.p.xi < 0
-    }]
   }
 }
 
@@ -1424,6 +1341,13 @@ export class Lognormal extends Distribution {
   constructor (mu = 0, sigma = 1) {
     super('continuous', arguments.length)
     this.p = { mu, sigma }
+    this.s = [{
+      value: 0,
+      closed: false
+    }, {
+      value: null,
+      closed: false
+    }]
     this.c = [sigma * Math.sqrt(2 * Math.PI), sigma * Math.SQRT2]
   }
 
@@ -1433,21 +1357,11 @@ export class Lognormal extends Distribution {
   }
 
   _pdf (x) {
-    return x > 0 ? Math.exp(-0.5 * Math.pow((Math.log(x) - this.p.mu) / this.p.sigma, 2)) / (x * this.c[0]) : 0
+    return Math.exp(-0.5 * Math.pow((Math.log(x) - this.p.mu) / this.p.sigma, 2)) / (x * this.c[0])
   }
 
   _cdf (x) {
-    return x > 0 ? 0.5 * (1 + special.erf((Math.log(x) - this.p.mu) / this.c[1])) : 0
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: false
-    }, {
-      value: null,
-      closed: false
-    }]
+    return 0.5 * (1 + special.erf((Math.log(x) - this.p.mu) / this.c[1]))
   }
 }
 
@@ -1468,6 +1382,13 @@ export class Lomax extends Distribution {
   constructor (lambda = 1, alpha = 1) {
     super('continuous', arguments.length)
     this.p = { lambda, alpha }
+    this.s = [{
+      value: 0,
+      closed: true
+    }, {
+      value: null,
+      closed: false
+    }]
   }
 
   _generator () {
@@ -1476,21 +1397,11 @@ export class Lomax extends Distribution {
   }
 
   _pdf (x) {
-    return x < 0 ? 0 : this.p.alpha * Math.pow(1 + x / this.p.lambda, -1 - this.p.alpha) / this.p.lambda
+    return this.p.alpha * Math.pow(1 + x / this.p.lambda, -1 - this.p.alpha) / this.p.lambda
   }
 
   _cdf (x) {
-    return x < 0 ? 0 : 1 - Math.pow(1 + x / this.p.lambda, -this.p.alpha)
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: true
-    }, {
-      value: null,
-      closed: false
-    }]
+    return 1 - Math.pow(1 + x / this.p.lambda, -this.p.alpha)
   }
 }
 
@@ -1511,6 +1422,13 @@ export class Normal extends Distribution {
   constructor (mu = 0, sigma = 1) {
     super('continuous', arguments.length)
     this.p = { mu, sigma }
+    this.s = [{
+      value: null,
+      closed: false
+    }, {
+      value: null,
+      closed: false
+    }]
     this.c = [sigma * Math.sqrt(2 * Math.PI), sigma * Math.SQRT2]
   }
 
@@ -1525,16 +1443,6 @@ export class Normal extends Distribution {
 
   _cdf (x) {
     return 0.5 * (1 + special.erf((x - this.p.mu) / this.c[1]))
-  }
-
-  support () {
-    return [{
-      value: null,
-      closed: false
-    }, {
-      value: null,
-      closed: false
-    }]
   }
 }
 
@@ -1555,6 +1463,13 @@ export class Pareto extends Distribution {
   constructor (xmin = 1, alpha = 1) {
     super('continuous', arguments.length)
     this.p = { xmin, alpha }
+    this.s = [{
+      value: xmin,
+      closed: true
+    }, {
+      value: null,
+      closed: false
+    }]
   }
 
   _generator () {
@@ -1563,21 +1478,11 @@ export class Pareto extends Distribution {
   }
 
   _pdf (x) {
-    return x < this.p.xmin ? 0 : this.p.alpha * Math.pow(this.p.xmin / x, this.p.alpha) / x
+    return this.p.alpha * Math.pow(this.p.xmin / x, this.p.alpha) / x
   }
 
   _cdf (x) {
-    return x < this.p.xmin ? 0 : 1 - Math.pow(this.p.xmin / x, this.p.alpha)
-  }
-
-  support () {
-    return [{
-      value: this.p.xmin,
-      closed: true
-    }, {
-      value: null,
-      closed: false
-    }]
+    return 1 - Math.pow(this.p.xmin / x, this.p.alpha)
   }
 }
 
@@ -1597,6 +1502,13 @@ export class Poisson extends Distribution {
   constructor (lambda = 1) {
     super('discrete', arguments.length)
     this.p = { lambda }
+    this.s = [{
+      value: 0,
+      closed: true
+    }, {
+      value: null,
+      closed: false
+    }]
   }
 
   _generator () {
@@ -1643,21 +1555,11 @@ export class Poisson extends Distribution {
   }
 
   _pdf (x) {
-    return x < 0 ? 0 : Math.pow(this.p.lambda, x) * Math.exp(-this.p.lambda) / special.gamma(x + 1)
+    return Math.pow(this.p.lambda, x) * Math.exp(-this.p.lambda) / special.gamma(x + 1)
   }
 
   _cdf (x) {
-    return x < 0 ? 0 : 1 - special.gammaLowerIncomplete(x + 1, this.p.lambda) / special.gamma(x + 1)
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: true
-    }, {
-      value: null,
-      closed: false
-    }]
+    return 1 - special.gammaLowerIncomplete(x + 1, this.p.lambda) / special.gamma(x + 1)
   }
 }
 
@@ -1675,6 +1577,13 @@ export class Poisson extends Distribution {
 export class Rademacher extends Distribution {
   constructor () {
     super('discrete', arguments.length)
+    this.s = [{
+      value: -1,
+      closed: true
+    }, {
+      value: 1,
+      closed: true
+    }]
   }
 
   _generator () {
@@ -1687,16 +1596,6 @@ export class Rademacher extends Distribution {
 
   _cdf (x) {
     return x < -1 ? 0 : x >= 1 ? 1 : 0.5
-  }
-
-  support () {
-    return [{
-      value: -1,
-      closed: true
-    }, {
-      value: 1,
-      closed: true
-    }]
   }
 }
 
@@ -1719,6 +1618,13 @@ export class UniformContinuous extends Distribution {
   constructor (xmin = 0, xmax = 1) {
     super('continuous', arguments.length)
     this.p = { xmin, xmax }
+    this.s = [{
+      value: xmin,
+      closed: true
+    }, {
+      value: xmax,
+      closed: true
+    }]
     this.c = [xmax - xmin]
   }
 
@@ -1728,21 +1634,11 @@ export class UniformContinuous extends Distribution {
   }
 
   _pdf (x) {
-    return x < this.p.xmin || x > this.p.xmax ? 0 : 1 / this.c[0]
+    return 1 / this.c[0]
   }
 
   _cdf (x) {
-    return x < this.p.xmin ? 0 : x > this.p.xmax ? 1 : (x - this.p.xmin) / this.c[0]
-  }
-
-  support () {
-    return [{
-      value: this.p.xmin,
-      closed: true
-    }, {
-      value: this.p.xmax,
-      closed: true
-    }]
+    return x > this.p.xmax ? 1 : (x - this.p.xmin) / this.c[0]
   }
 }
 
@@ -1764,6 +1660,13 @@ export class UniformDiscrete extends Distribution {
   constructor (xmin = 0, xmax = 100) {
     super('discrete', arguments.length)
     this.p = { xmin, xmax }
+    this.s = [{
+      value: this.p.xmin,
+      closed: true
+    }, {
+      value: this.p.xmax,
+      closed: true
+    }]
     this.c = [xmax - xmin + 1]
   }
 
@@ -1773,21 +1676,11 @@ export class UniformDiscrete extends Distribution {
   }
 
   _pdf (x) {
-    return x < this.p.xmin || x > this.p.xmax ? 0 : 1 / this.c[0]
+    return 1 / this.c[0]
   }
 
   _cdf (x) {
-    return x < this.p.xmin ? 0 : x > this.p.xmax ? 1 : (1 + x - this.p.xmin) / this.c[0]
-  }
-
-  support () {
-    return [{
-      value: this.p.xmin,
-      closed: true
-    }, {
-      value: this.p.xmax,
-      closed: true
-    }]
+    return (1 + x - this.p.xmin) / this.c[0]
   }
 }
 
@@ -1808,6 +1701,13 @@ export class Weibull extends Distribution {
   constructor (lambda = 1, k = 1) {
     super('continuous', arguments.length)
     this.p = { lambda, k }
+    this.s = [{
+      value: 0,
+      closed: true
+    }, {
+      value: null,
+      closed: false
+    }]
   }
 
   _generator () {
@@ -1816,21 +1716,11 @@ export class Weibull extends Distribution {
   }
 
   _pdf (x) {
-    return x < 0 ? 0 : (this.p.k / this.p.lambda) * Math.exp((this.p.k - 1) * Math.log(x / this.p.lambda) - Math.pow(x / this.p.lambda, this.p.k))
+    return (this.p.k / this.p.lambda) * Math.exp((this.p.k - 1) * Math.log(x / this.p.lambda) - Math.pow(x / this.p.lambda, this.p.k))
   }
 
   _cdf (x) {
-    return x < 0 ? 0 : 1 - Math.exp(-Math.pow(x / this.p.lambda, this.p.k))
-  }
-
-  support () {
-    return [{
-      value: 0,
-      closed: true
-    }, {
-      value: null,
-      closed: false
-    }]
+    return 1 - Math.exp(-Math.pow(x / this.p.lambda, this.p.k))
   }
 }
 

@@ -2,16 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2dce2d99-d55c-4cdc-9490-9c9d46ff6d0c" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/src/dist/distributions.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/dist/tests.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/continuous.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/discrete.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/distribution.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/core.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/standard.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/test.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/core.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/core.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/distributions.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/distributions.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dist.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/dist.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/dist/" />
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -29,8 +23,8 @@
       <file leaf-file-name="core.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/dist/core.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="539">
-              <caret line="201" column="37" selection-start-line="201" selection-start-column="37" selection-end-line="201" selection-end-column="37" />
+            <state relative-caret-position="14">
+              <caret line="226" column="16" selection-start-line="226" selection-start-column="16" selection-end-line="226" selection-end-column="16" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
               </folding>
@@ -41,11 +35,8 @@
       <file leaf-file-name="distributions.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/dist/distributions.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="404">
-              <caret line="1688" column="12" selection-start-line="1688" selection-start-column="12" selection-end-line="1688" selection-end-column="12" />
-              <folding>
-                <element signature="e#0#37#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="450">
+              <caret line="1742" column="3" lean-forward="true" selection-start-line="1742" selection-start-column="3" selection-end-line="1742" selection-end-column="3" />
             </state>
           </provider>
         </entry>
@@ -85,6 +76,7 @@
       <find>_normal</find>
       <find>_gamma</find>
       <find>discrete</find>
+      <find>parseInt</find>
     </findStrings>
     <replaceStrings>
       <replace>LAPS</replace>
@@ -121,13 +113,13 @@
         <option value="$PROJECT_DIR$/src/dist/distribution.js" />
         <option value="$PROJECT_DIR$/src/ts.js" />
         <option value="$PROJECT_DIR$/.gitignore" />
-        <option value="$PROJECT_DIR$/test/dist.js" />
         <option value="$PROJECT_DIR$/src/dist/standard.js" />
         <option value="$PROJECT_DIR$/src/dist/test.js" />
         <option value="$PROJECT_DIR$/src/dist/tests.js" />
         <option value="$PROJECT_DIR$/src/dist/discrete.js" />
         <option value="$PROJECT_DIR$/src/dist.js" />
         <option value="$PROJECT_DIR$/src/dist/continuous.js" />
+        <option value="$PROJECT_DIR$/test/dist.js" />
         <option value="$PROJECT_DIR$/src/dist/core.js" />
         <option value="$PROJECT_DIR$/src/dist/distributions.js" />
       </list>
@@ -256,7 +248,7 @@
       <option name="presentableId" value="Default" />
       <updated>1548048943070</updated>
       <workItem from="1548048944290" duration="50738000" />
-      <workItem from="1548196990787" duration="44024000" />
+      <workItem from="1548196990787" duration="47309000" />
     </task>
     <servers />
   </component>
@@ -272,13 +264,13 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="94762000" />
+    <option name="totallyTimeSpent" value="98047000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="992" y="24" width="928" height="1056" extended-state="4" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="2" sideWeight="0.49685535" visible="true" weight="0.34590518" />
+      <window_info active="true" content_ui="combo" id="Project" order="2" sideWeight="0.49685535" visible="true" weight="0.34590518" />
       <window_info anchor="bottom" id="TODO" order="11" />
       <window_info anchor="bottom" id="Docker" order="0" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="1" sideWeight="0.47306034" side_tool="true" weight="0.32911393" />
@@ -286,7 +278,7 @@
       <window_info anchor="bottom" id="Version Control" order="4" />
       <window_info anchor="bottom" id="Run" order="7" weight="0.32911393" />
       <window_info id="npm" order="1" side_tool="true" />
-      <window_info active="true" id="Structure" order="3" sideWeight="0.5031447" side_tool="true" visible="true" weight="0.34590518" />
+      <window_info id="Structure" order="3" sideWeight="0.5031447" side_tool="true" weight="0.34590518" />
       <window_info anchor="bottom" id="Terminal" order="3" weight="0.32911393" />
       <window_info id="Favorites" order="0" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="8" weight="0.39978904" />
@@ -628,8 +620,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/test/dist.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="675">
-          <caret line="342" selection-start-line="342" selection-end-line="342" />
+        <state relative-caret-position="1350">
+          <caret line="96" selection-start-line="96" selection-end-line="96" />
           <folding>
             <element signature="e#0#28#0" expanded="true" />
           </folding>
@@ -638,8 +630,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/dist/core.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="539">
-          <caret line="201" column="37" selection-start-line="201" selection-start-column="37" selection-end-line="201" selection-end-column="37" />
+        <state relative-caret-position="14">
+          <caret line="226" column="16" selection-start-line="226" selection-start-column="16" selection-end-line="226" selection-end-column="16" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
           </folding>
@@ -648,11 +640,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/dist/distributions.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="404">
-          <caret line="1688" column="12" selection-start-line="1688" selection-start-column="12" selection-end-line="1688" selection-end-column="12" />
-          <folding>
-            <element signature="e#0#37#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="450">
+          <caret line="1742" column="3" lean-forward="true" selection-start-line="1742" selection-start-column="3" selection-end-line="1742" selection-end-column="3" />
         </state>
       </provider>
     </entry>

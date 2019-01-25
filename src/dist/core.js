@@ -72,9 +72,7 @@ export class Distribution {
   constructor (type, k) {
     this._type = type
     this.k = k
-    this.s = []
     this.p = []
-    this.c = []
   }
 
   _generator () {
@@ -131,7 +129,7 @@ export class Distribution {
    * <code>closed</code> is always false.
    */
   support () {
-    throw Error('Distribution.support() is not implemented')
+    return this.s;
   }
 
   /**
@@ -172,7 +170,22 @@ export class Distribution {
    */
   pdf (x) {
     // Convert to integer if discrete
-    let z = this._type === 'discrete' ? Math.round(x) : x;
+    let z = this._type === 'discrete' ? Math.round(x) : x
+
+    // Check against support
+    if (this.s) {
+      let min = this.s[0]
+      if (min.value !== null && ((min.closed && z < min.value) || (!min.closed && z <= min.value))) {
+        return 0
+      }
+
+      let max = this.s[1]
+      if (max.value !== null && ((max.closed && z > max.value) || (!max.closed && z >= max.value))) {
+        return 0
+      }
+    }
+
+    // Return value
     return this._pdf(z)
   }
 
@@ -200,7 +213,22 @@ export class Distribution {
    */
   cdf (x) {
     // Convert to integer if discrete
-    let z = this._type === 'discrete' ? Math.round(x) : x;
+    let z = this._type === 'discrete' ? Math.round(x) : x
+
+    // Check against support
+    if (this.s) {
+      let min = this.s[0]
+      if (min.value !== null && z < min.value) {
+        return 0
+      }
+
+      let max = this.s[1]
+      if (max.value !== null && z >= max.value) {
+        return 1
+      }
+    }
+
+    // Return value
     return this._cdf(z)
   }
 

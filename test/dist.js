@@ -94,17 +94,6 @@ function ut_test(name, params, type = 'self') {
 describe('dist', () => {
      // Base class
     describe('Distribution', () => {
-        describe('.support()', () => {
-            it('should throw not implemented error', () => {
-                const invalid = new dist._InvalidDistribution();
-                assert.throws(() => {
-                    invalid.support();
-                }, {
-                    message: 'Distribution.support() is not implemented'
-                });
-            });
-        });
-
         describe('.sample()', () => {
             it('should throw not implemented error', () => {
                 const invalid = new dist._InvalidDistribution();
