@@ -42,9 +42,11 @@
       "src/utils.js",
       "src/core.js",
       "src/la.js",
+      "src/special/*.js",
       "src/special.js",
       "src/ts.js",
       "src/mc.js",
+      "src/dist/*.js",
       "src/dist.js",
       "src/index.js"
     ]

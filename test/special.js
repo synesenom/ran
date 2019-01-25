@@ -55,4 +55,14 @@ describe('special', () => {
             }
         });
     });
+
+    describe('.lambertW()', () => {
+      it('should satisfy the W * exp(W) = x equation', () => {
+        for (let i=0; i<LAPS; i++) {
+          let x = Math.random() * 10,
+            w = special.lambertW(x);
+          assert(Math.abs(w * Math.exp(w) - x) / x < 0.01, true);
+        }
+      });
+    });
 });

@@ -1013,7 +1013,7 @@ export class InverseChi2 extends Distribution {
     }]
   }
 
-  _generator() {
+  _generator () {
     // Direct sampling
     return 1 / gamma(Math.round(this.p.nu) / 2, 0.5)
   }

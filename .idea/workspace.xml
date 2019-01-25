@@ -2,15 +2,21 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2dce2d99-d55c-4cdc-9490-9c9d46ff6d0c" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/src/special/beta-incomplete.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/special/beta.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/special/core.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/special/error.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/special/gamma-log.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/special/gamma-lower-incomplete.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/special/gamma.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/special/lambert-w.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/src/docbuilder.py" beforeDir="false" afterPath="$PROJECT_DIR$/docs/src/docbuilder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/dist.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/dist/core.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/core.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/dist/distributions.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/distributions.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/tests.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/tests.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/dist.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/dist.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/special.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/special.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/special.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/special.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/dist/" />
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -25,32 +31,32 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="dist.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/dist.js">
+      <file leaf-file-name="core.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/special/core.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="16" selection-start-line="16" selection-end-line="16" />
+            <state relative-caret-position="345">
+              <caret line="23" column="11" selection-start-line="23" selection-start-column="11" selection-end-line="23" selection-end-column="11" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="dist.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/dist.js">
+      <file leaf-file-name="lambert-w.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/special/lambert-w.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="171">
-              <caret line="321" column="29" selection-start-line="321" selection-start-column="29" selection-end-line="321" selection-end-column="29" />
+            <state relative-caret-position="315">
+              <caret line="21" selection-start-line="21" selection-end-line="21" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="special.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/test/special.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="300">
+              <caret line="56" column="7" selection-start-line="56" selection-start-column="7" selection-end-line="56" selection-end-column="7" />
               <folding>
                 <element signature="e#0#28#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="distributions.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/dist/distributions.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="1494" column="37" selection-start-line="1494" selection-start-column="37" selection-end-line="1494" selection-end-column="37" />
             </state>
           </provider>
         </entry>
@@ -95,10 +101,12 @@
       <find>Inver</find>
       <find>InverseCh</find>
       <find>optiona</find>
+      <find>export</find>
     </findStrings>
     <replaceStrings>
       <replace>LAPS</replace>
       <replace>int</replace>
+      <replace>import</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -118,12 +126,10 @@
         <option value="$PROJECT_DIR$/src/la.js" />
         <option value="$PROJECT_DIR$/test/la.js" />
         <option value="$PROJECT_DIR$/test/ts.js" />
-        <option value="$PROJECT_DIR$/test/special.js" />
         <option value="$PROJECT_DIR$/src/mc.js" />
         <option value="$PROJECT_DIR$/src/index.js" />
         <option value="$PROJECT_DIR$/src/utils.js" />
         <option value="$PROJECT_DIR$/test/utils.js" />
-        <option value="$PROJECT_DIR$/src/special.js" />
         <option value="$PROJECT_DIR$/test/test-utils.js" />
         <option value="$PROJECT_DIR$/src/dist/base.js" />
         <option value="$PROJECT_DIR$/src/dist/distribution.js" />
@@ -134,12 +140,22 @@
         <option value="$PROJECT_DIR$/src/dist/tests.js" />
         <option value="$PROJECT_DIR$/src/dist/discrete.js" />
         <option value="$PROJECT_DIR$/src/dist/continuous.js" />
-        <option value="$PROJECT_DIR$/package.json" />
-        <option value="$PROJECT_DIR$/src/dist/core.js" />
         <option value="$PROJECT_DIR$/docs/src/docbuilder.py" />
-        <option value="$PROJECT_DIR$/src/dist.js" />
         <option value="$PROJECT_DIR$/test/dist.js" />
         <option value="$PROJECT_DIR$/src/dist/distributions.js" />
+        <option value="$PROJECT_DIR$/src/special/gammaLn.js" />
+        <option value="$PROJECT_DIR$/src/special/beta.js" />
+        <option value="$PROJECT_DIR$/src/special/error.js" />
+        <option value="$PROJECT_DIR$/src/dist/core.js" />
+        <option value="$PROJECT_DIR$/src/dist.js" />
+        <option value="$PROJECT_DIR$/src/special/core.js" />
+        <option value="$PROJECT_DIR$/src/special/gammaLowerIncomplete.js" />
+        <option value="$PROJECT_DIR$/src/special/betaIncomplete.js" />
+        <option value="$PROJECT_DIR$/src/special/gamma.js" />
+        <option value="$PROJECT_DIR$/src/special.js" />
+        <option value="$PROJECT_DIR$/package.json" />
+        <option value="$PROJECT_DIR$/src/special/lambert-w.js" />
+        <option value="$PROJECT_DIR$/test/special.js" />
       </list>
     </option>
   </component>
@@ -183,6 +199,11 @@
             <path>
               <item name="ran" type="b2602c69:ProjectViewProjectNode" />
               <item name="ran" type="462c0819:PsiDirectoryNode" />
+              <item name="coverage" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ran" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ran" type="462c0819:PsiDirectoryNode" />
               <item name="dist" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -206,6 +227,12 @@
               <item name="ran" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="dist" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ran" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ran" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="special" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="ran" type="b2602c69:ProjectViewProjectNode" />
@@ -238,7 +265,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Node.js.special.js">
+    <configuration name="special.js" type="NodeJSConfigurationType" factoryName="Node.js" temporary="true" nameIsGenerated="true" path-to-js-file="special.js" working-dir="$PROJECT_DIR$/src" />
     <configuration name="core..coin.should return head with probability = 0.5" type="mocha-javascript-test-runner" factoryName="Mocha" nameIsGenerated="true">
       <node-interpreter>project</node-interpreter>
       <node-options />
@@ -254,6 +282,15 @@
         <name value="should return head with probability = 0.5" />
       </test-names>
     </configuration>
+    <list>
+      <item itemvalue="Mocha.core..coin.should return head with probability = 0.5" />
+      <item itemvalue="Node.js.special.js" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Node.js.special.js" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -266,7 +303,7 @@
       <option name="presentableId" value="Default" />
       <updated>1548048943070</updated>
       <workItem from="1548048944290" duration="50738000" />
-      <workItem from="1548196990787" duration="50398000" />
+      <workItem from="1548196990787" duration="55036000" />
     </task>
     <servers />
   </component>
@@ -282,21 +319,21 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="101136000" />
+    <option name="totallyTimeSpent" value="105774000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="992" y="24" width="928" height="1056" extended-state="4" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="2" sideWeight="0.4978903" visible="true" weight="0.34590518" />
+      <window_info active="true" content_ui="combo" id="Project" order="2" sideWeight="0.49685535" visible="true" weight="0.34590518" />
       <window_info anchor="bottom" id="TODO" order="11" />
       <window_info anchor="bottom" id="Docker" order="0" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="1" sideWeight="0.47306034" side_tool="true" weight="0.32911393" />
       <window_info anchor="bottom" id="Find" order="6" sideWeight="0.52693963" weight="0.32911393" />
       <window_info anchor="bottom" id="Version Control" order="4" />
-      <window_info anchor="bottom" id="Run" order="7" weight="0.32911393" />
+      <window_info anchor="bottom" id="Run" order="7" visible="true" weight="0.32911393" />
       <window_info id="npm" order="1" side_tool="true" />
-      <window_info id="Structure" order="3" sideWeight="0.5021097" side_tool="true" visible="true" weight="0.34590518" />
+      <window_info id="Structure" order="3" sideWeight="0.5031447" side_tool="true" weight="0.34590518" />
       <window_info anchor="bottom" id="Terminal" order="3" weight="0.32911393" />
       <window_info id="Favorites" order="0" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="8" weight="0.39978904" />
@@ -321,63 +358,11 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/package.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="615">
-          <caret line="41" column="5" lean-forward="true" selection-start-line="41" selection-start-column="5" selection-end-line="41" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/core.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="35" lean-forward="true" selection-start-line="35" selection-end-line="35" />
-          <folding>
-            <element signature="e#0#28#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coverage/lcov-report/index.html">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/special.ts" />
-    <entry file="file://$PROJECT_DIR$/node_modules/webpack/lib/dependencies/WebpackMissingModule.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="8" selection-start-line="8" selection-end-line="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/node_modules/chai/lib/chai/interface/assert.js">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/node_modules/chai/lib/chai.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="495">
-          <caret line="90" column="43" selection-start-line="90" selection-start-column="43" selection-end-line="90" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/node_modules/chai/index.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="34" selection-start-column="34" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/coverage/coverage.json" />
     <entry file="file://$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external/lib.es5.d.ts">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="203">
           <caret line="1328" column="13" selection-start-line="1328" selection-start-column="13" selection-end-line="1328" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coverage/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="29" column="41" lean-forward="true" selection-start-line="29" selection-start-column="41" selection-end-line="29" selection-end-column="41" />
         </state>
       </provider>
     </entry>
@@ -455,13 +440,6 @@
           <folding>
             <element signature="e#0#30#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/special.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="12" selection-start-line="2" selection-start-column="12" selection-end-line="2" selection-end-column="12" />
         </state>
       </provider>
     </entry>
@@ -577,13 +555,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/package.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="29" column="65" selection-start-line="29" selection-start-column="65" selection-end-line="29" selection-end-column="65" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test/ts.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="420">
@@ -601,16 +572,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/special.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-525">
-          <caret line="109" column="30" lean-forward="true" selection-start-line="109" selection-start-column="30" selection-end-line="109" selection-end-column="30" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/docs/src/lineparser.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -618,16 +579,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="477">
           <caret line="296" column="31" selection-start-line="296" selection-start-column="31" selection-end-line="296" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/core.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="18" column="11" selection-start-line="18" selection-start-column="11" selection-end-line="18" selection-end-column="11" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -648,17 +599,120 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist.js">
+    <entry file="file://$PROJECT_DIR$/src/dist/distributions.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="16" selection-start-line="16" selection-end-line="16" />
+        <state>
+          <caret column="7" lean-forward="true" selection-start-column="7" selection-end-column="7" />
+          <folding>
+            <element signature="e#0#52#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/distributions.js">
+    <entry file="file://$PROJECT_DIR$/src/dist/core.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="1494" column="37" selection-start-line="1494" selection-start-column="37" selection-end-line="1494" selection-end-column="37" />
+        <state relative-caret-position="30">
+          <caret line="2" column="77" selection-start-line="2" selection-start-column="77" selection-end-line="2" selection-end-column="77" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="3" selection-start-line="5" selection-start-column="3" selection-end-line="5" selection-end-column="3" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/special/beta.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="1" lean-forward="true" selection-start-line="4" selection-start-column="1" selection-end-line="4" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/special/gamma.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/special/gamma-log.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="495">
+          <caret line="33" lean-forward="true" selection-start-line="33" selection-end-line="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/special/beta-incomplete.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="397">
+          <caret line="33" selection-start-line="33" selection-end-line="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/special/gamma-lower-incomplete.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="510">
+          <caret line="35" column="30" selection-start-line="35" selection-start-column="30" selection-end-line="35" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/special/core.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="23" column="11" selection-start-line="23" selection-start-column="11" selection-end-line="23" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/package.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="48" column="16" selection-start-line="48" selection-start-column="16" selection-end-line="48" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/special/error.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="14" selection-start-line="14" selection-end-line="22" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/special.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="23" column="10" selection-start-line="23" selection-start-column="10" selection-end-line="23" selection-end-column="10" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+            <element signature="e#108#143#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coverage/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="23" column="15" selection-start-line="23" selection-start-column="15" selection-end-line="23" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/special/lambert-w.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="21" selection-start-line="21" selection-end-line="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/special.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="56" column="7" selection-start-line="56" selection-start-column="7" selection-end-line="56" selection-end-column="7" />
+          <folding>
+            <element signature="e#0#28#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

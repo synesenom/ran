@@ -1,3 +1,9 @@
+/**
+ * A collection of random number generators for well-known distributions.
+ *
+ * @namespace dist
+ * @memberOf ran
+ */
 export * from './dist/distributions'
 
 // TODO Benford                               (can be directly implemented)
@@ -9,7 +15,7 @@ export * from './dist/distributions'
 // TODO Chi                                   (can be directly implemented using normal variates)
 // TODO Dagum                                 (can be directly implemented)
 // TODO Discrete Weibull                      (can be directly implemented)
-// TODO Exponential logarithmic               (generation unknown)
+// TODO Exponential logarithmic               (can be directly implemented)
 // TODO Error / exponential power             (generation unknown)
 // TODO Gamma/Gompertz                        (can be directly implemented)
 // TODO Gamma-Poisson / negative binomial / Pascal / Polya   (can be directly implemented)

@@ -3,13 +3,6 @@ import { chi2, kolmogorovSmirnov } from './tests'
 // TODO If a parameter is invalid, return undefined for generator and pdf/cdf
 
 /**
- * A collection of random number generators for well-known distributions.
- *
- * @namespace dist
- * @memberOf ran
- */
-
-/**
  * Generates a normally distributed value.
  *
  * @method normal
