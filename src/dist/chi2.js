@@ -9,12 +9,12 @@ import Gamma from './gamma'
  *
  * @class Chi2
  * @memberOf ran.dist
- * @param {number=} k Degrees of freedom. If not an integer, is rounded to the nearest one. Default value is 2.
+ * @param {number=} k Degrees of freedom. If not an integer, is rounded to the nearest one. Default value is 1.
  * @constructor
  */
 export default class extends Gamma {
   // Special case of gamma
-  constructor (k = 2) {
+  constructor (k = 1) {
     super(Math.round(k) / 2, 0.5)
   }
 }

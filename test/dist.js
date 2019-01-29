@@ -233,6 +233,9 @@ describe('dist', () => {
     name: 'Cauchy',
     p: () => [float(), float(0.5, 2)]
   }, {
+    name: 'Chi',
+    p: () => [int(1, 10)]
+  }, {
     name: 'Chi2',
     p: () => [int(1, 10)]
   }, {
@@ -252,6 +255,9 @@ describe('dist', () => {
   }, {
     name: 'Erlang',
     p: () => [int(1, 10), float(0.1, 5)]
+  }, {
+    name: 'ExponentialLogarithmic',
+    p: () => [float(), float(0.1, 10)]
   }, {
     name: 'Exponential',
     p: () => [float(0.1, 5)]
@@ -276,6 +282,12 @@ describe('dist', () => {
   }, {
     name: 'Gumbel',
     p: () => [float(-3, 3), float(0.1, 5)]
+  }, {
+    name: 'HalfNormal',
+    p: () => [float(0.1, 10)]
+  }, {
+    name: 'Hoyt',
+    p: () => [float(1), float(0.1, 5)]
   }, {
     name: 'Hypergeometric',
     p: () => [int(20, 40), int(20), int(10)]

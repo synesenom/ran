@@ -19,7 +19,7 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (d1 = 2, d2 = 2) {
     super('continuous', arguments.length)
-    this.p = { d1: Math.round(d1), d2: Math.round(d2) }
+    this.p = { d1, d2 }
     this.s = [{
       value: 0,
       closed: this.p.d1 !== 1

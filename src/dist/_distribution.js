@@ -4,7 +4,9 @@ import { chi2, kolmogorovSmirnov } from './_tests'
 
 /**
  * The distribution generator base class, all distribution generators extend this class. The methods listed here
- * are available for all distribution generators. The examples provided for this class are using a Pareto
+ * are available for all distribution generators. Integer parameters of a distribution are rounded.
+ *
+ * The examples provided for this class are using a Pareto
  * distribution.
  *
  * @class Distribution

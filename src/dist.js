@@ -14,11 +14,13 @@ export { default as Binomial } from './dist/binomial'
 export { default as BoundedPareto } from './dist/bounded-pareto'
 export { default as Burr } from './dist/burr'
 export { default as Cauchy } from './dist/cauchy'
+export { default as Chi } from './dist/chi'
 export { default as Chi2 } from './dist/chi2'
 export { default as Custom } from './dist/custom'
 export { default as Degenerate } from './dist/degenerate'
 export { default as Erlang } from './dist/erlang'
 export { default as Exponential } from './dist/exponential'
+export { default as ExponentialLogarithmic } from './dist/exponential-logarithmic'
 export { default as F } from './dist/f'
 export { default as Frechet } from './dist/frechet'
 export { default as Gamma } from './dist/gamma'
@@ -26,6 +28,8 @@ export { default as GeneralizedGamma } from './dist/generalized-gamma'
 export { default as Geometric } from './dist/geometric'
 export { default as Gompertz } from './dist/gompertz'
 export { default as Gumbel } from './dist/gumbel'
+export { default as HalfNormal } from './dist/half-normal'
+export { default as Hoyt } from './dist/hoyt'
 export { default as Hypergeometric } from './dist/hypergeometric'
 export { default as InverseChi2 } from './dist/inverse-chi2'
 export { default as InverseGamma } from './dist/inverse-gamma'
@@ -56,17 +60,13 @@ export { default as Weibull } from './dist/weibull'
 // TODO Beta-binomial                         (generation unknown)
 // TODO Beta-pascal / Beta negative binomial  (generation unknown)
 // TODO Birnbaum-Saunders                     (requires inverse erf)
-// TODO Boltzmann                             (special case of Custom)
 // TODO Borel                                 (generation unknown)
-// TODO Chi                                   (can be directly implemented using normal variates)
 // TODO Dagum                                 (can be directly implemented)
 // TODO Discrete Weibull                      (can be directly implemented)
-// TODO Exponential logarithmic               (can be directly implemented)
 // TODO Error / exponential power             (generation unknown)
 // TODO Gamma/Gompertz                        (can be directly implemented)
 // TODO Gamma-Poisson / negative binomial / Pascal / Polya   (can be directly implemented)
 // TODO Generalized Pareto                    (can be directly implemented)
-// TODO Hoyt                                  (can be directly implemented from Nakagami)
 // TODO Hyperbolic-secant                     (can be directly implemented)
 // TODO Johnson's SB                          (can be directly implemented)
 // TODO Johnson's SU                          (can be directly implemented)

@@ -17,9 +17,12 @@ import Custom from './custom'
  */
 export default class extends Custom {
   constructor (N = 10, K = 5, r = 5) {
+    let Ni = Math.round(N)
+    let Ki = Math.round(K)
+    let ri = Math.round(r)
     let weights = []
-    for (let k = 0; k <= K; k++) {
-      weights.push(Math.exp(binomLn(K + r - 1, k) + binomLn(N - r - k, K - k) - binomLn(N, K)))
+    for (let k = 0; k <= Ki; k++) {
+      weights.push(Math.exp(binomLn(Ki + ri - 1, k) + binomLn(Ni - ri - k, Ki - k) - binomLn(Ni, Ki)))
     }
     super(weights)
   }
