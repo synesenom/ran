@@ -10,16 +10,16 @@ import Distribution from './_distribution'
  *
  * @class Custom
  * @memberOf ran.dist
- * @param {number[]} weights Weights for the distribution (doesn't need to be normalized). Default value is an array
- * with a single value of 1.
+ * @param {number[]=} weights Weights for the distribution (doesn't need to be normalized). Default value is an array
+ * @param {number=} min Lowest value to sample (support starts at this value). Default value is 0.
  * @constructor
  */
 export default class extends Distribution {
-  constructor (weights = [1]) {
+  constructor (weights = [1], min = 0) {
     super('discrete', arguments.length)
-    this.p = { n: weights.length, weights }
+    this.p = { n: weights.length, weights, min }
     this.s = [{
-      value: 0,
+      value: min,
       closed: true
     }, {
       value: Math.max(0, weights.length - 1),
@@ -99,15 +99,19 @@ export default class extends Distribution {
   _generator () {
     // Direct sampling
     if (this.p.n <= 1) {
-      return 0
+      return this.p.min
     }
     let i = Math.floor(Math.random() * this.p.n)
-    if (Math.random() < this.c[0][i]) { return i } else { return this.c[1][i] }
+    if (Math.random() < this.c[0][i]) {
+      return i + this.p.min
+    } else {
+      return this.c[1][i] + this.p.min
+    }
   }
 
   _pdf (x) {
     if (this.p.n <= 1) {
-      return x !== 0 ? 0 : 1
+      return x !== this.p.min ? 0 : 1
     } else {
       return this.c[2][x]
     }

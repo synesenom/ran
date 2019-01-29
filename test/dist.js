@@ -277,6 +277,9 @@ describe('dist', () => {
     name: 'Gumbel',
     p: () => [float(-3, 3), float(0.1, 5)]
   }, {
+    name: 'Hypergeometric',
+    p: () => [int(10, 20), int(10), int(10)]
+  }, {
     name: 'InverseChi2',
     p: () => [int(1, 10)]
   }, {

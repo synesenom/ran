@@ -16,7 +16,7 @@ describe('ts', () => {
           for (let i = 0; i < 10000; i++) {
             cov.update([-Math.log(Math.random()) * s])
           }
-          assert.equal(Math.abs(cov.compute().m()[0][0] / (s * s) - 1) < 0.1, true)
+          assert.deepEqual(Math.abs(cov.compute().m()[0][0] / (s * s) - 1) < 0.1, true)
         }, LAPS)
       })
     })
