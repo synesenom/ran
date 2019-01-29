@@ -135,8 +135,10 @@ class DocBuilder:
         for source in sorted(glob.glob('{}/*'.format(dirname))):
             if isdir(source):
                 for filename in sorted(glob.glob('{}/*.js'.format(source))):
+                    print(filename)
                     parse_file(filename)
             else:
+                print(source)
                 parse_file(source)
         return self
 

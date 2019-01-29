@@ -11,11 +11,11 @@ const EPSILON = 1e-6
 /**
  * Runs a unit test for the .pdf() method of a generator.
  *
- * @method ut_pdf
+ * @method utPdf
  * @param {string} name Name of the generator.
  * @param {Function} params Generator for the parameters array.
  */
-function ut_pdf (name, params) {
+function utPdf (name, params) {
   utils.trials(() => {
     const self = new dist[name](...params())
 
@@ -41,11 +41,11 @@ function ut_pdf (name, params) {
 /**
  * Runs a unit test for the .sample() method of a generator.
  *
- * @method ut_sample
+ * @method utSample
  * @param {string} name Name of the generator.
  * @param {Function} params Generator for the parameters array.
  */
-function ut_sample (name, params) {
+function utSample (name, params) {
   utils.trials(() => {
     const self = new dist[name](...params())
     return self.type() === 'continuous'
@@ -64,12 +64,12 @@ function ut_sample (name, params) {
 /**
  * Runs a unit test for the .test() method of a generator.
  *
- * @method ut_test
+ * @method utTest
  * @param {string} name Name of the generator.
  * @param {Function} params Generator for the parameters array.
  * @param {string} type Type of test (with self or foreign distribution).
  */
-function ut_test (name, params, type = 'self') {
+function utTest (name, params, type = 'self') {
   switch (type) {
     case 'self':
       utils.trials(() => {
@@ -278,7 +278,7 @@ describe('dist', () => {
     p: () => [float(-3, 3), float(0.1, 5)]
   }, {
     name: 'Hypergeometric',
-    p: () => [int(10, 20), int(10), int(10)]
+    p: () => [int(20, 40), int(20), int(10)]
   }, {
     name: 'InverseChi2',
     p: () => [int(1, 10)]
@@ -334,6 +334,12 @@ describe('dist', () => {
     name: 'MaxwellBoltzmann',
     p: () => [float(0.1, 10)]
   }, {
+    name: 'Nakagami',
+    p: () => [float(0.5, 5), float(0.1, 5)]
+  }, {
+    name: 'NegativeHypergeometric',
+    p: () => [int(30, 40), int(10, 20), int(5, 10)]
+  }, {
     name: 'Normal',
     p: () => [float(-5, 5), float(0.1, 10)]
   }, {
@@ -366,47 +372,53 @@ describe('dist', () => {
     name: 'Weibull',
     p: () => [float(0.1, 10), float(0.1, 10)]
   }].forEach(d => {
+    // if (d.name !== 'Nakagami') return
+
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
-        describe('.sample()', () => {
-          it(`should generate values with ${d.name} distribution`, () => {
-            ut_sample(d.name, d.p)
-          })
-        })
         describe('.pdf()', () => {
           it('differentiating cdf should give pdf ', () => {
-            ut_pdf(d.name, d.p)
+            utPdf(d.name, d.p)
           })
         })
+
+        describe('.sample()', () => {
+          it(`should generate values with ${d.name} distribution`, () => {
+            utSample(d.name, d.p)
+          })
+        })
+
         describe('.test()', () => {
           it('should pass for own distribution', () => {
-            ut_test(d.name, d.p, 'self')
+            utTest(d.name, d.p, 'self')
           })
           if (!d.skip || d.skip.indexOf('test-foreign') === -1) {
             it('should reject foreign distribution', () => {
-              ut_test(d.name, d.p, 'foreign')
+              utTest(d.name, d.p, 'foreign')
             })
           }
         })
       } else {
         describe('.sample()', () => {
           d.cases.forEach(c => it(`should generate values with ${d.name} distribution [${c.desc}]`, () => {
-            ut_sample(d.name, c.p)
+            utSample(d.name, c.p)
           }))
         })
+
         describe('.pdf()', () => {
           d.cases.forEach(c => it(`differentiating cdf shuld give pdf [${c.desc}]`, () => {
-            ut_pdf(d.name, c.p)
+            utPdf(d.name, c.p)
           }))
         })
+
         describe('.test()', () => {
           d.cases.forEach(c => {
             it(`should pass for own distribution [${c.desc}]`, () => {
-              ut_test(d.name, c.p, 'self')
+              utTest(d.name, c.p, 'self')
             })
             if (!c.skip || c.skip.indexOf('test-foreign') === -1) {
               it(`should reject foreign distribution [${c.desc}]`, () => {
-                ut_test(d.name, c.p, 'foreign')
+                utTest(d.name, c.p, 'foreign')
               })
             }
           })

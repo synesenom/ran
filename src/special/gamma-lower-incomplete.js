@@ -1,4 +1,4 @@
-import { MAX_ITER, EPS, DELTA } from './core'
+import { MAX_ITER, EPS, DELTA } from './_core'
 import gamma from './gamma'
 
 // Lower incomplete gamma generator using the series expansion

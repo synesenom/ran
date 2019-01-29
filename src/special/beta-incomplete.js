@@ -1,4 +1,4 @@
-import { MAX_ITER, EPS, DELTA } from './core'
+import { MAX_ITER, EPS, DELTA } from './_core'
 import gammaLn from './gamma-log'
 
 // Incomplete beta generator using the continued fraction expansion

@@ -41,6 +41,8 @@ export { default as LogNormal } from './dist/log-normal'
 export { default as Lomax } from './dist/lomax'
 export { default as Makeham } from './dist/makeham'
 export { default as MaxwellBoltzmann } from './dist/maxwell-boltzmann'
+export { default as Nakagami } from './dist/nakagami'
+export { default as NegativeHypergeometric } from './dist/negative-hypergeometric'
 export { default as Normal } from './dist/normal'
 export { default as Pareto } from './dist/pareto'
 export { default as Poisson } from './dist/poisson'
@@ -64,22 +66,20 @@ export { default as Weibull } from './dist/weibull'
 // TODO Gamma/Gompertz                        (can be directly implemented)
 // TODO Gamma-Poisson / negative binomial / Pascal / Polya   (can be directly implemented)
 // TODO Generalized Pareto                    (can be directly implemented)
+// TODO Hoyt                                  (can be directly implemented from Nakagami)
 // TODO Hyperbolic-secant                     (can be directly implemented)
-// TODO Hypergeometric                        (can be directly implemented)
 // TODO Johnson's SB                          (can be directly implemented)
 // TODO Johnson's SU                          (can be directly implemented)
 // TODO Levy                                  (can be directly implemented)
 // TODO Log gamma                             (can be directly implemented)
 // TODO Log-Laplace                           (can be directly implemented)
-// TODO Logarithmic (continuous)              (requires lambertW function)
 // TODO Logarithmic (discrete)                (generation unknown)
 // TODO Logistic-exponential                  (can be directly implemented)
 // TODO Logit-normal                          (can be directly implemented)
 // TODO Muth                                  (requires lambertW function)
-// TODO Nakagami                              (can be directly implemented using gamma)
-// TODO Negative hypergeometric               (can be directly implemented)
 // TODO Student's t                           (requires hypergeometric function)
 // TODO triangular                            (can be directly implemented)
+// TODO Tukey                                 (can be directly implemented)
 // TODO Raised cosine                         (generation unknown)
 // TODO Reciprocal                            (can be directly implemented)
 // TODO Skellam                               (requires modified Bessel, cdf unkown)

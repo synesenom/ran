@@ -1,5 +1,6 @@
 import { betaIncomplete, gammaLn } from '../special'
 import Distribution from './_distribution'
+import binomLn from '../special/binom-log'
 
 /**
  * Generator for the [binomial distribution]{@link https://en.wikipedia.org/wiki/Binomial_distribution}:
@@ -78,7 +79,7 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return Math.exp(gammaLn(this.p.n + 1) - gammaLn(x + 1) - gammaLn(this.p.n - x + 1) +
+    return Math.exp(binomLn(this.p.n, x) +
       x * Math.log(this.p.p) + (this.p.n - x) * Math.log(1 - this.p.p))
   }
 
