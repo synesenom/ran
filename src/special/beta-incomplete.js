@@ -1,7 +1,6 @@
 import { MAX_ITER, EPS, DELTA } from './core'
 import gammaLn from './gamma-log'
 
-
 // Incomplete beta generator using the continued fraction expansion
 function _biContinuedFraction (a, b, x) {
   let qab = a + b
@@ -47,7 +46,7 @@ function _biContinuedFraction (a, b, x) {
    * @memberOf ran.special
    * @param {number} a First parameter of the function.
    * @param {number} b Second parameter of the function.
-   * @param {number} x Lower boundary of the integral.
+   * @param {number} x Upper boundary of the integral.
    * @returns {number} Value of the incomplete beta function.
    * @private
    */

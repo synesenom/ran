@@ -132,9 +132,9 @@ class DocBuilder:
                             self._blocks.append(block)
 
         BlockParser.reset()
-        for source in glob.glob('{}/*'.format(dirname)):
+        for source in sorted(glob.glob('{}/*'.format(dirname))):
             if isdir(source):
-                for filename in glob.glob('{}/*.js'.format(source)):
+                for filename in sorted(glob.glob('{}/*.js'.format(source))):
                     parse_file(filename)
             else:
                 parse_file(source)

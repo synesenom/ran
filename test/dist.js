@@ -92,11 +92,15 @@ function ut_test(name, params, type = 'self') {
 
 
 describe('dist', () => {
+  /*let LOG = new dist.Logarithmic(1, 5)
+  LOG.TEST()
+  return*/
+
      // Base class
     describe('Distribution', () => {
         describe('.sample()', () => {
             it('should throw not implemented error', () => {
-                const invalid = new dist._InvalidDistribution();
+                const invalid = new dist.InvalidDiscrete();
                 assert.throws(() => {
                     invalid.sample();
                 }, {
@@ -107,7 +111,7 @@ describe('dist', () => {
 
         describe('.pdf()', () => {
             it('should throw not implenented error', () => {
-                const invalid = new dist._InvalidDistribution();
+                const invalid = new dist.InvalidDiscrete();
                 assert.throws(() => {
                     invalid.pdf(0);
                 }, {
@@ -118,7 +122,7 @@ describe('dist', () => {
 
         describe('.cdf()', () => {
             it('should throw not implenented error', () => {
-                const invalid = new dist._InvalidDistribution();
+                const invalid = new dist.InvalidDiscrete();
                 assert.throws(() => {
                     invalid.cdf(0);
                 }, {
@@ -129,7 +133,7 @@ describe('dist', () => {
 
         describe('.survive()', () => {
             it('should throw not implemented error', () => {
-                const invalid = new dist._InvalidDistribution();
+                const invalid = new dist.InvalidDiscrete();
                 assert.throws(() => {
                     invalid.survival(0);
                 }, {
@@ -140,7 +144,7 @@ describe('dist', () => {
 
         describe('.hazard()', () => {
             it('should throw not implenented error', () => {
-                const invalid = new dist._InvalidDistribution();
+                const invalid = new dist.InvalidDiscrete();
                 assert.throws(() => {
                     invalid.hazard(0);
                 }, {
@@ -151,7 +155,7 @@ describe('dist', () => {
 
         describe('.cHazard()', () => {
             it('should throw not implenented error', () => {
-                const invalid = new dist._InvalidDistribution();
+                const invalid = new dist.InvalidDiscrete();
                 assert.throws(() => {
                     invalid.cHazard(0);
                 }, {
@@ -162,7 +166,7 @@ describe('dist', () => {
 
         describe('.lnPdf()', () => {
             it('should throw not implenented error', () => {
-                const invalid = new dist._InvalidDistribution();
+                const invalid = new dist.InvalidDiscrete();
                 assert.throws(() => {
                     invalid.lnPdf(0);
                 }, {
@@ -173,7 +177,7 @@ describe('dist', () => {
 
         describe('.L()', () => {
             it('should throw not implenented error', () => {
-                const invalid = new dist._InvalidDistribution();
+                const invalid = new dist.InvalidDiscrete();
                 assert.throws(() => {
                     invalid.L([0]);
                 }, {
@@ -184,7 +188,7 @@ describe('dist', () => {
 
         describe('.test()', () => {
             it('should throw not implenented error', () => {
-                const invalid = new dist._InvalidDistribution();
+                const invalid = new dist.InvalidDiscrete();
                 assert.throws(() => {
                     invalid.test([0]);
                 }, {
@@ -291,6 +295,9 @@ describe('dist', () => {
         name: 'Laplace',
         p: () => [float(-2, 2), float(0.1, 5)]
     }, {
+      name: 'Logarithmic',
+      p: () => [float(1, 5), float(5.1, 10)]
+    }, {
         name: 'LogCauchy',
         p: () => [float(-5, 5), float(0.1, 5)]
     }, {
@@ -309,14 +316,20 @@ describe('dist', () => {
             p: () => [float(-5, 5), float(0.1, 5), 0]
         }]
     }, {
-        name: 'Lognormal',
+        name: 'LogNormal',
         p: () => [float(-2, 2), float(0.1, 5)]
-    }, {
+    }/*, {
+      name: 'LogSeries',
+      p: () => [float()]
+    }*/, {
         name: 'Lomax',
         p: () => [float(0.1, 5), float(0.1, 5)]
     }, {
         name: 'Kumaraswamy',
         p: () => [float(0.1, 5), float(0.1, 5)]
+    }, {
+      name: 'Makeham',
+      p: () => [float(0.1, 5), float(0.1, 5), float(0.1, 5)]
     }, {
       name: 'MaxwellBoltzmann',
       p: () => [float(0.1, 10)]

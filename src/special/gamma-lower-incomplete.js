@@ -1,7 +1,6 @@
 import { MAX_ITER, EPS, DELTA } from './core'
 import gamma from './gamma'
 
-
 // Lower incomplete gamma generator using the series expansion
 function _gliSeries (s, x) {
   if (x < 0) {
