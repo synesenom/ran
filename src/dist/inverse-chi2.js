@@ -1,4 +1,4 @@
-import { gamma as fnGamma, gammaLowerIncomplete } from '../special'
+import { gammaLn, gammaLowerIncomplete } from '../special'
 import { gamma } from './_standard'
 import Distribution from './_distribution'
 
@@ -33,10 +33,10 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return Math.pow(2, -this.p.nu / 2) * Math.pow(x, -this.p.nu / 2 - 1) * Math.exp(-0.5 / x) / fnGamma(this.p.nu / 2)
+    return Math.pow(2, -this.p.nu / 2) * Math.pow(x, -this.p.nu / 2 - 1) * Math.exp(-0.5 / x - gammaLn(this.p.nu / 2))
   }
 
   _cdf (x) {
-    return 1 - gammaLowerIncomplete(this.p.nu / 2, 0.5 / x) / fnGamma(this.p.nu / 2)
+    return 1 - gammaLowerIncomplete(this.p.nu / 2, 0.5 / x)
   }
 }

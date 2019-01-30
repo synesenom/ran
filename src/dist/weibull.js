@@ -38,4 +38,4 @@ export default class extends Distribution {
   _cdf (x) {
     return 1 - Math.exp(-Math.pow(x / this.p.lambda, this.p.k))
   }
-}
+} /* istanbul ignore next */

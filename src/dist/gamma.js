@@ -1,4 +1,4 @@
-import { gamma as fnGamma, gammaLowerIncomplete } from '../special'
+import { gammaLn, gammaLowerIncomplete } from '../special'
 import { gamma } from './_standard'
 import Distribution from './_distribution'
 
@@ -27,7 +27,7 @@ export default class extends Distribution {
       value: null,
       closed: false
     }]
-    this.c = [Math.pow(beta, alpha), fnGamma(alpha)]
+    this.c = [Math.pow(beta, alpha)]
   }
 
   _generator () {
@@ -36,10 +36,10 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return this.c[0] * Math.exp((this.p.alpha - 1) * Math.log(x) - this.p.beta * x) / this.c[1]
+    return this.c[0] * Math.exp((this.p.alpha - 1) * Math.log(x) - this.p.beta * x - gammaLn(this.p.alpha))
   }
 
   _cdf (x) {
-    return gammaLowerIncomplete(this.p.alpha, this.p.beta * x) / this.c[1]
+    return gammaLowerIncomplete(this.p.alpha, this.p.beta * x)
   }
 }

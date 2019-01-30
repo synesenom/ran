@@ -1,4 +1,4 @@
-import { gamma, gammaLn, gammaLowerIncomplete } from '../special'
+import { gammaLn, gammaLowerIncomplete } from '../special'
 import Distribution from './_distribution'
 
 /**
@@ -49,6 +49,7 @@ export default class extends Distribution {
       let alpha = beta * this.p.lambda
 
       let k = Math.log(c) - this.p.lambda - Math.log(beta)
+
       // Max 1000 trials
       for (let trials = 0; trials < 1000; trials++) {
         let r, x, n
@@ -70,10 +71,10 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return Math.pow(this.p.lambda, x) * Math.exp(-this.p.lambda) / gamma(x + 1)
+    return Math.pow(this.p.lambda, x) * Math.exp(-this.p.lambda - gammaLn(x + 1))
   }
 
   _cdf (x) {
-    return 1 - gammaLowerIncomplete(x + 1, this.p.lambda) / gamma(x + 1)
+    return 1 - gammaLowerIncomplete(x + 1, this.p.lambda)
   }
 }

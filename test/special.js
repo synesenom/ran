@@ -1,4 +1,4 @@
-import assert from 'assert'
+import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import * as special from '../src/special'
 import utils from './test-utils'
@@ -28,12 +28,12 @@ describe('special', () => {
         assert(special.gammaLowerIncomplete(s, x) === 0)
       }, LAPS)
     })
-    it('should be equal to 1- exp(-x) for s = 1', () => {
+    it('should be equal to exp(-x) for s = 1', () => {
       utils.repeat(() => {
         let x = Math.random() * 100
 
-        let gli = special.gammaLowerIncomplete(1, x)
-        assert(Math.abs(gli - (1 - Math.exp(-x))) / gli < 0.01)
+        let gui = special.gammaUpperIncomplete(1, x) * special.gamma(1)
+        assert(Math.abs(gui - Math.exp(-x)) / gui < 0.01)
       }, LAPS)
     })
 
@@ -41,7 +41,7 @@ describe('special', () => {
       utils.repeat(() => {
         let x = Math.random() * 100
 
-        let gli = special.gammaLowerIncomplete(0.5, x)
+        let gli = special.gammaLowerIncomplete(0.5, x) * special.gamma(0.5)
         assert(Math.abs(gli - Math.sqrt(Math.PI) * special.erf(Math.sqrt(x))) / gli < 0.01)
       }, LAPS)
     })
@@ -54,7 +54,7 @@ describe('special', () => {
 
         let xs = Math.pow(x, s)
 
-        let gli = special.gammaLowerIncomplete(s, x)
+        let gli = special.gammaLowerIncomplete(s, x) * special.gamma(s)
         if (xs > 1e-100) {
           assert(Math.abs(gli / Math.pow(x, s) * s - 1) < 0.01)
         }
@@ -68,7 +68,7 @@ describe('special', () => {
         let x = 1e5 + Math.random() * 1e5
 
         let gli = special.gammaLowerIncomplete(s, x)
-        assert(Math.abs(gli - special.gamma(s)))
+        assert(Math.abs(gli - 1))
       }
     })
   })

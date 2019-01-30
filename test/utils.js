@@ -1,4 +1,4 @@
-import assert from 'assert'
+import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import utils from './test-utils'
 import { sum } from '../src/utils'
@@ -10,8 +10,8 @@ describe('utils', () => {
     it('should sum integers', () => {
       utils.repeat(() => {
         const n = Math.floor(2 + Math.random() * 100)
-        assert(
-          sum(Array.from({ length: n }, (d, i) => i)),
+        assert.equal(
+          sum(Array.from({ length: n + 1 }, (d, i) => i)),
           n * (n + 1) / 2
         )
       }, LAPS)
@@ -22,8 +22,8 @@ describe('utils', () => {
         const n = Math.floor(2 + Math.random() * 100)
 
         const a = n * (n + 1) / 2
-        assert(
-          sum(Array.from({ length: n }, (d, i) => i), 3),
+        assert.equal(
+          sum(Array.from({ length: n + 1 }, (d, i) => i), 3),
           a * a
         )
       }, LAPS)
@@ -34,8 +34,8 @@ describe('utils', () => {
     it('should sum integers', () => {
       utils.repeat(() => {
         const n = Math.floor(2 + Math.random() * 100)
-        assert(
-          sum(Array.from({ length: n }, (d, i) => i)),
+        assert.equal(
+          sum(Array.from({ length: n + 1 }, (d, i) => i)),
           n * (n + 1) / 2
         )
       }, LAPS)
@@ -46,8 +46,8 @@ describe('utils', () => {
         const n = Math.floor(2 + Math.random() * 100)
 
         const a = n * (n + 1) / 2
-        assert(
-          sum(Array.from({ length: n }, (d, i) => i), 5),
+        assert.equal(
+          sum(Array.from({ length: n + 1 }, (d, i) => i), 5),
           (4 * a * a * a - a * a) / 3
         )
       }, LAPS)

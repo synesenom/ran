@@ -1,4 +1,4 @@
-import assert from 'assert'
+import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import utils from './test-utils'
 import * as core from '../src/core'
@@ -43,7 +43,7 @@ describe('core', () => {
           r.forEach(function (ri) {
             values.push(ri)
             // Value is in range
-            assert.equal(true, (min < max ? min : max) <= ri && ri <= (min < max ? max : min))
+            assert((min < max ? min : max) <= ri && ri <= (min < max ? max : min))
           })
           // Length is correct
           assert.equal(k < 2 ? 1 : k, r.length)
@@ -84,7 +84,7 @@ describe('core', () => {
           values.push(r)
 
           // Value is in range
-          assert.equal(true, (min < max ? min : max) <= r && r <= (min < max ? max : min))
+          assert((min < max ? min : max) <= r && r <= (min < max ? max : min))
 
           // Value is integer
           assert.equal(r, parseInt(r, 10))
@@ -110,7 +110,7 @@ describe('core', () => {
             values.push(r[i])
 
             // Value is in range
-            assert.equal(true, (min < max ? min : max) <= r[i] && r[i] <= (min < max ? max : min))
+            assert((min < max ? min : max) <= r[i] && r[i] <= (min < max ? max : min))
           }
           // Length is correct
           assert.equal(k < 2 ? 1 : k, r.length)
@@ -148,7 +148,7 @@ describe('core', () => {
           r.forEach(function (ri) {
             add(freqs, ri)
             // Value is in array
-            assert.equal(values.indexOf(ri) > -1, true)
+            assert(values.indexOf(ri) > -1)
           })
           // Length is correct
           assert.equal(k < 2 ? 1 : k, r.length)
@@ -156,11 +156,11 @@ describe('core', () => {
         for (let i in values) {
           // Distribution is uniform
           if (values.hasOwnProperty(i)) {
-            assert.equal(true, freqs[values[i]] > 0)
+            assert(freqs[values[i]] > 0)
           }
         }
         for (let i in freqs) {
-          assert.equal(values.indexOf(i) > -1, true)
+          assert(values.indexOf(i) > -1)
         }
       }
     })
@@ -188,7 +188,7 @@ describe('core', () => {
           if (k < 2) { r = [r] }
           r.forEach(function (ri) {
             // Character is in array
-            assert.equal(true, string.indexOf(ri) > -1)
+            assert(string.indexOf(ri) > -1)
           })
           // Length is correct
           assert.equal(k < 2 ? 1 : k, r.length)
@@ -218,7 +218,7 @@ describe('core', () => {
         pos.forEach(function (p) {
           for (let i in p) {
             if (p.hasOwnProperty(i)) {
-              assert.equal(true, p[i] > 0)
+              assert(p[i] > 0)
             }
           }
         })

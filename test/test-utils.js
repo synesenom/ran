@@ -1,4 +1,4 @@
-import assert from 'assert'
+import { assert } from 'chai'
 
 export default (function () {
   // Critical values for P = 0.01

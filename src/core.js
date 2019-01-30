@@ -77,7 +77,7 @@ export function int (min, max, n) {
    *
    * @method choice
    * @memberOf ran.core
-   * @param {Array} values Array to sample from.
+   * @param {Array=} values Array to sample from.
    * @param {number=} n Number of elements to sample.
    * @returns {(object|Array)} Single element or array of sampled elements.
    * If array is invalid, null pointer is returned.
@@ -99,7 +99,7 @@ export function choice (values, n) {
    *
    * @method char
    * @memberOf ran.core
-   * @param {string} string String to sample characters from.
+   * @param {string=} string String to sample characters from.
    * @param {number=} n Number of characters to sample.
    * @returns {(string|Array)} Random character if n is not given or less than 2, an array of random characters
    * otherwise. If string is empty, null is returned.

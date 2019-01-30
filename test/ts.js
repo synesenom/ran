@@ -1,4 +1,4 @@
-import assert from 'assert'
+import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import utils from './test-utils'
 import * as ts from '../src/ts'

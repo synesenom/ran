@@ -1,4 +1,4 @@
-import assert from 'assert'
+import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import utils from './test-utils'
 import { float, int } from '../src/core'
@@ -100,9 +100,7 @@ describe('dist', () => {
         const invalid = new dist.InvalidDiscrete()
         assert.throws(() => {
           invalid.sample()
-        }, {
-          message: 'Distribution._generator() is not implemented'
-        })
+        }, 'Distribution._generator() is not implemented')
       })
     })
 
@@ -111,9 +109,7 @@ describe('dist', () => {
         const invalid = new dist.InvalidDiscrete()
         assert.throws(() => {
           invalid.pdf(0)
-        }, {
-          message: 'Distribution._pdf() is not implemented'
-        })
+        }, 'Distribution._pdf() is not implemented')
       })
     })
 
@@ -122,9 +118,7 @@ describe('dist', () => {
         const invalid = new dist.InvalidDiscrete()
         assert.throws(() => {
           invalid.cdf(0)
-        }, {
-          message: 'Distribution._cdf() is not implemented'
-        })
+        }, 'Distribution._cdf() is not implemented')
       })
     })
 
@@ -133,9 +127,7 @@ describe('dist', () => {
         const invalid = new dist.InvalidDiscrete()
         assert.throws(() => {
           invalid.survival(0)
-        }, {
-          message: 'Distribution._cdf() is not implemented'
-        })
+        }, 'Distribution._cdf() is not implemented')
       })
     })
 
@@ -144,9 +136,7 @@ describe('dist', () => {
         const invalid = new dist.InvalidDiscrete()
         assert.throws(() => {
           invalid.hazard(0)
-        }, {
-          message: 'Distribution._pdf() is not implemented'
-        })
+        }, 'Distribution._pdf() is not implemented')
       })
     })
 
@@ -155,9 +145,7 @@ describe('dist', () => {
         const invalid = new dist.InvalidDiscrete()
         assert.throws(() => {
           invalid.cHazard(0)
-        }, {
-          message: 'Distribution._cdf() is not implemented'
-        })
+        }, 'Distribution._cdf() is not implemented')
       })
     })
 
@@ -166,9 +154,7 @@ describe('dist', () => {
         const invalid = new dist.InvalidDiscrete()
         assert.throws(() => {
           invalid.lnPdf(0)
-        }, {
-          message: 'Distribution._pdf() is not implemented'
-        })
+        }, 'Distribution._pdf() is not implemented')
       })
     })
 
@@ -177,9 +163,7 @@ describe('dist', () => {
         const invalid = new dist.InvalidDiscrete()
         assert.throws(() => {
           invalid.L([0])
-        }, {
-          message: 'Distribution._pdf() is not implemented'
-        })
+        }, 'Distribution._pdf() is not implemented')
       })
     })
 
@@ -188,9 +172,7 @@ describe('dist', () => {
         const invalid = new dist.InvalidDiscrete()
         assert.throws(() => {
           invalid.test([0])
-        }, {
-          message: 'Distribution._pdf() is not implemented'
-        })
+        }, 'Distribution._pdf() is not implemented')
       })
     })
   });
