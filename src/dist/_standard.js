@@ -35,7 +35,7 @@ export function gamma (alpha, beta) {
 
     // Max 1000 trials
     for (let trials = 0; trials < 1000; trials++) {
-      Z = normal(0, 1)
+      Z = normal()
       if (Z > -1 / c) {
         V = Math.pow(1 + c * Z, 3)
         U = Math.random()

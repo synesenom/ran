@@ -23,7 +23,7 @@ describe('core', () => {
 
     it('should return a float uniformly distributed in [min, max]', () => {
       utils.trials(() => {
-        const max = Math.random() * 200
+        const max = Math.random() * 20
         const values = Array.from({ length: LAPS }, () => core.float(max))
         return utils.ksTtest(values, function (x) {
           return x / max
@@ -33,9 +33,9 @@ describe('core', () => {
 
     it('should return multiple floats uniformly distributed in [min, max]', () => {
       utils.trials(() => {
-        const min = Math.random() * 200 - 100
-        const max = Math.random() * 200 - 100
-        const k = Math.floor(Math.random() * 40 - 20)
+        const min = Math.random() * 20 - 10
+        const max = 10 + Math.random() * 10
+        const k = Math.floor(Math.random() * 10 - 5)
         const values = []
         for (let lap = 0; lap < LAPS; lap++) {
           let r = core.float(min, max, k)
@@ -66,7 +66,7 @@ describe('core', () => {
   describe('.int()', () => {
     it('should return an integer uniformly distributed in [0, max]', () => {
       utils.trials(() => {
-        const max = Math.floor(Math.random() * 100)
+        const max = Math.floor(Math.random() * 10)
         const values = Array.from({ length: LAPS }, () => core.int(max))
         return utils.chiTest(values, function () {
           return 1 / Math.abs(max + 1)
@@ -76,8 +76,8 @@ describe('core', () => {
 
     it('should return an integer uniformly distributed in [min, max]', () => {
       utils.trials(() => {
-        const min = Math.floor(Math.random() * 200 - 100)
-        const max = Math.floor(Math.random() * 200 - 100)
+        const min = Math.floor(Math.random() * 20 - 10)
+        const max = 20 + Math.floor(Math.random() * 10)
         const values = []
         for (let lap = 0; lap < LAPS; lap++) {
           let r = core.int(min, max)
@@ -99,9 +99,9 @@ describe('core', () => {
 
     it('should return multiple integers uniformly distributed in [0, max]', () => {
       utils.trials(() => {
-        const min = Math.floor(Math.random() * 200 - 100)
-        const max = Math.floor(Math.random() * 200 - 100)
-        const k = Math.floor(Math.random() * 20 - 10)
+        const min = Math.floor(Math.random() * 20 - 10)
+        const max = 20 + Math.floor(Math.random() * 10)
+        const k = Math.floor(Math.random() * 10 - 5)
         const values = []
         for (let lap = 0; lap < LAPS; lap++) {
           let r = core.int(min, max, k)

@@ -63,25 +63,38 @@ export default (function () {
      */
   function chiTest (values, model, c) {
     // Calculate distribution first
-    let p = {}
+    let p = new Map()
     for (let i = 0; i < values.length; i++) {
-      if (!p[values[i]]) { p[values[i]] = 0 }
-      p[values[i]]++
+      if (!p.has(values[i])) {
+        p.set(values[i], 1)
+      } else {
+        p.set(values[i], p.get(values[i]) + 1)
+      }
     }
 
     // Calculate chi-square
     let chi2 = 0
-    for (let x in p) {
-      if (p.hasOwnProperty(x)) {
-        let m = model(parseInt(x)) * values.length
-        chi2 += Math.pow(p[x] - m, 2) / m
+    let bin = 0
+    let pBin = 0
+    let k = 0
+    p.forEach((px, x) => {
+      // Add frequency to current bin
+      bin += model(parseInt(x)) * values.length
+      pBin += px
+
+      // If bin count is above 5, consider this a class and clear bin
+      if (bin > 10) {
+        chi2 += Math.pow(pBin - bin, 2) / bin
+        bin = 0
+        pBin = 0
+        k++
       }
-    }
+    })
 
     // Find critical value
-    let df = Math.max(1, Object.keys(p).length - c - 1)
+    let df = Math.max(1, k - c - 1)
     let crit = df <= 250 ? CHI_TABLE_LOW[df] : CHI_TABLE_HIGH[Math.ceil(df / 50)]
-    // console.log(df, crit, chi2);
+    // console.log(df, crit, chi2)
     return chi2 <= crit
   }
 

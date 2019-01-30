@@ -50,14 +50,14 @@ function utSample (name, params) {
     const self = new dist[name](...params())
     return self.type() === 'continuous'
       ? utils.ksTtest(self.sample(LAPS), x => self.cdf(x))
-      : utils.chiTest(self.sample(LAPS), x => self.pdf(x), 1)
+      : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
   })
 
   utils.trials(() => {
     const self = new dist[name]()
     return self.type() === 'continuous'
       ? utils.ksTtest(self.sample(LAPS), x => self.cdf(x))
-      : utils.chiTest(self.sample(LAPS), x => self.pdf(x), 1)
+      : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
   })
 }
 
@@ -235,6 +235,9 @@ describe('dist', () => {
       skip: ['test-foreign']
     }]
   }, {
+    name: 'Dagum',
+    p: () => [float(0.1, 5), float(0.1, 5), float(0.1, 5)]
+  }, {
     name: 'Erlang',
     p: () => [int(1, 10), float(0.1, 5)]
   }, {
@@ -368,20 +371,23 @@ describe('dist', () => {
   }, {
     name: 'Weibull',
     p: () => [float(0.1, 10), float(0.1, 10)]
+  }, {
+    name: 'YuleSimon',
+    p: () => [float(0.1, 5)]
   }].forEach(d => {
-    // if (d.name !== 'Nakagami') return
+    // if (d.name !== 'YuleSimon') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
-        describe('.pdf()', () => {
-          it('differentiating cdf should give pdf ', () => {
-            utPdf(d.name, d.p)
-          })
-        })
-
         describe('.sample()', () => {
           it(`should generate values with ${d.name} distribution`, () => {
             utSample(d.name, d.p)
+          })
+        })
+
+        describe('.pdf()', () => {
+          it('differentiating cdf should give pdf ', () => {
+            utPdf(d.name, d.p)
           })
         })
 

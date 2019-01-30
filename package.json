@@ -14,6 +14,7 @@
     "babel-register": "^6.26.0",
     "chai": "^4.2.0",
     "coveralls": "^3.0.2",
+    "cross-env": "^5.2.0",
     "eslint": "^5.12.1",
     "eslint-config-standard": "^12.0.0",
     "istanbul": "^0.4.5",
@@ -32,8 +33,8 @@
     "test": "./node_modules/.bin/_mocha --require babel-core/register",
     "docs": "python docs/src/parser.py",
     "build": "webpack",
-    "coverage": "nyc --reporter=text --reporter=html _mocha --timeout=3000",
-    "coveralls": "nyc --reporter=text-lcov _mocha | coveralls"
+    "coverage": "cross-env NODE_ENV=test nyc --reporter=text --reporter=html _mocha --recursive --require babel-register --timeout=3000",
+    "coveralls": "cross-env NODE_ENV=test nyc --reporter=text-lcov _mocha --recursive --require babel-register --timeout=3000 | coveralls"
   },
   "babel": {
     "presets": [
@@ -57,7 +58,7 @@
     "sourceMap": false,
     "instrument": false,
     "require": [
-      "babel-core/register"
+      "babel-register"
     ]
   },
   "repository": {

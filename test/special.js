@@ -48,7 +48,7 @@ describe('special', () => {
 
     it('should converge to x^s / s as x -> 0', () => {
       for (let i = 0; i < LAPS; i++) {
-        let s = Math.random() * 100
+        let s = Math.random()
 
         let x = 1e-5 * (1 + Math.random())
 

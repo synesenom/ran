@@ -17,6 +17,7 @@ export { default as Cauchy } from './dist/cauchy'
 export { default as Chi } from './dist/chi'
 export { default as Chi2 } from './dist/chi2'
 export { default as Custom } from './dist/custom'
+export { default as Dagum } from './dist/dagum'
 export { default as Degenerate } from './dist/degenerate'
 export { default as Erlang } from './dist/erlang'
 export { default as Exponential } from './dist/exponential'
@@ -56,13 +57,13 @@ export { default as Rayleigh } from './dist/rayleigh'
 export { default as UniformContinuous } from './dist/uniform-continuous'
 export { default as UniformDiscrete } from './dist/uniform-discrete'
 export { default as Weibull } from './dist/weibull'
+export { default as YuleSimon } from './dist/yule-simon'
 
 // TODO Benford                               (can be directly implemented)
 // TODO Beta-binomial                         (generation unknown)
 // TODO Beta-pascal / Beta negative binomial  (generation unknown)
 // TODO Birnbaum-Saunders                     (requires inverse erf)
 // TODO Borel                                 (generation unknown)
-// TODO Dagum                                 (can be directly implemented)
 // TODO Discrete Weibull                      (can be directly implemented)
 // TODO Error / exponential power             (generation unknown)
 // TODO Gamma/Gompertz                        (can be directly implemented)
@@ -80,9 +81,11 @@ export { default as Weibull } from './dist/weibull'
 // TODO Student's t                           (requires hypergeometric function)
 // TODO triangular                            (can be directly implemented)
 // TODO Tukey                                 (can be directly implemented)
+// TODO Planck                                (can be directly implemented)
 // TODO Raised cosine                         (generation unknown)
 // TODO Reciprocal                            (can be directly implemented)
 // TODO Skellam                               (requires modified Bessel, cdf unkown)
+// TODO stable                                (???)
 // TODO Soliton                               (special case of custom)
 // TODO U-quadratic                           (can be directly implemented)
 // TODO von Mises                             (generation is unknown)
@@ -90,3 +93,4 @@ export { default as Weibull } from './dist/weibull'
 // TODO Yule-Simon                            (can be directly implemented using exponential and geometric)
 // TODO Zeta                                  (requires zeta function, harmonic number)
 // TODO Zipf                                  (requires zeta function, harmonic number)
+// TODO ref: http://www.nrbook.com/devroye/Devroye_files/chapter_ten.pdf

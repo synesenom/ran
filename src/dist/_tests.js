@@ -65,17 +65,27 @@ export function chi2 (values, pmf, c) {
   })
 
   // Calculate chi-square sum
+  // Calculate chi-square
   let chi2 = 0
-
-  let n = values.length
-
+  let bin = 0
+  let pBin = 0
+  let k = 0
   p.forEach((px, x) => {
-    let m = pmf(parseInt(x)) * n
-    chi2 += Math.pow(px - m, 2) / m
+    // Add frequency to current bin
+    bin += pmf(parseInt(x)) * values.length
+    pBin += px
+
+    // If bin count is above 20 (for central limit theorem), consider this a class and clear bin
+    if (bin > 20) {
+      chi2 += Math.pow(pBin - bin, 2) / bin
+      bin = 0
+      pBin = 0
+      k++
+    }
   })
 
   // Get critical value
-  let df = Math.max(1, p.size - c - 1)
+  let df = Math.max(1, k - c - 1)
 
   let crit = df <= 250 ? _CHI_TABLE_LO[df] : _CHI_TABLE_HI[Math.floor(df / 50)]
 
