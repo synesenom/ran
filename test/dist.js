@@ -298,6 +298,9 @@ describe('dist', () => {
     name: 'Logistic',
     p: () => [float(-5, 5), float(0.1, 5)]
   }, {
+    name: 'LogLaplace',
+    p: () => [float(-2, 2), float(0.1, 5)]
+  }, {
     name: 'LogLogistic',
     cases: [{
       desc: 'positive shape parameter',

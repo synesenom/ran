@@ -29,6 +29,7 @@ export default class extends Distribution {
   }
 
   _generator () {
+    // Inverse transform sampling
     let u = Math.random()
     return this.p.alpha / (this.p.beta * this.p.lambda) - Math.log(u) / this.p.lambda -
       lambertW(this.p.alpha * Math.exp(this.p.alpha / this.p.lambda) * Math.pow(u, -this.p.beta / this.p.lambda) / this.p.lambda) / this.p.beta

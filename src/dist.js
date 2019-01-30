@@ -40,6 +40,7 @@ export { default as Laplace } from './dist/laplace'
 export { default as Logarithmic } from './dist/logarithmic'
 export { default as LogCauchy } from './dist/log-cauchy'
 export { default as Logistic } from './dist/logistict'
+export { default as LogLaplace } from './dist/log-laplace'
 export { default as LogLogistic } from './dist/log-logistic'
 export { default as LogNormal } from './dist/log-normal'
 export { default as Lomax } from './dist/lomax'
@@ -72,7 +73,6 @@ export { default as Weibull } from './dist/weibull'
 // TODO Johnson's SU                          (can be directly implemented)
 // TODO Levy                                  (can be directly implemented)
 // TODO Log gamma                             (can be directly implemented)
-// TODO Log-Laplace                           (can be directly implemented)
 // TODO Logarithmic (discrete)                (generation unknown)
 // TODO Logistic-exponential                  (can be directly implemented)
 // TODO Logit-normal                          (can be directly implemented)

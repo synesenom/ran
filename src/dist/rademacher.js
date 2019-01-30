@@ -24,6 +24,7 @@ export default class extends Distribution {
   }
 
   _generator () {
+    // Direct sampling
     return Math.random() > 0.5 ? -1 : 1
   }
 

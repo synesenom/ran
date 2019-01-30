@@ -28,6 +28,7 @@ export default class extends Distribution {
   }
 
   _generator () {
+    // Direct sampling from gamma
     return Math.sqrt(gamma(this.p.k / 2, 0.5))
   }
 

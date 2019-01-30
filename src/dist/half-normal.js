@@ -28,6 +28,7 @@ export default class extends Distribution {
   }
 
   _generator () {
+    // Direct sampling from normal
     return Math.abs(normal(0, this.p.sigma))
   }
 
