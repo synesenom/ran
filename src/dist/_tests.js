@@ -64,7 +64,6 @@ export function chi2 (values, pmf, c) {
     p.set(v, p.has(v) ? p.get(v) + 1 : 1)
   })
 
-  // Calculate chi-square sum
   // Calculate chi-square
   let chi2 = 0
   let bin = 0

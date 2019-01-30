@@ -54,6 +54,7 @@ export { default as Pareto } from './dist/pareto'
 export { default as Poisson } from './dist/poisson'
 export { default as Rademacher } from './dist/rademacher'
 export { default as Rayleigh } from './dist/rayleigh'
+export { default as Reciprocal } from './dist/reciprocal'
 export { default as UniformContinuous } from './dist/uniform-continuous'
 export { default as UniformDiscrete } from './dist/uniform-discrete'
 export { default as Weibull } from './dist/weibull'
@@ -80,17 +81,16 @@ export { default as YuleSimon } from './dist/yule-simon'
 // TODO Muth                                  (requires lambertW function)
 // TODO Student's t                           (requires hypergeometric function)
 // TODO triangular                            (can be directly implemented)
-// TODO Tukey                                 (can be directly implemented)
-// TODO Planck                                (can be directly implemented)
+// TODO Tukey                                 (more work)
+// TODO Planck                                (more work)
 // TODO Raised cosine                         (generation unknown)
 // TODO Reciprocal                            (can be directly implemented)
-// TODO Skellam                               (requires modified Bessel, cdf unkown)
+// TODO Skellam                               (modified Bessel of k)
 // TODO stable                                (???)
 // TODO Soliton                               (special case of custom)
 // TODO U-quadratic                           (can be directly implemented)
-// TODO von Mises                             (generation is unknown)
+// TODO von Mises                             (modified Bessel of k)
 // TODO Wigner semicircle                     (can be directly implemented using beta variate)
-// TODO Yule-Simon                            (can be directly implemented using exponential and geometric)
-// TODO Zeta                                  (requires zeta function, harmonic number)
-// TODO Zipf                                  (requires zeta function, harmonic number)
+// TODO Zeta                                  (zeta, harmonic number)
+// TODO Zipf                                  (zeta, harmonic number)
 // TODO ref: http://www.nrbook.com/devroye/Devroye_files/chapter_ten.pdf

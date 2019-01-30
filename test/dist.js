@@ -361,6 +361,9 @@ describe('dist', () => {
     name: 'Rayleigh',
     p: () => [float(0.1, 5)]
   }, {
+    name: 'Reciprocal',
+    p: () => [float(0.1, 5), float(5, 10)]
+  }, {
     name: 'UniformContinuous',
     p: () => [float(10), float(10.1, 100)],
     skip: ['test-foreign']
