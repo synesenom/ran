@@ -48,6 +48,7 @@ export default (function () {
     })
     for (let i = 0; i < values.length; i++) {
       D = Math.max(D, Math.abs((i + 1) / values.length - model(values[i])))
+      // console.log((i + 1) / values.length, model(values[i]))
     }
     // console.log(D)
     return D <= 1.628 / Math.sqrt(values.length)
@@ -85,6 +86,7 @@ export default (function () {
       // If bin count is above 5, consider this a class and clear bin
       if (bin > 10) {
         chi2 += Math.pow(pBin - bin, 2) / bin
+        // console.log(pBin, bin)
         bin = 0
         pBin = 0
         k++
@@ -124,9 +126,9 @@ export default (function () {
     for (let x = a; x < b; x++) {
       int += pmf(x)
       dy += Math.abs(cdf(x) - int)
-      // console.log(x, int, cdf(x));
+      // console.log(x, int, cdf(x))
     }
-    // console.log(dy);
+    // console.log(dy)
     return dy
   }
 
@@ -142,6 +144,7 @@ export default (function () {
   function cdf2pdf (dist, range, laps) {
     return sum(Array.from({ length: laps }, () => {
       let x0 = range[0] + Math.random() * (range[1] - range[0])
+      // console.log(dist.pdf(x0), differentiate(x => dist.cdf(x), x0, 1e-5))
       return Math.abs(dist.pdf(x0) - differentiate(x => dist.cdf(x), x0, 1e-5))
     })) / laps
   }

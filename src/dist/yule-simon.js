@@ -27,6 +27,7 @@ export default class extends Distribution {
   }
 
   _generator () {
+    // Direct sampling by compounding exponential and geometric
     let e1 = -Math.log(Math.random())
     let e2 = -Math.log(Math.random())
     return Math.ceil(-e1 / Math.log(1 - Math.exp(-e2 / this.p.rho)))

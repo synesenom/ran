@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  *
  * with \(x_\mathrm{min}, x_\mathrm{max} \in \mathbb{Z}\) and \(x_\mathrm{min} < x_\mathrm{max}\). Support: \(k \in \{x_\mathrm{min}, ..., x_\mathrm{max}\}\).
  *
- * @class UniformDiscrete
+ * @class DiscreteUniform
  * @memberOf ran.dist
  * @param {number=} xmin Lower boundary. Default value is 0.
  * @param {number=} xmax Upper boundary. Default value is 100.

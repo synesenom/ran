@@ -161,21 +161,22 @@ let gr = (function () {
   */
 
 /**
-   * Base class implementing a general Markov chain Monte Carlo sampler. All MCMC sampler is extended from this class. MCMC samplers can be used to approximate integrals
-   * by efficiently sampling a density that cannot be normalized or sampled directly.
-   *
-   * @class MCMC
-   * @memberOf ran.mc
-   * @param {Function} logDensity The logarithm of the density function to estimate.
-   * @param {Object=} config Object describing some configurations. Supported properties:
-   * <ul>
-   *     <li>{dim}: Dimension of the state space to sample. Default is 1.</li>
-   *     <li>{maxHistory}: Maximum length of history for aggregated computations. Default is 1000.</li>
-   * </ul>
-   * @param {Object=} initialState The initial internal state of the sampler. Supported properties: {x} (the
-   * starting state), {samplingRate} (sampling rate) and {internal} for the child class' own internal parameters.
-   * @constructor
-   */
+ * Base class implementing a general Markov chain Monte Carlo sampler. All MCMC sampler is extended from this class.
+ * MCMC samplers can be used to approximate integrals by efficiently sampling a density that cannot be normalized or
+ * sampled directly.
+ *
+ * @class MCMC
+ * @memberOf ran.mc
+ * @param {Function} logDensity The logarithm of the density function to estimate.
+ * @param {Object=} config Object describing some configurations. Supported properties:
+ * <ul>
+ *     <li>{dim}: Dimension of the state space to sample. Default is 1.</li>
+ *     <li>{maxHistory}: Maximum length of history for aggregated computations. Default is 1000.</li>
+ * </ul>
+ * @param {Object=} initialState The initial internal state of the sampler. Supported properties: {x} (the
+ * starting state), {samplingRate} (sampling rate) and {internal} for the child class' own internal parameters.
+ * @constructor
+ */
 class MCMC {
   constructor (logDensity, config = {}, initialState = {}) {
     this.dim = config.dim || 1
@@ -186,24 +187,24 @@ class MCMC {
     this.internal = initialState.internal || {}
 
     /**
-       * State history of the sampler.
-       *
-       * @namespace history
-       * @memberOf ran.mc.MCMC
-       * @private
-       */
+     * State history of the sampler.
+     *
+     * @namespace history
+     * @memberOf ran.mc.MCMC
+     * @private
+     */
     this.history = (function (self) {
       let _arr = Array.from({ length: self.dim }, () => [])
 
       return {
         /**
-           * Returns the current history.
-           *
-           * @method get
-           * @memberOf ran.mc.MCMC.history
-           * @return {Array} Current history.
-           * @private
-           */
+         * Returns the current history.
+         *
+         * @method get
+         * @memberOf ran.mc.MCMC.history
+         * @return {Array} Current history.
+         * @private
+         */
         get () {
           return _arr
         },

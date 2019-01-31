@@ -1,3 +1,5 @@
+import { gammaLn } from '../special'
+
 /**
  * Generates a normally distributed value.
  *
@@ -44,5 +46,58 @@ export function gamma (alpha, beta) {
     }
   } else {
     return gamma(alpha + 1, beta) * Math.pow(Math.random(), 1 / alpha)
+  }
+}
+
+/**
+ * Generates a Poisson distributed value.
+ *
+ * @method poisson
+ * @memberOf ran.dist
+ * @param {number} lambda Mean of the distribution.
+ * @returns {number} Random variate.
+ * @private
+ */
+export function poisson (lambda) {
+  // Direct sampling
+  if (lambda < 30) {
+    // Small lambda, Knuth's method
+    let l = Math.exp(-lambda)
+
+    let k = 0
+
+    let p = 1
+    do {
+      k++
+      p *= Math.random()
+    } while (p > l)
+    return k - 1
+  } else {
+    // Large lambda, normal approximation
+    let c = 0.767 - 3.36 / lambda
+
+    let beta = Math.PI / Math.sqrt(3 * lambda)
+
+    let alpha = beta * lambda
+
+    let k = Math.log(c) - lambda - Math.log(beta)
+
+    // Max 1000 trials
+    for (let trials = 0; trials < 1000; trials++) {
+      let r, x, n
+      do {
+        r = Math.random()
+        x = (alpha - Math.log((1 - r) / r)) / beta
+        n = Math.floor(x + 0.5)
+      } while (n < 0)
+      let v = Math.random()
+
+      let y = alpha - beta * x
+
+      let lhs = y + Math.log(v / Math.pow(1.0 + Math.exp(y), 2))
+
+      let rhs = k + n * Math.log(lambda) - gammaLn(n + 1)
+      if (lhs <= rhs) { return n }
+    }
   }
 }

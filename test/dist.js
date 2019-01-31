@@ -23,16 +23,16 @@ function utPdf (name, params) {
     if (self.type() === 'continuous') {
       return utils.cdf2pdf(
         self, [
-          (supp[0].value !== null ? supp[0].value : -100) - 10,
-          (supp[1].value !== null ? supp[1].value : 100) + 10
+          (supp[0].value !== null ? supp[0].value : -20) - 10,
+          (supp[1].value !== null ? supp[1].value : 20) + 10
         ], LAPS
       ) < EPSILON
     } else {
       return utils.diffDisc(
         x => self.pdf(x),
         x => self.cdf(x),
-        (supp[0].value !== null ? supp[0].value : -100) - 10,
-        (supp[1].value !== null ? supp[1].value : 100) + 10
+        (supp[0].value !== null ? supp[0].value : -20) - 10,
+        (supp[1].value !== null ? supp[1].value : 20) + 10
       ) < MAX_AVG_DIFF
     }
   })
@@ -84,8 +84,8 @@ function utTest (name, params, type = 'self') {
         const sample = self.sample(LAPS)
 
         const foreign = self.type() === 'continuous'
-          ? new dist.UniformContinuous(Math.min(...sample), Math.max(...sample))
-          : new dist.UniformDiscrete(Math.min(...sample), Math.max(...sample))
+          ? new dist.ContinuousUniform(Math.min(...sample), Math.max(...sample))
+          : new dist.DiscreteUniform(Math.min(...sample), Math.max(...sample))
         return !foreign.test(sample).passed
       })
       break
@@ -185,6 +185,9 @@ describe('dist', () => {
     name: 'Bates',
     p: () => [int(5, 10), float(10), float(10.1, 20)]
   }, {
+    name: 'Benini',
+    p: () => [float(0.1, 5), float(0.1, 5), float(0.1, 5)]
+  }, {
     name: 'Bernoulli',
     p: () => [float()]
   }, {
@@ -221,6 +224,10 @@ describe('dist', () => {
     name: 'Chi2',
     p: () => [int(1, 10)]
   }, {
+    name: 'ContinuousUniform',
+    p: () => [float(10), float(10.1, 100)],
+    skip: ['test-foreign']
+  }, {
     name: 'Custom',
     cases: [{
       desc: 'small n',
@@ -237,6 +244,13 @@ describe('dist', () => {
   }, {
     name: 'Dagum',
     p: () => [float(0.1, 5), float(0.1, 5), float(0.1, 5)]
+  }, {
+    name: 'DiscreteUniform',
+    p: () => [int(10), int(11, 100)],
+    skip: ['test-foreign']
+  }, {
+    name: 'DiscreteWeibull',
+    p: () => [float(0.1, 1), float(0.1, 5)]
   }, {
     name: 'Erlang',
     p: () => [int(1, 10), float(0.1, 5)]
@@ -255,6 +269,9 @@ describe('dist', () => {
   }, {
     name: 'Gamma',
     p: () => [float(0.1, 10), float(0.1, 3)]
+  }, {
+    name: 'GammaGompertz',
+    p: () => [float(0.1, 10), float(0.1, 5), float(0.1, 5)]
   }, {
     name: 'GeneralizedGamma',
     p: () => [float(0.1, 10), float(0.1, 5), float(0.1, 10)]
@@ -289,8 +306,14 @@ describe('dist', () => {
     name: 'IrwinHall',
     p: () => [int(5, 10)]
   }, {
+    name: 'JohnsonsSU',
+    p: () => [float(-5, 5), float(0.1, 5), float(0.1, 5), float(-5, 5)]
+  }, {
     name: 'Laplace',
     p: () => [float(-2, 2), float(0.1, 5)]
+  }, {
+    name: 'Levy',
+    p: () => [float(-5, 5), float(0.1, 10)]
   }, {
     name: 'Logarithmic',
     p: () => [float(1, 5), float(5.1, 10)]
@@ -299,6 +322,12 @@ describe('dist', () => {
     p: () => [float(-5, 5), float(0.1, 5)]
   }, {
     name: 'Logistic',
+    p: () => [float(-5, 5), float(0.1, 5)]
+  }, {
+    name: 'LogisticExponential',
+    p: () => [float(0.1, 5), float(0.1, 5)]
+  }, {
+    name: 'LogitNormal',
     p: () => [float(-5, 5), float(0.1, 5)]
   }, {
     name: 'LogLaplace',
@@ -340,6 +369,9 @@ describe('dist', () => {
     name: 'NegativeHypergeometric',
     p: () => [int(30, 40), int(10, 20), int(5, 10)]
   }, {
+    name: 'NegativeBinomial',
+    p: () => [int(20), float(0.1, 1)]
+  }, {
     name: 'Normal',
     p: () => [float(-5, 5), float(0.1, 10)]
   }, {
@@ -358,27 +390,25 @@ describe('dist', () => {
     name: 'Rademacher',
     p: () => []
   }, {
+    name: 'Soliton',
+    p: () => [int(0, 30)]
+  }, {
     name: 'Rayleigh',
     p: () => [float(0.1, 5)]
   }, {
     name: 'Reciprocal',
     p: () => [float(0.1, 5), float(5, 10)]
   }, {
-    name: 'UniformContinuous',
-    p: () => [float(10), float(10.1, 100)],
-    skip: ['test-foreign']
-  }, {
-    name: 'UniformDiscrete',
-    p: () => [int(10), int(11, 100)],
-    skip: ['test-foreign']
-  }, {
     name: 'Weibull',
     p: () => [float(0.1, 10), float(0.1, 10)]
+  }, {
+    name: 'WignerSemicircle',
+    p: () => [float(0.1, 10)]
   }, {
     name: 'YuleSimon',
     p: () => [float(0.1, 5)]
   }].forEach(d => {
-    // if (d.name !== 'YuleSimon') return
+    // if (d.name !== 'Benini') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
