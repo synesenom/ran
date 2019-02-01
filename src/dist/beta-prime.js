@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  * with \(\alpha, \beta \in \mathbb{R}^+\) and \(\mathrm{B}(\alpha, \beta)\) is the beta function.
  * Support: \(x \in \mathbb{R}^+\).
  *
- *
  * @class BetaPrime
  * @memberOf ran.dist
  * @param {number=} alpha First shape parameter. Default value is 2.

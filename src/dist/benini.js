@@ -28,6 +28,7 @@ export default class extends Distribution {
   }
 
   _generator () {
+    // Inverse transform sampling
     let D = -1
     while (D < 0) {
       D = this.p.alpha * this.p.alpha - 4 * this.p.beta * Math.log(Math.random())

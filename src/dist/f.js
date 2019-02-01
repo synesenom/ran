@@ -22,12 +22,12 @@ export default class extends Distribution {
     this.p = { d1, d2 }
     this.s = [{
       value: 0,
-      closed: this.p.d1 !== 1
+      closed: d1 !== 1
     }, {
       value: null,
       closed: false
     }]
-    this.c = [beta(this.p.d1 / 2, this.p.d2 / 2), Math.pow(this.p.d2, this.p.d2)]
+    this.c = [beta(d1 / 2, d2 / 2)]
   }
 
   _generator () {
@@ -36,7 +36,7 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return Math.sqrt(Math.pow(this.p.d1 * x, this.p.d1) * this.c[1] / Math.pow(this.p.d1 * x + this.p.d2, this.p.d1 + this.p.d2)) / (x * this.c[0])
+    return Math.sqrt(Math.pow(this.p.d1 * x, this.p.d1) * Math.pow(this.p.d2, this.p.d2) / Math.pow(this.p.d1 * x + this.p.d2, this.p.d1 + this.p.d2)) / (x * this.c[0])
   }
 
   _cdf (x) {

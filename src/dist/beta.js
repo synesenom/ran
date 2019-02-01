@@ -10,7 +10,6 @@ import { beta as fnBeta, betaIncomplete } from '../special'
  * with \(\alpha, \beta \in \mathbb{R}^+\) and \(\mathrm{B}(\alpha, \beta)\) is the beta function.
  * Support: \(x \in [0, 1]\).
  *
- *
  * @class Beta
  * @memberOf ran.dist
  * @param {number=} alpha First shape parameter. Default value is 1.

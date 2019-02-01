@@ -8,6 +8,7 @@ export { default as InvalidDiscrete } from './dist/_invalid'
 export { default as Arcsine } from './dist/arcsine'
 export { default as Bates } from './dist/bates'
 export { default as Benini } from './dist/benini'
+export { default as BenktanderII } from './dist/benktander-ii'
 export { default as Bernoulli } from './dist/bernoulli'
 export { default as Beta } from './dist/beta'
 export { default as BetaPrime } from './dist/beta-prime'
@@ -27,7 +28,9 @@ export { default as Erlang } from './dist/erlang'
 export { default as Exponential } from './dist/exponential'
 export { default as ExponentialLogarithmic } from './dist/exponential-logarithmic'
 export { default as F } from './dist/f'
+export { default as FlorySchulz } from './dist/flory-schulz'
 export { default as Frechet } from './dist/frechet'
+export { default as FishersZ } from './dist/fishers-z'
 export { default as Gamma } from './dist/gamma'
 export { default as GammaGompertz } from './dist/gamma-gompertz'
 export { default as GeneralizedGamma } from './dist/generalized-gamma'
@@ -79,28 +82,21 @@ export { default as YuleSimon } from './dist/yule-simon'
 // TODO Check parameter domains
 // TODO Make equations more visible
 
-// TODO Benford                               (can be directly implemented)
+// TODO Benford                               (inverse transform)
 // TODO Generalized Pareto                    (can be directly implemented)
 // TODO Hyperbolic-secant                     (can be directly implemented)
-// TODO Johnson's SB                          (can be directly implemented)
+// TODO Johnson's SB                          (direct from normal)
 // TODO Log gamma                             (can be directly implemented)
 // TODO triangular                            (can be directly implemented)
 // TODO U-quadratic                           (can be directly implemented)
-
-// TODO Benini                                (inverse transform)
 // TODO Half-logistic                         (inverse transform)
-// TODO Fisher's z                            (transformed from F)
-// TODO Flory-Schulz                          (lambertW)
 // TODO Benktander 1nd kind                   (lambertW)
 // TODO Benktander 2nd kind                   (lambertW)
-
 // TODO Beta-rectangular                      (compound)
 // TODO Delaporte                             (compound)
 // TODO Normal-exponential-gamma              (compound)
 // TODO slash                                 (compound: normal/uniform)
-
 // TODO Tukey                                 (pdf/cdf are not trivial)
-
 // TODO Hermite                               (requires higher order derivative)
 // TODO Planck                                (zeta)
 // TODO Zeta                                  (zeta, harmonic number)
@@ -108,19 +104,17 @@ export { default as YuleSimon } from './dist/yule-simon'
 // TODO von Mises                             (modified Bessel of k)
 // TODO Skellam                               (modified Bessel of first)
 // TODO Student's t                           (hypergeometric function)
-
 // TODO Birnbaum-Saunders                     (requires inverse erf)
-
 // TODO Muth                                  (not-invertible cdf)
-
 // TODO Beta-binomial                         (generation unknown)
 // TODO Beta-pascal / Beta negative binomial  (generation unknown)
 // TODO Borel                                 (generation unknown)
 // TODO Davis                                 (generation unknown)
 // TODO Error / exponential power             (generation unknown)
-
 // TODO Logarithmic (discrete)                (generation unknown)
 // TODO PERT distribution                     (generation unknown)
 // TODO Raised cosine                         (generation unknown)
 // TODO stable                                (generation unknown)
+
+// TODO Champernowne
 // TODO ref: http://www.nrbook.com/devroye/Devroye_files/chapter_ten.pdf

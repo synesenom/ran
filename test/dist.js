@@ -185,6 +185,9 @@ describe('dist', () => {
     name: 'Bates',
     p: () => [int(5, 10), float(10), float(10.1, 20)]
   }, {
+    name: 'BenktanderII',
+    p: () => [float(0.01, 5), float()]
+  }, {
     name: 'Benini',
     p: () => [float(0.1, 5), float(0.1, 5), float(0.1, 5)]
   }, {
@@ -250,7 +253,7 @@ describe('dist', () => {
     skip: ['test-foreign']
   }, {
     name: 'DiscreteWeibull',
-    p: () => [float(0.1, 1), float(0.1, 5)]
+    p: () => [float(), float(0.1, 5)]
   }, {
     name: 'Erlang',
     p: () => [int(1, 10), float(0.1, 5)]
@@ -262,6 +265,12 @@ describe('dist', () => {
     p: () => [float(0.1, 5)]
   }, {
     name: 'F',
+    p: () => [float(0.1, 5), float(0.1, 5)]
+  }, {
+    name: 'FlorySchulz',
+    p: () => [float()]
+  }, {
+    name: 'FishersZ',
     p: () => [float(0.1, 5), float(0.1, 5)]
   }, {
     name: 'Frechet',
@@ -277,7 +286,7 @@ describe('dist', () => {
     p: () => [float(0.1, 10), float(0.1, 5), float(0.1, 10)]
   }, {
     name: 'Geometric',
-    p: () => [float(0.1, 1)]
+    p: () => [float()]
   }, {
     name: 'Gompertz',
     p: () => [float(0.1, 5), float(0.1, 5), float(-5, 5)]
@@ -370,7 +379,7 @@ describe('dist', () => {
     p: () => [int(30, 40), int(10, 20), int(5, 10)]
   }, {
     name: 'NegativeBinomial',
-    p: () => [int(20), float(0.1, 1)]
+    p: () => [int(20), float()]
   }, {
     name: 'Normal',
     p: () => [float(-5, 5), float(0.1, 10)]
@@ -408,7 +417,7 @@ describe('dist', () => {
     name: 'YuleSimon',
     p: () => [float(0.1, 5)]
   }].forEach(d => {
-    // if (d.name !== 'Benini') return
+    // if (d.name !== 'BenktanderII') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
