@@ -1,4 +1,4 @@
-import Distribution from './_distribution'
+import Laplace from './laplace'
 
 /**
  * Generator for the [log-Laplace distribution]{@link https://en.wikipedia.org/wiki/Log-Laplace_distribution}:
@@ -13,10 +13,10 @@ import Distribution from './_distribution'
  * @param {number=} b Scale parameter. Default value is 1.
  * @constructor
  */
-export default class extends Distribution {
+export default class extends Laplace {
+  // Transforming Laplace distribution
   constructor (mu = 0, b = 1) {
-    super('continuous', arguments.length)
-    this.p = { mu, b }
+    super(mu, b)
     this.s = [{
       value: 0,
       closed: false
@@ -27,15 +27,15 @@ export default class extends Distribution {
   }
 
   _generator () {
-    // Direct sampling from Laplace
-    return Math.exp(this.p.b * Math.log(Math.random() / Math.random()) + this.p.mu)
+    // Direct sampling by transforming Laplace variate
+    return Math.exp(super._generator())
   }
 
   _pdf (x) {
-    return Math.exp(-Math.abs(Math.log(x) - this.p.mu) / this.p.b) / (2 * x * this.p.b)
+    return super._pdf(Math.log(x)) / x
   }
 
   _cdf (x) {
-    return 0.5 * (1 + Math.sign(Math.log(x) - this.p.mu) * (1 - Math.exp(-Math.abs(Math.log(x) - this.p.mu) / this.p.b)))
+    return super._cdf(Math.log(x))
   }
 }

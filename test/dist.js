@@ -131,6 +131,13 @@ const Param = {
 }
 
 describe('dist', () => {
+  /*let ih = new dist.LogCauchy()
+  for (let i = 0; i < 300; i++) {
+    console.log(i / 100, ih.pdf(i / 100), ih.cdf(i / 100))
+    // ih.cdf(i / 100)
+  }
+  return*/
+
   // Base class
   describe('Distribution', () => {
     describe('.sample()', () => {

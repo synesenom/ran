@@ -1,4 +1,4 @@
-import Distribution from './_distribution'
+import Cauchy from './cauchy'
 
 /**
  * Generator for the [log-Cauchy distribution]{@link https://en.wikipedia.org/wiki/Log-Cauchy_distribution}:
@@ -13,10 +13,10 @@ import Distribution from './_distribution'
  * @param {number=} sigma Scale parameter. Default value is 1.
  * @constructor
  */
-export default class extends Distribution {
+export default class extends Cauchy {
+  // Transforming Cauchy distribution
   constructor (mu = 0, sigma = 1) {
-    super('continuous', arguments.length)
-    this.p = { mu, sigma }
+    super(mu, sigma)
     this.s = [{
       value: 0,
       closed: false
@@ -27,15 +27,15 @@ export default class extends Distribution {
   }
 
   _generator () {
-    // Inverse transform sampling
-    return Math.exp(this.p.mu + this.p.sigma * Math.tan(Math.PI * (Math.random() - 0.5)))
+    // Direct sampling by transforming Cauchy variate
+    return Math.exp(super._generator())
   }
 
   _pdf (x) {
-    return this.p.sigma / (x * Math.PI * (this.p.sigma * this.p.sigma + Math.pow(Math.log(x) - this.p.mu, 2)))
+    return super._pdf(Math.log(x)) / x
   }
 
   _cdf (x) {
-    return 0.5 + Math.atan2(Math.log(x) - this.p.mu, this.p.sigma) / Math.PI
+    return super._cdf(Math.log(x))
   }
 }

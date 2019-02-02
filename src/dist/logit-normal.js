@@ -1,6 +1,4 @@
-import { erf } from '../special'
-import { normal } from './_standard'
-import Distribution from './_distribution'
+import Normal from './normal'
 
 /**
  * Generator for the [logit-normal distribution]{@link https://en.wikipedia.org/wiki/Logit-normal_distribution}:
@@ -15,10 +13,10 @@ import Distribution from './_distribution'
  * @param {number=} sigma Scale parameter. Default value is 1.
  * @constructor
  */
-export default class extends Distribution {
+export default class extends Normal {
+  // Transforming normal distribution
   constructor (mu = 0, sigma = 1) {
-    super('continuous', arguments.length)
-    this.p = { mu, sigma }
+    super(mu, sigma)
     this.s = [{
       value: 0,
       closed: false
@@ -30,14 +28,15 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling by transforming normal variate
-    return 1 / (1 + Math.exp(-normal(this.p.mu, this.p.sigma)))
+    // return 1 / (1 + Math.exp(-normal(this.p.mu, this.p.sigma)))
+    return 1 / (1 + Math.exp(-super._generator()))
   }
 
   _pdf (x) {
-    return Math.exp(-0.5 * Math.pow((Math.log(x / (1 - x)) - this.p.mu) / this.p.sigma, 2)) / (x * (1 - x) * this.p.sigma * Math.sqrt(2 * Math.PI))
+    return super._pdf(Math.log(x / (1 - x))) / (x * (1 - x))
   }
 
   _cdf (x) {
-    return 0.5 * (1 + erf((Math.log(x / (1 - x)) - this.p.mu) / (Math.SQRT2 * this.p.sigma)))
+    return super._cdf(Math.log(x / (1 - x)))
   }
 }
