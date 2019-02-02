@@ -25,6 +25,7 @@ export default class extends Distribution {
       value: null,
       closed: false
     }]
+    this.c = [(this.p.k / 2 - 1) * Math.LN2]
   }
 
   _generator () {
@@ -33,7 +34,7 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return Math.pow(x, this.p.k - 1) * Math.exp(-0.5 * x * x - gammaLn(this.p.k / 2)) / Math.pow(2, this.p.k / 2 - 1)
+    return Math.exp((this.p.k - 1) * Math.log(x) - 0.5 * x * x - gammaLn(this.p.k / 2) - this.c[0])
   }
 
   _cdf (x) {

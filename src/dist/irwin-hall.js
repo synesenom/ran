@@ -35,20 +35,38 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return neumaier(Array.from({ length: Math.floor(x) + 1 }, (d, k) => {
-      let z = (this.p.n - 1) * Math.log(x - k) + Math.log(this.p.n) - this.c[k]
+    // Use symmetry property for large x values
+    let y = x < this.p.n / 2 ? x : this.p.n - x
 
-      let s = k % 2 === 0 ? 1 : -1
-      return s * Math.exp(z)
-    }))
+    // Compute terms
+    let terms = Array.from({ length: Math.floor(y) + 1 }, (d, k) => {
+      let z = (this.p.n - 1) * Math.log(y - k) - this.c[k]
+
+      return k % 2 === 0 ? Math.exp(z) : -Math.exp(z)
+    })
+
+    // Sort terms
+    terms.sort((a, b) => Math.abs(a) - Math.abs(b))
+
+    // Calculate sum
+    return this.p.n * neumaier(terms)
   }
 
   _cdf (x) {
-    return neumaier(Array.from({ length: Math.floor(x) + 1 }, (d, k) => {
-      let z = this.p.n * Math.log(x - k) - this.c[k]
+    // Use symmetry property for large x values
+    let y = x < this.p.n / 2 ? x : this.p.n - x
 
-      let s = k % 2 === 0 ? 1 : -1
-      return s * Math.exp(z)
-    }))
+    // Compute terms
+    let terms = Array.from({ length: Math.floor(y) + 1 }, (d, k) => {
+      let z = this.p.n * Math.log(y - k) - this.c[k]
+
+      return k % 2 === 0 ? Math.exp(z) : -Math.exp(z)
+    })
+
+    // Sort terms
+    terms.sort((a, b) => Math.abs(a) - Math.abs(b))
+
+    // Calculate sum
+    return x < this.p.n / 2 ? neumaier(terms) : 1 - neumaier(terms)
   }
 }

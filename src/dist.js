@@ -50,7 +50,7 @@ export { default as Laplace } from './dist/laplace'
 export { default as Levy } from './dist/levy'
 export { default as Logarithmic } from './dist/logarithmic'
 export { default as LogCauchy } from './dist/log-cauchy'
-export { default as Logistic } from './dist/logistict'
+export { default as Logistic } from './dist/logistic'
 export { default as LogisticExponential } from './dist/logistic-exponential'
 export { default as LogitNormal } from './dist/logit-normal'
 export { default as LogLaplace } from './dist/log-laplace'
@@ -70,17 +70,16 @@ export { default as Rayleigh } from './dist/rayleigh'
 export { default as Reciprocal } from './dist/reciprocal'
 export { default as Soliton } from './dist/soliton'
 export { default as Weibull } from './dist/weibull'
-export { default as WignerSemicircle } from './dist/wigner-semicircle'
+export { default as Wigner } from './dist/wigner'
 export { default as YuleSimon } from './dist/yule-simon'
 
 // TODO Make pdf/cdf more robust when large numbers are included
-// TODO Robustness: check if value is finite
-// TODO Robustness: check if value is NaN
 // TODO Robustness: use logarithmic values
 // TODO Make use of compound distributions
 // TODO Simplify computations in pdf/cdf
 // TODO Check parameter domains
 // TODO Make equations more visible
+// TODO Use decimal.js for high precision
 
 // TODO Benford                               (inverse transform)
 // TODO Generalized Pareto                    (can be directly implemented)
@@ -91,7 +90,6 @@ export { default as YuleSimon } from './dist/yule-simon'
 // TODO U-quadratic                           (can be directly implemented)
 // TODO Half-logistic                         (inverse transform)
 // TODO Benktander 1nd kind                   (lambertW)
-// TODO Benktander 2nd kind                   (lambertW)
 // TODO Beta-rectangular                      (compound)
 // TODO Delaporte                             (compound)
 // TODO Normal-exponential-gamma              (compound)

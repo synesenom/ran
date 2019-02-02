@@ -1,7 +1,7 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import utils from './test-utils'
-import { sum } from '../src/utils'
+import { sum, neumaier, pairSum } from '../src/utils'
 
 const LAPS = 100
 
@@ -35,7 +35,7 @@ describe('utils', () => {
       utils.repeat(() => {
         const n = Math.floor(2 + Math.random() * 100)
         assert.equal(
-          sum(Array.from({ length: n + 1 }, (d, i) => i)),
+          neumaier(Array.from({ length: n + 1 }, (d, i) => i)),
           n * (n + 1) / 2
         )
       }, LAPS)
@@ -47,7 +47,7 @@ describe('utils', () => {
 
         const a = n * (n + 1) / 2
         assert.equal(
-          sum(Array.from({ length: n + 1 }, (d, i) => i), 5),
+          neumaier(Array.from({ length: n + 1 }, (d, i) => i * i * i * i * i)),
           (4 * a * a * a - a * a) / 3
         )
       }, LAPS)

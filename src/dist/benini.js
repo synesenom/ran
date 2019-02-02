@@ -38,11 +38,11 @@ export default class extends Distribution {
 
   _pdf (x) {
     let y = Math.log(x / this.p.sigma)
-    return Math.exp(-this.p.alpha * y - this.p.beta * y * y) * (this.p.alpha / x + 2 * this.p.beta * y / x)
+    return Math.exp(-y * (this.p.alpha + this.p.beta * y)) * (this.p.alpha + 2 * this.p.beta * y) / x
   }
 
   _cdf (x) {
     let y = Math.log(x / this.p.sigma)
-    return 1 - Math.exp(-this.p.alpha * y - this.p.beta * y * y)
+    return 1 - Math.exp(-y * (this.p.alpha + this.p.beta * y))
   }
 }

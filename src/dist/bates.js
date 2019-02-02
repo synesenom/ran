@@ -1,5 +1,5 @@
 import { sum, neumaier } from '../utils'
-import * as special from '../special'
+import { gammaLn } from '../special'
 import Distribution from './_distribution'
 
 /**
@@ -27,35 +27,51 @@ export default class extends Distribution {
       value: b,
       closed: true
     }]
-    this.c = Array.from({ length: this.p.n + 1 }, (d, k) => special.gammaLn(k + 1) + special.gammaLn(this.p.n - k + 1))
+    this.c = Array.from({ length: this.p.n + 1 }, (d, k) => gammaLn(k + 1) + gammaLn(this.p.n - k + 1))
   }
 
   _generator () {
     // Direct sampling
-    return sum(Array.from({ length: this.p.n }, () => (this.p.b - this.p.a) * Math.random() + this.p.a)) / this.p.n
+    return (this.p.b - this.p.a) * sum(Array.from({ length: this.p.n }, Math.random)) / this.p.n + this.p.a
   }
 
   _pdf (x) {
+    // Scaling the Irwin-Hall PDF
+    // Use symmetry property for large x values
     let y = (x - this.p.a) / (this.p.b - this.p.a)
+    y = this.p.n * (y < 0.5 ? y : 1 - y)
 
-    let nx = this.p.n * y
-    return this.p.n * neumaier(Array.from({ length: Math.floor(nx) + 1 }, (d, k) => {
-      let z = (this.p.n - 1) * Math.log(nx - k) + Math.log(this.p.n) - this.c[k]
+    // Compute terms
+    let terms = Array.from({ length: Math.floor(y) + 1 }, (d, k) => {
+      let z = (this.p.n - 1) * Math.log(y - k) - this.c[k]
 
-      let s = k % 2 === 0 ? 1 : -1
-      return s * Math.exp(z)
-    })) / (this.p.b - this.p.a)
+      return k % 2 === 0 ? Math.exp(z) : -Math.exp(z)
+    })
+
+    // Sort terms
+    terms.sort((a, b) => Math.abs(a) - Math.abs(b))
+
+    // Calculate sum
+    return this.p.n * this.p.n * neumaier(terms) / (this.p.b - this.p.a)
   }
 
   _cdf (x) {
+    // Scaling the Irwin-Hall CDF
+    // Use symmetry property for large x values
     let y = (x - this.p.a) / (this.p.b - this.p.a)
+    let t = this.p.n * (y < 0.5 ? y : 1 - y)
 
-    let nx = this.p.n * y
-    return neumaier(Array.from({ length: Math.floor(nx) + 1 }, (d, k) => {
-      let z = this.p.n * Math.log(nx - k) - this.c[k]
+    // Compute terms
+    let terms = Array.from({ length: Math.floor(t) + 1 }, (d, k) => {
+      let z = this.p.n * Math.log(t - k) - this.c[k]
 
-      let s = k % 2 === 0 ? 1 : -1
-      return s * Math.exp(z)
-    }))
+      return k % 2 === 0 ? Math.exp(z) : -Math.exp(z)
+    })
+
+    // Sort terms
+    terms.sort((a, b) => Math.abs(a) - Math.abs(b))
+
+    // Calculate sum
+    return y < 0.5 ? neumaier(terms) : 1 - neumaier(terms)
   }
 }

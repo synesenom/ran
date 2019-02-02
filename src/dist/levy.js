@@ -36,7 +36,7 @@ export default class extends Distribution {
 
   _pdf (x) {
     let z = x - this.p.mu
-    return Math.sqrt(0.5 * this.p.c / Math.PI) * Math.exp(-0.5 * this.p.c / z) / Math.pow(z, 1.5)
+    return Math.sqrt(0.5 * this.p.c / Math.PI) * Math.exp(-0.5 * this.p.c / z - 1.5 * Math.log(z))
   }
 
   _cdf (x) {

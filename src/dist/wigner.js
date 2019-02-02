@@ -2,13 +2,14 @@ import { gamma } from './_standard'
 import Distribution from './_distribution'
 
 /**
- * Generator for [Wigner semicircle distribution]{@link https://en.wikipedia.org/wiki/Wigner_semicircle_distribution}:
+ * Generator for [Wigner distribution]{@link https://en.wikipedia.org/wiki/Wigner_semicircle_distribution} (also known
+ * as semicircle distribution):
  *
  * $$f(x; R) = \frac{2}{\pi R^2} \sqrt{R^2 - x^2},$$
  *
  * with \(R \in \mathbb{R}^+\). Support: \(x \in [-R, R]\).
  *
- * @class WignerSemicircle
+ * @class Wigner
  * @memberOf ran.dist
  * @param {number=} R Radius of the distribution. Default value is 1.
  * @constructor

@@ -36,10 +36,10 @@ export function sum (arr, pow = 1) {
  * @param {number[]} arr Array to sum.
  * @returns {number} The sum of the elements in the array.
  */
-export function neumaier(arr) {
-  let s = arr[0],
-    c = 0
-  for (let i=1; i<arr.length; i++) {
+export function neumaier (arr) {
+  let s = arr[0]
+  let c = 0
+  for (let i = 1; i < arr.length; i++) {
     let t = s + arr[i]
     if (Math.abs(s) > Math.abs(arr[i])) {
       c += (s - t) + arr[i]

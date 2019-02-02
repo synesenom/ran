@@ -36,12 +36,11 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    let y = Math.exp(2 * x)
-    return 2 * Math.pow(this.p.d1, this.p.d1 / 2) * Math.pow(this.p.d2, this.p.d2 / 2) * Math.exp(this.p.d1 * x) / (beta(this.p.d1 / 2, this.p.d2 / 2) * Math.pow(this.p.d1 * y + this.p.d2, 0.5 * (this.p.d1 + this.p.d2)))
+    return 2 * Math.exp(this.p.d1 * x + 0.5 * (this.p.d1 * Math.log(this.p.d1) + this.p.d2 * Math.log(this.p.d2) - (this.p.d1 + this.p.d2) * Math.log(this.p.d1 * Math.exp(2 * x) + this.p.d2))) / this.c[0]
   }
 
   _cdf (x) {
     let y = Math.exp(2 * x)
-    return betaIncomplete(this.p.d1 / 2, this.p.d2 / 2, this.p.d1 * y / (this.p.d1 * y + this.p.d2))
+    return betaIncomplete(this.p.d1 / 2, this.p.d2 / 2, 1 / (1 + this.p.d2 * Math.exp(-2 * x) / this.p.d1))
   }
 }

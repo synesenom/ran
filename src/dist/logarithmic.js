@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; a, b) = \frac{\ln x}{a (1 - \ln a) - b (1 - \ln b)},$$
  *
- * with \(a, b \in \mathbb{R}^+ / (0, 1)\). Support: \(x \ in [a, b]\).
+ * with \(a, b \in (1, \infty)\). Support: \(x \in [a, b]\).
  *
  * @class Logarithmic
  * @memberOf ran.dist

@@ -25,11 +25,11 @@ export default class extends Distribution {
       value: null,
       closed: false
     }]
+    this.c = [(1 - this.p.b) / this.p.a, Math.exp(-a / b)]
   }
 
   _generator () {
-    let c = (1 - this.p.b) / this.p.a
-    return Math.pow(c * lambertW(Math.pow(Math.random() * Math.exp(-this.p.a / this.p.b), this.p.b / (this.p.b - 1)) / c), 1 / this.p.b)
+    return Math.pow(this.c[0] * lambertW(Math.pow(Math.random() * this.c[1], this.p.b / (this.p.b - 1)) / this.c[0]), 1 / this.p.b)
   }
 
   _pdf (x) {

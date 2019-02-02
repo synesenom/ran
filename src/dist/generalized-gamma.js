@@ -27,16 +27,15 @@ export default class extends Distribution {
       value: null,
       closed: false
     }]
-    this.c = [(p / Math.pow(a, d)), 1 / Math.pow(a, p)]
   }
 
   _generator () {
     // Direct sampling from gamma
-    return Math.pow(gamma(this.p.d / this.p.p, this.c[1]), 1 / this.p.p)
+    return Math.pow(gamma(this.p.d / this.p.p, Math.pow(this.p.a, -this.p.p)), 1 / this.p.p)
   }
 
   _pdf (x) {
-    return this.c[0] * Math.exp((this.p.d - 1) * Math.log(x) - Math.pow(x / this.p.a, this.p.p) - gammaLn(this.p.d / this.p.p))
+    return this.p.p * Math.exp(-this.p.d * Math.log(this.p.a) + (this.p.d - 1) * Math.log(x) - Math.pow(x / this.p.a, this.p.p) - gammaLn(this.p.d / this.p.p))
   }
 
   _cdf (x) {

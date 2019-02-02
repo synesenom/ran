@@ -36,7 +36,7 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return this.c[0] * Math.pow(x, 2 * this.p.q - 1) * Math.exp(-this.p.q * x * x / this.p.omega - gammaLn(this.p.q))
+    return 2 * Math.exp((2 * this.p.q - 1) * Math.log(x) + this.p.q * Math.log(this.p.q) - this.p.q * x * x / this.p.omega - gammaLn(this.p.q) - this.p.q * Math.log(this.p.omega))
   }
 
   _cdf (x) {

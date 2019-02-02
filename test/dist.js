@@ -23,16 +23,16 @@ function utPdf (name, params) {
     if (self.type() === 'continuous') {
       return utils.cdf2pdf(
         self, [
-          (supp[0].value !== null ? supp[0].value : -20) - 10,
-          (supp[1].value !== null ? supp[1].value : 20) + 10
+          (supp[0].value !== null ? supp[0].value : -20) - 1,
+          (supp[1].value !== null ? supp[1].value : 20) + 1
         ], LAPS
       ) < EPSILON
     } else {
       return utils.diffDisc(
         x => self.pdf(x),
         x => self.cdf(x),
-        (supp[0].value !== null ? supp[0].value : -20) - 10,
-        (supp[1].value !== null ? supp[1].value : 20) + 10
+        (supp[0].value !== null ? supp[0].value : -20) - 1,
+        (supp[1].value !== null ? supp[1].value : 20) + 1
       ) < MAX_AVG_DIFF
     }
   })
@@ -49,14 +49,14 @@ function utSample (name, params) {
   utils.trials(() => {
     const self = new dist[name](...params())
     return self.type() === 'continuous'
-      ? utils.ksTtest(self.sample(LAPS), x => self.cdf(x))
+      ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
       : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
   })
 
   utils.trials(() => {
     const self = new dist[name]()
     return self.type() === 'continuous'
-      ? utils.ksTtest(self.sample(LAPS), x => self.cdf(x))
+      ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
       : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
   })
 }
@@ -89,6 +89,44 @@ function utTest (name, params, type = 'self') {
         return !foreign.test(sample).passed
       })
       break
+  }
+}
+
+const Param = {
+  rangeMin () {
+    return float(10)
+  },
+
+  rangeMax () {
+    return float(10.1, 20)
+  },
+
+  shape () {
+    return float(0.01, 5)
+  },
+
+  location () {
+    return float(-5, 5)
+  },
+
+  scale () {
+    return float(0.01, 5)
+  },
+
+  prob () {
+    return float()
+  },
+
+  count () {
+    return int(1, 20)
+  },
+
+  degree () {
+    return int(1, 10)
+  },
+
+  rate () {
+    return float(10)
   }
 }
 
@@ -180,55 +218,55 @@ describe('dist', () => {
   // Ordinary distributions
   [{
     name: 'Arcsine',
-    p: () => [float(10), float(10.1, 100)]
+    p: () => [Param.rangeMin(), Param.rangeMax()]
   }, {
     name: 'Bates',
-    p: () => [int(5, 10), float(10), float(10.1, 20)]
+    p: () => [Param.count(), Param.rangeMin(), Param.rangeMax()]
   }, {
     name: 'BenktanderII',
-    p: () => [float(0.01, 5), float()]
+    p: () => [Param.scale(), Param.prob()]
   }, {
     name: 'Benini',
-    p: () => [float(0.1, 5), float(0.1, 5), float(0.1, 5)]
+    p: () => [Param.shape(), Param.shape(), Param.scale()]
   }, {
     name: 'Bernoulli',
-    p: () => [float()]
+    p: () => [Param.prob()]
   }, {
     name: 'Beta',
-    p: () => [float(0.1, 3), float(0.1, 3)]
+    p: () => [Param.shape(), Param.shape()]
   }, {
     name: 'BetaPrime',
-    p: () => [float(0.1, 3), float(0.1, 3)]
+    p: () => [Param.shape(), Param.shape()]
   }, {
     name: 'Binomial',
     cases: [{
       desc: 'small n',
-      p: () => [int(10, 20), float()]
+      p: () => [int(10, 20), Param.prob()]
     }, {
       desc: 'small mean',
-      p: () => [int(30, 100), float() / 105]
+      p: () => [int(30, 100), Param.prob() / 105]
     }, {
       desc: 'large n, mean',
-      p: () => [int(30, 100), float()]
+      p: () => [int(30, 100), Param.prob()]
     }]
   }, {
     name: 'BoundedPareto',
-    p: () => [float(0.1, 5), float(5.1, 5), float(0.1, 3)]
+    p: () => [Param.rangeMin(), Param.rangeMax(), Param.shape()]
   }, {
     name: 'Burr',
-    p: () => [float(0.1, 5), float(0.1, 5)]
+    p: () => [Param.shape(), Param.shape()]
   }, {
     name: 'Cauchy',
-    p: () => [float(), float(0.5, 2)]
+    p: () => [Param.location(), Param.scale()]
   }, {
     name: 'Chi',
-    p: () => [int(1, 10)]
+    p: () => [Param.degree()]
   }, {
     name: 'Chi2',
-    p: () => [int(1, 10)]
+    p: () => [Param.degree()]
   }, {
     name: 'ContinuousUniform',
-    p: () => [float(10), float(10.1, 100)],
+    p: () => [Param.rangeMin(), Param.rangeMax()],
     skip: ['test-foreign']
   }, {
     name: 'Custom',
@@ -246,151 +284,152 @@ describe('dist', () => {
     }]
   }, {
     name: 'Dagum',
-    p: () => [float(0.1, 5), float(0.1, 5), float(0.1, 5)]
+    p: () => [Param.shape(), Param.shape(), Param.scale()]
   }, {
     name: 'DiscreteUniform',
     p: () => [int(10), int(11, 100)],
     skip: ['test-foreign']
   }, {
     name: 'DiscreteWeibull',
-    p: () => [float(), float(0.1, 5)]
+    p: () => [Param.prob(), Param.shape()]
   }, {
     name: 'Erlang',
-    p: () => [int(1, 10), float(0.1, 5)]
+    p: () => [Param.degree(), Param.rate()]
   }, {
     name: 'ExponentialLogarithmic',
-    p: () => [float(), float(0.1, 10)]
+    p: () => [Param.prob(), Param.scale()]
   }, {
     name: 'Exponential',
-    p: () => [float(0.1, 5)]
+    p: () => [Param.rate()]
   }, {
     name: 'F',
-    p: () => [float(0.1, 5), float(0.1, 5)]
-  }, {
-    name: 'FlorySchulz',
-    p: () => [float()]
+    p: () => [Param.degree(), Param.degree()]
   }, {
     name: 'FishersZ',
-    p: () => [float(0.1, 5), float(0.1, 5)]
+    p: () => [Param.degree(), Param.degree()]
+  }, {
+    name: 'FlorySchulz',
+    p: () => [Param.prob()],
+    skip: ['test-foreign']
   }, {
     name: 'Frechet',
-    p: () => [float(0.1, 5), float(0.1, 5), float(-5, 5)]
+    p: () => [Param.shape(), Param.scale(), Param.location()]
   }, {
     name: 'Gamma',
-    p: () => [float(0.1, 10), float(0.1, 3)]
+    p: () => [Param.shape(), Param.rate()]
   }, {
     name: 'GammaGompertz',
-    p: () => [float(0.1, 10), float(0.1, 5), float(0.1, 5)]
+    p: () => [Param.scale(), Param.shape(), Param.shape()]
   }, {
     name: 'GeneralizedGamma',
-    p: () => [float(0.1, 10), float(0.1, 5), float(0.1, 10)]
+    p: () => [Param.scale(), Param.shape(), Param.shape()]
   }, {
     name: 'Geometric',
-    p: () => [float()]
+    p: () => [Param.prob()]
   }, {
     name: 'Gompertz',
-    p: () => [float(0.1, 5), float(0.1, 5), float(-5, 5)]
+    p: () => [Param.shape(), Param.scale()]
   }, {
     name: 'Gumbel',
-    p: () => [float(-3, 3), float(0.1, 5)]
+    p: () => [Param.location(), Param.scale()]
   }, {
     name: 'HalfNormal',
-    p: () => [float(0.1, 10)]
+    p: () => [Param.scale()]
   }, {
     name: 'Hoyt',
-    p: () => [float(1), float(0.1, 5)]
+    p: () => [Param.prob(), Param.scale()]
   }, {
     name: 'Hypergeometric',
     p: () => [int(20, 40), int(20), int(10)]
   }, {
     name: 'InverseChi2',
-    p: () => [int(1, 10)]
+    p: () => [Param.degree()]
   }, {
     name: 'InverseGamma',
-    p: () => [float(0.1, 5), float(0.1, 3)]
+    p: () => [Param.shape(), Param.scale()]
   }, {
     name: 'InverseGaussian',
-    p: () => [float(0.1, 5), float(0.1, 5)]
+    p: () => [Param.shape(), Param.scale()]
   }, {
     name: 'IrwinHall',
-    p: () => [int(5, 10)]
+    p: () => [Param.count() + 10]
   }, {
     name: 'JohnsonsSU',
-    p: () => [float(-5, 5), float(0.1, 5), float(0.1, 5), float(-5, 5)]
+    p: () => [Param.location(), Param.scale(), Param.scale(), Param.location()]
+  }, {
+    name: 'Kumaraswamy',
+    p: () => [Param.shape(), Param.shape()]
   }, {
     name: 'Laplace',
-    p: () => [float(-2, 2), float(0.1, 5)]
+    p: () => [Param.location(), Param.scale()]
   }, {
     name: 'Levy',
-    p: () => [float(-5, 5), float(0.1, 10)]
+    p: () => [Param.location(), Param.scale()]
   }, {
     name: 'Logarithmic',
-    p: () => [float(1, 5), float(5.1, 10)]
+    p: () => [Param.rangeMin() + 1, Param.rangeMax() + 5]
   }, {
     name: 'LogCauchy',
-    p: () => [float(-5, 5), float(0.1, 5)]
+    p: () => [Param.location(), Param.scale()]
   }, {
     name: 'Logistic',
-    p: () => [float(-5, 5), float(0.1, 5)]
+    p: () => [Param.location(), Param.scale()]
   }, {
     name: 'LogisticExponential',
-    p: () => [float(0.1, 5), float(0.1, 5)]
+    p: () => [Param.scale(), Param.shape()]
   }, {
     name: 'LogitNormal',
-    p: () => [float(-5, 5), float(0.1, 5)]
+    p: () => [Param.location(), Param.scale()]
   }, {
     name: 'LogLaplace',
-    p: () => [float(-2, 2), float(0.1, 5)]
+    p: () => [Param.location(), Param.scale()]
   }, {
     name: 'LogLogistic',
     cases: [{
       desc: 'positive shape parameter',
-      p: () => [float(-5, 5), float(0.1, 5), float(0.1, 5)]
+      p: () => [Param.location(), Param.scale(), float(0.1, 5)]
     }, {
       desc: 'negative shape parameter',
-      p: () => [float(-5, 5), float(0.1, 5), float(-5, -0.1)]
+      p: () => [Param.location(), Param.scale(), float(-5, -0.1)]
     }, {
       desc: 'zero shape parameter',
-      p: () => [float(-5, 5), float(0.1, 5), 0]
+      p: () => [Param.location(), Param.scale(), 0]
     }]
   }, {
     name: 'LogNormal',
-    p: () => [float(-2, 2), float(0.1, 5)]
+    p: () => [Param.location(), Param.scale()]
   }, /*, {
       name: 'LogSeries',
       p: () => [float()]
     } */ {
     name: 'Lomax',
-    p: () => [float(0.1, 5), float(0.1, 5)]
-  }, {
-    name: 'Kumaraswamy',
-    p: () => [float(0.1, 5), float(0.1, 5)]
+    p: () => [Param.scale(), Param.shape()]
   }, {
     name: 'Makeham',
-    p: () => [float(0.1, 5), float(0.1, 5), float(0.1, 5)]
+    p: () => [Param.shape(), Param.rate(), Param.scale()]
   }, {
     name: 'MaxwellBoltzmann',
-    p: () => [float(0.1, 10)]
+    p: () => [Param.scale()]
   }, {
     name: 'Nakagami',
-    p: () => [float(0.5, 5), float(0.1, 5)]
+    p: () => [Param.shape(), Param.scale()]
   }, {
     name: 'NegativeHypergeometric',
     p: () => [int(30, 40), int(10, 20), int(5, 10)]
   }, {
     name: 'NegativeBinomial',
-    p: () => [int(20), float()]
+    p: () => [Param.count(), Param.prob()]
   }, {
     name: 'Normal',
-    p: () => [float(-5, 5), float(0.1, 10)]
+    p: () => [Param.location(), Param.scale()]
   }, {
     name: 'Pareto',
-    p: () => [float(0.1, 5), float(0.1, 10)]
+    p: () => [Param.scale(), Param.shape()]
   }, {
     name: 'Poisson',
     cases: [{
       desc: 'low mean',
-      p: () => [float(5, 20)]
+      p: () => [float(20)]
     }, {
       desc: 'high mean',
       p: () => [float(31, 50)]
@@ -399,25 +438,25 @@ describe('dist', () => {
     name: 'Rademacher',
     p: () => []
   }, {
-    name: 'Soliton',
-    p: () => [int(0, 30)]
-  }, {
     name: 'Rayleigh',
-    p: () => [float(0.1, 5)]
+    p: () => [Param.scale()]
   }, {
     name: 'Reciprocal',
-    p: () => [float(0.1, 5), float(5, 10)]
+    p: () => [Param.rangeMin(), Param.rangeMax()]
+  }, {
+    name: 'Soliton',
+    p: () => [Param.count()]
   }, {
     name: 'Weibull',
-    p: () => [float(0.1, 10), float(0.1, 10)]
+    p: () => [Param.scale(), Param.shape()]
   }, {
-    name: 'WignerSemicircle',
-    p: () => [float(0.1, 10)]
+    name: 'Wigner',
+    p: () => [Param.scale()]
   }, {
     name: 'YuleSimon',
-    p: () => [float(0.1, 5)]
+    p: () => [Param.shape()]
   }].forEach(d => {
-    // if (d.name !== 'BenktanderII') return
+    // if (d.name !== 'Bates') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

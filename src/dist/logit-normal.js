@@ -2,10 +2,6 @@ import { erf } from '../special'
 import { normal } from './_standard'
 import Distribution from './_distribution'
 
-function logit (x) {
-  return Math.log(x / (1 - x))
-}
-
 /**
  * Generator for the [logit-normal distribution]{@link https://en.wikipedia.org/wiki/Logit-normal_distribution}:
  *
@@ -38,10 +34,10 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return Math.exp(-0.5 * Math.pow((logit(x) - this.p.mu) / this.p.sigma, 2)) / (x * (1 - x) * this.p.sigma * Math.sqrt(2 * Math.PI))
+    return Math.exp(-0.5 * Math.pow((Math.log(x / (1 - x)) - this.p.mu) / this.p.sigma, 2)) / (x * (1 - x) * this.p.sigma * Math.sqrt(2 * Math.PI))
   }
 
   _cdf (x) {
-    return 0.5 * (1 + erf((logit(x) - this.p.mu) / (Math.SQRT2 * this.p.sigma)))
+    return 0.5 * (1 + erf((Math.log(x / (1 - x)) - this.p.mu) / (Math.SQRT2 * this.p.sigma)))
   }
 }

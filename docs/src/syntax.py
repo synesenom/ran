@@ -29,23 +29,24 @@ class _JS:
             'methodOf': "@methodOf",
             'requires': "@requires",
             'override': "@override",
-            'type': "@type"
+            'type': "@type",
         },
         'description': {
-            'todo': "@todo"
+            'todo': "@todo",
         },
         'value': {
-            'var': "@var"
+            'var': "@var",
         },
         'unnamed_value_desc': {
-            'returns': "@returns"
+            'returns': "@returns",
         },
         'named_value_desc': {
             'param': "@param",
             'property': "@property",
+            'throws': "@throws",
         },
         'text': {
-            'example': "@example"
+            'example': "@example",
         }
     }
 

@@ -15,6 +15,7 @@ import binomLn from '../special/binom-log'
  * @param {number=} p Probability of success. Default value is 0.5.
  * @constructor
  */
+// TODO Use special case of custom instead
 export default class extends Distribution {
   constructor (n = 100, p = 0.5) {
     super('discrete', arguments.length)

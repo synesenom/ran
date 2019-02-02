@@ -15,7 +15,7 @@ describe('core', () => {
     it('should return a float uniformly distributed in [0, 1]', () => {
       utils.trials(() => {
         const values = Array.from({ length: LAPS }, () => core.float())
-        return utils.ksTtest(values, function (x) {
+        return utils.ksTest(values, function (x) {
           return x
         })
       })
@@ -25,7 +25,7 @@ describe('core', () => {
       utils.trials(() => {
         const max = Math.random() * 20
         const values = Array.from({ length: LAPS }, () => core.float(max))
-        return utils.ksTtest(values, function (x) {
+        return utils.ksTest(values, function (x) {
           return x / max
         })
       })
@@ -51,11 +51,11 @@ describe('core', () => {
 
         // Distribution is uniform
         if (min < max) {
-          return utils.ksTtest(values, function (x) {
+          return utils.ksTest(values, function (x) {
             return (x - min) / (max - min)
           })
         } else {
-          return utils.ksTtest(values, function (x) {
+          return utils.ksTest(values, function (x) {
             return (x - max) / (min - max)
           })
         }
