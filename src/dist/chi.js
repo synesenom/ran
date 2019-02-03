@@ -14,6 +14,7 @@ import Distribution from './_distribution'
  * @param {number=} k Degrees of freedom. If not an integer, is rounded to the nearest one. Default value is 1.
  * @constructor
  */
+// TODO Transform Chi2
 export default class extends Distribution {
   constructor (k = 1) {
     super('continuous', arguments.length)

@@ -605,7 +605,7 @@ class RWM extends MCMC {
   }
 
   // Iterator
-  _iter (x, warmUp) {
+  _iter (warmUp) {
     let x1 = this.proposal.jump(this.x, warmUp)
 
     let newLnp = this.lnp(x1)
@@ -629,19 +629,4 @@ class RWM extends MCMC {
   }
 }
 
-/* class HMC extends MCMC {
-      constructor(logDensity, dLogDensity, config, initialState) {
-          super(logDensity, config, initialState);
-      }
-  } */
-
-// TODO rejection sampling with log-concave dist
-// TODO slice sampling
-// TODO Gibbs sampling
-// TODO NUTS
-// TODO adaptive Metropolis
-
-// TODO Hamiltonian
-// TODO Adjust Euclidean metric from covariance in burn-in
-// TODO step size sampled randomly
 export { gr, RWM }

@@ -1,6 +1,4 @@
-import { beta, betaIncomplete } from '../special'
-import { gamma } from './_standard'
-import Distribution from './_distribution'
+import F from './f'
 
 /**
  * Generator for [Fisher's z distribution]{@link https://en.wikipedia.org/wiki/Fisher%27s_z-distribution}:
@@ -9,16 +7,16 @@ import Distribution from './_distribution'
  *
  * with \(d_1, d_2 \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}\).
  *
- * @class FishersZ
+ * @class FisherZ
  * @memberOf ran.dist
  * @param {number=} d1 First degree of freedom. Default value is 2.
  * @param {number=} d2 Second degree of freedom. Default value is 2.
  * @constructor
  */
-export default class extends Distribution {
+export default class extends F {
+  // Transforming F variate
   constructor (d1 = 1, d2 = 1) {
-    super('continuous', arguments.length)
-    this.p = { d1, d2 }
+    super(d1, d2)
     this.s = [{
       value: null,
       closed: false
@@ -26,21 +24,18 @@ export default class extends Distribution {
       value: null,
       closed: false
     }]
-    this.c = [beta(d1 / 2, d2 / 2), Math.pow(d2, d2)]
   }
 
   _generator () {
     // Direct sampling by transforming F variate
-    let f = this.p.d2 * gamma(this.p.d1 / 2, 1) / (this.p.d1 * gamma(this.p.d2 / 2, 1))
-    return 0.5 * Math.log(f)
+    return 0.5 * Math.log(super._generator())
   }
 
   _pdf (x) {
-    return 2 * Math.exp(this.p.d1 * x + 0.5 * (this.p.d1 * Math.log(this.p.d1) + this.p.d2 * Math.log(this.p.d2) - (this.p.d1 + this.p.d2) * Math.log(this.p.d1 * Math.exp(2 * x) + this.p.d2))) / this.c[0]
+    return super._pdf(Math.exp(2 * x)) * 2 * Math.exp(2 * x)
   }
 
   _cdf (x) {
-    let y = Math.exp(2 * x)
-    return betaIncomplete(this.p.d1 / 2, this.p.d2 / 2, 1 / (1 + this.p.d2 * Math.exp(-2 * x) / this.p.d1))
+    return super._cdf(Math.exp(2 * x))
   }
 }

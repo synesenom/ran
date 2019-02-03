@@ -1,6 +1,4 @@
-import { gammaLn, gammaLowerIncomplete } from '../special'
-import { gamma } from './_standard'
-import Distribution from './_distribution'
+import Gamma from './gamma'
 
 /**
  * Generator for the [inverse gamma distribution]{@link https://en.wikipedia.org/wiki/Inverse-gamma_distribution}:
@@ -15,10 +13,10 @@ import Distribution from './_distribution'
  * @param {number=} beta Scale parameter. Default value is 1.
  * @constructor
  */
-export default class extends Distribution {
+export default class extends Gamma {
+  // Transformation of gamma distribution
   constructor (alpha = 1, beta = 1) {
-    super('continuous', arguments.length)
-    this.p = { alpha, beta }
+    super(alpha, beta)
     this.s = [{
       value: 0,
       closed: false
@@ -30,15 +28,15 @@ export default class extends Distribution {
   }
 
   _generator () {
-    // Direct sampling from gamma
-    return 1 / gamma(this.p.alpha, this.p.beta)
+    // Direct sampling by transforming gamma variate
+    return 1 / super._generator()
   }
 
   _pdf (x) {
-    return this.c[0] * Math.pow(x, -1 - this.p.alpha) * Math.exp(-this.p.beta / x - gammaLn(this.p.alpha))
+    return super._pdf(1 / x) / (x * x)
   }
 
   _cdf (x) {
-    return 1 - gammaLowerIncomplete(this.p.alpha, this.p.beta / x)
+    return 1 - super._cdf(1 / x)
   }
 }

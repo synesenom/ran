@@ -1,7 +1,8 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for the [shifted log-logistic distribution]{@link https://en.wikipedia.org/wiki/Shifted_log-logistic_distribution}:
+ * Generator for the [shifted log-logistic distribution]{@link https://en.wikipedia.org/wiki/Shifted_log-logistic_distribution}
+ * (also known as Fisk distribution):
  *
  * $$f(x; \mu, s) = \frac{e^{-z}}{s (1 + e^{-z})^2},$$
  *

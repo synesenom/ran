@@ -15,11 +15,11 @@ export { default as BetaPrime } from './dist/beta-prime'
 export { default as Binomial } from './dist/binomial'
 export { default as BoundedPareto } from './dist/bounded-pareto'
 export { default as Burr } from './dist/burr'
+export { default as Categorical } from './dist/custom'
 export { default as Cauchy } from './dist/cauchy'
 export { default as Chi } from './dist/chi'
 export { default as Chi2 } from './dist/chi2'
 export { default as ContinuousUniform } from './dist/continuous-uniform'
-export { default as Custom } from './dist/custom'
 export { default as Dagum } from './dist/dagum'
 export { default as Degenerate } from './dist/degenerate'
 export { default as DiscreteUniform } from './dist/discrete-uniform'
@@ -30,7 +30,7 @@ export { default as ExponentialLogarithmic } from './dist/exponential-logarithmi
 export { default as F } from './dist/f'
 export { default as FlorySchulz } from './dist/flory-schulz'
 export { default as Frechet } from './dist/frechet'
-export { default as FishersZ } from './dist/fishers-z'
+export { default as FisherZ } from './dist/fisher-z'
 export { default as Gamma } from './dist/gamma'
 export { default as GammaGompertz } from './dist/gamma-gompertz'
 export { default as GeneralizedGamma } from './dist/generalized-gamma'
@@ -69,50 +69,7 @@ export { default as Rademacher } from './dist/rademacher'
 export { default as Rayleigh } from './dist/rayleigh'
 export { default as Reciprocal } from './dist/reciprocal'
 export { default as Soliton } from './dist/soliton'
+export { default as Triangular } from './dist/triangular'
 export { default as Weibull } from './dist/weibull'
 export { default as Wigner } from './dist/wigner'
 export { default as YuleSimon } from './dist/yule-simon'
-
-// TODO Make pdf/cdf more robust when large numbers are included
-// TODO Robustness: use logarithmic values
-// TODO Make use of compound distributions
-// TODO Simplify computations in pdf/cdf
-// TODO Check parameter domains
-// TODO Make equations more visible
-// TODO Use decimal.js for high precision
-
-// TODO Benford                               (inverse transform)
-// TODO Generalized Pareto                    (can be directly implemented)
-// TODO Hyperbolic-secant                     (can be directly implemented)
-// TODO Johnson's SB                          (direct from normal)
-// TODO Log gamma                             (can be directly implemented)
-// TODO triangular                            (can be directly implemented)
-// TODO U-quadratic                           (can be directly implemented)
-// TODO Half-logistic                         (inverse transform)
-// TODO Benktander 1nd kind                   (lambertW)
-// TODO Beta-rectangular                      (compound)
-// TODO Delaporte                             (compound)
-// TODO Normal-exponential-gamma              (compound)
-// TODO slash                                 (compound: normal/uniform)
-// TODO Tukey                                 (pdf/cdf are not trivial)
-// TODO Hermite                               (requires higher order derivative)
-// TODO Planck                                (zeta)
-// TODO Zeta                                  (zeta, harmonic number)
-// TODO Zipf                                  (zeta, harmonic number)
-// TODO von Mises                             (modified Bessel of k)
-// TODO Skellam                               (modified Bessel of first)
-// TODO Student's t                           (hypergeometric function)
-// TODO Birnbaum-Saunders                     (requires inverse erf)
-// TODO Muth                                  (not-invertible cdf)
-// TODO Beta-binomial                         (generation unknown)
-// TODO Beta-pascal / Beta negative binomial  (generation unknown)
-// TODO Borel                                 (generation unknown)
-// TODO Davis                                 (generation unknown)
-// TODO Error / exponential power             (generation unknown)
-// TODO Logarithmic (discrete)                (generation unknown)
-// TODO PERT distribution                     (generation unknown)
-// TODO Raised cosine                         (generation unknown)
-// TODO stable                                (generation unknown)
-
-// TODO Champernowne
-// TODO ref: http://www.nrbook.com/devroye/Devroye_files/chapter_ten.pdf

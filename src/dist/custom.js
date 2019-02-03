@@ -1,14 +1,13 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for a custom distribution, using the
- * [alias table method]{@link http://www.keithschwarz.com/darts-dice-coins}:
+ * Generator for a [categorical distribution]{@link https://en.wikipedia.org/wiki/Categorical_distribution}:
  *
  * $$f(k; \{w\}) = \frac{w_k}{\sum_j w_j},$$
  *
  * where \(w_k \in \mathbb{R}^+\). Support: \(k \in \mathbb{N}_0\).
  *
- * @class Custom
+ * @class Categorical
  * @memberOf ran.dist
  * @param {number[]=} weights Weights for the distribution (doesn't need to be normalized). Default value is an array
  * @param {number=} min Lowest value to sample (support starts at this value). Default value is 0.

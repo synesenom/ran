@@ -97,8 +97,12 @@ const Param = {
     return float(10)
   },
 
+  rangeIn () {
+    return float(10, 20)
+  },
+
   rangeMax () {
-    return float(10.1, 20)
+    return float(20, 30)
   },
 
   shape () {
@@ -131,7 +135,7 @@ const Param = {
 }
 
 describe('dist', () => {
-  /*let ih = new dist.LogCauchy()
+  /*let ih = new dist.Gamma(3, 1)
   for (let i = 0; i < 300; i++) {
     console.log(i / 100, ih.pdf(i / 100), ih.cdf(i / 100))
     // ih.cdf(i / 100)
@@ -263,20 +267,7 @@ describe('dist', () => {
     name: 'Burr',
     p: () => [Param.shape(), Param.shape()]
   }, {
-    name: 'Cauchy',
-    p: () => [Param.location(), Param.scale()]
-  }, {
-    name: 'Chi',
-    p: () => [Param.degree()]
-  }, {
-    name: 'Chi2',
-    p: () => [Param.degree()]
-  }, {
-    name: 'ContinuousUniform',
-    p: () => [Param.rangeMin(), Param.rangeMax()],
-    skip: ['test-foreign']
-  }, {
-    name: 'Custom',
+    name: 'Categorical',
     cases: [{
       desc: 'small n',
       p: () => [Array.from({ length: int(0, 1) }, Math.random)],
@@ -289,6 +280,19 @@ describe('dist', () => {
       p: () => [Array.from({ length: int(101, 120) }, Math.random)],
       skip: ['test-foreign']
     }]
+  }, {
+    name: 'Cauchy',
+    p: () => [Param.location(), Param.scale()]
+  }, {
+    name: 'Chi',
+    p: () => [Param.degree()]
+  }, {
+    name: 'Chi2',
+    p: () => [Param.degree()]
+  }, {
+    name: 'ContinuousUniform',
+    p: () => [Param.rangeMin(), Param.rangeMax()],
+    skip: ['test-foreign']
   }, {
     name: 'Dagum',
     p: () => [Param.shape(), Param.shape(), Param.scale()]
@@ -312,7 +316,7 @@ describe('dist', () => {
     name: 'F',
     p: () => [Param.degree(), Param.degree()]
   }, {
-    name: 'FishersZ',
+    name: 'FisherZ',
     p: () => [Param.degree(), Param.degree()]
   }, {
     name: 'FlorySchulz',
@@ -454,6 +458,9 @@ describe('dist', () => {
     name: 'Soliton',
     p: () => [Param.count()]
   }, {
+    name: 'Triangular',
+    p: () => [Param.rangeMin(), Param.rangeMax(), Param.rangeIn()]
+  }, {
     name: 'Weibull',
     p: () => [Param.scale(), Param.shape()]
   }, {
@@ -463,7 +470,7 @@ describe('dist', () => {
     name: 'YuleSimon',
     p: () => [Param.shape()]
   }].forEach(d => {
-    // if (d.name !== 'Bates') return
+    // if (d.name !== 'BetaPrime') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

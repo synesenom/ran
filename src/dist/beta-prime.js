@@ -1,6 +1,4 @@
-import { beta as fnBeta, betaIncomplete } from '../special'
-import { gamma } from './_standard'
-import Distribution from './_distribution'
+import Beta from './beta'
 
 /**
  * Generator for the [beta prime distribution]{@link https://en.wikipedia.org/wiki/Beta_prime_distribution} (also
@@ -17,10 +15,10 @@ import Distribution from './_distribution'
  * @param {number=} beta Second shape parameter. Default value is 2.
  * @constructor
  */
-export default class extends Distribution {
+export default class extends Beta {
+  // Transformation of beta distribution
   constructor (alpha = 2, beta = 2) {
-    super('continuous', arguments.length)
-    this.p = { alpha, beta }
+    super(alpha, beta)
     this.s = [{
       value: 0,
       closed: alpha >= 1
@@ -31,15 +29,16 @@ export default class extends Distribution {
   }
 
   _generator () {
-    // Direct sampling from gamma
-    return gamma(this.p.alpha, 1) / gamma(this.p.beta, 1)
+    // Direct sampling by transforming beta variate
+    let x = super._generator()
+    return x / (1 - x)
   }
 
   _pdf (x) {
-    return Math.pow(x, this.p.alpha - 1) * Math.pow(1 + x, -this.p.alpha - this.p.beta) / fnBeta(this.p.alpha, this.p.beta)
+    return super._pdf(x / (1 + x)) / Math.pow(1 + x, 2)
   }
 
   _cdf (x) {
-    return betaIncomplete(this.p.alpha, this.p.beta, x / (1 + x))
+    return super._cdf(x / (1 + x))
   }
 }
