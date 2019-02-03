@@ -9,6 +9,7 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
+    "babel-loader": "7.1.4",
     "babel-plugin-istanbul": "^5.1.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-register": "^6.26.0",
@@ -35,7 +36,7 @@
     "build": "webpack",
     "coverage": "cross-env NODE_ENV=test nyc --reporter=text --reporter=html _mocha --recursive --require babel-register --timeout=3000",
     "coveralls": "cross-env NODE_ENV=test nyc --reporter=text-lcov _mocha --recursive --require babel-register --timeout=3000 | coveralls",
-    "babel": "babel --presets es2015 src/*.js -o dist/ran.bundle.js"
+    "babel": "babel --presets es2015 src/core.js -o dist/ran.bundle.js"
   },
   "babel": {
     "presets": [
