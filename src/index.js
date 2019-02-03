@@ -5,11 +5,13 @@
  * @module ran
  */
 
-export * as core from './core'
-export * as la from './la'
-export * as dist from './dist'
-export * as ts from './ts'
-export * as mc from './mc'
+import * as core from './core'
+import * as la from './la'
+import * as dist from './dist'
+import * as ts from './ts'
+import * as mc from './mc'
+
+export { core, la, dist, ts, mc }
 
 // TODO next()
 // TODO trend()

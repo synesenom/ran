@@ -34,7 +34,8 @@
     "docs": "python docs/src/parser.py",
     "build": "webpack",
     "coverage": "cross-env NODE_ENV=test nyc --reporter=text --reporter=html _mocha --recursive --require babel-register --timeout=3000",
-    "coveralls": "cross-env NODE_ENV=test nyc --reporter=text-lcov _mocha --recursive --require babel-register --timeout=3000 | coveralls"
+    "coveralls": "cross-env NODE_ENV=test nyc --reporter=text-lcov _mocha --recursive --require babel-register --timeout=3000 | coveralls",
+    "babel": "babel --presets es2015 src/*.js -o dist/ran.bundle.js"
   },
   "babel": {
     "presets": [
