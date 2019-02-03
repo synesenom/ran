@@ -1,6 +1,6 @@
 {
   "name": "ranjs",
-  "version": "1.8.2",
+  "version": "1.8.3",
   "description": "Library for generating various random variables.",
   "main": "dist/ran.node.min.js",
   "directories": {
