@@ -75,11 +75,10 @@ class Distribution {
    *
    * @method support
    * @memberOf ran.dist.Distribution
-   * @returns {{value: ?number, closed: boolean}[]} An array of objects describing the lower and upper boundary of
-   * the support. Each object contains a <code>value: number</code> and a <code>closed: boolean</code> property
-   * with the value of the boundary and whether it is closed, respectively. If <code>value</code> is null, the
-   * boundary is (+/-) infinity (for upper and lower boundaries). When <code>value</code> is null,
-   * <code>closed</code> is always false.
+   * @returns {Object[]} An array of objects describing the lower and upper boundary of the support. Each object
+   * contains a <code>value: number</code> and a <code>closed: boolean</code> property with the value of the boundary
+   * and whether it is closed, respectively. If <code>value</code> is null, the boundary is (+/-) infinity (for upper
+   * and lower boundaries). When <code>value</code> is null, <code>closed</code> is always false.
    */
   support () {
     return this.s
@@ -145,7 +144,7 @@ class Distribution {
    *
    * if the distribution is continuous and
    *
-   * $$F(x) = \sum_{x_i < x} f(x_i),$$
+   * $$F(x) = \sum_{x_i \le x} f(x_i),$$
    *
    * if it is discrete. The functions \(f(t)\) and \(f(x_i)\) denote the probability density and mass functions.
    *

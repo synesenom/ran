@@ -8,6 +8,13 @@
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
 # ranjs
+
+Statistical library for generating various random variates, calculating likelihood functions and testing hypotheses (and more).
+
+
+# probability distributions
+`ranjs` includes more than [60 continuous and discrete distributions](https://synesenom.github.io/ran/#dist.Distribution), each tested rigorously
+
 Library for generating various random variables in a robust and fast way. Beyond random variate generation, `ranjs` provides the following:  
 - Useful statistical functions such as survival or hazard functions.  
 - Test method for each generator that can be used to check if some values are sampled from a specific distribution.  
