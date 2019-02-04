@@ -9,9 +9,6 @@
 // TODO Use decimal.js for high precision
 
 // TODO Benford                               (inverse transform)
-// TODO Generalized Pareto                    (can be directly implemented)
-// TODO Hyperbolic-secant                     (can be directly implemented)
-// TODO Johnson's SB                          (direct from normal)
 // TODO Log gamma                             (can be directly implemented)
 // TODO U-quadratic                           (can be directly implemented)
 // TODO Half-logistic                         (inverse transform)
@@ -48,7 +45,6 @@
 // TODO double gamma (scipy)
 // TODO double weibull (scipy)
 // TODO Exponentially modified Gaussian (EMG)
-// TODO Birnbaum-Saunders
 // TODO generalized logistic (scipy)
 // TODO generalized normal
 // TODO generalized Pareto (scipy)
@@ -74,7 +70,6 @@
 // TODO reciprocal inverse Gauss (scipy)
 // TODO skew normal (scipy)
 // TODO trapezoidal (scipy)
-// TODO triangle (special case of Bates)
 // TODO truncated exponential (scipy)
 
 // TODO Dirichlet

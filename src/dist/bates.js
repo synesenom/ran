@@ -1,6 +1,4 @@
-import { sum, neumaier } from '../utils'
-import { gammaLn } from '../special'
-import Distribution from './_distribution'
+import IrwinHall from './irwin-hall'
 
 /**
  * Generator for the [Bates distribution]{@link https://en.wikipedia.org/wiki/Bates_distribution}:
@@ -16,10 +14,11 @@ import Distribution from './_distribution'
  * @param {number=} b Upper boundary of the uniform variate. Default value is 1.
  * @constructor
  */
-export default class extends Distribution {
+export default class extends IrwinHall {
+  // Transformation of Irwin-Hall
   constructor (n = 10, a = 0, b = 1) {
-    super('continuous', arguments.length)
-    this.p = { n: Math.round(n), a, b }
+    super(n)
+    this.p = Object.assign({ a, b }, this.p)
     this.s = [{
       value: a,
       closed: true
@@ -27,51 +26,18 @@ export default class extends Distribution {
       value: b,
       closed: true
     }]
-    this.c = Array.from({ length: this.p.n + 1 }, (d, k) => gammaLn(k + 1) + gammaLn(this.p.n - k + 1))
   }
 
   _generator () {
-    // Direct sampling
-    return (this.p.b - this.p.a) * sum(Array.from({ length: this.p.n }, Math.random)) / this.p.n + this.p.a
+    // Direct sampling by transforming Irwin-Hall variate
+    return (this.p.b - this.p.a) * super._generator() / this.p.n + this.p.a
   }
 
   _pdf (x) {
-    // Scaling the Irwin-Hall PDF
-    // Use symmetry property for large x values
-    let y = (x - this.p.a) / (this.p.b - this.p.a)
-    y = this.p.n * (y < 0.5 ? y : 1 - y)
-
-    // Compute terms
-    let terms = Array.from({ length: Math.floor(y) + 1 }, (d, k) => {
-      let z = (this.p.n - 1) * Math.log(y - k) - this.c[k]
-
-      return k % 2 === 0 ? Math.exp(z) : -Math.exp(z)
-    })
-
-    // Sort terms
-    terms.sort((a, b) => Math.abs(a) - Math.abs(b))
-
-    // Calculate sum
-    return this.p.n * this.p.n * neumaier(terms) / (this.p.b - this.p.a)
+    return this.p.n * super._pdf(this.p.n * (x - this.p.a) / (this.p.b - this.p.a)) / (this.p.b - this.p.a)
   }
 
   _cdf (x) {
-    // Scaling the Irwin-Hall CDF
-    // Use symmetry property for large x values
-    let y = (x - this.p.a) / (this.p.b - this.p.a)
-    let t = this.p.n * (y < 0.5 ? y : 1 - y)
-
-    // Compute terms
-    let terms = Array.from({ length: Math.floor(t) + 1 }, (d, k) => {
-      let z = this.p.n * Math.log(t - k) - this.c[k]
-
-      return k % 2 === 0 ? Math.exp(z) : -Math.exp(z)
-    })
-
-    // Sort terms
-    terms.sort((a, b) => Math.abs(a) - Math.abs(b))
-
-    // Calculate sum
-    return y < 0.5 ? neumaier(terms) : 1 - neumaier(terms)
+    return super._cdf(this.p.n * (x - this.p.a) / (this.p.b - this.p.a))
   }
 }

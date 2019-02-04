@@ -135,12 +135,12 @@ const Param = {
 }
 
 describe('dist', () => {
-  /*let ih = new dist.Gamma(3, 1)
+  /* let ih = new dist.Gamma(3, 1)
   for (let i = 0; i < 300; i++) {
     console.log(i / 100, ih.pdf(i / 100), ih.cdf(i / 100))
     // ih.cdf(i / 100)
   }
-  return*/
+  return */
 
   // Base class
   describe('Distribution', () => {
@@ -207,11 +207,11 @@ describe('dist', () => {
       })
     })
 
-    describe('.L()', () => {
+    describe('.lnL()', () => {
       it('should throw not implenented error', () => {
         const invalid = new dist.InvalidDiscrete()
         assert.throws(() => {
-          invalid.L([0])
+          invalid.lnL([0])
         }, 'Distribution._pdf() is not implemented')
       })
     })
@@ -221,6 +221,24 @@ describe('dist', () => {
         const invalid = new dist.InvalidDiscrete()
         assert.throws(() => {
           invalid.test([0])
+        }, 'Distribution._pdf() is not implemented')
+      })
+    })
+
+    describe('.aic()', () => {
+      it('should throw not implenented error', () => {
+        const invalid = new dist.InvalidDiscrete()
+        assert.throws(() => {
+          invalid.aic([0])
+        }, 'Distribution._pdf() is not implemented')
+      })
+    })
+
+    describe('.bic()', () => {
+      it('should throw not implenented error', () => {
+        const invalid = new dist.InvalidDiscrete()
+        assert.throws(() => {
+          invalid.bic([0])
         }, 'Distribution._pdf() is not implemented')
       })
     })
@@ -260,6 +278,9 @@ describe('dist', () => {
       desc: 'large n, mean',
       p: () => [int(30, 100), Param.prob()]
     }]
+  }, {
+    name: 'BirnbaumSaunders',
+    p: () => [Param.location(), Param.scale(), Param.shape()]
   }, {
     name: 'BoundedPareto',
     p: () => [Param.rangeMin(), Param.rangeMax(), Param.shape()]
@@ -335,6 +356,15 @@ describe('dist', () => {
     name: 'GeneralizedGamma',
     p: () => [Param.scale(), Param.shape(), Param.shape()]
   }, {
+    name: 'GeneralizedPareto',
+    cases: [{
+      desc: 'nonzero shape parameter',
+      p: () => [Param.location(), Param.scale(), Param.shape()]
+    }, {
+      desc: 'zero shape parameter',
+      p: () => [Param.location(), Param.scale(), 0]
+    }]
+  }, {
     name: 'Geometric',
     p: () => [Param.prob()]
   }, {
@@ -349,6 +379,9 @@ describe('dist', () => {
   }, {
     name: 'Hoyt',
     p: () => [Param.prob(), Param.scale()]
+  }, {
+    name: 'HyperbolicSecant',
+    p: () => []
   }, {
     name: 'Hypergeometric',
     p: () => [int(20, 40), int(20), int(10)]
@@ -365,7 +398,10 @@ describe('dist', () => {
     name: 'IrwinHall',
     p: () => [Param.count() + 10]
   }, {
-    name: 'JohnsonsSU',
+    name: 'JohnsonSU',
+    p: () => [Param.location(), Param.scale(), Param.scale(), Param.location()]
+  }, {
+    name: 'JohnsonSB',
     p: () => [Param.location(), Param.scale(), Param.scale(), Param.location()]
   }, {
     name: 'Kumaraswamy',
@@ -470,7 +506,7 @@ describe('dist', () => {
     name: 'YuleSimon',
     p: () => [Param.shape()]
   }].forEach(d => {
-    // if (d.name !== 'BetaPrime') return
+    // if (d.name !== 'Bates') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
@@ -504,7 +540,7 @@ describe('dist', () => {
         })
 
         describe('.pdf()', () => {
-          d.cases.forEach(c => it(`differentiating cdf shuld give pdf [${c.desc}]`, () => {
+          d.cases.forEach(c => it(`differentiating cdf should give pdf [${c.desc}]`, () => {
             utPdf(d.name, c.p)
           }))
         })

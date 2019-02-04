@@ -144,7 +144,7 @@ export default (function () {
   function cdf2pdf (dist, range, laps) {
     let res = sum(Array.from({ length: laps }, () => {
       let x0 = range[0] + Math.random() * (range[1] - range[0])
-      // console.log(dist.pdf(x0), differentiate(x => dist.cdf(x), x0, 1e-5))
+      // console.log(x0, dist.pdf(x0), differentiate(x => dist.cdf(x), x0, 1e-5))
       return Math.abs(dist.pdf(x0) - differentiate(x => dist.cdf(x), x0, 1e-5))
     })) / laps
     // console.log(res)

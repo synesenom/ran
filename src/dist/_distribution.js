@@ -1,4 +1,4 @@
-import { some } from '../utils'
+import { neumaier, some } from '../utils'
 import { chi2, kolmogorovSmirnov } from './_tests'
 // TODO If a parameter is invalid, return undefined for generator and pdf/cdf
 
@@ -270,7 +270,7 @@ class Distribution {
    * where \(X\) is the set of observations (sample) and \(\theta\) is the parameter vector of the
    * distribution. The function \(f(x)\) denotes the probability density/mass function.
    *
-   * @method L
+   * @method lnL
    * @memberOf ran.dist.Distribution
    * @param {number[]} data Array of numbers to calculate log-likelihood for.
    * @return {number} The value of log-likelihood.
@@ -288,8 +288,11 @@ class Distribution {
    * // => -393.1174868780569
    *
    */
-  L (data) {
-    return data.reduce((acc, d) => acc + this.lnPdf(d), 0)
+  lnL (data) {
+    return neumaier(
+      data.map(d => this.lnPdf(d))
+        .sort((a, b) => b - a)
+    )
   }
 
   /**
@@ -324,6 +327,54 @@ class Distribution {
     return this._type === 'discrete'
       ? chi2(values, x => this._pdf(x), this.k)
       : kolmogorovSmirnov(values, x => this._cdf(x))
+  }
+
+  /**
+   * Returns the value of the [Akaike information criterion]{@link https://en.wikipedia.org/wiki/Akaike_information_criterion}
+   * for a specific data set. Note that this method does not optimize the likelihood, merely computes the AIC with the
+   * current parameter values.
+   *
+   * @method aic
+   * @memberOf ran.dist.Distribution
+   * @param {number[]} data Array of values containing the data.
+   * @returns {number} The AIC for the current parameters.
+   * @example
+   *
+   * let data = (new dist.Pareto(1, 2)).sample(1000)
+   *
+   * (new dist.Pareto(1, 2)).aic(data))
+   * // => 1584.6619128383577
+   *
+   * (new dist.Pareto(1, 5)).aic(data))
+   * // => 2719.0367230482957
+   *
+   */
+  aic (data) {
+    return 2 * (this.k - this.lnL(data))
+  }
+
+  /**
+   * Returns the value of the [Bayesian information criterion]{@link https://en.wikipedia.org/wiki/Bayesian_information_criterion}
+   * for a specific data set. Note that this method does not optimize the likelihood, merely computes the BIC with the
+   * current parameter values.
+   *
+   * @method bic
+   * @memberOf ran.dist.Distribution
+   * @param {number[]} data Array of values containing the data.
+   * @returns {number} The BIC for the current parameters.
+   * @example
+   *
+   * let data = (new dist.Pareto(1, 2)).sample(1000)
+   *
+   * (new dist.Pareto(1, 2)).bic(data))
+   * // => 1825.3432698372499
+   *
+   * (new dist.Pareto(1, 5)).bic(data))
+   * // => 3190.5839264881165
+   *
+   */
+  bic (data) {
+    return Math.log(data.length) * this.k - 2 * this.lnL(data)
   }
 }
 

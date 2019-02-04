@@ -28,7 +28,6 @@ export default class extends Normal {
 
   _generator () {
     // Direct sampling by transforming normal variate
-    // return 1 / (1 + Math.exp(-normal(this.p.mu, this.p.sigma)))
     return 1 / (1 + Math.exp(-super._generator()))
   }
 
