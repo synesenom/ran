@@ -1,4 +1,4 @@
-import Custom from './custom'
+import Categorical from './categorical'
 
 /**
  * Generator for the (ideal) [soliton distribution]{@link https://en.wikipedia.org/wiki/Soliton_distribution}:
@@ -12,14 +12,10 @@ import Custom from './custom'
  * @param {number=} N Number of blocks in the messaging model. Default value is 1.
  * @constructor
  */
-export default class extends Custom {
+export default class extends Categorical {
   // Special case of custom
   constructor (N = 10) {
     // Define weights
-    let weights = [0, 1 / N]
-    for (let k = 2; k <= N; k++) {
-      weights.push(1 / (k * (k - 1)))
-    }
-    super(weights)
+    super([0, 1 / N].concat(Array.from({ length: N - 2 }, (d, i) => 1 / ((i + 1) * (i + 2)))))
   }
 }

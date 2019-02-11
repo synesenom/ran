@@ -1,6 +1,4 @@
-import { beta, betaIncomplete } from '../special'
-import { gamma } from './_standard'
-import Distribution from './_distribution'
+import Beta from './beta'
 
 /**
  * Generator for the [F distribution]{@link https://en.wikipedia.org/wiki/F-distribution} (or Fisher-Snedecor's F
@@ -16,10 +14,11 @@ import Distribution from './_distribution'
  * @param {number=} d2 Second degree of freedom. Default value is 2.
  * @constructor
  */
-export default class extends Distribution {
+export default class extends Beta {
+  // Transformation of beta distribution
   constructor (d1 = 2, d2 = 2) {
-    super('continuous', arguments.length)
-    this.p = { d1, d2 }
+    super(d1 / 2, d2 / 2)
+    this.p = Object.assign({ d1, d2 }, this.p)
     this.s = [{
       value: 0,
       closed: d1 !== 1
@@ -27,19 +26,19 @@ export default class extends Distribution {
       value: null,
       closed: false
     }]
-    this.c = [beta(d1 / 2, d2 / 2)]
   }
 
   _generator () {
-    // Direct sampling from gamma
-    return this.p.d2 * gamma(this.p.d1 / 2, 1) / (this.p.d1 * gamma(this.p.d2 / 2, 1))
+    // Direct sampling by transforming beta variate
+    let x = super._generator()
+    return this.p.d2 * x / (this.p.d1 * (1 - x))
   }
 
   _pdf (x) {
-    return Math.exp(0.5 * (this.p.d2 * Math.log(this.p.d2) + this.p.d1 * Math.log(this.p.d1 * x) - (this.p.d1 + this.p.d2) * Math.log(this.p.d1 * x + this.p.d2))) / (x * this.c[0])
+    return this.p.d1 * this.p.d2 * super._pdf(this.p.d1 * x / (this.p.d2 + this.p.d1 * x)) / Math.pow(this.p.d2 + this.p.d1 * x, 2)
   }
 
   _cdf (x) {
-    return betaIncomplete(this.p.d1 / 2, this.p.d2 / 2, this.p.d1 * x / (this.p.d1 * x + this.p.d2))
+    return super._cdf(this.p.d1 * x / (this.p.d2 + this.p.d1 * x))
   }
 }

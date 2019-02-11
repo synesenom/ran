@@ -358,11 +358,11 @@ describe('dist', () => {
   }, {
     name: 'GeneralizedPareto',
     cases: [{
-      desc: 'nonzero shape parameter',
+      desc: 'non-negative shape parameter',
       p: () => [Param.location(), Param.scale(), Param.shape()]
     }, {
-      desc: 'zero shape parameter',
-      p: () => [Param.location(), Param.scale(), 0]
+      desc: 'negative shape parameter',
+      p: () => [Param.location(), Param.scale(), float(-5, -0.1)]
     }]
   }, {
     name: 'Geometric',
@@ -505,8 +505,14 @@ describe('dist', () => {
   }, {
     name: 'YuleSimon',
     p: () => [Param.shape()]
+  }, {
+    name: 'Zeta',
+    p: () => [Param.shape() + 2]
+  }, {
+    name: 'Zipf',
+    p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'Bates') return
+    // if (d.name !== 'Bernoulli') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

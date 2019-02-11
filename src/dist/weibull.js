@@ -1,4 +1,4 @@
-import Distribution from './_distribution'
+import Exponential from './exponential'
 
 /**
  * Generator for the [Weibull distribution]{@link https://en.wikipedia.org/wiki/Weibull_distribution}:
@@ -13,10 +13,11 @@ import Distribution from './_distribution'
  * @param {number=} k Shape parameter. Default value is 1.
  * @constructor
  */
-export default class extends Distribution {
+export default class extends Exponential {
+  // Transformation of exponential distribution
   constructor (lambda = 1, k = 1) {
-    super('continuous', arguments.length)
-    this.p = { lambda, k }
+    super(1)
+    this.p = Object.assign({ lambda2: lambda, k }, this.p)
     this.s = [{
       value: 0,
       closed: true
@@ -27,15 +28,15 @@ export default class extends Distribution {
   }
 
   _generator () {
-    // Inverse transform sampling
-    return this.p.lambda * Math.pow(-Math.log(Math.random()), 1 / this.p.k)
+    // Direct sampling by transforming exponential variate
+    return this.p.lambda2 * Math.pow(super._generator(), 1 / this.p.k)
   }
 
   _pdf (x) {
-    return (this.p.k / this.p.lambda) * Math.exp((this.p.k - 1) * Math.log(x / this.p.lambda) - Math.pow(x / this.p.lambda, this.p.k))
+    return this.p.k * Math.pow(x / this.p.lambda2, this.p.k - 1) * super._pdf(Math.pow(x / this.p.lambda2, this.p.k)) / this.p.lambda2
   }
 
   _cdf (x) {
-    return 1 - Math.exp(-Math.pow(x / this.p.lambda, this.p.k))
+    return super._cdf(Math.pow(x / this.p.lambda2, this.p.k))
   }
 }

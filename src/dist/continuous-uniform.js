@@ -39,6 +39,6 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return x > this.p.xmax ? 1 : (x - this.p.xmin) / this.c[0]
+    return (x - this.p.xmin) / this.c[0]
   }
 }

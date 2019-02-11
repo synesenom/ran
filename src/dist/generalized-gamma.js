@@ -1,6 +1,4 @@
-import { gammaLn, gammaLowerIncomplete } from '../special'
-import { gamma } from './_standard'
-import Distribution from './_distribution'
+import Gamma from './gamma'
 
 /**
  * Generator for the [generalized gamma distribution]{@link https://en.wikipedia.org/wiki/Generalized_gamma_distribution}:
@@ -16,10 +14,11 @@ import Distribution from './_distribution'
  * @param {number=} p Shape parameter. Default value is 1.
  * @constructor
  */
-export default class extends Distribution {
+export default class extends Gamma {
+  // Transformation of gamma distribution
   constructor (a = 1, d = 1, p = 1) {
-    super('continuous', arguments.length)
-    this.p = { a, d, p }
+    super(d / p, Math.pow(a, -p))
+    this.p = Object.assign({ a, d, p }, this.p)
     this.s = [{
       value: 0,
       closed: d >= 1
@@ -30,15 +29,15 @@ export default class extends Distribution {
   }
 
   _generator () {
-    // Direct sampling from gamma
-    return Math.pow(gamma(this.p.d / this.p.p, Math.pow(this.p.a, -this.p.p)), 1 / this.p.p)
+    // Direct sampling by transforming gamma variate
+    return Math.pow(super._generator(), 1 / this.p.p)
   }
 
   _pdf (x) {
-    return this.p.p * Math.exp(-this.p.d * Math.log(this.p.a) + (this.p.d - 1) * Math.log(x) - Math.pow(x / this.p.a, this.p.p) - gammaLn(this.p.d / this.p.p))
+    return this.p.p * Math.pow(x, this.p.p - 1) * super._pdf(Math.pow(x, this.p.p))
   }
 
   _cdf (x) {
-    return gammaLowerIncomplete(this.p.d / this.p.p, Math.pow(x / this.p.a, this.p.p))
+    return super._cdf(Math.pow(x, this.p.p))
   }
 }

@@ -1,4 +1,4 @@
-import Distribution from './_distribution'
+import Categorical from './categorical'
 
 /**
  * Generator for the [Rademacher distribution]{@link https://en.wikipedia.org/wiki/Rademacher_distribution}:
@@ -11,28 +11,9 @@ import Distribution from './_distribution'
  * @memberOf ran.dist
  * @constructor
  */
-export default class extends Distribution {
+export default class extends Categorical {
+  // Special case of categorical
   constructor () {
-    super('discrete', arguments.length)
-    this.s = [{
-      value: -1,
-      closed: true
-    }, {
-      value: 1,
-      closed: true
-    }]
-  }
-
-  _generator () {
-    // Direct sampling
-    return Math.random() > 0.5 ? -1 : 1
-  }
-
-  _pdf (x) {
-    return x === -1 || x === 1 ? 0.5 : 0
-  }
-
-  _cdf (x) {
-    return x < -1 ? 0 : x >= 1 ? 1 : 0.5
+    super([0.5, 0, 0.5], -1)
   }
 }

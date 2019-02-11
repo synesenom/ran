@@ -1,5 +1,5 @@
 import { binomLn } from '../special'
-import Custom from './custom'
+import Custom from './categorical'
 
 /**
  * Generator for the [negative hypergeometric distribution]{@link https://en.wikipedia.org/wiki/Negative_hypergeometric_distribution}:

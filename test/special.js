@@ -6,6 +6,19 @@ import utils from './test-utils'
 const LAPS = 100
 
 describe('special', () => {
+  describe('.hurwitzZeta', () => {
+    it('zeta(s) - zeta(s, n+1) should give H(s, n)', () => {
+      utils.repeat(() => {
+        let s = Math.random() * 10 + 1
+        let sum = 0
+        for (let n = 1; n < 100; n++) {
+          sum += 1 / Math.pow(n, s)
+          assert(Math.abs(sum - special.riemannZeta(s) + special.hurwitzZeta(s, n + 1)) / sum < 1e-6)
+        }
+      }, LAPS)
+    })
+  })
+
   describe('.gammaLn()', () => {
     it('should be equal to ln(gamma(x))', () => {
       for (let i = 0; i < LAPS; i++) {

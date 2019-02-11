@@ -26,7 +26,7 @@ class Distribution {
    * @method _generator
    * @memberOf ran.dist.Distribution
    * @returns {number} A single random variate.
-   * @private
+   * @protected
    */
   _generator () {
     throw Error('Distribution._generator() is not implemented')
@@ -39,7 +39,7 @@ class Distribution {
    * @memberOf ran.dist.Distribution
    * @param {number } x Value to evaluate the distribution/mass function at.
    * @returns {number} The probability density or probability at the specified value.
-   * @private
+   * @protected
    */
   _pdf (x) {
     throw Error('Distribution._pdf() is not implemented')
@@ -52,7 +52,7 @@ class Distribution {
    * @memberOf ran.dist.Distribution
    * @param {number=} x Value to evaluate the probability distribution at.
    * @returns {number} The value of the probability function at the specified value.
-   * @private
+   * @protected
    */
   _cdf (x) {
     throw Error('Distribution._cdf() is not implemented')
@@ -273,7 +273,7 @@ class Distribution {
    * @method lnL
    * @memberOf ran.dist.Distribution
    * @param {number[]} data Array of numbers to calculate log-likelihood for.
-   * @return {number} The value of log-likelihood.
+   * @returns {number} The log-likelihood of the data for the distribution.
    * @example
    *
    * let pareto = new ran.dist.Pareto(1, 2)
@@ -283,7 +283,7 @@ class Distribution {
    * pareto.L(sample1)
    * // => -104.55926409382
    *
-   * sample2 = uniform.sample(100)
+   * let sample2 = uniform.sample(100)
    * pareto.L(sample2)
    * // => -393.1174868780569
    *
@@ -293,6 +293,58 @@ class Distribution {
       data.map(d => this.lnPdf(d))
         .sort((a, b) => b - a)
     )
+  }
+
+  /**
+   * Returns the value of the [Akaike information criterion]{@link https://en.wikipedia.org/wiki/Akaike_information_criterion}
+   * for a specific data set. Note that this method does not optimize the likelihood, merely computes the AIC with the
+   * current parameter values.
+   *
+   * @method aic
+   * @memberOf ran.dist.Distribution
+   * @param {number[]} data Array of values containing the data.
+   * @returns {number} The AIC for the current parameters.
+   * @example
+   *
+   * let pareto1 = new dist.Pareto(1, 2)
+   * let pareto2 = new dist.Pareto(1, 5)
+   * let sample = pareto1.sample(1000)
+   *
+   * pareto1.aic(sample)
+   * // => 1584.6619128383577
+   *
+   * pareto2.aic(sample)
+   * // => 2719.0367230482957
+   *
+   */
+  aic (data) {
+    return 2 * (this.k - this.lnL(data))
+  }
+
+  /**
+   * Returns the value of the [Bayesian information criterion]{@link https://en.wikipedia.org/wiki/Bayesian_information_criterion}
+   * for a specific data set. Note that this method does not optimize the likelihood, merely computes the BIC with the
+   * current parameter values.
+   *
+   * @method bic
+   * @memberOf ran.dist.Distribution
+   * @param {number[]} data Array of values containing the data.
+   * @returns {number} The BIC for the current parameters.
+   * @example
+   *
+   * let pareto1 = new dist.Pareto(1, 2)
+   * let pareto2 = new dist.Pareto(1, 5)
+   * let sample = pareto1.sample(1000)
+   *
+   * pareto1.bic(sample)
+   * // => 1825.3432698372499
+   *
+   * pareto2.bic(sample)
+   * // => 3190.5839264881165
+   *
+   */
+  bic (data) {
+    return Math.log(data.length) * this.k - 2 * this.lnL(data)
   }
 
   /**
@@ -318,7 +370,7 @@ class Distribution {
    * pareto.test(sample1)
    * // => { statistics: 0.08632443341496943, passed: true }
    *
-   * sample2 = uniform.sample(100)
+   * let sample2 = uniform.sample(100)
    * pareto.test(sample2)
    * // => { statistics: 0.632890888159255, passed: false }
    *
@@ -327,54 +379,6 @@ class Distribution {
     return this._type === 'discrete'
       ? chi2(values, x => this._pdf(x), this.k)
       : kolmogorovSmirnov(values, x => this._cdf(x))
-  }
-
-  /**
-   * Returns the value of the [Akaike information criterion]{@link https://en.wikipedia.org/wiki/Akaike_information_criterion}
-   * for a specific data set. Note that this method does not optimize the likelihood, merely computes the AIC with the
-   * current parameter values.
-   *
-   * @method aic
-   * @memberOf ran.dist.Distribution
-   * @param {number[]} data Array of values containing the data.
-   * @returns {number} The AIC for the current parameters.
-   * @example
-   *
-   * let data = (new dist.Pareto(1, 2)).sample(1000)
-   *
-   * (new dist.Pareto(1, 2)).aic(data))
-   * // => 1584.6619128383577
-   *
-   * (new dist.Pareto(1, 5)).aic(data))
-   * // => 2719.0367230482957
-   *
-   */
-  aic (data) {
-    return 2 * (this.k - this.lnL(data))
-  }
-
-  /**
-   * Returns the value of the [Bayesian information criterion]{@link https://en.wikipedia.org/wiki/Bayesian_information_criterion}
-   * for a specific data set. Note that this method does not optimize the likelihood, merely computes the BIC with the
-   * current parameter values.
-   *
-   * @method bic
-   * @memberOf ran.dist.Distribution
-   * @param {number[]} data Array of values containing the data.
-   * @returns {number} The BIC for the current parameters.
-   * @example
-   *
-   * let data = (new dist.Pareto(1, 2)).sample(1000)
-   *
-   * (new dist.Pareto(1, 2)).bic(data))
-   * // => 1825.3432698372499
-   *
-   * (new dist.Pareto(1, 5)).bic(data))
-   * // => 3190.5839264881165
-   *
-   */
-  bic (data) {
-    return Math.log(data.length) * this.k - 2 * this.lnL(data)
   }
 }
 

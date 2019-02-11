@@ -1,4 +1,4 @@
-import Distribution from './_distribution'
+import Categorical from './categorical'
 
 /**
  * Generator for the [Bernoulli distribution]{@link https://en.wikipedia.org/wiki/Bernoulli_distribution}:
@@ -12,29 +12,9 @@ import Distribution from './_distribution'
  * @param {number=} p Probability of the outcome 1. Default value is 0.5.
  * @constructor
  */
-export default class extends Distribution {
+export default class extends Categorical {
+  // Special case of categorical
   constructor (p = 0.5) {
-    super('discrete', arguments.length)
-    this.p = { p }
-    this.s = [{
-      value: 0,
-      closed: true
-    }, {
-      value: 1,
-      closed: true
-    }]
-  }
-
-  _generator () {
-    // Direct sampling
-    return Math.random() < this.p.p ? 1 : 0
-  }
-
-  _pdf (x) {
-    return x === 1 ? this.p.p : x === 0 ? 1 - this.p.p : 0
-  }
-
-  _cdf () {
-    return 1 - this.p.p
+    super([1 - p, p])
   }
 }

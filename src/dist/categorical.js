@@ -21,7 +21,7 @@ export default class extends Distribution {
       value: min,
       closed: true
     }, {
-      value: Math.max(0, weights.length - 1),
+      value: Math.max(0, weights.length - 1) + min,
       closed: true
     }]
 
@@ -110,13 +110,13 @@ export default class extends Distribution {
 
   _pdf (x) {
     if (this.p.n <= 1) {
-      return x !== this.p.min ? 0 : 1
+      return 1
     } else {
-      return this.c[2][x]
+      return this.c[2][x - this.p.min]
     }
   }
 
   _cdf (x) {
-    return this.c[3][x]
+    return this.c[3][x - this.p.min]
   }
 }

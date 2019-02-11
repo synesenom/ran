@@ -1,13 +1,13 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for the [generalized Pareto distribution (GPD)]{@link https://en.wikipedia.org/wiki/Generalized_Pareto_distribution}:
+ * Generator for the [generalized Pareto distribution]{@link https://en.wikipedia.org/wiki/Generalized_Pareto_distribution}:
  *
  * $$fx; \mu, \sigma, \xi) = \begin{cases}\frac{1}{\sigma} (1 + \xi z)^{-(1/\xi + 1)} &\quad\text{if $\xi \ne 0$},\\\frac{1}{\sigma} e^{-z} &\quad\text{if $\xi = 0$}\\\end{cases},$$
  *
  * with \(\mu, \xi \in \mathbb{R}\), \(\sigma \in \mathbb{R}^+\) and \(z = \frac{x - \mu}{\sigma}\). Support: \(x \in [\mu, \infty)\) if \(\xi \ge 0\), \(x \in [\mu, \mu - \sigma / \xi]\) otherwise.
  *
- * @class GPD
+ * @class GeneralizedPareto
  * @memberOf ran.dist
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} sigma Scale parameter. Default value is 1.
@@ -22,7 +22,7 @@ export default class extends Distribution {
       value: mu,
       closed: true
     }, {
-      value: xi < 0 ? (mu - sigma) / xi : null,
+      value: xi < 0 ? mu - sigma / xi : null,
       closed: xi < 0
     }]
   }
