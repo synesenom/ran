@@ -23,16 +23,16 @@ function utPdf (name, params) {
     if (self.type() === 'continuous') {
       return utils.cdf2pdf(
         self, [
-          (supp[0].value !== null ? supp[0].value : -20) - 1,
-          (supp[1].value !== null ? supp[1].value : 20) + 1
+          (supp[0].value !== null ? supp[0].value : -30) - 3,
+          (supp[1].value !== null ? supp[1].value : 30) + 3
         ], LAPS
       ) < EPSILON
     } else {
       return utils.diffDisc(
         x => self.pdf(x),
         x => self.cdf(x),
-        (supp[0].value !== null ? supp[0].value : -20) - 1,
-        (supp[1].value !== null ? supp[1].value : 20) + 1
+        (supp[0].value !== null ? supp[0].value : -30) - 3,
+        (supp[1].value !== null ? supp[1].value : 30) + 3
       ) < MAX_AVG_DIFF
     }
   })
@@ -358,11 +358,14 @@ describe('dist', () => {
   }, {
     name: 'GeneralizedPareto',
     cases: [{
-      desc: 'non-negative shape parameter',
+      desc: 'positive shape parameter',
       p: () => [Param.location(), Param.scale(), Param.shape()]
     }, {
       desc: 'negative shape parameter',
       p: () => [Param.location(), Param.scale(), float(-5, -0.1)]
+    }, {
+      desc: 'zero shape parameter',
+      p: () => [Param.location(), Param.scale(), 0]
     }]
   }, {
     name: 'Geometric',
@@ -494,6 +497,9 @@ describe('dist', () => {
     name: 'Soliton',
     p: () => [Param.count()]
   }, {
+    name: 'StudentT',
+    p: () => [Param.shape()]
+  }, {
     name: 'Triangular',
     p: () => [Param.rangeMin(), Param.rangeMax(), Param.rangeIn()]
   }, {
@@ -512,7 +518,7 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'Bernoulli') return
+    // if (d.name !== 'StudentT') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

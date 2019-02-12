@@ -53,7 +53,6 @@ export function neumaier (arr) {
 
 /**
  * The main random number generator.
- * If min > max, a random number in (max, min) is generated.
  *
  * @method r
  * @memberOf ran.utils
@@ -63,7 +62,7 @@ export function neumaier (arr) {
  * @private
  */
 export function r (min, max) {
-  return min < max ? Math.random() * (max - min) + min : Math.random() * (min - max) + max
+  return Math.random() * (max - min) + min
 }
 
 /**

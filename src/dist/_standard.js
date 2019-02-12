@@ -1,10 +1,23 @@
 import { gammaLn } from '../special'
 
 /**
+ * Generates a random sign.
+ *
+ * @method sign
+ * @memberOf ran.dist
+ * @param {number=} p Probability of +1. Default value is 0.5.
+ * @return {number} Random sign (-1 or +1).
+ * @private
+ */
+export function sign (p = 0.5) {
+  return Math.random() < p ? 1 : -1
+}
+
+/**
  * Generates a normally distributed value.
  *
  * @method normal
- * @memberOf ran.dist.
+ * @memberOf ran.dist
  * @param mu {number=} Distribution mean. Default value is 0.
  * @param sigma {number=} Distribution standard deviation. Default value is 1.
  * @returns {number} Random variate.
@@ -21,13 +34,13 @@ export function normal (mu = 0, sigma = 1) {
  * Generates a gamma distributed value.
  *
  * @method gamma
- * @memberOf ran.dist.
+ * @memberOf ran.dist
  * @param alpha {number} Shape parameter.
- * @param beta {number} Rate parameter.
+ * @param beta {number=} Rate parameter. Default value is 1.
  * @returns {number} Random variate.
  * @private
  */
-export function gamma (alpha, beta) {
+export function gamma (alpha, beta = 1) {
   if (alpha > 1) {
     let d = alpha - 1 / 3
 
