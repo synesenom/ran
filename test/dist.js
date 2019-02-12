@@ -422,6 +422,9 @@ describe('dist', () => {
     name: 'LogCauchy',
     p: () => [Param.location(), Param.scale()]
   }, {
+    name: 'LogGamma',
+    p: () => [Param.shape(), Param.rate()]
+  }, {
     name: 'Logistic',
     p: () => [Param.location(), Param.scale()]
   }, {
@@ -518,7 +521,7 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'StudentT') return
+    // if (d.name !== 'Exponential') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

@@ -1,37 +1,20 @@
 import { gammaLn } from '../special'
 
 /**
- * Generates a random sign.
+ * Generates a exponential random variate.
  *
- * @method sign
+ * @method exponential
  * @memberOf ran.dist
- * @param {number=} p Probability of +1. Default value is 0.5.
- * @return {number} Random sign (-1 or +1).
- * @private
- */
-export function sign (p = 0.5) {
-  return Math.random() < p ? 1 : -1
-}
-
-/**
- * Generates a normally distributed value.
- *
- * @method normal
- * @memberOf ran.dist
- * @param mu {number=} Distribution mean. Default value is 0.
- * @param sigma {number=} Distribution standard deviation. Default value is 1.
+ * @param lambda {number=} Rate parameter. Default value is 1.
  * @returns {number} Random variate.
  * @private
  */
-export function normal (mu = 0, sigma = 1) {
-  let u = Math.random()
-
-  let v = Math.random()
-  return sigma * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) + mu
+export function exponential (lambda = 1) {
+  return -Math.log(Math.random()) / lambda
 }
 
 /**
- * Generates a gamma distributed value.
+ * Generates a gamma random variate.
  *
  * @method gamma
  * @memberOf ran.dist
@@ -63,7 +46,24 @@ export function gamma (alpha, beta = 1) {
 }
 
 /**
- * Generates a Poisson distributed value.
+ * Generates a normally random variate.
+ *
+ * @method normal
+ * @memberOf ran.dist
+ * @param mu {number=} Distribution mean. Default value is 0.
+ * @param sigma {number=} Distribution standard deviation. Default value is 1.
+ * @returns {number} Random variate.
+ * @private
+ */
+export function normal (mu = 0, sigma = 1) {
+  let u = Math.random()
+
+  let v = Math.random()
+  return sigma * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) + mu
+}
+
+/**
+ * Generates a Poisson random variate.
  *
  * @method poisson
  * @memberOf ran.dist
@@ -72,7 +72,6 @@ export function gamma (alpha, beta = 1) {
  * @private
  */
 export function poisson (lambda) {
-  // Direct sampling
   if (lambda < 30) {
     // Small lambda, Knuth's method
     let l = Math.exp(-lambda)
@@ -111,6 +110,40 @@ export function poisson (lambda) {
 
       let rhs = k + n * Math.log(lambda) - gammaLn(n + 1)
       if (lhs <= rhs) { return n }
+    }
+  }
+}
+
+/**
+ * Generates a random sign.
+ *
+ * @method sign
+ * @memberOf ran.dist
+ * @param {number=} p Probability of +1. Default value is 0.5.
+ * @return {number} Random sign (-1 or +1).
+ * @private
+ */
+export function sign (p = 0.5) {
+  return Math.random() < p ? 1 : -1
+}
+
+/**
+ * Generates a zeta random variate
+ *
+ * @method zeta
+ * @memberOf ran.dist
+ * @param {number} s Exponent.
+ * @returns {number} Random variate.
+ * @private
+ */
+export function zeta (s) {
+  // Rejection sampling
+  let b = Math.pow(2, s - 1)
+  for (let trials = 0; trials < 100; trials++) {
+    let x = Math.floor(Math.pow(Math.random(), -1 / (s - 1)))
+    let t = Math.pow(1 + 1 / x, s - 1)
+    if (Math.random() * x * (t - 1) / (b - 1) <= t / b) {
+      return x
     }
   }
 }

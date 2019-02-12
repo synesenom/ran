@@ -1,4 +1,5 @@
 import { riemannZeta, generalizedHarmonic } from '../special'
+import { zeta } from './_standard'
 import Distribution from './_distribution'
 
 /**
@@ -29,13 +30,7 @@ export default class extends Distribution {
 
   _generator () {
     // Rejection sampling
-    for (let trials = 0; trials < 100; trials++) {
-      let x = Math.floor(Math.pow(Math.random(), -1 / (this.p.s - 1)))
-      let t = Math.pow(1 + 1 / x, this.p.s - 1)
-      if (Math.random() * x * (t - 1) / (this.c[1] - 1) <= t / this.c[1]) {
-        return x
-      }
-    }
+    return zeta(this.p.s)
   }
 
   _pdf (x) {

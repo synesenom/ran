@@ -1,3 +1,4 @@
+import { exponential } from './_standard'
 import Distribution from './_distribution'
 
 /**
@@ -27,7 +28,8 @@ export default class extends Distribution {
 
   _generator () {
     // Inverse transform sampling
-    return -Math.log(Math.random()) / this.p.lambda
+    // return -Math.log(Math.random()) / this.p.lambda
+    return exponential(this.p.lambda)
   }
 
   _pdf (x) {
