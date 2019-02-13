@@ -6,7 +6,7 @@
  * @private
  */
 export { default as beta } from './special/beta'
-export { default as betaIncomplete } from './special/beta-incomplete'
+export { betaIncomplete, regularizedBetaIncomplete } from './special/beta-incomplete'
 export { default as binomLn } from './special/binom-log'
 export { default as erf } from './special/error'
 export { default as gamma } from './special/gamma'

@@ -1,4 +1,4 @@
-import { beta, betaIncomplete } from '../special'
+import { beta, regularizedBetaIncomplete } from '../special'
 import { sign, gamma } from './_standard'
 import Distribution from './_distribution'
 
@@ -38,7 +38,7 @@ export default class extends Distribution {
 
   _cdf (x) {
     return x > 0
-      ? 1 - 0.5 * betaIncomplete(this.p.nu / 2, 0.5, this.p.nu / (x * x + this.p.nu))
-      : 0.5 * betaIncomplete(this.p.nu / 2, 0.5, this.p.nu / (x * x + this.p.nu))
+      ? 1 - 0.5 * regularizedBetaIncomplete(this.p.nu / 2, 0.5, this.p.nu / (x * x + this.p.nu))
+      : 0.5 * regularizedBetaIncomplete(this.p.nu / 2, 0.5, this.p.nu / (x * x + this.p.nu))
   }
 }

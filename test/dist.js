@@ -16,25 +16,56 @@ const EPSILON = 1e-6
  * @param {Function} params Generator for the parameters array.
  */
 function utPdf (name, params) {
-  utils.trials(() => {
-    const self = new dist[name](...params())
+  it('pdf should return valid numbers', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
 
-    const supp = self.support()
-    if (self.type() === 'continuous') {
-      return utils.cdf2pdf(
-        self, [
+      let isNum = true
+      for (let x = -100; x <= 100; x++) {
+        let pdf = self.pdf(x)
+        isNum &= isFinite(pdf) && Number.isFinite(pdf)
+        if (!isFinite(pdf) || !Number.isFinite(pdf)) {
+          console.log(pdf)
+        }
+      }
+      return isNum
+    }, true)
+  })
+
+  it('cdf should return valid numbers', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
+
+      let isNum = true
+      for (let x = -100; x <= 100; x++) {
+        let cdf = self.cdf(x)
+        isNum &= isFinite(cdf) && Number.isFinite(cdf)
+      }
+      return isNum
+    }, true)
+  })
+
+  it('pdf/pmf should be de differential or difference of cdf', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
+
+      const supp = self.support()
+      if (self.type() === 'continuous') {
+        return utils.cdf2pdf(
+          self, [
+            (supp[0].value !== null ? supp[0].value : -30) - 3,
+            (supp[1].value !== null ? supp[1].value : 30) + 3
+          ], LAPS
+        ) < EPSILON
+      } else {
+        return utils.diffDisc(
+          x => self.pdf(x),
+          x => self.cdf(x),
           (supp[0].value !== null ? supp[0].value : -30) - 3,
           (supp[1].value !== null ? supp[1].value : 30) + 3
-        ], LAPS
-      ) < EPSILON
-    } else {
-      return utils.diffDisc(
-        x => self.pdf(x),
-        x => self.cdf(x),
-        (supp[0].value !== null ? supp[0].value : -30) - 3,
-        (supp[1].value !== null ? supp[1].value : 30) + 3
-      ) < MAX_AVG_DIFF
-    }
+        ) < MAX_AVG_DIFF
+      }
+    }, true)
   })
 }
 
@@ -46,18 +77,29 @@ function utPdf (name, params) {
  * @param {Function} params Generator for the parameters array.
  */
 function utSample (name, params) {
-  utils.trials(() => {
-    const self = new dist[name](...params())
-    return self.type() === 'continuous'
-      ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
-      : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
+  it('sample should contain only valid numbers', () => {
+    utils.trials(() => {
+      const sample = new dist[name](...params()).sample(1000)
+      return sample.reduce((acc, d) => acc && Number.isFinite(d) && isFinite(d), true)
+    }, true)
   })
 
-  utils.trials(() => {
-    const self = new dist[name]()
-    return self.type() === 'continuous'
-      ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
-      : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
+  it('values should be distributed correctly with default parameters', () => {
+    utils.trials(() => {
+      const self = new dist[name]()
+      return self.type() === 'continuous'
+        ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
+        : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
+    })
+  })
+
+  it('values should be distributed correctly with random parameters', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
+      return self.type() === 'continuous'
+        ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
+        : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
+    })
   })
 }
 
@@ -451,10 +493,10 @@ describe('dist', () => {
   }, {
     name: 'LogNormal',
     p: () => [Param.location(), Param.scale()]
-  }, /*, {
-      name: 'LogSeries',
-      p: () => [float()]
-    } */ {
+  }, {
+    name: 'LogSeries',
+    p: () => [Param.prob()]
+  }, {
     name: 'Lomax',
     p: () => [Param.scale(), Param.shape()]
   }, {
@@ -521,21 +563,13 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'Exponential') return
+    // if (d.name !== 'LogSeries') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
-        describe('.sample()', () => {
-          it(`should generate values with ${d.name} distribution`, () => {
-            utSample(d.name, d.p)
-          })
-        })
+        describe('.sample()', () => utSample(d.name, d.p))
 
-        describe('.pdf()', () => {
-          it('differentiating cdf should give pdf ', () => {
-            utPdf(d.name, d.p)
-          })
-        })
+        describe('.pdf()', () => utPdf(d.name, d.p))
 
         describe('.test()', () => {
           it('should pass for own distribution', () => {
@@ -549,15 +583,11 @@ describe('dist', () => {
         })
       } else {
         describe('.sample()', () => {
-          d.cases.forEach(c => it(`should generate values with ${d.name} distribution [${c.desc}]`, () => {
-            utSample(d.name, c.p)
-          }))
+          d.cases.forEach(c => utSample(d.name, c.p))
         })
 
         describe('.pdf()', () => {
-          d.cases.forEach(c => it(`differentiating cdf should give pdf [${c.desc}]`, () => {
-            utPdf(d.name, c.p)
-          }))
+          d.cases.forEach(c => utPdf(d.name, c.p))
         })
 
         describe('.test()', () => {

@@ -1,6 +1,6 @@
 import { gamma } from './_standard'
 import Distribution from './_distribution'
-import { beta as fnBeta, betaIncomplete } from '../special'
+import { beta as fnBeta, regularizedBetaIncomplete } from '../special'
 
 /**
  * Generator for the [beta distribution]{@link https://en.wikipedia.org/wiki/Beta_distribution}:
@@ -43,6 +43,6 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return betaIncomplete(this.p.alpha, this.p.beta, x)
+    return regularizedBetaIncomplete(this.p.alpha, this.p.beta, x)
   }
 }

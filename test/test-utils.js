@@ -128,8 +128,7 @@ export default (function () {
       dy += Math.abs(cdf(x) - int)
       // console.log(x, int, cdf(x))
     }
-    // console.log(dy)
-    return dy
+    return isFinite(dy) ? dy : 1e6
   }
 
   function differentiate (func, x0, dx) {

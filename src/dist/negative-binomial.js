@@ -1,4 +1,4 @@
-import { betaIncomplete, binomLn } from '../special'
+import { regularizedBetaIncomplete, binomLn } from '../special'
 import { gamma, poisson } from './_standard'
 import Distribution from './_distribution'
 
@@ -38,6 +38,6 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return 1 - betaIncomplete(x + 1, this.p.r, this.p.p)
+    return 1 - regularizedBetaIncomplete(x + 1, this.p.r, this.p.p)
   }
 }

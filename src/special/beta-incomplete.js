@@ -40,9 +40,31 @@ function _biContinuedFraction (a, b, x) {
 }
 
 /**
-   * Regularized incomplete beta function, using the continued fraction approximations.
+ * Incomplete beta function.
+ *
+ * @method betaIncomplete
+ * @memberOf ran.special
+ * @param {number} a First parameter of the function.
+ * @param {number} b Second parameter of the function.
+ * @param {number} x Upper boundary of the integral.
+ * @returns {number} Value of the incomplete beta function.
+ * @private
+ */
+export function betaIncomplete (a, b, x) {
+  let bt = (x <= 0 || x >= 1)
+    ? 0
+    : Math.exp(a * Math.log(x) + b * Math.log(1 - x))
+  /* return x < (a + 1) / (a + b + 2)
+    ? bt * _biContinuedFraction(a, b, x) / a
+    : 1 - bt * _biContinuedFraction(b, a, 1 - x) / b */
+  // FIXME Use clever faster method
+  return bt * _biContinuedFraction(a, b, x) / a
+}
+
+/**
+   * Regularized incomplete beta function.
    *
-   * @method betaIncomplete
+   * @method regularizedBetaIncomplete
    * @memberOf ran.special
    * @param {number} a First parameter of the function.
    * @param {number} b Second parameter of the function.
@@ -50,7 +72,7 @@ function _biContinuedFraction (a, b, x) {
    * @returns {number} Value of the incomplete beta function.
    * @private
    */
-export default function (a, b, x) {
+export function regularizedBetaIncomplete (a, b, x) {
   let bt = (x <= 0 || x >= 1)
     ? 0
     : Math.exp(gammaLn(a + b) - gammaLn(a) - gammaLn(b) + a * Math.log(x) + b * Math.log(1 - x))

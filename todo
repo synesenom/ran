@@ -9,7 +9,6 @@
 // TODO Use decimal.js for high precision
 
 // TODO Benford                               (inverse transform)
-// TODO Log gamma                             (can be directly implemented)
 // TODO U-quadratic                           (can be directly implemented)
 // TODO Half-logistic                         (inverse transform)
 // TODO Benktander 1nd kind                   (lambertW)
