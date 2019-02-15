@@ -14,7 +14,7 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Distribution {
-  constructor (rho = 1) {
+  constructor (rho = 2) {
     super('discrete', arguments.length)
     this.p = { rho }
     this.s = [{

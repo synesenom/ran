@@ -11,18 +11,18 @@ function phi (x) {
  *
  * $$f(x; \lambda, \mu) = \bigg[\frac{\lambda}{2 \pi x^3}\bigg]^{1/2} e^{\frac{-\lambda (x - \mu)^2}{2 \mu^2 x}},$$
  *
- * with \(\lambda, \mu \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
+ * with \(\mu, \lambda \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
  *
  * @class InverseGaussian
  * @memberOf ran.dist
- * @param {number=} lambda Shape parameter. Default value is 1.
  * @param {number=} mu Mean of the distribution. Default value is 1.
+ * @param {number=} lambda Shape parameter. Default value is 1.
  * @constructor
  */
 export default class extends Distribution {
-  constructor (lambda = 1, mu = 1) {
+  constructor (mu = 1, lambda = 1) {
     super('continuous', arguments.length)
-    this.p = { lambda, mu }
+    this.p = { mu, lambda }
     this.s = [{
       value: 0,
       closed: false

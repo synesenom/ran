@@ -22,7 +22,7 @@ export default class extends Distribution {
     this.p = { q, omega }
     this.s = [{
       value: 0,
-      closed: q >= 0.5
+      closed: true
     }, {
       value: null,
       closed: false
@@ -36,7 +36,14 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return 2 * Math.exp(this.p.q * Math.log(this.p.q) - this.p.q * x * x / this.p.omega - gammaLn(this.p.q) - this.p.q * Math.log(this.p.omega)) * Math.pow(x, 2 * this.p.q - 1)
+    let z = Math.pow(x, 2 * this.p.q - 1)
+
+    // Handle q < 0.5 and x << 0 case
+    if (!isFinite(z)) {
+      return 0
+    } else {
+      return 2 * Math.exp(this.p.q * Math.log(this.p.q) - this.p.q * x * x / this.p.omega - gammaLn(this.p.q) - this.p.q * Math.log(this.p.omega)) * z
+    }
   }
 
   _cdf (x) {

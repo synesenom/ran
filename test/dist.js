@@ -68,6 +68,18 @@ function utPdf (name, params) {
     })
   })
 
+  /* it('cdf should be non-decreasing', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
+
+      let flag = true
+      for (let x = -1000; x <= 1000; x++) {
+        flag &= self.cdf(x / 10 + 1e-3) >= self.cdf(x / 10)
+      }
+      return flag
+    })
+  }) */
+
   it('pdf (pmf) should be the differential (difference) of cdf', () => {
     utils.trials(() => {
       const self = new dist[name](...params())
@@ -154,7 +166,7 @@ function utTest (name, params, type = 'self') {
       utils.trials(() => {
         const self = new dist[name](...params())
         return self.test(self.sample(LAPS)).passed
-      }, 7)
+      }, 6)
       break
     case 'foreign':
       utils.trials(() => {
@@ -166,7 +178,7 @@ function utTest (name, params, type = 'self') {
           ? new dist.ContinuousUniform(Math.min(...sample), Math.max(...sample))
           : new dist.DiscreteUniform(Math.min(...sample), Math.max(...sample))
         return !foreign.test(sample).passed
-      }, 7)
+      }, 6)
       break
   }
 }
@@ -484,7 +496,7 @@ describe('dist', () => {
     p: () => [Param.shape(), Param.scale()]
   }, {
     name: 'InverseGaussian',
-    p: () => [Param.shape(), Param.scale()]
+    p: () => [Param.scale(), Param.shape()]
   }, {
     name: 'IrwinHall',
     p: () => [Param.count() + 10]
@@ -585,6 +597,9 @@ describe('dist', () => {
     name: 'Reciprocal',
     p: () => [Param.rangeMin(), Param.rangeMax()]
   }, {
+    name: 'RIG',
+    p: () => [Param.scale(), Param.shape()]
+  }, {
     name: 'Soliton',
     p: () => [Param.count()]
   }, {
@@ -601,7 +616,7 @@ describe('dist', () => {
     p: () => [Param.scale()]
   }, {
     name: 'YuleSimon',
-    p: () => [Param.shape()]
+    p: () => [Param.shape() + 0.2]
   }, {
     name: 'Zeta',
     p: () => [Param.shape() + 1]
@@ -609,7 +624,7 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'Zeta') return
+    // if (d.name !== 'YuleSimon') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

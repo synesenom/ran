@@ -4,32 +4,12 @@
     <list default="true" id="2dce2d99-d55c-4cdc-9490-9c9d46ff6d0c" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/index.html" afterPath="$PROJECT_DIR$/docs/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/_standard.js" afterPath="$PROJECT_DIR$/src/dist/_standard.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/benktander-ii.js" afterPath="$PROJECT_DIR$/src/dist/benktander-ii.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/beta-prime.js" afterPath="$PROJECT_DIR$/src/dist/beta-prime.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/beta.js" afterPath="$PROJECT_DIR$/src/dist/beta.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/chi.js" afterPath="$PROJECT_DIR$/src/dist/chi.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/discrete-weibull.js" afterPath="$PROJECT_DIR$/src/dist/discrete-weibull.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/flory-schulz.js" afterPath="$PROJECT_DIR$/src/dist/flory-schulz.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/gamma.js" afterPath="$PROJECT_DIR$/src/dist/gamma.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/generalized-gamma.js" afterPath="$PROJECT_DIR$/src/dist/generalized-gamma.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/half-normal.js" afterPath="$PROJECT_DIR$/src/dist/half-normal.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist.js" afterPath="$PROJECT_DIR$/src/dist.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/hoyt.js" afterPath="$PROJECT_DIR$/src/dist/hoyt.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/inverse-gaussian.js" afterPath="$PROJECT_DIR$/src/dist/inverse-gaussian.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/johnson-sb.js" afterPath="$PROJECT_DIR$/src/dist/johnson-sb.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/kumaraswamy.js" afterPath="$PROJECT_DIR$/src/dist/kumaraswamy.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/log-cauchy.js" afterPath="$PROJECT_DIR$/src/dist/log-cauchy.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/log-logistic.js" afterPath="$PROJECT_DIR$/src/dist/log-logistic.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/logistic-exponential.js" afterPath="$PROJECT_DIR$/src/dist/logistic-exponential.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/logistic.js" afterPath="$PROJECT_DIR$/src/dist/logistic.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/makeham.js" afterPath="$PROJECT_DIR$/src/dist/makeham.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/student-t.js" afterPath="$PROJECT_DIR$/src/dist/student-t.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/weibull.js" afterPath="$PROJECT_DIR$/src/dist/weibull.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/yule-simon.js" afterPath="$PROJECT_DIR$/src/dist/yule-simon.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/special/error.js" afterPath="$PROJECT_DIR$/src/special/error.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/core.js" afterPath="$PROJECT_DIR$/test/core.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/dist.js" afterPath="$PROJECT_DIR$/test/dist.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/test-utils.js" afterPath="$PROJECT_DIR$/test/test-utils.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/todo" afterPath="$PROJECT_DIR$/todo" />
     </list>
     <ignored path="$PROJECT_DIR$/dist/" />
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -47,51 +27,41 @@
       <file leaf-file-name="todo" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/todo">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-774">
-              <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
+            <state relative-caret-position="720">
+              <caret line="48" column="39" lean-forward="false" selection-start-line="48" selection-start-column="39" selection-end-line="48" selection-end-column="39" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="dist.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="dist.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test/dist.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="21" column="0" lean-forward="true" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+            <state relative-caret-position="316">
+              <caret line="626" column="7" lean-forward="false" selection-start-line="626" selection-start-column="7" selection-end-line="626" selection-end-column="7" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="yule-simon.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="yule-simon.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/dist/yule-simon.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="473">
-              <caret line="43" column="12" lean-forward="true" selection-start-line="43" selection-start-column="12" selection-end-line="43" selection-end-column="12" />
+            <state relative-caret-position="345">
+              <caret line="33" column="30" lean-forward="true" selection-start-line="33" selection-start-column="30" selection-end-line="33" selection-end-column="30" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="zeta.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/dist/zeta.js">
+      <file leaf-file-name="hoyt.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/dist/hoyt.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-97">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+            <state relative-caret-position="600">
+              <caret line="40" column="31" lean-forward="true" selection-start-line="40" selection-start-column="31" selection-end-line="40" selection-end-column="31" />
               <folding>
-                <element signature="e#0#61#0" expanded="true" />
+                <element signature="e#0#58#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="test-utils.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/test-utils.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="211">
-              <caret line="110" column="87" lean-forward="false" selection-start-line="110" selection-start-column="87" selection-end-line="110" selection-end-column="87" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -109,8 +79,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>special</find>
-      <find>la.</find>
       <find>core.</find>
       <find>core.int</find>
       <find>sum</find>
@@ -139,6 +107,8 @@
       <find>tri</find>
       <find>Beni</find>
       <find>Normal</find>
+      <find>series</find>
+      <find>Log</find>
     </findStrings>
     <replaceStrings>
       <replace>LAPS</replace>
@@ -152,7 +122,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/special/riemann-zeta.js" />
         <option value="$PROJECT_DIR$/src/special/generalized-harmonic.js" />
         <option value="$PROJECT_DIR$/src/dist/zipf.js" />
         <option value="$PROJECT_DIR$/src/dist/soliton.js" />
@@ -166,9 +135,7 @@
         <option value="$PROJECT_DIR$/src/dist/exponential.js" />
         <option value="$PROJECT_DIR$/src/special/gamma-incomplete.js" />
         <option value="$PROJECT_DIR$/src/dist/emg.js" />
-        <option value="$PROJECT_DIR$/src/dist.js" />
         <option value="$PROJECT_DIR$/src/special.js" />
-        <option value="$PROJECT_DIR$/todo" />
         <option value="$PROJECT_DIR$/src/dist/_distribution.js" />
         <option value="$PROJECT_DIR$/src/dist/_tests.js" />
         <option value="$PROJECT_DIR$/src/special/beta-incomplete.js" />
@@ -180,17 +147,14 @@
         <option value="$PROJECT_DIR$/src/dist/nakagami.js" />
         <option value="$PROJECT_DIR$/src/dist/generalized-gamma.js" />
         <option value="$PROJECT_DIR$/src/dist/logistic-exponential.js" />
-        <option value="$PROJECT_DIR$/src/dist/inverse-gaussian.js" />
         <option value="$PROJECT_DIR$/src/dist/chi2.js" />
         <option value="$PROJECT_DIR$/src/dist/gamma.js" />
         <option value="$PROJECT_DIR$/src/dist/chi.js" />
         <option value="$PROJECT_DIR$/src/dist/log-cauchy.js" />
-        <option value="$PROJECT_DIR$/src/dist/hoyt.js" />
         <option value="$PROJECT_DIR$/src/dist/log-logistic.js" />
         <option value="$PROJECT_DIR$/src/dist/logistic.js" />
         <option value="$PROJECT_DIR$/src/special/error.js" />
         <option value="$PROJECT_DIR$/src/dist/half-normal.js" />
-        <option value="$PROJECT_DIR$/src/dist/yule-simon.js" />
         <option value="$PROJECT_DIR$/src/dist/benktander-ii.js" />
         <option value="$PROJECT_DIR$/src/dist/discrete-weibull.js" />
         <option value="$PROJECT_DIR$/src/dist/flory-schulz.js" />
@@ -200,8 +164,14 @@
         <option value="$PROJECT_DIR$/src/dist/log-gamma.js" />
         <option value="$PROJECT_DIR$/src/dist/makeham.js" />
         <option value="$PROJECT_DIR$/src/dist/kumaraswamy.js" />
-        <option value="$PROJECT_DIR$/test/test-utils.js" />
         <option value="$PROJECT_DIR$/test/core.js" />
+        <option value="$PROJECT_DIR$/src/dist/inverse-gaussian.js" />
+        <option value="$PROJECT_DIR$/src/dist.js" />
+        <option value="$PROJECT_DIR$/src/dist/rig.js" />
+        <option value="$PROJECT_DIR$/todo" />
+        <option value="$PROJECT_DIR$/test/test-utils.js" />
+        <option value="$PROJECT_DIR$/src/dist/hoyt.js" />
+        <option value="$PROJECT_DIR$/src/dist/yule-simon.js" />
         <option value="$PROJECT_DIR$/test/dist.js" />
       </list>
     </option>
@@ -253,7 +223,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -281,7 +251,7 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -373,7 +343,8 @@
       <workItem from="1548769331858" duration="1702000" />
       <workItem from="1548772792861" duration="1975000" />
       <workItem from="1548775019394" duration="112022000" />
-      <workItem from="1549553062358" duration="56210000" />
+      <workItem from="1549553062358" duration="58596000" />
+      <workItem from="1550267491660" duration="64000" />
     </task>
     <servers />
   </component>
@@ -389,7 +360,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="300524000" />
+    <option name="totallyTimeSpent" value="302974000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="725" y="23" width="715" height="802" extended-state="0" />
@@ -398,7 +369,6 @@
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26993006" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32876712" sideWeight="0.50477487" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32876712" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="npm" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32876712" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -411,6 +381,7 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32876712" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -427,69 +398,10 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/dist/_tests.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="191">
-          <caret line="75" column="0" lean-forward="true" selection-start-line="75" selection-start-column="0" selection-end-line="75" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/node_modules/chai/chai.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="4896" column="10" lean-forward="false" selection-start-line="4896" selection-start-column="10" selection-end-line="4896" selection-end-column="10" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/beta-incomplete.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="96">
-          <caret line="59" column="35" lean-forward="false" selection-start-line="59" selection-start-column="35" selection-end-line="59" selection-end-column="35" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/log-series.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="21" column="12" lean-forward="true" selection-start-line="21" selection-start-column="12" selection-end-line="21" selection-end-column="12" />
-          <folding>
-            <element signature="e#0#43#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="332">
-          <caret line="63" column="52" lean-forward="true" selection-start-line="63" selection-start-column="52" selection-end-line="63" selection-end-column="52" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/fisher-z.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="30" column="34" lean-forward="true" selection-start-line="30" selection-start-column="34" selection-end-line="30" selection-end-column="34" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/f.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="288">
-          <caret line="28" column="3" lean-forward="true" selection-start-line="28" selection-start-column="3" selection-end-line="28" selection-end-column="3" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/dist/arcsine.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="12">
           <caret line="20" column="15" lean-forward="true" selection-start-line="20" selection-start-column="15" selection-end-line="20" selection-end-column="15" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -497,7 +409,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="330">
           <caret line="18" column="20" lean-forward="false" selection-start-line="18" selection-start-column="15" selection-end-line="18" selection-end-column="20" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -505,9 +416,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="218">
           <caret line="37" column="0" lean-forward="false" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#58#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -515,7 +423,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="283">
           <caret line="33" column="0" lean-forward="true" selection-start-line="33" selection-start-column="0" selection-end-line="33" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -523,7 +430,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="304">
           <caret line="33" column="3" lean-forward="true" selection-start-line="33" selection-start-column="3" selection-end-line="33" selection-end-column="3" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -531,7 +437,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -565,7 +470,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="200">
           <caret line="608" column="14" lean-forward="true" selection-start-line="608" selection-start-column="14" selection-end-line="608" selection-end-column="14" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -573,7 +477,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-149">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -581,7 +484,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-307">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -597,7 +499,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15">
           <caret line="1" column="0" lean-forward="true" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -605,7 +506,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -613,7 +513,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -629,7 +528,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -637,7 +535,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
           <caret line="5" column="33" lean-forward="false" selection-start-line="5" selection-start-column="33" selection-end-line="5" selection-end-column="33" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -645,9 +542,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="413">
           <caret line="45" column="12" lean-forward="true" selection-start-line="45" selection-start-column="12" selection-end-line="45" selection-end-column="12" />
-          <folding>
-            <element signature="e#0#34#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -689,7 +583,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -721,7 +614,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="357">
           <caret line="43" column="5" lean-forward="true" selection-start-line="43" selection-start-column="5" selection-end-line="43" selection-end-column="5" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -729,17 +621,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="420">
           <caret line="32" column="28" lean-forward="false" selection-start-line="32" selection-start-column="28" selection-end-line="32" selection-end-column="28" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/inverse-gaussian.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="533">
-          <caret line="53" column="4" lean-forward="false" selection-start-line="53" selection-start-column="4" selection-end-line="53" selection-end-column="4" />
-          <folding>
-            <element signature="e#0#32#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -747,19 +628,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="615">
           <caret line="47" column="0" lean-forward="true" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#32#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/hoyt.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="25" column="8" lean-forward="true" selection-start-line="25" selection-start-column="8" selection-end-line="25" selection-end-column="8" />
-          <folding>
-            <element signature="e#0#58#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -785,7 +653,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-138">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -801,7 +668,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="435">
           <caret line="27" column="3" lean-forward="true" selection-start-line="27" selection-start-column="3" selection-end-line="27" selection-end-column="3" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -823,14 +689,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/test-utils.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="211">
-          <caret line="110" column="87" lean-forward="false" selection-start-line="110" selection-start-column="87" selection-end-line="110" selection-end-column="87" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test/core.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="188">
@@ -841,18 +699,102 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/dist.js">
+    <entry file="file://$PROJECT_DIR$/src/dist/log-series.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="21" column="0" lean-forward="true" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+        <state relative-caret-position="450">
+          <caret line="29" column="0" lean-forward="true" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1">
+          <caret line="47" column="44" lean-forward="true" selection-start-line="47" selection-start-column="44" selection-end-line="47" selection-end-column="44" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/inverse-gamma.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/rig.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="9" column="35" lean-forward="false" selection-start-line="9" selection-start-column="35" selection-end-line="9" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/todo">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="720">
+          <caret line="48" column="39" lean-forward="false" selection-start-line="48" selection-start-column="39" selection-end-line="48" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/test-utils.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="308">
+          <caret line="163" column="9" lean-forward="false" selection-start-line="163" selection-start-column="9" selection-end-line="163" selection-end-column="9" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/inverse-gaussian.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="20" selection-end-column="3" />
+          <folding>
+            <element signature="e#0#32#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/bernoulli.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="20" column="0" lean-forward="true" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/categorical.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/hoyt.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="600">
+          <caret line="40" column="31" lean-forward="true" selection-start-line="40" selection-start-column="31" selection-end-line="40" selection-end-column="31" />
+          <folding>
+            <element signature="e#0#58#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/dist/yule-simon.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="473">
-          <caret line="43" column="12" lean-forward="true" selection-start-line="43" selection-start-column="12" selection-end-line="43" selection-end-column="12" />
+        <state relative-caret-position="345">
+          <caret line="33" column="30" lean-forward="true" selection-start-line="33" selection-start-column="30" selection-end-line="33" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/dist.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="316">
+          <caret line="626" column="7" lean-forward="false" selection-start-line="626" selection-start-column="7" selection-end-line="626" selection-end-column="7" />
           <folding />
         </state>
       </provider>
