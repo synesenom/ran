@@ -3,7 +3,7 @@ import Distribution from './_distribution'
 /**
  * Generator for the [discrete Weibull distribution]{@link https://en.wikipedia.org/wiki/Discrete_Weibull_distribution} (using the original parametrization):
  *
- * $$f(k; q, \beta) = 1 - q^{(k + 1)^\beta},$$
+ * $$f(k; q, \beta) = q^{k^\beta} - q^{(k + 1)^\beta},$$
  *
  * with \(q \in (0, 1)\) and \(\beta \in \mathbb{R}^+\). Support: \(k in \mathbb{N}_0\).
  *

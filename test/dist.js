@@ -5,7 +5,7 @@ import { float, int } from '../src/core'
 import * as dist from '../src/dist'
 
 const LAPS = 1000
-const MAX_AVG_DIFF = 1e-3
+const MAX_AVG_DIFF = 1e-5
 const EPSILON = 1e-6
 
 /**
@@ -21,15 +21,25 @@ function utPdf (name, params) {
       const self = new dist[name](...params())
 
       let isNum = true
-      for (let x = -100; x <= 100; x++) {
-        let pdf = self.pdf(x)
+      for (let x = -1000; x <= 1000; x++) {
+        let pdf = self.pdf(x / 10)
         isNum &= isFinite(pdf) && Number.isFinite(pdf)
-        if (!isFinite(pdf) || !Number.isFinite(pdf)) {
-          console.log(pdf)
-        }
       }
       return isNum
-    }, true)
+    })
+  })
+
+  it('pdf should be non-negative', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
+
+      let flag = true
+      for (let x = -1000; x <= 1000; x++) {
+        let pdf = self.pdf(x / 10)
+        flag &= pdf >= 0
+      }
+      return flag
+    })
   })
 
   it('cdf should return valid numbers', () => {
@@ -37,15 +47,28 @@ function utPdf (name, params) {
       const self = new dist[name](...params())
 
       let isNum = true
-      for (let x = -100; x <= 100; x++) {
-        let cdf = self.cdf(x)
+      for (let x = -1000; x <= 1000; x++) {
+        let cdf = self.cdf(x / 10)
         isNum &= isFinite(cdf) && Number.isFinite(cdf)
       }
       return isNum
-    }, true)
+    })
   })
 
-  it('pdf/pmf should be de differential or difference of cdf', () => {
+  it('cdf should be in [0, 1]', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
+
+      let flag = true
+      for (let x = -1000; x <= 1000; x++) {
+        let cdf = self.cdf(x / 10)
+        flag &= cdf >= 0 && cdf <= 1
+      }
+      return flag
+    })
+  })
+
+  it('pdf (pmf) should be the differential (difference) of cdf', () => {
     utils.trials(() => {
       const self = new dist[name](...params())
 
@@ -65,7 +88,7 @@ function utPdf (name, params) {
           (supp[1].value !== null ? supp[1].value : 30) + 3
         ) < MAX_AVG_DIFF
       }
-    }, true)
+    }, 8)
   })
 }
 
@@ -77,11 +100,25 @@ function utPdf (name, params) {
  * @param {Function} params Generator for the parameters array.
  */
 function utSample (name, params) {
-  it('sample should contain only valid numbers', () => {
+  it('sample should contain valid numbers', () => {
     utils.trials(() => {
       const sample = new dist[name](...params()).sample(1000)
       return sample.reduce((acc, d) => acc && Number.isFinite(d) && isFinite(d), true)
-    }, true)
+    })
+  })
+
+  it('sample should be within the range of the support', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
+      const supp = self.support()
+      const sample = self.sample(1000)
+      return sample.reduce((acc, d) => {
+        let above = supp[0].value === null || ((supp[0].closed && d >= supp[0].value) || (!supp[0].closed && d > supp[0].value))
+        let below = supp[1].value === null || ((supp[1].closed && d <= supp[1].value) || (!supp[1].closed && d < supp[1].value))
+
+        return acc && above && below
+      }, true)
+    })
   })
 
   it('values should be distributed correctly with default parameters', () => {
@@ -90,7 +127,7 @@ function utSample (name, params) {
       return self.type() === 'continuous'
         ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
         : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
-    })
+    }, 7)
   })
 
   it('values should be distributed correctly with random parameters', () => {
@@ -99,7 +136,7 @@ function utSample (name, params) {
       return self.type() === 'continuous'
         ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
         : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
-    })
+    }, 7)
   })
 }
 
@@ -117,7 +154,7 @@ function utTest (name, params, type = 'self') {
       utils.trials(() => {
         const self = new dist[name](...params())
         return self.test(self.sample(LAPS)).passed
-      })
+      }, 7)
       break
     case 'foreign':
       utils.trials(() => {
@@ -129,7 +166,7 @@ function utTest (name, params, type = 'self') {
           ? new dist.ContinuousUniform(Math.min(...sample), Math.max(...sample))
           : new dist.DiscreteUniform(Math.min(...sample), Math.max(...sample))
         return !foreign.test(sample).passed
-      })
+      }, 7)
       break
   }
 }
@@ -148,7 +185,7 @@ const Param = {
   },
 
   shape () {
-    return float(0.01, 5)
+    return float(0.1, 5)
   },
 
   location () {
@@ -156,7 +193,7 @@ const Param = {
   },
 
   scale () {
-    return float(0.01, 5)
+    return float(0.1, 5)
   },
 
   prob () {
@@ -295,7 +332,16 @@ describe('dist', () => {
     p: () => [Param.count(), Param.rangeMin(), Param.rangeMax()]
   }, {
     name: 'BenktanderII',
-    p: () => [Param.scale(), Param.prob()]
+    cases: [{
+      desc: 'negligible shape parameter',
+      p: () => [Param.scale(), 1 - Param.prob() / 100]
+    }, {
+      desc: 'unit shape parameter',
+      p: () => [Param.scale(), 1]
+    }, {
+      desc: 'normal shape parameter',
+      p: () => [Param.scale(), Math.min(0.9, Param.prob())]
+    }]
   }, {
     name: 'Benini',
     p: () => [Param.shape(), Param.shape(), Param.scale()]
@@ -465,7 +511,7 @@ describe('dist', () => {
     p: () => [Param.location(), Param.scale()]
   }, {
     name: 'LogGamma',
-    p: () => [Param.shape(), Param.rate()]
+    p: () => [Param.shape(), Param.rate(), Param.location()]
   }, {
     name: 'Logistic',
     p: () => [Param.location(), Param.scale()]
@@ -507,7 +553,7 @@ describe('dist', () => {
     p: () => [Param.scale()]
   }, {
     name: 'Nakagami',
-    p: () => [Param.shape(), Param.scale()]
+    p: () => [Param.shape() + 0.5, Param.scale()]
   }, {
     name: 'NegativeHypergeometric',
     p: () => [int(30, 40), int(10, 20), int(5, 10)]
@@ -558,12 +604,12 @@ describe('dist', () => {
     p: () => [Param.shape()]
   }, {
     name: 'Zeta',
-    p: () => [Param.shape() + 2]
+    p: () => [Param.shape() + 1]
   }, {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'LogSeries') return
+    // if (d.name !== 'Zeta') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
@@ -583,23 +629,30 @@ describe('dist', () => {
         })
       } else {
         describe('.sample()', () => {
-          d.cases.forEach(c => utSample(d.name, c.p))
+          d.cases.forEach(c => {
+            describe(c.desc, () => utSample(d.name, c.p))
+          })
         })
 
         describe('.pdf()', () => {
-          d.cases.forEach(c => utPdf(d.name, c.p))
+          d.cases.forEach(c => {
+            describe(c.desc, () => utPdf(d.name, c.p))
+          })
         })
 
         describe('.test()', () => {
           d.cases.forEach(c => {
-            it(`should pass for own distribution [${c.desc}]`, () => {
-              utTest(d.name, c.p, 'self')
-            })
-            if (!c.skip || c.skip.indexOf('test-foreign') === -1) {
-              it(`should reject foreign distribution [${c.desc}]`, () => {
-                utTest(d.name, c.p, 'foreign')
+            describe(c.desc, () => {
+              it('should pass for own distribution', () => {
+                utTest(d.name, c.p, 'self')
               })
-            }
+
+              if (!c.skip || c.skip.indexOf('test-foreign') === -1) {
+                it('should reject foreign distribution', () => {
+                  utTest(d.name, c.p, 'foreign')
+                })
+              }
+            })
           })
         })
       }

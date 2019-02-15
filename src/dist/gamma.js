@@ -22,7 +22,7 @@ export default class extends Distribution {
     this.p = { alpha, beta }
     this.s = [{
       value: 0,
-      closed: true
+      closed: alpha >= 1
     }, {
       value: null,
       closed: false
@@ -35,7 +35,7 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return Math.exp(this.p.alpha * Math.log(this.p.beta) + (this.p.alpha - 1) * Math.log(x) - this.p.beta * x - gammaLn(this.p.alpha))
+    return Math.exp(this.p.alpha * Math.log(this.p.beta) - this.p.beta * x - gammaLn(this.p.alpha)) * Math.pow(x, this.p.alpha - 1)
   }
 
   _cdf (x) {

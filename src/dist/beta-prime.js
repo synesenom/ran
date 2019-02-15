@@ -1,3 +1,4 @@
+import { gamma } from './_standard'
 import Beta from './beta'
 
 /**
@@ -29,9 +30,11 @@ export default class extends Beta {
   }
 
   _generator () {
-    // Direct sampling by transforming beta variate
-    let x = super._generator()
-    return x / (1 - x)
+    // Direct sampling from gamma (ignoring super)
+    let x = gamma(this.p.alpha, 1)
+
+    let y = gamma(this.p.beta, 1)
+    return x / y
   }
 
   _pdf (x) {

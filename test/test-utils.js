@@ -36,11 +36,12 @@ export default (function () {
   ]
 
   /**
-     * Performs a Kolmogorov-Smirnov test with significance level of 99%.
-     *
-     * @param values Sample of continuous random values.
-     * @param model Theoretical cumulative distribution function.
-     */
+   * Performs a Kolmogorov-Smirnov test with significance level of 99%.
+   *
+   * @method ksTest
+   * @param values Sample of continuous random values.
+   * @param model Theoretical cumulative distribution function.
+   */
   function ksTest (values, model) {
     let D = 0
     values.sort(function (a, b) {
@@ -55,13 +56,14 @@ export default (function () {
   }
 
   /**
-     * Performs a chi-square test with significance level of 0.001. That is, there is a 0.1% chance
-     * that the sample follows the distribution and we still reject it.
-     *
-     * @param {number[]} values Sample of discrete random values.
-     * @param {Function} model Theoretical cumulative mass function.
-     * @param {number} c Number of model parameters.
-     */
+   * Performs a chi-square test with significance level of 0.001. That is, there is a 0.1% chance
+   * that the sample follows the distribution and we still reject it.
+   *
+   * @method chiTest
+   * @param {number[]} values Sample of discrete random values.
+   * @param {Function} model Theoretical cumulative mass function.
+   * @param {number} c Number of model parameters.
+   */
   function chiTest (values, model, c) {
     // Calculate distribution first
     let p = new Map()
@@ -72,6 +74,7 @@ export default (function () {
         p.set(values[i], p.get(values[i]) + 1)
       }
     }
+    // console.log(values)
 
     // Calculate chi-square
     let chi2 = 0
@@ -83,10 +86,10 @@ export default (function () {
       bin += model(parseInt(x)) * values.length
       pBin += px
 
-      // If bin count is above 5, consider this a class and clear bin
+      // If bin count is above 20, consider this a class and clear bin
       if (bin > 10) {
         chi2 += Math.pow(pBin - bin, 2) / bin
-        // console.log(pBin, bin)
+        // console.log(pBin, bin, Math.pow(pBin - bin, 2) / bin)
         bin = 0
         pBin = 0
         k++
@@ -96,30 +99,48 @@ export default (function () {
     // Find critical value
     let df = Math.max(1, k - c - 1)
     let crit = df <= 250 ? CHI_TABLE_LOW[df] : CHI_TABLE_HIGH[Math.ceil(df / 50)]
-    // console.log(df, crit, chi2)
+    // console.log(crit, chi2)
     return chi2 <= crit
   }
 
   /**
-     * Performs 10 tests and checks if at least 6 was successful.
-     *
-     * @param test Test to run.
-     * @param complete Whether all trials should succeed.
-     */
-  function trials (test, complete) {
+   * Performs 10 tests and checks if at least 6 was successful.
+   *
+   * @method trials
+   * @param test Test to run.
+   * @param minSuccess Minimum number of successes to accept test. Default is 10 (all).
+   */
+  function trials (test, minSuccess = 10) {
     let success = 0
     for (let t = 0; t < 10; t++) {
       success += test() ? 1 : 0
     }
-    assert(success >= (complete ? 10 : 6))
+    assert(success >= minSuccess)
   }
 
+  /**
+   * Repeats a test several times.
+   *
+   * @method repeat
+   * @param test
+   * @param times
+   */
   function repeat (test, times) {
     for (let i = 0; i < times; i++) {
       test()
     }
   }
 
+  /**
+   * Calculates the difference between the sum of a PMF and CDF on a range.
+   *
+   * @method diffDisc
+   * @param {Function} pmf The probability mass function.
+   * @param {Function} cdf The cumulative density function.
+   * @param {number} a Start of the summation range.
+   * @param {number} b End of the summation range.
+   * @return {number} The total difference between the CDF and the summed PMF.
+   */
   function diffDisc (pmf, cdf, a, b) {
     let dy = 0
     let int = 0
@@ -131,21 +152,20 @@ export default (function () {
     return isFinite(dy) ? dy : 1e6
   }
 
-  function differentiate (func, x0, dx) {
-    let d = 0.5 * dx
-    return (func(x0 + d) - func(x0 - d)) / dx
-  }
-
-  function sum (arr) {
-    return arr.reduce((acc, d) => d + acc, 0)
+  function differentiate (f, x, h) {
+    // return (f(x - 2 * h) / 12 - 2 * f(x - h) / 3 + 2 * f(x + h) / 3 - f(x + 2 * h) / 12) / h
+    return (f(x + h) - f(x - h)) / (2 * h)
+    // return (-1.5 * f(x) + 2 * f(x + h) - 0.5 * f(x + 2 * h)) / h
   }
 
   function cdf2pdf (dist, range, laps) {
-    let res = sum(Array.from({ length: laps }, () => {
+    let res = Array.from({ length: laps }, () => {
       let x0 = range[0] + Math.random() * (range[1] - range[0])
       // console.log(x0, dist.pdf(x0), differentiate(x => dist.cdf(x), x0, 1e-5))
-      return Math.abs(dist.pdf(x0) - differentiate(x => dist.cdf(x), x0, 1e-5))
-    })) / laps
+      let p = dist.pdf(x0)
+      let df = p - differentiate(x => dist.cdf(x), x0, 1e-5)
+      return Math.abs(df) // / p
+    }).reduce((acc, d) => d + acc, 0) / laps
     // console.log(res)
     return res
   }

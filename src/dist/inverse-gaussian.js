@@ -3,7 +3,7 @@ import { normal } from './_standard'
 import Distribution from './_distribution'
 
 function phi (x) {
-  return 0.5 * (1 + erf(x / Math.SQRT2))
+  return 0.5 * (1 + erf(Math.SQRT1_2 * x))
 }
 
 /**
@@ -25,7 +25,7 @@ export default class extends Distribution {
     this.p = { lambda, mu }
     this.s = [{
       value: 0,
-      closed: true
+      closed: false
     }, {
       value: null,
       closed: false
@@ -51,6 +51,6 @@ export default class extends Distribution {
     let s = Math.sqrt(this.p.lambda / x)
 
     let t = x / this.p.mu
-    return phi(s * (t - 1)) + this.c[1] * phi(-s * (t + 1))
+    return Math.min(1, phi(s * (t - 1)) + this.c[1] * phi(-s * (t + 1)))
   }
 }

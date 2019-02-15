@@ -24,20 +24,28 @@ export default class extends Distribution {
       value: null,
       closed: false
     }]
+    this.c = [
+      this.p.rho + 1
+    ]
   }
 
   _generator () {
     // Direct sampling by compounding exponential and geometric
     let e1 = -Math.log(Math.random())
     let e2 = -Math.log(Math.random())
-    return Math.ceil(-e1 / Math.log(1 - Math.exp(-e2 / this.p.rho)))
+    let z = Math.exp(-e2 / this.p.rho)
+
+    // Handle z << 1 case
+    return 1 - z === 1
+      ? Math.ceil(e1 / z)
+      : Math.ceil(-e1 / Math.log(1 - z))
   }
 
   _pdf (x) {
-    return this.p.rho * beta(x, this.p.rho + 1)
+    return this.p.rho * beta(x, this.c[0])
   }
 
   _cdf (x) {
-    return 1 - x * beta(x, this.p.rho + 1)
+    return 1 - x * beta(x, this.c[0])
   }
 }

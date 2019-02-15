@@ -29,7 +29,9 @@ export function gamma (alpha, beta = 1) {
 
     let c = 1 / Math.sqrt(9 * d)
 
-    let Z; let V; let U
+    let Z
+    let V
+    let U
 
     // Max 1000 trials
     for (let trials = 0; trials < 1000; trials++) {

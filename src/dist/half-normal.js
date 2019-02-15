@@ -25,6 +25,11 @@ export default class extends Distribution {
       value: null,
       closed: false
     }]
+    this.c = [
+      Math.SQRT2 / (Math.sqrt(Math.PI) * sigma),
+      -0.5 / (sigma * sigma),
+      Math.SQRT1_2 / sigma
+    ]
   }
 
   _generator () {
@@ -33,10 +38,10 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return Math.SQRT2 * Math.exp(-0.5 * Math.pow(x / this.p.sigma, 2)) / (Math.sqrt(Math.PI) * this.p.sigma)
+    return this.c[0] * Math.exp(this.c[1] * x * x)
   }
 
   _cdf (x) {
-    return erf(x / (this.p.sigma * Math.SQRT2))
+    return erf(this.c[2] * x)
   }
 }

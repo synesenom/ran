@@ -21,7 +21,7 @@ export default class extends Gamma {
     this.p = Object.assign({ a, d, p }, this.p)
     this.s = [{
       value: 0,
-      closed: d >= 1
+      closed: d >= 1 && p >= 1 && d >= p
     }, {
       value: null,
       closed: false

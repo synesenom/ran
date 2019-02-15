@@ -20,20 +20,31 @@ export default class extends Distribution {
     this.p = { a, b }
     this.s = [{
       value: 0,
-      closed: false
+      closed: true
     }, {
       value: 1,
-      closed: false
+      closed: true
     }]
   }
 
   _generator () {
     // Inverse transform sampling
-    return Math.pow(1 - Math.pow(1 - Math.random(), 1 / this.p.b), 1 / this.p.a)
+    return Math.pow(1 - Math.pow(Math.random(), 1 / this.p.b), 1 / this.p.a)
   }
 
   _pdf (x) {
-    return this.p.a * this.p.b * Math.pow(x, this.p.a - 1) * Math.pow(1 - Math.pow(x, this.p.a), this.p.b - 1)
+    // Handle case a < 1 and x << 1
+    let a = Math.pow(x, this.p.a - 1)
+    if (!isFinite(a)) {
+      return 0
+    }
+
+    // Handle case b < 1 and 1 - x << 1
+    let b = Math.pow(1 - Math.pow(x, this.p.a), this.p.b - 1)
+    if (!isFinite(b)) {
+      return 0
+    }
+    return this.p.a * this.p.b * a * b
   }
 
   _cdf (x) {

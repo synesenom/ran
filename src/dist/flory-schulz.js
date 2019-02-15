@@ -1,4 +1,4 @@
-import { lambertW } from '../special'
+import { zeta } from './_standard'
 import Distribution from './_distribution'
 
 /**
@@ -24,11 +24,26 @@ export default class extends Distribution {
       value: null,
       closed: true
     }]
+
+    // Speed up constants for rejection sampling
+    let s = 1.5
+    let k = -(s + 1) / Math.log(1 - a)
+    this.c = [
+      s, k,
+      Math.pow(k, -s - 1) / Math.pow(1 - a, k)
+    ]
   }
 
   _generator () {
-    let c = Math.log(1 - this.p.a) / this.p.a
-    return Math.floor((lambertW(c * Math.exp(c) * Math.random()) / c - 1) / this.p.a)
+    // Rejection sampling with zeta distribution as major
+    for (let trial = 0; trial < 1000; trial++) {
+      let z = zeta(this.c[0])
+      if (Math.random() < Math.pow(z, this.c[0] + 1) * Math.pow(1 - this.p.a, z) * this.c[2]) {
+        return z
+      }
+    }
+
+    return 1
   }
 
   _pdf (x) {

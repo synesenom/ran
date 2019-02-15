@@ -20,7 +20,7 @@ export default class extends Exponential {
     this.p = Object.assign({ lambda2: lambda, k }, this.p)
     this.s = [{
       value: 0,
-      closed: true
+      closed: k >= 1
     }, {
       value: null,
       closed: false

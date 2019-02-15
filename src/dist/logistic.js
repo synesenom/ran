@@ -33,7 +33,9 @@ export default class extends Distribution {
 
   _pdf (x) {
     let z = Math.exp(-(x - this.p.mu) / this.p.s)
-    return z / (this.p.s * Math.pow(1 + z, 2))
+    return isFinite(z * z)
+      ? z / (this.p.s * Math.pow(1 + z, 2))
+      : 0
   }
 
   _cdf (x) {

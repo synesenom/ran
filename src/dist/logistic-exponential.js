@@ -19,7 +19,7 @@ export default class extends Distribution {
     this.p = { lambda, kappa }
     this.s = [{
       value: 0,
-      closed: false
+      closed: kappa >= 1
     }, {
       value: null,
       closed: false
@@ -28,16 +28,22 @@ export default class extends Distribution {
 
   _generator () {
     let u = Math.random()
-    return Math.log(1 + Math.pow(u / (1 - u), 1 / this.p.kappa)) / this.p.lambda
+    let z = Math.pow(u / (1 - u), 1 / this.p.kappa)
+
+    // Handle z << 1 cases
+    return 1 + z === 1
+      ? z / this.p.lambda
+      : Math.log(1 + z) / this.p.lambda
   }
 
   _pdf (x) {
     let y = Math.exp(this.p.lambda * x)
-    return this.p.lambda * this.p.kappa * Math.pow(y - 1, this.p.kappa - 1) * y / Math.pow(1 + Math.pow(y - 1, this.p.kappa), 2)
+    return isFinite(Math.pow(y, 2 * this.p.kappa)) ? this.p.lambda * this.p.kappa * Math.pow(y - 1, this.p.kappa - 1) * y / Math.pow(1 + Math.pow(y - 1, this.p.kappa), 2) : 0
   }
 
   _cdf (x) {
     let y = Math.pow(Math.exp(this.p.lambda * x) - 1, this.p.kappa)
-    return y / (1 + y)
+
+    return isFinite(y) ? y / (1 + y) : 1
   }
 }

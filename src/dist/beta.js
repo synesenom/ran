@@ -22,10 +22,10 @@ export default class extends Distribution {
     this.p = { alpha, beta }
     this.s = [{
       value: 0,
-      closed: alpha >= 1
+      closed: true
     }, {
       value: 1,
-      closed: beta >= 1
+      closed: true
     }]
     this.c = [fnBeta(alpha, beta)]
   }
@@ -35,11 +35,25 @@ export default class extends Distribution {
     let x = gamma(this.p.alpha, 1)
 
     let y = gamma(this.p.beta, 1)
-    return x / (x + y)
+    let z = x / (x + y)
+
+    // Handle 1 - z << 1 case
+    if (z === 1) {
+      return 1 - y / x
+    } else {
+      return z
+    }
   }
 
   _pdf (x) {
-    return Math.pow(x, this.p.alpha - 1) * Math.pow(1 - x, this.p.beta - 1) / this.c[0]
+    let a = Math.pow(x, this.p.alpha - 1)
+
+    let b = Math.pow(1 - x, this.p.beta - 1)
+
+    // Handle x = 0 and x = 1 cases
+    return isFinite(a) && isFinite(b)
+      ? a * b / this.c[0]
+      : 0
   }
 
   _cdf (x) {

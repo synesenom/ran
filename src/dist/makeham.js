@@ -26,18 +26,41 @@ export default class extends Distribution {
       value: null,
       closed: false
     }]
+
+    // Speed up constants
+    this.c = [
+      alpha / (beta * lambda),
+      alpha * Math.exp(alpha / lambda) / lambda,
+      -beta / lambda
+    ]
   }
 
   _generator () {
     // Inverse transform sampling
     let u = Math.random()
-    return this.p.alpha / (this.p.beta * this.p.lambda) - Math.log(u) / this.p.lambda -
-      lambertW(this.p.alpha * Math.exp(this.p.alpha / this.p.lambda) * Math.pow(u, -this.p.beta / this.p.lambda) / this.p.lambda) / this.p.beta
+    let z = this.c[1] * Math.pow(u, this.c[2])
+
+    // Handle z >> 1 case
+    let w = lambertW(z)
+    if (!isFinite(w)) {
+      let t = Math.log(this.c[1]) + this.c[2] * Math.log(u)
+      return this.c[0] - Math.log(u) / this.p.lambda -
+        (t - Math.log(t)) / this.p.beta
+    } else {
+      return this.c[0] - Math.log(u) / this.p.lambda -
+        w / this.p.beta
+    }
   }
 
   _pdf (x) {
     let y = Math.exp(this.p.beta * x)
-    return (this.p.alpha * y + this.p.lambda) * Math.exp(-this.p.lambda * x - this.p.alpha * (y - 1) / this.p.beta)
+
+    // Handle y >> 1 cases
+    if (isFinite(Math.exp(y))) {
+      return (this.p.alpha * y + this.p.lambda) * Math.exp(-this.p.lambda * x - this.p.alpha * (y - 1) / this.p.beta)
+    } else {
+      return 0
+    }
   }
 
   _cdf (x) {

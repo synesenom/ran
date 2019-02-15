@@ -21,11 +21,11 @@ export default class extends Normal {
     super()
     this.p = Object.assign({ gamma, delta, lambda, xi }, this.p)
     this.s = [{
-      value: this.p.xi,
-      closed: false
+      value: xi,
+      closed: true
     }, {
-      value: this.p.xi + this.p.lambda,
-      closed: false
+      value: xi + lambda,
+      closed: true
     }]
   }
   _generator () {
