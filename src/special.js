@@ -5,6 +5,7 @@
  * @memberOf ran
  * @private
  */
+export { besselI } from './special/bessel'
 export { default as beta } from './special/beta'
 export { betaIncomplete, regularizedBetaIncomplete } from './special/beta-incomplete'
 export { default as binomLn } from './special/binom-log'

@@ -18,6 +18,7 @@ class _JS:
         'flag': {
             'ignore': "@ignore",
             'private': "@private",
+            'protected': "@protected",
             'constructor': "@constructor",
         },
         'label': {

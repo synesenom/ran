@@ -1,11 +1,11 @@
-import { gamma } from './_standard'
+import { gamma } from './_core'
 import Beta from './beta'
 
 /**
  * Generator for the [beta prime distribution]{@link https://en.wikipedia.org/wiki/Beta_prime_distribution} (also
  * known as inverted beta):
  *
- * $$f(x; \alpha, \beta) = \frac{x^{\alpha - 1}(1 - x)^{-\alpha - \beta}}{\mathrm{B}(\alpha, \beta)},$$
+ * $$f(x; \alpha, \beta) = \frac{x^{\alpha - 1}(1 + x)^{-\alpha - \beta}}{\mathrm{B}(\alpha, \beta)},$$
  *
  * with \(\alpha, \beta \in \mathbb{R}^+\) and \(\mathrm{B}(\alpha, \beta)\) is the beta function.
  * Support: \(x \in \mathbb{R}^+\).

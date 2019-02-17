@@ -1,5 +1,5 @@
 import { erf } from '../special'
-import { normal } from './_standard'
+import { normal } from './_core'
 import Distribution from './_distribution'
 
 function phi (x) {

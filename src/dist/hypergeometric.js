@@ -2,7 +2,7 @@ import { binomLn } from '../special'
 import Custom from './categorical'
 
 /**
- * Generator for the [hypergeometric distribution]{@link https://en.wikipedia.org/wiki/Negative_hypergeometric_distribution}:
+ * Generator for the [hypergeometric distribution]{@link https://en.wikipedia.org/wiki/Hypergeometric_distribution}:
  *
  * $$f(k; N, K, r) = \frac{\begin{pmatrix}K \\ k \\ \end{pmatrix} \begin{pmatrix}N - k \\ n - k \\ \end{pmatrix}}{\begin{pmatrix}N \\ n \\ \end{pmatrix}},$$
  *

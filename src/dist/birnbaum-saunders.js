@@ -1,9 +1,9 @@
 import Normal from './normal'
 
 /**
- * Generator for the Birnbaum-Saunders distribution]{@link https://en.wikipedia.org/wiki/Birnbaum%E2%80%93Saunders_distribution}:
+ * Generator for the [Birnbaum-Saunders distribution]{@link https://en.wikipedia.org/wiki/Birnbaum%E2%80%93Saunders_distribution}:
  *
- * $$f(x; \mu, \beta, \gamma) = \frac{z + 1 / z}{2 \gamma (x - \mu} \phi\Big(\frac{z - 1 / z}{\gamma}\Big),$$
+ * $$f(x; \mu, \beta, \gamma) = \frac{z + 1 / z}{2 \gamma (x - \mu)} \phi\Big(\frac{z - 1 / z}{\gamma}\Big),$$
  *
  * with \(mu \in \mathbb{R}\), \(\beta, \gamma \in \mathbb{R}^+\), \(z = \sqrt{\frac{x - \mu}{\beta}}\) and \(\phi(x)\) is the probability density function of the standard normal distribution. Support: \(x \in (\mu, \infty)\).
  *

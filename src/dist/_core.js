@@ -1,6 +1,25 @@
 import { gammaLn } from '../special'
 
 /**
+ * Performs a rejection sampling.
+ *
+ * @method rejection
+ * @memberOf ran.dist
+ * @param {Function} g Generator for the sample (major function).
+ * @param {Function} accept The function that returns the acceptance threshold.
+ * @return {?number} The sampled random variate.
+ */
+export function rejection (g, accept) {
+  for (let trial = 0; trial < 1000; trial++) {
+    let x = g()
+    if (Math.random() < accept(x)) {
+      return x
+    }
+  }
+  return null
+}
+
+/**
  * Generates a exponential random variate.
  *
  * @method exponential

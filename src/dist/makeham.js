@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  * Generator for the [Makeham distribution]{@link https://en.wikipedia.org/wiki/Gompertz%E2%80%93Makeham_law_of_mortality}
  * (also known as Gompertz-Makeham distribution):
  *
- * $$f(x; \alpha, \beta, \lambda) = (\alpha e^{\beta x} + \lambda) \exp{-\lambda x},$$
+ * $$f(x; \alpha, \beta, \lambda) = (\alpha e^{\beta x} + \lambda) \exp\Big[{-\lambda x - \frac{\alpha}{\beta}(e^{\beta x} - 1)}\Big],$$
  *
  * with \(\alpha, \beta, \lambda \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
  *

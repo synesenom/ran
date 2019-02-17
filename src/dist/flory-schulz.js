@@ -1,4 +1,4 @@
-import { zeta } from './_standard'
+import { zeta, rejection } from './_core'
 import Distribution from './_distribution'
 
 /**
@@ -35,15 +35,11 @@ export default class extends Distribution {
   }
 
   _generator () {
-    // Rejection sampling with zeta distribution as major
-    for (let trial = 0; trial < 1000; trial++) {
-      let z = zeta(this.c[0])
-      if (Math.random() < Math.pow(z, this.c[0] + 1) * Math.pow(1 - this.p.a, z) * this.c[2]) {
-        return z
-      }
-    }
-
-    return 1
+    // Rejection sampling with zeta(1.5) distribution as major
+    return rejection(
+      () => zeta(this.c[0]),
+      x => Math.pow(x, this.c[0] + 1) * Math.pow(1 - this.p.a, x) * this.c[2]
+    )
   }
 
   _pdf (x) {

@@ -9,33 +9,26 @@
 // TODO Use decimal.js for high precision
 
 // TODO Benford                               (inverse transform)
-// TODO U-quadratic                           (can be directly implemented)
-// TODO Half-logistic                         (inverse transform)
 // TODO Benktander 1nd kind                   (lambertW)
-// TODO Beta-rectangular                      (compound)
 // TODO Delaporte                             (compound)
 // TODO Normal-exponential-gamma              (compound)
-// TODO slash                                 (compound: normal/uniform)
 // TODO Tukey                                 (pdf/cdf are not trivial)
 // TODO Hermite                               (requires higher order derivative)
-// TODO Planck                                (zeta)
+// TODO Planck                                (CDF unknown)
 // TODO von Mises                             (modified Bessel of k)
-// TODO Skellam                               (modified Bessel of first)
-// TODO Birnbaum-Saunders                     (requires inverse erf)
+// TODO Skellam                               (modified Bessel of first kind, Marcum Q function): https://stats.stackexchange.com/questions/279220/what-is-the-expectation-of-the-absolute-value-of-the-skellam-distribution; http://www.acta.sapientia.ro/acta-math/C3-1/math31-5.pdf
 // TODO Muth                                  (not-invertible cdf)
 // TODO Beta-binomial                         (generation unknown)
 // TODO Beta-pascal / Beta negative binomial  (generation unknown)
 // TODO Borel                                 (generation unknown)
 // TODO Davis                                 (generation unknown)
 // TODO Error / exponential power             (generation unknown)
-// TODO PERT distribution                     (generation unknown)
-// TODO Raised cosine                         (generation unknown)
 // TODO stable                                (generation unknown)
+// TODO trapezoidal
 
 // TODO alpha (scipy)
 // TODO anglit (scipy)
 // TODO ARGUS
-// TODO Bradford (scipy)
 // TODO crystal ball
 // TODO double gamma (scipy)
 // TODO double weibull (scipy)
@@ -57,7 +50,6 @@
 // TODO Non-central F (scipy)
 // TODO Non-central t (scipy)
 // TODO Normal inverse Gauss (scipy)
-// TODO Power-law (special case of beta)
 // TODO power-lognormal (scipy)
 // TODO R (scipy)
 // TODO Rice (scipy)
@@ -71,6 +63,7 @@
 // TODO inverse Wishart
 // TODO Champernowne
 // TODO ref: http://www.nrbook.com/devroye/Devroye_files/chapter_ten.pdf
+// TODO g-and-h distribution (https://books.google.dk/books?id=HMXYCgAAQBAJ&pg=PA29&dq=g-and-h+distribution&hl=en&sa=X&redir_esc=y#v=snippet&q=g-and-h%20distribution&f=false)
 
 
 # ts

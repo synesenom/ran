@@ -175,7 +175,7 @@ function utTest (name, params, type = 'self') {
         const sample = self.sample(LAPS)
 
         const foreign = self.type() === 'continuous'
-          ? new dist.ContinuousUniform(Math.min(...sample), Math.max(...sample))
+          ? new dist.Uniform(Math.min(...sample), Math.max(...sample))
           : new dist.DiscreteUniform(Math.min(...sample), Math.max(...sample))
         return !foreign.test(sample).passed
       }, 6)
@@ -226,13 +226,6 @@ const Param = {
 }
 
 describe('dist', () => {
-  /* let ih = new dist.Gamma(3, 1)
-  for (let i = 0; i < 300; i++) {
-    console.log(i / 100, ih.pdf(i / 100), ih.cdf(i / 100))
-    // ih.cdf(i / 100)
-  }
-  return */
-
   // Base class
   describe('Distribution', () => {
     describe('.sample()', () => {
@@ -367,6 +360,9 @@ describe('dist', () => {
     name: 'BetaPrime',
     p: () => [Param.shape(), Param.shape()]
   }, {
+    name: 'BetaRectangular',
+    p: () => [Param.shape(), Param.shape(), Param.prob(), Param.rangeMin(), Param.rangeMax()]
+  }, {
     name: 'Binomial',
     cases: [{
       desc: 'small n',
@@ -384,6 +380,9 @@ describe('dist', () => {
   }, {
     name: 'BoundedPareto',
     p: () => [Param.rangeMin(), Param.rangeMax(), Param.shape()]
+  }, {
+    name: 'Bradford',
+    p: () => [Param.shape()]
   }, {
     name: 'Burr',
     p: () => [Param.shape(), Param.shape()]
@@ -410,10 +409,6 @@ describe('dist', () => {
   }, {
     name: 'Chi2',
     p: () => [Param.degree()]
-  }, {
-    name: 'ContinuousUniform',
-    p: () => [Param.rangeMin(), Param.rangeMax()],
-    skip: ['test-foreign']
   }, {
     name: 'Dagum',
     p: () => [Param.shape(), Param.shape(), Param.scale()]
@@ -477,6 +472,9 @@ describe('dist', () => {
     name: 'Gumbel',
     p: () => [Param.location(), Param.scale()]
   }, {
+    name: 'HalfLogistic',
+    p: () => []
+  }, {
     name: 'HalfNormal',
     p: () => [Param.scale()]
   }, {
@@ -516,6 +514,9 @@ describe('dist', () => {
     name: 'Levy',
     p: () => [Param.location(), Param.scale()]
   }, {
+    name: 'Lindley',
+    p: () => [Param.shape()]
+  }, {
     name: 'Logarithmic',
     p: () => [Param.rangeMin() + 1, Param.rangeMax() + 5]
   }, {
@@ -538,16 +539,7 @@ describe('dist', () => {
     p: () => [Param.location(), Param.scale()]
   }, {
     name: 'LogLogistic',
-    cases: [{
-      desc: 'positive shape parameter',
-      p: () => [Param.location(), Param.scale(), float(0.1, 5)]
-    }, {
-      desc: 'negative shape parameter',
-      p: () => [Param.location(), Param.scale(), float(-5, -0.1)]
-    }, {
-      desc: 'zero shape parameter',
-      p: () => [Param.location(), Param.scale(), 0]
-    }]
+    p: () => [Param.scale(), Param.shape()]
   }, {
     name: 'LogNormal',
     p: () => [Param.location(), Param.scale()]
@@ -579,6 +571,9 @@ describe('dist', () => {
     name: 'Pareto',
     p: () => [Param.scale(), Param.shape()]
   }, {
+    name: 'PERT',
+    p: () => [Param.rangeMin(), Param.rangeIn(), Param.rangeMax()]
+  }, {
     name: 'Poisson',
     cases: [{
       desc: 'low mean',
@@ -588,8 +583,14 @@ describe('dist', () => {
       p: () => [float(31, 50)]
     }]
   }, {
+    name: 'PowerLaw',
+    p: () => [Param.scale()]
+  }, {
     name: 'Rademacher',
     p: () => []
+  }, {
+    name: 'RaisedCosine',
+    p: () => [Param.location(), Param.scale()]
   }, {
     name: 'Rayleigh',
     p: () => [Param.scale()]
@@ -597,8 +598,23 @@ describe('dist', () => {
     name: 'Reciprocal',
     p: () => [Param.rangeMin(), Param.rangeMax()]
   }, {
-    name: 'RIG',
+    name: 'ReciprocalInverseGaussian',
     p: () => [Param.scale(), Param.shape()]
+  }, {
+    name: 'ShiftedLogLogistic',
+    cases: [{
+      desc: 'positive shape parameter',
+      p: () => [Param.location(), Param.scale(), float(0.1, 5)]
+    }, {
+      desc: 'negative shape parameter',
+      p: () => [Param.location(), Param.scale(), float(-5, -0.1)]
+    }, {
+      desc: 'zero shape parameter',
+      p: () => [Param.location(), Param.scale(), 0]
+    }]
+  }, {
+    name: 'Slash',
+    p: () => []
   }, {
     name: 'Soliton',
     p: () => [Param.count()]
@@ -608,6 +624,13 @@ describe('dist', () => {
   }, {
     name: 'Triangular',
     p: () => [Param.rangeMin(), Param.rangeMax(), Param.rangeIn()]
+  }, {
+    name: 'Uniform',
+    p: () => [Param.rangeMin(), Param.rangeMax()],
+    skip: ['test-foreign']
+  }, {
+    name: 'UQuadratic',
+    p: () => [Param.rangeMin(), Param.rangeMax()]
   }, {
     name: 'Weibull',
     p: () => [Param.scale(), Param.shape()]
@@ -624,7 +647,7 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'YuleSimon') return
+    // if (d.name !== 'Zeta') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

@@ -1,5 +1,5 @@
 import { riemannZeta, generalizedHarmonic } from '../special'
-import { zeta } from './_standard'
+import { zeta } from './_core'
 import Distribution from './_distribution'
 
 /**
@@ -15,7 +15,7 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Distribution {
-  constructor (s = 2) {
+  constructor (s = 1) {
     super('discrete', arguments.length)
     this.p = { s }
     this.s = [{
@@ -25,7 +25,9 @@ export default class extends Distribution {
       value: null,
       closed: false
     }]
-    this.c = [riemannZeta(s), Math.pow(2, s - 1)]
+    this.c = [
+      riemannZeta(s), Math.pow(2, s - 1)
+    ]
   }
 
   _generator () {

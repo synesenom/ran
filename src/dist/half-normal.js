@@ -1,6 +1,4 @@
-import { erf } from '../special'
-import { normal } from './_standard'
-import Distribution from './_distribution'
+import Normal from './normal'
 
 /**
  * Generator for the [half-normal distribution]{@link https://en.wikipedia.org/wiki/Half-normal_distribution}:
@@ -14,10 +12,10 @@ import Distribution from './_distribution'
  * @param {number=} sigma Scale parameter. Default value is 1.
  * @constructor
  */
-export default class extends Distribution {
+export default class extends Normal {
+  // Transformation of normal distribution
   constructor (sigma = 1) {
-    super('continuous', arguments.length)
-    this.p = { sigma }
+    super(0, sigma)
     this.s = [{
       value: 0,
       closed: true
@@ -25,23 +23,18 @@ export default class extends Distribution {
       value: null,
       closed: false
     }]
-    this.c = [
-      Math.SQRT2 / (Math.sqrt(Math.PI) * sigma),
-      -0.5 / (sigma * sigma),
-      Math.SQRT1_2 / sigma
-    ]
   }
 
   _generator () {
-    // Direct sampling from normal
-    return Math.abs(normal(0, this.p.sigma))
+    // Direct sampling by transforming normal variate
+    return Math.abs(super._generator())
   }
 
   _pdf (x) {
-    return this.c[0] * Math.exp(this.c[1] * x * x)
+    return 2 * super._pdf(x)
   }
 
   _cdf (x) {
-    return erf(this.c[2] * x)
+    return 2 * super._cdf(x) - 1
   }
 }

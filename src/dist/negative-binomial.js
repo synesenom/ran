@@ -1,9 +1,9 @@
 import { regularizedBetaIncomplete, binomLn } from '../special'
-import { gamma, poisson } from './_standard'
+import { gamma, poisson } from './_core'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [negative-binomial distribution]{@link } (also known as Gamma-Poisson, Pascal or Polya distribution):
+ * Generator for the [negative-binomial distribution]{@link https://en.wikipedia.org/wiki/Negative_binomial_distribution} (also known as Gamma-Poisson, Pascal or Polya distribution):
  *
  * $$f(k; r, p) = \begin{pmatrix}k + r - 1 \\ k \\ \end{pmatrix} (1 - p)^r p^k,$$
  *

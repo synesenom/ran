@@ -1,4 +1,4 @@
-import { exponential } from './_standard'
+import { exponential } from './_core'
 import Distribution from './_distribution'
 
 /**

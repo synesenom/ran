@@ -1,5 +1,5 @@
 import { gammaLn, gammaLowerIncomplete } from '../special'
-import { gamma } from './_standard'
+import { gamma } from './_core'
 import Distribution from './_distribution'
 
 /**

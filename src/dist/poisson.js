@@ -1,5 +1,5 @@
 import { gammaLn, gammaLowerIncomplete } from '../special'
-import { poisson } from './_standard'
+import { poisson } from './_core'
 import Distribution from './_distribution'
 
 /**
