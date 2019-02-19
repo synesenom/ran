@@ -31,7 +31,7 @@ function _i1 (x) {
     z = 0.39894228 + t * (-0.3988024e-1 + t * (-0.362018e-2 + t * (0.163801e-2 + t * (-0.1031555e-1 + t * z))))
     z *= Math.exp(y) / Math.sqrt(y)
   }
-  return x < 0.0 ? -z : z
+  return x < 0 ? -z : z
 }
 
 const ACC = 40

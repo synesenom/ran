@@ -17,7 +17,7 @@ export default function (z) {
     let y = w * Math.exp(w) - z
     dw = y / ((w + 1) * Math.exp(w) - (w + 2) * y / (2 * w + 2))
     w -= dw
-    if (Math.abs(dw) < EPS) { break }
+    if (Math.abs(dw / w) < EPS) { break }
   }
 
   return w

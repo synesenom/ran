@@ -36,7 +36,7 @@ export default function (s, a) {
     z += c
 
     // Stop if precision achieved
-    if (Math.abs(c) < EPS) { break }
+    if (Math.abs(c / z) < EPS) { break }
   }
 
   return z
