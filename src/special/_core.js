@@ -14,7 +14,7 @@ export const MAX_ITER = 100
  * @memberOf ran.special
  * @private
  */
-export const EPS = 1e-10
+export const EPS = 1e-15
 
 /**
  * Replacement for unexpected zero values.

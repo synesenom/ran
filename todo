@@ -16,7 +16,6 @@
 // TODO Hermite                               (requires higher order derivative)
 // TODO Planck                                (CDF unknown)
 // TODO von Mises                             (modified Bessel of k)
-// TODO Skellam                               (modified Bessel of first kind, Marcum Q function): https://stats.stackexchange.com/questions/279220/what-is-the-expectation-of-the-absolute-value-of-the-skellam-distribution; http://www.acta.sapientia.ro/acta-math/C3-1/math31-5.pdf
 // TODO Muth                                  (not-invertible cdf)
 // TODO Beta-binomial                         (generation unknown)
 // TODO Beta-pascal / Beta negative binomial  (generation unknown)

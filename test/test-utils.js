@@ -86,7 +86,7 @@ export default (function () {
       bin += model(parseInt(x)) * values.length
       pBin += px
 
-      // If bin count is above 20, consider this a class and clear bin
+      // If bin count is above 10, consider this a class and clear bin
       if (bin > 10) {
         chi2 += Math.pow(pBin - bin, 2) / bin
         // console.log(pBin, bin, Math.pow(pBin - bin, 2) / bin)
@@ -131,31 +131,22 @@ export default (function () {
     }
   }
 
-  /**
-   * Calculates the difference between the sum of a PMF and CDF on a range.
-   *
-   * @method diffDisc
-   * @param {Function} pmf The probability mass function.
-   * @param {Function} cdf The cumulative density function.
-   * @param {number} a Start of the summation range.
-   * @param {number} b End of the summation range.
-   * @return {number} The total difference between the CDF and the summed PMF.
-   */
-  function diffDisc (pmf, cdf, a, b) {
-    let dy = 0
-    let int = 0
-    for (let x = a; x < b; x++) {
-      int += pmf(x)
-      dy += Math.abs(cdf(x) - int)
-      // console.log(x, int, cdf(x))
-    }
-    return isFinite(dy) ? dy : 1e6
-  }
-
   function differentiate (f, x, h) {
     // return (f(x - 2 * h) / 12 - 2 * f(x - h) / 3 + 2 * f(x + h) / 3 - f(x + 2 * h) / 12) / h
     return (f(x + h) - f(x - h)) / (2 * h)
     // return (-1.5 * f(x) + 2 * f(x + h) - 0.5 * f(x + 2 * h)) / h
+  }
+
+  function cdf2pdfDisc (dist, range, laps) {
+    let res = Array.from({ length: laps }, () => {
+      let x0 = Math.floor(range[0] + Math.random() * (range[1] - range[0]))
+      x0 = -Math.abs(x0)
+      let p = dist.pdf(x0)
+      let df = p - (dist.cdf(x0) - dist.cdf(x0 - 1))
+      // console.log(x0, p, dist.cdf(x0) - dist.cdf(x0 - 1))
+      return Math.abs(df)
+    }).reduce((acc, d) => d + acc, 0) / laps
+    return res
   }
 
   function cdf2pdf (dist, range, laps) {
@@ -164,18 +155,18 @@ export default (function () {
       // console.log(x0, dist.pdf(x0), differentiate(x => dist.cdf(x), x0, 1e-5))
       let p = dist.pdf(x0)
       let df = p - differentiate(x => dist.cdf(x), x0, 1e-5)
-      return Math.abs(df) // / p
+      return Math.abs(df)
     }).reduce((acc, d) => d + acc, 0) / laps
     // console.log(res)
     return res
   }
 
   return {
-    ksTest: ksTest,
-    chiTest: chiTest,
+    ksTest,
+    chiTest,
     trials,
     repeat,
-    diffDisc: diffDisc,
-    cdf2pdf
+    cdf2pdf,
+    cdf2pdfDisc
   }
 })()

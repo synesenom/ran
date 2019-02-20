@@ -4,6 +4,7 @@ import * as special from '../src/special'
 import utils from './test-utils'
 
 const LAPS = 100
+const EPS = 1e-3
 
 describe('special', () => {
   describe('.hurwitzZeta', () => {
@@ -82,6 +83,46 @@ describe('special', () => {
 
         let gli = special.gammaLowerIncomplete(s, x)
         assert(Math.abs(gli - 1))
+      }
+    })
+  })
+
+  describe('.marcumQ()', () => {
+    it('should satisfy the recurrence relation (y >= x + mu)', () => {
+      for (let i = 0; i < LAPS; i++) {
+        let mu = Math.random() * 10 + 2
+        let x = Math.random() * 10
+        let y = Math.random() * 10 + x + mu + 2
+
+        let q1 = special.marcumQ(mu + 1, x, y)
+        let q2 = special.marcumQ(mu, x, y)
+        let q3 = special.marcumQ(mu + 2, x, y)
+        let q4 = special.marcumQ(mu - 1, x, y)
+
+        if (x > mu) {
+          assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < EPS)
+        } else {
+          assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < EPS)
+        }
+      }
+    })
+
+    it('should satisfy the recurrence relation (y < x + mu)', () => {
+      for (let i = 0; i < LAPS; i++) {
+        let x = Math.random() * 10
+        let y = Math.random() * 10
+        let mu = Math.random() * 10 + 2 + Math.max(0, y - x)
+
+        let q1 = special.marcumQ(mu + 1, x, y)
+        let q2 = special.marcumQ(mu, x, y)
+        let q3 = special.marcumQ(mu + 2, x, y)
+        let q4 = special.marcumQ(mu - 1, x, y)
+
+        if (x > mu) {
+          assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < EPS)
+        } else {
+          assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < EPS)
+        }
       }
     })
   })

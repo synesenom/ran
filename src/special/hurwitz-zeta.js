@@ -3,7 +3,7 @@ import { B2k } from './_bernoulli'
 import { gammaLn } from '../special'
 
 /**
- * Hurwitz zeta function (only real values outside the critical strip).
+ * Computes the Hurwitz zeta function (only real values outside the critical strip) using the alternating series.
  * Source: https://projecteuclid.org/download/pdf_1/euclid.em/1046889587
  *
  * @method hurwitzZeta

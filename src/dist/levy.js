@@ -1,4 +1,4 @@
-import { erf } from '../special'
+import { erfc } from '../special'
 import { normal } from './_core'
 import Distribution from './_distribution'
 
@@ -40,6 +40,6 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return 1 - erf(Math.sqrt(0.5 * this.p.c / (x - this.p.mu)))
+    return erfc(Math.sqrt(0.5 * this.p.c / (x - this.p.mu)))
   }
 }

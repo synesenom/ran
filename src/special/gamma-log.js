@@ -9,7 +9,7 @@ const coeffs = [
 ]
 
 /**
-   * Logarithm of the gamma function.
+   * Computes the logarithm of the gamma function.
    *
    * @method gammaLn
    * @memberOf ran.special

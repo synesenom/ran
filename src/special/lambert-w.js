@@ -1,7 +1,7 @@
 import { MAX_ITER, EPS, DELTA } from './_core'
 
 /**
- * Lambert W function.
+ * Computes the Lambert W function.
  *
  * @method lambertW
  * @memberOf ran.special

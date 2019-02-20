@@ -3,9 +3,9 @@ import { describe, it } from 'mocha'
 import utils from './test-utils'
 import { float, int } from '../src/core'
 import * as dist from '../src/dist'
+import { marcumQ } from '../src/special'
 
 const LAPS = 1000
-const MAX_AVG_DIFF = 1e-5
 const EPSILON = 1e-6
 
 /**
@@ -21,9 +21,17 @@ function utPdf (name, params) {
       const self = new dist[name](...params())
 
       let isNum = true
-      for (let x = -1000; x <= 1000; x++) {
-        let pdf = self.pdf(x / 10)
-        isNum &= isFinite(pdf) && Number.isFinite(pdf)
+
+      if (self.type() === 'discrete') {
+        for (let x = -100; x <= 100; x++) {
+          let pdf = self.pdf(x)
+          isNum &= isFinite(pdf) && Number.isFinite(pdf)
+        }
+      } else {
+        for (let x = -1000; x <= 1000; x++) {
+          let pdf = self.pdf(x / 10)
+          isNum &= isFinite(pdf) && Number.isFinite(pdf)
+        }
       }
       return isNum
     })
@@ -34,9 +42,16 @@ function utPdf (name, params) {
       const self = new dist[name](...params())
 
       let flag = true
-      for (let x = -1000; x <= 1000; x++) {
-        let pdf = self.pdf(x / 10)
-        flag &= pdf >= 0
+      if (self.type() === 'discrete') {
+        for (let x = -100; x <= 100; x++) {
+          let pdf = self.pdf(x)
+          flag &= pdf >= 0
+        }
+      } else {
+        for (let x = -1000; x <= 1000; x++) {
+          let pdf = self.pdf(x / 10)
+          flag &= pdf >= 0
+        }
       }
       return flag
     })
@@ -47,9 +62,16 @@ function utPdf (name, params) {
       const self = new dist[name](...params())
 
       let isNum = true
-      for (let x = -1000; x <= 1000; x++) {
-        let cdf = self.cdf(x / 10)
-        isNum &= isFinite(cdf) && Number.isFinite(cdf)
+      if (self.type() === 'discrete') {
+        for (let x = -100; x <= 100; x++) {
+          let cdf = self.cdf(x)
+          isNum &= isFinite(cdf) && Number.isFinite(cdf)
+        }
+      } else {
+        for (let x = -1000; x <= 1000; x++) {
+          let cdf = self.cdf(x / 10)
+          isNum &= isFinite(cdf) && Number.isFinite(cdf)
+        }
       }
       return isNum
     })
@@ -60,21 +82,35 @@ function utPdf (name, params) {
       const self = new dist[name](...params())
 
       let flag = true
-      for (let x = -1000; x <= 1000; x++) {
-        let cdf = self.cdf(x / 10)
-        flag &= cdf >= 0 && cdf <= 1
+      if (self.type() === 'discrete') {
+        for (let x = -100; x <= 100; x++) {
+          let cdf = self.cdf(x)
+          flag &= cdf >= 0 && cdf <= 1
+        }
+      } else {
+        for (let x = -1000; x <= 1000; x++) {
+          let cdf = self.cdf(x / 10)
+          flag &= cdf >= 0 && cdf <= 1
+        }
       }
       return flag
     })
   })
 
+  // FIXME Fix it for FisherZ, InverseGaussian and LogisticExponential
   /* it('cdf should be non-decreasing', () => {
     utils.trials(() => {
       const self = new dist[name](...params())
 
       let flag = true
-      for (let x = -1000; x <= 1000; x++) {
-        flag &= self.cdf(x / 10 + 1e-3) >= self.cdf(x / 10)
+      if (self.type() === 'discrete') {
+        for (let x = -100; x <= 100; x++) {
+          flag &= self.cdf(x + 1) >= self.cdf(x)
+        }
+      } else {
+        for (let x = -1000; x <= 1000; x++) {
+          flag &= self.cdf(x / 10 + 1e-3) >= self.cdf(x / 10)
+        }
       }
       return flag
     })
@@ -93,12 +129,12 @@ function utPdf (name, params) {
           ], LAPS
         ) < EPSILON
       } else {
-        return utils.diffDisc(
-          x => self.pdf(x),
-          x => self.cdf(x),
-          (supp[0].value !== null ? supp[0].value : -30) - 3,
-          (supp[1].value !== null ? supp[1].value : 30) + 3
-        ) < MAX_AVG_DIFF
+        return utils.cdf2pdfDisc(
+          self, [
+            (supp[0].value !== null ? supp[0].value : -30) - 3,
+            (supp[1].value !== null ? supp[1].value : 30) + 3
+          ], LAPS
+        ) < EPSILON
       }
     }, 8)
   })
@@ -226,8 +262,6 @@ const Param = {
 }
 
 describe('dist', () => {
-  return
-
   // Base class
   describe('Distribution', () => {
     describe('.sample()', () => {
@@ -615,6 +649,9 @@ describe('dist', () => {
       p: () => [Param.location(), Param.scale(), 0]
     }]
   }, {
+    name: 'Skellam',
+    p: () => [float(1, 10), float(1, 10)]
+  }, {
     name: 'Slash',
     p: () => []
   }, {
@@ -649,7 +686,7 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'Zeta') return
+    // if (d.name !== 'Skellam') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

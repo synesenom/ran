@@ -2,7 +2,7 @@ import riemannZeta from './riemann-zeta'
 import hurwitzZeta from './hurwitz-zeta'
 
 /**
- * Generalized harmonic number H(n, m).
+ * Computes the generalized harmonic number H(n, m).
  *
  * @method generalizedHarmonic
  * @memberOf ran.special
