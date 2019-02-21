@@ -5,9 +5,9 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Skellam distribution]{@link https://en.wikipedia.org/wiki/Skellam_distribution}:
  *
- * $$f(k; \mu_1, \mu_2) = e^{-(\mu_1 + \mu_2)\Big(\frac{\mu_1}{\mu_2}\Big)^{k/2}} I_k(2 \sqrt{\mu_1 \mu_2}),$$
+ * $$f(k; \mu_1, \mu_2) = e^{-(\mu_1 + \mu_2)}\Big(\frac{\mu_1}{\mu_2}\Big)^{k/2} I_k(2 \sqrt{\mu_1 \mu_2}),$$
  *
- * with \(\mu_1, |mu_2 \in mathbb{R}^+ \cup \{0\}\). Support: \(k \in \mathbb{N}\).
+ * with \(\mu_1, \mu_2 \in mathbb{R}^+ \cup \{0\}\) and \(I_n(x)\) is the modified Bessel function of the first kind with order \(n\). Support: \(k \in \mathbb{N}\).
  *
  * @class Skellam
  * @memberOf ran.dist

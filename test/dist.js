@@ -637,6 +637,9 @@ describe('dist', () => {
     name: 'ReciprocalInverseGaussian',
     p: () => [Param.scale(), Param.shape()]
   }, {
+    name: 'Rice',
+    p: () => [Param.shape(), Param.scale()]
+  }, {
     name: 'ShiftedLogLogistic',
     cases: [{
       desc: 'positive shape parameter',
@@ -686,7 +689,7 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'Skellam') return
+    // if (d.name !== 'Rice') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

@@ -82,7 +82,7 @@ const _asymptoticExpansionLargeXi = {
 };
 
 /**
- * Computes the generalized Marcum-Q function. Currently only x < 5 values are supported. We use the definition as given in Eq. (1) in https://arxiv.org/pdf/1311.0681.pdf.
+ * Computes the generalized Marcum-Q function. Currently only x < 30 values are reliable. We use the definition as given in Eq. (1) in https://arxiv.org/pdf/1311.0681.pdf.
  *
  * @method marcumQ
  * @memberOf ran.special
@@ -95,13 +95,21 @@ export default function (mu, x, y) {
   // Pick primary function
   let primary = y > x + mu ? 'q' : 'p'
 
-  // Series expansion
-  if (x < 30) {
-    return _seriesExpansion[primary](mu, x, y)
+  // Special cases
+  if (y === 0) {
+    return 1
+  }
+  if (x === 0) {
+    return gammaUpperIncomplete(mu, y)
   }
 
+  // Series expansion
+  // if (x < 30) {
+  return _seriesExpansion[primary](mu, x, y)
+  // }
+
   // Asymptotic expansion
-  let xi = 2 * Math.sqrt(x * y)
+  /* let xi = 2 * Math.sqrt(x * y)
   if (xi > 30 && mu * mu < 2 * xi) {
     // TODO asymptotic expansion
     return null
@@ -121,5 +129,5 @@ export default function (mu, x, y) {
   }
 
   // Integral
-  return null
+  return null */
 }
