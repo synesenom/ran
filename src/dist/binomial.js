@@ -1,6 +1,7 @@
-import { regularizedBetaIncomplete, gammaLn } from '../special'
-import Distribution from './_distribution'
 import binomLn from '../special/binom-log'
+import gammaLn from '../special/gamma-log'
+import { regularizedBetaIncomplete } from '../special/beta-incomplete'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [binomial distribution]{@link https://en.wikipedia.org/wiki/Binomial_distribution}:

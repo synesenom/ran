@@ -42,8 +42,7 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    let y = Math.pow(Math.exp(this.p.lambda * x) - 1, this.p.kappa)
-
-    return isFinite(y) ? y / (1 + y) : 1
+    // Calculate 1 - S for robustness
+    return 1 - 1 / (1 + Math.pow(Math.exp(this.p.lambda * x) - 1, this.p.kappa))
   }
 }

@@ -39,4 +39,8 @@ export default class extends Exponential {
   _cdf (x) {
     return super._cdf(Math.pow(x / this.p.lambda2, this.p.k))
   }
+
+  /* _q (p) {
+    return this.p.lambda2 * Math.pow(p, 1 / this.p.k)
+  } */
 }

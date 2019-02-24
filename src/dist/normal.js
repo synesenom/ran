@@ -1,4 +1,4 @@
-import { erf } from '../special'
+import { erf } from '../special/error'
 import { normal } from './_core'
 import Distribution from './_distribution'
 

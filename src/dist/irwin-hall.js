@@ -1,5 +1,5 @@
-import { sum, neumaier } from '../utils'
-import { gammaLn } from '../special'
+import neumaier from '../algorithms/neumaier'
+import gammaLn from '../special/gamma-log'
 import Distribution from './_distribution'
 
 /**
@@ -31,7 +31,7 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling
-    return sum(Array.from({ length: this.p.n }, Math.random))
+    return neumaier(Array.from({ length: this.p.n }, Math.random))
   }
 
   _pdf (x) {

@@ -54,11 +54,10 @@ export function betaIncomplete (a, b, x) {
   let bt = (x <= 0 || x >= 1)
     ? 0
     : Math.exp(a * Math.log(x) + b * Math.log(1 - x))
-  /* return x < (a + 1) / (a + b + 2)
+  // Use I(b, a, x) only if b != 0
+  return a !== 0 && (x < (a + 1) / (a + b + 2) || b === 0)
     ? bt * _biContinuedFraction(a, b, x) / a
-    : 1 - bt * _biContinuedFraction(b, a, 1 - x) / b */
-  // FIXME Use clever faster method
-  return bt * _biContinuedFraction(a, b, x) / a
+    : 1 - bt * _biContinuedFraction(b, a, 1 - x) / b
 }
 
 /**

@@ -1,4 +1,5 @@
-import { besselI, marcumQ } from '../special'
+import { besselI } from '../special/bessel'
+import marcumQ from '../special/marcum-q'
 import { poisson } from './_core'
 import Distribution from './_distribution'
 
@@ -7,7 +8,7 @@ import Distribution from './_distribution'
  *
  * $$f(k; \mu_1, \mu_2) = e^{-(\mu_1 + \mu_2)}\Big(\frac{\mu_1}{\mu_2}\Big)^{k/2} I_k(2 \sqrt{\mu_1 \mu_2}),$$
  *
- * with \(\mu_1, \mu_2 \in mathbb{R}^+ \cup \{0\}\) and \(I_n(x)\) is the modified Bessel function of the first kind with order \(n\). Support: \(k \in \mathbb{N}\).
+ * with \(\mu_1, \mu_2 \in \mathbb{R}^+ \cup \{0\}\) and \(I_n(x)\) is the modified Bessel function of the first kind with order \(n\). Support: \(k \in \mathbb{N}\).
  *
  * @class Skellam
  * @memberOf ran.dist
@@ -29,7 +30,8 @@ export default class extends Distribution {
     this.c = [
       Math.exp(-mu1 - mu2),
       Math.sqrt(mu1 / mu2),
-      2 * Math.sqrt(mu1 * mu2)
+      2 * Math.sqrt(mu1 * mu2),
+      marcumQ(1, mu2, mu1)
     ]
   }
 
@@ -49,6 +51,6 @@ export default class extends Distribution {
     if (x >= 1) {
       return marcumQ(x + 1, this.p.mu2, this.p.mu1)
     }
-    return marcumQ(1, this.p.mu2, this.p.mu1)
+    return this.c[3]
   }
 }

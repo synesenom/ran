@@ -1,4 +1,4 @@
-import { binomLn } from '../special'
+import binomLn from '../special/binom-log'
 import Custom from './categorical'
 
 /**

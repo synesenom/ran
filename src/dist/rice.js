@@ -1,4 +1,5 @@
-import { besselI, marcumQ } from '../special'
+import { besselI } from '../special/bessel'
+import marcumQ from '../special/marcum-q'
 import { gamma, poisson } from './_core'
 import Distribution from './_distribution'
 
@@ -28,7 +29,9 @@ export default class extends Distribution {
     }]
     this.c = [
       0.5 * Math.pow(nu / sigma, 2),
-      sigma * sigma
+      sigma * sigma,
+      nu / (sigma * sigma),
+      nu * nu
     ]
   }
 
@@ -45,13 +48,13 @@ export default class extends Distribution {
 
     // Handle z >> 1 case (using asymptotic form of Bessel)
     if (isFinite(b)) {
-      return x * Math.exp(-0.5 * (x * x + this.p.nu * this.p.nu) / this.c[1]) * besselI(0, x * this.p.nu / this.c[1]) / this.c[1]
+      return x * Math.exp(-0.5 * (x * x + this.c[3]) / this.c[1]) * besselI(0, x * this.c[2]) / this.c[1]
     } else {
-      return x * Math.exp(-0.5 * (x * x + this.p.nu * this.p.nu) / this.c[1] + z - 0.5 * Math.log(2 * Math.PI * z)) / this.c[1]
+      return x * Math.exp(-0.5 * (x * x + this.c[3]) / this.c[1] + z - 0.5 * Math.log(2 * Math.PI * z)) / this.c[1]
     }
   }
 
   _cdf (x) {
-    return 1 - marcumQ(1, Math.pow(this.p.nu / this.p.sigma, 2) / 2, Math.pow(x / this.p.sigma, 2) / 2)
+    return 1 - marcumQ(1, this.c[0], Math.pow(x / this.p.sigma, 2) / 2)
   }
 }

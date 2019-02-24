@@ -1,5 +1,5 @@
 import { MAX_ITER, EPS } from './_core'
-import newton from './_newton'
+import newton from '../algorithms/newton'
 import gammaLn from './gamma-log'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from './gamma-incomplete'
 

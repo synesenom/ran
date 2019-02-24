@@ -1,85 +1,84 @@
 # dist
 
-// TODO Make pdf/cdf more robust when large numbers are included
-// TODO Robustness: use logarithmic values
-// TODO Make use of compound distributions
-// TODO Simplify computations in pdf/cdf
-// TODO Check parameter domains
-// TODO Make equations more visible
-// TODO Use decimal.js for high precision
+- Make pdf/cdf more robust when large numbers are included
+- Robustness: use logarithmic values
+- Make use of compound distributions
+- Simplify computations in pdf/cdf
+- Check parameter domains
+- Make equations more visible
+- Use decimal.js for high precision
 
-// TODO Benford                               (inverse transform)
-// TODO Benktander 1nd kind                   (lambertW)
-// TODO Delaporte                             (compound)
-// TODO Normal-exponential-gamma              (compound)
-// TODO Tukey                                 (pdf/cdf are not trivial)
-// TODO Hermite                               (requires higher order derivative)
-// TODO Planck                                (CDF unknown)
-// TODO von Mises                             (modified Bessel of k)
-// TODO Muth                                  (not-invertible cdf)
-// TODO Beta-binomial                         (generation unknown)
-// TODO Beta-pascal / Beta negative binomial  (generation unknown)
-// TODO Borel                                 (generation unknown)
-// TODO Davis                                 (generation unknown)
-// TODO Error / exponential power             (generation unknown)
-// TODO stable                                (generation unknown)
-// TODO trapezoidal
+- Benford                               (inverse transform)
+- Benktander 1nd kind                   (lambertW)
+- Delaporte                             (compound)
+- Normal-exponential-gamma              (compound)
+- Tukey                                 (pdf/cdf are not trivial)
+- Hermite                               (requires higher order derivative)
+- Planck                                (CDF unknown)
+- von Mises                             (modified Bessel of k)
+- Muth                                  (not-invertible cdf)
+- Beta-binomial                         (generation unknown)
+- Beta-pascal / Beta negative binomial  (generation unknown)
+- Borel                                 (generation unknown)
+- Davis                                 (generation unknown)
+- Error / exponential power             (generation unknown)
+- stable                                (generation unknown)
+- trapezoidal
 
-// TODO alpha (scipy)
-// TODO anglit (scipy)
-// TODO ARGUS
-// TODO crystal ball
-// TODO double gamma (scipy)
-// TODO double weibull (scipy)
-// TODO Exponentially modified Gaussian (EMG)
-// TODO generalized logistic (scipy)
-// TODO generalized normal
-// TODO generalized Pareto (scipy)
-// TODO generalized exponential (scipy)
-// TODO generalized extreme (scipy)
-// TODO Gauss hypergeometric (scipy)
-// TODO generalized half-logistic (scipy)
-// TODO Gilbrat (scipy)
-// TODO half logistic (scipy)
-// TODO half generalized normal (scipy)
-// TODO inverted Weibull (scipy)
-// TODO Mielke (scipy)
-// TODO Moyal (scipy)
-// TODO Non-central chi2 (scipy)
-// TODO Non-central F (scipy)
-// TODO Non-central t (scipy)
-// TODO Normal inverse Gauss (scipy)
-// TODO power-lognormal (scipy)
-// TODO R (scipy)
-// TODO Rice (scipy)
-// TODO skew normal (scipy)
-// TODO trapezoidal (scipy)
-// TODO truncated exponential (scipy)
+- alpha (scipy)
+- anglit (scipy)
+- ARGUS
+- crystal ball
+- double gamma (scipy)
+- double weibull (scipy)
+- Exponentially modified Gaussian (EMG)
+- generalized logistic (scipy)
+- generalized normal
+- generalized Pareto (scipy)
+- generalized exponential (scipy)
+- generalized extreme (scipy)
+- Gauss hypergeometric (scipy)
+- generalized half-logistic (scipy)
+- Gilbrat (scipy)
+- half logistic (scipy)
+- half generalized normal (scipy)
+- inverted Weibull (scipy)
+- Mielke (scipy)
+- Moyal (scipy)
+- Non-central beta
+- Non-central F
+- Non-central t (scipy)
+- Normal inverse Gauss (scipy)
+- power-lognormal (scipy)
+- R (scipy)
+- skew normal (Owen's T)
+- trapezoidal (scipy)
+- truncated exponential (scipy)
 
-// TODO Dirichlet
-// TODO discrete Laplacian (scipy)
-// TODO Wishart
-// TODO inverse Wishart
-// TODO Champernowne
-// TODO ref: http://www.nrbook.com/devroye/Devroye_files/chapter_ten.pdf
-// TODO g-and-h distribution (https://books.google.dk/books?id=HMXYCgAAQBAJ&pg=PA29&dq=g-and-h+distribution&hl=en&sa=X&redir_esc=y#v=snippet&q=g-and-h%20distribution&f=false)
+- Dirichlet
+- discrete Laplacian (scipy)
+- Wishart
+- inverse Wishart
+- Champernowne
+- ref: http://www.nrbook.com/devroye/Devroye_files/chapter_ten.pdf
+- g-and-h distribution (https://books.google.dk/books?id=HMXYCgAAQBAJ&pg=PA29&dq=g-and-h+distribution&hl=en&sa=X&redir_esc=y#v=snippet&q=g-and-h%20distribution&f=false)
 
 
 # ts
 
-// TODO Implement general Aggregator class
+- Implement general Aggregator class
 
 
 # mc
 
-// TODO slice sampling
-// TODO hmc
-// TODO rejection sampling with log-concave dist
-// TODO slice sampling
-// TODO Gibbs sampling
-// TODO NUTS
-// TODO adaptive Metropolis
+- slice sampling
+- hmc
+- rejection sampling with log-concave dist
+- slice sampling
+- Gibbs sampling
+- NUTS
+- adaptive Metropolis
 
-// TODO Hamiltonian
-// TODO Adjust Euclidean metric from covariance in burn-in
-// TODO step size sampled randomly
+- Hamiltonian
+- Adjust Euclidean metric from covariance in burn-in
+- step size sampled randomly

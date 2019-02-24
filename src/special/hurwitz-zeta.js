@@ -1,6 +1,6 @@
 import { EPS } from './_core'
-import { B2k } from './_bernoulli'
-import { gammaLn } from '../special'
+import { B2k } from '../constants/bernoulli'
+import gammaLn from '../special/gamma-log'
 
 /**
  * Computes the Hurwitz zeta function (only real values outside the critical strip) using the alternating series.

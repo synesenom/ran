@@ -1,4 +1,4 @@
-import { beta } from '../special'
+import beta from '../special/beta'
 import Distribution from './_distribution'
 
 /**

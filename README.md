@@ -11,56 +11,88 @@
 
 Statistical library for generating various random variates, calculating likelihood functions and testing hypotheses (and more).
 
+## probability distributions
 
-# probability distributions
-`ranjs` includes more than [60 continuous and discrete distributions](https://synesenom.github.io/ran/#dist.Distribution), each tested rigorously
+`ranjs` includes more than [90 continuous and discrete distributions](https://synesenom.github.io/ran/#dist.Distribution), each tested rigorously with a floating point precision of 15 digits. Earch distribution comes with the following methods:
 
-Library for generating various random variables in a robust and fast way. Beyond random variate generation, `ranjs` provides the following:  
-- Useful statistical functions such as survival or hazard functions.  
-- Test method for each generator that can be used to check if some values are sampled from a specific distribution.  
-- Monte Carlo methods for estimating unknown probability distributions (only Metropolis at the moment).  
+- sample generator
+- probability density/mass function
+- cumulative distribution function
+- survival function
+- hazard and cumulative hazard function
+- likelihood and AIC/BIC methods
+- test method that uses Kolmogorov-Smirnov test for continuous or $\chi^2$ tests for discrete distributions
 
+## mcmc methods
 
-# Install
-## Browser
+ `ranjs` also implements a random walk Metropolis (RWM) sampler.
+
+## install
+
+### browser
+
 Just include the [minified version](https://raw.githubusercontent.com/synesenom/ran/master/ran.min.js) and add
 
 ```
 <script type="text/javascript" src="ran.min.js"></script>
 ```
 
+### node
 
-## Node
 ```
 npm install ranjs
 ```
 
+## usage
 
-# Usage
+### distributions
+
 ```
-var ran = require('ranjs')
+const ran = require('ranjs')
 
-// Create generator
-var gamma = new ran.dist.Gamma(1.3, 4.2)
+// Create a new generator for Skellam distribution with mu1 = 1 and mu2 = 3
+const skellam = new ran.dist.Skellam(1, 3)
 
-// Get 100 random variates
-var values = gamma.sample(100)
+// Generate 10K variates
+let values = skellam.sample(1e4)
 
-// Get PDF/CDF functions
-var pdf = gamma.pdf
-var cdf = gamma.cdf
+// Test if samples indeed follow the specified distribution
+console.log(skellam.test(values))
+// => { statistics: 14.025360669436635, passed: true }
 
-// Higher level functions
-var h = gamma.hazard
-var H = gamma.cumulativeHazard
+// Evaluate PMF/CDF ...
+for (let k = -10; k <= 10; k++) {
+    console.log(k, skellam.pdf(k), skellam.cdf(k))
+}
+// => -4 0.10963424740027695 0.21542206959904264
+//    -3 0.1662284357019246 0.38165050508716936
+//    -2 0.20277318483535026 0.5844236896611729
+//    ...
 
-// Test if values are from this distribution
-console.log(gamma.test(values))
+// ... or higher level statistical functions
+for (let k = -4; k <= 4; k++) {
+    console.log(k, skellam.hazard(k), skellam.cHazard(k))
+}
+// => -4 0.13973659359019766 0.24260937407418487
+//    -3 0.26882602325948046 0.4807014556249526
+//    -2 0.487932492278074 0.8780890224913454
+//    ...
+
+
+// Create another distribution and check their AIC
+const skellam2 = new ran.dist.Skellam(1.2, 7.5)
+console.log(`Skellam(1, 3):     ${skellam.aic(values)}`)
+// => Skellam(1, 3):     41937.67252974663
+
+console.log(`Skellam(1.2, 7.5): ${skellam2.aic(values)}`)
+// => Skellam(1.2, 7.5): 66508.74299363888
 ```
 
-## Demo
+## demo
+
 A demo observable notebook is available [here](https://beta.observablehq.com/@synesenom/ranjs-demo) to play around with the library.
 
+## API and documentation
 
-# API
-[https://synesenom.github.io/ran/](https://synesenom.github.io/ran/)
+For the full API and documentation, see: [https://synesenom.github.io/ran/](https://synesenom.github.io/ran/)
+

@@ -1,4 +1,4 @@
-import { lambertW } from '../special'
+import lambertW from '../special/lambert-w'
 import Distribution from './_distribution'
 
 /**

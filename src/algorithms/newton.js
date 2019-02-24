@@ -1,10 +1,10 @@
-import { MAX_ITER, EPS } from './_core'
+import { MAX_ITER, EPS } from '../special/_core'
 
 /**
  * Finds the root of a function using Newton's method.
  *
  * @method newton
- * @memberOf ran.special
+ * @memberOf ran.algorithms
  * @param {Function} f Function to find root for. Must accept a single variable.
  * @param {Function} df First derivative of the function. Must accept a single variable.
  * @param {number} x0 Starting point of the optimization.

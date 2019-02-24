@@ -1,4 +1,5 @@
-import { regularizedBetaIncomplete, binomLn } from '../special'
+import binomLn from '../special/binom-log'
+import { regularizedBetaIncomplete } from '../special/beta-incomplete'
 import { gamma, poisson } from './_core'
 import Distribution from './_distribution'
 

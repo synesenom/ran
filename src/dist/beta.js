@@ -1,6 +1,7 @@
+import fnBeta from '../special/beta'
+import { regularizedBetaIncomplete } from '../special/beta-incomplete'
 import { gamma } from './_core'
 import Distribution from './_distribution'
-import { beta as fnBeta, regularizedBetaIncomplete } from '../special'
 
 /**
  * Generator for the [beta distribution]{@link https://en.wikipedia.org/wiki/Beta_distribution}:

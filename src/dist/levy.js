@@ -1,4 +1,4 @@
-import { erfc } from '../special'
+import { erfc } from '../special/error'
 import { normal } from './_core'
 import Distribution from './_distribution'
 

@@ -1,6 +1,4 @@
-import { gammaLn, gammaLowerIncomplete } from '../special'
-import { gamma } from './_core'
-import Distribution from './_distribution'
+import Chi2 from './chi2'
 
 /**
  * Generator for the [\(\chi\) distribution]{@link https://en.wikipedia.org/wiki/Chi_distribution}:
@@ -11,14 +9,14 @@ import Distribution from './_distribution'
  *
  * @class Chi
  * @memberOf ran.dist
- * @param {number=} k Degrees of freedom. If not an integer, is rounded to the nearest one. Default value is 1.
+ * @param {number=} k Degrees of freedom. If not an integer, is rounded to the nearest one. Default value is 2.
  * @constructor
  */
-// TODO Transform Chi2
-export default class extends Distribution {
-  constructor (k = 1) {
-    super('continuous', arguments.length)
-    this.p = { k: Math.round(k) }
+export default class extends Chi2 {
+  // Transformation of chi2 distribution
+  constructor (k = 2) {
+    super(k)
+    this.p = Object.assign({ k }, this.p)
     this.s = [{
       value: 0,
       closed: true
@@ -26,19 +24,22 @@ export default class extends Distribution {
       value: null,
       closed: false
     }]
-    this.c = [(this.p.k / 2 - 1) * Math.LN2]
   }
 
   _generator () {
-    // Direct sampling from gamma
-    return Math.sqrt(gamma(this.p.k / 2, 0.5))
+    // Direct sampling by transforming chi2 variate
+    return Math.sqrt(super._generator())
   }
 
   _pdf (x) {
-    return Math.exp(-0.5 * x * x - gammaLn(this.p.k / 2) - this.c[0]) * Math.pow(x, this.p.k - 1)
+    if (this.p.k === 1 && x === 0) {
+      return Math.sqrt(2 / Math.PI)
+    } else {
+      return 2 * x * super._pdf(x * x)
+    }
   }
 
   _cdf (x) {
-    return gammaLowerIncomplete(this.p.k / 2, x * x / 2)
+    return super._cdf(x * x)
   }
 }

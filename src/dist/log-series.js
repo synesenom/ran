@@ -1,4 +1,4 @@
-import { betaIncomplete } from '../special'
+import { betaIncomplete } from '../special/beta-incomplete'
 import Distribution from './_distribution'
 
 export default class extends Distribution {

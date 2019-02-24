@@ -3,9 +3,9 @@ import { describe, it } from 'mocha'
 import utils from './test-utils'
 import { float, int } from '../src/core'
 import * as dist from '../src/dist'
-import { marcumQ } from '../src/special'
 
 const LAPS = 1000
+const FPMIN = 1e-15
 const EPSILON = 1e-6
 
 /**
@@ -30,6 +30,9 @@ function utPdf (name, params) {
       } else {
         for (let x = -1000; x <= 1000; x++) {
           let pdf = self.pdf(x / 10)
+          if (!isFinite(pdf)) {
+            console.log(x, pdf)
+          }
           isNum &= isFinite(pdf) && Number.isFinite(pdf)
         }
       }
@@ -50,6 +53,9 @@ function utPdf (name, params) {
       } else {
         for (let x = -1000; x <= 1000; x++) {
           let pdf = self.pdf(x / 10)
+          if (pdf < 0) {
+            console.log(x / 10, pdf)
+          }
           flag &= pdf >= 0
         }
       }
@@ -98,7 +104,7 @@ function utPdf (name, params) {
   })
 
   // FIXME Fix it for FisherZ, InverseGaussian and LogisticExponential
-  /* it('cdf should be non-decreasing', () => {
+  it('cdf should be non-decreasing', () => {
     utils.trials(() => {
       const self = new dist[name](...params())
 
@@ -109,7 +115,78 @@ function utPdf (name, params) {
         }
       } else {
         for (let x = -1000; x <= 1000; x++) {
-          flag &= self.cdf(x / 10 + 1e-3) >= self.cdf(x / 10)
+          flag &= self.cdf(x / 10 + 1e-3) - self.cdf(x / 10) > -FPMIN
+        }
+      }
+      return flag
+    })
+  })
+
+  // TODO Add unit tests for q(): valid number, non-negative, increasing, equals to CDF inv
+  /* it('quantile should return valid numbers', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
+
+      let isNum = true
+
+      if (self.type() === 'discrete') {
+        // TODO For discrete as well
+      } else {
+        for (let i = 0; i < 100; i++) {
+          let q = self.q(Math.random())
+          isNum &= isFinite(q) && Number.isFinite(q)
+        }
+      }
+      return isNum
+    })
+  })
+
+  /* it('quantile should be non-negative', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
+
+      let flag = true
+      if (self.type() === 'discrete') {
+        // TODO For discrete as well
+      } else {
+        for (let x = -1000; x <= 1000; x++) {
+          let q = self.q(x / 10)
+          flag &= q >= 0
+        }
+      }
+      return flag
+    })
+  })
+
+  it('quantile should be non-decreasing', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
+
+      let flag = true
+      if (self.type() === 'discrete') {
+        // TODO For discrete as well
+      } else {
+        for (let x = -1000; x <= 1000; x++) {
+          flag &= self.q(x / 10 + 1e-3) >= self.q(x / 10)
+        }
+      }
+      return flag
+    })
+  })
+
+  it('quantile should satisfy the Galois inequality', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
+
+      let flag = true
+      if (self.type() === 'discrete') {
+        // TODO For discrete as well
+      } else {
+        for (let x = -1000; x <= 1000; x++) {
+          let p = Math.random()
+          let q = self.q(p)
+          let cdf = self.cdf(x / 10)
+          flag &= ((p <= cdf && q <= x / 10) || (p > cdf && q > x / 10))
         }
       }
       return flag
@@ -601,6 +678,12 @@ describe('dist', () => {
     name: 'NegativeBinomial',
     p: () => [Param.count(), Param.prob()]
   }, {
+    name: 'NoncentralChi2',
+    p: () => [Param.degree(), Param.scale()]
+  }, {
+    name: 'NoncentralChi',
+    p: () => [4, 4]
+  }, {
     name: 'Normal',
     p: () => [Param.location(), Param.scale()]
   }, {
@@ -689,13 +772,13 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'Rice') return
+    // if (d.name !== 'LogSeries') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
         describe('.sample()', () => utSample(d.name, d.p))
 
-        describe('.pdf()', () => utPdf(d.name, d.p))
+        describe('.pdf(), .cdf()', () => utPdf(d.name, d.p))
 
         describe('.test()', () => {
           it('should pass for own distribution', () => {
@@ -714,7 +797,7 @@ describe('dist', () => {
           })
         })
 
-        describe('.pdf()', () => {
+        describe('.pdf(), .cdf()', () => {
           d.cases.forEach(c => {
             describe(c.desc, () => utPdf(d.name, c.p))
           })
@@ -758,7 +841,7 @@ describe('dist', () => {
       })
     })
 
-    describe('.pdf()', () => {
+    describe('.pdf(), .cdf()', () => {
       it('differentiating cdf should give pdf', () => {
         utils.repeat(() => {
           const x0 = p()

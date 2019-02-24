@@ -1,4 +1,7 @@
-import { neumaier, some } from '../utils'
+import neumaier from '../algorithms/neumaier'
+import { some } from '../utils'
+import { float } from '../core'
+import newton from '../algorithms/newton'
 import { chi2, kolmogorovSmirnov } from './_tests'
 // TODO If a parameter is invalid, return undefined for generator and pdf/cdf
 
@@ -37,7 +40,7 @@ class Distribution {
    *
    * @method _pdf
    * @memberOf ran.dist.Distribution
-   * @param {number } x Value to evaluate the distribution/mass function at.
+   * @param {number} x Value to evaluate the distribution/mass function at.
    * @returns {number} The probability density or probability at the specified value.
    * @protected
    */
@@ -50,12 +53,40 @@ class Distribution {
    *
    * @method _cdf
    * @memberOf ran.dist.Distribution
-   * @param {number=} x Value to evaluate the probability distribution at.
+   * @param {number} x Value to evaluate the probability distribution at.
    * @returns {number} The value of the probability function at the specified value.
    * @protected
    */
   _cdf (x) {
     throw Error('Distribution._cdf() is not implemented')
+  }
+
+  /**
+   * Estimates the quantile function (inverse cumulative distribution function) by solving CDF(x) = p using Newton's method. Initial value for the algorithm is picked randomly from the support. Should not be overridden.
+   *
+   * @method _q
+   * @memberOf ran.dist.Distribution
+   * @param {number} p Probability to find value for.
+   * @param {number=} x0 Initial value for Newton's method.
+   * @returns {number} The value where the probability coincides with the specified value.
+   * @protected
+   */
+  // TODO Pick x0 as the mode of the distribution
+  _qEstimate (p, x0) {
+    let x = newton(
+      t => this._cdf(t) - p,
+      t => this._pdf(t),
+      typeof x0 === 'undefined' ? float(
+        this.s[0].value === null ? -10 : this.s[0].value,
+        this.s[1].value === null ? 10 : this.s[1].value
+      ) : x0
+    )
+
+    return this._type === 'discrete' ? Math.ceil(x) : x
+  }
+
+  _q (p) {
+    return this._qEstimate(p)
   }
 
   /**
@@ -174,6 +205,14 @@ class Distribution {
 
     // Return value
     return this._cdf(z)
+  }
+
+  q (p) {
+    if (p < 0 || p > 1) {
+      return null
+    } else {
+      return this._q(p)
+    }
   }
 
   /**

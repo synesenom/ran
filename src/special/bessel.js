@@ -1,6 +1,15 @@
-import { EPS } from './_core'
+import { EPS, MAX_ITER } from './_core'
 
-function _i0 (x) {
+/**
+ * Computes the modified Bessel function of the first kind with order zero.
+ *
+ * @method _I0
+ * @memberOf ran.special
+ * @param {number} x Value to evaluate the function at.
+ * @return {number} The function value.
+ * @private
+ */
+function _I0 (x) {
   let y = Math.abs(x)
   let z
   let t
@@ -16,7 +25,16 @@ function _i0 (x) {
   return z
 }
 
-function _i1 (x) {
+/**
+ * Computes the modified Bessel function of the first kind with order one.
+ *
+ * @method _I1
+ * @memberOf ran.special
+ * @param {number} x Value to evaluate the function at.
+ * @return {number} The function value.
+ * @private
+ */
+function _I1 (x) {
   let y = Math.abs(x)
   let z
   let t
@@ -34,14 +52,12 @@ function _i1 (x) {
   return x < 0 ? -z : z
 }
 
-const ACC = 40
-
 /**
- * Modified Bessel function of the first kind.
+ * Computes the modified Bessel function of the first kind. Only supports integer order.
  *
  * @method besselI
  * @memberOf ran.special
- * @param {number} n Order of the Bessel function.
+ * @param {number} n Order of the Bessel function. Must be an integer.
  * @param {number} x Value to evaluate the function at.
  * @return {number} The modified Bessel function of the first kind.
  */
@@ -53,11 +69,11 @@ export function besselI (n, x) {
   let y
 
   if (n === 0) {
-    return _i0(x)
+    return _I0(x)
   }
 
   if (n === 1) {
-    return _i1(x)
+    return _I1(x)
   }
 
   if (x === 0) {
@@ -68,7 +84,7 @@ export function besselI (n, x) {
   bip = 0
   y = 0
   bi = 1
-  for (let j = 2 * (n + Math.round(Math.sqrt(ACC * n))); j > 0; j--) {
+  for (let j = 2 * (n + Math.round(Math.sqrt(40 * n))); j > 0; j--) {
     bim = bip + j * tox * bi
     bip = bi
     bi = bim
@@ -81,6 +97,97 @@ export function besselI (n, x) {
       y = bip
     }
   }
-  y *= _i0(x) / bi
+  y *= _I0(x) / bi
   return x < 0 ? -y : y
+}
+
+/**
+ * Computes the modified spherical Bessel function of the second kind.
+ *
+ * @method _kn
+ * @memberOf ran.special
+ * @param {number} n Order of the Bessel function.
+ * @param {number} x Value to evaluate the function at.
+ * @return {(number|number[])} The function value at the specified order and one order less if order is larger than 1, single function value otherwise.
+ * @private
+ */
+function _kn (n, x) {
+  switch (n) {
+    case 0:
+      return Math.exp(-x) / x
+    case 1:
+      return Math.exp(-x) * (1 + 1 / x) / x
+    default:
+      // Upwards recurrence relation
+      let k1 = 1 + 1 / x
+      let k2 = 1
+      let k
+      for (let i = 2; i <= n; i++) {
+        k = (i + i - 1) * k1 / x + k2
+        k2 = k1
+        k1 = k
+      }
+      return [
+        Math.exp(-x) * k / x,
+        Math.exp(-x) * k2 / x
+      ]
+  }
+}
+
+/**
+ * Computes the ratio of two modified Bessel functions (same for spherical).
+ * H(n, x) = I(n
+ *
+ * @method _hi
+ * @memberOf ran.special
+ * @param {number} n Order of the Bessel function in the numerator.
+ * @param {number} x Value to evaluate the function at.
+ * @return {number} The function value.
+ * @private
+ */
+function _hi (n, x) {
+  // Continued fraction (from Numerical methods for special functions)
+  let d = x / (n + n + 1)
+  let del = d
+  let h = del
+  let b = (n + n + 3) / x
+  for (let i = 1; i < MAX_ITER; i++) {
+    d = 1 / (b + d)
+    del = (b * d - 1) * del
+    h += del
+    b += 2 / x
+
+    if (Math.abs(del / h) < EPS) { break }
+  }
+  return h
+}
+
+/**
+ * Computes the modified spherical Bessel function of the first kind. Only supports integer order.
+ * Source: http://cpc.cs.qub.ac.uk/summaries/ADGM_v1_0.html (Numerical methods for special functions).
+ *
+ * @method besselISpherical
+ * @memberOf ran.special
+ * @param {number} n Order of the spherical Bessel function. Must be an integer.
+ * @param {number} x Value to evaluate the function at.
+ * @return {number} The modified spherical Bessel function of the first kind.
+ */
+export function besselISpherical (n, x) {
+  switch (n) {
+    case 0:
+      // i0 separately
+      return x === 0 ? 1 : Math.sinh(x) / x
+    case 1:
+      // i1 separately
+      return x === 0 ? 0 : (Math.cosh(x) - Math.sinh(x) / x) / x
+    default:
+      if (n > 0) {
+        // Use Wronskian with single run k-calculation
+        let k = _kn(n + 1, x)
+        return x === 0 ? 0 : 1 / (x * x * (_hi(n + 1, x) * k[1] + k[0]))
+      } else {
+        // Backward recurrence for negative orders
+        return (n + n + 3) * besselISpherical(n + 1, x) / x + besselISpherical(n + 2, x)
+      }
+  }
 }
