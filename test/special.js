@@ -95,42 +95,48 @@ describe('special', () => {
   })
 
   describe('.marcumQ()', () => {
-    it('should satisfy the recurrence relation (y >= x + mu)', () => {
-      for (let i = 0; i < LAPS; i++) {
-        let mu = Math.random() * 10 + 2
-        let x = Math.random() * 10
-        let y = Math.random() * 10 + x + mu + 2
+    describe('x < 30', () => {
+      describe('Q(mu, x, y)', () => {
+        it('should satisfy the recurrence relation', () => {
+          for (let i = 0; i < LAPS; i++) {
+            let mu = Math.random() * 10 + 2
+            let x = Math.random() * 10
+            let y = Math.random() * 10 + x + mu + 2
 
-        let q1 = marcumQ(mu + 1, x, y)
-        let q2 = marcumQ(mu, x, y)
-        let q3 = marcumQ(mu + 2, x, y)
-        let q4 = marcumQ(mu - 1, x, y)
+            let q1 = marcumQ(mu + 1, x, y)
+            let q2 = marcumQ(mu, x, y)
+            let q3 = marcumQ(mu + 2, x, y)
+            let q4 = marcumQ(mu - 1, x, y)
 
-        if (x > mu) {
-          assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < EPS)
-        } else {
-          assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < EPS)
-        }
-      }
-    })
+            if (x > mu) {
+              assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < EPS)
+            } else {
+              assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < EPS)
+            }
+          }
+        })
+      })
 
-    it('should satisfy the recurrence relation (y < x + mu)', () => {
-      for (let i = 0; i < LAPS; i++) {
-        let x = Math.random() * 10
-        let y = Math.random() * 10
-        let mu = Math.random() * 10 + 2 + Math.max(0, y - x)
+      describe('P(mu, x, y)', () => {
+        it('should satisfy the recurrence relation (y < x + mu)', () => {
+          for (let i = 0; i < LAPS; i++) {
+            let x = Math.random() * 100
+            let y = Math.random() * 100
+            let mu = Math.random() * 100 + 2 + Math.max(0, y - x)
 
-        let q1 = marcumQ(mu + 1, x, y)
-        let q2 = marcumQ(mu, x, y)
-        let q3 = marcumQ(mu + 2, x, y)
-        let q4 = marcumQ(mu - 1, x, y)
+            let q1 = marcumQ(mu + 1, x, y)
+            let q2 = marcumQ(mu, x, y)
+            let q3 = marcumQ(mu + 2, x, y)
+            let q4 = marcumQ(mu - 1, x, y)
 
-        if (x > mu) {
-          assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < EPS)
-        } else {
-          assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < EPS)
-        }
-      }
+            if (x > mu) {
+              assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < EPS)
+            } else {
+              assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < EPS)
+            }
+          }
+        })
+      })
     })
   })
 

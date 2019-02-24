@@ -97,7 +97,7 @@ const _asymptoticExpansionLargeXi = {
 };
 
 /**
- * Computes the generalized Marcum-Q function. Currently only x < 30 values are reliable. We use the definition as given in Eq. (1) in https://arxiv.org/pdf/1311.0681.pdf.
+ * Computes the generalized Marcum-Q function. Only accurate in x < 30. Implementation source: https://arxiv.org/pdf/1311.0681.pdf.
  *
  * @method marcumQ
  * @memberOf ran.special
@@ -126,6 +126,7 @@ export default function (mu, x, y) {
   // Asymptotic expansion
   /* let xi = 2 * Math.sqrt(x * y)
   if (xi > 30 && mu * mu < 2 * xi) {
+    console.log('asymptotic 1')
     // TODO asymptotic expansion
     return null
   }
@@ -136,12 +137,15 @@ export default function (mu, x, y) {
   if (f1 < y && y < f2) {
     if (mu < 135) {
       // TODO recurrence relations
+      console.log('recurrence')
       return null
     } else {
       // TODO asymptotic expansion
+      console.log('asymptotic 2')
       return null
     }
   }
+  console.log('integral')
 
   // Integral
   return null */

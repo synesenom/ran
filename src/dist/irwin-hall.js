@@ -14,7 +14,6 @@ import Distribution from './_distribution'
  * @param {number=} n Number of uniform variates to sum. Default value is 1.
  * @constructor
  */
-// TODO improve summation in pdf/cdf
 export default class extends Distribution {
   constructor (n = 1) {
     super('continuous', arguments.length)
