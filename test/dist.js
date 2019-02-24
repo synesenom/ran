@@ -772,7 +772,7 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'LogSeries') return
+    // if (d.name !== 'Rice') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

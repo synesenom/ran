@@ -1,5 +1,6 @@
 import { MAX_ITER, EPS } from './_core'
 import newton from '../algorithms/newton'
+import gamma from './gamma'
 import gammaLn from './gamma-log'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from './gamma-incomplete'
 
@@ -14,8 +15,12 @@ const _seriesExpansion = {
   q (mu, x, y) {
     // Initialize terms with k = 0, Eq. (7)
     // ck = x^k / k!
-    // qk = Q_{mu + k}(y)
     let ck = 1
+
+    // qck = y^{mu + k - 1} e^{-y} / gamma(mu + k - 1)
+    let qck = Math.exp((mu - 1) * Math.log(y) - y - gammaLn(mu))
+
+    // qk = Q_{mu + k}(y)
     let qk = gammaUpperIncomplete(mu, y)
     let dz = ck * qk
     let z = dz
@@ -23,7 +28,8 @@ const _seriesExpansion = {
     for (let k = 1; k < MAX_ITER; k++) {
       // Update coefficients
       // Eq. (18)
-      qk = qk + Math.exp((mu + k - 1) * Math.log(y) - y - gammaLn(mu + k))
+      qck *= y / (mu + k - 1)
+      qk = qk + qck
       ck *= x / k
       dz = ck * qk
 
@@ -39,17 +45,25 @@ const _seriesExpansion = {
 
   p (mu, x, y) {
     // Find truncation number using Eqs. (26) - (27)
+    // Define some constants to speed up search
+    let c0 = mu + gammaLn(mu) - Math.log(2 * Math.PI * EPS)
+    let c1 = Math.log(x * y)
+    let c2 = x * y
     let n = newton(
-      t => (t + mu) * Math.log(t + mu) + t * Math.log(t) - 2 * t - t * Math.log(x * y) - mu - gammaLn(mu) + Math.log(2 * Math.PI * EPS),
-      t => Math.log(t * (t + mu) / (x * y)),
+      t => (t + mu) * Math.log(t + mu) + t * Math.log(t) - 2 * t - t * c1 - c0,
+      t => Math.log(t * (t + mu) / c2),
       0.5 * (Math.sqrt(mu * mu + 4 * x * y) - mu) + 1
     )
     n = Math.ceil(n)
 
     // Initialize terms with last index, Eq. (7)
     // ck = x^k / k!
-    // pk = P_{\mu + k}(y)
     let ck = Math.exp(n * Math.log(x) - gammaLn(n + 1))
+
+    // qck = y^{mu + k} e^{-y} / gamma(mu + k)
+    let pck = Math.exp((mu + n) * Math.log(y) - y - gammaLn(mu + n + 1))
+
+    // pk = P_{\mu + k}(y)
     let pk = gammaLowerIncomplete(mu + n, y)
     let dz = ck * pk
     let z = dz
@@ -57,7 +71,8 @@ const _seriesExpansion = {
     for (let k = n - 1; k >= 0; k--) {
       // Update coefficients
       // Eq. (19)
-      pk = pk + Math.exp((mu + k) * Math.log(y) - y - gammaLn(mu + k + 1))
+      pck *= (mu + k + 1) / y
+      pk = pk + pck
       ck *= (k + 1) / x
       dz = ck * pk
 

@@ -2,55 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2dce2d99-d55c-4cdc-9490-9c9d46ff6d0c" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/algorithms/neumaier.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/dist/noncentral-chi.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/dist/noncentral-chi2.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/algorithms.js" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/special.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/test/utils.js" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/special/_bernoulli.js" afterPath="$PROJECT_DIR$/src/constants/bernoulli.js" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/special/_newton.js" afterPath="$PROJECT_DIR$/src/algorithms/newton.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/special/owen-t.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/index.html" afterPath="$PROJECT_DIR$/docs/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist.js" afterPath="$PROJECT_DIR$/src/dist.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/_core.js" afterPath="$PROJECT_DIR$/src/dist/_core.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/_distribution.js" afterPath="$PROJECT_DIR$/src/dist/_distribution.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/benktander-ii.js" afterPath="$PROJECT_DIR$/src/dist/benktander-ii.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/beta.js" afterPath="$PROJECT_DIR$/src/dist/beta.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/binomial.js" afterPath="$PROJECT_DIR$/src/dist/binomial.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/chi.js" afterPath="$PROJECT_DIR$/src/dist/chi.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/chi2.js" afterPath="$PROJECT_DIR$/src/dist/chi2.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/gamma.js" afterPath="$PROJECT_DIR$/src/dist/gamma.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/hoyt.js" afterPath="$PROJECT_DIR$/src/dist/hoyt.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/hypergeometric.js" afterPath="$PROJECT_DIR$/src/dist/hypergeometric.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/inverse-chi2.js" afterPath="$PROJECT_DIR$/src/dist/inverse-chi2.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/inverse-gaussian.js" afterPath="$PROJECT_DIR$/src/dist/inverse-gaussian.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/irwin-hall.js" afterPath="$PROJECT_DIR$/src/dist/irwin-hall.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/levy.js" afterPath="$PROJECT_DIR$/src/dist/levy.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/log-series.js" afterPath="$PROJECT_DIR$/src/dist/log-series.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/logarithmic.js" afterPath="$PROJECT_DIR$/src/dist/logarithmic.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/logistic-exponential.js" afterPath="$PROJECT_DIR$/src/dist/logistic-exponential.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/makeham.js" afterPath="$PROJECT_DIR$/src/dist/makeham.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/nakagami.js" afterPath="$PROJECT_DIR$/src/dist/nakagami.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/negative-binomial.js" afterPath="$PROJECT_DIR$/src/dist/negative-binomial.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/negative-hypergeometric.js" afterPath="$PROJECT_DIR$/src/dist/negative-hypergeometric.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/normal.js" afterPath="$PROJECT_DIR$/src/dist/normal.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/poisson.js" afterPath="$PROJECT_DIR$/src/dist/poisson.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/rice.js" afterPath="$PROJECT_DIR$/src/dist/rice.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/skellam.js" afterPath="$PROJECT_DIR$/src/dist/skellam.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/student-t.js" afterPath="$PROJECT_DIR$/src/dist/student-t.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/weibull.js" afterPath="$PROJECT_DIR$/src/dist/weibull.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/yule-simon.js" afterPath="$PROJECT_DIR$/src/dist/yule-simon.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/zeta.js" afterPath="$PROJECT_DIR$/src/dist/zeta.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/special/bessel.js" afterPath="$PROJECT_DIR$/src/special/bessel.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/special/beta-incomplete.js" afterPath="$PROJECT_DIR$/src/special/beta-incomplete.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/special/hurwitz-zeta.js" afterPath="$PROJECT_DIR$/src/special/hurwitz-zeta.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/special/marcum-q.js" afterPath="$PROJECT_DIR$/src/special/marcum-q.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/utils.js" afterPath="$PROJECT_DIR$/src/utils.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/dist.js" afterPath="$PROJECT_DIR$/test/dist.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/special.js" afterPath="$PROJECT_DIR$/test/special.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/todo" afterPath="$PROJECT_DIR$/todo" />
     </list>
     <ignored path="$PROJECT_DIR$/dist/" />
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -75,10 +30,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="dist.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="dist.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/dist.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="492">
+            <state relative-caret-position="132">
               <caret line="774" column="7" lean-forward="false" selection-start-line="774" selection-start-column="7" selection-end-line="774" selection-end-column="7" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
@@ -87,13 +42,33 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="log-series.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/dist/log-series.js">
+      <file leaf-file-name="irwin-hall.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/dist/irwin-hall.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="465">
-              <caret line="29" column="0" lean-forward="true" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+            <state relative-caret-position="428">
+              <caret line="62" column="20" lean-forward="true" selection-start-line="62" selection-start-column="20" selection-end-line="62" selection-end-column="20" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="rice.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/dist/rice.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="5">
+              <caret line="1" column="40" lean-forward="false" selection-start-line="1" selection-start-column="40" selection-end-line="1" selection-end-column="40" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="marcum-q.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/special/marcum-q.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-221">
+              <caret line="32" column="17" lean-forward="true" selection-start-line="32" selection-start-column="17" selection-end-line="32" selection-end-column="17" />
               <folding>
-                <element signature="e#0#59#0" expanded="true" />
+                <element signature="e#0#39#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -161,8 +136,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/special/_adaptive-simpson.js" />
-        <option value="$PROJECT_DIR$/test/test-utils.js" />
         <option value="$PROJECT_DIR$/src/dist/chi2.js" />
         <option value="$PROJECT_DIR$/src/dist.js" />
         <option value="$PROJECT_DIR$/src/dist/noncentral-chi.js" />
@@ -211,7 +184,9 @@
         <option value="$PROJECT_DIR$/todo" />
         <option value="$PROJECT_DIR$/src/special/bessel.js" />
         <option value="$PROJECT_DIR$/src/special/beta-incomplete.js" />
+        <option value="$PROJECT_DIR$/src/special/owen-t.js" />
         <option value="$PROJECT_DIR$/test/dist.js" />
+        <option value="$PROJECT_DIR$/src/special/marcum-q.js" />
       </list>
     </option>
   </component>
@@ -284,12 +259,6 @@
               <item name="ran" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="dist" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="ran" type="b2602c69:ProjectViewProjectNode" />
-              <item name="ran" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="special" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="ran" type="b2602c69:ProjectViewProjectNode" />
@@ -400,7 +369,7 @@
       <workItem from="1550267491660" duration="14705000" />
       <workItem from="1550410360916" duration="9107000" />
       <workItem from="1550426793938" duration="31626000" />
-      <workItem from="1550739995878" duration="52725000" />
+      <workItem from="1550739995878" duration="54881000" />
     </task>
     <servers />
   </component>
@@ -416,7 +385,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="411073000" />
+    <option name="totallyTimeSpent" value="413229000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="721" y="23" width="719" height="802" extended-state="0" />
@@ -454,14 +423,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/dist/rademacher.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/dist/raised-cosine.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -492,14 +453,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/rice.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="1" column="40" lean-forward="false" selection-start-line="1" selection-start-column="40" selection-end-line="1" selection-end-column="40" />
           <folding />
         </state>
       </provider>
@@ -677,28 +630,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/marcum-q.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#39#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/algorithms/newton.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="90">
           <caret line="6" column="27" lean-forward="false" selection-start-line="6" selection-start-column="27" selection-end-line="6" selection-end-column="27" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/algorithms/neumaier.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="22" column="0" lean-forward="true" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -708,16 +643,6 @@
         <state relative-caret-position="98">
           <caret line="58" column="6" lean-forward="false" selection-start-line="58" selection-start-column="6" selection-end-line="58" selection-end-column="6" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/irwin-hall.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="15" column="3" lean-forward="true" selection-start-line="15" selection-start-column="3" selection-end-line="15" selection-end-column="3" />
-          <folding>
-            <element signature="e#0#45#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -884,12 +809,54 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/special/owen-t.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="1" column="0" lean-forward="true" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/rice.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5">
+          <caret line="1" column="40" lean-forward="false" selection-start-line="1" selection-start-column="40" selection-end-line="1" selection-end-column="40" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/algorithms/neumaier.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="19" column="3" lean-forward="true" selection-start-line="19" selection-start-column="3" selection-end-line="19" selection-end-column="3" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/irwin-hall.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="428">
+          <caret line="62" column="20" lean-forward="true" selection-start-line="62" selection-start-column="20" selection-end-line="62" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/test/dist.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="492">
+        <state relative-caret-position="132">
           <caret line="774" column="7" lean-forward="false" selection-start-line="774" selection-start-column="7" selection-end-line="774" selection-end-column="7" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/special/marcum-q.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-221">
+          <caret line="32" column="17" lean-forward="true" selection-start-line="32" selection-start-column="17" selection-end-line="32" selection-end-column="17" />
+          <folding>
+            <element signature="e#0#39#0" expanded="true" />
           </folding>
         </state>
       </provider>
