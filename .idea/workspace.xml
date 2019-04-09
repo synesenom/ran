@@ -2,85 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2dce2d99-d55c-4cdc-9490-9c9d46ff6d0c" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/src/constants/chebyshev.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/yarn.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/algorithms/neumaier.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/algorithms/neumaier.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/algorithms/newton.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/algorithms/newton.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/core.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/core.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/_core.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/_core.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/dist/_distribution.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/_distribution.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/arcsine.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/arcsine.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/benini.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/benini.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/benktander-ii.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/benktander-ii.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/beta-prime.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/beta-prime.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/beta-rectangular.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/beta-rectangular.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/beta.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/beta.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/binomial.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/binomial.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/bounded-pareto.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/bounded-pareto.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/bradford.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/bradford.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/burr.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/burr.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/categorical.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/categorical.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/cauchy.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/cauchy.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/dagum.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/dagum.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/discrete-uniform.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/discrete-uniform.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/discrete-weibull.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/discrete-weibull.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/exponential-logarithmic.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/exponential-logarithmic.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/exponential.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/exponential.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/flory-schulz.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/flory-schulz.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/frechet.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/frechet.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/gamma-gompertz.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/gamma-gompertz.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/gamma.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/gamma.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/generalized-pareto.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/generalized-pareto.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/geometric.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/geometric.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/gompertz.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/gompertz.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/gumbel.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/gumbel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/hoyt.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/hoyt.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/hyperbolic-secant.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/hyperbolic-secant.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/inverse-chi2.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/inverse-chi2.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/inverse-gaussian.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/inverse-gaussian.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/irwin-hall.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/irwin-hall.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/kumaraswamy.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/kumaraswamy.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/laplace.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/laplace.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/levy.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/levy.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/lindley.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/lindley.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/log-series.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/log-series.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/logarithmic.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/logarithmic.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/logistic-exponential.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/logistic-exponential.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/logistic.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/logistic.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/lomax.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/lomax.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/makeham.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/makeham.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/nakagami.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/nakagami.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/negative-binomial.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/negative-binomial.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/noncentral-chi2.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/noncentral-chi2.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/normal.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/normal.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/pareto.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/pareto.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/poisson.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/poisson.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/raised-cosine.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/raised-cosine.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/reciprocal.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/reciprocal.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/rice.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/rice.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/shifted-log-logistic.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/shifted-log-logistic.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/skellam.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/skellam.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/slash.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/slash.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/student-t.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/student-t.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/triangular.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/triangular.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/u-quadratic.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/u-quadratic.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/uniform.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/uniform.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/wigner.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/wigner.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/yule-simon.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/yule-simon.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/zeta.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/zeta.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/special/_core.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/special/_core.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/special/bessel.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/special/bessel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/special/beta.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/special/beta.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/special/binom-log.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/special/binom-log.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/special/gamma-incomplete.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/special/gamma-incomplete.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/special/marcum-q.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/special/marcum-q.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/core.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/core.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/dist.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/dist.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/todo" beforeDir="false" afterPath="$PROJECT_DIR$/todo" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/dist/" />
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -95,11 +19,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="_distribution.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="_distribution.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/dist/_distribution.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="278">
-              <caret line="148" column="5" lean-forward="true" selection-start-line="148" selection-start-column="5" selection-end-line="148" selection-end-column="5" />
+            <state relative-caret-position="68">
+              <caret line="134" column="36" selection-start-line="134" selection-start-column="36" selection-end-line="134" selection-end-column="36" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
               </folding>
@@ -111,7 +35,7 @@
         <entry file="file://$PROJECT_DIR$/test/dist.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="240">
-              <caret line="16" column="3" lean-forward="true" selection-start-line="16" selection-start-column="3" selection-end-line="16" selection-end-column="3" />
+              <caret line="16" column="3" selection-start-line="16" selection-start-column="3" selection-end-line="16" selection-end-column="3" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
               </folding>
@@ -119,11 +43,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="core.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="core.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/core.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="840">
-              <caret line="104" column="1" lean-forward="true" selection-start-line="104" selection-start-column="1" selection-end-line="104" selection-end-column="1" />
+            <state relative-caret-position="375">
+              <caret line="25" column="5" lean-forward="true" selection-start-line="25" selection-start-column="5" selection-end-line="25" selection-end-column="5" />
             </state>
           </provider>
         </entry>
@@ -132,7 +56,24 @@
         <entry file="file://$PROJECT_DIR$/docs/src/docbuilder.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="585">
-              <caret line="243" column="38" lean-forward="true" selection-start-line="243" selection-start-column="38" selection-end-line="243" selection-end-column="38" />
+              <caret line="243" column="38" selection-start-line="243" selection-start-column="38" selection-end-line="243" selection-end-column="38" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/coverage/index.html">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file leaf-file-name="README.md" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/README.md">
+          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+            <state split_layout="SPLIT">
+              <first_editor relative-caret-position="107">
+                <caret line="24" lean-forward="true" selection-start-line="24" selection-end-line="24" />
+              </first_editor>
+              <second_editor />
             </state>
           </provider>
         </entry>
@@ -199,7 +140,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/dist/bounded-pareto.js" />
         <option value="$PROJECT_DIR$/src/dist/bradford.js" />
         <option value="$PROJECT_DIR$/src/dist/burr.js" />
         <option value="$PROJECT_DIR$/src/dist/cauchy.js" />
@@ -247,9 +187,10 @@
         <option value="$PROJECT_DIR$/src/dist/yule-simon.js" />
         <option value="$PROJECT_DIR$/src/dist/noncentral-chi2.js" />
         <option value="$PROJECT_DIR$/src/dist/log-series.js" />
-        <option value="$PROJECT_DIR$/src/core.js" />
-        <option value="$PROJECT_DIR$/src/dist/_distribution.js" />
         <option value="$PROJECT_DIR$/test/dist.js" />
+        <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/src/dist/_distribution.js" />
+        <option value="$PROJECT_DIR$/src/core.js" />
       </list>
     </option>
   </component>
@@ -300,28 +241,7 @@
             <path>
               <item name="ran" type="b2602c69:ProjectViewProjectNode" />
               <item name="ran" type="462c0819:PsiDirectoryNode" />
-              <item name="dist" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="ran" type="b2602c69:ProjectViewProjectNode" />
-              <item name="ran" type="462c0819:PsiDirectoryNode" />
-              <item name="docs" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="ran" type="b2602c69:ProjectViewProjectNode" />
-              <item name="ran" type="462c0819:PsiDirectoryNode" />
-              <item name="docs" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="ran" type="b2602c69:ProjectViewProjectNode" />
-              <item name="ran" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="ran" type="b2602c69:ProjectViewProjectNode" />
-              <item name="ran" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="coverage" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -423,7 +343,7 @@
       <workItem from="1550410360916" duration="9107000" />
       <workItem from="1550426793938" duration="31626000" />
       <workItem from="1550739995878" duration="57439000" />
-      <workItem from="1554844021897" duration="3522000" />
+      <workItem from="1554844021897" duration="3863000" />
     </task>
     <servers />
   </component>
@@ -439,7 +359,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="419309000" />
+    <option name="totallyTimeSpent" value="419650000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="992" y="24" width="928" height="1056" extended-state="4" />
@@ -452,8 +372,8 @@
       <window_info id="npm" order="5" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="12" />
       <window_info anchor="bottom" id="Run" order="5" weight="0.32876712" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="10" sideWeight="0.4952251" visible="true" weight="0.3364979" />
-      <window_info content_ui="combo" id="Project" order="2" visible="true" weight="0.27693966" />
+      <window_info anchor="bottom" id="Terminal" order="10" sideWeight="0.4952251" visible="true" weight="0.3364979" />
+      <window_info active="true" content_ui="combo" id="Project" order="2" visible="true" weight="0.27693966" />
       <window_info id="Project Explorer" order="0" />
       <window_info id="Job Explorer" order="1" />
       <window_info anchor="bottom" id="Docker" order="1" show_stripe_button="false" />
@@ -482,19 +402,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/dist/inverse-gamma.js">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/inverse-gaussian.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="41" column="27" lean-forward="true" selection-start-line="41" selection-start-column="27" selection-end-line="41" selection-end-column="27" />
-          <folding>
-            <element signature="e#0#44#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/dist/johnson-sb.js">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -819,34 +726,47 @@
     <entry file="file://$PROJECT_DIR$/docs/src/docbuilder.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="585">
-          <caret line="243" column="38" lean-forward="true" selection-start-line="243" selection-start-column="38" selection-end-line="243" selection-end-column="38" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/core.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="840">
-          <caret line="104" column="1" lean-forward="true" selection-start-line="104" selection-start-column="1" selection-end-line="104" selection-end-column="1" />
+          <caret line="243" column="38" selection-start-line="243" selection-start-column="38" selection-end-line="243" selection-end-column="38" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/dist.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="240">
-          <caret line="16" column="3" lean-forward="true" selection-start-line="16" selection-start-column="3" selection-end-line="16" selection-end-column="3" />
+          <caret line="16" column="3" selection-start-line="16" selection-start-column="3" selection-end-line="16" selection-end-column="3" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/coverage/index.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="107">
+            <caret line="24" lean-forward="true" selection-start-line="24" selection-end-line="24" />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/dist/_distribution.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="278">
-          <caret line="148" column="5" lean-forward="true" selection-start-line="148" selection-start-column="5" selection-end-line="148" selection-end-column="5" />
+        <state relative-caret-position="68">
+          <caret line="134" column="36" selection-start-line="134" selection-start-column="36" selection-end-line="134" selection-end-column="36" />
           <folding>
             <element signature="e#0#32#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/core.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="375">
+          <caret line="25" column="5" lean-forward="true" selection-start-line="25" selection-start-column="5" selection-end-line="25" selection-end-column="5" />
         </state>
       </provider>
     </entry>

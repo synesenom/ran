@@ -9,19 +9,21 @@
 
 # ranjs
 
-Statistical library for generating various random variates, calculating likelihood functions and testing hypotheses (and more).
+Statistical library for generating various seeded random variates, calculating likelihood functions and testing hypotheses (and much more).
 
 ## probability distributions
 
 `ranjs` includes more than [90 continuous and discrete distributions](https://synesenom.github.io/ran/#dist.Distribution), each tested rigorously with a floating point precision of 15 digits. Earch distribution comes with the following methods:
 
-- sample generator
+- sampler
 - probability density/mass function
 - cumulative distribution function
 - survival function
 - hazard and cumulative hazard function
 - likelihood and AIC/BIC methods
-- test method that uses Kolmogorov-Smirnov test for continuous or $\chi^2$ tests for discrete distributions
+- test method that uses Kolmogorov-Smirnov test for continuous or chi2 tests for discrete distributions
+
+And every distribution can be individually seeded.
 
 ## mcmc methods
 

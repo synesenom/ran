@@ -132,7 +132,7 @@ class Distribution {
    * ([xoshiro128+]{@link http://vigna.di.unimi.it/ftp/papers/ScrambledLinear.pdf}) that is used in the core functions.
    *
    * @method seed
-   * @methodOf ran.core
+   * @methodOf ran.dist.Distribution
    * @param {(number|string)} value The value of the seed, either a number or a string (for the ease of tracking seeds).
    * @returns {ran.dist.Distribution} Reference to the current distribution.
    * @example

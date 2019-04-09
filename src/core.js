@@ -12,6 +12,7 @@ import { some } from './utils'
  *
  * @class Xoshiro128p
  * @memberOf ran.core
+ * @private
  */
 class Xoshiro128p {
   constructor (state) {
