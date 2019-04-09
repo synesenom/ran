@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2dce2d99-d55c-4cdc-9490-9c9d46ff6d0c" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/docs/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/styles/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/docs/styles/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dist/_distribution.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/_distribution.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.travis.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.travis.yml" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/dist/" />
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -19,11 +17,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="_distribution.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="_distribution.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/dist/_distribution.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="443">
-              <caret line="45" selection-start-line="45" selection-end-line="45" />
+            <state relative-caret-position="323">
+              <caret line="37" column="5" lean-forward="true" selection-start-line="37" selection-start-column="5" selection-end-line="37" selection-end-column="5" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
               </folding>
@@ -57,6 +55,15 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="337">
               <caret line="238" column="13" selection-start-line="238" selection-start-column="13" selection-end-line="238" selection-end-column="13" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name=".travis.yml" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.travis.yml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="30">
+              <caret line="2" selection-start-line="2" selection-end-line="2" />
             </state>
           </provider>
         </entry>
@@ -123,7 +130,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/dist/burr.js" />
         <option value="$PROJECT_DIR$/src/dist/cauchy.js" />
         <option value="$PROJECT_DIR$/src/dist/dagum.js" />
         <option value="$PROJECT_DIR$/src/dist/discrete-uniform.js" />
@@ -174,6 +180,7 @@
         <option value="$PROJECT_DIR$/src/core.js" />
         <option value="$PROJECT_DIR$/docs/styles/style.css" />
         <option value="$PROJECT_DIR$/src/dist/_distribution.js" />
+        <option value="$PROJECT_DIR$/.travis.yml" />
       </list>
     </option>
   </component>
@@ -332,7 +339,7 @@
       <workItem from="1550410360916" duration="9107000" />
       <workItem from="1550426793938" duration="31626000" />
       <workItem from="1550739995878" duration="57439000" />
-      <workItem from="1554844021897" duration="4245000" />
+      <workItem from="1554844021897" duration="4925000" />
     </task>
     <servers />
   </component>
@@ -348,7 +355,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="420032000" />
+    <option name="totallyTimeSpent" value="420712000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="992" y="24" width="928" height="1056" extended-state="4" />
@@ -391,13 +398,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/dist/laplace.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
-          <caret line="30" column="58" selection-start-line="30" selection-start-column="58" selection-end-line="30" selection-end-column="58" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/dist/levy.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="480">
@@ -751,11 +751,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/dist/_distribution.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="443">
-          <caret line="45" selection-start-line="45" selection-end-line="45" />
+        <state relative-caret-position="323">
+          <caret line="37" column="5" lean-forward="true" selection-start-line="37" selection-start-column="5" selection-end-line="37" selection-end-column="5" />
           <folding>
             <element signature="e#0#32#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.travis.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" selection-start-line="2" selection-end-line="2" />
         </state>
       </provider>
     </entry>
