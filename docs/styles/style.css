@@ -236,11 +236,11 @@ td {
     display: inline-block;
 }
 .card .return-type {
-    width: 100px;
+    width: 150px;
     float: left
 }
 .card .return-desc {
-    width: calc(100% - 100px);
+    width: calc(100% - 150px);
     float: right;
     padding-top: 3px;
 }

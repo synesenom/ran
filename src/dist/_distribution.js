@@ -42,6 +42,7 @@ class Distribution {
    * @memberOf ran.dist.Distribution
    * @returns {number} A single random variate.
    * @protected
+   * @ignore
    */
   _generator () {
     throw Error('Distribution._generator() is not implemented')
@@ -55,6 +56,7 @@ class Distribution {
    * @param {number} x Value to evaluate the distribution/mass function at.
    * @returns {number} The probability density or probability at the specified value.
    * @protected
+   * @ignore
    */
   _pdf (x) {
     throw Error('Distribution._pdf() is not implemented')
@@ -68,6 +70,7 @@ class Distribution {
    * @param {number} x Value to evaluate the probability distribution at.
    * @returns {number} The value of the probability function at the specified value.
    * @protected
+   * @ignore
    */
   _cdf (x) {
     throw Error('Distribution._cdf() is not implemented')
@@ -82,6 +85,7 @@ class Distribution {
    * @param {number=} x0 Initial value for Newton's method.
    * @returns {number} The value where the probability coincides with the specified value.
    * @protected
+   * @ignore
    */
   // TODO Pick x0 as the mode of the distribution
   _qEstimate (p, x0) {
@@ -137,8 +141,7 @@ class Distribution {
    * @returns {ran.dist.Distribution} Reference to the current distribution.
    * @example
    *
-   * let pareto = new ran.dist.Pareto(1, 2)
-   *                .seed('test')
+   * let pareto = new ran.dist.Pareto(1, 2).seed('test')
    * pareto.sample(5)
    * // => [ 1.2963808682328533,
    * //      1.1084992533723803,
