@@ -37,7 +37,7 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling
-    return poisson(this.p.mu1) - poisson(this.p.mu2)
+    return poisson(this.r, this.p.mu1) - poisson(this.r, this.p.mu2)
   }
 
   _pdf (x) {

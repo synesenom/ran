@@ -30,7 +30,7 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling by transforming normal variate
-    let y = normal(0, 1 / Math.sqrt(this.p.c))
+    let y = normal(this.r, 0, 1 / Math.sqrt(this.p.c))
     return this.p.mu + 1 / (y * y)
   }
 

@@ -27,7 +27,7 @@ export default class extends Distribution {
   }
 
   _generator () {
-    let u = Math.random()
+    let u = this.r.next()
     let z = Math.pow(u / (1 - u), 1 / this.p.kappa)
 
     // Handle z << 1 cases

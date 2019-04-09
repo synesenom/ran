@@ -5,12 +5,56 @@ import * as core from '../src/core'
 
 const TRIALS = 1
 const LAPS = 100
+const CHARS = '.,:;-+_!#%&/()[]{}?*0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 function add (dist, value) {
   if (!dist.hasOwnProperty(value)) { dist[value] = 1 } else { dist[value]++ }
 }
 
 describe('core', () => {
+  describe('.seed()', () => {
+    it('should return the same sequence of random numbers for the same numerical seed', () => {
+      utils.trials(() => {
+        const s = Math.floor(Math.random() * 10000)
+        core.seed(s)
+        const values1 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
+        core.seed(s)
+        const values2 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
+        return values1.reduce((acc, d, i) => acc && d === values2[i], true)
+      })
+    })
+
+    it('should return the same sequence of random numbers for the same string seed', () => {
+      utils.trials(() => {
+        const s = Array.from({ length: 32 }, () => CHARS.charAt(Math.floor(Math.random() * CHARS.length))).join('')
+        core.seed(s)
+        const values1 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
+        core.seed(s)
+        const values2 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
+        return values1.reduce((acc, d, i) => acc && d === values2[i], true)
+      })
+    })
+
+    it('should return different sequence of random numbers for different numerical seeds', () => {
+      utils.trials(() => {
+        core.seed(Math.floor(Math.random() * 10000))
+        const values1 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
+        core.seed(Math.floor(Math.random() * 10000))
+        const values2 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
+        return values1.reduce((acc, d, i) => acc && d !== values2[i], true)
+      })
+    })
+
+    it('should return different sequence of random numbers for different numerical seeds', () => {
+      utils.trials(() => {
+        core.seed(Array.from({ length: 32 }, () => CHARS.charAt(Math.floor(Math.random() * CHARS.length))).join(''))
+        const values1 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
+        core.seed(Array.from({ length: 32 }, () => CHARS.charAt(Math.floor(Math.random() * CHARS.length))).join(''))
+        const values2 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
+        return values1.reduce((acc, d, i) => acc && d !== values2[i], true)
+      })
+    })
+  })
   describe('.float()', () => {
     it('should return a float uniformly distributed in [0, 1]', () => {
       utils.trials(() => {

@@ -37,7 +37,8 @@ export default class extends Distribution {
   _generator () {
     // Rejection sampling with zeta(1.5) distribution as major
     return rejection(
-      () => zeta(this.c[0]),
+      this.r,
+      () => zeta(this.r, this.c[0]),
       x => Math.pow(x, this.c[0] + 1) * Math.pow(1 - this.p.a, x) * this.c[2]
     )
   }

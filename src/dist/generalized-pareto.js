@@ -28,7 +28,7 @@ export default class extends Distribution {
   }
 
   _generator () {
-    let u = Math.random()
+    let u = this.r.next()
     let y = this.p.xi === 0 ? -Math.log(u) : (Math.pow(u, -this.p.xi) - 1) / this.p.xi
     return this.p.mu + this.p.sigma * y
   }

@@ -33,7 +33,7 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling from gamma
-    return Math.sqrt(gamma(this.p.q, this.p.q / this.p.omega))
+    return Math.sqrt(gamma(this.r, this.p.q, this.p.q / this.p.omega))
   }
 
   _pdf (x) {

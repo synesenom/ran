@@ -1,3 +1,4 @@
+import { Xoshiro128p } from '../core'
 import neumaier from '../algorithms/neumaier'
 import { some } from '../utils'
 import { float } from '../core'
@@ -18,9 +19,20 @@ import { chi2, kolmogorovSmirnov } from './_tests'
  */
 class Distribution {
   constructor (type, k) {
+    // Distribution type: discrete or continuous
     this._type = type
+
+    // Number of parameters
     this.k = k
-    this.p = []
+
+    // The parameters
+    this.p = {}
+
+    // Distribution support
+    this.s = []
+
+    // Pseudo random number generator
+    this.r = new Xoshiro128p()
   }
 
   /**
@@ -113,6 +125,31 @@ class Distribution {
    */
   support () {
     return this.s
+  }
+
+  /**
+   * Sets the seed for the distribution generator. Distributions implement the same PRNG
+   * ([xoshiro128+]{@link http://vigna.di.unimi.it/ftp/papers/ScrambledLinear.pdf}) that is used in the core functions.
+   *
+   * @method seed
+   * @methodOf ran.core
+   * @param {(number|string)} value The value of the seed, either a number or a string (for the ease of tracking seeds).
+   * @returns {ran.dist.Distribution} Reference to the current distribution.
+   * @example
+   *
+   * let pareto = new ran.dist.Pareto(1, 2)
+   *                .seed('test')
+   * pareto.sample(5)
+   * // => [ 1.2963808682328533,
+   * //      1.1084992533723803,
+   * //      2.137114851993669,
+   * //      1.0173185472384896,
+   * //      1.6465170523444383 ]
+   *
+   */
+  seed(value) {
+    this.r.seed(value)
+    return this
   }
 
   /**

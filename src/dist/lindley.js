@@ -35,7 +35,8 @@ export default class extends Distribution {
   _generator () {
     // Rejection sampling with gamma(1, theta/2) distribution as major
     return rejection(
-      () => gamma(1, this.p.theta / 2),
+      this.r,
+      () => gamma(this.r, 1, this.p.theta / 2),
       x => this.c[1] * (1 + x) * Math.exp(-0.5 * this.p.theta * x)
     )
   }

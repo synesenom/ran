@@ -9,6 +9,7 @@ import { MAX_ITER, EPS } from '../special/_core'
  * @param {Function} df First derivative of the function. Must accept a single variable.
  * @param {number} x0 Starting point of the optimization.
  * @return {number} The root of the specified function.
+ * @private
  */
 export default function (f, df, x0) {
   let x = x0

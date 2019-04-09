@@ -31,7 +31,7 @@ export default class extends Distribution {
     // Inverse transform sampling
     let D = -1
     while (D < 0) {
-      D = this.p.alpha * this.p.alpha - 4 * this.p.beta * Math.log(Math.random())
+      D = this.p.alpha * this.p.alpha - 4 * this.p.beta * Math.log(this.r.next())
     }
     return this.p.sigma * Math.exp(0.5 * (Math.sqrt(D) - this.p.alpha) / this.p.beta)
   }

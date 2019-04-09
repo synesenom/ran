@@ -30,7 +30,7 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling
-    return neumaier(Array.from({ length: this.p.n }, Math.random))
+    return neumaier(Array.from({ length: this.p.n }, () => this.r.next()))
   }
 
   _pdf (x) {

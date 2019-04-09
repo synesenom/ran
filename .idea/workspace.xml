@@ -2,12 +2,85 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2dce2d99-d55c-4cdc-9490-9c9d46ff6d0c" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/special/hypergeometric.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/dist/irwin-hall.js" afterPath="$PROJECT_DIR$/src/dist/irwin-hall.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/special/marcum-q.js" afterPath="$PROJECT_DIR$/src/special/marcum-q.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/special/owen-t.js" afterPath="$PROJECT_DIR$/src/special/owen-t.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/special.js" afterPath="$PROJECT_DIR$/test/special.js" />
+      <change afterPath="$PROJECT_DIR$/src/constants/chebyshev.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yarn.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/algorithms/neumaier.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/algorithms/neumaier.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/algorithms/newton.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/algorithms/newton.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/core.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/_core.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/_core.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/_distribution.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/_distribution.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/arcsine.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/arcsine.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/benini.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/benini.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/benktander-ii.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/benktander-ii.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/beta-prime.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/beta-prime.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/beta-rectangular.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/beta-rectangular.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/beta.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/beta.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/binomial.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/binomial.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/bounded-pareto.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/bounded-pareto.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/bradford.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/bradford.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/burr.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/burr.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/categorical.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/categorical.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/cauchy.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/cauchy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/dagum.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/dagum.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/discrete-uniform.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/discrete-uniform.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/discrete-weibull.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/discrete-weibull.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/exponential-logarithmic.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/exponential-logarithmic.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/exponential.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/exponential.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/flory-schulz.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/flory-schulz.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/frechet.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/frechet.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/gamma-gompertz.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/gamma-gompertz.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/gamma.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/gamma.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/generalized-pareto.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/generalized-pareto.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/geometric.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/geometric.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/gompertz.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/gompertz.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/gumbel.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/gumbel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/hoyt.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/hoyt.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/hyperbolic-secant.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/hyperbolic-secant.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/inverse-chi2.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/inverse-chi2.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/inverse-gaussian.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/inverse-gaussian.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/irwin-hall.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/irwin-hall.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/kumaraswamy.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/kumaraswamy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/laplace.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/laplace.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/levy.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/levy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/lindley.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/lindley.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/log-series.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/log-series.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/logarithmic.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/logarithmic.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/logistic-exponential.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/logistic-exponential.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/logistic.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/logistic.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/lomax.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/lomax.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/makeham.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/makeham.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/nakagami.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/nakagami.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/negative-binomial.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/negative-binomial.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/noncentral-chi2.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/noncentral-chi2.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/normal.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/normal.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/pareto.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/pareto.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/poisson.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/poisson.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/raised-cosine.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/raised-cosine.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/reciprocal.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/reciprocal.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/rice.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/rice.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/shifted-log-logistic.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/shifted-log-logistic.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/skellam.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/skellam.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/slash.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/slash.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/student-t.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/student-t.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/triangular.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/triangular.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/u-quadratic.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/u-quadratic.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/uniform.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/uniform.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/wigner.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/wigner.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/yule-simon.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/yule-simon.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dist/zeta.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/dist/zeta.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/special/_core.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/special/_core.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/special/bessel.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/special/bessel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/special/beta.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/special/beta.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/special/binom-log.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/special/binom-log.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/special/gamma-incomplete.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/special/gamma-incomplete.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/special/marcum-q.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/special/marcum-q.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/core.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/core.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dist.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/dist.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/todo" beforeDir="false" afterPath="$PROJECT_DIR$/todo" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/dist/" />
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -22,12 +95,14 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="todo" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/todo">
+      <file leaf-file-name="_distribution.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/dist/_distribution.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="16" column="25" lean-forward="false" selection-start-line="16" selection-start-column="25" selection-end-line="16" selection-end-column="25" />
-              <folding />
+            <state relative-caret-position="278">
+              <caret line="148" column="5" lean-forward="true" selection-start-line="148" selection-start-column="5" selection-end-line="148" selection-end-column="5" />
+              <folding>
+                <element signature="e#0#32#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -35,8 +110,8 @@
       <file leaf-file-name="dist.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/dist.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="195">
-              <caret line="341" column="0" lean-forward="false" selection-start-line="341" selection-start-column="0" selection-end-line="341" selection-end-column="0" />
+            <state relative-caret-position="240">
+              <caret line="16" column="3" lean-forward="true" selection-start-line="16" selection-start-column="3" selection-end-line="16" selection-end-column="3" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
               </folding>
@@ -44,42 +119,20 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="special.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/special.js">
+      <file leaf-file-name="core.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/core.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="506">
-              <caret line="115" column="11" lean-forward="true" selection-start-line="115" selection-start-column="11" selection-end-line="115" selection-end-column="11" />
-              <folding />
+            <state relative-caret-position="840">
+              <caret line="104" column="1" lean-forward="true" selection-start-line="104" selection-start-column="1" selection-end-line="104" selection-end-column="1" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="marcum-q.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/special/marcum-q.js">
+      <file leaf-file-name="docbuilder.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/docs/src/docbuilder.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="53">
-              <caret line="110" column="30" lean-forward="true" selection-start-line="110" selection-start-column="30" selection-end-line="110" selection-end-column="30" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="owen-t.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/special/owen-t.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="9" column="0" lean-forward="true" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="hypergeometric.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/special/hypergeometric.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="30">
-              <caret line="1" column="0" lean-forward="true" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
-              <folding />
+            <state relative-caret-position="585">
+              <caret line="243" column="38" lean-forward="true" selection-start-line="243" selection-start-column="38" selection-end-line="243" selection-end-column="38" />
             </state>
           </provider>
         </entry>
@@ -97,7 +150,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Irwin</find>
       <find>MAX_TR</find>
       <find>_normal</find>
       <find>_gamma</find>
@@ -127,6 +179,7 @@
       <find>/utils</find>
       <find>// TODO</find>
       <find>TODO</find>
+      <find>Math.random</find>
     </findStrings>
     <replaceStrings>
       <replace>LAPS</replace>
@@ -146,57 +199,57 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/dist.js" />
-        <option value="$PROJECT_DIR$/src/dist/noncentral-chi.js" />
-        <option value="$PROJECT_DIR$/src/dist/weibull.js" />
-        <option value="$PROJECT_DIR$/src/dist/chi.js" />
-        <option value="$PROJECT_DIR$/src/special/_core.js" />
-        <option value="$PROJECT_DIR$/src/dist/fisher-z.js" />
-        <option value="$PROJECT_DIR$/src/special.js" />
-        <option value="$PROJECT_DIR$/src/dist/benktander-ii.js" />
-        <option value="$PROJECT_DIR$/src/dist/binomial.js" />
-        <option value="$PROJECT_DIR$/src/dist/beta.js" />
+        <option value="$PROJECT_DIR$/src/dist/bounded-pareto.js" />
+        <option value="$PROJECT_DIR$/src/dist/bradford.js" />
+        <option value="$PROJECT_DIR$/src/dist/burr.js" />
+        <option value="$PROJECT_DIR$/src/dist/cauchy.js" />
+        <option value="$PROJECT_DIR$/src/dist/dagum.js" />
+        <option value="$PROJECT_DIR$/src/dist/discrete-uniform.js" />
+        <option value="$PROJECT_DIR$/src/dist/discrete-weibull.js" />
+        <option value="$PROJECT_DIR$/src/dist/exponential.js" />
+        <option value="$PROJECT_DIR$/src/dist/exponential-logarithmic.js" />
+        <option value="$PROJECT_DIR$/src/dist/flory-schulz.js" />
+        <option value="$PROJECT_DIR$/src/dist/frechet.js" />
         <option value="$PROJECT_DIR$/src/dist/gamma.js" />
+        <option value="$PROJECT_DIR$/src/dist/gamma-gompertz.js" />
+        <option value="$PROJECT_DIR$/src/dist/generalized-pareto.js" />
+        <option value="$PROJECT_DIR$/src/dist/geometric.js" />
+        <option value="$PROJECT_DIR$/src/dist/gompertz.js" />
+        <option value="$PROJECT_DIR$/src/dist/gumbel.js" />
         <option value="$PROJECT_DIR$/src/dist/hoyt.js" />
-        <option value="$PROJECT_DIR$/src/dist/hypergeometric.js" />
+        <option value="$PROJECT_DIR$/src/dist/hyperbolic-secant.js" />
         <option value="$PROJECT_DIR$/src/dist/inverse-chi2.js" />
+        <option value="$PROJECT_DIR$/src/dist/inverse-gaussian.js" />
+        <option value="$PROJECT_DIR$/src/dist/kumaraswamy.js" />
+        <option value="$PROJECT_DIR$/src/dist/laplace.js" />
         <option value="$PROJECT_DIR$/src/dist/levy.js" />
-        <option value="$PROJECT_DIR$/src/dist/log-series.js" />
+        <option value="$PROJECT_DIR$/src/dist/lindley.js" />
         <option value="$PROJECT_DIR$/src/dist/logarithmic.js" />
+        <option value="$PROJECT_DIR$/src/dist/logistic.js" />
+        <option value="$PROJECT_DIR$/src/dist/logistic-exponential.js" />
+        <option value="$PROJECT_DIR$/src/dist/lomax.js" />
         <option value="$PROJECT_DIR$/src/dist/makeham.js" />
         <option value="$PROJECT_DIR$/src/dist/nakagami.js" />
         <option value="$PROJECT_DIR$/src/dist/negative-binomial.js" />
-        <option value="$PROJECT_DIR$/src/dist/negative-hypergeometric.js" />
-        <option value="$PROJECT_DIR$/src/dist/noncentral-chi2.js" />
-        <option value="$PROJECT_DIR$/src/dist/normal.js" />
+        <option value="$PROJECT_DIR$/src/dist/pareto.js" />
         <option value="$PROJECT_DIR$/src/dist/poisson.js" />
+        <option value="$PROJECT_DIR$/src/dist/raised-cosine.js" />
+        <option value="$PROJECT_DIR$/src/dist/reciprocal.js" />
         <option value="$PROJECT_DIR$/src/dist/rice.js" />
+        <option value="$PROJECT_DIR$/src/dist/shifted-log-logistic.js" />
         <option value="$PROJECT_DIR$/src/dist/skellam.js" />
+        <option value="$PROJECT_DIR$/src/dist/slash.js" />
         <option value="$PROJECT_DIR$/src/dist/student-t.js" />
+        <option value="$PROJECT_DIR$/src/dist/triangular.js" />
+        <option value="$PROJECT_DIR$/src/dist/u-quadratic.js" />
+        <option value="$PROJECT_DIR$/src/dist/uniform.js" />
+        <option value="$PROJECT_DIR$/src/dist/wigner.js" />
         <option value="$PROJECT_DIR$/src/dist/yule-simon.js" />
-        <option value="$PROJECT_DIR$/src/dist/zeta.js" />
-        <option value="$PROJECT_DIR$/src/dist/_core.js" />
-        <option value="$PROJECT_DIR$/src/special/hurwitz-zeta.js" />
-        <option value="$PROJECT_DIR$/src/algorithms/_newton.js" />
-        <option value="$PROJECT_DIR$/src/algorithms/newton.js" />
-        <option value="$PROJECT_DIR$/src/algorithms/neumaier.js" />
+        <option value="$PROJECT_DIR$/src/dist/noncentral-chi2.js" />
+        <option value="$PROJECT_DIR$/src/dist/log-series.js" />
+        <option value="$PROJECT_DIR$/src/core.js" />
         <option value="$PROJECT_DIR$/src/dist/_distribution.js" />
-        <option value="$PROJECT_DIR$/test/algorithms.js" />
-        <option value="$PROJECT_DIR$/src/utils.js" />
-        <option value="$PROJECT_DIR$/test/utils.js" />
-        <option value="$PROJECT_DIR$/src/dist/logistic-exponential.js" />
-        <option value="$PROJECT_DIR$/src/dist/inverse-gaussian.js" />
-        <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/src/constants/bernoulli.js" />
-        <option value="$PROJECT_DIR$/todo" />
-        <option value="$PROJECT_DIR$/src/special/bessel.js" />
-        <option value="$PROJECT_DIR$/src/special/beta-incomplete.js" />
-        <option value="$PROJECT_DIR$/src/special/hypergeometric.js" />
-        <option value="$PROJECT_DIR$/src/dist/irwin-hall.js" />
-        <option value="$PROJECT_DIR$/test/special.js" />
         <option value="$PROJECT_DIR$/test/dist.js" />
-        <option value="$PROJECT_DIR$/src/special/marcum-q.js" />
-        <option value="$PROJECT_DIR$/src/special/owen-t.js" />
       </list>
     </option>
   </component>
@@ -226,24 +279,14 @@
   <component name="PackageJsonUpdateNotifier">
     <dismissed value="$PROJECT_DIR$/package.json" />
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="721" />
-    <option name="y" value="23" />
-    <option name="width" value="719" />
-    <option name="height" value="802" />
+  <component name="ProjectFrameBounds" extendedState="4">
+    <option name="x" value="992" />
+    <option name="y" value="24" />
+    <option name="width" value="928" />
+    <option name="height" value="1056" />
   </component>
   <component name="ProjectView">
-    <navigator currentView="ProjectPane" proportions="" version="1">
-      <flattenPackages />
-      <showMembers />
-      <showModules />
-      <showLibraryContents />
-      <hideEmptyPackages />
-      <abbreviatePackageNames />
-      <autoscrollToSource />
-      <autoscrollFromSource />
-      <sortByType />
-      <manualOrder />
+    <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
@@ -262,13 +305,18 @@
             <path>
               <item name="ran" type="b2602c69:ProjectViewProjectNode" />
               <item name="ran" type="462c0819:PsiDirectoryNode" />
+              <item name="docs" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ran" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ran" type="462c0819:PsiDirectoryNode" />
+              <item name="docs" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="ran" type="b2602c69:ProjectViewProjectNode" />
               <item name="ran" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="special" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="ran" type="b2602c69:ProjectViewProjectNode" />
@@ -280,29 +328,28 @@
         </subPane>
       </pane>
       <pane id="Scope" />
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="nodejs.mocha.mocha_node_package_dir" value="$PROJECT_DIR$/node_modules/mocha" />
-    <property name="nodejs_package_manager_path" value="npm" />
-    <property name="standardjs.codestyle.accepted" value="true" />
-    <property name="typescript-compiler-editor-notification" value="false" />
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="HbShouldOpenHtmlAsHb" value="" />
-    <property name="nodejs_interpreter_path" value="/usr/local/bin/node" />
-    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.JavaScript" />
-    <property name="node.js.path.for.package.eslint" value="project" />
-    <property name="node.js.detected.package.eslint" value="true" />
-    <property name="node.js.selected.package.eslint" value="$PROJECT_DIR$/node_modules/eslint" />
-    <property name="node.js.path.for.package.standard" value="project" />
-    <property name="node.js.detected.package.standard" value="true" />
-    <property name="node.js.selected.package.standard" value="$PROJECT_DIR$/node_modules/standard" />
-    <property name="JavaScriptPreferStrict" value="true" />
     <property name="JavaScriptWeakerCompletionTypeGuess" value="true" />
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file:///Users/enys/Desktop/ran/src/dist/chi2.js" />
-    <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.standard" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.standard" value="project" />
+    <property name="node.js.selected.package.eslint" value="$PROJECT_DIR$/node_modules/eslint" />
+    <property name="node.js.selected.package.standard" value="$PROJECT_DIR$/node_modules/standard" />
+    <property name="nodejs.mocha.mocha_node_package_dir" value="$PROJECT_DIR$/node_modules/mocha" />
+    <property name="nodejs_interpreter_path" value="/usr/local/bin/node" />
+    <property name="nodejs_package_manager_path" value="npm" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.JavaScript" />
+    <property name="standardjs.codestyle.accepted" value="true" />
+    <property name="typescript-compiler-editor-notification" value="false" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -327,12 +374,13 @@
     </option>
   </component>
   <component name="RunManager" selected="Node.js.test.js">
+    <configuration name="special.js" type="NodeJSConfigurationType" factoryName="Node.js" temporary="true" nameIsGenerated="true" path-to-js-file="special.js" working-dir="$PROJECT_DIR$/src" />
+    <configuration name="test.js" type="NodeJSConfigurationType" factoryName="Node.js" temporary="true" path-to-js-file="$PROJECT_DIR$/demo/node/test.js" working-dir="$PROJECT_DIR$/demo" />
     <configuration name="core..coin.should return head with probability = 0.5" type="mocha-javascript-test-runner" factoryName="Mocha" nameIsGenerated="true">
       <node-interpreter>project</node-interpreter>
       <node-options />
       <working-directory>$PROJECT_DIR$</working-directory>
       <pass-parent-env>true</pass-parent-env>
-      <envs />
       <ui>bdd</ui>
       <extra-mocha-options />
       <test-kind>TEST</test-kind>
@@ -343,22 +391,17 @@
         <name value="should return head with probability = 0.5" />
       </test-names>
     </configuration>
-    <configuration name="special.js" type="NodeJSConfigurationType" factoryName="Node.js" temporary="true" nameIsGenerated="true" path-to-node="project" path-to-js-file="special.js" working-dir="$PROJECT_DIR$/src" />
-    <configuration name="test.js" type="NodeJSConfigurationType" factoryName="Node.js" temporary="true" path-to-node="project" path-to-js-file="$PROJECT_DIR$/demo/node/test.js" working-dir="$PROJECT_DIR$/demo" />
-    <list size="3">
-      <item index="0" class="java.lang.String" itemvalue="Mocha.core..coin.should return head with probability = 0.5" />
-      <item index="1" class="java.lang.String" itemvalue="Node.js.special.js" />
-      <item index="2" class="java.lang.String" itemvalue="Node.js.test.js" />
+    <list>
+      <item itemvalue="Mocha.core..coin.should return head with probability = 0.5" />
+      <item itemvalue="Node.js.special.js" />
+      <item itemvalue="Node.js.test.js" />
     </list>
     <recent_temporary>
-      <list size="2">
-        <item index="0" class="java.lang.String" itemvalue="Node.js.test.js" />
-        <item index="1" class="java.lang.String" itemvalue="Node.js.special.js" />
+      <list>
+        <item itemvalue="Node.js.test.js" />
+        <item itemvalue="Node.js.special.js" />
       </list>
     </recent_temporary>
-  </component>
-  <component name="ShelveChangesManager" show_recycled="false">
-    <option name="remove_strategy" value="false" />
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -380,6 +423,7 @@
       <workItem from="1550410360916" duration="9107000" />
       <workItem from="1550426793938" duration="31626000" />
       <workItem from="1550739995878" duration="57439000" />
+      <workItem from="1554844021897" duration="3522000" />
     </task>
     <servers />
   </component>
@@ -395,29 +439,35 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="415787000" />
+    <option name="totallyTimeSpent" value="419309000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="721" y="23" width="719" height="802" extended-state="0" />
+    <frame x="992" y="24" width="928" height="1056" extended-state="4" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2684284" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32876712" sideWeight="0.50477487" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32876712" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="npm" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32876712" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32876712" sideWeight="0.4952251" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info anchor="bottom" id="TODO" order="11" />
+      <window_info id="DB Browser" order="3" />
+      <window_info anchor="bottom" id="DB Execution Console" order="2" />
+      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.50477487" side_tool="true" weight="0.32876712" />
+      <window_info id="npm" order="5" side_tool="true" />
+      <window_info anchor="bottom" id="Version Control" order="12" />
+      <window_info anchor="bottom" id="Run" order="5" weight="0.32876712" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="10" sideWeight="0.4952251" visible="true" weight="0.3364979" />
+      <window_info content_ui="combo" id="Project" order="2" visible="true" weight="0.27693966" />
+      <window_info id="Project Explorer" order="0" />
+      <window_info id="Job Explorer" order="1" />
+      <window_info anchor="bottom" id="Docker" order="1" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Console" order="0" />
+      <window_info id="Structure" order="4" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="6" side_tool="true" />
+      <window_info anchor="bottom" id="Debug" order="6" weight="0.4" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="bottom" id="Message" order="3" />
+      <window_info anchor="bottom" id="Inspection" order="8" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="7" weight="0.25" />
+      <window_info anchor="bottom" id="Find" order="4" weight="0.32876712" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -430,442 +480,373 @@
     <breakpoint-manager>
       <option name="time" value="16" />
     </breakpoint-manager>
-    <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/dist/u-quadratic.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/uniform.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/weibull.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/wigner.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#31#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/yule-simon.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="33" lean-forward="false" selection-start-line="0" selection-start-column="33" selection-end-line="0" selection-end-column="33" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/zeta.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="1" column="48" lean-forward="false" selection-start-line="1" selection-start-column="48" selection-end-line="1" selection-end-column="48" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/zipf.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/index.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="7" column="7" lean-forward="true" selection-start-line="7" selection-start-column="7" selection-end-line="7" selection-end-column="7" />
-          <folding>
-            <element signature="n#!!doc" expanded="false" />
-            <element signature="e#244#274#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/_invalid.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/_tests.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/bates.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/arcsine.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/bounded-pareto.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/_core.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="234">
-          <caret line="45" column="18" lean-forward="true" selection-start-line="45" selection-start-column="18" selection-end-line="45" selection-end-column="18" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/core.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="278">
-          <caret line="149" column="23" lean-forward="false" selection-start-line="149" selection-start-column="23" selection-end-line="149" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/algorithms/newton.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="6" column="27" lean-forward="false" selection-start-line="6" selection-start-column="27" selection-end-line="6" selection-end-column="27" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/package.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="98">
-          <caret line="58" column="6" lean-forward="false" selection-start-line="58" selection-start-column="6" selection-end-line="58" selection-end-column="6" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/utils.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="7" column="0" lean-forward="true" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/algorithms.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="23" column="4" lean-forward="true" selection-start-line="23" selection-start-column="4" selection-end-line="23" selection-end-column="4" />
-          <folding>
-            <element signature="e#0#29#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/utils.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="18" column="0" lean-forward="true" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/logistic-exponential.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="503">
-          <caret line="43" column="12" lean-forward="true" selection-start-line="43" selection-start-column="12" selection-end-line="43" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/_core.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
-        <state split_layout="SPLIT">
-          <first_editor relative-caret-position="0">
-            <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-            <folding />
-          </first_editor>
-          <second_editor>
-            <markdownNavigatorState />
-          </second_editor>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/_distribution.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-6382">
-          <caret line="16" column="15" lean-forward="true" selection-start-line="16" selection-start-column="15" selection-end-line="16" selection-end-column="15" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/constants/bernoulli.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="4" column="26" lean-forward="true" selection-start-line="4" selection-start-column="26" selection-end-line="4" selection-end-column="26" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="593">
-          <caret line="99" column="0" lean-forward="true" selection-start-line="99" selection-start-column="0" selection-end-line="99" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/todo">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="16" column="25" lean-forward="false" selection-start-line="16" selection-start-column="25" selection-end-line="16" selection-end-column="25" />
-          <folding />
-        </state>
-      </provider>
+    <entry file="file://$PROJECT_DIR$/src/dist/inverse-gamma.js">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/src/dist/inverse-gaussian.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="518">
-          <caret line="61" column="12" lean-forward="true" selection-start-line="61" selection-start-column="12" selection-end-line="61" selection-end-column="12" />
+        <state relative-caret-position="345">
+          <caret line="41" column="27" lean-forward="true" selection-start-line="41" selection-start-column="27" selection-end-line="41" selection-end-column="27" />
           <folding>
-            <element signature="e#0#44#0" expanded="false" />
+            <element signature="e#0#44#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/skellam.js">
+    <entry file="file://$PROJECT_DIR$/src/dist/johnson-sb.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/kumaraswamy.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="278">
-          <caret line="42" column="12" lean-forward="false" selection-start-line="42" selection-start-column="12" selection-end-line="42" selection-end-column="12" />
+        <state relative-caret-position="465">
+          <caret line="31" column="44" selection-start-line="31" selection-start-column="44" selection-end-line="31" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/laplace.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="30" column="58" selection-start-line="30" selection-start-column="58" selection-end-line="30" selection-end-column="58" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/levy.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="480">
+          <caret line="32" column="27" selection-start-line="32" selection-start-column="27" selection-end-line="32" selection-end-column="27" />
+          <folding>
+            <element signature="e#0#39#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/lindley.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="37" column="13" selection-start-line="37" selection-start-column="13" selection-end-line="37" selection-end-column="13" />
+          <folding>
+            <element signature="e#0#42#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/log-gamma.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/logarithmic.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="435">
+          <caret line="35" column="23" selection-start-line="35" selection-start-column="23" selection-end-line="35" selection-end-column="23" />
           <folding>
             <element signature="e#0#43#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/beta.js">
+    <entry file="file://$PROJECT_DIR$/src/dist/logistic.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="578">
-          <caret line="62" column="1" lean-forward="true" selection-start-line="62" selection-start-column="1" selection-end-line="62" selection-end-column="1" />
+        <state relative-caret-position="450">
+          <caret line="30" column="58" selection-start-line="30" selection-start-column="58" selection-end-line="30" selection-end-column="58" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/logistic-exponential.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="29" column="23" selection-start-line="29" selection-start-column="23" selection-end-line="29" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/logit-normal.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/lomax.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="30" column="48" selection-start-line="30" selection-start-column="48" selection-end-line="30" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/makeham.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="39" column="23" selection-start-line="39" selection-start-column="23" selection-end-line="39" selection-end-column="23" />
           <folding>
-            <element signature="e#0#36#0" expanded="true" />
+            <element signature="e#0#43#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/maxwell-boltzmann.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/nakagami.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="34" column="35" selection-start-line="34" selection-start-column="35" selection-end-line="34" selection-end-column="35" />
+          <folding>
+            <element signature="e#0#42#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/negative-binomial.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="25" column="8" lean-forward="true" selection-start-line="25" selection-start-column="8" selection-end-line="25" selection-end-column="8" />
+          <folding>
+            <element signature="e#0#42#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/negative-hypergeometric.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#42#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/normal.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#38#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/pareto.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="30" column="45" selection-start-line="30" selection-start-column="45" selection-end-line="30" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/pert.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/poisson.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="465">
+          <caret line="31" column="27" selection-start-line="31" selection-start-column="27" selection-end-line="31" selection-end-column="27" />
+          <folding>
+            <element signature="e#0#42#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/power-law.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/rademacher.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/raised-cosine.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="29" column="17" lean-forward="true" selection-start-line="29" selection-start-column="17" selection-end-line="29" selection-end-column="17" />
+          <folding>
+            <element signature="e#0#43#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/rayleigh.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/reciprocal.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="465">
+          <caret line="31" column="68" selection-start-line="31" selection-start-column="68" selection-end-line="31" selection-end-column="68" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/reciprocal-inverse-gaussian.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/rice.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="39" column="28" selection-start-line="39" selection-start-column="28" selection-end-line="39" selection-end-column="28" />
+          <folding>
+            <element signature="e#0#43#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/shifted-log-logistic.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="41" column="65" selection-start-line="41" selection-start-column="65" selection-end-line="41" selection-end-column="65" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/skellam.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="35" column="3" lean-forward="true" selection-start-line="35" selection-start-column="3" selection-end-line="35" selection-end-column="3" />
+          <folding>
+            <element signature="e#0#43#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/slash.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="30" column="43" selection-start-line="30" selection-start-column="43" selection-end-line="30" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/soliton.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/student-t.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="248">
+          <caret line="30" column="17" lean-forward="true" selection-start-line="30" selection-start-column="17" selection-end-line="30" selection-end-column="17" />
+          <folding>
+            <element signature="e#0#34#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/triangular.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="30" column="23" selection-start-line="30" selection-start-column="23" selection-end-line="30" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/u-quadratic.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="308">
+          <caret line="35" column="36" selection-start-line="35" selection-start-column="36" selection-end-line="35" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/uniform.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="33" column="22" selection-start-line="33" selection-start-column="22" selection-end-line="33" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/weibull.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-135" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/wigner.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="32" column="26" selection-start-line="32" selection-start-column="26" selection-end-line="32" selection-end-column="26" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/yule-simon.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="34" column="34" selection-start-line="34" selection-start-column="34" selection-end-line="34" selection-end-column="34" />
+          <folding>
+            <element signature="e#0#34#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/zeta.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-180">
+          <folding>
+            <element signature="e#0#65#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/zipf.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/noncentral-chi.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/dist/noncentral-chi2.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="27" column="19" lean-forward="true" selection-start-line="27" selection-start-column="19" selection-end-line="27" selection-end-column="19" />
+          <folding>
+            <element signature="e#0#61#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/dist/log-series.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="465">
-          <caret line="29" column="0" lean-forward="true" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+        <state relative-caret-position="270">
+          <caret line="18" column="99" selection-start-line="18" selection-start-column="99" selection-end-line="18" selection-end-column="99" />
           <folding>
             <element signature="e#0#59#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/algorithms/neumaier.js">
+    <entry file="file://$PROJECT_DIR$/src/dist/_core.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="19" column="3" lean-forward="true" selection-start-line="19" selection-start-column="3" selection-end-line="19" selection-end-column="3" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/rice.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5">
-          <caret line="1" column="40" lean-forward="false" selection-start-line="1" selection-start-column="40" selection-end-line="1" selection-end-column="40" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/bessel.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1835">
-          <caret line="110" column="25" lean-forward="true" selection-start-line="110" selection-start-column="25" selection-end-line="110" selection-end-column="25" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/beta.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/beta-incomplete.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="930">
-          <caret line="61" column="0" lean-forward="true" selection-start-line="61" selection-start-column="0" selection-end-line="61" selection-end-column="0" />
+        <state relative-caret-position="-1755">
           <folding>
-            <element signature="e#0#46#0" expanded="true" />
+            <element signature="e#0#27#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/binom-log.js">
+    <entry file="file://$PROJECT_DIR$/src/dist/benktander-ii.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/error.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/gamma.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/gamma-incomplete.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        <state relative-caret-position="90">
+          <caret line="36" column="5" lean-forward="true" selection-start-line="36" selection-start-column="5" selection-end-line="36" selection-end-column="5" />
           <folding>
-            <element signature="e#0#46#0" expanded="true" />
+            <element signature="e#0#43#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/gamma-log.js">
+    <entry file="file://$PROJECT_DIR$/docs/src/docbuilder.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+        <state relative-caret-position="585">
+          <caret line="243" column="38" lean-forward="true" selection-start-line="243" selection-start-column="38" selection-end-line="243" selection-end-column="38" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/generalized-harmonic.js">
+    <entry file="file://$PROJECT_DIR$/src/core.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#40#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/hurwitz-zeta.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="41" lean-forward="false" selection-start-line="2" selection-start-column="41" selection-end-line="2" selection-end-column="41" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/lambert-w.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/riemann-zeta.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/dist/irwin-hall.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="355">
-          <caret line="24" column="15" lean-forward="true" selection-start-line="24" selection-start-column="15" selection-end-line="24" selection-end-column="15" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/special.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="506">
-          <caret line="115" column="11" lean-forward="true" selection-start-line="115" selection-start-column="11" selection-end-line="115" selection-end-column="11" />
-          <folding />
+        <state relative-caret-position="840">
+          <caret line="104" column="1" lean-forward="true" selection-start-line="104" selection-start-column="1" selection-end-line="104" selection-end-column="1" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/dist.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="341" column="0" lean-forward="false" selection-start-line="341" selection-start-column="0" selection-end-line="341" selection-end-column="0" />
+        <state relative-caret-position="240">
+          <caret line="16" column="3" lean-forward="true" selection-start-line="16" selection-start-column="3" selection-end-line="16" selection-end-column="3" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/marcum-q.js">
+    <entry file="file://$PROJECT_DIR$/src/dist/_distribution.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="53">
-          <caret line="110" column="30" lean-forward="true" selection-start-line="110" selection-start-column="30" selection-end-line="110" selection-end-column="30" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/owen-t.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="9" column="0" lean-forward="true" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/special/hypergeometric.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="1" column="0" lean-forward="true" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
-          <folding />
+        <state relative-caret-position="278">
+          <caret line="148" column="5" lean-forward="true" selection-start-line="148" selection-start-column="5" selection-end-line="148" selection-end-column="5" />
+          <folding>
+            <element signature="e#0#32#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

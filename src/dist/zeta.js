@@ -33,7 +33,7 @@ export default class extends Distribution {
 
   _generator () {
     // Rejection sampling
-    return zeta(this.p.s)
+    return zeta(this.r, this.p.s)
   }
 
   _pdf (x) {

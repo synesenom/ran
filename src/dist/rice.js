@@ -37,8 +37,8 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling using Poisson and gamma
-    let p = poisson(this.c[0])
-    let x = gamma(p + 1, 0.5)
+    let p = poisson(this.r, this.c[0])
+    let x = gamma(this.r, p + 1, 0.5)
     return this.p.sigma * Math.sqrt(x)
   }
 

@@ -31,7 +31,7 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling
-    return normal(this.p.mu, this.p.sigma)
+    return normal(this.r, this.p.mu, this.p.sigma)
   }
 
   _pdf (x) {

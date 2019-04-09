@@ -28,7 +28,7 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling from uniform
-    return this.p.b * Math.log(Math.random() / Math.random()) + this.p.mu
+    return this.p.b * Math.log(this.r.next() / this.r.next()) + this.p.mu
   }
 
   _pdf (x) {

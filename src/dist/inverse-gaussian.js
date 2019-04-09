@@ -39,12 +39,12 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling
-    let nu = normal()
+    let nu = normal(this.r)
 
     let y = nu * nu
 
     let x = this.p.mu + this.c[0] * this.p.mu * y - this.c[0] * Math.sqrt(this.p.mu * y * (4 * this.p.lambda + this.p.mu * y))
-    return Math.random() > this.p.mu / (this.p.mu + x) ? this.p.mu * this.p.mu / x : x
+    return this.r.next() > this.p.mu / (this.p.mu + x) ? this.p.mu * this.p.mu / x : x
   }
 
   _pdf (x) {

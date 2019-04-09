@@ -100,8 +100,8 @@ export default class extends Distribution {
     if (this.p.n <= 1) {
       return this.p.min
     }
-    let i = Math.floor(Math.random() * this.p.n)
-    if (Math.random() < this.c[0][i]) {
+    let i = Math.floor(this.r.next() * this.p.n)
+    if (this.r.next() < this.c[0][i]) {
       return i + this.p.min
     } else {
       return this.c[1][i] + this.p.min

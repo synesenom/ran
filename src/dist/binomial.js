@@ -38,7 +38,7 @@ export default class extends Distribution {
       // Small n
       let b = 0
       for (let i = 1; i <= this.p.n; i++) {
-        if (Math.random() < this.c[0]) b++
+        if (this.r.next() < this.c[0]) b++
       }
       return this.c[0] === this.p.p ? b : this.p.n - b
     } else if (this.c[1] < 1.0) {
@@ -47,7 +47,7 @@ export default class extends Distribution {
 
       let t = 1.0; let i
       for (i = 0; i <= this.p.n; i++) {
-        t *= Math.random()
+        t *= this.r.next()
         if (t < lambda) break
       }
       let b = Math.min(i, this.p.n)
@@ -69,13 +69,13 @@ export default class extends Distribution {
       let y; let em; let t
       do {
         do {
-          y = Math.tan(Math.PI * Math.random())
+          y = Math.tan(Math.PI * this.r.next())
           em = sq * y + this.c[1]
         } while (em < 0.0 || em >= (en + 1.0))
         em = Math.floor(em)
         t = 1.2 * sq * (1.0 + y * y) * Math.exp(g - gammaLn(em + 1.0) -
           gammaLn(en - em + 1.0) + em * pLog + (en - em) * pcLog)
-      } while (Math.random() > t)
+      } while (this.r.next() > t)
       return this.c[0] === this.p.p ? em : this.p.n - em
     }
   }

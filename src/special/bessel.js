@@ -60,6 +60,7 @@ function _I1 (x) {
  * @param {number} n Order of the Bessel function. Must be an integer.
  * @param {number} x Value to evaluate the function at.
  * @return {number} The modified Bessel function of the first kind.
+ * @private
  */
 export function besselI (n, x) {
   let bi
@@ -171,6 +172,7 @@ function _hi (n, x) {
  * @param {number} n Order of the spherical Bessel function. Must be an integer.
  * @param {number} x Value to evaluate the function at.
  * @return {number} The modified spherical Bessel function of the first kind.
+ * @private
  */
 export function besselISpherical (n, x) {
   switch (n) {

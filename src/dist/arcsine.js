@@ -29,7 +29,7 @@ export default class extends Distribution {
 
   _generator () {
     // Inverse transform sampling
-    let s = Math.sin(0.5 * Math.PI * Math.random())
+    let s = Math.sin(0.5 * Math.PI * this.r.next())
     return (s * s) * this.c[1] + this.p.a
   }
 

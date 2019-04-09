@@ -37,7 +37,7 @@ export default class extends Distribution {
 
   _generator () {
     // Inverse transform sampling
-    let u = Math.random()
+    let u = this.r.next()
     let z = this.c[1] * Math.pow(u, this.c[2])
 
     // Handle z >> 1 case

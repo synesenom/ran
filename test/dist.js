@@ -263,6 +263,29 @@ function utSample (name, params) {
         : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
     }, 7)
   })
+
+  it('should give the same sample for the same seed', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
+      const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+      self.seed(s)
+      const values1 = self.sample(LAPS)
+      self.seed(s)
+      const values2 = self.sample(LAPS)
+      return values1.reduce((acc, d, i) => acc && d === values2[i], true)
+    }, 7)
+  })
+
+  it('should not give the same sample for different seeds', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
+      self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+      const values1 = self.sample(LAPS)
+      self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+      const values2 = self.sample(LAPS)
+      return values1.reduce((acc, d, i) => acc || d !== values2[i], true)
+    }, 7)
+  })
 }
 
 /**
@@ -449,6 +472,9 @@ describe('dist', () => {
     name: 'Bates',
     p: () => [Param.count(), Param.rangeMin(), Param.rangeMax()]
   }, {
+    name: 'Benini',
+    p: () => [Param.shape(), Param.shape(), Param.scale()]
+  }, {
     name: 'BenktanderII',
     cases: [{
       desc: 'negligible shape parameter',
@@ -460,9 +486,6 @@ describe('dist', () => {
       desc: 'normal shape parameter',
       p: () => [Param.scale(), Math.min(0.9, Param.prob())]
     }]
-  }, {
-    name: 'Benini',
-    p: () => [Param.shape(), Param.shape(), Param.scale()]
   }, {
     name: 'Bernoulli',
     p: () => [Param.prob()]

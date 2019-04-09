@@ -33,9 +33,9 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling from gamma
-    let x = gamma(this.p.alpha, 1)
+    let x = gamma(this.r, this.p.alpha, 1)
 
-    let y = gamma(this.p.beta, 1)
+    let y = gamma(this.r, this.p.beta, 1)
     let z = x / (x + y)
 
     // Handle 1 - z << 1 case

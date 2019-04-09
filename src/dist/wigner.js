@@ -29,8 +29,8 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling by transforming beta variate
-    let x = gamma(1.5, 1)
-    let y = gamma(1.5, 1)
+    let x = gamma(this.r, 1.5, 1)
+    let y = gamma(this.r, 1.5, 1)
     return 2 * this.p.R * x / (x + y) - this.p.R
   }
 

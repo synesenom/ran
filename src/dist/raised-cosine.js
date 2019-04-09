@@ -30,11 +30,12 @@ export default class extends Distribution {
   _generator () {
     // Rejection sampling with normal(mu, s) distribution as major
     return rejection(
+      this.r,
       () => {
         // Sample normal variate within support
-        let x = normal(this.p.mu, this.p.s)
+        let x = normal(this.r, this.p.mu, this.p.s)
         while (x < this.p.mu - this.p.s || x > this.p.mu + this.p.s) {
-          x = normal(this.p.mu, this.p.s)
+          x = normal(this.r, this.p.mu, this.p.s)
         }
         return x
       },

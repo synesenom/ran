@@ -7,32 +7,6 @@
  */
 
 /**
- * Sums the element of an array.
- *
- * @method sum
- * @memberOf ran.utils.
- * @param {number[]} arr Array of numbers to sum over.
- * @param {number=} pow Power to raise each element before summing up.
- * @returns {number} The sum of the elements in the array.
- * @private
- */
-
-
-/**
- * The main random number generator.
- *
- * @method r
- * @memberOf ran.utils
- * @param {number} min Lower boundary.
- * @param {number} max Upper boundary.
- * @returns {number} Random number.
- * @private
- */
-export function r (min, max) {
-  return Math.random() * (max - min) + min
-}
-
-/**
  * Runs a generator once or several times to return a single value or an array of values.
  *
  * @method some

@@ -31,7 +31,7 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling by compounding Poisson and gamma
-    return poisson(gamma(this.p.r, 1 / this.p.p - 1))
+    return poisson(this.r, gamma(this.r, this.p.r, 1 / this.p.p - 1))
   }
 
   _pdf (x) {

@@ -17,10 +17,19 @@ export const MAX_ITER = 100
 export const EPS = 1e-15
 
 /**
- * Replacement for unexpected zero values.
+ * Safe underflow limit .
  *
  * @var {number} DELTA
  * @memberOf ran.special
  * @private
  */
 export const DELTA = 1e-30
+
+/**
+ * Safe overflow limit.
+ *
+ * @var {number} K
+ * @memberOf ran.special
+ * @private
+ */
+export const K = 1e+300

@@ -5,6 +5,7 @@
  * @memberOf ran.algorithms
  * @param {number[]} arr Array to sum.
  * @returns {number} The sum of the elements in the array.
+ * @private
  */
 export default function (arr) {
   let s = arr[0]

@@ -16,7 +16,7 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling
-    return Math.floor(1 + Math.log(Math.random()) / Math.log(1 - Math.pow(1 - this.p.p, Math.random())))
+    return Math.floor(1 + Math.log(this.r.next()) / Math.log(1 - Math.pow(1 - this.p.p, this.r.next())))
   }
 
   _pdf (x) {

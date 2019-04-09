@@ -37,9 +37,9 @@ export default class extends Distribution {
     // Inverse transform sampling
     if (this.p.xi === 0) {
       // Fall back to logistic
-      return this.p.mu - this.p.sigma * Math.log(1 / Math.random() - 1)
+      return this.p.mu - this.p.sigma * Math.log(1 / this.r.next() - 1)
     } else {
-      return this.p.mu + this.p.sigma * (Math.pow(1 / Math.random() - 1, -this.p.xi) - 1) / this.p.xi
+      return this.p.mu + this.p.sigma * (Math.pow(1 / this.r.next() - 1, -this.p.xi) - 1) / this.p.xi
     }
   }
 

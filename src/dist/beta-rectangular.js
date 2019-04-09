@@ -31,9 +31,9 @@ export default class extends Beta {
 
   _generator () {
     // Direct sampling by mixing beta and uniform variates
-    return Math.random() < this.p.theta
+    return this.r.next() < this.p.theta
       ? super._generator() * (this.p.b - this.p.a) + this.p.a
-      : Math.random() * (this.p.b - this.p.a) + this.p.a
+      : this.r.next() * (this.p.b - this.p.a) + this.p.a
   }
 
   _pdf (x) {

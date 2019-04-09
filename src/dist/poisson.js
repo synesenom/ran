@@ -29,7 +29,7 @@ export default class extends Distribution {
   }
 
   _generator () {
-    return poisson(this.p.lambda)
+    return poisson(this.r, this.p.lambda)
   }
 
   _pdf (x) {

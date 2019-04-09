@@ -105,6 +105,7 @@ const _asymptoticExpansionLargeXi = {
  * @param {number} x First variable.
  * @param {number} y Second variable.
  * @return {?number} The generalized Marcum-Q function at the specified values. If evaluated at an unsupported point, it returns null.
+ * @private
  */
 export default function (mu, x, y) {
   // Pick primary function

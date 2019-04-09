@@ -69,6 +69,20 @@
 - Implement general Aggregator class
 
 
+# process
+- next()
+- trend()
+- noise()
+- mean(power)
+- correlation()
+- Processes to add: https://en.wikipedia.org/wiki/Stochastic_process
+- Brown
+- Wiener
+- Orstein-Uhlenbeck
+- Gaussian
+- Galton-Watson
+
+
 # mc
 
 - slice sampling

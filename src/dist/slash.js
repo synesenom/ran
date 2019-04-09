@@ -28,7 +28,7 @@ export default class extends Normal {
 
   _generator () {
     // Direct sampling by the ratio of normal and uniform variates
-    return super._generator() / Math.random()
+    return super._generator() / this.r.next()
   }
 
   _pdf (x) {

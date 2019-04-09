@@ -32,7 +32,7 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling
-    return gamma(this.p.alpha, this.p.beta)
+    return gamma(this.r, this.p.alpha, this.p.beta)
   }
 
   _pdf (x) {

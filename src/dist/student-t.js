@@ -30,7 +30,7 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling using gamma variates
-    return sign() * Math.sqrt(this.p.nu * gamma(0.5) / gamma(this.p.nu / 2))
+    return sign(this.r) * Math.sqrt(this.p.nu * gamma(this.r, 0.5) / gamma(this.r, this.p.nu / 2))
   }
 
   _pdf (x) {

@@ -24,7 +24,7 @@ export default class extends Distribution {
   }
 
   _generator () {
-    return 2 * Math.log(Math.tan(0.5 * Math.PI * Math.random())) / Math.PI
+    return 2 * Math.log(Math.tan(0.5 * Math.PI * this.r.next())) / Math.PI
   }
 
   _pdf (x) {

@@ -28,7 +28,7 @@ export default class extends Distribution {
 
   _generator () {
     // Inverse transform sampling
-    return this.p.b * Math.pow(Math.pow(Math.random(), -1 / this.p.p) - 1, -1 / this.p.a)
+    return this.p.b * Math.pow(Math.pow(this.r.next(), -1 / this.p.p) - 1, -1 / this.p.a)
   }
 
   _pdf (x) {

@@ -78,6 +78,7 @@ function _gui (s, x) {
  * @param {number} s Exponent of the integrand.
  * @param {number} x Upper boundary of the integration.
  * @return {number} The regularized lower incomplete gamma function.
+ * @private
  */
 export function gammaLowerIncomplete (s, x) {
   return x < s + 1 ? _gli(s, x) : 1 - _gui(s, x)
@@ -91,6 +92,7 @@ export function gammaLowerIncomplete (s, x) {
  * @param {number} s Exponent of the integrand.
  * @param {number} x Lower boundary of the integration.
  * @return {number} The regularized upper incomplete gamma function.
+ * @private
  */
 export function gammaUpperIncomplete (s, x) {
   return x < s + 1 ? 1 - _gli(s, x) : _gui(s, x)
