@@ -27,7 +27,7 @@ export default class extends Distribution {
       value: 1,
       closed: true
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
     this.c = [
@@ -82,6 +82,21 @@ export default class extends Distribution {
     } else {
       // Otherwise
       return 1 - Math.pow(x, this.p.b - 1) * Math.exp(this.p.a * (1 - Math.pow(x, this.p.b)) / this.p.b)
+    }
+  }
+
+  _q(p) {
+    if (this.p.b === 1) {
+      // b = 1
+      return 1 - Math.log(p) / this.p.a
+    } else if (this.eps <= this.EPS_THRES) {
+      // 1 - b << 1
+      let a = this.p.a
+      let t = Math.log(a / this.eps) - Math.log(p) / this.eps + a / this.eps + 1
+      return this.eps * (t - Math.log(t)) / a
+    } else {
+      // Otherwise
+      return Math.pow(this.c[0] * lambertW(Math.pow(p * this.c[1], this.c[2]) / this.c[0]), 1 / this.p.b)
     }
   }
 }

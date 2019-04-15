@@ -20,7 +20,7 @@ export default class extends InverseGaussian {
       value: 0,
       closed: false
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
   }

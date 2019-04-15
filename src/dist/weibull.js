@@ -22,7 +22,7 @@ export default class extends Exponential {
       value: 0,
       closed: k >= 1
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
   }

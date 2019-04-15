@@ -1,12 +1,13 @@
 # dist
 
-- Make pdf/cdf more robust when large numbers are included
-- Robustness: use logarithmic values
+- Add quantile function
 - Make use of compound distributions
 - Simplify computations in pdf/cdf
 - Check parameter domains
 - Make equations more visible
 - Use decimal.js for high precision
+- If a parameter is invalid, return undefined for generator and pdf/cdf
+
 
 - Benford                               (inverse transform)
 - Benktander 1nd kind                   (lambertW)

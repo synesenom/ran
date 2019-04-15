@@ -21,7 +21,7 @@ export default class extends Chi2 {
       value: 0,
       closed: true
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
   }

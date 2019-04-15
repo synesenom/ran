@@ -1,4 +1,3 @@
-import { r } from '../core'
 import gammaLn from '../special/gamma-log'
 
 /**
@@ -9,7 +8,7 @@ import gammaLn from '../special/gamma-log'
  * @param r {ran.core.Xoshiro128p} Random generator.
  * @param {Function} g Generator for the sample (major function).
  * @param {Function} accept The function that returns the acceptance threshold.
- * @return {?number} The sampled random variate.
+ * @return {(number|undefined)} The sampled random variate.
  * @private
  */
 export function rejection (r, g, accept) {
@@ -19,7 +18,7 @@ export function rejection (r, g, accept) {
       return x
     }
   }
-  return null
+  return undefined
 }
 
 /**

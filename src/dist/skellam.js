@@ -21,10 +21,10 @@ export default class extends Distribution {
     super('discrete', arguments.length)
     this.p = { mu1, mu2 }
     this.s = [{
-      value: null,
+      value: -Infinity,
       closed: false
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
     this.c = [

@@ -18,10 +18,10 @@ export default class extends F {
   constructor (d1 = 1, d2 = 1) {
     super(d1, d2)
     this.s = [{
-      value: null,
+      value: -Infinity,
       closed: false
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
   }

@@ -15,10 +15,10 @@ export default class extends Distribution {
   constructor () {
     super('continuous', arguments.length)
     this.s = [{
-      value: null,
+      value: -Infinity,
       closed: false
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
   }

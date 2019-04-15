@@ -2,10 +2,6 @@ import { erf, erfc } from '../special/error'
 import { normal } from './_core'
 import Distribution from './_distribution'
 
-function phi (x) {
-  return 0.5 * (1 + erf(Math.SQRT1_2 * x))
-}
-
 /**
  * Generator for the Wald or [inverse Gaussian distribution]{@link https://en.wikipedia.org/wiki/Inverse_Gaussian_distribution}:
  *
@@ -27,7 +23,7 @@ export default class extends Distribution {
       value: 0,
       closed: false
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
     this.c = [

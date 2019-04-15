@@ -20,7 +20,7 @@ export default class extends Logistic {
       value: 0,
       closed: false
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
   }

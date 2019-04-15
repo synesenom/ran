@@ -19,16 +19,16 @@ export default class extends Distribution {
     super('continuous', arguments.length)
     this.p = { mu, sigma, xi }
     this.s = xi === 0 ? [{
-      value: null,
+      value: -Infinity,
       closed: false
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }] : [{
-      value: xi > 0 ? mu - sigma / xi : null,
+      value: xi > 0 ? mu - sigma / xi : -Infinity,
       closed: xi > 0
     }, {
-      value: xi < 0 ? mu - sigma / xi : null,
+      value: xi < 0 ? mu - sigma / xi : Infinity,
       closed: xi < 0
     }]
   }

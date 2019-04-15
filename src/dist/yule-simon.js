@@ -21,7 +21,7 @@ export default class extends Distribution {
       value: 1,
       closed: true
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
     this.c = [

@@ -21,7 +21,7 @@ export default class extends Distribution {
       value: 0,
       closed: kappa >= 1
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
   }

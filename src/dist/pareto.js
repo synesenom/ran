@@ -21,7 +21,7 @@ export default class extends Distribution {
       value: xmin,
       closed: true
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
   }

@@ -21,10 +21,10 @@ export default class extends Normal {
     super()
     this.p = Object.assign({ gamma, delta, lambda, xi }, this.p)
     this.s = [{
-      value: null,
+      value: -Infinity,
       closed: false
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
   }

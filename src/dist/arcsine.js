@@ -24,12 +24,16 @@ export default class extends Distribution {
       value: b,
       closed: true
     }]
-    this.c = [1 / Math.PI, b - a]
+    this.c = [
+      1 / Math.PI,
+      b - a,
+      0.5 * Math.PI
+    ]
   }
 
   _generator () {
     // Inverse transform sampling
-    let s = Math.sin(0.5 * Math.PI * this.r.next())
+    let s = Math.sin(this.c[2] * this.r.next())
     return (s * s) * this.c[1] + this.p.a
   }
 
@@ -39,5 +43,10 @@ export default class extends Distribution {
 
   _cdf (x) {
     return 2 * this.c[0] * Math.asin(Math.sqrt((x - this.p.a) / (this.p.b - this.p.a)))
+  }
+
+  _q(p) {
+    let s = Math.sin(this.c[2] * p)
+    return (s * s) * this.c[1] + this.p.a
   }
 }

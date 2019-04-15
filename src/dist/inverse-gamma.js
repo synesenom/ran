@@ -21,7 +21,7 @@ export default class extends Gamma {
       value: 0,
       closed: false
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
     this.c = [Math.pow(beta, alpha)]

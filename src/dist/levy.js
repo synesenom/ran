@@ -23,7 +23,7 @@ export default class extends Distribution {
       value: mu,
       closed: true
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
   }

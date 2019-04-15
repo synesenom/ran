@@ -20,7 +20,7 @@ export default class extends Normal {
       value: 0,
       closed: true
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
   }

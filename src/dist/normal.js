@@ -20,10 +20,10 @@ export default class extends Distribution {
     super('continuous', arguments.length)
     this.p = { mu, sigma }
     this.s = [{
-      value: null,
+      value: -Infinity,
       closed: false
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
     this.c = [sigma * Math.sqrt(2 * Math.PI), sigma * Math.SQRT2]

@@ -21,7 +21,7 @@ export default class extends Laplace {
       value: 0,
       closed: false
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
   }

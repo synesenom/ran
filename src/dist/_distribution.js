@@ -1,10 +1,10 @@
-import { Xoshiro128p } from '../core'
+import { Xoshiro128p, float } from '../core'
 import neumaier from '../algorithms/neumaier'
 import { some } from '../utils'
-import { float } from '../core'
 import newton from '../algorithms/newton'
 import { chi2, kolmogorovSmirnov } from './_tests'
-// TODO If a parameter is invalid, return undefined for generator and pdf/cdf
+import bracketing from '../algorithms/bracketing'
+import brent from '../algorithms/brent'
 
 /**
  * The distribution generator base class, all distribution generators extend this class. The methods listed here
@@ -77,32 +77,54 @@ class Distribution {
   }
 
   /**
-   * Estimates the quantile function (inverse cumulative distribution function) by solving CDF(x) = p using Newton's method. Initial value for the algorithm is picked randomly from the support. Should not be overridden.
+   * Estimates the quantile function (inverse cumulative distribution function) by solving CDF(x) = p using Newton's
+   * method. Initial value for the algorithm is picked randomly from the support. Should not be overridden.
    *
    * @method _q
    * @memberOf ran.dist.Distribution
    * @param {number} p Probability to find value for.
-   * @param {number=} x0 Initial value for Newton's method.
+   * @param {number?} x0 Initial guess for using Newton's method.
    * @returns {number} The value where the probability coincides with the specified value.
    * @protected
    * @ignore
    */
-  // TODO Pick x0 as the mode of the distribution
-  _qEstimate (p, x0) {
-    let x = newton(
+  _qEstimate(p, x0) {
+    // If a good initial guess is provided, use Newton's method
+    if (typeof x0 !== 'undefined') {
+      return newton(
+        t => this._cdf(t) - p,
+        t => this._pdf(t),
+        x0
+      )
+    }
+
+    let lo = Number.isFinite(this.s[0].value) ? -10 : this.s[0].value
+    let hi = Number.isFinite(this.s[1].value) ? 10 : this.s[1].value
+
+    // Bracket root first
+    let a = 0.5 * (lo + hi) - Math.random()
+    let b = a + 1
+    let bounds = bracketing(
       t => this._cdf(t) - p,
-      t => this._pdf(t),
-      typeof x0 === 'undefined' ? float(
-        this.s[0].value === null ? -10 : this.s[0].value,
-        this.s[1].value === null ? 10 : this.s[1].value
-      ) : x0
+      a , b
+    )
+    while (typeof bounds === 'undefined') {
+      a = float(lo, hi)
+      b = float(lo, hi)
+      bounds = bracketing(
+        t => this._cdf(t) - p,
+        Math.min(a, b),
+        Math.max(a, b)
+      )
+    }
+
+    // Solve CDF(x) - p using Brent's method
+    let x = brent(
+      t => this._cdf(t) - p,
+      ...bounds
     )
 
     return this._type === 'discrete' ? Math.ceil(x) : x
-  }
-
-  _q (p) {
-    return this._qEstimate(p)
   }
 
   /**
@@ -124,8 +146,7 @@ class Distribution {
    * @memberOf ran.dist.Distribution
    * @returns {Object[]} An array of objects describing the lower and upper boundary of the support. Each object
    * contains a <code>value: number</code> and a <code>closed: boolean</code> property with the value of the boundary
-   * and whether it is closed, respectively. If <code>value</code> is null, the boundary is (+/-) infinity (for upper
-   * and lower boundaries). When <code>value</code> is null, <code>closed</code> is always false.
+   * and whether it is closed, respectively. When <code>value</code> is (+/-)Infinity, <code>closed</code> is always false.
    */
   support () {
     return this.s
@@ -150,7 +171,7 @@ class Distribution {
    * //      1.6465170523444383 ]
    *
    */
-  seed(value) {
+  seed (value) {
     this.r.seed(value)
     return this
   }
@@ -195,12 +216,13 @@ class Distribution {
     // Convert to integer if discrete
     let z = this._type === 'discrete' ? Math.round(x) : x
 
-    // Check against support
-    if (this.s[0].value !== null && ((this.s[0].closed && z < this.s[0].value) || (!this.s[0].closed && z <= this.s[0].value))) {
+    // Check against lower support
+    if ((this.s[0].closed && z < this.s[0].value) || (!this.s[0].closed && z <= this.s[0].value)) {
       return 0
     }
 
-    if (this.s[1].value !== null && ((this.s[1].closed && z > this.s[1].value) || (!this.s[1].closed && z >= this.s[1].value))) {
+    // Check against upper support
+    if ((this.s[1].closed && z > this.s[1].value) || (!this.s[1].closed && z >= this.s[1].value)) {
       return 0
     }
 
@@ -234,12 +256,13 @@ class Distribution {
     // Convert to integer if discrete
     let z = this._type === 'discrete' ? Math.round(x) : x
 
-    // Check against support
-    if (this.s[0].value !== null && ((this.s[0].closed && z < this.s[0].value) || (!this.s[0].closed && z <= this.s[0].value))) {
+    // Check against lower support
+    if ((this.s[0].closed && z < this.s[0].value) || (!this.s[0].closed && z <= this.s[0].value)) {
       return 0
     }
 
-    if (this.s[1].value !== null && z >= this.s[1].value) {
+    // Check against upper support
+    if (z >= this.s[1].value) {
       return 1
     }
 
@@ -249,9 +272,20 @@ class Distribution {
 
   q (p) {
     if (p < 0 || p > 1) {
-      return null
+      // If out of bounds, return undefined
+      return undefined
+    } else if (p === 0) {
+      // If zero, return lower support boundary
+      return this.s[0].value
+    } else if (p === 1) {
+      // If unit, return upper support boundary
+      return this.s[1].value
     } else {
-      return this._q(p)
+      // If quantile function is implemented, use that, otherwise use the numerical estimator
+      return typeof this['_q'] === 'function'
+        ? this._q(p)
+        // TODO Even if using estimate, for some distributions use mode
+        : this._qEstimate(p)
     }
   }
 
@@ -428,7 +462,7 @@ class Distribution {
 
   /**
    * Tests if an array of values is sampled from the specified distribution. For discrete distributions this
-   * method uses \(\chi^2\) test, whereas for continuous distributions it uses the Kolmogorov-Smirnov test.
+   * method uses \(\chi^2\) test, whereas for continuous distributions it uses the Kolmogorov-Smirnov test. In both cases, the probability of Type I error (rejecting a correct null hypotheses) is 1%.
    *
    * @method test
    * @memberOf ran.dist.Distribution

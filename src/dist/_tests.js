@@ -34,7 +34,7 @@ const _CHI_TABLE_LO = [0,
 ]
 
 /**
- * Table containing critical values for the chi square test at 95% of confidence for high degrees of freedom.
+ * Table containing critical values for the chi square test at 99% of confidence for high degrees of freedom.
  *
  * @var {number[]} _CHI_TABLE_HI
  * @memberOf ran.dist

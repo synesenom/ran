@@ -21,7 +21,7 @@ export default class extends Cauchy {
       value: 0,
       closed: false
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
   }

@@ -23,7 +23,7 @@ export default class extends Beta {
       value: 0,
       closed: d1 !== 1
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
   }

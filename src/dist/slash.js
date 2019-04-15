@@ -15,10 +15,10 @@ export default class extends Normal {
   constructor () {
     super(0, 1)
     this.s = [{
-      value: null,
+      value: -Infinity,
       closed: false
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
     this.c1 = [

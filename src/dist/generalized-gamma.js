@@ -23,7 +23,7 @@ export default class extends Gamma {
       value: 0,
       closed: d >= 1 && p >= 1 && d >= p
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
   }

@@ -18,10 +18,10 @@ export default class extends Distribution {
     super('continuous', arguments.length)
     this.p = { x0, gamma }
     this.s = [{
-      value: null,
+      value: -Infinity,
       closed: false
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
     this.c = [Math.PI * this.p.gamma]

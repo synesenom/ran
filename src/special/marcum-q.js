@@ -94,7 +94,7 @@ const _asymptoticExpansionLargeXi = {
   p (mu, x, y) {
 
   }
-};
+}
 
 /**
  * Computes the generalized Marcum-Q function. Only accurate in x < 30. Implementation source: https://arxiv.org/pdf/1311.0681.pdf.

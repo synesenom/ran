@@ -18,10 +18,10 @@ export default class extends Distribution {
     super('continuous', arguments.length)
     this.p = { mu, beta }
     this.s = [{
-      value: null,
+      value: -Infinity,
       closed: false
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
   }

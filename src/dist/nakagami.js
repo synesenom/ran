@@ -24,7 +24,7 @@ export default class extends Distribution {
       value: 0,
       closed: true
     }, {
-      value: null,
+      value: Infinity,
       closed: false
     }]
     this.c = [2 * Math.pow(this.p.m, this.p.m) / Math.pow(this.p.omega, this.p.m)]
