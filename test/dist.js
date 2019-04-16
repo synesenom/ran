@@ -6,7 +6,7 @@ import * as dist from '../src/dist'
 
 const LAPS = 1000
 const FPMIN = 1e-15
-const PDF_CDF_PRECISION = 1e-2
+const PDF_CDF_PRECISION = 1e-3
 
 /**
  * Runs unit tests for the .pdf() method of a generator.

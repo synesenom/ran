@@ -1,4 +1,3 @@
-import { sum } from './utils'
 import { Normal } from './dist'
 
 /**
@@ -16,6 +15,14 @@ import { Normal } from './dist'
    * @private
    */
 const _MAX_HISTORY = 1e4
+
+function sum(arr, exponent = 1) {
+  if (exponent === 1) {
+    return arr.reduce((s, d) => s + d, 0)
+  } else {
+    return arr.reduce((s, d) => s + Math.pow(d, exponent), 0)
+  }
+}
 
 let gr = (function () {
   /**
@@ -247,7 +254,8 @@ class MCMC {
            * @return {number} Acceptance ratio.
            */
         compute () {
-          return sum(_arr) / _arr.length
+          // TODO
+          //return sum(_arr) / _arr.length
         },
 
         /**

@@ -153,7 +153,7 @@ export default (function () {
       /*if (Math.abs(p - df) / (p > Number.EPSILON ? p : 1) > 1e-3) {
         console.log(x0, p, df, p > Number.EPSILON ? Math.abs(p - df) / p : 0)
       }*/
-      return Math.abs(p - df) // / (p > Number.EPSILON ? p : 1)
+      return Math.abs(p - df)// / (p > Number.EPSILON ? p : 1)
     }).reduce((acc, d) => d + acc, 0) / laps
   }
 

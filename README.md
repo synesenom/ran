@@ -13,7 +13,7 @@ Statistical library for generating various seeded random variates, calculating l
 
 ## probability distributions
 
-`ranjs` includes more than [90 continuous and discrete distributions](https://synesenom.github.io/ran/#dist.Distribution), each tested rigorously with a floating point precision of 15 digits. Earch distribution comes with the following methods:
+`ranjs` includes more than [90 continuous and discrete distributions](https://synesenom.github.io/ran/#dist.Distribution), each tested rigorously for statistical correctness. Every distribution comes with the following methods:
 
 - sampler
 - probability density/mass function

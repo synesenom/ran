@@ -2,9 +2,36 @@
   "name": "ranjs",
   "version": "1.11.0",
   "description": "Library for generating various random variables.",
-  "main": "./dist/ran.node.min.js",
-  "directories": {
-    "test": "test"
+  "keywords": [
+    "random",
+    "generator",
+    "distributions",
+    "mcmc",
+    "statistics",
+    "test"
+  ],
+  "homepage": "https://synesenom.github.io/ran/",
+  "author": {
+    "name": "Enys Mones",
+    "url": "enysmones.com",
+    "email": "enys.mones@gmail.com"
+  },
+  "license": "MIT",
+  "main": "./dist/ranjsmin.js",
+  "module": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/synesenom/ran"
+  },
+  "scripts": {
+    "lint": "eslint src/*.js",
+    "standard": "./node_modules/.bin/standard --fix src/**/*.js",
+    "test": "./node_modules/.bin/_mocha --require babel-core/register",
+    "docs": "python docs/src/parser.py",
+    "build": "./node_modules/.bin/rollup -c",
+    "coverage": "cross-env NODE_ENV=test nyc --reporter=text --reporter=html _mocha --recursive --require babel-register --timeout=3000",
+    "coveralls": "cross-env NODE_ENV=test nyc --reporter=text-lcov _mocha --recursive --require babel-register --timeout=3000 | coveralls",
+    "babel": "babel --presets es2015 src/core.js -o dist/ran.bundle.js"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -24,19 +51,9 @@
     "nodemon": "^1.18.4",
     "npm": "^6.7.0",
     "nyc": "^13.1.0",
-    "standard": "^12.0.1",
-    "webpack": "^4.25.1",
-    "webpack-cli": "^3.1.2"
-  },
-  "scripts": {
-    "lint": "eslint src/*.js",
-    "standard": "./node_modules/.bin/standard --fix src/**/*.js",
-    "test": "./node_modules/.bin/_mocha --require babel-core/register",
-    "docs": "python docs/src/parser.py",
-    "build": "webpack",
-    "coverage": "cross-env NODE_ENV=test nyc --reporter=text --reporter=html _mocha --recursive --require babel-register --timeout=3000",
-    "coveralls": "cross-env NODE_ENV=test nyc --reporter=text-lcov _mocha --recursive --require babel-register --timeout=3000 | coveralls",
-    "babel": "babel --presets es2015 src/core.js -o dist/ran.bundle.js"
+    "rollup": "^1.10.0",
+    "rollup-plugin-terser": "^4.0.4",
+    "standard": "^12.0.1"
   },
   "babel": {
     "presets": [
@@ -62,23 +79,5 @@
     "require": [
       "babel-register"
     ]
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/synesenom/ran"
-  },
-  "keywords": [
-    "random",
-    "generator",
-    "distributions",
-    "mcmc",
-    "statistics",
-    "test"
-  ],
-  "author": "Enys Mones <enys.mones@gmail.com>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/synesenom/ran/issues"
-  },
-  "homepage": "https://synesenom.github.io/ran/"
+  }
 }
