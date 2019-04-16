@@ -17,7 +17,7 @@
     "email": "enys.mones@gmail.com"
   },
   "license": "MIT",
-  "main": "./dist/ranjsmin.js",
+  "main": "./dist/ranjs.min.js",
   "module": "src/index.js",
   "repository": {
     "type": "git",
