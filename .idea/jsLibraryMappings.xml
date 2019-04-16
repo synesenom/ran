@@ -2,6 +2,5 @@
 <project version="4">
   <component name="JavaScriptLibraryMappings">
     <file url="PROJECT" libraries="{d3, dashboard-utils}" />
-    <includedPredefinedLibrary name="Node.js Core" />
   </component>
 </project>

@@ -1,7 +1,0 @@
-{
-  "name": "node",
-  "version": "1.0.0",
-  "dependencies": {
-    "ranjs": "^1.11.0"
-  }
-}
