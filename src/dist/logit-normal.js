@@ -38,4 +38,8 @@ export default class extends Normal {
   _cdf (x) {
     return super._cdf(Math.log(x / (1 - x)))
   }
+
+  _q (p) {
+    return 1 / (1 + Math.exp(-super._q(p)))
+  }
 }

@@ -26,6 +26,7 @@ export default class extends Beta {
       value: Infinity,
       closed: false
     }]
+    this.mode = d2 > 2 ? (d2 - 2) * d2 / (d1 * (d2 + 2)) : 0
   }
 
   _generator () {

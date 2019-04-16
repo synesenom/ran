@@ -43,4 +43,9 @@ export default class extends Normal {
     let z = Math.sqrt((x - this.p.mu2) / this.p.beta)
     return super._cdf((z - 1 / z) / this.p.gamma)
   }
+
+  _q (p) {
+    let n = this.p.gamma * super._q(p)
+    return this.p.beta * 0.25 * Math.pow(n + Math.sqrt(4 + Math.pow(n, 2)), 2) + this.p.mu2
+  }
 }

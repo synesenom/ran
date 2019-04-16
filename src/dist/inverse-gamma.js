@@ -24,6 +24,7 @@ export default class extends Gamma {
       value: Infinity,
       closed: false
     }]
+    this.mode = beta / (alpha + 1)
     this.c = [Math.pow(beta, alpha)]
   }
 

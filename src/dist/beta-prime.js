@@ -27,6 +27,7 @@ export default class extends Beta {
       value: Infinity,
       closed: false
     }]
+    this.mode = alpha >= 1 ? (alpha - 1) / (beta + 1) : 0
   }
 
   _generator () {

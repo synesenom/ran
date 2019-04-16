@@ -40,7 +40,7 @@ export default class extends Distribution {
     }
 
     // Handle case b < 1 and 1 - x << 1
-    let b = Math.pow(1 - Math.pow(x, this.p.a), this.p.b - 1)
+    let b = Math.pow(1 - a * x, this.p.b - 1)
     if (!isFinite(b)) {
       return 0
     }
@@ -49,5 +49,9 @@ export default class extends Distribution {
 
   _cdf (x) {
     return 1 - Math.pow(1 - Math.pow(x, this.p.a), this.p.b)
+  }
+
+  _q (p) {
+    return Math.pow(1 - Math.pow(p, 1 / this.p.b), 1 / this.p.a)
   }
 }

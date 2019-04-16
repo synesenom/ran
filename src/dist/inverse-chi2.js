@@ -26,6 +26,7 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
+    this.mode = 1 / (nu + 2)
   }
 
   _generator () {

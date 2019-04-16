@@ -132,33 +132,29 @@ export default (function () {
   }
 
   function differentiate (f, x, h) {
-    // return (f(x - 2 * h) / 12 - 2 * f(x - h) / 3 + 2 * f(x + h) / 3 - f(x + 2 * h) / 12) / h
     return (f(x + h) - f(x - h)) / (2 * h)
-    // return (-1.5 * f(x) + 2 * f(x + h) - 0.5 * f(x + 2 * h)) / h
   }
 
   function cdf2pdfDisc (dist, range, laps) {
-    let res = Array.from({ length: laps }, () => {
+    return Array.from({ length: laps }, () => {
       let x0 = Math.floor(range[0] + Math.random() * (range[1] - range[0]))
       x0 = -Math.abs(x0)
       let p = dist.pdf(x0)
       let df = p - (dist.cdf(x0) - dist.cdf(x0 - 1))
-      // console.log(x0, p, dist.cdf(x0) - dist.cdf(x0 - 1))
-      return Math.abs(df)
+      return Math.abs(df)// / (p > Number.EPSILON ? p : 1)
     }).reduce((acc, d) => d + acc, 0) / laps
-    return res
   }
 
   function cdf2pdf (dist, range, laps) {
-    let res = Array.from({ length: laps }, () => {
+    return Array.from({ length: laps }, () => {
       let x0 = range[0] + Math.random() * (range[1] - range[0])
-      // console.log(x0, dist.pdf(x0), differentiate(x => dist.cdf(x), x0, 1e-5))
       let p = dist.pdf(x0)
-      let df = p - differentiate(x => dist.cdf(x), x0, 1e-5)
-      return Math.abs(df)
+      let df = differentiate(x => dist.cdf(x), x0, 1e-6)
+      /*if (Math.abs(p - df) / (p > Number.EPSILON ? p : 1) > 1e-3) {
+        console.log(x0, p, df, p > Number.EPSILON ? Math.abs(p - df) / p : 0)
+      }*/
+      return Math.abs(p - df) // / (p > Number.EPSILON ? p : 1)
     }).reduce((acc, d) => d + acc, 0) / laps
-    // console.log(res)
-    return res
   }
 
   return {

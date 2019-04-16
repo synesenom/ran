@@ -33,7 +33,7 @@ export default class extends Distribution {
     return Math.floor(this.r.next() * this.c[0]) + this.p.xmin
   }
 
-  _pdf (x) {
+  _pdf () {
     return 1 / this.c[0]
   }
 

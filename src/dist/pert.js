@@ -25,6 +25,7 @@ export default class extends Beta {
       value: c,
       closed: true
     }]
+    this.mode = b
   }
 
   _generator () {

@@ -23,6 +23,7 @@ export default class extends Logistic {
       value: Infinity,
       closed: false
     }]
+    this.mode = beta > 1 ? alpha * Math.pow((beta - 1) / (beta + 1), 1 / beta) : 0
   }
 
   _generator () {

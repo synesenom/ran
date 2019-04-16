@@ -19,7 +19,6 @@ export default class extends Distribution {
   // - We simplify terms with b
   // - W(x) is replaced by ln(x) - ln[ln(x)]
 
-  // TODO Handle b = 1 case separately
   constructor (a = 1, b = 0.5) {
     super('continuous', arguments.length)
     this.p = { a, b }

@@ -24,6 +24,7 @@ export default class extends Chi2 {
       value: Infinity,
       closed: false
     }]
+    this.mode = Math.max(k - 2, 0)
   }
 
   _generator () {

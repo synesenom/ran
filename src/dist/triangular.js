@@ -28,6 +28,7 @@ export default class extends Distribution {
   }
 
   _generator () {
+    // Inverse transform sampling
     let u = this.r.next()
     return u < (this.p.c - this.p.a) / (this.p.b - this.p.a)
       ? this.p.a + Math.sqrt(u * (this.p.b - this.p.a) * (this.p.c - this.p.a))
@@ -44,5 +45,11 @@ export default class extends Distribution {
     return x < this.p.c
       ? Math.pow(x - this.p.a, 2) / ((this.p.b - this.p.a) * (this.p.c - this.p.a))
       : 1 - Math.pow(this.p.b - x, 2) / ((this.p.b - this.p.a) * (this.p.b - this.p.c))
+  }
+
+  _q (p) {
+    return p < (this.p.c - this.p.a) / (this.p.b - this.p.a)
+      ? this.p.a + Math.sqrt(p * (this.p.b - this.p.a) * (this.p.c - this.p.a))
+      : this.p.b - Math.sqrt((1 - p) * (this.p.b - this.p.a) * (this.p.b - this.p.c))
   }
 }

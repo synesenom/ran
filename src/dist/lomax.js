@@ -38,4 +38,8 @@ export default class extends Distribution {
   _cdf (x) {
     return 1 - Math.pow(1 + x / this.p.lambda, -this.p.alpha)
   }
+
+  _q (p) {
+    return this.p.lambda * (Math.pow(p, -1 / this.p.alpha) - 1)
+  }
 }

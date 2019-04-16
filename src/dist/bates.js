@@ -26,6 +26,7 @@ export default class extends IrwinHall {
       value: b,
       closed: true
     }]
+    this.mode = 0.5 * (a + b)
   }
 
   _generator () {

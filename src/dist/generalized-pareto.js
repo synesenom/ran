@@ -28,6 +28,7 @@ export default class extends Distribution {
   }
 
   _generator () {
+    // Inverse sampling
     let u = this.r.next()
     let y = this.p.xi === 0 ? -Math.log(u) : (Math.pow(u, -this.p.xi) - 1) / this.p.xi
     return this.p.mu + this.p.sigma * y
@@ -45,5 +46,10 @@ export default class extends Distribution {
     return this.p.xi === 0
       ? 1 - Math.exp(-z)
       : 1 - Math.pow(1 + this.p.xi * z, -1 / this.p.xi)
+  }
+
+  _q (p) {
+    let y = this.p.xi === 0 ? -Math.log(1 - p) : (Math.pow(1 - p, -this.p.xi) - 1) / this.p.xi
+    return this.p.mu + this.p.sigma * y
   }
 }

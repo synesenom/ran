@@ -24,6 +24,7 @@ export default class extends F {
       value: Infinity,
       closed: false
     }]
+    this.mode = 0
   }
 
   _generator () {

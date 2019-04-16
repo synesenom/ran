@@ -1,4 +1,5 @@
 import Normal from './normal'
+import { erfinv } from '../special/error'
 
 /**
  * Generator for the [half-normal distribution]{@link https://en.wikipedia.org/wiki/Half-normal_distribution}:
@@ -23,6 +24,7 @@ export default class extends Normal {
       value: Infinity,
       closed: false
     }]
+    this.mode = 0
   }
 
   _generator () {
@@ -36,5 +38,9 @@ export default class extends Normal {
 
   _cdf (x) {
     return 2 * super._cdf(x) - 1
+  }
+
+  _q (p) {
+    return this.p.sigma * Math.sqrt(Math.PI) * erfinv(p)
   }
 }

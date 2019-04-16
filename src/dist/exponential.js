@@ -24,19 +24,27 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
+    this.c = [
+      Math.exp(-lambda)
+    ]
   }
 
   _generator () {
     // Inverse transform sampling
-    // return -Math.log(Math.random()) / this.p.lambda
     return exponential(this.r, this.p.lambda)
   }
 
   _pdf (x) {
-    return this.p.lambda * Math.exp(-this.p.lambda * x)
+    //return this.p.lambda * Math.exp(-this.p.lambda * x)
+    return this.p.lambda * Math.pow(this.c[0], x)
   }
 
   _cdf (x) {
-    return 1 - Math.exp(-this.p.lambda * x)
+    //return 1 - Math.exp(-this.p.lambda * x)
+    return 1 - Math.pow(this.c[0], x)
+  }
+
+  _q (p) {
+    return -Math.log(1 - p) / this.p.lambda
   }
 }

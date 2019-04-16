@@ -14,7 +14,7 @@ export const MAX_ITER = 100
  * @memberOf ran.special
  * @private
  */
-export const EPS = 1e-15
+export const EPS = Number.EPSILON
 
 /**
  * Safe underflow limit .

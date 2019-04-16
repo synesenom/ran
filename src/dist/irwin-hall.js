@@ -25,6 +25,7 @@ export default class extends Distribution {
       value: n,
       closed: true
     }]
+    this.mode = n / 2
     this.c = Array.from({ length: n + 1 }, (d, k) => gammaLn(k + 1) + gammaLn(n - k + 1))
   }
 

@@ -6,10 +6,10 @@ import * as dist from '../src/dist'
 
 const LAPS = 1000
 const FPMIN = 1e-15
-const EPSILON = 1e-6
+const PDF_CDF_PRECISION = 1e-2
 
 /**
- * Runs a unit test for the .pdf() method of a generator.
+ * Runs unit tests for the .pdf() method of a generator.
  *
  * @method utPdf
  * @param {string} name Name of the generator.
@@ -17,46 +17,50 @@ const EPSILON = 1e-6
  */
 function utPdf (name, params) {
   it('pdf should return valid numbers', () => {
-    const self = new dist[name](...params())
+    utils.trials(() => {
+      const self = new dist[name](...params())
 
-    let isNum = true
+      let isNum = true
 
-    if (self.type() === 'discrete') {
-      for (let x = -100; x <= 100; x++) {
-        let pdf = self.pdf(x)
-        isNum &= isFinite(pdf) && Number.isFinite(pdf)
-      }
-    } else {
-      for (let x = -1000; x <= 1000; x++) {
-        let pdf = self.pdf(x / 10)
-        if (!isFinite(pdf)) {
-          console.log(x, pdf)
+      if (self.type() === 'discrete') {
+        for (let x = -100; x <= 100; x++) {
+          let pdf = self.pdf(x)
+          isNum &= isFinite(pdf) && Number.isFinite(pdf)
         }
-        isNum &= isFinite(pdf) && Number.isFinite(pdf)
+      } else {
+        for (let x = -1000; x <= 1000; x++) {
+          let pdf = self.pdf(x / 10)
+          if (!isFinite(pdf)) {
+            console.log(x, pdf)
+          }
+          isNum &= isFinite(pdf) && Number.isFinite(pdf)
+        }
       }
-    }
-    assert(isNum);
+      return isNum
+    })
   })
 
   it('pdf should be non-negative', () => {
-    const self = new dist[name](...params())
+    utils.trials(() => {
+      const self = new dist[name](...params())
 
-    let nonNegative = true
-    if (self.type() === 'discrete') {
-      for (let x = -100; x <= 100; x++) {
-        let pdf = self.pdf(x)
-        nonNegative &= pdf >= 0
-      }
-    } else {
-      for (let x = -100; x <= 100; x++) {
-        let pdf = self.pdf(x / 10)
-        if (pdf < 0) {
-          console.log(x / 10, pdf)
+      let nonNegative = true
+      if (self.type() === 'discrete') {
+        for (let x = -100; x <= 100; x++) {
+          let pdf = self.pdf(x)
+          nonNegative &= pdf >= 0
         }
-        nonNegative &= pdf >= 0
+      } else {
+        for (let x = -100; x <= 100; x++) {
+          let pdf = self.pdf(x / 10)
+          if (pdf < 0) {
+            console.log(x / 10, pdf)
+          }
+          nonNegative &= pdf >= 0
+        }
       }
-    }
-    assert(nonNegative);
+      return nonNegative
+    })
   })
 
   it('cdf should return valid numbers', () => {
@@ -80,37 +84,41 @@ function utPdf (name, params) {
   })
 
   it('cdf should be in [0, 1]', () => {
-    const self = new dist[name](...params())
+    utils.trials(() => {
+      const self = new dist[name](...params())
 
-    let inRange = true
-    if (self.type() === 'discrete') {
-      for (let x = -100; x <= 100; x++) {
-        let cdf = self.cdf(x)
-        inRange &= cdf >= 0 && cdf <= 1
+      let inRange = true
+      if (self.type() === 'discrete') {
+        for (let x = -100; x <= 100; x++) {
+          let cdf = self.cdf(x)
+          inRange &= cdf >= 0 && cdf <= 1
+        }
+      } else {
+        for (let x = -1000; x <= 1000; x++) {
+          let cdf = self.cdf(x / 10)
+          inRange &= cdf >= 0 && cdf <= 1
+        }
       }
-    } else {
-      for (let x = -1000; x <= 1000; x++) {
-        let cdf = self.cdf(x / 10)
-        inRange &= cdf >= 0 && cdf <= 1
-      }
-    }
-    assert(inRange)
+      return inRange
+    })
   })
 
   it('cdf should be non-decreasing', () => {
-    const self = new dist[name](...params())
+    utils.trials(() => {
+      const self = new dist[name](...params())
 
-    let nonDecreasing = true
-    if (self.type() === 'discrete') {
-      for (let x = -100; x <= 100; x++) {
-        nonDecreasing &= self.cdf(x + 1) >= self.cdf(x)
+      let nonDecreasing = true
+      if (self.type() === 'discrete') {
+        for (let x = -100; x <= 100; x++) {
+          nonDecreasing &= self.cdf(x + 1) >= self.cdf(x)
+        }
+      } else {
+        for (let x = -1000; x <= 1000; x++) {
+          nonDecreasing &= self.cdf(x / 10 + 1e-3) - self.cdf(x / 10) > -FPMIN
+        }
       }
-    } else {
-      for (let x = -1000; x <= 1000; x++) {
-        nonDecreasing &= self.cdf(x / 10 + 1e-3) - self.cdf(x / 10) > -FPMIN
-      }
-    }
-    assert(nonDecreasing)
+      return nonDecreasing
+    })
   })
 
   it('pdf (pmf) should be the differential (difference) of cdf', () => {
@@ -124,92 +132,87 @@ function utPdf (name, params) {
             (Number.isFinite(supp[0].value) ? supp[0].value : -30) - 3,
             (Number.isFinite(supp[1].value) ? supp[1].value : 30) + 3
           ], LAPS
-        ) < EPSILON
+        ) < PDF_CDF_PRECISION
       } else {
         return utils.cdf2pdfDisc(
           self, [
             (Number.isFinite(supp[0].value) ? supp[0].value : -30) - 3,
             (Number.isFinite(supp[1].value) ? supp[1].value : 30) + 3
           ], LAPS
-        ) < EPSILON
+        ) < PDF_CDF_PRECISION
       }
-    }, 8)
+    })
   })
 
   // TODO Add unit tests for q(): valid number, non-negative, increasing, equals to CDF inv
-  /*it('quantile should return valid numbers', () => {
+  /* it('quantile should return valid numbers', () => {
     const self = new dist[name](...params())
 
     let isNum = true
     if (self.type() === 'discrete') {
       // TODO For discrete as well
     } else {
-      for (let p = 3; p <= 997; p++) {
-        let x = self.q(p / 1000);
-        if (!isFinite(x) || !Number.isFinite(x)) {
-          console.log(p / 1000, x)
-        }
+      for (let p = 1; p <= 99; p++) {
+        let x = self.q(p / 100);
         isNum &= isFinite(x) && Number.isFinite(x)
       }
     }
     assert(isNum)
   })
 
-  /* it('quantile should be non-negative', () => {
-    utils.trials(() => {
-      const self = new dist[name](...params())
+  it('quantile should be within support', () => {
+    const self = new dist[name](...params())
+    const supp = self.support()
 
-      let flag = true
-      if (self.type() === 'discrete') {
-        // TODO For discrete as well
-      } else {
-        for (let x = -1000; x <= 1000; x++) {
-          let q = self.q(x / 10)
-          flag &= q >= 0
-        }
+    let inRange = true
+    if (self.type() === 'discrete') {
+      // TODO For discrete as well
+    } else {
+      for (let p = 1; p <= 99; p++) {
+        let x = self.q(p / 100)
+        inRange &= x >= supp[0].value && x <= supp[1].value
       }
-      return flag
-    })
+    }
+    assert(inRange)
   })
 
   it('quantile should be non-decreasing', () => {
-    utils.trials(() => {
-      const self = new dist[name](...params())
+    const self = new dist[name](...params())
 
-      let flag = true
-      if (self.type() === 'discrete') {
-        // TODO For discrete as well
-      } else {
-        for (let x = -1000; x <= 1000; x++) {
-          flag &= self.q(x / 10 + 1e-3) >= self.q(x / 10)
-        }
+    let nonDecreasing = true
+    if (self.type() === 'discrete') {
+      // TODO For discrete as well
+    } else {
+      for (let p = 1; p <= 99; p++) {
+        nonDecreasing &= self.q(p / 100 + 1e-3) - self.q(p / 100 + 1e-3) > -FPMIN
+
       }
-      return flag
-    })
+    }
+    assert(nonDecreasing)
   })
 
-  it('quantile should satisfy the Galois inequality', () => {
-    utils.trials(() => {
-      const self = new dist[name](...params())
+  it('quantile should satisfy the Galois inequalities', () => {
+    const self = new dist[name](...params())
 
-      let flag = true
-      if (self.type() === 'discrete') {
-        // TODO For discrete as well
-      } else {
-        for (let x = -1000; x <= 1000; x++) {
-          let p = Math.random()
-          let q = self.q(p)
-          let cdf = self.cdf(x / 10)
-          flag &= ((p <= cdf && q <= x / 10) || (p > cdf && q > x / 10))
-        }
+    let passedGalois = true
+    if (self.type() === 'discrete') {
+      // TODO For discrete as well
+    } else {
+      for (let pi = 1; pi <= 999; pi++) {
+        let p = pi / 1000
+        let x = self.sample()
+        let q = self.q(p)
+        let cdf = self.cdf(x)
+        console.log(p, self.cdf(q))
+        passedGalois &= ((p <= cdf && q <= x) || (p >= cdf && q >= x))
       }
-      return flag
-    })
+    }
+    assert(passedGalois)
   }) */
 }
 
 /**
- * Runs a unit test for the .sample() method of a generator.
+ * Runs unit tests for the .sample() method of a generator.
  *
  * @method utSample
  * @param {string} name Name of the generator.
@@ -280,7 +283,7 @@ function utSample (name, params) {
 }
 
 /**
- * Runs a unit test for the .test() method of a generator.
+ * Runs unit tests for the .test() method of a generator.
  *
  * @method utTest
  * @param {string} name Name of the generator.
@@ -786,12 +789,13 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'Arcsine') return
+    // if (d.name !== 'Exponential') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
         describe('.sample()', () => utSample(d.name, d.p))
 
+        // TODO Add .q() to description
         describe('.pdf(), .cdf()', () => utPdf(d.name, d.p))
 
         describe('.test()', () => {
@@ -811,6 +815,7 @@ describe('dist', () => {
           })
         })
 
+        // TODO Add .q() to description
         describe('.pdf(), .cdf()', () => {
           d.cases.forEach(c => {
             describe(c.desc, () => utPdf(d.name, c.p))
@@ -855,6 +860,7 @@ describe('dist', () => {
       })
     })
 
+    // TODO Add .q() to description
     describe('.pdf(), .cdf()', () => {
       it('differentiating cdf should give pdf', () => {
         utils.repeat(() => {

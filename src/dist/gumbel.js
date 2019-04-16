@@ -39,4 +39,8 @@ export default class extends Distribution {
   _cdf (x) {
     return Math.exp(-Math.exp(-(x - this.p.mu) / this.p.beta))
   }
+
+  _q (p) {
+    return this.p.mu - this.p.beta * Math.log(-Math.log(p))
+  }
 }

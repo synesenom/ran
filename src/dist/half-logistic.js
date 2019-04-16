@@ -22,6 +22,7 @@ export default class extends Logistic {
       value: Infinity,
       closed: false
     }]
+    this.mode = 0
   }
 
   _generator () {

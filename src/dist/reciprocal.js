@@ -24,6 +24,7 @@ export default class extends Distribution {
       value: b,
       closed: true
     }]
+    this.mode = a / (Math.log(b) - Math.log(a))
     this.c = [Math.log(a), Math.log(b)]
   }
 

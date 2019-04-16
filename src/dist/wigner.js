@@ -25,6 +25,7 @@ export default class extends Distribution {
       value: R,
       closed: true
     }]
+    this.mode = 0
   }
 
   _generator () {

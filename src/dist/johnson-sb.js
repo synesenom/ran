@@ -39,8 +39,11 @@ export default class extends Normal {
   }
 
   _cdf (x) {
-    // return super._cdf(this.p.gamma + this.p.delta * Math.asinh((x - this.p.xi) / this.p.lambda))
     let z = x - this.p.xi
     return super._cdf(this.p.gamma + this.p.delta * Math.log(z / (this.p.lambda - z)))
+  }
+
+  _q (p) {
+    return this.p.xi + this.p.lambda / (1 + Math.exp(-(super._q(p) - this.p.gamma) / this.p.delta))
   }
 }

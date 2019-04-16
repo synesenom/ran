@@ -27,6 +27,7 @@ export default class extends Distribution {
   }
 
   _generator () {
+    // Inverse transform sampling
     let u = this.r.next()
     let z = Math.pow(u / (1 - u), 1 / this.p.kappa)
 
@@ -44,5 +45,14 @@ export default class extends Distribution {
   _cdf (x) {
     // Calculate 1 - S for robustness
     return 1 - 1 / (1 + Math.pow(Math.exp(this.p.lambda * x) - 1, this.p.kappa))
+  }
+
+  _q (p) {
+    let z = Math.pow(p / (1 - p), 1 / this.p.kappa)
+
+    // Handle z << 1 cases
+    return 1 + z === 1
+      ? z / this.p.lambda
+      : Math.log(1 + z) / this.p.lambda
   }
 }

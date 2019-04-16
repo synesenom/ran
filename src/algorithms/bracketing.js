@@ -8,7 +8,7 @@ import { MAX_ITER } from '../special/_core'
  * @param {Function} f Function to find root for. Must accept a single variable.
  * @param {number} a0 Initial lower boundary of the bracket.
  * @param {number} b0 Initial upper boundary of the bracket.
- * @return {?number[]} Array containing the bracket around the root if successful, undefined otherwise.
+ * @return {(number[]|undefined)} Array containing the bracket around the root if successful, undefined otherwise.
  * @private
  */
 export default function(f, a0, b0) {

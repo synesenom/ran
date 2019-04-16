@@ -3,8 +3,9 @@ import neumaier from '../algorithms/neumaier'
 import { some } from '../utils'
 import newton from '../algorithms/newton'
 import { chi2, kolmogorovSmirnov } from './_tests'
-import bracketing from '../algorithms/bracketing'
+import bracket from '../algorithms/bracketing'
 import brent from '../algorithms/brent'
+import { MAX_ITER } from '../special/_core'
 
 /**
  * The distribution generator base class, all distribution generators extend this class. The methods listed here
@@ -33,6 +34,9 @@ class Distribution {
 
     // Pseudo random number generator
     this.r = new Xoshiro128p()
+
+    // Mode of the distribution
+    this.mode = undefined
   }
 
   /**
@@ -98,25 +102,12 @@ class Distribution {
       )
     }
 
-    let lo = Number.isFinite(this.s[0].value) ? -10 : this.s[0].value
-    let hi = Number.isFinite(this.s[1].value) ? 10 : this.s[1].value
-
     // Bracket root first
-    let a = 0.5 * (lo + hi) - Math.random()
-    let b = a + 1
-    let bounds = bracketing(
+    let bounds = bracket(
       t => this._cdf(t) - p,
-      a , b
+      Number.isFinite(this.s[0].value) ? this.s[0].value : -10,
+      Number.isFinite(this.s[1].value) ? this.s[1].value : 10
     )
-    while (typeof bounds === 'undefined') {
-      a = float(lo, hi)
-      b = float(lo, hi)
-      bounds = bracketing(
-        t => this._cdf(t) - p,
-        Math.min(a, b),
-        Math.max(a, b)
-      )
-    }
 
     // Solve CDF(x) - p using Brent's method
     let x = brent(
@@ -194,7 +185,7 @@ class Distribution {
    * //      1.1694087449301402 ]
    *
    */
-  sample (n) {
+  sample (n = 1) {
     return some(() => this._generator(), n)
   }
 
@@ -285,7 +276,7 @@ class Distribution {
       return typeof this['_q'] === 'function'
         ? this._q(p)
         // TODO Even if using estimate, for some distributions use mode
-        : this._qEstimate(p)
+        : this._qEstimate(p, this.mode)
     }
   }
 

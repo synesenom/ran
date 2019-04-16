@@ -21,6 +21,7 @@ export default class extends Normal {
       value: Infinity,
       closed: false
     }]
+    this.mode = 0
     this.c1 = [
       0.5 / Math.sqrt(2 * Math.PI)
     ]

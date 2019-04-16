@@ -30,15 +30,19 @@ export default class extends Distribution {
   }
 
   _generator () {
-    // Direct sampling
+    // Inverse transform sampling
     return this.r.next() * this.c[0] + this.p.xmin
   }
 
-  _pdf (x) {
+  _pdf () {
     return 1 / this.c[0]
   }
 
   _cdf (x) {
     return (x - this.p.xmin) / this.c[0]
+  }
+
+  _q (p) {
+    return p * this.c[0] + this.p.xmin
   }
 }

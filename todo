@@ -1,6 +1,7 @@
 # dist
 
 - Add quantile function
+- Re-implement generators with quantile if accessible
 - Make use of compound distributions
 - Simplify computations in pdf/cdf
 - Check parameter domains

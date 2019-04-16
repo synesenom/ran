@@ -26,6 +26,7 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
+    this.mode = mu * (Math.sqrt(1 + 2.25 * Math.pow(mu / lambda, 2)) - 1.5 * mu / lambda)
     this.c = [
       0.5 * mu / lambda,
       Math.exp(2 * lambda / mu),

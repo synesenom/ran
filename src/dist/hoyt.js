@@ -28,6 +28,7 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
+    this.mode = Math.sqrt((q - 0.5) * omega / q)
     this.c = [2 * Math.pow(this.p.q, this.p.q) / Math.pow(this.p.omega, this.p.q)]
   }
 

@@ -28,6 +28,7 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
+    this.mode = alpha >= 1 ? (alpha - 1) / beta : 0
   }
 
   _generator () {

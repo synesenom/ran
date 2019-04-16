@@ -40,4 +40,8 @@ export default class extends Distribution {
   _cdf (x) {
     return 0.5 + Math.atan2(x - this.p.x0, this.p.gamma) / Math.PI
   }
+
+  _q (p) {
+    return this.p.x0 + this.p.gamma * (Math.tan(Math.PI * (p - 0.5)))
+  }
 }

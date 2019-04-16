@@ -24,6 +24,7 @@ export default class extends Distribution {
   }
 
   _generator () {
+    // Inverse transform sampling
     return 2 * Math.log(Math.tan(0.5 * Math.PI * this.r.next())) / Math.PI
   }
 
@@ -33,5 +34,9 @@ export default class extends Distribution {
 
   _cdf (x) {
     return 2 * Math.atan(Math.exp(0.5 * Math.PI * x)) / Math.PI
+  }
+
+  _q (p) {
+    return 2 * Math.log(Math.tan(0.5 * Math.PI * p)) / Math.PI
   }
 }

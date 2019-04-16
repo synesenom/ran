@@ -3,6 +3,7 @@ import newton from '../algorithms/newton'
 import gamma from './gamma'
 import gammaLn from './gamma-log'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from './gamma-incomplete'
+import { besselI } from './bessel'
 
 /**
  * Series expansion of the Marcum-Q function.
@@ -107,7 +108,7 @@ const _asymptoticExpansionLargeXi = {
  * @return {?number} The generalized Marcum-Q function at the specified values. If evaluated at an unsupported point, it returns null.
  * @private
  */
-export default function (mu, x, y) {
+export function marcumQ (mu, x, y) {
   // Pick primary function
   let primary = y > x + mu ? 'q' : 'p'
 
@@ -151,3 +152,11 @@ export default function (mu, x, y) {
   // Integral
   return null */
 }
+
+/*export function marcumQyInv (mu, x, q) {
+  return newton(
+    t => marcumQ(mu, x, t) - q,
+    t => -Math.pow(t / x, (mu - 1) / 2) * Math.exp(-x - t) * besselI(mu - 1, 2 * Math.sqrt(x * t)),
+    1
+  )
+}*/

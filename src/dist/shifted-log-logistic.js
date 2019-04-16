@@ -67,4 +67,13 @@ export default class extends Distribution {
       return 1 / (1 + Math.pow(1 + this.p.xi * z, -1 / this.p.xi))
     }
   }
+
+  _q (p) {
+    if (this.p.xi === 0) {
+      // Fall back to logistic
+      return this.p.mu - this.p.sigma * Math.log(1 / p - 1)
+    } else {
+      return this.p.mu + this.p.sigma * (Math.pow(1 / p - 1, -this.p.xi) - 1) / this.p.xi
+    }
+  }
 }

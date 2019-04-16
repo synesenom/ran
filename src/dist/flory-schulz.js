@@ -24,6 +24,7 @@ export default class extends Distribution {
       value: Infinity,
       closed: true
     }]
+    this.mode = - 1 / Math.log(1 - a)
 
     // Speed up constants for rejection sampling
     let s = 1.5

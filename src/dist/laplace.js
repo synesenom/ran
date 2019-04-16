@@ -28,7 +28,7 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling from uniform
-    return this.p.b * Math.log(this.r.next() / this.r.next()) + this.p.mu
+    return this.p.mu + this.p.b * Math.log(this.r.next() / this.r.next())
   }
 
   _pdf (x) {
@@ -38,5 +38,11 @@ export default class extends Distribution {
   _cdf (x) {
     let z = Math.exp((x - this.p.mu) / this.p.b)
     return x < this.p.mu ? 0.5 * z : 1 - 0.5 / z
+  }
+
+  _q (p) {
+    return p < 0.5
+      ? this.p.mu + this.p.b * Math.log(2 * p)
+      : this.p.mu - this.p.b * Math.log(2 - 2 * p)
   }
 }

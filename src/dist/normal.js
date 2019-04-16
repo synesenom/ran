@@ -1,4 +1,4 @@
-import { erf } from '../special/error'
+import { erf, erfinv } from '../special/error'
 import { normal } from './_core'
 import Distribution from './_distribution'
 
@@ -26,7 +26,10 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
-    this.c = [sigma * Math.sqrt(2 * Math.PI), sigma * Math.SQRT2]
+    this.c = [
+      sigma * Math.sqrt(2 * Math.PI),
+      sigma * Math.SQRT2
+    ]
   }
 
   _generator () {
@@ -40,5 +43,9 @@ export default class extends Distribution {
 
   _cdf (x) {
     return 0.5 * (1 + erf((x - this.p.mu) / this.c[1]))
+  }
+
+  _q (p) {
+    return this.p.mu + this.c[1] * erfinv(2 * p - 1)
   }
 }

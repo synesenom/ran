@@ -43,4 +43,8 @@ export default class extends Distribution {
   _cdf (x) {
     return this.c[0] * (Math.pow(x - this.c[1], 3) + this.c[2]) / 3
   }
+
+  _q (p) {
+    return Math.cbrt(3 * p / this.c[0] - this.c[2]) + this.c[1]
+  }
 }

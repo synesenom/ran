@@ -44,4 +44,9 @@ export default class extends Distribution {
   _cdf (x) {
     return (this.c[0] - x * (1 - Math.log(x))) / (this.c[0] - this.c[1])
   }
+
+  _q (p) {
+    let z = p * (this.c[0] - this.c[1]) - this.c[0]
+    return z / lambertW(z / Math.E)
+  }
 }

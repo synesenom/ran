@@ -26,6 +26,7 @@ export default class extends Gamma {
       value: Infinity,
       closed: false
     }]
+    this.mode = d > 0 ? a * Math.pow((d - 1) / p, 1 / p) : 0
   }
 
   _generator () {
