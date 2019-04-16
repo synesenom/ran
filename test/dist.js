@@ -127,21 +127,11 @@ function utPdf (name, params) {
 
       const supp = self.support()
       if (self.type() === 'continuous') {
-        return utils.cdf2pdf(
-          self, [
-            (Number.isFinite(supp[0].value) ? supp[0].value : -30) - 3,
-            (Number.isFinite(supp[1].value) ? supp[1].value : 30) + 3
-          ], LAPS
-        ) < PDF_CDF_PRECISION
+        return utils.Tests.pdf2cdf(self, LAPS)
       } else {
-        return utils.cdf2pdfDisc(
-          self, [
-            (Number.isFinite(supp[0].value) ? supp[0].value : -30) - 3,
-            (Number.isFinite(supp[1].value) ? supp[1].value : 30) + 3
-          ], LAPS
-        ) < PDF_CDF_PRECISION
+        return utils.Tests.pdf2cdf(self, LAPS, true)
       }
-    })
+    }, 7)
   })
 
   // TODO Add unit tests for q(): valid number, non-negative, increasing, equals to CDF inv
@@ -298,6 +288,7 @@ function utTest (name, params, type = 'self') {
         return self.test(self.sample(LAPS)).passed
       }, 6)
       break
+
     case 'foreign':
       utils.trials(() => {
         const self = new dist[name](...params())
@@ -789,7 +780,7 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'Exponential') return
+    // if (d.name !== 'HalfLogistic') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

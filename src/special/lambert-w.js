@@ -1,7 +1,8 @@
 import { MAX_ITER, EPS, DELTA } from './_core'
 
 /**
- * Computes the Lambert W function.
+ * Computes the Lambert W function using Halley's method.
+ * Source: https://cs.uwaterloo.ca/research/tr/1993/03/W.pdf
  *
  * @method lambertW
  * @memberOf ran.special

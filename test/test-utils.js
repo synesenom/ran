@@ -1,5 +1,7 @@
 import { assert } from 'chai'
 
+const PRECISION = 1e-10
+
 export default (function () {
   // Critical values for P = 0.01
   // Source: https://www.medcalc.org/manual/chi-square-table.php
@@ -135,26 +137,37 @@ export default (function () {
     return (f(x + h) - f(x - h)) / (2 * h)
   }
 
-  function cdf2pdfDisc (dist, range, laps) {
-    return Array.from({ length: laps }, () => {
-      let x0 = Math.floor(range[0] + Math.random() * (range[1] - range[0]))
-      x0 = -Math.abs(x0)
-      let p = dist.pdf(x0)
-      let df = p - (dist.cdf(x0) - dist.cdf(x0 - 1))
-      return Math.abs(df)// / (p > Number.EPSILON ? p : 1)
-    }).reduce((acc, d) => d + acc, 0) / laps
-  }
+  const Tests = {
+    pdf2cdf(dist, laps, discrete = false) {
+      // Determine testing range
+      let x1 = isFinite(dist.support()[0]) ? dist.support()[0] : -30
+      let x2 = isFinite(dist.support()[1]) ? dist.support()[1] : 30
+      let s = 0
 
-  function cdf2pdf (dist, range, laps) {
-    return Array.from({ length: laps }, () => {
-      let x0 = range[0] + Math.random() * (range[1] - range[0])
-      let p = dist.pdf(x0)
-      let df = differentiate(x => dist.cdf(x), x0, 1e-6)
-      /*if (Math.abs(p - df) / (p > Number.EPSILON ? p : 1) > 1e-3) {
-        console.log(x0, p, df, p > Number.EPSILON ? Math.abs(p - df) / p : 0)
-      }*/
-      return Math.abs(p - df)// / (p > Number.EPSILON ? p : 1)
-    }).reduce((acc, d) => d + acc, 0) / laps
+      // Aggregate difference between f(x) and F'(x)
+      if (discrete) {
+        for (let i = x1; i < x2; i++) {
+          let x = Math.floor(i);
+          let p = dist.pdf(x)
+          s += Math.abs(p - (dist.cdf(x) - dist.cdf(x - 1))) / (p > Number.EPSILON ? p : 1)
+        }
+      } else {
+        let dx = (x2 - x1) / laps;
+        for (let i = 0; i < laps; i++) {
+          let x = x1 + i * dx + Math.random()
+          let p = dist.pdf(x)
+          let df = differentiate(t => dist.cdf(t), x, 1e-6)
+          if (df > PRECISION && p > PRECISION) {
+            // console.log(p, Math.abs(p - df) / (p > Number.EPSILON ? p : 1))
+            s += Math.abs(p - df) / (p > PRECISION ? p : 1)
+          }
+        }
+      }
+
+      // Test passes if average relative difference is lower than 1%
+      // console.log(s / laps)
+      return s / laps < 1e-2
+    }
   }
 
   return {
@@ -162,7 +175,6 @@ export default (function () {
     chiTest,
     trials,
     repeat,
-    cdf2pdf,
-    cdf2pdfDisc
+    Tests
   }
 })()
