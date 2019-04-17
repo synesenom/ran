@@ -40,6 +40,7 @@ export default class extends Beta {
   }
 
   _cdf (x) {
-    return super._cdf(this.p.d1 * x / (this.p.d2 + this.p.d1 * x))
+    let y = this.p.d1 * x
+    return super._cdf( 1 / (1 + this.p.d2 / y))
   }
 }

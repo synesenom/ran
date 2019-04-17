@@ -210,7 +210,10 @@ export default (function () {
         let dx = (range[1] - range[0]) / laps
         for (let i = 0; i < laps; i++) {
           let x = range[0] + i * dx + Math.random()
-          nonDecreasing &= dist.cdf(x + 1e-3) - dist.cdf(x) > -Number.EPSILON
+          nonDecreasing &= dist.cdf(x + 1e-3) - dist.cdf(x - 1e-3) > -Number.EPSILON
+          if (dist.cdf(x + 1e-3) < dist.cdf(x - 1e-3)) {
+            console.log(dist.cdf(x), dist.cdf(x + 1e-3) - dist.cdf(x - 1e-3))
+          }
         }
       }
 
