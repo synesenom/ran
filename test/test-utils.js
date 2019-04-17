@@ -137,24 +137,103 @@ export default (function () {
     return (f(x + h) - f(x - h)) / (2 * h)
   }
 
+  function getTestRange(dist) {
+    return [
+      isFinite(dist.support()[0]) ? dist.support()[0] : -30,
+      isFinite(dist.support()[1]) ? dist.support()[1] : 30
+    ]
+  }
+
   const Tests = {
+    cdfType(dist, laps, discrete = false) {
+      // Init test variables
+      let range = getTestRange(dist)
+      let isNum = true
+
+      // Run test
+      if (discrete) {
+        for (let i = range[0]; i < range[1]; i++) {
+          let x = Math.floor(i)
+          let cdf = dist.cdf(x)
+          isNum &= isFinite(cdf) && Number.isFinite(cdf)
+        }
+      } else {
+        let dx = (range[1] - range[0]) / laps
+        for (let i = 0; i < laps; i++) {
+          let x = range[0] + i * dx + Math.random()
+          let cdf = dist.cdf(x)
+          isNum &= isFinite(cdf) && Number.isFinite(cdf)
+        }
+      }
+
+      // Test passes if CDF(x) is valid number
+      return isNum
+    },
+
+    cdfRange(dist, laps, discrete = false) {
+      // Init test variables
+      let range = getTestRange(dist)
+      let inRange = true
+
+      // Run test
+      if (discrete) {
+        for (let i = range[0]; i < range[1]; i++) {
+          let x = Math.floor(i)
+          let cdf = dist.cdf(x)
+          inRange &= (cdf >= 0 && cdf <= 1)
+        }
+      } else {
+        let dx = (range[1] - range[0]) / laps
+        for (let i = 0; i < laps; i++) {
+          let x = range[0] + i * dx + Math.random()
+          let cdf = dist.cdf(x)
+          inRange &= (cdf >= 0 && cdf <= 1)
+        }
+      }
+
+      // Test passes if 0 <= CDF(x) <= 1
+      return inRange
+    },
+
+    cdfMonotonicity(dist, laps, discrete = false) {
+      // Init test variables
+      let range = getTestRange(dist)
+      let nonDecreasing = true
+
+      // Run test
+      if (discrete) {
+        for (let i = range[0]; i < range[1]; i++) {
+          let x = Math.floor(i)
+          nonDecreasing &= dist.cdf(x + 1) >= dist.cdf(x)
+        }
+      } else {
+        let dx = (range[1] - range[0]) / laps
+        for (let i = 0; i < laps; i++) {
+          let x = range[0] + i * dx + Math.random()
+          nonDecreasing &= dist.cdf(x + 1e-3) - dist.cdf(x) > -Number.EPSILON
+        }
+      }
+
+      // Test passes if CDF was non-decreasing
+      return nonDecreasing
+    },
+
     pdf2cdf(dist, laps, discrete = false) {
-      // Determine testing range
-      let x1 = isFinite(dist.support()[0]) ? dist.support()[0] : -30
-      let x2 = isFinite(dist.support()[1]) ? dist.support()[1] : 30
+      // Init test variables
+      let range = getTestRange(dist)
       let s = 0
 
-      // Aggregate difference between f(x) and F'(x)
+      // Run test
       if (discrete) {
-        for (let i = x1; i < x2; i++) {
-          let x = Math.floor(i);
+        for (let i = range[0]; i < range[1]; i++) {
+          let x = Math.floor(i)
           let p = dist.pdf(x)
           s += Math.abs(p - (dist.cdf(x) - dist.cdf(x - 1))) / (p > Number.EPSILON ? p : 1)
         }
       } else {
-        let dx = (x2 - x1) / laps;
+        let dx = (range[1] - range[0]) / laps
         for (let i = 0; i < laps; i++) {
-          let x = x1 + i * dx + Math.random()
+          let x = range[0] + i * dx + Math.random()
           let p = dist.pdf(x)
           let df = differentiate(t => dist.cdf(t), x, 1e-6)
           if (df > PRECISION && p > PRECISION) {

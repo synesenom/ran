@@ -6,7 +6,6 @@ import * as dist from '../src/dist'
 
 const LAPS = 1000
 const FPMIN = 1e-15
-const PDF_CDF_PRECISION = 1e-3
 
 /**
  * Runs unit tests for the .pdf() method of a generator.
@@ -66,71 +65,29 @@ function utPdf (name, params) {
   it('cdf should return valid numbers', () => {
     utils.trials(() => {
       const self = new dist[name](...params())
-
-      let isNum = true
-      if (self.type() === 'discrete') {
-        for (let x = -100; x <= 100; x++) {
-          let cdf = self.cdf(x)
-          isNum &= isFinite(cdf) && Number.isFinite(cdf)
-        }
-      } else {
-        for (let x = -1000; x <= 1000; x++) {
-          let cdf = self.cdf(x / 10)
-          isNum &= isFinite(cdf) && Number.isFinite(cdf)
-        }
-      }
-      return isNum
+      return utils.Tests.cdfType(self, LAPS, self.type() === 'discrete')
     })
   })
 
   it('cdf should be in [0, 1]', () => {
     utils.trials(() => {
       const self = new dist[name](...params())
-
-      let inRange = true
-      if (self.type() === 'discrete') {
-        for (let x = -100; x <= 100; x++) {
-          let cdf = self.cdf(x)
-          inRange &= cdf >= 0 && cdf <= 1
-        }
-      } else {
-        for (let x = -1000; x <= 1000; x++) {
-          let cdf = self.cdf(x / 10)
-          inRange &= cdf >= 0 && cdf <= 1
-        }
-      }
-      return inRange
+      return utils.Tests.cdfRange(self, LAPS, self.type() === 'discrete')
     })
   })
 
   it('cdf should be non-decreasing', () => {
     utils.trials(() => {
       const self = new dist[name](...params())
-
-      let nonDecreasing = true
-      if (self.type() === 'discrete') {
-        for (let x = -100; x <= 100; x++) {
-          nonDecreasing &= self.cdf(x + 1) >= self.cdf(x)
-        }
-      } else {
-        for (let x = -1000; x <= 1000; x++) {
-          nonDecreasing &= self.cdf(x / 10 + 1e-3) - self.cdf(x / 10) > -FPMIN
-        }
-      }
-      return nonDecreasing
+      return utils.Tests.cdfMonotonicity(self, LAPS, self.type() === 'discrete')
     })
   })
 
   it('pdf (pmf) should be the differential (difference) of cdf', () => {
+    // Using a 7/10 acceptance here due to the instability of numerical differentiation
     utils.trials(() => {
       const self = new dist[name](...params())
-
-      const supp = self.support()
-      if (self.type() === 'continuous') {
-        return utils.Tests.pdf2cdf(self, LAPS)
-      } else {
-        return utils.Tests.pdf2cdf(self, LAPS, true)
-      }
+      return utils.Tests.pdf2cdf(self, LAPS, self.type() === 'discrete')
     }, 7)
   })
 
@@ -780,7 +737,7 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'HalfLogistic') return
+    // if (d.name !== 'Arcsine') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
