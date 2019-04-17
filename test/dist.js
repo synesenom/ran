@@ -88,7 +88,7 @@ function utPdf (name, params) {
     utils.trials(() => {
       const self = new dist[name](...params())
       return utils.Tests.pdf2cdf(self, LAPS, self.type() === 'discrete')
-    }, 7)
+    }, 8)
   })
 
   // TODO Add unit tests for q(): valid number, non-negative, increasing, equals to CDF inv
@@ -737,7 +737,7 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'Arcsine') return
+    // if (d.name !== 'HalfLogistic') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

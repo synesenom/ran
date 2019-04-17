@@ -1,4 +1,4 @@
-import Logistic from './logistic'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [half-logistic distribution]{@link https://en.wikipedia.org/wiki/Half-logistic_distribution}:
@@ -11,10 +11,9 @@ import Logistic from './logistic'
  * @memberOf ran.dist
  * @constructor
  */
-export default class extends Logistic {
-  // Transformation of logistic distribution
+export default class extends Distribution {
   constructor () {
-    super(0, 1)
+    super('continuous', arguments.length)
     this.s = [{
       value: 0,
       closed: true
@@ -22,19 +21,25 @@ export default class extends Logistic {
       value: Infinity,
       closed: false
     }]
-    this.mode = 0
   }
 
   _generator () {
-    // Direct sampling by transforming logistic variate
-    return Math.abs(super._generator())
+    // Inverse transform sampling
+    let u = this.r.next()
+    return -Math.log((1 - u) / (1 + u))
   }
 
   _pdf (x) {
-    return 2 * super._pdf(x)
+    let y = Math.exp(-x)
+    return 2 * y / Math.pow(1 + y, 2)
   }
 
   _cdf (x) {
-    return 2 * super._cdf(x) - 1
+    let y = Math.exp(-x)
+    return (1 - y) / (1 + y)
+  }
+
+  _q (p) {
+    return -Math.log((1 - p) / (1 + p))
   }
 }

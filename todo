@@ -9,7 +9,11 @@
 - Use decimal.js for high precision
 - If a parameter is invalid, return undefined for generator and pdf/cdf
 
+- Placeholder for Minimax
+- Placeholder for scale-inverse chi2
+- Placeholder for Nakagami-q (Hoyt)
 
+- ARGUS                                 (rejection sampling)
 - Benford                               (inverse transform)
 - Benktander 1nd kind                   (lambertW)
 - Delaporte                             (compound)
@@ -29,7 +33,6 @@
 
 - alpha (scipy)
 - anglit (scipy)
-- ARGUS
 - crystal ball
 - double gamma (scipy)
 - double weibull (scipy)
