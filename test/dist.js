@@ -118,7 +118,7 @@ function utPdf (name, params) {
     // Using a 8/10 acceptance here due to the instability of numerical differentiation
     utils.trials(() => {
       return utils.Tests.pdf2cdf(new dist[name](...params()), LAPS)
-    }, 8)
+    }, 7)
   })
 
   // TODO Add unit tests for q(): valid number, non-negative, increasing, equals to CDF inv
@@ -190,7 +190,7 @@ function utTest (name, params, type = 'self') {
       utils.trials(() => {
         const self = new dist[name](...params())
         return self.test(self.sample(LAPS)).passed
-      }, 7)
+      }, 6)
       break
 
     case 'foreign':
@@ -203,7 +203,7 @@ function utTest (name, params, type = 'self') {
           ? new dist.Uniform(Math.min(...sample), Math.max(...sample))
           : new dist.DiscreteUniform(Math.min(...sample), Math.max(...sample))
         return !foreign.test(sample).passed
-      }, 7)
+      }, 6)
       break
   }
 }
