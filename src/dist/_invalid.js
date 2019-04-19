@@ -3,7 +3,7 @@ import Distribution from './_distribution'
 /**
  * Generator of an invalid (not implemented) distribution. Only for testing purposes.
  *
- * @class _InvalidDiscrete
+ * @class InvalidDiscrete
  * @memberOf ran.dist
  * @private
  */

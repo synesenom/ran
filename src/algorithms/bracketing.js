@@ -12,7 +12,7 @@ import { MAX_ITER } from '../special/_core'
  * @private
  */
 export default function(f, a0, b0) {
-  // If initial boundaries are invalid, return null
+  // If initial boundaries are invalid, return undefined
   if (a0 === b0) {
     return undefined
   }
@@ -32,6 +32,7 @@ export default function(f, a0, b0) {
       f2 = f(a += 1.6 * (b - a))
     }
   }
+  console.log(f1, f2)
 
   return undefined
 }

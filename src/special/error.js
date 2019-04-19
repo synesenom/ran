@@ -22,8 +22,9 @@ const coeffs = [
  * @private
  */
 export function erf (x) {
+  // TODO Replace with continued fraction
   return x < 0
-    ? -gammaLowerIncomplete(0.5, x * x)
+    ? - gammaLowerIncomplete(0.5, x * x)
     : gammaLowerIncomplete(0.5, x * x)
 }
 
@@ -37,6 +38,7 @@ export function erf (x) {
  * @private
  */
 export function erfc (x) {
+  // TODO Replace with continued fraction
   return x < 0
     ? 1 + gammaLowerIncomplete(0.5, x * x)
     : gammaUpperIncomplete(0.5, x * x)
@@ -54,10 +56,10 @@ export function erfc (x) {
 export function erfinv (x) {
   // Estimate initial guess using the polynomial
   let x0 = 0
-  let c = Math.pow(Math.PI, 5)
+  let c = 0.5 * Math.pow(Math.PI, 5)
   for (let i = coeffs.length - 1; i >= 0; i--) {
-    c /= Math.PI
     x0 = (x0 + coeffs[i] * c) * x * x
+    c /= Math.PI
   }
   x0 = (x0 + 1) * x
 

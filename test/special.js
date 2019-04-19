@@ -1,20 +1,27 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { erf } from '../src/special/error'
+import { erf, erfinv } from '../src/special/error'
 import gamma from '../src/special/gamma'
 import gammaLn from '../src/special/gamma-log'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from '../src/special/gamma-incomplete'
 import hurwitzZeta from '../src/special/hurwitz-zeta'
-import marcumQ from '../src/special/marcum-q'
+import { marcumQ } from '../src/special/marcum-q'
 import lambertW from '../src/special/lambert-w'
 import riemannZeta from '../src/special/riemann-zeta'
 import utils from './test-utils'
 
 const LAPS = 100
-const EPS = 1e-3
+const PRECISION = 1e-12
 
 describe('special', () => {
-  return
+  describe('.erfinv()', () => {
+    it('should satisfy erf(erfinv(x)) = 1', () => {
+      utils.repeat(() => {
+        let x = 2 * Math.random() - 1
+        assert(Math.abs(erf(erfinv(x)) - x) < PRECISION)
+      }, LAPS)
+    })
+  })
 
   describe('.hurwitzZeta(), .riemannZeta()', () => {
     it('zeta(s) - zeta(s, n+1) should give H(s, n)', () => {
@@ -100,7 +107,7 @@ describe('special', () => {
     describe('x < 30', () => {
       describe('Q(mu, x, y)', () => {
         it('should satisfy the recurrence relation', () => {
-          for (let i = 0; i < LAPS; i++) {
+          utils.repeat(() => {
             let mu = Math.random() * 10 + 2
             let x = Math.random() * 10
             let y = Math.random() * 10 + x + mu + 2
@@ -111,17 +118,17 @@ describe('special', () => {
             let q4 = marcumQ(mu - 1, x, y)
 
             if (x > mu) {
-              assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < EPS)
+              assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < PRECISION)
             } else {
-              assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < EPS)
+              assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < PRECISION)
             }
-          }
+          }, LAPS)
         })
       })
 
       describe('P(mu, x, y)', () => {
         it('should satisfy the recurrence relation (y < x + mu)', () => {
-          for (let i = 0; i < LAPS; i++) {
+          utils.repeat(() => {
             let x = Math.random() * 100
             let y = Math.random() * 100
             let mu = Math.random() * 100 + 2 + Math.max(0, y - x)
@@ -132,11 +139,11 @@ describe('special', () => {
             let q4 = marcumQ(mu - 1, x, y)
 
             if (x > mu) {
-              assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < EPS)
+              assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < PRECISION)
             } else {
-              assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < EPS)
+              assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < PRECISION)
             }
-          }
+          }, LAPS)
         })
       })
     })
@@ -144,12 +151,11 @@ describe('special', () => {
 
   describe('.lambertW()', () => {
     it('should satisfy the W * exp(W) = x equation', () => {
-      for (let i = 0; i < LAPS; i++) {
+      utils.repeat(() => {
         let x = Math.random() * 10
-
         let w = lambertW(x)
         assert(Math.abs(w * Math.exp(w) - x) / x < 0.01)
-      }
+      })
     })
   })
 })

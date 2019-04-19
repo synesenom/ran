@@ -3,6 +3,7 @@ import { describe, it } from 'mocha'
 import utils from './test-utils'
 import { float, int } from '../src/core'
 import * as dist from '../src/dist'
+import InvalidDiscrete from '../src/dist/_invalid'
 
 const LAPS = 1000
 
@@ -255,7 +256,7 @@ describe('dist', () => {
   describe('Distribution', () => {
     describe('.sample()', () => {
       it('should throw not implemented error', () => {
-        const invalid = new dist.InvalidDiscrete()
+        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.sample()
         }, 'Distribution._generator() is not implemented')
@@ -263,8 +264,8 @@ describe('dist', () => {
     })
 
     describe('.pdf()', () => {
-      it('should throw not implenented error', () => {
-        const invalid = new dist.InvalidDiscrete()
+      it('should throw not implemented error', () => {
+        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.pdf(0)
         }, 'Distribution._pdf() is not implemented')
@@ -272,8 +273,8 @@ describe('dist', () => {
     })
 
     describe('.cdf()', () => {
-      it('should throw not implenented error', () => {
-        const invalid = new dist.InvalidDiscrete()
+      it('should throw not implemented error', () => {
+        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.cdf(0)
         }, 'Distribution._cdf() is not implemented')
@@ -282,7 +283,7 @@ describe('dist', () => {
 
     describe('.survive()', () => {
       it('should throw not implemented error', () => {
-        const invalid = new dist.InvalidDiscrete()
+        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.survival(0)
         }, 'Distribution._cdf() is not implemented')
@@ -290,8 +291,8 @@ describe('dist', () => {
     })
 
     describe('.hazard()', () => {
-      it('should throw not implenented error', () => {
-        const invalid = new dist.InvalidDiscrete()
+      it('should throw not implemented error', () => {
+        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.hazard(0)
         }, 'Distribution._pdf() is not implemented')
@@ -299,8 +300,8 @@ describe('dist', () => {
     })
 
     describe('.cHazard()', () => {
-      it('should throw not implenented error', () => {
-        const invalid = new dist.InvalidDiscrete()
+      it('should throw not implemented error', () => {
+        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.cHazard(0)
         }, 'Distribution._cdf() is not implemented')
@@ -308,8 +309,8 @@ describe('dist', () => {
     })
 
     describe('.lnPdf()', () => {
-      it('should throw not implenented error', () => {
-        const invalid = new dist.InvalidDiscrete()
+      it('should throw not implemented error', () => {
+        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.lnPdf(0)
         }, 'Distribution._pdf() is not implemented')
@@ -317,8 +318,8 @@ describe('dist', () => {
     })
 
     describe('.lnL()', () => {
-      it('should throw not implenented error', () => {
-        const invalid = new dist.InvalidDiscrete()
+      it('should throw not implemented error', () => {
+        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.lnL([0])
         }, 'Distribution._pdf() is not implemented')
@@ -326,8 +327,8 @@ describe('dist', () => {
     })
 
     describe('.test()', () => {
-      it('should throw not implenented error', () => {
-        const invalid = new dist.InvalidDiscrete()
+      it('should throw not implemented error', () => {
+        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.test([0])
         }, 'Distribution._pdf() is not implemented')
@@ -335,8 +336,8 @@ describe('dist', () => {
     })
 
     describe('.aic()', () => {
-      it('should throw not implenented error', () => {
-        const invalid = new dist.InvalidDiscrete()
+      it('should throw not implemented error', () => {
+        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.aic([0])
         }, 'Distribution._pdf() is not implemented')
@@ -344,8 +345,8 @@ describe('dist', () => {
     })
 
     describe('.bic()', () => {
-      it('should throw not implenented error', () => {
-        const invalid = new dist.InvalidDiscrete()
+      it('should throw not implemented error', () => {
+        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.bic([0])
         }, 'Distribution._pdf() is not implemented')
@@ -743,13 +744,13 @@ describe('dist', () => {
       it('should generate values with Degenerate distribution', () => {
         utils.trials(() => {
           const x0 = p()
-          const degenerate = new dist.Degenerate(...x0)
+          let degenerate = new dist.Degenerate(...x0)
           const samples = degenerate.sample(LAPS)
           return samples.reduce((s, d) => s && d === x0[0], true)
         })
 
         utils.trials(() => {
-          const degenerate = new dist.Degenerate()
+          let degenerate = new dist.Degenerate()
           const samples = degenerate.sample(LAPS)
           return samples.reduce((s, d) => s && d === 0, true)
         })
@@ -761,7 +762,7 @@ describe('dist', () => {
       it('differentiating cdf should give pdf', () => {
         utils.repeat(() => {
           const x0 = p()
-          const degenerate = new dist.Degenerate(...x0)
+          let degenerate = new dist.Degenerate(...x0)
           assert.equal(degenerate.pdf(x0[0]), 1)
           assert.equal(degenerate.pdf(x0[0] + Math.random() * 2 - 1), 0)
           assert.equal(degenerate.cdf(x0[0] - Math.random()), 0)
