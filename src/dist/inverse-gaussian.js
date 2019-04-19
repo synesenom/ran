@@ -54,7 +54,7 @@ export default class extends Distribution {
     let z = erf(Math.SQRT1_2 * (st - s))
 
     // Handle 1 - z << 1 case
-    if (1 - z > 1e-15) {
+    if (1 - z > Number.EPSILON) {
       return Math.min(1, 0.5 * (1 + z + this.c[1] * erfc(Math.SQRT1_2 * (st + s))))
     } else {
       return Math.min(1, 0.5 * (erfc(Math.SQRT1_2 * (s - st)) + this.c[1] * erfc(Math.SQRT1_2 * (st + s))))

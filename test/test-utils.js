@@ -212,7 +212,7 @@ export default (function () {
           let x = range[0] + i * dx + Math.random()
           nonDecreasing &= dist.cdf(x + 1e-3) - dist.cdf(x - 1e-3) > -Number.EPSILON
           if (dist.cdf(x + 1e-3) < dist.cdf(x - 1e-3)) {
-            console.log(dist.cdf(x), dist.cdf(x + 1e-3) - dist.cdf(x - 1e-3))
+            // console.log(dist.cdf(x), dist.cdf(x + 1e-3) - dist.cdf(x - 1e-3))
           }
         }
       }
@@ -247,7 +247,6 @@ export default (function () {
       }
 
       // Test passes if average relative difference is lower than 1%
-      // console.log(s / laps)
       return s / laps < 1e-2
     }
   }

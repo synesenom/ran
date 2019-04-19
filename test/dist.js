@@ -5,7 +5,76 @@ import { float, int } from '../src/core'
 import * as dist from '../src/dist'
 
 const LAPS = 1000
-const FPMIN = 1e-15
+
+/**
+ * Runs unit tests for the .sample() method of a generator.
+ *
+ * @method utSample
+ * @param {string} name Name of the generator.
+ * @param {Function} params Generator for the parameters array.
+ */
+function utSample (name, params) {
+  it('sample should contain valid numbers', () => {
+    utils.trials(() => {
+      const sample = new dist[name](...params()).sample(1000)
+      return sample.reduce((acc, d) => acc && Number.isFinite(d) && isFinite(d), true)
+    })
+  })
+
+  it('sample should be within the range of the support', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
+      const supp = self.support()
+      const sample = self.sample(1000)
+      return sample.reduce((acc, d) => {
+        let above = !Number.isFinite(supp[0].value) || ((supp[0].closed && d >= supp[0].value) || (!supp[0].closed && d > supp[0].value))
+        let below = !Number.isFinite(supp[1].value) || ((supp[1].closed && d <= supp[1].value) || (!supp[1].closed && d < supp[1].value))
+        return acc && above && below
+      }, true)
+    })
+  })
+
+  it('values should be distributed correctly with default parameters', () => {
+    utils.trials(() => {
+      const self = new dist[name]()
+      return self.type() === 'continuous'
+        ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
+        : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
+    }, 7)
+  })
+
+  it('values should be distributed correctly with random parameters', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
+      return self.type() === 'continuous'
+        ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
+        : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
+    }, 7)
+  })
+
+  it('should give the same sample for the same seed', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
+      const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+      self.seed(s)
+      const values1 = self.sample(LAPS)
+      self.seed(s)
+      const values2 = self.sample(LAPS)
+      return values1.reduce((acc, d, i) => acc && d === values2[i], true)
+    })
+  })
+
+  it('should not give the same sample for different seeds', () => {
+    utils.trials(() => {
+      const self = new dist[name](...params())
+      self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+      const values1 = self.sample(LAPS)
+      self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+      const values2 = self.sample(LAPS)
+      return values1.reduce((acc, d, i) => acc || d !== values2[i], true)
+    })
+  })
+}
 
 /**
  * Runs unit tests for the .pdf() method of a generator.
@@ -29,9 +98,6 @@ function utPdf (name, params) {
       } else {
         for (let x = -1000; x <= 1000; x++) {
           let pdf = self.pdf(x / 10)
-          if (!isFinite(pdf)) {
-            console.log(x, pdf)
-          }
           isNum &= isFinite(pdf) && Number.isFinite(pdf)
         }
       }
@@ -52,9 +118,6 @@ function utPdf (name, params) {
       } else {
         for (let x = -100; x <= 100; x++) {
           let pdf = self.pdf(x / 10)
-          if (pdf < 0) {
-            console.log(x / 10, pdf)
-          }
           nonNegative &= pdf >= 0
         }
       }
@@ -150,83 +213,11 @@ function utPdf (name, params) {
         let x = self.sample()
         let q = self.q(p)
         let cdf = self.cdf(x)
-        console.log(p, self.cdf(q))
         passedGalois &= ((p <= cdf && q <= x) || (p >= cdf && q >= x))
       }
     }
     assert(passedGalois)
   }) */
-}
-
-/**
- * Runs unit tests for the .sample() method of a generator.
- *
- * @method utSample
- * @param {string} name Name of the generator.
- * @param {Function} params Generator for the parameters array.
- */
-function utSample (name, params) {
-  it('sample should contain valid numbers', () => {
-    utils.trials(() => {
-      const sample = new dist[name](...params()).sample(1000)
-      return sample.reduce((acc, d) => acc && Number.isFinite(d) && isFinite(d), true)
-    })
-  })
-
-  it('sample should be within the range of the support', () => {
-    utils.trials(() => {
-      const self = new dist[name](...params())
-      const supp = self.support()
-      const sample = self.sample(1000)
-      return sample.reduce((acc, d) => {
-        let above = !Number.isFinite(supp[0].value) || ((supp[0].closed && d >= supp[0].value) || (!supp[0].closed && d > supp[0].value))
-        let below = !Number.isFinite(supp[1].value) || ((supp[1].closed && d <= supp[1].value) || (!supp[1].closed && d < supp[1].value))
-
-        return acc && above && below
-      }, true)
-    })
-  })
-
-  it('values should be distributed correctly with default parameters', () => {
-    utils.trials(() => {
-      const self = new dist[name]()
-      return self.type() === 'continuous'
-        ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
-        : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
-    }, 7)
-  })
-
-  it('values should be distributed correctly with random parameters', () => {
-    utils.trials(() => {
-      const self = new dist[name](...params())
-      return self.type() === 'continuous'
-        ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
-        : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
-    }, 7)
-  })
-
-  it('should give the same sample for the same seed', () => {
-    utils.trials(() => {
-      const self = new dist[name](...params())
-      const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
-      self.seed(s)
-      const values1 = self.sample(LAPS)
-      self.seed(s)
-      const values2 = self.sample(LAPS)
-      return values1.reduce((acc, d, i) => acc && d === values2[i], true)
-    }, 7)
-  })
-
-  it('should not give the same sample for different seeds', () => {
-    utils.trials(() => {
-      const self = new dist[name](...params())
-      self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
-      const values1 = self.sample(LAPS)
-      self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
-      const values2 = self.sample(LAPS)
-      return values1.reduce((acc, d, i) => acc || d !== values2[i], true)
-    }, 7)
-  })
 }
 
 /**
@@ -243,7 +234,7 @@ function utTest (name, params, type = 'self') {
       utils.trials(() => {
         const self = new dist[name](...params())
         return self.test(self.sample(LAPS)).passed
-      }, 6)
+      }, 7)
       break
 
     case 'foreign':
@@ -256,7 +247,7 @@ function utTest (name, params, type = 'self') {
           ? new dist.Uniform(Math.min(...sample), Math.max(...sample))
           : new dist.DiscreteUniform(Math.min(...sample), Math.max(...sample))
         return !foreign.test(sample).passed
-      }, 6)
+      }, 7)
       break
   }
 }
@@ -419,8 +410,8 @@ describe('dist', () => {
   }, {
     name: 'BenktanderII',
     cases: [{
-      desc: 'negligible shape parameter',
-      p: () => [Param.scale(), 1 - Param.prob() / 100]
+      desc: 'high shape parameter',
+      p: () => [Param.scale(), 1 - Param.prob() / 1000]
     }, {
       desc: 'unit shape parameter',
       p: () => [Param.scale(), 1]
@@ -737,7 +728,7 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    if (d.name !== 'FisherZ') return
+    // if (d.name !== 'GeneralizedPareto') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
