@@ -1,4 +1,4 @@
-import binomLn from '../special/binom-log'
+import logBinomial from '../special/log-binomial'
 import Custom from './categorical'
 
 /**
@@ -26,7 +26,7 @@ export default class extends Custom {
     let min = Math.max(0, ni + Ki - Ni)
     let max = Math.min(ni, Ki)
     for (let k = min; k <= max; k++) {
-      weights.push(Math.exp(binomLn(Ki, k) + binomLn(Ni - Ki, ni - k) - binomLn(Ni, ni)))
+      weights.push(Math.exp(logBinomial(Ki, k) + logBinomial(Ni - Ki, ni - k) - logBinomial(Ni, ni)))
     }
     super(weights)
   }

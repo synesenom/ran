@@ -2,7 +2,7 @@ import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import { erf, erfinv } from '../src/special/error'
 import gamma from '../src/special/gamma'
-import gammaLn from '../src/special/gamma-log'
+import gammaLn from '../src/special/log-gamma'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from '../src/special/gamma-incomplete'
 import hurwitzZeta from '../src/special/hurwitz-zeta'
 import { marcumQ } from '../src/special/marcum-q'
@@ -36,8 +36,8 @@ describe('special', () => {
     })
   })
 
-  describe('.gamma(), .gammaLn()', () => {
-    it('gammaLn(x) should be equal to ln(gamma(x))', () => {
+  describe('.gamma(), .logGamma()', () => {
+    it('logGamma(x) should be equal to ln(gamma(x))', () => {
       for (let i = 0; i < LAPS; i++) {
         let x = Math.random() * 100
 

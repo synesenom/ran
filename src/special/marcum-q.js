@@ -1,7 +1,7 @@
 import { MAX_ITER, EPS } from './_core'
 import newton from '../algorithms/newton'
 import gamma from './gamma'
-import gammaLn from './gamma-log'
+import logGamma from './log-gamma'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from './gamma-incomplete'
 import { besselI } from './bessel'
 
@@ -19,7 +19,7 @@ const _seriesExpansion = {
     let ck = 1
 
     // qck = y^{mu + k - 1} e^{-y} / gamma(mu + k - 1)
-    let qck = Math.exp((mu - 1) * Math.log(y) - y - gammaLn(mu))
+    let qck = Math.exp((mu - 1) * Math.log(y) - y - logGamma(mu))
 
     // qk = Q_{mu + k}(y)
     let qk = gammaUpperIncomplete(mu, y)
@@ -47,7 +47,7 @@ const _seriesExpansion = {
   p (mu, x, y) {
     // Find truncation number using Eqs. (26) - (27)
     // Define some constants to speed up search
-    let c0 = mu + gammaLn(mu) - Math.log(2 * Math.PI * EPS)
+    let c0 = mu + logGamma(mu) - Math.log(2 * Math.PI * EPS)
     let c1 = Math.log(x * y)
     let c2 = x * y
     let n = newton(
@@ -59,10 +59,10 @@ const _seriesExpansion = {
 
     // Initialize terms with last index, Eq. (7)
     // ck = x^k / k!
-    let ck = Math.exp(n * Math.log(x) - gammaLn(n + 1))
+    let ck = Math.exp(n * Math.log(x) - logGamma(n + 1))
 
     // qck = y^{mu + k} e^{-y} / gamma(mu + k)
-    let pck = Math.exp((mu + n) * Math.log(y) - y - gammaLn(mu + n + 1))
+    let pck = Math.exp((mu + n) * Math.log(y) - y - logGamma(mu + n + 1))
 
     // pk = P_{\mu + k}(y)
     let pk = gammaLowerIncomplete(mu + n, y)

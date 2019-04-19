@@ -1,4 +1,4 @@
-import gammaLn from '../special/gamma-log'
+import logGamma from '../special/log-gamma'
 import { gammaLowerIncomplete } from '../special/gamma-incomplete'
 import { poisson } from './_core'
 import Distribution from './_distribution'
@@ -33,7 +33,7 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return Math.pow(this.p.lambda, x) * Math.exp(-this.p.lambda - gammaLn(x + 1))
+    return Math.pow(this.p.lambda, x) * Math.exp(-this.p.lambda - logGamma(x + 1))
   }
 
   _cdf (x) {

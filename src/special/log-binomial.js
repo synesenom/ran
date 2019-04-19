@@ -1,9 +1,9 @@
-import gammaLn from './gamma-log'
+import logGamma from './log-gamma'
 
 /**
  * Computes the logarithm of the binomial coefficient for two numbers.
  *
- * @method binomLn
+ * @method logBinomial
  * @memberOf ran.special
  * @param {number} n Number of samples.
  * @param {number} k Number of draws
@@ -11,5 +11,5 @@ import gammaLn from './gamma-log'
  * @private
  */
 export default function (n, k) {
-  return gammaLn(n + 1) - gammaLn(k + 1) - gammaLn(n - k + 1)
+  return logGamma(n + 1) - logGamma(k + 1) - logGamma(n - k + 1)
 }

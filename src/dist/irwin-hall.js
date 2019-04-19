@@ -1,5 +1,5 @@
 import neumaier from '../algorithms/neumaier'
-import gammaLn from '../special/gamma-log'
+import logGamma from '../special/log-gamma'
 import Distribution from './_distribution'
 
 /**
@@ -26,7 +26,7 @@ export default class extends Distribution {
       closed: true
     }]
     this.mode = n / 2
-    this.c = Array.from({ length: n + 1 }, (d, k) => gammaLn(k + 1) + gammaLn(n - k + 1))
+    this.c = Array.from({ length: n + 1 }, (d, k) => logGamma(k + 1) + logGamma(n - k + 1))
   }
 
   _generator () {

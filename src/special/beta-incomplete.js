@@ -1,5 +1,5 @@
 import { MAX_ITER, EPS, DELTA } from './_core'
-import gammaLn from './gamma-log'
+import logGamma from './log-gamma'
 
 // Incomplete beta generator using the continued fraction expansion
 function _biContinuedFraction (a, b, x) {
@@ -74,7 +74,7 @@ export function betaIncomplete (a, b, x) {
 export function regularizedBetaIncomplete (a, b, x) {
   let bt = (x <= 0 || x >= 1)
     ? 0
-    : Math.exp(gammaLn(a + b) - gammaLn(a) - gammaLn(b) + a * Math.log(x) + b * Math.log(1 - x))
+    : Math.exp(logGamma(a + b) - logGamma(a) - logGamma(b) + a * Math.log(x) + b * Math.log(1 - x))
   return x < (a + 1) / (a + b + 2)
     ? bt * _biContinuedFraction(a, b, x) / a
     : 1 - bt * _biContinuedFraction(b, a, 1 - x) / b

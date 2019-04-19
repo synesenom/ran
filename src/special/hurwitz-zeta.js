@@ -1,6 +1,6 @@
 import { EPS } from './_core'
 import { B2k } from '../constants/bernoulli'
-import gammaLn from '../special/gamma-log'
+import logGamma from './log-gamma'
 
 /**
  * Computes the Hurwitz zeta function (only real values outside the critical strip) using the alternating series.
@@ -27,9 +27,9 @@ export default function (s, a) {
   let c = 1
   for (let k = 1; k < B2k.length; k++) {
     // Update coefficient
-    let m = gammaLn(s + 4 * k - 3) - gammaLn(s + 2 * k - 2)
+    let m = logGamma(s + 4 * k - 3) - logGamma(s + 2 * k - 2)
     m -= (s + 2 * k - 1) * Math.log(a + n)
-    m -= gammaLn(2 * k + 1)
+    m -= logGamma(2 * k + 1)
     c *= B2k[k - 1] * Math.exp(m)
 
     // Increment sum

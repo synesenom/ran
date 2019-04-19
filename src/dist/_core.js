@@ -1,4 +1,4 @@
-import gammaLn from '../special/gamma-log'
+import gammaLn from '../special/log-gamma'
 
 /**
  * Performs a rejection sampling.

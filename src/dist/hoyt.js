@@ -1,4 +1,4 @@
-import gammaLn from '../special/gamma-log'
+import logGamma from '../special/log-gamma'
 import { gammaLowerIncomplete } from '../special/gamma-incomplete'
 import { gamma } from './_core'
 import Distribution from './_distribution'
@@ -44,7 +44,7 @@ export default class extends Distribution {
     if (!isFinite(z)) {
       return 0
     } else {
-      return 2 * Math.exp(this.p.q * Math.log(this.p.q) - this.p.q * x * x / this.p.omega - gammaLn(this.p.q) - this.p.q * Math.log(this.p.omega)) * z
+      return 2 * Math.exp(this.p.q * Math.log(this.p.q) - this.p.q * x * x / this.p.omega - logGamma(this.p.q) - this.p.q * Math.log(this.p.omega)) * z
     }
   }
 

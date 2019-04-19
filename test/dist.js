@@ -124,7 +124,7 @@ function utPdf (name, params) {
 
   // TODO Add unit tests for q(): valid number, non-negative, increasing, equals to CDF inv
   /* it('quantile should return valid numbers', () => {
-    // return utils.Tests.qType(new dist[name](...params()), LAPS)
+    return utils.Tests.qType(new dist[name](...params()), LAPS)
   })
 
   /* it('quantile should be within support', () => {

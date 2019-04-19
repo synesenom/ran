@@ -1,5 +1,5 @@
-import binomLn from '../special/binom-log'
-import gammaLn from '../special/gamma-log'
+import logBinomial from '../special/log-binomial'
+import logGamma from '../special/log-gamma'
 import { regularizedBetaIncomplete } from '../special/beta-incomplete'
 import Distribution from './_distribution'
 
@@ -56,7 +56,7 @@ export default class extends Distribution {
       // Rest of the cases
       let en = this.p.n
 
-      let g = gammaLn(en + 1)
+      let g = logGamma(en + 1)
 
       let pc = 1 - this.c[0]
 
@@ -73,15 +73,15 @@ export default class extends Distribution {
           em = sq * y + this.c[1]
         } while (em < 0.0 || em >= (en + 1.0))
         em = Math.floor(em)
-        t = 1.2 * sq * (1.0 + y * y) * Math.exp(g - gammaLn(em + 1.0) -
-          gammaLn(en - em + 1.0) + em * pLog + (en - em) * pcLog)
+        t = 1.2 * sq * (1.0 + y * y) * Math.exp(g - logGamma(em + 1.0) -
+          logGamma(en - em + 1.0) + em * pLog + (en - em) * pcLog)
       } while (this.r.next() > t)
       return this.c[0] === this.p.p ? em : this.p.n - em
     }
   }
 
   _pdf (x) {
-    return Math.exp(binomLn(this.p.n, x) +
+    return Math.exp(logBinomial(this.p.n, x) +
       x * Math.log(this.p.p) + (this.p.n - x) * Math.log(1 - this.p.p))
   }
 

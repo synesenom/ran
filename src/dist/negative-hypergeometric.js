@@ -1,4 +1,4 @@
-import binomLn from '../special/binom-log'
+import logBinomial from '../special/log-binomial'
 import Custom from './categorical'
 
 /**
@@ -22,7 +22,7 @@ export default class extends Custom {
     let ri = Math.round(r)
     let weights = []
     for (let k = 0; k <= Ki; k++) {
-      weights.push(Math.exp(binomLn(Ki + ri - 1, k) + binomLn(Ni - ri - k, Ki - k) - binomLn(Ni, Ki)))
+      weights.push(Math.exp(logBinomial(Ki + ri - 1, k) + logBinomial(Ni - ri - k, Ki - k) - logBinomial(Ni, Ki)))
     }
     super(weights)
   }

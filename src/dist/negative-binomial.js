@@ -1,4 +1,4 @@
-import binomLn from '../special/binom-log'
+import logBinomial from '../special/log-binomial'
 import { regularizedBetaIncomplete } from '../special/beta-incomplete'
 import { gamma, poisson } from './_core'
 import Distribution from './_distribution'
@@ -35,7 +35,7 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return Math.exp(binomLn(x + this.p.r - 1, x) + this.p.r * Math.log(1 - this.p.p) + x * Math.log(this.p.p))
+    return Math.exp(logBinomial(x + this.p.r - 1, x) + this.p.r * Math.log(1 - this.p.p) + x * Math.log(this.p.p))
   }
 
   _cdf (x) {

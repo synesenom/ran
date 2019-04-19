@@ -1,5 +1,5 @@
 import { MAX_ITER, EPS, DELTA } from './_core'
-import gammaLn from './gamma-log'
+import logGamma from './log-gamma'
 
 /**
  * Computes the regularized lower incomplete gamma function.
@@ -28,7 +28,7 @@ function _gli (s, x) {
         break
       }
     }
-    return f * Math.exp(-x + s * Math.log(x) - gammaLn(s))
+    return f * Math.exp(-x + s * Math.log(x) - logGamma(s))
   }
 }
 
@@ -67,7 +67,7 @@ function _gui (s, x) {
       break
     }
   }
-  return f * Math.exp(-x + s * Math.log(x) - gammaLn(s))
+  return f * Math.exp(-x + s * Math.log(x) - logGamma(s))
 }
 
 /**
