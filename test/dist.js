@@ -86,64 +86,47 @@ function utSample (name, params) {
 function utPdf (name, params) {
   it('pdf should return valid numbers', () => {
     utils.trials(() => {
-      const self = new dist[name](...params())
-      return utils.Tests.pdfType(self, LAPS, self.type() === 'discrete')
+      return utils.Tests.pdfType(new dist[name](...params()), LAPS)
     })
   })
 
   it('pdf should be non-negative', () => {
     utils.trials(() => {
-      const self = new dist[name](...params())
-      return utils.Tests.pdfRange(self, LAPS, self.type() === 'discrete')
+      return utils.Tests.pdfRange(new dist[name](...params()), LAPS)
     })
   })
 
   it('cdf should return valid numbers', () => {
     utils.trials(() => {
-      const self = new dist[name](...params())
-      return utils.Tests.cdfType(self, LAPS, self.type() === 'discrete')
+      return utils.Tests.cdfType(new dist[name](...params()), LAPS)
     })
   })
 
   it('cdf should be in [0, 1]', () => {
     utils.trials(() => {
-      const self = new dist[name](...params())
-      return utils.Tests.cdfRange(self, LAPS, self.type() === 'discrete')
+      return utils.Tests.cdfRange(new dist[name](...params()), LAPS)
     })
   })
 
   it('cdf should be non-decreasing', () => {
     utils.trials(() => {
-      const self = new dist[name](...params())
-      return utils.Tests.cdfMonotonicity(self, LAPS, self.type() === 'discrete')
+      return utils.Tests.cdfMonotonicity(new dist[name](...params()), LAPS)
     })
   })
 
   it('pdf (pmf) should be the differential (difference) of cdf', () => {
-    // Using a 7/10 acceptance here due to the instability of numerical differentiation
+    // Using a 8/10 acceptance here due to the instability of numerical differentiation
     utils.trials(() => {
-      const self = new dist[name](...params())
-      return utils.Tests.pdf2cdf(self, LAPS, self.type() === 'discrete')
+      return utils.Tests.pdf2cdf(new dist[name](...params()), LAPS)
     }, 8)
   })
 
   // TODO Add unit tests for q(): valid number, non-negative, increasing, equals to CDF inv
-  /* it('quantile should return valid numbers', () => {
-    const self = new dist[name](...params())
-
-    let isNum = true
-    if (self.type() === 'discrete') {
-      // TODO For discrete as well
-    } else {
-      for (let p = 1; p <= 99; p++) {
-        let x = self.q(p / 100);
-        isNum &= isFinite(x) && Number.isFinite(x)
-      }
-    }
-    assert(isNum)
+  it('quantile should return valid numbers', () => {
+    // return utils.Tests.qType(new dist[name](...params()), LAPS)
   })
 
-  it('quantile should be within support', () => {
+  /* it('quantile should be within support', () => {
     const self = new dist[name](...params())
     const supp = self.support()
 
@@ -693,7 +676,8 @@ describe('dist', () => {
     p: () => [Param.scale()]
   }, {
     name: 'YuleSimon',
-    p: () => [Param.shape() + 0.2]
+    p: () => [Param.shape() + 0.2],
+    skip: ['test-foreign']
   }, {
     name: 'Zeta',
     p: () => [Param.shape() + 1]
@@ -701,7 +685,7 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'GeneralizedPareto') return
+    // if (d.name !== 'Rice') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

@@ -144,13 +144,13 @@ export default (function () {
     ]
   }
 
-  function sweepTest(dist, laps, unitTest, discrete = false) {
+  function runX(dist, laps, unitTest) {
     // Init test variables
     let range = getTestRange(dist)
     let passed = true
 
     // Run test
-    if (discrete) {
+    if (dist.type() === 'discrete') {
       for (let i = range[0]; i < range[1]; i++) {
         passed &= unitTest(dist, Math.floor(i))
       }
@@ -161,51 +161,65 @@ export default (function () {
       }
     }
 
-    // Test passes if F(x) is valid number
+    // Return aggregated test result
+    return passed
+  }
+
+  function runP(dist, laps, unitTest) {
+    // Init test variables
+    let passed = true
+
+    // Run test
+    for (let i = 0; i < laps - 1; i++) {
+        passed &= unitTest(dist, i / laps + Math.random())
+    }
+
+    // Return aggregated test result
     return passed
   }
 
   const Tests = {
-    pdfType(dist, laps, discrete = false) {
-      return sweepTest(dist, laps, (d, x) => {
+    pdfType(dist, laps) {
+      return runX(dist, laps, (d, x) => {
         let pdf = d.pdf(x)
         return isFinite(pdf) && Number.isFinite(pdf)
-      }, discrete)
+      })
     },
 
-    pdfRange(dist, laps, discrete = false) {
-      return sweepTest(dist, laps, (d, x) => dist.pdf(x) >= 0, discrete)
+    pdfRange(dist, laps) {
+      return runX(dist, laps, (d, x) => dist.pdf(x) >= 0)
     },
 
-    cdfType(dist, laps, discrete = false) {
-      return sweepTest(dist, laps, (d, x) => {
+    cdfType(dist, laps) {
+      return runX(dist, laps, (d, x) => {
         let cdf = d.cdf(x)
         return isFinite(cdf) && Number.isFinite(cdf)
-      }, discrete)
+      })
     },
 
-    cdfRange(dist, laps, discrete = false) {
-      return sweepTest(dist, laps, (d, x) => {
+    cdfRange(dist, laps) {
+      return runX(dist, laps, (d, x) => {
         let cdf = d.cdf(x)
         return cdf >= 0 && cdf <= 1
-      }, discrete)
+      })
     },
 
-    cdfMonotonicity(dist, laps, discrete = false) {
-      return sweepTest(dist, laps, (d, x) => {
+    cdfMonotonicity(dist, laps) {
+      let discrete = dist.type() === 'discrete'
+      return runX(dist, laps, (d, x) => {
         let x1 = discrete ? x : x - 1e-3
         let x2 = discrete ? x + 1 : x + 1e-3
         return dist.cdf(x2) - dist.cdf(x1) > -Number.EPSILON
-      }, discrete)
+      })
     },
 
-    pdf2cdf(dist, laps, discrete = false) {
+    pdf2cdf(dist, laps) {
       // Init test variables
       let range = getTestRange(dist)
       let s = 0
 
       // Run test
-      if (discrete) {
+      if (dist.type() === 'discrete') {
         for (let i = range[0]; i < range[1]; i++) {
           let x = Math.floor(i)
           let p = dist.pdf(x)
@@ -226,6 +240,13 @@ export default (function () {
 
       // Test passes if average relative difference is lower than 1%
       return s / laps < 1e-2
+    },
+
+    qType(dist, laps) {
+      runP(dist, laps, (d, p) => {
+        let q = d.q(p)
+        return isFinite(q) && Number.isFinite(q)
+      })
     }
   }
 

@@ -122,6 +122,10 @@ export function marcumQ (mu, x, y) {
 
   // Series expansion
   // if (x < 30) {
+  let res = _seriesExpansion[primary](mu, x, y)
+  /*if (!isFinite(res)) {
+    console.log(mu, x, y)
+  }*/
   return _seriesExpansion[primary](mu, x, y)
   // }
 
