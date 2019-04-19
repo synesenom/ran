@@ -87,41 +87,14 @@ function utPdf (name, params) {
   it('pdf should return valid numbers', () => {
     utils.trials(() => {
       const self = new dist[name](...params())
-
-      let isNum = true
-
-      if (self.type() === 'discrete') {
-        for (let x = -100; x <= 100; x++) {
-          let pdf = self.pdf(x)
-          isNum &= isFinite(pdf) && Number.isFinite(pdf)
-        }
-      } else {
-        for (let x = -1000; x <= 1000; x++) {
-          let pdf = self.pdf(x / 10)
-          isNum &= isFinite(pdf) && Number.isFinite(pdf)
-        }
-      }
-      return isNum
+      return utils.Tests.pdfType(self, LAPS, self.type() === 'discrete')
     })
   })
 
   it('pdf should be non-negative', () => {
     utils.trials(() => {
       const self = new dist[name](...params())
-
-      let nonNegative = true
-      if (self.type() === 'discrete') {
-        for (let x = -100; x <= 100; x++) {
-          let pdf = self.pdf(x)
-          nonNegative &= pdf >= 0
-        }
-      } else {
-        for (let x = -100; x <= 100; x++) {
-          let pdf = self.pdf(x / 10)
-          nonNegative &= pdf >= 0
-        }
-      }
-      return nonNegative
+      return utils.Tests.pdfRange(self, LAPS, self.type() === 'discrete')
     })
   })
 

@@ -144,81 +144,59 @@ export default (function () {
     ]
   }
 
-  const Tests = {
-    cdfType(dist, laps, discrete = false) {
-      // Init test variables
-      let range = getTestRange(dist)
-      let isNum = true
+  function sweepTest(dist, laps, unitTest, discrete = false) {
+    // Init test variables
+    let range = getTestRange(dist)
+    let passed = true
 
-      // Run test
-      if (discrete) {
-        for (let i = range[0]; i < range[1]; i++) {
-          let x = Math.floor(i)
-          let cdf = dist.cdf(x)
-          isNum &= isFinite(cdf) && Number.isFinite(cdf)
-        }
-      } else {
-        let dx = (range[1] - range[0]) / laps
-        for (let i = 0; i < laps; i++) {
-          let x = range[0] + i * dx + Math.random()
-          let cdf = dist.cdf(x)
-          isNum &= isFinite(cdf) && Number.isFinite(cdf)
-        }
+    // Run test
+    if (discrete) {
+      for (let i = range[0]; i < range[1]; i++) {
+        passed &= unitTest(dist, Math.floor(i))
       }
+    } else {
+      let dx = (range[1] - range[0]) / laps
+      for (let i = 0; i < laps; i++) {
+        passed &= unitTest(dist, range[0] + i * dx + Math.random())
+      }
+    }
 
-      // Test passes if CDF(x) is valid number
-      return isNum
+    // Test passes if F(x) is valid number
+    return passed
+  }
+
+  const Tests = {
+    pdfType(dist, laps, discrete = false) {
+      return sweepTest(dist, laps, (d, x) => {
+        let pdf = d.pdf(x)
+        return isFinite(pdf) && Number.isFinite(pdf)
+      }, discrete)
+    },
+
+    pdfRange(dist, laps, discrete = false) {
+      return sweepTest(dist, laps, (d, x) => dist.pdf(x) >= 0, discrete)
+    },
+
+    cdfType(dist, laps, discrete = false) {
+      return sweepTest(dist, laps, (d, x) => {
+        let cdf = d.cdf(x)
+        return isFinite(cdf) && Number.isFinite(cdf)
+      }, discrete)
     },
 
     cdfRange(dist, laps, discrete = false) {
-      // Init test variables
-      let range = getTestRange(dist)
-      let inRange = true
-
-      // Run test
-      if (discrete) {
-        for (let i = range[0]; i < range[1]; i++) {
-          let x = Math.floor(i)
-          let cdf = dist.cdf(x)
-          inRange &= (cdf >= 0 && cdf <= 1)
-        }
-      } else {
-        let dx = (range[1] - range[0]) / laps
-        for (let i = 0; i < laps; i++) {
-          let x = range[0] + i * dx + Math.random()
-          let cdf = dist.cdf(x)
-          inRange &= (cdf >= 0 && cdf <= 1)
-        }
-      }
-
-      // Test passes if 0 <= CDF(x) <= 1
-      return inRange
+      return sweepTest(dist, laps, (d, x) => {
+        let cdf = d.cdf(x)
+        return cdf >= 0 && cdf <= 1
+      }, discrete)
     },
 
     cdfMonotonicity(dist, laps, discrete = false) {
-      // Init test variables
-      let range = getTestRange(dist)
-      let nonDecreasing = true
-
-      // Run test
-      if (discrete) {
-        for (let i = range[0]; i < range[1]; i++) {
-          let x = Math.floor(i)
-          nonDecreasing &= dist.cdf(x + 1) >= dist.cdf(x)
-        }
-      } else {
-        let dx = (range[1] - range[0]) / laps
-        for (let i = 0; i < laps; i++) {
-          let x = range[0] + i * dx + Math.random()
-          nonDecreasing &= dist.cdf(x + 1e-3) - dist.cdf(x - 1e-3) > -Number.EPSILON
-          if (dist.cdf(x + 1e-3) < dist.cdf(x - 1e-3)) {
-            // console.log(dist.cdf(x), dist.cdf(x + 1e-3) - dist.cdf(x - 1e-3))
-          }
-        }
-      }
-
-      // Test passes if CDF was non-decreasing
-      return nonDecreasing
+      return sweepTest(dist, laps, (d, x) => {
+        let x1 = discrete ? x : x - 1e-3
+        let x2 = discrete ? x + 1 : x + 1e-3
+        return dist.cdf(x2) - dist.cdf(x1) > -Number.EPSILON
+      }, discrete)
     },
 
     pdf2cdf(dist, laps, discrete = false) {
