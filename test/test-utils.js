@@ -139,8 +139,8 @@ export default (function () {
 
   function getTestRange(dist) {
     return [
-      isFinite(dist.support()[0]) ? dist.support()[0] : -30,
-      isFinite(dist.support()[1]) ? dist.support()[1] : 30
+      isFinite(dist.support()[0]) ? dist.support()[0] - 10 : -30,
+      isFinite(dist.support()[1]) ? dist.support()[1] + 10 : 30
     ]
   }
 
@@ -152,12 +152,12 @@ export default (function () {
     // Run test
     if (dist.type() === 'discrete') {
       for (let i = range[0]; i < range[1]; i++) {
-        passed &= unitTest(dist, Math.floor(i))
+        passed = passed && unitTest(dist, Math.floor(i))
       }
     } else {
       let dx = (range[1] - range[0]) / laps
       for (let i = 0; i < laps; i++) {
-        passed &= unitTest(dist, range[0] + i * dx + Math.random())
+        passed = passed && unitTest(dist, range[0] + i * dx + Math.random())
       }
     }
 
@@ -171,7 +171,7 @@ export default (function () {
 
     // Run test
     for (let i = 0; i < laps - 1; i++) {
-        passed &= unitTest(dist, i / laps + Math.random())
+      passed = passed && unitTest(dist, (i + Math.random()) / laps)
     }
 
     // Return aggregated test result
@@ -243,9 +243,9 @@ export default (function () {
     },
 
     qType(dist, laps) {
-      runP(dist, laps, (d, p) => {
-        let q = d.q(p)
-        return isFinite(q) && Number.isFinite(q)
+      return runP(dist, laps, (d, p) => {
+        let x = d.q(p)
+        return isFinite(x) && Number.isFinite(x)
       })
     }
   }

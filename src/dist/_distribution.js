@@ -37,6 +37,9 @@ class Distribution {
 
     // Mode of the distribution
     this.mode = undefined
+
+    // Look-up table for the fallback quantile for discrete distributions
+    this._cdfTable = [];
   }
 
   /**
@@ -81,41 +84,105 @@ class Distribution {
   }
 
   /**
-   * Estimates the quantile function (inverse cumulative distribution function) by solving CDF(x) = p using Newton's
-   * method. Initial value for the algorithm is picked randomly from the support. Should not be overridden.
+   * Estimates the quantile function by using a look-up table.
    *
-   * @method _q
+   * @method _qEstimateTable
    * @memberOf ran.dist.Distribution
    * @param {number} p Probability to find value for.
-   * @param {number?} x0 Initial guess for using Newton's method.
-   * @returns {number} The value where the probability coincides with the specified value.
+   * @return {number} The lower boundary of the interval that satisfies F(x) = p if found, undefined otherwise.
    * @protected
    * @ignore
    */
-  _qEstimate(p, x0) {
-    // If a good initial guess is provided, use Newton's method
-    if (typeof x0 !== 'undefined') {
-      return newton(
-        t => this._cdf(t) - p,
-        t => this._pdf(t),
-        x0
+  _qEstimateTable(p) {
+    // Init running variable
+    let k = this.s[0].value
+    let kMax = this.s[1].closed ? this.s[1].value + 1 : 1e6
+
+    // Go through look-up table
+    if (this._cdfTable.length === 0) {
+      this._cdfTable.push(this.cdf(k))
+    }
+    for (; k < kMax; k++) {
+      // Add F(x) if necessary
+      if (this._cdfTable.length === k) {
+        this._cdfTable.push(this.cdf(k))
+      }
+
+      // Check if we reached quantile
+      if (p < this._cdfTable[k]) {
+        return k
+      }
+    }
+    // console.log(this._cdfTable[this._cdfTable.length - 1], p)
+
+    // console.log(this._cdfTable)
+    return undefined
+  }
+
+  /**
+   * Estimates the quantile function by solving F(x) = p using one of the root finding algorithms.
+   *
+   * @method _qEstimateRoot
+   * @memberOf ran.dist.Distribution
+   * @param {number} p Probability to find value for.
+   * @param {number?} x0 Initial guess for using Newton's method.
+   * @returns {number} The value where the probability coincides with the specified value if found, undefined otherwise.
+   * @protected
+   * @ignore
+   */
+  _qEstimateRoot(p, x0) {
+    // Start with Brent's method
+    // Find brackets
+    let bounds = bracket(
+      t => this.cdf(t) - p,
+      Number.isFinite(this.s[0].value) ? this.s[0].value : 1,
+      Number.isFinite(this.s[1].value) ? this.s[1].value : 1.1,
+      this.s
+    )
+    // console.log(p, bounds)
+
+    // Run Brent's method
+    let x = typeof bounds !== 'undefined'
+      ? brent(t => this.cdf(t) - p, ...bounds)
+      : x0
+
+    // Polish up with Newton's method
+    return newton(
+      t => this.cdf(t) - p,
+      t => this.pdf(t),
+      x
+    )
+    // If a good initial guess is provided, try with Newton's method
+    /*let x
+    if (typeof this.mode !== 'undefined') {
+      x = newton(
+        t => this.cdf(t) - p,
+        t => this.pdf(t),
+        this.mode
       )
+      // console.log(x)
+
+      if (isFinite(x) && Number.isFinite(x)) {
+        return x
+      }
     }
 
-    // Bracket root first
+    // If Newton failed, use Brent's method
+    // Find brackets
     let bounds = bracket(
-      t => this._cdf(t) - p,
-      Number.isFinite(this.s[0].value) ? this.s[0].value : -10,
-      Number.isFinite(this.s[1].value) ? this.s[1].value : 10
+      t => this.cdf(t) - p,
+      Number.isFinite(this.s[0].value) ? this.s[0].value : 1,
+      Number.isFinite(this.s[1].value) ? this.s[1].value : 1.1,
+      this.s
     )
+    // console.log(p, bounds)
 
-    // Solve CDF(x) - p using Brent's method
-    let x = brent(
-      t => this._cdf(t) - p,
+    // Solve F(x) - p using Brent's method
+    return typeof bounds === 'undefined'
+      ? undefined : brent(
+      t => this.cdf(t) - p,
       ...bounds
-    )
-
-    return this._type === 'discrete' ? Math.ceil(x) : x
+    )*/
   }
 
   /**
@@ -272,11 +339,13 @@ class Distribution {
       // If unit, return upper support boundary
       return this.s[1].value
     } else {
-      // If quantile function is implemented, use that, otherwise use the numerical estimator
+      // If quantile function is implemented, use that, otherwise use the estimators: look-up table for discrete and root-finder for continuous
+      //
       return typeof this['_q'] === 'function'
         ? this._q(p)
-        // TODO Even if using estimate, for some distributions use mode
-        : this._qEstimate(p, this.mode)
+        : this._type === 'discrete'
+          ? this._qEstimateTable(p)
+          : this._qEstimateRoot(p)
     }
   }
 

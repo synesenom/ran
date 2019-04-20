@@ -1,17 +1,20 @@
 import { MAX_ITER } from '../special/_core'
 
+const SCALE = 1.6
+
 /**
- * Estimates brackets around the root of a function.
+ * Estimates brackets around the root of a function. If there are no constraints specified, the bracketing interval grows without limits with a scaling factor of 1.6. Otherwise, the interval is limited to the boundary specified in the constraints. If the constraining interval has an open boundary, the boundary is approached with a distance shrinking with a factor of 1.6 in each step.
  *
  * @method bracket
  * @methodOf ran.algorithms
  * @param {Function} f Function to find root for. Must accept a single variable.
  * @param {number} a0 Initial lower boundary of the bracket.
  * @param {number} b0 Initial upper boundary of the bracket.
+ * @param {Object[]} s Object containing the constraints on the lower and upper bracket. Each constraint has a <code>closed</code> and <code>value</code> property denoting if the constraint is a closed interval and the value of the boundaries. If not set, (-inf, inf) is applied.
  * @return {(number[]|undefined)} Array containing the bracket around the root if successful, undefined otherwise.
  * @private
  */
-export default function(f, a0, b0) {
+export default function(f, a0, b0, s) {
   // If initial boundaries are invalid, return undefined
   if (a0 === b0) {
     return undefined
@@ -19,20 +22,31 @@ export default function(f, a0, b0) {
 
   // Start searching
   let a = a0
+  let min = s ? s[0].value : -Infinity
+  let deltaA = s && s[0].closed ? 0 : 1
   let b = b0
+  let max = s ? s[1].value : Infinity
+  let deltaB = s && s[1].closed ? 0 : 1
   let f1 = f(a)
   let f2 = f(b)
   for (let k = 0; k < MAX_ITER; k++) {
+    // If we have different signs, we are done
     if (f1 * f2 < 0.0) {
       return [a, b]
     }
+
+    // If lower boundary has a smaller value, extend to the left
     if (Math.abs(f1) < Math.abs(f2)) {
-      f1 = f(a += 1.6 * (a - b))
+      a = Math.max(a + SCALE * (a - b), min + deltaA)
+      deltaA /= SCALE
+      f1 = f(a)
     } else {
-      f2 = f(a += 1.6 * (b - a))
+      // Otherwise, extend to the right
+      b = Math.min(b + SCALE * (b - a), max - deltaB)
+      deltaB /= SCALE
+      f2 = f(b)
     }
   }
-  console.log(f1, f2)
 
   return undefined
 }

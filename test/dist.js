@@ -124,7 +124,9 @@ function utPdf (name, params) {
 
   // TODO Add unit tests for q(): valid number, non-negative, increasing, equals to CDF inv
   /* it('quantile should return valid numbers', () => {
-    return utils.Tests.qType(new dist[name](...params()), LAPS)
+    utils.trials(() => {
+      return utils.Tests.qType(new dist[name](...params()), LAPS)
+    })
   })
 
   /* it('quantile should be within support', () => {
@@ -681,12 +683,12 @@ describe('dist', () => {
     skip: ['test-foreign']
   }, {
     name: 'Zeta',
-    p: () => [Param.shape() + 1]
+    p: () => [Param.shape() + 1.5]
   }, {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'Rice') return
+    // if (d.name !== 'InverseGaussian') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

@@ -26,6 +26,7 @@ export default class extends Gamma {
       value: Infinity,
       closed: false
     }]
+    this.mode = Math.exp(alpha >= 1 ? (alpha - 1) / beta : 0) + this.p.mu - 1
   }
 
   _generator () {

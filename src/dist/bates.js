@@ -26,7 +26,6 @@ export default class extends IrwinHall {
       value: b,
       closed: true
     }]
-    this.mode = 0.5 * (a + b)
   }
 
   _generator () {
@@ -40,5 +39,9 @@ export default class extends IrwinHall {
 
   _cdf (x) {
     return super._cdf(this.p.n * (x - this.p.a) / (this.p.b - this.p.a))
+  }
+
+  _q (p) {
+    return (this.p.b - this.p.a) * super._q(p) / this.p.n + this.p.a
   }
 }

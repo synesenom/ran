@@ -40,4 +40,8 @@ export default class extends Distribution {
   _cdf (x) {
     return (1 + x - this.p.xmin) / this.c[0]
   }
+
+  _q (p) {
+    return Math.floor(p * this.c[0]) + this.p.xmin
+  }
 }

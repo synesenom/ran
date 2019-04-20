@@ -17,4 +17,8 @@ export default class extends Categorical {
   constructor (p = 0.5) {
     super([1 - p, p])
   }
+
+  _q (p) {
+    return p > 1 - this.p.p ? 1 : 0
+  }
 }

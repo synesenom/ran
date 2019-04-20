@@ -25,7 +25,6 @@ export default class extends Distribution {
       value: n,
       closed: true
     }]
-    this.mode = n / 2
     this.c = Array.from({ length: n + 1 }, (d, k) => logGamma(k + 1) + logGamma(n - k + 1))
   }
 
@@ -68,5 +67,9 @@ export default class extends Distribution {
 
     // Calculate sum
     return x < this.p.n / 2 ? neumaier(terms) : 1 - neumaier(terms)
+  }
+
+  _q (p) {
+    return this._qEstimateRoot(p)
   }
 }

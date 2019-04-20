@@ -2,6 +2,9 @@ import { besselI } from '../special/bessel'
 import { marcumQ } from '../special/marcum-q'
 import { poisson } from './_core'
 import Distribution from './_distribution'
+import newton from '../algorithms/newton'
+import bracket from '../algorithms/bracketing'
+import brent from '../algorithms/brent'
 
 /**
  * Generator for the [Skellam distribution]{@link https://en.wikipedia.org/wiki/Skellam_distribution}:
@@ -52,5 +55,9 @@ export default class extends Distribution {
       return marcumQ(x + 1, this.p.mu2, this.p.mu1)
     }
     return this.c[3]
+  }
+
+  _q (p) {
+    return Math.floor(this._qEstimateRoot(p, this.p.mu1 - this.p.mu2))
   }
 }

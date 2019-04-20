@@ -8,17 +8,20 @@ import { MAX_ITER, EPS } from '../special/_core'
  * @param {Function} f Function to find root for. Must accept a single variable.
  * @param {Function} df First derivative of the function. Must accept a single variable.
  * @param {number} x0 Starting point of the optimization.
- * @return {number} The root of the specified function.
+ * @return {(number|undefined)} The root of the specified function.
  * @private
  */
 export default function (f, df, x0) {
   let x = x0
-  let dx
+  let dx, d
 
   for (let k = 0; k < MAX_ITER; k++) {
-    dx = f(x) / df(x)
+    d = df(x)
+    // If derivative is zero, compute function for a close neighboring point
+    dx = f(x) / (d !== 0 ? d : df(x + Number.EPSILON))
     x -= dx
 
+    // Exit if we reached precision level
     if (Math.abs(dx / x) < EPS) { break }
   }
 

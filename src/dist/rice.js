@@ -57,8 +57,4 @@ export default class extends Distribution {
   _cdf (x) {
     return 1 - marcumQ(1, this.c[0], Math.pow(x / this.p.sigma, 2) / 2)
   }
-
-  /*_q (p) {
-    return this.p.sigma * Math.sqrt(2 * marcumQyInv(this.p.mu, this.c[0], 1 - p))
-  }*/
 }
