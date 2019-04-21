@@ -116,9 +116,9 @@ export default (function () {
    * @param test Test to run.
    * @param minSuccess Minimum number of successes to accept test. Default is 10 (all).
    */
-  function trials (test, minSuccess = 10) {
+  function trials (test, minSuccess = 5) {
     let success = 0
-    for (let t = 0; t < 10; t++) {
+    for (let t = 0; t < 5; t++) {
       success += test() ? 1 : 0
     }
     assert(success >= minSuccess)

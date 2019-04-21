@@ -48,7 +48,7 @@ function utSample (name, params) {
       return self.type() === 'continuous'
         ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
         : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
-    }, 6)
+    }, 3)
   })
 
   it('should give the same sample for the same seed', () => {
@@ -104,7 +104,7 @@ function utPdf (name, params) {
   })
 
   it('pdf (pmf) should be the differential (difference) of cdf', () => {
-    utils.trials(() => utils.Tests.pdf2cdf(new dist[name](...params()), LAPS), 8)
+    utils.trials(() => utils.Tests.pdf2cdf(new dist[name](...params()), LAPS), 4)
   })
 
   it('quantile should return valid numbers', () => {
@@ -138,7 +138,7 @@ function utTest (name, params, type = 'self') {
       utils.trials(() => {
         const self = new dist[name](...params())
         return self.test(self.sample(LAPS)).passed
-      }, 6)
+      }, 3)
       break
 
     case 'foreign':
@@ -151,7 +151,7 @@ function utTest (name, params, type = 'self') {
           ? new dist.Uniform(Math.min(...sample), Math.max(...sample))
           : new dist.DiscreteUniform(Math.min(...sample), Math.max(...sample))
         return !foreign.test(sample).passed
-      }, 6)
+      }, 3)
       break
   }
 }
