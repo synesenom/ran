@@ -38,8 +38,8 @@ export default class extends Distribution {
     // Inverse transform sampling
     let u = this.r.next()
 
+    // b = 1
     if (this.eps < Number.EPSILON) {
-      // b = 1
       return 1 - Math.log(u) / this.p.a
     }
 
@@ -59,8 +59,8 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
+    // b = 1
     if (this.eps < Number.EPSILON) {
-      // b = 1
       return this.p.a * Math.exp(this.p.a * (1 - x))
     }
 
@@ -70,8 +70,8 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
+    // b = 1
     if (this.eps < Number.EPSILON) {
-      // b = 1
       return 1 - Math.exp(this.p.a * (1 - x))
     }
 
@@ -80,8 +80,8 @@ export default class extends Distribution {
   }
 
   _q(p) {
+    // b = 1
     if (this.eps < Number.EPSILON) {
-      // b = 1
       return 1 - Math.log(1 - p) / this.p.a
     }
 

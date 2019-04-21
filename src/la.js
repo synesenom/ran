@@ -3,6 +3,7 @@
  *
  * @namespace la
  * @memberOf ran
+ * @private
  */
 
 /**

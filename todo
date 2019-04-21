@@ -1,18 +1,14 @@
-# dist
+# most important
+finish marcumQ implementation
 
-- Add quantile function
+
+# dist
 - Re-implement generators with quantile if accessible
 - Make use of compound distributions
-- Simplify computations in pdf/cdf
 - Check parameter domains
-- Make equations more visible
-- Use decimal.js for high precision
-- If a parameter is invalid, return undefined for generator and pdf/cdf
-
 - Placeholder for Minimax
 - Placeholder for scale-inverse chi2
 - Placeholder for Nakagami-q (Hoyt)
-
 - ARGUS                                 (rejection sampling)
 - Benford                               (inverse transform)
 - Benktander 1nd kind                   (lambertW)
@@ -30,7 +26,6 @@
 - Error / exponential power             (generation unknown)
 - stable                                (generation unknown)
 - trapezoidal
-
 - alpha (scipy)
 - anglit (scipy)
 - crystal ball
@@ -59,7 +54,6 @@
 - skew normal (Owen's T)
 - trapezoidal (scipy)
 - truncated exponential (scipy)
-
 - Dirichlet
 - discrete Laplacian (scipy)
 - Wishart
@@ -69,8 +63,23 @@
 - g-and-h distribution (https://books.google.dk/books?id=HMXYCgAAQBAJ&pg=PA29&dq=g-and-h+distribution&hl=en&sa=X&redir_esc=y#v=snippet&q=g-and-h%20distribution&f=false)
 
 
-# ts
+# statistical tests
+- normality test
+- anova (group variance)
+- analysis of similarities (group variance)
+- anderson-darling (distribution)
+- bartlett (homoscedasticity)
+- breusch-pagan (heteroscedasticity)
+- brown-forsythe (group variance)
+- cramer-von mises (distribution)
+- mann-whitney (hypothesis test)
+- wald (hypothesis test)
+- welch (equal mean)
+- wilcoxon (hypothesis test)
+- shapiro-wilk (normality)
 
+
+# ts
 - Implement general Aggregator class
 
 
@@ -89,7 +98,6 @@
 
 
 # mc
-
 - slice sampling
 - hmc
 - rejection sampling with log-concave dist
@@ -97,7 +105,6 @@
 - Gibbs sampling
 - NUTS
 - adaptive Metropolis
-
 - Hamiltonian
 - Adjust Euclidean metric from covariance in burn-in
 - step size sampled randomly
