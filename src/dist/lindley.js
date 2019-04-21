@@ -49,8 +49,4 @@ export default class extends Distribution {
   _cdf (x) {
     return 1 - Math.exp(-this.p.theta * x) * (this.c[0] + this.p.theta * x) / this.c[0]
   }
-
-  _q (p) {
-    return (lambertW(this.c[0] * Math.exp(-this.c[0]) * (p - 1)) - this.c[0]) / this.p.theta
-  }
 }

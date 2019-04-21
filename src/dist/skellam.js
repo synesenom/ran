@@ -58,6 +58,6 @@ export default class extends Distribution {
   }
 
   _q (p) {
-    return Math.floor(this._qEstimateRoot(p, this.p.mu1 - this.p.mu2))
+    return Math.floor(this._qEstimateRoot(p))
   }
 }

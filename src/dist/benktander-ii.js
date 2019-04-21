@@ -82,14 +82,14 @@ export default class extends Distribution {
   _q(p) {
     if (this.eps < Number.EPSILON) {
       // b = 1
-      return 1 - Math.log(p) / this.p.a
+      return 1 - Math.log(1 - p) / this.p.a
     }
 
     // Check if b is too close to 1
-    let w = lambertW(Math.pow(p * this.c[1], this.c[2]) / this.c[0])
+    let w = lambertW(Math.pow(this.c[1] * (1 - p), this.c[2]) / this.c[0])
     if (!isFinite(w)) {
       // 1 - b << 1, use logarithms
-      let l1 = this.c[3] + this.c[2] * Math.log(p)
+      let l1 = this.c[3] + this.c[2] * Math.log(1 - p)
       let l2 = Math.log(l1)
 
       // W(x) ~= ln(x) - ln ln(x) - ln(x) / (ln ln(x))

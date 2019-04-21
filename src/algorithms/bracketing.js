@@ -21,15 +21,16 @@ export default function(f, a0, b0, s) {
   }
 
   // Start searching
-  let a = a0
+  let a = Math.min(a0, b0)
   let min = s ? s[0].value : -Infinity
   let deltaA = s && s[0].closed ? 0 : 1
-  let b = b0
+  let b = Math.max(a0, b0)
   let max = s ? s[1].value : Infinity
   let deltaB = s && s[1].closed ? 0 : 1
   let f1 = f(a)
   let f2 = f(b)
   for (let k = 0; k < MAX_ITER; k++) {
+    // console.log(f1, f2)
     // If we have different signs, we are done
     if (f1 * f2 < 0.0) {
       return [a, b]

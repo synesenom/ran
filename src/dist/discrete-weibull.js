@@ -40,6 +40,6 @@ export default class extends Distribution {
   }
 
   _q (p) {
-    return Math.floor(Math.pow(Math.log(p) / Math.log(this.p.q), 1 / this.p.beta))
+    return Math.floor(Math.pow(Math.log(1 - p) / Math.log(this.p.q), 1 / this.p.beta))
   }
 }

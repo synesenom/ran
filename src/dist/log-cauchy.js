@@ -41,4 +41,8 @@ export default class extends Cauchy {
   _cdf (x) {
     return super._cdf(Math.log(x))
   }
+
+  _q (p) {
+    return Math.exp(super._q(p))
+  }
 }

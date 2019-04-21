@@ -37,6 +37,10 @@ export default (function () {
     895.984, 948.848, 1001.630, 1054.334, 1106.969
   ]
 
+  function safeCompare(a, b) {
+    return b - a > -Number.EPSILON
+  }
+
   /**
    * Performs a Kolmogorov-Smirnov test with significance level of 99%.
    *
@@ -170,7 +174,7 @@ export default (function () {
     let passed = true
 
     // Run test
-    for (let i = 0; i < laps - 1; i++) {
+    for (let i = 1; i < laps - 2; i++) {
       passed = passed && unitTest(dist, (i + Math.random()) / laps)
     }
 
@@ -207,9 +211,9 @@ export default (function () {
     cdfMonotonicity(dist, laps) {
       let discrete = dist.type() === 'discrete'
       return runX(dist, laps, (d, x) => {
-        let x1 = discrete ? x : x - 1e-3
-        let x2 = discrete ? x + 1 : x + 1e-3
-        return dist.cdf(x2) - dist.cdf(x1) > -Number.EPSILON
+        let p1 = discrete ? x : x - 1e-3
+        let p2 = discrete ? x + 1 : x + 1e-3
+        return safeCompare(p1, p2)
       })
     },
 
@@ -246,6 +250,41 @@ export default (function () {
       return runP(dist, laps, (d, p) => {
         let x = d.q(p)
         return isFinite(x) && Number.isFinite(x)
+      })
+    },
+
+    qRange(dist, laps) {
+      let supp = dist.support()
+      return runP(dist, laps, (d, p) => {
+        let x = d.q(p)
+        return x >= supp[0].value && x <= supp[1].value
+      })
+    },
+
+    qMonotonicity(dist, laps) {
+      return runP(dist, laps, (d, p) => {
+        let x1 = d.q(p)
+        let x2 = d.q(p + 1e-3)
+        return safeCompare(x1, x2)
+      })
+    },
+
+    qGalois(dist, laps) {
+      return runP(dist, laps, (d, p) => {
+        // Compute quantile
+        let q = d.q(p)
+        let passed = true
+
+        // Sample several values to test for Galois inequalities
+        for (let i = 0; i < 100; i++) {
+          let x = d.sample()
+          let cdf = d.cdf(x)
+          passed = passed && ((safeCompare(p, cdf) && safeCompare(q, x)) || (safeCompare(cdf, p) && safeCompare(x, q)))
+          if (!(safeCompare(p, cdf) && safeCompare(q, x)) && !(safeCompare(cdf, p) && safeCompare(x, q))) {
+            console.log(p, cdf, q, x)
+          }
+        }
+        return passed
       })
     }
   }

@@ -41,6 +41,14 @@ export default class extends Normal {
   _cdf (x) {
     return x === 0
       ? 0.5
-      : super._cdf(x) - [super._pdf(0) - super._pdf(x)] / x
+      : super._cdf(x) - (super._pdf(0) - super._pdf(x)) / x
+  }
+
+  _q (p) {
+    // Start with an estimate of the normal distribution's quantile
+    let x0 = super._q(p)
+
+    // Find true quantile with root finding
+    return this._qEstimateRoot(p, x0)
   }
 }

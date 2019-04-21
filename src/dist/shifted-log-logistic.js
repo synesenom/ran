@@ -63,8 +63,8 @@ export default class extends Distribution {
       return 1 / (1 + Math.exp(-(x - this.p.mu) / this.p.sigma))
     } else {
       let z = (x - this.p.mu) / this.p.sigma
-
-      return 1 / (1 + Math.pow(1 + this.p.xi * z, -1 / this.p.xi))
+      let y = Math.pow(1 + this.p.xi * z, -1 / this.p.xi)
+      return isFinite(y) ? 1 / (1 + y) : 0
     }
   }
 

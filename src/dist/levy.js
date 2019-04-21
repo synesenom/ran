@@ -26,7 +26,7 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
-    this.mode = mu + c / 3
+    // this.mode = mu + c / 3
   }
 
   _generator () {
@@ -41,6 +41,6 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return erfc(Math.sqrt(0.5 * this.p.c / (x - this.p.mu)))
+    return x === this.p.mu ? 0 : erfc(Math.sqrt(0.5 * this.p.c / (x - this.p.mu)))
   }
 }

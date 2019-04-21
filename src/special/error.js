@@ -5,11 +5,11 @@ import {
 import newton from '../algorithms/newton'
 
 const coeffs = [
-  1 / 12,
-  7 / 480,
-  127 / 40320,
-  4369 / 5806080,
-  34807 / 182476800
+  0.0833333333333333,
+  0.0145833333333333,
+  0.0031498015873016,
+  0.00075248704806,
+  0.0001907475361251
 ]
 
 /**
@@ -56,7 +56,7 @@ export function erfc (x) {
 export function erfinv (x) {
   // Estimate initial guess using the polynomial
   let x0 = 0
-  let c = 0.5 * Math.pow(Math.PI, 5)
+  let c = 0.5 * Math.pow(Math.PI, 5.5)
   for (let i = coeffs.length - 1; i >= 0; i--) {
     x0 = (x0 + coeffs[i] * c) * x * x
     c /= Math.PI

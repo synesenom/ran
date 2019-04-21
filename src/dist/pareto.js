@@ -40,6 +40,6 @@ export default class extends Distribution {
   }
 
   _q (p) {
-    return this.p.xmin / Math.pow(p, 1 / this.p.alpha)
+    return this.p.xmin / Math.pow(1 - p, 1 / this.p.alpha)
   }
 }

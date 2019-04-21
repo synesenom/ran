@@ -68,8 +68,4 @@ export default class extends Distribution {
     // Calculate sum
     return x < this.p.n / 2 ? neumaier(terms) : 1 - neumaier(terms)
   }
-
-  _q (p) {
-    return this._qEstimateRoot(p)
-  }
 }

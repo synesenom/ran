@@ -36,12 +36,10 @@ function utSample (name, params) {
   })
 
   it('values should be distributed correctly with default parameters', () => {
-    utils.trials(() => {
-      const self = new dist[name]()
-      return self.type() === 'continuous'
-        ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
-        : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
-    }, 7)
+    const self = new dist[name]()
+    return self.type() === 'continuous'
+      ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
+      : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
   })
 
   it('values should be distributed correctly with random parameters', () => {
@@ -50,7 +48,7 @@ function utSample (name, params) {
       return self.type() === 'continuous'
         ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
         : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
-    }, 7)
+    }, 6)
   })
 
   it('should give the same sample for the same seed', () => {
@@ -86,97 +84,44 @@ function utSample (name, params) {
  */
 function utPdf (name, params) {
   it('pdf should return valid numbers', () => {
-    utils.trials(() => {
-      return utils.Tests.pdfType(new dist[name](...params()), LAPS)
-    })
+    utils.trials(() => utils.Tests.pdfType(new dist[name](...params()), LAPS))
   })
 
   it('pdf should be non-negative', () => {
-    utils.trials(() => {
-      return utils.Tests.pdfRange(new dist[name](...params()), LAPS)
-    })
+    utils.trials(() => utils.Tests.pdfRange(new dist[name](...params()), LAPS))
   })
 
   it('cdf should return valid numbers', () => {
-    utils.trials(() => {
-      return utils.Tests.cdfType(new dist[name](...params()), LAPS)
-    })
+    utils.trials(() => utils.Tests.cdfType(new dist[name](...params()), LAPS))
   })
 
   it('cdf should be in [0, 1]', () => {
-    utils.trials(() => {
-      return utils.Tests.cdfRange(new dist[name](...params()), LAPS)
-    })
+    utils.trials(() => utils.Tests.cdfRange(new dist[name](...params()), LAPS))
   })
 
   it('cdf should be non-decreasing', () => {
-    utils.trials(() => {
-      return utils.Tests.cdfMonotonicity(new dist[name](...params()), LAPS)
-    })
+    utils.trials(() => utils.Tests.cdfMonotonicity(new dist[name](...params()), LAPS))
   })
 
   it('pdf (pmf) should be the differential (difference) of cdf', () => {
-    // Using a 8/10 acceptance here due to the instability of numerical differentiation
-    utils.trials(() => {
-      return utils.Tests.pdf2cdf(new dist[name](...params()), LAPS)
-    }, 7)
+    utils.trials(() => utils.Tests.pdf2cdf(new dist[name](...params()), LAPS), 8)
   })
 
-  // TODO Add unit tests for q(): valid number, non-negative, increasing, equals to CDF inv
-  /* it('quantile should return valid numbers', () => {
-    utils.trials(() => {
-      return utils.Tests.qType(new dist[name](...params()), LAPS)
-    })
+  it('quantile should return valid numbers', () => {
+    utils.trials(() => utils.Tests.qType(new dist[name](...params()), LAPS / 10))
   })
 
-  /* it('quantile should be within support', () => {
-    const self = new dist[name](...params())
-    const supp = self.support()
-
-    let inRange = true
-    if (self.type() === 'discrete') {
-      // TODO For discrete as well
-    } else {
-      for (let p = 1; p <= 99; p++) {
-        let x = self.q(p / 100)
-        inRange &= x >= supp[0].value && x <= supp[1].value
-      }
-    }
-    assert(inRange)
+  it('quantile should be within support', () => {
+    utils.trials(() => utils.Tests.qRange(new dist[name](...params()), LAPS / 10))
   })
 
   it('quantile should be non-decreasing', () => {
-    const self = new dist[name](...params())
-
-    let nonDecreasing = true
-    if (self.type() === 'discrete') {
-      // TODO For discrete as well
-    } else {
-      for (let p = 1; p <= 99; p++) {
-        nonDecreasing &= self.q(p / 100 + 1e-3) - self.q(p / 100 + 1e-3) > -FPMIN
-
-      }
-    }
-    assert(nonDecreasing)
+    utils.trials(() => utils.Tests.qMonotonicity(new dist[name](...params()), LAPS / 10))
   })
 
-  it('quantile should satisfy the Galois inequalities', () => {
-    const self = new dist[name](...params())
-
-    let passedGalois = true
-    if (self.type() === 'discrete') {
-      // TODO For discrete as well
-    } else {
-      for (let pi = 1; pi <= 999; pi++) {
-        let p = pi / 1000
-        let x = self.sample()
-        let q = self.q(p)
-        let cdf = self.cdf(x)
-        passedGalois &= ((p <= cdf && q <= x) || (p >= cdf && q >= x))
-      }
-    }
-    assert(passedGalois)
-  }) */
+  it('quantile should satisfy Galois intequalities', () => {
+    utils.trials(() => utils.Tests.qGalois(new dist[name](...params()), LAPS / 10))
+  })
 }
 
 /**
@@ -241,7 +186,7 @@ const Param = {
   },
 
   count () {
-    return int(1, 20)
+    return int(3, 20)
   },
 
   degree () {
@@ -525,7 +470,8 @@ describe('dist', () => {
     p: () => [Param.scale(), Param.shape()]
   }, {
     name: 'IrwinHall',
-    p: () => [Param.count() + 10]
+    p: () => [Param.count()],
+    skip: ['test-foreign']
   }, {
     name: 'JohnsonSU',
     p: () => [Param.location(), Param.scale(), Param.scale(), Param.location()]
@@ -688,7 +634,7 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'InverseGaussian') return
+    // if (d.name !== 'BenktanderII') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

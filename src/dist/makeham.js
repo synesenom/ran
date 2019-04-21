@@ -68,16 +68,16 @@ export default class extends Distribution {
   }
 
   _q (p) {
-    let z = this.c[1] * Math.pow(p, this.c[2])
+    let z = this.c[1] * Math.pow(1 - p, this.c[2])
 
     // Handle z >> 1 case
     let w = lambertW(z)
     if (!isFinite(w)) {
-      let t = Math.log(this.c[1]) + this.c[2] * Math.log(p)
-      return this.c[0] - Math.log(p) / this.p.lambda -
+      let t = Math.log(this.c[1]) + this.c[2] * Math.log(1 - p)
+      return this.c[0] - Math.log(1 - p) / this.p.lambda -
         (t - Math.log(t)) / this.p.beta
     } else {
-      return this.c[0] - Math.log(p) / this.p.lambda -
+      return this.c[0] - Math.log(1 - p) / this.p.lambda -
         w / this.p.beta
     }
   }

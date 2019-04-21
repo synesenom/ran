@@ -24,7 +24,6 @@ export default class extends Normal {
       value: Infinity,
       closed: false
     }]
-    this.mode = 0
   }
 
   _generator () {
@@ -41,6 +40,6 @@ export default class extends Normal {
   }
 
   _q (p) {
-    return this.p.sigma * Math.sqrt(Math.PI) * erfinv(p)
+    return this.p.sigma * 1.414213562373095 * erfinv(p)
   }
 }

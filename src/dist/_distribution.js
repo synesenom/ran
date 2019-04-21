@@ -7,6 +7,8 @@ import bracket from '../algorithms/bracketing'
 import brent from '../algorithms/brent'
 import { MAX_ITER } from '../special/_core'
 
+
+
 /**
  * The distribution generator base class, all distribution generators extend this class. The methods listed here
  * are available for all distribution generators. Integer parameters of a distribution are rounded.
@@ -89,7 +91,7 @@ class Distribution {
    * @method _qEstimateTable
    * @memberOf ran.dist.Distribution
    * @param {number} p Probability to find value for.
-   * @return {number} The lower boundary of the interval that satisfies F(x) = p if found, undefined otherwise.
+   * @returns {number} The lower boundary of the interval that satisfies F(x) = p if found, undefined otherwise.
    * @protected
    * @ignore
    */
@@ -113,76 +115,50 @@ class Distribution {
         return k
       }
     }
-    // console.log(this._cdfTable[this._cdfTable.length - 1], p)
-
-    // console.log(this._cdfTable)
     return undefined
   }
 
   /**
-   * Estimates the quantile function by solving F(x) = p using one of the root finding algorithms.
+   * Estimates the quantile function by solving F(x) = p using Brent's method.
    *
    * @method _qEstimateRoot
    * @memberOf ran.dist.Distribution
    * @param {number} p Probability to find value for.
    * @param {number?} x0 Initial guess for using Newton's method.
-   * @returns {number} The value where the probability coincides with the specified value if found, undefined otherwise.
+   * @returns {(number|undefined)} The value where the probability coincides with the specified value if found,
+   * undefined otherwise.
    * @protected
    * @ignore
    */
   _qEstimateRoot(p, x0) {
-    // Start with Brent's method
-    // Find brackets
-    let bounds = bracket(
-      t => this.cdf(t) - p,
-      Number.isFinite(this.s[0].value) ? this.s[0].value : 1,
-      Number.isFinite(this.s[1].value) ? this.s[1].value : 1.1,
-      this.s
-    )
-    // console.log(p, bounds)
+    // Guess range
+    let delta = ((Number.isFinite(this.s[1].value) ? this.s[1].value : 10) - (Number.isFinite(this.s[0].value) ? this.s[0].value : 1)) / 1000
 
-    // Run Brent's method
-    let x = typeof bounds !== 'undefined'
-      ? brent(t => this.cdf(t) - p, ...bounds)
-      : x0
-
-    // Polish up with Newton's method
-    return newton(
-      t => this.cdf(t) - p,
-      t => this.pdf(t),
-      x
-    )
-    // If a good initial guess is provided, try with Newton's method
-    /*let x
-    if (typeof this.mode !== 'undefined') {
-      x = newton(
-        t => this.cdf(t) - p,
-        t => this.pdf(t),
-        this.mode
-      )
-      // console.log(x)
-
-      if (isFinite(x) && Number.isFinite(x)) {
-        return x
-      }
+    // Set initial guess for lower boundary
+    let a0 = Math.random()
+    if(typeof x0 !== 'undefined') {
+      a0 = x0 - delta * Math.random()
+    } else if (this.s[0].closed) {
+      a0 = this.s[0].value + delta * Math.random()
+    } else if (Number.isFinite(this.s[0].value)) {
+      a0 = this.s[0].value + delta * Math.random()
     }
 
-    // If Newton failed, use Brent's method
-    // Find brackets
-    let bounds = bracket(
-      t => this.cdf(t) - p,
-      Number.isFinite(this.s[0].value) ? this.s[0].value : 1,
-      Number.isFinite(this.s[1].value) ? this.s[1].value : 1.1,
-      this.s
-    )
-    // console.log(p, bounds)
+    // Set initial guess for upper boundary
+    let b0 = a0 + Math.random()
+    if (typeof x0 !== 'undefined') {
+      b0 = x0 + delta * Math.random()
+    } else if (this.s[1].closed) {
+      b0 = this.s[1].value - delta * Math.random()
+    } else if (Number.isFinite(this.s[1].value)) {
+      b0 = this.s[1].value - delta * Math.random()
+    }
 
-    // Solve F(x) - p using Brent's method
-    return typeof bounds === 'undefined'
-      ? undefined : brent(
-      t => this.cdf(t) - p,
-      ...bounds
-    )*/
+    // Find brackets
+    let bounds = bracket(t => this.cdf(t) - p, a0, b0, this.s)
+
+    // Perform root-finding using Brent's method
+    return typeof bounds !== 'undefined' ? brent(t => this.cdf(t) - p, ...bounds) : undefined
   }
 
   /**
@@ -328,6 +304,29 @@ class Distribution {
     return this._cdf(z)
   }
 
+  /**
+   * The [quantile function]{@link https://en.wikipedia.org/wiki/Quantile_function} of the distribution. For continuous
+   * distributions, it is defined as the inverse of the distribution function:
+   *
+   * $$Q(p) = F^{-1}(p),$$
+   *
+   * whereas for discrete distributions it is the lower boundary of the interval that satisfies \(F(k) = p\):
+   *
+   * $$Q(p) = \mathrm{inf}\{k \in \mathrm{supp}(f): p \le F(k) \},$$
+   *
+   * with \(\mathrm{supp}(f)\) denoting the support of the distribution.
+   *
+   * This is an experimental function at the moment. For distributions with an analytically invertible
+   * cumulative distribution function, the quantile is explicitly implemented. In other cases, two fallback estimations
+   * are used: for continuous distributions the equation \(F(x) = p\) is solved using [Brent's method]{@link https://en.wikipedia.org/wiki/Brent%27s_method}.
+   * For most discrete distributions a look-up table is used with linear search.
+   *
+   * @method q
+   * @memberOf ran.dist.Distribution
+   * @param {number} p The probability at which the quantile should be evaluated.
+   * @returns {(number|undefined)} The value of the quantile function at the specified probability if it could be found,
+   * undefined otherwise.
+   */
   q (p) {
     if (p < 0 || p > 1) {
       // If out of bounds, return undefined
