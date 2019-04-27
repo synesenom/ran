@@ -1,11 +1,9 @@
-import { Xoshiro128p, float } from '../core'
+import { Xoshiro128p } from '../core'
 import neumaier from '../algorithms/neumaier'
 import { some } from '../utils'
-import newton from '../algorithms/newton'
 import { chi2, kolmogorovSmirnov } from './_tests'
 import bracket from '../algorithms/bracketing'
 import brent from '../algorithms/brent'
-import { MAX_ITER } from '../special/_core'
 
 
 

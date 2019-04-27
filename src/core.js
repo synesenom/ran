@@ -101,7 +101,7 @@ class Xoshiro128p {
    * @returns {number[]} The current state of the generator.
    */
   state() {
-    return this._state;
+    return this._state
   }
 }
 

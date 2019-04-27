@@ -1,4 +1,3 @@
-import lambertW from '../special/lambert-w'
 import { gamma, rejection } from './_core'
 import Distribution from './_distribution'
 

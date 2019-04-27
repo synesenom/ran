@@ -1,9 +1,7 @@
 import { MAX_ITER, EPS, DELTA } from './_core'
 import newton from '../algorithms/newton'
-import gamma from './gamma'
 import logGamma from './log-gamma'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from './gamma-incomplete'
-import { besselI } from './bessel'
 import { erfc } from './error'
 
 /**
@@ -149,7 +147,7 @@ const _asymptoticExpansionLargeXi = (function() {
   }
 })()
 
-const _recurrence = (function() {
+/*const _recurrence = (function() {
   function _fc(pnu, z) {
     let m = 0
     let b = 2 * pnu / z
@@ -241,7 +239,7 @@ const _recurrence = (function() {
       return 1 - z
     }
   }
-})()
+})()*/
 
 /**
  * Computes the generalized Marcum-Q function. Only accurate in x < 30. Implementation source: https://arxiv.org/pdf/1311.0681.pdf.
