@@ -6,7 +6,6 @@ import bracket from '../algorithms/bracketing'
 import brent from '../algorithms/brent'
 
 
-
 /**
  * The distribution generator base class, all distribution generators extend this class. The methods listed here
  * are available for all distribution generators. Integer parameters of a distribution are rounded.

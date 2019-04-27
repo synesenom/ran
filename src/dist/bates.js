@@ -18,7 +18,7 @@ export default class extends IrwinHall {
   // Transformation of Irwin-Hall
   constructor (n = 10, a = 0, b = 1) {
     super(n)
-    this.p = Object.assign({ a, b }, this.p)
+    this.p = Object.assign(this.p, { a, b })
     this.s = [{
       value: a,
       closed: true

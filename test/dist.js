@@ -184,7 +184,7 @@ function utTest (name, params, type = 'self') {
 
 const Param = {
   rangeMin () {
-    return float(10)
+    return float(0.1, 10)
   },
 
   rangeIn () {
@@ -208,7 +208,7 @@ const Param = {
   },
 
   prob () {
-    return float()
+    return float(0.01, 0.99)
   },
 
   count () {
@@ -220,7 +220,7 @@ const Param = {
   },
 
   rate () {
-    return float(10)
+    return float(0.1, 10)
   }
 }
 
@@ -524,7 +524,7 @@ describe('dist', () => {
     p: () => [Param.location(), Param.scale()]
   }, {
     name: 'LogGamma',
-    p: () => [Param.shape(), Param.rate(), Param.location()]
+    p: () => [Param.shape(), Param.rate(), Param.shape()]
   }, {
     name: 'Logistic',
     p: () => [Param.location(), Param.scale()]
@@ -660,7 +660,7 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'Rice') return
+    // if (d.name !== 'LogGamma') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

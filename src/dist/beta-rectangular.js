@@ -19,7 +19,7 @@ import Beta from './beta'
 export default class extends Beta {
   constructor (alpha = 1, beta = 1, theta = 0.5, a = 0, b = 1) {
     super(alpha, beta)
-    this.p = Object.assign({ theta, a, b }, this.p)
+    this.p = Object.assign(this.p, { theta, a, b })
     this.s = [{
       value: a,
       closed: true

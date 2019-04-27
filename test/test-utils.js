@@ -110,11 +110,11 @@ export default (function () {
   }
 
   /**
-   * Performs 10 tests and checks if at least 6 was successful.
+   * Performs 5 tests and checks if all were successful.
    *
    * @method trials
    * @param test Test to run.
-   * @param minSuccess Minimum number of successes to accept test. Default is 10 (all).
+   * @param minSuccess Minimum number of successes to accept test. Default is 5 (all).
    */
   function trials (test, minSuccess = 5) {
     let success = 0
@@ -281,7 +281,7 @@ export default (function () {
           let cdf = d.cdf(x)
           passed = passed && ((safeCompare(p, cdf) && safeCompare(q, x)) || (safeCompare(cdf, p) && safeCompare(x, q)))
           if (!(safeCompare(p, cdf) && safeCompare(q, x)) && !(safeCompare(cdf, p) && safeCompare(x, q))) {
-            console.log(p, cdf, q, x)
+            // console.log(p, cdf, q, x)
           }
         }
         return passed
