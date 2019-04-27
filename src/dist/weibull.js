@@ -17,7 +17,7 @@ export default class extends Exponential {
   // Transformation of exponential distribution
   constructor (lambda = 1, k = 1) {
     super(1)
-    this.p = Object.assign({ lambda2: lambda, k }, this.p)
+    this.p = Object.assign(this.p, { lambda2: lambda, k })
     this.s = [{
       value: 0,
       closed: k >= 1

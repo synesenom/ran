@@ -18,7 +18,7 @@ export default class extends Beta {
   // Transformation of beta distribution
   constructor (d1 = 2, d2 = 2) {
     super(d1 / 2, d2 / 2)
-    this.p = Object.assign({ d1, d2 }, this.p)
+    this.p = Object.assign(this.p, { d1, d2 })
     this.s = [{
       value: 0,
       closed: d1 !== 1

@@ -18,7 +18,7 @@ export default class extends Normal {
   // Transformation of normal distribution
   constructor (mu = 0, beta = 1, gamma = 1) {
     super()
-    this.p = Object.assign({ mu2: mu, beta, gamma }, this.p)
+    this.p = Object.assign(this.p, { mu2: mu, beta, gamma })
     this.s = [{
       value: mu,
       closed: false

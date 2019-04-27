@@ -17,7 +17,7 @@ import Beta from './beta'
 export default class extends Beta {
   constructor (a = 0, b = 0.5, c = 1) {
     super((4 * b + c - 5 * a) / (c - a), (5 * c - a - 4 * b) / (c - a))
-    this.p = Object.assign({ a, b, c }, this.p)
+    this.p = Object.assign(this.p, { a, b, c })
     this.s = [{
       value: a,
       closed: true

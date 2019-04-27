@@ -16,7 +16,7 @@ export default class extends Chi2 {
   // Transformation of chi2 distribution
   constructor (k = 2) {
     super(k)
-    this.p = Object.assign({ k }, this.p)
+    this.p = Object.assign(this.p, { k })
     this.s = [{
       value: 0,
       closed: true

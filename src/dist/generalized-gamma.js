@@ -18,7 +18,7 @@ export default class extends Gamma {
   // Transformation of gamma distribution
   constructor (a = 1, d = 1, p = 1) {
     super(d / p, Math.pow(a, -p))
-    this.p = Object.assign({ a, d, p }, this.p)
+    this.p = Object.assign(this.p, { a, d, p })
     this.s = [{
       value: 0,
       closed: d >= 1 && p >= 1 && d >= p
