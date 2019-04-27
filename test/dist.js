@@ -7,13 +7,6 @@ import InvalidDiscrete from '../src/dist/_invalid'
 
 const LAPS = 1000
 
-/**
- * Runs unit tests for the .sample() method of a generator.
- *
- * @method utSample
- * @param {string} name Name of the generator.
- * @param {Function} params Generator for the parameters array.
- */
 function utSample (name, params) {
   it('sample should contain valid numbers', () => {
     utils.trials(() => {
@@ -50,7 +43,9 @@ function utSample (name, params) {
         : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
     }, 3)
   })
+}
 
+function utSeed(name, params) {
   it('should give the same sample for the same seed', () => {
     utils.trials(() => {
       const self = new dist[name](...params())
@@ -75,13 +70,52 @@ function utSample (name, params) {
   })
 }
 
-/**
- * Runs unit tests for the .pdf() method of a generator.
- *
- * @method utPdf
- * @param {string} name Name of the generator.
- * @param {Function} params Generator for the parameters array.
- */
+function utLoadSave(name, params) {
+  it('loaded state should continue where it was saved at', () => {
+    utils.trials(() => {
+      // Create generator and seed
+      const self = new dist[name](...params())
+      const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+      const cut = LAPS / 3
+
+      // Generate full sample
+      const values = self.sample(LAPS)
+
+      // Reset generator, create two sub samples
+      self.seed(s)
+      const values1 = self.sample(cut)
+      let state = self.save()
+      self.seed(0)
+      self.load(state)
+      const values2 = self.sample(LAPS - cut)
+
+      // Compare samples
+      return values1.concat(values2)
+        .reduce((acc, d, i) => acc || d === values[i], true)
+    })
+  })
+
+  it('loaded state should copy full state of generator', () => {
+    utils.trials(() => {
+      // Create seeded generator
+      const self1 = new dist[name](...params())
+      self1.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+
+      // Generate original sample
+      self1.sample(LAPS)
+      const state = self1.save()
+      const values1 = self1.sample(LAPS)
+
+      // Generate new default generator and load state
+      const self2 = new dist[name]().load(state)
+      const values2 = self2.sample(LAPS)
+
+      // Compare samples
+      return values1.reduce((acc, d, i) => acc || d !== values2[i], true)
+    })
+  })
+}
+
 function utPdf (name, params) {
   it('pdf should return valid numbers', () => {
     utils.trials(() => utils.Tests.pdfType(new dist[name](...params()), LAPS))
@@ -124,14 +158,6 @@ function utPdf (name, params) {
   })
 }
 
-/**
- * Runs unit tests for the .test() method of a generator.
- *
- * @method utTest
- * @param {string} name Name of the generator.
- * @param {Function} params Generator for the parameters array.
- * @param {string} type Type of test (with self or foreign distribution).
- */
 function utTest (name, params, type = 'self') {
   switch (type) {
     case 'self':
@@ -640,6 +666,10 @@ describe('dist', () => {
       if (typeof d.cases === 'undefined') {
         describe('.sample()', () => utSample(d.name, d.p))
 
+        describe('.seed()', () => utSeed(d.name, d.p))
+
+        describe('.load(), .save()', () => utLoadSave(d.name, d.p))
+
         describe('.pdf(), .cdf(), .q()', () => utPdf(d.name, d.p))
 
         describe('.test()', () => {
@@ -656,6 +686,18 @@ describe('dist', () => {
         describe('.sample()', () => {
           d.cases.forEach(c => {
             describe(c.desc, () => utSample(d.name, c.p))
+          })
+        })
+
+        describe('.seed()', () => {
+          d.cases.forEach(c => {
+            describe(c.desc, () => utSeed(d.name, c.p))
+          })
+        })
+
+        describe('.load(), .save()', () => {
+          d.cases.forEach(c => {
+            describe(c.desc, () => utLoadSave(d.name, c.p))
           })
         })
 
@@ -684,6 +726,7 @@ describe('dist', () => {
     })
   })
 
+  // Degenerate distribution
   describe('Degenerate', () => {
     const p = () => [float(-10, 10)]
     describe('.sample()', () => {

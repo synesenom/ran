@@ -21,7 +21,7 @@ import brent from '../algorithms/brent'
 class Distribution {
   constructor (type, k) {
     // Distribution type: discrete or continuous
-    this._type = type
+    this.t = type
 
     // Number of parameters
     this.k = k
@@ -35,11 +35,8 @@ class Distribution {
     // Pseudo random number generator
     this.r = new Xoshiro128p()
 
-    // Mode of the distribution
-    this.mode = undefined
-
     // Look-up table for the fallback quantile for discrete distributions
-    this._cdfTable = [];
+    this._cdfTable = []
   }
 
   /**
@@ -167,7 +164,7 @@ class Distribution {
    * @returns {string} Distribution type.
    */
   type () {
-    return this._type
+    return this.t
   }
 
   /**
@@ -196,15 +193,79 @@ class Distribution {
    *
    * let pareto = new ran.dist.Pareto(1, 2).seed('test')
    * pareto.sample(5)
-   * // => [ 1.2963808682328533,
-   * //      1.1084992533723803,
-   * //      2.137114851993669,
-   * //      1.0173185472384896,
-   * //      1.6465170523444383 ]
+   * // => [ 1.571395735462202,
+   * //      2.317583041477979,
+   * //      1.1315154468682591,
+   * //      5.44269493220745,
+   * //      1.2587482868229616 ]
    *
    */
   seed (value) {
     this.r.seed(value)
+    return this
+  }
+
+  /**
+   * Returns the current state of the generator. The object returned by this method contains all information necessary to set up another generator of the same distribution (parameters, state of the pseudo random generator, etc).
+   *
+   * @method save
+   * @methodOf ran.dist.Distribution
+   * @return {Object} Object representing the inner state of the current generator.
+   * @example
+   *
+   * let pareto1 = new ran.dist.Pareto(1, 2).seed('test')
+   * let sample1 = pareto1.sample(2)
+   * let state = pareto1.save()
+   *
+   * let pareto2 = new ran.dist.Pareto().load(state)
+   * let sample2 = pareto2.sample(3)
+   * // => [ 1.1315154468682591,
+   * //      5.44269493220745,
+   * //      1.2587482868229616 ]
+   *
+   */
+  save() {
+    return {
+      prngState: this.r.save(),
+      params: this.p,
+      consts: this.c,
+      support: this.s
+    }
+  }
+
+  /**
+   * Loads a new state for the generator.
+   *
+   * @method load
+   * @methodOf ran.dist.Distribution
+   * @param {Object} state The state to load.
+   * @returns {ran.dist.Distribution} Reference to the current distribution.
+   * @example
+   *
+   * let pareto1 = new ran.dist.Pareto(1, 2).seed('test')
+   * let sample1 = pareto1.sample(2)
+   * let state = pareto1.save()
+   *
+   * let pareto2 = new ran.dist.Pareto().load(state)
+   * let sample2 = pareto2.sample(3)
+   * // => [ 1.1315154468682591,
+   * //      5.44269493220745,
+   * //      1.2587482868229616 ]
+   *
+   */
+  load(state) {
+    // Set parameters
+    this.p = state.params
+
+    // Set helper constants
+    this.c = state.consts
+
+    // Set support
+    this.s = state.support
+
+    // Set PRNG state
+    this.r.load(state.prngState)
+
     return this
   }
 
@@ -246,7 +307,7 @@ class Distribution {
    */
   pdf (x) {
     // Convert to integer if discrete
-    let z = this._type === 'discrete' ? Math.round(x) : x
+    let z = this.t === 'discrete' ? Math.round(x) : x
 
     // Check against lower support
     if ((this.s[0].closed && z < this.s[0].value) || (!this.s[0].closed && z <= this.s[0].value)) {
@@ -286,7 +347,7 @@ class Distribution {
    */
   cdf (x) {
     // Convert to integer if discrete
-    let z = this._type === 'discrete' ? Math.round(x) : x
+    let z = this.t === 'discrete' ? Math.round(x) : x
 
     // Check against lower support
     if ((this.s[0].closed && z < this.s[0].value) || (!this.s[0].closed && z <= this.s[0].value)) {
@@ -340,7 +401,7 @@ class Distribution {
       //
       return typeof this['_q'] === 'function'
         ? this._q(p)
-        : this._type === 'discrete'
+        : this.t === 'discrete'
           ? this._qEstimateTable(p)
           : this._qEstimateRoot(p)
     }
@@ -546,7 +607,7 @@ class Distribution {
    *
    */
   test (values) {
-    return this._type === 'discrete'
+    return this.t === 'discrete'
       ? chi2(values, x => this._pdf(x), this.k)
       : kolmogorovSmirnov(values, x => this._cdf(x))
   }

@@ -93,14 +93,25 @@ class Xoshiro128p {
   }
 
   /**
+   * Loads the state of the generator.
+   *
+   * @method load
+   * @methodOf ran.core.Xoshiro128p
+   * @param {number[]} state The state to load.
+   */
+  load(state) {
+    this._state = state
+  }
+
+  /**
    * Returns the current state of the generator. This can be later passed on to a new generator to continue where the
    * current one finished.
    *
-   * @method state
+   * @method save
    * @methodOf ran.core.Xoshiro128p
    * @returns {number[]} The current state of the generator.
    */
-  state() {
+  save() {
     return this._state
   }
 }
