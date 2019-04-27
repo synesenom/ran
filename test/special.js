@@ -5,7 +5,7 @@ import gamma from '../src/special/gamma'
 import gammaLn from '../src/special/log-gamma'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from '../src/special/gamma-incomplete'
 import hurwitzZeta from '../src/special/hurwitz-zeta'
-import { marcumQ } from '../src/special/marcum-q'
+import marcumQ from '../src/special/marcum-q'
 import lambertW from '../src/special/lambert-w'
 import riemannZeta from '../src/special/riemann-zeta'
 import utils from './test-utils'
@@ -104,13 +104,15 @@ describe('special', () => {
   })
 
   describe('.marcumQ()', () => {
-    describe('x < 30', () => {
-      describe('Q(mu, x, y)', () => {
+    describe('series expansion', () => {
+      describe('Q', () => {
         it('should satisfy the recurrence relation', () => {
           utils.repeat(() => {
-            let mu = Math.random() * 10 + 2
-            let x = Math.random() * 10
-            let y = Math.random() * 10 + x + mu + 2
+            let x = Math.random() * 30
+            let y = 40 + Math.random() * 60
+            let mu = 2 + Math.random() * 5
+            // console.log(x < 30, y >= x + mu)
+            // return
 
             let q1 = marcumQ(mu + 1, x, y)
             let q2 = marcumQ(mu, x, y)
@@ -126,12 +128,14 @@ describe('special', () => {
         })
       })
 
-      describe('P(mu, x, y)', () => {
-        it('should satisfy the recurrence relation (y < x + mu)', () => {
+      describe('P', () => {
+        it('should satisfy the recurrence relation', () => {
           utils.repeat(() => {
-            let x = Math.random() * 100
-            let y = Math.random() * 100
-            let mu = Math.random() * 100 + 2 + Math.max(0, y - x)
+            let x = Math.random() * 30
+            let y = 10 + Math.random() * 10
+            let mu = 30 + Math.random() * 5
+            // console.log(x < 30, y < x + mu)
+            // return
 
             let q1 = marcumQ(mu + 1, x, y)
             let q2 = marcumQ(mu, x, y)
@@ -147,6 +151,112 @@ describe('special', () => {
         })
       })
     })
+
+    describe('asymptotic expansion for large xi', () => {
+      describe('Q', () => {
+        it('should satisfy the recurrence relation', () => {
+          utils.repeat(() => {
+            let x = 40 + Math.random() * 10
+            let y = 60 + Math.random() * 10
+            let mu = 2 + Math.random() * 5
+            /*let xi = 2 * Math.sqrt(x * y)
+            console.log(x >= 30, xi > 30, mu * mu < 2 * xi, y >= x + mu)
+            return*/
+
+            let q1 = marcumQ(mu + 1, x, y)
+            let q2 = marcumQ(mu, x, y)
+            let q3 = marcumQ(mu + 2, x, y)
+            let q4 = marcumQ(mu - 1, x, y)
+
+            if (x > mu) {
+              assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < PRECISION)
+            } else {
+              assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < PRECISION)
+            }
+          }, LAPS)
+        })
+      })
+
+      describe('P', () => {
+        it('should satisfy the recurrence relation', () => {
+          utils.repeat(() => {
+            let x = 40 + Math.random() * 10
+            let y = 30 + Math.random() * 10
+            let mu = 2 + Math.random() * 5
+            /*let xi = 2 * Math.sqrt(x * y)
+            console.log(x >= 30, xi > 30, mu * mu < 2 * xi, y < x + mu)
+            return*/
+
+            let q1 = marcumQ(mu + 1, x, y)
+            let q2 = marcumQ(mu, x, y)
+            let q3 = marcumQ(mu + 2, x, y)
+            let q4 = marcumQ(mu - 1, x, y)
+
+            if (x > mu) {
+              assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < PRECISION)
+            } else {
+              assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < PRECISION)
+            }
+          }, LAPS)
+        })
+      })
+    })
+
+    /*describe('recurrence relation', () => {
+      describe('Q', () => {
+        it('should satisfy the recurrence relation', () => {
+          utils.repeat(() => {
+            let x = 40 + Math.random() * 10
+            let mu = 100 + Math.random() * 10
+            let s = Math.sqrt(4 * x + 2 * mu) - 5
+            let f1 = x + mu - s
+            let f2 = x + mu + s
+            let y = f1 + (f2 - f1) * (0.9 + 0.1 * Math.random())
+            //let xi = 2 * Math.sqrt(x * y)
+            //console.log(x >= 30, xi > 30, mu * mu > 2 * xi, f1 < y, y < f2, y > x + mu)
+            //return
+
+            let q1 = marcumQ(mu + 1, x, y)
+            let q2 = marcumQ(mu, x, y)
+            let q3 = marcumQ(mu + 2, x, y)
+            let q4 = marcumQ(mu - 1, x, y)
+
+            if (x > mu) {
+              assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < PRECISION)
+            } else {
+              assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < PRECISION)
+            }
+          }, LAPS)
+        })
+      })
+
+      describe('P', () => {
+        it('should satisfy the recurrence relation', () => {
+          utils.repeat(() => {
+            let x = 40 + Math.random() * 10
+            let mu = 100 + Math.random() * 10
+            let s = Math.sqrt(4 * x + 2 * mu) - 5
+            let f1 = x + mu - s
+            let f2 = x + mu + s
+            let y = f1 + 0.1 * (f2 - f1) * Math.random()
+            //let xi = 2 * Math.sqrt(x * y)
+            //console.log(x >= 30, xi > 30, mu * mu > 2 * xi, f1 < y, y < f2, mu < 135, y < x + mu)
+            //return
+
+            let q1 = marcumQ(mu + 1, x, y)
+            let q2 = marcumQ(mu, x, y)
+            let q3 = marcumQ(mu + 2, x, y)
+            let q4 = marcumQ(mu - 1, x, y)
+
+            if (x > mu) {
+              assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < PRECISION)
+            } else {
+              assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < PRECISION)
+            }
+          }, LAPS)
+        })
+      })
+    })*/
   })
 
   describe('.lambertW()', () => {

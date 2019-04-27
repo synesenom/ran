@@ -1,10 +1,7 @@
 import { besselI } from '../special/bessel'
-import { marcumQ } from '../special/marcum-q'
+import marcumQ from '../special/marcum-q'
 import { poisson } from './_core'
 import Distribution from './_distribution'
-import newton from '../algorithms/newton'
-import bracket from '../algorithms/bracketing'
-import brent from '../algorithms/brent'
 
 /**
  * Generator for the [Skellam distribution]{@link https://en.wikipedia.org/wiki/Skellam_distribution}:
