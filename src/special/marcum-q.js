@@ -268,15 +268,15 @@ export default function (mu, x, y) {
   }
 
   // Series expansion
-  if (x < 30) {
-    return _seriesExpansion[primary](mu, x, y)
-  }
+  //if (x < 30) {
+  return _seriesExpansion[primary](mu, x, y)
+  //}
 
   // Asymptotic expansion
-  //let xi = 2 * Math.sqrt(x * y)
-  //if (xi > 30 && mu * mu < 2 * xi) {
-  return _asymptoticExpansionLargeXi[primary](mu, x, y)
-  //}
+  /*let xi = 2 * Math.sqrt(x * y)
+  if (xi > 30 && mu * mu < 2 * xi) {
+    return _asymptoticExpansionLargeXi[primary](mu, x, y)
+  }
 
   /*let s = Math.sqrt(4 * x + 2 * mu)
   let f1 = x + mu - s

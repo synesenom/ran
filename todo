@@ -4,7 +4,6 @@
 
 
 # dist
-- Re-implement generators with quantile if accessible
 - Make use of compound distributions
 - Check parameter domains
 - Placeholder for Minimax

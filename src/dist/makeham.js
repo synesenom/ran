@@ -37,19 +37,7 @@ export default class extends Distribution {
 
   _generator () {
     // Inverse transform sampling
-    let u = this.r.next()
-    let z = this.c[1] * Math.pow(u, this.c[2])
-
-    // Handle z >> 1 case
-    let w = lambertW(z)
-    if (!isFinite(w)) {
-      let t = Math.log(this.c[1]) + this.c[2] * Math.log(u)
-      return this.c[0] - Math.log(u) / this.p.lambda -
-        (t - Math.log(t)) / this.p.beta
-    } else {
-      return this.c[0] - Math.log(u) / this.p.lambda -
-        w / this.p.beta
-    }
+    return this._q(this.r.next())
   }
 
   _pdf (x) {

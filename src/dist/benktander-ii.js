@@ -36,26 +36,7 @@ export default class extends Distribution {
 
   _generator () {
     // Inverse transform sampling
-    let u = this.r.next()
-
-    // b = 1
-    if (this.eps < Number.EPSILON) {
-      return 1 - Math.log(u) / this.p.a
-    }
-
-    // Check if b is too close to 1
-    let w = lambertW(Math.pow(u * this.c[1], this.c[2]) / this.c[0])
-    if (!isFinite(w)) {
-      // 1 - b << 1, use logarithms
-      let l1 = this.c[3] + this.c[2] * Math.log(u)
-      let l2 = Math.log(l1)
-
-      // W(x) ~= ln(x) - ln ln(x) - ln(x) / (ln ln(x))
-      return Math.pow(this.c[0] * (l1 - l2 + l2 / l1), 1 / this.p.b)
-    } else {
-      // All other cases
-      return Math.pow(this.c[0] * w, 1 / this.p.b)
-    }
+    return this._q(this.r.next())
   }
 
   _pdf (x) {

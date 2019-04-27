@@ -28,13 +28,7 @@ export default class extends Distribution {
 
   _generator () {
     // Inverse transform sampling
-    let u = this.r.next()
-    let z = Math.pow(u / (1 - u), 1 / this.p.kappa)
-
-    // Handle z << 1 cases
-    return 1 + z === 1
-      ? z / this.p.lambda
-      : Math.log(1 + z) / this.p.lambda
+    return this._q(this.r.next())
   }
 
   _pdf (x) {

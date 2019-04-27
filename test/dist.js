@@ -634,14 +634,13 @@ describe('dist', () => {
     name: 'Zipf',
     p: () => [Param.shape() + 1]
   }].forEach(d => {
-    // if (d.name !== 'Beta') return
+    // if (d.name !== 'Rice') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
         describe('.sample()', () => utSample(d.name, d.p))
 
-        // TODO Add .q() to description
-        describe('.pdf(), .cdf()', () => utPdf(d.name, d.p))
+        describe('.pdf(), .cdf(), .q()', () => utPdf(d.name, d.p))
 
         describe('.test()', () => {
           it('should pass for own distribution', () => {
@@ -660,8 +659,7 @@ describe('dist', () => {
           })
         })
 
-        // TODO Add .q() to description
-        describe('.pdf(), .cdf()', () => {
+        describe('.pdf(), .cdf(), .q()', () => {
           d.cases.forEach(c => {
             describe(c.desc, () => utPdf(d.name, c.p))
           })
@@ -705,7 +703,6 @@ describe('dist', () => {
       })
     })
 
-    // TODO Add .q() to description
     describe('.pdf(), .cdf()', () => {
       it('differentiating cdf should give pdf', () => {
         utils.repeat(() => {
