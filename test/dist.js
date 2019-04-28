@@ -782,6 +782,13 @@ describe('dist', () => {
       [-1], [0] // a > 0
     ]
   }, {
+    name: 'Mielke',
+    p: () => [Param.shape(), Param.shape()],
+    pi: [
+      [-1, 1], [0, 1],  // k > 0
+      [2, -1], [2, 0]   // s > 0
+    ]
+  }, {
     name: 'Moyal',
     p: () => [Param.location(), Param.scale()],
     pi: [
@@ -989,7 +996,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'Moyal') return
+    // if (d.name !== 'Mielke') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
