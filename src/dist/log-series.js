@@ -1,10 +1,29 @@
 import { betaIncomplete } from '../special/beta-incomplete'
 import Distribution from './_distribution'
 
+/**
+ * Generator for the [log-series distribution]{@link }:
+ *
+ * $$f(k; p) = \frac{-1}{\ln(1 - p)}\frac{p^k}{k},$$
+ *
+ * with \(p \in (0, 1)\). Support: \(k \in \mathbb{N}^+\).
+ *
+ * @class LogSeries
+ * @memberOf ran.dist
+ * @param {number=} p Distribution parameter. Default value is 0.5.
+ * @constructor
+ */
 export default class extends Distribution {
   constructor (p = 0.5) {
     super('discrete', arguments.length)
+
+    // Validate parameters
     this.p = { p }
+    this._validate({ p }, [
+      'p > 0', 'p < 1'
+    ])
+
+    // Set support
     this.s = [{
       value: 1,
       closed: true

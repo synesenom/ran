@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; a, b, c) = \begin{cases}0 &\quad\text{for $x < a$},\\\frac{2(x - a)}{(b - a)(c - a)} &\quad\text{for $a \le x < c$}\\\frac{2}{b - a} &\quad\text{for $x = c$}\\\frac{2(b - x)}{(b - a)(b - c)} &\quad\text{for $c < x \le b$}\\0 &\quad\text{for $b < x$} \\\end{cases},$$
  *
- * with \(a, b, c \in \mathbb{R}\) and \(a \le c \le b\). Support: \(x \in [a, b]\).
+ * with \(a, b, c \in \mathbb{R}\), \(a < b\) and \(a \le c \le b\). Support: \(x \in [a, b]\).
  *
  * @class Triangular
  * @memberOf ran.dist
@@ -17,7 +17,15 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (a = 0, b = 1, c = 0.5) {
     super('continuous', arguments.length)
+
+    // Validate parameters
     this.p = { a, b, c }
+    this._validate({ a, b, c }, [
+      'a < b',
+      'a <= c', 'c <= b'
+    ])
+
+    // Set support
     this.s = [{
       value: a,
       closed: true

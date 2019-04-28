@@ -18,7 +18,14 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (mu = 0, c = 1) {
     super('continuous', arguments.length)
+
+    // Validate parameters
     this.p = { mu, c }
+    this._validate({ mu, c }, [
+      'c > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: mu,
       closed: true
@@ -26,7 +33,6 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
-    // this.mode = mu + c / 3
   }
 
   _generator () {

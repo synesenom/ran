@@ -18,7 +18,16 @@ export default class extends Gamma {
   // Transformation of gamma distribution
   constructor (a = 1, d = 1, p = 1) {
     super(d / p, Math.pow(a, -p))
+
+    // Validate parameters
     this.p = Object.assign(this.p, { a, d, p })
+    this._validate({ a, d, p }, [
+      'a > 0',
+      'd > 0',
+      'p > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: d >= 1 && p >= 1 && d >= p
@@ -26,7 +35,6 @@ export default class extends Gamma {
       value: Infinity,
       closed: false
     }]
-    this.mode = d > 0 ? a * Math.pow((d - 1) / p, 1 / p) : 0
   }
 
   _generator () {

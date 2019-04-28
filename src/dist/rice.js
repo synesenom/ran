@@ -19,7 +19,15 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (nu = 1, sigma = 1) {
     super('continuous', arguments.length)
+
+    // Validate parameters
     this.p = { nu, sigma }
+    this._validate({ nu, sigma }, [
+      'nu > 0',
+      'sigma > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: true
@@ -27,6 +35,8 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speet-up constants
     this.c = [
       0.5 * Math.pow(nu / sigma, 2),
       sigma * sigma,

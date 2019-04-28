@@ -6,7 +6,7 @@ import Custom from './categorical'
  *
  * $$f(k; N, K, r) = \frac{\begin{pmatrix}k + r - 1 \\ k \\ \end{pmatrix} \begin{pmatrix}N - r - k \\ K - k \\ \end{pmatrix}}{\begin{pmatrix}N \\ K \\ \end{pmatrix}},$$
  *
- * with \(N \in \mathbb{N}_0\), \(K \in \{0, 1, ..., N\}\) and \(r \in \{0, 1, ..., K - N\}\). Support: \(k \in \{0, ..., K\}\).
+ * with \(N \in \mathbb{N}_0\), \(K \in \{0, 1, ..., N\}\) and \(r \in \{0, 1, ..., N - K\}\). Support: \(k \in \{0, ..., K\}\).
  *
  * @class NegativeHypergeometric
  * @memberOf ran.dist
@@ -25,5 +25,12 @@ export default class extends Custom {
       weights.push(Math.exp(logBinomial(Ki + ri - 1, k) + logBinomial(Ni - ri - k, Ki - k) - logBinomial(Ni, Ki)))
     }
     super(weights)
+
+    // Validate parameters
+    this._validate({ N: Ni, K: Ki, r: ri }, [
+      'N >= 0',
+      'K > 0', 'K <= N',
+      'r > 0', 'r <= N - K'
+    ])
   }
 }

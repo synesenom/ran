@@ -18,7 +18,15 @@ export default class extends Beta {
   // Transformation of beta distribution
   constructor (d1 = 2, d2 = 2) {
     super(d1 / 2, d2 / 2)
+
+    // Validate parameters
     this.p = Object.assign(this.p, { d1, d2 })
+    this._validate({ d1, d2 }, [
+      'd1 > 0',
+      'd2 > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: d1 !== 1
@@ -26,7 +34,6 @@ export default class extends Beta {
       value: Infinity,
       closed: false
     }]
-    this.mode = d2 > 2 ? (d2 - 2) * d2 / (d1 * (d2 + 2)) : 0
   }
 
   _generator () {

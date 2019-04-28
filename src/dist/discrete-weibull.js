@@ -10,13 +10,21 @@ import Distribution from './_distribution'
  * @class DiscreteWeibull
  * @memberOf ran.dist
  * @param {number=} q First shape parameter. Default value is 0.5.
- * @param {number=} beta Second shape parameter. Default value is 0.5.
+ * @param {number=} beta Second shape parameter. Default value is 1.
  * @constructor
  */
 export default class extends Distribution {
   constructor (q = 0.5, beta = 1) {
     super('discrete', arguments.length)
+
+    // Validate parameters
     this.p = { q, beta }
+    this._validate({ q, beta }, [
+      'q > 0', 'q < 1',
+      'beta > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: true

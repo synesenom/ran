@@ -20,8 +20,16 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (n = 100, p = 0.5) {
     super('discrete', arguments.length)
+
+    // Validate parameters
     let pp = p <= 0.5 ? p : 1 - p
     this.p = { n: Math.round(n), p }
+    this._validate({ n, p }, [
+      'n >= 0',
+      'p >= 0', 'p <= 1'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: true
@@ -29,6 +37,8 @@ export default class extends Distribution {
       value: this.p.n,
       closed: true
     }]
+
+    // Speed-up constants
     this.c = [pp, this.p.n * pp]
   }
 

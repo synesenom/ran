@@ -16,7 +16,14 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (x0 = 0, gamma = 1) {
     super('continuous', arguments.length)
+
+    // Validate parameters
     this.p = { x0, gamma }
+    this._validate({ x0, gamma }, [
+      'gamma > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: -Infinity,
       closed: false
@@ -24,7 +31,11 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
-    this.c = [Math.PI * this.p.gamma]
+
+    // Speed-up constants
+    this.c = [
+      Math.PI * this.p.gamma
+    ]
   }
 
   _generator () {

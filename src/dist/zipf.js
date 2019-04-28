@@ -9,13 +9,20 @@ import Categorical from './categorical'
  *
  * @class Zipf
  * @memberOf ran.dist
- * @param {number=} s Exponent of the distribution. Default value is 2.
- * @param {number=} N Number of words. Default is 100.
+ * @param {number=} s Exponent of the distribution. Default value is 1.
+ * @param {number=} N Number of words. If not an integer, it is rounded to the nearest integer. Default is 100.
  * @constructor
  */
 export default class extends Categorical {
   // Special case of categorical
   constructor (s = 1, N = 100) {
-    super(Array.from({ length: N }, (d, i) => Math.pow(i + 1, -s)), 1)
+    let Ni = Math.round(N)
+    super(Array.from({ length: Ni }, (d, i) => Math.pow(i + 1, -s)), 1)
+
+    // Validate parameters
+    this._validate({ s, N: Ni }, [
+      's >= 0',
+      'N > 0'
+    ])
   }
 }

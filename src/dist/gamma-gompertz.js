@@ -17,7 +17,16 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (b = 1, s = 1, beta = 1) {
     super('continuous', arguments.length)
+
+    // Validate parameters
     this.p = { b, s, beta }
+    this._validate({ b, s, beta }, [
+      'b > 0',
+      's > 0',
+      'beta > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: true

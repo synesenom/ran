@@ -19,7 +19,15 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (m = 1, omega = 1) {
     super('continuous', arguments.length)
+
+    // Validate parameters
     this.p = { m, omega }
+    this._validate({ m, omega }, [
+      'm >= 0.5',
+      'omega > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: true
@@ -27,8 +35,11 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
-    this.mode = Math.sqrt((m - 0.5) * omega / m)
-    this.c = [2 * Math.pow(this.p.m, this.p.m) / Math.pow(this.p.omega, this.p.m)]
+
+    // Speed-up constants
+    this.c = [
+      2 * Math.pow(this.p.m, this.p.m) / Math.pow(this.p.omega, this.p.m)
+    ]
   }
 
   _generator () {

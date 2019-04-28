@@ -17,6 +17,8 @@ export default class extends Gamma {
   // Transformation of gamma distribution
   constructor (alpha = 1, beta = 1) {
     super(alpha, beta)
+
+    // Set support
     this.s = [{
       value: 0,
       closed: false
@@ -24,7 +26,8 @@ export default class extends Gamma {
       value: Infinity,
       closed: false
     }]
-    this.mode = beta / (alpha + 1)
+
+    // Speed-up constants
     this.c = [Math.pow(beta, alpha)]
   }
 

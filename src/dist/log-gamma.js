@@ -6,7 +6,7 @@ import Gamma from './gamma'
  *
  * $$f(x; \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)} (\ln(x - \mu + 1)]^{\alpha - 1} (x - \mu + 1)^{-(1 + \beta)},$$
  *
- * where \(\alpha, \beta \in \mathbb{R}^+\) and \(\mu \in \mathbb{R}^+ / \{0\}\). Support: \(x \in [\mu, \infty)\).
+ * where \(\alpha, \beta \in \mathbb{R}^+\) and \(\mu \in \mathbb{R}^+ \cup \{0\}\). Support: \(x \in [\mu, \infty)\).
  *
  * @class LogGamma
  * @memberOf ran.dist
@@ -18,7 +18,14 @@ import Gamma from './gamma'
 export default class extends Gamma {
   constructor (alpha = 1, beta = 1, mu = 0) {
     super(alpha, beta)
+
+    // Validate parameters
     this.p = Object.assign(this.p, { mu })
+    this._validate({ mu }, [
+      'mu >= 0'
+    ])
+
+    // Set support
     this.s = [{
       value: mu,
       closed: true

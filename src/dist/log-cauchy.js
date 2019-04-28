@@ -17,6 +17,8 @@ export default class extends Cauchy {
   // Transforming Cauchy distribution
   constructor (mu = 0, sigma = 1) {
     super(mu, sigma)
+
+    // Set support
     this.s = [{
       value: 0,
       closed: false

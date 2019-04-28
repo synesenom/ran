@@ -17,7 +17,15 @@ import Beta from './beta'
 export default class extends Beta {
   constructor (a = 0, b = 0.5, c = 1) {
     super((4 * b + c - 5 * a) / (c - a), (5 * c - a - 4 * b) / (c - a))
+
+    // Validate parameters
     this.p = Object.assign(this.p, { a, b, c })
+    this._validate({ a, b, c }, [
+      'a < b',
+      'b < c'
+    ])
+
+    // Set support
     this.s = [{
       value: a,
       closed: true
@@ -25,7 +33,6 @@ export default class extends Beta {
       value: c,
       closed: true
     }]
-    this.mode = b
   }
 
   _generator () {

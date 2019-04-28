@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \theta) = \frac{\theta^2}{1 + \theta} (1 + x) e^{-\theta x},$$
  *
- * with \(theta \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+ \cup \{0\}\).
+ * with \(\theta \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+ \cup \{0\}\).
  *
  * @class Lindley
  * @memberOf ran.dist
@@ -16,7 +16,14 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (theta = 1) {
     super('continuous', arguments.length)
+
+    // Validate parameters
     this.p = { theta }
+    this._validate({ theta }, [
+      'theta > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: true
@@ -25,7 +32,7 @@ export default class extends Distribution {
       closed: false
     }]
 
-    // Speed up parameters for rejection sampling
+    // Speed-up constants
     this.c = [
       1 + theta,
       theta <= 2 ? theta * Math.exp(1 - theta / 2) / 2 : 1

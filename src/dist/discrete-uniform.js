@@ -17,7 +17,14 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (xmin = 0, xmax = 100) {
     super('discrete', arguments.length)
+
+    // Validate parameters
     this.p = { xmin: Math.round(xmin), xmax: Math.round(xmax) }
+    this._validate({ xmin, xmax }, [
+      'xmin < xmax'
+    ])
+
+    // Set support
     this.s = [{
       value: this.p.xmin,
       closed: true
@@ -25,7 +32,11 @@ export default class extends Distribution {
       value: this.p.xmax,
       closed: true
     }]
-    this.c = [this.p.xmax - this.p.xmin + 1]
+
+    // Speed-up constants
+    this.c = [
+      this.p.xmax - this.p.xmin + 1
+    ]
   }
 
   _generator () {

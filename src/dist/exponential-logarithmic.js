@@ -9,14 +9,22 @@ import Distribution from './_distribution'
  *
  * @class ExponentialLogarithmic
  * @memberOf ran.dist
- * @param {number=} p Shape parameter. Default value is 1.
+ * @param {number=} p Shape parameter. Default value is 0.5.
  * @param {number=} beta Scale parameter. Default value is 1.
  * @constructor
  */
 export default class extends Distribution {
   constructor (p = 0.5, beta = 1) {
     super('continuous', arguments.length)
+
+    // Validate parameters
     this.p = { p, beta }
+    this._validate({ p, beta }, [
+      'p > 0', 'p < 1',
+      'beta > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: true

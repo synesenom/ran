@@ -17,7 +17,15 @@ export default class extends Exponential {
   // Transformation of exponential distribution
   constructor (lambda = 1, k = 1) {
     super(1)
+
+    // Validate parameters
     this.p = Object.assign(this.p, { lambda2: lambda, k })
+    this._validate({ lambda, k }, [
+      'lambda > 0',
+      'k > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: k >= 1

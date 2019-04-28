@@ -7,7 +7,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; n) = \frac{1}{(n - 1)!} \sum_{k = 0}^{\lfloor x\rfloor} (-1)^k \begin{pmatrix}n \\ k \\ \end{pmatrix} (x - k)^{n - 1},$$
  *
- * with \(n \in \mathbb{N}_0\). Support: \(x \in [0, n]\).
+ * with \(n \in \mathbb{N}^+\). Support: \(x \in [0, n]\).
  *
  * @class IrwinHall
  * @memberOf ran.dist
@@ -17,7 +17,14 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (n = 1) {
     super('continuous', arguments.length)
+
+    // Validate parameters
     this.p = { n: Math.round(n) }
+    this._validate({ n: Math.round(n) }, [
+      'n > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: true
@@ -25,6 +32,8 @@ export default class extends Distribution {
       value: n,
       closed: true
     }]
+
+    // Speed-up constants
     this.c = Array.from({ length: n + 1 }, (d, k) => logGamma(k + 1) + logGamma(n - k + 1))
   }
 

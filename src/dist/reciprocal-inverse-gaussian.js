@@ -16,6 +16,8 @@ import InverseGaussian from './inverse-gaussian'
 export default class extends InverseGaussian {
   constructor (mu = 1, lambda = 1) {
     super(mu, lambda)
+
+    // Set support
     this.s = [{
       value: 0,
       closed: false

@@ -19,7 +19,15 @@ import Beta from './beta'
 export default class extends Beta {
   constructor (alpha = 1, beta = 1, theta = 0.5, a = 0, b = 1) {
     super(alpha, beta)
+
+    // Validate parameters
     this.p = Object.assign(this.p, { theta, a, b })
+    this._validate({ theta, a, b }, [
+      'theta >= 0', 'theta <= 1',
+      'a < b'
+    ])
+
+    // Set support
     this.s = [{
       value: a,
       closed: true

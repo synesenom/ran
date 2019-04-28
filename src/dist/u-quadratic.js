@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; a, b) = \alpha (x - \beta)^2,$$
  *
- * where \(\alpha = \frac{12}{(b - a)^3}\), \(\beta = \frac{a + b}{2}\), \(a, b \in mathbb{R}\) and \(a < b\). Support: \(x \in [1, b]\).
+ * where \(\alpha = \frac{12}{(b - a)^3}\), \(\beta = \frac{a + b}{2}\), \(a, b \in \mathbb{R}\) and \(a < b\). Support: \(x \in [1, b]\).
  *
  * @class UQuadratic
  * @memberOf ran.dist
@@ -16,7 +16,14 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (a = 0, b = 1) {
     super('continuous', arguments.length)
+
+    // Validate parameters
     this.p = { a, b }
+    this._validate({ a, b }, [
+      'a < b'
+    ])
+
+    // Set support
     this.s = [{
       value: a,
       closed: true
@@ -24,6 +31,8 @@ export default class extends Distribution {
       value: b,
       closed: true
     }]
+
+    // Speed-up constants
     this.c = [
       12 / Math.pow(b - a, 3),
       (a + b) / 2,

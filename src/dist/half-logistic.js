@@ -14,6 +14,8 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor () {
     super('continuous', arguments.length)
+
+    // Set support
     this.s = [{
       value: 0,
       closed: true

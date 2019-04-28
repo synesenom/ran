@@ -18,7 +18,14 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (xmin = 0, xmax = 1) {
     super('continuous', arguments.length)
+
+    // Validate parameters
     this.p = { xmin, xmax }
+    this._validate({ xmin, xmax }, [
+      'xmin < xmax'
+    ])
+
+    // Set support
     this.s = [{
       value: xmin,
       closed: true
@@ -26,7 +33,11 @@ export default class extends Distribution {
       value: xmax,
       closed: true
     }]
-    this.c = [xmax - xmin]
+
+    // Speed-up constants
+    this.c = [
+      xmax - xmin
+    ]
   }
 
   _generator () {

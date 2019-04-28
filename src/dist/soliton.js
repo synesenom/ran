@@ -16,6 +16,11 @@ export default class extends Categorical {
   // Special case of custom
   constructor (N = 10) {
     // Define weights
-    super([0, 1 / N].concat(Array.from({ length: N - 2 }, (d, i) => 1 / ((i + 1) * (i + 2)))))
+    super([1 / N].concat(Array.from({ length: N - 2 }, (d, i) => 1 / ((i + 1) * (i + 2)))), 1)
+
+    // Validate parameters
+    this._validate({ N }, [
+      'N > 0'
+    ])
   }
 }

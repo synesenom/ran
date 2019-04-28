@@ -17,5 +17,11 @@ export default class extends Gamma {
   // Special case of gamma
   constructor (k = 1, lambda = 1) {
     super(Math.round(k), lambda)
+
+    // Validate parameters
+    this._validate({ k, lambda }, [
+      'k > 0',
+      'lambda > 0'
+    ])
   }
 }

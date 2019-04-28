@@ -20,6 +20,8 @@ export default class extends Beta {
   // Transformation of beta distribution
   constructor (alpha = 2, beta = 2) {
     super(alpha, beta)
+
+    // Set support
     this.s = [{
       value: 0,
       closed: alpha >= 1
@@ -27,7 +29,6 @@ export default class extends Beta {
       value: Infinity,
       closed: false
     }]
-    this.mode = alpha >= 1 ? (alpha - 1) / (beta + 1) : 0
   }
 
   _generator () {

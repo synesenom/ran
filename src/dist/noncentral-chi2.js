@@ -19,7 +19,16 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (k = 2, lambda = 1) {
     super('continuous', arguments.length)
-    this.p = { k: Math.round(k), lambda }
+
+    // Validate parameters
+    let ki = Math.round(k)
+    this.p = { k: ki, lambda }
+    this._validate({ k: ki, lambda }, [
+      'k > 0',
+      'lambda > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: true
@@ -27,6 +36,8 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
     this.c = [
       this.p.k % 2 === 0
     ]

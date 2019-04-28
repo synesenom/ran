@@ -18,7 +18,14 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (lambda = 1) {
     super('discrete', arguments.length)
+
+    // Validate parameters
     this.p = { lambda }
+    this._validate({ lambda }, [
+      'lambda > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: true

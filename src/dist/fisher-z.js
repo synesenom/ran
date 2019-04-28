@@ -17,6 +17,8 @@ export default class extends F {
   // Transforming F variate
   constructor (d1 = 1, d2 = 1) {
     super(d1, d2)
+
+    // Set support
     this.s = [{
       value: -Infinity,
       closed: false
@@ -24,7 +26,6 @@ export default class extends F {
       value: Infinity,
       closed: false
     }]
-    this.mode = 0
   }
 
   _generator () {

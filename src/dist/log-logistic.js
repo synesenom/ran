@@ -1,4 +1,4 @@
-import Logistic from './logistic'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [log-logistic distribution]{@link https://en.wikipedia.org/wiki/Log-logistic_distribution} (also known as Fisk distribution):
@@ -13,9 +13,18 @@ import Logistic from './logistic'
  * @param {number=} beta Shape parameter. Default value is 1.
  * @constructor
  */
-export default class extends Logistic {
+export default class extends Distribution {
   constructor (alpha = 1, beta = 1) {
-    super(Math.log(alpha), 1 / beta)
+    super('continuous', arguments.length)
+
+    // Validate parameters
+    this.p = { alpha, beta }
+    this._validate({ alpha, beta }, [
+      'alpha > 0',
+      'beta > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: false
@@ -23,23 +32,29 @@ export default class extends Logistic {
       value: Infinity,
       closed: false
     }]
-    this.mode = beta > 1 ? alpha * Math.pow((beta - 1) / (beta + 1), 1 / beta) : 0
+
+    // Speed-up constants
+    this.c = [
+      beta / alpha
+    ]
   }
 
   _generator () {
-    // Direct sampling by transforming logistic variate
-    return Math.exp(super._generator())
+    // Inverse transform sampling
+    return this._q(this.r.next())
   }
 
   _pdf (x) {
-    return super._pdf(Math.log(x)) / x
+    let xa = x / this.p.alpha
+    let y = Math.pow(xa, this.p.beta - 1)
+    return this.c[0] * y / Math.pow(1 + xa * y, 2)
   }
 
   _cdf (x) {
-    return super._cdf(Math.log(x))
+    return 1 / (1 + Math.pow(x / this.p.alpha, -this.p.beta))
   }
 
   _q (p) {
-    return Math.exp(super._q(p))
+    return this.p.alpha * Math.pow(1 / p - 1, -1 / this.p.beta)
   }
 }

@@ -17,6 +17,8 @@ export default class extends Normal {
   // Transformation of normal distribution
   constructor (sigma = 1) {
     super(0, sigma)
+
+    // Set support
     this.s = [{
       value: 0,
       closed: true

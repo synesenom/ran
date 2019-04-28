@@ -19,7 +19,15 @@ export default class extends Normal {
   // Transformation of normal distribution
   constructor (gamma = 0, delta = 1, lambda = 1, xi = 0) {
     super()
+
+    // Validate parameters
     this.p = Object.assign(this.p, { gamma, delta, lambda, xi })
+    this._validate({ gamma, delta, lambda, xi }, [
+      'delta > 0',
+      'lambda > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: xi,
       closed: true

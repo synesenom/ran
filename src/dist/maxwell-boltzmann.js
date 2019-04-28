@@ -15,5 +15,10 @@ import Gamma from './gamma'
 export default class extends Gamma {
   constructor (a = 1) {
     super(1.5, 2 * a * a)
+
+    // Validate parameters
+    this._validate({ a }, [
+      'a > 0'
+    ])
   }
 }

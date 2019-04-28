@@ -16,7 +16,14 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (rho = 2) {
     super('discrete', arguments.length)
+
+    // Validate parameters
     this.p = { rho }
+    this._validate({ rho }, [
+      'rho > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: 1,
       closed: true
@@ -24,6 +31,8 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
     this.c = [
       this.p.rho + 1
     ]

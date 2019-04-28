@@ -16,7 +16,14 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (a = 0.5) {
     super('discrete', arguments.length)
+
+    // Validate parameters
     this.p = { a }
+    this._validate({ a }, [
+      'a > 0', 'a < 1'
+    ])
+
+    // Set support
     this.s = [{
       value: 1,
       closed: true
@@ -24,9 +31,8 @@ export default class extends Distribution {
       value: Infinity,
       closed: true
     }]
-    this.mode = - 1 / Math.log(1 - a)
 
-    // Speed up constants for rejection sampling
+    // Speed-up constants
     let s = 1.5
     let k = -(s + 1) / Math.log(1 - a)
     this.c = [

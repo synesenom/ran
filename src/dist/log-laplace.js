@@ -17,6 +17,8 @@ export default class extends Laplace {
   // Transforming Laplace distribution
   constructor (mu = 0, b = 1) {
     super(mu, b)
+
+    // Set support
     this.s = [{
       value: 0,
       closed: false

@@ -16,7 +16,14 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (lambda = 1) {
     super('continuous', arguments.length)
+
+    // Validate parameters
     this.p = { lambda }
+    this._validate({ lambda }, [
+      'lambda > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: true
@@ -24,6 +31,8 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
     this.c = [
       Math.exp(-lambda)
     ]

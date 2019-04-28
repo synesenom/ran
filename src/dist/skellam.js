@@ -19,7 +19,15 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (mu1 = 1, mu2 = 1) {
     super('discrete', arguments.length)
+
+    // Validate parameters
     this.p = { mu1, mu2 }
+    this._validate({ mu1, mu2 }, [
+      'mu1 > 0',
+      'mu2 > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: -Infinity,
       closed: false
@@ -27,6 +35,8 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
     this.c = [
       Math.exp(-mu1 - mu2),
       Math.sqrt(mu1 / mu2),

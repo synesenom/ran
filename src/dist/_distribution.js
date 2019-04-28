@@ -38,6 +38,30 @@ class Distribution {
     this._cdfTable = []
   }
 
+  _validate(params, constraints) {
+    // Go through parameters and check constraints
+    let errors = constraints.filter(constraint => {
+      // Read variables from constraint equation
+      let eq = constraint
+      for (let p in params) {
+        if (params.hasOwnProperty(p)) {
+          // Replace variable value with name in equation
+          eq = eq.replace(
+            new RegExp(`(${p} | ${p})`),
+            params[p]
+          )
+        }
+      }
+
+      // Evaluate condition and return constraint if failed
+      return !(new Function(`return ${eq}`)())
+    })
+
+    if (errors.length > 0) {
+      throw Error(`Invalid parameters. Parameters must satisfy the following constraints: ${constraints.join(', ')}`)
+    }
+  }
+
   /**
    * Generates a single random variate.
    *

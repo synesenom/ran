@@ -7,6 +7,16 @@ import InvalidDiscrete from '../src/dist/_invalid'
 
 const LAPS = 1000
 
+function utConstructor(name, invalidParams) {
+  it('should throw error if params are invalid', () => {
+    invalidParams.forEach(p => {
+      assert.throws(() => {
+        new dist[name](...p)
+      })
+    })
+  })
+}
+
 function utSample (name, params) {
   it('sample should contain valid numbers', () => {
     utils.trials(() => {
@@ -175,7 +185,7 @@ function utTest (name, params, type = 'self') {
 
         const foreign = self.type() === 'continuous'
           ? new dist.Uniform(Math.min(...sample), Math.max(...sample))
-          : new dist.DiscreteUniform(Math.min(...sample), Math.max(...sample))
+          : new dist.DiscreteUniform(Math.min(...sample), Math.max(...sample) + 1)
         return !foreign.test(sample).passed
       }, 3)
       break
@@ -330,18 +340,34 @@ describe('dist', () => {
   // Ordinary distributions
   [{
     name: 'Arcsine',
-    p: () => [Param.rangeMin(), Param.rangeMax()]
+    p: () => [Param.rangeMin(), Param.rangeMax()],
+    pi: [
+      [1, 1], [2, 1]  // a < b
+    ]
   }, {
     name: 'Bates',
-    p: () => [Param.count(), Param.rangeMin(), Param.rangeMax()]
+    p: () => [Param.count(), Param.rangeMin(), Param.rangeMax()],
+    pi: [
+      [-1, 0, 1], [0, 0, 1],  // n > 0
+      [10, 1, 1], [10, 2, 1]    // a < b
+    ]
   }, {
     name: 'Benini',
-    p: () => [Param.shape(), Param.shape(), Param.scale()]
+    p: () => [Param.shape(), Param.shape(), Param.scale()],
+    pi: [
+      [-1, 1, 1], [0, 1, 1],  // alpha > 0
+      [1, -1, 1], [1, 0, 1],  // beta > 0
+      [1, 1, -1], [1, 1, 0]   // sigma > 0
+    ]
   }, {
     name: 'BenktanderII',
     cases: [{
       desc: 'high shape parameter',
-      p: () => [Param.scale(), 1 - Param.prob() / 1000]
+      p: () => [Param.scale(), 1 - Param.prob() / 1000],
+      pi: [
+        [-1, 0.5], [0, 0.5],      // a > 0
+        [1, -1], [1, 0], [1, 1.5] // 0 < b <= 1
+      ]
     }, {
       desc: 'unit shape parameter',
       p: () => [Param.scale(), 1]
@@ -351,21 +377,40 @@ describe('dist', () => {
     }]
   }, {
     name: 'Bernoulli',
-    p: () => [Param.prob()]
+    p: () => [Param.prob()],
+    pi: [
+      [-1], [2] // 0 <= p <= 1
+    ]
   }, {
     name: 'Beta',
-    p: () => [Param.shape(), Param.shape()]
+    p: () => [Param.shape(), Param.shape()],
+    pi: [
+      [-1, 2], [0, 2], // alpha > 0
+      [2, -1], [2, 0]  // beta > 0
+    ]
   }, {
     name: 'BetaPrime',
-    p: () => [Param.shape(), Param.shape()]
+    p: () => [Param.shape(), Param.shape()],
+    pi: [
+      [-1, 2], [0, 2], // alpha > 0
+      [2, -1], [2, 0]  // beta > 0
+    ]
   }, {
     name: 'BetaRectangular',
-    p: () => [Param.shape(), Param.shape(), Param.prob(), Param.rangeMin(), Param.rangeMax()]
+    p: () => [Param.shape(), Param.shape(), Param.prob(), Param.rangeMin(), Param.rangeMax()],
+    pi: [
+      [1, 1, -1, 0, 1], [1, 1, 2, 0, 1],    // 0 <= theta <= 1
+      [1, 1, 0.5, 1, 1], [1, 1, 0.5, 2, 1], // a < b
+    ]
   }, {
     name: 'Binomial',
     cases: [{
       desc: 'small n',
-      p: () => [int(10, 20), Param.prob()]
+      p: () => [int(10, 20), Param.prob()],
+      pi: [
+        [-1, 0.5],            // n >= 0
+        [100, -1], [100, 2],  // 0 <= p <= 1
+      ]
     }, {
       desc: 'small mean',
       p: () => [int(30, 100), Param.prob() / 105]
@@ -375,21 +420,41 @@ describe('dist', () => {
     }]
   }, {
     name: 'BirnbaumSaunders',
-    p: () => [Param.location(), Param.scale(), Param.shape()]
+    p: () => [Param.location(), Param.scale(), Param.shape()],
+    pi: [
+      [0, -1, 1], [0, 0, 1],  // beta > 0
+      [0, 1, -1], [0, 1, 0],  // gamma > 0
+    ]
   }, {
     name: 'BoundedPareto',
-    p: () => [Param.rangeMin(), Param.rangeMax(), Param.shape()]
+    p: () => [Param.rangeMin(), Param.rangeMax(), Param.shape()],
+    pi: [
+      [-1, 10, 1], [0, 10, 1],  // L > 0
+      [1, -1, 1], [1, 0, 1],    // H > 0
+      [10, 10, 1], [12, 10, 1], // L < H
+      [1, 10, -1], [1, 10, 0],  // alpha > 0
+    ]
   }, {
     name: 'Bradford',
-    p: () => [Param.shape()]
+    p: () => [Param.shape()],
+    pi: [
+      [-1], [0] // c > 0
+    ]
   }, {
     name: 'Burr',
-    p: () => [Param.shape(), Param.shape()]
+    p: () => [Param.shape(), Param.shape()],
+    pi: [
+      [-1, 1], [0, 1], // c > 0
+      [1, -1], [1, 0], // k > 0
+    ]
   }, {
     name: 'Categorical',
     cases: [{
       desc: 'small n',
       p: () => [Array.from({ length: int(0, 1) }, Math.random)],
+      pi: [
+        [[-1, 1, 1], 0],  // w_i > 0
+      ],
       skip: ['test-foreign']
     }, {
       desc: 'moderate n',
@@ -401,59 +466,123 @@ describe('dist', () => {
     }]
   }, {
     name: 'Cauchy',
-    p: () => [Param.location(), Param.scale()]
+    p: () => [Param.location(), Param.scale()],
+    pi: [
+      [0, -1], [0, 0]  // gamma > 0
+    ]
   }, {
     name: 'Chi',
-    p: () => [Param.degree()]
+    p: () => [Param.degree()],
+    pi: [
+      [-1], [0] // k > 0
+    ]
   }, {
     name: 'Chi2',
-    p: () => [Param.degree()]
+    p: () => [Param.degree()],
+    pi: [
+      [-1], [0] // k > 0
+    ]
   }, {
     name: 'Dagum',
-    p: () => [Param.shape(), Param.shape(), Param.scale()]
+    p: () => [Param.shape(), Param.shape(), Param.scale()],
+    pi: [
+      [-1, 1, 1], [0, 1, 1],  // p > 0
+      [1, -1, 1], [1, 0, 1],  // a > 0
+      [1, 1, -1], [1, 1, 0]   // b > 0
+    ]
   }, {
     name: 'DiscreteUniform',
     p: () => [int(10), int(11, 100)],
+    pi: [
+      [100, 100], [105, 100]  // xmin < xmax
+    ],
     skip: ['test-foreign']
   }, {
     name: 'DiscreteWeibull',
-    p: () => [Param.prob(), Param.shape()]
+    p: () => [Param.prob(), Param.shape()],
+    pi: [
+      [-1, 1], [0, 1], [1, 1], [2, 1],  // 0 < q < 1
+      [0.5, -1], [0.5, 0]               // beta > 0
+    ]
   }, {
     name: 'Erlang',
-    p: () => [Param.degree(), Param.rate()]
-  }, {
-    name: 'ExponentialLogarithmic',
-    p: () => [Param.prob(), Param.scale()]
+    p: () => [Param.degree(), Param.rate()],
+    pi: [
+      [-1, 1], [0, 1], // k > 0
+      [1, -1], [1, 0]  // lambda > 0
+    ]
   }, {
     name: 'Exponential',
-    p: () => [Param.rate()]
+    p: () => [Param.rate()],
+    pi: [
+      [-1], [0] // lambda > 0
+    ]
+  }, {
+    name: 'ExponentialLogarithmic',
+    p: () => [Param.prob(), Param.scale()],
+    pi: [
+      [-1, 1], [0, 1], [1, 1], [2, 1],  // 0 < p < 1
+      [0.5, -1], [0.5, 0]               // beta > 0
+    ]
   }, {
     name: 'F',
-    p: () => [Param.degree(), Param.degree()]
+    p: () => [Param.degree(), Param.degree()],
+    pi: [
+      [-1, 2], [0, 2],  // d1 > 0
+      [2, -1], [2, 0]   // d2 > 0
+    ]
   }, {
     name: 'FisherZ',
-    p: () => [Param.degree(), Param.degree()]
+    p: () => [Param.degree(), Param.degree()],
+    pi: [
+      [-1, 2], [0, 2],  // d1 > 0
+      [2, -1], [2, 0]   // d2 > 0
+    ]
   }, {
     name: 'FlorySchulz',
     p: () => [Param.prob()],
+    pi: [
+      [-1], [0], [1], [2] // 0 < a < 1
+    ],
     skip: ['test-foreign']
   }, {
     name: 'Frechet',
-    p: () => [Param.shape(), Param.scale(), Param.location()]
+    p: () => [Param.shape(), Param.scale(), Param.location()],
+    pi: [
+      [-1, 1, 0], [0, 1, 0],  // alpha > 0
+      [1, -1, 0], [1, 0, 0]   // s > 0
+    ]
   }, {
     name: 'Gamma',
-    p: () => [Param.shape(), Param.rate()]
+    p: () => [Param.shape(), Param.rate()],
+    pi: [
+      [-1, 1], [0, 1],  // alpha > 0
+      [1, -1], [1, 0]   // beta > 0
+    ]
   }, {
     name: 'GammaGompertz',
-    p: () => [Param.scale(), Param.shape(), Param.shape()]
+    p: () => [Param.scale(), Param.shape(), Param.shape()],
+    pi: [
+      [-1, 1, 1], [0, 1, 1],  // b > 0
+      [1, -1, 1], [1, 0, 1],  // s > 0
+      [1, 1, -1], [1, 1, 0]   // beta > 0
+    ]
   }, {
     name: 'GeneralizedGamma',
-    p: () => [Param.scale(), Param.shape(), Param.shape()]
+    p: () => [Param.scale(), Param.shape(), Param.shape()],
+    pi: [
+      [-1, 1, 1], [0, 1, 1],  // a > 0
+      [1, -1, 1], [1, 0, 1],  // d > 0
+      [1, 1, -1], [1, 1, 0]   // p > 0
+    ]
   }, {
     name: 'GeneralizedPareto',
     cases: [{
       desc: 'positive shape parameter',
-      p: () => [Param.location(), Param.scale(), Param.shape()]
+      p: () => [Param.location(), Param.scale(), Param.shape()],
+      pi: [
+        [0, 1, -1], [0, 1, 0] // sigma > 0
+      ]
     }, {
       desc: 'negative shape parameter',
       p: () => [Param.location(), Param.scale(), float(-5, -0.1)]
@@ -463,13 +592,23 @@ describe('dist', () => {
     }]
   }, {
     name: 'Geometric',
-    p: () => [Param.prob()]
+    p: () => [Param.prob()],
+    pi: [
+      [-1], [0], [2]  // 0 < p <= 1
+    ]
   }, {
     name: 'Gompertz',
-    p: () => [Param.shape(), Param.scale()]
+    p: () => [Param.shape(), Param.scale()],
+    pi: [
+      [-1, 1], [0, 1],  // eta > 0
+      [1, -1], [1, 0]   // b > 0
+    ]
   }, {
     name: 'Gumbel',
-    p: () => [Param.location(), Param.scale()]
+    p: () => [Param.location(), Param.scale()],
+    pi: [
+      [0, -1], [0, 0] // beta > 0
+    ]
   }, {
     name: 'HalfLogistic',
     p: () => []
@@ -478,7 +617,11 @@ describe('dist', () => {
     p: () => [Param.scale()]
   }, {
     name: 'Hoyt',
-    p: () => [Param.prob(), Param.scale()]
+    p: () => [Param.prob(), Param.scale()],
+    pi: [
+      [-1, 1], [0, 1], [2, 1],  // 0 < q <= 1
+      [0.5, -1], [0.5, 0]       // omega > 0
+    ]
   }, {
     name: 'HyperbolicSecant',
     p: () => []
@@ -487,133 +630,276 @@ describe('dist', () => {
     p: () => [int(20, 40), int(20), int(10)]
   }, {
     name: 'InverseChi2',
-    p: () => [Param.degree()]
+    p: () => [Param.degree()],
+    pi: [
+      [-1], [0] // nu > 0
+    ]
   }, {
     name: 'InverseGamma',
-    p: () => [Param.shape(), Param.scale()]
+    p: () => [Param.shape(), Param.scale()],
+    pi: [
+      [-1, 1], [0, 1],  // alpha > 0
+      [1, -1], [1, 0]   // beta > 0
+    ]
   }, {
     name: 'InverseGaussian',
-    p: () => [Param.scale(), Param.shape()]
+    p: () => [Param.scale(), Param.shape()],
+    pi: [
+      [-1, 1], [0, 1],  // mu > 0
+      [1, -1], [1, 0]   // lambda > 0
+    ]
   }, {
     name: 'IrwinHall',
     p: () => [Param.count()],
+    pi: [
+      [-1], [0] // n > 0
+    ],
     skip: ['test-foreign']
   }, {
     name: 'JohnsonSU',
-    p: () => [Param.location(), Param.scale(), Param.scale(), Param.location()]
+    p: () => [Param.location(), Param.scale(), Param.scale(), Param.location()],
+    pi: [
+      [0, -1, 1, 0], [0, 0, 1, 0],  // delta > 0
+      [0, 1, -1, 0], [0, 1, 0, 0]   // lambda > 0
+    ]
   }, {
     name: 'JohnsonSB',
-    p: () => [Param.location(), Param.scale(), Param.scale(), Param.location()]
+    p: () => [Param.location(), Param.scale(), Param.scale(), Param.location()],
+    pi: [
+      [0, -1, 1, 0], [0, 0, 1, 0],  // delta > 0
+      [0, 1, -1, 0], [0, 1, 0, 0]   // lambda > 0
+    ]
   }, {
     name: 'Kumaraswamy',
-    p: () => [Param.shape(), Param.shape()]
+    p: () => [Param.shape(), Param.shape()],
+    pi: [
+      [-1, 1], [0, 1],  // a > 0
+      [1, -1], [1, 0]   // b > 0
+    ]
   }, {
     name: 'Laplace',
-    p: () => [Param.location(), Param.scale()]
+    p: () => [Param.location(), Param.scale()],
+    pi: [
+      [0, -1], [0, 0] // b > 0
+    ]
   }, {
     name: 'Levy',
-    p: () => [Param.location(), Param.scale()]
+    p: () => [Param.location(), Param.scale()],
+    pi: [
+      [0, -1], [0, 0] // c > 0
+    ]
   }, {
     name: 'Lindley',
-    p: () => [Param.shape()]
-  }, {
-    name: 'Logarithmic',
-    p: () => [Param.rangeMin() + 1, Param.rangeMax() + 5]
+    p: () => [Param.shape()],
+    pi: [
+      [-1], [0] // theta > 0
+    ]
   }, {
     name: 'LogCauchy',
-    p: () => [Param.location(), Param.scale()]
+    p: () => [Param.location(), Param.scale()],
+    pi: [
+      [0, -1], [0, 0]  // sigma > 0
+    ]
   }, {
     name: 'LogGamma',
-    p: () => [Param.shape(), Param.rate(), Param.shape()]
-  }, {
-    name: 'Logistic',
-    p: () => [Param.location(), Param.scale()]
-  }, {
-    name: 'LogisticExponential',
-    p: () => [Param.scale(), Param.shape()]
-  }, {
-    name: 'LogitNormal',
-    p: () => [Param.location(), Param.scale()]
+    p: () => [Param.shape(), Param.rate(), Param.shape()],
+    pi: [
+      [-1, 1, 0], [0, 1, 0],  // alpha > 0
+      [1, -1, 0], [1, 0, 0],  // beta > 0
+      [1, 1, -1]              // mu >= 0
+    ]
   }, {
     name: 'LogLaplace',
-    p: () => [Param.location(), Param.scale()]
+    p: () => [Param.location(), Param.scale()],
+    pi: [
+      [0, -1], [0, 0] // b > 0
+    ]
   }, {
     name: 'LogLogistic',
-    p: () => [Param.scale(), Param.shape()]
+    p: () => [Param.scale(), Param.shape()],
+    pi: [
+      [-1, 1], [0, 1],  // alpha > 0
+      [1, -1], [1, 0]   // beta > 0
+    ]
   }, {
     name: 'LogNormal',
-    p: () => [Param.location(), Param.scale()]
+    p: () => [Param.location(), Param.scale()],
+    pi: [
+      [0, -1], [0, 0] // sigma > 0
+    ]
   }, {
     name: 'LogSeries',
-    p: () => [Param.prob()]
+    p: () => [Param.prob()],
+    pi: [
+      [-1], [0], [1], [2] // 0 < p < 1
+    ]
+  }, {
+    name: 'Logarithmic',
+    p: () => [Param.rangeMin() + 1, Param.rangeMax() + 5],
+    pi: [
+      [-1, 2], [0, 2],  // a >= 1
+      [1, -1], [1, 0],  // b >= 1
+      [2, 2], [3, 2]    // a < b
+    ]
+  }, {
+    name: 'Logistic',
+    p: () => [Param.location(), Param.scale()],
+    pi: [
+      [0, -1], [0, 0] // s > 0
+    ]
+  }, {
+    name: 'LogisticExponential',
+    p: () => [Param.scale(), Param.shape()],
+    pi: [
+      [-1, 1], [0, 1],  // lambda > 0
+      [1, -1], [1, 0]   // kappa > 0
+    ]
+  }, {
+    name: 'LogitNormal',
+    p: () => [Param.location(), Param.scale()],
+    pi: [
+      [0, -1], [0, 0] // sigma > 0
+    ]
   }, {
     name: 'Lomax',
-    p: () => [Param.scale(), Param.shape()]
+    p: () => [Param.scale(), Param.shape()],
+    pi: [
+      [-1, 1], [0, 1],  // lambda > 0
+      [1, -1], [1, 0]   // alpha > 0
+    ]
   }, {
     name: 'Makeham',
-    p: () => [Param.shape(), Param.rate(), Param.scale()]
+    p: () => [Param.shape(), Param.rate(), Param.scale()],
+    pi: [
+      [-1, 1, 1], [0, 1, 1],  // alpha > 0
+      [1, -1, 1], [1, 0, 1],  // beta > 0
+      [1, 1, -1], [1, 1, 0]   // lambda > 0
+    ]
   }, {
     name: 'MaxwellBoltzmann',
-    p: () => [Param.scale()]
+    p: () => [Param.scale()],
+    pi: [
+      [-1], [0] // a > 0
+    ]
   }, {
     name: 'Nakagami',
-    p: () => [Param.shape() + 0.5, Param.scale()]
+    p: () => [Param.shape() + 0.5, Param.scale()],
+    pi: [
+      [-1, 1], [0, 1], [0.3, 1],  // m >= 0.5
+      [1, -1], [1, 0]             // omega > 0
+    ]
   }, {
     name: 'NegativeHypergeometric',
-    p: () => [int(30, 40), int(10, 20), int(5, 10)]
+    p: () => [int(30, 40), int(10, 20), int(5, 10)],
+    pi: [
+      [-1, 5, 5],               // N >= 0
+      [10, -1, 5], [10, 11, 5], // 0 <= K <= N
+      [10, 5, -1], [10, 5, 6]   // 0 <= r <= K - N
+    ]
   }, {
     name: 'NegativeBinomial',
-    p: () => [Param.count(), Param.prob()]
+    p: () => [Param.count(), Param.prob()],
+    pi: [
+      [-1, 0.5], [0, 0.5],  // r > 0
+      [10, -1], [10, 2]     // 0 <= p <= 1
+    ]
   }, {
     name: 'NoncentralChi2',
-    p: () => [Param.degree(), Param.scale()]
+    p: () => [Param.degree(), Param.scale()],
+    pi: [
+      [-1, 1], [0, 1],  // k > 0
+      [2, -1], [2, 0]   // lambda > 0
+    ]
   }, {
     name: 'NoncentralChi',
-    p: () => [4, 4]
+    p: () => [4, 4],
+    pi: [
+      [-1, 1], [0, 1],  // k > 0
+      [2, -1], [2, 0]   // lambda > 0
+    ]
   }, {
     name: 'Normal',
-    p: () => [Param.location(), Param.scale()]
+    p: () => [Param.location(), Param.scale()],
+    pi: [
+      [0, -1], [0, 0] // sigma > 0
+    ]
   }, {
     name: 'Pareto',
-    p: () => [Param.scale(), Param.shape()]
+    p: () => [Param.scale(), Param.shape()],
+    pi: [
+      [-1, 1], [0, 1],  // xmin > 0
+      [1, -1], [1, 0]   // alpha > 0
+    ]
   }, {
     name: 'PERT',
-    p: () => [Param.rangeMin(), Param.rangeIn(), Param.rangeMax()]
+    p: () => [Param.rangeMin(), Param.rangeIn(), Param.rangeMax()],
+    pi: [
+      [0.5, 0.5, 1], [0.8, 0.5, 1], // a < b
+      [0, 1, 1], [0, 1.1, 1]        // b < c
+    ]
   }, {
     name: 'Poisson',
     cases: [{
       desc: 'low mean',
-      p: () => [float(20)]
+      p: () => [float(20)],
+      pi: [
+        [-1], [0] // lambda > 0
+      ]
     }, {
       desc: 'high mean',
       p: () => [float(31, 50)]
     }]
   }, {
     name: 'PowerLaw',
-    p: () => [Param.scale()]
+    p: () => [Param.scale()],
+    pi: [
+      [-1], [0] // a > 0
+    ]
   }, {
     name: 'Rademacher',
     p: () => []
   }, {
     name: 'RaisedCosine',
-    p: () => [Param.location(), Param.scale()]
+    p: () => [Param.location(), Param.scale()],
+    pi: [
+      [0, -1], [0, 0] // s > 0
+    ]
   }, {
     name: 'Rayleigh',
-    p: () => [Param.scale()]
+    p: () => [Param.scale()],
+    pi: [
+      [-1], [0] // sigma > 0
+    ]
   }, {
     name: 'Reciprocal',
-    p: () => [Param.rangeMin(), Param.rangeMax()]
+    p: () => [Param.rangeMin(), Param.rangeMax()],
+    pi: [
+      [-1, 2], [0, 2],  // a > 0
+      [1, -1], [1, 0],  // b > 0
+      [2, 2], [3, 2]    // a < b
+    ]
   }, {
     name: 'ReciprocalInverseGaussian',
-    p: () => [Param.scale(), Param.shape()]
+    p: () => [Param.scale(), Param.shape()],
+    pi: [
+      [-1, 1], [0, 1],  // mu > 0
+      [1, -1], [1, 0]   // lambda > 0
+    ]
   }, {
     name: 'Rice',
-    p: () => [Param.shape(), Param.scale()]
+    p: () => [Param.shape(), Param.scale()],
+    pi: [
+      [-1, 1], [0, 1],  // nu > 0
+      [1, -1], [1, 0]   // sigma > 0
+    ]
   }, {
     name: 'ShiftedLogLogistic',
     cases: [{
       desc: 'positive shape parameter',
-      p: () => [Param.location(), Param.scale(), float(0.1, 5)]
+      p: () => [Param.location(), Param.scale(), float(0.1, 5)],
+      pi: [
+        [0, -1, 1], [0, 0, 1] // sigma > 0
+      ]
     }, {
       desc: 'negative shape parameter',
       p: () => [Param.location(), Param.scale(), float(-5, -0.1)]
@@ -623,47 +909,88 @@ describe('dist', () => {
     }]
   }, {
     name: 'Skellam',
-    p: () => [float(1, 10), float(1, 10)]
+    p: () => [float(1, 10), float(1, 10)],
+    pi: [
+      [-1, 1], [0, 1],  // mu1 > 0
+      [1, -1], [1, 0]   // mu2 > 0
+    ]
   }, {
     name: 'Slash',
     p: () => []
   }, {
     name: 'Soliton',
-    p: () => [Param.count()]
+    p: () => [Param.count()],
+    pi: [
+      [-1], [0] // N > 0
+    ]
   }, {
     name: 'StudentT',
-    p: () => [Param.shape()]
+    p: () => [Param.shape()],
+    pi: [
+      [-1], [0] // nu > 0
+    ]
   }, {
     name: 'Triangular',
-    p: () => [Param.rangeMin(), Param.rangeMax(), Param.rangeIn()]
+    p: () => [Param.rangeMin(), Param.rangeMax(), Param.rangeIn()],
+    pi: [
+      [1, 1, 0.5], [2, 1, 0.5], // a < b
+      [0, 1, -1], [0, 1, 2]     // a <= c <= b
+    ]
+  }, {
+    name: 'UQuadratic',
+    p: () => [Param.rangeMin(), Param.rangeMax()],
+    pi: [
+      [1, 1], [2, 1]  // a < b
+    ]
   }, {
     name: 'Uniform',
     p: () => [Param.rangeMin(), Param.rangeMax()],
+    pi: [
+      [1, 1], [2, 1]  // a < b
+    ],
     skip: ['test-foreign']
   }, {
-    name: 'UQuadratic',
-    p: () => [Param.rangeMin(), Param.rangeMax()]
-  }, {
     name: 'Weibull',
-    p: () => [Param.scale(), Param.shape()]
+    p: () => [Param.scale(), Param.shape()],
+    pi: [
+      [-1, 1], [0, 1],  // lambda > 0
+      [1, -1], [1, 0]   // k > 0
+    ]
   }, {
     name: 'Wigner',
-    p: () => [Param.scale()]
+    p: () => [Param.scale()],
+    pi: [
+      [-1], [0] // R > 0
+    ]
   }, {
     name: 'YuleSimon',
     p: () => [Param.shape() + 0.2],
+    pi: [
+      [-1], [0] // rho > 0
+    ],
     skip: ['test-foreign']
   }, {
     name: 'Zeta',
-    p: () => [Param.shape() + 1.5]
+    p: () => [Param.shape() + 1.5],
+    pi: [
+      [-1], [0], [1]  // s > 1
+    ]
   }, {
     name: 'Zipf',
-    p: () => [Param.shape() + 1]
+    p: () => [Param.shape() + 1],
+    pi: [
+      [-1, 100],      // s >= 1
+      [1, -1], [1, 0] // N > 0
+    ]
   }].forEach(d => {
-    // if (d.name !== 'LogGamma') return
+    // if (d.name !== 'InverseChi2') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
+        if (d.pi) {
+          describe('constructor', () => utConstructor(d.name, d.pi))
+        }
+
         describe('.sample()', () => utSample(d.name, d.p))
 
         describe('.seed()', () => utSeed(d.name, d.p))
@@ -683,6 +1010,15 @@ describe('dist', () => {
           }
         })
       } else {
+
+        describe('constructor', () => {
+          d.cases.forEach(c => {
+            if (c.pi) {
+              describe(c.desc, () => utConstructor(c.name, c.pi))
+            }
+          })
+        })
+
         describe('.sample()', () => {
           d.cases.forEach(c => {
             describe(c.desc, () => utSample(d.name, c.p))

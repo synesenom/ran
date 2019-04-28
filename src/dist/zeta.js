@@ -16,9 +16,16 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Distribution {
-  constructor (s = 1) {
+  constructor (s = 2) {
     super('discrete', arguments.length)
+
+    // Validate parameters
     this.p = { s }
+    this._validate({ s }, [
+      's > 1'
+    ])
+
+    // Set support
     this.s = [{
       value: 1,
       closed: true
@@ -26,6 +33,8 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
     this.c = [
       riemannZeta(s), Math.pow(2, s - 1)
     ]

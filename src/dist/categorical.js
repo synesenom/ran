@@ -5,18 +5,25 @@ import Distribution from './_distribution'
  *
  * $$f(k; \{w\}) = \frac{w_k}{\sum_j w_j},$$
  *
- * where \(w_k \in \mathbb{R}^+\). Support: \(k \in \mathbb{N}_0\).
+ * where \(w_k \in \mathbb{R}^+ / \{0\}\). Support: \(k \in \mathbb{N}_0\).
  *
  * @class Categorical
  * @memberOf ran.dist
- * @param {number[]=} weights Weights for the distribution (doesn't need to be normalized). Default value is an array
+ * @param {number[]=} weights Weights for the distribution (doesn't need to be normalized). Default value is an array with a single value of 1.
  * @param {number=} min Lowest value to sample (support starts at this value). Default value is 0.
  * @constructor
  */
 export default class extends Distribution {
   constructor (weights = [1], min = 0) {
     super('discrete', arguments.length)
+
+    // Validate parameters
     this.p = { n: weights.length, weights, min }
+    this._validate({ w_i: weights.reduce((acc, d) => acc * d, 1), min }, [
+      'w_i >= 0'
+    ])
+
+    // Set support
     this.s = [{
       value: min,
       closed: true

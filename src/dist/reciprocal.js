@@ -16,7 +16,16 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (a = 1, b = 2) {
     super('continuous', arguments.length)
+
+    // Validate parameters
     this.p = { a, b }
+    this._validate({ a, b }, [
+      'a > 0',
+      'b > 0',
+      'a < b'
+    ])
+
+    // Set support
     this.s = [{
       value: a,
       closed: true
@@ -24,8 +33,12 @@ export default class extends Distribution {
       value: b,
       closed: true
     }]
-    this.mode = a / (Math.log(b) - Math.log(a))
-    this.c = [Math.log(a), Math.log(b)]
+
+    // Speed-up constants
+    this.c = [
+      Math.log(a),
+      Math.log(b)
+    ]
   }
 
   _generator () {

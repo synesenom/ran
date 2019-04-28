@@ -12,14 +12,22 @@ import Distribution from './_distribution'
  *
  * @class NegativeBinomial
  * @memberOf ran.dist
- * @param {number=} r Number of failures until experiment is stopped. Default value is 10.
+ * @param {number=} r Number of failures until experiment is stopped. If not an integer, it is rounded to the nearest integer. Default value is 10.
  * @param {number=} p Probability of success. Default value is 0.5.
  * @constructor
  */
 export default class extends Distribution {
   constructor (r = 10, p = 0.5) {
     super('discrete', arguments.length)
-    this.p = { r, p }
+
+    // Validate parameters
+    this.p = { r: Math.round(r), p }
+    this._validate({ r, p }, [
+      'r > 0',
+      'p >= 0', 'p <= 1'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: true

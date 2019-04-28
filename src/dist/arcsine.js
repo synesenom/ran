@@ -16,7 +16,14 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (a = 0, b = 1) {
     super('continuous', arguments.length)
+
+    // Set parameters
     this.p = { a, b }
+    this._validate({ a, b }, [
+      'a < b'
+    ])
+
+    // Set support
     this.s = [{
       value: a,
       closed: true
@@ -24,6 +31,8 @@ export default class extends Distribution {
       value: b,
       closed: true
     }]
+
+    // Speed-up constants
     this.c = [
       1 / Math.PI,
       b - a,

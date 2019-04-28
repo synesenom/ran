@@ -9,14 +9,21 @@ import Chi2 from './chi2'
  *
  * @class Chi
  * @memberOf ran.dist
- * @param {number=} k Degrees of freedom. If not an integer, is rounded to the nearest one. Default value is 2.
+ * @param {number=} k Degrees of freedom. If not an integer, is rounded to the nearest integer. Default value is 2.
  * @constructor
  */
 export default class extends Chi2 {
   // Transformation of chi2 distribution
   constructor (k = 2) {
     super(k)
+
+    // Validate parameters
     this.p = Object.assign(this.p, { k })
+    this._validate({ k }, [
+      'k > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: true
@@ -24,7 +31,6 @@ export default class extends Chi2 {
       value: Infinity,
       closed: false
     }]
-    this.mode = Math.max(k - 2, 0)
   }
 
   _generator () {

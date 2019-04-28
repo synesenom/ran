@@ -17,7 +17,14 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (R = 1) {
     super('continuous', arguments.length)
+
+    // Validate parameters
     this.p = { R }
+    this._validate({ R }, [
+      'R > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: -R,
       closed: true
@@ -25,7 +32,6 @@ export default class extends Distribution {
       value: R,
       closed: true
     }]
-    this.mode = 0
   }
 
   _generator () {

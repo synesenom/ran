@@ -18,7 +18,15 @@ import Distribution from './_distribution'
 export default class extends Distribution {
   constructor (mu = 1, lambda = 1) {
     super('continuous', arguments.length)
+
+    // Validate parameters
     this.p = { mu, lambda }
+    this._validate({ mu, lambda }, [
+      'mu > 0',
+      'lambda > 0'
+    ])
+
+    // Set support
     this.s = [{
       value: 0,
       closed: false
@@ -26,6 +34,8 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
     this.c = [
       0.5 * mu / lambda,
       Math.exp(2 * lambda / mu),
