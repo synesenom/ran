@@ -5,7 +5,6 @@
 
 # dist
 - Make use of compound distributions
-- Check parameter domains
 - Placeholder for Minimax
 - Placeholder for scale-inverse chi2
 - Placeholder for Nakagami-q (Hoyt)
@@ -45,6 +44,7 @@
 - inverted Weibull (scipy)
 - Mielke (scipy)
 - Moyal (scipy)
+- Landau distribution (scipy)
 - Non-central beta
 - Non-central F
 - Non-central t (scipy)
