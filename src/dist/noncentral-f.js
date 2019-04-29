@@ -1,5 +1,7 @@
-import { EPS } from '../special/_core'
+import { EPS, MAX_ITER } from '../special/_core'
+import RecursiveSum from '../algorithms/recursive-sum'
 import logGamma from '../special/log-gamma'
+import beta from '../special/beta'
 import { regularizedBetaIncomplete } from '../special/beta-incomplete'
 import { gamma, poisson } from './_core'
 import Distribution from './_distribution'
@@ -9,13 +11,13 @@ export default class extends Distribution {
     super()
 
     // Validate parameters
-    let mi = Math.round(d1)
-    let ni = Math.round(d2)
-    this.p = { m: mi, n: ni, lambda }
-    this._validate({ m: mi, n: ni, lambda }, [
-      'm > 0',
-      'n > 0',
-      'lambda >= 0'
+    let d1i = Math.round(d1)
+    let d2i = Math.round(d2)
+    this.p = { d1: d1i, d2: d2i, lambda }
+    this._validate({ d1: d1i, d2: d2i, lambda }, [
+      'd1 > 0',
+      'd2 > 0',
+      'lambda > 0'
     ])
 
     // Set support
@@ -26,49 +28,70 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
+    this.c = [
+      d1i / d2i,
+      logGamma(d2i / 2),
+      0.5 * (d1i + d2i)
+    ]
   }
 
   _generator () {
-    let x1 = gamma(this.r, this.p.m / 2 + poisson(this.r, this.p.lambda / 2), 0.5)
-    let x2 = gamma(this.r, this.p.n / 2, 0.5)
-    return x1 * this.p.n / (x2 * this.p.m)
+    // Direct sampling from non-central chi2 and chi
+    let x1 = gamma(this.r, this.p.d1 / 2 + poisson(this.r, this.p.lambda / 2), 0.5)
+    let x2 = gamma(this.r, this.p.d2 / 2, 0.5)
+    return x1 / (x2 * this.c[0])
   }
 
   _pdf (x) {
-    let c = Math.pow(this.p.m / this.p.n, this.p.m / 2) * Math.pow(x, this.p.m / 2 - 1) / Math.pow(1 + this.p.m * x / this.p.n, 0.5 * (this.p.m + this.p.n))
-    let z = c * Math.exp(logGamma(0.5 * (this.p.m + this.p.n)) - logGamma(this.p.m / 2) - logGamma(this.p.n / 2))
-    let dz
-    for (let r = 1; r < 100; r++) {
-      // Update coefficients
-      c *= 0.5 * this.p.lambda * (this.p.m / this.p.n) * (x / (1 + this.p.m * x / this.p.n)) / r
+    // Build a recursive sum
+    let a = this.c[2]
+    let b = this.p.d1 / 2
+    let S = new RecursiveSum({
+      a: a,
+      b: b,
+      g: Math.exp(logGamma(a) - logGamma(b) - this.c[1]),
+      c: Math.pow(this.c[0], b) * Math.pow(x, b - 1) / Math.pow(1 + this.c[0] * x, a)
+    }, (t, r) => {
+      t.c *= 0.5 * this.p.lambda * this.c[0] * (x / (1 + this.c[0] * x)) / r
+      t.g *= t.a / t.b
+      t.a++
+      t.b++
+      return t
+    }, t => t.c * t.g)
 
-      // TODO Remove gamma and use fast update of coefficients
-      dz = c * Math.exp(logGamma(0.5 * (this.p.m + this.p.n) + r) - logGamma(this.p.m / 2 + r) - logGamma(this.p.n / 2))
-      z += dz
-
-      if (Math.abs(dz / z) < EPS) {
-        return Math.exp(-0.5 * this.p.lambda) * z
-      }
-    }
+    // Compute sum
+    let z = S.compute()
+    return typeof z === 'undefined' ? undefined : Math.exp(-0.5 * this.p.lambda) * z
   }
 
   _cdf (x) {
-    let c = 1
-    let y = this.p.m * x / this.p.n
+    // Build recursive sum
+    let y = this.c[0] * x
     let q = y / (1 + y)
-    let z = regularizedBetaIncomplete(this.p.m / 2, this.p.n / 2, q)
-    let dz
-    for (let r = 1; r < 100; r++) {
-      // Update coefficients
-      c *= 0.5 * this.p.lambda / r
+    let a = this.p.d1 / 2
+    let b = this.p.d2 / 2
+    let S = new RecursiveSum({
+      q: q,
+      c: 1,
+      a: a,
+      b: b,
+      bxy: beta(a, b),
+      xa: Math.pow(q, a),
+      xb: Math.pow(1 - q, b),
+      ix: regularizedBetaIncomplete(a, b, q)
+    }, (t, i) => {
+      t.c *= 0.5 * this.p.lambda / i
+      t.ix = t.ix - t.xa * t.xb / (t.a * t.bxy)
+      t.bxy *= t.a / (t.a + t.b)
+      t.a++
+      t.xa *= t.q
+      return t
+    }, t => t.c * t.ix)
 
-      // TODO Remove beta and use fast update of coefficients
-      dz = c * regularizedBetaIncomplete(this.p.m / 2 + r, this.p.n / 2, q)
-      z += dz
-
-      if (Math.abs(dz / z) < EPS) {
-        return Math.exp(-0.5 * this.p.lambda) * z
-      }
-    }
+    // Compute sum
+    let z = S.compute()
+    return typeof z === 'undefined' ? undefined : Math.exp(-0.5 * this.p.lambda) * z
   }
 }
