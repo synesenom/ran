@@ -822,6 +822,14 @@ describe('dist', () => {
       [10, -1], [10, 2]     // 0 <= p <= 1
     ]
   }, {
+    name: 'NoncentralBeta',
+    p: () => [Param.shape(), Param.shape(), Param.scale()],
+    pi: [
+      [-1, 2, 1], [0, 2, 1],  // alpha > 0
+      [2, -1, 1], [2, 0, 1],  // beta > 0
+      [2, 2, -1]              // lambda >= 0
+    ]
+  }, {
     name: 'NoncentralChi2',
     p: () => [Param.degree(), Param.scale()],
     pi: [
@@ -841,7 +849,7 @@ describe('dist', () => {
     pi: [
       [-1, 2, 1], [0, 2, 1],  // alpha > 0
       [2, -1, 1], [2, 0, 1],  // beta > 0
-      [2, 2, -1], [2, 2, 0]   // lambda >= 0
+      [2, 2, -1]              // lambda >= 0
     ]
   }, {
     name: 'Normal',

@@ -27,7 +27,7 @@ export default function (x0, updater, deltaFn) {
 
     // Check if accuracy has reached
     if (Math.abs(delta / sum) < EPS) {
-      return sum
+      break
     }
   }
   return sum
