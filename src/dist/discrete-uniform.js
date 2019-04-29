@@ -10,8 +10,8 @@ import Distribution from './_distribution'
  *
  * @class DiscreteUniform
  * @memberOf ran.dist
- * @param {number=} xmin Lower boundary. Default value is 0.
- * @param {number=} xmax Upper boundary. Default value is 100.
+ * @param {number=} xmin Lower boundary. If not an integer, it is rounded to the nearest one. Default value is 0.
+ * @param {number=} xmax Upper boundary. If not an integer, it is rounded to the nearest one. Default value is 100.
  * @constructor
  */
 export default class extends Distribution {
@@ -19,8 +19,10 @@ export default class extends Distribution {
     super('discrete', arguments.length)
 
     // Validate parameters
-    this.p = { xmin: Math.round(xmin), xmax: Math.round(xmax) }
-    this._validate({ xmin, xmax }, [
+    let xmini = Math.round(xmin)
+    let xmaxi = Math.round(xmax)
+    this.p = { xmin: xmini, xmax: xmaxi }
+    this._validate({ xmin: xmini, xmax: xmaxi }, [
       'xmin < xmax'
     ])
 

@@ -37,7 +37,7 @@ export function exponential (r, lambda = 1) {
 }
 
 /**
- * Generates a gamma random variate.
+ * Generates a gamma random variate with the rate parametrization.
  *
  * @method gamma
  * @memberOf ran.dist

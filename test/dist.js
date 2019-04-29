@@ -627,7 +627,12 @@ describe('dist', () => {
     p: () => []
   }, {
     name: 'Hypergeometric',
-    p: () => [int(20, 40), int(20), int(10)]
+    p: () => [int(20, 40), int(20), int(10)],
+    pi: [
+      [-1, 5, 5], [0, 5, 5],    // N > 0
+      [10, -1, 5], [10, 12, 5], // 0 <= K <= N
+      [10, 5, -1], [10, 5, 12]  // 0 <= n <= N
+    ]
   }, {
     name: 'InverseChi2',
     p: () => [Param.degree()],
@@ -831,6 +836,14 @@ describe('dist', () => {
       [2, -1], [2, 0]   // lambda > 0
     ]
   }, {
+    name: 'NoncentralF',
+    p: () => [Param.degree(), Param.degree(), Param.scale()],
+    pi: [
+      [-1, 2, 1], [0, 2, 1],  // alpha > 0
+      [2, -1, 1], [2, 0, 1],  // beta > 0
+      [2, 2, -1]              // lambda >= 0
+    ]
+  }, {
     name: 'Normal',
     p: () => [Param.location(), Param.scale()],
     pi: [
@@ -996,7 +1009,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'Mielke') return
+    if (d.name === 'NoncentralF') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

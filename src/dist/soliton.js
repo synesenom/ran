@@ -9,17 +9,18 @@ import Categorical from './categorical'
  *
  * @class Soliton
  * @memberOf ran.dist
- * @param {number=} N Number of blocks in the messaging model. Default value is 1.
+ * @param {number=} N Number of blocks in the messaging model. If not an integer, it is rounded to the nearest one. Default value is 1.
  * @constructor
  */
 export default class extends Categorical {
   // Special case of custom
   constructor (N = 10) {
     // Define weights
-    super([1 / N].concat(Array.from({ length: N - 2 }, (d, i) => 1 / ((i + 1) * (i + 2)))), 1)
+    let Ni = Math.round(N)
+    super([1 / Ni].concat(Array.from({ length: Ni - 2 }, (d, i) => 1 / ((i + 1) * (i + 2)))), 1)
 
     // Validate parameters
-    this._validate({ N }, [
+    this._validate({ N: Ni }, [
       'N > 0'
     ])
   }

@@ -16,10 +16,11 @@ import Gamma from './gamma'
 export default class extends Gamma {
   // Special case of gamma
   constructor (k = 1, lambda = 1) {
-    super(Math.round(k), lambda)
+    let ki = Math.round(k)
+    super(ki, lambda)
 
     // Validate parameters
-    this._validate({ k, lambda }, [
+    this._validate({ k: ki, lambda }, [
       'k > 0',
       'lambda > 0'
     ])

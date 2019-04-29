@@ -9,17 +9,18 @@ import NoncentralChi2 from './noncentral-chi2'
  *
  * @class NoncentralChi
  * @memberOf ran.dist
- * @param {number=} k Degrees of freedom. Default value is 2.
+ * @param {number=} k Degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
  * @param {number=} lambda Non-centrality parameter. Default value is 1.
  * @constructor
  */
 export default class extends NoncentralChi2 {
   // Transformation of non-central chi2 distribution
   constructor (k = 2, lambda = 1) {
-    super(k, lambda * lambda)
+    let ki = Math.round(k)
+    super(ki, lambda * lambda)
 
     // Validate parameters
-    this._validate({ k, lambda }, [
+    this._validate({ k: ki, lambda }, [
       'lambda > 0'
     ])
 

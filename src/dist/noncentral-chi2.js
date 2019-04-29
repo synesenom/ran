@@ -12,7 +12,7 @@ import Distribution from './_distribution'
  *
  * @class NoncentralChi2
  * @memberOf ran.dist
- * @param {number=} k Degrees of freedom. Default value is 2.
+ * @param {number=} k Degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
  * @param {number=} lambda Non-centrality parameter. Default value is 1.
  * @constructor
  */

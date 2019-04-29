@@ -5,9 +5,6 @@
 
 # dist
 - Make use of compound distributions
-- Placeholder for Minimax
-- Placeholder for scale-inverse chi2
-- Placeholder for Nakagami-q (Hoyt)
 - ARGUS                                 (rejection sampling)
 - Benford                               (inverse transform)
 - Benktander 1nd kind                   (lambertW)
@@ -42,7 +39,6 @@
 - half logistic (scipy)
 - half generalized normal (scipy)
 - inverted Weibull (scipy)
-- Mielke (scipy)
 - Landau distribution (scipy)
 - Non-central beta
 - Non-central F

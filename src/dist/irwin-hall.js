@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  *
  * @class IrwinHall
  * @memberOf ran.dist
- * @param {number=} n Number of uniform variates to sum. Default value is 1.
+ * @param {number=} n Number of uniform variates to sum. If not an integer, it is rounded to the nearest one. Default value is 1.
  * @constructor
  */
 export default class extends Distribution {
@@ -19,8 +19,9 @@ export default class extends Distribution {
     super('continuous', arguments.length)
 
     // Validate parameters
-    this.p = { n: Math.round(n) }
-    this._validate({ n: Math.round(n) }, [
+    let ni = Math.round(n)
+    this.p = { n: ni }
+    this._validate({ n: ni }, [
       'n > 0'
     ])
 
@@ -29,12 +30,12 @@ export default class extends Distribution {
       value: 0,
       closed: true
     }, {
-      value: n,
+      value: ni,
       closed: true
     }]
 
     // Speed-up constants
-    this.c = Array.from({ length: n + 1 }, (d, k) => logGamma(k + 1) + logGamma(n - k + 1))
+    this.c = Array.from({ length: ni + 1 }, (d, k) => logGamma(k + 1) + logGamma(ni - k + 1))
   }
 
   _generator () {

@@ -5,7 +5,7 @@ import Dagum from './dagum'
  *
  * $$f(x; k, s) = \frac{k x^{k - 1}}{(1 + x^s)^{1 + k/s}},$$
  *
- * with \(k, s \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\). It can be viewed as a special case of the [Dagum distribution]{@link #dist.Dagum}.
+ * with \(k, s \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\). It can be viewed as a re-parametrization of the [Dagum distribution]{@link #dist.Dagum}.
  *
  * @class Mielke
  * @memberOf ran.dist

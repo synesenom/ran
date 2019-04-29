@@ -10,9 +10,9 @@ import Custom from './categorical'
  *
  * @class NegativeHypergeometric
  * @memberOf ran.dist
- * @param {number=} N Total number of elements to sample from. Default value is 10.
- * @param {number=} K Total number of successes. Default value is 5.
- * @param {number=} r Total number of failures to stop at. Default value is 5.
+ * @param {number=} N Total number of elements to sample from. If not an integer, it is rounded to the nearest one. Default value is 10.
+ * @param {number=} K Total number of successes. If not an integer, it is rounded to the nearest one. Default value is 5.
+ * @param {number=} r Total number of failures to stop at. If not an integer, it is rounded to the nearest one. Default value is 5.
  * @constructor
  */
 export default class extends Custom {

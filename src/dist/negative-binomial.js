@@ -21,8 +21,9 @@ export default class extends Distribution {
     super('discrete', arguments.length)
 
     // Validate parameters
-    this.p = { r: Math.round(r), p }
-    this._validate({ r, p }, [
+    let ri = Math.round(r)
+    this.p = { r: ri, p }
+    this._validate({ r: ri, p }, [
       'r > 0',
       'p >= 0', 'p <= 1'
     ])
