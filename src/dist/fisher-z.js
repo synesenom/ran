@@ -16,7 +16,9 @@ import F from './f'
 export default class extends F {
   // Transforming F variate
   constructor (d1 = 1, d2 = 1) {
-    super(d1, d2)
+    let d1i = Math.round(d1)
+    let d2i = Math.round(d2)
+    super(d1i / 2, d2i / 2)
 
     // Set support
     this.s = [{

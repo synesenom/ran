@@ -10,18 +10,20 @@ import Beta from './beta'
  *
  * @class F
  * @memberOf ran.dist
- * @param {number=} d1 First degree of freedom. Default value is 2.
- * @param {number=} d2 Second degree of freedom. Default value is 2.
+ * @param {number=} d1 First degree of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
+ * @param {number=} d2 Second degree of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
  * @constructor
  */
 export default class extends Beta {
   // Transformation of beta distribution
   constructor (d1 = 2, d2 = 2) {
-    super(d1 / 2, d2 / 2)
+    let d1i = Math.round(d1)
+    let d2i = Math.round(d2)
+    super(d1i / 2, d2i / 2)
 
     // Validate parameters
-    this.p = Object.assign(this.p, { d1, d2 })
-    this._validate({ d1, d2 }, [
+    this.p = Object.assign(this.p, { d1: d1i, d2: d2i })
+    this._validate({ d1: d1i, d2: d2i }, [
       'd1 > 0',
       'd2 > 0'
     ])
@@ -29,7 +31,7 @@ export default class extends Beta {
     // Set support
     this.s = [{
       value: 0,
-      closed: d1 !== 1
+      closed: d1i !== 1
     }, {
       value: Infinity,
       closed: false
