@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; x_0, \gamma) = \frac{1}{\pi\gamma\bigg[1 + \Big(\frac{x - x_0}{\gamma}\Big)^2\bigg]}$$
  *
- * where \(x_0 \in \mathbb{R}\) and \(\gamma \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}\).
+ * where \(x_0 \in \mathbb{R}\) and \(\gamma > 0\). Support: \(x \in \mathbb{R}\).
  *
  * @class Cauchy
  * @memberOf ran.dist

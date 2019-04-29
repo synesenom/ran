@@ -5,7 +5,7 @@ import Chi2 from './chi2'
  *
  * $$f(x; k) = \frac{1}{2^{k/2 - 1} \Gamma(k/2)} x^{k - 1} e^{-x^2/2},$$
  *
- * where \(k \in \mathbb{N}^+\). Support: \(x \in \mathbb{R}^+\).
+ * where \(k \in \mathbb{N}^+\). Support: \(x > 0\).
  *
  * @class Chi
  * @memberOf ran.dist

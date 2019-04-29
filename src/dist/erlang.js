@@ -5,7 +5,7 @@ import Gamma from './gamma'
  *
  * $$f(x; k, \lambda) = \frac{\lambda^k x^{k - 1} e^{-\lambda x}}{(k - 1)!},$$
  *
- * where \(k \in \mathbb{N}^+\) and \(\lambda \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+ \cup \{0\}\).
+ * where \(k \in \mathbb{N}^+\) and \(\lambda > 0\). Support: \(x \ge 0\).
  *
  * @class Erlang
  * @memberOf ran.dist

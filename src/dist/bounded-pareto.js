@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; L, H, \alpha) = \frac{\alpha L^\alpha x^{-\alpha - 1}}{1 - \big(\frac{L}{H}\big)^\alpha},$$
  *
- * with \(L, H \in \mathbb{R}^+\), \(H > L\) and \(\alpha \in \mathbb{R}^+\). Support: \(x \in [L, H]\).
+ * with \(L, H > 0\), \(H > L\) and \(\alpha > 0\). Support: \(x \in [L, H]\).
  *
  * @class BoundedPareto
  * @memberOf ran.dist

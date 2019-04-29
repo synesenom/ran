@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$fx; \mu, \sigma, \xi) = \begin{cases}\frac{1}{\sigma} (1 + \xi z)^{-(1/\xi + 1)} &\quad\text{if $\xi \ne 0$},\\\frac{1}{\sigma} e^{-z} &\quad\text{if $\xi = 0$}\\\end{cases},$$
  *
- * with \(\mu, \xi \in \mathbb{R}\), \(\sigma \in \mathbb{R}^+\) and \(z = \frac{x - \mu}{\sigma}\). Support: \(x \in [\mu, \infty)\) if \(\xi \ge 0\), \(x \in [\mu, \mu - \sigma / \xi]\) otherwise.
+ * with \(\mu, \xi \in \mathbb{R}\), \(\sigma > 0\) and \(z = \frac{x - \mu}{\sigma}\). Support: \(x \in [\mu, \infty)\) if \(\xi \ge 0\), \(x \in [\mu, \mu - \sigma / \xi]\) otherwise.
  *
  * @class GeneralizedPareto
  * @memberOf ran.dist

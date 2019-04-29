@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; a, b) = \frac{1}{x [\ln b - \ln a]},$$
  *
- * with \(a, b \in \mathbb{R}^+\) and \(a < b\). Support: \(x \in [a, b]\).
+ * with \(a, b > 0\) and \(a < b\). Support: \(x \in [a, b]\).
  *
  * @class Reciprocal
  * @memberOf ran.dist

@@ -5,7 +5,7 @@ import Normal from './normal'
  *
  * $$f(x; \mu, \sigma) = \frac{1}{\sigma \sqrt{2 \pi} x (1 - x)} e^{-\frac{[\mathrm{logit}(x) - \mu]^2}{2 \sigma^2}},$$
  *
- * with \(\mu \in \mathbb{R}\), \(\sigma \in \mathbb{R}^+\) and \(\mathrm{logit}(x) = \ln \frac{x}{1 - x}\). Support: \(x \in (0, 1)\).
+ * with \(\mu \in \mathbb{R}\), \(\sigma > 0\) and \(\mathrm{logit}(x) = \ln \frac{x}{1 - x}\). Support: \(x \in (0, 1)\).
  *
  * @class LogitNormal
  * @memberOf ran.dist

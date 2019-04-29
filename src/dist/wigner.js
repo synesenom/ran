@@ -7,7 +7,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; R) = \frac{2}{\pi R^2} \sqrt{R^2 - x^2},$$
  *
- * with \(R \in \mathbb{R}^+\). Support: \(x \in [-R, R]\).
+ * with \(R > 0\). Support: \(x \in [-R, R]\).
  *
  * @class Wigner
  * @memberOf ran.dist

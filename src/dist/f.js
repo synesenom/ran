@@ -6,7 +6,7 @@ import Beta from './beta'
  *
  * $$f(x; d_1, d_2) = \frac{\sqrt{\frac{(d_1 x)^{d_1} d_2^{d_2}}{(d_1x + d_2)^{d_1 + d_2}}}}{x \mathrm{B}\big(\frac{d_1}{2}, \frac{d_2}{2}\big)},$$
  *
- * with \(d_1, d_2 \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
+ * with \(d_1, d_2 > 0\). Support: \(x > 0\).
  *
  * @class F
  * @memberOf ran.dist

@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(k; q, \beta) = q^{k^\beta} - q^{(k + 1)^\beta},$$
  *
- * with \(q \in (0, 1)\) and \(\beta \in \mathbb{R}^+\). Support: \(k \in \mathbb{N}_0\).
+ * with \(q \in (0, 1)\) and \(\beta > 0\). Support: \(k \in \mathbb{N}_0\).
  *
  * @class DiscreteWeibull
  * @memberOf ran.dist

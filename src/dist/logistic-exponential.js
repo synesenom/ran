@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \lambda, \kappa) = \frac{\lambda \kappa (e^{\lambda x} - 1)^{\kappa - 1} e^{\lambda x}}{[1 + (e^{\lambda x} - 1)^\kappa]^2},$$
  *
- * where \(\lambda, \kappa \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
+ * where \(\lambda, \kappa > 0\). Support: \(x > 0\).
  *
  * @class LogisticExponential
  * @memberOf ran.dist

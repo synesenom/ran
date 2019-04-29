@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \lambda, \alpha) = \frac{\alpha}{\lambda}\bigg[1 + \frac{x}{\lambda}\bigg]^{-(\alpha + 1)},$$
  *
- * with \(\lambda, \alpha \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+ \cup \{0\}\).
+ * with \(\lambda, \alpha > 0\). Support: \(x \ge 0\).
  *
  * @class Lomax
  * @memberOf ran.dist

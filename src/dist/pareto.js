@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; x_\mathrm{min}, \alpha) = \frac{\alpha x_\mathrm{min}^\alpha}{x^{\alpha + 1}},$$
  *
- * with \(x_\mathrm{min}, \alpha \in \mathbb{R}^+\). Support: \(x \in [x_\mathrm{min}, \infty)\).
+ * with \(x_\mathrm{min}, \alpha > 0\). Support: \(x \in [x_\mathrm{min}, \infty)\).
  *
  * @class Pareto
  * @memberOf ran.dist

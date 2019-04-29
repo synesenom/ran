@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \mu, s) = \frac{e^{-z}}{s (1 + e^{-z})^2},$$
  *
- * with \(z = \frac{x - \mu}{s}\), \(\mu \in \mathbb{R}\) and \(s \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}\).
+ * with \(z = \frac{x - \mu}{s}\), \(\mu \in \mathbb{R}\) and \(s > 0\). Support: \(x \in \mathbb{R}\).
  *
  * @class Logistic
  * @memberOf ran.dist

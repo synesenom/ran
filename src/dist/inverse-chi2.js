@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \nu) = \frac{2^{-\nu/2}}{\Gamma(\nu / 2)} x^{-\nu/2 - 1} e^{-1/(2x)},$$
  *
- * with \(\nu \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
+ * with \(\nu > 0\). Support: \(x > 0\).
  *
  * @class InverseChi2
  * @memberOf ran.dist

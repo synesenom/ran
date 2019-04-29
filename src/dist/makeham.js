@@ -7,7 +7,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \alpha, \beta, \lambda) = (\alpha e^{\beta x} + \lambda) \exp\Big[{-\lambda x - \frac{\alpha}{\beta}(e^{\beta x} - 1)}\Big],$$
  *
- * with \(\alpha, \beta, \lambda \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
+ * with \(\alpha, \beta, \lambda > 0\). Support: \(x > 0\).
  *
  * @class Makeham
  * @memberOf ran.dist

@@ -5,7 +5,7 @@ import F from './f'
  *
  * $$f(x; d_1, d_2) = \sqrt{\frac{d_1^{d_1} d_2^{d_2}}{(d_1 e^{2 x} + d_2)^{d_1 + d_2}}} \frac{2 e^{d_1 x}}{\mathrm{B}\big(\frac{d_1}{2}, \frac{d_2}{2}\big)},$$
  *
- * with \(d_1, d_2 \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}\).
+ * with \(d_1, d_2 > 0\). Support: \(x \in \mathbb{R}\).
  *
  * @class FisherZ
  * @memberOf ran.dist

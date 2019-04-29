@@ -5,7 +5,7 @@ import Weibull from './weibull'
  *
  * $$f(x; \sigma) = \frac{x}{\sigma^2} e^{-\frac{x^2}{2\sigma^2}},$$
  *
- * with \(\sigma \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+ \cup \{0\}\).
+ * with \(\sigma > 0\). Support: \(x \ge 0\).
  *
  * @class Rayleigh
  * @memberOf ran.dist

@@ -6,7 +6,7 @@ import { erfinv } from '../special/error'
  *
  * $$f(x; \sigma) = \frac{\sqrt{2}}{\sigma\sqrt{\pi}} e^{-\frac{x^2}{2\sigma^2}},$$
  *
- * with \(\sigma \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+ \cup \{0\}\).
+ * with \(\sigma > 0\). Support: \(x \ge 0\).
  *
  * @class HalfNormal
  * @memberOf ran.dist

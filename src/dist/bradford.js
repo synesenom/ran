@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; c) = \frac{c}{\ln(1 + c) (1 + c x)},$$
  *
- * with \(c \in \mathbb{R}^+\). Support: \(x \in [0, 1]\).
+ * with \(c > 0\). Support: \(x \in [0, 1]\).
  *
  * @class Bradford
  * @memberOf ran.dist

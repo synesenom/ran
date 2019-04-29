@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \alpha, \beta) = \frac{(\beta / \alpha) (x / \alpha)^{\beta - 1}}{([1 + (x / \alpha)^\beta]^2},$$
  *
- * with \(\alpha, \beta \in \mathbb{R}^+\). Support: \(x \in [0, \infty)\).
+ * with \(\alpha, \beta > 0\). Support: \(x \in [0, \infty)\).
  *
  * @class LogLogistic
  * @memberOf ran.dist

@@ -5,7 +5,7 @@ import Laplace from './laplace'
  *
  * $$f(x; \mu, b) = \frac{1}{2bx}e^{-\frac{|\mathrm{ln} x - \mu|}{b}},$$
  *
- * where \(\mu \in \mathbb{R}\) and \(b \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}\).
+ * where \(\mu \in \mathbb{R}\) and \(b > 0\). Support: \(x \in \mathbb{R}\).
  *
  * @class LogLaplace
  * @memberOf ran.dist

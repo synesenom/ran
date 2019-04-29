@@ -5,7 +5,7 @@ import Kumaraswamy from './kumaraswamy'
  *
  * $$f(x; a) = a x^{a - 1},$$
  *
- * with \(a \in \mathbb{R}^+\). Support: \(x \in [0, 1]\).
+ * with \(a > 0\). Support: \(x \in [0, 1]\).
  *
  * @class PowerLaw
  * @memberOf ran.dist

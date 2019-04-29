@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; k; \lambda) = \frac{1}{2}e^{-\frac{x + \lambda}{2}} \bigg(\frac{x}{\lambda}\bigg)^{k/4 - 1/2} I_{k/2 - 1}\big(\sqrt{\lambda x}\big),$$
  *
- * with \(k \in \mathbb{N}^+\), \(\lambda \in \mathbb{R}^+\) and \(I_n(x)\) is the modified Bessel function of the first kind with order \(n\). Support: \(x \in [0, \infty)\).
+ * with \(k \in \mathbb{N}^+\), \(\lambda > 0\) and \(I_n(x)\) is the modified Bessel function of the first kind with order \(n\). Support: \(x \in [0, \infty)\).
  *
  * @class NoncentralChi2
  * @memberOf ran.dist

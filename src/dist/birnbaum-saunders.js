@@ -5,7 +5,7 @@ import Normal from './normal'
  *
  * $$f(x; \mu, \beta, \gamma) = \frac{z + 1 / z}{2 \gamma (x - \mu)} \phi\Big(\frac{z - 1 / z}{\gamma}\Big),$$
  *
- * with \(mu \in \mathbb{R}\), \(\beta, \gamma \in \mathbb{R}^+\), \(z = \sqrt{\frac{x - \mu}{\beta}}\) and \(\phi(x)\) is the probability density function of the standard normal distribution. Support: \(x \in (\mu, \infty)\).
+ * with \(\mu \in \mathbb{R}\), \(\beta, \gamma > 0\), \(z = \sqrt{\frac{x - \mu}{\beta}}\) and \(\phi(x)\) is the probability density function of the standard normal distribution. Support: \(x \in (\mu, \infty)\).
  *
  * @class BirnbaumSaunders
  * @memberOf ran.dist

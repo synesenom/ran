@@ -5,7 +5,7 @@ import Beta from './beta'
  *
  * $$f(x; \alpha, \beta, \theta, a, b) = \theta \frac{(x - a)^{\alpha - 1} (b - x)^{\beta - 1}}{\mathrm{B}(\alpha, \beta) (b - a)^{\alpha + \beta - 1}} + \frac{1 - \theta}{b - a},$$
  *
- * with \(\alpha, \beta \in \mathbb{R}^+\), \(\theta \in [0, 1]\), \(a, b \in \mathbb{R}\), \(a < b\) and \(\mathrm{B}(x, y)\) is the beta function. Support: \(x \in [a, b]\).
+ * with \(\alpha, \beta > 0\), \(\theta \in [0, 1]\), \(a, b \in \mathbb{R}\), \(a < b\) and \(\mathrm{B}(x, y)\) is the beta function. Support: \(x \in [a, b]\).
  *
  * @class BetaRectangular
  * @memberOf ran.dist

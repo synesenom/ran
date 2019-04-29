@@ -5,7 +5,7 @@ import Gamma from './gamma'
  *
  * $$f(x; a) = \sqrt{\frac{2}{\pi}}\frac{x^2 e^{-x^2 / (2a^2)}}{a^3},$$
  *
- * with \(a \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
+ * with \(a > 0\). Support: \(x > 0\).
  *
  * @class MaxwellBoltzmann
  * @memberOf ran.dist

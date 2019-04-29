@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \mu, s) = \frac{1}{2s} \Big[1 + \cos\Big(\frac{x - \mu}{s} \pi\Big)\Big],$$
  *
- * where \(\mu \in \mathbb{R}\) and \(s \in \mathbb{R}^+\). Support: \(x \in [\mu - s, \mu + s]\).
+ * where \(\mu \in \mathbb{R}\) and \(s > 0\). Support: \(x \in [\mu - s, \mu + s]\).
  *
  * @class RaisedCosine
  * @memberOf ran.dist

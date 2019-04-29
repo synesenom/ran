@@ -5,7 +5,7 @@ import Gamma from './gamma'
  *
  * $$f(x; k) = \frac{1}{2^{k/2} \Gamma(k/2)} x^{k/2 - 1} e^{-x/2},$$
  *
- * where \(k \in \mathbb{N}^+\). Support: \(x \in \mathbb{R}^+\).
+ * where \(k \in \mathbb{N}^+\). Support: \(x > 0\).
  *
  * @class Chi2
  * @memberOf ran.dist

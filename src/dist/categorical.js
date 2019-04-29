@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(k; \{w\}) = \frac{w_k}{\sum_j w_j},$$
  *
- * where \(w_k \in \mathbb{R}^+ / \{0\}\). Support: \(k \in \mathbb{N}_0\).
+ * where \(w_k > 0 / \{0\}\). Support: \(k \in \mathbb{N}_0\).
  *
  * @class Categorical
  * @memberOf ran.dist

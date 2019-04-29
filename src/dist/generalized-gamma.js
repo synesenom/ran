@@ -5,7 +5,7 @@ import Gamma from './gamma'
  *
  * $$f(x; a, d, p) = \frac{p/a^d}{\Gamma(d/p)} x^{d - 1} e^{-(x/a)^p},$$
  *
- * where \(a, d, p \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
+ * where \(a, d, p > 0\). Support: \(x > 0\).
  *
  * @class GeneralizedGamma
  * @memberOf ran.dist

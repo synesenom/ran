@@ -5,7 +5,7 @@ import InverseGaussian from './inverse-gaussian'
  *
  * $$f(x; \lambda, \mu) = \bigg[\frac{\lambda}{2 \pi x}\bigg]^{1/2} e^{\frac{-\lambda (1 - \mu x)^2}{2 \mu^2 x}},$$
  *
- * with \(\mu, \lambda \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
+ * with \(\mu, \lambda > 0\). Support: \(x > 0\).
  *
  * @class ReciprocalInverseGaussian
  * @memberOf ran.dist

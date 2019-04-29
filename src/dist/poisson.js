@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  *
  * $$f(k; \lambda) = \frac{\lambda^k e^{-\lambda}}{k!},$$
  *
- * with \(\lambda \in \mathbb{R}^+\). Support: \(k \in \mathbb{N}_0\).
+ * with \(\lambda > 0\). Support: \(k \in \mathbb{N}_0\).
  *
  * @class Poisson
  * @memberOf ran.dist

@@ -5,7 +5,7 @@ import Normal from './normal'
  *
  * $$f(x; \gamma, \delta, \lambda, \xi) = \frac{\delta \lambda}{\sqrt{2 \pi} z (\lambda - z)} e^{-\frac{1}{2}\big[\gamma + \delta \ln \frac{z}{\lambda - z}\big]^2},$$
  *
- * with \(\gamma, \xi \in \mathbb{R}\), \(\delta, \lambda \in \mathbb{R}^+\) and \(z = x - \xi\). Support: \(x \in (\xi, \xi + \lambda)\).
+ * with \(\gamma, \xi \in \mathbb{R}\), \(\delta, \lambda > 0\) and \(z = x - \xi\). Support: \(x \in (\xi, \xi + \lambda)\).
  *
  * @class JohnsonSB
  * @memberOf ran.dist

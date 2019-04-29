@@ -5,7 +5,7 @@ import Normal from './normal'
  *
  * $$f(x; \gamma, \delta, \lambda, \xi) = \frac{\delta}{\lambda \sqrt{2 \pi}} \frac{e^{-\frac{1}{2}\big[\gamma + \delta \mathrm{sinh}^{-1} z \big]^2}}{\sqrt{1 + z^2}},$$
  *
- * with \(\gamma, \xi \in \mathbb{R}\), \(\delta, \lambda \in \mathbb{R}^+\) and \(z = \frac{x - \xi}{\lambda}\). Support: \(x \in \mathbb{R}\).
+ * with \(\gamma, \xi \in \mathbb{R}\), \(\delta, \lambda > 0\) and \(z = \frac{x - \xi}{\lambda}\). Support: \(x \in \mathbb{R}\).
  *
  * @class JohnsonSU
  * @memberOf ran.dist

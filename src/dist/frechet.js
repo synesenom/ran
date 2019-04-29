@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \alpha, s, m) = \frac{\alpha z^{-1 -\alpha} e^{-z^{-\alpha}}}{s},$$
  *
- * with \(z = \frac{x - m}{s}\). and \(\alpha, s \in \mathbb{R}^+\), \(m \in \mathbb{R}\). Support: \(x \in \mathbb{R}, x > m\).
+ * with \(z = \frac{x - m}{s}\). and \(\alpha, s > 0\), \(m \in \mathbb{R}\). Support: \(x \in \mathbb{R}, x > m\).
  *
  * @class Frechet
  * @memberOf ran.dist

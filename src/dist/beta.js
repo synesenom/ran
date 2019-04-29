@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \alpha, \beta) = \frac{x^{\alpha - 1}(1 - x)^{\beta - 1}}{\mathrm{B}(\alpha, \beta)},$$
  *
- * with \(\alpha, \beta \in \mathbb{R}^+\) and \(\mathrm{B}(\alpha, \beta)\) is the beta function.
+ * with \(\alpha, \beta > 0\) and \(\mathrm{B}(\alpha, \beta)\) is the beta function.
  * Support: \(x \in [0, 1]\).
  *
  * @class Beta

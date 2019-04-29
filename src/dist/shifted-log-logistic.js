@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \mu, s) = \frac{(1 + \xi z)^{-(1/\xi + 1)}}{\sigma [1 + (1 + \xi z)^{-1/\xi}]^2},$$
  *
- * with \(z = \frac{x - \mu}{\sigma}\), \(\mu, \xi \in \mathbb{R}\) and \(\sigma \in \mathbb{R}^+\). Support: \(x \ge \mu - \sigma/\xi\) if \(\xi > 0\), \(x \le \mu - \sigma/\xi\) if \(\xi < 0\), \(x \in \mathbb{R}\) otherwise.
+ * with \(z = \frac{x - \mu}{\sigma}\), \(\mu, \xi \in \mathbb{R}\) and \(\sigma > 0\). Support: \(x \ge \mu - \sigma/\xi\) if \(\xi > 0\), \(x \le \mu - \sigma/\xi\) if \(\xi < 0\), \(x \in \mathbb{R}\) otherwise.
  *
  * @class ShiftedLogLogistic
  * @memberOf ran.dist

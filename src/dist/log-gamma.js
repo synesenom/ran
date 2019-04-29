@@ -6,7 +6,7 @@ import Gamma from './gamma'
  *
  * $$f(x; \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)} (\ln(x - \mu + 1)]^{\alpha - 1} (x - \mu + 1)^{-(1 + \beta)},$$
  *
- * where \(\alpha, \beta \in \mathbb{R}^+\) and \(\mu \in \mathbb{R}^+ \cup \{0\}\). Support: \(x \in [\mu, \infty)\).
+ * where \(\alpha, \beta > 0\) and \(\mu \ge 0\). Support: \(x \in [\mu, \infty)\).
  *
  * @class LogGamma
  * @memberOf ran.dist

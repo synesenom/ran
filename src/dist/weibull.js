@@ -5,7 +5,7 @@ import Exponential from './exponential'
  *
  * $$f(x; \lambda, k) = \frac{k}{\lambda}\bigg(\frac{x}{\lambda}\bigg)^{k - 1} e^{-(x / \lambda)^k},$$
  *
- * with \(\lambda, k \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+ \cup \{0\}\).
+ * with \(\lambda, k > 0\). Support: \(x \ge 0\).
  *
  * @class Weibull
  * @memberOf ran.dist

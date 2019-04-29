@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{\alpha - 1} e^{-\beta x},$$
  *
- * where \(\alpha, \beta \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
+ * where \(\alpha, \beta > 0\). Support: \(x > 0\).
  *
  * @class Gamma
  * @memberOf ran.dist

@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \mu, \beta) = \frac{1}{\beta} e^{-(z + e^{-z})},$$
  *
- * with \(z = \frac{x - \mu}{\beta}\) and \(\mu \in \mathbb{R}\), \(\beta \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}\).
+ * with \(z = \frac{x - \mu}{\beta}\) and \(\mu \in \mathbb{R}\), \(\beta > 0\). Support: \(x \in \mathbb{R}\).
  *
  * @class Gumbel
  * @memberOf ran.dist

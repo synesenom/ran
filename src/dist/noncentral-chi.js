@@ -5,7 +5,7 @@ import NoncentralChi2 from './noncentral-chi2'
  *
  * $$f(x; k; \lambda) = \frac{x^k \lambda}{(\lambda x)^{k/2}} e^{-\frac{x^2 + \lambda^2}{2}} I_{k/2 - 1}(\lambda x),$$
  *
- * with \(k \in \mathbb{N}^+\), \(\lambda \in \mathbb{R}^+\) and \(I_n(x)\) is the modified Bessel function of the first kind with order \(n\). Support: \(x \in [0, \infty)\).
+ * with \(k \in \mathbb{N}^+\), \(\lambda > 0\) and \(I_n(x)\) is the modified Bessel function of the first kind with order \(n\). Support: \(x \in [0, \infty)\).
  *
  * @class NoncentralChi
  * @memberOf ran.dist

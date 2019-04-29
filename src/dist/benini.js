@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \alpha, \beta, \sigma) = \bigg(\frac{\alpha}{x} + \frac{2 \beta \ln \frac{x}{\sigma}}{x}\bigg) e^{-\alpha \ln \frac{x}{\sigma} - \beta \ln^2 \frac{x}{\sigma}},$$
  *
- * with \(\alpha, \beta, \sigma \in \mathbb{R}^+\). Support: \(x \in (\sigma, \infty)\).
+ * with \(\alpha, \beta, \sigma > 0\). Support: \(x \in (\sigma, \infty)\).
  *
  * @class Benini
  * @memberOf ran.dist

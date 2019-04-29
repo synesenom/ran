@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; p, a, b) = \frac{ap}{x} \frac{\big(\frac{x}{b}\big)^{ap}}{\Big[\big(\frac{x}{b}\big)^a + 1\Big]^{p + 1}},$$
  *
- * with \(p, a, b \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
+ * with \(p, a, b > 0\). Support: \(x > 0\).
  *
  * @class Dagum
  * @memberOf ran.dist

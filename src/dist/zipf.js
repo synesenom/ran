@@ -5,7 +5,7 @@ import Categorical from './categorical'
  *
  * $$f(k; s, N) = \frac{k^{-s}}{H_{N, s}},$$
  *
- * with \(s \in \mathbb{R}^+ \cup \{0\}\), \(N \in \mathbb{N}^+\) and \(H_{N, s}\) denotes the generalized harmonic number. Support: \(k \in \{1, 2, ..., N\}\).
+ * with \(s \ge 0\), \(N \in \mathbb{N}^+\) and \(H_{N, s}\) denotes the generalized harmonic number. Support: \(k \in \{1, 2, ..., N\}\).
  *
  * @class Zipf
  * @memberOf ran.dist

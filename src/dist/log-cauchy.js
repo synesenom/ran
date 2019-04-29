@@ -5,7 +5,7 @@ import Cauchy from './cauchy'
  *
  * $$f(x; \mu, \sigma) = \frac{1}{\pi x}\bigg[\frac{\sigma}{(\ln x - \mu)^2 + \sigma^2}\bigg],$$
  *
- * with \(\mu \in \mathbb{R}\) and \(\sigma \in \mathbb{R}^+\). Support: \(x \in \mathbb{R}^+\).
+ * with \(\mu \in \mathbb{R}\) and \(\sigma > 0\). Support: \(x > 0\).
  *
  * @class LogCauchy
  * @memberOf ran.dist
