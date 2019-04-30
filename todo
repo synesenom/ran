@@ -40,12 +40,11 @@
 - half generalized normal (scipy)
 - inverted Weibull (scipy)
 - Landau distribution (scipy)
-- Non-central beta
-- Non-central F
 - Non-central t (scipy)
 - Normal inverse Gauss (scipy)
 - power-lognormal (scipy)
 - R (scipy)
+- Student Z
 - skew normal (Owen's T)
 - trapezoidal (scipy)
 - truncated exponential (scipy)
@@ -55,6 +54,9 @@
 - inverse Wishart
 - Champernowne
 
+- list: https://docs.scipy.org/doc/scipy-0.13.0/reference/tutorial/stats/continuous.html
+- list: http://mathworld.wolfram.com/topics/ContinuousDistributions.html
+- list: http://mathworld.wolfram.com/topics/DiscreteDistributions.html
 - ref: http://www.nrbook.com/devroye/Devroye_files/chapter_ten.pdf
 - ref: http://www.stat.rice.edu/~dobelman/textfiles/DistributionsHandbook.pdf
 - g-and-h distribution (https://books.google.dk/books?id=HMXYCgAAQBAJ&pg=PA29&dq=g-and-h+distribution&hl=en&sa=X&redir_esc=y#v=snippet&q=g-and-h%20distribution&f=false)

@@ -1,9 +1,4 @@
-import recursiveSum from '../algorithms/recursive-sum'
-import logGamma from '../special/log-gamma'
-import beta from '../special/beta'
-import { regularizedBetaIncomplete } from '../special/beta-incomplete'
-import { gamma, poisson } from './_core'
-import Distribution from './_distribution'
+import NoncentralBeta from './noncentral-beta'
 
 /**
  * Generator for the [non-central F distribution]{@link https://en.wikipedia.org/wiki/Noncentral_F-distribution}:
@@ -19,14 +14,15 @@ import Distribution from './_distribution'
  * @param {number=} lambda Non-centrality parameter. Default value is 1.
  * @constructor
  */
-export default class extends Distribution {
+export default class extends NoncentralBeta {
+  // Transformation of non-central beta distribution
   constructor (d1 = 2, d2 = 2, lambda = 1) {
-    super('continuous', arguments.length)
-
-    // Validate parameters
     let d1i = Math.round(d1)
     let d2i = Math.round(d2)
-    this.p = { d1: d1i, d2: d2i, lambda }
+    super(d1i / 2, d2i / 2, lambda)
+
+    // Validate parameters
+    this.p = Object.assign(this.p, { d1: d1i, d2: d2i, lambda })
     this._validate({ d1: d1i, d2: d2i, lambda }, [
       'd1 > 0',
       'd2 > 0',
@@ -41,54 +37,20 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
-
-    // Speed-up constants
-    this.c = [
-      d1i / d2i,
-      logGamma(d2i / 2),
-      0.5 * (d1i + d2i)
-    ]
   }
 
   _generator () {
-    // Direct sampling from non-central chi2 and chi
-    let x1 = gamma(this.r, this.p.d1 / 2 + poisson(this.r, this.p.lambda / 2), 0.5)
-    let x2 = gamma(this.r, this.p.d2 / 2, 0.5)
-    return x1 / (x2 * this.c[0])
+    // Direct sampling by transforming non-central beta variate
+    let x = super._generator()
+    return this.p.d2 * x / (this.p.d1 * (1 - x))
   }
 
   _pdf (x) {
-    // Compute recursive sum
-    return Math.exp(-0.5 * this.p.lambda) * recursiveSum({
-      c: Math.pow(this.c[0], this.p.d1 / 2) * Math.pow(x, this.p.d1 / 2 - 1) / Math.pow(1 + this.c[0] * x, this.c[2]),
-      a: this.c[2],
-      b: this.p.d1 / 2,
-      g: Math.exp(logGamma(this.c[2]) - logGamma(this.p.d1 / 2) - this.c[1])
-    }, (t, r) => {
-      t.c *= 0.5 * this.p.lambda * this.c[0] * (x / (1 + this.c[0] * x)) / r
-      t.g *= t.a / t.b
-      t.a++
-      t.b++
-      return t
-    }, t => t.c * t.g)
+    return this.p.d1 * this.p.d2 * super._pdf(this.p.d1 * x / (this.p.d2 + this.p.d1 * x)) / Math.pow(this.p.d2 + this.p.d1 * x, 2)
   }
 
   _cdf (x) {
-    let q = x / (1 / this.c[0] + x)
-    let xb = Math.pow(1 - q, this.p.d2 / 2)
-    return Math.exp(-0.5 * this.p.lambda) * recursiveSum({
-      c: 1,
-      a: this.p.d1 / 2,
-      xa: Math.pow(q, this.p.d1 / 2),
-      bxy: beta(this.p.d1 / 2, this.p.d2 / 2),
-      ix: regularizedBetaIncomplete(this.p.d1 / 2, this.p.d2 / 2, q)
-    }, (t, i) => {
-      t.c *= 0.5 * this.p.lambda / i
-      t.ix = t.ix - t.xa * xb / (t.a * t.bxy)
-      t.bxy *= t.a / (t.a + this.p.d2 / 2)
-      t.a++
-      t.xa *= q
-      return t
-    }, t => t.c * t.ix)
+    let y = this.p.d1 * x
+    return super._cdf( 1 / (1 + this.p.d2 / y))
   }
 }
