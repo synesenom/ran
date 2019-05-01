@@ -40,7 +40,10 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = []
+    this.c = [
+      Math.exp(-0.5 * lambda),
+      betaFn(alpha, beta)
+    ]
   }
 
   _generator () {
@@ -62,10 +65,10 @@ export default class extends Distribution {
   _pdf (x) {
     let xa = Math.pow(x, this.p.alpha - 1)
     let xb = Math.pow(1 - x, this.p.beta - 1)
-    return Math.exp(-0.5 * this.p.lambda) * recursiveSum({
+    return this.c[0] * recursiveSum({
       c: xa * xb,
       a: this.p.alpha,
-      bxy: betaFn(this.p.alpha, this.p.beta)
+      bxy: this.c[1]
     }, (t, i) => {
       t.c *= 0.5 * this.p.lambda * x / i
       t.bxy *= t.a / (t.a + this.p.beta)
@@ -76,11 +79,11 @@ export default class extends Distribution {
 
   _cdf (x) {
     let xb = Math.pow(1 - x, this.p.beta)
-    return Math.exp(-0.5 * this.p.lambda) * recursiveSum({
+    return this.c[0] * recursiveSum({
       c: 1,
       a: this.p.alpha,
       xa: Math.pow(x, this.p.alpha),
-      bxy: betaFn(this.p.alpha, this.p.beta),
+      bxy: this.c[1],
       ix: regularizedBetaIncomplete(this.p.alpha, this.p.beta, x)
     }, (t, i) => {
       t.c *= 0.5 * this.p.lambda / i
