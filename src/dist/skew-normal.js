@@ -3,6 +3,20 @@ import { normal } from './_core'
 import Normal from './normal'
 import { erf } from '../special/error'
 
+/**
+ * Generator for the [skew normal distribution]{@link https://en.wikipedia.org/wiki/Skew_normal_distribution}:
+ *
+ * $$f(x; \xi, \omega, \alpha) = \frac{2}{\omega} \phi\bigg(\frac{x - \xi}{\omega}\bigg) \Phi\bigg(\alpha \frac{x - \xi}{\omega}\bigg),$$
+ *
+ * where \(\xi, \alpha > 0\), \(\omega \in \mathbb{R}\) and \(\phi(x)\), \(\Phi(x)\) denote the probability density and cumulative distribution functions of the standard [normal distribution]{@link #dist.Normal}. Support: \(x \in \mathbb{R}\).
+ *
+ * @class SkewNormal
+ * @memberOf ran.dist
+ * @param {number=} xi Location parameter. Default value is 0.
+ * @param {number=} omega Scale parameter. Default value is 1.
+ * @param {number=} alpha Shape parameter. Default value is 1.
+ * @constructor
+ */
 export default class extends Normal {
   constructor (xi = 0, omega = 1, alpha = 1) {
     super(xi, omega)

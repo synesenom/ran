@@ -5,7 +5,7 @@ import Normal from './normal'
  *
  * $$f(x) = \begin{cases}\frac{\varphi(0) - \varphi(x)}{x^2} &\quad\text{if $x \ne 0$},\\\frac{1}{2 \sqrt{2 \pi}} &\quad\text{if $x = 0$}\\\end{cases},$$
  *
- * where \(\varphi(x)\) is the probability density function of the standard normal distribution. Support: \(x \in \mathbb{R}\).
+ * where \(\varphi(x)\) is the probability density function of the standard [normal distribution]{@link #dist.Normal}. Support: \(x \in \mathbb{R}\).
  *
  * @class Slash
  * @memberOf ran.dist
