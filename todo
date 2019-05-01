@@ -45,7 +45,6 @@
 - power-lognormal (scipy)
 - R (scipy)
 - Student Z
-- skew normal (Owen's T)
 - trapezoidal (scipy)
 - truncated exponential (scipy)
 - Dirichlet
