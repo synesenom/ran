@@ -44,10 +44,6 @@ export default class extends Normal {
   }
 
   _q (p) {
-    // Start with an estimate of the normal distribution's quantile
-    let x0 = super._q(p)
-
-    // Find true quantile with root finding
-    return this._qEstimateRoot(p, x0)
+    return this._qEstimateRoot(p)
   }
 }

@@ -142,21 +142,18 @@ class Distribution {
    * @method _qEstimateRoot
    * @memberOf ran.dist.Distribution
    * @param {number} p Probability to find value for.
-   * @param {number?} x0 Initial guess for using Newton's method.
    * @returns {(number|undefined)} The value where the probability coincides with the specified value if found,
    * undefined otherwise.
    * @protected
    * @ignore
    */
-  _qEstimateRoot(p, x0) {
+  _qEstimateRoot(p) {
     // Guess range
-    let delta = ((Number.isFinite(this.s[1].value) ? this.s[1].value : 10) - (Number.isFinite(this.s[0].value) ? this.s[0].value : 1)) / 1000
+    let delta = ((Number.isFinite(this.s[1].value) ? this.s[1].value : 10) - (Number.isFinite(this.s[0].value) ? this.s[0].value : -10)) / 2
 
     // Set initial guess for lower boundary
     let a0 = Math.random()
-    if(typeof x0 !== 'undefined') {
-      a0 = x0 - delta * Math.random()
-    } else if (this.s[0].closed) {
+    if (this.s[0].closed) {
       a0 = this.s[0].value + delta * Math.random()
     } else if (Number.isFinite(this.s[0].value)) {
       a0 = this.s[0].value + delta * Math.random()
@@ -164,9 +161,7 @@ class Distribution {
 
     // Set initial guess for upper boundary
     let b0 = a0 + Math.random()
-    if (typeof x0 !== 'undefined') {
-      b0 = x0 + delta * Math.random()
-    } else if (this.s[1].closed) {
+    if (this.s[1].closed) {
       b0 = this.s[1].value - delta * Math.random()
     } else if (Number.isFinite(this.s[1].value)) {
       b0 = this.s[1].value - delta * Math.random()

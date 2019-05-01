@@ -1,9 +1,9 @@
 import { MAX_ITER } from '../special/_core'
 
-const SCALE = 1.6
+const SCALE = 1.618
 
 /**
- * Estimates brackets around the root of a function. If there are no constraints specified, the bracketing interval grows without limits with a scaling factor of 1.6. Otherwise, the interval is limited to the boundary specified in the constraints. If the constraining interval has an open boundary, the boundary is approached with a distance shrinking with a factor of 1.6 in each step.
+ * Estimates brackets around the root of a function. If there are no constraints specified, the bracketing interval grows without limits with a scaling factor of 1.618. Otherwise, the interval is limited to the boundary specified in the constraints. If the constraining interval has an open boundary, the boundary is approached with a distance shrinking with a factor of 1.618 in each step.
  *
  * @method bracket
  * @methodOf ran.algorithms
@@ -41,10 +41,16 @@ export default function(f, a0, b0, s) {
       a = Math.max(a + SCALE * (a - b), min + deltaA)
       deltaA /= SCALE
       f1 = f(a)
-    } else {
-      // Otherwise, extend to the right
+    } else if (Math.abs(f1) > Math.abs(f2)) {
+      // If upper boundary has a smaller value, extend to the right
       b = Math.min(b + SCALE * (b - a), max - deltaB)
       deltaB /= SCALE
+      f2 = f(b)
+    } else {
+      // If they have the same value, extend in both sides
+      a = Math.max(a - 1, min + deltaA)
+      b = Math.min(b + 1, max + deltaB)
+      f1 = f(a)
       f2 = f(b)
     }
   }

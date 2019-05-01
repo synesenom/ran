@@ -91,6 +91,7 @@ export { default as ReciprocalInverseGaussian } from './dist/reciprocal-inverse-
 export { default as Rice } from './dist/rice'
 export { default as ShiftedLogLogistic } from './dist/shifted-log-logistic'
 export { default as Skellam } from './dist/skellam'
+export { default as SkewNormal } from './dist/skew-normal'
 export { default as Slash } from './dist/slash'
 export { default as Soliton } from './dist/soliton'
 export { default as StudentT } from './dist/student-t'

@@ -236,7 +236,7 @@ export default (function () {
           let p = dist.pdf(x)
           let df = differentiate(t => dist.cdf(t), x, 1e-6)
           if (df > PRECISION && p > PRECISION) {
-            // console.log(x, p, Math.abs(p - df) / (p > Number.EPSILON ? p : 1))
+            // console.log(x, p, df)
             s += Math.abs(p - df) / (p > PRECISION ? p : 1)
           }
         }

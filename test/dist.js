@@ -585,7 +585,7 @@ describe('dist', () => {
       ]
     }, {
       desc: 'negative shape parameter',
-      p: () => [Param.location(), Param.scale(), float(-5, -0.1)]
+      p: () => [Param.location(), Param.scale(), -Param.shape()]
     }, {
       desc: 'zero shape parameter',
       p: () => [Param.location(), Param.scale(), 0]
@@ -955,6 +955,21 @@ describe('dist', () => {
       [1, -1], [1, 0]   // mu2 > 0
     ]
   }, {
+    name: 'SkewNormal',
+    cases: [{
+      desc: 'positive shape parameter',
+      p: () => [Param.location(), Param.scale(), Param.shape()],
+      pi: [
+        [0, 1, -1], [0, 1, 0] // omega > 0
+      ]
+    }, {
+      desc: 'negative shape parameter',
+      p: () => [Param.location(), Param.scale(), -Param.shape()]
+    }, {
+      desc: 'zero shape parameter',
+      p: () => [Param.location(), Param.scale(), 0]
+    }]
+  }, {
     name: 'Slash',
     p: () => []
   }, {
@@ -1023,7 +1038,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name === 'NoncentralT') return
+    // if (d.name !== 'Slash') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
