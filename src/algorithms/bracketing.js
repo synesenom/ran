@@ -49,11 +49,14 @@ export default function(f, a0, b0, s) {
     } else {
       // If they have the same value, extend in both sides
       a = Math.max(a - 1, min + deltaA)
-      b = Math.min(b + 1, max + deltaB)
+      deltaA /= SCALE
       f1 = f(a)
+      b = Math.min(b + 1, max + deltaB)
+      deltaB /= SCALE
       f2 = f(b)
     }
   }
+  // console.log(a, b, f1, f2)
 
   return undefined
 }
