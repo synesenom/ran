@@ -851,7 +851,13 @@ describe('dist', () => {
       [2, -1, 1], [2, 0, 1],  // beta > 0
       [2, 2, -1]              // lambda >= 0
     ]
-  }, {
+  }/*, {
+    name: 'NoncentralT',
+    p: () => [Param.degree(), Param.location()],
+    pi: [
+      [-1, 1], [0, 1] // nu > 0
+    ]
+  }*/, {
     name: 'Normal',
     p: () => [Param.location(), Param.scale()],
     pi: [
@@ -1017,7 +1023,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'NoncentralF') return
+    if (d.name === 'NoncentralT') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

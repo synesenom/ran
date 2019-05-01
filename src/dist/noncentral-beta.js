@@ -44,7 +44,7 @@ export default class extends Distribution {
   }
 
   _generator () {
-    // Direct sampling from gamma
+    // Direct sampling from non-central chi2 and gamma
     let j = poisson(this.r, this.p.lambda / 2)
     let x = gamma(this.r, this.p.alpha + j, 1)
 
@@ -84,7 +84,7 @@ export default class extends Distribution {
       ix: regularizedBetaIncomplete(this.p.alpha, this.p.beta, x)
     }, (t, i) => {
       t.c *= 0.5 * this.p.lambda / i
-      t.ix = t.ix - t.xa * xb / (t.a * t.bxy)
+      t.ix -= t.xa * xb / (t.a * t.bxy)
       t.bxy *= t.a / (t.a + this.p.beta)
       t.a++
       t.xa *= x
