@@ -1,5 +1,5 @@
 import logBinomial from '../special/log-binomial'
-import Custom from './categorical'
+import Categorical from './categorical'
 
 /**
  * Generator for the [hypergeometric distribution]{@link https://en.wikipedia.org/wiki/Hypergeometric_distribution}:
@@ -15,7 +15,7 @@ import Custom from './categorical'
  * @param {number=} n If not an integer, it is rounded to the nearest one. Number of draws. Default value is 5.
  * @constructor
  */
-export default class extends Custom {
+export default class extends Categorical {
   constructor (N = 10, K = 5, n = 5) {
     let Ni = Math.round(N)
     let Ki = Math.round(K)
@@ -30,7 +30,7 @@ export default class extends Custom {
     super(weights)
 
     // Validate parameters
-    this._validate({ N: Ni, K: Ki, n: ni }, [
+    Distribution._validate({ N: Ni, K: Ki, n: ni }, [
       'N > 0',
       'K >= 0', 'K <= N',
       'n >= 0', 'n <= N'

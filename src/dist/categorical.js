@@ -19,7 +19,7 @@ export default class extends Distribution {
 
     // Validate parameters
     this.p = { n: weights.length, weights, min }
-    this._validate({ w_i: weights.reduce((acc, d) => acc * d, 1), min }, [
+    Distribution._validate({ w_i: weights.reduce((acc, d) => acc * d, 1), min }, [
       'w_i >= 0'
     ])
 
@@ -124,6 +124,6 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return this.c[3][x - this.p.min]
+    return Math.min(1, this.c[3][x - this.p.min])
   }
 }

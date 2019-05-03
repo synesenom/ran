@@ -23,7 +23,7 @@ export default class extends Distribution {
 
     // Validate parameters
     this.p = { q, omega }
-    this._validate({ q, omega }, [
+    Distribution._validate({ q, omega }, [
       'q > 0', 'q <= 1',
       'omega > 0'
     ])

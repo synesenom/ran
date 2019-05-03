@@ -22,7 +22,7 @@ export default class extends Distribution {
 
     // Validate parameters
     this.p = { mu1, mu2 }
-    this._validate({ mu1, mu2 }, [
+    Distribution._validate({ mu1, mu2 }, [
       'mu1 > 0',
       'mu2 > 0'
     ])

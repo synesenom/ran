@@ -16,7 +16,6 @@ import Distribution from './_distribution'
  * @param {number=} p Probability of success. Default value is 0.5.
  * @constructor
  */
-// TODO Use special case of custom instead
 export default class extends Distribution {
   constructor (n = 100, p = 0.5) {
     super('discrete', arguments.length)
@@ -24,7 +23,7 @@ export default class extends Distribution {
     // Validate parameters
     let pp = p <= 0.5 ? p : 1 - p
     this.p = { n: Math.round(n), p }
-    this._validate({ n, p }, [
+    Distribution._validate({ n, p }, [
       'n >= 0',
       'p >= 0', 'p <= 1'
     ])

@@ -14,7 +14,7 @@ export default class extends Distribution {
     // Validate parameters
     let nui = Math.round(nu)
     this.p = { mu, nu: nui }
-    this._validate({ mu, nu: nui }, [
+    Distribution._validate({ mu, nu: nui }, [
       'nu > 0'
     ])
 

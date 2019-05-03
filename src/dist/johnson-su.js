@@ -22,7 +22,7 @@ export default class extends Normal {
 
     // Validate parameters
     this.p = Object.assign(this.p, { gamma, delta, lambda, xi })
-    this._validate({ gamma, delta, lambda, xi }, [
+    Distribution._validate({ gamma, delta, lambda, xi }, [
       'delta > 0',
       'lambda > 0'
     ])

@@ -17,7 +17,7 @@ export default class extends Gamma {
     super(1.5, 2 * a * a)
 
     // Validate parameters
-    this._validate({ a }, [
+    Distribution._validate({ a }, [
       'a > 0'
     ])
   }

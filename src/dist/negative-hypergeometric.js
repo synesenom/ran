@@ -1,5 +1,5 @@
 import logBinomial from '../special/log-binomial'
-import Custom from './categorical'
+import Categorical from './categorical'
 
 /**
  * Generator for the [negative hypergeometric distribution]{@link https://en.wikipedia.org/wiki/Negative_hypergeometric_distribution}:
@@ -15,7 +15,7 @@ import Custom from './categorical'
  * @param {number=} r Total number of failures to stop at. If not an integer, it is rounded to the nearest one. Default value is 5.
  * @constructor
  */
-export default class extends Custom {
+export default class extends Categorical {
   constructor (N = 10, K = 5, r = 5) {
     let Ni = Math.round(N)
     let Ki = Math.round(K)
@@ -27,7 +27,7 @@ export default class extends Custom {
     super(weights)
 
     // Validate parameters
-    this._validate({ N: Ni, K: Ki, r: ri }, [
+    Distribution._validate({ N: Ni, K: Ki, r: ri }, [
       'N >= 0',
       'K > 0', 'K <= N',
       'r > 0', 'r <= N - K'

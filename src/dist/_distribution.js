@@ -38,7 +38,7 @@ class Distribution {
     this._cdfTable = []
   }
 
-  _validate(params, constraints) {
+  static _validate(params, constraints) {
     // Go through parameters and check constraints
     let errors = constraints.filter(constraint => {
       // Read variables from constraint equation

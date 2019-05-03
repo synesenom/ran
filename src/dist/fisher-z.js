@@ -36,7 +36,8 @@ export default class extends F {
   }
 
   _pdf (x) {
-    return super._pdf(Math.exp(2 * x)) * 2 * Math.exp(2 * x)
+    let y = Math.exp(2 * x)
+    return super._pdf(y) * 2 * y
   }
 
   _cdf (x) {

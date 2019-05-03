@@ -22,7 +22,7 @@ export default class extends IrwinHall {
 
     // Validate parameters
     this.p = Object.assign(this.p, { a, b })
-    this._validate({ a, b, n: ni }, [
+    Distribution._validate({ a, b, n: ni }, [
       'n > 0',
       'a < b'
     ])

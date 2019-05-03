@@ -51,7 +51,7 @@ function utSample (name, params) {
       return self.type() === 'continuous'
         ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
         : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
-    }, 3)
+    }, 8)
   })
 }
 
@@ -148,7 +148,7 @@ function utPdf (name, params) {
   })
 
   it('pdf (pmf) should be the differential (difference) of cdf', () => {
-    utils.trials(() => utils.Tests.pdf2cdf(new dist[name](...params()), LAPS), 4)
+    utils.trials(() => utils.Tests.pdf2cdf(new dist[name](...params()), LAPS), 8)
   })
 
   it('quantile should return valid numbers', () => {
@@ -174,7 +174,7 @@ function utTest (name, params, type = 'self') {
       utils.trials(() => {
         const self = new dist[name](...params())
         return self.test(self.sample(LAPS)).passed
-      }, 3)
+      }, 7)
       break
 
     case 'foreign':
@@ -187,7 +187,7 @@ function utTest (name, params, type = 'self') {
           ? new dist.Uniform(Math.min(...sample), Math.max(...sample))
           : new dist.DiscreteUniform(Math.min(...sample), Math.max(...sample) + 1)
         return !foreign.test(sample).passed
-      }, 3)
+      }, 7)
       break
   }
 }
@@ -406,7 +406,7 @@ describe('dist', () => {
     name: 'Binomial',
     cases: [{
       desc: 'small n',
-      p: () => [int(10, 20), Param.prob()],
+      p: () => [int(5, 20), Param.prob()],
       pi: [
         [-1, 0.5],            // n >= 0
         [100, -1], [100, 2],  // 0 <= p <= 1
@@ -635,7 +635,7 @@ describe('dist', () => {
     ]
   }, {
     name: 'InverseChi2',
-    p: () => [Param.degree()],
+    p: () => [Param.degree() + 1],
     pi: [
       [-1], [0] // nu > 0
     ]
@@ -896,6 +896,13 @@ describe('dist', () => {
       [-1], [0] // a > 0
     ]
   }, {
+    name: 'QExponential',
+    p: () => [2 - Param.shape(), Param.rate()],
+    pi: [
+      [2, 1], [3, 1],     // q < 2
+      [1.5, -1], [1.5, 0] // lambda > 0
+    ]
+  }, {
     name: 'Rademacher',
     p: () => []
   }, {
@@ -1019,14 +1026,14 @@ describe('dist', () => {
     ]
   }, {
     name: 'YuleSimon',
-    p: () => [Param.shape() + 0.2],
+    p: () => [Param.shape() + 1],
     pi: [
       [-1], [0] // rho > 0
     ],
     skip: ['test-foreign']
   }, {
     name: 'Zeta',
-    p: () => [Param.shape() + 1.5],
+    p: () => [Param.shape() + 1.8],
     pi: [
       [-1], [0], [1]  // s > 1
     ]
@@ -1038,7 +1045,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'SkewNormal') return
+    // if (d.name !== 'QExponential') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

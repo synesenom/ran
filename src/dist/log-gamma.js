@@ -21,7 +21,7 @@ export default class extends Gamma {
 
     // Validate parameters
     this.p = Object.assign(this.p, { mu })
-    this._validate({ mu }, [
+    Distribution._validate({ mu }, [
       'mu >= 0'
     ])
 

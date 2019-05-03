@@ -20,8 +20,9 @@ export default class extends Distribution {
     super('continuous', arguments.length)
 
     // Validate parameters
-    this.p = { nu: Math.round(nu) }
-    this._validate({ nu: Math.round(nu) }, [
+    let nui = Math.round(nu)
+    this.p = { nu: nui }
+    Distribution._validate({ nu: nui }, [
       'nu > 0'
     ])
 

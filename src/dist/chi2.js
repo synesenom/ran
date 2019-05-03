@@ -18,7 +18,7 @@ export default class extends Gamma {
     super(Math.round(k) / 2, 0.5)
 
     // Validate parameters
-    this._validate({ k }, [
+    Distribution._validate({ k }, [
       'k > 0'
     ])
   }

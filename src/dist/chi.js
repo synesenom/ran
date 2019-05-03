@@ -20,7 +20,7 @@ export default class extends Chi2 {
     // Validate parameters
     let ki = Math.round(k)
     this.p = Object.assign(this.p, { k: ki })
-    this._validate({ k: ki }, [
+    Distribution._validate({ k: ki }, [
       'k > 0'
     ])
 

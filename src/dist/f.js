@@ -23,7 +23,7 @@ export default class extends Beta {
 
     // Validate parameters
     this.p = Object.assign(this.p, { d1: d1i, d2: d2i })
-    this._validate({ d1: d1i, d2: d2i }, [
+    Distribution._validate({ d1: d1i, d2: d2i }, [
       'd1 > 0',
       'd2 > 0'
     ])
@@ -45,7 +45,8 @@ export default class extends Beta {
   }
 
   _pdf (x) {
-    return this.p.d1 * this.p.d2 * super._pdf(this.p.d1 * x / (this.p.d2 + this.p.d1 * x)) / Math.pow(this.p.d2 + this.p.d1 * x, 2)
+    let y = this.p.d2 + this.p.d1 * x
+    return this.p.d1 * this.p.d2 * super._pdf(this.p.d1 * x / y) / Math.pow(y, 2)
   }
 
   _cdf (x) {
