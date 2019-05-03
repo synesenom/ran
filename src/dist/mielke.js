@@ -1,4 +1,5 @@
 import Dagum from './dagum'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [Mielke distribution]{@link https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.mielke.html#r7049b665a02e-2}:

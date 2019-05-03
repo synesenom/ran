@@ -5,6 +5,7 @@
 
 # dist
 - Make use of compound distributions
+- Balding-Nichols (beta)
 - ARGUS                                 (rejection sampling)
 - Benford                               (inverse transform)
 - Benktander 1nd kind                   (lambertW)

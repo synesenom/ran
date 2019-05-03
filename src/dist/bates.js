@@ -1,4 +1,5 @@
 import IrwinHall from './irwin-hall'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [Bates distribution]{@link https://en.wikipedia.org/wiki/Bates_distribution}:

@@ -1,4 +1,5 @@
 import Beta from './beta'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [F distribution]{@link https://en.wikipedia.org/wiki/F-distribution} (or Fisher-Snedecor's F

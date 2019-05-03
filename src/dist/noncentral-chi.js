@@ -1,4 +1,5 @@
 import NoncentralChi2 from './noncentral-chi2'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [non-central \(\chi\) distribution]{@link https://en.wikipedia.org/wiki/Noncentral_chi_distribution}:

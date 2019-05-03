@@ -1,4 +1,5 @@
 import Normal from './normal'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [Birnbaum-Saunders distribution]{@link https://en.wikipedia.org/wiki/Birnbaum%E2%80%93Saunders_distribution}:

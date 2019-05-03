@@ -1,4 +1,5 @@
 import Categorical from './categorical'
+import Distribution from './_distribution'
 
 /**
  * Generator for the (ideal) [soliton distribution]{@link https://en.wikipedia.org/wiki/Soliton_distribution}:

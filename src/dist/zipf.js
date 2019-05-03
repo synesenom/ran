@@ -1,4 +1,5 @@
 import Categorical from './categorical'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [Zipf distribution]{@link https://en.wikipedia.org/wiki/Zipf%27s_law}:

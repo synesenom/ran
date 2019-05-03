@@ -1,4 +1,5 @@
 import Gamma from './gamma'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [Maxwell-Boltzmann distribution]{@link https://en.wikipedia.org/wiki/Maxwell%E2%80%93Boltzmann_distribution}:

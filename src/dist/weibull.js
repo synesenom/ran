@@ -1,4 +1,5 @@
 import Exponential from './exponential'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [Weibull distribution]{@link https://en.wikipedia.org/wiki/Weibull_distribution}:

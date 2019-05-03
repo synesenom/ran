@@ -1,4 +1,5 @@
 import Beta from './beta'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [beta-rectangular distribution]{@link https://en.wikipedia.org/wiki/Beta_rectangular_distribution}:

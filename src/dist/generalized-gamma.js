@@ -1,4 +1,5 @@
 import Gamma from './gamma'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [generalized gamma distribution]{@link https://en.wikipedia.org/wiki/Generalized_gamma_distribution}:

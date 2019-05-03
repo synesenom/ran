@@ -1,5 +1,6 @@
 import logBinomial from '../special/log-binomial'
 import Categorical from './categorical'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [negative hypergeometric distribution]{@link https://en.wikipedia.org/wiki/Negative_hypergeometric_distribution}:

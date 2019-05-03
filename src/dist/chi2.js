@@ -1,4 +1,5 @@
 import Gamma from './gamma'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [\(\chi^2\) distribution]{@link https://en.wikipedia.org/wiki/Chi-squared_distribution}:

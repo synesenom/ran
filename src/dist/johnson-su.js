@@ -1,4 +1,5 @@
 import Normal from './normal'
+import Distribution from './_distribution'
 
 /**
  * Generator for [Johnson's \(S_U\) distribution]{@link https://en.wikipedia.org/wiki/Johnson%27s_SU-distribution}:

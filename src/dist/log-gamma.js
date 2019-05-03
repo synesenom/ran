@@ -1,4 +1,5 @@
 import Gamma from './gamma'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [log-gamma distribution]{@link https://reference.wolfram.com/language/ref/LogGammaDistribution.html} using the

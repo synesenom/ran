@@ -1,4 +1,5 @@
 import Beta from './beta'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [PERT distribution]{@link https://en.wikipedia.org/wiki/PERT_distribution}:

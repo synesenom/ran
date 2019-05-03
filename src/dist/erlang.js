@@ -1,4 +1,5 @@
 import Gamma from './gamma'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [Erlang distribution]{@link https://en.wikipedia.org/wiki/Erlang_distribution}:
