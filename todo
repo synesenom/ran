@@ -9,7 +9,6 @@
 - ARGUS                                 (rejection sampling)
 - Benford                               (inverse transform)
 - Benktander 1nd kind                   (lambertW)
-- Delaporte                             (compound)
 - Normal-exponential-gamma              (compound)
 - Tukey                                 (pdf/cdf are not trivial)
 - Hermite                               (requires higher order derivative)

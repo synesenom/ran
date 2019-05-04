@@ -35,7 +35,7 @@ class Distribution {
     this.r = new Xoshiro128p()
 
     // Look-up table for the fallback quantile for discrete distributions
-    this._cdfTable = []
+    this._qTable = []
   }
 
   static _validate(params, constraints) {
@@ -114,22 +114,23 @@ class Distribution {
    * @ignore
    */
   _qEstimateTable(p) {
+    // TODO Use binary search tree
     // Init running variable
     let k = this.s[0].value
     let kMax = this.s[1].closed ? this.s[1].value + 1 : 1e6
 
     // Go through look-up table
-    if (this._cdfTable.length === 0) {
-      this._cdfTable.push(this.cdf(k))
+    if (this._qTable.length === 0) {
+      this._qTable.push(this.cdf(k))
     }
     for (; k < kMax; k++) {
       // Add F(x) if necessary
-      if (this._cdfTable.length === k) {
-        this._cdfTable.push(this.cdf(k))
+      if (this._qTable.length === k) {
+        this._qTable.push(this.cdf(k))
       }
 
       // Check if we reached quantile
-      if (p < this._cdfTable[k]) {
+      if (p < this._qTable[k]) {
         return k
       }
     }

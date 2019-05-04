@@ -7,6 +7,11 @@ import InvalidDiscrete from '../src/dist/_invalid'
 
 const LAPS = 1000
 
+/*let DP3 = new dist.Delaporte(1, 3, 3)
+for (let k = 0; k < 22; k++) {
+  console.log(k, DP3.pdf(k))
+}*/
+
 function utConstructor(name, invalidParams) {
   it('should throw error if params are invalid', () => {
     invalidParams.forEach(p => {
@@ -489,6 +494,14 @@ describe('dist', () => {
       [-1, 1, 1], [0, 1, 1],  // p > 0
       [1, -1, 1], [1, 0, 1],  // a > 0
       [1, 1, -1], [1, 1, 0]   // b > 0
+    ]
+  }, {
+    name: 'Delaporte',
+    p: () => [Param.scale(), Param.shape(), Param.shape()],
+    pi: [
+      [-1, 1, 1], [0, 1, 1],  // alpha > 0
+      [1, -1, 1], [1, 0, 1],  // beta > 0
+      [1, 1, -1], [1, 1, 0]   // lambda > 0
     ]
   }, {
     name: 'DiscreteUniform',
@@ -1045,7 +1058,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'QExponential') return
+    // if (d.name !== 'Delaporte') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
