@@ -78,7 +78,6 @@ export default (function () {
         p.set(values[i], p.get(values[i]) + 1)
       }
     }
-    // console.log(values)
 
     // Calculate chi-square
     let chi2 = 0

@@ -23,7 +23,6 @@
 - stable                                (generation unknown)
 - trapezoidal
 - alpha (scipy)
-- anglit (scipy)
 - crystal ball
 - double gamma (scipy)
 - double weibull (scipy)
@@ -53,6 +52,7 @@
 - inverse Wishart
 - Champernowne
 
+- list: https://chaospy.readthedocs.io/en/development/distributions/collection.html
 - list: https://docs.scipy.org/doc/scipy-0.13.0/reference/tutorial/stats/continuous.html
 - list: http://mathworld.wolfram.com/topics/ContinuousDistributions.html
 - list: http://mathworld.wolfram.com/topics/DiscreteDistributions.html

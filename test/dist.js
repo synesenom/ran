@@ -344,6 +344,9 @@ describe('dist', () => {
 
   // Ordinary distributions
   [{
+    name: 'Anglit',
+    p: () => []
+  }, {
     name: 'Arcsine',
     p: () => [Param.rangeMin(), Param.rangeMax()],
     pi: [
@@ -1058,7 +1061,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'Delaporte') return
+    // if (d.name !== 'Anglit') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
