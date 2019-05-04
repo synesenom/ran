@@ -5,6 +5,7 @@
  * @memberOf ran
  */
 export { default as InvalidDiscrete } from './dist/_invalid'
+export { default as Alpha } from './dist/alpha'
 export { default as Anglit } from './dist/anglit'
 export { default as Arcsine } from './dist/arcsine'
 export { default as Bates } from './dist/bates'

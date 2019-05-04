@@ -344,6 +344,12 @@ describe('dist', () => {
 
   // Ordinary distributions
   [{
+    name: 'Alpha',
+    p: () => [Param.shape()],
+    pi: [
+      [-1], [0] // alpha > 0
+    ]
+  }, {
     name: 'Anglit',
     p: () => []
   }, {
@@ -1061,7 +1067,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'Anglit') return
+    // if (d.name !== 'Alpha') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
