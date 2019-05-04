@@ -10,7 +10,7 @@ const SCALE = 1.618
  * @param {Function} f Function to find root for. Must accept a single variable.
  * @param {number} a0 Initial lower boundary of the bracket.
  * @param {number} b0 Initial upper boundary of the bracket.
- * @param {Object[]} s Object containing the constraints on the lower and upper bracket. Each constraint has a <code>closed</code> and <code>value</code> property denoting if the constraint is a closed interval and the value of the boundaries. If not set, (-inf, inf) is applied.
+ * @param {?Object[]} s Object containing the constraints on the lower and upper bracket. Each constraint has a <code>closed</code> and <code>value</code> property denoting if the constraint is a closed interval and the value of the boundaries. If not set, (-inf, inf) is applied.
  * @return {(number[]|undefined)} Array containing the bracket around the root if successful, undefined otherwise.
  * @private
  */
@@ -56,7 +56,6 @@ export default function(f, a0, b0, s) {
       f2 = f(b)
     }
   }
-  // console.log(a, b, f1, f2)
 
   return undefined
 }

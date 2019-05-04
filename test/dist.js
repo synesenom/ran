@@ -1021,6 +1021,19 @@ describe('dist', () => {
       [0, 1, -1], [0, 1, 2]     // a <= c <= b
     ]
   }, {
+    name: 'TukeyLambda',
+    cases: [{
+      desc: 'zero shape parameter',
+      p: () => [0]
+    }, {
+      desc: 'positive shape parameter',
+      p: () => [Param.shape()],
+      skip: ['test-foreign']
+    }, {
+      desc: 'negative shape parameter',
+      p: () => [-Param.shape()]
+    }]
+  }, {
     name: 'UQuadratic',
     p: () => [Param.rangeMin(), Param.rangeMax()],
     pi: [
@@ -1067,7 +1080,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'Alpha') return
+    // if (d.name !== 'TukeyLambda') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

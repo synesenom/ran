@@ -46,6 +46,7 @@ export default class extends Distribution {
   }
 
   _generator () {
+    // Inverse transform sampling
     return this._q(this.r.next())
   }
 

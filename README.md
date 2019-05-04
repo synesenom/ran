@@ -13,11 +13,12 @@ Statistical library for generating various seeded random variates, calculating l
 
 ## probability distributions
 
-`ranjs` includes more than [90 continuous and discrete distributions](https://synesenom.github.io/ran/#dist.Distribution), each tested rigorously for statistical correctness. Every distribution comes with the following methods:
+`ranjs` implements more than [100 continuous and discrete distributions](https://synesenom.github.io/ran/#dist.Distribution) (and counting), each tested rigorously for statistical correctness over a variety of parameters. Every distribution comes with the following methods:
 
-- sampler
+- fast and robust sampler
 - probability density/mass function
 - cumulative distribution function
+- quantile function
 - survival function
 - hazard and cumulative hazard function
 - likelihood and AIC/BIC methods
