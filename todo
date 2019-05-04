@@ -22,8 +22,6 @@
 - stable                                (generation unknown)
 - trapezoidal
 - crystal ball
-- double gamma (scipy)
-- double weibull (scipy)
 - Exponentially modified Gaussian (EMG)
 - generalized logistic (scipy)
 - generalized normal

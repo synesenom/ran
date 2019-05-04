@@ -7,9 +7,9 @@ import InvalidDiscrete from '../src/dist/_invalid'
 
 const LAPS = 1000
 
-/*let DP3 = new dist.Delaporte(1, 3, 3)
-for (let k = 0; k < 22; k++) {
-  console.log(k, DP3.pdf(k))
+/*let TD = new dist.DoubleWeibull()
+for (let x = 0; x <= 1; x += 0.01) {
+  console.log(x, TD.q(x))
 }*/
 
 function utConstructor(name, invalidParams) {
@@ -525,6 +525,20 @@ describe('dist', () => {
     pi: [
       [-1, 1], [0, 1], [1, 1], [2, 1],  // 0 < q < 1
       [0.5, -1], [0.5, 0]               // beta > 0
+    ]
+  }, {
+    name: 'DoubleGamma',
+    p: () => [Param.shape(), Param.rate()],
+    pi: [
+      [-1, 1], [0, 1],  // alpha > 0
+      [1, -1], [1, 0]   // beta > 0
+    ]
+  }, {
+    name: 'DoubleWeibull',
+    p: () => [Param.scale(), Param.shape()],
+    pi: [
+      [-1, 1], [0, 1],  // lambda > 0
+      [1, -1], [1, 0]   // k > 0
     ]
   }, {
     name: 'Erlang',
@@ -1080,7 +1094,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'TukeyLambda') return
+    // if (d.name !== 'DoubleWeibull') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
