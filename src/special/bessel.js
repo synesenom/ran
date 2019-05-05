@@ -137,7 +137,6 @@ function _kn (n, x) {
 
 /**
  * Computes the ratio of two modified Bessel functions (same for spherical).
- * H(n, x) = I(n
  *
  * @method _hi
  * @memberOf ran.special

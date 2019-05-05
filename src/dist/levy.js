@@ -3,7 +3,7 @@ import { normal } from './_core'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Levy distribution]{@link https://en.wikipedia.org/wiki/Lévy_distribution}:
+ * Generator for the [Lévy distribution]{@link https://en.wikipedia.org/wiki/Lévy_distribution}:
  *
  * $$f(x; \mu, c) = \sqrt{\frac{c}{2 \pi}}\frac{e^{-\frac{c}{2(x - \mu)}}}{(x - \mu)^{3/2}},$$
  *

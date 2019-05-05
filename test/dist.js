@@ -929,7 +929,7 @@ describe('dist', () => {
       p: () => [float(31, 50)]
     }]
   }, {
-    name: 'PowerLaw',
+    name: 'Power',
     p: () => [Param.scale()],
     pi: [
       [-1], [0] // a > 0
@@ -1073,6 +1073,12 @@ describe('dist', () => {
     ],
     skip: ['test-foreign']
   }, {
+    name: 'VonMises',
+    p: () => [Param.shape()],
+    pi: [
+      [-1], [0] // kappa > 0
+    ]
+  }, {
     name: 'Weibull',
     p: () => [Param.scale(), Param.shape()],
     pi: [
@@ -1106,7 +1112,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'Delaporte') return
+    // if (d.name !== 'VonMises') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

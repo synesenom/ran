@@ -4,48 +4,49 @@
 
 
 # dist
-- hyperexponential
-- Balding-Nichols (beta)
 - ARGUS                                 (rejection sampling)
+- Balding-Nichols (beta)
 - Benford                               (inverse transform)
 - Benktander 1nd kind                   (lambertW)
-- Normal-exponential-gamma              (compound)
-- Hermite                               (requires higher order derivative)
-- Planck                                (CDF unknown)
-- von Mises                             (modified Bessel of k)
-- Muth                                  (not-invertible cdf)
 - Beta-binomial                         (generation unknown)
 - Beta-pascal / Beta negative binomial  (generation unknown)
 - Borel                                 (generation unknown)
-- Davis                                 (generation unknown)
-- Error / exponential power             (generation unknown)
-- stable                                (generation unknown)
+- Champernowne
 - crystal ball
+- Davis                                 (generation unknown)
+- discrete Laplacian (scipy)
+- double-exponential
+- doubly non-central f
+- doubly non-central t
+- Error / exponential power             (generation unknown)
+- exponential power
 - Exponentially modified Gaussian (EMG)
-- generalized logistic (scipy)
-- generalized normal
+- exponentiated weibull
+- Gauss hypergeometric (scipy)
 - generalized exponential (scipy)
 - generalized extreme (scipy)
-- Gauss hypergeometric (scipy)
 - generalized half-logistic (scipy)
-- Gilbrat (scipy)
+- generalized logistic (scipy)
+- generalized normal
 - half generalized normal (scipy)
+- Hermite                               (requires higher order derivative)
+- hyperexponential
+- inverse Wishart
 - inverted Weibull (scipy)
+- KolmogorovSmirnov one                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_ksone.html
+- KolmogorovSmirnov two                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_kstwobign.html
 - Landau distribution (scipy)
+- Muth                                  (not-invertible cdf)
 - Non-central t (scipy)
-- doubly non-central t
-- doubly non-central f
-- double-exponential
+- Normal-exponential-gamma              (compound)
 - Normal inverse Gauss (scipy)
+- Planck                                (CDF unknown)
 - power-lognormal (scipy)
 - R (scipy)
+- stable                                (generation unknown)
 - Student Z
 - truncated exponential (scipy)
-- Dirichlet
-- discrete Laplacian (scipy)
 - Wishart
-- inverse Wishart
-- Champernowne
 
 - list: https://chaospy.readthedocs.io/en/development/distributions/collection.html
 - list: https://docs.scipy.org/doc/scipy-0.13.0/reference/tutorial/stats/continuous.html

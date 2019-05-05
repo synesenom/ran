@@ -3,7 +3,7 @@ import Distribution from './_distribution'
 /**
  * Generator for the [half-logistic distribution]{@link https://en.wikipedia.org/wiki/Half-logistic_distribution}:
  *
- * $$f(x) = \frac{2 e^{-x}}{(1 + e^{-x})^2)}.$$
+ * $$f(x) = \frac{2 e^{-x}}{(1 + e^{-x})^2}.$$
  *
  * Support: \(x \in [0, \infty)\).
  *
