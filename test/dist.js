@@ -633,6 +633,9 @@ describe('dist', () => {
       [-1], [0], [2]  // 0 < p <= 1
     ]
   }, {
+    name: 'Gilbrat',
+    p: () => []
+  }, {
     name: 'Gompertz',
     p: () => [Param.shape(), Param.scale()],
     pi: [
