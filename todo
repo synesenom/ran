@@ -4,7 +4,7 @@
 
 
 # dist
-- Make use of compound distributions
+- hyperexponential
 - Balding-Nichols (beta)
 - ARGUS                                 (rejection sampling)
 - Benford                               (inverse transform)
@@ -20,7 +20,6 @@
 - Davis                                 (generation unknown)
 - Error / exponential power             (generation unknown)
 - stable                                (generation unknown)
-- trapezoidal
 - crystal ball
 - Exponentially modified Gaussian (EMG)
 - generalized logistic (scipy)
@@ -30,16 +29,17 @@
 - Gauss hypergeometric (scipy)
 - generalized half-logistic (scipy)
 - Gilbrat (scipy)
-- half logistic (scipy)
 - half generalized normal (scipy)
 - inverted Weibull (scipy)
 - Landau distribution (scipy)
 - Non-central t (scipy)
+- doubly non-central t
+- doubly non-central f
+- double-exponential
 - Normal inverse Gauss (scipy)
 - power-lognormal (scipy)
 - R (scipy)
 - Student Z
-- trapezoidal (scipy)
 - truncated exponential (scipy)
 - Dirichlet
 - discrete Laplacian (scipy)

@@ -33,6 +33,13 @@ export default class extends Distribution {
       value: b,
       closed: true
     }]
+
+    // TODO Speed-up constants
+    this.c = [
+      b - a,
+      b - c,
+      c - a
+    ]
   }
 
   _generator () {
@@ -42,19 +49,19 @@ export default class extends Distribution {
 
   _pdf (x) {
     return x < this.p.c
-      ? 2 * (x - this.p.a) / ((this.p.b - this.p.a) * (this.p.c - this.p.a))
-      : 2 * (this.p.b - x) / ((this.p.b - this.p.a) * (this.p.b - this.p.c))
+      ? 2 * (x - this.p.a) / (this.c[0] * this.c[2])
+      : 2 * (this.p.b - x) / (this.c[0] * this.c[1])
   }
 
   _cdf (x) {
     return x < this.p.c
-      ? Math.pow(x - this.p.a, 2) / ((this.p.b - this.p.a) * (this.p.c - this.p.a))
-      : 1 - Math.pow(this.p.b - x, 2) / ((this.p.b - this.p.a) * (this.p.b - this.p.c))
+      ? Math.pow(x - this.p.a, 2) / (this.c[0] * this.c[2])
+      : 1 - Math.pow(this.p.b - x, 2) / (this.c[0] * this.c[1])
   }
 
   _q (p) {
-    return p < (this.p.c - this.p.a) / (this.p.b - this.p.a)
-      ? this.p.a + Math.sqrt(p * (this.p.b - this.p.a) * (this.p.c - this.p.a))
-      : this.p.b - Math.sqrt((1 - p) * (this.p.b - this.p.a) * (this.p.b - this.p.c))
+    return p < this.c[2] / this.c[0]
+      ? this.p.a + Math.sqrt(p * this.c[0] * this.c[2])
+      : this.p.b - Math.sqrt((1 - p) * this.c[0] * this.c[1])
   }
 }

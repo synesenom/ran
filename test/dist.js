@@ -1028,6 +1028,15 @@ describe('dist', () => {
       [-1], [0] // nu > 0
     ]
   }, {
+    name: 'Trapezoidal',
+    p: () => [Param.location(), Param.location(), Param.location(), Param.location()].sort((a, b) => a - b),
+    pi: [
+      [1, 0.33, 0.67, 1], [2, 0.33, 0.67, 1],                     // a < d
+      [1, 0.33, 0.67, 1], [0, 0.67, 0.67, 1], [0, 0.8, 0.67, 1],  // a <= b < c
+      [0, 0.33, 2, 1]                                             // c <= d
+    ],
+    skip: ['test-foreign']
+  }, {
     name: 'Triangular',
     p: () => [Param.rangeMin(), Param.rangeMax(), Param.rangeIn()],
     pi: [
@@ -1094,7 +1103,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'DoubleWeibull') return
+    // if (d.name !== 'Delaporte') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
