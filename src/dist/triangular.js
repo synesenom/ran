@@ -3,14 +3,14 @@ import Distribution from './_distribution'
 /**
  * Generator for the asymmetric [triangular distribution]{@link https://en.wikipedia.org/wiki/Triangular_distribution}:
  *
- * $$f(x; a, b, c) = \begin{cases}0 &\quad\text{for $x < a$},\\\frac{2(x - a)}{(b - a)(c - a)} &\quad\text{for $a \le x < c$}\\\frac{2}{b - a} &\quad\text{for $x = c$}\\\frac{2(b - x)}{(b - a)(b - c)} &\quad\text{for $c < x \le b$}\\0 &\quad\text{for $b < x$} \\\end{cases},$$
+ * $$f(x; a, b, c) = \begin{cases}0 &\quad\text{for $x < a$},\\\frac{2 (x - a)}{(b - a) (c - a)} &\quad\text{for $a \le x < c$}\\\frac{2 (b - x)}{(b - a) (b - c)} &\quad\text{for $c \le x \le b$}\\0 &\quad\text{for $b < x$} \\\end{cases},$$
  *
  * with \(a, b, c \in \mathbb{R}\), \(a < b\) and \(a \le c \le b\). Support: \(x \in [a, b]\).
  *
  * @class Triangular
  * @memberOf ran.dist
- * @param {number=} a Lower boundary of the support. Default value is 0.
- * @param {number=} b Upper boundary of the support. Default value is 1.
+ * @param {number=} a Lower bound of the support. Default value is 0.
+ * @param {number=} b Upper bound of the support. Default value is 1.
  * @param {number=} c Mode of the distribution. Default value is 0.5.
  * @constructor
  */
