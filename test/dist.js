@@ -7,7 +7,7 @@ import InvalidDiscrete from '../src/dist/_invalid'
 
 const LAPS = 1000
 
-/*let TD = new dist.DoubleWeibull()
+/*let TD = new dist.UniformProduct()
 for (let x = 0; x <= 1; x += 0.01) {
   console.log(x, TD.q(x))
 }*/
@@ -1073,6 +1073,15 @@ describe('dist', () => {
     ],
     skip: ['test-foreign']
   }, {
+    name: 'UniformProduct',
+    p: () => [Param.degree()],
+    pi: [
+      [-1], [0]
+    ]
+  }, {
+    name: 'UniformRatio',
+    p: () => []
+  }, {
     name: 'VonMises',
     p: () => [Param.shape()],
     pi: [
@@ -1112,7 +1121,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'VonMises') return
+    // if (d.name !== 'UniformRatio') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

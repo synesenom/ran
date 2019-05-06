@@ -11,9 +11,12 @@
 - Beta-binomial                         (generation unknown)
 - Beta-pascal / Beta negative binomial  (generation unknown)
 - Borel                                 (generation unknown)
+- Borel-Tanner
+- Bose-Einstein                         http://mathworld.wolfram.com/Bose-EinsteinDistribution.html
 - Champernowne
 - crystal ball
 - Davis                                 (generation unknown)
+- discrete exponential
 - discrete Laplacian (scipy)
 - double-exponential
 - doubly non-central f
@@ -22,6 +25,8 @@
 - exponential power
 - Exponentially modified Gaussian (EMG)
 - exponentiated weibull
+- exponential power
+- Fermi-Dirac                           http://mathworld.wolfram.com/Fermi-DiracDistribution.html
 - Gauss hypergeometric (scipy)
 - generalized exponential (scipy)
 - generalized extreme (scipy)
@@ -29,29 +34,29 @@
 - generalized logistic (scipy)
 - generalized normal
 - half generalized normal (scipy)
+- heads-minus-tails                     http://mathworld.wolfram.com/Heads-Minus-TailsDistribution.html
 - Hermite                               (requires higher order derivative)
 - hyperexponential
-- inverse Wishart
 - inverted Weibull (scipy)
 - KolmogorovSmirnov one                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_ksone.html
 - KolmogorovSmirnov two                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_kstwobign.html
 - Landau distribution (scipy)
+- Map-Airy                              http://mathworld.wolfram.com/Map-AiryDistribution.html
 - Muth                                  (not-invertible cdf)
 - Non-central t (scipy)
 - Normal-exponential-gamma              (compound)
 - Normal inverse Gauss (scipy)
+- Normal product                        http://mathworld.wolfram.com/NormalProductDistribution.html
 - Planck                                (CDF unknown)
 - power-lognormal (scipy)
 - R (scipy)
 - stable                                (generation unknown)
-- Student Z
+- Student Z                             http://mathworld.wolfram.com/Studentsz-Distribution.html
 - truncated exponential (scipy)
-- Wishart
+- truncated normal
 
 - list: https://chaospy.readthedocs.io/en/development/distributions/collection.html
 - list: https://docs.scipy.org/doc/scipy-0.13.0/reference/tutorial/stats/continuous.html
-- list: http://mathworld.wolfram.com/topics/ContinuousDistributions.html
-- list: http://mathworld.wolfram.com/topics/DiscreteDistributions.html
 - ref: http://www.nrbook.com/devroye/Devroye_files/chapter_ten.pdf
 
 
