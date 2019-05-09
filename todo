@@ -43,7 +43,6 @@
 - Landau distribution (scipy)
 - Map-Airy                              http://mathworld.wolfram.com/Map-AiryDistribution.html
 - Muth                                  (not-invertible cdf)
-- Non-central t (scipy)
 - Normal-exponential-gamma              (compound)
 - Normal inverse Gauss (scipy)
 - Normal product                        http://mathworld.wolfram.com/NormalProductDistribution.html

@@ -7,9 +7,18 @@ import InvalidDiscrete from '../src/dist/_invalid'
 
 const LAPS = 1000
 
-/*let TD = new dist.UniformProduct()
-for (let x = 0; x <= 1; x += 0.01) {
-  console.log(x, TD.q(x))
+/*let NCT0 = new dist.NoncentralT(1, 0)
+let NCT1 = new dist.NoncentralT(4, 0)
+let NCT2 = new dist.NoncentralT(1, 4)
+let NCT3 = new dist.NoncentralT(4, 4)
+for (let x = -5; x <= 10; x += 0.01) {
+  console.log(
+    x,
+    NCT0.cdf(x),
+    NCT1.cdf(x),
+    NCT2.cdf(x),
+    NCT3.cdf(x)
+  )
 }*/
 
 function utConstructor(name, invalidParams) {
@@ -890,13 +899,13 @@ describe('dist', () => {
       [2, -1, 1], [2, 0, 1],  // beta > 0
       [2, 2, -1]              // lambda >= 0
     ]
-  }/*, {
+  }, {
     name: 'NoncentralT',
     p: () => [Param.degree(), Param.location()],
     pi: [
       [-1, 1], [0, 1] // nu > 0
     ]
-  }*/, {
+  }, {
     name: 'Normal',
     p: () => [Param.location(), Param.scale()],
     pi: [
@@ -1121,7 +1130,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'UniformRatio') return
+    // if (d.name !== 'NoncentralT') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

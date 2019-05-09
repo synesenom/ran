@@ -204,9 +204,9 @@ export default (function () {
     cdfRange(dist, laps) {
       return runX(dist, laps, (d, x) => {
         let cdf = d.cdf(x)
-        /*if (cdf < 0 || cdf > 1) {
+        if (cdf < 0 || cdf > 1) {
           console.log(cdf)
-        }*/
+        }
         return cdf >= 0 && cdf <= 1
       })
     },
@@ -239,7 +239,9 @@ export default (function () {
           let p = dist.pdf(x)
           let df = differentiate(t => dist.cdf(t), x, 1e-6)
           if (df > PRECISION && p > PRECISION) {
-            // console.log(1 / x, p, df, Math.abs(p - df) / (p > PRECISION ? p : 1))
+            if (Math.abs(p - df) / (p > PRECISION ? p : 1) > 0.01) {
+              // console.log(1 / x, p, df, Math.abs(p - df) / (p > PRECISION ? p : 1))
+            }
             s += Math.abs(p - df) / (p > PRECISION ? p : 1)
           }
         }

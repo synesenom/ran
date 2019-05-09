@@ -12,7 +12,6 @@ function add (dist, value) {
 }
 
 describe('core', () => {
-  return
   describe('.seed()', () => {
     it('should return the same sequence of random numbers for the same numerical seed', () => {
       utils.trials(() => {
@@ -56,6 +55,7 @@ describe('core', () => {
       })
     })
   })
+
   describe('.float()', () => {
     it('should return a float uniformly distributed in [0, 1]', () => {
       utils.trials(() => {

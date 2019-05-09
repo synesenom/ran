@@ -8,16 +8,7 @@ const coeffs = [
   -0.5395239384953e-5
 ]
 
-/**
-   * Computes the logarithm of the gamma function.
-   *
-   * @method logGamma
-   * @memberOf ran.special
-   * @param {number} z Value to evaluate log(gamma) at.
-   * @returns {number} The log(gamma) value.
-   * @private
-   */
-export default function (z) {
+function _logGamma(z) {
   let x = z
 
   let y = z
@@ -30,4 +21,30 @@ export default function (z) {
     ser += coeffs[j] / y
   }
   return tmp + Math.log(2.5066282746310005 * ser / x)
+}
+
+/**
+   * Computes the logarithm of the gamma function.
+   *
+   * @method logGamma
+   * @memberOf ran.special
+   * @param {number} z Value to evaluate log(gamma) at.
+   * @returns {number} The log(gamma) value.
+   * @private
+   */
+export default function (z) {
+  // If z > 0, simply compute log-gamma
+  if (z > 0) {
+    return _logGamma(z)
+  } else {
+    // Otherwise, compute it iteratively starting from the first positive argument
+    let k = z - Math.floor(z)
+    let g = _logGamma(k)
+    k = -k
+    while (k < -z) {
+      k++
+      g -= Math.log(k)
+    }
+    return g
+  }
 }

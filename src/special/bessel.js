@@ -53,56 +53,6 @@ function _I1 (x) {
 }
 
 /**
- * Computes the modified Bessel function of the first kind. Only supports integer order.
- *
- * @method besselI
- * @memberOf ran.special
- * @param {number} n Order of the Bessel function. Must be an integer.
- * @param {number} x Value to evaluate the function at.
- * @return {number} The modified Bessel function of the first kind.
- * @private
- */
-export function besselI (n, x) {
-  let bi
-  let bim
-  let bip
-  let tox
-  let y
-
-  if (n === 0) {
-    return _I0(x)
-  }
-
-  if (n === 1) {
-    return _I1(x)
-  }
-
-  if (x === 0) {
-    return 0
-  }
-
-  tox = 2 / Math.abs(x)
-  bip = 0
-  y = 0
-  bi = 1
-  for (let j = 2 * (n + Math.round(Math.sqrt(40 * n))); j > 0; j--) {
-    bim = bip + j * tox * bi
-    bip = bi
-    bi = bim
-    if (Math.abs(bi) > 1 / EPS) {
-      y *= EPS
-      bi *= EPS
-      bip *= EPS
-    }
-    if (j === n) {
-      y = bip
-    }
-  }
-  y *= _I0(x) / bi
-  return x < 0 ? -y : y
-}
-
-/**
  * Computes the modified spherical Bessel function of the second kind.
  *
  * @method _kn
@@ -163,14 +113,64 @@ function _hi (n, x) {
 }
 
 /**
- * Computes the modified spherical Bessel function of the first kind. Only supports integer order.
+ * Computes the modified Bessel function of the first kind. Only supports integer order.
+ *
+ * @method besselI
+ * @memberOf ran.special
+ * @param {number} n Order of the Bessel function. Must be an integer.
+ * @param {number} x Value to evaluate the function at.
+ * @return {number} The modified Bessel function of the first kind.
+ * @private
+ */
+export function besselI (n, x) {
+  let bi
+  let bim
+  let bip
+  let tox
+  let y
+
+  if (n === 0) {
+    return _I0(x)
+  }
+
+  if (n === 1) {
+    return _I1(x)
+  }
+
+  if (x === 0) {
+    return 0
+  }
+
+  tox = 2 / Math.abs(x)
+  bip = 0
+  y = 0
+  bi = 1
+  for (let j = 2 * (n + Math.round(Math.sqrt(40 * n))); j > 0; j--) {
+    bim = bip + j * tox * bi
+    bip = bi
+    bi = bim
+    if (Math.abs(bi) > 1 / EPS) {
+      y *= EPS
+      bi *= EPS
+      bip *= EPS
+    }
+    if (j === n) {
+      y = bip
+    }
+  }
+  y *= _I0(x) / bi
+  return x < 0 ? -y : y
+}
+
+/**
+ * Computes the modified spherical Bessel function of the first kind. Only integer order is supported.
  * Source: http://cpc.cs.qub.ac.uk/summaries/ADGM_v1_0.html (Numerical methods for special functions).
  *
  * @method besselISpherical
  * @memberOf ran.special
  * @param {number} n Order of the spherical Bessel function. Must be an integer.
  * @param {number} x Value to evaluate the function at.
- * @return {number} The modified spherical Bessel function of the first kind.
+ * @returns {number} The modified spherical Bessel function of the first kind.
  * @private
  */
 export function besselISpherical (n, x) {
@@ -192,3 +192,36 @@ export function besselISpherical (n, x) {
       }
   }
 }
+
+/**
+ * Computes the modified Bessel function of the first kind for fractional order.
+ *
+ * @method besselInu
+ * @memberOf ran.special
+ * @param {number} nu Order of the Bessel function. Should be fractional.
+ * @param {number} x Value to evaluate the function at.
+ * @returns {number} The modified Bessel function of the first kind.
+ * @private
+ */
+/*export function besselInu (nu, x) {
+  return Math.pow(0.5 * x, nu) * recursiveSum({
+    c: gamma(nu + 1)
+  }, (t, i) => {
+    t.c *= 0.25 * x * x / (i * (nu + i))
+    return t
+  }, t => t.c)
+}*/
+
+/**
+ * Computes the modified Bessel function of the second kind for fractional order.
+ *
+ * @method besselKnu
+ * @memberOf ran.special
+ * @param {number} nu Order of the Bessel function. Should be fractional.
+ * @param {number} x Value to evaluate the function at.
+ * @returns {number} The modified Bessel function of the second kind.
+ * @private
+ */
+/*export function besselKnu (nu, x) {
+  return Math.PI * (besselInu(-nu, x) - besselInu(nu, x)) / (2 * Math.sin(nu * Math.PI))
+}*/
