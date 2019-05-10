@@ -143,8 +143,8 @@ export default (function () {
 
   function getTestRange(dist) {
     return [
-      isFinite(dist.support()[0]) ? dist.support()[0] - 10 : -30,
-      isFinite(dist.support()[1]) ? dist.support()[1] + 10 : 30
+      isFinite(dist.support()[0].value) ? dist.support()[0].value - 1 : -30,
+      isFinite(dist.support()[1].value) ? dist.support()[1].value + 1 : 30
     ]
   }
 
@@ -237,6 +237,7 @@ export default (function () {
         for (let i = 0; i < laps; i++) {
           let x = range[0] + i * dx + Math.random()
           let p = dist.pdf(x)
+          // console.log(x, p)
           let df = differentiate(t => dist.cdf(t), x, 1e-6)
           if (df > Number.EPSILON && p > Number.EPSILON) {
             if (Math.abs(p - df) > PRECISION) {

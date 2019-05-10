@@ -91,7 +91,7 @@ const _seriesExpansion = {
  * @memberOf ran.special
  * @private
  */
-const _asymptoticExpansionLargeXi = (function() {
+/*const _asymptoticExpansionLargeXi = (function() {
   function _aelx(mu, x, y, complementary) {
     // Calculate scale variables
     let xi = 2 * Math.sqrt(x * y)
@@ -145,8 +145,15 @@ const _asymptoticExpansionLargeXi = (function() {
       return 1 - _aelx(mu, x, y, true)
     }
   }
-})()
+})()*/
 
+/**
+ * Recurrence relation evaluation.
+ *
+ * @namespace _recurrence
+ * @memberOf ran.special
+ * @private
+ */
 /*const _recurrence = (function() {
   function _fc(pnu, z) {
     let m = 0

@@ -1,3 +1,4 @@
+import { MAX_ITER } from '../special/_core'
 import gammaLn from '../special/log-gamma'
 
 /**
@@ -13,7 +14,7 @@ import gammaLn from '../special/log-gamma'
  * @private
  */
 export function rejection (r, g, accept, transform) {
-  for (let trial = 0; trial < 1000; trial++) {
+  for (let trial = 0; trial < MAX_ITER; trial++) {
     let x = g()
     if (r.next() < accept(x)) {
       return typeof transform !== 'undefined' ? transform(x) : x
