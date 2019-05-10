@@ -1,6 +1,9 @@
 # most important
 - finish marcumQ implementation
 - add unit tests to ran.mc
+- add method references in docs
+- improve special function precision
+
 
 # dist
 - ARGUS                                 (rejection sampling)
@@ -15,16 +18,13 @@
 - Champernowne
 - crystal ball
 - Davis                                 (generation unknown)
-- discrete exponential
 - discrete Laplacian (scipy)
 - double-exponential
 - doubly non-central f
 - doubly non-central t
 - Error / exponential power             (generation unknown)
-- exponential power
 - Exponentially modified Gaussian (EMG)
 - exponentiated weibull
-- exponential power
 - Fermi-Dirac                           http://mathworld.wolfram.com/Fermi-DiracDistribution.html
 - Gauss hypergeometric (scipy)
 - generalized exponential (scipy)
@@ -34,18 +34,18 @@
 - generalized normal
 - half generalized normal (scipy)
 - heads-minus-tails                     http://mathworld.wolfram.com/Heads-Minus-TailsDistribution.html
-- Hermite                               (requires higher order derivative)
-- hyperexponential
 - inverted Weibull (scipy)
 - KolmogorovSmirnov one                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_ksone.html
 - KolmogorovSmirnov two                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_kstwobign.html
 - Landau distribution (scipy)
 - Map-Airy                              http://mathworld.wolfram.com/Map-AiryDistribution.html
 - Muth                                  (not-invertible cdf)
+- Neyman A                              https://www.researchgate.net/publication/284720187_Neyman_type_A_distribution_for_the_natural_disasters_and_related_casualties_in_Turkey/download
 - Normal-exponential-gamma              (compound)
 - Normal inverse Gauss (scipy)
 - Normal product                        http://mathworld.wolfram.com/NormalProductDistribution.html
 - Planck                                (CDF unknown)
+- Polya-Aeppli                          https://en.wikipedia.org/wiki/Geometric_Poisson_distribution
 - power-lognormal (scipy)
 - R (scipy)
 - stable                                (generation unknown)

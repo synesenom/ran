@@ -7,14 +7,19 @@ import InvalidDiscrete from '../src/dist/_invalid'
 
 const LAPS = 1000
 
-/*let TD1 = new dist.Hyperexponential([{weight: 1, rate: 1}, {weight: 2, rate: 2}])
-for (let x = 0; x <= 5; x += 0.01) {
+/*
+let TD1 = new dist.Hermite(0.1, 1.5)
+let TD2 = new dist.Hermite(1, 0.125)
+let TD3 = new dist.Hermite(1, 2)
+for (let x = 0; x <= 15; x++) {
   console.log(
     x,
     TD1.pdf(x),
-    TD1.cdf(x)
+    TD2.pdf(x),
+    TD3.pdf(x)
   )
-}*/
+}
+*/
 
 function utConstructor(name, invalidParams) {
   it('should throw error if params are invalid', () => {
@@ -617,6 +622,14 @@ describe('dist', () => {
       [1, 1, -1], [1, 1, 0]   // p > 0
     ]
   }, {
+    name: 'GeneralizedHermite',
+    p: () => [Param.rate(), Param.rate(), Param.degree() + 1],
+    pi: [
+      [-1, 1, 2],                       // a1 > 0
+      [1, -1, 2],                       // a2 > 0
+      [1, 1, -1], [1, 1, 0], [1, 1, 1]  // m > 1
+    ]
+  }, {
     name: 'GeneralizedPareto',
     cases: [{
       desc: 'positive shape parameter',
@@ -1133,7 +1146,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'Hyperexponential') return
+    // if (d.name !== 'GeneralizedHermite') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
