@@ -40,7 +40,7 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return Math.pow(this.p.lambda, x) * Math.exp(-this.p.lambda - logGamma(x + 1))
+    return Math.exp(x * Math.log(this.p.lambda) - this.p.lambda - logGamma(x + 1))
   }
 
   _cdf (x) {

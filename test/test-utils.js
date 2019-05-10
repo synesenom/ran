@@ -230,7 +230,7 @@ export default (function () {
         for (let i = range[0]; i < range[1]; i++) {
           let x = Math.floor(i)
           let p = dist.pdf(x)
-          s += Math.abs(p - (dist.cdf(x) - dist.cdf(x - 1))) / (p > Number.EPSILON ? p : 1)
+          s += Math.abs(p - (dist.cdf(x) - dist.cdf(x - 1)))
         }
       } else {
         let dx = (range[1] - range[0]) / laps
@@ -238,17 +238,17 @@ export default (function () {
           let x = range[0] + i * dx + Math.random()
           let p = dist.pdf(x)
           let df = differentiate(t => dist.cdf(t), x, 1e-6)
-          if (df > PRECISION && p > PRECISION) {
-            if (Math.abs(p - df) / (p > PRECISION ? p : 1) > 0.01) {
-              // console.log(1 / x, p, df, Math.abs(p - df) / (p > PRECISION ? p : 1))
+          if (df > Number.EPSILON && p > Number.EPSILON) {
+            if (Math.abs(p - df) > PRECISION) {
+              // console.log(1 / x, p, df, Math.abs(p - df))
             }
-            s += Math.abs(p - df) / (p > PRECISION ? p : 1)
+            s += Math.abs(p - df)
           }
         }
       }
 
       // Test passes if average relative difference is lower than 1%
-      return s / laps < 1e-2
+      return s / laps < 1e-6
     },
 
     qType(dist, laps) {

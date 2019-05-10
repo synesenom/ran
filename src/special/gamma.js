@@ -9,6 +9,7 @@ const coeffs = [
   9.9843695780195716e-6,
   1.5056327351493116e-7
 ]
+const SQRT_PI2 = Math.sqrt(2 * Math.PI)
 
 /**
    * Gamma function, using the Lanczos approximation.
@@ -30,9 +31,9 @@ function _gamma (z) {
     let l = coeffs.length
     coeffs.forEach((c, i) => {
       x += c / (z + i + 1)
-      let t = z + l - 0.5
-      y = Math.sqrt(2 * Math.PI) * Math.pow(t, (z + 0.5)) * Math.exp(-t) * x
     })
+    let t = z + l - 0.5
+    y = SQRT_PI2 * Math.pow(t, (z + 0.5)) * Math.exp(-t) * x
   }
   return y
 }
