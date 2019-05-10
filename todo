@@ -2,7 +2,6 @@
 - finish marcumQ implementation
 - add unit tests to ran.mc
 
-
 # dist
 - ARGUS                                 (rejection sampling)
 - Balding-Nichols (beta)

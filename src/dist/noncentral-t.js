@@ -16,7 +16,7 @@ import { EPS } from '../special/_core'
  * @class NoncentralT
  * @memberOf ran.dist
  * @param {number=} nu Degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 1.
- * @param {number=} mu Noncentrality parameter. Default value is 1.
+ * @param {number=} mu Non-centrality parameter. Default value is 1.
  * @constructor
  */
 export default class extends Distribution {

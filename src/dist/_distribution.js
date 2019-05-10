@@ -394,15 +394,15 @@ class Distribution {
    *
    * with \(\mathrm{supp}(f)\) denoting the support of the distribution.
    *
-   * This is an experimental function at the moment. For distributions with an analytically invertible
+   * For distributions with an analytically invertible
    * cumulative distribution function, the quantile is explicitly implemented. In other cases, two fallback estimations
    * are used: for continuous distributions the equation \(F(x) = p\) is solved using [Brent's method]{@link https://en.wikipedia.org/wiki/Brent%27s_method}.
-   * For most discrete distributions a look-up table is used with linear search.
+   * For discrete distributions a look-up table is used with linear search.
    *
    * @method q
    * @memberOf ran.dist.Distribution
    * @param {number} p The probability at which the quantile should be evaluated.
-   * @returns {(number|undefined)} The value of the quantile function at the specified probability if it could be found,
+   * @returns {(number|undefined)} The value of the quantile function at the specified probability if \(p \in [0, 1]\) and the quantile could be found,
    * undefined otherwise.
    */
   q (p) {

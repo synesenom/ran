@@ -1,4 +1,3 @@
-// Source: https://people.sc.fsu.edu/~jburkardt/py_src/owens/owens.html
 import { erf, erfc } from './error'
 
 // Constants
@@ -259,6 +258,7 @@ function _t (h, a, ah) {
 
 /**
  * Computes the Owen's T function based on the paper https://www.jstatsoft.org/article/view/v005i05/t.pdf.
+ * Translated from the python code: https://people.sc.fsu.edu/~jburkardt/py_src/owens/owens.html
  *
  * @method owenT
  * @memberOf ran.special

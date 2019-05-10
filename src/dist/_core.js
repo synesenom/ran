@@ -22,6 +22,70 @@ export function rejection (r, g, accept, transform) {
   return undefined
 }
 
+export function aliasTable (w) {
+  // Pre-compute tables
+  let n = w.length
+
+  let prob = [0]
+
+  let alias = [0]
+
+  let total = 0
+  if (w.length > 1) {
+    // Get sum (for normalization)
+    for (let i = 0; i < n; i++) { total += w[i] }
+
+    // Fill up small and large work lists
+    let p = []
+
+    let small = []
+
+    let large = []
+    for (let i = 0; i < n; i++) {
+      p.push(n * w[i] / total)
+      if (p[i] < 1.0) { small.push(i) } else { large.push(i) }
+    }
+
+    // Init tables
+    prob = []
+    alias = []
+    for (let i = 0; i < n; i++) {
+      prob.push(1.0)
+      alias.push(i)
+    }
+
+    // Fill up alias table
+    let s = 0
+
+    let l = 0
+    while (small.length > 0 && large.length > 0) {
+      s = small.shift()
+      l = large.shift()
+
+      prob[s] = p[s]
+      alias[s] = l
+
+      p[l] += p[s] - 1.0
+      if (p[l] < 1.0) { small.push(l) } else { large.push(l) }
+    }
+    while (large.length > 0) {
+      l = large.shift()
+      prob[l] = 1.0
+      alias[l] = l
+    }
+    while (small.length > 0) {
+      s = small.shift()
+      prob[s] = 1.0
+      alias[s] = s
+    }
+  }
+
+  // Return table
+  return {
+    prob, alias, normalizedWeights: w.map(d => d / total)
+  }
+}
+
 /**
  * Generates a exponential random variate.
  *

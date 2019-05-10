@@ -7,17 +7,12 @@ import InvalidDiscrete from '../src/dist/_invalid'
 
 const LAPS = 1000
 
-/*let NCT0 = new dist.NoncentralT(1, 0)
-let NCT1 = new dist.NoncentralT(4, 0)
-let NCT2 = new dist.NoncentralT(1, 4)
-let NCT3 = new dist.NoncentralT(4, 4)
-for (let x = -5; x <= 10; x += 0.01) {
+/*let TD1 = new dist.Hyperexponential([{weight: 1, rate: 1}, {weight: 2, rate: 2}])
+for (let x = 0; x <= 5; x += 0.01) {
   console.log(
     x,
-    NCT0.cdf(x),
-    NCT1.cdf(x),
-    NCT2.cdf(x),
-    NCT3.cdf(x)
+    TD1.pdf(x),
+    TD1.cdf(x)
   )
 }*/
 
@@ -249,6 +244,7 @@ const Param = {
 }
 
 describe('dist', () => {
+  //return
   // Base class
   describe('Distribution', () => {
     describe('.sample()', () => {
@@ -673,6 +669,13 @@ describe('dist', () => {
   }, {
     name: 'HyperbolicSecant',
     p: () => []
+  }, {
+    name: 'Hyperexponential',
+    p: () => [Array.from({ length: Param.degree() + 1 }).map(() => ({ weight: Param.shape(), rate: Param.rate() }))],
+    pi: [
+      [[-1, 1, 1]], [[0, 1, 1]],  // lambda_i > 0
+      [[]]                        // n > 0
+    ]
   }, {
     name: 'Hypergeometric',
     p: () => [int(20, 40), int(20), int(10)],
@@ -1130,7 +1133,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'NoncentralT') return
+    if (d.name !== 'Hyperexponential') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

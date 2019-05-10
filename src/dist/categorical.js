@@ -1,3 +1,4 @@
+import { aliasTable } from './_core'
 import Distribution from './_distribution'
 
 /**
@@ -33,7 +34,7 @@ export default class extends Distribution {
     }]
 
     // Pre-compute tables
-    let n = weights.length
+    /*let n = weights.length
 
     let prob = [0]
 
@@ -87,15 +88,16 @@ export default class extends Distribution {
         prob[s] = 1.0
         alias[s] = s
       }
-    }
+    }*/
+    let { prob, alias, normalizedWeights } = aliasTable(weights)
 
     // Build pmf and cdf
-    let pmf = [weights[0] / total]
+    let pmf = [normalizedWeights[0]]
 
-    let cdf = [weights[0] / total]
+    let cdf = [normalizedWeights[0]]
     for (let i = 1; i < weights.length; i++) {
-      pmf.push(weights[i] / total)
-      cdf.push(cdf[i - 1] + weights[i] / total)
+      pmf.push(normalizedWeights[i])
+      cdf.push(cdf[i - 1] + normalizedWeights[i])
     }
 
     // Assign to constants

@@ -8,14 +8,15 @@
  * @private
  */
 export default function (arr) {
-  let s = arr[0]
+  let sorted = arr.sort((a, b) => a - b)
+  let s = sorted[0]
   let c = 0
-  for (let i = 1; i < arr.length; i++) {
-    let t = s + arr[i]
-    if (Math.abs(s) > Math.abs(arr[i])) {
-      c += (s - t) + arr[i]
+  for (let i = 1; i < sorted.length; i++) {
+    let t = s + sorted[i]
+    if (Math.abs(s) > Math.abs(sorted[i])) {
+      c += (s - t) + sorted[i]
     } else {
-      c += (arr[i] - t) + s
+      c += (sorted[i] - t) + s
     }
     s = t
   }
