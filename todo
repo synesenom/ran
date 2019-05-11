@@ -45,7 +45,7 @@
 - Normal inverse Gauss (scipy)
 - Normal product                        http://mathworld.wolfram.com/NormalProductDistribution.html
 - Planck                                (CDF unknown)
-- Polya-Aeppli                          https://en.wikipedia.org/wiki/Geometric_Poisson_distribution
+- Polya-Aeppli                          https://en.wikipedia.org/wiki/Geometric_Poisson_distribution, https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/pappdf.htm
 - power-lognormal (scipy)
 - R (scipy)
 - stable                                (generation unknown)
@@ -56,6 +56,8 @@
 - list: https://chaospy.readthedocs.io/en/development/distributions/collection.html
 - list: https://docs.scipy.org/doc/scipy-0.13.0/reference/tutorial/stats/continuous.html
 - ref: http://www.nrbook.com/devroye/Devroye_files/chapter_ten.pdf
+
+- v2: use standard form + location and scale parameters (https://www.itl.nist.gov/div898/handbook/eda/section3/eda364.htm#FORMULAS)
 
 
 # statistical tests
@@ -103,3 +105,5 @@
 - Hamiltonian
 - Adjust Euclidean metric from covariance in burn-in
 - step size sampled randomly
+
+
