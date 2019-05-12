@@ -549,12 +549,6 @@ describe('dist', () => {
       [0.5, -1], [0.5, 0]               // beta > 0
     ]
   }, {
-    name: 'DoubleExponential',
-    p: () => [Param.rate()],
-    pi: [
-      [-1], [0] // lambda > 0
-    ]
-  }, {
     name: 'DoubleGamma',
     p: () => [Param.shape(), Param.rate()],
     pi: [
@@ -1178,7 +1172,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'NeymanA') return
+    //if (d.name !== 'Rademacher') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

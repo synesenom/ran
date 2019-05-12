@@ -1,6 +1,7 @@
 import logGamma from '../special/log-gamma'
 import { gamma, poisson } from './_core'
 import Distribution from './_distribution'
+import PreComputed from './_pre-computed'
 
 /**
  * Generator for the [Delaporte distribution]{@link }:
@@ -16,9 +17,10 @@ import Distribution from './_distribution'
  * @param {number=} lambda Mean of the Poisson component. Default value is 1.
  * @constructor
  */
-export default class extends Distribution {
+export default class extends PreComputed {
   constructor (alpha = 1, beta = 1, lambda = 1) {
-    super('discrete', arguments.length)
+    // Using raw probability mass values
+    super()
 
     // Validate parameters
     this.p = { alpha, beta, lambda }
@@ -42,23 +44,9 @@ export default class extends Distribution {
       beta / (lambda * (1 + beta)),
       Math.exp(-lambda) / Math.pow(1 + beta, alpha)
     ]
-
-    // Look-up tables
-    this.pdfTable = []
-    this.cdfTable = []
   }
 
-  /**
-   * Computes the probability mass for a specific index.
-   *
-   * @method _pk
-   * @methodOf ran.dist.Delaporte
-   * @param {number} k Index to compute pmf for.
-   * @returns {number} The probability mass for the specified index.
-   * @private
-   */
-  // TODO Use some recursion instead
-   _pk(k) {
+  _pk(k) {
     // Set i = 0 term
     let ki = k
     let dz = 1
@@ -81,47 +69,10 @@ export default class extends Distribution {
     return z * Math.exp(k * Math.log(this.p.lambda) - logGamma(k + 1)) * this.c[1]
   }
 
-  /**
-   * Advances look-up tables up to a specific index.
-   *
-   * @method _advance
-   * @methodOf ran.dist.Delaporte
-   * @param {number} x The index to advance look-up tables to.
-   * @private
-   */
-  _advance (x) {
-    for (let k = this.pdfTable.length; k <= x; k++) {
-      let pdf = this._pk(k)
-      this.pdfTable.push(pdf)
-      this.cdfTable.push((this.cdfTable[this.cdfTable.length - 1] || 0) + pdf)
-    }
-  }
-
   _generator () {
     // Direct sampling as compound Poisson
     let j = gamma(this.r, this.p.alpha, 1 / this.p.beta)
     return poisson(this.r, this.p.lambda + j)
   }
-
-  _pdf (x) {
-    // Check if we already have it in the look-up table
-    if (x < this.pdfTable.length) {
-      return this.pdfTable[x]
-    }
-
-    // If not, compute new values and return f(x)
-    this._advance(x)
-    return this.pdfTable[x]
-  }
-
-  _cdf (x) {
-    // If already in table, return value
-    if (x < this.cdfTable.length) {
-      return this.cdfTable[x]
-    }
-
-    // Otherwise, advance to current index and return F(x)
-    this._advance(x)
-    return this.cdfTable[x]
-  }
 }
+
