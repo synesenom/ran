@@ -12,11 +12,11 @@ import Distribution from './_distribution'
  *
  * @class Zeta
  * @memberOf ran.dist
- * @param {number=} s Exponent of the distribution. Default value is 2.
+ * @param {number=} s Exponent of the distribution. Default value is 3.
  * @constructor
  */
 export default class extends Distribution {
-  constructor (s = 2) {
+  constructor (s = 3) {
     super('discrete', arguments.length)
 
     // Validate parameters

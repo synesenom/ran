@@ -1172,7 +1172,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    //if (d.name !== 'Rademacher') return
+    if (d.name !== 'Zeta') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
