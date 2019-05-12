@@ -230,6 +230,7 @@ export default (function () {
         for (let i = range[0]; i < range[1]; i++) {
           let x = Math.floor(i)
           let p = dist.pdf(x)
+          // console.log(x, p, dist.cdf(x) - dist.cdf(x - 1))
           s += Math.abs(p - (dist.cdf(x) - dist.cdf(x - 1)))
         }
       } else {

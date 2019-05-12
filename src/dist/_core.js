@@ -26,7 +26,7 @@ export function rejection (r, g, accept, transform) {
 /**
  * Creates an alias table for quick generation of categorical discrete variates.
  *
- * @methof aliasTable
+ * @method aliasTable
  * @memberOf ran.dist
  * @param {number[]} w Array of weights to calculate probabilities from.
  * @returns {Object} Object containing three properties: prob, alias and normalizedWeights, representing the probability table, alias table and the normalized weights.

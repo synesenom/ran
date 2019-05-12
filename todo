@@ -38,6 +38,7 @@
 - KolmogorovSmirnov one                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_ksone.html
 - KolmogorovSmirnov two                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_kstwobign.html
 - Landau distribution (scipy)
+- Luria-Delbruck                        (compound Poisson)
 - Map-Airy                              http://mathworld.wolfram.com/Map-AiryDistribution.html
 - Muth                                  (not-invertible cdf)
 - Neyman A                              https://www.researchgate.net/publication/284720187_Neyman_type_A_distribution_for_the_natural_disasters_and_related_casualties_in_Turkey/download

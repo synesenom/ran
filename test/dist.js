@@ -8,18 +8,28 @@ import InvalidDiscrete from '../src/dist/_invalid'
 const LAPS = 1000
 
 /*
-let TD1 = new dist.Hermite(0.1, 1.5)
-let TD2 = new dist.Hermite(1, 0.125)
-let TD3 = new dist.Hermite(1, 2)
-for (let x = 0; x <= 15; x++) {
+let TD1 = new dist.PolyaAeppli(8, 0.2)
+let hist = Array.from(TD1.sample(100000).reduce((acc, d) => {
+  if (!acc.has(d))
+    acc.set(d, 1)
+  else
+    acc.set(d, acc.get(d) + 1)
+  return acc
+}, new Map()))
+hist = hist.map(d => ({
+  x: d[0],
+  y: d[1] / 100000
+})).sort((a, b) => a.x - b.x)
+  .forEach(d => console.log(d.x, d.y))
+*/
+/*for (let x = 0; x <= 15; x++) {
   console.log(
     x,
     TD1.pdf(x),
     TD2.pdf(x),
     TD3.pdf(x)
   )
-}
-*/
+}*/
 
 function utConstructor(name, invalidParams) {
   it('should throw error if params are invalid', () => {
@@ -54,9 +64,11 @@ function utSample (name, params) {
 
   it('values should be distributed correctly with default parameters', () => {
     const self = new dist[name]()
-    return self.type() === 'continuous'
-      ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
-      : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
+    assert(
+      self.type() === 'continuous'
+        ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
+        : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
+    )
   })
 
   it('values should be distributed correctly with random parameters', () => {
@@ -954,6 +966,13 @@ describe('dist', () => {
       p: () => [float(31, 50)]
     }]
   }, {
+    name: 'PolyaAeppli',
+    p: () => [Param.shape(), Param.prob()],
+    pi: [
+      [-1, 0.5], [0, 0.5],            // lambda > 0
+      [1, -1], [1, 0], [1, 1], [1, 2] // 0 < theta < 1
+    ]
+  }, {
     name: 'Power',
     p: () => [Param.scale()],
     pi: [
@@ -1146,7 +1165,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'RaisedCosine') return
+    if (d.name !== 'PolyaAeppli') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

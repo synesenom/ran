@@ -5,7 +5,7 @@ import Kumaraswamy from './kumaraswamy'
  *
  * $$f(x; a) = a x^{a - 1},$$
  *
- * with \(a > 0\). Support: \(x \in [0, 1]\). It is a special case of the [Kumaraswamy distribution]{@link #dist.Kumaraswamy}.
+ * with \(a > 0\). Support: \(x \in (0, 1)\). It is a special case of the [Kumaraswamy distribution]{@link #dist.Kumaraswamy}.
  *
  * @class Power
  * @memberOf ran.dist
