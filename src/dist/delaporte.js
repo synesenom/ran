@@ -57,6 +57,7 @@ export default class extends Distribution {
    * @returns {number} The probability mass for the specified index.
    * @private
    */
+  // TODO Use some recursion instead
    _pk(k) {
     // Set i = 0 term
     let ki = k
@@ -64,8 +65,8 @@ export default class extends Distribution {
     let z = dz
 
     // Advance until k - 1
-    for (let i = 1; i < k; i++) {
-      dz *= (this.p.alpha + i - 1) * this.c[0] * ki / i
+    for (let j = 1; j < k; j++) {
+      dz *= (this.p.alpha + j - 1) * this.c[0] * ki / j
       ki--
       z += dz
     }

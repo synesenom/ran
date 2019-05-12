@@ -2,7 +2,7 @@ import Distribution from './_distribution'
 import { poisson } from './_core'
 
 /**
- * Generator for the [Pólya-Aeppli distribution]{@link https://arxiv.org/abs/1406.2780}:
+ * Generator for the [Pólya-Aeppli distribution]{@link https://arxiv.org/abs/1406.2780} (also known as [geometric Poisson distribution]{@link https://en.wikipedia.org/wiki/Geometric_Poisson_distribution#CITEREFJohnsonKotzKemp2005}):
  *
  * $$f(k; \lambda, \theta) = \begin{cases}e^{-\lambda} &\quad\text{if $k = 0$},\\e^{-\lambda} \sum_{j = 1}^k \frac{\lambda^j}{j!} \begin{pmatrix}k - 1 \\ j - 1 \\ \end{pmatrix} \theta^{k - j} (1 - \theta)^j &\quad\text{otherwise}\\\end{cases},$$
  *
@@ -33,6 +33,8 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // TODO Speed-up constants
 
     // Look-up tables
     this.logPdfTable = []

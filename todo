@@ -19,7 +19,6 @@
 - crystal ball
 - Davis                                 (generation unknown)
 - discrete Laplacian (scipy)
-- double-exponential
 - doubly non-central f
 - doubly non-central t
 - Error / exponential power             (generation unknown)
@@ -46,7 +45,6 @@
 - Normal inverse Gauss (scipy)
 - Normal product                        http://mathworld.wolfram.com/NormalProductDistribution.html
 - Planck                                (CDF unknown)
-- Polya-Aeppli                          https://en.wikipedia.org/wiki/Geometric_Poisson_distribution, https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/pappdf.htm
 - power-lognormal (scipy)
 - R (scipy)
 - stable                                (generation unknown)

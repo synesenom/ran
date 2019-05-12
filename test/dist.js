@@ -549,6 +549,12 @@ describe('dist', () => {
       [0.5, -1], [0.5, 0]               // beta > 0
     ]
   }, {
+    name: 'DoubleExponential',
+    p: () => [Param.rate()],
+    pi: [
+      [-1], [0] // lambda > 0
+    ]
+  }, {
     name: 'DoubleGamma',
     p: () => [Param.shape(), Param.rate()],
     pi: [
@@ -898,6 +904,13 @@ describe('dist', () => {
       [10, -1], [10, 2]     // 0 <= p <= 1
     ]
   }, {
+    name: 'NeymanA',
+    p: () => [Param.shape(), Param.shape()],
+    pi: [
+      [-1, 1], [0, 1],  // lambda > 0
+      [1, -1], [1, 0]   // mu > 0
+    ]
+  }, {
     name: 'NoncentralBeta',
     p: () => [Param.shape(), Param.shape(), Param.scale()],
     pi: [
@@ -1165,7 +1178,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'PolyaAeppli') return
+    if (d.name !== 'NeymanA') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
