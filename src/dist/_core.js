@@ -229,6 +229,10 @@ export function sign (r, p = 0.5) {
   return r.next() < p ? 1 : -1
 }
 
+export function uniform(r, a = 0, b = 1) {
+  return a + r.next() * (b - a)
+}
+
 /**
  * Generates a zeta random variate
  *

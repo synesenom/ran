@@ -1,4 +1,4 @@
-import { normal, rejection } from './_core'
+import { normal, rejection, uniform } from './_core'
 import Distribution from './_distribution'
 
 /**
@@ -35,20 +35,12 @@ export default class extends Distribution {
   }
 
   _generator () {
-    // Rejection sampling with normal(mu, s) distribution as major
+    // Rejection sampling with uniform distribution as major
     return rejection(
       this.r,
-      () => {
-        // Sample normal variate within support
-        let x = normal(this.r, this.p.mu, this.p.s)
-        while (x < this.p.mu - this.p.s || x > this.p.mu + this.p.s) {
-          x = normal(this.r, this.p.mu, this.p.s)
-        }
-        return x
-      },
+      () => uniform(this.r, this.p.mu - this.p.s, this.p.mu + this.p.s),
       x => {
-        let z = (x - this.p.mu) / this.p.s
-        return 0.5 * (1 + Math.cos(Math.PI * z) * Math.exp(0.5 * z * z))
+        return 0.5 * (1 + Math.cos(Math.PI * (x - this.p.mu) / this.p.s))
       }
     )
   }

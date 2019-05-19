@@ -1180,7 +1180,7 @@ describe('dist', () => {
     // JohnsonSB: Galois
     // LogGamma: Galois
     // RaisedCosine: sample
-    // if (d.name !== 'RaisedCosine') return
+    //if (d.name !== 'RaisedCosine') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
