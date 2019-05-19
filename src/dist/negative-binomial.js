@@ -25,7 +25,7 @@ export default class extends Distribution {
     this.p = { r: ri, p }
     Distribution._validate({ r: ri, p }, [
       'r > 0',
-      'p >= 0', 'p <= 1'
+      'p > 0', 'p < 1'
     ])
 
     // Set support

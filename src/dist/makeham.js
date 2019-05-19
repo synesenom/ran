@@ -1,4 +1,4 @@
-import lambertW from '../special/lambert-w'
+import { lambertW0 } from '../special/lambert-w'
 import Distribution from './_distribution'
 
 /**
@@ -68,7 +68,7 @@ export default class extends Distribution {
     let z = this.c[1] * Math.pow(1 - p, this.c[2])
 
     // Handle z >> 1 case
-    let w = lambertW(z)
+    let w = lambertW0(z)
     if (!isFinite(w)) {
       let t = Math.log(this.c[1]) + this.c[2] * Math.log(1 - p)
       return this.c[0] - Math.log(1 - p) / this.p.lambda -

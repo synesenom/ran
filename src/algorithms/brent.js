@@ -86,6 +86,4 @@ export default function(f, x1, x2) {
     }
     fb = f(b)
   }
-
-  return undefined
 }

@@ -1,4 +1,4 @@
-import lambertW from '../special/lambert-w'
+import { lambertW0 } from '../special/lambert-w'
 import Distribution from './_distribution'
 
 /**
@@ -57,6 +57,6 @@ export default class extends Distribution {
 
   _q (p) {
     let z = p * (this.c[0] - this.c[1]) - this.c[0]
-    return z / lambertW(z / Math.E)
+    return z / lambertW0(z / Math.E)
   }
 }

@@ -8,28 +8,15 @@ import InvalidDiscrete from '../src/dist/_invalid'
 const LAPS = 1000
 
 /*
-let TD1 = new dist.PolyaAeppli(8, 0.2)
-let hist = Array.from(TD1.sample(100000).reduce((acc, d) => {
-  if (!acc.has(d))
-    acc.set(d, 1)
-  else
-    acc.set(d, acc.get(d) + 1)
-  return acc
-}, new Map()))
-hist = hist.map(d => ({
-  x: d[0],
-  y: d[1] / 100000
-})).sort((a, b) => a.x - b.x)
-  .forEach(d => console.log(d.x, d.y))
-*/
-/*for (let x = 0; x <= 15; x++) {
+let TD1 = new dist.BetaNegativeBinomial(4.8, 0.7, 2)
+for (let x = 0; x <= 100; x++) {
   console.log(
     x,
     TD1.pdf(x),
-    TD2.pdf(x),
-    TD3.pdf(x)
+    TD1.cdf(x)
   )
-}*/
+}
+*/
 
 function utConstructor(name, invalidParams) {
   it('should throw error if params are invalid', () => {
@@ -63,12 +50,12 @@ function utSample (name, params) {
   })
 
   it('values should be distributed correctly with default parameters', () => {
-    const self = new dist[name]()
-    assert(
-      self.type() === 'continuous'
-        ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
-        : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
-    )
+    utils.trials(() => {
+      const self = new dist[name]()
+      return self.type() === 'continuous'
+          ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
+          : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
+    }, 8)
   })
 
   it('values should be distributed correctly with random parameters', () => {
@@ -264,9 +251,10 @@ describe('dist', () => {
   //return
   // Base class
   describe('Distribution', () => {
+    const invalid = new InvalidDiscrete()
+
     describe('.sample()', () => {
       it('should throw not implemented error', () => {
-        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.sample()
         }, 'Distribution._generator() is not implemented')
@@ -275,7 +263,6 @@ describe('dist', () => {
 
     describe('.pdf()', () => {
       it('should throw not implemented error', () => {
-        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.pdf(0)
         }, 'Distribution._pdf() is not implemented')
@@ -284,16 +271,28 @@ describe('dist', () => {
 
     describe('.cdf()', () => {
       it('should throw not implemented error', () => {
-        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.cdf(0)
         }, 'Distribution._cdf() is not implemented')
       })
     })
 
+    describe('.q()', () => {
+      it('should return undefined if p < 0 or p > 1', () => {
+        assert(typeof invalid.q(-1) === 'undefined')
+        assert(typeof invalid.q(2) === 'undefined')
+      })
+    })
+
+    describe('.q()', () => {
+      it('should return support boundary if p === 0 or p === 1', () => {
+        assert(invalid.q(0) === invalid.support()[0].value)
+        assert(invalid.q(1) === invalid.support()[1].value)
+      })
+    })
+
     describe('.survive()', () => {
       it('should throw not implemented error', () => {
-        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.survival(0)
         }, 'Distribution._cdf() is not implemented')
@@ -302,7 +301,6 @@ describe('dist', () => {
 
     describe('.hazard()', () => {
       it('should throw not implemented error', () => {
-        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.hazard(0)
         }, 'Distribution._pdf() is not implemented')
@@ -311,7 +309,6 @@ describe('dist', () => {
 
     describe('.cHazard()', () => {
       it('should throw not implemented error', () => {
-        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.cHazard(0)
         }, 'Distribution._cdf() is not implemented')
@@ -320,7 +317,6 @@ describe('dist', () => {
 
     describe('.lnPdf()', () => {
       it('should throw not implemented error', () => {
-        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.lnPdf(0)
         }, 'Distribution._pdf() is not implemented')
@@ -329,7 +325,6 @@ describe('dist', () => {
 
     describe('.lnL()', () => {
       it('should throw not implemented error', () => {
-        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.lnL([0])
         }, 'Distribution._pdf() is not implemented')
@@ -338,7 +333,6 @@ describe('dist', () => {
 
     describe('.test()', () => {
       it('should throw not implemented error', () => {
-        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.test([0])
         }, 'Distribution._pdf() is not implemented')
@@ -347,7 +341,6 @@ describe('dist', () => {
 
     describe('.aic()', () => {
       it('should throw not implemented error', () => {
-        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.aic([0])
         }, 'Distribution._pdf() is not implemented')
@@ -356,7 +349,6 @@ describe('dist', () => {
 
     describe('.bic()', () => {
       it('should throw not implemented error', () => {
-        const invalid = new InvalidDiscrete()
         assert.throws(() => {
           invalid.bic([0])
         }, 'Distribution._pdf() is not implemented')
@@ -508,10 +500,16 @@ describe('dist', () => {
     ]
   }, {
     name: 'Chi',
-    p: () => [Param.degree()],
-    pi: [
-      [-1], [0] // k > 0
-    ]
+    cases: [{
+      desc: 'k = 1',
+      p: () => [1],
+      pi: [
+        [-1], [0] // k > 0
+      ]
+    }, {
+      desc: 'k > 1',
+      p: () => [Param.degree()]
+    }],
   }, {
     name: 'Chi2',
     p: () => [Param.degree()],
@@ -686,11 +684,17 @@ describe('dist', () => {
     p: () => [Param.scale()]
   }, {
     name: 'Hoyt',
-    p: () => [Param.prob(), Param.scale()],
-    pi: [
-      [-1, 1], [0, 1], [2, 1],  // 0 < q <= 1
-      [0.5, -1], [0.5, 0]       // omega > 0
-    ]
+    cases: [{
+      desc: 'q < 0.5',
+      p: () => [Param.prob() / 2, Param.scale()],
+      pi: [
+        [-1, 1], [0, 1], [2, 1],  // 0 < q <= 1
+        [0.5, -1], [0.5, 0]       // omega > 0
+      ]
+    }, {
+      desc: 'normal q',
+      p: () => [Param.prob(), Param.scale()]
+    }]
   }, {
     name: 'HyperbolicSecant',
     p: () => []
@@ -894,8 +898,8 @@ describe('dist', () => {
     name: 'NegativeBinomial',
     p: () => [Param.count(), Param.prob()],
     pi: [
-      [-1, 0.5], [0, 0.5],  // r > 0
-      [10, -1], [10, 2]     // 0 <= p <= 1
+      [-1, 0.5], [0, 0.5],                // r > 0
+      [10, -1], [10, 0], [10, 1], [10, 2] // 0 < p < 1
     ]
   }, {
     name: 'NeymanA',
@@ -1172,7 +1176,11 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'Zeta') return
+    // Geometric: sample
+    // JohnsonSB: Galois
+    // LogGamma: Galois
+    // RaisedCosine: sample
+    // if (d.name !== 'RaisedCosine') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

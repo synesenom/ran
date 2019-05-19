@@ -63,7 +63,7 @@ describe('core', () => {
         return utils.ksTest(values, function (x) {
           return x
         })
-      }, 3)
+      }, 8)
     })
 
     it('should return a float uniformly distributed in [min, max]', () => {
@@ -73,7 +73,7 @@ describe('core', () => {
         return utils.ksTest(values, function (x) {
           return x / max
         })
-      }, 3)
+      }, 8)
     })
 
     it('should return multiple floats uniformly distributed in [min, max]', () => {
@@ -104,7 +104,7 @@ describe('core', () => {
             return (x - max) / (min - max)
           })
         }
-      }, 3)
+      }, 8)
     })
   })
 
@@ -116,7 +116,7 @@ describe('core', () => {
         return utils.chiTest(values, function () {
           return 1 / Math.abs(max + 1)
         }, 1)
-      }, 3)
+      }, 8)
     })
 
     it('should return an integer uniformly distributed in [min, max]', () => {
@@ -139,7 +139,7 @@ describe('core', () => {
         return utils.chiTest(values, () => {
           return 1 / Math.abs(max - min + 1)
         }, 1)
-      }, 3)
+      }, 8)
     })
 
     it('should return multiple integers uniformly distributed in [0, max]', () => {
@@ -165,7 +165,7 @@ describe('core', () => {
         return utils.chiTest(values, () => {
           return 1 / Math.abs(max - min + 1)
         }, 1)
-      }, 3)
+      }, 8)
     })
   })
 
@@ -289,7 +289,7 @@ describe('core', () => {
         return utils.chiTest(values, () => {
           return 0.5
         }, 1)
-      }, 3)
+      }, 8)
     })
 
     it('should return multiple heads/tails with specific probability', () => {
@@ -311,7 +311,7 @@ describe('core', () => {
         return utils.chiTest(values, function (x) {
           return x === head ? p : 1 - p
         }, 1)
-      }, 3)
+      }, 8)
     })
   })
 })

@@ -1,11 +1,12 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import { erf } from '../src/special/error'
+import { f11 } from '../src/special/hypergeometric'
 import gamma from '../src/special/gamma'
 import logGamma from '../src/special/log-gamma'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from '../src/special/gamma-incomplete'
 import hurwitzZeta from '../src/special/hurwitz-zeta'
-import lambertW from '../src/special/lambert-w'
+import { lambertW0, lambertW1 } from '../src/special/lambert-w'
 import marcumQ from '../src/special/marcum-q'
 import owenT from '../src/special/owen-t'
 import riemannZeta from '../src/special/riemann-zeta'
@@ -15,6 +16,19 @@ const LAPS = 100
 const PRECISION = 1e-10
 
 describe('special', () => {
+  /*describe('.f11()', () => {
+    it('F(a, a - 0.5, -2x) should give x^a e^x', () => {
+      utils.repeat(() => {
+        let a = Math.random() * 10
+        let x = Math.random()
+        let y = Math.exp(x) * Math.pow(x, a)
+        let fx = f11(a, a - 0.5, -2 * x)
+        console.log(y, fx)
+        assert(Math.abs(fx - y) < PRECISION)
+      }, LAPS)
+    })
+  })*/
+
   describe('.hurwitzZeta(), .riemannZeta()', () => {
     it('zeta(s) - zeta(s, n+1) should give H(s, n)', () => {
       utils.repeat(() => {
@@ -95,17 +109,50 @@ describe('special', () => {
     })
   })
 
-  describe('.lambertW()', () => {
+  describe('.lambertW0()', () => {
     it('should satisfy the W * exp(W) = x equation', () => {
       utils.repeat(() => {
         let x = Math.random() * 10
-        let w = lambertW(x)
+        let w = lambertW0(x)
+        assert(Math.abs(w * Math.exp(w) - x) / x < PRECISION)
+      })
+    })
+  })
+
+  describe('.lambertW1()', () => {
+    it('should satisfy the W * exp(W) = x equation', () => {
+      utils.repeat(() => {
+        let x = -Math.random() / Math.E
+        let w = lambertW1(x)
         assert(Math.abs(w * Math.exp(w) - x) / x < PRECISION)
       })
     })
   })
 
   describe('.marcumQ()', () => {
+    describe('special cases', () => {
+      describe('x = 0', () => {
+        it('should satisfy the recurrence relation', () => {
+          let x = Math.random() * 30
+          let y = 0
+          let mu = 2 + Math.random() * 5
+
+          assert(marcumQ(mu, x, y) === 1)
+        })
+      })
+
+      describe('y = 1', () => {
+        it('should satisfy the recurrence relation', () => {
+          utils.repeat(() => {
+            let x = 0
+            let y = 40 + Math.random() * 60
+            let mu = 2 + Math.random() * 5
+
+            assert(Math.abs(marcumQ(mu, x, y) - gammaUpperIncomplete(mu, y)) < PRECISION)
+          }, LAPS)
+        })
+      })
+    })
     describe('series expansion', () => {
       describe('Q', () => {
         it('should satisfy the recurrence relation', () => {

@@ -1,4 +1,3 @@
-import { zeta, rejection } from './_core'
 import Distribution from './_distribution'
 
 /**
@@ -33,28 +32,30 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    let s = 1.5
-    let k = -(s + 1) / Math.log(1 - a)
     this.c = [
-      s, k,
-      Math.pow(k, -s - 1) / Math.pow(1 - a, k)
+      1 - a
     ]
   }
 
   _generator () {
-    // Rejection sampling with zeta(1.5) distribution as major
-    return rejection(
-      this.r,
-      () => zeta(this.r, this.c[0]),
-      x => Math.pow(x, this.c[0] + 1) * Math.pow(1 - this.p.a, x) * this.c[2]
-    )
+    // Inverse transform sampling
+    let k = 1
+    let r = this.r.next()
+    let ak = 1 + this.p.a
+    let p = this.c[0]
+    while (r < p * ak) {
+      ak += this.p.a
+      p *= this.c[0]
+      k++
+    }
+    return k
   }
 
   _pdf (x) {
-    return this.p.a * this.p.a * x * Math.pow(1 - this.p.a, x - 1)
+    return this.p.a * this.p.a * x * Math.pow(this.c[0], x - 1)
   }
 
   _cdf (x) {
-    return 1 - Math.pow(1 - this.p.a, x) * (1 + this.p.a * x)
+    return 1 - Math.pow(this.c[0], x) * (1 + this.p.a * x)
   }
 }

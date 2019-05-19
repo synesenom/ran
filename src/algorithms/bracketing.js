@@ -56,6 +56,4 @@ export default function(f, a0, b0, s) {
       f2 = f(b)
     }
   }
-
-  return undefined
 }

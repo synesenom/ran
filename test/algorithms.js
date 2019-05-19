@@ -1,7 +1,7 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import utils from './test-utils'
-import lambertW from '../src/special/lambert-w'
+import { lambertW0 } from '../src/special/lambert-w'
 import bracketing from '../src/algorithms/bracketing'
 import brent from '../src/algorithms/brent'
 import newton from '../src/algorithms/newton'
@@ -17,8 +17,8 @@ describe('algorithms', () => {
         const c = Math.random() * 10
         const bracket = bracketing(
           t => t * Math.exp(t) - c,
-          lambertW(c) + 1,
-          lambertW(c) + 1
+          lambertW0(c) + 1,
+          lambertW0(c) + 1
         )
         assert(typeof bracket === 'undefined')
       }, LAPS)
@@ -29,8 +29,8 @@ describe('algorithms', () => {
         const c = Math.random() * 10
         const bracket = bracketing(
           t => t * Math.exp(t) - c,
-          lambertW(c) + 1,
-          lambertW(c) + 2
+          lambertW0(c) + 1,
+          lambertW0(c) + 2
         )
         assert(bracket[0] * Math.exp(bracket[0]) < c && bracket[1] * Math.exp(bracket[1]) > c)
       }, LAPS)
@@ -43,8 +43,8 @@ describe('algorithms', () => {
         const c = Math.random() * 10
         const sol = brent(
           t => t * Math.exp(t) - c,
-          lambertW(c) + 1,
-          lambertW(c) + 2
+          lambertW0(c) + 1,
+          lambertW0(c) + 2
         )
         assert(typeof sol === 'undefined')
       }, LAPS)
@@ -54,10 +54,10 @@ describe('algorithms', () => {
         const c = Math.random() * 10
         const sol = brent(
           t => t * Math.exp(t) - c,
-          lambertW(c) - 1,
-          lambertW(c) + 1
+          lambertW0(c) - 1,
+          lambertW0(c) + 1
         )
-        assert(Math.abs((sol - lambertW(c)) / sol) < PRECISION)
+        assert(Math.abs((sol - lambertW0(c)) / sol) < PRECISION)
       }, LAPS)
     })
   })
@@ -71,7 +71,7 @@ describe('algorithms', () => {
           t => Math.exp(t) * (1 + t),
           Math.random() * 10
         )
-        assert(Math.abs((sol - lambertW(c)) / sol) < PRECISION)
+        assert(Math.abs((sol - lambertW0(c)) / sol) < PRECISION)
       }, LAPS)
     })
   })

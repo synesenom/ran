@@ -115,14 +115,14 @@ export function exponential (r, lambda = 1) {
  * @method gamma
  * @memberOf ran.dist
  * @param r {ran.core.Xoshiro128p} Random generator.
- * @param alpha {number} Shape parameter.
- * @param beta {number=} Rate parameter. Default value is 1.
+ * @param a {number} Shape parameter.
+ * @param b {number=} Rate parameter. Default value is 1.
  * @returns {number} Random variate.
  * @private
  */
-export function gamma (r, alpha, beta = 1) {
-  if (alpha > 1) {
-    let d = alpha - 1 / 3
+export function gamma (r, a, b = 1) {
+  if (a > 1) {
+    let d = a - 1 / 3
 
     let c = 1 / Math.sqrt(9 * d)
 
@@ -136,11 +136,11 @@ export function gamma (r, alpha, beta = 1) {
       if (Z > -1 / c) {
         V = Math.pow(1 + c * Z, 3)
         U = r.next()
-        if (Math.log(U) < 0.5 * Z * Z + d * (1 - V + Math.log(V))) { return d * V / beta }
+        if (Math.log(U) < 0.5 * Z * Z + d * (1 - V + Math.log(V))) { return d * V / b }
       }
     }
   } else {
-    return gamma(r, alpha + 1, beta) * Math.pow(r.next(), 1 / alpha)
+    return gamma(r, a + 1, b) * Math.pow(r.next(), 1 / a)
   }
 }
 

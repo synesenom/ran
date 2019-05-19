@@ -32,11 +32,6 @@ class Xoshiro128p {
    * @returns {number} The hash code.
    */
   static hash(str) {
-    // For empty string, return 0
-    if (str.length === 0) {
-      return 0
-    }
-
     // Calculate Java's String.hashCode value
     let hash = 0
     for (let i = 0; i < str.length; i++) {

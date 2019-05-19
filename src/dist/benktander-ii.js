@@ -1,4 +1,4 @@
-import lambertW from '../special/lambert-w'
+import { lambertW0 } from '../special/lambert-w'
 import Distribution from './_distribution'
 
 /**
@@ -77,7 +77,7 @@ export default class extends Distribution {
     }
 
     // Check if b is too close to 1
-    let w = lambertW(Math.pow(this.c[1] * (1 - p), this.c[2]) / this.c[0])
+    let w = lambertW0(Math.pow(this.c[1] * (1 - p), this.c[2]) / this.c[0])
     if (!isFinite(w)) {
       // 1 - b << 1, use logarithms
       let l1 = this.c[3] + this.c[2] * Math.log(1 - p)

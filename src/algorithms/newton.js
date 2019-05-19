@@ -18,7 +18,7 @@ export default function (f, df, x0) {
   for (let k = 0; k < MAX_ITER; k++) {
     d = df(x)
     // If derivative is zero, compute function for a close neighboring point
-    dx = f(x) / (d !== 0 ? d : df(x + Number.EPSILON))
+    dx = f(x) / (Math.abs(d) > Number.EPSILON ? d : df(x + Number.EPSILON))
     x -= dx
 
     // Exit if we reached precision level

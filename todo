@@ -11,6 +11,7 @@
 - Benford                               (inverse transform)
 - Benktander 1nd kind                   (lambertW)
 - Beta-binomial                         (generation unknown)
+- beta geometric
 - Beta-pascal / Beta negative binomial  (generation unknown)
 - Borel                                 (generation unknown)
 - Borel-Tanner
@@ -40,7 +41,6 @@
 - Luria-Delbruck                        (compound Poisson)
 - Map-Airy                              http://mathworld.wolfram.com/Map-AiryDistribution.html
 - Muth                                  (not-invertible cdf)
-- Neyman A                              https://www.researchgate.net/publication/284720187_Neyman_type_A_distribution_for_the_natural_disasters_and_related_casualties_in_Turkey/download
 - Normal-exponential-gamma              (compound)
 - Normal inverse Gauss (scipy)
 - Normal product                        http://mathworld.wolfram.com/NormalProductDistribution.html
@@ -51,6 +51,7 @@
 - Student Z                             http://mathworld.wolfram.com/Studentsz-Distribution.html
 - truncated exponential (scipy)
 - truncated normal
+- Waring
 
 - list: https://chaospy.readthedocs.io/en/development/distributions/collection.html
 - list: https://docs.scipy.org/doc/scipy-0.13.0/reference/tutorial/stats/continuous.html
@@ -73,6 +74,7 @@
 - welch (equal mean)
 - wilcoxon (hypothesis test)
 - shapiro-wilk (normality)
+- list: https://docs.scipy.org/doc/scipy/reference/stats.html
 
 
 # ts
@@ -104,5 +106,4 @@
 - Hamiltonian
 - Adjust Euclidean metric from covariance in burn-in
 - step size sampled randomly
-
-
+- inspiration: https://github.com/chi-feng/mcmc-demo

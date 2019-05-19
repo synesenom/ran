@@ -134,7 +134,7 @@ class Distribution {
         return k
       }
     }
-    return undefined
+    // FIXME This is unnecessary: return undefined
   }
 
   /**
@@ -541,7 +541,6 @@ class Distribution {
   lnL (data) {
     return neumaier(
       data.map(d => this.lnPdf(d))
-        .sort((a, b) => b - a)
     )
   }
 
@@ -627,8 +626,8 @@ class Distribution {
    */
   test (values) {
     return this.t === 'discrete'
-      ? chi2(values, x => this._pdf(x), this.k)
-      : kolmogorovSmirnov(values, x => this._cdf(x))
+      ? chi2(values, x => this.pdf(x), this.k)
+      : kolmogorovSmirnov(values, x => this.cdf(x))
   }
 }
 

@@ -79,15 +79,20 @@ export default (function () {
       }
     }
 
+    // Create sorted frequencies
+    let dist = Array.from(p)
+      .map(d => ({x: d[0], p: d[1]}))
+      .sort((a, b) => a.x - b.x);
+
     // Calculate chi-square
     let chi2 = 0
     let bin = 0
     let pBin = 0
     let k = 0
-    p.forEach((px, x) => {
+    dist.forEach(d => {
       // Add frequency to current bin
-      bin += model(parseInt(x)) * values.length
-      pBin += px
+      bin += model(parseInt(d.x)) * values.length
+      pBin += d.p
 
       // If bin count is above 10, consider this a class and clear bin
       if (bin > 10) {
@@ -102,7 +107,9 @@ export default (function () {
     // Find critical value
     let df = Math.max(1, k - c - 1)
     let crit = df <= 250 ? CHI_TABLE_LOW[df] : CHI_TABLE_HIGH[Math.ceil(df / 50)]
-    // console.log(crit, chi2)
+    if (chi2 > crit) {
+      //console.log(chi2, crit)
+    }
     return chi2 <= crit
   }
 
@@ -145,7 +152,7 @@ export default (function () {
     return [
       isFinite(dist.support()[0].value) ? dist.support()[0].value - 1 : -30,
       isFinite(dist.support()[1].value) ? dist.support()[1].value + 1 : 30
-    ]
+    ].concat([0, 1e-10])
   }
 
   function runX(dist, laps, unitTest) {

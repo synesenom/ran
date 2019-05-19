@@ -20,7 +20,16 @@ export default class extends Distribution {
     this.cdfTable = []
   }
 
-  _pk() {
+  /**
+   * Computes the probability mass value for a specified index.
+   *
+   * @method _pk
+   * @methodOf ran.dist.PreComputed
+   * @param {number} k Index to computed probability for.
+   * @returns {number} The probability for the specified index.
+   * @private
+   */
+  _pk(k) {
     throw Error('_pk() is not implemented')
   }
 
@@ -34,9 +43,16 @@ export default class extends Distribution {
    */
   _advance (x) {
     for (let k = this.pdfTable.length; k <= x; k++) {
+      // Update probability mass
       let pdf = this._pk(k)
       this.pdfTable.push(pdf)
-      this.cdfTable.push((this.cdfTable[this.cdfTable.length - 1] || 0) + (this.logP ? Math.exp(pdf) : pdf))
+
+      // Update cumulative function
+      if (typeof this['_ck'] === 'function') {
+        this.cdfTable.push(this._ck(k))
+      } else {
+        this.cdfTable.push((this.cdfTable[this.cdfTable.length - 1] || 0) + (this.logP ? Math.exp(pdf) : pdf))
+      }
     }
   }
 
@@ -59,6 +75,6 @@ export default class extends Distribution {
 
     // Otherwise, advance to current index and return F(x)
     this._advance(x)
-    return this.cdfTable[x]
+    return Math.min(1, this.cdfTable[x])
   }
 }
