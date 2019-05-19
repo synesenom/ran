@@ -1,7 +1,6 @@
 import logBinomial from '../special/log-binomial'
-import logGamma from '../special/log-gamma'
-import { regularizedBetaIncomplete } from '../special/beta-incomplete'
 import Distribution from './_distribution'
+import Categorical from './categorical'
 
 /**
  * Generator for the [binomial distribution]{@link https://en.wikipedia.org/wiki/Binomial_distribution}:
@@ -16,14 +15,13 @@ import Distribution from './_distribution'
  * @param {number=} p Probability of success. Default value is 0.5.
  * @constructor
  */
-export default class extends Distribution {
+export default class extends Categorical {
   constructor (n = 100, p = 0.5) {
-    super('discrete', arguments.length)
+    let ni = Math.round(n)
+    super(Array.from({ length: ni + 1 }, (d, i) => Math.exp(logBinomial(n, i) + i * Math.log(p) + (n - i) * Math.log(1 - p))))
 
     // Validate parameters
-    let pp = p <= 0.5 ? p : 1 - p
-    this.p = { n: Math.round(n), p }
-    Distribution._validate({ n, p }, [
+    Distribution._validate({ n: ni, p }, [
       'n >= 0',
       'p >= 0', 'p <= 1'
     ])
@@ -33,68 +31,8 @@ export default class extends Distribution {
       value: 0,
       closed: true
     }, {
-      value: this.p.n,
+      value: ni,
       closed: true
     }]
-
-    // Speed-up constants
-    this.c = [pp, this.p.n * pp]
-  }
-
-  _generator () {
-    // Direct sampling
-    if (this.p.n < 25) {
-      // Small n
-      let b = 0
-      for (let i = 1; i <= this.p.n; i++) {
-        if (this.r.next() < this.c[0]) b++
-      }
-      return this.c[0] === this.p.p ? b : this.p.n - b
-    } else if (this.c[1] < 1.0) {
-      // Small mean
-      let lambda = Math.exp(-this.c[1])
-
-      let t = 1.0; let i
-      for (i = 0; i <= this.p.n; i++) {
-        t *= this.r.next()
-        if (t < lambda) break
-      }
-      let b = Math.min(i, this.p.n)
-      return this.c[0] === this.p.p ? b : this.p.n - b
-    } else {
-      // Rest of the cases
-      let en = this.p.n
-
-      let g = logGamma(en + 1)
-
-      let pc = 1 - this.c[0]
-
-      let pLog = Math.log(this.c[0])
-
-      let pcLog = Math.log(pc)
-
-      let sq = Math.sqrt(2.0 * this.c[1] * pc)
-
-      let y; let em; let t
-      do {
-        do {
-          y = Math.tan(Math.PI * this.r.next())
-          em = sq * y + this.c[1]
-        } while (em < 0.0 || em >= (en + 1.0))
-        em = Math.floor(em)
-        t = 1.2 * sq * (1.0 + y * y) * Math.exp(g - logGamma(em + 1.0) -
-          logGamma(en - em + 1.0) + em * pLog + (en - em) * pcLog)
-      } while (this.r.next() > t)
-      return this.c[0] === this.p.p ? em : this.p.n - em
-    }
-  }
-
-  _pdf (x) {
-    return Math.exp(logBinomial(this.p.n, x) +
-      x * Math.log(this.p.p) + (this.p.n - x) * Math.log(1 - this.p.p))
-  }
-
-  _cdf (x) {
-    return regularizedBetaIncomplete(this.p.n - x, 1 + x, 1 - this.p.p)
   }
 }

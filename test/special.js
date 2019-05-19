@@ -19,8 +19,8 @@ describe('special', () => {
   /*describe('.f11()', () => {
     it('F(a, a - 0.5, -2x) should give x^a e^x', () => {
       utils.repeat(() => {
-        let a = Math.random() * 10
-        let x = Math.random()
+        let a = 1//Math.random() * 10
+        let x = 0.1//Math.random()
         let y = Math.exp(x) * Math.pow(x, a)
         let fx = f11(a, a - 0.5, -2 * x)
         console.log(y, fx)

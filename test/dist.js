@@ -50,12 +50,10 @@ function utSample (name, params) {
   })
 
   it('values should be distributed correctly with default parameters', () => {
-    utils.trials(() => {
       const self = new dist[name]()
-      return self.type() === 'continuous'
-          ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
-          : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
-    }, 8)
+      assert(self.type() === 'continuous'
+        ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
+        : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length))
   })
 
   it('values should be distributed correctly with random parameters', () => {
@@ -1176,11 +1174,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // Geometric: sample
-    // JohnsonSB: Galois
-    // LogGamma: Galois
-    // RaisedCosine: sample
-    //if (d.name !== 'RaisedCosine') return
+    // if (d.name !== 'GeneralizedGamma') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

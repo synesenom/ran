@@ -38,7 +38,7 @@ const CHI_TABLE_HIGH = [
 
 export default (function () {
   function safeCompare(a, b) {
-    return b - a > -Number.EPSILON
+    return b - a > -PRECISION
   }
 
   /**
@@ -108,7 +108,7 @@ export default (function () {
     let df = Math.max(1, k - c - 1)
     let crit = df <= 250 ? CHI_TABLE_LOW[df] : CHI_TABLE_HIGH[Math.ceil(df / 50)]
     if (chi2 > crit) {
-      //console.log(chi2, crit)
+      // console.log(chi2, crit)
     }
     return chi2 <= crit
   }
@@ -122,13 +122,13 @@ export default (function () {
    */
   function trials (test, minSuccess = 10) {
     let success = 0
-    for (let t = 0; t < 100; t++) {
-    //for (let t = 0; t < 10; t++) {
+    //for (let t = 0; t < 100; t++) {
+    for (let t = 0; t < 10; t++) {
       success += test() ? 1 : 0
     }
-    console.log(success)
-    assert(success >= 100)
-    //assert(success >= minSuccess)
+    //console.log(success)
+    //assert(success >= 100)
+    assert(success >= minSuccess)
   }
 
   /**
@@ -298,7 +298,7 @@ export default (function () {
           let cdf = d.cdf(x)
           passed = passed && ((safeCompare(p, cdf) && safeCompare(q, x)) || (safeCompare(cdf, p) && safeCompare(x, q)))
           if (!(safeCompare(p, cdf) && safeCompare(q, x)) && !(safeCompare(cdf, p) && safeCompare(x, q))) {
-            // console.log(p, cdf, q, x)
+            console.log(p, cdf, q, x)
           }
         }
         return passed

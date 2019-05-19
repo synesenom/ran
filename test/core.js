@@ -60,9 +60,7 @@ describe('core', () => {
     it('should return a float uniformly distributed in [0, 1]', () => {
       utils.trials(() => {
         const values = Array.from({ length: LAPS }, () => core.float())
-        return utils.ksTest(values, function (x) {
-          return x
-        })
+        return utils.ksTest(values, x => x)
       }, 8)
     })
 
@@ -70,9 +68,7 @@ describe('core', () => {
       utils.trials(() => {
         const max = Math.random() * 20
         const values = Array.from({ length: LAPS }, () => core.float(max))
-        return utils.ksTest(values, function (x) {
-          return x / max
-        })
+        return utils.ksTest(values, x => x / max)
       }, 8)
     })
 
@@ -85,7 +81,7 @@ describe('core', () => {
         for (let lap = 0; lap < LAPS; lap++) {
           let r = core.float(min, max, k)
           if (k < 2) { r = [r] }
-          r.forEach(function (ri) {
+          r.forEach(ri => {
             values.push(ri)
             // Value is in range
             assert((min < max ? min : max) <= ri && ri <= (min < max ? max : min))
@@ -96,13 +92,9 @@ describe('core', () => {
 
         // Distribution is uniform
         if (min < max) {
-          return utils.ksTest(values, function (x) {
-            return (x - min) / (max - min)
-          })
+          return utils.ksTest(values, x => (x - min) / (max - min))
         } else {
-          return utils.ksTest(values, function (x) {
-            return (x - max) / (min - max)
-          })
+          return utils.ksTest(values, x => (x - max) / (min - max))
         }
       }, 8)
     })
@@ -113,9 +105,7 @@ describe('core', () => {
       utils.trials(() => {
         const max = Math.floor(Math.random() * 10)
         const values = Array.from({ length: LAPS }, () => core.int(max))
-        return utils.chiTest(values, function () {
-          return 1 / Math.abs(max + 1)
-        }, 1)
+        return utils.chiTest(values, () => 1 / Math.abs(max + 1), 1)
       }, 8)
     })
 
@@ -190,7 +180,7 @@ describe('core', () => {
         for (let lap = 0; lap < LAPS; lap++) {
           let r = core.choice(values, k)
           if (k < 2) { r = [r] }
-          r.forEach(function (ri) {
+          r.forEach(ri => {
             add(freqs, ri)
             // Value is in array
             assert(values.indexOf(ri) > -1)
@@ -231,7 +221,7 @@ describe('core', () => {
         for (let lap = 0; lap < LAPS; lap++) {
           let r = core.char(string, k)
           if (k < 2) { r = [r] }
-          r.forEach(function (ri) {
+          r.forEach(ri => {
             // Character is in array
             assert(string.indexOf(ri) > -1)
           })
@@ -254,13 +244,11 @@ describe('core', () => {
 
         for (let lap = 0; lap < LAPS; lap++) {
           core.shuffle(values)
-          values.forEach(function (v, i) {
-            add(pos[v], i)
-          })
+          values.forEach((v, i) => add(pos[v], i))
         }
 
         // Check if all positions have been visited at least once
-        pos.forEach(function (p) {
+        pos.forEach(p => {
           for (let i in p) {
             if (p.hasOwnProperty(i)) {
               assert(p[i] > 0)
@@ -280,9 +268,7 @@ describe('core', () => {
         for (let lap = 0; lap < LAPS; lap++) {
           let r = core.coin(head, tail)
           r = [r]
-          r.forEach(function (ri) {
-            values.push(ri)
-          })
+          r.forEach(ri => values.push(ri))
         }
 
         // Distribution is uniform
@@ -302,15 +288,11 @@ describe('core', () => {
         for (let lap = 0; lap < LAPS; lap++) {
           let r = core.coin(head, tail, p, k)
           if (k < 2) { r = [r] }
-          r.forEach(function (ri) {
-            values.push(ri)
-          })
+          r.forEach(ri => values.push(ri))
         }
 
         // Distribution is uniform
-        return utils.chiTest(values, function (x) {
-          return x === head ? p : 1 - p
-        }, 1)
+        return utils.chiTest(values, x => x === head ? p : 1 - p, 1)
       }, 8)
     })
   })
