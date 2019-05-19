@@ -49,7 +49,8 @@ export default class extends Normal {
 
   _cdf (x) {
     let z = x - this.p.xi
-    return super._cdf(this.p.gamma + this.p.delta * Math.log(z / (this.p.lambda - z)))
+    let lnz = Math.log(z / (this.p.lambda - z))
+    return isFinite(lnz) ? super._cdf(this.p.gamma + this.p.delta * lnz) : 0
   }
 
   _q (p) {
