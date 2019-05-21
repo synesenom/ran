@@ -1,7 +1,9 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
+import { besselInu } from '../src/special/bessel'
+import digamma from '../src/special/digamma'
 import { erf } from '../src/special/error'
-import { f11 } from '../src/special/hypergeometric'
+import { f11, f21 } from '../src/special/hypergeometric'
 import gamma from '../src/special/gamma'
 import logGamma from '../src/special/log-gamma'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from '../src/special/gamma-incomplete'
@@ -15,22 +17,152 @@ import utils from './test-utils'
 const LAPS = 100
 const PRECISION = 1e-10
 
+function equal (x, y) {
+  return Math.abs((x - y) / y) < PRECISION
+}
+
+const em = 0.57721566490153286060
+
 describe('special', () => {
-  /*describe('.f11()', () => {
-    it('F(a, a - 0.5, -2x) should give x^a e^x', () => {
+  describe('digamma(z)', () => {
+    it('should return reference values', () => {
+      assert(equal(digamma(1), -em))
+      assert(equal(digamma(0.5), -em - 2 * Math.log(2)))
+      assert(equal(digamma(1 / 4), -Math.PI / 2 - 3 * Math.log(2) - em))
+    })
+
+    it('should give the harmonic number for integers', () => {
       utils.repeat(() => {
-        let a = 1//Math.random() * 10
-        let x = 0.1//Math.random()
-        let y = Math.exp(x) * Math.pow(x, a)
-        let fx = f11(a, a - 0.5, -2 * x)
-        console.log(y, fx)
-        assert(Math.abs(fx - y) < PRECISION)
+        let z = Math.floor(Math.random() * 100) + 1
+        assert(equal(digamma(z), digamma(z + 1) - 1 / z))
       }, LAPS)
     })
-  })*/
+  })
 
-  describe('.hurwitzZeta(), .riemannZeta()', () => {
-    it('zeta(s) - zeta(s, n+1) should give H(s, n)', () => {
+  describe('f11(a, b, z)', () => {
+    describe('|z| < 50', () => {
+      it('f11(0, b, z) = 1', () => {
+        utils.repeat(() => {
+          let b = Math.random()
+          let z = Math.random() * 40
+          assert(equal(f11(0, b, z), 1))
+        }, LAPS)
+      })
+
+      it('f11(b, b, z) = exp(z)', () => {
+        utils.repeat(() => {
+          let b = Math.random() * 10
+          let z = Math.random() * 40
+          assert(equal(f11(b, b, z), Math.exp(z)))
+        }, LAPS)
+      })
+
+      it('f11(2, 1, z) = (1 + z) * exp(z)', () => {
+        utils.repeat(() => {
+          let z = Math.random() * 40
+          assert(equal(f11(2, 1, z), (1 + z) * Math.exp(z)))
+        }, LAPS)
+      })
+
+      it('f11(1, 2, z) = (exp(z) - 1) / z', () => {
+        utils.repeat(() => {
+          let z = Math.random() * 40
+          assert(equal(f11(1, 2, z), (Math.exp(z) - 1) / z))
+        }, LAPS)
+      })
+
+      it('(2z / sqrt(pi)) * f11(0.5, 1.5, -z^2) = erf(z)', () => {
+        utils.repeat(() => {
+          let z = Math.random()
+          assert(equal(2 * z * f11(0.5, 1.5, -z * z) / Math.sqrt(Math.PI), erf(z)))
+        }, LAPS)
+      })
+
+      it('f11(a, 2a, z) = exp(z/2) (z/4)^(0.5 - a) gamma(a + 0.5) I(a - 0.5; z/2)', () => {
+        utils.repeat(() => {
+          let a = Math.random() * 10
+          let z = Math.random() * 40
+          assert(equal(
+            f11(a, 2 * a, z),
+            Math.exp(z / 2 + (0.5 - a) * Math.log(z / 4) + logGamma(a + 0.5)) * besselInu(a - 0.5, z / 2)
+          ))
+        }, LAPS)
+      })
+    })
+
+    describe('|z| >= 50', () => {
+      it('f11(0, b, z) = 1', () => {
+        utils.repeat(() => {
+          let b = Math.random()
+          let z = Math.random() * 40 + 50
+          assert(equal(f11(0, b, z), 1))
+        }, LAPS)
+      })
+
+      it('f11(b, b, z) = exp(z)', () => {
+        utils.repeat(() => {
+          let b = Math.random() * 10
+          let z = Math.random() * 40 + 50
+          assert(equal(f11(b, b, z), Math.exp(z)))
+        }, LAPS)
+      })
+
+      it('f11(2, 1, z) = (1 + z) * exp(z)', () => {
+        utils.repeat(() => {
+          let z = Math.random() * 40 + 50
+          assert(equal(f11(2, 1, z), (1 + z) * Math.exp(z)))
+        }, LAPS)
+      })
+
+      it('f11(1, 2, z) = (exp(z) - 1) / z', () => {
+        utils.repeat(() => {
+          let z = Math.random() * 40 + 50
+          assert(equal(f11(1, 2, z), (Math.exp(z) - 1) / z))
+        }, LAPS)
+      })
+
+      it('f11(a, 2a, z) = exp(z/2) (z/4)^(0.5 - a) gamma(a + 0.5) I(a - 0.5; z/2)', () => {
+        utils.repeat(() => {
+          let a = Math.random() * 10
+          let z = Math.random() * 40 + 50
+          assert(equal(
+            f11(a, 2 * a, z),
+            Math.exp(z / 2 + (0.5 - a) * Math.log(z / 4) + logGamma(a + 0.5)) * besselInu(a - 0.5, z / 2)
+          ))
+        }, LAPS)
+      })
+    })
+  })
+
+  describe('f21(a, b, c, z)', () => {
+    describe('z < -1', () => {
+      it('TEST', () => {
+        let z = 1 + Math.random() * 10
+        console.log(
+          f21(0.5, 0.5, 1.5, -z * z),
+          Math.log(z + Math.sqrt(1 + z * z)) / z
+        )
+      })
+    })
+
+    describe('-1 <= z < 0', () => {
+    })
+
+    describe('0 <= z <= 0.5', () => {
+
+    })
+
+    describe('0.5 < z <= 1', () => {})
+
+    describe('1 < z <= 2', () => {})
+
+    describe('2 < z', () => {
+
+    })
+  })
+
+  describe('hurwitzZeta(s, a), riemannZeta(s)', () => {
+    it('riemannZeta(s) - hurwitzZeta(s, n+1) should give H(s, n)', () => {
       utils.repeat(() => {
         let s = Math.random() * 10 + 1
         let sum = 0
@@ -42,8 +174,8 @@ describe('special', () => {
     })
   })
 
-  describe('.gamma(), .logGamma()', () => {
-    it('logGamma(x) should be equal to ln(gamma(x))', () => {
+  describe('gamma(z), logGamma(z)', () => {
+    it('logGamma(z) should be equal to ln(gamma(z))', () => {
       for (let i = 0; i < LAPS; i++) {
         let x = Math.random() * 100
 
@@ -55,7 +187,7 @@ describe('special', () => {
     })
   })
 
-  describe('.gammaLowerIncomplete(), .gammaUpperIncomplete()', () => {
+  describe('gammaLowerIncomplete(s, x), gammaUpperIncomplete(s, x)', () => {
     it('should vanish below 0', () => {
       utils.repeat(() => {
         let s = 2 + Math.random() * 10
@@ -109,7 +241,7 @@ describe('special', () => {
     })
   })
 
-  describe('.lambertW0()', () => {
+  describe('lambertW0(z)', () => {
     it('should satisfy the W * exp(W) = x equation', () => {
       utils.repeat(() => {
         let x = Math.random() * 10
@@ -119,7 +251,7 @@ describe('special', () => {
     })
   })
 
-  describe('.lambertW1()', () => {
+  describe('lambertW1(z)', () => {
     it('should satisfy the W * exp(W) = x equation', () => {
       utils.repeat(() => {
         let x = -Math.random() / Math.E
@@ -129,7 +261,7 @@ describe('special', () => {
     })
   })
 
-  describe('.marcumQ()', () => {
+  describe('marcumQ(mu, x, y)', () => {
     describe('special cases', () => {
       describe('x = 0', () => {
         it('should satisfy the recurrence relation', () => {
@@ -201,7 +333,8 @@ describe('special', () => {
       })
     })
 
-    /*describe('asymptotic expansion for large xi', () => {
+    /*
+    describe('asymptotic expansion for large xi', () => {
       describe('Q', () => {
         it('should satisfy the recurrence relation', () => {
           utils.repeat(() => {
@@ -305,10 +438,11 @@ describe('special', () => {
           }, LAPS)
         })
       })
-    })*/
+    })
+    */
   })
 
-  describe('.owenT()', () => {
+  describe('owenT(h, a)', () => {
     it('should return reference values', () => {
       [
         {h: 0.0625, a: 0.25, t: 0.03891193023470137},

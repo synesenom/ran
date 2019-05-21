@@ -1,4 +1,6 @@
 import { EPS, MAX_ITER } from './_core'
+import gamma from './gamma'
+import recursiveSum from '../algorithms/recursive-sum'
 
 /**
  * Computes the modified Bessel function of the first kind with order zero.
@@ -203,14 +205,14 @@ export function besselISpherical (n, x) {
  * @returns {number} The modified Bessel function of the first kind.
  * @private
  */
-/*export function besselInu (nu, x) {
-  return Math.pow(0.5 * x, nu) * recursiveSum({
-    c: gamma(nu + 1)
+export function besselInu (nu, x) {
+  return Math.pow(x / 2, nu) * recursiveSum({
+    c: 1 / gamma(nu + 1)
   }, (t, i) => {
-    t.c *= 0.25 * x * x / (i * (nu + i))
+    t.c *= x * x / (4 * i * (nu + i))
     return t
   }, t => t.c)
-}*/
+}
 
 /**
  * Computes the modified Bessel function of the second kind for fractional order.
@@ -222,6 +224,8 @@ export function besselISpherical (n, x) {
  * @returns {number} The modified Bessel function of the second kind.
  * @private
  */
-/*export function besselKnu (nu, x) {
-  return Math.PI * (besselInu(-nu, x) - besselInu(nu, x)) / (2 * Math.sin(nu * Math.PI))
-}*/
+/*
+ export function besselKnu (nu, x) {
+   return Math.PI * (besselInu(-nu, x) - besselInu(nu, x)) / (2 * Math.sin(nu * Math.PI))
+ }
+*/

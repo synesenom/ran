@@ -4,7 +4,7 @@ import {
 } from './gamma-incomplete'
 import newton from '../algorithms/newton'
 
-const coeffs = [
+const CErfInv = [
   0.0833333333333333,
   0.0145833333333333,
   0.0031498015873016,
@@ -24,7 +24,7 @@ const coeffs = [
 export function erf (x) {
   // TODO Replace with continued fraction
   return x < 0
-    ? - gammaLowerIncomplete(0.5, x * x)
+    ? -gammaLowerIncomplete(0.5, x * x)
     : gammaLowerIncomplete(0.5, x * x)
 }
 
@@ -56,9 +56,10 @@ export function erfc (x) {
 export function erfinv (x) {
   // Estimate initial guess using the polynomial
   let x0 = 0
+  let x2 = x * x
   let c = 0.5 * Math.pow(Math.PI, 5.5)
-  for (let i = coeffs.length - 1; i >= 0; i--) {
-    x0 = (x0 + coeffs[i] * c) * x * x
+  for (let i = CErfInv.length - 1; i >= 0; i--) {
+    x0 = (x0 + CErfInv[i] * c) * x2
     c /= Math.PI
   }
   x0 = (x0 + 1) * x
