@@ -48,7 +48,6 @@
 - power-lognormal (scipy)
 - R (scipy)
 - stable                                (generation unknown)
-- Student Z                             http://mathworld.wolfram.com/Studentsz-Distribution.html
 - truncated exponential (scipy)
 - truncated normal
 - Waring

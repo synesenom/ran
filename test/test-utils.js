@@ -55,7 +55,7 @@ export default (function () {
       D = Math.max(D, Math.abs((i + 1) / values.length - model(values[i])))
       // console.log(values[i], (i + 1) / values.length, model(values[i]))
     }
-    // console.log(D)
+    // console.log(D, 1.628 / Math.sqrt(values.length))
     return D <= 1.628 / Math.sqrt(values.length)
   }
 

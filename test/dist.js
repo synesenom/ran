@@ -246,7 +246,6 @@ const Param = {
 }
 
 describe('dist', () => {
-  return
   // Base class
   describe('Distribution', () => {
     const invalid = new InvalidDiscrete()
@@ -1084,6 +1083,12 @@ describe('dist', () => {
       [-1], [0] // nu > 0
     ]
   }, {
+    name: 'StudentZ',
+    p: () => [Param.shape() + 1],
+    pi: [
+      [-1], [0], [1]  // n > 1
+    ]
+  }, {
     name: 'Trapezoidal',
     p: () => [Param.location(), Param.location(), Param.location(), Param.location()].sort((a, b) => a - b),
     pi: [
@@ -1174,7 +1179,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'GeneralizedGamma') return
+    // if (d.name !== 'StudentZ') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
