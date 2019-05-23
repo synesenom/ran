@@ -8,7 +8,9 @@ import PreComputed from './_pre-computed'
  *
  * $$f(k; a_1, a_m, m) = p_0 \frac{\mu^k (m - d)^k}{(m - 1)^k} \sum_{j = 0}^{\lfloor k / m \rfloor} \frac{(d - 1)^j (m - 1)^{(m - 1)j}}{m^j \mu^{(m - 1)j} (m - d)^{mj} (k - mj)! j!},$$
  *
- * where \(p_0 = e^{\mu \big[\frac{d - 1}{m} - 1\big]}\), \(m\mu = a_1 + m a_m\), \(d = \frac{a_1 + m^2 a_m}{a_1 + m a_m}\), \(a_1, a_m > 0\) and \(m \in \mathbb{N}^+ \ \{1\}\). Support: \(k \in \mathbb{N}\). It is the distribution of \(X_1 + m X_m\) where \(X_1, X_2\) are Poisson variates with parameters \(a_1, a_m\) respectively. This implementation uses the recursive method described in [1].
+ * where \(p_0 = e^{\mu \big[\frac{d - 1}{m} - 1\big]}\), \(m\mu = a_1 + m a_m\), \(d = \frac{a_1 + m^2 a_m}{a_1 + m a_m}\), \(a_1, a_m > 0\) and \(m \in \mathbb{N}^+ \ \{1\}\).
+ * Support: \(k \in \mathbb{N}\). It is the distribution of \(X_1 + m X_m\) where \(X_1, X_2\) are Poisson variates with
+ * parameters \(a_1, a_m\) respectively.
  *
  * @class GeneralizedHermite
  * @memberOf ran.dist
@@ -54,10 +56,12 @@ export default class extends PreComputed {
     }
 
     if (k < this.p.m) {
-      return this.c[2] * Math.exp(k * Math.log(this.c[0]) - logGamma(k + 1) + k * Math.log((this.p.m - this.c[1]) / (this.p.m - 1)))
+      return this.c[2] *
+        Math.exp(k * Math.log(this.c[0]) - logGamma(k + 1) + k * Math.log((this.p.m - this.c[1]) / (this.p.m - 1)))
     }
 
-    return this.c[0] * ((this.c[1] - 1) * this.pdfTable[k - this.p.m] + (this.p.m - this.c[1]) * this.pdfTable[k - 1]) / (k * (this.p.m - 1))
+    return this.c[0] * ((this.c[1] - 1) * this.pdfTable[k - this.p.m] + (this.p.m - this.c[1]) * this.pdfTable[k - 1]) /
+      (k * (this.p.m - 1))
   }
 
   _generator () {

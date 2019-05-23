@@ -994,6 +994,12 @@ describe('dist', () => {
       [1.5, -1], [1.5, 0] // lambda > 0
     ]
   }, {
+    name: 'R',
+    p: () => [Param.shape()],
+    pi: [
+      [-1], [0] // c > 0
+    ]
+  }, {
     name: 'Rademacher',
     p: () => []
   }, {
@@ -1179,7 +1185,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'StudentZ') return
+    //if (d.name !== 'R') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
