@@ -637,6 +637,13 @@ describe('dist', () => {
       [1, 1, -1], [1, 1, 0], [1, 1, 1]  // m > 1
     ]
   }, {
+    name: 'GeneralizedNormal',
+    p: () => [Param.location(), Param.scale(), Param.shape()],
+    pi: [
+      [0, -1, 1], [0, 0, 1],  // alpha > 0
+      [0, 1, -1], [0, 1, 0]   // beta > 0
+    ]
+  }, {
     name: 'GeneralizedPareto',
     cases: [{
       desc: 'positive shape parameter',
@@ -1185,7 +1192,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    //if (d.name !== 'R') return
+    if (d.name !== 'GeneralizedNormal') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

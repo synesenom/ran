@@ -31,7 +31,6 @@
 - generalized extreme (scipy)
 - generalized half-logistic (scipy)
 - generalized logistic (scipy)
-- generalized normal
 - half generalized normal (scipy)
 - heads-minus-tails                     http://mathworld.wolfram.com/Heads-Minus-TailsDistribution.html
 - inverted Weibull (scipy)
@@ -46,7 +45,6 @@
 - Normal product                        http://mathworld.wolfram.com/NormalProductDistribution.html
 - Planck                                (CDF unknown)
 - power-lognormal (scipy)
-- R (scipy)
 - stable                                (generation unknown)
 - truncated exponential (scipy)
 - truncated normal
