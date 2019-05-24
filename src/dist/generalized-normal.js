@@ -38,6 +38,7 @@ export default class extends GeneralizedGamma {
   }
 
   _generator () {
+    // Transforming generalized gamma variate
     return (this.r.next() > 0.5 ? 1 : -1) * Math.abs(super._generator()) + this.p.mu
   }
 

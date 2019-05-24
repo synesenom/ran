@@ -681,6 +681,13 @@ describe('dist', () => {
       [0, -1], [0, 0] // beta > 0
     ]
   }, {
+    name: 'HalfGeneralizedNormal',
+    p: () => [Param.scale(), Param.shape()],
+    pi: [
+      [-1, 1], [0, 1],  // alpha > 0
+      [1, -1], [1, 0]   // beta > 0
+    ]
+  }, {
     name: 'HalfLogistic',
     p: () => []
   }, {
@@ -1192,7 +1199,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'GeneralizedNormal') return
+    if (d.name !== 'HalfGeneralizedNormal') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

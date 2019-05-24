@@ -31,7 +31,6 @@
 - generalized extreme (scipy)
 - generalized half-logistic (scipy)
 - generalized logistic (scipy)
-- half generalized normal (scipy)
 - heads-minus-tails                     http://mathworld.wolfram.com/Heads-Minus-TailsDistribution.html
 - inverted Weibull (scipy)
 - KolmogorovSmirnov one                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_ksone.html
