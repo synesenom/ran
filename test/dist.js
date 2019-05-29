@@ -1212,7 +1212,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    //if (d.name !== 'HeadsMinusTails') return
+    // if (d.name !== 'HeadsMinusTails') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

@@ -1,10 +1,22 @@
 import Distribution from './_distribution'
+import PreComputed from './_pre-computed'
 import logBinomial from '../special/log-binomial'
 
-export default class extends Distribution {
-  // TODO Change to PreComputed
+/**
+ * Generator for the [heads-minus-tails distribution]{@link http://mathworld.wolfram.com/Heads-Minus-TailsDistribution.html}:
+ *
+ * $$f(k; n) = \begin{cases}\Big(\frac{1}{2}\Big)^{2n} \begin{pmatrix}2n \\ n \\ \end{pmatrix} &\quad\text{if $k = 0$},\\2 \Big(\frac{1}{2}\Big)^{2n} \begin{pmatrix}2n \\ m + n \\ \end{pmatrix} &\quad\text{if $k = 2m$},\\0 &\quad\text{else}\\ \end{cases}$$
+ *
+ * where \(n \in \mathbb{N}^+\). Support: \(k \in [0, n]\).
+ *
+ * @class HeadsMinusTails
+ * @memberOf ran.dist
+ * @param {number=} n Half number of trials. Default value is 10.
+ * @constructor
+ */
+export default class extends PreComputed {
   constructor (n = 10) {
-    super('discrete', arguments.length)
+    super()
 
     // Validate parameters
     let ni = Math.round(n)
@@ -21,6 +33,21 @@ export default class extends Distribution {
       value: 2 * ni,
       closed: true
     }]
+
+    // Speed-up constants
+    this.c = [
+      2 * ni * Math.log(0.5)
+    ]
+  }
+
+  _pk (k) {
+    if (k === 0) {
+      return Math.exp(this.c[0] + logBinomial(2 * this.p.n, this.p.n))
+    } else {
+      return k % 2 === 0
+        ? 2 * Math.exp(this.c[0] + logBinomial(2 * this.p.n, Math.round(k / 2) + this.p.n))
+        : 0
+    }
   }
 
   _generator () {
@@ -28,24 +55,6 @@ export default class extends Distribution {
     for (let i = 0; i < 2 * this.p.n; i++) {
       heads += this.r.next() > 0.5 ? 0 : 1
     }
-    return Math.abs(heads - (2 * this.p.n - heads))
-  }
-
-  _pdf (x) {
-    if (x === 0) {
-      return Math.exp(2 * this.p.n * Math.log(0.5) + logBinomial(2 * this.p.n, this.p.n))
-    } else {
-      return x % 2 === 1
-        ? 2 * Math.exp(2 * this.p.n * Math.log(0.5) + logBinomial(2 * this.p.n, x + this.p.n))
-        : 0
-    }
-  }
-
-  _cdf (x) {
-    let cdf = 0
-    for (let k = 0; k <= x; k++) {
-      cdf += this._pdf(k)
-    }
-    return cdf
+    return Math.abs(2 * heads - 2 * this.p.n)
   }
 }

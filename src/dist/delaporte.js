@@ -23,8 +23,8 @@ export default class extends PreComputed {
     super()
 
     // Validate parameters
-    this.p = { alpha, beta, lambda }
-    Distribution._validate({ alpha, beta, lambda }, [
+    this.p = {alpha, beta, lambda}
+    Distribution._validate({alpha, beta, lambda}, [
       'alpha > 0',
       'beta > 0',
       'lambda > 0'
@@ -46,7 +46,7 @@ export default class extends PreComputed {
     ]
   }
 
-  _pk(k) {
+  _pk (k) {
     // Set i = 0 term
     let ki = k
     let dz = 1

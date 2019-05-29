@@ -4,7 +4,7 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Bernoulli distribution]{@link https://en.wikipedia.org/wiki/Bernoulli_distribution}:
  *
- * $$f(k; p) = \begin{cases}p &\quad\text{if $k = 1$},\\1 - p &\quad\text{if $k = 0$}\\\end{cases},$$
+ * $$f(k; p) = \begin{cases}p &\quad\text{if $k = 1$},\\1 - p &\quad\text{if $k = 0$},\\\end{cases}$$
  *
  * where \(p \in [0, 1]\). Support: \(k \in \{0, 1\}\).
  *
