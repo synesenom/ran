@@ -637,6 +637,13 @@ describe('dist', () => {
       [1, 1, -1], [1, 1, 0], [1, 1, 1]  // m > 1
     ]
   }, {
+    name: 'GeneralizedLogistic',
+    p: () => [Param.location(), Param.scale(), Param.shape()],
+    pi: [
+      [0, -1, 1], [0, 0, 1],  // s > 0
+      [0, 1, -1], [0, 1, 0]   // c > 0
+    ]
+  }, {
     name: 'GeneralizedNormal',
     p: () => [Param.location(), Param.scale(), Param.shape()],
     pi: [
@@ -693,6 +700,12 @@ describe('dist', () => {
   }, {
     name: 'HalfNormal',
     p: () => [Param.scale()]
+  }, {
+    name: 'HeadsMinusTails',
+    p: () => [Param.degree()],
+    pi: [
+      [-1]  // n >= 0
+    ]
   }, {
     name: 'Hoyt',
     cases: [{
@@ -1199,7 +1212,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'HalfGeneralizedNormal') return
+    //if (d.name !== 'HeadsMinusTails') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

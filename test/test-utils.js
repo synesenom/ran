@@ -298,7 +298,7 @@ export default (function () {
           let cdf = d.cdf(x)
           passed = passed && ((safeCompare(p, cdf) && safeCompare(q, x)) || (safeCompare(cdf, p) && safeCompare(x, q)))
           if (!(safeCompare(p, cdf) && safeCompare(q, x)) && !(safeCompare(cdf, p) && safeCompare(x, q))) {
-            console.log(p, cdf, q, x)
+            // console.log(p, cdf, q, x)
           }
         }
         return passed

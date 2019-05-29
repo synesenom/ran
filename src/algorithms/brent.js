@@ -13,13 +13,13 @@ import { EPS, MAX_ITER } from '../special/_core'
  * @private
  */
 export default function(f, x1, x2) {
-  let a = x1,
-    b = x2,
-    c = x2,
-    d, e
-  let fa = f(a),
-    fb = f(b),
-    fc, p, q, r, s, eps, xm
+  let a = x1
+  let b = x2
+  let c = x2
+  let d, e
+  let fa = f(a)
+  let fb = f(b)
+  let fc, p, q, r, s, eps, xm
 
   if ((fa > 0.0 && fb > 0.0) || (fa < 0.0 && fb < 0.0)) {
     return undefined
@@ -87,3 +87,4 @@ export default function(f, x1, x2) {
     fb = f(b)
   }
 }
+

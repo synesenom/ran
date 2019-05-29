@@ -3,6 +3,7 @@
 - add unit tests to ran.mc
 - add method references in docs
 - improve special function precision
+- transformation functions to shift/scale generators
 
 
 # dist
@@ -30,13 +31,12 @@
 - generalized exponential (scipy)
 - generalized extreme (scipy)
 - generalized half-logistic (scipy)
-- generalized logistic (scipy)
 - heads-minus-tails                     http://mathworld.wolfram.com/Heads-Minus-TailsDistribution.html
 - inverted Weibull (scipy)
 - KolmogorovSmirnov one                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_ksone.html
 - KolmogorovSmirnov two                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_kstwobign.html
 - Landau distribution (scipy)
-- Luria-Delbruck                        (compound Poisson)
+- Luria-Delbruck                        https://arxiv.org/pdf/1203.3422.pdf
 - Map-Airy                              http://mathworld.wolfram.com/Map-AiryDistribution.html
 - Muth                                  (not-invertible cdf)
 - Normal-exponential-gamma              (compound)

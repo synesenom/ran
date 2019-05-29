@@ -4,7 +4,7 @@ import Distribution from './_distribution'
 /**
  * Generator for the [R distribution]{@link https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_rdist.html}:
  *
- * $$f(x; c) = \frac{(1 - x^2}^{c / 2 - 1}{\mathrm{B}\big(\frac{1}{2}, \frac{c}{2}\big},$$
+ * $$f(x; c) = \frac{(1 - x^2)^{\frac{c}{2} - 1}}{\mathrm{B}\big(\frac{1}{2}, \frac{c}{2}\big)},$$
  *
  * where \(c > 0\). Support: \(x \in [-1, 1]\).
  *

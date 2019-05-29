@@ -1,13 +1,11 @@
-/*
-const coeffs = [
+/* const coeffs = [
   1 / 12,
   1 / 120,
   1 / 252,
   1 / 240,
   1 / 132,
   1 / 12
-]
-*/
+] */
 
 /**
  * Evaluates the digamma function using the series expanson.
@@ -18,16 +16,14 @@ const coeffs = [
  * @returns {number} The estimated value.
  * @private
  */
-/*
-function _psiSeries (z) {
+/* function _psiSeries (z) {
   let z2 = z * z
   let s = 0
   for (let i = coeffs.length - 1; i >= 0; i--) {
     s = (coeffs[i] - s) / z2
   }
   return Math.log(z) - 0.5 / z - s
-}
-*/
+} */
 
 /**
  * Computes the digamma function for arbitrary arguments.
@@ -39,8 +35,7 @@ function _psiSeries (z) {
  * @returns {number} The digamma function at the specified value.
  * @private
  */
-/*
-function _digamma (z) {
+/* function _digamma (z) {
   // Reflection for z < 0
   if (z < 0) {
     return _digamma(1 - z) - Math.PI / Math.tan(Math.PI * z)
@@ -55,5 +50,4 @@ function _digamma (z) {
   return _psiSeries(z) + s
 }
 
-export default _digamma
-*/
+export default _digamma */

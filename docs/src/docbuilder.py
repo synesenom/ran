@@ -122,6 +122,7 @@ class DocBuilder:
 
     def parse_dir(self, dirname):
         def parse_file(f):
+            print(f)
             with open(f, 'r') as fp:
                 while True:
                     block = BlockParser.next_block(source, fp)

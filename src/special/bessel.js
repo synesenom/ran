@@ -224,8 +224,7 @@ export function besselInu (nu, x) {
  * @returns {number} The modified Bessel function of the second kind.
  * @private
  */
-/*
- export function besselKnu (nu, x) {
-   return Math.PI * (besselInu(-nu, x) - besselInu(nu, x)) / (2 * Math.sin(nu * Math.PI))
- }
-*/
+/* export function besselKnu (nu, x) {
+  return Math.PI * (besselInu(-nu, x) - besselInu(nu, x)) / (2 * Math.sin(nu * Math.PI))
+} */
+

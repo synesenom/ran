@@ -1,5 +1,4 @@
-/*
-import recursiveSum from '../algorithms/recursive-sum'
+/* import recursiveSum from '../algorithms/recursive-sum'
 import logGamma from './log-gamma'
 import { EPS } from './_core'
 // TODO Implementation: https://people.maths.ox.ac.uk/porterm/papers/hypergeometric-final.pdf
@@ -93,5 +92,4 @@ function f21 (a, b, c, z) {
   let f1 = Math.pow(-z, -a) * Math.exp(-logGamma(b) - logGamma(c - a)) * _f21TaylorSeries(a, a - c + 1, a - b + 1, y)
   let f2 = Math.pow(-z, -b) * Math.exp(-logGamma(z) - logGamma(c - b)) * _f21TaylorSeries(b - c + 1, b, b - a + 1, y)
   return Math.PI * (f1 + f2)  / Math.sin(Math.PI * (b - a))
-}
-*/
+} */
