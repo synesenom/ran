@@ -31,7 +31,6 @@
 - generalized exponential (scipy)
 - generalized extreme (scipy)
 - generalized half-logistic (scipy)
-- heads-minus-tails                     http://mathworld.wolfram.com/Heads-Minus-TailsDistribution.html
 - inverted Weibull (scipy)
 - KolmogorovSmirnov one                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_ksone.html
 - KolmogorovSmirnov two                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_kstwobign.html

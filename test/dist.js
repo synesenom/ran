@@ -370,6 +370,13 @@ describe('dist', () => {
       [1, 1], [2, 1]  // a < b
     ]
   }, {
+    name: 'BaldingNichols',
+    p: () => [Param.prob(), Param.prob()],
+    pi: [
+      [-1, 0.5], [0, 0.5], [1, 0.5], [2, 0.5],  // 0 < F < 1
+      [0.5, -1], [0.5, 0], [0.5, 1], [0.5, 2]   // 0 < p < 1
+    ]
+  }, {
     name: 'Bates',
     p: () => [Param.count(), Param.rangeMin(), Param.rangeMax()],
     pi: [
@@ -1212,7 +1219,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'HeadsMinusTails') return
+    if (d.name !== 'BaldingNichols') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
