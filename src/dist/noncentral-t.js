@@ -2,7 +2,7 @@ import recursiveSum from '../algorithms/recursive-sum'
 import { erf } from '../special/error'
 import logGamma from '../special/log-gamma'
 import { regularizedBetaIncomplete } from '../special/beta-incomplete'
-import { normal, gamma } from './_core'
+import { normal, gamma, chi2 } from './_core'
 import Distribution from './_distribution'
 import { EPS } from '../special/_core'
 
@@ -179,7 +179,7 @@ export default class extends Distribution {
   _generator () {
     // Direct sampling from a normal and a chi2
     let x = normal(this.r)
-    let y = gamma(this.r, this.p.nu / 2, 0.5)
+    let y = chi2(this.r, this.p.nu)
     return (x + this.p.mu) / Math.sqrt(y / this.p.nu)
   }
 

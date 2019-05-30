@@ -1,6 +1,6 @@
 import { besselI, besselISpherical } from '../special/bessel'
 import marcumQ from '../special/marcum-q'
-import { gamma, poisson } from './_core'
+import { gamma, noncentralChi2, poisson } from './_core'
 import Distribution from './_distribution'
 
 /**
@@ -44,9 +44,8 @@ export default class extends Distribution {
   }
 
   _generator () {
-    // Direct sampling by compounding Poisson and gamma
-    let j = poisson(this.r, this.p.lambda / 2)
-    return gamma(this.r, this.p.k / 2 + j, 0.5)
+    // Direct sampling
+    return noncentralChi2(this.r, this.p.k, this.p.lambda)
   }
 
   _pdf (x) {

@@ -1,4 +1,4 @@
-import { normal, rejection, uniform } from './_core'
+import { rejection } from './_core'
 import Distribution from './_distribution'
 
 /**
@@ -38,7 +38,7 @@ export default class extends Distribution {
     // Rejection sampling with uniform distribution as major
     return rejection(
       this.r,
-      () => uniform(this.r, this.p.mu - this.p.s, this.p.mu + this.p.s),
+      () => this.p.mu - this.p.s + 2 * this.p.s * this.r.next(),
       x => {
         return 0.5 * (1 + Math.cos(Math.PI * (x - this.p.mu) / this.p.s))
       }

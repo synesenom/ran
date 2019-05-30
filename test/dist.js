@@ -1245,7 +1245,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'InvertedWeibull') return
+    if (d.name !== 'InverseChi2') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

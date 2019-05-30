@@ -1,6 +1,6 @@
 import logGamma from '../special/log-gamma'
 import { gammaLowerIncomplete } from '../special/gamma-incomplete'
-import { gamma } from './_core'
+import { chi2 } from './_core'
 import Distribution from './_distribution'
 
 /**
@@ -38,7 +38,7 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling
-    return 1 / gamma(this.r, Math.round(this.p.nu) / 2, 0.5)
+    return 1 / chi2(this.r, this.p.nu)
   }
 
   _pdf (x) {

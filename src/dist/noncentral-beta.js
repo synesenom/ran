@@ -1,7 +1,7 @@
 import recursiveSum from '../algorithms/recursive-sum'
 import betaFn from '../special/beta'
 import { regularizedBetaIncomplete } from '../special/beta-incomplete'
-import { gamma, poisson } from './_core'
+import { chi2, gamma, noncentralChi2, poisson } from './_core'
 import Distribution from './_distribution'
 
 /**
@@ -47,11 +47,9 @@ export default class extends Distribution {
   }
 
   _generator () {
-    // Direct sampling from non-central chi2 and gamma
-    let j = poisson(this.r, this.p.lambda / 2)
-    let x = gamma(this.r, this.p.alpha + j, 1)
-
-    let y = gamma(this.r, this.p.beta, 1)
+    // Direct sampling from non-central chi2 and chi2
+    let x = noncentralChi2(this.r, 2 * this.p.alpha, this.p.lambda)
+    let y = chi2(this.r, 2 * this.p.beta)
     let z = x / (x + y)
 
     // Handle 1 - z << 1 case

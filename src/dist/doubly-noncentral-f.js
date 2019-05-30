@@ -1,4 +1,5 @@
 import Distribution from './_distribution'
+import { noncentralChi2 } from './_core'
 
 export default class extends Distribution {
   constructor (n1 = 2, n2 = 2, lambda1 = 1, lambda2 = 1) {
@@ -26,7 +27,9 @@ export default class extends Distribution {
   }
 
   _generator () {
-
+    let x1 = noncentralChi2(this.r, this.p.n1, this.p.lambda1)
+    let x2 = noncentralChi2(this.r, this.p.n2, this.p.lambda2)
+    return x1 * this.p.n2 / (x2 * this.p.n1)
   }
 
   _pdf (x) {
