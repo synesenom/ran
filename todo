@@ -8,7 +8,6 @@
 
 # dist
 - ARGUS                                 (rejection sampling)
-- Balding-Nichols (beta)
 - Benford                               (inverse transform)
 - Benktander 1nd kind                   (lambertW)
 - Beta-binomial                         (generation unknown)

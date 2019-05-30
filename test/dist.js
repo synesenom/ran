@@ -628,6 +628,14 @@ describe('dist', () => {
       [1, 1, -1], [1, 1, 0]   // beta > 0
     ]
   }, {
+    name: 'GeneralizedExponential',
+    p: () => [Param.shape(), Param.shape(), Param.shape()],
+    pi: [
+      [-1, 1, 1], [0, 1, 1],  // a > 0
+      [1, -1, 1], [1, 0, 1],  // b > 0
+      [1, 1, -1], [1, 1, 0]   // c > 0
+    ]
+  }, {
     name: 'GeneralizedGamma',
     p: () => [Param.scale(), Param.shape(), Param.shape()],
     pi: [
@@ -1219,7 +1227,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'BaldingNichols') return
+    if (d.name !== 'GeneralizedExponential') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
