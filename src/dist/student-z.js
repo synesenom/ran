@@ -4,7 +4,7 @@ import Distribution from './_distribution'
 /**
  * Generator for [Student's Z distribution]{@link http://mathworld.wolfram.com/Studentsz-Distribution.html}:
  *
- * $$f(x; n) = \frac{\Gamma\bigg(\frac{n}{2}\bigg}{\sqrt{\pi} \Gamma\bigg(\frac{n - 1}{2}\bigg)} (1 + x^2)^{-\frac{n}{2}},$$
+ * $$f(x; n) = \frac{\Gamma\Big(\frac{n}{2}\Big)}{\sqrt{\pi} \Gamma\Big(\frac{n - 1}{2}\Big)} (1 + x^2)^{-\frac{n}{2}},$$
  *
  * with \(n > 1\). Support: \(x \in \mathbb{R}\).
  *

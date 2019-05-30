@@ -27,8 +27,6 @@
 - exponentiated weibull
 - Fermi-Dirac                           http://mathworld.wolfram.com/Fermi-DiracDistribution.html
 - Gauss hypergeometric (scipy)
-- generalized exponential (scipy)
-- generalized extreme (scipy)
 - generalized half-logistic (scipy)
 - inverted Weibull (scipy)
 - KolmogorovSmirnov one                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_ksone.html

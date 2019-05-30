@@ -636,6 +636,18 @@ describe('dist', () => {
       [1, 1, -1], [1, 1, 0]   // c > 0
     ]
   }, {
+    name: 'GeneralizedExtremeValue',
+    cases: [{
+      desc: 'positive shape parameter',
+      p: () => [Param.shape()],
+      pi: [
+        [0] // c != 0
+      ]
+    }, {
+      desc: 'negative shape parameter',
+      p: () => [-Param.shape()]
+    }]
+  }, {
     name: 'GeneralizedGamma',
     p: () => [Param.scale(), Param.shape(), Param.shape()],
     pi: [
@@ -1227,7 +1239,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'GeneralizedExponential') return
+    if (d.name !== 'GeneralizedExtremeValue') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
