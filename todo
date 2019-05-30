@@ -28,7 +28,6 @@
 - Fermi-Dirac                           http://mathworld.wolfram.com/Fermi-DiracDistribution.html
 - Gauss hypergeometric (scipy)
 - generalized half-logistic (scipy)
-- inverted Weibull (scipy)
 - KolmogorovSmirnov one                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_ksone.html
 - KolmogorovSmirnov two                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_kstwobign.html
 - Landau distribution (scipy)
@@ -48,7 +47,6 @@
 - list: https://chaospy.readthedocs.io/en/development/distributions/collection.html
 - list: https://docs.scipy.org/doc/scipy-0.13.0/reference/tutorial/stats/continuous.html
 - ref: http://www.nrbook.com/devroye/Devroye_files/chapter_ten.pdf
-
 - v2: use standard form + location and scale parameters (https://www.itl.nist.gov/div898/handbook/eda/section3/eda364.htm#FORMULAS)
 
 

@@ -785,6 +785,12 @@ describe('dist', () => {
       [1, -1], [1, 0]   // lambda > 0
     ]
   }, {
+    name: 'InvertedWeibull',
+    p: () => [Param.shape()],
+    pi: [
+      [-1], [0] // c > 0
+    ]
+  }, {
     name: 'IrwinHall',
     p: () => [Param.count()],
     pi: [
@@ -1239,7 +1245,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'GeneralizedExtremeValue') return
+    if (d.name !== 'InvertedWeibull') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
