@@ -1,5 +1,5 @@
-import NoncentralBeta from './noncentral-beta'
 import Distribution from './_distribution'
+import NoncentralBeta from './noncentral-beta'
 
 /**
  * Generator for the [non-central F distribution]{@link https://en.wikipedia.org/wiki/Noncentral_F-distribution}:

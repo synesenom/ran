@@ -21,7 +21,6 @@
 - Davis                                 (generation unknown)
 - discrete Laplacian (scipy)
 - double exponential
-- doubly non-central f
 - doubly non-central t
 - Error / exponential power             (generation unknown)
 - Exponentially modified Gaussian (EMG)
@@ -29,12 +28,15 @@
 - Fermi-Dirac                           http://mathworld.wolfram.com/Fermi-DiracDistribution.html
 - Gauss hypergeometric (scipy)
 - generalized half-logistic (scipy)
+- K-prime (https://arxiv.org/pdf/1003.4890v1.pdf)
+- K-square (https://arxiv.org/pdf/1003.4890v1.pdf)
 - KolmogorovSmirnov one                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_ksone.html
 - KolmogorovSmirnov two                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_kstwobign.html
 - Landau distribution (scipy)
 - Luria-Delbruck                        https://arxiv.org/pdf/1203.3422.pdf
 - Map-Airy                              http://mathworld.wolfram.com/Map-AiryDistribution.html
 - Muth                                  (not-invertible cdf)
+- non-central eta (r sadist)
 - Normal-exponential-gamma              (compound)
 - Normal inverse Gauss (scipy)
 - Normal product                        http://mathworld.wolfram.com/NormalProductDistribution.html
@@ -45,6 +47,7 @@
 - truncated normal
 - Waring
 
+- list: https://rdrr.io/cran/sadists/f/inst/doc/sadists.pdf
 - list: https://chaospy.readthedocs.io/en/development/distributions/collection.html
 - list: https://docs.scipy.org/doc/scipy-0.13.0/reference/tutorial/stats/continuous.html
 - ref: http://www.nrbook.com/devroye/Devroye_files/chapter_ten.pdf

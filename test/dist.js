@@ -8,12 +8,21 @@ import InvalidDiscrete from '../src/dist/_invalid'
 const LAPS = 1000
 
 /*
-let TD1 = new dist.BetaNegativeBinomial(4.8, 0.7, 2)
-for (let x = 0; x <= 100; x++) {
+let TD0 = new dist.DoublyNoncentralF(10, 5, 10, 0)
+let TD1 = new dist.DoublyNoncentralF(10, 5, 10, 1)
+let TD2 = new dist.DoublyNoncentralF(10, 5, 10, 2)
+let TD3 = new dist.DoublyNoncentralF(10, 5, 10, 3)
+let TD4 = new dist.DoublyNoncentralF(10, 5, 10, 4)
+let TD5 = new dist.DoublyNoncentralF(10, 5, 10, 5)
+for (let x = 0; x <= 10; x += 0.01) {
   console.log(
     x,
+    TD0.pdf(x),
     TD1.pdf(x),
-    TD1.cdf(x)
+    TD2.pdf(x),
+    TD3.pdf(x),
+    TD4.pdf(x),
+    TD5.pdf(x)
   )
 }
 */
@@ -196,7 +205,7 @@ function utTest (name, params, type = 'self') {
 
         const foreign = self.type() === 'continuous'
           ? new dist.Uniform(Math.min(...sample), Math.max(...sample))
-          : new dist.DiscreteUniform(Math.min(...sample), Math.max(...sample) + 1)
+          : new dist.DiscreteUniform(Math.min(...sample) - 1, Math.max(...sample) + 1)
         return !foreign.test(sample).passed
       }, 7)
       break
@@ -246,6 +255,7 @@ const Param = {
 }
 
 describe('dist', () => {
+  // return
   // Base class
   describe('Distribution', () => {
     const invalid = new InvalidDiscrete()
@@ -563,6 +573,24 @@ describe('dist', () => {
     pi: [
       [-1, 1], [0, 1],  // lambda > 0
       [1, -1], [1, 0]   // k > 0
+    ]
+  }, {
+    name: 'DoublyNoncentralBeta',
+    p: () => [Param.shape(), Param.shape(), Param.shape(), Param.shape()],
+    pi: [
+      [-1, 1, 1, 1], [0, 1, 1, 1],  // alpha > 0
+      [1, -1, 1, 1], [1, 0, 1, 1],  // beta > 0
+      [1, 1, -1, 1],                // lambda1 >= 0
+      [1, 1, 1, -1]                 // lambda2 >= 0
+    ]
+  }, {
+    name: 'DoublyNoncentralF',
+    p: () => [Param.degree(), Param.degree(), Param.scale(), Param.scale()],
+    pi: [
+      [-1, 2, 1, 1], [0, 2, 1, 1],  // n1 > 0
+      [2, -1, 1, 1], [2, 0, 1, 1],  // n2 > 0
+      [2, 2, -1, 1],                // lambda1 >= 0
+      [2, 2, 1, -1],                // lambda2 >= 0
     ]
   }, {
     name: 'Erlang',
@@ -1245,7 +1273,8 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'InverseChi2') return
+    // if (d.name !== 'Arcsine') return
+    if (['DoublyNoncentralBeta', 'DoublyNoncentralF'].indexOf(d.name) > -1) return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

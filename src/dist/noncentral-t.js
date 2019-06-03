@@ -2,7 +2,7 @@ import recursiveSum from '../algorithms/recursive-sum'
 import { erf } from '../special/error'
 import logGamma from '../special/log-gamma'
 import { regularizedBetaIncomplete } from '../special/beta-incomplete'
-import { normal, gamma, chi2 } from './_core'
+import { normal, chi2 } from './_core'
 import Distribution from './_distribution'
 import { EPS } from '../special/_core'
 
@@ -40,7 +40,7 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    let nu2 = nu / 2
+    let nu2 = nui / 2
     let gnu = logGamma(nu2)
     let gnu1 = logGamma(nu2 + 1)
     let mu2 = mu * mu / 2
@@ -54,8 +54,8 @@ export default class extends Distribution {
       logGamma(k + 1.5 + nu2) - gk15 - gnu1,
       logGamma(k + nu2) - gk1 - gnu,
       logGamma(k + 1 + nu2) - gk1 - gnu1,
-      Math.sqrt(1 + 2 / nu),
-      Math.exp(logGamma((nu + 1) / 2) - logGamma(nu / 2) - mu2) / Math.sqrt(Math.PI * nu)
+      Math.sqrt(1 + 2 / nui),
+      Math.exp(logGamma((nui + 1) / 2) - logGamma(nui / 2) - mu2) / Math.sqrt(Math.PI * nui)
     ]
   }
 

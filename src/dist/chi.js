@@ -1,5 +1,5 @@
-import Chi2 from './chi2'
 import Distribution from './_distribution'
+import Chi2 from './chi2'
 
 /**
  * Generator for the [\(\chi\) distribution]{@link https://en.wikipedia.org/wiki/Chi_distribution}:
