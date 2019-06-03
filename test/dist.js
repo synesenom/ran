@@ -5,7 +5,7 @@ import { float, int } from '../src/core'
 import * as dist from '../src/dist'
 import InvalidDiscrete from '../src/dist/_invalid'
 
-const LAPS = 1000
+const LAPS = 100
 
 /*
 let TD0 = new dist.DoublyNoncentralF(10, 5, 10, 0)
@@ -1273,8 +1273,8 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'Arcsine') return
-    if (['DoublyNoncentralBeta', 'DoublyNoncentralF'].indexOf(d.name) > -1) return
+    if (d.name !== 'DoublyNoncentralF') return
+    // if (['DoublyNoncentralBeta', 'DoublyNoncentralF'].indexOf(d.name) > -1) return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
