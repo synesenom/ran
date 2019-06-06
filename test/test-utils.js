@@ -290,17 +290,18 @@ export default (function () {
       return runP(dist, laps, (d, p) => {
         // Compute quantile
         let q = d.q(p)
+        let trials = 0
         let passed = true
 
         // Sample several values to test for Galois inequalities
-        for (let i = 0; i < 100; i++) {
+        do {
           let x = d.sample()
           let cdf = d.cdf(x)
-          passed = passed && ((safeCompare(p, cdf) && safeCompare(q, x)) || (safeCompare(cdf, p) && safeCompare(x, q)))
-          if (!(safeCompare(p, cdf) && safeCompare(q, x)) && !(safeCompare(cdf, p) && safeCompare(x, q))) {
-            // console.log(p, cdf, q, x)
+          if (Math.abs(p - cdf) >= PRECISION) {
+            passed = passed && ((safeCompare(p, cdf) && safeCompare(q, x)) || (safeCompare(cdf, p) && safeCompare(x, q)))
+            trials++
           }
-        }
+        } while (trials < 10)
         return passed
       })
     }

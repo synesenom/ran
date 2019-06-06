@@ -22,5 +22,14 @@ export default class extends Beta {
     ])
     let f = (1 - F) / F
     super(f * p, f * (1 - p))
+
+    // Set support
+    this.s = [{
+      value: 0,
+      closed: false
+    }, {
+      value: 1,
+      closed: false
+    }]
   }
 }

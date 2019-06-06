@@ -5,7 +5,7 @@ import { float, int } from '../src/core'
 import * as dist from '../src/dist'
 import InvalidDiscrete from '../src/dist/_invalid'
 
-const LAPS = 100
+const LAPS = 1000
 
 /*
 let TD0 = new dist.DoublyNoncentralF(10, 5, 10, 0)
@@ -51,8 +51,8 @@ function utSample (name, params) {
       const supp = self.support()
       const sample = self.sample(1000)
       return sample.reduce((acc, d) => {
-        let above = !Number.isFinite(supp[0].value) || ((supp[0].closed && d >= supp[0].value) || (!supp[0].closed && d > supp[0].value))
-        let below = !Number.isFinite(supp[1].value) || ((supp[1].closed && d <= supp[1].value) || (!supp[1].closed && d < supp[1].value))
+        let above = d >= supp[0].value
+        let below = d <= supp[1].value
         return acc && above && below
       }, true)
     })
@@ -71,7 +71,7 @@ function utSample (name, params) {
       return self.type() === 'continuous'
         ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
         : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
-    }, 8)
+    }, 7)
   })
 }
 
@@ -1273,8 +1273,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'DoublyNoncentralF') return
-    // if (['DoublyNoncentralBeta', 'DoublyNoncentralF'].indexOf(d.name) > -1) return
+    //if (d.name !== 'BaldingNichols') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

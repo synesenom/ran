@@ -27,7 +27,7 @@ export default class extends DoublyNoncentralBeta {
     // Set support
     this.s = [{
       value: 0,
-      closed: true
+      closed: false
     }, {
       value: Infinity,
       closed: false
@@ -37,15 +37,15 @@ export default class extends DoublyNoncentralBeta {
   _generator () {
     // Direct sampling by transforming a doubly non-central beta
     let x = super._generator()
-    return this.p.beta * x / (this.p.alpha * (1 - x))
+    return this.p.d2 * x / (this.p.d1 * (1 - x))
   }
 
   _pdf (x) {
-    let n = this.p.alpha / this.p.beta
-    return n * super._pdf(x / (this.p.beta / this.p.alpha + x)) / Math.pow(1 + n * x, 2)
+    let n = this.p.d1 / this.p.d2
+    return n * super._pdf(x / (1 / n + x)) / Math.pow(1 + n * x, 2)
   }
 
   _cdf (x) {
-    return super._cdf(x / (this.p.beta / this.p.alpha + x))
+    return super._cdf(x / (this.p.d2 / this.p.d1 + x))
   }
 }

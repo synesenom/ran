@@ -30,7 +30,6 @@ export default function(f, a0, b0, s) {
   let f1 = f(a)
   let f2 = f(b)
   for (let k = 0; k < MAX_ITER; k++) {
-    // console.log(f1, f2)
     // If we have different signs, we are done
     if (f1 * f2 < 0.0) {
       return [a, b]
@@ -56,4 +55,7 @@ export default function(f, a0, b0, s) {
       f2 = f(b)
     }
   }
+
+  // Return boundary anyway
+  return [a, b]
 }

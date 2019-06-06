@@ -155,7 +155,7 @@ class Distribution {
     // Set initial guess for lower boundary
     let a0 = Math.random()
     if (this.s[0].closed) {
-      a0 = this.s[0].value + delta * Math.random()
+      a0 = this.s[0].value + Number.EPSILON// + delta * Math.random()
     } else if (Number.isFinite(this.s[0].value)) {
       a0 = this.s[0].value + delta * Math.random()
     }
@@ -163,7 +163,7 @@ class Distribution {
     // Set initial guess for upper boundary
     let b0 = a0 + Math.random()
     if (this.s[1].closed) {
-      b0 = this.s[1].value - delta * Math.random()
+      b0 = this.s[1].value - Number.EPSILON//delta * Math.random()
     } else if (Number.isFinite(this.s[1].value)) {
       b0 = this.s[1].value - delta * Math.random()
     }
@@ -172,7 +172,11 @@ class Distribution {
     let bounds = bracket(t => this.cdf(t) - p, a0, b0, this.s)
 
     // Perform root-finding using Brent's method
-    return typeof bounds !== 'undefined' ? brent(t => this.cdf(t) - p, ...bounds) : undefined
+    return typeof bounds !== 'undefined'
+      ? Math.min(Math.max(
+        brent(t => this.cdf(t) - p, ...bounds),
+        this.s[0].value), this.s[1].value
+      ) : undefined
   }
 
   /**
