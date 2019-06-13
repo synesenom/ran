@@ -1,5 +1,6 @@
 import recursiveSum from '../algorithms/recursive-sum'
 import betaFn from '../special/beta'
+import logGamma from '../special/log-gamma'
 import { regularizedBetaIncomplete } from '../special/beta-incomplete'
 import { chi2, noncentralChi2 } from './_core'
 import Distribution from './_distribution'
@@ -19,6 +20,7 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Distribution {
+  // TODO Use outward iteration
   constructor (alpha = 1, beta = 1, lambda = 1) {
     super('continuous', arguments.length)
 
@@ -41,7 +43,7 @@ export default class extends Distribution {
 
     // Speed-up constants
     this.c = [
-      Math.exp(-0.5 * lambda),
+      Math.exp(-lambda / 2),
       betaFn(alpha, beta)
     ]
   }
@@ -61,35 +63,114 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    let xa = Math.pow(x, this.p.alpha - 1)
+    // Speed-up variables
+    let l2 = this.p.lambda / 2
+    let i0 = Math.round(l2)
+    let iAlpha0 = this.p.alpha + i0
+
+    // Init variables
+    let p0 = Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
+    let xa0 = Math.pow(x, iAlpha0 - 1)
     let xb = Math.pow(1 - x, this.p.beta - 1)
-    return this.c[0] * recursiveSum({
-      c: xa * xb,
-      a: this.p.alpha,
-      bxy: this.c[1]
+    let b0 = betaFn(iAlpha0, this.p.beta)
+
+    // Forward sum
+    let z = recursiveSum({
+      p: p0,
+      xa: xa0,
+      b: b0
     }, (t, i) => {
-      t.c *= 0.5 * this.p.lambda * x / i
-      t.bxy *= t.a / (t.a + this.p.beta)
-      t.a++
+      t.p *= l2 / (i + i0)
       return t
-    }, t => t.c / t.bxy)
+    }, t => t.p * t.xa * xb / t.b, (t, i) => {
+      let iAlpha = iAlpha0 + i
+      t.xa *= x
+      t.b *= iAlpha / (iAlpha + this.p.beta)
+      return t
+    })
+
+    if (i0 > 0) {
+      iAlpha0--
+      let xa = xa0 / x
+      let b = b0 * (iAlpha0 + this.p.beta) / iAlpha0
+      z += recursiveSum({
+        p: p0 * i0 / l2,
+        xa,
+        b
+      }, (t, i) => {
+        let j = i0 - i - 1
+        let iAlpha = iAlpha0 - i
+        if (j >= 0) {
+          t.p /= l2 / (j + 1)
+          t.xa /= x
+          t.b /= iAlpha / (iAlpha + this.p.beta)
+        } else {
+          t.p = 0
+          t.ib = 0
+        }
+        return t
+      }, t => t.p * t.xa * xb / t.b)
+    }
+
+    return z
   }
 
   _cdf (x) {
+    // Speed-up variables
+    let l2 = this.p.lambda / 2
+    let i0 = Math.round(l2)
+    let iAlpha0 = this.p.alpha + i0
+
+    // Init variables
+    let p0 = Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
+    let xa0 = Math.pow(x, iAlpha0)
     let xb = Math.pow(1 - x, this.p.beta)
-    return this.c[0] * recursiveSum({
-      c: 1,
-      a: this.p.alpha,
-      xa: Math.pow(x, this.p.alpha),
-      bxy: this.c[1],
-      ix: regularizedBetaIncomplete(this.p.alpha, this.p.beta, x)
+    let b0 = betaFn(iAlpha0, this.p.beta)
+    let ib0 = regularizedBetaIncomplete(iAlpha0, this.p.beta, x)
+
+    // Forward sum
+    let z = recursiveSum({
+      p: p0,
+      xa: xa0,
+      b: b0,
+      ib: ib0
     }, (t, i) => {
-      t.c *= 0.5 * this.p.lambda / i
-      t.ix -= t.xa * xb / (t.a * t.bxy)
-      t.bxy *= t.a / (t.a + this.p.beta)
-      t.a++
-      t.xa *= x
+      t.p *= l2 / (i + i0)
       return t
-    }, t => t.c * t.ix)
+    }, t => t.p * t.ib, (t, i) => {
+      let iAlpha = iAlpha0 + i
+      t.ib -= t.xa * xb / (iAlpha * t.b)
+      t.xa *= x
+      t.b *= iAlpha / (iAlpha + this.p.beta)
+      return t
+    })
+
+    // Backward sum
+    if (i0 > 0) {
+      iAlpha0--
+      let xa = xa0 / x
+      let b = b0 * (iAlpha0 + this.p.beta) / iAlpha0
+      z += recursiveSum({
+        p: p0 * i0 / l2,
+        xa,
+        b,
+        ib: ib0 + xa * xb / (iAlpha0 * b)
+      }, (t, i) => {
+        let j = i0 - i - 1
+        let iAlpha = iAlpha0 - i
+        if (j >= 0) {
+          t.p /= l2 / (j + 1)
+          t.xa /= x
+          t.b /= iAlpha / (iAlpha + this.p.beta)
+          t.ib += t.xa * xb / (iAlpha * t.b)
+        } else {
+          t.p = 0
+          t.ib = 0
+        }
+        return t
+      }, t => t.p * t.ib)
+    }
+
+    return Math.min(1, z)
   }
 }
