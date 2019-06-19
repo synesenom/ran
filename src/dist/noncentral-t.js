@@ -4,7 +4,6 @@ import logGamma from '../special/log-gamma'
 import { regularizedBetaIncomplete } from '../special/beta-incomplete'
 import { normal, chi2 } from './_core'
 import Distribution from './_distribution'
-import { EPS } from '../special/_core'
 
 /**
  * Generator for the [non-central t distribution]{@link https://en.wikipedia.org/wiki/Noncentral_t-distribution}:
@@ -19,7 +18,7 @@ import { EPS } from '../special/_core'
  * @param {number=} mu Non-centrality parameter. Default value is 1.
  * @constructor
  */
-export default class extends Distribution {
+class NoncentralT extends Distribution {
   constructor (nu = 1, mu = 1) {
     super('continuous', arguments.length)
 
@@ -40,20 +39,8 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    let nu2 = nui / 2
-    let gnu = logGamma(nu2)
-    let gnu1 = logGamma(nu2 + 1)
     let mu2 = mu * mu / 2
-    let k = Math.floor(mu2)
-    let gk1 = logGamma(k + 1)
-    let gk15 = logGamma(k + 1.5)
     this.c = [
-      Math.exp(-mu2 - logGamma(k + 1) + k * Math.log(mu2)),
-      Math.exp(-mu2 - logGamma(k + 1.5) + k * Math.log(mu2)) / Math.SQRT2,
-      logGamma(k + 0.5 + nu2) - gk15 - gnu ,
-      logGamma(k + 1.5 + nu2) - gk15 - gnu1,
-      logGamma(k + nu2) - gk1 - gnu,
-      logGamma(k + 1 + nu2) - gk1 - gnu1,
       Math.sqrt(1 + 2 / nui),
       Math.exp(logGamma((nui + 1) / 2) - logGamma(nui / 2) - mu2) / Math.sqrt(Math.PI * nui)
     ]
@@ -63,16 +50,15 @@ export default class extends Distribution {
    * Calculates the cumulative distribution function for a specific pairs of parameters and value.
    * Source: http://www.ucs.louisiana.edu/~kxk4695/CSDA-03.pdf
    *
-   * @method _fnm
+   * @method fnm
    * @methodOf ran.dist.NoncentralT
    * @param {number} nu Degrees of freedom.
    * @param {number} mu Non-centrality parameter.
    * @param {number} x Value to evaluate distribution function at.
-   * @param {boolean=} alt Whether to use alternative (nu + 2) speed-up constants.
    * @returns {number} The cumulative probability.
-   * @private
+   * @static
    */
-  _fnm(nu, mu, x, alt = false) {
+  static fnm(nu, mu, x) {
     // If mu = 0, return CDF for central t
     if (Math.abs(mu) < Number.EPSILON) {
       return x > 0
@@ -88,89 +74,72 @@ export default class extends Distribution {
       return phi
     }
 
-    // Otherwise, compute sum
-    let p = this.c[0]
-    let q = delta * this.c[1]
+    // Initialize iterators
     let y = x * x / (nu + x * x)
     let mu2 = delta * delta / 2
-    let k = Math.floor(mu2)
-    let ap = k + 0.5
-    let aq = k + 1
-    let b = nu / 2
-    let apb = ap + b
-    let aqb = aq + b
+    let nu2 = nu / 2
+    let k0 = Math.floor(mu2)
+    let gnu = logGamma(nu2)
+    let gk1 = logGamma(k0 + 1)
+    let gk15 = logGamma(k0 + 1.5)
     let ly = Math.log(y)
-    let bl1y = b * Math.log(1 - y)
-    let gp = Math.exp((alt ? this.c[3] : this.c[2]) + ap * ly + bl1y)
-    let gq = Math.exp((alt ? this.c[5] : this.c[4]) + (aq - 1) * ly + bl1y)
-    let ip = regularizedBetaIncomplete(ap, b, y)
-    let iq = regularizedBetaIncomplete(aq, b, y)
+    let p0 = Math.exp(-mu2 - logGamma(k0 + 1) + k0 * Math.log(mu2))
+    let q0 = delta * Math.exp(-mu2 - logGamma(k0 + 1.5) + k0 * Math.log(mu2)) / Math.SQRT2
+    let ap = k0 + 0.5
+    let aq = k0 + 1
+    let apb = ap + nu2
+    let aqb = aq + nu2
+    let bl1y = nu2 * Math.log(1 - y)
+    let gp0 = Math.exp(logGamma(k0 + nu2 + 0.5) - gnu - gk15 + ap * ly + bl1y)
+    let gq0 = Math.exp(logGamma(k0 + nu2) - gnu - gk1 + (aq - 1) * ly + bl1y)
+    let ip0 = regularizedBetaIncomplete(ap, nu2, y)
+    let iq0 = regularizedBetaIncomplete(aq, nu2, y)
+
+    // Forward summation
+    let gq = gq0 * y * (aqb - 1) / aq
     let z = recursiveSum({
-      stop: false,
-      term: p * ip + q * iq,
-      rempois: 1 - p,
-      error: 1,
-      j: -1,
-
-      // Forward variables
-      kf: k,
-      pf: p, qf: q,
-      gpf: gp, gqf: gq,
-      ipf: ip, iqf: iq,
-
-      // Backward variables
-      kb: k + 1,
-      pb: p, qb: q,
-      gpb: gp,
-      gqb: gq * y * (aqb - 1) / aq,
-      ipb: ip, iqb: iq
+      p: p0 * mu2 / (k0 + 1),
+      gp: gp0 * y * apb / (ap + 1),
+      ip: ip0 - gp0,
+      q: q0 * mu2 / (k0 + 1.5),
+      gq: gq,
+      iq: iq0 - gq
     }, (t, i) => {
-      // Check if we need to stop
-      if (t.stop) {
-        t.term = 0
-        return t
-      }
-
-      // Iterator
-      t.j++
-
-      // Forward
-      t.kf++
-      t.ipf -= t.gpf
-      t.gpf *= y * (apb + t.j) / (ap + i)
-      t.pf *= mu2 / t.kf
-      t.gqf *= y * (aqb + t.j - 1) / (aq + t.j)
-      t.iqf -= t.gqf
-      t.qf *= mu2 / (t.kf + 0.5)
-      t.term = t.pf * t.ipf + t.qf * t.iqf
-
-      // Stopping condition
-      t.error = t.rempois * t.ipf * (0.5 + Math.abs(delta) / 4)
-      t.rempois -= t.pf
-      if (i > k) {
-        if (t.error < EPS) {
-          t.stop = true
-        }
-      } else {
-        // Backward
-        t.kb--
-        t.gpb *= (ap - t.j) / (y * (apb - i))
-        t.ipb += t.gpb
-        t.pb *= t.kb / mu2
-        t.gqb *= (aq - t.j) / (y * (aqb - i))
-        t.iqb += t.gqb
-        t.qb *= (t.kb + 0.5) / mu2
-        t.term += t.pb * t.ipb + t.qb * t.iqb
-
-        // Stopping condition
-        t.rempois -= t.pb
-        if (t.rempois <= EPS) {
-          t.stop = true
-        }
-      }
-
+      let j = i + 1
+      t.p *= mu2 / (k0 + j)
+      t.ip -= t.gp
+      t.gp *= y * (apb + i) / (ap + j)
+      t.q *= mu2 / (k0 + j + 0.5)
+      t.gq *= y * (aqb + i - 1) / (aq + i)
+      t.iq -= t.gq
       return t
-    }, t => t.term)
+    }, t => t.p * t.ip + t.q * t.iq)
+
+    // Backward summation
+    z += recursiveSum({
+      p: p0,
+      gp: gp0,
+      ip: ip0,
+      q: q0,
+      gq: gq0 * y * (aqb - 1) / aq,
+      iq: iq0
+    }, (t, i) => {
+      let j = i - 1
+      if (j < k0) {
+        t.p *= (k0 - j) / mu2
+        t.gp *= (ap - j) / (y * (apb - i))
+        t.ip += t.gp
+        t.q *= (k0 - j + 0.5) / mu2
+        t.gq *= (aq - j) / (y * (aqb - i))
+        t.iq += t.gq
+      } else {
+        t.p = 0
+        t.ip = 0
+        t.q = 0
+        t.iq = 0
+      }
+      return t
+    }, t => t.p * t.ip + t.q * t.iq)
 
     z = z / 2 + phi
     return Math.min(Math.max(x >= 0 ? z : 1 - z, 0), 1)
@@ -185,13 +154,15 @@ export default class extends Distribution {
 
   _pdf (x) {
     if (Math.abs(x) < Number.EPSILON) {
-      return this.c[7]
+      return this.c[1]
     } else {
-      return Math.max(0, this.p.nu * (this._fnm(this.p.nu + 2, this.p.mu, x * this.c[6], true) - this._fnm(this.p.nu, this.p.mu, x)) / x)
+      return Math.max(0, this.p.nu * (NoncentralT.fnm(this.p.nu + 2, this.p.mu, x * this.c[0]) - NoncentralT.fnm(this.p.nu, this.p.mu, x)) / x)
     }
   }
 
   _cdf (x) {
-    return this._fnm(this.p.nu, this.p.mu, x)
+    return NoncentralT.fnm(this.p.nu, this.p.mu, x)
   }
 }
+
+export default NoncentralT
