@@ -1,9 +1,8 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import { besselInu } from '../src/special/bessel'
-import digamma from '../src/special/digamma'
 import { erf } from '../src/special/error'
-import { f11, f21 } from '../src/special/hypergeometric'
+import { f11 } from '../src/special/hypergeometric'
 import gamma from '../src/special/gamma'
 import logGamma from '../src/special/log-gamma'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from '../src/special/gamma-incomplete'
@@ -21,8 +20,6 @@ function equal (x, y) {
   return Math.abs((x - y) / y) < PRECISION
 }
 
-// const em = 0.57721566490153286060
-
 describe('special', () => {
   /*
   describe('digamma(z)', () => {
@@ -39,6 +36,34 @@ describe('special', () => {
       }, LAPS)
     })
   })
+
+  describe('f21(a, b, c, z)', () => {
+    describe('z < -1', () => {
+      it('TEST', () => {
+        let z = 1 + Math.random() * 10
+        console.log(
+          f21(0.5, 0.5, 1.5, -z * z),
+          Math.log(z + Math.sqrt(1 + z * z)) / z
+        )
+      })
+    })
+
+    describe('-1 <= z < 0', () => {
+    })
+
+    describe('0 <= z <= 0.5', () => {
+
+    })
+
+    describe('0.5 < z <= 1', () => {})
+
+    describe('1 < z <= 2', () => {})
+
+    describe('2 < z', () => {
+
+    })
+  })
+  */
 
   describe('f11(a, b, z)', () => {
     describe('|z| < 50', () => {
@@ -89,6 +114,18 @@ describe('special', () => {
           ))
         }, LAPS)
       })
+
+      it('a f11(a+1, b, z) = (b - a) f11(a-1, b, z) + (2a - b + z) f11(a, b, z)', () => {
+        utils.repeat(() => {
+          let a = Math.random() * 10
+          let b = Math.random() * 10
+          let z = Math.random() * 40
+          assert(equal(
+            a * f11(a + 1, b, z),
+            (b - a) * f11(a - 1, b, z) + (2 * a - b + z) * f11(a, b, z)
+          ))
+        }, LAPS)
+      })
     })
 
     describe('|z| >= 50', () => {
@@ -132,36 +169,20 @@ describe('special', () => {
           ))
         }, LAPS)
       })
-    })
-  })
 
-  describe('f21(a, b, c, z)', () => {
-    describe('z < -1', () => {
-      it('TEST', () => {
-        let z = 1 + Math.random() * 10
-        console.log(
-          f21(0.5, 0.5, 1.5, -z * z),
-          Math.log(z + Math.sqrt(1 + z * z)) / z
-        )
+      it('a f11(a+1, b, z) = (b - a) f11(a-1, b, z) + (2a - b + z) f11(a, b, z)', () => {
+        utils.repeat(() => {
+          let a = Math.random() * 10 + 3
+          let b = Math.random() * 10 + 3
+          let z = Math.random() * 40 + 50
+          assert(equal(
+            a * f11(a + 1, b, z),
+            (b - a) * f11(a - 1, b, z) + (2 * a - b + z) * f11(a, b, z)
+          ))
+        }, LAPS)
       })
     })
-
-    describe('-1 <= z < 0', () => {
-    })
-
-    describe('0 <= z <= 0.5', () => {
-
-    })
-
-    describe('0.5 < z <= 1', () => {})
-
-    describe('1 < z <= 2', () => {})
-
-    describe('2 < z', () => {
-
-    })
   })
-  */
 
   describe('hurwitzZeta(s, a), riemannZeta(s)', () => {
     it('riemannZeta(s) - hurwitzZeta(s, n+1) should give H(s, n)', () => {

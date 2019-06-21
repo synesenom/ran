@@ -8,21 +8,19 @@ import InvalidDiscrete from '../src/dist/_invalid'
 const LAPS = 1000
 
 /*
-let TD0 = new dist.DoublyNoncentralF(10, 5, 10, 0)
-let TD1 = new dist.DoublyNoncentralF(10, 5, 10, 1)
-let TD2 = new dist.DoublyNoncentralF(10, 5, 10, 2)
-let TD3 = new dist.DoublyNoncentralF(10, 5, 10, 3)
-let TD4 = new dist.DoublyNoncentralF(10, 5, 10, 4)
-let TD5 = new dist.DoublyNoncentralF(10, 5, 10, 5)
-for (let x = 0; x <= 10; x += 0.01) {
+let TD0 = new dist.NoncentralT(int(1, 10), -10)
+let TD1 = new dist.NoncentralT(int(1, 10), -5)
+let TD2 = new dist.NoncentralT(int(1, 10), 0)
+let TD3 = new dist.NoncentralT(int(1, 10), 5)
+let TD4 = new dist.NoncentralT(int(1, 10), 10)
+for (let x = -20; x <= 20; x += 0.01) {
   console.log(
     x,
-    TD0.pdf(x),
-    TD1.pdf(x),
-    TD2.pdf(x),
-    TD3.pdf(x),
-    TD4.pdf(x),
-    TD5.pdf(x)
+    TD0.cdf(x),
+    TD1.cdf(x),
+    TD2.cdf(x),
+    TD3.cdf(x),
+    TD4.cdf(x)
   )
 }
 */
@@ -593,6 +591,13 @@ describe('dist', () => {
       [2, 2, 1, -1],                // lambda2 >= 0
     ]
   }, {
+    name: 'DoublyNoncentralT',
+    p: () => [Param.degree(), Param.location(), Param.shape()],
+    pi: [
+      [-1, 1, 1], [0, 1, 1],  // nu > 0
+      [1, 1, -1]              // theta >= 0
+    ]
+  }, {
     name: 'Erlang',
     p: () => [Param.degree(), Param.rate()],
     pi: [
@@ -1025,7 +1030,8 @@ describe('dist', () => {
     ]
   }, {
     name: 'NoncentralT',
-    p: () => [Param.degree(), Param.location()],
+    p: () => [10, 5],
+    //p: () => [Param.degree(), Param.location()],
     pi: [
       [-1, 1], [0, 1] // nu > 0
     ]
@@ -1273,7 +1279,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    //if (d.name !== 'BaldingNichols') return
+    //if (d.name !== 'DoublyNoncentralT') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

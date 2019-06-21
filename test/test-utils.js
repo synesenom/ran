@@ -245,7 +245,6 @@ export default (function () {
         for (let i = 0; i < laps; i++) {
           let x = range[0] + i * dx + Math.random()
           let p = dist.pdf(x)
-          // console.log(x, p)
           let df = differentiate(t => dist.cdf(t), x, 1e-6)
           if (df > Number.EPSILON && p > Number.EPSILON) {
             if (Math.abs(p - df) > PRECISION) {
