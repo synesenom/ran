@@ -227,4 +227,3 @@ export function besselInu (nu, x) {
 /* export function besselKnu (nu, x) {
   return Math.PI * (besselInu(-nu, x) - besselInu(nu, x)) / (2 * Math.sin(nu * Math.PI))
 } */
-

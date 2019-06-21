@@ -2,9 +2,9 @@ import recursiveSum from '../algorithms/recursive-sum'
 import logGamma from './log-gamma'
 // TODO Implementation: https://people.maths.ox.ac.uk/porterm/papers/hypergeometric-final.pdf
 
-/*function _isInteger (x) {
+/* function _isInteger (x) {
   return Math.abs(Math.floor(x) - x) < Number.EPSILON
-}*/
+} */
 
 function _f11TaylorSeries (a, b, z) {
   // Replace with faster method (Method b)
@@ -26,14 +26,14 @@ function _f11AsymptoticSeries (a, b, z) {
   return Math.exp(z + (a - b) * Math.log(z) + logGamma(b) - logGamma(a)) * s
 }
 
-/*function _f21TaylorSeries (a, b, c, z) {
+/* function _f21TaylorSeries (a, b, c, z) {
   return 1 + recursiveSum({
     c: a * b * z / c
   }, (t, i) => {
     t.c *= (a + i) * (b + i) * z / ((c + i) * (i + 1))
     return t
   }, t => t.c)
-}*/
+} */
 
 export function f11 (a, b, z) {
   // Special cases
@@ -48,7 +48,7 @@ export function f11 (a, b, z) {
   }
 }
 
-/*function f21 (a, b, c, z) {
+/* function f21 (a, b, c, z) {
   // 15.3.8 in Abramowitz & Stegun
   // TODO Handle a - b
   if (z < -1) {
@@ -91,4 +91,4 @@ export function f11 (a, b, z) {
   let f1 = Math.pow(-z, -a) * Math.exp(-logGamma(b) - logGamma(c - a)) * _f21TaylorSeries(a, a - c + 1, a - b + 1, y)
   let f2 = Math.pow(-z, -b) * Math.exp(-logGamma(z) - logGamma(c - b)) * _f21TaylorSeries(b - c + 1, b, b - a + 1, y)
   return Math.PI * (f1 + f2)  / Math.sin(Math.PI * (b - a))
-}*/
+} */

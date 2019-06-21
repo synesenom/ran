@@ -12,7 +12,7 @@ import { EPS, MAX_ITER } from '../special/_core'
  * @return {?number} The root location if found, undefined otherwise.
  * @private
  */
-export default function(f, x1, x2) {
+export default function (f, x1, x2) {
   let a = x1
   let b = x2
   let c = x2
@@ -87,4 +87,3 @@ export default function(f, x1, x2) {
     fb = f(b)
   }
 }
-

@@ -1,8 +1,7 @@
-import { MAX_ITER, EPS, DELTA } from './_core'
+import { MAX_ITER, EPS } from './_core'
 import newton from '../algorithms/newton'
 import logGamma from './log-gamma'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from './gamma-incomplete'
-import { erfc } from './error'
 
 /**
  * Series expansion of the Marcum-Q function. Section 3 in https://arxiv.org/pdf/1311.0681.pdf.
@@ -91,7 +90,7 @@ const _seriesExpansion = {
  * @memberOf ran.special
  * @private
  */
-/*const _asymptoticExpansionLargeXi = (function() {
+/* const _asymptoticExpansionLargeXi = (function() {
   function _aelx(mu, x, y, complementary) {
     // Calculate scale variables
     let xi = 2 * Math.sqrt(x * y)
@@ -145,7 +144,7 @@ const _seriesExpansion = {
       return 1 - _aelx(mu, x, y, true)
     }
   }
-})()*/
+})() */
 
 /**
  * Recurrence relation evaluation.
@@ -154,7 +153,7 @@ const _seriesExpansion = {
  * @memberOf ran.special
  * @private
  */
-/*const _recurrence = (function() {
+/* const _recurrence = (function() {
   function _fc(pnu, z) {
     let m = 0
     let b = 2 * pnu / z
@@ -246,7 +245,7 @@ const _seriesExpansion = {
       return 1 - z
     }
   }
-})()*/
+})() */
 
 /**
  * Computes the generalized Marcum-Q function. Only accurate in x < 30. Implementation source: https://arxiv.org/pdf/1311.0681.pdf.
@@ -273,12 +272,12 @@ export default function (mu, x, y) {
   }
 
   // Series expansion
-  //if (x < 30) {
+  // if (x < 30) {
   return _seriesExpansion[primary](mu, x, y)
-  //}
+  // }
 
   // Asymptotic expansion
-  /*let xi = 2 * Math.sqrt(x * y)
+  /* let xi = 2 * Math.sqrt(x * y)
   if (xi > 30 && mu * mu < 2 * xi) {
     return _asymptoticExpansionLargeXi[primary](mu, x, y)
   }
@@ -300,5 +299,5 @@ export default function (mu, x, y) {
   console.log('integral')
 
   // Integral
-  return undefined*/
+  return undefined */
 }

@@ -1,6 +1,4 @@
 // Coefficients
-import gamma from './gamma'
-
 const coeffs = [
   76.18009172947146,
   -86.50532032941677,

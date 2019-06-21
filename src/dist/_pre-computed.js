@@ -29,7 +29,7 @@ export default class extends Distribution {
    * @returns {number} The probability for the specified index.
    * @private
    */
-  _pk(k) {
+  _pk (k) {
     throw Error('_pk() is not implemented')
   }
 

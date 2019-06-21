@@ -42,7 +42,7 @@ export default class extends PreComputed {
     ]
   }
 
-  _pk(k) {
+  _pk (k) {
     if (k === 0) {
       return -this.p.lambda
     }

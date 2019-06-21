@@ -26,8 +26,8 @@ export default class extends Distribution {
     super('continuous', arguments.length)
 
     // Validate parameters
-    this.p = {alpha, beta, lambda1, lambda2}
-    Distribution._validate({alpha, beta, lambda1, lambda2}, [
+    this.p = { alpha, beta, lambda1, lambda2 }
+    Distribution._validate({ alpha, beta, lambda1, lambda2 }, [
       'alpha > 0',
       'beta > 0',
       'lambda1 >= 0',
@@ -82,7 +82,6 @@ export default class extends Distribution {
     let bb0 = b0
 
     // Init delta and sum
-    let dz = 0
     let z = 0
 
     // Forward r
@@ -220,7 +219,6 @@ export default class extends Distribution {
     let ib0 = regularizedBetaIncomplete(this.p.alpha + r0, this.p.beta + s0, x)
 
     // Delta and sum
-    let dz = 0
     let z = 0
 
     // Forward r

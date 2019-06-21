@@ -23,8 +23,8 @@ export default class extends PreComputed {
     super()
 
     // Validate parameters
-    this.p = {alpha, beta, lambda}
-    Distribution._validate({alpha, beta, lambda}, [
+    this.p = { alpha, beta, lambda }
+    Distribution._validate({ alpha, beta, lambda }, [
       'alpha > 0',
       'beta > 0',
       'lambda > 0'
@@ -75,4 +75,3 @@ export default class extends PreComputed {
     return poisson(this.r, this.p.lambda + j)
   }
 }
-

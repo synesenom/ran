@@ -122,12 +122,9 @@ export default (function () {
    */
   function trials (test, minSuccess = 10) {
     let success = 0
-    //for (let t = 0; t < 100; t++) {
     for (let t = 0; t < 10; t++) {
       success += test() ? 1 : 0
     }
-    //console.log(success)
-    //assert(success >= 100)
     assert(success >= minSuccess)
   }
 
@@ -261,7 +258,8 @@ export default (function () {
 
     qType(dist, laps) {
       return runP(dist, laps, (d, p) => {
-        let x = d.q(p)
+        let x = d.//TD.pdf(-2)
+q(p)
         if (!isFinite(x)) {
           console.log(p, x)
         }

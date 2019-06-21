@@ -15,7 +15,7 @@ import neumaier from '../algorithms/neumaier'
  * @constructor
  */
 export default class extends Distribution {
-  constructor (parameters = [{weight: 1, rate: 1}, {weight: 1, rate: 1}]) {
+  constructor (parameters = [{ weight: 1, rate: 1 }, { weight: 1, rate: 1 }]) {
     super('continuous', parameters.length)
 
     // Validate parameters

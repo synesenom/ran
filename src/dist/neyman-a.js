@@ -21,8 +21,8 @@ export default class extends PreComputed {
     super()
 
     // Validate parameters
-    this.p = {lambda, theta}
-    Distribution._validate({lambda, theta}, [
+    this.p = { lambda, theta }
+    Distribution._validate({ lambda, theta }, [
       'lambda > 0',
       'theta > 0'
     ])
@@ -44,7 +44,7 @@ export default class extends PreComputed {
   }
 
   // TODO Use Stirling numbers
-  _pk(k) {
+  _pk (k) {
     if (k === 0) {
       return this.c[0]
     }

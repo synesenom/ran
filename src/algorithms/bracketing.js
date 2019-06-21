@@ -14,7 +14,7 @@ const SCALE = 1.618
  * @return {(number[]|undefined)} Array containing the bracket around the root if successful, undefined otherwise.
  * @private
  */
-export default function(f, a0, b0, s) {
+export default function (f, a0, b0, s) {
   // If initial boundaries are invalid, return undefined
   if (a0 === b0) {
     return undefined

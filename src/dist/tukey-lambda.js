@@ -18,7 +18,7 @@ export default class extends Distribution {
     super('continuous', arguments.length)
 
     // Validate parameters
-    this.p = {lambda}
+    this.p = { lambda }
 
     // Set support
     this.s = [{

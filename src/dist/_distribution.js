@@ -5,7 +5,6 @@ import { chi2, kolmogorovSmirnov } from './_tests'
 import bracket from '../algorithms/bracketing'
 import brent from '../algorithms/brent'
 
-
 /**
  * The distribution generator base class, all distribution generators extend this class. The methods listed here
  * are available for all distribution generators. Integer parameters of a distribution are rounded.
@@ -38,7 +37,7 @@ class Distribution {
     this._qTable = []
   }
 
-  static _validate(params, constraints) {
+  static _validate (params, constraints) {
     // Go through parameters and check constraints
     let errors = constraints.filter(constraint => {
       // Read variables from constraint equation
@@ -113,7 +112,7 @@ class Distribution {
    * @protected
    * @ignore
    */
-  _qEstimateTable(p) {
+  _qEstimateTable (p) {
     // TODO Use binary search tree
     // Init running variable
     let k = this.s[0].value
@@ -148,7 +147,7 @@ class Distribution {
    * @protected
    * @ignore
    */
-  _qEstimateRoot(p) {
+  _qEstimateRoot (p) {
     // Guess range
     let delta = ((Number.isFinite(this.s[1].value) ? this.s[1].value : 10) - (Number.isFinite(this.s[0].value) ? this.s[0].value : -10)) / 2
 
@@ -247,7 +246,7 @@ class Distribution {
    * //      1.2587482868229616 ]
    *
    */
-  save() {
+  save () {
     return {
       prngState: this.r.save(),
       params: this.p,
@@ -276,7 +275,7 @@ class Distribution {
    * //      1.2587482868229616 ]
    *
    */
-  load(state) {
+  load (state) {
     // Set parameters
     this.p = state.params
 

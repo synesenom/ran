@@ -58,7 +58,7 @@ class NoncentralT extends Distribution {
    * @returns {number} The cumulative probability.
    * @static
    */
-  static fnm(nu, mu, x) {
+  static fnm (nu, mu, x) {
     // If mu = 0, return CDF for central t
     if (Math.abs(mu) < Number.EPSILON) {
       return x > 0

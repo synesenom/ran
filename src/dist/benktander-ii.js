@@ -70,7 +70,7 @@ export default class extends Distribution {
     return 1 - Math.pow(x, this.p.b - 1) * Math.exp(this.p.a * (1 - Math.pow(x, this.p.b)) / this.p.b)
   }
 
-  _q(p) {
+  _q (p) {
     // b = 1
     if (this.eps < Number.EPSILON) {
       return 1 - Math.log(1 - p) / this.p.a

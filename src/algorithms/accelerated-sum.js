@@ -9,7 +9,7 @@
  * @returns {number} The sum of the series up to the first n-th terms.
  * @private
  */
-export default function(a, n = 20) {
+export default function (a, n = 20) {
   let d = Math.pow(3 + 2 * Math.SQRT2, n)
   d = (d + 1 / d) / 2
   let b = -1

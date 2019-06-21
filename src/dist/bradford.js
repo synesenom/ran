@@ -50,7 +50,7 @@ export default class extends Distribution {
     return Math.log(1 + this.p.c * x) / this.c[0]
   }
 
-  _q(p) {
+  _q (p) {
     return (Math.exp(this.c[0] * p) - 1) / this.p.c
   }
 }

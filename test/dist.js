@@ -57,10 +57,12 @@ function utSample (name, params) {
   })
 
   it('values should be distributed correctly with default parameters', () => {
+    utils.trials(() => {
       const self = new dist[name]()
-      assert(self.type() === 'continuous'
+      return self.type() === 'continuous'
         ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
-        : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length))
+        : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
+    }, 7)
   })
 
   it('values should be distributed correctly with random parameters', () => {

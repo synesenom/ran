@@ -53,7 +53,7 @@ export default class extends Distribution {
     return 2 * this.c[0] * Math.asin(Math.sqrt((x - this.p.a) / (this.p.b - this.p.a)))
   }
 
-  _q(p) {
+  _q (p) {
     let s = Math.sin(this.c[2] * p)
     return (s * s) * this.c[1] + this.p.a
   }

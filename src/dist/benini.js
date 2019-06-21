@@ -51,7 +51,7 @@ export default class extends Distribution {
     return 1 - Math.exp(-y * (this.p.alpha + this.p.beta * y))
   }
 
-  _q(p) {
+  _q (p) {
     return this.p.sigma * Math.exp(0.5 * (Math.sqrt(this.p.alpha * this.p.alpha - 4 * this.p.beta * Math.log(1 - p)) - this.p.alpha) / this.p.beta)
   }
 }
