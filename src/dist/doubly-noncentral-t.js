@@ -1,13 +1,24 @@
+import startIndex from '../algorithms/start-index'
 import gamma from '../special/gamma'
 import logGamma from '../special/log-gamma'
 import Distribution from './_distribution'
 import { noncentralChi2, normal } from './_core'
-import { EPS, MAX_ITER } from '../special/_core'
 import { f11 } from '../special/hypergeometric'
 import acceleratedSum from '../algorithms/accelerated-sum'
 import recursiveSum from '../algorithms/recursive-sum'
 import NoncentralT from './noncentral-t'
 
+/**
+ * Generator for the [doubly non-central t distribution]{@link }:
+ *
+ * $$f(x; \nu, \mu, \theta) = $$
+ *
+ * where ...
+ *
+ * @class DoublyNoncentralT
+ * @memberOf ran.dist
+ * @constructor
+ */
 export default class extends Distribution {
   constructor (nu = 1, mu = 1, theta = 1) {
     super('continuous', arguments.length)
@@ -28,6 +39,65 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
+    this.c = [
+      -0.5 * (theta + mu * mu + Math.log(Math.PI * nui)) - logGamma(nui / 2)
+    ]
+  }
+
+  /**
+   * Advances the hypergeometric function forward in its first argument.
+   *
+   * @method _f11Forward
+   * @methodOf ran.dist.DoublyNoncentralT
+   * @param {number} f1 Function value for one iteration before.
+   * @param {number} f2 Function value for two iterations before.
+   * @param {number} a First argument.
+   * @param {number} b Second argument.
+   * @param {number} z Third argument.
+   * @returns {number} The function value at the current iteration.
+   * @private
+   */
+  _f11Forward(f1, f2, a, b, z) {
+    return ((2 * a - b + z) * f1 + (b - a) * f2) / a
+  }
+
+  /**
+   * Advances the hypergeometric function backward in its first argument.
+   *
+   * @method _f11Backward
+   * @methodOf ran.dist.DoublyNoncentralT
+   * @param {number} f1 Function value for one iteration ahead.
+   * @param {number} f2 Function value for two iterations ahead.
+   * @param {number} a First argument.
+   * @param {number} b Second argument.
+   * @param {number} z Third argument.
+   * @returns {number} The function value at the current iteration.
+   * @private
+   */
+  _f11Backward(f1, f2, a, b, z) {
+    return (a * f2 - (2 * a - b + z) * f1) / (b - a)
+  }
+
+  /**
+   * Logarithm of the term in the probability density function.
+   *
+   * @method _logA
+   * @methodOf ran.dist.DoublyNoncentralT
+   * @param {number} x Value to evaluate density at.
+   * @param {number} j Index of the term to evaluate.
+   * @returns {number} The logarithm of the term.
+   * @private
+   */
+  _logA(x, j) {
+    let tk = 1 + x * x / this.p.nu
+    let kj = (this.p.nu + j + 1) / 2
+    return j * Math.log(Math.abs(x * this.p.mu / Math.sqrt(this.p.nu / 2)))
+      + logGamma(kj)
+      - kj * Math.log(tk)
+      - logGamma(j + 1)
+      + Math.log(f11(kj, this.p.nu / 2, this.p.theta / (2 * tk)))
   }
 
   _generator () {
@@ -38,113 +108,179 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    // TODO Separate x * mu = 0 case
-    // TODO Use outward iteration from some j0
-
+    // Some pre-computed constants
+    let nu2 = this.p.nu / 2
     let tk = 1 + x * x / this.p.nu
     let srtk = Math.sqrt(tk)
-    let c = [
-      0.5 * (this.p.theta + this.p.mu * this.p.mu + Math.log(Math.PI * this.p.nu)) + logGamma(this.p.nu / 2),
-      Math.abs(x * this.p.mu) * Math.sqrt(2 / this.p.nu),
-      this.p.theta / (2 * tk),
-      Math.abs(x * this.p.mu) * Math.sqrt(2 / this.p.nu) / srtk
-    ]
+    let lntk = Math.log(tk)
+    let tmuk = Math.abs(x * this.p.mu / Math.sqrt(nu2))
+    let lntmuk = Math.log(tmuk)
+    let thetatk = this.p.theta / (2 * tk)
 
-    // Init Poisson and gamma terms
-    let gp0 = Math.pow(srtk, -this.p.nu) * Math.exp(-c[0]) / c[1]
-    // Even and odd terms
-    let gk = [0, 0]
-    let gp
+    // Find index with highest amplitude
+    let j0 = startIndex(j => this._logA(x, j))
 
-    // Init hyper-geometric term
-    // Even and odd terms
-    let f1 = [0, 0]
-    let f2 = [0, 0]
-    let f
-
-    let dz = 0
     let z = 0
     if (x * this.p.mu >= 0) {
-      // x * mu > 0: normal sum
-      for (let j = 0; j < MAX_ITER; j++) {
-        let j2 = j % 2
+      // Init terms
+      let kj0 = (this.p.nu + j0 + 1) / 2
+      let gp = Math.exp(
+        this.c[0]
+        + j0 * lntmuk
+        - logGamma(j0 + 1)
+        - kj0 * lntk
+      )
+      let gk0 = gamma(kj0)
+      let f10 = f11(kj0, nu2, thetatk)
+
+      // Forward
+      z = recursiveSum({
+        gp,
+        gk: [
+          gk0,
+          gamma(kj0 - 0.5)
+        ],
+        g: gp * gk0,
+        f1: [
+          f10,
+          f11(kj0 - 0.5, nu2, thetatk)
+        ],
+        f2: [
+          f11(kj0 - 1, nu2, thetatk),
+          f11(kj0 - 1.5, nu2, thetatk)
+        ],
+        f: f10
+      }, (t, i) => {
+        let j = j0 + i
+        let j2 = i % 2
         let kj = (this.p.nu + j + 1) / 2
+        t.gp *= tmuk / (j * srtk)
+        t.gk[j2] *= kj - 1
+        t.g = t.gp * t.gk[j2]
 
-        // Poisson and gamma terms
-        gp0 *= c[3] / (j > 0 ? j : 1)
-        gp = gp0
-        if (j < 2) {
-          gk[j2] = gamma(kj)
-          gp *= gk[j2]
-        } else {
-          gk[j2] *= kj - 1
-          gp *= gk[j2]
-        }
+        t.f = this._f11Forward(t.f1[j2], t.f2[j2], kj - 1, nu2, thetatk)
+        t.f2[j2] = t.f1[j2]
+        t.f1[j2] = t.f
+        return t
+      }, t => t.g * t.f)
 
-        // Hyper-geometric terms
-        if (j < 2) {
-          // Init first terms of the recurrence relation
-          f2[j2] = f11(kj, this.p.nu / 2, c[2])
-          f = f2[j2]
-        } else if (j < 4) {
-          // Init second terms of the recurrence relation
-          f1[j2] = f11(kj, this.p.nu / 2, c[2])
-          f = f1[j2]
-        } else {
-          // Update terms
-          f = ((this.p.nu / 2 - kj + 1) * f2[j2] + (2 * kj - 2 - this.p.nu / 2 + c[2]) * f1[j2]) / (kj - 1)
-          f2[j2] = f1[j2]
-          f1[j2] = f
-        }
+      // Backward
+      if (j0 > 0) {
+        kj0 -= 0.5
+        gp *= j0 * srtk / tmuk
+        gk0 = gamma(kj0)
+        f10 = f11(kj0, nu2, thetatk)
+        z += recursiveSum({
+          gp: gp,
+          gk: [
+            gk0,
+            gamma(kj0 + 0.5)
+          ],
+          g: gp * gk0,
+          f1: [
+            f10,
+            f11(kj0 + 0.5, this.p.nu / 2, thetatk)
+          ],
+          f2: [
+            f11(kj0 + 1, this.p.nu / 2, thetatk),
+            f11(kj0 + 1.5, this.p.nu / 2, thetatk)
+          ],
+          f: f10
+        }, (t, i) => {
+          let j = j0 - i
+          if (j > 0) {
+            let j2 = i % 2
+            let kj = (this.p.nu + j) / 2
 
-        // Update sum
-        dz = gp * f
-        z += dz
+            t.gp /= tmuk / (j * srtk)
+            t.gk[j2] /= kj
+            t.g = t.gp * t.gk[j2]
 
-        // Check for stopping
-        if (Math.abs(dz / z) < EPS) {
-          break
-        }
+            t.f = this._f11Backward(t.f1[j2], t.f2[j2], kj + 1, nu2, thetatk)
+            t.f2[j2] = t.f1[j2]
+            t.f1[j2] = t.f
+          } else {
+            t.g = 0
+            t.f = 0
+          }
+          return t
+        }, t => t.g * t.f)
       }
     } else {
-      // TODO Use outward summation
-      // x * mu < 0: accelerated sum for alternating series
-      z = acceleratedSum(j => {
-        let j2 = j % 2
+      // Forward
+      let kj0 = (this.p.nu + j0 + 1) / 2
+      let gp0 = Math.exp(
+        this.c[0]
+        + (j0 - 1) * lntmuk
+        - logGamma(j0)
+        - (kj0 - 0.5) * lntk
+      )
+      let gk0 = gamma(kj0 - 1)
+      let gk1 = gamma(kj0 - 0.5)
+      let gk = [gk0, gk1]
+      let f2 = [
+        f11(kj0 - 2, nu2, thetatk),
+        f11(kj0 - 1.5, nu2, thetatk)
+      ]
+      let f1 = [
+        f11(kj0 - 1, nu2, thetatk),
+        f11(kj0 - 0.5, nu2, thetatk)
+      ]
+
+      let gp = gp0
+      z += acceleratedSum(i => {
+        let j = j0 + i
+        let j2 = i % 2
         let kj = (this.p.nu + j + 1) / 2
 
-        // Poisson and gamma terms
-        gp0 *= c[3] / (j > 0 ? j : 1)
-        gp = gp0
-        if (j < 2) {
-          gk[j2] = gamma(kj)
-          gp *= gk[j2]
-        } else {
-          gk[j2] *= kj - 1
-          gp *= gk[j2]
-        }
+        gp *= tmuk / (j * srtk)
+        gk[j2] *= kj - 1
+        let g = gp * gk[j2]
 
-        // Hyper-geometric terms
-        if (j < 2) {
-          // Init first terms of the recurrence relation
-          f2[j2] = f11(kj, this.p.nu / 2, c[2])
-          f = f2[j2]
-        } else if (j < 4) {
-          // Init second terms of the recurrence relation
-          f1[j2] = f11(kj, this.p.nu / 2, c[2])
-          f = f1[j2]
-        } else {
-          // Update terms
-          f = ((this.p.nu / 2 - kj + 1) * f2[j2] + (2 * kj - 2 - this.p.nu / 2 + c[2]) * f1[j2]) / (kj - 1)
-          f2[j2] = f1[j2]
-          f1[j2] = f
-        }
+        let f = this._f11Forward(f1[j2], f2[j2], kj - 1, nu2, thetatk)
+        f2[j2] = f1[j2]
+        f1[j2] = f
 
-        return gp * f
-      }, 100)
+        return g * f
+      })
+
+      // Backward
+      if (j0 > 0) {
+        kj0 -= 0.5
+        let gp = gp0 * tmuk / (j0 * srtk)
+        gk = [gk1 * kj0, gk0 * (kj0 - 0.5)]
+        f2 = [
+          f11(kj0 + 2,nu2, thetatk),
+          f11(kj0 + 1.5, nu2, thetatk)
+        ]
+        f1 = [
+          f11(kj0 + 1, nu2, thetatk),
+          f11(kj0 + 0.5, nu2, thetatk)
+        ]
+        z -= acceleratedSum(i => {
+          let j = j0 - i
+          let j2 = i % 2
+          let kj = (this.p.nu + j) / 2
+          let dz = 0
+
+          if (j > 0) {
+            gp /= tmuk / (j * srtk)
+            gk[j2] /= kj
+            let g = gp * gk[j2]
+
+            let f = this._f11Backward(f1[j2], f2[j2], kj + 1, nu2, thetatk)
+            f2[j2] = f1[j2]
+            f1[j2] = f
+
+            dz = g * f
+          }
+
+          return dz
+        })
+      }
     }
 
-    return z
+    return Math.abs(z)
   }
 
   _cdf (x) {
