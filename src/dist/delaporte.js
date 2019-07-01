@@ -20,7 +20,7 @@ import PreComputed from './_pre-computed'
 export default class extends PreComputed {
   constructor (alpha = 1, beta = 1, lambda = 1) {
     // Using raw probability mass values
-    super()
+    super(true)
 
     // Validate parameters
     this.p = { alpha, beta, lambda }
@@ -42,7 +42,8 @@ export default class extends PreComputed {
     // Speed-up constants
     this.c = [
       beta / (lambda * (1 + beta)),
-      Math.exp(-lambda) / Math.pow(1 + beta, alpha)
+      -lambda - alpha * Math.log(1 + beta),
+      Math.log(lambda)
     ]
   }
 
@@ -66,7 +67,7 @@ export default class extends PreComputed {
     }
 
     // Return sum with constants
-    return z * Math.exp(k * Math.log(this.p.lambda) - logGamma(k + 1)) * this.c[1]
+    return Math.log(z) + k * this.c[2] - logGamma(k + 1) + this.c[1]
   }
 
   _generator () {

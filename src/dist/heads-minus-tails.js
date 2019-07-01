@@ -16,7 +16,7 @@ import logBinomial from '../special/log-binomial'
  */
 export default class extends PreComputed {
   constructor (n = 10) {
-    super()
+    super(true)
 
     // Validate parameters
     let ni = Math.round(n)
@@ -42,11 +42,11 @@ export default class extends PreComputed {
 
   _pk (k) {
     if (k === 0) {
-      return Math.exp(this.c[0] + logBinomial(2 * this.p.n, this.p.n))
+      return this.c[0] + logBinomial(2 * this.p.n, this.p.n)
     } else {
       return k % 2 === 0
-        ? 2 * Math.exp(this.c[0] + logBinomial(2 * this.p.n, Math.round(k / 2) + this.p.n))
-        : 0
+        ? Math.log(2) + this.c[0] + logBinomial(2 * this.p.n, Math.round(k / 2) + this.p.n)
+        : -Infinity
     }
   }
 

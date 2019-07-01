@@ -1358,7 +1358,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'DoublyNoncentralT') return
+    if (d.name !== 'NeymanA') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

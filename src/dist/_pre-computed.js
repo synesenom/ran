@@ -1,7 +1,9 @@
 import Distribution from './_distribution'
 
 /**
- * Base class representing a discrete distribution with a pre-computed array of probability mass values.
+ * Base class representing a discrete distribution with pre-computed arrays. This class should be used when the
+ * cumulative probability function is not available in closed form. A basic adaptive alias table is also implemented for
+ * the case there is no simple method to generate random variates.
  *
  * @class PreComputed
  * @memberOf ran.dist
@@ -55,6 +57,8 @@ export default class extends Distribution {
       }
     }
   }
+
+  // TODO Add adaptive alias table _generator ()
 
   _pdf (x) {
     // Check if we already have it in the look-up table

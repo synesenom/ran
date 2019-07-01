@@ -22,7 +22,7 @@ import PreComputed from './_pre-computed'
 export default class extends PreComputed {
   constructor (a1 = 1, a2 = 1, m = 2) {
     // Using raw probability mass values
-    super()
+    super(true)
 
     // Validate parameters
     let mi = Math.round(m)
@@ -44,9 +44,9 @@ export default class extends PreComputed {
 
     // Speed-up constants
     this.c = [
-      a1 + m * a2,
+      Math.log(a1 + m * a2),
       (a1 + m * m * a2) / (a1 + m * a2),
-      Math.exp(-a1 - a2)
+      -a1 - a2
     ]
   }
 
@@ -56,12 +56,12 @@ export default class extends PreComputed {
     }
 
     if (k < this.p.m) {
-      return this.c[2] *
-        Math.exp(k * Math.log(this.c[0]) - logGamma(k + 1) + k * Math.log((this.p.m - this.c[1]) / (this.p.m - 1)))
+      return this.c[2] + k * this.c[0] - logGamma(k + 1) + k * Math.log((this.p.m - this.c[1]) / (this.p.m - 1))
     }
 
-    return this.c[0] * ((this.c[1] - 1) * this.pdfTable[k - this.p.m] + (this.p.m - this.c[1]) * this.pdfTable[k - 1]) /
-      (k * (this.p.m - 1))
+    return this.c[0]
+      + Math.log((this.c[1] - 1) * Math.exp(this.pdfTable[k - this.p.m]) + (this.p.m - this.c[1]) * Math.exp(this.pdfTable[k - 1]))
+      - Math.log((k * (this.p.m - 1)))
   }
 
   _generator () {
