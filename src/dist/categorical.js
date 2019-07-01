@@ -1,5 +1,6 @@
 import { aliasTable } from './_core'
 import Distribution from './_distribution'
+import AliasTable from './_alias-table'
 
 /**
  * Generator for a [categorical distribution]{@link https://en.wikipedia.org/wiki/Categorical_distribution}:
@@ -33,44 +34,34 @@ export default class extends Distribution {
       closed: true
     }]
 
-    // Pre-compute tables
-    let { prob, alias, normalizedWeights } = aliasTable(weights)
+    // Build alias table
+    this.aliasTable = new AliasTable(weights)
 
     // Build pmf and cdf
-    let pmf = [normalizedWeights[0]]
-
-    let cdf = [normalizedWeights[0]]
+    let weight = this.aliasTable.weight(0)
+    this.pdfTable = [weight]
+    this.cdfTable = [weight]
     for (let i = 1; i < weights.length; i++) {
-      pmf.push(normalizedWeights[i])
-      cdf.push(cdf[i - 1] + normalizedWeights[i])
+      weight = this.aliasTable.weight(i)
+      this.pdfTable.push(weight)
+      this.cdfTable.push(this.cdfTable[i - 1] + weight)
     }
-
-    // Assign to constants
-    this.c = [prob, alias, pmf, cdf]
   }
 
   _generator () {
     // Direct sampling
-    if (this.p.n <= 1) {
-      return this.p.min
-    }
-    let i = Math.floor(this.r.next() * this.p.n)
-    if (this.r.next() < this.c[0][i]) {
-      return i + this.p.min
-    } else {
-      return this.c[1][i] + this.p.min
-    }
+    return this.p.min + this.aliasTable.sample(this.r)
   }
 
   _pdf (x) {
     if (this.p.n <= 1) {
       return 1
     } else {
-      return this.c[2][x - this.p.min]
+      return this.pdfTable[x - this.p.min]
     }
   }
 
   _cdf (x) {
-    return Math.min(1, this.c[3][x - this.p.min])
+    return Math.min(1, this.cdfTable[x - this.p.min])
   }
 }

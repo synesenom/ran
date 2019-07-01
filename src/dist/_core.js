@@ -29,7 +29,7 @@ export function rejection (r, g, accept, transform) {
  * @method aliasTable
  * @memberOf ran.dist
  * @param {number[]} w Array of weights to calculate probabilities from.
- * @returns {Object} Object containing three properties: prob, alias and normalizedWeights, representing the probability table, alias table and the normalized weights.
+ * @returns {Object} Object containing three properties: prob, alias and weights, representing the probability table, alias table and the normalized weights.
  */
 export function aliasTable (w) {
   // Pre-compute tables
@@ -91,7 +91,9 @@ export function aliasTable (w) {
 
   // Return table
   return {
-    prob, alias, normalizedWeights: w.map(d => d / total)
+    prob,
+    alias,
+    weights: w.map(d => d / total)
   }
 }
 

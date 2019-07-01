@@ -28,81 +28,6 @@ for (let x = -20; x <= 20; x += 0.01) {
 }
 */
 
-const t = -2
-const mu = 3
-const k = 10
-const k2 = k / 2
-const tk = 1 + t * t / k
-const theta = 5
-function logA(j) {
-  let kj = (k + j + 1) / 2
-  return j * Math.log(Math.abs(t * mu / Math.sqrt(k2)))
-    + logGamma(kj)
-    - kj * Math.log(tk)
-    - logGamma(j + 1)
-    + Math.log(f11(kj, k2, theta / (2 * tk)))
-}
-
-function findMax(func) {
-  let i = 2
-
-  // Bracket maximum
-  let j1 = 1
-  let f1 = func(j1)
-  let j2 = 2
-  let f2 = func(j2)
-  let j = 3
-  let f
-  while (f2 >= f1) {
-    // Calculate new value
-    j = j1 + j2
-    f = func(j)
-    i++
-
-    // Update indices if new value is larger
-    if (f >= f2) {
-      j1 = j2
-      j2 = j
-      f1 = f2
-      f2 = f
-    } else {
-      break
-    }
-  }
-
-  // Close bracket
-  let a = j1
-  let fa = f1
-  let b = j
-  let fb = f
-  let m
-  let fm
-  while (a !== b) {
-    // Add middle point
-    m = Math.floor((a + b) / 2)
-    fm = func(m)
-    i++
-
-    // Check if boundary is small enough
-    if (m === a || m === b) {
-      break
-    }
-
-    // Update
-    if (fa > fb) {
-      fb = fm
-      b = m
-    } else {
-      fa = fm
-      a = m
-    }
-  }
-  console.log(i, m)
-  return m
-}
-
-// findMax(x => logA(x))
-
 function utConstructor(name, invalidParams) {
   it('should throw error if params are invalid', () => {
     invalidParams.forEach(p => {
@@ -1358,7 +1283,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'NeymanA') return
+    if (d.name !== 'Categorical') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

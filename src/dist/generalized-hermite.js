@@ -59,9 +59,9 @@ export default class extends PreComputed {
       return this.c[2] + k * this.c[0] - logGamma(k + 1) + k * Math.log((this.p.m - this.c[1]) / (this.p.m - 1))
     }
 
-    return this.c[0]
-      + Math.log((this.c[1] - 1) * Math.exp(this.pdfTable[k - this.p.m]) + (this.p.m - this.c[1]) * Math.exp(this.pdfTable[k - 1]))
-      - Math.log((k * (this.p.m - 1)))
+    return this.c[0] +
+      Math.log((this.c[1] - 1) * Math.exp(this.pdfTable[k - this.p.m]) + (this.p.m - this.c[1]) * Math.exp(this.pdfTable[k - 1])) -
+      Math.log((k * (this.p.m - 1)))
   }
 
   _generator () {

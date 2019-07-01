@@ -62,7 +62,7 @@ export default class extends Distribution {
    * @returns {number} The function value at the current iteration.
    * @private
    */
-  _f11Forward(f1, f2, a, b, z) {
+  _f11Forward (f1, f2, a, b, z) {
     return ((2 * a - b + z) * f1 + (b - a) * f2) / a
   }
 
@@ -79,7 +79,7 @@ export default class extends Distribution {
    * @returns {number} The function value at the current iteration.
    * @private
    */
-  _f11Backward(f1, f2, a, b, z) {
+  _f11Backward (f1, f2, a, b, z) {
     return (a * f2 - (2 * a - b + z) * f1) / (b - a)
   }
 
@@ -93,14 +93,14 @@ export default class extends Distribution {
    * @returns {number} The logarithm of the term.
    * @private
    */
-  _logA(x, j) {
+  _logA (x, j) {
     let tk = 1 + x * x / this.p.nu
     let kj = (this.p.nu + j + 1) / 2
-    return j * Math.log(Math.abs(x * this.p.mu / Math.sqrt(this.p.nu / 2)))
-      + logGamma(kj)
-      - kj * Math.log(tk)
-      - logGamma(j + 1)
-      + Math.log(f11(kj, this.p.nu / 2, this.p.theta / (2 * tk)))
+    return j * Math.log(Math.abs(x * this.p.mu / Math.sqrt(this.p.nu / 2))) +
+      logGamma(kj) -
+      kj * Math.log(tk) -
+      logGamma(j + 1) +
+      Math.log(f11(kj, this.p.nu / 2, this.p.theta / (2 * tk)))
   }
 
   _generator () {
@@ -128,10 +128,10 @@ export default class extends Distribution {
       // Init terms
       let kj0 = (this.p.nu + j0 + 1) / 2
       let gp = Math.exp(
-        this.c[0]
-        + j0 * lntmuk
-        - logGamma(j0 + 1)
-        - kj0 * lntk
+        this.c[0] +
+        j0 * lntmuk -
+        logGamma(j0 + 1) -
+        kj0 * lntk
       )
       let gk0 = gamma(kj0)
       let f10 = f11(kj0, nu2, thetatk)
@@ -213,10 +213,10 @@ export default class extends Distribution {
       // Forward
       let kj0 = (this.p.nu + j0 + 1) / 2
       let gp0 = Math.exp(
-        this.c[0]
-        + (j0 - 1) * lntmuk
-        - logGamma(j0)
-        - (kj0 - 0.5) * lntk
+        this.c[0] +
+        (j0 - 1) * lntmuk -
+        logGamma(j0) -
+        (kj0 - 0.5) * lntk
       )
       let gk0 = gamma(kj0 - 1)
       let gk1 = gamma(kj0 - 0.5)
@@ -253,7 +253,7 @@ export default class extends Distribution {
         let gp = gp0 * tmuk / (j0 * srtk)
         gk = [gk1 * kj0, gk0 * (kj0 - 0.5)]
         f2 = [
-          f11(kj0 + 2,nu2, thetatk),
+          f11(kj0 + 2, nu2, thetatk),
           f11(kj0 + 1.5, nu2, thetatk)
         ]
         f1 = [

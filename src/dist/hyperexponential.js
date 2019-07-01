@@ -1,4 +1,5 @@
 import { aliasTable, exponential } from './_core'
+import AliasTable from './_alias-table'
 import Distribution from './_distribution'
 import neumaier from '../algorithms/neumaier'
 
@@ -43,21 +44,13 @@ export default class extends Distribution {
       closed: false
     }]
 
-    // Categorical generator for speed up generation
-    this.alias = aliasTable(parameters.map(d => d.weight))
+    // Categorical generator for weight
+    this.aliasTable = new AliasTable(parameters.map(d => d.weight))
   }
 
   _generator () {
     // Direct sampling
-    let i = 0
-    if (this.p.n > 1) {
-      let j = Math.floor(this.r.next() * this.p.n)
-      if (this.r.next() < this.alias.prob[j]) {
-        i = j
-      } else {
-        i = this.alias.alias[j]
-      }
-    }
+    let i = this.aliasTable.sample(this.r)
     return exponential(this.r, this.p.rates[i])
   }
 
