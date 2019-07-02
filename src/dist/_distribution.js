@@ -115,14 +115,10 @@ class Distribution {
   _qEstimateTable (p) {
     // TODO Use binary search tree
     // Init running variable
-    let k = this.s[0].value
     let kMax = this.s[1].closed ? this.s[1].value + 1 : 1e6
 
     // Go through look-up table
-    if (this._qTable.length === 0) {
-      this._qTable.push(this.cdf(k))
-    }
-    for (; k < kMax; k++) {
+    for (let k = 0; k < kMax; k++) {
       // Add F(x) if necessary
       if (this._qTable.length === k) {
         this._qTable.push(this.cdf(k))

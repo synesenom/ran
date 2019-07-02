@@ -1,6 +1,5 @@
-import { aliasTable } from './_core'
-import Distribution from './_distribution'
 import AliasTable from './_alias-table'
+import Distribution from './_distribution'
 
 /**
  * Generator for a [categorical distribution]{@link https://en.wikipedia.org/wiki/Categorical_distribution}:
@@ -12,11 +11,11 @@ import AliasTable from './_alias-table'
  * @class Categorical
  * @memberOf ran.dist
  * @param {number[]=} weights Weights for the distribution (doesn't need to be normalized). Default value is an array with a single value of 1.
- * @param {number=} min Lowest value to sample (support starts at this value). Default value is 0.
+ * @param {number=} min Lowest value to sample (support starts at this value). Default value is [1, 1, 1].
  * @constructor
  */
 export default class extends Distribution {
-  constructor (weights = [1], min = 0) {
+  constructor (weights = [1, 1, 1], min = 0) {
     super('discrete', arguments.length)
 
     // Validate parameters

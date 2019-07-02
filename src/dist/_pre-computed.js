@@ -1,3 +1,4 @@
+import AliasTable from './_alias-table'
 import Distribution from './_distribution'
 
 /**
@@ -14,10 +15,15 @@ export default class extends Distribution {
   constructor (logP = false) {
     super('discrete', arguments.length)
 
+    // Constants
+    this.TABLE_SIZE = 1000
+    this.MAX_NUMBER_OF_TABLES = 100
+
     // Logarithmic pdf
     this.logP = logP
 
     // Look-up tables
+    this.aliasTables = []
     this.pdfTable = []
     this.cdfTable = []
   }
@@ -58,7 +64,57 @@ export default class extends Distribution {
     }
   }
 
-  // TODO Add adaptive alias table _generator ()
+  /**
+   * Adds a new alias table.
+   *
+   * @method _addAliasTable
+   * @methodOf ran.dist.PreComputed
+   * @private
+   */
+  _addAliasTable () {
+    // Calculate index offset
+    let offset = this.aliasTables.length
+
+    // Compute weights and total weight
+    let weights = Array.from({ length: this.TABLE_SIZE }, (d, i) => this._pdf(this.TABLE_SIZE * offset + i))
+    let total = weights.reduce((acc, d) => acc + d, 0)
+    if (offset > 0) {
+      // Remove previously accumulated total weight
+      total += this.aliasTables[offset - 1].total
+    }
+
+    // Add table
+    this.aliasTables.push({
+      table: new AliasTable(weights.concat([1 - total])),
+      total
+    })
+  }
+
+  _generator () {
+    // Start with first table
+    let tableIndex = 0
+    do {
+      // Add table if needed
+      if (tableIndex >= this.aliasTables.length) {
+        this._addAliasTable()
+      }
+
+      // Sample from current table
+      let i = this.aliasTables[tableIndex].table.sample(this.r)
+
+      // Check if sample is outside of table domain
+      if (i === this.TABLE_SIZE) {
+        // Increment table index and add new table if needed
+        tableIndex++
+      } else {
+        // Otherwise, return sample
+        return i + tableIndex * this.TABLE_SIZE
+      }
+    } while (tableIndex < this.MAX_NUMBER_OF_TABLES)
+
+    // If did not find sample in max number of tables, return undefined
+    return undefined
+  }
 
   _pdf (x) {
     // Check if we already have it in the look-up table

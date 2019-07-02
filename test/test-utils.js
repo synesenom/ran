@@ -37,7 +37,7 @@ const CHI_TABLE_HIGH = [
 ]
 
 export default (function () {
-  function safeCompare(a, b) {
+  function safeCompare (a, b) {
     return b - a > -PRECISION
   }
 
@@ -81,8 +81,8 @@ export default (function () {
 
     // Create sorted frequencies
     let dist = Array.from(p)
-      .map(d => ({x: d[0], p: d[1]}))
-      .sort((a, b) => a.x - b.x);
+      .map(d => ({ x: d[0], p: d[1] }))
+      .sort((a, b) => a.x - b.x)
 
     // Calculate chi-square
     let chi2 = 0
@@ -107,10 +107,11 @@ export default (function () {
     // Find critical value
     let df = Math.max(1, k - c - 1)
     let crit = df <= 250 ? CHI_TABLE_LOW[df] : CHI_TABLE_HIGH[Math.ceil(df / 50)]
+    // console.log(crit, chi2)
     if (chi2 > crit) {
       // console.log(chi2, crit)
     }
-    return chi2 <= crit
+    return chi2 > 0 && chi2 <= crit
   }
 
   /**
@@ -145,14 +146,14 @@ export default (function () {
     return (f(x + h) - f(x - h)) / (2 * h)
   }
 
-  function getTestRange(dist) {
+  function getTestRange (dist) {
     return [
       isFinite(dist.support()[0].value) ? dist.support()[0].value - 1 : -30,
       isFinite(dist.support()[1].value) ? dist.support()[1].value + 1 : 30
     ].concat([0, 1e-10])
   }
 
-  function runX(dist, laps, unitTest) {
+  function runX (dist, laps, unitTest) {
     // Init test variables
     let range = getTestRange(dist)
     let passed = true
@@ -173,7 +174,7 @@ export default (function () {
     return passed
   }
 
-  function runP(dist, laps, unitTest) {
+  function runP (dist, laps, unitTest) {
     // Init test variables
     let passed = true
 
@@ -187,25 +188,25 @@ export default (function () {
   }
 
   const Tests = {
-    pdfType(dist, laps) {
+    pdfType (dist, laps) {
       return runX(dist, laps, (d, x) => {
         let pdf = d.pdf(x)
         return isFinite(pdf) && Number.isFinite(pdf)
       })
     },
 
-    pdfRange(dist, laps) {
+    pdfRange (dist, laps) {
       return runX(dist, laps, (d, x) => dist.pdf(x) >= 0)
     },
 
-    cdfType(dist, laps) {
+    cdfType (dist, laps) {
       return runX(dist, laps, (d, x) => {
         let cdf = d.cdf(x)
         return isFinite(cdf) && Number.isFinite(cdf)
       })
     },
 
-    cdfRange(dist, laps) {
+    cdfRange (dist, laps) {
       return runX(dist, laps, (d, x) => {
         let cdf = d.cdf(x)
         if (cdf < 0 || cdf > 1) {
@@ -215,7 +216,7 @@ export default (function () {
       })
     },
 
-    cdfMonotonicity(dist, laps) {
+    cdfMonotonicity (dist, laps) {
       let discrete = dist.type() === 'discrete'
       return runX(dist, laps, (d, x) => {
         let p1 = discrete ? x : x - 1e-3
@@ -224,7 +225,7 @@ export default (function () {
       })
     },
 
-    pdf2cdf(dist, laps) {
+    pdf2cdf (dist, laps) {
       // Init test variables
       let range = getTestRange(dist)
       let s = 0
@@ -256,10 +257,9 @@ export default (function () {
       return s / laps < 1e-6
     },
 
-    qType(dist, laps) {
+    qType (dist, laps) {
       return runP(dist, laps, (d, p) => {
-        let x = d.//TD.pdf(-2)
-q(p)
+        let x = d.q(p)
         if (!isFinite(x)) {
           console.log(p, x)
         }
@@ -267,7 +267,7 @@ q(p)
       })
     },
 
-    qRange(dist, laps) {
+    qRange (dist, laps) {
       let supp = dist.support()
       return runP(dist, laps, (d, p) => {
         let x = d.q(p)
@@ -275,7 +275,7 @@ q(p)
       })
     },
 
-    qMonotonicity(dist, laps) {
+    qMonotonicity (dist, laps) {
       return runP(dist, laps, (d, p) => {
         let x1 = d.q(p)
         let x2 = d.q(p + 1e-3)
@@ -283,7 +283,7 @@ q(p)
       })
     },
 
-    qGalois(dist, laps) {
+    qGalois (dist, laps) {
       return runP(dist, laps, (d, p) => {
         // Compute quantile
         let q = d.q(p)

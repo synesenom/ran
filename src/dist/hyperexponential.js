@@ -1,4 +1,4 @@
-import { aliasTable, exponential } from './_core'
+import { exponential } from './_core'
 import AliasTable from './_alias-table'
 import Distribution from './_distribution'
 import neumaier from '../algorithms/neumaier'

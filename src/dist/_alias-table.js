@@ -83,11 +83,7 @@ export default class {
     }
 
     let i = Math.floor(r.next() * this.n)
-    if (r.next() < this.prob[i]) {
-      return i
-    } else {
-      return this.alias[i]
-    }
+    return r.next() < this.prob[i] ? i : this.alias[i]
   }
 
   /**

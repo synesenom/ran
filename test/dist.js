@@ -5,44 +5,37 @@ import { float, int } from '../src/core'
 import * as dist from '../src/dist'
 import InvalidDiscrete from '../src/dist/_invalid'
 
-import logGamma from '../src/special/log-gamma'
-import { f11 } from '../src/special/hypergeometric'
-
 const LAPS = 1000
 
 /*
-let TD0 = new dist.NoncentralT(int(1, 10), -10)
-let TD1 = new dist.NoncentralT(int(1, 10), -5)
-let TD2 = new dist.NoncentralT(int(1, 10), 0)
-let TD3 = new dist.NoncentralT(int(1, 10), 5)
-let TD4 = new dist.NoncentralT(int(1, 10), 10)
-for (let x = -20; x <= 20; x += 0.01) {
-  console.log(
-    x,
-    TD0.cdf(x),
-    TD1.cdf(x),
-    TD2.cdf(x),
-    TD3.cdf(x),
-    TD4.cdf(x)
-  )
+const N = 1e6
+const DIST = new dist.Borel(0.8)
+let hist = DIST.sample(N)
+    .reduce((acc, d) => {
+      if (!acc.hasOwnProperty(d)) {
+        acc[d] = 0
+      }
+      acc[d]++
+      return acc
+    }, {})
+for (let i = 1; i < 100; i++) {
+  console.log(i, DIST.pdf(i), (hist[i] || 0) / N)
 }
 */
 
-function utConstructor(name, invalidParams) {
+function utConstructor (name, invalidParams) {
   it('should throw error if params are invalid', () => {
     invalidParams.forEach(p => {
-      assert.throws(() => {
-        new dist[name](...p)
-      })
+      assert.throws(() => new dist[name](...p))
     })
   })
 }
 
-function utSample (name, params) {
+function utSample (name, params, skip) {
   it('sample should contain valid numbers', () => {
     utils.trials(() => {
       const sample = new dist[name](...params()).sample(1000)
-      return sample.reduce((acc, d) => acc && Number.isFinite(d) && isFinite(d), true)
+      return sample.reduce((acc, d) => acc && Number.isFinite(d) && isFinite(d) && !isNaN(d), true)
     })
   })
 
@@ -68,17 +61,19 @@ function utSample (name, params) {
     }, 7)
   })
 
-  it('values should be distributed correctly with random parameters', () => {
-    utils.trials(() => {
-      const self = new dist[name](...params())
-      return self.type() === 'continuous'
-        ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
-        : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
-    }, 7)
-  })
+  if (skip && skip.indexOf('test-self') === -1) {
+    it('values should be distributed correctly with random parameters', () => {
+      utils.trials(() => {
+        const self = new dist[name](...params())
+        return self.type() === 'continuous'
+          ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
+          : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
+      }, 7)
+    })
+  }
 }
 
-function utSeed(name, params) {
+function utSeed (name, params) {
   it('should give the same sample for the same seed', () => {
     utils.trials(() => {
       const self = new dist[name](...params())
@@ -103,7 +98,7 @@ function utSeed(name, params) {
   })
 }
 
-function utLoadSave(name, params) {
+function utLoadSave (name, params) {
   it('loaded state should continue where it was saved at', () => {
     utils.trials(() => {
       // Create generator and seed
@@ -205,7 +200,6 @@ function utTest (name, params, type = 'self') {
         const self = new dist[name](...params())
 
         const sample = self.sample(LAPS)
-
         const foreign = self.type() === 'continuous'
           ? new dist.Uniform(Math.min(...sample), Math.max(...sample))
           : new dist.DiscreteUniform(Math.min(...sample) - 1, Math.max(...sample) + 1)
@@ -471,6 +465,19 @@ describe('dist', () => {
       [0, 1, -1], [0, 1, 0],  // gamma > 0
     ]
   }, {
+    name: 'Borel',
+    p: () => [Param.prob()],
+    pi: [
+      [-1], [2] // 0 <= mu <= 1
+    ]
+  }, {
+    name: 'BorelTanner',
+    p: () => [Param.prob(), Param.degree()],
+    pi: [
+      [-1, 2], [2, 2],    // 0 <= mu <= 1
+      [0.5, -1], [0.5, 0] // k > 0
+    ]
+  }, {
     name: 'BoundedPareto',
     p: () => [Param.rangeMin(), Param.rangeMax(), Param.shape()],
     pi: [
@@ -500,7 +507,7 @@ describe('dist', () => {
       pi: [
         [[-1, 1, 1], 0],  // w_i > 0
       ],
-      skip: ['test-foreign']
+      skip: ['test-self', 'test-foreign']
     }, {
       desc: 'moderate n',
       p: () => [Array.from({ length: int(10, 100) }, Math.random)]
@@ -1283,7 +1290,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'Categorical') return
+    // if (d.name !== 'BorelTanner') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
@@ -1291,7 +1298,7 @@ describe('dist', () => {
           describe('constructor', () => utConstructor(d.name, d.pi))
         }
 
-        describe('.sample()', () => utSample(d.name, d.p))
+        describe('.sample()', () => utSample(d.name, d.p, d.skip))
 
         describe('.seed()', () => utSeed(d.name, d.p))
 
@@ -1300,9 +1307,12 @@ describe('dist', () => {
         describe('.pdf(), .cdf(), .q()', () => utPdf(d.name, d.p))
 
         describe('.test()', () => {
-          it('should pass for own distribution', () => {
-            utTest(d.name, d.p, 'self')
-          })
+          if (!d.skip || d.skip.indexOf('test-self') === -1) {
+            it('should pass for own distribution', () => {
+              utTest(d.name, d.p, 'self')
+            })
+          }
+
           if (!d.skip || d.skip.indexOf('test-foreign') === -1) {
             it('should reject foreign distribution', () => {
               utTest(d.name, d.p, 'foreign')
@@ -1310,7 +1320,6 @@ describe('dist', () => {
           }
         })
       } else {
-
         describe('constructor', () => {
           d.cases.forEach(c => {
             if (c.pi) {
