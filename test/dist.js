@@ -428,6 +428,14 @@ describe('dist', () => {
       [2, -1], [2, 0]  // beta > 0
     ]
   }, {
+    name: 'BetaBinomial',
+    p: () => [Param.degree() * 10, Param.shape(), Param.shape()],
+    pi: [
+      [-1, 1, 1],                 // n > 0
+      [100, -1, 1], [100, 0, 1],  // alpha > 0
+      [100, 1, -1], [100, 1, 0]   // beta > 0
+    ]
+  }, {
     name: 'BetaPrime',
     p: () => [Param.shape(), Param.shape()],
     pi: [
@@ -1290,7 +1298,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'BorelTanner') return
+    if (d.name !== 'BetaBinomial') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
