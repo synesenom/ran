@@ -44,6 +44,7 @@ export default class extends Distribution {
   }
 
   _generator () {
+    // TODO Make this core generator
     // Direct sampling from gamma
     let x = gamma(this.r, this.p.alpha, 1)
 

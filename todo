@@ -10,9 +10,8 @@
 - ARGUS                                 (rejection sampling)
 - Benford                               (inverse transform)
 - Benktander 1nd kind                   (lambertW)
-- Beta-binomial                         (generation unknown)
 - beta geometric
-- Beta-pascal / Beta negative binomial  (generation unknown)
+- Beta negative binomial
 - Bose-Einstein                         http://mathworld.wolfram.com/Bose-EinsteinDistribution.html
 - Champernowne
 - crystal ball
@@ -29,6 +28,7 @@
 - K-square (https://arxiv.org/pdf/1003.4890v1.pdf)
 - KolmogorovSmirnov one                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_ksone.html
 - KolmogorovSmirnov two                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_kstwobign.html
+- inverse hypergeometric                https://www.vosesoftware.com/riskwiki/InverseHypergeometricdistribution.php
 - Landau distribution (scipy)
 - Luria-Delbruck                        https://arxiv.org/pdf/1203.3422.pdf
 - Map-Airy                              http://mathworld.wolfram.com/Map-AiryDistribution.html

@@ -6,7 +6,7 @@ import Distribution from './_distribution'
 /**
  * Generator for the [beta-binomial distribution]{@link https://en.wikipedia.org/wiki/Beta-binomial_distribution}:
  *
- * $$f(k; n, p) = \begin{pmatrix}n \\ k \\ \end{pmatrix} \frac{\mathrm{B}(\alpha + k, \beta + n - k)}{\mathrm{B}(\alpha, \beta)},$$
+ * $$f(k; n, \alpha, \beta) = \begin{pmatrix}n \\ k \\ \end{pmatrix} \frac{\mathrm{B}(\alpha + k, \beta + n - k)}{\mathrm{B}(\alpha, \beta)},$$
  *
  * with \(n \in \mathbb{N}_0\) and \(\alpha, \beta > 0\). Support: \(k \in \{0, ..., n\}\).
  *

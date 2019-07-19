@@ -4,7 +4,8 @@ import { gamma, poisson } from './_core'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [negative-binomial distribution]{@link https://en.wikipedia.org/wiki/Negative_binomial_distribution} (also known as Gamma-Poisson, Pascal or Polya distribution):
+ * Generator for the [negative-binomial distribution]{@link https://en.wikipedia.org/wiki/Negative_binomial_distribution}
+ * (also known as Gamma-Poisson, Pascal or Pólya distribution):
  *
  * $$f(k; r, p) = \begin{pmatrix}k + r - 1 \\ k \\ \end{pmatrix} (1 - p)^r p^k,$$
  *
@@ -12,7 +13,8 @@ import Distribution from './_distribution'
  *
  * @class NegativeBinomial
  * @memberOf ran.dist
- * @param {number=} r Number of failures until experiment is stopped. If not an integer, it is rounded to the nearest integer. Default value is 10.
+ * @param {number=} r Number of failures until the experiment is stopped. If not an integer, it is rounded to the nearest
+ * integer. Default value is 10.
  * @param {number=} p Probability of success. Default value is 0.5.
  * @constructor
  */
@@ -39,6 +41,7 @@ export default class extends Distribution {
   }
 
   _generator () {
+    // TODO Make this a core generator
     // Direct sampling by compounding Poisson and gamma
     return poisson(this.r, gamma(this.r, this.p.r, 1 / this.p.p - 1))
   }
