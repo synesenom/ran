@@ -42,7 +42,7 @@ export default class extends Distribution {
   }
 
   /**
-   * Advances look-up tables up to a specific index.
+   * Advances look-up tables for PDF and CDF up to a specific index.
    *
    * @method _advance
    * @methodOf ran.dist.PreComputed
@@ -57,7 +57,7 @@ export default class extends Distribution {
 
       // Update cumulative function
       if (typeof this['_ck'] === 'function') {
-        this.cdfTable.push(this._ck(k))
+        this.cdfTable.push(this['_ck'](k))
       } else {
         this.cdfTable.push((this.cdfTable[this.cdfTable.length - 1] || 0) + (this.logP ? Math.exp(pdf) : pdf))
       }

@@ -40,20 +40,28 @@ class Distribution {
   static _validate (params, constraints) {
     // Go through parameters and check constraints
     let errors = constraints.filter(constraint => {
-      // Read variables from constraint equation
-      let eq = constraint
-      for (let p in params) {
-        if (params.hasOwnProperty(p)) {
-          // Replace variable value with name in equation
-          eq = eq.replace(
-            new RegExp(`(${p} | ${p})`),
-            params[p]
-          )
-        }
-      }
+      // Tokenize constraint
+      let tokens = constraint.split(' ')
 
-      // Evaluate condition and return constraint if failed
-      return !(new Function(`return ${eq}`)())
+      // Substitute parameters if there is any
+      let a = params[tokens[0]] || parseFloat(tokens[0])
+      let b = params[tokens[2]] || parseFloat(tokens[2])
+
+      // Check for errors
+      switch (tokens[1]) {
+        case '=':
+          return a !== b
+        case '<':
+          return a >= b
+        case '<=':
+          return a > b
+        case '>':
+          return a <= b
+        case '>=':
+          return a < b
+        default:
+          return false
+      }
     })
 
     if (errors.length > 0) {
