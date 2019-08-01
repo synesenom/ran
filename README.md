@@ -34,11 +34,12 @@ And every distribution can be individually seeded.
 
 ### browser
 
-Just include the [minified version](https://raw.githubusercontent.com/synesenom/ran/master/ran.min.js) and add
+Just include the [minified version](https://unpkg.com/ranjs@1.19.2/dist/ranjs.min.js) and add
 
 ```
 <script type="text/javascript" src="ran.min.js"></script>
 ```
+The module will be exported under `ranjs`.
 
 ### node
 
