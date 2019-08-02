@@ -25,7 +25,7 @@ const coeffs = [
  */
 export default function T (n, x) {
   if (n < 12) {
-    let c = coeffs[n]
+    const c = coeffs[n]
     let i = c.length - 1
     let y = c[i]
     while (i > 0) {

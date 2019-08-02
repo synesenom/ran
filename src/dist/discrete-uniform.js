@@ -19,8 +19,8 @@ export default class extends Distribution {
     super('discrete', arguments.length)
 
     // Validate parameters
-    let xmini = Math.round(xmin)
-    let xmaxi = Math.round(xmax)
+    const xmini = Math.round(xmin)
+    const xmaxi = Math.round(xmax)
     this.p = { xmin: xmini, xmax: xmaxi }
     Distribution._validate({ xmin: xmini, xmax: xmaxi }, [
       'xmin < xmax'

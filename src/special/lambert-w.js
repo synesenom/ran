@@ -5,7 +5,7 @@ function _halley (z, w0) {
   let dw = 0
 
   for (let i = 0; i < MAX_ITER; i++) {
-    let y = w * Math.exp(w) - z
+    const y = w * Math.exp(w) - z
     dw = y / ((w + 1) * Math.exp(w) - (w + 2) * y / (2 * w + 2))
     w -= dw
     if (Math.abs(dw / w) < EPS) { break }

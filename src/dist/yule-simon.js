@@ -40,9 +40,9 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling by compounding exponential and geometric
-    let e1 = -Math.log(this.r.next())
-    let e2 = -Math.log(this.r.next())
-    let z = Math.exp(-e2 / this.p.rho)
+    const e1 = -Math.log(this.r.next())
+    const e2 = -Math.log(this.r.next())
+    const z = Math.exp(-e2 / this.p.rho)
 
     // Handle z << 1 case
     return 1 - z === 1

@@ -49,7 +49,7 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    let z = Math.pow(x, 2 * this.p.q - 1)
+    const z = Math.pow(x, 2 * this.p.q - 1)
 
     // Handle q < 0.5 and x << 0 case
     if (!isFinite(z)) {

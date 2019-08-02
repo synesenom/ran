@@ -8,11 +8,11 @@
  * @private
  */
 export default function (arr) {
-  let sorted = arr.sort((a, b) => a - b)
+  const sorted = arr.sort((a, b) => a - b)
   let s = sorted[0]
   let c = 0
   for (let i = 1; i < sorted.length; i++) {
-    let t = s + sorted[i]
+    const t = s + sorted[i]
     if (Math.abs(s) > Math.abs(sorted[i])) {
       c += (s - t) + sorted[i]
     } else {

@@ -54,7 +54,7 @@ export default class extends Distribution {
   }
 
   _q (p) {
-    let s = Math.sin(this.c[2] * p)
+    const s = Math.sin(this.c[2] * p)
     return (s * s) * this.c[1] + this.p.a
   }
 }

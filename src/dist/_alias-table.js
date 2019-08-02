@@ -21,11 +21,11 @@ export default class {
       for (let i = 0; i < this.n; i++) { total += weights[i] }
 
       // Fill up small and large work lists
-      let p = []
+      const p = []
 
-      let small = []
+      const small = []
 
-      let large = []
+      const large = []
       for (let i = 0; i < this.n; i++) {
         p.push(this.n * weights[i] / total)
         if (p[i] < 1.0) { small.push(i) } else { large.push(i) }
@@ -82,7 +82,7 @@ export default class {
       return 0
     }
 
-    let i = Math.floor(r.next() * this.n)
+    const i = Math.floor(r.next() * this.n)
     return r.next() < this.prob[i] ? i : this.alias[i]
   }
 

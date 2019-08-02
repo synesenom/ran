@@ -36,7 +36,7 @@ export default class extends Gamma {
   }
 
   _cdf (x) {
-    let y = super._cdf(Math.abs(x))
+    const y = super._cdf(Math.abs(x))
     return (x > 0 ? 1 + y : 1 - y) / 2
   }
 }

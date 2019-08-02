@@ -24,7 +24,6 @@
     "url": "https://github.com/synesenom/ran"
   },
   "scripts": {
-    "lint": "eslint src/*.js",
     "standard": "./node_modules/.bin/standard --fix src/**/*.js",
     "test": "./node_modules/.bin/_mocha --require babel-core/register",
     "docs": "python docs/src/parser.py",
@@ -42,8 +41,8 @@
     "chai": "^4.2.0",
     "coveralls": "^3.0.2",
     "cross-env": "^5.2.0",
-    "eslint": "^5.12.1",
-    "eslint-config-standard": "^12.0.0",
+    "eslint": "^6.1.0",
+    "eslint-config-standard": "^13.0.1",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
     "mocha-lcov-reporter": "^1.3.0",

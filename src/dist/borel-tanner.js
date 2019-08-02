@@ -21,7 +21,7 @@ export default class extends PreComputed {
     super()
 
     // Validate parameters
-    let ni = Math.round(n)
+    const ni = Math.round(n)
     this.p = { mu, n: ni }
     Distribution._validate({ mu, n: ni }, [
       'mu >= 0', 'mu <= 1',
@@ -48,7 +48,7 @@ export default class extends PreComputed {
       return k === this.p.n ? 1 : 0
     }
 
-    let kn = k - this.p.n
+    const kn = k - this.p.n
     return (this.p.n / k) * Math.exp(kn * Math.log(this.p.mu * k) - this.p.mu * k - logGamma(kn + 1))
   }
 }

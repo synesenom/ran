@@ -33,9 +33,9 @@ export default class extends Beta {
 
   _generator () {
     // Direct sampling from gamma (ignoring super)
-    let x = gamma(this.r, this.p.alpha, 1)
+    const x = gamma(this.r, this.p.alpha, 1)
 
-    let y = gamma(this.r, this.p.beta, 1)
+    const y = gamma(this.r, this.p.beta, 1)
     return x / y
   }
 

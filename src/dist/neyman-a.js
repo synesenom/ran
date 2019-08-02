@@ -59,7 +59,7 @@ export default class extends PreComputed {
   }
 
   _generator () {
-    let N = poisson(this.r, this.p.lambda)
+    const N = poisson(this.r, this.p.lambda)
     let z = 0
     for (let i = 0; i < N; i++) {
       z += poisson(this.r, this.p.theta)

@@ -46,10 +46,10 @@ export default class extends Distribution {
   _generator () {
     // TODO Make this core generator
     // Direct sampling from gamma
-    let x = gamma(this.r, this.p.alpha, 1)
+    const x = gamma(this.r, this.p.alpha, 1)
 
-    let y = gamma(this.r, this.p.beta, 1)
-    let z = x / (x + y)
+    const y = gamma(this.r, this.p.beta, 1)
+    const z = x / (x + y)
 
     // Handle 1 - z << 1 case
     if (z === 1) {
@@ -60,9 +60,9 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    let a = Math.pow(x, this.p.alpha - 1)
+    const a = Math.pow(x, this.p.alpha - 1)
 
-    let b = Math.pow(1 - x, this.p.beta - 1)
+    const b = Math.pow(1 - x, this.p.beta - 1)
 
     // Handle x = 0 and x = 1 cases
     return isFinite(a) && isFinite(b)

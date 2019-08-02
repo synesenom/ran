@@ -36,18 +36,18 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling by transforming beta variate
-    let x = gamma(this.r, 1.5, 1)
-    let y = gamma(this.r, 1.5, 1)
+    const x = gamma(this.r, 1.5, 1)
+    const y = gamma(this.r, 1.5, 1)
     return 2 * this.p.R * x / (x + y) - this.p.R
   }
 
   _pdf (x) {
-    let r = this.p.R * this.p.R
+    const r = this.p.R * this.p.R
     return 2 * Math.sqrt(r - x * x) / (Math.PI * r)
   }
 
   _cdf (x) {
-    let r = this.p.R * this.p.R
+    const r = this.p.R * this.p.R
     return 0.5 + x * Math.sqrt(r - x * x) / (Math.PI * r) + Math.asin(x / this.p.R) / Math.PI
   }
 }

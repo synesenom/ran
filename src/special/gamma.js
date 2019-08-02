@@ -28,11 +28,11 @@ function _gamma (z) {
     z--
     let x = 0.99999999999980993
 
-    let l = coeffs.length
+    const l = coeffs.length
     coeffs.forEach((c, i) => {
       x += c / (z + i + 1)
     })
-    let t = z + l - 0.5
+    const t = z + l - 0.5
     y = SQRT_PI2 * Math.pow(t, (z + 0.5)) * Math.exp(-t) * x
   }
   return y

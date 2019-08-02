@@ -40,7 +40,7 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    let y = Math.exp(this.p.lambda * x)
+    const y = Math.exp(this.p.lambda * x)
     return isFinite(Math.pow(y, 2 * this.p.kappa)) ? this.p.lambda * this.p.kappa * Math.pow(y - 1, this.p.kappa - 1) * y / Math.pow(1 + Math.pow(y - 1, this.p.kappa), 2) : 0
   }
 
@@ -50,7 +50,7 @@ export default class extends Distribution {
   }
 
   _q (p) {
-    let z = Math.pow(p / (1 - p), 1 / this.p.kappa)
+    const z = Math.pow(p / (1 - p), 1 / this.p.kappa)
 
     // Handle z << 1 cases
     return 1 + z === 1

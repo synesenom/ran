@@ -40,21 +40,21 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    let z = (x - this.p.mu) / this.p.sigma
+    const z = (x - this.p.mu) / this.p.sigma
     return this.p.xi === 0
       ? Math.exp(-z) / this.p.sigma
       : Math.pow(1 + this.p.xi * z, -1 / this.p.xi - 1) / this.p.sigma
   }
 
   _cdf (x) {
-    let z = (x - this.p.mu) / this.p.sigma
+    const z = (x - this.p.mu) / this.p.sigma
     return this.p.xi === 0
       ? 1 - Math.exp(-z)
       : 1 - Math.pow(1 + this.p.xi * z, -1 / this.p.xi)
   }
 
   _q (p) {
-    let y = this.p.xi === 0 ? -Math.log(1 - p) : (Math.pow(1 - p, -this.p.xi) - 1) / this.p.xi
+    const y = this.p.xi === 0 ? -Math.log(1 - p) : (Math.pow(1 - p, -this.p.xi) - 1) / this.p.xi
     return this.p.mu + this.p.sigma * y
   }
 }

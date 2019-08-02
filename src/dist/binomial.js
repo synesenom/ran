@@ -17,7 +17,7 @@ import Categorical from './categorical'
  */
 export default class extends Categorical {
   constructor (n = 100, p = 0.5) {
-    let ni = Math.round(n)
+    const ni = Math.round(n)
     super(Array.from({ length: ni + 1 }, (d, i) => Math.exp(logBinomial(n, i) + i * Math.log(p) + (n - i) * Math.log(1 - p))))
 
     // Validate parameters

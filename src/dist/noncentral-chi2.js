@@ -21,7 +21,7 @@ export default class extends Distribution {
     super('continuous', arguments.length)
 
     // Validate parameters
-    let ki = Math.round(k)
+    const ki = Math.round(k)
     this.p = { k: ki, lambda }
     Distribution._validate({ k: ki, lambda }, [
       'k > 0',

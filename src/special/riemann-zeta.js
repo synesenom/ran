@@ -11,6 +11,6 @@ import acceleratedSum from '../algorithms/accelerated-sum'
  * @private
  */
 export default function (s) {
-  let z = acceleratedSum(k => Math.pow(k + 1, -s))
+  const z = acceleratedSum(k => Math.pow(k + 1, -s))
   return z / (1 - Math.pow(2, 1 - s))
 }

@@ -11,7 +11,7 @@
 import { EPS } from '../special/_core'
 
 export default function (a) {
-  let n = 30
+  const n = 30
   let d = Math.pow(3 + 2 * Math.SQRT2, n)
   d = (d + 1 / d) / 2
   let b = -1

@@ -18,8 +18,8 @@ import Distribution from './_distribution'
 export default class extends Beta {
   // Transformation of beta distribution
   constructor (d1 = 2, d2 = 2) {
-    let d1i = Math.round(d1)
-    let d2i = Math.round(d2)
+    const d1i = Math.round(d1)
+    const d2i = Math.round(d2)
     super(d1i / 2, d2i / 2)
 
     // Validate parameters
@@ -41,17 +41,17 @@ export default class extends Beta {
 
   _generator () {
     // Direct sampling by transforming beta variate
-    let x = super._generator()
+    const x = super._generator()
     return this.p.d2 * x / (this.p.d1 * (1 - x))
   }
 
   _pdf (x) {
-    let y = this.p.d2 + this.p.d1 * x
+    const y = this.p.d2 + this.p.d1 * x
     return this.p.d1 * this.p.d2 * super._pdf(this.p.d1 * x / y) / Math.pow(y, 2)
   }
 
   _cdf (x) {
-    let y = this.p.d1 * x
+    const y = this.p.d1 * x
     return super._cdf(1 / (1 + this.p.d2 / y))
   }
 }

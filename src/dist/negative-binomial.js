@@ -23,7 +23,7 @@ export default class extends Distribution {
     super('discrete', arguments.length)
 
     // Validate parameters
-    let ri = Math.round(r)
+    const ri = Math.round(r)
     this.p = { r: ri, p }
     Distribution._validate({ r: ri, p }, [
       'r > 0',

@@ -47,14 +47,14 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling using Poisson and gamma
-    let p = poisson(this.r, this.c[0])
-    let x = gamma(this.r, p + 1, 0.5)
+    const p = poisson(this.r, this.c[0])
+    const x = gamma(this.r, p + 1, 0.5)
     return this.p.sigma * Math.sqrt(x)
   }
 
   _pdf (x) {
-    let z = x * this.p.nu / this.c[1]
-    let b = besselI(0, z)
+    const z = x * this.p.nu / this.c[1]
+    const b = besselI(0, z)
 
     // Handle z >> 1 case (using asymptotic form of Bessel)
     if (isFinite(b)) {

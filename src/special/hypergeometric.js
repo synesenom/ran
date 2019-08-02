@@ -17,7 +17,7 @@ function _f11TaylorSeries (a, b, z) {
 }
 
 function _f11AsymptoticSeries (a, b, z) {
-  let s = 1 + recursiveSum({
+  const s = 1 + recursiveSum({
     c: (b - a) * (1 - a) / z
   }, (t, i) => {
     t.c *= (b - a + i) * (1 - a + i) / ((i + 1) * z)

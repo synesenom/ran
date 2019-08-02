@@ -45,9 +45,9 @@ const _seriesExpansion = {
   p (mu, x, y) {
     // Find truncation number using Eqs. (26) - (27)
     // Define some constants to speed up search
-    let c0 = mu + logGamma(mu) - Math.log(2 * Math.PI * EPS)
-    let c1 = Math.log(x * y)
-    let c2 = x * y
+    const c0 = mu + logGamma(mu) - Math.log(2 * Math.PI * EPS)
+    const c1 = Math.log(x * y)
+    const c2 = x * y
     let n = newton(
       t => (t + mu) * Math.log(t + mu) + t * Math.log(t) - 2 * t - t * c1 - c0,
       t => Math.log(t * (t + mu) / c2),
@@ -260,7 +260,7 @@ const _seriesExpansion = {
  */
 export default function (mu, x, y) {
   // Pick primary function
-  let primary = y > x + mu ? 'q' : 'p'
+  const primary = y > x + mu ? 'q' : 'p'
   // console.log(primary)
 
   // Special cases

@@ -20,7 +20,7 @@ export default class extends Beta {
       'F > 0', 'F < 1',
       'p > 0', 'p < 1'
     ])
-    let f = (1 - F) / F
+    const f = (1 - F) / F
     super(f * p, f * (1 - p))
 
     // Set support

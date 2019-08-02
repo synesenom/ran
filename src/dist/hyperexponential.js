@@ -20,8 +20,8 @@ export default class extends Distribution {
     super('continuous', parameters.length)
 
     // Validate parameters
-    let weights = parameters.map(d => d.weight)
-    let norm = weights.reduce((acc, d) => d + acc, 0)
+    const weights = parameters.map(d => d.weight)
+    const norm = weights.reduce((acc, d) => d + acc, 0)
     this.p = Object.assign(this.p, {
       weights: weights.map(d => d / norm),
       rates: parameters.map(d => d.rate),
@@ -50,7 +50,7 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling
-    let i = this.aliasTable.sample(this.r)
+    const i = this.aliasTable.sample(this.r)
     return exponential(this.r, this.p.rates[i])
   }
 

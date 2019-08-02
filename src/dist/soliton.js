@@ -17,7 +17,7 @@ export default class extends Categorical {
   // Special case of custom
   constructor (N = 10) {
     // Define weights
-    let Ni = Math.round(N)
+    const Ni = Math.round(N)
     super([1 / Ni].concat(Array.from({ length: Ni - 2 }, (d, i) => 1 / ((i + 1) * (i + 2)))), 1)
 
     // Validate parameters

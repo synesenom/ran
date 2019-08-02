@@ -31,12 +31,12 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    let y = Math.exp(-x)
+    const y = Math.exp(-x)
     return 2 * y / Math.pow(1 + y, 2)
   }
 
   _cdf (x) {
-    let y = Math.exp(-x)
+    const y = Math.exp(-x)
     return (1 - y) / (1 + y)
   }
 

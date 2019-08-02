@@ -56,7 +56,7 @@ export function erfc (x) {
 export function erfinv (x) {
   // Estimate initial guess using the polynomial
   let x0 = 0
-  let x2 = x * x
+  const x2 = x * x
   let c = 0.5 * Math.pow(Math.PI, 5.5)
   for (let i = CErfInv.length - 1; i >= 0; i--) {
     x0 = (x0 + CErfInv[i] * c) * x2

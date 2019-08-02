@@ -14,7 +14,7 @@ import logGamma from './log-gamma'
  * @private
  */
 export default function (s, a) {
-  let n = 20
+  const n = 20
 
   // First sum
   let z = 0

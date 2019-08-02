@@ -59,7 +59,7 @@ const _CHI_TABLE_HI = [
  */
 export function chi2 (values, pmf, c) {
   // Calculate observed distribution
-  let p = new Map()
+  const p = new Map()
   values.forEach(function (v) {
     p.set(v, p.has(v) ? p.get(v) + 1 : 1)
   })
@@ -84,9 +84,9 @@ export function chi2 (values, pmf, c) {
   })
 
   // Get critical value
-  let df = Math.max(1, k - c - 1)
+  const df = Math.max(1, k - c - 1)
 
-  let crit = df <= 250 ? _CHI_TABLE_LO[df] : _CHI_TABLE_HI[Math.floor(df / 50)]
+  const crit = df <= 250 ? _CHI_TABLE_LO[df] : _CHI_TABLE_HI[Math.floor(df / 50)]
 
   // Return comparison results
   return {

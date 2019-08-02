@@ -18,8 +18,8 @@ import NoncentralBeta from './noncentral-beta'
 export default class extends NoncentralBeta {
   // Transformation of non-central beta distribution
   constructor (d1 = 2, d2 = 2, lambda = 1) {
-    let d1i = Math.round(d1)
-    let d2i = Math.round(d2)
+    const d1i = Math.round(d1)
+    const d2i = Math.round(d2)
     super(d1i / 2, d2i / 2, lambda)
 
     // Validate parameters
@@ -42,7 +42,7 @@ export default class extends NoncentralBeta {
 
   _generator () {
     // Direct sampling by transforming non-central beta variate
-    let x = super._generator()
+    const x = super._generator()
     return this.p.d2 * x / (this.p.d1 * (1 - x))
   }
 
@@ -51,7 +51,7 @@ export default class extends NoncentralBeta {
   }
 
   _cdf (x) {
-    let y = this.p.d1 * x
+    const y = this.p.d1 * x
     return super._cdf(1 / (1 + this.p.d2 / y))
   }
 }

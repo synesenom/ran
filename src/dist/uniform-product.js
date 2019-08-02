@@ -8,7 +8,7 @@ export default class extends Distribution {
     super('continuous', arguments.length)
 
     // Validate parameters
-    let ni = Math.round(n)
+    const ni = Math.round(n)
     this.p = { n: ni }
     Distribution._validate({ n: ni }, [
       'n > 0'

@@ -18,7 +18,7 @@ const coeffs = [
    * @private
    */
 export default function (z) {
-  let x = z
+  const x = z
 
   let y = z
 

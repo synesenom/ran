@@ -42,8 +42,8 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    let y = Math.exp(this.p.b * x)
-    let z = Math.pow(this.p.beta - 1 + y, this.p.s + 1)
+    const y = Math.exp(this.p.b * x)
+    const z = Math.pow(this.p.beta - 1 + y, this.p.s + 1)
     return isFinite(y) && isFinite(z) ? this.p.b * this.p.s * Math.pow(this.p.beta, this.p.s) * y / z : 0
   }
 

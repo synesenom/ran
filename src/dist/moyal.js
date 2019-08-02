@@ -45,14 +45,14 @@ export default class extends Distribution {
       this.r,
       () => Math.PI * this.r.next() - Math.PI / 2,
       t => {
-        let z = Math.tan(t)
+        const z = Math.tan(t)
         return Math.exp(-0.5 * (z + Math.exp(-z))) / (Math.sqrt(2 * Math.PI) * Math.pow(Math.cos(t), 2))
       }, t => this.p.sigma * Math.tan(t) + this.p.mu
     )
   }
 
   _pdf (x) {
-    let z = (x - this.p.mu) / this.p.sigma
+    const z = (x - this.p.mu) / this.p.sigma
     return Math.exp(-0.5 * (z + Math.exp(-z))) / this.c[0]
   }
 

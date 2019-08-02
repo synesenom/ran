@@ -19,7 +19,7 @@ export default class extends Distribution {
     super('continuous', arguments.length)
 
     // Validate parameters
-    let ni = Math.round(n)
+    const ni = Math.round(n)
     this.p = { n: ni }
     Distribution._validate({ n: ni }, [
       'n > 0'
@@ -45,11 +45,11 @@ export default class extends Distribution {
 
   _pdf (x) {
     // Use symmetry property for large x values
-    let y = x < this.p.n / 2 ? x : this.p.n - x
+    const y = x < this.p.n / 2 ? x : this.p.n - x
 
     // Compute terms
-    let terms = Array.from({ length: Math.floor(y) + 1 }, (d, k) => {
-      let z = (this.p.n - 1) * Math.log(y - k) - this.c[k]
+    const terms = Array.from({ length: Math.floor(y) + 1 }, (d, k) => {
+      const z = (this.p.n - 1) * Math.log(y - k) - this.c[k]
 
       return k % 2 === 0 ? Math.exp(z) : -Math.exp(z)
     })
@@ -63,11 +63,11 @@ export default class extends Distribution {
 
   _cdf (x) {
     // Use symmetry property for large x values
-    let y = x < this.p.n / 2 ? x : this.p.n - x
+    const y = x < this.p.n / 2 ? x : this.p.n - x
 
     // Compute terms
-    let terms = Array.from({ length: Math.floor(y) + 1 }, (d, k) => {
-      let z = this.p.n * Math.log(y - k) - this.c[k]
+    const terms = Array.from({ length: Math.floor(y) + 1 }, (d, k) => {
+      const z = this.p.n * Math.log(y - k) - this.c[k]
 
       return k % 2 === 0 ? Math.exp(z) : -Math.exp(z)
     })

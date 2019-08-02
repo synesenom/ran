@@ -48,12 +48,12 @@ export default class extends Distribution {
   _pdf (x) {
     if (this.p.xi === 0) {
       // Fall back to logistic
-      let z = Math.exp(-(x - this.p.mu) / this.p.sigma)
+      const z = Math.exp(-(x - this.p.mu) / this.p.sigma)
       return isFinite(z * z)
         ? z / (this.p.sigma * Math.pow(1 + z, 2))
         : 0
     } else {
-      let z = (x - this.p.mu) / this.p.sigma
+      const z = (x - this.p.mu) / this.p.sigma
 
       return Math.pow(1 + this.p.xi * z, -(1 / this.p.xi + 1)) / (this.p.sigma * Math.pow(1 + Math.pow(1 + this.p.xi * z, -1 / this.p.xi), 2))
     }
@@ -64,8 +64,8 @@ export default class extends Distribution {
       // Fall back to logistic
       return 1 / (1 + Math.exp(-(x - this.p.mu) / this.p.sigma))
     } else {
-      let z = (x - this.p.mu) / this.p.sigma
-      let y = Math.pow(1 + this.p.xi * z, -1 / this.p.xi)
+      const z = (x - this.p.mu) / this.p.sigma
+      const y = Math.pow(1 + this.p.xi * z, -1 / this.p.xi)
       return isFinite(y) ? 1 / (1 + y) : 0
     }
   }

@@ -38,12 +38,12 @@ export default class extends Beta {
   }
 
   _pdf (x) {
-    let y = (x + 1) / 2
+    const y = (x + 1) / 2
     return y * super._pdf(y * y)
   }
 
   _cdf (x) {
-    let y = (x + 1) / 2
+    const y = (x + 1) / 2
     return super._cdf(y * y)
   }
 }

@@ -45,11 +45,11 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling
-    let nu = normal(this.r)
+    const nu = normal(this.r)
 
-    let y = nu * nu
+    const y = nu * nu
 
-    let x = this.p.mu + this.c[0] * this.p.mu * y - this.c[0] * Math.sqrt(this.p.mu * y * (4 * this.p.lambda + this.p.mu * y))
+    const x = this.p.mu + this.c[0] * this.p.mu * y - this.c[0] * Math.sqrt(this.p.mu * y * (4 * this.p.lambda + this.p.mu * y))
     return this.r.next() > this.p.mu / (this.p.mu + x) ? this.p.mu * this.p.mu / x : x
   }
 
@@ -58,9 +58,9 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    let s = Math.sqrt(this.p.lambda / x)
-    let st = Math.sqrt(x) * this.c[2]
-    let z = erf(Math.SQRT1_2 * (st - s))
+    const s = Math.sqrt(this.p.lambda / x)
+    const st = Math.sqrt(x) * this.c[2]
+    const z = erf(Math.SQRT1_2 * (st - s))
 
     // Handle 1 - z << 1 case
     if (1 - z > Number.EPSILON) {

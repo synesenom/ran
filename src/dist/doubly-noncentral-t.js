@@ -27,7 +27,7 @@ export default class extends Distribution {
     super('continuous', arguments.length)
 
     // Validate parameters
-    let nui = Math.round(nu)
+    const nui = Math.round(nu)
     this.p = { nu: nui, mu, theta }
     Distribution._validate({ nu: nui, mu, theta }, [
       'nu > 0',
@@ -94,8 +94,8 @@ export default class extends Distribution {
    * @private
    */
   _logA (x, j) {
-    let tk = 1 + x * x / this.p.nu
-    let kj = (this.p.nu + j + 1) / 2
+    const tk = 1 + x * x / this.p.nu
+    const kj = (this.p.nu + j + 1) / 2
     return j * Math.log(Math.abs(x * this.p.mu / Math.sqrt(this.p.nu / 2))) +
       logGamma(kj) -
       kj * Math.log(tk) -
@@ -105,23 +105,23 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling from a normal and a non-central chi2
-    let x = normal(this.r, this.p.mu)
-    let y = noncentralChi2(this.r, this.p.nu, this.p.theta)
+    const x = normal(this.r, this.p.mu)
+    const y = noncentralChi2(this.r, this.p.nu, this.p.theta)
     return x / Math.sqrt(y / this.p.nu)
   }
 
   _pdf (x) {
     // Some pre-computed constants
-    let nu2 = this.p.nu / 2
-    let tk = 1 + x * x / this.p.nu
-    let srtk = Math.sqrt(tk)
-    let lntk = Math.log(tk)
-    let tmuk = Math.abs(x * this.p.mu / Math.sqrt(nu2))
-    let lntmuk = Math.log(tmuk)
-    let thetatk = this.p.theta / (2 * tk)
+    const nu2 = this.p.nu / 2
+    const tk = 1 + x * x / this.p.nu
+    const srtk = Math.sqrt(tk)
+    const lntk = Math.log(tk)
+    const tmuk = Math.abs(x * this.p.mu / Math.sqrt(nu2))
+    const lntmuk = Math.log(tmuk)
+    const thetatk = this.p.theta / (2 * tk)
 
     // Find index with highest amplitude
-    let j0 = startIndex(j => this._logA(x, j))
+    const j0 = startIndex(j => this._logA(x, j))
 
     let z = 0
     if (x * this.p.mu >= 0) {
@@ -154,9 +154,9 @@ export default class extends Distribution {
         ],
         f: f10
       }, (t, i) => {
-        let j = j0 + i
-        let j2 = i % 2
-        let kj = (this.p.nu + j + 1) / 2
+        const j = j0 + i
+        const j2 = i % 2
+        const kj = (this.p.nu + j + 1) / 2
         t.gp *= tmuk / (j * srtk)
         t.gk[j2] *= kj - 1
         t.g = t.gp * t.gk[j2]
@@ -190,10 +190,10 @@ export default class extends Distribution {
           ],
           f: f10
         }, (t, i) => {
-          let j = j0 - i
+          const j = j0 - i
           if (j > 0) {
-            let j2 = i % 2
-            let kj = (this.p.nu + j) / 2
+            const j2 = i % 2
+            const kj = (this.p.nu + j) / 2
 
             t.gp /= tmuk / (j * srtk)
             t.gk[j2] /= kj
@@ -212,14 +212,14 @@ export default class extends Distribution {
     } else {
       // Forward
       let kj0 = (this.p.nu + j0 + 1) / 2
-      let gp0 = Math.exp(
+      const gp0 = Math.exp(
         this.c[0] +
         (j0 - 1) * lntmuk -
         logGamma(j0) -
         (kj0 - 0.5) * lntk
       )
-      let gk0 = gamma(kj0 - 1)
-      let gk1 = gamma(kj0 - 0.5)
+      const gk0 = gamma(kj0 - 1)
+      const gk1 = gamma(kj0 - 0.5)
       let gk = [gk0, gk1]
       let f2 = [
         f11(kj0 - 2, nu2, thetatk),
@@ -232,15 +232,15 @@ export default class extends Distribution {
 
       let gp = gp0
       z += acceleratedSum(i => {
-        let j = j0 + i
-        let j2 = i % 2
-        let kj = (this.p.nu + j + 1) / 2
+        const j = j0 + i
+        const j2 = i % 2
+        const kj = (this.p.nu + j + 1) / 2
 
         gp *= tmuk / (j * srtk)
         gk[j2] *= kj - 1
-        let g = gp * gk[j2]
+        const g = gp * gk[j2]
 
-        let f = this._f11Forward(f1[j2], f2[j2], kj - 1, nu2, thetatk)
+        const f = this._f11Forward(f1[j2], f2[j2], kj - 1, nu2, thetatk)
         f2[j2] = f1[j2]
         f1[j2] = f
 
@@ -261,17 +261,17 @@ export default class extends Distribution {
           f11(kj0 + 0.5, nu2, thetatk)
         ]
         z -= acceleratedSum(i => {
-          let j = j0 - i
-          let j2 = i % 2
-          let kj = (this.p.nu + j) / 2
+          const j = j0 - i
+          const j2 = i % 2
+          const kj = (this.p.nu + j) / 2
           let dz = 0
 
           if (j > 0) {
             gp /= tmuk / (j * srtk)
             gk[j2] /= kj
-            let g = gp * gk[j2]
+            const g = gp * gk[j2]
 
-            let f = this._f11Backward(f1[j2], f2[j2], kj + 1, nu2, thetatk)
+            const f = this._f11Backward(f1[j2], f2[j2], kj + 1, nu2, thetatk)
             f2[j2] = f1[j2]
             f1[j2] = f
 
@@ -290,13 +290,13 @@ export default class extends Distribution {
     // Sum of the product of Poisson weights and singly non-central t CDF
     // Source: https://www.wiley.com/en-us/Intermediate+Probability%3A+A+Computational+Approach-p-9780470026373
 
-    let y = Math.abs(x)
-    let mu = x < 0 ? -this.p.mu : this.p.mu
-    let z = recursiveSum({
+    const y = Math.abs(x)
+    const mu = x < 0 ? -this.p.mu : this.p.mu
+    const z = recursiveSum({
       p: Math.exp(-this.p.theta / 2),
       f: NoncentralT.fnm(this.p.nu, mu, y)
     }, (t, i) => {
-      let i2 = 2 * i
+      const i2 = 2 * i
       t.p *= this.p.theta / i2
       t.f = NoncentralT.fnm(this.p.nu + i2, mu, y * Math.sqrt(1 + i2 / this.p.nu))
       return t

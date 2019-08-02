@@ -48,10 +48,10 @@ export default class extends PreComputed {
 
   _generator () {
     // TODO Use core beta generator
-    let x = gamma(this.r, this.p.alpha, 1)
-    let y = gamma(this.r, this.p.beta, 1)
-    let z = x / (x + y)
-    let p = z === 1 ? 1 - y / x : z
+    const x = gamma(this.r, this.p.alpha, 1)
+    const y = gamma(this.r, this.p.beta, 1)
+    const z = x / (x + y)
+    const p = z === 1 ? 1 - y / x : z
     return Math.floor(Math.log(1 - this.r.next()) / Math.log(1 - p)) + 1
   }
 }

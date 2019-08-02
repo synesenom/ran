@@ -20,8 +20,8 @@ export default class extends DoublyNoncentralBeta {
     super(d1 / 2, d2 / 2, lambda1, lambda2)
 
     // Validate parameters
-    let d1i = Math.round(d1)
-    let d2i = Math.round(d2)
+    const d1i = Math.round(d1)
+    const d2i = Math.round(d2)
     this.p = Object.assign(this.p, { d1: d1i, d2: d2i })
 
     // Set support
@@ -36,12 +36,12 @@ export default class extends DoublyNoncentralBeta {
 
   _generator () {
     // Direct sampling by transforming a doubly non-central beta
-    let x = super._generator()
+    const x = super._generator()
     return this.p.d2 * x / (this.p.d1 * (1 - x))
   }
 
   _pdf (x) {
-    let n = this.p.d1 / this.p.d2
+    const n = this.p.d1 / this.p.d2
     return n * super._pdf(x / (1 / n + x)) / Math.pow(1 + n * x, 2)
   }
 

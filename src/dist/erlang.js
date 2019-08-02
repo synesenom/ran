@@ -17,7 +17,7 @@ import Distribution from './_distribution'
 export default class extends Gamma {
   // Special case of gamma
   constructor (k = 1, lambda = 1) {
-    let ki = Math.round(k)
+    const ki = Math.round(k)
     super(ki, lambda)
 
     // Validate parameters

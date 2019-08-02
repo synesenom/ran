@@ -16,8 +16,8 @@ import F from './f'
 export default class extends F {
   // Transforming F variate
   constructor (d1 = 1, d2 = 1) {
-    let d1i = Math.round(d1)
-    let d2i = Math.round(d2)
+    const d1i = Math.round(d1)
+    const d2i = Math.round(d2)
     super(d1i / 2, d2i / 2)
 
     // Set support
@@ -36,7 +36,7 @@ export default class extends F {
   }
 
   _pdf (x) {
-    let y = Math.exp(2 * x)
+    const y = Math.exp(2 * x)
     return super._pdf(y) * 2 * y
   }
 

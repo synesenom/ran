@@ -54,7 +54,7 @@ const orders = [
 ]
 
 // Some constants for the algorithms
-let c2 = [
+const c2 = [
   0.99999999999999987510,
   -0.99999999999988796462,
   0.99999999998290743652,
@@ -120,9 +120,9 @@ function _phiComp (z) {
 
 // T1
 function _t1 (h, a, m) {
-  let hh = -0.5 * h * h
-  let dhs = Math.exp(hh)
-  let aa = a * a
+  const hh = -0.5 * h * h
+  const dhs = Math.exp(hh)
+  const aa = a * a
   let aj = HALF_PI_INV * a
   let dj = dhs - 1
   let gj = hh * dhs
@@ -139,14 +139,14 @@ function _t1 (h, a, m) {
 
 // T2
 function _t2 (h, a, ah, m) {
-  let hh = h * h
-  let aa = -a * a
+  const hh = h * h
+  const aa = -a * a
   let vi = PI2_SQRT_INV * a * Math.exp(-0.5 * ah * ah)
   let ph = _phi(ah) / h
-  let y = 1 / hh
+  const y = 1 / hh
   let z = 0
 
-  let iMax = m + m + 1
+  const iMax = m + m + 1
   for (let i = 1; i < iMax; i += 2) {
     z += ph
     ph = y * (vi - i * ph)
@@ -157,11 +157,11 @@ function _t2 (h, a, ah, m) {
 
 // T3
 function _t3 (h, a, ah, m) {
-  let hh = h * h
-  let aa = a * a
+  const hh = h * h
+  const aa = a * a
   let vi = PI2_SQRT_INV * a * Math.exp(-0.5 * ah * ah)
   let ph = _phi(ah) / h
-  let y = 1 / hh
+  const y = 1 / hh
   let z = 0
 
   for (let i = 1, ii = 1; i <= m; i++, ii += 2) {
@@ -174,13 +174,13 @@ function _t3 (h, a, ah, m) {
 
 // T4
 function _t4 (h, a, m) {
-  let hh = h * h
-  let aa = -a * a
+  const hh = h * h
+  const aa = -a * a
   let z = 0
   let ai = HALF_PI_INV * a * Math.exp(-0.5 * hh * (1 - aa))
   let yi = 1
 
-  let iMax = m + m + 1
+  const iMax = m + m + 1
   for (let i = 3; i <= iMax; i += 2) {
     z += ai * yi
     yi = (1 - hh * yi) / i
@@ -191,12 +191,12 @@ function _t4 (h, a, m) {
 
 // T5
 function _t5 (h, a, m) {
-  let hh = -0.5 * h * h
-  let aa = a * a
+  const hh = -0.5 * h * h
+  const aa = a * a
   let z = 0
 
   for (let i = 0; i < m; i++) {
-    let r = 1 + aa * pts[i]
+    const r = 1 + aa * pts[i]
     z += wts[i] * Math.exp(hh * r) / r
   }
   return a * z
@@ -204,9 +204,9 @@ function _t5 (h, a, m) {
 
 // T6
 function _t6 (h, a) {
-  let phi = _phiComp(h)
-  let y = 1 - a
-  let r = Math.atan(y / (1 + a))
+  const phi = _phiComp(h)
+  const y = 1 - a
+  const r = Math.atan(y / (1 + a))
   let z = 0.5 * phi * (1 - phi)
 
   if (r !== 0) {
@@ -235,8 +235,8 @@ function _t (h, a, ah) {
   }
 
   // Find sector code and order
-  let code = codes[row][col]
-  let order = orders[code]
+  const code = codes[row][col]
+  const order = orders[code]
 
   // Run corresponding algorithm
   switch (methods[code]) {
@@ -268,10 +268,10 @@ function _t (h, a, ah) {
  * @private
  */
 export default function (h, a) {
-  let cut = 0.67
-  let hAbs = Math.abs(h)
-  let aAbs = Math.abs(a)
-  let ah = aAbs * hAbs
+  const cut = 0.67
+  const hAbs = Math.abs(h)
+  const aAbs = Math.abs(a)
+  const ah = aAbs * hAbs
   let z
 
   if (aAbs <= 1) {
@@ -279,8 +279,8 @@ export default function (h, a) {
   } else if (hAbs <= cut) {
     z = 0.25 - _phi(hAbs) * _phi(ah) - _t(ah, 1 / aAbs, hAbs)
   } else {
-    let phiH = _phiComp(hAbs)
-    let phiAh = _phiComp(ah)
+    const phiH = _phiComp(hAbs)
+    const phiAh = _phiComp(ah)
     z = 0.5 * (phiH + phiAh) - phiH * phiAh - _t(ah, 1 / aAbs, hAbs)
   }
 

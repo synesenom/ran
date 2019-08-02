@@ -37,12 +37,12 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling by transforming normal variate
-    let y = normal(this.r, 0, 1 / Math.sqrt(this.p.c))
+    const y = normal(this.r, 0, 1 / Math.sqrt(this.p.c))
     return this.p.mu + 1 / (y * y)
   }
 
   _pdf (x) {
-    let z = x - this.p.mu
+    const z = x - this.p.mu
     return Math.sqrt(0.5 * this.p.c / Math.PI) * Math.exp(-0.5 * this.p.c / z - 1.5 * Math.log(z))
   }
 

@@ -63,8 +63,8 @@ export default function (f, x1, x2) {
         q = -q
       }
       p = Math.abs(p)
-      let min1 = 3.0 * xm * q - Math.abs(eps * q)
-      let min2 = Math.abs(e * q)
+      const min1 = 3.0 * xm * q - Math.abs(eps * q)
+      const min2 = Math.abs(e * q)
       if (2.0 * p < (min1 < min2 ? min1 : min2)) {
         e = d
         d = p / q

@@ -3,11 +3,11 @@ import logGamma from './log-gamma'
 
 // Incomplete beta generator using the continued fraction expansion
 function _biContinuedFraction (a, b, x) {
-  let qab = a + b
+  const qab = a + b
 
-  let qap = a + 1
+  const qap = a + 1
 
-  let qam = a - 1
+  const qam = a - 1
 
   let c = 1
 
@@ -17,7 +17,7 @@ function _biContinuedFraction (a, b, x) {
   let h = d
 
   for (let i = 1; i < MAX_ITER; i++) {
-    let m2 = 2 * i
+    const m2 = 2 * i
 
     let aa = i * (b - i) * x / ((qam + m2) * (a + m2))
     d = 1 + aa * d
@@ -32,7 +32,7 @@ function _biContinuedFraction (a, b, x) {
     c = 1 + aa / c
     c = Math.max(Math.abs(c), DELTA)
     d = 1 / d
-    let del = d * c
+    const del = d * c
     h *= del
     if (Math.abs(del - 1) < EPS) { break }
   }
@@ -51,7 +51,7 @@ function _biContinuedFraction (a, b, x) {
  * @private
  */
 export function betaIncomplete (a, b, x) {
-  let bt = (x <= 0 || x >= 1)
+  const bt = (x <= 0 || x >= 1)
     ? 0
     : Math.exp(a * Math.log(x) + b * Math.log(1 - x))
   // Use I(b, a, x) only if b != 0
@@ -72,7 +72,7 @@ export function betaIncomplete (a, b, x) {
    * @private
    */
 export function regularizedBetaIncomplete (a, b, x) {
-  let bt = (x <= 0 || x >= 1)
+  const bt = (x <= 0 || x >= 1)
     ? 0
     : Math.exp(logGamma(a + b) - logGamma(a) - logGamma(b) + a * Math.log(x) + b * Math.log(1 - x))
   return x < (a + 1) / (a + b + 2)

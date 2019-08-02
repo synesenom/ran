@@ -1,5 +1,5 @@
 export const stirlingSecond = (function () {
-  let _s = new Map()
+  const _s = new Map()
   _s.set('0 0', 1)
 
   function snk (n, k) {
@@ -7,12 +7,12 @@ export const stirlingSecond = (function () {
       return 0
     }
 
-    let i = `${n} ${k}`
+    const i = `${n} ${k}`
     if (_s.has(i)) {
       return _s.get(i)
     }
 
-    let s = k * snk(n - 1, k) + snk(n - 1, k - 1)
+    const s = k * snk(n - 1, k) + snk(n - 1, k - 1)
     _s.set(i, s)
     return s
   }

@@ -19,17 +19,17 @@ import Distribution from './_distribution'
 export default class extends Categorical {
   constructor (N = 10, K = 5, r = 5) {
     // Validate parameters
-    let Ni = Math.round(N)
-    let Ki = Math.round(K)
-    let ri = Math.round(r)
-    Distribution._validate({ N: Ni, K: Ki, r: ri }, [
+    const Ni = Math.round(N)
+    const Ki = Math.round(K)
+    const ri = Math.round(r)
+    Distribution._validate({ N: Ni, K: Ki, r: ri, 'N - K': Ni - Ki }, [
       'N >= 0',
       'K > 0', 'K <= N',
       'r > 0', 'r <= N - K'
     ])
 
     // Build weights
-    let weights = []
+    const weights = []
     for (let k = 0; k <= Ki; k++) {
       weights.push(Math.exp(logBinomial(Ki + ri - 1, k) + logBinomial(Ni - ri - k, Ki - k) - logBinomial(Ni, Ki)))
     }

@@ -50,7 +50,7 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    let z = (x - this.p.mu) / this.p.s
+    const z = (x - this.p.mu) / this.p.s
     return 0.5 * (1 + z + Math.sin(Math.PI * z) / Math.PI)
   }
 }

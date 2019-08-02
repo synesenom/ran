@@ -37,12 +37,12 @@ export default class extends Distribution {
 
   _generator () {
     // Sampling method from here: http://sa-ijas.stat.unipd.it/sites/sa-ijas.stat.unipd.it/files/417-426.pdf
-    let s = this.p.kappa > 1.3 ? 1 / Math.sqrt(this.p.kappa) : Math.PI * Math.exp(-this.p.kappa)
+    const s = this.p.kappa > 1.3 ? 1 / Math.sqrt(this.p.kappa) : Math.PI * Math.exp(-this.p.kappa)
 
     for (let i = 0; i < MAX_ITER; i++) {
-      let R1 = this.r.next()
-      let R2 = this.r.next()
-      let theta = s * (2 * R2 - 1) / R1
+      const R1 = this.r.next()
+      const R2 = this.r.next()
+      const theta = s * (2 * R2 - 1) / R1
       if (Math.abs(theta) > Math.PI) {
         continue
       }

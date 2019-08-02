@@ -52,7 +52,7 @@ export default class extends Distribution {
   _advance (x) {
     for (let k = this.pdfTable.length; k <= x; k++) {
       // Update probability mass
-      let pdf = this._pk(k)
+      const pdf = this._pk(k)
       this.pdfTable.push(pdf)
 
       // Update cumulative function
@@ -73,10 +73,10 @@ export default class extends Distribution {
    */
   _addAliasTable () {
     // Calculate index offset
-    let offset = this.aliasTables.length
+    const offset = this.aliasTables.length
 
     // Compute weights and total weight
-    let weights = Array.from({ length: this.TABLE_SIZE }, (d, i) => this._pdf(this.TABLE_SIZE * offset + i))
+    const weights = Array.from({ length: this.TABLE_SIZE }, (d, i) => this._pdf(this.TABLE_SIZE * offset + i))
     let total = weights.reduce((acc, d) => acc + d, 0)
     if (offset > 0) {
       // Remove previously accumulated total weight
@@ -100,7 +100,7 @@ export default class extends Distribution {
       }
 
       // Sample from current table
-      let i = this.aliasTables[tableIndex].table.sample(this.r)
+      const i = this.aliasTables[tableIndex].table.sample(this.r)
 
       // Check if sample is outside of table domain
       if (i === this.TABLE_SIZE) {

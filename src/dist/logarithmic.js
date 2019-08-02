@@ -56,7 +56,7 @@ export default class extends Distribution {
   }
 
   _q (p) {
-    let z = p * (this.c[0] - this.c[1]) - this.c[0]
+    const z = p * (this.c[0] - this.c[1]) - this.c[0]
     return z / lambertW0(z / Math.E)
   }
 }

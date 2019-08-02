@@ -56,7 +56,7 @@ export default class extends Distribution {
     }
 
     // All other cases
-    let y = Math.pow(x, this.p.b)
+    const y = Math.pow(x, this.p.b)
     return Math.exp(this.p.a * (1 - y) / this.p.b) * Math.pow(x, this.p.b - 2) * (this.p.a * y - this.p.b + 1)
   }
 
@@ -77,11 +77,11 @@ export default class extends Distribution {
     }
 
     // Check if b is too close to 1
-    let w = lambertW0(Math.pow(this.c[1] * (1 - p), this.c[2]) / this.c[0])
+    const w = lambertW0(Math.pow(this.c[1] * (1 - p), this.c[2]) / this.c[0])
     if (!isFinite(w)) {
       // 1 - b << 1, use logarithms
-      let l1 = this.c[3] + this.c[2] * Math.log(1 - p)
-      let l2 = Math.log(l1)
+      const l1 = this.c[3] + this.c[2] * Math.log(1 - p)
+      const l2 = Math.log(l1)
 
       // W(x) ~= ln(x) - ln ln(x) - ln(x) / (ln ln(x))
       return Math.pow(this.c[0] * (l1 - l2 + l2 / l1), 1 / this.p.b)

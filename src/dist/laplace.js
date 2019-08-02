@@ -43,7 +43,7 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    let z = Math.exp((x - this.p.mu) / this.p.b)
+    const z = Math.exp((x - this.p.mu) / this.p.b)
     return x < this.p.mu ? 0.5 * z : 1 - 0.5 / z
   }
 

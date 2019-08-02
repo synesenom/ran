@@ -9,7 +9,7 @@ export default class extends PreComputed {
     super()
 
     // Validate parameters
-    let ri = Math.round(r)
+    const ri = Math.round(r)
     this.p = { r: ri, alpha, beta }
     Distribution._validate({ r: ri, alpha, beta }, [
       'r > 0',
@@ -42,10 +42,10 @@ export default class extends PreComputed {
   _generator () {
     // Direct sampling by compounding beta and negative binomial
     // TODO Use core beta generator
-    let x = gamma(this.r, this.p.alpha, 1)
-    let y = gamma(this.r, this.p.beta, 1)
-    let z = x / (x + y)
-    let p = z === 1 ? 1 - y / x : z
+    const x = gamma(this.r, this.p.alpha, 1)
+    const y = gamma(this.r, this.p.beta, 1)
+    const z = x / (x + y)
+    const p = z === 1 ? 1 - y / x : z
     return poisson(this.r, gamma(this.r, this.p.r, 1 / p - 1))
   }
 }

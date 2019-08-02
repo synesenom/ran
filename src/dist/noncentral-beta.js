@@ -50,9 +50,9 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling from non-central chi2 and chi2
-    let x = noncentralChi2(this.r, 2 * this.p.alpha, this.p.lambda)
-    let y = chi2(this.r, 2 * this.p.beta)
-    let z = x / (x + y)
+    const x = noncentralChi2(this.r, 2 * this.p.alpha, this.p.lambda)
+    const y = chi2(this.r, 2 * this.p.beta)
+    const z = x / (x + y)
 
     // Handle 1 - z << 1 case
     if (z === 1) {
@@ -64,15 +64,15 @@ export default class extends Distribution {
 
   _pdf (x) {
     // Speed-up variables
-    let l2 = this.p.lambda / 2
-    let i0 = Math.round(l2)
+    const l2 = this.p.lambda / 2
+    const i0 = Math.round(l2)
     let iAlpha0 = this.p.alpha + i0
 
     // Init variables
-    let p0 = Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
-    let xa0 = Math.pow(x, iAlpha0 - 1)
-    let xb = Math.pow(1 - x, this.p.beta - 1)
-    let b0 = betaFn(iAlpha0, this.p.beta)
+    const p0 = Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
+    const xa0 = Math.pow(x, iAlpha0 - 1)
+    const xb = Math.pow(1 - x, this.p.beta - 1)
+    const b0 = betaFn(iAlpha0, this.p.beta)
 
     // Forward sum
     let z = recursiveSum({
@@ -83,7 +83,7 @@ export default class extends Distribution {
       t.p *= l2 / (i + i0)
       return t
     }, t => t.p * t.xa * xb / t.b, (t, i) => {
-      let iAlpha = iAlpha0 + i
+      const iAlpha = iAlpha0 + i
       t.xa *= x
       t.b *= iAlpha / (iAlpha + this.p.beta)
       return t
@@ -91,15 +91,15 @@ export default class extends Distribution {
 
     if (i0 > 0) {
       iAlpha0--
-      let xa = xa0 / x
-      let b = b0 * (iAlpha0 + this.p.beta) / iAlpha0
+      const xa = xa0 / x
+      const b = b0 * (iAlpha0 + this.p.beta) / iAlpha0
       z += recursiveSum({
         p: p0 * i0 / l2,
         xa,
         b
       }, (t, i) => {
-        let j = i0 - i - 1
-        let iAlpha = iAlpha0 - i
+        const j = i0 - i - 1
+        const iAlpha = iAlpha0 - i
         if (j >= 0) {
           t.p /= l2 / (j + 1)
           t.xa /= x
@@ -117,16 +117,16 @@ export default class extends Distribution {
 
   _cdf (x) {
     // Speed-up variables
-    let l2 = this.p.lambda / 2
-    let i0 = Math.round(l2)
+    const l2 = this.p.lambda / 2
+    const i0 = Math.round(l2)
     let iAlpha0 = this.p.alpha + i0
 
     // Init variables
-    let p0 = Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
-    let xa0 = Math.pow(x, iAlpha0)
-    let xb = Math.pow(1 - x, this.p.beta)
-    let b0 = betaFn(iAlpha0, this.p.beta)
-    let ib0 = regularizedBetaIncomplete(iAlpha0, this.p.beta, x)
+    const p0 = Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
+    const xa0 = Math.pow(x, iAlpha0)
+    const xb = Math.pow(1 - x, this.p.beta)
+    const b0 = betaFn(iAlpha0, this.p.beta)
+    const ib0 = regularizedBetaIncomplete(iAlpha0, this.p.beta, x)
 
     // Forward sum
     let z = recursiveSum({
@@ -138,7 +138,7 @@ export default class extends Distribution {
       t.p *= l2 / (i + i0)
       return t
     }, t => t.p * t.ib, (t, i) => {
-      let iAlpha = iAlpha0 + i
+      const iAlpha = iAlpha0 + i
       t.ib -= t.xa * xb / (iAlpha * t.b)
       t.xa *= x
       t.b *= iAlpha / (iAlpha + this.p.beta)
@@ -148,16 +148,16 @@ export default class extends Distribution {
     // Backward sum
     if (i0 > 0) {
       iAlpha0--
-      let xa = xa0 / x
-      let b = b0 * (iAlpha0 + this.p.beta) / iAlpha0
+      const xa = xa0 / x
+      const b = b0 * (iAlpha0 + this.p.beta) / iAlpha0
       z += recursiveSum({
         p: p0 * i0 / l2,
         xa,
         b,
         ib: ib0 + xa * xb / (iAlpha0 * b)
       }, (t, i) => {
-        let j = i0 - i - 1
-        let iAlpha = iAlpha0 - i
+        const j = i0 - i - 1
+        const iAlpha = iAlpha0 - i
         if (j >= 0) {
           t.p /= l2 / (j + 1)
           t.xa /= x

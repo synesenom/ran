@@ -42,7 +42,7 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    let z = this.p.b * (1 - Math.exp(-this.p.c * x))
+    const z = this.p.b * (1 - Math.exp(-this.p.c * x))
     return (this.p.a + z) * Math.exp(-(this.p.a + this.p.b) * x + z / this.p.c)
   }
 
@@ -51,8 +51,8 @@ export default class extends Distribution {
   }
 
   _q (p) {
-    let ab = this.p.a + this.p.b
-    let w = lambertW0(-this.p.b * Math.exp((this.p.c * Math.log(1 - p) - this.p.b) / ab) / ab)
+    const ab = this.p.a + this.p.b
+    const w = lambertW0(-this.p.b * Math.exp((this.p.c * Math.log(1 - p) - this.p.b) / ab) / ab)
     return (this.p.b * w + this.p.a * w + this.p.b - this.p.c * Math.log(1 - p)) / (this.p.c * ab)
   }
 }

@@ -37,19 +37,20 @@ export default class extends Normal {
       closed: true
     }]
   }
+
   _generator () {
     // Direct sampling by transforming normal variate
     return this.p.xi + this.p.lambda / (1 + Math.exp(-(super._generator() - this.p.gamma) / this.p.delta))
   }
 
   _pdf (x) {
-    let z = x - this.p.xi
+    const z = x - this.p.xi
     return this.p.delta * this.p.lambda * super._pdf(this.p.gamma + this.p.delta * Math.log(z / (this.p.lambda - z))) / (z * (this.p.lambda - z))
   }
 
   _cdf (x) {
-    let z = x - this.p.xi
-    let lnz = Math.log(z / (this.p.lambda - z))
+    const z = x - this.p.xi
+    const lnz = Math.log(z / (this.p.lambda - z))
     return isFinite(lnz) ? super._cdf(this.p.gamma + this.p.delta * lnz) : 0
   }
 

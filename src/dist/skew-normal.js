@@ -34,7 +34,7 @@ export default class extends Normal {
     }]
 
     // Speed-up constants (be aware of the constants for the parent)
-    let delta = this.p.alpha / Math.sqrt(1 + this.p.alpha * this.p.alpha)
+    const delta = this.p.alpha / Math.sqrt(1 + this.p.alpha * this.p.alpha)
     this.c1 = [
       delta,
       Math.sqrt(1 - delta * delta)
@@ -43,10 +43,10 @@ export default class extends Normal {
 
   _generator () {
     // Method from http://azzalini.stat.unipd.it/SN/faq-r.html
-    let u0 = normal(this.r)
-    let v = normal(this.r)
-    let u1 = this.c1[0] * u0 + this.c1[1] * v
-    let z = u0 >= 0 ? u1 : -u1
+    const u0 = normal(this.r)
+    const v = normal(this.r)
+    const u1 = this.c1[0] * u0 + this.c1[1] * v
+    const z = u0 >= 0 ? u1 : -u1
     return this.p.xi + this.p.omega * z
   }
 
@@ -55,7 +55,7 @@ export default class extends Normal {
   }
 
   _cdf (x) {
-    let z = super._cdf(x) - 2 * owenT((x - this.p.xi) / this.p.omega, this.p.alpha)
+    const z = super._cdf(x) - 2 * owenT((x - this.p.xi) / this.p.omega, this.p.alpha)
     return Math.min(1, Math.max(0, z))
   }
 

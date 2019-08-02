@@ -72,7 +72,7 @@ export default class extends PreComputed {
 
   _generator () {
     // Direct sampling as compound Poisson
-    let j = gamma(this.r, this.p.alpha, 1 / this.p.beta)
+    const j = gamma(this.r, this.p.alpha, 1 / this.p.beta)
     return poisson(this.r, this.p.lambda + j)
   }
 }

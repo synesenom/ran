@@ -37,13 +37,14 @@ export default class extends Normal {
       closed: false
     }]
   }
+
   _generator () {
     // Direct sampling by transforming normal variate
     return this.p.xi + this.p.lambda * Math.sinh((super._generator() - this.p.gamma) / this.p.delta)
   }
 
   _pdf (x) {
-    let z = (x - this.p.xi) / this.p.lambda
+    const z = (x - this.p.xi) / this.p.lambda
     return this.p.delta * super._pdf(this.p.gamma + this.p.delta * Math.asinh(z)) / (this.p.lambda * Math.sqrt(1 + z * z))
   }
 

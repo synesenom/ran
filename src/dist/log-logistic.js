@@ -45,8 +45,8 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    let xa = x / this.p.alpha
-    let y = Math.pow(xa, this.p.beta - 1)
+    const xa = x / this.p.alpha
+    const y = Math.pow(xa, this.p.beta - 1)
     return this.c[0] * y / Math.pow(1 + xa * y, 2)
   }
 

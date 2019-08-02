@@ -821,8 +821,9 @@ describe('dist', () => {
     name: 'Hyperexponential',
     p: () => [Array.from({ length: Param.degree() + 1 }).map(() => ({ weight: Param.shape(), rate: Param.rate() }))],
     pi: [
-      [[-1, 1, 1]], [[0, 1, 1]],  // lambda_i > 0
-      [[]]                        // n > 0
+      [{weight: -1, rate: 1}, {weight: 1, rate: 1}],
+      [{weight: 0, rate: 1}, {weight: 1, rate: 1}],   // lambda_i > 0
+      [[]]                                            // n > 0
     ]
   }, {
     name: 'Hypergeometric',
@@ -1313,7 +1314,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'Borel') return
+    // if (d.name !== 'NegativeHypergeometric') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

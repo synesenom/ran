@@ -30,7 +30,7 @@ export default class extends Cauchy {
 
   _generator () {
     // Direct sampling by transforming Cauchy variate
-    let z = super._generator()
+    const z = super._generator()
 
     // Handle |z| >> 1 cases
     return Math.max(Math.min(Number.MAX_VALUE, Math.exp(z)), Number.MIN_VALUE)

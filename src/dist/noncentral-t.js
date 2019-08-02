@@ -23,7 +23,7 @@ class NoncentralT extends Distribution {
     super('continuous', arguments.length)
 
     // Validate parameters
-    let nui = Math.round(nu)
+    const nui = Math.round(nu)
     this.p = { nu: nui, mu }
     Distribution._validate({ nu: nui, mu }, [
       'nu > 0'
@@ -39,7 +39,7 @@ class NoncentralT extends Distribution {
     }]
 
     // Speed-up constants
-    let mu2 = mu * mu / 2
+    const mu2 = mu * mu / 2
     this.c = [
       Math.sqrt(1 + 2 / nui),
       Math.exp(logGamma((nui + 1) / 2) - logGamma(nui / 2) - mu2) / Math.sqrt(Math.PI * nui)
@@ -66,8 +66,8 @@ class NoncentralT extends Distribution {
         : 0.5 * regularizedBetaIncomplete(nu / 2, 0.5, nu / (x * x + nu))
     }
 
-    let delta = x < 0 ? -mu : mu
-    let phi = 0.5 * (1 + erf(-delta / Math.SQRT2))
+    const delta = x < 0 ? -mu : mu
+    const phi = 0.5 * (1 + erf(-delta / Math.SQRT2))
 
     // If x = 0, return normal part
     if (Math.abs(x) < Number.EPSILON) {
@@ -75,28 +75,28 @@ class NoncentralT extends Distribution {
     }
 
     // Initialize iterators
-    let y = x * x / (nu + x * x)
-    let mu2 = delta * delta / 2
-    let nu2 = nu / 2
-    let k0 = Math.floor(mu2)
-    let gnu = logGamma(nu2)
-    let gk1 = logGamma(k0 + 1)
-    let gk15 = logGamma(k0 + 1.5)
-    let ly = Math.log(y)
-    let p0 = Math.exp(-mu2 - logGamma(k0 + 1) + k0 * Math.log(mu2))
-    let q0 = delta * Math.exp(-mu2 - logGamma(k0 + 1.5) + k0 * Math.log(mu2)) / Math.SQRT2
-    let ap = k0 + 0.5
-    let aq = k0 + 1
-    let apb = ap + nu2
-    let aqb = aq + nu2
-    let bl1y = nu2 * Math.log(1 - y)
-    let gp0 = Math.exp(logGamma(k0 + nu2 + 0.5) - gnu - gk15 + ap * ly + bl1y)
-    let gq0 = Math.exp(logGamma(k0 + nu2) - gnu - gk1 + (aq - 1) * ly + bl1y)
-    let ip0 = regularizedBetaIncomplete(ap, nu2, y)
-    let iq0 = regularizedBetaIncomplete(aq, nu2, y)
+    const y = x * x / (nu + x * x)
+    const mu2 = delta * delta / 2
+    const nu2 = nu / 2
+    const k0 = Math.floor(mu2)
+    const gnu = logGamma(nu2)
+    const gk1 = logGamma(k0 + 1)
+    const gk15 = logGamma(k0 + 1.5)
+    const ly = Math.log(y)
+    const p0 = Math.exp(-mu2 - logGamma(k0 + 1) + k0 * Math.log(mu2))
+    const q0 = delta * Math.exp(-mu2 - logGamma(k0 + 1.5) + k0 * Math.log(mu2)) / Math.SQRT2
+    const ap = k0 + 0.5
+    const aq = k0 + 1
+    const apb = ap + nu2
+    const aqb = aq + nu2
+    const bl1y = nu2 * Math.log(1 - y)
+    const gp0 = Math.exp(logGamma(k0 + nu2 + 0.5) - gnu - gk15 + ap * ly + bl1y)
+    const gq0 = Math.exp(logGamma(k0 + nu2) - gnu - gk1 + (aq - 1) * ly + bl1y)
+    const ip0 = regularizedBetaIncomplete(ap, nu2, y)
+    const iq0 = regularizedBetaIncomplete(aq, nu2, y)
 
     // Forward summation
-    let gq = gq0 * y * (aqb - 1) / aq
+    const gq = gq0 * y * (aqb - 1) / aq
     let z = recursiveSum({
       p: p0 * mu2 / (k0 + 1),
       gp: gp0 * y * apb / (ap + 1),
@@ -105,7 +105,7 @@ class NoncentralT extends Distribution {
       gq: gq,
       iq: iq0 - gq
     }, (t, i) => {
-      let j = i + 1
+      const j = i + 1
       t.p *= mu2 / (k0 + j)
       t.ip -= t.gp
       t.gp *= y * (apb + i) / (ap + j)
@@ -124,7 +124,7 @@ class NoncentralT extends Distribution {
       gq: gq0 * y * (aqb - 1) / aq,
       iq: iq0
     }, (t, i) => {
-      let j = i - 1
+      const j = i - 1
       if (j < k0) {
         t.p *= (k0 - j) / mu2
         t.gp *= (ap - j) / (y * (apb - i))
@@ -147,8 +147,8 @@ class NoncentralT extends Distribution {
 
   _generator () {
     // Direct sampling from a normal and a chi2
-    let x = normal(this.r)
-    let y = chi2(this.r, this.p.nu)
+    const x = normal(this.r)
+    const y = chi2(this.r, this.p.nu)
     return (x + this.p.mu) / Math.sqrt(y / this.p.nu)
   }
 

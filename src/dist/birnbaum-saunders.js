@@ -39,22 +39,22 @@ export default class extends Normal {
 
   _generator () {
     // Direct sampling by transforming normal variate
-    let n = this.p.gamma * super._generator()
+    const n = this.p.gamma * super._generator()
     return this.p.beta * 0.25 * Math.pow(n + Math.sqrt(4 + Math.pow(n, 2)), 2) + this.p.mu2
   }
 
   _pdf (x) {
-    let z = Math.sqrt((x - this.p.mu2) / this.p.beta)
+    const z = Math.sqrt((x - this.p.mu2) / this.p.beta)
     return (z + 1 / z) * super._pdf((z - 1 / z) / this.p.gamma) / (2 * this.p.gamma * (x - this.p.mu2))
   }
 
   _cdf (x) {
-    let z = Math.sqrt((x - this.p.mu2) / this.p.beta)
+    const z = Math.sqrt((x - this.p.mu2) / this.p.beta)
     return super._cdf((z - 1 / z) / this.p.gamma)
   }
 
   _q (p) {
-    let n = this.p.gamma * super._q(p)
+    const n = this.p.gamma * super._q(p)
     return this.p.beta * 0.25 * Math.pow(n + Math.sqrt(4 + Math.pow(n, 2)), 2) + this.p.mu2
   }
 }

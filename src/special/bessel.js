@@ -12,7 +12,7 @@ import recursiveSum from '../algorithms/recursive-sum'
  * @private
  */
 function _I0 (x) {
-  let y = Math.abs(x)
+  const y = Math.abs(x)
   let z
   let t
 
@@ -37,7 +37,7 @@ function _I0 (x) {
  * @private
  */
 function _I1 (x) {
-  let y = Math.abs(x)
+  const y = Math.abs(x)
   let z
   let t
 
@@ -128,7 +128,6 @@ export function besselI (n, x) {
   let bi
   let bim
   let bip
-  let tox
   let y
 
   if (n === 0) {
@@ -143,7 +142,7 @@ export function besselI (n, x) {
     return 0
   }
 
-  tox = 2 / Math.abs(x)
+  const tox = 2 / Math.abs(x)
   bip = 0
   y = 0
   bi = 1
@@ -186,7 +185,7 @@ export function besselISpherical (n, x) {
     default:
       if (n > 0) {
         // Use Wronskian with single run k-calculation
-        let k = _kn(n + 1, x)
+        const k = _kn(n + 1, x)
         return x === 0 ? 0 : 1 / (x * x * (_hi(n + 1, x) * k[1] + k[0]))
       } else {
         // Backward recurrence for negative orders

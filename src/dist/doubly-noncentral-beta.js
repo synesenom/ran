@@ -46,9 +46,9 @@ export default class extends Distribution {
 
   _generator () {
     // Direct sampling from non-central chi2
-    let x = noncentralChi2(this.r, 2 * this.p.alpha, this.p.lambda1)
-    let y = noncentralChi2(this.r, 2 * this.p.beta, this.p.lambda2)
-    let z = x / (x + y)
+    const x = noncentralChi2(this.r, 2 * this.p.alpha, this.p.lambda1)
+    const y = noncentralChi2(this.r, 2 * this.p.beta, this.p.lambda2)
+    const z = x / (x + y)
 
     // Handle 1 - z << 1 case
     if (z === 1) {
@@ -60,24 +60,24 @@ export default class extends Distribution {
 
   _pdf (x) {
     // Using outward summation
-    let y = x / (1 - x)
-    let ab = this.p.alpha + this.p.beta
+    const y = x / (1 - x)
+    const ab = this.p.alpha + this.p.beta
 
     // Speed-up constants
-    let l1 = this.p.lambda1 / 2
-    let l2 = this.p.lambda2 / 2
+    const l1 = this.p.lambda1 / 2
+    const l2 = this.p.lambda2 / 2
 
     // Initial indices
-    let r0 = Math.round(l1)
-    let s0 = Math.round(l2)
+    const r0 = Math.round(l1)
+    const s0 = Math.round(l2)
 
     // Init terms
-    let pr0 = Math.exp(r0 * Math.log(l1) - logGamma(r0 + 1))
-    let ps0 = Math.exp(s0 * Math.log(l2) - logGamma(s0 + 1))
-    let psf0 = (s0 > 0 ? s0 : 1) * ps0 / l2
-    let yr0 = Math.pow(y, this.p.alpha + r0 - 2)
-    let ys0 = Math.pow(1 + y, this.p.alpha + r0 + this.p.beta + s0 - 2)
-    let b0 = fnBeta(this.p.alpha + r0, this.p.beta + s0)
+    const pr0 = Math.exp(r0 * Math.log(l1) - logGamma(r0 + 1))
+    const ps0 = Math.exp(s0 * Math.log(l2) - logGamma(s0 + 1))
+    const psf0 = (s0 > 0 ? s0 : 1) * ps0 / l2
+    const yr0 = Math.pow(y, this.p.alpha + r0 - 2)
+    const ys0 = Math.pow(1 + y, this.p.alpha + r0 + this.p.beta + s0 - 2)
+    const b0 = fnBeta(this.p.alpha + r0, this.p.beta + s0)
     let bf0 = b0
     let bb0 = b0
 
@@ -88,8 +88,8 @@ export default class extends Distribution {
     let ysf0 = ys0
     let pyrf = yr0 * pr0 * (r0 > 0 ? r0 : 1) / l1
     for (let kr = 0; kr < MAX_ITER; kr++) {
-      let r = r0 + kr
-      let rAlpha = this.p.alpha + r
+      const r = r0 + kr
+      const rAlpha = this.p.alpha + r
       let dz = 0
 
       // Update terms
@@ -102,12 +102,12 @@ export default class extends Distribution {
         p: psf0 * l2 / (s0 > 0 ? s0 : 1),
         b: bf0
       }, (t, i) => {
-        let s = s0 + i
+        const s = s0 + i
         t.y *= 1 + y
         t.p *= l2 / (s > 0 ? s : 1)
         return t
       }, t => pyrf * t.p / (t.b * t.y), (t, i) => {
-        let s = s0 + i
+        const s = s0 + i
         t.b *= (this.p.beta + s) / (ab + r + s)
         return t
       })
@@ -119,7 +119,7 @@ export default class extends Distribution {
           p: s0 * ps0 / l2,
           b: bf0 * (ab + r + s0 - 1) / (this.p.beta + s0 - 1)
         }, (t, i) => {
-          let s = s0 - i - 1
+          const s = s0 - i - 1
           if (s >= 0) {
             t.y /= 1 + y
             t.p *= (s + 1) / l2
@@ -146,7 +146,7 @@ export default class extends Distribution {
       let pyrb = y * yr0 * pr0
       for (let r = r0 - 1; r >= 0; r--) {
         let dz = 0
-        let rAlpha = this.p.alpha + r
+        const rAlpha = this.p.alpha + r
 
         // Update terms
         ysb0 /= 1 + y
@@ -159,12 +159,12 @@ export default class extends Distribution {
           p: psf0 * l2 / (s0 > 0 ? s0 : 1),
           b: bb0
         }, (t, i) => {
-          let s = s0 + i
+          const s = s0 + i
           t.y *= 1 + y
           t.p *= l2 / (s > 0 ? s : 1)
           return t
         }, t => pyrb * t.p / (t.b * t.y), (t, i) => {
-          let s = s0 + i
+          const s = s0 + i
           t.b *= (this.p.beta + s) / (ab + r + s)
           return t
         })
@@ -176,7 +176,7 @@ export default class extends Distribution {
             p: ps0 * s0 / l2,
             b: bb0 * (ab + r + s0 - 1) / (this.p.beta + s0 - 1)
           }, (t, i) => {
-            let s = s0 - i - 1
+            const s = s0 - i - 1
             if (s >= 0) {
               t.y /= 1 + y
               t.p *= (s + 1) / l2
@@ -201,22 +201,22 @@ export default class extends Distribution {
 
   _cdf (x) {
     // Using outward summation
-    let r0 = Math.round(this.p.lambda1 / 2)
-    let s0 = Math.round(this.p.lambda2 / 2)
-    let sBeta0 = this.p.beta + s0 - 1
+    const r0 = Math.round(this.p.lambda1 / 2)
+    const s0 = Math.round(this.p.lambda2 / 2)
+    const sBeta0 = this.p.beta + s0 - 1
 
     // Speed-up constants
-    let l1 = this.p.lambda1 / 2
-    let l2 = this.p.lambda2 / 2
+    const l1 = this.p.lambda1 / 2
+    const l2 = this.p.lambda2 / 2
 
     // Init terms
-    let pr0 = Math.exp(r0 * Math.log(l1) - logGamma(r0 + 1))
-    let ps0 = Math.exp(s0 * Math.log(l2) - logGamma(s0 + 1))
-    let psf0 = (s0 > 0 ? s0 : 1) * ps0 / l2
-    let xa0 = Math.pow(x, this.p.alpha + r0)
-    let xb0 = Math.pow(1 - x, this.p.beta + s0)
-    let b0 = fnBeta(this.p.alpha + r0, this.p.beta + s0)
-    let ib0 = regularizedBetaIncomplete(this.p.alpha + r0, this.p.beta + s0, x)
+    const pr0 = Math.exp(r0 * Math.log(l1) - logGamma(r0 + 1))
+    const ps0 = Math.exp(s0 * Math.log(l2) - logGamma(s0 + 1))
+    const psf0 = (s0 > 0 ? s0 : 1) * ps0 / l2
+    const xa0 = Math.pow(x, this.p.alpha + r0)
+    const xb0 = Math.pow(1 - x, this.p.beta + s0)
+    const b0 = fnBeta(this.p.alpha + r0, this.p.beta + s0)
+    const ib0 = regularizedBetaIncomplete(this.p.alpha + r0, this.p.beta + s0, x)
 
     // Delta and sum
     let z = 0
@@ -227,8 +227,8 @@ export default class extends Distribution {
     let bf0 = b0
     let ibf0 = ib0
     for (let kr = 0; kr < MAX_ITER; kr++) {
-      let r = r0 + kr
-      let rAlpha = this.p.alpha + r
+      const r = r0 + kr
+      const rAlpha = this.p.alpha + r
       let dz = 0
 
       // Update terms
@@ -241,12 +241,12 @@ export default class extends Distribution {
         b: bf0,
         ib: ibf0
       }, (t, i) => {
-        let s = s0 + i
+        const s = s0 + i
         t.p *= l2 / (s > 0 ? s : 1)
         return t
       }, t => prf * t.p * t.ib, (t, i) => {
-        let s = s0 + i
-        let sBeta = this.p.beta + s
+        const s = s0 + i
+        const sBeta = this.p.beta + s
         t.ib += xaf * t.xb / (sBeta * t.b)
         t.b *= sBeta / (rAlpha + sBeta)
         t.xb *= 1 - x
@@ -255,16 +255,16 @@ export default class extends Distribution {
 
       // Backward s
       if (s0 > 0) {
-        let xb = xb0 / (1 - x)
-        let bfb = bf0 * (rAlpha + sBeta0) / sBeta0
+        const xb = xb0 / (1 - x)
+        const bfb = bf0 * (rAlpha + sBeta0) / sBeta0
         dz += recursiveSum({
           p: ps0 * s0 / l2,
           xb,
           b: bfb,
           ib: ibf0 - xaf * xb / (sBeta0 * bfb)
         }, (t, i) => {
-          let s = s0 - i - 1
-          let sBeta = this.p.beta + s
+          const s = s0 - i - 1
+          const sBeta = this.p.beta + s
           if (s >= 0) {
             t.p *= (s + 1) / l2
             t.xb /= 1 - x
@@ -298,7 +298,7 @@ export default class extends Distribution {
       let ibb0 = ib0
       for (let r = r0 - 1; r >= 0; r--) {
         let dz = 0
-        let rAlpha = this.p.alpha + r
+        const rAlpha = this.p.alpha + r
 
         // Update terms
         prb *= (r + 1) / l1
@@ -313,12 +313,12 @@ export default class extends Distribution {
           b: bb0,
           ib: ibb0
         }, (t, i) => {
-          let s = s0 + i
+          const s = s0 + i
           t.p *= l2 / (s > 0 ? s : 1)
           return t
         }, t => prb * t.p * t.ib, (t, i) => {
-          let s = s0 + i
-          let sBeta = this.p.beta + s
+          const s = s0 + i
+          const sBeta = this.p.beta + s
           t.ib += xab * t.xb / (sBeta * t.b)
           t.b *= sBeta / (rAlpha + sBeta)
           t.xb *= 1 - x
@@ -327,16 +327,16 @@ export default class extends Distribution {
 
         // Backward s
         if (s0 > 0) {
-          let xbb = xb0 / (1 - x)
-          let bbb = bb0 * (rAlpha + sBeta0) / sBeta0
+          const xbb = xb0 / (1 - x)
+          const bbb = bb0 * (rAlpha + sBeta0) / sBeta0
           dz += recursiveSum({
             p: ps0 * s0 / l2,
             xb: xb0 / (1 - x),
             b: bb0 * (rAlpha + sBeta0) / sBeta0,
             ib: ibb0 - xab * xbb / (sBeta0 * bbb)
           }, (t, i) => {
-            let s = s0 - i - 1
-            let sBeta = this.p.beta + s
+            const s = s0 - i - 1
+            const sBeta = this.p.beta + s
             if (s >= 0) {
               t.p *= (s + 1) / l2
               t.xb /= 1 - x

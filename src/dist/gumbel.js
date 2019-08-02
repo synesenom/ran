@@ -39,7 +39,7 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    let z = (x - this.p.mu) / this.p.beta
+    const z = (x - this.p.mu) / this.p.beta
     return Math.exp(-(z + Math.exp(-z))) / this.p.beta
   }
 

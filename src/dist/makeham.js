@@ -50,7 +50,7 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    let y = Math.exp(this.p.beta * x)
+    const y = Math.exp(this.p.beta * x)
 
     // Handle y >> 1 cases
     if (isFinite(Math.exp(y))) {
@@ -65,12 +65,12 @@ export default class extends Distribution {
   }
 
   _q (p) {
-    let z = this.c[1] * Math.pow(1 - p, this.c[2])
+    const z = this.c[1] * Math.pow(1 - p, this.c[2])
 
     // Handle z >> 1 case
-    let w = lambertW0(z)
+    const w = lambertW0(z)
     if (!isFinite(w)) {
-      let t = Math.log(this.c[1]) + this.c[2] * Math.log(1 - p)
+      const t = Math.log(this.c[1]) + this.c[2] * Math.log(1 - p)
       return this.c[0] - Math.log(1 - p) / this.p.lambda -
         (t - Math.log(t)) / this.p.beta
     } else {

@@ -18,13 +18,13 @@ import Distribution from './_distribution'
  */
 export default class extends Categorical {
   constructor (N = 10, K = 5, n = 5) {
-    let Ni = Math.round(N)
-    let Ki = Math.round(K)
-    let ni = Math.round(n)
+    const Ni = Math.round(N)
+    const Ki = Math.round(K)
+    const ni = Math.round(n)
 
-    let weights = []
-    let min = Math.max(0, ni + Ki - Ni)
-    let max = Math.min(ni, Ki)
+    const weights = []
+    const min = Math.max(0, ni + Ki - Ni)
+    const max = Math.min(ni, Ki)
     for (let k = min; k <= max; k++) {
       weights.push(Math.exp(logBinomial(Ki, k) + logBinomial(Ni - Ki, ni - k) - logBinomial(Ni, ni)))
     }

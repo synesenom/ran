@@ -37,14 +37,14 @@ export default class extends Distribution {
 
   _pdf (x) {
     if (this.p.lambda === 0) {
-      let y = Math.exp(-x)
+      const y = Math.exp(-x)
       return y / Math.pow(1 + y, 2)
     } else {
       if (x === 0) {
         return Math.pow(2, this.p.lambda) / 4
       } else {
         // f(x) = Q^(-1)[F(x)]
-        let z = this._cdf(x)
+        const z = this._cdf(x)
         return 1 / (Math.pow(z, this.p.lambda - 1) + Math.pow(1 - z, this.p.lambda - 1))
       }
     }

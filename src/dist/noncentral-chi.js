@@ -17,7 +17,7 @@ import NoncentralChi2 from './noncentral-chi2'
 export default class extends NoncentralChi2 {
   // Transformation of non-central chi2 distribution
   constructor (k = 2, lambda = 1) {
-    let ki = Math.round(k)
+    const ki = Math.round(k)
     super(ki, lambda * lambda)
 
     // Validate parameters

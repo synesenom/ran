@@ -26,7 +26,7 @@ export default function (x0, preUpdate, deltaFn, postUpdate) {
     x = preUpdate(x, i)
 
     // Update delta and sum
-    let delta = deltaFn(x)
+    const delta = deltaFn(x)
     sum += delta
 
     // Check if accuracy has reached

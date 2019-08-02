@@ -39,13 +39,16 @@ class Distribution {
 
   static _validate (params, constraints) {
     // Go through parameters and check constraints
-    let errors = constraints.filter(constraint => {
+    const errors = constraints.filter(constraint => {
       // Tokenize constraint
-      let tokens = constraint.split(' ')
+      let tokens = constraint.split(/ (<=|>=) /)
+      if (tokens.length === 1) {
+        tokens = constraint.split(/ (=|<|>) /)
+      }
 
       // Substitute parameters if there is any
-      let a = params.hasOwnProperty(tokens[0]) ? params[tokens[0]] : parseFloat(tokens[0])
-      let b = params.hasOwnProperty(tokens[2]) ? params[tokens[2]] : parseFloat(tokens[2])
+      const a = Object.prototype.hasOwnProperty.call(params, tokens[0]) ? params[tokens[0]] : parseFloat(tokens[0])
+      const b = Object.prototype.hasOwnProperty.call(params, tokens[2]) ? params[tokens[2]] : parseFloat(tokens[2])
 
       // Check for errors
       switch (tokens[1]) {
@@ -123,7 +126,7 @@ class Distribution {
   _qEstimateTable (p) {
     // TODO Use binary search tree
     // Init running variable
-    let kMax = this.s[1].closed ? this.s[1].value + 1 : 1e6
+    const kMax = this.s[1].closed ? this.s[1].value + 1 : 1e6
 
     // Go through look-up table
     for (let k = 0; k < kMax; k++) {
@@ -153,7 +156,7 @@ class Distribution {
    */
   _qEstimateRoot (p) {
     // Guess range
-    let delta = ((Number.isFinite(this.s[1].value) ? this.s[1].value : 10) - (Number.isFinite(this.s[0].value) ? this.s[0].value : -10)) / 2
+    const delta = ((Number.isFinite(this.s[1].value) ? this.s[1].value : 10) - (Number.isFinite(this.s[0].value) ? this.s[0].value : -10)) / 2
 
     // Set initial guess for lower boundary
     let a0 = Math.random()
@@ -172,7 +175,7 @@ class Distribution {
     }
 
     // Find brackets
-    let bounds = bracket(t => this.cdf(t) - p, a0, b0, this.s)
+    const bounds = bracket(t => this.cdf(t) - p, a0, b0, this.s)
 
     // Perform root-finding using Brent's method
     return typeof bounds !== 'undefined'
@@ -333,7 +336,7 @@ class Distribution {
    */
   pdf (x) {
     // Convert to integer if discrete
-    let z = this.t === 'discrete' ? Math.round(x) : x
+    const z = this.t === 'discrete' ? Math.round(x) : x
 
     // Check against lower support
     if ((this.s[0].closed && z < this.s[0].value) || (!this.s[0].closed && z <= this.s[0].value)) {
@@ -373,7 +376,7 @@ class Distribution {
    */
   cdf (x) {
     // Convert to integer if discrete
-    let z = this.t === 'discrete' ? Math.round(x) : x
+    const z = this.t === 'discrete' ? Math.round(x) : x
 
     // Check against lower support
     if ((this.s[0].closed && z < this.s[0].value) || (!this.s[0].closed && z <= this.s[0].value)) {
