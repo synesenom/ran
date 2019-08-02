@@ -44,8 +44,8 @@ class Distribution {
       let tokens = constraint.split(' ')
 
       // Substitute parameters if there is any
-      let a = params[tokens[0]] || parseFloat(tokens[0])
-      let b = params[tokens[2]] || parseFloat(tokens[2])
+      let a = params.hasOwnProperty(tokens[0]) ? params[tokens[0]] : parseFloat(tokens[0])
+      let b = params.hasOwnProperty(tokens[2]) ? params[tokens[2]] : parseFloat(tokens[2])
 
       // Check for errors
       switch (tokens[1]) {

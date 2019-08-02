@@ -35,6 +35,17 @@ describe('algorithms', () => {
         assert(bracket[0] * Math.exp(bracket[0]) < c && bracket[1] * Math.exp(bracket[1]) > c)
       }, LAPS)
     })
+
+    it('should return the specified boundaries if root was not found', () => {
+      utils.repeat(() => {
+        const bracket = bracketing(
+          t => Math.exp(-t) + 1,
+          0,
+          2
+        )
+        assert(bracket[0] === 0 && bracket[1] === 2)
+      }, LAPS)
+    })
   })
 
   describe('.brent()', () => {

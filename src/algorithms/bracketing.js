@@ -57,5 +57,8 @@ export default function (f, a0, b0, s) {
   }
 
   // Return boundary anyway
-  return [a, b]
+  return [
+    typeof a0 === 'number' ? a0 : a,
+    typeof b0 === 'number' ? b0 : b
+  ]
 }
