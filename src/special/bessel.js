@@ -212,17 +212,3 @@ export function besselInu (nu, x) {
     return t
   }, t => t.c)
 }
-
-/**
- * Computes the modified Bessel function of the second kind for fractional order.
- *
- * @method besselKnu
- * @memberOf ran.special
- * @param {number} nu Order of the Bessel function. Should be fractional.
- * @param {number} x Value to evaluate the function at.
- * @returns {number} The modified Bessel function of the second kind.
- * @private
- */
-/* export function besselKnu (nu, x) {
-  return Math.PI * (besselInu(-nu, x) - besselInu(nu, x)) / (2 * Math.sin(nu * Math.PI))
-} */
