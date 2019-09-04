@@ -27,17 +27,3 @@ function _halley (z, w0) {
 export function lambertW0 (z) {
   return _halley(z, z < 1 ? 0 : Math.log(z))
 }
-
-/**
- * Computes the Lambert W function (lower branch) using Halley's method.
- * Source: https://cs.uwaterloo.ca/research/tr/1993/03/W.pdf
- *
- * @method lambertW1
- * @memberOf ran.special
- * @param {number} z Value to evaluate the Lambert W function at.
- * @returns {number} Value of the Lambert W function.
- * @private
- */
-export function lambertW1 (z) {
-  return _halley(z, -2)
-}
