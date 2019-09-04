@@ -267,7 +267,7 @@ describe('special', () => {
         let x = Math.random() * 10
         let w = lambertW0(x)
         assert(equal(w * Math.exp(w), x))
-      })
+      }, LAPS)
     })
   })
 
