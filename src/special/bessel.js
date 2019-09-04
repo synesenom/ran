@@ -65,26 +65,19 @@ function _I1 (x) {
  * @private
  */
 function _kn (n, x) {
-  switch (n) {
-    case 0:
-      return Math.exp(-x) / x
-    case 1:
-      return Math.exp(-x) * (1 + 1 / x) / x
-    default:
-      // Upwards recurrence relation
-      let k1 = 1 + 1 / x
-      let k2 = 1
-      let k
-      for (let i = 2; i <= n; i++) {
-        k = (i + i - 1) * k1 / x + k2
-        k2 = k1
-        k1 = k
-      }
-      return [
-        Math.exp(-x) * k / x,
-        Math.exp(-x) * k2 / x
-      ]
+  // Upwards recurrence relation
+  let k1 = 1 + 1 / x
+  let k2 = 1
+  let k
+  for (let i = 2; i <= n; i++) {
+    k = (i + i - 1) * k1 / x + k2
+    k2 = k1
+    k1 = k
   }
+  return [
+    Math.exp(-x) * k / x,
+    Math.exp(-x) * k2 / x
+  ]
 }
 
 /**
