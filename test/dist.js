@@ -501,11 +501,17 @@ describe('dist', () => {
     }]
   }, {
     name: 'BorelTanner',
-    p: () => [Param.prob(), Param.degree()],
-    pi: [
-      [-1, 2], [2, 2],    // 0 <= mu <= 1
-      [0.5, -1], [0.5, 0] // k > 0
-    ]
+    cases: [{
+      desc: 'mu > 0',
+      p: () => [Param.prob(), Param.degree()],
+      pi: [
+        [-1, 2], [2, 2],    // 0 <= mu <= 1
+        [0.5, -1], [0.5, 0] // k > 0
+      ]
+    }, {
+      desc: 'mu = 0',
+      p: () => [0, Param.degree()]
+    }]
   }, {
     name: 'BoundedPareto',
     p: () => [Param.rangeMin(), Param.rangeMax(), Param.shape()],
