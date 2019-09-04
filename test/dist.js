@@ -489,10 +489,16 @@ describe('dist', () => {
     ]
   }, {
     name: 'Borel',
-    p: () => [Param.prob()],
-    pi: [
-      [-1], [2] // 0 <= mu <= 1
-    ]
+    cases: [{
+      desc: 'mu > 0',
+      p: () => [Param.prob()],
+      pi: [
+        [-1], [2] // 0 <= mu <= 1
+      ]
+    }, {
+      desc: 'mu = 0',
+      p: () => [0]
+    }]
   }, {
     name: 'BorelTanner',
     p: () => [Param.prob(), Param.degree()],
@@ -1314,7 +1320,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'NegativeHypergeometric') return
+    // if (d.name !== 'Borel') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
