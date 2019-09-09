@@ -3,7 +3,7 @@ import Normal from '../dist/normal'
 /**
  * Marks an array of values with a type.
  *
- * @mthod _markData
+ * @method _markData
  * @memberOf ran.test
  * @param {number[]} data Array of numbers to mark.
  * @param {number} type Type of the data to mark with.
@@ -64,9 +64,27 @@ function _computeRanks(data) {
   return rankedData
 }
 
-// Also known as Wilcoxon rank-sum test
-// https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test
-export default function mannWhitney(data1, data2, alpha = 0.05) {
+/**
+ * Calculates the [Mann-Whitney statistics]{@link https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test} for two data sets.
+ *
+ * @method mannWhitney
+ * @memberOf ran.test
+ * @param {number[]} data1 First data set.
+ * @param {number[]} data2 Second data set.
+ * @param {number} alpha Confidence level.
+ * @returns {Object} Object containing the test statistics and whether the data sets passed the null hypothesis that their distribution is the same.
+ * @example
+ *
+ * let pareto = new ran.dist.Pareto(1, 2)
+ * let uniform = new ran.dist.UniformContinuous(1, 10);
+ *
+ * ran.test.mannWhitney(pareto.sample(1000), pareto.sample(100), 0.1)
+ * // => { U: 0.6427808284792651, passed: true }
+ *
+ * ran.test.mannWhitney(pareto.sample(1000), uniform.sample(1000), 0.1)
+ * // => { U: 38.72015463311832, passed: false }
+ */
+export default function (data1, data2, alpha = 0.05) {
   // Flag data sets
   let rankedData1 = _markData(data1, 1)
   let rankedData2 = _markData(data2, 2)

@@ -25,6 +25,7 @@ export const stirlingSecond = (function () {
    * @param {number} n Number of objects.
    * @param {number} k Number of non-empty sets.
    * @returns The (n, k)-th Stirling number of the second kind.
+   * @private
    */
   return snk
 })()

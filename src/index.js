@@ -10,5 +10,6 @@ import * as la from './la'
 import * as dist from './dist'
 import * as ts from './ts'
 import * as mc from './mc'
+import * as test from './test'
 
-export { core, la, dist, ts, mc }
+export { core, la, dist, ts, mc, test }
