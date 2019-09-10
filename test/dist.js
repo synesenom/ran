@@ -252,7 +252,7 @@ const Param = {
 }
 
 describe('dist', () => {
-  return
+  // return
   // Base class
   describe('Distribution', () => {
     const invalid = new InvalidDiscrete()
