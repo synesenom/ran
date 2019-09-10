@@ -10,7 +10,7 @@ import Normal from '../dist/normal'
  * @returns {Object[]} Array of objects containing the data as value properties and type as the type properties.
  * @private
  */
-function _markData(data, type) {
+function _markData (data, type) {
   return data.map(d => ({
     value: d,
     type
@@ -26,9 +26,9 @@ function _markData(data, type) {
  * @returns {Object[]} Array of objects containing the marked data along with the ranks.
  * @private
  */
-function _computeRanks(data) {
+function _computeRanks (data) {
   // Merge data sets, sort and assign ranks
-  let rankedData = data
+  const rankedData = data
     // Sort values
     .sort((a, b) => a.value - b.value)
     // Assign ranks
@@ -49,7 +49,7 @@ function _computeRanks(data) {
     } else {
       // Update ranks
       if (hi !== lo) {
-        let midpoint = (rankedData[hi].rank + rankedData[lo].rank) / 2
+        const midpoint = (rankedData[hi].rank + rankedData[lo].rank) / 2
         for (let j = lo; j <= hi; j++) {
           rankedData[j].rank = midpoint
         }
@@ -69,41 +69,46 @@ function _computeRanks(data) {
  *
  * @method mannWhitney
  * @memberOf ran.test
- * @param {number[]} data1 First data set.
- * @param {number[]} data2 Second data set.
+ * @param {Array[]} dataSets Array containing the two data sets.
  * @param {number} alpha Confidence level.
  * @returns {Object} Object containing the test statistics and whether the data sets passed the null hypothesis that their distribution is the same.
+ * @throws Error when the number of data sets is different from 2.
  * @example
  *
  * let pareto = new ran.dist.Pareto(1, 2)
- * let uniform = new ran.dist.UniformContinuous(1, 10);
+ * let uniform = new ran.dist.Uniform(1, 10);
  *
- * ran.test.mannWhitney(pareto.sample(1000), pareto.sample(100), 0.1)
- * // => { U: 0.6427808284792651, passed: true }
+ * ran.test.mannWhitney([pareto.sample(100), pareto.sample(100)[, 0.1)
+ * // => { U: 0.46180049966683373, passed: true }
  *
- * ran.test.mannWhitney(pareto.sample(1000), uniform.sample(1000), 0.1)
- * // => { U: 38.72015463311832, passed: false }
+ * ran.test.mannWhitney([pareto.sample(100), uniform.sample(100)], 0.1)
+ * // => { U: 8.67403054929767, passed: false }
  */
-export default function (data1, data2, alpha = 0.05) {
+export default function (dataSets, alpha = 0.05) {
+  // Check data sets
+  if (dataSets.length !== 2) {
+    throw Error('dataSets must contain two data sets')
+  }
+
   // Flag data sets
-  let rankedData1 = _markData(data1, 1)
-  let rankedData2 = _markData(data2, 2)
+  const rankedData1 = _markData(dataSets[0], 1)
+  const rankedData2 = _markData(dataSets[1], 2)
 
   // Assign ranks
-  let ranks = _computeRanks(rankedData1.concat(rankedData2))
+  const ranks = _computeRanks(rankedData1.concat(rankedData2))
 
   // Compute statistics
-  let n1 = data1.length
-  let n2 = data2.length
-  let r1 = ranks.filter(d => d.type === 1)
+  const n1 = dataSets[0].length
+  const n2 = dataSets[1].length
+  const r1 = ranks.filter(d => d.type === 1)
     .reduce((acc, d) => acc + d.rank, 0)
-  let u1 = r1 - n1 * (n1 + 1) / 2
-  let u = Math.min(u1, n1 * n2 - u1)
+  const u1 = r1 - n1 * (n1 + 1) / 2
+  const u = Math.min(u1, n1 * n2 - u1)
 
   // Standardize U
-  let m = n1 * n2 / 2
-  let s = Math.sqrt(n1 * n2 * (n1 + n2 + 1) / 12)
-  let z = Math.abs((u - m) / s)
+  const m = n1 * n2 / 2
+  const s = Math.sqrt(n1 * n2 * (n1 + n2 + 1) / 12)
+  const z = Math.abs((u - m) / s)
 
   // Compare against critical value
   return {

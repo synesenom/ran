@@ -52,19 +52,18 @@
 
 
 # statistical tests
-- normality test
+- normality tests
 - anova (group variance)
 - analysis of similarities (group variance)
 - anderson-darling (distribution)
-- bartlett (homoscedasticity)
 - breusch-pagan (heteroscedasticity)
 - brown-forsythe (group variance)
 - cramer-von mises (distribution)
-- mann-whitney (hypothesis test)
 - wald (hypothesis test)
 - welch (equal mean)
 - wilcoxon (hypothesis test)
 - shapiro-wilk (normality)
+- levene's test
 - list: https://docs.scipy.org/doc/scipy/reference/stats.html
 
 

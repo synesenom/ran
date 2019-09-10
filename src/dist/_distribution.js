@@ -1,6 +1,6 @@
-import { Xoshiro128p } from '../core'
+import Xoshiro128p from '../core/xoshiro'
 import neumaier from '../algorithms/neumaier'
-import { some } from '../utils'
+import some from '../utils/some'
 import { chi2, kolmogorovSmirnov } from './_tests'
 import bracket from '../algorithms/bracketing'
 import brent from '../algorithms/brent'
