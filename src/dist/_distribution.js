@@ -37,6 +37,16 @@ class Distribution {
     this._qTable = []
   }
 
+  /**
+   * Validates a set of parameters using a list of constraints.
+   *
+   * @method _validate
+   * @memberOf Distribution
+   * @param {Object} params Object containing the parameters to validate.
+   * @param {string[]} constraints Array of strings defining the parameter constraints.
+   * @private
+   * @throws Error when any of the parameters don't satisfy the constraints.
+   */
   static _validate (params, constraints) {
     // Go through parameters and check constraints
     const errors = constraints.filter(constraint => {
@@ -70,6 +80,19 @@ class Distribution {
     if (errors.length > 0) {
       throw Error(`Invalid parameters. Parameters must satisfy the following constraints: ${constraints.join(', ')}`)
     }
+  }
+
+  /**
+   * Rounds a value to an integer if the distribution is of discrete type.
+   *
+   * @method _toInt
+   * @memberOf Distribution
+   * @param {number} x Value to round if necessary.
+   * @returns {number} The rounded or left intact value.
+   * @private
+   */
+  _toInt(x) {
+    return this.t === 'discrete' ? Math.round(x) : x
   }
 
   /**
@@ -336,7 +359,7 @@ class Distribution {
    */
   pdf (x) {
     // Convert to integer if discrete
-    const z = this.t === 'discrete' ? Math.round(x) : x
+    const z = this._toInt(x)
 
     // Check against lower support
     if ((this.s[0].closed && z < this.s[0].value) || (!this.s[0].closed && z <= this.s[0].value)) {
@@ -376,7 +399,7 @@ class Distribution {
    */
   cdf (x) {
     // Convert to integer if discrete
-    const z = this.t === 'discrete' ? Math.round(x) : x
+    const z = this._toInt(x)
 
     // Check against lower support
     if ((this.s[0].closed && z < this.s[0].value) || (!this.s[0].closed && z <= this.s[0].value)) {
@@ -418,7 +441,6 @@ class Distribution {
   q (p) {
     if (p < 0 || p > 1) {
       // If out of bounds, return undefined
-      return undefined
     } else if (p === 0) {
       // If zero, return lower support boundary
       return this.s[0].value

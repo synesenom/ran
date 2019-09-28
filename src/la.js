@@ -78,7 +78,7 @@ export class Vector {
      *
      */
   i (i, value) {
-    if (value !== undefined) {
+    if (typeof value !== 'undefined') {
       this._v[i] = value
     } else {
       return this._v[i]
@@ -248,7 +248,7 @@ export class Matrix {
      *
      */
   ij (i, j, value) {
-    if (value !== undefined) {
+    if (typeof value !== 'undefined') {
       this._m[i][j] = value
     } else {
       return this._m[i][j]

@@ -10,9 +10,7 @@ import mean from './mean'
  * @private
  */
 export default function (values) {
-  if (values.length === 0) {
-    return undefined
-  } else {
+  if (values.length > 0) {
     const m = mean(values)
     const m2 = values.reduce((acc, d) => acc + d * d, 0)
     return m2 / values.length - m * m

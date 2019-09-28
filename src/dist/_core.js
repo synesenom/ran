@@ -9,7 +9,7 @@ import gammaLn from '../special/log-gamma'
  * @param {ran.core.Xoshiro128p} r Random generator.
  * @param {Function} g Generator for the sample (major function).
  * @param {Function} accept The function that returns the acceptance threshold.
- * @param {Function} transform Optional transformation to apply once the sample is accepted (for transformed distributions).
+ * @param {?Function} transform Optional transformation to apply once the sample is accepted (for transformed distributions).
  * @return {(number|undefined)} The sampled random variate.
  * @private
  */
@@ -20,7 +20,6 @@ export function rejection (r, g, accept, transform) {
       return typeof transform !== 'undefined' ? transform(x) : x
     }
   }
-  return undefined
 }
 
 /**

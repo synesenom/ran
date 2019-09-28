@@ -91,8 +91,8 @@ export function int (min, max, n) {
  * @memberOf ran.core
  * @param {Array=} values Array to sample from.
  * @param {number=} n Number of elements to sample.
- * @returns {(object|object[])} Single element or array of sampled elements.
- * If array is invalid, undefined is returned.
+ * @returns {(object|object[]|undefined)} Single element or array of sampled elements. If the array is invalid (empty or
+ * not passed), undefined is returned.
  * @example
  *
  * ran.core.choice([1, 2, 3, 4, 5])
@@ -102,8 +102,8 @@ export function int (min, max, n) {
  * // => [ 1, 5, 4, 4, 1 ]
  */
 export function choice (values, n) {
-  if (!values) {
-    return undefined
+  if (!Array.isArray(values) || values.length === 0) {
+    return
   }
   return some(() => values[Math.floor(r.next() * values.length)], n)
 }
@@ -115,7 +115,7 @@ export function choice (values, n) {
  * @memberOf ran.core
  * @param {string=} string String to sample characters from.
  * @param {number=} n Number of characters to sample.
- * @returns {(string|string[])} Random character if n is not given or less than 2, an array of random characters
+ * @returns {(string|string[]|undefined)} Random character if n is not given or less than 2, an array of random characters
  * otherwise. If string is empty, undefined is returned.
  * @example
  *
@@ -127,8 +127,8 @@ export function choice (values, n) {
  *
  */
 export function char (string, n) {
-  if (!string) {
-    return undefined
+  if (typeof string !== 'string' || string === '') {
+    return
   }
   return some(() => string.charAt(Math.floor(r.next() * string.length)), n)
 }

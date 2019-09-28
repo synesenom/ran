@@ -34,7 +34,7 @@ export default class extends Distribution {
     return this.c[0] / (Math.cosh(this.p.alpha * (x - this.p.x0)) + this.p.lambda)
   }
 
-  _cdf (x) {
+  _cdf () {
     return this.c[0]
   }
 }

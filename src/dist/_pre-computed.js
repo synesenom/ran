@@ -113,7 +113,6 @@ export default class extends Distribution {
     } while (tableIndex < this.MAX_NUMBER_OF_TABLES)
 
     // If did not find sample in max number of tables, return undefined
-    return undefined
   }
 
   _pdf (x) {
