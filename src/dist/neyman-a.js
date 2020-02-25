@@ -2,29 +2,30 @@ import { poisson } from './_core'
 import Distribution from './_distribution'
 import PreComputed from './_pre-computed'
 
+// TODO Fix equation in docstring
 /**
  * Generator for the [Neyman type A distribution]{@link http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.527.574&rep=rep1&type=pdf}:
  *
- *$$f(k; \lambda, \theta) = e^{-\lambda + \lambda e^{-\theta}},$$
+ *$$f(k; \lambda, \phi) = \frac{e^{-\lambda + \lambda e^{-\phi}} \phi^k}{k!} \sum_{j=1}^k S(k, j) \lambda^k e^{-\phi k},$$
  *
- * where \(\lambda, \theta > 0\). Support: \(k \in \mathbb{N}_0\0.
+ * where \(\lambda, \theta > 0\) and \(S(n, m)\) denotes the [Stirling number of the second kind]{@link https://en.wikipedia.org/wiki/Stirling_numbers_of_the_second_kind}. Support: \(k \in \mathbb{N}_0\).
  *
  * @class NeymanA
  * @memberOf ran.dist
  * @param {number=} lambda Mean of the number of clusters. Default value is 1.
- * @param {number=} theta Mean of the cluster size. Default value is 1.
+ * @param {number=} phi Mean of the cluster size. Default value is 1.
  * @constructor
  */
 export default class extends PreComputed {
-  constructor (lambda = 1, theta = 1) {
+  constructor (lambda = 1, phi = 1) {
     // Using raw probability mass values
     super()
 
     // Validate parameters
-    this.p = { lambda, theta }
-    Distribution._validate({ lambda, theta }, [
+    this.p = { lambda, phi }
+    Distribution.validate({ lambda, phi }, [
       'lambda > 0',
-      'theta > 0'
+      'phi > 0'
     ])
 
     // Set support
@@ -38,12 +39,12 @@ export default class extends PreComputed {
 
     // Speed-up constants
     this.c = [
-      Math.exp(-lambda * (1 - Math.exp(-theta))),
-      lambda * theta * Math.exp(-theta)
+      Math.exp(-lambda * (1 - Math.exp(-phi))),
+      lambda * phi * Math.exp(-phi)
     ]
   }
 
-  // TODO Use Stirling numbers
+  // Using Eq. (131) in Johnson, Kotz, Kemp: Univariate Discrete Distributions.
   _pk (k) {
     if (k === 0) {
       return this.c[0]
@@ -52,7 +53,7 @@ export default class extends PreComputed {
     let dz = 1
     let z = this.pdfTable[k - 1]
     for (let j = 1; j < k; j++) {
-      dz *= this.p.theta / j
+      dz *= this.p.phi / j
       z += dz * this.pdfTable[k - j - 1]
     }
     return this.c[1] * z / k
@@ -62,7 +63,7 @@ export default class extends PreComputed {
     const N = poisson(this.r, this.p.lambda)
     let z = 0
     for (let i = 0; i < N; i++) {
-      z += poisson(this.r, this.p.theta)
+      z += poisson(this.r, this.p.phi)
     }
     return Math.round(z)
   }

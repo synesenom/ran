@@ -19,7 +19,7 @@ export default class extends Dagum {
     super(k / s, s, 1)
 
     // Validate parameters
-    Distribution._validate({ k, s }, [
+    Distribution.validate({ k, s }, [
       'k > 0',
       's > 0'
     ])

@@ -1,6 +1,6 @@
 import fnBeta from '../special/beta'
 import { regularizedBetaIncomplete } from '../special/beta-incomplete'
-import { gamma } from './_core'
+import { beta as rBeta } from './_core'
 import Distribution from './_distribution'
 
 /**
@@ -23,7 +23,7 @@ export default class extends Distribution {
 
     // Validate parameters
     this.p = { alpha, beta }
-    Distribution._validate({ alpha, beta }, [
+    Distribution.validate({ alpha, beta }, [
       'alpha > 0',
       'beta > 0'
     ])
@@ -44,19 +44,8 @@ export default class extends Distribution {
   }
 
   _generator () {
-    // TODO Make this core generator
-    // Direct sampling from gamma
-    const x = gamma(this.r, this.p.alpha, 1)
-
-    const y = gamma(this.r, this.p.beta, 1)
-    const z = x / (x + y)
-
-    // Handle 1 - z << 1 case
-    if (z === 1) {
-      return 1 - y / x
-    } else {
-      return z
-    }
+    // Direct generation
+    return rBeta(this.r, this.p.alpha, this.p.beta)
   }
 
   _pdf (x) {

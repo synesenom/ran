@@ -6,7 +6,8 @@ import Distribution from './_distribution'
  *
  * $$f(x; n, a, b) = \frac{n}{(b - a)(n - 1)!} \sum_{k = 0}^{\lfloor nz \rfloor} (-1)^k \begin{pmatrix}n \\ k \\ \end{pmatrix} (nz - k)^{n - 1},$$
  *
- * with \(z = \frac{x - a}{b - a}\), \(n \in \mathbb{N}^+\) and \(a, b \in \mathbb{R}, a < b\). Support: \(x \in [a, b]\).
+ * with \(z = \frac{x - a}{b - a}\), \(n \in \mathbb{N}^+\) and \(a, b \in \mathbb{R}, a < b\).
+ * Support: \(x \in [a, b]\).
  *
  * @class Bates
  * @memberOf ran.dist
@@ -23,7 +24,7 @@ export default class extends IrwinHall {
 
     // Validate parameters
     this.p = Object.assign(this.p, { a, b })
-    Distribution._validate({ a, b, n: ni }, [
+    Distribution.validate({ a, b, n: ni }, [
       'n > 0',
       'a < b'
     ])

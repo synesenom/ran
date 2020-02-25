@@ -20,7 +20,7 @@ export default class extends Distribution {
 
     // Validate parameters
     this.p = { R }
-    Distribution._validate({ R }, [
+    Distribution.validate({ R }, [
       'R > 0'
     ])
 

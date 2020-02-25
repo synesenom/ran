@@ -106,7 +106,7 @@ describe('core', () => {
         const max = Math.floor(Math.random() * 10)
         const values = Array.from({ length: LAPS }, () => core.int(max))
         return utils.chiTest(values, () => 1 / Math.abs(max + 1), 1)
-      }, 8)
+      }, 7)
     })
 
     it('should return an integer uniformly distributed in [min, max]', () => {
@@ -262,8 +262,8 @@ describe('core', () => {
   describe('.coin()', () => {
     it('should return head or tail with 50% chance', () => {
       utils.trials(() => {
-        const head = parseInt(Math.random() * 20)
-        const tail = parseInt(Math.random() * 20)
+        const head = parseInt(Math.random() * 10)
+        const tail = parseInt(Math.random() * 10)
         const values = []
         for (let lap = 0; lap < LAPS; lap++) {
           let r = core.coin(head, tail)
@@ -275,7 +275,7 @@ describe('core', () => {
         return utils.chiTest(values, () => {
           return 0.5
         }, 1)
-      }, 8)
+      }, 6)
     })
 
     it('should return multiple heads/tails with specific probability', () => {

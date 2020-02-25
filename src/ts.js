@@ -1,83 +1,10 @@
-import { Matrix } from './la'
-
 /**
  * Namespace containing various exposed methods related to time series
  *
  * @namespace ts
  * @memberOf ran
  */
-
-/* class Aggregator {
-      constructor(dimension = 1) {
-          this.dim = dimension;
-          this.n = 0;
-          this.history = [];
-      }
-
-      reset() {
-          this.n = 0;
-          this.history = Array.from({length: this.dim}, () => []);
-      }
-  } */
-
-/**
-   * Class representing the aggregate [covariance matrix]{@link https://en.wikipedia.org/wiki/Covariance_matrix} of a time series:
-   *
-   * $$C_{ij} = \mathbb{E}\big[\big(X_i - \mathbb{E}[X_i]\big)\big(X_j - \mathbb{E}[X_j]\big)\big],$$
-   *
-   * where \(\mathbb{E}\) denotes the expected value and \(X_i, X_j\) are the i-th and j-th variables in the time series. The elements are accumulated sequentially and the covariance is computed from historical values.
-   *
-   * @class Cov
-   * @memberOf ran.ts
-   * @param {number} dimension The linear dimension of the covariance. Default is 1.
-   * @constructor
-   */
-export class Cov {
-  constructor (dimension = 1) {
-    this.dim = dimension
-    this.n = 0
-    this.x = new Array(this.dim).fill(0)
-    this.xy = Array.from({ length: this.dim }, () => new Array(this.dim).fill(0))
-  }
-
-  /**
-     * Resets the covariance to zero.
-     *
-     * @method reset
-     * @memberOf ran.ts.Cov
-     */
-  reset () {
-    this.n = 0
-    this.x = new Array(this.dim).fill(0)
-    this.xy = Array.from({ length: this.dim }, () => new Array(this.dim).fill(0))
-  }
-
-  /**
-     * Updates the covariance with a new observation.
-     *
-     * @method update
-     * @memberOf ran.ts.Cov
-     * @param {Array} x The array containing the components of the new observation.
-     */
-  update (x) {
-    this.x = this.x.map((d, i) => (this.n * d + x[i]) / (this.n + 1))
-    this.xy = this.xy.map((row, i) => row.map((d, j) => (this.n * d + x[i] * x[j]) / (this.n + 1)))
-    this.n++
-  }
-
-  /**
-     * Computes the current value of the covariance matrix.
-     *
-     * @method compute
-     * @memberOf ran.ts.Cov
-     * @returns {Matrix} The covariance matrix.
-     */
-  compute () {
-    return new Matrix(
-      this.xy.map((row, i) => row.map((d, j) => (d - this.x[i] * this.x[j])))
-    )
-  }
-}
+export { default as OnlineCovariance } from './ts/online-covariance'
 
 /**
    * Class representing an [auto-correlation]{@link https://en.wikipedia.org/wiki/Autocorrelation} function:
@@ -171,3 +98,5 @@ export class AC {
     }
   }
 }
+
+export { default as Covariance } from './ts/online-covariance'

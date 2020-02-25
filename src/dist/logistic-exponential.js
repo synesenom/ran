@@ -19,7 +19,7 @@ export default class extends Distribution {
 
     // Validate parameters
     this.p = { lambda, kappa }
-    Distribution._validate({ lambda, kappa }, [
+    Distribution.validate({ lambda, kappa }, [
       'lambda > 0',
       'kappa > 0'
     ])

@@ -16,12 +16,13 @@ import Categorical from './categorical'
  * @constructor
  */
 export default class extends Categorical {
+  // Special case of categorical
   constructor (n = 100, p = 0.5) {
     const ni = Math.round(n)
     super(Array.from({ length: ni + 1 }, (d, i) => Math.exp(logBinomial(n, i) + i * Math.log(p) + (n - i) * Math.log(1 - p))))
 
     // Validate parameters
-    Distribution._validate({ n: ni, p }, [
+    Distribution.validate({ n: ni, p }, [
       'n >= 0',
       'p >= 0', 'p <= 1'
     ])

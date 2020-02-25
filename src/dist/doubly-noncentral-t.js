@@ -29,7 +29,7 @@ export default class extends Distribution {
     // Validate parameters
     const nui = Math.round(nu)
     this.p = { nu: nui, mu, theta }
-    Distribution._validate({ nu: nui, mu, theta }, [
+    Distribution.validate({ nu: nui, mu, theta }, [
       'nu > 0',
       'theta >= 0'
     ])

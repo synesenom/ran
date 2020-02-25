@@ -2,7 +2,7 @@ import logBeta from '../special/log-beta'
 import logGamma from '../special/log-gamma'
 import PreComputed from './_pre-computed'
 import Distribution from './_distribution'
-import { gamma, poisson } from './_core'
+import { beta as rBeta, gamma, poisson } from './_core'
 
 export default class extends PreComputed {
   constructor (r = 10, alpha = 1, beta = 1) {
@@ -11,7 +11,7 @@ export default class extends PreComputed {
     // Validate parameters
     const ri = Math.round(r)
     this.p = { r: ri, alpha, beta }
-    Distribution._validate({ r: ri, alpha, beta }, [
+    Distribution.validate({ r: ri, alpha, beta }, [
       'r > 0',
       'alpha > 0',
       'beta > 0'
@@ -41,11 +41,7 @@ export default class extends PreComputed {
   // TODO Direct sampling
   _generator () {
     // Direct sampling by compounding beta and negative binomial
-    // TODO Use core beta generator
-    const x = gamma(this.r, this.p.alpha, 1)
-    const y = gamma(this.r, this.p.beta, 1)
-    const z = x / (x + y)
-    const p = z === 1 ? 1 - y / x : z
+    const p = rBeta(this.r, this.p.alpha, this.p.beta)
     return poisson(this.r, gamma(this.r, this.p.r, 1 / p - 1))
   }
 }

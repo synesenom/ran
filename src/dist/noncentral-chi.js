@@ -21,7 +21,7 @@ export default class extends NoncentralChi2 {
     super(ki, lambda * lambda)
 
     // Validate parameters
-    Distribution._validate({ k: ki, lambda }, [
+    Distribution.validate({ k: ki, lambda }, [
       'lambda > 0'
     ])
 

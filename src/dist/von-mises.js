@@ -21,7 +21,7 @@ export default class extends Distribution {
 
     // Validate parameters
     this.p = { kappa }
-    Distribution._validate({ kappa }, [
+    Distribution.validate({ kappa }, [
       'kappa > 0'
     ])
 

@@ -21,7 +21,7 @@ export default class extends Gamma {
     super(ki, lambda)
 
     // Validate parameters
-    Distribution._validate({ k: ki, lambda }, [
+    Distribution.validate({ k: ki, lambda }, [
       'k > 0',
       'lambda > 0'
     ])

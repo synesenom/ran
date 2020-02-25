@@ -29,6 +29,7 @@
 - KolmogorovSmirnov one                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_ksone.html
 - KolmogorovSmirnov two                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_kstwobign.html
 - inverse hypergeometric                https://www.vosesoftware.com/riskwiki/InverseHypergeometricdistribution.php
+- lambda-prime (https://arxiv.org/pdf/1003.4890v1.pdf)
 - Landau distribution (scipy)
 - Luria-Delbruck                        https://arxiv.org/pdf/1203.3422.pdf
 - Map-Airy                              http://mathworld.wolfram.com/Map-AiryDistribution.html
@@ -49,6 +50,7 @@
 - list: https://docs.scipy.org/doc/scipy-0.13.0/reference/tutorial/stats/continuous.html
 - ref: http://www.nrbook.com/devroye/Devroye_files/chapter_ten.pdf
 - v2: use standard form + location and scale parameters (https://www.itl.nist.gov/div898/handbook/eda/section3/eda364.htm#FORMULAS)
+- https://eris62.eu/telechargements/1999Lecoutre-TwousefuldistributionsforBayesianpredictiveproceduresundernormalmodels.pdf
 
 
 # statistical tests

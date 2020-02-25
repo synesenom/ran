@@ -21,7 +21,7 @@ export default class extends Exponential {
 
     // Validate parameters
     this.p = Object.assign(this.p, { lambda2: lambda, k })
-    Distribution._validate({ lambda, k }, [
+    Distribution.validate({ lambda, k }, [
       'lambda > 0',
       'k > 0'
     ])

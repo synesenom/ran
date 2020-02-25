@@ -19,7 +19,7 @@ export default class extends Beta {
 
     // Validate parameters
     this.p = Object.assign(this.p, { c })
-    Distribution._validate({ c }, [
+    Distribution.validate({ c }, [
       'c > 0'
     ])
 

@@ -21,7 +21,7 @@ export default class extends Categorical {
     super([1 / Ni].concat(Array.from({ length: Ni - 2 }, (d, i) => 1 / ((i + 1) * (i + 2)))), 1)
 
     // Validate parameters
-    Distribution._validate({ N: Ni }, [
+    Distribution.validate({ N: Ni }, [
       'N > 0'
     ])
   }

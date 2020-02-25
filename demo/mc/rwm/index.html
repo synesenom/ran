@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="../../d3.v4.min.js"></script>
+    <script src="../../dashboard-utils.min.js"></script>
+    <script src="../../../dist/ranjs.min.js"></script>
+    <title>demo | RWM</title>
+</head>
+<body>
+<script>
+  // Create probability distribution to sample from
+  const pdf = x => Math.pow(Math.sin(x), 2) * Math.exp(x / 10) + 0.1;
+
+  // Plots
+  let plots = [{
+    name: 'theory',
+    values: Array.from({ length: 1000 }, (d, i) => ({
+      x: i / 150,
+      y: pdf(i / 150)
+    }))
+  }];
+
+  // Chart
+  const hist = new du.widgets.LineChart('plot')
+    .colors({theory: 'crimson', data: 'royalblue'})
+    .width(800)
+    .height(500)
+    .margins(50)
+    .fontSize(16)
+    .yTickFormat(x => x.toFixed(3))
+    .data(plots)
+    .render();
+
+  // Add progress bar
+  const progressBar = new du.widgets.ProgressBar('progressBar')
+    .x(10)
+    .y(600)
+    .width(window.innerWidth - 20)
+    .height(20)
+    .fontSize(16)
+    .label('Warm-up')
+    .percentage(0)
+    .thickness(3)
+    .align('left')
+    .render();
+
+  // Start sampling
+  const worker = new Worker('worker.js');
+  worker.postMessage({foo: 'bar'});
+  worker.onmessage = e => {
+    switch (e.data.type) {
+      case 'warmUp':
+        progressBar.percentage(e.data.i)
+          .render();
+        break;
+      case 'sample':
+        console.log(e.data.samples);
+        break;
+    }
+  };
+</script>
+</body>
+</html>

@@ -17,6 +17,7 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Categorical {
+  // Special case of categorical
   constructor (N = 10, K = 5, n = 5) {
     const Ni = Math.round(N)
     const Ki = Math.round(K)
@@ -31,7 +32,7 @@ export default class extends Categorical {
     super(weights)
 
     // Validate parameters
-    Distribution._validate({ N: Ni, K: Ki, n: ni }, [
+    Distribution.validate({ N: Ni, K: Ki, n: ni }, [
       'N > 0',
       'K >= 0', 'K <= N',
       'n >= 0', 'n <= N'

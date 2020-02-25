@@ -1,21 +1,12 @@
 import { assert } from'chai'
 import { describe, it } from 'mocha'
 import { int, float } from '../src/core'
-import Pareto from '../src/dist/pareto'
-import Uniform from '../src/dist/uniform'
 import Poisson from '../src/dist/poisson'
 import Normal from '../src/dist/normal'
 import * as test from '../src/test'
 import utils from './test-utils'
 
 const SAMPLE_SIZE = 100
-
-let pareto = new Pareto(1, 2);
-let uniform = new Uniform(1, 10);
-console.log(test.mannWhitney([
-  pareto.sample(100),
-  uniform.sample(100)
-], 0.1));
 
 describe('test', () => {
   describe('bartlett', () => {

@@ -19,7 +19,7 @@ export default class extends Distribution {
 
     // Validate parameters
     this.p = { theta }
-    Distribution._validate({ theta }, [
+    Distribution.validate({ theta }, [
       'theta > 0'
     ])
 

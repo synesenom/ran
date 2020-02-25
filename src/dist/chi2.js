@@ -19,7 +19,7 @@ export default class extends Gamma {
     super(Math.round(k) / 2, 0.5)
 
     // Validate parameters
-    Distribution._validate({ k }, [
+    Distribution.validate({ k }, [
       'k > 0'
     ])
   }

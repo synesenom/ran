@@ -22,7 +22,7 @@ export default class extends GeneralizedGamma {
 
     // Validate parameters
     this.p = Object.assign(this.p, { mu, alpha2: alpha, beta2: beta })
-    Distribution._validate({ mu, alpha, beta }, [
+    Distribution.validate({ mu, alpha, beta }, [
       'alpha > 0',
       'beta > 0'
     ])

@@ -12,6 +12,7 @@ import LogNormal from './log-normal'
  * @constructor
  */
 export default class extends LogNormal {
+  // Special case of log-normal
   constructor () {
     super(0, 1)
   }

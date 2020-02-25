@@ -27,7 +27,7 @@ export default class extends Distribution {
       rates: parameters.map(d => d.rate),
       n: weights.length
     })
-    Distribution._validate({
+    Distribution.validate({
       lambda_i: parameters.reduce((acc, d) => acc * d.rate, 1),
       n: weights.length
     }, [

@@ -108,6 +108,20 @@ describe('la', () => {
       })
     })
 
+    describe('.sub()', () => {
+      it('should subtract two vectors', () => {
+        utils.repeat(() => {
+          let n = 1 + Math.floor(Math.random() * 100)
+          let arr1 = Array.from({ length: n }, () => Math.random())
+          let arr2 = Array.from({ length: n }, () => Math.random())
+          assert.deepEqual(
+            new la.Vector(arr1).sub(new la.Vector(arr2)),
+            new la.Vector(arr1.map((d, i) => d - arr2[i]))
+          )
+        }, 100)
+      })
+    })
+
     describe('.dot()', () => {
       it('should compute the dot product of two vectors', () => {
         utils.repeat(() => {
@@ -118,6 +132,22 @@ describe('la', () => {
             new la.Vector(arr1).dot(new la.Vector(arr2)),
             arr1.reduce((p, d, i) => p + d * arr2[i], 0)
           )
+        }, 100)
+      })
+    })
+
+    describe('.outer()', () => {
+      it('should compute the outer product of two vectors', () => {
+        utils.repeat(() => {
+          let n = 1 + Math.floor(Math.random() * 10)
+          let arr1 = Array.from({ length: n }, () => Math.random())
+          let arr2 = Array.from({ length: n }, () => Math.random())
+          let mat = new la.Matrix(new la.Vector(arr1).outer(new la.Vector(arr2)))
+          mat.m().forEach((row, i) => {
+            row.forEach((d, j) => {
+              assert.equal(d, arr1[i] * arr2[j])
+            })
+          })
         }, 100)
       })
     })
@@ -246,6 +276,20 @@ describe('la', () => {
           assert.deepEqual(
             new la.Matrix(arr1).add(new la.Matrix(arr2)),
             new la.Matrix(arr1.map((d, i) => d.map((dd, j) => dd + arr2[i][j])))
+          )
+        }, 100)
+      })
+    })
+
+    describe('.sub()', () => {
+      it('should subtract two matrices', () => {
+        utils.repeat(() => {
+          let n = 1 + Math.floor(Math.random() * 10)
+          let arr1 = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
+          let arr2 = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
+          assert.deepEqual(
+            new la.Matrix(arr1).sub(new la.Matrix(arr2)),
+            new la.Matrix(arr1.map((d, i) => d.map((dd, j) => dd - arr2[i][j])))
           )
         }, 100)
       })

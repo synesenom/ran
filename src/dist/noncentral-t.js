@@ -25,7 +25,7 @@ class NoncentralT extends Distribution {
     // Validate parameters
     const nui = Math.round(nu)
     this.p = { nu: nui, mu }
-    Distribution._validate({ nu: nui, mu }, [
+    Distribution.validate({ nu: nui, mu }, [
       'nu > 0'
     ])
 
@@ -57,6 +57,7 @@ class NoncentralT extends Distribution {
    * @param {number} x Value to evaluate distribution function at.
    * @returns {number} The cumulative probability.
    * @static
+   * @ignore
    */
   static fnm (nu, mu, x) {
     // If mu = 0, return CDF for central t

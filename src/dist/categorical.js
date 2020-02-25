@@ -20,7 +20,7 @@ export default class extends Distribution {
 
     // Validate parameters
     this.p = { n: weights.length, weights, min }
-    Distribution._validate({ w_i: weights.reduce((acc, d) => acc * d, 1), min }, [
+    Distribution.validate({ w_i: weights.reduce((acc, d) => acc * d, 1), min }, [
       'w_i >= 0'
     ])
 

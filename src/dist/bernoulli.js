@@ -19,7 +19,7 @@ export default class extends Categorical {
     super([1 - p, p])
 
     // Validate parameter
-    Distribution._validate({ p }, [
+    Distribution.validate({ p }, [
       'p >= 0',
       'p <= 1'
     ])

@@ -14,6 +14,7 @@ import Gamma from './gamma'
  * @constructor
  */
 export default class extends Gamma {
+  // Transformation of gamma
   constructor (alpha = 1, beta = 1) {
     super(alpha, beta)
 

@@ -22,7 +22,7 @@ export default class extends Categorical {
     const Ni = Math.round(N)
     const Ki = Math.round(K)
     const ri = Math.round(r)
-    Distribution._validate({ N: Ni, K: Ki, r: ri, 'N - K': Ni - Ki }, [
+    Distribution.validate({ N: Ni, K: Ki, r: ri, 'N - K': Ni - Ki }, [
       'N >= 0',
       'K > 0', 'K <= N',
       'r > 0', 'r <= N - K'

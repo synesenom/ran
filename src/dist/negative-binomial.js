@@ -25,7 +25,7 @@ export default class extends Distribution {
     // Validate parameters
     const ri = Math.round(r)
     this.p = { r: ri, p }
-    Distribution._validate({ r: ri, p }, [
+    Distribution.validate({ r: ri, p }, [
       'r > 0',
       'p > 0', 'p < 1'
     ])
@@ -41,7 +41,6 @@ export default class extends Distribution {
   }
 
   _generator () {
-    // TODO Make this a core generator
     // Direct sampling by compounding Poisson and gamma
     return poisson(this.r, gamma(this.r, this.p.r, 1 / this.p.p - 1))
   }

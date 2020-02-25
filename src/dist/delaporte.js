@@ -24,7 +24,7 @@ export default class extends PreComputed {
 
     // Validate parameters
     this.p = { alpha, beta, lambda }
-    Distribution._validate({ alpha, beta, lambda }, [
+    Distribution.validate({ alpha, beta, lambda }, [
       'alpha > 0',
       'beta > 0',
       'lambda > 0'

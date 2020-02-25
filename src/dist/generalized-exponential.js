@@ -21,7 +21,7 @@ export default class extends Distribution {
 
     // Validate parameters
     this.p = { a, b, c }
-    Distribution._validate({ a, b, c }, [
+    Distribution.validate({ a, b, c }, [
       'a > 0',
       'b > 0',
       'c > 0'
@@ -38,6 +38,7 @@ export default class extends Distribution {
   }
 
   _generator () {
+    // Inverse transform sampling
     return this._q(this.r.next())
   }
 

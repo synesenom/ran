@@ -7,21 +7,6 @@ import InvalidDiscrete from '../src/dist/_invalid'
 
 const LAPS = 1000
 
-/*
-const N = 1e6
-const DIST = new dist.Borel(0.8)
-let hist = DIST.sample(N)
-    .reduce((acc, d) => {
-      if (!acc.hasOwnProperty(d)) {
-        acc[d] = 0
-      }
-      acc[d]++
-      return acc
-    }, {})
-for (let i = 1; i < 100; i++) {
-  console.log(i, DIST.pdf(i), (hist[i] || 0) / N)
-}
-*/
 
 function utConstructor (name, invalidParams) {
   it('should throw error if params are invalid', () => {
@@ -58,7 +43,7 @@ function utSample (name, params, skip) {
       return self.type() === 'continuous'
         ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
         : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
-    }, 7)
+    }, 6)
   })
 
   if (skip && skip.indexOf('test-self') === -1) {
@@ -68,7 +53,7 @@ function utSample (name, params, skip) {
         return self.type() === 'continuous'
           ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
           : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
-      }, 7)
+      }, 6)
     })
   }
 }
@@ -192,7 +177,7 @@ function utTest (name, params, type = 'self') {
       utils.trials(() => {
         const self = new dist[name](...params())
         return self.test(self.sample(LAPS)).passed
-      }, 7)
+      }, 6)
       break
 
     case 'foreign':
@@ -204,7 +189,7 @@ function utTest (name, params, type = 'self') {
           ? new dist.Uniform(Math.min(...sample), Math.max(...sample))
           : new dist.DiscreteUniform(Math.min(...sample) - 1, Math.max(...sample) + 1)
         return !foreign.test(sample).passed
-      }, 7)
+      }, 6)
       break
   }
 }
@@ -252,7 +237,6 @@ const Param = {
 }
 
 describe('dist', () => {
-  // return
   // Base class
   describe('Distribution', () => {
     const invalid = new InvalidDiscrete()
@@ -1326,7 +1310,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'Borel') return
+    // if (d.name !== 'Triangular') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

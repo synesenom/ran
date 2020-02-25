@@ -19,7 +19,7 @@ export default class extends GeneralizedPareto {
     super(0, 1 / (lambda * (2 - q)), (q - 1) / (2 - q))
 
     // Validate parameters
-    Distribution._validate({ q, lambda }, [
+    Distribution.validate({ q, lambda }, [
       'q < 2',
       'lambda > 0'
     ])

@@ -14,6 +14,7 @@ import Weibull from './weibull'
  * @constructor
  */
 export default class extends Weibull {
+  // Transformation of Weibull
   constructor (lambda = 1, k = 1) {
     super(lambda, k)
 

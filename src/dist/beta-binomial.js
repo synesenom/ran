@@ -18,12 +18,13 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Categorical {
+  // Special case of categorical
   constructor (n = 100, alpha = 1, beta = 1) {
     const ni = Math.round(n)
     super(Array.from({ length: ni + 1 }, (d, i) => Math.exp(logBinomial(ni, i) + logBeta(i + alpha, ni - i + beta) - logBeta(alpha, beta))))
 
     // Validate parameters
-    Distribution._validate({ n: ni, alpha, beta }, [
+    Distribution.validate({ n: ni, alpha, beta }, [
       'n >= 0',
       'alpha > 0',
       'beta > 0'

@@ -24,7 +24,7 @@ export default class extends NoncentralBeta {
 
     // Validate parameters
     this.p = Object.assign(this.p, { d1: d1i, d2: d2i, lambda })
-    Distribution._validate({ d1: d1i, d2: d2i, lambda }, [
+    Distribution.validate({ d1: d1i, d2: d2i, lambda }, [
       'd1 > 0',
       'd2 > 0',
       'lambda > 0'

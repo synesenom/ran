@@ -21,7 +21,7 @@ export default class extends Categorical {
     super(Array.from({ length: Ni }, (d, i) => Math.pow(i + 1, -s)), 1)
 
     // Validate parameters
-    Distribution._validate({ s, N: Ni }, [
+    Distribution.validate({ s, N: Ni }, [
       's >= 0',
       'N > 0'
     ])

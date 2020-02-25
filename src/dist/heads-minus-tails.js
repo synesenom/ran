@@ -21,7 +21,7 @@ export default class extends PreComputed {
     // Validate parameters
     const ni = Math.round(n)
     this.p = { n: ni }
-    Distribution._validate({ n: ni }, [
+    Distribution.validate({ n: ni }, [
       'n >= 0'
     ])
 

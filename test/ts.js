@@ -1,39 +1,43 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import utils from './test-utils'
+import * as la from '../src/la'
 import * as ts from '../src/ts'
 
-const LAPS = 2
+const MAX_LENGTH = 10
+const PRECISION = 1e-10
 
 describe('ts', () => {
-  describe('Cov', () => {
-    describe('.compute()', () => {
-      it('should compute covariance', () => {
-        utils.repeat(() => {
-          const cov = new ts.Cov()
-
-          const s = 1 + Math.random() * 9
-          for (let i = 0; i < 10000; i++) {
-            cov.update([-Math.log(Math.random()) * s])
-          }
-          assert.deepEqual(Math.abs(cov.compute().m()[0][0] / (s * s) - 1) < 0.1, true)
-        }, LAPS)
-      })
-    })
-    describe('.reset()', () => {
-      it('should clear history', () => {
-        utils.repeat(() => {
-          const cov = new ts.Cov(2)
-          for (let i = 0; i < 10; i++) {
-            let r = Math.random()
-            cov.update([r, 2 * r + 0.1 * Math.random() - 0.05])
-          }
-          cov.reset()
-          assert.deepEqual(cov.compute().m(), [[0, 0], [0, 0]])
-        }, LAPS)
+  describe('Covariance', () => {
+    it('should calculate the covariance matrix online', () => {
+      const data1 = Array.from({ length: MAX_LENGTH }, Math.random)
+      const data2 = Array.from({ length: MAX_LENGTH }, Math.random)
+      const covariance = new ts.Covariance(2)
+      data1.forEach((d, i) => {
+        const n = i + 1
+        const sub1 = data1.slice(0, i + 1)
+        const sub2 = data2.slice(0, i + 1)
+        const x1 = sub1.reduce((sum, d) => sum + d, 0)
+        const x2 = sub1.reduce((sum, d) => sum + d * d, 0)
+        const y1 = sub2.reduce((sum, d) => sum + d, 0)
+        const y2 = sub2.reduce((sum, d) => sum + d * d, 0)
+        const xy = sub1.reduce((sum, d, i) => sum + d * sub2[i], 0)
+        const cov = new la.Matrix([
+          [(x2 - x1 * x1 / n) / n, (xy - x1 * y1 / n) / n],
+          [(xy - y1 * x1 / n) / n, (y2 - y1 * y1 / n) / n],
+        ])
+        covariance.update([d, data2[i]])
+        if (i > 0) {
+          cov.sub(covariance.compute()).m().forEach((row, i) => {
+            row.forEach((d, j) => {
+              assert.equal(Math.abs(d / cov.ij(i, j)) < PRECISION, true)
+            })
+          })
+        }
       })
     })
   })
+
+  /*
 
   describe('AC', () => {
     describe('.compute()', () => {
@@ -61,5 +65,5 @@ describe('ts', () => {
         }, LAPS)
       })
     })
-  })
+  })*/
 })

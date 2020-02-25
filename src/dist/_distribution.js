@@ -40,20 +40,20 @@ class Distribution {
   /**
    * Validates a set of parameters using a list of constraints.
    *
-   * @method _validate
+   * @method validate
    * @memberOf Distribution
    * @param {Object} params Object containing the parameters to validate.
    * @param {string[]} constraints Array of strings defining the parameter constraints.
-   * @private
    * @throws Error when any of the parameters don't satisfy the constraints.
+   * @ignore
    */
-  static _validate (params, constraints) {
+  static validate (params, constraints) {
     // Go through parameters and check constraints
     const errors = constraints.filter(constraint => {
       // Tokenize constraint
       let tokens = constraint.split(/ (<=|>=) /)
       if (tokens.length === 1) {
-        tokens = constraint.split(/ (=|<|>) /)
+        tokens = constraint.split(/ [=<>] /)
       }
 
       // Substitute parameters if there is any

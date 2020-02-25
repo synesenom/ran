@@ -20,7 +20,7 @@ export default class extends Distribution {
 
     // Validate parameters
     this.p = { a, b, c }
-    Distribution._validate({ a, b, c }, [
+    Distribution.validate({ a, b, c }, [
       'a < b',
       'a <= c', 'c <= b'
     ])
@@ -34,11 +34,16 @@ export default class extends Distribution {
       closed: true
     }]
 
-    // TODO Speed-up constants
+    // Speed-up constants
+    const ba = b - a
+    const bc = b - c
+    const ca = c - a
     this.c = [
-      b - a,
-      b - c,
-      c - a
+      ba,
+      bc,
+      ca,
+      ba * bc,
+      ba * ca
     ]
   }
 
@@ -49,19 +54,19 @@ export default class extends Distribution {
 
   _pdf (x) {
     return x < this.p.c
-      ? 2 * (x - this.p.a) / (this.c[0] * this.c[2])
-      : 2 * (this.p.b - x) / (this.c[0] * this.c[1])
+      ? 2 * (x - this.p.a) / this.c[4]
+      : 2 * (this.p.b - x) / this.c[3]
   }
 
   _cdf (x) {
     return x < this.p.c
-      ? Math.pow(x - this.p.a, 2) / (this.c[0] * this.c[2])
-      : 1 - Math.pow(this.p.b - x, 2) / (this.c[0] * this.c[1])
+      ? Math.pow(x - this.p.a, 2) / this.c[4]
+      : 1 - Math.pow(this.p.b - x, 2) / this.c[3]
   }
 
   _q (p) {
     return p < this.c[2] / this.c[0]
-      ? this.p.a + Math.sqrt(p * this.c[0] * this.c[2])
-      : this.p.b - Math.sqrt((1 - p) * this.c[0] * this.c[1])
+      ? this.p.a + Math.sqrt(p * this.c[4])
+      : this.p.b - Math.sqrt((1 - p) * this.c[3])
   }
 }

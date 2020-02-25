@@ -1,7 +1,7 @@
 import logBeta from '../special/log-beta'
 import Distribution from './_distribution'
 import PreComputed from './_pre-computed'
-import { gamma } from './_core'
+import { beta as rBeta } from './_core'
 
 /**
  * Generator for the [beta-geometric distribution]{@link https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bgepdf.htm}:
@@ -23,7 +23,7 @@ export default class extends PreComputed {
 
     // Validate parameters
     this.p = { alpha, beta }
-    Distribution._validate({ alpha, beta }, [
+    Distribution.validate({ alpha, beta }, [
       'alpha > 0',
       'beta > 0'
     ])
@@ -47,11 +47,7 @@ export default class extends PreComputed {
   }
 
   _generator () {
-    // TODO Use core beta generator
-    const x = gamma(this.r, this.p.alpha, 1)
-    const y = gamma(this.r, this.p.beta, 1)
-    const z = x / (x + y)
-    const p = z === 1 ? 1 - y / x : z
+    const p = rBeta(this.r, this.p.alpha, this.p.beta)
     return Math.floor(Math.log(1 - this.r.next()) / Math.log(1 - p)) + 1
   }
 }

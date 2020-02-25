@@ -20,7 +20,7 @@ export default class extends PreComputed {
 
     // Validate parameters
     this.p = { mu }
-    Distribution._validate({ mu }, [
+    Distribution.validate({ mu }, [
       'mu >= 0', 'mu <= 1'
     ])
 

@@ -16,7 +16,7 @@ import Distribution from './_distribution'
 export default class extends StudentT {
   constructor (n = 2) {
     // Validate parameter
-    Distribution._validate({ n }, [
+    Distribution.validate({ n }, [
       'n > 1'
     ])
 
