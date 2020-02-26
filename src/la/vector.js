@@ -129,7 +129,7 @@ class Vector {
    *
    */
   add (vec) {
-    let v = vec.v()
+    const v = vec.v()
     return new Vector(this._v.map((d, i) => d + v[i]))
   }
 
@@ -149,7 +149,7 @@ class Vector {
    *
    */
   sub (vec) {
-    let v = vec.v()
+    const v = vec.v()
     return new Vector(this._v.map((d, i) => d - v[i]))
   }
 
@@ -169,11 +169,11 @@ class Vector {
    *
    */
   dot (vec) {
-    let v = vec.v()
+    const v = vec.v()
     return this._v.reduce((sum, d, i) => sum + d * v[i], 0)
   }
 
-  outer(vec) {
+  outer (vec) {
     return this._v.map(u => vec.scale(u).v())
   }
 }

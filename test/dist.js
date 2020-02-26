@@ -5,6 +5,8 @@ import { float, int } from '../src/core'
 import * as dist from '../src/dist'
 import InvalidDiscrete from '../src/dist/_invalid'
 
+
+// Constants
 const LAPS = 1000
 
 
@@ -43,7 +45,7 @@ function utSample (name, params, skip) {
       return self.type() === 'continuous'
         ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
         : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
-    }, 6)
+    })
   })
 
   if (skip && skip.indexOf('test-self') === -1) {
@@ -53,7 +55,7 @@ function utSample (name, params, skip) {
         return self.type() === 'continuous'
           ? utils.ksTest(self.sample(LAPS), x => self.cdf(x))
           : utils.chiTest(self.sample(LAPS), x => self.pdf(x), params().length)
-      }, 6)
+      })
     })
   }
 }
@@ -177,7 +179,7 @@ function utTest (name, params, type = 'self') {
       utils.trials(() => {
         const self = new dist[name](...params())
         return self.test(self.sample(LAPS)).passed
-      }, 6)
+      })
       break
 
     case 'foreign':
@@ -189,7 +191,7 @@ function utTest (name, params, type = 'self') {
           ? new dist.Uniform(Math.min(...sample), Math.max(...sample))
           : new dist.DiscreteUniform(Math.min(...sample) - 1, Math.max(...sample) + 1)
         return !foreign.test(sample).passed
-      }, 6)
+      })
       break
   }
 }
@@ -1310,7 +1312,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'Triangular') return
+    // if (d.name !== 'BetaRectangular') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

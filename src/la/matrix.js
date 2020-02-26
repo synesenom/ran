@@ -154,7 +154,7 @@ class Matrix {
    *
    */
   add (mat) {
-    let m = mat.m()
+    const m = mat.m()
     return new Matrix(this._m.map((row, i) => row.map((d, j) => d + m[i][j])))
   }
 
@@ -177,7 +177,7 @@ class Matrix {
    *
    */
   sub (mat) {
-    let m = mat.m()
+    const m = mat.m()
     return new Matrix(this._m.map((row, i) => row.map((d, j) => d - m[i][j])))
   }
 
@@ -200,9 +200,9 @@ class Matrix {
    *
    */
   mult (mat) {
-    let m = mat.m()
-    let n = this._m.length
-    let r = new Matrix(n)
+    const m = mat.m()
+    const n = this._m.length
+    const r = new Matrix(n)
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < n; j++) {
         let rij = 0
@@ -275,11 +275,11 @@ class Matrix {
    */
   ldl () {
     // Init D, L
-    let n = this._m.length
+    const n = this._m.length
 
-    let D = new Matrix(n)
+    const D = new Matrix(n)
 
-    let L = new Matrix(n)
+    const L = new Matrix(n)
 
     // Perform decomposition
     for (let j = 0; j < n; j++) {

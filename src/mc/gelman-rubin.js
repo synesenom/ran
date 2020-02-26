@@ -1,4 +1,4 @@
-function sum(arr, exponent = 1) {
+function sum (arr, exponent = 1) {
   if (exponent === 1) {
     return arr.reduce((s, d) => s + d, 0)
   } else {
@@ -19,28 +19,28 @@ export default (function () {
    */
   function _gri (samples, dim) {
     // Calculate sample statistics
-    let m = []
+    const m = []
 
-    let s = []
+    const s = []
     samples.forEach(function (d) {
-      let di = d.map(function (x) {
+      const di = d.map(function (x) {
         return x[dim]
       })
-      let mi = sum(di) / di.length
+      const mi = sum(di) / di.length
 
-      let si = (sum(di, 2) - di.length * mi * mi) / (di.length - 1)
+      const si = (sum(di, 2) - di.length * mi * mi) / (di.length - 1)
       m.push(mi)
       s.push(si)
     })
 
     // Calculate within and between variances
-    let w = sum(s) / samples.length
+    const w = sum(s) / samples.length
 
-    let mm = sum(m) / samples.length
+    const mm = sum(m) / samples.length
 
-    let b = (sum(m, 2) - samples.length * mm * mm) * samples[0].length / (samples.length - 1)
+    const b = (sum(m, 2) - samples.length * mm * mm) * samples[0].length / (samples.length - 1)
 
-    let v = ((samples[0].length - 1) * w + b) / samples[0].length
+    const v = ((samples[0].length - 1) * w + b) / samples[0].length
     return Math.sqrt(v / w)
   }
 

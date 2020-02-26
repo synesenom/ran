@@ -32,7 +32,7 @@ export default class {
      * @private
      */
     this.history = (function (self) {
-      let _arr = Array.from({ length: self.dim }, () => [])
+      const _arr = Array.from({ length: self.dim }, () => [])
 
       return {
         /**
@@ -74,7 +74,7 @@ export default class {
      * @private
      */
     this.acceptance = (function (self) {
-      let _arr = []
+      const _arr = []
 
       return {
         /**
@@ -170,9 +170,9 @@ export default class {
    */
   statistics () {
     return this.history.get().map(h => {
-      let m = h.reduce((sum, d) => sum + d, 0) / h.length
+      const m = h.reduce((sum, d) => sum + d, 0) / h.length
 
-      let s = h.reduce((sum, d) => sum + (d - m) * (d - m), 0) / h.length
+      const s = h.reduce((sum, d) => sum + (d - m) * (d - m), 0) / h.length
       return {
         mean: m,
         std: s,
@@ -204,11 +204,11 @@ export default class {
     // return this._ac.compute();
     return this.history.get().map(h => {
       // Get average
-      let m = h.reduce((s, d) => s + d) / h.length
+      const m = h.reduce((s, d) => s + d) / h.length
 
-      let m2 = h.reduce((s, d) => s + d * d)
+      const m2 = h.reduce((s, d) => s + d * d)
 
-      let rho = new Array(100).fill(0)
+      const rho = new Array(100).fill(0)
       for (let i = 0; i < h.length; i++) {
         for (let r = 0; r < rho.length; r++) {
           if (i - r > 0) {
@@ -236,7 +236,7 @@ export default class {
    */
   iterate (callback = null, warmUp = false) {
     // Get new state
-    let i = this._iter(this.x, warmUp)
+    const i = this._iter(this.x, warmUp)
 
     // Update accumulators
     this.history.update(i.x)
@@ -273,7 +273,7 @@ export default class {
 
       // Adjust sampling rate
       // Get highest zero point
-      let z = this.ac().reduce((first, d) => {
+      const z = this.ac().reduce((first, d) => {
         for (let i = 0; i < d.length - 1; i++) {
           if (Math.abs(d[i]) <= 0.05) {
             return Math.max(first, i)
@@ -307,11 +307,11 @@ export default class {
    */
   sample (progress, size = 1000) {
     // Calculate total iterations
-    let iMax = this.samplingRate * size
+    const iMax = this.samplingRate * size
 
-    let batchSize = iMax / 100
+    const batchSize = iMax / 100
 
-    let samples = []
+    const samples = []
 
     // Start sampling
     for (let i = 0; i < iMax; i++) {

@@ -27,7 +27,7 @@ export default class {
    * @methodOf ran.ts.OnlineCovariance
    * @param {number[]} x Array of numbers representing the new observations.
    */
-  update(x) {
+  update (x) {
     this.n++
     const vx = new Vector(x)
     const mean = this.mean.add(vx.sub(this.mean).scale(1 / this.n))
@@ -44,7 +44,7 @@ export default class {
    * @methodOf ran.ts.OnlineCovariance
    * @returns {(ran.la.Matrix | undefined)} The current covariance matrix if there was any update already, undefined otherwise.
    */
-  compute() {
+  compute () {
     return this.n > 0 ? this.cov.scale(1 / this.n) : undefined
   }
 }

@@ -91,7 +91,7 @@ class Distribution {
    * @returns {number} The rounded or left intact value.
    * @private
    */
-  _toInt(x) {
+  _toInt (x) {
     return this.t === 'discrete' ? Math.round(x) : x
   }
 
@@ -450,7 +450,7 @@ class Distribution {
     } else {
       // If quantile function is implemented, use that, otherwise use the estimators: look-up table for discrete and root-finder for continuous
       //
-      return typeof this['_q'] === 'function'
+      return typeof this._q === 'function'
         ? this._q(p)
         : this.t === 'discrete'
           ? this._qEstimateTable(p)

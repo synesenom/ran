@@ -1,5 +1,8 @@
 import { assert } from 'chai'
+import seedrandom from 'seedrandom'
 
+
+// Constants
 const PRECISION = 1e-10
 
 // Critical values for P = 0.01
@@ -115,18 +118,19 @@ export default (function () {
   }
 
   /**
-   * Performs 10 tests and checks if all were successful.
+   * Performs 5 tests and checks if at least 4 were successful.
    *
    * @method trials
    * @param test Test to run.
-   * @param minSuccess Minimum number of successes to accept test. Default is 10 (all).
    */
-  function trials (test, minSuccess = 10) {
+  function trials (test) {
+    // Seed Math.random for controlled random tests
+    Math.random = seedrandom('test')
     let success = 0
-    for (let t = 0; t < 10; t++) {
-      success += test() ? 1 : 0
+    for (let t = 0; t < 5; t++) {
+      success += test(t) ? 1 : 0
     }
-    assert(success >= minSuccess)
+    assert(success >= 4, `Failed ${5 - success} out of ${5}`)
   }
 
   /**

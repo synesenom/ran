@@ -2,15 +2,20 @@ import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import * as la from '../src/la'
 import * as ts from '../src/ts'
+import utils from './test-utils'
 
+
+// Constants
 const MAX_LENGTH = 10
 const PRECISION = 1e-10
 
+
 describe('ts', () => {
+  return
   describe('Covariance', () => {
     it('should calculate the covariance matrix online', () => {
-      const data1 = Array.from({ length: MAX_LENGTH }, Math.random)
-      const data2 = Array.from({ length: MAX_LENGTH }, Math.random)
+      const data1 = Array.from({length: MAX_LENGTH}, Math.random)
+      const data2 = Array.from({length: MAX_LENGTH}, Math.random)
       const covariance = new ts.Covariance(2)
       data1.forEach((d, i) => {
         const n = i + 1

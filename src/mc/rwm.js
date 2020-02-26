@@ -28,13 +28,13 @@ export default class extends MCMC {
      * @private
      */
     this.proposal = (function (self) {
-      let _q = new Normal(0, 1)
+      const _q = new Normal(0, 1)
 
-      let _acceptance = new Array(self.dim).fill(0)
+      const _acceptance = new Array(self.dim).fill(0)
 
-      let _sigma = self.internal.proposal || new Array(self.dim).fill(1)
+      const _sigma = self.internal.proposal || new Array(self.dim).fill(1)
 
-      let _ls = _sigma.map(d => Math.log(d))
+      const _ls = _sigma.map(d => Math.log(d))
 
       let _n = 0
 
@@ -115,9 +115,9 @@ export default class extends MCMC {
   _iter (warmUp) {
     let x1 = this.proposal.jump(this.x, warmUp)
 
-    let newLnp = this.lnp(x1)
+    const newLnp = this.lnp(x1)
 
-    let accepted = Math.random() < Math.exp(newLnp - this.lastLnp)
+    const accepted = Math.random() < Math.exp(newLnp - this.lastLnp)
     if (accepted) {
       this.lastLnp = newLnp
     } else {

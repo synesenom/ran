@@ -3,6 +3,8 @@ import { describe, it } from 'mocha'
 import utils from './test-utils'
 import * as core from '../src/core'
 
+
+// Constants
 const TRIALS = 1
 const LAPS = 100
 const CHARS = '.,:;-+_!#%&/()[]{}?*0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -61,7 +63,7 @@ describe('core', () => {
       utils.trials(() => {
         const values = Array.from({ length: LAPS }, () => core.float())
         return utils.ksTest(values, x => x)
-      }, 8)
+      })
     })
 
     it('should return a float uniformly distributed in [min, max]', () => {
@@ -69,7 +71,7 @@ describe('core', () => {
         const max = Math.random() * 20
         const values = Array.from({ length: LAPS }, () => core.float(max))
         return utils.ksTest(values, x => x / max)
-      }, 8)
+      })
     })
 
     it('should return multiple floats uniformly distributed in [min, max]', () => {
@@ -96,7 +98,7 @@ describe('core', () => {
         } else {
           return utils.ksTest(values, x => (x - max) / (min - max))
         }
-      }, 8)
+      })
     })
   })
 
@@ -106,7 +108,7 @@ describe('core', () => {
         const max = Math.floor(Math.random() * 10)
         const values = Array.from({ length: LAPS }, () => core.int(max))
         return utils.chiTest(values, () => 1 / Math.abs(max + 1), 1)
-      }, 7)
+      })
     })
 
     it('should return an integer uniformly distributed in [min, max]', () => {
@@ -126,10 +128,8 @@ describe('core', () => {
         }
 
         // Distribution is uniform
-        return utils.chiTest(values, () => {
-          return 1 / Math.abs(max - min + 1)
-        }, 1)
-      }, 8)
+        return utils.chiTest(values, () => 1 / Math.abs(max - min + 1), 1)
+      })
     })
 
     it('should return multiple integers uniformly distributed in [0, max]', () => {
@@ -145,17 +145,15 @@ describe('core', () => {
             values.push(r[i])
 
             // Value is in range
-            assert((min < max ? min : max) <= r[i] && r[i] <= (min < max ? max : min))
+            assert((min < max ? min : max) <= r[i] && r[i] <= (min < max ? max : min), 'Value is out of range')
           }
           // Length is correct
-          assert.equal(k < 2 ? 1 : k, r.length)
+          assert.equal(k < 2 ? 1 : k, r.length, 'Number of samples is incorrect')
         }
 
         // Distribution is uniform
-        return utils.chiTest(values, () => {
-          return 1 / Math.abs(max - min + 1)
-        }, 1)
-      }, 8)
+        return utils.chiTest(values, () => 1 / Math.abs(max - min + 1), max === min ? 1 : 2)
+      })
     })
   })
 
@@ -207,7 +205,7 @@ describe('core', () => {
     })
 
     it('should return a single null (null as argument)', () => {
-      assert.equal(core.char(null), null)
+      assert.equal(core.char(), null)
     })
 
     it('should return a single null (empty string as argument)', () => {
@@ -262,8 +260,8 @@ describe('core', () => {
   describe('.coin()', () => {
     it('should return head or tail with 50% chance', () => {
       utils.trials(() => {
-        const head = parseInt(Math.random() * 10)
-        const tail = parseInt(Math.random() * 10)
+        const head = Math.floor(Math.random() * 10)
+        const tail = head + Math.floor(1 + Math.random() * 10)
         const values = []
         for (let lap = 0; lap < LAPS; lap++) {
           let r = core.coin(head, tail)
@@ -272,18 +270,16 @@ describe('core', () => {
         }
 
         // Distribution is uniform
-        return utils.chiTest(values, () => {
-          return 0.5
-        }, 1)
-      }, 6)
+        return utils.chiTest(values, () => 0.5, 1)
+      })
     })
 
     it('should return multiple heads/tails with specific probability', () => {
       utils.trials(() => {
         const p = Math.random()
         const k = Math.floor(Math.random() * 10)
-        const head = parseInt(Math.random() * 20)
-        const tail = parseInt(Math.random() * 20)
+        const head = Math.floor(Math.random() * 20)
+        const tail = head + Math.floor(1 + Math.random() * 20)
         const values = []
         for (let lap = 0; lap < LAPS; lap++) {
           let r = core.coin(head, tail, p, k)
@@ -293,7 +289,7 @@ describe('core', () => {
 
         // Distribution is uniform
         return utils.chiTest(values, x => x === head ? p : 1 - p, 1)
-      }, 8)
+      })
     })
   })
 })

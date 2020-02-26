@@ -28,15 +28,15 @@ export default class {
     this.acceptance = new AcceptanceRate(1000)
   }
 
-  _iter() {
+  _iter () {
     throw Error('_iterate() is not implemented')
   }
 
-  _adjust() {
+  _adjust () {
     throw Error('_adjust() is not implemented')
   }
 
-  state() {
+  state () {
     return {
       x: this.x,
       samplingRate: this.samplingRate,
@@ -44,7 +44,7 @@ export default class {
     }
   }
 
-  warmUp(options, onProgress) {
+  warmUp (options, onProgress) {
     const numBatches = options.numBatches || 100
     const iterPerBatch = options.iterPerBatch || 1e4
     const autoCorrelation = new AutoCorrelation(iterPerBatch, 100)
@@ -54,7 +54,7 @@ export default class {
       autoCorrelation.reset()
       for (let iteration = 0; iteration < iterPerBatch; iteration++) {
         // Get new state
-        let i = this._iter(this.x, true)
+        const i = this._iter(this.x, true)
         this.x = i.x
 
         // Update accumulators
@@ -66,7 +66,7 @@ export default class {
       }
 
       // Compute auto-correlation
-      let z = autoCorrelation.compute().reduce((first, d) => {
+      const z = autoCorrelation.compute().reduce((first, d) => {
         for (let i = 0; i < d.length - 1; i++) {
           if (Math.abs(d[i]) <= 0.05) {
             return Math.max(first, i)
@@ -93,10 +93,10 @@ export default class {
     const batchSize = maxIterations / 100
 
     // Start sampling
-    let samples = []
+    const samples = []
     for (let i = 0; i < maxIterations; i++) {
       // Get new state
-      let i = this._iter(this.x)
+      const i = this._iter(this.x)
       this.x = i.x
 
       // Adjust occasionally, also send progress status
