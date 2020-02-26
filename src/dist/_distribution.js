@@ -4,6 +4,7 @@ import some from '../utils/some'
 import { chi2, kolmogorovSmirnov } from './_tests'
 import bracket from '../algorithms/bracketing'
 import brent from '../algorithms/brent'
+import { MAX_ITER } from '../special/_core'
 
 /**
  * The distribution generator base class, all distribution generators extend this class. The methods listed here
@@ -147,7 +148,37 @@ class Distribution {
    * @ignore
    */
   _qEstimateTable (p) {
-    // TODO Use binary search tree
+    // Find upper bound
+    /*let k1 = 0
+    let k2 = 1
+    let delta = 1
+    for (let i = 0; i < MAX_ITER; i++) {
+      let q = this.cdf(k2)
+      if (q >= p) {
+        break
+      }
+
+      k1 = k2
+      delta = Math.ceil(1.618 * delta)
+      k2 += delta
+    }
+
+    // Find quantile within bracket
+    for (let i = 0; i < MAX_ITER; i++) {
+      if (k2 - k1 <= 1) {
+        return k2
+      }
+
+      let k = Math.floor((k1 + k2) / 2)
+      let q = this.cdf(k)
+      if (p > q) {
+        k1 = k
+      } else {
+        k2 = k
+      }
+    }*/
+
+    // TODO Do something faster here
     // Init running variable
     const kMax = this.s[1].closed ? this.s[1].value + 1 : 1e6
 
@@ -163,7 +194,6 @@ class Distribution {
         return k
       }
     }
-    // FIXME This is unnecessary: return undefined
   }
 
   /**

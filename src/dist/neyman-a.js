@@ -2,7 +2,6 @@ import { poisson } from './_core'
 import Distribution from './_distribution'
 import PreComputed from './_pre-computed'
 
-// TODO Fix equation in docstring
 /**
  * Generator for the [Neyman type A distribution]{@link http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.527.574&rep=rep1&type=pdf}:
  *

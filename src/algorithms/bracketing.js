@@ -3,14 +3,19 @@ import { MAX_ITER } from '../special/_core'
 const SCALE = 1.618
 
 /**
- * Estimates brackets around the root of a function. If there are no constraints specified, the bracketing interval grows without limits with a scaling factor of 1.618. Otherwise, the interval is limited to the boundary specified in the constraints. If the constraining interval has an open boundary, the boundary is approached with a distance shrinking with a factor of 1.618 in each step.
+ * Estimates brackets around the root of a function. If there are no constraints specified, the bracketing interval
+ * grows without limits with a scaling factor of 1.618. Otherwise, the interval is limited to the boundary specified in
+ * the constraints. If the constraining interval has an open boundary, the boundary is approached with a distance
+ * shrinking with a factor of 1.618 in each step.
  *
  * @method bracket
  * @methodOf ran.algorithms
  * @param {Function} f Function to find root for. Must accept a single variable.
  * @param {number} a0 Initial lower boundary of the bracket.
  * @param {number} b0 Initial upper boundary of the bracket.
- * @param {?Object[]} s Object containing the constraints on the lower and upper bracket. Each constraint has a <code>closed</code> and <code>value</code> property denoting if the constraint is a closed interval and the value of the boundaries. If not set, (-inf, inf) is applied.
+ * @param {?Object[]} s Object containing the constraints on the lower and upper bracket. Each constraint has a
+ * <code>closed</code> and <code>value</code> property denoting if the constraint is a closed interval and the value of
+ * the boundaries. If not set, (-inf, inf) is applied.
  * @return {(number[]|undefined)} Array containing the bracket around the root if successful, undefined otherwise.
  * @private
  */

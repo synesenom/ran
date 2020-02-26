@@ -11,7 +11,7 @@ export default class extends Distribution {
     const ni = Math.round(n)
     this.p = { n: ni }
     Distribution.validate({ n: ni }, [
-      'n > 0'
+      'n > 1'
     ])
 
     // Set support

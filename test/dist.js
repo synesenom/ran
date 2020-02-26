@@ -4,6 +4,7 @@ import utils from './test-utils'
 import { float, int } from '../src/core'
 import * as dist from '../src/dist'
 import InvalidDiscrete from '../src/dist/_invalid'
+import seedrandom from 'seedrandom'
 
 
 // Constants
@@ -48,7 +49,7 @@ function utSample (name, params, skip) {
     })
   })
 
-  if (skip && skip.indexOf('test-self') === -1) {
+  if (!skip || skip.indexOf('test-self') === -1) {
     it('values should be distributed correctly with random parameters', () => {
       utils.trials(() => {
         const self = new dist[name](...params())
@@ -452,20 +453,11 @@ describe('dist', () => {
     ]
   }, {
     name: 'Binomial',
-    cases: [{
-      desc: 'small n',
-      p: () => [int(5, 20), Param.prob()],
-      pi: [
-        [-1, 0.5],            // n >= 0
-        [100, -1], [100, 2],  // 0 <= p <= 1
-      ]
-    }, {
-      desc: 'small mean',
-      p: () => [int(30, 100), Param.prob() / 105]
-    }, {
-      desc: 'large n, mean',
-      p: () => [int(30, 100), Param.prob()]
-    }]
+    p: () => [Param.rangeMax(), Param.prob()],
+    pi: [
+      [-1, 0.5],            // n >= 0
+      [100, -1], [100, 2],  // 0 <= p <= 1
+    ]
   }, {
     name: 'BirnbaumSaunders',
     p: () => [Param.location(), Param.scale(), Param.shape()],
@@ -526,9 +518,9 @@ describe('dist', () => {
       desc: 'small n',
       p: () => [Array.from({ length: int(0, 1) }, Math.random)],
       pi: [
-        [[-1, 1, 1], 0],  // w_i > 0
-      ],
-      skip: ['test-self', 'test-foreign']
+        [[-1, 1, 1], 0],    // w_i > 0
+        [[], 0], [[1], 0]   // n_w > 1
+      ]
     }, {
       desc: 'moderate n',
       p: () => [Array.from({ length: int(10, 100) }, Math.random)]
@@ -797,8 +789,9 @@ describe('dist', () => {
     name: 'HeadsMinusTails',
     p: () => [Param.degree()],
     pi: [
-      [-1]  // n >= 0
-    ]
+      [-1]  // n > 0
+    ],
+    seed: 1
   }, {
     name: 'Hoyt',
     cases: [{
@@ -1265,9 +1258,9 @@ describe('dist', () => {
     skip: ['test-foreign']
   }, {
     name: 'UniformProduct',
-    p: () => [Param.degree()],
+    p: () => [Param.degree() + 1],
     pi: [
-      [-1], [0]
+      [-1], [0], [1]  // n > 1
     ]
   }, {
     name: 'UniformRatio',
@@ -1312,7 +1305,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'BetaRectangular') return
+    // if (d.name !== 'HeadsMinusTails') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

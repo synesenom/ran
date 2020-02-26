@@ -2,9 +2,9 @@ import AliasTable from './_alias-table'
 import Distribution from './_distribution'
 
 /**
- * Base class representing a discrete distribution with pre-computed arrays. This class should be used when the
+ * Base class representing a discrete distribution with pre-computed arrays. This class should be used only when the
  * cumulative probability function is not available in closed form. A basic adaptive alias table is also implemented for
- * the case there is no simple method to generate random variates.
+ * the case when there is no simple method to generate random variates.
  *
  * @class PreComputed
  * @memberOf ran.dist
@@ -79,7 +79,7 @@ export default class extends Distribution {
     const weights = Array.from({ length: this.TABLE_SIZE }, (d, i) => this._pdf(this.TABLE_SIZE * offset + i))
     let total = weights.reduce((acc, d) => acc + d, 0)
     if (offset > 0) {
-      // Remove previously accumulated total weight
+      // Add previously accumulated total weight
       total += this.aliasTables[offset - 1].total
     }
 
@@ -112,6 +112,7 @@ export default class extends Distribution {
       }
     } while (tableIndex < this.MAX_NUMBER_OF_TABLES)
 
+    // TODO Should throw an error
     // If did not find sample in max number of tables, return undefined
   }
 

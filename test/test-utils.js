@@ -110,11 +110,18 @@ export default (function () {
     // Find critical value
     let df = Math.max(1, k - c - 1)
     let crit = df <= 250 ? CHI_TABLE_LOW[df] : CHI_TABLE_HIGH[Math.ceil(df / 50)]
-    // console.log(crit, chi2)
+    // console.log(chi2, crit)
     if (chi2 > crit) {
       // console.log(chi2, crit)
     }
-    return chi2 > 0 && chi2 <= crit
+
+    // Check if distribution is degenerate
+    if (p.size === 1) {
+      let k0 = p.keys().next().value
+      return model(k0) === 1 && chi2 === 0
+    } else {
+      return chi2 > 0 && chi2 <= crit
+    }
   }
 
   /**
@@ -122,10 +129,11 @@ export default (function () {
    *
    * @method trials
    * @param test Test to run.
+   * @param seed {number?} Seed to initialize Math.random with.
    */
-  function trials (test) {
+  function trials (test, seed) {
     // Seed Math.random for controlled random tests
-    Math.random = seedrandom('test')
+    Math.random = seedrandom(typeof seed !== 'undefined' ? seed : 7)
     let success = 0
     for (let t = 0; t < 5; t++) {
       success += test(t) ? 1 : 0
@@ -213,9 +221,6 @@ export default (function () {
     cdfRange (dist, laps) {
       return runX(dist, laps, (d, x) => {
         let cdf = d.cdf(x)
-        if (cdf < 0 || cdf > 1) {
-          console.log(cdf)
-        }
         return cdf >= 0 && cdf <= 1
       })
     },
