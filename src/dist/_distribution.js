@@ -33,9 +33,6 @@ class Distribution {
 
     // Pseudo random number generator
     this.r = new Xoshiro128p()
-
-    // Look-up table for the fallback quantile for discrete distributions
-    this._qTable = []
   }
 
   /**
@@ -149,8 +146,8 @@ class Distribution {
    */
   _qEstimateTable (p) {
     // Find upper bound
-    /*let k1 = 0
-    let k2 = 1
+    let k1 = 0
+    let k2 = 0
     let delta = 1
     for (let i = 0; i < MAX_ITER; i++) {
       let q = this.cdf(k2)
@@ -159,8 +156,8 @@ class Distribution {
       }
 
       k1 = k2
-      delta = Math.ceil(1.618 * delta)
       k2 += delta
+      delta = Math.ceil(1.618 * delta)
     }
 
     // Find quantile within bracket
@@ -175,23 +172,6 @@ class Distribution {
         k1 = k
       } else {
         k2 = k
-      }
-    }*/
-
-    // TODO Do something faster here
-    // Init running variable
-    const kMax = this.s[1].closed ? this.s[1].value + 1 : 1e6
-
-    // Go through look-up table
-    for (let k = 0; k < kMax; k++) {
-      // Add F(x) if necessary
-      if (this._qTable.length === k) {
-        this._qTable.push(this.cdf(k))
-      }
-
-      // Check if we reached quantile
-      if (p < this._qTable[k]) {
-        return k
       }
     }
   }
