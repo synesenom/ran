@@ -15,8 +15,24 @@ function _halley (z, w0) {
 }
 
 /**
+ * Computes the Lambert W function (branch -1) using Halley's method.
+ * Source: Corless et al: On the Lambert W Function (https://cs.uwaterloo.ca/research/tr/1993/03/W.pdf)
+ *
+ * @method lamberW1m
+ * @memberOf ran.special
+ * @param z {number} Value to evaluate the Lambert W function at.
+ * @returns {number} Value of the Lambert W function.
+ * @private
+ */
+export function lambertW1m (z) {
+  // TODO Find better w0
+  return _halley(z, -2)
+}
+
+/**
  * Computes the Lambert W function (principal branch) using Halley's method.
- * Source: https://cs.uwaterloo.ca/research/tr/1993/03/W.pdf
+ * Source: Corless et al: On the Lambert W Function (https://cs.uwaterloo.ca/research/tr/1993/03/W.pdf)
+ *
  *
  * @method lambertW0
  * @memberOf ran.special

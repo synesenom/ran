@@ -7,7 +7,7 @@ import gamma from '../src/special/gamma'
 import logGamma from '../src/special/log-gamma'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from '../src/special/gamma-incomplete'
 import hurwitzZeta from '../src/special/hurwitz-zeta'
-import { lambertW0 } from '../src/special/lambert-w'
+import { lambertW0, lambertW1m } from '../src/special/lambert-w'
 import marcumQ from '../src/special/marcum-q'
 import owenT from '../src/special/owen-t'
 import riemannZeta from '../src/special/riemann-zeta'
@@ -266,6 +266,16 @@ describe('special', () => {
       utils.repeat(() => {
         let x = Math.random() * 10
         let w = lambertW0(x)
+        assert(equal(w * Math.exp(w), x))
+      }, LAPS)
+    })
+  })
+
+  describe('lambertW1m(z)', () => {
+    it('should satisfy the W * exp(W) = x equation', () => {
+      utils.repeat(() => {
+        let x = -1 * Math.random() / Math.E
+        let w = lambertW1m(x)
         assert(equal(w * Math.exp(w), x))
       }, LAPS)
     })
