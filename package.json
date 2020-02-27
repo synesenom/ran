@@ -1,6 +1,6 @@
 {
   "name": "ranjs",
-  "version": "1.22.1",
+  "version": "1.23.0",
   "description": "Library for generating various random variables.",
   "keywords": [
     "random",
