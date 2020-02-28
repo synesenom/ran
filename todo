@@ -33,7 +33,6 @@
 - Landau distribution (scipy)
 - Luria-Delbruck                        https://arxiv.org/pdf/1203.3422.pdf
 - Map-Airy                              http://mathworld.wolfram.com/Map-AiryDistribution.html
-- Muth                                  (not-invertible cdf)
 - non-central eta (r sadist)
 - Normal-exponential-gamma              (compound)
 - Normal inverse Gauss (scipy)

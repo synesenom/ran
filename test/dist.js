@@ -1311,7 +1311,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    if (d.name !== 'Muth') return
+    // if (d.name !== 'R') return
 
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

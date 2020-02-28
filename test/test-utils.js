@@ -125,7 +125,7 @@ export default (function () {
   }
 
   /**
-   * Performs 5 tests and checks if at least 4 were successful.
+   * Performs 5 tests and checks if at least 3 were successful.
    *
    * @method trials
    * @param test Test to run.
@@ -138,7 +138,7 @@ export default (function () {
     for (let t = 0; t < 5; t++) {
       success += test(t) ? 1 : 0
     }
-    assert(success >= 4, `Failed ${5 - success} out of ${5}`)
+    assert(success >= 3, `Failed ${5 - success} out of ${5}`)
   }
 
   /**
