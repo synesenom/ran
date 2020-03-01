@@ -98,3 +98,13 @@
 - Adjust Euclidean metric from covariance in burn-in
 - step size sampled randomly
 - inspiration: https://github.com/chi-feng/mcmc-demo
+
+
+# add tags to distributions
+- discrete/continuous
+- bounded/unbounded
+- exponential
+
+
+# transform distributions
+- add Transform class that transforms a distribution

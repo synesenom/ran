@@ -9,7 +9,6 @@ import utils from './test-utils'
 const SAMPLE_SIZE = 100
 
 describe('test', () => {
-  return
   describe('bartlett', () => {
     it('should throw exception for less than two data sets', () => {
       assert.throws(() => {

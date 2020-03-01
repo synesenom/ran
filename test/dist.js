@@ -4,12 +4,214 @@ import utils from './test-utils'
 import { float, int } from '../src/core'
 import * as dist from '../src/dist'
 import InvalidDiscrete from '../src/dist/_invalid'
-import seedrandom from 'seedrandom'
+import testCases from './dist-cases'
 
 
 // Constants
 const LAPS = 1000
+const LAPS_2 = 100
 
+
+const UnitTests = {
+  constructor (tc) {
+    it('should throw error if params are invalid', () => {
+      tc.invalidParams.forEach(params => {
+        assert.throws(() => new dist[tc.name](...params))
+      })
+    })
+  },
+
+  seed (tc) {
+    it('should give the same sample for the same seed', () => {
+      utils.trials(() => {
+        const self = new dist[tc.name]()
+        const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+        self.seed(s)
+        const values1 = self.sample(LAPS_2)
+        self.seed(s)
+        const values2 = self.sample(LAPS_2)
+        return values1.reduce((acc, d, i) => acc && d === values2[i], true)
+      })
+    })
+
+    it('should give different samples for different seeds', () => {
+      utils.trials(() => {
+        const self = new dist[tc.name]()
+        self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+        const values1 = self.sample(LAPS_2)
+        self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+        const values2 = self.sample(LAPS_2)
+        return values1.reduce((acc, d, i) => acc || d !== values2[i], true)
+      })
+    })
+  },
+
+  loadAndSave (tc) {
+    it('loaded state should continue where it was saved at', () => {
+      utils.trials(() => {
+        // Create generator and seed
+        const generator = new dist[tc.name]()
+        const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+        const cut = LAPS_2 / 3
+
+        // Generate full sample
+        const values = generator.sample(LAPS_2)
+
+        // Reset generator, create two sub samples
+        generator.seed(s)
+        const values1 = generator.sample(cut)
+        let state = generator.save()
+        generator.seed(0)
+        generator.load(state)
+        const values2 = generator.sample(LAPS_2 - cut)
+
+        // Compare samples
+        return values1.concat(values2)
+          .reduce((acc, d, i) => acc || d === values[i], true)
+      })
+    })
+
+    it('loaded state should copy full state of generator', () => {
+      utils.trials(() => {
+        // Create seeded generator
+        const generator1 = new dist[tc.name]()
+        generator1.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+
+        // Generate original sample
+        generator1.sample(LAPS_2)
+        const state = generator1.save()
+        const values1 = generator1.sample(LAPS_2)
+
+        // Generate new default generator and load state
+        const generator2 = new dist[tc.name]().load(state)
+        const values2 = generator2.sample(LAPS_2)
+
+        // Compare samples
+        return values1.reduce((acc, d, i) => acc || d !== values2[i], true)
+      })
+    })
+  },
+
+  pdf (tc) {
+    // Test cases
+    let cases = [{
+      name: 'default parameters',
+      gen: () => new dist[tc.name]()
+    }].concat(tc.cases.map(c => ({
+      name: c.name || 'random parameters',
+      gen: () => new dist[tc.name](...c.params())
+    })))
+
+    cases.forEach(c => {
+      describe(c.name, () => {
+        it('pdf should return valid numbers', () => {
+          utils.trials(() => utils.Tests.pdfType(c.gen(), LAPS_2))
+        })
+        it('pdf should be non-negative', () => {
+          utils.trials(() => utils.Tests.pdfRange(c.gen(), LAPS_2))
+        })
+        it('cdf should return valid numbers', () => {
+          utils.trials(() => utils.Tests.cdfType(c.gen(), LAPS_2))
+        })
+        it('cdf should be in [0, 1]', () => {
+          utils.trials(() => utils.Tests.cdfRange(c.gen(), LAPS_2))
+        })
+        it('cdf should be non-decreasing', () => {
+          utils.trials(() => utils.Tests.cdfMonotonicity(c.gen(), LAPS_2))
+        })
+        it('pdf (pmf) should be the differential (difference) of cdf', () => {
+          utils.trials(() => utils.Tests.pdf2cdf(c.gen(), LAPS_2))
+        })
+        it('quantile should return valid numbers', () => {
+          utils.trials(() => utils.Tests.qType(c.gen(), LAPS_2))
+        })
+        it('quantile should be within support', () => {
+          utils.trials(() => utils.Tests.qRange(c.gen(), LAPS_2))
+        })
+        it('quantile should be non-decreasing', () => {
+          utils.trials(() => utils.Tests.qMonotonicity(c.gen(), LAPS_2))
+        })
+        it('quantile should satisfy Galois intequalities', () => {
+          utils.trials(() => utils.Tests.qGalois(c.gen(), LAPS_2))
+        })
+      })
+    })
+  },
+
+  sample (tc) {
+    // Test cases
+    let cases = [{
+      name: 'default parameters',
+      gen: () => new dist[tc.name]()
+    }].concat(tc.cases.map(c => ({
+      name: c.name || 'random parameters',
+      gen: () => new dist[tc.name](...c.params())
+    })))
+
+    cases.forEach(c => {
+      describe(c.name, () => {
+        it('sample should contain valid numbers', () => {
+          utils.trials(() => {
+            const sample = c.gen().sample(LAPS_2)
+            return sample.reduce((acc, d) => acc && Number.isFinite(d) && isFinite(d) && !isNaN(d), true)
+          })
+        })
+
+        it('sample should be within the range of the support', () => {
+          utils.trials(() => {
+            const generator = c.gen()
+            const supp = generator.support()
+            const sample = generator.sample(LAPS_2)
+            return sample.reduce((acc, d) => {
+              let above = d >= supp[0].value
+              let below = d <= supp[1].value
+              return acc && above && below
+            }, true)
+          })
+        })
+
+        it('sample values should be distributed correctly', () => {
+          utils.trials(() => {
+            const generator = c.gen()
+            return generator.type() === 'continuous'
+              ? utils.ksTest(generator.sample(LAPS_2), x => generator.cdf(x))
+              : utils.chiTest(generator.sample(LAPS_2), x => generator.pdf(x), tc.params().length)
+          })
+        })
+      })
+    })
+  },
+
+  test (tc) {
+    // Test cases
+    let cases = [{
+      name: 'default parameters',
+      gen: () => new dist[tc.name]()
+    }].concat(tc.cases.map(c => ({
+      name: c.name || 'random parameters',
+      gen: () => new dist[tc.name](...c.params())
+    })))
+
+    cases.forEach(c => {
+      describe(c.name, () => {
+        it('should pass for own test', () => {
+          utils.trials(() => {
+            const generator = c.gen()
+            return generator.test(generator.sample(LAPS_2)).passed
+          })
+        })
+
+        it('should reject foreign distribution', () => {
+          utils.trials(() => {
+            const generator = c.gen()
+            const sample = generator.sample(LAPS_2)
+            return !(new dist[tc.foreign.generator](...tc.foreign.params(sample))).test(sample).passed
+          })
+        })
+      })
+    })
+  }
+}
 
 function utConstructor (name, invalidParams) {
   it('should throw error if params are invalid', () => {
@@ -349,21 +551,6 @@ describe('dist', () => {
 
   // Ordinary distributions
   [{
-    name: 'Alpha',
-    p: () => [Param.shape()],
-    pi: [
-      [-1], [0] // alpha > 0
-    ]
-  }, {
-    name: 'Anglit',
-    p: () => []
-  }, {
-    name: 'Arcsine',
-    p: () => [Param.rangeMin(), Param.rangeMax()],
-    pi: [
-      [1, 1], [2, 1]  // a < b
-    ]
-  }, {
     name: 'BaldingNichols',
     p: () => [Param.prob(), Param.prob()],
     pi: [
@@ -1311,8 +1498,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
-    // if (d.name !== 'R') return
-
+    //if (d.name !== 'Alpha') return
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {
         if (d.pi) {
@@ -1320,8 +1506,6 @@ describe('dist', () => {
         }
 
         describe('.sample()', () => utSample(d.name, d.p, d.skip))
-
-        describe('.seed()', () => utSeed(d.name, d.p))
 
         describe('.load(), .save()', () => utLoadSave(d.name, d.p))
 
@@ -1389,6 +1573,18 @@ describe('dist', () => {
           })
         })
       }
+    })
+  })
+
+  // Improved test cases
+  testCases.forEach(tc  => {
+    describe(tc.name, () => {
+      describe('constructor', () => UnitTests.constructor(tc))
+      describe('.seed()', () => UnitTests.seed(tc))
+      describe('.load(), .save()', () => UnitTests.loadAndSave(tc))
+      describe('.pdf(), .cdf(), .q()', () => UnitTests.pdf(tc))
+      describe('.sample()', () => UnitTests.sample(tc))
+      describe('.test()', () => UnitTests.test(tc))
     })
   })
 

@@ -269,9 +269,6 @@ export default (function () {
     qType (dist, laps) {
       return runP(dist, laps, (d, p) => {
         let x = d.q(p)
-        if (!isFinite(x)) {
-          console.log(p, x)
-        }
         return isFinite(x) && Number.isFinite(x)
       })
     },

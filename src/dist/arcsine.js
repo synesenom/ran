@@ -5,7 +5,8 @@ import Distribution from './_distribution'
  *
  * $$f(x; a, b) = \frac{1}{\pi \sqrt{(x -a) (b - x)}},$$
  *
- * where \(a, b \in \mathbb{R}\) and \(a < b\). Support: \(x \in [a, b]\).
+ * where \(a, b \in \mathbb{R}\) and \(a < b\).
+ * Support: \(x \in [a, b]\).
  *
  * @class Arcsine
  * @memberOf ran.dist
@@ -14,6 +15,8 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Distribution {
+  // Source: Feller (1991). An Introduction to Probability Theory and Its Applications — Volume 2, Second Edition,
+  // John Wiley and Sons, p. 79.
   constructor (a = 0, b = 1) {
     super('continuous', arguments.length)
 
@@ -50,7 +53,7 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return 2 * this.c[0] * Math.asin(Math.sqrt((x - this.p.a) / (this.p.b - this.p.a)))
+    return 2 * this.c[0] * Math.asin(Math.sqrt((x - this.p.a) / this.c[1]))
   }
 
   _q (p) {

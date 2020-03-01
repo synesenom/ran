@@ -4,21 +4,29 @@ import { erf, erfinv } from '../special/error'
 /**
  * Generator for the [alpha distribution]{@link https://docs.scipy.org/doc/scipy-1.0.0/reference/tutorial/stats/continuous_alpha.html}:
  *
- * $$f(x; \alpha) = \frac{1}{x^2 \Phi(\alpha) \sqrt{2 \pi}} \exp\bigg[-\frac{1}{2} \bigg(\alpha - \frac{1}{x}\bigg)^2\bigg],$$
+ * $$f(x; \alpha) = \frac{\phi\Big(\alpha - \frac{\beta}{x}\Big)}{x^2 \Phi(\alpha)},$$
+ *
+ * where \(\alpha, \beta > 0\) and \(\phi(x), \Phi(x)\) denote the probability density and cumulative probability
+ * functions of the [Normal distribution]{@link #dist.Normal}.
+ * Support: \(x > 0\).
  *
  * @class Alpha
  * @memberOf ran.dist
  * @param {number=} alpha Shape parameter. Default value is 1.
+ * @param {number=} beta Scale parameter. Default value is 1.
  * @constructor
  */
 export default class extends Distribution {
-  constructor (alpha = 1) {
+  // Source: Johnson, Kotz, and Balakrishnan (1994). Continuous Univariate Distributions — Volume 1, Second Edition,
+  // John Wiley and Sons, p. 173.
+  constructor (alpha = 1, beta = 1) {
     super('continuous', arguments.length)
 
     // Validate parameters
-    this.p = { alpha }
-    Distribution.validate({ alpha }, [
-      'alpha > 0'
+    this.p = { alpha, beta }
+    Distribution.validate({ alpha, beta }, [
+      'alpha > 0',
+      'beta > 0'
     ])
 
     // Set support
@@ -51,14 +59,14 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return Math.exp(-0.5 * Math.pow(this.p.alpha - 1 / x, 2)) / (x * x * this.c[1])
+    return this.p.beta * Math.exp(-0.5 * Math.pow(this.p.alpha - this.p.beta / x, 2)) / (x * x * this.c[1])
   }
 
   _cdf (x) {
-    return this._phi(this.p.alpha - 1 / x) / this.c[0]
+    return this._phi(this.p.alpha - this.p.beta / x) / this.c[0]
   }
 
   _q (p) {
-    return 1 / (this.p.alpha - this._phiInv(p * this.c[0]))
+    return this.p.beta / (this.p.alpha - this._phiInv(p * this.c[0]))
   }
 }
