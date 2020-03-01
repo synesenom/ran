@@ -39,9 +39,9 @@ export default class extends Distribution {
       (1 - b) / a,
       Math.exp(-a / b),
       b / (b - 1),
-      Math.log(a / (1 - b)) + a / (1 - b)
+      Math.log(a / (1 - b)) + a / (1 - b),
+      1 - b < Number.EPSILON
     ]
-    this.eps = 1 - b
   }
 
   _generator () {
@@ -51,7 +51,7 @@ export default class extends Distribution {
 
   _pdf (x) {
     // b = 1
-    if (this.eps < Number.EPSILON) {
+    if (this.c[4]) {
       return this.p.a * Math.exp(this.p.a * (1 - x))
     }
 
@@ -62,7 +62,7 @@ export default class extends Distribution {
 
   _cdf (x) {
     // b = 1
-    if (this.eps < Number.EPSILON) {
+    if (this.c[4]) {
       return 1 - Math.exp(this.p.a * (1 - x))
     }
 
@@ -72,7 +72,7 @@ export default class extends Distribution {
 
   _q (p) {
     // b = 1
-    if (this.eps < Number.EPSILON) {
+    if (this.c[4]) {
       return 1 - Math.log(1 - p) / this.p.a
     }
 

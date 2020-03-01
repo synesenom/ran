@@ -11,7 +11,8 @@ import Distribution from './_distribution'
  *
  * @class IrwinHall
  * @memberOf ran.dist
- * @param {number=} n Number of uniform variates to sum. If not an integer, it is rounded to the nearest one. Default value is 1.
+ * @param {number=} n Number of uniform variates to sum. If not an integer, it is rounded to the nearest one. Default
+ * value is 1.
  * @constructor
  */
 export default class extends Distribution {
@@ -55,7 +56,7 @@ export default class extends Distribution {
     })
 
     // Sort terms
-    terms.sort((a, b) => Math.abs(a) - Math.abs(b))
+    terms.sort((a, b) => a - b)
 
     // Calculate sum
     return this.p.n * neumaier(terms)
@@ -73,9 +74,9 @@ export default class extends Distribution {
     })
 
     // Sort terms
-    terms.sort((a, b) => Math.abs(a) - Math.abs(b))
+    const sum = neumaier(terms.sort((a, b) => a - b))
 
     // Calculate sum
-    return x < this.p.n / 2 ? neumaier(terms) : 1 - neumaier(terms)
+    return x < this.p.n / 2 ? sum : 1 - sum
   }
 }

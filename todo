@@ -23,6 +23,7 @@
 - exponentiated weibull
 - Fermi-Dirac                           http://mathworld.wolfram.com/Fermi-DiracDistribution.html
 - Gauss hypergeometric (scipy)
+- generalized beta-prime
 - generalized half-logistic (scipy)
 - K-prime (https://arxiv.org/pdf/1003.4890v1.pdf)
 - K-square (https://arxiv.org/pdf/1003.4890v1.pdf)

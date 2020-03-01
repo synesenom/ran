@@ -18,7 +18,7 @@ import Distribution from './_distribution'
  */
 export default class extends IrwinHall {
   // Transformation of Irwin-Hall
-  constructor (n = 10, a = 0, b = 1) {
+  constructor (n = 3, a = 0, b = 1) {
     const ni = Math.round(n)
     super(ni)
 
@@ -37,18 +37,24 @@ export default class extends IrwinHall {
       value: b,
       closed: true
     }]
+
+    // Extend speed-up constants. Note that c in IrwinHall has a length of n + 1
+    this.c = this.c.concat([
+      n / (b - a),
+      n * a / (b - a)
+    ])
   }
 
   _generator () {
     // Direct sampling by transforming Irwin-Hall variate
-    return (this.p.b - this.p.a) * super._generator() / this.p.n + this.p.a
+    return super._generator() / this.c[this.p.n + 1] + this.p.a
   }
 
   _pdf (x) {
-    return this.p.n * super._pdf(this.p.n * (x - this.p.a) / (this.p.b - this.p.a)) / (this.p.b - this.p.a)
+    return this.c[this.p.n + 1] * super._pdf(this.c[this.p.n + 1] * x - this.c[this.p.n + 2])
   }
 
   _cdf (x) {
-    return super._cdf(this.p.n * (x - this.p.a) / (this.p.b - this.p.a))
+    return super._cdf(this.c[this.p.n + 1] * x - this.c[this.p.n + 2])
   }
 }

@@ -57,5 +57,6 @@ export default function (term) {
       a = m
     }
   }
+
   return m
 }

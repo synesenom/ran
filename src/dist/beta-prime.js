@@ -7,7 +7,7 @@ import Beta from './beta'
  *
  * $$f(x; \alpha, \beta) = \frac{x^{\alpha - 1}(1 + x)^{-\alpha - \beta}}{\mathrm{B}(\alpha, \beta)},$$
  *
- * with \(\alpha, \beta > 0\) and \(\mathrm{B}(\alpha, \beta)\) is the beta function.
+ * with \(\alpha, \beta > 0\) and \(\mathrm{B}(x, y)\) is the beta function.
  * Support: \(x > 0\).
  *
  * @class BetaPrime

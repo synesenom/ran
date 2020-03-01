@@ -3,6 +3,7 @@ import neumaier from '../algorithms/neumaier'
 import gamma from '../special/gamma'
 import { gammaUpperIncomplete } from '../special/gamma-incomplete'
 
+// TODO Docs
 export default class extends Distribution {
   constructor (n = 2) {
     super('continuous', arguments.length)

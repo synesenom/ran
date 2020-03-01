@@ -7,7 +7,7 @@ import { erf, erfinv } from '../special/error'
  * $$f(x; \alpha) = \frac{\phi\Big(\alpha - \frac{\beta}{x}\Big)}{x^2 \Phi(\alpha)},$$
  *
  * where \(\alpha, \beta > 0\) and \(\phi(x), \Phi(x)\) denote the probability density and cumulative probability
- * functions of the [Normal distribution]{@link #dist.Normal}.
+ * functions of the [normal distribution]{@link #dist.Normal}.
  * Support: \(x > 0\).
  *
  * @class Alpha

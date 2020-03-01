@@ -175,7 +175,8 @@ const UnitTests = {
             const generator = c.gen()
             return generator.type() === 'continuous'
               ? utils.ksTest(generator.sample(LAPS_2), x => generator.cdf(x))
-              : utils.chiTest(generator.sample(LAPS_2), x => generator.pdf(x), tc.params().length)
+              : utils.chiTest(generator.sample(LAPS_2), x => generator.pdf(x),
+                Object.keys(generator.save().params).length)
           })
         })
       })
@@ -550,66 +551,7 @@ describe('dist', () => {
   });
 
   // Ordinary distributions
-  [{
-    name: 'BaldingNichols',
-    p: () => [Param.prob(), Param.prob()],
-    pi: [
-      [-1, 0.5], [0, 0.5], [1, 0.5], [2, 0.5],  // 0 < F < 1
-      [0.5, -1], [0.5, 0], [0.5, 1], [0.5, 2]   // 0 < p < 1
-    ]
-  }, {
-    name: 'Bates',
-    p: () => [Param.count(), Param.rangeMin(), Param.rangeMax()],
-    pi: [
-      [-1, 0, 1], [0, 0, 1],  // n > 0
-      [10, 1, 1], [10, 2, 1]    // a < b
-    ]
-  }, {
-    name: 'Benini',
-    p: () => [Param.shape(), Param.shape(), Param.scale()],
-    pi: [
-      [-1, 1, 1], [0, 1, 1],  // alpha > 0
-      [1, -1, 1], [1, 0, 1],  // beta > 0
-      [1, 1, -1], [1, 1, 0]   // sigma > 0
-    ]
-  }, {
-    name: 'BenktanderII',
-    cases: [{
-      desc: 'high shape parameter',
-      p: () => [Param.scale(), 1 - Param.prob() / 1000],
-      pi: [
-        [-1, 0.5], [0, 0.5],      // a > 0
-        [1, -1], [1, 0], [1, 1.5] // 0 < b <= 1
-      ]
-    }, {
-      desc: 'unit shape parameter',
-      p: () => [Param.scale(), 1]
-    }, {
-      desc: 'normal shape parameter',
-      p: () => [Param.scale(), Math.min(0.9, Param.prob())]
-    }]
-  }, {
-    name: 'Bernoulli',
-    p: () => [Param.prob()],
-    pi: [
-      [-1], [2] // 0 <= p <= 1
-    ]
-  }, {
-    name: 'Beta',
-    p: () => [Param.shape(), Param.shape()],
-    pi: [
-      [-1, 2], [0, 2], // alpha > 0
-      [2, -1], [2, 0]  // beta > 0
-    ]
-  }, {
-    name: 'BetaBinomial',
-    p: () => [Param.degree() * 10, Param.shape(), Param.shape()],
-    pi: [
-      [-1, 1, 1],                 // n > 0
-      [100, -1, 1], [100, 0, 1],  // alpha > 0
-      [100, 1, -1], [100, 1, 0]   // beta > 0
-    ]
-  }/*, {
+  [/*, {
     name: 'BetaGeometric',
     p: () => [Param.shape(), Param.shape()],
     pi: [
@@ -624,82 +566,7 @@ describe('dist', () => {
       [10, -1, 1], [10, 0, 1],  // alpha > 0
       [10, 1, -1], [10, 1, 0]   // beta > 0
     ]
-  }*/, {
-    name: 'BetaPrime',
-    p: () => [Param.shape(), Param.shape()],
-    pi: [
-      [-1, 2], [0, 2], // alpha > 0
-      [2, -1], [2, 0]  // beta > 0
-    ]
-  }, {
-    name: 'BetaRectangular',
-    p: () => [Param.shape(), Param.shape(), Param.prob(), Param.rangeMin(), Param.rangeMax()],
-    pi: [
-      [1, 1, -1, 0, 1], [1, 1, 2, 0, 1],    // 0 <= theta <= 1
-      [1, 1, 0.5, 1, 1], [1, 1, 0.5, 2, 1], // a < b
-    ]
-  }, {
-    name: 'Binomial',
-    p: () => [Param.rangeMax(), Param.prob()],
-    pi: [
-      [-1, 0.5],            // n >= 0
-      [100, -1], [100, 2],  // 0 <= p <= 1
-    ]
-  }, {
-    name: 'BirnbaumSaunders',
-    p: () => [Param.location(), Param.scale(), Param.shape()],
-    pi: [
-      [0, -1, 1], [0, 0, 1],  // beta > 0
-      [0, 1, -1], [0, 1, 0],  // gamma > 0
-    ]
-  }, {
-    name: 'Borel',
-    cases: [{
-      desc: 'mu > 0',
-      p: () => [Param.prob()],
-      pi: [
-        [-1], [2] // 0 <= mu <= 1
-      ]
-    }, {
-      desc: 'mu = 0',
-      p: () => [0]
-    }]
-  }, {
-    name: 'BorelTanner',
-    cases: [{
-      desc: 'mu > 0',
-      p: () => [Param.prob(), Param.degree()],
-      pi: [
-        [-1, 2], [2, 2],    // 0 <= mu <= 1
-        [0.5, -1], [0.5, 0] // k > 0
-      ]
-    }, {
-      desc: 'mu = 0',
-      p: () => [0, Param.degree()]
-    }]
-  }, {
-    name: 'BoundedPareto',
-    p: () => [Param.rangeMin(), Param.rangeMax(), Param.shape()],
-    pi: [
-      [-1, 10, 1], [0, 10, 1],  // L > 0
-      [1, -1, 1], [1, 0, 1],    // H > 0
-      [10, 10, 1], [12, 10, 1], // L < H
-      [1, 10, -1], [1, 10, 0],  // alpha > 0
-    ]
-  }, {
-    name: 'Bradford',
-    p: () => [Param.shape()],
-    pi: [
-      [-1], [0] // c > 0
-    ]
-  }, {
-    name: 'Burr',
-    p: () => [Param.shape(), Param.shape()],
-    pi: [
-      [-1, 1], [0, 1], // c > 0
-      [1, -1], [1, 0], // k > 0
-    ]
-  }, {
+  }*/{
     name: 'Categorical',
     cases: [{
       desc: 'small n',
@@ -1037,13 +904,6 @@ describe('dist', () => {
     pi: [
       [-1], [0] // c > 0
     ]
-  }, {
-    name: 'IrwinHall',
-    p: () => [Param.count()],
-    pi: [
-      [-1], [0] // n > 0
-    ],
-    skip: ['test-foreign']
   }, {
     name: 'JohnsonSU',
     p: () => [Param.location(), Param.scale(), Param.scale(), Param.location()],

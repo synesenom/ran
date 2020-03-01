@@ -34,6 +34,13 @@ export default class extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
+    this.c = [
+      alpha * alpha,
+      4 * beta,
+      0.5 / beta
+    ]
   }
 
   _generator () {
@@ -43,7 +50,8 @@ export default class extends Distribution {
 
   _pdf (x) {
     const y = Math.log(x / this.p.sigma)
-    return Math.exp(-y * (this.p.alpha + this.p.beta * y)) * (this.p.alpha + 2 * this.p.beta * y) / x
+    const z = this.p.alpha + this.p.beta * y
+    return Math.exp(-y * z) * (z + this.p.beta * y) / x
   }
 
   _cdf (x) {
@@ -52,6 +60,6 @@ export default class extends Distribution {
   }
 
   _q (p) {
-    return this.p.sigma * Math.exp(0.5 * (Math.sqrt(this.p.alpha * this.p.alpha - 4 * this.p.beta * Math.log(1 - p)) - this.p.alpha) / this.p.beta)
+    return this.p.sigma * Math.exp(this.c[2] * (Math.sqrt(this.c[0] - this.c[1] * Math.log(1 - p)) - this.p.alpha))
   }
 }

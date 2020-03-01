@@ -1,5 +1,6 @@
 import Distribution from './_distribution'
 
+// TODO Docs
 export default class extends Distribution {
   constructor () {
     super('continuous', arguments.length)

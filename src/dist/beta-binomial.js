@@ -12,14 +12,14 @@ import Distribution from './_distribution'
  *
  * @class BetaBinomial
  * @memberOf ran.dist
- * @param {number=} n Number of trials. Default value is 100.
+ * @param {number=} n Number of trials. Default value is 10.
  * @param {number=} alpha First shape parameter. Default value is 1.
- * @param {number=} beta Second shape parameter. Default value is 1.
+ * @param {number=} beta Second shape parameter. Default value is 2.
  * @constructor
  */
 export default class extends Categorical {
   // Special case of categorical
-  constructor (n = 100, alpha = 1, beta = 1) {
+  constructor (n = 10, alpha = 1, beta = 2) {
     const ni = Math.round(n)
     super(Array.from({ length: ni + 1 }, (d, i) => Math.exp(logBinomial(ni, i) + logBeta(i + alpha, ni - i + beta) - logBeta(alpha, beta))))
 

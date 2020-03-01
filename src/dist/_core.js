@@ -28,7 +28,7 @@ export function beta (r, a, b) {
   const z = x / (x + y)
 
   // Handle 1 - z << 1 case
-  return z === 1 ? 1 - y / x : z
+  return Math.abs(1 - z) < Number.EPSILON ? 1 - y / x : z
 }
 
 /**

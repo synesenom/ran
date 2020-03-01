@@ -39,7 +39,9 @@ export default class extends Distribution {
 
     // Speed-up constants
     this.c = [
-      fnBeta(alpha, beta)
+      fnBeta(alpha, beta),
+      alpha - 1,
+      beta - 1
     ]
   }
 
@@ -49,9 +51,9 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    const a = Math.pow(x, this.p.alpha - 1)
+    const a = Math.pow(x, this.c[1])
 
-    const b = Math.pow(1 - x, this.p.beta - 1)
+    const b = Math.pow(1 - x, this.c[2])
 
     // Handle x = 0 and x = 1 cases
     return isFinite(a) && isFinite(b)

@@ -19,7 +19,7 @@ export default class extends Categorical {
   // Special case of categorical
   constructor (n = 100, p = 0.5) {
     const ni = Math.round(n)
-    super(Array.from({ length: ni + 1 }, (d, i) => Math.exp(logBinomial(n, i) + i * Math.log(p) + (n - i) * Math.log(1 - p))))
+    super(Array.from({ length: ni + 1 }, (d, k) => Math.exp(logBinomial(n, k) + k * Math.log(p) + (n - k) * Math.log(1 - p))))
 
     // Validate parameters
     Distribution.validate({ n: ni, p }, [

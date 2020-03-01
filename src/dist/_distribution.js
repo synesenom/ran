@@ -33,6 +33,9 @@ class Distribution {
 
     // Pseudo random number generator
     this.r = new Xoshiro128p()
+
+    // Speed-up constants
+    this.c = []
   }
 
   /**
@@ -268,7 +271,8 @@ class Distribution {
   }
 
   /**
-   * Returns the current state of the generator. The object returned by this method contains all information necessary to set up another generator of the same distribution (parameters, state of the pseudo random generator, etc).
+   * Returns the current state of the generator. The object returned by this method contains all information necessary
+   * to set up another generator of the same distribution (parameters, state of the pseudo random generator, etc).
    *
    * @method save
    * @methodOf ran.dist.Distribution

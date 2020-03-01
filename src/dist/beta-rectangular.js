@@ -37,26 +37,26 @@ export default class extends Beta {
       closed: true
     }]
 
-    // Speed-up constants
-    this.c1 = [
+    // Speed-up constants. Note that Beta has 3 speed-up constants
+    this.c = this.c.concat([
       b - a,
       1 - theta
-    ]
+    ])
   }
 
   _generator () {
     // Direct sampling by mixing beta and uniform variates
     return this.r.next() < this.p.theta
-      ? super._generator() * this.c1[0] + this.p.a
-      : this.r.next() * this.c1[0] + this.p.a
+      ? super._generator() * this.c[3] + this.p.a
+      : this.r.next() * this.c[3] + this.p.a
   }
 
   _pdf (x) {
-    return (this.p.theta * super._pdf((x - this.p.a) / this.c1[0]) + this.c1[1]) / this.c1[0]
+    return (this.p.theta * super._pdf((x - this.p.a) / this.c[3]) + this.c[4]) / this.c[3]
   }
 
   _cdf (x) {
     let y = x - this.p.a
-    return this.p.theta * super._cdf(y / this.c1[0]) + this.c1[1] * y / this.c1[0]
+    return this.p.theta * super._cdf(y / this.c[3]) + this.c[4] * y / this.c[3]
   }
 }

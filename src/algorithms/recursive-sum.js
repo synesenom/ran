@@ -1,14 +1,19 @@
 import { EPS, MAX_ITER } from '../special/_core'
 
 /**
- * Class implementing a recursive sum. It is initialized with the zeroth term of the sum, an updater for the term variables and a method that computes the term from the variables. If the module specified accuracy has reached, the iteration stops, otherwise the maximum number of iterations are used.
+ * Class implementing a recursive sum. It is initialized with the zeroth term of the sum, an updater for the term
+ * variables and a method that computes the term from the variables. If the module specified accuracy has reached, the
+ * iteration stops, otherwise the maximum number of iterations are used.
  *
  * @method recursiveSum
  * @memberOf ran.algorithms
  * @param {Object} x0 Object containing the state of the variables in the zeroth index.
- * @param {Function} preUpdate Function that takes the current state of the variables, the current index and returns the next state of the variables before calculating the delta.
- * @param {Function} deltaFn Function that takes the current state of the variables and returns the term corresponding to the state.
- * @param {Function?} postUpdate Function that takes the current state of the variables, the current index and returns the next state of the variables after calculating the delta.
+ * @param {Function} preUpdate Function that takes the current state of the variables, the current index and returns the
+ * next state of the variables before calculating the delta.
+ * @param {Function} deltaFn Function that takes the current state of the variables and returns the term corresponding
+ * to the state.
+ * @param {Function?} postUpdate Function that takes the current state of the variables, the current index and returns
+ * the next state of the variables after calculating the delta.
  * @returns {number} The approximated sum.
  * @private
  */

@@ -32,8 +32,10 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
+    let c0 = Math.log(1 + c)
     this.c = [
-      Math.log(1 + c)
+      c0,
+      c / c0
     ]
   }
 
@@ -43,7 +45,7 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return this.p.c / (this.c[0] * (1 + this.p.c * x))
+    return this.c[1] / (1 + this.p.c * x)
   }
 
   _cdf (x) {
