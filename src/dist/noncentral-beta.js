@@ -55,7 +55,7 @@ export default class extends Distribution {
     const z = x / (x + y)
 
     // Handle 1 - z << 1 case
-    if (z === 1) {
+    if (Math.abs(1 - z) < Number.EPSILON) {
       return 1 - y / x
     } else {
       return z

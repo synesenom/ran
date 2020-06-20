@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { besselInu } from '../src/special/bessel'
+import { besselI, besselInu } from '../src/special/bessel'
 import { erf } from '../src/special/error'
 import { f11 } from '../src/special/hypergeometric'
 import gamma from '../src/special/gamma'
@@ -65,7 +65,7 @@ describe('special', () => {
   })
   */
 
-  describe('f11(a, b, z)', () => {
+  describe('f11', () => {
     describe('|z| < 50', () => {
       it('f11(0, b, z) = 1', () => {
         utils.repeat(() => {
@@ -184,8 +184,8 @@ describe('special', () => {
     })
   })
 
-  describe('hurwitzZeta(s, a), riemannZeta(s)', () => {
-    it('riemannZeta(s) - hurwitzZeta(s, n+1) should give H(s, n)', () => {
+  describe('hurwitzZeta, riemannZeta', () => {
+    it('riemannZeta(s) - hurwitzZeta(s, n+1) = H(s, n)', () => {
       utils.repeat(() => {
         let s = Math.random() * 10 + 1
         let sum = 0
@@ -197,8 +197,8 @@ describe('special', () => {
     })
   })
 
-  describe('gamma(z), logGamma(z)', () => {
-    it('logGamma(z) should be equal to ln(gamma(z))', () => {
+  describe('gamma, logGamma', () => {
+    it('logGamma(z)  ln(gamma(z))', () => {
       for (let i = 0; i < LAPS; i++) {
         let x = Math.random() * 100
 
@@ -210,7 +210,7 @@ describe('special', () => {
     })
   })
 
-  describe('gammaLowerIncomplete(s, x), gammaUpperIncomplete(s, x)', () => {
+  describe('gammaLowerIncomplete, gammaUpperIncomplete', () => {
     it('should vanish below 0', () => {
       utils.repeat(() => {
         let s = 2 + Math.random() * 10
@@ -261,7 +261,7 @@ describe('special', () => {
     })
   })
 
-  describe('lambertW0(z)', () => {
+  describe('lambertW0', () => {
     it('should satisfy the W * exp(W) = x equation', () => {
       utils.repeat(() => {
         let x = Math.random() * 10
@@ -271,7 +271,7 @@ describe('special', () => {
     })
   })
 
-  describe('lambertW1m(z)', () => {
+  describe('lambertW1m', () => {
     it('should satisfy the W * exp(W) = x equation', () => {
       utils.repeat(() => {
         let x = -1 * Math.random() / Math.E
@@ -281,7 +281,7 @@ describe('special', () => {
     })
   })
 
-  describe('marcumQ(mu, x, y)', () => {
+  describe('marcumQ', () => {
     describe('special cases', () => {
       describe('x = 0', () => {
         it('should satisfy the recurrence relation', () => {
@@ -313,8 +313,6 @@ describe('special', () => {
             let x = Math.random() * 30
             let y = 40 + Math.random() * 60
             let mu = 2 + Math.random() * 5
-            // console.log(x < 30, y >= x + mu)
-            // return
 
             let q1 = marcumQ(mu + 1, x, y)
             let q2 = marcumQ(mu, x, y)
@@ -336,8 +334,6 @@ describe('special', () => {
             let x = Math.random() * 30
             let y = 10 + Math.random() * 10
             let mu = 30 + Math.random() * 5
-            // console.log(x < 30, y < x + mu)
-            // return
 
             let q1 = marcumQ(mu + 1, x, y)
             let q2 = marcumQ(mu, x, y)
@@ -463,7 +459,7 @@ describe('special', () => {
     */
   })
 
-  describe('owenT(h, a)', () => {
+  describe('owenT', () => {
     it('should return reference values', () => {
       [
         {h: 0.0625, a: 0.25, t: 0.03891193023470137},

@@ -63,8 +63,6 @@ class Distribution {
 
       // Check for errors
       switch (tokens[1]) {
-        case '=':
-          return a !== b
         case '<':
           return a >= b
         case '<=':
@@ -214,11 +212,12 @@ class Distribution {
     const bounds = bracket(t => this.cdf(t) - p, a0, b0, this.s)
 
     // Perform root-finding using Brent's method
-    return typeof bounds !== 'undefined'
-      ? Math.min(Math.max(
+    if (typeof bounds !== 'undefined') {
+      return Math.min(Math.max(
         brent(t => this.cdf(t) - p, ...bounds),
         this.s[0].value), this.s[1].value
-      ) : undefined
+      )
+    }
   }
 
   /**

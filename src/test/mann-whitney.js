@@ -65,13 +65,15 @@ function _computeRanks (data) {
 }
 
 /**
- * Calculates the [Mann-Whitney statistics]{@link https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test} for two data sets.
+ * Calculates the [Mann-Whitney statistics]{@link https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test} for two
+ * data sets.
  *
  * @method mannWhitney
  * @memberOf ran.test
  * @param {Array[]} dataSets Array containing the two data sets.
  * @param {number} alpha Confidence level.
- * @returns {Object} Object containing the test statistics and whether the data sets passed the null hypothesis that their distribution is the same.
+ * @returns {Object} Object containing the test statistics and whether the data sets passed the null hypothesis that
+ * the samples come from the same distribution.
  * @throws Error when the number of data sets is different from 2.
  * @example
  *
@@ -91,11 +93,11 @@ export default function (dataSets, alpha = 0.05) {
   }
 
   // Flag data sets
-  const rankedData1 = _markData(dataSets[0], 1)
-  const rankedData2 = _markData(dataSets[1], 2)
+  const markedData1 = _markData(dataSets[0], 1)
+  const markedData2 = _markData(dataSets[1], 2)
 
   // Assign ranks
-  const ranks = _computeRanks(rankedData1.concat(rankedData2))
+  const ranks = _computeRanks(markedData1.concat(markedData2))
 
   // Compute statistics
   const n1 = dataSets[0].length
@@ -113,6 +115,6 @@ export default function (dataSets, alpha = 0.05) {
   // Compare against critical value
   return {
     U: z,
-    passed: z <= (new Normal()).q(1 - alpha)
+    passed: z <= (new Normal()).q(1 - 2 * alpha)
   }
 }

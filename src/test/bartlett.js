@@ -8,7 +8,8 @@ import Chi2 from '../dist/chi2'
  * @memberOf ran.test
  * @param {Array[]} dataSets Array containing the data sets.
  * @param {number} alpha Confidence level.
- * @returns {Object} Object containing the test statistics and whether the data sets passed the null hypothesis that their variance is the same.
+ * @returns {Object} Object containing the test statistics and whether the data sets passed the null hypothesis that
+ * their variances are the same.
  * @throws Error when the number of data sets is less than 2.
  * @throws Error when the size of any data set is less than 2 elements.
  * @example
@@ -50,6 +51,7 @@ export default function (dataSets, alpha = 0.05) {
   // Compare against critical value
   return {
     chi2: chi2,
+    // TODO Fix two-sided test
     passed: chi2 <= (new Chi2(k - 1)).q(1 - alpha)
   }
 }

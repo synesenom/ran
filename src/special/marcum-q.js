@@ -248,14 +248,16 @@ const _seriesExpansion = {
 })() */
 
 /**
- * Computes the generalized Marcum-Q function. Only accurate in x < 30. Implementation source: https://arxiv.org/pdf/1311.0681.pdf.
+ * Computes the generalized Marcum-Q function. Only accurate in x < 30.
+ * Implementation source: https://arxiv.org/pdf/1311.0681.pdf.
  *
  * @method marcumQ
  * @memberOf ran.special
  * @param {number} mu The order of the function.
  * @param {number} x First variable.
  * @param {number} y Second variable.
- * @return {?number} The generalized Marcum-Q function at the specified values. If evaluated at an unsupported point, it returns undefined.
+ * @return {?number} The generalized Marcum-Q function at the specified values. If evaluated at an unsupported point, it
+ * returns undefined.
  * @private
  */
 export default function (mu, x, y) {

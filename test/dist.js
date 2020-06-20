@@ -442,7 +442,10 @@ const Param = {
   }
 }
 
+console.log(new dist.Cauchy().sample(2))
+
 describe('dist', () => {
+  return
   // Base class
   describe('Distribution', () => {
     const invalid = new InvalidDiscrete()
