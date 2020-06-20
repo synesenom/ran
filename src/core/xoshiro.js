@@ -12,6 +12,9 @@ class Xoshiro128p {
       (Math.random() * Number.MAX_SAFE_INTEGER) >>> 0,
       2, 3, 4
     ]
+
+    // Call next once.
+    this.next()
   }
 
   /**
