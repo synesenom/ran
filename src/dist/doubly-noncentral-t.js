@@ -45,7 +45,8 @@ export default class extends Distribution {
 
     // Speed-up constants
     this.c = [
-      -0.5 * (theta + mu * mu + Math.log(Math.PI * nui)) - logGamma(nui / 2)
+      -0.5 * (theta + mu * mu + Math.log(Math.PI * nui)) - logGamma(nui / 2),
+      Math.exp(-theta / 2)
     ]
   }
 
@@ -127,12 +128,7 @@ export default class extends Distribution {
     if (x * this.p.mu >= 0) {
       // Init terms
       let kj0 = (this.p.nu + j0 + 1) / 2
-      let gp = Math.exp(
-        this.c[0] +
-        j0 * lntmuk -
-        logGamma(j0 + 1) -
-        kj0 * lntk
-      )
+      let gp = Math.exp(this.c[0] + j0 * lntmuk - logGamma(j0 + 1) - kj0 * lntk)
       let gk0 = gamma(kj0)
       let f10 = f11(kj0, nu2, thetatk)
 
@@ -212,12 +208,7 @@ export default class extends Distribution {
     } else {
       // Forward
       let kj0 = (this.p.nu + j0 + 1) / 2
-      const gp0 = Math.exp(
-        this.c[0] +
-        (j0 - 1) * lntmuk -
-        logGamma(j0) -
-        (kj0 - 0.5) * lntk
-      )
+      const gp0 = Math.exp(this.c[0] + (j0 - 1) * lntmuk - logGamma(j0) - (kj0 - 0.5) * lntk)
       const gk0 = gamma(kj0 - 1)
       const gk1 = gamma(kj0 - 0.5)
       let gk = [gk0, gk1]
@@ -287,13 +278,13 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    // Sum of the product of Poisson weights and singly non-central t CDF
+    // Sum of the product of Poisson weights and single non-central t CDF
     // Source: https://www.wiley.com/en-us/Intermediate+Probability%3A+A+Computational+Approach-p-9780470026373
 
     const y = Math.abs(x)
     const mu = x < 0 ? -this.p.mu : this.p.mu
     const z = recursiveSum({
-      p: Math.exp(-this.p.theta / 2),
+      p: this.c[1],
       f: NoncentralT.fnm(this.p.nu, mu, y)
     }, (t, i) => {
       const i2 = 2 * i

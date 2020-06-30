@@ -52,9 +52,9 @@ class Distribution {
     // Go through parameters and check constraints
     const errors = constraints.filter(constraint => {
       // Tokenize constraint
-      let tokens = constraint.split(/ (<=|>=) /)
+      let tokens = constraint.split(/ (<=|>=|!=) /)
       if (tokens.length === 1) {
-        tokens = constraint.split(/ (=|<|>) /)
+        tokens = constraint.split(/ ([=<>]) /)
       }
 
       // Substitute parameters if there is any
@@ -71,6 +71,8 @@ class Distribution {
           return a <= b
         case '>=':
           return a < b
+        case '!=':
+          return a === b
         default:
           return false
       }

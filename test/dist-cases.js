@@ -363,6 +363,394 @@ export default [{
     params: () => [Param.degree()]
   }]
 }, {
+  name: 'Dagum',
+  invalidParams: [
+    [-1, 1, 1], [0, 1, 1],  // p > 0
+    [1, -1, 1], [1, 0, 1],  // a > 0
+    [1, 1, -1], [1, 1, 0]   // b > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.shape(), Param.shape(), Param.scale()]
+  }]
+}, {
+  name: 'Delaporte',
+  invalidParams: [
+    [-1, 1, 1], [0, 1, 1],  // alpha > 0
+    [1, -1, 1], [1, 0, 1],  // beta > 0
+    [1, 1, -1], [1, 1, 0]   // lambda > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.scale(), Param.shape(), Param.shape()]
+  }]
+}, {
+  name: 'DiscreteUniform',
+  invalidParams: [
+    [105, 100]  // xmin <= xmax
+  ],
+  foreign: {
+    generator: 'Poisson',
+    params: s => [s.reduce((sum, d) => d + sum, 0) / s.length]
+  },
+  cases: [{
+    params: () => [int(10), int(11, 100)]
+  }]
+}, {
+  name: 'DiscreteWeibull',
+  invalidParams: [
+    [-1, 1], [0, 1], [1, 1], [2, 1],  // 0 < q < 1
+    [0.5, -1], [0.5, 0]               // beta > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.prob(), Param.shape()]
+  }]
+}, {
+  name: 'DoubleGamma',
+  invalidParams: [
+    [-1, 1], [0, 1],  // alpha > 0
+    [1, -1], [1, 0]   // beta > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.shape(), Param.rate()]
+  }]
+}, {
+  name: 'DoubleWeibull',
+  invalidParams: [
+    [-1, 1], [0, 1],  // lambda > 0
+    [1, -1], [1, 0]   // k > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.scale(), Param.shape()]
+  }]
+}, {
+  name: 'DoublyNoncentralBeta',
+  invalidParams: [
+    [-1, 1, 1, 1], [0, 1, 1, 1],  // alpha > 0
+    [1, -1, 1, 1], [1, 0, 1, 1],  // beta > 0
+    [1, 1, -1, 1],                // lambda1 >= 0
+    [1, 1, 1, -1]                 // lambda2 >= 0
+  ],
+  foreign: {
+    generator: 'Poisson',
+    params: s => [s.reduce((sum, d) => d + sum, 0) / s.length]
+  },
+  cases: [{
+    params: () => [Param.shape(), Param.shape(), Param.shape(), Param.shape()]
+  }]
+}, {
+  name: 'DoublyNoncentralF',
+  invalidParams: [
+    [-1, 2, 1, 1], [0, 2, 1, 1],  // n1 > 0
+    [2, -1, 1, 1], [2, 0, 1, 1],  // n2 > 0
+    [2, 2, -1, 1],                // lambda1 >= 0
+    [2, 2, 1, -1],                // lambda2 >= 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.degree(), Param.degree(), Param.scale(), Param.scale()]
+  }]
+}, {
+  name: 'DoublyNoncentralT',
+  invalidParams: [
+    [-1, 1, 1], [0, 1, 1],  // nu > 0
+    [1, 1, -1]              // theta >= 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.degree(), Param.location(), Param.shape()]
+  }]
+}, {
+  name: 'Erlang',
+  invalidParams: [
+    [-1, 1], [0, 1], // k > 0
+    [1, -1], [1, 0]  // lambda > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.degree(), Param.rate()]
+  }]
+}, {
+  name: 'Exponential',
+  invalidParams: [
+    [-1], [0] // lambda > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.rate()]
+  }]
+}, {
+  name: 'ExponentialLogarithmic',
+  invalidParams: [
+    [-1, 1], [0, 1], [1, 1], [2, 1],  // 0 < p < 1
+    [0.5, -1], [0.5, 0]               // beta > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.prob(), Param.scale()]
+  }]
+}, {
+  name: 'F',
+  invalidParams: [
+    [-1, 2], [0, 2],  // d1 > 0
+    [2, -1], [2, 0]   // d2 > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.degree(), Param.degree()]
+  }]
+}, {
+  name: 'FisherZ',
+  invalidParams: [
+    [-1, 2], [0, 2],  // d1 > 0
+    [2, -1], [2, 0]   // d2 > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.degree(), Param.degree()]
+  }]
+}, {
+  name: 'FlorySchulz',
+  invalidParams: [
+    [-1], [0], [1], [2] // 0 < a < 1
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.prob()]
+  }]
+}, {
+  name: 'Frechet',
+  invalidParams: [
+    [-1, 1, 0], [0, 1, 0],  // alpha > 0
+    [1, -1, 0], [1, 0, 0]   // s > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.shape(), Param.scale(), Param.location()]
+  }]
+}, {
+  name: 'Gamma',
+  invalidParams: [
+    [-1, 1], [0, 1],  // alpha > 0
+    [1, -1], [1, 0]   // beta > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.shape(), Param.rate()]
+  }]
+}, {
+  name: 'GammaGompertz',
+  invalidParams: [
+    [-1, 1, 1], [0, 1, 1],  // b > 0
+    [1, -1, 1], [1, 0, 1],  // s > 0
+    [1, 1, -1], [1, 1, 0]   // beta > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.scale(), Param.shape(), Param.shape()]
+  }]
+}, {
+  name: 'GeneralizedExponential',
+  invalidParams: [
+    [-1, 1, 1], [0, 1, 1],  // a > 0
+    [1, -1, 1], [1, 0, 1],  // b > 0
+    [1, 1, -1], [1, 1, 0]   // c > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.shape(), Param.shape(), Param.shape()]
+  }]
+}, {
+  name: 'GeneralizedExtremeValue',
+  invalidParams: [
+    [0] // c != 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    name: 'positive shape parameter',
+    params: () => [Param.shape()]
+  }, {
+    name: 'negative shape parameter',
+    params: () => [-Param.shape()]
+  }]
+}, {
+  name: 'GeneralizedGamma',
+  invalidParams: [
+    [-1, 1, 1], [0, 1, 1],  // a > 0
+    [1, -1, 1], [1, 0, 1],  // d > 0
+    [1, 1, -1], [1, 1, 0]   // p > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.scale(), Param.shape(), Param.shape()]
+  }]
+}, {
+  name: 'GeneralizedHermite',
+  invalidParams: [
+    [-1, 1, 2],                       // a1 > 0
+    [1, -1, 2],                       // a2 > 0
+    [1, 1, -1], [1, 1, 0], [1, 1, 1]  // m > 1
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.rate(), Param.rate(), Param.degree() + 1]
+  }]
+}, {
+  name: 'GeneralizedLogistic',
+  invalidParams: [
+    [0, -1, 1], [0, 0, 1],  // s > 0
+    [0, 1, -1], [0, 1, 0]   // c > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.location(), Param.scale(), Param.shape()]
+  }]
+}, {
+  name: 'GeneralizedNormal',
+  invalidParams: [
+    [0, -1, 1], [0, 0, 1],  // alpha > 0
+    [0, 1, -1], [0, 1, 0]   // beta > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.location(), Param.scale(), Param.shape()]
+  }]
+}, {
+  name: 'GeneralizedPareto',
+  invalidParams: [
+    [0, -1, 1], [0, 0, 1] // sigma > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    name: 'positive shape parameter',
+    params: () => [Param.location(), Param.scale(), Param.shape()]
+  }, {
+    name: 'negative shape parameter',
+    params: () => [Param.location(), Param.scale(), -Param.shape()]
+  }, {
+    name: 'zero shape parameter',
+    params: () => [Param.location(), Param.scale(), 0]
+  }]
+}, {
+  name: 'Geometric',
+  invalidParams: [
+    [-1], [0], [2]  // 0 < p <= 1
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.prob()]
+  }]
+}, {
+  name: 'Gilbrat',
+  invalidParams: [],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => []
+  }]
+}, {
+  name: 'Gompertz',
+  invalidParams: [
+    [-1, 1], [0, 1],  // eta > 0
+    [1, -1], [1, 0]   // b > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.shape(), Param.scale()]
+  }]
+}, {
+  name: 'Gumbel',
+  invalidParams: [
+    [0, -1], [0, 0] // beta > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.location(), Param.scale()]
+  }]
+}, {
   name: 'IrwinHall',
   invalidParams: [
     [-1], [0] // n > 0

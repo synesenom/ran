@@ -129,9 +129,8 @@ export default (function () {
    *
    * @method trials
    * @param test Test to run.
-   * @param seed {number?} Seed to initialize Math.random with.
    */
-  function trials (test, seed) {
+  function trials (test) {
     let success = 0
     for (let t = 0; t < 5; t++) {
       success += test(t) ? 1 : 0
