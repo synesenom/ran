@@ -8,8 +8,6 @@
 
 # dist
 - ARGUS                                 (rejection sampling)
-- Benford                               (inverse transform)
-- Benktander 1nd kind                   (lambertW)
 - beta geometric
 - Beta negative binomial
 - Bose-Einstein                         http://mathworld.wolfram.com/Bose-EinsteinDistribution.html
@@ -21,14 +19,13 @@
 - Error / exponential power             (generation unknown)
 - Exponentially modified Gaussian (EMG)
 - exponentiated weibull
+- extended negative binomial            https://en.wikipedia.org/wiki/Extended_negative_binomial_distribution
 - Fermi-Dirac                           http://mathworld.wolfram.com/Fermi-DiracDistribution.html
 - Gauss hypergeometric (scipy)
 - generalized beta-prime
 - generalized half-logistic (scipy)
 - K-prime (https://arxiv.org/pdf/1003.4890v1.pdf)
 - K-square (https://arxiv.org/pdf/1003.4890v1.pdf)
-- KolmogorovSmirnov one                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_ksone.html
-- KolmogorovSmirnov two                 https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_kstwobign.html
 - inverse hypergeometric                https://www.vosesoftware.com/riskwiki/InverseHypergeometricdistribution.php
 - lambda-prime (https://arxiv.org/pdf/1003.4890v1.pdf)
 - Landau distribution (scipy)
@@ -38,6 +35,7 @@
 - Normal-exponential-gamma              (compound)
 - Normal inverse Gauss (scipy)
 - Normal product                        http://mathworld.wolfram.com/NormalProductDistribution.html
+- parabolic fractal                     https://en.wikipedia.org/wiki/Parabolic_fractal_distribution
 - Planck                                (CDF unknown)
 - power-lognormal (scipy)
 - stable                                (generation unknown)
