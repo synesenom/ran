@@ -23,7 +23,7 @@ export default class extends Distribution {
     const xmaxi = Math.round(xmax)
     this.p = { xmin: xmini, xmax: xmaxi }
     Distribution.validate({ xmin: xmini, xmax: xmaxi }, [
-      'xmin < xmax'
+      'xmin <= xmax'
     ])
 
     // Set support

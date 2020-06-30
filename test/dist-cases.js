@@ -172,11 +172,11 @@ export default [{
     [100, 1, -1], [100, 1, 0]   // beta > 0
   ],
   foreign: {
-    generator: 'DiscreteUniform',
-    params: s => [Math.min(...s), Math.max(...s)]
+    generator: 'Bates',
+    params: s => [3, Math.min(...s), Math.max(...s)]
   },
   cases: [{
-    params: () => [Param.degree() * 10, Param.shape(), Param.shape()]
+    params: () => [Param.degree() * 5, Param.shape(), Param.shape()]
   }]
 }, {
   name: 'BetaPrime',
@@ -285,7 +285,7 @@ export default [{
   ],
   foreign: {
     generator: 'Bates',
-    params: s => [3, 0, 1]
+    params: () => [3, 0, 1]
   },
   cases: [{
     params: () => [Param.shape()]
@@ -302,6 +302,65 @@ export default [{
   },
   cases: [{
     params: () => [Param.shape(), Param.shape()]
+  }]
+}, {
+  name: 'Categorical',
+  invalidParams: [
+    [[-1, 1, 1], 0],  // w_i > 0
+  ],
+  foreign: {
+    generator: 'Bates',
+    params: s => () => [3, Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    name: 'small n',
+    params: () => [Array.from({length: int(0, 1)}, Math.random)]
+  }, {
+    name: 'moderate n',
+    params: () => [Array.from({ length: int(10, 100) }, Math.random)]
+  }, {
+    name: 'large n',
+    params: () => [Array.from({ length: int(101, 120) }, Math.random)]
+  }],
+}, {
+  name: 'Cauchy',
+  invalidParams: [
+    [0, -1], [0, 0]  // gamma > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.location(), Param.scale()]
+  }]
+}, {
+  name: 'Chi',
+  invalidParams: [
+    [-1], [0] // k > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    name: 'k = 1',
+    params: () => [1],
+  }, {
+    name: 'k > 1',
+    params: () => [Param.degree()]
+  }],
+}, {
+  name: 'Chi2',
+  invalidParams: [
+    [-1], [0] // k > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.degree()]
   }]
 }, {
   name: 'IrwinHall',

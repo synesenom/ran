@@ -9,7 +9,8 @@ import testCases from './dist-cases'
 
 // Constants
 const LAPS = 1000
-const LAPS_2 = 100
+// TODO Decrease sample size.
+const LAPS_2 = 1000
 
 
 const UnitTests = {
@@ -442,10 +443,7 @@ const Param = {
   }
 }
 
-console.log(new dist.Cauchy().sample(2))
-
 describe('dist', () => {
-  return
   // Base class
   describe('Distribution', () => {
     const invalid = new InvalidDiscrete()
@@ -570,47 +568,6 @@ describe('dist', () => {
       [10, 1, -1], [10, 1, 0]   // beta > 0
     ]
   }*/{
-    name: 'Categorical',
-    cases: [{
-      desc: 'small n',
-      p: () => [Array.from({ length: int(0, 1) }, Math.random)],
-      pi: [
-        [[-1, 1, 1], 0],    // w_i > 0
-        [[], 0], [[1], 0]   // n_w > 1
-      ]
-    }, {
-      desc: 'moderate n',
-      p: () => [Array.from({ length: int(10, 100) }, Math.random)]
-    }, {
-      desc: 'large n',
-      p: () => [Array.from({ length: int(101, 120) }, Math.random)],
-      skip: ['test-foreign']
-    }]
-  }, {
-    name: 'Cauchy',
-    p: () => [Param.location(), Param.scale()],
-    pi: [
-      [0, -1], [0, 0]  // gamma > 0
-    ]
-  }, {
-    name: 'Chi',
-    cases: [{
-      desc: 'k = 1',
-      p: () => [1],
-      pi: [
-        [-1], [0] // k > 0
-      ]
-    }, {
-      desc: 'k > 1',
-      p: () => [Param.degree()]
-    }],
-  }, {
-    name: 'Chi2',
-    p: () => [Param.degree()],
-    pi: [
-      [-1], [0] // k > 0
-    ]
-  }, {
     name: 'Dagum',
     p: () => [Param.shape(), Param.shape(), Param.scale()],
     pi: [
@@ -630,7 +587,7 @@ describe('dist', () => {
     name: 'DiscreteUniform',
     p: () => [int(10), int(11, 100)],
     pi: [
-      [100, 100], [105, 100]  // xmin < xmax
+      [105, 100]  // xmin <= xmax
     ],
     skip: ['test-foreign']
   }, {
@@ -1361,6 +1318,7 @@ describe('dist', () => {
       [1, -1], [1, 0] // N > 0
     ]
   }].forEach(d => {
+    //return
     //if (d.name !== 'Alpha') return
     describe(d.name, () => {
       if (typeof d.cases === 'undefined') {

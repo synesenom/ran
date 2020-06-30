@@ -23,7 +23,7 @@ export default class extends Distribution {
     Distribution.validate({ w_i: (() => {
         const allPositive = weights.reduce((acc, d) => acc && (d >= 0), true)
         return allPositive ? 1 : -1
-      }), min }, [
+      })(), min }, [
       'w_i >= 0'
     ])
 

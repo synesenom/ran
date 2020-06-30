@@ -132,8 +132,6 @@ export default (function () {
    * @param seed {number?} Seed to initialize Math.random with.
    */
   function trials (test, seed) {
-    // Seed Math.random for controlled random tests
-    Math.random = seedrandom(typeof seed !== 'undefined' ? seed : 7)
     let success = 0
     for (let t = 0; t < 5; t++) {
       success += test(t) ? 1 : 0
@@ -141,13 +139,6 @@ export default (function () {
     assert(success >= 3, `Failed ${5 - success} out of ${5}`)
   }
 
-  /**
-   * Repeats a test several times.
-   *
-   * @method repeat
-   * @param test
-   * @param times
-   */
   function repeat (test, times) {
     for (let i = 0; i < times; i++) {
       test()
