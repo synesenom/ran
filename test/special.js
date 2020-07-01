@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { besselI, besselInu } from '../src/special/bessel'
+import { besselInu } from '../src/special/bessel'
 import { erf } from '../src/special/error'
 import { f11 } from '../src/special/hypergeometric'
 import gamma from '../src/special/gamma'
@@ -11,14 +11,9 @@ import { lambertW0, lambertW1m } from '../src/special/lambert-w'
 import marcumQ from '../src/special/marcum-q'
 import owenT from '../src/special/owen-t'
 import riemannZeta from '../src/special/riemann-zeta'
-import utils from './test-utils'
+import { equal, repeat } from './test-utils'
 
 const LAPS = 100
-const PRECISION = 1e-10
-
-function equal (x, y) {
-  return Math.abs((x - y) / y) < PRECISION
-}
 
 describe('special', () => {
   /*
@@ -30,7 +25,7 @@ describe('special', () => {
     })
 
     it('should give the harmonic number for integers', () => {
-      utils.repeat(() => {
+      repeat(() => {
         let z = Math.floor(Math.random() * 100) + 1
         assert(equal(digamma(z), digamma(z + 1) - 1 / z))
       }, LAPS)
@@ -68,7 +63,7 @@ describe('special', () => {
   describe('f11', () => {
     describe('|z| < 50', () => {
       it('f11(0, b, z) = 1', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let b = Math.random()
           let z = Math.random() * 40
           assert(equal(f11(0, b, z), 1))
@@ -76,7 +71,7 @@ describe('special', () => {
       })
 
       it('f11(b, b, z) = exp(z)', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let b = Math.random() * 10
           let z = Math.random() * 40
           assert(equal(f11(b, b, z), Math.exp(z)))
@@ -84,28 +79,28 @@ describe('special', () => {
       })
 
       it('f11(2, 1, z) = (1 + z) * exp(z)', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let z = Math.random() * 40
           assert(equal(f11(2, 1, z), (1 + z) * Math.exp(z)))
         }, LAPS)
       })
 
       it('f11(1, 2, z) = (exp(z) - 1) / z', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let z = Math.random() * 40
           assert(equal(f11(1, 2, z), (Math.exp(z) - 1) / z))
         }, LAPS)
       })
 
       it('(2z / sqrt(pi)) * f11(0.5, 1.5, -z^2) = erf(z)', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let z = Math.random()
           assert(equal(2 * z * f11(0.5, 1.5, -z * z) / Math.sqrt(Math.PI), erf(z)))
         }, LAPS)
       })
 
       it('f11(a, 2a, z) = exp(z/2) (z/4)^(0.5 - a) gamma(a + 0.5) I(a - 0.5; z/2)', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let a = Math.random() * 10
           let z = Math.random() * 40
           assert(equal(
@@ -116,7 +111,7 @@ describe('special', () => {
       })
 
       it('a f11(a+1, b, z) = (b - a) f11(a-1, b, z) + (2a - b + z) f11(a, b, z)', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let a = Math.random() * 10
           let b = Math.random() * 10
           let z = Math.random() * 40
@@ -130,7 +125,7 @@ describe('special', () => {
 
     describe('|z| >= 50', () => {
       it('f11(0, b, z) = 1', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let b = Math.random()
           let z = Math.random() * 40 + 50
           assert(equal(f11(0, b, z), 1))
@@ -138,7 +133,7 @@ describe('special', () => {
       })
 
       it('f11(b, b, z) = exp(z)', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let b = Math.random() * 10
           let z = Math.random() * 40 + 50
           assert(equal(f11(b, b, z), Math.exp(z)))
@@ -146,21 +141,21 @@ describe('special', () => {
       })
 
       it('f11(2, 1, z) = (1 + z) * exp(z)', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let z = Math.random() * 40 + 50
           assert(equal(f11(2, 1, z), (1 + z) * Math.exp(z)))
         }, LAPS)
       })
 
       it('f11(1, 2, z) = (exp(z) - 1) / z', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let z = Math.random() * 40 + 50
           assert(equal(f11(1, 2, z), (Math.exp(z) - 1) / z))
         }, LAPS)
       })
 
       it('f11(a, 2a, z) = exp(z/2) (z/4)^(0.5 - a) gamma(a + 0.5) I(a - 0.5; z/2)', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let a = Math.random() * 10
           let z = Math.random() * 40 + 50
           assert(equal(
@@ -171,7 +166,7 @@ describe('special', () => {
       })
 
       it('a f11(a+1, b, z) = (b - a) f11(a-1, b, z) + (2a - b + z) f11(a, b, z)', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let a = Math.random() * 10 + 3
           let b = Math.random() * 10 + 3
           let z = Math.random() * 40 + 50
@@ -186,7 +181,7 @@ describe('special', () => {
 
   describe('hurwitzZeta, riemannZeta', () => {
     it('riemannZeta(s) - hurwitzZeta(s, n+1) = H(s, n)', () => {
-      utils.repeat(() => {
+      repeat(() => {
         let s = Math.random() * 10 + 1
         let sum = 0
         for (let n = 1; n < 100; n++) {
@@ -212,7 +207,7 @@ describe('special', () => {
 
   describe('gammaLowerIncomplete, gammaUpperIncomplete', () => {
     it('should vanish below 0', () => {
-      utils.repeat(() => {
+      repeat(() => {
         let s = 2 + Math.random() * 10
 
         let x = -10
@@ -220,7 +215,7 @@ describe('special', () => {
       }, LAPS)
     })
     it('should be equal to exp(-x) for s = 1', () => {
-      utils.repeat(() => {
+      repeat(() => {
         let x = Math.random() * 100
 
         let gui = gammaUpperIncomplete(1, x) * gamma(1)
@@ -229,7 +224,7 @@ describe('special', () => {
     })
 
     it('should be equal to sqrt(pi) * erf(sqrt(x)) for s = 1/2', () => {
-      utils.repeat(() => {
+      repeat(() => {
         let x = Math.random() * 100
 
         let gli = gammaLowerIncomplete(0.5, x) * gamma(0.5)
@@ -263,7 +258,7 @@ describe('special', () => {
 
   describe('lambertW0', () => {
     it('should satisfy the W * exp(W) = x equation', () => {
-      utils.repeat(() => {
+      repeat(() => {
         let x = Math.random() * 10
         let w = lambertW0(x)
         assert(equal(w * Math.exp(w), x))
@@ -273,7 +268,7 @@ describe('special', () => {
 
   describe('lambertW1m', () => {
     it('should satisfy the W * exp(W) = x equation', () => {
-      utils.repeat(() => {
+      repeat(() => {
         let x = -1 * Math.random() / Math.E
         let w = lambertW1m(x)
         assert(equal(w * Math.exp(w), x))
@@ -295,7 +290,7 @@ describe('special', () => {
 
       describe('y = 1', () => {
         it('should satisfy the recurrence relation', () => {
-          utils.repeat(() => {
+          repeat(() => {
             let x = 0
             let y = 40 + Math.random() * 60
             let mu = 2 + Math.random() * 5
@@ -309,7 +304,7 @@ describe('special', () => {
     describe('series expansion', () => {
       describe('Q', () => {
         it('should satisfy the recurrence relation', () => {
-          utils.repeat(() => {
+          repeat(() => {
             let x = Math.random() * 30
             let y = 40 + Math.random() * 60
             let mu = 2 + Math.random() * 5
@@ -330,7 +325,7 @@ describe('special', () => {
 
       describe('P', () => {
         it('should satisfy the recurrence relation', () => {
-          utils.repeat(() => {
+          repeat(() => {
             let x = Math.random() * 30
             let y = 10 + Math.random() * 10
             let mu = 30 + Math.random() * 5
@@ -354,7 +349,7 @@ describe('special', () => {
     describe('asymptotic expansion for large xi', () => {
       describe('Q', () => {
         it('should satisfy the recurrence relation', () => {
-          utils.repeat(() => {
+          repeat(() => {
             let x = 40 + Math.random() * 10
             let y = 60 + Math.random() * 10
             let mu = 2 + Math.random() * 5
@@ -378,7 +373,7 @@ describe('special', () => {
 
       describe('P', () => {
         it('should satisfy the recurrence relation', () => {
-          utils.repeat(() => {
+          repeat(() => {
             let x = 40 + Math.random() * 10
             let y = 30 + Math.random() * 10
             let mu = 2 + Math.random() * 5
@@ -404,7 +399,7 @@ describe('special', () => {
     /*describe('recurrence relation', () => {
       describe('Q', () => {
         it('should satisfy the recurrence relation', () => {
-          utils.repeat(() => {
+          repeat(() => {
             let x = 40 + Math.random() * 10
             let mu = 100 + Math.random() * 10
             let s = Math.sqrt(4 * x + 2 * mu) - 5
@@ -431,7 +426,7 @@ describe('special', () => {
 
       describe('P', () => {
         it('should satisfy the recurrence relation', () => {
-          utils.repeat(() => {
+          repeat(() => {
             let x = 40 + Math.random() * 10
             let mu = 100 + Math.random() * 10
             let s = Math.sqrt(4 * x + 2 * mu) - 5

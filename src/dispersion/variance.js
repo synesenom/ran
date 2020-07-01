@@ -4,7 +4,7 @@
  * @method variance
  * @memberOf ran.dispersion
  * @param {number[]} values Array of values to calculate variance for.
- * @returns {(number|undefined)} Variance of the values if there are any, undefined otherwise.
+ * @returns {(number|undefined)} Variance of the values if there are more than two, undefined otherwise.
  * @example
  *
  * ran.dispersion.variance([])
@@ -22,7 +22,7 @@ export default function (values) {
     let diff = 0
     let mean = 0
     let M = 0
-    for (let x of values) {
+    for (const x of values) {
       diff = x - mean
       mean += diff / ++n
       M += diff * (x - mean)

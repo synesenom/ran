@@ -1,11 +1,9 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import utils from './test-utils'
+import { repeat } from './test-utils'
 import { lambertW0 } from '../src/special/lambert-w'
-import bracketing from '../src/algorithms/bracketing'
-import brent from '../src/algorithms/brent'
-import newton from '../src/algorithms/newton'
-import neumaier from '../src/algorithms/neumaier'
+import * as algorithms from '../src/algorithms'
+import { int, shuffle } from '../src/core'
 
 const LAPS = 100
 const PRECISION = 10 * Number.EPSILON
@@ -13,9 +11,9 @@ const PRECISION = 10 * Number.EPSILON
 describe('algorithms', () => {
   describe('.bracketing()', () => {
     it('should return undefined if initial bracket is invalid', () => {
-      utils.repeat(() => {
+      repeat(() => {
         const c = Math.random() * 10
-        const bracket = bracketing(
+        const bracket = algorithms.bracketing(
           t => t * Math.exp(t) - c,
           lambertW0(c) + 1,
           lambertW0(c) + 1
@@ -25,9 +23,9 @@ describe('algorithms', () => {
     })
 
     it('should find an appropriate bracket for exp(-x) = c x', () => {
-      utils.repeat(() => {
+      repeat(() => {
         const c = Math.random() * 10
-        const bracket = bracketing(
+        const bracket = algorithms.bracketing(
           t => t * Math.exp(t) - c,
           lambertW0(c) + 1,
           lambertW0(c) + 2
@@ -37,8 +35,8 @@ describe('algorithms', () => {
     })
 
     it('should return the specified boundaries if root was not found', () => {
-      utils.repeat(() => {
-        const bracket = bracketing(
+      repeat(() => {
+        const bracket = algorithms.bracketing(
           t => Math.exp(-t) + 1,
           0,
           2
@@ -50,9 +48,9 @@ describe('algorithms', () => {
 
   describe('.brent()', () => {
     it('should return undefined if brackets are wrong', () => {
-      utils.repeat(() => {
+      repeat(() => {
         const c = Math.random() * 10
-        const sol = brent(
+        const sol = algorithms.brent(
           t => t * Math.exp(t) - c,
           lambertW0(c) + 1,
           lambertW0(c) + 2
@@ -61,9 +59,9 @@ describe('algorithms', () => {
       }, LAPS)
     })
     it('should find the solution of exp(-x) = c x', () => {
-      utils.repeat(() => {
+      repeat(() => {
         const c = Math.random() * 10
-        const sol = brent(
+        const sol = algorithms.brent(
           t => t * Math.exp(t) - c,
           lambertW0(c) - 1,
           lambertW0(c) + 1
@@ -75,9 +73,9 @@ describe('algorithms', () => {
 
   describe('.newton()', () => {
     it('should find the solution of exp(-x) = c x', () => {
-      utils.repeat(() => {
+      repeat(() => {
         const c = Math.random() * 10
-        const sol = newton(
+        const sol = algorithms.newton(
           t => t * Math.exp(t) - c,
           t => Math.exp(t) * (1 + t),
           Math.random() * 10
@@ -89,24 +87,35 @@ describe('algorithms', () => {
 
   describe('.neumaier()', () => {
     it('should sum integers', () => {
-      utils.repeat(() => {
+      repeat(() => {
         const n = Math.floor(2 + Math.random() * 100)
         assert.equal(
-          neumaier(Array.from({ length: n + 1 }, (d, i) => i)),
+          algorithms.neumaier(Array.from({ length: n + 1 }, (d, i) => i)),
           n * (n + 1) / 2
         )
       }, LAPS)
     })
 
     it('should sum powers of 5', () => {
-      utils.repeat(() => {
+      repeat(() => {
         const n = Math.floor(2 + Math.random() * 100)
 
         const a = n * (n + 1) / 2
         assert.equal(
-          neumaier(Array.from({ length: n + 1 }, (d, i) => i * i * i * i * i)),
+          algorithms.neumaier(Array.from({ length: n + 1 }, (d, i) => i * i * i * i * i)),
           (4 * a * a * a - a * a) / 3
         )
+      }, LAPS)
+    })
+  })
+
+  describe('.quickselect()', () => {
+    it('should select the k-th element', () => {
+      repeat(() => {
+        const values = Array.from({length: 100}, Math.random)
+        const k = int(50, 99)
+        const item = values.sort((a, b) => a - b)[k]
+        assert(algorithms.quickselect(shuffle(values), k) === item)
       }, LAPS)
     })
   })

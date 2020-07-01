@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import utils from './test-utils'
+import { repeat, trials, ksTest, chiTest, Tests } from './test-utils'
 import { float, int } from '../src/core'
 import * as dist from '../src/dist'
 import InvalidDiscrete from '../src/dist/_invalid'
@@ -24,7 +24,7 @@ const UnitTests = {
 
   seed (tc) {
     it('should give the same sample for the same seed', () => {
-      utils.trials(() => {
+      trials(() => {
         const self = new dist[tc.name]()
         const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
         self.seed(s)
@@ -36,7 +36,7 @@ const UnitTests = {
     })
 
     it('should give different samples for different seeds', () => {
-      utils.trials(() => {
+      trials(() => {
         const self = new dist[tc.name]()
         self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
         const values1 = self.sample(LAPS_2)
@@ -49,7 +49,7 @@ const UnitTests = {
 
   loadAndSave (tc) {
     it('loaded state should continue where it was saved at', () => {
-      utils.trials(() => {
+      trials(() => {
         // Create generator and seed
         const generator = new dist[tc.name]()
         const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
@@ -73,7 +73,7 @@ const UnitTests = {
     })
 
     it('loaded state should copy full state of generator', () => {
-      utils.trials(() => {
+      trials(() => {
         // Create seeded generator
         const generator1 = new dist[tc.name]()
         generator1.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
@@ -106,35 +106,35 @@ const UnitTests = {
     cases.forEach(c => {
       describe(c.name, () => {
         it('pdf should return valid numbers', () => {
-          utils.trials(() => utils.Tests.pdfType(c.gen(), LAPS_2))
+          trials(() => Tests.pdfType(c.gen(), LAPS_2))
         })
         it('pdf should be non-negative', () => {
-          utils.trials(() => utils.Tests.pdfRange(c.gen(), LAPS_2))
+          trials(() => Tests.pdfRange(c.gen(), LAPS_2))
         })
         it('cdf should return valid numbers', () => {
-          utils.trials(() => utils.Tests.cdfType(c.gen(), LAPS_2))
+          trials(() => Tests.cdfType(c.gen(), LAPS_2))
         })
         it('cdf should be in [0, 1]', () => {
-          utils.trials(() => utils.Tests.cdfRange(c.gen(), LAPS_2))
+          trials(() => Tests.cdfRange(c.gen(), LAPS_2))
         })
         it('cdf should be non-decreasing', () => {
-          utils.trials(() => utils.Tests.cdfMonotonicity(c.gen(), LAPS_2))
+          trials(() => Tests.cdfMonotonicity(c.gen(), LAPS_2))
         })
         it('pdf (pmf) should be the differential (difference) of cdf', () => {
-          utils.trials(() => utils.Tests.pdf2cdf(c.gen(), LAPS_2))
+          trials(() => Tests.pdf2cdf(c.gen(), LAPS_2))
         })
         // Quantile tests use only 10% of the normal sample size due to computational complexity.
         it('quantile should return valid numbers', () => {
-          utils.trials(() => utils.Tests.qType(c.gen(), LAPS_2 / 10))
+          trials(() => Tests.qType(c.gen(), LAPS_2 / 10))
         })
         it('quantile should be within support', () => {
-          utils.trials(() => utils.Tests.qRange(c.gen(), LAPS_2 / 10))
+          trials(() => Tests.qRange(c.gen(), LAPS_2 / 10))
         })
         it('quantile should be non-decreasing', () => {
-          utils.trials(() => utils.Tests.qMonotonicity(c.gen(), LAPS_2 / 10))
+          trials(() => Tests.qMonotonicity(c.gen(), LAPS_2 / 10))
         })
         it('quantile should satisfy Galois intequalities', () => {
-          utils.trials(() => utils.Tests.qGalois(c.gen(), LAPS_2 / 10))
+          trials(() => Tests.qGalois(c.gen(), LAPS_2 / 10))
         })
       })
     })
@@ -153,14 +153,14 @@ const UnitTests = {
     cases.forEach(c => {
       describe(c.name, () => {
         it('sample should contain valid numbers', () => {
-          utils.trials(() => {
+          trials(() => {
             const sample = c.gen().sample(LAPS_2)
             return sample.reduce((acc, d) => acc && Number.isFinite(d) && isFinite(d) && !isNaN(d), true)
           })
         })
 
         it('sample should be within the range of the support', () => {
-          utils.trials(() => {
+          trials(() => {
             const generator = c.gen()
             const supp = generator.support()
             const sample = generator.sample(LAPS_2)
@@ -173,11 +173,11 @@ const UnitTests = {
         })
 
         it('sample values should be distributed correctly', () => {
-          utils.trials(() => {
+          trials(() => {
             const generator = c.gen()
             return generator.type() === 'continuous'
-              ? utils.ksTest(generator.sample(LAPS_2), x => generator.cdf(x))
-              : utils.chiTest(generator.sample(LAPS_2), x => generator.pdf(x),
+              ? ksTest(generator.sample(LAPS_2), x => generator.cdf(x))
+              : chiTest(generator.sample(LAPS_2), x => generator.pdf(x),
                 Object.keys(generator.save().params).length)
           })
         })
@@ -198,14 +198,14 @@ const UnitTests = {
     cases.forEach(c => {
       describe(c.name, () => {
         it('should pass for own test', () => {
-          utils.trials(() => {
+          trials(() => {
             const generator = c.gen()
             return generator.test(generator.sample(LAPS_2)).passed
           })
         })
 
         it('should reject foreign distribution', () => {
-          utils.trials(() => {
+          trials(() => {
             const generator = c.gen()
             const sample = generator.sample(LAPS_2)
             return !(new dist[tc.foreign.generator](...tc.foreign.params(sample))).test(sample).passed
@@ -341,14 +341,14 @@ describe('dist', () => {
     const p = () => [float(-10, 10)]
     describe('.sample()', () => {
       it('should generate values with Degenerate distribution', () => {
-        utils.trials(() => {
+        trials(() => {
           const x0 = p()
           let degenerate = new dist.Degenerate(...x0)
           const samples = degenerate.sample(LAPS)
           return samples.reduce((s, d) => s && d === x0[0], true)
         })
 
-        utils.trials(() => {
+        trials(() => {
           let degenerate = new dist.Degenerate()
           const samples = degenerate.sample(LAPS)
           return samples.reduce((s, d) => s && d === 0, true)
@@ -358,7 +358,7 @@ describe('dist', () => {
 
     describe('.pdf(), .cdf()', () => {
       it('differentiating cdf should give pdf', () => {
-        utils.repeat(() => {
+        repeat(() => {
           const x0 = p()
           let degenerate = new dist.Degenerate(...x0)
           assert.equal(degenerate.pdf(x0[0]), 1)

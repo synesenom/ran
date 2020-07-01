@@ -10,7 +10,7 @@ describe('dispersion', () => {
   describe('.variance()', () => {
     it('should compute the unbiased variance', () => {
       repeat(() => {
-        const values = Array.from({length: int(2, SAMPLE_SIZE)}, Math.random)
+        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
         let mean = values.reduce((m, d) => d + m, 0) / values.length
         let variance = values.reduce((v, d) => (d - mean) * (d - mean) + v, 0) / (values.length - 1)
         assert(equal(dispersion.variance(values), variance))
@@ -27,7 +27,7 @@ describe('dispersion', () => {
   describe('.stdev()', () => {
     it('should compute the unbiased standard deviation', () => {
       repeat(() => {
-        const values = Array.from({length: int(2, SAMPLE_SIZE)}, Math.random)
+        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
         let mean = values.reduce((m, d) => d + m, 0) / values.length
         let stdev = Math.sqrt(values.reduce((v, d) => (d - mean) * (d - mean) + v, 0) / (values.length - 1))
         assert(equal(dispersion.stdev(values), stdev))

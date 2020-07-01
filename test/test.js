@@ -4,7 +4,7 @@ import { int, float } from '../src/core'
 import Poisson from '../src/dist/poisson'
 import Normal from '../src/dist/normal'
 import * as test from '../src/test'
-import utils from './test-utils'
+import { trials } from './test-utils'
 
 const SAMPLE_SIZE = 100
 
@@ -23,7 +23,7 @@ describe('test', () => {
     })
 
     it('should pass for discrete samples of the same variance', () => {
-      utils.trials(() => {
+      trials(() => {
         let k = int(2, 5)
         let lambda = int(1, 30)
         return test.bartlett(Array.from({ length: k }, () => (new Poisson(lambda)).sample(SAMPLE_SIZE))).passed
@@ -31,14 +31,14 @@ describe('test', () => {
     })
 
     it('should reject for discrete samples of different variance', () => {
-      utils.trials(() => {
+      trials(() => {
         let k = int(3, 5)
         return !test.bartlett(Array.from({ length: k }, () => (new Poisson(1 + Math.random() * 30)).sample(SAMPLE_SIZE))).passed
       }, 7)
     })
 
     it('should pass for continuous samples of the same variance', () => {
-      utils.trials(() => {
+      trials(() => {
         let k = int(2, 5)
         let mu = float(0, 5)
         let sigma = float(1, 10)
@@ -47,7 +47,7 @@ describe('test', () => {
     })
 
     it('should reject for continuous samples of different variance', () => {
-      utils.trials(() => {
+      trials(() => {
         let k = int(3, 5)
         return !test.bartlett(Array.from({ length: k }, () => (new Normal(float(0, 5), float(1, 10))).sample(SAMPLE_SIZE))).passed
       }, 7)
@@ -62,7 +62,7 @@ describe('test', () => {
     })
 
     it('should pass for samples of the same discrete distribution', () => {
-      utils.trials(() => {
+      trials(() => {
         let lambda = int(1, 10)
         let sample1 = (new Poisson(lambda)).sample(SAMPLE_SIZE)
         let sample2 = (new Poisson(lambda)).sample(SAMPLE_SIZE)
@@ -71,7 +71,7 @@ describe('test', () => {
     })
 
     it('should reject for samples of different discrete distributions', () => {
-      utils.trials(() => {
+      trials(() => {
         let lambda = int(1, 10)
         let sample1 = (new Poisson(lambda)).sample(SAMPLE_SIZE)
         let sample2 = (new Poisson(lambda + 10)).sample(SAMPLE_SIZE)
@@ -80,7 +80,7 @@ describe('test', () => {
     })
 
     it('should pass for samples of the same continuous distribution', () => {
-      utils.trials(() => {
+      trials(() => {
         let mu = float(0, 5)
         let sigma = float(1, 10)
         let sample1 = (new Normal(mu, sigma)).sample(SAMPLE_SIZE)
@@ -90,7 +90,7 @@ describe('test', () => {
     })
 
     it('should reject for samples of different continuous distributions', () => {
-      utils.trials(() => {
+      trials(() => {
         let mu = float(0, 5)
         let sigma = float(1, 10)
         let sample1 = (new Normal(mu, sigma)).sample(SAMPLE_SIZE)

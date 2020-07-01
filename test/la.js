@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import utils from './test-utils'
+import { repeat } from './test-utils'
 import * as la from '../src/la'
 
 const EPSILON = 1e-10
@@ -13,7 +13,7 @@ describe('la', () => {
       })
 
       it('should create an n-dimensional unit vector', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let n = 1 + Math.floor(Math.random() * 100)
           assert.deepEqual(
             new la.Vector(n),
@@ -29,7 +29,7 @@ describe('la', () => {
 
     describe('.v()', () => {
       it('should return vector as array', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let n = 1 + Math.floor(Math.random() * 100)
           let arr = Array.from({ length: n }, () => Math.random())
           assert.deepEqual(
@@ -45,7 +45,7 @@ describe('la', () => {
         let n = 2 + Math.floor(Math.random() * 100)
         let arr = Array.from({ length: n }, () => Math.random())
         let v = new la.Vector(arr)
-        utils.repeat(() => {
+        repeat(() => {
           let i = Math.floor(Math.random() * n)
           assert.deepEqual(v.i(i), arr[i])
         }, 100)
@@ -55,7 +55,7 @@ describe('la', () => {
         let n = 2 + Math.floor(Math.random() * 10)
         let arr = Array.from({ length: n }, () => Math.random())
         let v = new la.Vector(arr)
-        utils.repeat(() => {
+        repeat(() => {
           let i = Math.floor(Math.random() * n)
           let s = Math.random()
           v.i(i, s)
@@ -68,7 +68,7 @@ describe('la', () => {
     describe('.f()', () => {
       it('should apply a function element-wise', () => {
         let funcs = [Math.sqrt, Math.cos, Math.sin, Math.exp, Math.log]
-        utils.repeat(() => {
+        repeat(() => {
           let n = 2 + Math.floor(Math.random() * 10)
           let arr = Array.from({ length: n }, () => Math.random())
           let func = funcs[Math.floor(Math.random() * funcs.length)]
@@ -82,7 +82,7 @@ describe('la', () => {
 
     describe('.scale()', () => {
       it('should scale the vector element-wise', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let s = Math.random()
           let n = 1 + Math.floor(Math.random() * 100)
           let arr = Array.from({ length: n }, () => Math.random())
@@ -96,7 +96,7 @@ describe('la', () => {
 
     describe('.add()', () => {
       it('should add two vectors', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let n = 1 + Math.floor(Math.random() * 100)
           let arr1 = Array.from({ length: n }, () => Math.random())
           let arr2 = Array.from({ length: n }, () => Math.random())
@@ -110,7 +110,7 @@ describe('la', () => {
 
     describe('.sub()', () => {
       it('should subtract two vectors', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let n = 1 + Math.floor(Math.random() * 100)
           let arr1 = Array.from({ length: n }, () => Math.random())
           let arr2 = Array.from({ length: n }, () => Math.random())
@@ -124,7 +124,7 @@ describe('la', () => {
 
     describe('.dot()', () => {
       it('should compute the dot product of two vectors', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let n = 1 + Math.floor(Math.random() * 100)
           let arr1 = Array.from({ length: n }, () => Math.random())
           let arr2 = Array.from({ length: n }, () => Math.random())
@@ -138,7 +138,7 @@ describe('la', () => {
 
     describe('.outer()', () => {
       it('should compute the outer product of two vectors', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let n = 1 + Math.floor(Math.random() * 10)
           let arr1 = Array.from({ length: n }, () => Math.random())
           let arr2 = Array.from({ length: n }, () => Math.random())
@@ -160,7 +160,7 @@ describe('la', () => {
       })
 
       it('should create an nxn identity matrix', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let n = 1 + Math.floor(Math.random() * 10)
           assert.deepEqual(
             new la.Matrix(n),
@@ -178,7 +178,7 @@ describe('la', () => {
 
     describe('.m()', () => {
       it('should return matrix as an array of arrays', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let n = 1 + Math.floor(Math.random() * 10)
           let arr = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
           assert.deepEqual(
@@ -194,7 +194,7 @@ describe('la', () => {
         let n = 2 + Math.floor(Math.random() * 10)
         let arr = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
         let M = new la.Matrix(arr)
-        utils.repeat(() => {
+        repeat(() => {
           let i = Math.floor(Math.random() * n)
           let j = Math.floor(Math.random() * n)
           assert.deepEqual(M.ij(i, j), arr[i][j])
@@ -205,7 +205,7 @@ describe('la', () => {
         let n = 2 + Math.floor(Math.random() * 10)
         let arr = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
         let M = new la.Matrix(arr)
-        utils.repeat(() => {
+        repeat(() => {
           let i = Math.floor(Math.random() * n)
           let j = Math.floor(Math.random() * n)
           let s = Math.random()
@@ -218,7 +218,7 @@ describe('la', () => {
 
     describe('.t()', () => {
       it('should transpose the matrix', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let n = 1 + Math.floor(Math.random() * 10)
           let arr = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
           assert.deepEqual(
@@ -229,7 +229,7 @@ describe('la', () => {
       })
 
       it('should return original matrix after two transposition', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let n = 1 + Math.floor(Math.random() * 10)
           let arr = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
           let M = new la.Matrix(arr)
@@ -241,7 +241,7 @@ describe('la', () => {
     describe('.f()', () => {
       it('should apply a function element-wise', () => {
         let funcs = [Math.sqrt, Math.cos, Math.sin, Math.exp, Math.log]
-        utils.repeat(() => {
+        repeat(() => {
           let n = 1 + Math.floor(Math.random() * 10)
           let arr = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
           let func = funcs[Math.floor(Math.random() * funcs.length)]
@@ -255,7 +255,7 @@ describe('la', () => {
 
     describe('.scale()', () => {
       it('should scale a matrix element-wise', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let s = Math.random()
           let n = 1 + Math.floor(Math.random() * 10)
           let arr = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
@@ -269,7 +269,7 @@ describe('la', () => {
 
     describe('.add()', () => {
       it('should add two matrices', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let n = 1 + Math.floor(Math.random() * 10)
           let arr1 = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
           let arr2 = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
@@ -283,7 +283,7 @@ describe('la', () => {
 
     describe('.sub()', () => {
       it('should subtract two matrices', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let n = 1 + Math.floor(Math.random() * 10)
           let arr1 = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
           let arr2 = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
@@ -297,7 +297,7 @@ describe('la', () => {
 
     describe('.act()', () => {
       it('should act a matrix on a vector', () => {
-        utils.repeat(() => {
+        repeat(() => {
           let n = 1 + Math.floor(Math.random() * 10)
           let arr1 = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
           let arr2 = Array.from({ length: n }, () => Math.random())
@@ -316,7 +316,7 @@ describe('la', () => {
         let M = new la.Matrix(Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random())))
         let N = new la.Matrix(Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random())))
         let C = M.mult(N)
-        utils.repeat(() => {
+        repeat(() => {
           let r = new la.Vector(Array.from({ length: n }, () => Math.random() > 0.5 ? 1 : 0))
           let P = M.act(N.act(r)).add(C.act(r).scale(-1))
           assert.deepEqual(P.v().reduce((s, d) => s && Math.abs(d) < EPSILON, true), true)
@@ -326,7 +326,7 @@ describe('la', () => {
 
     describe('.ldl()', () => {
       function perform (test) {
-        utils.repeat(() => {
+        repeat(() => {
           let n = 1 + Math.floor(Math.random() * 10)
           let arr = Array.from({ length: n }, () => Array.from({ length: n }, () => 0))
           for (let i = 0; i < n; i++) {

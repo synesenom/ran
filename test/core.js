@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import utils from './test-utils'
+import { trials, ksTest, chiTest } from './test-utils'
 import * as core from '../src/core'
 
 
@@ -16,7 +16,7 @@ function add (dist, value) {
 describe('core', () => {
   describe('.seed()', () => {
     it('should return the same sequence of random numbers for the same numerical seed', () => {
-      utils.trials(() => {
+      trials(() => {
         const s = Math.floor(Math.random() * 10000)
         core.seed(s)
         const values1 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
@@ -27,7 +27,7 @@ describe('core', () => {
     })
 
     it('should return the same sequence of random numbers for the same string seed', () => {
-      utils.trials(() => {
+      trials(() => {
         const s = Array.from({ length: 32 }, () => CHARS.charAt(Math.floor(Math.random() * CHARS.length))).join('')
         core.seed(s)
         const values1 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
@@ -38,7 +38,7 @@ describe('core', () => {
     })
 
     it('should return different sequence of random numbers for different numerical seeds', () => {
-      utils.trials(() => {
+      trials(() => {
         core.seed(Math.floor(Math.random() * 10000))
         const values1 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
         core.seed(Math.floor(Math.random() * 10000))
@@ -48,7 +48,7 @@ describe('core', () => {
     })
 
     it('should return different sequence of random numbers for different numerical seeds', () => {
-      utils.trials(() => {
+      trials(() => {
         core.seed(Array.from({ length: 32 }, () => CHARS.charAt(Math.floor(Math.random() * CHARS.length))).join(''))
         const values1 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
         core.seed(Array.from({ length: 32 }, () => CHARS.charAt(Math.floor(Math.random() * CHARS.length))).join(''))
@@ -60,22 +60,22 @@ describe('core', () => {
 
   describe('.float()', () => {
     it('should return a float uniformly distributed in [0, 1]', () => {
-      utils.trials(() => {
+      trials(() => {
         const values = Array.from({ length: LAPS }, () => core.float())
-        return utils.ksTest(values, x => x)
+        return ksTest(values, x => x)
       })
     })
 
     it('should return a float uniformly distributed in [min, max]', () => {
-      utils.trials(() => {
+      trials(() => {
         const max = Math.random() * 20
         const values = Array.from({ length: LAPS }, () => core.float(max))
-        return utils.ksTest(values, x => x / max)
+        return ksTest(values, x => x / max)
       })
     })
 
     it('should return multiple floats uniformly distributed in [min, max]', () => {
-      utils.trials(() => {
+      trials(() => {
         const min = Math.random() * 20 - 10
         const max = 10 + Math.random() * 10
         const k = Math.floor(Math.random() * 10 - 5)
@@ -94,9 +94,9 @@ describe('core', () => {
 
         // Distribution is uniform
         if (min < max) {
-          return utils.ksTest(values, x => (x - min) / (max - min))
+          return ksTest(values, x => (x - min) / (max - min))
         } else {
-          return utils.ksTest(values, x => (x - max) / (min - max))
+          return ksTest(values, x => (x - max) / (min - max))
         }
       })
     })
@@ -104,15 +104,15 @@ describe('core', () => {
 
   describe('.int()', () => {
     it('should return an integer uniformly distributed in [0, max]', () => {
-      utils.trials(() => {
+      trials(() => {
         const max = Math.floor(Math.random() * 10)
         const values = Array.from({ length: LAPS }, () => core.int(max))
-        return utils.chiTest(values, () => 1 / Math.abs(max + 1), 1)
+        return chiTest(values, () => 1 / Math.abs(max + 1), 1)
       })
     })
 
     it('should return an integer uniformly distributed in [min, max]', () => {
-      utils.trials(() => {
+      trials(() => {
         const min = Math.floor(Math.random() * 20 - 10)
         const max = 20 + Math.floor(Math.random() * 10)
         const values = []
@@ -128,12 +128,12 @@ describe('core', () => {
         }
 
         // Distribution is uniform
-        return utils.chiTest(values, () => 1 / Math.abs(max - min + 1), 1)
+        return chiTest(values, () => 1 / Math.abs(max - min + 1), 1)
       })
     })
 
     it('should return multiple integers uniformly distributed in [0, max]', () => {
-      utils.trials(() => {
+      trials(() => {
         const min = Math.floor(Math.random() * 20 - 10)
         const max = 20 + Math.floor(Math.random() * 10)
         const k = Math.floor(Math.random() * 10 - 5)
@@ -152,7 +152,7 @@ describe('core', () => {
         }
 
         // Distribution is uniform
-        return utils.chiTest(values, () => 1 / Math.abs(max - min + 1), max === min ? 1 : 2)
+        return chiTest(values, () => 1 / Math.abs(max - min + 1), max === min ? 1 : 2)
       })
     })
   })
@@ -259,7 +259,7 @@ describe('core', () => {
 
   describe('.coin()', () => {
     it('should return head or tail with 50% chance', () => {
-      utils.trials(() => {
+      trials(() => {
         const head = Math.floor(Math.random() * 10)
         const tail = head + Math.floor(1 + Math.random() * 10)
         const values = []
@@ -270,12 +270,12 @@ describe('core', () => {
         }
 
         // Distribution is uniform
-        return utils.chiTest(values, () => 0.5, 1)
+        return chiTest(values, () => 0.5, 1)
       })
     })
 
     it('should return multiple heads/tails with specific probability', () => {
-      utils.trials(() => {
+      trials(() => {
         const p = Math.random()
         const k = Math.floor(Math.random() * 10)
         const head = Math.floor(Math.random() * 20)
@@ -288,7 +288,7 @@ describe('core', () => {
         }
 
         // Distribution is uniform
-        return utils.chiTest(values, x => x === head ? p : 1 - p, 1)
+        return chiTest(values, x => x === head ? p : 1 - p, 1)
       })
     })
   })
