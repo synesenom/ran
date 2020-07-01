@@ -39,272 +39,244 @@ const CHI_TABLE_HIGH = [
   895.984, 948.848, 1001.630, 1054.334, 1106.969
 ]
 
-export default (function () {
-  function safeCompare (a, b) {
-    return b - a > -PRECISION
+function safeCompare (a, b) {
+  return b - a > -PRECISION
+}
+
+function differentiate (f, x, h) {
+  return (f(x + h) - f(x - h)) / (2 * h)
+}
+
+function getTestRange (dist) {
+  return [
+    isFinite(dist.support()[0].value) ? dist.support()[0].value - 1 : -30,
+    isFinite(dist.support()[1].value) ? dist.support()[1].value + 1 : 30
+  ].concat([0, 1e-10])
+}
+
+function runX (dist, laps, unitTest) {
+  // Init test variables
+  let range = getTestRange(dist)
+  let passed = true
+
+  // Run test
+  if (dist.type() === 'discrete') {
+    for (let i = range[0]; i < range[1]; i++) {
+      passed = passed && unitTest(dist, Math.floor(i))
+    }
+  } else {
+    let dx = (range[1] - range[0]) / laps
+    for (let i = 0; i < laps; i++) {
+      passed = passed && unitTest(dist, range[0] + i * dx + Math.random())
+    }
   }
 
-  /**
-   * Performs a Kolmogorov-Smirnov test with significance level of 99%.
-   *
-   * @method ksTest
-   * @param values Sample of continuous random values.
-   * @param model Theoretical cumulative distribution function.
-   */
-  function ksTest (values, model) {
-    let D = 0
-    values.sort((a, b) => a - b)
-    for (let i = 0; i < values.length; i++) {
-      D = Math.max(D, Math.abs((i + 1) / values.length - model(values[i])))
-      // console.log(values[i], (i + 1) / values.length, model(values[i]))
-    }
-    // console.log(D, 1.628 / Math.sqrt(values.length))
-    return D <= 1.628 / Math.sqrt(values.length)
+  // Return aggregated test result
+  return passed
+}
+
+function runP (dist, laps, unitTest) {
+  // Init test variables
+  let passed = true
+
+  // Run test
+  for (let i = 1; i < laps - 2; i++) {
+    passed = passed && unitTest(dist, (i + Math.random()) / laps)
   }
 
-  /**
-   * Performs a chi-square test with significance level of 0.001. That is, there is a 0.1% chance
-   * that the sample follows the distribution and we still reject it.
-   *
-   * @method chiTest
-   * @param {number[]} values Sample of discrete random values.
-   * @param {Function} model Theoretical cumulative mass function.
-   * @param {number} c Number of model parameters.
-   */
-  function chiTest (values, model, c) {
-    // Calculate distribution first
-    let p = new Map()
-    for (let i = 0; i < values.length; i++) {
-      if (!p.has(values[i])) {
-        p.set(values[i], 1)
-      } else {
-        p.set(values[i], p.get(values[i]) + 1)
-      }
-    }
+  // Return aggregated test result
+  return passed
+}
 
-    // Create sorted frequencies
-    let dist = Array.from(p)
-      .map(d => ({ x: d[0], p: d[1] }))
-      .sort((a, b) => a.x - b.x)
+export function ksTest (values, model) {
+  let D = 0
+  values.sort((a, b) => a - b)
+  for (let i = 0; i < values.length; i++) {
+    D = Math.max(D, Math.abs((i + 1) / values.length - model(values[i])))
+    // console.log(values[i], (i + 1) / values.length, model(values[i]))
+  }
+  // console.log(D, 1.628 / Math.sqrt(values.length))
+  return D <= 1.628 / Math.sqrt(values.length)
+}
 
-    // Calculate chi-square
-    let chi2 = 0
-    let bin = 0
-    let pBin = 0
-    let k = 0
-    dist.forEach(d => {
-      // Add frequency to current bin
-      bin += model(parseInt(d.x)) * values.length
-      pBin += d.p
-
-      // If bin count is above 10, consider this a class and clear bin
-      if (bin > 10) {
-        chi2 += Math.pow(pBin - bin, 2) / bin
-        // console.log(pBin, bin, Math.pow(pBin - bin, 2) / bin)
-        bin = 0
-        pBin = 0
-        k++
-      }
-    })
-
-    // Find critical value
-    let df = Math.max(1, k - c - 1)
-    let crit = df <= 250 ? CHI_TABLE_LOW[df] : CHI_TABLE_HIGH[Math.ceil(df / 50)]
-    // console.log(chi2, crit)
-    if (chi2 > crit) {
-      // console.log(chi2, crit)
-    }
-
-    // Check if distribution is degenerate
-    if (p.size === 1) {
-      let k0 = p.keys().next().value
-      return model(k0) === 1 && chi2 === 0
+export function chiTest (values, model, c) {
+  // Calculate distribution first
+  let p = new Map()
+  for (let i = 0; i < values.length; i++) {
+    if (!p.has(values[i])) {
+      p.set(values[i], 1)
     } else {
-      return chi2 > 0 && chi2 <= crit
+      p.set(values[i], p.get(values[i]) + 1)
     }
   }
 
-  /**
-   * Performs 5 tests and checks if at least 3 were successful.
-   *
-   * @method trials
-   * @param test Test to run.
-   */
-  function trials (test) {
-    let success = 0
-    for (let t = 0; t < 5; t++) {
-      success += test(t) ? 1 : 0
+  // Create sorted frequencies
+  let dist = Array.from(p)
+    .map(d => ({ x: d[0], p: d[1] }))
+    .sort((a, b) => a.x - b.x)
+
+  // Calculate chi-square
+  let chi2 = 0
+  let bin = 0
+  let pBin = 0
+  let k = 0
+  dist.forEach(d => {
+    // Add frequency to current bin
+    bin += model(parseInt(d.x)) * values.length
+    pBin += d.p
+
+    // If bin count is above 10, consider this a class and clear bin
+    if (bin > 10) {
+      chi2 += Math.pow(pBin - bin, 2) / bin
+      // console.log(pBin, bin, Math.pow(pBin - bin, 2) / bin)
+      bin = 0
+      pBin = 0
+      k++
     }
-    assert(success >= 3, `Failed ${5 - success} out of ${5}`)
+  })
+
+  // Find critical value
+  let df = Math.max(1, k - c - 1)
+  let crit = df <= 250 ? CHI_TABLE_LOW[df] : CHI_TABLE_HIGH[Math.ceil(df / 50)]
+  // console.log(chi2, crit)
+  if (chi2 > crit) {
+    // console.log(chi2, crit)
   }
 
-  function repeat (test, times) {
-    for (let i = 0; i < times; i++) {
-      test()
-    }
+  // Check if distribution is degenerate
+  if (p.size === 1) {
+    let k0 = p.keys().next().value
+    return model(k0) === 1 && chi2 === 0
+  } else {
+    return chi2 > 0 && chi2 <= crit
   }
+}
 
-  function differentiate (f, x, h) {
-    return (f(x + h) - f(x - h)) / (2 * h)
+export function trials (test) {
+  let success = 0
+  for (let t = 0; t < 5; t++) {
+    success += test(t) ? 1 : 0
   }
+  assert(success >= 3, `Failed ${5 - success} out of ${5}`)
+}
 
-  function getTestRange (dist) {
-    return [
-      isFinite(dist.support()[0].value) ? dist.support()[0].value - 1 : -30,
-      isFinite(dist.support()[1].value) ? dist.support()[1].value + 1 : 30
-    ].concat([0, 1e-10])
+export function repeat (test, times = 10) {
+  for (let i = 0; i < times; i++) {
+    test()
   }
+}
 
-  function runX (dist, laps, unitTest) {
+export function equal (x, y) {
+  return Math.abs((x - y) / y) < 1e-10
+}
+
+export const Tests = {
+  pdfType (dist, laps) {
+    return runX(dist, laps, (d, x) => {
+      let pdf = d.pdf(x)
+      return isFinite(pdf) && Number.isFinite(pdf)
+    })
+  },
+
+  pdfRange (dist, laps) {
+    return runX(dist, laps, (d, x) => dist.pdf(x) >= 0)
+  },
+
+  cdfType (dist, laps) {
+    return runX(dist, laps, (d, x) => {
+      let cdf = d.cdf(x)
+      return isFinite(cdf) && Number.isFinite(cdf)
+    })
+  },
+
+  cdfRange (dist, laps) {
+    return runX(dist, laps, (d, x) => {
+      let cdf = d.cdf(x)
+      return cdf >= 0 && cdf <= 1
+    })
+  },
+
+  cdfMonotonicity (dist, laps) {
+    let discrete = dist.type() === 'discrete'
+    return runX(dist, laps, (d, x) => {
+      let p1 = discrete ? x : x - 1e-3
+      let p2 = discrete ? x + 1 : x + 1e-3
+      return safeCompare(p1, p2)
+    })
+  },
+
+  pdf2cdf (dist, laps) {
     // Init test variables
     let range = getTestRange(dist)
-    let passed = true
+    let s = 0
 
     // Run test
     if (dist.type() === 'discrete') {
       for (let i = range[0]; i < range[1]; i++) {
-        passed = passed && unitTest(dist, Math.floor(i))
+        let x = Math.floor(i)
+        let p = dist.pdf(x)
+        // console.log(x, p, dist.cdf(x) - dist.cdf(x - 1))
+        s += Math.abs(p - (dist.cdf(x) - dist.cdf(x - 1)))
       }
     } else {
       let dx = (range[1] - range[0]) / laps
       for (let i = 0; i < laps; i++) {
-        passed = passed && unitTest(dist, range[0] + i * dx + Math.random())
-      }
-    }
-
-    // Return aggregated test result
-    return passed
-  }
-
-  function runP (dist, laps, unitTest) {
-    // Init test variables
-    let passed = true
-
-    // Run test
-    for (let i = 1; i < laps - 2; i++) {
-      passed = passed && unitTest(dist, (i + Math.random()) / laps)
-    }
-
-    // Return aggregated test result
-    return passed
-  }
-
-  const Tests = {
-    pdfType (dist, laps) {
-      return runX(dist, laps, (d, x) => {
-        let pdf = d.pdf(x)
-        return isFinite(pdf) && Number.isFinite(pdf)
-      })
-    },
-
-    pdfRange (dist, laps) {
-      return runX(dist, laps, (d, x) => dist.pdf(x) >= 0)
-    },
-
-    cdfType (dist, laps) {
-      return runX(dist, laps, (d, x) => {
-        let cdf = d.cdf(x)
-        return isFinite(cdf) && Number.isFinite(cdf)
-      })
-    },
-
-    cdfRange (dist, laps) {
-      return runX(dist, laps, (d, x) => {
-        let cdf = d.cdf(x)
-        return cdf >= 0 && cdf <= 1
-      })
-    },
-
-    cdfMonotonicity (dist, laps) {
-      let discrete = dist.type() === 'discrete'
-      return runX(dist, laps, (d, x) => {
-        let p1 = discrete ? x : x - 1e-3
-        let p2 = discrete ? x + 1 : x + 1e-3
-        return safeCompare(p1, p2)
-      })
-    },
-
-    pdf2cdf (dist, laps) {
-      // Init test variables
-      let range = getTestRange(dist)
-      let s = 0
-
-      // Run test
-      if (dist.type() === 'discrete') {
-        for (let i = range[0]; i < range[1]; i++) {
-          let x = Math.floor(i)
-          let p = dist.pdf(x)
-          // console.log(x, p, dist.cdf(x) - dist.cdf(x - 1))
-          s += Math.abs(p - (dist.cdf(x) - dist.cdf(x - 1)))
-        }
-      } else {
-        let dx = (range[1] - range[0]) / laps
-        for (let i = 0; i < laps; i++) {
-          let x = range[0] + i * dx + Math.random()
-          let p = dist.pdf(x)
-          let df = differentiate(t => dist.cdf(t), x, 1e-6)
-          if (df > Number.EPSILON && p > Number.EPSILON) {
-            if (Math.abs(p - df) > PRECISION) {
-              // console.log(x, p, df, Math.abs(p - df))
-            }
-            s += Math.abs(p - df)
+        let x = range[0] + i * dx + Math.random()
+        let p = dist.pdf(x)
+        let df = differentiate(t => dist.cdf(t), x, 1e-6)
+        if (df > Number.EPSILON && p > Number.EPSILON) {
+          if (Math.abs(p - df) > PRECISION) {
+            // console.log(x, p, df, Math.abs(p - df))
           }
+          s += Math.abs(p - df)
         }
       }
-
-      // Test passes if average relative difference is lower than 1%
-      return s / laps < 1e-6
-    },
-
-    qType (dist, laps) {
-      return runP(dist, laps, (d, p) => {
-        let x = d.q(p)
-        return isFinite(x) && Number.isFinite(x)
-      })
-    },
-
-    qRange (dist, laps) {
-      let supp = dist.support()
-      return runP(dist, laps, (d, p) => {
-        let x = d.q(p)
-        return x >= supp[0].value && x <= supp[1].value
-      })
-    },
-
-    qMonotonicity (dist, laps) {
-      return runP(dist, laps, (d, p) => {
-        let x1 = d.q(p)
-        let x2 = d.q(p + 1e-3)
-        return safeCompare(x1, x2)
-      })
-    },
-
-    qGalois (dist, laps) {
-      return runP(dist, laps, (d, p) => {
-        // Compute quantile
-        let q = d.q(p)
-        let trials = 0
-        let passed = true
-
-        // Sample several values to test for Galois inequalities
-        do {
-          let x = d.sample()
-          let cdf = d.cdf(x)
-          if (Math.abs(p - cdf) >= PRECISION) {
-            passed = passed && ((safeCompare(p, cdf) && safeCompare(q, x)) || (safeCompare(cdf, p) && safeCompare(x, q)))
-            trials++
-          }
-        } while (trials < 10)
-        return passed
-      })
     }
-  }
 
-  return {
-    ksTest,
-    chiTest,
-    trials,
-    repeat,
-    Tests
+    // Test passes if average relative difference is lower than 1%
+    return s / laps < 1e-6
+  },
+
+  qType (dist, laps) {
+    return runP(dist, laps, (d, p) => {
+      let x = d.q(p)
+      return isFinite(x) && Number.isFinite(x)
+    })
+  },
+
+  qRange (dist, laps) {
+    let supp = dist.support()
+    return runP(dist, laps, (d, p) => {
+      let x = d.q(p)
+      return x >= supp[0].value && x <= supp[1].value
+    })
+  },
+
+  qMonotonicity (dist, laps) {
+    return runP(dist, laps, (d, p) => {
+      let x1 = d.q(p)
+      let x2 = d.q(p + 1e-3)
+      return safeCompare(x1, x2)
+    })
+  },
+
+  qGalois (dist, laps) {
+    return runP(dist, laps, (d, p) => {
+      // Compute quantile
+      let q = d.q(p)
+      let trials = 0
+      let passed = true
+
+      // Sample several values to test for Galois inequalities
+      do {
+        let x = d.sample()
+        let cdf = d.cdf(x)
+        if (Math.abs(p - cdf) >= PRECISION) {
+          passed = passed && ((safeCompare(p, cdf) && safeCompare(q, x)) || (safeCompare(cdf, p) && safeCompare(x, q)))
+          trials++
+        }
+      } while (trials < 10)
+      return passed
+    })
   }
-})()
+}
