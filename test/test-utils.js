@@ -166,8 +166,8 @@ export function repeat (test, times = 10) {
   }
 }
 
-export function equal (x, y) {
-  return Math.abs((x - y) / y) < 1e-10
+export function equal (x, y, precision) {
+  return typeof precision === 'undefined' ? Math.abs((x - y) / y) < 1e-10 : Math.abs((x - y) / y) < Math.pow(10, -precision)
 }
 
 export const Tests = {

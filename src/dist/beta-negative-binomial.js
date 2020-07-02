@@ -1,5 +1,4 @@
 import logBeta from '../special/log-beta'
-import logGamma from '../special/log-gamma'
 import PreComputed from './_pre-computed'
 import Distribution from './_distribution'
 import { beta as rBeta, gamma, poisson } from './_core'
@@ -31,12 +30,12 @@ export default class extends PreComputed {
 
   _pk (k) {
     if (k === 0) {
-      //return Math.exp(logGamma(this.p.r + k) - logGamma(k + 1) - logGamma(this.p.r) + logBeta(this.p.alpha + this.p.r, this.p.beta + k) - logBeta(this.p.alpha, this.p.beta))
+      // return Math.exp(logGamma(this.p.r + k) - logGamma(k + 1) - logGamma(this.p.r) + logBeta(this.p.alpha + this.p.r, this.p.beta + k) - logBeta(this.p.alpha, this.p.beta))
       return Math.exp(logBeta(this.p.alpha + this.p.r, this.p.beta) - logBeta(this.p.alpha, this.p.beta))
     }
 
     return this.pdfTable[k - 1] * (this.p.r + k - 1) * (this.p.beta + k - 1) / (k * (this.p.alpha + this.p.r + this.p.beta + k - 1))
-    //return this.pdfTable[k - 1] * (k + this.p.r - 1) * (k + (this.p.alpha - 1)) / (k * (k + this.p.alpha + this.p.beta + this.p.r - 1))
+    // return this.pdfTable[k - 1] * (k + this.p.r - 1) * (k + (this.p.alpha - 1)) / (k * (k + this.p.alpha + this.p.beta + this.p.r - 1))
     // return Math.exp(logGamma(this.p.r + k) - logGamma(k + 1) - logGamma(this.p.r) + logBeta(this.p.alpha + this.p.r, this.p.beta + k) - logBeta(this.p.alpha, this.p.beta))
   }
 

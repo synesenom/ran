@@ -6,7 +6,7 @@ import { quickselect } from '../algorithms'
  * @method median
  * @methodOf ran.location
  * @param {number[]} values Array of values to calculate median for.
- * @return {number} Median of the values if there are any, undefined otherwise.
+ * @returns {number} Median of the values if there are any, undefined otherwise.
  * @example
  *
  * ran.location.median([])

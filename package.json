@@ -30,6 +30,7 @@
     "test:dispersion": "./node_modules/.bin/_mocha --require babel-core/register test/dispersion.js",
     "test:dist": "./node_modules/.bin/_mocha --require babel-core/register test/dist.js",
     "test:la": "./node_modules/.bin/_mocha --require babel-core/register test/la.js",
+    "test:location": "./node_modules/.bin/_mocha --require babel-core/register test/location.js",
     "test:special": "./node_modules/.bin/_mocha --require babel-core/register test/special.js",
     "test:test": "./node_modules/.bin/_mocha --require babel-core/register test/test.js",
     "test:ts": "./node_modules/.bin/_mocha --require babel-core/register test/ts.js",

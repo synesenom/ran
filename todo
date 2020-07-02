@@ -10,36 +10,33 @@
 - ARGUS                                 (rejection sampling)
 - beta geometric
 - Beta negative binomial
-- Bose-Einstein                         http://mathworld.wolfram.com/Bose-EinsteinDistribution.html
-- Champernowne
+- Champernowne                          https://en.wikipedia.org/wiki/Champernowne_distribution
 - crystal ball
-- Davis                                 (generation unknown)
-- discrete Laplacian (scipy)
+- Davis                                 https://en.wikipedia.org/wiki/Davis_distribution
+- discrete Laplacian                    scipy
 - double exponential
-- Error / exponential power             (generation unknown)
-- Exponentially modified Gaussian (EMG)
+- Error / exponential power
+- Exponentially modified Gaussian
 - exponentiated weibull
 - extended negative binomial            https://en.wikipedia.org/wiki/Extended_negative_binomial_distribution
-- Fermi-Dirac                           http://mathworld.wolfram.com/Fermi-DiracDistribution.html
-- Gauss hypergeometric (scipy)
+- Gauss hypergeometric                  scipy
 - generalized beta-prime
-- generalized half-logistic (scipy)
-- K-prime (https://arxiv.org/pdf/1003.4890v1.pdf)
-- K-square (https://arxiv.org/pdf/1003.4890v1.pdf)
+- generalized half-logistic             scipy
+- K-prime                               https://arxiv.org/pdf/1003.4890v1.pdf
+- K-square                              https://arxiv.org/pdf/1003.4890v1.pdf
 - inverse hypergeometric                https://www.vosesoftware.com/riskwiki/InverseHypergeometricdistribution.php
-- lambda-prime (https://arxiv.org/pdf/1003.4890v1.pdf)
-- Landau distribution (scipy)
+- lambda-prime                          https://arxiv.org/pdf/1003.4890v1.pdf
+- Landau distribution                   https://en.wikipedia.org/wiki/Landau_distribution
 - Luria-Delbruck                        https://arxiv.org/pdf/1203.3422.pdf
-- Map-Airy                              http://mathworld.wolfram.com/Map-AiryDistribution.html
-- non-central eta (r sadist)
-- Normal-exponential-gamma              (compound)
-- Normal inverse Gauss (scipy)
+- non-central eta                       r sadist
+- Normal-exponential-gamma              compound
+- Normal inverse Gauss                  scipy
 - Normal product                        http://mathworld.wolfram.com/NormalProductDistribution.html
 - parabolic fractal                     https://en.wikipedia.org/wiki/Parabolic_fractal_distribution
-- Planck                                (CDF unknown)
-- power-lognormal (scipy)
-- stable                                (generation unknown)
-- truncated exponential (scipy)
+- Planck                                CDF unknown
+- power-lognormal                       scipy
+- stable
+- truncated exponential                 scipy
 - truncated normal
 - Waring
 

@@ -1,4 +1,4 @@
-import variance from '../utils/variance'
+import variance from '../dispersion/variance'
 import Chi2 from '../dist/chi2'
 
 /**

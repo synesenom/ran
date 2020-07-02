@@ -153,7 +153,7 @@ class Distribution {
     let k2 = 0
     let delta = 1
     for (let i = 0; i < MAX_ITER; i++) {
-      let q = this.cdf(k2)
+      const q = this.cdf(k2)
       if (q >= p) {
         break
       }
@@ -169,8 +169,8 @@ class Distribution {
         return k2
       }
 
-      let k = Math.floor((k1 + k2) / 2)
-      let q = this.cdf(k)
+      const k = Math.floor((k1 + k2) / 2)
+      const q = this.cdf(k)
       if (p > q) {
         k1 = k
       } else {

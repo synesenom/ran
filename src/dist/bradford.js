@@ -32,7 +32,7 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    let c0 = Math.log(1 + c)
+    const c0 = Math.log(1 + c)
     this.c = [
       c0,
       c / c0

@@ -20,10 +20,13 @@ export default class extends Distribution {
 
     // Validate parameters
     this.p = { n: weights.length, weights, min }
-    Distribution.validate({ w_i: (() => {
+    Distribution.validate({
+      w_i: (() => {
         const allPositive = weights.reduce((acc, d) => acc && (d >= 0), true)
         return allPositive ? 1 : -1
-      })(), min }, [
+      })(),
+      min
+    }, [
       'w_i >= 0'
     ])
 

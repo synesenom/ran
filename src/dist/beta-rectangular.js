@@ -56,7 +56,7 @@ export default class extends Beta {
   }
 
   _cdf (x) {
-    let y = x - this.p.a
+    const y = x - this.p.a
     return this.p.theta * super._cdf(y / this.c[3]) + this.c[4] * y / this.c[3]
   }
 }

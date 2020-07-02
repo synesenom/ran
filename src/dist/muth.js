@@ -35,7 +35,7 @@ export default class extends Distribution {
     }]
   }
 
-  _survival(x) {
+  _survival (x) {
     return Math.exp(this.p.alpha * x - (Math.exp(this.p.alpha * x) - 1) / this.p.alpha)
   }
 
