@@ -38,6 +38,27 @@ describe('dispersion', () => {
     })
   })
 
+  describe('.cv', () => {
+    it('should return undefined if sample size is less than 2', () => {
+      assert(typeof dispersion.cv([]) === 'undefined')
+      assert(typeof dispersion.cv([1]) === 'undefined')
+    })
+
+    it('should return undefined if mean is 0', () => {
+      assert(typeof dispersion.cv([-1, 0, 1]) === 'undefined')
+    })
+
+    it('should return the coefficient of variation', () => {
+      repeat(() => {
+        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
+        let mean = values.reduce((m, d) => d + m, 0) / values.length
+        let stdev = Math.sqrt(values.reduce((v, d) => (d - mean) * (d - mean) + v, 0) / (values.length - 1))
+        assert(equal(dispersion.cv(values), stdev / mean))
+      })
+      console.log(dispersion.cv([1, 2, 3, 4, 5]))
+    })
+  })
+
   describe('.md', () => {
     it('should return undefined if sample size is less than 2', () => {
       assert(typeof dispersion.md([]) === 'undefined')
