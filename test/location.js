@@ -48,7 +48,7 @@ describe('location', () => {
         })
       })
 
-      it('should return an array of a multiple elemente for multimodal sample', () => {
+      it('should return an array of a multiple elements for multimodal sample', () => {
         repeat(() => {
           const values = Array.from({length: SAMPLE_SIZE}, () => int(20))
             .concat(new Array(SAMPLE_SIZE).fill(21))
@@ -83,6 +83,7 @@ describe('location', () => {
           const mode = location.mode(sample)
           return equal(mode, mu, 2)
         })
+        console.log(location.mode([1.2, 3.4, 5.6]))
       })
     })
   })

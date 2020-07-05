@@ -21,7 +21,7 @@ import mean from '../location/mean'
  * ran.dispersion.cv([-1, 0, 1])
  * // => undefined
  *
- * ran.dispersion.stdev([1, 2, 3, 4, 5])
+ * ran.dispersion.cv([1, 2, 3, 4, 5])
  * // => 0.5270462766947299
  */
 export default function (values) {
