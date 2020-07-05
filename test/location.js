@@ -13,7 +13,7 @@ describe('location', () => {
       assert(typeof location.median([]) === 'undefined')
     })
 
-    it('should compute the median for odd sample size', () => {
+    it('should return the median for odd sample size', () => {
       repeat(() => {
         const values = Array.from({length: SAMPLE_SIZE + 1}, Math.random)
           .sort((a, b) => a - b)
@@ -22,7 +22,7 @@ describe('location', () => {
       })
     })
 
-    it('should compute the median for even sample size', () => {
+    it('should return the median for even sample size', () => {
       repeat(() => {
         const values = Array.from({length: SAMPLE_SIZE}, Math.random)
           .sort((a, b) => a - b)

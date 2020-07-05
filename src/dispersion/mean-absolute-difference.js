@@ -1,10 +1,11 @@
 /**
- * Calculates the mean absolute difference of an array of values.
+ * Calculates the [mean absolute difference]{@link https://en.wikipedia.org/wiki/Mean_absolute_difference} of an array
+ * of values.
  *
  * @method md
  * @methodOf ran.dispersion
  * @param {number[]} values Array of values to calculate mean absolute difference for.
- * @returns {(number|undefined)} Standard deviation of the values if there are more than two, undefined otherwise.
+ * @returns {(number|undefined)} Mean absolute difference of the values if there are more than two, undefined otherwise.
  * @example
  *
  * ran.dispersion.md([])

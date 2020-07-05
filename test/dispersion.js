@@ -12,7 +12,7 @@ describe('dispersion', () => {
       assert(typeof dispersion.variance([1]) === 'undefined')
     })
 
-    it('should compute the unbiased variance', () => {
+    it('should return the unbiased variance', () => {
       repeat(() => {
         const values = Array.from({length: SAMPLE_SIZE}, Math.random)
         let mean = values.reduce((m, d) => d + m, 0) / values.length
@@ -28,7 +28,7 @@ describe('dispersion', () => {
       assert(typeof dispersion.stdev([1]) === 'undefined')
     })
 
-    it('should compute the unbiased standard deviation', () => {
+    it('should return the unbiased standard deviation', () => {
       repeat(() => {
         const values = Array.from({length: SAMPLE_SIZE}, Math.random)
         let mean = values.reduce((m, d) => d + m, 0) / values.length
@@ -44,7 +44,7 @@ describe('dispersion', () => {
       assert(typeof dispersion.md([1]) === 'undefined')
     })
 
-    it('should compute the mean absolute difference', () => {
+    it('should return the mean absolute difference', () => {
       repeat(() => {
         const values = Array.from({length: SAMPLE_SIZE}, Math.random)
         let md = 0
@@ -53,8 +53,36 @@ describe('dispersion', () => {
             md += Math.abs(values[i] - values[j])
           }
         }
-        md /= (values.length * values.length)
+        md /= values.length * values.length
         assert(equal(dispersion.md(values), md))
+      })
+    })
+  })
+
+  describe('.rmd', () => {
+    it('should return undefined if sample size is less than 2', () => {
+      assert(typeof dispersion.rmd([]) === 'undefined')
+      assert(typeof dispersion.rmd([1]) === 'undefined')
+    })
+
+    it('should return undefined if mean is zero', () => {
+      assert(typeof dispersion.rmd([-1, 0, 1]) === 'undefined')
+    })
+
+    it('should return the relative mean absolute difference', () => {
+      repeat(() => {
+        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
+        let mean = 0
+        let rd = 0
+        for (let i = 0; i < values.length; i++) {
+          mean += values[i]
+          for (let j = 0; j < values.length; j++) {
+            rd += Math.abs(values[i] - values[j])
+          }
+        }
+        mean /= values.length
+        rd /= mean * values.length * values.length
+        assert(equal(dispersion.rmd(values), rd))
       })
     })
   })
