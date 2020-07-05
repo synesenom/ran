@@ -165,7 +165,7 @@ describe('special', () => {
         }, LAPS)
       })
 
-      it('a f11(a+1, b, z) = (b - a) f11(a-1, b, z) + (2a - b + z) f11(a, b, z)', () => {
+      it('a * f11(a+1, b, z) = (b - a) * f11(a-1, b, z) + (2a - b + z) * f11(a, b, z)', () => {
         repeat(() => {
           let a = Math.random() * 10 + 3
           let b = Math.random() * 10 + 3
@@ -174,21 +174,8 @@ describe('special', () => {
             a * f11(a + 1, b, z),
             (b - a) * f11(a - 1, b, z) + (2 * a - b + z) * f11(a, b, z)
           ))
-        }, LAPS)
+        })
       })
-    })
-  })
-
-  describe('hurwitzZeta, riemannZeta', () => {
-    it('riemannZeta(s) - hurwitzZeta(s, n+1) = H(s, n)', () => {
-      repeat(() => {
-        let s = Math.random() * 10 + 1
-        let sum = 0
-        for (let n = 1; n < 100; n++) {
-          sum += 1 / Math.pow(n, s)
-          assert(Math.abs(sum - riemannZeta(s) + hurwitzZeta(s, n + 1)) / sum < 1e-6)
-        }
-      }, LAPS)
     })
   })
 
@@ -253,6 +240,19 @@ describe('special', () => {
         let x = 1e5 + Math.random() * 1e5
         assert(equal(gammaLowerIncomplete(s, x), 1))
       }
+    })
+  })
+
+  describe('hurwitzZeta, riemannZeta', () => {
+    it('riemannZeta(s) - hurwitzZeta(s, n+1) = H(s, n)', () => {
+      repeat(() => {
+        let s = Math.random() * 10 + 1
+        let sum = 0
+        for (let n = 1; n < 100; n++) {
+          sum += 1 / Math.pow(n, s)
+          assert(Math.abs(sum - riemannZeta(s) + hurwitzZeta(s, n + 1)) / sum < 1e-6)
+        }
+      }, LAPS)
     })
   })
 

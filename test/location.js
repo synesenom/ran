@@ -8,6 +8,51 @@ import * as dist from '../src/dist'
 const SAMPLE_SIZE = 100
 
 describe('location', () => {
+  describe('.geometricMean()', () => {
+    it('should return zero for sample containing zero', () => {
+      repeat(() => {
+        const values = Array.from({ length: SAMPLE_SIZE}, Math.random)
+          .concat([0])
+        assert(location.geometricMean(values) === 0)
+      })
+    })
+
+    it('should return the geometric mean of the sample', () => {
+      repeat(() => {
+        const values = Array.from({ length: SAMPLE_SIZE}, Math.random)
+        let mean = Math.pow(values.reduce((prod, d) => d * prod, 1), 1 / SAMPLE_SIZE)
+        assert(equal(location.geometricMean(values), mean))
+      })
+    })
+  })
+
+  describe('.harmonicMean()', () => {
+    it('should return undefined for sample containing zero', () => {
+      repeat(() => {
+        const values = Array.from({ length: SAMPLE_SIZE}, Math.random)
+          .concat([0])
+        assert(typeof location.harmonicMean(values) === 'undefined')
+      })
+    })
+
+    it('should return undefined for sample containing negative values', () => {
+      repeat(() => {
+        const values = Array.from({ length: SAMPLE_SIZE}, Math.random)
+          .concat([-1])
+        assert(typeof location.harmonicMean(values) === 'undefined')
+      })
+    })
+
+    it('should return the geometric mean of the sample', () => {
+      repeat(() => {
+        const values = Array.from({ length: SAMPLE_SIZE}, Math.random)
+        let mean = values.length / values.reduce((sum, d) => sum + 1 / d, 0)
+        assert(equal(location.harmonicMean(values), mean))
+      })
+      console.log(location.harmonicMean([1, 2, 3]))
+    })
+  })
+
   describe('.median()', () => {
     it('should return undefined for a sample size less than 1', () => {
       assert(typeof location.median([]) === 'undefined')
@@ -49,15 +94,13 @@ describe('location', () => {
       })
 
       it('should return an array of a multiple elements for multimodal sample', () => {
-        repeat(() => {
-          const values = Array.from({length: SAMPLE_SIZE}, () => int(20))
-            .concat(new Array(SAMPLE_SIZE).fill(21))
-            .concat(new Array(SAMPLE_SIZE).fill(22))
-          const mode = location.mode(values)
-          assert(mode.length === 2)
-          assert(equal(mode[0], 21))
-          assert(equal(mode[1], 22))
-        })
+        const values = Array.from({length: SAMPLE_SIZE}, () => int(20))
+          .concat(new Array(SAMPLE_SIZE).fill(21))
+          .concat(new Array(SAMPLE_SIZE).fill(22))
+        const mode = location.mode(values)
+        assert(mode.length === 2, 'Number of modes is invalid')
+        assert(equal(mode[0], 21), 'Value of first mode is invalid')
+        assert(equal(mode[1], 22), 'Value of second mode is invalid')
       })
     })
 
