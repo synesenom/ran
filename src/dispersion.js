@@ -5,6 +5,7 @@
  * @memberOf ran
  */
 export { default as cv } from './dispersion/coefficient-of-variation'
+export { default as entropy } from './dispersion/entropy'
 export { default as md } from './dispersion/mean-absolute-difference'
 export { default as rmd } from './dispersion/relative-mean-absolute-difference'
 export { default as stdev } from './dispersion/stdev'

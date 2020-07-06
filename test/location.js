@@ -49,7 +49,6 @@ describe('location', () => {
         let mean = values.length / values.reduce((sum, d) => sum + 1 / d, 0)
         assert(equal(location.harmonicMean(values), mean))
       })
-      console.log(location.harmonicMean([1, 2, 3]))
     })
   })
 
@@ -84,13 +83,11 @@ describe('location', () => {
 
     describe('discrete sample', () => {
       it('should return an array of a single element for unimodal sample', () => {
-        repeat(() => {
-          const values = Array.from({length: SAMPLE_SIZE}, () => int(20))
-            .concat(new Array(SAMPLE_SIZE).fill(21))
-          const mode = location.mode(values)
-          assert(mode.length === 1)
-          assert(equal(mode[0], 21))
-        })
+        const values = Array.from({length: SAMPLE_SIZE}, () => int(20))
+          .concat(new Array(SAMPLE_SIZE).fill(21))
+        const mode = location.mode(values)
+        assert(mode.length === 1)
+        assert(equal(mode[0], 21))
       })
 
       it('should return an array of a multiple elements for multimodal sample', () => {
@@ -99,6 +96,7 @@ describe('location', () => {
           .concat(new Array(SAMPLE_SIZE).fill(22))
         const mode = location.mode(values)
         assert(mode.length === 2, 'Number of modes is invalid')
+        console.log(mode)
         assert(equal(mode[0], 21), 'Value of first mode is invalid')
         assert(equal(mode[1], 22), 'Value of second mode is invalid')
       })
