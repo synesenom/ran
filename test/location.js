@@ -96,7 +96,6 @@ describe('location', () => {
           .concat(new Array(SAMPLE_SIZE).fill(22))
         const mode = location.mode(values)
         assert(mode.length === 2, 'Number of modes is invalid')
-        console.log(mode)
         assert(equal(mode[0], 21), 'Value of first mode is invalid')
         assert(equal(mode[1], 22), 'Value of second mode is invalid')
       })

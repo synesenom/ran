@@ -16,7 +16,7 @@ function discreteMode (values) {
   const maxCounts = counts[0][1]
 
   // Return values with highest count.
-  return counts.filter(d => d[1] === maxCounts).map(d => d[0])
+  return counts.filter(d => d[1] === maxCounts).map(d => d[0]).sort((a, b) => a - b)
 }
 
 /**
@@ -64,7 +64,8 @@ function continuousMode (values) {
 
 /**
  * Calculates the mode(s) of a sample. In case of discrete values (integers), it returns the values corresponding to the
- * highest frequencies. For continuous sample, the mode is estimated using the [half-sample mode algorithm]{@link https://arxiv.org/pdf/math/0505419.pdf}.
+ * highest frequencies in ascending order. For continuous sample, the mode is estimated using the
+ * [half-sample mode algorithm]{@link https://arxiv.org/pdf/math/0505419.pdf}.
  *
  * @method mode
  * @methodOf ran.location
