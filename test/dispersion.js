@@ -66,6 +66,35 @@ describe('dispersion', () => {
     })
   })
 
+  describe('.gini()', () => {
+    it('should return undefined if sample size is less than 2', () => {
+      assert(typeof dispersion.gini([]) === 'undefined')
+      assert(typeof dispersion.gini([1]) === 'undefined')
+    })
+
+    it('should return undefined if mean is zero', () => {
+      assert(typeof dispersion.gini([-1, 0, 1]) === 'undefined')
+    })
+
+    it('should return the relative mean absolute difference', () => {
+      repeat(() => {
+        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
+        let mean = 0
+        let g = 0
+        for (let i = 0; i < values.length; i++) {
+          mean += values[i]
+          for (let j = 0; j < values.length; j++) {
+            g += Math.abs(values[i] - values[j])
+          }
+        }
+        mean /= values.length
+        g /= 2 * mean * values.length * values.length
+        assert(equal(dispersion.gini(values), g))
+      })
+      console.log(dispersion.gini([1, 1, 1, 7]))
+    })
+  })
+
   describe('.iqr()', () => {
     it('should return undefined for an empty sample', () => {
       assert(typeof dispersion.iqr([]) === 'undefined')
@@ -145,6 +174,22 @@ describe('dispersion', () => {
     })
   })
 
+  describe('.range()', () => {
+    it('should return undefined for an empty sample', () => {
+      assert(typeof dispersion.range([]) === 'undefined')
+    })
+
+    it('should return the range for a finite sample', () => {
+      repeat(() => {
+        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
+        const range = dispersion.range(values)
+        const min = values.sort((a, b) => a - b)[0]
+        const max = values.sort((a, b) => b - a)[0]
+        assert(equal(max - min, range))
+      })
+    })
+  })
+
   describe('.rmd()', () => {
     it('should return undefined if sample size is less than 2', () => {
       assert(typeof dispersion.rmd([]) === 'undefined')
@@ -169,6 +214,37 @@ describe('dispersion', () => {
         mean /= values.length
         rd /= mean * values.length * values.length
         assert(equal(dispersion.rmd(values), rd))
+      })
+    })
+  })
+
+  describe('.qcd()', () => {
+    it('should return undefined for an empty sample', () => {
+      assert(typeof dispersion.qcd([]) === 'undefined')
+    })
+
+    it('should return 0 for a sample of a single element', () => {
+      assert(dispersion.qcd([1]) === 0)
+    })
+
+    it('should return the quartile coefficient of dispersion for a finite sample', () => {
+      repeat(() => {
+        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
+        const qcd = dispersion.qcd(values)
+
+        // Lower quartile.
+        let h = (values.length - 1) * 0.25
+        let q0 = values.sort((a, b) => a - b)[Math.floor(h)]
+        let q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
+        const lo = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
+
+        // Upper quartile.
+        h = (values.length - 1) * 0.75
+        q0 = values.sort((a, b) => a - b)[Math.floor(h)]
+        q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
+        const hi = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
+
+        assert(equal((hi - lo) / (lo + hi), qcd))
       })
     })
   })

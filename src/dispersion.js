@@ -4,12 +4,15 @@
  * @namespace dispersion
  * @memberOf ran
  */
-export { default as cv } from './dispersion/coefficient-of-variation'
+export { default as cv } from './dispersion/cv'
 export { default as entropy } from './dispersion/entropy'
-export { default as iqr } from './dispersion/interquartile-range'
-export { default as md } from './dispersion/mean-absolute-difference'
+export { default as gini } from './dispersion/gini'
+export { default as iqr } from './dispersion/iqr'
+export { default as md } from './dispersion/md'
 export { default as midhinge } from './dispersion/midhinge'
-export { default as rmd } from './dispersion/relative-mean-absolute-difference'
+export { default as range } from './dispersion/range'
+export { default as rmd } from './dispersion/rmd'
 export { default as stdev } from './dispersion/stdev'
+export { default as qcd } from './dispersion/qcd'
 export { default as variance } from './dispersion/variance'
-export { default as vmr } from './dispersion/variance-to-mean-ratio'
+export { default as vmr } from './dispersion/vmr'

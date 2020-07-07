@@ -1,4 +1,4 @@
-import md from './mean-absolute-difference'
+import md from './md'
 import mean from '../location/mean'
 
 /**
