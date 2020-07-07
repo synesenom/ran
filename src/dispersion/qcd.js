@@ -15,7 +15,7 @@ import quantile from '../utils/quantile'
  * // => undefined
  *
  * ran.dispersion.qcd([1, 2, 3])
- * // =>
+ * // => 0.25
  */
 export default function (values) {
   if (values.length === 0) {
