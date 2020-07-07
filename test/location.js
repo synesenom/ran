@@ -77,6 +77,22 @@ describe('location', () => {
     })
   })
 
+  describe('.midrange()', () => {
+    it('should return undefined for an empty sample', () => {
+      assert(typeof location.midrange([]) === 'undefined')
+    })
+
+    it('should return the midrange for a finite sample', () => {
+      repeat(() => {
+        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
+        const mr = location.midrange(values)
+        const min = values.sort((a, b) => a - b)[0]
+        const max = values.sort((a, b) => b - a)[0]
+        assert(equal(0.5 * (min + max), mr))
+      })
+    })
+  })
+
   describe('.mode()', () => {
     it('should return undefined for a sample size less than 1', () => {
       assert(typeof location.mode([]) === 'undefined')
