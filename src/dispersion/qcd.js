@@ -22,7 +22,7 @@ export default function (values) {
     return undefined
   }
 
-  let q1 = quantile(values, 0.25)
-  let q3 = quantile(values, 0.75)
+  const q1 = quantile(values, 0.25)
+  const q3 = quantile(values, 0.75)
   return (q3 - q1) / (q1 + q3)
 }

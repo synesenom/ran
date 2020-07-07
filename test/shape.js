@@ -37,7 +37,6 @@ describe('dispersion', () => {
         let c = Math.sqrt(n * (n - 1)) / (n - 2)
         assert(equal(c * (x3 - 3 * x1 * s * s - x1 * x1 * x1) / (s * s * s), shape.skewness(values)))
       })
-      console.log(shape.skewness([1, 2, 2, 2]))
     })
   })
 })

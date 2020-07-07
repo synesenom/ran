@@ -32,7 +32,7 @@ export default function (values) {
   }
 
   const m = mean(values)
-  let m2 = mean(values.map(d => Math.pow(d - m, 2)))
-  let m3 = mean(values.map(d => Math.pow(d - m, 3)))
+  const m2 = mean(values.map(d => Math.pow(d - m, 2)))
+  const m3 = mean(values.map(d => Math.pow(d - m, 3)))
   return m3 === 0 ? undefined : Math.sqrt(values.length * (values.length - 1)) * m3 / ((values.length - 2) * Math.pow(m2, 1.5))
 }

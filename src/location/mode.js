@@ -46,19 +46,20 @@ function continuousMode (values) {
         return (values[2] + values[1]) / 2
       }
       return values[1]
-    default:
+    default: {
       let j = 0
       let wMin = values[values.length - 1] - values[0]
-      let N = Math.ceil(values.length / 2)
-      let n = values.length
+      const N = Math.ceil(values.length / 2)
+      const n = values.length
       for (let i = 0; i < n - N + 1; i++) {
-        let w = values[i + N - 1] - values[i]
+        const w = values[i + N - 1] - values[i]
         if (w < wMin) {
           wMin = w
           j = i
         }
       }
       return continuousMode(values.slice(j, j + N))
+    }
   }
 }
 

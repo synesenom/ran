@@ -25,7 +25,7 @@ import mean from '../location/mean'
  * // => 0.8333333333333334
  */
 export default function (values) {
-  let v = variance(values)
+  const v = variance(values)
   const m = mean(values)
   return m === 0 ? undefined : v && v / m
 }

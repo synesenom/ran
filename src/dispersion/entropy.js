@@ -1,6 +1,6 @@
 import { neumaier } from '../algorithms'
 
-function log(base) {
+function log (base) {
   const logBase = typeof base === 'undefined' ? 1 : Math.log(base)
   return x => Math.log(x) / logBase
 }
