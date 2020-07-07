@@ -11,24 +11,21 @@
 
 Statistical library for generating various seeded random variates, calculating likelihood functions and testing hypotheses (and much more).
 
-## probability distributions
+The library includes:
 
-`ranjs` implements more than [100 continuous and discrete distributions](https://synesenom.github.io/ran/#dist.Distribution) (and counting), each tested rigorously for statistical correctness over a variety of parameters. Every distribution comes with the following methods:
+1. Statistical metrics and tests: a variety of central tendency, dispersion and shape statistics as well as statistical tests.
+2. Probability distributions: more than [130 continuous and discrete distributions](https://synesenom.github.io/ran/#dist.Distribution) (and counting), each tested rigorously for statistical correctness over a variety of parameters. Every distribution comes with the following methods:
 
-- fast and robust sampler
-- probability density/mass function
-- cumulative distribution function
-- quantile function
-- survival function
-- hazard and cumulative hazard function
-- likelihood and AIC/BIC methods
-- test method that uses Kolmogorov-Smirnov test for continuous or chi2 tests for discrete distributions
+    2.1 fast and robust sampler  
+    2.2 probability density/mass function
+    2.3 cumulative distribution function  
+    2.4 quantile function  
+    2.5 survival, hazard and cumulative hazard functions.
+    2.6 likelihood and AIC/BIC methods
+    2.7 test method that uses Kolmogorov-Smirnov test for continuous or chi2 tests for discrete distributions
 
-And every distribution can be individually seeded.
-
-## mcmc methods
-
- `ranjs` also implements a random walk Metropolis (RWM) sampler.
+    Also, every distribution can be individually seeded.
+3. A random walk Metropolis (RWM) sampler.
 
 ## install
 
