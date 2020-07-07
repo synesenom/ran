@@ -17,7 +17,7 @@ The library includes:
 2. Probability distributions: more than [130 continuous and discrete distributions](https://synesenom.github.io/ran/#dist.Distribution) (and counting), each tested rigorously for statistical correctness over a variety of parameters. Every distribution comes with the following methods:
 
     2.1 fast and robust sampler  
-    2.2 probability density/mass function
+    2.2 probability density/mass function  
     2.3 cumulative distribution function  
     2.4 quantile function  
     2.5 survival, hazard and cumulative hazard functions.
