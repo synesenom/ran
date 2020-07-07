@@ -20,8 +20,8 @@ The library includes:
     2.2 probability density/mass function  
     2.3 cumulative distribution function  
     2.4 quantile function  
-    2.5 survival, hazard and cumulative hazard functions.
-    2.6 likelihood and AIC/BIC methods
+    2.5 survival, hazard and cumulative hazard functions.  
+    2.6 likelihood and AIC/BIC methods  
     2.7 test method that uses Kolmogorov-Smirnov test for continuous or chi2 tests for discrete distributions
 
     Also, every distribution can be individually seeded.
