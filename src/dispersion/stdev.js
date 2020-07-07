@@ -20,5 +20,6 @@ import variance from './variance'
  */
 // TODO Example.
 export default function (values) {
-  return values.length > 1 ? Math.abs(Math.sqrt(variance(values))) : undefined
+  let v = variance(values)
+  return v && Math.abs(Math.sqrt(v))
 }

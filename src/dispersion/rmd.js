@@ -24,10 +24,7 @@ import mean from '../location/mean'
  * // => 0.5
  */
 export default function (values) {
-  if (values.length < 2) {
-    return undefined
-  }
-
+  const mad = md(values)
   const m = mean(values)
-  return m === 0 ? undefined : md(values) / m
+  return m === 0 ? undefined : mad && mad / m
 }

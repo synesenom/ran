@@ -91,7 +91,6 @@ describe('dispersion', () => {
         g /= 2 * mean * values.length * values.length
         assert(equal(dispersion.gini(values), g))
       })
-      console.log(dispersion.gini([1, 1, 1, 7]))
     })
   })
 
