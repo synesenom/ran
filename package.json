@@ -34,6 +34,7 @@
     "test:special": "./node_modules/.bin/_mocha --require babel-core/register test/special.js",
     "test:test": "./node_modules/.bin/_mocha --require babel-core/register test/test.js",
     "test:ts": "./node_modules/.bin/_mocha --require babel-core/register test/ts.js",
+    "test:utils": "./node_modules/.bin/_mocha --require babel-core/register test/utils.js",
     "test": "./node_modules/.bin/_mocha --reporter min --require babel-core/register",
     "docs": "python docs/src/parser.py",
     "build": "npm run docs && ./node_modules/.bin/rollup -c",

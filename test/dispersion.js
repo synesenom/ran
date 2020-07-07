@@ -7,7 +7,7 @@ import * as dispersion from '../src/dispersion'
 const SAMPLE_SIZE = 100
 
 describe('dispersion', () => {
-  describe('.cv', () => {
+  describe('.cv()', () => {
     it('should return undefined if sample size is less than 2', () => {
       assert(typeof dispersion.cv([]) === 'undefined')
       assert(typeof dispersion.cv([1]) === 'undefined')
@@ -27,7 +27,7 @@ describe('dispersion', () => {
     })
   })
 
-  describe('.entropy', () => {
+  describe('.entropy()', () => {
     it('should return undefined if sample is empty', () => {
       assert(typeof dispersion.entropy([]) === 'undefined')
     })
@@ -66,7 +66,38 @@ describe('dispersion', () => {
     })
   })
 
-  describe('.md', () => {
+  describe('.iqr()', () => {
+    it('should return undefined for an empty sample', () => {
+      assert(typeof dispersion.iqr([]) === 'undefined')
+    })
+
+    it('should return 0 for a sample of a single element', () => {
+      assert(dispersion.iqr([1]) === 0)
+    })
+
+    it('should return the interquartile range for a finite sample', () => {
+      repeat(() => {
+        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
+        const iqr = dispersion.iqr(values)
+
+        // Lower quartile.
+        let h = (values.length - 1) * 0.25
+        let q0 = values.sort((a, b) => a - b)[Math.floor(h)]
+        let q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
+        const lo = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
+
+        // Upper quartile.
+        h = (values.length - 1) * 0.75
+        q0 = values.sort((a, b) => a - b)[Math.floor(h)]
+        q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
+        const hi = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
+
+        assert(equal(hi - lo, iqr))
+      })
+    })
+  })
+
+  describe('.md()', () => {
     it('should return undefined if sample size is less than 2', () => {
       assert(typeof dispersion.md([]) === 'undefined')
       assert(typeof dispersion.md([1]) === 'undefined')
@@ -87,7 +118,34 @@ describe('dispersion', () => {
     })
   })
 
-  describe('.rmd', () => {
+  describe('.midhinge()', () => {
+    it('should return undefined for an empty sample', () => {
+      assert(typeof dispersion.midhinge([]) === 'undefined')
+    })
+
+    it('should return the midhinge for a finite sample', () => {
+      repeat(() => {
+        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
+        const mh = dispersion.midhinge(values)
+
+        // Lower quartile.
+        let h = (values.length - 1) * 0.25
+        let q0 = values.sort((a, b) => a - b)[Math.floor(h)]
+        let q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
+        const lo = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
+
+        // Upper quartile.
+        h = (values.length - 1) * 0.75
+        q0 = values.sort((a, b) => a - b)[Math.floor(h)]
+        q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
+        const hi = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
+
+        assert(equal(0.5 * (hi + lo), mh))
+      })
+    })
+  })
+
+  describe('.rmd()', () => {
     it('should return undefined if sample size is less than 2', () => {
       assert(typeof dispersion.rmd([]) === 'undefined')
       assert(typeof dispersion.rmd([1]) === 'undefined')
@@ -147,7 +205,7 @@ describe('dispersion', () => {
     })
   })
 
-  describe('.vmr', () => {
+  describe('.vmr()', () => {
     it('should return undefined if sample size is less than 2', () => {
       assert(typeof dispersion.vmr([]) === 'undefined')
       assert(typeof dispersion.vmr([1]) === 'undefined')

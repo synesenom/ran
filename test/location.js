@@ -4,6 +4,7 @@ import { repeat, equal, trials } from './test-utils'
 import { int } from '../src/core'
 import * as location from '../src/location'
 import * as dist from '../src/dist'
+import * as dispersion from '../src/dispersion'
 
 const SAMPLE_SIZE = 100
 
@@ -124,6 +125,35 @@ describe('location', () => {
           return equal(mode, mu, 2)
         })
       })
+    })
+  })
+
+  describe('.trimean()', () => {
+    it('should return undefined for an empty sample', () => {
+      assert(typeof location.trimean([]) === 'undefined')
+    })
+
+    it('should return the trimean for a finite sample', () => {
+      const values = Array.from({length: SAMPLE_SIZE}, Math.random)
+      const trimean = location.trimean(values)
+
+      // Lower quartile.
+      let h = (values.length - 1) * 0.25
+      let q0 = values.sort((a, b) => a - b)[Math.floor(h)]
+      let q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
+      const lo = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
+
+      // Upper quartile.
+      h = (values.length - 1) * 0.75
+      q0 = values.sort((a, b) => a - b)[Math.floor(h)]
+      q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
+      const hi = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
+
+      // Median.
+      const median = values.length % 2 === 0 ? 0.5 * (values[values.length / 2 - 1] + values[values.length / 2])
+        : values[(values.length - 1) / 2]
+
+      assert(equal(0.25 * (hi + lo + 2 * median), trimean))
     })
   })
 })
