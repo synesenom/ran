@@ -40,6 +40,7 @@
     "docs": "python docs/src/parser.py",
     "build": "npm run docs && ./node_modules/.bin/rollup -c",
     "coverage": "cross-env NODE_ENV=test nyc --reporter=text --reporter=html _mocha --recursive --require babel-register --timeout=3000",
+    "coverage:algorithm": "cross-env NODE_ENV=test nyc --reporter=text --reporter=html _mocha --require babel-register --timeout=3000 test/algorithms.js",
     "coveralls": "cross-env NODE_ENV=test nyc --reporter=text-lcov _mocha --recursive --require babel-register --timeout=3000 | coveralls",
     "babel": "babel --presets es2015 src/core.js -o dist/ran.bundle.js"
   },

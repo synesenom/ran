@@ -16,13 +16,13 @@ The library includes:
 1. Statistical metrics and tests: a variety of central tendency, dispersion and shape statistics as well as statistical tests.
 2. Probability distributions: more than [130 continuous and discrete distributions](https://synesenom.github.io/ran/#dist.Distribution) (and counting), each tested rigorously for statistical correctness over a variety of parameters. Every distribution comes with the following methods:
 
-    2.1 fast and robust sampler  
-    2.2 probability density/mass function  
-    2.3 cumulative distribution function  
-    2.4 quantile function  
+    2.1 fast and robust sampler.  
+    2.2 probability density/mass function.  
+    2.3 cumulative distribution function.  
+    2.4 quantile function.  
     2.5 survival, hazard and cumulative hazard functions.  
-    2.6 likelihood and AIC/BIC methods  
-    2.7 test method that uses Kolmogorov-Smirnov test for continuous or chi2 tests for discrete distributions
+    2.6 likelihood and AIC/BIC methods.  
+    2.7 test method that uses Kolmogorov-Smirnov test for continuous or chi2 tests for discrete distributions.
 
     Also, every distribution can be individually seeded.
 3. A random walk Metropolis (RWM) sampler.

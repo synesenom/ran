@@ -108,7 +108,7 @@ function _hi (n, x) {
 }
 
 /**
- * Computes the modified Bessel function of the first kind. Only supports integer order.
+ * Computes the modified Bessel function of the first kind. Only integer order.
  *
  * @method besselI
  * @memberOf ran.special
@@ -153,7 +153,7 @@ export function besselI (n, x) {
     }
   }
   y *= _I0(x) / bi
-  return x < 0 ? -y : y
+  return y
 }
 
 /**

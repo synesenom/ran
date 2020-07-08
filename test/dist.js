@@ -4,14 +4,16 @@ import { repeat, trials, ksTest, chiTest, Tests } from './test-utils'
 import { float, int } from '../src/core'
 import * as dist from '../src/dist'
 import InvalidDiscrete from '../src/dist/_invalid'
+import PreComputed from '../src/dist/_pre-computed'
 import testCases from './dist-cases'
-
+import Distribution from '../src/dist/_distribution'
+import logBeta from '../src/special/log-beta'
+import { beta as rBeta } from '../src/dist/_core'
 
 // Constants
 const LAPS = 1000
 // TODO Decrease sample size.
 const LAPS_2 = 1000
-
 
 const UnitTests = {
   constructor (tc) {
@@ -323,6 +325,21 @@ describe('dist', () => {
       })
     })
   });
+
+  describe('PreComputed', () => {
+    class PreComputedTestClass extends PreComputed {
+      constructor () {
+        super()
+      }
+    }
+    const preComputed = new PreComputedTestClass()
+
+    it('should throw error if _pk is not overridden', () => {
+      assert.throws(() => {
+        preComputed._pk()
+      }, 'PreComputed._pk() is not implemented')
+    })
+  })
 
   // Ordinary distributions.
   testCases.forEach(tc  => {

@@ -20,12 +20,12 @@ const SCALE = 1.618
  * @private
  */
 export default function (f, a0, b0, s) {
-  // If initial boundaries are invalid, return undefined
+  // If initial boundaries are invalid, return undefined.
   if (a0 === b0) {
     return
   }
 
-  // Start searching
+  // Start searching.
   let a = Math.min(a0, b0)
   const min = s ? s[0].value : -Infinity
   let deltaA = s && s[0].closed ? 0 : 1
@@ -35,23 +35,23 @@ export default function (f, a0, b0, s) {
   let f1 = f(a)
   let f2 = f(b)
   for (let k = 0; k < MAX_ITER; k++) {
-    // If we have different signs, we are done
+    // If we have different signs, we are done.
     if (f1 * f2 < 0.0) {
       return [a, b]
     }
 
-    // If lower boundary has a smaller value, extend to the left
+    // If lower boundary has a smaller value, extend to the left.
     if (Math.abs(f1) < Math.abs(f2)) {
       a = Math.max(a + SCALE * (a - b), min + deltaA)
       deltaA /= SCALE
       f1 = f(a)
     } else if (Math.abs(f1) > Math.abs(f2)) {
-      // If upper boundary has a smaller value, extend to the right
+      // If upper boundary has a smaller value, extend to the right.
       b = Math.min(b + SCALE * (b - a), max - deltaB)
       deltaB /= SCALE
       f2 = f(b)
     } else {
-      // If they have the same value, extend in both sides
+      // If they have the same value, extend in both sides.
       a = Math.max(a - 1, min + deltaA)
       deltaA /= SCALE
       f1 = f(a)
@@ -61,9 +61,6 @@ export default function (f, a0, b0, s) {
     }
   }
 
-  // Return boundary anyway
-  return [
-    typeof a0 === 'number' ? a0 : a,
-    typeof b0 === 'number' ? b0 : b
-  ]
+  // Return boundary anyway.
+  return [a0 || a, b0 || b]
 }

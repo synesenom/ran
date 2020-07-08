@@ -38,7 +38,7 @@ export default class extends Distribution {
    * @private
    */
   _pk (k) {
-    throw Error('_pk() is not implemented')
+    throw Error('PreComputed._pk() is not implemented')
   }
 
   /**

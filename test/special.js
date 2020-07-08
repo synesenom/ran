@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { besselInu } from '../src/special/bessel'
+import { besselI, besselInu, besselISpherical } from '../src/special/bessel'
 import { erf } from '../src/special/error'
 import { f11 } from '../src/special/hypergeometric'
 import gamma from '../src/special/gamma'
@@ -12,6 +12,7 @@ import marcumQ from '../src/special/marcum-q'
 import owenT from '../src/special/owen-t'
 import riemannZeta from '../src/special/riemann-zeta'
 import { equal, repeat } from './test-utils'
+import { betaIncomplete } from '../src/special/beta-incomplete'
 
 const LAPS = 100
 
@@ -60,7 +61,48 @@ describe('special', () => {
   })
   */
 
-  describe('f11', () => {
+  describe('.bessel()', () => {
+    it('In(0) should be equal to 0 for n > 1', () => {
+      repeat(() => {
+        const n = Math.floor(1 + 10 * Math.random())
+        assert(besselI(n, 0) === 0)
+      })
+    })
+
+    it('I1(-x) should be equal to -I1(x)', () => {
+      repeat(() => {
+        const x = 1 + 10 * Math.random()
+        assert(equal(besselI(1, -x), -besselI(1, x)))
+      })
+    })
+  })
+
+  describe('.besselISpherical()', () => {
+    it('i0(0) should be 1', () => {
+      assert(besselISpherical(0, 0) === 1)
+    })
+
+    it('i1(0) should be 0', () => {
+      assert(besselISpherical(1, 0) === 0)
+    })
+
+    it('in(0) should be 1 for n > 0', () => {
+      const n = Math.floor(1 + 10 * Math.random())
+      assert(besselISpherical(n, 0) === 0)
+    })
+  })
+
+  describe('.betaIncomplete()', () => {
+    it('B(a, b, x) should be equal to 0 if b > 0 and x <= 0', () => {
+      assert(betaIncomplete(Math.random(), Math.random() + 1, -Math.random()) === 0)
+    })
+
+    it('B(a, b, x) should be equal to 1 if b > 0 and x >= 1', () => {
+      assert(betaIncomplete(Math.random(), Math.random() + 1, 1 + Math.random()) === 1)
+    })
+  })
+
+  describe('.f11()', () => {
     describe('|z| < 50', () => {
       it('f11(0, b, z) = 1', () => {
         repeat(() => {
@@ -179,7 +221,7 @@ describe('special', () => {
     })
   })
 
-  describe('gamma, logGamma', () => {
+  describe('.gamma(), .logGamma()', () => {
     it('logGamma(z)  ln(gamma(z))', () => {
       for (let i = 0; i < LAPS; i++) {
         let x = Math.random() * 100
@@ -192,7 +234,7 @@ describe('special', () => {
     })
   })
 
-  describe('gammaLowerIncomplete, gammaUpperIncomplete', () => {
+  describe('.gammaLowerIncomplete(), .gammaUpperIncomplete()', () => {
     it('should vanish below 0', () => {
       repeat(() => {
         let s = 2 + Math.random() * 10
@@ -243,7 +285,7 @@ describe('special', () => {
     })
   })
 
-  describe('hurwitzZeta, riemannZeta', () => {
+  describe('.hurwitzZeta(), .riemannZeta()', () => {
     it('riemannZeta(s) - hurwitzZeta(s, n+1) = H(s, n)', () => {
       repeat(() => {
         let s = Math.random() * 10 + 1
@@ -256,7 +298,7 @@ describe('special', () => {
     })
   })
 
-  describe('lambertW0', () => {
+  describe('.lambertW0()', () => {
     it('should satisfy the W * exp(W) = x equation', () => {
       repeat(() => {
         let x = Math.random() * 10
@@ -266,7 +308,7 @@ describe('special', () => {
     })
   })
 
-  describe('lambertW1m', () => {
+  describe('.lambertW1m()', () => {
     it('should satisfy the W * exp(W) = x equation', () => {
       repeat(() => {
         let x = -1 * Math.random() / Math.E
@@ -276,7 +318,7 @@ describe('special', () => {
     })
   })
 
-  describe('marcumQ', () => {
+  describe('.marcumQ()', () => {
     describe('special cases', () => {
       describe('x = 0', () => {
         it('should satisfy the recurrence relation', () => {
@@ -454,7 +496,7 @@ describe('special', () => {
     */
   })
 
-  describe('owenT', () => {
+  describe('.owenT()', () => {
     it('should return reference values', () => {
       [
         {h: 0.0625, a: 0.25, t: 0.03891193023470137},

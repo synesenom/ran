@@ -83,6 +83,17 @@ describe('algorithms', () => {
         assert(Math.abs((sol - lambertW0(c)) / sol) < PRECISION)
       }, LAPS)
     })
+
+    it('should find the solution of exp(x) - 1 = x', () => {
+      repeat(() => {
+        const sol = algorithms.newton(
+          t => Math.exp(t) - t - 1,
+          t => Math.exp(t) - 1,
+          0
+        )
+        assert(Math.abs(sol) < PRECISION)
+      })
+    })
   })
 
   describe('.neumaier()', () => {
