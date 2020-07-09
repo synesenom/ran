@@ -49,7 +49,7 @@ export default class extends Distribution {
     if (this.p.xi === 0) {
       // Fall back to logistic
       const z = Math.exp(-(x - this.p.mu) / this.p.sigma)
-      return isFinite(z * z)
+      return Number.isFinite(z * z)
         ? z / (this.p.sigma * Math.pow(1 + z, 2))
         : 0
     } else {
@@ -66,7 +66,7 @@ export default class extends Distribution {
     } else {
       const z = (x - this.p.mu) / this.p.sigma
       const y = Math.pow(1 + this.p.xi * z, -1 / this.p.xi)
-      return isFinite(y) ? 1 / (1 + y) : 0
+      return Number.isFinite(y) ? 1 / (1 + y) : 0
     }
   }
 

@@ -3,7 +3,7 @@ import { MAX_ITER } from '../special/_core'
 const SCALE = 1.618
 
 /**
- * Estimates brackets around the root of a function. If there are no constraints specified, the bracketing interval
+ * Estimates brackets around the root of a function. If there are no constraints specified, the bracket interval
  * grows without limits with a scaling factor of 1.618. Otherwise, the interval is limited to the boundary specified in
  * the constraints. If the constraining interval has an open boundary, the boundary is approached with a distance
  * shrinking with a factor of 1.618 in each step.

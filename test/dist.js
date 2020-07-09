@@ -1,14 +1,12 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import { repeat, trials, ksTest, chiTest, Tests } from './test-utils'
-import { float, int } from '../src/core'
+import { float } from '../src/core'
 import * as dist from '../src/dist'
 import InvalidDiscrete from '../src/dist/_invalid'
 import PreComputed from '../src/dist/_pre-computed'
 import testCases from './dist-cases'
 import Distribution from '../src/dist/_distribution'
-import logBeta from '../src/special/log-beta'
-import { beta as rBeta } from '../src/dist/_core'
 
 // Constants
 const LAPS = 1000
@@ -157,7 +155,7 @@ const UnitTests = {
         it('sample should contain valid numbers', () => {
           trials(() => {
             const sample = c.gen().sample(LAPS_2)
-            return sample.reduce((acc, d) => acc && Number.isFinite(d) && isFinite(d) && !isNaN(d), true)
+            return sample.reduce((acc, d) => acc && Number.isFinite(d) && !isNaN(d), true)
           })
         })
 

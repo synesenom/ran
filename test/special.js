@@ -1,5 +1,6 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
+import * as special from '../src/special'
 import { besselI, besselInu, besselISpherical } from '../src/special/bessel'
 import { erf } from '../src/special/error'
 import { f11 } from '../src/special/hypergeometric'
@@ -78,17 +79,35 @@ describe('special', () => {
   })
 
   describe('.besselISpherical()', () => {
-    it('i0(0) should be 1', () => {
+    it('i(0, 0) should be 1', () => {
       assert(besselISpherical(0, 0) === 1)
     })
 
-    it('i1(0) should be 0', () => {
+    it('i(1, 0) should be 0', () => {
       assert(besselISpherical(1, 0) === 0)
     })
 
-    it('in(0) should be 1 for n > 0', () => {
+    it('i(n, 0) should be 1 for n > 0', () => {
       const n = Math.floor(1 + 10 * Math.random())
       assert(besselISpherical(n, 0) === 0)
+    })
+
+    it('should satisfy the recurrence relation for negative order', () => {
+      repeat(() => {
+        const n = -Math.floor(1 + 10 * Math.random())
+        const x = 10 * Math.random()
+        assert(equal(special.besselISpherical(n - 1, x) - besselISpherical(n + 1, x),
+          (2 * n + 1) * besselISpherical(n, x) / x))
+      })
+    })
+
+    it('should satisfy the recurrence relation for positive order', () => {
+      repeat(() => {
+        const n = Math.floor(1 + 10 * Math.random())
+        const x = 10 * Math.random()
+        assert(equal(special.besselISpherical(n - 1, x) - besselISpherical(n + 1, x),
+          (2 * n + 1) * besselISpherical(n, x) / x))
+      })
     })
   })
 

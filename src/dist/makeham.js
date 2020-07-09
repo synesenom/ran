@@ -19,7 +19,7 @@ export default class extends Distribution {
   constructor (alpha = 1, beta = 1, lambda = 1) {
     super('continuous', arguments.length)
 
-    // Validate parameters
+    // Validate parameters.
     this.p = { alpha, beta, lambda }
     Distribution.validate({ alpha, beta, lambda }, [
       'alpha > 0',
@@ -27,7 +27,7 @@ export default class extends Distribution {
       'lambda > 0'
     ])
 
-    // Set support
+    // Set support.
     this.s = [{
       value: 0,
       closed: false
@@ -36,7 +36,7 @@ export default class extends Distribution {
       closed: false
     }]
 
-    // Speed-up constants
+    // Speed-up constants.
     this.c = [
       alpha / (beta * lambda),
       alpha * Math.exp(alpha / lambda) / lambda,
@@ -45,15 +45,15 @@ export default class extends Distribution {
   }
 
   _generator () {
-    // Inverse transform sampling
+    // Inverse transform sampling.
     return this._q(this.r.next())
   }
 
   _pdf (x) {
     const y = Math.exp(this.p.beta * x)
 
-    // Handle y >> 1 cases
-    if (isFinite(Math.exp(y))) {
+    // Handle y >> 1 cases.
+    if (Number.isFinite(Math.exp(y))) {
       return (this.p.alpha * y + this.p.lambda) * Math.exp(-this.p.lambda * x - this.p.alpha * (y - 1) / this.p.beta)
     } else {
       return 0
@@ -67,15 +67,13 @@ export default class extends Distribution {
   _q (p) {
     const z = this.c[1] * Math.pow(1 - p, this.c[2])
 
-    // Handle z >> 1 case
+    // Handle z >> 1 case.
     const w = lambertW0(z)
-    if (!isFinite(w)) {
-      const t = Math.log(this.c[1]) + this.c[2] * Math.log(1 - p)
-      return this.c[0] - Math.log(1 - p) / this.p.lambda -
-        (t - Math.log(t)) / this.p.beta
+    if (Number.isFinite(w)) {
+      return this.c[0] - Math.log(1 - p) / this.p.lambda - w / this.p.beta
     } else {
-      return this.c[0] - Math.log(1 - p) / this.p.lambda -
-        w / this.p.beta
+      const t = Math.log(this.c[1]) + this.c[2] * Math.log(1 - p)
+      return this.c[0] - Math.log(1 - p) / this.p.lambda - (t - Math.log(t)) / this.p.beta
     }
   }
 }

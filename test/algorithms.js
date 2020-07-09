@@ -9,11 +9,11 @@ const LAPS = 100
 const PRECISION = 10 * Number.EPSILON
 
 describe('algorithms', () => {
-  describe('.bracketing()', () => {
+  describe('.bracket()', () => {
     it('should return undefined if initial bracket is invalid', () => {
       repeat(() => {
         const c = Math.random() * 10
-        const bracket = algorithms.bracketing(
+        const bracket = algorithms.bracket(
           t => t * Math.exp(t) - c,
           lambertW0(c) + 1,
           lambertW0(c) + 1
@@ -25,7 +25,7 @@ describe('algorithms', () => {
     it('should find an appropriate bracket for exp(-x) = c x', () => {
       repeat(() => {
         const c = Math.random() * 10
-        const bracket = algorithms.bracketing(
+        const bracket = algorithms.bracket(
           t => t * Math.exp(t) - c,
           lambertW0(c) + 1,
           lambertW0(c) + 2
@@ -36,7 +36,7 @@ describe('algorithms', () => {
 
     it('should return the specified boundaries if root was not found', () => {
       repeat(() => {
-        const bracket = algorithms.bracketing(
+        const bracket = algorithms.bracket(
           t => Math.exp(-t) + 1,
           0,
           2

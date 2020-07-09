@@ -56,7 +56,7 @@ export default class extends Distribution {
     const b = Math.pow(1 - x, this.c[2])
 
     // Handle x = 0 and x = 1 cases
-    return isFinite(a) && isFinite(b)
+    return Number.isFinite(a) && Number.isFinite(b)
       ? a * b / this.c[0]
       : 0
   }

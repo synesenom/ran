@@ -52,7 +52,7 @@ export default class extends Distribution {
     const z = Math.pow(x, 2 * this.p.q - 1)
 
     // Handle q < 0.5 and x << 0 case
-    if (!isFinite(z)) {
+    if (!Number.isFinite(z)) {
       return 0
     } else {
       return 2 * Math.exp(this.p.q * Math.log(this.p.q) - this.p.q * x * x / this.p.omega - logGamma(this.p.q) - this.p.q * Math.log(this.p.omega)) * z

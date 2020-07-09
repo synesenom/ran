@@ -78,7 +78,7 @@ export default class extends Distribution {
 
     // Check if b is too close to 1
     const w = lambertW0(Math.pow(this.c[1] * (1 - p), this.c[2]) / this.c[0])
-    if (!isFinite(w)) {
+    if (!Number.isFinite(w)) {
       // 1 - b << 1, use logarithms
       const l1 = this.c[3] + this.c[2] * Math.log(1 - p)
       const l2 = Math.log(l1)

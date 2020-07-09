@@ -57,7 +57,7 @@ export default class extends Distribution {
     const b = besselI(0, z)
 
     // Handle z >> 1 case (using asymptotic form of Bessel)
-    if (isFinite(b)) {
+    if (Number.isFinite(b)) {
       return x * Math.exp(-0.5 * (x * x + this.c[3]) / this.c[1]) * besselI(0, x * this.c[2]) / this.c[1]
     } else {
       return x * Math.exp(-0.5 * (x * x + this.c[3]) / this.c[1] + z - 0.5 * Math.log(2 * Math.PI * z)) / this.c[1]

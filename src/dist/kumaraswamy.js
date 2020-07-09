@@ -43,13 +43,13 @@ export default class extends Distribution {
   _pdf (x) {
     // Handle case a < 1 and x << 1
     const a = Math.pow(x, this.p.a - 1)
-    if (!isFinite(a)) {
+    if (!Number.isFinite(a)) {
       return 0
     }
 
     // Handle case b < 1 and 1 - x << 1
     const b = Math.pow(1 - a * x, this.p.b - 1)
-    if (!isFinite(b)) {
+    if (!Number.isFinite(b)) {
       return 0
     }
     return this.p.a * this.p.b * a * b

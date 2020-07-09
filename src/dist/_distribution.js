@@ -2,7 +2,7 @@ import Xoshiro128p from '../core/xoshiro'
 import neumaier from '../algorithms/neumaier'
 import some from '../utils/some'
 import { chi2, kolmogorovSmirnov } from './_tests'
-import bracket from '../algorithms/bracketing'
+import bracket from '../algorithms/bracket'
 import brent from '../algorithms/brent'
 import { MAX_ITER } from '../special/_core'
 

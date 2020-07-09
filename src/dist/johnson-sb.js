@@ -51,7 +51,7 @@ export default class extends Normal {
   _cdf (x) {
     const z = x - this.p.xi
     const lnz = Math.log(z / (this.p.lambda - z))
-    return isFinite(lnz) ? super._cdf(this.p.gamma + this.p.delta * lnz) : 0
+    return Number.isFinite(lnz) ? super._cdf(this.p.gamma + this.p.delta * lnz) : 0
   }
 
   _q (p) {

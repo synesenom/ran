@@ -49,8 +49,8 @@ function differentiate (f, x, h) {
 
 function getTestRange (dist) {
   return [
-    isFinite(dist.support()[0].value) ? dist.support()[0].value - 1 : -30,
-    isFinite(dist.support()[1].value) ? dist.support()[1].value + 1 : 30
+    Number.isFinite(dist.support()[0].value) ? dist.support()[0].value - 1 : -30,
+    Number.isFinite(dist.support()[1].value) ? dist.support()[1].value + 1 : 30
   ].concat([0, 1e-10])
 }
 
@@ -174,7 +174,7 @@ export const Tests = {
   pdfType (dist, laps) {
     return runX(dist, laps, (d, x) => {
       let pdf = d.pdf(x)
-      return isFinite(pdf) && Number.isFinite(pdf)
+      return Number.isFinite(pdf)
     })
   },
 
@@ -185,7 +185,7 @@ export const Tests = {
   cdfType (dist, laps) {
     return runX(dist, laps, (d, x) => {
       let cdf = d.cdf(x)
-      return isFinite(cdf) && Number.isFinite(cdf)
+      return Number.isFinite(cdf)
     })
   },
 
@@ -240,7 +240,7 @@ export const Tests = {
   qType (dist, laps) {
     return runP(dist, laps, (d, p) => {
       let x = d.q(p)
-      return isFinite(x) && Number.isFinite(x)
+      return Number.isFinite(x)
     })
   },
 
