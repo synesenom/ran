@@ -1,4 +1,4 @@
-import quantile from '../utils/quantile'
+import quantile from '../shape/quantile'
 
 /**
  * Calculates the [interquartile range]{@link https://en.wikipedia.org/wiki/Interquartile_range} for a sample of values.

@@ -1,4 +1,4 @@
-import quantile from '../utils/quantile'
+import quantile from '../shape/quantile'
 import median from './median'
 
 /**

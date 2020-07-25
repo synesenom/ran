@@ -1,3 +1,5 @@
+import quantile from '../shape/quantile'
+
 /**
  * Calculates the [midhinge]{@link https://en.wikipedia.org/wiki/Midhinge} for a sample of values.
  *
@@ -13,8 +15,6 @@
  * ran.dispersion.midhinge([1, 1, 1, 2, 3])
  * // => 1.5
  */
-import quantile from '../utils/quantile'
-
 export default function (values) {
   if (values.length === 0) {
     return undefined

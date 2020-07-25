@@ -1,4 +1,4 @@
-import quantile from '../utils/quantile'
+import quantile from '../shape/quantile'
 
 /**
  * Calculates the [quartile coefficient of dispersion]{@link https://en.wikipedia.org/wiki/Quartile_coefficient_of_dispersion}

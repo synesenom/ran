@@ -1,12 +1,13 @@
 import mean from '../location/mean'
+import moment from './moment'
 
 /**
- * Calculates the [sample kurtosis]{@link https://en.wikipedia.org/wiki/Kurtosis#Estimators_of_population_kurtosis}
+ * Calculates the [sample excess kurtosis]{@link https://en.wikipedia.org/wiki/Kurtosis#Estimators_of_population_kurtosis}
  * which is unbiased for the normal distribution.
  *
  * @method kurtosis
  * @methodOf ran.shape
- * @param {number[]} values Array of values to calculate skewness for.
+ * @param {number[]} values Array of values to calculate kurtosis for.
  * @returns {(number|undefined)} The sample kurtosis of values if there are more than two and their variance is nonzero,
  * undefined otherwise.
  * @example
@@ -33,7 +34,7 @@ export default function (values) {
 
   const n = values.length
   const m = mean(values)
-  const m2 = mean(values.map(d => Math.pow(d - m, 2)))
-  const m4 = mean(values.map(d => Math.pow(d - m, 4)))
+  const m2 = moment(values, 2, m)
+  const m4 = moment(values, 4, m)
   return m2 === 0 ? undefined : (n - 1) * ((n + 1) * m4 / (m2 * m2) - 3 * (n - 1)) / ((n - 2) * (n - 3))
 }

@@ -1,4 +1,5 @@
 import mean from '../location/mean'
+import moment from './moment'
 
 /**
  * Calculates the [Fisher-Pearson standardized sample skewness]{@link https://en.wikipedia.org/wiki/Skewness#Sample_skewness}
@@ -33,7 +34,7 @@ export default function (values) {
 
   const n = values.length
   const m = mean(values)
-  const m2 = mean(values.map(d => Math.pow(d - m, 2)))
-  const m3 = mean(values.map(d => Math.pow(d - m, 3)))
+  const m2 = moment(values, 2, m)
+  const m3 = moment(values, 3, m)
   return m2 === 0 ? undefined : Math.sqrt(n * (n - 1)) * m3 / ((n - 2) * Math.pow(m2, 1.5))
 }
