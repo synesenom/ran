@@ -37,7 +37,7 @@
     "test:ts": "./node_modules/.bin/_mocha --require babel-core/register test/ts.js",
     "test:utils": "./node_modules/.bin/_mocha --require babel-core/register test/utils.js",
     "test": "./node_modules/.bin/_mocha --reporter min --require babel-core/register",
-    "docs": "python docs/src/parser.py",
+    "build:docs": "python docs/src/parser.py",
     "build": "npm run docs && ./node_modules/.bin/rollup -c",
     "coverage": "cross-env NODE_ENV=test nyc --reporter=text --reporter=html _mocha --recursive --require babel-register --timeout=3000",
     "coverage:algorithm": "cross-env NODE_ENV=test nyc --reporter=text --reporter=html _mocha --require babel-register --timeout=3000 test/algorithms.js",
