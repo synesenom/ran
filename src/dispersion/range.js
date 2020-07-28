@@ -1,3 +1,6 @@
+import max from '../shape/max'
+import min from '../shape/min'
+
 /**
  * Calculates the [range]{@link } for a sample of values.
  *
@@ -18,11 +21,5 @@ export default function (values) {
     return undefined
   }
 
-  let min = values[0]
-  let max = values[0]
-  for (const x of values) {
-    min = Math.min(min, x)
-    max = Math.max(max, x)
-  }
-  return max - min
+  return max(values) - min(values)
 }

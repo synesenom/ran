@@ -27,6 +27,7 @@
     "standard": "./node_modules/.bin/standard --fix src/**/*.js",
     "test:algorithm": "./node_modules/.bin/_mocha --require babel-core/register test/algorithms.js",
     "test:core": "./node_modules/.bin/_mocha --require babel-core/register test/core.js",
+    "test:dependence": "./node_modules/.bin/_mocha --require babel-core/register test/dependence.js",
     "test:dispersion": "./node_modules/.bin/_mocha --require babel-core/register test/dispersion.js",
     "test:dist": "./node_modules/.bin/_mocha --require babel-core/register test/dist.js",
     "test:la": "./node_modules/.bin/_mocha --require babel-core/register test/la.js",
