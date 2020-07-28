@@ -8,7 +8,6 @@ describe('dependence', () => {
     it('should return undefined if any array is empty', () => {
       assert(typeof dependence.kendall([], [1, 2, 3]) === 'undefined')
       assert(typeof dependence.kendall([1, 2, 3], []) === 'undefined')
-      console.log(dependence.kendall([1, 2, 3], [1, 4, 2]))
     })
 
     it('should return undefined if arrays have different length', () => {
