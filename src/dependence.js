@@ -6,4 +6,5 @@
  */
 export { default as kendall } from './dependence/kendall'
 export { default as pearson } from './dependence/pearson'
+export { default as pointBiserial } from './dependence/point-biserial'
 export { default as spearman } from './dependence/spearman'

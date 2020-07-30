@@ -82,6 +82,33 @@ describe('dependence', () => {
     })
   })
 
+  describe('.pointBiserial()', () => {
+    it('should return undefined if any array is empty', () => {
+      assert(typeof dependence.pointBiserial([], [1, 2, 3]) === 'undefined')
+      assert(typeof dependence.pointBiserial([1, 2, 3], []) === 'undefined')
+    })
+
+    it('should return undefined if arrays have different length', () => {
+      assert(typeof dependence.pointBiserial([1, 2, 3], [4, 5]) === 'undefined')
+    })
+
+    it('should return the point-biserial correlation of two arrays', () => {
+      const x = [
+        38, 40, 15, 28, 31, 33, 39, 27, 24, 8, 29, 5, 34, 17, 42, 45, 35, 16, 27, 28, 4, 48, 22, 3, 14, 46, 45, 44, 43,
+        35, 13, 14, 32, 33, 8, 30, 11, 43, 37, 41, 15, 13, 10, 17, 20, 5, 22, 11, 44, 31, 36, 24, 43, 44, 20, 3, 40, 42,
+        16, 49, 12, 41, 8, 31, 26, 41, 7, 8, 5, 16, 24, 43, 34, 29, 41, 4, 16, 19, 49, 7, 3, 25, 39, 5, 4, 48, 49, 13,
+        45, 11, 26, 26, 19, 31, 15, 6, 31, 48, 8, 35
+      ]
+      const y = [
+        0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0,
+        1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0,
+        0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0
+      ]
+      const pointBiserial = 0.11845990445247673
+      assert(equal(dependence.pointBiserial(x, y), pointBiserial))
+    })
+  })
+
   describe('.spearman()', () => {
     it('should return undefined if any array is empty', () => {
       assert(typeof dependence.spearman([], [1, 2, 3]) === 'undefined')
