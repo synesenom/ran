@@ -83,7 +83,7 @@ class Vector {
    * @method f
    * @memberOf ran.la.Vector
    * @param {Function} func Function to apply on each element.
-   * @returns {Vector} The transformed matrix.
+   * @returns {ran.la.Vector} The transformed matrix.
    * @example
    *
    * let v = new ran.la.Vector([1, 2, 3])
@@ -101,7 +101,7 @@ class Vector {
    * @method scale
    * @memberOf ran.la.Vector
    * @param {number} s Scalar to multiply vector with.
-   * @returns {Vector} The scaled vector.
+   * @returns {ran.la.Vector} The scaled vector.
    * @example
    *
    * let vec = new ran.la.Vector([1, 2, 3])
@@ -118,8 +118,8 @@ class Vector {
    *
    * @method add
    * @memberOf ran.la.Vector
-   * @param {Vector} vec The vector to add.
-   * @returns {Vector} The sum vector.
+   * @param {ran.la.Vector} vec The vector to add.
+   * @returns {ran.la.Vector} The sum vector.
    * @example
    *
    * let v = new ran.la.Vector([1, 2, 3])
@@ -138,8 +138,8 @@ class Vector {
    *
    * @method sub
    * @memberOf ran.la.Vector
-   * @param {Vector} vec The vector to subtract.
-   * @returns {Vector} The difference vector.
+   * @param {ran.la.Vector} vec The vector to subtract.
+   * @returns {ran.la.Vector} The difference vector.
    * @example
    *
    * let v = new ran.la.Vector([4, 5, 6])
@@ -158,7 +158,7 @@ class Vector {
    *
    * @method dot
    * @memberOf ran.la.Vector
-   * @param {Vector} vec Vector to multiply with.
+   * @param {ran.la.Vector} vec Vector to multiply with.
    * @returns {number} The dot product.
    * @example
    *

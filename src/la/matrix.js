@@ -98,8 +98,9 @@ class Matrix {
    *
    * @method f
    * @memberOf ran.la.Matrix
-   * @param {Function} func Function to apply on each element.
-   * @returns {Matrix} The transformed matrix.
+   * @param {Function} func Function to apply on each element. May take three parameters: the element's value and its
+   * row and column indices.
+   * @returns {ran.la.Matrix} The transformed matrix.
    * @example
    *
    * let M = new ran.la.Matrix([[1, 2], [3, 4]])
@@ -111,7 +112,8 @@ class Matrix {
    *
    */
   f (func) {
-    return new Matrix(this._m.map(row => row.map(d => func(d))))
+    // TODO Unit test arguments i and j.
+    return new Matrix(this._m.map((row, i) => row.map((d, j) => func(d, i, j))))
   }
 
   /**
@@ -120,7 +122,7 @@ class Matrix {
    * @method scale
    * @memberOf ran.la.Matrix
    * @param {number} s The scalar to multiply matrix with.
-   * @returns {Matrix} The scaled matrix.
+   * @returns {ran.la.Matrix} The scaled matrix.
    * @example
    *
    * let M = new ran.la.Matrix([[1, 2], [3, 4]])
@@ -140,8 +142,8 @@ class Matrix {
    *
    * @method add
    * @memberOf ran.la.Matrix
-   * @param {Matrix} mat The matrix to add.
-   * @returns {Matrix} The sum of the two matrices.
+   * @param {ran.la.Matrix} mat The matrix to add.
+   * @returns {ran.la.Matrix} The sum of the two matrices.
    * @example
    *
    * let M = new ran.la.Matrix([[1, 2], [3, 4]])
@@ -163,8 +165,8 @@ class Matrix {
    *
    * @method sub
    * @memberOf ran.la.Matrix
-   * @param {Matrix} mat The matrix to subtract.
-   * @returns {Matrix} The difference of the two matrices.
+   * @param {ran.la.Matrix} mat The matrix to subtract.
+   * @returns {ran.la.Matrix} The difference of the two matrices.
    * @example
    *
    * let M = new ran.la.Matrix([[5, 6], [7, 8]])
@@ -220,7 +222,7 @@ class Matrix {
    *
    * @method t
    * @memberOf ran.la.Matrix
-   * @returns {Matrix} The transposed matrix.
+   * @returns {ran.la.Matrix} The transposed matrix.
    * @example
    *
    * let M = new ran.la.Matrix([[1, 2], [3, 4]])
@@ -236,21 +238,21 @@ class Matrix {
   }
 
   /**
-   * Multiplies a vector with the matrix (acts this matrix on a vector).
+   * Multiplies a vector with the matrix (applies this matrix on a vector).
    *
-   * @method act
+   * @method apply
    * @memberOf ran.la.Matrix
-   * @param {ran.la.Vector} vec Vector to act matrix on.
-   * @returns {Vector} The mapped vector.
+   * @param {ran.la.Vector} vec Vector to apply matrix on.
+   * @returns {ran.la.Vector} The mapped vector.
    * @example
    *
    * let M = new ran.la.Matrix([[1, 2], [3, 4]])
    * let v = new ran.la.Vector([5, 6])
-   * M.act(v)
+   * M.apply(v)
    * // => ( 17, 39 )
    *
    */
-  act (vec) {
+  apply (vec) {
     return new Vector(this._m.map(d => vec.dot(new Vector(d))))
   }
 
@@ -301,6 +303,30 @@ class Matrix {
     }
 
     return { D, L }
+  }
+
+  /**
+   * Returns an array representing the row sums of the matrix.
+   *
+   * @method rowSum
+   * @methodOf ran.la.Matrix
+   * @return {number[]} Array containing the row sums.
+   */
+  rowSum () {
+    return this._m.map(row => row.reduce((sum, d) => sum + d, 0))
+  }
+
+  /**
+   * Returns the Hadamard (element-wise) product of the matrix with another matrix
+   *
+   * @method hadamard
+   * @methodOf ran.la.Matrix
+   * @param {ran.la.Matrix} mat Matrix to calculate element-wise product with.
+   * @return {ran.la.Matrix} The result matrix.
+   */
+  hadamard (mat) {
+    const m = mat.m()
+    return this.f((d, i, j) => d * m[i][j])
   }
 }
 

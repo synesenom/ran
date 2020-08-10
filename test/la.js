@@ -227,6 +227,7 @@ describe('la', () => {
           )
         }, 100)
       })
+      console.log(new la.Matrix([[1, 2], [3, 4]]).t())
 
       it('should return original matrix after two transposition', () => {
         repeat(() => {
@@ -295,14 +296,14 @@ describe('la', () => {
       })
     })
 
-    describe('.act()', () => {
-      it('should act a matrix on a vector', () => {
+    describe('.apply()', () => {
+      it('should apply a matrix on a vector', () => {
         repeat(() => {
           let n = 1 + Math.floor(Math.random() * 10)
           let arr1 = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
           let arr2 = Array.from({ length: n }, () => Math.random())
           assert.deepEqual(
-            new la.Matrix(arr1).act(new la.Vector(arr2)),
+            new la.Matrix(arr1).apply(new la.Vector(arr2)),
             new la.Vector(arr1.map(d => arr2.reduce((p, dd, i) => p + dd * d[i], 0)))
           )
         }, 100)
@@ -318,7 +319,7 @@ describe('la', () => {
         let C = M.mult(N)
         repeat(() => {
           let r = new la.Vector(Array.from({ length: n }, () => Math.random() > 0.5 ? 1 : 0))
-          let P = M.act(N.act(r)).add(C.act(r).scale(-1))
+          let P = M.apply(N.apply(r)).add(C.apply(r).scale(-1))
           assert.deepEqual(P.v().reduce((s, d) => s && Math.abs(d) < EPSILON, true), true)
         }, 100)
       })
@@ -388,6 +389,33 @@ describe('la', () => {
           }
           assert.equal(sm < EPSILON, true)
         })
+      })
+    })
+
+    describe('.rowSum()', () => {
+      it('should return the row sum of the matrix', () => {
+        repeat(() => {
+          let n = 1 + Math.floor(Math.random() * 10)
+          let arr = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
+          assert.deepEqual(
+            new la.Matrix(arr).rowSum(),
+            arr.map(row => row.reduce((sum, d) => sum + d, 0))
+          )
+        }, 100)
+      })
+    })
+
+    describe('.hadamard()', () => {
+      it('should return the Hadamard product of two matrices', () => {
+        repeat(() => {
+          let n = 1 + Math.floor(Math.random() * 10)
+          let arr1 = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
+          let arr2 = Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random()))
+          assert.deepEqual(
+            new la.Matrix(arr1).hadamard(new la.Matrix(arr2)),
+            new la.Matrix(arr1.map((row, i) => row.map((d, j) => d * arr2[i][j])))
+          )
+        }, 100)
       })
     })
   })
