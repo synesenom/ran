@@ -5,6 +5,7 @@
  * @memberOf ran
  */
 export { default as cv } from './dispersion/cv'
+export { default as dVar } from './dispersion/distance-variance'
 export { default as entropy } from './dispersion/entropy'
 export { default as gini } from './dispersion/gini'
 export { default as iqr } from './dispersion/iqr'

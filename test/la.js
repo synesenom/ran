@@ -227,7 +227,6 @@ describe('la', () => {
           )
         }, 100)
       })
-      console.log(new la.Matrix([[1, 2], [3, 4]]).t())
 
       it('should return original matrix after two transposition', () => {
         repeat(() => {

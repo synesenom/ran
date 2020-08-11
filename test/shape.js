@@ -7,6 +7,7 @@ import * as dispersion from '../src/dispersion'
 
 const SAMPLE_SIZE = 100
 
+// TODO Go through methods and check input conditions.
 describe('dispersion', () => {
   describe('.kurtosis()', () => {
     it('should return undefined if sample size is less than 3', () => {
@@ -74,6 +75,19 @@ describe('dispersion', () => {
         }
         xk /= n
         assert(equal(xk, moment))
+      })
+    })
+  })
+
+  describe('.odds()', () => {
+    it('should return undefined if probability is 1', () => {
+      assert(typeof shape.odds(1) === 'undefined')
+    })
+
+    it('should return the odds for a probability', () => {
+      repeat(() => {
+        const p = 0.01 + 0.99 * Math.random()
+        assert(equal(shape.odds(p) === p / (1 - p)))
       })
     })
   })

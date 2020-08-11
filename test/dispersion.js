@@ -3,9 +3,11 @@ import { describe, it } from 'mocha'
 import { repeat, equal } from './test-utils'
 import { int } from '../src/core'
 import * as dispersion from '../src/dispersion'
+import * as dependence from '../src/dependence'
 
 const SAMPLE_SIZE = 100
 
+// TODO Go through methods and check input conditions.
 describe('dispersion', () => {
   describe('.cv()', () => {
     it('should return undefined if sample size is less than 2', () => {
@@ -24,6 +26,23 @@ describe('dispersion', () => {
         let stdev = Math.sqrt(values.reduce((v, d) => (d - mean) * (d - mean) + v, 0) / (values.length - 1))
         assert(equal(dispersion.cv(values), stdev / mean))
       })
+    })
+  })
+
+  describe('.dVar()', () => {
+    it('should return undefined for empty array', () => {
+      assert(typeof dispersion.dVar([]) === 'undefined')
+    })
+
+    it('should return the distance variance of an array', () => {
+      const x = [
+        17, 20, 0, 17, 46, 20, 31, 27, 1, 29, 16, 20, 5, 32, 28, 41, 35, 32, 6, 18, 8, 38, 27, 25, 32, 43, 5, 28, 6, 40,
+        16, 42, 38, 48, 44, 7, 33, 23, 33, 11, 26, 32, 27, 10, 18, 0, 21, 44, 23, 47, 29, 12, 17, 7, 39, 15, 0, 16, 0,
+        17, 6, 17, 25, 8, 1, 18, 18, 0, 35, 46, 13, 21, 20, 11, 39, 41, 23, 37, 29, 27, 18, 17, 15, 42, 33, 3, 11, 8,
+        45, 2, 31, 26, 21, 37, 25, 5, 11, 47, 16, 25
+      ]
+      const dVar = 9.422636422997547
+      assert(equal(dispersion.dVar(x), dVar))
     })
   })
 
@@ -85,7 +104,6 @@ describe('dispersion', () => {
       testCases.forEach(tc => {
         assert(equal(dispersion.entropy(tc.probabilities, base), tc.entropy / Math.log(base), 8))
       })
-      console.log(dispersion.entropy([0.3, 0.3, 0.4]))
     })
   })
 

@@ -8,6 +8,7 @@ import * as dispersion from '../src/dispersion'
 
 const SAMPLE_SIZE = 100
 
+// TODO Go through methods and check input conditions.
 describe('location', () => {
   describe('.geometricMean()', () => {
     it('should return zero for sample containing zero', () => {

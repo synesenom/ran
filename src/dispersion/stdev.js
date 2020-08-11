@@ -20,6 +20,7 @@ import variance from './variance'
  */
 // TODO Example.
 export default function (values) {
+  // TODO Check for undefined in unit test.
   const v = variance(values)
   return v && Math.abs(Math.sqrt(v))
 }

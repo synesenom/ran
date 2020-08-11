@@ -1,5 +1,5 @@
 import stdev from '../dispersion/stdev'
-import { mean } from '../location'
+import covariance from './covariance'
 
 /**
  * Calculates the [Pearson correlation coefficient]{@link https://en.wikipedia.org/wiki/Pearson_correlation_coefficient}
@@ -29,16 +29,9 @@ import { mean } from '../location'
  * // => 0.6643835616438358
  */
 export default function (x, y) {
-  if (x.length === 0 || y.length === 0 || x.length !== y.length) {
-    return undefined
-  }
-
-  const n = x.length
+  // TODO Check if length is below 2.
+  const cov = covariance(x, y)
   const sx = stdev(x)
   const sy = stdev(y)
-  if (sx === 0 || sy === 0) {
-    return undefined
-  }
-
-  return (x.reduce((sum, d, i) => sum + d * y[i], 0) - n * mean(x) * mean(y)) / ((n - 1) * sx * sy)
+  return typeof cov === 'undefined' || sx * sy === 0 ? undefined : cov / (sx * sy)
 }

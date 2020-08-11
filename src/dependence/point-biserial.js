@@ -37,9 +37,9 @@ export default function (x, y) {
 
   const x0 = x.filter((d, i) => y[i] === 0)
   const x1 = x.filter((d, i) => y[i] === 1)
-  let n0 = x0.length
-  let n1 = x1.length
-  let m0 = mean(x0)
-  let m1 = mean(x1)
+  const n0 = x0.length
+  const n1 = x1.length
+  const m0 = mean(x0)
+  const m1 = mean(x1)
   return (m1 - m0) * Math.sqrt(n0 * n1 / (x.length * (x.length - 1))) / s
 }

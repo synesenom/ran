@@ -1,7 +1,8 @@
-import sign from '../utils/sign'
+import concordant from '../utils/concordant'
+import discordant from '../utils/discordant'
 
 function nTies (values) {
-  const counts = values.reduce((acc, d) => Object.assign(acc, {[d]: (acc[d] || 0) + 1}), {})
+  const counts = values.reduce((acc, d) => Object.assign(acc, { [d]: (acc[d] || 0) + 1 }), {})
   const ties = Object.values(counts).filter(d => d > 1)
   return ties.reduce((sum, d) => sum + d * (d - 1) / 2, 0)
 }
@@ -36,12 +37,7 @@ export default function (x, y) {
   }
 
   // Numerator.
-  let num = 0
-  for (let i = 1; i < x.length; i++) {
-    for (let j = 0; j < i; j++) {
-      num += sign(x[i] - x[j]) * sign(y[i] - y[j])
-    }
-  }
+  const num = concordant(x, y) - discordant(x, y)
 
   // Correction for ties.
   const n0 = x.length * (x.length - 1) / 2

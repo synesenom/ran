@@ -1,5 +1,4 @@
-import { neumaier } from '../algorithms'
-import count from '../utils/count'
+import neumaier from '../algorithms/neumaier'
 
 function log (base) {
   const logBase = typeof base === 'undefined' ? 1 : Math.log(base)
@@ -7,8 +6,8 @@ function log (base) {
 }
 
 /**
- * Calculates the [Shannon entropy]{@link https://en.wikipedia.org/wiki/Entropy_(information_theory)} of an array of
- * values.
+ * Calculates the [Shannon entropy]{@link https://en.wikipedia.org/wiki/Entropy_(information_theory)} for a probability
+ * distribution.
  *
  * @method entropy
  * @memberOf ran.dispersion
