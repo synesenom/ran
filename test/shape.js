@@ -79,19 +79,6 @@ describe('dispersion', () => {
     })
   })
 
-  describe('.odds()', () => {
-    it('should return undefined if probability is 1', () => {
-      assert(typeof shape.odds(1) === 'undefined')
-    })
-
-    it('should return the odds for a probability', () => {
-      repeat(() => {
-        const p = 0.01 + 0.99 * Math.random()
-        assert(equal(shape.odds(p) === p / (1 - p)))
-      })
-    })
-  })
-
   describe('.quantile()', () => {
     it('should return undefined for empty sample', () => {
       assert(typeof shape.quantile([], 0.5) === 'undefined')
