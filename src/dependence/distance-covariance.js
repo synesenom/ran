@@ -26,5 +26,5 @@ export default function (x, y) {
 
   const a = distanceMatrix(x)
   const b = distanceMatrix(y)
-  return Math.sqrt(mean(a.hadamard(b).m().flat()))
+  return Math.sqrt(mean([].concat(...a.hadamard(b).m())))
 }

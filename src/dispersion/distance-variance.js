@@ -24,5 +24,5 @@ export default function (x) {
 
   // Calculate distance matrix.
   const a = distanceMatrix(x)
-  return Math.sqrt(mean(a.hadamard(a).m().flat()))
+  return Math.sqrt(mean([].concat(...a.hadamard(a).m())))
 }
