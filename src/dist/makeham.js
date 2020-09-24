@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  * with \(\alpha, \beta, \lambda > 0\). Support: \(x > 0\).
  *
  * @class Makeham
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha Shape parameter. Default value is 1.
  * @param {number=} beta Rate parameter. Default value is 1.
  * @param {number=} lambda Scale parameter. Default value is 1.

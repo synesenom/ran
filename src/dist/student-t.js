@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  * with \(\nu > 0\) and \(\mathrm{B}(x, y)\) is the beta function. Support: \(x \in \mathbb{R}\).
  *
  * @class StudentT
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} nu Degrees of freedom. Default value is 1.
  * @constructor
  */

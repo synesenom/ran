@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * Support: \(x \in [a, b]\).
  *
  * @class Arcsine
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} a Lower boundary. Default value is 0.
  * @param {number=} b Upper boundary. Default value is 1.
  * @constructor

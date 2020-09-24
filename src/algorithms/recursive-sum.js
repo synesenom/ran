@@ -6,7 +6,7 @@ import { EPS, MAX_ITER } from '../special/_core'
  * iteration stops, otherwise the maximum number of iterations are used.
  *
  * @method recursiveSum
- * @memberOf ran.algorithms
+ * @memberof ran.algorithms
  * @param {Object} x0 Object containing the state of the variables in the zeroth index.
  * @param {Function} preUpdate Function that takes the current state of the variables, the current index and returns the
  * next state of the variables before calculating the delta.

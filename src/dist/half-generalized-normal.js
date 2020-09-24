@@ -8,7 +8,7 @@ import GeneralizedNormal from './generalized-normal'
  * with \(\alpha, \beta > 0\). Support: \(x > 0\).
  *
  * @class HalfGeneralizedNormal
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha Scale parameter. Default value is 1.
  * @param {number=} beta Shape parameter. Default value is 1.
  * @constructor

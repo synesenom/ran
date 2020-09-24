@@ -11,7 +11,7 @@ import { beta as rBeta } from './_core'
  * with \(\alpha, \beta > 0\). Support: \(k \in \{0, ..., n\}\).
  *
  * @class BetaGeometric
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha First shape parameter. Default value is 1.
  * @param {number=} beta Second shape parameter. Default value is 1.
  * @constructor

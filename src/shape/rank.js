@@ -2,7 +2,7 @@
  * Calculates the fractional rank for an array of values.
  *
  * @method rank
- * @methodOf ran.shape
+ * @memberof ran.shape
  * @param {number[]} values Array of values to calculate ranks for.
  * @returns {(number|undefined)} The ranks of the values if there are any, undefined otherwise.
  * @example

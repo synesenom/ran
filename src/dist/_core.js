@@ -5,7 +5,7 @@ import gammaLn from '../special/log-gamma'
  * Performs a rejection sampling.
  *
  * @method rejection
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {ran.core.Xoshiro128p} r Random generator.
  * @param {Function} g Generator for the sample (major function).
  * @param {Function} accept The function that returns the acceptance threshold.
@@ -35,7 +35,7 @@ export function beta (r, a, b) {
  * Generates a chi2 random variate.
  *
  * @method chi2
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {ran.core.Xoshiro128p} r Random generator.
  * @param {number=} nu Degrees of freedom.
  * @returns {number} Random variate.
@@ -48,7 +48,7 @@ export function chi2 (r, nu) {
  * Generates a exponential random variate.
  *
  * @method exponential
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {ran.core.Xoshiro128p} r Random generator.
  * @param {number=} lambda Rate parameter. Default value is 1.
  * @returns {number} Random variate.
@@ -62,7 +62,7 @@ export function exponential (r, lambda = 1) {
  * Generates a gamma random variate with the rate parametrization.
  *
  * @method gamma
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {ran.core.Xoshiro128p} r Random generator.
  * @param {number} a Shape parameter.
  * @param {number=} b Rate parameter. Default value is 1.
@@ -97,7 +97,7 @@ export function gamma (r, a, b = 1) {
  * Generates a non-central chi2 random variate.
  *
  * @method noncentralChi2
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {ran.core.Xoshiro128p} r Random generator.
  * @param {number} k Degrees of freedom.
  * @param {number} lambda Non-centrality parameter.
@@ -114,7 +114,7 @@ export function noncentralChi2 (r, k, lambda) {
  * Generates a normally distributed random variate.
  *
  * @method normal
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {ran.core.Xoshiro128p} r Random generator.
  * @param {number=} mu Distribution mean. Default value is 0.
  * @param {number=} sigma Distribution standard deviation. Default value is 1.
@@ -132,7 +132,7 @@ export function normal (r, mu = 0, sigma = 1) {
  * Generates a Poisson random variate.
  *
  * @method poisson
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {ran.core.Xoshiro128p} r Random generator.
  * @param {number} lambda Mean of the distribution.
  * @returns {number} Random variate.
@@ -185,7 +185,7 @@ export function poisson (r, lambda) {
  * Generates a random sign.
  *
  * @method sign
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {ran.core.Xoshiro128p} r Random generator.
  * @param {number=} p Probability of +1. Default value is 0.5.
  * @return {number} Random sign (-1 or +1).
@@ -199,7 +199,7 @@ export function sign (r, p = 0.5) {
  * Generates a zeta random variate
  *
  * @method zeta
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {ran.core.Xoshiro128p} r Random generator.
  * @param {number} s Exponent.
  * @returns {number} Random variate.

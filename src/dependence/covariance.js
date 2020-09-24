@@ -5,7 +5,7 @@ import { mean } from '../location'
  * for paired arrays of values.
  *
  * @method covariance
- * @methodOf ran.dependence
+ * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
  * @returns {(number|undefined)} The sample covariance if both arrays have more than one element and they have the same

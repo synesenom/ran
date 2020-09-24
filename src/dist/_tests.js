@@ -2,7 +2,7 @@
  * Table containing critical values for the chi square test at 99% of confidence for low degrees of freedom.
  *
  * @var {number[]} _CHI_TABLE_LO
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @private
  */
 const _CHI_TABLE_LO = [0,
@@ -37,7 +37,7 @@ const _CHI_TABLE_LO = [0,
  * Table containing critical values for the chi square test at 99% of confidence for high degrees of freedom.
  *
  * @var {number[]} _CHI_TABLE_HI
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @private
  */
 const _CHI_TABLE_HI = [
@@ -49,7 +49,7 @@ const _CHI_TABLE_HI = [
  * Performs a chi square test for an array of values and a probability mass function.
  *
  * @method chi2
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param values {number[]} Array of values to perform test for.
  * @param pmf {Function} Probability mass function to perform test against.
  * @param c {number} Number of parameters for the distribution.
@@ -99,7 +99,7 @@ export function chi2 (values, pmf, c) {
  * Performs a Kolmogorov-Smirnov test for an array of values and a cumulative distribution function.
  *
  * @method kolmogorovSmirnov
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param values {number[]} Array of values to perform test for.
  * @param cdf {Function} Cumulative distribution function to perform test against.
  * @returns {{statistics: number, passed: boolean}} Test results, containing the raw K-S statistics and a

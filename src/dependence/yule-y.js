@@ -9,7 +9,7 @@ import { oddsRatio } from '../dependence'
  * Probabilities don't need to sum to 1.
  *
  * @method yuleY
- * @methodOf ran.dependence
+ * @memberof ran.dependence
  * @param {number} p00 The probability of X = 0 and Y = 0.
  * @param {number} p01 The probability of X = 0 and Y = 1.
  * @param {number} p10 The probability of X = 1 and Y = 0.

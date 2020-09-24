@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(z = \frac{x - m}{s}\). and \(\alpha, s > 0\), \(m \in \mathbb{R}\). Support: \(x \in \mathbb{R}, x > m\).
  *
  * @class Frechet
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha Shape parameter. Default value is 1.
  * @param {number=} s Scale parameter. Default value is 1.
  * @param {number=} m Location parameter. Default value is 0.

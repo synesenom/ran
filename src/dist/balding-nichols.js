@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  * Support: \(x \in (0, 1)\). It is simply a re-parametrization of the [beta distribution]{@link #dist.Beta}.
  *
  * @class BaldingNichols
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} F Fixation index. Default value is 0.5.
  * @param {number=} p Allele frequency. Default value is 0.5.
  * @constructor

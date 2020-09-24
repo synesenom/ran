@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * where \(a, b, c \in \mathbb{R}\), \(a < b < c\), \(\alpha = \frac{4b + c - 5a}{c - a}\), \(\beta = \frac{5c - a -4b}{c - a}\) and \(\mathrm{B}(x, y)\) is the beta function. Support: \(x \in [a, c]\).
  *
  * @class PERT
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} a Lower boundary of the support. Default value is 0.
  * @param {number=} b Mode of the distribution. Default value is 0.5.
  * @param {number=} c Upper boundary of the support. Default value is 1.

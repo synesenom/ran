@@ -5,11 +5,14 @@
  * @module ran
  */
 
-import * as core from './core'
-import * as la from './la'
-import * as dist from './dist'
-import * as ts from './ts'
-import * as mc from './mc'
-import * as test from './test'
+export * as core from './core'
+export * as dependence from './dependence'
 
-export { core, la, dist, ts, mc, test }
+/*
+export * as dispersion from './dispersion'
+export * as dist from './dist'
+export * as location from './location'
+export * as mc from './mc'
+export * as shape from './shape'
+export * as test from './test'
+ */

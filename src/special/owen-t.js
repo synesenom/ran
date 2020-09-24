@@ -261,7 +261,7 @@ function _t (h, a, ah) {
  * Translated from the python code: https://people.sc.fsu.edu/~jburkardt/py_src/owens/owens.html
  *
  * @method owenT
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} h First parameter.
  * @param {number} a Second parameter.
  * @returns {number} Owen's T function at the specified values.

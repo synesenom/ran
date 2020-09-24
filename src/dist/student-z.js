@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(n > 1\). Support: \(x \in \mathbb{R}\).
  *
  * @class StudentZ
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} n Degrees of freedom. Default value is 2.
  * @constructor
  */

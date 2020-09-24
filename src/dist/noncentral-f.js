@@ -9,7 +9,7 @@ import NoncentralBeta from './noncentral-beta'
  * where \(d_1, d_2 \in \mathbb{N}^+\) and \(\lambda > 0\). Support: \(x \ge 0\).
  *
  * @class NoncentralF
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} d1 First degree of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
  * @param {number=} d2 Second degree of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
  * @param {number=} lambda Non-centrality parameter. Default value is 1.

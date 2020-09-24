@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(\eta, b > 0\). Support: \(x \ge 0\).
  *
  * @class Gompertz
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} eta Shape parameter. Default value is 1.
  * @param {number=} beta Scale parameter. Default value is 1.
  * @constructor

@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(\mu \in \mathbb{R}\), \(\beta, \gamma > 0\), \(z = \sqrt{\frac{x - \mu}{\beta}}\) and \(\phi(x)\) is the probability density function of the standard [normal distribution]{@link #dist.Normal}. Support: \(x \in (\mu, \infty)\).
  *
  * @class BirnbaumSaunders
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} beta Scale parameter. Default value is 1.
  * @param {number=} gamma Shape parameter. Default value is 1.

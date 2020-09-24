@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  * with \(\mu \in \mathbb{R}\) and \(c > 0\). Support: \(x \in [\mu, \infty)\).
  *
  * @class Levy
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} c Scale parameter. Default value is 1.
  * @constructor

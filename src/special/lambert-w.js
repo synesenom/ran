@@ -19,7 +19,7 @@ function _halley (z, w0) {
  * Source: Corless et al: On the Lambert W Function (https://cs.uwaterloo.ca/research/tr/1993/03/W.pdf)
  *
  * @method lamberW1m
- * @memberOf ran.special
+ * @memberof ran.special
  * @param z {number} Value to evaluate the Lambert W function at.
  * @returns {number} Value of the Lambert W function.
  * @private
@@ -35,7 +35,7 @@ export function lambertW1m (z) {
  *
  *
  * @method lambertW0
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} z Value to evaluate the Lambert W function at.
  * @returns {number} Value of the Lambert W function.
  * @private

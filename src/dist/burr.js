@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(c, k > 0\). Support: \(x > 0\).
  *
  * @class Burr
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} c First shape parameter. Default value is 1.
  * @param {number=} k Second shape parameter. Default value is 1.
  * @constructor

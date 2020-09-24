@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * where \(\lambda, \kappa > 0\). Support: \(x > 0\).
  *
  * @class LogisticExponential
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} lambda Scale parameter. Default value is 1.
  * @param {number=} kappa Shape parameter. Default value is 1.
  * @constructor

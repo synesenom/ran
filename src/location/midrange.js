@@ -2,7 +2,7 @@
  * Calculates the [mid-range]{@link https://en.wikipedia.org/wiki/Mid-range} for a sample of values.
  *
  * @method midrange
- * @methodOf ran.location
+ * @memberof ran.location
  * @param {number[]} values Array of values to calculate mid-range for.
  * @return {(number|undefined)} The mid-range of the values if there is any, undefined otherwise.
  * @example

@@ -6,7 +6,7 @@ import distanceMatrix from '../utils/distance-matrix'
  * paired arrays of values.
  *
  * @method dCov
- * @methodOf ran.dependence
+ * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
  * @returns {(number|undefined)} The distance covariance if none of the arrays are empty and they have the same length,

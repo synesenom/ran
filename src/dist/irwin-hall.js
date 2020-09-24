@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  * with \(n \in \mathbb{N}^+\). Support: \(x \in [0, n]\).
  *
  * @class IrwinHall
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} n Number of uniform variates to sum. If not an integer, it is rounded to the nearest one. Default
  * value is 1.
  * @constructor

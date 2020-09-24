@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * where \(k \in \mathbb{N}^+\) and \(\lambda > 0\). Support: \(x \ge 0\).
  *
  * @class Erlang
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} k Shape parameter. It is rounded to the nearest integer. Default value is 1.
  * @param {number=} lambda Rate parameter. Default value is 1.
  * @constructor

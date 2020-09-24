@@ -11,7 +11,7 @@
  * Evaluates the digamma function using the series expanson.
  *
  * @method _psiSeries
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} z Argument to evaluate digamma for.
  * @returns {number} The estimated value.
  * @private
@@ -30,7 +30,7 @@
  * Source: https://www.jstor.org/stable/2347257
  *
  * @method digamma
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} z Value to evaluate digamma at.
  * @returns {number} The digamma function at the specified value.
  * @private

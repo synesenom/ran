@@ -16,7 +16,7 @@ const CErfInv = [
  * Computes the error function.
  *
  * @method erf
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} x Value to evaluate the error function at.
  * @returns {number} Error function value.
  * @private
@@ -32,7 +32,7 @@ export function erf (x) {
  * Computes the complementary error function.
  *
  * @method erfc
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} x Value to evaluate the complementary error function at.
  * @returns {number} Complementary error function value.
  * @private

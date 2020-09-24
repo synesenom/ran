@@ -3,8 +3,8 @@ import mean from './mean'
 /**
  * Calculates the [geometric mean]{@link https://en.wikipedia.org/wiki/Geometric_mean} of an array of values.
  *
- * @method mean
- * @memberOf ran.location
+ * @method geometricMean
+ * @memberof ran.location
  * @param {number[]} values Array of values to calculate geometric mean for.
  * @returns {(number|undefined)} Gemoetric mean of the values if there are any, undefined otherwise.
  * @example

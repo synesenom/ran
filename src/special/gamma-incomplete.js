@@ -5,7 +5,7 @@ import logGamma from './log-gamma'
  * Computes the regularized lower incomplete gamma function.
  *
  * @method _gli
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} s Exponent of the integrand.
  * @param {number} x Upper boundary of the integration.
  * @return {number} The regularized lower incomplete gamma function.
@@ -36,7 +36,7 @@ function _gli (s, x) {
  * Computes the regularized upper incomplete gamma function.
  *
  * @method _gui
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} s Exponent of the integrand.
  * @param {number} x Lower boundary of the integration.
  * @return {number} The regularized upper incomplete gamma function.
@@ -74,7 +74,7 @@ function _gui (s, x) {
  * Computes the regularized lower incomplete gamma function.
  *
  * @method gammaLowerIncomplete
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} s Exponent of the integrand.
  * @param {number} x Upper boundary of the integration.
  * @return {number} The regularized lower incomplete gamma function.
@@ -88,7 +88,7 @@ export function gammaLowerIncomplete (s, x) {
  * Computes the regularized upper incomplete gamma function.
  *
  * @method gammaUpperIncomplete
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} s Exponent of the integrand.
  * @param {number} x Lower boundary of the integration.
  * @return {number} The regularized upper incomplete gamma function.

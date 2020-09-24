@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(a, b, c \in \mathbb{R}\), \(a < b\) and \(a \le c \le b\). Support: \(x \in [a, b]\).
  *
  * @class Triangular
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} a Lower bound of the support. Default value is 0.
  * @param {number=} b Upper bound of the support. Default value is 1.
  * @param {number=} c Mode of the distribution. Default value is 0.5.

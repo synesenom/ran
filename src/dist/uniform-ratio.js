@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * Support: \(x > 0\).
  *
  * @class UniformRatio
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @constructor
  */
 export default class extends Distribution {

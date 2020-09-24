@@ -6,7 +6,7 @@ import mean from '../location/mean'
  * paired arrays of values.
  *
  * @method dVar
- * @methodOf ran.dependence
+ * @memberof ran.dependence
  * @param {number[]} x Array of values.
  * @returns {(number|undefined)} The distance variance if the array os not empty, undefined otherwise.
  * @example

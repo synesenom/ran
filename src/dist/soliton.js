@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(N \in \mathbb{N}^+\). Support: \(k \in \{1, 2, ..., N\}\).
  *
  * @class Soliton
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} N Number of blocks in the messaging model. If not an integer, it is rounded to the nearest one. Default value is 1.
  * @constructor
  */

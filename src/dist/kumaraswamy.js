@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(a, b > 0\). Support: \(x \in (0, 1)\).
  *
  * @class Kumaraswamy
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha First shape parameter. Default value is 1.
  * @param {number=} beta Second shape parameter. Default value is 1.
  * @constructor

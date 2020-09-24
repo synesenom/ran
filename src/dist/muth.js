@@ -11,7 +11,7 @@ import { lambertW1m } from '../special/lambert-w'
  * with \(\alpha \in (0, 1]\). Support: \(x > 0\).
  *
  * @class Muth
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha Shape parameter. Default value is 0.5.
  * @constructor
  */

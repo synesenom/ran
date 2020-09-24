@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(z = \frac{x - \mu}{\sigma}\), \(\mu, \xi \in \mathbb{R}\) and \(\sigma > 0\). Support: \(x \ge \mu - \sigma/\xi\) if \(\xi > 0\), \(x \le \mu - \sigma/\xi\) if \(\xi < 0\), \(x \in \mathbb{R}\) otherwise.
  *
  * @class ShiftedLogLogistic
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} sigma Scale parameter. Default value is 1.
  * @param {number=} xi Shape parameter. Default value is 1.

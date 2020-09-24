@@ -10,7 +10,7 @@ import Categorical from './categorical'
  * with \(n \in \mathbb{N}_0\) and \(p \in [0, 1]\). Support: \(k \in \{0, ..., n\}\).
  *
  * @class Binomial
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} n Number of trials. Default value is 100.
  * @param {number=} p Probability of success. Default value is 0.5.
  * @constructor

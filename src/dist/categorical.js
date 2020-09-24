@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * where \(w_k > 0 / \{0\}\). Support: \(k \in \mathbb{N}_0\).
  *
  * @class Categorical
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number[]=} weights Weights for the distribution (doesn't need to be normalized). Default value is an array with a single value of 1.
  * @param {number=} min Lowest value to sample (support starts at this value). Default value is [1, 1, 1].
  * @constructor

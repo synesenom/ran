@@ -5,7 +5,7 @@ import Chi2 from '../dist/chi2'
  * Calculates the [Bartlett statistics]{@link https://en.wikipedia.org/wiki/Bartlett%27s_test} for multiple data sets.
  *
  * @method bartlett
- * @memberOf ran.test
+ * @memberof ran.test
  * @param {Array[]} dataSets Array containing the data sets.
  * @param {number} alpha Confidence level.
  * @returns {Object} Object containing the test statistics and whether the data sets passed the null hypothesis that
@@ -21,7 +21,7 @@ import Chi2 from '../dist/chi2'
  * ran.test.bartlett([normal1.sample(100), normal1.sample(100), normal1.sample(100)], 0.1)
  * // => { chi2: 0.09827551592930094, passed: true }
  *
- * ran.test.mannWhitney([normal1.sample(100), normal2.sample(100), normal3.sample(100)], 0.1)
+ * ran.test.bartlett([normal1.sample(100), normal2.sample(100), normal3.sample(100)], 0.1)
  * // => { chi2: 104.31185521417476, passed: false }
  */
 export default function (dataSets, alpha = 0.05) {

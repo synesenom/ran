@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  * with \(R > 0\). Support: \(x \in [-R, R]\).
  *
  * @class Wigner
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} R Radius of the distribution. Default value is 1.
  * @constructor
  */

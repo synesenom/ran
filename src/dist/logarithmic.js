@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(a, b \in [1, \infty)\) and \(a < b\). Support: \(x \in [a, b]\).
  *
  * @class Logarithmic
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} a Lower boundary of the distribution. Default value is 1.
  * @param {number=} b Upper boundary of the distribution. Default value is 2.
  * @constructor

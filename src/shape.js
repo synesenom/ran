@@ -2,7 +2,7 @@
  * Namespaces containing various shape metrics.
  *
  * @namespace shape
- * @memberOf ran
+ * @memberof ran
  */
 export { default as kurtosis } from './shape/kurtosis'
 export { default as moment } from './shape/moment'

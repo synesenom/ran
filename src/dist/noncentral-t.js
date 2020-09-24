@@ -13,7 +13,7 @@ import Distribution from './_distribution'
  * with \(\nu \in \mathbb{N}^+\) and \(\mu \in \mathbb{R}\). Support: \(x \in \mathbb{R}\).
  *
  * @class NoncentralT
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} nu Degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 1.
  * @param {number=} mu Non-centrality parameter. Default value is 1.
  * @constructor

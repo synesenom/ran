@@ -8,7 +8,7 @@ import Normal from './normal'
  * where \(\phi(x)\) is the probability density function of the standard [normal distribution]{@link #dist.Normal}. Support: \(x \in \mathbb{R}\).
  *
  * @class Slash
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @constructor
  */
 export default class extends Normal {

@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * Support: \(x \in \mathbb{R}\).
  *
  * @class HyperbolicSecant
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @constructor
  */
 export default class extends Distribution {

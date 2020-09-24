@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(\gamma, \xi \in \mathbb{R}\), \(\delta, \lambda > 0\) and \(z = x - \xi\). Support: \(x \in (\xi, \xi + \lambda)\).
  *
  * @class JohnsonSB
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} gamma First location parameter. Default value is 0.
  * @param {number=} delta First scale parameter. Default value is 1.
  * @param {number=} lambda Second scale parameter. Default value is 1.

@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * where \(x_0 \in \mathbb{R}\) and \(\gamma > 0\). Support: \(x \in \mathbb{R}\).
  *
  * @class Cauchy
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} x0 Location parameter. Default value is 0.
  * @param {number=} gamma Scale parameter. Default value is 1.
  * @constructor

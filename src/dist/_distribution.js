@@ -14,7 +14,7 @@ import { MAX_ITER } from '../special/_core'
  * distribution.
  *
  * @class Distribution
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @constructor
  */
 class Distribution {
@@ -42,7 +42,7 @@ class Distribution {
    * Validates a set of parameters using a list of constraints.
    *
    * @method validate
-   * @memberOf Distribution
+   * @memberof Distribution
    * @param {Object} params Object containing the parameters to validate.
    * @param {string[]} constraints Array of strings defining the parameter constraints.
    * @throws Error when any of the parameters don't satisfy the constraints.
@@ -87,7 +87,7 @@ class Distribution {
    * Rounds a value to an integer if the distribution is of discrete type.
    *
    * @method _toInt
-   * @memberOf Distribution
+   * @memberof Distribution
    * @param {number} x Value to round if necessary.
    * @returns {number} The rounded or left intact value.
    * @private
@@ -100,7 +100,7 @@ class Distribution {
    * Generates a single random variate.
    *
    * @method _generator
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @returns {number} A single random variate.
    * @protected
    * @ignore
@@ -113,7 +113,7 @@ class Distribution {
    * The probability distribution or probability mass function.
    *
    * @method _pdf
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {number} x Value to evaluate the distribution/mass function at.
    * @returns {number} The probability density or probability at the specified value.
    * @protected
@@ -127,7 +127,7 @@ class Distribution {
    * The probability distribution function.
    *
    * @method _cdf
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {number} x Value to evaluate the probability distribution at.
    * @returns {number} The value of the probability function at the specified value.
    * @protected
@@ -141,7 +141,7 @@ class Distribution {
    * Estimates the quantile function by using a look-up table.
    *
    * @method _qEstimateTable
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {number} p Probability to find value for.
    * @returns {number} The lower boundary of the interval that satisfies F(x) = p if found, undefined otherwise.
    * @protected
@@ -183,7 +183,7 @@ class Distribution {
    * Estimates the quantile function by solving F(x) = p using Brent's method.
    *
    * @method _qEstimateRoot
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {number} p Probability to find value for.
    * @returns {(number|undefined)} The value where the probability coincides with the specified value if found,
    * undefined otherwise.
@@ -226,7 +226,7 @@ class Distribution {
    * Returns the type of the distribution (either discrete or continuous).
    *
    * @method type
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @returns {string} Distribution type.
    */
   type () {
@@ -238,7 +238,7 @@ class Distribution {
    * for the probability distribution is not necessarily the same as the support of the cumulative distribution.
    *
    * @method support
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @returns {Object[]} An array of objects describing the lower and upper boundary of the support. Each object
    * contains a <code>value: number</code> and a <code>closed: boolean</code> property with the value of the boundary
    * and whether it is closed, respectively. When <code>value</code> is (+/-)Infinity, <code>closed</code> is always false.
@@ -340,7 +340,7 @@ class Distribution {
    * Generates some random variate.
    *
    * @method sample
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {number=} n Number of variates to generate. If not specified, a single value is returned.
    * @returns {(number|number[])} Single sample or an array of samples.
    * @example
@@ -362,7 +362,7 @@ class Distribution {
    * [Probability density function]{@link https://en.wikipedia.org/wiki/Probability_density_function}. In case of discrete distributions, it is the [probability mass function]{@link https://en.wikipedia.org/wiki/Probability_mass_function}.
    *
    * @method pdf
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {number} x Value to evaluate distribution at.
    * @returns {number} The probability density or probability mass.
    * @example
@@ -402,7 +402,7 @@ class Distribution {
    * if it is discrete. The functions \(f(t)\) and \(f(x_i)\) denote the probability density and mass functions.
    *
    * @method cdf
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {number} x Value to evaluate CDF at.
    * @returns {number} The cumulative distribution value.
    * @example
@@ -448,7 +448,7 @@ class Distribution {
    * For discrete distributions a look-up table is used with linear search.
    *
    * @method q
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {number} p The probability at which the quantile should be evaluated.
    * @returns {(number|undefined)} The value of the quantile function at the specified probability if \(p \in [0, 1]\) and the quantile could be found,
    * undefined otherwise.
@@ -481,7 +481,7 @@ class Distribution {
    * where \(F(x)\) denotes the cumulative distribution function.
    *
    * @method survival
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {number} x Value to evaluate survival function at.
    * @returns {number} The survival value.
    * @example
@@ -503,7 +503,7 @@ class Distribution {
    * where \(f(x)\) and \(S(x)\) are the probability density (or mass) function and the survival function, respectively.
    *
    * @method hazard
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {number} x Value to evaluate the hazard at.
    * @returns {number} The hazard value.
    * @example
@@ -525,7 +525,7 @@ class Distribution {
    * where \(\lambda(x)\) is the hazard function.
    *
    * @method cHazard
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {number} x Value to evaluate cumulative hazard at.
    * @returns {number} The cumulative hazard.
    * @example
@@ -544,7 +544,7 @@ class Distribution {
    * For discrete distributions, this is the logarithm of the probability mass function.
    *
    * @method logPdf
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {number} x Value to evaluate the log pdf at.
    * @returns {number} The logarithmic probability density (or mass).
    * @example
@@ -568,7 +568,7 @@ class Distribution {
    * distribution. The function \(f(x)\) denotes the probability density/mass function.
    *
    * @method lnL
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {number[]} data Array of numbers to calculate log-likelihood for.
    * @returns {number} The log-likelihood of the data for the distribution.
    * @example
@@ -597,7 +597,7 @@ class Distribution {
    * current parameter values.
    *
    * @method aic
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {number[]} data Array of values containing the data.
    * @returns {number} The AIC for the current parameters.
    * @example
@@ -623,7 +623,7 @@ class Distribution {
    * current parameter values.
    *
    * @method bic
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {number[]} data Array of values containing the data.
    * @returns {number} The BIC for the current parameters.
    * @example
@@ -648,7 +648,7 @@ class Distribution {
    * method uses \(\chi^2\) test, whereas for continuous distributions it uses the Kolmogorov-Smirnov test. In both cases, the probability of Type I error (rejecting a correct null hypotheses) is 1%.
    *
    * @method test
-   * @memberOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {number[]} values Array of values to test.
    * @returns {Object} Object with two properties representing the result of the test:
    * <ul>

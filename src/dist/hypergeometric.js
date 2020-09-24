@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  * with \(N \in \mathbb{N}^+\), \(K \in \{0, 1, ..., N\}\) and \(n \in \{0, 1, ..., N\}\). Support: \(k \in \{\mathrm{max}(0, n+K-N), ..., \mathrm{min}(n, K)\}\).
  *
  * @class Hypergeometric
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} N Total number of elements to sample from. If not an integer, it is rounded to the nearest one. Default value is 10.
  * @param {number=} K Total number of successes. If not an integer, it is rounded to the nearest one. Default value is 5.
  * @param {number=} n If not an integer, it is rounded to the nearest one. Number of draws. Default value is 5.

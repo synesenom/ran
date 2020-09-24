@@ -2,7 +2,7 @@
  * Namespaces containing various dispersion metrics.
  *
  * @namespace dispersion
- * @memberOf ran
+ * @memberof ran
  */
 export { default as cv } from './dispersion/cv'
 export { default as dVar } from './dispersion/distance-variance'

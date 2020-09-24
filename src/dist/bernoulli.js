@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * where \(p \in [0, 1]\). Support: \(k \in \{0, 1\}\).
  *
  * @class Bernoulli
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} p Probability of the outcome 1. Default value is 0.5.
  * @constructor
  */

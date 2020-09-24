@@ -7,7 +7,7 @@ import { gammaLowerIncomplete, gammaUpperIncomplete } from './gamma-incomplete'
  * Series expansion of the Marcum-Q function. Section 3 in https://arxiv.org/pdf/1311.0681.pdf.
  *
  * @namespace _seriesExpansion
- * @memberOf ran.special
+ * @memberof ran.special
  * @private
  */
 const _seriesExpansion = {
@@ -87,7 +87,7 @@ const _seriesExpansion = {
  * Asymptotic expansion for large xi. Section 4.1 in https://arxiv.org/pdf/1311.0681.pdf.
  *
  * @namespace _seriesExpansion
- * @memberOf ran.special
+ * @memberof ran.special
  * @private
  */
 /* const _asymptoticExpansionLargeXi = (function() {
@@ -150,7 +150,7 @@ const _seriesExpansion = {
  * Recurrence relation evaluation.
  *
  * @namespace _recurrence
- * @memberOf ran.special
+ * @memberof ran.special
  * @private
  */
 /* const _recurrence = (function() {
@@ -252,7 +252,7 @@ const _seriesExpansion = {
  * Implementation source: https://arxiv.org/pdf/1311.0681.pdf.
  *
  * @method marcumQ
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} mu The order of the function.
  * @param {number} x First variable.
  * @param {number} y Second variable.

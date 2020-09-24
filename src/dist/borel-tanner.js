@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  * where \(\mu \in [0, 1]\) and \(n \in \mathbb{N}^+\). Support: \(k \ge n\).
  *
  * @class BorelTanner
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number} mu Distribution parameter. Default value is 0.5.
  * @param {number} n Number of Borel distributed variates to add. If not an integer, it is rounded to the nearest one.
  * Default value is 2.

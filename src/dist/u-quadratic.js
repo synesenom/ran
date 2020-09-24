@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * where \(\alpha = \frac{12}{(b - a)^3}\), \(\beta = \frac{a + b}{2}\), \(a, b \in \mathbb{R}\) and \(a < b\). Support: \(x \in [1, b]\).
  *
  * @class UQuadratic
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} a Lower bound of the support. Default value is 0.
  * @param {number=} b Upper bound of the support. Default value is 1.
  * @constructor

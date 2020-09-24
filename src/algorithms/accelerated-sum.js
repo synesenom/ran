@@ -3,7 +3,7 @@
  * Source: https://projecteuclid.org/download/pdf_1/euclid.em/1046889587
  *
  * @method acceleratedSum
- * @memberOf ran.algorithms
+ * @memberof ran.algorithms
  * @param {Function} a Function returning the k-th element of the series.
  * @returns {number} The sum of the series up to the first n-th terms.
  * @private

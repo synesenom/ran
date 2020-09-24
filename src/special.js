@@ -1,6 +1,6 @@
 /**
  * @namespace algorithms
- * @memberOf ran
+ * @memberof ran
  * @private
  */
 export { besselISpherical } from './special/bessel'

@@ -5,7 +5,7 @@ import mean from '../location/mean'
  * Calculates the [relative mean absolute difference]{@link https://en.wikipedia.org/wiki/Mean_absolute_difference#Relative_mean_absolute_difference} of an array of values.
  *
  * @method rmd
- * @methodOf ran.dispersion
+ * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate relative mean absolute difference for.
  * @returns {(number|undefined)} Relative mean absolute difference of the values if there are more than two, undefined
  * otherwise.

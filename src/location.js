@@ -2,7 +2,7 @@
  * Namespaces containing various central tendency metrics.
  *
  * @namespace location
- * @memberOf ran
+ * @memberof ran
  */
 export { default as geometricMean } from './location/geometric-mean'
 export { default as harmonicMean } from './location/harmonic-mean'

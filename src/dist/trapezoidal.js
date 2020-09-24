@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * where \(a, b, c, d \in \mathbb{R}\), \(a < d\), \(a \le b < c\) and \(c \le d\). Support: \(x \in [a, d]\).
  *
  * @class Trapezoidal
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} a Lower bound of the support. Default value is 0.
  * @param {number=} b Start of the level part. Default value is 0.33.
  * @param {number=} c End of the level part. Default value is 0.67.

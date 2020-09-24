@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(\lambda > 0\). Support: \(x \ge 0\).
  *
  * @class Exponential
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} lambda Rate parameter. Default value is 1.
  * @constructor
  */

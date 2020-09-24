@@ -8,7 +8,7 @@ import Gamma from './gamma'
  * where \(\alpha, \beta > 0\). Support: \(x \in \mathbb{R}\).
  *
  * @class DoubleGamma
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha Shape parameter. Default value is 1.
  * @param {number=} beta Rate parameter. Default value is 1.
  * @constructor

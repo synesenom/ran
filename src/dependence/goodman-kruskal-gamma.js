@@ -6,7 +6,7 @@ import discordant from '../utils/discordant'
  * arrays of values.
  *
  * @method goodmanKruskalGamma
- * @methodOf ran.dependence
+ * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
  * @returns {(number|undefined)} The Goodman-Kruskal gamma if none of the arrays are empty and they have the same

@@ -1,0 +1,103 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="utf-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        link(href="https://fonts.googleapis.com/css?family=Montserrat:200,400,700", rel="stylesheet")
+        link(rel="stylesheet", type="text/css", href="styles/style.css")
+        link(rel="stylesheet", type="text/css", href="styles/atelier-lakeside-light.css")
+        script(src="highlight.min.js")
+        script(src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML")
+        script.
+            hljs.initHighlightingOnLoad();
+            MathJax.Hub.Config({
+              "HTML-CSS": {}
+            });
+        style.
+            span.hl {
+                font-weight: 400;
+                color: dodgerblue;
+            }
+        title #{name}
+    body
+        // TODO Github banner.
+        aside
+            .search-bar
+                input#search(type="search", placeholder="search")
+            ul.sections
+                each section in menu
+                    li
+                        label(id="toc-" + section.name, for="" + section.name) #{section.name}
+                        input(type="checkbox", for="" + section.name)
+                        ul.methods
+                            each member in section.members
+                                li.toc-entry(id="toc-" + member.index)
+                                    a(href="#" + member.index) #{member.name}
+        main
+            h1 what is this?
+            p A small library for robust generation of various random variates, testing data against distributions, calculating different statistical properties, or sampling unknown distributions using advanced MCMC methods.
+
+            h1 install in node
+            pre.install
+                code.bash npm install --save ranjs
+
+            h1 use in browser
+            pre.install
+                code.html &lt;script type="text/javascript" src="ran.min.js"&gt;&lt;/script&gt;
+
+            h1 demo
+            p
+                a(href="https://beta.observablehq.com/@synesenom/ranjs-demo") https://beta.observablehq.com/@synesenom/ranjs-demo
+
+            h1 documentation
+            each entry in api
+                .card
+                    pre.title(id="" + entry.index) #{entry.signature}
+                    .desc !{entry.desc}
+                    if entry.params
+                        h3 Parameters
+                        table
+                            thead
+                                tr
+                                    th.param-name Name
+                                    th.param-type Type
+                                    th.param-desc Description
+                            tbody
+                                each param in entry.params
+                                    tr
+                                        td.param-name #{param.name}
+                                        td.param-type
+                                            each type in param.type
+                                                code #{type}
+                                        td.param-desc #{param.desc}
+                    if entry.returns
+                        h3 Returns
+                        .returns
+                            .return-type
+                                each type in entry.returns.type
+                                    code #{type}
+                            .return-desc #{entry.returns.desc}
+                    if entry.examples
+                        h3 Examples
+                        pre
+                            code.example.hljs.js.javascript #{entry.examples}
+            // TODO Add content.
+
+            script.
+                // List of entries.
+                const list = JSON.parse('!{searchList}');
+
+                // Bind search to the search input change.
+                document.getElementById("search").addEventListener("input", function () {
+                  // Find names containing the search keyword.
+                  const token = this.value.toLowerCase();
+                  const ids = new Set(
+                    list.filter(d => d.split('.').slice(-1)[0].toLowerCase().indexOf(token) > -1)
+                      .map(d => `toc-${d}`)
+                  );
+
+                  // Highlight matching entries.
+                  Array.from(document.getElementsByClassName('toc-entry')).forEach(entry => {
+                    entry.style.display = ids.has(entry.id) ? 'block' : 'none';
+                  });
+                });

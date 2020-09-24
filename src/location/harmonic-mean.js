@@ -3,8 +3,8 @@ import mean from './mean'
 /**
  * Calculates the [harmonic mean]{@link https://en.wikipedia.org/wiki/Harmonic_mean} of an array of values.
  *
- * @method mean
- * @memberOf ran.location
+ * @method harmonicMean
+ * @memberof ran.location
  * @param {number[]} values Array of values to calculate harmonic mean for.
  * @returns {(number|undefined)} Harmonic mean of the values if there are any, undefined otherwise.
  * @example

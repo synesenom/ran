@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  * where \(\alpha, \beta > 0\) and \(\mu \ge 0\). Support: \(x \in [\mu, \infty)\).
  *
  * @class LogGamma
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha Shape parameter. Default value is 1.
  * @param {number=} beta Rate parameter. Default value is 1.
  * @param {number=} mu Location parameter. Default value is 0.

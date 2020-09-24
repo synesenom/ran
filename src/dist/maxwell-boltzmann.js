@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(a > 0\). Support: \(x > 0\).
  *
  * @class MaxwellBoltzmann
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} a Scale parameter. Default value is 1.
  * @constructor
  */

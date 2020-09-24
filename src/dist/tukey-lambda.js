@@ -9,7 +9,7 @@ import brent from '../algorithms/brent'
  * where \(Q(p) = \frac{p^\lambda - (1 - p)^\lambda}{\lambda}\) and \(F(x) = Q^{-1}(x)\). Support: \(x \in [-1/\lambda, 1/\lambda]\) if \(\lambda > 0\), otherwise \(x \in \mathbb{R}\).
  *
  * @class TukeyLambda
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} lambda Shape parameter. Default value is 1.5.
  * @constructor
  */

@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(p \in (0, 1)\). Support: \(k \in \mathbb{N}^+\).
  *
  * @class LogSeries
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} p Distribution parameter. Default value is 0.5.
  * @constructor
  */

@@ -12,7 +12,7 @@ import Distribution from './_distribution'
  * Support: \(x \in (0, 1)\).
  *
  * @class Beta
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha First shape parameter. Default value is 1.
  * @param {number=} beta Second shape parameter. Default value is 1.
  * @constructor

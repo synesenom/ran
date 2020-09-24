@@ -8,7 +8,7 @@ import F from './f'
  * with \(d_1, d_2 > 0\). Support: \(x \in \mathbb{R}\).
  *
  * @class FisherZ
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} d1 First degree of freedom. Default value is 2.
  * @param {number=} d2 Second degree of freedom. Default value is 2.
  * @constructor

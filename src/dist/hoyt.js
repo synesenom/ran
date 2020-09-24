@@ -12,7 +12,7 @@ import Distribution from './_distribution'
  * where \(q \in (0, 1]\) and \(\omega > 0\). Support: \(x > 0\).
  *
  * @class Hoyt
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} q Shape parameter. Default value is 0.5.
  * @param {number=} omega Spread parameter. Default value is 1.
  * @constructor

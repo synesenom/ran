@@ -15,7 +15,7 @@ const SQRT_PI2 = Math.sqrt(2 * Math.PI)
    * Gamma function, using the Lanczos approximation.
    *
    * @method gamma
-   * @memberOf ran.special
+   * @memberof ran.special
    * @param {number} z Value to evaluate Gamma function at.
    * @returns {number} Gamma function value.
    * @private

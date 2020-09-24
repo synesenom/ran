@@ -11,7 +11,7 @@ export default (function () {
    * Calculates the G-R diagnostic for a single set of samples and a specified state dimension.
    *
    * @method _gri
-   * @memberOf ran.mc
+   * @memberof ran.mc
    * @param {Array} samples Array of samples.
    * @param {number} dim Index of the state dimension to consider.
    * @returns {number} The G-R diagnostic.
@@ -49,7 +49,7 @@ export default (function () {
    * of samples. The statistics can be used to monitor the convergence of an MCMC model.
    *
    * @method gelmanRubin
-   * @memberOf ran.mc
+   * @memberof ran.mc
    * @param {Array} samples Array of samples, where each sample is an array of states.
    * @param {number=} maxLength Maximum length of the diagnostic function. Default value is 1000.
    * @returns {Array} Array of Gelman-Rubin diagnostic versus iteration number for each state variable.

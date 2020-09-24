@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(p \in (0, 1)\) and \(\beta > 0\). Support: \(x \ge 0\).
  *
  * @class ExponentialLogarithmic
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} p Shape parameter. Default value is 0.5.
  * @param {number=} beta Scale parameter. Default value is 1.
  * @constructor

@@ -9,7 +9,7 @@ import Matrix from '../la/matrix'
  * where \(\mathbb{E}\) denotes the expected value and \(X_i, X_j\) are the i-th and j-th variables in the time series. The covariance matrix is calculated online at each update.
  *
  * @class OnlineCovariance
- * @memberOf ran.ts
+ * @memberof ran.ts
  * @param {number} dimension The linear dimension of the covariance. Default is 1.
  * @constructor
  */

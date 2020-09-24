@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  * with \(N \in \mathbb{N}_0\), \(K \in \{0, 1, ..., N\}\) and \(r \in \{0, 1, ..., N - K\}\). Support: \(k \in \{0, ..., K\}\).
  *
  * @class NegativeHypergeometric
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} N Total number of elements to sample from. If not an integer, it is rounded to the nearest one. Default value is 10.
  * @param {number=} K Total number of successes. If not an integer, it is rounded to the nearest one. Default value is 5.
  * @param {number=} r Total number of failures to stop at. If not an integer, it is rounded to the nearest one. Default value is 5.

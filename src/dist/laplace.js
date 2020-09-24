@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * where \(\mu \in \mathbb{R}\) and \(b > 0\). Support: \(x \in \mathbb{R}\).
  *
  * @class Laplace
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} b Scale parameter. Default value is 1.
  * @constructor

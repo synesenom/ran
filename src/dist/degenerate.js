@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * where \(x_0 \in \mathbb{R}\). Support: \(x \in \mathbb{R}\).
  *
  * @class Degenerate
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} x0 Location of the distribution. Default value is 0.
  * @constructor
  */

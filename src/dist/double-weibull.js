@@ -8,7 +8,7 @@ import Weibull from './weibull'
  * with \(\lambda, k > 0\). Support: \(x \in \mathbb{R}\).
  *
  * @class DoubleWeibull
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} lambda Scale parameter. Default value is 1.
  * @param {number=} k Shape parameter. Default value is 1.
  * @constructor

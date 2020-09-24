@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  * with \(\mu_1, \mu_2 \ge 0\) and \(I_n(x)\) is the modified Bessel function of the first kind with order \(n\). Support: \(k \in \mathbb{N}\).
  *
  * @class Skellam
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} mu1 Mean of the first Poisson distribution. Default value is 1.
  * @param {number=} mu2 Mean of the second Poisson distribution. Default value is 1.
  * @constructor

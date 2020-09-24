@@ -21,7 +21,7 @@ export const stirlingSecond = (function () {
    * Computes the Stirling number of the second kind.
    *
    * @method stirlingSecond
-   * @memberOf ran.special
+   * @memberof ran.special
    * @param {number} n Number of objects.
    * @param {number} k Number of non-empty sets.
    * @returns The (n, k)-th Stirling number of the second kind.

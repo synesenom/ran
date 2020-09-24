@@ -11,7 +11,7 @@ import { MAX_ITER } from '../special/_core'
  * with \(\kappa > 0\). Support: \(x \in [-\pi, \pi]\). Note that originally this distribution is periodic and therefore it is defined over \(\mathbb{R}\), but (without the loss of general usage) this implementation still does limit the support on the bounded interval \([-\pi, \pi]\).
  *
  * @class VonMises
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} kappa Shape parameter. Default value is 1.
  * @constructor
  */

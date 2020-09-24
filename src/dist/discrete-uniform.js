@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(x_\mathrm{min}, x_\mathrm{max} \in \mathbb{Z}\) and \(x_\mathrm{min} < x_\mathrm{max}\). Support: \(k \in \{x_\mathrm{min}, ..., x_\mathrm{max}\}\).
  *
  * @class DiscreteUniform
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} xmin Lower boundary. If not an integer, it is rounded to the nearest one. Default value is 0.
  * @param {number=} xmax Upper boundary. If not an integer, it is rounded to the nearest one. Default value is 100.
  * @constructor

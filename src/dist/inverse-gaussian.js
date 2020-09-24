@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  * with \(\mu, \lambda > 0\). Support: \(x > 0\).
  *
  * @class InverseGaussian
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} mu Mean of the distribution. Default value is 1.
  * @param {number=} lambda Shape parameter. Default value is 1.
  * @constructor

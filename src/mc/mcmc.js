@@ -4,7 +4,7 @@
  * sampled directly.
  *
  * @class MCMC
- * @memberOf ran.mc
+ * @memberof ran.mc
  * @param {Function} logDensity The logarithm of the density function to estimate.
  * @param {Object=} config Object describing some configurations. Supported properties:
  * <ul>
@@ -28,7 +28,7 @@ export default class {
      * State history of the sampler.
      *
      * @namespace history
-     * @memberOf ran.mc.MCMC
+     * @memberof ran.mc.MCMC
      * @private
      */
     this.history = (function (self) {
@@ -39,7 +39,7 @@ export default class {
          * Returns the current history.
          *
          * @method get
-         * @memberOf ran.mc.MCMC.history
+         * @memberof ran.mc.MCMC.history
          * @return {Array} Current history.
          * @private
          */
@@ -51,7 +51,7 @@ export default class {
          * Updates state history with new data.
          *
          * @method update
-         * @memberOf ran.mc.MCMC.history
+         * @memberof ran.mc.MCMC.history
          * @param {Array} x Last state to update history with.
          */
         update (x) {
@@ -70,7 +70,7 @@ export default class {
      * Acceptance ratio.
      *
      * @namespace acceptance
-     * @memberOf ran.mc.MCMC
+     * @memberof ran.mc.MCMC
      * @private
      */
     this.acceptance = (function (self) {
@@ -81,7 +81,7 @@ export default class {
          * Computes acceptance for the current historical data.
          *
          * @method compute
-         * @memberOf ran.mc.MCMC.acceptance
+         * @memberof ran.mc.MCMC.acceptance
          * @return {number} Acceptance ratio.
          */
         compute () {
@@ -92,7 +92,7 @@ export default class {
          * Updates acceptance history with new data.
          *
          * @method update
-         * @memberOf ran.mc.MCMC.acceptance
+         * @memberof ran.mc.MCMC.acceptance
          * @param {number} a Acceptance: 1 if last state was accepted, 0 otherwise.
          */
         update (a) {
@@ -109,7 +109,7 @@ export default class {
    * Returns the internal variables of the class. Must be overridden.
    *
    * @method _internal
-   * @memberOf ran.mc.MCMC
+   * @memberof ran.mc.MCMC
    * @returns {Object} Object containing the internal variables.
    * @private
    */
@@ -121,7 +121,7 @@ export default class {
    * Performs a single iteration. Must be overridden.
    *
    * @method _iter
-   * @memberOf ran.mc.MCMC
+   * @memberof ran.mc.MCMC
    * @param {number[]} x Current state of the Markov chain.
    * @param {boolean=} warmUp Whether iteration takes place during warm-up or not. Default is false.
    * @returns {{x: Array, accepted: boolean}} Object containing the new state ({x}) and whether it is a
@@ -136,7 +136,7 @@ export default class {
    * Adjusts internal parameters. Must be overridden.
    *
    * @method _adjust
-   * @memberOf ran.mc.MCMC
+   * @memberof ran.mc.MCMC
    * @param {Object} i Object containing the result of the last iteration.
    * @private
    */
@@ -149,7 +149,7 @@ export default class {
    * the same type to continue a previously warmed up sampler.
    *
    * @method state
-   * @memberOf ran.mc.MCMC
+   * @memberof ran.mc.MCMC
    * @returns {Object} Object containing all relevant parameters of the sampler.
    */
   state () {
@@ -165,7 +165,7 @@ export default class {
    * standard deviation and coefficient of variation.
    *
    * @method statistics
-   * @memberOf ran.mc.MCMC
+   * @memberof ran.mc.MCMC
    * @returns {Object[]} Array containing objects for each dimension. Objects contain <code>mean</code>, <code>std</code> and <code>cv</code>.
    */
   statistics () {
@@ -185,7 +185,7 @@ export default class {
    * Computes acceptance rate based on historical data.
    *
    * @method ar
-   * @memberOf ran.mc.MCMC
+   * @memberof ran.mc.MCMC
    * @returns {number} The acceptance rate in the last several iterations.
    */
   ar () {
@@ -196,7 +196,7 @@ export default class {
    * Computes the auto-correlation function for each dimension based on historical data.
    *
    * @method ac
-   * @memberOf ran.mc.MCMC
+   * @memberof ran.mc.MCMC
    * @returns {number[][]} Array containing the correlation function (correlation versus lag) for each
    * dimension.
    */
@@ -228,7 +228,7 @@ export default class {
    * Performs a single iteration.
    *
    * @method iterate
-   * @memberOf ran.mc.MCMC
+   * @memberof ran.mc.MCMC
    * @param {Function=} callback Callback to trigger after the iteration.
    * @param {boolean=} warmUp Whether iteration takes place during warm-up or not. Default is false.
    * @returns {Object} Object containing the new state (<code>x</code>) and whether it is a
@@ -256,7 +256,7 @@ export default class {
    * and therefore sampling does not take place. Instead, all relevant variables are adjusted.
    *
    * @method warmUp
-   * @memberOf ran.mc.MCMC
+   * @memberof ran.mc.MCMC
    * @param {Function} progress Callback function to call when an integer percentage of the warm-up is done.
    * The percentage of the finished batches is passed as a parameter.
    * @param {number=} maxBatches Maximum number of batches for warm-up. Each batch consists of 10K iterations.
@@ -299,7 +299,7 @@ export default class {
    * taking place.
    *
    * @method sample
-   * @memberOf ran.mc.MCMC
+   * @memberof ran.mc.MCMC
    * @param {Function} progress Callback function to call when an integer percentage of the samples is
    * collected. The percentage of the samples already collected is passed as a parameter.
    * @param {number=} size Size of the sampled set. Default is 1000.

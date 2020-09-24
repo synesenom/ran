@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  * with \(\lambda > 0\). Support: \(k \in \mathbb{N}_0\).
  *
  * @class Poisson
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} lambda Mean of the distribution. Default value is 1.
  * @constructor
  */

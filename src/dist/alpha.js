@@ -11,7 +11,7 @@ import { erf, erfinv } from '../special/error'
  * Support: \(x > 0\).
  *
  * @class Alpha
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha Shape parameter. Default value is 1.
  * @param {number=} beta Scale parameter. Default value is 1.
  * @constructor

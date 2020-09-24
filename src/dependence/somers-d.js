@@ -9,7 +9,7 @@ function tau (a, b) {
  * Calculates [Somers' D]{@link https://en.wikipedia.org/wiki/Somers%27_D} for paired arrays of values.
  *
  * @method somersD
- * @methodOf ran.dependence
+ * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
  * @returns {(number|undefined)} Somers' D if none of the arrays are empty, they have the same length, undefined

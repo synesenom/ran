@@ -11,7 +11,7 @@ import PreComputed from './_pre-computed'
  * with \(\alpha, \beta, \lambda > 0\). Support: \(k \in \mathbb{N}_0\). For \(\lambda = 0\), it is the [negative binomial]{@link #dist.NegativeBinomial}, and for \(\alpha = \beta = 0\) it is the [Poisson distribution]{@link #dist.Poisson}. Note that these special cases are not covered by this class. For these distributions, please refer to the corresponding generators.
  *
  * @class Delaporte
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha Shape parameter of the gamma component. Default component is 1.
  * @param {number=} beta Scale parameter of the gamma component. Default value is 1.
  * @param {number=} lambda Mean of the Poisson component. Default value is 1.

@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * where \(q < 2\), \(\lambda > 0\) and \(e^x_q\) denotes the [q-exponential function]{@link https://en.wikipedia.org/wiki/Tsallis_statistics#q-exponential}. Support: \(x > 0\) if \(q \ge 1\), otherwise \(x \in \big[0, \frac{1}{\lambda (1 - q)}\big)\).
  *
  * @class QExponential
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} q Shape parameter. Default value is 1.5.
  * @param {number=} lambda Rate parameter. Default value is 1.
  * @constructor

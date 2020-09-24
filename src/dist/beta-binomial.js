@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  * with \(n \in \mathbb{N}_0\) and \(\alpha, \beta > 0\). Support: \(k \in \{0, ..., n\}\).
  *
  * @class BetaBinomial
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} n Number of trials. Default value is 10.
  * @param {number=} alpha First shape parameter. Default value is 1.
  * @param {number=} beta Second shape parameter. Default value is 2.

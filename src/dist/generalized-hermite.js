@@ -13,7 +13,7 @@ import PreComputed from './_pre-computed'
  * parameters \(a_1, a_m\) respectively.
  *
  * @class GeneralizedHermite
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} a1 Mean of the first Poisson component. Default value is 1.
  * @param {number=} am Mean of the second Poisson component. Default value is 1.
  * @param {number=} m Multiplier of the second Poisson. If not an integer, it is rounded to the nearest one. Default value is 2.

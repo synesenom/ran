@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(\mu, \xi \in \mathbb{R}\), \(\sigma > 0\) and \(z = \frac{x - \mu}{\sigma}\). Support: \(x \in [\mu, \infty)\) if \(\xi \ge 0\), \(x \in [\mu, \mu - \sigma / \xi]\) otherwise.
  *
  * @class GeneralizedPareto
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} sigma Scale parameter. Default value is 1.
  * @param {number=} xi Shape parameter. Default value is 1.

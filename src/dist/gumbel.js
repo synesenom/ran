@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(z = \frac{x - \mu}{\beta}\) and \(\mu \in \mathbb{R}\), \(\beta > 0\). Support: \(x \in \mathbb{R}\).
  *
  * @class Gumbel
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} beta Scale parameter. Default value is 1.
  * @constructor

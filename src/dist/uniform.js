@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  * Support: \(x \in [x_\mathrm{min}, x_\mathrm{max}]\).
  *
  * @class Uniform
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} xmin Lower boundary. Default value is 0.
  * @param {number=} xmax Upper boundary. Default value is 1.
  * @constructor

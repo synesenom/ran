@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(\alpha, \beta, \sigma > 0\). Support: \(x \in (\sigma, \infty)\).
  *
  * @class Benini
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha First shape parameter. Default value is 1.
  * @param {number=} beta Second shape parameter. Default value is 1.
  * @param {number=} sigma Scale parameter. Default value is 1.

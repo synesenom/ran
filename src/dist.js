@@ -2,7 +2,7 @@
  * A collection of random number generators for well-known distributions.
  *
  * @namespace dist
- * @memberOf ran
+ * @memberof ran
  */
 export { default as InvalidDiscrete } from './dist/_invalid'
 export { default as Alpha } from './dist/alpha'

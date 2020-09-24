@@ -2,8 +2,8 @@
  * A xoshiro128+ pseudo random number generator.
  *
  * @class Xoshiro128p
- * @memberOf ran.core
- * @private
+ * @memberof ran.core
+ * @ignore
  */
 class Xoshiro128p {
   constructor (state) {
@@ -21,9 +21,10 @@ class Xoshiro128p {
    * Generates a has for a string, based on the Java String.hashCode implementation.
    *
    * @method hash
-   * @methodOf ran.core.Xoshiro128p
+   * @memberof ran.core.Xoshiro128p
    * @param {string} str String to hash.
    * @returns {number} The hash code.
+   * @ignore
    */
   static hash (str) {
     // Calculate Java's String.hashCode value
@@ -39,8 +40,9 @@ class Xoshiro128p {
    * Returns the next pseudo random number.
    *
    * @method next
-   * @methodOf ran.core.Xoshiro128p
+   * @memberof ran.core.Xoshiro128p
    * @returns {number} The next pseudo random number.
+   * @ignore
    */
   next () {
     // Init helper variables
@@ -64,9 +66,10 @@ class Xoshiro128p {
    * implements the [xoshiro128+ algorithm]{@link http://vigna.di.unimi.it/ftp/papers/ScrambledLinear.pdf}.
    *
    * @method seed
-   * @methodOf ran.core.Xoshiro128p
+   * @memberof ran.core.Xoshiro128p
    * @param {(number|string)} value The value of the seed, either a number or a string (for the ease of tracking
    * seeds).
+   * @ignore
    */
   seed (value) {
     // Set state
@@ -85,8 +88,9 @@ class Xoshiro128p {
    * Loads the state of the generator.
    *
    * @method load
-   * @methodOf ran.core.Xoshiro128p
+   * @memberof ran.core.Xoshiro128p
    * @param {number[]} state The state to load.
+   * @ignore
    */
   load (state) {
     this._state = state
@@ -97,8 +101,9 @@ class Xoshiro128p {
    * current one finished.
    *
    * @method save
-   * @methodOf ran.core.Xoshiro128p
+   * @memberof ran.core.Xoshiro128p
    * @returns {number[]} The current state of the generator.
+   * @ignore
    */
   save () {
     return this._state

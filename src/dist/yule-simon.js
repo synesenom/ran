@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(\rho > 0\) and \(\mathrm{B}(x, y)\) is the beta function. Support: \(k \in \mathbb{N}^+\).
  *
  * @class YuleSimon
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} rho Shape parameter. Default value is 1.
  * @constructor
  */

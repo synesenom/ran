@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(\lambda, \alpha > 0\). Support: \(x \ge 0\).
  *
  * @class Lomax
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} lambda Scale parameter. Default value is 1.
  * @param {number=} alpha Shape parameter. Default value is 1.
  * @constructor

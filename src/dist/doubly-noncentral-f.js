@@ -8,7 +8,7 @@ import DoublyNoncentralBeta from './doubly-noncentral-beta'
  * where \(d_1, d_2 \in \mathbb{N}^+\) and \(\lambda_1, \lambda_2 \ge 0\). Support: \(x > 0\).
  *
  * @class DoublyNoncentralF
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} d1 First degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
  * @param {number=} d2 Second degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
  * @param {number=} lambda1 First non-centrality parameter. Default value is 1.

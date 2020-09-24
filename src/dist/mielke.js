@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(k, s > 0\). Support: \(x > 0\). It can be viewed as a re-parametrization of the [Dagum distribution]{@link #dist.Dagum}.
  *
  * @class Mielke
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} k First shape parameter. Default value is 2.
  * @param {number=} s Second shape parameter. Default value is 1.
  * @constructor

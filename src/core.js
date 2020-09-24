@@ -3,7 +3,7 @@ import Xoshiro128p from './core/xoshiro'
 
 /**
  * @namespace core
- * @memberOf ran
+ * @memberof ran
  */
 
 // The internal generator of the core
@@ -14,7 +14,7 @@ const r = new Xoshiro128p()
  * implements the [xoshiro128+ algorithm]{@link http://vigna.di.unimi.it/ftp/papers/ScrambledLinear.pdf}.
  *
  * @method seed
- * @memberOf ran.core
+ * @memberof ran.core
  * @param {(number|string)} value The value of the seed, either a number or a string (for the ease of tracking seeds).
  */
 export const seed = value => r.seed(value)
@@ -26,7 +26,7 @@ export const seed = value => r.seed(value)
  * If only min is specified, generates a single random float between 0 and min.
  *
  * @method float
- * @memberOf ran.core
+ * @memberof ran.core
  * @param {number=} min Lower boundary, or upper if max is not given.
  * @param {number=} max Upper boundary.
  * @param {number=} n Number of floats to generate.
@@ -62,7 +62,7 @@ export function float (min, max, n) {
  * If only min is specified, generates a single random integer between 0 and min.
  *
  * @method int
- * @memberOf ran.core
+ * @memberof ran.core
  * @param {number} min Lower boundary, or upper if max is not specified.
  * @param {number=} max Upper boundary.
  * @param {number=} n Number of integers to generate.
@@ -88,7 +88,7 @@ export function int (min, max, n) {
  * Samples some elements with replacement from an array with uniform distribution.
  *
  * @method choice
- * @memberOf ran.core
+ * @memberof ran.core
  * @param {Array=} values Array to sample from.
  * @param {number=} n Number of elements to sample.
  * @returns {(object|object[]|undefined)} Single element or array of sampled elements. If the array is invalid (empty or
@@ -112,7 +112,7 @@ export function choice (values, n) {
  * Samples some characters with replacement from a string with uniform distribution.
  *
  * @method char
- * @memberOf ran.core
+ * @memberof ran.core
  * @param {string=} string String to sample characters from.
  * @param {number=} n Number of characters to sample.
  * @returns {(string|string[]|undefined)} Random character if n is not given or less than 2, an array of random characters
@@ -137,7 +137,7 @@ export function char (string, n) {
  * Shuffles an array in-place using the Fisher--Yates algorithm.
  *
  * @method shuffle
- * @memberOf ran.core
+ * @memberof ran.core
  * @param {Array} values Array to shuffle.
  * @returns {Array} The shuffled array.
  * @example
@@ -161,7 +161,7 @@ export function shuffle (values) {
  * Flips a biased coin several times and returns the associated head/tail value or array of values.
  *
  * @method coin
- * @memberOf ran.core
+ * @memberof ran.core
  * @param {object} head Head value.
  * @param {object} tail Tail value.
  * @param {number=} p Bias (probability of head). Default is 0.5.

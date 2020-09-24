@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(q \in (0, 1)\) and \(\beta > 0\). Support: \(k \in \mathbb{N}_0\).
  *
  * @class DiscreteWeibull
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} q First shape parameter. Default value is 0.5.
  * @param {number=} beta Second shape parameter. Default value is 1.
  * @constructor

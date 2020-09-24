@@ -4,7 +4,7 @@ import Normal from '../dist/normal'
  * Marks an array of values with a type.
  *
  * @method _markData
- * @memberOf ran.test
+ * @memberof ran.test
  * @param {number[]} data Array of numbers to mark.
  * @param {number} type Type of the data to mark with.
  * @returns {Object[]} Array of objects containing the data as value properties and type as the type properties.
@@ -21,7 +21,7 @@ function _markData (data, type) {
  * Computes the ranks for an array of marked data.
  *
  * @method _computeRanks
- * @memberOf ran.test
+ * @memberof ran.test
  * @param {Object[]} data Array of objects containing the marked data sets.
  * @returns {Object[]} Array of objects containing the marked data along with the ranks.
  * @private
@@ -69,7 +69,7 @@ function _computeRanks (data) {
  * data sets.
  *
  * @method mannWhitney
- * @memberOf ran.test
+ * @memberof ran.test
  * @param {Array[]} dataSets Array containing the two data sets.
  * @param {number} alpha Confidence level.
  * @returns {Object} Object containing the test statistics and whether the data sets passed the null hypothesis that

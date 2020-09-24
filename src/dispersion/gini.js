@@ -4,7 +4,7 @@ import rmd from './rmd'
  * Calculates the [Gini coefficient]{@link https://en.wikipedia.org/wiki/Gini_coefficient} for a sample of values.
  *
  * @method gini
- * @methodOf ran.dispersion
+ * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate the Gini coefficient for.
  * @return {(number|undefined)} The Gini coefficient of the values if there are more than one, undefined otherwise.
  * @example

@@ -8,7 +8,7 @@ import InverseGaussian from './inverse-gaussian'
  * with \(\mu, \lambda > 0\). Support: \(x > 0\).
  *
  * @class ReciprocalInverseGaussian
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} mu Mean of the inverse Gaussian distribution. Default value is 1.
  * @param {number=} lambda Shape parameter. Default value is 1.
  * @constructor

@@ -2,7 +2,7 @@
  * Sums the element of an array using the robust (but slower) [Neumaier method]{@link https://www.mat.univie.ac.at/~neum/scan/01.pdf}.
  *
  * @method neumaier
- * @memberOf ran.algorithms
+ * @memberof ran.algorithms
  * @param {number[]} arr Array to sum.
  * @returns {number} The sum of the elements in the array.
  * @private

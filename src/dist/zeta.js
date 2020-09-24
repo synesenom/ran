@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  * with \(s \in (1, \infty)\) and \(\zeta(x)\) is the Riemann zeta function. Support: \(k \in \mathbb{N}^+\).
  *
  * @class Zeta
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} s Exponent of the distribution. Default value is 3.
  * @constructor
  */

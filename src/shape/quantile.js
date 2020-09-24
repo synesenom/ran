@@ -4,7 +4,7 @@ import quickselect from '../algorithms/quickselect'
  * Calculates the quantile at 0 < p < 1 using the R-7 algorithm.
  *
  * @method quantile
- * @methodOf ran.utils
+ * @memberof ran.utils
  * @param {number[]} values Array of values to calculate quantile for.
  * @param {number} p Value to calculate quantile at.
  * @return {(number|undefined)} The quantile of the sample if there is any, undefined otherwise.

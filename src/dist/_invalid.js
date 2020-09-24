@@ -4,7 +4,7 @@ import Distribution from './_distribution'
  * Generator of an invalid (not implemented) distribution. Only for testing purposes.
  *
  * @class InvalidDiscrete
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @private
  */
 export default class extends Distribution {

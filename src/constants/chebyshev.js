@@ -17,7 +17,7 @@ const coeffs = [
  * Computes the n-th Chebyshev polynomial.
  *
  * @method T
- * @memberOf ran.constants
+ * @memberof ran.constants
  * @param {number} n Order of the polynomial.
  * @param {number} x Value to evaluate the polynomial at.
  * @returns {number} The function value.

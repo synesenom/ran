@@ -43,7 +43,7 @@ function _biContinuedFraction (a, b, x) {
  * Incomplete beta function.
  *
  * @method betaIncomplete
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} a First parameter of the function.
  * @param {number} b Second parameter of the function.
  * @param {number} x Upper boundary of the integral.
@@ -64,7 +64,7 @@ export function betaIncomplete (a, b, x) {
    * Regularized incomplete beta function.
    *
    * @method regularizedBetaIncomplete
-   * @memberOf ran.special
+   * @memberof ran.special
    * @param {number} a First parameter of the function.
    * @param {number} b Second parameter of the function.
    * @param {number} x Upper boundary of the integral.

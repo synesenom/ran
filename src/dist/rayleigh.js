@@ -8,7 +8,7 @@ import Weibull from './weibull'
  * with \(\sigma > 0\). Support: \(x \ge 0\).
  *
  * @class Rayleigh
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} sigma Scale parameter. Default value is 1.
  * @constructor
  */

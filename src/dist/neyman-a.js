@@ -10,7 +10,7 @@ import PreComputed from './_pre-computed'
  * where \(\lambda, \theta > 0\) and \(S(n, m)\) denotes the [Stirling number of the second kind]{@link https://en.wikipedia.org/wiki/Stirling_numbers_of_the_second_kind}. Support: \(k \in \mathbb{N}_0\).
  *
  * @class NeymanA
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} lambda Mean of the number of clusters. Default value is 1.
  * @param {number=} phi Mean of the cluster size. Default value is 1.
  * @constructor

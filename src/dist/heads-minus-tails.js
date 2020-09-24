@@ -10,7 +10,7 @@ import logBinomial from '../special/log-binomial'
  * where \(n \in \mathbb{N}^+\). Support: \(k \in [0, n]\).
  *
  * @class HeadsMinusTails
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} n Half number of trials. Default value is 10.
  * @constructor
  */

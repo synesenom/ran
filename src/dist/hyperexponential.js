@@ -11,7 +11,7 @@ import neumaier from '../algorithms/neumaier'
  * where \(w_i, \lambda_i > 0\). Support: \(x \ge 0\).
  *
  * @class Hyperexponential
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {Object[]=} parameters Array containing the rates and corresponding weights. Each array element must be an object with twp properties: weight and rate. Default value is <code>[{weight: 1, rate: 1}, {weight: 1, rate: 1}]</code>.
  * @constructor
  */

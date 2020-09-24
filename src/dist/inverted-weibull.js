@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(c > 0\). Support: \(x \ge 0\).
  *
  * @class InvertedWeibull
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} c Shape parameter. Default value is 2.
  * @constructor
  */

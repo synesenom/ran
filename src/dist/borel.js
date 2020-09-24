@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  * where \(\mu \in [0, 1]\). Support: \(k \in \mathbb{N}^+\).
  *
  * @class Borel
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number} mu Distribution parameter. Default value is 0.5.
  * @constructor
  */

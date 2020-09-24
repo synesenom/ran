@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(\lambda, k > 0\). Support: \(x \ge 0\).
  *
  * @class Weibull
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} lambda Scale parameter. Default value is 1.
  * @param {number=} k Shape parameter. Default value is 1.
  * @constructor

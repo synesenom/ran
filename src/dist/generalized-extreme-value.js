@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(c \ne 0\). Support: \(x \in (-\infty, 1 / c]\) if \(c > 0\), \(x \in [1 / c, \infty)\) otherwise.
  *
  * @class GeneralizedExtremeValue
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} c Shape parameter. Default value is 2.
  * @constructor
  */

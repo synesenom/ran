@@ -7,7 +7,7 @@ import Distribution from './_distribution'
  * the case when there is no simple method to generate random variates.
  *
  * @class PreComputed
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @abstract
  * @private
  */

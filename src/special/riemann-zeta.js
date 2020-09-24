@@ -5,7 +5,7 @@ import acceleratedSum from '../algorithms/accelerated-sum'
  * Source: https://projecteuclid.org/download/pdf_1/euclid.em/1046889587
  *
  * @method riemannZeta
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} s Value to evaluate Riemann zeta at.
  * @return {number} Value of the Riemann zeta function.
  * @private

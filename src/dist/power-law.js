@@ -8,7 +8,7 @@ import Kumaraswamy from './kumaraswamy'
  * with \(a > 0\). Support: \(x \in (0, 1)\). It is a special case of the [Kumaraswamy distribution]{@link #dist.Kumaraswamy}.
  *
  * @class PowerLaw
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} a One plus the exponent of the distribution. Default value is 1.
  * @constructor
  */

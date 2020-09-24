@@ -6,7 +6,7 @@ import moment from './moment'
  * for a sample of values.
  *
  * @method skewness
- * @methodOf ran.shape
+ * @memberof ran.shape
  * @param {number[]} values Array of values to calculate skewness for.
  * @returns {(number|undefined)} The sample skewness of values if there are more than two and their variance is nonzero,
  * undefined otherwise.

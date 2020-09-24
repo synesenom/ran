@@ -6,7 +6,7 @@ import recursiveSum from '../algorithms/recursive-sum'
  * Computes the modified Bessel function of the first kind with order zero.
  *
  * @method _I0
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} x Value to evaluate the function at.
  * @return {number} The function value.
  * @private
@@ -31,7 +31,7 @@ function _I0 (x) {
  * Computes the modified Bessel function of the first kind with order one.
  *
  * @method _I1
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} x Value to evaluate the function at.
  * @return {number} The function value.
  * @private
@@ -58,7 +58,7 @@ function _I1 (x) {
  * Computes the modified spherical Bessel function of the second kind.
  *
  * @method _kn
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} n Order of the Bessel function.
  * @param {number} x Value to evaluate the function at.
  * @return {(number|number[])} The function value at the specified order and one order less if order is larger than 1, single function value otherwise.
@@ -84,7 +84,7 @@ function _kn (n, x) {
  * Computes the ratio of two modified Bessel functions (same for spherical).
  *
  * @method _hi
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} n Order of the Bessel function in the numerator.
  * @param {number} x Value to evaluate the function at.
  * @return {number} The function value.
@@ -111,7 +111,7 @@ function _hi (n, x) {
  * Computes the modified Bessel function of the first kind. Only integer order.
  *
  * @method besselI
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} n Order of the Bessel function. Must be an integer.
  * @param {number} x Value to evaluate the function at.
  * @return {number} The modified Bessel function of the first kind.
@@ -161,7 +161,7 @@ export function besselI (n, x) {
  * Source: http://cpc.cs.qub.ac.uk/summaries/ADGM_v1_0.html (Numerical methods for special functions).
  *
  * @method besselISpherical
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} n Order of the spherical Bessel function. Must be an integer.
  * @param {number} x Value to evaluate the function at.
  * @returns {number} The modified spherical Bessel function of the first kind.
@@ -191,7 +191,7 @@ export function besselISpherical (n, x) {
  * Computes the modified Bessel function of the first kind for fractional order.
  *
  * @method besselInu
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} nu Order of the Bessel function. Should be fractional.
  * @param {number} x Value to evaluate the function at.
  * @returns {number} The modified Bessel function of the first kind.

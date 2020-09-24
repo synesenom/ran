@@ -7,7 +7,7 @@ import { Normal } from '../dist'
  * Proposals are updated according to the [Metropolis-Within-Gibbs procedure]{@link http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.161.2424}:
  *
  * @class RWM
- * @memberOf ran.mc
+ * @memberof ran.mc
  * @param {Function} logDensity The logarithm of the density function to estimate.
  * @param {Object=} config RWM configurations.
  * @param {Object=} initialState Initial state of the RWM sampler.
@@ -24,7 +24,7 @@ export default class extends MCMC {
      * Proposal distributions.
      *
      * @namespace proposal
-     * @memberOf ran.mc.RWM
+     * @memberof ran.mc.RWM
      * @private
      */
     this.proposal = (function (self) {
@@ -47,7 +47,7 @@ export default class extends MCMC {
          * Samples new state.
          *
          * @method jump
-         * @memberOf ran.mc.RWM.proposal
+         * @memberof ran.mc.RWM.proposal
          * @param {Array} x Current state.
          * @param {boolean} single Whether only a single dimension should be updated.
          * @return {Array} New state.
@@ -62,7 +62,7 @@ export default class extends MCMC {
          * Updates proposal distributions.
          *
          * @method update
-         * @memberOf ran.mc.RWM.proposal
+         * @memberof ran.mc.RWM.proposal
          * @param {boolean} accepted Whether last state was accepted.
          */
         update (accepted) {
@@ -94,7 +94,7 @@ export default class extends MCMC {
          * Returns the current scales of the proposals.
          *
          * @method scales
-         * @memberOf ran.mc.RWM.proposal
+         * @memberof ran.mc.RWM.proposal
          * @return {Array} Array of proposal scales.
          */
         scales () {

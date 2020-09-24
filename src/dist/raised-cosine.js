@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * where \(\mu \in \mathbb{R}\) and \(s > 0\). Support: \(x \in [\mu - s, \mu + s]\).
  *
  * @class RaisedCosine
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} mu Location paramter. Default value is 0.
  * @param {number=} s Scale parameter. Default value is 1.
  * @constructor

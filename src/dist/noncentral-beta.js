@@ -13,7 +13,7 @@ import Distribution from './_distribution'
  * where \(\alpha, \beta > 0\) and \(\lambda \ge 0\). Support: \(x \in [0, 1]\).
  *
  * @class NoncentralBeta
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha First shape parameter. Default value is 1.
  * @param {number=} beta Second shape parameter. Default value is 1.
  * @param {number=} lambda Non-centrality parameter. Default value is 1.

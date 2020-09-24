@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * Support: \(x \in \Big[\mu-\frac{\beta \pi}{4}, \mu + \frac{\beta \pi}{4}\Big]\).
  *
  * @class Anglit
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} beta Scale parameter. Default value is 1.
  * @constructor

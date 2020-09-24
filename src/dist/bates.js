@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  * Support: \(x \in [a, b]\).
  *
  * @class Bates
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} n Number of uniform variates to sum. If not an integer, it is rounded to the nearest one. Default value is 10.
  * @param {number=} a Lower boundary of the uniform variate. Default value is 0.
  * @param {number=} b Upper boundary of the uniform variate. Default value is 1.

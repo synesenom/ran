@@ -6,7 +6,7 @@ import pearson from './pearson'
  * for two paired arrays of values.
  *
  * @method spearman
- * @methodOf ran.dependence
+ * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
  * @returns {(number|undefined)} Spearman's rank correlation coefficient if none of the arrays are empty and they have

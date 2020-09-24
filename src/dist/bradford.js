@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(c > 0\). Support: \(x \in [0, 1]\).
  *
  * @class Bradford
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} c Shape parameter. Default value is 1.
  * @constructor
  */

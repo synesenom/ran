@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(x_\mathrm{min}, \alpha > 0\). Support: \(x \in [x_\mathrm{min}, \infty)\).
  *
  * @class Pareto
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} xmin Scale parameter. Default value is 1.
  * @param {number=} alpha Shape parameter. Default value is 1.
  * @constructor

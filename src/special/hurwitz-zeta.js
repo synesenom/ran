@@ -7,7 +7,7 @@ import logGamma from './log-gamma'
  * Source: https://projecteuclid.org/download/pdf_1/euclid.em/1046889587
  *
  * @method hurwitzZeta
- * @memberOf ran.special
+ * @memberof ran.special
  * @param {number} s Exponent.
  * @param {number} a Shift.
  * @return {number} Value of the Hurwitz zeta function.

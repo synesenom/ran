@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(a, b > 0\) and \(a < b\). Support: \(x \in [a, b]\).
  *
  * @class Reciprocal
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} a Lower boundary of the support. Default value is 1.
  * @param {number=} b Upper boundary of the support. Default value is 2.
  * @constructor

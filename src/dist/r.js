@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * where \(c > 0\). Support: \(x \in [-1, 1]\).
  *
  * @class R
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} c Shape parameter. Default value is 1.
  * @constructor
  */

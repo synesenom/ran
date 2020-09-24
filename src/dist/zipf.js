@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(s \ge 0\), \(N \in \mathbb{N}^+\) and \(H_{N, s}\) denotes the generalized harmonic number. Support: \(k \in \{1, 2, ..., N\}\).
  *
  * @class Zipf
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} s Exponent of the distribution. Default value is 1.
  * @param {number=} N Number of words. If not an integer, it is rounded to the nearest integer. Default is 100.
  * @constructor

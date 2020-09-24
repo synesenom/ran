@@ -8,7 +8,7 @@ import Categorical from './categorical'
  * Support: \(k \in \{-1, 1\}\).
  *
  * @class Rademacher
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @constructor
  */
 export default class extends Categorical {

@@ -2,12 +2,13 @@
  * Class representing a real vector.
  *
  * @class Vector
- * @memberOf ran.la
+ * @memberof ran.la
  * @param {(number|Array|ran.la.Vector)=} arg The constructor argument. If it is a number, it sets the
  * dimension of the vector. If it is an array, the vector is initialized with the array elements. If it is
  * another vector, it is copied to this vector. If not specified, a 3D vector is created directing in the X
  * axis.
  * @constructor
+ * @ignore
  * @example
  *
  * let vec1 = new ran.la.Vector()
@@ -35,7 +36,7 @@ class Vector {
    * Returns the vector as an array.
    *
    * @method v
-   * @memberOf ran.la.Vector
+   * @memberof ran.la.Vector
    * @returns {Array} The vector as an array.
    * @example
    *
@@ -52,7 +53,7 @@ class Vector {
    * Returns or sets an element of the vector.
    *
    * @method i
-   * @memberOf ran.la.Vector
+   * @memberof ran.la.Vector
    * @param {number} i Index of the element.
    * @param {number=} value The new value of the i-th element. If not specified, the value at i is returned.
    * @example
@@ -81,7 +82,7 @@ class Vector {
    * Performs an operation on the vector element-wise.
    *
    * @method f
-   * @memberOf ran.la.Vector
+   * @memberof ran.la.Vector
    * @param {Function} func Function to apply on each element.
    * @returns {ran.la.Vector} The transformed matrix.
    * @example
@@ -99,7 +100,7 @@ class Vector {
    * Multiplies this vector with a scalar.
    *
    * @method scale
-   * @memberOf ran.la.Vector
+   * @memberof ran.la.Vector
    * @param {number} s Scalar to multiply vector with.
    * @returns {ran.la.Vector} The scaled vector.
    * @example
@@ -117,7 +118,7 @@ class Vector {
    * Adds another vector to this vector.
    *
    * @method add
-   * @memberOf ran.la.Vector
+   * @memberof ran.la.Vector
    * @param {ran.la.Vector} vec The vector to add.
    * @returns {ran.la.Vector} The sum vector.
    * @example
@@ -137,7 +138,7 @@ class Vector {
    * Subtracts another vector from this vector.
    *
    * @method sub
-   * @memberOf ran.la.Vector
+   * @memberof ran.la.Vector
    * @param {ran.la.Vector} vec The vector to subtract.
    * @returns {ran.la.Vector} The difference vector.
    * @example
@@ -157,7 +158,7 @@ class Vector {
    * Calculates the dot product with another vector.
    *
    * @method dot
-   * @memberOf ran.la.Vector
+   * @memberof ran.la.Vector
    * @param {ran.la.Vector} vec Vector to multiply with.
    * @returns {number} The dot product.
    * @example

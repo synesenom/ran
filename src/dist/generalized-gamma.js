@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * where \(a, d, p > 0\). Support: \(x > 0\).
  *
  * @class GeneralizedGamma
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} a Scale parameter. Default value is 1.
  * @param {number=} d Shape parameter. Default value is 1.
  * @param {number=} p Shape parameter. Default value is 1.

@@ -8,7 +8,7 @@ import Normal from './normal'
  * with \(\mu \in \mathbb{R}\), \(\sigma > 0\) and \(\mathrm{logit}(x) = \ln \frac{x}{1 - x}\). Support: \(x \in (0, 1)\).
  *
  * @class LogitNormal
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} sigma Scale parameter. Default value is 1.
  * @constructor

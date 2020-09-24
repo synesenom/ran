@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  * [generalized gamma distribution]{@link #dist.GeneralizedGamma}.
  *
  * @class GeneralizedNormal
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} mu Location paramameter. Default value is 0.
  * @param {number=} alpha Scale parameter. Default value is 1.
  * @param {number=} beta Shape parameter. Default value is 1.

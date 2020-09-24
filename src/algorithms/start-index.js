@@ -2,7 +2,7 @@
  * Finds the index corresponding to the largest term in a series.
  *
  * @method startIndex
- * @memberOf ran.algorithms
+ * @memberof ran.algorithms
  * @param {Function} term Function that accepts an index and returns the term.
  * @returns {number} The index of the largest term.
  * @private

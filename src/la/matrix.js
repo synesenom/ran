@@ -4,12 +4,13 @@ import Vector from './vector'
  * Class representing an immutable real square matrix.
  *
  * @class Matrix
- * @memberOf ran.la
+ * @memberof ran.la
  * @param {(number|Array|ran.la.Matrix)=} arg The constructor argument. If it is a number, it sets the
  * linear dimension of the matrix. If it is an array of arrays, the matrix is initialized with the array
  * elements. If it is another matrix, it is copied to this matrix. If not specified, a 3x3 identity matrix is
  * created.
  * @constructor
+ * @ignore
  * @example
  *
  * let M1 = new ran.la.Matrix()
@@ -43,7 +44,7 @@ class Matrix {
    * Returns the matrix as an array of arrays.
    *
    * @method m
-   * @memberOf ran.la.Matrix
+   * @memberof ran.la.Matrix
    * @returns {Array[]} The matrix in an array of array representation.
    * @example
    *
@@ -62,7 +63,7 @@ class Matrix {
    * Returns or sets an element of the matrix.
    *
    * @method ij
-   * @memberOf ran.la.Matrix
+   * @memberof ran.la.Matrix
    * @param {number} i Row index of the element.
    * @param {number} j Column index of the element.
    * @param {number=} value The new value of the element at the i-th row and j-th column. If not specified,
@@ -97,7 +98,7 @@ class Matrix {
    * Performs an operation on the matrix element-wise.
    *
    * @method f
-   * @memberOf ran.la.Matrix
+   * @memberof ran.la.Matrix
    * @param {Function} func Function to apply on each element. May take three parameters: the element's value and its
    * row and column indices.
    * @returns {ran.la.Matrix} The transformed matrix.
@@ -120,7 +121,7 @@ class Matrix {
    * Multiplies the matrix with a scalar.
    *
    * @method scale
-   * @memberOf ran.la.Matrix
+   * @memberof ran.la.Matrix
    * @param {number} s The scalar to multiply matrix with.
    * @returns {ran.la.Matrix} The scaled matrix.
    * @example
@@ -141,7 +142,7 @@ class Matrix {
    * Adds another matrix to the current matrix.
    *
    * @method add
-   * @memberOf ran.la.Matrix
+   * @memberof ran.la.Matrix
    * @param {ran.la.Matrix} mat The matrix to add.
    * @returns {ran.la.Matrix} The sum of the two matrices.
    * @example
@@ -164,7 +165,7 @@ class Matrix {
    * Subtracts another matrix from the current matrix.
    *
    * @method sub
-   * @memberOf ran.la.Matrix
+   * @memberof ran.la.Matrix
    * @param {ran.la.Matrix} mat The matrix to subtract.
    * @returns {ran.la.Matrix} The difference of the two matrices.
    * @example
@@ -187,7 +188,7 @@ class Matrix {
    * Multiplies the matrix with another matrix (from the right).
    *
    * @method mult
-   * @memberOf ran.la.Matrix
+   * @memberof ran.la.Matrix
    * @param {Matrix} mat Matrix to multiply current matrix with.
    * @returns {Matrix} The product matrix.
    * @example
@@ -221,7 +222,7 @@ class Matrix {
    * Returns the transpose of the matrix.
    *
    * @method t
-   * @memberOf ran.la.Matrix
+   * @memberof ran.la.Matrix
    * @returns {ran.la.Matrix} The transposed matrix.
    * @example
    *
@@ -241,7 +242,7 @@ class Matrix {
    * Multiplies a vector with the matrix (applies this matrix on a vector).
    *
    * @method apply
-   * @memberOf ran.la.Matrix
+   * @memberof ran.la.Matrix
    * @param {ran.la.Vector} vec Vector to apply matrix on.
    * @returns {ran.la.Vector} The mapped vector.
    * @example
@@ -261,7 +262,7 @@ class Matrix {
    * matrix.
    *
    * @method ldl
-   * @memberOf ran.la.Matrix
+   * @memberof ran.la.Matrix
    * @returns {Object} Object containing two properties: {D} and {L} representing the corresponding matrices
    * in the LDL decomposition.
    * @example
@@ -309,7 +310,7 @@ class Matrix {
    * Returns an array representing the row sums of the matrix.
    *
    * @method rowSum
-   * @methodOf ran.la.Matrix
+   * @memberof ran.la.Matrix
    * @return {number[]} Array containing the row sums.
    */
   rowSum () {
@@ -320,7 +321,7 @@ class Matrix {
    * Returns the Hadamard (element-wise) product of the matrix with another matrix
    *
    * @method hadamard
-   * @methodOf ran.la.Matrix
+   * @memberof ran.la.Matrix
    * @param {ran.la.Matrix} mat Matrix to calculate element-wise product with.
    * @return {ran.la.Matrix} The result matrix.
    */

@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  * with \(\nu, \sigma > 0\) and \(I_0(x)\) is the modified Bessel function of the first kind with order zero. Support: \(x \in [0, \infty)\).
  *
  * @class Rice
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} nu First shape parameter. Default value is 1.
  * @param {number=} sigma Second shape parameter. Default value is 1.
  * @constructor

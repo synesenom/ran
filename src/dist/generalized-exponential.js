@@ -9,7 +9,7 @@ import { lambertW0 } from '../special/lambert-w'
  * where \(a, b, c > 0\). Support> \(x \ge 0\).
  *
  * @class GeneralizedExponential
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} a First shape parameter. Default value is 1.
  * @param {number=} b Second shape parameter. Default value is 1.
  * @param {number=} c Third shape parameter. Default value is 1.

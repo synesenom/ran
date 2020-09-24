@@ -11,7 +11,7 @@ import Beta from './beta'
  * Support: \(x > 0\).
  *
  * @class BetaPrime
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha First shape parameter. Default value is 2.
  * @param {number=} beta Second shape parameter. Default value is 2.
  * @constructor

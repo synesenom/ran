@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(a \in (0, 1)\). Support: \(k \in \mathbb{N}^+\).
  *
  * @class FlorySchulz
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} a Shape parameter. Default value is 0.5.
  * @constructor
  */

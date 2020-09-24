@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(p, a, b > 0\). Support: \(x > 0\).
  *
  * @class Dagum
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} p First shape parameter. Default value is 1.
  * @param {number=} a Second shape parameter. Default value is 1.
  * @param {number=} b Scale parameter. Default value is 1.

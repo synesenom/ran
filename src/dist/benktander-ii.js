@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(a > 0\) and \(b \in (0, 1]\). Support: \(x \in [1, \infty)\).
  *
  * @class BenktanderII
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} a Scale parameter. Default value is 1.
  * @param {number=} b Shape parameter. Default value is 0.5.
  * @constructor

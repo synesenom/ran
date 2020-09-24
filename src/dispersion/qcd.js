@@ -5,7 +5,7 @@ import quantile from '../shape/quantile'
  * for a sample of values.
  *
  * @method qcd
- * @methodOf ran.dispersion
+ * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate quartile coefficient of dispersion for.
  * @return {(number|undefined)} The quartile coefficient of dispersion of the values if there is any, undefined
  * otherwise.

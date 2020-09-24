@@ -8,7 +8,7 @@ import LogNormal from './log-normal'
  * Support: \(x > 0\). Note that this distribution is simply a special case of the [log-normal]{@link #dist.LogNormal}.
  *
  * @class Gilbrat
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @constructor
  */
 export default class extends LogNormal {

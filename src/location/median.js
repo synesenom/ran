@@ -4,7 +4,7 @@ import { quickselect } from '../algorithms'
  * Calculates the median of a sample of values.
  *
  * @method median
- * @methodOf ran.location
+ * @memberof ran.location
  * @param {number[]} values Array of values to calculate median for.
  * @returns {number} Median of the values if there are any, undefined otherwise.
  * @example

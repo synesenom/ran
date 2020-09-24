@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(b, s, \beta > 0\). Support: \(x \ge 0\).
  *
  * @class GammaGompertz
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} b Scale parameter. Default value is 1.
  * @param {number=} s First shape parameter. Default value is 1.
  * @param {number=} beta Second shape parameter. Default value is 1.

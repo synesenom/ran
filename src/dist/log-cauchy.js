@@ -8,7 +8,7 @@ import Cauchy from './cauchy'
  * with \(\mu \in \mathbb{R}\) and \(\sigma > 0\). Support: \(x > 0\).
  *
  * @class LogCauchy
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} sigma Scale parameter. Default value is 1.
  * @constructor

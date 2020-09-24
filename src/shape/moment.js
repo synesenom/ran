@@ -4,7 +4,7 @@ import mean from '../location/mean'
  * Calculates the [k-th raw moment]{@link https://en.wikipedia.org/wiki/Moment_(mathematics)} for a sample of values.
  *
  * @method moment
- * @methodOf ran.shape
+ * @memberof ran.shape
  * @param {number[]} values Array of values to calculate moment for.
  * @param {number} k Order of the moment.
  * @param {number} [c = 0] Value to shift the distribution by before calculating the moment.

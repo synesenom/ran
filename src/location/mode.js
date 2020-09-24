@@ -2,7 +2,7 @@
  * Calculates the mode(s) for a sample of discrete values.
  *
  * @method discreteMode
- * @methodOf ran.location
+ * @memberof ran.location
  * @param {number[]} values Array containing the sample.
  * @return {number[]} Array containing the modes of the sample.
  * @private
@@ -23,7 +23,7 @@ function discreteMode (values) {
  * Calculates the mode for continuous sample using the half sample mode: https://arxiv.org/pdf/math/0505419.pdf.
  *
  * @method continuousMode
- * @methodOf ran.location.mode
+ * @memberof ran.location.mode
  * @param {number[]} values Array containing the continuous sample.
  * @return {number} The estimated mode.
  * @private
@@ -69,7 +69,7 @@ function continuousMode (values) {
  * [half-sample mode algorithm]{@link https://arxiv.org/pdf/math/0505419.pdf}.
  *
  * @method mode
- * @methodOf ran.location
+ * @memberof ran.location
  * @param {number[]} values Array of values to calculate mode for.
  * @returns {number|number[]|undefined} The estimated mode (continuous sample), an array of modes (discrete sample) or
  * undefined (empty sample).

@@ -9,7 +9,7 @@ import Gamma from './gamma'
  * where \(k \in \mathbb{N}^+\). Support: \(x > 0\).
  *
  * @class Chi2
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} k Degrees of freedom. If not an integer, is rounded to the nearest one. Default value is 2.
  * @constructor
  */

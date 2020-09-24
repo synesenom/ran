@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(\alpha, \beta > 0\), \(\theta \in [0, 1]\), \(a, b \in \mathbb{R}\), \(a < b\) and \(\mathrm{B}(x, y)\) is the beta function. Support: \(x \in [a, b]\).
  *
  * @class BetaRectangular
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha First shape parameter. Default value is 1.
  * @param {number=} beta Second shape parameter. Default value is 1.
  * @param {number=} theta Mixture parameter. Default value is 0.5.

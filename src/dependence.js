@@ -2,7 +2,7 @@
  * Namespaces containing various dependence metrics.
  *
  * @namespace dependence
- * @memberOf ran
+ * @memberof ran
  */
 export { default as covariance } from './dependence/covariance'
 export { default as dCov } from './dependence/distance-covariance'

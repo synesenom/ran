@@ -2,7 +2,7 @@
  * Class implementing an [alias table]{@link https://en.wikipedia.org/wiki/Alias_method} with a sampler.
  *
  * @class AliasTable
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number[]} weights The (unnormalized) weights for the alias table.
  * @constructor
  * @ignore

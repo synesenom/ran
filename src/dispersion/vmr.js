@@ -6,7 +6,7 @@ import mean from '../location/mean'
  * of values.
  *
  * @method vmr
- * @memberOf ran.dispersion
+ * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate variance-to-mean ratio for.
  * @returns {(number|undefined)} Variance-to-mean ratio of the values if there are more than two and the mean is not
  * zero, undefined otherwise.

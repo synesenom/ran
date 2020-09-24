@@ -10,7 +10,7 @@ import { gammaLowerIncomplete } from '../special/gamma-incomplete'
  * where \(z = \frac{x - \mu}{\sigma}\), \(\mu \in \mathbb{R}\) and \(\sigma > 0\). Support: \(x \in \mathbb{R}\).
  *
  * @class Moyal
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} sigma Scale parameter. Default value is 1.
  * @constructor

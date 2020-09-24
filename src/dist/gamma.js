@@ -12,7 +12,7 @@ import Distribution from './_distribution'
  * where \(\alpha, \beta > 0\). Support: \(x > 0\).
  *
  * @class Gamma
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha Shape parameter. Default value is 1.
  * @param {number=} beta Rate parameter. Default value is 1.
  * @constructor

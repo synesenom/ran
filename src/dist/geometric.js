@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(p \in (0, 1]\). Support: \(k \in \{0, 1, 2, ...\}\). Note that the [discrete exponential distribution]{@link https://docs.scipy.org/doc/scipy/reference/tutorial/stats/discrete_planck.html} is also a geometric distribution with rate parameter equal to \(-\ln(1 - p)\).
  *
  * @class Geometric
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number} p Probability of success. Default value is 0.5.
  * @constructor
  */

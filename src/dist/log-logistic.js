@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(\alpha, \beta > 0\). Support: \(x \in [0, \infty)\).
  *
  * @class LogLogistic
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha Scale parameter. Default value is 1.
  * @param {number=} beta Shape parameter. Default value is 1.
  * @constructor

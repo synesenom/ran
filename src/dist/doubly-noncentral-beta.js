@@ -14,7 +14,7 @@ import fnBeta from '../special/beta'
  * where \(\alpha, \beta \in \mathbb{N}^+\) and \(\lambda_1, \lambda_2 \ge 0\). Support: \(x \in (0, 1)\).
  *
  * @class DoublyNoncentralBeta
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} alpha First shape parameter. Default value is 1.
  * @param {number=} beta Second shape parameter. Default value is 1.
  * @param {number=} lambda1 First non-centrality parameter. Default value is 1.

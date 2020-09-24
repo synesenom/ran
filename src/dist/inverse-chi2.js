@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  * with \(\nu > 0\). Support: \(x > 0\).
  *
  * @class InverseChi2
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} nu Degrees of freedom. Default value is 1.
  * @constructor
  */

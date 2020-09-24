@@ -12,7 +12,7 @@ import Distribution from './_distribution'
  * with \(r \in \mathbb{N}^+\) and \(p \in [0, 1]\). Support: \(k \in \mathbb{N}_0\).
  *
  * @class NegativeBinomial
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} r Number of failures until the experiment is stopped. If not an integer, it is rounded to the nearest
  * integer. Default value is 10.
  * @param {number=} p Probability of success. Default value is 0.5.

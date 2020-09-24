@@ -10,7 +10,7 @@ import { poisson } from './_core'
  * where \(\lambda > 0\) and \(\theta \in (0, 1)\). Support: \(k \in \mathbb{N}_0\).
  *
  * @class PolyaAeppli
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} lambda Mean of the Poisson component. Default value is 1.
  * @param {number=} theta Parameter of the shifted geometric component. Default value is 0.5.
  * @constructor

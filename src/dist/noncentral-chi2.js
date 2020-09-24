@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  * with \(k \in \mathbb{N}^+\), \(\lambda > 0\) and \(I_n(x)\) is the modified Bessel function of the first kind with order \(n\). Support: \(x \in [0, \infty)\).
  *
  * @class NoncentralChi2
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} k Degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
  * @param {number=} lambda Non-centrality parameter. Default value is 1.
  * @constructor

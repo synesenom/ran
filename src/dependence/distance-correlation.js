@@ -6,7 +6,7 @@ import mean from '../location/mean'
  * for paired arrays of values.
  *
  * @method dCor
- * @methodOf ran.dependence
+ * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
  * @returns {(number|undefined)} The distance correlation if none of the arrays are empty and they have the same length,

@@ -12,7 +12,7 @@ const coeffs = [
    * Computes the logarithm of the gamma function for positive arguments.
    *
    * @method logGamma
-   * @memberOf ran.special
+   * @memberof ran.special
    * @param {number} z Value to evaluate log(gamma) at.
    * @returns {number} The log(gamma) value.
    * @private

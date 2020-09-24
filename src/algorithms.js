@@ -1,6 +1,6 @@
 /**
  * @namespace algorithms
- * @memberOf ran
+ * @memberof ran
  * @private
  */
 export { default as bracket } from './algorithms/bracket'

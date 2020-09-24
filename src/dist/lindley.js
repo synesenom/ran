@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  * with \(\theta > 0\). Support: \(x \ge 0\).
  *
  * @class Lindley
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} theta Shape parameter. Default value is 1.
  * @constructor
  */

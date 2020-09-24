@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(z = \frac{x - \mu}{s}\), \(\mu \in \mathbb{R}\) and \(s, c > 0\). Support: \(x \in \mathbb{R}\).
  *
  * @class GeneralizedLogistic
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} s Scale parameter. Default value is 1.
  * @param {number=} c Shape parameter. Default value is 1.

@@ -16,7 +16,7 @@ import NoncentralT from './noncentral-t'
  * where \(\nu \in \mathbb{N}^+\), \(\mu \in \mathbb{R}\) and \(\theta > 0\). Support: \(x \in \mathbb{R}\).
  *
  * @class DoublyNoncentralT
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number} nu Degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 1.
  * @param {number} mu Location parameter. Default value is 1.
  * @param {number} theta Shape parameter. Default value is 1.

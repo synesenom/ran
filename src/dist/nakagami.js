@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  * where \(m \in \mathbb{R}\), \(m \ge 0.5\) and \(\Omega > 0\). Support: \(x > 0\).
  *
  * @class Nakagami
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} m Shape parameter. Default value is 1.
  * @param {number=} omega Spread parameter. Default value is 1.
  * @constructor

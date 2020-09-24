@@ -11,7 +11,7 @@ import { erf } from '../special/error'
  * where \(\xi, \alpha > 0\), \(\omega \in \mathbb{R}\) and \(\phi(x)\), \(\Phi(x)\) denote the probability density and cumulative distribution functions of the standard [normal distribution]{@link #dist.Normal}. Support: \(x \in \mathbb{R}\).
  *
  * @class SkewNormal
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} xi Location parameter. Default value is 0.
  * @param {number=} omega Scale parameter. Default value is 1.
  * @param {number=} alpha Shape parameter. Default value is 1.

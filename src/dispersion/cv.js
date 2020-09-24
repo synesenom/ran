@@ -6,7 +6,7 @@ import mean from '../location/mean'
  * of values.
  *
  * @method cv
- * @memberOf ran.dispersion
+ * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate coefficient of variation for.
  * @returns {(number|undefined)} Coefficient of variation of the values if there are more than two and the mean is not
  * zero, undefined otherwise.

@@ -7,7 +7,7 @@ import neumaier from '../algorithms/neumaier'
  * $$D_\mathrm{KL}(P \parallel Q) = \sum_{x \in \mathcal{X}} P(x) \log\bigg(\frac{P(x)}{Q(x)}\bigg).$$
  *
  * @method kullbackLeibler
- * @methodOf ran.dependence
+ * @memberof ran.dependence
  * @param {number[]} p Array representing the probabilities for the i-th value in the base distribution (P).
  * @param {number[]} q Array representing the probabilities for the i-th value in compared distribution (Q).
  * @returns {(number|undefined)} The Kullback-Leibler divergence if none of the distributions are empty and Q(x) = 0

@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  * with \(L, H > 0\), \(H > L\) and \(\alpha > 0\). Support: \(x \in [L, H]\).
  *
  * @class BoundedPareto
- * @memberOf ran.dist
+ * @memberof ran.dist
  * @param {number=} L Lower boundary. Default value is 1.
  * @param {number=} H Upper boundary. Default value is 10.
  * @param {number=} alpha Shape parameter. Default value is 1.

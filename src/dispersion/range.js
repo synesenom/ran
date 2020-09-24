@@ -5,7 +5,7 @@ import min from '../shape/min'
  * Calculates the [range]{@link } for a sample of values.
  *
  * @method range
- * @methodOf ran.dispersion
+ * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate range for.
  * @return {(number|undefined)} The range of the values if there is any, undefined otherwise.
  * @example

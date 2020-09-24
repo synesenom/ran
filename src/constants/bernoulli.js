@@ -2,7 +2,7 @@
  * The first couple of even indexed Bernoulli numbers starting at B_2.
  *
  * @var {number[]} B
- * @memberOf ran.constants
+ * @memberof ran.constants
  * @private
  */
 export const B2k = [
