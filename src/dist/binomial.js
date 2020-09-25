@@ -5,9 +5,9 @@ import Categorical from './categorical'
 /**
  * Generator for the [binomial distribution]{@link https://en.wikipedia.org/wiki/Binomial_distribution}:
  *
- * $$f(k; n, p) = \begin{pmatrix}n \\ k \\ \end{pmatrix} p^k (1 - p)^{n - k},$$
+ * $$f(k; n, p) = \begin{pmatrix}n \\\\ k \\\\ \end{pmatrix} p^k (1 - p)^{n - k},$$
  *
- * with \(n \in \mathbb{N}_0\) and \(p \in [0, 1]\). Support: \(k \in \{0, ..., n\}\).
+ * with $n \in \mathbb{N}_0$ and $p \in \[0, 1\]$. Support: $k \in \{0, ..., n\}$.
  *
  * @class Binomial
  * @memberof ran.dist

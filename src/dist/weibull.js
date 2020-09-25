@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \lambda, k) = \frac{k}{\lambda}\bigg(\frac{x}{\lambda}\bigg)^{k - 1} e^{-(x / \lambda)^k},$$
  *
- * with \(\lambda, k > 0\). Support: \(x \ge 0\).
+ * with $\lambda, k > 0$. Support: $x \ge 0$.
  *
  * @class Weibull
  * @memberof ran.dist

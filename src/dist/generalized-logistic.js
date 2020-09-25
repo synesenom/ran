@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \mu, s, c) = \frac{c e^{-z}}{s (1 + e^{-z})^{c + 1}},$$
  *
- * with \(z = \frac{x - \mu}{s}\), \(\mu \in \mathbb{R}\) and \(s, c > 0\). Support: \(x \in \mathbb{R}\).
+ * with $z = \frac{x - \mu}{s}$, $\mu \in \mathbb{R}$ and $s, c > 0$. Support: $x \in \mathbb{R}$.
  *
  * @class GeneralizedLogistic
  * @memberof ran.dist

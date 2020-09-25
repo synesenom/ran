@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(k; \rho) = \rho \mathrm{B}(k, \rho + 1),$$
  *
- * with \(\rho > 0\) and \(\mathrm{B}(x, y)\) is the beta function. Support: \(k \in \mathbb{N}^+\).
+ * with $\rho > 0$ and $\mathrm{B}(x, y)$ is the beta function. Support: $k \in \mathbb{N}^+$.
  *
  * @class YuleSimon
  * @memberof ran.dist

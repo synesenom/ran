@@ -3,9 +3,9 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Dagum distribution]{@link https://en.wikipedia.org/wiki/Dagum_distribution}:
  *
- * $$f(x; p, a, b) = \frac{ap}{x} \frac{\big(\frac{x}{b}\big)^{ap}}{\Big[\big(\frac{x}{b}\big)^a + 1\Big]^{p + 1}},$$
+ * $$f(x; p, a, b) = \frac{ap}{x} \frac{\big(\frac{x}{b}\big)^{ap}}{\Big\[\big(\frac{x}{b}\big)^a + 1\Big\]^{p + 1}},$$
  *
- * with \(p, a, b > 0\). Support: \(x > 0\).
+ * with $p, a, b > 0$. Support: $x > 0$.
  *
  * @class Dagum
  * @memberof ran.dist

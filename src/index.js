@@ -7,12 +7,8 @@
 
 export * as core from './core'
 export * as dependence from './dependence'
-
-/*
 export * as dispersion from './dispersion'
 export * as dist from './dist'
 export * as location from './location'
-export * as mc from './mc'
 export * as shape from './shape'
 export * as test from './test'
- */

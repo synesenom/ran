@@ -4,9 +4,9 @@ import Distribution from './_distribution'
 /**
  * Generator for the [uniform ratio distribution]{@link https://en.wikipedia.org/wiki/Ratio_distribution#Uniform_ratio_distribution}:
  *
- * $$f(x) = \begin{cases}\frac{1}{2} &\quad\text{if $x < 1$},\\\frac{1}{2x^2} &\quad\text{if $x \ge 1$},\\\end{cases}.$$
+ * $$f(x) = \begin{cases}\frac{1}{2} &\quad\text{if $x < 1$},\\\\ \frac{1}{2x^2} &\quad\text{if $x \ge 1$},\\\\ \end{cases}.$$
  *
- * Support: \(x > 0\).
+ * Support: $x > 0$.
  *
  * @class UniformRatio
  * @memberof ran.dist

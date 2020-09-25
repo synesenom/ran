@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; c) = c x^{-c - 1} e^{-x^{-c}},$$
  *
- * with \(c > 0\). Support: \(x \ge 0\).
+ * with $c > 0$. Support: $x \ge 0$.
  *
  * @class InvertedWeibull
  * @memberof ran.dist

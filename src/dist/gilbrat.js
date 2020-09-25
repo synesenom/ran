@@ -5,7 +5,7 @@ import LogNormal from './log-normal'
  *
  * $$f(x) = \frac{1}{x \sqrt{2 \pi}}e^{-\frac{\ln x^2}{2}}.$$
  *
- * Support: \(x > 0\). Note that this distribution is simply a special case of the [log-normal]{@link #dist.LogNormal}.
+ * Support: $x > 0$. Note that this distribution is simply a special case of the [log-normal]{@link #dist.LogNormal}.
  *
  * @class Gilbrat
  * @memberof ran.dist

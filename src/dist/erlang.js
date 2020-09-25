@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; k, \lambda) = \frac{\lambda^k x^{k - 1} e^{-\lambda x}}{(k - 1)!},$$
  *
- * where \(k \in \mathbb{N}^+\) and \(\lambda > 0\). Support: \(x \ge 0\).
+ * where $k \in \mathbb{N}^+$ and $\lambda > 0$. Support: $x \ge 0$.
  *
  * @class Erlang
  * @memberof ran.dist

@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; q, \omega) = \frac{2q^q}{\Gamma(q) \omega^q} x^{2q - 1} e^{-\frac{q}{\omega} x^2},$$
  *
- * where \(q \in (0, 1]\) and \(\omega > 0\). Support: \(x > 0\).
+ * where $q \in (0, 1]$ and $\omega > 0$. Support: $x > 0$.
  *
  * @class Hoyt
  * @memberof ran.dist

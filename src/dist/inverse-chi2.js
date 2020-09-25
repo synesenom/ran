@@ -4,11 +4,11 @@ import { chi2 } from './_core'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [inverse \(\chi^2\) distribution]{@link https://en.wikipedia.org/wiki/Inverse-chi-squared_distribution}:
+ * Generator for the [inverse $\chi^2$ distribution]{@link https://en.wikipedia.org/wiki/Inverse-chi-squared_distribution}:
  *
  * $$f(x; \nu) = \frac{2^{-\nu/2}}{\Gamma(\nu / 2)} x^{-\nu/2 - 1} e^{-1/(2x)},$$
  *
- * with \(\nu > 0\). Support: \(x > 0\).
+ * with $\nu > 0$. Support: $x > 0$.
  *
  * @class InverseChi2
  * @memberof ran.dist

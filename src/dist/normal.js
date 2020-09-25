@@ -7,7 +7,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \mu, \sigma) = \frac{1}{\sqrt{2 \pi \sigma^2}} e^{-\frac{(x - \mu)^2}{2\sigma^2}},$$
  *
- * with \(\mu \in \mathbb{R}\) and \(\sigma > 0\). Support: \(x \in \mathbb{R}\).
+ * with $\mu \in \mathbb{R}$ and $\sigma > 0$. Support: $x \in \mathbb{R}$.
  *
  * @class Normal
  * @memberof ran.dist

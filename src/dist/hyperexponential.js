@@ -8,7 +8,7 @@ import neumaier from '../algorithms/neumaier'
  *
  * $$f(x; \{w\}, \{\lambda\}) = \frac{1}{\sum_j w_j} \sum_i w_i \lambda_i e^{-\lambda_i x},$$
  *
- * where \(w_i, \lambda_i > 0\). Support: \(x \ge 0\).
+ * where $w_i, \lambda_i > 0$. Support: $x \ge 0$.
  *
  * @class Hyperexponential
  * @memberof ran.dist

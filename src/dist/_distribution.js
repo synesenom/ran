@@ -399,7 +399,7 @@ class Distribution {
    *
    * $$F(x) = \sum_{x_i \le x} f(x_i),$$
    *
-   * if it is discrete. The functions \(f(t)\) and \(f(x_i)\) denote the probability density and mass functions.
+   * if it is discrete. The functions $f(t)$ and $f(x_i)$ denote the probability density and mass functions.
    *
    * @method cdf
    * @memberof ran.dist.Distribution
@@ -436,21 +436,21 @@ class Distribution {
    *
    * $$Q(p) = F^{-1}(p),$$
    *
-   * whereas for discrete distributions it is the lower boundary of the interval that satisfies \(F(k) = p\):
+   * whereas for discrete distributions it is the lower boundary of the interval that satisfies $F(k) = p$:
    *
-   * $$Q(p) = \mathrm{inf}\{k \in \mathrm{supp}(f): p \le F(k) \},$$
+   * $$Q(p) = \mathrm{inf}\\{k \in \mathrm{supp}(f): p \le F(k)\\},$$
    *
-   * with \(\mathrm{supp}(f)\) denoting the support of the distribution.
+   * with $\mathrm{supp}(f)$ denoting the support of the distribution.
    *
    * For distributions with an analytically invertible
    * cumulative distribution function, the quantile is explicitly implemented. In other cases, two fallback estimations
-   * are used: for continuous distributions the equation \(F(x) = p\) is solved using [Brent's method]{@link https://en.wikipedia.org/wiki/Brent%27s_method}.
+   * are used: for continuous distributions the equation $F(x) = p$ is solved using [Brent's method]{@link https://en.wikipedia.org/wiki/Brent%27s_method}.
    * For discrete distributions a look-up table is used with linear search.
    *
    * @method q
    * @memberof ran.dist.Distribution
    * @param {number} p The probability at which the quantile should be evaluated.
-   * @returns {(number|undefined)} The value of the quantile function at the specified probability if \(p \in [0, 1]\) and the quantile could be found,
+   * @returns {(number|undefined)} The value of the quantile function at the specified probability if $p \in [0, 1]$ and the quantile could be found,
    * undefined otherwise.
    */
   q (p) {
@@ -478,7 +478,7 @@ class Distribution {
    *
    * $$S(x) = 1 - F(x),$$
    *
-   * where \(F(x)\) denotes the cumulative distribution function.
+   * where $F(x)$ denotes the cumulative distribution function.
    *
    * @method survival
    * @memberof ran.dist.Distribution
@@ -500,7 +500,7 @@ class Distribution {
    *
    * $$\lambda(x) = \frac{f(x)}{S(x)},$$
    *
-   * where \(f(x)\) and \(S(x)\) are the probability density (or mass) function and the survival function, respectively.
+   * where $f(x)$ and $S(x)$ are the probability density (or mass) function and the survival function, respectively.
    *
    * @method hazard
    * @memberof ran.dist.Distribution
@@ -522,7 +522,7 @@ class Distribution {
    *
    * $$\Lambda(x) = \int_0^x \lambda(t) \,\mathrm{d}t,$$
    *
-   * where \(\lambda(x)\) is the hazard function.
+   * where $\lambda(x)$ is the hazard function.
    *
    * @method cHazard
    * @memberof ran.dist.Distribution
@@ -564,8 +564,8 @@ class Distribution {
    *
    * $$\ln L(\theta | X) = \sum_{x \in X} \ln f(x; \theta),$$
    *
-   * where \(X\) is the set of observations (sample) and \(\theta\) is the parameter vector of the
-   * distribution. The function \(f(x)\) denotes the probability density/mass function.
+   * where $X$ is the set of observations (sample) and $\theta$ is the parameter vector of the
+   * distribution. The function $f(x)$ denotes the probability density/mass function.
    *
    * @method lnL
    * @memberof ran.dist.Distribution
@@ -645,14 +645,14 @@ class Distribution {
 
   /**
    * Tests if an array of values is sampled from the specified distribution. For discrete distributions this
-   * method uses \(\chi^2\) test, whereas for continuous distributions it uses the Kolmogorov-Smirnov test. In both cases, the probability of Type I error (rejecting a correct null hypotheses) is 1%.
+   * method uses $\chi^2$ test, whereas for continuous distributions it uses the Kolmogorov-Smirnov test. In both cases, the probability of Type I error (rejecting a correct null hypotheses) is 1%.
    *
    * @method test
    * @memberof ran.dist.Distribution
    * @param {number[]} values Array of values to test.
    * @returns {Object} Object with two properties representing the result of the test:
    * <ul>
-   *     <li>{statistics}: The \(\chi^2\) or D statistics depending on whether the distribution is discrete or
+   *     <li>{statistics}: The $\chi^2$ or D statistics depending on whether the distribution is discrete or
    *     continuous.</li>
    *     <li>{passed}: Whether the sample passed the null hypothesis that it is sampled from the current
    *     distribution.</li>

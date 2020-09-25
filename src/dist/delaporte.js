@@ -8,7 +8,7 @@ import PreComputed from './_pre-computed'
  *
  * $$f(k; \alpha, \beta, \lambda) = \frac{e^{-\lambda}}{\Gamma(\alpha)}\sum_{j = 0}^k \frac{\Gamma(\alpha + j) \beta^j \lambda^{k - j}}{j! (1 + \beta)^{\alpha + j} (k - j)!},$$
  *
- * with \(\alpha, \beta, \lambda > 0\). Support: \(k \in \mathbb{N}_0\). For \(\lambda = 0\), it is the [negative binomial]{@link #dist.NegativeBinomial}, and for \(\alpha = \beta = 0\) it is the [Poisson distribution]{@link #dist.Poisson}. Note that these special cases are not covered by this class. For these distributions, please refer to the corresponding generators.
+ * with $\alpha, \beta, \lambda > 0$. Support: $k \in \mathbb{N}_0$. For $\lambda = 0$, it is the [negative binomial]{@link #dist.NegativeBinomial}, and for $\alpha = \beta = 0$ it is the [Poisson distribution]{@link #dist.Poisson}. Note that these special cases are not covered by this class. For these distributions, please refer to the corresponding generators.
  *
  * @class Delaporte
  * @memberof ran.dist

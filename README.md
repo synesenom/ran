@@ -25,7 +25,6 @@ The library includes:
     2.7 test method that uses Kolmogorov-Smirnov test for continuous or chi2 tests for discrete distributions.
 
     Also, every distribution can be individually seeded.
-3. A random walk Metropolis (RWM) sampler.
 
 ## install
 

@@ -5,7 +5,7 @@ import Gamma from './gamma'
  *
  * $$f(x; \alpha, \beta) = \frac{\beta^\alpha}{2 \Gamma(\alpha)} |x|^{\alpha - 1} e^{-\beta |x|},$$
  *
- * where \(\alpha, \beta > 0\). Support: \(x \in \mathbb{R}\).
+ * where $\alpha, \beta > 0$. Support: $x \in \mathbb{R}$.
  *
  * @class DoubleGamma
  * @memberof ran.dist

@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \eta, b) = b \eta e^{\eta + bx - \eta e^{bx}} ,$$
  *
- * with \(\eta, b > 0\). Support: \(x \ge 0\).
+ * with $\eta, b > 0$. Support: $x \ge 0$.
  *
  * @class Gompertz
  * @memberof ran.dist

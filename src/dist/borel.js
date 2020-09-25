@@ -7,7 +7,7 @@ import Distribution from './_distribution'
  *
  * $$f(k; \mu) = \frac{e^{-\mu k} (\mu k)^{k - 1}}{k!},$$
  *
- * where \(\mu \in [0, 1]\). Support: \(k \in \mathbb{N}^+\).
+ * where $\mu \in \[0, 1\]$. Support: $k \in \mathbb{N}^+$.
  *
  * @class Borel
  * @memberof ran.dist

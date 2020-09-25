@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; n) = \frac{\Gamma\Big(\frac{n}{2}\Big)}{\sqrt{\pi} \Gamma\Big(\frac{n - 1}{2}\Big)} (1 + x^2)^{-\frac{n}{2}},$$
  *
- * with \(n > 1\). Support: \(x \in \mathbb{R}\).
+ * with $n > 1$. Support: $x \in \mathbb{R}$.
  *
  * @class StudentZ
  * @memberof ran.dist

@@ -8,9 +8,9 @@ import Distribution from './_distribution'
 /**
  * Generator for the [non-central t distribution]{@link https://en.wikipedia.org/wiki/Noncentral_t-distribution}:
  *
- * $$f(x; \nu, \mu) = \frac{\nu^\frac{\nu}{2} \exp\Big(-\frac{\nu \mu^2}{2 (x^2 + \nu)}\Big)}{\sqrt{\pi} \Gamma\big(\frac{\nu}{2}\big) 2^\frac{\nu - 1}{2} (x^2 + \nu)^\frac{\nu + 1}{2}} \int_0^\infty y^\nu \exp\bigg(-\frac{1}{2}\bigg[y - \frac{\mu x}{\sqrt{x^2 + \nu}}\bigg]^2\bigg) \mathrm{d}y,$$
+ * $$f(x; \nu, \mu) = \frac{\nu^\frac{\nu}{2} \exp\Big(-\frac{\nu \mu^2}{2 (x^2 + \nu)}\Big)}{\sqrt{\pi} \Gamma\big(\frac{\nu}{2}\big) 2^\frac{\nu - 1}{2} (x^2 + \nu)^\frac{\nu + 1}{2}} \int_0^\infty y^\nu \exp\bigg(-\frac{1}{2}\bigg\[y - \frac{\mu x}{\sqrt{x^2 + \nu}}\bigg\]^2\bigg) \mathrm{d}y,$$
  *
- * with \(\nu \in \mathbb{N}^+\) and \(\mu \in \mathbb{R}\). Support: \(x \in \mathbb{R}\).
+ * with $\nu \in \mathbb{N}^+$ and $\mu \in \mathbb{R}$. Support: $x \in \mathbb{R}$.
  *
  * @class NoncentralT
  * @memberof ran.dist

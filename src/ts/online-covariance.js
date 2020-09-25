@@ -6,7 +6,7 @@ import Matrix from '../la/matrix'
  *
  * $$C_{ij} = \mathbb{E}\big[\big(X_i - \mathbb{E}[X_i]\big)\big(X_j - \mathbb{E}[X_j]\big)\big],$$
  *
- * where \(\mathbb{E}\) denotes the expected value and \(X_i, X_j\) are the i-th and j-th variables in the time series. The covariance matrix is calculated online at each update.
+ * where $\mathbb{E}$ denotes the expected value and $X_i, X_j$ are the i-th and j-th variables in the time series. The covariance matrix is calculated online at each update.
  *
  * @class OnlineCovariance
  * @memberof ran.ts

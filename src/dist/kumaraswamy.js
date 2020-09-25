@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; a, b) = a b x^{a-1} (1 - x^a)^{b - 1},$$
  *
- * with \(a, b > 0\). Support: \(x \in (0, 1)\).
+ * with $a, b > 0$. Support: $x \in (0, 1)$.
  *
  * @class Kumaraswamy
  * @memberof ran.dist

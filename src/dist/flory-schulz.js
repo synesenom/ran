@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(k; a) = a^2 k (1 - a)^{k - 1},$$
  *
- * with \(a \in (0, 1)\). Support: \(k \in \mathbb{N}^+\).
+ * with $a \in (0, 1)$. Support: $k \in \mathbb{N}^+$.
  *
  * @class FlorySchulz
  * @memberof ran.dist

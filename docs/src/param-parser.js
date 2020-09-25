@@ -1,4 +1,4 @@
-const getDesc = require('./dfs')
+const DescParser = require('./desc-parser')
 const TypeParser = require('./type-parser')
 
 module.exports = param => {
@@ -7,7 +7,7 @@ module.exports = param => {
 
   return {
     name: param.name,
-    desc: getDesc(param),
+    desc: DescParser(param),
     optional: isOptional(param.type),
     default: param.default && param.default.replace('=>', ' => '),
     type: TypeParser(param.type)

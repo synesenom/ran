@@ -3,9 +3,9 @@ import InverseGaussian from './inverse-gaussian'
 /**
  * Generator for the [reciprocal inverse Gaussian distribution (RIG)]{@link https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_recipinvgauss.html}:
  *
- * $$f(x; \lambda, \mu) = \bigg[\frac{\lambda}{2 \pi x}\bigg]^{1/2} e^{\frac{-\lambda (1 - \mu x)^2}{2 \mu^2 x}},$$
+ * $$f(x; \lambda, \mu) = \bigg\[\frac{\lambda}{2 \pi x}\bigg\]^{1/2} e^{\frac{-\lambda (1 - \mu x)^2}{2 \mu^2 x}},$$
  *
- * with \(\mu, \lambda > 0\). Support: \(x > 0\).
+ * with $\mu, \lambda > 0$. Support: $x > 0$.
  *
  * @class ReciprocalInverseGaussian
  * @memberof ran.dist

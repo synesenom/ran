@@ -5,7 +5,7 @@ import Normal from './normal'
  *
  * $$f(x; \mu, \sigma) = \frac{1}{x \sigma \sqrt{2 \pi}}e^{-\frac{(\ln x - \mu)^2}{2\sigma^2}},$$
  *
- * where \(\mu \in \mathbb{R}\) and \(\sigma > 0\). Support: \(x > 0\).
+ * where $\mu \in \mathbb{R}$ and $\sigma > 0$. Support: $x > 0$.
  *
  * @class LogNormal
  * @memberof ran.dist

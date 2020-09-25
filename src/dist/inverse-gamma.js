@@ -5,7 +5,7 @@ import Gamma from './gamma'
  *
  * $$f(x; \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{-\alpha - 1} e^{-\beta/x},$$
  *
- * where \(\alpha, \beta > 0\). Support: \(x > 0\).
+ * where $\alpha, \beta > 0$. Support: $x > 0$.
  *
  * @class InverseGamma
  * @memberof ran.dist

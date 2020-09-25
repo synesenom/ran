@@ -7,7 +7,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \mu, c) = \sqrt{\frac{c}{2 \pi}}\frac{e^{-\frac{c}{2(x - \mu)}}}{(x - \mu)^{3/2}},$$
  *
- * with \(\mu \in \mathbb{R}\) and \(c > 0\). Support: \(x \in [\mu, \infty)\).
+ * with $\mu \in \mathbb{R}$ and $c > 0$. Support: $x \in [\mu, \infty)$.
  *
  * @class Levy
  * @memberof ran.dist

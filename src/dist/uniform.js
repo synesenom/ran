@@ -6,8 +6,8 @@ import Distribution from './_distribution'
  *
  * $$f(x; x_\mathrm{min}, x_\mathrm{max}) = \frac{1}{x_\mathrm{max} - x_\mathrm{min}},$$
  *
- * with \(x_\mathrm{min}, x_\mathrm{max} \in \mathbb{R}\) and \(x_\mathrm{min} < x_\mathrm{max}\).
- * Support: \(x \in [x_\mathrm{min}, x_\mathrm{max}]\).
+ * with $x_\mathrm{min}, x_\mathrm{max} \in \mathbb{R}$ and $x_\mathrm{min} < x_\mathrm{max}$.
+ * Support: $x \in \[x_\mathrm{min}, x_\mathrm{max}\]$.
  *
  * @class Uniform
  * @memberof ran.dist

@@ -2,13 +2,13 @@ import Distribution from './_distribution'
 import { erf, erfinv } from '../special/error'
 
 /**
- * Generator for the [alpha distribution]{@link https://docs.scipy.org/doc/scipy-1.0.0/reference/tutorial/stats/continuous_alpha.html}:
+ * Generator for the [alpha distribution]{@link https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_alpha.html}:
  *
  * $$f(x; \alpha) = \frac{\phi\Big(\alpha - \frac{\beta}{x}\Big)}{x^2 \Phi(\alpha)},$$
  *
- * where \(\alpha, \beta > 0\) and \(\phi(x), \Phi(x)\) denote the probability density and cumulative probability
+ * where $\alpha, \beta > 0$ and $\phi(x), \Phi(x)$ denote the probability density and cumulative probability
  * functions of the [normal distribution]{@link #dist.Normal}.
- * Support: \(x > 0\).
+ * Support: $x > 0$.
  *
  * @class Alpha
  * @memberof ran.dist

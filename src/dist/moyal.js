@@ -7,7 +7,7 @@ import { gammaLowerIncomplete } from '../special/gamma-incomplete'
  *
  * $$f(x; \mu, \sigma) = \frac{1}{\sqrt{2 \pi}}e^{-\frac{1}{2}(z + e^{-z})},$$
  *
- * where \(z = \frac{x - \mu}{\sigma}\), \(\mu \in \mathbb{R}\) and \(\sigma > 0\). Support: \(x \in \mathbb{R}\).
+ * where $z = \frac{x - \mu}{\sigma}$, $\mu \in \mathbb{R}$ and $\sigma > 0$. Support: $x \in \mathbb{R}$.
  *
  * @class Moyal
  * @memberof ran.dist

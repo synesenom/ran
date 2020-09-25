@@ -5,8 +5,8 @@ import Distribution from './_distribution'
  *
  * $$f(x) = \frac{1}{\beta} \cos\bigg(2 \frac{x - \mu}{\beta}\bigg),$$
  *
- * where\(\mu \in \mathbb{R}\) and \(\beta > 0\).
- * Support: \(x \in \Big[\mu-\frac{\beta \pi}{4}, \mu + \frac{\beta \pi}{4}\Big]\).
+ * where$\mu \in \mathbb{R}$ and $\beta > 0$.
+ * Support: $x \in \Big\[\mu-\frac{\beta \pi}{4}, \mu + \frac{\beta \pi}{4}\Big\]$.
  *
  * @class Anglit
  * @memberof ran.dist

@@ -5,7 +5,7 @@ import GeneralizedNormal from './generalized-normal'
  *
  * $$f(x; \alpha, \beta) = \frac{\beta}{\Gamma\big(\frac{1}{\beta}\big)} e^{-|x|^\beta},$$
  *
- * with \(\alpha, \beta > 0\). Support: \(x > 0\).
+ * with $\alpha, \beta > 0$. Support: $x > 0$.
  *
  * @class HalfGeneralizedNormal
  * @memberof ran.dist

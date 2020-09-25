@@ -8,7 +8,7 @@ import { beta as rBeta } from './_core'
  *
  * $$f(k; \alpha, \beta) = \frac{\mathrm{B}(\alpha + 1, \beta + k - 1)}{\mathrm{B}(\alpha, \beta)},$$
  *
- * with \(\alpha, \beta > 0\). Support: \(k \in \{0, ..., n\}\).
+ * with $\alpha, \beta > 0$. Support: $k \in \{0, ..., n\}$.
  *
  * @class BetaGeometric
  * @memberof ran.dist

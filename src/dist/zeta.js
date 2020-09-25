@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  *
  * $$f(k; s) = \frac{k^{-s}}{\zeta(s)},$$
  *
- * with \(s \in (1, \infty)\) and \(\zeta(x)\) is the Riemann zeta function. Support: \(k \in \mathbb{N}^+\).
+ * with $s \in (1, \infty)$ and $\zeta(x)$ is the Riemann zeta function. Support: $k \in \mathbb{N}^+$.
  *
  * @class Zeta
  * @memberof ran.dist

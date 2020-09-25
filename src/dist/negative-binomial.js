@@ -7,9 +7,9 @@ import Distribution from './_distribution'
  * Generator for the [negative-binomial distribution]{@link https://en.wikipedia.org/wiki/Negative_binomial_distribution}
  * (also known as Gamma-Poisson, Pascal or Pólya distribution):
  *
- * $$f(k; r, p) = \begin{pmatrix}k + r - 1 \\ k \\ \end{pmatrix} (1 - p)^r p^k,$$
+ * $$f(k; r, p) = \begin{pmatrix}k + r - 1 \\\\ k \\\\ \end{pmatrix} (1 - p)^r p^k,$$
  *
- * with \(r \in \mathbb{N}^+\) and \(p \in [0, 1]\). Support: \(k \in \mathbb{N}_0\).
+ * with $r \in \mathbb{N}^+$ and $p \in \[0, 1\]$. Support: $k \in \mathbb{N}_0$.
  *
  * @class NegativeBinomial
  * @memberof ran.dist

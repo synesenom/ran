@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; a) = \sqrt{\frac{2}{\pi}}\frac{x^2 e^{-x^2 / (2a^2)}}{a^3},$$
  *
- * with \(a > 0\). Support: \(x > 0\).
+ * with $a > 0$. Support: $x > 0$.
  *
  * @class MaxwellBoltzmann
  * @memberof ran.dist

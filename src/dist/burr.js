@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; c, k) = c k \frac{x^{c - 1}}{(1 + x^c)^{k + 1}},$$
  *
- * with \(c, k > 0\). Support: \(x > 0\).
+ * with $c, k > 0$. Support: $x > 0$.
  *
  * @class Burr
  * @memberof ran.dist

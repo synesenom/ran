@@ -2,11 +2,11 @@ import Normal from './normal'
 import Distribution from './_distribution'
 
 /**
- * Generator for [Johnson's \(S_B\) distribution]{@link https://en.wikipedia.org/wiki/Johnson%27s_SU-distribution#Johnson's_SB-distribution}:
+ * Generator for [Johnson's $S_B$ distribution]{@link https://en.wikipedia.org/wiki/Johnson%27s_SU-distribution#Johnson's_SB-distribution}:
  *
- * $$f(x; \gamma, \delta, \lambda, \xi) = \frac{\delta \lambda}{\sqrt{2 \pi} z (\lambda - z)} e^{-\frac{1}{2}\big[\gamma + \delta \ln \frac{z}{\lambda - z}\big]^2},$$
+ * $$f(x; \gamma, \delta, \lambda, \xi) = \frac{\delta \lambda}{\sqrt{2 \pi} z (\lambda - z)} e^{-\frac{1}{2}\big\[\gamma + \delta \ln \frac{z}{\lambda - z}\big\]^2},$$
  *
- * with \(\gamma, \xi \in \mathbb{R}\), \(\delta, \lambda > 0\) and \(z = x - \xi\). Support: \(x \in (\xi, \xi + \lambda)\).
+ * with $\gamma, \xi \in \mathbb{R}$, $\delta, \lambda > 0$ and $z = x - \xi$. Support: $x \in (\xi, \xi + \lambda)$.
  *
  * @class JohnsonSB
  * @memberof ran.dist

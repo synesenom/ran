@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x) = \frac{1}{2}\mathrm{sech}\Big(\frac{\pi}{2} x\Big).$$
  *
- * Support: \(x \in \mathbb{R}\).
+ * Support: $x \in \mathbb{R}$.
  *
  * @class HyperbolicSecant
  * @memberof ran.dist

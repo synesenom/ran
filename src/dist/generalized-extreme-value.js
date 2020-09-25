@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; c) = (1 - cx)^{1 / c - 1} e^{-(1 - cx)^{1 / c}},$$
  *
- * with \(c \ne 0\). Support: \(x \in (-\infty, 1 / c]\) if \(c > 0\), \(x \in [1 / c, \infty)\) otherwise.
+ * with $c \ne 0$. Support: $x \in (-\infty, 1 / c]$ if $c > 0$, $x \in [1 / c, \infty)$ otherwise.
  *
  * @class GeneralizedExtremeValue
  * @memberof ran.dist

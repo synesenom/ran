@@ -11,12 +11,12 @@ const assembleLinks = children => {
 
 const simplify = str => str.replace(/\s+/g, ' ')
 
-const _dfs = (obj, key, map) => {
+const dfs = (obj, key, map) => {
   if (Array.isArray(obj.children)) {
-    return map(assembleLinks(obj.children).map(d => _dfs(d, key, map)))
+    return map(assembleLinks(obj.children).map(d => dfs(d, key, map)))
   } else {
     return obj[key]
   }
 }
 
-module.exports = obj => _dfs(obj.description, 'value', d => simplify(d.join(' ')))
+module.exports = obj => dfs(obj.description, 'value', d => simplify(d.join('')))

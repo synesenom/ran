@@ -7,7 +7,7 @@ import Distribution from './_distribution'
  *
  * $$f(k; \mu, n) = \frac{n}{k}\frac{e^{-\mu k} (\mu k)^{k - n}}{(k - n)!},$$
  *
- * where \(\mu \in [0, 1]\) and \(n \in \mathbb{N}^+\). Support: \(k \ge n\).
+ * where $\mu \in \[0, 1\]$ and $n \in \mathbb{N}^+$. Support: $k \ge n$.
  *
  * @class BorelTanner
  * @memberof ran.dist

@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; c) = \frac{(1 - x^2)^{\frac{c}{2} - 1}}{\mathrm{B}\big(\frac{1}{2}, \frac{c}{2}\big)},$$
  *
- * where \(c > 0\). Support: \(x \in [-1, 1]\).
+ * where $c > 0$. Support: $x \in \[-1, 1\]$.
  *
  * @class R
  * @memberof ran.dist

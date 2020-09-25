@@ -8,7 +8,7 @@ import { lambertW1m } from '../special/lambert-w'
  *
  * $$f(x; \alpha) = (e^{\alpha x} - \alpha) \exp\bigg(\alpha x - \frac{1}{\alpha} (e^{\alpha x} - 1)\bigg),$$
  *
- * with \(\alpha \in (0, 1]\). Support: \(x > 0\).
+ * with $\alpha \in (0, 1]$. Support: $x > 0$.
  *
  * @class Muth
  * @memberof ran.dist

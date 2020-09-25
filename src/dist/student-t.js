@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \nu) = \frac{1}{\sqrt{\nu}\mathrm{B}\big(\frac{1}{2}, \frac{\nu}{2}\big)} \Big(1 + \frac{x^2}{\nu}\Big)^{-\frac{\nu + 1}{2}},$$
  *
- * with \(\nu > 0\) and \(\mathrm{B}(x, y)\) is the beta function. Support: \(x \in \mathbb{R}\).
+ * with $\nu > 0$ and $\mathrm{B}(x, y)$ is the beta function. Support: $x \in \mathbb{R}$.
  *
  * @class StudentT
  * @memberof ran.dist

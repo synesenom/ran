@@ -1,15 +1,38 @@
 const documentation = require('documentation');
 const pug = require('pug');
 const fs = require('fs');
-const getDesc = require('./dfs');
-const ParamParser = require('./param-parser');
-const TypeParser = require('./type-parser');
+const DescParser = require('./src/desc-parser');
+const ParamParser = require('./src/param-parser');
+const TypeParser = require('./src/type-parser');
+
+
+// Prioritized entries.
+const PRIORITY = {
+  dist: [
+    'Distribution'
+  ]
+}
+
+
+const comparator = (a, b) => a.name.localeCompare(b.name)
+
+
+function getSortedEntries (entries, priority) {
+  if (typeof priority === 'undefined') {
+    return entries.sort(comparator)
+  }
+  return entries.filter(d => priority.indexOf(d.name) > -1)
+    .sort(comparator)
+    .concat(entries.filter(d => priority.indexOf(d.name) === -1)
+      .sort(comparator)
+    )
+}
 
 
 function parseEntry (entry) {
   const name = entry.name
   const params = entry.params.map(ParamParser)
-  console.log(`${entry.memberof}.${name}`.slice(4))
+  const desc = DescParser(entry)
 
   return {
     name,
@@ -17,12 +40,12 @@ function parseEntry (entry) {
     path: entry.memberof,
     signature: `${name}(${params.map((d, i) => `${d.optional ? '[' : ''}${i > 0 ? ', ' : ''}${d.name}`)
       .join('')}${params.filter(d => d.optional).map(() => ']').join('')})`,
-    desc: getDesc(entry),
+    desc,
     params: params.length > 0 ? params : undefined,
     returns: (() => {
       let ret = entry.returns[0]
       return ret && {
-        desc: getDesc(ret),
+        desc: DescParser(ret),
         type: TypeParser(ret.type)
       }
     })(),
@@ -31,23 +54,18 @@ function parseEntry (entry) {
 }
 
 
-// TODO Fix broken math in descriptions.
-// TODO Fix order ot entries in dist.
+// TODO Make equations readable by replacing e^{} with exp.
 (async () => {
   // Start from index.js
   const root = await documentation.build([
-    './src/index.js',
-    './src/dispersion.js',
-    './src/dist.js',
-    './src/la.js',
-    './src/shape.js'
-  ], {});
+    './src/index.js'
+  ], {})
 
   // Build documentation.
   const docs = root[0].members.static.sort((a, b) => a.name.localeCompare(b.name))
     .map(m => ({
       name: m.name,
-      members: m.members.static.sort((a, b) => a.name.localeCompare(b.name))
+      members: getSortedEntries(m.members.static, PRIORITY[m.name])
         .map(entry => {
           // First level member.
           let items = [parseEntry(entry)]
@@ -56,7 +74,7 @@ function parseEntry (entry) {
           if (entry.members.static.length > 0) {
             items = items.concat(entry.members.static.map(parseEntry))
           }
-          return items
+          return getSortedEntries(items, [entry.name])
         })
         .flat()
     }))
@@ -74,11 +92,12 @@ function parseEntry (entry) {
   const api = docs.map(d => d.members).flat()
 
   // Compile index template.
-  const template = pug.compileFile(`./docs/index.pug`)
-  fs.writeFileSync('docs/index.html', template({
+  const template = pug.compileFile(`./docs/templates/index.pug`)
+  fs.writeFileSync('./docs/index.html', template({
+    gitHubBanner: fs.readFileSync('./docs/templates/github-banner.html', {encoding: 'utf-8'}),
     name: 'ranjs',
     menu,
     searchList: JSON.stringify(searchList),
     api
-  }));
+  }))
 })()

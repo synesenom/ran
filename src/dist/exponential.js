@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \lambda) = \lambda e^{-\lambda x},$$
  *
- * with \(\lambda > 0\). Support: \(x \ge 0\).
+ * with $\lambda > 0$. Support: $x \ge 0$.
  *
  * @class Exponential
  * @memberof ran.dist

@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \nu, \sigma) = \frac{x}{\sigma^2} e^{-\frac{x^2 + \nu^2}{2 \sigma^2}} I_0\bigg(\frac{\nu x}{\sigma^2}\bigg),$$
  *
- * with \(\nu, \sigma > 0\) and \(I_0(x)\) is the modified Bessel function of the first kind with order zero. Support: \(x \in [0, \infty)\).
+ * with $\nu, \sigma > 0$ and $I_0(x)$ is the modified Bessel function of the first kind with order zero. Support: $x \in [0, \infty)$.
  *
  * @class Rice
  * @memberof ran.dist

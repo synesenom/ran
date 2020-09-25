@@ -3,9 +3,9 @@ import Distribution from './_distribution'
 /**
  * Generator for the [degenerate distribution]{@link https://en.wikipedia.org/wiki/Degenerate_distribution}:
  *
- * $$f(x; x_0) = \begin{cases}1 &\quad\text{if $x = x_0$}\\0 &\quad\text{otherwise}\\\end{cases},$$
+ * $$f(x; x_0) = \begin{cases}1 &\quad\text{if $x = x_0$}\\\\0 &\quad\text{otherwise}\\\\\\end{cases},$$
  *
- * where \(x_0 \in \mathbb{R}\). Support: \(x \in \mathbb{R}\).
+ * where $x_0 \in \mathbb{R}$. Support: $x \in \mathbb{R}$.
  *
  * @class Degenerate
  * @memberof ran.dist

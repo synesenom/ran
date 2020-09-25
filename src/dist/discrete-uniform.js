@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(k; x_\mathrm{min}, x_\mathrm{max}) = \frac{1}{x_\mathrm{max} - x_\mathrm{min} + 1},$$
  *
- * with \(x_\mathrm{min}, x_\mathrm{max} \in \mathbb{Z}\) and \(x_\mathrm{min} < x_\mathrm{max}\). Support: \(k \in \{x_\mathrm{min}, ..., x_\mathrm{max}\}\).
+ * with $x_\mathrm{min}, x_\mathrm{max} \in \mathbb{Z}$ and $x_\mathrm{min} < x_\mathrm{max}$. Support: $k \in \{x_\mathrm{min}, ..., x_\mathrm{max}\}$.
  *
  * @class DiscreteUniform
  * @memberof ran.dist

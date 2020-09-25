@@ -5,9 +5,9 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Irwin-Hall distribution]{@link https://en.wikipedia.org/wiki/Irwin%E2%80%93Hall_distribution}:
  *
- * $$f(x; n) = \frac{1}{(n - 1)!} \sum_{k = 0}^{\lfloor x\rfloor} (-1)^k \begin{pmatrix}n \\ k \\ \end{pmatrix} (x - k)^{n - 1},$$
+ * $$f(x; n) = \frac{1}{(n - 1)!} \sum_{k = 0}^{\lfloor x\rfloor} (-1)^k \begin{pmatrix}n \\\\ k \\\\ \end{pmatrix} (x - k)^{n - 1},$$
  *
- * with \(n \in \mathbb{N}^+\). Support: \(x \in [0, n]\).
+ * with $n \in \mathbb{N}^+$. Support: $x \in \[0, n\]$.
  *
  * @class IrwinHall
  * @memberof ran.dist

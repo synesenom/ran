@@ -2,11 +2,11 @@ import Normal from './normal'
 import Distribution from './_distribution'
 
 /**
- * Generator for [Johnson's \(S_U\) distribution]{@link https://en.wikipedia.org/wiki/Johnson%27s_SU-distribution}:
+ * Generator for [Johnson's $S_U$ distribution]{@link https://en.wikipedia.org/wiki/Johnson%27s_SU-distribution}:
  *
- * $$f(x; \gamma, \delta, \lambda, \xi) = \frac{\delta}{\lambda \sqrt{2 \pi}} \frac{e^{-\frac{1}{2}\big[\gamma + \delta \mathrm{sinh}^{-1} z \big]^2}}{\sqrt{1 + z^2}},$$
+ * $$f(x; \gamma, \delta, \lambda, \xi) = \frac{\delta}{\lambda \sqrt{2 \pi}} \frac{e^{-\frac{1}{2}\big\[\gamma + \delta \mathrm{sinh}^{-1} z \big\]^2}}{\sqrt{1 + z^2}},$$
  *
- * with \(\gamma, \xi \in \mathbb{R}\), \(\delta, \lambda > 0\) and \(z = \frac{x - \xi}{\lambda}\). Support: \(x \in \mathbb{R}\).
+ * with $\gamma, \xi \in \mathbb{R}$, $\delta, \lambda > 0$ and $z = \frac{x - \xi}{\lambda}$. Support: $x \in \mathbb{R}$.
  *
  * @class JohnsonSU
  * @memberof ran.dist

@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; a, b, c) = \frac{(x - a)^{\alpha - 1} (c - x)^{\beta - 1}}{\mathrm{B}(\alpha, \beta) (c - a)^{\alpha + \beta + 1}},$$
  *
- * where \(a, b, c \in \mathbb{R}\), \(a < b < c\), \(\alpha = \frac{4b + c - 5a}{c - a}\), \(\beta = \frac{5c - a -4b}{c - a}\) and \(\mathrm{B}(x, y)\) is the beta function. Support: \(x \in [a, c]\).
+ * where $a, b, c \in \mathbb{R}$, $a < b < c$, $\alpha = \frac{4b + c - 5a}{c - a}$, $\beta = \frac{5c - a -4b}{c - a}$ and $\mathrm{B}(x, y)$ is the beta function. Support: $x \in [a, c]$.
  *
  * @class PERT
  * @memberof ran.dist

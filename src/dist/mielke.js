@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; k, s) = \frac{k x^{k - 1}}{(1 + x^s)^{1 + k/s}},$$
  *
- * with \(k, s > 0\). Support: \(x > 0\). It can be viewed as a re-parametrization of the [Dagum distribution]{@link #dist.Dagum}.
+ * with $k, s > 0$. Support: $x > 0$. It can be viewed as a re-parametrization of the [Dagum distribution]{@link #dist.Dagum}.
  *
  * @class Mielke
  * @memberof ran.dist

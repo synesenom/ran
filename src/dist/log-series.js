@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(k; p) = \frac{-1}{\ln(1 - p)}\frac{p^k}{k},$$
  *
- * with \(p \in (0, 1)\). Support: \(k \in \mathbb{N}^+\).
+ * with $p \in (0, 1)$. Support: $k \in \mathbb{N}^+$.
  *
  * @class LogSeries
  * @memberof ran.dist

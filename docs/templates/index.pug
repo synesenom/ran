@@ -11,7 +11,11 @@ html(lang="en")
         script.
             hljs.initHighlightingOnLoad();
             MathJax.Hub.Config({
-              "HTML-CSS": {}
+              "HTML-CSS": {},
+              tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+              }
             });
         style.
             span.hl {
@@ -20,7 +24,7 @@ html(lang="en")
             }
         title #{name}
     body
-        // TODO Github banner.
+        | !{gitHubBanner}
         aside
             .search-bar
                 input#search(type="search", placeholder="search")
@@ -69,19 +73,18 @@ html(lang="en")
                                         td.param-type
                                             each type in param.type
                                                 code #{type}
-                                        td.param-desc #{param.desc}
+                                        td.param-desc !{param.desc}
                     if entry.returns
                         h3 Returns
                         .returns
                             .return-type
                                 each type in entry.returns.type
                                     code #{type}
-                            .return-desc #{entry.returns.desc}
+                            .return-desc !{entry.returns.desc}
                     if entry.examples
                         h3 Examples
                         pre
                             code.example.hljs.js.javascript #{entry.examples}
-            // TODO Add content.
 
             script.
                 // List of entries.

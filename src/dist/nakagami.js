@@ -8,7 +8,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; m, \Omega) = \frac{2m^m}{\Gamma(m) \Omega^m} x^{2m - 1} e^{-\frac{m}{\Omega} x^2},$$
  *
- * where \(m \in \mathbb{R}\), \(m \ge 0.5\) and \(\Omega > 0\). Support: \(x > 0\).
+ * where $m \in \mathbb{R}$, $m \ge 0.5$ and $\Omega > 0$. Support: $x > 0$.
  *
  * @class Nakagami
  * @memberof ran.dist

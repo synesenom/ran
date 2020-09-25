@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \theta) = \frac{\theta^2}{1 + \theta} (1 + x) e^{-\theta x},$$
  *
- * with \(\theta > 0\). Support: \(x \ge 0\).
+ * with $\theta > 0$. Support: $x \ge 0$.
  *
  * @class Lindley
  * @memberof ran.dist

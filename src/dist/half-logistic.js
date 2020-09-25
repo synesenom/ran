@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x) = \frac{2 e^{-x}}{(1 + e^{-x})^2}.$$
  *
- * Support: \(x \in [0, \infty)\).
+ * Support: $x \in [0, \infty)$.
  *
  * @class HalfLogistic
  * @memberof ran.dist

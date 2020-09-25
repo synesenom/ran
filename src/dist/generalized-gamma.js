@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; a, d, p) = \frac{p/a^d}{\Gamma(d/p)} x^{d - 1} e^{-(x/a)^p},$$
  *
- * where \(a, d, p > 0\). Support: \(x > 0\).
+ * where $a, d, p > 0$. Support: $x > 0$.
  *
  * @class GeneralizedGamma
  * @memberof ran.dist

@@ -3,9 +3,9 @@ import Distribution from './_distribution'
 /**
  * Generator for the [logistic-exponential distribution]{@link http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.295.8653&rep=rep1&type=pdf}:
  *
- * $$f(x; \lambda, \kappa) = \frac{\lambda \kappa (e^{\lambda x} - 1)^{\kappa - 1} e^{\lambda x}}{[1 + (e^{\lambda x} - 1)^\kappa]^2},$$
+ * $$f(x; \lambda, \kappa) = \frac{\lambda \kappa (e^{\lambda x} - 1)^{\kappa - 1} e^{\lambda x}}{\[1 + (e^{\lambda x} - 1)^\kappa\]^2},$$
  *
- * where \(\lambda, \kappa > 0\). Support: \(x > 0\).
+ * where $\lambda, \kappa > 0$. Support: $x > 0$.
  *
  * @class LogisticExponential
  * @memberof ran.dist

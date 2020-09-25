@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \mu, \alpha, \beta) = \frac{\beta}{2 \alpha \Gamma\big(\frac{1}{\beta}\big)} e^{-\big(\frac{|x - \mu|}{\alpha}\big)^\beta},$$
  *
- * where \(\mu \in \mathbb{R}\) and \(\alpha, \beta > 0\). Support: \(x \in \mathbb{R\). It is also a special case of the
+ * where $\mu \in \mathbb{R}$ and $\alpha, \beta > 0$. Support: $x \in \mathbb{R}$. It is also a special case of the
  * [generalized gamma distribution]{@link #dist.GeneralizedGamma}.
  *
  * @class GeneralizedNormal

@@ -3,9 +3,9 @@ import Distribution from './_distribution'
 /**
  * Generator for the [trapezoidal distribution]{@link https://en.wikipedia.org/wiki/Trapezoidal_distribution}:
  *
- * $$f(x; a, b, c, d) = \begin{cases}0 &\quad\text{for $x < a$},\\\frac{2 (x - a)}{(b - a) (d + c - a - b)} &\quad\text{for $a \le x < b$}\\\frac{2}{d + c - a - b} &\quad\text{for $b \le x < c$}\\\frac{2 (d - x)}{(d - c) (d + c - a - b)} &\quad\text{for $c \le x \le d$}\\0 &\quad\text{for $d < x$} \\\end{cases},$$
+ * $$f(x; a, b, c, d) = \begin{cases}0 &\quad\text{for $x < a$},\\\\ \frac{2 (x - a)}{(b - a) (d + c - a - b)} &\quad\text{for $a \le x < b$}\\\\ \frac{2}{d + c - a - b} &\quad\text{for $b \le x < c$}\\\\ \frac{2 (d - x)}{(d - c) (d + c - a - b)} &\quad\text{for $c \le x \le d$}\\\\ 0 &\quad\text{for $d < x$} \\\\ \end{cases},$$
  *
- * where \(a, b, c, d \in \mathbb{R}\), \(a < d\), \(a \le b < c\) and \(c \le d\). Support: \(x \in [a, d]\).
+ * where $a, b, c, d \in \mathbb{R}$, $a < d$, $a \le b < c$ and $c \le d$. Support: $x \in \[a, d\]$.
  *
  * @class Trapezoidal
  * @memberof ran.dist

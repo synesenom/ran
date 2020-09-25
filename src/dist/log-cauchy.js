@@ -3,9 +3,9 @@ import Cauchy from './cauchy'
 /**
  * Generator for the [log-Cauchy distribution]{@link https://en.wikipedia.org/wiki/Log-Cauchy_distribution}:
  *
- * $$f(x; \mu, \sigma) = \frac{1}{\pi x}\bigg[\frac{\sigma}{(\ln x - \mu)^2 + \sigma^2}\bigg],$$
+ * $$f(x; \mu, \sigma) = \frac{1}{\pi x}\bigg\[\frac{\sigma}{(\ln x - \mu)^2 + \sigma^2}\bigg\],$$
  *
- * with \(\mu \in \mathbb{R}\) and \(\sigma > 0\). Support: \(x > 0\).
+ * with $\mu \in \mathbb{R}$ and $\sigma > 0$. Support: $x > 0$.
  *
  * @class LogCauchy
  * @memberof ran.dist

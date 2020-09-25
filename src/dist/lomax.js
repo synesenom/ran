@@ -3,9 +3,9 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Lomax distribution]{@link https://en.wikipedia.org/wiki/Lomax_distribution}:
  *
- * $$f(x; \lambda, \alpha) = \frac{\alpha}{\lambda}\bigg[1 + \frac{x}{\lambda}\bigg]^{-(\alpha + 1)},$$
+ * $$f(x; \lambda, \alpha) = \frac{\alpha}{\lambda}\bigg\[1 + \frac{x}{\lambda}\bigg\]^{-(\alpha + 1)},$$
  *
- * with \(\lambda, \alpha > 0\). Support: \(x \ge 0\).
+ * with $\lambda, \alpha > 0$. Support: $x \ge 0$.
  *
  * @class Lomax
  * @memberof ran.dist

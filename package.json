@@ -38,7 +38,6 @@
     "test:ts": "./node_modules/.bin/_mocha --require babel-core/register test/ts.js",
     "test:utils": "./node_modules/.bin/_mocha --require babel-core/register test/utils.js",
     "test": "./node_modules/.bin/_mocha --reporter min --require babel-core/register",
-    "build:docs": "python docs/src/parser.py",
     "docs": "node ./docs/index.js",
     "build": "npm run build:docs && ./node_modules/.bin/rollup -c",
     "coverage": "cross-env NODE_ENV=test nyc --reporter=text --reporter=html _mocha --recursive --require babel-register --timeout=3000",

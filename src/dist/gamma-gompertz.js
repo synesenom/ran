@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; b, s, \beta) = \frac{b s e^{b x} \beta^s}{(\beta - 1 + e^{b x})^{s + 1}},$$
  *
- * with \(b, s, \beta > 0\). Support: \(x \ge 0\).
+ * with $b, s, \beta > 0$. Support: $x \ge 0$.
  *
  * @class GammaGompertz
  * @memberof ran.dist

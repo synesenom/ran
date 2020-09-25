@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \mu, b) = \frac{1}{2b}e^{-\frac{|x - \mu|}{b}},$$
  *
- * where \(\mu \in \mathbb{R}\) and \(b > 0\). Support: \(x \in \mathbb{R}\).
+ * where $\mu \in \mathbb{R}$ and $b > 0$. Support: $x \in \mathbb{R}$.
  *
  * @class Laplace
  * @memberof ran.dist

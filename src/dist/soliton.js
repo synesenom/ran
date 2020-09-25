@@ -4,9 +4,9 @@ import Distribution from './_distribution'
 /**
  * Generator for the (ideal) [soliton distribution]{@link https://en.wikipedia.org/wiki/Soliton_distribution}:
  *
- * $$f(k; N) = \begin{cases}\frac{1}{N} &\quad\text{if $k = 1$},\\\frac{1}{k (1 - k)} &\quad\text{otherwise}\\\end{cases},$$
+ * $$f(k; N) = \begin{cases}\frac{1}{N} &\quad\text{if $k = 1$},\\\\ \frac{1}{k (1 - k)} &\quad\text{otherwise}\\\\ \end{cases},$$
  *
- * with \(N \in \mathbb{N}^+\). Support: \(k \in \{1, 2, ..., N\}\).
+ * with $N \in \mathbb{N}^+$. Support: $k \in \{1, 2, ..., N\}$.
  *
  * @class Soliton
  * @memberof ran.dist

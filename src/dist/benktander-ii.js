@@ -6,7 +6,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; a, b) = e^{\frac{a}{b}(1 - x^b)} x^{b-2} (ax^b - b + 1),$$
  *
- * with \(a > 0\) and \(b \in (0, 1]\). Support: \(x \in [1, \infty)\).
+ * with $a > 0$ and $b \in (0, 1]$. Support: $x \in [1, \infty)$.
  *
  * @class BenktanderII
  * @memberof ran.dist

@@ -5,7 +5,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; p, \beta) = -\frac{1}{\ln p} \frac{\beta (1 - p) e^{-\beta x}}{1 - (1 - p) e^{-\beta x}},$$
  *
- * with \(p \in (0, 1)\) and \(\beta > 0\). Support: \(x \ge 0\).
+ * with $p \in (0, 1)$ and $\beta > 0$. Support: $x \ge 0$.
  *
  * @class ExponentialLogarithmic
  * @memberof ran.dist

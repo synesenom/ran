@@ -3,9 +3,9 @@ import Distribution from './_distribution'
 /**
  * Generator for the [reciprocal distribution]{@link https://en.wikipedia.org/wiki/Reciprocal_distribution}:
  *
- * $$f(x; a, b) = \frac{1}{x [\ln b - \ln a]},$$
+ * $$f(x; a, b) = \frac{1}{x \[\ln b - \ln a\]},$$
  *
- * with \(a, b > 0\) and \(a < b\). Support: \(x \in [a, b]\).
+ * with $a, b > 0$ and $a < b$. Support: $x \in \[a, b\]$.
  *
  * @class Reciprocal
  * @memberof ran.dist

@@ -2,11 +2,11 @@ import Distribution from './_distribution'
 import Chi2 from './chi2'
 
 /**
- * Generator for the [\(\chi\) distribution]{@link https://en.wikipedia.org/wiki/Chi_distribution}:
+ * Generator for the [$\chi$ distribution]{@link https://en.wikipedia.org/wiki/Chi_distribution}:
  *
  * $$f(x; k) = \frac{1}{2^{k/2 - 1} \Gamma(k/2)} x^{k - 1} e^{-x^2/2},$$
  *
- * where \(k \in \mathbb{N}^+\). Support: \(x > 0\).
+ * where $k \in \mathbb{N}^+$. Support: $x > 0$.
  *
  * @class Chi
  * @memberof ran.dist

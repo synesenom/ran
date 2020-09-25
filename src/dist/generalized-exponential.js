@@ -6,7 +6,7 @@ import { lambertW0 } from '../special/lambert-w'
  *
  * $$f(x; a, b, c) = \big(a + b (1 - e^{-c x})\big) e^{-(a + b)x + \frac{b}{c} (1 - e^{-c x})},$$
  *
- * where \(a, b, c > 0\). Support> \(x \ge 0\).
+ * where $a, b, c > 0$. Support> $x \ge 0$.
  *
  * @class GeneralizedExponential
  * @memberof ran.dist
