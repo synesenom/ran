@@ -1,0 +1,16 @@
+// Links.
+@import "colors";
+
+a {
+  &, &:visited {
+    text-decoration: none;
+    color: royalblue;
+    border-bottom: 3px solid transparent;
+    transition: border-bottom .2s;
+  }
+
+  &:hover {
+    border-bottom: 3px solid royalblue;
+    transition: border-bottom .2s;
+  }
+}

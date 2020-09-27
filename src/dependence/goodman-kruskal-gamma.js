@@ -11,7 +11,7 @@ import discordant from '../utils/discordant'
  * @param {number[]} y Second array of values.
  * @returns {(number|undefined)} The Goodman-Kruskal gamma if none of the arrays are empty and they have the same
  * length, undefined otherwise.
- * TODO @example
+ * @todo example
  */
 export default function (x, y) {
   if (x.length === 0 || y.length === 0 || x.length !== y.length) {

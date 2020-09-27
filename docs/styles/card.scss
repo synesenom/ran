@@ -1,0 +1,49 @@
+// Card: a single API entry.
+@import "colors";
+
+
+.card {
+  margin: 0 30px 120px 30px;
+
+  .title {
+    font-family: 'Courier', monospace;
+    font-size: 1.1em;
+    padding: 20px 25px;
+    background-color: $colorCardTitle;
+    border-left: 4px solid royalblue;
+    overflow-x: scroll;
+
+    &::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+  }
+
+  .desc {
+    margin: 10px 0 20px 0;
+  }
+
+  .returns {
+    margin-top: 10px;
+    display: inline-block;
+  }
+
+  .return-type {
+    width: 150px;
+    float: left
+  }
+
+  .return-desc {
+    width: calc(100% - 150px);
+    float: right;
+    padding-top: 3px;
+
+    ul li {
+      margin-top: 10px;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+  }
+}

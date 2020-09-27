@@ -1,0 +1,20 @@
+// Scrollbar style, works only for webkit.
+@import "colors";
+
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ddd;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: $colorThemeMain;
+}

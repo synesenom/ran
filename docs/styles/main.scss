@@ -1,0 +1,23 @@
+main {
+  position: absolute;
+  width: 100%;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+h1 {
+  display: inline-block;
+  margin: 60px 30px 10px 30px;
+  font-size: 1.5em;
+  font-weight: normal;
+  color: #555;
+}
+
+p {
+  width: calc(100% - 60px);
+  padding: 0 30px;
+  margin: 0;
+}

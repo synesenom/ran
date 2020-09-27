@@ -1,0 +1,17 @@
+// Base style: html, body and general style.
+@import "colors";
+
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  line-height: 1.4em;
+}
+
+::selection {
+  color: $colorFontSelect;
+  background: $colorThemeMain;
+}

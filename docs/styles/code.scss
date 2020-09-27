@@ -1,0 +1,89 @@
+// Code related style.
+@import "colors";
+
+
+pre {
+  &.install {
+    width: calc(100% - 40px);
+    margin: 0 20px;
+
+    code {
+      padding: 20px !important;
+    }
+  }
+}
+
+.hljs {
+  display: block;
+  overflow-x: auto;
+  background: #ebf8ff;
+  color: $colorCodeDefault;
+  padding: 0.5em;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+// Comment, quote.
+.hljs-comment,
+.hljs-quote {
+  color: $colorCodeComment;
+}
+
+// Parameters.
+.hljs-params {
+  // No special color...
+}
+
+// Variables.
+.hljs-variable,
+.hljs-template-variable,
+.hljs-attribute,
+.hljs-tag,
+.hljs-name,
+.hljs-link,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class {
+  color: #d22d72;
+}
+
+// Numbers.
+.hljs-number,
+.hljs-meta,
+.hljs-literal,
+.hljs-subst,
+.hljs-type {
+  color: $colorCodeNumber;
+}
+
+// Strings.
+.hljs-string,
+.hljs-symbol,
+.hljs-regexp,
+.hljs-bullet {
+  color: $colorCodeString;
+}
+
+// Functions.
+.hljs-title,
+.hljs-section {
+  color: $colorCodeFunction;
+}
+
+// Built-ins.
+.hljs-built_in,
+.hljs-builtin-name {
+  color: $colorCodeBuiltIn;
+}
+
+// Syntax keywords.
+.hljs-keyword,
+.hljs-selector-tag {
+  color: $colorCodeKeyword;
+}

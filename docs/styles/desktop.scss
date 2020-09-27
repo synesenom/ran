@@ -1,0 +1,10 @@
+@media screen and (min-width: 800px) {
+  aside {
+    margin-left: 0;
+    width: calc(240px - 2px);
+  }
+
+  main {
+    width: calc(100% - 250px);
+  }
+}

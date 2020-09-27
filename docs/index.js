@@ -1,5 +1,6 @@
 const documentation = require('documentation');
 const pug = require('pug');
+const sass = require('node-sass');
 const fs = require('fs');
 const DescParser = require('./src/desc-parser');
 const ParamParser = require('./src/param-parser');
@@ -32,7 +33,6 @@ function getSortedEntries (entries, priority) {
 function parseEntry (entry) {
   const name = entry.name
   const params = entry.params.map(ParamParser)
-  const desc = DescParser(entry)
 
   return {
     name,
@@ -40,7 +40,7 @@ function parseEntry (entry) {
     path: entry.memberof,
     signature: `${name}(${params.map((d, i) => `${d.optional ? '[' : ''}${i > 0 ? ', ' : ''}${d.name}`)
       .join('')}${params.filter(d => d.optional).map(() => ']').join('')})`,
-    desc,
+    desc: DescParser(entry),
     params: params.length > 0 ? params : undefined,
     returns: (() => {
       let ret = entry.returns[0]
@@ -56,6 +56,12 @@ function parseEntry (entry) {
 
 // TODO Make equations readable by replacing e^{} with exp.
 (async () => {
+  // Compile style.
+  const style = sass.renderSync({
+    file: './docs/styles/index.scss',
+    outputStyle: 'compressed'
+  }).css.toString()
+
   // Start from index.js
   const root = await documentation.build([
     './src/index.js'
@@ -98,6 +104,7 @@ function parseEntry (entry) {
     name: 'ranjs',
     menu,
     searchList: JSON.stringify(searchList),
-    api
+    api,
+    style
   }))
 })()

@@ -1,0 +1,134 @@
+// Menu (aside).
+@import "dimensions";
+@import "colors";
+@import "mixins";
+
+
+input#menu {
+  display: none;
+
+  &:checked {
+    ~ aside {
+      margin-left: 0;
+      transition: margin-left .5s;
+    }
+
+    ~ .menu-overlay {
+      opacity: 1;
+      pointer-events: all;
+      transition: opacity .5s;
+    }
+  }
+}
+
+label.menu-button {
+  font-size: 1.5em;
+  position: absolute;
+  left: 15px;
+  top: 15px;
+  z-index: 99;
+}
+
+.menu-overlay {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: opacity .5s;
+  z-index: 9;
+  pointer-events: none;
+}
+
+aside {
+  position: absolute;
+  width: $dimAsideWith;
+  top: 0;
+  bottom: 0;
+  overflow-y: scroll;
+  box-shadow: 0 0 20px #888;
+  margin-left: calc(-#{$dimAsideWith} - 50px);
+  background: #fff;
+  z-index: 99;
+  transition: margin-left 1s;
+
+  // Search bar.
+  .search-bar {
+    width: calc(100% - 30px);
+    height: 30px;
+    margin: 15px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid $colorThemeMain;
+
+    input {
+      width: calc(100% - 10px);
+      height: 100%;
+      margin-left: 10px;
+      background: none;
+      border: none;
+      outline: none;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1em;
+      -webkit-appearance: none;
+      border-radius: 0;
+    }
+  }
+
+  // Modules.
+  .sections {
+    @include prefix(user-select, none, webkit moz ms);
+    list-style: none;
+    width: calc(100% - 30px);
+    margin: 0 15px;
+    padding: 0;
+
+    label {
+      display: block;
+      cursor: pointer;
+      margin-bottom: 10px;
+      font-size: 1.1em;
+
+      &:hover {
+        color: $colorThemeMain;
+      }
+    }
+
+    > li {
+      margin-bottom: 20px;
+    }
+
+    input {
+      display: none;
+
+      &:checked + .methods {
+        display: none;
+      }
+    }
+
+    .methods {
+      display: block;
+      list-style: none;
+      padding: 0;
+      border-left: 1px solid #ddd;
+
+      a {
+        &, &:visited {
+          display: block;
+          text-decoration: none;
+          color: #bbb;
+          font-family: 'Courier', monospace;
+          font-size: 0.8em;
+          padding: 4px 8px;
+          border: none;
+        }
+
+        &:hover {
+          background-color: #f5f5f5;
+          color: $colorThemeMain;
+        }
+      }
+    }
+  }
+}

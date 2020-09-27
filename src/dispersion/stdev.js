@@ -18,7 +18,6 @@ import variance from './variance'
  * ran.dispersion.stdev([1, 2, 3, 4, 5])
  * // => 1.5811388300841898
  */
-// TODO Example.
 export default function (values) {
   // TODO Check for undefined in unit test.
   const v = variance(values)
