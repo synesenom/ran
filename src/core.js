@@ -134,7 +134,7 @@ export function char (string, n) {
 }
 
 /**
- * Shuffles an array in-place using the Fisher--Yates algorithm.
+ * Shuffles an array in-place using the Fisher‒Yates algorithm.
  *
  * @method shuffle
  * @memberof ran.core

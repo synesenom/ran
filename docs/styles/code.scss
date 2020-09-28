@@ -4,13 +4,24 @@
 
 pre {
   &.install {
-    width: calc(100% - 40px);
-    margin: 0 20px;
+    margin: 0 30px;
 
     code {
-      padding: 20px !important;
+      background-color: #f5f5f5;
     }
   }
+
+  code {
+    padding: 30px !important;
+    line-height: 1.5em;
+  }
+}
+
+code.type {
+  background-color: #f5f5f5;
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-size: 0.9em;
 }
 
 .hljs {
@@ -18,7 +29,6 @@ pre {
   overflow-x: auto;
   background: #ebf8ff;
   color: $colorCodeDefault;
-  padding: 0.5em;
 }
 
 .hljs-emphasis {
@@ -50,7 +60,7 @@ pre {
 .hljs-name,
 .hljs-selector-id,
 .hljs-selector-class {
-  color: #d22d72;
+  color: $colorCodeDefault;
 }
 
 // Numbers.
@@ -84,6 +94,7 @@ pre {
 
 // Syntax keywords.
 .hljs-keyword,
+.hljs-attr,
 .hljs-selector-tag {
   color: $colorCodeKeyword;
 }

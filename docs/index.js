@@ -2,9 +2,17 @@ const documentation = require('documentation');
 const pug = require('pug');
 const sass = require('node-sass');
 const fs = require('fs');
+const hljs = require('highlight.js/lib/core');
+const { mjpage } = require('mathjax-node-page');
 const DescParser = require('./src/desc-parser');
 const ParamParser = require('./src/param-parser');
 const TypeParser = require('./src/type-parser');
+
+
+// Register highlight languages.
+hljs.registerLanguage('bash', require('highlight.js/lib/languages/bash'))
+hljs.registerLanguage('xml', require('highlight.js/lib/languages/xml'))
+hljs.registerLanguage('javascript', require('highlight.js/lib/languages/javascript'))
 
 
 // Prioritized entries.
@@ -49,7 +57,9 @@ function parseEntry (entry) {
         type: TypeParser(ret.type)
       }
     })(),
-    examples: entry.examples.length > 0 ? entry.examples[0].description : undefined
+    examples: entry.examples.length > 0
+      ? hljs.highlight('javascript', entry.examples[0].description).value
+      : undefined
   }
 }
 
@@ -62,13 +72,14 @@ function parseEntry (entry) {
     outputStyle: 'compressed'
   }).css.toString()
 
-  // Start from index.js
+  // Parse documentation strings starting from index.js.
   const root = await documentation.build([
     './src/index.js'
   ], {})
 
-  // Build documentation.
-  const docs = root[0].members.static.sort((a, b) => a.name.localeCompare(b.name))
+  // Build API documentation.
+  const docs = root[0].members.static
+    .sort((a, b) => a.name.localeCompare(b.name))
     .map(m => ({
       name: m.name,
       members: getSortedEntries(m.members.static, PRIORITY[m.name])
@@ -99,12 +110,31 @@ function parseEntry (entry) {
 
   // Compile index template.
   const template = pug.compileFile(`./docs/templates/index.pug`)
-  fs.writeFileSync('./docs/index.html', template({
+  let page = template({
+    install: {
+      browser: hljs.highlight('xml', `<script type="text/javascript" src="ran.min.js"></script>`)
+        .value,
+      node: hljs.highlight('bash', 'npm install --save ranjs').value
+    },
+    demo: 'https://beta.observablehq.com/@synesenom/ranjs-demo',
     gitHubBanner: fs.readFileSync('./docs/templates/github-banner.html', {encoding: 'utf-8'}),
     name: 'ranjs',
     menu,
     searchList: JSON.stringify(searchList),
     api,
     style
-  }))
+  })
+
+  // Pre-render math.
+  mjpage(page, {
+    format: ['TeX'],
+    singleDollars: true,
+    displayErrors: true
+  }, {
+    useGlobalCache: true,
+    svg: true
+  }, result => {
+    // Write final page.
+    fs.writeFileSync('./docs/index.html', result)
+  })
 })()

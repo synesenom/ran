@@ -5,19 +5,6 @@ html(lang="en")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         link(href="https://fonts.googleapis.com/css?family=Montserrat:200,400,700", rel="stylesheet")
         link(rel="stylesheet", type="text/css", href="styles/style.css")
-        script(src="highlight.min.js")
-        script(src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_SVG")
-        script.
-            hljs.initHighlightingOnLoad();
-            MathJax.Hub.Config({
-              svg: {
-                fontCache: 'global'
-              },
-              tex2jax: {
-                inlineMath: [['$', '$']],
-                processEscapes: true
-              }
-            });
         style(type="text/css")
             | !{style}
         title #{name}
@@ -44,15 +31,15 @@ html(lang="en")
 
             h1 install in node
             pre.install
-                code.bash npm install --save ranjs
+                code.hljs !{install.node}
 
             h1 use in browser
             pre.install
-                code.html &lt;script type="text/javascript" src="ran.min.js"&gt;&lt;/script&gt;
+                code.hljs !{install.browser}
 
             h1 demo
             p
-                a(href="https://beta.observablehq.com/@synesenom/ranjs-demo") https://beta.observablehq.com/@synesenom/ranjs-demo
+                a(href="" + demo) #{demo}
 
             h1 documentation
             each entry in api
@@ -73,19 +60,19 @@ html(lang="en")
                                         td.param-name #{param.name}
                                         td.param-type
                                             each type in param.type
-                                                code #{type}
+                                                code.type #{type}
                                         td.param-desc !{param.desc}
                     if entry.returns
                         h3 Returns
                         .returns
                             .return-type
                                 each type in entry.returns.type
-                                    code #{type}
+                                    code.type #{type}
                             .return-desc !{entry.returns.desc}
                     if entry.examples
                         h3 Examples
                         pre
-                            code.example.hljs.js.javascript #{entry.examples}
+                            code.example.hljs !{entry.examples}
 
             script.
                 // List of entries.
