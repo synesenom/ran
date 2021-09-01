@@ -1,4 +1,4 @@
-import { oddsRatio } from '../dependence'
+import oddsRatio from '../dependence/odds-ratio'
 
 /**
  * Calculates [Yule's Q]{@link https://en.wikipedia.org/wiki/Goodman_and_Kruskal%27s_gamma#Yule's_Q} for the joint

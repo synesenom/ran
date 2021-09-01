@@ -1,4 +1,4 @@
-import { oddsRatio } from '../dependence'
+import oddsRatio from '../dependence/odds-ratio'
 
 /**
  * Calculates [Yule's Y]{@link https://en.wikipedia.org/wiki/Coefficient_of_colligation} for the joint probabilities of
