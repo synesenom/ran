@@ -109,7 +109,7 @@ function parseEntry (entry) {
   const api = docs.map(d => d.members).flat()
 
   // Compile index template.
-  const template = pug.compileFile(`./docs/templates/index.pug`)
+  const template = pug.compileFile('./docs/templates/index.pug')
   let page = template({
     install: {
       browser: hljs.highlight('xml', `<script type="text/javascript" src="ran.min.js"></script>`)

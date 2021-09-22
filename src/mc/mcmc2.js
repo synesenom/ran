@@ -1,4 +1,4 @@
-//import AutoCorrelation from './auto-correlation'
+// import AutoCorrelation from './auto-correlation'
 
 export default class {
   constructor (logDensity, config = {}, initialState = {}) {
@@ -25,7 +25,7 @@ export default class {
     this.internal = initialState.internal || {}
 
     // Acceptance
-    //this.acceptance = new AcceptanceRate(1000)
+    // this.acceptance = new AcceptanceRate(1000)
   }
 
   _iter () {
@@ -47,18 +47,18 @@ export default class {
   warmUp (options, onProgress) {
     const numBatches = options.numBatches || 100
     const iterPerBatch = options.iterPerBatch || 1e4
-    //const autoCorrelation = new AutoCorrelation(iterPerBatch, 100)
+    // const autoCorrelation = new AutoCorrelation(iterPerBatch, 100)
 
     // Run batches
     for (let batch = 0; batch < numBatches; batch++) {
-      //autoCorrelation.reset()
+      // autoCorrelation.reset()
       for (let iteration = 0; iteration < iterPerBatch; iteration++) {
         // Get new state
         const i = this._iter(this.x, true)
         this.x = i.x
 
         // Update accumulators
-        //autoCorrelation.update(i.x)
+        // autoCorrelation.update(i.x)
         this.acceptance.update(i.accepted)
 
         // Adjust internal parameters
@@ -66,7 +66,7 @@ export default class {
       }
 
       // Compute auto-correlation
-      /*const z = autoCorrelation.compute().reduce((first, d) => {
+      /* const z = autoCorrelation.compute().reduce((first, d) => {
         for (let i = 0; i < d.length - 1; i++) {
           if (Math.abs(d[i]) <= 0.05) {
             return Math.max(first, i)
