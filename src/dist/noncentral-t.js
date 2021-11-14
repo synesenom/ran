@@ -51,7 +51,7 @@ class NoncentralT extends Distribution {
    * Source: http://www.ucs.louisiana.edu/~kxk4695/CSDA-03.pdf
    *
    * @method fnm
-   * @methodOf ran.dist.NoncentralT
+   * @memberof ran.dist.NoncentralT
    * @param {number} nu Degrees of freedom.
    * @param {number} mu Non-centrality parameter.
    * @param {number} x Value to evaluate distribution function at.

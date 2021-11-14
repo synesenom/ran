@@ -46,7 +46,7 @@ function parseEntry (entry) {
     name,
     index: `${entry.memberof}.${name}`.slice(4).replace('.', '-'),
     path: entry.memberof,
-    signature: `${name}(${params.map((d, i) => `${d.optional ? '[' : ''}${i > 0 ? ', ' : ''}${d.name}`)
+    signature: `${entry.memberof}.${name}(${params.map((d, i) => `${d.optional ? '[' : ''}${i > 0 ? ', ' : ''}${d.name}`)
       .join('')}${params.filter(d => d.optional).map(() => ']').join('')})`,
     desc: DescParser(entry),
     params: params.length > 0 ? params : undefined,

@@ -11,7 +11,7 @@ const r = new Xoshiro128p()
 
 /**
  * Sets the seed for the underlying pseudo random number generator used by the core generators. Under the hood, ranjs
- * implements the [xoshiro128+ algorithm]{@link http://vigna.di.unimi.it/ftp/papers/ScrambledLinear.pdf}.
+ * implements the [xoshiro128+]{@link https://arxiv.org/abs/1805.01407} algorithm as described in Blackman and Vigna: Scrambled Linear Pseudorandom Number Generators (2019).
  *
  * @method seed
  * @memberof ran.core
@@ -134,7 +134,7 @@ export function char (string, n) {
 }
 
 /**
- * Shuffles an array in-place using the Fisher‒Yates algorithm.
+ * Shuffles an array in-place using the [Fisher‒Yates algorithm]{@link https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle}.
  *
  * @method shuffle
  * @memberof ran.core

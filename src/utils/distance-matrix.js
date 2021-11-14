@@ -5,7 +5,7 @@ import mean from '../location/mean'
  * Calculates the [distance matrix for the distance covariance]{@link https://en.wikipedia.org/wiki/Distance_correlation#Distance_covariance}.
  *
  * @method distanceMatrix
- * @methodOf ran.dependence
+ * @memberof ran.dependence
  * @param {number[]} values Array of values to calculate distance matrix for.
  * @return {ran.la.Matrix} The distance matrix.
  * @private

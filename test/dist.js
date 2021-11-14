@@ -186,7 +186,7 @@ const UnitTests = {
   },
 
   test (tc) {
-    // Test cases
+    // Test cases.
     let cases = [{
       name: 'default parameters',
       gen: () => new dist[tc.name]()
@@ -195,6 +195,7 @@ const UnitTests = {
       gen: () => new dist[tc.name](...c.params())
     })))
 
+    // Go through text cases.
     cases.forEach(c => {
       describe(c.name, () => {
         it('should pass for own test', () => {
@@ -340,16 +341,18 @@ describe('dist', () => {
   })
 
   // Ordinary distributions.
-  testCases.forEach(tc  => {
-    describe(tc.name, () => {
-      describe('constructor', () => UnitTests.constructor(tc))
-      describe('.seed()', () => UnitTests.seed(tc))
-      describe('.load(), .save()', () => UnitTests.loadAndSave(tc))
-      describe('.pdf(), .cdf(), .q()', () => UnitTests.pdf(tc))
-      describe('.sample()', () => UnitTests.sample(tc))
-      describe('.test()', () => UnitTests.test(tc))
+  testCases
+    //.filter(tc => [].indexOf(tc.name) > -1)
+    .forEach(tc  => {
+      describe(tc.name, () => {
+        describe('constructor', () => UnitTests.constructor(tc))
+        describe('.seed()', () => UnitTests.seed(tc))
+        describe('.load(), .save()', () => UnitTests.loadAndSave(tc))
+        describe('.pdf(), .cdf(), .q()', () => UnitTests.pdf(tc))
+        describe('.sample()', () => UnitTests.sample(tc))
+        describe('.test()', () => UnitTests.test(tc))
+      })
     })
-  })
 
   // Degenerate distribution
   describe('Degenerate', () => {

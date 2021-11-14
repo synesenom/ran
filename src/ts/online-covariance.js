@@ -24,7 +24,7 @@ export default class {
    * Updates the covariance matrix with new observations.
    *
    * @method update
-   * @methodOf ran.ts.OnlineCovariance
+   * @memberof ran.ts.OnlineCovariance
    * @param {number[]} x Array of numbers representing the new observations.
    */
   update (x) {
@@ -41,7 +41,7 @@ export default class {
    * Computes the current value of the covariance matrix.
    *
    * @method compute
-   * @methodOf ran.ts.OnlineCovariance
+   * @memberof ran.ts.OnlineCovariance
    * @returns {(ran.la.Matrix | undefined)} The current covariance matrix if there was any update already, undefined otherwise.
    */
   compute () {

@@ -74,7 +74,7 @@ export default class {
    * Returns a sample from the alias table.
    *
    * @method sample
-   * @methodOf ran.dist.AliasTable
+   * @memberof ran.dist.AliasTable
    * @param {ran.core.Xoshiro128p} r Pseudo random number generator to use.
    * @returns {number} The random sample.
    */
@@ -91,7 +91,7 @@ export default class {
    * Returns the i-th weight of the alias table.
    *
    * @method weight
-   * @methodOf ran.dist.AliasTable
+   * @memberof ran.dist.AliasTable
    * @param {number} i Index of the weight to return.
    * @returns {number} The i-th weight.
    */

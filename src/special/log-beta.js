@@ -4,7 +4,7 @@ import logGamma from './log-gamma'
  * Logarithm of the beta function.
  *
  * @method logBeta
- * @methodOf ran.special
+ * @memberof ran.special
  * @param {number} x First argument.
  * @param {number} y Second argument.
  * @returns {number} The logarithm of the beta function.

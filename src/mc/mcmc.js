@@ -279,6 +279,7 @@ export default class {
             return Math.max(first, i)
           }
         }
+        return first
       }, 0)
       // Change sampling rate if zero point is different
       if (z > this.samplingRate) {

@@ -48,7 +48,7 @@ export function erfc (x) {
  * Computes the inverse error function.
  *
  * @method erfinv
- * @methodOf ran.special
+ * @memberof ran.special
  * @param {number} x Value to evaluate the inverse error function at.
  * @return {number} The inverse error function value.
  * @private

@@ -32,7 +32,7 @@ export default class extends Distribution {
    * Computes the probability mass value for a specified index.
    *
    * @method _pk
-   * @methodOf ran.dist.PreComputed
+   * @memberof ran.dist.PreComputed
    * @param {number} k Index to computed probability for.
    * @returns {number} The probability for the specified index.
    * @private
@@ -45,7 +45,7 @@ export default class extends Distribution {
    * Advances look-up tables for PDF and CDF up to a specific index.
    *
    * @method _advance
-   * @methodOf ran.dist.PreComputed
+   * @memberof ran.dist.PreComputed
    * @param {number} x The index to advance look-up tables to.
    * @private
    */
@@ -68,7 +68,7 @@ export default class extends Distribution {
    * Adds a new alias table.
    *
    * @method _addAliasTable
-   * @methodOf ran.dist.PreComputed
+   * @memberof ran.dist.PreComputed
    * @private
    */
   _addAliasTable () {

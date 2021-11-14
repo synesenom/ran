@@ -54,7 +54,7 @@ export default class extends Distribution {
    * Advances the hypergeometric function forward in its first argument.
    *
    * @method _f11Forward
-   * @methodOf ran.dist.DoublyNoncentralT
+   * @memberof ran.dist.DoublyNoncentralT
    * @param {number} f1 Function value for one iteration before.
    * @param {number} f2 Function value for two iterations before.
    * @param {number} a First argument.
@@ -71,7 +71,7 @@ export default class extends Distribution {
    * Advances the hypergeometric function backward in its first argument.
    *
    * @method _f11Backward
-   * @methodOf ran.dist.DoublyNoncentralT
+   * @memberof ran.dist.DoublyNoncentralT
    * @param {number} f1 Function value for one iteration ahead.
    * @param {number} f2 Function value for two iterations ahead.
    * @param {number} a First argument.
@@ -88,7 +88,7 @@ export default class extends Distribution {
    * Logarithm of the term in the probability density function.
    *
    * @method _logA
-   * @methodOf ran.dist.DoublyNoncentralT
+   * @memberof ran.dist.DoublyNoncentralT
    * @param {number} x Value to evaluate density at.
    * @param {number} j Index of the term to evaluate.
    * @returns {number} The logarithm of the term.

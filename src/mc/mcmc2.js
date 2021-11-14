@@ -73,7 +73,6 @@ export default class {
           }
         }
       }, 0)
-       */
 
       // Change sampling rate based on auto-correlation
       if (z > this.samplingRate) {
@@ -81,6 +80,7 @@ export default class {
       } else if (z < this.samplingRate && this.samplingRate > 1) {
         this.samplingRate--
       }
+       */
 
       // Call optional onProgress
       onProgress && onProgress(batch)

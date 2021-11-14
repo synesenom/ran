@@ -5,7 +5,7 @@ import { EPS, MAX_ITER } from '../special/_core'
  * Source: https://en.wikipedia.org/wiki/Brent%27s_method
  *
  * @method brent
- * @methodOf ran.algorithms
+ * @memberof ran.algorithms
  * @param {Function} f Function to find root for. Must accept a single variable.
  * @param {number} x1 Lower boundary of the bracket.
  * @param {number} x2 Upper boundary of the bracket.

@@ -310,11 +310,11 @@ export default [{
   ],
   foreign: {
     generator: 'Bates',
-    params: s => () => [3, Math.min(...s), Math.max(...s)]
+    params: s => [3, Math.min(...s), Math.max(...s)]
   },
   cases: [{
     name: 'small n',
-    params: () => [Array.from({length: int(0, 1)}, Math.random)]
+    params: () => [Array.from({length: 2}, Math.random)]
   }, {
     name: 'moderate n',
     params: () => [Array.from({ length: int(10, 100) }, Math.random)]
@@ -1616,11 +1616,8 @@ export default [{
   name: 'TukeyLambda',
   invalidParams: [],
   foreign: {
-    generator: 'Poisson',
-    params: s => {
-      const s2 = s.filter(d => d >= 0)
-      return s2.reduce((sum, d) => d + sum, 0) / s2.length
-    }
+    generator: 'Bates',
+    params: s => [3, Math.min(...s), Math.max(...s)]
   },
   cases: [{
     name: 'zero shape parameter',

@@ -9,7 +9,7 @@ const SCALE = 1.618
  * shrinking with a factor of 1.618 in each step.
  *
  * @method bracket
- * @methodOf ran.algorithms
+ * @memberof ran.algorithms
  * @param {Function} f Function to find root for. Must accept a single variable.
  * @param {number} a0 Initial lower boundary of the bracket.
  * @param {number} b0 Initial upper boundary of the bracket.

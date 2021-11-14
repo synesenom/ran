@@ -191,10 +191,10 @@ class Distribution {
    * @ignore
    */
   _qEstimateRoot (p) {
-    // Guess range
+    // Guess range.
     const delta = ((Number.isFinite(this.s[1].value) ? this.s[1].value : 10) - (Number.isFinite(this.s[0].value) ? this.s[0].value : -10)) / 2
 
-    // Set initial guess for lower boundary
+    // Set initial guess for lower boundary.
     let a0 = Math.random()
     if (this.s[0].closed) {
       a0 = this.s[0].value + Number.EPSILON
@@ -202,7 +202,7 @@ class Distribution {
       a0 = this.s[0].value + delta * Math.random()
     }
 
-    // Set initial guess for upper boundary
+    // Set initial guess for upper boundary.
     let b0 = a0 + Math.random()
     if (this.s[1].closed) {
       b0 = this.s[1].value - Number.EPSILON
@@ -210,10 +210,10 @@ class Distribution {
       b0 = this.s[1].value - delta * Math.random()
     }
 
-    // Find brackets
+    // Find brackets.
     const bounds = bracket(t => this.cdf(t) - p, a0, b0, this.s)
 
-    // Perform root-finding using Brent's method
+    // Perform root-finding using Brent's method.
     if (typeof bounds !== 'undefined') {
       return Math.min(Math.max(
         brent(t => this.cdf(t) - p, ...bounds),
@@ -252,7 +252,7 @@ class Distribution {
    * ([xoshiro128+]{@link http://vigna.di.unimi.it/ftp/papers/ScrambledLinear.pdf}) that is used in the core functions.
    *
    * @method seed
-   * @methodOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {(number|string)} value The value of the seed, either a number or a string (for the ease of tracking seeds).
    * @returns {ran.dist.Distribution} Reference to the current distribution.
    * @example
@@ -276,7 +276,7 @@ class Distribution {
    * to set up another generator of the same distribution (parameters, state of the pseudo random generator, etc).
    *
    * @method save
-   * @methodOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @return {Object} Object representing the inner state of the current generator.
    * @example
    *
@@ -295,7 +295,7 @@ class Distribution {
     return {
       prngState: this.r.save(),
       params: this.p,
-      consts: this.c,
+      constants: this.c,
       support: this.s
     }
   }
@@ -304,7 +304,7 @@ class Distribution {
    * Loads a new state for the generator.
    *
    * @method load
-   * @methodOf ran.dist.Distribution
+   * @memberof ran.dist.Distribution
    * @param {Object} state The state to load.
    * @returns {ran.dist.Distribution} Reference to the current distribution.
    * @example
@@ -325,7 +325,7 @@ class Distribution {
     this.p = state.params
 
     // Set helper constants
-    this.c = state.consts
+    this.c = state.constants
 
     // Set support
     this.s = state.support

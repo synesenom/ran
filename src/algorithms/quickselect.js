@@ -9,7 +9,7 @@ const swap = (arr, i, j) => {
  * Based on this C code: http://finmath.stanford.edu/~ryantibs/median/quickselect.c
  *
  * @method quickselect
- * @methodOf ran.algorithms
+ * @memberof ran.algorithms
  * @param {number[]} values Array of values to select from.
  * @param {number} k The index of the item to select.
  * @return {number} The selected item.

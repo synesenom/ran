@@ -25,19 +25,10 @@ export default class extends Distribution {
     ])
 
     // Set support
-    this.s = xi === 0 ? [{
-      value: -Infinity,
-      closed: false
-    }, {
-      value: Infinity,
-      closed: false
-    }] : [{
-      value: xi > 0 ? mu - sigma / xi : -Infinity,
-      closed: xi > 0
-    }, {
-      value: xi < 0 ? mu - sigma / xi : Infinity,
-      closed: xi < 0
-    }]
+    this.s = xi === 0
+      ? [{ value: -Infinity, closed: false }, { value: Infinity, closed: false }]
+      : [{ value: xi > 0 ? mu - sigma / xi : -Infinity, closed: xi > 0 },
+          { value: xi < 0 ? mu - sigma / xi : Infinity, closed: xi < 0 }]
   }
 
   _generator () {

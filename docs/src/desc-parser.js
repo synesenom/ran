@@ -1,9 +1,26 @@
+function extractLinkText (node) {
+  const re = /\[(.*?)\]/;
+  return re.exec(node.value)[1]
+}
+
+function removeLinkText (node, text) {
+  return node.value.replace(`[${text}]`, '')
+    .replace('{@link', '')
+}
+
+function extractLinkURL (node) {
+  return node.url.replace('}', '')
+}
+
 const assembleLinks = children => {
   for (let i = 0; i < children.length; i++) {
-    if (children[i].type === 'linkReference') {
-      children[i + 1].value = `<a href='${children[i + 1].url}'>${children[i].children[0].value}</a>`
-      delete children[i].children
-      delete children[i + 1].children
+    if (children[i + 1] && children[i + 1].type === 'link') {
+      const linkText = extractLinkText(children[i])
+      const context = removeLinkText(children[i], linkText)
+      const linkUrl = extractLinkURL(children[i + 1])
+      children[i].value = `${context} <a href='${linkUrl}'>${linkText}</a>`
+      delete children[i + 1]
+      i += 2
     }
   }
   return children

@@ -240,9 +240,6 @@ function _t (h, a, ah) {
 
   // Run corresponding algorithm
   switch (methods[code]) {
-    case 1:
-    default:
-      return _t1(h, a, order)
     case 2:
       return _t2(h, a, ah, order)
     case 3:
@@ -253,6 +250,9 @@ function _t (h, a, ah) {
       return _t5(h, a, order)
     case 6:
       return _t6(h, a)
+    case 1:
+    default:
+      return _t1(h, a, order)
   }
 }
 
