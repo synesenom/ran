@@ -4,12 +4,12 @@ import Distribution from './_distribution'
 import PreComputed from './_pre-computed'
 
 /**
- * Generator for the [generalized Hermite distribution]{@link https://en.wikipedia.org/wiki/Hermite_distribution}:
+ * Generator for the [generalized Hermite distribution]{@link https://journal.r-project.org/archive/2015/RJ-2015-035/RJ-2015-035.pdf}:
  *
  * $$f(k; a_1, a_m, m) = p_0 \frac{\mu^k (m - d)^k}{(m - 1)^k} \sum\_{j = 0}^{\lfloor k / m \rfloor} \frac{(d - 1)^j (m - 1)^{(m - 1)j}}{m^j \mu^{(m - 1)j} (m - d)^{mj} (k - mj)! j!},$$
  *
- * where $p_0 = e^{\mu \big\[\frac{d - 1}{m} - 1\big\]}$, $m\mu = a_1 + m a_m$, $d = \frac{a_1 + m^2 a_m}{a_1 + m a_m}$,
- * $a_1, a_m > 0$ and $m \in \mathbb{N}^+ \ \{1\}$.
+ * where $p_0 = e^{\mu \big\[\frac{d - 1}{m} - 1\big\]}$, $\mu = a_1 + m a_m$, $d = \frac{a_1 + m^2 a_m}{a_1 + m a_m}$,
+ * $a_1, a_m > 0$ and $m \in \mathbb{N}^+ \setminus \{ 1 \}$.
  * Support: $k \in \mathbb{N}$. It is the distribution of $X_1 + m X_m$ where $X_1, X_2$ are Poisson variates with
  * parameters $a_1, a_m$ respectively.
  *

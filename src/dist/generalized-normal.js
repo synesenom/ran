@@ -2,7 +2,7 @@ import GeneralizedGamma from './generalized-gamma'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [generalized normal distribution]{@link }:
+ * Generator for the [generalized normal distribution]{@link https://en.wikipedia.org/wiki/Generalized_normal_distribution}:
  *
  * $$f(x; \mu, \alpha, \beta) = \frac{\beta}{2 \alpha \Gamma\big(\frac{1}{\beta}\big)} e^{-\big(\frac{|x - \mu|}{\alpha}\big)^\beta},$$
  *

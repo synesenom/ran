@@ -24,6 +24,9 @@ export default function (x, y) {
   const b = distanceMatrix(y)
   const dVarX = Math.sqrt(mean([].concat(...a.hadamard(a).m())))
   const dVarY = Math.sqrt(mean([].concat(...b.hadamard(b).m())))
-  const dCov = Math.sqrt(mean([].concat(...a.hadamard(b).m())))
-  return dVarX * dVarY > 0 ? dCov / Math.sqrt(dVarX * dVarY) : undefined
+  if (dVarX * dVarY > 0) {
+    const dCov = Math.sqrt(mean([].concat(...a.hadamard(b).m())))
+    return dCov / Math.sqrt(dVarX * dVarY)
+  }
+  return undefined
 }

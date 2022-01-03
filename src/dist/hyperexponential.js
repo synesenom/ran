@@ -4,7 +4,7 @@ import Distribution from './_distribution'
 import neumaier from '../algorithms/neumaier'
 
 /**
- * Generator for the [hyperexponential distribution]{@link }:
+ * Generator for the [hyperexponential distribution]{@link https://en.wikipedia.org/wiki/Hyperexponential_distribution}:
  *
  * $$f(x; \{w\}, \{\lambda\}) = \frac{1}{\sum_j w_j} \sum_i w_i \lambda_i e^{-\lambda_i x},$$
  *

@@ -113,7 +113,6 @@ class Matrix {
    *
    */
   f (func) {
-    // TODO Unit test arguments i and j.
     return new Matrix(this._m.map((row, i) => row.map((d, j) => func(d, i, j))))
   }
 

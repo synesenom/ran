@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Laplace distribution]{@link https://en.wikipedia.org/wiki/Laplace_distribution} (also known as [double exponential distribution]{@link https://www.itl.nist.gov/div898/handbook/eda/section3/eda366c.htm}):
+ * Generator for the [Laplace distribution]{@link https://en.wikipedia.org/wiki/Laplace_distribution} (also known as double exponential distribution):
  *
  * $$f(x; \mu, b) = \frac{1}{2b}e^{-\frac{|x - \mu|}{b}},$$
  *

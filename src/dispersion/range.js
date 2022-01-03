@@ -2,7 +2,7 @@ import max from '../shape/max'
 import min from '../shape/min'
 
 /**
- * Calculates the [range]{@link } for a sample of values.
+ * Calculates the [range]{@link https://en.wikipedia.org/wiki/Range_(statistics)} for a sample of values.
  *
  * @method range
  * @memberof ran.dispersion

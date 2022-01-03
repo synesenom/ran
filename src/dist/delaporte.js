@@ -4,7 +4,7 @@ import Distribution from './_distribution'
 import PreComputed from './_pre-computed'
 
 /**
- * Generator for the [Delaporte distribution]{@link }:
+ * Generator for the [Delaporte distribution]{@link https://en.wikipedia.org/wiki/Delaporte_distribution}:
  *
  * $$f(k; \alpha, \beta, \lambda) = \frac{e^{-\lambda}}{\Gamma(\alpha)}\sum_{j = 0}^k \frac{\Gamma(\alpha + j) \beta^j \lambda^{k - j}}{j! (1 + \beta)^{\alpha + j} (k - j)!},$$
  *

@@ -11,6 +11,6 @@ a {
 
   &:hover {
     border-bottom: 3px solid royalblue;
-    transition: border-bottom .2s;
+    transition: border-bottom .2s, padding-bottom .2s;
   }
 }

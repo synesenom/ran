@@ -2,7 +2,7 @@ import { betaIncomplete } from '../special/beta-incomplete'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [log-series distribution]{@link }:
+ * Generator for the [log-series distribution]{@link https://en.wikipedia.org/wiki/Logarithmic_distribution}:
  *
  * $$f(k; p) = \frac{-1}{\ln(1 - p)}\frac{p^k}{k},$$
  *

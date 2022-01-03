@@ -35,14 +35,12 @@ describe('algorithms', () => {
     })
 
     it('should return the specified boundaries if root was not found', () => {
-      repeat(() => {
-        const bracket = algorithms.bracket(
-          t => Math.exp(-t) + 1,
-          0,
-          2
-        )
-        assert(bracket[0] === 0 && bracket[1] === 2)
-      }, LAPS)
+      const bracket = algorithms.bracket(
+        t => Math.exp(-t) + 1,
+        0,
+        2
+      )
+      assert(bracket[0] === 0 && bracket[1] === 2)
     })
   })
 

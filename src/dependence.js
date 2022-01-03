@@ -7,7 +7,6 @@
 export { default as covariance } from './dependence/covariance'
 export { default as dCov } from './dependence/distance-covariance'
 export { default as dCor } from './dependence/distance-correlation'
-export { default as goodmanKruskalGamma } from './dependence/goodman-kruskal-gamma'
 export { default as kendall } from './dependence/kendall'
 export { default as kullbackLeibler } from './dependence/kullback-leibler'
 export { default as oddsRatio } from './dependence/odds-ratio'

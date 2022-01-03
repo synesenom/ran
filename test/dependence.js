@@ -4,7 +4,6 @@ import { repeat, equal } from './test-utils'
 import * as dependence from '../src/dependence'
 
 
-// TODO Go through methods and check input conditions.
 describe('dependence', () => {
   describe('.covariance()', () => {
     it('should return undefined if any of the arrays has fewer than two elements', () => {
@@ -73,8 +72,8 @@ describe('dependence', () => {
 
   describe('.dCor()', () => {
     it('should return undefined if any array is empty', () => {
-      assert(typeof dependence.dCov([], [1, 2, 3]) === 'undefined')
-      assert(typeof dependence.dCov([1, 2, 3], []) === 'undefined')
+      assert(typeof dependence.dCor([], [1, 2, 3]) === 'undefined')
+      assert(typeof dependence.dCor([1, 2, 3], []) === 'undefined')
     })
 
     it('should return the distance correlation of two arrays', () => {
@@ -93,19 +92,6 @@ describe('dependence', () => {
       const dCor = 0.8679753723517001
       assert(equal(dependence.dCor(x, y), dCor))
     })
-  })
-
-  describe('.goodmanKruskalGamma()', () => {
-    it('should return undefined if any array is empty', () => {
-      assert(typeof dependence.goodmanKruskalGamma([], [1, 2, 3]) === 'undefined')
-      assert(typeof dependence.goodmanKruskalGamma([1, 2, 3], []) === 'undefined')
-    })
-
-    it('should return undefined if arrays have different length', () => {
-      assert(typeof dependence.goodmanKruskalGamma([1, 2, 3], [4, 5]) === 'undefined')
-    })
-
-    // TODO Test Goodman-Kruskal gamma.
   })
 
   describe('.kendall()', () => {
@@ -236,7 +222,11 @@ describe('dependence', () => {
     })
 
     it('should return undefined if arrays have different length', () => {
-      assert(typeof dependence.pointBiserial([1, 2, 3], [4, 5]) === 'undefined')
+      assert(typeof dependence.pointBiserial([1, 2, 3], [0, 1]) === 'undefined')
+    })
+
+    it('should return undefined if standard deviation of x is 0', () => {
+      assert(typeof dependence.pointBiserial([1, 1, 1], [0, 0, 1]) === 'undefined')
     })
 
     it('should return the point-biserial correlation of two arrays', () => {
@@ -322,8 +312,8 @@ describe('dependence', () => {
 
   describe('.yuleQ()', () => {
     it('should return undefined if any of p01 and p10 is zero', () => {
-      assert(typeof dependence.yuleY(0.1, 0, 0.3, 0.4) === 'undefined')
-      assert(typeof dependence.yuleY(0.1, 0.2, 0, 0.4) === 'undefined')
+      assert(typeof dependence.yuleQ(0.1, 0, 0.3, 0.4) === 'undefined')
+      assert(typeof dependence.yuleQ(0.1, 0.2, 0, 0.4) === 'undefined')
     })
 
     it(`should return Yule's Q for a contingency table of joint probabilities`, () => {

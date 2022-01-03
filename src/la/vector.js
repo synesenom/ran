@@ -174,6 +174,22 @@ class Vector {
     return this._v.reduce((sum, d, i) => sum + d * v[i], 0)
   }
 
+  /**
+   * Calculates the outer product with another vector.
+   *
+   * @method outer
+   * @memberof ran.la.Vector
+   * @param vec {ran.la.Vector} vec Vector to multiply with (from the right).
+   * @returns {Array[]}
+   * @example
+   *
+   * let v = new ran.la.Vector([1, 2, 3])
+   * let w = new ran.la.Vector([4, 5, 6])
+   * v.outer(w)
+   * // => [[4,   5,  6],
+   *        [8,  10, 12],
+   *        [12, 15, 18]]
+   */
   outer (vec) {
     return this._v.map(u => vec.scale(u).v())
   }

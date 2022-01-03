@@ -359,7 +359,7 @@ class Distribution {
   }
 
   /**
-   * [Probability density function]{@link https://en.wikipedia.org/wiki/Probability_density_function}. In case of discrete distributions, it is the [probability mass function]{@link https://en.wikipedia.org/wiki/Probability_mass_function}.
+   * [Probability density function]{@link https://en.wikipedia.org/wiki/Probability_density_function}. In case of discrete distributions, it is the probability mass function.
    *
    * @method pdf
    * @memberof ran.dist.Distribution
