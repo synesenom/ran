@@ -3,7 +3,7 @@
  *
  * @method some
  * @memberof ran.utils
- * @param {function} generator Random generator to use.
+ * @param {Function} generator Random generator to use.
  * @param {number=} k Number of values to generate.
  * @returns {(number|string|Array)} Single value or array of generated values.
  * @private

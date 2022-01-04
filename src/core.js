@@ -162,8 +162,8 @@ export function shuffle (values) {
  *
  * @method coin
  * @memberof ran.core
- * @param {object} head Head value.
- * @param {object} tail Tail value.
+ * @param {Object} head Head value.
+ * @param {Object} tail Tail value.
  * @param {number=} p Bias (probability of head). Default is 0.5.
  * @param {number=} n Number of coins to flip. Default is 1.
  * @returns {(object|object[])} Single head/tail value or an array of head/tail values.

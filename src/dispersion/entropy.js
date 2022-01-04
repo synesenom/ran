@@ -1,6 +1,6 @@
 import neumaier from '../algorithms/neumaier'
 
-function log (base) {
+function _log (base) {
   const logBase = typeof base === 'undefined' ? 1 : Math.log(base)
   return x => Math.log(x) / logBase
 }
@@ -12,7 +12,7 @@ function log (base) {
  * @method entropy
  * @memberof ran.dispersion
  * @param {number[]} probabilities Array representing the probabilities for the i-th value.
- * @param {number?} base Base for the logarithm. If not specified, natural logarithm is used.
+ * @param {number=} base Base for the logarithm. If not specified, natural logarithm is used.
  * @returns {(number|undefined)} Entropy of the probabilities if there are any, undefined otherwise.
  * @example
  *
@@ -31,7 +31,7 @@ export default function (probabilities, base) {
   }
 
   // Create logarithm using the specified base.
-  const logFunc = log(base)
+  const logFunc = _log(base)
 
   // Return the sum using the accurate Neumaier summation.
   return -neumaier(probabilities.map(d => d * logFunc(d)))

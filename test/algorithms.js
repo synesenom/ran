@@ -46,15 +46,13 @@ describe('algorithms', () => {
 
   describe('.brent()', () => {
     it('should return undefined if brackets are wrong', () => {
-      repeat(() => {
-        const c = Math.random() * 10
-        const sol = algorithms.brent(
-          t => t * Math.exp(t) - c,
-          lambertW0(c) + 1,
-          lambertW0(c) + 2
-        )
-        assert(typeof sol === 'undefined')
-      }, LAPS)
+      const c = 5
+      const sol = algorithms.brent(
+        t => t * Math.exp(t) - c,
+        lambertW0(c) + 1,
+        lambertW0(c) + 2
+      )
+      assert(typeof sol === 'undefined')
     })
     it('should find the solution of exp(-x) = c x', () => {
       repeat(() => {

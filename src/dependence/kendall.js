@@ -8,7 +8,7 @@ function nTies (values) {
 }
 
 /**
- * Calculates [Kendall's (type B) correlation coefficient]{@link https://en.wikipedia.org/wiki/Pearson_correlation_coefficient}
+ * Calculates [Kendall's rank correlation coefficient]{@link https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient}
  * for paired arrays of values.
  *
  * @method kendall

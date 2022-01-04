@@ -12,7 +12,7 @@ import { EPS, MAX_ITER } from '../special/_core'
  * next state of the variables before calculating the delta.
  * @param {Function} deltaFn Function that takes the current state of the variables and returns the term corresponding
  * to the state.
- * @param {Function?} postUpdate Function that takes the current state of the variables, the current index and returns
+ * @param {Function=} postUpdate Function that takes the current state of the variables, the current index and returns
  * the next state of the variables after calculating the delta.
  * @returns {number} The approximated sum.
  * @private

@@ -6,8 +6,6 @@ import oddsRatio from '../dependence/odds-ratio'
  *
  * $$Q(p_{00}, p_{01}, p_{10}, p_{11}) = \frac{p_{00} p_{11} - p_{01} p_{10}}{p_{00} p_{11} + p_{01} p_{10}}.$$
  *
- * Probabilities don't need to sum to 1.
- *
  * @method yuleQ
  * @memberof ran.dependence
  * @param {number} p00 The probability of X = 0 and Y = 0.

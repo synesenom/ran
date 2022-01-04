@@ -50,8 +50,7 @@ export default function (dataSets, alpha = 0.05) {
 
   // Compare against critical value
   return {
-    chi2: chi2,
-    // TODO Fix two-sided test
+    chi2,
     passed: chi2 <= (new Chi2(k - 1)).q(1 - alpha)
   }
 }

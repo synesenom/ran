@@ -3,7 +3,6 @@ import { describe, it } from 'mocha'
 import { repeat, trials, ksTest, chiTest, Tests } from './test-utils'
 import { float } from '../src/core'
 import * as dist from '../src/dist'
-import InvalidDiscrete from '../src/dist/_invalid'
 import PreComputed from '../src/dist/_pre-computed'
 import testCases from './dist-cases'
 import Distribution from '../src/dist/_distribution'
@@ -220,7 +219,7 @@ const UnitTests = {
 describe('dist', () => {
   // Base class
   describe('Distribution', () => {
-    const invalid = new InvalidDiscrete()
+    const invalid = new dist.InvalidDiscrete()
 
     describe('.sample()', () => {
       it('should throw not implemented error', () => {
@@ -342,7 +341,7 @@ describe('dist', () => {
 
   // Ordinary distributions.
   testCases
-    //.filter(tc => [].indexOf(tc.name) > -1)
+    .filter(tc => ['TukeyLambda', 'DoublyNoncentralT'].indexOf(tc.name) > -1)
     .forEach(tc  => {
       describe(tc.name, () => {
         describe('constructor', () => UnitTests.constructor(tc))

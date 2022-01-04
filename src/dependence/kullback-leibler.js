@@ -1,7 +1,7 @@
 import neumaier from '../algorithms/neumaier'
 
 /**
- * Calculates the [Kullback-Leibler divergence]{@link https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence}
+ * Calculates the (discrete) [Kullback-Leibler divergence]{@link https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence}
  * for two probability distributions:
  *
  * $$D\_\mathrm{KL}(P \parallel Q) = \sum\_{x \in \mathcal{X}} P(x) \log\bigg(\frac{P(x)}{Q(x)}\bigg).$$

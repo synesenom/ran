@@ -8,9 +8,7 @@ import { MAX_ITER } from '../special/_core'
 
 /**
  * The distribution generator base class, all distribution generators extend this class. The methods listed here
- * are available for all distribution generators. Integer parameters of a distribution are rounded.
- *
- * The examples provided for this class are using a Pareto
+ * are available for all distribution generators. Integer parameters of a distribution are rounded. The examples provided for this class are using a Pareto
  * distribution.
  *
  * @class Distribution
@@ -138,7 +136,7 @@ class Distribution {
   }
 
   /**
-   * Estimates the quantile function by using a look-up table.
+   * Estimates the quantile function using a look-up table.
    *
    * @method _qEstimateTable
    * @memberof ran.dist.Distribution
@@ -192,7 +190,8 @@ class Distribution {
    */
   _qEstimateRoot (p) {
     // Guess range.
-    const delta = ((Number.isFinite(this.s[1].value) ? this.s[1].value : 10) - (Number.isFinite(this.s[0].value) ? this.s[0].value : -10)) / 2
+    const delta = ((Number.isFinite(this.s[1].value) ? this.s[1].value : 10)
+      - (Number.isFinite(this.s[0].value) ? this.s[0].value : -10)) / 2
 
     // Set initial guess for lower boundary.
     let a0 = Math.random()
@@ -359,7 +358,8 @@ class Distribution {
   }
 
   /**
-   * [Probability density function]{@link https://en.wikipedia.org/wiki/Probability_density_function}. In case of discrete distributions, it is the probability mass function.
+   * [Probability density function]{@link https://en.wikipedia.org/wiki/Probability_density_function}. In case of
+   * discrete distributions, it is the probability mass function.
    *
    * @method pdf
    * @memberof ran.dist.Distribution
@@ -440,9 +440,7 @@ class Distribution {
    *
    * $$Q(p) = \mathrm{inf}\\{k \in \mathrm{supp}(f): p \le F(k)\\},$$
    *
-   * with $\mathrm{supp}(f)$ denoting the support of the distribution.
-   *
-   * For distributions with an analytically invertible
+   * with $\mathrm{supp}(f)$ denoting the support of the distribution. For distributions with an analytically invertible
    * cumulative distribution function, the quantile is explicitly implemented. In other cases, two fallback estimations
    * are used: for continuous distributions the equation $F(x) = p$ is solved using [Brent's method]{@link https://en.wikipedia.org/wiki/Brent%27s_method}.
    * For discrete distributions a look-up table is used with linear search.
@@ -456,6 +454,7 @@ class Distribution {
   q (p) {
     if (p < 0 || p > 1) {
       // If out of bounds, return undefined
+      return undefined
     } else if (p === 0) {
       // If zero, return lower support boundary
       return this.s[0].value
@@ -463,8 +462,8 @@ class Distribution {
       // If unit, return upper support boundary
       return this.s[1].value
     } else {
-      // If quantile function is implemented, use that, otherwise use the estimators: look-up table for discrete and root-finder for continuous
-      //
+      // If quantile function is implemented, use that, otherwise use the estimators: look-up table for discrete and
+      // root-finder for continuous
       return typeof this._q === 'function'
         ? this._q(p)
         : this.t === 'discrete'

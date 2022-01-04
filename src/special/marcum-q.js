@@ -256,7 +256,7 @@ const _seriesExpansion = {
  * @param {number} mu The order of the function.
  * @param {number} x First variable.
  * @param {number} y Second variable.
- * @return {?number} The generalized Marcum-Q function at the specified values. If evaluated at an unsupported point, it
+ * @return {(number|undefined)} The generalized Marcum-Q function at the specified values. If evaluated at an unsupported point, it
  * returns undefined.
  * @private
  */

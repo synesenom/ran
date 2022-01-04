@@ -180,7 +180,7 @@ class Vector {
    * @method outer
    * @memberof ran.la.Vector
    * @param vec {ran.la.Vector} vec Vector to multiply with (from the right).
-   * @returns {Array[]}
+   * @returns {Array[]} An array of arrays representing the outer product.
    * @example
    *
    * let v = new ran.la.Vector([1, 2, 3])
