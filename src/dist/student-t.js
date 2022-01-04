@@ -1,5 +1,4 @@
-import beta from '../special/beta'
-import { regularizedBetaIncomplete } from '../special/beta-incomplete'
+import { regularizedBetaIncomplete, beta } from '../special'
 import { sign, gamma } from './_core'
 import Distribution from './_distribution'
 

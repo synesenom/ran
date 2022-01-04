@@ -1,5 +1,5 @@
-import some from './utils/some'
-import Xoshiro128p from './core/xoshiro'
+import some from '../utils/some'
+import Xoshiro128p from './xoshiro'
 
 /**
  * @namespace core

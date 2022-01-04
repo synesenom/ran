@@ -1,5 +1,5 @@
 import Normal from './normal'
-import { erfinv } from '../special/error'
+import { erfinv } from '../special'
 
 /**
  * Generator for the [half-normal distribution]{@link https://en.wikipedia.org/wiki/Half-normal_distribution}:

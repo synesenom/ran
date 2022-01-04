@@ -1,4 +1,4 @@
-import logGamma from '../special/log-gamma'
+import { logGamma } from '../special'
 import PreComputed from './_pre-computed'
 import Distribution from './_distribution'
 

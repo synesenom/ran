@@ -1,11 +1,8 @@
-import startIndex from '../algorithms/start-index'
-import gamma from '../special/gamma'
-import logGamma from '../special/log-gamma'
+import clamp from '../utils/clamp'
 import Distribution from './_distribution'
 import { noncentralChi2, normal } from './_core'
-import { f11 } from '../special/hypergeometric'
-import acceleratedSum from '../algorithms/accelerated-sum'
-import recursiveSum from '../algorithms/recursive-sum'
+import { f11, gamma, logGamma } from '../special'
+import { acceleratedSum, recursiveSum } from '../algorithms'
 import NoncentralT from './noncentral-t'
 
 /**
@@ -14,6 +11,7 @@ import NoncentralT from './noncentral-t'
  * $$f(x; \nu, \mu, \theta) = \frac{e^{-\frac{\theta + \mu^2}{2}}}{\sqrt{\pi \nu}} \sum_{j = 0}^\infty \frac{1}{j!} \frac{(x \mu \sqrt{2 / \nu})^j}{(1 + x^2 / \nu)^{\frac{\nu + j + 1}{2}}} \frac{\Gamma\big(\frac{\nu + j + 1}{2}\big)}{\Gamma\big(\frac{\nu}{2}\big)} {}_1F_1\bigg(\frac{\nu + j + 1}{2}, \frac{\nu}{2}; \frac{\theta}{2 (1 + x^2 / \nu)}\bigg),$$
  *
  * where $\nu \in \mathbb{N}^+$, $\mu \in \mathbb{R}$ and $\theta > 0$. Support: $x \in \mathbb{R}$.
+ * Implementation is based on Section 10.4.1.2 in Marc S. Paolella. Intermediate Probability: A Computational Approach. (2007)
  *
  * @class DoublyNoncentralT
  * @memberof ran.dist
@@ -48,6 +46,63 @@ export default class extends Distribution {
       -0.5 * (theta + mu * mu + Math.log(Math.PI * nui)) - logGamma(nui / 2),
       Math.exp(-theta / 2)
     ]
+  }
+
+  /**
+   * Finds the index corresponding to the largest term in a series.
+   *
+   * @method startIndex
+   * @memberof ran.dist.DoublyNoncentralT
+   * @param {Function} term Function that accepts an index and returns the term value.
+   * @returns {number} The index of the largest term.
+   * @private
+   */
+  _findStartIndex (term) {
+    // Find bracket that contains the maximum value.
+    let j1 = 1
+    let f1 = term(j1)
+    let j2 = 2
+    let f2 = term(j2)
+    let j = 3
+    let f = term(j)
+    while (f2 >= f1) {
+      // Calculate new value: advance index according to a Fibonacci series.
+      j = j1 + j2
+      f = term(j)
+
+      // Keep advancing the index if new value is larger.
+      if (f >= f2) {
+        j1 = j2
+        j2 = j
+        f1 = f2
+        f2 = f
+      } else {
+        break
+      }
+    }
+
+    // Narrow bracket to find the exact index.
+    while (j1 !== j2) {
+      // Add bisection point.
+      j = Math.floor((j1 + j2) / 2)
+      f = term(j)
+
+      // Check if current boundary is small enough.
+      if (j === j1 || j === j2) {
+        break
+      }
+
+      // Update the right index.
+      if (f1 > f2) {
+        f2 = f
+        j2 = j
+      } else {
+        f1 = f
+        j1 = j
+      }
+    }
+
+    return j
   }
 
   /**
@@ -122,7 +177,7 @@ export default class extends Distribution {
     const thetatk = this.p.theta / (2 * tk)
 
     // Find index with highest amplitude
-    const j0 = startIndex(j => this._logA(x, j))
+    const j0 = this._findStartIndex(j => this._logA(x, j))
 
     let z = 0
     if (x * this.p.mu >= 0) {
@@ -292,6 +347,6 @@ export default class extends Distribution {
       t.f = NoncentralT.fnm(this.p.nu + i2, mu, y * Math.sqrt(1 + i2 / this.p.nu))
       return t
     }, t => t.p * t.f)
-    return Math.min(1, Math.max(0, x < 0 ? 1 - z : z))
+    return clamp(x < 0 ? 1 - z : z)
   }
 }

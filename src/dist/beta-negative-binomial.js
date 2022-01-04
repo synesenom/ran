@@ -1,4 +1,4 @@
-import logBeta from '../special/log-beta'
+import { logBeta } from '../special'
 import PreComputed from './_pre-computed'
 import Distribution from './_distribution'
 import { beta as rBeta, gamma, poisson } from './_core'

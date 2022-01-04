@@ -1,7 +1,5 @@
 import recursiveSum from '../algorithms/recursive-sum'
-import betaFn from '../special/beta'
-import logGamma from '../special/log-gamma'
-import { regularizedBetaIncomplete } from '../special/beta-incomplete'
+import { regularizedBetaIncomplete, beta as fnBeta, logGamma } from '../special'
 import { chi2, noncentralChi2 } from './_core'
 import Distribution from './_distribution'
 
@@ -44,7 +42,7 @@ export default class extends Distribution {
     // Speed-up constants
     this.c = [
       Math.exp(-lambda / 2),
-      betaFn(alpha, beta)
+      fnBeta(alpha, beta)
     ]
   }
 
@@ -72,7 +70,7 @@ export default class extends Distribution {
     const p0 = Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
     const xa0 = Math.pow(x, iAlpha0 - 1)
     const xb = Math.pow(1 - x, this.p.beta - 1)
-    const b0 = betaFn(iAlpha0, this.p.beta)
+    const b0 = fnBeta(iAlpha0, this.p.beta)
 
     // Forward sum
     let z = recursiveSum({
@@ -125,7 +123,7 @@ export default class extends Distribution {
     const p0 = Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
     const xa0 = Math.pow(x, iAlpha0)
     const xb = Math.pow(1 - x, this.p.beta)
-    const b0 = betaFn(iAlpha0, this.p.beta)
+    const b0 = fnBeta(iAlpha0, this.p.beta)
     const ib0 = regularizedBetaIncomplete(iAlpha0, this.p.beta, x)
 
     // Forward sum

@@ -1,10 +1,9 @@
+import clamp from '../utils/clamp'
 import recursiveSum from '../algorithms/recursive-sum'
 import Distribution from './_distribution'
 import { noncentralChi2 } from './_core'
 import { EPS, MAX_ITER } from '../special/_core'
-import logGamma from '../special/log-gamma'
-import { regularizedBetaIncomplete } from '../special/beta-incomplete'
-import fnBeta from '../special/beta'
+import { regularizedBetaIncomplete, beta as fnBeta, logGamma } from '../special'
 
 /**
  * Generator for the [doubly non-central beta distribution]{@link https://rdrr.io/cran/sadists/f/inst/doc/sadists.pdf}:
@@ -357,6 +356,6 @@ export default class extends Distribution {
       }
     }
 
-    return Math.max(0, Math.min(1, Math.exp(-l1 - l2) * z))
+    return clamp(Math.exp(-l1 - l2) * z)
   }
 }

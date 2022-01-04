@@ -1,7 +1,5 @@
 import recursiveSum from '../algorithms/recursive-sum'
-import { erf } from '../special/error'
-import logGamma from '../special/log-gamma'
-import { regularizedBetaIncomplete } from '../special/beta-incomplete'
+import { erf, regularizedBetaIncomplete, logGamma } from '../special'
 import { normal, chi2 } from './_core'
 import Distribution from './_distribution'
 

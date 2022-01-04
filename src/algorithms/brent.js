@@ -1,6 +1,5 @@
 import { EPS, MAX_ITER } from '../special/_core'
 
-
 /**
  * Finds the root of a function using Brent's method.
  * Source: https://en.wikipedia.org/wiki/Brent%27s_method

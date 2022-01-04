@@ -1,6 +1,5 @@
 import Categorical from './categorical'
-import logBeta from '../special/log-beta'
-import logBinomial from '../special/log-binomial'
+import { logBeta, logBinomial } from '../special'
 import Distribution from './_distribution'
 
 /**

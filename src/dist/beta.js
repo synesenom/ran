@@ -1,5 +1,4 @@
-import fnBeta from '../special/beta'
-import { regularizedBetaIncomplete } from '../special/beta-incomplete'
+import { regularizedBetaIncomplete, beta as fnBeta } from '../special'
 import { beta as rBeta } from './_core'
 import Distribution from './_distribution'
 

@@ -4,5 +4,5 @@
  * @namespace la
  * @memberof ran
  */
-export { default as Vector } from './la/vector'
-export { default as Matrix } from './la/matrix'
+export { default as Vector } from './vector'
+export { default as Matrix } from './matrix'

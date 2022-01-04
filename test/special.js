@@ -1,19 +1,7 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import * as special from '../src/special'
-import { besselI, besselInu, besselISpherical } from '../src/special/bessel'
-import { erf } from '../src/special/error'
-import { f11 } from '../src/special/hypergeometric'
-import gamma from '../src/special/gamma'
-import logGamma from '../src/special/log-gamma'
-import { gammaLowerIncomplete, gammaUpperIncomplete } from '../src/special/gamma-incomplete'
-import hurwitzZeta from '../src/special/hurwitz-zeta'
-import { lambertW0, lambertW1m } from '../src/special/lambert-w'
-import marcumQ from '../src/special/marcum-q'
-import owenT from '../src/special/owen-t'
-import riemannZeta from '../src/special/riemann-zeta'
 import { equal, repeat } from './test-utils'
-import { betaIncomplete } from '../src/special/beta-incomplete'
+import * as special from '../src/special'
 
 const LAPS = 100
 
@@ -66,38 +54,38 @@ describe('special', () => {
     it('In(0) should be equal to 0 for n > 1', () => {
       repeat(() => {
         const n = Math.floor(1 + 10 * Math.random())
-        assert(besselI(n, 0) === 0)
+        assert(special.besselI(n, 0) === 0)
       })
     })
 
     it('I1(-x) should be equal to -I1(x)', () => {
       repeat(() => {
         const x = 1 + 10 * Math.random()
-        assert(equal(besselI(1, -x), -besselI(1, x)))
+        assert(equal(special.besselI(1, -x), -special.besselI(1, x)))
       })
     })
   })
 
   describe('.besselISpherical()', () => {
     it('i(0, 0) should be 1', () => {
-      assert(besselISpherical(0, 0) === 1)
+      assert(special.besselISpherical(0, 0) === 1)
     })
 
     it('i(1, 0) should be 0', () => {
-      assert(besselISpherical(1, 0) === 0)
+      assert(special.besselISpherical(1, 0) === 0)
     })
 
     it('i(n, 0) should be 1 for n > 0', () => {
       const n = Math.floor(1 + 10 * Math.random())
-      assert(besselISpherical(n, 0) === 0)
+      assert(special.besselISpherical(n, 0) === 0)
     })
 
     it('should satisfy the recurrence relation for negative order', () => {
       repeat(() => {
         const n = -Math.floor(1 + 10 * Math.random())
         const x = 10 * Math.random()
-        assert(equal(special.besselISpherical(n - 1, x) - besselISpherical(n + 1, x),
-          (2 * n + 1) * besselISpherical(n, x) / x))
+        assert(equal(special.besselISpherical(n - 1, x) - special.besselISpherical(n + 1, x),
+          (2 * n + 1) * special.besselISpherical(n, x) / x))
       })
     })
 
@@ -105,19 +93,19 @@ describe('special', () => {
       repeat(() => {
         const n = Math.floor(1 + 10 * Math.random())
         const x = 10 * Math.random()
-        assert(equal(special.besselISpherical(n - 1, x) - besselISpherical(n + 1, x),
-          (2 * n + 1) * besselISpherical(n, x) / x))
+        assert(equal(special.besselISpherical(n - 1, x) - special.besselISpherical(n + 1, x),
+          (2 * n + 1) * special.besselISpherical(n, x) / x))
       })
     })
   })
 
   describe('.betaIncomplete()', () => {
     it('B(a, b, x) should be equal to 0 if b > 0 and x <= 0', () => {
-      assert(betaIncomplete(Math.random(), Math.random() + 1, -Math.random()) === 0)
+      assert(special.betaIncomplete(Math.random(), Math.random() + 1, -Math.random()) === 0)
     })
 
     it('B(a, b, x) should be equal to 1 if b > 0 and x >= 1', () => {
-      assert(betaIncomplete(Math.random(), Math.random() + 1, 1 + Math.random()) === 1)
+      assert(special.betaIncomplete(Math.random(), Math.random() + 1, 1 + Math.random()) === 1)
     })
   })
 
@@ -127,7 +115,7 @@ describe('special', () => {
         repeat(() => {
           let b = Math.random()
           let z = Math.random() * 40
-          assert(equal(f11(0, b, z), 1))
+          assert(equal(special.f11(0, b, z), 1))
         }, LAPS)
       })
 
@@ -135,28 +123,28 @@ describe('special', () => {
         repeat(() => {
           let b = Math.random() * 10
           let z = Math.random() * 40
-          assert(equal(f11(b, b, z), Math.exp(z)))
+          assert(equal(special.f11(b, b, z), Math.exp(z)))
         }, LAPS)
       })
 
       it('f11(2, 1, z) = (1 + z) * exp(z)', () => {
         repeat(() => {
           let z = Math.random() * 40
-          assert(equal(f11(2, 1, z), (1 + z) * Math.exp(z)))
+          assert(equal(special.f11(2, 1, z), (1 + z) * Math.exp(z)))
         }, LAPS)
       })
 
       it('f11(1, 2, z) = (exp(z) - 1) / z', () => {
         repeat(() => {
           let z = Math.random() * 40
-          assert(equal(f11(1, 2, z), (Math.exp(z) - 1) / z))
+          assert(equal(special.f11(1, 2, z), (Math.exp(z) - 1) / z))
         }, LAPS)
       })
 
       it('(2z / sqrt(pi)) * f11(0.5, 1.5, -z^2) = erf(z)', () => {
         repeat(() => {
           let z = Math.random()
-          assert(equal(2 * z * f11(0.5, 1.5, -z * z) / Math.sqrt(Math.PI), erf(z)))
+          assert(equal(2 * z * special.f11(0.5, 1.5, -z * z) / Math.sqrt(Math.PI), special.erf(z)))
         }, LAPS)
       })
 
@@ -165,8 +153,8 @@ describe('special', () => {
           let a = Math.random() * 10
           let z = Math.random() * 40
           assert(equal(
-            f11(a, 2 * a, z),
-            Math.exp(z / 2 + (0.5 - a) * Math.log(z / 4) + logGamma(a + 0.5)) * besselInu(a - 0.5, z / 2)
+            special.f11(a, 2 * a, z),
+            Math.exp(z / 2 + (0.5 - a) * Math.log(z / 4) + special.logGamma(a + 0.5)) * special.besselInu(a - 0.5, z / 2)
           ))
         }, LAPS)
       })
@@ -177,8 +165,8 @@ describe('special', () => {
           let b = Math.random() * 10
           let z = Math.random() * 40
           assert(equal(
-            a * f11(a + 1, b, z),
-            (b - a) * f11(a - 1, b, z) + (2 * a - b + z) * f11(a, b, z)
+            a * special.f11(a + 1, b, z),
+            (b - a) * special.f11(a - 1, b, z) + (2 * a - b + z) * special.f11(a, b, z)
           ))
         }, LAPS)
       })
@@ -189,7 +177,7 @@ describe('special', () => {
         repeat(() => {
           let b = Math.random()
           let z = Math.random() * 40 + 50
-          assert(equal(f11(0, b, z), 1))
+          assert(equal(special.f11(0, b, z), 1))
         }, LAPS)
       })
 
@@ -197,21 +185,21 @@ describe('special', () => {
         repeat(() => {
           let b = Math.random() * 10
           let z = Math.random() * 40 + 50
-          assert(equal(f11(b, b, z), Math.exp(z)))
+          assert(equal(special.f11(b, b, z), Math.exp(z)))
         }, LAPS)
       })
 
       it('f11(2, 1, z) = (1 + z) * exp(z)', () => {
         repeat(() => {
           let z = Math.random() * 40 + 50
-          assert(equal(f11(2, 1, z), (1 + z) * Math.exp(z)))
+          assert(equal(special.f11(2, 1, z), (1 + z) * Math.exp(z)))
         }, LAPS)
       })
 
       it('f11(1, 2, z) = (exp(z) - 1) / z', () => {
         repeat(() => {
           let z = Math.random() * 40 + 50
-          assert(equal(f11(1, 2, z), (Math.exp(z) - 1) / z))
+          assert(equal(special.f11(1, 2, z), (Math.exp(z) - 1) / z))
         }, LAPS)
       })
 
@@ -220,8 +208,8 @@ describe('special', () => {
           let a = Math.random() * 10
           let z = Math.random() * 40 + 50
           assert(equal(
-            f11(a, 2 * a, z),
-            Math.exp(z / 2 + (0.5 - a) * Math.log(z / 4) + logGamma(a + 0.5)) * besselInu(a - 0.5, z / 2)
+            special.f11(a, 2 * a, z),
+            Math.exp(z / 2 + (0.5 - a) * Math.log(z / 4) + special.logGamma(a + 0.5)) * special.besselInu(a - 0.5, z / 2)
           ))
         }, LAPS)
       })
@@ -232,8 +220,8 @@ describe('special', () => {
           let b = Math.random() * 10 + 3
           let z = Math.random() * 40 + 50
           assert(equal(
-            a * f11(a + 1, b, z),
-            (b - a) * f11(a - 1, b, z) + (2 * a - b + z) * f11(a, b, z)
+            a * special.f11(a + 1, b, z),
+            (b - a) * special.f11(a - 1, b, z) + (2 * a - b + z) * special.f11(a, b, z)
           ))
         })
       })
@@ -241,13 +229,13 @@ describe('special', () => {
   })
 
   describe('.gamma(), .logGamma()', () => {
-    it('logGamma(z)  ln(gamma(z))', () => {
+    it('logGamma(z) = ln(gamma(z))', () => {
       for (let i = 0; i < LAPS; i++) {
         let x = Math.random() * 100
 
-        let g = gamma(x)
+        let g = special.gamma(x)
 
-        let lng = logGamma(x)
+        let lng = special.logGamma(x)
         assert(Math.abs(Math.log(g) - lng) / lng < 0.01)
       }
     })
@@ -259,14 +247,14 @@ describe('special', () => {
         let s = 2 + Math.random() * 10
 
         let x = -10
-        assert(gammaLowerIncomplete(s, x) === 0)
+        assert(special.gammaLowerIncomplete(s, x) === 0)
       }, LAPS)
     })
     it('should be equal to exp(-x) for s = 1', () => {
       repeat(() => {
         let x = Math.random() * 100
 
-        let gui = gammaUpperIncomplete(1, x) * gamma(1)
+        let gui = special.gammaUpperIncomplete(1, x) * special.gamma(1)
         assert(Math.abs(gui - Math.exp(-x)) / gui < 0.01)
       }, LAPS)
     })
@@ -275,8 +263,8 @@ describe('special', () => {
       repeat(() => {
         let x = Math.random() * 100
 
-        let gli = gammaLowerIncomplete(0.5, x) * gamma(0.5)
-        assert(Math.abs(gli - Math.sqrt(Math.PI) * erf(Math.sqrt(x))) / gli < 0.01)
+        let gli = special.gammaLowerIncomplete(0.5, x) * special.gamma(0.5)
+        assert(Math.abs(gli - Math.sqrt(Math.PI) * special.erf(Math.sqrt(x))) / gli < 0.01)
       }, LAPS)
     })
 
@@ -288,7 +276,7 @@ describe('special', () => {
 
         let xs = Math.pow(x, s)
 
-        let gli = gammaLowerIncomplete(s, x) * gamma(s)
+        let gli = special.gammaLowerIncomplete(s, x) * special.gamma(s)
         if (xs > 1e-100) {
           assert(Math.abs(gli / Math.pow(x, s) * s - 1) < 0.01)
         }
@@ -299,7 +287,7 @@ describe('special', () => {
       for (let i = 0; i > LAPS; i++) {
         let s = Math.random() * 100
         let x = 1e5 + Math.random() * 1e5
-        assert(equal(gammaLowerIncomplete(s, x), 1))
+        assert(equal(special.gammaLowerIncomplete(s, x), 1))
       }
     })
   })
@@ -311,7 +299,7 @@ describe('special', () => {
         let sum = 0
         for (let n = 1; n < 100; n++) {
           sum += 1 / Math.pow(n, s)
-          assert(Math.abs(sum - riemannZeta(s) + hurwitzZeta(s, n + 1)) / sum < 1e-6)
+          assert(Math.abs(sum - special.riemannZeta(s) + special.hurwitzZeta(s, n + 1)) / sum < 1e-6)
         }
       }, LAPS)
     })
@@ -321,7 +309,7 @@ describe('special', () => {
     it('should satisfy the W * exp(W) = x equation', () => {
       repeat(() => {
         let x = Math.random() * 10
-        let w = lambertW0(x)
+        let w = special.lambertW0(x)
         assert(equal(w * Math.exp(w), x))
       }, LAPS)
     })
@@ -331,7 +319,7 @@ describe('special', () => {
     it('should satisfy the W * exp(W) = x equation', () => {
       repeat(() => {
         let x = -1 * Math.random() / Math.E
-        let w = lambertW1m(x)
+        let w = special.lambertW1m(x)
         assert(equal(w * Math.exp(w), x))
       }, LAPS)
     })
@@ -345,7 +333,7 @@ describe('special', () => {
           let y = 0
           let mu = 2 + Math.random() * 5
 
-          assert(equal(marcumQ(mu, x, y), 1))
+          assert(equal(special.marcumQ(mu, x, y), 1))
         })
       })
 
@@ -356,7 +344,7 @@ describe('special', () => {
             let y = 40 + Math.random() * 60
             let mu = 2 + Math.random() * 5
 
-            assert(equal(marcumQ(mu, x, y), gammaUpperIncomplete(mu, y)))
+            assert(equal(special.marcumQ(mu, x, y), special.gammaUpperIncomplete(mu, y)))
           }, LAPS)
         })
       })
@@ -370,10 +358,10 @@ describe('special', () => {
             let y = 40 + Math.random() * 60
             let mu = 2 + Math.random() * 5
 
-            let q1 = marcumQ(mu + 1, x, y)
-            let q2 = marcumQ(mu, x, y)
-            let q3 = marcumQ(mu + 2, x, y)
-            let q4 = marcumQ(mu - 1, x, y)
+            let q1 = special.marcumQ(mu + 1, x, y)
+            let q2 = special.marcumQ(mu, x, y)
+            let q3 = special.marcumQ(mu + 2, x, y)
+            let q4 = special.marcumQ(mu - 1, x, y)
 
             if (x > mu) {
               assert(equal(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4), 1))
@@ -391,10 +379,10 @@ describe('special', () => {
             let y = 10 + Math.random() * 10
             let mu = 30 + Math.random() * 5
 
-            let q1 = marcumQ(mu + 1, x, y)
-            let q2 = marcumQ(mu, x, y)
-            let q3 = marcumQ(mu + 2, x, y)
-            let q4 = marcumQ(mu - 1, x, y)
+            let q1 = special.marcumQ(mu + 1, x, y)
+            let q2 = special.marcumQ(mu, x, y)
+            let q3 = special.marcumQ(mu + 2, x, y)
+            let q4 = special.marcumQ(mu - 1, x, y)
 
             if (x > mu) {
               assert(equal(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4), 1))
@@ -547,7 +535,7 @@ describe('special', () => {
         {h: 0.0078125, a: 10, t: 0.2340886964802671},
         {h: 0.0078125, a: 100, t: 0.2479460829231492}
         ].forEach(d => {
-          assert(equal(owenT(d.h, d.a), d.t))
+          assert(equal(special.owenT(d.h, d.a), d.t))
       })
     })
   })

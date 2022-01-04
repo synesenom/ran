@@ -1,4 +1,4 @@
-import logGamma from '../special/log-gamma'
+import { logGamma } from '../special'
 import { gamma, poisson } from './_core'
 import Distribution from './_distribution'
 import PreComputed from './_pre-computed'

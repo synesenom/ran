@@ -1,5 +1,5 @@
 import recursiveSum from '../algorithms/recursive-sum'
-import { besselI } from '../special/bessel'
+import { besselI } from '../special'
 import Distribution from './_distribution'
 import { MAX_ITER } from '../special/_core'
 

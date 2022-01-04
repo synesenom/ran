@@ -1,7 +1,7 @@
-import owenT from '../special/owen-t'
+import clamp from '../utils/clamp'
 import { normal } from './_core'
+import { erf, owenT } from '../special'
 import Normal from './normal'
-import { erf } from '../special/error'
 
 /**
  * Generator for the [skew normal distribution]{@link https://en.wikipedia.org/wiki/Skew_normal_distribution}:
@@ -56,7 +56,7 @@ export default class extends Normal {
 
   _cdf (x) {
     const z = super._cdf(x) - 2 * owenT((x - this.p.xi) / this.p.omega, this.p.alpha)
-    return Math.min(1, Math.max(0, z))
+    return clamp(z)
   }
 
   _q (p) {

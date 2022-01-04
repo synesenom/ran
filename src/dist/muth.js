@@ -1,7 +1,7 @@
 // https://journals.vgtu.lt/index.php/MMA/article/view/1001/767
 
 import Distribution from './_distribution'
-import { lambertW1m } from '../special/lambert-w'
+import { lambertW1m } from '../special'
 
 /**
  * Generator for the [Muth distribution]{@link https://journals.vgtu.lt/index.php/MMA/article/view/1001/767}:

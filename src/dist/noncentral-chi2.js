@@ -1,5 +1,4 @@
-import { besselI, besselISpherical } from '../special/bessel'
-import marcumQ from '../special/marcum-q'
+import { besselI, besselISpherical, marcumQ } from '../special'
 import { noncentralChi2 } from './_core'
 import Distribution from './_distribution'
 

@@ -1,5 +1,5 @@
 import neumaier from '../algorithms/neumaier'
-import logGamma from '../special/log-gamma'
+import { logGamma } from '../special'
 import Distribution from './_distribution'
 
 /**

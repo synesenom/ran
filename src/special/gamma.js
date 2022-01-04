@@ -21,7 +21,7 @@ const SQRT_PI2 = Math.sqrt(2 * Math.PI)
    * @private
    */
 function _gamma (z) {
-  let y = 0
+  let y
   if (z < 0.5) {
     y = Math.PI / (Math.sin(Math.PI * z) * _gamma(1 - z))
   } else {

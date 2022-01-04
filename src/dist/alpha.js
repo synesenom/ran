@@ -1,5 +1,5 @@
 import Distribution from './_distribution'
-import { erf, erfinv } from '../special/error'
+import { erf, erfinv } from '../special'
 
 /**
  * Generator for the [alpha distribution]{@link https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_alpha.html}:

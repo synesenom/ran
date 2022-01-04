@@ -1,6 +1,6 @@
 import Distribution from './_distribution'
 import PreComputed from './_pre-computed'
-import logBinomial from '../special/log-binomial'
+import { logBinomial } from '../special'
 
 /**
  * Generator for the [heads-minus-tails distribution]{@link http://mathworld.wolfram.com/Heads-Minus-TailsDistribution.html}:

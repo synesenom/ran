@@ -1,5 +1,4 @@
-import logGamma from '../special/log-gamma'
-import { gammaLowerIncomplete } from '../special/gamma-incomplete'
+import { gammaLowerIncomplete, logGamma } from '../special'
 import { gamma } from './_core'
 import Distribution from './_distribution'
 

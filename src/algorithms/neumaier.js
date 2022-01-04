@@ -1,5 +1,5 @@
 /**
- * Sums the element of an array using the robust (but slower) [Neumaier method]{@link https://www.mat.univie.ac.at/~neum/scan/01.pdf}.
+ * Sums the element of an array using the robust [Neumaier method]{@link https://en.wikipedia.org/wiki/Kahan_summation_algorithm#Further_enhancements}.
  *
  * @method neumaier
  * @memberof ran.algorithms
@@ -8,9 +8,14 @@
  * @private
  */
 export default function (arr) {
+  // Sort array first.
   const sorted = arr.sort((a, b) => a - b)
+
+  // Init sum and correction.
   let s = sorted[0]
   let c = 0
+
+  // Start summation.
   for (let i = 1; i < sorted.length; i++) {
     const t = s + sorted[i]
     if (Math.abs(s) > Math.abs(sorted[i])) {

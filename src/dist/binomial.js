@@ -1,4 +1,4 @@
-import logBinomial from '../special/log-binomial'
+import { logBinomial } from '../special'
 import Distribution from './_distribution'
 import Categorical from './categorical'
 

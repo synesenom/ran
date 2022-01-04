@@ -1,12 +1,76 @@
-const swap = (arr, i, j) => {
-  const t = arr[i]
+/**
+ * Swaps two elements of an array.
+ *
+ * @method _swap
+ * @memberof ran.algorithms
+ * @param {number[]} arr Array to modify.
+ * @param {number} i First index to use for swap
+ * @param {number} j First index to use for swap
+ * @private
+ */
+const _swap = (arr, i, j) => {
+  const tmp = arr[i]
   arr[i] = arr[j]
-  arr[j] = t
+  arr[j] = tmp
+}
+
+/**
+ * Partitions an array by a specific pivot value using the
+ * [Lomuto partition scheme]{@link https://en.wikipedia.org/wiki/Quickselect#Algorithm}.
+ *
+ * @method _partition
+ * @memberof ran.algorithms
+ * @param {number[]} arr Array to partition.
+ * @param {number} left Lower bound of the partitioning.
+ * @param {number} right Upper bound of the partitioning.
+ * @param {number} pivotIndex Index to partition array around.
+ * @return {number} The new pivot index after partitioning.
+ * @private
+ */
+function _partition (arr, left, right, pivotIndex) {
+  // TODO Change this to Hoare's partition scheme
+  const pivotValue = arr[pivotIndex]
+  _swap(arr, pivotIndex, right)
+  let storeIndex = left
+  for (let i = left; i < right; i++) {
+    if (arr[i] < pivotValue) {
+      _swap(arr, storeIndex, i)
+      storeIndex++
+    }
+  }
+  _swap(arr, right, storeIndex)
+  return storeIndex
+}
+
+/**
+ * Performs a quickselect within a specific range of indices.
+ *
+ * @method _select
+ * @memberof ran.algorithms
+ * @param {number[]} arr Array to perform quickselect on.
+ * @param {number} left Lower boundary of the index range.
+ * @param {number} right Upper boundary of the index range.
+ * @param {number} k The rank of the element to find.
+ * @return {number} The k-th lowest element in the array.
+ * @private
+ */
+function _select (arr, left, right, k) {
+  if (left === right) {
+    return arr[left]
+  }
+  const pivotIndex = _partition(arr, left, right, Math.floor((left + right) / 2))
+  if (k === pivotIndex) {
+    return arr[k]
+  } else if (k < pivotIndex) {
+    return _select(arr, left, pivotIndex - 1, k)
+  } else {
+    return _select(arr, pivotIndex + 1, right, k)
+  }
 }
 
 /**
  * Selects the k-th smallest element in an array using the quickselect algorithm.
- * Based on this C code: http://finmath.stanford.edu/~ryantibs/median/quickselect.c
+ * Just a direct implementation from https://en.wikipedia.org/wiki/Quickselect#Algorithm.
  *
  * @method quickselect
  * @memberof ran.algorithms
@@ -16,52 +80,5 @@ const swap = (arr, i, j) => {
  * @private
  */
 export default function (values, k) {
-  let li
-  let ri
-  let mid
-  let a
-  let left = 0
-  let right = values.length - 1
-  const iMax = values.length * values.length
-  let jMax
-  for (let i = 0; i < iMax; i++) {
-    if (right <= left + 1) {
-      if (right === left + 1 && values[right] < values[left]) {
-        swap(values, left, right)
-      }
-      return values[k]
-    } else {
-      mid = (left + right) >> 1
-      swap(values, mid, left + 1)
-      if (values[left] > values[right]) {
-        swap(values, left, right)
-      }
-      if (values[left + 1] > values[right]) {
-        swap(values, left + 1, right)
-      }
-      if (values[left] > values[left + 1]) {
-        swap(values, left, left + 1)
-      }
-      li = left + 1
-      ri = right
-      a = values[left + 1]
-      jMax = ri - li + 1
-      for (let j = 0; j < jMax; j++) {
-        do li++; while (values[li] < a)
-        do ri--; while (values[ri] > a)
-        if (ri < li) {
-          break
-        }
-        swap(values, li, ri)
-      }
-      values[left + 1] = values[ri]
-      values[ri] = a
-      if (ri >= k) {
-        right = ri - 1
-      }
-      if (ri <= k) {
-        left = li
-      }
-    }
-  }
+  return _select(values, 0, values.length - 1, k)
 }

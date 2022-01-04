@@ -1,4 +1,4 @@
-import { betaIncomplete } from '../special/beta-incomplete'
+import { betaIncomplete } from '../special'
 import Distribution from './_distribution'
 
 /**

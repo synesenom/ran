@@ -190,8 +190,8 @@ class Distribution {
    */
   _qEstimateRoot (p) {
     // Guess range.
-    const delta = ((Number.isFinite(this.s[1].value) ? this.s[1].value : 10)
-      - (Number.isFinite(this.s[0].value) ? this.s[0].value : -10)) / 2
+    const delta = ((Number.isFinite(this.s[1].value) ? this.s[1].value : 10) -
+      (Number.isFinite(this.s[0].value) ? this.s[0].value : -10)) / 2
 
     // Set initial guess for lower boundary.
     let a0 = Math.random()

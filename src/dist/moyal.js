@@ -1,6 +1,6 @@
 import { rejection } from './_core'
 import Distribution from './_distribution'
-import { gammaLowerIncomplete } from '../special/gamma-incomplete'
+import { gammaLowerIncomplete } from '../special'
 
 /**
  * Generator for the [Moyal distribution]{@link https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.moyal.html#r7049b665a02e-2}:

@@ -1,5 +1,5 @@
 import { MAX_ITER } from '../special/_core'
-import gammaLn from '../special/log-gamma'
+import { logGamma } from '../special'
 
 /**
  * Performs a rejection sampling.
@@ -177,7 +177,7 @@ export function poisson (r, lambda) {
 
       const lhs = y + Math.log(v / Math.pow(1.0 + Math.exp(y), 2))
 
-      const rhs = k + n * Math.log(lambda) - gammaLn(n + 1)
+      const rhs = k + n * Math.log(lambda) - logGamma(n + 1)
       if (lhs <= rhs) { return n }
     }
   }

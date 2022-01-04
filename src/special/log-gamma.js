@@ -1,5 +1,7 @@
+/* eslint no-loss-of-precision: 0 */
+
 // Coefficients
-const coeffs = [
+const COEFFS = [
   76.18009172947146,
   -86.50532032941677,
   24.01409824083091,
@@ -27,7 +29,7 @@ export default function (z) {
   let sum = 1.000000000190015
   for (let j = 0; j < 6; j++) {
     y++
-    sum += coeffs[j] / y
+    sum += COEFFS[j] / y
   }
   return res + Math.log(2.5066282746310005 * sum / x)
 }

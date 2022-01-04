@@ -1,5 +1,6 @@
 import { MAX_ITER } from '../special/_core'
 
+// Scaling factor to speed up explorations.
 const SCALE = 1.618
 
 /**
@@ -25,39 +26,43 @@ export default function (f, a0, b0, s) {
     return
   }
 
-  // Start searching.
+  // Initialize variables.
   let a = Math.min(a0, b0)
   const min = s ? s[0].value : -Infinity
   let deltaA = s && s[0].closed ? 0 : 1
   let b = Math.max(a0, b0)
   const max = s ? s[1].value : Infinity
   let deltaB = s && s[1].closed ? 0 : 1
-  let f1 = f(a)
-  let f2 = f(b)
+  let fa = f(a)
+  let fb = f(b)
+  let expansion
+
+  // Start searching.
   for (let k = 0; k < MAX_ITER; k++) {
     // If we have different signs, we are done.
-    if (f1 * f2 < 0.0) {
+    if (fa * fb < 0.0) {
       return [a, b]
     }
 
-    // If lower boundary has a smaller value, extend to the left.
-    if (Math.abs(f1) < Math.abs(f2)) {
-      a = Math.max(a + SCALE * (a - b), min + deltaA)
+    // If lower boundary has a smaller value, extend to the left while respecting the support.
+    expansion = SCALE * (b - a)
+    if (Math.abs(fa) < Math.abs(fb)) {
+      a = Math.max(a - expansion, min + deltaA)
       deltaA /= SCALE
-      f1 = f(a)
-    } else if (Math.abs(f1) > Math.abs(f2)) {
-      // If upper boundary has a smaller value, extend to the right.
-      b = Math.min(b + SCALE * (b - a), max - deltaB)
+      fa = f(a)
+    } else if (Math.abs(fa) > Math.abs(fb)) {
+      // If upper boundary has a smaller value, extend to the right while respecting the support.
+      b = Math.min(b + expansion, max - deltaB)
       deltaB /= SCALE
-      f2 = f(b)
+      fb = f(b)
     } else {
       // If they have the same value, extend in both sides.
-      a = Math.max(a - 1, min + deltaA)
+      a = Math.max(a - expansion, min + deltaA)
       deltaA /= SCALE
-      f1 = f(a)
-      b = Math.min(b + 1, max + deltaB)
+      fa = f(a)
+      b = Math.min(b + expansion, max + deltaB)
       deltaB /= SCALE
-      f2 = f(b)
+      fb = f(b)
     }
   }
 

@@ -1,5 +1,5 @@
 import Distribution from './_distribution'
-import { lambertW0 } from '../special/lambert-w'
+import { lambertW0 } from '../special'
 
 /**
  * Generator for the [generalized exponential distribution]{@link https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_genexpon.html}:

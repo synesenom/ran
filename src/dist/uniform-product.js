@@ -1,7 +1,6 @@
 import Distribution from './_distribution'
 import neumaier from '../algorithms/neumaier'
-import gamma from '../special/gamma'
-import { gammaUpperIncomplete } from '../special/gamma-incomplete'
+import { gamma, gammaUpperIncomplete } from '../special'
 
 // TODO Docs
 export default class extends Distribution {
