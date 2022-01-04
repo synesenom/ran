@@ -4,4 +4,4 @@
  * @namespace ts
  * @memberof ran
  */
-export { default as OnlineCovariance } from './ts/online-covariance'
+export { default as OnlineCovariance } from './online-covariance'
