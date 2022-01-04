@@ -24,35 +24,39 @@ const UnitTests = {
   },
 
   seed (tc) {
+    const sampleSize = 100
+
     it('should give the same sample for the same seed', () => {
       const self = new dist[tc.name]()
       const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
       self.seed(s)
-      const values1 = self.sample(LAPS)
+      const values1 = self.sample(sampleSize)
       self.seed(s)
-      const values2 = self.sample(LAPS)
+      const values2 = self.sample(sampleSize)
       assert(values1.reduce((acc, d, i) => acc && d === values2[i], true))
     })
 
     it('should give different samples for different seeds', () => {
       const self = new dist[tc.name]()
       self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
-      const values1 = self.sample(LAPS)
+      const values1 = self.sample(sampleSize)
       self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
-      const values2 = self.sample(LAPS)
+      const values2 = self.sample(sampleSize)
       assert(values1.reduce((acc, d, i) => acc || d !== values2[i], true))
     })
   },
 
   loadAndSave (tc) {
+    const sampleSize = 100
+
     it('loaded state should continue where it was saved at', () => {
         // Create generator and seed
         const generator = new dist[tc.name]()
         const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
-        const cut = LAPS / 3
+        const cut = Math.floor(sampleSize / 3)
 
         // Generate full sample
-        const values = generator.sample(LAPS)
+        const values = generator.sample(sampleSize)
 
         // Reset generator, create two sub samples
         generator.seed(s)
@@ -60,7 +64,7 @@ const UnitTests = {
         let state = generator.save()
         generator.seed(0)
         generator.load(state)
-        const values2 = generator.sample(LAPS - cut)
+        const values2 = generator.sample(sampleSize - cut)
 
         // Compare samples
         assert(values1.concat(values2).reduce((acc, d, i) => acc || d === values[i], true))
@@ -189,14 +193,14 @@ const UnitTests = {
         it('should pass for own test', () => {
           trials(() => {
             const generator = c.gen()
-            return generator.test(generator.sample(LAPS)).passed
+            return generator.test(generator.sample(SAMPLE_SIZE)).passed
           })
         })
 
         it('should reject foreign distribution', () => {
           trials(() => {
             const generator = c.gen()
-            const sample = generator.sample(LAPS)
+            const sample = generator.sample(SAMPLE_SIZE)
             return !(new dist[tc.foreign.generator](...tc.foreign.params(sample))).test(sample).passed
           })
         })
