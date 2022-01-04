@@ -7,11 +7,13 @@ import PreComputed from '../src/dist/_pre-computed'
 import testCases from './dist-cases'
 import Distribution from '../src/dist/_distribution'
 
-// Constants
-const LAPS = 1000
-// TODO Decrease sample size.
-const LAPS_2 = 1000
 
+// Constants.
+const LAPS = 1000
+const SAMPLE_SIZE = 1000
+
+
+// Unit test suite.
 const UnitTests = {
   constructor (tc) {
     it('should throw error if params are invalid', () => {
@@ -23,39 +25,34 @@ const UnitTests = {
 
   seed (tc) {
     it('should give the same sample for the same seed', () => {
-      trials(() => {
-        const self = new dist[tc.name]()
-        const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
-        self.seed(s)
-        const values1 = self.sample(LAPS_2)
-        self.seed(s)
-        const values2 = self.sample(LAPS_2)
-        return values1.reduce((acc, d, i) => acc && d === values2[i], true)
-      })
+      const self = new dist[tc.name]()
+      const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+      self.seed(s)
+      const values1 = self.sample(LAPS)
+      self.seed(s)
+      const values2 = self.sample(LAPS)
+      assert(values1.reduce((acc, d, i) => acc && d === values2[i], true))
     })
 
     it('should give different samples for different seeds', () => {
-      trials(() => {
-        const self = new dist[tc.name]()
-        self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
-        const values1 = self.sample(LAPS_2)
-        self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
-        const values2 = self.sample(LAPS_2)
-        return values1.reduce((acc, d, i) => acc || d !== values2[i], true)
-      })
+      const self = new dist[tc.name]()
+      self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+      const values1 = self.sample(LAPS)
+      self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+      const values2 = self.sample(LAPS)
+      assert(values1.reduce((acc, d, i) => acc || d !== values2[i], true))
     })
   },
 
   loadAndSave (tc) {
     it('loaded state should continue where it was saved at', () => {
-      trials(() => {
         // Create generator and seed
         const generator = new dist[tc.name]()
         const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
-        const cut = LAPS_2 / 3
+        const cut = LAPS / 3
 
         // Generate full sample
-        const values = generator.sample(LAPS_2)
+        const values = generator.sample(LAPS)
 
         // Reset generator, create two sub samples
         generator.seed(s)
@@ -63,33 +60,29 @@ const UnitTests = {
         let state = generator.save()
         generator.seed(0)
         generator.load(state)
-        const values2 = generator.sample(LAPS_2 - cut)
+        const values2 = generator.sample(LAPS - cut)
 
         // Compare samples
-        return values1.concat(values2)
-          .reduce((acc, d, i) => acc || d === values[i], true)
+        assert(values1.concat(values2).reduce((acc, d, i) => acc || d === values[i], true))
       })
-    })
 
     it('loaded state should copy full state of generator', () => {
-      trials(() => {
         // Create seeded generator
         const generator1 = new dist[tc.name]()
         generator1.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
 
         // Generate original sample
-        generator1.sample(LAPS_2)
+        generator1.sample(LAPS)
         const state = generator1.save()
-        const values1 = generator1.sample(LAPS_2)
+        const values1 = generator1.sample(LAPS)
 
         // Generate new default generator and load state
         const generator2 = new dist[tc.name]().load(state)
-        const values2 = generator2.sample(LAPS_2)
+        const values2 = generator2.sample(LAPS)
 
         // Compare samples
-        return values1.reduce((acc, d, i) => acc || d !== values2[i], true)
+        assert(values1.reduce((acc, d, i) => acc || d !== values2[i], true) === true)
       })
-    })
   },
 
   pdf (tc) {
@@ -105,35 +98,34 @@ const UnitTests = {
     cases.forEach(c => {
       describe(c.name, () => {
         it('pdf should return valid numbers', () => {
-          trials(() => Tests.pdfType(c.gen(), LAPS_2))
+          assert(Tests.pdfType(c.gen(), 100))
         })
         it('pdf should be non-negative', () => {
-          trials(() => Tests.pdfRange(c.gen(), LAPS_2))
+          assert(Tests.pdfRange(c.gen(), 100))
         })
         it('cdf should return valid numbers', () => {
-          trials(() => Tests.cdfType(c.gen(), LAPS_2))
+          assert(Tests.cdfType(c.gen(), 100))
         })
         it('cdf should be in [0, 1]', () => {
-          trials(() => Tests.cdfRange(c.gen(), LAPS_2))
+          assert(Tests.cdfRange(c.gen(), 100))
         })
         it('cdf should be non-decreasing', () => {
-          trials(() => Tests.cdfMonotonicity(c.gen(), LAPS_2))
+          assert(Tests.cdfMonotonicity(c.gen(), 100))
         })
         it('pdf (pmf) should be the differential (difference) of cdf', () => {
-          trials(() => Tests.pdf2cdf(c.gen(), LAPS_2))
+          assert(Tests.pdf2cdf(c.gen(), 100))
         })
-        // Quantile tests use only 10% of the normal sample size due to computational complexity.
         it('quantile should return valid numbers', () => {
-          trials(() => Tests.qType(c.gen(), LAPS_2 / 10))
+          assert(Tests.qType(c.gen(), 100))
         })
         it('quantile should be within support', () => {
-          trials(() => Tests.qRange(c.gen(), LAPS_2 / 10))
+          assert(Tests.qRange(c.gen(), 100))
         })
         it('quantile should be non-decreasing', () => {
-          trials(() => Tests.qMonotonicity(c.gen(), LAPS_2 / 10))
+          assert(Tests.qMonotonicity(c.gen(), 100))
         })
-        it('quantile should satisfy Galois intequalities', () => {
-          trials(() => Tests.qGalois(c.gen(), LAPS_2 / 10))
+        it('quantile should satisfy Galois inequalities', () => {
+          assert(Tests.qGalois(c.gen(), 100))
         })
       })
     })
@@ -151,32 +143,29 @@ const UnitTests = {
 
     cases.forEach(c => {
       describe(c.name, () => {
-        it('sample should contain valid numbers', () => {
-          trials(() => {
-            const sample = c.gen().sample(LAPS_2)
-            return sample.reduce((acc, d) => acc && Number.isFinite(d) && !isNaN(d), true)
-          })
-        })
-
         it('sample should be within the range of the support', () => {
-          trials(() => {
-            const generator = c.gen()
-            const supp = generator.support()
-            const sample = generator.sample(LAPS_2)
-            return sample.reduce((acc, d) => {
-              let above = d >= supp[0].value
-              let below = d <= supp[1].value
-              return acc && above && below
-            }, true)
-          })
+          // Generate sample.
+          const generator = c.gen()
+          const supp = generator.support()
+          const sample = generator.sample(SAMPLE_SIZE)
+
+          // Check if all values are numbers.
+          assert(sample.reduce((acc, d) => acc && Number.isFinite(d) && !isNaN(d), true), 'Sample contains invalid values')
+
+          // Check if values are within range.
+          assert(sample.reduce((acc, d) => {
+            let above = d >= supp[0].value
+            let below = d <= supp[1].value
+            return acc && above && below
+          }, true), 'Sample is out of range')
         })
 
         it('sample values should be distributed correctly', () => {
           trials(() => {
             const generator = c.gen()
             return generator.type() === 'continuous'
-              ? ksTest(generator.sample(LAPS_2), x => generator.cdf(x))
-              : chiTest(generator.sample(LAPS_2), x => generator.pdf(x),
+              ? ksTest(generator.sample(SAMPLE_SIZE), x => generator.cdf(x))
+              : chiTest(generator.sample(SAMPLE_SIZE), x => generator.pdf(x),
                 Object.keys(generator.save().params).length)
           })
         })
@@ -200,14 +189,14 @@ const UnitTests = {
         it('should pass for own test', () => {
           trials(() => {
             const generator = c.gen()
-            return generator.test(generator.sample(LAPS_2)).passed
+            return generator.test(generator.sample(LAPS)).passed
           })
         })
 
         it('should reject foreign distribution', () => {
           trials(() => {
             const generator = c.gen()
-            const sample = generator.sample(LAPS_2)
+            const sample = generator.sample(LAPS)
             return !(new dist[tc.foreign.generator](...tc.foreign.params(sample))).test(sample).passed
           })
         })
