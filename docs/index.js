@@ -58,7 +58,7 @@ function parseEntry (entry) {
       }
     })(),
     examples: entry.examples.length > 0
-      ? hljs.highlight('javascript', entry.examples[0].description).value
+      ? hljs.highlight(entry.examples[0].description, {language: 'javascript'}).value
       : undefined
   }
 }
@@ -112,9 +112,9 @@ function parseEntry (entry) {
   const template = pug.compileFile('./docs/templates/index.pug')
   let page = template({
     install: {
-      browser: hljs.highlight('xml', `<script type="text/javascript" src="ran.min.js"></script>`)
+      browser: hljs.highlight(`<script type="text/javascript" src="ran.min.js"></script>`, {language: 'xml'})
         .value,
-      node: hljs.highlight('bash', 'npm install --save ranjs').value
+      node: hljs.highlight('npm install --save ranjs', {language: 'bash'}).value
     },
     demo: 'https://beta.observablehq.com/@synesenom/ranjs-demo',
     gitHubBanner: fs.readFileSync('./docs/templates/github-banner.html', {encoding: 'utf-8'}),
