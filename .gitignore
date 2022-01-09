@@ -1,7 +1,7 @@
 # Node
 node_modules/*
 
-# Coverage
+# Generated output
 .nyc_output
 coverage
 

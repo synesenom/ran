@@ -1,4 +1,4 @@
-import { EPS, MAX_ITER } from '../special/_core'
+import { EPS, MAX_ITER } from '../core/constants'
 
 /**
  * Class implementing a recursive sum. It is initialized with the zeroth term of the sum, an updater for the term

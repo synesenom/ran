@@ -1,15 +1,23 @@
+# add source of implementations
+- wikipedia
+- boost library
+- numerical recipes
+- intermediate probability book
+
+
 # most important
-- finish marcumQ implementation
-- add unit tests to ran.mc
 - add method references in docs
 - improve special function precision
 - transformation functions to shift/scale generators
 
 
 # dist
-- ARGUS                                 (rejection sampling)
-- beta geometric
-- Beta negative binomial
+- ARGUS                                 https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.argus.html
+                                        https://en.wikipedia.org/wiki/ARGUS_distribution
+- beta geometric                        gen, pmf, cdf: https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bgepdf.htm
+- Beta negative binomial                gen: negative-binomial + beta
+                                        pmf: https://en.wikipedia.org/wiki/Beta_negative_binomial_distribution
+                                        cdf: https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bnbcdf.htm
 - Champernowne                          https://en.wikipedia.org/wiki/Champernowne_distribution
 - crystal ball
 - Davis                                 https://en.wikipedia.org/wiki/Davis_distribution
@@ -38,7 +46,8 @@
 - stable
 - truncated exponential                 scipy
 - truncated normal
-- Waring
+- Waring                                https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bgepdf.htm
+- Yule                                  https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/yulpdf.htm
 
 - list: https://rdrr.io/cran/sadists/f/inst/doc/sadists.pdf
 - list: https://chaospy.readthedocs.io/en/development/distributions/collection.html
@@ -104,3 +113,7 @@
 
 # transform distributions
 - add Transform class that transforms a distribution
+
+
+# special functions
+- list: https://www.boost.org/doc/libs/1_77_0/libs/math/doc/html/special.html

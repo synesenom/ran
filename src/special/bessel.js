@@ -1,4 +1,4 @@
-import { EPS, MAX_ITER } from './_core'
+import { EPS, MAX_ITER } from '../core/constants'
 import gamma from './gamma'
 import recursiveSum from '../algorithms/recursive-sum'
 

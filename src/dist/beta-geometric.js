@@ -1,7 +1,7 @@
 import { logBeta } from '../special'
 import Distribution from './_distribution'
 import PreComputed from './_pre-computed'
-import { beta as rBeta } from './_core'
+import rBeta from './_beta'
 
 /**
  * Generator for the [beta-geometric distribution]{@link https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bgepdf.htm}:

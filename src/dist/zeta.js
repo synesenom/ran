@@ -1,5 +1,5 @@
 import { generalizedHarmonic, riemannZeta } from '../special'
-import { zeta } from './_core'
+import zeta from './_zeta'
 import Distribution from './_distribution'
 
 /**

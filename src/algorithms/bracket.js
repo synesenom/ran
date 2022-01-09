@@ -1,4 +1,4 @@
-import { MAX_ITER } from '../special/_core'
+import { MAX_ITER } from '../core/constants'
 
 // Scaling factor to speed up explorations.
 const SCALE = 1.618

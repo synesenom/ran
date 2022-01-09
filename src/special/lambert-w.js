@@ -1,4 +1,4 @@
-import { MAX_ITER, EPS } from './_core'
+import { MAX_ITER, EPS } from '../core/constants'
 
 function _halley (z, w0) {
   let w = w0

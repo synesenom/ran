@@ -1,5 +1,5 @@
 import { erf, erfc } from '../special'
-import { normal } from './_core'
+import normal from './_normal'
 import Distribution from './_distribution'
 
 /**

@@ -1,4 +1,4 @@
-import { rejection } from './_core'
+import rejection from '../algorithms/rejection'
 import Distribution from './_distribution'
 
 /**

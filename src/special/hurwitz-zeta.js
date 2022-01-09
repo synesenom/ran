@@ -1,4 +1,4 @@
-import { EPS } from './_core'
+import { EPS } from '../core/constants'
 import { B2k } from '../constants/bernoulli'
 import logGamma from './log-gamma'
 

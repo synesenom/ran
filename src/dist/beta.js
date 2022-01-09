@@ -1,5 +1,5 @@
 import { regularizedBetaIncomplete, beta as fnBeta } from '../special'
-import { beta as rBeta } from './_core'
+import rBeta from './_beta'
 import Distribution from './_distribution'
 
 /**

@@ -1,5 +1,6 @@
 import { besselI, marcumQ } from '../special'
-import { gamma, poisson } from './_core'
+import gamma from './_gamma'
+import poisson from './_poisson'
 import Distribution from './_distribution'
 
 /**

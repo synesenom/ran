@@ -1,6 +1,7 @@
 import recursiveSum from '../algorithms/recursive-sum'
 import { regularizedBetaIncomplete, beta as fnBeta, logGamma } from '../special'
-import { chi2, noncentralChi2 } from './_core'
+import chi2 from './_chi2'
+import noncentralChi2 from './_noncentral-chi2'
 import Distribution from './_distribution'
 
 /**

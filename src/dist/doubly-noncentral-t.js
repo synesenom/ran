@@ -1,6 +1,7 @@
 import clamp from '../utils/clamp'
 import Distribution from './_distribution'
-import { noncentralChi2, normal } from './_core'
+import noncentralChi2 from './_noncentral-chi2'
+import normal from './_normal'
 import { f11, gamma, logGamma } from '../special'
 import { acceleratedSum, recursiveSum } from '../algorithms'
 import NoncentralT from './noncentral-t'

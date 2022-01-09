@@ -1,6 +1,6 @@
 import Distribution from './_distribution'
 import PreComputed from './_pre-computed'
-import { poisson } from './_core'
+import poisson from './_poisson'
 
 /**
  * Generator for the [Pólya-Aeppli distribution]{@link https://arxiv.org/abs/1406.2780} (also known as geometric Poisson distribution):

@@ -4,7 +4,7 @@ import some from '../utils/some'
 import { chi2, kolmogorovSmirnov } from './_tests'
 import bracket from '../algorithms/bracket'
 import brent from '../algorithms/brent'
-import { MAX_ITER } from '../special/_core'
+import { MAX_ITER } from '../core/constants'
 
 /**
  * The distribution generator base class, all distribution generators extend this class. The methods listed here

@@ -1,7 +1,9 @@
 import { logBeta } from '../special'
 import PreComputed from './_pre-computed'
 import Distribution from './_distribution'
-import { beta as rBeta, gamma, poisson } from './_core'
+import rBeta from './_beta'
+import gamma from './_gamma'
+import poisson from './_poisson'
 
 export default class extends PreComputed {
   constructor (r = 10, alpha = 1, beta = 1) {

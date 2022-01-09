@@ -1,4 +1,4 @@
-import { MAX_ITER, EPS } from './_core'
+import { MAX_ITER, EPS } from '../core/constants'
 import newton from '../algorithms/newton'
 import logGamma from './log-gamma'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from './gamma-incomplete'

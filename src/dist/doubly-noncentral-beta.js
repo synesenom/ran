@@ -1,9 +1,9 @@
 import clamp from '../utils/clamp'
-import recursiveSum from '../algorithms/recursive-sum'
-import Distribution from './_distribution'
-import { noncentralChi2 } from './_core'
-import { EPS, MAX_ITER } from '../special/_core'
+import { recursiveSum } from '../algorithms'
+import { EPS, MAX_ITER } from '../core/constants'
 import { regularizedBetaIncomplete, beta as fnBeta, logGamma } from '../special'
+import noncentralChi2 from './_noncentral-chi2'
+import Distribution from './_distribution'
 
 /**
  * Generator for the [doubly non-central beta distribution]{@link https://rdrr.io/cran/sadists/f/inst/doc/sadists.pdf}:

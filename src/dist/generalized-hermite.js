@@ -1,5 +1,5 @@
 import { logGamma } from '../special'
-import { poisson } from './_core'
+import poisson from './_poisson'
 import Distribution from './_distribution'
 import PreComputed from './_pre-computed'
 

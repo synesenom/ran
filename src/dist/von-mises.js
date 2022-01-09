@@ -1,7 +1,7 @@
 import recursiveSum from '../algorithms/recursive-sum'
 import { besselI } from '../special'
 import Distribution from './_distribution'
-import { MAX_ITER } from '../special/_core'
+import { MAX_ITER } from '../core/constants'
 
 /**
  * Generator for the [von Mises distribution]{@link https://en.wikipedia.org/wiki/Von_Mises_distribution}:

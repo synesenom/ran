@@ -1,5 +1,5 @@
 import { gammaLowerIncomplete, logGamma } from '../special'
-import { chi2 } from './_core'
+import chi2 from './_chi2'
 import Distribution from './_distribution'
 
 /**

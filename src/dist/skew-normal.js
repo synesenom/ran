@@ -1,5 +1,5 @@
 import clamp from '../utils/clamp'
-import { normal } from './_core'
+import normal from './_normal'
 import { erf, owenT } from '../special'
 import Normal from './normal'
 

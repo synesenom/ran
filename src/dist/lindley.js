@@ -1,4 +1,5 @@
-import { gamma, rejection } from './_core'
+import rejection from '../algorithms/rejection'
+import gamma from './_gamma'
 import Distribution from './_distribution'
 
 /**

@@ -1,4 +1,4 @@
-import { EPS } from '../special/_core'
+import { EPS } from '../core/constants'
 
 /**
  * Computes the first n terms of an alternating series using Algorithm 1 in:

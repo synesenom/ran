@@ -1,4 +1,4 @@
-import { MAX_ITER, EPS } from '../special/_core'
+import { MAX_ITER, EPS } from '../core/constants'
 
 /**
  * Finds the root of a function using [Newton's method]{@link https://en.wikipedia.org/wiki/Newton's_method}.

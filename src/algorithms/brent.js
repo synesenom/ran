@@ -1,4 +1,4 @@
-import { EPS, MAX_ITER } from '../special/_core'
+import { EPS, MAX_ITER } from '../core/constants'
 
 /**
  * Finds the root of a function using Brent's method.

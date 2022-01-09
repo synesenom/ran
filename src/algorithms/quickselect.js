@@ -28,7 +28,7 @@ const _swap = (arr, i, j) => {
  * @private
  */
 function _partition (arr, left, right, pivotIndex) {
-  // TODO Change this to Hoare's partition scheme
+  // TODO Change this to Hoare's partition scheme.
   const pivotValue = arr[pivotIndex]
   _swap(arr, pivotIndex, right)
   let storeIndex = left
