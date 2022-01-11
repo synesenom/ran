@@ -334,7 +334,7 @@ describe('dist', () => {
 
   // Ordinary distributions.
   testCases
-    //.filter(tc => ['DoublyNoncentralT'].indexOf(tc.name) > -1)
+    .filter(tc => ['Lindley'].indexOf(tc.name) > -1)
     .forEach(tc  => {
       describe(tc.name, () => {
         describe('constructor', () => UnitTests.constructor(tc))

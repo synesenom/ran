@@ -1,6 +1,5 @@
-import rejection from '../algorithms/rejection'
-import gamma from './_gamma'
 import Distribution from './_distribution'
+import { lambertW1m } from '../special'
 
 /**
  * Generator for the [Lindley distribution]{@link http://www.hjms.hacettepe.edu.tr/uploads/b35d591c-22f6-4136-8735-20c82936cd64.pdf}:
@@ -36,17 +35,13 @@ export default class extends Distribution {
     // Speed-up constants
     this.c = [
       1 + theta,
-      theta <= 2 ? theta * Math.exp(1 - theta / 2) / 2 : 1
+      Math.exp(-theta - 1) * (1 + theta)
     ]
   }
 
   _generator () {
-    // Rejection sampling with gamma(1, theta/2) distribution as major
-    return rejection(
-      this.r,
-      () => gamma(this.r, 1, this.p.theta / 2),
-      x => this.c[1] * (1 + x) * Math.exp(-0.5 * this.p.theta * x)
-    )
+    // Inverse transform sampling using Lambert W.
+    return -(lambertW1m(-this.r.next() * this.c[1]) + this.c[0]) / this.p.theta
   }
 
   _pdf (x) {
