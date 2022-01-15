@@ -46,7 +46,23 @@ class Vector {
    *
    */
   v () {
-    return this._v
+    return this._v.slice()
+  }
+
+  /**
+   * Returns the dimension of the vector.
+   *
+   * @method dim
+   * @memberof ran.la.Vector
+   * @return {number} Number of dimensions.
+   * @example
+   *
+   * let vec = new ran.la.Vector([1, 2, 3, 4])
+   * vec.dim()
+   * // => 4
+   */
+  dim () {
+    return this._v.length
   }
 
   /**
@@ -83,7 +99,7 @@ class Vector {
    *
    * @method f
    * @memberof ran.la.Vector
-   * @param {Function} func Function to apply on each element.
+   * @param {Function} func Function to apply on each element. May take two arguments: the vector value and the current index.
    * @returns {ran.la.Vector} The transformed matrix.
    * @example
    *
@@ -93,7 +109,7 @@ class Vector {
    *
    */
   f (func) {
-    return new Vector(this._v.map(d => func(d)))
+    return new Vector(this._v.map((d, i) => func(d, i)))
   }
 
   /**

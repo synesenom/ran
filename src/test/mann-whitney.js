@@ -1,4 +1,4 @@
-import Normal from '../dist/normal'
+import { Normal } from '../dist'
 
 /**
  * Marks an array of values with a type.
@@ -87,19 +87,19 @@ function _computeRanks (data) {
  * // => { U: 8.67403054929767, passed: false }
  */
 export default function (dataSets, alpha = 0.05) {
-  // Check data sets
+  // Check data sets.
   if (dataSets.length !== 2) {
     throw Error('dataSets must contain two data sets')
   }
 
-  // Flag data sets
+  // Flag data sets.
   const markedData1 = _markData(dataSets[0], 1)
   const markedData2 = _markData(dataSets[1], 2)
 
-  // Assign ranks
+  // Assign ranks.
   const ranks = _computeRanks(markedData1.concat(markedData2))
 
-  // Compute statistics
+  // Compute statistics.
   const n1 = dataSets[0].length
   const n2 = dataSets[1].length
   const r1 = ranks.filter(d => d.type === 1)
@@ -107,12 +107,12 @@ export default function (dataSets, alpha = 0.05) {
   const u1 = r1 - n1 * (n1 + 1) / 2
   const u = Math.min(u1, n1 * n2 - u1)
 
-  // Standardize U
+  // Standardize U.
   const m = n1 * n2 / 2
   const s = Math.sqrt(n1 * n2 * (n1 + n2 + 1) / 12)
   const z = Math.abs((u - m) / s)
 
-  // Compare against critical value
+  // Compare against critical value.
   return {
     U: z,
     passed: z <= (new Normal()).q(1 - 2 * alpha)

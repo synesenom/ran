@@ -1,5 +1,5 @@
-import variance from '../dispersion/variance'
-import Chi2 from '../dist/chi2'
+import { variance } from '../dispersion'
+import { Chi2 } from '../dist'
 
 /**
  * Calculates the [Bartlett statistics]{@link https://en.wikipedia.org/wiki/Bartlett%27s_test} for multiple data sets.
@@ -25,22 +25,22 @@ import Chi2 from '../dist/chi2'
  * // => { chi2: 104.31185521417476, passed: false }
  */
 export default function (dataSets, alpha = 0.05) {
-  // Check number of data sets
+  // Check number of data sets.
   if (dataSets.length < 2) {
     throw Error('dataSet must contain multiple data sets')
   }
 
-  // Check size of data sets
+  // Check size of data sets.
   for (let i = 0; i < dataSets.length; i++) {
     if (dataSets[i].length < 2) {
       throw Error('Data sets in dataSet must have multiple elements')
     }
   }
 
-  // Number of samples
+  // Number of samples.
   const k = dataSets.length
 
-  // Compute statistics
+  // Compute statistics.
   const N = dataSets.reduce((acc, d) => acc + d.length, 0)
   const nInv = dataSets.reduce((acc, d) => acc + 1 / (d.length - 1), 0)
   const Si = dataSets.map(variance)
@@ -48,7 +48,7 @@ export default function (dataSets, alpha = 0.05) {
   const lnSi = dataSets.reduce((acc, d, i) => acc + (d.length - 1) * Math.log(Si[i]), 0)
   const chi2 = ((N - k) * Math.log(Sp) - lnSi) / (1 + (nInv - 1 / (N - k)) / (3 * (k - 1)))
 
-  // Compare against critical value
+  // Compare against critical value.
   return {
     chi2,
     passed: chi2 <= (new Chi2(k - 1)).q(1 - alpha)

@@ -328,6 +328,22 @@ class Matrix {
     const m = mat.m()
     return this.f((d, i, j) => d * m[i][j])
   }
+
+  /**
+   * Returns the trace of the matrix.
+   *
+   * @method trace
+   * @memberof ran.la.Matrix
+   * @return {number} The trace of the matrix.
+   */
+  trace () {
+    const n = this._m.length
+    let t = 0
+    for (let i = 0; i < n; i++) {
+      t += this._m[i][i]
+    }
+    return t
+  }
 }
 
 export default Matrix
