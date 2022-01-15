@@ -67,8 +67,19 @@ function medianDist (x) {
  * @return {Object} Object containing the test statistics and whether the data sets passed the null hypothesis that
  * they are statistically independent.
  * @throws Error when the number of data sets is less than 2.
+ * @example
+ *
+ * let sample1 = Array.from({length: 50}, (d, i) => i)
+ * let sample2 = sample1.map(d => d + Math.random() - 0.5)
+ * ran.test.hsic([sample1, sample2])
+ * // => { stat: 6.197628059960943, passed: false }
+ *
+ * sample1 = ran.core.float(0, 10, 50)
+ * sample2 = ran.core.float(0, 10, 50)
+ * ran.test.hsic([sample1, sample2])
+ * // => { stat: 0.3876607680368274, passed: true }
  */
-export default function (dataSets, alpha = 0.05) {
+export default function hsic (dataSets, alpha = 0.05) {
   // Check data sets.
   if (dataSets.length !== 2) {
     throw Error('dataSets must contain two data sets')
