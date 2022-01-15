@@ -25,5 +25,5 @@ jobs:
 workflows:
   test_my_app:
     jobs:
-      - install_node_example
+      - install-node-example
       - test
