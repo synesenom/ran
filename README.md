@@ -1,4 +1,4 @@
-[![Build Status](https://img.shields.io/travis/synesenom/ran/master.svg)](https://travis-ci.org/synesenom/ran)
+[![CircleCI](https://img.shields.io/circleci/build/github/synesenom/ran)](https://app.circleci.com/pipelines/github/synesenom/ran)
 [![Coverage Status](https://coveralls.io/repos/github/synesenom/ran/badge.svg?branch=master)](https://coveralls.io/github/synesenom/ran?branch=master)
 [![npm](https://img.shields.io/npm/v/ranjs.svg)](https://www.npmjs.com/package/ranjs)
 [![David](https://img.shields.io/david/synesenom/ranjs.svg)](https://david-dm.org/synesenom/ran)
