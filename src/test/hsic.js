@@ -63,10 +63,12 @@ function medianDist (x) {
  * @method hsic
  * @memberof ran.test
  * @param {Array[]} dataSets Array containing the two data sets.
- * @param {number} alpha Confidence level.
+ * @param {number} [alpha = 0.05] Confidence level.
  * @return {Object} Object containing the test statistics and whether the data sets passed the null hypothesis that
  * they are statistically independent.
- * @throws Error when the number of data sets is less than 2.
+ * @throws {Error} If the number of data sets is less than 2.
+ * @throws {Error} If the data sets have different sample size.
+ * @throws {Error} If the sample size is less than 6.
  * @example
  *
  * let sample1 = Array.from({length: 50}, (d, i) => i)
@@ -83,6 +85,18 @@ export default function hsic (dataSets, alpha = 0.05) {
   // Check data sets.
   if (dataSets.length !== 2) {
     throw Error('dataSets must contain two data sets')
+  }
+
+  // Check for equal sample size.
+  if (dataSets[0].length !== dataSets[1].length) {
+    throw Error('Data sets must have the same length')
+  }
+
+  // Check size of data sets.
+  for (let i = 0; i < dataSets.length; i++) {
+    if (dataSets[i].length < 6) {
+      throw Error('Data sets in dataSet must have at least 6 elements')
+    }
   }
 
   // Convert data sets to vectors.

@@ -178,7 +178,20 @@ export default [{
   cases: [{
     params: () => [Param.degree() * 5, Param.shape(), Param.shape()]
   }]
-}, {
+}/*, {
+  name: 'BetaGeometric',
+  invalidParams: [
+    [-1, 1],                    // alpha < 0
+    [1,  -1]                    // beta < 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.shape(), Param.shape()]
+  }]
+}*/, {
   name: 'BetaPrime',
   invalidParams: [
     [-1, 2], [0, 2], // alpha > 0

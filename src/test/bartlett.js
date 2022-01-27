@@ -7,11 +7,11 @@ import { Chi2 } from '../dist'
  * @method bartlett
  * @memberof ran.test
  * @param {Array[]} dataSets Array containing the data sets.
- * @param {number} alpha Confidence level.
- * @returns {Object} Object containing the test statistics and whether the data sets passed the null hypothesis that
+ * @param {number} [alpha = 0.05] Confidence level.
+ * @returns {Object} Object containing the test statistics (chi2) and whether the data sets passed the null hypothesis that
  * their variances are the same.
- * @throws Error when the number of data sets is less than 2.
- * @throws Error when the size of any data set is less than 2 elements.
+ * @throws {Error} If the number of data sets is less than 2.
+ * @throws {Error} If the size of any data set is less than 2 elements.
  * @example
  *
  * let normal1 = new ran.dist.Normal(1, 2)
@@ -19,10 +19,10 @@ import { Chi2 } from '../dist'
  * let normal3 = new ran.dist.Normal(1, 5)
  *
  * ran.test.bartlett([normal1.sample(100), normal1.sample(100), normal1.sample(100)], 0.1)
- * // => { chi2: 0.09827551592930094, passed: true }
+ * // => { stat: 0.09827551592930094, passed: true }
  *
  * ran.test.bartlett([normal1.sample(100), normal2.sample(100), normal3.sample(100)], 0.1)
- * // => { chi2: 104.31185521417476, passed: false }
+ * // => { stat: 104.31185521417476, passed: false }
  */
 export default function (dataSets, alpha = 0.05) {
   // Check number of data sets.
@@ -50,7 +50,7 @@ export default function (dataSets, alpha = 0.05) {
 
   // Compare against critical value.
   return {
-    chi2,
+    stat: chi2,
     passed: chi2 <= (new Chi2(k - 1)).q(1 - alpha)
   }
 }

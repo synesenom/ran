@@ -7,6 +7,7 @@ const { mjpage } = require('mathjax-node-page');
 const DescParser = require('./src/desc-parser');
 const ParamParser = require('./src/param-parser');
 const TypeParser = require('./src/type-parser');
+const ThrowsParser = require('./src/throws-parser');
 
 
 // Register highlight languages.
@@ -41,6 +42,7 @@ function getSortedEntries (entries, priority) {
 function parseEntry (entry) {
   const name = entry.name
   const params = entry.params.map(ParamParser)
+  const throws = entry.throws.map(ThrowsParser)
 
   return {
     name,
@@ -57,6 +59,7 @@ function parseEntry (entry) {
         type: TypeParser(ret.type)
       }
     })(),
+    throws: throws.length > 0 ? throws : undefined,
     examples: entry.examples.length > 0
       ? hljs.highlight(entry.examples[0].description, {language: 'javascript'}).value
       : undefined
@@ -67,17 +70,20 @@ function parseEntry (entry) {
 // TODO Make equations readable by replacing e^{} with exp.
 (async () => {
   // Compile style.
+  console.log('Compiling style')
   const style = sass.renderSync({
     file: './docs/styles/index.scss',
     outputStyle: 'compressed'
   }).css.toString()
 
   // Parse documentation strings starting from index.js.
+  console.log('Parsing docstrings')
   const root = await documentation.build([
     './src/index.js'
   ], {})
 
   // Build API documentation.
+  console.log('Building API content')
   const docs = root[0].members.static
     .sort((a, b) => a.name.localeCompare(b.name))
     .map(m => ({
@@ -97,18 +103,21 @@ function parseEntry (entry) {
     }))
 
   // Build menu.
+  console.log('Building the menu')
   const menu = docs.map(({name, members}) => ({
     name,
     members: members.map(({index, name}) => ({index, name}))
   }))
 
   // Build search list.
+  console.log('Building the search list')
   const searchList = menu.reduce((list, section) => list.concat(section.members.map(d => d.index)), [])
 
   // Build API.
   const api = docs.map(d => d.members).flat()
 
   // Compile index template.
+  console.log('Compiling the template')
   const template = pug.compileFile('./docs/templates/index.pug')
   let page = template({
     install: {
@@ -126,6 +135,7 @@ function parseEntry (entry) {
   })
 
   // Pre-render math.
+  console.log('Pre-rendering math')
   mjpage(page, {
     format: ['TeX'],
     singleDollars: true,

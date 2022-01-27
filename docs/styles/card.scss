@@ -3,14 +3,14 @@
 
 
 .card {
-  margin: 0 30px 120px 30px;
+  margin-top: 120px;
 
   .title {
     font-family: 'Courier', monospace;
     font-size: 1.1em;
     padding: 20px 25px;
     background-color: $colorCardTitle;
-    border-left: 4px solid royalblue;
+    border-left: 8px solid royalblue;
     overflow-x: scroll;
 
     &::-webkit-scrollbar {
@@ -20,20 +20,24 @@
   }
 
   .desc {
-    margin: 10px 0 20px 0;
+    margin-top: 10px;
+    margin-bottom: 20px;
   }
 
-  .returns {
+  .returns,
+  .throws {
     margin-top: 10px;
     display: inline-block;
   }
 
-  .return-type {
+  .return-type,
+  .throws-type {
     width: 150px;
     float: left
   }
 
-  .return-desc {
+  .return-desc,
+  .throws-desc {
     width: calc(100% - 150px);
     float: right;
     padding-top: 3px;
@@ -46,4 +50,15 @@
       }
     }
   }
+
+  .throws-entry {
+    width: 100%;
+    display: inline-block;
+  }
+}
+
+.margined, h3 {
+  width: calc(100% - 60px);
+  margin-left: 30px;
+  margin-right: 30px;
 }

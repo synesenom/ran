@@ -7,4 +7,14 @@
   main {
     width: calc(100% - 250px);
   }
+
+  .card {
+    margin: 0 30px 120px 30px;
+  }
+
+  .margined, h3 {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
 }

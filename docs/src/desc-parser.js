@@ -18,7 +18,7 @@ const assembleLinks = children => {
       const linkText = extractLinkText(children[i])
       const context = removeLinkText(children[i], linkText)
       const linkUrl = extractLinkURL(children[i + 1])
-      children[i].value = `${context} <a href='${linkUrl}'>${linkText}</a>`
+      children[i].value = `${context} <a href='${linkUrl}' target='_blank'>${linkText}</a>`
       delete children[i + 1]
       i += 2
     }

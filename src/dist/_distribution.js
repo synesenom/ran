@@ -43,7 +43,7 @@ class Distribution {
    * @memberof Distribution
    * @param {Object} params Object containing the parameters to validate.
    * @param {string[]} constraints Array of strings defining the parameter constraints.
-   * @throws Error when any of the parameters don't satisfy the constraints.
+   * @throws {Error} If any of the parameters don't satisfy the constraints.
    * @ignore
    */
   static validate (params, constraints) {

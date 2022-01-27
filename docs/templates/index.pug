@@ -45,10 +45,10 @@ html(lang="en")
             each entry in api
                 .card
                     pre.title(id="" + entry.index) #{entry.signature}
-                    .desc !{entry.desc}
+                    .desc.margined !{entry.desc}
                     if entry.params
                         h3 Parameters
-                        table
+                        table.margined
                             thead
                                 tr
                                     th.param-name Name
@@ -64,11 +64,19 @@ html(lang="en")
                                         td.param-desc !{param.desc}
                     if entry.returns
                         h3 Returns
-                        .returns
+                        .returns.margined
                             .return-type
                                 each type in entry.returns.type
                                     code.type #{type}
                             .return-desc !{entry.returns.desc}
+                    if entry.throws
+                        h3 Throws
+                        .throws.margined
+                            each exception in entry.throws
+                                .throws-entry
+                                    .throws-type
+                                          code.type #{exception.type}
+                                    .throws-desc !{exception.desc}
                     if entry.examples
                         h3 Examples
                         pre
