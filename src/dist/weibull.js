@@ -37,12 +37,13 @@ export default class extends Exponential {
   }
 
   _generator () {
-    // Direct sampling by transforming exponential variate
-    return this.p.lambda2 * Math.pow(super._generator(), 1 / this.p.k)
+    // Inverse transform sampling.
+    return this._q(this.r.next())
   }
 
   _pdf (x) {
-    return this.p.k * Math.pow(x / this.p.lambda2, this.p.k - 1) * super._pdf(Math.pow(x / this.p.lambda2, this.p.k)) / this.p.lambda2
+    const t = x / this.p.lambda2
+    return this.p.k * Math.pow(t, this.p.k - 1) * super._pdf(Math.pow(t, this.p.k)) / this.p.lambda2
   }
 
   _cdf (x) {

@@ -536,6 +536,20 @@ export default [{
     params: () => [Param.prob(), Param.scale()]
   }]
 }, {
+  name: 'ExponentiatedWeibull',
+  invalidParams: [
+    [-1, 1, 1], [0, 1, 1],  // lambda > 0
+    [1, -1, 1], [1, 0, 1],  // k > 0
+    [1, 1, -1], [1, 1, 0]   // alpha > 0
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.scale(), Param.shape(), Param.shape()]
+  }]
+}, {
   name: 'F',
   invalidParams: [
     [-1, 2], [0, 2],  // d1 > 0

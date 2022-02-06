@@ -25,7 +25,6 @@
 - double exponential
 - Error / exponential power
 - Exponentially modified Gaussian
-- exponentiated weibull
 - extended negative binomial            https://en.wikipedia.org/wiki/Extended_negative_binomial_distribution
 - Gauss hypergeometric                  scipy
 - generalized beta-prime
@@ -63,13 +62,11 @@
 - analysis of similarities (group variance)
 - anderson-darling (distribution)
 - breusch-pagan (heteroscedasticity)
-- brown-forsythe (group variance)
 - cramer-von mises (distribution)
 - wald (hypothesis test)
 - welch (equal mean)
 - wilcoxon (hypothesis test)
 - shapiro-wilk (normality)
-- levene's test
 - list: https://docs.scipy.org/doc/scipy/reference/stats.html
 
 

@@ -1,5 +1,6 @@
 import { terser } from 'rollup-plugin-terser'
-import { nodeResolve } from '@rollup/plugin-node-resolve';import * as meta from "./package.json";
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import * as meta from "./package.json";
 
 const copyright = `// ${meta.homepage} v${meta.version} Copyright ${(new Date).getFullYear()} ${meta.author.name}`;
 

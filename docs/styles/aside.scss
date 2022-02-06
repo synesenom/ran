@@ -111,13 +111,13 @@ aside {
       display: block;
       list-style: none;
       padding: 0;
-      border-left: 1px solid #ddd;
+      border-left: 1px solid #999;
 
       a {
         &, &:visited {
           display: block;
           text-decoration: none;
-          color: #bbb;
+          color: #999;
           font-family: 'Courier', monospace;
           font-size: 0.8em;
           padding: 4px 8px;

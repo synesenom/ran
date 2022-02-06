@@ -334,7 +334,7 @@ describe('dist', () => {
 
   // Ordinary distributions.
   testCases
-    //.filter(tc => ['BetaGeometric'].indexOf(tc.name) > -1)
+    //.filter(tc => ['Weibull', 'ExponentiatedWeibull'].indexOf(tc.name) > -1)
     .forEach(tc  => {
       describe(tc.name, () => {
         describe('constructor', () => UnitTests.constructor(tc))
