@@ -11,3 +11,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Exponentiated Weibull distribution.
 - Minor style change in docs.
 - Changelog added.
+- Romberg's method for numerical integration added.

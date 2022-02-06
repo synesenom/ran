@@ -6,7 +6,7 @@ import * as algorithms from '../src/algorithms'
 import { int, shuffle } from '../src/core'
 
 const LAPS = 100
-const PRECISION = 10 * Number.EPSILON
+const PRECISION = 1e-10
 
 describe('algorithms', () => {
   describe('.bracket()', () => {
@@ -113,6 +113,20 @@ describe('algorithms', () => {
           (4 * a * a * a - a * a) / 3
         )
       }, LAPS)
+    })
+  })
+
+  describe('romberg()', () => {
+    it('should integrate the function x^3 exp(-x)', () => {
+      const integral = t => Math.exp(-t) * (-t * (t * (t + 3) + 6) - 6) + 6
+      for (let b = 0.1; b < 10;  b++) {
+        const i = algorithms.romberg(
+          t => Math.pow(t, 3) * Math.exp(-t),
+          0,
+          b
+        )
+        assert(Math.abs((i - integral(b)) / i) < PRECISION)
+      }
     })
   })
 

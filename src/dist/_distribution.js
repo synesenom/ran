@@ -215,8 +215,7 @@ class Distribution {
     // Perform root-finding using Brent's method.
     if (typeof bounds !== 'undefined') {
       return Math.min(Math.max(
-        brent(t => this.cdf(t) - p, ...bounds),
-        this.s[0].value), this.s[1].value
+        brent(t => this.cdf(t) - p, ...bounds), this.s[0].value), this.s[1].value
       )
     }
   }

@@ -38,7 +38,6 @@ export default class extends Distribution {
   }
 
   _generator () {
-    // Inverse transform sampling
     let k = 1
     const r = this.r.next()
     let ak = 1 + this.p.a
