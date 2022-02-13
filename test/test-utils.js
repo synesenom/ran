@@ -1,5 +1,4 @@
 import { assert } from 'chai'
-import seedrandom from 'seedrandom'
 
 
 // Constants
@@ -51,7 +50,7 @@ function getTestRange (dist) {
   return [
     Number.isFinite(dist.support()[0].value) ? dist.support()[0].value - 1 : -50,
     Number.isFinite(dist.support()[1].value) ? dist.support()[1].value + 1 : 50
-  ].concat([0, 1e-10])
+  ]
 }
 
 function runX (dist, laps, unitTest) {

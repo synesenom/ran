@@ -389,7 +389,22 @@ export default [{
   cases: [{
     params: () => [Param.shape(), Param.shape(), Param.scale()]
   }]
-}, {
+}/*, {
+  name: 'Davis',
+  invalidParams: [
+    [-1, 1, 1.5], [0, 1, 1.5],  // mu > 0
+    [1, -1, 1.5], [1, 0, 1.5],  // b > 0
+    [1, 1, -1], [1, 1, 0],      // n > 0
+    [1, 1, 1]                   // n != 1
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.shape(), Param.scale(), Param.shape()]
+  }]
+}*/, {
   name: 'Delaporte',
   invalidParams: [
     [-1, 1, 1], [0, 1, 1],  // alpha > 0
@@ -966,6 +981,16 @@ export default [{
   },
   cases: [{
     params: () => [Param.location(), Param.scale(), Param.scale(), Param.location()]
+  }]
+}, {
+  name: 'Kolmogorov',
+  invalidParams: [],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => []
   }]
 }, {
   name: 'Kumaraswamy',
