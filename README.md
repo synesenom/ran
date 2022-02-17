@@ -1,8 +1,6 @@
 [![CircleCI](https://img.shields.io/circleci/build/github/synesenom/ran)](https://app.circleci.com/pipelines/github/synesenom/ran)
 [![Coverage Status](https://coveralls.io/repos/github/synesenom/ran/badge.svg?branch=master)](https://coveralls.io/github/synesenom/ran?branch=master)
 [![npm](https://img.shields.io/npm/v/ranjs.svg)](https://www.npmjs.com/package/ranjs)
-[![David](https://img.shields.io/david/synesenom/ranjs.svg)](https://david-dm.org/synesenom/ran)
-[![David](https://img.shields.io/david/dev/synesenom/ranjs.svg)](https://david-dm.org/synesenom/ran)
 [![Inline docs](http://inch-ci.org/github/synesenom/ran.svg?branch=master)](http://inch-ci.org/github/synesenom/ran)
 [![License](https://img.shields.io/npm/l/ranjs.svg)](https://www.npmjs.com/package/ranjs)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)

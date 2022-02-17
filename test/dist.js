@@ -344,7 +344,7 @@ describe('dist', () => {
 
   // Ordinary distributions.
   testCases
-    //.filter(tc => ['Kolmogorov'].indexOf(tc.name) > -1)
+    //.filter(tc => ['TruncatedNormal'].indexOf(tc.name) > -1)
     .forEach(tc  => {
       describe(tc.name, () => {
         describe('constructor', () => UnitTests.constructor(tc))

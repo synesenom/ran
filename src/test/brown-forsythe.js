@@ -1,4 +1,4 @@
-import {generalLevene} from './levene'
+import { generalLevene } from './levene'
 import { median } from '../location'
 
 /**

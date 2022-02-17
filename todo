@@ -44,7 +44,6 @@
 - power-lognormal                       scipy
 - stable
 - truncated exponential                 scipy
-- truncated normal
 - Waring                                https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bgepdf.htm
 - Yule                                  https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/yulpdf.htm
 

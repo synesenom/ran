@@ -33,7 +33,7 @@ export default class Davis extends Distribution {
   _pdf (x) {
     let y = 0
     for (let k = 0; k < MAX_ITER; k++) {
-      const dy = (k % 2 === 0 ? 1 : -1) * k**2 * x * Math.exp(-2 * (k * x)**2)
+      const dy = (k % 2 === 0 ? 1 : -1) * k ** 2 * x * Math.exp(-2 * (k * x) ** 2)
       y += dy
       if (Math.abs(dy) < EPS * Math.abs(y)) {
         return -8 * y
@@ -45,7 +45,7 @@ export default class Davis extends Distribution {
   _cdf (x) {
     let y = 0
     for (let k = 1; k < MAX_ITER; k++) {
-      const dy = (k % 2 === 0 ? 1 : -1) * Math.exp(-2 * (k * x)**2)
+      const dy = (k % 2 === 0 ? 1 : -1) * Math.exp(-2 * (k * x) ** 2)
       y += dy
       if (Math.abs(dy) < EPS * Math.abs(y)) {
         return 1 + 2 * y

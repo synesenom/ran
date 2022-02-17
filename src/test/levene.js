@@ -15,7 +15,7 @@ import { F } from '../dist'
  * @throws {Error} If the size of any data set is less than 2 elements.
  * @ignore
  */
-export function generalLevene(dataSets, alpha, aggregator) {
+export function generalLevene (dataSets, alpha, aggregator) {
 // Check number of data sets.
   if (dataSets.length < 2) {
     throw Error('dataSet must contain multiple data sets')
@@ -31,11 +31,11 @@ export function generalLevene(dataSets, alpha, aggregator) {
   const Zij = dataSets.map((data, i) => data.map(d => Math.abs(d - Yi[i])))
   const Zi = Zij.map(mean)
   const Z = mean(Zij.flat())
-  const num = Ni.reduce((sum, n, i) => sum + n * (Zi[i] - Z)**2, 0)
+  const num = Ni.reduce((sum, n, i) => sum + n * (Zi[i] - Z) ** 2, 0)
   let denom = 0
   for (let i = 0; i < k; i++) {
     for (let j = 0; j < Ni[i]; j++) {
-      denom += (Zij[i][j] - Zi[i])**2
+      denom += (Zij[i][j] - Zi[i]) ** 2
     }
   }
   const stat = (N - k) * num / ((k - 1) * denom)

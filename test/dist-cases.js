@@ -1665,6 +1665,19 @@ export default [{
     params: () => [Param.rangeMin(), Param.rangeMax(), Param.rangeIn()]
   }]
 }, {
+  name: 'TruncatedNormal',
+  invalidParams: [
+    [0, -1, 0, 1], [0, 0, 0, 1], // sigma > 0
+    [0, 1, 0, 0], [0, 1, 1, 0]   // b > a
+  ],
+  foreign: {
+    generator: 'Uniform',
+    params: s => [Math.min(...s), Math.max(...s)]
+  },
+  cases: [{
+    params: () => [Param.location(), Param.scale(), Param.rangeMin(), Param.rangeMax() + 1]
+  }]
+}, {
   name: 'TukeyLambda',
   invalidParams: [],
   foreign: {

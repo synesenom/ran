@@ -16,7 +16,7 @@ import { median } from '../location'
  * @return {ran.la.Matrix} The inner product.
  * @private
  */
-function rbfDot(x, y, deg) {
+function rbfDot (x, y, deg) {
   const n1 = x.dim()
   const n2 = y.dim()
 

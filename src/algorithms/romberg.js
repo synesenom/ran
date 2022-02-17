@@ -8,11 +8,11 @@ function trapezoid (f, a, b, n) {
   if (n === 1) {
     return 0.5 * (b - a) * (f(a) + f(b))
   } else {
-    let m = 2**(n - 2)
-    let h = (b - a) / m
+    const m = 2 ** (n - 2)
+    const h = (b - a) / m
     let x = a + 0.5 * h
     let s = 0
-    for (let i = 0; i < m; i++, x+=h) {
+    for (let i = 0; i < m; i++, x += h) {
       s += f(x)
     }
     return 0.5 * (trapezoid(f, a, b, n - 1) + h * s)
@@ -22,11 +22,11 @@ function trapezoid (f, a, b, n) {
 function interpolate (xa, ya, n, x) {
   let ns = 1
   let dif = Math.abs(x - xa[1])
-  let c = new Array(n + 1).fill(0)
-  let d = new Array(n + 1).fill(0)
+  const c = new Array(n + 1).fill(0)
+  const d = new Array(n + 1).fill(0)
 
   for (let i = 1; i <= n; i++) {
-    let dift = Math.abs(x - xa[i])
+    const dift = Math.abs(x - xa[i])
     if (dift < dif) {
       ns = i
       dif = dift
@@ -49,7 +49,7 @@ function interpolate (xa, ya, n, x) {
     dy = 2 * ns < n - m ? c[ns + 1] : d[ns--]
     y += dy
   }
-  return {dy, y}
+  return { dy, y }
 }
 
 /**
@@ -63,14 +63,14 @@ function interpolate (xa, ya, n, x) {
  * @return {number} The approximate integral of the function.
  * @private
  */
-export default function (f, a, b){
-  let s = new Array(MAX_STEPS + 1)
-  let h = new Array(MAX_STEPS + 1).fill(1)
+export default function (f, a, b) {
+  const s = new Array(MAX_STEPS + 1)
+  const h = new Array(MAX_STEPS + 1).fill(1)
 
   for (let j = 0; j < MAX_STEPS; j++) {
     s[j] = trapezoid(f, a, b, j + 1)
     if (j >= POLYNOMIAL_ORDER - 1) {
-      let {dy, y} = interpolate(h.slice(j - POLYNOMIAL_ORDER), s.slice(j - POLYNOMIAL_ORDER), POLYNOMIAL_ORDER, 0)
+      const { dy, y } = interpolate(h.slice(j - POLYNOMIAL_ORDER), s.slice(j - POLYNOMIAL_ORDER), POLYNOMIAL_ORDER, 0)
       if (Math.abs(dy) < EPS * Math.abs(y)) {
         return y
       }
