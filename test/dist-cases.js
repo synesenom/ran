@@ -1675,7 +1675,10 @@ export default [{
     params: s => [Math.min(...s), Math.max(...s)]
   },
   cases: [{
-    params: () => [Param.location(), Param.scale(), Param.rangeMin(), Param.rangeMax() + 1]
+    params: () => {
+      const a = Param.location()
+      return [Param.location(), Param.scale(), a, a + 5 + 10 * Math.random()]
+    }
   }]
 }, {
   name: 'TukeyLambda',

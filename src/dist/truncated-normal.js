@@ -38,7 +38,7 @@ export default class extends Normal {
       closed: true
     }]
 
-    // Speed-up constants
+    // Speed-up constants.
     this.c2 = [
       super._cdf(a),
       super._cdf(b) - super._cdf(a)
