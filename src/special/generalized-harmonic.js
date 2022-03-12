@@ -12,5 +12,15 @@ import hurwitzZeta from './hurwitz-zeta'
  * @private
  */
 export default function (n, m) {
+  if (n < 10) {
+    // If n is small, just calculate it exactly.
+    let z = 0
+    for (let k = 1; k <= n; k++) {
+      z += 1 / k**m
+    }
+    return z
+  }
+
+  // Otherwise use the zeta functions.
   return riemannZeta(m) - hurwitzZeta(m, n + 1)
 }
