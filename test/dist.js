@@ -123,7 +123,7 @@ const UnitTests = {
         })
 
         it('quantile should be non-decreasing', () => {
-          assert(Tests.qMonotonicity(c.generate(), 100))
+          Tests.qMonotonicity(c.generate())
         })
 
         it('quantile should satisfy Galois inequalities', () => {
@@ -341,7 +341,7 @@ describe('dist', () => {
 
   // Ordinary distributions.
   testCases
-    .filter(tc => ['TruncatedNormal'].indexOf(tc.name) > -1)
+    .filter(tc => ['Kolmogorov'].indexOf(tc.name) > -1)
     .forEach(tc  => {
       describe(tc.name, () => {
         describe('constructor', () => UnitTests.constructor(tc))
@@ -353,38 +353,51 @@ describe('dist', () => {
       })
     })
 
-  // Degenerate distribution
+  // Degenerate distribution.
   describe('Degenerate', () => {
-    const p = () => [float(-10, 10)]
     describe('.sample()', () => {
-      it('should generate values with Degenerate distribution', () => {
-        trials(() => {
-          const x0 = p()
-          let degenerate = new dist.Degenerate(...x0)
-          const samples = degenerate.sample(LAPS)
-          return samples.reduce((s, d) => s && d === x0[0], true)
-        })
-
-        trials(() => {
+      describe('default parameters', () => {
+        it('should generate values with Degenerate distribution', () => {
           let degenerate = new dist.Degenerate()
-          const samples = degenerate.sample(LAPS)
-          return samples.reduce((s, d) => s && d === 0, true)
+          degenerate.sample(LAPS).forEach(d => {
+            assert(d === 0)
+          })
+        })
+      })
+      describe('random parameters', () => {
+        it('should generate values with Degenerate distribution', () => {
+          const x0 = float()
+          let degenerate = new dist.Degenerate(x0)
+          degenerate.sample(LAPS).forEach(d => {
+            assert(d === x0)
+          })
         })
       })
     })
 
     describe('.pdf(), .cdf()', () => {
-      it('differentiating cdf should give pdf', () => {
-        repeat(() => {
-          const x0 = p()
-          let degenerate = new dist.Degenerate(...x0)
-          assert.equal(degenerate.pdf(x0[0]), 1)
-          assert.equal(degenerate.pdf(x0[0] + Math.random() * 2 - 1), 0)
-          assert.equal(degenerate.cdf(x0[0] - Math.random()), 0)
-          assert.equal(degenerate.cdf(x0[0]), 1)
-          assert.equal(degenerate.cdf(x0[0] + Math.random()), 1)
-        }, LAPS)
+      describe('default parameters', () => {
+        it('differentiating cdf should give pdf', () => {
+          let degenerate = new dist.Degenerate()
+          assert.equal(degenerate.pdf(0), 1)
+          assert.equal(degenerate.pdf(Math.random() * 2 - 1), 0)
+          assert.equal(degenerate.cdf(-Math.random()), 0)
+          assert.equal(degenerate.cdf(0), 1)
+          assert.equal(degenerate.cdf(Math.random()), 1)
+        })
       })
+      describe('random parameters', () => {
+        it('differentiating cdf should give pdf', () => {
+          const x0 = float()
+          let degenerate = new dist.Degenerate(x0)
+          assert.equal(degenerate.pdf(x0), 1)
+          assert.equal(degenerate.pdf(x0 + Math.random() * 2 - 1), 0)
+          assert.equal(degenerate.cdf(x0 - Math.random()), 0)
+          assert.equal(degenerate.cdf(x0), 1)
+          assert.equal(degenerate.cdf(x0 + Math.random()), 1)
+        })
+      })
+
     })
   })
 })

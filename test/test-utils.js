@@ -328,7 +328,7 @@ export const Tests = {
     return runP(dist, (d, p) => {
       let x1 = d.q(p)
       let x2 = d.q(p + 1e-3)
-      return safeCompare(x1, x2)
+      assert(safeCompare(x1, x2), `q(${x1}; ${getParamList(d)}) > q(${x2}; ${getParamList(d)})`)
     })
   },
 
