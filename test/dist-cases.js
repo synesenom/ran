@@ -1676,8 +1676,10 @@ export default [{
   },
   cases: [{
     params: () => {
+      // Choose the peak somewhere within the support to avoid a completely flat distribution.
       const a = Param.location()
-      return [Param.location(), Param.scale(), a, a + 5 + 10 * Math.random()]
+      const b = a + float(5, 10)
+      return [float(a, b), Param.scale(), a, b]
     }
   }]
 }, {

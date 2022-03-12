@@ -2,7 +2,9 @@ import { assert } from 'chai'
 
 
 // Constants
+const H = 0.01
 const PRECISION = 1e-10
+const RANGE_STEPS = 100
 
 // Critical values for P = 0.01
 // Source: https://www.medcalc.org/manual/chi-square-table.php
@@ -38,12 +40,81 @@ const CHI_TABLE_HIGH = [
   895.984, 948.848, 1001.630, 1054.334, 1106.969
 ]
 
-function safeCompare (a, b) {
-  return b - a > -PRECISION
+
+export function equal (x, y, precision = 10) {
+  return Math.abs((x - y) / y) < Math.pow(10, -precision)
 }
 
-function differentiate (f, x, h) {
-  return (f(x + h) - f(x - h)) / (2 * h)
+function almostEqual(a, b, tol = PRECISION) {
+  return Math.abs(a - b) < tol
+}
+
+function safeCompare (a, b) {
+  return b - a >= 0//-PRECISION
+}
+
+function _a(f, x, h, n, m) {
+  if (n === 1) {
+    const h2 = h / Math.pow(2, m - 1)
+    return (f(x + h2) - f(x - h2)) / h2 / 2
+  } else {
+    const c = Math.pow(4, n - 1)
+    return (c * _a(f, x, h, n - 1, m + 1) - _a(f, x, h, n - 1, m)) / (c - 1)
+  }
+}
+
+function differentiate (f, x, h = 0.01) {
+  return _a(f, x, h, 5, 1)
+  /*
+  let res = _a(f, x, h, 1, 1)
+  let err
+  for (let n = 2; n <= 10; n++) {
+    for (let m = 1; m <= 10; m++) {
+      let res2 = _a(f, x, h, n, m)
+      err = Math.abs(res2 - res) / res
+      console.log(res2)
+      if (err < Number.EPSILON) {
+        return res2
+      }
+      res = res2
+    }
+  }
+  return res
+
+  //return (4 * _a(f, x, 0.001, 1, 2) - _a(f, x, 0.001, 1, 1)) / 3
+  /*
+  const CON = 1.4
+  const CON2 = CON * CON
+  const BIG = 1e30
+  const NTAB = 10
+  const SAFE = 2.0
+
+  let i, j
+  let errt, fac, hh, a, ans, err
+  a = Array.from({length: NTAB + 1}, () => Array.from({length: NTAB + 1}))
+  hh = h
+  a[1][1] = (f(x + hh) - f(x - hh)) / (2 * hh)
+  err = BIG
+
+  for (i = 2; i <= NTAB; i++) {
+    hh /= CON
+    a[1][i] = (f(x + hh) - f(x - hh)) / (2 * hh)
+    fac = CON2
+    for (j = 2; j <= i; j++) {
+      a[j][i] = (a[j-1][i]*fac - a[j-1][i-1]) / (fac-1)
+      fac = CON2 * fac
+      errt = Math.max(Math.abs(a[j][i]-a[j-1][i]), Math.abs(a[j][i]-a[j-1][i-1]))
+      if  (errt <= err) {
+        err = errt
+        ans = a[j][i]
+        console.log(err)
+      }
+    }
+    if (Math.abs(a[i][i] - a[i-1][i-1]) >= SAFE * err) break
+  }
+  console.log(x, i, j, err)
+  return ans
+   */
 }
 
 function getTestRange (dist) {
@@ -53,7 +124,13 @@ function getTestRange (dist) {
   ]
 }
 
-function runX (dist, laps, unitTest) {
+function getParamList(dist) {
+  return Object.entries(dist.p)
+    .map(([name, value]) => `${name}=${value.toPrecision(3)}`)
+    .join(', ')
+}
+
+function runX (dist, unitTest) {
   // Init test variables
   let range = getTestRange(dist)
   let passed = true
@@ -64,8 +141,8 @@ function runX (dist, laps, unitTest) {
       passed = passed && unitTest(dist, Math.floor(i))
     }
   } else {
-    let dx = (range[1] - range[0]) / laps
-    for (let i = 0; i < laps; i++) {
+    let dx = (range[1] - range[0]) / RANGE_STEPS
+    for (let i = 0; i < RANGE_STEPS; i++) {
       passed = passed && unitTest(dist, range[0] + i * dx + Math.random())
     }
   }
@@ -74,13 +151,13 @@ function runX (dist, laps, unitTest) {
   return passed
 }
 
-function runP (dist, laps, unitTest) {
+function runP (dist, unitTest) {
   // Init test variables
   let passed = true
 
   // Run test
-  for (let i = 1; i < laps - 2; i++) {
-    passed = passed && unitTest(dist, (i + Math.random()) / laps)
+  for (let i = 1; i < RANGE_STEPS - 2; i++) {
+    passed = passed && unitTest(dist, (i + Math.random()) / RANGE_STEPS)
   }
 
   // Return aggregated test result
@@ -165,117 +242,107 @@ export function repeat (test, times = 10) {
   }
 }
 
-export function equal (x, y, precision = 10) {
-  return Math.abs((x - y) / y) < Math.pow(10, -precision)
-}
+
 
 export const Tests = {
-  pdfType (dist, laps) {
-    return runX(dist, laps, (d, x) => {
-      let pdf = d.pdf(x)
-      return Number.isFinite(pdf)
+  pdfRange (dist) {
+    // Run through x values and assert PDF(x) >= 0.
+    return runX(dist, (d, x) => {
+      const pdf = d.pdf(x)
+      assert(Number.isFinite(pdf) && pdf >= 0, `pdf(${x}; ${getParamList(d)}) = ${pdf}`)
     })
   },
 
-  pdfRange (dist, laps) {
-    return runX(dist, laps, (d, x) => dist.pdf(x) >= 0)
-  },
-
-  cdfType (dist, laps) {
-    return runX(dist, laps, (d, x) => {
+  cdfRange (dist) {
+    // Run through x values and assert 0 <= CDF(x) <= 1.
+    return runX(dist, (d, x) => {
       let cdf = d.cdf(x)
-      return Number.isFinite(cdf)
+      assert(Number.isFinite(cdf) && cdf >= 0 && cdf <= 1, `cdf(${x}; ${getParamList(d)}) = ${cdf}`)
     })
   },
 
-  cdfRange (dist, laps) {
-    return runX(dist, laps, (d, x) => {
-      let cdf = d.cdf(x)
-      return cdf >= 0 && cdf <= 1
-    })
-  },
-
-  cdfMonotonicity (dist, laps) {
+  cdfMonotonicity (dist) {
     let discrete = dist.type() === 'discrete'
-    return runX(dist, laps, (d, x) => {
+
+    // Run through x values and assert CDF(x - dx) <= CDF(x + dx).
+    return runX(dist, (d, x) => {
       let p1 = discrete ? x : x - 1e-3
       let p2 = discrete ? x + 1 : x + 1e-3
-      return safeCompare(p1, p2)
+      assert(safeCompare(p1, p2), `cdf(${p1}; ${getParamList(d)}) > cdf(${p2}; ${getParamList(d)})`)
     })
   },
 
-  pdf2cdf (dist, laps) {
+  cdf2pdf (dist) {
     // Init test variables
-    let range = getTestRange(dist)
-    let s = 0
+    const range = getTestRange(dist)
 
     // Run test
     if (dist.type() === 'discrete') {
+      // Discrete distribution: PMF(k) = CDF(k) - CDF(k - 1).
       for (let i = range[0]; i < range[1]; i++) {
-        let x = Math.floor(i)
-        let p = dist.pdf(x)
-        // console.log(x, p, dist.cdf(x) - dist.cdf(x - 1))
-        s += Math.abs(p - (dist.cdf(x) - dist.cdf(x - 1)))
+        const x = Math.floor(i)
+        const p = dist.pdf(x)
+        const cdf1 = dist.cdf(x)
+        const cdf0 = dist.cdf(x - 1)
+        assert(almostEqual(p, cdf1 - cdf0), `pdf(${x}) = ${p} != ${cdf1 - cdf0} = ${cdf1} - ${cdf0}`)
       }
     } else {
-      let dx = (range[1] - range[0]) / laps
-      for (let i = 0; i < laps; i++) {
-        let x = range[0] + i * dx + Math.random()
-        let p = dist.pdf(x)
-        let df = differentiate(t => dist.cdf(t), x, 1e-6)
-        if (df > Number.EPSILON && p > Number.EPSILON) {
-          if (Math.abs(p - df) > PRECISION) {
-            // console.log(x, p, df, Math.abs(p - df))
-          }
-          s += Math.abs(p - df)
+      // Continuous distribution: PDF(x) = d CDF(x) / dx
+      const supp = dist.support()
+      const dx = (range[1] - range[0]) / RANGE_STEPS
+      for (let i = 0; i < RANGE_STEPS; i++) {
+        // Perform test only within the support boundaries.
+        const x = range[0] + i * dx + Math.random()
+        if (x < supp[0].value + H || x > supp[1].value - H) {
+          continue
+        }
+
+        // If PDF(x) is below precision, don't perform the test.
+        const p = dist.pdf(x)
+        if (p < Number.EPSILON) {
+          continue
+        }
+
+        // Compare CDF and PDF.
+        const df = differentiate(t => dist.cdf(t), x, H)
+        if (p > Number.EPSILON) {
+          assert(almostEqual(p, df), `pdf(${x.toPrecision(3)}; ${getParamList(dist)}) = ${p} != ${df} = d/dx cdf(${x.toPrecision(3)}). delta = ${(p - df).toPrecision(3)}`)
         }
       }
     }
-
-    // Test passes if average relative difference is lower than 1%
-    return s / laps < 1e-6
   },
 
-  qType (dist, laps) {
-    return runP(dist, laps, (d, p) => {
-      let x = d.q(p)
-      return Number.isFinite(x)
-    })
-  },
-
-  qRange (dist, laps) {
+  qRange (dist) {
+    // Extract distribution support.
     let supp = dist.support()
-    return runP(dist, laps, (d, p) => {
+
+    // Run through p values and assert supp[0] <= q(p) <= supp[1].
+    return runP(dist, (d, p) => {
       let x = d.q(p)
-      return x >= supp[0].value && x <= supp[1].value
+      assert(Number.isFinite(x) && x >= supp[0].value && x <= supp[1].value,
+        `q(${p}; ${getParamList(d)}) = ${x}, support = [${supp[0].value}, ${supp[1].value}]`)
     })
   },
 
-  qMonotonicity (dist, laps) {
-    return runP(dist, laps, (d, p) => {
+  qMonotonicity (dist) {
+    return runP(dist, (d, p) => {
       let x1 = d.q(p)
       let x2 = d.q(p + 1e-3)
       return safeCompare(x1, x2)
     })
   },
 
-  qGalois (dist, laps) {
-    return runP(dist, laps, (d, p) => {
-      // Compute quantile
+  qGalois (dist) {
+    return runP(dist, (d, p) => {
+      // Compute quantile.
       let q = d.q(p)
-      let trials = 0
-      let passed = true
 
-      // Sample several values to test for Galois inequalities
-      do {
+      // Sample several values to test for Galois inequalities.
+      for (let i = 0; i < 10; i++) {
         let x = d.sample()
         let cdf = d.cdf(x)
-        if (Math.abs(p - cdf) >= PRECISION) {
-          passed = passed && ((safeCompare(p, cdf) && safeCompare(q, x)) || (safeCompare(cdf, p) && safeCompare(x, q)))
-          trials++
-        }
-      } while (trials < 10)
-      return passed
+        assert((x - q) * (cdf - p) > 0, `cdf(${x}) = ${cdf} and q(${p}) = ${q}`)
+      }
     })
   }
 }

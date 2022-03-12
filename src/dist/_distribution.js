@@ -77,7 +77,7 @@ class Distribution {
     })
 
     if (errors.length > 0) {
-      throw Error(`Invalid parameters. Parameters must satisfy the following constraints: ${constraints.join(', ')}`)
+      throw Error(`Invalid parameters. Parameters must satisfy the following constraints: ${constraints.join(', ')}. Got: ${Object.entries(params).map(([name, value]) => `${name} = ${value}`).join(', ')}`)
     }
   }
 

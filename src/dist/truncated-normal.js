@@ -4,7 +4,7 @@ import Distribution from './_distribution'
 /**
  * Generator for the [truncated normal distribution]{@link https://en.wikipedia.org/wiki/Truncated_normal_distribution}:
  *
- * $$f(x; \mu, \sigma, a, b) = \frac{1}{\sigma} \frac{\phi(\xi)}{\Phi(\beta) - \Phi(\alpha)},$$
+ * $$f(x; \mu, \sigma, a, b) = \frac{\phi(\xi)}{\Phi(\beta) - \Phi(\alpha)},$$
  *
  * where $\xi = \frac{x - \mu}{\sigma}, \alpha = \frac{a - \mu}{\sigma}$ and $\beta = \frac{b - \mu}{\sigma}$.
  * The functions $\phi$ and $\Phi$ denote the probability density and cumulative distribution functions of the normal
@@ -20,7 +20,9 @@ import Distribution from './_distribution'
  */
 export default class extends Normal {
   constructor (mu = 0, sigma = 1, a = 0, b = 1) {
+    // Call super and update number of parameters.
     super(mu, sigma)
+    this.k = arguments.length
 
     // Validate parameters.
     this.p = { mu, sigma, a, b }
@@ -29,7 +31,7 @@ export default class extends Normal {
       'b > a'
     ])
 
-    // Set support
+    // Set support.
     this.s = [{
       value: a,
       closed: true
@@ -41,7 +43,8 @@ export default class extends Normal {
     // Speed-up constants.
     this.c2 = [
       super._cdf(a),
-      super._cdf(b) - super._cdf(a)
+      super._cdf(b) - super._cdf(a),
+      super._cdf((a + b) / 2)
     ]
   }
 
