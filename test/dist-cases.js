@@ -1311,7 +1311,7 @@ export default [{
     params: () => [Param.shape(), Param.shape(), Param.scale()]
   }]
 }, {
-  name: 'NoncentralChi2',
+  name: 'NoncentralChi',
   invalidParams: [
     [-1, 1], [0, 1],  // k > 0
     [2, -1], [2, 0]   // lambda > 0
@@ -1324,7 +1324,7 @@ export default [{
     params: () => [Param.degree(), Param.scale()]
   }]
 }, {
-  name: 'NoncentralChi',
+  name: 'NoncentralChi2',
   invalidParams: [
     [-1, 1], [0, 1],  // k > 0
     [2, -1], [2, 0]   // lambda > 0
@@ -1334,7 +1334,11 @@ export default [{
     params: s => [Math.min(...s), Math.max(...s)]
   },
   cases: [{
-    params: () => [4, 4]
+    name: 'odd k',
+    params: () => [2 * Param.degree() + 1, Param.scale()]
+  }, {
+    name: 'even k',
+    params: () => [2 * Param.degree(), Param.scale()]
   }]
 }, {
   name: 'NoncentralF',

@@ -11,4 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Exponentiated Weibull distribution.
 - Minor style change in docs.
 - Changelog added.
-- Romberg's method for numerical integration added.
+- Tests are simplified and improved by removing numerically not feasible cases.
+- Test are more thorough and accurate.
+- Generalized harmonic number is more accurate.

@@ -14,11 +14,14 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Categorical {
-  // Special case of custom
+  // Special case of categorical.
   constructor (N = 10) {
     // Define weights
     const Ni = Math.round(N)
     super([1 / Ni].concat(Array.from({ length: Ni - 2 }, (d, i) => 1 / ((i + 1) * (i + 2)))), 1)
+
+    // Update number of parameters.
+    this.k = 1
 
     // Validate parameters
     Distribution.validate({ N: Ni }, [

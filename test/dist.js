@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { repeat, trials, ksTest, chiTest, Tests } from './test-utils'
+import { trials, ksTest, chiTest, Tests } from './test-utils'
 import { float } from '../src/core'
 import * as dist from '../src/dist'
 import PreComputed from '../src/dist/_pre-computed'
@@ -341,7 +341,7 @@ describe('dist', () => {
 
   // Ordinary distributions.
   testCases
-    .filter(tc => ['Kolmogorov'].indexOf(tc.name) > -1)
+    //.filter(tc => ['Rice'].indexOf(tc.name) > -1)
     .forEach(tc  => {
       describe(tc.name, () => {
         describe('constructor', () => UnitTests.constructor(tc))
@@ -397,7 +397,6 @@ describe('dist', () => {
           assert.equal(degenerate.cdf(x0 + Math.random()), 1)
         })
       })
-
     })
   })
 })

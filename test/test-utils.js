@@ -49,40 +49,7 @@ function almostEqual(a, b, tol = PRECISION) {
   return Math.abs(a - b) < tol
 }
 
-function safeCompare (a, b) {
-  return b - a >= 0//-PRECISION
-}
-
-function _a(f, x, h, n, m) {
-  if (n === 1) {
-    const h2 = h / Math.pow(2, m - 1)
-    return (f(x + h2) - f(x - h2)) / h2 / 2
-  } else {
-    const c = Math.pow(4, n - 1)
-    return (c * _a(f, x, h, n - 1, m + 1) - _a(f, x, h, n - 1, m)) / (c - 1)
-  }
-}
-
 function differentiate (f, x, h = 0.01) {
-  return _a(f, x, h, 5, 1)
-  /*
-  let res = _a(f, x, h, 1, 1)
-  let err
-  for (let n = 2; n <= 10; n++) {
-    for (let m = 1; m <= 10; m++) {
-      let res2 = _a(f, x, h, n, m)
-      err = Math.abs(res2 - res) / res
-      console.log(res2)
-      if (err < Number.EPSILON) {
-        return res2
-      }
-      res = res2
-    }
-  }
-  return res
-
-  //return (4 * _a(f, x, 0.001, 1, 2) - _a(f, x, 0.001, 1, 1)) / 3
-  /*
   const CON = 1.4
   const CON2 = CON * CON
   const BIG = 1e30
@@ -107,14 +74,11 @@ function differentiate (f, x, h = 0.01) {
       if  (errt <= err) {
         err = errt
         ans = a[j][i]
-        console.log(err)
       }
     }
     if (Math.abs(a[i][i] - a[i-1][i-1]) >= SAFE * err) break
   }
-  console.log(x, i, j, err)
   return ans
-   */
 }
 
 function getTestRange (dist) {
@@ -125,43 +89,39 @@ function getTestRange (dist) {
 }
 
 function getParamList(dist) {
+
   return Object.entries(dist.p)
-    .map(([name, value]) => `${name}=${value.toPrecision(3)}`)
+    .map(([name, value]) => {
+      if (Array.isArray(value)) {
+        return `${name}=[${value.join(', ')}]`
+      }
+      return `${name}=${value.toPrecision(3)}`
+    })
     .join(', ')
 }
 
 function runX (dist, unitTest) {
   // Init test variables
   let range = getTestRange(dist)
-  let passed = true
 
   // Run test
   if (dist.type() === 'discrete') {
     for (let i = range[0]; i < range[1]; i++) {
-      passed = passed && unitTest(dist, Math.floor(i))
+      unitTest(dist, Math.floor(i))
     }
   } else {
     let dx = (range[1] - range[0]) / RANGE_STEPS
     for (let i = 0; i < RANGE_STEPS; i++) {
-      passed = passed && unitTest(dist, range[0] + i * dx + Math.random())
+      unitTest(dist, range[0] + i * dx + Math.random())
     }
   }
-
-  // Return aggregated test result
-  return passed
 }
 
 function runP (dist, unitTest) {
-  // Init test variables
-  let passed = true
-
   // Run test
   for (let i = 1; i < RANGE_STEPS - 2; i++) {
-    passed = passed && unitTest(dist, (i + Math.random()) / RANGE_STEPS)
+    unitTest(dist, (i + Math.random()) / RANGE_STEPS)
   }
-
-  // Return aggregated test result
-  return passed
 }
 
 export function ksTest (values, model) {
@@ -243,21 +203,20 @@ export function repeat (test, times = 10) {
 }
 
 
-
 export const Tests = {
   pdfRange (dist) {
     // Run through x values and assert PDF(x) >= 0.
-    return runX(dist, (d, x) => {
+    runX(dist, (d, x) => {
       const pdf = d.pdf(x)
-      assert(Number.isFinite(pdf) && pdf >= 0, `pdf(${x}; ${getParamList(d)}) = ${pdf}`)
+      assert(Number.isFinite(pdf) && !Number.isNaN(pdf) && pdf >= 0, `pdf(${x}; ${getParamList(d)}) = ${pdf}`)
     })
   },
 
   cdfRange (dist) {
     // Run through x values and assert 0 <= CDF(x) <= 1.
-    return runX(dist, (d, x) => {
+    runX(dist, (d, x) => {
       let cdf = d.cdf(x)
-      assert(Number.isFinite(cdf) && cdf >= 0 && cdf <= 1, `cdf(${x}; ${getParamList(d)}) = ${cdf}`)
+      assert(Number.isFinite(cdf) && !Number.isNaN(cdf) && cdf >= 0 && cdf <= 1, `cdf(${x}; ${getParamList(d)}) = ${cdf}`)
     })
   },
 
@@ -265,10 +224,10 @@ export const Tests = {
     let discrete = dist.type() === 'discrete'
 
     // Run through x values and assert CDF(x - dx) <= CDF(x + dx).
-    return runX(dist, (d, x) => {
+    runX(dist, (d, x) => {
       let p1 = discrete ? x : x - 1e-3
       let p2 = discrete ? x + 1 : x + 1e-3
-      assert(safeCompare(p1, p2), `cdf(${p1}; ${getParamList(d)}) > cdf(${p2}; ${getParamList(d)})`)
+      assert(p2 > p1, `cdf(${p1}; ${getParamList(d)}) > cdf(${p2}; ${getParamList(d)})`)
     })
   },
 
@@ -293,7 +252,7 @@ export const Tests = {
       for (let i = 0; i < RANGE_STEPS; i++) {
         // Perform test only within the support boundaries.
         const x = range[0] + i * dx + Math.random()
-        if (x < supp[0].value + H || x > supp[1].value - H) {
+        if (x < supp[0].value + 2 * H || x > supp[1].value - 2 * H) {
           continue
         }
 
@@ -306,7 +265,7 @@ export const Tests = {
         // Compare CDF and PDF.
         const df = differentiate(t => dist.cdf(t), x, H)
         if (p > Number.EPSILON) {
-          assert(almostEqual(p, df), `pdf(${x.toPrecision(3)}; ${getParamList(dist)}) = ${p} != ${df} = d/dx cdf(${x.toPrecision(3)}). delta = ${(p - df).toPrecision(3)}`)
+          assert(almostEqual(p, df, PRECISION), `pdf(${x.toPrecision(3)}; ${getParamList(dist)}) = ${p} != ${df} = d/dx cdf(${x.toPrecision(3)}). delta = ${(p - df).toPrecision(3)}`)
         }
       }
     }
@@ -317,7 +276,7 @@ export const Tests = {
     let supp = dist.support()
 
     // Run through p values and assert supp[0] <= q(p) <= supp[1].
-    return runP(dist, (d, p) => {
+    runP(dist, (d, p) => {
       let x = d.q(p)
       assert(Number.isFinite(x) && x >= supp[0].value && x <= supp[1].value,
         `q(${p}; ${getParamList(d)}) = ${x}, support = [${supp[0].value}, ${supp[1].value}]`)
@@ -325,15 +284,15 @@ export const Tests = {
   },
 
   qMonotonicity (dist) {
-    return runP(dist, (d, p) => {
+    runP(dist, (d, p) => {
       let x1 = d.q(p)
       let x2 = d.q(p + 1e-3)
-      assert(safeCompare(x1, x2), `q(${x1}; ${getParamList(d)}) > q(${x2}; ${getParamList(d)})`)
+      assert(x2 >= x1, `q(${x1}; ${getParamList(d)}) > q(${x2}; ${getParamList(d)})`)
     })
   },
 
   qGalois (dist) {
-    return runP(dist, (d, p) => {
+    runP(dist, (d, p) => {
       // Compute quantile.
       let q = d.q(p)
 
@@ -341,7 +300,7 @@ export const Tests = {
       for (let i = 0; i < 10; i++) {
         let x = d.sample()
         let cdf = d.cdf(x)
-        assert((x - q) * (cdf - p) > 0, `cdf(${x}) = ${cdf} and q(${p}) = ${q}`)
+        assert((x - q) * (cdf - p) >= 0, `cdf(${x}) = ${cdf} and q(${p}) = ${q}`)
       }
     })
   }

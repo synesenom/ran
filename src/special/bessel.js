@@ -1,9 +1,13 @@
 import { EPS, MAX_ITER } from '../core/constants'
 import gamma from './gamma'
+import logGamma from './log-gamma'
 import recursiveSum from '../algorithms/recursive-sum'
+
 
 /**
  * Computes the modified Bessel function of the first kind with order zero.
+ * This algorithm simply applies the definition:
+ * https://en.wikipedia.org/wiki/Bessel_function#Modified_Bessel_functions:_I%CE%B1,_K%CE%B1
  *
  * @method _I0
  * @memberof ran.special
@@ -12,17 +16,12 @@ import recursiveSum from '../algorithms/recursive-sum'
  * @private
  */
 function _I0 (x) {
-  const y = Math.abs(x)
-  let z
-  let t
-
-  if (y < 3.75) {
-    t = x / 3.75
-    t *= t
-    z = 1 + t * (3.5156229 + t * (3.0899424 + t * (1.2067492 + t * (0.2659732 + t * (0.360768e-1 + t * 0.45813e-2)))))
-  } else {
-    t = 3.75 / y
-    z = (Math.exp(y) / Math.sqrt(y)) * (0.39894228 + t * (0.1328592e-1 + t * (0.225319e-2 + t * (-0.157565e-2 + t * (0.916281e-2 + t * (-0.2057706e-1 + t * (0.2635537e-1 + t * (-0.1647633e-1 + t * 0.392377e-2))))))))
+  let dz = 1
+  let z = dz
+  for (let m = 1; m < MAX_ITER; m++) {
+    dz *= (x / 2)**2 / m**2
+    z += dz
+    if (Math.abs(dz / z) < EPS) {break}
   }
   return z
 }
