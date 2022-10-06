@@ -1,4 +1,4 @@
-import { regularizedBetaIncomplete, beta as fnBeta } from '../special'
+import { regularizedBetaIncomplete, logBeta } from '../special'
 import rBeta from './_beta'
 import Distribution from './_distribution'
 
@@ -38,7 +38,7 @@ export default class extends Distribution {
 
     // Speed-up constants
     this.c = [
-      fnBeta(alpha, beta),
+      logBeta(alpha, beta),
       alpha - 1,
       beta - 1
     ]
@@ -50,14 +50,12 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    const a = Math.pow(x, this.c[1])
+    const a = this.c[1] * Math.log(x)
 
-    const b = Math.pow(1 - x, this.c[2])
+    const b = this.c[2] * Math.log(1 - x)
 
     // Handle x = 0 and x = 1 cases
-    return Number.isFinite(a) && Number.isFinite(b)
-      ? a * b / this.c[0]
-      : 0
+    return Math.exp(a + b - this.c[0])
   }
 
   _cdf (x) {
