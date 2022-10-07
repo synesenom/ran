@@ -50,6 +50,10 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
+    if (this.c[1] === 0 && this.c[2] === 0) {
+      return 1
+    }
+
     const a = this.c[1] * Math.log(x)
 
     const b = this.c[2] * Math.log(1 - x)
