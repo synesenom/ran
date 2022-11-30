@@ -341,8 +341,8 @@ describe('dist', () => {
 
   // Ordinary distributions.
   testCases
-    //.filter(tc => ['Rice'].indexOf(tc.name) > -1)
-    .forEach(tc  => {
+    .filter(tc => ['Skellam'].indexOf(tc.name) > -1)
+    .forEach(tc => {
       describe(tc.name, () => {
         describe('constructor', () => UnitTests.constructor(tc))
         describe('.seed()', () => UnitTests.seed(tc))
