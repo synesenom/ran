@@ -20,7 +20,8 @@ function discreteMode (values) {
 }
 
 /**
- * Calculates the mode for continuous sample using the half sample mode: https://arxiv.org/pdf/math/0505419.pdf.
+ * Calculates the mode for continuous sample based on Bickel and Fruhwirth: On a Fast, Robust Estimator of the Mode:
+ * https://arxiv.org/pdf/math/0505419.pdf.
  *
  * @method continuousMode
  * @memberof ran.location.mode

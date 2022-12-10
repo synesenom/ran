@@ -15,10 +15,10 @@ import F from './f'
  */
 export default class extends F {
   // Transformation of F
-  constructor (d1 = 1, d2 = 1) {
+  constructor (d1 = 2, d2 = 2) {
     const d1i = Math.round(d1)
     const d2i = Math.round(d2)
-    super(d1i / 2, d2i / 2)
+    super(d1i, d2i)
 
     // Set support
     this.s = [{
@@ -37,6 +37,7 @@ export default class extends F {
 
   _pdf (x) {
     const y = Math.exp(2 * x)
+    console.log(super._pdf(y) * 2 * y)
     return super._pdf(y) * 2 * y
   }
 

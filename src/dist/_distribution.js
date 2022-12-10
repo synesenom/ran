@@ -643,7 +643,8 @@ class Distribution {
 
   /**
    * Tests if an array of values is sampled from the specified distribution. For discrete distributions this
-   * method uses $\chi^2$ test, whereas for continuous distributions it uses the Kolmogorov-Smirnov test. In both cases, the probability of Type I error (rejecting a correct null hypotheses) is 1%.
+   * method uses $\chi^2$ test, whereas for continuous distributions it uses the Kolmogorov-Smirnov test. In both cases,
+   * the probability of Type I error (rejecting a correct null hypotheses) is 1%.
    *
    * @method test
    * @memberof ran.dist.Distribution

@@ -1,12 +1,11 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { trials, ksTest, chiTest } from './test-utils'
+import { ksTest, chiTest } from './test-utils'
 import * as core from '../src/core'
-
 
 // Constants
 const TRIALS = 1
-const LAPS = 100
+const LAPS = 1000
 const CHARS = '.,:;-+_!#%&/()[]{}?*0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 function add (dist, value) {
@@ -16,144 +15,124 @@ function add (dist, value) {
 describe('core', () => {
   describe('.seed()', () => {
     it('should return the same sequence of random numbers for the same numerical seed', () => {
-      trials(() => {
-        const s = Math.floor(Math.random() * 10000)
-        core.seed(s)
-        const values1 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
-        core.seed(s)
-        const values2 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
-        return values1.reduce((acc, d, i) => acc && d === values2[i], true)
-      })
+      const s = Math.floor(Math.random() * 10000)
+      core.seed(s)
+      const values1 = Array.from({ length: LAPS }, () => core.int(Number.MAX_SAFE_INTEGER))
+      core.seed(s)
+      const values2 = Array.from({ length: LAPS }, () => core.int(Number.MAX_SAFE_INTEGER))
+      assert(values1.reduce((acc, d, i) => acc && d === values2[i]))
     })
 
     it('should return the same sequence of random numbers for the same string seed', () => {
-      trials(() => {
-        const s = Array.from({ length: 32 }, () => CHARS.charAt(Math.floor(Math.random() * CHARS.length))).join('')
-        core.seed(s)
-        const values1 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
-        core.seed(s)
-        const values2 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
-        return values1.reduce((acc, d, i) => acc && d === values2[i], true)
-      })
+      const s = Array.from({ length: 32 }, () => CHARS.charAt(Math.floor(Math.random() * CHARS.length))).join('')
+      core.seed(s)
+      const values1 = Array.from({ length: LAPS }, () => core.int(Number.MAX_SAFE_INTEGER))
+      core.seed(s)
+      const values2 = Array.from({ length: LAPS }, () => core.int(Number.MAX_SAFE_INTEGER))
+      assert(values1.reduce((acc, d, i) => acc && d === values2[i]))
     })
 
     it('should return different sequence of random numbers for different numerical seeds', () => {
-      trials(() => {
-        core.seed(Math.floor(Math.random() * 10000))
-        const values1 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
-        core.seed(Math.floor(Math.random() * 10000))
-        const values2 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
-        return values1.reduce((acc, d, i) => acc && d !== values2[i], true)
-      })
+      core.seed(Math.floor(Math.random() * 10000))
+      const values1 = Array.from({ length: LAPS }, () => core.int(Number.MAX_SAFE_INTEGER))
+      core.seed(Math.floor(Math.random() * 10000))
+      const values2 = Array.from({ length: LAPS }, () => core.int(Number.MAX_SAFE_INTEGER))
+      assert(values1.reduce((acc, d, i) => acc && d !== values2[i]))
     })
 
     it('should return different sequence of random numbers for different numerical seeds', () => {
-      trials(() => {
-        core.seed(Array.from({ length: 32 }, () => CHARS.charAt(Math.floor(Math.random() * CHARS.length))).join(''))
-        const values1 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
-        core.seed(Array.from({ length: 32 }, () => CHARS.charAt(Math.floor(Math.random() * CHARS.length))).join(''))
-        const values2 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
-        return values1.reduce((acc, d, i) => acc && d !== values2[i], true)
-      })
+      core.seed(Array.from({ length: 32 }, () => CHARS.charAt(Math.floor(Math.random() * CHARS.length))).join(''))
+      const values1 = Array.from({ length: LAPS }, () => core.int(Number.MAX_SAFE_INTEGER))
+      core.seed(Array.from({ length: 32 }, () => CHARS.charAt(Math.floor(Math.random() * CHARS.length))).join(''))
+      const values2 = Array.from({ length: LAPS }, () => core.int(Number.MAX_SAFE_INTEGER))
+      assert(values1.reduce((acc, d, i) => acc && d !== values2[i]))
     })
   })
 
   describe('.float()', () => {
     it('should return a float uniformly distributed in [0, 1]', () => {
-      trials(() => {
-        const values = Array.from({ length: LAPS }, () => core.float())
-        return ksTest(values, x => x)
-      })
+      const values = Array.from({ length: 10 * LAPS }, () => core.float())
+      assert(ksTest(values, x => x))
     })
 
     it('should return a float uniformly distributed in [min, max]', () => {
-      trials(() => {
-        const max = Math.random() * 20
-        const values = Array.from({ length: LAPS }, () => core.float(max))
-        return ksTest(values, x => x / max)
-      })
+      const max = Math.random() * 20
+      const values = Array.from({ length: LAPS }, () => core.float(max))
+      assert(ksTest(values, x => x / max))
     })
 
     it('should return multiple floats uniformly distributed in [min, max]', () => {
-      trials(() => {
-        const min = Math.random() * 20 - 10
-        const max = 10 + Math.random() * 10
-        const k = Math.floor(Math.random() * 10 - 5)
-        const values = []
-        for (let lap = 0; lap < LAPS; lap++) {
-          let r = core.float(min, max, k)
-          if (k < 2) { r = [r] }
-          r.forEach(ri => {
-            values.push(ri)
-            // Value is in range
-            assert((min < max ? min : max) <= ri && ri <= (min < max ? max : min))
-          })
-          // Length is correct
-          assert.equal(k < 2 ? 1 : k, r.length)
-        }
+      const min = Math.random() * 20 - 10
+      const max = 10 + Math.random() * 10
+      const k = Math.floor(Math.random() * 10 - 5)
+      const values = []
+      for (let lap = 0; lap < LAPS; lap++) {
+        let r = core.float(min, max, k)
+        if (k < 2) { r = [r] }
+        r.forEach(ri => {
+          values.push(ri)
+          // Value is in range
+          assert((min < max ? min : max) <= ri && ri <= (min < max ? max : min))
+        })
+        // Length is correct
+        assert.equal(k < 2 ? 1 : k, r.length)
+      }
 
-        // Distribution is uniform
-        if (min < max) {
-          return ksTest(values, x => (x - min) / (max - min))
-        } else {
-          return ksTest(values, x => (x - max) / (min - max))
-        }
-      })
+      // Distribution is uniform
+      if (min < max) {
+        assert(ksTest(values, x => (x - min) / (max - min)))
+      } else {
+        assert(ksTest(values, x => (x - max) / (min - max)))
+      }
     })
   })
 
   describe('.int()', () => {
     it('should return an integer uniformly distributed in [0, max]', () => {
-      trials(() => {
-        const max = Math.floor(Math.random() * 10)
-        const values = Array.from({ length: LAPS }, () => core.int(max))
-        return chiTest(values, () => 1 / Math.abs(max + 1), 1)
-      })
+      const max = Math.floor(Math.random() * 10)
+      const values = Array.from({ length: LAPS }, () => core.int(max))
+      assert(chiTest(values, () => 1 / Math.abs(max + 1), 1))
     })
 
     it('should return an integer uniformly distributed in [min, max]', () => {
-      trials(() => {
-        const min = Math.floor(Math.random() * 20 - 10)
-        const max = 20 + Math.floor(Math.random() * 10)
-        const values = []
-        for (let lap = 0; lap < LAPS; lap++) {
-          let r = core.int(min, max)
-          values.push(r)
+      const min = Math.floor(Math.random() * 20 - 10)
+      const max = 20 + Math.floor(Math.random() * 10)
+      const values = []
+      for (let lap = 0; lap < LAPS; lap++) {
+        const r = core.int(min, max)
+        values.push(r)
 
-          // Value is in range
-          assert((min < max ? min : max) <= r && r <= (min < max ? max : min))
+        // Value is in range
+        assert((min < max ? min : max) <= r && r <= (min < max ? max : min))
 
-          // Value is integer
-          assert.equal(r, parseInt(r, 10))
-        }
+        // Value is integer
+        assert.equal(r, parseInt(r, 10))
+      }
 
-        // Distribution is uniform
-        return chiTest(values, () => 1 / Math.abs(max - min + 1), 1)
-      })
+      // Distribution is uniform
+      assert(chiTest(values, () => 1 / Math.abs(max - min + 1), 1))
     })
 
     it('should return multiple integers uniformly distributed in [0, max]', () => {
-      trials(() => {
-        const min = Math.floor(Math.random() * 20 - 10)
-        const max = 20 + Math.floor(Math.random() * 10)
-        const k = Math.floor(Math.random() * 10 - 5)
-        const values = []
-        for (let lap = 0; lap < LAPS; lap++) {
-          let r = core.int(min, max, k)
-          if (k < 2) { r = [r] }
-          for (let i = 0; i < r.length; i++) {
-            values.push(r[i])
+      const min = Math.floor(Math.random() * 20 - 10)
+      const max = 20 + Math.floor(Math.random() * 10)
+      const k = Math.floor(Math.random() * 10 - 5)
+      const values = []
+      for (let lap = 0; lap < LAPS; lap++) {
+        let r = core.int(min, max, k)
+        if (k < 2) { r = [r] }
+        for (let i = 0; i < r.length; i++) {
+          values.push(r[i])
 
-            // Value is in range
-            assert((min < max ? min : max) <= r[i] && r[i] <= (min < max ? max : min), 'Value is out of range')
-          }
-          // Length is correct
-          assert.equal(k < 2 ? 1 : k, r.length, 'Number of samples is incorrect')
+          // Value is in range
+          assert((min < max ? min : max) <= r[i] && r[i] <= (min < max ? max : min), 'Value is out of range')
         }
+        // Length is correct
+        assert.equal(k < 2 ? 1 : k, r.length, 'Number of samples is incorrect')
+      }
 
-        // Distribution is uniform
-        return chiTest(values, () => 1 / Math.abs(max - min + 1), max === min ? 1 : 2)
-      })
+      // Distribution is uniform
+      assert(chiTest(values, () => 1 / Math.abs(max - min + 1), max === min ? 1 : 2))
     })
   })
 
@@ -186,13 +165,13 @@ describe('core', () => {
           // Length is correct
           assert.equal(k < 2 ? 1 : k, r.length)
         }
-        for (let i in values) {
+        for (const i in values) {
           // Distribution is uniform
           if (values.hasOwnProperty(i)) {
             assert(freqs[values[i]] > 0)
           }
         }
-        for (let i in freqs) {
+        for (const i in freqs) {
           assert(values.indexOf(i) > -1)
         }
       }
@@ -247,7 +226,7 @@ describe('core', () => {
 
         // Check if all positions have been visited at least once
         pos.forEach(p => {
-          for (let i in p) {
+          for (const i in p) {
             if (p.hasOwnProperty(i)) {
               assert(p[i] > 0)
             }
@@ -259,37 +238,33 @@ describe('core', () => {
 
   describe('.coin()', () => {
     it('should return head or tail with 50% chance', () => {
-      trials(() => {
-        const head = Math.floor(Math.random() * 10)
-        const tail = head + Math.floor(1 + Math.random() * 10)
-        const values = []
-        for (let lap = 0; lap < LAPS; lap++) {
-          let r = core.coin(head, tail)
-          r = [r]
-          r.forEach(ri => values.push(ri))
-        }
+      const head = Math.floor(Math.random() * 10)
+      const tail = head + Math.floor(1 + Math.random() * 10)
+      const values = []
+      for (let lap = 0; lap < LAPS; lap++) {
+        let r = core.coin(head, tail)
+        r = [r]
+        r.forEach(ri => values.push(ri))
+      }
 
-        // Distribution is uniform
-        return chiTest(values, () => 0.5, 1)
-      })
+      // Distribution is uniform
+      assert(chiTest(values, () => 0.5, 1))
     })
 
     it('should return multiple heads/tails with specific probability', () => {
-      trials(() => {
-        const p = Math.random()
-        const k = Math.floor(Math.random() * 10)
-        const head = Math.floor(Math.random() * 20)
-        const tail = head + Math.floor(1 + Math.random() * 20)
-        const values = []
-        for (let lap = 0; lap < LAPS; lap++) {
-          let r = core.coin(head, tail, p, k)
-          if (k < 2) { r = [r] }
-          r.forEach(ri => values.push(ri))
-        }
+      const p = Math.random()
+      const k = Math.floor(Math.random() * 10)
+      const head = Math.floor(Math.random() * 20)
+      const tail = head + Math.floor(1 + Math.random() * 20)
+      const values = []
+      for (let lap = 0; lap < LAPS; lap++) {
+        let r = core.coin(head, tail, p, k)
+        if (k < 2) { r = [r] }
+        r.forEach(ri => values.push(ri))
+      }
 
-        // Distribution is uniform
-        return chiTest(values, x => x === head ? p : 1 - p, 1)
-      })
+      // Distribution is uniform
+      assert(chiTest(values, x => x === head ? p : 1 - p, 1))
     })
   })
 })

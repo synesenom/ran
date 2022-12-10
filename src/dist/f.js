@@ -17,7 +17,7 @@ import Distribution from './_distribution'
  */
 export default class extends Beta {
   // Transformation of beta distribution
-  constructor (d1 = 2, d2 = 2) {
+  constructor (d1 = 1, d2 = 1) {
     const d1i = Math.round(d1)
     const d2i = Math.round(d2)
     super(d1i / 2, d2i / 2)

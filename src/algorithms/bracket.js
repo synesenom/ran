@@ -67,5 +67,6 @@ export default function (f, a0, b0, s) {
   }
 
   // Return boundary anyway.
-  return [a0 || a, b0 || b]
+  // TODO Should return b0 || b if this breaks down.
+  return [a0 || a, b0]
 }

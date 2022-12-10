@@ -1,18 +1,15 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { trials, ksTest, chiTest, Tests } from './test-utils'
+import { ksTest, chiTest, Tests } from './test-utils'
 import { float } from '../src/core'
 import * as dist from '../src/dist'
 import PreComputed from '../src/dist/_pre-computed'
 import testCases from './dist-cases'
-import Distribution from '../src/dist/_distribution'
-
 
 // Constants.
 const PRECISION = 1e-10
 const LAPS = 1000
 const SAMPLE_SIZE = 1000
-
 
 // Unit test suite.
 const UnitTests = {
@@ -51,48 +48,48 @@ const UnitTests = {
     const sampleSize = 100
 
     it('loaded state should continue where it was saved at', () => {
-        // Create generator and seed
-        const generator = new dist[tc.name]()
-        const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
-        const cut = Math.floor(sampleSize / 3)
+      // Create generator and seed
+      const generator = new dist[tc.name]()
+      const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+      const cut = Math.floor(sampleSize / 3)
 
-        // Generate full sample
-        const values = generator.sample(sampleSize)
+      // Generate full sample
+      const values = generator.sample(sampleSize)
 
-        // Reset generator, create two sub samples
-        generator.seed(s)
-        const values1 = generator.sample(cut)
-        let state = generator.save()
-        generator.seed(0)
-        generator.load(state)
-        const values2 = generator.sample(sampleSize - cut)
+      // Reset generator, create two sub samples
+      generator.seed(s)
+      const values1 = generator.sample(cut)
+      const state = generator.save()
+      generator.seed(0)
+      generator.load(state)
+      const values2 = generator.sample(sampleSize - cut)
 
-        // Compare samples
-        assert(values1.concat(values2).reduce((acc, d, i) => acc || d === values[i], true))
-      })
+      // Compare samples
+      assert(values1.concat(values2).reduce((acc, d, i) => acc || d === values[i], true))
+    })
 
     it('loaded state should copy full state of generator', () => {
-        // Create seeded generator
-        const generator1 = new dist[tc.name]()
-        generator1.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+      // Create seeded generator
+      const generator1 = new dist[tc.name]()
+      generator1.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
 
-        // Generate original sample
-        generator1.sample(LAPS)
-        const state = generator1.save()
-        const values1 = generator1.sample(LAPS)
+      // Generate original sample
+      generator1.sample(LAPS)
+      const state = generator1.save()
+      const values1 = generator1.sample(LAPS)
 
-        // Generate new default generator and load state
-        const generator2 = new dist[tc.name]().load(state)
-        const values2 = generator2.sample(LAPS)
+      // Generate new default generator and load state
+      const generator2 = new dist[tc.name]().load(state)
+      const values2 = generator2.sample(LAPS)
 
-        // Compare samples
-        assert(values1.reduce((acc, d, i) => acc || d !== values2[i], true) === true)
-      })
+      // Compare samples
+      assert(values1.reduce((acc, d, i) => acc || d !== values2[i], true) === true)
+    })
   },
 
   pdf (tc) {
     // Test cases
-    let cases = [{
+    const cases = [{
       name: 'default parameters',
       generate: () => new dist[tc.name]()
     }].concat(tc.cases.map(c => ({
@@ -135,7 +132,7 @@ const UnitTests = {
 
   sample (tc) {
     // Test cases
-    let cases = [{
+    const cases = [{
       name: 'default parameters',
       generate: () => new dist[tc.name]()
     }].concat(tc.cases.map(c => ({
@@ -160,13 +157,11 @@ const UnitTests = {
         })
 
         it('sample values should be distributed correctly', () => {
-          trials(() => {
-            const generator = c.generate()
-            return generator.type() === 'continuous'
-              ? ksTest(generator.sample(SAMPLE_SIZE), x => generator.cdf(x))
-              : chiTest(generator.sample(SAMPLE_SIZE), x => generator.pdf(x),
-                Object.keys(generator.save().params).length)
-          })
+          const generator = c.generate()
+          assert(generator.type() === 'continuous'
+            ? ksTest(generator.sample(SAMPLE_SIZE), x => generator.cdf(x))
+            : chiTest(generator.sample(SAMPLE_SIZE), x => generator.pdf(x),
+              Object.keys(generator.save().params).length))
         })
       })
     })
@@ -174,14 +169,14 @@ const UnitTests = {
 
   test (tc) {
     // Test cases.
-    let cases = [{
+    const cases = [{
       name: 'default parameters',
       gen: () => new dist[tc.name]()
     }].concat(tc.cases.map(c => ({
       name: c.name || 'random parameters',
       gen: () => {
         const p = c.params()
-        //console.log(p)
+        // console.log(p)
         return new dist[tc.name](...p)
       }
     })))
@@ -190,26 +185,22 @@ const UnitTests = {
     cases.forEach(c => {
       describe(c.name, () => {
         it('should pass for own test', () => {
-          trials(() => {
-            const generator = c.gen()
-            return generator.test(generator.sample(SAMPLE_SIZE)).passed
-          })
+          const generator = c.gen()
+          assert(generator.test(generator.sample(SAMPLE_SIZE)).passed)
         })
 
         it('should reject foreign distribution', () => {
-          trials(() => {
-            for (let i = 0; i < 10; i++) {
-              const generator = c.gen()
-              const sample = generator.sample(SAMPLE_SIZE)
-              try {
-                const foreign = new dist[tc.foreign.generator](...tc.foreign.params(sample))
-                return !foreign.test(sample).passed
-              } catch (e) {
-                // DO nothing.
-                console.log(generator.p)
-              }
+          for (let i = 0; i < 10; i++) {
+            const generator = c.gen()
+            const sample = generator.sample(SAMPLE_SIZE)
+            try {
+              const foreign = new dist[tc.foreign.generator](...tc.foreign.params(sample))
+              assert(!foreign.test(sample).passed)
+            } catch (e) {
+              // DO nothing.
+              console.log(generator.p)
             }
-          })
+          }
         })
       })
     })
@@ -322,14 +313,11 @@ describe('dist', () => {
         }, 'Distribution._pdf() is not implemented')
       })
     })
-  });
+  })
 
   describe('PreComputed', () => {
-    class PreComputedTestClass extends PreComputed {
-      constructor () {
-        super()
-      }
-    }
+    class PreComputedTestClass extends PreComputed {}
+
     const preComputed = new PreComputedTestClass()
 
     it('should throw error if _pk is not overridden', () => {
@@ -341,7 +329,7 @@ describe('dist', () => {
 
   // Ordinary distributions.
   testCases
-    .filter(tc => ['Skellam'].indexOf(tc.name) > -1)
+    .filter(tc => ['FisherZ'].indexOf(tc.name) > -1)
     .forEach(tc => {
       describe(tc.name, () => {
         describe('constructor', () => UnitTests.constructor(tc))
@@ -358,7 +346,7 @@ describe('dist', () => {
     describe('.sample()', () => {
       describe('default parameters', () => {
         it('should generate values with Degenerate distribution', () => {
-          let degenerate = new dist.Degenerate()
+          const degenerate = new dist.Degenerate()
           degenerate.sample(LAPS).forEach(d => {
             assert(d === 0)
           })
@@ -367,7 +355,7 @@ describe('dist', () => {
       describe('random parameters', () => {
         it('should generate values with Degenerate distribution', () => {
           const x0 = float()
-          let degenerate = new dist.Degenerate(x0)
+          const degenerate = new dist.Degenerate(x0)
           degenerate.sample(LAPS).forEach(d => {
             assert(d === x0)
           })
@@ -378,7 +366,7 @@ describe('dist', () => {
     describe('.pdf(), .cdf()', () => {
       describe('default parameters', () => {
         it('differentiating cdf should give pdf', () => {
-          let degenerate = new dist.Degenerate()
+          const degenerate = new dist.Degenerate()
           assert.equal(degenerate.pdf(0), 1)
           assert.equal(degenerate.pdf(Math.random() * 2 - 1), 0)
           assert.equal(degenerate.cdf(-Math.random()), 0)
@@ -389,7 +377,7 @@ describe('dist', () => {
       describe('random parameters', () => {
         it('differentiating cdf should give pdf', () => {
           const x0 = float()
-          let degenerate = new dist.Degenerate(x0)
+          const degenerate = new dist.Degenerate(x0)
           assert.equal(degenerate.pdf(x0), 1)
           assert.equal(degenerate.pdf(x0 + Math.random() * 2 - 1), 0)
           assert.equal(degenerate.cdf(x0 - Math.random()), 0)

@@ -1,9 +1,7 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { repeat, equal } from './test-utils'
-import { int } from '../src/core'
+import { equal } from './test-utils'
 import * as dispersion from '../src/dispersion'
-import * as dependence from '../src/dependence'
 
 const SAMPLE_SIZE = 100
 
@@ -20,12 +18,10 @@ describe('dispersion', () => {
     })
 
     it('should return the coefficient of variation', () => {
-      repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
-        let mean = values.reduce((m, d) => d + m, 0) / values.length
-        let stdev = Math.sqrt(values.reduce((v, d) => (d - mean) * (d - mean) + v, 0) / (values.length - 1))
-        assert(equal(dispersion.cv(values), stdev / mean))
-      })
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+      const mean = values.reduce((m, d) => d + m, 0) / values.length
+      const stdev = Math.sqrt(values.reduce((v, d) => (d - mean) * (d - mean) + v, 0) / (values.length - 1))
+      assert(equal(dispersion.cv(values), stdev / mean))
     })
   })
 
@@ -118,20 +114,18 @@ describe('dispersion', () => {
     })
 
     it('should return the relative mean absolute difference', () => {
-      repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
-        let mean = 0
-        let g = 0
-        for (let i = 0; i < values.length; i++) {
-          mean += values[i]
-          for (let j = 0; j < values.length; j++) {
-            g += Math.abs(values[i] - values[j])
-          }
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+      let mean = 0
+      let g = 0
+      for (let i = 0; i < values.length; i++) {
+        mean += values[i]
+        for (let j = 0; j < values.length; j++) {
+          g += Math.abs(values[i] - values[j])
         }
-        mean /= values.length
-        g /= 2 * mean * values.length * values.length
-        assert(equal(dispersion.gini(values), g))
-      })
+      }
+      mean /= values.length
+      g /= 2 * mean * values.length * values.length
+      assert(equal(dispersion.gini(values), g))
     })
   })
 
@@ -145,24 +139,22 @@ describe('dispersion', () => {
     })
 
     it('should return the interquartile range for a finite sample', () => {
-      repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
-        const iqr = dispersion.iqr(values)
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+      const iqr = dispersion.iqr(values)
 
-        // Lower quartile.
-        let h = (values.length - 1) * 0.25
-        let q0 = values.sort((a, b) => a - b)[Math.floor(h)]
-        let q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
-        const lo = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
+      // Lower quartile.
+      let h = (values.length - 1) * 0.25
+      let q0 = values.sort((a, b) => a - b)[Math.floor(h)]
+      let q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
+      const lo = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
 
-        // Upper quartile.
-        h = (values.length - 1) * 0.75
-        q0 = values.sort((a, b) => a - b)[Math.floor(h)]
-        q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
-        const hi = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
+      // Upper quartile.
+      h = (values.length - 1) * 0.75
+      q0 = values.sort((a, b) => a - b)[Math.floor(h)]
+      q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
+      const hi = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
 
-        assert(equal(hi - lo, iqr))
-      })
+      assert(equal(hi - lo, iqr))
     })
   })
 
@@ -173,17 +165,15 @@ describe('dispersion', () => {
     })
 
     it('should return the mean absolute difference', () => {
-      repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
-        let md = 0
-        for (let i = 0; i < values.length; i++) {
-          for (let j = 0; j < values.length; j++) {
-            md += Math.abs(values[i] - values[j])
-          }
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+      let md = 0
+      for (let i = 0; i < values.length; i++) {
+        for (let j = 0; j < values.length; j++) {
+          md += Math.abs(values[i] - values[j])
         }
-        md /= values.length * values.length
-        assert(equal(dispersion.md(values), md))
-      })
+      }
+      md /= values.length * values.length
+      assert(equal(dispersion.md(values), md))
     })
   })
 
@@ -193,24 +183,22 @@ describe('dispersion', () => {
     })
 
     it('should return the midhinge for a finite sample', () => {
-      repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
-        const mh = dispersion.midhinge(values)
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+      const mh = dispersion.midhinge(values)
 
-        // Lower quartile.
-        let h = (values.length - 1) * 0.25
-        let q0 = values.sort((a, b) => a - b)[Math.floor(h)]
-        let q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
-        const lo = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
+      // Lower quartile.
+      let h = (values.length - 1) * 0.25
+      let q0 = values.sort((a, b) => a - b)[Math.floor(h)]
+      let q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
+      const lo = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
 
-        // Upper quartile.
-        h = (values.length - 1) * 0.75
-        q0 = values.sort((a, b) => a - b)[Math.floor(h)]
-        q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
-        const hi = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
+      // Upper quartile.
+      h = (values.length - 1) * 0.75
+      q0 = values.sort((a, b) => a - b)[Math.floor(h)]
+      q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
+      const hi = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
 
-        assert(equal(0.5 * (hi + lo), mh))
-      })
+      assert(equal(0.5 * (hi + lo), mh))
     })
   })
 
@@ -220,13 +208,11 @@ describe('dispersion', () => {
     })
 
     it('should return the range for a finite sample', () => {
-      repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
-        const range = dispersion.range(values)
-        const min = values.sort((a, b) => a - b)[0]
-        const max = values.sort((a, b) => b - a)[0]
-        assert(equal(max - min, range))
-      })
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+      const range = dispersion.range(values)
+      const min = values.sort((a, b) => a - b)[0]
+      const max = values.sort((a, b) => b - a)[0]
+      assert(equal(max - min, range))
     })
   })
 
@@ -241,20 +227,18 @@ describe('dispersion', () => {
     })
 
     it('should return the relative mean absolute difference', () => {
-      repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
-        let mean = 0
-        let rd = 0
-        for (let i = 0; i < values.length; i++) {
-          mean += values[i]
-          for (let j = 0; j < values.length; j++) {
-            rd += Math.abs(values[i] - values[j])
-          }
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+      let mean = 0
+      let rd = 0
+      for (let i = 0; i < values.length; i++) {
+        mean += values[i]
+        for (let j = 0; j < values.length; j++) {
+          rd += Math.abs(values[i] - values[j])
         }
-        mean /= values.length
-        rd /= mean * values.length * values.length
-        assert(equal(dispersion.rmd(values), rd))
-      })
+      }
+      mean /= values.length
+      rd /= mean * values.length * values.length
+      assert(equal(dispersion.rmd(values), rd))
     })
   })
 
@@ -268,24 +252,22 @@ describe('dispersion', () => {
     })
 
     it('should return the quartile coefficient of dispersion for a finite sample', () => {
-      repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
-        const qcd = dispersion.qcd(values)
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+      const qcd = dispersion.qcd(values)
 
-        // Lower quartile.
-        let h = (values.length - 1) * 0.25
-        let q0 = values.sort((a, b) => a - b)[Math.floor(h)]
-        let q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
-        const lo = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
+      // Lower quartile.
+      let h = (values.length - 1) * 0.25
+      let q0 = values.sort((a, b) => a - b)[Math.floor(h)]
+      let q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
+      const lo = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
 
-        // Upper quartile.
-        h = (values.length - 1) * 0.75
-        q0 = values.sort((a, b) => a - b)[Math.floor(h)]
-        q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
-        const hi = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
+      // Upper quartile.
+      h = (values.length - 1) * 0.75
+      q0 = values.sort((a, b) => a - b)[Math.floor(h)]
+      q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
+      const hi = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
 
-        assert(equal((hi - lo) / (lo + hi), qcd))
-      })
+      assert(equal((hi - lo) / (lo + hi), qcd))
     })
   })
 
@@ -296,12 +278,10 @@ describe('dispersion', () => {
     })
 
     it('should return the unbiased standard deviation', () => {
-      repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
-        let mean = values.reduce((m, d) => d + m, 0) / values.length
-        let stdev = Math.sqrt(values.reduce((v, d) => (d - mean) * (d - mean) + v, 0) / (values.length - 1))
-        assert(equal(dispersion.stdev(values), stdev))
-      })
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+      let mean = values.reduce((m, d) => d + m, 0) / values.length
+      let stdev = Math.sqrt(values.reduce((v, d) => (d - mean) * (d - mean) + v, 0) / (values.length - 1))
+      assert(equal(dispersion.stdev(values), stdev))
     })
   })
 
@@ -312,12 +292,10 @@ describe('dispersion', () => {
     })
 
     it('should return the unbiased variance', () => {
-      repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
-        let mean = values.reduce((m, d) => d + m, 0) / values.length
-        let variance = values.reduce((v, d) => (d - mean) * (d - mean) + v, 0) / (values.length - 1)
-        assert(equal(dispersion.variance(values), variance))
-      })
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+      let mean = values.reduce((m, d) => d + m, 0) / values.length
+      let variance = values.reduce((v, d) => (d - mean) * (d - mean) + v, 0) / (values.length - 1)
+      assert(equal(dispersion.variance(values), variance))
     })
   })
 
@@ -332,12 +310,10 @@ describe('dispersion', () => {
     })
 
     it('should return the coefficient of variation', () => {
-      repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
-        let mean = values.reduce((m, d) => d + m, 0) / values.length
-        let variance = values.reduce((v, d) => (d - mean) * (d - mean) + v, 0) / (values.length - 1)
-        assert(equal(dispersion.vmr(values), variance / mean))
-      })
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+      let mean = values.reduce((m, d) => d + m, 0) / values.length
+      let variance = values.reduce((v, d) => (d - mean) * (d - mean) + v, 0) / (values.length - 1)
+      assert(equal(dispersion.vmr(values), variance / mean))
     })
   })
 })

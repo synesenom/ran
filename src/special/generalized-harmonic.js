@@ -16,7 +16,7 @@ export default function (n, m) {
     // If n is small, just calculate it exactly.
     let z = 0
     for (let k = 1; k <= n; k++) {
-      z += 1 / k**m
+      z += 1 / k ** m
     }
     return z
   }

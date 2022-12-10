@@ -1,10 +1,9 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { repeat, equal, trials } from './test-utils'
+import { equal } from './test-utils'
 import { int } from '../src/core'
 import * as location from '../src/location'
 import * as dist from '../src/dist'
-import * as dispersion from '../src/dispersion'
 
 const SAMPLE_SIZE = 100
 
@@ -12,45 +11,35 @@ const SAMPLE_SIZE = 100
 describe('location', () => {
   describe('.geometricMean()', () => {
     it('should return zero for sample containing zero', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE}, Math.random)
-          .concat([0])
-        assert(location.geometricMean(values) === 0)
-      })
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+        .concat([0])
+      assert(location.geometricMean(values) === 0)
     })
 
     it('should return the geometric mean of the sample', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE}, Math.random)
-        let mean = Math.pow(values.reduce((prod, d) => d * prod, 1), 1 / SAMPLE_SIZE)
-        assert(equal(location.geometricMean(values), mean))
-      })
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+      const mean = Math.pow(values.reduce((prod, d) => d * prod, 1), 1 / SAMPLE_SIZE)
+      assert(equal(location.geometricMean(values), mean))
     })
   })
 
   describe('.harmonicMean()', () => {
     it('should return undefined for sample containing zero', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE}, Math.random)
-          .concat([0])
-        assert(typeof location.harmonicMean(values) === 'undefined')
-      })
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+        .concat([0])
+      assert(typeof location.harmonicMean(values) === 'undefined')
     })
 
     it('should return undefined for sample containing negative values', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE}, Math.random)
-          .concat([-1])
-        assert(typeof location.harmonicMean(values) === 'undefined')
-      })
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+        .concat([-1])
+      assert(typeof location.harmonicMean(values) === 'undefined')
     })
 
     it('should return the geometric mean of the sample', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE}, Math.random)
-        let mean = values.length / values.reduce((sum, d) => sum + 1 / d, 0)
-        assert(equal(location.harmonicMean(values), mean))
-      })
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+      const mean = values.length / values.reduce((sum, d) => sum + 1 / d, 0)
+      assert(equal(location.harmonicMean(values), mean))
     })
   })
 
@@ -60,21 +49,17 @@ describe('location', () => {
     })
 
     it('should return the median for odd sample size', () => {
-      repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE + 1}, Math.random)
-          .sort((a, b) => a - b)
-        let median = values[(values.length - 1) / 2]
-        assert(location.median(values) === median)
-      })
+      const values = Array.from({ length: SAMPLE_SIZE + 1 }, Math.random)
+        .sort((a, b) => a - b)
+      const median = values[(values.length - 1) / 2]
+      assert(location.median(values) === median)
     })
 
     it('should return the median for even sample size', () => {
-      repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
-          .sort((a, b) => a - b)
-        let median = 0.5 * (values[values.length / 2 - 1] + values[values.length / 2])
-        assert(equal(location.median(values), median))
-      })
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+        .sort((a, b) => a - b)
+      const median = 0.5 * (values[values.length / 2 - 1] + values[values.length / 2])
+      assert(equal(location.median(values), median))
     })
   })
 
@@ -84,13 +69,11 @@ describe('location', () => {
     })
 
     it('should return the midrange for a finite sample', () => {
-      repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
-        const mr = location.midrange(values)
-        const min = values.sort((a, b) => a - b)[0]
-        const max = values.sort((a, b) => b - a)[0]
-        assert(equal(0.5 * (min + max), mr))
-      })
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+      const mr = location.midrange(values)
+      const min = values.sort((a, b) => a - b)[0]
+      const max = values.sort((a, b) => b - a)[0]
+      assert(equal(0.5 * (min + max), mr))
     })
   })
 
@@ -101,7 +84,7 @@ describe('location', () => {
 
     describe('discrete sample', () => {
       it('should return an array of a single element for unimodal sample', () => {
-        const values = Array.from({length: SAMPLE_SIZE}, () => int(20))
+        const values = Array.from({ length: SAMPLE_SIZE }, () => int(20))
           .concat(new Array(SAMPLE_SIZE).fill(21))
         const mode = location.mode(values)
         assert(mode.length === 1)
@@ -109,7 +92,7 @@ describe('location', () => {
       })
 
       it('should return an array of a multiple elements for multimodal sample', () => {
-        const values = Array.from({length: SAMPLE_SIZE}, () => int(20))
+        const values = Array.from({ length: SAMPLE_SIZE }, () => int(20))
           .concat(new Array(SAMPLE_SIZE).fill(21))
           .concat(new Array(SAMPLE_SIZE).fill(22))
         const mode = location.mode(values)
@@ -135,12 +118,10 @@ describe('location', () => {
       })
 
       it('should return the approximate mode for sample size larger than 3', () => {
-        trials(() => {
-          const mu = 10 * Math.random()
-          const sample = new dist.Normal(mu, 0.1).sample(1000)
-          const mode = location.mode(sample)
-          return equal(mode, mu, 2)
-        })
+        const mu = 10 + Math.random()
+        const sample = new dist.Normal(mu, 0.1).sample(1000)
+        const mode = location.mode(sample)
+        assert(equal(mode, mu, 2))
       })
     })
   })
@@ -151,7 +132,7 @@ describe('location', () => {
     })
 
     it('should return the trimean for a finite sample', () => {
-      const values = Array.from({length: SAMPLE_SIZE}, Math.random)
+      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
       const trimean = location.trimean(values)
 
       // Lower quartile.
@@ -167,7 +148,8 @@ describe('location', () => {
       const hi = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
 
       // Median.
-      const median = values.length % 2 === 0 ? 0.5 * (values[values.length / 2 - 1] + values[values.length / 2])
+      const median = values.length % 2 === 0
+        ? 0.5 * (values[values.length / 2 - 1] + values[values.length / 2])
         : values[(values.length - 1) / 2]
 
       assert(equal(0.25 * (hi + lo + 2 * median), trimean))

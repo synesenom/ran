@@ -1,5 +1,4 @@
-import { EPS, MAX_ITER } from '../core/constants'
-import neumaier from './neumaier'
+import { EPS } from '../core/constants'
 
 const MAX_STEPS = 20
 const POLYNOMIAL_ORDER = 5
@@ -77,5 +76,4 @@ export default function (f, a, b) {
     }
     h[j + 1] = 0.25 * h[j]
   }
-  return 0
 }
