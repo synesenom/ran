@@ -1,7 +1,8 @@
 import Gamma from './gamma'
 
 /**
- * Generator for the [double gamma distribution]{@link https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_dgamma.html} (with the same shape/rate parametrization that the [gamma distribution]{@link #dist.Gamma} uses):
+ * Generator for the [double gamma distribution]{@link https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_dgamma.html}
+ * (with the same shape/rate parametrization that the [gamma distribution]{@link #dist.Gamma} uses):
  *
  * $$f(x; \alpha, \beta) = \frac{\beta^\alpha}{2 \Gamma(\alpha)} |x|^{\alpha - 1} e^{-\beta |x|},$$
  *

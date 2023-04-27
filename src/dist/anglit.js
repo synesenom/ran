@@ -3,9 +3,9 @@ import Distribution from './_distribution'
 /**
  * Generator for the [anglit distribution]{@link https://docs.scipy.org/doc/scipy-1.0.0/reference/tutorial/stats/continuous_anglit.html}:
  *
- * $$f(x) = \frac{1}{\beta} \cos\bigg(2 \frac{x - \mu}{\beta}\bigg),$$
+ * $$f(x; \mu, \beta) = \frac{1}{\beta} \cos\bigg(2 \frac{x - \mu}{\beta}\bigg),$$
  *
- * where$\mu \in \mathbb{R}$ and $\beta > 0$.
+ * where $\mu \in \mathbb{R}$ and $\beta > 0$.
  * Support: $x \in \Big\[\mu-\frac{\beta \pi}{4}, \mu + \frac{\beta \pi}{4}\Big\]$.
  *
  * @class Anglit

@@ -2,9 +2,9 @@ import Distribution from './_distribution'
 import { erf, erfinv } from '../special'
 
 /**
- * Generator for the [alpha distribution]{@link https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_alpha.html}:
+ * Generator for the [alpha distribution]{@link https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/alppdf.htm}:
  *
- * $$f(x; \alpha) = \frac{\phi\Big(\alpha - \frac{\beta}{x}\Big)}{x^2 \Phi(\alpha)},$$
+ * $$f(x; \alpha, \beta) = \frac{\phi\Big(\alpha - \frac{\beta}{x}\Big)}{x^2 \Phi(\alpha)},$$
  *
  * where $\alpha, \beta > 0$ and $\phi(x), \Phi(x)$ denote the probability density and cumulative probability
  * functions of the [normal distribution]{@link #dist.Normal}.

@@ -1,20 +1,18 @@
-const documentation = require('documentation');
-const pug = require('pug');
-const sass = require('node-sass');
-const fs = require('fs');
-const hljs = require('highlight.js/lib/core');
-const { mjpage } = require('mathjax-node-page');
-const DescParser = require('./src/desc-parser');
-const ParamParser = require('./src/param-parser');
-const TypeParser = require('./src/type-parser');
-const ThrowsParser = require('./src/throws-parser');
-
+const documentation = require('documentation')
+const pug = require('pug')
+const sass = require('node-sass')
+const fs = require('fs')
+const hljs = require('highlight.js/lib/core')
+const { mjpage } = require('mathjax-node-page')
+const DescParser = require('./src/desc-parser')
+const ParamParser = require('./src/param-parser')
+const TypeParser = require('./src/type-parser')
+const ThrowsParser = require('./src/throws-parser')
 
 // Register highlight languages.
 hljs.registerLanguage('bash', require('highlight.js/lib/languages/bash'))
 hljs.registerLanguage('xml', require('highlight.js/lib/languages/xml'))
 hljs.registerLanguage('javascript', require('highlight.js/lib/languages/javascript'))
-
 
 // Prioritized entries.
 const PRIORITY = {
@@ -23,9 +21,7 @@ const PRIORITY = {
   ]
 }
 
-
 const comparator = (a, b) => a.name.localeCompare(b.name)
-
 
 function getSortedEntries (entries, priority) {
   if (typeof priority === 'undefined') {
@@ -37,7 +33,6 @@ function getSortedEntries (entries, priority) {
       .sort(comparator)
     )
 }
-
 
 function parseEntry (entry) {
   const name = entry.name
@@ -53,7 +48,7 @@ function parseEntry (entry) {
     desc: DescParser(entry),
     params: params.length > 0 ? params : undefined,
     returns: (() => {
-      let ret = entry.returns[0]
+      const ret = entry.returns[0]
       return ret && {
         desc: DescParser(ret),
         type: TypeParser(ret.type)
@@ -61,11 +56,10 @@ function parseEntry (entry) {
     })(),
     throws: throws.length > 0 ? throws : undefined,
     examples: entry.examples.length > 0
-      ? hljs.highlight(entry.examples[0].description, {language: 'javascript'}).value
+      ? hljs.highlight(entry.examples[0].description, { language: 'javascript' }).value
       : undefined
   }
 }
-
 
 // TODO Make equations readable by replacing e^{} with exp.
 (async () => {
@@ -104,9 +98,9 @@ function parseEntry (entry) {
 
   // Build menu.
   console.log('Building the menu')
-  const menu = docs.map(({name, members}) => ({
+  const menu = docs.map(({ name, members }) => ({
     name,
-    members: members.map(({index, name}) => ({index, name}))
+    members: members.map(({ index, name }) => ({ index, name }))
   }))
 
   // Build search list.
@@ -119,14 +113,14 @@ function parseEntry (entry) {
   // Compile index template.
   console.log('Compiling the template')
   const template = pug.compileFile('./docs/templates/index.pug')
-  let page = template({
+  const page = template({
     install: {
-      browser: hljs.highlight(`<script type="text/javascript" src="ran.min.js"></script>`, {language: 'xml'})
+      browser: hljs.highlight('<script type="text/javascript" src="ran.min.js"></script>', { language: 'xml' })
         .value,
-      node: hljs.highlight('npm install --save ranjs', {language: 'bash'}).value
+      node: hljs.highlight('npm install --save ranjs', { language: 'bash' }).value
     },
     demo: 'https://beta.observablehq.com/@synesenom/ranjs-demo',
-    gitHubBanner: fs.readFileSync('./docs/templates/github-banner.html', {encoding: 'utf-8'}),
+    gitHubBanner: fs.readFileSync('./docs/templates/github-banner.html', { encoding: 'utf-8' }),
     name: 'ranjs',
     menu,
     searchList: JSON.stringify(searchList),

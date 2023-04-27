@@ -1,7 +1,7 @@
 import Weibull from './weibull'
 
 /**
- * Generator for the [double Weibull distribution]{@link https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_dweibull.html}:
+ * Generator for the [double Weibull distribution]{@link https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_dweibull.html}:
  *
  * $$f(x; \lambda, k) = \frac{k}{\lambda}\bigg(\frac{|x|}{\lambda}\bigg)^{k - 1} e^{-(|x| / \lambda)^k},$$
  *

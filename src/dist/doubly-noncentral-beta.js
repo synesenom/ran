@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; \alpha, \beta, \lambda_1, \lambda_2) = e^{-\frac{\lambda_1 + \lambda_2}{2}} \sum\_{k = 0}^\infty \sum\_{l = 0}^\infty \frac{\big(\frac{\lambda_1}{2}\big)^k}{k!} \frac{\big(\frac{\lambda_2}{2}\big)^l}{l!} \frac{x^{\alpha + k - 1} (1 - x)^{\beta + l - 1}}{\mathrm{B}\big(\alpha + k, \beta + l\big)},$$
  *
- * where $\alpha, \beta \in \mathbb{N}^+$ and $\lambda_1, \lambda_2 \ge 0$. Support: $x \in (0, 1)$.
+ * where $\alpha, \beta > 0$ and $\lambda_1, \lambda_2 \ge 0$. Support: $x \in (0, 1)$.
  *
  * @class DoublyNoncentralBeta
  * @memberof ran.dist

@@ -7,6 +7,9 @@
 
 # most important
 - add method references in docs
+- fix doubly non-central t pdf at 0
+- fix Kolmogorov pdf at 0
+- remove default parameters from distributions throw error if parameter is missing
 - improve special function precision
 - transformation functions to shift/scale generators
 
@@ -29,21 +32,26 @@
 - Gauss hypergeometric                  scipy
 - generalized beta-prime
 - generalized half-logistic             scipy
+- generalized hyperbolic                https://en.wikipedia.org/wiki/Generalised_hyperbolic_distribution
 - K-prime                               https://arxiv.org/pdf/1003.4890v1.pdf
 - K-square                              https://arxiv.org/pdf/1003.4890v1.pdf
 - inverse hypergeometric                https://www.vosesoftware.com/riskwiki/InverseHypergeometricdistribution.php
+- inverse distributions                 https://en.wikipedia.org/wiki/Inverse_distribution
 - lambda-prime                          https://arxiv.org/pdf/1003.4890v1.pdf
 - Landau distribution                   https://en.wikipedia.org/wiki/Landau_distribution
 - Luria-Delbruck                        https://arxiv.org/pdf/1203.3422.pdf
 - non-central eta                       r sadist
 - Normal-exponential-gamma              compound
 - Normal inverse Gauss                  scipy
+- Normal inverse gamma                  https://en.wikipedia.org/wiki/Normal-inverse-gamma_distribution, special case of generalized hyperbolic
 - Normal product                        http://mathworld.wolfram.com/NormalProductDistribution.html
 - parabolic fractal                     https://en.wikipedia.org/wiki/Parabolic_fractal_distribution
 - Planck                                CDF unknown
 - power-lognormal                       scipy
+- reciprocal normal distribution        https://en.wikipedia.org/wiki/Inverse_distribution#Reciprocal_normal_distribution
 - stable
 - truncated exponential                 scipy
+- variance-gamma                        https://en.wikipedia.org/wiki/Variance-gamma_distribution, special case of generalized hyperbolic
 - Waring                                https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bgepdf.htm
 - Yule                                  https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/yulpdf.htm
 

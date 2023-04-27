@@ -2,7 +2,7 @@ import Beta from './beta'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [R distribution]{@link https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_rdist.html}:
+ * Generator for the [R distribution]{@link https://docs.scipy.org/doc/scipy-1.5.4/reference/tutorial/stats/continuous_rdist.html}:
  *
  * $$f(x; c) = \frac{(1 - x^2)^{\frac{c}{2} - 1}}{\mathrm{B}\big(\frac{1}{2}, \frac{c}{2}\big)},$$
  *

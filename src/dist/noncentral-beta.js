@@ -23,7 +23,7 @@ export default class extends Distribution {
   constructor (alpha = 1, beta = 1, lambda = 1) {
     super('continuous', arguments.length)
 
-    // Validate parameters
+    // Validate parameters.
     this.p = { alpha, beta, lambda }
     Distribution.validate({ alpha, beta, lambda }, [
       'alpha > 0',
@@ -31,7 +31,7 @@ export default class extends Distribution {
       'lambda >= 0'
     ])
 
-    // Set support
+    // Set support.
     this.s = [{
       value: 0,
       closed: true
@@ -40,7 +40,7 @@ export default class extends Distribution {
       closed: true
     }]
 
-    // Speed-up constants
+    // Speed-up constants.
     this.c = [
       Math.exp(-lambda / 2),
       fnBeta(alpha, beta)
@@ -48,12 +48,12 @@ export default class extends Distribution {
   }
 
   _generator () {
-    // Direct sampling from non-central chi2 and chi2
+    // Direct sampling from non-central chi2 and chi2.
     const x = noncentralChi2(this.r, 2 * this.p.alpha, this.p.lambda)
     const y = chi2(this.r, 2 * this.p.beta)
     const z = x / (x + y)
 
-    // Handle 1 - z << 1 case
+    // Handle 1 - z << 1 case.
     if (Math.abs(1 - z) < Number.EPSILON) {
       return 1 - y / x
     } else {
@@ -62,18 +62,18 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    // Speed-up variables
+    // Speed-up variables.
     const l2 = this.p.lambda / 2
     const i0 = Math.round(l2)
     let iAlpha0 = this.p.alpha + i0
 
-    // Init variables
+    // Init variables.
     const p0 = Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
     const xa0 = Math.pow(x, iAlpha0 - 1)
     const xb = Math.pow(1 - x, this.p.beta - 1)
     const b0 = fnBeta(iAlpha0, this.p.beta)
 
-    // Forward sum
+    // Forward sum.
     let z = recursiveSum({
       p: p0,
       xa: xa0,
@@ -88,6 +88,7 @@ export default class extends Distribution {
       return t
     })
 
+    // Backward sum.
     if (i0 > 0) {
       iAlpha0--
       const xa = xa0 / x
@@ -127,7 +128,7 @@ export default class extends Distribution {
     const b0 = fnBeta(iAlpha0, this.p.beta)
     const ib0 = regularizedBetaIncomplete(iAlpha0, this.p.beta, x)
 
-    // Forward sum
+    // Forward sum.
     let z = recursiveSum({
       p: p0,
       xa: xa0,
@@ -144,7 +145,7 @@ export default class extends Distribution {
       return t
     })
 
-    // Backward sum
+    // Backward sum.
     if (i0 > 0) {
       iAlpha0--
       const xa = xa0 / x

@@ -1,9 +1,10 @@
 # Node
-node_modules/*
+/node_modules
 
 # Generated output
-.nyc_output
-coverage
+/.nyc_output
+/coverage
+/.circleci/
 
 # Idea
 .idea/*

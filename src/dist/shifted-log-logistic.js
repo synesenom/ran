@@ -3,7 +3,7 @@ import Distribution from './_distribution'
 /**
  * Generator for the [shifted log-logistic distribution]{@link https://en.wikipedia.org/wiki/Shifted_log-logistic_distribution}:
  *
- * $$f(x; \mu, s) = \frac{(1 + \xi z)^{-(1/\xi + 1)}}{\sigma \[1 + (1 + \xi z)^{-1/\xi}\]^2},$$
+ * $$f(x; \mu, \sigma, \xi) = \frac{(1 + \xi z)^{-(1/\xi + 1)}}{\sigma \[1 + (1 + \xi z)^{-1/\xi}\]^2},$$
  *
  * with $z = \frac{x - \mu}{\sigma}$, $\mu, \xi \in \mathbb{R}$ and $\sigma > 0$. Support: $x \ge \mu - \sigma/\xi$ if $\xi > 0$, $x \le \mu - \sigma/\xi$ if $\xi < 0$, $x \in \mathbb{R}$ otherwise.
  *
