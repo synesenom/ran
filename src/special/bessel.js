@@ -1,8 +1,6 @@
 import { EPS, MAX_ITER } from '../core/constants'
 import gamma from './gamma'
-import logGamma from './log-gamma'
 import recursiveSum from '../algorithms/recursive-sum'
-
 
 /**
  * Computes the modified Bessel function of the first kind with order zero.
@@ -19,9 +17,9 @@ function _I0 (x) {
   let dz = 1
   let z = dz
   for (let m = 1; m < MAX_ITER; m++) {
-    dz *= (x / 2)**2 / m**2
+    dz *= (x / 2) ** 2 / m ** 2
     z += dz
-    if (Math.abs(dz / z) < EPS) {break}
+    if (Math.abs(dz / z) < EPS) { break }
   }
   return z
 }

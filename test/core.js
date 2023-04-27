@@ -3,14 +3,13 @@ import { describe, it } from 'mocha'
 import { trials, ksTest, chiTest } from './test-utils'
 import * as core from '../src/core'
 
-
 // Constants
 const TRIALS = 1
 const LAPS = 100
 const CHARS = '.,:;-+_!#%&/()[]{}?*0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 function add (dist, value) {
-  if (!dist.hasOwnProperty(value)) { dist[value] = 1 } else { dist[value]++ }
+  if (typeof dist[value] === 'undefined') { dist[value] = 1 } else { dist[value]++ }
 }
 
 describe('core', () => {
@@ -19,9 +18,9 @@ describe('core', () => {
       trials(() => {
         const s = Math.floor(Math.random() * 10000)
         core.seed(s)
-        const values1 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
+        const values1 = Array.from({ length: LAPS }, () => core.int(Number.MAX_SAFE_INTEGER))
         core.seed(s)
-        const values2 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
+        const values2 = Array.from({ length: LAPS }, () => core.int(Number.MAX_SAFE_INTEGER))
         return values1.reduce((acc, d, i) => acc && d === values2[i], true)
       })
     })
@@ -30,9 +29,9 @@ describe('core', () => {
       trials(() => {
         const s = Array.from({ length: 32 }, () => CHARS.charAt(Math.floor(Math.random() * CHARS.length))).join('')
         core.seed(s)
-        const values1 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
+        const values1 = Array.from({ length: LAPS }, () => core.int(Number.MAX_SAFE_INTEGER))
         core.seed(s)
-        const values2 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
+        const values2 = Array.from({ length: LAPS }, () => core.int(Number.MAX_SAFE_INTEGER))
         return values1.reduce((acc, d, i) => acc && d === values2[i], true)
       })
     })
@@ -40,9 +39,9 @@ describe('core', () => {
     it('should return different sequence of random numbers for different numerical seeds', () => {
       trials(() => {
         core.seed(Math.floor(Math.random() * 10000))
-        const values1 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
+        const values1 = Array.from({ length: LAPS }, () => core.int(Number.MAX_SAFE_INTEGER))
         core.seed(Math.floor(Math.random() * 10000))
-        const values2 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
+        const values2 = Array.from({ length: LAPS }, () => core.int(Number.MAX_SAFE_INTEGER))
         return values1.reduce((acc, d, i) => acc && d !== values2[i], true)
       })
     })
@@ -50,9 +49,9 @@ describe('core', () => {
     it('should return different sequence of random numbers for different numerical seeds', () => {
       trials(() => {
         core.seed(Array.from({ length: 32 }, () => CHARS.charAt(Math.floor(Math.random() * CHARS.length))).join(''))
-        const values1 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
+        const values1 = Array.from({ length: LAPS }, () => core.int(Number.MAX_SAFE_INTEGER))
         core.seed(Array.from({ length: 32 }, () => CHARS.charAt(Math.floor(Math.random() * CHARS.length))).join(''))
-        const values2 = Array.from({length: LAPS}, () => core.int(Number.MAX_SAFE_INTEGER))
+        const values2 = Array.from({ length: LAPS }, () => core.int(Number.MAX_SAFE_INTEGER))
         return values1.reduce((acc, d, i) => acc && d !== values2[i], true)
       })
     })
@@ -117,7 +116,7 @@ describe('core', () => {
         const max = 20 + Math.floor(Math.random() * 10)
         const values = []
         for (let lap = 0; lap < LAPS; lap++) {
-          let r = core.int(min, max)
+          const r = core.int(min, max)
           values.push(r)
 
           // Value is in range
@@ -186,13 +185,11 @@ describe('core', () => {
           // Length is correct
           assert.equal(k < 2 ? 1 : k, r.length)
         }
-        for (let i in values) {
+        for (const i in values) {
           // Distribution is uniform
-          if (values.hasOwnProperty(i)) {
-            assert(freqs[values[i]] > 0)
-          }
+          assert(freqs[values[i]] > 0)
         }
-        for (let i in freqs) {
+        for (const i in freqs) {
           assert(values.indexOf(i) > -1)
         }
       }
@@ -247,10 +244,8 @@ describe('core', () => {
 
         // Check if all positions have been visited at least once
         pos.forEach(p => {
-          for (let i in p) {
-            if (p.hasOwnProperty(i)) {
-              assert(p[i] > 0)
-            }
+          for (const i in p) {
+            assert(p[i] > 0)
           }
         })
       }

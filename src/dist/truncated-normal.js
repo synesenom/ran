@@ -1,4 +1,4 @@
-import Normal  from './normal'
+import Normal from './normal'
 import Distribution from './_distribution'
 
 /**

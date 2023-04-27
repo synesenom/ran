@@ -3,7 +3,6 @@ import { describe, it } from 'mocha'
 import { repeat, equal } from './test-utils'
 import { int } from '../src/core'
 import * as shape from '../src/shape'
-import * as dispersion from '../src/dispersion'
 
 const SAMPLE_SIZE = 100
 
@@ -22,9 +21,9 @@ describe('dispersion', () => {
 
     it('should return the kurtosis', () => {
       repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
-        let kurtosis = shape.kurtosis(values)
-        let n = values.length
+        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+        const kurtosis = shape.kurtosis(values)
+        const n = values.length
         let x1 = 0
         for (let i = 0; i < values.length; i++) {
           x1 += values[i]
@@ -49,10 +48,10 @@ describe('dispersion', () => {
 
     it('should return the moment for finite sample for c = 0', () => {
       repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
+        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
         const k = int(0, 10)
-        let moment = shape.moment(values, k)
-        let n = values.length
+        const moment = shape.moment(values, k)
+        const n = values.length
         let xk = 0
         for (let i = 0; i < values.length; i++) {
           xk += Math.pow(values[i], k)
@@ -64,11 +63,11 @@ describe('dispersion', () => {
 
     it('should return the moment for finite sample for c != 0', () => {
       repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
+        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
         const k = int(0, 10)
         const c = Math.random()
-        let moment = shape.moment(values, k, c)
-        let n = values.length
+        const moment = shape.moment(values, k, c)
+        const n = values.length
         let xk = 0
         for (let i = 0; i < values.length; i++) {
           xk += Math.pow(values[i] - c, k)
@@ -87,7 +86,7 @@ describe('dispersion', () => {
     it('should return quantile for finite sample', () => {
       repeat(() => {
         const p = Math.random()
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
+        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
         const q = shape.quantile(values, p)
         const h = (values.length - 1) * p
         const q0 = values.sort((a, b) => a - b)[Math.floor(h)]
@@ -133,9 +132,9 @@ describe('dispersion', () => {
 
     it('should return the skewness', () => {
       repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
-        let skewness = shape.skewness(values)
-        let n = values.length
+        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
+        const skewness = shape.skewness(values)
+        const n = values.length
         let x1 = 0
         let x2 = 0
         let x3 = 0
@@ -147,8 +146,8 @@ describe('dispersion', () => {
         x1 /= n
         x2 /= n
         x3 /= n
-        let s = Math.sqrt(Math.abs(x2 - x1 * x1))
-        let c = Math.sqrt(n * (n - 1)) / (n - 2)
+        const s = Math.sqrt(Math.abs(x2 - x1 * x1))
+        const c = Math.sqrt(n * (n - 1)) / (n - 2)
         assert(equal(c * (x3 - 3 * x1 * s * s - x1 * x1 * x1) / (s * s * s), skewness))
       })
     })
@@ -163,9 +162,9 @@ describe('dispersion', () => {
       assert(typeof shape.yule([1, 1, 1]) === 'undefined')
     })
 
-    it(`should return Yule's coefficient for a finite sample`, () => {
+    it('should return Yule\'s coefficient for a finite sample', () => {
       repeat(() => {
-        const values = Array.from({length: SAMPLE_SIZE}, Math.random)
+        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
         const yule = shape.yule(values)
 
         // Lower quartile.
@@ -181,7 +180,8 @@ describe('dispersion', () => {
         const hi = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
 
         // Median.
-        const median = values.length % 2 === 0 ? 0.5 * (values[values.length / 2 - 1] + values[values.length / 2])
+        const median = values.length % 2 === 0
+          ? 0.5 * (values[values.length / 2 - 1] + values[values.length / 2])
           : values[(values.length - 1) / 2]
 
         assert(equal((lo + hi - 2 * median) / (hi - lo), yule))
