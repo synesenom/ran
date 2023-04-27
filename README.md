@@ -4,8 +4,7 @@
 [![Inline docs](http://inch-ci.org/github/synesenom/ran.svg?branch=master)](http://inch-ci.org/github/synesenom/ran)
 [![License](https://img.shields.io/npm/l/ranjs.svg)](https://www.npmjs.com/package/ranjs)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
-[![CodeScene Code Health](https://codescene.io/projects/20135/status-badges/code-health)](https://codescene.io/projects/20135)
-
+[![CodeScene Code Health](https://codescene.io/projects/28921/status-badges/code-health)](https://codescene.io/projects/28921)
 # ranjs
 
 Statistical library for generating various seeded random variates, calculating likelihood functions and testing hypotheses (and much more).
