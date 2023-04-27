@@ -3,7 +3,6 @@ import { describe, it } from 'mocha'
 import { repeat, equal } from './test-utils'
 import * as dependence from '../src/dependence'
 
-
 describe('dependence', () => {
   describe('.covariance()', () => {
     it('should return undefined if any of the arrays has fewer than two elements', () => {
@@ -104,7 +103,7 @@ describe('dependence', () => {
       assert(typeof dependence.kendall([1, 2, 3], [4, 5]) === 'undefined')
     })
 
-    it(`should return Kendall's tau of two arrays`, () => {
+    it('should return Kendall\'s tau of two arrays', () => {
       const x = [
         30, 18, 24, 48, 33, 38, 48, 1, 12, 5, 7, 3, 8, 32, 28, 15, 32, 12, 37, 13, 26, 1, 6, 41, 1, 31, 11, 33, 19, 31,
         12, 19, 25, 45, 34, 37, 37, 26, 1, 39, 42, 34, 0, 21, 20, 34, 38, 25, 34, 49, 0, 17, 28, 37, 49, 24, 18, 19, 23,
@@ -255,7 +254,7 @@ describe('dependence', () => {
       assert(typeof dependence.somersD([1, 2, 3], [1, 2, 3, 4]) === 'undefined')
     })
 
-    it(`should return Somers' D`, () => {
+    it('should return Somers\' D', () => {
       const x = [
         14, 24, 45, 13, 2, 38, 0, 27, 32, 34, 39, 3, 34, 17, 34, 38, 8, 24, 6, 35, 16, 35, 11, 25, 7, 10, 35, 14, 17,
         35, 7, 46, 10, 10, 13, 19, 45, 23, 26, 38, 17, 4, 6, 29, 30, 32, 26, 6, 31, 28, 43, 6, 15, 49, 2, 48, 40, 45, 0,
@@ -283,7 +282,7 @@ describe('dependence', () => {
       assert(typeof dependence.spearman([1, 2, 3], [4, 5]) === 'undefined')
     })
 
-    it(`should return Spearman's rank correlation of two arrays`, () => {
+    it('should return Spearman\'s rank correlation of two arrays', () => {
       const x = [30, 7, 20, 27, 3, 2, 32, 46, 45, 35, 14, 0, 34, 22, 37, 22, 5, 23, 19, 39, 15, 17, 10, 23, 10, 27, 9,
         37, 19, 46, 11, 22, 28, 21, 44, 31, 8, 21, 8, 26, 6, 6, 33, 4, 1, 12, 25, 19, 42, 2, 29, 33, 41, 49, 25, 43, 24,
         1, 5, 17, 32, 42, 29, 26, 48, 10, 31, 41, 1, 19, 24, 10, 26, 21, 44, 9, 26, 24, 49, 47, 17, 9, 32, 33, 25, 4,
@@ -316,7 +315,7 @@ describe('dependence', () => {
       assert(typeof dependence.yuleQ(0.1, 0.2, 0, 0.4) === 'undefined')
     })
 
-    it(`should return Yule's Q for a contingency table of joint probabilities`, () => {
+    it('should return Yule\'s Q for a contingency table of joint probabilities', () => {
       repeat(() => {
         const p00 = 0.01 + 0.99 * Math.random()
         const p01 = 0.01 + 0.99 * Math.random()
@@ -334,7 +333,7 @@ describe('dependence', () => {
       assert(typeof dependence.yuleY(0.1, 0.2, 0, 0.4) === 'undefined')
     })
 
-    it(`should return Yule's Y for a contingency table of joint probabilities`, () => {
+    it('should return Yule\'s Y for a contingency table of joint probabilities', () => {
       repeat(() => {
         const p00 = 0.01 + 0.99 * Math.random()
         const p01 = 0.01 + 0.99 * Math.random()

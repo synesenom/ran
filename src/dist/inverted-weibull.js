@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for the [inverted Weibull distribution]{@link https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_invweibull.html}:
+ * Generator for the [inverted Weibull distribution]{@link https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_invweibull.html}:
  *
  * $$f(x; c) = c x^{-c - 1} e^{-x^{-c}},$$
  *

@@ -2,7 +2,7 @@ import Distribution from './_distribution'
 import { lambertW0 } from '../special'
 
 /**
- * Generator for the [generalized exponential distribution]{@link https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_genexpon.html}:
+ * Generator for the [generalized exponential distribution]{@link https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_genexpon.html}:
  *
  * $$f(x; a, b, c) = \big(a + b (1 - e^{-c x})\big) e^{-(a + b)x + \frac{b}{c} (1 - e^{-c x})},$$
  *

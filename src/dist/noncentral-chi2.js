@@ -55,7 +55,7 @@ export default class extends Distribution {
         return 0.5 * Math.exp(-0.5 * this.p.lambda)
       } else {
         return 0.5 * Math.exp(-0.5 * (x + this.p.lambda) + (this.p.k / 4 - 0.5) * Math.log(x / this.p.lambda)) * besselI(Math.round(this.p.k / 2) - 1, Math.sqrt(this.p.lambda * x))
-        //return 0.5 * Math.exp(-0.5 * (x + this.p.lambda)) * Math.pow(x / this.p.lambda, this.p.k / 4 - 0.5) * besselI(Math.abs(Math.floor(this.p.k / 2) - 1), Math.sqrt(this.p.lambda * x))
+        // return 0.5 * Math.exp(-0.5 * (x + this.p.lambda)) * Math.pow(x / this.p.lambda, this.p.k / 4 - 0.5) * besselI(Math.abs(Math.floor(this.p.k / 2) - 1), Math.sqrt(this.p.lambda * x))
       }
     } else {
       // k is odd

@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for the [generalized extreme value distribution]{@link https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_genextreme.html}:
+ * Generator for the [generalized extreme value distribution]{@link https://en.wikipedia.org/wiki/Generalized_extreme_value_distribution}:
  *
  * $$f(x; c) = (1 - cx)^{1 / c - 1} e^{-(1 - cx)^{1 / c}},$$
  *

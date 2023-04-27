@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Bradford distribution]{@link https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_bradford.html}:
+ * Generator for the [Bradford distribution]{@link https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bradford.html}:
  *
  * $$f(x; c) = \frac{c}{\ln(1 + c) (1 + c x)},$$
  *

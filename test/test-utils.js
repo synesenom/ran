@@ -1,6 +1,5 @@
 import { assert } from 'chai'
 
-
 // Constants
 const H = 0.01
 const PRECISION = 1e-10
@@ -40,12 +39,11 @@ const CHI_TABLE_HIGH = [
   895.984, 948.848, 1001.630, 1054.334, 1106.969
 ]
 
-
 export function equal (x, y, precision = 10) {
   return Math.abs((x - y) / y) < Math.pow(10, -precision)
 }
 
-function almostEqual(a, b, tol = PRECISION) {
+function almostEqual (a, b, tol = PRECISION) {
   return Math.abs(a - b) < tol
 }
 
@@ -57,8 +55,8 @@ function differentiate (f, x, h = 0.01) {
   const SAFE = 2.0
 
   let i, j
-  let errt, fac, hh, a, ans, err
-  a = Array.from({length: NTAB + 1}, () => Array.from({length: NTAB + 1}))
+  let errt, fac, hh, ans, err
+  const a = Array.from({ length: NTAB + 1 }, () => Array.from({ length: NTAB + 1 }))
   hh = h
   a[1][1] = (f(x + hh) - f(x - hh)) / (2 * hh)
   err = BIG
@@ -68,15 +66,15 @@ function differentiate (f, x, h = 0.01) {
     a[1][i] = (f(x + hh) - f(x - hh)) / (2 * hh)
     fac = CON2
     for (j = 2; j <= i; j++) {
-      a[j][i] = (a[j-1][i]*fac - a[j-1][i-1]) / (fac-1)
+      a[j][i] = (a[j - 1][i] * fac - a[j - 1][i - 1]) / (fac - 1)
       fac = CON2 * fac
-      errt = Math.max(Math.abs(a[j][i]-a[j-1][i]), Math.abs(a[j][i]-a[j-1][i-1]))
-      if  (errt <= err) {
+      errt = Math.max(Math.abs(a[j][i] - a[j - 1][i]), Math.abs(a[j][i] - a[j - 1][i - 1]))
+      if (errt <= err) {
         err = errt
         ans = a[j][i]
       }
     }
-    if (Math.abs(a[i][i] - a[i-1][i-1]) >= SAFE * err) break
+    if (Math.abs(a[i][i] - a[i - 1][i - 1]) >= SAFE * err) break
   }
   return ans
 }
@@ -88,8 +86,7 @@ function getTestRange (dist) {
   ]
 }
 
-function getParamList(dist) {
-
+function getParamList (dist) {
   return Object.entries(dist.p)
     .map(([name, value]) => {
       if (Array.isArray(value)) {
@@ -102,7 +99,7 @@ function getParamList(dist) {
 
 function runX (dist, unitTest) {
   // Init test variables
-  let range = getTestRange(dist)
+  const range = getTestRange(dist)
 
   // Run test
   if (dist.type() === 'discrete') {
@@ -110,7 +107,7 @@ function runX (dist, unitTest) {
       unitTest(dist, Math.floor(i))
     }
   } else {
-    let dx = (range[1] - range[0]) / RANGE_STEPS
+    const dx = (range[1] - range[0]) / RANGE_STEPS
     for (let i = 0; i < RANGE_STEPS; i++) {
       unitTest(dist, range[0] + i * dx + Math.random())
     }
@@ -137,7 +134,7 @@ export function ksTest (values, model) {
 
 export function chiTest (values, model, c) {
   // Calculate distribution first
-  let p = new Map()
+  const p = new Map()
   for (let i = 0; i < values.length; i++) {
     if (!p.has(values[i])) {
       p.set(values[i], 1)
@@ -147,7 +144,7 @@ export function chiTest (values, model, c) {
   }
 
   // Create sorted frequencies
-  let dist = Array.from(p)
+  const dist = Array.from(p)
     .map(d => ({ x: d[0], p: d[1] }))
     .sort((a, b) => a.x - b.x)
 
@@ -172,8 +169,8 @@ export function chiTest (values, model, c) {
   })
 
   // Find critical value
-  let df = Math.max(1, k - c - 1)
-  let crit = df <= 250 ? CHI_TABLE_LOW[df] : CHI_TABLE_HIGH[Math.ceil(df / 50)]
+  const df = Math.max(1, k - c - 1)
+  const crit = df <= 250 ? CHI_TABLE_LOW[df] : CHI_TABLE_HIGH[Math.ceil(df / 50)]
   // console.log(chi2, crit)
   if (chi2 > crit) {
     // console.log(chi2, crit)
@@ -181,7 +178,7 @@ export function chiTest (values, model, c) {
 
   // Check if distribution is degenerate
   if (p.size === 1) {
-    let k0 = p.keys().next().value
+    const k0 = p.keys().next().value
     return model(k0) === 1 && chi2 === 0
   } else {
     return chi2 > 0 && chi2 <= crit
@@ -202,7 +199,6 @@ export function repeat (test, times = 10) {
   }
 }
 
-
 export const Tests = {
   pdfRange (dist) {
     // Run through x values and assert PDF(x) >= 0.
@@ -215,18 +211,18 @@ export const Tests = {
   cdfRange (dist) {
     // Run through x values and assert 0 <= CDF(x) <= 1.
     runX(dist, (d, x) => {
-      let cdf = d.cdf(x)
+      const cdf = d.cdf(x)
       assert(Number.isFinite(cdf) && !Number.isNaN(cdf) && cdf >= 0 && cdf <= 1, `cdf(${x}; ${getParamList(d)}) = ${cdf}`)
     })
   },
 
   cdfMonotonicity (dist) {
-    let discrete = dist.type() === 'discrete'
+    const discrete = dist.type() === 'discrete'
 
     // Run through x values and assert CDF(x - dx) <= CDF(x + dx).
     runX(dist, (d, x) => {
-      let p1 = discrete ? x : x - 1e-3
-      let p2 = discrete ? x + 1 : x + 1e-3
+      const p1 = discrete ? x : x - 1e-3
+      const p2 = discrete ? x + 1 : x + 1e-3
       assert(p2 > p1, `cdf(${p1}; ${getParamList(d)}) > cdf(${p2}; ${getParamList(d)})`)
     })
   },
@@ -273,11 +269,11 @@ export const Tests = {
 
   qRange (dist) {
     // Extract distribution support.
-    let supp = dist.support()
+    const supp = dist.support()
 
     // Run through p values and assert supp[0] <= q(p) <= supp[1].
     runP(dist, (d, p) => {
-      let x = d.q(p)
+      const x = d.q(p)
       assert(Number.isFinite(x) && x >= supp[0].value && x <= supp[1].value,
         `q(${p}; ${getParamList(d)}) = ${x}, support = [${supp[0].value}, ${supp[1].value}]`)
     })
@@ -285,8 +281,8 @@ export const Tests = {
 
   qMonotonicity (dist) {
     runP(dist, (d, p) => {
-      let x1 = d.q(p)
-      let x2 = d.q(p + 1e-3)
+      const x1 = d.q(p)
+      const x2 = d.q(p + 1e-3)
       assert(x2 >= x1, `q(${x1}; ${getParamList(d)}) > q(${x2}; ${getParamList(d)})`)
     })
   },
@@ -294,12 +290,12 @@ export const Tests = {
   qGalois (dist) {
     runP(dist, (d, p) => {
       // Compute quantile.
-      let q = d.q(p)
+      const q = d.q(p)
 
       // Sample several values to test for Galois inequalities.
       for (let i = 0; i < 10; i++) {
-        let x = d.sample()
-        let cdf = d.cdf(x)
+        const x = d.sample()
+        const cdf = d.cdf(x)
         assert((x - q) * (cdf - p) >= 0, `cdf(${x}) = ${cdf} and q(${p}) = ${q}`)
       }
     })

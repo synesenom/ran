@@ -119,7 +119,7 @@ describe('algorithms', () => {
   describe('romberg()', () => {
     it('should integrate the function x^3 exp(-x)', () => {
       const integral = t => Math.exp(-t) * (-t * (t * (t + 3) + 6) - 6) + 6
-      for (let b = 0.1; b < 10;  b++) {
+      for (let b = 0.1; b < 10; b++) {
         const i = algorithms.romberg(
           t => Math.pow(t, 3) * Math.exp(-t),
           0,
@@ -133,7 +133,7 @@ describe('algorithms', () => {
   describe('.quickselect()', () => {
     it('should select the k-th element', () => {
       repeat(() => {
-        const values = Array.from({length: 100}, Math.random)
+        const values = Array.from({ length: 100 }, Math.random)
         const k = int(50, 99)
         const item = values.sort((a, b) => a - b)[k]
         assert(algorithms.quickselect(shuffle(values), k) === item)

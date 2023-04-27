@@ -45,20 +45,20 @@ const Param = {
 export default [{
   name: 'Alpha',
   invalidParams: [
-    [-1, 1], [0, 1],  // alpha > 0
-    [1, -1], [1, 0]   // beta > 0
+    [-1, 1], [0, 1], // alpha > 0
+    [1, -1], [1, 0] // beta > 0
   ],
   foreign: {
     generator: 'Pareto',
     params: () => [Param.scale(), Param.shape()]
   },
   cases: [{
-    params: () => [Param.shape(), Param.scale()],
+    params: () => [Param.shape(), Param.scale()]
   }]
 }, {
   name: 'Anglit',
   invalidParams: [
-    [0, -1], [0, 0]   // beta > 0
+    [0, -1], [0, 0] // beta > 0
   ],
   foreign: {
     generator: 'Arcsine',
@@ -70,7 +70,7 @@ export default [{
 }, {
   name: 'Arcsine',
   invalidParams: [
-    [1, 1], [2, 1]  // a < b
+    [1, 1], [2, 1] // a < b
   ],
   foreign: {
     generator: 'Bates',
@@ -82,8 +82,8 @@ export default [{
 }, {
   name: 'BaldingNichols',
   invalidParams: [
-    [-1, 0.5], [0, 0.5], [1, 0.5], [2, 0.5],  // 0 < F < 1
-    [0.5, -1], [0.5, 0], [0.5, 1], [0.5, 2]   // 0 < p < 1
+    [-1, 0.5], [0, 0.5], [1, 0.5], [2, 0.5], // 0 < F < 1
+    [0.5, -1], [0.5, 0], [0.5, 1], [0.5, 2] // 0 < p < 1
   ],
   foreign: {
     generator: 'Bates',
@@ -95,8 +95,8 @@ export default [{
 }, {
   name: 'Bates',
   invalidParams: [
-    [-1, 0, 1], [0, 0, 1],    // n > 0
-    [10, 1, 1], [10, 2, 1]    // a < b
+    [-1, 0, 1], [0, 0, 1], // n > 0
+    [10, 1, 1], [10, 2, 1] // a < b
   ],
   foreign: {
     generator: 'UniformProduct',
@@ -108,9 +108,9 @@ export default [{
 }, {
   name: 'Benini',
   invalidParams: [
-    [-1, 1, 1], [0, 1, 1],  // alpha > 0
-    [1, -1, 1], [1, 0, 1],  // beta > 0
-    [1, 1, -1], [1, 1, 0]   // sigma > 0
+    [-1, 1, 1], [0, 1, 1], // alpha > 0
+    [1, -1, 1], [1, 0, 1], // beta > 0
+    [1, 1, -1], [1, 1, 0] // sigma > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -122,7 +122,7 @@ export default [{
 }, {
   name: 'BenktanderII',
   invalidParams: [
-    [-1, 0.5], [0, 0.5],      // a > 0
+    [-1, 0.5], [0, 0.5], // a > 0
     [1, -1], [1, 0], [1, 1.5] // 0 < b <= 1
   ],
   foreign: {
@@ -155,7 +155,7 @@ export default [{
   name: 'Beta',
   invalidParams: [
     [-1, 2], [0, 2], // alpha > 0
-    [2, -1], [2, 0]  // beta > 0
+    [2, -1], [2, 0] // beta > 0
   ],
   foreign: {
     generator: 'UniformProduct',
@@ -167,9 +167,9 @@ export default [{
 }, {
   name: 'BetaBinomial',
   invalidParams: [
-    [-1, 1, 1],                 // n > 0
-    [100, -1, 1], [100, 0, 1],  // alpha > 0
-    [100, 1, -1], [100, 1, 0]   // beta > 0
+    [-1, 1, 1], // n > 0
+    [100, -1, 1], [100, 0, 1], // alpha > 0
+    [100, 1, -1], [100, 1, 0] // beta > 0
   ],
   foreign: {
     generator: 'Bates',
@@ -178,7 +178,7 @@ export default [{
   cases: [{
     params: () => [Param.degree() * 5, Param.shape(), Param.shape()]
   }]
-}/*, {
+}, /*, {
   name: 'BetaGeometric',
   invalidParams: [
     [-1, 1],                    // alpha < 0
@@ -191,11 +191,11 @@ export default [{
   cases: [{
     params: () => [Param.shape(), Param.shape()]
   }]
-}*/, {
+} */ {
   name: 'BetaPrime',
   invalidParams: [
     [-1, 2], [0, 2], // alpha > 0
-    [2, -1], [2, 0]  // beta > 0
+    [2, -1], [2, 0] // beta > 0
   ],
   foreign: {
     generator: 'Bates',
@@ -207,8 +207,8 @@ export default [{
 }, {
   name: 'BetaRectangular',
   invalidParams: [
-    [1, 1, -1, 0, 1], [1, 1, 2, 0, 1],    // 0 <= theta <= 1
-    [1, 1, 0.5, 1, 1], [1, 1, 0.5, 2, 1], // a < b
+    [1, 1, -1, 0, 1], [1, 1, 2, 0, 1], // 0 <= theta <= 1
+    [1, 1, 0.5, 1, 1], [1, 1, 0.5, 2, 1] // a < b
   ],
   foreign: {
     generator: 'Bates',
@@ -220,21 +220,21 @@ export default [{
 }, {
   name: 'Binomial',
   invalidParams: [
-    [-1, 0.5],            // n >= 0
-    [100, -1], [100, 2],  // 0 <= p <= 1
+    [-1, 0.5], // n >= 0
+    [100, -1], [100, 2] // 0 <= p <= 1
   ],
   foreign: {
     generator: 'DiscreteUniform',
     params: s => [Math.min(...s), Math.max(...s)]
   },
   cases: [{
-    params: () => [Param.rangeMax(), Param.prob()],
+    params: () => [Param.rangeMax(), Param.prob()]
   }]
 }, {
   name: 'BirnbaumSaunders',
   invalidParams: [
-    [0, -1, 1], [0, 0, 1],  // beta > 0
-    [0, 1, -1], [0, 1, 0],  // gamma > 0
+    [0, -1, 1], [0, 0, 1], // beta > 0
+    [0, 1, -1], [0, 1, 0] // gamma > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -262,7 +262,7 @@ export default [{
 }, {
   name: 'BorelTanner',
   invalidParams: [
-    [-1, 2], [2, 2],    // 0 <= mu <= 1
+    [-1, 2], [2, 2], // 0 <= mu <= 1
     [0.5, -1], [0.5, 0] // k > 0
   ],
   foreign: {
@@ -279,10 +279,10 @@ export default [{
 }, {
   name: 'BoundedPareto',
   invalidParams: [
-    [-1, 10, 1], [0, 10, 1],  // L > 0
-    [1, -1, 1], [1, 0, 1],    // H > 0
+    [-1, 10, 1], [0, 10, 1], // L > 0
+    [1, -1, 1], [1, 0, 1], // H > 0
     [10, 10, 1], [12, 10, 1], // L < H
-    [1, 10, -1], [1, 10, 0],  // alpha > 0
+    [1, 10, -1], [1, 10, 0] // alpha > 0
   ],
   foreign: {
     generator: 'DiscreteUniform',
@@ -307,7 +307,7 @@ export default [{
   name: 'Burr',
   invalidParams: [
     [-1, 1], [0, 1], // c > 0
-    [1, -1], [1, 0], // k > 0
+    [1, -1], [1, 0] // k > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -319,7 +319,7 @@ export default [{
 }, {
   name: 'Categorical',
   invalidParams: [
-    [[-1, 1, 1], 0],  // w_i > 0
+    [[-1, 1, 1], 0] // w_i > 0
   ],
   foreign: {
     generator: 'Bates',
@@ -327,18 +327,18 @@ export default [{
   },
   cases: [{
     name: 'small n',
-    params: () => [Array.from({length: 2}, Math.random)]
+    params: () => [Array.from({ length: 2 }, Math.random)]
   }, {
     name: 'moderate n',
     params: () => [Array.from({ length: int(10, 100) }, Math.random)]
   }, {
     name: 'large n',
     params: () => [Array.from({ length: int(101, 120) }, Math.random)]
-  }],
+  }]
 }, {
   name: 'Cauchy',
   invalidParams: [
-    [0, -1], [0, 0]  // gamma > 0
+    [0, -1], [0, 0] // gamma > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -358,11 +358,11 @@ export default [{
   },
   cases: [{
     name: 'k = 1',
-    params: () => [1],
+    params: () => [1]
   }, {
     name: 'k > 1',
     params: () => [Param.degree()]
-  }],
+  }]
 }, {
   name: 'Chi2',
   invalidParams: [
@@ -378,9 +378,9 @@ export default [{
 }, {
   name: 'Dagum',
   invalidParams: [
-    [-1, 1, 1], [0, 1, 1],  // p > 0
-    [1, -1, 1], [1, 0, 1],  // a > 0
-    [1, 1, -1], [1, 1, 0]   // b > 0
+    [-1, 1, 1], [0, 1, 1], // p > 0
+    [1, -1, 1], [1, 0, 1], // a > 0
+    [1, 1, -1], [1, 1, 0] // b > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -389,7 +389,7 @@ export default [{
   cases: [{
     params: () => [Param.shape(), Param.shape(), Param.scale()]
   }]
-}/*, {
+}, /*, {
   name: 'Davis',
   invalidParams: [
     [-1, 1, 1.5], [0, 1, 1.5],  // mu > 0
@@ -404,12 +404,12 @@ export default [{
   cases: [{
     params: () => [Param.shape(), Param.scale(), Param.shape()]
   }]
-}*/, {
+} */ {
   name: 'Delaporte',
   invalidParams: [
-    [-1, 1, 1], [0, 1, 1],  // alpha > 0
-    [1, -1, 1], [1, 0, 1],  // beta > 0
-    [1, 1, -1], [1, 1, 0]   // lambda > 0
+    [-1, 1, 1], [0, 1, 1], // alpha > 0
+    [1, -1, 1], [1, 0, 1], // beta > 0
+    [1, 1, -1], [1, 1, 0] // lambda > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -421,7 +421,7 @@ export default [{
 }, {
   name: 'DiscreteUniform',
   invalidParams: [
-    [105, 100]  // xmin <= xmax
+    [105, 100] // xmin <= xmax
   ],
   foreign: {
     generator: 'Poisson',
@@ -433,8 +433,8 @@ export default [{
 }, {
   name: 'DiscreteWeibull',
   invalidParams: [
-    [-1, 1], [0, 1], [1, 1], [2, 1],  // 0 < q < 1
-    [0.5, -1], [0.5, 0]               // beta > 0
+    [-1, 1], [0, 1], [1, 1], [2, 1], // 0 < q < 1
+    [0.5, -1], [0.5, 0] // beta > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -446,8 +446,8 @@ export default [{
 }, {
   name: 'DoubleGamma',
   invalidParams: [
-    [-1, 1], [0, 1],  // alpha > 0
-    [1, -1], [1, 0]   // beta > 0
+    [-1, 1], [0, 1], // alpha > 0
+    [1, -1], [1, 0] // beta > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -459,8 +459,8 @@ export default [{
 }, {
   name: 'DoubleWeibull',
   invalidParams: [
-    [-1, 1], [0, 1],  // lambda > 0
-    [1, -1], [1, 0]   // k > 0
+    [-1, 1], [0, 1], // lambda > 0
+    [1, -1], [1, 0] // k > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -472,10 +472,10 @@ export default [{
 }, {
   name: 'DoublyNoncentralBeta',
   invalidParams: [
-    [-1, 1, 1, 1], [0, 1, 1, 1],  // alpha > 0
-    [1, -1, 1, 1], [1, 0, 1, 1],  // beta > 0
-    [1, 1, -1, 1],                // lambda1 >= 0
-    [1, 1, 1, -1]                 // lambda2 >= 0
+    [-1, 1, 1, 1], [0, 1, 1, 1], // alpha > 0
+    [1, -1, 1, 1], [1, 0, 1, 1], // beta > 0
+    [1, 1, -1, 1], // lambda1 >= 0
+    [1, 1, 1, -1] // lambda2 >= 0
   ],
   foreign: {
     generator: 'Poisson',
@@ -487,10 +487,10 @@ export default [{
 }, {
   name: 'DoublyNoncentralF',
   invalidParams: [
-    [-1, 2, 1, 1], [0, 2, 1, 1],  // n1 > 0
-    [2, -1, 1, 1], [2, 0, 1, 1],  // n2 > 0
-    [2, 2, -1, 1],                // lambda1 >= 0
-    [2, 2, 1, -1],                // lambda2 >= 0
+    [-1, 2, 1, 1], [0, 2, 1, 1], // n1 > 0
+    [2, -1, 1, 1], [2, 0, 1, 1], // n2 > 0
+    [2, 2, -1, 1], // lambda1 >= 0
+    [2, 2, 1, -1] // lambda2 >= 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -502,8 +502,8 @@ export default [{
 }, {
   name: 'DoublyNoncentralT',
   invalidParams: [
-    [-1, 1, 1], [0, 1, 1],  // nu > 0
-    [1, 1, -1]              // theta >= 0
+    [-1, 1, 1], [0, 1, 1], // nu > 0
+    [1, 1, -1] // theta >= 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -516,7 +516,7 @@ export default [{
   name: 'Erlang',
   invalidParams: [
     [-1, 1], [0, 1], // k > 0
-    [1, -1], [1, 0]  // lambda > 0
+    [1, -1], [1, 0] // lambda > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -540,8 +540,8 @@ export default [{
 }, {
   name: 'ExponentialLogarithmic',
   invalidParams: [
-    [-1, 1], [0, 1], [1, 1], [2, 1],  // 0 < p < 1
-    [0.5, -1], [0.5, 0]               // beta > 0
+    [-1, 1], [0, 1], [1, 1], [2, 1], // 0 < p < 1
+    [0.5, -1], [0.5, 0] // beta > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -553,9 +553,9 @@ export default [{
 }, {
   name: 'ExponentiatedWeibull',
   invalidParams: [
-    [-1, 1, 1], [0, 1, 1],  // lambda > 0
-    [1, -1, 1], [1, 0, 1],  // k > 0
-    [1, 1, -1], [1, 1, 0]   // alpha > 0
+    [-1, 1, 1], [0, 1, 1], // lambda > 0
+    [1, -1, 1], [1, 0, 1], // k > 0
+    [1, 1, -1], [1, 1, 0] // alpha > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -567,8 +567,8 @@ export default [{
 }, {
   name: 'F',
   invalidParams: [
-    [-1, 2], [0, 2],  // d1 > 0
-    [2, -1], [2, 0]   // d2 > 0
+    [-1, 2], [0, 2], // d1 > 0
+    [2, -1], [2, 0] // d2 > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -580,8 +580,8 @@ export default [{
 }, {
   name: 'FisherZ',
   invalidParams: [
-    [-1, 2], [0, 2],  // d1 > 0
-    [2, -1], [2, 0]   // d2 > 0
+    [-1, 2], [0, 2], // d1 > 0
+    [2, -1], [2, 0] // d2 > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -605,8 +605,8 @@ export default [{
 }, {
   name: 'Frechet',
   invalidParams: [
-    [-1, 1, 0], [0, 1, 0],  // alpha > 0
-    [1, -1, 0], [1, 0, 0]   // s > 0
+    [-1, 1, 0], [0, 1, 0], // alpha > 0
+    [1, -1, 0], [1, 0, 0] // s > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -618,8 +618,8 @@ export default [{
 }, {
   name: 'Gamma',
   invalidParams: [
-    [-1, 1], [0, 1],  // alpha > 0
-    [1, -1], [1, 0]   // beta > 0
+    [-1, 1], [0, 1], // alpha > 0
+    [1, -1], [1, 0] // beta > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -631,9 +631,9 @@ export default [{
 }, {
   name: 'GammaGompertz',
   invalidParams: [
-    [-1, 1, 1], [0, 1, 1],  // b > 0
-    [1, -1, 1], [1, 0, 1],  // s > 0
-    [1, 1, -1], [1, 1, 0]   // beta > 0
+    [-1, 1, 1], [0, 1, 1], // b > 0
+    [1, -1, 1], [1, 0, 1], // s > 0
+    [1, 1, -1], [1, 1, 0] // beta > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -645,9 +645,9 @@ export default [{
 }, {
   name: 'GeneralizedExponential',
   invalidParams: [
-    [-1, 1, 1], [0, 1, 1],  // a > 0
-    [1, -1, 1], [1, 0, 1],  // b > 0
-    [1, 1, -1], [1, 1, 0]   // c > 0
+    [-1, 1, 1], [0, 1, 1], // a > 0
+    [1, -1, 1], [1, 0, 1], // b > 0
+    [1, 1, -1], [1, 1, 0] // c > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -675,9 +675,9 @@ export default [{
 }, {
   name: 'GeneralizedGamma',
   invalidParams: [
-    [-1, 1, 1], [0, 1, 1],  // a > 0
-    [1, -1, 1], [1, 0, 1],  // d > 0
-    [1, 1, -1], [1, 1, 0]   // p > 0
+    [-1, 1, 1], [0, 1, 1], // a > 0
+    [1, -1, 1], [1, 0, 1], // d > 0
+    [1, 1, -1], [1, 1, 0] // p > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -689,9 +689,9 @@ export default [{
 }, {
   name: 'GeneralizedHermite',
   invalidParams: [
-    [-1, 1, 2],                       // a1 > 0
-    [1, -1, 2],                       // a2 > 0
-    [1, 1, -1], [1, 1, 0], [1, 1, 1]  // m > 1
+    [-1, 1, 2], // a1 > 0
+    [1, -1, 2], // a2 > 0
+    [1, 1, -1], [1, 1, 0], [1, 1, 1] // m > 1
   ],
   foreign: {
     generator: 'Uniform',
@@ -703,8 +703,8 @@ export default [{
 }, {
   name: 'GeneralizedLogistic',
   invalidParams: [
-    [0, -1, 1], [0, 0, 1],  // s > 0
-    [0, 1, -1], [0, 1, 0]   // c > 0
+    [0, -1, 1], [0, 0, 1], // s > 0
+    [0, 1, -1], [0, 1, 0] // c > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -716,8 +716,8 @@ export default [{
 }, {
   name: 'GeneralizedNormal',
   invalidParams: [
-    [0, -1, 1], [0, 0, 1],  // alpha > 0
-    [0, 1, -1], [0, 1, 0]   // beta > 0
+    [0, -1, 1], [0, 0, 1], // alpha > 0
+    [0, 1, -1], [0, 1, 0] // beta > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -748,7 +748,7 @@ export default [{
 }, {
   name: 'Geometric',
   invalidParams: [
-    [-1], [0], [2]  // 0 < p <= 1
+    [-1], [0], [2] // 0 < p <= 1
   ],
   foreign: {
     generator: 'Uniform',
@@ -770,8 +770,8 @@ export default [{
 }, {
   name: 'Gompertz',
   invalidParams: [
-    [-1, 1], [0, 1],  // eta > 0
-    [1, -1], [1, 0]   // b > 0
+    [-1, 1], [0, 1], // eta > 0
+    [1, -1], [1, 0] // b > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -795,8 +795,8 @@ export default [{
 }, {
   name: 'HalfGeneralizedNormal',
   invalidParams: [
-    [-1, 1], [0, 1],  // alpha > 0
-    [1, -1], [1, 0]   // beta > 0
+    [-1, 1], [0, 1], // alpha > 0
+    [1, -1], [1, 0] // beta > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -818,7 +818,7 @@ export default [{
 }, {
   name: 'HalfNormal',
   invalidParams: [
-    [-1], [0]   // sigma > 0
+    [-1], [0] // sigma > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -830,7 +830,7 @@ export default [{
 }, {
   name: 'HeadsMinusTails',
   invalidParams: [
-    [-1]  // n > 0
+    [-1] // n > 0
   ],
   foreign: {
     generator: 'DiscreteUniform',
@@ -842,8 +842,8 @@ export default [{
 }, {
   name: 'Hoyt',
   invalidParams: [
-    [-1, 1], [0, 1], [2, 1],  // 0 < q <= 1
-    [0.5, -1], [0.5, 0]       // omega > 0
+    [-1, 1], [0, 1], [2, 1], // 0 < q <= 1
+    [0.5, -1], [0.5, 0] // omega > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -869,9 +869,9 @@ export default [{
 }, {
   name: 'Hyperexponential',
   invalidParams: [
-    [{weight: -1, rate: 1}, {weight: 1, rate: 1}],
-    [{weight: 0, rate: 1}, {weight: 1, rate: 1}],   // lambda_i > 0
-    [[]]                                            // n > 0
+    [{ weight: -1, rate: 1 }, { weight: 1, rate: 1 }],
+    [{ weight: 0, rate: 1 }, { weight: 1, rate: 1 }], // lambda_i > 0
+    [[]] // n > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -883,9 +883,9 @@ export default [{
 }, {
   name: 'Hypergeometric',
   invalidParams: [
-    [-1, 5, 5], [0, 5, 5],    // N > 0
+    [-1, 5, 5], [0, 5, 5], // N > 0
     [10, -1, 5], [10, 12, 5], // 0 <= K <= N
-    [10, 5, -1], [10, 5, 12]  // 0 <= n <= N
+    [10, 5, -1], [10, 5, 12] // 0 <= n <= N
   ],
   foreign: {
     generator: 'DiscreteUniform',
@@ -913,8 +913,8 @@ export default [{
     params: s => [Math.min(...s), Math.max(...s)]
   },
   invalidParams: [
-    [-1, 1], [0, 1],  // alpha > 0
-    [1, -1], [1, 0]   // beta > 0
+    [-1, 1], [0, 1], // alpha > 0
+    [1, -1], [1, 0] // beta > 0
   ],
   cases: [{
     params: () => [Param.shape(), Param.scale()]
@@ -926,8 +926,8 @@ export default [{
     params: s => [Math.min(...s), Math.max(...s)]
   },
   invalidParams: [
-    [-1, 1], [0, 1],  // mu > 0
-    [1, -1], [1, 0]   // lambda > 0
+    [-1, 1], [0, 1], // mu > 0
+    [1, -1], [1, 0] // lambda > 0
   ],
   cases: [{
     params: () => [Param.scale(), Param.shape()]
@@ -959,8 +959,8 @@ export default [{
 }, {
   name: 'JohnsonSU',
   invalidParams: [
-    [0, -1, 1, 0], [0, 0, 1, 0],  // delta > 0
-    [0, 1, -1, 0], [0, 1, 0, 0]   // lambda > 0
+    [0, -1, 1, 0], [0, 0, 1, 0], // delta > 0
+    [0, 1, -1, 0], [0, 1, 0, 0] // lambda > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -972,8 +972,8 @@ export default [{
 }, {
   name: 'JohnsonSB',
   invalidParams: [
-    [0, -1, 1, 0], [0, 0, 1, 0],  // delta > 0
-    [0, 1, -1, 0], [0, 1, 0, 0]   // lambda > 0
+    [0, -1, 1, 0], [0, 0, 1, 0], // delta > 0
+    [0, 1, -1, 0], [0, 1, 0, 0] // lambda > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -995,8 +995,8 @@ export default [{
 }, {
   name: 'Kumaraswamy',
   invalidParams: [
-    [-1, 1], [0, 1],  // a > 0
-    [1, -1], [1, 0]   // b > 0
+    [-1, 1], [0, 1], // a > 0
+    [1, -1], [1, 0] // b > 0
   ],
   foreign: {
     generator: 'RaisedCosine',
@@ -1044,7 +1044,7 @@ export default [{
 }, {
   name: 'LogCauchy',
   invalidParams: [
-    [0, -1], [0, 0]  // sigma > 0
+    [0, -1], [0, 0] // sigma > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -1056,9 +1056,9 @@ export default [{
 }, {
   name: 'LogGamma',
   invalidParams: [
-    [-1, 1, 0], [0, 1, 0],  // alpha > 0
-    [1, -1, 0], [1, 0, 0],  // beta > 0
-    [1, 1, -1]              // mu >= 0
+    [-1, 1, 0], [0, 1, 0], // alpha > 0
+    [1, -1, 0], [1, 0, 0], // beta > 0
+    [1, 1, -1] // mu >= 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -1082,8 +1082,8 @@ export default [{
 }, {
   name: 'LogLogistic',
   invalidParams: [
-    [-1, 1], [0, 1],  // alpha > 0
-    [1, -1], [1, 0]   // beta > 0
+    [-1, 1], [0, 1], // alpha > 0
+    [1, -1], [1, 0] // beta > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -1119,9 +1119,9 @@ export default [{
 }, {
   name: 'Logarithmic',
   invalidParams: [
-    [-1, 2], [0, 2],  // a >= 1
-    [1, -1], [1, 0],  // b >= 1
-    [2, 2], [3, 2]    // a < b
+    [-1, 2], [0, 2], // a >= 1
+    [1, -1], [1, 0], // b >= 1
+    [2, 2], [3, 2] // a < b
   ],
   foreign: {
     generator: 'Uniform',
@@ -1145,8 +1145,8 @@ export default [{
 }, {
   name: 'LogisticExponential',
   invalidParams: [
-    [-1, 1], [0, 1],  // lambda > 0
-    [1, -1], [1, 0]   // kappa > 0
+    [-1, 1], [0, 1], // lambda > 0
+    [1, -1], [1, 0] // kappa > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -1170,8 +1170,8 @@ export default [{
 }, {
   name: 'Lomax',
   invalidParams: [
-    [-1, 1], [0, 1],  // lambda > 0
-    [1, -1], [1, 0]   // alpha > 0
+    [-1, 1], [0, 1], // lambda > 0
+    [1, -1], [1, 0] // alpha > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -1183,9 +1183,9 @@ export default [{
 }, {
   name: 'Makeham',
   invalidParams: [
-    [-1, 1, 1], [0, 1, 1],  // alpha > 0
-    [1, -1, 1], [1, 0, 1],  // beta > 0
-    [1, 1, -1], [1, 1, 0]   // lambda > 0
+    [-1, 1, 1], [0, 1, 1], // alpha > 0
+    [1, -1, 1], [1, 0, 1], // beta > 0
+    [1, 1, -1], [1, 1, 0] // lambda > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -1209,8 +1209,8 @@ export default [{
 }, {
   name: 'Mielke',
   invalidParams: [
-    [-1, 1], [0, 1],  // k > 0
-    [2, -1], [2, 0]   // s > 0
+    [-1, 1], [0, 1], // k > 0
+    [2, -1], [2, 0] // s > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -1234,7 +1234,7 @@ export default [{
 }, {
   name: 'Muth',
   invalidParams: [
-    [-1], [0], [2]  // 0 < alpha <= 1
+    [-1], [0], [2] // 0 < alpha <= 1
   ],
   foreign: {
     generator: 'Uniform',
@@ -1246,8 +1246,8 @@ export default [{
 }, {
   name: 'Nakagami',
   invalidParams: [
-    [-1, 1], [0, 1], [0.3, 1],  // m >= 0.5
-    [1, -1], [1, 0]             // omega > 0
+    [-1, 1], [0, 1], [0.3, 1], // m >= 0.5
+    [1, -1], [1, 0] // omega > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -1259,9 +1259,9 @@ export default [{
 }, {
   name: 'NegativeHypergeometric',
   invalidParams: [
-    [-1, 5, 5],               // N >= 0
+    [-1, 5, 5], // N >= 0
     [10, -1, 5], [10, 11, 5], // 0 <= K <= N
-    [10, 5, -1], [10, 5, 6]   // 0 <= r <= K - N
+    [10, 5, -1], [10, 5, 6] // 0 <= r <= K - N
   ],
   foreign: {
     generator: 'DiscreteUniform',
@@ -1273,7 +1273,7 @@ export default [{
 }, {
   name: 'NegativeBinomial',
   invalidParams: [
-    [-1, 0.5], [0, 0.5],                // r > 0
+    [-1, 0.5], [0, 0.5], // r > 0
     [10, -1], [10, 0], [10, 1], [10, 2] // 0 < p < 1
   ],
   foreign: {
@@ -1286,8 +1286,8 @@ export default [{
 }, {
   name: 'NeymanA',
   invalidParams: [
-    [-1, 1], [0, 1],  // lambda > 0
-    [1, -1], [1, 0]   // mu > 0
+    [-1, 1], [0, 1], // lambda > 0
+    [1, -1], [1, 0] // mu > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -1299,9 +1299,9 @@ export default [{
 }, {
   name: 'NoncentralBeta',
   invalidParams: [
-    [-1, 2, 1], [0, 2, 1],  // alpha > 0
-    [2, -1, 1], [2, 0, 1],  // beta > 0
-    [2, 2, -1]              // lambda >= 0
+    [-1, 2, 1], [0, 2, 1], // alpha > 0
+    [2, -1, 1], [2, 0, 1], // beta > 0
+    [2, 2, -1] // lambda >= 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -1313,8 +1313,8 @@ export default [{
 }, {
   name: 'NoncentralChi',
   invalidParams: [
-    [-1, 1], [0, 1],  // k > 0
-    [2, -1], [2, 0]   // lambda > 0
+    [-1, 1], [0, 1], // k > 0
+    [2, -1], [2, 0] // lambda > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -1326,8 +1326,8 @@ export default [{
 }, {
   name: 'NoncentralChi2',
   invalidParams: [
-    [-1, 1], [0, 1],  // k > 0
-    [2, -1], [2, 0]   // lambda > 0
+    [-1, 1], [0, 1], // k > 0
+    [2, -1], [2, 0] // lambda > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -1343,9 +1343,9 @@ export default [{
 }, {
   name: 'NoncentralF',
   invalidParams: [
-    [-1, 2, 1], [0, 2, 1],  // alpha > 0
-    [2, -1, 1], [2, 0, 1],  // beta > 0
-    [2, 2, -1]              // lambda >= 0
+    [-1, 2, 1], [0, 2, 1], // alpha > 0
+    [2, -1, 1], [2, 0, 1], // beta > 0
+    [2, 2, -1] // lambda >= 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -1381,8 +1381,8 @@ export default [{
 }, {
   name: 'Pareto',
   invalidParams: [
-    [-1, 1], [0, 1],  // xmin > 0
-    [1, -1], [1, 0]   // alpha > 0
+    [-1, 1], [0, 1], // xmin > 0
+    [1, -1], [1, 0] // alpha > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -1395,7 +1395,7 @@ export default [{
   name: 'PERT',
   invalidParams: [
     [0.5, 0.5, 1], [0.8, 0.5, 1], // a < b
-    [0, 1, 1], [0, 1.1, 1]        // b < c
+    [0, 1, 1], [0, 1.1, 1] // b < c
   ],
   foreign: {
     generator: 'Uniform',
@@ -1423,7 +1423,7 @@ export default [{
 }, {
   name: 'PolyaAeppli',
   invalidParams: [
-    [-1, 0.5], [0, 0.5],            // lambda > 0
+    [-1, 0.5], [0, 0.5], // lambda > 0
     [1, -1], [1, 0], [1, 1], [1, 2] // 0 < theta < 1
   ],
   foreign: {
@@ -1434,7 +1434,7 @@ export default [{
     params: () => [Param.shape(), Param.prob()]
   }]
 }, {
-  name: 'Power',
+  name: 'PowerLaw',
   invalidParams: [
     [-1], [0] // a > 0
   ],
@@ -1448,7 +1448,7 @@ export default [{
 }, {
   name: 'QExponential',
   invalidParams: [
-    [2, 1], [3, 1],     // q < 2
+    [2, 1], [3, 1], // q < 2
     [1.5, -1], [1.5, 0] // lambda > 0
   ],
   foreign: {
@@ -1507,9 +1507,9 @@ export default [{
 }, {
   name: 'Reciprocal',
   invalidParams: [
-    [-1, 2], [0, 2],  // a > 0
-    [1, -1], [1, 0],  // b > 0
-    [2, 2], [3, 2]    // a < b
+    [-1, 2], [0, 2], // a > 0
+    [1, -1], [1, 0], // b > 0
+    [2, 2], [3, 2] // a < b
   ],
   foreign: {
     generator: 'Uniform',
@@ -1521,8 +1521,8 @@ export default [{
 }, {
   name: 'ReciprocalInverseGaussian',
   invalidParams: [
-    [-1, 1], [0, 1],  // mu > 0
-    [1, -1], [1, 0]   // lambda > 0
+    [-1, 1], [0, 1], // mu > 0
+    [1, -1], [1, 0] // lambda > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -1534,8 +1534,8 @@ export default [{
 }, {
   name: 'Rice',
   invalidParams: [
-    [-1, 1], [0, 1],  // nu > 0
-    [1, -1], [1, 0]   // sigma > 0
+    [-1, 1], [0, 1], // nu > 0
+    [1, -1], [1, 0] // sigma > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -1566,8 +1566,8 @@ export default [{
 }, {
   name: 'Skellam',
   invalidParams: [
-    [-1, 1], [0, 1],  // mu1 > 0
-    [1, -1], [1, 0]   // mu2 > 0
+    [-1, 1], [0, 1], // mu1 > 0
+    [1, -1], [1, 0] // mu2 > 0
   ],
   foreign: {
     generator: 'DiscreteUniform',
@@ -1632,7 +1632,7 @@ export default [{
 }, {
   name: 'StudentZ',
   invalidParams: [
-    [-1], [0], [1]  // n > 1
+    [-1], [0], [1] // n > 1
   ],
   foreign: {
     generator: 'Uniform',
@@ -1644,9 +1644,9 @@ export default [{
 }, {
   name: 'Trapezoidal',
   invalidParams: [
-    [1, 0.33, 0.67, 1], [2, 0.33, 0.67, 1],                     // a < d
-    [1, 0.33, 0.67, 1], [0, 0.67, 0.67, 1], [0, 0.8, 0.67, 1],  // a <= b < c
-    [0, 0.33, 2, 1]                                             // c <= d
+    [1, 0.33, 0.67, 1], [2, 0.33, 0.67, 1], // a < d
+    [1, 0.33, 0.67, 1], [0, 0.67, 0.67, 1], [0, 0.8, 0.67, 1], // a <= b < c
+    [0, 0.33, 2, 1] // c <= d
   ],
   foreign: {
     generator: 'Uniform',
@@ -1659,7 +1659,7 @@ export default [{
   name: 'Triangular',
   invalidParams: [
     [1, 1, 0.5], [2, 1, 0.5], // a < b
-    [0, 1, -1], [0, 1, 2]     // a <= c <= b
+    [0, 1, -1], [0, 1, 2] // a <= c <= b
   ],
   foreign: {
     generator: 'Uniform',
@@ -1672,7 +1672,7 @@ export default [{
   name: 'TruncatedNormal',
   invalidParams: [
     [0, -1, 0, 1], [0, 0, 0, 1], // sigma > 0
-    [0, 1, 0, 0], [0, 1, 1, 0]   // b > a
+    [0, 1, 0, 0], [0, 1, 1, 0] // b > a
   ],
   foreign: {
     generator: 'Uniform',
@@ -1698,7 +1698,7 @@ export default [{
     params: () => [0]
   }, {
     name: 'positive shape parameter',
-    params: () => [Param.shape()],
+    params: () => [Param.shape()]
   }, {
     name: 'negative shape parameter',
     params: () => [-Param.shape()]
@@ -1706,7 +1706,7 @@ export default [{
 }, {
   name: 'UQuadratic',
   invalidParams: [
-    [1, 1], [2, 1]  // a < b
+    [1, 1], [2, 1] // a < b
   ],
   foreign: {
     generator: 'Uniform',
@@ -1718,7 +1718,7 @@ export default [{
 }, {
   name: 'Uniform',
   invalidParams: [
-    [1, 1], [2, 1]  // a < b
+    [1, 1], [2, 1] // a < b
   ],
   foreign: {
     generator: 'Poisson',
@@ -1730,7 +1730,7 @@ export default [{
 }, {
   name: 'UniformProduct',
   invalidParams: [
-    [-1], [0], [1]  // n > 1
+    [-1], [0], [1] // n > 1
   ],
   foreign: {
     generator: 'Uniform',
@@ -1764,8 +1764,8 @@ export default [{
 }, {
   name: 'Weibull',
   invalidParams: [
-    [-1, 1], [0, 1],  // lambda > 0
-    [1, -1], [1, 0]   // k > 0
+    [-1, 1], [0, 1], // lambda > 0
+    [1, -1], [1, 0] // k > 0
   ],
   foreign: {
     generator: 'Uniform',
@@ -1801,7 +1801,7 @@ export default [{
 }, {
   name: 'Zeta',
   invalidParams: [
-    [-1], [0], [1]  // s > 1
+    [-1], [0], [1] // s > 1
   ],
   foreign: {
     generator: 'Uniform',
@@ -1813,7 +1813,7 @@ export default [{
 }, {
   name: 'Zipf',
   invalidParams: [
-    [-1, 100],      // s >= 1
+    [-1, 100], // s >= 1
     [1, -1], [1, 0] // N > 0
   ],
   foreign: {

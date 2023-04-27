@@ -72,6 +72,8 @@ class Vector {
    * @memberof ran.la.Vector
    * @param {number} i Index of the element.
    * @param {number=} value The new value of the i-th element. If not specified, the value at i is returned.
+   * @return {(number | Vector)} The i-th element if value is not specified, otherwise a vector with the i-th element
+   * changed
    * @example
    *
    * let v = new ran.la.Vector()
@@ -89,6 +91,7 @@ class Vector {
   i (i, value) {
     if (typeof value !== 'undefined') {
       this._v[i] = value
+      return new Vector(this._v)
     } else {
       return this._v[i]
     }

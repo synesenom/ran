@@ -1,5 +1,4 @@
-import { EPS, MAX_ITER } from '../core/constants'
-import neumaier from './neumaier'
+import { EPS } from '../core/constants'
 
 const MAX_STEPS = 20
 const POLYNOMIAL_ORDER = 5

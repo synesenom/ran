@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for the [generalized logistic distribution]{@link https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_genlogistic.html}:
+ * Generator for the [generalized logistic distribution]{@link https://en.wikipedia.org/wiki/Generalized_logistic_distribution}:
  *
  * $$f(x; \mu, s, c) = \frac{c e^{-z}}{s (1 + e^{-z})^{c + 1}},$$
  *
