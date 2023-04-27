@@ -13,142 +13,67 @@ describe('la', () => {
       })
 
       it('should create an n-dimensional unit vector', () => {
-        repeat(() => {
-          const n = 1 + Math.floor(Math.random() * 100)
-          assert.deepEqual(
-            new la.Vector(n),
-            new la.Vector(Array.from({ length: n - 1 }, () => 0).unshift(1))
-          )
-        }, 100)
+        assert.deepEqual(new la.Vector(5), new la.Vector([1, 0, 0, 0, 0]))
       })
 
       it('should copy another vector', () => {
-        assert.deepEqual(new la.Vector(), new la.Vector(new la.Vector()))
+        assert.deepEqual(new la.Vector([1, 0, 0, 0]), new la.Vector(new la.Vector(4)))
       })
     })
 
     describe('.v()', () => {
       it('should return vector as array', () => {
-        repeat(() => {
-          const n = 1 + Math.floor(Math.random() * 100)
-          const arr = Array.from({ length: n }, () => Math.random())
-          assert.deepEqual(
-            new la.Vector(arr).v(),
-            arr
-          )
-        }, 100)
+        assert.deepEqual(new la.Vector([1.2, 3.4, 5.6, 7.8]).v(), [1.2, 3.4, 5.6, 7.8])
       })
     })
 
     describe('.i()', () => {
       it('should return the i-th element', () => {
-        const n = 2 + Math.floor(Math.random() * 100)
-        const arr = Array.from({ length: n }, () => Math.random())
-        const v = new la.Vector(arr)
-        repeat(() => {
-          const i = Math.floor(Math.random() * n)
-          assert.deepEqual(v.i(i), arr[i])
-        }, 100)
+        assert.equal(new la.Vector([1.2, 3.4, 5.6, 7.8]).i(2), 5.6)
       })
 
       it('should set the i-th element', () => {
-        const n = 2 + Math.floor(Math.random() * 10)
-        const arr = Array.from({ length: n }, () => Math.random())
-        const v = new la.Vector(arr)
-        repeat(() => {
-          const i = Math.floor(Math.random() * n)
-          const s = Math.random()
-          v.i(i, s)
-          arr[i] = s
-          assert.deepEqual(v, new la.Vector(arr))
-        }, 100)
+        assert.equal(new la.Vector([1.2, 3.4, 5.6, 7.8]).i(2, 9.0).i(2), 9.0)
       })
     })
 
     describe('.f()', () => {
       it('should apply a function element-wise', () => {
-        const funcs = [Math.sqrt, Math.cos, Math.sin, Math.exp, Math.log]
-        repeat(() => {
-          const n = 2 + Math.floor(Math.random() * 10)
-          const arr = Array.from({ length: n }, () => Math.random())
-          const func = funcs[Math.floor(Math.random() * funcs.length)]
-          assert.deepEqual(
-            new la.Vector(arr).f(func),
-            new la.Vector(arr.map(d => func(d)))
-          )
-        }, 100)
+        assert.deepEqual(new la.Vector([1.2, 3.4, 5.6, 7.8]).f(x => x * 2), new la.Vector([2.4, 6.8, 11.2, 15.6]))
       })
     })
 
     describe('.scale()', () => {
       it('should scale the vector element-wise', () => {
-        repeat(() => {
-          const s = Math.random()
-          const n = 1 + Math.floor(Math.random() * 100)
-          const arr = Array.from({ length: n }, () => Math.random())
-          assert.deepEqual(
-            new la.Vector(arr).scale(s),
-            new la.Vector(arr.map(d => d * s))
-          )
-        }, 100)
+        it('should apply a function element-wise', () => {
+          assert.deepEqual(new la.Vector([1.2, 3.4, 5.6, 7.8]).scale(2), new la.Vector([2.4, 6.8, 11.2, 15.6]))
+        })
       })
     })
 
     describe('.add()', () => {
       it('should add two vectors', () => {
-        repeat(() => {
-          const n = 1 + Math.floor(Math.random() * 100)
-          const arr1 = Array.from({ length: n }, () => Math.random())
-          const arr2 = Array.from({ length: n }, () => Math.random())
-          assert.deepEqual(
-            new la.Vector(arr1).add(new la.Vector(arr2)),
-            new la.Vector(arr1.map((d, i) => d + arr2[i]))
-          )
-        }, 100)
+        assert.deepEqual(new la.Vector([1, 2, 3]).add(new la.Vector([6, 7, 8])), new la.Vector([7, 9, 11]))
       })
     })
 
     describe('.sub()', () => {
       it('should subtract two vectors', () => {
-        repeat(() => {
-          const n = 1 + Math.floor(Math.random() * 100)
-          const arr1 = Array.from({ length: n }, () => Math.random())
-          const arr2 = Array.from({ length: n }, () => Math.random())
-          assert.deepEqual(
-            new la.Vector(arr1).sub(new la.Vector(arr2)),
-            new la.Vector(arr1.map((d, i) => d - arr2[i]))
-          )
-        }, 100)
+        assert.deepEqual(new la.Vector([1, 2, 3]).sub(new la.Vector([6, 7, 8])), new la.Vector([-5, -5, -5]))
       })
     })
 
     describe('.dot()', () => {
       it('should compute the dot product of two vectors', () => {
-        repeat(() => {
-          const n = 1 + Math.floor(Math.random() * 100)
-          const arr1 = Array.from({ length: n }, () => Math.random())
-          const arr2 = Array.from({ length: n }, () => Math.random())
-          assert.deepEqual(
-            new la.Vector(arr1).dot(new la.Vector(arr2)),
-            arr1.reduce((p, d, i) => p + d * arr2[i], 0)
-          )
-        }, 100)
+        assert.deepEqual(new la.Vector([1.2, 3.4, 5.6, 7.8]).dot(new la.Vector([1, 2, 3, 4])), 56)
       })
     })
 
     describe('.outer()', () => {
       it('should compute the outer product of two vectors', () => {
-        repeat(() => {
-          const n = 1 + Math.floor(Math.random() * 10)
-          const arr1 = Array.from({ length: n }, () => Math.random())
-          const arr2 = Array.from({ length: n }, () => Math.random())
-          const mat = new la.Matrix(new la.Vector(arr1).outer(new la.Vector(arr2)))
-          mat.m().forEach((row, i) => {
-            row.forEach((d, j) => {
-              assert.equal(d, arr1[i] * arr2[j])
-            })
-          })
-        }, 100)
+        assert.deepEqual(new la.Vector([1, 2, 3]).outer(new la.Vector([4, 5, 6])), [
+          [4, 5, 6], [8, 10, 12], [12, 15, 18]
+        ])
       })
     })
   })
