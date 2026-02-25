@@ -26,7 +26,7 @@ import mean from '../location/mean'
  * // => 0.8660254037844386
  */
 export default function (x, y) {
-  if (x.length === 0 || y.length === 0 || x.length !== y.length) {
+  if (!validInputs(x, y)) {
     return undefined
   }
 
@@ -42,4 +42,10 @@ export default function (x, y) {
   const m0 = mean(x0)
   const m1 = mean(x1)
   return (m1 - m0) * Math.sqrt(n0 * n1 / (x.length * (x.length - 1))) / s
+}
+
+function validInputs(x, y) {
+  return (x.length !== 0 &&
+    y.length !== 0 &&
+    x.length === y.length)
 }

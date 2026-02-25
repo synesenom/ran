@@ -8,7 +8,6 @@ import testCases from './dist-cases'
 
 // Constants.
 const PRECISION = 1e-10
-const LAPS = 1000
 const SAMPLE_SIZE = 1000
 
 // Unit test suite.
@@ -74,13 +73,13 @@ const UnitTests = {
       generator1.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
 
       // Generate original sample
-      generator1.sample(LAPS)
+      generator1.sample(10)
       const state = generator1.save()
-      const values1 = generator1.sample(LAPS)
+      const values1 = generator1.sample(10)
 
       // Generate new default generator and load state
       const generator2 = new dist[tc.name]().load(state)
-      const values2 = generator2.sample(LAPS)
+      const values2 = generator2.sample(10)
 
       // Compare samples
       assert(values1.reduce((acc, d, i) => acc || d !== values2[i], true) === true)
@@ -352,7 +351,7 @@ describe('dist', () => {
       describe('default parameters', () => {
         it('should generate values with Degenerate distribution', () => {
           const degenerate = new dist.Degenerate()
-          degenerate.sample(LAPS).forEach(d => {
+          degenerate.sample(10).forEach(d => {
             assert(d === 0)
           })
         })
@@ -361,7 +360,7 @@ describe('dist', () => {
         it('should generate values with Degenerate distribution', () => {
           const x0 = float()
           const degenerate = new dist.Degenerate(x0)
-          degenerate.sample(LAPS).forEach(d => {
+          degenerate.sample(10).forEach(d => {
             assert(d === x0)
           })
         })

@@ -27,15 +27,23 @@ import neumaier from '../algorithms/neumaier'
  * // => 0.2396882491444514
  */
 export default function (p, q) {
-  if (p.length === 0 || q.length === 0 || p.length !== q.length) {
+  if (!isValid(p, q)) {
     return undefined
   }
 
   // Check Q(x) = 0 => P(x) = 0 implication.
-  if (q.filter((qi, i) => qi === 0 && p[i] !== 0).length > 0) {
+  if (hasZeroQWithNonZeroP(p, q)) {
     return undefined
   }
 
   // Calculate sum over all P(x) > 0 elements.
   return neumaier(p.filter(d => d > 0).map((pi, i) => pi * Math.log(pi / q[i])))
+}
+
+function isValid(p, q) {
+  return p.length !== 0 && q.length !== 0 && p.length === q.length
+}
+
+function hasZeroQWithNonZeroP(p, q) {
+  return q.filter((qi, i) => qi === 0 && p[i] !== 0).length > 0
 }

@@ -26,9 +26,13 @@ import pearson from './pearson'
  * // => 1
  */
 export default function (x, y) {
-  if (x.length === 0 || y.length === 0 || x.length !== y.length) {
+  if (!isValidInput(x, y)) {
     return undefined
   }
 
   return pearson(rank(x), rank(y))
+}
+
+function isValidInput(x, y) {
+  return x.length !== 0 && y.length !== 0 && x.length === y.length
 }

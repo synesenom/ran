@@ -2,8 +2,8 @@ export const stirlingSecond = (function () {
   const _s = new Map()
   _s.set('0 0', 1)
 
-  function snk (n, k) {
-    if (n < 0 || k < 0 || k > n) {
+  function snk(n, k) {
+    if (isInvalidInput(n, k)) {
       return 0
     }
 
@@ -15,6 +15,10 @@ export const stirlingSecond = (function () {
     const s = k * snk(n - 1, k) + snk(n - 1, k - 1)
     _s.set(i, s)
     return s
+  }
+
+  function isInvalidInput(n, k) {
+    return n < 0 || k < 0 || k > n
   }
 
   /**

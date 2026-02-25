@@ -30,14 +30,14 @@ The library includes:
 
 Just include the [minified version](https://unpkg.com/ranjs@1.19.2/dist/ranjs.min.js) and add
 
-```
+```html
 <script type="text/javascript" src="ran.min.js"></script>
 ```
 The module will be exported under `ranjs`.
 
 ### node
 
-```
+```bash
 npm install ranjs
 ```
 
@@ -45,7 +45,7 @@ npm install ranjs
 
 ### distributions
 
-```
+```javascript
 const ran = require('ranjs')
 
 // Create a new generator for Skellam distribution with mu1 = 1 and mu2 = 3
