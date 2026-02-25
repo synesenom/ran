@@ -17,6 +17,39 @@ function _markData (data, type) {
   }))
 }
 
+function _mergeAndSortData(data) {
+  return data
+    .sort((a, b) => a.value - b.value)
+    .map((d, i) => ({
+      value: d.value,
+      type: d.type,
+      rank: i + 1
+    }));
+}
+
+function _updateRanks(rankedData, lo, hi) {
+  const midpoint = (rankedData[hi].rank + rankedData[lo].rank) / 2;
+  for (let j = lo; j <= hi; j++) {
+    rankedData[j].rank = midpoint;
+  }
+}
+
+function _adjustRanksForTies(rankedData) {
+  let lo = 0;
+  let hi = lo;
+  for (let i = 1; i < rankedData.length; i++) {
+    if (rankedData[i].value === rankedData[lo].value) {
+      hi = i;
+    } else {
+      if (hi !== lo) {
+        _updateRanks(rankedData, lo, hi);
+      }
+      lo = i;
+      hi = lo;
+    }
+  }
+}
+
 /**
  * Computes the ranks for an array of marked data.
  *
@@ -27,40 +60,8 @@ function _markData (data, type) {
  * @private
  */
 function _computeRanks (data) {
-  // Merge data sets, sort and assign ranks
-  const rankedData = data
-    // Sort values
-    .sort((a, b) => a.value - b.value)
-    // Assign ranks
-    .map((d, i) => ({
-      value: d.value,
-      type: d.type,
-      rank: i + 1
-    }))
-
-  // Adjust ranks
-  // Fix ranks for ties
-  let lo = 0
-  let hi = lo
-  for (let i = 1; i < rankedData.length; i++) {
-    // Check for ties
-    if (rankedData[i].value === rankedData[lo].value) {
-      hi = i
-    } else {
-      // Update ranks
-      if (hi !== lo) {
-        const midpoint = (rankedData[hi].rank + rankedData[lo].rank) / 2
-        for (let j = lo; j <= hi; j++) {
-          rankedData[j].rank = midpoint
-        }
-      }
-
-      // Reset low and high ranks
-      lo = i
-      hi = lo
-    }
-  }
-
+  const rankedData = _mergeAndSortData(data)
+  _adjustRanksForTies(rankedData)
   return rankedData
 }
 

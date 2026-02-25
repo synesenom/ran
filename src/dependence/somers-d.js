@@ -29,9 +29,13 @@ function tau (a, b) {
  * // => -1
  */
 export default function (x, y) {
-  if (x.length === 0 || y.length === 0 || x.length !== y.length) {
-    return undefined
+  if (isInvalidInput(x, y)) {
+    return undefined;
   }
 
-  return tau(x, y) / tau(x, x)
+  return tau(x, y) / tau(x, x);
+}
+
+function isInvalidInput(x, y) {
+  return x.length === 0 || y.length === 0 || x.length !== y.length;
 }

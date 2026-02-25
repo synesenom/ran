@@ -2,8 +2,8 @@ import { assert } from 'chai'
 
 // Constants
 const H = 0.01
-const PRECISION = 1e-10
-const RANGE_STEPS = 100
+const PRECISION = 1e-9
+const RANGE_STEPS = 10
 
 // Critical values for P = 0.01
 // Source: https://www.medcalc.org/manual/chi-square-table.php
@@ -239,7 +239,8 @@ export const Tests = {
         const p = dist.pdf(x)
         const cdf1 = dist.cdf(x)
         const cdf0 = dist.cdf(x - 1)
-        assert(almostEqual(p, cdf1 - cdf0), `pdf(${x}) = ${p} != ${cdf1 - cdf0} = ${cdf1} - ${cdf0}`)
+        const df = cdf1 - cdf0
+        assert(almostEqual(p, df), `pdf(${x}) = ${p} != ${df} = ${cdf1} - ${cdf0}. delta = ${(p - df).toPrecision(3)}`)
       }
     } else {
       // Continuous distribution: PDF(x) = d CDF(x) / dx

@@ -6,7 +6,7 @@ const PI2_SQRT_INV = 1 / Math.sqrt(2 * Math.PI)
 const HALF_PI_INV = 0.5 / Math.PI
 
 // Ranges for a and h to select algorithm
-const aRanges = [
+const A_RANGES = [
   0.025,
   0.09,
   0.15,
@@ -15,7 +15,7 @@ const aRanges = [
   0.9,
   0.99999
 ]
-const hRanges = [
+const H_RANGES = [
   0.02,
   0.06,
   0.09,
@@ -33,7 +33,7 @@ const hRanges = [
 ]
 
 // Algorithm sector codes
-const codes = [
+const CODES = [
   [0, 0, 1, 12, 12, 12, 12, 12, 12, 12, 12, 15, 15, 15, 8],
   [0, 1, 1, 2, 2, 4, 4, 13, 13, 14, 14, 15, 15, 15, 8],
   [1, 1, 2, 2, 2, 4, 4, 14, 14, 14, 14, 15, 15, 15, 9],
@@ -45,17 +45,17 @@ const codes = [
 ]
 
 // Method to use
-const methods = [
+const METHODS = [
   1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 4, 4, 4, 4, 5, 6
 ]
 
 // Order of approximation
-const orders = [
+const ORDERS = [
   2, 3, 4, 5, 7, 10, 12, 18, 10, 20, 30, 20, 4, 7, 8, 20, 13, 0
 ]
 
 // Some constants for the algorithms
-const c2 = [
+const C2 = [
   0.99999999999999987510,
   -0.99999999999988796462,
   0.99999999998290743652,
@@ -78,7 +78,7 @@ const c2 = [
   -0.44676566663971825242e-02,
   0.39141169402373836468e-03
 ]
-const pts = [
+const PTS = [
   0.35082039676451715489e-02,
   0.31279042338030753740e-01,
   0.85266826283219451090e-01,
@@ -94,7 +94,7 @@ const pts = [
   0.99178832974629703586
 ]
 
-const wts = [
+const WTS = [
   0.18831438115323502887e-01,
   0.18567086243977649478e-01,
   0.18042093461223385584e-01,
@@ -166,7 +166,7 @@ function _t3 (h, a, ah, m) {
   let z = 0
 
   for (let i = 1, ii = 1; i <= m; i++, ii += 2) {
-    z += ph * c2[i - 1]
+    z += ph * C2[i - 1]
     ph = y * (ii * ph - vi)
     vi *= aa
   }
@@ -197,8 +197,8 @@ function _t5 (h, a, m) {
   let z = 0
 
   for (let i = 0; i < m; i++) {
-    const r = 1 + aa * pts[i]
-    z += wts[i] * Math.exp(hh * r) / r
+    const r = 1 + aa * PTS[i]
+    z += WTS[i] * Math.exp(hh * r) / r
   }
   return a * z
 }
@@ -216,44 +216,59 @@ function _t6 (h, a) {
   return z
 }
 
-function _t (h, a, ah) {
-  // Find sector row
+function _t(h, a, ah) {
+  const row = findSectorRow(a)
+  const col = findSectorColumn(h)
+  const code = getCode(row, col)
+  const order = getOrder(code)
+  return runAlgorithm(code, order, h, a, ah)
+}
+
+function findSectorRow(a) {
   let row = 7
   for (let i = 0; i < 7; i++) {
-    if (a <= aRanges[i]) {
+    if (a <= A_RANGES[i]) {
       row = i
       break
     }
   }
+  return row
+}
 
-  // Find sector column
+function findSectorColumn(h) {
   let col = 14
   for (let i = 0; i < 14; i++) {
-    if (h <= hRanges[i]) {
+    if (h <= H_RANGES[i]) {
       col = i
       break
     }
   }
+  return col
+}
 
-  // Find sector code and order
-  const code = codes[row][col]
-  const order = orders[code]
+function getCode(row, col) {
+  return CODES[row][col]
+}
 
-  // Run corresponding algorithm
-  switch (methods[code]) {
+function getOrder(code) {
+  return ORDERS[code]
+}
+
+function runAlgorithm(code, order, h, a, ah) {
+  switch (METHODS[code]) {
     case 2:
-      return _t2(h, a, ah, order)
+      return _t2.call(this, h, a, ah, order)
     case 3:
-      return _t3(h, a, ah, order)
+      return _t3.call(this, h, a, ah, order)
     case 4:
-      return _t4(h, a, order)
+      return _t4.call(this, h, a, order)
     case 5:
-      return _t5(h, a, order)
+      return _t5.call(this, h, a, order)
     case 6:
-      return _t6(h, a)
+      return _t6.call(this, h, a)
     case 1:
     default:
-      return _t1(h, a, order)
+      return _t1.call(this, h, a, order)
   }
 }
 

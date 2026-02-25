@@ -28,12 +28,15 @@ import { mean } from '../location'
  * // => 16.166666666666668
  */
 export default function (x, y) {
-  // TODO Make this a separate utility method.
-  if (x.length < 2 || y.length < 2 || x.length !== y.length) {
+  if (isInvalidInput(x, y)) {
     return undefined
   }
 
   const mx = mean(x)
   const my = mean(y)
   return x.length * mean(x.map((d, i) => (d - mx) * (y[i] - my))) / (x.length - 1)
+}
+
+function isInvalidInput(x, y) {
+  return x.length < 2 || y.length < 2 || x.length !== y.length
 }
