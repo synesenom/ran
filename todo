@@ -1,17 +1,5 @@
-# add source of implementations
-- wikipedia
-- boost library
-- numerical recipes
-- intermediate probability book
-
-
 # most important
-- add method references in docs
-- fix doubly non-central t pdf at 0
-- fix Kolmogorov pdf at 0
-- remove default parameters from distributions throw error if parameter is missing
 - improve special function precision
-- transformation functions to shift/scale generators
 
 
 # dist
@@ -96,10 +84,8 @@
 
 
 # mc
-- slice sampling
 - hmc
 - rejection sampling with log-concave dist
-- slice sampling
 - Gibbs sampling
 - NUTS
 - adaptive Metropolis
@@ -107,16 +93,6 @@
 - Adjust Euclidean metric from covariance in burn-in
 - step size sampled randomly
 - inspiration: https://github.com/chi-feng/mcmc-demo
-
-
-# add tags to distributions
-- discrete/continuous
-- bounded/unbounded
-- exponential
-
-
-# transform distributions
-- add Transform class that transforms a distribution
 
 
 # special functions

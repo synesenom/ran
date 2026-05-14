@@ -9,3 +9,6 @@
 # Idea
 .idea/*
 /sandbox/
+
+# Claude
+.claude/settings.local.json
