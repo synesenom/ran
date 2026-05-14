@@ -24,6 +24,7 @@
     "url": "https://github.com/synesenom/ran"
   },
   "scripts": {
+    "lint": "./node_modules/.bin/standard src/**/*.js test/*.js",
     "standard": "./node_modules/.bin/standard --fix src/**/*.js test/*.js",
     "test": "./node_modules/.bin/_mocha -r esm",
     "docs": "node ./docs/index.js",
