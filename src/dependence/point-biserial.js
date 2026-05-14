@@ -44,7 +44,7 @@ export default function (x, y) {
   return (m1 - m0) * Math.sqrt(n0 * n1 / (x.length * (x.length - 1))) / s
 }
 
-function validInputs(x, y) {
+function validInputs (x, y) {
   return (x.length !== 0 &&
     y.length !== 0 &&
     x.length === y.length)

@@ -30,12 +30,12 @@ function tau (a, b) {
  */
 export default function (x, y) {
   if (isInvalidInput(x, y)) {
-    return undefined;
+    return undefined
   }
 
-  return tau(x, y) / tau(x, x);
+  return tau(x, y) / tau(x, x)
 }
 
-function isInvalidInput(x, y) {
-  return x.length === 0 || y.length === 0 || x.length !== y.length;
+function isInvalidInput (x, y) {
+  return x.length === 0 || y.length === 0 || x.length !== y.length
 }

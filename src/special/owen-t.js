@@ -216,7 +216,7 @@ function _t6 (h, a) {
   return z
 }
 
-function _t(h, a, ah) {
+function _t (h, a, ah) {
   const row = findSectorRow(a)
   const col = findSectorColumn(h)
   const code = getCode(row, col)
@@ -224,7 +224,7 @@ function _t(h, a, ah) {
   return runAlgorithm(code, order, h, a, ah)
 }
 
-function findSectorRow(a) {
+function findSectorRow (a) {
   let row = 7
   for (let i = 0; i < 7; i++) {
     if (a <= A_RANGES[i]) {
@@ -235,7 +235,7 @@ function findSectorRow(a) {
   return row
 }
 
-function findSectorColumn(h) {
+function findSectorColumn (h) {
   let col = 14
   for (let i = 0; i < 14; i++) {
     if (h <= H_RANGES[i]) {
@@ -246,15 +246,15 @@ function findSectorColumn(h) {
   return col
 }
 
-function getCode(row, col) {
+function getCode (row, col) {
   return CODES[row][col]
 }
 
-function getOrder(code) {
+function getOrder (code) {
   return ORDERS[code]
 }
 
-function runAlgorithm(code, order, h, a, ah) {
+function runAlgorithm (code, order, h, a, ah) {
   switch (METHODS[code]) {
     case 2:
       return _t2.call(this, h, a, ah, order)

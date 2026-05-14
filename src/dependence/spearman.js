@@ -33,6 +33,6 @@ export default function (x, y) {
   return pearson(rank(x), rank(y))
 }
 
-function isValidInput(x, y) {
+function isValidInput (x, y) {
   return x.length !== 0 && y.length !== 0 && x.length === y.length
 }
