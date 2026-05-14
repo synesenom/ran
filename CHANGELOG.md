@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `npm test` now works on Node 20+ by replacing the unmaintained `esm` loader with `@babel/register`, aligning the test and coverage execution paths.
+- `Kolmogorov.pdf(0)` and `Kolmogorov.cdf(0)` now correctly return 0. Previously the lower support bound was declared `closed: true` (contradicting the documented support x > 0), causing `cdf(0)` to evaluate a non-convergent Grandi's series and return −1.
 
 ## [1.24.6] - 2026-05-14
 
