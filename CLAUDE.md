@@ -84,6 +84,19 @@ When a change touches many files (new base class method, convention rename acros
 **Documentation updates as follow-ups:**
 - `README.md` and `CLAUDE.md` updates file as separate issues, not part of the feature PR. Doc-only PRs review in seconds.
 
+## Versioning and Changelog
+
+**Release model: batched.** PRs are merged without bumping the version. When enough changes have accumulated, a dedicated release PR bumps the version, promotes `[Unreleased]` to the new version, and triggers the npm publish.
+
+**Semver tiers:**
+- **Patch** (`x.y.Z`): dependency updates, bug fixes, internal refactors with no API change.
+- **Minor** (`x.Y.0`): new distributions, new public methods, additive API changes.
+- **Major** (`X.0.0`): breaking API changes (parameter renames, removed methods, changed return shapes).
+
+**Per-PR changelog rule:** If a PR makes a user-visible change (bug fix, new feature, dependency security fix, removed dead code), add a bullet to the `## [Unreleased]` section of `CHANGELOG.md` following the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format. Pure refactors, test-only changes, and doc-only changes do not need a changelog entry.
+
+**Release PR:** Rename `## [Unreleased]` to `## [x.y.z] - YYYY-MM-DD`, add a new empty `## [Unreleased]` above it, and bump `version` in `package.json`. For vulnerabilities that cannot be fixed without a breaking toolchain change, document the accepted risk in the changelog entry with a reference to the tracking issue.
+
 ## Documentation
 
 - When adding, removing, or modifying files in `.claude/skills/` or `.claude/agents/`, update `.claude/README.md` to reflect the change.

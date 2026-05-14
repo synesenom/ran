@@ -1,6 +1,6 @@
 {
   "name": "ranjs",
-  "version": "1.24.5",
+  "version": "1.24.6",
   "description": "Library for generating various random variables.",
   "keywords": [
     "random",
@@ -29,8 +29,7 @@
     "test": "./node_modules/.bin/_mocha -r esm",
     "docs": "node ./docs/index.js",
     "build": "./node_modules/.bin/rollup -c",
-    "coverage": "cross-env NODE_ENV=test nyc --reporter=html _mocha --require @babel/register",
-    "coveralls": "cross-env NODE_ENV=test nyc --reporter=text-lcov _mocha --recursive --require @babel/register | coveralls"
+    "coverage": "cross-env NODE_ENV=test nyc --reporter=html _mocha --require @babel/register"
   },
   "devDependencies": {
     "@babel/core": "^7.18.6",
@@ -40,7 +39,6 @@
     "@rollup/plugin-node-resolve": "^13.1.3",
     "babel-plugin-istanbul": "^6.0.0",
     "chai": "^4.3.4",
-    "coveralls": "^3.1.1",
     "cross-env": "^7.0.3",
     "documentation": "^14.0.0",
     "eslint": "^7.32.0",
@@ -51,9 +49,7 @@
     "lodash.flattendeep": "^4.4.0",
     "mathjax-node-page": "^3.2.0",
     "mocha": "^10.2.0",
-    "mocha-lcov-reporter": "^1.3.0",
-    "nodemon": "^2.0.15",
-    "npm": "^11.14.1",
+    "nodemon": "^3.0.0",
     "nyc": "^15.1.0",
     "pug": "^3.0.2",
     "rollup": "^2.64.0",
