@@ -84,6 +84,14 @@ When a change touches many files (new base class method, convention rename acros
 **Documentation updates as follow-ups:**
 - `README.md` and `CLAUDE.md` updates file as separate issues, not part of the feature PR. Doc-only PRs review in seconds.
 
+## Versioning and Changelog
+
+- **Patch bump** (`x.y.Z`): dependency updates, bug fixes, internal refactors with no API change.
+- **Minor bump** (`x.Y.0`): new distributions, new public methods, additive API changes.
+- **Major bump** (`X.0.0`): breaking API changes (parameter renames, removed methods, changed return shapes).
+- **When a PR includes a version bump**, add a `CHANGELOG.md` entry for that version following the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format. PRs that do not bump the version do not need a changelog entry.
+- For vulnerabilities or dependencies that cannot be fixed without a breaking toolchain change, document the accepted risk in the changelog entry with a reference to the tracking issue.
+
 ## Documentation
 
 - When adding, removing, or modifying files in `.claude/skills/` or `.claude/agents/`, update `.claude/README.md` to reflect the change.
