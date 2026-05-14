@@ -19,7 +19,7 @@ export default class Davis extends Distribution {
     // Set support.
     this.s = [{
       value: 0,
-      closed: true
+      closed: false
     }, {
       value: Infinity,
       closed: false
@@ -43,6 +43,7 @@ export default class Davis extends Distribution {
   }
 
   _cdf (x) {
+    if (x <= 0) return 0
     let y = 0
     for (let k = 1; k < MAX_ITER; k++) {
       const dy = (k % 2 === 0 ? 1 : -1) * Math.exp(-2 * (k * x) ** 2)

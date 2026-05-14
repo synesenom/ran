@@ -345,6 +345,29 @@ describe('dist', () => {
       })
     })
 
+  // Kolmogorov: open lower boundary — x=0 is outside the support (x>0) and must return 0.
+  describe('Kolmogorov', () => {
+    const k = new dist.Kolmogorov()
+
+    describe('.pdf()', () => {
+      it('should return 0 at the open lower boundary x = 0', () => {
+        assert.equal(k.pdf(0), 0)
+      })
+    })
+
+    describe('.cdf()', () => {
+      it('should return 0 at the open lower boundary x = 0', () => {
+        assert.equal(k.cdf(0), 0)
+      })
+    })
+
+    describe('.survival()', () => {
+      it('should return 1 at the open lower boundary x = 0', () => {
+        assert.equal(k.survival(0), 1)
+      })
+    })
+  })
+
   // Degenerate distribution.
   describe('Degenerate', () => {
     describe('.sample()', () => {
