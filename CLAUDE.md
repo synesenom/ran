@@ -86,11 +86,16 @@ When a change touches many files (new base class method, convention rename acros
 
 ## Versioning and Changelog
 
-- **Patch bump** (`x.y.Z`): dependency updates, bug fixes, internal refactors with no API change.
-- **Minor bump** (`x.Y.0`): new distributions, new public methods, additive API changes.
-- **Major bump** (`X.0.0`): breaking API changes (parameter renames, removed methods, changed return shapes).
-- **When a PR includes a version bump**, add a `CHANGELOG.md` entry for that version following the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format. PRs that do not bump the version do not need a changelog entry.
-- For vulnerabilities or dependencies that cannot be fixed without a breaking toolchain change, document the accepted risk in the changelog entry with a reference to the tracking issue.
+**Release model: batched.** PRs are merged without bumping the version. When enough changes have accumulated, a dedicated release PR bumps the version, promotes `[Unreleased]` to the new version, and triggers the npm publish.
+
+**Semver tiers:**
+- **Patch** (`x.y.Z`): dependency updates, bug fixes, internal refactors with no API change.
+- **Minor** (`x.Y.0`): new distributions, new public methods, additive API changes.
+- **Major** (`X.0.0`): breaking API changes (parameter renames, removed methods, changed return shapes).
+
+**Per-PR changelog rule:** If a PR makes a user-visible change (bug fix, new feature, dependency security fix, removed dead code), add a bullet to the `## [Unreleased]` section of `CHANGELOG.md` following the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format. Pure refactors, test-only changes, and doc-only changes do not need a changelog entry.
+
+**Release PR:** Rename `## [Unreleased]` to `## [x.y.z] - YYYY-MM-DD`, add a new empty `## [Unreleased]` above it, and bump `version` in `package.json`. For vulnerabilities that cannot be fixed without a breaking toolchain change, document the accepted risk in the changelog entry with a reference to the tracking issue.
 
 ## Documentation
 
