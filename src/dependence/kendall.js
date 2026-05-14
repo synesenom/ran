@@ -1,7 +1,7 @@
 import concordant from '../utils/concordant'
 import discordant from '../utils/discordant'
 
-function nTies(values) {
+function nTies (values) {
   const counts = values.reduce((acc, d) => Object.assign(acc, { [d]: (acc[d] || 0) + 1 }), {})
   const ties = Object.values(counts).filter(d => d > 1)
   return ties.reduce((sum, d) => sum + d * (d - 1) / 2, 0)
@@ -48,6 +48,6 @@ export default function (x, y) {
   return num / Math.sqrt((n0 - n1) * (n0 - n2))
 }
 
-function invalidInput(x, y) {
+function invalidInput (x, y) {
   return x.length === 0 || y.length === 0 || x.length !== y.length
 }

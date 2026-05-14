@@ -1,6 +1,6 @@
 const documentation = require('documentation')
 const pug = require('pug')
-const sass = require('node-sass')
+const sass = require('sass')
 const fs = require('fs')
 const hljs = require('highlight.js/lib/core')
 const { mjpage } = require('mathjax-node-page')

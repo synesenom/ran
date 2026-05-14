@@ -37,6 +37,6 @@ export default function (x, y) {
   return x.length * mean(x.map((d, i) => (d - mx) * (y[i] - my))) / (x.length - 1)
 }
 
-function isInvalidInput(x, y) {
+function isInvalidInput (x, y) {
   return x.length < 2 || y.length < 2 || x.length !== y.length
 }

@@ -40,10 +40,10 @@ export default function (p, q) {
   return neumaier(p.filter(d => d > 0).map((pi, i) => pi * Math.log(pi / q[i])))
 }
 
-function isValid(p, q) {
+function isValid (p, q) {
   return p.length !== 0 && q.length !== 0 && p.length === q.length
 }
 
-function hasZeroQWithNonZeroP(p, q) {
+function hasZeroQWithNonZeroP (p, q) {
   return q.filter((qi, i) => qi === 0 && p[i] !== 0).length > 0
 }
