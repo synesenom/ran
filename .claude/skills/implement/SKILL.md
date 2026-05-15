@@ -124,7 +124,17 @@ To continue:
 3. Continue with Phase 3, Step 2
 ```
 
-### 5. Final Completion
+### 5. Update CHANGELOG.md
+
+Before reporting completion, decide if the change is user-visible:
+
+**User-visible** (must add changelog entry): bug fixes, new distributions or methods, changed behavior, added/removed public API, dependency security fixes, removed dead code.
+
+**Not user-visible** (skip): pure refactors, test-only changes, doc-only changes, internal renaming with no API change.
+
+If user-visible, add a bullet to the `## [Unreleased]` section of `CHANGELOG.md` under the appropriate sub-heading (`Added`, `Changed`, or `Fixed`). Follow the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format. If `## [Unreleased]` does not exist, create it at the top of the changelog.
+
+### 6. Final Completion
 
 > "Implementation Complete!
 >
@@ -135,6 +145,8 @@ To continue:
 > Testing:
 > - Linting (npm run standard): PASSED
 > - Test suite (npm test): PASSED
+>
+> CHANGELOG: <entry added under [Unreleased] / skipped — not user-visible>
 >
 > Files modified:
 > - `<file 1>`
