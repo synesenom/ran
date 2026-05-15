@@ -1638,6 +1638,7 @@ export default [{
     params: s => [Math.min(...s), Math.max(...s)]
   },
   cases: [{
+    // mu must lie within [a, b] so the truncated PDF isn't near-flat
     params: () => [2.5, 2, 0, 5]
   }]
 }, {
