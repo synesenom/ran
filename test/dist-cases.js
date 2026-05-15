@@ -466,8 +466,9 @@ export default [{
     params: s => [Math.min(...s), Math.max(...s)]
   },
   cases: [{
-    // mu=1 instead of 0 — mu=0 triggers a NaN bug tracked as issue #52
     params: () => [5, 1, 2]
+  }, {
+    params: () => [5, 0, 2]
   }]
 }, {
   name: 'Erlang',

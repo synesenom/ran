@@ -168,6 +168,13 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
+    // When mu = 0, all j > 0 terms in the series carry a factor of mu^j = 0, so only j = 0 survives.
+    if (this.p.mu === 0) {
+      const tk = 1 + x * x / this.p.nu
+      const kj0 = (this.p.nu + 1) / 2
+      return Math.exp(this.c[0]) * gamma(kj0) * f11(kj0, this.p.nu / 2, this.p.theta / (2 * tk)) / Math.pow(tk, kj0)
+    }
+
     // Some pre-computed constants
     const nu2 = this.p.nu / 2
     const tk = 1 + x * x / this.p.nu
