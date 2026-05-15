@@ -27,7 +27,7 @@ export default class extends Distribution {
     this.p = { r: ri, p }
     Distribution.validate({ r: ri, p }, [
       'r > 0',
-      'p > 0', 'p < 1'
+      'p > 0', 'p < 1' // p=0 causes 1/p-1=Infinity in sampler; p=1 collapses PMF to zero — see solutions/distribution/2026-05-15-1730-negative-binomial-p-strict-bounds.md
     ])
 
     // Set support
