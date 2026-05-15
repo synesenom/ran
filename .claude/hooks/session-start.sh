@@ -6,7 +6,6 @@ if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
 fi
 
 git fetch origin main
-git checkout main
-git pull origin main
+git checkout -B main origin/main
 
 npm install
