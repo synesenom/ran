@@ -38,6 +38,7 @@ export default class extends F {
     return 0.5 * Math.log(super._generator())
   }
 
+  // See solutions/distribution/2026-05-15-1921-fisher-z-pdf-log-space-overflow.md
   _pdf (x) {
     const t = 2 * x
     const logSum = t >= 0
