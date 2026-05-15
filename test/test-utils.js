@@ -252,14 +252,21 @@ export const Tests = {
         }
 
         // Compare CDF and PDF.
+        // Two coarse estimates should agree for smooth functions; a large
+        // disagreement means the stencil is crossing a kink in the PDF
+        // (e.g. DoubleGamma at x=0, Triangular/Trapezoidal at x=c), making
+        // the derivative unreliable regardless of step size.
+        const q1 = (dist.cdf(x + H) - dist.cdf(x - H)) / (2 * H)
+        const q2 = (dist.cdf(x + H / 2) - dist.cdf(x - H / 2)) / H
+        if (Math.abs(q1 - q2) > 1e-3) {
+          continue
+        }
         const df = differentiate(t => dist.cdf(t), x, H)
         // Skip when CDF is saturated at 0 or 1 — derivative rounds to exactly 0
         if (Math.abs(df) < PRECISION) {
           continue
         }
-        if (p > Number.EPSILON) {
-          assert(almostEqual(p, df, PRECISION), `pdf(${x.toPrecision(3)}; ${getParamList(dist)}) = ${p} != ${df} = d/dx cdf(${x.toPrecision(3)}). delta = ${(p - df).toPrecision(3)}`)
-        }
+        assert(almostEqual(p, df, Math.max(PRECISION, p * 1e-6)), `pdf(${x.toPrecision(3)}; ${getParamList(dist)}) = ${p} != ${df} = d/dx cdf(${x.toPrecision(3)}). delta = ${(p - df).toPrecision(3)}`)
       }
     }
   },
