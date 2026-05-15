@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-`ranjs` is a JavaScript statistical library for generating random variates, working with probability distributions, testing hypotheses, and computing statistical properties. Built as ES modules, distributed as a single minified bundle via Rollup.
+`ranjs` is a JavaScript statistical library for generating random variates, working with probability distributions, testing hypotheses, and computing statistical properties. Built as ES modules, distributed as ESM (`dist/ranjs.esm.js`), CJS (`dist/ranjs.cjs.js`), and minified UMD (`dist/ranjs.min.js`) via Rollup.
 
 ## Commands
 

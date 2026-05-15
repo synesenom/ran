@@ -5,6 +5,7 @@
 /.nyc_output
 /coverage
 /.circleci/
+/dist/
 
 # Idea
 .idea/*
