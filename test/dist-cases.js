@@ -1232,7 +1232,7 @@ export default [{
   name: 'NegativeBinomial',
   invalidParams: [
     [-1, 0.5], [0, 0.5], // r > 0
-    [10, -1], [10, 0], [10, 1], [10, 2] // 0 < p < 1
+    [10, -1], [10, 2] // 0 <= p <= 1
   ],
   foreign: {
     generator: 'DiscreteUniform',
