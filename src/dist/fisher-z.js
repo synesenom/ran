@@ -20,6 +20,9 @@ export default class extends F {
     const d2i = Math.round(d2)
     super(d1i / 2, d2i / 2)
 
+    // this.c[0] is logBeta(d1/2, d2/2) from Beta's constructor; indices 1-2 also used by Beta
+    this.c[3] = Math.LN2 + (this.p.d1 / 2) * Math.log(this.p.d1) + (this.p.d2 / 2) * Math.log(this.p.d2) - this.c[0]
+
     // Set support
     this.s = [{
       value: -Infinity,
@@ -36,8 +39,11 @@ export default class extends F {
   }
 
   _pdf (x) {
-    const y = Math.exp(2 * x)
-    return super._pdf(y) * 2 * y
+    const t = 2 * x
+    const logSum = t >= 0
+      ? t + Math.log(this.p.d1 + this.p.d2 * Math.exp(-t))
+      : Math.log(this.p.d2 + this.p.d1 * Math.exp(t))
+    return Math.exp(this.c[3] + this.p.d1 * x - ((this.p.d1 + this.p.d2) / 2) * logSum)
   }
 
   _cdf (x) {
