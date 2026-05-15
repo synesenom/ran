@@ -547,6 +547,9 @@ export default [{
   },
   cases: [{
     params: () => [5, 5]
+  }, {
+    name: 'low degrees of freedom',
+    params: () => [1, 1]
   }]
 }, {
   name: 'FlorySchulz',
