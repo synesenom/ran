@@ -48,7 +48,7 @@ npm run docs
 
 - Tests live in `test/` and mirror `src/` module structure.
 - Mocha test runner with Chai `assert` for assertions.
-- `test/test-utils.js` — shared helpers: `trials`, `ksTest`, `chiTest`, `Tests`.
+- `test/test-utils.js` — shared helpers: `ksTest`, `chiTest`, `repeat`, `Tests`.
 - `test/dist-cases.js` — per-distribution test case definitions (`name`, `invalidParams`, `params`, `cases`).
 - `test/dist.js` — runs the full distribution test suite against all entries in `dist-cases.js`.
 - **Behavior-first assertions**: assert on the output of public methods given known inputs (hand-calculated expected values), not on internal state.

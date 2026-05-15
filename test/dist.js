@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { trials, ksTest, chiTest, Tests } from './test-utils'
+import { ksTest, chiTest, Tests } from './test-utils'
 import { float } from '../src/core'
 import * as dist from '../src/dist'
 import PreComputed from '../src/dist/_pre-computed'
@@ -8,7 +8,7 @@ import testCases from './dist-cases'
 
 // Constants.
 const PRECISION = 1e-10
-const SAMPLE_SIZE = 1000
+const SAMPLE_SIZE = 10000
 
 // Unit test suite.
 const UnitTests = {
@@ -156,13 +156,12 @@ const UnitTests = {
         })
 
         it('sample values should be distributed correctly', () => {
-          trials(() => {
-            const generator = c.generate()
-            return generator.type() === 'continuous'
-              ? ksTest(generator.sample(SAMPLE_SIZE), x => generator.cdf(x))
-              : chiTest(generator.sample(SAMPLE_SIZE), x => generator.pdf(x),
-                Object.keys(generator.save().params).length)
-          })
+          const generator = c.generate()
+          generator.seed(0)
+          assert(generator.type() === 'continuous'
+            ? ksTest(generator.sample(SAMPLE_SIZE), x => generator.cdf(x))
+            : chiTest(generator.sample(SAMPLE_SIZE), x => generator.pdf(x),
+              Object.keys(generator.save().params).length))
         })
       })
     })
@@ -186,26 +185,17 @@ const UnitTests = {
     cases.forEach(c => {
       describe(c.name, () => {
         it('should pass for own test', () => {
-          trials(() => {
-            const generator = c.gen()
-            return generator.test(generator.sample(SAMPLE_SIZE)).passed
-          })
+          const generator = c.gen()
+          generator.seed(0)
+          assert(generator.test(generator.sample(SAMPLE_SIZE)).passed)
         })
 
         it('should reject foreign distribution', () => {
-          trials(() => {
-            for (let i = 0; i < 10; i++) {
-              const generator = c.gen()
-              const sample = generator.sample(SAMPLE_SIZE)
-              try {
-                const foreign = new dist[tc.foreign.generator](...tc.foreign.params(sample))
-                return !foreign.test(sample).passed
-              } catch (e) {
-                // DO nothing.
-                console.log(generator.p)
-              }
-            }
-          })
+          const generator = c.gen()
+          generator.seed(0)
+          const sample = generator.sample(SAMPLE_SIZE)
+          const foreign = new dist[tc.foreign.generator](...tc.foreign.params(sample))
+          assert(!foreign.test(sample).passed)
         })
       })
     })
