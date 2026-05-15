@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  *
  * $$f(k; r, p) = \begin{pmatrix}k + r - 1 \\\\ k \\\\ \end{pmatrix} (1 - p)^r p^k,$$
  *
- * with $r \in \mathbb{N}^+$ and $p \in (0, 1)$. Support: $k \in \mathbb{N}_0$.
+ * with $r \in \mathbb{N}^+$ and $p \in \[0, 1\]$. Support: $k \in \mathbb{N}_0$.
  *
  * @class NegativeBinomial
  * @memberof ran.dist
@@ -27,7 +27,7 @@ export default class extends Distribution {
     this.p = { r: ri, p }
     Distribution.validate({ r: ri, p }, [
       'r > 0',
-      'p > 0', 'p < 1' // p=0 causes 1/p-1=Infinity in sampler; p=1 collapses PMF to zero — see solutions/distribution/2026-05-15-1730-negative-binomial-p-strict-bounds.md
+      'p >= 0', 'p <= 1'
     ])
 
     // Set support
