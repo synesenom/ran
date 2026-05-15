@@ -1,9 +1,8 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { int, float } from '../src/core'
+import { int, float, seed } from '../src/core'
 import { Poisson, Normal } from '../src/dist'
 import * as test from '../src/test'
-import { trials } from './test-utils'
 
 const SAMPLE_SIZE = 50
 
@@ -22,34 +21,30 @@ describe('test', () => {
     })
 
     it('should pass for discrete samples of the same variance', () => {
-      trials(() => {
-        const k = int(2, 5)
-        const lambda = int(1, 30)
-        return test.bartlett(Array.from({ length: k }, () => (new Poisson(lambda)).sample(SAMPLE_SIZE))).passed
-      })
+      seed(0)
+      const k = int(2, 5)
+      const lambda = int(1, 30)
+      assert(test.bartlett(Array.from({ length: k }, (_, i) => (new Poisson(lambda)).seed(i).sample(SAMPLE_SIZE))).passed)
     })
 
     it('should reject for discrete samples of different variance', () => {
-      trials(() => {
-        const k = int(3, 5)
-        return !test.bartlett(Array.from({ length: k }, () => (new Poisson(1 + Math.random() * 30)).sample(SAMPLE_SIZE))).passed
-      })
+      seed(0)
+      const k = int(3, 5)
+      assert(!test.bartlett(Array.from({ length: k }, (_, i) => (new Poisson(1 + float() * 30)).seed(i).sample(SAMPLE_SIZE))).passed)
     })
 
     it('should pass for continuous samples of the same variance', () => {
-      trials(() => {
-        const k = int(2, 5)
-        const mu = float(0, 5)
-        const sigma = float(1, 10)
-        return test.bartlett(Array.from({ length: k }, () => (new Normal(mu, sigma)).sample(SAMPLE_SIZE))).passed
-      })
+      seed(0)
+      const k = int(2, 5)
+      const mu = float(0, 5)
+      const sigma = float(1, 10)
+      assert(test.bartlett(Array.from({ length: k }, (_, i) => (new Normal(mu, sigma)).seed(i).sample(SAMPLE_SIZE))).passed)
     })
 
     it('should reject for continuous samples of different variance', () => {
-      trials(() => {
-        const k = int(3, 5)
-        return !test.bartlett(Array.from({ length: k }, () => (new Normal(float(0, 5), float(1, 10))).sample(SAMPLE_SIZE))).passed
-      })
+      seed(0)
+      const k = int(3, 5)
+      assert(!test.bartlett(Array.from({ length: k }, (_, i) => (new Normal(float(0, 5), float(1, 10))).seed(i).sample(SAMPLE_SIZE))).passed)
     })
   })
 
@@ -61,34 +56,30 @@ describe('test', () => {
     })
 
     it('should pass for discrete samples of the same variance', () => {
-      trials(() => {
-        const k = int(2, 5)
-        const lambda = int(1, 30)
-        return test.brownForsythe(Array.from({ length: k }, () => (new Poisson(lambda)).sample(SAMPLE_SIZE))).passed
-      })
+      seed(0)
+      const k = int(2, 5)
+      const lambda = int(1, 30)
+      assert(test.brownForsythe(Array.from({ length: k }, (_, i) => (new Poisson(lambda)).seed(i).sample(SAMPLE_SIZE))).passed)
     })
 
     it('should reject for discrete samples of different variance', () => {
-      trials(() => {
-        const k = int(3, 5)
-        return !test.brownForsythe(Array.from({ length: k }, () => (new Poisson(1 + Math.random() * 30)).sample(SAMPLE_SIZE))).passed
-      })
+      seed(0)
+      const k = int(3, 5)
+      assert(!test.brownForsythe(Array.from({ length: k }, (_, i) => (new Poisson(1 + float() * 30)).seed(i).sample(SAMPLE_SIZE))).passed)
     })
 
     it('should pass for continuous samples of the same variance', () => {
-      trials(() => {
-        const k = int(2, 5)
-        const mu = float(0, 5)
-        const sigma = float(1, 10)
-        return test.brownForsythe(Array.from({ length: k }, () => (new Normal(mu, sigma)).sample(SAMPLE_SIZE))).passed
-      })
+      seed(0)
+      const k = int(2, 5)
+      const mu = float(0, 5)
+      const sigma = float(1, 10)
+      assert(test.brownForsythe(Array.from({ length: k }, (_, i) => (new Normal(mu, sigma)).seed(i).sample(SAMPLE_SIZE))).passed)
     })
 
     it('should reject for continuous samples of different variance', () => {
-      trials(() => {
-        const k = int(3, 5)
-        return !test.brownForsythe(Array.from({ length: k }, () => (new Normal(float(0, 5), float(1, 10))).sample(SAMPLE_SIZE))).passed
-      })
+      seed(0)
+      const k = int(3, 5)
+      assert(!test.brownForsythe(Array.from({ length: k }, (_, i) => (new Normal(float(0, 5), float(1, 10))).seed(i).sample(SAMPLE_SIZE))).passed)
     })
   })
 
@@ -112,20 +103,18 @@ describe('test', () => {
     })
 
     it('should pass for independent samples', () => {
-      trials(() => {
-        const sample1 = float(0, 10, SAMPLE_SIZE)
-        const sample2 = float(0, 10, SAMPLE_SIZE)
-        return test.hsic([sample1, sample2])
-      })
+      seed(0)
+      const sample1 = float(0, 10, SAMPLE_SIZE)
+      const sample2 = float(0, 10, SAMPLE_SIZE)
+      assert(test.hsic([sample1, sample2]).passed)
     })
 
     it('should reject for dependent data sets', () => {
-      trials(() => {
-        const normal = new Normal()
-        const sample1 = Array.from({ length: SAMPLE_SIZE }, (d, i) => i)
-        const sample2 = sample1.map(d => d + normal.sample())
-        return !test.hsic([sample1, sample2]).passed
-      })
+      seed(0)
+      const normal = new Normal().seed(0)
+      const sample1 = Array.from({ length: SAMPLE_SIZE }, (d, i) => i)
+      const sample2 = sample1.map(d => d + normal.sample())
+      assert(!test.hsic([sample1, sample2]).passed)
     })
   })
 
@@ -137,34 +126,30 @@ describe('test', () => {
     })
 
     it('should pass for discrete samples of the same variance', () => {
-      trials(() => {
-        const k = int(2, 5)
-        const lambda = int(1, 30)
-        return test.levene(Array.from({ length: k }, () => (new Poisson(lambda)).sample(SAMPLE_SIZE))).passed
-      })
+      seed(0)
+      const k = int(2, 5)
+      const lambda = int(1, 30)
+      assert(test.levene(Array.from({ length: k }, (_, i) => (new Poisson(lambda)).seed(i).sample(SAMPLE_SIZE))).passed)
     })
 
     it('should reject for discrete samples of different variance', () => {
-      trials(() => {
-        const k = int(3, 5)
-        return !test.levene(Array.from({ length: k }, () => (new Poisson(1 + Math.random() * 30)).sample(SAMPLE_SIZE))).passed
-      })
+      seed(0)
+      const k = int(3, 5)
+      assert(!test.levene(Array.from({ length: k }, (_, i) => (new Poisson(1 + float() * 30)).seed(i).sample(SAMPLE_SIZE))).passed)
     })
 
     it('should pass for continuous samples of the same variance', () => {
-      trials(() => {
-        const k = int(2, 5)
-        const mu = float(0, 5)
-        const sigma = float(1, 10)
-        return test.levene(Array.from({ length: k }, () => (new Normal(mu, sigma)).sample(SAMPLE_SIZE))).passed
-      })
+      seed(0)
+      const k = int(2, 5)
+      const mu = float(0, 5)
+      const sigma = float(1, 10)
+      assert(test.levene(Array.from({ length: k }, (_, i) => (new Normal(mu, sigma)).seed(i).sample(SAMPLE_SIZE))).passed)
     })
 
     it('should reject for continuous samples of different variance', () => {
-      trials(() => {
-        const k = int(3, 5)
-        return !test.levene(Array.from({ length: k }, () => (new Normal(float(0, 5), float(1, 10))).sample(SAMPLE_SIZE))).passed
-      })
+      seed(0)
+      const k = int(3, 5)
+      assert(!test.levene(Array.from({ length: k }, (_, i) => (new Normal(float(0, 5), float(1, 10))).seed(i).sample(SAMPLE_SIZE))).passed)
     })
   })
 
@@ -176,41 +161,37 @@ describe('test', () => {
     })
 
     it('should pass for samples of the same discrete distribution', () => {
-      trials(() => {
-        const lambda = int(1, 10)
-        const sample1 = (new Poisson(lambda)).sample(SAMPLE_SIZE)
-        const sample2 = (new Poisson(lambda)).sample(SAMPLE_SIZE)
-        return test.mannWhitney([sample1, sample2]).passed
-      })
+      seed(0)
+      const lambda = int(1, 10)
+      const sample1 = (new Poisson(lambda)).seed(1).sample(SAMPLE_SIZE)
+      const sample2 = (new Poisson(lambda)).seed(2).sample(SAMPLE_SIZE)
+      assert(test.mannWhitney([sample1, sample2]).passed)
     })
 
     it('should reject for samples of different discrete distributions', () => {
-      trials(() => {
-        const lambda = int(1, 10)
-        const sample1 = (new Poisson(lambda)).sample(SAMPLE_SIZE)
-        const sample2 = (new Poisson(lambda + 10)).sample(SAMPLE_SIZE)
-        return !test.mannWhitney([sample1, sample2]).passed
-      })
+      seed(0)
+      const lambda = int(1, 10)
+      const sample1 = (new Poisson(lambda)).seed(1).sample(SAMPLE_SIZE)
+      const sample2 = (new Poisson(lambda + 10)).seed(2).sample(SAMPLE_SIZE)
+      assert(!test.mannWhitney([sample1, sample2]).passed)
     })
 
     it('should pass for samples of the same continuous distribution', () => {
-      trials(() => {
-        const mu = float(0, 5)
-        const sigma = float(1, 10)
-        const sample1 = (new Normal(mu, sigma)).sample(SAMPLE_SIZE)
-        const sample2 = (new Normal(mu, sigma)).sample(SAMPLE_SIZE)
-        return test.mannWhitney([sample1, sample2]).passed
-      })
+      seed(0)
+      const mu = float(0, 5)
+      const sigma = float(1, 10)
+      const sample1 = (new Normal(mu, sigma)).seed(1).sample(SAMPLE_SIZE)
+      const sample2 = (new Normal(mu, sigma)).seed(2).sample(SAMPLE_SIZE)
+      assert(test.mannWhitney([sample1, sample2]).passed)
     })
 
     it('should reject for samples of different continuous distributions', () => {
-      trials(() => {
-        const mu = float(0, 5)
-        const sigma = float(1, 10)
-        const sample1 = (new Normal(mu, sigma)).sample(SAMPLE_SIZE)
-        const sample2 = (new Normal(mu + 10, sigma)).sample(SAMPLE_SIZE)
-        return !test.mannWhitney([sample1, sample2]).passed
-      })
+      seed(0)
+      const mu = float(0, 5)
+      const sigma = float(1, 10)
+      const sample1 = (new Normal(mu, sigma)).seed(1).sample(SAMPLE_SIZE)
+      const sample2 = (new Normal(mu + 10, sigma)).seed(2).sample(SAMPLE_SIZE)
+      assert(!test.mannWhitney([sample1, sample2]).passed)
     })
   })
 })

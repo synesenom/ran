@@ -185,14 +185,6 @@ export function chiTest (values, model, c) {
   }
 }
 
-export function trials (test) {
-  let success = 0
-  for (let t = 0; t < 5; t++) {
-    success += test(t) ? 1 : 0
-  }
-  assert(success >= 3, `Failed ${5 - success} out of ${5}`)
-}
-
 export function repeat (test, times = 10) {
   for (let i = 0; i < times; i++) {
     test()

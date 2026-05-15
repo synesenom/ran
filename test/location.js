@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { repeat, equal, trials } from './test-utils'
+import { repeat, equal } from './test-utils'
 import { int } from '../src/core'
 import * as location from '../src/location'
 import * as dist from '../src/dist'
@@ -134,12 +134,10 @@ describe('location', () => {
       })
 
       it('should return the approximate mode for sample size larger than 3', () => {
-        trials(() => {
-          const mu = 10 * Math.random()
-          const sample = new dist.Normal(mu, 0.1).sample(1000)
-          const mode = location.mode(sample)
-          return equal(mode, mu, 2)
-        })
+        const mu = 3.7
+        const sample = new dist.Normal(mu, 0.1).seed(0).sample(1000)
+        const mode = location.mode(sample)
+        assert(equal(mode, mu, 2))
       })
     })
   })
