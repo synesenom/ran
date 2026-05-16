@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI now runs `npm run build` on every push to `main` and every pull request; a build badge scoped to the `build` job was added to `README.md`.
 - Replaced hand-rolled SVG pixel math in `.github/scripts/gen-badge.js` with `badge-maker`; removed legacy `.circleci/config.yml`.
 - Upgraded `rollup` from `^2.64.0` to `^4.x`. Replaced unmaintained `rollup-plugin-terser` with `@rollup/plugin-terser`. Upgraded `@rollup/plugin-node-resolve` from `^13.x` to `^16.x`.
+- Docs build (`npm run docs`) is now driven by a `pages` array in `docs/index.js`; adding a page is one array entry plus one Pug template that extends the new shared layout `docs/templates/_layout.pug`. The compiled SCSS is written once to `docs/styles/style.css` and linked externally from every page (previously inlined into each rendered HTML). See [ADR-0002](decisions/0002-docs-pages-array.md).
 
 ### Fixed
 

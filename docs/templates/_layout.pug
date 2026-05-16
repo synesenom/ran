@@ -1,0 +1,18 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="utf-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        link(href="https://fonts.googleapis.com/css?family=Montserrat:200,400,700", rel="stylesheet")
+        link(rel="stylesheet", type="text/css", href="styles/style.css")
+        title #{name}
+    body
+        | !{gitHubBanner}
+        block sidebar
+        main
+            if pages && pages.length > 1
+                nav.page-nav
+                    each pg in pages
+                        a(href=pg.output, class=(pg.output === currentPage ? 'active' : ''))= pg.navLabel
+            block content
+            block scripts
