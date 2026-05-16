@@ -86,6 +86,7 @@ jobs:
         with:
           path: ./docs
 
+  # deploy-pages@v4 requires upload-pages-artifact@v3 specifically — see solutions/tooling/2026-05-16-1730-docs-pages-deploy-artifact-action.md
   docs-deploy:
     needs: [docs-build]
     runs-on: ubuntu-latest
