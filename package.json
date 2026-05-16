@@ -19,8 +19,10 @@
   "license": "MIT",
   "main": "./dist/ranjs.min.js",
   "module": "./dist/ranjs.esm.js",
+  "types": "./dist/ranjs.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/ranjs.d.ts",
       "import": "./dist/ranjs.esm.js",
       "require": "./dist/ranjs.cjs.js",
       "default": "./dist/ranjs.min.js"
@@ -41,6 +43,8 @@
     "test": "./node_modules/.bin/_mocha --require @babel/register",
     "docs": "node ./docs/index.js",
     "build": "./node_modules/.bin/rollup -c",
+    "typecheck": "./node_modules/.bin/tsc --noEmit",
+    "check-decl": "node scripts/check-declarations.js",
     "prepublishOnly": "npm run build",
     "coverage": "cross-env NODE_ENV=test nyc --reporter=html _mocha --require @babel/register"
   },
@@ -69,7 +73,8 @@
     "rollup": "^4.60.4",
     "sass": "^1.77.8",
     "seedrandom": "^3.0.5",
-    "standard": "^16.0.4"
+    "standard": "^16.0.4",
+    "typescript": "^6.0.3"
   },
   "babel": {
     "presets": [

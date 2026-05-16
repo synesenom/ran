@@ -23,6 +23,9 @@ npm run build
 
 # Generate docs
 npm run docs
+
+# Validate TypeScript declarations
+npm run typecheck
 ```
 
 ## Architecture
@@ -102,6 +105,17 @@ When a change touches many files (new base class method, convention rename acros
 - When adding, removing, or modifying files in `.claude/skills/` or `.claude/agents/`, update `.claude/README.md` to reflect the change.
 - Keep `README.md` up to date whenever changes warrant it (new distributions, changed API, new modules).
 - JSDoc-style comments on the `Distribution` base class and major public methods follow the existing format in `src/dist/_distribution.js` (class/method tags, `@param`, `@returns`, `@memberof`).
+
+## TypeScript Declarations
+
+`dist/ranjs.d.ts` is a **hand-written** ambient module declaration (not generated). It is exempted from the `/dist/` gitignore rule via `!dist/ranjs.d.ts`.
+
+**Maintenance rules:**
+- When adding a new distribution class, add a corresponding `class <Name> extends Distribution { constructor(...) }` line to `dist/ranjs.d.ts` in alphabetical order.
+- When adding a new public method to the `Distribution` base class, add the matching signature to the `class Distribution { ... }` block.
+- When adding a function to a statistical namespace (`core`, `location`, `dispersion`, `shape`, `dependence`, `test`), add its typed signature in the matching `export namespace` block.
+- Run `npm run typecheck` after every edit to `dist/ranjs.d.ts` to confirm the file compiles correctly.
+- `tsconfig.json` is for typecheck only (`"noEmit": true`) and resolves `ranjs` imports via `paths` pointing at `dist/ranjs.d.ts`.
 
 ## Communication Style
 
