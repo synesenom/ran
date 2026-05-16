@@ -82,10 +82,24 @@ jobs:
         if: steps.node-cache.outputs.cache-hit != 'true'
       - run: npm run docs
       - run: test -f docs/index.html && test -f docs/styles/style.css
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-pages-artifact@v3
         with:
-          name: docs
-          path: docs/
+          path: ./docs
+
+  docs-deploy:
+    needs: [docs-build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
   build:
     needs: [lint, test, typecheck]
