@@ -14,6 +14,7 @@ import normal from './_normal'
 export default function gamma (r, a, b = 1) {
   // Extra U^(1/a) draw in the boost branch pushed the a=1 KS statistic over
   // the p=0.01 threshold at N=10000 (issue #193); run M-T directly instead.
+  // See solutions/distribution/2026-05-16-1851-gamma-sampler-boundary-α=1.md
   if (a >= 1) {
     const d = a - 1 / 3
 
