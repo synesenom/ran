@@ -65,6 +65,28 @@ jobs:
       - run: npm run check-decl
       - run: npm run typecheck
 
+  docs-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/cache@v4
+        id: node-cache
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npm ci
+        if: steps.node-cache.outputs.cache-hit != 'true'
+      - run: npm run docs
+      - run: test -f docs/index.html && test -f docs/styles/style.css
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: docs/
+
   build:
     needs: [lint, test, typecheck]
     runs-on: ubuntu-latest
