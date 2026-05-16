@@ -100,6 +100,12 @@ When a change touches many files (new base class method, convention rename acros
 
 **Release PR:** Rename `## [Unreleased]` to `## [x.y.z] - YYYY-MM-DD`, add a new empty `## [Unreleased]` above it, and bump `version` in `package.json`. For vulnerabilities that cannot be fixed without a breaking toolchain change, document the accepted risk in the changelog entry with a reference to the tracking issue.
 
+**Triggering a release:** After the release PR is merged, create and push a tag:
+```bash
+git tag v1.25.0 && git push origin v1.25.0
+```
+This triggers `.github/workflows/release.yml`, which runs lint → typecheck → tests → `npm publish --provenance`. Prerequisites: an `NPM_TOKEN` **granular access token** (not a classic automation token) must be stored in GitHub repository Settings → Secrets → Actions, and tag protection rules must restrict `v*` tag creation to maintainers (Settings → Rules → Tag protection).
+
 ## Documentation
 
 - When adding, removing, or modifying files in `.claude/skills/` or `.claude/agents/`, update `.claude/README.md` to reflect the change.
