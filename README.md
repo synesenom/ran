@@ -1,5 +1,4 @@
 [![Build](https://img.shields.io/github/actions/workflow/status/synesenom/ran/ci.yml?branch=main&job=build&label=build)](https://github.com/synesenom/ran/actions/workflows/ci.yml)
-[![Coverage Status](https://coveralls.io/repos/github/synesenom/ran/badge.svg?branch=main)](https://coveralls.io/github/synesenom/ran?branch=main)
 [![npm](https://img.shields.io/npm/v/ranjs.svg)](https://www.npmjs.com/package/ranjs)
 [![Inline docs](http://inch-ci.org/github/synesenom/ran.svg?branch=main)](http://inch-ci.org/github/synesenom/ran)
 [![License](https://img.shields.io/npm/l/ranjs.svg)](https://www.npmjs.com/package/ranjs)
