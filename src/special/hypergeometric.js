@@ -17,13 +17,35 @@ function _f11TaylorSeries (a, b, z) {
 }
 
 function _f11AsymptoticSeries (a, b, z) {
+  const prefactor = Math.exp(z + (a - b) * Math.log(z) + logGamma(b) - logGamma(a))
+
+  // When terms decrease from the outset (|ratio₀| < 1) the series reaches its
+  // minimum around s ≈ z and then diverges.  EPS-based stopping can miss this
+  // because the minimum term may sit just above the EPS·sum threshold, causing
+  // recursiveSum to run all MAX_ITER iterations and accumulate the diverging
+  // tail.  In this regime truncate at the minimum term instead.
+  if (Math.abs((b - a) * (1 - a)) <= z) {
+    let term = 1
+    let sum = 1
+    for (let s = 0; s < 100; s++) {
+      const next = term * (b - a + s) * (1 - a + s) / ((s + 1) * z)
+      if (Math.abs(next) >= Math.abs(term)) break
+      term = next
+      sum += term
+      if (Math.abs(term / sum) < Number.EPSILON) break
+    }
+    return prefactor * sum
+  }
+
+  // When |ratio₀| > 1 terms grow until the Pochhammer factor (1-a+s) passes
+  // through its near-zero at s = a-1, after which they collapse and EPS fires.
   const s = 1 + recursiveSum({
     c: (b - a) * (1 - a) / z
   }, (t, i) => {
     t.c *= (b - a + i) * (1 - a + i) / ((i + 1) * z)
     return t
   }, t => t.c)
-  return Math.exp(z + (a - b) * Math.log(z) + logGamma(b) - logGamma(a)) * s
+  return prefactor * s
 }
 
 /* function _f21TaylorSeries (a, b, c, z) {
