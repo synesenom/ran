@@ -1,4 +1,4 @@
-[![CircleCI](https://img.shields.io/circleci/build/github/synesenom/ran)](https://app.circleci.com/pipelines/github/synesenom/ran)
+[![CI](https://img.shields.io/github/actions/workflow/status/synesenom/ran/ci.yml?branch=main)](https://github.com/synesenom/ran/actions/workflows/ci.yml)
 [![Coverage Status](https://coveralls.io/repos/github/synesenom/ran/badge.svg?branch=main)](https://coveralls.io/github/synesenom/ran?branch=main)
 [![npm](https://img.shields.io/npm/v/ranjs.svg)](https://www.npmjs.com/package/ranjs)
 [![Inline docs](http://inch-ci.org/github/synesenom/ran.svg?branch=main)](http://inch-ci.org/github/synesenom/ran)
