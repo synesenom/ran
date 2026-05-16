@@ -5,7 +5,8 @@
 /.nyc_output
 /coverage
 /.circleci/
-/dist/
+/dist/*.js
+/dist/*.map
 /docs/styles/style.css
 
 # Idea
