@@ -12,7 +12,9 @@ import normal from './_normal'
  * @ignore
  */
 export default function gamma (r, a, b = 1) {
-  if (a > 1) {
+  // Extra U^(1/a) draw in the boost branch pushed the a=1 KS statistic over
+  // the p=0.01 threshold at N=10000 (issue #193); run M-T directly instead.
+  if (a >= 1) {
     const d = a - 1 / 3
 
     const c = 1 / Math.sqrt(9 * d)
