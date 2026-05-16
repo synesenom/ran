@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `docs/index.html` is no longer tracked in the repository; it is now built and deployed to GitHub Pages automatically via `actions/deploy-pages@v4` on every push to `main`. The `docs-build` CI job now uploads via `actions/upload-pages-artifact@v3` instead of `actions/upload-artifact@v4`.
 - CI now runs `npm run build` on every push to `main` and every pull request; a build badge scoped to the `build` job was added to `README.md`.
 - Replaced hand-rolled SVG pixel math in `.github/scripts/gen-badge.js` with `badge-maker`; removed legacy `.circleci/config.yml`.
 - Upgraded `rollup` from `^2.64.0` to `^4.x`. Replaced unmaintained `rollup-plugin-terser` with `@rollup/plugin-terser`. Upgraded `@rollup/plugin-node-resolve` from `^13.x` to `^16.x`.
