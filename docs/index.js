@@ -113,7 +113,8 @@ function parseEntry (entry) {
 
   const gitHubBanner = fs.readFileSync('./docs/templates/github-banner.html', { encoding: 'utf-8' })
 
-  // Page-list-driven build. See decisions/0002-docs-pages-array.md.
+  // Page-list-driven build. See decisions/0002-docs-pages-array.md
+  // and solutions/tooling/2026-05-16-1135-docs-pages-array-build.md.
   // Adding a page is one entry here + one Pug template that extends _layout.
   const pages = [
     {
