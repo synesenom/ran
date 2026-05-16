@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `FisherZ.pdf(x)` no longer returns `Infinity` for right-tail values at default parameters (`d1=1, d2=1`). Replaced delegating computation through F→Beta with a direct log-space formula that avoids float64 precision loss when the Beta argument rounds to 1.0.
 - `NegativeBinomial` constructor now correctly rejects out-of-range parameters: `r ≤ 0`, `p < 0`, and `p > 1`. Previously some values slipped through validation.
 - Gamma sampler now runs Marsaglia-Tsang directly at shape `α = 1` instead of routing through the `Gamma(α+1) · U^(1/α)` boost branch. The boost is mathematically exact but consumes an extra PRNG draw per sample, which pushed the seed-42 KS statistic just over the p=0.01 critical value at N=10000. Fix transitively repairs sampling-test failures for `Gamma`, `Chi`, `Chi2`, `Erlang`, `InverseGamma`, `LogGamma`, `Nakagami`, and `GeneralizedGamma` at their default parameters (#193).
+- `SkewNormal` sampler now draws both Box-Muller outputs from a single uniform pair instead of calling `_normal` twice (which discarded one branch per call). Halves PRNG consumption per sample and resolves the seed-12345 KS failure for the positive-shape-parameter case (#195).
 
 ## [1.24.6] - 2026-05-14
 

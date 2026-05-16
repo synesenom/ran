@@ -1,5 +1,4 @@
 import clamp from '../utils/clamp'
-import normal from './_normal'
 import { erf, owenT } from '../special'
 import Normal from './normal'
 
@@ -44,9 +43,14 @@ export default class extends Normal {
   }
 
   _generator () {
-    // Method from http://azzalini.stat.unipd.it/SN/faq-r.html
-    const u0 = normal(this.r)
-    const v = normal(this.r)
+    // Azzalini's method (http://azzalini.stat.unipd.it/SN/faq-r.html) needs two independent
+    // standard normals; Box-Muller naturally produces both branches from one uniform pair,
+    // halving PRNG consumption vs. calling _normal twice and discarding one branch each time.
+    const bmu = this.r.next()
+    const bmv = this.r.next()
+    const mag = Math.sqrt(-2 * Math.log(bmu))
+    const u0 = mag * Math.sin(2 * Math.PI * bmv)
+    const v = mag * Math.cos(2 * Math.PI * bmv)
     const u1 = this.c1[0] * u0 + this.c1[1] * v
     const z = u0 >= 0 ? u1 : -u1
     return this.p.xi + this.p.omega * z
