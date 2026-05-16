@@ -47,6 +47,8 @@ const _choice2 = ran.core.choice([1, 2, 3], 2)
 const _ch2 = ran.core.char('abc')
 const _ch3 = ran.core.char('abc', 3)
 const _shuffled = ran.core.shuffle([1, 2, 3])
+const _coinSingle: string = ran.core.coin('H', 'T')
+const _coinP: string = ran.core.coin('H', 'T', 0.5)
 const _coin: string | Array<string> = ran.core.coin('H', 'T', 0.5, 3)
 
 // Statistical namespaces — location
@@ -85,7 +87,7 @@ void s1; void s2; void _s3; void f1; void f2; void _p; void _cat; void _cat2; vo
 void _pdf; void _cdf; void _q; void _surv; void _haz; void _ch
 void _lp; void _ll; void _aic; void _bic; void _tstat; void _tpass
 void _tp; void sp; void _sv; void _sc; void state; void _f3; void _f4; void _i1; void _i2; void _i3
-void _choice1; void _choice2; void _ch2; void _ch3; void _shuffled; void _coin; void _mean
+void _choice1; void _choice2; void _ch2; void _ch3; void _shuffled; void _coinSingle; void _coinP; void _coin; void _mean
 void _gm; void _hm; void _med; void _var; void _sd; void _iqr
 void _skew; void _kurt; void _q50; void _pear; void _spear; void _kend; void _cov
 void _bstat; void _bpass; void _bf; void _lev; void _mw; void _hsic

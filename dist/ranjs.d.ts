@@ -198,7 +198,8 @@ declare module 'ranjs' {
     function char(string: string): string | undefined
     function char(string: string, n: number): string | string[] | undefined
     function shuffle<T>(values: T[]): T[]
-    function coin<H, T>(head: H, tail: T, p?: number, n?: number): H | T | Array<H | T>
+    function coin<H, T>(head: H, tail: T, p?: number): H | T
+    function coin<H, T>(head: H, tail: T, p: number, n: number): H | T | Array<H | T>
   }
 
   // ---- ran.location ---------------------------------------------------
