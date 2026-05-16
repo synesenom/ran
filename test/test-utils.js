@@ -195,6 +195,21 @@ export function repeat (test, times = 10) {
   }
 }
 
+export function checkRefVals (dist, refVals) {
+  for (const { x, pdf, pmf, cdf } of refVals) {
+    if (pdf !== undefined) {
+      const actual = dist.pdf(x)
+      assert(Math.abs(actual - pdf) < PRECISION, `pdf(${x}) = ${actual}, expected ${pdf}`)
+    }
+    if (pmf !== undefined) {
+      const actual = dist.pdf(x)
+      assert(Math.abs(actual - pmf) < PRECISION, `pmf(${x}) = ${actual}, expected ${pmf}`)
+    }
+    const actualCdf = dist.cdf(x)
+    assert(Math.abs(actualCdf - cdf) < PRECISION, `cdf(${x}) = ${actualCdf}, expected ${cdf}`)
+  }
+}
+
 export const Tests = {
   pdfRange (dist) {
     // Run through x values and assert PDF(x) >= 0.
