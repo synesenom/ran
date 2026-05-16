@@ -269,6 +269,7 @@ export const Tests = {
         // Skip when Ridders' Richardson table did not converge — the stencil is crossing
         // a kink in the PDF (e.g. Laplace at mu, DoubleGamma at 0) that prevents reliable
         // finite-difference differentiation even when the coarse kink guard above passes
+        // See solutions/testing/2026-05-16-ridders-error-estimate-kink-detection.md
         if (dfErr > Math.max(PRECISION, Math.abs(df) * 1e-7)) {
           continue
         }
