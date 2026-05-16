@@ -302,6 +302,7 @@ export const Tests = {
     })
   },
 
+  // See solutions/testing/2026-05-16-0653-galois-inequality-ulp-guard.md
   qGalois (dist) {
     runP(dist, (d, p) => {
       const q = d.q(p)
