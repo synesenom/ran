@@ -46,6 +46,7 @@ export default class extends Normal {
     // Azzalini's method (http://azzalini.stat.unipd.it/SN/faq-r.html) needs two independent
     // standard normals; Box-Muller naturally produces both branches from one uniform pair,
     // halving PRNG consumption vs. calling _normal twice and discarding one branch each time.
+    // See solutions/distribution/2026-05-16-1920-skewnormal-box-muller-branch-waste.md
     const bmu = this.r.next()
     const bmv = this.r.next()
     const mag = Math.sqrt(-2 * Math.log(bmu))
