@@ -33,8 +33,19 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
   build:
-    needs: [lint, test]
+    needs: [lint, test, typecheck]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
