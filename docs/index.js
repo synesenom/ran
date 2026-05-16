@@ -63,12 +63,13 @@ function parseEntry (entry) {
 
 // TODO Make equations readable by replacing e^{} with exp.
 (async () => {
-  // Compile style.
+  // Compile style to disk so every page links the same external stylesheet.
   console.log('Compiling style')
-  const style = sass.renderSync({
+  const compiledStyle = sass.renderSync({
     file: './docs/styles/index.scss',
     outputStyle: 'compressed'
   }).css.toString()
+  fs.writeFileSync('./docs/styles/style.css', compiledStyle)
 
   // Parse documentation strings starting from index.js.
   console.log('Parsing docstrings')
@@ -110,35 +111,61 @@ function parseEntry (entry) {
   // Build API.
   const api = docs.map(d => d.members).flat()
 
-  // Compile index template.
-  console.log('Compiling the template')
-  const template = pug.compileFile('./docs/templates/index.pug')
-  const page = template({
-    install: {
-      browser: hljs.highlight('<script type="text/javascript" src="ran.min.js"></script>', { language: 'xml' })
-        .value,
-      node: hljs.highlight('npm install --save ranjs', { language: 'bash' }).value
-    },
-    demo: 'https://beta.observablehq.com/@synesenom/ranjs-demo',
-    gitHubBanner: fs.readFileSync('./docs/templates/github-banner.html', { encoding: 'utf-8' }),
-    name: 'ranjs',
-    menu,
-    searchList: JSON.stringify(searchList),
-    api,
-    style
-  })
+  const gitHubBanner = fs.readFileSync('./docs/templates/github-banner.html', { encoding: 'utf-8' })
 
-  // Pre-render math.
-  console.log('Pre-rendering math')
-  mjpage(page, {
-    format: ['TeX'],
-    singleDollars: true,
-    displayErrors: true
-  }, {
-    useGlobalCache: true,
-    svg: true
-  }, result => {
-    // Write final page.
-    fs.writeFileSync('./docs/index.html', result)
-  })
+  // Page-list-driven build. See decisions/0002-docs-pages-array.md
+  // and solutions/tooling/2026-05-16-1135-docs-pages-array-build.md.
+  // Adding a page is one entry here + one Pug template that extends _layout.
+  const pages = [
+    {
+      template: './docs/templates/index.pug',
+      output: 'index.html',
+      navLabel: 'API',
+      data: {
+        install: {
+          browser: hljs.highlight('<script type="text/javascript" src="ran.min.js"></script>', { language: 'xml' })
+            .value,
+          node: hljs.highlight('npm install --save ranjs', { language: 'bash' }).value
+        },
+        demo: 'https://beta.observablehq.com/@synesenom/ranjs-demo',
+        menu,
+        searchList: JSON.stringify(searchList),
+        api
+      }
+    }
+  ]
+
+  for (const pageDef of pages) {
+    console.log(`Rendering ${pageDef.output}`)
+    const template = pug.compileFile(pageDef.template)
+    const rendered = template({
+      name: 'ranjs',
+      gitHubBanner,
+      ...pageDef.data,
+      pages,
+      currentPage: pageDef.output
+    })
+
+    // mjpage is callback-based; wrap so the loop awaits each page. Note:
+    // useGlobalCache shares MathJax's SVG glyph cache across this single
+    // process invocation — fine while index.html is the only math-bearing
+    // page; revisit if a future math-rendering page is added (see #116).
+    await new Promise((resolve, reject) => {
+      mjpage(rendered, {
+        format: ['TeX'],
+        singleDollars: true,
+        displayErrors: true
+      }, {
+        useGlobalCache: true,
+        svg: true
+      }, result => {
+        try {
+          fs.writeFileSync(`./docs/${pageDef.output}`, result)
+          resolve()
+        } catch (err) {
+          reject(err)
+        }
+      })
+    })
+  }
 })()

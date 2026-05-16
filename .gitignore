@@ -6,6 +6,7 @@
 /coverage
 /.circleci/
 /dist/
+/docs/styles/style.css
 
 # Idea
 .idea/*
