@@ -9,37 +9,44 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
       - uses: actions/cache@v4
         id: node-cache
         with:
           path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          key: node-modules-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('package-lock.json') }}
       - run: npm ci
         if: steps.node-cache.outputs.cache-hit != 'true'
       - run: npm run lint
 
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
       - uses: actions/cache@v4
         id: node-cache
         with:
           path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          key: node-modules-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('package-lock.json') }}
       - run: npm ci
         if: steps.node-cache.outputs.cache-hit != 'true'
       - run: npx cross-env NODE_ENV=test nyc --reporter=lcov ./node_modules/.bin/_mocha --require @babel/register
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2
+        if: matrix.node-version == 20
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fail-on-error: false
