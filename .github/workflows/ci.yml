@@ -14,8 +14,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+      - uses: actions/cache@v4
+        id: node-cache
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npm ci
+        if: steps.node-cache.outputs.cache-hit != 'true'
       - run: npm run lint
 
   test:
@@ -25,8 +30,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+      - uses: actions/cache@v4
+        id: node-cache
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npm ci
+        if: steps.node-cache.outputs.cache-hit != 'true'
       - run: npx cross-env NODE_ENV=test nyc --reporter=lcov ./node_modules/.bin/_mocha --require @babel/register
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2
@@ -41,8 +51,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+      - uses: actions/cache@v4
+        id: node-cache
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npm ci
+        if: steps.node-cache.outputs.cache-hit != 'true'
       - run: npm run check-decl
       - run: npm run typecheck
 
@@ -54,6 +69,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+      - uses: actions/cache@v4
+        id: node-cache
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npm ci
+        if: steps.node-cache.outputs.cache-hit != 'true'
       - run: npm run build
