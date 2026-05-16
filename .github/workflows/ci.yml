@@ -45,8 +45,6 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -55,15 +53,6 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Run tests with coverage
-        run: npx cross-env NODE_ENV=test nyc --reporter=json-summary ./node_modules/.bin/_mocha --require @babel/register
-      - name: Generate coverage badge
-        run: node .github/scripts/gen-badge.js
-      - name: Commit badge
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add img/coverage.svg
-          if ! git diff --staged --quiet; then
-            git commit -m "chore: update coverage badge [skip ci]"
-            git push origin HEAD:main
-          fi
+        run: npx cross-env NODE_ENV=test nyc --reporter=lcov ./node_modules/.bin/_mocha --require @babel/register
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2
