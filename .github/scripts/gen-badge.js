@@ -2,7 +2,7 @@
 'use strict'
 
 const fs = require('fs')
-const { makeBadge } = require('badge-maker')
+const { makeBadge } = require('badge-maker') // see solutions/tooling/2026-05-16-1220-badge-maker-svg-delegation.md
 
 const summary = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'))
 const pct = Math.round(summary.total.lines.pct)
