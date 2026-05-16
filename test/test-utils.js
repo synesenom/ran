@@ -76,7 +76,7 @@ function differentiate (f, x, h = 0.01) {
     }
     if (Math.abs(a[i][i] - a[i - 1][i - 1]) >= SAFE * err) break
   }
-  return ans
+  return [ans, err]
 }
 
 function getTestRange (dist) {
@@ -261,9 +261,15 @@ export const Tests = {
         if (Math.abs(q1 - q2) > 1e-3) {
           continue
         }
-        const df = differentiate(t => dist.cdf(t), x, H)
+        const [df, dfErr] = differentiate(t => dist.cdf(t), x, H)
         // Skip when CDF is saturated at 0 or 1 — derivative rounds to exactly 0
         if (Math.abs(df) < PRECISION) {
+          continue
+        }
+        // Skip when Ridders' Richardson table did not converge — the stencil is crossing
+        // a kink in the PDF (e.g. Laplace at mu, DoubleGamma at 0) that prevents reliable
+        // finite-difference differentiation even when the coarse kink guard above passes
+        if (dfErr > Math.max(PRECISION, Math.abs(df) * 1e-7)) {
           continue
         }
         assert(almostEqual(p, df, Math.max(PRECISION, p * 1e-6)), `pdf(${x.toPrecision(3)}; ${getParamList(dist)}) = ${p} != ${df} = d/dx cdf(${x.toPrecision(3)}). delta = ${(p - df).toPrecision(3)}`)
