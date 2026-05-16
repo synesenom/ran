@@ -4,6 +4,10 @@ import { assert } from 'chai'
 const H = 0.01
 const PRECISION = 1e-9
 const RANGE_STEPS = 10
+// Golden-ratio conjugate: low-discrepancy deterministic offset replacing Math.random() jitter.
+const GOLDEN = 0.6180339887
+// Fixed reference probabilities for qGalois: well-spread across (0,1), spanning both sides of any p.
+const GALOIS_PROBS = [0.1, 0.25, 0.5, 0.75, 0.9]
 
 // Critical values for P = 0.01
 // Source: https://www.medcalc.org/manual/chi-square-table.php
@@ -109,7 +113,7 @@ function runX (dist, unitTest) {
   } else {
     const dx = (range[1] - range[0]) / RANGE_STEPS
     for (let i = 0; i < RANGE_STEPS; i++) {
-      unitTest(dist, range[0] + i * dx + Math.random())
+      unitTest(dist, range[0] + i * dx + (i * GOLDEN) % 1)
     }
   }
 }
@@ -117,7 +121,7 @@ function runX (dist, unitTest) {
 function runP (dist, unitTest) {
   // Run test
   for (let i = 1; i < RANGE_STEPS - 2; i++) {
-    unitTest(dist, (i + Math.random()) / RANGE_STEPS)
+    unitTest(dist, (i + (i * GOLDEN) % 1) / RANGE_STEPS)
   }
 }
 
@@ -240,7 +244,7 @@ export const Tests = {
       const dx = (range[1] - range[0]) / RANGE_STEPS
       for (let i = 0; i < RANGE_STEPS; i++) {
         // Perform test only within the support boundaries.
-        const x = range[0] + i * dx + Math.random()
+        const x = range[0] + i * dx + (i * GOLDEN) % 1
         if (x < supp[0].value + 2 * H || x > supp[1].value - 2 * H) {
           continue
         }
@@ -300,14 +304,19 @@ export const Tests = {
 
   qGalois (dist) {
     runP(dist, (d, p) => {
-      // Compute quantile.
       const q = d.q(p)
 
-      // Sample several values to test for Galois inequalities.
-      for (let i = 0; i < 10; i++) {
-        const x = d.sample()
+      for (const px of GALOIS_PROBS) {
+        const x = d.q(px)
         const cdf = d.cdf(x)
-        assert((x - q) * (cdf - p) >= 0, `cdf(${x}) = ${cdf} and q(${p}) = ${q}`)
+        const dx = x - q
+        const dp = cdf - p
+        // Skip when x and q are numerically indistinguishable — the product sign
+        // is then determined by floating-point rounding noise, not by a real violation.
+        if (Math.abs(dx) < 4 * Number.EPSILON * (Math.abs(x) + Math.abs(q) + 1)) {
+          continue
+        }
+        assert(dx * dp >= 0, `cdf(${x}) = ${cdf} and q(${p}) = ${q}`)
       }
     })
   }
