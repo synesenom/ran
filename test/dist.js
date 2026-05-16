@@ -168,8 +168,8 @@ const UnitTests = {
             generator.seed(s)
             assert(generator.type() === 'continuous'
               ? ksTest(generator.sample(SAMPLE_SIZE), x => generator.cdf(x))
-              : chiTest(generator.sample(SAMPLE_SIZE), x => generator.pdf(x),
-                Object.keys(generator.save().params).length), `seed ${s}`)
+              // c=0: parameters are known, not estimated from data — see solutions/testing/2026-05-16-1915-alias-table-chi2-df-correction.md
+              : chiTest(generator.sample(SAMPLE_SIZE), x => generator.pdf(x), 0), `seed ${s}`)
           }
         })
       })
