@@ -42,6 +42,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - run: npm run check-decl
       - run: npm run typecheck
 
   build:
