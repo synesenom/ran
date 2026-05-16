@@ -163,12 +163,14 @@ const UnitTests = {
         })
 
         it('sample values should be distributed correctly', () => {
-          const generator = c.generate()
-          generator.seed(0)
-          assert(generator.type() === 'continuous'
-            ? ksTest(generator.sample(SAMPLE_SIZE), x => generator.cdf(x))
-            : chiTest(generator.sample(SAMPLE_SIZE), x => generator.pdf(x),
-              Object.keys(generator.save().params).length))
+          for (const s of [0, 42, 12345]) {
+            const generator = c.generate()
+            generator.seed(s)
+            assert(generator.type() === 'continuous'
+              ? ksTest(generator.sample(SAMPLE_SIZE), x => generator.cdf(x))
+              : chiTest(generator.sample(SAMPLE_SIZE), x => generator.pdf(x),
+                Object.keys(generator.save().params).length), `seed ${s}`)
+          }
         })
       })
     })
@@ -192,17 +194,21 @@ const UnitTests = {
     cases.forEach(c => {
       describe(c.name, () => {
         it('should pass for own test', () => {
-          const generator = c.gen()
-          generator.seed(0)
-          assert(generator.test(generator.sample(SAMPLE_SIZE)).passed)
+          for (const s of [0, 42, 12345]) {
+            const generator = c.gen()
+            generator.seed(s)
+            assert(generator.test(generator.sample(SAMPLE_SIZE)).passed, `seed ${s}`)
+          }
         })
 
         it('should reject foreign distribution', () => {
-          const generator = c.gen()
-          generator.seed(0)
-          const sample = generator.sample(SAMPLE_SIZE)
-          const foreign = new dist[tc.foreign.generator](...tc.foreign.params(sample))
-          assert(!foreign.test(sample).passed)
+          for (const s of [0, 42, 12345]) {
+            const generator = c.gen()
+            generator.seed(s)
+            const sample = generator.sample(SAMPLE_SIZE)
+            const foreign = new dist[tc.foreign.generator](...tc.foreign.params(sample))
+            assert(!foreign.test(sample).passed, `seed ${s}`)
+          }
         })
       })
     })
