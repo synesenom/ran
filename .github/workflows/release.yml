@@ -1,0 +1,36 @@
+name: Release
+
+# Requires an NPM_TOKEN secret in GitHub repository settings (Settings > Secrets)
+# with npm publish permission. Tag protection rules should restrict v* tag
+# creation to maintainers only (Settings > Rules > Tag protection).
+on:
+  push:
+    tags: ['v*']
+
+# id-token: write is required for npm provenance attestation generation.
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+      - uses: actions/cache@v4
+        id: node-cache
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npm ci
+        if: steps.node-cache.outputs.cache-hit != 'true'
+      - run: npm run lint
+      - run: npm run check-decl && npm run typecheck
+      - run: npx cross-env NODE_ENV=test ./node_modules/.bin/_mocha --require @babel/register
+      - run: npm publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
