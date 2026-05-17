@@ -585,7 +585,14 @@ block content
             tr
                 td: code nbinom(n, p)
                 td: code new NegativeBinomial(r, p)
-                td n → r (rename only); both count failures before r successes
+                td n → r; p_ranjs = 1 − p_scipy (p convention differs)
+
+    p.callout
+        strong ⚠ p convention differs:
+        |  scipy nbinom counts failures before n successes, with p = P(success).
+        |  ranjs NegativeBinomial counts successes before r failures, with p = P(success).
+        |  The PMFs are duals: scipy uses p^n·(1−p)^k; ranjs uses (1−p)^r·p^x.
+        |  Convert: r = n, p_ranjs = 1 − p_scipy.
 
     .code-pair
         pre: code.language-python.
@@ -594,7 +601,8 @@ block content
             d.pmf(3)
             d.rvs(size=5)
         pre: code.language-javascript.
-            const d = new ranjs.dist.NegativeBinomial(5, 0.4)
+            // p_ranjs = 1 - p_scipy = 0.6
+            const d = new ranjs.dist.NegativeBinomial(5, 0.6)
             d.pdf(3)
             d.sample(5)
 
