@@ -83,7 +83,13 @@ export default [{
   ],
   cases: [{
     params: () => [2, 2]
-  }]
+  }],
+  refVals: [
+    { x: 0.2, pdf: 0.96, cdf: 0.104 },
+    { x: 0.4, pdf: 1.44, cdf: 0.352 },
+    { x: 0.6, pdf: 1.44, cdf: 0.648 },
+    { x: 0.8, pdf: 0.96, cdf: 0.896 }
+  ]
 }, {
   name: 'BetaPrime',
   invalidParams: [
@@ -153,7 +159,13 @@ export default [{
   ],
   cases: [{
     params: () => [0, 2]
-  }]
+  }],
+  refVals: [
+    { x: -4, pdf: 0.0318309886183791, cdf: 0.147583617650433 },
+    { x: 0, pdf: 0.159154943091895, cdf: 0.5 },
+    { x: 2, pdf: 0.0795774715459477, cdf: 0.75 },
+    { x: 6, pdf: 0.0159154943091895, cdf: 0.897583617650433 }
+  ]
 }, {
   name: 'Chi',
   invalidParams: [
@@ -261,7 +273,13 @@ export default [{
   ],
   cases: [{
     params: () => [2]
-  }]
+  }],
+  refVals: [
+    { x: 0.5, pdf: 0.735758882342885, cdf: 0.632120558828558 },
+    { x: 1, pdf: 0.270670566473225, cdf: 0.864664716763387 },
+    { x: 2, pdf: 0.0366312777774684, cdf: 0.981684361111266 },
+    { x: 3, pdf: 0.00495750435333272, cdf: 0.997521247823334 }
+  ]
 }, {
   name: 'ExponentialLogarithmic',
   invalidParams: [
@@ -325,7 +343,13 @@ export default [{
   ],
   cases: [{
     params: () => [2, 2]
-  }]
+  }],
+  refVals: [
+    { x: 0.5, pdf: 0.735758882342885, cdf: 0.264241117657115 },
+    { x: 1, pdf: 0.541341132946451, cdf: 0.593994150290162 },
+    { x: 2, pdf: 0.146525111109873, cdf: 0.908421805556329 },
+    { x: 3, pdf: 0.0297450261199963, cdf: 0.982648734763335 }
+  ]
 }, {
   name: 'GammaGompertz',
   invalidParams: [
@@ -432,7 +456,13 @@ export default [{
   ],
   cases: [{
     params: () => [0, 2]
-  }]
+  }],
+  refVals: [
+    { x: -2, pdf: 0.0896870393670086, cdf: 0.0659880358453125 },
+    { x: 0, pdf: 0.183939720585721, cdf: 0.367879441171442 },
+    { x: 2, pdf: 0.127323190021791, cdf: 0.692200627555346 },
+    { x: 5, pdf: 0.0378080899587133, cdf: 0.921193655175516 }
+  ]
 }, {
   name: 'HalfGeneralizedNormal',
   invalidParams: [
@@ -580,7 +610,13 @@ export default [{
   ],
   cases: [{
     params: () => [0, 2]
-  }]
+  }],
+  refVals: [
+    { x: -2, pdf: 0.0919698602928606, cdf: 0.183939720585721 },
+    { x: 0, pdf: 0.25, cdf: 0.5 },
+    { x: 1, pdf: 0.151632664928158, cdf: 0.696734670143683 },
+    { x: 4, pdf: 0.0338338208091532, cdf: 0.932332358381694 }
+  ]
 }, {
   name: 'Levy',
   invalidParams: [
@@ -646,7 +682,13 @@ export default [{
   ],
   cases: [{
     params: () => [0, 2]
-  }]
+  }],
+  refVals: [
+    { x: 0.5, pdf: 0.375688416016771, cdf: 0.364455844736536 },
+    { x: 1, pdf: 0.199471140200716, cdf: 0.5 },
+    { x: 2, pdf: 0.0939221040041928, cdf: 0.635544155263464 },
+    { x: 5, pdf: 0.0288596767752982, cdf: 0.789509060951237 }
+  ]
 }, {
   name: 'Logarithmic',
   invalidParams: [
@@ -666,7 +708,13 @@ export default [{
   ],
   cases: [{
     params: () => [0, 2]
-  }]
+  }],
+  refVals: [
+    { x: -4, pdf: 0.0524967927017533, cdf: 0.119202922022118 },
+    { x: 0, pdf: 0.125, cdf: 0.5 },
+    { x: 2, pdf: 0.0983059666207409, cdf: 0.731058578630005 },
+    { x: 5, pdf: 0.0350518582725541, cdf: 0.924141819978757 }
+  ]
 }, {
   name: 'LogisticExponential',
   invalidParams: [
@@ -817,7 +865,13 @@ export default [{
   ],
   cases: [{
     params: () => [0, 2]
-  }]
+  }],
+  refVals: [
+    { x: -2, pdf: 0.120985362259572, cdf: 0.158655253931457 },
+    { x: 0, pdf: 0.199471140200716, cdf: 0.5 },
+    { x: 1, pdf: 0.17603266338215, cdf: 0.691462461274013 },
+    { x: 3, pdf: 0.0647587978329459, cdf: 0.933192798731142 }
+  ]
 }, {
   name: 'Pareto',
   invalidParams: [
@@ -827,7 +881,13 @@ export default [{
   ],
   cases: [{
     params: () => [2, 2]
-  }]
+  }],
+  refVals: [
+    { x: 2.5, pdf: 0.512, cdf: 0.36 },
+    { x: 3, pdf: 0.296296296296296, cdf: 0.555555555555556 },
+    { x: 5, pdf: 0.064, cdf: 0.84 },
+    { x: 10, pdf: 0.008, cdf: 0.96 }
+  ]
 }, {
   name: 'PERT',
   invalidParams: [
@@ -1047,7 +1107,13 @@ export default [{
   },
   cases: [{
     params: () => [5, 25]
-  }]
+  }],
+  refVals: [
+    { x: 7, pdf: 0.05, cdf: 0.1 },
+    { x: 10, pdf: 0.05, cdf: 0.25 },
+    { x: 15, pdf: 0.05, cdf: 0.5 },
+    { x: 20, pdf: 0.05, cdf: 0.75 }
+  ]
 }, {
   name: 'UniformProduct',
   invalidParams: [
@@ -1081,7 +1147,13 @@ export default [{
   ],
   cases: [{
     params: () => [2, 2]
-  }]
+  }],
+  refVals: [
+    { x: 0.5, pdf: 0.234853265703369, cdf: 0.0605869371865242 },
+    { x: 1, pdf: 0.389400391535702, cdf: 0.221199216928595 },
+    { x: 2, pdf: 0.367879441171442, cdf: 0.632120558828558 },
+    { x: 3, pdf: 0.158098836842796, cdf: 0.894600775438136 }
+  ]
 }, {
   name: 'Wigner',
   invalidParams: [
