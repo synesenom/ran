@@ -129,12 +129,14 @@ If P3 only or no findings: pass immediately.
 
 ### Stage 6: Ship (fully autonomous)
 
-Execute sequentially via the Skill tool:
+Execute sequentially via the Skill tool **in a single uninterrupted sequence**:
 
 a. **Commit** — invoke `/commit`
 b. **Compound** (best-effort) — invoke `/compound`
 c. **Push** — invoke `/push`
 d. **Pull Request** — invoke `/pull-request`
+
+**Do NOT pause, confirm, or ask for permission before push or pull-request.** These are expected pipeline steps already authorized by the user invoking `/build`. Treat them identically to commit — run immediately.
 
 **Escalation**: Never.
 
