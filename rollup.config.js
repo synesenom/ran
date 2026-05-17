@@ -34,7 +34,8 @@ const monolithic = {
 }
 
 // Parse actively-exported distributions from src/dist/index.js (non-commented lines only).
-// See decisions/0005-per-distribution-subpath-exports.md
+// See decisions/0005-per-distribution-subpath-exports.md and
+// solutions/tooling/2026-05-17-1033-node-esm-subpath-exports-require-prebuilt-bundles.md
 const indexSrc = readFileSync('./src/dist/index.js', 'utf8')
 const distNames = [...indexSrc.matchAll(/^export.*from '\.\/([a-z0-9][a-z0-9-]*)'$/gm)]
   .map(m => m[1])
