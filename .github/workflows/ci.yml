@@ -43,7 +43,7 @@ jobs:
       - run: npx cross-env NODE_ENV=test nyc --reporter=lcov ./node_modules/.bin/_mocha --require @babel/register
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2
-        if: matrix.node-version == 20
+        if: matrix.node-version == 20 && github.event_name == 'push'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fail-on-error: false

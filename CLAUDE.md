@@ -52,11 +52,11 @@ npm run typecheck
 - Tests live in `test/` and mirror `src/` module structure.
 - Mocha test runner with Chai `assert` for assertions.
 - `test/test-utils.js` — shared helpers: `ksTest`, `chiTest`, `repeat`, `Tests`.
-- `test/dist-cases.js` — per-distribution test case definitions (`name`, `invalidParams`, `params`, `cases`).
-- `test/dist.js` — runs the full distribution test suite against all entries in `dist-cases.js`.
+- `test/dist-cases-continuous.js` and `test/dist-cases-discrete.js` — per-distribution test case definitions (`name`, `invalidParams`, `params`, `cases`), split by distribution type.
+- `test/dist.js` — runs the full distribution test suite against all entries in `dist-cases-continuous.js` and `dist-cases-discrete.js`.
 - **Behavior-first assertions**: assert on the output of public methods given known inputs (hand-calculated expected values), not on internal state.
 - **Statistical verification**: use `ksTest` (Kolmogorov-Smirnov) for continuous distributions and `chiTest` (chi-squared) for discrete distributions when verifying that `sample()` produces correctly distributed values.
-- **New distributions must be added to `test/dist-cases.js`** with `invalidParams`, `params`, and `cases` entries before any implementation is written (TDD).
+- **New distributions must be added to the appropriate `test/dist-cases-*.js` file** with `invalidParams`, `params`, and `cases` entries before any implementation is written (TDD).
 - **No 100% line coverage enforcement** — test for meaningful behavior, not line counts.
 
 ## GitHub Issues

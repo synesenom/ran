@@ -4,7 +4,10 @@ import { ksTest, chiTest, Tests, checkRefVals } from './test-utils'
 import { float } from '../src/core'
 import * as dist from '../src/dist'
 import PreComputed from '../src/dist/_pre-computed'
-import testCases from './dist-cases'
+import continuousCases from './dist-cases-continuous'
+import discreteCases from './dist-cases-discrete'
+
+const testCases = [...continuousCases, ...discreteCases]
 
 // Constants.
 const PRECISION = 1e-10
@@ -86,7 +89,7 @@ const UnitTests = {
     })
   },
 
-  pdf (tc) {
+  analytical (tc) {
     // Test cases
     const cases = tc.cases.map(c => ({
       name: c.name || 'random parameters',
@@ -197,7 +200,17 @@ const UnitTests = {
             const generator = c.gen()
             generator.seed(s)
             const sample = generator.sample(SAMPLE_SIZE)
-            const foreign = new dist[tc.foreign.generator](...tc.foreign.params(sample))
+            let foreign
+            if (tc.foreign) {
+              foreign = new dist[tc.foreign.generator](...tc.foreign.params(sample))
+            } else {
+              // spread on 10k elements overflows the call stack on some engines; reduce is safe at any size
+              const lo = sample.reduce((a, d) => d < a ? d : a, Infinity)
+              const hi = sample.reduce((a, d) => d > a ? d : a, -Infinity)
+              foreign = generator.type() === 'continuous'
+                ? new dist.Uniform(lo, hi)
+                : new dist.DiscreteUniform(lo, lo < hi ? hi : lo + 1)
+            }
             assert(!foreign.test(sample).passed, `seed ${s}`)
           }
         })
@@ -333,7 +346,7 @@ describe('dist', () => {
         describe('constructor', () => UnitTests.constructor(tc))
         describe('.seed()', () => UnitTests.seed(tc))
         describe('.load(), .save()', () => UnitTests.loadAndSave(tc))
-        describe('.pdf(), .cdf(), .q()', () => UnitTests.pdf(tc))
+        describe('.pdf(), .cdf(), .q()', () => UnitTests.analytical(tc))
         describe('.sample()', () => UnitTests.sample(tc))
         describe('.test()', () => UnitTests.test(tc))
       })
