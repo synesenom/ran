@@ -1,0 +1,672 @@
+extends _layout
+
+block sidebar
+    input(id="menu", type="checkbox")
+    label.menu-button(for="menu") ☰
+    label.menu-overlay(for="menu")
+    aside
+        ul.sections
+            li
+                label Methods
+                ul.methods
+                    li: a(href="#methods") Method mapping
+            li
+                label Distributions
+                ul.methods
+                    li: a(href="#dist-normal") Normal
+                    li: a(href="#dist-uniform") Uniform
+                    li: a(href="#dist-exponential") Exponential
+                    li: a(href="#dist-gamma") Gamma
+                    li: a(href="#dist-beta") Beta
+                    li: a(href="#dist-chi2") Chi-squared
+                    li: a(href="#dist-studentt") Student's t
+                    li: a(href="#dist-f") F
+                    li: a(href="#dist-lognormal") Log-normal
+                    li: a(href="#dist-weibull") Weibull
+                    li: a(href="#dist-pareto") Pareto
+                    li: a(href="#dist-cauchy") Cauchy
+                    li: a(href="#dist-laplace") Laplace
+                    li: a(href="#dist-logistic") Logistic
+                    li: a(href="#dist-triangular") Triangular
+                    li: a(href="#dist-poisson") Poisson
+                    li: a(href="#dist-binomial") Binomial
+                    li: a(href="#dist-negativebinomial") Negative Binomial
+                    li: a(href="#dist-geometric") Geometric
+                    li: a(href="#dist-hypergeometric") Hypergeometric
+
+block content
+    h1 Porting from scipy.stats
+
+    p
+        | This guide maps scipy.stats APIs to their ranjs equivalents for the 20 most-used
+        | distributions. Each section shows the constructor parameters side-by-side and a
+        | brief usage example in both Python and JavaScript.
+
+    h1#methods Method mapping
+
+    p All ranjs distribution instances share the same methods regardless of distribution type.
+
+    table
+        thead
+            tr
+                th scipy.stats
+                th ranjs
+                th Notes
+        tbody
+            tr
+                td: code dist.rvs(size=n)
+                td: code dist.sample(n)
+                td returns Array of length n
+            tr
+                td: code dist.rvs()
+                td: code dist.sample()
+                td returns a single number
+            tr
+                td: code dist.pdf(x)
+                td: code dist.pdf(x)
+                td same name; also covers discrete pmf
+            tr
+                td: code dist.pmf(k)
+                td: code dist.pdf(k)
+                td ranjs uses pdf() for both continuous and discrete
+            tr
+                td: code dist.cdf(x)
+                td: code dist.cdf(x)
+                td same name
+            tr
+                td: code dist.ppf(q)
+                td: code dist.q(q)
+                td quantile / percent-point function
+            tr
+                td: code dist.sf(x)
+                td: code dist.survival(x)
+                td survival function = 1 − CDF
+            tr
+                td: code dist.logpdf(x)
+                td: code dist.lnPdf(x)
+                td log-density
+            tr
+                td: code scipy.stats.kstest(data, dist)
+                td: code new Dist(...).test(data)
+                td built-in KS goodness-of-fit test
+
+    h1 Distributions
+
+    //- ── Normal ──────────────────────────────────────────────────────────────
+    h2#dist-normal Normal
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code norm(loc=0, scale=1)
+                td: code new Normal(mu=0, sigma=1)
+                td loc → mu, scale → sigma
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import norm
+            d = norm(loc=2, scale=0.5)
+            d.pdf(2.0)      # 0.7979
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            const d = new ranjs.dist.Normal(2, 0.5)
+            d.pdf(2.0)      // 0.7979
+            d.sample(5)
+
+    //- ── Uniform ─────────────────────────────────────────────────────────────
+    h2#dist-uniform Uniform
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code uniform(loc=0, scale=1)
+                td: code new Uniform(xmin=0, xmax=1)
+                td loc → xmin; xmax = loc + scale
+
+    p.callout
+        strong ⚠ Parameter difference:
+        |  scipy uses start + width (loc, scale); ranjs uses start + end (xmin, xmax).
+        |  Convert: xmin = loc, xmax = loc + scale.
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import uniform
+            d = uniform(loc=1, scale=3)   # support [1, 4]
+            d.pdf(2.5)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            const d = new ranjs.dist.Uniform(1, 4)  // support [1, 4]
+            d.pdf(2.5)
+            d.sample(5)
+
+    //- ── Exponential ─────────────────────────────────────────────────────────
+    h2#dist-exponential Exponential
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code expon(loc=0, scale=1)
+                td: code new Exponential(lambda=1)
+                td scale = 1/lambda (scipy uses mean; ranjs uses rate)
+
+    p.callout
+        strong ⚠ Parameter difference:
+        |  scipy's scale is the mean (1/λ); ranjs lambda is the rate (λ).
+        |  Convert: lambda = 1 / scale.
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import expon
+            d = expon(scale=0.5)   # rate = 2
+            d.pdf(1.0)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            const d = new ranjs.dist.Exponential(2)  // rate = 2
+            d.pdf(1.0)
+            d.sample(5)
+
+    //- ── Gamma ───────────────────────────────────────────────────────────────
+    h2#dist-gamma Gamma
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code gamma(a, loc=0, scale=1)
+                td: code new Gamma(alpha, beta=1)
+                td a → alpha; beta = 1/scale (rate parameterization)
+
+    p.callout
+        strong ⚠ Parameter difference:
+        |  scipy uses a scale parameter (mean/shape); ranjs uses a rate parameter (beta = 1/scale).
+        |  Convert: beta = 1 / scale.
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import gamma
+            d = gamma(a=2, scale=0.5)   # rate = 2
+            d.pdf(1.0)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            const d = new ranjs.dist.Gamma(2, 2)  // alpha=2, beta=2 (rate)
+            d.pdf(1.0)
+            d.sample(5)
+
+    //- ── Beta ────────────────────────────────────────────────────────────────
+    h2#dist-beta Beta
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code beta(a, b)
+                td: code new Beta(alpha, beta)
+                td a → alpha, b → beta (rename only)
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import beta
+            d = beta(a=2, b=5)
+            d.pdf(0.3)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            const d = new ranjs.dist.Beta(2, 5)
+            d.pdf(0.3)
+            d.sample(5)
+
+    //- ── Chi-squared ─────────────────────────────────────────────────────────
+    h2#dist-chi2 Chi-squared
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code chi2(df)
+                td: code new Chi2(k)
+                td df → k (rename only)
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import chi2
+            d = chi2(df=4)
+            d.pdf(2.0)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            const d = new ranjs.dist.Chi2(4)
+            d.pdf(2.0)
+            d.sample(5)
+
+    //- ── Student's t ─────────────────────────────────────────────────────────
+    h2#dist-studentt Student's t
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code t(df)
+                td: code new StudentT(nu)
+                td df → nu (rename only)
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import t
+            d = t(df=10)
+            d.pdf(0.0)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            const d = new ranjs.dist.StudentT(10)
+            d.pdf(0.0)
+            d.sample(5)
+
+    //- ── F ───────────────────────────────────────────────────────────────────
+    h2#dist-f F
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code f(dfn, dfd)
+                td: code new F(d1, d2)
+                td dfn → d1, dfd → d2 (rename only)
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import f
+            d = f(dfn=5, dfd=10)
+            d.pdf(1.0)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            const d = new ranjs.dist.F(5, 10)
+            d.pdf(1.0)
+            d.sample(5)
+
+    //- ── Log-normal ──────────────────────────────────────────────────────────
+    h2#dist-lognormal Log-normal
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code lognorm(s, loc=0, scale=1)
+                td: code new LogNormal(mu=0, sigma=1)
+                td s → sigma; mu = log(scale)
+
+    p.callout
+        strong ⚠ Non-trivial conversion:
+        |  scipy parameterizes lognorm with s (shape = σ of ln X) and scale (= exp(μ of ln X)).
+        |  ranjs uses log-space parameters directly: mu = mean of ln X, sigma = std dev of ln X.
+        |  Convert: mu = Math.log(scale), sigma = s.
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import lognorm
+            import numpy as np
+            # X ~ LogNormal with log-mean=1, log-sd=0.5
+            d = lognorm(s=0.5, scale=np.exp(1))
+            d.pdf(3.0)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            // mu=1, sigma=0.5 are log-space parameters
+            const d = new ranjs.dist.LogNormal(1, 0.5)
+            d.pdf(3.0)
+            d.sample(5)
+
+    //- ── Weibull ─────────────────────────────────────────────────────────────
+    h2#dist-weibull Weibull
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code weibull_min(c, loc=0, scale=1)
+                td: code new Weibull(lambda=1, k=1)
+                td c → k (shape); scale → lambda (scale) — order reversed
+
+    p.callout
+        strong ⚠ Parameter order reversed:
+        |  scipy's first positional argument c is the shape (k in ranjs); scipy's scale is ranjs lambda.
+        |  Convert: Weibull(lambda=scale, k=c).
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import weibull_min
+            d = weibull_min(c=1.5, scale=2.0)
+            d.pdf(1.0)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            // Weibull(lambda, k): lambda=scale=2.0, k=c=1.5
+            const d = new ranjs.dist.Weibull(2.0, 1.5)
+            d.pdf(1.0)
+            d.sample(5)
+
+    //- ── Pareto ──────────────────────────────────────────────────────────────
+    h2#dist-pareto Pareto
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code pareto(b, loc=0, scale=1)
+                td: code new Pareto(xmin=1, alpha=1)
+                td b → alpha (shape); scale → xmin (minimum value)
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import pareto
+            d = pareto(b=3, scale=1)   # xmin=1, alpha=3
+            d.pdf(2.0)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            const d = new ranjs.dist.Pareto(1, 3)  // xmin=1, alpha=3
+            d.pdf(2.0)
+            d.sample(5)
+
+    //- ── Cauchy ──────────────────────────────────────────────────────────────
+    h2#dist-cauchy Cauchy
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code cauchy(loc=0, scale=1)
+                td: code new Cauchy(x0=0, gamma=1)
+                td loc → x0, scale → gamma (rename only)
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import cauchy
+            d = cauchy(loc=0, scale=1)
+            d.pdf(0.0)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            const d = new ranjs.dist.Cauchy(0, 1)
+            d.pdf(0.0)
+            d.sample(5)
+
+    //- ── Laplace ─────────────────────────────────────────────────────────────
+    h2#dist-laplace Laplace
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code laplace(loc=0, scale=1)
+                td: code new Laplace(mu=0, b=1)
+                td loc → mu, scale → b (rename only)
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import laplace
+            d = laplace(loc=0, scale=1)
+            d.pdf(0.0)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            const d = new ranjs.dist.Laplace(0, 1)
+            d.pdf(0.0)
+            d.sample(5)
+
+    //- ── Logistic ────────────────────────────────────────────────────────────
+    h2#dist-logistic Logistic
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code logistic(loc=0, scale=1)
+                td: code new Logistic(mu=0, s=1)
+                td loc → mu, scale → s (rename only)
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import logistic
+            d = logistic(loc=0, scale=1)
+            d.pdf(0.0)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            const d = new ranjs.dist.Logistic(0, 1)
+            d.pdf(0.0)
+            d.sample(5)
+
+    //- ── Triangular ──────────────────────────────────────────────────────────
+    h2#dist-triangular Triangular
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code triang(c, loc=0, scale=1)
+                td: code new Triangular(a=0, b=1, c=0.5)
+                td a=loc, b=loc+scale, c=a+c_scipy*scale
+
+    p.callout
+        strong ⚠ Non-trivial conversion:
+        |  scipy's c is the normalized mode (0–1 within [loc, loc+scale]).
+        |  ranjs uses absolute bounds a (lower), b (upper), and c (mode).
+        |  Convert: a = loc, b = loc + scale, c = loc + c_scipy * scale.
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import triang
+            # lower=1, upper=4, mode=2: c=(2-1)/(4-1)=0.333
+            d = triang(c=0.333, loc=1, scale=3)
+            d.pdf(2.0)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            // Triangular(a, b, c): a=1, b=4, mode=2
+            const d = new ranjs.dist.Triangular(1, 4, 2)
+            d.pdf(2.0)
+            d.sample(5)
+
+    //- ── Poisson ─────────────────────────────────────────────────────────────
+    h2#dist-poisson Poisson
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code poisson(mu)
+                td: code new Poisson(lambda=1)
+                td mu → lambda (rename only)
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import poisson
+            d = poisson(mu=3)
+            d.pmf(2)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            const d = new ranjs.dist.Poisson(3)
+            d.pdf(2)    // pdf() covers pmf for discrete
+            d.sample(5)
+
+    //- ── Binomial ────────────────────────────────────────────────────────────
+    h2#dist-binomial Binomial
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code binom(n, p)
+                td: code new Binomial(n, p)
+                td identical
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import binom
+            d = binom(n=10, p=0.3)
+            d.pmf(3)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            const d = new ranjs.dist.Binomial(10, 0.3)
+            d.pdf(3)
+            d.sample(5)
+
+    //- ── Negative Binomial ───────────────────────────────────────────────────
+    h2#dist-negativebinomial Negative Binomial
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code nbinom(n, p)
+                td: code new NegativeBinomial(r, p)
+                td n → r (rename only); both count failures before r successes
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import nbinom
+            d = nbinom(n=5, p=0.4)
+            d.pmf(3)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            const d = new ranjs.dist.NegativeBinomial(5, 0.4)
+            d.pdf(3)
+            d.sample(5)
+
+    //- ── Geometric ───────────────────────────────────────────────────────────
+    h2#dist-geometric Geometric
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code geom(p)
+                td: code new Geometric(p)
+                td same p; different support convention
+
+    p.callout
+        strong ⚠ Different support:
+        |  scipy geom has support {1, 2, 3, …} and counts trials until the first success.
+        |  ranjs Geometric has support {0, 1, 2, …} and counts failures before the first success.
+        |  Convert: ranjs_value = scipy_value − 1.
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import geom
+            d = geom(p=0.3)   # support {1, 2, 3, ...}
+            d.pmf(1)          # P(X=1) = p = 0.3
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            const d = new ranjs.dist.Geometric(0.3)  // support {0, 1, 2, ...}
+            d.pdf(0)          // P(X=0) = p = 0.3
+            d.sample(5)
+
+    //- ── Hypergeometric ──────────────────────────────────────────────────────
+    h2#dist-hypergeometric Hypergeometric
+
+    table
+        thead
+            tr
+                th scipy
+                th ranjs
+                th Parameter mapping
+        tbody
+            tr
+                td: code hypergeom(M, n, N)
+                td: code new Hypergeometric(N, K, n)
+                td M → N (population); n → K (successes in pop.); N → n (draws)
+
+    p.callout
+        strong ⚠ Parameter name collision:
+        |  scipy and ranjs both use N, but they mean different things.
+        |  scipy: M = population size, n = successes in population, N = number of draws.
+        |  ranjs: N = population size, K = successes in population, n = number of draws.
+        |  Convert: Hypergeometric(N=M, K=n_scipy, n=N_scipy).
+
+    .code-pair
+        pre: code.language-python.
+            from scipy.stats import hypergeom
+            # population=20, successes_in_pop=7, draws=5
+            d = hypergeom(M=20, n=7, N=5)
+            d.pmf(2)
+            d.rvs(size=5)
+        pre: code.language-javascript.
+            // Hypergeometric(N, K, n): N=20, K=7, n=5
+            const d = new ranjs.dist.Hypergeometric(20, 7, 5)
+            d.pdf(2)
+            d.sample(5)
+
+block scripts
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/python.min.js")
+    script.
+        hljs.highlightAll()

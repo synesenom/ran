@@ -132,6 +132,12 @@ function parseEntry (entry) {
         searchList: JSON.stringify(searchList),
         api
       }
+    },
+    {
+      template: './docs/templates/porting-scipy.pug',
+      output: 'porting-scipy.html',
+      navLabel: 'SciPy Porting',
+      data: {}
     }
   ]
 
