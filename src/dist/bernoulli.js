@@ -15,8 +15,8 @@ import Distribution from './_distribution'
  */
 export default class extends Categorical {
   // Special case of categorical
-  constructor (p = 0.5) {
-    super([1 - p, p])
+  constructor (p) {
+    super([1 - p, p], 0)
 
     // Validate parameter
     Distribution.validate({ p }, [

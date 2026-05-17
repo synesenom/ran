@@ -14,7 +14,7 @@ import Kumaraswamy from './kumaraswamy'
  */
 export default class extends Kumaraswamy {
   // Special case of Kumaraswamy.
-  constructor (a = 1) {
+  constructor (a) {
     super(a, 1)
   }
 }

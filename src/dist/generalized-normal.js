@@ -17,7 +17,7 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends GeneralizedGamma {
-  constructor (mu = 0, alpha = 1, beta = 1) {
+  constructor (mu, alpha, beta) {
     super(alpha, 1, beta)
 
     // Validate parameters

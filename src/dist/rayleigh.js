@@ -14,7 +14,7 @@ import Weibull from './weibull'
  */
 export default class extends Weibull {
   // Special case of Weibull
-  constructor (sigma = 1) {
+  constructor (sigma) {
     super(sigma * Math.SQRT2, 2)
   }
 }

@@ -14,7 +14,7 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Beta {
-  constructor (c = 1) {
+  constructor (c) {
     super(0.5, c / 2)
 
     // Validate parameters

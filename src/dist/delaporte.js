@@ -19,7 +19,7 @@ import PreComputed from './_pre-computed'
  * @constructor
  */
 export default class extends PreComputed {
-  constructor (alpha = 1, beta = 1, lambda = 1) {
+  constructor (alpha, beta, lambda) {
     // Using raw probability mass values
     super(true)
 

@@ -15,7 +15,7 @@ import F from './f'
  */
 export default class extends F {
   // Transformation of F
-  constructor (d1 = 1, d2 = 1) {
+  constructor (d1, d2) {
     const d1i = Math.round(d1)
     const d2i = Math.round(d2)
     super(d1i / 2, d2i / 2)

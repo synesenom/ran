@@ -15,7 +15,7 @@ import Normal from './normal'
  */
 export default class extends Normal {
   // Transforming normal distribution
-  constructor (mu = 0, sigma = 1) {
+  constructor (mu, sigma) {
     super(mu, sigma)
 
     // Set support

@@ -17,8 +17,8 @@ import Distribution from './_distribution'
  */
 export default class extends Normal {
   // Transformation of normal distribution
-  constructor (mu = 0, beta = 1, gamma = 1) {
-    super()
+  constructor (mu, beta, gamma) {
+    super(0, 1)
 
     // Validate parameters
     this.p = Object.assign(this.p, { mu2: mu, beta, gamma })

@@ -16,7 +16,7 @@ import { gammaLowerIncomplete } from '../special'
  * @constructor
  */
 export default class extends Distribution {
-  constructor (mu = 0, sigma = 1) {
+  constructor (mu, sigma) {
     super('continuous', arguments.length)
 
     // Validate parameters

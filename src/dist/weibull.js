@@ -16,7 +16,7 @@ import Distribution from './_distribution'
  */
 export default class extends Exponential {
   // Transformation of exponential distribution
-  constructor (lambda = 1, k = 1) {
+  constructor (lambda, k) {
     super(1)
 
     // Validate parameters

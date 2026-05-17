@@ -15,7 +15,7 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Dagum {
-  constructor (k = 2, s = 1) {
+  constructor (k, s) {
     super(k / s, s, 1)
 
     // Validate parameters

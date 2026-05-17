@@ -15,7 +15,7 @@ import Gamma from './gamma'
  */
 export default class extends Gamma {
   // Special case of gamma
-  constructor (k = 2) {
+  constructor (k) {
     super(Math.round(k) / 2, 0.5)
 
     // Validate parameters

@@ -17,7 +17,7 @@ import NoncentralBeta from './noncentral-beta'
  */
 export default class extends NoncentralBeta {
   // Transformation of non-central beta distribution
-  constructor (d1 = 2, d2 = 2, lambda = 1) {
+  constructor (d1, d2, lambda) {
     const d1i = Math.round(d1)
     const d2i = Math.round(d2)
     super(d1i / 2, d2i / 2, lambda)

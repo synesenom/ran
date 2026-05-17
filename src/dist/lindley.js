@@ -14,7 +14,7 @@ import { lambertW1m } from '../special'
  * @constructor
  */
 export default class extends Distribution {
-  constructor (theta = 1) {
+  constructor (theta) {
     super('continuous', arguments.length)
 
     // Validate parameters

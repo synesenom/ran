@@ -43,10 +43,18 @@ class Distribution {
    * @memberof Distribution
    * @param {Object} params Object containing the parameters to validate.
    * @param {string[]} constraints Array of strings defining the parameter constraints.
-   * @throws {Error} If any of the parameters don't satisfy the constraints.
+   * @throws {Error} If any parameter is undefined, null, or NaN, or doesn't satisfy the constraints.
    * @ignore
    */
   static validate (params, constraints) {
+    // See decisions/0004-validate-rejects-undefined-and-nan.md — comparison operators against undefined/null/NaN return false, so missing params would otherwise pass silently
+    const missing = Object.entries(params)
+      .filter(([, v]) => v === undefined || v === null || Number.isNaN(v))
+      .map(([name]) => name)
+    if (missing.length > 0) {
+      throw Error(`Invalid parameters. Required parameters missing or not a number: ${missing.join(', ')}.`)
+    }
+
     // Go through parameters and check constraints
     const errors = constraints.filter(constraint => {
       // Tokenize constraint

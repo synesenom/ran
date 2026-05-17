@@ -20,7 +20,7 @@ import Distribution from './_distribution'
  */
 export default class extends Distribution {
   // TODO Use outward iteration
-  constructor (alpha = 1, beta = 1, lambda = 1) {
+  constructor (alpha, beta, lambda) {
     super('continuous', arguments.length)
 
     // Validate parameters.

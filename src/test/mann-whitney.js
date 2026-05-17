@@ -115,6 +115,6 @@ export default function (dataSets, alpha = 0.05) {
   // Compare against critical value.
   return {
     stat: U,
-    passed: Math.abs((U - m) / s) <= (new Normal()).q(1 - 2 * alpha)
+    passed: Math.abs((U - m) / s) <= (new Normal(0, 1)).q(1 - 2 * alpha)
   }
 }

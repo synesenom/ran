@@ -16,7 +16,7 @@ import Distribution from './_distribution'
  * @param {number=} lambda Scale parameter. Default value is 1.
  */
 export default class extends Distribution {
-  constructor (alpha = 1, beta = 1, lambda = 1) {
+  constructor (alpha, beta, lambda) {
     super('continuous', arguments.length)
 
     // Validate parameters.

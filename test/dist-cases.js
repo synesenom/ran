@@ -1,6 +1,7 @@
 export default [{
   name: 'Alpha',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // alpha > 0
     [1, -1], [1, 0] // beta > 0
   ],
@@ -14,6 +15,7 @@ export default [{
 }, {
   name: 'Anglit',
   invalidParams: [
+    [], // all params required
     [0, -1], [0, 0] // beta > 0
   ],
   foreign: {
@@ -26,6 +28,7 @@ export default [{
 }, {
   name: 'Arcsine',
   invalidParams: [
+    [], // all params required
     [1, 1], [2, 1] // a < b
   ],
   foreign: {
@@ -38,6 +41,7 @@ export default [{
 }, {
   name: 'BaldingNichols',
   invalidParams: [
+    [], // all params required
     [-1, 0.5], [0, 0.5], [1, 0.5], [2, 0.5], // 0 < F < 1
     [0.5, -1], [0.5, 0], [0.5, 1], [0.5, 2] // 0 < p < 1
   ],
@@ -51,6 +55,7 @@ export default [{
 }, {
   name: 'Bates',
   invalidParams: [
+    [], // all params required
     [-1, 0, 1], [0, 0, 1], // n > 0
     [10, 1, 1], [10, 2, 1] // a < b
   ],
@@ -64,6 +69,7 @@ export default [{
 }, {
   name: 'Benini',
   invalidParams: [
+    [], // all params required
     [-1, 1, 1], [0, 1, 1], // alpha > 0
     [1, -1, 1], [1, 0, 1], // beta > 0
     [1, 1, -1], [1, 1, 0] // sigma > 0
@@ -78,6 +84,7 @@ export default [{
 }, {
   name: 'BenktanderII',
   invalidParams: [
+    [], // all params required
     [-1, 0.5], [0, 0.5], // a > 0
     [1, -1], [1, 0], [1, 1.5] // 0 < b <= 1
   ],
@@ -98,6 +105,7 @@ export default [{
 }, {
   name: 'Bernoulli',
   invalidParams: [
+    [], // all params required
     [-1], [2] // 0 <= p <= 1
   ],
   foreign: {
@@ -110,6 +118,7 @@ export default [{
 }, {
   name: 'Beta',
   invalidParams: [
+    [], // all params required
     [-1, 2], [0, 2], // alpha > 0
     [2, -1], [2, 0] // beta > 0
   ],
@@ -123,6 +132,7 @@ export default [{
 }, {
   name: 'BetaBinomial',
   invalidParams: [
+    [], // all params required
     [-1, 1, 1], // n > 0
     [100, -1, 1], [100, 0, 1], // alpha > 0
     [100, 1, -1], [100, 1, 0] // beta > 0
@@ -137,6 +147,7 @@ export default [{
 }, /*, {
   name: 'BetaGeometric',
   invalidParams: [
+    [], // all params required
     [-1, 1],                    // alpha < 0
     [1,  -1]                    // beta < 0
   ],
@@ -150,6 +161,7 @@ export default [{
 } */ {
   name: 'BetaPrime',
   invalidParams: [
+    [], // all params required
     [-1, 2], [0, 2], // alpha > 0
     [2, -1], [2, 0] // beta > 0
   ],
@@ -163,6 +175,7 @@ export default [{
 }, {
   name: 'BetaRectangular',
   invalidParams: [
+    [], // all params required
     [1, 1, -1, 0, 1], [1, 1, 2, 0, 1], // 0 <= theta <= 1
     [1, 1, 0.5, 1, 1], [1, 1, 0.5, 2, 1] // a < b
   ],
@@ -176,6 +189,7 @@ export default [{
 }, {
   name: 'Binomial',
   invalidParams: [
+    [], // all params required
     [-1, 0.5], // n >= 0
     [100, -1], [100, 2] // 0 <= p <= 1
   ],
@@ -189,6 +203,7 @@ export default [{
 }, {
   name: 'BirnbaumSaunders',
   invalidParams: [
+    [], // all params required
     [0, -1, 1], [0, 0, 1], // beta > 0
     [0, 1, -1], [0, 1, 0] // gamma > 0
   ],
@@ -202,6 +217,7 @@ export default [{
 }, {
   name: 'Borel',
   invalidParams: [
+    [], // all params required
     [-1], [2] // 0 <= mu <= 1
   ],
   foreign: {
@@ -218,6 +234,7 @@ export default [{
 }, {
   name: 'BorelTanner',
   invalidParams: [
+    [], // all params required
     [-1, 2], [2, 2], // 0 <= mu <= 1
     [0.5, -1], [0.5, 0] // k > 0
   ],
@@ -235,6 +252,7 @@ export default [{
 }, {
   name: 'BoundedPareto',
   invalidParams: [
+    [], // all params required
     [-1, 10, 1], [0, 10, 1], // L > 0
     [1, -1, 1], [1, 0, 1], // H > 0
     [10, 10, 1], [12, 10, 1], // L < H
@@ -250,6 +268,7 @@ export default [{
 }, {
   name: 'Bradford',
   invalidParams: [
+    [], // all params required
     [-1], [0] // c > 0
   ],
   foreign: {
@@ -262,6 +281,7 @@ export default [{
 }, {
   name: 'Burr',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // c > 0
     [1, -1], [1, 0] // k > 0
   ],
@@ -275,6 +295,7 @@ export default [{
 }, {
   name: 'Categorical',
   invalidParams: [
+    [], // all params required
     [[-1, 1, 1], 0] // w_i > 0
   ],
   foreign: {
@@ -283,17 +304,18 @@ export default [{
   },
   cases: [{
     name: 'small n',
-    params: () => [[0.4, 0.6]]
+    params: () => [[0.4, 0.6], 0]
   }, {
     name: 'moderate n',
-    params: () => [[0.1, 0.05, 0.15, 0.08, 0.12, 0.1, 0.07, 0.13, 0.09, 0.11]]
+    params: () => [[0.1, 0.05, 0.15, 0.08, 0.12, 0.1, 0.07, 0.13, 0.09, 0.11], 0]
   }, {
     name: 'large n',
-    params: () => [Array.from({ length: 105 }, () => 1 / 105)]
+    params: () => [Array.from({ length: 105 }, () => 1 / 105), 0]
   }]
 }, {
   name: 'Cauchy',
   invalidParams: [
+    [], // all params required
     [0, -1], [0, 0] // gamma > 0
   ],
   foreign: {
@@ -306,6 +328,7 @@ export default [{
 }, {
   name: 'Chi',
   invalidParams: [
+    [], // all params required
     [-1], [0] // k > 0
   ],
   foreign: {
@@ -322,6 +345,7 @@ export default [{
 }, {
   name: 'Chi2',
   invalidParams: [
+    [], // all params required
     [-1], [0] // k > 0
   ],
   foreign: {
@@ -334,6 +358,7 @@ export default [{
 }, {
   name: 'Dagum',
   invalidParams: [
+    [], // all params required
     [-1, 1, 1], [0, 1, 1], // p > 0
     [1, -1, 1], [1, 0, 1], // a > 0
     [1, 1, -1], [1, 1, 0] // b > 0
@@ -348,6 +373,7 @@ export default [{
 }, /*, {
   name: 'Davis',
   invalidParams: [
+    [], // all params required
     [-1, 1, 1.5], [0, 1, 1.5],  // mu > 0
     [1, -1, 1.5], [1, 0, 1.5],  // b > 0
     [1, 1, -1], [1, 1, 0],      // n > 0
@@ -363,6 +389,7 @@ export default [{
 } */ {
   name: 'Delaporte',
   invalidParams: [
+    [], // all params required
     [-1, 1, 1], [0, 1, 1], // alpha > 0
     [1, -1, 1], [1, 0, 1], // beta > 0
     [1, 1, -1], [1, 1, 0] // lambda > 0
@@ -377,6 +404,7 @@ export default [{
 }, {
   name: 'DiscreteUniform',
   invalidParams: [
+    [], // all params required
     [105, 100] // xmin <= xmax
   ],
   foreign: {
@@ -389,6 +417,7 @@ export default [{
 }, {
   name: 'DiscreteWeibull',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], [1, 1], [2, 1], // 0 < q < 1
     [0.5, -1], [0.5, 0] // beta > 0
   ],
@@ -402,6 +431,7 @@ export default [{
 }, {
   name: 'DoubleGamma',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // alpha > 0
     [1, -1], [1, 0] // beta > 0
   ],
@@ -415,6 +445,7 @@ export default [{
 }, {
   name: 'DoubleWeibull',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // lambda > 0
     [1, -1], [1, 0] // k > 0
   ],
@@ -428,6 +459,7 @@ export default [{
 }, {
   name: 'DoublyNoncentralBeta',
   invalidParams: [
+    [], // all params required
     [-1, 1, 1, 1], [0, 1, 1, 1], // alpha > 0
     [1, -1, 1, 1], [1, 0, 1, 1], // beta > 0
     [1, 1, -1, 1], // lambda1 >= 0
@@ -443,6 +475,7 @@ export default [{
 }, {
   name: 'DoublyNoncentralF',
   invalidParams: [
+    [], // all params required
     [-1, 2, 1, 1], [0, 2, 1, 1], // n1 > 0
     [2, -1, 1, 1], [2, 0, 1, 1], // n2 > 0
     [2, 2, -1, 1], // lambda1 >= 0
@@ -458,6 +491,7 @@ export default [{
 }, {
   name: 'DoublyNoncentralT',
   invalidParams: [
+    [], // all params required
     [-1, 1, 1], [0, 1, 1], // nu > 0
     [1, 1, -1] // theta >= 0
   ],
@@ -473,6 +507,7 @@ export default [{
 }, {
   name: 'Erlang',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // k > 0
     [1, -1], [1, 0] // lambda > 0
   ],
@@ -486,6 +521,7 @@ export default [{
 }, {
   name: 'Exponential',
   invalidParams: [
+    [], // all params required
     [-1], [0] // lambda > 0
   ],
   foreign: {
@@ -498,6 +534,7 @@ export default [{
 }, {
   name: 'ExponentialLogarithmic',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], [1, 1], [2, 1], // 0 < p < 1
     [0.5, -1], [0.5, 0] // beta > 0
   ],
@@ -511,6 +548,7 @@ export default [{
 }, {
   name: 'ExponentiatedWeibull',
   invalidParams: [
+    [], // all params required
     [-1, 1, 1], [0, 1, 1], // lambda > 0
     [1, -1, 1], [1, 0, 1], // k > 0
     [1, 1, -1], [1, 1, 0] // alpha > 0
@@ -525,6 +563,7 @@ export default [{
 }, {
   name: 'F',
   invalidParams: [
+    [], // all params required
     [-1, 2], [0, 2], // d1 > 0
     [2, -1], [2, 0] // d2 > 0
   ],
@@ -538,6 +577,7 @@ export default [{
 }, {
   name: 'FisherZ',
   invalidParams: [
+    [], // all params required
     [-1, 2], [0, 2], // d1 > 0
     [2, -1], [2, 0] // d2 > 0
   ],
@@ -554,6 +594,7 @@ export default [{
 }, {
   name: 'FlorySchulz',
   invalidParams: [
+    [], // all params required
     [-1], [0], [1], [2] // 0 < a < 1
   ],
   foreign: {
@@ -566,6 +607,7 @@ export default [{
 }, {
   name: 'Frechet',
   invalidParams: [
+    [], // all params required
     [-1, 1, 0], [0, 1, 0], // alpha > 0
     [1, -1, 0], [1, 0, 0] // s > 0
   ],
@@ -579,6 +621,7 @@ export default [{
 }, {
   name: 'Gamma',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // alpha > 0
     [1, -1], [1, 0] // beta > 0
   ],
@@ -592,6 +635,7 @@ export default [{
 }, {
   name: 'GammaGompertz',
   invalidParams: [
+    [], // all params required
     [-1, 1, 1], [0, 1, 1], // b > 0
     [1, -1, 1], [1, 0, 1], // s > 0
     [1, 1, -1], [1, 1, 0] // beta > 0
@@ -606,6 +650,7 @@ export default [{
 }, {
   name: 'GeneralizedExponential',
   invalidParams: [
+    [], // all params required
     [-1, 1, 1], [0, 1, 1], // a > 0
     [1, -1, 1], [1, 0, 1], // b > 0
     [1, 1, -1], [1, 1, 0] // c > 0
@@ -620,6 +665,7 @@ export default [{
 }, {
   name: 'GeneralizedExtremeValue',
   invalidParams: [
+    [], // all params required
     [0] // c != 0
   ],
   foreign: {
@@ -636,6 +682,7 @@ export default [{
 }, {
   name: 'GeneralizedGamma',
   invalidParams: [
+    [], // all params required
     [-1, 1, 1], [0, 1, 1], // a > 0
     [1, -1, 1], [1, 0, 1], // d > 0
     [1, 1, -1], [1, 1, 0] // p > 0
@@ -650,6 +697,7 @@ export default [{
 }, {
   name: 'GeneralizedHermite',
   invalidParams: [
+    [], // all params required
     [-1, 1, 2], // a1 > 0
     [1, -1, 2], // a2 > 0
     [1, 1, -1], [1, 1, 0], [1, 1, 1] // m > 1
@@ -664,6 +712,7 @@ export default [{
 }, {
   name: 'GeneralizedLogistic',
   invalidParams: [
+    [], // all params required
     [0, -1, 1], [0, 0, 1], // s > 0
     [0, 1, -1], [0, 1, 0] // c > 0
   ],
@@ -677,6 +726,7 @@ export default [{
 }, {
   name: 'GeneralizedNormal',
   invalidParams: [
+    [], // all params required
     [0, -1, 1], [0, 0, 1], // alpha > 0
     [0, 1, -1], [0, 1, 0] // beta > 0
   ],
@@ -690,6 +740,7 @@ export default [{
 }, {
   name: 'GeneralizedPareto',
   invalidParams: [
+    [], // all params required
     [0, -1, 1], [0, 0, 1] // sigma > 0
   ],
   foreign: {
@@ -709,6 +760,7 @@ export default [{
 }, {
   name: 'Geometric',
   invalidParams: [
+    [], // all params required
     [-1], [0], [2] // 0 < p <= 1
   ],
   foreign: {
@@ -731,6 +783,7 @@ export default [{
 }, {
   name: 'Gompertz',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // eta > 0
     [1, -1], [1, 0] // b > 0
   ],
@@ -744,6 +797,7 @@ export default [{
 }, {
   name: 'Gumbel',
   invalidParams: [
+    [], // all params required
     [0, -1], [0, 0] // beta > 0
   ],
   foreign: {
@@ -756,6 +810,7 @@ export default [{
 }, {
   name: 'HalfGeneralizedNormal',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // alpha > 0
     [1, -1], [1, 0] // beta > 0
   ],
@@ -779,6 +834,7 @@ export default [{
 }, {
   name: 'HalfNormal',
   invalidParams: [
+    [], // all params required
     [-1], [0] // sigma > 0
   ],
   foreign: {
@@ -791,6 +847,7 @@ export default [{
 }, {
   name: 'HeadsMinusTails',
   invalidParams: [
+    [], // all params required
     [-1] // n > 0
   ],
   foreign: {
@@ -803,6 +860,7 @@ export default [{
 }, {
   name: 'Hoyt',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], [2, 1], // 0 < q <= 1
     [0.5, -1], [0.5, 0] // omega > 0
   ],
@@ -830,6 +888,7 @@ export default [{
 }, {
   name: 'Hyperexponential',
   invalidParams: [
+    [], // all params required
     [{ weight: -1, rate: 1 }, { weight: 1, rate: 1 }],
     [{ weight: 0, rate: 1 }, { weight: 1, rate: 1 }], // lambda_i > 0
     [[]] // n > 0
@@ -844,6 +903,7 @@ export default [{
 }, {
   name: 'Hypergeometric',
   invalidParams: [
+    [], // all params required
     [-1, 5, 5], [0, 5, 5], // N > 0
     [10, -1, 5], [10, 12, 5], // 0 <= K <= N
     [10, 5, -1], [10, 5, 12] // 0 <= n <= N
@@ -862,6 +922,7 @@ export default [{
     params: s => [Math.min(...s), Math.max(...s)]
   },
   invalidParams: [
+    [], // all params required
     [-1], [0] // nu > 0
   ],
   cases: [{
@@ -874,6 +935,7 @@ export default [{
     params: s => [Math.min(...s), Math.max(...s)]
   },
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // alpha > 0
     [1, -1], [1, 0] // beta > 0
   ],
@@ -887,6 +949,7 @@ export default [{
     params: s => [Math.min(...s), Math.max(...s)]
   },
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // mu > 0
     [1, -1], [1, 0] // lambda > 0
   ],
@@ -900,6 +963,7 @@ export default [{
     params: s => [Math.min(...s), Math.max(...s)]
   },
   invalidParams: [
+    [], // all params required
     [-1], [0] // c > 0
   ],
   cases: [{
@@ -908,6 +972,7 @@ export default [{
 }, {
   name: 'IrwinHall',
   invalidParams: [
+    [], // all params required
     [-1], [0] // n > 0
   ],
   foreign: {
@@ -920,6 +985,7 @@ export default [{
 }, {
   name: 'JohnsonSU',
   invalidParams: [
+    [], // all params required
     [0, -1, 1, 0], [0, 0, 1, 0], // delta > 0
     [0, 1, -1, 0], [0, 1, 0, 0] // lambda > 0
   ],
@@ -933,6 +999,7 @@ export default [{
 }, {
   name: 'JohnsonSB',
   invalidParams: [
+    [], // all params required
     [0, -1, 1, 0], [0, 0, 1, 0], // delta > 0
     [0, 1, -1, 0], [0, 1, 0, 0] // lambda > 0
   ],
@@ -956,6 +1023,7 @@ export default [{
 }, {
   name: 'Kumaraswamy',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // a > 0
     [1, -1], [1, 0] // b > 0
   ],
@@ -969,6 +1037,7 @@ export default [{
 }, {
   name: 'Laplace',
   invalidParams: [
+    [], // all params required
     [0, -1], [0, 0] // b > 0
   ],
   foreign: {
@@ -981,6 +1050,7 @@ export default [{
 }, {
   name: 'Levy',
   invalidParams: [
+    [], // all params required
     [0, -1], [0, 0] // c > 0
   ],
   foreign: {
@@ -993,6 +1063,7 @@ export default [{
 }, {
   name: 'Lindley',
   invalidParams: [
+    [], // all params required
     [-1], [0] // theta > 0
   ],
   foreign: {
@@ -1005,6 +1076,7 @@ export default [{
 }, {
   name: 'LogCauchy',
   invalidParams: [
+    [], // all params required
     [0, -1], [0, 0] // sigma > 0
   ],
   foreign: {
@@ -1017,6 +1089,7 @@ export default [{
 }, {
   name: 'LogGamma',
   invalidParams: [
+    [], // all params required
     [-1, 1, 0], [0, 1, 0], // alpha > 0
     [1, -1, 0], [1, 0, 0], // beta > 0
     [1, 1, -1] // mu >= 0
@@ -1031,6 +1104,7 @@ export default [{
 }, {
   name: 'LogLaplace',
   invalidParams: [
+    [], // all params required
     [0, -1], [0, 0] // b > 0
   ],
   foreign: {
@@ -1043,6 +1117,7 @@ export default [{
 }, {
   name: 'LogLogistic',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // alpha > 0
     [1, -1], [1, 0] // beta > 0
   ],
@@ -1056,6 +1131,7 @@ export default [{
 }, {
   name: 'LogNormal',
   invalidParams: [
+    [], // all params required
     [0, -1], [0, 0] // sigma > 0
   ],
   foreign: {
@@ -1068,6 +1144,7 @@ export default [{
 }, {
   name: 'LogSeries',
   invalidParams: [
+    [], // all params required
     [-1], [0], [1], [2] // 0 < p < 1
   ],
   foreign: {
@@ -1080,6 +1157,7 @@ export default [{
 }, {
   name: 'Logarithmic',
   invalidParams: [
+    [], // all params required
     [-1, 2], [0, 2], // a >= 1
     [1, -1], [1, 0], // b >= 1
     [2, 2], [3, 2] // a < b
@@ -1094,6 +1172,7 @@ export default [{
 }, {
   name: 'Logistic',
   invalidParams: [
+    [], // all params required
     [0, -1], [0, 0] // s > 0
   ],
   foreign: {
@@ -1106,6 +1185,7 @@ export default [{
 }, {
   name: 'LogisticExponential',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // lambda > 0
     [1, -1], [1, 0] // kappa > 0
   ],
@@ -1119,6 +1199,7 @@ export default [{
 }, {
   name: 'LogitNormal',
   invalidParams: [
+    [], // all params required
     [0, -1], [0, 0] // sigma > 0
   ],
   foreign: {
@@ -1131,6 +1212,7 @@ export default [{
 }, {
   name: 'Lomax',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // lambda > 0
     [1, -1], [1, 0] // alpha > 0
   ],
@@ -1144,6 +1226,7 @@ export default [{
 }, {
   name: 'Makeham',
   invalidParams: [
+    [], // all params required
     [-1, 1, 1], [0, 1, 1], // alpha > 0
     [1, -1, 1], [1, 0, 1], // beta > 0
     [1, 1, -1], [1, 1, 0] // lambda > 0
@@ -1158,6 +1241,7 @@ export default [{
 }, {
   name: 'MaxwellBoltzmann',
   invalidParams: [
+    [], // all params required
     [-1], [0] // a > 0
   ],
   foreign: {
@@ -1170,6 +1254,7 @@ export default [{
 }, {
   name: 'Mielke',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // k > 0
     [2, -1], [2, 0] // s > 0
   ],
@@ -1183,6 +1268,7 @@ export default [{
 }, {
   name: 'Moyal',
   invalidParams: [
+    [], // all params required
     [0, -1], [0, 0] // sigma > 0
   ],
   foreign: {
@@ -1195,6 +1281,7 @@ export default [{
 }, {
   name: 'Muth',
   invalidParams: [
+    [], // all params required
     [-1], [0], [2] // 0 < alpha <= 1
   ],
   foreign: {
@@ -1207,6 +1294,7 @@ export default [{
 }, {
   name: 'Nakagami',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], [0.3, 1], // m >= 0.5
     [1, -1], [1, 0] // omega > 0
   ],
@@ -1220,6 +1308,7 @@ export default [{
 }, {
   name: 'NegativeHypergeometric',
   invalidParams: [
+    [], // all params required
     [-1, 5, 5], // N >= 0
     [10, -1, 5], [10, 11, 5], // 0 <= K <= N
     [10, 5, -1], [10, 5, 6] // 0 <= r <= K - N
@@ -1234,6 +1323,7 @@ export default [{
 }, {
   name: 'NegativeBinomial',
   invalidParams: [
+    [], // all params required
     [-1, 0.5], [0, 0.5], // r > 0
     [10, -1], [10, 2] // 0 <= p <= 1
   ],
@@ -1247,6 +1337,7 @@ export default [{
 }, {
   name: 'NeymanA',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // lambda > 0
     [1, -1], [1, 0] // mu > 0
   ],
@@ -1260,6 +1351,7 @@ export default [{
 }, {
   name: 'NoncentralBeta',
   invalidParams: [
+    [], // all params required
     [-1, 2, 1], [0, 2, 1], // alpha > 0
     [2, -1, 1], [2, 0, 1], // beta > 0
     [2, 2, -1] // lambda >= 0
@@ -1274,6 +1366,7 @@ export default [{
 }, {
   name: 'NoncentralChi',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // k > 0
     [2, -1], [2, 0] // lambda > 0
   ],
@@ -1287,6 +1380,7 @@ export default [{
 }, {
   name: 'NoncentralChi2',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // k > 0
     [2, -1], [2, 0] // lambda > 0
   ],
@@ -1304,6 +1398,7 @@ export default [{
 }, {
   name: 'NoncentralF',
   invalidParams: [
+    [], // all params required
     [-1, 2, 1], [0, 2, 1], // alpha > 0
     [2, -1, 1], [2, 0, 1], // beta > 0
     [2, 2, -1] // lambda >= 0
@@ -1318,6 +1413,7 @@ export default [{
 }, {
   name: 'NoncentralT',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1] // nu > 0
   ],
   foreign: {
@@ -1330,6 +1426,7 @@ export default [{
 }, {
   name: 'Normal',
   invalidParams: [
+    [], // all params required
     [0, -1], [0, 0] // sigma > 0
   ],
   foreign: {
@@ -1342,6 +1439,7 @@ export default [{
 }, {
   name: 'Pareto',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // xmin > 0
     [1, -1], [1, 0] // alpha > 0
   ],
@@ -1355,6 +1453,7 @@ export default [{
 }, {
   name: 'PERT',
   invalidParams: [
+    [], // all params required
     [0.5, 0.5, 1], [0.8, 0.5, 1], // a < b
     [0, 1, 1], [0, 1.1, 1] // b < c
   ],
@@ -1368,6 +1467,7 @@ export default [{
 }, {
   name: 'Poisson',
   invalidParams: [
+    [], // all params required
     [-1], [0] // lambda > 0
   ],
   foreign: {
@@ -1384,6 +1484,7 @@ export default [{
 }, {
   name: 'PolyaAeppli',
   invalidParams: [
+    [], // all params required
     [-1, 0.5], [0, 0.5], // lambda > 0
     [1, -1], [1, 0], [1, 1], [1, 2] // 0 < theta < 1
   ],
@@ -1397,6 +1498,7 @@ export default [{
 }, {
   name: 'PowerLaw',
   invalidParams: [
+    [], // all params required
     [-1], [0] // a > 0
   ],
   foreign: {
@@ -1409,6 +1511,7 @@ export default [{
 }, {
   name: 'QExponential',
   invalidParams: [
+    [], // all params required
     [2, 1], [3, 1], // q < 2
     [1.5, -1], [1.5, 0] // lambda > 0
   ],
@@ -1422,6 +1525,7 @@ export default [{
 }, {
   name: 'R',
   invalidParams: [
+    [], // all params required
     [-1], [0] // c > 0
   ],
   foreign: {
@@ -1446,6 +1550,7 @@ export default [{
 }, {
   name: 'RaisedCosine',
   invalidParams: [
+    [], // all params required
     [0, -1], [0, 0] // s > 0
   ],
   foreign: {
@@ -1458,6 +1563,7 @@ export default [{
 }, {
   name: 'Rayleigh',
   invalidParams: [
+    [], // all params required
     [-1], [0] // sigma > 0
   ],
   foreign: {
@@ -1470,6 +1576,7 @@ export default [{
 }, {
   name: 'Reciprocal',
   invalidParams: [
+    [], // all params required
     [-1, 2], [0, 2], // a > 0
     [1, -1], [1, 0], // b > 0
     [2, 2], [3, 2] // a < b
@@ -1484,6 +1591,7 @@ export default [{
 }, {
   name: 'ReciprocalInverseGaussian',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // mu > 0
     [1, -1], [1, 0] // lambda > 0
   ],
@@ -1497,6 +1605,7 @@ export default [{
 }, {
   name: 'Rice',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // nu > 0
     [1, -1], [1, 0] // sigma > 0
   ],
@@ -1510,6 +1619,7 @@ export default [{
 }, {
   name: 'ShiftedLogLogistic',
   invalidParams: [
+    [], // all params required
     [0, -1, 1], [0, 0, 1] // sigma > 0
   ],
   foreign: {
@@ -1529,6 +1639,7 @@ export default [{
 }, {
   name: 'Skellam',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // mu1 > 0
     [1, -1], [1, 0] // mu2 > 0
   ],
@@ -1542,6 +1653,7 @@ export default [{
 }, {
   name: 'SkewNormal',
   invalidParams: [
+    [], // all params required
     [0, -1, 1], [0, 0, 1] // omega > 0
   ],
   foreign: {
@@ -1571,6 +1683,7 @@ export default [{
 }, {
   name: 'Soliton',
   invalidParams: [
+    [], // all params required
     [-1], [0] // N > 0
   ],
   foreign: {
@@ -1583,6 +1696,7 @@ export default [{
 }, {
   name: 'StudentT',
   invalidParams: [
+    [], // all params required
     [-1], [0] // nu > 0
   ],
   foreign: {
@@ -1595,6 +1709,7 @@ export default [{
 }, {
   name: 'StudentZ',
   invalidParams: [
+    [], // all params required
     [-1], [0], [1] // n > 1
   ],
   foreign: {
@@ -1607,6 +1722,7 @@ export default [{
 }, {
   name: 'Trapezoidal',
   invalidParams: [
+    [], // all params required
     [1, 0.33, 0.67, 1], [2, 0.33, 0.67, 1], // a < d
     [1, 0.33, 0.67, 1], [0, 0.67, 0.67, 1], [0, 0.8, 0.67, 1], // a <= b < c
     [0, 0.33, 2, 1] // c <= d
@@ -1621,6 +1737,7 @@ export default [{
 }, {
   name: 'Triangular',
   invalidParams: [
+    [], // all params required
     [1, 1, 0.5], [2, 1, 0.5], // a < b
     [0, 1, -1], [0, 1, 2] // a <= c <= b
   ],
@@ -1634,6 +1751,7 @@ export default [{
 }, {
   name: 'TruncatedNormal',
   invalidParams: [
+    [], // all params required
     [0, -1, 0, 1], [0, 0, 0, 1], // sigma > 0
     [0, 1, 0, 0], [0, 1, 1, 0] // b > a
   ],
@@ -1647,7 +1765,9 @@ export default [{
   }]
 }, {
   name: 'TukeyLambda',
-  invalidParams: [],
+  invalidParams: [
+    [] // all params required
+  ],
   foreign: {
     generator: 'Bates',
     params: s => [3, Math.min(...s), Math.max(...s)]
@@ -1665,6 +1785,7 @@ export default [{
 }, {
   name: 'UQuadratic',
   invalidParams: [
+    [], // all params required
     [1, 1], [2, 1] // a < b
   ],
   foreign: {
@@ -1677,6 +1798,7 @@ export default [{
 }, {
   name: 'Uniform',
   invalidParams: [
+    [], // all params required
     [1, 1], [2, 1] // a < b
   ],
   foreign: {
@@ -1689,6 +1811,7 @@ export default [{
 }, {
   name: 'UniformProduct',
   invalidParams: [
+    [], // all params required
     [-1], [0], [1] // n > 1
   ],
   foreign: {
@@ -1711,6 +1834,7 @@ export default [{
 }, {
   name: 'VonMises',
   invalidParams: [
+    [], // all params required
     [-1], [0] // kappa > 0
   ],
   foreign: {
@@ -1723,6 +1847,7 @@ export default [{
 }, {
   name: 'Weibull',
   invalidParams: [
+    [], // all params required
     [-1, 1], [0, 1], // lambda > 0
     [1, -1], [1, 0] // k > 0
   ],
@@ -1736,6 +1861,7 @@ export default [{
 }, {
   name: 'Wigner',
   invalidParams: [
+    [], // all params required
     [-1], [0] // R > 0
   ],
   foreign: {
@@ -1748,6 +1874,7 @@ export default [{
 }, {
   name: 'YuleSimon',
   invalidParams: [
+    [], // all params required
     [-1], [0] // rho > 0
   ],
   foreign: {
@@ -1760,6 +1887,7 @@ export default [{
 }, {
   name: 'Zeta',
   invalidParams: [
+    [], // all params required
     [-1], [0], [1] // s > 1
   ],
   foreign: {
@@ -1772,6 +1900,7 @@ export default [{
 }, {
   name: 'Zipf',
   invalidParams: [
+    [], // all params required
     [-1, 100], // s >= 1
     [1, -1], [1, 0] // N > 0
   ],
@@ -1780,6 +1909,6 @@ export default [{
     params: s => [Math.min(...s), Math.max(...s)]
   },
   cases: [{
-    params: () => [3]
+    params: () => [3, 100]
   }]
 }]

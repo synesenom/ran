@@ -24,7 +24,7 @@ const UnitTests = {
     const sampleSize = 100
 
     it('should give the same sample for the same seed', () => {
-      const self = new dist[tc.name]()
+      const self = new dist[tc.name](...tc.cases[0].params())
       const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
       self.seed(s)
       const values1 = self.sample(sampleSize)
@@ -34,7 +34,7 @@ const UnitTests = {
     })
 
     it('should give different samples for different seeds', () => {
-      const self = new dist[tc.name]()
+      const self = new dist[tc.name](...tc.cases[0].params())
       self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
       const values1 = self.sample(sampleSize)
       self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
@@ -48,7 +48,7 @@ const UnitTests = {
 
     it('loaded state should continue where it was saved at', () => {
       // Create generator and seed
-      const generator = new dist[tc.name]()
+      const generator = new dist[tc.name](...tc.cases[0].params())
       const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
       const cut = Math.floor(sampleSize / 3)
 
@@ -69,7 +69,7 @@ const UnitTests = {
 
     it('loaded state should copy full state of generator', () => {
       // Create seeded generator
-      const generator1 = new dist[tc.name]()
+      const generator1 = new dist[tc.name](...tc.cases[0].params())
       generator1.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
 
       // Generate original sample
@@ -78,7 +78,7 @@ const UnitTests = {
       const values1 = generator1.sample(10)
 
       // Generate new default generator and load state
-      const generator2 = new dist[tc.name]().load(state)
+      const generator2 = new dist[tc.name](...tc.cases[0].params()).load(state)
       const values2 = generator2.sample(10)
 
       // Compare samples
@@ -88,13 +88,10 @@ const UnitTests = {
 
   pdf (tc) {
     // Test cases
-    const cases = [{
-      name: 'default parameters',
-      generate: () => new dist[tc.name]()
-    }].concat(tc.cases.map(c => ({
+    const cases = tc.cases.map(c => ({
       name: c.name || 'random parameters',
       generate: () => new dist[tc.name](...c.params())
-    })))
+    }))
 
     cases.forEach(c => {
       describe(c.name, () => {
@@ -138,13 +135,10 @@ const UnitTests = {
 
   sample (tc) {
     // Test cases
-    const cases = [{
-      name: 'default parameters',
-      generate: () => new dist[tc.name]()
-    }].concat(tc.cases.map(c => ({
+    const cases = tc.cases.map(c => ({
       name: c.name || 'random parameters',
       generate: () => new dist[tc.name](...c.params())
-    })))
+    }))
 
     cases.forEach(c => {
       describe(c.name, () => {
@@ -178,17 +172,14 @@ const UnitTests = {
 
   test (tc) {
     // Test cases.
-    const cases = [{
-      name: 'default parameters',
-      gen: () => new dist[tc.name]()
-    }].concat(tc.cases.map(c => ({
+    const cases = tc.cases.map(c => ({
       name: c.name || 'random parameters',
       gen: () => {
         const p = c.params()
         // console.log(p)
         return new dist[tc.name](...p)
       }
-    })))
+    }))
 
     // Go through text cases.
     cases.forEach(c => {
@@ -348,6 +339,15 @@ describe('dist', () => {
       })
     })
 
+  // Degenerate is not covered by dist-cases.js (special-cased below) — verify constructor throws on missing params per issue #50.
+  describe('Degenerate', () => {
+    describe('constructor', () => {
+      it('should throw error if no parameters are provided', () => {
+        assert.throws(() => new dist.Degenerate())
+      })
+    })
+  })
+
   // Kolmogorov: open lower boundary — x=0 is outside the support (x>0) and must return 0.
   describe('Kolmogorov', () => {
     const k = new dist.Kolmogorov()
@@ -374,14 +374,6 @@ describe('dist', () => {
   // Degenerate distribution.
   describe('Degenerate', () => {
     describe('.sample()', () => {
-      describe('default parameters', () => {
-        it('should generate values with Degenerate distribution', () => {
-          const degenerate = new dist.Degenerate()
-          degenerate.sample(10).forEach(d => {
-            assert(d === 0)
-          })
-        })
-      })
       describe('random parameters', () => {
         it('should generate values with Degenerate distribution', () => {
           const x0 = float()
@@ -394,16 +386,6 @@ describe('dist', () => {
     })
 
     describe('.pdf(), .cdf()', () => {
-      describe('default parameters', () => {
-        it('differentiating cdf should give pdf', () => {
-          const degenerate = new dist.Degenerate()
-          assert.equal(degenerate.pdf(0), 1)
-          assert.equal(degenerate.pdf(Math.random() * 2 - 1), 0)
-          assert.equal(degenerate.cdf(-Math.random()), 0)
-          assert.equal(degenerate.cdf(0), 1)
-          assert.equal(degenerate.cdf(Math.random()), 1)
-        })
-      })
       describe('random parameters', () => {
         it('differentiating cdf should give pdf', () => {
           const x0 = float()

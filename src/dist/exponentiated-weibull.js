@@ -17,7 +17,7 @@ import Distribution from './_distribution'
  */
 export default class extends Weibull {
   // Transformation of Weibull distribution.
-  constructor (lambda = 1, k = 1, alpha = 1) {
+  constructor (lambda, k, alpha) {
     super(lambda, k)
 
     // Validate parameters.

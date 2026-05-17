@@ -14,7 +14,7 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Distribution {
-  constructor (lambda = 1, alpha = 1) {
+  constructor (lambda, alpha) {
     super('continuous', arguments.length)
 
     // Validate parameters

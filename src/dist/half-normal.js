@@ -15,7 +15,7 @@ import { erfinv } from '../special'
  */
 export default class extends Normal {
   // Transformation of normal distribution
-  constructor (sigma = 1) {
+  constructor (sigma) {
     super(0, sigma)
 
     // Set support

@@ -15,7 +15,7 @@ import Weibull from './weibull'
  */
 export default class extends Weibull {
   // Transformation of Weibull
-  constructor (lambda = 1, k = 1) {
+  constructor (lambda, k) {
     super(lambda, k)
 
     // Set support

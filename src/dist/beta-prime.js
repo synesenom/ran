@@ -18,7 +18,7 @@ import Beta from './beta'
  */
 export default class extends Beta {
   // Transformation of beta distribution
-  constructor (alpha = 2, beta = 2) {
+  constructor (alpha, beta) {
     super(alpha, beta)
 
     // Set support

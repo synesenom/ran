@@ -16,7 +16,7 @@ import Distribution from './_distribution'
  */
 export default class extends Categorical {
   // Special case of categorical
-  constructor (s = 1, N = 100) {
+  constructor (s, N) {
     const Ni = Math.round(N)
     super(Array.from({ length: Ni }, (d, i) => Math.pow(i + 1, -s)), 1)
 

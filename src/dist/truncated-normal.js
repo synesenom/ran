@@ -19,7 +19,7 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Normal {
-  constructor (mu = 0, sigma = 1, a = 0, b = 1) {
+  constructor (mu, sigma, a, b) {
     // Call super and update number of parameters.
     super(mu, sigma)
     this.k = arguments.length

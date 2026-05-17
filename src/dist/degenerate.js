@@ -13,9 +13,13 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Distribution {
-  constructor (x0 = 0) {
+  constructor (x0) {
     super('continuous', arguments.length)
+
+    // Validate parameters
     this.p = { x0 }
+    Distribution.validate({ x0 }, [])
+
     this.s = [{
       value: x0,
       closed: true

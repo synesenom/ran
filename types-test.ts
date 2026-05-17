@@ -3,8 +3,8 @@ import * as ran from 'ranjs'
 // Distribution instantiation
 const n = new ran.dist.Normal(0, 1)
 const _p = new ran.dist.Pareto(1, 2)
-const _cat = new ran.dist.Categorical([1, 2, 3])
-const _cat2 = new ran.dist.Categorical([1, 2, 3], 0)
+const _cat = new ran.dist.Categorical([1, 2, 3], 0)
+const _cat2 = new ran.dist.Categorical([0.4, 0.6], 1)
 const _hyp = new ran.dist.Hyperexponential([{ weight: 1, rate: 2 }])
 
 // Base class methods

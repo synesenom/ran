@@ -22,7 +22,7 @@ import NoncentralT from './noncentral-t'
  * @constructor
  */
 export default class extends Distribution {
-  constructor (nu = 1, mu = 1, theta = 1) {
+  constructor (nu, mu, theta) {
     super('continuous', arguments.length)
 
     // Validate parameters
