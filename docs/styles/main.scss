@@ -21,3 +21,28 @@ p {
   padding: 0 30px;
   margin: 0;
 }
+
+nav.page-nav {
+  display: flex;
+  padding: 20px 30px 0;
+  border-bottom: 1px solid #e0e0e0;
+  gap: 0;
+
+  a {
+    padding: 8px 20px;
+    text-decoration: none;
+    color: #555;
+    font-size: 0.9em;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+
+    &.active {
+      color: royalblue;
+      border-bottom-color: royalblue;
+    }
+
+    &:hover:not(.active) {
+      color: #333;
+    }
+  }
+}

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Docs site now includes a [scipy.stats → ranjs porting guide](docs/templates/porting-scipy.pug) (`porting-scipy.html`) with side-by-side Python/JavaScript examples for the 20 most-used scipy distributions, a method-mapping table, and callouts for non-trivial parameter differences (LogNormal, Weibull, Triangular, Geometric, Hypergeometric).
 - Per-distribution subpath exports: `import Normal from 'ranjs/dist/normal'` now resolves correctly in Node.js ESM, browsers, and bundlers (Vite, Webpack, esbuild). Each of the 134 exported distributions has a corresponding self-contained ESM bundle at `dist/<name>.esm.js` (≈8–15× smaller than importing the full library). See [ADR-0005](decisions/0005-per-distribution-subpath-exports.md).
 - Automated npm publish workflow (`.github/workflows/release.yml`): pushing a `v*` tag now runs lint, typecheck, and tests before publishing to npm with provenance attestation. Requires an `NPM_TOKEN` secret in repository settings.
 - TypeScript type declarations added (`dist/ranjs.d.ts`). All 135 distribution classes, the `Distribution` base class (17 public methods), and the `core`, `location`, `dispersion`, `shape`, `dependence`, and `test` namespaces are now fully typed. `"types": "./dist/ranjs.d.ts"` added to `package.json` at the top level and inside `"exports"` for full compatibility with all TypeScript `moduleResolution` modes. See [ADR-0003](decisions/0003-typescript-declarations.md).
