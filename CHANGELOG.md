@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TypeScript type declarations added (`dist/ranjs.d.ts`). All 135 distribution classes, the `Distribution` base class (17 public methods), and the `core`, `location`, `dispersion`, `shape`, `dependence`, and `test` namespaces are now fully typed. `"types": "./dist/ranjs.d.ts"` added to `package.json` at the top level and inside `"exports"` for full compatibility with all TypeScript `moduleResolution` modes. See [ADR-0003](decisions/0003-typescript-declarations.md).
 - Build now produces three artifacts: `dist/ranjs.esm.js` (ES module), `dist/ranjs.cjs.js` (CommonJS), and `dist/ranjs.min.js` (UMD, minified, CDN). `"exports"` field added to `package.json` routing `import` to ESM and `require` to CJS. `"sideEffects": false` added to enable tree-shaking across the 130+ distribution classes.
 
+### Fixed
+
+- `erf` and `erfc` in `src/special/error.js` now use a hybrid Taylor series (|x| ≤ 2) / Laplace continued fraction (|x| > 2) instead of delegating to `gammaLowerIncomplete`/`gammaUpperIncomplete`. This fixes relative precision loss in the tails (5σ+) and resolves the `// TODO Replace with continued fraction` comments. Adds far-tail `Normal(0, 2)` reference values at x = ±10 and ±14 to the test suite. Closes #211.
+
 ### Changed
 
 - **BREAKING:** All 131 distribution constructors now require their parameters — default values have been removed. Constructing a distribution with no arguments (e.g. `new Normal()`, `new Exponential()`) now throws `Error('Invalid parameters. Required parameters missing or not a number: ...')` instead of silently using arbitrary defaults. The 7 distributions that genuinely have no parameters (`Gilbrat`, `HalfLogistic`, `HyperbolicSecant`, `Kolmogorov`, `Rademacher`, `Slash`, `UniformRatio`) still construct with no arguments. `Distribution.validate()` now rejects `undefined` and `NaN` parameter values as a centralized fail-fast guard. See [ADR-0004](decisions/0004-validate-rejects-undefined-and-nan.md) and #50.

@@ -539,4 +539,57 @@ describe('special', () => {
       })
     })
   })
+
+  describe('.erf()', () => {
+    it('should return reference values', () => {
+      assert(special.erf(0) === 0)
+      ;[
+        { x: 0.5, y: 0.5204998778130465 },
+        { x: 1.0, y: 0.8427007929497149 },
+        { x: 1.5, y: 0.9661051464753108 },
+        { x: 2.0, y: 0.9953222650189527 },
+        { x: 3.0, y: 0.9999779095030014 },
+        { x: 5.0, y: 0.9999999999984626 }
+      ].forEach(d => {
+        assert(equal(special.erf(d.x), d.y), `erf(${d.x})`)
+      })
+    })
+
+    it('should satisfy erf(-x) = -erf(x)', () => {
+      [0.5, 2, 5].forEach(x => {
+        assert(equal(special.erf(-x), -special.erf(x)), `erf(-${x})`)
+      })
+    })
+  })
+
+  describe('.erfc()', () => {
+    it('should return reference values', () => {
+      assert(special.erfc(0) === 1)
+      ;[
+        { x: 0.5, y: 0.4795001221869535 },
+        { x: 1.0, y: 0.1572992070502851 },
+        { x: 2.0, y: 0.004677734981047265 },
+        { x: 3.0, y: 2.209049699858544e-5 },
+        { x: 5.0, y: 1.537459794428035e-12 },
+        { x: 10.0, y: 2.08848758376254e-45 }
+      ].forEach(d => {
+        assert(equal(special.erfc(d.x), d.y), `erfc(${d.x})`)
+      })
+    })
+
+    it('should return 0 for large positive x', () => {
+      assert(special.erfc(27) === 0)
+    })
+
+    it('should satisfy erfc(-x) = 2 - erfc(x)', () => {
+      [0.5, 2, 5].forEach(x => {
+        assert(equal(special.erfc(-x), 2 - special.erfc(x)), `erfc(-${x})`)
+      })
+    })
+
+    it('should maintain relative precision in the far tail', () => {
+      // erfc(7/sqrt(2)) appears in Normal(0,2).cdf(14); CF branch must give full precision
+      assert(equal(special.erfc(7 / Math.SQRT2), 2.559625087771669924e-12), 'erfc(7/sqrt(2))')
+    })
+  })
 })
