@@ -26,6 +26,408 @@
       "import": "./dist/ranjs.esm.js",
       "require": "./dist/ranjs.cjs.js",
       "default": "./dist/ranjs.min.js"
+    },
+    "./dist/alpha": {
+      "import": "./dist/alpha.esm.js"
+    },
+    "./dist/anglit": {
+      "import": "./dist/anglit.esm.js"
+    },
+    "./dist/arcsine": {
+      "import": "./dist/arcsine.esm.js"
+    },
+    "./dist/balding-nichols": {
+      "import": "./dist/balding-nichols.esm.js"
+    },
+    "./dist/bates": {
+      "import": "./dist/bates.esm.js"
+    },
+    "./dist/benini": {
+      "import": "./dist/benini.esm.js"
+    },
+    "./dist/benktander-ii": {
+      "import": "./dist/benktander-ii.esm.js"
+    },
+    "./dist/bernoulli": {
+      "import": "./dist/bernoulli.esm.js"
+    },
+    "./dist/beta": {
+      "import": "./dist/beta.esm.js"
+    },
+    "./dist/beta-binomial": {
+      "import": "./dist/beta-binomial.esm.js"
+    },
+    "./dist/beta-prime": {
+      "import": "./dist/beta-prime.esm.js"
+    },
+    "./dist/beta-rectangular": {
+      "import": "./dist/beta-rectangular.esm.js"
+    },
+    "./dist/binomial": {
+      "import": "./dist/binomial.esm.js"
+    },
+    "./dist/birnbaum-saunders": {
+      "import": "./dist/birnbaum-saunders.esm.js"
+    },
+    "./dist/borel": {
+      "import": "./dist/borel.esm.js"
+    },
+    "./dist/borel-tanner": {
+      "import": "./dist/borel-tanner.esm.js"
+    },
+    "./dist/bounded-pareto": {
+      "import": "./dist/bounded-pareto.esm.js"
+    },
+    "./dist/bradford": {
+      "import": "./dist/bradford.esm.js"
+    },
+    "./dist/burr": {
+      "import": "./dist/burr.esm.js"
+    },
+    "./dist/categorical": {
+      "import": "./dist/categorical.esm.js"
+    },
+    "./dist/cauchy": {
+      "import": "./dist/cauchy.esm.js"
+    },
+    "./dist/chi": {
+      "import": "./dist/chi.esm.js"
+    },
+    "./dist/chi2": {
+      "import": "./dist/chi2.esm.js"
+    },
+    "./dist/dagum": {
+      "import": "./dist/dagum.esm.js"
+    },
+    "./dist/degenerate": {
+      "import": "./dist/degenerate.esm.js"
+    },
+    "./dist/delaporte": {
+      "import": "./dist/delaporte.esm.js"
+    },
+    "./dist/discrete-uniform": {
+      "import": "./dist/discrete-uniform.esm.js"
+    },
+    "./dist/discrete-weibull": {
+      "import": "./dist/discrete-weibull.esm.js"
+    },
+    "./dist/double-gamma": {
+      "import": "./dist/double-gamma.esm.js"
+    },
+    "./dist/double-weibull": {
+      "import": "./dist/double-weibull.esm.js"
+    },
+    "./dist/doubly-noncentral-beta": {
+      "import": "./dist/doubly-noncentral-beta.esm.js"
+    },
+    "./dist/doubly-noncentral-f": {
+      "import": "./dist/doubly-noncentral-f.esm.js"
+    },
+    "./dist/doubly-noncentral-t": {
+      "import": "./dist/doubly-noncentral-t.esm.js"
+    },
+    "./dist/erlang": {
+      "import": "./dist/erlang.esm.js"
+    },
+    "./dist/exponential": {
+      "import": "./dist/exponential.esm.js"
+    },
+    "./dist/exponential-logarithmic": {
+      "import": "./dist/exponential-logarithmic.esm.js"
+    },
+    "./dist/exponentiated-weibull": {
+      "import": "./dist/exponentiated-weibull.esm.js"
+    },
+    "./dist/f": {
+      "import": "./dist/f.esm.js"
+    },
+    "./dist/fisher-z": {
+      "import": "./dist/fisher-z.esm.js"
+    },
+    "./dist/flory-schulz": {
+      "import": "./dist/flory-schulz.esm.js"
+    },
+    "./dist/frechet": {
+      "import": "./dist/frechet.esm.js"
+    },
+    "./dist/gamma": {
+      "import": "./dist/gamma.esm.js"
+    },
+    "./dist/gamma-gompertz": {
+      "import": "./dist/gamma-gompertz.esm.js"
+    },
+    "./dist/generalized-exponential": {
+      "import": "./dist/generalized-exponential.esm.js"
+    },
+    "./dist/generalized-extreme-value": {
+      "import": "./dist/generalized-extreme-value.esm.js"
+    },
+    "./dist/generalized-gamma": {
+      "import": "./dist/generalized-gamma.esm.js"
+    },
+    "./dist/generalized-hermite": {
+      "import": "./dist/generalized-hermite.esm.js"
+    },
+    "./dist/generalized-logistic": {
+      "import": "./dist/generalized-logistic.esm.js"
+    },
+    "./dist/generalized-normal": {
+      "import": "./dist/generalized-normal.esm.js"
+    },
+    "./dist/generalized-pareto": {
+      "import": "./dist/generalized-pareto.esm.js"
+    },
+    "./dist/geometric": {
+      "import": "./dist/geometric.esm.js"
+    },
+    "./dist/gilbrat": {
+      "import": "./dist/gilbrat.esm.js"
+    },
+    "./dist/gompertz": {
+      "import": "./dist/gompertz.esm.js"
+    },
+    "./dist/gumbel": {
+      "import": "./dist/gumbel.esm.js"
+    },
+    "./dist/half-generalized-normal": {
+      "import": "./dist/half-generalized-normal.esm.js"
+    },
+    "./dist/half-logistic": {
+      "import": "./dist/half-logistic.esm.js"
+    },
+    "./dist/half-normal": {
+      "import": "./dist/half-normal.esm.js"
+    },
+    "./dist/heads-minus-tails": {
+      "import": "./dist/heads-minus-tails.esm.js"
+    },
+    "./dist/hoyt": {
+      "import": "./dist/hoyt.esm.js"
+    },
+    "./dist/hyperbolic-secant": {
+      "import": "./dist/hyperbolic-secant.esm.js"
+    },
+    "./dist/hyperexponential": {
+      "import": "./dist/hyperexponential.esm.js"
+    },
+    "./dist/hypergeometric": {
+      "import": "./dist/hypergeometric.esm.js"
+    },
+    "./dist/inverse-chi2": {
+      "import": "./dist/inverse-chi2.esm.js"
+    },
+    "./dist/inverse-gamma": {
+      "import": "./dist/inverse-gamma.esm.js"
+    },
+    "./dist/inverse-gaussian": {
+      "import": "./dist/inverse-gaussian.esm.js"
+    },
+    "./dist/inverted-weibull": {
+      "import": "./dist/inverted-weibull.esm.js"
+    },
+    "./dist/irwin-hall": {
+      "import": "./dist/irwin-hall.esm.js"
+    },
+    "./dist/johnson-sb": {
+      "import": "./dist/johnson-sb.esm.js"
+    },
+    "./dist/johnson-su": {
+      "import": "./dist/johnson-su.esm.js"
+    },
+    "./dist/kolmogorov": {
+      "import": "./dist/kolmogorov.esm.js"
+    },
+    "./dist/kumaraswamy": {
+      "import": "./dist/kumaraswamy.esm.js"
+    },
+    "./dist/laplace": {
+      "import": "./dist/laplace.esm.js"
+    },
+    "./dist/levy": {
+      "import": "./dist/levy.esm.js"
+    },
+    "./dist/lindley": {
+      "import": "./dist/lindley.esm.js"
+    },
+    "./dist/log-cauchy": {
+      "import": "./dist/log-cauchy.esm.js"
+    },
+    "./dist/log-gamma": {
+      "import": "./dist/log-gamma.esm.js"
+    },
+    "./dist/log-laplace": {
+      "import": "./dist/log-laplace.esm.js"
+    },
+    "./dist/log-logistic": {
+      "import": "./dist/log-logistic.esm.js"
+    },
+    "./dist/log-normal": {
+      "import": "./dist/log-normal.esm.js"
+    },
+    "./dist/log-series": {
+      "import": "./dist/log-series.esm.js"
+    },
+    "./dist/logarithmic": {
+      "import": "./dist/logarithmic.esm.js"
+    },
+    "./dist/logistic": {
+      "import": "./dist/logistic.esm.js"
+    },
+    "./dist/logistic-exponential": {
+      "import": "./dist/logistic-exponential.esm.js"
+    },
+    "./dist/logit-normal": {
+      "import": "./dist/logit-normal.esm.js"
+    },
+    "./dist/lomax": {
+      "import": "./dist/lomax.esm.js"
+    },
+    "./dist/makeham": {
+      "import": "./dist/makeham.esm.js"
+    },
+    "./dist/maxwell-boltzmann": {
+      "import": "./dist/maxwell-boltzmann.esm.js"
+    },
+    "./dist/mielke": {
+      "import": "./dist/mielke.esm.js"
+    },
+    "./dist/moyal": {
+      "import": "./dist/moyal.esm.js"
+    },
+    "./dist/muth": {
+      "import": "./dist/muth.esm.js"
+    },
+    "./dist/nakagami": {
+      "import": "./dist/nakagami.esm.js"
+    },
+    "./dist/negative-binomial": {
+      "import": "./dist/negative-binomial.esm.js"
+    },
+    "./dist/negative-hypergeometric": {
+      "import": "./dist/negative-hypergeometric.esm.js"
+    },
+    "./dist/neyman-a": {
+      "import": "./dist/neyman-a.esm.js"
+    },
+    "./dist/noncentral-beta": {
+      "import": "./dist/noncentral-beta.esm.js"
+    },
+    "./dist/noncentral-chi": {
+      "import": "./dist/noncentral-chi.esm.js"
+    },
+    "./dist/noncentral-chi2": {
+      "import": "./dist/noncentral-chi2.esm.js"
+    },
+    "./dist/noncentral-f": {
+      "import": "./dist/noncentral-f.esm.js"
+    },
+    "./dist/noncentral-t": {
+      "import": "./dist/noncentral-t.esm.js"
+    },
+    "./dist/normal": {
+      "import": "./dist/normal.esm.js"
+    },
+    "./dist/pareto": {
+      "import": "./dist/pareto.esm.js"
+    },
+    "./dist/pert": {
+      "import": "./dist/pert.esm.js"
+    },
+    "./dist/poisson": {
+      "import": "./dist/poisson.esm.js"
+    },
+    "./dist/polya-aeppli": {
+      "import": "./dist/polya-aeppli.esm.js"
+    },
+    "./dist/power-law": {
+      "import": "./dist/power-law.esm.js"
+    },
+    "./dist/q-exponential": {
+      "import": "./dist/q-exponential.esm.js"
+    },
+    "./dist/r": {
+      "import": "./dist/r.esm.js"
+    },
+    "./dist/rademacher": {
+      "import": "./dist/rademacher.esm.js"
+    },
+    "./dist/raised-cosine": {
+      "import": "./dist/raised-cosine.esm.js"
+    },
+    "./dist/rayleigh": {
+      "import": "./dist/rayleigh.esm.js"
+    },
+    "./dist/reciprocal": {
+      "import": "./dist/reciprocal.esm.js"
+    },
+    "./dist/reciprocal-inverse-gaussian": {
+      "import": "./dist/reciprocal-inverse-gaussian.esm.js"
+    },
+    "./dist/rice": {
+      "import": "./dist/rice.esm.js"
+    },
+    "./dist/shifted-log-logistic": {
+      "import": "./dist/shifted-log-logistic.esm.js"
+    },
+    "./dist/skellam": {
+      "import": "./dist/skellam.esm.js"
+    },
+    "./dist/skew-normal": {
+      "import": "./dist/skew-normal.esm.js"
+    },
+    "./dist/slash": {
+      "import": "./dist/slash.esm.js"
+    },
+    "./dist/soliton": {
+      "import": "./dist/soliton.esm.js"
+    },
+    "./dist/student-t": {
+      "import": "./dist/student-t.esm.js"
+    },
+    "./dist/student-z": {
+      "import": "./dist/student-z.esm.js"
+    },
+    "./dist/trapezoidal": {
+      "import": "./dist/trapezoidal.esm.js"
+    },
+    "./dist/triangular": {
+      "import": "./dist/triangular.esm.js"
+    },
+    "./dist/truncated-normal": {
+      "import": "./dist/truncated-normal.esm.js"
+    },
+    "./dist/tukey-lambda": {
+      "import": "./dist/tukey-lambda.esm.js"
+    },
+    "./dist/u-quadratic": {
+      "import": "./dist/u-quadratic.esm.js"
+    },
+    "./dist/uniform": {
+      "import": "./dist/uniform.esm.js"
+    },
+    "./dist/uniform-product": {
+      "import": "./dist/uniform-product.esm.js"
+    },
+    "./dist/uniform-ratio": {
+      "import": "./dist/uniform-ratio.esm.js"
+    },
+    "./dist/von-mises": {
+      "import": "./dist/von-mises.esm.js"
+    },
+    "./dist/weibull": {
+      "import": "./dist/weibull.esm.js"
+    },
+    "./dist/wigner": {
+      "import": "./dist/wigner.esm.js"
+    },
+    "./dist/yule-simon": {
+      "import": "./dist/yule-simon.esm.js"
+    },
+    "./dist/zeta": {
+      "import": "./dist/zeta.esm.js"
+    },
+    "./dist/zipf": {
+      "import": "./dist/zipf.esm.js"
     }
   },
   "sideEffects": false,

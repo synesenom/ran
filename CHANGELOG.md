@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Per-distribution subpath exports: `import Normal from 'ranjs/dist/normal'` now resolves correctly in Node.js ESM, browsers, and bundlers (Vite, Webpack, esbuild). Each of the 134 exported distributions has a corresponding self-contained ESM bundle at `dist/<name>.esm.js` (≈8–15× smaller than importing the full library). See [ADR-0005](decisions/0005-per-distribution-subpath-exports.md).
 - Automated npm publish workflow (`.github/workflows/release.yml`): pushing a `v*` tag now runs lint, typecheck, and tests before publishing to npm with provenance attestation. Requires an `NPM_TOKEN` secret in repository settings.
 - TypeScript type declarations added (`dist/ranjs.d.ts`). All 135 distribution classes, the `Distribution` base class (17 public methods), and the `core`, `location`, `dispersion`, `shape`, `dependence`, and `test` namespaces are now fully typed. `"types": "./dist/ranjs.d.ts"` added to `package.json` at the top level and inside `"exports"` for full compatibility with all TypeScript `moduleResolution` modes. See [ADR-0003](decisions/0003-typescript-declarations.md).
 - Build now produces three artifacts: `dist/ranjs.esm.js` (ES module), `dist/ranjs.cjs.js` (CommonJS), and `dist/ranjs.min.js` (UMD, minified, CDN). `"exports"` field added to `package.json` routing `import` to ESM and `require` to CJS. `"sideEffects": false` added to enable tree-shaking across the 130+ distribution classes.
