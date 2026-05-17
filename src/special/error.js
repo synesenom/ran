@@ -1,16 +1,45 @@
-import {
-  gammaLowerIncomplete,
-  gammaUpperIncomplete
-} from './gamma-incomplete'
+import { MAX_ITER, EPS, DELTA } from '../core/constants'
 import newton from '../algorithms/newton'
 
-const CErfInv = [
+const C_ERF_INV = [
   0.0833333333333333,
   0.0145833333333333,
   0.0031498015873016,
   0.00075248704806,
   0.0001907475361251
 ]
+
+// Maclaurin series for erf on [0, 2]; term recurrence avoids factorial overflow
+function _erfSeries (x) {
+  const x2 = x * x
+  let term = x
+  let sum = x
+  for (let n = 1; n <= MAX_ITER; n++) {
+    term *= -x2 * (2 * n - 1) / (n * (2 * n + 1))
+    sum += term
+    if (Math.abs(term) < Math.abs(sum) * EPS) break
+  }
+  return sum * 2 / Math.sqrt(Math.PI)
+}
+
+// Laplace continued fraction for erfc: b_n = x, a_n = n/2 (DLMF 7.9.2)
+function _erfcCF (x) {
+  let f = x
+  let C = x
+  let D = 0
+  for (let n = 1; n <= MAX_ITER; n++) {
+    const a = n / 2
+    D = x + a * D
+    if (Math.abs(D) < DELTA) D = DELTA
+    D = 1 / D
+    C = x + a / C
+    if (Math.abs(C) < DELTA) C = DELTA
+    const delta = C * D
+    f *= delta
+    if (Math.abs(delta - 1) < EPS) break
+  }
+  return Math.exp(-x * x) / Math.sqrt(Math.PI) / f
+}
 
 /**
  * Computes the error function.
@@ -22,10 +51,9 @@ const CErfInv = [
  * @private
  */
 export function erf (x) {
-  // TODO Replace with continued fraction
-  return x < 0
-    ? -gammaLowerIncomplete(0.5, x * x)
-    : gammaLowerIncomplete(0.5, x * x)
+  if (x < 0) return -erf(-x)
+  if (x <= 2) return _erfSeries(x)
+  return 1 - _erfcCF(x)
 }
 
 /**
@@ -38,10 +66,12 @@ export function erf (x) {
  * @private
  */
 export function erfc (x) {
-  // TODO Replace with continued fraction
-  return x < 0
-    ? 1 + gammaLowerIncomplete(0.5, x * x)
-    : gammaUpperIncomplete(0.5, x * x)
+  if (x > 26.6) return 0
+  if (x < 0) return 1 + erf(-x)
+  // Use CF directly for x > 1 to avoid cancellation in 1 - erf(x) near 1
+  // See solutions/special-functions/2026-05-17-1540-erfc-crossover-cancellation.md
+  if (x <= 1) return 1 - _erfSeries(x)
+  return _erfcCF(x)
 }
 
 /**
@@ -58,8 +88,8 @@ export function erfinv (x) {
   let x0 = 0
   const x2 = x * x
   let c = 0.5 * Math.pow(Math.PI, 5.5)
-  for (let i = CErfInv.length - 1; i >= 0; i--) {
-    x0 = (x0 + CErfInv[i] * c) * x2
+  for (let i = C_ERF_INV.length - 1; i >= 0; i--) {
+    x0 = (x0 + C_ERF_INV[i] * c) * x2
     c /= Math.PI
   }
   x0 = (x0 + 1) * x
