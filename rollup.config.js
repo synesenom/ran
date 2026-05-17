@@ -36,7 +36,7 @@ const monolithic = {
 // Parse actively-exported distributions from src/dist/index.js (non-commented lines only).
 // See decisions/0005-per-distribution-subpath-exports.md
 const indexSrc = readFileSync('./src/dist/index.js', 'utf8')
-const distNames = [...indexSrc.matchAll(/^export.*from '\.\/([^_'][^']*)'$/gm)]
+const distNames = [...indexSrc.matchAll(/^export.*from '\.\/([a-z0-9][a-z0-9-]*)'$/gm)]
   .map(m => m[1])
 
 const perDist = distNames.map(name => ({
