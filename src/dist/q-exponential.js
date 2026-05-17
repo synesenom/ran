@@ -15,7 +15,7 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends GeneralizedPareto {
-  constructor (q = 1.5, lambda = 1) {
+  constructor (q, lambda) {
     super(0, 1 / (lambda * (2 - q)), (q - 1) / (2 - q))
 
     // Validate parameters

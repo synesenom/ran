@@ -16,7 +16,7 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Beta {
-  constructor (a = 0, b = 0.5, c = 1) {
+  constructor (a, b, c) {
     super((4 * b + c - 5 * a) / (c - a), (5 * c - a - 4 * b) / (c - a))
 
     // Validate parameters

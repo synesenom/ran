@@ -19,7 +19,7 @@ import Normal from './normal'
  * @constructor
  */
 export default class extends Normal {
-  constructor (xi = 0, omega = 1, alpha = 1) {
+  constructor (xi, omega, alpha) {
     super(xi, omega)
 
     // Add new parameter

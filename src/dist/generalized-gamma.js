@@ -17,7 +17,7 @@ import Distribution from './_distribution'
  */
 export default class extends Gamma {
   // Transformation of gamma distribution
-  constructor (a = 1, d = 1, p = 1) {
+  constructor (a, d, p) {
     super(d / p, Math.pow(a, -p))
 
     // Validate parameters

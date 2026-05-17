@@ -15,7 +15,7 @@ import Laplace from './laplace'
  */
 export default class extends Laplace {
   // Transforming Laplace distribution
-  constructor (mu = 0, b = 1) {
+  constructor (mu, b) {
     super(mu, b)
 
     // Set support

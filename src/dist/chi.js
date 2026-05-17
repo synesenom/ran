@@ -15,7 +15,7 @@ import Chi2 from './chi2'
  */
 export default class extends Chi2 {
   // Transformation of chi2 distribution
-  constructor (k = 2) {
+  constructor (k) {
     super(k)
 
     // Validate parameters

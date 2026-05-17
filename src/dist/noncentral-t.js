@@ -18,7 +18,7 @@ import Distribution from './_distribution'
  * @constructor
  */
 class NoncentralT extends Distribution {
-  constructor (nu = 1, mu = 1) {
+  constructor (nu, mu) {
     super('continuous', arguments.length)
 
     // Validate parameters

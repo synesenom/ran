@@ -14,7 +14,7 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Gamma {
-  constructor (a = 1) {
+  constructor (a) {
     super(1.5, 2 * a * a)
 
     // Validate parameters

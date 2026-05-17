@@ -4,7 +4,7 @@ import { gamma, gammaUpperIncomplete } from '../special'
 
 // TODO Docs
 export default class extends Distribution {
-  constructor (n = 2) {
+  constructor (n) {
     super('continuous', arguments.length)
 
     // Validate parameters

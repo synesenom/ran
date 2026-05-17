@@ -18,7 +18,7 @@ import Distribution from './_distribution'
  */
 export default class extends IrwinHall {
   // Transformation of Irwin-Hall
-  constructor (n = 3, a = 0, b = 1) {
+  constructor (n, a, b) {
     const ni = Math.round(n)
     super(ni)
 

@@ -17,7 +17,7 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Categorical {
-  constructor (N = 10, K = 5, r = 5) {
+  constructor (N, K, r) {
     // Validate parameters
     const Ni = Math.round(N)
     const Ki = Math.round(K)
@@ -33,6 +33,6 @@ export default class extends Categorical {
     for (let k = 0; k <= Ki; k++) {
       weights.push(Math.exp(logBinomial(Ki + ri - 1, k) + logBinomial(Ni - ri - k, Ki - k) - logBinomial(Ni, Ki)))
     }
-    super(weights)
+    super(weights, 0)
   }
 }

@@ -14,7 +14,7 @@ import GeneralizedNormal from './generalized-normal'
  * @constructor
  */
 export default class extends GeneralizedNormal {
-  constructor (alpha = 1, beta = 1) {
+  constructor (alpha, beta) {
     super(0, alpha, beta)
 
     // Set support

@@ -16,7 +16,7 @@ import Gamma from './gamma'
  */
 export default class extends Gamma {
   // Transformation of gamma
-  constructor (alpha = 1, beta = 1) {
+  constructor (alpha, beta) {
     super(alpha, beta)
 
     // Set support

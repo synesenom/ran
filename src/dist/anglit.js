@@ -16,7 +16,7 @@ import Distribution from './_distribution'
  */
 export default class extends Distribution {
   // Source: King (2017). Statistics for Process control engineers, John Wiley and Sons, p. 472.
-  constructor (mu = 0, beta = 1) {
+  constructor (mu, beta) {
     super('continuous', arguments.length)
 
     // Validate parameters

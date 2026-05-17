@@ -14,11 +14,12 @@ import brent from '../algorithms/brent'
  * @constructor
  */
 export default class extends Distribution {
-  constructor (lambda = 1.5) {
+  constructor (lambda) {
     super('continuous', arguments.length)
 
     // Validate parameters
     this.p = { lambda }
+    Distribution.validate({ lambda }, [])
 
     // Set support
     this.s = [{

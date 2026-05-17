@@ -16,7 +16,7 @@ import { MAX_ITER } from '../core/constants'
  * @constructor
  */
 export default class extends Distribution {
-  constructor (kappa = 1) {
+  constructor (kappa) {
     super('continuous', arguments.length)
 
     // Validate parameters

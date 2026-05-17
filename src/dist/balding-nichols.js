@@ -19,7 +19,7 @@ export default class extends Beta {
   // Special parametrization of the beta distribution
   // Source: Balding and Nichols. A method for quantifying differentiation between populations at multi-allelic loci and
   // its implications for investigating identity and paternity. Genetica (96) 3-12, 1995.
-  constructor (F = 0.5, p = 0.5) {
+  constructor (F, p) {
     Distribution.validate({ F, p }, [
       'F > 0', 'F < 1',
       'p > 0', 'p < 1'

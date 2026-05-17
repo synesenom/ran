@@ -15,7 +15,7 @@ import Distribution from './_distribution'
  */
 export default class extends Categorical {
   // Special case of categorical.
-  constructor (N = 10) {
+  constructor (N) {
     // Define weights
     const Ni = Math.round(N)
     super([1 / Ni].concat(Array.from({ length: Ni - 2 }, (d, i) => 1 / ((i + 1) * (i + 2)))), 1)

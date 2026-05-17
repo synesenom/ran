@@ -15,7 +15,7 @@ import Cauchy from './cauchy'
  */
 export default class extends Cauchy {
   // Transforming Cauchy distribution
-  constructor (mu = 0, sigma = 1) {
+  constructor (mu, sigma) {
     super(mu, sigma)
 
     // Set support

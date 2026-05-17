@@ -6,7 +6,7 @@ import gamma from './_gamma'
 import poisson from './_poisson'
 
 export default class extends PreComputed {
-  constructor (r = 10, alpha = 1, beta = 1) {
+  constructor (r, alpha, beta) {
     super()
 
     // Validate parameters

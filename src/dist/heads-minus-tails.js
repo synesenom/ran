@@ -15,7 +15,7 @@ import { logBinomial } from '../special'
  * @constructor
  */
 export default class extends PreComputed {
-  constructor (n = 10) {
+  constructor (n) {
     super(true)
 
     // Validate parameters

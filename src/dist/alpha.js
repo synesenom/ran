@@ -19,7 +19,7 @@ import { erf, erfinv } from '../special'
 export default class extends Distribution {
   // Source: Johnson, Kotz, and Balakrishnan (1994). Continuous Univariate Distributions — Volume 1, Second Edition,
   // John Wiley and Sons, p. 173.
-  constructor (alpha = 1, beta = 1) {
+  constructor (alpha, beta) {
     super('continuous', arguments.length)
 
     // Validate parameters

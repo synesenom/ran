@@ -17,7 +17,7 @@ import DoublyNoncentralBeta from './doubly-noncentral-beta'
  */
 export default class extends DoublyNoncentralBeta {
   // Transformation of double non-central beta
-  constructor (d1 = 2, d2 = 2, lambda1 = 1, lambda2 = 1) {
+  constructor (d1, d2, lambda1, lambda2) {
     super(d1 / 2, d2 / 2, lambda1, lambda2)
 
     // Validate parameters

@@ -18,7 +18,7 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Beta {
-  constructor (alpha = 1, beta = 1, theta = 0.5, a = 0, b = 1) {
+  constructor (alpha, beta, theta, a, b) {
     super(alpha, beta)
 
     // Validate parameters

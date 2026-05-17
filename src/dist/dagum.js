@@ -14,7 +14,7 @@ import Distribution from './_distribution'
  * @param {number=} b Scale parameter. Default value is 1.
  */
 export default class extends Distribution {
-  constructor (p = 1, a = 1, b = 1) {
+  constructor (p, a, b) {
     super('continuous', arguments.length)
 
     // Validate parameters

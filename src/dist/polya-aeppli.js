@@ -16,7 +16,7 @@ import poisson from './_poisson'
  * @constructor
  */
 export default class extends PreComputed {
-  constructor (lambda = 1, theta = 0.5) {
+  constructor (lambda, theta) {
     // Using logarithmic probability mass values
     super(true)
 

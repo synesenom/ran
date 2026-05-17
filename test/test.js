@@ -111,7 +111,7 @@ describe('test', () => {
 
     it('should reject for dependent data sets', () => {
       seed(0)
-      const normal = new Normal().seed(0)
+      const normal = new Normal(0, 1).seed(0)
       const sample1 = Array.from({ length: SAMPLE_SIZE }, (d, i) => i)
       const sample2 = sample1.map(d => d + normal.sample())
       assert(!test.hsic([sample1, sample2]).passed)

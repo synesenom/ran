@@ -13,7 +13,7 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Distribution {
-  constructor (a = 0.5) {
+  constructor (a) {
     super('discrete', arguments.length)
 
     // Validate parameters

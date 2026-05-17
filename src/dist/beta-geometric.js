@@ -17,7 +17,7 @@ import rBeta from './_beta'
  * @constructor
  */
 export default class extends PreComputed {
-  constructor (alpha = 1, beta = 1) {
+  constructor (alpha, beta) {
     // TODO Use log PDF
     super()
 
