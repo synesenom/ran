@@ -47,7 +47,7 @@ class Distribution {
    * @ignore
    */
   static validate (params, constraints) {
-    // See decisions/0004-validate-rejects-undefined-and-nan.md — comparison operators against undefined/null/NaN return false, so missing params would otherwise pass silently
+    // See decisions/0004-validate-rejects-undefined-and-nan.md, solutions/correctness/2026-05-17-0847-validate-rejects-missing-params.md — comparison operators against undefined/null/NaN return false, so missing params would otherwise pass silently
     const missing = Object.entries(params)
       .filter(([, v]) => v === undefined || v === null || Number.isNaN(v))
       .map(([name]) => name)
