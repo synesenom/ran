@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- scipy reference values (`refVals`) added to 9 normal and logistic variant distributions: `HalfNormal`, `TruncatedNormal`, `SkewNormal`, `GeneralizedNormal`, `HalfLogistic`, `LogitNormal`, `Rice`, `Moyal`, `BirnbaumSaunders`. Values computed with scipy (or closed-form derivation for `LogitNormal`) and cross-validated against the built CJS bundle. Closes #127.
 - scipy reference values (`refVals`) added to 10 continuous distributions: `Chi`, `Chi2`, `StudentT`, `F`, `Erlang`, `Rayleigh`, `MaxwellBoltzmann`, `Nakagami`, `InverseGamma`, `InverseChi2`. Values were computed with scipy 1.17.1 and pin the test suite against third-party parameterization bugs. Closes #126.
 - Docs site now includes a [scipy.stats → ranjs porting guide](docs/templates/porting-scipy.pug) (`porting-scipy.html`) with side-by-side Python/JavaScript examples for the 20 most-used scipy distributions, a method-mapping table, and callouts for non-trivial parameter differences (LogNormal, Weibull, Triangular, Geometric, Hypergeometric).
 - Per-distribution subpath exports: `import Normal from 'ranjs/dist/normal'` now resolves correctly in Node.js ESM, browsers, and bundlers (Vite, Webpack, esbuild). Each of the 134 exported distributions has a corresponding self-contained ESM bundle at `dist/<name>.esm.js` (≈8–15× smaller than importing the full library). See [ADR-0005](decisions/0005-per-distribution-subpath-exports.md).
