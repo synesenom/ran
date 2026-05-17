@@ -2,6 +2,25 @@
 - improve special function precision
 
 
+# publication-grade gaps (auditable → publication-grade)
+## filed as issues
+- #211  erf/erfc: replace series expansion with continued fraction for tail accuracy
+- #212  property tests: PDF non-negativity, CDF monotonicity, quantile roundtrip
+- #213  quantile() reference values via scipy ppf() for 12 core continuous distributions
+- #214  catastrophic cancellation audit and fix (1 - exp(...) patterns near boundaries)
+- #135  second parameter set per distribution + refVals for each new set
+
+## not yet filed
+- far-tail refVals for Normal/LogNormal (±5σ, ±7σ) to expose and track erf accuracy
+- complete refVals series for all ~120 distributions (only 12 continuous covered so far)
+- refVals and property tests for discrete distributions (Binomial, Poisson, NegativeBinomial, …)
+- validate special functions (gammaLowerIncomplete, betaIncomplete, Bessel, digamma, …)
+  across full input domains against scipy/boost, not just spot checks
+- systematic parameter-space coverage: grid of parameter values per distribution,
+  not just two hand-picked sets
+- document accuracy bounds: "Normal CDF accurate to X ULP for |x| ≤ Y" etc.
+
+
 # dist
 - ARGUS                                 https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.argus.html
                                         https://en.wikipedia.org/wiki/ARGUS_distribution
