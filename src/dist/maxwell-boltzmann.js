@@ -15,11 +15,24 @@ import Distribution from './_distribution'
  */
 export default class extends Gamma {
   constructor (a) {
-    super(1.5, 2 * a * a)
+    // X = sqrt(Y) where Y ~ Gamma(3/2, rate=1/(2a²)); Jacobian gives Maxwell-Boltzmann PDF
+    super(1.5, 0.5 / (a * a))
 
     // Validate parameters
     Distribution.validate({ a }, [
       'a > 0'
     ])
+  }
+
+  _generator () {
+    return Math.sqrt(super._generator())
+  }
+
+  _pdf (x) {
+    return 2 * x * super._pdf(x * x)
+  }
+
+  _cdf (x) {
+    return super._cdf(x * x)
   }
 }

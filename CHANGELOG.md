@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- scipy reference values (`refVals`) added to 10 continuous distributions: `Chi`, `Chi2`, `StudentT`, `F`, `Erlang`, `Rayleigh`, `MaxwellBoltzmann`, `Nakagami`, `InverseGamma`, `InverseChi2`. Values were computed with scipy 1.17.1 and pin the test suite against third-party parameterization bugs. Closes #126.
 - Docs site now includes a [scipy.stats → ranjs porting guide](docs/templates/porting-scipy.pug) (`porting-scipy.html`) with side-by-side Python/JavaScript examples for the 20 most-used scipy distributions, a method-mapping table, and callouts for non-trivial parameter differences (LogNormal, Weibull, Triangular, Geometric, Hypergeometric).
 - Per-distribution subpath exports: `import Normal from 'ranjs/dist/normal'` now resolves correctly in Node.js ESM, browsers, and bundlers (Vite, Webpack, esbuild). Each of the 134 exported distributions has a corresponding self-contained ESM bundle at `dist/<name>.esm.js` (≈8–15× smaller than importing the full library). See [ADR-0005](decisions/0005-per-distribution-subpath-exports.md).
 - Automated npm publish workflow (`.github/workflows/release.yml`): pushing a `v*` tag now runs lint, typecheck, and tests before publishing to npm with provenance attestation. Requires an `NPM_TOKEN` secret in repository settings.
@@ -16,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `MaxwellBoltzmann` constructor now passes rate = 1/(2a²) to the Gamma base class (was incorrectly 2a²). The distribution was previously self-consistent but produced values from the wrong density; the correct PDF is f(x;a) = sqrt(2/π) x² exp(−x²/2a²) / a³. Closes #126.
 - `erf` and `erfc` in `src/special/error.js` now use a hybrid Taylor series (|x| ≤ 2) / Laplace continued fraction (|x| > 2) instead of delegating to `gammaLowerIncomplete`/`gammaUpperIncomplete`. This fixes relative precision loss in the tails (5σ+) and resolves the `// TODO Replace with continued fraction` comments. Adds far-tail `Normal(0, 2)` reference values at x = ±10 and ±14 to the test suite. Closes #211.
 
 ### Changed
