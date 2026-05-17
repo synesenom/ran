@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs'
 import { createRequire } from 'module'
 import terser from '@rollup/plugin-terser'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
@@ -9,7 +10,7 @@ const meta = require('./package.json')
 
 const copyright = `// ${meta.homepage} v${meta.version} Copyright ${(new Date).getFullYear()} ${meta.author.name}`
 
-export default {
+const monolithic = {
   input: 'src/index.js',
   plugins: [nodeResolve()],
   output: [
@@ -31,3 +32,22 @@ export default {
     }
   ]
 }
+
+// Parse actively-exported distributions from src/dist/index.js (non-commented lines only).
+// See decisions/0005-per-distribution-subpath-exports.md and
+// solutions/tooling/2026-05-17-1033-node-esm-subpath-exports-require-prebuilt-bundles.md
+const indexSrc = readFileSync('./src/dist/index.js', 'utf8')
+const distNames = [...indexSrc.matchAll(/^export.*from '\.\/([a-z0-9][a-z0-9-]*)'$/gm)]
+  .map(m => m[1])
+
+const perDist = distNames.map(name => ({
+  input: `src/dist/${name}.js`,
+  plugins: [nodeResolve()],
+  output: {
+    file: `dist/${name}.esm.js`,
+    format: 'es',
+    banner: copyright
+  }
+}))
+
+export default [monolithic, ...perDist]

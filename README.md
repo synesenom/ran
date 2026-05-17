@@ -44,6 +44,17 @@ npm install ranjs
 
 ### distributions
 
+Import a single distribution directly (Node ESM, Vite, Webpack, esbuild):
+
+```javascript
+import Normal from 'ranjs/dist/normal'
+
+const n = new Normal(0, 1)
+console.log(n.pdf(0)) // => 0.3989422804014327
+```
+
+Or import the full library (CommonJS / browser script):
+
 ```javascript
 const ran = require('ranjs')
 
