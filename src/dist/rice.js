@@ -1,4 +1,4 @@
-import { besselI, marcumQ } from '../special'
+import { besselI, marcumP } from '../special'
 import gamma from './_gamma'
 import poisson from './_poisson'
 import Distribution from './_distribution'
@@ -65,6 +65,9 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return 1 - marcumQ(1, this.c[0], Math.pow(x / this.p.sigma, 2) / 2)
+    // Complementary Marcum Q avoids catastrophic cancellation in the
+    // lower tail: `1 - marcumQ(...)` would lose precision because
+    // marcumQ internally forms `1 - P` to deliver Q (#246).
+    return marcumP(1, this.c[0], Math.pow(x / this.p.sigma, 2) / 2)
   }
 }
