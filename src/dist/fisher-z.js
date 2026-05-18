@@ -18,7 +18,8 @@ export default class extends F {
   constructor (d1, d2) {
     const d1i = Math.round(d1)
     const d2i = Math.round(d2)
-    // F's constructor halves d.o.f. internally when calling Beta; pass full d.o.f. (issue #130)
+    // F's constructor halves d.o.f. internally when calling Beta; pass full d.o.f.
+    // See solutions/correctness/2026-05-18-0534-fisher-z-double-halving-subclass-delegation.md
     super(d1i, d2i)
 
     // this.c[0] is logBeta(d1/2, d2/2) from Beta's constructor; indices 1-2 also used by Beta
