@@ -45,9 +45,10 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    // u/(1+u) avoids cancellation in 1-1/(1+u) when u = expm1(lambda*x)^kappa is near 0
+    // u/(1+u) avoids cancellation in 1-1/(1+u) when u = expm1(lambda*x)^kappa is near 0;
+    // guard against overflow: expm1(large) = Infinity, so u/(1+u) = NaN — return 1 instead
     const u = Math.pow(Math.expm1(this.p.lambda * x), this.p.kappa)
-    return u / (1 + u)
+    return Number.isFinite(u) ? u / (1 + u) : 1
   }
 
   _q (p) {
