@@ -1,3 +1,4 @@
+import { gammaUpperIncomplete } from '../special'
 import Gamma from './gamma'
 
 /**
@@ -41,6 +42,7 @@ export default class extends Gamma {
   }
 
   _cdf (x) {
-    return 1 - super._cdf(1 / x)
+    // Direct upper gamma avoids catastrophic cancellation when beta/x is large (x near 0)
+    return gammaUpperIncomplete(this.p.alpha, this.p.beta / x)
   }
 }
