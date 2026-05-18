@@ -168,6 +168,13 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
+    // Near x = 0 the dominant j = 0 term is dropped by the backward series loop, so collapse to
+    // the j=0-only closed form. Threshold matches NoncentralT._pdf convention.
+    if (Math.abs(x) < Number.EPSILON) {
+      const kj0 = (this.p.nu + 1) / 2
+      return Math.exp(this.c[0]) * gamma(kj0) * f11(kj0, this.p.nu / 2, this.p.theta / 2)
+    }
+
     // When mu = 0, all j > 0 terms in the series carry a factor of mu^j = 0, so only j = 0 survives.
     if (this.p.mu === 0) {
       const tk = 1 + x * x / this.p.nu
