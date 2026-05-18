@@ -69,6 +69,20 @@ Convolution of a Normal(μ, σ²) and an Exponential(λ) distribution; common in
 - Requires accurate `error.js` (erfc in tail)
 - Refs: [Wikipedia](https://en.wikipedia.org/wiki/Exponentially_modified_Gaussian_distribution)
 
+#### Asymmetric Laplace
+Two-sided exponential with an asymmetry parameter κ > 0. Reduces to symmetric Laplace when κ = 1. The likelihood kernel for Bayesian quantile regression and the prior implied by LASSO.
+- **PDF:** f(x; μ, σ, κ) = (√2/σ) · κ/(1+κ²) · exp(−√2·κ^(∓1)/σ · |x−μ|), sign depending on which side of μ
+- **CDF:** closed form involving exp
+- **Sampling:** inversion via closed-form quantile function
+- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Asymmetric_Laplace_distribution); Kozubowski & Podgórski (2001) *Statistical Inference for Stochastic Processes* 4:73–104
+
+#### Tweedie (Compound Poisson-Gamma)
+Family parameterised by a power index p ∈ (1, 2): for fixed p the distribution is compound Poisson with Gamma-distributed cluster masses. Used in insurance loss models (exact-zero outcomes with a continuous positive tail), rainfall accumulation, and any GLM with a non-negative response. Special cases: p = 1 is Poisson, p = 2 is Gamma.
+- **PMF/PDF:** no closed form; computed via a rapidly converging series over the compound Poisson terms
+- **Sampling:** exact via compound structure — draw N ~ Poisson(λ), then sum N independent Gamma(α, β) variates
+- **Dependency:** `_poisson.js`, `_gamma.js` (both already in `src/dist/`); `neumaier.js` for the series PDF
+- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Tweedie_distribution); Jørgensen (1987) *JRSS-B* 49(2):127–162
+
 #### Stable (Lévy α-stable)
 Four-parameter family (α ∈ (0,2], β ∈ [−1,1], γ ≥ 0, δ ∈ ℝ) encompassing all distributions that are limits of normalized sums of iid random variables. No closed-form PDF/CDF except for special cases (Cauchy: α=1, β=0; Gaussian: α=2; Lévy: α=½, β=1).
 - **Sampling:** Chambers-Mallows-Stuck (CMS) algorithm — exact, O(1)
@@ -81,14 +95,14 @@ Four-parameter family (α ∈ (0,2], β ∈ [−1,1], γ ≥ 0, δ ∈ ℝ) enco
 Special case of the Generalized Hyperbolic distribution with δ = 0. Popular in option pricing (Madan-Seneta model).
 - **PDF:** f(x; μ, σ, ν, θ) involves |x−μ|^(λ−½) · K_{λ−½}(α|x−μ|) where α = √(θ²/σ⁴ + 2/(σ²ν)), λ = 1/ν
 - **Sampling:** via variance-mean mixture: X | G ~ Normal(μ + θG, σ²G), G ~ Gamma(1/ν, ν)
-- **Dependency:** `bessel.js` (K_{λ−½}), `_gamma.js`
+- **Dependency:** `bessel.js` (K_{λ−½}), `_gamma.js` — **`besselK` is currently absent from `src/special/`; must be added first**
 - Refs: [Wikipedia](https://en.wikipedia.org/wiki/Variance-gamma_distribution)
 
 #### Normal-Inverse Gaussian (NIG)
 Special case of the Generalized Hyperbolic distribution with λ = −½. Popular in financial return modelling and engineering.
 - **PDF:** f(x; μ, α, β, δ) = (αδ/π) · K₁(α√(δ²+(x−μ)²)) / √(δ²+(x−μ)²) · exp(δγ + β(x−μ))  where γ = √(α²−β²)
 - **Sampling:** via the representation X | V ~ Normal(μ + βV, V), V ~ InverseGaussian(δ/γ, δ²)
-- **Dependency:** `bessel.js` (K₁), `inverse-gaussian.js` (already in `src/dist/`)
+- **Dependency:** `bessel.js` (K₁), `inverse-gaussian.js` — **`besselK` is currently absent from `src/special/`; must be added first**
 - Refs: [scipy `norminvgauss`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.norminvgauss.html)
 
 #### Generalized Hyperbolic
@@ -99,6 +113,7 @@ A five-parameter family (λ, α, β, μ, δ) that unifies several heavy-tailed d
 - **Student-t:** α = 0 (limit)
 - **PDF:** involves modified Bessel function K_λ(·) — needs accurate `bessel.js`
 - **Sampling:** via the GIG (Generalized Inverse Gaussian) mixing representation
+- **Prerequisite:** `besselK` (second-kind modified Bessel, all real orders) is currently absent from `src/special/bessel.js` — must be added before this distribution can be implemented
 - Refs: [Wikipedia](https://en.wikipedia.org/wiki/Generalised_hyperbolic_distribution)
 
 #### Normal-Inverse Gamma
@@ -111,7 +126,7 @@ Conjugate prior for the mean and variance of a normal distribution in Bayesian a
 Distribution of Z = X·Y where X, Y ~ Normal(0, 1) independently. The sampler is trivial; the main work is implementing the PDF via K₀.
 - **PDF:** f(z) = K₀(|z|)/π where K₀ is the modified Bessel function of the second kind, order 0
 - **Sampling:** trivial — multiply two standard Normal samples
-- **Dependency:** `bessel.js` (K₀)
+- **Dependency:** `bessel.js` (K₀) — **`besselK` is currently absent from `src/special/`; must be added first**
 - Refs: [MathWorld](http://mathworld.wolfram.com/NormalProductDistribution.html)
 
 #### Normal-Exponential-Gamma (NEG)
@@ -121,6 +136,14 @@ Three-parameter scale mixture of normals where the variance follows a Gamma prio
 #### Generalized Beta-Prime
 Extension of the Beta-Prime (a.k.a. inverted-Beta, Pearson type VI) distribution with additional shape parameters. Beta-Prime itself is already in `src/dist/beta-prime.js`.
 - Refs: [scipy `betaprime`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.betaprime.html) with extended parameterization
+
+#### Generalized Logistic Type IV (Skew-Logistic)
+The four-type Generalized Logistic family has Types I–IV in the literature; the library's `GeneralizedLogistic` covers only one parameterisation. Type IV has a PDF expressible as a rescaled beta density on the logistic scale, nesting the symmetric logistic at α = β = 1. Used in extreme-value theory and L-moments hydrology (Hosking framework).
+- **PDF:** f(x; α, β) = B(α, β)⁻¹ · exp(−αx) / (1 + exp(−x))^(α+β)
+- **CDF:** I(eˣ/(1+eˣ); α, β) — regularized incomplete beta
+- **Sampling:** logit transform of a Beta(α, β) variate
+- **Dependency:** `beta-incomplete.js` (already in `src/special/`)
+- Refs: Hosking, J.R.M. (1994) "The four-parameter kappa distribution", *IBM Journal of Research and Development* 38(3):251–258
 
 #### Power-Lognormal
 Generalization of the lognormal distribution by raising its CDF to a power p. Also called the "Crow distribution." Used in reliability engineering.
@@ -133,11 +156,42 @@ Generalization of the lognormal distribution by raising its CDF to a power p. Al
 Generalization of `src/dist/half-logistic.js` with an additional shape parameter controlling tail weight. Used in reliability and survival analysis.
 - Refs: [scipy `genhalflogistic`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.genhalflogistic.html)
 
+#### Exponentiated Exponential (Gupta-Kundu)
+Two-parameter alternative to the Gamma and Weibull for lifetime data; has a simpler closed-form CDF that makes parameter estimation easier. Can be implemented as a thin subclass of the existing `ExponentiatedWeibull` with shape k = 1 fixed.
+- **CDF:** F(x; α, λ) = (1 − e^(−λx))^α
+- **PDF:** f(x; α, λ) = α·λ·e^(−λx)·(1−e^(−λx))^(α−1)
+- **Sampling:** exact inversion: x = −log(1−u^(1/α))/λ
+- Note: `ExponentiatedWeibull` is already in `src/dist/exponentiated-weibull.js`; this can subclass it with k = 1
+- Refs: Gupta, R.D. & Kundu, D. (1999) "Generalized exponential distributions", *Australian & New Zealand Journal of Statistics* 41(2):173–188
+
+#### Two-Component Weibull Mixture
+Standard model for bimodal failure-time data (infant mortality + wear-out failure modes). Widely used in mechanical reliability, semiconductor burn-in, and field-return analysis (MIL-HDBK-338B).
+- **PDF:** f(x; λ₁, k₁, λ₂, k₂, p) = p·Weibull(λ₁,k₁) + (1−p)·Weibull(λ₂,k₂)
+- **Sampling:** draw Bernoulli(p), then sample from the selected Weibull component
+- **Dependency:** `src/dist/weibull.js` (already present)
+- Refs: [Wikipedia — mixture distribution](https://en.wikipedia.org/wiki/Mixture_distribution)
+
 #### Gauss Hypergeometric
 Continuous distribution on [0, 1] whose PDF involves the Gauss hypergeometric function ₂F₁.
 - **PDF:** f(x; a, b, c, z) ∝ x^a · (1−x)^b · (1+zx)^c
 - **Dependency:** `hypergeometric.js` must implement ₂F₁ accurately for |z| < 1
 - Refs: [scipy `gausshyper`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gausshyper.html)
+
+#### Wrapped Cauchy
+Heavy-tailed circular distribution on [−π, π); the stereographic projection of a Cauchy distribution onto the circle. Used in wind direction modelling, paleomagnetism, and neuroscience (head direction cells). The only other circular distribution in the library is `VonMises`.
+- **PDF:** f(θ; μ, ρ) = (1/(2π)) · (1−ρ²) / (1 + ρ² − 2ρ·cos(θ−μ)),  ρ ∈ (0,1)
+- **CDF:** closed form via arctan
+- **Sampling:** exact inversion via closed-form quantile
+- No special functions required
+- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Wrapped_Cauchy_distribution)
+
+#### Wrapped Normal
+Circular diffusion model; the standard distribution for random-walk turning angles in animal movement ecology, ocean current headings, and wind direction statistics.
+- **PDF:** f(θ; μ, σ) = (1/(σ√(2π))) · Σₖ exp(−(θ−μ+2πk)²/(2σ²)), series truncated at ~5 terms for σ < π
+- **CDF:** numerical integration (Romberg, already in `src/algorithms/`)
+- **Sampling:** trivial — (Normal(μ, σ) mod 2π)
+- **Dependency:** `neumaier.js` for accurate series summation
+- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Wrapped_normal_distribution)
 
 #### Reciprocal Normal
 Distribution of 1/X when X ~ Normal(μ, σ²). Proper only when the normal has negligible mass near zero (μ ≫ σ).
@@ -200,6 +254,20 @@ One-parameter distribution on [0, *c*] from particle physics (ARGUS experiment a
 - **Dependency:** `gamma-incomplete.js` must be accurate near 0
 - Refs: [scipy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.argus.html), [Wikipedia](https://en.wikipedia.org/wiki/ARGUS_distribution)
 
+#### Maxwell-Jüttner
+Relativistic analogue of the `MaxwellBoltzmann` distribution (already in the library); describes particle momenta in a relativistic ideal gas. Used in plasma physics and astrophysics.
+- **PDF:** f(p; θ) = p² / (θ · K₂(1/θ)) · exp(−√(1+p²)/θ),  θ = kT/(mc²)
+- **Sampling:** rejection sampling against a Maxwellian envelope
+- **Prerequisite:** `besselK` (K₂ via recurrence K₂(z) = (2/z)·K₁(z) + K₀(z)) — must be added to `src/special/` first
+- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Maxwell%E2%80%93J%C3%BCttner_distribution)
+
+#### Power Benini
+Two-shape-parameter extension of the existing `Benini` distribution used in actuarial income and loss severity fitting. The extra shape parameter covers cases where the standard Benini cannot fit the tail.
+- **CDF:** F(x; α, β, σ) = 1 − exp(−α·log(x/σ) − β·log(x/σ)²)
+- **Sampling:** inversion via quadratic formula in log(x/σ)
+- Note: `Benini` is already in `src/dist/benini.js`; this is a direct generalisation
+- Refs: Klugman, S.A., Panjer, H.H. & Willmot, G.E. (2012) *Loss Models*, 4th ed., Chapter 3
+
 ---
 
 #### Double Exponential
@@ -232,11 +300,32 @@ Discrete analogue of the Laplace distribution; symmetric about an integer locati
 - **Sampling:** difference of two independent Geometric variates
 - Refs: [scipy `dlaplace`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.dlaplace.html)
 
+#### Conway-Maxwell-Poisson (COM-Poisson)
+The only distribution in the library that would cover *under-dispersion* (variance < mean). The Poisson, Negative Binomial, and Delaporte all cover over-dispersion; no existing discrete distribution handles count data with variance < mean, which arises in quality control, sports scoring, and retail transaction data.
+- **PMF:** f(k; λ, ν) = λᵏ / ((k!)^ν · Z(λ, ν)) where Z = Σ λʲ/(j!)^ν
+- **Sampling:** via the PreComputed table pattern (same as Delaporte, NeymanA, PolyaAeppli)
+- **Dependency:** `neumaier.js` for computing the normalizing constant Z; `PreComputed` base class — both already present
+- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Conway%E2%80%93Maxwell%E2%80%93Poisson_distribution); Shmueli et al. (2005) *JRSS-C* 54(1):127–142
+
 #### Waring
 Generalization of the Yule-Simon distribution (already `[partial]` below). Yule-Simon is the special case σ = 1.
 - **PMF:** P(X = k) = B(k + σ, ρ) / B(σ, ρ − 1) for k = 0, 1, 2, ..., where ρ > 1, σ > 0
 - **CDF:** at NIST reference
 - Refs: [NIST Dataplot](https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bgepdf.htm)
+
+#### Sibuya
+Discrete power-law distribution with an O(1) exact sampler. Used in species abundance models, fragmentation theory, and as the innovation distribution in INAR(1) integer-valued time series.
+- **PMF:** P(X = k; α) = (−1)^(k−1) · C(α, k) = α · Γ(k−α) / (Γ(1−α) · k!),  α ∈ (0, 1)
+- **Sampling:** exact in O(1): k = ⌈U^(−1/α)⌉ where U ~ Uniform(0,1), with geometric thinning
+- **Dependency:** `log-gamma.js` for PMF evaluation (already in `src/special/`)
+- Refs: Sibuya, M. (1979) "Generalized hypergeometric, digamma and trigamma distributions", *Ann. Inst. Stat. Math.* 31(1):373–390
+
+#### Panjer (a,b,0) Class
+Unified actuarial recursion that subsumes Poisson, Binomial, and Negative Binomial via a single recurrence f(k) = (a + b/k)·f(k−1). Allows parameter sweeps across the entire class without selecting a named distribution; central to aggregate loss modelling in non-life insurance.
+- **PMF:** defined by recursion coefficients (a, b) and initial mass f(0); Poisson: a=0, b=λ; Binomial: a=−p/(1−p), b=(n+1)p/(1−p); NegBinom: a=p, b=(r−1)p
+- **Sampling:** via PreComputed PMF table
+- **Dependency:** `PreComputed` base class (already present)
+- Refs: Panjer, H.H. (1981) "Recursive evaluation of a family of compound distributions", *ASTIN Bulletin* 12(1):22–26
 
 #### Extended Negative Binomial
 More general form of the Negative Binomial; PMF includes a zero-truncation or zero-inflation correction.
@@ -261,6 +350,12 @@ Discrete distribution for the number of mutant cells in a fluctuation assay (Lur
 ---
 
 *Low-priority — specialist or narrow-domain distributions.*
+
+#### Dirichlet-Multinomial (Pólya Distribution)
+Marginal distribution of a Multinomial(n, p) when p is drawn from Dirichlet(α). The univariate marginal for a single component is the Beta-Binomial (already implemented); this is the multivariate generalisation. Central to topic modelling (LDA) and Bayesian A/B tests with more than two buckets.
+- **PMF:** f(k; n, α) = C(n; k) · B(k+α) / B(α) where B is the multivariate beta function
+- **Prerequisite:** The `Distribution` base class (`_pdf(x)`, `_cdf(x)`, `_generator()`) is scalar-valued. A **multivariate distribution base class** must be designed and filed as a separate architectural issue before this or any other vector-valued distribution (Dirichlet, Multivariate Normal, Wishart) can be added.
+- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Dirichlet-multinomial_distribution)
 
 #### Beta-Geometric
 **[partial]** — `src/dist/beta-geometric.js` — PMF and generator are present but carry a `// TODO Use log PDF` note. The current `_pk` computes `Math.exp(logBeta(…) − logBeta(…))` directly; for large k the difference of log-betas should be returned as-is (log-PMF) to avoid underflow, and the PreComputed base class updated to consume log probabilities.
@@ -456,11 +551,11 @@ Functions needed for the distributions above or otherwise missing:
 
 | Function | Needed by | Notes |
 |----------|-----------|-------|
+| **`besselK` — K_ν(x), all real ν** | NIG, Variance-Gamma, Normal Product, Generalized Hyperbolic, Maxwell-Jüttner | **Entirely absent.** `src/special/bessel.js` exports only first-kind functions (I_ν). K_ν must be added as a standalone prerequisite issue before any of the listed distributions can be implemented. Recurrence: K_{n+1}(x) = (2n/x)·K_n(x) + K_{n−1}(x); seed from K_0 and K_1 series. |
 | Polygamma ψₙ(x), n ≥ 1 | Various | Trigamma (n=1) most urgent; can derive from digamma recurrence + Euler-Maclaurin |
 | Exponential integral Eₙ(x), Ei(x) | Planck CDF | Related to incomplete gamma; Ei(x) = −E₁(−x) for x > 0 |
 | Polylogarithm Liₛ(z) | Planck CDF, Fermi-Dirac | Li₂ (dilogarithm) has known series; general Liₛ needs Lerch transcendent |
 | Elliptic integrals K(k), E(k) | Some special distributions | Carlson symmetric forms most numerically stable |
-| Modified Bessel K_ν (general ν) | NIG, Variance-Gamma | `bessel.js` may only implement integer orders; check and extend to real ν |
 | `log1p(x)`, `expm1(x)` | Catastrophic cancellation (#214) | Use `Math.log1p` / `Math.expm1` (native in JS); ensure they are used consistently |
 
 - Full reference: [Boost.Math special functions](https://www.boost.org/doc/libs/1_77_0/libs/math/doc/html/special.html)
