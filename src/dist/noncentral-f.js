@@ -47,10 +47,12 @@ export default class extends NoncentralBeta {
   }
 
   _pdf (x) {
+    if (x === 0) return 0
     return this.p.d1 * this.p.d2 * super._pdf(this.p.d1 * x / (this.p.d2 + this.p.d1 * x)) / Math.pow(this.p.d2 + this.p.d1 * x, 2)
   }
 
   _cdf (x) {
+    if (x === 0) return 0
     const y = this.p.d1 * x
     return super._cdf(1 / (1 + this.p.d2 / y))
   }
