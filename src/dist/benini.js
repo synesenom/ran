@@ -56,7 +56,8 @@ export default class extends Distribution {
 
   _cdf (x) {
     const y = Math.log(x / this.p.sigma)
-    return 1 - Math.exp(-y * (this.p.alpha + this.p.beta * y))
+    // -expm1 avoids catastrophic cancellation when y = log(x/sigma) is near 0 (x near sigma)
+    return -Math.expm1(-y * (this.p.alpha + this.p.beta * y))
   }
 
   _q (p) {

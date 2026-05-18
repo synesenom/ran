@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Catastrophic cancellation in `_cdf` near the lower support boundary fixed for 13 distributions: `Exponential`, `Benini`, `Gompertz`, `Hyperexponential`, `GeneralizedPareto` (both ξ=0 and ξ≠0 branches), `Lomax`, `Burr`, `Pareto`, `GammaGompertz`, `Makeham`, `GeneralizedExponential`, `HalfLogistic`, `LogisticExponential`, `Muth`. All fixes use `Math.expm1`/`Math.log1p` builtins or `Math.tanh` to retain full double-precision accuracy when the CDF argument approaches zero. Boundary-region reference values added to verify correctness. Closes #214.
+
 ### Added
 
 - scipy/R reference values (`refVals`) added to 7 noncentral distributions: `NoncentralBeta`, `NoncentralChi`, `NoncentralChi2`, `NoncentralF`, `NoncentralT`, `DoublyNoncentralF`, `DoublyNoncentralT`. Singly-noncentral values from `scipy.stats.{ncx2, ncf, nct}` and R `dbeta/pbeta(ncp=...)`; doubly-noncentral values from Poisson-mixture decomposition built on scipy primitives (CRAN `sadists` was unreachable). `NoncentralT.cases[0]` was reordered so `refVals` exercise the noncentral code path (μ=1) rather than the central-t branch (μ=0). Cross-validation surfaced two pre-existing NaN-at-x=0 bugs (`NoncentralBeta` and `DoublyNoncentralT` at closed-support boundaries) — tracked separately as #230 and #229. Closes #133.

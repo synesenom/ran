@@ -49,8 +49,10 @@ export default class extends Distribution {
   _cdf (x) {
     const z = (x - this.p.mu) / this.p.sigma
     return this.p.xi === 0
-      ? 1 - Math.exp(-z)
-      : 1 - Math.pow(1 + this.p.xi * z, -1 / this.p.xi)
+      // -expm1(-z) avoids catastrophic cancellation when z = (x-mu)/sigma is near 0
+      ? -Math.expm1(-z)
+      // -expm1(-log1p(xi*z)/xi) avoids cancellation when xi*z is near 0
+      : -Math.expm1(-Math.log1p(this.p.xi * z) / this.p.xi)
   }
 
   _q (p) {
