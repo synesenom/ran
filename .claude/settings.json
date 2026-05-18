@@ -1,4 +1,10 @@
 {
+  "permissions": {
+    "allow": [
+      "Edit(.claude/tmp*)",
+      "Write(.claude/tmp*)"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {
