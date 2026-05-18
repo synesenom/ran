@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Catastrophic cancellation in `InverseChi2._cdf` at small `x` fixed by computing the upper tail directly via `gammaUpperIncomplete(nu/2, 0.5/x)` instead of `1 - gammaLowerIncomplete(...)`. Previously, `InverseChi2(6).cdf(0.01)` returned `0` due to `1 - (1 - 2.5e-19)` rounding to zero; it now returns the correct value `≈ 2.51e-19` at full double precision. Boundary-region reference value at `x=0.01` added to the test suite. The `checkRefVals` test helper was extended with a relative-tolerance fallback for sub-precision expected values so future cancellation bugs cannot pass vacuously under the absolute `1e-9` tolerance. Closes #243.
 - Catastrophic cancellation in `_cdf` near the lower support boundary fixed for 13 distributions: `Exponential`, `Benini`, `Gompertz`, `Hyperexponential`, `GeneralizedPareto` (both ξ=0 and ξ≠0 branches), `Lomax`, `Burr`, `Pareto`, `GammaGompertz`, `Makeham`, `GeneralizedExponential`, `HalfLogistic`, `LogisticExponential`, `Muth`. All fixes use `Math.expm1`/`Math.log1p` builtins or `Math.tanh` to retain full double-precision accuracy when the CDF argument approaches zero. Boundary-region reference values added to verify correctness. Closes #214.
 
 ### Added
