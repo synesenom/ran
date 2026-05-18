@@ -244,7 +244,7 @@ export default [{
   cases: [{
     params: () => [5, 5]
   }],
-  // k=±1 skipped: ~7.7e-10 precision loss from besselI(1, ·) exceeds 1e-10 refVal tolerance
+  // k=±1 skipped: ~7.7e-10 precision loss from besselI(1, ·) exceeds 1e-10 refVal tolerance — see #225
   refVals: [
     { x: -10, pmf: 0.000993881922213998, cdf: 0.0015932746537998337 },
     { x: -5, pmf: 0.03528429361493396, cdf: 0.07572690384881897 },
