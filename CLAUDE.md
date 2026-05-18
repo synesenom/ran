@@ -65,7 +65,9 @@ npm run typecheck
 ## GitHub Issues
 
 - **Always use the `ops-issue` agent** when creating GitHub issues. Never call `gh issue create` directly.
-- Every issue must have both a **priority** label (`high`, `medium`, `low`) and a **difficulty** label (`difficult`, `moderate`, `trivial`).
+- Every issue must have a **priority** label (`high`, `medium`, `low`) and a **difficulty** label (`difficult`, `moderate`, `trivial`).
+- Breaking-change issues also get a **`major`** label. Breaking means: constructor or public-method rename/removal, or a wrong-distribution fix that changes computed values for existing inputs. Everything else gets no semver label.
+- Every issue must be assigned to a **milestone**: `v2.0.0` for `major` issues, `v1.25.0` for everything else. The `ops-issue` agent sets this automatically. A GitHub Actions workflow (`.github/workflows/require-milestone.yml`) flags any issue opened without a milestone.
 - **One concern per issue.** Reject titles that contain `+`, "and", or comma-separated lists of changes.
 - **PR size cap is enforced via the issue template.** Production-code diff must stay under ~400 lines (tests excluded). If a feature can't fit, decompose before filing.
 - **Mandatory bug triage on every fix/hotfix/build.** `/hotfix`, `/fix`, and `/build` each have a dedicated **Bug Triage** stage that invokes the `ops-triage` agent to classify observations into `definite` / `ambiguous` / `not_a_bug`. `definite` bugs are auto-filed via `ops-issue` in a batch; `ambiguous` cases are escalated to the user in a single prompt; `not_a_bug` is silent. Do not skip the stage even if the session feels clean — the agent will skim the diff for red flags as a safety net.
@@ -104,11 +106,12 @@ When a change touches many files (new base class method, convention rename acros
 
 **Release PR:** Rename `## [Unreleased]` to `## [x.y.z] - YYYY-MM-DD`, add a new empty `## [Unreleased]` above it, and bump `version` in `package.json`. For vulnerabilities that cannot be fixed without a breaking toolchain change, document the accepted risk in the changelog entry with a reference to the tracking issue.
 
-**Triggering a release:** After the release PR is merged, create and push a tag:
+**Triggering a release:** Use the `/release` skill from a machine where `gh` and `git` are available. It handles the full pipeline end-to-end: version bump, changelog, release PR, merge, tag, and milestone rotation. Run it as:
 ```bash
-git tag v1.25.0 && git push origin v1.25.0
+/release          # bumps minor automatically (1.24.6 → 1.25.0)
+/release 1.25.0   # explicit version
 ```
-This triggers `.github/workflows/release.yml`, which runs lint → typecheck → tests → `npm publish --provenance`. Prerequisites: an `NPM_TOKEN` **granular access token** (not a classic automation token) must be stored in GitHub repository Settings → Secrets → Actions, and tag protection rules must restrict `v*` tag creation to maintainers (Settings → Rules → Tag protection).
+The skill pushes `v{version}` which triggers `.github/workflows/release.yml` (lint → typecheck → tests → `npm publish --provenance`). Prerequisites: an `NPM_TOKEN` **granular access token** (not a classic automation token) must be stored in GitHub repository Settings → Secrets → Actions, and tag protection rules must restrict `v*` tag creation to maintainers (Settings → Rules → Tag protection).
 
 ## Documentation
 
