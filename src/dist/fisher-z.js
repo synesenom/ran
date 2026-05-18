@@ -18,7 +18,8 @@ export default class extends F {
   constructor (d1, d2) {
     const d1i = Math.round(d1)
     const d2i = Math.round(d2)
-    super(d1i / 2, d2i / 2)
+    // F's constructor halves d.o.f. internally when calling Beta; pass full d.o.f. (issue #130)
+    super(d1i, d2i)
 
     // this.c[0] is logBeta(d1/2, d2/2) from Beta's constructor; indices 1-2 also used by Beta
     this.c[3] = Math.LN2 + (this.p.d1 / 2) * Math.log(this.p.d1) + (this.p.d2 / 2) * Math.log(this.p.d2) - this.c[0]

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- scipy/numpy reference values (`refVals`) added to the final 12 distributions: `InverseGaussian`, `Triangular`, `Trapezoidal`, `LogCauchy`, `LogLaplace`, `LogGamma`, `Lindley`, `Hoyt`, `FisherZ`, `StudentZ`, `Skellam` (discrete; uses `pmf`), `GeneralizedGamma`. Values computed from `scipy.stats` direct mappings, log-transformations, or change-of-variables, and numpy closed forms for Trapezoidal and Lindley — never transcribed from the ranjs source. Closes #130.
 - scipy reference values (`refVals`) added to 9 extreme-value and heavy-tail distributions: `Frechet`, `GeneralizedExtremeValue`, `GeneralizedPareto`, `Levy`, `Lomax`, `Burr`, `Dagum`, `Gompertz`, `Kolmogorov`. Values computed with scipy (Dagum cross-verified via Burr XII relationship). Closes #128.
 - scipy reference values (`refVals`) added to 9 normal and logistic variant distributions: `HalfNormal`, `TruncatedNormal`, `SkewNormal`, `GeneralizedNormal`, `HalfLogistic`, `LogitNormal`, `Rice`, `Moyal`, `BirnbaumSaunders`. Values computed with scipy (or closed-form derivation for `LogitNormal`) and cross-validated against the built CJS bundle. Closes #127.
 - scipy reference values (`refVals`) added to 10 continuous distributions: `Chi`, `Chi2`, `StudentT`, `F`, `Erlang`, `Rayleigh`, `MaxwellBoltzmann`, `Nakagami`, `InverseGamma`, `InverseChi2`. Values were computed with scipy 1.17.1 and pin the test suite against third-party parameterization bugs. Closes #126.
@@ -19,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `FisherZ` constructor now passes `(d1, d2)` to the F base class instead of `(d1/2, d2/2)`. Previously, `new FisherZ(d1, d2)` silently produced Fisher's z with degrees of freedom `(round(d1/2), round(d2/2))` (e.g. `FisherZ(5, 5)` was internally F(3, 3)). Internal-consistency tests passed because all distributional self-checks used the same wrong d.o.f. The bug was surfaced by adding scipy-independent reference values per #130. Closes #130.
 - `MaxwellBoltzmann` constructor now passes rate = 1/(2a²) to the Gamma base class (was incorrectly 2a²). The distribution was previously self-consistent but produced values from the wrong density; the correct PDF is f(x;a) = sqrt(2/π) x² exp(−x²/2a²) / a³. Closes #126.
 - `erf` and `erfc` in `src/special/error.js` now use a hybrid Taylor series (|x| ≤ 2) / Laplace continued fraction (|x| > 2) instead of delegating to `gammaLowerIncomplete`/`gammaUpperIncomplete`. This fixes relative precision loss in the tails (5σ+) and resolves the `// TODO Replace with continued fraction` comments. Adds far-tail `Normal(0, 2)` reference values at x = ±10 and ±14 to the test suite. Closes #211.
 
