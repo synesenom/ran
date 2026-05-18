@@ -38,6 +38,8 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
+    // 0^(-c-1) * exp(-inf) = inf * 0 = NaN; the mathematical limit as x→0+ is 0
+    if (x === 0) return 0
     return this.p.c * Math.pow(x, -1 - this.p.c) * Math.exp(-1 / Math.pow(x, this.p.c))
   }
 
