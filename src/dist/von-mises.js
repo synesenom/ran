@@ -65,6 +65,7 @@ export default class extends Distribution {
 
   _cdf (x) {
     // F(x) is computed according to the sum in https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_vonmises.html
+    // Series truncation causes ~3.7e-10 error vs scipy at intermediate x — see solutions/testing/2026-05-18-1415-bounded-circular-special-shape-refvals-scipy-numpy.md and #255
     return 0.5 * (1 + x / Math.PI) + recursiveSum({
       c: 0
     }, (t, i) => {
