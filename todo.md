@@ -50,50 +50,49 @@ Moving the library from *auditable* to *publication-grade* requires systematic r
 
 > Entries marked **[duplicate]** are already covered by an existing distribution under a different name.
 > Entries marked **[partial]** exist in `src/dist/` but have open TODOs or incorrect/missing implementations.
+> Within each subsection, entries are ordered from most broadly useful to most specialised.
 
 ### Continuous
 
-#### ARGUS
-One-parameter distribution on [0, *c*] from particle physics (ARGUS experiment at DESY).
-- **PDF:** f(x; c, p) ∝ x · (1 − (x/c)²)^p, standard form p = ½
-- **CDF:** involves regularized incomplete gamma
-- **Sampling:** rejection sampling or inversion via root-finding
-- **Dependency:** `gamma-incomplete.js` must be accurate near 0
-- Refs: [scipy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.argus.html), [Wikipedia](https://en.wikipedia.org/wiki/ARGUS_distribution)
-
-#### Crystal Ball
-Continuous distribution with a Gaussian core above a threshold and a power-law tail below; used ubiquitously in particle physics for signal modelling.
-- **PDF:** Gaussian for (x−μ)/σ > −α; power law C·(n/|α|·(n/|α|−|α|−(x−μ)/σ))^(−n) below
-- **CDF:** combination of erf and rational terms
-- **Sampling:** rejection or inverse CDF
-- Depends on accurate `error.js`
-- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Crystal_Ball_function)
-
-#### Davis
-**[partial]** — `src/dist/davis.js` — PDF is correct but two blockers remain:
-- `_generator()` returns a hardcoded `1` — needs actual implementation (rejection sampling with a bounding envelope over the power-law decay)
-- `_cdf()` has a stray `console.log` and uses Romberg integration; numerical CDF is acceptable (no closed form exists) but the debug statement must be removed before the distribution is usable
-- **refVals needed:** two parameter sets in `test/dist-cases-continuous.js` with PDF/CDF/quantile values cross-checked against scipy `davis` or manual integration
-- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Davis_distribution)
+#### Truncated Exponential
+Exponential distribution restricted to the interval [a, b], 0 ≤ a < b ≤ ∞. Among the simplest missing distributions; follows the same pattern as the existing `TruncatedNormal`.
+- **PDF:** f(x; λ, a, b) = λ·e^(−λx) / (e^(−λa) − e^(−λb))
+- **CDF:** (e^(−λa) − e^(−λx)) / (e^(−λa) − e^(−λb))
+- **Sampling:** inversion: x = −log(e^(−λa) − U·(e^(−λa)−e^(−λb))) / λ
+- Refs: [scipy `truncexpon`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.truncexpon.html)
 
 #### Exponentially Modified Gaussian (EMG)
-Convolution of a Normal(μ, σ²) and an Exponential(λ) distribution; common in chromatography and reaction-time modelling.
+Convolution of a Normal(μ, σ²) and an Exponential(λ) distribution; common in chromatography, neuroscience, and reaction-time modelling.
 - **PDF:** f(x; μ, σ, λ) = (λ/2) · exp(λ/2·(2μ + λσ² − 2x)) · erfc((μ + λσ² − x)/(σ√2))
 - **CDF:** combination of Φ and erfc terms
 - **Sampling:** trivially, sum an independent Normal(μ, σ) and Exponential(λ) variate
 - Requires accurate `error.js` (erfc in tail)
 - Refs: [Wikipedia](https://en.wikipedia.org/wiki/Exponentially_modified_Gaussian_distribution)
 
-#### Generalized Beta-Prime
-Extension of the Beta-Prime (a.k.a. inverted-Beta, Pearson type VI) distribution with additional shape parameters. Beta-Prime itself is already in `src/dist/beta-prime.js`.
-- Refs: scipy's `betaprime` with extended parameterization
+#### Stable (Lévy α-stable)
+Four-parameter family (α ∈ (0,2], β ∈ [−1,1], γ ≥ 0, δ ∈ ℝ) encompassing all distributions that are limits of normalized sums of iid random variables. No closed-form PDF/CDF except for special cases (Cauchy: α=1, β=0; Gaussian: α=2; Lévy: α=½, β=1).
+- **Sampling:** Chambers-Mallows-Stuck (CMS) algorithm — exact, O(1)
+- **PDF/CDF:** numerical Fourier inversion; expensive and numerically delicate
+- **Note:** This is a large implementation effort; the CMS sampler alone may ship as a first step. Several existing distributions (Cauchy, Levy) are special cases.
+- Implementation complexity: **high**
+- Refs: Chambers, J.M., Mallows, C.L. & Stuck, B.W. (1976) "A Method for Simulating Stable Random Variables", *JASA* 71(354):340–344; Nolan, J.P. (2020) *Univariate Stable Distributions*, Springer; [Wikipedia](https://en.wikipedia.org/wiki/Stable_distribution)
 
-#### Generalized Half-Logistic
-Generalization of `src/dist/half-logistic.js` with an additional shape parameter controlling tail weight.
-- Refs: [scipy `genhalflogistic`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.genhalflogistic.html)
+#### Variance-Gamma
+Special case of the Generalized Hyperbolic distribution with δ = 0. Popular in option pricing (Madan-Seneta model).
+- **PDF:** f(x; μ, σ, ν, θ) involves |x−μ|^(λ−½) · K_{λ−½}(α|x−μ|) where α = √(θ²/σ⁴ + 2/(σ²ν)), λ = 1/ν
+- **Sampling:** via variance-mean mixture: X | G ~ Normal(μ + θG, σ²G), G ~ Gamma(1/ν, ν)
+- **Dependency:** `bessel.js` (K_{λ−½}), `_gamma.js`
+- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Variance-gamma_distribution)
+
+#### Normal-Inverse Gaussian (NIG)
+Special case of the Generalized Hyperbolic distribution with λ = −½. Popular in financial return modelling and engineering.
+- **PDF:** f(x; μ, α, β, δ) = (αδ/π) · K₁(α√(δ²+(x−μ)²)) / √(δ²+(x−μ)²) · exp(δγ + β(x−μ))  where γ = √(α²−β²)
+- **Sampling:** via the representation X | V ~ Normal(μ + βV, V), V ~ InverseGaussian(δ/γ, δ²)
+- **Dependency:** `bessel.js` (K₁), `inverse-gaussian.js` (already in `src/dist/`)
+- Refs: [scipy `norminvgauss`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.norminvgauss.html)
 
 #### Generalized Hyperbolic
-A five-parameter family (λ, α, β, μ, δ) that unifies several heavy-tailed distributions. Special cases include:
+A five-parameter family (λ, α, β, μ, δ) that unifies several heavy-tailed distributions used in finance and physics. Special cases include:
 - **Normal-Inverse Gaussian (NIG):** λ = −½
 - **Variance-Gamma:** δ = 0
 - **Hyperbolic:** λ = 1
@@ -101,6 +100,62 @@ A five-parameter family (λ, α, β, μ, δ) that unifies several heavy-tailed d
 - **PDF:** involves modified Bessel function K_λ(·) — needs accurate `bessel.js`
 - **Sampling:** via the GIG (Generalized Inverse Gaussian) mixing representation
 - Refs: [Wikipedia](https://en.wikipedia.org/wiki/Generalised_hyperbolic_distribution)
+
+#### Normal-Inverse Gamma
+Conjugate prior for the mean and variance of a normal distribution in Bayesian analysis. As a univariate marginal for the mean, it reduces to a (scaled) Student-t.
+- **PDF:** f(μ, σ²; μ₀, λ, α, β) = NormalPDF(μ | μ₀, σ²/λ) · InverseGammaPDF(σ² | α, β)
+- **Sampling:** draw σ² from InverseGamma(α, β), then μ from Normal(μ₀, σ²/λ)
+- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Normal-inverse-gamma_distribution); note: special case of Generalized Hyperbolic
+
+#### Normal Product
+Distribution of Z = X·Y where X, Y ~ Normal(0, 1) independently. The sampler is trivial; the main work is implementing the PDF via K₀.
+- **PDF:** f(z) = K₀(|z|)/π where K₀ is the modified Bessel function of the second kind, order 0
+- **Sampling:** trivial — multiply two standard Normal samples
+- **Dependency:** `bessel.js` (K₀)
+- Refs: [MathWorld](http://mathworld.wolfram.com/NormalProductDistribution.html)
+
+#### Normal-Exponential-Gamma (NEG)
+Three-parameter scale mixture of normals where the variance follows a Gamma prior with an Exponential-Gamma hyperprior. Produces a heavy-tailed, leptokurtic distribution useful in sparse signal modelling. Marginal PDF has a closed form involving Kummer's confluent hypergeometric function.
+- Refs: Griffin, J.E. & Brown, P.J. (2011) "Bayesian Hyper-Lassos With Non-Convex Penalization", *Australian & New Zealand Journal of Statistics* 53(4):423–442
+
+#### Generalized Beta-Prime
+Extension of the Beta-Prime (a.k.a. inverted-Beta, Pearson type VI) distribution with additional shape parameters. Beta-Prime itself is already in `src/dist/beta-prime.js`.
+- Refs: [scipy `betaprime`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.betaprime.html) with extended parameterization
+
+#### Power-Lognormal
+Generalization of the lognormal distribution by raising its CDF to a power p. Also called the "Crow distribution." Used in reliability engineering.
+- **PDF:** f(x; σ, p) = p · φ(log x / σ) / (x · σ) · Φ(−log x / σ)^(p−1) where φ and Φ are standard normal PDF/CDF
+- **CDF:** F(x) = 1 − Φ(log x / σ)^p
+- **Sampling:** inversion: x = exp(−σ · Φ⁻¹(u^(1/p)))
+- Refs: [scipy `powerlognorm`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.powerlognorm.html)
+
+#### Generalized Half-Logistic
+Generalization of `src/dist/half-logistic.js` with an additional shape parameter controlling tail weight. Used in reliability and survival analysis.
+- Refs: [scipy `genhalflogistic`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.genhalflogistic.html)
+
+#### Gauss Hypergeometric
+Continuous distribution on [0, 1] whose PDF involves the Gauss hypergeometric function ₂F₁.
+- **PDF:** f(x; a, b, c, z) ∝ x^a · (1−x)^b · (1+zx)^c
+- **Dependency:** `hypergeometric.js` must implement ₂F₁ accurately for |z| < 1
+- Refs: [scipy `gausshyper`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gausshyper.html)
+
+#### Reciprocal Normal
+Distribution of 1/X when X ~ Normal(μ, σ²). Proper only when the normal has negligible mass near zero (μ ≫ σ).
+- **PDF:** f(y) = (1/y²) · φ((1/y − μ)/σ) / σ
+- **Sampling:** draw X ~ Normal(μ, σ), return 1/X
+- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Inverse_distribution#Reciprocal_normal_distribution)
+
+#### Non-Central η (Eta)
+Distribution of the square root of a rescaled non-central chi-squared, arising in Bayesian power analysis. Related to `NonCentralChi` in `src/dist/`.
+- Refs: [sadists R package](https://cran.r-project.org/package=sadists)
+
+#### Parabolic Fractal
+Bounded distribution with a parabolic probability density, appearing in fractal and self-similar models.
+- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Parabolic_fractal_distribution)
+
+---
+
+*Low-priority — specialist or narrow-domain distributions.*
 
 #### K-prime
 Distribution from Bayesian prediction under normal models; appears as the predictive distribution for a scaled normal ratio.
@@ -114,6 +169,13 @@ Square of the K-prime distribution; related to noncentral chi-squared in the sam
 Bayesian analogue of the t-distribution from Lecoutre (1999); defined on the positive reals.
 - Refs: [arXiv:1003.4890](https://arxiv.org/pdf/1003.4890v1.pdf), [Lecoutre 1999](https://eris62.eu/telechargements/1999Lecoutre-TwousefuldistributionsforBayesianpredictiveproceduresundernormalmodels.pdf)
 
+#### Planck
+Continuous distribution proportional to the Planck blackbody spectrum: f(x) ∝ x³/(exp(x)−1) on (0,∞).
+- **CDF:** involves the Bose-Einstein integral / polylogarithm Li₄(e^(−x)) — no elementary closed form
+- **Sampling:** rejection sampling or series expansion sampling
+- **Note:** CDF inversion requires numerical root-finding; `quantile()` must use Brent's method
+- Refs: Devroye, L. (1986) *Non-Uniform Random Variate Generation*, Chapter 10 (Planck/Bose-Einstein sampling); see also [Wikipedia — Planck's law](https://en.wikipedia.org/wiki/Planck%27s_law)
+
 #### Landau
 Continuous, asymmetric, heavy-tailed distribution describing energy loss of a charged particle traversing a thin absorber (Landau fluctuations). A special case of the Lévy stable family (α=1, β=1) and has no closed-form PDF.
 - **PDF:** approximated by Fourier series inversion or fast approximations (Moyal approximation: f(x) ≈ (1/√(2π))·exp(−(x+e^(−x))/2))
@@ -122,82 +184,43 @@ Continuous, asymmetric, heavy-tailed distribution describing energy loss of a ch
 - Implementation note: the Moyal distribution (already in `src/dist/moyal.js`) is an analytically tractable approximation; exact Landau requires numerical Fourier inversion
 - Refs: [Wikipedia](https://en.wikipedia.org/wiki/Landau_distribution)
 
-#### Normal-Exponential-Gamma (NEG)
-Three-parameter scale mixture of normals where the variance follows a Gamma prior with an Exponential-Gamma hyperprior. Produces a heavy-tailed, leptokurtic distribution useful in sparse signal modelling. Marginal PDF has a closed form involving Kummer's confluent hypergeometric function.
-- Refs: Griffin, J.E. & Brown, P.J. (2011) "Bayesian Hyper-Lassos With Non-Convex Penalization", *Australian & New Zealand Journal of Statistics* 53(4):423–442
+#### Crystal Ball
+Continuous distribution with a Gaussian core above a threshold and a power-law tail below; used in particle physics for signal modelling.
+- **PDF:** Gaussian for (x−μ)/σ > −α; power law C·(n/|α|·(n/|α|−|α|−(x−μ)/σ))^(−n) below
+- **CDF:** combination of erf and rational terms
+- **Sampling:** rejection or inverse CDF
+- Depends on accurate `error.js`
+- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Crystal_Ball_function)
 
-#### Normal-Inverse Gaussian (NIG)
-Special case of the Generalized Hyperbolic distribution with λ = −½. Popular in financial return modelling.
-- **PDF:** f(x; μ, α, β, δ) = (αδ/π) · K₁(α√(δ²+(x−μ)²)) / √(δ²+(x−μ)²) · exp(δγ + β(x−μ))  where γ = √(α²−β²)
-- **Sampling:** via the representation X | V ~ Normal(μ + βV, V), V ~ InverseGaussian(δ/γ, δ²)
-- **Dependency:** `bessel.js` (K₁), `inverse-gaussian.js` (already in `src/dist/`)
-- Refs: [scipy `norminvgauss`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.norminvgauss.html)
+#### ARGUS
+One-parameter distribution on [0, *c*] from particle physics (ARGUS experiment at DESY).
+- **PDF:** f(x; c, p) ∝ x · (1 − (x/c)²)^p, standard form p = ½
+- **CDF:** involves regularized incomplete gamma
+- **Sampling:** rejection sampling or inversion via root-finding
+- **Dependency:** `gamma-incomplete.js` must be accurate near 0
+- Refs: [scipy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.argus.html), [Wikipedia](https://en.wikipedia.org/wiki/ARGUS_distribution)
 
-#### Normal-Inverse Gamma
-Joint prior for the mean and variance of a normal distribution in Bayesian analysis. As a univariate marginal for the mean, it reduces to a (scaled) Student-t.
-- **PDF:** f(μ, σ²; μ₀, λ, α, β) = NormalPDF(μ | μ₀, σ²/λ) · InverseGammaPDF(σ² | α, β)
-- **Sampling:** draw σ² from InverseGamma(α, β), then μ from Normal(μ₀, σ²/λ)
-- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Normal-inverse-gamma_distribution); note: special case of Generalized Hyperbolic
-
-#### Normal Product
-Distribution of Z = X·Y where X, Y ~ Normal(0, 1) independently.
-- **PDF:** f(z) = K₀(|z|)/π where K₀ is the modified Bessel function of the second kind, order 0
-- **Sampling:** trivial — multiply two standard Normal samples
-- **Dependency:** `bessel.js` (K₀)
-- Refs: [MathWorld](http://mathworld.wolfram.com/NormalProductDistribution.html)
-
-#### Parabolic Fractal
-Bounded distribution with a parabolic probability density, appearing in fractal and self-similar models.
-- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Parabolic_fractal_distribution)
-
-#### Planck
-Continuous distribution proportional to the Planck blackbody spectrum: f(x) ∝ x³/(exp(x)−1) on (0,∞).
-- **CDF:** involves the Bose-Einstein integral / polylogarithm Li₄(e^(−x)) — no elementary closed form
-- **Sampling:** rejection sampling or series expansion sampling
-- **Note:** CDF inversion requires numerical root-finding; `quantile()` must use Brent's method
-- Refs: Devroye, L. (1986) *Non-Uniform Random Variate Generation*, Chapter 10 (Planck/Bose-Einstein sampling); see also [Wikipedia — Planck's law](https://en.wikipedia.org/wiki/Planck%27s_law)
-
-#### Power-Lognormal
-Generalization of the lognormal distribution by raising its CDF to a power p. Also called the "Crow distribution."
-- **PDF:** f(x; σ, p) = p · φ(log x / σ) / (x · σ) · Φ(−log x / σ)^(p−1) where φ and Φ are standard normal PDF/CDF
-- **CDF:** F(x) = 1 − Φ(log x / σ)^p
-- **Sampling:** inversion: x = exp(−σ · Φ⁻¹(u^(1/p)))
-- Refs: [scipy `powerlognorm`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.powerlognorm.html)
-
-#### Reciprocal Normal
-Distribution of 1/X when X ~ Normal(μ, σ²). Proper only when the normal has negligible mass near zero (μ ≫ σ).
-- **PDF:** f(y) = (1/y²) · φ((1/y − μ)/σ) / σ
-- **Sampling:** draw X ~ Normal(μ, σ), return 1/X
-- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Inverse_distribution#Reciprocal_normal_distribution)
-
-#### Stable (Lévy α-stable)
-Four-parameter family (α ∈ (0,2], β ∈ [−1,1], γ ≥ 0, δ ∈ ℝ) encompassing all distributions that are limits of normalized sums of iid random variables. No closed-form PDF/CDF except for special cases (Cauchy: α=1, β=0; Gaussian: α=2; Lévy: α=½, β=1).
-- **Sampling:** Chambers-Mallows-Stuck (CMS) algorithm — exact, O(1)
-- **PDF/CDF:** numerical Fourier inversion; expensive and numerically delicate
-- **Note:** This is a large implementation effort; the CMS sampler alone may ship as a first step. Several existing distributions (Cauchy, Levy) are special cases.
-- Implementation complexity: **high**
-- Refs: Chambers, J.M., Mallows, C.L. & Stuck, B.W. (1976) "A Method for Simulating Stable Random Variables", *JASA* 71(354):340–344; Nolan, J.P. (2020) *Univariate Stable Distributions*, Springer; [Wikipedia](https://en.wikipedia.org/wiki/Stable_distribution)
-
-#### Truncated Exponential
-Exponential distribution restricted to the interval [a, b], 0 ≤ a < b ≤ ∞.
-- **PDF:** f(x; λ, a, b) = λ·e^(−λx) / (e^(−λa) − e^(−λb))
-- **CDF:** (e^(−λa) − e^(−λx)) / (e^(−λa) − e^(−λb))
-- **Sampling:** inversion: x = −log(e^(−λa) − U·(e^(−λa)−e^(−λb))) / λ
-- Note: TruncatedNormal already exists in `src/dist/truncated-normal.js`; this follows the same pattern
-- Refs: [scipy `truncexpon`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.truncexpon.html)
-
-#### Variance-Gamma
-Special case of the Generalized Hyperbolic distribution with δ = 0. Popular in option pricing (Madan-Seneta model).
-- **PDF:** f(x; μ, σ, ν, θ) involves |x−μ|^(λ−½) · K_{λ−½}(α|x−μ|) where α = √(θ²/σ⁴ + 2/(σ²ν)), λ = 1/ν
-- **Sampling:** via variance-mean mixture: X | G ~ Normal(μ + θG, σ²G), G ~ Gamma(1/ν, ν)
-- **Dependency:** `bessel.js` (K_{λ−½}), `_gamma.js`
-- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Variance-gamma_distribution)
+---
 
 #### Double Exponential
 **[duplicate]** — equivalent to the Laplace distribution; already implemented in `src/dist/laplace.js`.
 
 #### Error / Exponential Power
 **[duplicate]** — equivalent to the Generalized Normal (Subbotin) distribution; already implemented in `src/dist/generalized-normal.js`.
+
+#### Davis
+**[partial]** — `src/dist/davis.js` — PDF is correct but two blockers remain:
+- `_generator()` returns a hardcoded `1` — needs actual implementation (rejection sampling with a bounding envelope over the power-law decay)
+- `_cdf()` has a stray `console.log` and uses Romberg integration; numerical CDF is acceptable (no closed form exists) but the debug statement must be removed before the distribution is usable
+- **refVals needed:** two parameter sets in `test/dist-cases-continuous.js` with PDF/CDF/quantile values cross-checked against scipy `davis` or manual integration
+- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Davis_distribution)
+
+#### Champernowne
+**[partial]** — `src/dist/champernowne.js` — Substantially incomplete:
+- `_generator()` body is empty — no sampler at all
+- `_pdf` is missing the normalization constant (`// TODO Add normalization factor`); the correct constant is C = α√(1−λ²)/π, derived from ∫ dx/(cosh(αx)+λ) = π/(α√(1−λ²))
+- `_cdf()` is wrong — returns the hardcoded constant `this.c[0] = 1` instead of F(x) = ½ + (√(1−λ²)/π)·arctan(sinh(α(x−x₀))/√(1−λ²))
+- **refVals needed:** two parameter sets in `test/dist-cases-continuous.js` with PDF/CDF/quantile values cross-checked against [Wikipedia](https://en.wikipedia.org/wiki/Champernowne_distribution) or numerical integration
 
 ---
 
@@ -209,15 +232,15 @@ Discrete analogue of the Laplace distribution; symmetric about an integer locati
 - **Sampling:** difference of two independent Geometric variates
 - Refs: [scipy `dlaplace`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.dlaplace.html)
 
+#### Waring
+Generalization of the Yule-Simon distribution (already `[partial]` below). Yule-Simon is the special case σ = 1.
+- **PMF:** P(X = k) = B(k + σ, ρ) / B(σ, ρ − 1) for k = 0, 1, 2, ..., where ρ > 1, σ > 0
+- **CDF:** at NIST reference
+- Refs: [NIST Dataplot](https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bgepdf.htm)
+
 #### Extended Negative Binomial
 More general form of the Negative Binomial; PMF includes a zero-truncation or zero-inflation correction.
 - Refs: [Wikipedia](https://en.wikipedia.org/wiki/Extended_negative_binomial_distribution)
-
-#### Gauss Hypergeometric
-Continuous-on-[0,1] distribution whose PDF involves the Gauss hypergeometric function ₂F₁.
-- **PDF:** f(x; a, b, c, z) ∝ x^a · (1−x)^b · (1+zx)^c
-- **Dependency:** `hypergeometric.js` must implement ₂F₁ accurately for |z| < 1
-- Refs: [scipy `gausshyper`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gausshyper.html)
 
 #### Inverse Hypergeometric
 Discrete distribution modelling the number of draws needed to obtain exactly *r* successes in sampling without replacement from a finite population of size *N* containing *K* successes. Analogous to the negative hypergeometric.
@@ -235,15 +258,9 @@ Discrete distribution for the number of mutant cells in a fluctuation assay (Lur
 - **Sampling:** simulation of the branching process (computationally expensive for large populations)
 - Refs: [arXiv:1203.3422](https://arxiv.org/pdf/1203.3422.pdf)
 
-#### Non-Central η (Eta)
-Distribution of the square root of a rescaled non-central chi-squared, arising in Bayesian power analysis. Related to `NonCentralChi` in `src/dist/`.
-- Note: referenced as `r sadist` — see the [sadists R package](https://cran.r-project.org/package=sadists)
+---
 
-#### Waring
-Generalization of the Yule-Simon distribution. Yule-Simon is the special case σ = 1.
-- **PMF:** P(X = k) = B(k + σ, ρ) / B(σ, ρ − 1) for k = 0, 1, 2, ..., where ρ > 1, σ > 0
-- **CDF:** at NIST reference
-- Refs: [NIST Dataplot](https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bgepdf.htm)
+*Low-priority — specialist or narrow-domain distributions.*
 
 #### Beta-Geometric
 **[partial]** — `src/dist/beta-geometric.js` — PMF and generator are present but carry a `// TODO Use log PDF` note. The current `_pk` computes `Math.exp(logBeta(…) − logBeta(…))` directly; for large k the difference of log-betas should be returned as-is (log-PMF) to avoid underflow, and the PreComputed base class updated to consume log probabilities.
@@ -255,13 +272,6 @@ Generalization of the Yule-Simon distribution. Yule-Simon is the special case σ
 2. The recurrence-based `_pk` has two commented-out alternative formulas alongside the active one, indicating the PMF is not yet finalised
 3. The generator comment says `// TODO Direct sampling`; the current implementation compounds Beta → Gamma → Poisson which is correct but has higher variance than a direct method
 - **refVals needed:** two parameter sets in `test/dist-cases-discrete.js` with PMF/CDF values cross-checked against [Wikipedia](https://en.wikipedia.org/wiki/Beta_negative_binomial_distribution) or [NIST](https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bnbcdf.htm)
-
-#### Champernowne
-**[partial]** — `src/dist/champernowne.js` — Substantially incomplete:
-- `_generator()` body is empty — no sampler at all
-- `_pdf` is missing the normalization constant (`// TODO Add normalization factor`); the correct constant is C = α√(1−λ²)/π, derived from ∫ dx/(cosh(αx)+λ) = π/(α√(1−λ²))
-- `_cdf()` is wrong — returns the hardcoded constant `this.c[0] = 1` instead of F(x) = ½ + (√(1−λ²)/π)·arctan(sinh(α(x−x₀))/√(1−λ²))
-- **refVals needed:** two parameter sets in `test/dist-cases-continuous.js` with PDF/CDF/quantile values cross-checked against [Wikipedia](https://en.wikipedia.org/wiki/Champernowne_distribution) or numerical integration
 
 #### Yule-Simon
 **[partial]** — `src/dist/yule-simon.js` — PMF and CDF formulas are correct. The generator uses an exponential-geometric compound representation which is mathematically sound, but the edge-case branch (`1 − z === 1 → Math.ceil(e1 / z)`) can produce `Infinity` when z underflows to exactly 0, since e1/0 = Infinity. That branch needs a large-sample approximation (e.g. return a Pareto-distributed integer) rather than the direct ratio.
