@@ -69,6 +69,7 @@ npm run typecheck
   - `major` — breaking API change (constructor/public-method rename or removal, wrong-distribution fix that changes computed values)
   - `minor` — additive change (new distribution, new public method/property)
   - `patch` — everything else (bug fix, internal refactor, test/tooling/docs)
+- Every issue must be assigned to a **milestone** (`v1.25.0` for patch/minor, `v2.0.0` for major). The `ops-issue` agent infers the milestone automatically from the semver label. A GitHub Actions workflow (`.github/workflows/require-milestone.yml`) flags any issue opened without a milestone by adding a `needs-milestone` label and posting a comment.
 - **One concern per issue.** Reject titles that contain `+`, "and", or comma-separated lists of changes.
 - **PR size cap is enforced via the issue template.** Production-code diff must stay under ~400 lines (tests excluded). If a feature can't fit, decompose before filing.
 - **Mandatory bug triage on every fix/hotfix/build.** `/hotfix`, `/fix`, and `/build` each have a dedicated **Bug Triage** stage that invokes the `ops-triage` agent to classify observations into `definite` / `ambiguous` / `not_a_bug`. `definite` bugs are auto-filed via `ops-issue` in a batch; `ambiguous` cases are escalated to the user in a single prompt; `not_a_bug` is silent. Do not skip the stage even if the session feels clean — the agent will skim the diff for red flags as a safety net.

@@ -1,0 +1,45 @@
+name: Require milestone
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  require-milestone:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.issue.milestone == null }}
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo
+            const issue_number = context.issue.number
+
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: 'needs-milestone' })
+            } catch {
+              await github.rest.issues.createLabel({
+                owner, repo,
+                name: 'needs-milestone',
+                color: 'e4e669',
+                description: 'Missing release milestone assignment',
+              })
+            }
+
+            await github.rest.issues.addLabels({ owner, repo, issue_number, labels: ['needs-milestone'] })
+
+            await github.rest.issues.createComment({
+              owner, repo, issue_number,
+              body: [
+                '**No milestone assigned.** Please assign this issue to the appropriate release milestone based on its `semver` label:',
+                '',
+                '| `semver` label | Milestone |',
+                '|---|---|',
+                '| `patch` | nearest `v1.x.x` milestone |',
+                '| `minor` | nearest `v1.x.x` milestone |',
+                '| `major` | `v2.0.0` milestone |',
+              ].join('\n'),
+            })
