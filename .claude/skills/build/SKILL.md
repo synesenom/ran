@@ -192,8 +192,8 @@ d. **Pull Request** — invoke `/pull-request`
 > Triage: <N> filed / <M> skipped / clean
 > Review: PASSED (<N> issues auto-fixed)
 > Commit: `<hash>` <message>
-> PR: <URL>
 > Compound: `<solution path>` (or SKIPPED)
+> PR: <URL>
 >
 > Escalations: <N> (or None)"
 
