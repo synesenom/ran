@@ -344,6 +344,7 @@ export default [{
   }],
   // Reference via Poisson mixture of singly-noncentral t: T | L=l = T' * sqrt(nu/(nu+2l)),
   // T' ~ NCT(nu+2l, mu), L ~ Pois(theta/2) (Patnaik 1949 / Paolella 2007). Built on scipy.stats.nct.
+  // See solutions/testing/2026-05-18-0712-noncentral-refvals-doubly-poisson-mixture-scaling.md
   // x = 0 omitted: ranjs DoublyNoncentralT._pdf(0) returns NaN when mu != 0 — separate
   // pre-existing bug (NoncentralT._pdf has the analogous guard but DoublyNoncentralT._pdf does not).
   refVals: [
