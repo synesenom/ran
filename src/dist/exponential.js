@@ -48,7 +48,8 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return 1 - Math.pow(this.c[0], x)
+    // -expm1(-lambda*x) avoids catastrophic cancellation when lambda*x is near 0
+    return -Math.expm1(-this.p.lambda * x)
   }
 
   _q (p) {

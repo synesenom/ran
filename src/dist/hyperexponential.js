@@ -61,6 +61,7 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return Math.min(neumaier(this.p.rates.map((d, i) => this.p.weights[i] * (1 - Math.exp(-d * x)))), 1)
+    // -expm1(-d*x) per component avoids cancellation when d*x is near 0
+    return Math.min(neumaier(this.p.rates.map((d, i) => this.p.weights[i] * -Math.expm1(-d * x))), 1)
   }
 }

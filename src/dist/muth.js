@@ -36,7 +36,7 @@ export default class extends Distribution {
   }
 
   _survival (x) {
-    return Math.exp(this.p.alpha * x - (Math.exp(this.p.alpha * x) - 1) / this.p.alpha)
+    return Math.exp(this.p.alpha * x - Math.expm1(this.p.alpha * x) / this.p.alpha)
   }
 
   _generator () {
@@ -49,7 +49,8 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return 1 - this._survival(x)
+    // -expm1 avoids cancellation in 1 - survival(x) near x=0
+    return -Math.expm1(this.p.alpha * x - Math.expm1(this.p.alpha * x) / this.p.alpha)
   }
 
   _q (p) {

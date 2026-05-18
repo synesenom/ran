@@ -44,7 +44,9 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return 1 - Math.exp(-this.p.eta * (Math.exp(this.p.b * x) - 1))
+    // Inner expm1 avoids cancellation in exp(b*x)-1 near x=0;
+    // outer -expm1 avoids the 1-exp(-...) cancellation
+    return -Math.expm1(-this.p.eta * Math.expm1(this.p.b * x))
   }
 
   _q (p) {

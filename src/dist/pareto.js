@@ -44,7 +44,8 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return 1 - Math.pow(this.p.xmin / x, this.p.alpha)
+    // -expm1(-alpha * log(x/xmin)) avoids cancellation when x is near xmin
+    return -Math.expm1(-this.p.alpha * Math.log(x / this.p.xmin))
   }
 
   _q (p) {

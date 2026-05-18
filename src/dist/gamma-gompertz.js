@@ -48,7 +48,8 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return 1 - Math.pow(1 + (Math.exp(this.p.b * x) - 1) / this.p.beta, -this.p.s)
+    // expm1 for exp(b*x)-1 near x=0; log1p+expm1 avoids cancellation in 1-(1+u)^{-s}
+    return -Math.expm1(-this.p.s * Math.log1p(Math.expm1(this.p.b * x) / this.p.beta))
   }
 
   _q (p) {

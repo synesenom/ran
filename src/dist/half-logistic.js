@@ -36,8 +36,8 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    const y = Math.exp(-x)
-    return (1 - y) / (1 + y)
+    // tanh(x/2) = (1-exp(-x))/(1+exp(-x)) avoids cancellation near x=0
+    return Math.tanh(x / 2)
   }
 
   _q (p) {
