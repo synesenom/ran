@@ -43,44 +43,45 @@ const _seriesExpansion = {
   },
 
   p (mu, x, y) {
-    // Find truncation number using Eqs. (26) - (27)
-    // Define some constants to speed up search
-    const c0 = mu + logGamma(mu) - Math.log(2 * Math.PI * EPS)
-    const c1 = Math.log(x * y)
-    const c2 = x * y
-    let n = newton(
-      t => (t + mu) * Math.log(t + mu) + t * Math.log(t) - 2 * t - t * c1 - c0,
-      t => Math.log(t * (t + mu) / c2),
-      0.5 * (Math.sqrt(mu * mu + 4 * x * y) - mu) + 1
-    )
-    n = Math.ceil(n)
-
-    // Initialize terms with last index, Eq. (7)
-    // ck = x^k / k!
-    let ck = Math.exp(n * Math.log(x) - logGamma(n + 1))
-
-    // qck = y^{mu + k} e^{-y} / gamma(mu + k)
-    let pck = Math.exp((mu + n) * Math.log(y) - y - logGamma(mu + n + 1))
-
-    // pk = P_{\mu + k}(y)
-    let pk = gammaLowerIncomplete(mu + n, y)
-    let dz = ck * pk
-    let z = dz
-
-    for (let k = n - 1; k >= 0; k--) {
-      // Update coefficients
-      // Eq. (19)
-      pck *= (mu + k + 1) / y
-      pk += pck
-      ck *= (k + 1) / x
-      dz = ck * pk
-
-      // Update sum
-      z += dz
-    }
-
-    return 1 - Math.exp(-x) * z
+    // marcumQ uses the p-series in the regime where Q ≈ 1; the raw sum
+    // is 1 − Q, so Q is recovered via a final subtraction from 1.
+    return 1 - _pSeriesComplement(mu, x, y)
   }
+}
+
+// Returns `1 − Q_M` computed via the p-series of the Marcum-Q. Extracted
+// so that marcumP can return this raw value directly without the
+// subtraction-from-1 that catastrophically cancels in deep lower tails
+// of distributions that are `1 − marcumQ(...)` (see #245).
+function _pSeriesComplement (mu, x, y) {
+  // Find truncation number using Eqs. (26) - (27)
+  const c0 = mu + logGamma(mu) - Math.log(2 * Math.PI * EPS)
+  const c1 = Math.log(x * y)
+  const c2 = x * y
+  let n = newton(
+    t => (t + mu) * Math.log(t + mu) + t * Math.log(t) - 2 * t - t * c1 - c0,
+    t => Math.log(t * (t + mu) / c2),
+    0.5 * (Math.sqrt(mu * mu + 4 * x * y) - mu) + 1
+  )
+  n = Math.ceil(n)
+
+  // Initialize terms with last index, Eq. (7)
+  let ck = Math.exp(n * Math.log(x) - logGamma(n + 1))
+  let pck = Math.exp((mu + n) * Math.log(y) - y - logGamma(mu + n + 1))
+  let pk = gammaLowerIncomplete(mu + n, y)
+  let dz = ck * pk
+  let z = dz
+
+  for (let k = n - 1; k >= 0; k--) {
+    // Eq. (19)
+    pck *= (mu + k + 1) / y
+    pk += pck
+    ck *= (k + 1) / x
+    dz = ck * pk
+    z += dz
+  }
+
+  return Math.exp(-x) * z
 }
 
 /**
@@ -277,6 +278,44 @@ export default function (mu, x, y) {
   // if (x < 30) {
   return _seriesExpansion[primary](mu, x, y)
   // }
+}
+
+/**
+ * Computes 1 − Q_M(μ, √(2x), √(2y)), the complement of the generalized
+ * Marcum-Q function, without forming the subtraction `1 - marcumQ(...)`
+ * directly. Use this in place of `1 - marcumQ(...)` whenever the result
+ * is expected to be small (e.g. the lower-tail CDF of noncentral
+ * chi-squared family distributions). In the p-branch regime (y ≤ x + μ)
+ * the raw complement is returned directly, avoiding the
+ * subtraction-from-1 that marcumQ does internally to deliver Q.
+ *
+ * @method marcumP
+ * @memberof ran.special
+ * @param {number} mu The order of the function.
+ * @param {number} x First variable.
+ * @param {number} y Second variable.
+ * @return {number} 1 − Q_M evaluated at the specified arguments.
+ * @private
+ */
+export function marcumP (mu, x, y) {
+  // Mirror marcumQ's special-case branches with their complements
+  if (y === 0) {
+    return 0
+  }
+  if (x === 0) {
+    return gammaLowerIncomplete(mu, y)
+  }
+
+  // q-branch primary regime: Q is small (near 0), so `1 - Q` is
+  // well-conditioned and forming the subtraction is safe.
+  if (y > x + mu) {
+    return 1 - _seriesExpansion.q(mu, x, y)
+  }
+
+  // p-branch primary regime: Q ≈ 1, so the complement (i.e. the CDF
+  // here) is what we actually want — return the raw series sum
+  // without subtracting from 1.
+  return _pSeriesComplement(mu, x, y)
 
   // Asymptotic expansion
   /* let xi = 2 * Math.sqrt(x * y)
