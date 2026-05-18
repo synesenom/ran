@@ -318,7 +318,18 @@ export default [{
   ],
   cases: [{
     params: () => [5, 5, 2, 2]
-  }]
+  }],
+  // Reference via DNCF = (d1/d2) DNCB(d1 x / (d2 + d1 x); d1/2, d2/2, l1, l2) / (1 + d1 x / d2)^2
+  // with DNCB computed as a double Poisson mixture of central Beta (scipy.stats.beta).
+  refVals: [
+    { x: 0, pdf: 0, cdf: 0 },
+    { x: 0.1, pdf: 2.36576378810754495e-01, cdf: 1.06215481993450992e-02 },
+    { x: 0.5, pdf: 6.40130294075871853e-01, cdf: 2.24458249868424553e-01 },
+    { x: 1, pdf: 4.40721081331183484e-01, cdf: 4.99999999999999778e-01 },
+    { x: 2, pdf: 1.60032573518967963e-01, cdf: 7.75541750131575003e-01 },
+    { x: 5, pdf: 1.82861209431563546e-02, cdf: 9.53920129500879788e-01 },
+    { x: 10, pdf: 2.36576378810754787e-03, cdf: 9.89378451800654424e-01 }
+  ]
 }, {
   name: 'DoublyNoncentralT',
   invalidParams: [
@@ -330,7 +341,20 @@ export default [{
     params: () => [5, 1, 2]
   }, {
     params: () => [5, 0, 2]
-  }]
+  }],
+  // Reference via Poisson mixture of singly-noncentral t: T | L=l = T' * sqrt(nu/(nu+2l)),
+  // T' ~ NCT(nu+2l, mu), L ~ Pois(theta/2) (Patnaik 1949 / Paolella 2007). Built on scipy.stats.nct.
+  // x = 0 omitted: ranjs DoublyNoncentralT._pdf(0) returns NaN when mu != 0 — separate
+  // pre-existing bug (NoncentralT._pdf has the analogous guard but DoublyNoncentralT._pdf does not).
+  refVals: [
+    { x: -2, pdf: 5.59943985655494709e-03, cdf: 3.19024441057616341e-03 },
+    { x: -0.5, pdf: 1.24357721367590379e-01, cdf: 6.16048001364787115e-02 },
+    { x: 0.5, pdf: 4.13694130960595985e-01, cdf: 3.34030914989116468e-01 },
+    { x: 1, pdf: 4.14926459260090530e-01, cdf: 5.47951641938449696e-01 },
+    { x: 2, pdf: 1.80243486077573289e-01, cdf: 8.48392210681696457e-01 },
+    { x: 3, pdf: 5.30323144725616744e-02, cdf: 9.53220762468006244e-01 },
+    { x: 5, pdf: 5.49662116490106430e-03, cdf: 9.93619224640923671e-01 }
+  ]
 }, {
   name: 'Erlang',
   invalidParams: [
@@ -1249,7 +1273,18 @@ export default [{
   ],
   cases: [{
     params: () => [2, 2, 2]
-  }]
+  }],
+  // Reference values from R: dbeta(x, 2, 2, ncp=2), pbeta(x, 2, 2, ncp=2)
+  // x = 0 omitted: ranjs NoncentralBeta.{pdf,cdf}(0) return NaN even though the support is
+  // closed at 0 — separate pre-existing bug, see follow-up issue.
+  refVals: [
+    { x: 0.1, pdf: 2.41868290579682427e-01, cdf: 1.17498631239324781e-02 },
+    { x: 0.3, pdf: 8.22792189851986433e-01, cdf: 1.16647887413446061e-01 },
+    { x: 0.5, pdf: 1.40260215058546489e+00, cdf: 3.41173495906274826e-01 },
+    { x: 0.7, pdf: 1.66306282360838864e+00, cdf: 6.57031679456358875e-01 },
+    { x: 0.9, pdf: 9.94325838679715801e-01, cdf: 9.45464617651525452e-01 },
+    { x: 1, pdf: 0, cdf: 1 }
+  ]
 }, {
   name: 'NoncentralChi',
   invalidParams: [
@@ -1259,7 +1294,16 @@ export default [{
   ],
   cases: [{
     params: () => [5, 2]
-  }]
+  }],
+  // Reference values via sqrt-transform of NoncentralChi2: 2x*ncx2.pdf(x^2, 5, 4), ncx2.cdf(x^2, 5, 4)
+  refVals: [
+    { x: 0.5, pdf: 2.19103756169606667e-03, cdf: 2.20813233528201376e-04 },
+    { x: 1, pdf: 3.19082837193696844e-02, cdf: 6.62763412685461392e-03 },
+    { x: 2, pdf: 2.99373998083280635e-01, cdf: 1.50877104628692610e-01 },
+    { x: 3, pdf: 4.53699011112119910e-01, cdf: 5.69126836813116932e-01 },
+    { x: 5, pdf: 2.49291473799524849e-02, cdf: 9.91448348289697745e-01 },
+    { x: 7, pdf: 1.69114344801161317e-05, cdf: 9.99996554069459198e-01 }
+  ]
 }, {
   name: 'NoncentralChi2',
   invalidParams: [
@@ -1273,7 +1317,16 @@ export default [{
   }, {
     name: 'even k',
     params: () => [10, 2]
-  }]
+  }],
+  // Reference values from scipy.stats.ncx2(x, 11, 2) — matches cases[0] (odd k)
+  refVals: [
+    { x: 0.5, pdf: 5.59303273906062885e-06, cdf: 5.24927507113575457e-07 },
+    { x: 2, pdf: 1.54673823267370753e-03, cdf: 6.42238334231252862e-04 },
+    { x: 5, pdf: 2.76581349692687425e-02, cdf: 3.60424103453580377e-02 },
+    { x: 11, pdf: 7.84472343451085019e-02, cdf: 4.03577081375967095e-01 },
+    { x: 20, pdf: 2.55619889343394538e-02, cdf: 8.91817756323735611e-01 },
+    { x: 30, pdf: 2.16559853511574937e-03, cdf: 9.92704278814706464e-01 }
+  ]
 }, {
   name: 'NoncentralF',
   invalidParams: [
@@ -1285,8 +1338,15 @@ export default [{
   cases: [{
     params: () => [5, 5, 2]
   }],
+  // Reference values from scipy.stats.ncf(x, 5, 5, 2); x = 0 boundary locks in #233 fix.
   refVals: [
-    { x: 0, pdf: 0, cdf: 0 }
+    { x: 0, pdf: 0, cdf: 0 },
+    { x: 0.1, pdf: 1.17397170290385197e-01, cdf: 5.11927867315676091e-03 },
+    { x: 0.5, pdf: 4.40683526827978733e-01, cdf: 1.34274746594105460e-01 },
+    { x: 1, pdf: 4.00172286359995244e-01, cdf: 3.53049172026125846e-01 },
+    { x: 2, pdf: 1.99832400825656203e-01, cdf: 6.45087917335031458e-01 },
+    { x: 5, pdf: 3.28380206914100914e-02, cdf: 9.06625030137766852e-01 },
+    { x: 10, pdf: 5.09403860638321659e-03, cdf: 9.75541462446864127e-01 }
   ]
 }, {
   name: 'NoncentralT',
@@ -1294,9 +1354,26 @@ export default [{
     [], // all params required
     [-1, 1], [0, 1] // nu > 0
   ],
+  // cases[0] uses mu=1 so refVals exercise the noncentral code path
+  // (the existing mu=0 case is preserved at index 1 for statistical coverage)
   cases: [{
+    name: 'noncentral',
+    params: () => [5, 1]
+  }, {
+    name: 'central',
     params: () => [5, 0]
-  }]
+  }],
+  // Reference values from scipy.stats.nct(x, 5, 1)
+  refVals: [
+    { x: -2, pdf: 9.11717039629604542e-03, cdf: 5.89646228984215710e-03 },
+    { x: -0.5, pdf: 1.20440145439585033e-01, cdf: 7.23022434769041017e-02 },
+    { x: 0, pdf: 2.30243096009366599e-01, cdf: 1.58655253931457074e-01 },
+    { x: 0.5, pdf: 3.36004554731343885e-01, cdf: 3.02125861936113571e-01 },
+    { x: 1, pdf: 3.62324839233718665e-01, cdf: 4.80926141242105254e-01 },
+    { x: 2, pdf: 2.11406434691297024e-01, cdf: 7.78074662616214829e-01 },
+    { x: 3, pdf: 8.12113208712925416e-02, cdf: 9.16261755972806458e-01 },
+    { x: 5, pdf: 1.12627589009714965e-02, cdf: 9.85852288560151280e-01 }
+  ]
 }, {
   name: 'Normal',
   invalidParams: [
