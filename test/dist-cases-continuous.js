@@ -1284,7 +1284,10 @@ export default [{
   ],
   cases: [{
     params: () => [5, 5, 2]
-  }]
+  }],
+  refVals: [
+    { x: 0, pdf: 0, cdf: 0 }
+  ]
 }, {
   name: 'NoncentralT',
   invalidParams: [
