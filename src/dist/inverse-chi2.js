@@ -47,6 +47,7 @@ export default class extends Distribution {
   _cdf (x) {
     // Complementary form avoids catastrophic cancellation in the lower tail:
     // for small x, 0.5/x is large and 1 - P(s, 0.5/x) rounds to 0.
+    // See solutions/correctness/2026-05-18-1133-inverse-chi2-cdf-complementary-gamma.md
     return gammaUpperIncomplete(this.p.nu / 2, 0.5 / x)
   }
 }
