@@ -48,7 +48,8 @@ Moving the library from *auditable* to *publication-grade* requires systematic r
 
 ## Distributions
 
-> Entries marked **[done]** exist in `src/dist/`. Entries marked **[duplicate]** are already covered by an existing distribution under a different name.
+> Entries marked **[duplicate]** are already covered by an existing distribution under a different name.
+> Entries marked **[partial]** exist in `src/dist/` but have open TODOs or incorrect/missing implementations.
 
 ### Continuous
 
@@ -66,9 +67,14 @@ Continuous distribution with a Gaussian core above a threshold and a power-law t
 - **CDF:** combination of erf and rational terms
 - **Sampling:** rejection or inverse CDF
 - Depends on accurate `error.js`
+- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Crystal_Ball_function)
 
 #### Davis
-**[done]** — `src/dist/davis.js`
+**[partial]** — `src/dist/davis.js` — PDF is correct but two blockers remain:
+- `_generator()` returns a hardcoded `1` — needs actual implementation (rejection sampling with a bounding envelope over the power-law decay)
+- `_cdf()` has a stray `console.log` and uses Romberg integration; numerical CDF is acceptable (no closed form exists) but the debug statement must be removed before the distribution is usable
+- **refVals needed:** two parameter sets in `test/dist-cases-continuous.js` with PDF/CDF/quantile values cross-checked against scipy `davis` or manual integration
+- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Davis_distribution)
 
 #### Exponentially Modified Gaussian (EMG)
 Convolution of a Normal(μ, σ²) and an Exponential(λ) distribution; common in chromatography and reaction-time modelling.
@@ -76,6 +82,7 @@ Convolution of a Normal(μ, σ²) and an Exponential(λ) distribution; common in
 - **CDF:** combination of Φ and erfc terms
 - **Sampling:** trivially, sum an independent Normal(μ, σ) and Exponential(λ) variate
 - Requires accurate `error.js` (erfc in tail)
+- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Exponentially_modified_Gaussian_distribution)
 
 #### Generalized Beta-Prime
 Extension of the Beta-Prime (a.k.a. inverted-Beta, Pearson type VI) distribution with additional shape parameters. Beta-Prime itself is already in `src/dist/beta-prime.js`.
@@ -117,6 +124,7 @@ Continuous, asymmetric, heavy-tailed distribution describing energy loss of a ch
 
 #### Normal-Exponential-Gamma (NEG)
 Three-parameter scale mixture of normals where the variance follows a Gamma prior with an Exponential-Gamma hyperprior. Produces a heavy-tailed, leptokurtic distribution useful in sparse signal modelling. Marginal PDF has a closed form involving Kummer's confluent hypergeometric function.
+- Refs: Griffin, J.E. & Brown, P.J. (2011) "Bayesian Hyper-Lassos With Non-Convex Penalization", *Australian & New Zealand Journal of Statistics* 53(4):423–442
 
 #### Normal-Inverse Gaussian (NIG)
 Special case of the Generalized Hyperbolic distribution with λ = −½. Popular in financial return modelling.
@@ -147,6 +155,7 @@ Continuous distribution proportional to the Planck blackbody spectrum: f(x) ∝ 
 - **CDF:** involves the Bose-Einstein integral / polylogarithm Li₄(e^(−x)) — no elementary closed form
 - **Sampling:** rejection sampling or series expansion sampling
 - **Note:** CDF inversion requires numerical root-finding; `quantile()` must use Brent's method
+- Refs: Devroye, L. (1986) *Non-Uniform Random Variate Generation*, Chapter 10 (Planck/Bose-Einstein sampling); see also [Wikipedia — Planck's law](https://en.wikipedia.org/wiki/Planck%27s_law)
 
 #### Power-Lognormal
 Generalization of the lognormal distribution by raising its CDF to a power p. Also called the "Crow distribution."
@@ -167,6 +176,7 @@ Four-parameter family (α ∈ (0,2], β ∈ [−1,1], γ ≥ 0, δ ∈ ℝ) enco
 - **PDF/CDF:** numerical Fourier inversion; expensive and numerically delicate
 - **Note:** This is a large implementation effort; the CMS sampler alone may ship as a first step. Several existing distributions (Cauchy, Levy) are special cases.
 - Implementation complexity: **high**
+- Refs: Chambers, J.M., Mallows, C.L. & Stuck, B.W. (1976) "A Method for Simulating Stable Random Variables", *JASA* 71(354):340–344; Nolan, J.P. (2020) *Univariate Stable Distributions*, Springer; [Wikipedia](https://en.wikipedia.org/wiki/Stable_distribution)
 
 #### Truncated Exponential
 Exponential distribution restricted to the interval [a, b], 0 ≤ a < b ≤ ∞.
@@ -233,19 +243,29 @@ Distribution of the square root of a rescaled non-central chi-squared, arising i
 Generalization of the Yule-Simon distribution. Yule-Simon is the special case σ = 1.
 - **PMF:** P(X = k) = B(k + σ, ρ) / B(σ, ρ − 1) for k = 0, 1, 2, ..., where ρ > 1, σ > 0
 - **CDF:** at NIST reference
-- Refs: [NIST Dataplot](https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bgepdf.htm), [Yule-Simon (done) in `src/dist/yule-simon.js`](src/dist/yule-simon.js)
+- Refs: [NIST Dataplot](https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bgepdf.htm)
 
 #### Beta-Geometric
-**[done]** — `src/dist/beta-geometric.js`
+**[partial]** — `src/dist/beta-geometric.js` — PMF and generator are present but carry a `// TODO Use log PDF` note. The current `_pk` computes `Math.exp(logBeta(…) − logBeta(…))` directly; for large k the difference of log-betas should be returned as-is (log-PMF) to avoid underflow, and the PreComputed base class updated to consume log probabilities.
+- **refVals needed:** two parameter sets in `test/dist-cases-discrete.js` with PMF/CDF values cross-checked against [NIST](https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bgepdf.htm)
 
 #### Beta-Negative Binomial
-**[done]** — `src/dist/beta-negative-binomial.js`
+**[partial]** — `src/dist/beta-negative-binomial.js` — Three open issues:
+1. Speed-up constants not computed (`// TODO Speed-up constants`)
+2. The recurrence-based `_pk` has two commented-out alternative formulas alongside the active one, indicating the PMF is not yet finalised
+3. The generator comment says `// TODO Direct sampling`; the current implementation compounds Beta → Gamma → Poisson which is correct but has higher variance than a direct method
+- **refVals needed:** two parameter sets in `test/dist-cases-discrete.js` with PMF/CDF values cross-checked against [Wikipedia](https://en.wikipedia.org/wiki/Beta_negative_binomial_distribution) or [NIST](https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bnbcdf.htm)
 
 #### Champernowne
-**[done]** — `src/dist/champernowne.js`
+**[partial]** — `src/dist/champernowne.js` — Substantially incomplete:
+- `_generator()` body is empty — no sampler at all
+- `_pdf` is missing the normalization constant (`// TODO Add normalization factor`); the correct constant is C = α√(1−λ²)/π, derived from ∫ dx/(cosh(αx)+λ) = π/(α√(1−λ²))
+- `_cdf()` is wrong — returns the hardcoded constant `this.c[0] = 1` instead of F(x) = ½ + (√(1−λ²)/π)·arctan(sinh(α(x−x₀))/√(1−λ²))
+- **refVals needed:** two parameter sets in `test/dist-cases-continuous.js` with PDF/CDF/quantile values cross-checked against [Wikipedia](https://en.wikipedia.org/wiki/Champernowne_distribution) or numerical integration
 
-#### Yule (Yule-Simon)
-**[done]** — `src/dist/yule-simon.js`
+#### Yule-Simon
+**[partial]** — `src/dist/yule-simon.js` — PMF and CDF formulas are correct. The generator uses an exponential-geometric compound representation which is mathematically sound, but the edge-case branch (`1 − z === 1 → Math.ceil(e1 / z)`) can produce `Infinity` when z underflows to exactly 0, since e1/0 = Infinity. That branch needs a large-sample approximation (e.g. return a Pareto-distributed integer) rather than the direct ratio.
+- **refVals needed:** two parameter sets in `test/dist-cases-discrete.js` with PMF/CDF values cross-checked against [Wikipedia](https://en.wikipedia.org/wiki/Yule%E2%80%93Simon_distribution)
 
 ---
 
