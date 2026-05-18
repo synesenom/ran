@@ -34,12 +34,11 @@ jobs:
             await github.rest.issues.createComment({
               owner, repo, issue_number,
               body: [
-                '**No milestone assigned.** Please assign this issue to the appropriate release milestone based on its `semver` label:',
+                '**No milestone assigned.** Please assign this issue to the appropriate release milestone:',
                 '',
-                '| `semver` label | Milestone |',
+                '| Issue type | Milestone |',
                 '|---|---|',
-                '| `patch` | nearest `v1.x.x` milestone |',
-                '| `minor` | nearest `v1.x.x` milestone |',
-                '| `major` | `v2.0.0` milestone |',
+                '| Breaking change (has `major` label) | `v2.0.0` |',
+                '| Everything else | `v1.25.0` |',
               ].join('\n'),
             })
