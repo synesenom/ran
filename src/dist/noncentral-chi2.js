@@ -1,4 +1,4 @@
-import { besselI, besselISpherical, marcumQ } from '../special'
+import { besselI, besselISpherical, marcumP } from '../special'
 import noncentralChi2 from './_noncentral-chi2'
 import Distribution from './_distribution'
 
@@ -69,6 +69,9 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return 1 - marcumQ(this.p.k / 2, this.p.lambda / 2, x / 2)
+    // Complementary Marcum Q avoids catastrophic cancellation in the
+    // lower tail: `1 - marcumQ(...)` would lose precision because
+    // marcumQ internally forms `1 - P` to deliver Q (#245).
+    return marcumP(this.p.k / 2, this.p.lambda / 2, x / 2)
   }
 }
