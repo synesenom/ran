@@ -4,7 +4,7 @@
  * @method midrange
  * @memberof ran.location
  * @param {number[]} values Array of values to calculate mid-range for.
- * @return {(number|undefined)} The mid-range of the values if there is any, undefined otherwise.
+ * @returns {(number|undefined)} The mid-range of the values if there is any, undefined otherwise.
  * @example
  *
  * ran.location.midrange([])

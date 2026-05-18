@@ -13,7 +13,7 @@ import { median } from '../location'
  * @param {ran.la.Vector} x First data vector.
  * @param {ran.la.Vector} y Second data vector.
  * @param {number} deg Kernel size.
- * @return {ran.la.Matrix} The inner product.
+ * @returns {ran.la.Matrix} The inner product.
  * @private
  */
 function rbfDot (x, y, deg) {
@@ -41,7 +41,7 @@ function rbfDot (x, y, deg) {
  * @method medianDist
  * @memberof ran.dependence
  * @param {ran.la.Vector} x Vector containing the data points.
- * @return {number} The median distance.
+ * @returns {number} The median distance.
  * @private
  */
 function medianDist (x) {
@@ -64,7 +64,7 @@ function medianDist (x) {
  * @memberof ran.test
  * @param {Array[]} dataSets Array containing the two data sets.
  * @param {number} [alpha = 0.05] Confidence level.
- * @return {Object} Object containing the test statistics and whether the data sets passed the null hypothesis that
+ * @returns {Object} Object containing the test statistics and whether the data sets passed the null hypothesis that
  * they are statistically independent.
  * @throws {Error} If the number of data sets is less than 2.
  * @throws {Error} If the data sets have different sample size.

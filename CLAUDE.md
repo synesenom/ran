@@ -15,6 +15,9 @@ npm install
 # Run linter (Standard.js)
 npm run standard
 
+# Run JSDoc linter (eslint-plugin-jsdoc)
+npm run jsdoclint
+
 # Run tests (Mocha)
 npm test
 

@@ -4,7 +4,7 @@
  * @method discreteMode
  * @memberof ran.location
  * @param {number[]} values Array containing the sample.
- * @return {number[]} Array containing the modes of the sample.
+ * @returns {number[]} Array containing the modes of the sample.
  * @private
  */
 function discreteMode (values) {
@@ -25,7 +25,7 @@ function discreteMode (values) {
  * @method continuousMode
  * @memberof ran.location.mode
  * @param {number[]} values Array containing the continuous sample.
- * @return {number} The estimated mode.
+ * @returns {number} The estimated mode.
  * @private
  */
 function continuousMode (values) {
