@@ -16,6 +16,7 @@ const r = new Xoshiro128p()
  * @method seed
  * @memberof ran.core
  * @param {(number|string)} value The value of the seed, either a number or a string (for the ease of tracking seeds).
+ * @returns {void}
  */
 export const seed = value => r.seed(value)
 

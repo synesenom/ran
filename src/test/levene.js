@@ -5,7 +5,7 @@ import { F } from '../dist'
  * Calculates the general Levene test with the specified aggregator. For mean it is the Leven test, for median it gives the Brown-Forsythe test.
  *
  * @method generalLevene
- * @memberOf ran.test
+ * @memberof ran.test
  * @param {Array[]} dataSets Array containing the data sets.
  * @param {number} [alpha = 0.05] Confidence level.
  * @param aggregator

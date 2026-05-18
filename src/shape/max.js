@@ -1,3 +1,11 @@
+/**
+ * Returns the maximum of an array of values.
+ *
+ * @method max
+ * @memberof ran.shape
+ * @param {number[]} values Array of values to find the maximum for.
+ * @returns {number} The maximum of the values.
+ */
 export default function (values) {
   let max = values[0]
   for (const x of values) {

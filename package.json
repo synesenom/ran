@@ -441,6 +441,7 @@
   ],
   "scripts": {
     "lint": "./node_modules/.bin/standard src/**/*.js test/*.js",
+    "jsdoclint": "./node_modules/.bin/eslint --no-eslintrc --config .eslintrc.jsdoc.js src/dist/_distribution.js src/core/index.js src/location src/dispersion src/shape src/dependence src/test",
     "standard": "./node_modules/.bin/standard --fix src/**/*.js test/*.js",
     "test": "./node_modules/.bin/_mocha --require @babel/register",
     "docs": "node ./docs/index.js",
@@ -464,6 +465,7 @@
     "documentation": "^14.0.0",
     "eslint": "^7.32.0",
     "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-jsdoc": "^50.8.0",
     "highlight.js": "^11.7.0",
     "istanbul": "^0.4.5",
     "lodash.flattendeep": "^4.4.0",

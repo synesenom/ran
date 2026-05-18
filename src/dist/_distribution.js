@@ -13,7 +13,6 @@ import { MAX_ITER } from '../core/constants'
  *
  * @class Distribution
  * @memberof ran.dist
- * @constructor
  */
 class Distribution {
   constructor (type, k) {
@@ -283,7 +282,7 @@ class Distribution {
    *
    * @method save
    * @memberof ran.dist.Distribution
-   * @return {Object} Object representing the inner state of the current generator.
+   * @returns {Object} Object representing the inner state of the current generator.
    * @example
    *
    * let pareto1 = new ran.dist.Pareto(1, 2).seed('test')
