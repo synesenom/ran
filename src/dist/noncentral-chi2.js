@@ -72,6 +72,7 @@ export default class extends Distribution {
     // Complementary Marcum Q avoids catastrophic cancellation in the
     // lower tail: `1 - marcumQ(...)` would lose precision because
     // marcumQ internally forms `1 - P` to deliver Q (#245).
+    // See solutions/special-functions/2026-05-18-1212-noncentral-chi2-cdf-complementary-marcum-q.md
     return marcumP(this.p.k / 2, this.p.lambda / 2, x / 2)
   }
 }
