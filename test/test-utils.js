@@ -195,18 +195,31 @@ export function repeat (test, times = 10) {
   }
 }
 
+// Tolerance for refVal comparison. For sub-precision expected values, fall
+// back to relative tolerance so catastrophic-cancellation bugs that return 0
+// or 1e-16 instead of, say, 2.5e-19 cannot pass vacuously under the absolute
+// PRECISION check.
+function refValTol (expected) {
+  // 1e-10 relative tolerance leaves 3+ orders of magnitude of headroom above
+  // typical continued-fraction precision (~1e-13) while still catching mild
+  // regressions in the sub-precision regime that a 1e-3 band would miss.
+  return Math.abs(expected) >= PRECISION
+    ? PRECISION
+    : Math.max(Math.abs(expected) * 1e-10, Number.MIN_VALUE)
+}
+
 export function checkRefVals (dist, refVals) {
   for (const { x, pdf, pmf, cdf } of refVals) {
     if (pdf !== undefined) {
       const actual = dist.pdf(x)
-      assert(Math.abs(actual - pdf) < PRECISION, `pdf(${x}) = ${actual}, expected ${pdf}`)
+      assert(Math.abs(actual - pdf) < refValTol(pdf), `pdf(${x}) = ${actual}, expected ${pdf}`)
     }
     if (pmf !== undefined) {
       const actual = dist.pdf(x)
-      assert(Math.abs(actual - pmf) < PRECISION, `pmf(${x}) = ${actual}, expected ${pmf}`)
+      assert(Math.abs(actual - pmf) < refValTol(pmf), `pmf(${x}) = ${actual}, expected ${pmf}`)
     }
     const actualCdf = dist.cdf(x)
-    assert(Math.abs(actualCdf - cdf) < PRECISION, `cdf(${x}) = ${actualCdf}, expected ${cdf}`)
+    assert(Math.abs(actualCdf - cdf) < refValTol(cdf), `cdf(${x}) = ${actualCdf}, expected ${cdf}`)
   }
 }
 

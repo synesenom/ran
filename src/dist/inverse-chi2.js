@@ -1,4 +1,4 @@
-import { gammaLowerIncomplete, logGamma } from '../special'
+import { gammaUpperIncomplete, logGamma } from '../special'
 import chi2 from './_chi2'
 import Distribution from './_distribution'
 
@@ -45,6 +45,8 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return 1 - gammaLowerIncomplete(this.p.nu / 2, 0.5 / x)
+    // Complementary form avoids catastrophic cancellation in the lower tail:
+    // for small x, 0.5/x is large and 1 - P(s, 0.5/x) rounds to 0.
+    return gammaUpperIncomplete(this.p.nu / 2, 0.5 / x)
   }
 }
