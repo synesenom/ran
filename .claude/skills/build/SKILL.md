@@ -100,7 +100,7 @@ Report progress after each phase:
 
 Invoke `/validate` via the Skill tool, passing the issue number.
 
-**If PASS**: Proceed to Stage 5.
+**If PASS**: Proceed to Stage 4.5.
 
 **If FAIL**: Fix each unmet criterion, re-run `npm run standard && npm test`, then re-invoke `/validate`.
 
@@ -110,6 +110,44 @@ Invoke `/validate` via the Skill tool, passing the issue number.
 **After 3 consecutive failures**, STOP and escalate.
 
 **Skip** if `<argument>` is a topic description with no GitHub issue.
+
+---
+
+### Stage 4.5: Bug Triage (mostly autonomous)
+
+While running Stages 1-4, you may have observed things that *might* be bugs unrelated to the current task — a pre-existing NaN at a boundary, a flaky test, a docstring that contradicts the code, an unexpected empirical result during cross-validation. The triage stage forces the question "should any of these be filed?" rather than relying on you to remember the global rule mid-flow.
+
+**Step 4.5a — Collect observations.**
+
+Compile every candidate concern noticed during the build into a structured list. Each entry needs:
+- `summary` — one-line description
+- `stage` — where it surfaced (`research`, `implement`, `validate`, `review`)
+- `evidence` — file:line, test output, or empirical result
+- `orchestrator_call` — your tentative classification (`bug`, `suspect`, `not-a-bug`) and one-line reason
+
+If you genuinely noticed nothing, pass an empty list — the agent will skim the diff for red flags as a safety net.
+
+**Step 4.5b — Invoke `ops-triage`.**
+
+Spawn the `ops-triage` agent with `branch`, `session_kind: "build"`, `target_issue`, `observations`, and `diff_path` (the patch file from `.claude/tmp/`, if Stage 5 hasn't created it yet, build one with `git diff origin/main...HEAD > .claude/tmp/triage-diff-<branch>.patch`).
+
+The agent returns three buckets: `definite`, `ambiguous`, `not_a_bug`.
+
+**Step 4.5c — Act on the result.**
+
+- **`definite` (auto-file in batch)**: For each entry, invoke `ops-issue` with the drafted `title`/`body`/`priority`/`difficulty`/`extra_labels`. Collect the returned issue URLs.
+- **`ambiguous` (escalate in batch)**: Use a single `AskUserQuestion` with one question per entry, options "File issue" / "Skip", plus an "Other" fallback. For each "File issue" answer, invoke `ops-issue` using the `draft_title`. Skip the rest silently.
+- **`not_a_bug`**: silent.
+
+**Step 4.5d — Report.**
+
+> "Triage: <N> filed (<URLs>), <M> skipped, <K> not a bug."
+
+If all three buckets are empty: "Triage: clean."
+
+**Escalation**: Only on `ambiguous` entries (batched into one prompt).
+
+**Skip**: Never. Always run, even on topic-driven builds — the diff still warrants a red-flag skim.
 
 ---
 
@@ -151,6 +189,7 @@ d. **Pull Request** — invoke `/pull-request`
 > Implementation: <N> phases executed
 > Tests: All passing (lint + tests)
 > Validate: PASSED (<N> attempts) or SKIPPED
+> Triage: <N> filed / <M> skipped / clean
 > Review: PASSED (<N> issues auto-fixed)
 > Commit: `<hash>` <message>
 > PR: <URL>

@@ -59,7 +59,20 @@ d. **Run linting and tests**:
    ```
 e. **If tests fail**: debug directly — no recovery agents needed for a small fix
 
-### 5. Review + Auto-fix
+### 5. Bug Triage
+
+Compile observations noticed during step 4 (a flaky test, a pre-existing NaN at a boundary, a contradicting docstring, etc.) into a structured list with `summary`, `stage`, `evidence`, and your tentative `orchestrator_call`.
+
+Spawn the `ops-triage` agent with `branch`, `session_kind: "hotfix"`, `target_issue`, the `observations` list, and a `diff_path` (write `git diff main...HEAD` to `.claude/tmp/triage-diff-<branch>.patch` first).
+
+Act on the result:
+- **`definite`**: invoke `ops-issue` once per entry with the drafted fields. Collect URLs.
+- **`ambiguous`**: one batched `AskUserQuestion` (File issue / Skip / Other). For each "File issue", invoke `ops-issue`.
+- **`not_a_bug`**: silent.
+
+Report: `> "Triage: <N> filed (<URLs>), <M> skipped, <K> not a bug."` or `> "Triage: clean."`
+
+### 6. Review + Auto-fix
 
 Invoke `/review` via the Skill tool.
 
@@ -67,18 +80,19 @@ Invoke `/review` via the Skill tool.
 - If the second review still has P1/P2 findings: **STOP** and report.
 - If P3 only or no findings: proceed to commit.
 
-### 6. Ship (fully autonomous)
+### 7. Ship (fully autonomous)
 
 a. **Commit** — invoke `/commit`
 b. **Push** — invoke `/push`
 c. **Pull Request** — invoke `/pull-request`
 
-### 7. Report
+### 8. Report
 
 > "Hotfix applied: `<commit hash>` <commit message>
 >
 > Changed: <list of files>
 > Tests: All passing
+> Triage: <N> filed / <M> skipped / clean
 > Review: PASSED
 > PR: <URL>"
 
