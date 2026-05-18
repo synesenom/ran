@@ -39,24 +39,46 @@ Abort with a clear error message if any check fails.
 
 ```bash
 CURRENT=$(node -p "require('./package.json').version")
+LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
 ```
 
-- If a `version` argument was provided, use it as `VERSION`.
-- Otherwise bump minor: split `CURRENT` on `.`, increment middle number, zero the patch.
+**If a `version` argument was provided**, use it as `VERSION` directly.
 
-Compute `NEXT_VERSION` (the milestone to create after this release):
-- Minor release `X.Y.0` → next is `X.(Y+1).0`
-- Major release `X.0.0` → next is `(X+1).0.0`
+**Otherwise, infer the bump type** by checking whether any `major`-labelled
+issues were closed since the last tag:
 
-Print `VERSION` and `NEXT_VERSION` so the operator can confirm before
-continuing.
+```bash
+if [ -n "$LAST_TAG" ]; then
+  LAST_TAG_DATE=$(git log -1 --format=%cI "$LAST_TAG")
+  MAJOR_CLOSED=$(gh issue list \
+    --state closed \
+    --label major \
+    --json number,closedAt,title \
+    --jq ".[] | select(.closedAt > \"$LAST_TAG_DATE\") | \"#\(.number) \(.title)\"")
+else
+  MAJOR_CLOSED=$(gh issue list \
+    --state closed \
+    --label major \
+    --json number,title \
+    --jq '.[] | "#\(.number) \(.title)"')
+fi
+```
+
+- If `MAJOR_CLOSED` is non-empty → **bump major**: `X.Y.Z` → `(X+1).0.0`
+- Otherwise → **bump minor**: `X.Y.Z` → `X.(Y+1).0`
+
+Compute `NEXT_VERSION` (the non-major milestone to create after this release):
+- Any release `X.Y.0` → next is `X.(Y+1).0`
+- Major release `(X+1).0.0` → next is `(X+1).1.0`
+
+Print `VERSION`, the bump type (major/minor), any triggering major issues, and
+`NEXT_VERSION` so the operator can confirm before continuing.
 
 ---
 
 ### 3. Show what's in the release
 
 ```bash
-LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
 if [ -n "$LAST_TAG" ]; then
   CHANGES=$(git log "${LAST_TAG}..HEAD" --oneline --no-merges)
 else
