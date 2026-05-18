@@ -62,6 +62,10 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
+    // recursiveSum produces 0/0 = NaN at the closed-support boundary; limit is 0 for alpha > 1.
+    // For alpha <= 1 the PDF is non-zero or divergent at 0 — out of scope, leave as NaN until fixed.
+    if (x === 0 && this.p.alpha > 1) return 0
+
     // Speed-up variables.
     const l2 = this.p.lambda / 2
     const i0 = Math.round(l2)
@@ -116,6 +120,9 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
+    // regularizedBetaIncomplete + series produce NaN at exact x = 0; CDF is 0 at the closed lower support
+    if (x === 0) return 0
+
     // Speed-up variables
     const l2 = this.p.lambda / 2
     const i0 = Math.round(l2)

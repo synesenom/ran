@@ -1276,9 +1276,8 @@ export default [{
     params: () => [2, 2, 2]
   }],
   // Reference values from R: dbeta(x, 2, 2, ncp=2), pbeta(x, 2, 2, ncp=2)
-  // x = 0 omitted: ranjs NoncentralBeta.{pdf,cdf}(0) return NaN even though the support is
-  // closed at 0 — separate pre-existing bug, see follow-up issue.
   refVals: [
+    { x: 0, pdf: 0, cdf: 0 },
     { x: 0.1, pdf: 2.41868290579682427e-01, cdf: 1.17498631239324781e-02 },
     { x: 0.3, pdf: 8.22792189851986433e-01, cdf: 1.16647887413446061e-01 },
     { x: 0.5, pdf: 1.40260215058546489e+00, cdf: 3.41173495906274826e-01 },

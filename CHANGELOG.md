@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `NoncentralBeta._pdf(0)` and `._cdf(0)` now return `0` instead of `NaN` at the closed-support lower boundary. The series in `recursiveSum` hits a 0/0 indeterminate form at exact `x = 0`, but the mathematical limit is `0` for `alpha > 1`. Added boundary guard and `{ x: 0, pdf: 0, cdf: 0 }` to `NoncentralBeta` refVals. Closes #230.
 - `FisherZ` constructor now passes `(d1, d2)` to the F base class instead of `(d1/2, d2/2)`. Previously, `new FisherZ(d1, d2)` silently produced Fisher's z with degrees of freedom `(round(d1/2), round(d2/2))` (e.g. `FisherZ(5, 5)` was internally F(3, 3)). Internal-consistency tests passed because all distributional self-checks used the same wrong d.o.f. The bug was surfaced by adding scipy-independent reference values per #130. Closes #130.
 - `MaxwellBoltzmann` constructor now passes rate = 1/(2a²) to the Gamma base class (was incorrectly 2a²). The distribution was previously self-consistent but produced values from the wrong density; the correct PDF is f(x;a) = sqrt(2/π) x² exp(−x²/2a²) / a³. Closes #126.
 - `erf` and `erfc` in `src/special/error.js` now use a hybrid Taylor series (|x| ≤ 2) / Laplace continued fraction (|x| > 2) instead of delegating to `gammaLowerIncomplete`/`gammaUpperIncomplete`. This fixes relative precision loss in the tails (5σ+) and resolves the `// TODO Replace with continued fraction` comments. Adds far-tail `Normal(0, 2)` reference values at x = ±10 and ±14 to the test suite. Closes #211.
