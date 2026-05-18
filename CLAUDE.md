@@ -65,6 +65,7 @@ npm run typecheck
 - Every issue must have both a **priority** label (`high`, `medium`, `low`) and a **difficulty** label (`difficult`, `moderate`, `trivial`).
 - **One concern per issue.** Reject titles that contain `+`, "and", or comma-separated lists of changes.
 - **PR size cap is enforced via the issue template.** Production-code diff must stay under ~400 lines (tests excluded). If a feature can't fit, decompose before filing.
+- **Mandatory bug issue on surfaced bugs.** If any bug is discovered during `/hotfix`, `/fix`, or `/build`, file a bugfix issue via the `ops-issue` agent immediately — before continuing with the fix. No bug may be silently patched without a corresponding issue on record.
 
 ## Decomposing Cross-Cutting Changes
 

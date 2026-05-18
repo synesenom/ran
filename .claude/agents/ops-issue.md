@@ -4,6 +4,8 @@ description: Creates a single GitHub issue with structured body, priority label 
 model: haiku
 tools:
   - Bash
+  - mcp__github__issue_write
+  - mcp__github__get_label
 permissionMode: default
 ---
 
@@ -48,7 +50,9 @@ If the input already contains a fully formed body, use it as-is. If the input is
 
 1. **Validate labels** — priority must be one of `high`/`medium`/`low`; difficulty must be one of `difficult`/`moderate`/`trivial`. If invalid, default to `medium` priority and `moderate` difficulty.
 
-2. **Ensure labels exist** — Before creating the issue, create any missing labels:
+2. **Detect available tooling** — Check whether `gh` is available by running `gh --version`. If it succeeds, use the `gh` CLI path (steps 3a–4a). If it fails or is not found, use the GitHub MCP server path (steps 3b–4b).
+
+3a. **[gh path] Ensure labels exist** — Before creating the issue, create any missing labels:
    ```bash
    gh label create "<label>" --description "<description>" --color "<color>" --force
    ```
@@ -56,12 +60,16 @@ If the input already contains a fully formed body, use it as-is. If the input is
    - `high` → `d73a4a` (red), `medium` → `fbca04` (yellow), `low` → `0e8a16` (green)
    - `difficult` → `5319e7` (purple), `moderate` → `1d76db` (blue), `trivial` → `bfdadc` (light gray)
 
-3. **Create the issue**:
+4a. **[gh path] Create the issue**:
    ```bash
    gh issue create --title "<title>" --body "<body>" --label "<priority>,<difficulty>[,<extra_labels>]"
    ```
 
-4. **Return the issue URL** — Respond with ONLY the created issue URL, no other text.
+3b. **[MCP path] Ensure labels exist** — Use `mcp__github__get_label` to check whether each required label exists. For any that are missing, use `mcp__github__issue_write` with `mode: "create_label"` (or the equivalent label-creation call) to create it with the appropriate color. Label colors are the same as above.
+
+4b. **[MCP path] Create the issue** — Call `mcp__github__issue_write` with `mode: "create"`, passing `title`, `body`, and `labels` (array containing priority, difficulty, and any extra labels).
+
+5. **Return the issue URL** — Respond with ONLY the created issue URL, no other text.
 
 ## Rules
 
