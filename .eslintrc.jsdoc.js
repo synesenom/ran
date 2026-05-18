@@ -1,5 +1,6 @@
 // See decisions/0006-jsdoc-enforcement-tooling.md — separate config keeps JSDoc enforcement
 // isolated from the editor-hint .eslintrc.js and Standard.js toolchain.
+// See solutions/tooling/2026-05-18-1000-eslint-plugin-jsdoc-esm7-schema-incompatibility.md — v50.8.0 pinned (not v62.x) due to schema incompatibility with ESLint 7.
 module.exports = {
   env: {
     es6: true,
