@@ -38,6 +38,7 @@ This directory contains the skills and agents that power the development workflo
     ├── review-tests.md        # Reviews for test quality gaps
     ├── ops-insight.md         # Extracts problem/fix/insight from diffs
     ├── ops-issue.md           # Creates GitHub issues
+    ├── ops-triage.md          # Classifies surfaced-bug observations into definite/ambiguous/not-a-bug
     ├── suggest-distributions.md  # Suggests new probability distributions
     ├── suggest-methods.md        # Suggests new statistical methods/metrics
     ├── suggest-testing.md        # Suggests test coverage improvements
@@ -184,7 +185,8 @@ Launched **in parallel** by [`/suggest`](skills/suggest/SKILL.md). Each scout sc
 | Agent | Model | Used by | Purpose |
 |-------|-------|---------|---------|
 | [`ops-insight`](agents/ops-insight.md) | Sonnet | compound | Extract problem/root-cause/fix/prevention from diffs and plans |
-| [`ops-issue`](agents/ops-issue.md) | Haiku | (manual) | Create GitHub issues with priority + difficulty labels |
+| [`ops-issue`](agents/ops-issue.md) | Haiku | (manual, ops-triage) | Create GitHub issues with priority + difficulty labels |
+| [`ops-triage`](agents/ops-triage.md) | Sonnet | fix, hotfix, build | Classify surfaced-bug observations into definite/ambiguous/not-a-bug; draft `ops-issue` input for definite bugs |
 
 ## Command → Agent Dependency Map
 
@@ -218,13 +220,17 @@ Launched **in parallel** by [`/suggest`](skills/suggest/SKILL.md). Each scout sc
 
 /pull-request → (no agents, ADR gate for non-trivial PRs)
 
-/build ──────→ research → plan → implement → validate → review → ship(commit, compound, push, PR)
-               Uses all agents: discovery-*, design-*, recovery-*, review-*, ops-*
+/build ──────→ research → plan → implement → validate → triage → review → ship(commit, compound, push, PR)
+               Uses all agents: discovery-*, design-*, recovery-*, ops-triage, review-*, ops-*
 
 /validate ───→ discovery-thoughts
 
-/fix ────────→ review-* (conditional, only when .js files changed)
-/hotfix ─────→ review-correctness (lightweight check before commit)
+/fix ────────→ ops-triage
+              → ops-issue (per definite bug)
+              → review-* (conditional, only when .js files changed)
+/hotfix ─────→ ops-triage
+              → ops-issue (per definite bug)
+              → review-correctness (lightweight check before commit)
 /commit ─────→ (no agents)
 /explore ────→ (no agents, uses web search + codebase reads)
 /next ───────→ (no agents, fetches GitHub issues via gh CLI)

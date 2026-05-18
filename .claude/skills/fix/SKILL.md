@@ -51,7 +51,20 @@ npm test
 
 If tests fail, debug and fix. If the fix grows too complex, stop and suggest `/build` instead.
 
-### 5. Review (conditional)
+### 5. Bug Triage
+
+Compile observations noticed during steps 3–4 (pre-existing NaN at a boundary, a flaky test, a docstring that contradicts the code, etc.) into a structured list. Each entry needs `summary`, `stage`, `evidence`, and your tentative `orchestrator_call`.
+
+Spawn the `ops-triage` agent with `branch`, `session_kind: "fix"`, `target_issue`, the `observations` list, and a `diff_path` (write `git diff main...HEAD` to `.claude/tmp/triage-diff-<branch>.patch` if not already done).
+
+Act on the result:
+- **`definite`**: invoke `ops-issue` once per entry with the drafted fields. Collect URLs.
+- **`ambiguous`**: one batched `AskUserQuestion` (File issue / Skip / Other). For each "File issue", invoke `ops-issue`.
+- **`not_a_bug`**: silent.
+
+Report: `> "Triage: <N> filed (<URLs>), <M> skipped, <K> not a bug."` or `> "Triage: clean."`
+
+### 6. Review (conditional)
 
 Check if any `.js` files were modified:
 
@@ -63,19 +76,20 @@ git diff main --name-only | grep '\.js$'
 
 **If no `.js` files were modified**: skip review.
 
-### 6. Ship (fully autonomous)
+### 7. Ship (fully autonomous)
 
 a. **Commit** — invoke `/commit`
 b. **Push** — invoke `/push`
 c. **Pull Request** — invoke `/pull-request`
 
-### 7. Report
+### 8. Report
 
 > "Resolved: `<commit hash>` <commit message>
 >
 > Issue: #<number> — <title>
 > Changed: <list of files>
 > Tests: All passing
+> Triage: <N> filed / <M> skipped / clean
 > Review: PASSED / SKIPPED (no .js changes)
 > PR: <URL>"
 
