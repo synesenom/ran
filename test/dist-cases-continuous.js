@@ -1558,7 +1558,11 @@ export default [{
   cases: [{
     params: () => [2, 2]
   }],
+  // Boundary x=1e-4 and x=1e-2 entries lock in the #246 fix (complementary
+  // Marcum-Q avoids `1 − marcumQ(...)` cancellation in the lower tail).
   refVals: [
+    { x: 1e-4, pdf: 1.5163266483338794e-05, cdf: 7.581633244038656e-10 },
+    { x: 1e-2, pdf: 1.5163171722548333e-03, cdf: 7.581609553828705e-06 },
     { x: 0.5, pdf: 0.0746363849795025, cdf: 0.018806393428795098 },
     { x: 1, pdf: 0.14231040705729825, cdf: 0.07347260204335199 },
     { x: 2, pdf: 0.23287980379682005, cdf: 0.26712019620317995 },
