@@ -56,6 +56,7 @@ Full pipelines that chain multiple skills together.
 | Skill | Pipeline | When to use |
 |-------|----------|-------------|
 | [`/build`](skills/build/SKILL.md) | research → plan → implement → validate → review → ship (commit, compound, push, PR) | Full pipeline from issue to PR |
+| [`/release`](skills/release/SKILL.md) | preflight → version bump → changelog → PR → merge → tag → milestone rotation | Cut a versioned npm release end-to-end |
 
 ### Leaf Skills
 
@@ -224,6 +225,8 @@ Launched **in parallel** by [`/suggest`](skills/suggest/SKILL.md). Each scout sc
                Uses all agents: discovery-*, design-*, recovery-*, ops-triage, review-*, ops-*
 
 /validate ───→ discovery-thoughts
+
+/release ────→ (no agents; uses git + gh CLI directly)
 
 /fix ────────→ ops-triage
               → ops-issue (per definite bug)
