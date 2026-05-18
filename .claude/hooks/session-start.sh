@@ -5,9 +5,6 @@ if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
   exit 0
 fi
 
-git fetch origin main
-git checkout -B main origin/main
-
 npm install
 
 # Install the project's stop hook so pipeline working dirs (thoughts/, solutions/)
