@@ -13,6 +13,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} mu1 Mean of the first Poisson distribution. Default value is 1.
  * @param {number=} mu2 Mean of the second Poisson distribution. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Skellam_distribution
  * @constructor
  */
 export default class extends Distribution {

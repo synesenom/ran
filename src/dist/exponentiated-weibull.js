@@ -13,6 +13,7 @@ import Distribution from './_distribution'
  * @param {number=} lambda Scale parameter. Default value is 1.
  * @param {number=} k First shape parameter. Default value is 1.
  * @param {number=} alpha Second shape parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Exponentiated_Weibull_distribution
  * @constructor
  */
 export default class extends Weibull {

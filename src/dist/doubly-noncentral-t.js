@@ -19,6 +19,7 @@ import NoncentralT from './noncentral-t'
  * @param {number} nu Degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 1.
  * @param {number} mu Location parameter. Default value is 1.
  * @param {number} theta Shape parameter. Default value is 1.
+ * @see https://cran.r-project.org/web/packages/sadists/sadists.pdf
  * @constructor
  */
 export default class extends Distribution {

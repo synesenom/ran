@@ -11,6 +11,7 @@ import Distribution from './_distribution'
  * @class MaxwellBoltzmann
  * @memberof ran.dist
  * @param {number=} a Scale parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Maxwell%E2%80%93Boltzmann_distribution
  * @constructor
  */
 export default class extends Gamma {

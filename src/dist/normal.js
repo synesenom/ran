@@ -13,6 +13,8 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} mu Location parameter (mean). Default value is 0.
  * @param {number=} sigma Squared scale parameter (variance). Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Normal_distribution
+ * @see https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform Box–Muller transform (sampling algorithm)
  * @constructor
  */
 export default class extends Distribution {

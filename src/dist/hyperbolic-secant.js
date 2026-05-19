@@ -9,6 +9,7 @@ import Distribution from './_distribution'
  *
  * @class HyperbolicSecant
  * @memberof ran.dist
+ * @see https://en.wikipedia.org/wiki/Hyperbolic_secant_distribution
  * @constructor
  */
 export default class extends Distribution {

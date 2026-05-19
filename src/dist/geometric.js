@@ -11,6 +11,7 @@ import Distribution from './_distribution'
  * @class Geometric
  * @memberof ran.dist
  * @param {number} p Probability of success. Default value is 0.5.
+ * @see https://en.wikipedia.org/wiki/Geometric_distribution
  * @constructor
  */
 export default class extends Distribution {

@@ -11,6 +11,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} q First shape parameter. Default value is 0.5.
  * @param {number=} beta Second shape parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Discrete_Weibull_distribution
  * @constructor
  */
 export default class extends Distribution {

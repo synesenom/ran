@@ -13,6 +13,7 @@ import Distribution from './_distribution'
  * @class StudentT
  * @memberof ran.dist
  * @param {number=} nu Degrees of freedom. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Student%27s_t-distribution
  * @constructor
  */
 export default class extends Distribution {

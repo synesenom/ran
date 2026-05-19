@@ -14,6 +14,7 @@ import Distribution from './_distribution'
  * @param {number=} mu Location paramameter. Default value is 0.
  * @param {number=} alpha Scale parameter. Default value is 1.
  * @param {number=} beta Shape parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Generalized_normal_distribution
  * @constructor
  */
 export default class extends GeneralizedGamma {

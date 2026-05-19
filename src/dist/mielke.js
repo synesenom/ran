@@ -12,6 +12,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} k First shape parameter. Default value is 2.
  * @param {number=} s Second shape parameter. Default value is 1.
+ * @see https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.mielke.html#r7049b665a02e-2
  * @constructor
  */
 export default class extends Dagum {

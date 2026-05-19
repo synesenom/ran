@@ -11,6 +11,7 @@ import Distribution from './_distribution'
  * @class Soliton
  * @memberof ran.dist
  * @param {number=} N Number of blocks in the messaging model. If not an integer, it is rounded to the nearest one. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Soliton_distribution
  * @constructor
  */
 export default class extends Categorical {

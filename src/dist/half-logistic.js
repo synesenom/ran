@@ -9,6 +9,7 @@ import Distribution from './_distribution'
  *
  * @class HalfLogistic
  * @memberof ran.dist
+ * @see https://en.wikipedia.org/wiki/Half-logistic_distribution
  * @constructor
  */
 export default class extends Distribution {

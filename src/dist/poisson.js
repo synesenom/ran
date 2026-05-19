@@ -12,6 +12,8 @@ import Distribution from './_distribution'
  * @class Poisson
  * @memberof ran.dist
  * @param {number=} lambda Mean of the distribution. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Poisson_distribution
+ * @see D. E. Knuth, "Seminumerical Algorithms", The Art of Computer Programming vol. 2, 1969 (small λ). A. C. Atkinson, "The Computer Generation of Poisson Random Variables", Appl. Stat. 28(1), 29–35, 1979 (large λ).
  * @constructor
  */
 export default class extends Distribution {

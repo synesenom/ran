@@ -11,6 +11,7 @@ import Gamma from './gamma'
  * @class Chi2
  * @memberof ran.dist
  * @param {number=} k Degrees of freedom. If not an integer, is rounded to the nearest one. Default value is 2.
+ * @see https://en.wikipedia.org/wiki/Chi-squared_distribution
  * @constructor
  */
 export default class extends Gamma {

@@ -12,6 +12,7 @@ import Distribution from './_distribution'
  * @class Borel
  * @memberof ran.dist
  * @param {number} mu Distribution parameter. Default value is 0.5.
+ * @see https://en.wikipedia.org/wiki/Borel_distribution
  * @constructor
  */
 export default class extends PreComputed {

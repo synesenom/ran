@@ -11,6 +11,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} eta Shape parameter. Default value is 1.
  * @param {number=} beta Scale parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Gompertz_distribution
  * @constructor
  */
 export default class extends Distribution {

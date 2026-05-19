@@ -13,6 +13,7 @@ import { gammaLowerIncomplete } from '../special'
  * @memberof ran.dist
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} sigma Scale parameter. Default value is 1.
+ * @see https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.moyal.html#r7049b665a02e-2
  * @constructor
  */
 export default class extends Distribution {

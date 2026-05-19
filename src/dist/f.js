@@ -13,6 +13,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} d1 First degree of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
  * @param {number=} d2 Second degree of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
+ * @see https://en.wikipedia.org/wiki/F-distribution
  * @constructor
  */
 export default class extends Beta {

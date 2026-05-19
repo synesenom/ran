@@ -12,6 +12,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} k Shape parameter. It is rounded to the nearest integer. Default value is 1.
  * @param {number=} lambda Rate parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Erlang_distribution
  * @constructor
  */
 export default class extends Gamma {

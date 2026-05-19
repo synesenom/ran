@@ -13,6 +13,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} xmin Lower boundary. Default value is 0.
  * @param {number=} xmax Upper boundary. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)
  * @constructor
  */
 export default class extends Distribution {

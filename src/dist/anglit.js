@@ -12,6 +12,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} beta Scale parameter. Default value is 1.
+ * @see https://docs.scipy.org/doc/scipy-1.0.0/reference/tutorial/stats/continuous_anglit.html
  * @constructor
  */
 export default class extends Distribution {

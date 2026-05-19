@@ -10,6 +10,7 @@ import Kumaraswamy from './kumaraswamy'
  * @class PowerLaw
  * @memberof ran.dist
  * @param {number=} a One plus the exponent of the distribution. Default value is 1.
+ * @see https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.powerlaw.html
  * @constructor
  */
 export default class extends Kumaraswamy {

@@ -11,6 +11,7 @@ import Distribution from './_distribution'
  * @class R
  * @memberof ran.dist
  * @param {number=} c Shape parameter. Default value is 1.
+ * @see https://docs.scipy.org/doc/scipy-1.5.4/reference/tutorial/stats/continuous_rdist.html
  * @constructor
  */
 export default class extends Beta {

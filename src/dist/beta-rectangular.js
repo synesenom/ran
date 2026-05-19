@@ -15,6 +15,7 @@ import Distribution from './_distribution'
  * @param {number=} theta Mixture parameter. Default value is 0.5.
  * @param {number=} a Lower boundary of the support. Default value is 0.
  * @param {number=} b Upper boundary of the support. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Beta_rectangular_distribution
  * @constructor
  */
 export default class extends Beta {

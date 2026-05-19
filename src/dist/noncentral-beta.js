@@ -16,6 +16,7 @@ import Distribution from './_distribution'
  * @param {number=} alpha First shape parameter. Default value is 1.
  * @param {number=} beta Second shape parameter. Default value is 1.
  * @param {number=} lambda Non-centrality parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Noncentral_beta_distribution
  * @constructor
  */
 export default class extends Distribution {

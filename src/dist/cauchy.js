@@ -11,6 +11,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} x0 Location parameter. Default value is 0.
  * @param {number=} gamma Scale parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Cauchy_distribution
  * @constructor
  */
 export default class extends Distribution {

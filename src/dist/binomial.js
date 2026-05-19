@@ -13,6 +13,7 @@ import Categorical from './categorical'
  * @memberof ran.dist
  * @param {number=} n Number of trials. Default value is 100.
  * @param {number=} p Probability of success. Default value is 0.5.
+ * @see https://en.wikipedia.org/wiki/Binomial_distribution
  * @constructor
  */
 export default class extends Categorical {

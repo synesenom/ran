@@ -12,6 +12,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} q Shape parameter. Default value is 1.5.
  * @param {number=} lambda Rate parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Q-exponential_distribution
  * @constructor
  */
 export default class extends GeneralizedPareto {

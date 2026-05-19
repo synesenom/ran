@@ -13,6 +13,7 @@ import Distribution from './_distribution'
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} beta Scale parameter. Default value is 1.
  * @param {number=} gamma Shape parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Birnbaum%E2%80%93Saunders_distribution
  * @constructor
  */
 export default class extends Normal {

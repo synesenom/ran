@@ -11,6 +11,7 @@ import Distribution from './_distribution'
  * @class Bernoulli
  * @memberof ran.dist
  * @param {number=} p Probability of the outcome 1. Default value is 0.5.
+ * @see https://en.wikipedia.org/wiki/Bernoulli_distribution
  * @constructor
  */
 export default class extends Categorical {

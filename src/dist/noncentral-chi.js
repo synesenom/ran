@@ -12,6 +12,7 @@ import NoncentralChi2 from './noncentral-chi2'
  * @memberof ran.dist
  * @param {number=} k Degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
  * @param {number=} lambda Non-centrality parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Noncentral_chi_distribution
  * @constructor
  */
 export default class extends NoncentralChi2 {

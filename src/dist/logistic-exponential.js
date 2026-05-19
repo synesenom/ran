@@ -11,6 +11,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} lambda Scale parameter. Default value is 1.
  * @param {number=} kappa Shape parameter. Default value is 1.
+ * @see http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.295.8653&rep=rep1&type=pdf
  * @constructor
  */
 export default class extends Distribution {

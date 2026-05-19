@@ -11,6 +11,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} a Lower boundary of the support. Default value is 1.
  * @param {number=} b Upper boundary of the support. Default value is 2.
+ * @see https://en.wikipedia.org/wiki/Reciprocal_distribution
  * @constructor
  */
 export default class extends Distribution {

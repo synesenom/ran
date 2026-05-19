@@ -14,6 +14,8 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} alpha Shape parameter. Default value is 1.
  * @param {number=} beta Rate parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Gamma_distribution
+ * @see G. Marsaglia and W. W. Tsang, "A Simple Method for Generating Gamma Variables", ACM Trans. Math. Softw. 26(3), 363–372, 2000.
  * @constructor
  */
 export default class extends Distribution {

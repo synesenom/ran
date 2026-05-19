@@ -12,6 +12,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} lambda Scale parameter. Default value is 1.
  * @param {number=} k Shape parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Weibull_distribution
  * @constructor
  */
 export default class extends Exponential {

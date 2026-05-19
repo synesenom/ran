@@ -9,6 +9,7 @@ import LogNormal from './log-normal'
  *
  * @class Gilbrat
  * @memberof ran.dist
+ * @see http://mathworld.wolfram.com/GibratsDistribution.html
  * @constructor
  */
 export default class extends LogNormal {

@@ -14,6 +14,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} nu First shape parameter. Default value is 1.
  * @param {number=} sigma Second shape parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Rice_distribution
  * @constructor
  */
 export default class extends Distribution {

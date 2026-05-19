@@ -16,6 +16,7 @@ import PreComputed from './_pre-computed'
  * @param {number=} alpha Shape parameter of the gamma component. Default component is 1.
  * @param {number=} beta Scale parameter of the gamma component. Default value is 1.
  * @param {number=} lambda Mean of the Poisson component. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Delaporte_distribution
  * @constructor
  */
 export default class extends PreComputed {

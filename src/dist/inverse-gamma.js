@@ -12,6 +12,7 @@ import Gamma from './gamma'
  * @memberof ran.dist
  * @param {number=} alpha Shape parameter. Default value is 1.
  * @param {number=} beta Scale parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Inverse-gamma_distribution
  * @constructor
  */
 export default class extends Gamma {

@@ -16,6 +16,7 @@ import Distribution from './_distribution'
  * @param {number=} sigma Variance of the underlying normal distribution. Default value is 1.
  * @param {number=} a Lower boundary of the support. Default value is 0.
  * @param {number=} b Upper boundary of the support. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Truncated_normal_distribution
  * @constructor
  */
 export default class extends Normal {

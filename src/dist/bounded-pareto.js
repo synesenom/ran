@@ -12,6 +12,7 @@ import Distribution from './_distribution'
  * @param {number=} L Lower boundary. Default value is 1.
  * @param {number=} H Upper boundary. Default value is 10.
  * @param {number=} alpha Shape parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Pareto_distribution#Bounded_Pareto_distribution
  * @constructor
  */
 export default class extends Distribution {

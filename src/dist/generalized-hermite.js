@@ -18,6 +18,7 @@ import PreComputed from './_pre-computed'
  * @param {number=} a1 Mean of the first Poisson component. Default value is 1.
  * @param {number=} am Mean of the second Poisson component. Default value is 1.
  * @param {number=} m Multiplier of the second Poisson. If not an integer, it is rounded to the nearest one. Default value is 2.
+ * @see https://journal.r-project.org/archive/2015/RJ-2015-035/RJ-2015-035.pdf
  * @constructor
  */
 export default class extends PreComputed {

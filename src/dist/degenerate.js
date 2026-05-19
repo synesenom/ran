@@ -10,6 +10,7 @@ import Distribution from './_distribution'
  * @class Degenerate
  * @memberof ran.dist
  * @param {number=} x0 Location of the distribution. Default value is 0.
+ * @see https://en.wikipedia.org/wiki/Degenerate_distribution
  * @constructor
  */
 export default class extends Distribution {

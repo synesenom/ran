@@ -10,6 +10,7 @@ import Distribution from './_distribution'
  * @class GeneralizedExtremeValue
  * @memberof ran.dist
  * @param {number=} c Shape parameter. Default value is 2.
+ * @see https://en.wikipedia.org/wiki/Generalized_extreme_value_distribution
  * @constructor
  */
 export default class extends Distribution {

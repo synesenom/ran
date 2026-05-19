@@ -16,6 +16,7 @@ import Distribution from './_distribution'
  * @param {number=} r Number of failures until the experiment is stopped. If not an integer, it is rounded to the nearest
  * integer. Default value is 10.
  * @param {number=} p Probability of success. Default value is 0.5.
+ * @see https://en.wikipedia.org/wiki/Negative_binomial_distribution
  * @constructor
  */
 export default class extends Distribution {

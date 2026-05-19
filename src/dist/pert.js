@@ -13,6 +13,7 @@ import Distribution from './_distribution'
  * @param {number=} a Lower boundary of the support. Default value is 0.
  * @param {number=} b Mode of the distribution. Default value is 0.5.
  * @param {number=} c Upper boundary of the support. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/PERT_distribution
  * @constructor
  */
 export default class extends Beta {

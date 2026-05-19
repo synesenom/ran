@@ -14,6 +14,7 @@ import rBeta from './_beta'
  * @memberof ran.dist
  * @param {number=} alpha First shape parameter. Default value is 1.
  * @param {number=} beta Second shape parameter. Default value is 1.
+ * @see https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bgepdf.htm
  * @constructor
  */
 export default class extends PreComputed {

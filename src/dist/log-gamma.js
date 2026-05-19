@@ -14,6 +14,7 @@ import Distribution from './_distribution'
  * @param {number=} alpha Shape parameter. Default value is 1.
  * @param {number=} beta Rate parameter. Default value is 1.
  * @param {number=} mu Location parameter. Default value is 0.
+ * @see https://reference.wolfram.com/language/ref/LogGammaDistribution.html
  * @constructor
  */
 export default class extends Gamma {

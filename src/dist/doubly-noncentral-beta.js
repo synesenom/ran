@@ -18,6 +18,7 @@ import Distribution from './_distribution'
  * @param {number=} beta Second shape parameter. Default value is 1.
  * @param {number=} lambda1 First non-centrality parameter. Default value is 1.
  * @param {number=} lambda2 Second non-centrality parameter. Default value is 1.
+ * @see https://rdrr.io/cran/sadists/f/inst/doc/sadists.pdf
  * @constructor
  */
 export default class extends Distribution {
