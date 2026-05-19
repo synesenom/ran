@@ -20,6 +20,7 @@ const AD_SAMPLE_SIZE = 5000
 // α = 0.001 matches the historical false-positive rate of the previous KS check
 // (its one-sided statistic with the two-sided 1.628/√N band rejects at an
 // effective rate well below the nominal α = 0.01).
+// See solutions/testing/2026-05-19-1132-gof-test-swap-effective-alpha-empirical-calibration.md
 const AD_ALPHA = 0.001
 
 // Unit test suite.

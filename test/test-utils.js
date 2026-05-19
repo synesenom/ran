@@ -158,6 +158,8 @@ export function _adinf (z) {
 
 // Marsaglia finite-n correction; piecewise in x = adinf(A²). Improves the
 // asymptotic CDF approximation by ~10⁻³ for moderate n; harmless as n → ∞.
+// See solutions/testing/2026-05-19-1132-marsaglia-errfix-transcription-branch-coverage.md
+// for the transcription pitfall around the g2 branch.
 function _errfix (n, x) {
   const c = 0.01265 + 0.1757 / n
   if (x < c) {
