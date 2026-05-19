@@ -77,6 +77,7 @@ export default [{
     name: 'zero parameter',
     params: () => [0]
   }],
+  // mu=0 degenerates to a point mass at 1; the chi-test trivially passes regardless of sampler behavior
   sampleParams: [{ name: 'positive parameter', params: () => [0.5] }],
   // Borel(mu=0.5): pmf(k)=e^(-μk)(μk)^(k-1)/k!, CDF via cumulative sum
   refVals: [
@@ -105,6 +106,7 @@ export default [{
     name: 'zero parameter',
     params: () => [0, 5]
   }],
+  // mu=0 degenerates to a point mass at n; the chi-test trivially passes regardless of sampler behavior
   sampleParams: [{ name: 'positive parameter', params: () => [0.5, 5] }],
   // BorelTanner(mu=0.5, n=5): pmf=(n/k)·e^(-μk)(μk)^(k-n)/(k-n)!, CDF via cumulative sum
   refVals: [
@@ -138,6 +140,7 @@ export default [{
     name: 'large n',
     params: () => [Array.from({ length: 105 }, () => 1 / 105), 0]
   }],
+  // moderate/large n excluded for test-suite speed; the sampler's code path is independent of the number of categories
   sampleParams: [{ name: 'small n', params: () => [[0.4, 0.6], 0] }],
   // No scipy equivalent; PMF is w[i] / sum(w) (numpy)
   refVals: [
