@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { adTest, _adinf, _adStatistic } from './test-utils'
+import { adTest, ksTest, _adinf, _adStatistic } from './test-utils'
 import { float, seed } from '../src/core'
 
 // Hand-computed A² for the symmetric reference sample u = [0.1, 0.3, 0.5, 0.7, 0.9].
@@ -25,6 +25,22 @@ describe('test-utils', () => {
       const left = _adinf(2 - 1e-6)
       const right = _adinf(2 + 1e-6)
       assert(Math.abs(left - right) < 1e-5, `discontinuity at z=2: left=${left}, right=${right}`)
+    })
+  })
+
+  describe('ksTest', () => {
+    it('should accept a sample that matches the model CDF', () => {
+      seed(12345)
+      const sample = Array.from({ length: 1000 }, () => float())
+      assert(ksTest(sample, x => x))
+    })
+
+    it('should reject a left-shifted sample at α = 0.01', () => {
+      seed(12345)
+      // Compressing to [0, 0.7) means the EDF saturates at 1 by x=0.7 while the
+      // Uniform[0,1) model CDF is only 0.7 there, giving D ≈ 0.3 >> threshold ≈ 0.051.
+      const sample = Array.from({ length: 1000 }, () => float() * 0.7)
+      assert(!ksTest(sample, x => x))
     })
   })
 

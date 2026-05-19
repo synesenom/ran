@@ -113,7 +113,8 @@ export function kolmogorovSmirnov (values, cdf) {
   // Calculate D value
   let D = 0
   for (let i = 0; i < values.length; i++) {
-    D = Math.max(D, Math.abs((i + 1) / values.length - cdf(values[i])))
+    const F = cdf(values[i])
+    D = Math.max(D, Math.abs((i + 1) / values.length - F), Math.abs(F - i / values.length))
   }
 
   // Return comparison results
