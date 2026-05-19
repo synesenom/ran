@@ -32,7 +32,7 @@ export default class extends Categorical {
     // Build weights
     const weights = []
     for (let k = 0; k <= Ki; k++) {
-      weights.push(Math.exp(logBinomial(Ki + ri - 1, k) + logBinomial(Ni - ri - k, Ki - k) - logBinomial(Ni, Ki)))
+      weights.push(Math.exp(logBinomial(k + ri - 1, k) + logBinomial(Ni - ri - k, Ki - k) - logBinomial(Ni, Ki)))
     }
     super(weights, 0)
   }

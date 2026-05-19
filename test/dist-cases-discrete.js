@@ -338,14 +338,20 @@ export default [{
     [], // all params required
     [-1, 5, 5], // N >= 0
     [10, -1, 5], [10, 11, 5], // 0 <= K <= N
-    [10, 5, -1], [10, 5, 6] // 0 <= r <= K - N
+    [10, 5, -1], [10, 5, 6] // 0 < r <= N - K
   ],
   cases: [{
     params: () => [35, 15, 7]
-  }]
-  // refVals deferred: ranjs._pdf uses logBinomial(K+r-1, k) where the documented
-  // formula and scipy.stats.nhypergeom use C(k+r-1, k). pmf(0;35,15,7) is 0.000297
-  // in ranjs vs 0.0115 in scipy. Filed as separate bug.
+  }],
+  // scipy.stats.nhypergeom(M=35, n=15, r=7)
+  refVals: [
+    { x: 0, pmf: 0.0115279603600311, cdf: 0.0115279603600311 },
+    { x: 2, pmf: 0.08966191391124509, cdf: 0.1444197256213678 },
+    { x: 5, pmf: 0.16273637374860703, cdf: 0.603040415276796 },
+    { x: 8, pmf: 0.07167384049897532, cdf: 0.9237349067403976 },
+    { x: 12, pmf: 0.0032007456682079717, cdf: 0.998939093503107 },
+    { x: 15, pmf: 0.000016707188927434303, cdf: 1 }
+  ]
 }, {
   name: 'NegativeBinomial',
   invalidParams: [
