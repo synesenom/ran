@@ -19,7 +19,7 @@ export default class extends Categorical {
   constructor (N) {
     // Define weights
     const Ni = Math.round(N)
-    super([1 / Ni].concat(Array.from({ length: Ni - 2 }, (d, i) => 1 / ((i + 1) * (i + 2)))), 1)
+    super([1 / Ni].concat(Array.from({ length: Ni - 1 }, (d, i) => 1 / ((i + 1) * (i + 2)))), 1)
 
     // Update number of parameters.
     this.k = 1
