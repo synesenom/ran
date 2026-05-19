@@ -274,6 +274,15 @@ function refValTol (expected) {
     : Math.max(Math.abs(expected) * 1e-10, Number.MIN_VALUE)
 }
 
+// 1e-6 matches the tolerance specified in issue #213: root-finding accumulates
+// more error than direct PDF/CDF evaluation, so a looser bound than PRECISION is justified.
+export function checkQuantileVals (dist, quantileVals) {
+  for (const { p, x } of quantileVals) {
+    const actual = dist.q(p)
+    assert(Math.abs(actual - x) < 1e-6, `q(${p}) = ${actual}, expected ${x}`)
+  }
+}
+
 export function checkRefVals (dist, refVals) {
   for (const { x, pdf, pmf, cdf } of refVals) {
     if (pdf !== undefined) {
