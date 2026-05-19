@@ -129,7 +129,8 @@ export function ksTest (values, model) {
   let D = 0
   values.sort((a, b) => a - b)
   for (let i = 0; i < values.length; i++) {
-    D = Math.max(D, Math.abs((i + 1) / values.length - model(values[i])))
+    const F = model(values[i])
+    D = Math.max(D, Math.abs((i + 1) / values.length - F), Math.abs(F - i / values.length))
     // console.log(values[i], (i + 1) / values.length, model(values[i]))
   }
   // console.log(D, 1.628 / Math.sqrt(values.length))
