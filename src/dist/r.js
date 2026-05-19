@@ -16,7 +16,7 @@ import Distribution from './_distribution'
  */
 export default class extends Beta {
   constructor (c) {
-    // Affine reduction: U = (X+1)/2 ~ Beta(c/2, c/2). One-to-one map onto [-1, 1] avoids the 0·∞ corner that the squared-variable reduction hits at x=0 for c<2.
+    // Affine reduction: U = (X+1)/2 ~ Beta(c/2, c/2). See solutions/correctness/2026-05-19-1730-r-distribution-mixed-beta-reductions.md — one-to-one map onto [-1, 1] avoids the 0·∞ corner that the squared-variable reduction hits at x=0 for c<2.
     super(c / 2, c / 2)
 
     // Validate parameters
