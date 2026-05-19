@@ -484,11 +484,21 @@ export default [{
   ],
   cases: [{
     params: () => [10]
-  }]
-  // refVals deferred: ranjs's Soliton(N) builds N-1 weights, omitting pmf(N) and
-  // implicitly renormalizing — support becomes {1, ..., N-1} instead of the
-  // documented {1, ..., N}. pmf(1;10) is 0.1011 in ranjs vs 0.1 in the formula.
-  // Filed as separate bug.
+  }],
+  // Ideal soliton N=10: pmf(1)=1/10, pmf(k)=1/(k(k-1)) for k=2..10
+  // CDF is the telescoping sum; cdf(10)=1.
+  refVals: [
+    { x: 1, pmf: 0.1, cdf: 0.1 },
+    { x: 2, pmf: 0.5, cdf: 0.6 },
+    { x: 3, pmf: 1 / 6, cdf: 23 / 30 },
+    { x: 4, pmf: 1 / 12, cdf: 17 / 20 },
+    { x: 5, pmf: 1 / 20, cdf: 0.9 },
+    { x: 6, pmf: 1 / 30, cdf: 14 / 15 },
+    { x: 7, pmf: 1 / 42, cdf: 67 / 70 },
+    { x: 8, pmf: 1 / 56, cdf: 39 / 40 },
+    { x: 9, pmf: 1 / 72, cdf: 89 / 90 },
+    { x: 10, pmf: 1 / 90, cdf: 1.0 }
+  ]
 }, {
   name: 'YuleSimon',
   invalidParams: [
