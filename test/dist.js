@@ -148,7 +148,7 @@ const UnitTests = {
 
   sample (tc) {
     // Test cases
-    const cases = tc.cases.map(c => ({
+    const cases = (tc.sampleParams ?? tc.cases).map(c => ({
       name: c.name || 'random parameters',
       generate: () => new dist[tc.name](...c.params())
     }))

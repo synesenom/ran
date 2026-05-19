@@ -133,6 +133,8 @@ export default [{
     name: 'normal shape parameter',
     params: () => [2, 0.5]
   }],
+  // b=1 (log branch in _q) and b≈1 near-boundary excluded — b=0.5 covers the Lambert W path; b=1 correctness verified by the analytical suite
+  sampleParams: [{ name: 'normal shape parameter', params: () => [2, 0.5] }],
   // mpmath: BenktanderII PDF/CDF formula with a=2, b=0.9995 @ 50 dps
   refVals: [
     { x: 1.001, pdf: 1.996500505574631, cdf: 0.001998499585372714 },
@@ -317,6 +319,8 @@ export default [{
     name: 'k > 1',
     params: () => [5]
   }],
+  // k=1 and k>1 share the sqrt(chi2) sampler with no code-path branch; single case suffices
+  sampleParams: [{ name: 'k = 1', params: () => [1] }],
   refVals: [
     { x: 0, pdf: 0.7978845608028654, cdf: 0 },
     { x: 0.1, pdf: 0.793905094954024, cdf: 0.079655674554058 },
@@ -472,6 +476,8 @@ export default [{
   }, {
     params: () => [5, 0, 2]
   }],
+  // theta=0 uses the identical sampler path (normal(r,mu)/sqrt(noncentralChi2(r,nu,theta))); no theta branch in _sample
+  sampleParams: [{ params: () => [5, 1, 2] }],
   // Reference via Poisson mixture of singly-noncentral t: T | L=l = T' * sqrt(nu/(nu+2l)),
   // T' ~ NCT(nu+2l, mu), L ~ Pois(theta/2) (Patnaik 1949 / Paolella 2007). Built on scipy.stats.nct.
   // See solutions/testing/2026-05-18-0712-noncentral-refvals-doubly-poisson-mixture-scaling.md
@@ -607,6 +613,8 @@ export default [{
     name: 'low degrees of freedom',
     params: () => [1, 1]
   }],
+  // low d.f. excluded: d1=d2=1 yields a heavy-tailed F (Cauchy of logs) that inflates AD-test variance and causes spurious GoF failures
+  sampleParams: [{ params: () => [5, 5] }],
   refVals: [
     { x: -3, pdf: 8.20683548076297e-06, cdf: 1.6471841028035418e-06 },
     { x: -1, pdf: 0.09702323575946462, cdf: 0.02332756957763953 },
@@ -710,6 +718,8 @@ export default [{
     name: 'negative shape parameter',
     params: () => [-2]
   }],
+  // negative shape uses the same (-log(p))^c quantile formula as positive; no sign-dependent branch in _sample
+  sampleParams: [{ name: 'positive shape parameter', params: () => [2] }],
   refVals: [
     { x: -2, pdf: 0.0477972614141583, cdf: 0.106877925660386 },
     { x: -1, pdf: 0.102145506092914, cdf: 0.176921206317764 },
@@ -794,6 +804,8 @@ export default [{
     name: 'zero shape parameter',
     params: () => [0, 2, 0]
   }],
+  // xi<0 shares the xi>0 power-transform quantile path; xi=0 (log branch) excluded — quantile correctness for xi=0 covered by the analytical suite
+  sampleParams: [{ name: 'positive shape parameter', params: () => [0, 2, 2] }],
   refVals: [
     { x: 1e-6, pdf: 0.49999925000093753, cdf: 4.99999624925529e-7 },
     { x: 1e-4, pdf: 0.4999250093739064, cdf: 4.999625031243404e-5 },
@@ -935,6 +947,8 @@ export default [{
     name: 'normal q',
     params: () => [0.5, 2]
   }],
+  // any interior q exercises the same Gamma-variate sampler (sqrt(Gamma(q, q/omega))); no q-value branch exists in _generator
+  sampleParams: [{ name: 'normal q', params: () => [0.5, 2] }],
   // ranjs's Hoyt impl is Nakagami-m with m=q (class is misnamed); refs via scipy.stats.nakagami
   refVals: [
     { x: 0.1, pdf: 1.0359375032184368, cdf: 0.2073948032927819 },
@@ -1594,6 +1608,8 @@ export default [{
     name: 'even k',
     params: () => [10, 2]
   }],
+  // even and odd k share the same Gamma-based noncentralChi2 sampler; the even/odd branch is in _pdf only
+  sampleParams: [{ name: 'odd k', params: () => [11, 2] }],
   // Reference values from scipy.stats.ncx2(x, 11, 2) — matches cases[0] (odd k)
   refVals: [
     { x: 1e-4, pdf: 1.552980522417813e-22, cdf: 2.8236187208673515e-27 },
@@ -1641,6 +1657,8 @@ export default [{
     name: 'central',
     params: () => [5, 0]
   }],
+  // mu=0 uses the identical sampler path (normal(r,mu)/sqrt(chi2/nu)); no central branch in _sample
+  sampleParams: [{ name: 'noncentral', params: () => [5, 1] }],
   // Reference values from scipy.stats.nct(x, 5, 1)
   refVals: [
     { x: -2, pdf: 9.11717039629604542e-03, cdf: 5.89646228984215710e-03 },
@@ -1895,6 +1913,8 @@ export default [{
     name: 'zero shape parameter',
     params: () => [0, 2, 0]
   }],
+  // xi<0 shares the xi>0 power-transform quantile path; xi=0 (logistic, log branch in _q) excluded — quantile correctness for xi=0 covered by the analytical suite
+  sampleParams: [{ name: 'positive shape parameter', params: () => [0, 2, 2] }],
   refVals: [
     { x: -2, pdf: 0, cdf: 0 },
     { x: -0.9, pdf: 0.912657670484702, cdf: 0.240253073352042 },
@@ -1922,6 +1942,8 @@ export default [{
     name: 'zero shape parameter',
     params: () => [0, 2, 0]
   }],
+  // positive, negative, and zero alpha all use Azzalini's unconditional Box-Muller method; no alpha-sign branch exists in _generator
+  sampleParams: [{ name: 'positive shape parameter', params: () => [0, 2, 2] }],
   refVals: [
     { x: -4, pdf: 1.7099609572430577e-6, cdf: 3.143618030015566e-7 },
     { x: -2, pdf: 0.005504865910407027, cdf: 0.001718879945288876 },
@@ -2066,6 +2088,8 @@ export default [{
     name: 'negative shape parameter',
     params: () => [-2]
   }],
+  // lambda<0 shares the lambda>0 power-transform quantile path; lambda=0 (logit branch) excluded — quantile correctness covered by the analytical suite
+  sampleParams: [{ name: 'positive shape parameter', params: () => [2] }],
   // scipy.stats.tukeylambda(0)  # equals logistic at lambda=0
   refVals: [
     { x: -5.0, pdf: 0.006648056670790155, cdf: 0.006692850924284856 },
