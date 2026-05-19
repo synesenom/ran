@@ -27,7 +27,18 @@ export default [{
   ],
   cases: [{
     params: () => [25, 2, 2]
-  }]
+  }],
+  // scipy.stats.betabinom(n=25, a=2, b=2)
+  refVals: [
+    { x: 0, pmf: 0.007936507936507943, cdf: 0.007936507936507943 },
+    { x: 3.0, pmf: 0.028083028083028087, cdf: 0.07326007326007328 },
+    { x: 7.0, pmf: 0.04639804639804648, cdf: 0.2344322344322346 },
+    { x: 10.0, pmf: 0.053724053724053936, cdf: 0.38949938949938967 },
+    { x: 12.0, pmf: 0.05555555555555544, cdf: 0.5000000000000001 },
+    { x: 15.0, pmf: 0.053724053724053936, cdf: 0.6642246642246644 },
+    { x: 20.0, pmf: 0.03846153846153849, cdf: 0.8931623931623933 },
+    { x: 25.0, pmf: 0.007936507936507943, cdf: 1.0 }
+  ]
 }, {
   name: 'Binomial',
   invalidParams: [
@@ -57,13 +68,26 @@ export default [{
     [], // all params required
     [-1], [2] // 0 <= mu <= 1
   ],
+  // 'positive parameter' is first so refVals (always evaluated against cases[0]
+  // per test/dist.js:133) exercises the non-degenerate distribution.
   cases: [{
-    name: 'zero parameter',
-    params: () => [0]
-  }, {
     name: 'positive parameter',
     params: () => [0.5]
-  }]
+  }, {
+    name: 'zero parameter',
+    params: () => [0]
+  }],
+  // Borel(mu=0.5): pmf(k)=e^(-μk)(μk)^(k-1)/k!, CDF via cumulative sum
+  refVals: [
+    { x: 1.0, pmf: 0.6065306597126334, cdf: 0.6065306597126334 },
+    { x: 2.0, pmf: 0.18393972058572117, cdf: 0.7904703802983546 },
+    { x: 3.0, pmf: 0.08367381005566117, cdf: 0.8741441903540158 },
+    { x: 4.0, pmf: 0.0451117610788709, cdf: 0.9192559514328867 },
+    { x: 6.0, pmf: 0.016803135574154082, cdf: 0.9627794641632579 },
+    { x: 8.0, pmf: 0.007442545326215793, cdf: 0.9812360594716548 },
+    { x: 12.0, pmf: 0.001877413336924442, cdf: 0.994481007535648 },
+    { x: 20.0, pmf: 0.00018660813139987598, cdf: 0.9993627401273154 }
+  ]
 }, {
   name: 'BorelTanner',
   invalidParams: [
@@ -71,13 +95,26 @@ export default [{
     [-1, 2], [2, 2], // 0 <= mu <= 1
     [0.5, -1], [0.5, 0] // k > 0
   ],
+  // 'positive parameter' is first so refVals (always evaluated against cases[0]
+  // per test/dist.js:133) exercises the non-degenerate distribution.
   cases: [{
-    name: 'zero parameter',
-    params: () => [0, 5]
-  }, {
     name: 'positive parameter',
     params: () => [0.5, 5]
-  }]
+  }, {
+    name: 'zero parameter',
+    params: () => [0, 5]
+  }],
+  // BorelTanner(mu=0.5, n=5): pmf=(n/k)·e^(-μk)(μk)^(k-n)/(k-n)!, CDF via cumulative sum
+  refVals: [
+    { x: 5.0, pmf: 0.0820849986238988, cdf: 0.0820849986238988 },
+    { x: 6.0, pmf: 0.12446767091965986, cdf: 0.20655266954355866 },
+    { x: 7.0, pmf: 0.13211355247264345, cdf: 0.3386662220162021 },
+    { x: 8.0, pmf: 0.12210425925822786, cdf: 0.46077048127443 },
+    { x: 10.0, pmf: 0.08773368488392536, cdf: 0.6539528442362021 },
+    { x: 12.0, pmf: 0.05736540751713573, cdf: 0.7827352034608114 },
+    { x: 15.0, pmf: 0.02861012346955784, cdf: 0.8932594545773648 },
+    { x: 25.0, pmf: 0.002657202272307442, cdf: 0.9897914880529921 }
+  ]
 }, {
   name: 'Categorical',
   invalidParams: [
@@ -114,7 +151,18 @@ export default [{
   ],
   cases: [{
     params: () => [2, 2, 2]
-  }]
+  }],
+  // mpmath: Delaporte(α=2, β=2, λ=2) direct sum formula @ 50 dps; CDF via cumulative sum
+  refVals: [
+    { x: 0, pmf: 0.015037253692956967, cdf: 0.015037253692956967 },
+    { x: 1.0, pmf: 0.05012417897652322, cdf: 0.06516143266948018 },
+    { x: 2.0, pmf: 0.09022352215774179, cdf: 0.15538495482722198 },
+    { x: 3.0, pmf: 0.11807028825581024, cdf: 0.2734552430830322 },
+    { x: 5.0, pmf: 0.12133764214465029, cdf: 0.5221454288495155 },
+    { x: 8.0, pmf: 0.0707262675425665, cdf: 0.7878701739239051 },
+    { x: 12.0, pmf: 0.023278610148764332, cdf: 0.9394756377198948 },
+    { x: 20.0, pmf: 0.0016349305025805995, cdf: 0.9961851621606456 }
+  ]
 }, {
   name: 'DiscreteUniform',
   invalidParams: [
@@ -147,7 +195,18 @@ export default [{
   ],
   cases: [{
     params: () => [0.5, 2]
-  }]
+  }],
+  // DiscreteWeibull(q=0.5, β=2): closed form pmf(k)=q^(k^β)-q^((k+1)^β), cdf(k)=1-q^((k+1)^β)
+  refVals: [
+    { x: 0, pmf: 0.5, cdf: 0.5 },
+    { x: 1.0, pmf: 0.4375, cdf: 0.9375 },
+    { x: 2.0, pmf: 0.060546875, cdf: 0.998046875 },
+    { x: 3.0, pmf: 0.0019378662109375, cdf: 0.9999847412109375 },
+    { x: 4.0, pmf: 1.5228986740112305e-05, cdf: 0.9999999701976776 },
+    { x: 5.0, pmf: 2.9787770472466946e-08, cdf: 0.9999999999854481 },
+    { x: 7.0, pmf: 1.7763026292916262e-15, cdf: 1.0 },
+    { x: 10.0, pmf: 7.888605290628195e-31, cdf: 1.0 }
+  ]
 }, {
   name: 'FlorySchulz',
   invalidParams: [
@@ -156,7 +215,18 @@ export default [{
   ],
   cases: [{
     params: () => [0.5]
-  }]
+  }],
+  // FlorySchulz(a=0.5): pmf=a^2·k·(1-a)^(k-1); cdf=1-(1-a)^k(1+a·k)
+  refVals: [
+    { x: 1.0, pmf: 0.25, cdf: 0.25 },
+    { x: 2.0, pmf: 0.25, cdf: 0.5 },
+    { x: 3.0, pmf: 0.1875, cdf: 0.6875 },
+    { x: 4.0, pmf: 0.125, cdf: 0.8125 },
+    { x: 6.0, pmf: 0.046875, cdf: 0.9375 },
+    { x: 9.0, pmf: 0.0087890625, cdf: 0.9892578125 },
+    { x: 15.0, pmf: 0.0002288818359375, cdf: 0.9997406005859375 },
+    { x: 25.0, pmf: 3.725290298461914e-07, cdf: 0.9999995976686478 }
+  ]
 }, {
   name: 'GeneralizedHermite',
   invalidParams: [
@@ -167,7 +237,18 @@ export default [{
   ],
   cases: [{
     params: () => [2, 2, 6]
-  }]
+  }],
+  // GeneralizedHermite(a1=2, a2=2, m=6) as X1 + 6·X2, X_i ~ scipy.stats.poisson(2); CDF via cumsum
+  refVals: [
+    { x: 0, pmf: 0.018315638888734182, cdf: 0.018315638888734182 },
+    { x: 1.0, pmf: 0.036631277777468364, cdf: 0.05494691666620255 },
+    { x: 2.0, pmf: 0.036631277777468364, cdf: 0.09157819444367091 },
+    { x: 3.0, pmf: 0.02442085185164557, cdf: 0.11599904629531647 },
+    { x: 6.0, pmf: 0.03825933456757807, cdf: 0.17135297715904646 },
+    { x: 8.0, pmf: 0.07337884532565885, cdf: 0.3184595371225305 },
+    { x: 12.0, pmf: 0.0398875479769076, cdf: 0.4414099317158779 },
+    { x: 18.0, pmf: 0.027677278671054566, cdf: 0.6998700442018335 }
+  ]
 }, {
   name: 'Geometric',
   invalidParams: [
@@ -195,7 +276,16 @@ export default [{
   ],
   cases: [{
     params: () => [5]
-  }]
+  }],
+  // HeadsMinusTails(n=5): pmf(0)=C(2n,n)/4^n, pmf(2m)=2·C(2n,n+m)/4^n; CDF via cumulative sum
+  refVals: [
+    { x: 0, pmf: 0.24609375, cdf: 0.24609375 },
+    { x: 2.0, pmf: 0.41015625, cdf: 0.65625 },
+    { x: 4.0, pmf: 0.234375, cdf: 0.890625 },
+    { x: 6.0, pmf: 0.087890625, cdf: 0.978515625 },
+    { x: 8.0, pmf: 0.01953125, cdf: 0.998046875 },
+    { x: 10.0, pmf: 0.001953125, cdf: 1.0 }
+  ]
 }, {
   name: 'Hypergeometric',
   invalidParams: [
@@ -224,7 +314,18 @@ export default [{
   ],
   cases: [{
     params: () => [0.5]
-  }]
+  }],
+  // scipy.stats.logser(p=0.5)
+  refVals: [
+    { x: 1.0, pmf: 0.7213475204444817, cdf: 0.7213475204444817 },
+    { x: 2.0, pmf: 0.18033688011112042, cdf: 0.9016844005556022 },
+    { x: 3.0, pmf: 0.06011229337037347, cdf: 0.9617966939259757 },
+    { x: 4.0, pmf: 0.022542110013890053, cdf: 0.9843388039398657 },
+    { x: 5.0, pmf: 0.009016844005556022, cdf: 0.9933556479454217 },
+    { x: 7.0, pmf: 0.001610150715277861, cdf: 0.9987228169963479 },
+    { x: 10.0, pmf: 0.00014088818758681285, cdf: 0.9998812309831728 },
+    { x: 20.0, pmf: 6.879306034512346e-08, cdf: 0.999999937229902 }
+  ]
 }, {
   name: 'NegativeHypergeometric',
   invalidParams: [
@@ -236,6 +337,9 @@ export default [{
   cases: [{
     params: () => [35, 15, 7]
   }]
+  // refVals deferred: ranjs._pdf uses logBinomial(K+r-1, k) where the documented
+  // formula and scipy.stats.nhypergeom use C(k+r-1, k). pmf(0;35,15,7) is 0.000297
+  // in ranjs vs 0.0115 in scipy. Filed as separate bug.
 }, {
   name: 'NegativeBinomial',
   invalidParams: [
@@ -267,7 +371,18 @@ export default [{
   ],
   cases: [{
     params: () => [2, 2]
-  }]
+  }],
+  // NeymanA(λ=2, φ=2) compound Poisson: pmf(k)=Σ_j Pois(j;λ)·Pois(k;jφ); CDF via cumsum
+  refVals: [
+    { x: 0, pmf: 0.17740333081914028, cdf: 0.17740333081914028 },
+    { x: 1.0, pmf: 0.09603572009410741, cdf: 0.2734390509132477 },
+    { x: 2.0, pmf: 0.12202976285364354, cdf: 0.39546881376689125 },
+    { x: 3.0, pmf: 0.12070244710091246, cdf: 0.5161712608678037 },
+    { x: 4.0, pmf: 0.10737111436151524, cdf: 0.623542375229319 },
+    { x: 6.0, pmf: 0.07407697138311874, cdf: 0.7884728507179998 },
+    { x: 10.0, pmf: 0.023888133739920096, cdf: 0.9481690751884645 },
+    { x: 20.0, pmf: 0.0003644479532151495, cdf: 0.999442904902409 }
+  ]
 }, {
   name: 'Poisson',
   invalidParams: [
@@ -301,13 +416,29 @@ export default [{
   ],
   cases: [{
     params: () => [2, 0.5]
-  }]
+  }],
+  // PolyaAeppli(λ=2, θ=0.5) closed-form series; CDF via cumsum
+  refVals: [
+    { x: 0, pmf: 0.1353352832366127, cdf: 0.1353352832366127 },
+    { x: 1.0, pmf: 0.1353352832366127, cdf: 0.2706705664732254 },
+    { x: 2.0, pmf: 0.1353352832366127, cdf: 0.4060058497098381 },
+    { x: 3.0, pmf: 0.12405734296689497, cdf: 0.5300631926767331 },
+    { x: 4.0, pmf: 0.10714043256231838, cdf: 0.6372036252390515 },
+    { x: 6.0, pmf: 0.07067509235689774, cdf: 0.7964105487132334 },
+    { x: 10.0, pmf: 0.02262304843105503, cdf: 0.9464595907555691 },
+    { x: 20.0, pmf: 0.0005328296608723276, cdf: 0.9989993828812536 }
+  ]
 }, {
   name: 'Rademacher',
   invalidParams: [],
   cases: [{
     params: () => []
-  }]
+  }],
+  // Rademacher: P(X=-1) = P(X=1) = 0.5
+  refVals: [
+    { x: -1.0, pmf: 0.5, cdf: 0.5 },
+    { x: 1.0, pmf: 0.5, cdf: 1.0 }
+  ]
 }, {
   name: 'Skellam',
   invalidParams: [
@@ -340,6 +471,10 @@ export default [{
   cases: [{
     params: () => [10]
   }]
+  // refVals deferred: ranjs's Soliton(N) builds N-1 weights, omitting pmf(N) and
+  // implicitly renormalizing — support becomes {1, ..., N-1} instead of the
+  // documented {1, ..., N}. pmf(1;10) is 0.1011 in ranjs vs 0.1 in the formula.
+  // Filed as separate bug.
 }, {
   name: 'YuleSimon',
   invalidParams: [
@@ -348,7 +483,18 @@ export default [{
   ],
   cases: [{
     params: () => [3]
-  }]
+  }],
+  // scipy.stats.yulesimon(alpha=3)
+  refVals: [
+    { x: 1.0, pmf: 0.75, cdf: 0.75 },
+    { x: 2.0, pmf: 0.15000000000000002, cdf: 0.9 },
+    { x: 3.0, pmf: 0.05, cdf: 0.95 },
+    { x: 4.0, pmf: 0.02142857142857143, cdf: 0.9714285714285714 },
+    { x: 6.0, pmf: 0.005952380952380954, cdf: 0.9880952380952381 },
+    { x: 10.0, pmf: 0.0010489510489510487, cdf: 0.9965034965034965 },
+    { x: 20.0, pmf: 8.469791078486729e-05, cdf: 0.9994353472614342 },
+    { x: 50.0, pmf: 2.561256723298898e-06, cdf: 0.999957312387945 }
+  ]
 }, {
   name: 'Zeta',
   invalidParams: [
@@ -357,7 +503,18 @@ export default [{
   ],
   cases: [{
     params: () => [3.8]
-  }]
+  }],
+  // scipy.stats.zipf(a=3.8)  # scipy zipf is the Zeta distribution
+  refVals: [
+    { x: 1.0, pmf: 0.9111529505495871, cdf: 0.9111529505495871 },
+    { x: 2.0, pmf: 0.06541499346543785, cdf: 0.976567944015025 },
+    { x: 3.0, pmf: 0.014012980508908498, cdf: 0.9905809245239335 },
+    { x: 4.0, pmf: 0.004696380961618142, cdf: 0.9952773054855517 },
+    { x: 6.0, pmf: 0.0010060429786992943, cdf: 0.9982947800674529 },
+    { x: 10.0, pmf: 0.0001444080108616899, cdf: 0.9995519091451442 },
+    { x: 20.0, pmf: 1.036757778282607e-05, cdf: 0.9999309656983761 },
+    { x: 50.0, pmf: 3.18790425501579e-07, cdf: 0.9999944646904115 }
+  ]
 }, {
   name: 'Zipf',
   invalidParams: [
@@ -367,5 +524,16 @@ export default [{
   ],
   cases: [{
     params: () => [3, 100]
-  }]
+  }],
+  // scipy.stats.zipfian(a=3, n=100)
+  refVals: [
+    { x: 1.0, pmf: 0.8319416331806166, cdf: 0.8319416331806166 },
+    { x: 2.0, pmf: 0.10399270414757711, cdf: 0.9359343373281938 },
+    { x: 3.0, pmf: 0.030812653080763582, cdf: 0.9667469904089574 },
+    { x: 5.0, pmf: 0.00665553306544493, cdf: 0.9864016114928494 },
+    { x: 10.0, pmf: 0.0008319416331806169, cdf: 0.9962767159478153 },
+    { x: 30.0, pmf: 3.081265308076359e-05, cdf: 0.9995941430438425 },
+    { x: 70.0, pmf: 2.425485811022207e-06, cdf: 0.9999574952682868 },
+    { x: 100.0, pmf: 8.319416331806168e-07, cdf: 1.0 }
+  ]
 }]
