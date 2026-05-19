@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { adTest, chiTest, Tests, checkRefVals } from './test-utils'
+import { adTest, chiTest, Tests, checkRefVals, checkQuantileVals } from './test-utils'
 import { float } from '../src/core'
 import * as dist from '../src/dist'
 import PreComputed from '../src/dist/_pre-computed'
@@ -142,6 +142,13 @@ const UnitTests = {
       it('pdf and cdf should match reference values', () => {
         const generator = new dist[tc.name](...tc.cases[0].params())
         checkRefVals(generator, tc.refVals)
+      })
+    }
+
+    if (tc.quantileVals) {
+      it('quantile should match reference values', () => {
+        const generator = new dist[tc.name](...tc.cases[0].params())
+        checkQuantileVals(generator, tc.quantileVals)
       })
     }
   },
