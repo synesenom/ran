@@ -133,8 +133,13 @@ export default [{
     name: 'normal shape parameter',
     params: () => [2, 0.5]
   }],
-  // b=1 (log branch in _q) and b≈1 near-boundary excluded — b=0.5 covers the Lambert W path; b=1 correctness verified by the analytical suite
-  sampleParams: [{ name: 'normal shape parameter', params: () => [2, 0.5] }],
+  sampleParams: [
+    { name: 'normal shape parameter', params: () => [2, 0.5] },
+    // b=0.9995 exercises the near-boundary asymptotic approximation branch in _q
+    { name: 'high shape parameter', params: () => [2, 0.9995] },
+    // b=1 exercises the log branch (1 - Math.log(1-p)/a) in _q
+    { name: 'unit shape parameter', params: () => [2, 1] }
+  ],
   // mpmath: BenktanderII PDF/CDF formula with a=2, b=0.9995 @ 50 dps
   refVals: [
     { x: 1.001, pdf: 1.996500505574631, cdf: 0.001998499585372714 },
