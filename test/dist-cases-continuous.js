@@ -89,7 +89,7 @@ export default [{
   cases: [{
     params: () => [10, 5, 25]
   }],
-  // scipy.stats.irwinhall(10) rescaled to [5, 25]
+  // scipy.stats.irwinhall(10): pdf rescaled by n/(b-a)=0.5 at y=(x-5)*10/20
   refVals: [
     { x: 7.0, pdf: 1.3778659611992946e-06, cdf: 2.7557319223985894e-07 },
     { x: 9.0, pdf: 0.0006916887125220459, cdf: 0.000279431216931217 },
@@ -1749,7 +1749,7 @@ export default [{
   cases: [{
     params: () => [0, 2]
   }],
-  // QExponential(q=0, λ=2) closed-form on [0, 0.5]
+  // QExponential(q=0, λ=2) closed-form on [0, 0.5) (right boundary open since pdf=0 there)
   refVals: [
     { x: 0, pdf: 4.0, cdf: 0 },
     { x: 0.05, pdf: 3.6, cdf: 0.18999999999999995 },
@@ -2132,6 +2132,8 @@ export default [{
   }],
   // UniformProduct(n=6) closed-form: f=(-ln x)^5/Γ(6), F=Γ(6,-ln x)/Γ(6) via scipy.special.gammaincc
   refVals: [
+    { x: 0.001, pdf: 131.07005179452625, cdf: 0.31264433762447863 },
+    { x: 0.005, pdf: 34.79433958423896, cdf: 0.5637661089959862 },
     { x: 0.01, pdf: 17.260253734258598, cdf: 0.6848673126214759 },
     { x: 0.05, pdf: 2.0106373453388224, cdf: 0.9165117128531364 },
     { x: 0.1, pdf: 0.5393829291955812, cdf: 0.9698850818634569 },
