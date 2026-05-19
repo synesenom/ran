@@ -77,6 +77,7 @@ export default [{
     name: 'zero parameter',
     params: () => [0]
   }],
+  sampleParams: [{ name: 'positive parameter', params: () => [0.5] }],
   // Borel(mu=0.5): pmf(k)=e^(-μk)(μk)^(k-1)/k!, CDF via cumulative sum
   refVals: [
     { x: 1.0, pmf: 0.6065306597126334, cdf: 0.6065306597126334 },
@@ -104,6 +105,7 @@ export default [{
     name: 'zero parameter',
     params: () => [0, 5]
   }],
+  sampleParams: [{ name: 'positive parameter', params: () => [0.5, 5] }],
   // BorelTanner(mu=0.5, n=5): pmf=(n/k)·e^(-μk)(μk)^(k-n)/(k-n)!, CDF via cumulative sum
   refVals: [
     { x: 5.0, pmf: 0.0820849986238988, cdf: 0.0820849986238988 },
@@ -136,6 +138,7 @@ export default [{
     name: 'large n',
     params: () => [Array.from({ length: 105 }, () => 1 / 105), 0]
   }],
+  sampleParams: [{ name: 'small n', params: () => [[0.4, 0.6], 0] }],
   // No scipy equivalent; PMF is w[i] / sum(w) (numpy)
   refVals: [
     { x: 0, pmf: 0.4, cdf: 0.4 },
@@ -396,6 +399,8 @@ export default [{
     name: 'high mean',
     params: () => [40]
   }],
+  // Keep both sampleParams: Knuth (lambda < 30) and Atkinson (lambda >= 30) are separate code paths
+  sampleParams: [{ name: 'low mean', params: () => [10] }, { name: 'high mean', params: () => [40] }],
   // scipy.stats.poisson(10) — refVals always evaluated against cases[0] (test/dist.js:133)
   refVals: [
     { x: 2, pmf: 0.0022699964881242435, cdf: 0.0027693957155115775 },
