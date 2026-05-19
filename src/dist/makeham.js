@@ -14,6 +14,8 @@ import Distribution from './_distribution'
  * @param {number=} alpha Shape parameter. Default value is 1.
  * @param {number=} beta Rate parameter. Default value is 1.
  * @param {number=} lambda Scale parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Gompertz%E2%80%93Makeham_law_of_mortality
+ * @constructor
  */
 export default class extends Distribution {
   constructor (alpha, beta, lambda) {

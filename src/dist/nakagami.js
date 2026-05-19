@@ -13,6 +13,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} m Shape parameter. Default value is 1.
  * @param {number=} omega Spread parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Nakagami_distribution
  * @constructor
  */
 export default class extends Distribution {

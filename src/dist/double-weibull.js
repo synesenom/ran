@@ -11,6 +11,7 @@ import Weibull from './weibull'
  * @memberof ran.dist
  * @param {number=} lambda Scale parameter. Default value is 1.
  * @param {number=} k Shape parameter. Default value is 1.
+ * @see https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_dweibull.html
  * @constructor
  */
 export default class extends Weibull {

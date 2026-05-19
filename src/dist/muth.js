@@ -4,7 +4,7 @@ import Distribution from './_distribution'
 import { lambertW1m } from '../special'
 
 /**
- * Generator for the [Muth distribution]{@link https://www.tandfonline.com/doi/abs/10.3846/13926292.2015.1048540:
+ * Generator for the [Muth distribution]{@link https://www.tandfonline.com/doi/abs/10.3846/13926292.2015.1048540}:
  *
  * $$f(x; \alpha) = (e^{\alpha x} - \alpha) \exp\bigg(\alpha x - \frac{1}{\alpha} (e^{\alpha x} - 1)\bigg),$$
  *
@@ -13,6 +13,7 @@ import { lambertW1m } from '../special'
  * @class Muth
  * @memberof ran.dist
  * @param {number=} alpha Shape parameter. Default value is 0.5.
+ * @see https://www.tandfonline.com/doi/abs/10.3846/13926292.2015.1048540
  * @constructor
  */
 export default class extends Distribution {

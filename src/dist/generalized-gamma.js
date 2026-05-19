@@ -13,6 +13,7 @@ import Distribution from './_distribution'
  * @param {number=} a Scale parameter. Default value is 1.
  * @param {number=} d Shape parameter. Default value is 1.
  * @param {number=} p Shape parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Generalized_gamma_distribution
  * @constructor
  */
 export default class extends Gamma {

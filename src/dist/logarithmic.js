@@ -12,6 +12,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} a Lower boundary of the distribution. Default value is 1.
  * @param {number=} b Upper boundary of the distribution. Default value is 2.
+ * @see http://mathworld.wolfram.com/LogarithmicDistribution.html
  * @constructor
  */
 export default class extends Distribution {

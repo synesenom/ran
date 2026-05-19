@@ -13,6 +13,7 @@ import { lambertW0 } from '../special'
  * @param {number=} a First shape parameter. Default value is 1.
  * @param {number=} b Second shape parameter. Default value is 1.
  * @param {number=} c Third shape parameter. Default value is 1.
+ * @see https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_genexpon.html
  * @constructor
  */
 export default class extends Distribution {

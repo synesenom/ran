@@ -13,6 +13,7 @@ import PreComputed from './_pre-computed'
  * @memberof ran.dist
  * @param {number=} lambda Mean of the number of clusters. Default value is 1.
  * @param {number=} phi Mean of the cluster size. Default value is 1.
+ * @see http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.527.574&rep=rep1&type=pdf
  * @constructor
  */
 export default class extends PreComputed {

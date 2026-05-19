@@ -14,6 +14,7 @@ import Distribution from './_distribution'
  * @param {number} mu Distribution parameter. Default value is 0.5.
  * @param {number} n Number of Borel distributed variates to add. If not an integer, it is rounded to the nearest one.
  * Default value is 2.
+ * @see https://en.wikipedia.org/wiki/Borel_distribution#Borel%E2%80%93Tanner_distribution
  * @constructor
  */
 export default class extends PreComputed {

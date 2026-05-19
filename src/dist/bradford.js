@@ -10,6 +10,7 @@ import Distribution from './_distribution'
  * @class Bradford
  * @memberof ran.dist
  * @param {number=} c Shape parameter. Default value is 1.
+ * @see https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bradford.html
  * @constructor
  */
 export default class extends Distribution {

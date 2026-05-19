@@ -13,6 +13,7 @@ import NoncentralBeta from './noncentral-beta'
  * @param {number=} d1 First degree of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
  * @param {number=} d2 Second degree of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
  * @param {number=} lambda Non-centrality parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Noncentral_F-distribution
  * @constructor
  */
 export default class extends NoncentralBeta {

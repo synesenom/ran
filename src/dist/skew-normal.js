@@ -16,6 +16,8 @@ import Normal from './normal'
  * @param {number=} xi Location parameter. Default value is 0.
  * @param {number=} omega Scale parameter. Default value is 1.
  * @param {number=} alpha Shape parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Skew_normal_distribution
+ * @see A. Azzalini, "SN package FAQ", https://azzalini.stat.unipd.it/SN/faq-r.html (sampling algorithm)
  * @constructor
  */
 export default class extends Normal {

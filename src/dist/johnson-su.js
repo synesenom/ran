@@ -14,6 +14,7 @@ import Distribution from './_distribution'
  * @param {number=} delta First scale parameter. Default value is 1.
  * @param {number=} lambda Second scale parameter. Default value is 1.
  * @param {number=} xi Second location parameter. Default value is 0.
+ * @see https://en.wikipedia.org/wiki/Johnson%27s_SU-distribution
  * @constructor
  */
 export default class extends Normal {

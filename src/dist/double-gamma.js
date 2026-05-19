@@ -12,6 +12,7 @@ import Gamma from './gamma'
  * @memberof ran.dist
  * @param {number=} alpha Shape parameter. Default value is 1.
  * @param {number=} beta Rate parameter. Default value is 1.
+ * @see https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_dgamma.html
  * @constructor
  */
 export default class extends Gamma {

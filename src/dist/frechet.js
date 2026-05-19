@@ -12,6 +12,7 @@ import Distribution from './_distribution'
  * @param {number=} alpha Shape parameter. Default value is 1.
  * @param {number=} s Scale parameter. Default value is 1.
  * @param {number=} m Location parameter. Default value is 0.
+ * @see https://en.wikipedia.org/wiki/Frechet_distribution
  * @constructor
  */
 export default class extends Distribution {

@@ -13,6 +13,7 @@ import poisson from './_poisson'
  * @memberof ran.dist
  * @param {number=} lambda Mean of the Poisson component. Default value is 1.
  * @param {number=} theta Parameter of the shifted geometric component. Default value is 0.5.
+ * @see https://arxiv.org/abs/1406.2780
  * @constructor
  */
 export default class extends PreComputed {

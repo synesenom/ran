@@ -11,6 +11,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} s Scale parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Logistic_distribution
  * @constructor
  */
 export default class extends Distribution {

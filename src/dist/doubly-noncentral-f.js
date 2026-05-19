@@ -13,6 +13,7 @@ import DoublyNoncentralBeta from './doubly-noncentral-beta'
  * @param {number=} d2 Second degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
  * @param {number=} lambda1 First non-centrality parameter. Default value is 1.
  * @param {number=} lambda2 Second non-centrality parameter. Default value is 1.
+ * @see https://rdrr.io/cran/sadists/f/inst/doc/sadists.pdf
  * @constructor
  */
 export default class extends DoublyNoncentralBeta {

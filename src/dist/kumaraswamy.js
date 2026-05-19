@@ -12,6 +12,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} alpha First shape parameter. Default value is 1.
  * @param {number=} beta Second shape parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Kumaraswamy_distribution
  * @constructor
  */
 export default class extends Distribution {

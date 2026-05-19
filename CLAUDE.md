@@ -66,7 +66,7 @@ npm run typecheck
 
 - **Always use the `ops-issue` agent** when creating GitHub issues. Never call `gh issue create` directly.
 - Every issue must have a **priority** label (`high`, `medium`, `low`) and a **difficulty** label (`difficult`, `moderate`, `trivial`).
-- Breaking-change issues also get a **`major`** label. Breaking means: constructor or public-method rename/removal, or a wrong-distribution fix that changes computed values for existing inputs. Everything else gets no semver label.
+- Breaking-change issues also get a **`major`** label. Breaking means: constructor or public-method rename/removal, or intentional parameter convention changes. Bug fixes — including wrong-formula corrections — are not major even if they change computed values; document them in the changelog instead. Everything else gets no semver label.
 - Every issue must be assigned to a **milestone**: `v2.0.0` for `major` issues, `v1.25.0` for everything else. The `ops-issue` agent sets this automatically. A GitHub Actions workflow (`.github/workflows/require-milestone.yml`) flags any issue opened without a milestone.
 - **One concern per issue.** Reject titles that contain `+`, "and", or comma-separated lists of changes.
 - **PR size cap is enforced via the issue template.** Production-code diff must stay under ~400 lines (tests excluded). If a feature can't fit, decompose before filing.

@@ -8,6 +8,7 @@ const DescParser = require('./src/desc-parser')
 const ParamParser = require('./src/param-parser')
 const TypeParser = require('./src/type-parser')
 const ThrowsParser = require('./src/throws-parser')
+const SeesParser = require('./src/sees-parser')
 
 // Register highlight languages.
 hljs.registerLanguage('bash', require('highlight.js/lib/languages/bash'))
@@ -57,7 +58,8 @@ function parseEntry (entry) {
     throws: throws.length > 0 ? throws : undefined,
     examples: entry.examples.length > 0
       ? hljs.highlight(entry.examples[0].description, { language: 'javascript' }).value
-      : undefined
+      : undefined,
+    sees: entry.sees.length > 0 ? entry.sees.map(SeesParser) : undefined
   }
 }
 

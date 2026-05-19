@@ -13,6 +13,8 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} mu Mean of the distribution. Default value is 1.
  * @param {number=} lambda Shape parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Inverse_Gaussian_distribution
+ * @see J. R. Michael, W. R. Schucany and R. W. Haas, "Generating Random Variates Using Transformations with Multiple Roots", Am. Stat. 30(2), 88–90, 1976.
  * @constructor
  */
 export default class extends Distribution {

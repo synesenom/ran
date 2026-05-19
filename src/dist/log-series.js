@@ -11,6 +11,8 @@ import Distribution from './_distribution'
  * @class LogSeries
  * @memberof ran.dist
  * @param {number=} p Distribution parameter. Default value is 0.5.
+ * @see https://en.wikipedia.org/wiki/Logarithmic_distribution
+ * @see A. Kemp, "Efficient generation of logarithmically distributed pseudo-random variables", Appl. Stat. 30(3), 249–253, 1981.
  * @constructor
  */
 export default class extends Distribution {

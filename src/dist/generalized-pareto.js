@@ -12,6 +12,7 @@ import Distribution from './_distribution'
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} sigma Scale parameter. Default value is 1.
  * @param {number=} xi Shape parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Generalized_Pareto_distribution
  * @constructor
  */
 export default class extends Distribution {

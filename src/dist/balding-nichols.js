@@ -13,6 +13,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number=} F Fixation index. Default value is 0.5.
  * @param {number=} p Allele frequency. Default value is 0.5.
+ * @see https://en.wikipedia.org/wiki/Balding%E2%80%93Nichols_model
  * @constructor
  */
 export default class extends Beta {

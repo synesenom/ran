@@ -14,6 +14,7 @@ import Beta from './beta'
  * @memberof ran.dist
  * @param {number=} alpha First shape parameter. Default value is 2.
  * @param {number=} beta Second shape parameter. Default value is 2.
+ * @see https://en.wikipedia.org/wiki/Beta_prime_distribution
  * @constructor
  */
 export default class extends Beta {

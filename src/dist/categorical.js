@@ -12,6 +12,7 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number[]=} weights Weights for the distribution (doesn't need to be normalized). Default value is an array with a single value of 1.
  * @param {number=} min Lowest value to sample (support starts at this value). Default value is [1, 1, 1].
+ * @see https://en.wikipedia.org/wiki/Categorical_distribution
  * @constructor
  */
 export default class extends Distribution {

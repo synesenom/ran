@@ -11,6 +11,7 @@ import GeneralizedNormal from './generalized-normal'
  * @memberof ran.dist
  * @param {number=} alpha Scale parameter. Default value is 1.
  * @param {number=} beta Shape parameter. Default value is 1.
+ * @see https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.halfgennorm.html
  * @constructor
  */
 export default class extends GeneralizedNormal {

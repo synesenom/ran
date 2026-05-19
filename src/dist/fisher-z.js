@@ -11,6 +11,7 @@ import F from './f'
  * @memberof ran.dist
  * @param {number=} d1 First degree of freedom. Default value is 2.
  * @param {number=} d2 Second degree of freedom. Default value is 2.
+ * @see https://en.wikipedia.org/wiki/Fisher%27s_z-distribution
  * @constructor
  */
 export default class extends F {

@@ -12,6 +12,8 @@ import Distribution from './_distribution'
  * @param {number=} p First shape parameter. Default value is 1.
  * @param {number=} a Second shape parameter. Default value is 1.
  * @param {number=} b Scale parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Dagum_distribution
+ * @constructor
  */
 export default class extends Distribution {
   constructor (p, a, b) {

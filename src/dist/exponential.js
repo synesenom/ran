@@ -11,6 +11,7 @@ import Distribution from './_distribution'
  * @class Exponential
  * @memberof ran.dist
  * @param {number=} lambda Rate parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Exponential_distribution
  * @constructor
  */
 export default class extends Distribution {

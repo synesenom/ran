@@ -12,6 +12,7 @@ import Distribution from './_distribution'
  * @class Wigner
  * @memberof ran.dist
  * @param {number=} R Radius of the distribution. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Wigner_semicircle_distribution
  * @constructor
  */
 export default class extends Distribution {

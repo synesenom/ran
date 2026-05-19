@@ -74,6 +74,11 @@ block content
                 h3 Examples
                 pre
                     code.example.hljs !{entry.examples}
+            if entry.sees
+                h3 References
+                ul.margined
+                    each see in entry.sees
+                        li !{see}
 
 block scripts
     script.

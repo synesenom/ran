@@ -10,6 +10,7 @@ import Weibull from './weibull'
  * @class Rayleigh
  * @memberof ran.dist
  * @param {number=} sigma Scale parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Rayleigh_distribution
  * @constructor
  */
 export default class extends Weibull {

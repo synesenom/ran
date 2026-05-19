@@ -13,6 +13,7 @@ import Distribution from './_distribution'
  * @param {number=} b Start of the level part. Default value is 0.33.
  * @param {number=} c End of the level part. Default value is 0.67.
  * @param {number=} d Upper bound of the support. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Trapezoidal_distribution
  * @constructor
  */
 export default class extends Distribution {

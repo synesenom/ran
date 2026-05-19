@@ -12,6 +12,7 @@ import Distribution from './_distribution'
  * @param {number=} a Lower bound of the support. Default value is 0.
  * @param {number=} b Upper bound of the support. Default value is 1.
  * @param {number=} c Mode of the distribution. Default value is 0.5.
+ * @see https://en.wikipedia.org/wiki/Triangular_distribution
  * @constructor
  */
 export default class extends Distribution {

@@ -11,6 +11,7 @@ import Laplace from './laplace'
  * @memberof ran.dist
  * @param {number=} mu Location parameter. Default value is 0.
  * @param {number=} b Scale parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Log-Laplace_distribution
  * @constructor
  */
 export default class extends Laplace {

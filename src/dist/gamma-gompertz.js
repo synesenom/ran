@@ -12,6 +12,7 @@ import Distribution from './_distribution'
  * @param {number=} b Scale parameter. Default value is 1.
  * @param {number=} s First shape parameter. Default value is 1.
  * @param {number=} beta Second shape parameter. Default value is 1.
+ * @see https://en.wikipedia.org/wiki/Gamma/Gompertz_distribution
  * @constructor
  */
 export default class extends Distribution {
