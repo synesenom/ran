@@ -16,7 +16,8 @@ import Distribution from './_distribution'
  */
 export default class extends Beta {
   constructor (c) {
-    super(0.5, c / 2)
+    // Affine reduction: U = (X+1)/2 ~ Beta(c/2, c/2). One-to-one map onto [-1, 1] avoids the 0·∞ corner that the squared-variable reduction hits at x=0 for c<2.
+    super(c / 2, c / 2)
 
     // Validate parameters
     this.p = Object.assign(this.p, { c })
@@ -35,16 +36,14 @@ export default class extends Beta {
   }
 
   _generator () {
-    return 2 * Math.sqrt(super._generator()) - 1
+    return 2 * super._generator() - 1
   }
 
   _pdf (x) {
-    const y = (x + 1) / 2
-    return y * super._pdf(y * y)
+    return 0.5 * super._pdf((x + 1) / 2)
   }
 
   _cdf (x) {
-    const y = (x + 1) / 2
-    return super._cdf(y * y)
+    return super._cdf((x + 1) / 2)
   }
 }

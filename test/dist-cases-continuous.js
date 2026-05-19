@@ -1793,11 +1793,19 @@ export default [{
     // c=4 instead of 2 — at c=2 the sample distribution is too uniform-shaped
     // for the foreign-rejection test (vs Uniform) to reject reliably
     params: () => [4]
-  }]
-  // refVals deferred: scipy.stats.rdist(c=4).pdf(-0.95) = 0.073 but ranjs returns
-  // 0.750 — ranjs._pdf computes y·f_Beta(y²) with y=(x+1)/2, which is asymmetric
-  // on [-1, 1] and disagrees with both the docstring formula
-  // f(x;c) = (1-x²)^(c/2-1)/B(1/2,c/2) and scipy.stats.rdist. Filed as separate bug.
+  }],
+  // f(x; 4) = (3/4)(1 - x²), F(x; 4) = (3x - x³)/4 + 1/2 — closed form, matches scipy.stats.rdist(c=4)
+  refVals: [
+    { x: -1, pdf: 0, cdf: 0 },
+    { x: -0.95, pdf: 0.073125, cdf: 0.00184375 },
+    { x: -0.5, pdf: 0.5625, cdf: 0.15625 },
+    { x: -0.25, pdf: 0.703125, cdf: 0.31640625 },
+    { x: 0, pdf: 0.75, cdf: 0.5 },
+    { x: 0.25, pdf: 0.703125, cdf: 0.68359375 },
+    { x: 0.5, pdf: 0.5625, cdf: 0.84375 },
+    { x: 0.95, pdf: 0.073125, cdf: 0.99815625 },
+    { x: 1, pdf: 0, cdf: 1 }
+  ]
 }, {
   name: 'RaisedCosine',
   invalidParams: [
