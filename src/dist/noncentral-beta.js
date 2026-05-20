@@ -73,7 +73,8 @@ export default class extends Distribution {
     let iAlpha0 = this.p.alpha + i0
 
     // Init variables.
-    const p0 = Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
+    // Guard l2=0: 0*log(0) = NaN by IEEE 754, but the Poisson weight e^0 * 0^0 / 0! = 1.
+    const p0 = l2 === 0 ? 1 : Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
     const xa0 = Math.pow(x, iAlpha0 - 1)
     const xb = Math.pow(1 - x, this.p.beta - 1)
     const b0 = fnBeta(iAlpha0, this.p.beta)
@@ -130,7 +131,8 @@ export default class extends Distribution {
     let iAlpha0 = this.p.alpha + i0
 
     // Init variables
-    const p0 = Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
+    // Guard l2=0: 0*log(0) = NaN by IEEE 754, but the Poisson weight e^0 * 0^0 / 0! = 1.
+    const p0 = l2 === 0 ? 1 : Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
     const xa0 = Math.pow(x, iAlpha0)
     const xb = Math.pow(1 - x, this.p.beta)
     const b0 = fnBeta(iAlpha0, this.p.beta)
