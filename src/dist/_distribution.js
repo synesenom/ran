@@ -184,6 +184,8 @@ class Distribution {
     }
   }
 
+  // _qEstimateTable is broken for negative-integer support (hardwired start at k=0); use this instead.
+  // See solutions/algorithm/2026-05-20-0647-q-estimate-walk-infinite-support-discrete.md
   /**
    * Estimates the quantile function using a deterministic linear walk from a caller-supplied start.
    * Walks toward the infimum quantile until cdf(k) >= p and cdf(k-1) < p.
