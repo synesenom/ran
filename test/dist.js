@@ -135,6 +135,10 @@ const UnitTests = {
         it('quantile should satisfy Galois inequalities', () => {
           Tests.qGalois(c.generate())
         })
+
+        it('quantile should round-trip through cdf', () => {
+          Tests.quantileRoundtrip(c.generate())
+        })
       })
     })
 

@@ -8,6 +8,8 @@ const RANGE_STEPS = 10
 const GOLDEN = 0.6180339887
 // Fixed reference probabilities for qGalois: well-spread across (0,1), spanning both sides of any p.
 const GALOIS_PROBS = [0.1, 0.25, 0.5, 0.75, 0.9]
+// Fixed probabilities for quantile roundtrip: includes tails where root-finding is hardest.
+const ROUNDTRIP_PROBS = [0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95]
 
 // Critical values for P = 0.01
 // Source: https://www.medcalc.org/manual/chi-square-table.php
@@ -320,9 +322,11 @@ export const Tests = {
 
     // Run through x values and assert CDF(x - dx) <= CDF(x + dx).
     runX(dist, (d, x) => {
-      const p1 = discrete ? x : x - 1e-3
-      const p2 = discrete ? x + 1 : x + 1e-3
-      assert(p2 > p1, `cdf(${p1}; ${getParamList(d)}) > cdf(${p2}; ${getParamList(d)})`)
+      const x1 = discrete ? x : x - 1e-3
+      const x2 = discrete ? x + 1 : x + 1e-3
+      const c1 = d.cdf(x1)
+      const c2 = d.cdf(x2)
+      assert(c2 >= c1, `cdf(${x2}; ${getParamList(d)}) = ${c2} < cdf(${x1}; ${getParamList(d)}) = ${c1}`)
     })
   },
 
@@ -423,5 +427,27 @@ export const Tests = {
         assert(dx * dp >= 0, `cdf(${x}) = ${cdf} and q(${p}) = ${q}`)
       }
     })
+  },
+
+  quantileRoundtrip (dist) {
+    const discrete = dist.type() === 'discrete'
+    for (const p of ROUNDTRIP_PROBS) {
+      const x = dist.q(p)
+      assert(typeof x === 'number' && Number.isFinite(x),
+        `q(${p}; ${getParamList(dist)}) = ${x} is not finite`)
+      if (discrete) {
+        assert(dist.cdf(x) >= p,
+          `cdf(q(${p}); ${getParamList(dist)}) = ${dist.cdf(x)} < ${p}`)
+        // Skip lower-infimum check at the support boundary — cdf(min-1) = 0 < p trivially.
+        if (x > dist.support()[0].value) {
+          assert(dist.cdf(x - 1) < p,
+            `cdf(q(${p}) - 1; ${getParamList(dist)}) = ${dist.cdf(x - 1)} >= ${p}`)
+        }
+      } else {
+        const c = dist.cdf(x)
+        assert(Math.abs(c - p) < 1e-6,
+          `|cdf(q(${p}); ${getParamList(dist)}) - ${p}| = ${Math.abs(c - p)} >= 1e-6`)
+      }
+    }
   }
 }
