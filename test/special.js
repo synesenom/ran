@@ -65,6 +65,17 @@ describe('special', () => {
       })
     })
 
+    it('In(-x) should be equal to -In(x) for odd n >= 3', () => {
+      // Regression for the backward-recurrence sign bug fixed in #255: abs(x) with no sign
+      // correction caused I_n(-x) != -I_n(x) for odd n >= 3
+      repeat(() => {
+        const x = 1 + 10 * Math.random()
+        assert(equal(special.besselI(3, -x), -special.besselI(3, x)))
+        assert(equal(special.besselI(5, -x), -special.besselI(5, x)))
+        assert(equal(special.besselI(7, -x), -special.besselI(7, x)))
+      })
+    })
+
     it('I1(x) should match scipy reference values', () => {
       // scipy.stats cross-validation; these were the values broken by the old _I1 polynomial
       assert(equal(special.besselI(1, 2), 1.590636854637329))
