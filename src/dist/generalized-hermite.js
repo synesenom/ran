@@ -25,6 +25,7 @@ export default class extends PreComputed {
   constructor (a1, a2, m) {
     // Using raw probability mass values
     super(true)
+    this.k = 3
 
     // Validate parameters
     const mi = Math.round(m)

@@ -21,6 +21,7 @@ export default class extends PreComputed {
   constructor (alpha, beta) {
     // TODO Use log PDF
     super()
+    this.k = 2
 
     // Validate parameters
     this.p = { alpha, beta }

@@ -18,6 +18,7 @@ import Distribution from './_distribution'
 export default class extends PreComputed {
   constructor (mu) {
     super(true)
+    this.k = 1
 
     // Validate parameters
     this.p = { mu }

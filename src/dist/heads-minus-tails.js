@@ -18,6 +18,7 @@ import { logBinomial } from '../special'
 export default class extends PreComputed {
   constructor (n) {
     super(true)
+    this.k = 1
 
     // Validate parameters
     const ni = Math.round(n)

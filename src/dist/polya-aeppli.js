@@ -20,6 +20,7 @@ export default class extends PreComputed {
   constructor (lambda, theta) {
     // Using logarithmic probability mass values
     super(true)
+    this.k = 2
 
     // Validate parameters
     this.p = { lambda, theta }

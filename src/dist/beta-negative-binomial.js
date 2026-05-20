@@ -8,6 +8,7 @@ import poisson from './_poisson'
 export default class extends PreComputed {
   constructor (r, alpha, beta) {
     super()
+    this.k = 3
 
     // Validate parameters
     const ri = Math.round(r)

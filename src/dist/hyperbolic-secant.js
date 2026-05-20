@@ -14,7 +14,7 @@ import Distribution from './_distribution'
  */
 export default class extends Distribution {
   constructor () {
-    super('continuous', arguments.length)
+    super('continuous', 0)
     this.s = [{
       value: -Infinity,
       closed: false

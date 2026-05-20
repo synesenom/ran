@@ -17,7 +17,7 @@ import Distribution from './_distribution'
  */
 export default class extends Distribution {
   constructor (xmin, xmax) {
-    super('discrete', arguments.length)
+    super('discrete', 2)
 
     // Validate parameters
     const xmini = Math.round(xmin)

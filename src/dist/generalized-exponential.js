@@ -18,7 +18,7 @@ import { lambertW0 } from '../special'
  */
 export default class extends Distribution {
   constructor (a, b, c) {
-    super('continuous', arguments.length)
+    super('continuous', 3)
 
     // Validate parameters
     this.p = { a, b, c }

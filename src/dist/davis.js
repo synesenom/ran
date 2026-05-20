@@ -4,7 +4,7 @@ import { romberg } from '../algorithms'
 
 export default class Davis extends Distribution {
   constructor (mu, b, n) {
-    super('continuous', arguments.length)
+    super('continuous', 3)
 
     // Validate parameters.
     this.p = { mu, b, n }

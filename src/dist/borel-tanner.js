@@ -20,6 +20,7 @@ import Distribution from './_distribution'
 export default class extends PreComputed {
   constructor (mu, n) {
     super()
+    this.k = 2
 
     // Validate parameters
     const ni = Math.round(n)
