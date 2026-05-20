@@ -78,9 +78,11 @@ git diff main --name-only | grep '\.js$'
 
 ### 7. Ship (fully autonomous)
 
+Invoke all three sub-skills in sequence **without any pause or output between them**. As soon as one returns, invoke the next immediately. Do not generate any text between steps — no confirmation prompts, no interim status messages. Proceed directly to step 8 only after all three have completed.
+
 a. **Commit** — invoke `/commit`
-b. **Push** — invoke `/push`
-c. **Pull Request** — invoke `/pull-request`
+b. **Push** — invoke `/push` immediately after `/commit` returns
+c. **Pull Request** — invoke `/pull-request` immediately after `/push` returns
 
 ### 8. Report
 
