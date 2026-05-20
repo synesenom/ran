@@ -24,7 +24,7 @@ import NoncentralT from './noncentral-t'
  */
 export default class extends Distribution {
   constructor (nu, mu, theta) {
-    super('continuous', arguments.length)
+    super('continuous', 3)
 
     // Validate parameters
     const nui = Math.round(nu)

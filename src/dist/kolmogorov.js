@@ -15,7 +15,7 @@ import { EPS, MAX_ITER } from '../core/constants'
  */
 export default class Davis extends Distribution {
   constructor () {
-    super('continuous', arguments.length)
+    super('continuous', 0)
 
     // Set support.
     this.s = [{

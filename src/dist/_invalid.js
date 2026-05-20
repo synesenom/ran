@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  */
 export default class extends Distribution {
   constructor () {
-    super('discrete', arguments.length)
+    super('discrete', 0)
     this.s = [{
       value: -Infinity,
       closed: false

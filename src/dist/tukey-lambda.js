@@ -16,7 +16,7 @@ import brent from '../algorithms/brent'
  */
 export default class extends Distribution {
   constructor (lambda) {
-    super('continuous', arguments.length)
+    super('continuous', 1)
 
     // Validate parameters
     this.p = { lambda }

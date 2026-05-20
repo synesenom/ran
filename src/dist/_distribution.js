@@ -713,7 +713,8 @@ class Distribution {
    */
   test (values) {
     return this.t === 'discrete'
-      ? chi2(values, x => this.pdf(x), this.k)
+      // Parameters are fixed in the constructor (known), not estimated from values — df correction is 0.
+      ? chi2(values, x => this.pdf(x), 0)
       : kolmogorovSmirnov(values, x => this.cdf(x))
   }
 }

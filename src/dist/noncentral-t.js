@@ -20,7 +20,7 @@ import Distribution from './_distribution'
  */
 class NoncentralT extends Distribution {
   constructor (nu, mu) {
-    super('continuous', arguments.length)
+    super('continuous', 2)
 
     // Validate parameters
     const nui = Math.round(nu)

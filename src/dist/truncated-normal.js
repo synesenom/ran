@@ -23,7 +23,7 @@ export default class extends Normal {
   constructor (mu, sigma, a, b) {
     // Call super and update number of parameters.
     super(mu, sigma)
-    this.k = arguments.length
+    this.k = 4
 
     // Validate parameters.
     this.p = { mu, sigma, a, b }

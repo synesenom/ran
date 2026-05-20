@@ -21,7 +21,7 @@ import Distribution from './_distribution'
  */
 export default class extends Distribution {
   constructor (r, p) {
-    super('discrete', arguments.length)
+    super('discrete', 2)
 
     // Validate parameters
     const ri = Math.round(r)

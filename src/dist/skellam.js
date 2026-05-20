@@ -18,7 +18,7 @@ import Distribution from './_distribution'
  */
 export default class extends Distribution {
   constructor (mu1, mu2) {
-    super('discrete', arguments.length)
+    super('discrete', 2)
 
     // Validate parameters
     this.p = { mu1, mu2 }

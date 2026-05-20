@@ -21,7 +21,7 @@ export default class extends Distribution {
   // Source: Johnson, Kotz, and Balakrishnan (1994). Continuous Univariate Distributions — Volume 1, Second Edition,
   // John Wiley and Sons, p. 173.
   constructor (alpha, beta) {
-    super('continuous', arguments.length)
+    super('continuous', 2)
 
     // Validate parameters
     this.p = { alpha, beta }

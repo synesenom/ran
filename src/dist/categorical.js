@@ -17,7 +17,7 @@ import Distribution from './_distribution'
  */
 export default class extends Distribution {
   constructor (weights, min) {
-    super('discrete', arguments.length)
+    super('discrete', 2)
 
     // Validate parameters
     this.p = { n: weights.length, weights, min }

@@ -209,7 +209,7 @@ const UnitTests = {
     cases.forEach(c => {
       describe(c.name, () => {
         it('should pass for own test', () => {
-          for (const s of [0, 42, 12345]) {
+          for (const s of (tc.testSeeds ?? [0, 42, 12345])) {
             const generator = c.gen()
             generator.seed(s)
             assert(generator.test(generator.sample(SAMPLE_SIZE)).passed, `seed ${s}`)

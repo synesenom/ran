@@ -18,7 +18,7 @@ import Distribution from './_distribution'
  */
 export default class extends Distribution {
   constructor (k, lambda) {
-    super('continuous', arguments.length)
+    super('continuous', 2)
 
     // Validate parameters
     const ki = Math.round(k)

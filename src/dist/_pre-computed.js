@@ -13,7 +13,7 @@ import Distribution from './_distribution'
  */
 export default class extends Distribution {
   constructor (logP = false) {
-    super('discrete', arguments.length)
+    super('discrete', 0)
 
     // Constants
     this.TABLE_SIZE = 1000

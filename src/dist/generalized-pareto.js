@@ -17,7 +17,7 @@ import Distribution from './_distribution'
  */
 export default class extends Distribution {
   constructor (mu, sigma, xi) {
-    super('continuous', arguments.length)
+    super('continuous', 3)
 
     // Validate parameters
     this.p = { mu, sigma, xi }

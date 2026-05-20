@@ -19,7 +19,7 @@ export default class extends Distribution {
   // Source: Feller (1991). An Introduction to Probability Theory and Its Applications — Volume 2, Second Edition,
   // John Wiley and Sons, p. 79.
   constructor (a, b) {
-    super('continuous', arguments.length)
+    super('continuous', 2)
 
     // Set parameters
     this.p = { a, b }

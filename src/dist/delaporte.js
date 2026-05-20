@@ -23,6 +23,7 @@ export default class extends PreComputed {
   constructor (alpha, beta, lambda) {
     // Using raw probability mass values
     super(true)
+    this.k = 3
 
     // Validate parameters
     this.p = { alpha, beta, lambda }
