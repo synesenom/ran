@@ -25,33 +25,6 @@ function _I0 (x) {
 }
 
 /**
- * Computes the modified Bessel function of the first kind with order one.
- *
- * @method _I1
- * @memberof ran.special
- * @param {number} x Value to evaluate the function at.
- * @return {number} The function value.
- * @private
- */
-function _I1 (x) {
-  const y = Math.abs(x)
-  let z
-  let t
-
-  if (y < 3.75) {
-    t = x / 3.75
-    t *= t
-    z = y * (0.5 + t * (0.87890594 + t * (0.51498869 + t * (0.15084934 + t * (0.2658733e-1 + t * (0.301532e-2 + t * 0.32411e-3))))))
-  } else {
-    t = 3.75 / y
-    z = 0.2282967e-1 + t * (-0.2895312e-1 + t * (0.1787654e-1 - t * 0.420059e-2))
-    z = 0.39894228 + t * (-0.3988024e-1 + t * (-0.362018e-2 + t * (0.163801e-2 + t * (-0.1031555e-1 + t * z))))
-    z *= Math.exp(y) / Math.sqrt(y)
-  }
-  return x < 0 ? -z : z
-}
-
-/**
  * Computes the modified spherical Bessel function of the second kind.
  *
  * @method _kn
@@ -124,10 +97,6 @@ export function besselI (n, x) {
     return _I0(x)
   }
 
-  if (n === 1) {
-    return _I1(x)
-  }
-
   if (x === 0) {
     return 0
   }
@@ -136,7 +105,9 @@ export function besselI (n, x) {
   bip = 0
   y = 0
   bi = 1
-  for (let j = 2 * (n + Math.round(Math.sqrt(40 * n))); j > 0; j--) {
+  // j_max must exceed both n and |x|: when j < |x| the ratio I_{j+1}/I_j ≈ 1
+  // and the backward recurrence hasn't contracted enough to suppress the K_n component.
+  for (let j = 2 * (n + Math.round(Math.sqrt(40 * n))) + Math.ceil(2 * Math.abs(x)); j > 0; j--) {
     bim = bip + j * tox * bi
     bip = bi
     bi = bim
@@ -150,7 +121,9 @@ export function besselI (n, x) {
     }
   }
   y *= _I0(x) / bi
-  return y
+  // Odd-order modified Bessel functions are odd: I_n(-x) = -I_n(x) for odd n.
+  // The backward recurrence operates on |x|, so correct the sign here.
+  return x < 0 && n % 2 === 1 ? -y : y
 }
 
 /**

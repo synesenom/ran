@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `besselI(n=1, x)` had only ~8 significant digits of accuracy due to a polynomial approximation (`_I1`, from Numerical Recipes) with limited-precision coefficients. Replaced with Miller's backward recurrence — the same algorithm used for n≥2 — and extended the loop upper-bound by `⌈2|x|⌉` to ensure the recurrence contracts the K_n component before reaching n=1 (required when |x| > n). Added odd-function sign correction for negative arguments. Fixes ~3.7e-10 CDF error in `VonMises` at intermediate x; expands VonMises refVals from 3 to 11 reference points. Closes #255.
+
 - `BenktanderII._cdf` lost precision near the lower support boundary (x ≈ 1) due to catastrophic cancellation in `1 − exp(arg)` and `1 − xᵇ⁻¹·exp(u)` when their arguments approach zero. Rewrote using `Math.expm1` for the b=1 branch and a split `(1−xᵇ⁻¹) − xᵇ⁻¹·expm1(u)` decomposition for the general branch, eliminating the cancellation. Closes #242.
 - `Bernoulli._q` returned `0` for all `p > 0.5` because `this.p.p` is `undefined` after the `Categorical` parent constructor overwrites `this.p` with `{ n, weights, min }`. Fixed by using `this.p.weights[0]` (the CDF at k=0) as the threshold. Closes #212.
 - `DiscreteUniform._q`, `Geometric._q`, and `DiscreteWeibull._q` returned a quantile one too large when `p` landed exactly on a CDF step (e.g., `Geometric(0.5).q(0.5)` returned `1` instead of `0`). Each used `Math.floor` on the algebraic inverse `k+1`; changed to `Math.ceil(…) - 1` which is identical for non-integer arguments but correct at exact integers. Closes #212.

@@ -64,6 +64,12 @@ describe('special', () => {
         assert(equal(special.besselI(1, -x), -special.besselI(1, x)))
       })
     })
+
+    it('I1(x) should match scipy reference values', () => {
+      // scipy.stats cross-validation; these were the values broken by the old _I1 polynomial
+      assert(equal(special.besselI(1, 2), 1.590636854637329))
+      assert(equal(special.besselI(1, 10), 2670.988303701254))
+    })
   })
 
   describe('.besselISpherical()', () => {
