@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `DoublyNoncentralChi2` distribution: the law of `X = U + V` with `U ~ ncχ²(k1, λ1)` and `V ~ ncχ²(k2, λ2)` independent. Because the non-central chi-square is closed under addition, `DoublyNoncentralChi2(k1, k2, λ1, λ2)` is exactly `ncχ²(k1 + k2, λ1 + λ2)`; it is implemented in that collapsed closed form rather than via a double Poisson series. Closes #228.
 - `Distribution._qEstimateWalk(p, start)` protected helper: deterministic linear walk from a caller-supplied integer start toward the infimum discrete quantile. Exits when `cdf(k) >= p` and `cdf(k-1) < p`. Provides a non-random alternative to `_qEstimateRoot` for infinite-support discrete distributions with analytically-known parameters. Closes #284.
 - Property tests for all distributions: `cdfMonotonicity` now asserts `cdf(x₂) >= cdf(x₁)` across a deterministic grid (it was previously a no-op that only asserted scalar arithmetic ordering). A new `Tests.quantileRoundtrip` helper asserts `|cdf(q(p)) − p| < 1e-6` for continuous distributions and the two-sided infimum definition for discrete distributions across the fixed probability grid `{0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95}`. Closes #212.
 
