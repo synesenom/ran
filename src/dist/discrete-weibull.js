@@ -49,6 +49,8 @@ export default class extends Distribution {
   }
 
   _q (p) {
-    return Math.floor(Math.pow(Math.log(1 - p) / Math.log(this.p.q), 1 / this.p.beta))
+    // ceil(x)-1 equals floor(x) for non-integer x but gives x-1 when x is exact,
+    // preventing the off-by-one when CDF(k) = p exactly.
+    return Math.ceil(Math.pow(Math.log(1 - p) / Math.log(this.p.q), 1 / this.p.beta)) - 1
   }
 }

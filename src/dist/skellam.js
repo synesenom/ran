@@ -65,6 +65,10 @@ export default class extends Distribution {
   }
 
   _q (p) {
-    return Math.floor(this._qEstimateRoot(p))
+    // _qEstimateRoot finds a continuous root of CDF(x)-p. For a step function the root lands
+    // just below the integer boundary, so floor undershoots by 1. Increment if needed.
+    let k = Math.floor(this._qEstimateRoot(p))
+    if (this.cdf(k) < p) k++
+    return k
   }
 }

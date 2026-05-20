@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `Bernoulli._q` returned `0` for all `p > 0.5` because `this.p.p` is `undefined` after the `Categorical` parent constructor overwrites `this.p` with `{ n, weights, min }`. Fixed by using `this.p.weights[0]` (the CDF at k=0) as the threshold. Closes #212.
+- `DiscreteUniform._q`, `Geometric._q`, and `DiscreteWeibull._q` returned a quantile one too large when `p` landed exactly on a CDF step (e.g., `Geometric(0.5).q(0.5)` returned `1` instead of `0`). Each used `Math.floor` on the algebraic inverse `k+1`; changed to `Math.ceil(…) - 1` which is identical for non-integer arguments but correct at exact integers. Closes #212.
+- `Skellam._q` applied `Math.floor` to the result of `_qEstimateRoot`, which finds a continuous root of `CDF(x) − p`. For a step function the root lands just below the integer boundary, causing `Math.floor` to undershoot by 1. Added a one-step correction: `if (this.cdf(k) < p) k++`. Closes #212.
+
+### Added
+
+- Property tests for all distributions: `cdfMonotonicity` now asserts `cdf(x₂) >= cdf(x₁)` across a deterministic grid (it was previously a no-op that only asserted scalar arithmetic ordering). A new `Tests.quantileRoundtrip` helper asserts `|cdf(q(p)) − p| < 1e-6` for continuous distributions and the two-sided infimum definition for discrete distributions across the fixed probability grid `{0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95}`. Closes #212.
+
 - `R` distribution generator, PDF, and CDF now produce a symmetric distribution matching the documented formula `f(x; c) = (1 - x²)^(c/2-1) / B(1/2, c/2)` on `[-1, 1]`. The previous implementation configured `Beta(0.5, c/2)` (the squared-variable parent) but then applied the affine substitution `y = (x+1)/2` and squared it, breaking `x → −x` symmetry. For `c=4`, `pdf(-0.95)` returned `~0.7495` instead of the correct `~0.0731`. Reduced to the affine `U = (X+1)/2 ~ Beta(c/2, c/2)`, which is one-to-one and avoids the `0·∞` corner at `x=0` for `c<2`. `refVals` for `R(4)` (previously deferred) added to the test suite. Closes #261.
 - `Soliton` distribution support truncation fixed: the weight array was built with `length: N-2`, silently omitting `k=N` and causing the Categorical base class to renormalize the remaining weights upward. Changed to `length: N-1` so `pmf(1)` returns the correct `1/N` and `pmf(N)` returns `1/(N(N-1))`. Closes #263.
 - Catastrophic cancellation in `Rice._cdf` at small `x` fixed by computing the complementary Marcum Q (`marcumP`) directly instead of `1 - marcumQ(...)`. The same double subtraction-from-1 chain that affected `NoncentralChi2` (see #245) destroyed precision in the Rice lower tail. Boundary-region reference values at `x=1e-4` (CDF ≈ 7.58e-10) and `x=1e-2` (CDF ≈ 7.58e-6) added to the test suite. Closes #246.

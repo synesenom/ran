@@ -48,6 +48,10 @@ export default class extends Distribution {
   }
 
   _q (p) {
-    return Math.floor(Math.log(1 - p) / Math.log(1 - this.p.p))
+    // p=1 gives log(0)=-Infinity in denominator; the distribution degenerates to always 0.
+    if (this.p.p === 1) return 0
+    // ceil(x)-1 equals floor(x) for non-integer x but gives x-1 when x is exact,
+    // preventing the off-by-one when CDF(k) = p exactly.
+    return Math.ceil(Math.log(1 - p) / Math.log(1 - this.p.p)) - 1
   }
 }

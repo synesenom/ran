@@ -27,6 +27,7 @@ export default class extends Categorical {
   }
 
   _q (p) {
-    return p > 1 - this.p.p ? 1 : 0
+    // this.p.weights[0] is the CDF at k=0; this.p.p is shadowed by the Categorical constructor.
+    return p > this.p.weights[0] ? 1 : 0
   }
 }

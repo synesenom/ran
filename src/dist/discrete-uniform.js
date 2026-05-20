@@ -56,6 +56,8 @@ export default class extends Distribution {
   }
 
   _q (p) {
-    return Math.floor(p * this.c[0]) + this.p.xmin
+    // ceil(x)-1 equals floor(x) for non-integer x but gives x-1 when x is exactly an integer,
+    // which is needed when p*N is exact so CDF(k) = p and the correct quantile is k, not k+1.
+    return Math.ceil(p * this.c[0]) - 1 + this.p.xmin
   }
 }
