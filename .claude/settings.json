@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Edit(.claude/tmp*)",
-      "Write(.claude/tmp*)"
+      "Write(.claude/tmp*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(mkdir*/.claude/tmp*)",
+      "Bash(mkdir .claude/tmp*)"
     ]
   },
   "hooks": {
