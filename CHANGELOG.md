@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `Distribution._qEstimateWalk(p, start)` protected helper: deterministic linear walk from a caller-supplied integer start toward the infimum discrete quantile. Exits when `cdf(k) >= p` and `cdf(k-1) < p`. Provides a non-random alternative to `_qEstimateRoot` for infinite-support discrete distributions with analytically-known parameters. Closes #284.
 - Property tests for all distributions: `cdfMonotonicity` now asserts `cdf(x₂) >= cdf(x₁)` across a deterministic grid (it was previously a no-op that only asserted scalar arithmetic ordering). A new `Tests.quantileRoundtrip` helper asserts `|cdf(q(p)) − p| < 1e-6` for continuous distributions and the two-sided infimum definition for discrete distributions across the fixed probability grid `{0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95}`. Closes #212.
 
 - `R` distribution generator, PDF, and CDF now produce a symmetric distribution matching the documented formula `f(x; c) = (1 - x²)^(c/2-1) / B(1/2, c/2)` on `[-1, 1]`. The previous implementation configured `Beta(0.5, c/2)` (the squared-variable parent) but then applied the affine substitution `y = (x+1)/2` and squared it, breaking `x → −x` symmetry. For `c=4`, `pdf(-0.95)` returned `~0.7495` instead of the correct `~0.0731`. Reduced to the affine `U = (X+1)/2 ~ Beta(c/2, c/2)`, which is one-to-one and avoids the `0·∞` corner at `x=0` for `c<2`. `refVals` for `R(4)` (previously deferred) added to the test suite. Closes #261.

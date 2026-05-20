@@ -1,5 +1,5 @@
 import { assert } from 'chai'
-import { describe, it } from 'mocha'
+import { before, describe, it } from 'mocha'
 import { adTest, chiTest, Tests, checkRefVals, checkQuantileVals } from './test-utils'
 import { float } from '../src/core'
 import * as dist from '../src/dist'
@@ -402,6 +402,32 @@ describe('dist', () => {
       it('should return 1 at the open lower boundary x = 0', () => {
         assert.equal(k.survival(0), 1)
       })
+    })
+  })
+
+  // Base class helper: _qEstimateWalk.
+  describe('Distribution._qEstimateWalk', () => {
+    // Poisson(5) reference values:
+    //   ppf(0.1) = 2   cdf(2)=0.12465  cdf(1)=0.04043
+    //   ppf(0.5) = 5   cdf(5)=0.61596  cdf(4)=0.44049
+    //   ppf(0.9) = 8   cdf(8)=0.93191  cdf(7)=0.86663
+    let d
+    before(() => { d = new dist.Poisson(5) })
+
+    it('should walk up from a start below the quantile', () => {
+      assert.strictEqual(d._qEstimateWalk(0.9, 0), 8)
+    })
+
+    it('should walk down from a start above the quantile', () => {
+      assert.strictEqual(d._qEstimateWalk(0.1, 20), 2)
+    })
+
+    it('should return immediately when start already satisfies the invariant', () => {
+      assert.strictEqual(d._qEstimateWalk(0.5, 5), 5)
+    })
+
+    it('should walk up from a negative start', () => {
+      assert.strictEqual(d._qEstimateWalk(0.5, -10), 5)
     })
   })
 
