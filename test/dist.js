@@ -467,4 +467,29 @@ describe('dist', () => {
       })
     })
   })
+
+  // Lindley: AIC/BIC parameter-count regression — this.k must be 1 so the penalty is not silently dropped.
+  // Guard against reverting super('continuous', 1) back to super('continuous', arguments.length),
+  // which would set k=0 if a default were ever reintroduced to the constructor.
+  describe('Lindley', () => {
+    const sample = [0.1, 0.5, 1.0, 1.5, 2.0, 0.3, 0.8, 1.2, 2.5, 0.6]
+    const d = new dist.Lindley(1)
+
+    it('should throw when constructed without arguments', () => {
+      assert.throws(() => new dist.Lindley())
+    })
+
+    it('should have paramCount k=1', () => {
+      assert.strictEqual(d.k, 1)
+    })
+
+    it('aic() should include the parameter penalty (k=1)', () => {
+      // AIC = 2*(k - lnL); with k=1 the penalty is 2. k=0 would make aic() return a lower value.
+      assert.strictEqual(d.aic(sample), 2 * (1 - d.lnL(sample)))
+    })
+
+    it('bic() should include the parameter penalty (k=1)', () => {
+      assert.strictEqual(d.bic(sample), Math.log(sample.length) * 1 - 2 * d.lnL(sample))
+    })
+  })
 })
