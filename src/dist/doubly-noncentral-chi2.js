@@ -47,6 +47,7 @@ export default class extends Distribution {
     // since χ² is additive in degrees of freedom and the Poisson noncentrality
     // counts add. The double series collapses to a single one by the binomial
     // theorem.
+    // See solutions/distribution/2026-05-20-1838-doubly-noncentral-chi2-additivity-collapse.md
     // Speed-up constants: [collapsed dof, collapsed noncentrality, dof is even]
     this.c = [k1i + k2i, lambda1 + lambda2, (k1i + k2i) % 2 === 0]
   }
