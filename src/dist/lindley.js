@@ -50,6 +50,8 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return 1 - Math.exp(-this.p.theta * x) * (this.c[0] + this.p.theta * x) / this.c[0]
+    const tx = this.p.theta * x
+    // -expm1(-tx) avoids catastrophic cancellation when theta*x is near 0
+    return -Math.expm1(-tx) - Math.exp(-tx) * tx / this.c[0]
   }
 }
