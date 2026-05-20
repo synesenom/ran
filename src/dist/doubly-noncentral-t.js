@@ -7,7 +7,7 @@ import { acceleratedSum, recursiveSum } from '../algorithms'
 import NoncentralT from './noncentral-t'
 
 /**
- * Generator for the [doubly non-central t distribution]{@link https://cran.r-project.org/web/packages/sadists/sadists.pdf}:
+ * Generator for the [doubly non-central t distribution]{@link https://www.wiley.com/en-us/Intermediate+Probability%3A+A+Computational+Approach-p-9780470026373}:
  *
  * $$f(x; \nu, \mu, \theta) = \frac{e^{-\frac{\theta + \mu^2}{2}}}{\sqrt{\pi \nu}} \sum_{j = 0}^\infty \frac{1}{j!} \frac{(x \mu \sqrt{2 / \nu})^j}{(1 + x^2 / \nu)^{\frac{\nu + j + 1}{2}}} \frac{\Gamma\big(\frac{\nu + j + 1}{2}\big)}{\Gamma\big(\frac{\nu}{2}\big)} {}_1F_1\bigg(\frac{\nu + j + 1}{2}, \frac{\nu}{2}; \frac{\theta}{2 (1 + x^2 / \nu)}\bigg),$$
  *
@@ -19,7 +19,7 @@ import NoncentralT from './noncentral-t'
  * @param {number} nu Degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 1.
  * @param {number} mu Location parameter. Default value is 1.
  * @param {number} theta Shape parameter. Default value is 1.
- * @see https://cran.r-project.org/web/packages/sadists/sadists.pdf
+ * @see https://www.wiley.com/en-us/Intermediate+Probability%3A+A+Computational+Approach-p-9780470026373
  * @constructor
  */
 export default class extends Distribution {

@@ -6,11 +6,12 @@ import noncentralChi2 from './_noncentral-chi2'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [doubly non-central beta distribution]{@link https://rdrr.io/cran/sadists/f/inst/doc/sadists.pdf}:
+ * Generator for the [doubly non-central beta distribution]{@link https://arxiv.org/abs/1706.08557}:
  *
  * $$f(x; \alpha, \beta, \lambda_1, \lambda_2) = e^{-\frac{\lambda_1 + \lambda_2}{2}} \sum\_{k = 0}^\infty \sum\_{l = 0}^\infty \frac{\big(\frac{\lambda_1}{2}\big)^k}{k!} \frac{\big(\frac{\lambda_2}{2}\big)^l}{l!} \frac{x^{\alpha + k - 1} (1 - x)^{\beta + l - 1}}{\mathrm{B}\big(\alpha + k, \beta + l\big)},$$
  *
  * where $\alpha, \beta > 0$ and $\lambda_1, \lambda_2 \ge 0$. Support: $x \in (0, 1)$.
+ * Formula from C. Orsi. New insights into non-central beta distributions. arXiv:1706.08557, 2017, Eq. (21).
  *
  * @class DoublyNoncentralBeta
  * @memberof ran.dist
@@ -18,7 +19,7 @@ import Distribution from './_distribution'
  * @param {number=} beta Second shape parameter. Default value is 1.
  * @param {number=} lambda1 First non-centrality parameter. Default value is 1.
  * @param {number=} lambda2 Second non-centrality parameter. Default value is 1.
- * @see https://rdrr.io/cran/sadists/f/inst/doc/sadists.pdf
+ * @see https://arxiv.org/abs/1706.08557
  * @constructor
  */
 export default class extends Distribution {
