@@ -52,6 +52,7 @@ export default class extends Distribution {
     if (this.p.p === 1) return 0
     // ceil(x)-1 equals floor(x) for non-integer x but gives x-1 when x is exact,
     // preventing the off-by-one when CDF(k) = p exactly.
+    // See solutions/testing/2026-05-20-0459-discrete-quantile-ceil-minus-one-pattern.md
     return Math.ceil(Math.log(1 - p) / Math.log(1 - this.p.p)) - 1
   }
 }
