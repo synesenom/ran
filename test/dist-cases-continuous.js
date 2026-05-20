@@ -457,6 +457,19 @@ export default [{
   ],
   cases: [{
     params: () => [2, 2, 2, 2]
+  }, {
+    // Regression: lambda1=0 previously produced NaN via 0*log(0) in Poisson-weight init.
+    // Reduces to NoncentralBeta(beta, alpha, lambda2) at (1-x).
+    name: 'lambda1 = 0',
+    params: () => [2, 2, 0, 2]
+  }, {
+    // Symmetric case: lambda2=0 reduces to NoncentralBeta(alpha, beta, lambda1) at x.
+    name: 'lambda2 = 0',
+    params: () => [2, 2, 2, 0]
+  }, {
+    // Both zero collapses to central Beta(alpha, beta).
+    name: 'both lambdas = 0',
+    params: () => [2, 2, 0, 0]
   }],
   // mpmath: DNCBeta double-Poisson mixture of central Beta @ 50 dps
   refVals: [

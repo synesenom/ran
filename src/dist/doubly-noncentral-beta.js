@@ -3,6 +3,7 @@ import { recursiveSum } from '../algorithms'
 import { EPS, MAX_ITER } from '../core/constants'
 import { regularizedBetaIncomplete, beta as fnBeta, logGamma } from '../special'
 import noncentralChi2 from './_noncentral-chi2'
+import NoncentralBeta from './noncentral-beta'
 import Distribution from './_distribution'
 
 /**
@@ -59,6 +60,16 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
+    // Poisson weight init r0 * log(l1) = 0 * -Inf = NaN when lambda1 or lambda2 is 0.
+    // When lambda1=0 the double sum collapses to NoncentralBeta(beta, alpha, lambda2) at (1-x).
+    if (this.p.lambda1 === 0) {
+      return new NoncentralBeta(this.p.beta, this.p.alpha, this.p.lambda2)._pdf(1 - x)
+    }
+    // When lambda2=0 the double sum collapses to NoncentralBeta(alpha, beta, lambda1) at x.
+    if (this.p.lambda2 === 0) {
+      return new NoncentralBeta(this.p.alpha, this.p.beta, this.p.lambda1)._pdf(x)
+    }
+
     // Using outward summation
     const y = x / (1 - x)
     const ab = this.p.alpha + this.p.beta
@@ -200,6 +211,15 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
+    // Poisson weight init 0 * log(0) = NaN — same guard as _pdf.
+    // F_DNB(x; a, b, 0, l2) = 1 - F_NB(1-x; b, a, l2) by symmetry of the Beta integral.
+    if (this.p.lambda1 === 0) {
+      return 1 - new NoncentralBeta(this.p.beta, this.p.alpha, this.p.lambda2)._cdf(1 - x)
+    }
+    if (this.p.lambda2 === 0) {
+      return new NoncentralBeta(this.p.alpha, this.p.beta, this.p.lambda1)._cdf(x)
+    }
+
     // Using outward summation
     const r0 = Math.round(this.p.lambda1 / 2)
     const s0 = Math.round(this.p.lambda2 / 2)
