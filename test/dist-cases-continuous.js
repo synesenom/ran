@@ -470,6 +470,39 @@ export default [{
     { x: 0.95, pdf: 0.24021945141148776, cdf: 0.9939986726186042 }
   ]
 }, {
+  name: 'DoublyNoncentralChi2',
+  invalidParams: [
+    [], // all params required
+    [-1, 1, 1, 1], [0, 1, 1, 1], // k1 > 0
+    [1, -1, 1, 1], [1, 0, 1, 1], // k2 > 0
+    [1, 1, -1, 1], // lambda1 >= 0
+    [1, 1, 1, -1] // lambda2 >= 0
+  ],
+  cases: [{
+    name: 'odd k',
+    params: () => [3, 4, 2, 3]
+  }, {
+    name: 'even k',
+    params: () => [2, 4, 1, 2]
+  }, {
+    name: 'central (lambda = 0)',
+    params: () => [2, 3, 0, 0]
+  }],
+  // all cases share the same Gamma-based noncentralChi2 sampler; the even/odd
+  // and lambda=0 branches are in _pdf only
+  sampleParams: [{ name: 'odd k', params: () => [3, 4, 2, 3] }],
+  // DNCχ²(k1,k2,λ1,λ2) ≡ ncχ²(k1+k2,λ1+λ2) (noncentral chi-square is closed
+  // under addition); reference values from scipy.stats.ncx2(x, 7, 5)
+  refVals: [
+    { x: 0, pdf: 0, cdf: 0 },
+    { x: 0.5, pdf: 0.00035810556059907985, cdf: 5.2044744636715236e-05 },
+    { x: 2, pdf: 0.008840429826928656, cdf: 0.005485852990664728 },
+    { x: 5, pdf: 0.04638026109654982, cdf: 0.08609164480899485 },
+    { x: 12, pdf: 0.06675006467770306, cdf: 0.5595988425472201 },
+    { x: 20, pdf: 0.021381674460119068, cdf: 0.9035570405215593 },
+    { x: 30, pdf: 0.002171313708402558, cdf: 0.9920276524490758 }
+  ]
+}, {
   name: 'DoublyNoncentralF',
   invalidParams: [
     [], // all params required

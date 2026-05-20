@@ -76,6 +76,7 @@ declare module 'ranjs' {
     class DoubleGamma extends Distribution { constructor(alpha: number, beta: number) }
     class DoubleWeibull extends Distribution { constructor(lambda: number, k: number) }
     class DoublyNoncentralBeta extends Distribution { constructor(alpha: number, beta: number, lambda1: number, lambda2: number) }
+    class DoublyNoncentralChi2 extends Distribution { constructor(k1: number, k2: number, lambda1: number, lambda2: number) }
     class DoublyNoncentralF extends Distribution { constructor(d1: number, d2: number, lambda1: number, lambda2: number) }
     class DoublyNoncentralT extends Distribution { constructor(nu: number, mu: number, theta: number) }
     class Erlang extends Distribution { constructor(k: number, lambda: number) }
