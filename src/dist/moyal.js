@@ -1,6 +1,6 @@
 import rejection from '../algorithms/rejection'
 import Distribution from './_distribution'
-import { gammaLowerIncomplete } from '../special'
+import { gammaUpperIncomplete } from '../special'
 
 /**
  * Generator for the [Moyal distribution]{@link https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.moyal.html#r7049b665a02e-2}:
@@ -58,6 +58,7 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return 1 - gammaLowerIncomplete(0.5, 0.5 * Math.exp((this.p.mu - x) / this.p.sigma))
+    // gammaUpperIncomplete avoids catastrophic cancellation when x << mu (large z, Q near zero)
+    return gammaUpperIncomplete(0.5, 0.5 * Math.exp((this.p.mu - x) / this.p.sigma))
   }
 }
