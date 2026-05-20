@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Bernoulli._q` returned `0` for all `p > 0.5` because `this.p.p` is `undefined` after the `Categorical` parent constructor overwrites `this.p` with `{ n, weights, min }`. Fixed by using `this.p.weights[0]` (the CDF at k=0) as the threshold. Closes #212.
 - `DiscreteUniform._q`, `Geometric._q`, and `DiscreteWeibull._q` returned a quantile one too large when `p` landed exactly on a CDF step (e.g., `Geometric(0.5).q(0.5)` returned `1` instead of `0`). Each used `Math.floor` on the algebraic inverse `k+1`; changed to `Math.ceil(…) - 1` which is identical for non-integer arguments but correct at exact integers. Closes #212.
 - `Skellam._q` applied `Math.floor` to the result of `_qEstimateRoot`, which finds a continuous root of `CDF(x) − p`. For a step function the root lands just below the integer boundary, causing `Math.floor` to undershoot by 1. Added a one-step correction: `if (this.cdf(k) < p) k++`. Closes #212.
+- `Skellam._q` could silently return `NaN` in the extreme tails: `_qEstimateRoot` uses a random bracket initialisation and returns `undefined` when its 100-iteration cap is exhausted, and `Math.floor(undefined)` is `NaN`. Replaced with `_qEstimateWalk(p, Math.floor(μ₁ − μ₂))`, anchored at the distribution mean; the walk is fully deterministic and always returns a valid integer. Closes #283.
 
 ### Added
 
