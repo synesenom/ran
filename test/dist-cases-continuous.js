@@ -526,6 +526,19 @@ export default [{
   ],
   cases: [{
     params: () => [5, 5, 2, 2]
+  }, {
+    // Regression: lambda1=0 previously produced NaN (inherited from DoublyNoncentralBeta, fixed in #304).
+    // Reduces to singly-noncentral F(n1, n2, lambda2).
+    name: 'lambda1 = 0',
+    params: () => [5, 5, 0, 2]
+  }, {
+    // Symmetric case: lambda2=0 reduces to singly-noncentral F(n1, n2, lambda1).
+    name: 'lambda2 = 0',
+    params: () => [5, 5, 2, 0]
+  }, {
+    // Both zero collapses to central F(n1, n2).
+    name: 'both lambdas = 0',
+    params: () => [5, 5, 0, 0]
   }],
   // Reference via DNCF = (d1/d2) DNCB(d1 x / (d2 + d1 x); d1/2, d2/2, l1, l2) / (1 + d1 x / d2)^2
   // with DNCB computed as a double Poisson mixture of central Beta (scipy.stats.beta).
