@@ -19,6 +19,32 @@
     }
   }
 
+  &.deprecated .title {
+    border-left-color: darkorange;
+  }
+
+  .deprecated-banner {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 8px 0;
+    margin-top: 10px;
+
+    .deprecated-label {
+      font-weight: bold;
+      color: darkorange;
+      font-family: 'Courier', monospace;
+      font-size: 0.85em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .deprecated-message {
+      color: #666;
+      font-size: 0.9em;
+    }
+  }
+
   .desc {
     margin-top: 10px;
     margin-bottom: 20px;

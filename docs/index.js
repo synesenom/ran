@@ -59,7 +59,8 @@ function parseEntry (entry) {
     examples: entry.examples.length > 0
       ? hljs.highlight(entry.examples[0].description, { language: 'javascript' }).value
       : undefined,
-    sees: entry.sees.length > 0 ? entry.sees.map(SeesParser) : undefined
+    sees: entry.sees.length > 0 ? entry.sees.map(SeesParser) : undefined,
+    deprecated: entry.deprecated ? DescParser({ description: entry.deprecated }) : undefined
   }
 }
 

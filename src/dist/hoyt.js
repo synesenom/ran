@@ -1,9 +1,6 @@
 import Nakagami from './nakagami'
 
 /**
- * @deprecated `ran.dist.Hoyt` is a misnamed alias for the Nakagami distribution. Use
- * `ran.dist.Nakagami` instead. This class will be removed in a future major release.
- *
  * Generator for the [Nakagami distribution]{@link https://en.wikipedia.org/wiki/Nakagami_distribution}
  * (previously mis-labelled as the Hoyt distribution):
  *
@@ -15,6 +12,7 @@ import Nakagami from './nakagami'
  * @memberof ran.dist
  * @param {number=} q Shape parameter (same as m in Nakagami). Default value is 0.5.
  * @param {number=} omega Spread parameter. Default value is 1.
+ * @deprecated Use [ran.dist.Nakagami]{@link ran.dist.Nakagami} instead. This class will be removed in a future major release.
  * @see ran.dist.Nakagami
  * @constructor
  */
