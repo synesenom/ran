@@ -64,11 +64,20 @@ export default class extends Distribution {
   _cdf (x) {
     // b = 1
     if (this.c[4]) {
-      return 1 - Math.exp(this.p.a * (1 - x))
+      // expm1 avoids 1 - exp(arg) cancellation when arg → 0 near x = 1
+      return -Math.expm1(this.p.a * (1 - x))
     }
 
     // All other cases
-    return 1 - Math.pow(x, this.p.b - 1) * Math.exp(this.p.a * (1 - Math.pow(x, this.p.b)) / this.p.b)
+    // Split 1 - xbm1*exp(u) as (1 - xbm1) + xbm1*(1 - exp(u)) to avoid
+    // 1 - 1 cancellation when both factors approach 1 near x = 1;
+    // xbm1 = xb/x reuses the already-computed xb and avoids a second Math.pow;
+    // using the same xbm1 in both terms guarantees (1-xbm1)+xbm1 = 1 at large x
+    // where expm1(u) collapses to -1
+    const xb = Math.pow(x, this.p.b)
+    const u = this.p.a * (1 - xb) / this.p.b
+    const xbm1 = xb / x
+    return (1 - xbm1) - xbm1 * Math.expm1(u)
   }
 
   _q (p) {
