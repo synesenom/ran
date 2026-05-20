@@ -120,6 +120,9 @@
     "./dist/doubly-noncentral-beta": {
       "import": "./dist/doubly-noncentral-beta.esm.js"
     },
+    "./dist/doubly-noncentral-chi2": {
+      "import": "./dist/doubly-noncentral-chi2.esm.js"
+    },
     "./dist/doubly-noncentral-f": {
       "import": "./dist/doubly-noncentral-f.esm.js"
     },
