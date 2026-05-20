@@ -184,6 +184,34 @@ class Distribution {
     }
   }
 
+  // _qEstimateTable is broken for negative-integer support (hardwired start at k=0); use this instead.
+  // See solutions/algorithm/2026-05-20-0647-q-estimate-walk-infinite-support-discrete.md
+  /**
+   * Estimates the quantile function using a deterministic linear walk from a caller-supplied start.
+   * Walks toward the infimum quantile until cdf(k) >= p and cdf(k-1) < p.
+   *
+   * @method _qEstimateWalk
+   * @memberof ran.dist.Distribution
+   * @param {number} p Probability to find value for.
+   * @param {number} start Integer to start the walk from.
+   * @returns {number} The smallest integer k such that F(k) >= p and F(k-1) < p.
+   * @protected
+   * @ignore
+   */
+  _qEstimateWalk (p, start) {
+    let k = start
+    if (this.cdf(k) >= p) {
+      while (this.cdf(k - 1) >= p) {
+        k--
+      }
+    } else {
+      while (this.cdf(k) < p) {
+        k++
+      }
+    }
+    return k
+  }
+
   /**
    * Estimates the quantile function by solving F(x) = p using Brent's method.
    *
