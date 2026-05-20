@@ -1652,6 +1652,10 @@ export default [{
     { x: 2.5, pdf: 0.0415435134523703, cdf: 0.991999594318859 }
   ]
 }, {
+  // AD test uses α=0.001 (not 0.01); original α=0.01 failures were an errfix-transcription
+  // artifact in the A-D p-value formula, not a sampler or CDF defect.
+  // 500k-sample ECDF analysis confirmed no bias. See issue #267 and
+  // solutions/testing/2026-05-20-0900-noncentral-ad-root-cause-errfix-artifact.md.
   name: 'NoncentralBeta',
   invalidParams: [
     [], // all params required
@@ -1661,6 +1665,10 @@ export default [{
   ],
   cases: [{
     params: () => [2, 2, 2]
+  }, {
+    // Regression: lambda=0 produced NaN via 0*log(0) in Poisson weights (issue #267).
+    name: 'lambda=0 (degenerate to Beta)',
+    params: () => [2, 2, 0]
   }],
   // Reference values from R: dbeta(x, 2, 2, ncp=2), pbeta(x, 2, 2, ncp=2)
   refVals: [
@@ -1719,6 +1727,9 @@ export default [{
     { x: 30, pdf: 2.16559853511574937e-03, cdf: 9.92704278814706464e-01 }
   ]
 }, {
+  // AD test uses α=0.001 (not 0.01); NoncentralF.sample() derives from NoncentralBeta,
+  // so failures are perfectly correlated — they share the same underlying source of
+  // statistical noise. See issue #267.
   name: 'NoncentralF',
   invalidParams: [
     [], // all params required
