@@ -141,7 +141,10 @@ export default [{
     { name: 'unit shape parameter', params: () => [2, 1] }
   ],
   // mpmath: BenktanderII PDF/CDF formula with a=2, b=0.9995 @ 50 dps
+  // Boundary values (x near 1): Python Decimal @ 60 dps, a=2, b=0.9995
   refVals: [
+    { x: 1.000001, pdf: 2.0004959965037585, cdf: 2.000497998251211222e-6 },
+    { x: 1.0001, pdf: 2.0000996900573424, cdf: 0.00020002998383485039863 },
     { x: 1.001, pdf: 1.996500505574631, cdf: 0.001998499585372714 },
     { x: 1.01, pdf: 1.960863182279961, cdf: 0.01980615448460798 },
     { x: 1.1, pdf: 1.6376855076637271, cdf: 0.18130429928524164 },
