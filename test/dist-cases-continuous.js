@@ -1595,6 +1595,12 @@ export default [{
     params: () => [0, 2]
   }],
   refVals: [
+    // boundary region: very negative x makes z=0.5*exp((mu-x)/sigma) large;
+    // 1-P(0.5,z) catastrophically cancels — Q(0.5,z) computes directly
+    // computed via python math.erfc(sqrt(z)), z=0.5*exp((0-x)/2)
+    { x: -10, pdf: 1.43915726661616e-32, cdf: 3.85316238272452e-34 },
+    { x: -6, pdf: 3.88868591541381e-5, cdf: 7.40545839069017e-6 },
+    { x: -4, pdf: 0.013479115879408, cdf: 0.00656219167259134 },
     { x: -2, pdf: 0.08448116845349869, cdf: 0.09920475041111473 },
     { x: 0, pdf: 0.12098536225957168, cdf: 0.31731050786291415 },
     { x: 1, pdf: 0.11470965943431939, cdf: 0.4360970763850289 },
