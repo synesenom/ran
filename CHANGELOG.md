@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `DoublyNoncentralBeta._pdf` and `._cdf` returned `NaN` when `lambda1` or `lambda2` was 0, because the outward-summation Poisson-weight initialisation evaluated `0 * Math.log(0) = NaN` (IEEE 754). Added early-return guards: when `lambda1 = 0` the double sum collapses to `NoncentralBeta(beta, alpha, lambda2)` at `(1-x)`; when `lambda2 = 0` it collapses to `NoncentralBeta(alpha, beta, lambda1)` at `x`. `DoublyNoncentralF` (which inherits both methods) is fixed implicitly. Closes #304.
+
 - `NoncentralBeta._pdf` and `._cdf` returned `NaN` for `lambda = 0` because the Poisson weight computation evaluated `0 * Math.log(0) = NaN` (IEEE 754). Added a guard: when `lambda / 2 === 0`, the weight for the sole k=0 term is 1. Closes #267.
 
 - `besselI(n=1, x)` had only ~8 significant digits of accuracy due to a polynomial approximation (`_I1`, from Numerical Recipes) with limited-precision coefficients. Replaced with Miller's backward recurrence — the same algorithm used for n≥2 — and extended the loop upper-bound by `⌈2|x|⌉` to ensure the recurrence contracts the K_n component before reaching n=1 (required when |x| > n). Added odd-function sign correction for negative arguments. Fixes ~3.7e-10 CDF error in `VonMises` at intermediate x; expands VonMises refVals from 3 to 11 reference points. Closes #255.
