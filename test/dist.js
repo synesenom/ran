@@ -429,6 +429,14 @@ describe('dist', () => {
     it('should walk up from a negative start', () => {
       assert.strictEqual(d._qEstimateWalk(0.5, -10), 5)
     })
+
+    it('should return lower support boundary when p=0', () => {
+      assert.strictEqual(d._qEstimateWalk(0, 5), 0)
+    })
+
+    it('should return upper support boundary when p=1', () => {
+      assert.strictEqual(d._qEstimateWalk(1, 5), Infinity)
+    })
   })
 
   // Degenerate distribution.

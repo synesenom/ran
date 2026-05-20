@@ -188,7 +188,8 @@ class Distribution {
   // See solutions/algorithm/2026-05-20-0647-q-estimate-walk-infinite-support-discrete.md
   /**
    * Estimates the quantile function using a deterministic linear walk from a caller-supplied start.
-   * Walks toward the infimum quantile until cdf(k) >= p and cdf(k-1) < p.
+   * When p=0 returns the lower support bound; when p=1 returns the upper support bound.
+   * For 0 < p < 1, walks toward the infimum quantile until cdf(k) >= p and cdf(k-1) < p.
    *
    * @method _qEstimateWalk
    * @memberof ran.dist.Distribution
@@ -199,6 +200,12 @@ class Distribution {
    * @ignore
    */
   _qEstimateWalk (p, start) {
+    if (p === 0) {
+      return this.s[0].value
+    }
+    if (p === 1) {
+      return this.s[1].value
+    }
     let k = start
     if (this.cdf(k) >= p) {
       while (this.cdf(k - 1) >= p) {
