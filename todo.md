@@ -177,6 +177,14 @@ Continuous distribution on [0, 1] whose PDF involves the Gauss hypergeometric fu
 - **Dependency:** `hypergeometric.js` must implement ₂F₁ accurately for |z| < 1
 - Refs: [scipy `gausshyper`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gausshyper.html)
 
+#### Hoyt (Nakagami-q)
+The classical Hoyt distribution — not to be confused with `ran.dist.Hoyt`, which was a misnamed alias for the Nakagami-m distribution and has been deprecated (see #226). The true Hoyt (Nakagami-q) PDF contains a modified Bessel function I₀ and is a distinct family used in fading-channel modelling.
+- **PDF:** f(x; q, ω) = 2(1+q²)x / (qω) · exp(−(1+q²)²x²/(4q²ω)) · I₀((1−q⁴)x²/(4q²ω)),  q ∈ (0, 1], ω > 0, x ≥ 0
+- **CDF:** no elementary closed form; expressible via the Marcum Q-function: F(x) = 1 − Q₁(a·x, b·x) where a and b are functions of q and ω
+- **Sampling:** rejection sampling against a Rayleigh envelope, or inversion via Brent root-finding on the Marcum Q CDF
+- **Dependency:** `bessel.js` (I₀ — already present); `marcum-q.js` (marcumQ — already present)
+- Refs: [Wikipedia — Hoyt distribution](https://en.wikipedia.org/wiki/Hoyt_distribution); Simon, M.K. (2002) "A new twist on the Marcum Q-function and its application", *IEEE Commun. Lett.* 2(2):39–41
+
 #### Wrapped Cauchy
 Heavy-tailed circular distribution on [−π, π); the stereographic projection of a Cauchy distribution onto the circle. Used in wind direction modelling, paleomagnetism, and neuroscience (head direction cells). The only other circular distribution in the library is `VonMises`.
 - **PDF:** f(θ; μ, ρ) = (1/(2π)) · (1−ρ²) / (1 + ρ² − 2ρ·cos(θ−μ)),  ρ ∈ (0,1)

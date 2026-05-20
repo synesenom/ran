@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Skellam._q` applied `Math.floor` to the result of `_qEstimateRoot`, which finds a continuous root of `CDF(x) − p`. For a step function the root lands just below the integer boundary, causing `Math.floor` to undershoot by 1. Added a one-step correction: `if (this.cdf(k) < p) k++`. Closes #212.
 - `Skellam._q` could silently return `NaN` in the extreme tails: `_qEstimateRoot` uses a random bracket initialisation and returns `undefined` when its 100-iteration cap is exhausted, and `Math.floor(undefined)` is `NaN`. Replaced with `_qEstimateWalk(p, Math.floor(μ₁ − μ₂))`, anchored at the distribution mean; the walk is fully deterministic and always returns a valid integer. Closes #283.
 
+### Deprecated
+
+- `ran.dist.Hoyt` is deprecated. It was implementing the Nakagami-m distribution under the wrong name; `ran.dist.Nakagami` is the canonical, correctly-named class. `new Hoyt(q, omega)` now emits a `console.warn` and delegates entirely to `Nakagami(q, omega)`. The parameter constraint changes from `0 < q ≤ 1` to `q ≥ 0.5` (the Nakagami-m domain); computed values are identical for all previously valid `q ∈ [0.5, 1]`. `Hoyt` will be removed in a future major release. Closes #226.
+
 ### Added
 
 - `Distribution._qEstimateWalk(p, start)` protected helper: deterministic linear walk from a caller-supplied integer start toward the infimum discrete quantile. Exits when `cdf(k) >= p` and `cdf(k-1) < p`. Provides a non-random alternative to `_qEstimateRoot` for infinite-support discrete distributions with analytically-known parameters. Closes #284.

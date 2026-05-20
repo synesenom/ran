@@ -36,7 +36,11 @@ block content
 
     h1 documentation
     each entry in api
-        .card
+        .card(class=entry.deprecated ? 'deprecated' : '')
+            if entry.deprecated
+                .deprecated-banner.margined
+                    span.deprecated-label Deprecated
+                    span.deprecated-message !{entry.deprecated}
             pre.title(id="" + entry.index) #{entry.signature}
             .desc.margined !{entry.desc}
             if entry.params

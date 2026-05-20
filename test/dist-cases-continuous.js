@@ -992,26 +992,26 @@ export default [{
   name: 'Hoyt',
   invalidParams: [
     [], // all params required
-    [-1, 1], [0, 1], [2, 1], // 0 < q <= 1
+    [-1, 1], [0, 1], [0.25, 1], // q >= 0.5 (delegates to Nakagami)
     [0.5, -1], [0.5, 0] // omega > 0
   ],
   cases: [{
-    name: 'q < 0.5',
-    params: () => [0.25, 2]
-  }, {
-    name: 'normal q',
+    name: 'q at boundary',
     params: () => [0.5, 2]
+  }, {
+    name: 'q > 1 (previously invalid)',
+    params: () => [2, 1]
   }],
-  // any interior q exercises the same Gamma-variate sampler (sqrt(Gamma(q, q/omega))); no q-value branch exists in _generator
-  sampleParams: [{ name: 'normal q', params: () => [0.5, 2] }],
-  // ranjs's Hoyt impl is Nakagami-m with m=q (class is misnamed); refs via scipy.stats.nakagami
+  // delegates to Nakagami; sampler is sqrt(Gamma(q, q/omega))
+  sampleParams: [{ name: 'q at boundary', params: () => [0.5, 2] }],
+  // deprecated alias for Nakagami; case 1: scipy.stats.nakagami(nu=0.5, loc=0, scale=sqrt(2)); case 2: scipy.stats.nakagami(nu=2, loc=0, scale=1/sqrt(2))
   refVals: [
-    { x: 0.1, pdf: 1.0359375032184368, cdf: 0.2073948032927819 },
-    { x: 0.5, pdf: 0.4495931846212488, cdf: 0.460990635130189 },
-    { x: 1, pdf: 0.2894607037402299, cdf: 0.6401572060830842 },
-    { x: 1.5, pdf: 0.20215545797877604, cdf: 0.7615574091542903 },
-    { x: 2, pdf: 0.14067411288159118, cdf: 0.8464864041916776 },
-    { x: 4, pdf: 0.022195118312496324, cdf: 0.9827139881404833 }
+    { x: 0.1, pdf: 0.5627808712129855, cdf: 0.056371977797014215 },
+    { x: 0.5, pdf: 0.5300070646880344, cdf: 0.276326390168225 },
+    { x: 1, pdf: 0.4393912894677035, cdf: 0.5204998778130242 },
+    { x: 1.5, pdf: 0.32146553459758986, cdf: 0.7111556336534848 },
+    { x: 2, pdf: 0.20755374871028842, cdf: 0.8427007929496787 },
+    { x: 4, pdf: 0.010333492677045582, cdf: 0.9953222650189529 }
   ]
 }, {
   name: 'HyperbolicSecant',

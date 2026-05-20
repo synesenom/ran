@@ -103,6 +103,7 @@ declare module 'ranjs' {
     class HalfLogistic extends Distribution { constructor() }
     class HalfNormal extends Distribution { constructor(sigma: number) }
     class HeadsMinusTails extends Distribution { constructor(n: number) }
+    /** @deprecated Use `ran.dist.Nakagami` instead. */
     class Hoyt extends Distribution { constructor(q: number, omega: number) }
     class HyperbolicSecant extends Distribution { constructor() }
     class Hyperexponential extends Distribution { constructor(parameters: Array<{ weight: number; rate: number }>) }
