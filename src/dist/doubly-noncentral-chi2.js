@@ -26,6 +26,7 @@ export default class extends NoncentralChi2 {
     // DNCχ²(k1, k2, λ1, λ2) ≡ ncχ²(k1 + k2, λ1 + λ2): χ² is additive in
     // degrees of freedom and the Poisson noncentrality counts add.
     // See solutions/distribution/2026-05-20-1838-doubly-noncentral-chi2-additivity-collapse.md
+    // See solutions/distribution/2026-05-21-1300-doubly-noncentral-chi2-inherit-noncentral-chi2.md
     super(k1i + k2i, lambda1 + lambda2)
 
     // Merge original params alongside the collapsed k/lambda set by super
