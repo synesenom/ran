@@ -4,6 +4,7 @@ import trap from '../algorithms/trap'
 import logGamma from './log-gamma'
 import { erfc } from './error'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from './gamma-incomplete'
+import { F_JK, U_K } from './_marcum-coefficients'
 
 /**
  * Series expansion of the Marcum-Q function. Section 3 in https://arxiv.org/pdf/1311.0681.pdf.
@@ -400,6 +401,114 @@ function _recurrence (mu, x, y) {
 }
 
 /**
+ * Computes the modified-Bessel correction term
+ * T = e^{-mu zeta^2/2} e^{-mu eta(xi)} I_mu(mu xi) of the large-mu expansion,
+ * Eqs. (73), (75), (80) in https://arxiv.org/pdf/1311.0681.pdf. The scaled
+ * Bessel factor e^{-mu eta(xi)} I_mu(mu xi) is evaluated through its uniform
+ * asymptotic expansion (Eq. 45), so no overflow-prone I_mu call is needed.
+ *
+ * @method _besselT
+ * @memberof ran.special
+ * @param {number} mu The order of the function.
+ * @param {number} xs Scaled first variable x / mu.
+ * @param {number} ys Scaled second variable y / mu.
+ * @param {number} eHalfMuZeta2 The pre-computed factor e^{-mu zeta^2 / 2}.
+ * @return {number} The correction term T.
+ * @private
+ */
+function _besselT (mu, xs, ys, eHalfMuZeta2) {
+  const xi2 = 4 * xs * ys
+  const t = 1 / Math.sqrt(1 + xi2)
+
+  // sum_k u_k(t) / mu^k, Horner in 1/mu with an inner Horner in t.
+  let s = 0
+  for (let k = U_K.length - 1; k >= 0; k--) {
+    const c = U_K[k]
+    let uk = 0
+    for (let m = c.length - 1; m >= 0; m--) {
+      uk = uk * t + c[m]
+    }
+    s = s / mu + uk
+  }
+
+  const scaled = s / (Math.sqrt(2 * Math.PI * mu) * Math.sqrt(Math.sqrt(1 + xi2)))
+  return eHalfMuZeta2 * scaled
+}
+
+/**
+ * Large-mu uniform asymptotic expansion of the Marcum function. Section 4.2 in
+ * https://arxiv.org/pdf/1311.0681.pdf. Evaluates the transition band y ~ x + mu
+ * directly when mu >= 135, where backward recurrence would take O(mu) steps.
+ * The smaller of P and Q is summed from its own expansion (Eq. 75 for Q,
+ * Eq. 80 for P), so the deep-tail precision guarantee is preserved.
+ *
+ * @method _largeMu
+ * @memberof ran.special
+ * @param {number} mu The order of the function.
+ * @param {number} x First variable.
+ * @param {number} y Second variable.
+ * @return {Object} Object holding the Marcum P and Q values as `p` and `q`.
+ * @private
+ */
+function _largeMu (mu, x, y) {
+  const xs = x / mu
+  const ys = y / mu
+  const u = 1 / Math.sqrt(2 * xs + 1)
+  const u2 = u * u
+  const zeta = _zetaxy(xs, ys)
+
+  // Q is the smaller tail above the transition line (zeta < 0), P below it.
+  // The primary expansion is the one whose erfc leading term is that small
+  // tail: it uses eta = zeta for Q and eta = -zeta for P (so -eta > 0).
+  const qPrimary = zeta < 0
+  const eta = qPrimary ? zeta : -zeta
+  const eHalfMuZeta2 = Math.exp(-0.5 * mu * zeta * zeta)
+
+  // Psi_j(eta), Eqs. (67)-(68).
+  const jMax = F_JK.length - 1
+  const psi = [
+    Math.sqrt(Math.PI / (2 * mu)) * erfc(-eta * Math.sqrt(mu / 2)),
+    eHalfMuZeta2 / mu
+  ]
+  // etaPow carries (-eta)^(j-1) across the loop, avoiding a Math.pow per term.
+  let etaPow = -eta
+  for (let j = 2; j <= jMax; j++) {
+    psi[j] = ((j - 1) * psi[j - 2] + etaPow * eHalfMuZeta2) / mu
+    etaPow *= -eta
+  }
+
+  // Expansion = sqrt(mu/2pi) sum_j A_j Psi_j with A_j = sum_k f_{jk}/mu^k and
+  // f_{jk}(u) = u^(j+2k) D_{jk}(u^2). The P-expansion (Eq. 79) flips the sign
+  // of the odd-j terms.
+  const r = u2 / mu
+  let sum = 0
+  let uj = 1
+  for (let j = 0; j <= jMax; j++) {
+    const col = F_JK[j]
+    let aj = 0
+    for (let k = col.length - 1; k >= 0; k--) {
+      const d = col[k]
+      let djk = 0
+      for (let m = d.length - 1; m >= 0; m--) {
+        djk = djk * u2 + d[m]
+      }
+      aj = aj * r + djk
+    }
+    aj *= uj
+    uj *= u
+    sum += (qPrimary || j % 2 === 0 ? aj : -aj) * psi[j]
+  }
+  const expansion = Math.sqrt(mu / (2 * Math.PI)) * sum
+
+  // Q_mu = Q_{mu+1} - T (Eq. 75); P_mu = P_{mu+1} + T (Eq. 80).
+  const tTerm = _besselT(mu, xs, ys, eHalfMuZeta2)
+  const primary = qPrimary ? expansion - tTerm : expansion + tTerm
+  return qPrimary
+    ? { q: primary, p: 1 - primary }
+    : { p: primary, q: 1 - primary }
+}
+
+/**
  * Dispatches the Marcum function computation to the numerical method valid for
  * the (mu, x, y) regime and returns both the P and Q values.
  *
@@ -431,14 +540,13 @@ function _marcum (mu, x, y) {
     return _asymptoticLargeXi(mu, x, y)
   }
 
-  // Recurrence relation across the transition band y = x + mu, where the
-  // quadrature integrand is near-singular. Eq. (14). The paper restricts this
-  // branch to mu < 135 because it covers larger mu with a separate large-mu
-  // asymptotic expansion (Section 4.2); that expansion is out of scope here,
-  // so the recurrence covers the whole band.
+  // Transition band y = x + mu, where the quadrature integrand is near-
+  // singular. Below mu = 135 the three-term recurrence (Eq. 14) solves the
+  // band; at mu >= 135 the large-mu uniform asymptotic expansion (Section 4.2)
+  // evaluates it directly, avoiding the O(mu) recurrence steps.
   const s = Math.sqrt(4 * x + 2 * mu)
   if (y > x + mu - s && y < x + mu + s) {
-    return _recurrence(mu, x, y)
+    return mu >= 135 ? _largeMu(mu, x, y) : _recurrence(mu, x, y)
   }
 
   // Quadrature. Section 5.
@@ -448,8 +556,10 @@ function _marcum (mu, x, y) {
 /**
  * Computes the generalized Marcum-Q function. The dispatcher selects, by the
  * (mu, x, y) regime, the series expansion (Section 3), the large-xi asymptotic
- * expansion (Section 4.1), the recurrence relation (Eq. 14) or the quadrature
- * method (Section 5). Implementation source: https://arxiv.org/pdf/1311.0681.pdf.
+ * expansion (Section 4.1), the recurrence relation (Eq. 14, transition band
+ * with mu < 135), the large-mu asymptotic expansion (Section 4.2, transition
+ * band with mu >= 135) or the quadrature method (Section 5). Implementation
+ * source: https://arxiv.org/pdf/1311.0681.pdf.
  *
  * @method marcumQ
  * @memberof ran.special
