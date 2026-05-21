@@ -181,6 +181,7 @@ export default class extends Distribution {
       }, t => t.p * t.ib)
     }
 
-    return Math.min(1, z)
+    // Series can produce a small negative value via floating-point cancellation; symmetric guard with Math.min(1, ...).
+    return Math.max(0, Math.min(1, z))
   }
 }

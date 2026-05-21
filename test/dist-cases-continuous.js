@@ -1728,6 +1728,28 @@ export default [{
     // Regression: lambda=0 produced NaN via 0*log(0) in Poisson weights (issue #267).
     name: 'lambda=0 (degenerate to Beta)',
     params: () => [2, 2, 0]
+  }, {
+    // Stress test: large lambda forces many Poisson terms; floating-point cancellation risk.
+    // Reference values from mpmath (dps=20): ncbeta_cdf(2, 2, 100, x).
+    name: 'large lambda',
+    params: () => [2, 2, 100],
+    refVals: [
+      { x: 0.9, pdf: 1.395361444040611e+00, cdf: 3.110910129477763e-02 },
+      { x: 0.95, pdf: 9.931823105374480e+00, cdf: 2.574339466217881e-01 },
+      { x: 0.99, pdf: 1.653231233465270e+01, cdf: 9.006079598702932e-01 }
+    ]
+  }, {
+    // Stress test: asymmetric shapes with non-trivial lambda; exercises series near support boundary.
+    // alpha=0.5 (< 1) means _pdf(0) returns NaN (known open defect, noncentral-beta.js:66-68), but
+    // pdfRange uses a golden-ratio step that does not land on x=0 exactly, so the harness still passes.
+    // Reference values from mpmath (dps=20): interior points only (x=0 pdf excluded due to above defect).
+    name: 'asymmetric shapes',
+    params: () => [0.5, 5, 10],
+    refVals: [
+      { x: 0.3, pdf: 1.109454870961770e+00, cdf: 1.492809427219101e-01 },
+      { x: 0.5, pdf: 2.015251093123254e+00, cdf: 4.715604423604929e-01 },
+      { x: 0.7, pdf: 1.488828919050658e+00, cdf: 8.557627658350277e-01 }
+    ]
   }],
   // Reference values from R: dbeta(x, 2, 2, ncp=2), pbeta(x, 2, 2, ncp=2)
   refVals: [
