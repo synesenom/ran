@@ -71,7 +71,7 @@ export default function (f, a, b) {
 
   for (let j = 0; j < MAX_STEPS; j++) {
     s[j] = trapezoid(f, a, b, j + 1)
-    if (j >= POLYNOMIAL_ORDER - 1) {
+    if (j >= POLYNOMIAL_ORDER) {
       const { dy, y } = interpolate(h.slice(j - POLYNOMIAL_ORDER), s.slice(j - POLYNOMIAL_ORDER), POLYNOMIAL_ORDER, 0)
       if (Math.abs(dy) < EPS * Math.abs(y)) {
         return y
