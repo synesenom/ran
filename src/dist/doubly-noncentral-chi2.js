@@ -3,11 +3,12 @@ import noncentralChi2 from './_noncentral-chi2'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [doubly non-central $\chi^2$ distribution]{@link https://rdrr.io/cran/sadists/f/inst/doc/sadists.pdf}:
+ * Generator for the [doubly non-central $\chi^2$ distribution]{@link https://doi.org/10.1093/biomet/36.1-2.202}:
  *
  * $$f(x; k_1, k_2, \lambda_1, \lambda_2) = e^{-\frac{\lambda_1 + \lambda_2}{2}} \sum\_{j = 0}^\infty \sum\_{l = 0}^\infty \frac{\big(\frac{\lambda_1}{2}\big)^j}{j!} \frac{\big(\frac{\lambda_2}{2}\big)^l}{l!} f_{\chi^2}\big(x; k_1 + k_2 + 2j + 2l\big),$$
  *
  * where $f_{\chi^2}(x; \nu)$ is the central $\chi^2$ density with $\nu$ degrees of freedom, $k_1, k_2 \in \mathbb{N}^+$ and $\lambda_1, \lambda_2 \ge 0$. Support: $x \in [0, \infty)$.
+ * Formula follows from the Poisson-mixture representation of the non-central χ² in P. B. Patnaik. The non-central χ²- and F-distributions and their applications. *Biometrika*, 36(1–2):202–232, 1949.
  *
  * @class DoublyNoncentralChi2
  * @memberof ran.dist
@@ -15,7 +16,7 @@ import Distribution from './_distribution'
  * @param {number=} k2 Second degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 1.
  * @param {number=} lambda1 First non-centrality parameter. Default value is 1.
  * @param {number=} lambda2 Second non-centrality parameter. Default value is 1.
- * @see https://rdrr.io/cran/sadists/f/inst/doc/sadists.pdf
+ * @see https://doi.org/10.1093/biomet/36.1-2.202
  * @constructor
  */
 export default class extends Distribution {
