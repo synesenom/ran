@@ -114,6 +114,12 @@ describe('algorithms', () => {
         )
       }, LAPS)
     })
+
+    it('should not mutate the input array', () => {
+      const arr = [3, 1, 2]
+      assert.equal(algorithms.neumaier(arr), 6)
+      assert.deepEqual(arr, [3, 1, 2])
+    })
   })
 
   describe('romberg()', () => {

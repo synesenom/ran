@@ -9,7 +9,7 @@
  */
 export default function (arr) {
   // Sort array first.
-  const sorted = arr.sort((a, b) => a - b)
+  const sorted = [...arr].sort((a, b) => a - b)
 
   // Init sum and correction.
   let s = sorted[0]
