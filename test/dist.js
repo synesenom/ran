@@ -103,7 +103,8 @@ const UnitTests = {
     // Test cases
     const cases = tc.cases.map(c => ({
       name: c.name || 'random parameters',
-      generate: () => new dist[tc.name](...c.params())
+      generate: () => new dist[tc.name](...c.params()),
+      refVals: c.refVals
     }))
 
     cases.forEach(c => {
@@ -139,6 +140,12 @@ const UnitTests = {
         it('quantile should round-trip through cdf', () => {
           Tests.quantileRoundtrip(c.generate())
         })
+
+        if (c.refVals) {
+          it('pdf and cdf should match per-case reference values', () => {
+            checkRefVals(c.generate(), c.refVals)
+          })
+        }
       })
     })
 
