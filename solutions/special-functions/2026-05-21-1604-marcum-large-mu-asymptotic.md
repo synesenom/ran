@@ -59,9 +59,11 @@ before its output is trusted:
   *empirically* selects the truncation (`J=9, K=4`) so the worst-case relative
   error at `µ = 135` is `≤ 1×10⁻¹¹` (achieved `1.6×10⁻¹²`).
 
-The float64 output is hardcoded into a machine-generated module,
-`src/special/_marcum-coefficients.js` — the same hardcoded-table pattern as
-`gamma.js`, `owen-t.js`, `log-gamma.js`. A hardcoded table was chosen over a
+The float64 output is hardcoded into `src/special/marcum-q.js` as a
+machine-generated `const` block, delimited by `BEGIN/END GENERATED
+COEFFICIENTS` markers that `scripts/marcum-fjk-generate.py` splices into — the
+same inline hardcoded-table pattern as `gamma.js`, `owen-t.js`, `log-gamma.js`
+(none of which use a standalone module). A hardcoded table was chosen over a
 runtime power-series derivation because float64 series-reversion at truncation
 order ~10 has a condition-number problem; exact offline derivation sidesteps
 it. `_largeMu` evaluates the expansion (erfc-seeded `Ψ_j` recurrence, Horner
@@ -71,10 +73,11 @@ correction `T` via the uniform Bessel asymptotic. The dispatcher splits the
 band: `µ ≥ 135 → _largeMu`, `µ < 135 → _recurrence`.
 
 Secondary: ESLint's `no-loss-of-precision` false-positives on some canonical
-16-digit float64 literals in the generated file (its `toPrecision()` heuristic
+16-digit float64 literals in the generated block (its `toPrecision()` heuristic
 rounds the opposite way to the shortest round-trip repr). A scoped
-`eslint-disable no-loss-of-precision` at the top of the generated file
-suppresses it; every literal was verified to round-trip (`String(Number(s)) === s`).
+`/* eslint-disable no-loss-of-precision */ … /* eslint-enable */` pair around
+the generated literals suppresses it; every literal was verified to round-trip
+(`String(Number(s)) === s`).
 
 ## Prevention Strategy
 
