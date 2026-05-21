@@ -1,4 +1,4 @@
-import { besselI, besselISpherical, marcumP } from '../special'
+import { besselI, besselISpherical, marcumP, logGamma } from '../special'
 import noncentralChi2 from './_noncentral-chi2'
 import Distribution from './_distribution'
 
@@ -7,7 +7,7 @@ import Distribution from './_distribution'
  *
  * $$f(x; k; \lambda) = \frac{1}{2}e^{-\frac{x + \lambda}{2}} \bigg(\frac{x}{\lambda}\bigg)^{k/4 - 1/2} I_{k/2 - 1}\big(\sqrt{\lambda x}\big),$$
  *
- * with $k \in \mathbb{N}^+$, $\lambda > 0$ and $I_n(x)$ is the modified Bessel function of the first kind with order $n$. Support: $x \in [0, \infty)$.
+ * with $k \in \mathbb{N}^+$, $\lambda \ge 0$ and $I_n(x)$ is the modified Bessel function of the first kind with order $n$. Support: $x \in [0, \infty)$. When $\lambda = 0$ the distribution degenerates to a central $\chi^2(k)$.
  *
  * @class NoncentralChi2
  * @memberof ran.dist
@@ -25,7 +25,7 @@ export default class extends Distribution {
     this.p = { k: ki, lambda }
     Distribution.validate({ k: ki, lambda }, [
       'k > 0',
-      'lambda > 0'
+      'lambda >= 0'
     ])
 
     // Set support
@@ -49,6 +49,18 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
+    if (this.p.lambda === 0) {
+      // Bessel form divides by λ and is undefined at zero; fall back to central chi-squared density
+      if (this.p.k === 2 && x === 0) {
+        // 0*log(0) = NaN without the guard; limit is 0.5
+        return 0.5
+      }
+      return Math.exp(
+        (this.p.k / 2 - 1) * Math.log(x) - x / 2 -
+        (this.p.k / 2) * Math.LN2 - logGamma(this.p.k / 2)
+      )
+    }
+
     if (this.c[0]) {
       // k is even
       if (this.p.k === 2 && x === 0) {

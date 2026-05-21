@@ -1,6 +1,5 @@
-import { besselI, besselISpherical, marcumP, logGamma } from '../special'
-import noncentralChi2 from './_noncentral-chi2'
 import Distribution from './_distribution'
+import NoncentralChi2 from './noncentral-chi2'
 
 /**
  * Generator for the [doubly non-central $\chi^2$ distribution]{@link https://doi.org/10.1093/biomet/36.1-2.202}:
@@ -19,74 +18,25 @@ import Distribution from './_distribution'
  * @see https://doi.org/10.1093/biomet/36.1-2.202
  * @constructor
  */
-export default class extends Distribution {
+export default class extends NoncentralChi2 {
   constructor (k1, k2, lambda1, lambda2) {
-    super('continuous', 4)
-
-    // Validate parameters
     const k1i = Math.round(k1)
     const k2i = Math.round(k2)
-    this.p = { k1: k1i, k2: k2i, lambda1, lambda2 }
+
+    // DNCχ²(k1, k2, λ1, λ2) ≡ ncχ²(k1 + k2, λ1 + λ2): χ² is additive in
+    // degrees of freedom and the Poisson noncentrality counts add.
+    // See solutions/distribution/2026-05-20-1838-doubly-noncentral-chi2-additivity-collapse.md
+    super(k1i + k2i, lambda1 + lambda2)
+
+    // Merge original params alongside the collapsed k/lambda set by super
+    this.p = Object.assign(this.p, { k1: k1i, k2: k2i, lambda1, lambda2 })
+
+    // Validate the four individual parameters (super already validated collapsed form)
     Distribution.validate({ k1: k1i, k2: k2i, lambda1, lambda2 }, [
       'k1 > 0',
       'k2 > 0',
       'lambda1 >= 0',
       'lambda2 >= 0'
     ])
-
-    // Set support
-    this.s = [{
-      value: 0,
-      closed: true
-    }, {
-      value: Infinity,
-      closed: false
-    }]
-
-    // The sum of two independent non-central chi-squares is itself a
-    // non-central chi-square: DNCχ²(k1, k2, λ1, λ2) ≡ ncχ²(k1 + k2, λ1 + λ2),
-    // since χ² is additive in degrees of freedom and the Poisson noncentrality
-    // counts add. The double series collapses to a single one by the binomial
-    // theorem.
-    // See solutions/distribution/2026-05-20-1838-doubly-noncentral-chi2-additivity-collapse.md
-    // Speed-up constants: [collapsed dof, collapsed noncentrality, dof is even]
-    this.c = [k1i + k2i, lambda1 + lambda2, (k1i + k2i) % 2 === 0]
-  }
-
-  _generator () {
-    // Direct sampling from the equivalent non-central chi-square
-    return noncentralChi2(this.r, this.c[0], this.c[1])
-  }
-
-  _pdf (x) {
-    const k = this.c[0]
-    const lambda = this.c[1]
-
-    if (lambda === 0) {
-      // λ1 = λ2 = 0 reduces to a central chi-square; the non-central Bessel
-      // form below divides by λ and cannot be evaluated here
-      if (k === 2 && x === 0) {
-        return 0.5
-      }
-      return Math.exp((k / 2 - 1) * Math.log(x) - x / 2 - (k / 2) * Math.LN2 - logGamma(k / 2))
-    }
-
-    if (this.c[2]) {
-      // k is even
-      if (k === 2 && x === 0) {
-        // k = 2, x -> 0, by differentiating F(x)
-        return 0.5 * Math.exp(-0.5 * lambda)
-      }
-      return 0.5 * Math.exp(-0.5 * (x + lambda) + (k / 4 - 0.5) * Math.log(x / lambda)) * besselI(Math.round(k / 2) - 1, Math.sqrt(lambda * x))
-    }
-
-    // k is odd; k = k1 + k2 >= 2, so the k = 1 limit of NoncentralChi2 never applies
-    return 0.5 * Math.exp(-0.5 * (x + lambda)) * Math.pow(x / lambda, k / 4 - 0.5) * besselISpherical(Math.floor((k - 3) / 2), Math.sqrt(lambda * x)) * Math.sqrt(2 * Math.sqrt(x * lambda) / Math.PI)
-  }
-
-  _cdf (x) {
-    // marcumP handles λ = 0 (it reduces to the central chi-square CDF), so no
-    // separate branch is needed here
-    return marcumP(this.c[0] / 2, this.c[1] / 2, x / 2)
   }
 }
