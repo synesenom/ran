@@ -1763,7 +1763,7 @@ export default [{
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // k > 0
-    [2, -1], [2, 0] // lambda > 0
+    [2, -1] // lambda >= 0
   ],
   cases: [{
     name: 'odd k',
@@ -1771,6 +1771,13 @@ export default [{
   }, {
     name: 'even k',
     params: () => [10, 2]
+  }, {
+    name: 'central (lambda = 0), even k',
+    params: () => [10, 0]
+  }, {
+    // k=2, lambda=0, x=0 is the specific boundary where 0*log(0)=NaN without the guard; exercises that path
+    name: 'central (lambda = 0), k=2',
+    params: () => [2, 0]
   }],
   // even and odd k share the same Gamma-based noncentralChi2 sampler; the even/odd branch is in _pdf only
   sampleParams: [{ name: 'odd k', params: () => [11, 2] }],

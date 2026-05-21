@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `DoublyNoncentralChi2` now extends `NoncentralChi2` instead of reimplementing its PDF and CDF. The `_pdf`, `_cdf`, and `_generator` are fully inherited. The model complexity used by `aic()` and `bic()` changes from 4 to 2, reflecting that the distribution has 2 identifiable parameters in its collapsed form `NoncentralChi2(k1+k2, λ1+λ2)`. `NoncentralChi2` now also accepts `lambda = 0` (was `lambda > 0`), degenerating correctly to a central chi-squared. Closes #316.
+
 ### Fixed
 
 - `romberg` returned the silent sentinel `0` when the 20-step budget was exhausted without convergence — indistinguishable from a genuine zero integral. It now returns the best Richardson extrapolate accumulated so far, consistent with how `trap` returns its last estimate on timeout. The stray `console.log` in `Davis._cdf` (which exposed this bug during development) has also been removed. Closes #312.
