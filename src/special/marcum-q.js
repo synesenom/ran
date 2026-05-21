@@ -1,18 +1,26 @@
-import { MAX_ITER, EPS } from '../core/constants'
+import { MAX_ITER, EPS, DELTA } from '../core/constants'
 import newton from '../algorithms/newton'
+import trap from '../algorithms/trap'
 import logGamma from './log-gamma'
+import { erfc } from './error'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from './gamma-incomplete'
 
 /**
  * Series expansion of the Marcum-Q function. Section 3 in https://arxiv.org/pdf/1311.0681.pdf.
+ * Computes the primary (smaller) of P and Q directly so deep lower tails are
+ * free of catastrophic cancellation (see #245), and derives the complement.
  *
- * @namespace _seriesExpansion
+ * @method _series
  * @memberof ran.special
+ * @param {number} mu The order of the function.
+ * @param {number} x First variable.
+ * @param {number} y Second variable.
+ * @return {Object} Object holding the Marcum P and Q values as `p` and `q`.
  * @private
  */
-const _seriesExpansion = {
-  q (mu, x, y) {
-    // Initialize terms with k = 0, Eq. (7)
+function _series (mu, x, y) {
+  if (y > x + mu) {
+    // q-regime: Q is the small primary, summed directly. Eqs. (7), (18).
     // ck = x^k / k!
     let ck = 1
 
@@ -25,28 +33,21 @@ const _seriesExpansion = {
     let z = dz
 
     for (let k = 1; k < MAX_ITER; k++) {
-      // Update coefficients
-      // Eq. (18)
       qck *= y / (mu + k - 1)
       qk += qck
       ck *= x / k
       dz = ck * qk
-
-      // Update sum
       z += dz
-
-      // Check if we should stop
       if (dz / z < EPS) { break }
     }
 
-    return Math.exp(-x) * z
-  },
-
-  p (mu, x, y) {
-    // marcumQ uses the p-series in the regime where Q ≈ 1; the raw sum
-    // is 1 − Q, so Q is recovered via a final subtraction from 1.
-    return 1 - _pSeriesComplement(mu, x, y)
+    const q = Math.exp(-x) * z
+    return { p: 1 - q, q }
   }
+
+  // p-regime: P is the small primary, returned directly without forming 1 - Q.
+  const p = _pSeriesComplement(mu, x, y)
+  return { p, q: 1 - p }
 }
 
 // Returns `1 − Q_M` computed via the p-series of the Marcum-Q. Extracted
@@ -85,260 +86,398 @@ function _pSeriesComplement (mu, x, y) {
 }
 
 /**
- * Asymptotic expansion for large xi. Section 4.1 in https://arxiv.org/pdf/1311.0681.pdf.
+ * Computes Phi_n = sigma^{n-1/2} Gamma(1/2 - n, sigma xi) via the Legendre
+ * continued fraction for the incomplete gamma function. Used when sigma xi is
+ * large, where the forward recurrence (Eq. 36) is unstable because Phi_n is
+ * its recessive solution.
  *
- * @namespace _seriesExpansion
+ * @method _phi
  * @memberof ran.special
+ * @param {number} n Index of the Phi function.
+ * @param {number} sigma Scale variable.
+ * @param {number} xi Scale variable.
+ * @return {number} The value of Phi_n.
  * @private
  */
-/* const _asymptoticExpansionLargeXi = (function() {
-  function _aelx(mu, x, y, complementary) {
-    // Calculate scale variables
-    let xi = 2 * Math.sqrt(x * y)
-    let sigma = Math.pow(Math.sqrt(y) - Math.sqrt(x), 2) / xi
-    let rho = Math.sqrt(y / x)
+function _phi (n, sigma, xi) {
+  const a = 0.5 - n
+  const z = sigma * xi
+  let b = z + 1 - a
+  let c = 1 / DELTA
+  let d = 1 / b
+  let cf = d
+  for (let i = 1; i < MAX_ITER; i++) {
+    const ai = -i * (i - a)
+    b += 2
+    d = ai * d + b
+    if (Math.abs(d) < DELTA) { d = DELTA }
+    c = b + ai / c
+    if (Math.abs(c) < DELTA) { c = DELTA }
+    d = 1 / d
+    const delta = c * d
+    cf *= delta
+    if (Math.abs(delta - 1) < EPS) { break }
+  }
+  return Math.exp(-z) * Math.pow(xi, 0.5 - n) * cf
+}
 
-    // am = A_n(mu)
-    // am1 = A_n(mu - 1)
-    let am = 1
-    let am1 = 1
+/**
+ * Raw asymptotic-series sum for the Marcum function in the large-xi regime.
+ * Section 4.1 in https://arxiv.org/pdf/1311.0681.pdf. Sums the Q-series
+ * (Eqs. 37-38) when `complementary` is false and the P-series (Eqs. 39-40)
+ * when it is true.
+ *
+ * @method _aelx
+ * @memberof ran.special
+ * @param {number} mu The order of the function.
+ * @param {number} x First variable.
+ * @param {number} y Second variable.
+ * @param {boolean} complementary Whether to sum the P-series instead of the Q-series.
+ * @return {number} The asymptotic-series value.
+ * @private
+ */
+function _aelx (mu, x, y, complementary) {
+  const xi = 2 * Math.sqrt(x * y)
+  const sigma = Math.pow(Math.sqrt(y) - Math.sqrt(x), 2) / xi
+  const sx = sigma * xi
+  const rho = Math.sqrt(y / x)
 
-    // phic = e^{-sigma xi} xi^{-n + 1/2}
-    let phic = Math.exp(-sigma * xi) * Math.sqrt(xi)
-    let phi = Math.sqrt(Math.PI / sigma) * erfc(Math.sqrt(y) - Math.sqrt(x))
+  // Forward recurrence of Phi_n (Eq. 36) amplifies its recessive component by
+  // ~e^{sigma xi}, so it is only safe for small sigma xi; otherwise each Phi_n
+  // is evaluated independently by continued fraction.
+  const useCF = sx >= 5
 
-    // psic = (-1)^n rho^mu / (2 sqrt(pi))
-    let psic = 0.5 * Math.pow(rho, mu) / Math.sqrt(2 * Math.PI)
-    let psi = complementary ? 0.5 * Math.pow(rho, mu - 0.5) * erfc(Math.sqrt(y) - Math.sqrt(x)) : psic * (am1 - am / rho) * phi
-    let z = psi
+  // A_n(mu), A_n(mu - 1): ratio A_n / A_{n-1} = (mu^2 - (n - 1/2)^2) / (2n). Eq. (32).
+  let am = 1
+  let am1 = 1
 
-    // TODO Reverse iteration: n0 = sigma * xi and backwards for numerical stability
-    for (let n = 1; n < MAX_ITER; n++) {
-      // A_n(mu) and A_n(mu - 1)
-      am *= -(Math.pow(2 * n - 1, 2) - 4 * mu * mu) / (8 * n)
-      am1 *= -(Math.pow(2 * n - 1, 2) - 4 * (mu - 1) * (mu - 1)) / (8 * n)
+  // phic = e^{-sigma xi} xi^{1/2 - n}; phi = Phi_n. Eqs. (34)-(36). At sigma = 0
+  // (x = y) Phi_0 diverges, but every term that uses it carries a 0 factor, so
+  // any finite placeholder is safe.
+  let phic = Math.exp(-sx) * Math.sqrt(xi)
+  let phi = useCF
+    ? _phi(0, sigma, xi)
+    : (sigma === 0 ? 0 : Math.sqrt(Math.PI / sigma) * erfc(Math.sqrt(sx)))
 
-      // Phi
+  // psic = (-1)^n rho^mu / (2 sqrt(2 pi)).
+  let psic = 0.5 * Math.pow(rho, mu) / Math.sqrt(2 * Math.PI)
+
+  // Leading term: Psi_0 (Eq. 38) or Psi-tilde_0 (Eq. 40).
+  let z = complementary
+    ? 0.5 * Math.pow(rho, mu - 0.5) * erfc(Math.sqrt(x) - Math.sqrt(y))
+    : psic * (am1 - am / rho) * phi
+
+  let prevAbs = Infinity
+  for (let n = 1; n < MAX_ITER; n++) {
+    am *= (mu * mu - (n - 0.5) * (n - 0.5)) / (2 * n)
+    am1 *= ((mu - 1) * (mu - 1) - (n - 0.5) * (n - 0.5)) / (2 * n)
+
+    if (useCF) {
+      phi = _phi(n, sigma, xi)
+    } else {
       phic /= xi
       phi = (phic - sigma * phi) / (n - 0.5)
-
-      // Psi
-      psic *= -1
-      psi = psic * (am1 - am / rho) * phi
-
-      // Update Q or P
-      z = complementary ? z - psi : z + psi
-
-      // Check if we should stop
-      if (Math.abs(psi) / z < EPS) { break }
     }
 
-    return z
+    psic *= -1
+
+    // Psi-tilde_n = -Psi_n for n >= 1 (Eq. 39).
+    const term = (complementary ? -1 : 1) * psic * (am1 - am / rho) * phi
+    z += term
+
+    // Truncate only after two consecutive negligible terms: the factor
+    // (A_n(mu-1) - A_n(mu)/rho) crosses zero once, making a single mid-series
+    // term spuriously small.
+    const tol = Math.abs(z) * EPS
+    const absTerm = Math.abs(term)
+    if (absTerm < tol && prevAbs < tol) { break }
+    prevAbs = absTerm
   }
 
-  return {
-    q (mu, x, y) {
-      return _aelx(mu, x, y, false)
-    },
-
-    p (mu, x, y) {
-      return 1 - _aelx(mu, x, y, true)
-    }
-  }
-})() */
+  return z
+}
 
 /**
- * Recurrence relation evaluation.
+ * Asymptotic expansion of the Marcum function for large xi. Section 4.1 in
+ * https://arxiv.org/pdf/1311.0681.pdf. The Q-series is used for y > x and the
+ * P-series for y <= x (the sigma = 0 transition), each computing its tail
+ * directly so the complement never amplifies a small value.
  *
- * @namespace _recurrence
+ * @method _asymptoticLargeXi
  * @memberof ran.special
+ * @param {number} mu The order of the function.
+ * @param {number} x First variable.
+ * @param {number} y Second variable.
+ * @return {Object} Object holding the Marcum P and Q values as `p` and `q`.
  * @private
  */
-/* const _recurrence = (function() {
-  function _fc(pnu, z) {
-    let m = 0
-    let b = 2 * pnu / z
-    let a = 1
-    let res = DELTA
-    let c0 = res
-    let d0 = 0
-    let delta = 0
-    do {
-      d0 = b + a * d0
-      if (Math.abs(d0) < DELTA){
-        d0 = DELTA
-      }
-      c0 = b + a / c0
-      if (Math.abs(c0) < DELTA) {
-        c0 = DELTA
-      }
-      d0 = 1 / d0
-      delta = c0 * d0
-      res = res * delta
-      m = m + 1
-      a = 1
-      b = 2 * (pnu + m) / z
-    } while (Math.abs(delta - 1) > EPS)
-    return res
+function _asymptoticLargeXi (mu, x, y) {
+  if (y > x) {
+    const q = _aelx(mu, x, y, false)
+    return { p: 1 - q, q }
   }
-
-  function _pqTrap(mu, x, y, p, q, ierr) {
-    let xs = x / mu
-    let ys = y / mu
-    let xis2 = 4 * xs * ys
-    let wxis = Math.sqrt(1 + xis2)
-    let a = 0
-    let b= 3
-    let epstrap = 1e-13
-    let pq = _trap(a, b, epstrap, xis2, mu, wxis, ys)
-    let zeta = _zetaxy(xs, ys)
-    if ((-mu * 0.5 * zeta * zeta) < Math.log(DELTA)) {
-      if (y > x + mu) {
-        return {
-          q: 0,
-          p: 1
-        }
-      } else {
-        return {
-          q: 1,
-          p: 0
-        }
-      }
-    } else {
-      pq = pq * Math.exp(-mu * 0.5 * zeta * zeta) / Math.PI
-      if (zeta < 0) {
-        return {
-          q: pq,
-          p: 1 - pq
-        }
-      } else {
-        return {
-          q: 1 + pq,
-          p: -pq
-        }
-      }
-    }
-  }
-
-  return {
-    q(mu, x, y) {
-      return undefined
-    },
-
-    p(mu, x, y) {
-      let b = 1
-      let nu = y - x + b * b + b * Math.sqrt(2 * (x + y) + b * b)
-      let n1 = Math.floor(mu)
-      let n2 = Math.floor(nu) + 2
-      let n3 = n2 - n1
-      let mur = mu + n3
-      let xi = 2 * Math.sqrt(x * y)
-      let cmu = Math.sqrt(y / x) * _fc(mur, xi)
-      let p1 = _pqTrap(mur, x, y)
-      let p0 = _pqTrap(mur, x, y)
-      let z = 0
-      for (let n = 0; n < n3 - 1; n++) {
-        z = ((1 + cmu) * p0 - p1) / cmu
-        p1 = p0
-        p0 = z
-        cmu = y / (mur - n - 1 + x * cmu)
-      }
-      return 1 - z
-    }
-  }
-})() */
+  const p = _aelx(mu, x, y, true)
+  return { p, q: 1 - p }
+}
 
 /**
- * Computes the generalized Marcum-Q function. Only accurate in x < 30.
- * Implementation source: https://arxiv.org/pdf/1311.0681.pdf.
+ * Computes log(1 + u) - u without the cancellation that the direct
+ * subtraction suffers for small u.
+ *
+ * @method _log1pmx
+ * @memberof ran.special
+ * @param {number} u Argument.
+ * @return {number} log(1 + u) - u.
+ * @private
+ */
+function _log1pmx (u) {
+  if (u === 0) {
+    return 0
+  }
+  if (Math.abs(u) > 0.5) {
+    return Math.log1p(u) - u
+  }
+  let p = u
+  let sum = 0
+  for (let k = 2; k < MAX_ITER; k++) {
+    p *= u
+    const d = (k % 2 === 0 ? -1 : 1) * p / k
+    sum += d
+    if (Math.abs(d) < Math.abs(sum) * EPS) { break }
+  }
+  return sum
+}
+
+/**
+ * Computes the saddle-point variable zeta of the quadrature representation,
+ * Eqs. (56), (84) in https://arxiv.org/pdf/1311.0681.pdf, in scaled variables.
+ * The half-square is assembled so every term is O((xs - ys + 1)^2), avoiding
+ * the cancellation of the raw formula near the transition line ys = xs + 1.
+ *
+ * @method _zetaxy
+ * @memberof ran.special
+ * @param {number} xs Scaled first variable x / mu.
+ * @param {number} ys Scaled second variable y / mu.
+ * @return {number} The value of zeta.
+ * @private
+ */
+function _zetaxy (xs, ys) {
+  const w = Math.sqrt(1 + 4 * xs * ys)
+  const eps = xs - ys + 1
+  const d1 = xs + ys + w
+  const d2 = w + 2 * ys - 1
+  const halfZetaSq = eps * eps / d1 + 2 * eps * eps / (d1 * d2) + _log1pmx(2 * eps / d2)
+  return Math.sign(eps) * Math.sqrt(2 * Math.max(halfZetaSq, 0))
+}
+
+/**
+ * Quadrature method for the Marcum function. Section 5 in
+ * https://arxiv.org/pdf/1311.0681.pdf. Evaluates the trapezoidal integral
+ * representation (Eq. 95) and returns both tails, computing the
+ * directly-evaluated one without subtraction.
+ *
+ * @method _pqTrap
+ * @memberof ran.special
+ * @param {number} mu The order of the function.
+ * @param {number} x First variable.
+ * @param {number} y Second variable.
+ * @return {Object} Object holding the Marcum P and Q values as `p` and `q`.
+ * @private
+ */
+function _pqTrap (mu, x, y) {
+  const xs = x / mu
+  const ys = y / mu
+  const xis2 = 4 * xs * ys
+  const wxis = Math.sqrt(1 + xis2)
+
+  // Integrand e^{mu psi(theta)} f(theta) of Eq. (95); even in theta.
+  const integrand = theta => {
+    const s = Math.sin(theta)
+    const cs = Math.cos(theta)
+    const g = theta === 0 ? 1 : theta / s
+    const rho = Math.sqrt(g * g + xis2)
+    const r = (g + rho) / (2 * ys)
+    // sin(theta) - theta cos(theta); series below 0.1 where it cancels.
+    const t2 = theta * theta
+    const smt = Math.abs(theta) < 0.1
+      ? theta * t2 * (1 / 3 - t2 / 30 + t2 * t2 / 840)
+      : s - theta * cs
+    const gp = theta === 0 ? 0 : smt / (s * s)
+    const rp = gp * (1 + g / rho) / (2 * ys)
+    const psi = cs * rho - wxis - Math.log((g + rho) / (1 + wxis))
+    const f = (s * rp + (cs - r) * r) / (r * r - 2 * r * cs + 1)
+    return f * Math.exp(mu * psi)
+  }
+
+  const zeta = _zetaxy(xs, ys)
+  const halfMuZeta2 = 0.5 * mu * zeta * zeta
+
+  // The primary tail underflows: e^{-mu zeta^2 / 2} is below the safe range.
+  if (-halfMuZeta2 < Math.log(DELTA)) {
+    return y > x + mu ? { p: 1, q: 0 } : { p: 0, q: 1 }
+  }
+
+  // The integrand is a peak at theta = 0 of width ~1/sqrt(mu wxis) (since
+  // psi''(0) = -wxis); integrate only over its support so the node count
+  // stays bounded regardless of mu.
+  const b = Math.min(Math.PI, 14 / Math.sqrt(mu * wxis))
+
+  // Q = e^{-mu zeta^2/2} / (2 pi) * integral over [-pi, pi]; integrand is even.
+  const pq = trap(integrand, 0, b) * Math.exp(-halfMuZeta2) / Math.PI
+  return zeta < 0
+    ? { q: pq, p: 1 - pq }
+    : { q: 1 + pq, p: -pq }
+}
+
+/**
+ * Computes the ratio I_nu(z) / I_{nu-1}(z) of modified Bessel functions of the
+ * first kind via a continued fraction (modified Lentz). Valid for fractional
+ * order, free of overflow because dominant factors cancel in the ratio.
+ *
+ * @method _fc
+ * @memberof ran.special
+ * @param {number} nu Order of the Bessel function in the numerator.
+ * @param {number} z Argument.
+ * @return {number} The ratio I_nu(z) / I_{nu-1}(z).
+ * @private
+ */
+function _fc (nu, z) {
+  let m = 0
+  let b = 2 * nu / z
+  let f = DELTA
+  let c = f
+  let d = 0
+  let delta
+  do {
+    d = b + d
+    if (Math.abs(d) < DELTA) { d = DELTA }
+    c = b + 1 / c
+    if (Math.abs(c) < DELTA) { c = DELTA }
+    d = 1 / d
+    delta = c * d
+    f *= delta
+    m++
+    b = 2 * (nu + m) / z
+  } while (Math.abs(delta - 1) > EPS && m < MAX_ITER)
+  return f
+}
+
+/**
+ * Recurrence-relation method for the Marcum function. The three-term
+ * recurrence Eq. (14) in https://arxiv.org/pdf/1311.0681.pdf is solved
+ * backward for its minimal solution P, seeded by the quadrature method at
+ * orders raised above the transition band.
+ *
+ * @method _recurrence
+ * @memberof ran.special
+ * @param {number} mu The order of the function.
+ * @param {number} x First variable.
+ * @param {number} y Second variable.
+ * @return {Object} Object holding the Marcum P and Q values as `p` and `q`.
+ * @private
+ */
+function _recurrence (mu, x, y) {
+  // Raise the starting order so the quadrature seeds fall below the
+  // transition band, where quadrature is accurate.
+  const nu = y - x + 1 + Math.sqrt(2 * (x + y) + 1)
+  const n3 = Math.max(1, Math.floor(nu) + 2 - Math.floor(mu))
+  const mur = mu + n3
+  const xi = 2 * Math.sqrt(x * y)
+
+  let cmu = Math.sqrt(y / x) * _fc(mur, xi)
+  let p1 = _pqTrap(mur + 1, x, y).p
+  let p0 = _pqTrap(mur, x, y).p
+  let z = p0
+  for (let n = 0; n < n3; n++) {
+    z = ((1 + cmu) * p0 - p1) / cmu
+    p1 = p0
+    p0 = z
+    cmu = y / (mur - n - 1 + x * cmu)
+  }
+
+  return { p: z, q: 1 - z }
+}
+
+/**
+ * Dispatches the Marcum function computation to the numerical method valid for
+ * the (mu, x, y) regime and returns both the P and Q values.
+ *
+ * @method _marcum
+ * @memberof ran.special
+ * @param {number} mu The order of the function.
+ * @param {number} x First variable.
+ * @param {number} y Second variable.
+ * @return {Object} Object holding the Marcum P and Q values as `p` and `q`.
+ * @private
+ */
+function _marcum (mu, x, y) {
+  // Special cases.
+  if (y === 0) {
+    return { p: 0, q: 1 }
+  }
+  if (x === 0) {
+    return { p: gammaLowerIncomplete(mu, y), q: gammaUpperIncomplete(mu, y) }
+  }
+
+  // Series expansion. Section 3.
+  if (x < 30) {
+    return _series(mu, x, y)
+  }
+
+  // Asymptotic expansion for large xi. Section 4.1.
+  const xi = 2 * Math.sqrt(x * y)
+  if (xi > 30 && mu * mu < 2 * xi) {
+    return _asymptoticLargeXi(mu, x, y)
+  }
+
+  // Recurrence relation across the transition band y = x + mu, where the
+  // quadrature integrand is near-singular. Eq. (14). The paper restricts this
+  // branch to mu < 135 because it covers larger mu with a separate large-mu
+  // asymptotic expansion (Section 4.2); that expansion is out of scope here,
+  // so the recurrence covers the whole band.
+  const s = Math.sqrt(4 * x + 2 * mu)
+  if (y > x + mu - s && y < x + mu + s) {
+    return _recurrence(mu, x, y)
+  }
+
+  // Quadrature. Section 5.
+  return _pqTrap(mu, x, y)
+}
+
+/**
+ * Computes the generalized Marcum-Q function. The dispatcher selects, by the
+ * (mu, x, y) regime, the series expansion (Section 3), the large-xi asymptotic
+ * expansion (Section 4.1), the recurrence relation (Eq. 14) or the quadrature
+ * method (Section 5). Implementation source: https://arxiv.org/pdf/1311.0681.pdf.
  *
  * @method marcumQ
  * @memberof ran.special
  * @param {number} mu The order of the function.
  * @param {number} x First variable.
  * @param {number} y Second variable.
- * @return {(number|undefined)} The generalized Marcum-Q function at the specified values. If evaluated at an unsupported point, it
- * returns undefined.
+ * @return {number} The generalized Marcum-Q function at the specified values.
  * @private
  */
 export default function (mu, x, y) {
-  // Pick primary function
-  const primary = y > x + mu ? 'q' : 'p'
-  // console.log(primary)
-
-  // Special cases
-  if (y === 0) {
-    return 1
-  }
-  if (x === 0) {
-    return gammaUpperIncomplete(mu, y)
-  }
-
-  // Series expansion
-  // if (x < 30) {
-  return _seriesExpansion[primary](mu, x, y)
-  // }
+  return _marcum(mu, x, y).q
 }
 
 /**
- * Computes 1 − Q_M(μ, √(2x), √(2y)), the complement of the generalized
- * Marcum-Q function, without forming the subtraction `1 - marcumQ(...)`
- * directly. Use this in place of `1 - marcumQ(...)` whenever the result
- * is expected to be small (e.g. the lower-tail CDF of noncentral
- * chi-squared family distributions). In the p-branch regime (y ≤ x + μ)
- * the raw complement is returned directly, avoiding the
- * subtraction-from-1 that marcumQ does internally to deliver Q.
+ * Computes the complementary generalized Marcum function P_M = 1 − Q_M without
+ * forming the subtraction `1 - marcumQ(...)`. Use this in place of
+ * `1 - marcumQ(...)` whenever the result is expected to be small (e.g. the
+ * lower-tail CDF of noncentral chi-squared family distributions): each
+ * computation branch evaluates the smaller of P and Q directly, so the deep
+ * lower tail never loses precision to catastrophic cancellation (see #245).
  *
  * @method marcumP
  * @memberof ran.special
  * @param {number} mu The order of the function.
  * @param {number} x First variable.
  * @param {number} y Second variable.
- * @return {number} 1 − Q_M evaluated at the specified arguments.
+ * @return {number} The complementary Marcum function 1 − Q_M.
  * @private
  */
 export function marcumP (mu, x, y) {
-  // Mirror marcumQ's special-case branches with their complements
-  if (y === 0) {
-    return 0
-  }
-  if (x === 0) {
-    return gammaLowerIncomplete(mu, y)
-  }
-
-  // q-branch primary regime: Q is small (near 0), so `1 - Q` is
-  // well-conditioned and forming the subtraction is safe.
-  if (y > x + mu) {
-    return 1 - _seriesExpansion.q(mu, x, y)
-  }
-
-  // p-branch primary regime: Q ≈ 1, so the complement (i.e. the CDF
-  // here) is what we actually want — return the raw series sum
-  // without subtracting from 1.
-  return _pSeriesComplement(mu, x, y)
-
-  // Asymptotic expansion
-  /* let xi = 2 * Math.sqrt(x * y)
-  if (xi > 30 && mu * mu < 2 * xi) {
-    return _asymptoticExpansionLargeXi[primary](mu, x, y)
-  }
-
-  /*let s = Math.sqrt(4 * x + 2 * mu)
-  let f1 = x + mu - s
-  let f2 = x + mu + s
-  if (f1 < y && y < f2) {
-    if (mu < 135) {
-      // TODO recurrence relations
-      console.log('recurrence')
-      return _recurrence[primary](mu, x, y)
-    } else {
-      // TODO asymptotic expansion
-      console.log('asymptotic large mu')
-      return undefined
-    }
-  }
-  console.log('integral')
-
-  // Integral
-  return undefined */
+  return _marcum(mu, x, y).p
 }
