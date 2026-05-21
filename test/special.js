@@ -528,21 +528,55 @@ describe('special', () => {
         }, LAPS)
       })
 
-      it('should satisfy the recurrence relation for large mu', () => {
+      it('should match scipy ncx2 reference values', () => {
+        [
+          { mu: 100, x: 50, y: 150, p: 0.5117578749745552, q: 0.48824212502544484 },
+          { mu: 90, x: 60, y: 140, p: 0.2499150811158282, q: 0.7500849188841718 }
+        ].forEach(d => {
+          assert(equal(special.marcumQ(d.mu, d.x, d.y), d.q), `marcumQ(${d.mu}, ${d.x}, ${d.y})`)
+          assert(equal(special.marcumP(d.mu, d.x, d.y), d.p), `marcumP(${d.mu}, ${d.x}, ${d.y})`)
+        })
+      })
+    })
+
+    describe('large mu asymptotic', () => {
+      const check = (x, y, mu) => {
+        const q1 = special.marcumQ(mu + 1, x, y)
+        const q2 = special.marcumQ(mu, x, y)
+        const q3 = special.marcumQ(mu + 2, x, y)
+        const q4 = special.marcumQ(mu - 1, x, y)
+        const r = x > mu
+          ? ((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4)
+          : ((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4)
+        assert(equal(r, 1))
+      }
+
+      it('should satisfy the recurrence relation', () => {
+        // mu >= 135 is the dispatch threshold; at the boundary the mu-1 order
+        // may fall on the recurrence branch, but the three-term identity holds
+        // across any mix of correct branches. Both x < mu and x > mu run.
         repeat(() => {
-          const x = 40 + Math.random() * 30
-          const mu = 150 + Math.random() * 50
+          const x = 30 + Math.random() * 50
+          const mu = 135 + Math.random() * 115
           const s = Math.sqrt(4 * x + 2 * mu)
-          check(x, x + mu - 0.8 * s + Math.random() * 1.6 * s, mu)
+          check(x, x + mu - 0.9 * s + Math.random() * 1.8 * s, mu)
+        }, LAPS)
+        repeat(() => {
+          const mu = 135 + Math.random() * 65
+          const x = mu + 20 + Math.random() * 80
+          const s = Math.sqrt(4 * x + 2 * mu)
+          check(x, x + mu - 0.9 * s + Math.random() * 1.8 * s, mu)
         }, LAPS)
       })
 
       it('should match scipy ncx2 reference values', () => {
         [
-          { mu: 100, x: 50, y: 150, p: 0.5117578749745552, q: 0.48824212502544484 },
-          { mu: 90, x: 60, y: 140, p: 0.2499150811158282, q: 0.7500849188841718 },
-          { mu: 180, x: 50, y: 230, p: 0.5093676830927151, q: 0.4906323169072849 },
-          { mu: 160, x: 70, y: 250, p: 0.8745123498463062, q: 0.12548765015369384 }
+          { mu: 135, x: 40, y: 170, p: 0.3755801225650498, q: 0.6244198774349506 },
+          { mu: 135, x: 44, y: 188, p: 0.7323059732316725, q: 0.26769402676832693 },
+          { mu: 150, x: 60, y: 205, p: 0.38907639626893925, q: 0.6109236037310609 },
+          { mu: 200, x: 55, y: 248, p: 0.35242643120412376, q: 0.6475735687958762 },
+          { mu: 160, x: 70, y: 250, p: 0.8745123498463065, q: 0.1254876501536935 },
+          { mu: 180, x: 50, y: 230, p: 0.5093676830927159, q: 0.49063231690728504 }
         ].forEach(d => {
           assert(equal(special.marcumQ(d.mu, d.x, d.y), d.q), `marcumQ(${d.mu}, ${d.x}, ${d.y})`)
           assert(equal(special.marcumP(d.mu, d.x, d.y), d.p), `marcumP(${d.mu}, ${d.x}, ${d.y})`)
@@ -579,9 +613,10 @@ describe('special', () => {
           : ((y + mu) * p2) / (x * p3 + (mu - x) * p1 + y * p4)
         assert(equal(r, 1))
       }
-      // Series, asymptotic, quadrature and recurrence regimes. The quadrature
-      // and recurrence points stay close enough to the transition that P is
-      // above the underflow limit, so the relation is meaningfully exercised.
+      // Series, asymptotic, quadrature, recurrence and large-mu regimes. The
+      // quadrature and recurrence points stay close enough to the transition
+      // that P is above the underflow limit, so the relation is meaningfully
+      // exercised.
       repeat(() => check(Math.random() * 30, 10 + Math.random() * 10, 30 + Math.random() * 5), LAPS)
       repeat(() => {
         const x = 45 + Math.random() * 90
@@ -599,6 +634,12 @@ describe('special', () => {
         const s = Math.sqrt(4 * x + 2 * mu)
         check(x, x + mu - 0.8 * s + Math.random() * 1.6 * s, mu)
       }, LAPS)
+      repeat(() => {
+        const x = 30 + Math.random() * 50
+        const mu = 135 + Math.random() * 110
+        const s = Math.sqrt(4 * x + 2 * mu)
+        check(x, x + mu - 0.9 * s + Math.random() * 1.8 * s, mu)
+      }, LAPS)
     })
   })
 
@@ -607,7 +648,7 @@ describe('special', () => {
       const identity = (x, y, mu) => {
         assert(equal(special.marcumQ(mu, x, y) + special.marcumP(mu, x, y), 1))
       }
-      // Series, asymptotic, quadrature and recurrence regimes.
+      // Series, asymptotic, quadrature, recurrence and large-mu regimes.
       repeat(() => identity(Math.random() * 30, 40 + Math.random() * 60, 2 + Math.random() * 5), LAPS)
       repeat(() => {
         const x = 35 + Math.random() * 100
@@ -617,6 +658,12 @@ describe('special', () => {
       repeat(() => {
         const x = 40 + Math.random() * 30
         const mu = 80 + Math.random() * 40
+        const s = Math.sqrt(4 * x + 2 * mu)
+        identity(x, x + mu - 0.8 * s + Math.random() * 1.6 * s, mu)
+      }, LAPS)
+      repeat(() => {
+        const x = 30 + Math.random() * 50
+        const mu = 140 + Math.random() * 100
         const s = Math.sqrt(4 * x + 2 * mu)
         identity(x, x + mu - 0.8 * s + Math.random() * 1.6 * s, mu)
       }, LAPS)
