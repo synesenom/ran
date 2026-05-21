@@ -65,6 +65,9 @@ function interpolate (xa, ya, n, x) {
 export default function (f, a, b) {
   const s = new Array(MAX_STEPS + 1)
   const h = new Array(MAX_STEPS + 1).fill(1)
+  // Best Richardson extrapolate seen so far; returned on non-convergence so
+  // callers cannot mistake a failed integration for a genuine zero integral.
+  let best = 0
 
   for (let j = 0; j < MAX_STEPS; j++) {
     s[j] = trapezoid(f, a, b, j + 1)
@@ -73,8 +76,9 @@ export default function (f, a, b) {
       if (Math.abs(dy) < EPS * Math.abs(y)) {
         return y
       }
+      best = y
     }
     h[j + 1] = 0.25 * h[j]
   }
-  return 0
+  return best
 }

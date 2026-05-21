@@ -36,7 +36,6 @@ export default class Davis extends Distribution {
     if (x <= this.p.mu) {
       return 0
     }
-    console.log(x, romberg(t => this._pdf(t), this.p.mu, x))
     return romberg(t => this._pdf(t), this.p.mu, x)
   }
 }
