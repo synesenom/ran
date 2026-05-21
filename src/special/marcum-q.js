@@ -4,6 +4,9 @@ import trap from '../algorithms/trap'
 import logGamma from './log-gamma'
 import { erfc } from './error'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from './gamma-incomplete'
+// The §4.2 expansion needs ~50 f_{jk} coefficients to reach 1e-10 at mu = 135;
+// the paper prints only 10 (Eq. 90). See
+// solutions/special-functions/2026-05-21-1604-marcum-large-mu-asymptotic.md
 import { F_JK, U_K } from './_marcum-coefficients'
 
 /**
