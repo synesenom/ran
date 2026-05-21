@@ -145,6 +145,7 @@ function _aelx (mu, x, y, complementary) {
   // Forward recurrence of Phi_n (Eq. 36) amplifies its recessive component by
   // ~e^{sigma xi}, so it is only safe for small sigma xi; otherwise each Phi_n
   // is evaluated independently by continued fraction.
+  // See solutions/special-functions/2026-05-21-0724-marcum-q-four-branches.md
   const useCF = sx >= 5
 
   // A_n(mu), A_n(mu - 1): ratio A_n / A_{n-1} = (mu^2 - (n - 1/2)^2) / (2n). Eq. (32).
