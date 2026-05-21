@@ -128,6 +128,17 @@ describe('algorithms', () => {
         assert(Math.abs((i - integral(b)) / i) < PRECISION)
       }
     })
+
+    it('should return the best available extrapolate when budget is exhausted', () => {
+      // A step-function integrand (true integral 1.7) defeats Richardson
+      // extrapolation: O(1/n) trapezoid convergence cannot satisfy the O(h^2)
+      // polynomial convergence criterion within MAX_STEPS. The old code returned
+      // the silent sentinel 0; the fix returns the best accumulated extrapolate.
+      const result = algorithms.romberg(t => t < 0.3 ? 1 : 2, 0, 1)
+      assert(result !== 0)
+      assert(Number.isFinite(result))
+      assert(Math.abs(result - 1.7) < 1e-4)
+    })
   })
 
   describe('.quickselect()', () => {
