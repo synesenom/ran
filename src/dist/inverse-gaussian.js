@@ -38,11 +38,11 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      0.5 * mu / lambda,
-      Math.exp(2 * lambda / mu),
-      Math.sqrt(lambda / (mu * mu))
-    ]
+    this.c = {
+      halfMuOverLambda: 0.5 * mu / lambda,
+      expTwoLambdaOverMu: Math.exp(2 * lambda / mu),
+      sqrtLambdaOverMuSq: Math.sqrt(lambda / (mu * mu))
+    }
   }
 
   _generator () {
@@ -51,7 +51,7 @@ export default class extends Distribution {
 
     const y = nu * nu
 
-    const x = this.p.mu + this.c[0] * this.p.mu * y - this.c[0] * Math.sqrt(this.p.mu * y * (4 * this.p.lambda + this.p.mu * y))
+    const x = this.p.mu + this.c.halfMuOverLambda * this.p.mu * y - this.c.halfMuOverLambda * Math.sqrt(this.p.mu * y * (4 * this.p.lambda + this.p.mu * y))
     return this.r.next() > this.p.mu / (this.p.mu + x) ? this.p.mu * this.p.mu / x : x
   }
 
@@ -61,14 +61,14 @@ export default class extends Distribution {
 
   _cdf (x) {
     const s = Math.sqrt(this.p.lambda / x)
-    const st = Math.sqrt(x) * this.c[2]
+    const st = Math.sqrt(x) * this.c.sqrtLambdaOverMuSq
     const z = erf(Math.SQRT1_2 * (st - s))
 
     // Handle 1 - z << 1 case
     if (1 - z > Number.EPSILON) {
-      return Math.min(1, 0.5 * (1 + z + this.c[1] * erfc(Math.SQRT1_2 * (st + s))))
+      return Math.min(1, 0.5 * (1 + z + this.c.expTwoLambdaOverMu * erfc(Math.SQRT1_2 * (st + s))))
     } else {
-      return Math.min(1, 0.5 * (erfc(Math.SQRT1_2 * (s - st)) + this.c[1] * erfc(Math.SQRT1_2 * (st + s))))
+      return Math.min(1, 0.5 * (erfc(Math.SQRT1_2 * (s - st)) + this.c.expTwoLambdaOverMu * erfc(Math.SQRT1_2 * (st + s))))
     }
   }
 }
