@@ -409,30 +409,32 @@ describe('special', () => {
           }, LAPS)
         })
       })
+
+      it('should match scipy ncx2 reference values', () => {
+        [
+          { mu: 4, x: 10, y: 20, p: 0.8840146502552253, q: 0.11598534974477473 },
+          { mu: 2, x: 5, y: 3, p: 0.10329898661024607, q: 0.8967010133897539 }
+        ].forEach(d => {
+          assert(equal(special.marcumQ(d.mu, d.x, d.y), d.q), `marcumQ(${d.mu}, ${d.x}, ${d.y})`)
+          assert(equal(special.marcumP(d.mu, d.x, d.y), d.p), `marcumP(${d.mu}, ${d.x}, ${d.y})`)
+        })
+      })
     })
 
-    /*
     describe('asymptotic expansion for large xi', () => {
       describe('Q', () => {
         it('should satisfy the recurrence relation', () => {
           repeat(() => {
-            let x = 40 + Math.random() * 10
-            let y = 60 + Math.random() * 10
-            let mu = 2 + Math.random() * 5
-            //let xi = 2 * Math.sqrt(x * y)
-            //console.log(x >= 30, xi > 30, mu * mu < 2 * xi, y >= x + mu)
-            //return
+            const x = 35 + Math.random() * 100
+            const y = x + 20 + Math.random() * 100
+            const mu = 3 + Math.random() * 3
 
-            let q1 = marcumQ(mu + 1, x, y)
-            let q2 = marcumQ(mu, x, y)
-            let q3 = marcumQ(mu + 2, x, y)
-            let q4 = marcumQ(mu - 1, x, y)
+            const q1 = special.marcumQ(mu + 1, x, y)
+            const q2 = special.marcumQ(mu, x, y)
+            const q3 = special.marcumQ(mu + 2, x, y)
+            const q4 = special.marcumQ(mu - 1, x, y)
 
-            if (x > mu) {
-              assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < PRECISION)
-            } else {
-              assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < PRECISION)
-            }
+            assert(equal(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4), 1))
           }, LAPS)
         })
       })
@@ -440,84 +442,185 @@ describe('special', () => {
       describe('P', () => {
         it('should satisfy the recurrence relation', () => {
           repeat(() => {
-            let x = 40 + Math.random() * 10
-            let y = 30 + Math.random() * 10
-            let mu = 2 + Math.random() * 5
-            //let xi = 2 * Math.sqrt(x * y)
-            //console.log(x >= 30, xi > 30, mu * mu < 2 * xi, y < x + mu)
-            //return
+            const x = 45 + Math.random() * 90
+            const y = x - 5 - Math.random() * 25
+            const mu = 3 + Math.random() * 3
 
-            let q1 = marcumQ(mu + 1, x, y)
-            let q2 = marcumQ(mu, x, y)
-            let q3 = marcumQ(mu + 2, x, y)
-            let q4 = marcumQ(mu - 1, x, y)
+            const q1 = special.marcumQ(mu + 1, x, y)
+            const q2 = special.marcumQ(mu, x, y)
+            const q3 = special.marcumQ(mu + 2, x, y)
+            const q4 = special.marcumQ(mu - 1, x, y)
 
-            if (x > mu) {
-              assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < PRECISION)
-            } else {
-              assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < PRECISION)
-            }
+            assert(equal(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4), 1))
           }, LAPS)
+        })
+      })
+
+      it('should match scipy ncx2 reference values', () => {
+        [
+          { mu: 5, x: 40, y: 60, q: 0.05987990370344369, p: 0.9401200962965562 },
+          { mu: 3, x: 120, y: 150, q: 0.04687422045974286, p: 0.9531257795402576 },
+          { mu: 10, x: 70, y: 45, q: 0.9994063950877903, p: 0.0005936049122101624 },
+          { mu: 3, x: 46, y: 5, q: 0.9999999999966671, p: 3.3330073779888013e-12 }
+        ].forEach(d => {
+          assert(equal(special.marcumQ(d.mu, d.x, d.y), d.q), `marcumQ(${d.mu}, ${d.x}, ${d.y})`)
+          assert(equal(special.marcumP(d.mu, d.x, d.y), d.p), `marcumP(${d.mu}, ${d.x}, ${d.y})`)
         })
       })
     })
 
-    /*describe('recurrence relation', () => {
-      describe('Q', () => {
-        it('should satisfy the recurrence relation', () => {
-          repeat(() => {
-            let x = 40 + Math.random() * 10
-            let mu = 100 + Math.random() * 10
-            let s = Math.sqrt(4 * x + 2 * mu) - 5
-            let f1 = x + mu - s
-            let f2 = x + mu + s
-            let y = f1 + (f2 - f1) * (0.9 + 0.1 * Math.random())
-            //let xi = 2 * Math.sqrt(x * y)
-            //console.log(x >= 30, xi > 30, mu * mu > 2 * xi, f1 < y, y < f2, y > x + mu)
-            //return
+    describe('quadrature', () => {
+      it('should satisfy the recurrence relation', () => {
+        repeat(() => {
+          const x = 40 + Math.random() * 40
+          const y = 0.5 + Math.random() * 1.5
+          const mu = 3 + Math.random() * 5
 
-            let q1 = marcumQ(mu + 1, x, y)
-            let q2 = marcumQ(mu, x, y)
-            let q3 = marcumQ(mu + 2, x, y)
-            let q4 = marcumQ(mu - 1, x, y)
+          const q1 = special.marcumQ(mu + 1, x, y)
+          const q2 = special.marcumQ(mu, x, y)
+          const q3 = special.marcumQ(mu + 2, x, y)
+          const q4 = special.marcumQ(mu - 1, x, y)
 
-            if (x > mu) {
-              assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < PRECISION)
-            } else {
-              assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < PRECISION)
-            }
-          }, LAPS)
-        })
+          assert(equal(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4), 1))
+        }, LAPS)
       })
 
-      describe('P', () => {
-        it('should satisfy the recurrence relation', () => {
-          repeat(() => {
-            let x = 40 + Math.random() * 10
-            let mu = 100 + Math.random() * 10
-            let s = Math.sqrt(4 * x + 2 * mu) - 5
-            let f1 = x + mu - s
-            let f2 = x + mu + s
-            let y = f1 + 0.1 * (f2 - f1) * Math.random()
-            //let xi = 2 * Math.sqrt(x * y)
-            //console.log(x >= 30, xi > 30, mu * mu > 2 * xi, f1 < y, y < f2, mu < 135, y < x + mu)
-            //return
-
-            let q1 = marcumQ(mu + 1, x, y)
-            let q2 = marcumQ(mu, x, y)
-            let q3 = marcumQ(mu + 2, x, y)
-            let q4 = marcumQ(mu - 1, x, y)
-
-            if (x > mu) {
-              assert(Math.abs(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4) - 1) < PRECISION)
-            } else {
-              assert(Math.abs(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4) - 1) < PRECISION)
-            }
-          }, LAPS)
+      it('should match scipy ncx2 reference values', () => {
+        [
+          { mu: 140, x: 100, y: 235, p: 0.4015210444334114, q: 0.5984789555665886 },
+          { mu: 140, x: 100, y: 200, p: 0.011694400751604403, q: 0.9883055992483956 },
+          { mu: 60, x: 200, y: 400, p: 0.9999999966690462, q: 3.3309538428122277e-9 },
+          { mu: 5, x: 50, y: 4, p: 7.677483509552288e-16, q: 0.9999999999999992 },
+          { mu: 8, x: 60, y: 3, p: 3.3894189213527325e-23, q: 1.0 }
+        ].forEach(d => {
+          assert(equal(special.marcumQ(d.mu, d.x, d.y), d.q), `marcumQ(${d.mu}, ${d.x}, ${d.y})`)
+          assert(equal(special.marcumP(d.mu, d.x, d.y), d.p), `marcumP(${d.mu}, ${d.x}, ${d.y})`)
         })
       })
     })
-    */
+
+    describe('recurrence relation', () => {
+      const check = (x, y, mu) => {
+        const q1 = special.marcumQ(mu + 1, x, y)
+        const q2 = special.marcumQ(mu, x, y)
+        const q3 = special.marcumQ(mu + 2, x, y)
+        const q4 = special.marcumQ(mu - 1, x, y)
+        const r = x > mu
+          ? ((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4)
+          : ((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4)
+        assert(equal(r, 1))
+      }
+
+      it('should satisfy the recurrence relation', () => {
+        // Both x < mu and x > mu inside the transition band, exercising both
+        // forms of the recurrence test.
+        repeat(() => {
+          const x = 40 + Math.random() * 30
+          const mu = 80 + Math.random() * 40
+          const s = Math.sqrt(4 * x + 2 * mu)
+          check(x, x + mu - 0.8 * s + Math.random() * 1.6 * s, mu)
+        }, LAPS)
+        repeat(() => {
+          const x = 80 + Math.random() * 60
+          const mu = 40 + Math.random() * 30
+          const s = Math.sqrt(4 * x + 2 * mu)
+          check(x, x + mu - 0.8 * s + Math.random() * 1.6 * s, mu)
+        }, LAPS)
+      })
+
+      it('should satisfy the recurrence relation for large mu', () => {
+        repeat(() => {
+          const x = 40 + Math.random() * 30
+          const mu = 150 + Math.random() * 50
+          const s = Math.sqrt(4 * x + 2 * mu)
+          check(x, x + mu - 0.8 * s + Math.random() * 1.6 * s, mu)
+        }, LAPS)
+      })
+
+      it('should match scipy ncx2 reference values', () => {
+        [
+          { mu: 100, x: 50, y: 150, p: 0.5117578749745552, q: 0.48824212502544484 },
+          { mu: 90, x: 60, y: 140, p: 0.2499150811158282, q: 0.7500849188841718 },
+          { mu: 180, x: 50, y: 230, p: 0.5093676830927151, q: 0.4906323169072849 },
+          { mu: 160, x: 70, y: 250, p: 0.8745123498463062, q: 0.12548765015369384 }
+        ].forEach(d => {
+          assert(equal(special.marcumQ(d.mu, d.x, d.y), d.q), `marcumQ(${d.mu}, ${d.x}, ${d.y})`)
+          assert(equal(special.marcumP(d.mu, d.x, d.y), d.p), `marcumP(${d.mu}, ${d.x}, ${d.y})`)
+        })
+      })
+    })
+  })
+
+  describe('.marcumP()', () => {
+    describe('special cases', () => {
+      it('should return 0 for y = 0', () => {
+        repeat(() => {
+          assert(special.marcumP(2 + Math.random() * 5, Math.random() * 30, 0) === 0)
+        }, LAPS)
+      })
+
+      it('should equal the lower incomplete gamma for x = 0', () => {
+        repeat(() => {
+          const y = 40 + Math.random() * 60
+          const mu = 2 + Math.random() * 5
+          assert(equal(special.marcumP(mu, 0, y), special.gammaLowerIncomplete(mu, y)))
+        }, LAPS)
+      })
+    })
+
+    it('should satisfy the recurrence relation', () => {
+      const check = (x, y, mu) => {
+        const p1 = special.marcumP(mu + 1, x, y)
+        const p2 = special.marcumP(mu, x, y)
+        const p3 = special.marcumP(mu + 2, x, y)
+        const p4 = special.marcumP(mu - 1, x, y)
+        const r = x > mu
+          ? ((x - mu) * p1 + (y + mu) * p2) / (x * p3 + y * p4)
+          : ((y + mu) * p2) / (x * p3 + (mu - x) * p1 + y * p4)
+        assert(equal(r, 1))
+      }
+      // Series, asymptotic, quadrature and recurrence regimes. The quadrature
+      // and recurrence points stay close enough to the transition that P is
+      // above the underflow limit, so the relation is meaningfully exercised.
+      repeat(() => check(Math.random() * 30, 10 + Math.random() * 10, 30 + Math.random() * 5), LAPS)
+      repeat(() => {
+        const x = 45 + Math.random() * 90
+        check(x, x - 5 - Math.random() * 25, 3 + Math.random() * 3)
+      }, LAPS)
+      repeat(() => {
+        const x = 40 + Math.random() * 30
+        const mu = 80 + Math.random() * 40
+        const s = Math.sqrt(4 * x + 2 * mu)
+        check(x, x + mu - 1.7 * s + Math.random() * 0.6 * s, mu)
+      }, LAPS)
+      repeat(() => {
+        const x = 40 + Math.random() * 30
+        const mu = 80 + Math.random() * 40
+        const s = Math.sqrt(4 * x + 2 * mu)
+        check(x, x + mu - 0.8 * s + Math.random() * 1.6 * s, mu)
+      }, LAPS)
+    })
+  })
+
+  describe('marcumQ and marcumP', () => {
+    it('should satisfy marcumQ + marcumP = 1 across all branches', () => {
+      const identity = (x, y, mu) => {
+        assert(equal(special.marcumQ(mu, x, y) + special.marcumP(mu, x, y), 1))
+      }
+      // Series, asymptotic, quadrature and recurrence regimes.
+      repeat(() => identity(Math.random() * 30, 40 + Math.random() * 60, 2 + Math.random() * 5), LAPS)
+      repeat(() => {
+        const x = 35 + Math.random() * 100
+        identity(x, x + 20 + Math.random() * 100, 3 + Math.random() * 3)
+      }, LAPS)
+      repeat(() => identity(40 + Math.random() * 40, 0.5 + Math.random() * 1.5, 3 + Math.random() * 5), LAPS)
+      repeat(() => {
+        const x = 40 + Math.random() * 30
+        const mu = 80 + Math.random() * 40
+        const s = Math.sqrt(4 * x + 2 * mu)
+        identity(x, x + mu - 0.8 * s + Math.random() * 1.6 * s, mu)
+      }, LAPS)
+    })
   })
 
   describe('.owenT()', () => {

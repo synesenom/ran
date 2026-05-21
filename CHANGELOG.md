@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `marcumQ` and `marcumP` were accurate only for `x < 30` — the asymptotic, recurrence and quadrature computation branches existed only as commented-out scaffolding. Activated all four methods of Gil, Segura & Temme (arXiv:1311.0681) behind a regime dispatcher: series expansion (§3), large-ξ asymptotic expansion (§4.1), three-term recurrence relation (Eq. 14) and trapezoidal quadrature (§5). The Marcum functions are now accurate across the full `μ ≥ 1, x > 0, y > 0` domain, restoring full-range CDF precision for the `Rice`, `NoncentralChi2`, `DoublyNoncentralChi2` and `Skellam` distributions. Closes #253.
+
 - `DoublyNoncentralBeta._pdf` and `._cdf` returned `NaN` when `lambda1` or `lambda2` was 0, because the outward-summation Poisson-weight initialisation evaluated `0 * Math.log(0) = NaN` (IEEE 754). Added early-return guards: when `lambda1 = 0` the double sum collapses to `NoncentralBeta(beta, alpha, lambda2)` at `(1-x)`; when `lambda2 = 0` it collapses to `NoncentralBeta(alpha, beta, lambda1)` at `x`. `DoublyNoncentralF` (which inherits both methods) is fixed implicitly. Closes #304.
 
 - `NoncentralBeta._pdf` and `._cdf` returned `NaN` for `lambda = 0` because the Poisson weight computation evaluated `0 * Math.log(0) = NaN` (IEEE 754). Added a guard: when `lambda / 2 === 0`, the weight for the sole k=0 term is 1. Closes #267.
