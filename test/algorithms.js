@@ -135,6 +135,14 @@ describe('algorithms', () => {
       }
     })
 
+    it('should compute ∫sin(x)dx = 2 over [0,π] to machine precision', () => {
+      // Regression guard for the j=POLYNOMIAL_ORDER-1 off-by-one: sin(x) on [0,π]
+      // requires only a few Romberg steps. Any result worse than 1e-12 would indicate
+      // the polynomial interpolation window is receiving bad data.
+      const result = algorithms.romberg(t => Math.sin(t), 0, Math.PI)
+      assert(Math.abs(result - 2) < 1e-12)
+    })
+
     it('should return the best available extrapolate when budget is exhausted', () => {
       // A step-function integrand (true integral 1.7) defeats Richardson
       // extrapolation: O(1/n) trapezoid convergence cannot satisfy the O(h^2)
