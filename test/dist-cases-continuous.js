@@ -1821,8 +1821,8 @@ export default [{
   name: 'NoncentralF',
   invalidParams: [
     [], // all params required
-    [-1, 2, 1], [0, 2, 1], // alpha > 0
-    [2, -1, 1], [2, 0, 1], // beta > 0
+    [-1, 2, 1], [0, 2, 1], // d1 > 0
+    [2, -1, 1], [2, 0, 1], // d2 > 0
     [2, 2, -1] // lambda >= 0
   ],
   cases: [{
