@@ -38,9 +38,9 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      this.p.k % 2 === 0
-    ]
+    this.c = {
+      kIsEven: this.p.k % 2 === 0
+    }
   }
 
   _generator () {
@@ -61,7 +61,7 @@ export default class extends Distribution {
       )
     }
 
-    if (this.c[0]) {
+    if (this.c.kIsEven) {
       // k is even
       if (this.p.k === 2 && x === 0) {
         // k = 2, x -> 0, by differentiating F(x)
