@@ -42,10 +42,10 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants.
-    this.c = [
-      Math.exp(-lambda / 2),
-      fnBeta(alpha, beta)
-    ]
+    this.c = {
+      expHalfLambda: Math.exp(-lambda / 2),
+      beta: fnBeta(alpha, beta)
+    }
   }
 
   _generator () {
@@ -69,7 +69,7 @@ export default class extends Distribution {
       if (this.p.alpha > 1) return 0
       if (this.p.alpha < 1) return Infinity
       // alpha===1: k=0 term is e^(-lambda/2)*(1-0)^(beta-1)/B(1,beta); all k>=1 vanish since 0^k=0.
-      return this.c[0] / this.c[1]
+      return this.c.expHalfLambda / this.c.beta
     }
 
     // Speed-up variables.

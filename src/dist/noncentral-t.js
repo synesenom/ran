@@ -40,10 +40,10 @@ class NoncentralT extends Distribution {
 
     // Speed-up constants
     const mu2 = mu * mu / 2
-    this.c = [
-      Math.sqrt(1 + 2 / nui),
-      Math.exp(logGamma((nui + 1) / 2) - logGamma(nui / 2) - mu2) / Math.sqrt(Math.PI * nui)
-    ]
+    this.c = {
+      nuScale: Math.sqrt(1 + 2 / nui),
+      pdfAt0: Math.exp(logGamma((nui + 1) / 2) - logGamma(nui / 2) - mu2) / Math.sqrt(Math.PI * nui)
+    }
   }
 
   /**
@@ -155,9 +155,9 @@ class NoncentralT extends Distribution {
 
   _pdf (x) {
     if (Math.abs(x) < Number.EPSILON) {
-      return this.c[1]
+      return this.c.pdfAt0
     } else {
-      return Math.max(0, this.p.nu * (NoncentralT.fnm(this.p.nu + 2, this.p.mu, x * this.c[0]) - NoncentralT.fnm(this.p.nu, this.p.mu, x)) / x)
+      return Math.max(0, this.p.nu * (NoncentralT.fnm(this.p.nu + 2, this.p.mu, x * this.c.nuScale) - NoncentralT.fnm(this.p.nu, this.p.mu, x)) / x)
     }
   }
 

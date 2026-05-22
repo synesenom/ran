@@ -44,10 +44,10 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      -0.5 * (theta + mu * mu + Math.log(Math.PI * nui)) - logGamma(nui / 2),
-      Math.exp(-theta / 2)
-    ]
+    this.c = {
+      logScale: -0.5 * (theta + mu * mu + Math.log(Math.PI * nui)) - logGamma(nui / 2),
+      expHalfTheta: Math.exp(-theta / 2)
+    }
   }
 
   /**
@@ -173,14 +173,14 @@ export default class extends Distribution {
     // the j=0-only closed form. Threshold matches NoncentralT._pdf convention.
     if (Math.abs(x) < Number.EPSILON) {
       const kj0 = (this.p.nu + 1) / 2
-      return Math.exp(this.c[0]) * gamma(kj0) * f11(kj0, this.p.nu / 2, this.p.theta / 2)
+      return Math.exp(this.c.logScale) * gamma(kj0) * f11(kj0, this.p.nu / 2, this.p.theta / 2)
     }
 
     // When mu = 0, all j > 0 terms in the series carry a factor of mu^j = 0, so only j = 0 survives.
     if (this.p.mu === 0) {
       const tk = 1 + x * x / this.p.nu
       const kj0 = (this.p.nu + 1) / 2
-      return Math.exp(this.c[0]) * gamma(kj0) * f11(kj0, this.p.nu / 2, this.p.theta / (2 * tk)) / Math.pow(tk, kj0)
+      return Math.exp(this.c.logScale) * gamma(kj0) * f11(kj0, this.p.nu / 2, this.p.theta / (2 * tk)) / Math.pow(tk, kj0)
     }
 
     // Some pre-computed constants
@@ -199,7 +199,7 @@ export default class extends Distribution {
     if (x * this.p.mu >= 0) {
       // Init terms
       let kj0 = (this.p.nu + j0 + 1) / 2
-      let gp = Math.exp(this.c[0] + j0 * lntmuk - logGamma(j0 + 1) - kj0 * lntk)
+      let gp = Math.exp(this.c.logScale + j0 * lntmuk - logGamma(j0 + 1) - kj0 * lntk)
       let gk0 = gamma(kj0)
       let f10 = f11(kj0, nu2, thetatk)
 
@@ -279,7 +279,7 @@ export default class extends Distribution {
     } else {
       // Forward
       let kj0 = (this.p.nu + j0 + 1) / 2
-      const gp0 = Math.exp(this.c[0] + (j0 - 1) * lntmuk - logGamma(j0) - (kj0 - 0.5) * lntk)
+      const gp0 = Math.exp(this.c.logScale + (j0 - 1) * lntmuk - logGamma(j0) - (kj0 - 0.5) * lntk)
       const gk0 = gamma(kj0 - 1)
       const gk1 = gamma(kj0 - 0.5)
       let gk = [gk0, gk1]
@@ -355,7 +355,7 @@ export default class extends Distribution {
     const y = Math.abs(x)
     const mu = x < 0 ? -this.p.mu : this.p.mu
     const z = recursiveSum({
-      p: this.c[1],
+      p: this.c.expHalfTheta,
       f: NoncentralT.fnm(this.p.nu, mu, y)
     }, (t, i) => {
       const i2 = 2 * i
