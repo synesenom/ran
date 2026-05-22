@@ -34,24 +34,24 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      1 + theta,
-      Math.exp(-theta - 1) * (1 + theta)
-    ]
+    this.c = {
+      thetaP1: 1 + theta,
+      expFactor: Math.exp(-theta - 1) * (1 + theta)
+    }
   }
 
   _generator () {
     // Inverse transform sampling using Lambert W.
-    return -(lambertW1m(-this.r.next() * this.c[1]) + this.c[0]) / this.p.theta
+    return -(lambertW1m(-this.r.next() * this.c.expFactor) + this.c.thetaP1) / this.p.theta
   }
 
   _pdf (x) {
-    return this.p.theta * this.p.theta * (1 + x) * Math.exp(-this.p.theta * x) / this.c[0]
+    return this.p.theta * this.p.theta * (1 + x) * Math.exp(-this.p.theta * x) / this.c.thetaP1
   }
 
   _cdf (x) {
     const tx = this.p.theta * x
     // -expm1(-tx) avoids catastrophic cancellation when theta*x is near 0
-    return -Math.expm1(-tx) - Math.exp(-tx) * tx / this.c[0]
+    return -Math.expm1(-tx) - Math.exp(-tx) * tx / this.c.thetaP1
   }
 }

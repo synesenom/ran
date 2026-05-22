@@ -40,10 +40,10 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      this._phi(alpha),
-      this._phi(alpha) * Math.sqrt(2 * Math.PI)
-    ]
+    this.c = {
+      phiAlpha: this._phi(alpha),
+      phiAlphaSqrt2Pi: this._phi(alpha) * Math.sqrt(2 * Math.PI)
+    }
   }
 
   _phi (x) {
@@ -60,14 +60,14 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return this.p.beta * Math.exp(-0.5 * Math.pow(this.p.alpha - this.p.beta / x, 2)) / (x * x * this.c[1])
+    return this.p.beta * Math.exp(-0.5 * Math.pow(this.p.alpha - this.p.beta / x, 2)) / (x * x * this.c.phiAlphaSqrt2Pi)
   }
 
   _cdf (x) {
-    return this._phi(this.p.alpha - this.p.beta / x) / this.c[0]
+    return this._phi(this.p.alpha - this.p.beta / x) / this.c.phiAlpha
   }
 
   _q (p) {
-    return this.p.beta / (this.p.alpha - this._phiInv(p * this.c[0]))
+    return this.p.beta / (this.p.alpha - this._phiInv(p * this.c.phiAlpha))
   }
 }

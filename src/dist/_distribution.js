@@ -32,7 +32,7 @@ class Distribution {
     this.r = new Xoshiro128p()
 
     // Speed-up constants
-    this.c = []
+    this.c = {}
   }
 
   /**

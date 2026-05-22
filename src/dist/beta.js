@@ -38,11 +38,11 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      logBeta(alpha, beta),
-      alpha - 1,
-      beta - 1
-    ]
+    this.c = {
+      lnBeta: logBeta(alpha, beta),
+      alphaM1: alpha - 1,
+      betaM1: beta - 1
+    }
   }
 
   _generator () {
@@ -51,16 +51,16 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    if (this.c[1] === 0 && this.c[2] === 0) {
+    if (this.c.alphaM1 === 0 && this.c.betaM1 === 0) {
       return 1
     }
 
-    const a = this.c[1] * Math.log(x)
+    const a = this.c.alphaM1 * Math.log(x)
 
-    const b = this.c[2] * Math.log(1 - x)
+    const b = this.c.betaM1 * Math.log(1 - x)
 
     // Handle x = 0 and x = 1 cases
-    return Math.exp(a + b - this.c[0])
+    return Math.exp(a + b - this.c.lnBeta)
   }
 
   _cdf (x) {
