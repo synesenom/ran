@@ -39,16 +39,16 @@ export default class extends PreComputed {
     }]
 
     // Speed-up constants
-    this.c = [
-      Math.exp(-lambda * (1 - Math.exp(-phi))),
-      lambda * phi * Math.exp(-phi)
-    ]
+    this.c = {
+      p0: Math.exp(-lambda * (1 - Math.exp(-phi))),
+      r: lambda * phi * Math.exp(-phi)
+    }
   }
 
   // Using Eq. (131) in Johnson, Kotz, Kemp: Univariate Discrete Distributions.
   _pk (k) {
     if (k === 0) {
-      return this.c[0]
+      return this.c.p0
     }
 
     let dz = 1
@@ -57,7 +57,7 @@ export default class extends PreComputed {
       dz *= this.p.phi / j
       z += dz * this.pdfTable[k - j - 1]
     }
-    return this.c[1] * z / k
+    return this.c.r * z / k
   }
 
   _generator () {

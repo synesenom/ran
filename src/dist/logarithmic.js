@@ -37,10 +37,10 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      a * (1 - Math.log(a)),
-      b * (1 - Math.log(b))
-    ]
+    this.c = {
+      fa: a * (1 - Math.log(a)),
+      fb: b * (1 - Math.log(b))
+    }
   }
 
   _generator () {
@@ -49,15 +49,15 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return Math.log(x) / (this.c[0] - this.c[1])
+    return Math.log(x) / (this.c.fa - this.c.fb)
   }
 
   _cdf (x) {
-    return (this.c[0] - x * (1 - Math.log(x))) / (this.c[0] - this.c[1])
+    return (this.c.fa - x * (1 - Math.log(x))) / (this.c.fa - this.c.fb)
   }
 
   _q (p) {
-    const z = p * (this.c[0] - this.c[1]) - this.c[0]
+    const z = p * (this.c.fa - this.c.fb) - this.c.fa
     return z / lambertW0(z / Math.E)
   }
 }

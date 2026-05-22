@@ -37,9 +37,9 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      2 * Math.pow(this.p.m, this.p.m) / Math.pow(this.p.omega, this.p.m)
-    ]
+    this.c = {
+      normFactor: 2 * Math.pow(this.p.m, this.p.m) / Math.pow(this.p.omega, this.p.m)
+    }
   }
 
   _generator () {
@@ -48,7 +48,7 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return this.c[0] * Math.pow(x, 2 * this.p.m - 1) * Math.exp(-this.p.m * x * x / this.p.omega - logGamma(this.p.m))
+    return this.c.normFactor * Math.pow(x, 2 * this.p.m - 1) * Math.exp(-this.p.m * x * x / this.p.omega - logGamma(this.p.m))
   }
 
   _cdf (x) {

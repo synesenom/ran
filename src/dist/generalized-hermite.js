@@ -46,24 +46,24 @@ export default class extends PreComputed {
     }]
 
     // Speed-up constants
-    this.c = [
-      Math.log(a1 + m * a2),
-      (a1 + m * m * a2) / (a1 + m * a2),
-      -a1 - a2
-    ]
+    this.c = {
+      logMu: Math.log(a1 + m * a2),
+      d: (a1 + m * m * a2) / (a1 + m * a2),
+      baseLogProb: -a1 - a2
+    }
   }
 
   _pk (k) {
     if (k === 0) {
-      return this.c[2]
+      return this.c.baseLogProb
     }
 
     if (k < this.p.m) {
-      return this.c[2] + k * this.c[0] - logGamma(k + 1) + k * Math.log((this.p.m - this.c[1]) / (this.p.m - 1))
+      return this.c.baseLogProb + k * this.c.logMu - logGamma(k + 1) + k * Math.log((this.p.m - this.c.d) / (this.p.m - 1))
     }
 
-    return this.c[0] +
-      Math.log((this.c[1] - 1) * Math.exp(this.pdfTable[k - this.p.m]) + (this.p.m - this.c[1]) * Math.exp(this.pdfTable[k - 1])) -
+    return this.c.logMu +
+      Math.log((this.c.d - 1) * Math.exp(this.pdfTable[k - this.p.m]) + (this.p.m - this.c.d) * Math.exp(this.pdfTable[k - 1])) -
       Math.log((k * (this.p.m - 1)))
   }
 

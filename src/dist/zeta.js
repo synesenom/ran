@@ -36,9 +36,10 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      riemannZeta(s), Math.pow(2, s - 1)
-    ]
+    this.c = {
+      zetaS: riemannZeta(s),
+      pow2sm1: Math.pow(2, s - 1)
+    }
   }
 
   _generator () {
@@ -47,10 +48,10 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return Math.pow(x, -this.p.s) / this.c[0]
+    return Math.pow(x, -this.p.s) / this.c.zetaS
   }
 
   _cdf (x) {
-    return generalizedHarmonic(x, this.p.s) / this.c[0]
+    return generalizedHarmonic(x, this.p.s) / this.c.zetaS
   }
 }

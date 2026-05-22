@@ -34,9 +34,9 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      this.p.rho + 1
-    ]
+    this.c = {
+      rhoPlus1: this.p.rho + 1
+    }
   }
 
   _generator () {
@@ -52,10 +52,10 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return this.p.rho * beta(x, this.c[0])
+    return this.p.rho * beta(x, this.c.rhoPlus1)
   }
 
   _cdf (x) {
-    return 1 - x * beta(x, this.c[0])
+    return 1 - x * beta(x, this.c.rhoPlus1)
   }
 }

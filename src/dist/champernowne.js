@@ -20,9 +20,9 @@ export default class extends Distribution {
       closed: false
     }]
 
-    this.c = [
-      1
-    ]
+    this.c = {
+      norm: 1
+    }
   }
 
   _generator () {
@@ -31,10 +31,10 @@ export default class extends Distribution {
 
   _pdf (x) {
     // TODO Add normalization factor
-    return this.c[0] / (Math.cosh(this.p.alpha * (x - this.p.x0)) + this.p.lambda)
+    return this.c.norm / (Math.cosh(this.p.alpha * (x - this.p.x0)) + this.p.lambda)
   }
 
   _cdf () {
-    return this.c[0]
+    return this.c.norm
   }
 }

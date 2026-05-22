@@ -43,11 +43,11 @@ export default class extends PreComputed {
     }]
 
     // Speed-up constants
-    this.c = [
-      beta / (lambda * (1 + beta)),
-      -lambda - alpha * Math.log(1 + beta),
-      Math.log(lambda)
-    ]
+    this.c = {
+      r: beta / (lambda * (1 + beta)),
+      baseLogProb: -lambda - alpha * Math.log(1 + beta),
+      logLambda: Math.log(lambda)
+    }
   }
 
   _pk (k) {
@@ -58,19 +58,19 @@ export default class extends PreComputed {
 
     // Advance until k - 1
     for (let j = 1; j < k; j++) {
-      dz *= (this.p.alpha + j - 1) * this.c[0] * ki / j
+      dz *= (this.p.alpha + j - 1) * this.c.r * ki / j
       ki--
       z += dz
     }
 
     // If k > 0, add last term
     if (k > 0) {
-      dz *= (this.p.alpha + k - 1) * this.c[0] / k
+      dz *= (this.p.alpha + k - 1) * this.c.r / k
       z += dz
     }
 
     // Return sum with constants
-    return Math.log(z) + k * this.c[2] - logGamma(k + 1) + this.c[1]
+    return Math.log(z) + k * this.c.logLambda - logGamma(k + 1) + this.c.baseLogProb
   }
 
   _generator () {

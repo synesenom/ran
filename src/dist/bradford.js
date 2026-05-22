@@ -33,11 +33,11 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    const c0 = Math.log(1 + c)
-    this.c = [
-      c0,
-      c / c0
-    ]
+    const log1pc = Math.log(1 + c)
+    this.c = {
+      log1pc,
+      cOverLog1pc: c / log1pc
+    }
   }
 
   _generator () {
@@ -46,14 +46,14 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return this.c[1] / (1 + this.p.c * x)
+    return this.c.cOverLog1pc / (1 + this.p.c * x)
   }
 
   _cdf (x) {
-    return Math.log(1 + this.p.c * x) / this.c[0]
+    return Math.log(1 + this.p.c * x) / this.c.log1pc
   }
 
   _q (p) {
-    return (Math.exp(this.c[0] * p) - 1) / this.p.c
+    return (Math.exp(this.c.log1pc * p) - 1) / this.p.c
   }
 }
