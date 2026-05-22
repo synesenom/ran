@@ -37,9 +37,9 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      this.p.xmax - this.p.xmin + 1
-    ]
+    this.c = {
+      n: this.p.xmax - this.p.xmin + 1
+    }
   }
 
   _generator () {
@@ -48,16 +48,16 @@ export default class extends Distribution {
   }
 
   _pdf () {
-    return 1 / this.c[0]
+    return 1 / this.c.n
   }
 
   _cdf (x) {
-    return (1 + x - this.p.xmin) / this.c[0]
+    return (1 + x - this.p.xmin) / this.c.n
   }
 
   _q (p) {
     // ceil(x)-1 equals floor(x) for non-integer x but gives x-1 when x is exactly an integer,
     // which is needed when p*N is exact so CDF(k) = p and the correct quantile is k, not k+1.
-    return Math.ceil(p * this.c[0]) - 1 + this.p.xmin
+    return Math.ceil(p * this.c.n) - 1 + this.p.xmin
   }
 }

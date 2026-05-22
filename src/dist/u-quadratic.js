@@ -35,11 +35,11 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      12 / Math.pow(b - a, 3),
-      (a + b) / 2,
-      Math.pow((b - a) / 2, 3)
-    ]
+    this.c = {
+      alpha: 12 / Math.pow(b - a, 3),
+      beta: (a + b) / 2,
+      halfRangeCubed: Math.pow((b - a) / 2, 3)
+    }
   }
 
   _generator () {
@@ -48,14 +48,14 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return this.c[0] * Math.pow(x - this.c[1], 2)
+    return this.c.alpha * Math.pow(x - this.c.beta, 2)
   }
 
   _cdf (x) {
-    return this.c[0] * (Math.pow(x - this.c[1], 3) + this.c[2]) / 3
+    return this.c.alpha * (Math.pow(x - this.c.beta, 3) + this.c.halfRangeCubed) / 3
   }
 
   _q (p) {
-    return Math.cbrt(3 * p / this.c[0] - this.c[2]) + this.c[1]
+    return Math.cbrt(3 * p / this.c.alpha - this.c.halfRangeCubed) + this.c.beta
   }
 }
