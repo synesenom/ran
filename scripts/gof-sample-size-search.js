@@ -11,7 +11,6 @@
 
 import fs from 'fs'
 import path from 'path'
-import { fileURLToPath } from 'url'
 import * as dist from '../src/dist'
 import continuousCases from '../test/dist-cases-continuous'
 import discreteCases from '../test/dist-cases-discrete'
@@ -24,7 +23,8 @@ const MIN_SIZE = 1000
 // Matches the alpha used in the production GoF test (dist.js).
 const AD_ALPHA = 0.001
 
-const OUTPUT_PATH = path.join(path.dirname(fileURLToPath(import.meta.url)), 'gof-min-sample-size.csv')
+// __dirname is available because @babel/register transpiles ES modules to CJS.
+const OUTPUT_PATH = path.join(__dirname, 'gof-min-sample-size.csv')
 
 // Returns false if ANY of the distribution's parameter cases fails the GoF test at
 // sample size n with the given seed.
