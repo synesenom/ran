@@ -1137,7 +1137,7 @@ export default [{
     { x: 0.3, pdf: 0.840036306465067, cdf: 0.531285609132968 },
     { x: 0.4, pdf: 1.42975823095691, cdf: 0.639407319161897 }
   ],
-  // scipy.stats.genextreme(c=2, loc=0, scale=1)  # xi=2 (cases[0]: positive shape)
+  // scipy.stats.genextreme(c=2, loc=0, scale=1)  # c=2; ranjs/scipy positive c gives bounded upper support at 1/c=0.5 (Weibull-type GEV)
   quantileVals: [
     { p: 0.01, x: -10.103796220956797 },
     { p: 0.05, x: -3.9872059274064826 },
