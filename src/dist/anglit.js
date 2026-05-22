@@ -36,12 +36,12 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      2 / beta,
-      2 * mu / beta,
-      1 / beta,
-      mu / beta - Math.PI / 4
-    ]
+    this.c = {
+      twoOverBeta: 2 / beta,
+      twoMuOverBeta: 2 * mu / beta,
+      oneOverBeta: 1 / beta,
+      muOverBetaMinusPiOver4: mu / beta - Math.PI / 4
+    }
   }
 
   _generator () {
@@ -50,11 +50,11 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return Math.cos(this.c[0] * x - this.c[1]) / this.p.beta
+    return Math.cos(this.c.twoOverBeta * x - this.c.twoMuOverBeta) / this.p.beta
   }
 
   _cdf (x) {
-    return Math.pow(Math.sin(this.c[2] * x - this.c[3]), 2)
+    return Math.pow(Math.sin(this.c.oneOverBeta * x - this.c.muOverBetaMinusPiOver4), 2)
   }
 
   _q (p) {

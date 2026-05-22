@@ -34,9 +34,9 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      Math.exp(-lambda)
-    ]
+    this.c = {
+      expNegLambda: Math.exp(-lambda)
+    }
   }
 
   _generator () {
@@ -45,7 +45,7 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return this.p.lambda * Math.pow(this.c[0], x)
+    return this.p.lambda * Math.pow(this.c.expNegLambda, x)
   }
 
   _cdf (x) {
