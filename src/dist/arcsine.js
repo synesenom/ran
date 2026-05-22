@@ -37,11 +37,11 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      1 / Math.PI,
-      b - a,
-      0.5 * Math.PI
-    ]
+    this.c = {
+      invPi: 1 / Math.PI,
+      range: b - a,
+      halfPi: 0.5 * Math.PI
+    }
   }
 
   _generator () {
@@ -50,15 +50,15 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return this.c[0] / Math.sqrt((x - this.p.a) * (this.p.b - x))
+    return this.c.invPi / Math.sqrt((x - this.p.a) * (this.p.b - x))
   }
 
   _cdf (x) {
-    return 2 * this.c[0] * Math.asin(Math.sqrt((x - this.p.a) / this.c[1]))
+    return 2 * this.c.invPi * Math.asin(Math.sqrt((x - this.p.a) / this.c.range))
   }
 
   _q (p) {
-    const s = Math.sin(this.c[2] * p)
-    return (s * s) * this.c[1] + this.p.a
+    const s = Math.sin(this.c.halfPi * p)
+    return (s * s) * this.c.range + this.p.a
   }
 }

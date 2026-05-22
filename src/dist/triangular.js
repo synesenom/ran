@@ -39,13 +39,13 @@ export default class extends Distribution {
     const ba = b - a
     const bc = b - c
     const ca = c - a
-    this.c = [
+    this.c = {
       ba,
       bc,
       ca,
-      ba * bc,
-      ba * ca
-    ]
+      baBc: ba * bc,
+      baCa: ba * ca
+    }
   }
 
   _generator () {
@@ -55,19 +55,19 @@ export default class extends Distribution {
 
   _pdf (x) {
     return x < this.p.c
-      ? 2 * (x - this.p.a) / this.c[4]
-      : 2 * (this.p.b - x) / this.c[3]
+      ? 2 * (x - this.p.a) / this.c.baCa
+      : 2 * (this.p.b - x) / this.c.baBc
   }
 
   _cdf (x) {
     return x < this.p.c
-      ? Math.pow(x - this.p.a, 2) / this.c[4]
-      : 1 - Math.pow(this.p.b - x, 2) / this.c[3]
+      ? Math.pow(x - this.p.a, 2) / this.c.baCa
+      : 1 - Math.pow(this.p.b - x, 2) / this.c.baBc
   }
 
   _q (p) {
-    return p < this.c[2] / this.c[0]
-      ? this.p.a + Math.sqrt(p * this.c[4])
-      : this.p.b - Math.sqrt((1 - p) * this.c[3])
+    return p < this.c.ca / this.c.ba
+      ? this.p.a + Math.sqrt(p * this.c.baCa)
+      : this.p.b - Math.sqrt((1 - p) * this.c.baBc)
   }
 }

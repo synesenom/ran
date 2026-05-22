@@ -36,9 +36,9 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      xmax - xmin
-    ]
+    this.c = {
+      range: xmax - xmin
+    }
   }
 
   _generator () {
@@ -47,14 +47,14 @@ export default class extends Distribution {
   }
 
   _pdf () {
-    return 1 / this.c[0]
+    return 1 / this.c.range
   }
 
   _cdf (x) {
-    return (x - this.p.xmin) / this.c[0]
+    return (x - this.p.xmin) / this.c.range
   }
 
   _q (p) {
-    return p * this.c[0] + this.p.xmin
+    return p * this.c.range + this.p.xmin
   }
 }
