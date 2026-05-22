@@ -34,9 +34,9 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      Math.PI * this.p.gamma
-    ]
+    this.c = {
+      piGamma: Math.PI * this.p.gamma
+    }
   }
 
   _generator () {
@@ -46,7 +46,7 @@ export default class extends Distribution {
 
   _pdf (x) {
     const y = (x - this.p.x0) / this.p.gamma
-    return 1 / (this.c[0] * (1 + y * y))
+    return 1 / (this.c.piGamma * (1 + y * y))
   }
 
   _cdf (x) {

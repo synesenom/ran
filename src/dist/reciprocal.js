@@ -36,22 +36,22 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      Math.log(a),
-      Math.log(b)
-    ]
+    this.c = {
+      logA: Math.log(a),
+      logB: Math.log(b)
+    }
   }
 
   _generator () {
     // Direct sampling
-    return this.p.a * Math.exp((this.c[1] - this.c[0]) * this.r.next())
+    return this.p.a * Math.exp((this.c.logB - this.c.logA) * this.r.next())
   }
 
   _pdf (x) {
-    return 1 / (x * (this.c[1] - this.c[0]))
+    return 1 / (x * (this.c.logB - this.c.logA))
   }
 
   _cdf (x) {
-    return (Math.log(x) - this.c[0]) / (this.c[1] - this.c[0])
+    return (Math.log(x) - this.c.logA) / (this.c.logB - this.c.logA)
   }
 }

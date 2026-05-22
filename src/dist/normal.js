@@ -37,10 +37,10 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      sigma * Math.sqrt(2 * Math.PI),
-      sigma * Math.SQRT2
-    ]
+    this.c = {
+      sigmaRoot2Pi: sigma * Math.sqrt(2 * Math.PI),
+      sigmaRoot2: sigma * Math.SQRT2
+    }
   }
 
   _generator () {
@@ -49,14 +49,14 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return Math.exp(-0.5 * Math.pow((x - this.p.mu) / this.p.sigma, 2)) / this.c[0]
+    return Math.exp(-0.5 * Math.pow((x - this.p.mu) / this.p.sigma, 2)) / this.c.sigmaRoot2Pi
   }
 
   _cdf (x) {
-    return 0.5 * (1 + erf((x - this.p.mu) / this.c[1]))
+    return 0.5 * (1 + erf((x - this.p.mu) / this.c.sigmaRoot2))
   }
 
   _q (p) {
-    return this.p.mu + this.c[1] * erfinv(2 * p - 1)
+    return this.p.mu + this.c.sigmaRoot2 * erfinv(2 * p - 1)
   }
 }
