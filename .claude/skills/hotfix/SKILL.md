@@ -78,21 +78,17 @@ Invoke `/review` via the Skill tool.
 
 **If P1/P2 findings**: auto-fix, re-run tests, then re-invoke `/review` once.
 - If the second review still has P1/P2 findings: **STOP** and report.
-- If P3 only or no findings: proceed to compound.
+- If P3 only or no findings: proceed to commit.
 
-### 7. Compound
+### 7. Ship (fully autonomous)
 
-Invoke `/compound` via the Skill tool immediately after review passes. Do not pause or ask for confirmation.
-
-### 8. Ship (fully autonomous)
-
-Invoke all three sub-skills in sequence **without any pause or output between them**. As soon as one returns, invoke the next immediately. Do not generate any text between steps — no "committing now", no "pushing...", no confirmation prompts. Proceed directly to step 9 only after all three have completed.
+Invoke all three sub-skills in sequence **without any pause or output between them**. As soon as one returns, invoke the next immediately. Do not generate any text between steps — no "committing now", no "pushing...", no confirmation prompts. Proceed directly to step 8 only after all three have completed.
 
 a. **Commit** — invoke `/commit`
 b. **Push** — invoke `/push` immediately after `/commit` returns
 c. **Pull Request** — invoke `/pull-request` immediately after `/push` returns
 
-### 9. Report
+### 8. Report
 
 > "Hotfix applied: `<commit hash>` <commit message>
 >
@@ -100,7 +96,6 @@ c. **Pull Request** — invoke `/pull-request` immediately after `/push` returns
 > Tests: All passing
 > Triage: <N> filed / <M> skipped / clean
 > Review: PASSED
-> Compound: `<solution path>` (or SKIPPED)
 > PR: <URL>"
 
 ## Rules
