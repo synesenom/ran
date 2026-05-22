@@ -278,10 +278,12 @@ function refValTol (expected) {
 
 // 1e-6 matches the tolerance specified in issue #213: root-finding accumulates
 // more error than direct PDF/CDF evaluation, so a looser bound than PRECISION is justified.
+// Mixed absolute/relative band (issue #338): a pure absolute 1e-6 is vacuous for
+// extreme-tail quantiles whose magnitude dwarfs one ULP, so divide by max(1, |x|).
 export function checkQuantileVals (dist, quantileVals) {
   for (const { p, x } of quantileVals) {
     const actual = dist.q(p)
-    assert(Math.abs(actual - x) < 1e-6, `q(${p}) = ${actual}, expected ${x}`)
+    assert(Math.abs(actual - x) / Math.max(1, Math.abs(x)) < 1e-6, `q(${p}) = ${actual}, expected ${x}`)
   }
 }
 
