@@ -22,3 +22,7 @@ DoubleWeibull,0
 DoublyNoncentralBeta,0
 DoublyNoncentralChi2,0
 DoublyNoncentralF,0
+DoublyNoncentralT,0
+Erlang,0
+Exponential,0
+ExponentialLogarithmic,0
