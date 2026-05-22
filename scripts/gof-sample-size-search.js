@@ -20,7 +20,7 @@ import continuousCases from '../test/dist-cases-continuous'
 import discreteCases from '../test/dist-cases-discrete'
 import { adTest, chiTest } from '../test/test-utils'
 
-const REPS = 10
+const REPS = 100
 const MAX_SIZE = 10000
 const STEP = 1000
 const MIN_SIZE = 1000
