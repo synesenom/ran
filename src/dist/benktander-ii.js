@@ -36,13 +36,13 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      (1 - b) / a,
-      Math.exp(-a / b),
-      b / (b - 1),
-      Math.log(a / (1 - b)) + a / (1 - b),
-      1 - b < Number.EPSILON
-    ]
+    this.c = {
+      bm1OverA: (1 - b) / a,
+      expNegAOverB: Math.exp(-a / b),
+      bOverBm1: b / (b - 1),
+      logScaled: Math.log(a / (1 - b)) + a / (1 - b),
+      bIsOne: 1 - b < Number.EPSILON
+    }
   }
 
   _generator () {
@@ -52,7 +52,7 @@ export default class extends Distribution {
 
   _pdf (x) {
     // b = 1
-    if (this.c[4]) {
+    if (this.c.bIsOne) {
       return this.p.a * Math.exp(this.p.a * (1 - x))
     }
 
@@ -63,7 +63,7 @@ export default class extends Distribution {
 
   _cdf (x) {
     // b = 1
-    if (this.c[4]) {
+    if (this.c.bIsOne) {
       // expm1 avoids 1 - exp(arg) cancellation when arg → 0 near x = 1
       return -Math.expm1(this.p.a * (1 - x))
     }
@@ -82,22 +82,22 @@ export default class extends Distribution {
 
   _q (p) {
     // b = 1
-    if (this.c[4]) {
+    if (this.c.bIsOne) {
       return 1 - Math.log(1 - p) / this.p.a
     }
 
     // Check if b is too close to 1
-    const w = lambertW0(Math.pow(this.c[1] * (1 - p), this.c[2]) / this.c[0])
+    const w = lambertW0(Math.pow(this.c.expNegAOverB * (1 - p), this.c.bOverBm1) / this.c.bm1OverA)
     if (!Number.isFinite(w)) {
       // 1 - b << 1, use logarithms
-      const l1 = this.c[3] + this.c[2] * Math.log(1 - p)
+      const l1 = this.c.logScaled + this.c.bOverBm1 * Math.log(1 - p)
       const l2 = Math.log(l1)
 
       // W(x) ~= ln(x) - ln ln(x) - ln(x) / (ln ln(x))
-      return Math.pow(this.c[0] * (l1 - l2 + l2 / l1), 1 / this.p.b)
+      return Math.pow(this.c.bm1OverA * (l1 - l2 + l2 / l1), 1 / this.p.b)
     } else {
       // All other cases
-      return Math.pow(this.c[0] * w, 1 / this.p.b)
+      return Math.pow(this.c.bm1OverA * w, 1 / this.p.b)
     }
   }
 }

@@ -36,11 +36,11 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      c * k,
-      -1 / k,
-      1 / c
-    ]
+    this.c = {
+      ck: c * k,
+      negInvK: -1 / k,
+      invC: 1 / c
+    }
   }
 
   _generator () {
@@ -50,7 +50,7 @@ export default class extends Distribution {
 
   _pdf (x) {
     const y = Math.pow(x, this.p.c)
-    return this.c[0] * y / (x * Math.pow(1 + y, this.p.k + 1))
+    return this.c.ck * y / (x * Math.pow(1 + y, this.p.k + 1))
   }
 
   _cdf (x) {
@@ -59,6 +59,6 @@ export default class extends Distribution {
   }
 
   _q (p) {
-    return Math.pow(Math.pow(1 - p, this.c[1]) - 1, this.c[2])
+    return Math.pow(Math.pow(1 - p, this.c.negInvK) - 1, this.c.invC)
   }
 }

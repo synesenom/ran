@@ -31,7 +31,8 @@ class Distribution {
     // Pseudo random number generator
     this.r = new Xoshiro128p()
 
-    // Speed-up constants
+    // Speed-up constants — must be a named object, never a positional array
+    // decisions/0008-this-c-named-object-convention.md
     this.c = {}
   }
 

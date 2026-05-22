@@ -35,9 +35,9 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      beta / alpha
-    ]
+    this.c = {
+      betaOverAlpha: beta / alpha
+    }
   }
 
   _generator () {
@@ -48,7 +48,7 @@ export default class extends Distribution {
   _pdf (x) {
     const xa = x / this.p.alpha
     const y = Math.pow(xa, this.p.beta - 1)
-    return this.c[0] * y / Math.pow(1 + xa * y, 2)
+    return this.c.betaOverAlpha * y / Math.pow(1 + xa * y, 2)
   }
 
   _cdf (x) {

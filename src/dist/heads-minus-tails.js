@@ -37,17 +37,17 @@ export default class extends PreComputed {
     }]
 
     // Speed-up constants
-    this.c = [
-      2 * ni * Math.log(0.5)
-    ]
+    this.c = {
+      baseLogProb: 2 * ni * Math.log(0.5)
+    }
   }
 
   _pk (k) {
     if (k === 0) {
-      return this.c[0] + logBinomial(2 * this.p.n, this.p.n)
+      return this.c.baseLogProb + logBinomial(2 * this.p.n, this.p.n)
     } else {
       return k % 2 === 0
-        ? Math.log(2) + this.c[0] + logBinomial(2 * this.p.n, Math.round(k / 2) + this.p.n)
+        ? Math.log(2) + this.c.baseLogProb + logBinomial(2 * this.p.n, Math.round(k / 2) + this.p.n)
         : -Infinity
     }
   }

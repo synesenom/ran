@@ -33,29 +33,29 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      1 - a
-    ]
+    this.c = {
+      oneMinusA: 1 - a
+    }
   }
 
   _generator () {
     let k = 1
     const r = this.r.next()
     let ak = 1 + this.p.a
-    let p = this.c[0]
+    let p = this.c.oneMinusA
     while (r < p * ak) {
       ak += this.p.a
-      p *= this.c[0]
+      p *= this.c.oneMinusA
       k++
     }
     return k
   }
 
   _pdf (x) {
-    return this.p.a * this.p.a * x * Math.pow(this.c[0], x - 1)
+    return this.p.a * this.p.a * x * Math.pow(this.c.oneMinusA, x - 1)
   }
 
   _cdf (x) {
-    return 1 - Math.pow(this.c[0], x) * (1 + this.p.a * x)
+    return 1 - Math.pow(this.c.oneMinusA, x) * (1 + this.p.a * x)
   }
 }

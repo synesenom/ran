@@ -37,12 +37,12 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      Math.exp(-mu1 - mu2),
-      Math.sqrt(mu1 / mu2),
-      2 * Math.sqrt(mu1 * mu2),
-      marcumQ(1, mu2, mu1)
-    ]
+    this.c = {
+      expNeg: Math.exp(-mu1 - mu2),
+      sqrtRatio: Math.sqrt(mu1 / mu2),
+      twoSqrtProd: 2 * Math.sqrt(mu1 * mu2),
+      cdfAtZero: marcumQ(1, mu2, mu1)
+    }
   }
 
   _generator () {
@@ -51,7 +51,7 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return this.c[0] * Math.pow(this.c[1], x) * besselI(Math.abs(x), this.c[2])
+    return this.c.expNeg * Math.pow(this.c.sqrtRatio, x) * besselI(Math.abs(x), this.c.twoSqrtProd)
   }
 
   _cdf (x) {
@@ -61,7 +61,7 @@ export default class extends Distribution {
     if (x >= 1) {
       return marcumQ(x + 1, this.p.mu2, this.p.mu1)
     }
-    return this.c[3]
+    return this.c.cdfAtZero
   }
 
   _q (p) {

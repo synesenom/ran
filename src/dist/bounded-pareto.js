@@ -38,11 +38,11 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      Math.pow(L, alpha),
-      Math.pow(H, alpha),
-      (1 - Math.pow(L / H, alpha))
-    ]
+    this.c = {
+      Lalpha: Math.pow(L, alpha),
+      Halpha: Math.pow(H, alpha),
+      denom: 1 - Math.pow(L / H, alpha)
+    }
   }
 
   _generator () {
@@ -51,14 +51,14 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    return this.p.alpha * Math.pow(this.p.L / x, this.p.alpha) / (x * this.c[2])
+    return this.p.alpha * Math.pow(this.p.L / x, this.p.alpha) / (x * this.c.denom)
   }
 
   _cdf (x) {
-    return (1 - this.c[0] * Math.pow(x, -this.p.alpha)) / this.c[2]
+    return (1 - this.c.Lalpha * Math.pow(x, -this.p.alpha)) / this.c.denom
   }
 
   _q (p) {
-    return Math.pow((this.c[1] + p * (this.c[0] - this.c[1])) / (this.c[0] * this.c[1]), -1 / this.p.alpha)
+    return Math.pow((this.c.Halpha + p * (this.c.Lalpha - this.c.Halpha)) / (this.c.Lalpha * this.c.Halpha), -1 / this.p.alpha)
   }
 }

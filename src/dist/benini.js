@@ -37,11 +37,11 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      alpha * alpha,
-      4 * beta,
-      0.5 / beta
-    ]
+    this.c = {
+      alpha2: alpha * alpha,
+      fourBeta: 4 * beta,
+      halfInvBeta: 0.5 / beta
+    }
   }
 
   _generator () {
@@ -62,6 +62,6 @@ export default class extends Distribution {
   }
 
   _q (p) {
-    return this.p.sigma * Math.exp(this.c[2] * (Math.sqrt(this.c[0] - this.c[1] * Math.log(1 - p)) - this.p.alpha))
+    return this.p.sigma * Math.exp(this.c.halfInvBeta * (Math.sqrt(this.c.alpha2 - this.c.fourBeta * Math.log(1 - p)) - this.p.alpha))
   }
 }

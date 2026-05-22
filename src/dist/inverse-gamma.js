@@ -30,7 +30,7 @@ export default class extends Gamma {
     }]
 
     // Speed-up constants
-    this.c = [Math.pow(beta, alpha)]
+    this.c = { betaAlpha: Math.pow(beta, alpha) }
   }
 
   _generator () {

@@ -39,9 +39,9 @@ export default class extends PreComputed {
     }]
 
     // Speed-up constants
-    this.c = [
-      Math.log(lambda * (1 - theta)) - lambda
-    ]
+    this.c = {
+      logP1: Math.log(lambda * (1 - theta)) - lambda
+    }
   }
 
   _pk (k) {
@@ -50,7 +50,7 @@ export default class extends PreComputed {
     }
 
     if (k === 1) {
-      return this.c[0]
+      return this.c.logP1
     }
 
     return this.pdfTable[k - 1] + Math.log((this.p.lambda * (1 - this.p.theta) + 2 * (k - 1) * this.p.theta - this.p.theta * this.p.theta * (k - 2) * Math.exp(this.pdfTable[k - 2] - this.pdfTable[k - 1])) / k)

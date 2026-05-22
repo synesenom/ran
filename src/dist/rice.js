@@ -37,31 +37,31 @@ export default class extends Distribution {
       closed: false
     }]
 
-    // Speet-up constants
-    this.c = [
-      0.5 * Math.pow(nu / sigma, 2),
-      sigma * sigma,
-      nu / (sigma * sigma),
-      nu * nu
-    ]
+    // Speed-up constants
+    this.c = {
+      halfNuSqRatio: 0.5 * Math.pow(nu / sigma, 2),
+      sigma2: sigma * sigma,
+      nuOverSigma2: nu / (sigma * sigma),
+      nu2: nu * nu
+    }
   }
 
   _generator () {
     // Direct sampling using Poisson and gamma
-    const p = poisson(this.r, this.c[0])
+    const p = poisson(this.r, this.c.halfNuSqRatio)
     const x = gamma(this.r, p + 1, 0.5)
     return this.p.sigma * Math.sqrt(x)
   }
 
   _pdf (x) {
-    const z = x * this.p.nu / this.c[1]
+    const z = x * this.p.nu / this.c.sigma2
     const b = besselI(0, z)
 
     // Handle z >> 1 case (using asymptotic form of Bessel)
     if (Number.isFinite(b)) {
-      return x * Math.exp(-0.5 * (x * x + this.c[3]) / this.c[1]) * besselI(0, x * this.c[2]) / this.c[1]
+      return x * Math.exp(-0.5 * (x * x + this.c.nu2) / this.c.sigma2) * besselI(0, x * this.c.nuOverSigma2) / this.c.sigma2
     } else {
-      return x * Math.exp(-0.5 * (x * x + this.c[3]) / this.c[1] + z - 0.5 * Math.log(2 * Math.PI * z)) / this.c[1]
+      return x * Math.exp(-0.5 * (x * x + this.c.nu2) / this.c.sigma2 + z - 0.5 * Math.log(2 * Math.PI * z)) / this.c.sigma2
     }
   }
 
@@ -69,6 +69,6 @@ export default class extends Distribution {
     // Complementary Marcum Q avoids catastrophic cancellation in the
     // lower tail: `1 - marcumQ(...)` would lose precision because
     // marcumQ internally forms `1 - P` to deliver Q (#246).
-    return marcumP(1, this.c[0], Math.pow(x / this.p.sigma, 2) / 2)
+    return marcumP(1, this.c.halfNuSqRatio, Math.pow(x / this.p.sigma, 2) / 2)
   }
 }

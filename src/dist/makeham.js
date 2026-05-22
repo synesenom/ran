@@ -39,11 +39,11 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants.
-    this.c = [
-      alpha / (beta * lambda),
-      alpha * Math.exp(alpha / lambda) / lambda,
-      -beta / lambda
-    ]
+    this.c = {
+      alphaOverBetaLambda: alpha / (beta * lambda),
+      expFactor: alpha * Math.exp(alpha / lambda) / lambda,
+      negBetaOverLambda: -beta / lambda
+    }
   }
 
   _generator () {
@@ -68,15 +68,15 @@ export default class extends Distribution {
   }
 
   _q (p) {
-    const z = this.c[1] * Math.pow(1 - p, this.c[2])
+    const z = this.c.expFactor * Math.pow(1 - p, this.c.negBetaOverLambda)
 
     // Handle z >> 1 case.
     const w = lambertW0(z)
     if (Number.isFinite(w)) {
-      return this.c[0] - Math.log(1 - p) / this.p.lambda - w / this.p.beta
+      return this.c.alphaOverBetaLambda - Math.log(1 - p) / this.p.lambda - w / this.p.beta
     } else {
-      const t = Math.log(this.c[1]) + this.c[2] * Math.log(1 - p)
-      return this.c[0] - Math.log(1 - p) / this.p.lambda - (t - Math.log(t)) / this.p.beta
+      const t = Math.log(this.c.expFactor) + this.c.negBetaOverLambda * Math.log(1 - p)
+      return this.c.alphaOverBetaLambda - Math.log(1 - p) / this.p.lambda - (t - Math.log(t)) / this.p.beta
     }
   }
 }
