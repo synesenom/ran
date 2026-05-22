@@ -1739,13 +1739,20 @@ export default [{
       { x: 0.99, pdf: 1.653231233465270e+01, cdf: 9.006079598702932e-01 }
     ]
   }, {
+    // alpha=1 boundary: only the k=0 Poisson term survives at x=0 (x^k=0 for k>=1), giving e^(-lambda/2)/B(1,beta).
+    // Reference value computed analytically: 5*exp(-5) = 3.368973499542734e-02.
+    name: 'alpha=1 (finite pdf at x=0)',
+    params: () => [1, 5, 10],
+    refVals: [
+      { x: 0, pdf: 3.368973499542734e-02, cdf: 0 }
+    ]
+  }, {
     // Stress test: asymmetric shapes with non-trivial lambda; exercises series near support boundary.
-    // alpha=0.5 (< 1) means _pdf(0) returns NaN (known open defect, noncentral-beta.js:66-68), but
-    // pdfRange uses a golden-ratio step that does not land on x=0 exactly, so the harness still passes.
-    // Reference values from mpmath (dps=20): interior points only (x=0 pdf excluded due to above defect).
+    // Reference values from mpmath (dps=20).
     name: 'asymmetric shapes',
     params: () => [0.5, 5, 10],
     refVals: [
+      { x: 0, pdf: Infinity, cdf: 0 },
       { x: 0.3, pdf: 1.109454870961770e+00, cdf: 1.492809427219101e-01 },
       { x: 0.5, pdf: 2.015251093123254e+00, cdf: 4.715604423604929e-01 },
       { x: 0.7, pdf: 1.488828919050658e+00, cdf: 8.557627658350277e-01 }
