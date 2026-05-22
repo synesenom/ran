@@ -36,9 +36,9 @@ export default class extends Distribution {
     }]
 
     // Speed-up constants
-    this.c = [
-      sigma * Math.sqrt(2 * Math.PI)
-    ]
+    this.c = {
+      sigmaRoot2Pi: sigma * Math.sqrt(2 * Math.PI)
+    }
   }
 
   _generator () {
@@ -54,7 +54,7 @@ export default class extends Distribution {
 
   _pdf (x) {
     const z = (x - this.p.mu) / this.p.sigma
-    return Math.exp(-0.5 * (z + Math.exp(-z))) / this.c[0]
+    return Math.exp(-0.5 * (z + Math.exp(-z))) / this.c.sigmaRoot2Pi
   }
 
   _cdf (x) {
