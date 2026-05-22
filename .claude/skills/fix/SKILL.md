@@ -76,15 +76,19 @@ git diff main --name-only | grep '\.js$'
 
 **If no `.js` files were modified**: skip review.
 
-### 7. Ship (fully autonomous)
+### 7. Compound
 
-Invoke all three sub-skills in sequence **without any pause or output between them**. As soon as one returns, invoke the next immediately. Do not generate any text between steps — no confirmation prompts, no interim status messages. Proceed directly to step 8 only after all three have completed.
+Invoke `/compound` via the Skill tool immediately after review (or after tests pass if review was skipped). Do not pause or ask for confirmation.
+
+### 8. Ship (fully autonomous)
+
+Invoke all three sub-skills in sequence **without any pause or output between them**. As soon as one returns, invoke the next immediately. Do not generate any text between steps — no confirmation prompts, no interim status messages. Proceed directly to step 9 only after all three have completed.
 
 a. **Commit** — invoke `/commit`
 b. **Push** — invoke `/push` immediately after `/commit` returns
 c. **Pull Request** — invoke `/pull-request` immediately after `/push` returns
 
-### 8. Report
+### 9. Report
 
 > "Resolved: `<commit hash>` <commit message>
 >
@@ -93,6 +97,7 @@ c. **Pull Request** — invoke `/pull-request` immediately after `/push` returns
 > Tests: All passing
 > Triage: <N> filed / <M> skipped / clean
 > Review: PASSED / SKIPPED (no .js changes)
+> Compound: `<solution path>` (or SKIPPED)
 > PR: <URL>"
 
 ## Rules

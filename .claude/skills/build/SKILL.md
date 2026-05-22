@@ -165,14 +165,19 @@ If P3 only or no findings: pass immediately.
 
 ---
 
+### Stage 5.5: Compound (fully autonomous)
+
+Invoke `/compound` via the Skill tool immediately after review passes. Do not pause or ask for confirmation.
+
+---
+
 ### Stage 6: Ship (fully autonomous)
 
 Execute sequentially via the Skill tool **in a single uninterrupted sequence**:
 
 a. **Commit** — invoke `/commit`
-b. **Compound** (best-effort) — invoke `/compound`
-c. **Push** — invoke `/push`
-d. **Pull Request** — invoke `/pull-request`
+b. **Push** — invoke `/push`
+c. **Pull Request** — invoke `/pull-request`
 
 **Do NOT pause, confirm, or ask for permission before push or pull-request.** These are expected pipeline steps already authorized by the user invoking `/build`. Treat them identically to commit — run immediately.
 
@@ -191,8 +196,8 @@ d. **Pull Request** — invoke `/pull-request`
 > Validate: PASSED (<N> attempts) or SKIPPED
 > Triage: <N> filed / <M> skipped / clean
 > Review: PASSED (<N> issues auto-fixed)
-> Commit: `<hash>` <message>
 > Compound: `<solution path>` (or SKIPPED)
+> Commit: `<hash>` <message>
 > PR: <URL>
 >
 > Escalations: <N> (or None)"
@@ -205,7 +210,7 @@ d. **Pull Request** — invoke `/pull-request`
 - **No plan possible**: STOP after research. Ask the user to clarify scope.
 - **Validation failure (unrecoverable)**: STOP after 3 attempts. Report which criteria remain unmet.
 - **Review failure (unrecoverable)**: STOP after 3 auto-fix attempts. Report remaining P1/P2 issues.
-- **Compound failure**: Never blocks the pipeline. Log "Compound: SKIPPED" and continue.
+- **Compound failure**: Never blocks the pipeline. Log "Compound: SKIPPED" and continue to Stage 6.
 
 ## Rules
 
