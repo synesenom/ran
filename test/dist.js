@@ -170,6 +170,9 @@ const UnitTests = {
       name: c.name || 'random parameters',
       generate: () => new dist[tc.name](...c.params())
     }))
+    // per-distribution override for GoF assertion only; support-range check always uses SAMPLE_SIZE
+    // See solutions/testing/2026-05-22-1820-per-distribution-gof-sample-size-override.md
+    const n = tc.sampleSize
 
     cases.forEach(c => {
       describe(c.name, () => {
@@ -192,9 +195,9 @@ const UnitTests = {
             const generator = c.generate()
             generator.seed(s)
             assert(generator.type() === 'continuous'
-              ? adTest(generator.sample(AD_SAMPLE_SIZE), x => generator.cdf(x), AD_ALPHA)
+              ? adTest(generator.sample(n ?? AD_SAMPLE_SIZE), x => generator.cdf(x), AD_ALPHA)
               // c=0: parameters are known, not estimated from data — see solutions/testing/2026-05-16-1915-alias-table-chi2-df-correction.md
-              : chiTest(generator.sample(SAMPLE_SIZE), x => generator.pdf(x), 0), `seed ${s}`)
+              : chiTest(generator.sample(n ?? SAMPLE_SIZE), x => generator.pdf(x), 0), `seed ${s}`)
           }
         })
       })

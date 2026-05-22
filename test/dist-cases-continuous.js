@@ -841,6 +841,8 @@ export default [{
   cases: [{
     params: () => [2]
   }],
+  // Log-transform sampler is exact; analytic CDF. AD converges well below 5000.
+  sampleSize: 2500,
   refVals: [
     { x: -0.1, pdf: 0, cdf: 0 },
     { x: 1e-6, pdf: 1.999996000004, cdf: 1.999998000001333e-6 },
@@ -2617,6 +2619,8 @@ export default [{
   cases: [{
     params: () => [0, 2]
   }],
+  // Box-Muller sampler is exact; analytic erf CDF. AD converges well below 5000.
+  sampleSize: 2500,
   refVals: [
     { x: -6, pdf: 0.0022159242059690038, cdf: 0.0013498980316300933 },
     { x: -3, pdf: 0.06475879783294587, cdf: 0.06680720126885807 },
@@ -3287,6 +3291,8 @@ export default [{
     [], // all params required
     [1, 1], [2, 1] // a < b
   ],
+  // Direct inversion sampler; AD is distribution-free for exact CDFs. 2500 gives adequate power at alpha=0.001.
+  sampleSize: 2500,
   foreign: {
     // generic fallback is Uniform(lo, hi) which IS the distribution under test — use Poisson instead
     generator: 'Poisson',
