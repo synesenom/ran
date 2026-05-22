@@ -71,6 +71,8 @@ export default class extends Distribution {
     // All other cases
     // Split 1 - xbm1*exp(u) as (1 - xbm1) + xbm1*(1 - exp(u)) to avoid
     // 1 - 1 cancellation when both factors approach 1 near x = 1;
+    // refVals near x=1 must use the direct formula, not this expm1 path — see
+    // solutions/testing/2026-05-22-1708-refvals-self-validation-cancellation-boundary.md
     // xbm1 = xb/x reuses the already-computed xb and avoids a second Math.pow;
     // using the same xbm1 in both terms guarantees (1-xbm1)+xbm1 = 1 at large x
     // where expm1(u) collapses to -1
