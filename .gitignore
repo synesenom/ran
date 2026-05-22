@@ -19,3 +19,6 @@
 .claude/settings.local.json
 .claude/tmp/
 thoughts/
+
+# Script output
+scripts/gof-min-sample-size.csv
