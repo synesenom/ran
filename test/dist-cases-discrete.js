@@ -16,6 +16,16 @@ export default [{
   refVals: [
     { x: 0, pmf: 0.5000000000000001, cdf: 0.5 },
     { x: 1, pmf: 0.5, cdf: 1.0 }
+  ],
+  // scipy.stats.bernoulli(0.5)
+  quantileVals: [
+    { p: 0.01, x: 0 },
+    { p: 0.05, x: 0 },
+    { p: 0.25, x: 0 },
+    { p: 0.5, x: 0 },
+    { p: 0.75, x: 1 },
+    { p: 0.95, x: 1 },
+    { p: 0.99, x: 1 }
   ]
 }, {
   name: 'BetaBinomial',
@@ -38,6 +48,16 @@ export default [{
     { x: 15.0, pmf: 0.053724053724053936, cdf: 0.6642246642246644 },
     { x: 20.0, pmf: 0.03846153846153849, cdf: 0.8931623931623933 },
     { x: 25.0, pmf: 0.007936507936507943, cdf: 1.0 }
+  ],
+  // scipy.stats.betabinom(n=25, a=2, b=2)
+  quantileVals: [
+    { p: 0.01, x: 1 },
+    { p: 0.05, x: 3 },
+    { p: 0.25, x: 8 },
+    { p: 0.5, x: 13 },
+    { p: 0.75, x: 17 },
+    { p: 0.95, x: 22 },
+    { p: 0.99, x: 24 }
   ]
 }, {
   name: 'Binomial',
@@ -61,6 +81,16 @@ export default [{
     { x: 18, pmf: 0.014325976371765138, cdf: 0.9926833510398865 },
     { x: 22, pmf: 6.854534149169929e-05, cdf: 0.9999902844429016 },
     { x: 25, pmf: 2.980232238769538e-08, cdf: 1.0 }
+  ],
+  // scipy.stats.binom(25, 0.5)
+  quantileVals: [
+    { p: 0.01, x: 7 },
+    { p: 0.05, x: 8 },
+    { p: 0.25, x: 11 },
+    { p: 0.5, x: 12 },
+    { p: 0.75, x: 14 },
+    { p: 0.95, x: 17 },
+    { p: 0.99, x: 18 }
   ]
 }, {
   name: 'Borel',
@@ -89,6 +119,16 @@ export default [{
     { x: 8.0, pmf: 0.007442545326215793, cdf: 0.9812360594716548 },
     { x: 12.0, pmf: 0.001877413336924442, cdf: 0.994481007535648 },
     { x: 20.0, pmf: 0.00018660813139987598, cdf: 0.9993627401273154 }
+  ],
+  // Borel(mu=0.5) — ranjs quantile cross-validated against CDF refVals
+  quantileVals: [
+    { p: 0.01, x: 1 },
+    { p: 0.05, x: 1 },
+    { p: 0.25, x: 1 },
+    { p: 0.5, x: 1 },
+    { p: 0.75, x: 2 },
+    { p: 0.95, x: 6 },
+    { p: 0.99, x: 10 }
   ]
 }, {
   name: 'BorelTanner',
@@ -118,6 +158,16 @@ export default [{
     { x: 12.0, pmf: 0.05736540751713573, cdf: 0.7827352034608114 },
     { x: 15.0, pmf: 0.02861012346955784, cdf: 0.8932594545773648 },
     { x: 25.0, pmf: 0.002657202272307442, cdf: 0.9897914880529921 }
+  ],
+  // BorelTanner(mu=0.5, n=5) — ranjs quantile cross-validated against CDF refVals
+  quantileVals: [
+    { p: 0.01, x: 5 },
+    { p: 0.05, x: 5 },
+    { p: 0.25, x: 7 },
+    { p: 0.5, x: 9 },
+    { p: 0.75, x: 12 },
+    { p: 0.95, x: 19 },
+    { p: 0.99, x: 26 }
   ]
 }, {
   name: 'Categorical',
@@ -146,6 +196,16 @@ export default [{
   refVals: [
     { x: 0, pmf: 0.4, cdf: 0.4 },
     { x: 1, pmf: 0.6, cdf: 1.0 }
+  ],
+  // Categorical([0.4, 0.6], offset=0) — ranjs quantile cross-validated against CDF refVals
+  quantileVals: [
+    { p: 0.01, x: 0 },
+    { p: 0.05, x: 0 },
+    { p: 0.25, x: 0 },
+    { p: 0.5, x: 1 },
+    { p: 0.75, x: 1 },
+    { p: 0.95, x: 1 },
+    { p: 0.99, x: 1 }
   ]
 }, {
   name: 'Delaporte',
@@ -168,6 +228,16 @@ export default [{
     { x: 8.0, pmf: 0.0707262675425665, cdf: 0.7878701739239051 },
     { x: 12.0, pmf: 0.023278610148764332, cdf: 0.9394756377198948 },
     { x: 20.0, pmf: 0.0016349305025805995, cdf: 0.9961851621606456 }
+  ],
+  // Delaporte(α=2, β=2, λ=2) — ranjs quantile cross-validated against CDF refVals
+  quantileVals: [
+    { p: 0.01, x: 0 },
+    { p: 0.05, x: 1 },
+    { p: 0.25, x: 3 },
+    { p: 0.5, x: 5 },
+    { p: 0.75, x: 8 },
+    { p: 0.95, x: 13 },
+    { p: 0.99, x: 18 }
   ]
 }, {
   name: 'DiscreteUniform',
@@ -191,6 +261,16 @@ export default [{
     { x: 30, pmf: 0.021739130434782608, cdf: 0.5652173913043478 },
     { x: 40, pmf: 0.021739130434782608, cdf: 0.782608695652174 },
     { x: 50, pmf: 0.021739130434782608, cdf: 1.0 }
+  ],
+  // scipy.stats.randint(5, 51) — upper bound is exclusive
+  quantileVals: [
+    { p: 0.01, x: 5 },
+    { p: 0.05, x: 7 },
+    { p: 0.25, x: 16 },
+    { p: 0.5, x: 27 },
+    { p: 0.75, x: 39 },
+    { p: 0.95, x: 48 },
+    { p: 0.99, x: 50 }
   ]
 }, {
   name: 'DiscreteWeibull',
@@ -212,6 +292,16 @@ export default [{
     { x: 5.0, pmf: 2.9787770472466946e-08, cdf: 0.9999999999854481 },
     { x: 7.0, pmf: 1.7763026292916262e-15, cdf: 1.0 },
     { x: 10.0, pmf: 7.888605290628195e-31, cdf: 1.0 }
+  ],
+  // DiscreteWeibull(q=0.5, β=2) — ranjs quantile cross-validated against CDF refVals
+  quantileVals: [
+    { p: 0.01, x: 0 },
+    { p: 0.05, x: 0 },
+    { p: 0.25, x: 0 },
+    { p: 0.5, x: 0 },
+    { p: 0.75, x: 1 },
+    { p: 0.95, x: 2 },
+    { p: 0.99, x: 2 }
   ]
 }, {
   name: 'FlorySchulz',
@@ -232,6 +322,16 @@ export default [{
     { x: 9.0, pmf: 0.0087890625, cdf: 0.9892578125 },
     { x: 15.0, pmf: 0.0002288818359375, cdf: 0.9997406005859375 },
     { x: 25.0, pmf: 3.725290298461914e-07, cdf: 0.9999995976686478 }
+  ],
+  // FlorySchulz(a=0.5) — ranjs quantile cross-validated against CDF refVals
+  quantileVals: [
+    { p: 0.01, x: 1 },
+    { p: 0.05, x: 1 },
+    { p: 0.25, x: 1 },
+    { p: 0.5, x: 2 },
+    { p: 0.75, x: 4 },
+    { p: 0.95, x: 7 },
+    { p: 0.99, x: 10 }
   ]
 }, {
   name: 'GeneralizedHermite',
@@ -254,6 +354,16 @@ export default [{
     { x: 8.0, pmf: 0.07337884532565885, cdf: 0.3184595371225305 },
     { x: 12.0, pmf: 0.0398875479769076, cdf: 0.4414099317158779 },
     { x: 18.0, pmf: 0.027677278671054566, cdf: 0.6998700442018335 }
+  ],
+  // GeneralizedHermite(a1=2, a2=2, m=6) — ranjs quantile cross-validated against CDF refVals
+  quantileVals: [
+    { p: 0.01, x: 0 },
+    { p: 0.05, x: 1 },
+    { p: 0.25, x: 8 },
+    { p: 0.5, x: 13 },
+    { p: 0.75, x: 20 },
+    { p: 0.95, x: 30 },
+    { p: 0.99, x: 38 }
   ]
 }, {
   name: 'Geometric',
@@ -273,6 +383,16 @@ export default [{
     { x: 5, pmf: 0.015624999999999988, cdf: 0.984375 },
     { x: 8, pmf: 0.0019531250000000035, cdf: 0.998046875 },
     { x: 12, pmf: 0.00012207031250000008, cdf: 0.9998779296875 }
+  ],
+  // scipy.stats.nbinom(1, 0.5) — 0-indexed geometric; see refVals parameterization note
+  quantileVals: [
+    { p: 0.01, x: 0 },
+    { p: 0.05, x: 0 },
+    { p: 0.25, x: 0 },
+    { p: 0.5, x: 0 },
+    { p: 0.75, x: 1 },
+    { p: 0.95, x: 4 },
+    { p: 0.99, x: 6 }
   ]
 }, {
   name: 'HeadsMinusTails',
@@ -291,6 +411,16 @@ export default [{
     { x: 6.0, pmf: 0.087890625, cdf: 0.978515625 },
     { x: 8.0, pmf: 0.01953125, cdf: 0.998046875 },
     { x: 10.0, pmf: 0.001953125, cdf: 1.0 }
+  ],
+  // HeadsMinusTails(n=5) — ranjs quantile cross-validated against CDF refVals
+  quantileVals: [
+    { p: 0.01, x: 0 },
+    { p: 0.05, x: 0 },
+    { p: 0.25, x: 2 },
+    { p: 0.5, x: 2 },
+    { p: 0.75, x: 4 },
+    { p: 0.95, x: 6 },
+    { p: 0.99, x: 8 }
   ]
 }, {
   name: 'Hypergeometric',
@@ -311,6 +441,16 @@ export default [{
     { x: 3, pmf: 0.15999326344153927, cdf: 0.9687592101385205 },
     { x: 4, pmf: 0.029472443265546714, cdf: 0.9982316534040672 },
     { x: 5, pmf: 0.0017683465959328027, cdf: 1.0 }
+  ],
+  // scipy.stats.hypergeom(M=30, n=10, N=5) — see refVals parameterization note
+  quantileVals: [
+    { p: 0.01, x: 0 },
+    { p: 0.05, x: 0 },
+    { p: 0.25, x: 1 },
+    { p: 0.5, x: 2 },
+    { p: 0.75, x: 2 },
+    { p: 0.95, x: 3 },
+    { p: 0.99, x: 4 }
   ]
 }, {
   name: 'LogSeries',
@@ -331,6 +471,16 @@ export default [{
     { x: 7.0, pmf: 0.001610150715277861, cdf: 0.9987228169963479 },
     { x: 10.0, pmf: 0.00014088818758681285, cdf: 0.9998812309831728 },
     { x: 20.0, pmf: 6.879306034512346e-08, cdf: 0.999999937229902 }
+  ],
+  // scipy.stats.logser(p=0.5)
+  quantileVals: [
+    { p: 0.01, x: 1 },
+    { p: 0.05, x: 1 },
+    { p: 0.25, x: 1 },
+    { p: 0.5, x: 1 },
+    { p: 0.75, x: 2 },
+    { p: 0.95, x: 3 },
+    { p: 0.99, x: 5 }
   ]
 }, {
   name: 'NegativeHypergeometric',
@@ -351,6 +501,16 @@ export default [{
     { x: 8, pmf: 0.07167384049897532, cdf: 0.9237349067403976 },
     { x: 12, pmf: 0.0032007456682079717, cdf: 0.998939093503107 },
     { x: 15, pmf: 0.000016707188927434303, cdf: 1 }
+  ],
+  // scipy.stats.nhypergeom(M=35, n=15, r=7)
+  quantileVals: [
+    { p: 0.01, x: 0 },
+    { p: 0.05, x: 1 },
+    { p: 0.25, x: 3 },
+    { p: 0.5, x: 5 },
+    { p: 0.75, x: 7 },
+    { p: 0.95, x: 9 },
+    { p: 0.99, x: 11 }
   ]
 }, {
   name: 'NegativeBinomial',
@@ -373,6 +533,16 @@ export default [{
     { x: 10, pmf: 0.058570775268195, cdf: 0.8724787538527833 },
     { x: 15, pmf: 0.008488977840717116, cdf: 0.9868309265111141 },
     { x: 25, pmf: 3.570821815044619e-05, cdf: 0.9999592256410035 }
+  ],
+  // scipy.stats.nbinom(10, 0.6) — ranjs p is failures; scipy p is successes; see refVals note
+  quantileVals: [
+    { p: 0.01, x: 1 },
+    { p: 0.05, x: 2 },
+    { p: 0.25, x: 4 },
+    { p: 0.5, x: 6 },
+    { p: 0.75, x: 9 },
+    { p: 0.95, x: 13 },
+    { p: 0.99, x: 16 }
   ]
 }, {
   name: 'NeymanA',
@@ -394,6 +564,16 @@ export default [{
     { x: 6.0, pmf: 0.07407697138311874, cdf: 0.7884728507179998 },
     { x: 10.0, pmf: 0.023888133739920096, cdf: 0.9481690751884645 },
     { x: 20.0, pmf: 0.0003644479532151495, cdf: 0.999442904902409 }
+  ],
+  // NeymanA(λ=2, φ=2) — ranjs quantile cross-validated against CDF refVals
+  quantileVals: [
+    { p: 0.01, x: 0 },
+    { p: 0.05, x: 0 },
+    { p: 0.25, x: 1 },
+    { p: 0.5, x: 3 },
+    { p: 0.75, x: 6 },
+    { p: 0.95, x: 11 },
+    { p: 0.99, x: 14 }
   ]
 }, {
   name: 'Poisson',
@@ -420,6 +600,16 @@ export default [{
     { x: 15, pmf: 0.034718069630684245, cdf: 0.9512595966960213 },
     { x: 20, pmf: 0.0018660813139987742, cdf: 0.998411739338142 },
     { x: 30, pmf: 1.7115717355368203e-07, cdf: 0.9999999201620534 }
+  ],
+  // scipy.stats.poisson(10)
+  quantileVals: [
+    { p: 0.01, x: 3 },
+    { p: 0.05, x: 5 },
+    { p: 0.25, x: 8 },
+    { p: 0.5, x: 10 },
+    { p: 0.75, x: 12 },
+    { p: 0.95, x: 15 },
+    { p: 0.99, x: 18 }
   ]
 }, {
   name: 'PolyaAeppli',
@@ -441,6 +631,16 @@ export default [{
     { x: 6.0, pmf: 0.07067509235689774, cdf: 0.7964105487132334 },
     { x: 10.0, pmf: 0.02262304843105503, cdf: 0.9464595907555691 },
     { x: 20.0, pmf: 0.0005328296608723276, cdf: 0.9989993828812536 }
+  ],
+  // PolyaAeppli(λ=2, θ=0.5) — ranjs quantile cross-validated against CDF refVals
+  quantileVals: [
+    { p: 0.01, x: 0 },
+    { p: 0.05, x: 0 },
+    { p: 0.25, x: 1 },
+    { p: 0.5, x: 3 },
+    { p: 0.75, x: 6 },
+    { p: 0.95, x: 11 },
+    { p: 0.99, x: 15 }
   ]
 }, {
   name: 'Rademacher',
@@ -452,6 +652,16 @@ export default [{
   refVals: [
     { x: -1.0, pmf: 0.5, cdf: 0.5 },
     { x: 1.0, pmf: 0.5, cdf: 1.0 }
+  ],
+  // Rademacher — ranjs quantile cross-validated against CDF refVals
+  quantileVals: [
+    { p: 0.01, x: -1 },
+    { p: 0.05, x: -1 },
+    { p: 0.25, x: -1 },
+    { p: 0.5, x: -1 },
+    { p: 0.75, x: 1 },
+    { p: 0.95, x: 1 },
+    { p: 0.99, x: 1 }
   ]
 }, {
   name: 'Skellam',
@@ -475,6 +685,16 @@ export default [{
     { x: 5, pmf: 0.03528429361493396, cdf: 0.959557389766115 },
     { x: 8, pmf: 0.005269407891006391, cdf: 0.9960314331413155 },
     { x: 10, pmf: 0.000993881922213998, cdf: 0.9994006072684142 }
+  ],
+  // scipy.stats.skellam(mu1=5, mu2=5)
+  quantileVals: [
+    { p: 0.01, x: -7 },
+    { p: 0.05, x: -5 },
+    { p: 0.25, x: -2 },
+    { p: 0.5, x: 0 },
+    { p: 0.75, x: 2 },
+    { p: 0.95, x: 5 },
+    { p: 0.99, x: 7 }
   ]
 }, {
   name: 'Soliton',
@@ -498,6 +718,16 @@ export default [{
     { x: 8, pmf: 1 / 56, cdf: 39 / 40 },
     { x: 9, pmf: 1 / 72, cdf: 89 / 90 },
     { x: 10, pmf: 1 / 90, cdf: 1.0 }
+  ],
+  // Soliton(N=10) — ranjs quantile cross-validated against CDF refVals
+  quantileVals: [
+    { p: 0.01, x: 1 },
+    { p: 0.05, x: 1 },
+    { p: 0.25, x: 2 },
+    { p: 0.5, x: 2 },
+    { p: 0.75, x: 3 },
+    { p: 0.95, x: 7 },
+    { p: 0.99, x: 10 }
   ]
 }, {
   name: 'YuleSimon',
@@ -518,6 +748,16 @@ export default [{
     { x: 10.0, pmf: 0.0010489510489510487, cdf: 0.9965034965034965 },
     { x: 20.0, pmf: 8.469791078486729e-05, cdf: 0.9994353472614342 },
     { x: 50.0, pmf: 2.561256723298898e-06, cdf: 0.999957312387945 }
+  ],
+  // scipy.stats.yulesimon(alpha=3)
+  quantileVals: [
+    { p: 0.01, x: 1 },
+    { p: 0.05, x: 1 },
+    { p: 0.25, x: 1 },
+    { p: 0.5, x: 1 },
+    { p: 0.75, x: 1 },
+    { p: 0.95, x: 3 },
+    { p: 0.99, x: 7 }
   ]
 }, {
   name: 'Zeta',
@@ -538,6 +778,16 @@ export default [{
     { x: 10.0, pmf: 0.0001444080108616899, cdf: 0.9995519091451442 },
     { x: 20.0, pmf: 1.036757778282607e-05, cdf: 0.9999309656983761 },
     { x: 50.0, pmf: 3.18790425501579e-07, cdf: 0.9999944646904115 }
+  ],
+  // scipy.stats.zipf(a=3.8) — scipy zipf is the Zeta distribution
+  quantileVals: [
+    { p: 0.01, x: 1 },
+    { p: 0.05, x: 1 },
+    { p: 0.25, x: 1 },
+    { p: 0.5, x: 1 },
+    { p: 0.75, x: 1 },
+    { p: 0.95, x: 2 },
+    { p: 0.99, x: 3 }
   ]
 }, {
   name: 'Zipf',
@@ -559,5 +809,15 @@ export default [{
     { x: 30.0, pmf: 3.081265308076359e-05, cdf: 0.9995941430438425 },
     { x: 70.0, pmf: 2.425485811022207e-06, cdf: 0.9999574952682868 },
     { x: 100.0, pmf: 8.319416331806168e-07, cdf: 1.0 }
+  ],
+  // scipy.stats.zipfian(a=3, n=100)
+  quantileVals: [
+    { p: 0.01, x: 1 },
+    { p: 0.05, x: 1 },
+    { p: 0.25, x: 1 },
+    { p: 0.5, x: 1 },
+    { p: 0.75, x: 1 },
+    { p: 0.95, x: 3 },
+    { p: 0.99, x: 6 }
   ]
 }]
