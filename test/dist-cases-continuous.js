@@ -200,11 +200,13 @@ export default [{
     // b=1 exercises the log branch (1 - Math.log(1-p)/a) in _q
     { name: 'unit shape parameter', params: () => [2, 1] }
   ],
-  // mpmath: BenktanderII PDF/CDF formula with a=2, b=0.9995 @ 50 dps
-  // Boundary values (x near 1): Python Decimal @ 60 dps, a=2, b=0.9995
+  // Python Decimal @ 60 dps, direct formula f(x)=exp(a*(1-x^b)/b)*x^(b-2)*(a*x^b-b+1),
+  // F(x)=1-x^(b-1)*exp(a*(1-x^b)/b); a=2, b=0.9995; all other rows: mpmath @ 50 dps
   refVals: [
-    { x: 1.000001, pdf: 2.0004959965037585, cdf: 2.000497998251211222e-6 },
-    { x: 1.0001, pdf: 2.0000996900573424, cdf: 0.00020002998383485039863 },
+    // Python Decimal @ 60 dps: xb=Decimal('1.000001')**b; u=a*(1-xb)/b; 1-(xb/x)*u.exp()
+    { x: 1.000001, pdf: 2.0004959965037585, cdf: 2.0004979982512112e-06 },
+    // Python Decimal @ 60 dps: xb=Decimal('1.0001')**b; u=a*(1-xb)/b; 1-(xb/x)*u.exp()
+    { x: 1.0001, pdf: 2.0000996900573424, cdf: 0.0002000299838348504 },
     { x: 1.001, pdf: 1.996500505574631, cdf: 0.001998499585372714 },
     { x: 1.01, pdf: 1.960863182279961, cdf: 0.01980615448460798 },
     { x: 1.1, pdf: 1.6376855076637271, cdf: 0.18130429928524164 },
@@ -1251,8 +1253,11 @@ export default [{
     name: 'zero shape parameter',
     params: () => [0, 2, 0]
   }],
-  // xi<0 shares the xi>0 power-transform quantile path; xi=0 (log branch) excluded — quantile correctness for xi=0 covered by the analytical suite
-  sampleParams: [{ name: 'positive shape parameter', params: () => [0, 2, 2] }],
+  // xi<0 shares the xi>0 power-transform quantile path; xi=0 exercises the -log(1-p) branch in _q
+  sampleParams: [
+    { name: 'positive shape parameter', params: () => [0, 2, 2] },
+    { name: 'zero shape parameter', params: () => [0, 2, 0] }
+  ],
   refVals: [
     { x: 1e-6, pdf: 0.49999925000093753, cdf: 4.99999624925529e-7 },
     { x: 1e-4, pdf: 0.4999250093739064, cdf: 4.999625031243404e-5 },
@@ -2964,8 +2969,11 @@ export default [{
     name: 'zero shape parameter',
     params: () => [0, 2, 0]
   }],
-  // xi<0 shares the xi>0 power-transform quantile path; xi=0 (logistic, log branch in _q) excluded — quantile correctness for xi=0 covered by the analytical suite
-  sampleParams: [{ name: 'positive shape parameter', params: () => [0, 2, 2] }],
+  // xi<0 shares the xi>0 power-transform quantile path; xi=0 exercises the logistic quantile branch in _q
+  sampleParams: [
+    { name: 'positive shape parameter', params: () => [0, 2, 2] },
+    { name: 'zero shape parameter', params: () => [0, 2, 0] }
+  ],
   refVals: [
     { x: -2, pdf: 0, cdf: 0 },
     { x: -0.9, pdf: 0.912657670484702, cdf: 0.240253073352042 },
@@ -3219,8 +3227,11 @@ export default [{
     name: 'negative shape parameter',
     params: () => [-2]
   }],
-  // lambda<0 shares the lambda>0 power-transform quantile path; lambda=0 (logit branch) excluded — quantile correctness covered by the analytical suite
-  sampleParams: [{ name: 'positive shape parameter', params: () => [2] }],
+  // lambda<0 shares the lambda>0 power-transform quantile path; lambda=0 exercises the log(p/(1-p)) branch in _q
+  sampleParams: [
+    { name: 'positive shape parameter', params: () => [2] },
+    { name: 'zero shape parameter', params: () => [0] }
+  ],
   // scipy.stats.tukeylambda(0)  # equals logistic at lambda=0
   refVals: [
     { x: -5.0, pdf: 0.006648056670790155, cdf: 0.006692850924284856 },

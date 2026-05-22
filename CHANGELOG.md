@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `GeneralizedPareto`, `ShiftedLogLogistic`, and `TukeyLambda` GoF sampling tests now cover the boundary branches (`xi=0` / `lambda=0`) in `_q`, exercising the `−log(1−p)`, logistic, and `log(p/(1−p))` code paths respectively. Closes #270.
+
 ### Changed
 
 - `marcumQ` and `marcumP` now evaluate the transition band `y ≈ x + μ` with `μ ≥ 135` via the large-μ uniform asymptotic expansion (Section 4.2 of Gil, Segura & Temme, arXiv:1311.0681) instead of the `O(μ)` three-term recurrence. This is the fifth and final computation branch of the source algorithm and removes the recurrence's accumulated rounding in that regime. Closes #315.
@@ -13,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `DoublyNoncentralChi2` now extends `NoncentralChi2` instead of reimplementing its PDF and CDF. The `_pdf`, `_cdf`, and `_generator` are fully inherited. The model complexity used by `aic()` and `bic()` changes from 4 to 2, reflecting that the distribution has 2 identifiable parameters in its collapsed form `NoncentralChi2(k1+k2, λ1+λ2)`. `NoncentralChi2` now also accepts `lambda = 0` (was `lambda > 0`), degenerating correctly to a central chi-squared. Closes #316.
 
 ### Fixed
+
+- `BenktanderII` near-boundary `refVals` at `x = 1+1e-6` and `x = 1+1e-4` (params `[2, 0.9995]`) were replaced with values derived independently via Python `Decimal` at 60 decimal places using the direct mathematical formula, not the `expm1`-based implementation formula. Closes #295.
 
 - `romberg` returned the silent sentinel `0` when the 20-step budget was exhausted without convergence — indistinguishable from a genuine zero integral. It now returns the best Richardson extrapolate accumulated so far, consistent with how `trap` returns its last estimate on timeout. The stray `console.log` in `Davis._cdf` (which exposed this bug during development) has also been removed. Closes #312.
 - `marcumQ` and `marcumP` were accurate only for `x < 30` — the asymptotic, recurrence and quadrature computation branches existed only as commented-out scaffolding. Activated all four methods of Gil, Segura & Temme (arXiv:1311.0681) behind a regime dispatcher: series expansion (§3), large-ξ asymptotic expansion (§4.1), three-term recurrence relation (Eq. 14) and trapezoidal quadrature (§5). The Marcum functions are now accurate across the full `μ ≥ 1, x > 0, y > 0` domain, restoring full-range CDF precision for the `Rice`, `NoncentralChi2`, `DoublyNoncentralChi2` and `Skellam` distributions. Closes #253.
