@@ -63,9 +63,14 @@ export default class extends Distribution {
   }
 
   _pdf (x) {
-    // recursiveSum produces 0/0 = NaN at the closed-support boundary; limit is 0 for alpha > 1.
-    // For alpha <= 1 the PDF is non-zero or divergent at 0 — out of scope, leave as NaN until fixed.
-    if (x === 0 && this.p.alpha > 1) return 0
+    // At x=0: x^(alpha+k-1) collapses to 0 for all k when alpha>1; only k=0 survives when alpha=1;
+    // diverges for alpha<1 since x^(alpha-1) → +∞.
+    if (x === 0) {
+      if (this.p.alpha > 1) return 0
+      if (this.p.alpha < 1) return Infinity
+      // alpha===1: k=0 term is e^(-lambda/2)*(1-0)^(beta-1)/B(1,beta); all k>=1 vanish since 0^k=0.
+      return this.c[0] / this.c[1]
+    }
 
     // Speed-up variables.
     const l2 = this.p.lambda / 2

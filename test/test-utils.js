@@ -289,7 +289,11 @@ export function checkRefVals (dist, refVals) {
   for (const { x, pdf, pmf, cdf } of refVals) {
     if (pdf !== undefined) {
       const actual = dist.pdf(x)
-      assert(Math.abs(actual - pdf) < refValTol(pdf), `pdf(${x}) = ${actual}, expected ${pdf}`)
+      if (!Number.isFinite(pdf)) {
+        assert(actual === pdf, `pdf(${x}) = ${actual}, expected ${pdf}`)
+      } else {
+        assert(Math.abs(actual - pdf) < refValTol(pdf), `pdf(${x}) = ${actual}, expected ${pdf}`)
+      }
     }
     if (pmf !== undefined) {
       const actual = dist.pdf(x)
