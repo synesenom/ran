@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `Distribution` internal field `this.t` renamed to `this._type` for readability. No behavioural change. Closes #205 (PR 1/6).
+
 - `marcumQ` and `marcumP` now evaluate the transition band `y ≈ x + μ` with `μ ≥ 135` via the large-μ uniform asymptotic expansion (Section 4.2 of Gil, Segura & Temme, arXiv:1311.0681) instead of the `O(μ)` three-term recurrence. This is the fifth and final computation branch of the source algorithm and removes the recurrence's accumulated rounding in that regime. Closes #315.
 
 - `DoublyNoncentralChi2` now extends `NoncentralChi2` instead of reimplementing its PDF and CDF. The `_pdf`, `_cdf`, and `_generator` are fully inherited. The model complexity used by `aic()` and `bic()` changes from 4 to 2, reflecting that the distribution has 2 identifiable parameters in its collapsed form `NoncentralChi2(k1+k2, λ1+λ2)`. `NoncentralChi2` now also accepts `lambda = 0` (was `lambda > 0`), degenerating correctly to a central chi-squared. Closes #316.
