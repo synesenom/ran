@@ -311,7 +311,16 @@ export default [{
   ],
   cases: [{
     params: () => [0.5]
+  }, {
+    // Small-a boundary region where the naive formula loses all digits (issue #248)
+    params: () => [1e-8],
+    refVals: [
+      { x: 1, pmf: 1.0000000000000001e-16, cdf: 1.0000000003187713e-16 },
+      { x: 2, pmf: 1.99999998e-16, cdf: 2.9999999844127016e-16 },
+      { x: 5, pmf: 4.999999800000002e-16, cdf: 1.4999999591191263e-15 }
+    ]
   }],
+  sampleParams: [{ params: () => [0.5] }],
   // FlorySchulz(a=0.5): pmf=a^2·k·(1-a)^(k-1); cdf=1-(1-a)^k(1+a·k)
   refVals: [
     { x: 1.0, pmf: 0.25, cdf: 0.25 },

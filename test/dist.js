@@ -205,8 +205,8 @@ const UnitTests = {
   },
 
   test (tc) {
-    // Test cases.
-    const cases = tc.cases.map(c => ({
+    // Test cases — skip sampling-expensive parameter sets the same way .sample() does.
+    const cases = (tc.sampleParams ?? tc.cases).map(c => ({
       name: c.name || 'random parameters',
       gen: () => {
         const p = c.params()

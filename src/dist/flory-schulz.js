@@ -34,21 +34,17 @@ export default class extends Distribution {
 
     // Speed-up constants
     this.c = {
-      oneMinusA: 1 - a
+      oneMinusA: 1 - a,
+      lnOneMinusA: Math.log1p(-a)
     }
   }
 
   _generator () {
-    let k = 1
-    const r = this.r.next()
-    let ak = 1 + this.p.a
-    let p = this.c.oneMinusA
-    while (r < p * ak) {
-      ak += this.p.a
-      p *= this.c.oneMinusA
-      k++
-    }
-    return k
+    // FlorySchulz(a) = G1 + G2 + 1, G_i ~ Geom(a) (failures before success).
+    // Geom(a) inverse-CDF: floor(log(U) / log(1-a)), O(1) regardless of a.
+    const g1 = Math.floor(Math.log(this.r.next()) / this.c.lnOneMinusA)
+    const g2 = Math.floor(Math.log(this.r.next()) / this.c.lnOneMinusA)
+    return g1 + g2 + 1
   }
 
   _pdf (x) {
@@ -56,6 +52,8 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return 1 - Math.pow(this.c.oneMinusA, x) * (1 + this.p.a * x)
+    // log1p/expm1 avoids 1-near-1 cancellation in 1-(1-a)^k*(1+ka) when a→0
+    const kLnOma = x * this.c.lnOneMinusA
+    return -Math.expm1(kLnOma) - Math.exp(kLnOma) * x * this.p.a
   }
 }
