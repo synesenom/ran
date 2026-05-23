@@ -16,7 +16,7 @@ import { MAX_ITER } from '../core/constants'
  */
 class Distribution {
   constructor (type, k) {
-    // decisions/0009-rename-single-letter-instance-fields.md
+    // decisions/0009-rename-single-letter-instance-fields.md — descriptive names replace single-letter abbreviations
     this._type = type
 
     // Number of parameters
