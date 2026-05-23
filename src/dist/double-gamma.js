@@ -10,8 +10,8 @@ import Gamma from './gamma'
  *
  * @class DoubleGamma
  * @memberof ran.dist
- * @param {number=} alpha Shape parameter. Default value is 1.
- * @param {number=} beta Rate parameter. Default value is 1.
+ * @param {number} alpha Shape parameter.
+ * @param {number} beta Rate parameter.
  * @see https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_dgamma.html
  * @constructor
  */

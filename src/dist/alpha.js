@@ -12,8 +12,8 @@ import { erf, erfinv } from '../special'
  *
  * @class Alpha
  * @memberof ran.dist
- * @param {number=} alpha Shape parameter. Default value is 1.
- * @param {number=} beta Scale parameter. Default value is 1.
+ * @param {number} alpha Shape parameter.
+ * @param {number} beta Scale parameter.
  * @see https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/alppdf.htm
  * @constructor
  */

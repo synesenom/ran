@@ -16,9 +16,9 @@ import NoncentralT from './noncentral-t'
  *
  * @class DoublyNoncentralT
  * @memberof ran.dist
- * @param {number} nu Degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 1.
- * @param {number} mu Location parameter. Default value is 1.
- * @param {number} theta Shape parameter. Default value is 1.
+ * @param {number} nu Degrees of freedom. If not an integer, it is rounded to the nearest one.
+ * @param {number} mu Location parameter.
+ * @param {number} theta Shape parameter.
  * @see https://www.wiley.com/en-us/Intermediate+Probability%3A+A+Computational+Approach-p-9780470026373
  * @constructor
  */

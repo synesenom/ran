@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  *
  * @class FlorySchulz
  * @memberof ran.dist
- * @param {number=} a Shape parameter. Default value is 0.5.
+ * @param {number} a Shape parameter.
  * @see https://en.wikipedia.org/wiki/Flory%E2%80%93Schulz_distribution
  * @constructor
  */

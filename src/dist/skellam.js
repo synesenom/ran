@@ -11,8 +11,8 @@ import Distribution from './_distribution'
  *
  * @class Skellam
  * @memberof ran.dist
- * @param {number=} mu1 Mean of the first Poisson distribution. Default value is 1.
- * @param {number=} mu2 Mean of the second Poisson distribution. Default value is 1.
+ * @param {number} mu1 Mean of the first Poisson distribution.
+ * @param {number} mu2 Mean of the second Poisson distribution.
  * @see https://en.wikipedia.org/wiki/Skellam_distribution
  * @constructor
  */

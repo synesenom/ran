@@ -9,9 +9,9 @@ import Distribution from './_distribution'
  *
  * @class Frechet
  * @memberof ran.dist
- * @param {number=} alpha Shape parameter. Default value is 1.
- * @param {number=} s Scale parameter. Default value is 1.
- * @param {number=} m Location parameter. Default value is 0.
+ * @param {number} alpha Shape parameter.
+ * @param {number} s Scale parameter.
+ * @param {number} m Location parameter.
  * @see https://en.wikipedia.org/wiki/Frechet_distribution
  * @constructor
  */

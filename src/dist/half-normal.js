@@ -10,7 +10,7 @@ import { erfinv } from '../special'
  *
  * @class HalfNormal
  * @memberof ran.dist
- * @param {number=} sigma Scale parameter. Default value is 1.
+ * @param {number} sigma Scale parameter.
  * @see https://en.wikipedia.org/wiki/Half-normal_distribution
  * @constructor
  */

@@ -11,10 +11,10 @@ import NoncentralChi2 from './noncentral-chi2'
  *
  * @class DoublyNoncentralChi2
  * @memberof ran.dist
- * @param {number=} k1 First degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 1.
- * @param {number=} k2 Second degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 1.
- * @param {number=} lambda1 First non-centrality parameter. Default value is 1.
- * @param {number=} lambda2 Second non-centrality parameter. Default value is 1.
+ * @param {number} k1 First degrees of freedom. If not an integer, it is rounded to the nearest one.
+ * @param {number} k2 Second degrees of freedom. If not an integer, it is rounded to the nearest one.
+ * @param {number} lambda1 First non-centrality parameter.
+ * @param {number} lambda2 Second non-centrality parameter.
  * @see https://doi.org/10.1093/biomet/36.1-2.202
  * @constructor
  */

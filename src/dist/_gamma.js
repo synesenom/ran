@@ -7,7 +7,7 @@ import normal from './_normal'
  * @memberof ran.dist
  * @param {ran.core.Xoshiro128p} r Random generator.
  * @param {number} a Shape parameter.
- * @param {number=} b Rate parameter. Default value is 1.
+ * @param {number} b Rate parameter.
  * @returns {number} Random variate.
  * @ignore
  */

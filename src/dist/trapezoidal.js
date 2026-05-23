@@ -9,10 +9,10 @@ import Distribution from './_distribution'
  *
  * @class Trapezoidal
  * @memberof ran.dist
- * @param {number=} a Lower bound of the support. Default value is 0.
- * @param {number=} b Start of the level part. Default value is 0.33.
- * @param {number=} c End of the level part. Default value is 0.67.
- * @param {number=} d Upper bound of the support. Default value is 1.
+ * @param {number} a Lower bound of the support.
+ * @param {number} b Start of the level part.
+ * @param {number} c End of the level part.
+ * @param {number} d Upper bound of the support.
  * @see https://en.wikipedia.org/wiki/Trapezoidal_distribution
  * @constructor
  */

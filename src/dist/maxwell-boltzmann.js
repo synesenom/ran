@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  *
  * @class MaxwellBoltzmann
  * @memberof ran.dist
- * @param {number=} a Scale parameter. Default value is 1.
+ * @param {number} a Scale parameter.
  * @see https://en.wikipedia.org/wiki/Maxwell%E2%80%93Boltzmann_distribution
  * @constructor
  */

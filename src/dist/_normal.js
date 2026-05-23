@@ -4,8 +4,8 @@
  * @method normal
  * @memberof ran.dist
  * @param {ran.core.Xoshiro128p} r Random generator.
- * @param {number=} mu Distribution mean. Default value is 0.
- * @param {number=} sigma Distribution standard deviation. Default value is 1.
+ * @param {number} mu Distribution mean.
+ * @param {number} sigma Distribution standard deviation.
  * @returns {number} Random variate.
  * @ignore
  */

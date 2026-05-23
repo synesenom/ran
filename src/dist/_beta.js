@@ -6,8 +6,8 @@ import gamma from './_gamma'
  * @method normal
  * @memberof ran.dist
  * @param {ran.core.Xoshiro128p} r Random generator.
- * @param {number=} a First shape parameter.
- * @param {number=} b Second shape parameter.
+ * @param {number} a First shape parameter.
+ * @param {number} b Second shape parameter.
  * @returns {number} Random variate.
  * @ignore
  */

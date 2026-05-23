@@ -11,9 +11,9 @@ import Distribution from './_distribution'
  *
  * @class LogGamma
  * @memberof ran.dist
- * @param {number=} alpha Shape parameter. Default value is 1.
- * @param {number=} beta Rate parameter. Default value is 1.
- * @param {number=} mu Location parameter. Default value is 0.
+ * @param {number} alpha Shape parameter.
+ * @param {number} beta Rate parameter.
+ * @param {number} mu Location parameter.
  * @see https://reference.wolfram.com/language/ref/LogGammaDistribution.html
  * @constructor
  */

@@ -9,8 +9,8 @@ import Laplace from './laplace'
  *
  * @class LogLaplace
  * @memberof ran.dist
- * @param {number=} mu Location parameter. Default value is 0.
- * @param {number=} b Scale parameter. Default value is 1.
+ * @param {number} mu Location parameter.
+ * @param {number} b Scale parameter.
  * @see https://en.wikipedia.org/wiki/Log-Laplace_distribution
  * @constructor
  */

@@ -10,8 +10,8 @@ import Distribution from './_distribution'
  *
  * @class RaisedCosine
  * @memberof ran.dist
- * @param {number=} mu Location paramter. Default value is 0.
- * @param {number=} s Scale parameter. Default value is 1.
+ * @param {number} mu Location paramter.
+ * @param {number} s Scale parameter.
  * @see https://en.wikipedia.org/wiki/Raised_cosine_distribution
  * @constructor
  */

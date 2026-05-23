@@ -9,8 +9,8 @@ import GeneralizedNormal from './generalized-normal'
  *
  * @class HalfGeneralizedNormal
  * @memberof ran.dist
- * @param {number=} alpha Scale parameter. Default value is 1.
- * @param {number=} beta Shape parameter. Default value is 1.
+ * @param {number} alpha Scale parameter.
+ * @param {number} beta Shape parameter.
  * @see https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.halfgennorm.html
  * @constructor
  */

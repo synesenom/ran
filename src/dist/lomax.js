@@ -9,8 +9,8 @@ import Distribution from './_distribution'
  *
  * @class Lomax
  * @memberof ran.dist
- * @param {number=} lambda Scale parameter. Default value is 1.
- * @param {number=} alpha Shape parameter. Default value is 1.
+ * @param {number} lambda Scale parameter.
+ * @param {number} alpha Shape parameter.
  * @see https://en.wikipedia.org/wiki/Lomax_distribution
  * @constructor
  */

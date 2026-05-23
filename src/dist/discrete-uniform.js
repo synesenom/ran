@@ -10,8 +10,8 @@ import Distribution from './_distribution'
  *
  * @class DiscreteUniform
  * @memberof ran.dist
- * @param {number=} xmin Lower boundary. If not an integer, it is rounded to the nearest one. Default value is 0.
- * @param {number=} xmax Upper boundary. If not an integer, it is rounded to the nearest one. Default value is 100.
+ * @param {number} xmin Lower boundary. If not an integer, it is rounded to the nearest one.
+ * @param {number} xmax Upper boundary. If not an integer, it is rounded to the nearest one.
  * @see https://en.wikipedia.org/wiki/Discrete_uniform_distribution
  * @constructor
  */

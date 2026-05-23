@@ -13,9 +13,9 @@ import PreComputed from './_pre-computed'
  *
  * @class Delaporte
  * @memberof ran.dist
- * @param {number=} alpha Shape parameter of the gamma component. Default component is 1.
- * @param {number=} beta Scale parameter of the gamma component. Default value is 1.
- * @param {number=} lambda Mean of the Poisson component. Default value is 1.
+ * @param {number} alpha Shape parameter of the gamma component. Default component is 1.
+ * @param {number} beta Scale parameter of the gamma component.
+ * @param {number} lambda Mean of the Poisson component.
  * @see https://en.wikipedia.org/wiki/Delaporte_distribution
  * @constructor
  */

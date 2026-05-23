@@ -10,7 +10,7 @@ import brent from '../algorithms/brent'
  *
  * @class TukeyLambda
  * @memberof ran.dist
- * @param {number=} lambda Shape parameter. Default value is 1.5.
+ * @param {number} lambda Shape parameter.
  * @see https://en.wikipedia.org/wiki/Tukey_lambda_distribution
  * @constructor
  */

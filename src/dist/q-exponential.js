@@ -10,8 +10,8 @@ import Distribution from './_distribution'
  *
  * @class QExponential
  * @memberof ran.dist
- * @param {number=} q Shape parameter. Default value is 1.5.
- * @param {number=} lambda Rate parameter. Default value is 1.
+ * @param {number} q Shape parameter.
+ * @param {number} lambda Rate parameter.
  * @see https://en.wikipedia.org/wiki/Q-exponential_distribution
  * @constructor
  */

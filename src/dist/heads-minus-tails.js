@@ -11,7 +11,7 @@ import { logBinomial } from '../special'
  *
  * @class HeadsMinusTails
  * @memberof ran.dist
- * @param {number=} n Half number of trials. Default value is 10.
+ * @param {number} n Half number of trials.
  * @see http://mathworld.wolfram.com/Heads-Minus-TailsDistribution.html
  * @constructor
  */

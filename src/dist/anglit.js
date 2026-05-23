@@ -10,8 +10,8 @@ import Distribution from './_distribution'
  *
  * @class Anglit
  * @memberof ran.dist
- * @param {number=} mu Location parameter. Default value is 0.
- * @param {number=} beta Scale parameter. Default value is 1.
+ * @param {number} mu Location parameter.
+ * @param {number} beta Scale parameter.
  * @see https://docs.scipy.org/doc/scipy-1.0.0/reference/tutorial/stats/continuous_anglit.html
  * @constructor
  */

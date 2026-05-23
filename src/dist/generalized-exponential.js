@@ -10,9 +10,9 @@ import { lambertW0 } from '../special'
  *
  * @class GeneralizedExponential
  * @memberof ran.dist
- * @param {number=} a First shape parameter. Default value is 1.
- * @param {number=} b Second shape parameter. Default value is 1.
- * @param {number=} c Third shape parameter. Default value is 1.
+ * @param {number} a First shape parameter.
+ * @param {number} b Second shape parameter.
+ * @param {number} c Third shape parameter.
  * @see https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_genexpon.html
  * @constructor
  */

@@ -10,10 +10,10 @@ import Distribution from './_distribution'
  *
  * @class JohnsonSU
  * @memberof ran.dist
- * @param {number=} gamma First location parameter. Default value is 0.
- * @param {number=} delta First scale parameter. Default value is 1.
- * @param {number=} lambda Second scale parameter. Default value is 1.
- * @param {number=} xi Second location parameter. Default value is 0.
+ * @param {number} gamma First location parameter.
+ * @param {number} delta First scale parameter.
+ * @param {number} lambda Second scale parameter.
+ * @param {number} xi Second location parameter.
  * @see https://en.wikipedia.org/wiki/Johnson%27s_SU-distribution
  * @constructor
  */

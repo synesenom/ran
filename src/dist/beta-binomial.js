@@ -11,9 +11,9 @@ import Distribution from './_distribution'
  *
  * @class BetaBinomial
  * @memberof ran.dist
- * @param {number=} n Number of trials. Default value is 10.
- * @param {number=} alpha First shape parameter. Default value is 1.
- * @param {number=} beta Second shape parameter. Default value is 2.
+ * @param {number} n Number of trials.
+ * @param {number} alpha First shape parameter.
+ * @param {number} beta Second shape parameter.
  * @see https://en.wikipedia.org/wiki/Beta-binomial_distribution
  * @constructor
  */

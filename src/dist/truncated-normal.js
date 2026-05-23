@@ -12,10 +12,10 @@ import Distribution from './_distribution'
  *
  * @class TruncatedNormal
  * @memberof ran.dist
- * @param {number=} mu Mean of the underlying normal distribution. Default value is 0.
- * @param {number=} sigma Variance of the underlying normal distribution. Default value is 1.
- * @param {number=} a Lower boundary of the support. Default value is 0.
- * @param {number=} b Upper boundary of the support. Default value is 1.
+ * @param {number} mu Mean of the underlying normal distribution.
+ * @param {number} sigma Variance of the underlying normal distribution.
+ * @param {number} a Lower boundary of the support.
+ * @param {number} b Upper boundary of the support.
  * @see https://en.wikipedia.org/wiki/Truncated_normal_distribution
  * @constructor
  */

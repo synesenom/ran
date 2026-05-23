@@ -12,7 +12,7 @@ import { MAX_ITER } from '../core/constants'
  *
  * @class VonMises
  * @memberof ran.dist
- * @param {number=} kappa Shape parameter. Default value is 1.
+ * @param {number} kappa Shape parameter.
  * @see https://en.wikipedia.org/wiki/Von_Mises_distribution
  * @see L. Barabesi, "Generating von Mises variates by the ratio-of-uniforms method", Statistica Applicata 7(4), 417–426, 1995.
  * @constructor

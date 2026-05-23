@@ -9,9 +9,9 @@ import Distribution from './_distribution'
  *
  * @class ShiftedLogLogistic
  * @memberof ran.dist
- * @param {number=} mu Location parameter. Default value is 0.
- * @param {number=} sigma Scale parameter. Default value is 1.
- * @param {number=} xi Shape parameter. Default value is 1.
+ * @param {number} mu Location parameter.
+ * @param {number} sigma Scale parameter.
+ * @param {number} xi Shape parameter.
  * @see https://en.wikipedia.org/wiki/Shifted_log-logistic_distribution
  * @constructor
  */

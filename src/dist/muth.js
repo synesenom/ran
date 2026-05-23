@@ -12,7 +12,7 @@ import { lambertW1m } from '../special'
  *
  * @class Muth
  * @memberof ran.dist
- * @param {number=} alpha Shape parameter. Default value is 0.5.
+ * @param {number} alpha Shape parameter.
  * @see https://www.tandfonline.com/doi/abs/10.3846/13926292.2015.1048540
  * @constructor
  */

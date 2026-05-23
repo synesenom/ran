@@ -6,7 +6,7 @@ import gamma from './_gamma'
  * @method chi2
  * @memberof ran.dist
  * @param {ran.core.Xoshiro128p} r Random generator.
- * @param {number=} nu Degrees of freedom.
+ * @param {number} nu Degrees of freedom.
  * @returns {number} Random variate.
  * @ignore
  */

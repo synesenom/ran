@@ -10,7 +10,7 @@ import { lambertW1m } from '../special'
  *
  * @class Lindley
  * @memberof ran.dist
- * @param {number=} theta Shape parameter. Default value is 1.
+ * @param {number} theta Shape parameter.
  * @see http://www.hjms.hacettepe.edu.tr/uploads/b35d591c-22f6-4136-8735-20c82936cd64.pdf
  * @constructor
  */

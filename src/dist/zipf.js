@@ -10,8 +10,8 @@ import Distribution from './_distribution'
  *
  * @class Zipf
  * @memberof ran.dist
- * @param {number=} s Exponent of the distribution. Default value is 1.
- * @param {number=} N Number of words. If not an integer, it is rounded to the nearest integer. Default is 100.
+ * @param {number} s Exponent of the distribution.
+ * @param {number} N Number of words. If not an integer, it is rounded to the nearest integer. Default is 100.
  * @see https://en.wikipedia.org/wiki/Zipf%27s_law
  * @constructor
  */

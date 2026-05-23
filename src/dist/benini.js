@@ -9,9 +9,9 @@ import Distribution from './_distribution'
  *
  * @class Benini
  * @memberof ran.dist
- * @param {number=} alpha First shape parameter. Default value is 1.
- * @param {number=} beta Second shape parameter. Default value is 1.
- * @param {number=} sigma Scale parameter. Default value is 1.
+ * @param {number} alpha First shape parameter.
+ * @param {number} beta Second shape parameter.
+ * @param {number} sigma Scale parameter.
  * @see https://en.wikipedia.org/wiki/Benini_distribution
  * @constructor
  */

@@ -9,8 +9,8 @@ import Distribution from './_distribution'
  *
  * @class DiscreteWeibull
  * @memberof ran.dist
- * @param {number=} q First shape parameter. Default value is 0.5.
- * @param {number=} beta Second shape parameter. Default value is 1.
+ * @param {number} q First shape parameter.
+ * @param {number} beta Second shape parameter.
  * @see https://en.wikipedia.org/wiki/Discrete_Weibull_distribution
  * @constructor
  */

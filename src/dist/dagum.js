@@ -9,9 +9,9 @@ import Distribution from './_distribution'
  *
  * @class Dagum
  * @memberof ran.dist
- * @param {number=} p First shape parameter. Default value is 1.
- * @param {number=} a Second shape parameter. Default value is 1.
- * @param {number=} b Scale parameter. Default value is 1.
+ * @param {number} p First shape parameter.
+ * @param {number} a Second shape parameter.
+ * @param {number} b Scale parameter.
  * @see https://en.wikipedia.org/wiki/Dagum_distribution
  * @constructor
  */

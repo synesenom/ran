@@ -12,7 +12,7 @@ import Distribution from './_distribution'
  *
  * @class StudentT
  * @memberof ran.dist
- * @param {number=} nu Degrees of freedom. Default value is 1.
+ * @param {number} nu Degrees of freedom.
  * @see https://en.wikipedia.org/wiki/Student%27s_t-distribution
  * @constructor
  */
