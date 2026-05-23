@@ -1,4 +1,4 @@
-import { gammaLowerIncomplete, logGamma } from '../special'
+import { gammaLowerIncomplete, gammaLowerIncompleteInv, logGamma } from '../special'
 import gamma from './_gamma'
 import Distribution from './_distribution'
 
@@ -52,5 +52,9 @@ export default class Gamma extends Distribution {
 
   _cdf (x) {
     return gammaLowerIncomplete(this.p.alpha, this.p.beta * x)
+  }
+
+  _q (p) {
+    return gammaLowerIncompleteInv(this.p.alpha, p) / this.p.beta
   }
 }

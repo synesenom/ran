@@ -21,6 +21,7 @@ export default class DoubleGamma extends Gamma {
    */
   constructor (alpha, beta) {
     super(alpha, beta)
+    this._q = undefined // Gamma._q is wrong for the double-sided transform; fall back to _qEstimateRoot
 
     // Set support
     this.s = [{

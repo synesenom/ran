@@ -22,6 +22,7 @@ export default class LogGamma extends Gamma {
    */
   constructor (alpha, beta, mu) {
     super(alpha, beta)
+    this._q = undefined // Gamma._q is wrong for the log transform; fall back to _qEstimateRoot
 
     // Validate parameters
     this.p = Object.assign(this.p, { mu })
