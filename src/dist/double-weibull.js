@@ -46,7 +46,7 @@ export default class DoubleWeibull extends Weibull {
 
   _q (p) {
     return p > 0.5
-      ? super._q(2 * p - 1)
-      : -super._q(1 - 2 * p)
+      ? this.p.lambda2 * Math.pow(-Math.log(2 - 2 * p), 1 / this.p.k)
+      : -(this.p.lambda2 * Math.pow(-Math.log(2 * p), 1 / this.p.k))
   }
 }

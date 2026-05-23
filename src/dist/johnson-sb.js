@@ -1,5 +1,6 @@
 import Normal from './normal'
 import Distribution from './_distribution'
+import { erfinv } from '../special'
 
 /**
  * Generator for [Johnson's $S_B$ distribution]{@link https://en.wikipedia.org/wiki/Johnson%27s_SU-distribution#Johnson's_SB-distribution}:
@@ -58,6 +59,6 @@ export default class JohnsonSB extends Normal {
   }
 
   _q (p) {
-    return this.p.xi + this.p.lambda / (1 + Math.exp(-(super._q(p) - this.p.gamma) / this.p.delta))
+    return this.p.xi + this.p.lambda / (1 + Math.exp(-(this.c.sigmaRoot2 * erfinv(2 * p - 1) - this.p.gamma) / this.p.delta))
   }
 }

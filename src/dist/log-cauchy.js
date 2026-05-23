@@ -48,6 +48,6 @@ export default class LogCauchy extends Cauchy {
   }
 
   _q (p) {
-    return Math.exp(super._q(p))
+    return Math.exp(this.p.x0 + this.p.gamma * Math.tan(Math.PI * (p - 0.5)))
   }
 }

@@ -1,5 +1,6 @@
 import Normal from './normal'
 import Distribution from './_distribution'
+import { erfinv } from '../special'
 
 /**
  * Generator for the [truncated normal distribution]{@link https://en.wikipedia.org/wiki/Truncated_normal_distribution}:
@@ -43,12 +44,11 @@ export default class TruncatedNormal extends Normal {
       closed: true
     }]
 
-    // Speed-up constants.
-    this.c2 = [
-      super._cdf(a),
-      super._cdf(b) - super._cdf(a),
-      super._cdf((a + b) / 2)
-    ]
+    // Speed-up constants — merge with parent Normal constants.
+    Object.assign(this.c, {
+      phiA: super._cdf(a),
+      Z: super._cdf(b) - super._cdf(a)
+    })
   }
 
   _generator () {
@@ -56,14 +56,14 @@ export default class TruncatedNormal extends Normal {
   }
 
   _pdf (x) {
-    return super._pdf(x) / this.c2[1]
+    return super._pdf(x) / this.c.Z
   }
 
   _cdf (x) {
-    return (super._cdf(x) - this.c2[0]) / this.c2[1]
+    return (super._cdf(x) - this.c.phiA) / this.c.Z
   }
 
   _q (p) {
-    return super._q(this.c2[0] + p * this.c2[1])
+    return this.p.mu + this.c.sigmaRoot2 * erfinv(2 * (this.c.phiA + p * this.c.Z) - 1)
   }
 }

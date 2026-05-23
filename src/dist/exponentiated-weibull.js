@@ -55,6 +55,6 @@ export default class ExponentiatedWeibull extends Weibull {
   }
 
   _q (p) {
-    return super._q(Math.pow(p, 1 / this.p.alpha))
+    return this.p.lambda2 * Math.pow(-Math.log(1 - Math.pow(p, 1 / this.p.alpha)), 1 / this.p.k)
   }
 }

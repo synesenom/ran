@@ -1,4 +1,5 @@
 import Normal from './normal'
+import { erfinv } from '../special'
 
 /**
  * Generator for the [logit-normal distribution]{@link https://en.wikipedia.org/wiki/Logit-normal_distribution}:
@@ -45,6 +46,6 @@ export default class LogitNormal extends Normal {
   }
 
   _q (p) {
-    return 1 / (1 + Math.exp(-super._q(p)))
+    return 1 / (1 + Math.exp(-(this.p.mu + this.c.sigmaRoot2 * erfinv(2 * p - 1))))
   }
 }
