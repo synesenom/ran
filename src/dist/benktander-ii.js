@@ -10,8 +10,8 @@ import Distribution from './_distribution'
  *
  * @class BenktanderII
  * @memberof ran.dist
- * @param {number=} a Scale parameter. Default value is 1.
- * @param {number=} b Shape parameter. Default value is 0.5.
+ * @param {number} a Scale parameter.
+ * @param {number} b Shape parameter.
  * @see https://en.wikipedia.org/wiki/Benktander_type_II_distribution
  * @constructor
  */

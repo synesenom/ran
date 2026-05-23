@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  *
  * @class StudentZ
  * @memberof ran.dist
- * @param {number=} n Degrees of freedom. Default value is 2.
+ * @param {number} n Degrees of freedom.
  * @see http://mathworld.wolfram.com/Studentsz-Distribution.html
  * @constructor
  */

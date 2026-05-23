@@ -13,9 +13,9 @@ import Distribution from './_distribution'
  *
  * @class NegativeBinomial
  * @memberof ran.dist
- * @param {number=} r Number of failures until the experiment is stopped. If not an integer, it is rounded to the nearest
- * integer. Default value is 10.
- * @param {number=} p Probability of success. Default value is 0.5.
+ * @param {number} r Number of failures until the experiment is stopped. If not an integer, it is rounded to the nearest
+ * integer.
+ * @param {number} p Probability of success.
  * @see https://en.wikipedia.org/wiki/Negative_binomial_distribution
  * @constructor
  */

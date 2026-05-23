@@ -4,7 +4,7 @@
  * @method sign
  * @memberof ran.dist
  * @param {ran.core.Xoshiro128p} r Random generator.
- * @param {number=} p Probability of +1. Default value is 0.5.
+ * @param {number} p Probability of +1.
  * @return {number} Random sign (-1 or +1).
  * @ignore
  */

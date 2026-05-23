@@ -9,8 +9,8 @@ import Distribution from './_distribution'
  *
  * @class LogLogistic
  * @memberof ran.dist
- * @param {number=} alpha Scale parameter. Default value is 1.
- * @param {number=} beta Shape parameter. Default value is 1.
+ * @param {number} alpha Scale parameter.
+ * @param {number} beta Shape parameter.
  * @see https://en.wikipedia.org/wiki/Log-logistic_distribution
  * @constructor
  */

@@ -12,8 +12,8 @@ import Distribution from './_distribution'
  *
  * @class Rice
  * @memberof ran.dist
- * @param {number=} nu First shape parameter. Default value is 1.
- * @param {number=} sigma Second shape parameter. Default value is 1.
+ * @param {number} nu First shape parameter.
+ * @param {number} sigma Second shape parameter.
  * @see https://en.wikipedia.org/wiki/Rice_distribution
  * @constructor
  */

@@ -9,8 +9,8 @@ import Distribution from './_distribution'
  *
  * @class Pareto
  * @memberof ran.dist
- * @param {number=} xmin Scale parameter. Default value is 1.
- * @param {number=} alpha Shape parameter. Default value is 1.
+ * @param {number} xmin Scale parameter.
+ * @param {number} alpha Shape parameter.
  * @see https://en.wikipedia.org/wiki/Pareto_distribution
  * @constructor
  */

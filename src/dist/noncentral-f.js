@@ -10,9 +10,9 @@ import NoncentralBeta from './noncentral-beta'
  *
  * @class NoncentralF
  * @memberof ran.dist
- * @param {number=} d1 First degree of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
- * @param {number=} d2 Second degree of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
- * @param {number=} lambda Non-centrality parameter. Default value is 1.
+ * @param {number} d1 First degree of freedom. If not an integer, it is rounded to the nearest one.
+ * @param {number} d2 Second degree of freedom. If not an integer, it is rounded to the nearest one.
+ * @param {number} lambda Non-centrality parameter.
  * @see https://en.wikipedia.org/wiki/Noncentral_F-distribution
  * @constructor
  */

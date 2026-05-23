@@ -16,10 +16,10 @@ import Distribution from './_distribution'
  *
  * @class DoublyNoncentralBeta
  * @memberof ran.dist
- * @param {number=} alpha First shape parameter. Default value is 1.
- * @param {number=} beta Second shape parameter. Default value is 1.
- * @param {number=} lambda1 First non-centrality parameter. Default value is 1.
- * @param {number=} lambda2 Second non-centrality parameter. Default value is 1.
+ * @param {number} alpha First shape parameter.
+ * @param {number} beta Second shape parameter.
+ * @param {number} lambda1 First non-centrality parameter.
+ * @param {number} lambda2 Second non-centrality parameter.
  * @see https://arxiv.org/abs/1706.08557
  * @constructor
  */

@@ -9,8 +9,8 @@ import InverseGaussian from './inverse-gaussian'
  *
  * @class ReciprocalInverseGaussian
  * @memberof ran.dist
- * @param {number=} mu Mean of the inverse Gaussian distribution. Default value is 1.
- * @param {number=} lambda Shape parameter. Default value is 1.
+ * @param {number} mu Mean of the inverse Gaussian distribution.
+ * @param {number} lambda Shape parameter.
  * @see https://docs.scipy.org/doc/scipy-1.7.0/reference/tutorial/stats/continuous_recipinvgauss.html
  * @constructor
  */

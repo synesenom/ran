@@ -11,8 +11,8 @@ import Distribution from './_distribution'
  *
  * @class Normal
  * @memberof ran.dist
- * @param {number=} mu Location parameter (mean). Default value is 0.
- * @param {number=} sigma Squared scale parameter (variance). Default value is 1.
+ * @param {number} mu Location parameter (mean).
+ * @param {number} sigma Squared scale parameter (variance).
  * @see https://en.wikipedia.org/wiki/Normal_distribution
  * @see https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform Box–Muller transform (sampling algorithm)
  * @constructor

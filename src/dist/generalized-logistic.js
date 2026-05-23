@@ -9,9 +9,9 @@ import Distribution from './_distribution'
  *
  * @class GeneralizedLogistic
  * @memberof ran.dist
- * @param {number=} mu Location parameter. Default value is 0.
- * @param {number=} s Scale parameter. Default value is 1.
- * @param {number=} c Shape parameter. Default value is 1.
+ * @param {number} mu Location parameter.
+ * @param {number} s Scale parameter.
+ * @param {number} c Shape parameter.
  * @see https://en.wikipedia.org/wiki/Generalized_logistic_distribution
  * @constructor
  */

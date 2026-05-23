@@ -9,8 +9,8 @@ import Distribution from './_distribution'
  *
  * @class ExponentialLogarithmic
  * @memberof ran.dist
- * @param {number=} p Shape parameter. Default value is 0.5.
- * @param {number=} beta Scale parameter. Default value is 1.
+ * @param {number} p Shape parameter.
+ * @param {number} beta Scale parameter.
  * @see https://en.wikipedia.org/wiki/Exponential-logarithmic_distribution#Related_distribution
  * @constructor
  */

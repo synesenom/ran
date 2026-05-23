@@ -10,8 +10,8 @@ import Nakagami from './nakagami'
  *
  * @class Hoyt
  * @memberof ran.dist
- * @param {number=} q Shape parameter (same as m in Nakagami). Default value is 0.5.
- * @param {number=} omega Spread parameter. Default value is 1.
+ * @param {number} q Shape parameter (same as m in Nakagami).
+ * @param {number} omega Spread parameter.
  * @deprecated Use [ran.dist.Nakagami]{@link ran.dist.Nakagami} instead. This class will be removed in a future major release.
  * @see ran.dist.Nakagami
  * @constructor

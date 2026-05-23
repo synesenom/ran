@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  *
  * @class IrwinHall
  * @memberof ran.dist
- * @param {number=} n Number of uniform variates to sum. If not an integer, it is rounded to the nearest one. Default
+ * @param {number} n Number of uniform variates to sum. If not an integer, it is rounded to the nearest one. Default
  * value is 1.
  * @see https://en.wikipedia.org/wiki/Irwin%E2%80%93Hall_distribution
  * @constructor

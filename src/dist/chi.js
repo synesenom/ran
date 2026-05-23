@@ -10,7 +10,7 @@ import Chi2 from './chi2'
  *
  * @class Chi
  * @memberof ran.dist
- * @param {number=} k Degrees of freedom. If not an integer, is rounded to the nearest integer. Default value is 2.
+ * @param {number} k Degrees of freedom. If not an integer, is rounded to the nearest integer.
  * @see https://en.wikipedia.org/wiki/Chi_distribution
  * @constructor
  */

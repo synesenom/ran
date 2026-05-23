@@ -10,10 +10,10 @@ import DoublyNoncentralBeta from './doubly-noncentral-beta'
  *
  * @class DoublyNoncentralF
  * @memberof ran.dist
- * @param {number=} d1 First degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
- * @param {number=} d2 Second degrees of freedom. If not an integer, it is rounded to the nearest one. Default value is 2.
- * @param {number=} lambda1 First non-centrality parameter. Default value is 1.
- * @param {number=} lambda2 Second non-centrality parameter. Default value is 1.
+ * @param {number} d1 First degrees of freedom. If not an integer, it is rounded to the nearest one.
+ * @param {number} d2 Second degrees of freedom. If not an integer, it is rounded to the nearest one.
+ * @param {number} lambda1 First non-centrality parameter.
+ * @param {number} lambda2 Second non-centrality parameter.
  * @see https://doi.org/10.1111/j.1467-842X.1965.tb00036.x
  * @constructor
  */

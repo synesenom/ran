@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  *
  * @class Zeta
  * @memberof ran.dist
- * @param {number=} s Exponent of the distribution. Default value is 3.
+ * @param {number} s Exponent of the distribution.
  * @see https://en.wikipedia.org/wiki/Zeta_distribution
  * @see L. Devroye, "Non-Uniform Random Variate Generation", Springer-Verlag, 1986, ch. 10.
  * @constructor

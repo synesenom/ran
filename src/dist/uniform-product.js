@@ -11,7 +11,7 @@ import { gamma, gammaUpperIncomplete } from '../special'
  *
  * @class UniformProduct
  * @memberof ran.dist
- * @param {number=} n Number of uniform factors. If not an integer, it is rounded to the nearest one. Default value is 2.
+ * @param {number} n Number of uniform factors. If not an integer, it is rounded to the nearest one.
  * @see https://mathworld.wolfram.com/UniformProductDistribution.html
  * @constructor
  */

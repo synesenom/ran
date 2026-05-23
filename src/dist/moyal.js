@@ -11,8 +11,8 @@ import { gammaUpperIncomplete } from '../special'
  *
  * @class Moyal
  * @memberof ran.dist
- * @param {number=} mu Location parameter. Default value is 0.
- * @param {number=} sigma Scale parameter. Default value is 1.
+ * @param {number} mu Location parameter.
+ * @param {number} sigma Scale parameter.
  * @see https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.moyal.html#r7049b665a02e-2
  * @constructor
  */

@@ -10,8 +10,8 @@ import Distribution from './_distribution'
  *
  * @class Arcsine
  * @memberof ran.dist
- * @param {number=} a Lower boundary. Default value is 0.
- * @param {number=} b Upper boundary. Default value is 1.
+ * @param {number} a Lower boundary.
+ * @param {number} b Upper boundary.
  * @see https://en.wikipedia.org/wiki/Arcsine_distribution#Arbitrary_bounded_support
  * @constructor
  */

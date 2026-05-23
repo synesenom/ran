@@ -10,9 +10,9 @@ import Distribution from './_distribution'
  *
  * @class GeneralizedGamma
  * @memberof ran.dist
- * @param {number=} a Scale parameter. Default value is 1.
- * @param {number=} d Shape parameter. Default value is 1.
- * @param {number=} p Shape parameter. Default value is 1.
+ * @param {number} a Scale parameter.
+ * @param {number} d Shape parameter.
+ * @param {number} p Shape parameter.
  * @see https://en.wikipedia.org/wiki/Generalized_gamma_distribution
  * @constructor
  */

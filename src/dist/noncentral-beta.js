@@ -13,9 +13,9 @@ import Distribution from './_distribution'
  *
  * @class NoncentralBeta
  * @memberof ran.dist
- * @param {number=} alpha First shape parameter. Default value is 1.
- * @param {number=} beta Second shape parameter. Default value is 1.
- * @param {number=} lambda Non-centrality parameter. Default value is 1.
+ * @param {number} alpha First shape parameter.
+ * @param {number} beta Second shape parameter.
+ * @param {number} lambda Non-centrality parameter.
  * @see https://en.wikipedia.org/wiki/Noncentral_beta_distribution
  * @constructor
  */

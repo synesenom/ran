@@ -11,8 +11,8 @@ import Distribution from './_distribution'
  *
  * @class Uniform
  * @memberof ran.dist
- * @param {number=} xmin Lower boundary. Default value is 0.
- * @param {number=} xmax Upper boundary. Default value is 1.
+ * @param {number} xmin Lower boundary.
+ * @param {number} xmax Upper boundary.
  * @see https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)
  * @constructor
  */

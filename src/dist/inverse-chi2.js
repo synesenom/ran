@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  *
  * @class InverseChi2
  * @memberof ran.dist
- * @param {number=} nu Degrees of freedom. Default value is 1.
+ * @param {number} nu Degrees of freedom.
  * @see https://en.wikipedia.org/wiki/Inverse-chi-squared_distribution
  * @constructor
  */

@@ -9,8 +9,8 @@ import Distribution from './_distribution'
  *
  * @class Cauchy
  * @memberof ran.dist
- * @param {number=} x0 Location parameter. Default value is 0.
- * @param {number=} gamma Scale parameter. Default value is 1.
+ * @param {number} x0 Location parameter.
+ * @param {number} gamma Scale parameter.
  * @see https://en.wikipedia.org/wiki/Cauchy_distribution
  * @constructor
  */

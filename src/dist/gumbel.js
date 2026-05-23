@@ -9,8 +9,8 @@ import Distribution from './_distribution'
  *
  * @class Gumbel
  * @memberof ran.dist
- * @param {number=} mu Location parameter. Default value is 0.
- * @param {number=} beta Scale parameter. Default value is 1.
+ * @param {number} mu Location parameter.
+ * @param {number} beta Scale parameter.
  * @see https://en.wikipedia.org/wiki/Gumbel_distribution
  * @constructor
  */

@@ -11,9 +11,9 @@ import Distribution from './_distribution'
  *
  * @class Makeham
  * @memberof ran.dist
- * @param {number=} alpha Shape parameter. Default value is 1.
- * @param {number=} beta Rate parameter. Default value is 1.
- * @param {number=} lambda Scale parameter. Default value is 1.
+ * @param {number} alpha Shape parameter.
+ * @param {number} beta Rate parameter.
+ * @param {number} lambda Scale parameter.
  * @see https://en.wikipedia.org/wiki/Gompertz%E2%80%93Makeham_law_of_mortality
  * @constructor
  */

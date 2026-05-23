@@ -9,8 +9,8 @@ import Normal from './normal'
  *
  * @class LogNormal
  * @memberof ran.dist
- * @param {number=} mu Location parameter. Default value is 0.
- * @param {number=} sigma Scale parameter. Default value is 1.
+ * @param {number} mu Location parameter.
+ * @param {number} sigma Scale parameter.
  * @see https://en.wikipedia.org/wiki/Log-normal_distribution
  * @constructor
  */

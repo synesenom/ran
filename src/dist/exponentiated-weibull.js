@@ -10,9 +10,9 @@ import Distribution from './_distribution'
  *
  * @class ExponentiatedWeibull
  * @memberof ran.dist
- * @param {number=} lambda Scale parameter. Default value is 1.
- * @param {number=} k First shape parameter. Default value is 1.
- * @param {number=} alpha Second shape parameter. Default value is 1.
+ * @param {number} lambda Scale parameter.
+ * @param {number} k First shape parameter.
+ * @param {number} alpha Second shape parameter.
  * @see https://en.wikipedia.org/wiki/Exponentiated_Weibull_distribution
  * @constructor
  */

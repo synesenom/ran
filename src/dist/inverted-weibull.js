@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  *
  * @class InvertedWeibull
  * @memberof ran.dist
- * @param {number=} c Shape parameter. Default value is 2.
+ * @param {number} c Shape parameter.
  * @see https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_invweibull.html
  * @constructor
  */

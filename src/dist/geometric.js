@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  *
  * @class Geometric
  * @memberof ran.dist
- * @param {number} p Probability of success. Default value is 0.5.
+ * @param {number} p Probability of success.
  * @see https://en.wikipedia.org/wiki/Geometric_distribution
  * @constructor
  */

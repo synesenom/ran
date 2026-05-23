@@ -11,9 +11,9 @@ import Distribution from './_distribution'
  *
  * @class GeneralizedNormal
  * @memberof ran.dist
- * @param {number=} mu Location paramameter. Default value is 0.
- * @param {number=} alpha Scale parameter. Default value is 1.
- * @param {number=} beta Shape parameter. Default value is 1.
+ * @param {number} mu Location paramameter.
+ * @param {number} alpha Scale parameter.
+ * @param {number} beta Shape parameter.
  * @see https://en.wikipedia.org/wiki/Generalized_normal_distribution
  * @constructor
  */

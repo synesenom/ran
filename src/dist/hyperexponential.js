@@ -12,9 +12,8 @@ import neumaier from '../algorithms/neumaier'
  *
  * @class Hyperexponential
  * @memberof ran.dist
- * @param {Object[]=} parameters Array containing the rates and corresponding weights. Each array element must be an
- * object with twp properties: weight and rate. Default value is
- * <code>[{weight: 1, rate: 1}, {weight: 1, rate: 1}]</code>.
+ * @param {Object[]} parameters Array containing the rates and corresponding weights. Each array element must be an
+ * object with two properties: weight and rate.
  * @see https://en.wikipedia.org/wiki/Hyperexponential_distribution
  * @constructor
  */

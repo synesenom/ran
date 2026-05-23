@@ -9,9 +9,9 @@ import Distribution from './_distribution'
  *
  * @class GammaGompertz
  * @memberof ran.dist
- * @param {number=} b Scale parameter. Default value is 1.
- * @param {number=} s First shape parameter. Default value is 1.
- * @param {number=} beta Second shape parameter. Default value is 1.
+ * @param {number} b Scale parameter.
+ * @param {number} s First shape parameter.
+ * @param {number} beta Second shape parameter.
  * @see https://en.wikipedia.org/wiki/Gamma/Gompertz_distribution
  * @constructor
  */

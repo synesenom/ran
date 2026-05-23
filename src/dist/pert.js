@@ -10,9 +10,9 @@ import Distribution from './_distribution'
  *
  * @class PERT
  * @memberof ran.dist
- * @param {number=} a Lower boundary of the support. Default value is 0.
- * @param {number=} b Mode of the distribution. Default value is 0.5.
- * @param {number=} c Upper boundary of the support. Default value is 1.
+ * @param {number} a Lower boundary of the support.
+ * @param {number} b Mode of the distribution.
+ * @param {number} c Upper boundary of the support.
  * @see https://en.wikipedia.org/wiki/PERT_distribution
  * @constructor
  */

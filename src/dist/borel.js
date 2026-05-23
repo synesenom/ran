@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  *
  * @class Borel
  * @memberof ran.dist
- * @param {number} mu Distribution parameter. Default value is 0.5.
+ * @param {number} mu Distribution parameter.
  * @see https://en.wikipedia.org/wiki/Borel_distribution
  * @constructor
  */

@@ -10,9 +10,9 @@ import Distribution from './_distribution'
  *
  * @class BirnbaumSaunders
  * @memberof ran.dist
- * @param {number=} mu Location parameter. Default value is 0.
- * @param {number=} beta Scale parameter. Default value is 1.
- * @param {number=} gamma Shape parameter. Default value is 1.
+ * @param {number} mu Location parameter.
+ * @param {number} beta Scale parameter.
+ * @param {number} gamma Shape parameter.
  * @see https://en.wikipedia.org/wiki/Birnbaum%E2%80%93Saunders_distribution
  * @constructor
  */

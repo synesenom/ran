@@ -9,8 +9,8 @@ import Distribution from './_distribution'
  *
  * @class Reciprocal
  * @memberof ran.dist
- * @param {number=} a Lower boundary of the support. Default value is 1.
- * @param {number=} b Upper boundary of the support. Default value is 2.
+ * @param {number} a Lower boundary of the support.
+ * @param {number} b Upper boundary of the support.
  * @see https://en.wikipedia.org/wiki/Reciprocal_distribution
  * @constructor
  */

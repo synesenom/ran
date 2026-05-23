@@ -10,8 +10,8 @@ import Distribution from './_distribution'
  *
  * @class Logarithmic
  * @memberof ran.dist
- * @param {number=} a Lower boundary of the distribution. Default value is 1.
- * @param {number=} b Upper boundary of the distribution. Default value is 2.
+ * @param {number} a Lower boundary of the distribution.
+ * @param {number} b Upper boundary of the distribution.
  * @see http://mathworld.wolfram.com/LogarithmicDistribution.html
  * @constructor
  */

@@ -9,8 +9,8 @@ import F from './f'
  *
  * @class FisherZ
  * @memberof ran.dist
- * @param {number=} d1 First degree of freedom. Default value is 2.
- * @param {number=} d2 Second degree of freedom. Default value is 2.
+ * @param {number} d1 First degree of freedom.
+ * @param {number} d2 Second degree of freedom.
  * @see https://en.wikipedia.org/wiki/Fisher%27s_z-distribution
  * @constructor
  */

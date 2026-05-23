@@ -12,8 +12,8 @@ import Beta from './beta'
  *
  * @class BetaPrime
  * @memberof ran.dist
- * @param {number=} alpha First shape parameter. Default value is 2.
- * @param {number=} beta Second shape parameter. Default value is 2.
+ * @param {number} alpha First shape parameter.
+ * @param {number} beta Second shape parameter.
  * @see https://en.wikipedia.org/wiki/Beta_prime_distribution
  * @constructor
  */

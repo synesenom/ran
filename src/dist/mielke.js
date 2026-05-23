@@ -10,8 +10,8 @@ import Distribution from './_distribution'
  *
  * @class Mielke
  * @memberof ran.dist
- * @param {number=} k First shape parameter. Default value is 2.
- * @param {number=} s Second shape parameter. Default value is 1.
+ * @param {number} k First shape parameter.
+ * @param {number} s Second shape parameter.
  * @see https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.mielke.html#r7049b665a02e-2
  * @constructor
  */
