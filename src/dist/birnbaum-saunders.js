@@ -1,5 +1,6 @@
 import Normal from './normal'
 import Distribution from './_distribution'
+import { erfinv } from '../special'
 
 /**
  * Generator for the [Birnbaum-Saunders distribution]{@link https://en.wikipedia.org/wiki/Birnbaum%E2%80%93Saunders_distribution} (also known as fatigue life distribution):
@@ -57,7 +58,7 @@ export default class BirnbaumSaunders extends Normal {
   }
 
   _q (p) {
-    const n = this.p.gamma * super._q(p)
+    const n = this.p.gamma * this.c.sigmaRoot2 * erfinv(2 * p - 1)
     return this.p.beta * 0.25 * Math.pow(n + Math.sqrt(4 + Math.pow(n, 2)), 2) + this.p.mu2
   }
 }

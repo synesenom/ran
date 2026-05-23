@@ -45,6 +45,8 @@ export default class LogLaplace extends Laplace {
   }
 
   _q (p) {
-    return Math.exp(super._q(p))
+    return p < 0.5
+      ? Math.exp(this.p.mu + this.p.b * Math.log(2 * p))
+      : Math.exp(this.p.mu - this.p.b * Math.log(2 - 2 * p))
   }
 }

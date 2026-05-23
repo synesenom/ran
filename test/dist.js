@@ -104,7 +104,8 @@ const UnitTests = {
     const cases = tc.cases.map(c => ({
       name: c.name || 'random parameters',
       generate: () => new dist[tc.name](...c.params()),
-      refVals: c.refVals
+      refVals: c.refVals,
+      quantileVals: c.quantileVals
     }))
 
     cases.forEach(c => {
@@ -144,6 +145,12 @@ const UnitTests = {
         if (c.refVals) {
           it('pdf and cdf should match per-case reference values', () => {
             checkRefVals(c.generate(), c.refVals)
+          })
+        }
+
+        if (c.quantileVals) {
+          it('quantile should match per-case reference values', () => {
+            checkQuantileVals(c.generate(), c.quantileVals)
           })
         }
       })
