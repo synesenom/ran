@@ -11,6 +11,13 @@ export default [{
   },
   cases: [{
     params: () => [0.5]
+  }, {
+    name: 'low probability',
+    params: () => [0.1],
+    refVals: [
+      { x: 0, pmf: 0.9, cdf: 0.9 },
+      { x: 1.0, pmf: 0.1, cdf: 1.0 }
+    ]
   }],
   // scipy.stats.bernoulli(0.5)
   refVals: [
@@ -37,6 +44,18 @@ export default [{
   ],
   cases: [{
     params: () => [25, 2, 2]
+  }, {
+    name: 'small n, asymmetric shapes',
+    params: () => [10, 0.5, 4],
+    refVals: [
+      { x: 0, pmf: 0.522764142524541, cdf: 0.522764142524541 },
+      { x: 1.0, pmf: 0.201063131740208, cdf: 0.723827274264749 },
+      { x: 2.0, pmf: 0.113098011603867, cdf: 0.836925285868616 },
+      { x: 3.0, pmf: 0.0685442494568891, cdf: 0.905469535325505 },
+      { x: 5.0, pmf: 0.0251900116754068, cdf: 0.972642899793257 },
+      { x: 7.0, pmf: 0.00765767786901183, cdf: 0.994732355184637 },
+      { x: 10.0, pmf: 0.000322061191626409, cdf: 1.0 }
+    ]
   }],
   // scipy.stats.betabinom(n=25, a=2, b=2)
   refVals: [
@@ -68,6 +87,18 @@ export default [{
   ],
   cases: [{
     params: () => [25, 0.5]
+  }, {
+    name: 'small n, low p',
+    params: () => [10, 0.1],
+    refVals: [
+      { x: 0, pmf: 0.3486784401, cdf: 0.3486784401 },
+      { x: 1.0, pmf: 0.387420489, cdf: 0.7360989291 },
+      { x: 2.0, pmf: 0.1937102445, cdf: 0.9298091736 },
+      { x: 3.0, pmf: 0.057395628, cdf: 0.9872048016 },
+      { x: 5.0, pmf: 0.0014880348, cdf: 0.9998530974 },
+      { x: 7.0, pmf: 8.748e-06, cdf: 0.9999996264 },
+      { x: 10.0, pmf: 1e-10, cdf: 1.0 }
+    ]
   }],
   // scipy.stats.binom(25, 0.5) — endpoints x=0, x=25 included for boundary coverage.
   refVals: [
@@ -217,6 +248,18 @@ export default [{
   ],
   cases: [{
     params: () => [2, 2, 2]
+  }, {
+    name: 'small parameters',
+    params: () => [0.5, 0.5, 0.5],
+    refVals: [
+      { x: 0, pmf: 0.495230209883203, cdf: 0.495230209883203 },
+      { x: 1.0, pmf: 0.330153473255469, cdf: 0.825383683138672 },
+      { x: 2.0, pmf: 0.123807552470801, cdf: 0.949191235609473 },
+      { x: 3.0, pmf: 0.0366837192506076, cdf: 0.985874954860081 },
+      { x: 5.0, pmf: 0.00282770335890101, cdf: 0.998828893220452 },
+      { x: 8.0, pmf: 7.46142634083494e-05, cdf: 0.999966322415356 },
+      { x: 12.0, pmf: 7.22481176754832e-07, cdf: 0.999999661448892 }
+    ]
   }],
   // mpmath: Delaporte(α=2, β=2, λ=2) direct sum formula @ 50 dps; CDF via cumulative sum
   refVals: [
@@ -252,6 +295,17 @@ export default [{
   },
   cases: [{
     params: () => [5, 50]
+  }, {
+    name: 'small range',
+    params: () => [0, 9],
+    refVals: [
+      { x: 0, pmf: 0.1, cdf: 0.1 },
+      { x: 1.0, pmf: 0.1, cdf: 0.2 },
+      { x: 3.0, pmf: 0.1, cdf: 0.4 },
+      { x: 5.0, pmf: 0.1, cdf: 0.6 },
+      { x: 7.0, pmf: 0.1, cdf: 0.8 },
+      { x: 9.0, pmf: 0.1, cdf: 1.0 }
+    ]
   }],
   // scipy.stats.randint(5, 51) — randint's upper bound is EXCLUSIVE
   refVals: [
@@ -281,6 +335,18 @@ export default [{
   ],
   cases: [{
     params: () => [0.5, 2]
+  }, {
+    name: 'high q, standard beta',
+    params: () => [0.75, 2],
+    refVals: [
+      { x: 0, pmf: 0.25, cdf: 0.25 },
+      { x: 1.0, pmf: 0.43359375, cdf: 0.68359375 },
+      { x: 2.0, pmf: 0.241321563720703, cdf: 0.924915313720703 },
+      { x: 3.0, pmf: 0.0650620905216783, cdf: 0.989977404242381 },
+      { x: 4.0, pmf: 0.00927005229945355, cdf: 0.999247456541835 },
+      { x: 5.0, pmf: 0.000720759682839331, cdf: 0.999968216224674 },
+      { x: 6.0, pmf: 3.10286797837665e-05, cdf: 0.999999244904458 }
+    ]
   }],
   // DiscreteWeibull(q=0.5, β=2): closed form pmf(k)=q^(k^β)-q^((k+1)^β), cdf(k)=1-q^((k+1)^β)
   refVals: [
@@ -352,6 +418,18 @@ export default [{
   ],
   cases: [{
     params: () => [2, 2, 6]
+  }, {
+    name: 'medium parameters',
+    params: () => [3, 2, 2],
+    refVals: [
+      { x: 0, pmf: 0.00673794699908547, cdf: 0.00673794699908547 },
+      { x: 1.0, pmf: 0.0202138409972564, cdf: 0.0269517879963419 },
+      { x: 2.0, pmf: 0.0437966554940556, cdf: 0.0707484434903974 },
+      { x: 4.0, pmf: 0.0968579881118536, cdf: 0.238354875092648 },
+      { x: 6.0, pmf: 0.121928765904284, cdf: 0.474997188656363 },
+      { x: 9.0, pmf: 0.0874053102347883, cdf: 0.785349834912156 },
+      { x: 14.0, pmf: 0.0151750665825685, cdf: 0.978238281408613 }
+    ]
   }],
   // GeneralizedHermite(a1=2, a2=2, m=6) as X1 + 6·X2, X_i ~ scipy.stats.poisson(2); CDF via cumsum
   refVals: [
@@ -382,6 +460,18 @@ export default [{
   ],
   cases: [{
     params: () => [0.5]
+  }, {
+    name: 'low success probability',
+    params: () => [0.25],
+    refVals: [
+      { x: 0, pmf: 0.25, cdf: 0.25 },
+      { x: 1.0, pmf: 0.1875, cdf: 0.4375 },
+      { x: 2.0, pmf: 0.140625, cdf: 0.578125 },
+      { x: 5.0, pmf: 0.059326171875, cdf: 0.822021484375 },
+      { x: 10.0, pmf: 0.0140783786773682, cdf: 0.957764863967896 },
+      { x: 20.0, pmf: 0.000792802984733494, cdf: 0.9976215910458 },
+      { x: 40.0, pmf: 2.51414629040938e-06, cdf: 0.999992457561129 }
+    ]
   }],
   // scipy.stats.nbinom(1, 0.5) — 0-indexed geometric; see solutions/testing/2026-05-18-1443-discrete-refvals-scipy-parameterization-traps.md
   refVals: [
@@ -411,6 +501,14 @@ export default [{
   ],
   cases: [{
     params: () => [5]
+  }, {
+    name: 'small n',
+    params: () => [2],
+    refVals: [
+      { x: 0, pmf: 0.375, cdf: 0.375 },
+      { x: 2.0, pmf: 0.5, cdf: 0.875 },
+      { x: 4.0, pmf: 0.125, cdf: 1.0 }
+    ]
   }],
   // HeadsMinusTails(n=5): pmf(0)=C(2n,n)/4^n, pmf(2m)=2·C(2n,n+m)/4^n; CDF via cumulative sum
   refVals: [
@@ -441,6 +539,15 @@ export default [{
   ],
   cases: [{
     params: () => [30, 10, 5]
+  }, {
+    name: 'different ratio',
+    params: () => [20, 3, 10],
+    refVals: [
+      { x: 0, pmf: 0.105263157894737, cdf: 0.105263157894737 },
+      { x: 1.0, pmf: 0.394736842105263, cdf: 0.5 },
+      { x: 2.0, pmf: 0.394736842105263, cdf: 0.894736842105263 },
+      { x: 3.0, pmf: 0.105263157894737, cdf: 1.0 }
+    ]
   }],
   // scipy.stats.hypergeom(M=30, n=10, N=5) — scipy n/N collide with ranjs K/n; see solutions/testing/2026-05-18-1443-discrete-refvals-scipy-parameterization-traps.md
   refVals: [
@@ -469,6 +576,18 @@ export default [{
   ],
   cases: [{
     params: () => [0.5]
+  }, {
+    name: 'high p (heavy tail)',
+    params: () => [0.9],
+    refVals: [
+      { x: 1.0, pmf: 0.390865033712927, cdf: 0.390865033712927 },
+      { x: 2.0, pmf: 0.175889265170817, cdf: 0.566754298883744 },
+      { x: 3.0, pmf: 0.10553355910249, cdf: 0.672287857986234 },
+      { x: 5.0, pmf: 0.0512893097238102, cdf: 0.794812320104225 },
+      { x: 8.0, pmf: 0.023368691742911, cdf: 0.886322523337341 },
+      { x: 12.0, pmf: 0.0102214657683493, cdf: 0.942771510226212 },
+      { x: 20.0, pmf: 0.0026400035108471, cdf: 0.982960299940085 }
+    ]
   }],
   // scipy.stats.logser(p=0.5)
   refVals: [
@@ -501,6 +620,17 @@ export default [{
   ],
   cases: [{
     params: () => [35, 15, 7]
+  }, {
+    name: 'different sizes',
+    params: () => [20, 5, 10],
+    refVals: [
+      { x: 0, pmf: 0.0162538699690236, cdf: 0.0162538699690236 },
+      { x: 1.0, pmf: 0.0812693498451179, cdf: 0.0975232198141415 },
+      { x: 2.0, pmf: 0.198658410732565, cdf: 0.296181630546707 },
+      { x: 3.0, pmf: 0.297987616098999, cdf: 0.594169246645706 },
+      { x: 4.0, pmf: 0.276702786377847, cdf: 0.870872033023553 },
+      { x: 5.0, pmf: 0.129127966976447, cdf: 1.0 }
+    ]
   }],
   // scipy.stats.nhypergeom(M=35, n=15, r=7)
   refVals: [
@@ -570,6 +700,18 @@ export default [{
   ],
   cases: [{
     params: () => [2, 2]
+  }, {
+    name: 'small parameters',
+    params: () => [0.5, 0.5],
+    refVals: [
+      { x: 0, pmf: 0.821408548613843, cdf: 0.821408548613843 },
+      { x: 1.0, pmf: 0.124552367221088, cdf: 0.94596091583493 },
+      { x: 2.0, pmf: 0.040581195487694, cdf: 0.986542111322624 },
+      { x: 3.0, pmf: 0.0103885281342759, cdf: 0.9969306394569 },
+      { x: 5.0, pmf: 0.000527764552683717, cdf: 0.99986029763932 },
+      { x: 8.0, pmf: 4.47403388659552e-06, cdf: 0.999998947285767 },
+      { x: 12.0, pmf: 5.23418151128657e-09, cdf: 0.999999998889424 }
+    ]
   }],
   // NeymanA(λ=2, φ=2) compound Poisson: pmf(k)=Σ_j Pois(j;λ)·Pois(k;jφ); CDF via cumsum
   refVals: [
@@ -637,6 +779,18 @@ export default [{
   ],
   cases: [{
     params: () => [2, 0.5]
+  }, {
+    name: 'small lambda, low theta',
+    params: () => [0.5, 0.1],
+    refVals: [
+      { x: 0, pmf: 0.606530659712633, cdf: 0.606530659712633 },
+      { x: 1.0, pmf: 0.272938796870685, cdf: 0.879469456583318 },
+      { x: 2.0, pmf: 0.0887051089829726, cdf: 0.968174565566291 },
+      { x: 3.0, pmf: 0.0242233182222733, cdf: 0.992397883788564 },
+      { x: 5.0, pmf: 0.00133343396277433, cdf: 0.99964641323977 },
+      { x: 8.0, pmf: 1.10921687823909e-05, cdf: 0.999997456414512 },
+      { x: 12.0, pmf: 1.1751359521484e-08, cdf: 0.999999997593084 }
+    ]
   }],
   // PolyaAeppli(λ=2, θ=0.5) closed-form series; CDF via cumsum
   refVals: [
@@ -689,6 +843,18 @@ export default [{
   ],
   cases: [{
     params: () => [5, 5]
+  }, {
+    name: 'asymmetric rates',
+    params: () => [1, 4],
+    refVals: [
+      { x: -8.0, pmf: 0.0169212857205509, cdf: 0.0283550406135297 },
+      { x: -4.0, pmf: 0.152684650468194, cdf: 0.392120449209373 },
+      { x: -2.0, pmf: 0.173089486515016, cdf: 0.745101034255013 },
+      { x: 0, pmf: 0.0761517511012951, cdf: 0.952770303246472 },
+      { x: 2.0, pmf: 0.0108180929071885, cdf: 0.996467775626202 },
+      { x: 4.0, pmf: 0.000596424415891384, cdf: 0.999874998456634 },
+      { x: 6.0, pmf: 1.62621192930146e-05, cdf: 0.999997535763671 }
+    ]
   }],
   refVals: [
     { x: -10, pmf: 0.000993881922213998, cdf: 0.0015932746537998337 },
@@ -722,6 +888,14 @@ export default [{
   ],
   cases: [{
     params: () => [10]
+  }, {
+    name: 'small N',
+    params: () => [3],
+    refVals: [
+      { x: 1.0, pmf: 0.333333333333333, cdf: 0.333333333333333 },
+      { x: 2.0, pmf: 0.5, cdf: 0.833333333333333 },
+      { x: 3.0, pmf: 0.166666666666667, cdf: 1 }
+    ]
   }],
   // Ideal soliton N=10: pmf(1)=1/10, pmf(k)=1/(k(k-1)) for k=2..10
   // CDF is the telescoping sum; cdf(10)=1.
@@ -755,6 +929,18 @@ export default [{
   ],
   cases: [{
     params: () => [3]
+  }, {
+    name: 'smaller rho (heavier tail)',
+    params: () => [2.5],
+    refVals: [
+      { x: 1.0, pmf: 0.714285714285714, cdf: 0.714285714285714 },
+      { x: 2.0, pmf: 0.158730158730159, cdf: 0.873015873015873 },
+      { x: 3.0, pmf: 0.0577200577200577, cdf: 0.930735930735931 },
+      { x: 5.0, pmf: 0.0142080142080142, cdf: 0.971583971583972 },
+      { x: 8.0, pmf: 0.0035190128069385, cdf: 0.988739159017797 },
+      { x: 15.0, pmf: 0.000483320646628586, cdf: 0.997100076120228 },
+      { x: 30.0, pmf: 4.87833153778343e-05, cdf: 0.999414600215466 }
+    ]
   }],
   // scipy.stats.yulesimon(alpha=3)
   refVals: [
@@ -785,6 +971,17 @@ export default [{
   ],
   cases: [{
     params: () => [3.8]
+  }, {
+    name: 'light-tailed s',
+    params: () => [5.0],
+    refVals: [
+      { x: 1.0, pmf: 0.964387340429262, cdf: 0.964387340429262 },
+      { x: 2.0, pmf: 0.0301371043884144, cdf: 0.994524444817676 },
+      { x: 3.0, pmf: 0.00396867218283647, cdf: 0.998493117000513 },
+      { x: 5.0, pmf: 0.000308603948937364, cdf: 0.999743505461588 },
+      { x: 10.0, pmf: 9.64387340429262e-06, cdf: 0.999980313190986 },
+      { x: 20.0, pmf: 3.01371043884144e-07, cdf: 0.999998637562679 }
+    ]
   }],
   // scipy.stats.zipf(a=3.8)  # scipy zipf is the Zeta distribution
   refVals: [
@@ -816,6 +1013,18 @@ export default [{
   ],
   cases: [{
     params: () => [3, 100]
+  }, {
+    name: 'near-boundary exponent, small N',
+    params: () => [1.5, 20],
+    refVals: [
+      { x: 1.0, pmf: 0.460684691303022, cdf: 0.460684691303022 },
+      { x: 2.0, pmf: 0.162876634604599, cdf: 0.623561325907621 },
+      { x: 3.0, pmf: 0.0886588101784465, cdf: 0.712220136086068 },
+      { x: 5.0, pmf: 0.0412048914378826, cdf: 0.811010613936828 },
+      { x: 10.0, pmf: 0.0145681290768911, cdf: 0.919220976482574 },
+      { x: 15.0, pmf: 0.00792988505453027, cdf: 0.969483682312297 },
+      { x: 20.0, pmf: 0.00515061142973532, cdf: 1.0 }
+    ]
   }],
   // scipy.stats.zipfian(a=3, n=100)
   refVals: [
