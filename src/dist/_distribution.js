@@ -16,8 +16,8 @@ import { MAX_ITER } from '../core/constants'
  */
 class Distribution {
   constructor (type, k) {
-    // Distribution type: discrete or continuous
-    this.t = type
+    // decisions/0009-rename-single-letter-instance-fields.md — descriptive names replace single-letter abbreviations
+    this._type = type
 
     // Number of parameters
     this.k = k
@@ -99,7 +99,7 @@ class Distribution {
    * @private
    */
   _toInt (x) {
-    return this.t === 'discrete' ? Math.round(x) : x
+    return this._type === 'discrete' ? Math.round(x) : x
   }
 
   /**
@@ -271,7 +271,7 @@ class Distribution {
    * @returns {string} Distribution type.
    */
   type () {
-    return this.t
+    return this._type
   }
 
   /**
@@ -530,7 +530,7 @@ class Distribution {
       // root-finder for continuous
       return typeof this._q === 'function'
         ? this._q(p)
-        : this.t === 'discrete'
+        : this._type === 'discrete'
           ? this._qEstimateTable(p)
           : this._qEstimateRoot(p)
     }
@@ -735,7 +735,7 @@ class Distribution {
    *
    */
   test (values) {
-    return this.t === 'discrete'
+    return this._type === 'discrete'
       // Parameters are fixed in the constructor (known), not estimated from values — df correction is 0.
       ? chi2(values, x => this.pdf(x), 0)
       : kolmogorovSmirnov(values, x => this.cdf(x))
