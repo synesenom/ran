@@ -1029,7 +1029,19 @@ export default [{
   cases: [{
     params: () => [5, 1, 2]
   }, {
-    params: () => [5, 0, 2]
+    name: 'mu=0',
+    params: () => [5, 0, 2],
+    // Poisson mixture of Student-t: T|L=l ~ t(5+2l)*sqrt(5/(5+2l)), L~Pois(1); mu=0 collapses NCT to t
+    refVals: [
+      { x: -3, pdf: 9.72574017736815323032e-03, cdf: 7.56414510159157497948e-03 },
+      { x: -2, pdf: 4.61984789839845338966e-02, cdf: 3.06789735179859926473e-02 },
+      { x: -1, pdf: 2.15258609533600542285e-01, cdf: 1.43285545250342594148e-01 },
+      { x: 0, pdf: 4.50645852994852602613e-01, cdf: 5.00000000000000000000e-01 },
+      { x: 1, pdf: 2.15258609533600542285e-01, cdf: 8.56714454749657350341e-01 },
+      { x: 2, pdf: 4.61984789839845338966e-02, cdf: 9.69321026482014014292e-01 },
+      { x: 3, pdf: 9.72574017736815323032e-03, cdf: 9.92435854898408464919e-01 },
+      { x: 5, pdf: 7.88941311192887682543e-04, cdf: 9.99127993039473527581e-01 }
+    ]
   }],
   // theta=0 uses the identical sampler path (normal(r,mu)/sqrt(noncentralChi2(r,nu,theta))); no theta branch in _sample
   sampleParams: [{ params: () => [5, 1, 2] }],
