@@ -456,7 +456,7 @@
     "check-decl": "node scripts/check-subpath-exports.js",
     "prepublishOnly": "npm run build",
     "coverage": "cross-env NODE_ENV=test nyc --reporter=html _mocha --require @babel/register",
-    "bench": "npm run build && node bench/index.js"
+    "bench": "npm run build && node scripts/bench.js"
   },
   "devDependencies": {
     "@babel/core": "^7.18.6",
