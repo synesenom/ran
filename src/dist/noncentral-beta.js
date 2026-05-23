@@ -20,7 +20,6 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class extends Distribution {
-  // TODO Use outward iteration
   constructor (alpha, beta, lambda) {
     super('continuous', 3)
 
