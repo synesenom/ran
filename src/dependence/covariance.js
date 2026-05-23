@@ -8,7 +8,7 @@ import { mean } from '../location'
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
- * @returns {(number|undefined)} The sample covariance if both arrays have more than one element and they have the same
+ * @returns {number|undefined} The sample covariance if both arrays have more than one element and they have the same
  * length, undefined otherwise.
  * @example
  *

@@ -5,19 +5,21 @@ import Distribution from './_distribution'
 /**
  * Generator for the [beta distribution]{@link https://en.wikipedia.org/wiki/Beta_distribution}:
  *
- * $$f(x; \alpha, \beta) = \frac{x^{\alpha - 1}(1 - x)^{\beta - 1}}{\mathrm{B}(\alpha, \beta)},$$
+ * $f(x; \alpha, \beta) = \frac{x^{\alpha - 1}(1 - x)^{\beta - 1}}{\mathrm{B}(\alpha, \beta)},$
  *
  * with $\alpha, \beta > 0$ and $\mathrm{B}(\alpha, \beta)$ is the beta function.
  * Support: $x \in (0, 1)$.
  *
  * @class Beta
  * @memberof ran.dist
- * @param {number} alpha First shape parameter.
- * @param {number} beta Second shape parameter.
  * @see https://en.wikipedia.org/wiki/Beta_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Beta extends Distribution {
+  /**
+   * @param {number} alpha First shape parameter.
+   * @param {number} beta Second shape parameter.
+   */
   constructor (alpha, beta) {
     super('continuous', 2)
 

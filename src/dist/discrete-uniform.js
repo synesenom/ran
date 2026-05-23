@@ -4,18 +4,20 @@ import Distribution from './_distribution'
  * Generator for the discrete
  * [uniform distribution]{@link https://en.wikipedia.org/wiki/Discrete_uniform_distribution}:
  *
- * $$f(k; x_\mathrm{min}, x_\mathrm{max}) = \frac{1}{x_\mathrm{max} - x_\mathrm{min} + 1},$$
+ * $f(k; x_\mathrm{min}, x_\mathrm{max}) = \frac{1}{x_\mathrm{max} - x_\mathrm{min} + 1},$
  *
  * with $x_\mathrm{min}, x_\mathrm{max} \in \mathbb{Z}$ and $x_\mathrm{min} < x_\mathrm{max}$. Support: $k \in \{x_\mathrm{min}, ..., x_\mathrm{max}\}$.
  *
  * @class DiscreteUniform
  * @memberof ran.dist
- * @param {number} xmin Lower boundary. If not an integer, it is rounded to the nearest one.
- * @param {number} xmax Upper boundary. If not an integer, it is rounded to the nearest one.
  * @see https://en.wikipedia.org/wiki/Discrete_uniform_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class DiscreteUniform extends Distribution {
+  /**
+   * @param {number} xmin Lower boundary. If not an integer, it is rounded to the nearest one.
+   * @param {number} xmax Upper boundary. If not an integer, it is rounded to the nearest one.
+   */
   constructor (xmin, xmax) {
     super('discrete', 2)
 

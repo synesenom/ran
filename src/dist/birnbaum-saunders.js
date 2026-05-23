@@ -4,20 +4,22 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Birnbaum-Saunders distribution]{@link https://en.wikipedia.org/wiki/Birnbaum%E2%80%93Saunders_distribution} (also known as fatigue life distribution):
  *
- * $$f(x; \mu, \beta, \gamma) = \frac{z + 1 / z}{2 \gamma (x - \mu)} \phi\Big(\frac{z - 1 / z}{\gamma}\Big),$$
+ * $f(x; \mu, \beta, \gamma) = \frac{z + 1 / z}{2 \gamma (x - \mu)} \phi\Big(\frac{z - 1 / z}{\gamma}\Big),$
  *
  * with $\mu \in \mathbb{R}$, $\beta, \gamma > 0$, $z = \sqrt{\frac{x - \mu}{\beta}}$ and $\phi(x)$ is the probability density function of the standard [normal distribution]{@link #dist.Normal}. Support: $x \in (\mu, \infty)$.
  *
  * @class BirnbaumSaunders
  * @memberof ran.dist
- * @param {number} mu Location parameter.
- * @param {number} beta Scale parameter.
- * @param {number} gamma Shape parameter.
  * @see https://en.wikipedia.org/wiki/Birnbaum%E2%80%93Saunders_distribution
  * @constructor
  */
-export default class extends Normal {
+export default class BirnbaumSaunders extends Normal {
   // Transformation of normal distribution
+  /**
+   * @param {number} mu Location parameter.
+   * @param {number} beta Scale parameter.
+   * @param {number} gamma Shape parameter.
+   */
   constructor (mu, beta, gamma) {
     super(0, 1)
 

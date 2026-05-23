@@ -5,17 +5,19 @@ import { logBinomial } from '../special'
 /**
  * Generator for the [heads-minus-tails distribution]{@link http://mathworld.wolfram.com/Heads-Minus-TailsDistribution.html}:
  *
- * $$f(k; n) = \begin{cases}\Big(\frac{1}{2}\Big)^{2n} \begin{pmatrix}2n \\\\ n \\\\ \end{pmatrix} &\quad\text{if $k = 0$},\\\\2 \Big(\frac{1}{2}\Big)^{2n} \begin{pmatrix}2n \\\\ m + n \\\\ \end{pmatrix} &\quad\text{if $k = 2m$},\\\\0 &\quad\text{else}\\\\ \end{cases}$$
+ * $f(k; n) = \begin{cases}\Big(\frac{1}{2}\Big)^{2n} \begin{pmatrix}2n \\\\ n \\\\ \end{pmatrix} &\quad\text{if $k = 0$},\\\\2 \Big(\frac{1}{2}\Big)^{2n} \begin{pmatrix}2n \\\\ m + n \\\\ \end{pmatrix} &\quad\text{if $k = 2m$},\\\\0 &\quad\text{else}\\\\ \end{cases}$
  *
  * where $n \in \mathbb{N}^+$. Support: $k \in \[0, n\]$.
  *
  * @class HeadsMinusTails
  * @memberof ran.dist
- * @param {number} n Half number of trials.
  * @see http://mathworld.wolfram.com/Heads-Minus-TailsDistribution.html
  * @constructor
  */
-export default class extends PreComputed {
+export default class HeadsMinusTails extends PreComputed {
+  /**
+   * @param {number} n Half number of trials.
+   */
   constructor (n) {
     super(true)
     this.k = 1

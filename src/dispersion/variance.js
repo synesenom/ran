@@ -4,7 +4,7 @@
  * @method variance
  * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate variance for.
- * @returns {(number|undefined)} Variance of the values if there are more than two, undefined otherwise.
+ * @returns {number|undefined} Variance of the values if there are more than two, undefined otherwise.
  * @example
  *
  * ran.dispersion.variance([])

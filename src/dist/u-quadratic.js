@@ -3,19 +3,21 @@ import Distribution from './_distribution'
 /**
  * Generator for the [u-quadratic distribution]{@link https://en.wikipedia.org/wiki/U-quadratic_distribution}:
  *
- * $$f(x; a, b) = \alpha (x - \beta)^2,$$
+ * $f(x; a, b) = \alpha (x - \beta)^2,$
  *
  * where $\alpha = \frac{12}{(b - a)^3}$, $\beta = \frac{a + b}{2}$, $a, b \in \mathbb{R}$ and $a < b$.
  * Support: $x \in \[a, b\]$.
  *
  * @class UQuadratic
  * @memberof ran.dist
- * @param {number} a Lower bound of the support.
- * @param {number} b Upper bound of the support.
  * @see https://en.wikipedia.org/wiki/U-quadratic_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class UQuadratic extends Distribution {
+  /**
+   * @param {number} a Lower bound of the support.
+   * @param {number} b Upper bound of the support.
+   */
   constructor (a, b) {
     super('continuous', 2)
 

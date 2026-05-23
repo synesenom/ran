@@ -3,18 +3,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Gompertz distribution]{@link https://en.wikipedia.org/wiki/Gompertz_distribution}:
  *
- * $$f(x; \eta, b) = b \eta e^{\eta + bx - \eta e^{bx}} ,$$
+ * $f(x; \eta, b) = b \eta e^{\eta + bx - \eta e^{bx}} ,$
  *
  * with $\eta, b > 0$. Support: $x \ge 0$.
  *
  * @class Gompertz
  * @memberof ran.dist
- * @param {number} eta Shape parameter.
- * @param {number} beta Scale parameter.
  * @see https://en.wikipedia.org/wiki/Gompertz_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Gompertz extends Distribution {
+  /**
+   * @param {number} eta Shape parameter.
+   * @param {number} beta Scale parameter.
+   */
   constructor (eta, b) {
     super('continuous', 2)
 

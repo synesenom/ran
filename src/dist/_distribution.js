@@ -226,7 +226,7 @@ class Distribution {
    * @method _qEstimateRoot
    * @memberof ran.dist.Distribution
    * @param {number} p Probability to find value for.
-   * @returns {(number|undefined)} The value where the probability coincides with the specified value if found,
+   * @returns {number|undefined} The value where the probability coincides with the specified value if found,
    * undefined otherwise.
    * @protected
    * @ignore
@@ -268,7 +268,7 @@ class Distribution {
    *
    * @method type
    * @memberof ran.dist.Distribution
-   * @returns {string} Distribution type.
+   * @returns {'continuous' | 'discrete'} Distribution type.
    */
   type () {
     return this._type
@@ -280,7 +280,7 @@ class Distribution {
    *
    * @method support
    * @memberof ran.dist.Distribution
-   * @returns {Object[]} An array of objects describing the lower and upper boundary of the support. Each object
+   * @returns {{value: number, closed: boolean}[]} An array of objects describing the lower and upper boundary of the support. Each object
    * contains a <code>value: number</code> and a <code>closed: boolean</code> property with the value of the boundary
    * and whether it is closed, respectively. When <code>value</code> is (+/-)Infinity, <code>closed</code> is always false.
    */
@@ -299,7 +299,7 @@ class Distribution {
    *
    * @method bounded
    * @memberof ran.dist.Distribution
-   * @returns {string} The boundedness category of the support.
+   * @returns {'bounded' | 'lower' | 'upper' | 'unbounded'} The boundedness category of the support.
    */
   bounded () {
     const lowerFinite = Number.isFinite(this.s[0].value)
@@ -316,8 +316,8 @@ class Distribution {
    *
    * @method seed
    * @memberof ran.dist.Distribution
-   * @param {(number|string)} value The value of the seed, either a number or a string (for the ease of tracking seeds).
-   * @returns {ran.dist.Distribution} Reference to the current distribution.
+   * @param {number|string} value The value of the seed, either a number or a string (for the ease of tracking seeds).
+   * @returns {this} Reference to the current distribution.
    * @example
    *
    * let pareto = new ran.dist.Pareto(1, 2).seed('test')
@@ -340,7 +340,7 @@ class Distribution {
    *
    * @method save
    * @memberof ran.dist.Distribution
-   * @returns {Object} Object representing the inner state of the current generator.
+   * @returns {{prngState: *, params: Object, constants: Object, support: {value: number, closed: boolean}[]}} Object representing the inner state of the current generator.
    * @example
    *
    * let pareto1 = new ran.dist.Pareto(1, 2).seed('test')
@@ -369,7 +369,7 @@ class Distribution {
    * @method load
    * @memberof ran.dist.Distribution
    * @param {Object} state The state to load.
-   * @returns {ran.dist.Distribution} Reference to the current distribution.
+   * @returns {this} Reference to the current distribution.
    * @example
    *
    * let pareto1 = new ran.dist.Pareto(1, 2).seed('test')
@@ -400,12 +400,26 @@ class Distribution {
   }
 
   /**
+   * @overload
+   * @returns {number}
+   */
+  /**
+   * @overload
+   * @param {1} n
+   * @returns {number}
+   */
+  /**
+   * @overload
+   * @param {number} n
+   * @returns {number|number[]}
+   */
+  /**
    * Generates some random variate.
    *
    * @method sample
    * @memberof ran.dist.Distribution
    * @param {number=} n Number of variates to generate. If not specified, a single value is returned.
-   * @returns {(number|number[])} Single sample or an array of samples.
+   * @returns {number|number[]} Single sample or an array of samples.
    * @example
    *
    * let pareto = new ran.dist.Pareto(1, 2)
@@ -512,7 +526,7 @@ class Distribution {
    * @method q
    * @memberof ran.dist.Distribution
    * @param {number} p The probability at which the quantile should be evaluated.
-   * @returns {(number|undefined)} The value of the quantile function at the specified probability if $p \in [0, 1]$ and the quantile could be found,
+   * @returns {number|undefined} The value of the quantile function at the specified probability if $p \in [0, 1]$ and the quantile could be found,
    * undefined otherwise.
    */
   q (p) {
@@ -713,7 +727,7 @@ class Distribution {
    * @method test
    * @memberof ran.dist.Distribution
    * @param {number[]} values Array of values to test.
-   * @returns {Object} Object with two properties representing the result of the test:
+   * @returns {{statistics: number, passed: boolean}} Object with two properties representing the result of the test:
    * <ul>
    *     <li>{statistics}: The $\chi^2$ or D statistics depending on whether the distribution is discrete or
    *     continuous.</li>

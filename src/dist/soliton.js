@@ -4,18 +4,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the (ideal) [soliton distribution]{@link https://en.wikipedia.org/wiki/Soliton_distribution}:
  *
- * $$f(k; N) = \begin{cases}\frac{1}{N} &\quad\text{if $k = 1$},\\\\ \frac{1}{k (k - 1)} &\quad\text{otherwise}\\\\ \end{cases},$$
+ * $f(k; N) = \begin{cases}\frac{1}{N} &\quad\text{if $k = 1$},\\\\ \frac{1}{k (k - 1)} &\quad\text{otherwise}\\\\ \end{cases},$
  *
  * with $N \in \mathbb{N}^+$. Support: $k \in \{1, 2, ..., N\}$.
  *
  * @class Soliton
  * @memberof ran.dist
- * @param {number} N Number of blocks in the messaging model. If not an integer, it is rounded to the nearest one.
  * @see https://en.wikipedia.org/wiki/Soliton_distribution
  * @constructor
  */
-export default class extends Categorical {
+export default class Soliton extends Categorical {
   // Special case of categorical.
+  /**
+   * @param {number} N Number of blocks in the messaging model. If not an integer, it is rounded to the nearest one.
+   */
   constructor (N) {
     // Define weights
     const Ni = Math.round(N)

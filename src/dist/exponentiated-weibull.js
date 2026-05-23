@@ -4,20 +4,22 @@ import Distribution from './_distribution'
 /**
  * Generator for the [exponentiated Weibull distribution]{@link https://en.wikipedia.org/wiki/Exponentiated_Weibull_distribution}:
  *
- * $$f(x; \lambda, k) = \alpha \frac{k}{\lambda}\bigg(\frac{x}{\lambda}\bigg)^{k - 1} \bigg[1 - e^{-(x / \lambda)^k}\bigg]^{\alpha - 1} e^{-(x / \lambda)^k},$$
+ * $f(x; \lambda, k) = \alpha \frac{k}{\lambda}\bigg(\frac{x}{\lambda}\bigg)^{k - 1} \bigg[1 - e^{-(x / \lambda)^k}\bigg]^{\alpha - 1} e^{-(x / \lambda)^k},$
  *
  * with $\lambda, k, \alpha > 0$. Support: $x \ge 0$.
  *
  * @class ExponentiatedWeibull
  * @memberof ran.dist
- * @param {number} lambda Scale parameter.
- * @param {number} k First shape parameter.
- * @param {number} alpha Second shape parameter.
  * @see https://en.wikipedia.org/wiki/Exponentiated_Weibull_distribution
  * @constructor
  */
-export default class extends Weibull {
+export default class ExponentiatedWeibull extends Weibull {
   // Transformation of Weibull distribution.
+  /**
+   * @param {number} lambda Scale parameter.
+   * @param {number} k First shape parameter.
+   * @param {number} alpha Second shape parameter.
+   */
   constructor (lambda, k, alpha) {
     super(lambda, k)
 

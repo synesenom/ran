@@ -12,7 +12,7 @@ import LogNormal from './log-normal'
  * @see http://mathworld.wolfram.com/GibratsDistribution.html
  * @constructor
  */
-export default class extends LogNormal {
+export default class Gilbrat extends LogNormal {
   // Special case of log-normal
   constructor () {
     super(0, 1)

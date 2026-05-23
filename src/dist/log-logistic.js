@@ -3,18 +3,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the [log-logistic distribution]{@link https://en.wikipedia.org/wiki/Log-logistic_distribution} (also known as Fisk distribution):
  *
- * $$f(x; \alpha, \beta) = \frac{(\beta / \alpha) (x / \alpha)^{\beta - 1}}{\[1 + (x / \alpha)^\beta\]^2},$$
+ * $f(x; \alpha, \beta) = \frac{(\beta / \alpha) (x / \alpha)^{\beta - 1}}{\[1 + (x / \alpha)^\beta\]^2},$
  *
  * with $\alpha, \beta > 0$. Support: $x \in [0, \infty)$.
  *
  * @class LogLogistic
  * @memberof ran.dist
- * @param {number} alpha Scale parameter.
- * @param {number} beta Shape parameter.
  * @see https://en.wikipedia.org/wiki/Log-logistic_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class LogLogistic extends Distribution {
+  /**
+   * @param {number} alpha Scale parameter.
+   * @param {number} beta Shape parameter.
+   */
   constructor (alpha, beta) {
     super('continuous', 2)
 

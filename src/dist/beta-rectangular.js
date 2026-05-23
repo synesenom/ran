@@ -4,21 +4,23 @@ import Distribution from './_distribution'
 /**
  * Generator for the [beta-rectangular distribution]{@link https://en.wikipedia.org/wiki/Beta_rectangular_distribution}:
  *
- * $$f(x; \alpha, \beta, \theta, a, b) = \theta \frac{(x - a)^{\alpha - 1} (b - x)^{\beta - 1}}{\mathrm{B}(\alpha, \beta) (b - a)^{\alpha + \beta - 1}} + \frac{1 - \theta}{b - a},$$
+ * $f(x; \alpha, \beta, \theta, a, b) = \theta \frac{(x - a)^{\alpha - 1} (b - x)^{\beta - 1}}{\mathrm{B}(\alpha, \beta) (b - a)^{\alpha + \beta - 1}} + \frac{1 - \theta}{b - a},$
  *
  * with $\alpha, \beta > 0$, $\theta \in \[0, 1\]$, $a, b \in \mathbb{R}$, $a < b$ and $\mathrm{B}(x, y)$ is the beta function. Support: $x \in \[a, b\]$.
  *
  * @class BetaRectangular
  * @memberof ran.dist
- * @param {number} alpha First shape parameter.
- * @param {number} beta Second shape parameter.
- * @param {number} theta Mixture parameter.
- * @param {number} a Lower boundary of the support.
- * @param {number} b Upper boundary of the support.
  * @see https://en.wikipedia.org/wiki/Beta_rectangular_distribution
  * @constructor
  */
-export default class extends Beta {
+export default class BetaRectangular extends Beta {
+  /**
+   * @param {number} alpha First shape parameter.
+   * @param {number} beta Second shape parameter.
+   * @param {number} theta Mixture parameter.
+   * @param {number} a Lower boundary of the support.
+   * @param {number} b Upper boundary of the support.
+   */
   constructor (alpha, beta, theta, a, b) {
     super(alpha, beta)
 

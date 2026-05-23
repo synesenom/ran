@@ -5,17 +5,19 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Borel distribution]{@link https://en.wikipedia.org/wiki/Borel_distribution}:
  *
- * $$f(k; \mu) = \frac{e^{-\mu k} (\mu k)^{k - 1}}{k!},$$
+ * $f(k; \mu) = \frac{e^{-\mu k} (\mu k)^{k - 1}}{k!},$
  *
  * where $\mu \in \[0, 1\]$. Support: $k \in \mathbb{N}^+$.
  *
  * @class Borel
  * @memberof ran.dist
- * @param {number} mu Distribution parameter.
  * @see https://en.wikipedia.org/wiki/Borel_distribution
  * @constructor
  */
-export default class extends PreComputed {
+export default class Borel extends PreComputed {
+  /**
+   * @param {number} mu Distribution parameter.
+   */
   constructor (mu) {
     super(true)
     this.k = 1

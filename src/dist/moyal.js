@@ -5,18 +5,20 @@ import { gammaUpperIncomplete } from '../special'
 /**
  * Generator for the [Moyal distribution]{@link https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.moyal.html#r7049b665a02e-2}:
  *
- * $$f(x; \mu, \sigma) = \frac{1}{\sqrt{2 \pi}}e^{-\frac{1}{2}(z + e^{-z})},$$
+ * $f(x; \mu, \sigma) = \frac{1}{\sqrt{2 \pi}}e^{-\frac{1}{2}(z + e^{-z})},$
  *
  * where $z = \frac{x - \mu}{\sigma}$, $\mu \in \mathbb{R}$ and $\sigma > 0$. Support: $x \in \mathbb{R}$.
  *
  * @class Moyal
  * @memberof ran.dist
- * @param {number} mu Location parameter.
- * @param {number} sigma Scale parameter.
  * @see https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.moyal.html#r7049b665a02e-2
  * @constructor
  */
-export default class extends Distribution {
+export default class Moyal extends Distribution {
+  /**
+   * @param {number} mu Location parameter.
+   * @param {number} sigma Scale parameter.
+   */
   constructor (mu, sigma) {
     super('continuous', 2)
 

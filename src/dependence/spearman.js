@@ -9,7 +9,7 @@ import pearson from './pearson'
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
- * @returns {(number|undefined)} Spearman's rank correlation coefficient if none of the arrays are empty and they have
+ * @returns {number|undefined} Spearman's rank correlation coefficient if none of the arrays are empty and they have
  * the same length, undefined otherwise.
  * @example
  *

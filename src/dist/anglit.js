@@ -3,20 +3,22 @@ import Distribution from './_distribution'
 /**
  * Generator for the [anglit distribution]{@link https://docs.scipy.org/doc/scipy-1.0.0/reference/tutorial/stats/continuous_anglit.html}:
  *
- * $$f(x; \mu, \beta) = \frac{1}{\beta} \cos\bigg(2 \frac{x - \mu}{\beta}\bigg),$$
+ * $f(x; \mu, \beta) = \frac{1}{\beta} \cos\bigg(2 \frac{x - \mu}{\beta}\bigg),$
  *
  * where $\mu \in \mathbb{R}$ and $\beta > 0$.
  * Support: $x \in \Big\[\mu-\frac{\beta \pi}{4}, \mu + \frac{\beta \pi}{4}\Big\]$.
  *
  * @class Anglit
  * @memberof ran.dist
- * @param {number} mu Location parameter.
- * @param {number} beta Scale parameter.
  * @see https://docs.scipy.org/doc/scipy-1.0.0/reference/tutorial/stats/continuous_anglit.html
  * @constructor
  */
-export default class extends Distribution {
+export default class Anglit extends Distribution {
   // Source: King (2017). Statistics for Process control engineers, John Wiley and Sons, p. 472.
+  /**
+   * @param {number} mu Location parameter.
+   * @param {number} beta Scale parameter.
+   */
   constructor (mu, beta) {
     super('continuous', 2)
 

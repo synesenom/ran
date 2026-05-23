@@ -13,7 +13,7 @@ import { EPS, MAX_ITER } from '../core/constants'
  * @see https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test#Kolmogorov_distribution
  * @constructor
  */
-export default class Davis extends Distribution {
+export default class Kolmogorov extends Distribution {
   constructor () {
     super('continuous', 0)
 

@@ -9,20 +9,22 @@ import NoncentralT from './noncentral-t'
 /**
  * Generator for the [doubly non-central t distribution]{@link https://www.wiley.com/en-us/Intermediate+Probability%3A+A+Computational+Approach-p-9780470026373}:
  *
- * $$f(x; \nu, \mu, \theta) = \frac{e^{-\frac{\theta + \mu^2}{2}}}{\sqrt{\pi \nu}} \sum_{j = 0}^\infty \frac{1}{j!} \frac{(x \mu \sqrt{2 / \nu})^j}{(1 + x^2 / \nu)^{\frac{\nu + j + 1}{2}}} \frac{\Gamma\big(\frac{\nu + j + 1}{2}\big)}{\Gamma\big(\frac{\nu}{2}\big)} {}_1F_1\bigg(\frac{\nu + j + 1}{2}, \frac{\nu}{2}; \frac{\theta}{2 (1 + x^2 / \nu)}\bigg),$$
+ * $f(x; \nu, \mu, \theta) = \frac{e^{-\frac{\theta + \mu^2}{2}}}{\sqrt{\pi \nu}} \sum_{j = 0}^\infty \frac{1}{j!} \frac{(x \mu \sqrt{2 / \nu})^j}{(1 + x^2 / \nu)^{\frac{\nu + j + 1}{2}}} \frac{\Gamma\big(\frac{\nu + j + 1}{2}\big)}{\Gamma\big(\frac{\nu}{2}\big)} {}_1F_1\bigg(\frac{\nu + j + 1}{2}, \frac{\nu}{2}; \frac{\theta}{2 (1 + x^2 / \nu)}\bigg),$
  *
  * where $\nu \in \mathbb{N}^+$, $\mu \in \mathbb{R}$ and $\theta > 0$. Support: $x \in \mathbb{R}$.
  * Implementation is based on Section 10.4.1.2 in Marc S. Paolella. Intermediate Probability: A Computational Approach. (2007)
  *
  * @class DoublyNoncentralT
  * @memberof ran.dist
- * @param {number} nu Degrees of freedom. If not an integer, it is rounded to the nearest one.
- * @param {number} mu Location parameter.
- * @param {number} theta Shape parameter.
  * @see https://www.wiley.com/en-us/Intermediate+Probability%3A+A+Computational+Approach-p-9780470026373
  * @constructor
  */
-export default class extends Distribution {
+export default class DoublyNoncentralT extends Distribution {
+  /**
+   * @param {number} nu Degrees of freedom. If not an integer, it is rounded to the nearest one.
+   * @param {number} mu Location parameter.
+   * @param {number} theta Shape parameter.
+   */
   constructor (nu, mu, theta) {
     super('continuous', 3)
 

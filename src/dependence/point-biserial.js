@@ -9,7 +9,7 @@ import mean from '../location/mean'
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values. Must contain 0s and 1s only.
- * @returns {(number|undefined)} The point-biserial correlation coefficient if none of the arrays are empty, they have
+ * @returns {number|undefined} The point-biserial correlation coefficient if none of the arrays are empty, they have
  * the same length and each has a positive variance, undefined otherwise.
  * @example
  *

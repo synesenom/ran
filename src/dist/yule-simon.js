@@ -4,17 +4,19 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Yule-Simon distribution]{@link https://en.wikipedia.org/wiki/Yule%E2%80%93Simon_distribution}:
  *
- * $$f(k; \rho) = \rho \mathrm{B}(k, \rho + 1),$$
+ * $f(k; \rho) = \rho \mathrm{B}(k, \rho + 1),$
  *
  * with $\rho > 0$ and $\mathrm{B}(x, y)$ is the beta function. Support: $k \in \mathbb{N}^+$.
  *
  * @class YuleSimon
  * @memberof ran.dist
- * @param {number} rho Shape parameter.
  * @see https://en.wikipedia.org/wiki/Yule%E2%80%93Simon_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class YuleSimon extends Distribution {
+  /**
+   * @param {number} rho Shape parameter.
+   */
   constructor (rho) {
     super('discrete', 1)
 

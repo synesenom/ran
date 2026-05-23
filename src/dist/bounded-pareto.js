@@ -3,19 +3,21 @@ import Distribution from './_distribution'
 /**
  * Generator for the [bounded Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution#Bounded_Pareto_distribution}:
  *
- * $$f(x; L, H, \alpha) = \frac{\alpha L^\alpha x^{-\alpha - 1}}{1 - \big(\frac{L}{H}\big)^\alpha},$$
+ * $f(x; L, H, \alpha) = \frac{\alpha L^\alpha x^{-\alpha - 1}}{1 - \big(\frac{L}{H}\big)^\alpha},$
  *
  * with $L, H > 0$, $H > L$ and $\alpha > 0$. Support: $x \in \[L, H\]$.
  *
  * @class BoundedPareto
  * @memberof ran.dist
- * @param {number} L Lower boundary.
- * @param {number} H Upper boundary.
- * @param {number} alpha Shape parameter.
  * @see https://en.wikipedia.org/wiki/Pareto_distribution#Bounded_Pareto_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class BoundedPareto extends Distribution {
+  /**
+   * @param {number} L Lower boundary.
+   * @param {number} H Upper boundary.
+   * @param {number} alpha Shape parameter.
+   */
   constructor (L, H, alpha) {
     super('continuous', 3)
 

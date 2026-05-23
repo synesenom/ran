@@ -3,19 +3,21 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Benini distribution]{@link https://en.wikipedia.org/wiki/Benini_distribution}:
  *
- * $$f(x; \alpha, \beta, \sigma) = \bigg(\frac{\alpha}{x} + \frac{2 \beta \ln \frac{x}{\sigma}}{x}\bigg) e^{-\alpha \ln \frac{x}{\sigma} - \beta \ln^2 \frac{x}{\sigma}},$$
+ * $f(x; \alpha, \beta, \sigma) = \bigg(\frac{\alpha}{x} + \frac{2 \beta \ln \frac{x}{\sigma}}{x}\bigg) e^{-\alpha \ln \frac{x}{\sigma} - \beta \ln^2 \frac{x}{\sigma}},$
  *
  * with $\alpha, \beta, \sigma > 0$. Support: $x \in (\sigma, \infty)$.
  *
  * @class Benini
  * @memberof ran.dist
- * @param {number} alpha First shape parameter.
- * @param {number} beta Second shape parameter.
- * @param {number} sigma Scale parameter.
  * @see https://en.wikipedia.org/wiki/Benini_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Benini extends Distribution {
+  /**
+   * @param {number} alpha First shape parameter.
+   * @param {number} beta Second shape parameter.
+   * @param {number} sigma Scale parameter.
+   */
   constructor (alpha, beta, sigma) {
     super('continuous', 3)
 

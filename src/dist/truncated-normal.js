@@ -4,7 +4,7 @@ import Distribution from './_distribution'
 /**
  * Generator for the [truncated normal distribution]{@link https://en.wikipedia.org/wiki/Truncated_normal_distribution}:
  *
- * $$f(x; \mu, \sigma, a, b) = \frac{\phi(\xi)}{\Phi(\beta) - \Phi(\alpha)},$$
+ * $f(x; \mu, \sigma, a, b) = \frac{\phi(\xi)}{\Phi(\beta) - \Phi(\alpha)},$
  *
  * where $\xi = \frac{x - \mu}{\sigma}, \alpha = \frac{a - \mu}{\sigma}$ and $\beta = \frac{b - \mu}{\sigma}$.
  * The functions $\phi$ and $\Phi$ denote the probability density and cumulative distribution functions of the normal
@@ -12,14 +12,16 @@ import Distribution from './_distribution'
  *
  * @class TruncatedNormal
  * @memberof ran.dist
- * @param {number} mu Mean of the underlying normal distribution.
- * @param {number} sigma Variance of the underlying normal distribution.
- * @param {number} a Lower boundary of the support.
- * @param {number} b Upper boundary of the support.
  * @see https://en.wikipedia.org/wiki/Truncated_normal_distribution
  * @constructor
  */
-export default class extends Normal {
+export default class TruncatedNormal extends Normal {
+  /**
+   * @param {number} mu Mean of the underlying normal distribution.
+   * @param {number} sigma Variance of the underlying normal distribution.
+   * @param {number} a Lower boundary of the support.
+   * @param {number} b Upper boundary of the support.
+   */
   constructor (mu, sigma, a, b) {
     // Call super and update number of parameters.
     super(mu, sigma)

@@ -4,18 +4,20 @@ import { erfinv } from '../special'
 /**
  * Generator for the [half-normal distribution]{@link https://en.wikipedia.org/wiki/Half-normal_distribution}:
  *
- * $$f(x; \sigma) = \frac{\sqrt{2}}{\sigma\sqrt{\pi}} e^{-\frac{x^2}{2\sigma^2}},$$
+ * $f(x; \sigma) = \frac{\sqrt{2}}{\sigma\sqrt{\pi}} e^{-\frac{x^2}{2\sigma^2}},$
  *
  * with $\sigma > 0$. Support: $x \ge 0$.
  *
  * @class HalfNormal
  * @memberof ran.dist
- * @param {number} sigma Scale parameter.
  * @see https://en.wikipedia.org/wiki/Half-normal_distribution
  * @constructor
  */
-export default class extends Normal {
+export default class HalfNormal extends Normal {
   // Transformation of normal distribution
+  /**
+   * @param {number} sigma Scale parameter.
+   */
   constructor (sigma) {
     super(0, sigma)
 

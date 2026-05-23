@@ -10,7 +10,7 @@ import neumaier from '../algorithms/neumaier'
  * @memberof ran.dependence
  * @param {number[]} p Array representing the probabilities for the i-th value in the base distribution (P).
  * @param {number[]} q Array representing the probabilities for the i-th value in compared distribution (Q).
- * @returns {(number|undefined)} The Kullback-Leibler divergence if none of the distributions are empty and Q(x) = 0
+ * @returns {number|undefined} The Kullback-Leibler divergence if none of the distributions are empty and Q(x) = 0
  * implies that P(x) = 0 for all x, otherwise undefined.
  * @example
  *

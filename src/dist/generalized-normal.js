@@ -4,20 +4,22 @@ import Distribution from './_distribution'
 /**
  * Generator for the [generalized normal distribution]{@link https://en.wikipedia.org/wiki/Generalized_normal_distribution}:
  *
- * $$f(x; \mu, \alpha, \beta) = \frac{\beta}{2 \alpha \Gamma\big(\frac{1}{\beta}\big)} e^{-\big(\frac{|x - \mu|}{\alpha}\big)^\beta},$$
+ * $f(x; \mu, \alpha, \beta) = \frac{\beta}{2 \alpha \Gamma\big(\frac{1}{\beta}\big)} e^{-\big(\frac{|x - \mu|}{\alpha}\big)^\beta},$
  *
  * where $\mu \in \mathbb{R}$ and $\alpha, \beta > 0$. Support: $x \in \mathbb{R}$. It is also a special case of the
  * [generalized gamma distribution]{@link #dist.GeneralizedGamma}.
  *
  * @class GeneralizedNormal
  * @memberof ran.dist
- * @param {number} mu Location paramameter.
- * @param {number} alpha Scale parameter.
- * @param {number} beta Shape parameter.
  * @see https://en.wikipedia.org/wiki/Generalized_normal_distribution
  * @constructor
  */
-export default class extends GeneralizedGamma {
+export default class GeneralizedNormal extends GeneralizedGamma {
+  /**
+   * @param {number} mu Location paramameter.
+   * @param {number} alpha Scale parameter.
+   * @param {number} beta Shape parameter.
+   */
   constructor (mu, alpha, beta) {
     super(alpha, 1, beta)
 

@@ -3,20 +3,22 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Champernowne distribution]{@link https://en.wikipedia.org/wiki/Champernowne_distribution}:
  *
- * $$f(x; \alpha, \lambda, x_0) = \frac{C}{\cosh(\alpha(x - x_0)) + \lambda},$$
+ * $f(x; \alpha, \lambda, x_0) = \frac{C}{\cosh(\alpha(x - x_0)) + \lambda},$
  *
  * with normalization constant $C = \frac{\alpha\sqrt{1 - \lambda^2}}{2\arccos(\lambda)}$,
  * where $\alpha > 0$, $0 \le \lambda < 1$, and $x_0 \in \mathbb{R}$. Support: $x \in \mathbb{R}$.
  *
  * @class Champernowne
  * @memberof ran.dist
- * @param {number} alpha Shape parameter. Must be positive.
- * @param {number} lambda Asymmetry parameter. Must satisfy 0 <= lambda < 1.
- * @param {number} x0 Location parameter.
  * @see https://en.wikipedia.org/wiki/Champernowne_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Champernowne extends Distribution {
+  /**
+   * @param {number} alpha Shape parameter. Must be positive.
+   * @param {number} lambda Asymmetry parameter. Must satisfy 0 <= lambda < 1.
+   * @param {number} x0 Location parameter.
+   */
   constructor (alpha, lambda, x0) {
     super('continuous', 3)
 

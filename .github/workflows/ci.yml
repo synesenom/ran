@@ -79,6 +79,7 @@ jobs:
       - run: npm ci
         if: steps.node-cache.outputs.cache-hit != 'true'
       - run: npm run check-decl
+      - run: ./node_modules/.bin/tsc -p tsconfig.build.json
       - run: npm run typecheck
 
   docs-build:

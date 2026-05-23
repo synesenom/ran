@@ -5,19 +5,21 @@ import Distribution from './_distribution'
  * Generator for the [log-gamma distribution]{@link https://reference.wolfram.com/language/ref/LogGammaDistribution.html} using the
  * shape/rate parametrization:
  *
- * $$f(x; \alpha, \beta, \mu) = \frac{\beta^\alpha}{\Gamma(\alpha)} \ln^{\alpha - 1}(x - \mu + 1) (x - \mu + 1)^{-(1 + \beta)},$$
+ * $f(x; \alpha, \beta, \mu) = \frac{\beta^\alpha}{\Gamma(\alpha)} \ln^{\alpha - 1}(x - \mu + 1) (x - \mu + 1)^{-(1 + \beta)},$
  *
  * where $\alpha, \beta > 0$ and $\mu \ge 0$. Support: $x \in [\mu, \infty)$.
  *
  * @class LogGamma
  * @memberof ran.dist
- * @param {number} alpha Shape parameter.
- * @param {number} beta Rate parameter.
- * @param {number} mu Location parameter.
  * @see https://reference.wolfram.com/language/ref/LogGammaDistribution.html
  * @constructor
  */
-export default class extends Gamma {
+export default class LogGamma extends Gamma {
+  /**
+   * @param {number} alpha Shape parameter.
+   * @param {number} beta Rate parameter.
+   * @param {number} mu Location parameter.
+   */
   constructor (alpha, beta, mu) {
     super(alpha, beta)
 

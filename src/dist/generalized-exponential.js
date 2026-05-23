@@ -4,19 +4,21 @@ import { lambertW0 } from '../special'
 /**
  * Generator for the [generalized exponential distribution]{@link https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_genexpon.html}:
  *
- * $$f(x; a, b, c) = \big(a + b (1 - e^{-c x})\big) e^{-(a + b)x + \frac{b}{c} (1 - e^{-c x})},$$
+ * $f(x; a, b, c) = \big(a + b (1 - e^{-c x})\big) e^{-(a + b)x + \frac{b}{c} (1 - e^{-c x})},$
  *
  * where $a, b, c > 0$. Support> $x \ge 0$.
  *
  * @class GeneralizedExponential
  * @memberof ran.dist
- * @param {number} a First shape parameter.
- * @param {number} b Second shape parameter.
- * @param {number} c Third shape parameter.
  * @see https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_genexpon.html
  * @constructor
  */
-export default class extends Distribution {
+export default class GeneralizedExponential extends Distribution {
+  /**
+   * @param {number} a First shape parameter.
+   * @param {number} b Second shape parameter.
+   * @param {number} c Third shape parameter.
+   */
   constructor (a, b, c) {
     super('continuous', 3)
 

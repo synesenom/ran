@@ -5,17 +5,19 @@ import { gamma, gammaUpperIncomplete } from '../special'
 /**
  * Generator for the [product of uniform distribution]{@link https://mathworld.wolfram.com/UniformProductDistribution.html}:
  *
- * $$f(x; n) = \frac{(-\ln x)^{n-1}}{(n-1)!},$$
+ * $f(x; n) = \frac{(-\ln x)^{n-1}}{(n-1)!},$
  *
  * with $n \in \mathbb{N}, n > 1$. Support: $x \in (0, 1\]$.
  *
  * @class UniformProduct
  * @memberof ran.dist
- * @param {number} n Number of uniform factors. If not an integer, it is rounded to the nearest one.
  * @see https://mathworld.wolfram.com/UniformProductDistribution.html
  * @constructor
  */
-export default class extends Distribution {
+export default class UniformProduct extends Distribution {
+  /**
+   * @param {number} n Number of uniform factors. If not an integer, it is rounded to the nearest one.
+   */
   constructor (n) {
     super('continuous', 1)
 

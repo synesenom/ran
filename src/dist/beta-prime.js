@@ -5,20 +5,22 @@ import Beta from './beta'
  * Generator for the [beta prime distribution]{@link https://en.wikipedia.org/wiki/Beta_prime_distribution} (also
  * known as inverted beta):
  *
- * $$f(x; \alpha, \beta) = \frac{x^{\alpha - 1}(1 + x)^{-\alpha - \beta}}{\mathrm{B}(\alpha, \beta)},$$
+ * $f(x; \alpha, \beta) = \frac{x^{\alpha - 1}(1 + x)^{-\alpha - \beta}}{\mathrm{B}(\alpha, \beta)},$
  *
  * with $\alpha, \beta > 0$ and $\mathrm{B}(x, y)$ is the beta function.
  * Support: $x > 0$.
  *
  * @class BetaPrime
  * @memberof ran.dist
- * @param {number} alpha First shape parameter.
- * @param {number} beta Second shape parameter.
  * @see https://en.wikipedia.org/wiki/Beta_prime_distribution
  * @constructor
  */
-export default class extends Beta {
+export default class BetaPrime extends Beta {
   // Transformation of beta distribution
+  /**
+   * @param {number} alpha First shape parameter.
+   * @param {number} beta Second shape parameter.
+   */
   constructor (alpha, beta) {
     super(alpha, beta)
 

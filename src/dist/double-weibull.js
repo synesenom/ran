@@ -3,19 +3,21 @@ import Weibull from './weibull'
 /**
  * Generator for the [double Weibull distribution]{@link https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_dweibull.html}:
  *
- * $$f(x; \lambda, k) = \frac{k}{\lambda}\bigg(\frac{|x|}{\lambda}\bigg)^{k - 1} e^{-(|x| / \lambda)^k},$$
+ * $f(x; \lambda, k) = \frac{k}{\lambda}\bigg(\frac{|x|}{\lambda}\bigg)^{k - 1} e^{-(|x| / \lambda)^k},$
  *
  * with $\lambda, k > 0$. Support: $x \in \mathbb{R}$.
  *
  * @class DoubleWeibull
  * @memberof ran.dist
- * @param {number} lambda Scale parameter.
- * @param {number} k Shape parameter.
  * @see https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_dweibull.html
  * @constructor
  */
-export default class extends Weibull {
+export default class DoubleWeibull extends Weibull {
   // Transformation of Weibull
+  /**
+   * @param {number} lambda Scale parameter.
+   * @param {number} k Shape parameter.
+   */
   constructor (lambda, k) {
     super(lambda, k)
 

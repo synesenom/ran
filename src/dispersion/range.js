@@ -7,7 +7,7 @@ import min from '../shape/min'
  * @method range
  * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate range for.
- * @returns {(number|undefined)} The range of the values if there is any, undefined otherwise.
+ * @returns {number|undefined} The range of the values if there is any, undefined otherwise.
  * @example
  *
  * ran.dispersion.range([])

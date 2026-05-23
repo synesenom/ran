@@ -3,22 +3,24 @@ import DoublyNoncentralBeta from './doubly-noncentral-beta'
 /**
  * Generator for the [doubly non-central F distribution]{@link https://doi.org/10.1111/j.1467-842X.1965.tb00036.x}:
  *
- * $$f(x; d_1, d_2, \lambda_1, \lambda_2) = \frac{d_1}{d_2} e^{-\frac{\lambda_1 + \lambda_2}{2}} \sum\_{k = 0}^\infty \sum\_{l = 0}^\infty \frac{\big(\frac{\lambda_1}{2}\big)^k}{k!} \frac{\big(\frac{\lambda_2}{2}\big)^l}{l!} \frac{\big(\frac{d_1 x}{d_2}\big)^{\frac{d_1}{2} + k - 1}}{\big(1 + \frac{d_1 x}{d_2}\big)^{\frac{d_1 + d_2}{2} + k + l}} \frac{1}{\mathrm{B}\big(\frac{d_1}{2} + k, \frac{d_2}{2} + l\big)},$$
+ * $f(x; d_1, d_2, \lambda_1, \lambda_2) = \frac{d_1}{d_2} e^{-\frac{\lambda_1 + \lambda_2}{2}} \sum\_{k = 0}^\infty \sum\_{l = 0}^\infty \frac{\big(\frac{\lambda_1}{2}\big)^k}{k!} \frac{\big(\frac{\lambda_2}{2}\big)^l}{l!} \frac{\big(\frac{d_1 x}{d_2}\big)^{\frac{d_1}{2} + k - 1}}{\big(1 + \frac{d_1 x}{d_2}\big)^{\frac{d_1 + d_2}{2} + k + l}} \frac{1}{\mathrm{B}\big(\frac{d_1}{2} + k, \frac{d_2}{2} + l\big)},$
  *
  * where $d_1, d_2 \in \mathbb{N}^+$ and $\lambda_1, \lambda_2 \ge 0$. Support: $x > 0$.
  * Formula from M. L. Tiku. Series expansions for the doubly non-central F-distribution. *Australian Journal of Statistics*, 7(2):78–89, 1965.
  *
  * @class DoublyNoncentralF
  * @memberof ran.dist
- * @param {number} d1 First degrees of freedom. If not an integer, it is rounded to the nearest one.
- * @param {number} d2 Second degrees of freedom. If not an integer, it is rounded to the nearest one.
- * @param {number} lambda1 First non-centrality parameter.
- * @param {number} lambda2 Second non-centrality parameter.
  * @see https://doi.org/10.1111/j.1467-842X.1965.tb00036.x
  * @constructor
  */
-export default class extends DoublyNoncentralBeta {
+export default class DoublyNoncentralF extends DoublyNoncentralBeta {
   // Transformation of double non-central beta
+  /**
+   * @param {number} d1 First degrees of freedom. If not an integer, it is rounded to the nearest one.
+   * @param {number} d2 Second degrees of freedom. If not an integer, it is rounded to the nearest one.
+   * @param {number} lambda1 First non-centrality parameter.
+   * @param {number} lambda2 Second non-centrality parameter.
+   */
   constructor (d1, d2, lambda1, lambda2) {
     super(d1 / 2, d2 / 2, lambda1, lambda2)
 

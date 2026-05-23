@@ -5,19 +5,21 @@ import Distribution from './_distribution'
 /**
  * Generator for the Wald or [inverse Gaussian distribution]{@link https://en.wikipedia.org/wiki/Inverse_Gaussian_distribution}:
  *
- * $$f(x; \lambda, \mu) = \bigg\[\frac{\lambda}{2 \pi x^3}\bigg\]^{1/2} e^{\frac{-\lambda (x - \mu)^2}{2 x \mu^2}},$$
+ * $f(x; \lambda, \mu) = \bigg\[\frac{\lambda}{2 \pi x^3}\bigg\]^{1/2} e^{\frac{-\lambda (x - \mu)^2}{2 x \mu^2}},$
  *
  * with $\mu, \lambda > 0$. Support: $x > 0$.
  *
  * @class InverseGaussian
  * @memberof ran.dist
- * @param {number} mu Mean of the distribution.
- * @param {number} lambda Shape parameter.
  * @see https://en.wikipedia.org/wiki/Inverse_Gaussian_distribution
  * @see J. R. Michael, W. R. Schucany and R. W. Haas, "Generating Random Variates Using Transformations with Multiple Roots", Am. Stat. 30(2), 88–90, 1976.
  * @constructor
  */
-export default class extends Distribution {
+export default class InverseGaussian extends Distribution {
+  /**
+   * @param {number} mu Mean of the distribution.
+   * @param {number} lambda Shape parameter.
+   */
   constructor (mu, lambda) {
     super('continuous', 2)
 

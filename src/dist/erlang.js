@@ -4,19 +4,21 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Erlang distribution]{@link https://en.wikipedia.org/wiki/Erlang_distribution}:
  *
- * $$f(x; k, \lambda) = \frac{\lambda^k x^{k - 1} e^{-\lambda x}}{(k - 1)!},$$
+ * $f(x; k, \lambda) = \frac{\lambda^k x^{k - 1} e^{-\lambda x}}{(k - 1)!},$
  *
  * where $k \in \mathbb{N}^+$ and $\lambda > 0$. Support: $x \ge 0$.
  *
  * @class Erlang
  * @memberof ran.dist
- * @param {number} k Shape parameter. It is rounded to the nearest integer.
- * @param {number} lambda Rate parameter.
  * @see https://en.wikipedia.org/wiki/Erlang_distribution
  * @constructor
  */
-export default class extends Gamma {
+export default class Erlang extends Gamma {
   // Special case of gamma
+  /**
+   * @param {number} k Shape parameter. It is rounded to the nearest integer.
+   * @param {number} lambda Rate parameter.
+   */
   constructor (k, lambda) {
     const ki = Math.round(k)
     super(ki, lambda)

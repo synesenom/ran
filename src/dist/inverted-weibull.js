@@ -3,17 +3,19 @@ import Distribution from './_distribution'
 /**
  * Generator for the [inverted Weibull distribution]{@link https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_invweibull.html}:
  *
- * $$f(x; c) = c x^{-c - 1} e^{-x^{-c}},$$
+ * $f(x; c) = c x^{-c - 1} e^{-x^{-c}},$
  *
  * with $c > 0$. Support: $x \ge 0$.
  *
  * @class InvertedWeibull
  * @memberof ran.dist
- * @param {number} c Shape parameter.
  * @see https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_invweibull.html
  * @constructor
  */
-export default class extends Distribution {
+export default class InvertedWeibull extends Distribution {
+  /**
+   * @param {number} c Shape parameter.
+   */
   constructor (c) {
     super('continuous', 1)
 

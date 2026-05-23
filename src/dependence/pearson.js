@@ -9,7 +9,7 @@ import covariance from './covariance'
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
- * @returns {(number|undefined)} The Pearson correlation coefficient if none of the arrays are empty, they have the
+ * @returns {number|undefined} The Pearson correlation coefficient if none of the arrays are empty, they have the
  * same length and each has a positive variance, undefined otherwise.
  * @example
  *

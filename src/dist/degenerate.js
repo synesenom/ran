@@ -3,17 +3,19 @@ import Distribution from './_distribution'
 /**
  * Generator for the [degenerate distribution]{@link https://en.wikipedia.org/wiki/Degenerate_distribution}:
  *
- * $$f(x; x_0) = \begin{cases}1 &\quad\text{if $x = x_0$}\\\\0 &\quad\text{otherwise}\\\\\\end{cases},$$
+ * $f(x; x_0) = \begin{cases}1 &\quad\text{if $x = x_0$}\\\\0 &\quad\text{otherwise}\\\\\\end{cases},$
  *
  * where $x_0 \in \mathbb{R}$. Support: $x \in \mathbb{R}$.
  *
  * @class Degenerate
  * @memberof ran.dist
- * @param {number} x0 Location of the distribution.
  * @see https://en.wikipedia.org/wiki/Degenerate_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Degenerate extends Distribution {
+  /**
+   * @param {number} x0 Location of the distribution.
+   */
   constructor (x0) {
     super('continuous', 1)
 

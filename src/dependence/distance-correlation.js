@@ -9,7 +9,7 @@ import mean from '../location/mean'
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
- * @returns {(number|undefined)} The distance correlation if none of the arrays are empty and they have the same length,
+ * @returns {number|undefined} The distance correlation if none of the arrays are empty and they have the same length,
  * undefined otherwise.
  * @example
  *

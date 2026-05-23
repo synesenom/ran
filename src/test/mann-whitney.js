@@ -73,7 +73,7 @@ function _computeRanks (data) {
  * @memberof ran.test
  * @param {Array[]} dataSets Array containing the two data sets.
  * @param {number} [alpha = 0.05] Confidence level.
- * @returns {Object} Object containing the (non-standardized) test statistics (U) and whether the data sets passed the null hypothesis that
+ * @returns {{stat: number, passed: boolean}} Object containing the (non-standardized) test statistics (U) and whether the data sets passed the null hypothesis that
  * the samples come from the same distribution.
  * @throws {Error} If the number of data sets is different from 2.
  * @example

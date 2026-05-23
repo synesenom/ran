@@ -5,18 +5,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Poisson distribution]{@link https://en.wikipedia.org/wiki/Poisson_distribution}:
  *
- * $$f(k; \lambda) = \frac{\lambda^k e^{-\lambda}}{k!},$$
+ * $f(k; \lambda) = \frac{\lambda^k e^{-\lambda}}{k!},$
  *
  * with $\lambda > 0$. Support: $k \in \mathbb{N}_0$.
  *
  * @class Poisson
  * @memberof ran.dist
- * @param {number} lambda Mean of the distribution.
  * @see https://en.wikipedia.org/wiki/Poisson_distribution
  * @see D. E. Knuth, "Seminumerical Algorithms", The Art of Computer Programming vol. 2, 1969 (small λ). A. C. Atkinson, "The Computer Generation of Poisson Random Variables", Appl. Stat. 28(1), 29–35, 1979 (large λ).
  * @constructor
  */
-export default class extends Distribution {
+export default class Poisson extends Distribution {
+  /**
+   * @param {number} lambda Mean of the distribution.
+   */
   constructor (lambda) {
     super('discrete', 1)
 

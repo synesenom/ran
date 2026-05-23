@@ -12,7 +12,7 @@ import Distribution from './_distribution'
  * @see https://en.wikipedia.org/wiki/Half-logistic_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class HalfLogistic extends Distribution {
   constructor () {
     super('continuous', 0)
 

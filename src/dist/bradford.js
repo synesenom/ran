@@ -3,17 +3,19 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Bradford distribution]{@link https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bradford.html}:
  *
- * $$f(x; c) = \frac{c}{\ln(1 + c) (1 + c x)},$$
+ * $f(x; c) = \frac{c}{\ln(1 + c) (1 + c x)},$
  *
  * with $c > 0$. Support: $x \in \[0, 1\]$.
  *
  * @class Bradford
  * @memberof ran.dist
- * @param {number} c Shape parameter.
  * @see https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bradford.html
  * @constructor
  */
-export default class extends Distribution {
+export default class Bradford extends Distribution {
+  /**
+   * @param {number} c Shape parameter.
+   */
   constructor (c) {
     super('continuous', 1)
 

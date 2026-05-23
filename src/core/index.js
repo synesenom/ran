@@ -15,11 +15,33 @@ const r = new Xoshiro128p()
  *
  * @method seed
  * @memberof ran.core
- * @param {(number|string)} value The value of the seed, either a number or a string (for the ease of tracking seeds).
+ * @param {number|string} value The value of the seed, either a number or a string (for the ease of tracking seeds).
  * @returns {void}
  */
 export const seed = value => r.seed(value)
 
+/**
+ * @overload
+ * @returns {number}
+ */
+/**
+ * @overload
+ * @param {number} min
+ * @returns {number}
+ */
+/**
+ * @overload
+ * @param {number} min
+ * @param {number} max
+ * @returns {number}
+ */
+/**
+ * @overload
+ * @param {number} min
+ * @param {number} max
+ * @param {number} n
+ * @returns {number|number[]}
+ */
 /**
  * Generates some uniformly distributed random floats in (min, max).
  * If min > max, a random float in (max, min) is generated.
@@ -31,7 +53,7 @@ export const seed = value => r.seed(value)
  * @param {number=} min Lower boundary, or upper if max is not given.
  * @param {number=} max Upper boundary.
  * @param {number=} n Number of floats to generate.
- * @returns {(number|number[])} Single float or array of random floats.
+ * @returns {number|number[]} Single float or array of random floats.
  * @example
  *
  * ran.core.float()
@@ -58,6 +80,24 @@ export function float (min, max, n) {
 }
 
 /**
+ * @overload
+ * @param {number} min
+ * @returns {number}
+ */
+/**
+ * @overload
+ * @param {number} min
+ * @param {number} max
+ * @returns {number}
+ */
+/**
+ * @overload
+ * @param {number} min
+ * @param {number} max
+ * @param {number} n
+ * @returns {number|number[]}
+ */
+/**
  * Generates some uniformly distributed random integers in (min, max).
  * If min > max, a random integer in (max, min) is generated.
  * If only min is specified, generates a single random integer between 0 and min.
@@ -67,7 +107,7 @@ export function float (min, max, n) {
  * @param {number} min Lower boundary, or upper if max is not specified.
  * @param {number=} max Upper boundary.
  * @param {number=} n Number of integers to generate.
- * @returns {(number|number[])} Single integer or array of random integers.
+ * @returns {number|number[]} Single integer or array of random integers.
  * @example
  *
  * ran.core.int(10)
@@ -86,13 +126,27 @@ export function int (min, max, n) {
 }
 
 /**
+ * @template T
+ * @overload
+ * @param {T[]} values
+ * @returns {T|undefined}
+ */
+/**
+ * @template T
+ * @overload
+ * @param {T[]} values
+ * @param {number} n
+ * @returns {T|T[]|undefined}
+ */
+/**
  * Samples some elements with replacement from an array with uniform distribution.
  *
+ * @template T
  * @method choice
  * @memberof ran.core
- * @param {Array=} values Array to sample from.
+ * @param {T[]} values Array to sample from.
  * @param {number=} n Number of elements to sample.
- * @returns {(object|object[]|undefined)} Single element or array of sampled elements. If the array is invalid (empty or
+ * @returns {T|T[]|undefined} Single element or array of sampled elements. If the array is invalid (empty or
  * not passed), undefined is returned.
  * @example
  *
@@ -110,13 +164,24 @@ export function choice (values, n) {
 }
 
 /**
+ * @overload
+ * @param {string} string
+ * @returns {string|undefined}
+ */
+/**
+ * @overload
+ * @param {string} string
+ * @param {number} n
+ * @returns {string|string[]|undefined}
+ */
+/**
  * Samples some characters with replacement from a string with uniform distribution.
  *
  * @method char
  * @memberof ran.core
  * @param {string=} string String to sample characters from.
  * @param {number=} n Number of characters to sample.
- * @returns {(string|string[]|undefined)} Random character if n is not given or less than 2, an array of random characters
+ * @returns {string|string[]|undefined} Random character if n is not given or less than 2, an array of random characters
  * otherwise. If string is empty, undefined is returned.
  * @example
  *
@@ -137,10 +202,11 @@ export function char (string, n) {
 /**
  * Shuffles an array in-place using the [Fisher‒Yates algorithm]{@link https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle}.
  *
+ * @template T
  * @method shuffle
  * @memberof ran.core
- * @param {Array} values Array to shuffle.
- * @returns {Array} The shuffled array.
+ * @param {T[]} values Array to shuffle.
+ * @returns {T[]} The shuffled array.
  * @example
  *
  * ran.core.shuffle([1, 2, 3])
@@ -159,15 +225,33 @@ export function shuffle (values) {
 }
 
 /**
+ * @template H, T
+ * @overload
+ * @param {H} head
+ * @param {T} tail
+ * @param {number=} p
+ * @returns {H|T}
+ */
+/**
+ * @template H, T
+ * @overload
+ * @param {H} head
+ * @param {T} tail
+ * @param {number} p
+ * @param {number} n
+ * @returns {H|T|Array<H|T>}
+ */
+/**
  * Flips a biased coin several times and returns the associated head/tail value or array of values.
  *
+ * @template H, T
  * @method coin
  * @memberof ran.core
- * @param {Object} head Head value.
- * @param {Object} tail Tail value.
+ * @param {H} head Head value.
+ * @param {T} tail Tail value.
  * @param {number=} p Bias (probability of head). Default is 0.5.
  * @param {number=} n Number of coins to flip. Default is 1.
- * @returns {(object|object[])} Single head/tail value or an array of head/tail values.
+ * @returns {H|T|Array<H|T>} Single head/tail value or an array of head/tail values.
  * @example
  *
  * ran.core.coin('a', {b: 2})

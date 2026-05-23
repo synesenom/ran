@@ -4,18 +4,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the (continuous) [logarithmic distribution]{@link http://mathworld.wolfram.com/LogarithmicDistribution.html}:
  *
- * $$f(x; a, b) = \frac{\ln x}{a (1 - \ln a) - b (1 - \ln b)},$$
+ * $f(x; a, b) = \frac{\ln x}{a (1 - \ln a) - b (1 - \ln b)},$
  *
  * with $a, b \in [1, \infty)$ and $a < b$. Support: $x \in \[a, b\]$.
  *
  * @class Logarithmic
  * @memberof ran.dist
- * @param {number} a Lower boundary of the distribution.
- * @param {number} b Upper boundary of the distribution.
  * @see http://mathworld.wolfram.com/LogarithmicDistribution.html
  * @constructor
  */
-export default class extends Distribution {
+export default class Logarithmic extends Distribution {
+  /**
+   * @param {number} a Lower boundary of the distribution.
+   * @param {number} b Upper boundary of the distribution.
+   */
   constructor (a, b) {
     super('continuous', 2)
 

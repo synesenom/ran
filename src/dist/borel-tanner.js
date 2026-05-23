@@ -5,18 +5,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Borel-Tanner distribution]{@link https://en.wikipedia.org/wiki/Borel_distribution#Borel%E2%80%93Tanner_distribution}:
  *
- * $$f(k; \mu, n) = \frac{n}{k}\frac{e^{-\mu k} (\mu k)^{k - n}}{(k - n)!},$$
+ * $f(k; \mu, n) = \frac{n}{k}\frac{e^{-\mu k} (\mu k)^{k - n}}{(k - n)!},$
  *
  * where $\mu \in \[0, 1\]$ and $n \in \mathbb{N}^+$. Support: $k \ge n$.
  *
  * @class BorelTanner
  * @memberof ran.dist
- * @param {number} mu Distribution parameter.
- * @param {number} n Number of Borel distributed variates to add. If not an integer, it is rounded to the nearest one.
  * @see https://en.wikipedia.org/wiki/Borel_distribution#Borel%E2%80%93Tanner_distribution
  * @constructor
  */
-export default class extends PreComputed {
+export default class BorelTanner extends PreComputed {
+  /**
+   * @param {number} mu Distribution parameter.
+   * @param {number} n Number of Borel distributed variates to add. If not an integer, it is rounded to the nearest one.
+   */
   constructor (mu, n) {
     super()
     this.k = 2

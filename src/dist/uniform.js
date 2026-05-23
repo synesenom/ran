@@ -4,19 +4,21 @@ import Distribution from './_distribution'
  * Generator for the continuous
  * [uniform distribution]{@link https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)}:
  *
- * $$f(x; x_\mathrm{min}, x_\mathrm{max}) = \frac{1}{x_\mathrm{max} - x_\mathrm{min}},$$
+ * $f(x; x_\mathrm{min}, x_\mathrm{max}) = \frac{1}{x_\mathrm{max} - x_\mathrm{min}},$
  *
  * with $x_\mathrm{min}, x_\mathrm{max} \in \mathbb{R}$ and $x_\mathrm{min} < x_\mathrm{max}$.
  * Support: $x \in \[x_\mathrm{min}, x_\mathrm{max}\]$.
  *
  * @class Uniform
  * @memberof ran.dist
- * @param {number} xmin Lower boundary.
- * @param {number} xmax Upper boundary.
  * @see https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)
  * @constructor
  */
-export default class extends Distribution {
+export default class Uniform extends Distribution {
+  /**
+   * @param {number} xmin Lower boundary.
+   * @param {number} xmax Upper boundary.
+   */
   constructor (xmin, xmax) {
     super('continuous', 2)
 

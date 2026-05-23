@@ -4,19 +4,21 @@ import NoncentralChi2 from './noncentral-chi2'
 /**
  * Generator for the [non-central $\chi$ distribution]{@link https://en.wikipedia.org/wiki/Noncentral_chi_distribution}:
  *
- * $$f(x; k; \lambda) = \frac{x^k \lambda}{(\lambda x)^{k/2}} e^{-\frac{x^2 + \lambda^2}{2}} I_{k/2 - 1}(\lambda x),$$
+ * $f(x; k; \lambda) = \frac{x^k \lambda}{(\lambda x)^{k/2}} e^{-\frac{x^2 + \lambda^2}{2}} I_{k/2 - 1}(\lambda x),$
  *
  * with $k \in \mathbb{N}^+$, $\lambda > 0$ and $I_n(x)$ is the modified Bessel function of the first kind with order $n$. Support: $x \in [0, \infty)$.
  *
  * @class NoncentralChi
  * @memberof ran.dist
- * @param {number} k Degrees of freedom. If not an integer, it is rounded to the nearest one.
- * @param {number} lambda Non-centrality parameter.
  * @see https://en.wikipedia.org/wiki/Noncentral_chi_distribution
  * @constructor
  */
-export default class extends NoncentralChi2 {
+export default class NoncentralChi extends NoncentralChi2 {
   // Transformation of non-central chi2 distribution
+  /**
+   * @param {number} k Degrees of freedom. If not an integer, it is rounded to the nearest one.
+   * @param {number} lambda Non-centrality parameter.
+   */
   constructor (k, lambda) {
     const ki = Math.round(k)
     super(ki, lambda * lambda)

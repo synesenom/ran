@@ -3,18 +3,20 @@ import GeneralizedNormal from './generalized-normal'
 /**
  * Generator for the [half generalized normal distribution]{@link https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.halfgennorm.html}:
  *
- * $$f(x; \alpha, \beta) = \frac{\beta}{\Gamma\big(\frac{1}{\beta}\big)} e^{-|x|^\beta},$$
+ * $f(x; \alpha, \beta) = \frac{\beta}{\Gamma\big(\frac{1}{\beta}\big)} e^{-|x|^\beta},$
  *
  * with $\alpha, \beta > 0$. Support: $x > 0$.
  *
  * @class HalfGeneralizedNormal
  * @memberof ran.dist
- * @param {number} alpha Scale parameter.
- * @param {number} beta Shape parameter.
  * @see https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.halfgennorm.html
  * @constructor
  */
-export default class extends GeneralizedNormal {
+export default class HalfGeneralizedNormal extends GeneralizedNormal {
+  /**
+   * @param {number} alpha Scale parameter.
+   * @param {number} beta Shape parameter.
+   */
   constructor (alpha, beta) {
     super(0, alpha, beta)
 

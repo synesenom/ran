@@ -5,19 +5,21 @@ import Distribution from './_distribution'
  * Generator for the [F distribution]{@link https://en.wikipedia.org/wiki/F-distribution} (or Fisher-Snedecor's F
  * distribution):
  *
- * $$f(x; d_1, d_2) = \frac{\sqrt{\frac{(d_1 x)^{d_1} d_2^{d_2}}{(d_1x + d_2)^{d_1 + d_2}}}}{x \mathrm{B}\big(\frac{d_1}{2}, \frac{d_2}{2}\big)},$$
+ * $f(x; d_1, d_2) = \frac{\sqrt{\frac{(d_1 x)^{d_1} d_2^{d_2}}{(d_1x + d_2)^{d_1 + d_2}}}}{x \mathrm{B}\big(\frac{d_1}{2}, \frac{d_2}{2}\big)},$
  *
  * with $d_1, d_2 > 0$. Support: $x > 0$.
  *
  * @class F
  * @memberof ran.dist
- * @param {number} d1 First degree of freedom. If not an integer, it is rounded to the nearest one.
- * @param {number} d2 Second degree of freedom. If not an integer, it is rounded to the nearest one.
  * @see https://en.wikipedia.org/wiki/F-distribution
  * @constructor
  */
-export default class extends Beta {
+export default class F extends Beta {
   // Transformation of beta distribution
+  /**
+   * @param {number} d1 First degree of freedom. If not an integer, it is rounded to the nearest one.
+   * @param {number} d2 Second degree of freedom. If not an integer, it is rounded to the nearest one.
+   */
   constructor (d1, d2) {
     const d1i = Math.round(d1)
     const d2i = Math.round(d2)

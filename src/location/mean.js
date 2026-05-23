@@ -4,7 +4,7 @@
  * @method mean
  * @memberof ran.location
  * @param {number[]} values Array of values to calculate mean for.
- * @returns {(number|undefined)} Mean of the values if there are any, undefined otherwise.
+ * @returns {number|undefined} Mean of the values if there are any, undefined otherwise.
  * @example
  *
  * ran.location.mean([])

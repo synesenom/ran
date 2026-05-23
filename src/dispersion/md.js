@@ -5,7 +5,7 @@
  * @method md
  * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate mean absolute difference for.
- * @returns {(number|undefined)} Mean absolute difference of the values if there are more than two, undefined otherwise.
+ * @returns {number|undefined} Mean absolute difference of the values if there are more than two, undefined otherwise.
  * @example
  *
  * ran.dispersion.md([])

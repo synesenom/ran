@@ -3,17 +3,19 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Flory-Schulz distribution]{@link https://en.wikipedia.org/wiki/Flory%E2%80%93Schulz_distribution}:
  *
- * $$f(k; a) = a^2 k (1 - a)^{k - 1},$$
+ * $f(k; a) = a^2 k (1 - a)^{k - 1},$
  *
  * with $a \in (0, 1)$. Support: $k \in \mathbb{N}^+$.
  *
  * @class FlorySchulz
  * @memberof ran.dist
- * @param {number} a Shape parameter.
  * @see https://en.wikipedia.org/wiki/Flory%E2%80%93Schulz_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class FlorySchulz extends Distribution {
+  /**
+   * @param {number} a Shape parameter.
+   */
   constructor (a) {
     super('discrete', 1)
 

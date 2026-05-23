@@ -3,19 +3,21 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Frechet distribution]{@link https://en.wikipedia.org/wiki/Frechet_distribution}:
  *
- * $$f(x; \alpha, s, m) = \frac{\alpha z^{-1 -\alpha} e^{-z^{-\alpha}}}{s},$$
+ * $f(x; \alpha, s, m) = \frac{\alpha z^{-1 -\alpha} e^{-z^{-\alpha}}}{s},$
  *
  * with $z = \frac{x - m}{s}$. and $\alpha, s > 0$, $m \in \mathbb{R}$. Support: $x \in \mathbb{R}, x > m$.
  *
  * @class Frechet
  * @memberof ran.dist
- * @param {number} alpha Shape parameter.
- * @param {number} s Scale parameter.
- * @param {number} m Location parameter.
  * @see https://en.wikipedia.org/wiki/Frechet_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Frechet extends Distribution {
+  /**
+   * @param {number} alpha Shape parameter.
+   * @param {number} s Scale parameter.
+   * @param {number} m Location parameter.
+   */
   constructor (alpha, s, m) {
     super('continuous', 3)
 

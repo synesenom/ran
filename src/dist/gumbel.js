@@ -3,18 +3,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Gumbel distribution]{@link https://en.wikipedia.org/wiki/Gumbel_distribution}:
  *
- * $$f(x; \mu, \beta) = \frac{1}{\beta} e^{-(z + e^{-z})},$$
+ * $f(x; \mu, \beta) = \frac{1}{\beta} e^{-(z + e^{-z})},$
  *
  * with $z = \frac{x - \mu}{\beta}$ and $\mu \in \mathbb{R}$, $\beta > 0$. Support: $x \in \mathbb{R}$.
  *
  * @class Gumbel
  * @memberof ran.dist
- * @param {number} mu Location parameter.
- * @param {number} beta Scale parameter.
  * @see https://en.wikipedia.org/wiki/Gumbel_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Gumbel extends Distribution {
+  /**
+   * @param {number} mu Location parameter.
+   * @param {number} beta Scale parameter.
+   */
   constructor (mu, beta) {
     super('continuous', 2)
 

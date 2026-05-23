@@ -3,19 +3,21 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Gamma/Gompertz distribution]{@link https://en.wikipedia.org/wiki/Gamma/Gompertz_distribution}:
  *
- * $$f(x; b, s, \beta) = \frac{b s e^{b x} \beta^s}{(\beta - 1 + e^{b x})^{s + 1}},$$
+ * $f(x; b, s, \beta) = \frac{b s e^{b x} \beta^s}{(\beta - 1 + e^{b x})^{s + 1}},$
  *
  * with $b, s, \beta > 0$. Support: $x \ge 0$.
  *
  * @class GammaGompertz
  * @memberof ran.dist
- * @param {number} b Scale parameter.
- * @param {number} s First shape parameter.
- * @param {number} beta Second shape parameter.
  * @see https://en.wikipedia.org/wiki/Gamma/Gompertz_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class GammaGompertz extends Distribution {
+  /**
+   * @param {number} b Scale parameter.
+   * @param {number} s First shape parameter.
+   * @param {number} beta Second shape parameter.
+   */
   constructor (b, s, beta) {
     super('continuous', 3)
 

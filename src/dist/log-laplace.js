@@ -3,19 +3,21 @@ import Laplace from './laplace'
 /**
  * Generator for the [log-Laplace distribution]{@link https://en.wikipedia.org/wiki/Log-Laplace_distribution}:
  *
- * $$f(x; \mu, b) = \frac{1}{2bx}e^{-\frac{|\mathrm{ln} x - \mu|}{b}},$$
+ * $f(x; \mu, b) = \frac{1}{2bx}e^{-\frac{|\mathrm{ln} x - \mu|}{b}},$
  *
  * where $\mu \in \mathbb{R}$ and $b > 0$. Support: $x > 0$.
  *
  * @class LogLaplace
  * @memberof ran.dist
- * @param {number} mu Location parameter.
- * @param {number} b Scale parameter.
  * @see https://en.wikipedia.org/wiki/Log-Laplace_distribution
  * @constructor
  */
-export default class extends Laplace {
+export default class LogLaplace extends Laplace {
   // Transforming Laplace distribution
+  /**
+   * @param {number} mu Location parameter.
+   * @param {number} b Scale parameter.
+   */
   constructor (mu, b) {
     super(mu, b)
 

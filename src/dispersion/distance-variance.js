@@ -8,7 +8,7 @@ import mean from '../location/mean'
  * @method dVar
  * @memberof ran.dispersion
  * @param {number[]} x Array of values.
- * @returns {(number|undefined)} The distance variance if the array os not empty, undefined otherwise.
+ * @returns {number|undefined} The distance variance if the array os not empty, undefined otherwise.
  * @example
  *
  * ran.dependence.dVar([])

@@ -5,18 +5,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Skellam distribution]{@link https://en.wikipedia.org/wiki/Skellam_distribution}:
  *
- * $$f(k; \mu_1, \mu_2) = e^{-(\mu_1 + \mu_2)}\Big(\frac{\mu_1}{\mu_2}\Big)^{k/2} I_k(2 \sqrt{\mu_1 \mu_2}),$$
+ * $f(k; \mu_1, \mu_2) = e^{-(\mu_1 + \mu_2)}\Big(\frac{\mu_1}{\mu_2}\Big)^{k/2} I_k(2 \sqrt{\mu_1 \mu_2}),$
  *
  * with $\mu_1, \mu_2 \ge 0$ and $I_n(x)$ is the modified Bessel function of the first kind with order $n$. Support: $k \in \mathbb{N}$.
  *
  * @class Skellam
  * @memberof ran.dist
- * @param {number} mu1 Mean of the first Poisson distribution.
- * @param {number} mu2 Mean of the second Poisson distribution.
  * @see https://en.wikipedia.org/wiki/Skellam_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Skellam extends Distribution {
+  /**
+   * @param {number} mu1 Mean of the first Poisson distribution.
+   * @param {number} mu2 Mean of the second Poisson distribution.
+   */
   constructor (mu1, mu2) {
     super('discrete', 2)
 

@@ -8,7 +8,7 @@ import moment from './moment'
  * @method kurtosis
  * @memberof ran.shape
  * @param {number[]} values Array of values to calculate kurtosis for.
- * @returns {(number|undefined)} The sample kurtosis of values if there are more than two and their variance is nonzero,
+ * @returns {number|undefined} The sample kurtosis of values if there are more than two and their variance is nonzero,
  * undefined otherwise.
  * @example
  *

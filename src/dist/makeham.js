@@ -5,19 +5,21 @@ import Distribution from './_distribution'
  * Generator for the [Makeham distribution]{@link https://en.wikipedia.org/wiki/Gompertz%E2%80%93Makeham_law_of_mortality}
  * (also known as Gompertz-Makeham distribution):
  *
- * $$f(x; \alpha, \beta, \lambda) = (\alpha e^{\beta x} + \lambda) \exp\Big\[{-\lambda x - \frac{\alpha}{\beta}(e^{\beta x} - 1)}\Big\],$$
+ * $f(x; \alpha, \beta, \lambda) = (\alpha e^{\beta x} + \lambda) \exp\Big\[{-\lambda x - \frac{\alpha}{\beta}(e^{\beta x} - 1)}\Big\],$
  *
  * with $\alpha, \beta, \lambda > 0$. Support: $x > 0$.
  *
  * @class Makeham
  * @memberof ran.dist
- * @param {number} alpha Shape parameter.
- * @param {number} beta Rate parameter.
- * @param {number} lambda Scale parameter.
  * @see https://en.wikipedia.org/wiki/Gompertz%E2%80%93Makeham_law_of_mortality
  * @constructor
  */
-export default class extends Distribution {
+export default class Makeham extends Distribution {
+  /**
+   * @param {number} alpha Shape parameter.
+   * @param {number} beta Rate parameter.
+   * @param {number} lambda Scale parameter.
+   */
   constructor (alpha, beta, lambda) {
     super('continuous', 3)
 

@@ -4,20 +4,22 @@ import NoncentralBeta from './noncentral-beta'
 /**
  * Generator for the [non-central F distribution]{@link https://en.wikipedia.org/wiki/Noncentral_F-distribution}:
  *
- * $$f(x; d\_1, d\_2, \lambda) = e^{-\frac{\lambda}{2}} \sum\_{k=0}^\infty \frac{1}{k!} \bigg(\frac{\lambda}{2}\bigg)^k \frac{\Big(\frac{d_1}{d_2}\Big)^{\frac{d_1}{2} + k} \Big(\frac{d_2}{d_2 + d_1 x}\Big)^{\frac{d_1 + d_2}{2} + k}}{\mathrm{B}\Big(\frac{d_2}{2}, \frac{d_1}{2} + k\Big)} x^{\frac{d_1}{2} -1 + k},$$
+ * $f(x; d\_1, d\_2, \lambda) = e^{-\frac{\lambda}{2}} \sum\_{k=0}^\infty \frac{1}{k!} \bigg(\frac{\lambda}{2}\bigg)^k \frac{\Big(\frac{d_1}{d_2}\Big)^{\frac{d_1}{2} + k} \Big(\frac{d_2}{d_2 + d_1 x}\Big)^{\frac{d_1 + d_2}{2} + k}}{\mathrm{B}\Big(\frac{d_2}{2}, \frac{d_1}{2} + k\Big)} x^{\frac{d_1}{2} -1 + k},$
  *
  * where $d_1, d_2 \in \mathbb{N}^+$ and $\lambda > 0$. Support: $x \ge 0$.
  *
  * @class NoncentralF
  * @memberof ran.dist
- * @param {number} d1 First degree of freedom. If not an integer, it is rounded to the nearest one.
- * @param {number} d2 Second degree of freedom. If not an integer, it is rounded to the nearest one.
- * @param {number} lambda Non-centrality parameter.
  * @see https://en.wikipedia.org/wiki/Noncentral_F-distribution
  * @constructor
  */
-export default class extends NoncentralBeta {
+export default class NoncentralF extends NoncentralBeta {
   // Transformation of non-central beta distribution
+  /**
+   * @param {number} d1 First degree of freedom. If not an integer, it is rounded to the nearest one.
+   * @param {number} d2 Second degree of freedom. If not an integer, it is rounded to the nearest one.
+   * @param {number} lambda Non-centrality parameter.
+   */
   constructor (d1, d2, lambda) {
     const d1i = Math.round(d1)
     const d2i = Math.round(d2)

@@ -15,7 +15,7 @@ function nTies (values) {
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
- * @returns {(number|undefined)} Kendall's correlation coefficient if none of the arrays are empty and they have the
+ * @returns {number|undefined} Kendall's correlation coefficient if none of the arrays are empty and they have the
  * same length, undefined otherwise.
  * @example
  *
