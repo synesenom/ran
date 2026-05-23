@@ -3,8 +3,6 @@
 
 const ran = require('../dist/ranjs.cjs.js')
 const jStat = require('jstat')
-
-// @stdlib — benchmarked for the 5 original distributions only
 const stdNormal = require('@stdlib/stats-base-dists-normal')
 const stdGamma = require('@stdlib/stats-base-dists-gamma')
 const stdBeta = require('@stdlib/stats-base-dists-beta')
@@ -37,27 +35,9 @@ var rGamma = new ran.dist.Gamma(2, 1)
 var rBeta = new ran.dist.Beta(2, 5)
 var rPoisson = new ran.dist.Poisson(4)
 var rExp = new ran.dist.Exponential(1)
-var rArcsine = new ran.dist.Arcsine(0, 1)
-var rBinomial = new ran.dist.Binomial(10, 0.3)
-var rCauchy = new ran.dist.Cauchy(0, 1)
-var rF = new ran.dist.F(5, 10)
-var rChi2 = new ran.dist.Chi2(4)
-var rHypgeom = new ran.dist.Hypergeometric(20, 8, 5)
-var rInvGamma = new ran.dist.InverseGamma(2, 1)
-var rKumaraswamy = new ran.dist.Kumaraswamy(2, 5)
-var rLaplace = new ran.dist.Laplace(0, 1)
-var rLogNormal = new ran.dist.LogNormal(0, 1)
-var rNegBin = new ran.dist.NegativeBinomial(5, 0.5)
-var rNoncentralT = new ran.dist.NoncentralT(5, 1)
-var rPareto = new ran.dist.Pareto(1, 2)
-var rStudentT = new ran.dist.StudentT(5)
-var rTriangular = new ran.dist.Triangular(0, 1, 0.5)
-var rUniform = new ran.dist.Uniform(0, 1)
-var rWeibull = new ran.dist.Weibull(1, 2)
 
 // Each distribution entry: name, and fns for each library.
 // fns: { sample, pdf, cdf, quantile } — null means unavailable in that library.
-// stdlib: null for all distributions beyond the original 5 (packages not installed).
 var distributions = [
   {
     name: 'Normal',
@@ -137,7 +117,7 @@ var distributions = [
       sample: function () { return bench(function () { for (var i = 0; i < 10000; i++) jStat.poisson.sample(4) }, 20, 10000) },
       pdf: function () { return bench(function () { jStat.poisson.pdf(4, 4) }, 10000) },
       cdf: function () { return bench(function () { jStat.poisson.cdf(4, 4) }, 10000) },
-      quantile: null
+      quantile: null // jStat does not implement a quantile function for Poisson
     },
     stdlib: {
       sample: function () { return bench(function () { for (var i = 0; i < 10000; i++) stdPoissonRng(4) }, 20, 10000) },
@@ -166,278 +146,6 @@ var distributions = [
       cdf: function () { return bench(function () { stdExp.cdf(1.0, 1) }, 10000) },
       quantile: function () { return bench(function () { stdExp.quantile(0.5, 1) }, 10000) }
     }
-  },
-  {
-    name: 'Arcsine',
-    ranjs: {
-      sample: function () { return bench(function () { rArcsine.sample(10000) }, 20, 10000) },
-      pdf: function () { return bench(function () { rArcsine.pdf(0.3) }, 10000) },
-      cdf: function () { return bench(function () { rArcsine.cdf(0.3) }, 10000) },
-      quantile: function () { return bench(function () { rArcsine.q(0.5) }, 10000) }
-    },
-    jstat: {
-      sample: function () { return bench(function () { for (var i = 0; i < 10000; i++) jStat.arcsine.sample(0, 1) }, 20, 10000) },
-      pdf: function () { return bench(function () { jStat.arcsine.pdf(0.3, 0, 1) }, 10000) },
-      cdf: function () { return bench(function () { jStat.arcsine.cdf(0.3, 0, 1) }, 10000) },
-      quantile: function () { return bench(function () { jStat.arcsine.inv(0.5, 0, 1) }, 10000) }
-    },
-    stdlib: { sample: null, pdf: null, cdf: null, quantile: null }
-  },
-  {
-    name: 'Binomial',
-    ranjs: {
-      sample: function () { return bench(function () { rBinomial.sample(10000) }, 20, 10000) },
-      pdf: function () { return bench(function () { rBinomial.pdf(3) }, 10000) },
-      cdf: function () { return bench(function () { rBinomial.cdf(3) }, 10000) },
-      quantile: function () { return bench(function () { rBinomial.q(0.5) }, 10000) }
-    },
-    jstat: {
-      sample: null,
-      pdf: function () { return bench(function () { jStat.binomial.pdf(3, 10, 0.3) }, 10000) },
-      cdf: function () { return bench(function () { jStat.binomial.cdf(3, 10, 0.3) }, 10000) },
-      quantile: null
-    },
-    stdlib: { sample: null, pdf: null, cdf: null, quantile: null }
-  },
-  {
-    name: 'Cauchy',
-    ranjs: {
-      sample: function () { return bench(function () { rCauchy.sample(10000) }, 20, 10000) },
-      pdf: function () { return bench(function () { rCauchy.pdf(0.5) }, 10000) },
-      cdf: function () { return bench(function () { rCauchy.cdf(0.5) }, 10000) },
-      quantile: function () { return bench(function () { rCauchy.q(0.6) }, 10000) }
-    },
-    jstat: {
-      sample: function () { return bench(function () { for (var i = 0; i < 10000; i++) jStat.cauchy.sample(0, 1) }, 20, 10000) },
-      pdf: function () { return bench(function () { jStat.cauchy.pdf(0.5, 0, 1) }, 10000) },
-      cdf: function () { return bench(function () { jStat.cauchy.cdf(0.5, 0, 1) }, 10000) },
-      quantile: function () { return bench(function () { jStat.cauchy.inv(0.6, 0, 1) }, 10000) }
-    },
-    stdlib: { sample: null, pdf: null, cdf: null, quantile: null }
-  },
-  {
-    name: 'F',
-    ranjs: {
-      sample: function () { return bench(function () { rF.sample(10000) }, 20, 10000) },
-      pdf: function () { return bench(function () { rF.pdf(1.0) }, 10000) },
-      cdf: function () { return bench(function () { rF.cdf(1.0) }, 10000) },
-      quantile: function () { return bench(function () { rF.q(0.5) }, 10000) }
-    },
-    jstat: {
-      sample: function () { return bench(function () { for (var i = 0; i < 10000; i++) jStat.centralF.sample(5, 10) }, 20, 10000) },
-      pdf: function () { return bench(function () { jStat.centralF.pdf(1.0, 5, 10) }, 10000) },
-      cdf: function () { return bench(function () { jStat.centralF.cdf(1.0, 5, 10) }, 10000) },
-      quantile: function () { return bench(function () { jStat.centralF.inv(0.5, 5, 10) }, 10000) }
-    },
-    stdlib: { sample: null, pdf: null, cdf: null, quantile: null }
-  },
-  {
-    name: 'Chi2',
-    ranjs: {
-      sample: function () { return bench(function () { rChi2.sample(10000) }, 20, 10000) },
-      pdf: function () { return bench(function () { rChi2.pdf(2.0) }, 10000) },
-      cdf: function () { return bench(function () { rChi2.cdf(2.0) }, 10000) },
-      quantile: function () { return bench(function () { rChi2.q(0.5) }, 10000) }
-    },
-    jstat: {
-      sample: function () { return bench(function () { for (var i = 0; i < 10000; i++) jStat.chisquare.sample(4) }, 20, 10000) },
-      pdf: function () { return bench(function () { jStat.chisquare.pdf(2.0, 4) }, 10000) },
-      cdf: function () { return bench(function () { jStat.chisquare.cdf(2.0, 4) }, 10000) },
-      quantile: function () { return bench(function () { jStat.chisquare.inv(0.5, 4) }, 10000) }
-    },
-    stdlib: { sample: null, pdf: null, cdf: null, quantile: null }
-  },
-  {
-    name: 'Hypergeometric',
-    ranjs: {
-      sample: function () { return bench(function () { rHypgeom.sample(10000) }, 20, 10000) },
-      pdf: function () { return bench(function () { rHypgeom.pdf(2) }, 10000) },
-      cdf: function () { return bench(function () { rHypgeom.cdf(2) }, 10000) },
-      quantile: function () { return bench(function () { rHypgeom.q(0.5) }, 10000) }
-    },
-    jstat: {
-      sample: null,
-      pdf: function () { return bench(function () { jStat.hypgeom.pdf(2, 20, 8, 5) }, 10000) },
-      cdf: function () { return bench(function () { jStat.hypgeom.cdf(2, 20, 8, 5) }, 10000) },
-      quantile: null
-    },
-    stdlib: { sample: null, pdf: null, cdf: null, quantile: null }
-  },
-  {
-    name: 'InverseGamma',
-    ranjs: {
-      sample: function () { return bench(function () { rInvGamma.sample(10000) }, 20, 10000) },
-      pdf: function () { return bench(function () { rInvGamma.pdf(1.0) }, 10000) },
-      cdf: function () { return bench(function () { rInvGamma.cdf(1.0) }, 10000) },
-      quantile: function () { return bench(function () { rInvGamma.q(0.5) }, 10000) }
-    },
-    jstat: {
-      sample: function () { return bench(function () { for (var i = 0; i < 10000; i++) jStat.invgamma.sample(2, 1) }, 20, 10000) },
-      pdf: function () { return bench(function () { jStat.invgamma.pdf(1.0, 2, 1) }, 10000) },
-      cdf: function () { return bench(function () { jStat.invgamma.cdf(1.0, 2, 1) }, 10000) },
-      quantile: function () { return bench(function () { jStat.invgamma.inv(0.5, 2, 1) }, 10000) }
-    },
-    stdlib: { sample: null, pdf: null, cdf: null, quantile: null }
-  },
-  {
-    name: 'Kumaraswamy',
-    ranjs: {
-      sample: function () { return bench(function () { rKumaraswamy.sample(10000) }, 20, 10000) },
-      pdf: function () { return bench(function () { rKumaraswamy.pdf(0.3) }, 10000) },
-      cdf: function () { return bench(function () { rKumaraswamy.cdf(0.3) }, 10000) },
-      quantile: function () { return bench(function () { rKumaraswamy.q(0.5) }, 10000) }
-    },
-    jstat: {
-      sample: null,
-      pdf: function () { return bench(function () { jStat.kumaraswamy.pdf(0.3, 2, 5) }, 10000) },
-      cdf: function () { return bench(function () { jStat.kumaraswamy.cdf(0.3, 2, 5) }, 10000) },
-      quantile: function () { return bench(function () { jStat.kumaraswamy.inv(0.5, 2, 5) }, 10000) }
-    },
-    stdlib: { sample: null, pdf: null, cdf: null, quantile: null }
-  },
-  {
-    name: 'Laplace',
-    ranjs: {
-      sample: function () { return bench(function () { rLaplace.sample(10000) }, 20, 10000) },
-      pdf: function () { return bench(function () { rLaplace.pdf(0.0) }, 10000) },
-      cdf: function () { return bench(function () { rLaplace.cdf(0.0) }, 10000) },
-      quantile: function () { return bench(function () { rLaplace.q(0.5) }, 10000) }
-    },
-    jstat: {
-      sample: function () { return bench(function () { for (var i = 0; i < 10000; i++) jStat.laplace.sample(0, 1) }, 20, 10000) },
-      pdf: function () { return bench(function () { jStat.laplace.pdf(0.0, 0, 1) }, 10000) },
-      cdf: function () { return bench(function () { jStat.laplace.cdf(0.0, 0, 1) }, 10000) },
-      quantile: null
-    },
-    stdlib: { sample: null, pdf: null, cdf: null, quantile: null }
-  },
-  {
-    name: 'LogNormal',
-    ranjs: {
-      sample: function () { return bench(function () { rLogNormal.sample(10000) }, 20, 10000) },
-      pdf: function () { return bench(function () { rLogNormal.pdf(1.0) }, 10000) },
-      cdf: function () { return bench(function () { rLogNormal.cdf(1.0) }, 10000) },
-      quantile: function () { return bench(function () { rLogNormal.q(0.5) }, 10000) }
-    },
-    jstat: {
-      sample: function () { return bench(function () { for (var i = 0; i < 10000; i++) jStat.lognormal.sample(0, 1) }, 20, 10000) },
-      pdf: function () { return bench(function () { jStat.lognormal.pdf(1.0, 0, 1) }, 10000) },
-      cdf: function () { return bench(function () { jStat.lognormal.cdf(1.0, 0, 1) }, 10000) },
-      quantile: function () { return bench(function () { jStat.lognormal.inv(0.5, 0, 1) }, 10000) }
-    },
-    stdlib: { sample: null, pdf: null, cdf: null, quantile: null }
-  },
-  {
-    name: 'NegativeBinomial',
-    ranjs: {
-      sample: function () { return bench(function () { rNegBin.sample(10000) }, 20, 10000) },
-      pdf: function () { return bench(function () { rNegBin.pdf(3) }, 10000) },
-      cdf: function () { return bench(function () { rNegBin.cdf(3) }, 10000) },
-      quantile: function () { return bench(function () { rNegBin.q(0.5) }, 10000) }
-    },
-    jstat: {
-      sample: null,
-      pdf: function () { return bench(function () { jStat.negbin.pdf(3, 5, 0.5) }, 10000) },
-      cdf: function () { return bench(function () { jStat.negbin.cdf(3, 5, 0.5) }, 10000) },
-      quantile: null
-    },
-    stdlib: { sample: null, pdf: null, cdf: null, quantile: null }
-  },
-  {
-    name: 'NoncentralT',
-    ranjs: {
-      sample: function () { return bench(function () { rNoncentralT.sample(10000) }, 20, 10000) },
-      pdf: function () { return bench(function () { rNoncentralT.pdf(1.0) }, 10000) },
-      cdf: function () { return bench(function () { rNoncentralT.cdf(1.0) }, 10000) },
-      quantile: function () { return bench(function () { rNoncentralT.q(0.5) }, 10000) }
-    },
-    jstat: {
-      sample: null,
-      pdf: function () { return bench(function () { jStat.noncentralt.pdf(1.0, 5, 1) }, 10000) },
-      cdf: function () { return bench(function () { jStat.noncentralt.cdf(1.0, 5, 1) }, 10000) },
-      quantile: null
-    },
-    stdlib: { sample: null, pdf: null, cdf: null, quantile: null }
-  },
-  {
-    name: 'Pareto',
-    ranjs: {
-      sample: function () { return bench(function () { rPareto.sample(10000) }, 20, 10000) },
-      pdf: function () { return bench(function () { rPareto.pdf(2.0) }, 10000) },
-      cdf: function () { return bench(function () { rPareto.cdf(2.0) }, 10000) },
-      quantile: function () { return bench(function () { rPareto.q(0.5) }, 10000) }
-    },
-    jstat: {
-      sample: null,
-      pdf: function () { return bench(function () { jStat.pareto.pdf(2.0, 1, 2) }, 10000) },
-      cdf: function () { return bench(function () { jStat.pareto.cdf(2.0, 1, 2) }, 10000) },
-      quantile: function () { return bench(function () { jStat.pareto.inv(0.5, 1, 2) }, 10000) }
-    },
-    stdlib: { sample: null, pdf: null, cdf: null, quantile: null }
-  },
-  {
-    name: 'StudentT',
-    ranjs: {
-      sample: function () { return bench(function () { rStudentT.sample(10000) }, 20, 10000) },
-      pdf: function () { return bench(function () { rStudentT.pdf(0.0) }, 10000) },
-      cdf: function () { return bench(function () { rStudentT.cdf(0.0) }, 10000) },
-      quantile: function () { return bench(function () { rStudentT.q(0.5) }, 10000) }
-    },
-    jstat: {
-      sample: function () { return bench(function () { for (var i = 0; i < 10000; i++) jStat.studentt.sample(5) }, 20, 10000) },
-      pdf: function () { return bench(function () { jStat.studentt.pdf(0.0, 5) }, 10000) },
-      cdf: function () { return bench(function () { jStat.studentt.cdf(0.0, 5) }, 10000) },
-      quantile: function () { return bench(function () { jStat.studentt.inv(0.5, 5) }, 10000) }
-    },
-    stdlib: { sample: null, pdf: null, cdf: null, quantile: null }
-  },
-  {
-    name: 'Triangular',
-    ranjs: {
-      sample: function () { return bench(function () { rTriangular.sample(10000) }, 20, 10000) },
-      pdf: function () { return bench(function () { rTriangular.pdf(0.5) }, 10000) },
-      cdf: function () { return bench(function () { rTriangular.cdf(0.5) }, 10000) },
-      quantile: function () { return bench(function () { rTriangular.q(0.5) }, 10000) }
-    },
-    jstat: {
-      sample: function () { return bench(function () { for (var i = 0; i < 10000; i++) jStat.triangular.sample(0, 1, 0.5) }, 20, 10000) },
-      pdf: function () { return bench(function () { jStat.triangular.pdf(0.5, 0, 1, 0.5) }, 10000) },
-      cdf: function () { return bench(function () { jStat.triangular.cdf(0.5, 0, 1, 0.5) }, 10000) },
-      quantile: function () { return bench(function () { jStat.triangular.inv(0.5, 0, 1, 0.5) }, 10000) }
-    },
-    stdlib: { sample: null, pdf: null, cdf: null, quantile: null }
-  },
-  {
-    name: 'Uniform',
-    ranjs: {
-      sample: function () { return bench(function () { rUniform.sample(10000) }, 20, 10000) },
-      pdf: function () { return bench(function () { rUniform.pdf(0.5) }, 10000) },
-      cdf: function () { return bench(function () { rUniform.cdf(0.5) }, 10000) },
-      quantile: function () { return bench(function () { rUniform.q(0.5) }, 10000) }
-    },
-    jstat: {
-      sample: function () { return bench(function () { for (var i = 0; i < 10000; i++) jStat.uniform.sample(0, 1) }, 20, 10000) },
-      pdf: function () { return bench(function () { jStat.uniform.pdf(0.5, 0, 1) }, 10000) },
-      cdf: function () { return bench(function () { jStat.uniform.cdf(0.5, 0, 1) }, 10000) },
-      quantile: function () { return bench(function () { jStat.uniform.inv(0.5, 0, 1) }, 10000) }
-    },
-    stdlib: { sample: null, pdf: null, cdf: null, quantile: null }
-  },
-  {
-    name: 'Weibull',
-    ranjs: {
-      sample: function () { return bench(function () { rWeibull.sample(10000) }, 20, 10000) },
-      pdf: function () { return bench(function () { rWeibull.pdf(1.0) }, 10000) },
-      cdf: function () { return bench(function () { rWeibull.cdf(1.0) }, 10000) },
-      quantile: function () { return bench(function () { rWeibull.q(0.5) }, 10000) }
-    },
-    jstat: {
-      sample: function () { return bench(function () { for (var i = 0; i < 10000; i++) jStat.weibull.sample(1, 2) }, 20, 10000) },
-      pdf: function () { return bench(function () { jStat.weibull.pdf(1.0, 1, 2) }, 10000) },
-      cdf: function () { return bench(function () { jStat.weibull.cdf(1.0, 1, 2) }, 10000) },
-      quantile: function () { return bench(function () { jStat.weibull.inv(0.5, 1, 2) }, 10000) }
-    },
-    stdlib: { sample: null, pdf: null, cdf: null, quantile: null }
   }
 ]
 
@@ -461,5 +169,4 @@ rows.forEach(function (r) {
   console.log('| ' + r.join(' | ') + ' |')
 })
 
-console.log('\n*N/A (jStat): operation not implemented for this distribution.')
-console.log('N/A (@stdlib): only benchmarked for Normal, Gamma, Beta, Poisson, and Exponential.')
+console.log('\n*N/A: jStat does not implement a quantile function for the Poisson distribution.')
