@@ -356,6 +356,28 @@ describe('dist', () => {
         }, 'Distribution._pdf() is not implemented')
       })
     })
+
+    describe('.bounded()', () => {
+      it('should return "bounded" for Beta (finite lower and upper)', () => {
+        assert.equal(new dist.Beta(1, 1).bounded(), 'bounded')
+      })
+
+      it('should return "lower" for Exponential (finite lower, infinite upper)', () => {
+        assert.equal(new dist.Exponential(1).bounded(), 'lower')
+      })
+
+      it('should return "unbounded" for Normal (infinite lower and upper)', () => {
+        assert.equal(new dist.Normal(0, 1).bounded(), 'unbounded')
+      })
+
+      it('should return "bounded" for Binomial (finite discrete support)', () => {
+        assert.equal(new dist.Binomial(10, 0.5).bounded(), 'bounded')
+      })
+
+      it('should return "lower" for Poisson (semi-infinite discrete support)', () => {
+        assert.equal(new dist.Poisson(3).bounded(), 'lower')
+      })
+    })
   })
 
   describe('PreComputed', () => {

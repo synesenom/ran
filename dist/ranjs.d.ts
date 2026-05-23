@@ -3,6 +3,7 @@ declare module 'ranjs' {
 
   export namespace dist {
     type DistributionType = 'continuous' | 'discrete'
+    type BoundedType = 'bounded' | 'lower' | 'upper' | 'unbounded'
 
     interface SupportBound {
       value: number
@@ -24,6 +25,7 @@ declare module 'ranjs' {
     class Distribution {
       type(): DistributionType
       support(): SupportBound[]
+      bounded(): BoundedType
       seed(value: number | string): this
       save(): DistributionState
       load(state: DistributionState): this
