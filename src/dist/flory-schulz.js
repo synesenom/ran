@@ -40,16 +40,11 @@ export default class extends Distribution {
   }
 
   _generator () {
-    let k = 1
-    const r = this.r.next()
-    let ak = 1 + this.p.a
-    let p = this.c.oneMinusA
-    while (r < p * ak) {
-      ak += this.p.a
-      p *= this.c.oneMinusA
-      k++
-    }
-    return k
+    // FlorySchulz(a) = G1 + G2 + 1, G_i ~ Geom(a) (failures before success).
+    // Geom(a) inverse-CDF: floor(log(U) / log(1-a)), O(1) regardless of a.
+    const g1 = Math.floor(Math.log(this.r.next()) / this.c.lnOneMinusA)
+    const g2 = Math.floor(Math.log(this.r.next()) / this.c.lnOneMinusA)
+    return g1 + g2 + 1
   }
 
   _pdf (x) {
