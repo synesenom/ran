@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `Champernowne` distribution was a non-functional stub: `_generator()` returned `undefined`, `_cdf(x)` always returned `1`, and `_pdf(x)` lacked its normalization constant. Fixed all three: normalization constant is now `alpha * sqrt(1 - lambda²) / (2 * arccos(lambda))`, CDF uses the closed-form `arctan(k * tanh(...))` formula, and `_generator()` uses inverse-transform sampling via a new closed-form `_q(p)`. The class is now exported from `src/dist/index.js` and declared in `dist/ranjs.d.ts`. Closes #337.
+
 - `BenktanderII` near-boundary `refVals` at `x = 1+1e-6` and `x = 1+1e-4` (params `[2, 0.9995]`) were replaced with values derived independently via Python `Decimal` at 60 decimal places using the direct mathematical formula, not the `expm1`-based implementation formula. Closes #295.
 
 - `romberg` returned the silent sentinel `0` when the 20-step budget was exhausted without convergence — indistinguishable from a genuine zero integral. It now returns the best Richardson extrapolate accumulated so far, consistent with how `trap` returns its last estimate on timeout. The stray `console.log` in `Davis._cdf` (which exposed this bug during development) has also been removed. Closes #312.

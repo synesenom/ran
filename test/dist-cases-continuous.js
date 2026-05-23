@@ -467,6 +467,41 @@ export default [{
     { p: 0.99, x: 63.641031907547855 }
   ]
 }, {
+  name: 'Champernowne',
+  invalidParams: [
+    [], // all params required
+    [-1, 0.5, 0], [0, 0.5, 0], // alpha > 0
+    [1, -0.1, 0], // lambda >= 0
+    [1, 1, 0], [1, 1.5, 0] // lambda < 1
+  ],
+  cases: [{
+    params: () => [2, 0.5, 1]
+  }, {
+    // lambda=0 reduces to the hyperbolic-sech family (norm=alpha/pi); exercises k=1, atanK=pi/4 boundary
+    name: 'lambda = 0 (sech limit)',
+    params: () => [1, 0, 0]
+  }],
+  // alpha=2, lambda=0.5, x0=1 — computed via closed-form formulas
+  refVals: [
+    { x: -3, pdf: 0.0005546645886305675, cdf: 0.0002773788272275842 },
+    { x: -1, pdf: 0.02973915487580311, cdf: 0.015008221681761117 },
+    { x: 0, pdf: 0.19402988578462738, cdf: 0.10440985661657778 },
+    { x: 1, pdf: 0.551328895421792, cdf: 0.5 },
+    { x: 2, pdf: 0.19402988578462738, cdf: 0.8955901433834222 },
+    { x: 3, pdf: 0.02973915487580311, cdf: 0.984991778318239 },
+    { x: 5, pdf: 0.0005546645886305675, cdf: 0.9997226211727723 }
+  ],
+  // closed-form: x0 + (2/alpha) * arctanh(tan((2p-1)*arctan(k))/k)
+  quantileVals: [
+    { p: 0.01, x: -1.2045552131324042 },
+    { p: 0.05, x: -0.3870671730942188 },
+    { p: 0.25, x: 0.4974737306288095 },
+    { p: 0.5, x: 1.0 },
+    { p: 0.75, x: 1.5025262693711905 },
+    { p: 0.95, x: 2.3870671730942177 },
+    { p: 0.99, x: 3.204555213132404 }
+  ]
+}, {
   name: 'Chi',
   invalidParams: [
     [], // all params required
