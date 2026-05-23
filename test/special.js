@@ -309,6 +309,57 @@ describe('special', () => {
     })
   })
 
+  describe('.gammaLowerIncompleteInv()', () => {
+    it('should return 0 for p = 0', () => {
+      repeat(() => {
+        const a = 0.5 + Math.random() * 10
+        assert(special.gammaLowerIncompleteInv(a, 0) === 0)
+      }, LAPS)
+    })
+
+    it('should return Infinity for p = 1', () => {
+      repeat(() => {
+        const a = 0.5 + Math.random() * 10
+        assert(special.gammaLowerIncompleteInv(a, 1) === Infinity)
+      }, LAPS)
+    })
+
+    it('should round-trip with gammaLowerIncomplete for a >= 1', () => {
+      repeat(() => {
+        const a = 1 + Math.random() * 20
+        const p = 0.01 + Math.random() * 0.98
+        const x = special.gammaLowerIncompleteInv(a, p)
+        assert(Math.abs(special.gammaLowerIncomplete(a, x) - p) < 1e-10)
+      }, LAPS)
+    })
+
+    it('should round-trip with gammaLowerIncomplete for a < 1', () => {
+      repeat(() => {
+        const a = 0.1 + Math.random() * 0.9
+        const p = 0.01 + Math.random() * 0.98
+        const x = special.gammaLowerIncompleteInv(a, p)
+        assert(Math.abs(special.gammaLowerIncomplete(a, x) - p) < 1e-10)
+      }, LAPS)
+    })
+
+    it('should return a known value: gammaLowerIncompleteInv(2, 0.5) ≈ 1.6783', () => {
+      // gammaLowerIncomplete(2, 1.6783469900166612) = 0.5 exactly
+      assert(Math.abs(special.gammaLowerIncompleteInv(2, 0.5) - 1.6783469900166612) < 1e-10)
+    })
+
+    it('should handle extreme lower tail (small p)', () => {
+      const x = special.gammaLowerIncompleteInv(5, 1e-10)
+      assert(isFinite(x) && x > 0)
+      assert(Math.abs(special.gammaLowerIncomplete(5, x) - 1e-10) < 1e-15)
+    })
+
+    it('should handle extreme upper tail (p close to 1)', () => {
+      const x = special.gammaLowerIncompleteInv(5, 1 - 1e-10)
+      assert(isFinite(x) && x > 0)
+      assert(Math.abs(special.gammaLowerIncomplete(5, x) - (1 - 1e-10)) < 1e-10)
+    })
+  })
+
   describe('.hurwitzZeta(), .riemannZeta()', () => {
     it('riemannZeta(s) - hurwitzZeta(s, n+1) = H(s, n)', () => {
       repeat(() => {

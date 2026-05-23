@@ -20,6 +20,7 @@ export default class MaxwellBoltzmann extends Gamma {
   constructor (a) {
     // X = sqrt(Y) where Y ~ Gamma(3/2, rate=1/(2a²)); Jacobian gives Maxwell-Boltzmann PDF
     super(1.5, 0.5 / (a * a))
+    this._q = undefined // Gamma._q is wrong for the sqrt transform; fall back to _qEstimateRoot
 
     // Validate parameters
     Distribution.validate({ a }, [

@@ -1,4 +1,4 @@
-import { gammaUpperIncomplete } from '../special'
+import { gammaUpperIncomplete, gammaLowerIncompleteInv } from '../special'
 import Gamma from './gamma'
 
 /**
@@ -47,5 +47,10 @@ export default class InverseGamma extends Gamma {
   _cdf (x) {
     // Direct upper gamma avoids catastrophic cancellation when beta/x is large (x near 0)
     return gammaUpperIncomplete(this.p.alpha, this.p.beta / x)
+  }
+
+  _q (p) {
+    // CDF = Q(alpha, beta/x) = p → beta/x = invGL(alpha, 1-p) → x = beta / invGL(alpha, 1-p)
+    return this.p.beta / gammaLowerIncompleteInv(this.p.alpha, 1 - p)
   }
 }

@@ -22,6 +22,7 @@ export default class GeneralizedGamma extends Gamma {
    */
   constructor (a, d, p) {
     super(d / p, Math.pow(a, -p))
+    this._q = undefined // Gamma._q is wrong for the power transform; fall back to _qEstimateRoot
 
     // Validate parameters
     this.p = Object.assign(this.p, { a, d, p })
