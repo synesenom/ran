@@ -4,7 +4,7 @@ import { erf, erfinv } from '../special'
 /**
  * Generator for the [alpha distribution]{@link https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/alppdf.htm}:
  *
- * $$f(x; \alpha, \beta) = \frac{\phi\Big(\alpha - \frac{\beta}{x}\Big)}{x^2 \Phi(\alpha)},$$
+ * $f(x; \alpha, \beta) = \frac{\phi\Big(\alpha - \frac{\beta}{x}\Big)}{x^2 \Phi(\alpha)},$
  *
  * where $\alpha, \beta > 0$ and $\phi(x), \Phi(x)$ denote the probability density and cumulative probability
  * functions of the [normal distribution]{@link #dist.Normal}.
@@ -12,14 +12,16 @@ import { erf, erfinv } from '../special'
  *
  * @class Alpha
  * @memberof ran.dist
- * @param {number} alpha Shape parameter.
- * @param {number} beta Scale parameter.
  * @see https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/alppdf.htm
  * @constructor
  */
-export default class extends Distribution {
+export default class Alpha extends Distribution {
   // Source: Johnson, Kotz, and Balakrishnan (1994). Continuous Univariate Distributions — Volume 1, Second Edition,
   // John Wiley and Sons, p. 173.
+  /**
+   * @param {number} alpha Shape parameter.
+   * @param {number} beta Scale parameter.
+   */
   constructor (alpha, beta) {
     super('continuous', 2)
 

@@ -3,19 +3,21 @@ import Distribution from './_distribution'
 /**
  * Generator for the [generalized logistic distribution]{@link https://en.wikipedia.org/wiki/Generalized_logistic_distribution}:
  *
- * $$f(x; \mu, s, c) = \frac{c e^{-z}}{s (1 + e^{-z})^{c + 1}},$$
+ * $f(x; \mu, s, c) = \frac{c e^{-z}}{s (1 + e^{-z})^{c + 1}},$
  *
  * with $z = \frac{x - \mu}{s}$, $\mu \in \mathbb{R}$ and $s, c > 0$. Support: $x \in \mathbb{R}$.
  *
  * @class GeneralizedLogistic
  * @memberof ran.dist
- * @param {number} mu Location parameter.
- * @param {number} s Scale parameter.
- * @param {number} c Shape parameter.
  * @see https://en.wikipedia.org/wiki/Generalized_logistic_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class GeneralizedLogistic extends Distribution {
+  /**
+   * @param {number} mu Location parameter.
+   * @param {number} s Scale parameter.
+   * @param {number} c Shape parameter.
+   */
   constructor (mu, s, c) {
     super('continuous', 3)
 

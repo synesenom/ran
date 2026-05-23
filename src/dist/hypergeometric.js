@@ -5,20 +5,22 @@ import Distribution from './_distribution'
 /**
  * Generator for the [hypergeometric distribution]{@link https://en.wikipedia.org/wiki/Hypergeometric_distribution}:
  *
- * $$f(k; N, K, n) = \frac{\begin{pmatrix}K \\\\ k \\\\ \end{pmatrix} \begin{pmatrix}N - k \\\\ n - k \\\\ \end{pmatrix}}{\begin{pmatrix}N \\\\ n \\\\ \end{pmatrix}},$$
+ * $f(k; N, K, n) = \frac{\begin{pmatrix}K \\\\ k \\\\ \end{pmatrix} \begin{pmatrix}N - k \\\\ n - k \\\\ \end{pmatrix}}{\begin{pmatrix}N \\\\ n \\\\ \end{pmatrix}},$
  *
  * with $N \in \mathbb{N}^+$, $K \in \{0, 1, ..., N\}$ and $n \in \{0, 1, ..., N\}$. Support: $k \in \{\mathrm{max}(0, n+K-N), ..., \mathrm{min}(n, K)\}$.
  *
  * @class Hypergeometric
  * @memberof ran.dist
- * @param {number} N Total number of elements to sample from. If not an integer, it is rounded to the nearest one.
- * @param {number} K Total number of successes. If not an integer, it is rounded to the nearest one.
- * @param {number} n If not an integer, it is rounded to the nearest one. Number of draws.
  * @see https://en.wikipedia.org/wiki/Hypergeometric_distribution
  * @constructor
  */
-export default class extends Categorical {
+export default class Hypergeometric extends Categorical {
   // Special case of categorical
+  /**
+   * @param {number} N Total number of elements to sample from. If not an integer, it is rounded to the nearest one.
+   * @param {number} K Total number of successes. If not an integer, it is rounded to the nearest one.
+   * @param {number} n If not an integer, it is rounded to the nearest one. Number of draws.
+   */
   constructor (N, K, n) {
     const Ni = Math.round(N)
     const Ki = Math.round(K)

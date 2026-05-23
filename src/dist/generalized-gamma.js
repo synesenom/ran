@@ -4,20 +4,22 @@ import Distribution from './_distribution'
 /**
  * Generator for the [generalized gamma distribution]{@link https://en.wikipedia.org/wiki/Generalized_gamma_distribution}:
  *
- * $$f(x; a, d, p) = \frac{p/a^d}{\Gamma(d/p)} x^{d - 1} e^{-(x/a)^p},$$
+ * $f(x; a, d, p) = \frac{p/a^d}{\Gamma(d/p)} x^{d - 1} e^{-(x/a)^p},$
  *
  * where $a, d, p > 0$. Support: $x > 0$.
  *
  * @class GeneralizedGamma
  * @memberof ran.dist
- * @param {number} a Scale parameter.
- * @param {number} d Shape parameter.
- * @param {number} p Shape parameter.
  * @see https://en.wikipedia.org/wiki/Generalized_gamma_distribution
  * @constructor
  */
-export default class extends Gamma {
+export default class GeneralizedGamma extends Gamma {
   // Transformation of gamma distribution
+  /**
+   * @param {number} a Scale parameter.
+   * @param {number} d Shape parameter.
+   * @param {number} p Shape parameter.
+   */
   constructor (a, d, p) {
     super(d / p, Math.pow(a, -p))
 

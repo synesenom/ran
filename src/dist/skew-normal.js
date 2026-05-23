@@ -5,7 +5,7 @@ import Normal from './normal'
 /**
  * Generator for the [skew normal distribution]{@link https://en.wikipedia.org/wiki/Skew_normal_distribution}:
  *
- * $$f(x; \xi, \omega, \alpha) = \frac{2}{\omega} \phi\bigg(\frac{x - \xi}{\omega}\bigg) \Phi\bigg(\alpha \frac{x - \xi}{\omega}\bigg),$$
+ * $f(x; \xi, \omega, \alpha) = \frac{2}{\omega} \phi\bigg(\frac{x - \xi}{\omega}\bigg) \Phi\bigg(\alpha \frac{x - \xi}{\omega}\bigg),$
  *
  * where $\xi, \alpha \in \mathbb{R}$, $\omega > 0$ and $\phi(x)$, $\Phi(x)$ denote the probability density and
  * cumulative distribution functions of the standard [normal distribution]{@link #dist.Normal}.
@@ -13,14 +13,16 @@ import Normal from './normal'
  *
  * @class SkewNormal
  * @memberof ran.dist
- * @param {number} xi Location parameter.
- * @param {number} omega Scale parameter.
- * @param {number} alpha Shape parameter.
  * @see https://en.wikipedia.org/wiki/Skew_normal_distribution
  * @see A. Azzalini, "SN package FAQ", https://azzalini.stat.unipd.it/SN/faq-r.html (sampling algorithm)
  * @constructor
  */
-export default class extends Normal {
+export default class SkewNormal extends Normal {
+  /**
+   * @param {number} xi Location parameter.
+   * @param {number} omega Scale parameter.
+   * @param {number} alpha Shape parameter.
+   */
   constructor (xi, omega, alpha) {
     super(xi, omega)
 

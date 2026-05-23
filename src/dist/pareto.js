@@ -3,18 +3,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Pareto distribution]{@link https://en.wikipedia.org/wiki/Pareto_distribution}:
  *
- * $$f(x; x_\mathrm{min}, \alpha) = \frac{\alpha x_\mathrm{min}^\alpha}{x^{\alpha + 1}},$$
+ * $f(x; x_\mathrm{min}, \alpha) = \frac{\alpha x_\mathrm{min}^\alpha}{x^{\alpha + 1}},$
  *
  * with $x_\mathrm{min}, \alpha > 0$. Support: $x \in [x_\mathrm{min}, \infty)$.
  *
  * @class Pareto
  * @memberof ran.dist
- * @param {number} xmin Scale parameter.
- * @param {number} alpha Shape parameter.
  * @see https://en.wikipedia.org/wiki/Pareto_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Pareto extends Distribution {
+  /**
+   * @param {number} xmin Scale parameter.
+   * @param {number} alpha Shape parameter.
+   */
   constructor (xmin, alpha) {
     super('continuous', 2)
 

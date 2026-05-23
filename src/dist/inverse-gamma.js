@@ -4,19 +4,21 @@ import Gamma from './gamma'
 /**
  * Generator for the [inverse gamma distribution]{@link https://en.wikipedia.org/wiki/Inverse-gamma_distribution}:
  *
- * $$f(x; \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{-\alpha - 1} e^{-\beta/x},$$
+ * $f(x; \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{-\alpha - 1} e^{-\beta/x},$
  *
  * where $\alpha, \beta > 0$. Support: $x > 0$.
  *
  * @class InverseGamma
  * @memberof ran.dist
- * @param {number} alpha Shape parameter.
- * @param {number} beta Scale parameter.
  * @see https://en.wikipedia.org/wiki/Inverse-gamma_distribution
  * @constructor
  */
-export default class extends Gamma {
+export default class InverseGamma extends Gamma {
   // Transformation of gamma distribution
+  /**
+   * @param {number} alpha Shape parameter.
+   * @param {number} beta Scale parameter.
+   */
   constructor (alpha, beta) {
     super(alpha, beta)
 

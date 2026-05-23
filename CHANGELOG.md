@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- TypeScript declarations are now generated from JSDoc via `tsc --allowJs --declaration --emitDeclarationOnly` as part of `npm run build`. The generated `dist/index.d.ts` replaces the hand-written `dist/ranjs.d.ts`, making type drift structurally impossible. Includes `@overload` annotations for `sample()`, `float()`, `int()`, `choice()`, `shuffle()`, and `coin()`. Closes #170.
+
+### Removed
+
+- Hand-written `dist/ranjs.d.ts` removed from version control (now a build artifact).
+- `scripts/check-declarations.js` deleted (structural completeness now guaranteed by tsc).
+
 - `Distribution` base class now exposes `bounded()`, returning `'bounded'`, `'lower'`, `'upper'`, or `'unbounded'` based on whether the support endpoints are finite. `type()` and `support()` are documented as stable public API. TypeScript declarations updated accordingly. Closes #119.
 
 - `GeneralizedPareto`, `ShiftedLogLogistic`, and `TukeyLambda` GoF sampling tests now cover the boundary branches (`xi=0` / `lambda=0`) in `_q`, exercising the `−log(1−p)`, logistic, and `log(p/(1−p))` code paths respectively. Closes #270.

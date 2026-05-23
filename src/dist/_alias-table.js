@@ -75,7 +75,7 @@ export default class {
    *
    * @method sample
    * @memberof ran.dist.AliasTable
-   * @param {ran.core.Xoshiro128p} r Pseudo random number generator to use.
+   * @param {*} r Pseudo random number generator to use.
    * @returns {number} The random sample.
    */
   sample (r) {

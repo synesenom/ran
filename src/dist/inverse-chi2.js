@@ -5,17 +5,19 @@ import Distribution from './_distribution'
 /**
  * Generator for the [inverse $\chi^2$ distribution]{@link https://en.wikipedia.org/wiki/Inverse-chi-squared_distribution}:
  *
- * $$f(x; \nu) = \frac{2^{-\nu/2}}{\Gamma(\nu / 2)} x^{-\nu/2 - 1} e^{-1/(2x)},$$
+ * $f(x; \nu) = \frac{2^{-\nu/2}}{\Gamma(\nu / 2)} x^{-\nu/2 - 1} e^{-1/(2x)},$
  *
  * with $\nu \in \mathbb{N}^+$. Support: $x > 0$.
  *
  * @class InverseChi2
  * @memberof ran.dist
- * @param {number} nu Degrees of freedom.
  * @see https://en.wikipedia.org/wiki/Inverse-chi-squared_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class InverseChi2 extends Distribution {
+  /**
+   * @param {number} nu Degrees of freedom.
+   */
   constructor (nu) {
     super('continuous', 1)
 

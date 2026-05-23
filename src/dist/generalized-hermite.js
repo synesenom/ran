@@ -6,7 +6,7 @@ import PreComputed from './_pre-computed'
 /**
  * Generator for the [generalized Hermite distribution]{@link https://journal.r-project.org/archive/2015/RJ-2015-035/RJ-2015-035.pdf}:
  *
- * $$f(k; a_1, a_m, m) = p_0 \frac{\mu^k (m - d)^k}{(m - 1)^k} \sum\_{j = 0}^{\lfloor k / m \rfloor} \frac{(d - 1)^j (m - 1)^{(m - 1)j}}{m^j \mu^{(m - 1)j} (m - d)^{mj} (k - mj)! j!},$$
+ * $f(k; a_1, a_m, m) = p_0 \frac{\mu^k (m - d)^k}{(m - 1)^k} \sum\_{j = 0}^{\lfloor k / m \rfloor} \frac{(d - 1)^j (m - 1)^{(m - 1)j}}{m^j \mu^{(m - 1)j} (m - d)^{mj} (k - mj)! j!},$
  *
  * where $p_0 = e^{\mu \big\[\frac{d - 1}{m} - 1\big\]}$, $\mu = a_1 + m a_m$, $d = \frac{a_1 + m^2 a_m}{a_1 + m a_m}$,
  * $a_1, a_m > 0$ and $m \in \mathbb{N}^+ \setminus \{ 1 \}$.
@@ -15,13 +15,15 @@ import PreComputed from './_pre-computed'
  *
  * @class GeneralizedHermite
  * @memberof ran.dist
- * @param {number} a1 Mean of the first Poisson component.
- * @param {number} am Mean of the second Poisson component.
- * @param {number} m Multiplier of the second Poisson. If not an integer, it is rounded to the nearest one.
  * @see https://journal.r-project.org/archive/2015/RJ-2015-035/RJ-2015-035.pdf
  * @constructor
  */
-export default class extends PreComputed {
+export default class GeneralizedHermite extends PreComputed {
+  /**
+   * @param {number} a1 Mean of the first Poisson component.
+   * @param {number} am Mean of the second Poisson component.
+   * @param {number} m Multiplier of the second Poisson. If not an integer, it is rounded to the nearest one.
+   */
   constructor (a1, a2, m) {
     // Using raw probability mass values
     super(true)

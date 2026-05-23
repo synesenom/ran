@@ -4,18 +4,20 @@ import Distribution from './_distribution'
 /**
  * Generator for a [categorical distribution]{@link https://en.wikipedia.org/wiki/Categorical_distribution}:
  *
- * $$f(k; \{w\}) = \frac{w_k}{\sum_j w_j},$$
+ * $f(k; \{w\}) = \frac{w_k}{\sum_j w_j},$
  *
  * where $w_k > 0$. Support: $k \in \mathbb{N}_0$.
  *
  * @class Categorical
  * @memberof ran.dist
- * @param {number[]} weights Weights for the distribution (doesn't need to be normalized).
- * @param {number} min Lowest value to sample (support starts at this value).
  * @see https://en.wikipedia.org/wiki/Categorical_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Categorical extends Distribution {
+  /**
+   * @param {number[]} weights Weights for the distribution (doesn't need to be normalized).
+   * @param {number} min Lowest value to sample (support starts at this value).
+   */
   constructor (weights, min) {
     super('discrete', 2)
 

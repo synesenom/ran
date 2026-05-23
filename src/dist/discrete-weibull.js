@@ -3,18 +3,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the [discrete Weibull distribution]{@link https://en.wikipedia.org/wiki/Discrete_Weibull_distribution} (using the original parametrization):
  *
- * $$f(k; q, \beta) = q^{k^\beta} - q^{(k + 1)^\beta},$$
+ * $f(k; q, \beta) = q^{k^\beta} - q^{(k + 1)^\beta},$
  *
  * with $q \in (0, 1)$ and $\beta > 0$. Support: $k \in \mathbb{N}_0$.
  *
  * @class DiscreteWeibull
  * @memberof ran.dist
- * @param {number} q First shape parameter.
- * @param {number} beta Second shape parameter.
  * @see https://en.wikipedia.org/wiki/Discrete_Weibull_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class DiscreteWeibull extends Distribution {
+  /**
+   * @param {number} q First shape parameter.
+   * @param {number} beta Second shape parameter.
+   */
   constructor (q, beta) {
     super('discrete', 2)
 

@@ -3,19 +3,21 @@ import Normal from './normal'
 /**
  * Generator for the [log-normal distribution]{@link https://en.wikipedia.org/wiki/Log-normal_distribution}:
  *
- * $$f(x; \mu, \sigma) = \frac{1}{x \sigma \sqrt{2 \pi}}e^{-\frac{(\ln x - \mu)^2}{2\sigma^2}},$$
+ * $f(x; \mu, \sigma) = \frac{1}{x \sigma \sqrt{2 \pi}}e^{-\frac{(\ln x - \mu)^2}{2\sigma^2}},$
  *
  * where $\mu \in \mathbb{R}$ and $\sigma > 0$. Support: $x > 0$.
  *
  * @class LogNormal
  * @memberof ran.dist
- * @param {number} mu Location parameter.
- * @param {number} sigma Scale parameter.
  * @see https://en.wikipedia.org/wiki/Log-normal_distribution
  * @constructor
  */
-export default class extends Normal {
+export default class LogNormal extends Normal {
   // Transforming normal distribution
+  /**
+   * @param {number} mu Location parameter.
+   * @param {number} sigma Scale parameter.
+   */
   constructor (mu, sigma) {
     super(mu, sigma)
 

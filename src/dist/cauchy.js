@@ -3,18 +3,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Cauchy distribution]{@link https://en.wikipedia.org/wiki/Cauchy_distribution}:
  *
- * $$f(x; x_0, \gamma) = \frac{1}{\pi\gamma\bigg\[1 + \Big(\frac{x - x_0}{\gamma}\Big)^2\bigg\]}$$
+ * $f(x; x_0, \gamma) = \frac{1}{\pi\gamma\bigg\[1 + \Big(\frac{x - x_0}{\gamma}\Big)^2\bigg\]}$
  *
  * where $x_0 \in \mathbb{R}$ and $\gamma > 0$. Support: $x \in \mathbb{R}$.
  *
  * @class Cauchy
  * @memberof ran.dist
- * @param {number} x0 Location parameter.
- * @param {number} gamma Scale parameter.
  * @see https://en.wikipedia.org/wiki/Cauchy_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Cauchy extends Distribution {
+  /**
+   * @param {number} x0 Location parameter.
+   * @param {number} gamma Scale parameter.
+   */
   constructor (x0, gamma) {
     super('continuous', 2)
 

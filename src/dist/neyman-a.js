@@ -5,18 +5,20 @@ import PreComputed from './_pre-computed'
 /**
  * Generator for the [Neyman type A distribution]{@link http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.527.574&rep=rep1&type=pdf}:
  *
- *$$f(k; \lambda, \phi) = \frac{e^{-\lambda + \lambda e^{-\phi}} \phi^k}{k!} \sum_{j=1}^k S(k, j) \lambda^k e^{-\phi k},$$
+ *$f(k; \lambda, \phi) = \frac{e^{-\lambda + \lambda e^{-\phi}} \phi^k}{k!} \sum_{j=1}^k S(k, j) \lambda^k e^{-\phi k},$
  *
  * where $\lambda, \theta > 0$ and $S(n, m)$ denotes the [Stirling number of the second kind]{@link https://en.wikipedia.org/wiki/Stirling_numbers_of_the_second_kind}. Support: $k \in \mathbb{N}_0$.
  *
  * @class NeymanA
  * @memberof ran.dist
- * @param {number} lambda Mean of the number of clusters.
- * @param {number} phi Mean of the cluster size.
  * @see http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.527.574&rep=rep1&type=pdf
  * @constructor
  */
-export default class extends PreComputed {
+export default class NeymanA extends PreComputed {
+  /**
+   * @param {number} lambda Mean of the number of clusters.
+   * @param {number} phi Mean of the cluster size.
+   */
   constructor (lambda, phi) {
     // Using raw probability mass values
     super()

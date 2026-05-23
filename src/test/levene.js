@@ -7,9 +7,9 @@ import { F } from '../dist'
  * @method generalLevene
  * @memberof ran.test
  * @param {Array[]} dataSets Array containing the data sets.
- * @param {number} [alpha = 0.05] Confidence level.
+ * @param {number} alpha Confidence level.
  * @param aggregator
- * @returns {Object} Object containing the test statistics and whether the data sets passed the null hypothesis that
+ * @returns {{stat: number, passed: boolean}} Object containing the test statistics and whether the data sets passed the null hypothesis that
  * their variances are the same.
  * @throws {Error} If the number of data sets is less than 2.
  * @throws {Error} If the size of any data set is less than 2 elements.
@@ -52,8 +52,8 @@ export function generalLevene (dataSets, alpha, aggregator) {
  * @method levene
  * @memberof ran.test
  * @param {Array[]} dataSets Array containing the data sets.
- * @param {number} [alpha = 0.05] Confidence level.
- * @returns {Object} Object containing the test statistics (W) and whether the data sets passed the null hypothesis that
+ * @param {number} alpha Confidence level.
+ * @returns {{stat: number, passed: boolean}} Object containing the test statistics (W) and whether the data sets passed the null hypothesis that
  * their variances are the same.
  * @throws {Error} If the number of data sets is less than 2.
  * @throws {Error} If the size of any data set is less than 2 elements.

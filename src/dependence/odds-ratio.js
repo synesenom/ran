@@ -10,7 +10,7 @@
  * @param {number} p01 The probability of X = 0 and Y = 1.
  * @param {number} p10 The probability of X = 1 and Y = 0.
  * @param {number} p11 The probability of X = 1 and Y = 1.
- * @returns {(number|undefined)} The odds ratio if p01 and p10 are positive, undefined otherwise.
+ * @returns {number|undefined} The odds ratio if p01 and p10 are positive, undefined otherwise.
  * @example
  *
  * ran.dependence.oddsRatio(0.3, 0, 0.3, 0.4)

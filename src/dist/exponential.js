@@ -4,17 +4,19 @@ import Distribution from './_distribution'
 /**
  * Generator for the [exponential distribution]{@link https://en.wikipedia.org/wiki/Exponential_distribution}:
  *
- * $$f(x; \lambda) = \lambda e^{-\lambda x},$$
+ * $f(x; \lambda) = \lambda e^{-\lambda x},$
  *
  * with $\lambda > 0$. Support: $x \ge 0$.
  *
  * @class Exponential
  * @memberof ran.dist
- * @param {number} lambda Rate parameter.
  * @see https://en.wikipedia.org/wiki/Exponential_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Exponential extends Distribution {
+  /**
+   * @param {number} lambda Rate parameter.
+   */
   constructor (lambda) {
     super('continuous', 1)
 

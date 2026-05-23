@@ -5,18 +5,20 @@ import poisson from './_poisson'
 /**
  * Generator for the [Pólya-Aeppli distribution]{@link https://arxiv.org/abs/1406.2780} (also known as geometric Poisson distribution):
  *
- * $$f(k; \lambda, \theta) = \begin{cases}e^{-\lambda} &\quad\text{if $k = 0$},\\\\ e^{-\lambda} \sum_{j = 1}^k \frac{\lambda^j}{j!} \begin{pmatrix}k - 1 \\\\ j - 1 \\\\ \end{pmatrix} \theta^{k - j} (1 - \theta)^j &\quad\text{otherwise}\\\\ \end{cases},$$
+ * $f(k; \lambda, \theta) = \begin{cases}e^{-\lambda} &\quad\text{if $k = 0$},\\\\ e^{-\lambda} \sum_{j = 1}^k \frac{\lambda^j}{j!} \begin{pmatrix}k - 1 \\\\ j - 1 \\\\ \end{pmatrix} \theta^{k - j} (1 - \theta)^j &\quad\text{otherwise}\\\\ \end{cases},$
  *
  * where $\lambda > 0$ and $\theta \in (0, 1)$. Support: $k \in \mathbb{N}_0$.
  *
  * @class PolyaAeppli
  * @memberof ran.dist
- * @param {number} lambda Mean of the Poisson component.
- * @param {number} theta Parameter of the shifted geometric component.
  * @see https://arxiv.org/abs/1406.2780
  * @constructor
  */
-export default class extends PreComputed {
+export default class PolyaAeppli extends PreComputed {
+  /**
+   * @param {number} lambda Mean of the Poisson component.
+   * @param {number} theta Parameter of the shifted geometric component.
+   */
   constructor (lambda, theta) {
     // Using logarithmic probability mass values
     super(true)

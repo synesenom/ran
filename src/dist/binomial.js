@@ -5,19 +5,21 @@ import Categorical from './categorical'
 /**
  * Generator for the [binomial distribution]{@link https://en.wikipedia.org/wiki/Binomial_distribution}:
  *
- * $$f(k; n, p) = \begin{pmatrix}n \\\\ k \\\\ \end{pmatrix} p^k (1 - p)^{n - k},$$
+ * $f(k; n, p) = \begin{pmatrix}n \\\\ k \\\\ \end{pmatrix} p^k (1 - p)^{n - k},$
  *
  * with $n \in \mathbb{N}_0$ and $p \in \[0, 1\]$. Support: $k \in \{0, ..., n\}$.
  *
  * @class Binomial
  * @memberof ran.dist
- * @param {number} n Number of trials.
- * @param {number} p Probability of success.
  * @see https://en.wikipedia.org/wiki/Binomial_distribution
  * @constructor
  */
-export default class extends Categorical {
+export default class Binomial extends Categorical {
   // Special case of categorical
+  /**
+   * @param {number} n Number of trials.
+   * @param {number} p Probability of success.
+   */
   constructor (n, p) {
     const ni = Math.round(n)
     super(Array.from({ length: ni + 1 }, (d, k) => Math.exp(logBinomial(n, k) + k * Math.log(p) + (n - k) * Math.log(1 - p))), 0)

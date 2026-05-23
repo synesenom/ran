@@ -5,18 +5,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the [zeta distribution]{@link https://en.wikipedia.org/wiki/Zeta_distribution}:
  *
- * $$f(k; s) = \frac{k^{-s}}{\zeta(s)},$$
+ * $f(k; s) = \frac{k^{-s}}{\zeta(s)},$
  *
  * with $s \in (1, \infty)$ and $\zeta(x)$ is the Riemann zeta function. Support: $k \in \mathbb{N}^+$.
  *
  * @class Zeta
  * @memberof ran.dist
- * @param {number} s Exponent of the distribution.
  * @see https://en.wikipedia.org/wiki/Zeta_distribution
  * @see L. Devroye, "Non-Uniform Random Variate Generation", Springer-Verlag, 1986, ch. 10.
  * @constructor
  */
-export default class extends Distribution {
+export default class Zeta extends Distribution {
+  /**
+   * @param {number} s Exponent of the distribution.
+   */
   constructor (s) {
     super('discrete', 1)
 

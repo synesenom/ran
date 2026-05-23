@@ -4,19 +4,21 @@ import Gamma from './gamma'
  * Generator for the [double gamma distribution]{@link https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_dgamma.html}
  * (with the same shape/rate parametrization that the [gamma distribution]{@link #dist.Gamma} uses):
  *
- * $$f(x; \alpha, \beta) = \frac{\beta^\alpha}{2 \Gamma(\alpha)} |x|^{\alpha - 1} e^{-\beta |x|},$$
+ * $f(x; \alpha, \beta) = \frac{\beta^\alpha}{2 \Gamma(\alpha)} |x|^{\alpha - 1} e^{-\beta |x|},$
  *
  * where $\alpha, \beta > 0$. Support: $x \in \mathbb{R}$.
  *
  * @class DoubleGamma
  * @memberof ran.dist
- * @param {number} alpha Shape parameter.
- * @param {number} beta Rate parameter.
  * @see https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_dgamma.html
  * @constructor
  */
-export default class extends Gamma {
+export default class DoubleGamma extends Gamma {
   // Transformation of gamma
+  /**
+   * @param {number} alpha Shape parameter.
+   * @param {number} beta Rate parameter.
+   */
   constructor (alpha, beta) {
     super(alpha, beta)
 

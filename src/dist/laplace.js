@@ -3,18 +3,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Laplace distribution]{@link https://en.wikipedia.org/wiki/Laplace_distribution} (also known as double exponential distribution):
  *
- * $$f(x; \mu, b) = \frac{1}{2b}e^{-\frac{|x - \mu|}{b}},$$
+ * $f(x; \mu, b) = \frac{1}{2b}e^{-\frac{|x - \mu|}{b}},$
  *
  * where $\mu \in \mathbb{R}$ and $b > 0$. Support: $x \in \mathbb{R}$.
  *
  * @class Laplace
  * @memberof ran.dist
- * @param {number} mu Location parameter.
- * @param {number} b Scale parameter.
  * @see https://en.wikipedia.org/wiki/Laplace_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Laplace extends Distribution {
+  /**
+   * @param {number} mu Location parameter.
+   * @param {number} b Scale parameter.
+   */
   constructor (mu, b) {
     super('continuous', 2)
 

@@ -5,17 +5,19 @@ import Distribution from './_distribution'
  * Generator for [Wigner distribution]{@link https://en.wikipedia.org/wiki/Wigner_semicircle_distribution} (also known
  * as semicircle distribution):
  *
- * $$f(x; R) = \frac{2}{\pi R^2} \sqrt{R^2 - x^2},$$
+ * $f(x; R) = \frac{2}{\pi R^2} \sqrt{R^2 - x^2},$
  *
  * with $R > 0$. Support: $x \in \[-R, R\]$.
  *
  * @class Wigner
  * @memberof ran.dist
- * @param {number} R Radius of the distribution.
  * @see https://en.wikipedia.org/wiki/Wigner_semicircle_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Wigner extends Distribution {
+  /**
+   * @param {number} R Radius of the distribution.
+   */
   constructor (R) {
     super('continuous', 1)
 

@@ -3,18 +3,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the [reciprocal distribution]{@link https://en.wikipedia.org/wiki/Reciprocal_distribution}:
  *
- * $$f(x; a, b) = \frac{1}{x \[\ln b - \ln a\]},$$
+ * $f(x; a, b) = \frac{1}{x \[\ln b - \ln a\]},$
  *
  * with $a, b > 0$ and $a < b$. Support: $x \in \[a, b\]$.
  *
  * @class Reciprocal
  * @memberof ran.dist
- * @param {number} a Lower boundary of the support.
- * @param {number} b Upper boundary of the support.
  * @see https://en.wikipedia.org/wiki/Reciprocal_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Reciprocal extends Distribution {
+  /**
+   * @param {number} a Lower boundary of the support.
+   * @param {number} b Upper boundary of the support.
+   */
   constructor (a, b) {
     super('continuous', 2)
 

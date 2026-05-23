@@ -67,7 +67,7 @@ class Xoshiro128p {
    *
    * @method seed
    * @memberof ran.core.Xoshiro128p
-   * @param {(number|string)} value The value of the seed, either a number or a string (for the ease of tracking
+   * @param {number|string} value The value of the seed, either a number or a string (for the ease of tracking
    * seeds).
    * @ignore
    */

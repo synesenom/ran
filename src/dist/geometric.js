@@ -4,17 +4,19 @@ import Distribution from './_distribution'
  * Generator for the [geometric distribution]{@link https://en.wikipedia.org/wiki/Geometric_distribution} (the number of
  * failures before the first success definition):
  *
- * $$f(k; p) = p (1 - p)^k,$$
+ * $f(k; p) = p (1 - p)^k,$
  *
  * with $p \in (0, 1]$. Support: $k \in \{0, 1, 2, ...\}$. Note that the [discrete exponential distribution]{@link https://docs.scipy.org/doc/scipy/reference/tutorial/stats/discrete_planck.html} is also a geometric distribution with rate parameter equal to $-\ln(1 - p)$.
  *
  * @class Geometric
  * @memberof ran.dist
- * @param {number} p Probability of success.
  * @see https://en.wikipedia.org/wiki/Geometric_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Geometric extends Distribution {
+  /**
+   * @param {number} p Probability of success.
+   */
   constructor (p) {
     super('discrete', 1)
 

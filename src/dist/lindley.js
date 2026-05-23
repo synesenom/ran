@@ -4,17 +4,19 @@ import { lambertW1m } from '../special'
 /**
  * Generator for the [Lindley distribution]{@link http://www.hjms.hacettepe.edu.tr/uploads/b35d591c-22f6-4136-8735-20c82936cd64.pdf}:
  *
- * $$f(x; \theta) = \frac{\theta^2}{1 + \theta} (1 + x) e^{-\theta x},$$
+ * $f(x; \theta) = \frac{\theta^2}{1 + \theta} (1 + x) e^{-\theta x},$
  *
  * with $\theta > 0$. Support: $x \ge 0$.
  *
  * @class Lindley
  * @memberof ran.dist
- * @param {number} theta Shape parameter.
  * @see http://www.hjms.hacettepe.edu.tr/uploads/b35d591c-22f6-4136-8735-20c82936cd64.pdf
  * @constructor
  */
-export default class extends Distribution {
+export default class Lindley extends Distribution {
+  /**
+   * @param {number} theta Shape parameter.
+   */
   constructor (theta) {
     super('continuous', 1)
 

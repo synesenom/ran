@@ -6,18 +6,20 @@ import { MAX_ITER } from '../core/constants'
 /**
  * Generator for the [von Mises distribution]{@link https://en.wikipedia.org/wiki/Von_Mises_distribution}:
  *
- * $$f(x; \kappa) = \frac{e^{\kappa \cos(x)}}{2 \pi I_0(\kappa)},$$
+ * $f(x; \kappa) = \frac{e^{\kappa \cos(x)}}{2 \pi I_0(\kappa)},$
  *
  * with $\kappa > 0$. Support: $x \in \[-\pi, \pi\]$. Note that originally this distribution is periodic and therefore it is defined over $\mathbb{R}$, but (without the loss of general usage) this implementation still does limit the support on the bounded interval $\[-\pi, \pi\]$.
  *
  * @class VonMises
  * @memberof ran.dist
- * @param {number} kappa Shape parameter.
  * @see https://en.wikipedia.org/wiki/Von_Mises_distribution
  * @see L. Barabesi, "Generating von Mises variates by the ratio-of-uniforms method", Statistica Applicata 7(4), 417–426, 1995.
  * @constructor
  */
-export default class extends Distribution {
+export default class VonMises extends Distribution {
+  /**
+   * @param {number} kappa Shape parameter.
+   */
   constructor (kappa) {
     super('continuous', 1)
 

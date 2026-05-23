@@ -7,19 +7,21 @@ import PreComputed from './_pre-computed'
 /**
  * Generator for the [Delaporte distribution]{@link https://en.wikipedia.org/wiki/Delaporte_distribution}:
  *
- * $$f(k; \alpha, \beta, \lambda) = \frac{e^{-\lambda}}{\Gamma(\alpha)}\sum_{j = 0}^k \frac{\Gamma(\alpha + j) \beta^j \lambda^{k - j}}{j! (1 + \beta)^{\alpha + j} (k - j)!},$$
+ * $f(k; \alpha, \beta, \lambda) = \frac{e^{-\lambda}}{\Gamma(\alpha)}\sum_{j = 0}^k \frac{\Gamma(\alpha + j) \beta^j \lambda^{k - j}}{j! (1 + \beta)^{\alpha + j} (k - j)!},$
  *
  * with $\alpha, \beta, \lambda > 0$. Support: $k \in \mathbb{N}_0$. For $\lambda = 0$, it is the [negative binomial]{@link #dist.NegativeBinomial}, and for $\alpha = \beta = 0$ it is the [Poisson distribution]{@link #dist.Poisson}. Note that these special cases are not covered by this class. For these distributions, please refer to the corresponding generators.
  *
  * @class Delaporte
  * @memberof ran.dist
- * @param {number} alpha Shape parameter of the gamma component. Default component is 1.
- * @param {number} beta Scale parameter of the gamma component.
- * @param {number} lambda Mean of the Poisson component.
  * @see https://en.wikipedia.org/wiki/Delaporte_distribution
  * @constructor
  */
-export default class extends PreComputed {
+export default class Delaporte extends PreComputed {
+  /**
+   * @param {number} alpha Shape parameter of the gamma component. Default component is 1.
+   * @param {number} beta Scale parameter of the gamma component.
+   * @param {number} lambda Mean of the Poisson component.
+   */
   constructor (alpha, beta, lambda) {
     // Using raw probability mass values
     super(true)

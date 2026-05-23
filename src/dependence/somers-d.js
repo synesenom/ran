@@ -12,7 +12,7 @@ function tau (a, b) {
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
- * @returns {(number|undefined)} Somers' D if none of the arrays are empty, they have the same length, undefined
+ * @returns {number|undefined} Somers' D if none of the arrays are empty, they have the same length, undefined
  * otherwise.
  * @example
  *

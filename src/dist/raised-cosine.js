@@ -4,18 +4,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the [raised cosine distribution]{@link https://en.wikipedia.org/wiki/Raised_cosine_distribution}:
  *
- * $$f(x; \mu, s) = \frac{1}{2s} \Big\[1 + \cos\Big(\frac{x - \mu}{s} \pi\Big)\Big\],$$
+ * $f(x; \mu, s) = \frac{1}{2s} \Big\[1 + \cos\Big(\frac{x - \mu}{s} \pi\Big)\Big\],$
  *
  * where $\mu \in \mathbb{R}$ and $s > 0$. Support: $x \in \[\mu - s, \mu + s\]$.
  *
  * @class RaisedCosine
  * @memberof ran.dist
- * @param {number} mu Location paramter.
- * @param {number} s Scale parameter.
  * @see https://en.wikipedia.org/wiki/Raised_cosine_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class RaisedCosine extends Distribution {
+  /**
+   * @param {number} mu Location paramter.
+   * @param {number} s Scale parameter.
+   */
   constructor (mu, s) {
     super('continuous', 2)
 

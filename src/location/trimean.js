@@ -7,7 +7,7 @@ import median from './median'
  * @method trimean
  * @memberof ran.location
  * @param {number[]} values Array of values to calculate trimean for.
- * @returns {(number|undefined)} The trimean of the values if there is any, undefined otherwise.
+ * @returns {number|undefined} The trimean of the values if there is any, undefined otherwise.
  * @example
  *
  * ran.location.trimean([])

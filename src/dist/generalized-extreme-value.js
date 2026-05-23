@@ -3,17 +3,19 @@ import Distribution from './_distribution'
 /**
  * Generator for the [generalized extreme value distribution]{@link https://en.wikipedia.org/wiki/Generalized_extreme_value_distribution}:
  *
- * $$f(x; c) = (1 - cx)^{1 / c - 1} e^{-(1 - cx)^{1 / c}},$$
+ * $f(x; c) = (1 - cx)^{1 / c - 1} e^{-(1 - cx)^{1 / c}},$
  *
  * with $c \ne 0$. Support: $x \in (-\infty, 1 / c]$ if $c > 0$, $x \in [1 / c, \infty)$ otherwise.
  *
  * @class GeneralizedExtremeValue
  * @memberof ran.dist
- * @param {number} c Shape parameter.
  * @see https://en.wikipedia.org/wiki/Generalized_extreme_value_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class GeneralizedExtremeValue extends Distribution {
+  /**
+   * @param {number} c Shape parameter.
+   */
   constructor (c) {
     super('continuous', 1)
 

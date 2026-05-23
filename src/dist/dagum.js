@@ -3,19 +3,21 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Dagum distribution]{@link https://en.wikipedia.org/wiki/Dagum_distribution}:
  *
- * $$f(x; p, a, b) = \frac{ap}{x} \frac{\big(\frac{x}{b}\big)^{ap}}{\Big\[\big(\frac{x}{b}\big)^a + 1\Big\]^{p + 1}},$$
+ * $f(x; p, a, b) = \frac{ap}{x} \frac{\big(\frac{x}{b}\big)^{ap}}{\Big\[\big(\frac{x}{b}\big)^a + 1\Big\]^{p + 1}},$
  *
  * with $p, a, b > 0$. Support: $x > 0$.
  *
  * @class Dagum
  * @memberof ran.dist
- * @param {number} p First shape parameter.
- * @param {number} a Second shape parameter.
- * @param {number} b Scale parameter.
  * @see https://en.wikipedia.org/wiki/Dagum_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Dagum extends Distribution {
+  /**
+   * @param {number} p First shape parameter.
+   * @param {number} a Second shape parameter.
+   * @param {number} b Scale parameter.
+   */
   constructor (p, a, b) {
     super('continuous', 3)
 

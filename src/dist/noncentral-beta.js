@@ -7,19 +7,21 @@ import Distribution from './_distribution'
 /**
  * Generator for the [non-central beta distribution]{@link https://en.wikipedia.org/wiki/Noncentral_beta_distribution}:
  *
- * $$f(x; \alpha, \beta, \lambda) = e^{-\frac{\lambda}{2}} \sum\_{k = 0}^\infty \frac{1}{k!} \bigg(\frac{\lambda}{2}\bigg)^k \frac{x^{\alpha + k - 1} (1 - x)^{\beta - 1}}{\mathrm{B}(\alpha + k, \beta)},$$
+ * $f(x; \alpha, \beta, \lambda) = e^{-\frac{\lambda}{2}} \sum\_{k = 0}^\infty \frac{1}{k!} \bigg(\frac{\lambda}{2}\bigg)^k \frac{x^{\alpha + k - 1} (1 - x)^{\beta - 1}}{\mathrm{B}(\alpha + k, \beta)},$
  *
  * where $\alpha, \beta > 0$ and $\lambda \ge 0$. Support: $x \in \[0, 1\]$.
  *
  * @class NoncentralBeta
  * @memberof ran.dist
- * @param {number} alpha First shape parameter.
- * @param {number} beta Second shape parameter.
- * @param {number} lambda Non-centrality parameter.
  * @see https://en.wikipedia.org/wiki/Noncentral_beta_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class NoncentralBeta extends Distribution {
+  /**
+   * @param {number} alpha First shape parameter.
+   * @param {number} beta Second shape parameter.
+   * @param {number} lambda Non-centrality parameter.
+   */
   constructor (alpha, beta, lambda) {
     super('continuous', 3)
 

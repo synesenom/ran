@@ -6,7 +6,7 @@ import quantile from '../shape/quantile'
  * @method midhinge
  * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate midhinge for.
- * @returns {(number|undefined)} The midhinge of the values if there is any, undefined otherwise.
+ * @returns {number|undefined} The midhinge of the values if there is any, undefined otherwise.
  * @example
  *
  * ran.dispersion.midhinge([])

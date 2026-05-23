@@ -4,18 +4,20 @@ import Distribution from './_distribution'
  * Generator for the [Burr (XII) distribution]{@link https://en.wikipedia.org/wiki/Burr_distribution} (also known as
  * Singh-Maddala distribution):
  *
- * $$f(x; c, k) = c k \frac{x^{c - 1}}{(1 + x^c)^{k + 1}},$$
+ * $f(x; c, k) = c k \frac{x^{c - 1}}{(1 + x^c)^{k + 1}},$
  *
  * with $c, k > 0$. Support: $x > 0$.
  *
  * @class Burr
  * @memberof ran.dist
- * @param {number} c First shape parameter.
- * @param {number} k Second shape parameter.
  * @see https://en.wikipedia.org/wiki/Burr_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Burr extends Distribution {
+  /**
+   * @param {number} c First shape parameter.
+   * @param {number} k Second shape parameter.
+   */
   constructor (c, k) {
     super('continuous', 2)
 

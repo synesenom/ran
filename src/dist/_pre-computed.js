@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  * @abstract
  * @private
  */
-export default class extends Distribution {
+export default class PreComputed extends Distribution {
   constructor (logP = false) {
     super('discrete', 0)
 
@@ -35,7 +35,7 @@ export default class extends Distribution {
    * @memberof ran.dist.PreComputed
    * @param {number} k Index to computed probability for.
    * @returns {number} The probability for the specified index.
-   * @private
+   * @protected
    */
   _pk (k) {
     throw Error('PreComputed._pk() is not implemented')

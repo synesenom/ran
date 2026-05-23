@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "target": "ES2017",
+    "strict": false,
+    "ignoreDeprecations": "6.0"
+  },
+  "include": ["src/**/*.js"],
+  "exclude": [
+    "src/**/_*.js",
+    "src/utils/*.js",
+    "src/algorithms/*.js",
+    "src/special/*.js",
+    "src/la/*.js",
+    "src/mc/*.js",
+    "src/ts/*.js",
+    "src/core/xoshiro.js",
+    "src/core/constants.js"
+  ]
+}

@@ -5,18 +5,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the [non-central $\chi^2$ distribution]{@link https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution}:
  *
- * $$f(x; k; \lambda) = \frac{1}{2}e^{-\frac{x + \lambda}{2}} \bigg(\frac{x}{\lambda}\bigg)^{k/4 - 1/2} I_{k/2 - 1}\big(\sqrt{\lambda x}\big),$$
+ * $f(x; k; \lambda) = \frac{1}{2}e^{-\frac{x + \lambda}{2}} \bigg(\frac{x}{\lambda}\bigg)^{k/4 - 1/2} I_{k/2 - 1}\big(\sqrt{\lambda x}\big),$
  *
  * with $k \in \mathbb{N}^+$, $\lambda \ge 0$ and $I_n(x)$ is the modified Bessel function of the first kind with order $n$. Support: $x \in [0, \infty)$. When $\lambda = 0$ the distribution degenerates to a central $\chi^2(k)$.
  *
  * @class NoncentralChi2
  * @memberof ran.dist
- * @param {number} k Degrees of freedom. If not an integer, it is rounded to the nearest one.
- * @param {number} lambda Non-centrality parameter.
  * @see https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class NoncentralChi2 extends Distribution {
+  /**
+   * @param {number} k Degrees of freedom. If not an integer, it is rounded to the nearest one.
+   * @param {number} lambda Non-centrality parameter.
+   */
   constructor (k, lambda) {
     super('continuous', 2)
 

@@ -4,18 +4,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the [Benktander type II distribution]{@link https://en.wikipedia.org/wiki/Benktander_type_II_distribution}:
  *
- * $$f(x; a, b) = e^{\frac{a}{b}(1 - x^b)} x^{b-2} (ax^b - b + 1),$$
+ * $f(x; a, b) = e^{\frac{a}{b}(1 - x^b)} x^{b-2} (ax^b - b + 1),$
  *
  * with $a > 0$ and $b \in (0, 1]$. Support: $x \in [1, \infty)$.
  *
  * @class BenktanderII
  * @memberof ran.dist
- * @param {number} a Scale parameter.
- * @param {number} b Shape parameter.
  * @see https://en.wikipedia.org/wiki/Benktander_type_II_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class BenktanderII extends Distribution {
+  /**
+   * @param {number} a Scale parameter.
+   * @param {number} b Shape parameter.
+   */
   constructor (a, b) {
     super('continuous', 2)
 

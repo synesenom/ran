@@ -9,7 +9,7 @@ import distanceMatrix from '../utils/distance-matrix'
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
- * @returns {(number|undefined)} The distance covariance if none of the arrays are empty and they have the same length,
+ * @returns {number|undefined} The distance covariance if none of the arrays are empty and they have the same length,
  * undefined otherwise.
  * @example
  *

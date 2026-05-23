@@ -8,7 +8,7 @@ import { median } from '../location'
  * @memberof ran.test
  * @param {Array[]} dataSets Array containing the data sets.
  * @param {number} [alpha = 0.05] Confidence level.
- * @returns {Object} Object containing the test statistics (W) and whether the data sets passed the null hypothesis that
+ * @returns {{stat: number, passed: boolean}} Object containing the test statistics (W) and whether the data sets passed the null hypothesis that
  * their variances are the same.
  * @throws {Error} If the number of data sets is less than 2.
  * @throws {Error} If the size of any data set is less than 2 elements.

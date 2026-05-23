@@ -4,18 +4,20 @@ import Distribution from './_distribution'
 /**
  * Generator for the [log-series distribution]{@link https://en.wikipedia.org/wiki/Logarithmic_distribution}:
  *
- * $$f(k; p) = \frac{-1}{\ln(1 - p)}\frac{p^k}{k},$$
+ * $f(k; p) = \frac{-1}{\ln(1 - p)}\frac{p^k}{k},$
  *
  * with $p \in (0, 1)$. Support: $k \in \mathbb{N}^+$.
  *
  * @class LogSeries
  * @memberof ran.dist
- * @param {number} p Distribution parameter.
  * @see https://en.wikipedia.org/wiki/Logarithmic_distribution
  * @see A. Kemp, "Efficient generation of logarithmically distributed pseudo-random variables", Appl. Stat. 30(3), 249–253, 1981.
  * @constructor
  */
-export default class extends Distribution {
+export default class LogSeries extends Distribution {
+  /**
+   * @param {number} p Distribution parameter.
+   */
   constructor (p) {
     super('discrete', 1)
 

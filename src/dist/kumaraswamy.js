@@ -4,18 +4,20 @@ import Distribution from './_distribution'
  * Generator for the [Kumaraswamy distribution]{@link https://en.wikipedia.org/wiki/Kumaraswamy_distribution} (also
  * known as Minimax distribution):
  *
- * $$f(x; a, b) = a b x^{a-1} (1 - x^a)^{b - 1},$$
+ * $f(x; a, b) = a b x^{a-1} (1 - x^a)^{b - 1},$
  *
  * with $a, b > 0$. Support: $x \in (0, 1)$.
  *
  * @class Kumaraswamy
  * @memberof ran.dist
- * @param {number} alpha First shape parameter.
- * @param {number} beta Second shape parameter.
  * @see https://en.wikipedia.org/wiki/Kumaraswamy_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class Kumaraswamy extends Distribution {
+  /**
+   * @param {number} alpha First shape parameter.
+   * @param {number} beta Second shape parameter.
+   */
   constructor (a, b) {
     super('continuous', 2)
 

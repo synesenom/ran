@@ -5,19 +5,21 @@ import Distribution from './_distribution'
 /**
  * Generator for the [normal distribution]{@link https://en.wikipedia.org/wiki/Normal_distribution}:
  *
- * $$f(x; \mu, \sigma) = \frac{1}{\sqrt{2 \pi \sigma^2}} e^{-\frac{(x - \mu)^2}{2\sigma^2}},$$
+ * $f(x; \mu, \sigma) = \frac{1}{\sqrt{2 \pi \sigma^2}} e^{-\frac{(x - \mu)^2}{2\sigma^2}},$
  *
  * with $\mu \in \mathbb{R}$ and $\sigma > 0$. Support: $x \in \mathbb{R}$.
  *
  * @class Normal
  * @memberof ran.dist
- * @param {number} mu Location parameter (mean).
- * @param {number} sigma Squared scale parameter (variance).
  * @see https://en.wikipedia.org/wiki/Normal_distribution
  * @see https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform Box–Muller transform (sampling algorithm)
  * @constructor
  */
-export default class extends Distribution {
+export default class Normal extends Distribution {
+  /**
+   * @param {number} mu Location parameter (mean).
+   * @param {number} sigma Squared scale parameter (variance).
+   */
   constructor (mu, sigma) {
     super('continuous', 2)
 

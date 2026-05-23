@@ -5,19 +5,21 @@ import Distribution from './_distribution'
 /**
  * Generator for the [negative hypergeometric distribution]{@link https://en.wikipedia.org/wiki/Negative_hypergeometric_distribution}:
  *
- * $$f(k; N, K, r) = \frac{\begin{pmatrix}k + r - 1 \\\\ k \\\\ \end{pmatrix} \begin{pmatrix}N - r - k \\\\ K - k \\\\ \end{pmatrix}}{\begin{pmatrix}N \\\\ K \\\\ \end{pmatrix}},$$
+ * $f(k; N, K, r) = \frac{\begin{pmatrix}k + r - 1 \\\\ k \\\\ \end{pmatrix} \begin{pmatrix}N - r - k \\\\ K - k \\\\ \end{pmatrix}}{\begin{pmatrix}N \\\\ K \\\\ \end{pmatrix}},$
  *
  * with $N \in \mathbb{N}_0$, $K \in \{0, 1, ..., N\}$ and $r \in \{0, 1, ..., N - K\}$. Support: $k \in \{0, ..., K\}$.
  *
  * @class NegativeHypergeometric
  * @memberof ran.dist
- * @param {number} N Total number of elements to sample from. If not an integer, it is rounded to the nearest one.
- * @param {number} K Total number of successes. If not an integer, it is rounded to the nearest one.
- * @param {number} r Total number of failures to stop at. If not an integer, it is rounded to the nearest one.
  * @see https://en.wikipedia.org/wiki/Negative_hypergeometric_distribution
  * @constructor
  */
-export default class extends Categorical {
+export default class NegativeHypergeometric extends Categorical {
+  /**
+   * @param {number} N Total number of elements to sample from. If not an integer, it is rounded to the nearest one.
+   * @param {number} K Total number of successes. If not an integer, it is rounded to the nearest one.
+   * @param {number} r Total number of failures to stop at. If not an integer, it is rounded to the nearest one.
+   */
   constructor (N, K, r) {
     // Validate parameters
     const Ni = Math.round(N)

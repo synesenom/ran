@@ -13,7 +13,7 @@ function _log (base) {
  * @memberof ran.dispersion
  * @param {number[]} probabilities Array representing the probabilities for the i-th value.
  * @param {number=} base Base for the logarithm. If not specified, natural logarithm is used.
- * @returns {(number|undefined)} Entropy of the probabilities if there are any, undefined otherwise.
+ * @returns {number|undefined} Entropy of the probabilities if there are any, undefined otherwise.
  * @example
  *
  * ran.dispersion.entropy([])

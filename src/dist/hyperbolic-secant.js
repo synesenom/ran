@@ -12,7 +12,7 @@ import Distribution from './_distribution'
  * @see https://en.wikipedia.org/wiki/Hyperbolic_secant_distribution
  * @constructor
  */
-export default class extends Distribution {
+export default class HyperbolicSecant extends Distribution {
   constructor () {
     super('continuous', 0)
     this.s = [{

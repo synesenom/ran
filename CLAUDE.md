@@ -121,14 +121,15 @@ The skill pushes `v{version}` which triggers `.github/workflows/release.yml` (li
 
 ## TypeScript Declarations
 
-`dist/ranjs.d.ts` is a **hand-written** ambient module declaration (not generated). It is exempted from the `/dist/` gitignore rule via `!dist/ranjs.d.ts`.
+TypeScript declarations are **generated** from JSDoc annotations via `tsc --allowJs --declaration --emitDeclarationOnly` as part of `npm run build`. The entry point is `dist/index.d.ts` (one `.d.ts` per source file, rooted at `src/index.js`). See `decisions/0010-jsdoc-driven-declaration-generation.md`.
 
 **Maintenance rules:**
-- When adding a new distribution class, add a corresponding `class <Name> extends Distribution { constructor(...) }` line to `dist/ranjs.d.ts` in alphabetical order.
-- When adding a new public method to the `Distribution` base class, add the matching signature to the `class Distribution { ... }` block.
-- When adding a function to a statistical namespace (`core`, `location`, `dispersion`, `shape`, `dependence`, `test`), add its typed signature in the matching `export namespace` block.
-- Run `npm run typecheck` after every edit to `dist/ranjs.d.ts` to confirm the file compiles correctly.
-- `tsconfig.json` is for typecheck only (`"noEmit": true`) and resolves `ranjs` imports via `paths` pointing at `dist/ranjs.d.ts`.
+- When adding a new distribution, give the class an explicit name: `export default class MyDist extends Distribution`. Do not use anonymous `export default class extends`.
+- Every distribution constructor must have a JSDoc block with `@param` tags directly on the `constructor()` method (not only on the class-level JSDoc). tsc only reads `@param` from the constructor method's JSDoc block for constructor typing.
+- JSDoc union types must use `{number|string}` syntax — not `{(number|string)}` (extra parens are ignored by tsc).
+- `@overload` JSDoc blocks before a function/method produce typed overload signatures in the generated declaration.
+- Run `npm run build && npm run typecheck` after any JSDoc annotation changes to confirm the generated declarations are correct.
+- `tsconfig.json` is for typecheck only (`"noEmit": true`) and resolves `ranjs` imports via `paths` pointing at `dist/index.d.ts`. `tsconfig.build.json` is the separate config that drives declaration generation.
 
 ## Communication Style
 
