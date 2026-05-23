@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `bench/` directory with `bench/index.js`: a performance comparison script benchmarking ranjs against jStat and `@stdlib/stats/base/dists` across Normal, Gamma, Beta, Poisson, and Exponential distributions for sample, pdf, cdf, and quantile operations. Run with `npm run bench`. Closes #114.
 - TypeScript declarations are now generated from JSDoc via `tsc --allowJs --declaration --emitDeclarationOnly` as part of `npm run build`. The generated `dist/index.d.ts` replaces the hand-written `dist/ranjs.d.ts`, making type drift structurally impossible. Includes `@overload` annotations for `sample()`, `float()`, `int()`, `choice()`, `shuffle()`, and `coin()`. Closes #170.
 
 ### Removed
