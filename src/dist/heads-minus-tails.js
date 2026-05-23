@@ -19,7 +19,7 @@ import { logBinomial } from '../special'
  */
 export default class HeadsMinusTails extends PreComputed {
   /**
-   * @param {number} n Half number of trials.
+   * @param {number} n Half number of trials (n > 0).
    */
   constructor (n) {
     super(true)
@@ -29,7 +29,7 @@ export default class HeadsMinusTails extends PreComputed {
     const ni = Math.round(n)
     this.p = { n: ni }
     Distribution.validate({ n: ni }, [
-      'n >= 0'
+      'n > 0'
     ])
 
     // Set support

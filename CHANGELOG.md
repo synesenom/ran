@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `HeadsMinusTails` now rejects `n = 0`: constraint tightened from `n >= 0` to `n > 0`, matching the documented domain $n \in \mathbb{N}^+$. Closes #363.
+
 ### Added
 
 - TypeScript declarations are now generated from JSDoc via `tsc --allowJs --declaration --emitDeclarationOnly` as part of `npm run build`. The generated `dist/index.d.ts` replaces the hand-written `dist/ranjs.d.ts`, making type drift structurally impossible. Includes `@overload` annotations for `sample()`, `float()`, `int()`, `choice()`, `shuffle()`, and `coin()`. Closes #170.
