@@ -1,4 +1,5 @@
 import Normal from './normal'
+import { erfinv } from '../special'
 
 /**
  * Generator for the [log-normal distribution]{@link https://en.wikipedia.org/wiki/Log-normal_distribution}:
@@ -44,7 +45,8 @@ export default class LogNormal extends Normal {
     return super._cdf(Math.log(x))
   }
 
+  // Inlined Normal._q to avoid V8 megamorphic deoptimization — see solutions/performance/2026-05-23-1810-super-q-v8-megamorphic-deoptimization.md
   _q (p) {
-    return Math.exp(super._q(p))
+    return Math.exp(this.p.mu + this.c.sigmaRoot2 * erfinv(2 * p - 1))
   }
 }
