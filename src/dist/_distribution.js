@@ -289,6 +289,28 @@ class Distribution {
   }
 
   /**
+   * Returns the boundedness category of the distribution's support:
+   * <ul>
+   *   <li><code>'bounded'</code>: both lower and upper bounds are finite.</li>
+   *   <li><code>'lower'</code>: only the lower bound is finite (lower-bounded, unbounded above).</li>
+   *   <li><code>'upper'</code>: only the upper bound is finite (upper-bounded, unbounded below).</li>
+   *   <li><code>'unbounded'</code>: neither bound is finite.</li>
+   * </ul>
+   *
+   * @method bounded
+   * @memberof ran.dist.Distribution
+   * @returns {string} The boundedness category of the support.
+   */
+  bounded () {
+    const lowerFinite = Number.isFinite(this.s[0].value)
+    const upperFinite = Number.isFinite(this.s[1].value)
+    if (lowerFinite && upperFinite) return 'bounded'
+    if (lowerFinite) return 'lower'
+    if (upperFinite) return 'upper'
+    return 'unbounded'
+  }
+
+  /**
    * Sets the seed for the distribution generator. Distributions implement the same PRNG
    * ([xoshiro128+]{@link http://vigna.di.unimi.it/ftp/papers/ScrambledLinear.pdf}) that is used in the core functions.
    *
