@@ -30,9 +30,6 @@ export default class InverseGamma extends Gamma {
       value: Infinity,
       closed: false
     }]
-
-    // Speed-up constants
-    this.c = { betaAlpha: Math.pow(beta, alpha) }
   }
 
   _generator () {
