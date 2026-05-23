@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Quantile throughput restored for 10 derived distributions (`BirnbaumSaunders`, `DoubleWeibull`, `ExponentiatedWeibull`, `JohnsonSB`, `JohnsonSU`, `LogCauchy`, `LogLaplace`, `LogNormal`, `LogitNormal`, `TruncatedNormal`): `super._q` calls replaced with inlined closed-form formulas, eliminating the V8 megamorphic deoptimization that caused up to 56× slowdown. Closes #366.
 - `HeadsMinusTails` now rejects `n = 0`: constraint tightened from `n >= 0` to `n > 0`, matching the documented domain $n \in \mathbb{N}^+$. Closes #363.
+- `InverseGamma`: removed unused `this.c.betaAlpha` pre-computation (`Math.pow(beta, alpha)`) that was computed on every construction but never read. Closes #373.
 
 ### Added
 
