@@ -34,7 +34,8 @@ export default class extends Distribution {
 
     // Speed-up constants
     this.c = {
-      oneMinusA: 1 - a
+      oneMinusA: 1 - a,
+      lnOneMinusA: Math.log1p(-a)
     }
   }
 
@@ -56,6 +57,8 @@ export default class extends Distribution {
   }
 
   _cdf (x) {
-    return 1 - Math.pow(this.c.oneMinusA, x) * (1 + this.p.a * x)
+    // log1p/expm1 avoids 1-near-1 cancellation in 1-(1-a)^k*(1+ka) when a→0
+    const kLnOma = x * this.c.lnOneMinusA
+    return -Math.expm1(kLnOma) - Math.exp(kLnOma) * x * this.p.a
   }
 }
