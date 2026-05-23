@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `NegativeBinomial` `_pdf(0)` returned `NaN` at `p=0` (`0 * -Infinity`), and `_generator()` returned `undefined` at `p=1` (`Poisson(Infinity)`). Added degenerate-case guards in `_pdf`, `_cdf`, and `_generator` for `p=0` (all mass at k=0), and tightened the parameter constraint from `p ≤ 1` to `p < 1` (p=1 yields an all-zero PMF and no valid distribution). Closes #145.
+
 - `Champernowne` distribution was a non-functional stub: `_generator()` returned `undefined`, `_cdf(x)` always returned `1`, and `_pdf(x)` lacked its normalization constant. Fixed all three: normalization constant is now `alpha * sqrt(1 - lambda²) / (2 * arccos(lambda))`, CDF uses the closed-form `arctan(k * tanh(...))` formula, and `_generator()` uses inverse-transform sampling via a new closed-form `_q(p)`. The class is now exported from `src/dist/index.js` and declared in `dist/ranjs.d.ts`. Closes #337.
 
 - `BenktanderII` near-boundary `refVals` at `x = 1+1e-6` and `x = 1+1e-4` (params `[2, 0.9995]`) were replaced with values derived independently via Python `Decimal` at 60 decimal places using the direct mathematical formula, not the `expm1`-based implementation formula. Closes #295.

@@ -526,12 +526,20 @@ export default [{
   invalidParams: [
     [], // all params required
     [-1, 0.5], [0, 0.5], // r > 0
-    [10, -1], [10, 2] // 0 <= p <= 1
+    [10, -1], [10, 1], [10, 2] // 0 <= p < 1
   ],
   // p=0.4 (asymmetric) so the scipy success/failure swap in nbinom(r, 1-p) can't hide;
   // see solutions/testing/2026-05-18-1443-discrete-refvals-scipy-parameterization-traps.md
   cases: [{
     params: () => [10, 0.4]
+  }, {
+    name: 'p=0 degenerate (all mass at 0)',
+    params: () => [5, 0],
+    refVals: [
+      { x: 0, pmf: 1, cdf: 1 },
+      { x: 1, pmf: 0, cdf: 1 },
+      { x: 5, pmf: 0, cdf: 1 }
+    ]
   }],
   // scipy.stats.nbinom(10, 1-0.4 = 0.6)
   refVals: [
