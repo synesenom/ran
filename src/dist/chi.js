@@ -20,6 +20,7 @@ export default class Chi extends Chi2 {
    */
   constructor (k) {
     super(k)
+    this._q = undefined // Gamma._q is wrong for the sqrt transform; fall back to _qEstimateRoot — solutions/correctness/2026-05-23-1930-gamma-subclass-q-inheritance-guard.md
 
     // Validate parameters
     const ki = Math.round(k)
