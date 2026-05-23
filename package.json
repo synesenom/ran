@@ -87,6 +87,9 @@
     "./dist/categorical": {
       "import": "./dist/categorical.esm.js"
     },
+    "./dist/champernowne": {
+      "import": "./dist/champernowne.esm.js"
+    },
     "./dist/cauchy": {
       "import": "./dist/cauchy.esm.js"
     },

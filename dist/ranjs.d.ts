@@ -65,6 +65,7 @@ declare module 'ranjs' {
     class Bradford extends Distribution { constructor(c: number) }
     class Burr extends Distribution { constructor(c: number, k: number) }
     class Categorical extends Distribution { constructor(weights: number[], min: number) }
+    class Champernowne extends Distribution { constructor(alpha: number, lambda: number, x0: number) }
     class Cauchy extends Distribution { constructor(x0: number, gamma: number) }
     class Chi extends Distribution { constructor(k: number) }
     class Chi2 extends Distribution { constructor(k: number) }
