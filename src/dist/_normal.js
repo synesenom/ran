@@ -35,7 +35,7 @@ const ZIGW = ZIGX.slice(0, _N).map((xi, i) => ZIGX[i + 1] / xi)
  * @ignore
  */
 export default function (r, mu = 0, sigma = 1) {
-  for (;;) {
+  while (true) {
     const u = 2 * r.next() - 1
     const i = Math.floor(r.next() * _N)
 
