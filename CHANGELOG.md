@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `Gamma.q(p)` (and `Chi2.q(p)`, `InverseGamma.q(p)`) Wilson-Hilferty seed now uses
+  an A&S §26.2.17 rational approximation instead of `erfinv`, eliminating nested
+  Newton iteration inside the outer Halley loop and accelerating quantile throughput.
+  Closes #384.
+
 - `Normal.q(p)` now uses an A&S §26.2.17 rational approximation seed with two fixed
   Newton refinement steps instead of `erfinv`, removing the convergent Newton loop
   and reducing from 3–5 `erf` evaluations to exactly 2. Closes #385.

@@ -1,6 +1,5 @@
 import { MAX_ITER, EPS, DELTA } from '../core/constants'
 import logGamma from './log-gamma'
-import { erfinv } from './error'
 
 /**
  * Computes the regularized lower incomplete gamma function.
@@ -119,7 +118,12 @@ export function gammaLowerIncompleteInv (a, p) {
   // leading-term series inversion for a < 1 (or when W-H produces a non-positive value).
   let x
   if (a >= 1) {
-    const z = Math.SQRT2 * erfinv(2 * p - 1)
+    // A&S §26.2.17 rational approximation: |error| < 4.5e-4, avoids nested erfinv iteration.
+    const q = p <= 0.5 ? p : 1 - p
+    const t = Math.sqrt(-2 * Math.log(q))
+    const z0 = t - (2.515517 + t * (0.802853 + t * 0.010328)) /
+                (1 + t * (1.432788 + t * (0.189269 + t * 0.001308)))
+    const z = p <= 0.5 ? -z0 : z0
     const h = 9 * a
     x = a * Math.pow(1 - 1 / h + z / Math.sqrt(h), 3)
   }
