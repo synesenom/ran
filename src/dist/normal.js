@@ -12,7 +12,7 @@ import Distribution from './_distribution'
  * @class Normal
  * @memberof ran.dist
  * @see https://en.wikipedia.org/wiki/Normal_distribution
- * @see https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform Box–Muller transform (sampling algorithm)
+ * @see https://en.wikipedia.org/wiki/Ziggurat_algorithm Improved Ziggurat algorithm (sampling algorithm)
  * @constructor
  */
 export default class Normal extends Distribution {
