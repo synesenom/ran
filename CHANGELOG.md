@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Normal variate generator now uses the Improved Ziggurat algorithm
+  (Marsaglia-Tsang 2000 / Doornik 2005) instead of Box-Muller, achieving
+  2–4× throughput improvement on `Normal.sample()` and all distributions
+  that derive normal variates (`Levy`, `NoncentralT`, `DoublyNoncentralT`,
+  `InverseGaussian`, Gamma-family). Public API unchanged. Also eliminates
+  a latent NaN when the PRNG returned exactly 0 (`log(0)` in Box-Muller).
+  Closes #369.
+
 ### Fixed
 
 - `Gamma.q(p)` now uses a dedicated Wilson-Hilferty initial estimate + Halley refinement algorithm instead of the generic Brent root-finder, eliminating the 2.5–3× quantile overhead. `Chi2.q(p)` and `InverseGamma.q(p)` benefit automatically. `gammaLowerIncompleteInv` is now exported from `ran.special`. Closes #367.

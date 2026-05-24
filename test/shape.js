@@ -148,7 +148,8 @@ describe('dispersion', () => {
         x3 /= n
         const s = Math.sqrt(Math.abs(x2 - x1 * x1))
         const c = Math.sqrt(n * (n - 1)) / (n - 2)
-        assert(equal(c * (x3 - 3 * x1 * s * s - x1 * x1 * x1) / (s * s * s), skewness))
+        const ref = c * (x3 - 3 * x1 * s * s - x1 * x1 * x1) / (s * s * s)
+        assert(Math.abs(ref - skewness) <= 1e-10 * (1 + Math.abs(skewness)))
       })
     })
   })
