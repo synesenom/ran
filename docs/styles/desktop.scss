@@ -17,4 +17,10 @@
     margin-left: 0;
     margin-right: 0;
   }
+
+  .code-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
 }

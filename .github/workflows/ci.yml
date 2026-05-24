@@ -98,7 +98,7 @@ jobs:
       - run: npm ci
         if: steps.node-cache.outputs.cache-hit != 'true'
       - run: npm run docs
-      - run: test -f docs/index.html && test -f docs/styles/style.css
+      - run: test -f docs/index.html && test -f docs/porting-scipy.html && test -f docs/styles/style.css
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./docs
