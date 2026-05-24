@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `Normal.q(p)` now uses an A&S §26.2.17 rational approximation seed with two fixed
+  Newton refinement steps instead of `erfinv`, removing the convergent Newton loop
+  and reducing from 3–5 `erf` evaluations to exactly 2. Closes #385.
+
 - `StudentT.q(p)` now uses a 4-term Cornish-Fisher seed (A&S §26.7.8) + Halley
   refinement instead of the previous 2-term seed + Newton, reducing CDF evaluations
   from ~5 to ~2 and yielding ~2.4× additional throughput improvement. Closes #381.
