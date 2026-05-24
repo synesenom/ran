@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Docs build now locates the `ran` module entry in `documentation`'s output by
+  `kind`/`name` instead of `root[0]`, restoring the API documentation section,
+  sidebar menu, and search list on `docs/index.html`.
+
 ### Changed
 
 - `Gamma.q(p)` (and `Chi2.q(p)`, `InverseGamma.q(p)`) Wilson-Hilferty seed now uses

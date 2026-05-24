@@ -82,7 +82,15 @@ function parseEntry (entry) {
 
   // Build API documentation.
   console.log('Building API content')
-  const docs = root[0].members.static
+  // documentation@v14 returns top-level entries as a flat array; the `ran`
+  // module is not guaranteed to be root[0] (orphan classes like
+  // Hyperexponential, IrwinHall, NegativeBinomial precede it). Find it by
+  // kind+name instead of indexing positionally.
+  const moduleEntry = root.find(d => d.kind === 'module' && d.name === 'ran')
+  if (!moduleEntry) {
+    throw new Error('docs build: could not find `ran` module entry in documentation output')
+  }
+  const docs = moduleEntry.members.static
     .sort((a, b) => a.name.localeCompare(b.name))
     .map(m => ({
       name: m.name,
