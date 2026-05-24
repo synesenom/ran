@@ -22,6 +22,7 @@ Scan the test suite and production code to find areas where testing could be str
 - `test/test-utils.js` — Shared utilities (`trials`, `ksTest`, `chiTest`)
 - `test/dist.js` — Runs the full distribution test suite
 - Tests use Mocha and Chai `assert`
+- `todo.md` — Structured development backlog; the `## Publication-Grade Gaps` section lists specific testing gaps, split into already-filed GitHub issues and items not yet filed. Items in the "Not Yet Filed" subsection are untracked and strong candidates for promotion.
 
 ## Your Task
 
@@ -36,13 +37,15 @@ Scan the test suite and production code to find areas where testing could be str
    - How numerical precision is handled
    - What assertions are made
 
-3. **Read corresponding production code** to identify:
+3. **Read the `## Publication-Grade Gaps` section of `todo.md`**, specifically the "Not Yet Filed" subsection. These are vetted, untracked testing gaps that are ready to be promoted to suggested status.
+
+4. **Read corresponding production code** to identify:
    - Parameter boundary conditions that aren't tested
    - Numerical edge cases (very large/small parameters, near-zero inputs, inputs at support boundaries)
    - Special cases in formulas (e.g., when `alpha = 1` simplifies a distribution, or when parameters degenerate)
    - Distributions in `dist-cases.js` with only one test case or no boundary cases
 
-4. **Identify gaps and opportunities**:
+5. **Identify gaps and opportunities**, drawing on both the code scan and `todo.md`:
    - Distributions missing `invalidParams` coverage for all constraint directions
    - Missing round-trip tests (`quantile(cdf(x)) ≈ x`)
    - Missing symmetry tests for symmetric distributions
@@ -51,7 +54,7 @@ Scan the test suite and production code to find areas where testing could be str
    - Test infrastructure improvements (better helpers, shared numerical comparison utilities)
    - Property-based testing opportunities
 
-5. **Generate 2-3 concrete suggestions**, each with:
+6. **Generate 2-3 concrete suggestions**, each with:
    - A clear imperative title
    - A 2-3 sentence description
    - Why it's valuable

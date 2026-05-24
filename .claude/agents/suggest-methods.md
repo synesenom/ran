@@ -27,6 +27,7 @@ Scan the statistical infrastructure (special functions, algorithms, summary stat
 - `src/mc/` — MCMC methods
 - `src/la/` — Linear algebra
 - `src/ts/` — Time series
+- `todo.md` — Structured development backlog; the `## Statistical Tests`, `## Special Functions`, `## MCMC`, and `## Time Series` sections list known gaps. Items without a linked GitHub issue number are untracked backlog entries and strong candidates for promotion.
 
 ## Your Task
 
@@ -34,7 +35,9 @@ Scan the statistical infrastructure (special functions, algorithms, summary stat
 
 2. **Read a few implementation files** to understand patterns
 
-3. **Identify gaps and opportunities**:
+3. **Read the `## Statistical Tests`, `## Special Functions`, `## MCMC`, and `## Time Series` sections of `todo.md`**. Note which entries have no linked GitHub issue number — those are untracked and ready to be promoted to suggested status.
+
+4. **Identify gaps and opportunities**, drawing on both the code scan and `todo.md`:
    - Missing hypothesis tests (e.g., Kolmogorov-Smirnov two-sample, Anderson-Darling, Shapiro-Wilk)
    - Missing special functions needed by standard distributions (check what distributions use workarounds)
    - Missing numerical algorithms that would improve distribution implementations
@@ -43,7 +46,7 @@ Scan the statistical infrastructure (special functions, algorithms, summary stat
    - Missing linear algebra operations needed by multivariate distributions
    - Improvements to existing algorithms (accuracy, stability, speed)
 
-4. **Generate 2-3 concrete suggestions**, each with:
+5. **Generate 2-3 concrete suggestions**, each with:
    - A clear imperative title
    - A 2-3 sentence description
    - Why it's valuable
