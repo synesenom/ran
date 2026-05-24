@@ -16,7 +16,6 @@ import NoncentralT from './noncentral-t'
  *
  * @class DoublyNoncentralT
  * @memberof ran.dist
- * @see https://www.wiley.com/en-us/Intermediate+Probability%3A+A+Computational+Approach-p-9780470026373
  * @constructor
  */
 export default class DoublyNoncentralT extends Distribution {

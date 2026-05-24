@@ -10,7 +10,6 @@ import DoublyNoncentralBeta from './doubly-noncentral-beta'
  *
  * @class DoublyNoncentralF
  * @memberof ran.dist
- * @see https://doi.org/10.1111/j.1467-842X.1965.tb00036.x
  * @constructor
  */
 export default class DoublyNoncentralF extends DoublyNoncentralBeta {

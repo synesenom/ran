@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class Hypergeometric
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Hypergeometric_distribution
  * @constructor
  */
 export default class Hypergeometric extends Categorical {

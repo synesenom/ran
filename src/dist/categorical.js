@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class Categorical
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Categorical_distribution
  * @constructor
  */
 export default class Categorical extends Distribution {

@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class Gumbel
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Gumbel_distribution
  * @constructor
  */
 export default class Gumbel extends Distribution {

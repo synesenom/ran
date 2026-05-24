@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class Nakagami
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Nakagami_distribution
  * @constructor
  */
 export default class Nakagami extends Distribution {

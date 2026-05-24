@@ -11,7 +11,6 @@ import NoncentralChi2 from './noncentral-chi2'
  *
  * @class DoublyNoncentralChi2
  * @memberof ran.dist
- * @see https://doi.org/10.1093/biomet/36.1-2.202
  * @constructor
  */
 export default class DoublyNoncentralChi2 extends NoncentralChi2 {

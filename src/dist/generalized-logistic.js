@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class GeneralizedLogistic
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Generalized_logistic_distribution
  * @constructor
  */
 export default class GeneralizedLogistic extends Distribution {

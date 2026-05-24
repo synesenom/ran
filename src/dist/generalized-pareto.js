@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class GeneralizedPareto
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Generalized_Pareto_distribution
  * @constructor
  */
 export default class GeneralizedPareto extends Distribution {

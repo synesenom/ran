@@ -10,7 +10,6 @@ import NoncentralBeta from './noncentral-beta'
  *
  * @class NoncentralF
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Noncentral_F-distribution
  * @constructor
  */
 export default class NoncentralF extends NoncentralBeta {

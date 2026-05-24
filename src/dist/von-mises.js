@@ -12,7 +12,6 @@ import { MAX_ITER } from '../core/constants'
  *
  * @class VonMises
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Von_Mises_distribution
  * @see L. Barabesi, "Generating von Mises variates by the ratio-of-uniforms method", Statistica Applicata 7(4), 417–426, 1995.
  * @constructor
  */

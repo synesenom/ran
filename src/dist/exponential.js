@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class Exponential
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Exponential_distribution
  * @constructor
  */
 export default class Exponential extends Distribution {

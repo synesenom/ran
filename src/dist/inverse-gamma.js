@@ -10,7 +10,6 @@ import Gamma from './gamma'
  *
  * @class InverseGamma
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Inverse-gamma_distribution
  * @constructor
  */
 export default class InverseGamma extends Gamma {

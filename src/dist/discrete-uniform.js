@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class DiscreteUniform
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Discrete_uniform_distribution
  * @constructor
  */
 export default class DiscreteUniform extends Distribution {

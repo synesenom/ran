@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class UQuadratic
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/U-quadratic_distribution
  * @constructor
  */
 export default class UQuadratic extends Distribution {

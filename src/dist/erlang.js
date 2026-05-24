@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class Erlang
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Erlang_distribution
  * @constructor
  */
 export default class Erlang extends Gamma {

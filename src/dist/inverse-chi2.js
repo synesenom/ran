@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class InverseChi2
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Inverse-chi-squared_distribution
  * @constructor
  */
 export default class InverseChi2 extends Distribution {

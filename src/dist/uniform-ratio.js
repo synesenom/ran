@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class UniformRatio
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Ratio_distribution#Uniform_ratio_distribution
  * @constructor
  */
 export default class UniformRatio extends Distribution {

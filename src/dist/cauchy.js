@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class Cauchy
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Cauchy_distribution
  * @constructor
  */
 export default class Cauchy extends Distribution {

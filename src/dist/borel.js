@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class Borel
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Borel_distribution
  * @constructor
  */
 export default class Borel extends PreComputed {

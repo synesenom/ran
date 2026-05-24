@@ -10,7 +10,6 @@ import brent from '../algorithms/brent'
  *
  * @class TukeyLambda
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Tukey_lambda_distribution
  * @constructor
  */
 export default class TukeyLambda extends Distribution {

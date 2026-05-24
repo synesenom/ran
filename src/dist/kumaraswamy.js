@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class Kumaraswamy
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Kumaraswamy_distribution
  * @constructor
  */
 export default class Kumaraswamy extends Distribution {

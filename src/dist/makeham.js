@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class Makeham
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Gompertz%E2%80%93Makeham_law_of_mortality
  * @constructor
  */
 export default class Makeham extends Distribution {

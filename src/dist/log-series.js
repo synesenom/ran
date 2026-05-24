@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class LogSeries
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Logarithmic_distribution
  * @see A. Kemp, "Efficient generation of logarithmically distributed pseudo-random variables", Appl. Stat. 30(3), 249–253, 1981.
  * @constructor
  */

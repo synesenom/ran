@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class Dagum
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Dagum_distribution
  * @constructor
  */
 export default class Dagum extends Distribution {

@@ -10,7 +10,6 @@ import { erfinv } from '../special'
  *
  * @class LogitNormal
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Logit-normal_distribution
  * @constructor
  */
 export default class LogitNormal extends Normal {

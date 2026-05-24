@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class StudentZ
  * @memberof ran.dist
- * @see http://mathworld.wolfram.com/Studentsz-Distribution.html
  * @constructor
  */
 export default class StudentZ extends StudentT {

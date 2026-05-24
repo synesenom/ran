@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class Mielke
  * @memberof ran.dist
- * @see https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.mielke.html#r7049b665a02e-2
  * @constructor
  */
 export default class Mielke extends Dagum {

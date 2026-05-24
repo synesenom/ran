@@ -13,7 +13,6 @@ import Distribution from './_distribution'
  *
  * @class StudentT
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Student%27s_t-distribution
  * @constructor
  */
 export default class StudentT extends Distribution {

@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class BorelTanner
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Borel_distribution#Borel%E2%80%93Tanner_distribution
  * @constructor
  */
 export default class BorelTanner extends PreComputed {

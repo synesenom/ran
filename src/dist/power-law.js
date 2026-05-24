@@ -9,7 +9,6 @@ import Kumaraswamy from './kumaraswamy'
  *
  * @class PowerLaw
  * @memberof ran.dist
- * @see https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.powerlaw.html
  * @constructor
  */
 export default class PowerLaw extends Kumaraswamy {

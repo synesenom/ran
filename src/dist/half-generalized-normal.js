@@ -9,7 +9,6 @@ import GeneralizedNormal from './generalized-normal'
  *
  * @class HalfGeneralizedNormal
  * @memberof ran.dist
- * @see https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.halfgennorm.html
  * @constructor
  */
 export default class HalfGeneralizedNormal extends GeneralizedNormal {

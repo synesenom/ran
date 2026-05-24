@@ -10,7 +10,6 @@ import Gamma from './gamma'
  *
  * @class DoubleGamma
  * @memberof ran.dist
- * @see https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_dgamma.html
  * @constructor
  */
 export default class DoubleGamma extends Gamma {

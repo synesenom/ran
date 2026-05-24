@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class F
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/F-distribution
  * @constructor
  */
 export default class F extends Beta {

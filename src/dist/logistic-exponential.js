@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class LogisticExponential
  * @memberof ran.dist
- * @see http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.295.8653&rep=rep1&type=pdf
  * @constructor
  */
 export default class LogisticExponential extends Distribution {

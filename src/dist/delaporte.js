@@ -13,7 +13,6 @@ import PreComputed from './_pre-computed'
  *
  * @class Delaporte
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Delaporte_distribution
  * @constructor
  */
 export default class Delaporte extends PreComputed {

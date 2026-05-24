@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  *
  * @class BaldingNichols
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Balding%E2%80%93Nichols_model
+ * @see D.J. Balding and R.A. Nichols, "A method for quantifying differentiation between populations at multi-allelic loci and its implications for investigating identity and paternity", Genetica 96, 3–12, 1995.
  * @constructor
  */
 export default class BaldingNichols extends Beta {

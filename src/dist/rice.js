@@ -12,7 +12,6 @@ import Distribution from './_distribution'
  *
  * @class Rice
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Rice_distribution
  * @constructor
  */
 export default class Rice extends Distribution {

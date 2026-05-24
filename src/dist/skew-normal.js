@@ -13,7 +13,6 @@ import Normal from './normal'
  *
  * @class SkewNormal
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Skew_normal_distribution
  * @see A. Azzalini, "SN package FAQ", https://azzalini.stat.unipd.it/SN/faq-r.html (sampling algorithm)
  * @constructor
  */

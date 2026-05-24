@@ -12,7 +12,6 @@ import Distribution from './_distribution'
  *
  * @class Beta
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Beta_distribution
  * @constructor
  */
 export default class Beta extends Distribution {

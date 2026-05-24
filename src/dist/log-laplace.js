@@ -9,7 +9,6 @@ import Laplace from './laplace'
  *
  * @class LogLaplace
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Log-Laplace_distribution
  * @constructor
  */
 export default class LogLaplace extends Laplace {

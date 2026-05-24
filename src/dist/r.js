@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class R
  * @memberof ran.dist
- * @see https://docs.scipy.org/doc/scipy-1.5.4/reference/tutorial/stats/continuous_rdist.html
  * @constructor
  */
 export default class R extends Beta {

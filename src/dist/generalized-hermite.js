@@ -15,7 +15,6 @@ import PreComputed from './_pre-computed'
  *
  * @class GeneralizedHermite
  * @memberof ran.dist
- * @see https://journal.r-project.org/archive/2015/RJ-2015-035/RJ-2015-035.pdf
  * @constructor
  */
 export default class GeneralizedHermite extends PreComputed {

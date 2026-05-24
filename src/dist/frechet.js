@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class Frechet
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Frechet_distribution
  * @constructor
  */
 export default class Frechet extends Distribution {

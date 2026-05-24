@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class FlorySchulz
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Flory%E2%80%93Schulz_distribution
  * @constructor
  */
 export default class FlorySchulz extends Distribution {

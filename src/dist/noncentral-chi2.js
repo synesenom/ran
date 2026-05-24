@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class NoncentralChi2
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution
  * @constructor
  */
 export default class NoncentralChi2 extends Distribution {

@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class Triangular
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Triangular_distribution
  * @constructor
  */
 export default class Triangular extends Distribution {

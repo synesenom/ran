@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class GeneralizedGamma
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Generalized_gamma_distribution
  * @constructor
  */
 export default class GeneralizedGamma extends Gamma {

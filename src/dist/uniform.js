@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class Uniform
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)
  * @constructor
  */
 export default class Uniform extends Distribution {

@@ -10,7 +10,6 @@ import Chi2 from './chi2'
  *
  * @class Chi
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Chi_distribution
  * @constructor
  */
 export default class Chi extends Chi2 {

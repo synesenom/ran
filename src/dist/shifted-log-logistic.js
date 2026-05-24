@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class ShiftedLogLogistic
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Shifted_log-logistic_distribution
  * @constructor
  */
 export default class ShiftedLogLogistic extends Distribution {

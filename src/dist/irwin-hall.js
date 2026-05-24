@@ -12,7 +12,6 @@ import Distribution from './_distribution'
  * @class IrwinHall
  * @memberof ran.dist
  * value is 1.
- * @see https://en.wikipedia.org/wiki/Irwin%E2%80%93Hall_distribution
  * @constructor
  */
 export default class IrwinHall extends Distribution {

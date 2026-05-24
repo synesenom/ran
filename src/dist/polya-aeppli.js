@@ -11,7 +11,6 @@ import poisson from './_poisson'
  *
  * @class PolyaAeppli
  * @memberof ran.dist
- * @see https://arxiv.org/abs/1406.2780
  * @constructor
  */
 export default class PolyaAeppli extends PreComputed {

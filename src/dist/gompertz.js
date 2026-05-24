@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class Gompertz
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Gompertz_distribution
  * @constructor
  */
 export default class Gompertz extends Distribution {

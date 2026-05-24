@@ -13,7 +13,6 @@ import neumaier from '../algorithms/neumaier'
  * @class Hyperexponential
  * @memberof ran.dist
  * object with two properties: weight and rate.
- * @see https://en.wikipedia.org/wiki/Hyperexponential_distribution
  * @constructor
  */
 export default class Hyperexponential extends Distribution {

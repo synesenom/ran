@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class YuleSimon
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Yule%E2%80%93Simon_distribution
  * @constructor
  */
 export default class YuleSimon extends Distribution {

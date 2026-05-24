@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class NegativeHypergeometric
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Negative_hypergeometric_distribution
  * @constructor
  */
 export default class NegativeHypergeometric extends Categorical {
