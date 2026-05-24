@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `StudentT.q(p)` now uses a 4-term Cornish-Fisher seed (A&S §26.7.8) + Halley
+  refinement instead of the previous 2-term seed + Newton, reducing CDF evaluations
+  from ~5 to ~2 and yielding ~2.4× additional throughput improvement. Closes #381.
+
 - `StudentT.q(p)` now uses a Cornish-Fisher seed + Newton refinement instead of
   Brent root-finding, reducing CDF evaluations from ~20 to ~3 and yielding
   ~7× throughput improvement. Closes #368.
