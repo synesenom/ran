@@ -1,0 +1,90 @@
+// Porting guide page. Applies to docs/porting-scipy.html, which uses
+// h2 section headings, standalone tables, .code-pair (two-column code
+// blocks), .callout (warning blocks) and a static (non-checkbox-driven)
+// sidebar — none of which the API page exercises.
+//
+// Because both pages link the single compiled docs/styles/style.css,
+// every selector in this partial is in scope for the API page too.
+// Page-specific rules either use class selectors tied to porting-only
+// markup (.code-pair, p.callout) or :has() conditions on a
+// structurally page-distinguishing element (.search-bar is in the
+// API aside but not the porting aside).
+// See solutions/tooling/2026-05-24-1439-shared-stylesheet-cross-page-selector-leak.md
+// — verify cross-page DOM impact when adding bare-tag selectors here.
+@import "colors";
+
+
+// Per-distribution section headings. Mirrors the h1 typographic system
+// in main.scss (Montserrat, normal weight, 30-px gutter) but shrinks
+// and recolors to make the h1 → h2 hierarchy scannable.
+h2 {
+  display: inline-block;
+  margin: 50px 30px 8px 30px;
+  font-size: 1.25em;
+  font-weight: normal;
+  color: $colorThemeMain;
+}
+
+// Standalone tables (the API page tables all live inside .card .margined,
+// which keeps the higher-specificity .card rules winning; main > table
+// matches only direct children of main, not .card descendants).
+main > table {
+  width: calc(100% - 60px);
+  margin: 12px 30px 24px 30px;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+  }
+}
+
+// Side-by-side Python / JavaScript code blocks. Mobile-first single
+// column here; the two-column override lives in desktop.scss alongside
+// the other min-width: 800px page-level overrides.
+.code-pair {
+  margin: 12px 30px;
+
+  > pre {
+    min-width: 0;
+  }
+}
+
+// Parameter-difference warning blocks. Left border + amber tint matches
+// the left-border accent pattern used by .card .title (card.scss:11-14)
+// and reinforces the ⚠ symbol that already appears in the prose.
+p.callout {
+  margin: 16px 30px;
+  padding: 12px 16px;
+  border-left: 4px solid #d97706;
+  background: #fffbeb;
+  border-radius: 0 3px 3px 0;
+
+  strong {
+    color: #92400e;
+  }
+}
+
+// Static sidebar (no search bar, no checkboxes). The aside.scss rules
+// assume a .search-bar above .sections and a checkbox toggle beside
+// each label; these overrides cover what is missing. aside:not(:has(
+// .search-bar)) scopes the first-child margin to the porting page so
+// the API page's first section is not pushed down below its existing
+// search bar.
+aside:not(:has(.search-bar)) {
+  ul.sections > li:first-child {
+    margin-top: 20px;
+  }
+}
+
+aside {
+  // Labels without an adjacent checkbox sibling are decorative, not
+  // interactive — drop the pointer cursor that aside.scss applies.
+  ul.sections label:not(:has(+ input)) {
+    cursor: default;
+
+    &:hover {
+      color: inherit;
+    }
+  }
+}
