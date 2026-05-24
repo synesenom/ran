@@ -1,4 +1,5 @@
 import { regularizedBetaIncomplete, beta } from '../special'
+import { MAX_ITER, EPS } from '../core/constants'
 import sign from './_sign'
 import gamma from './_gamma'
 import Distribution from './_distribution'
@@ -36,6 +37,12 @@ export default class StudentT extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Pre-compute PDF normalisation constant and sqrt(nu) for use in _pdf and _q
+    this.c = {
+      betaNorm: 1 / (Math.sqrt(nu) * beta(0.5, nu / 2)),
+      sqrtNu: Math.sqrt(nu)
+    }
   }
 
   _generator () {
@@ -44,12 +51,50 @@ export default class StudentT extends Distribution {
   }
 
   _pdf (x) {
-    return Math.pow(1 + x * x / this.p.nu, -0.5 * (this.p.nu + 1)) / (Math.sqrt(this.p.nu) * beta(0.5, this.p.nu / 2))
+    return this.c.betaNorm * Math.pow(1 + x * x / this.p.nu, -0.5 * (this.p.nu + 1))
   }
 
   _cdf (x) {
     return x > 0
       ? 1 - 0.5 * regularizedBetaIncomplete(this.p.nu / 2, 0.5, this.p.nu / (x * x + this.p.nu))
       : 0.5 * regularizedBetaIncomplete(this.p.nu / 2, 0.5, this.p.nu / (x * x + this.p.nu))
+  }
+
+  _q (p) {
+    // nu=1 is the Cauchy distribution with an exact closed-form quantile;
+    // the Cornish-Fisher series diverges at nu=1 so this fast path is essential.
+    if (this.p.nu === 1) {
+      return Math.tan(Math.PI * (p - 0.5))
+    }
+
+    // Reduce to p > 0.5 via symmetry
+    if (p < 0.5) {
+      return -this._q(1 - p)
+    }
+
+    // Cornish-Fisher expansion (A&S §26.7.8) from the normal quantile as seed;
+    // 2 correction terms give ~3-digit accuracy for nu >= 5, which is enough for
+    // Newton's quadratic convergence to reach machine precision in 2-3 steps.
+    //
+    // A&S §26.2.17 rational approximation is used instead of erfinv because erfinv
+    // requires Newton iteration internally, making it ~100× slower than this
+    // closed-form expression (log + sqrt + polynomial arithmetic).
+    // See solutions/performance/2026-05-24-0630-erfinv-as-seed-negates-newton-speedup.md
+    const s = Math.sqrt(-2 * Math.log(1 - p))
+    const z = s - (2.515517 + s * (0.802853 + s * 0.010328)) /
+      (1 + s * (1.432788 + s * (0.189269 + s * 0.001308)))
+    const z2 = z * z
+    let t = z + (z2 * z + z) / (4 * this.p.nu) +
+      (5 * z2 * z2 * z + 16 * z2 * z + 3 * z) / (96 * this.p.nu * this.p.nu)
+
+    // Newton refinement: t <- t - (F(t; nu) - p) / f(t; nu)
+    for (let i = 0; i < MAX_ITER; i++) {
+      const dt = (this._cdf(t) - p) / this._pdf(t)
+      t -= dt
+      if (Math.abs(dt) <= EPS * Math.max(Math.abs(t), 1)) {
+        break
+      }
+    }
+    return t
   }
 }
