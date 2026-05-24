@@ -28,6 +28,7 @@ Explore the codebase with fresh eyes and suggest ideas that don't fit neatly int
 - `demo/` — Browser demo files
 - `docs/` — Documentation generator
 - `thoughts/` — Research documents, plans, solutions
+- `todo.md` — Structured development backlog; the `## Stochastic Processes` and `## Time Series` sections describe entirely new modules not yet started, and the `## Most Important` section flags cross-cutting priorities. Items without a linked GitHub issue number are untracked and are strong candidates for promotion.
 
 ## Your Task
 
@@ -37,7 +38,9 @@ Explore the codebase with fresh eyes and suggest ideas that don't fit neatly int
    - Documentation and demo infrastructure
    - Past research and solutions
 
-2. **Think laterally** — consider ideas across ALL dimensions:
+2. **Read the `## Stochastic Processes`, `## Time Series`, and `## Most Important` sections of `todo.md`**. These describe entire new modules and cross-cutting capabilities that are outside the scope of the other scout agents (distributions, methods, testing, infra). Items without a linked GitHub issue number are untracked and ready to be promoted.
+
+3. **Think laterally** — consider ideas across ALL dimensions:
    - New mathematical capabilities (e.g., multivariate distributions, random processes, Bayesian inference primitives)
    - Cross-cutting capabilities (e.g., fitting distributions to data, model selection, bootstrap methods)
    - Developer experience (TypeScript types, better error messages, interactive playground)
@@ -47,7 +50,7 @@ Explore the codebase with fresh eyes and suggest ideas that don't fit neatly int
    - Things the library is NOT doing that similar libraries (scipy.stats, R's stats package) do
    - Entirely novel ideas that don't fit any existing category
 
-3. **Generate 2-3 concrete suggestions**, each with:
+4. **Generate 2-3 concrete suggestions**, each with:
    - A clear imperative title (suitable for a GitHub issue)
    - A 2-3 sentence description of what it would involve
    - Why it's valuable (what new capability or insight it unlocks)

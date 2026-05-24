@@ -23,6 +23,7 @@ Scan the distribution implementations in this codebase and suggest concrete, act
 - `src/special/` — Available special functions
 - `src/algorithms/` — Available numerical algorithms
 - `test/dist-cases.js` — Test case definitions for all distributions
+- `todo.md` — Structured development backlog; the `## Distributions` section lists both new distributions to add and `[partial]` implementations with known bugs. Items without a linked GitHub issue number are untracked and are strong candidates for promotion.
 
 ## Your Task
 
@@ -32,15 +33,17 @@ Scan the distribution implementations in this codebase and suggest concrete, act
 
 3. **Read `src/special/index.js`** to understand what special functions are available
 
-4. **Identify gaps and opportunities**:
+4. **Read the `## Distributions` section of `todo.md`** (both `### Continuous` and `### Discrete` subsections). Note which entries are marked `[partial]` (known bugs to fix) vs. new distributions to add, and which have no linked GitHub issue number — those are untracked backlog items ready to be promoted.
+
+5. **Identify gaps and opportunities**, drawing on both the code scan and `todo.md`:
    - Missing distribution families (e.g., multivariate, matrix-variate, truncated versions)
    - Missing discrete distributions (e.g., Conway-Maxwell-Poisson, Panjer class)
    - Missing continuous distributions from standard references
-   - Improvements to existing distributions (better samplers, missing methods)
+   - `[partial]` distributions in `todo.md` with known bugs or incomplete implementations
    - Missing compound/mixture distributions
    - Missing copulas or dependence structures
 
-5. **Generate 2-3 concrete suggestions**, each with:
+6. **Generate 2-3 concrete suggestions**, each with:
    - A clear imperative title (suitable for a GitHub issue)
    - A 2-3 sentence description of the distribution and what it models
    - Why it's valuable (what gap it fills, what use cases it enables)
