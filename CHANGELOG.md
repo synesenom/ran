@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `StudentT.q(p)` now uses a Cornish-Fisher seed + Newton refinement instead of
+  Brent root-finding, reducing CDF evaluations from ~20 to ~3 and yielding
+  ~7× throughput improvement. Closes #368.
+
 - Normal variate generator now uses the Improved Ziggurat algorithm
   (Marsaglia-Tsang 2000 / Doornik 2005) instead of Box-Muller, achieving
   2–4× throughput improvement on `Normal.sample()` and all distributions
