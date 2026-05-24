@@ -35,6 +35,7 @@ var rGamma = new ran.dist.Gamma(2, 1)
 var rBeta = new ran.dist.Beta(2, 5)
 var rPoisson = new ran.dist.Poisson(4)
 var rExp = new ran.dist.Exponential(1)
+var rStudentT = new ran.dist.StudentT(5)
 
 // Each distribution entry: name, and fns for each library.
 // fns: { sample, pdf, cdf, quantile } — null means unavailable in that library.
@@ -127,6 +128,22 @@ var distributions = [
     }
   },
   {
+    name: 'Student-t (nu=5)',
+    ranjs: {
+      sample: function () { return bench(function () { rStudentT.sample(10000) }, 20, 10000) },
+      pdf: function () { return bench(function () { rStudentT.pdf(1.5) }, 10000) },
+      cdf: function () { return bench(function () { rStudentT.cdf(1.5) }, 10000) },
+      quantile: function () { return bench(function () { rStudentT.q(0.975) }, 10000) }
+    },
+    jstat: {
+      sample: function () { return bench(function () { for (var i = 0; i < 10000; i++) jStat.studentt.sample(5) }, 20, 10000) },
+      pdf: function () { return bench(function () { jStat.studentt.pdf(1.5, 5) }, 10000) },
+      cdf: function () { return bench(function () { jStat.studentt.cdf(1.5, 5) }, 10000) },
+      quantile: function () { return bench(function () { jStat.studentt.inv(0.975, 5) }, 10000) }
+    },
+    stdlib: null
+  },
+  {
     name: 'Exponential',
     ranjs: {
       sample: function () { return bench(function () { rExp.sample(10000) }, 20, 10000) },
@@ -156,9 +173,9 @@ console.log('Running benchmarks (10 000 iterations per operation)...\n')
 var rows = []
 distributions.forEach(function (d) {
   ops.forEach(function (op) {
-    var ranjsResult = d.ranjs[op] ? formatOps(d.ranjs[op]()) : 'N/A'
-    var jstatResult = d.jstat[op] ? formatOps(d.jstat[op]()) : 'N/A*'
-    var stdlibResult = d.stdlib[op] ? formatOps(d.stdlib[op]()) : 'N/A'
+    var ranjsResult = d.ranjs && d.ranjs[op] ? formatOps(d.ranjs[op]()) : 'N/A'
+    var jstatResult = d.jstat && d.jstat[op] ? formatOps(d.jstat[op]()) : 'N/A*'
+    var stdlibResult = d.stdlib && d.stdlib[op] ? formatOps(d.stdlib[op]()) : 'N/A'
     rows.push([d.name, op, ranjsResult, jstatResult, stdlibResult])
   })
 })
