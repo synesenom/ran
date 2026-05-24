@@ -88,12 +88,17 @@ export default class StudentT extends Distribution {
       (5 * z2 * z2 * z + 16 * z2 * z + 3 * z) / (96 * this.p.nu * this.p.nu)
 
     // Newton refinement: t <- t - (F(t; nu) - p) / f(t; nu)
+    // tPrev detects period-2 oscillation: when regularizedBetaIncomplete lands 1 ULP
+    // off the true p, Newton bounces between two adjacent floats indefinitely.
+    let tPrev = NaN
     for (let i = 0; i < MAX_ITER; i++) {
       const dt = (this._cdf(t) - p) / this._pdf(t)
+      const tOld = t
       t -= dt
-      if (Math.abs(dt) <= EPS * Math.max(Math.abs(t), 1)) {
+      if (t === tPrev || Math.abs(dt) <= EPS * Math.max(Math.abs(t), 1)) {
         break
       }
+      tPrev = tOld
     }
     return t
   }
