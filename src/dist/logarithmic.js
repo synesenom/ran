@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class Logarithmic
  * @memberof ran.dist
- * @see http://mathworld.wolfram.com/LogarithmicDistribution.html
  * @constructor
  */
 export default class Logarithmic extends Distribution {

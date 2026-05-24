@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class Skellam
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Skellam_distribution
  * @constructor
  */
 export default class Skellam extends Distribution {

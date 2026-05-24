@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class QExponential
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Q-exponential_distribution
  * @constructor
  */
 export default class QExponential extends GeneralizedPareto {

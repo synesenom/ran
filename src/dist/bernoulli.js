@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class Bernoulli
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Bernoulli_distribution
  * @constructor
  */
 export default class Bernoulli extends Categorical {

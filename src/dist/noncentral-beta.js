@@ -13,7 +13,6 @@ import Distribution from './_distribution'
  *
  * @class NoncentralBeta
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Noncentral_beta_distribution
  * @constructor
  */
 export default class NoncentralBeta extends Distribution {

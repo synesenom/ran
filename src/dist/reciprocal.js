@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class Reciprocal
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Reciprocal_distribution
  * @constructor
  */
 export default class Reciprocal extends Distribution {

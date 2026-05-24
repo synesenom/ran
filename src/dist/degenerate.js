@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class Degenerate
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Degenerate_distribution
  * @constructor
  */
 export default class Degenerate extends Distribution {

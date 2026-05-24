@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  *
  * @class Anglit
  * @memberof ran.dist
- * @see https://docs.scipy.org/doc/scipy-1.0.0/reference/tutorial/stats/continuous_anglit.html
+ * @see M. King, Statistics for Process Control Engineers, John Wiley and Sons, 2017, p. 472.
  * @constructor
  */
 export default class Anglit extends Distribution {

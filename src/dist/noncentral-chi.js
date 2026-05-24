@@ -10,7 +10,6 @@ import NoncentralChi2 from './noncentral-chi2'
  *
  * @class NoncentralChi
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Noncentral_chi_distribution
  * @constructor
  */
 export default class NoncentralChi extends NoncentralChi2 {

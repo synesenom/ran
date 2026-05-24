@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class Geometric
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Geometric_distribution
  * @constructor
  */
 export default class Geometric extends Distribution {

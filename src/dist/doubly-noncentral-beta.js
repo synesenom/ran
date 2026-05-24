@@ -16,7 +16,6 @@ import Distribution from './_distribution'
  *
  * @class DoublyNoncentralBeta
  * @memberof ran.dist
- * @see https://arxiv.org/abs/1706.08557
  * @constructor
  */
 export default class DoublyNoncentralBeta extends Distribution {

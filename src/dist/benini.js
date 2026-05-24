@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class Benini
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Benini_distribution
  * @constructor
  */
 export default class Benini extends Distribution {

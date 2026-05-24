@@ -15,7 +15,6 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @param {number} nu Degrees of freedom. If not an integer, it is rounded to the nearest one.
  * @param {number} mu Non-centrality parameter.
- * @see https://en.wikipedia.org/wiki/Noncentral_t-distribution
  * @constructor
  */
 class NoncentralT extends Distribution {

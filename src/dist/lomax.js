@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class Lomax
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Lomax_distribution
  * @constructor
  */
 export default class Lomax extends Distribution {

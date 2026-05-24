@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class MaxwellBoltzmann
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Maxwell%E2%80%93Boltzmann_distribution
  * @constructor
  */
 export default class MaxwellBoltzmann extends Gamma {

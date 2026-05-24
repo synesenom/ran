@@ -12,7 +12,7 @@ import { erf, erfinv } from '../special'
  *
  * @class Alpha
  * @memberof ran.dist
- * @see https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/alppdf.htm
+ * @see Johnson, Kotz, and Balakrishnan, Continuous Univariate Distributions Vol. 1, 2nd ed., John Wiley and Sons, 1994, p. 173.
  * @constructor
  */
 export default class Alpha extends Distribution {

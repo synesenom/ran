@@ -9,7 +9,6 @@ import InverseGaussian from './inverse-gaussian'
  *
  * @class ReciprocalInverseGaussian
  * @memberof ran.dist
- * @see https://docs.scipy.org/doc/scipy-1.7.0/reference/tutorial/stats/continuous_recipinvgauss.html
  * @constructor
  */
 export default class ReciprocalInverseGaussian extends InverseGaussian {

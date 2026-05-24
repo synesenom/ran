@@ -10,7 +10,6 @@ import { EPS, MAX_ITER } from '../core/constants'
  *
  * @class Kolmogorov
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test#Kolmogorov_distribution
  * @constructor
  */
 export default class Kolmogorov extends Distribution {

@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class Bates
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Bates_distribution
  * @constructor
  */
 export default class Bates extends IrwinHall {

@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class GeneralizedNormal
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Generalized_normal_distribution
  * @constructor
  */
 export default class GeneralizedNormal extends GeneralizedGamma {

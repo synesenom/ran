@@ -10,7 +10,6 @@ import { erfinv } from '../special'
  *
  * @class HalfNormal
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Half-normal_distribution
  * @constructor
  */
 export default class HalfNormal extends Normal {

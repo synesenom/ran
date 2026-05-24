@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class Burr
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Burr_distribution
  * @constructor
  */
 export default class Burr extends Distribution {

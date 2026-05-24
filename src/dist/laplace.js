@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class Laplace
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Laplace_distribution
  * @constructor
  */
 export default class Laplace extends Distribution {

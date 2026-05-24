@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class DiscreteWeibull
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Discrete_Weibull_distribution
  * @constructor
  */
 export default class DiscreteWeibull extends Distribution {

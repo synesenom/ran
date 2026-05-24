@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class Soliton
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Soliton_distribution
  * @constructor
  */
 export default class Soliton extends Categorical {

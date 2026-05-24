@@ -14,7 +14,6 @@ import Distribution from './_distribution'
  * @class NegativeBinomial
  * @memberof ran.dist
  * integer.
- * @see https://en.wikipedia.org/wiki/Negative_binomial_distribution
  * @constructor
  */
 export default class NegativeBinomial extends Distribution {

@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class InvertedWeibull
  * @memberof ran.dist
- * @see https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_invweibull.html
  * @constructor
  */
 export default class InvertedWeibull extends Distribution {

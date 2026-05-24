@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class Zipf
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Zipf%27s_law
  * @constructor
  */
 export default class Zipf extends Categorical {

@@ -9,7 +9,6 @@ import Cauchy from './cauchy'
  *
  * @class LogCauchy
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Log-Cauchy_distribution
  * @constructor
  */
 export default class LogCauchy extends Cauchy {

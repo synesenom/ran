@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class BenktanderII
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Benktander_type_II_distribution
  * @constructor
  */
 export default class BenktanderII extends Distribution {

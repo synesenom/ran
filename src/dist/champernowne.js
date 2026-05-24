@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class Champernowne
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Champernowne_distribution
  * @constructor
  */
 export default class Champernowne extends Distribution {

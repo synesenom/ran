@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class BetaBinomial
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Beta-binomial_distribution
  * @constructor
  */
 export default class BetaBinomial extends Categorical {

@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class BoundedPareto
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Pareto_distribution#Bounded_Pareto_distribution
  * @constructor
  */
 export default class BoundedPareto extends Distribution {

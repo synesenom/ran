@@ -10,7 +10,6 @@ import { erfinv } from '../special'
  *
  * @class LogNormal
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Log-normal_distribution
  * @constructor
  */
 export default class LogNormal extends Normal {

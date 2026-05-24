@@ -12,7 +12,6 @@ import { lambertW1m } from '../special'
  *
  * @class Muth
  * @memberof ran.dist
- * @see https://www.tandfonline.com/doi/abs/10.3846/13926292.2015.1048540
  * @constructor
  */
 export default class Muth extends Distribution {

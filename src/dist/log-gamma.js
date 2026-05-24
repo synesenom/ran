@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class LogGamma
  * @memberof ran.dist
- * @see https://reference.wolfram.com/language/ref/LogGammaDistribution.html
  * @constructor
  */
 export default class LogGamma extends Gamma {

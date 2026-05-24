@@ -9,7 +9,6 @@ import F from './f'
  *
  * @class FisherZ
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Fisher%27s_z-distribution
  * @constructor
  */
 export default class FisherZ extends F {

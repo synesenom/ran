@@ -11,7 +11,6 @@ import PreComputed from './_pre-computed'
  *
  * @class NeymanA
  * @memberof ran.dist
- * @see http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.527.574&rep=rep1&type=pdf
  * @constructor
  */
 export default class NeymanA extends PreComputed {

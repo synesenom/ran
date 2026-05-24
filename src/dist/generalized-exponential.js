@@ -10,7 +10,6 @@ import { lambertW0 } from '../special'
  *
  * @class GeneralizedExponential
  * @memberof ran.dist
- * @see https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_genexpon.html
  * @constructor
  */
 export default class GeneralizedExponential extends Distribution {

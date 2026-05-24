@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class Pareto
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Pareto_distribution
  * @constructor
  */
 export default class Pareto extends Distribution {

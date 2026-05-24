@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class Levy
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Lévy_distribution
  * @constructor
  */
 export default class Levy extends Distribution {

@@ -11,7 +11,6 @@ import { erfinv } from '../special'
  *
  * @class JohnsonSU
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Johnson%27s_SU-distribution
  * @constructor
  */
 export default class JohnsonSU extends Normal {

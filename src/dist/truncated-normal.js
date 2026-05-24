@@ -13,7 +13,6 @@ import { erfinv } from '../special'
  *
  * @class TruncatedNormal
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Truncated_normal_distribution
  * @constructor
  */
 export default class TruncatedNormal extends Normal {

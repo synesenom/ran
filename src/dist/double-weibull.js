@@ -9,7 +9,6 @@ import Weibull from './weibull'
  *
  * @class DoubleWeibull
  * @memberof ran.dist
- * @see https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_dweibull.html
  * @constructor
  */
 export default class DoubleWeibull extends Weibull {

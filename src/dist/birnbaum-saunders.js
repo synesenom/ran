@@ -11,7 +11,6 @@ import { erfinv } from '../special'
  *
  * @class BirnbaumSaunders
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Birnbaum%E2%80%93Saunders_distribution
  * @constructor
  */
 export default class BirnbaumSaunders extends Normal {

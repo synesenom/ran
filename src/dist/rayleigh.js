@@ -9,7 +9,6 @@ import Weibull from './weibull'
  *
  * @class Rayleigh
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Rayleigh_distribution
  * @constructor
  */
 export default class Rayleigh extends Weibull {

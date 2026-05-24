@@ -14,6 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Distribution JSDoc references de-duplicated: removed 135 `@see <url>` tags
+  whose URL was identical to the inline `{@link <url>}` already present in
+  the distribution's description. The rendered "References" section now
+  appears only when it carries non-trivial information (papers, books,
+  algorithm citations) rather than repeating the distribution-name link.
+  Four `// Source:` code comments (Alpha, Anglit, Arcsine, BaldingNichols)
+  were promoted to class-level `@see` entries so the cited works show up in
+  the rendered docs.
+
 - `Gamma.q(p)` (and `Chi2.q(p)`, `InverseGamma.q(p)`) Wilson-Hilferty seed now uses
   an A&S §26.2.17 rational approximation instead of `erfinv`, eliminating nested
   Newton iteration inside the outer Halley loop and accelerating quantile throughput.

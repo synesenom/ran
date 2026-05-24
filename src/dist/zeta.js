@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class Zeta
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Zeta_distribution
  * @see L. Devroye, "Non-Uniform Random Variate Generation", Springer-Verlag, 1986, ch. 10.
  * @constructor
  */

@@ -11,7 +11,6 @@ import Categorical from './categorical'
  *
  * @class Binomial
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Binomial_distribution
  * @constructor
  */
 export default class Binomial extends Categorical {

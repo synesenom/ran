@@ -9,7 +9,6 @@ import Categorical from './categorical'
  *
  * @class Rademacher
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Rademacher_distribution
  * @constructor
  */
 export default class Rademacher extends Categorical {

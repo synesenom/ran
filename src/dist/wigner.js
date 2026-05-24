@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class Wigner
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Wigner_semicircle_distribution
  * @constructor
  */
 export default class Wigner extends Distribution {

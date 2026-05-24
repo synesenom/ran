@@ -11,7 +11,6 @@ import { gammaUpperIncomplete } from '../special'
  *
  * @class Moyal
  * @memberof ran.dist
- * @see https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.moyal.html#r7049b665a02e-2
  * @constructor
  */
 export default class Moyal extends Distribution {

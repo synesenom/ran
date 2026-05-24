@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class BetaRectangular
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Beta_rectangular_distribution
  * @constructor
  */
 export default class BetaRectangular extends Beta {

@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class RaisedCosine
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Raised_cosine_distribution
  * @constructor
  */
 export default class RaisedCosine extends Distribution {

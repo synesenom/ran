@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class ExponentialLogarithmic
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Exponential-logarithmic_distribution#Related_distribution
  * @constructor
  */
 export default class ExponentialLogarithmic extends Distribution {

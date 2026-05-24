@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class Trapezoidal
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Trapezoidal_distribution
  * @constructor
  */
 export default class Trapezoidal extends Distribution {

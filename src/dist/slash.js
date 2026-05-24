@@ -10,7 +10,6 @@ import Normal from './normal'
  *
  * @class Slash
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Slash_distribution
  * @constructor
  */
 export default class Slash extends Normal {

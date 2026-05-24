@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class Weibull
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Weibull_distribution
  * @constructor
  */
 export default class Weibull extends Exponential {

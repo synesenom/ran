@@ -11,7 +11,6 @@ import { gamma, gammaUpperIncomplete } from '../special'
  *
  * @class UniformProduct
  * @memberof ran.dist
- * @see https://mathworld.wolfram.com/UniformProductDistribution.html
  * @constructor
  */
 export default class UniformProduct extends Distribution {

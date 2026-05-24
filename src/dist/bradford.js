@@ -9,7 +9,6 @@ import Distribution from './_distribution'
  *
  * @class Bradford
  * @memberof ran.dist
- * @see https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bradford.html
  * @constructor
  */
 export default class Bradford extends Distribution {

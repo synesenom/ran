@@ -12,7 +12,6 @@ import Beta from './beta'
  *
  * @class BetaPrime
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Beta_prime_distribution
  * @constructor
  */
 export default class BetaPrime extends Beta {

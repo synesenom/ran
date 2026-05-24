@@ -10,7 +10,6 @@ import Gamma from './gamma'
  *
  * @class Chi2
  * @memberof ran.dist
- * @see https://en.wikipedia.org/wiki/Chi-squared_distribution
  * @constructor
  */
 export default class Chi2 extends Gamma {
