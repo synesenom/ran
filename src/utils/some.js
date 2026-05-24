@@ -11,7 +11,10 @@
 export default function (generator, k = 1) {
   if (k < 2) {
     return generator()
-  } else {
-    return Array.from({ length: k }, () => generator())
   }
+  const result = new Array(k)
+  for (let i = 0; i < k; i++) {
+    result[i] = generator()
+  }
+  return result
 }
