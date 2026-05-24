@@ -38,10 +38,15 @@ export default class StudentT extends Distribution {
       closed: false
     }]
 
-    // Pre-compute PDF normalisation constant and sqrt(nu) for use in _pdf and _q
+    // Pre-compute constants for _pdf and the hot path in _q
+    const nu2 = nu * nu
     this.c = {
       betaNorm: 1 / (Math.sqrt(nu) * beta(0.5, nu / 2)),
-      sqrtNu: Math.sqrt(nu)
+      sqrtNu: Math.sqrt(nu),
+      halfNu1: (nu + 1) / 2,
+      nu2,
+      nu3: nu2 * nu,
+      nu4: nu2 * nu2
     }
   }
 
@@ -51,7 +56,7 @@ export default class StudentT extends Distribution {
   }
 
   _pdf (x) {
-    return this.c.betaNorm * Math.pow(1 + x * x / this.p.nu, -0.5 * (this.p.nu + 1))
+    return this.c.betaNorm * Math.pow(1 + x * x / this.p.nu, -this.c.halfNu1)
   }
 
   _cdf (x) {
@@ -73,8 +78,8 @@ export default class StudentT extends Distribution {
     }
 
     // Cornish-Fisher expansion (A&S §26.7.8) from the normal quantile as seed;
-    // 2 correction terms give ~3-digit accuracy for nu >= 5, which is enough for
-    // Newton's quadratic convergence to reach machine precision in 2-3 steps.
+    // 4 correction terms give ~4-digit accuracy for nu >= 3, reducing Halley steps
+    // from ~5 (2-term) to ~2.
     //
     // A&S §26.2.17 rational approximation is used instead of erfinv because erfinv
     // requires Newton iteration internally, making it ~100× slower than this
@@ -84,21 +89,39 @@ export default class StudentT extends Distribution {
     const z = s - (2.515517 + s * (0.802853 + s * 0.010328)) /
       (1 + s * (1.432788 + s * (0.189269 + s * 0.001308)))
     const z2 = z * z
-    let t = z + (z2 * z + z) / (4 * this.p.nu) +
-      (5 * z2 * z2 * z + 16 * z2 * z + 3 * z) / (96 * this.p.nu * this.p.nu)
+    const z3 = z2 * z
+    const z5 = z3 * z2
+    const z7 = z5 * z2
+    const z9 = z7 * z2
+    let t = z +
+      (z3 + z) / (4 * this.p.nu) +
+      (5 * z5 + 16 * z3 + 3 * z) / (96 * this.c.nu2) +
+      (3 * z7 + 19 * z5 + 17 * z3 - 15 * z) / (384 * this.c.nu3) +
+      (79 * z9 + 776 * z7 + 1482 * z5 - 1920 * z3 - 945 * z) / (92160 * this.c.nu4)
 
-    // Newton refinement: t <- t - (F(t; nu) - p) / f(t; nu)
-    // tPrev detects period-2 oscillation: when regularizedBetaIncomplete lands 1 ULP
-    // off the true p, Newton bounces between two adjacent floats indefinitely.
+    // Halley refinement: cubic convergence via log-derivative of the t-pdf,
+    // d/dt ln f(t) = -(nu+1)*t/(nu+t²), at cost of 3 extra arithmetic ops per step.
+    // Check terminates BEFORE applying the next step so the last applied t is kept.
+    // dtAbsMin detects the IBF noise floor: when |dt| stops decreasing, further steps
+    // only add floating-point noise regardless of nu. 4*EPS covers cases where IBF
+    // already delivers near-machine-epsilon accuracy and |dt| drops below that band.
+    // tPrev is a period-2 safety net for the rare case the noise floor isn't monotone.
+    // See solutions/performance/2026-05-24-1430-halley-higher-period-oscillation-ibf-noise-floor.md
     let tPrev = NaN
+    let dtAbsMin = Infinity
     for (let i = 0; i < MAX_ITER; i++) {
       const dt = (this._cdf(t) - p) / this._pdf(t)
+      const dtAbsCurr = Math.abs(dt)
+      if (dtAbsCurr <= 4 * EPS * Math.max(Math.abs(t), 1) || dtAbsCurr >= dtAbsMin) {
+        break
+      }
       const tOld = t
-      t -= dt
-      if (t === tPrev || Math.abs(dt) <= EPS * Math.max(Math.abs(t), 1)) {
+      t -= dt / (1 + dt * (this.p.nu + 1) * t / (2 * (this.p.nu + t * t)))
+      if (t === tPrev) {
         break
       }
       tPrev = tOld
+      dtAbsMin = dtAbsCurr
     }
     return t
   }
