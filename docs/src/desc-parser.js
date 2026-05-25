@@ -1,5 +1,16 @@
+// Renders a documentation.js description AST into HTML.
+//
+// Markdown descriptions in the source JSDoc carry paragraph breaks (blank
+// lines between blocks like prose → formula → prose), but the old parser
+// flattened the whole tree into a single inline string, which both
+// collapsed paragraphs visually and stripped breathing room around
+// standalone math. We now emit one <p> per markdown paragraph and let
+// the page CSS handle spacing. {@link …} fragments (which arrive in the
+// AST as adjacent [text, link] pairs) are stitched back into a single
+// <a> per pair via assembleLinks.
+
 function extractLinkText (node) {
-  const re = /\[(.*?)\]/;
+  const re = /\[(.*?)\]/
   return re.exec(node.value)[1]
 }
 
@@ -28,12 +39,31 @@ const assembleLinks = children => {
 
 const simplify = str => str.replace(/\s+/g, ' ')
 
-const dfs = (obj, key, map) => {
-  if (Array.isArray(obj.children)) {
-    return map(assembleLinks(obj.children).map(d => dfs(d, key, map)))
-  } else {
-    return obj[key]
+const renderNode = node => {
+  if (Array.isArray(node.children)) {
+    return assembleLinks(node.children).map(renderNode).join('')
   }
+  return node.value || ''
 }
 
-module.exports = obj => dfs(obj.description, 'value', d => simplify(d.join('')))
+module.exports = obj => {
+  const root = obj.description
+  if (!root || !Array.isArray(root.children)) {
+    return ''
+  }
+  // Each top-level child of a markdown description is typically a
+  // paragraph node. Wrap each in <p> so multi-paragraph descriptions
+  // ("Generator for X:" → "$f(...)$" → "with μ ∈ ℝ …") keep their
+  // semantic breaks; this is what gives standalone formulas vertical
+  // breathing room in the rendered card.
+  const paragraphs = root.children
+    .filter(c => c.type === 'paragraph')
+    .map(p => `<p>${simplify(renderNode(p)).trim()}</p>`)
+
+  // Fallback for descriptions with no paragraph nodes (rare — e.g. a
+  // single bare text root): render the whole subtree inline.
+  if (paragraphs.length === 0) {
+    return simplify(renderNode(root)).trim()
+  }
+  return paragraphs.join('')
+}

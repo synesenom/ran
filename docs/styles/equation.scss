@@ -1,26 +1,37 @@
 // Server-rendered MathJax SVG. mjpage wraps each formula in a span:
 //   .mjpage         inline math ($a$ inside prose)
 //   .mjpage__block  display math (centered, on its own line)
-// The base CSS that mjpage injects sets .mjpage to display:inline, but
-// inline elements ignore vertical padding when sizing line boxes — so
-// tall fractions and exponents render flush against the line below.
-// Promoting .mjpage to inline-block with vertical padding extends the
-// line box vertically, giving every formula real breathing room while
-// short symbols (μ ∈ ℝ) still flow naturally with the text. Display math
-// gets a larger explicit block margin on top of that.
+//
+// mjpage injects its own <style> block AFTER our stylesheet in <head>,
+// and that block sets max-width: none / padding: 0 / display: inline on
+// .mjpage. So every property we need to win against it has to be
+// !important — otherwise wide formulas overflow the column on mobile
+// and tall ones collide with the line below.
+//
+// Both selectors clamp width to the content column and turn on
+// overflow-x: auto, so a wide formula (e.g. Beta-Rectangular's
+// piecewise PDF) becomes a horizontally scrollable strip on narrow
+// viewports instead of being cut off. inline-block on .mjpage lets
+// vertical padding actually grow the line box, giving tall inline math
+// breathing room in mixed-text paragraphs. Standalone formulas live in
+// their own <p> (via DescParser) and get extra room from paragraph
+// margins.
 
 .mjpage {
   display: inline-block !important;
   vertical-align: middle;
-  padding: 0.45em 0.2em;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 0.25em 0.15em !important;
 }
 
 .mjpage__block {
   display: block !important;
   max-width: 100% !important;
-  overflow-x: auto;
-  overflow-y: hidden;
-  margin: 1.8em auto !important;
-  padding: 8px 0 10px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  margin: 1.2em auto !important;
+  padding: 6px 0 8px !important;
   text-align: center;
 }

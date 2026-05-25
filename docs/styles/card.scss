@@ -66,14 +66,23 @@
     }
   }
 
-  // Descriptions frequently contain inline MathJax SVG (6+ ex tall); a
-  // generous line-height keeps neighbouring text from colliding with
-  // fractions and exponents.
+  // Descriptions are emitted as one <p> per markdown paragraph by
+  // DescParser. Block-level <p> margins inside .desc give standalone
+  // formulas natural vertical breathing room without per-element math
+  // hacks. line-height stays slightly looser than body to keep tall
+  // inline math from crowding adjacent text within a mixed paragraph.
   .desc {
     margin: 6px 0 14px;
     color: $colorInk;
-    line-height: 1.9;
+    line-height: 1.75;
   }
+
+  .desc p {
+    margin: 0.9em 0;
+  }
+
+  .desc p:first-child { margin-top: 0; }
+  .desc p:last-child { margin-bottom: 0; }
 
   // Section labels inside a card (Parameters / Returns / Throws / Examples /
   // References). These are emitted as <h3> by the template; here we override
