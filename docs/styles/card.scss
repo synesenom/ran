@@ -66,9 +66,13 @@
     }
   }
 
+  // Descriptions frequently contain inline MathJax SVG (6+ ex tall); a
+  // generous line-height keeps neighbouring text from colliding with
+  // fractions and exponents.
   .desc {
     margin: 6px 0 14px;
     color: $colorInk;
+    line-height: 1.9;
   }
 
   // Section labels inside a card (Parameters / Returns / Throws / Examples /

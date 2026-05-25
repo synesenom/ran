@@ -1,9 +1,26 @@
-// Server-rendered MathJax SVG blocks. The mjpage wrapper sets text-align
-// center + display block on .mjpage__block; we keep horizontal scroll for
-// wide formulas and constrain to the content column on desktop.
+// Server-rendered MathJax SVG. mjpage wraps each formula in a span:
+//   .mjpage         inline math ($a$ inside prose)
+//   .mjpage__block  display math (centered, on its own line)
+// The base CSS that mjpage injects sets .mjpage to display:inline, but
+// inline elements ignore vertical padding when sizing line boxes — so
+// tall fractions and exponents render flush against the line below.
+// Promoting .mjpage to inline-block with vertical padding extends the
+// line box vertically, giving every formula real breathing room while
+// short symbols (μ ∈ ℝ) still flow naturally with the text. Display math
+// gets a larger explicit block margin on top of that.
+
+.mjpage {
+  display: inline-block !important;
+  vertical-align: middle;
+  padding: 0.45em 0.2em;
+}
+
 .mjpage__block {
+  display: block !important;
   max-width: 100% !important;
   overflow-x: auto;
   overflow-y: hidden;
-  padding-bottom: 4px !important;
+  margin: 1.8em auto !important;
+  padding: 8px 0 10px !important;
+  text-align: center;
 }
