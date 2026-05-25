@@ -32,6 +32,9 @@ jobs:
       - run: npm run jsdoclint
       - run: npm run check-decl && ./node_modules/.bin/tsc -p tsconfig.build.json && npm run typecheck
       - run: npx cross-env NODE_ENV=test ./node_modules/.bin/_mocha --require @babel/register
+      - run: npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: npm publish --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
