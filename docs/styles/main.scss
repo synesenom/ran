@@ -122,22 +122,6 @@ main > * {
 }
 
 
-// Etymology note under the hero.
-.namenote {
-  margin: 14px auto 0;
-  padding: 0;
-  font-size: 14px;
-  color: $colorMuted;
-  line-height: 1.6;
-  max-width: 60ch;
-  width: auto;
-
-  b { color: $colorInk; font-weight: 600; }
-  i { font-style: italic; }
-  .zh-inline { color: $colorAccent; font-weight: 500; }
-}
-
-
 // ---- Metadata pills ---------------------------------------------------------
 // <div class="pills"><span class="pill">…</span></div>
 .pills {
