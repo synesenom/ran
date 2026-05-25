@@ -443,7 +443,8 @@
   },
   "files": [
     "dist/",
-    "src/"
+    "src/",
+    "README.md"
   ],
   "scripts": {
     "lint": "./node_modules/.bin/standard src/**/*.js test/*.js",
