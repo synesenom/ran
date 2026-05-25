@@ -1,17 +1,33 @@
-// Theme colors.
-$colorThemeMain: royalblue;
+// Design tokens for the "clean docs + ink brand layer" theme.
+// Surface palette is white + neutral lines, primary is blue, accent is the
+// ink-red used sparingly (h2 labels, the "js" in the wordmark, => arrows
+// in example output). Mirrors the :root variables in the design package.
+// See decisions/ for the original ranjs.css source.
 
-// Font colors.
+$colorBg: #ffffff;
+$colorPanel: #f7f9fb;     // pills, inline code, hover row
+$colorInk: #1b2733;        // primary text
+$colorMuted: #5c6b7a;      // secondary text
+$colorLine: #e4e9ef;       // borders / rules
+$colorBlue: #2563b6;       // primary / links / signature chip text
+$colorBlueSoft: #eaf1fa;   // signature chip background
+$colorAccent: #b23a2e;     // ink-red accent
+
+// Code blocks (light scheme).
+$colorCodeBg: #f5f8fb;
+$colorCodeFg: #243240;
+$colorCodeCm: #8a98a8;     // comments
+$colorCodeAr: #b23a2e;     // => arrows in example output
+$colorCodeString: #2f7a3a;
+$colorCodeNumber: #b23a2e;
+$colorCodeKeyword: #2563b6;
+$colorCodeBuiltIn: #6f42c1;
+
+// Aliases used by older partials, retained so cross-partial references
+// don't dangle while the architecture is incremental.
+$colorThemeMain: $colorBlue;
 $colorFontSelect: #fff;
-
-// Code color schema.
-$colorCodeDefault: #555;
-$colorCodeComment: grey;
-$colorCodeString: forestgreen;
-$colorCodeKeyword: #a8801a;
-$colorCodeFunction: $colorThemeMain;
-$colorCodeNumber: firebrick;
-$colorCodeBuiltIn: indigo;
-
-// Card.
-$colorCardTitle: #f5f5f5;
+$colorCodeDefault: $colorCodeFg;
+$colorCodeComment: $colorCodeCm;
+$colorCodeFunction: $colorBlue;
+$colorCardTitle: $colorBlueSoft;

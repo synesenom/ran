@@ -1,20 +1,12 @@
-// Scrollbar style, works only for webkit.
+// Thin neutral scrollbars (WebKit only).
 @import "colors";
 
 
 ::-webkit-scrollbar {
   width: 6px;
-  height: 3px;
+  height: 6px;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #aaa;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: $colorThemeMain;
-}
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: $colorLine; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: $colorMuted; }

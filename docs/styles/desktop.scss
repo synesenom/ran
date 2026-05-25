@@ -1,21 +1,25 @@
+// Desktop overrides. On screens >= 800px the sidebar slides in
+// permanently and the main column gets a left offset to clear it.
+@import "dimensions";
+
+
 @media screen and (min-width: 800px) {
   aside {
     margin-left: 0;
-    width: calc(240px - 2px);
+    width: $dimAsideWidth;
+    box-shadow: none;
+  }
+
+  label.menu-button,
+  .menu-overlay {
+    display: none;
   }
 
   main {
-    width: calc(100% - 250px);
-  }
-
-  .card {
-    margin: 0 30px 120px 30px;
-  }
-
-  .margined, h3 {
-    width: 100%;
-    margin-left: 0;
-    margin-right: 0;
+    left: $dimAsideWidth;
+    width: calc(100% - #{$dimAsideWidth});
+    padding-left: 36px;
+    padding-right: 36px;
   }
 
   .code-pair {

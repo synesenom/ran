@@ -1,37 +1,60 @@
-// Parameter / return / throws tables used inside API doc cards.
+// Parameter / return / throws tables (and the standalone tables in the
+// porting page). The generated markup uses .param-name, .param-type,
+// .param-desc on <td>/<th>. The thead row is rendered as a small mono
+// uppercase label in the new theme.
+@import "colors";
 
-thead tr th {
-  font-weight: bold;
-  text-align: left;
-  font-variant: all-small-caps;
-  color: #888;
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 12px;
+  font-size: 14.5px;
 }
 
-tr {
-  vertical-align: top;
+thead th {
+  text-align: left;
+  font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: $colorMuted;
+  border-bottom: 2px solid $colorLine;
+  padding: 0.5em 0.7em;
+}
+
+tbody tr {
+  border-bottom: 1px solid $colorLine;
+}
+
+tbody tr:hover {
+  background: $colorPanel;
 }
 
 td {
-  padding-top: 10px;
+  padding: 0.6em 0.7em;
+  vertical-align: top;
 }
 
-.param-type code,
-.return-type code {
-  display: inline-block;
-  margin: 0 4px 4px 0;
-}
-
-.param-type code:first-child {
-  margin-top: -10px;
-}
-
-.param-name {
-  width: 100px;
+// Parameter name lives in the first column. The generator marks it with
+// .param-name; the porting page uses plain td (first child). Both should
+// render as the small monospaced blue identifier.
+.param-name,
+tbody td:first-child {
+  font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+  color: $colorBlue;
+  white-space: nowrap;
 }
 
 .param-type {
-  width: 100px;
-  padding-right: 10px;
-  clear: both;
+  white-space: nowrap;
+}
+
+.param-type code,
+.return-type code,
+.throws-type code {
   display: inline-block;
+  margin: 0 4px 4px 0;
 }

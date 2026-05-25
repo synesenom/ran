@@ -1,2 +1,9 @@
-// Various dimension parameters.
-$dimAsideWith: 60%;
+// Layout dimensions.
+$dimAsideWidth: 260px;     // desktop sidebar width
+$dimTopBarHeight: 56px;    // sticky top bar height
+$dimContent: 760px;        // content column max-width
+$dimAsideMobile: 60%;      // sidebar slide-out width on mobile
+
+// Backwards-compat name kept for any external reference; new code should
+// prefer $dimAsideWidth.
+$dimAsideWith: $dimAsideMobile;
