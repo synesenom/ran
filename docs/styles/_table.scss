@@ -58,3 +58,21 @@ tbody td:first-child {
   display: inline-block;
   margin: 0 4px 4px 0;
 }
+
+// DescParser now wraps every description (incl. one-liner param descs)
+// in <p>. Reset the default paragraph margins inside table cells and
+// inline desc holders so a single-paragraph param row doesn't grow a
+// 16px gap above/below its content. Multi-paragraph param descs are
+// rare but still get an in-cell visual break via the gap rule below.
+td p,
+.return-desc p,
+.throws-desc p,
+.deprecated-message p {
+  margin: 0;
+}
+
+td p + p,
+.return-desc p + p,
+.throws-desc p + p {
+  margin-top: 0.4em;
+}

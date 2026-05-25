@@ -37,8 +37,21 @@ function getSortedEntries (entries, priority) {
 
 function parseEntry (entry) {
   const name = entry.name
-  const params = entry.params.map(ParamParser)
-  const throws = entry.throws.map(ThrowsParser)
+  // Distribution classes carry @param/@throws on the constructor's own
+  // JSDoc (the post-#306 layout: class block has no @param so tsc can
+  // pick the constructor signature). documentation.js v14 surfaces that
+  // block as entry.constructorComment. Fall back to it when the class
+  // entry itself has no params/throws, otherwise the rendered cards
+  // show "Name()" with no Parameters table.
+  const ctor = entry.constructorComment
+  const sourceParams = entry.params.length > 0
+    ? entry.params
+    : (ctor ? ctor.params : [])
+  const sourceThrows = entry.throws.length > 0
+    ? entry.throws
+    : (ctor ? ctor.throws : [])
+  const params = sourceParams.map(ParamParser)
+  const throws = sourceThrows.map(ThrowsParser)
 
   return {
     name,
