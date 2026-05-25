@@ -18,23 +18,37 @@ block sidebar
                                 a(href="#" + member.index) #{member.name}
 
 block content
-    h1 what is this?
+    .hero
+        img.mark(src="assets/ran.svg", alt="然 rán")
+        div
+            h1 ranjs
+            p.sub
+                | #[span.zh rán · 然] #[span.gloss &ldquo;so; correct&rdquo;] &mdash; robust random variates, distribution testing &amp; statistics for JavaScript.
+    p.namenote
+        | The name is a play on #[b ran] (random) and the Chinese #[span.zh-inline 然] #[i rán] &mdash; &ldquo;so; thus; correct&rdquo; &mdash; the sound that matches the library, the meaning that suits a tool for getting distributions right.
+
+    .pills
+        span.pill 130+ distributions
+        span.pill seedable
+        span.pill zero deps
+        span.pill MIT
+
+    h2 What is this?
     p A small library for robust generation of various random variates, testing data against distributions or calculating different statistical properties.
 
-    h1 install in node
+    h2 Install in node
     pre.install
         code.hljs !{install.node}
 
-    h1 use in browser
+    h2 Use in browser
     pre.install
         code.hljs !{install.browser}
 
-    h1 demo
+    h2 Demo
     p
-        a(href="https://observablehq.com/d/bb01e148548b6ef9", target="_blank") Continuous distributions
-        a(href="https://observablehq.com/d/b2f210c305445d4e", target="_blank") Discrete distributions
+        | #[a(href="https://observablehq.com/d/bb01e148548b6ef9", target="_blank") Continuous distributions] &middot; #[a(href="https://observablehq.com/d/b2f210c305445d4e", target="_blank") Discrete distributions]
 
-    h1 documentation
+    h2 API
     each entry in api
         .card(class=entry.deprecated ? 'deprecated' : '')
             if entry.deprecated

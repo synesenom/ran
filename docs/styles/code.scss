@@ -1,78 +1,83 @@
-// Code related style.
+// Code blocks (block <pre>) and inline <code>.
+// Generated highlight.js output uses .hljs and .hljs-* token classes inside
+// <pre><code>. We map those tokens onto the new light palette.
 @import "colors";
 
 
-pre {
-  &.install {
-    margin: 0 30px;
+// Inline code (table cells, prose).
+:not(pre) > code {
+  font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  color: $colorCodeFg;
+  background: $colorPanel;
+  border: 1px solid $colorLine;
+  border-radius: 4px;
+  padding: 0.05em 0.35em;
+}
 
-    code {
-      background-color: #f5f5f5;
-    }
-  }
+// Block code (examples, install snippets).
+pre {
+  margin: 8px 0;
+  background: $colorCodeBg;
+  color: $colorCodeFg;
+  border: 1px solid $colorLine;
+  border-radius: 10px;
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13.5px;
+  line-height: 1.6;
+  box-shadow: 0 1px 2px rgba(16, 27, 42, 0.04);
 
   code {
-    padding: 30px !important;
-    line-height: 1.5em;
+    font-family: inherit;
+    background: none;
+    border: none;
+    padding: 0 !important;
+    color: inherit;
+    font-size: inherit;
   }
 }
 
-code.type {
-  background-color: #f5f5f5;
-  padding: 3px 6px;
-  border-radius: 3px;
-  font-size: 0.9em;
+// The install snippet on the API landing page is a plain pre.install with
+// a code.hljs inside. Drop any extra background — the pre already provides
+// it — and tighten padding.
+pre.install {
+  padding: 14px 18px;
+
+  code { background: none; padding: 0; }
 }
 
+// "Type" pills shown in parameter / return / throws tables.
+code.type {
+  font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  color: $colorBlue;
+  background: $colorBlueSoft;
+  border: 1px solid $colorLine;
+  border-radius: 4px;
+  padding: 1px 6px;
+  display: inline-block;
+  margin: 0 4px 4px 0;
+}
+
+// highlight.js token colours (light scheme tuned to the new palette).
 .hljs {
   display: block;
   overflow-x: auto;
-  background: #ebf8ff;
-  color: $colorCodeDefault;
+  background: transparent;
+  color: $colorCodeFg;
 }
 
-.hljs-emphasis {
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: 600; }
+
+.hljs-comment,
+.hljs-quote {
+  color: $colorCodeCm;
   font-style: italic;
 }
 
-.hljs-strong {
-  font-weight: bold;
-}
-
-// Comment, quote.
-.hljs-comment,
-.hljs-quote {
-  color: $colorCodeComment;
-}
-
-// Parameters.
-.hljs-params {
-  // No special color...
-}
-
-// Variables.
-.hljs-variable,
-.hljs-template-variable,
-.hljs-attribute,
-.hljs-tag,
-.hljs-name,
-.hljs-link,
-.hljs-name,
-.hljs-selector-id,
-.hljs-selector-class {
-  color: $colorCodeDefault;
-}
-
-// Numbers.
-.hljs-number,
-.hljs-meta,
-.hljs-literal,
-.hljs-subst,
-.hljs-type {
-  color: $colorCodeNumber;
-}
-
-// Strings.
 .hljs-string,
 .hljs-symbol,
 .hljs-regexp,
@@ -80,21 +85,37 @@ code.type {
   color: $colorCodeString;
 }
 
-// Functions.
-.hljs-title,
-.hljs-section {
-  color: $colorCodeFunction;
+.hljs-number,
+.hljs-literal,
+.hljs-meta,
+.hljs-subst,
+.hljs-type {
+  color: $colorCodeNumber;
 }
 
-// Built-ins.
+.hljs-title,
+.hljs-section {
+  color: $colorBlue;
+}
+
 .hljs-built_in,
 .hljs-builtin-name {
   color: $colorCodeBuiltIn;
 }
 
-// Syntax keywords.
 .hljs-keyword,
 .hljs-attr,
 .hljs-selector-tag {
   color: $colorCodeKeyword;
+}
+
+.hljs-variable,
+.hljs-template-variable,
+.hljs-attribute,
+.hljs-tag,
+.hljs-name,
+.hljs-link,
+.hljs-selector-id,
+.hljs-selector-class {
+  color: $colorCodeFg;
 }

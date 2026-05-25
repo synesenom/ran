@@ -1,16 +1,10 @@
-// Links.
 @import "colors";
 
 a {
   &, &:visited {
+    color: $colorBlue;
     text-decoration: none;
-    color: royalblue;
-    border-bottom: 3px solid transparent;
-    transition: border-bottom .2s;
   }
 
-  &:hover {
-    border-bottom: 3px solid royalblue;
-    transition: border-bottom .2s, padding-bottom .2s;
-  }
+  &:hover { text-decoration: underline; }
 }

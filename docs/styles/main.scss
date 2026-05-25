@@ -1,48 +1,205 @@
+// Main column, sticky top bar, hero, pills, namenote, section headings.
+@import "colors";
+@import "dimensions";
+
+
+// ---- Top navigation bar -----------------------------------------------------
+// <div class="top"><img class="mark"><span class="nm">ran<b>js</b></span><nav>…</nav></div>
+.top {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: $dimTopBarHeight;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 22px;
+  border-bottom: 1px solid $colorLine;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+
+  .mark {
+    height: 30px;
+    width: auto;
+    display: block;
+    color: $colorInk;
+  }
+
+  .nm {
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+    color: $colorInk;
+
+    // The "js" in ranjs gets the ink-red accent.
+    b { color: $colorAccent; font-weight: inherit; }
+  }
+
+  nav {
+    margin-left: auto;
+    display: flex;
+    gap: 22px;
+
+    a, a:visited {
+      color: $colorMuted;
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    a.active { color: $colorInk; }
+    a:hover { color: $colorInk; text-decoration: none; }
+  }
+}
+
+
+// ---- Main scrolling area ----------------------------------------------------
+// Offset by top-bar height so the bar always overlays content edges cleanly.
+// scroll-padding-top keeps anchor jumps (#core-float, #dist-Normal …) from
+// landing under the fixed top bar.
 main {
   position: absolute;
-  width: 100%;
+  top: $dimTopBarHeight;
   right: 0;
-  top: 0;
   bottom: 0;
+  width: 100%;
   overflow-y: scroll;
   overflow-x: hidden;
+  padding: 32px 22px 96px;
+  scroll-padding-top: 16px;
 }
 
-h1 {
-  display: inline-block;
-  margin: 60px 30px 10px 30px;
-  font-size: 1.5em;
-  font-weight: normal;
-  color: #555;
+// Anchored elements (signature chips, in-page h1/h2/h3 with id) reserve
+// a top gap so the sticky bar does not crop the heading on hash navigation.
+[id] {
+  scroll-margin-top: 16px;
 }
 
-p {
-  width: calc(100% - 60px);
-  padding: 0 30px;
-  margin: 0;
+// Constrain every direct child of <main> to the 760px reading column.
+// Centered with auto margins; full-bleed on mobile via the responsive
+// override at the bottom of this file.
+main > * {
+  max-width: $dimContent;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-nav.page-nav {
+
+// ---- Hero -------------------------------------------------------------------
+// <div class="hero"><img class="mark"><div><h1>…</h1><p class="sub">…</p></div></div>
+.hero {
   display: flex;
-  padding: 20px 30px 0;
-  border-bottom: 1px solid #e0e0e0;
-  gap: 0;
+  align-items: center;
+  gap: 26px;
+  margin: 18px auto 14px;
 
-  a {
-    padding: 8px 20px;
-    text-decoration: none;
-    color: #555;
-    font-size: 0.9em;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-
-    &.active {
-      color: royalblue;
-      border-bottom-color: royalblue;
-    }
-
-    &:hover:not(.active) {
-      color: #333;
-    }
+  .mark {
+    height: 96px;
+    width: auto;
+    flex: 0 0 auto;
+    color: $colorInk;
   }
+
+  h1 {
+    margin: 0;
+    font-size: 46px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: $colorInk;
+  }
+
+  .sub {
+    margin: 0.5em 0 0;
+    padding: 0;
+    width: auto;
+    color: $colorMuted;
+    font-size: 16px;
+    max-width: 46ch;
+
+    .zh { color: $colorAccent; font-weight: 500; }
+    .gloss { font-style: italic; color: $colorMuted; }
+  }
+}
+
+
+// Etymology note under the hero.
+.namenote {
+  margin: 14px auto 0;
+  padding: 0;
+  font-size: 14px;
+  color: $colorMuted;
+  line-height: 1.6;
+  max-width: 60ch;
+  width: auto;
+
+  b { color: $colorInk; font-weight: 600; }
+  i { font-style: italic; }
+  .zh-inline { color: $colorAccent; font-weight: 500; }
+}
+
+
+// ---- Metadata pills ---------------------------------------------------------
+// <div class="pills"><span class="pill">…</span></div>
+.pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 22px auto 8px;
+}
+
+.pill {
+  font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: $colorMuted;
+  background: $colorPanel;
+  border: 1px solid $colorLine;
+  border-radius: 999px;
+  padding: 4px 11px;
+}
+
+
+// ---- Section headings -------------------------------------------------------
+// h1 is reserved for the hero. Section headings in body content use h2,
+// styled as a small uppercase label in the ink-red accent.
+h1 {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: $colorInk;
+  margin: 1.6em auto 0.4em;
+}
+
+h2 {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $colorAccent;
+  font-weight: 600;
+  margin: 2.4em auto 0.2em;
+}
+
+// Generic paragraph reset (the previous theme stretched p to full width
+// with a 30px gutter; centering is now handled by main > *).
+p {
+  margin: 0.6em auto;
+  padding: 0;
+  width: auto;
+}
+
+
+// ---- Page nav (kept as a redundant in-content nav, hidden by default) -------
+// The top bar now carries the page navigation. The Pug layout still emits
+// nav.page-nav for backwards compat; suppress it so it does not duplicate.
+nav.page-nav { display: none; }
+
+
+// ---- Responsive -------------------------------------------------------------
+@media (max-width: 620px) {
+  main { padding: 24px 16px 64px; }
+
+  .hero { gap: 16px; }
+  .hero .mark { height: 66px; }
+  .hero h1 { font-size: 34px; }
+
+  .top nav { display: none; }
 }

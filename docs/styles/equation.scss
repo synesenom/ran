@@ -1,6 +1,9 @@
+// Server-rendered MathJax SVG blocks. The mjpage wrapper sets text-align
+// center + display block on .mjpage__block; we keep horizontal scroll for
+// wide formulas and constrain to the content column on desktop.
 .mjpage__block {
   max-width: 100% !important;
-  overflow-x: scroll;
+  overflow-x: auto;
   overflow-y: hidden;
   padding-bottom: 4px !important;
 }

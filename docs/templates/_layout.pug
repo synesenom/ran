@@ -3,16 +3,25 @@ html(lang="en")
     head
         meta(charset="utf-8")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
-        link(href="https://fonts.googleapis.com/css?family=Montserrat:200,400,700", rel="stylesheet")
+        link(rel="icon", type="image/svg+xml", href="assets/ran.svg")
+        link(rel="icon", type="image/png", sizes="256x256", href="assets/ran-256.png")
+        link(rel="preconnect", href="https://fonts.googleapis.com")
+        link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin)
+        link(href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap", rel="stylesheet")
         link(rel="stylesheet", type="text/css", href="styles/style.css")
         title #{name}
     body
-        | !{gitHubBanner}
-        block sidebar
-        main
-            if pages && pages.length > 1
-                nav.page-nav
+        div.top
+            img.mark(src="assets/ran.svg", alt="然")
+            span.nm
+                | ran
+                b js
+            nav
+                if pages && pages.length > 1
                     each pg in pages
                         a(href=pg.output, class=(pg.output === currentPage ? 'active' : ''))= pg.navLabel
+                a(href="https://github.com/synesenom/ran", target="_blank", rel="noopener") GitHub
+        block sidebar
+        main
             block content
             block scripts

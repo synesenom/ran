@@ -1,17 +1,24 @@
-// Base style: html, body and general style.
+// Base reset + global typography. Body uses the system sans-serif stack —
+// no webfont is required (the design ships IBM Plex Mono for code only).
 @import "colors";
 
+
+*, *::before, *::after { box-sizing: border-box; }
 
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 14px;
-  line-height: 1.4em;
+  background: $colorBg;
+  color: $colorInk;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
   color: $colorFontSelect;
-  background: $colorThemeMain;
+  background: $colorBlue;
 }

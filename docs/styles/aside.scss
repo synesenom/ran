@@ -1,6 +1,8 @@
-// Menu (aside).
-@import "dimensions";
+// Sidebar (table of contents + search). Reskinned to the white/blue/accent
+// palette; structural behavior (mobile slide-in toggle via the checkbox
+// hack, search input, collapsible section labels) is preserved.
 @import "colors";
+@import "dimensions";
 @import "mixins";
 
 
@@ -10,124 +12,130 @@ input#menu {
   &:checked {
     ~ aside {
       margin-left: 0;
-      transition: margin-left .5s;
+      transition: margin-left 0.4s;
     }
-
     ~ .menu-overlay {
       opacity: 1;
       pointer-events: all;
-      transition: opacity .5s;
+      transition: opacity 0.4s;
     }
   }
 }
 
+// On mobile the top bar hides its nav links (see main.scss responsive
+// block), so the menu button sits in the same row as the wordmark on the
+// right edge of the top bar. On desktop the sidebar is permanent and the
+// button is hidden entirely (desktop.scss).
 label.menu-button {
-  font-size: 1.5em;
-  position: absolute;
-  left: 15px;
-  top: 15px;
-  z-index: 99;
+  font-size: 1.4em;
+  color: $colorInk;
+  position: fixed;
+  right: 16px;
+  top: 10px;
+  z-index: 110;
+  cursor: pointer;
+  line-height: 1;
+  padding: 6px 8px;
 }
 
 .menu-overlay {
-  position: absolute;
-  width: 100%;
-  top: 0;
+  position: fixed;
+  top: $dimTopBarHeight;
   bottom: 0;
   left: 0;
-  background: rgba(0, 0, 0, 0.2);
+  right: 0;
+  background: rgba(27, 39, 51, 0.18);
   opacity: 0;
-  transition: opacity .5s;
-  z-index: 9;
+  transition: opacity 0.4s;
+  z-index: 90;
   pointer-events: none;
 }
 
 aside {
-  position: absolute;
-  width: $dimAsideWith;
-  top: 0;
+  position: fixed;
+  top: $dimTopBarHeight;
   bottom: 0;
-  overflow-y: scroll;
-  box-shadow: 0 0 20px #888;
-  margin-left: calc(-#{$dimAsideWith} - 50px);
-  background: #fff;
-  z-index: 99;
-  transition: margin-left 1s;
+  left: 0;
+  width: $dimAsideMobile;
+  overflow-y: auto;
+  background: $colorBg;
+  border-right: 1px solid $colorLine;
+  box-shadow: 0 0 24px rgba(16, 27, 42, 0.08);
+  margin-left: calc(-#{$dimAsideMobile} - 50px);
+  z-index: 95;
+  transition: margin-left 0.4s;
 
-  // Search bar.
   .search-bar {
-    width: calc(100% - 30px);
-    height: 30px;
-    margin: 15px;
-    padding-bottom: 5px;
-    border-bottom: 2px solid $colorThemeMain;
+    width: calc(100% - 28px);
+    margin: 14px;
+    padding: 0 0 6px;
+    border-bottom: 1px solid $colorLine;
 
     input {
-      width: calc(100% - 10px);
-      height: 100%;
-      margin-left: 10px;
+      width: 100%;
+      height: 28px;
       background: none;
       border: none;
       outline: none;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 1em;
+      font-family: inherit;
+      font-size: 14px;
+      color: $colorInk;
       -webkit-appearance: none;
       border-radius: 0;
+
+      &::placeholder { color: $colorMuted; }
     }
   }
 
-  // Modules.
   .sections {
     @include prefix(user-select, none, webkit moz ms);
     list-style: none;
-    width: calc(100% - 30px);
-    margin: 0 15px;
+    width: calc(100% - 28px);
+    margin: 0 14px 24px;
     padding: 0;
 
-    label {
+    > li { margin-bottom: 18px; }
+
+    > li > label {
       display: block;
       cursor: pointer;
-      margin-bottom: 10px;
-      font-size: 1.1em;
+      margin-bottom: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: $colorAccent;
 
-      &:hover {
-        color: $colorThemeMain;
-      }
+      &:hover { color: $colorInk; }
     }
 
-    > li {
-      margin-bottom: 20px;
-    }
+    input { display: none; }
 
-    input {
-      display: none;
-
-      &:checked + .methods {
-        display: none;
-      }
-    }
+    input:checked + .methods { display: none; }
 
     .methods {
       display: block;
       list-style: none;
-      padding: 0;
-      border-left: 1px solid #999;
+      padding: 4px 0 4px 10px;
+      margin: 0;
+      border-left: 1px solid $colorLine;
 
-      a {
-        &, &:visited {
-          display: block;
-          text-decoration: none;
-          color: #999;
-          font-family: 'Courier', monospace;
-          font-size: 0.8em;
-          padding: 4px 8px;
-          border: none;
-        }
+      li { margin: 0; }
 
-        &:hover {
-          background-color: #f5f5f5;
-          color: $colorThemeMain;
-        }
+      a, a:visited {
+        display: block;
+        text-decoration: none;
+        color: $colorMuted;
+        font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+        font-size: 12.5px;
+        padding: 3px 8px;
+        border: none;
+        border-radius: 4px;
+      }
+
+      a:hover {
+        background: $colorPanel;
+        color: $colorBlue;
       }
     }
   }
