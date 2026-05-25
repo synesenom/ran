@@ -30,7 +30,7 @@ jobs:
         if: steps.node-cache.outputs.cache-hit != 'true'
       - run: npm run lint
       - run: npm run jsdoclint
-      - run: npm run check-decl && npm run typecheck
+      - run: npm run check-decl && ./node_modules/.bin/tsc -p tsconfig.build.json && npm run typecheck
       - run: npx cross-env NODE_ENV=test ./node_modules/.bin/_mocha --require @babel/register
       - run: npm publish --provenance
         env:
