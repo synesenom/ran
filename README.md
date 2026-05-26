@@ -1,7 +1,5 @@
-<img src="docs/assets/ran-grey.svg" alt="ranjs logo" width="60" /><br/>
-<em>rán · 然 &mdash; "so; correct"</em>
-
 # ranjs
+*rán · 然 — "so; correct"*
 
 [![Build](https://img.shields.io/github/actions/workflow/status/synesenom/ran/ci.yml?branch=main&job=build&label=build)](https://github.com/synesenom/ran/actions/workflows/ci.yml)
 [![Coverage Status](https://coveralls.io/repos/github/synesenom/ran/badge.svg?branch=main)](https://coveralls.io/github/synesenom/ran?branch=main)
