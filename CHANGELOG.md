@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `ConwayMaxwellPoisson` distribution: two-parameter count distribution generalizing Poisson (ν=1), supporting both overdispersion (ν<1) and underdispersion (ν>1).
+
 ## [1.25.0] - 2026-05-25
 
 ### Fixed
