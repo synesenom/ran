@@ -105,7 +105,8 @@ const UnitTests = {
       name: c.name || 'random parameters',
       generate: () => new dist[tc.name](...c.params()),
       refVals: c.refVals,
-      quantileVals: c.quantileVals
+      quantileVals: c.quantileVals,
+      symmetry: c.symmetry
     }))
 
     cases.forEach(c => {
@@ -151,6 +152,12 @@ const UnitTests = {
         if (c.quantileVals) {
           it('quantile should match per-case reference values', () => {
             checkQuantileVals(c.generate(), c.quantileVals)
+          })
+        }
+
+        if (c.symmetry !== undefined) {
+          it('pdf and cdf should be symmetric around the center', () => {
+            Tests.symmetry(c.generate(), c.symmetry)
           })
         }
       })

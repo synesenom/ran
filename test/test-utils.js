@@ -455,5 +455,21 @@ export const Tests = {
           `|cdf(q(${p}); ${getParamList(dist)}) - ${p}| = ${Math.abs(c - p)} >= 1e-6`)
       }
     }
+  },
+
+  symmetry (dist, center) {
+    const supp = dist.support()
+    const lo = Number.isFinite(supp[0].value) ? supp[0].value : -Infinity
+    const hi = Number.isFinite(supp[1].value) ? supp[1].value : Infinity
+    const hw = Math.min(Math.min(hi - center, center - lo) * 0.9, 10)
+    for (const f of [0.1, 0.3, 0.5, 0.7, 0.9]) {
+      const x = f * hw
+      const pdfPlus = dist.pdf(center + x)
+      const pdfMinus = dist.pdf(center - x)
+      assert(almostEqual(pdfPlus, pdfMinus), `pdf(${center}+${x}) = ${pdfPlus} != pdf(${center}-${x}) = ${pdfMinus}`)
+      const cdfPlus = dist.cdf(center + x)
+      const cdfMinus = dist.cdf(center - x)
+      assert(almostEqual(cdfPlus + cdfMinus, 1), `cdf(${center}+${x}) + cdf(${center}-${x}) = ${cdfPlus + cdfMinus} != 1`)
+    }
   }
 }
