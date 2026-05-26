@@ -13,6 +13,7 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class UniformRatio extends Distribution {
+  /** */
   constructor () {
     super('continuous', 0)
 

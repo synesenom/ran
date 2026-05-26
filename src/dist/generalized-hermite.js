@@ -20,7 +20,7 @@ import PreComputed from './_pre-computed'
 export default class GeneralizedHermite extends PreComputed {
   /**
    * @param {number} a1 Mean of the first Poisson component.
-   * @param {number} am Mean of the second Poisson component.
+   * @param {number} a2 Mean of the second Poisson component.
    * @param {number} m Multiplier of the second Poisson. If not an integer, it is rounded to the nearest one.
    */
   constructor (a1, a2, m) {

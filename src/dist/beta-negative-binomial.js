@@ -6,6 +6,11 @@ import gamma from './_gamma'
 import poisson from './_poisson'
 
 export default class extends PreComputed {
+  /**
+   * @param {number} r Number of successes (rounded to nearest integer).
+   * @param {number} alpha First shape parameter.
+   * @param {number} beta Second shape parameter.
+   */
   constructor (r, alpha, beta) {
     super()
     this.k = 3

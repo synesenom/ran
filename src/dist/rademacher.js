@@ -13,6 +13,7 @@ import Categorical from './categorical'
  */
 export default class Rademacher extends Categorical {
   // Special case of categorical
+  /** */
   constructor () {
     super([0.5, 0, 0.5], -1)
   }
