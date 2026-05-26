@@ -403,6 +403,19 @@ describe('dist', () => {
         preComputed._pk()
       }, 'PreComputed._pk() is not implemented')
     })
+
+    it('should clamp _cdf to 1 on cache-hit path when PMFs sum to 1+epsilon', () => {
+      // Subclass whose PMFs sum to slightly above 1 (simulating floating-point rounding)
+      class OverflowPMF extends PreComputed {
+        _pk () { return 0.5 + 1e-15 }
+      }
+      const d = new OverflowPMF()
+      // Warm up cache by accessing index 1 (fills cdfTable[0] and cdfTable[1])
+      d._cdf(1)
+      // cdfTable[0] = 0.5+eps, cdfTable[1] ≈ 1 + 2eps > 1; re-reading from cache must still return ≤ 1
+      assert.isAtMost(d._cdf(0), 1)
+      assert.isAtMost(d._cdf(1), 1)
+    })
   })
 
   // Ordinary distributions.

@@ -60,15 +60,4 @@ export default class ConwayMaxwellPoisson extends PreComputed {
     }
     return this.pdfTable[k - 1] * this.p.lambda / Math.pow(k, this.p.nu)
   }
-
-  // The running-sum CDF can accumulate to 1 + 1 ULP due to floating-point rounding.
-  // Clamping here prevents the monotonicity invariant from being violated for large k.
-  // See solutions/correctness/2026-05-26-1210-precomputed-cdf-asymmetric-clamping.md
-  _cdf (x) {
-    if (x < this.cdfTable.length) {
-      return Math.min(1, this.cdfTable[x])
-    }
-    this._advance(x)
-    return Math.min(1, this.cdfTable[x])
-  }
 }

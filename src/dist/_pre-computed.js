@@ -130,7 +130,7 @@ export default class PreComputed extends Distribution {
   _cdf (x) {
     // If already in table, return value
     if (x < this.cdfTable.length) {
-      return this.cdfTable[x]
+      return Math.min(1, this.cdfTable[x])
     }
 
     // Otherwise, advance to current index and return F(x)
