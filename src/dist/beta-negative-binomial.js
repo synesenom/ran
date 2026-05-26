@@ -5,7 +5,18 @@ import rBeta from './_beta'
 import gamma from './_gamma'
 import poisson from './_poisson'
 
-export default class extends PreComputed {
+/**
+ * Generator for the [beta-negative-binomial distribution]{@link https://en.wikipedia.org/wiki/Beta_negative_binomial_distribution}:
+ *
+ * $f(k; r, \alpha, \beta) = \frac{\Gamma(r + k)}{\Gamma(k + 1)\,\Gamma(r)} \frac{\mathrm{B}(\alpha + r,\, \beta + k)}{\mathrm{B}(\alpha,\, \beta)},$
+ *
+ * with $r \in \mathbb{N}^+$ and $\alpha, \beta > 0$. Support: $k \in \mathbb{N}_0$.
+ *
+ * @class BetaNegativeBinomial
+ * @memberof ran.dist
+ * @constructor
+ */
+export default class BetaNegativeBinomial extends PreComputed {
   /**
    * @param {number} r Number of successes (rounded to nearest integer).
    * @param {number} alpha First shape parameter.
