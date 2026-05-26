@@ -49,10 +49,12 @@ export default [{
     [0, -1], [0, 0] // beta > 0
   ],
   cases: [{
-    params: () => [0, 2]
+    params: () => [0, 2],
+    symmetry: 0
   }, {
     name: 'shifted location',
     params: () => [3, 0.5],
+    symmetry: 3,
     refVals: [
       { x: 2.6, pdf: 0, cdf: 0 },
       { x: 2.8, pdf: 1.39341341869433, cdf: 0.141321954550238 },
@@ -600,10 +602,12 @@ export default [{
     [0, -1], [0, 0] // gamma > 0
   ],
   cases: [{
-    params: () => [0, 2]
+    params: () => [0, 2],
+    symmetry: 0
   }, {
     name: 'shifted location, small scale',
     params: () => [3, 0.5],
+    symmetry: 3,
     refVals: [
       { x: 0, pdf: 0.0172059397937184, cdf: 0.0525684567112534 },
       { x: 1.0, pdf: 0.0374482219039754, cdf: 0.0779791303773693 },
@@ -805,10 +809,12 @@ export default [{
     [1, -1], [1, 0] // beta > 0
   ],
   cases: [{
-    params: () => [2, 2]
+    params: () => [2, 2],
+    symmetry: 0
   }, {
     name: 'near-zero alpha',
     params: () => [0.5, 2],
+    symmetry: 0,
     refVals: [
       { x: -3.0, pdf: 0.00057092958335171, cdf: 0.000266002752569605 },
       { x: -1.0, pdf: 0.0539909665131881, cdf: 0.0227501319481793 },
@@ -849,10 +855,12 @@ export default [{
     [1, -1], [1, 0] // k > 0
   ],
   cases: [{
-    params: () => [2, 2]
+    params: () => [2, 2],
+    symmetry: 0
   }, {
     name: 'near-zero k',
     params: () => [2, 0.5],
+    symmetry: 0,
     refVals: [
       { x: -4.0, pdf: 0.0214886864422952, cdf: 0.121558367217107 },
       { x: -2.0, pdf: 0.0459849301464303, cdf: 0.183939720585721 },
@@ -2789,10 +2797,12 @@ export default [{
     [0, -1], [0, 0] // s > 0
   ],
   cases: [{
-    params: () => [0, 2]
+    params: () => [0, 2],
+    symmetry: 0
   }, {
     name: 'shifted location, small scale',
     params: () => [3, 0.5],
+    symmetry: 3,
     refVals: [
       { x: 0, pdf: 0.00493301858272009, cdf: 0.00247262315663477 },
       { x: 1.0, pdf: 0.0353254124265822, cdf: 0.0179862099620916 },
@@ -3491,10 +3501,12 @@ export default [{
     [0, -1], [0, 0] // sigma > 0
   ],
   cases: [{
-    params: () => [0, 2]
+    params: () => [0, 2],
+    symmetry: 0
   }, {
     name: 'shifted location, small sigma',
     params: () => [3, 0.5],
+    symmetry: 3,
     refVals: [
       { x: 1.5, pdf: 0.00886369682387602, cdf: 0.00134989803163009 },
       { x: 2.0, pdf: 0.107981933026376, cdf: 0.0227501319481792 },
@@ -3721,10 +3733,12 @@ export default [{
   cases: [{
     // c=4 instead of 2 — at c=2 the sample distribution is too uniform-shaped
     // for the foreign-rejection test (vs Uniform) to reject reliably
-    params: () => [4]
+    params: () => [4],
+    symmetry: 0
   }, {
     name: 'near-zero c (U-shaped)',
     params: () => [0.5],
+    symmetry: 0,
     refVals: [
       { x: -0.9, pdf: 0.66261701448848, cdf: 0.257004951825697 },
       { x: -0.5, pdf: 0.236609314080785, cdf: 0.397756778317356 },
@@ -4083,10 +4097,12 @@ export default [{
     [-1], [0] // nu > 0
   ],
   cases: [{
-    params: () => [2]
+    params: () => [2],
+    symmetry: 0
   }, {
     name: 'near-zero nu (heavy tail)',
     params: () => [0.5],
+    symmetry: 0,
     refVals: [
       { x: -5.0, pdf: 0.0141307479465662, cdf: 0.142995701579429 },
       { x: -2.0, pdf: 0.0518992282473726, cdf: 0.222757445091566 },
@@ -4100,6 +4116,7 @@ export default [{
     // scipy.stats.t(df=5).ppf(p); acceptance criterion: q(0.975) ≈ 2.5706
     name: 'nu=5',
     params: () => [5],
+    symmetry: 0,
     quantileVals: [
       { p: 0.025, x: -2.5705818366147395 },
       { p: 0.5, x: 0.0 },
