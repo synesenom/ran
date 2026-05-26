@@ -17,7 +17,10 @@ module.exports = {
       // default preference for @function so existing docs tags aren't treated as violations.
       tagNamePreference: {
         // @method is used for documentation.js compatibility; keep it as-is.
-        method: 'method'
+        method: 'method',
+        // @constructor is used in all distribution class JSDoc blocks; keep it as-is.
+        // 'tag constructor' prefix avoids Object.prototype.constructor key conflict (eslint#13289).
+        'tag constructor': 'constructor'
       }
     }
   },
@@ -48,5 +51,31 @@ module.exports = {
     }],
     'jsdoc/require-param': 'error',
     'jsdoc/require-returns': 'error'
-  }
+  },
+  // Require JSDoc on distribution constructors — each constructor must carry @param tags so
+  // tsc can generate typed constructor signatures from JSDoc annotations.
+  overrides: [
+    {
+      files: ['src/dist/[!_]*.js'],
+      excludedFiles: ['src/dist/index.js'],
+      rules: {
+        'jsdoc/require-jsdoc': ['error', {
+          require: {
+            FunctionDeclaration: false,
+            MethodDefinition: false,
+            ArrowFunctionExpression: false,
+            FunctionExpression: false
+          },
+          contexts: [
+            'ExportDefaultDeclaration > FunctionDeclaration',
+            'ExportNamedDeclaration > FunctionDeclaration',
+            'ExportNamedDeclaration > VariableDeclaration > VariableDeclarator > ArrowFunctionExpression',
+            'MethodDefinition:not([key.name=/^_/]):not([kind=constructor])',
+            'MethodDefinition[kind=constructor]'
+          ],
+          checkConstructors: true
+        }]
+      }
+    }
+  ]
 }

@@ -13,6 +13,7 @@ import { EPS, MAX_ITER } from '../core/constants'
  * @constructor
  */
 export default class Kolmogorov extends Distribution {
+  /** */
   constructor () {
     super('continuous', 0)
 

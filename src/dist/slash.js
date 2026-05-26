@@ -13,6 +13,7 @@ import Normal from './normal'
  * @constructor
  */
 export default class Slash extends Normal {
+  /** */
   constructor () {
     super(0, 1)
     this.s = [{

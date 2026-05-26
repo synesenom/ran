@@ -18,6 +18,10 @@ import Distribution from './_distribution'
  * @constructor
  */
 class NoncentralT extends Distribution {
+  /**
+   * @param {number} nu Degrees of freedom. If not an integer, it is rounded to the nearest one.
+   * @param {number} mu Non-centrality parameter.
+   */
   constructor (nu, mu) {
     super('continuous', 2)
 

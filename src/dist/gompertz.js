@@ -14,7 +14,7 @@ import Distribution from './_distribution'
 export default class Gompertz extends Distribution {
   /**
    * @param {number} eta Shape parameter.
-   * @param {number} beta Scale parameter.
+   * @param {number} b Scale parameter.
    */
   constructor (eta, b) {
     super('continuous', 2)

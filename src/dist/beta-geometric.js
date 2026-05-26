@@ -17,6 +17,10 @@ import rBeta from './_beta'
  * @constructor
  */
 export default class extends PreComputed {
+  /**
+   * @param {number} alpha First shape parameter.
+   * @param {number} beta Second shape parameter.
+   */
   constructor (alpha, beta) {
     // TODO Use log PDF
     super()

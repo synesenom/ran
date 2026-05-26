@@ -14,8 +14,8 @@ import Distribution from './_distribution'
  */
 export default class Kumaraswamy extends Distribution {
   /**
-   * @param {number} alpha First shape parameter.
-   * @param {number} beta Second shape parameter.
+   * @param {number} a First shape parameter.
+   * @param {number} b Second shape parameter.
    */
   constructor (a, b) {
     super('continuous', 2)

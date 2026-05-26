@@ -3,6 +3,11 @@ import Distribution from './_distribution'
 import { romberg } from '../algorithms'
 
 export default class Davis extends Distribution {
+  /**
+   * @param {number} mu Location parameter.
+   * @param {number} b Scale parameter.
+   * @param {number} n Shape parameter. Must not equal 1.
+   */
   constructor (mu, b, n) {
     super('continuous', 3)
 
