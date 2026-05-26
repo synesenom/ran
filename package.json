@@ -99,6 +99,9 @@
     "./dist/chi2": {
       "import": "./dist/chi2.esm.js"
     },
+    "./dist/conway-maxwell-poisson": {
+      "import": "./dist/conway-maxwell-poisson.esm.js"
+    },
     "./dist/dagum": {
       "import": "./dist/dagum.esm.js"
     },
