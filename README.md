@@ -1,5 +1,6 @@
 <p align="center">
-  <img src="docs/assets/ran.svg" alt="ranjs logo" width="120" />
+  <img src="docs/assets/ran.svg" alt="ranjs logo" width="120" /><br/>
+  <em>rán · 然 &mdash; "so; correct"</em>
 </p>
 
 # ranjs
