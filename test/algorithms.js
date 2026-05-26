@@ -165,4 +165,30 @@ describe('algorithms', () => {
       }, LAPS)
     })
   })
+
+  describe('.nelderMead()', () => {
+    it('should minimise a 1D quadratic', () => {
+      const result = algorithms.nelderMead(x => (x[0] - 3) ** 2, [0])
+      assert(Math.abs(result[0] - 3) < 1e-6)
+    })
+
+    it('should minimise a 2D quadratic', () => {
+      const result = algorithms.nelderMead(x => (x[0] - 2) ** 2 + (x[1] - 5) ** 2, [0, 0])
+      assert(Math.abs(result[0] - 2) < 1e-6)
+      assert(Math.abs(result[1] - 5) < 1e-6)
+    })
+
+    it('should minimise the Rosenbrock function', () => {
+      const rosenbrock = x => 100 * (x[1] - x[0] ** 2) ** 2 + (1 - x[0]) ** 2
+      const result = algorithms.nelderMead(rosenbrock, [0, 0])
+      assert(Math.abs(result[0] - 1) < 1e-3)
+      assert(Math.abs(result[1] - 1) < 1e-3)
+    })
+
+    it('should respect maxIter option and return without throwing', () => {
+      const result = algorithms.nelderMead(x => (x[0] - 3) ** 2, [0], { maxIter: 1 })
+      assert(Array.isArray(result))
+      assert(result.length === 1)
+    })
+  })
 })

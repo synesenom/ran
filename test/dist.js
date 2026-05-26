@@ -392,6 +392,29 @@ describe('dist', () => {
         assert.equal(new dist.Poisson(3).bounded(), 'lower')
       })
     })
+
+    describe('.fit()', () => {
+      it('Normal.fit should return a Normal instance', () => {
+        const result = dist.Normal.fit([1, 2, 3, 4, 5])
+        assert(result instanceof dist.Normal)
+      })
+
+      it('Normal.fit should recover mu close to sample mean', () => {
+        const result = dist.Normal.fit([1, 2, 3, 4, 5])
+        assert(Math.abs(result.p.mu - 3) < 0.1)
+      })
+
+      it('Normal.fit should recover sigma close to MLE std dev', () => {
+        const result = dist.Normal.fit([1, 2, 3, 4, 5])
+        assert(Math.abs(result.p.sigma - Math.sqrt(2)) < 0.1)
+      })
+
+      it('Exponential.fit should return an Exponential instance', () => {
+        const data = Array.from({ length: 20 }, (_, i) => (i + 1) * 0.1)
+        const result = dist.Exponential.fit(data)
+        assert(result instanceof dist.Exponential)
+      })
+    })
   })
 
   describe('PreComputed', () => {

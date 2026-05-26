@@ -69,4 +69,11 @@ export default class Normal extends Distribution {
     }
     return this.p.mu + this.p.sigma * z
   }
+
+  static _fitInit (data) {
+    const n = data.length
+    const mu = data.reduce((s, x) => s + x, 0) / n
+    const sigma = Math.sqrt(data.reduce((s, x) => s + (x - mu) ** 2, 0) / n) || 1
+    return [mu, sigma]
+  }
 }

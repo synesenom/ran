@@ -1,5 +1,6 @@
 import Xoshiro128p from '../core/xoshiro'
 import neumaier from '../algorithms/neumaier'
+import nelderMead from '../algorithms/nelder-mead'
 import some from '../utils/some'
 import { chi2, kolmogorovSmirnov } from './_tests'
 import bracket from '../algorithms/bracket'
@@ -753,6 +754,64 @@ class Distribution {
       // Parameters are fixed in the constructor (known), not estimated from values — df correction is 0.
       ? chi2(values, x => this.pdf(x), 0)
       : kolmogorovSmirnov(values, x => this.cdf(x))
+  }
+
+  /**
+   * Returns the initial parameter vector for the MLE optimizer. The base-class default takes
+   * the constructor arity from `this.length` and draws random positive values in (0, 5) until
+   * a vector validates against the distribution's parameter constraints. All-ones fails for
+   * ~22% of distributions in the library (ordering constraints like `a < b`, probability bounds,
+   * integer constraints), whereas random retries succeed for every distribution with a scalar
+   * constructor. Subclasses should override with a data-aware (method-of-moments) estimate for
+   * better convergence — see decisions/0012-distribution-fit-nelder-mead.md.
+   *
+   * @method _fitInit
+   * @memberof ran.dist.Distribution
+   * @param {number[]} data Array of observations (may be used by subclass overrides).
+   * @returns {number[]} Initial parameter vector.
+   * @protected
+   * @ignore
+   */
+  static _fitInit (data) { // eslint-disable-line no-unused-vars
+    const k = this.length
+    if (k === 0) {
+      throw Error(`${this.name}.fit() requires a _fitInit() implementation (non-scalar or zero-arity constructor)`)
+    }
+    const MAX_TRIES = 500
+    for (let t = 0; t < MAX_TRIES; t++) {
+      const params = Array.from({ length: k }, () => Math.random() * 5 + 1e-3)
+      try {
+        new this(...params) // eslint-disable-line no-new
+        return params
+      } catch (_) {}
+    }
+    throw Error(`${this.name}.fit() requires a _fitInit() implementation for this distribution`)
+  }
+
+  /**
+   * Estimates the distribution parameters from data using maximum likelihood estimation (MLE).
+   * Uses the Nelder-Mead simplex optimizer to maximise the log-likelihood lnL(data).
+   * See [decisions/0012-distribution-fit-nelder-mead.md]{@link ../../decisions/0012-distribution-fit-nelder-mead.md}.
+   *
+   * @method fit
+   * @memberof ran.dist.Distribution
+   * @param {number[]} data Array of observations to fit.
+   * @returns {Distribution} A new instance of the same distribution with MLE parameters.
+   */
+  static fit (data) {
+    const Cls = this
+    const x0 = Cls._fitInit(data)
+    const best = nelderMead(
+      params => {
+        try {
+          return -new Cls(...params).lnL(data)
+        } catch (_) {
+          return Infinity
+        }
+      },
+      x0
+    )
+    return new Cls(...best)
   }
 }
 
