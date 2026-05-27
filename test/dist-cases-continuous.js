@@ -93,10 +93,12 @@ export default [{
     [1, 1], [2, 1] // a < b
   ],
   cases: [{
-    params: () => [5, 25]
+    params: () => [5, 25],
+    symmetry: 15
   }, {
     name: 'unit interval',
     params: () => [0, 1],
+    symmetry: 0.5,
     refVals: [
       { x: 0.01, pdf: 3.19913472585565, cdf: 0.0637685608585199 },
       { x: 0.1, pdf: 1.06103295394597, cdf: 0.204832764699133 },
@@ -179,10 +181,12 @@ export default [{
     [10, 1, 1], [10, 2, 1] // a < b
   ],
   cases: [{
-    params: () => [10, 5, 25]
+    params: () => [10, 5, 25],
+    symmetry: 15
   }, {
     name: 'small n, unit interval',
     params: () => [3, 0, 1],
+    symmetry: 0.5,
     refVals: [
       { x: 0.1, pdf: 0.135, cdf: 0.0045 },
       { x: 0.2, pdf: 0.54, cdf: 0.036 },
@@ -1686,10 +1690,12 @@ export default [{
     [0, 1, -1], [0, 1, 0] // beta > 0
   ],
   cases: [{
-    params: () => [0, 2, 2]
+    params: () => [0, 2, 2],
+    symmetry: 0
   }, {
     name: 'shifted location, small shapes',
     params: () => [3, 0.5, 0.5],
+    symmetry: 3,
     refVals: [
       { x: 1.0, pdf: 0.0676676416183063, cdf: 0.203002924854919 },
       { x: 2.0, pdf: 0.121558367217107, cdf: 0.293467858755469 },
@@ -2026,7 +2032,8 @@ export default [{
   name: 'HyperbolicSecant',
   invalidParams: [],
   cases: [{
-    params: () => []
+    params: () => [],
+    symmetry: 0
   }],
   // HyperbolicSecant PDF=0.5·sech(pi·x/2), CDF=(2/pi)·atan(exp(pi·x/2)) via mpmath
   refVals: [
@@ -2265,10 +2272,12 @@ export default [{
     [-1], [0] // n > 0
   ],
   cases: [{
-    params: () => [10]
+    params: () => [10],
+    symmetry: 5
   }, {
     name: 'small n',
     params: () => [3],
+    symmetry: 1.5,
     refVals: [
       { x: 0.1, pdf: 0.005, cdf: 0.000166666666666667 },
       { x: 0.5, pdf: 0.125, cdf: 0.0208333333333333 },
@@ -2458,10 +2467,12 @@ export default [{
     [0, -1], [0, 0] // b > 0
   ],
   cases: [{
-    params: () => [0, 2]
+    params: () => [0, 2],
+    symmetry: 0
   }, {
     name: 'shifted location, small scale',
     params: () => [3, 0.5],
+    symmetry: 3,
     refVals: [
       { x: 1.0, pdf: 0.0183156388887342, cdf: 0.00915781944436709 },
       { x: 2.0, pdf: 0.135335283236613, cdf: 0.0676676416183064 },
@@ -3820,10 +3831,12 @@ export default [{
     [0, -1], [0, 0] // s > 0
   ],
   cases: [{
-    params: () => [0, 2]
+    params: () => [0, 2],
+    symmetry: 0
   }, {
     name: 'shifted location, small scale',
     params: () => [3, 0.5],
+    symmetry: 3,
     refVals: [
       { x: 2.55, pdf: 0.048943483704846, cdf: 0.000818417845826702 },
       { x: 2.65, pdf: 0.412214747707527, cdf: 0.021240946299879 },
@@ -4109,7 +4122,8 @@ export default [{
   name: 'Slash',
   invalidParams: [],
   cases: [{
-    params: () => []
+    params: () => [],
+    symmetry: 0
   }],
   // Slash closed-form via scipy.stats.norm: f=(phi(0)-phi(x))/x^2, F=Phi(x) - (phi(0)-phi(x))/x
   refVals: [
@@ -4193,10 +4207,12 @@ export default [{
     [-1], [0], [1] // n > 1
   ],
   cases: [{
-    params: () => [3]
+    params: () => [3],
+    symmetry: 0
   }, {
     name: 'small df',
     params: () => [2],
+    symmetry: 0,
     refVals: [
       { x: -3.0, pdf: 0.0318309886183791, cdf: 0.102416382349567 },
       { x: -1.0, pdf: 0.159154943091895, cdf: 0.25 },
@@ -4373,13 +4389,16 @@ export default [{
   },
   cases: [{
     name: 'zero shape parameter',
-    params: () => [0]
+    params: () => [0],
+    symmetry: 0
   }, {
     name: 'positive shape parameter',
-    params: () => [2]
+    params: () => [2],
+    symmetry: 0
   }, {
     name: 'negative shape parameter',
-    params: () => [-2]
+    params: () => [-2],
+    symmetry: 0
   }],
   // lambda<0 shares the lambda>0 power-transform quantile path; lambda=0 exercises the log(p/(1-p)) branch in _q
   sampleParams: [
@@ -4414,10 +4433,12 @@ export default [{
     [1, 1], [2, 1] // a < b
   ],
   cases: [{
-    params: () => [5, 25]
+    params: () => [5, 25],
+    symmetry: 15
   }, {
     name: 'unit interval',
     params: () => [0, 1],
+    symmetry: 0.5,
     refVals: [
       { x: 0.02, pdf: 2.7648, cdf: 0.0576320000000001 },
       { x: 0.1, pdf: 1.92, cdf: 0.244 },
@@ -4461,10 +4482,12 @@ export default [{
     params: s => [s.reduce((sum, d) => d + sum, 0) / s.length]
   },
   cases: [{
-    params: () => [5, 25]
+    params: () => [5, 25],
+    symmetry: 15
   }, {
     name: 'unit interval',
     params: () => [0, 1],
+    symmetry: 0.5,
     refVals: [
       { x: 0.1, pdf: 1.0, cdf: 0.1 },
       { x: 0.25, pdf: 1.0, cdf: 0.25 },
@@ -4573,10 +4596,12 @@ export default [{
     [-1], [0] // kappa > 0
   ],
   cases: [{
-    params: () => [2]
+    params: () => [2],
+    symmetry: 0
   }, {
     name: 'near-zero kappa (near-uniform)',
     params: () => [0.5],
+    symmetry: 0,
     refVals: [
       { x: -3.0, pdf: 0.091225297646184, cdf: 0.0128738440401115 },
       { x: -2.0, pdf: 0.121541415755575, cdf: 0.115176889913108 },
@@ -4661,10 +4686,12 @@ export default [{
     [-1], [0] // R > 0
   ],
   cases: [{
-    params: () => [2]
+    params: () => [2],
+    symmetry: 0
   }, {
     name: 'small R',
     params: () => [0.5],
+    symmetry: 0,
     refVals: [
       { x: -0.45, pdf: 0.554992250642031, cdf: 0.0186930367342494 },
       { x: -0.3, pdf: 1.01859163578813, cdf: 0.142378489932647 },
