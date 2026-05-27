@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Distribution.fit(data)` static method for maximum-likelihood parameter estimation via Nelder-Mead simplex optimizer (#404)
 - `ConwayMaxwellPoisson` distribution: two-parameter count distribution generalizing Poisson (ν=1), supporting both overdispersion (ν<1) and underdispersion (ν>1).
+- `ZipfMandelbrot` distribution: three-parameter finite discrete distribution with PMF `(k+q)^{-s} / H_{N,s,q}`, generalizing `Zipf` by the shift parameter `q ≥ 0` (#398).
 
 ## [1.25.0] - 2026-05-25
 
