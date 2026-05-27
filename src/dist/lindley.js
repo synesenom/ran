@@ -2,7 +2,7 @@ import Distribution from './_distribution'
 import { lambertW1m } from '../special'
 
 /**
- * Probability function for the [Lindley distribution]{@link http://www.hjms.hacettepe.edu.tr/uploads/b35d591c-22f6-4136-8735-20c82936cd64.pdf}:
+ * Probability density function for the [Lindley distribution]{@link http://www.hjms.hacettepe.edu.tr/uploads/b35d591c-22f6-4136-8735-20c82936cd64.pdf}:
  *
  * $f(x; \theta) = \frac{\theta^2}{1 + \theta} (1 + x) e^{-\theta x},$
  *

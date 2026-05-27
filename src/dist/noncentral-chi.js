@@ -2,7 +2,7 @@ import Distribution from './_distribution'
 import NoncentralChi2 from './noncentral-chi2'
 
 /**
- * Probability function for the [non-central $\chi$ distribution]{@link https://en.wikipedia.org/wiki/Noncentral_chi_distribution}:
+ * Probability density function for the [non-central $\chi$ distribution]{@link https://en.wikipedia.org/wiki/Noncentral_chi_distribution}:
  *
  * $f(x; k; \lambda) = \frac{x^k \lambda}{(\lambda x)^{k/2}} e^{-\frac{x^2 + \lambda^2}{2}} I_{k/2 - 1}(\lambda x),$
  *

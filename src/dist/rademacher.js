@@ -1,7 +1,7 @@
 import Categorical from './categorical'
 
 /**
- * Probability function for the [Rademacher distribution]{@link https://en.wikipedia.org/wiki/Rademacher_distribution}:
+ * Probability mass function for the [Rademacher distribution]{@link https://en.wikipedia.org/wiki/Rademacher_distribution}:
  *
  * $$f(k) = \begin{cases}1/2 &\quad\text{if $k = -1$},\\\\ 1/2 &\quad\text{if $k = 1$},\\\\ 0 &\quad\text{otherwise}.\\\\ \end{cases}$$
  *

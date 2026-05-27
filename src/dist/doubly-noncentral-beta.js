@@ -7,7 +7,7 @@ import NoncentralBeta from './noncentral-beta'
 import Distribution from './_distribution'
 
 /**
- * Probability function for the [doubly non-central beta distribution]{@link https://arxiv.org/abs/1706.08557}:
+ * Probability density function for the [doubly non-central beta distribution]{@link https://arxiv.org/abs/1706.08557}:
  *
  * $f(x; \alpha, \beta, \lambda_1, \lambda_2) = e^{-\frac{\lambda_1 + \lambda_2}{2}} \sum\_{k = 0}^\infty \sum\_{l = 0}^\infty \frac{\big(\frac{\lambda_1}{2}\big)^k}{k!} \frac{\big(\frac{\lambda_2}{2}\big)^l}{l!} \frac{x^{\alpha + k - 1} (1 - x)^{\beta + l - 1}}{\mathrm{B}\big(\alpha + k, \beta + l\big)},$
  *

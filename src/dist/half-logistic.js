@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Probability function for the [half-logistic distribution]{@link https://en.wikipedia.org/wiki/Half-logistic_distribution}:
+ * Probability density function for the [half-logistic distribution]{@link https://en.wikipedia.org/wiki/Half-logistic_distribution}:
  *
  * $$f(x) = \frac{2 e^{-x}}{(1 + e^{-x})^2}.$$
  *

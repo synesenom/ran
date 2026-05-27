@@ -2,7 +2,7 @@ import Categorical from './categorical'
 import Distribution from './_distribution'
 
 /**
- * Probability function for the [Bernoulli distribution]{@link https://en.wikipedia.org/wiki/Bernoulli_distribution}:
+ * Probability mass function for the [Bernoulli distribution]{@link https://en.wikipedia.org/wiki/Bernoulli_distribution}:
  *
  * $f(k; p) = \begin{cases}p &\quad\text{if $k = 1$},\\\1 - p &\quad\text{if $k = 0$},\\\\\end{cases},$
  *

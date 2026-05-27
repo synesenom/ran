@@ -4,7 +4,7 @@ import Distribution from './_distribution'
 import PreComputed from './_pre-computed'
 
 /**
- * Probability function for the [generalized Hermite distribution]{@link https://journal.r-project.org/archive/2015/RJ-2015-035/RJ-2015-035.pdf}:
+ * Probability mass function for the [generalized Hermite distribution]{@link https://journal.r-project.org/archive/2015/RJ-2015-035/RJ-2015-035.pdf}:
  *
  * $f(k; a_1, a_m, m) = p_0 \frac{\mu^k (m - d)^k}{(m - 1)^k} \sum\_{j = 0}^{\lfloor k / m \rfloor} \frac{(d - 1)^j (m - 1)^{(m - 1)j}}{m^j \mu^{(m - 1)j} (m - d)^{mj} (k - mj)! j!},$
  *

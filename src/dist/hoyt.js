@@ -1,7 +1,7 @@
 import Nakagami from './nakagami'
 
 /**
- * Probability function for the [Nakagami distribution]{@link https://en.wikipedia.org/wiki/Nakagami_distribution}
+ * Probability density function for the [Nakagami distribution]{@link https://en.wikipedia.org/wiki/Nakagami_distribution}
  * (previously mis-labelled as the Hoyt distribution):
  *
  * $f(x; m, \omega) = \frac{2m^m}{\Gamma(m) \omega^m} x^{2m - 1} e^{-\frac{m}{\omega} x^2},$

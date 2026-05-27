@@ -4,7 +4,7 @@ import Distribution from './_distribution'
 import { lambertW1m } from '../special'
 
 /**
- * Probability function for the [Muth distribution]{@link https://www.tandfonline.com/doi/abs/10.3846/13926292.2015.1048540}:
+ * Probability density function for the [Muth distribution]{@link https://www.tandfonline.com/doi/abs/10.3846/13926292.2015.1048540}:
  *
  * $f(x; \alpha) = (e^{\alpha x} - \alpha) \exp\bigg(\alpha x - \frac{1}{\alpha} (e^{\alpha x} - 1)\bigg),$
  *

@@ -2,7 +2,7 @@ import Distribution from './_distribution'
 import NoncentralBeta from './noncentral-beta'
 
 /**
- * Probability function for the [non-central F distribution]{@link https://en.wikipedia.org/wiki/Noncentral_F-distribution}:
+ * Probability density function for the [non-central F distribution]{@link https://en.wikipedia.org/wiki/Noncentral_F-distribution}:
  *
  * $f(x; d\_1, d\_2, \lambda) = e^{-\frac{\lambda}{2}} \sum\_{k=0}^\infty \frac{1}{k!} \bigg(\frac{\lambda}{2}\bigg)^k \frac{\Big(\frac{d_1}{d_2}\Big)^{\frac{d_1}{2} + k} \Big(\frac{d_2}{d_2 + d_1 x}\Big)^{\frac{d_1 + d_2}{2} + k}}{\mathrm{B}\Big(\frac{d_2}{2}, \frac{d_1}{2} + k\Big)} x^{\frac{d_1}{2} -1 + k},$
  *

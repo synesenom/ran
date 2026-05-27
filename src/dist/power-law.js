@@ -1,7 +1,7 @@
 import Kumaraswamy from './kumaraswamy'
 
 /**
- * Probability function for the [power-law distribution]{@link https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.powerlaw.html} (also called power-law distribution):
+ * Probability density function for the [power-law distribution]{@link https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.powerlaw.html} (also called power-law distribution):
  *
  * $f(x; a) = a x^{a - 1},$
  *

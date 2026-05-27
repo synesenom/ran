@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Probability function for the [Cauchy distribution]{@link https://en.wikipedia.org/wiki/Cauchy_distribution}:
+ * Probability density function for the [Cauchy distribution]{@link https://en.wikipedia.org/wiki/Cauchy_distribution}:
  *
  * $f(x; x_0, \gamma) = \frac{1}{\pi\gamma\bigg\[1 + \Big(\frac{x - x_0}{\gamma}\Big)^2\bigg\]}$
  *

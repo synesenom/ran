@@ -3,7 +3,7 @@ import gamma from './_gamma'
 import Distribution from './_distribution'
 
 /**
- * Probability function for the [Nakagami distribution]{@link https://en.wikipedia.org/wiki/Nakagami_distribution}:
+ * Probability density function for the [Nakagami distribution]{@link https://en.wikipedia.org/wiki/Nakagami_distribution}:
  *
  * $f(x; m, \Omega) = \frac{2m^m}{\Gamma(m) \Omega^m} x^{2m - 1} e^{-\frac{m}{\Omega} x^2},$
  *

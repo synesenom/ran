@@ -2,7 +2,7 @@ import Distribution from './_distribution'
 import NoncentralChi2 from './noncentral-chi2'
 
 /**
- * Probability function for the [doubly non-central $\chi^2$ distribution]{@link https://doi.org/10.1093/biomet/36.1-2.202}:
+ * Probability density function for the [doubly non-central $\chi^2$ distribution]{@link https://doi.org/10.1093/biomet/36.1-2.202}:
  *
  * $f(x; k_1, k_2, \lambda_1, \lambda_2) = e^{-\frac{\lambda_1 + \lambda_2}{2}} \sum\_{j = 0}^\infty \sum\_{l = 0}^\infty \frac{\big(\frac{\lambda_1}{2}\big)^j}{j!} \frac{\big(\frac{\lambda_2}{2}\big)^l}{l!} f_{\chi^2}\big(x; k_1 + k_2 + 2j + 2l\big),$
  *

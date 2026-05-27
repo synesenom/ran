@@ -2,7 +2,7 @@ import Beta from './beta'
 import Distribution from './_distribution'
 
 /**
- * Probability function for the [PERT distribution]{@link https://en.wikipedia.org/wiki/PERT_distribution}:
+ * Probability density function for the [PERT distribution]{@link https://en.wikipedia.org/wiki/PERT_distribution}:
  *
  * $f(x; a, b, c) = \frac{(x - a)^{\alpha - 1} (c - x)^{\beta - 1}}{\mathrm{B}(\alpha, \beta) (c - a)^{\alpha + \beta + 1}},$
  *

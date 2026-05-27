@@ -3,7 +3,7 @@ import neumaier from '../algorithms/neumaier'
 import { gamma, gammaUpperIncomplete } from '../special'
 
 /**
- * Probability function for the [product of uniform distribution]{@link https://mathworld.wolfram.com/UniformProductDistribution.html}:
+ * Probability density function for the [product of uniform distribution]{@link https://mathworld.wolfram.com/UniformProductDistribution.html}:
  *
  * $f(x; n) = \frac{(-\ln x)^{n-1}}{(n-1)!},$
  *

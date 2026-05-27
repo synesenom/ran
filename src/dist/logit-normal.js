@@ -2,7 +2,7 @@ import Normal from './normal'
 import { erfinv } from '../special'
 
 /**
- * Probability function for the [logit-normal distribution]{@link https://en.wikipedia.org/wiki/Logit-normal_distribution}:
+ * Probability density function for the [logit-normal distribution]{@link https://en.wikipedia.org/wiki/Logit-normal_distribution}:
  *
  * $f(x; \mu, \sigma) = \frac{1}{\sigma \sqrt{2 \pi} x (1 - x)} e^{-\frac{\[\mathrm{logit}(x) - \mu\]^2}{2 \sigma^2}},$
  *

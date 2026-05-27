@@ -3,7 +3,7 @@ import rBeta from './_beta'
 import Distribution from './_distribution'
 
 /**
- * Probability function for the [beta distribution]{@link https://en.wikipedia.org/wiki/Beta_distribution}:
+ * Probability density function for the [beta distribution]{@link https://en.wikipedia.org/wiki/Beta_distribution}:
  *
  * $f(x; \alpha, \beta) = \frac{x^{\alpha - 1}(1 - x)^{\beta - 1}}{\mathrm{B}(\alpha, \beta)},$
  *

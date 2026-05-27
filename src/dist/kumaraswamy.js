@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Probability function for the [Kumaraswamy distribution]{@link https://en.wikipedia.org/wiki/Kumaraswamy_distribution} (also
+ * Probability density function for the [Kumaraswamy distribution]{@link https://en.wikipedia.org/wiki/Kumaraswamy_distribution} (also
  * known as Minimax distribution):
  *
  * $f(x; a, b) = a b x^{a-1} (1 - x^a)^{b - 1},$

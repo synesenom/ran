@@ -2,7 +2,7 @@ import Distribution from './_distribution'
 import { erf, erfinv } from '../special'
 
 /**
- * Probability function for the [alpha distribution]{@link https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/alppdf.htm}:
+ * Probability density function for the [alpha distribution]{@link https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/alppdf.htm}:
  *
  * $f(x; \alpha, \beta) = \frac{\phi\Big(\alpha - \frac{\beta}{x}\Big)}{x^2 \Phi(\alpha)},$
  *

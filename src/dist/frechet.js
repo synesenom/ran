@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Probability function for the [Frechet distribution]{@link https://en.wikipedia.org/wiki/Frechet_distribution}:
+ * Probability density function for the [Frechet distribution]{@link https://en.wikipedia.org/wiki/Frechet_distribution}:
  *
  * $f(x; \alpha, s, m) = \frac{\alpha z^{-1 -\alpha} e^{-z^{-\alpha}}}{s},$
  *

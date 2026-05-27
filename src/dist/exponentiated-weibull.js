@@ -2,7 +2,7 @@ import Weibull from './weibull'
 import Distribution from './_distribution'
 
 /**
- * Probability function for the [exponentiated Weibull distribution]{@link https://en.wikipedia.org/wiki/Exponentiated_Weibull_distribution}:
+ * Probability density function for the [exponentiated Weibull distribution]{@link https://en.wikipedia.org/wiki/Exponentiated_Weibull_distribution}:
  *
  * $f(x; \lambda, k) = \alpha \frac{k}{\lambda}\bigg(\frac{x}{\lambda}\bigg)^{k - 1} \bigg[1 - e^{-(x / \lambda)^k}\bigg]^{\alpha - 1} e^{-(x / \lambda)^k},$
  *

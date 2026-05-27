@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Probability function for the [reciprocal distribution]{@link https://en.wikipedia.org/wiki/Reciprocal_distribution}:
+ * Probability density function for the [reciprocal distribution]{@link https://en.wikipedia.org/wiki/Reciprocal_distribution}:
  *
  * $f(x; a, b) = \frac{1}{x \[\ln b - \ln a\]},$
  *

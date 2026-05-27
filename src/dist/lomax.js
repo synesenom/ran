@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Probability function for the [Lomax distribution]{@link https://en.wikipedia.org/wiki/Lomax_distribution}:
+ * Probability density function for the [Lomax distribution]{@link https://en.wikipedia.org/wiki/Lomax_distribution}:
  *
  * $f(x; \lambda, \alpha) = \frac{\alpha}{\lambda}\bigg\[1 + \frac{x}{\lambda}\bigg\]^{-(\alpha + 1)},$
  *

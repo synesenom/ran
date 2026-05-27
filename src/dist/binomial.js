@@ -3,7 +3,7 @@ import Distribution from './_distribution'
 import Categorical from './categorical'
 
 /**
- * Probability function for the [binomial distribution]{@link https://en.wikipedia.org/wiki/Binomial_distribution}:
+ * Probability mass function for the [binomial distribution]{@link https://en.wikipedia.org/wiki/Binomial_distribution}:
  *
  * $f(k; n, p) = \begin{pmatrix}n \\\\ k \\\\ \end{pmatrix} p^k (1 - p)^{n - k},$
  *

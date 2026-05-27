@@ -3,7 +3,7 @@ import PreComputed from './_pre-computed'
 import { logBinomial } from '../special'
 
 /**
- * Probability function for the absolute-value (folded) heads-minus-tails distribution, i.e. the distribution of
+ * Probability mass function for the absolute-value (folded) heads-minus-tails distribution, i.e. the distribution of
  * $|H - T|$ where $H$ is the number of heads in $2n$ fair coin flips and $T = 2n - H$ is the number
  * of tails. This is the non-negative folded variant; the signed $H - T$ distribution (support
  * $[-2n, 2n]$) is described at the MathWorld reference below:

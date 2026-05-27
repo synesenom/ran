@@ -2,7 +2,7 @@ import { lambertW0 } from '../special'
 import Distribution from './_distribution'
 
 /**
- * Probability function for the (continuous) [logarithmic distribution]{@link http://mathworld.wolfram.com/LogarithmicDistribution.html}:
+ * Probability density function for the (continuous) [logarithmic distribution]{@link http://mathworld.wolfram.com/LogarithmicDistribution.html}:
  *
  * $f(x; a, b) = \frac{\ln x}{a (1 - \ln a) - b (1 - \ln b)},$
  *

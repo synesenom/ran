@@ -2,7 +2,7 @@ import Gamma from './gamma'
 import Distribution from './_distribution'
 
 /**
- * Probability function for the [log-gamma distribution]{@link https://reference.wolfram.com/language/ref/LogGammaDistribution.html} using the
+ * Probability density function for the [log-gamma distribution]{@link https://reference.wolfram.com/language/ref/LogGammaDistribution.html} using the
  * shape/rate parametrization:
  *
  * $f(x; \alpha, \beta, \mu) = \frac{\beta^\alpha}{\Gamma(\alpha)} \ln^{\alpha - 1}(x - \mu + 1) (x - \mu + 1)^{-(1 + \beta)},$

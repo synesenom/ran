@@ -3,7 +3,7 @@ import PreComputed from './_pre-computed'
 import Distribution from './_distribution'
 
 /**
- * Probability function for the [Borel-Tanner distribution]{@link https://en.wikipedia.org/wiki/Borel_distribution#Borel%E2%80%93Tanner_distribution}:
+ * Probability mass function for the [Borel-Tanner distribution]{@link https://en.wikipedia.org/wiki/Borel_distribution#Borel%E2%80%93Tanner_distribution}:
  *
  * $f(k; \mu, n) = \frac{n}{k}\frac{e^{-\mu k} (\mu k)^{k - n}}{(k - n)!},$
  *

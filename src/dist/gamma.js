@@ -3,7 +3,7 @@ import gamma from './_gamma'
 import Distribution from './_distribution'
 
 /**
- * Probability function for the [gamma distribution]{@link https://en.wikipedia.org/wiki/Gamma_distribution} using the
+ * Probability density function for the [gamma distribution]{@link https://en.wikipedia.org/wiki/Gamma_distribution} using the
  * shape/rate parametrization:
  *
  * $f(x; \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{\alpha - 1} e^{-\beta x},$

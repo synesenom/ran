@@ -2,7 +2,7 @@ import Categorical from './categorical'
 import Distribution from './_distribution'
 
 /**
- * Probability function for the [Zipf distribution]{@link https://en.wikipedia.org/wiki/Zipf%27s_law}:
+ * Probability mass function for the [Zipf distribution]{@link https://en.wikipedia.org/wiki/Zipf%27s_law}:
  *
  * $f(k; s, N) = \frac{k^{-s}}{H_{N, s}},$
  *

@@ -4,7 +4,7 @@ import Distribution from './_distribution'
 import { MAX_ITER } from '../core/constants'
 
 /**
- * Probability function for the [von Mises distribution]{@link https://en.wikipedia.org/wiki/Von_Mises_distribution}:
+ * Probability density function for the [von Mises distribution]{@link https://en.wikipedia.org/wiki/Von_Mises_distribution}:
  *
  * $f(x; \kappa) = \frac{e^{\kappa \cos(x)}}{2 \pi I_0(\kappa)},$
  *
