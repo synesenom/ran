@@ -8,6 +8,7 @@
 export { besselI, besselInu, besselISpherical } from './bessel'
 export { default as beta } from './beta'
 export { betaIncomplete, regularizedBetaIncomplete } from './beta-incomplete'
+export { default as digamma } from './digamma'
 export { erf, erfc, erfinv } from './error'
 export { default as gamma } from './gamma'
 export { gammaLowerIncomplete, gammaUpperIncomplete, gammaLowerIncompleteInv } from './gamma-incomplete'
