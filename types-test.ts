@@ -32,6 +32,7 @@ const state = n.save()
 n.load(state)
 n.seed(42)
 n.seed('test')
+const _fitted = ran.dist.Normal.fit([1, 2, 3, 4, 5])
 
 // core namespace — all overloads
 ran.core.seed(42)
