@@ -53,4 +53,11 @@ export default class Pareto extends Distribution {
   _q (p) {
     return this.p.xmin / Math.pow(1 - p, 1 / this.p.alpha)
   }
+
+  static _fitInit (data) {
+    const xmin = Math.min(...data)
+    const n = data.length
+    const alpha = n / data.reduce((s, x) => s + Math.log(x / xmin), 0)
+    return [xmin, alpha]
+  }
 }

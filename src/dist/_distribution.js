@@ -633,7 +633,7 @@ class Distribution {
    *
    */
   lnPdf (x) {
-    return Math.log(this._pdf(x))
+    return Math.log(this.pdf(x))
   }
 
   /**
@@ -804,7 +804,9 @@ class Distribution {
     const best = nelderMead(
       params => {
         try {
-          return -new Cls(...params).lnL(data)
+          const v = -new Cls(...params).lnL(data)
+          // neumaier(-Infinity, ...) returns NaN; treat as invalid params
+          return isNaN(v) ? Infinity : v
         } catch (_) {
           return Infinity
         }
