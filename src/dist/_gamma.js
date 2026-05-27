@@ -24,8 +24,9 @@ export default function gamma (r, a, b = 1) {
     let V
     let U
 
-    // Max 1000 trials
-    for (let trials = 0; trials < 1000; trials++) {
+    // Unbounded loop; Marsaglia-Tsang acceptance rate exceeds 0.98 for a >= 1,
+    // so the expected number of iterations is bounded and termination is guaranteed.
+    while (true) {
       Z = normal(r)
       if (Z > -1 / c) {
         V = Math.pow(1 + c * Z, 3)
