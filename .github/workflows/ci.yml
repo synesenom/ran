@@ -135,3 +135,4 @@ jobs:
       - run: npm ci
         if: steps.node-cache.outputs.cache-hit != 'true'
       - run: npm run build
+      - run: test -f dist/ranjs.esm.js && test -f dist/ranjs.cjs.js && test -f dist/ranjs.min.js && test -f dist/index.d.ts
