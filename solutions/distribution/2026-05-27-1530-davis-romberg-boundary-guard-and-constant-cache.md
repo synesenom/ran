@@ -44,8 +44,9 @@ Three coordinated fixes were applied:
 **General skeleton-distribution rule** (see also Champernowne fix):
 A distribution is not present in the codebase until it has:
 1. An uncommented export in `src/dist/index.js`
-2. At least one `refVals` entry in `test/dist-cases-*.js` (verified against Python/R, not from the same JS code)
-3. A working `_generator()` — never a hard-coded constant
+2. A matching `"./dist/<name>": { "import": "./dist/<name>.esm.js" }` entry in `package.json` exports (`npm run check-decl` enforces this)
+3. At least one `refVals` entry in `test/dist-cases-*.js` (verified against Python/R, not from the same JS code)
+4. A working `_generator()` — never a hard-coded constant
 
 ## Related Solutions
 
