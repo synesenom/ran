@@ -414,6 +414,20 @@ describe('dist', () => {
         const result = dist.Exponential.fit(data)
         assert(result instanceof dist.Exponential)
       })
+
+      it('Pareto.fit should recover xmin close to min(data)', () => {
+        const data = [1.5, 2.0, 3.1, 1.8, 2.5]
+        const result = dist.Pareto.fit(data)
+        assert(Math.abs(result.p.xmin - 1.5) < 1e-3)
+      })
+
+      it('Pareto.fit should recover alpha close to closed-form MLE', () => {
+        const data = [1.5, 2.0, 3.1, 1.8, 2.5]
+        const xmin = Math.min(...data)
+        const alphaExpected = data.length / data.reduce((s, x) => s + Math.log(x / xmin), 0)
+        const result = dist.Pareto.fit(data)
+        assert(Math.abs(result.p.alpha - alphaExpected) < 0.05)
+      })
     })
   })
 
