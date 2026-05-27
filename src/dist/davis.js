@@ -1,4 +1,6 @@
-import { riemannZeta, gamma } from '../special'
+import { riemannZeta, gamma as gammaFn } from '../special'
+import gamma from './_gamma'
+import zeta from './_zeta'
 import Distribution from './_distribution'
 import { romberg } from '../algorithms'
 
@@ -17,7 +19,7 @@ export default class Davis extends Distribution {
   /**
    * @param {number} mu Location parameter.
    * @param {number} b Scale parameter.
-   * @param {number} n Shape parameter. Must not equal 1.
+   * @param {number} n Shape parameter. Must be greater than 1.
    */
   constructor (mu, b, n) {
     super('continuous', 3)
@@ -27,7 +29,7 @@ export default class Davis extends Distribution {
     Distribution.validate({ mu, b, n }, [
       'mu > 0',
       'b > 0',
-      'n > 0', 'n != 1'
+      'n > 1'
     ])
 
     // Set support.
@@ -41,11 +43,18 @@ export default class Davis extends Distribution {
   }
 
   _generator () {
-    return 1
+    // Zeta-Gamma mixture: Davis(mu, b, n) = mu + b / Gamma(n, Zeta(n))
+    const k = zeta(this.r, this.p.n)
+    return this.p.mu + this.p.b / gamma(this.r, this.p.n, k)
   }
 
   _pdf (x) {
-    return this.p.b ** this.p.n * Math.pow(x - this.p.mu, -1 - this.p.n) / gamma(this.p.n) / riemannZeta(this.p.n) / (Math.exp(this.p.b / (x - this.p.mu)) - 1)
+    const y = x - this.p.mu
+    if (y <= 0) return 0
+    const bOverY = this.p.b / y
+    // exp(bOverY) overflows to Infinity for bOverY > ~709; PDF → 0 in that limit
+    if (bOverY > 700) return 0
+    return Math.pow(this.p.b, this.p.n) * Math.pow(y, -1 - this.p.n) / (gammaFn(this.p.n) * riemannZeta(this.p.n) * (Math.exp(bOverY) - 1))
   }
 
   _cdf (x) {
