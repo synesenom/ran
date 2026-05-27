@@ -2,6 +2,17 @@ import { riemannZeta, gamma } from '../special'
 import Distribution from './_distribution'
 import { romberg } from '../algorithms'
 
+/**
+ * Generator for the [Davis distribution]{@link https://en.wikipedia.org/wiki/Davis_distribution}:
+ *
+ * $f(x; \mu, b, n) = \frac{b^n (x - \mu)^{-1-n}}{\Gamma(n)\, \zeta(n)\, \left(e^{b/(x-\mu)} - 1\right)},$
+ *
+ * with $\mu > 0$, $b > 0$, and $n > 0, n \neq 1$. Support: $x \in (\mu, \infty)$.
+ *
+ * @class Davis
+ * @memberof ran.dist
+ * @constructor
+ */
 export default class Davis extends Distribution {
   /**
    * @param {number} mu Location parameter.
