@@ -39,12 +39,11 @@ td {
 
 // Parameter name lives in the first column. The generator marks it with
 // .param-name; the porting page uses plain td (first child). Both should
-// render as the small monospaced blue identifier.
+// render as the small monospaced identifier.
 .param-name,
 tbody td:first-child {
   font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
   font-size: 13px;
-  color: $colorBlue;
   white-space: nowrap;
 }
 
