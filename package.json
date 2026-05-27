@@ -437,6 +437,9 @@
     },
     "./dist/zipf": {
       "import": "./dist/zipf.esm.js"
+    },
+    "./dist/zipf-mandelbrot": {
+      "import": "./dist/zipf-mandelbrot.esm.js"
     }
   },
   "sideEffects": false,
