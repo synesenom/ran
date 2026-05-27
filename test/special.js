@@ -6,6 +6,34 @@ import * as special from '../src/special/index.js'
 const LAPS = 100
 
 describe('special', () => {
+  const EM = 0.5772156649015329
+
+  describe('digamma(z)', () => {
+    it('should return reference values', () => {
+      assert(equal(special.digamma(1), -EM))
+      assert(equal(special.digamma(2), 1 - EM))
+      assert(equal(special.digamma(0.5), -EM - 2 * Math.log(2)))
+      assert(equal(special.digamma(0.25), -Math.PI / 2 - 3 * Math.log(2) - EM))
+      // z >= 10: direct Stirling path
+      assert(equal(special.digamma(10), 2.251752589066721))
+    })
+
+    it('should return reference values for negative non-integer arguments', () => {
+      // Exercises the reflection formula: ψ(z) = ψ(1-z) - π·cot(πz)
+      // ψ(-0.5) = ψ(1.5) = ψ(0.5) + 2 = 2 - EM - 2·ln2
+      assert(equal(special.digamma(-0.5), 2 - EM - 2 * Math.log(2)))
+      // ψ(-1.5) = ψ(2.5) = ψ(1.5) + 2/3
+      assert(equal(special.digamma(-1.5), 2 - EM - 2 * Math.log(2) + 2 / 3))
+    })
+
+    it('should satisfy the recurrence ψ(z+1) = ψ(z) + 1/z', () => {
+      repeat(() => {
+        const z = Math.random() * 100 + 0.1
+        assert(equal(special.digamma(z + 1), special.digamma(z) + 1 / z))
+      }, LAPS)
+    })
+  })
+
   /*
   describe('digamma(z)', () => {
     it('should return reference values', () => {
