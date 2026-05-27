@@ -2,7 +2,7 @@ import Distribution from './_distribution'
 import brent from '../algorithms/brent'
 
 /**
- * Generator for the [Tukey lambda distribution]{@link https://en.wikipedia.org/wiki/Tukey_lambda_distribution}:
+ * Probability function for the [Tukey lambda distribution]{@link https://en.wikipedia.org/wiki/Tukey_lambda_distribution}:
  *
  * $f(x; \lambda) = \frac{1}{Q^{-1}(F(x))},$
  *

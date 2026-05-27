@@ -4,7 +4,7 @@ import poisson from './_poisson'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [negative-binomial distribution]{@link https://en.wikipedia.org/wiki/Negative_binomial_distribution}
+ * Probability function for the [negative-binomial distribution]{@link https://en.wikipedia.org/wiki/Negative_binomial_distribution}
  * (also known as Gamma-Poisson, Pascal or Pólya distribution):
  *
  * $f(k; r, p) = \begin{pmatrix}k + r - 1 \\\\ k \\\\ \end{pmatrix} (1 - p)^r p^k,$

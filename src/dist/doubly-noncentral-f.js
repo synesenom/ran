@@ -1,7 +1,7 @@
 import DoublyNoncentralBeta from './doubly-noncentral-beta'
 
 /**
- * Generator for the [doubly non-central F distribution]{@link https://doi.org/10.1111/j.1467-842X.1965.tb00036.x}:
+ * Probability function for the [doubly non-central F distribution]{@link https://doi.org/10.1111/j.1467-842X.1965.tb00036.x}:
  *
  * $f(x; d_1, d_2, \lambda_1, \lambda_2) = \frac{d_1}{d_2} e^{-\frac{\lambda_1 + \lambda_2}{2}} \sum\_{k = 0}^\infty \sum\_{l = 0}^\infty \frac{\big(\frac{\lambda_1}{2}\big)^k}{k!} \frac{\big(\frac{\lambda_2}{2}\big)^l}{l!} \frac{\big(\frac{d_1 x}{d_2}\big)^{\frac{d_1}{2} + k - 1}}{\big(1 + \frac{d_1 x}{d_2}\big)^{\frac{d_1 + d_2}{2} + k + l}} \frac{1}{\mathrm{B}\big(\frac{d_1}{2} + k, \frac{d_2}{2} + l\big)},$
  *

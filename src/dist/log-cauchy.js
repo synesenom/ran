@@ -1,7 +1,7 @@
 import Cauchy from './cauchy'
 
 /**
- * Generator for the [log-Cauchy distribution]{@link https://en.wikipedia.org/wiki/Log-Cauchy_distribution}:
+ * Probability function for the [log-Cauchy distribution]{@link https://en.wikipedia.org/wiki/Log-Cauchy_distribution}:
  *
  * $f(x; \mu, \sigma) = \frac{1}{\pi x}\bigg\[\frac{\sigma}{(\ln x - \mu)^2 + \sigma^2}\bigg\],$
  *

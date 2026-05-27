@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Champernowne distribution]{@link https://en.wikipedia.org/wiki/Champernowne_distribution}:
+ * Probability function for the [Champernowne distribution]{@link https://en.wikipedia.org/wiki/Champernowne_distribution}:
  *
  * $f(x; \alpha, \lambda, x_0) = \frac{C}{\cosh(\alpha(x - x_0)) + \lambda},$
  *

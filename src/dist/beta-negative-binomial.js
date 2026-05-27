@@ -6,7 +6,7 @@ import gamma from './_gamma'
 import poisson from './_poisson'
 
 /**
- * Generator for the [beta-negative-binomial distribution]{@link https://en.wikipedia.org/wiki/Beta_negative_binomial_distribution}:
+ * Probability function for the [beta-negative-binomial distribution]{@link https://en.wikipedia.org/wiki/Beta_negative_binomial_distribution}:
  *
  * $f(k; r, \alpha, \beta) = \frac{\Gamma(r + k)}{\Gamma(k + 1)\,\Gamma(r)} \frac{\mathrm{B}(\alpha + r,\, \beta + k)}{\mathrm{B}(\alpha,\, \beta)},$
  *

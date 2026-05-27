@@ -2,7 +2,7 @@ import rejection from '../algorithms/rejection'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [raised cosine distribution]{@link https://en.wikipedia.org/wiki/Raised_cosine_distribution}:
+ * Probability function for the [raised cosine distribution]{@link https://en.wikipedia.org/wiki/Raised_cosine_distribution}:
  *
  * $f(x; \mu, s) = \frac{1}{2s} \Big\[1 + \cos\Big(\frac{x - \mu}{s} \pi\Big)\Big\],$
  *

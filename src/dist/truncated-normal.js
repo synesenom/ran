@@ -3,7 +3,7 @@ import Distribution from './_distribution'
 import { erfinv } from '../special'
 
 /**
- * Generator for the [truncated normal distribution]{@link https://en.wikipedia.org/wiki/Truncated_normal_distribution}:
+ * Probability function for the [truncated normal distribution]{@link https://en.wikipedia.org/wiki/Truncated_normal_distribution}:
  *
  * $f(x; \mu, \sigma, a, b) = \frac{\phi(\xi)}{\Phi(\beta) - \Phi(\alpha)},$
  *

@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Gompertz distribution]{@link https://en.wikipedia.org/wiki/Gompertz_distribution}:
+ * Probability function for the [Gompertz distribution]{@link https://en.wikipedia.org/wiki/Gompertz_distribution}:
  *
  * $f(x; \eta, b) = b \eta e^{\eta + bx - \eta e^{bx}} ,$
  *

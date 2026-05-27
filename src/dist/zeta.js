@@ -3,7 +3,7 @@ import zeta from './_zeta'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [zeta distribution]{@link https://en.wikipedia.org/wiki/Zeta_distribution}:
+ * Probability function for the [zeta distribution]{@link https://en.wikipedia.org/wiki/Zeta_distribution}:
  *
  * $f(k; s) = \frac{k^{-s}}{\zeta(s)},$
  *

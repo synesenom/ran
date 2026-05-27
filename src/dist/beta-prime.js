@@ -2,7 +2,7 @@ import gamma from './_gamma'
 import Beta from './beta'
 
 /**
- * Generator for the [beta prime distribution]{@link https://en.wikipedia.org/wiki/Beta_prime_distribution} (also
+ * Probability function for the [beta prime distribution]{@link https://en.wikipedia.org/wiki/Beta_prime_distribution} (also
  * known as inverted beta):
  *
  * $f(x; \alpha, \beta) = \frac{x^{\alpha - 1}(1 + x)^{-\alpha - \beta}}{\mathrm{B}(\alpha, \beta)},$

@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for the [geometric distribution]{@link https://en.wikipedia.org/wiki/Geometric_distribution} (the number of
+ * Probability function for the [geometric distribution]{@link https://en.wikipedia.org/wiki/Geometric_distribution} (the number of
  * failures before the first success definition):
  *
  * $f(k; p) = p (1 - p)^k,$

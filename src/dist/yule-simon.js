@@ -2,7 +2,7 @@ import { beta } from '../special'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Yule-Simon distribution]{@link https://en.wikipedia.org/wiki/Yule%E2%80%93Simon_distribution}:
+ * Probability function for the [Yule-Simon distribution]{@link https://en.wikipedia.org/wiki/Yule%E2%80%93Simon_distribution}:
  *
  * $f(k; \rho) = \rho \mathrm{B}(k, \rho + 1),$
  *

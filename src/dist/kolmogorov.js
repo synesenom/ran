@@ -2,7 +2,7 @@ import Distribution from './_distribution'
 import { EPS, MAX_ITER } from '../core/constants'
 
 /**
- * Generator for the [Kolmogorov distribution]{@link https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test#Kolmogorov_distribution}:
+ * Probability function for the [Kolmogorov distribution]{@link https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test#Kolmogorov_distribution}:
  *
  * $$f(x) = 8 \sum_{k=1}^\infty (-1)^{k - 1} k^2 x e^{-2 k^2 x^2}.$$
  *

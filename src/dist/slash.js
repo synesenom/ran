@@ -1,7 +1,7 @@
 import Normal from './normal'
 
 /**
- * Generator for the [slash distribution]{@link https://en.wikipedia.org/wiki/Slash_distribution}:
+ * Probability function for the [slash distribution]{@link https://en.wikipedia.org/wiki/Slash_distribution}:
  *
  * $$f(x) = \begin{cases}\frac{\phi(0) - \phi(x)}{x^2} &\quad\text{if $x \ne 0$},\\\\ \frac{1}{2 \sqrt{2 \pi}} &\quad\text{if $x = 0$}\\\\ \end{cases},$$
  *

@@ -2,7 +2,7 @@ import Categorical from './categorical'
 import Distribution from './_distribution'
 
 /**
- * Generator for the (ideal) [soliton distribution]{@link https://en.wikipedia.org/wiki/Soliton_distribution}:
+ * Probability function for the (ideal) [soliton distribution]{@link https://en.wikipedia.org/wiki/Soliton_distribution}:
  *
  * $f(k; N) = \begin{cases}\frac{1}{N} &\quad\text{if $k = 1$},\\\\ \frac{1}{k (k - 1)} &\quad\text{otherwise}\\\\ \end{cases},$
  *

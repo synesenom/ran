@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for the continuous
+ * Probability function for the continuous
  * [uniform distribution]{@link https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)}:
  *
  * $f(x; x_\mathrm{min}, x_\mathrm{max}) = \frac{1}{x_\mathrm{max} - x_\mathrm{min}},$

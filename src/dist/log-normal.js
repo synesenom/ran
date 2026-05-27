@@ -2,7 +2,7 @@ import Normal from './normal'
 import { erfinv } from '../special'
 
 /**
- * Generator for the [log-normal distribution]{@link https://en.wikipedia.org/wiki/Log-normal_distribution}:
+ * Probability function for the [log-normal distribution]{@link https://en.wikipedia.org/wiki/Log-normal_distribution}:
  *
  * $f(x; \mu, \sigma) = \frac{1}{x \sigma \sqrt{2 \pi}}e^{-\frac{(\ln x - \mu)^2}{2\sigma^2}},$
  *

@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Gumbel distribution]{@link https://en.wikipedia.org/wiki/Gumbel_distribution}:
+ * Probability function for the [Gumbel distribution]{@link https://en.wikipedia.org/wiki/Gumbel_distribution}:
  *
  * $f(x; \mu, \beta) = \frac{1}{\beta} e^{-(z + e^{-z})},$
  *

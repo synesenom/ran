@@ -2,7 +2,7 @@ import exponential from './_exponential'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [exponential distribution]{@link https://en.wikipedia.org/wiki/Exponential_distribution}:
+ * Probability function for the [exponential distribution]{@link https://en.wikipedia.org/wiki/Exponential_distribution}:
  *
  * $f(x; \lambda) = \lambda e^{-\lambda x},$
  *

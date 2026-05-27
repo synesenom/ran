@@ -5,7 +5,7 @@ import Distribution from './_distribution'
 import { romberg } from '../algorithms'
 
 /**
- * Generator for the [Davis distribution]{@link https://en.wikipedia.org/wiki/Davis_distribution}:
+ * Probability function for the [Davis distribution]{@link https://en.wikipedia.org/wiki/Davis_distribution}:
  *
  * $f(x; \mu, b, n) = \frac{b^n (x - \mu)^{-1-n}}{\Gamma(n)\,\zeta(n)\,(e^{b/(x-\mu)} - 1)},$
  *

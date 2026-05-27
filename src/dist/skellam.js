@@ -3,7 +3,7 @@ import poisson from './_poisson'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Skellam distribution]{@link https://en.wikipedia.org/wiki/Skellam_distribution}:
+ * Probability function for the [Skellam distribution]{@link https://en.wikipedia.org/wiki/Skellam_distribution}:
  *
  * $f(k; \mu_1, \mu_2) = e^{-(\mu_1 + \mu_2)}\Big(\frac{\mu_1}{\mu_2}\Big)^{k/2} I_k(2 \sqrt{\mu_1 \mu_2}),$
  *

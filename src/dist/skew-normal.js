@@ -3,7 +3,7 @@ import { erf, owenT } from '../special'
 import Normal from './normal'
 
 /**
- * Generator for the [skew normal distribution]{@link https://en.wikipedia.org/wiki/Skew_normal_distribution}:
+ * Probability function for the [skew normal distribution]{@link https://en.wikipedia.org/wiki/Skew_normal_distribution}:
  *
  * $f(x; \xi, \omega, \alpha) = \frac{2}{\omega} \phi\bigg(\frac{x - \xi}{\omega}\bigg) \Phi\bigg(\alpha \frac{x - \xi}{\omega}\bigg),$
  *

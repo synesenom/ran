@@ -3,7 +3,7 @@ import PreComputed from './_pre-computed'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Borel distribution]{@link https://en.wikipedia.org/wiki/Borel_distribution}:
+ * Probability function for the [Borel distribution]{@link https://en.wikipedia.org/wiki/Borel_distribution}:
  *
  * $f(k; \mu) = \frac{e^{-\mu k} (\mu k)^{k - 1}}{k!},$
  *
