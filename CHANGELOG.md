@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `neumaier()` now returns `±Infinity` (instead of `NaN`) when the input array contains `±Infinity`; fixes `lnL()`, `aic()`, and `bic()` silently returning `NaN` when any observation falls outside a distribution's support (#442)
 
+### Changed
+
+- `npm test` now runs under nyc with coverage thresholds enforced (`branches ≥ 92%`, `lines ≥ 98%`, `functions = 100%`, `statements ≥ 98%`); the suite exits non-zero if coverage drops below these baselines (#400)
+
 ### Added
 
 - `Distribution.fit(data)` static method for maximum-likelihood parameter estimation via Nelder-Mead simplex optimizer (#404)
