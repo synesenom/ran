@@ -40,23 +40,25 @@ export default class Bates extends IrwinHall {
       closed: true
     }]
 
-    // Extend speed-up constants. Note that c in IrwinHall has a length of n + 1
-    this.c = this.c.concat([
-      n / (b - a),
-      n * a / (b - a)
-    ])
+    // Extend speed-up constants with Bates affine transform coefficients
+    Object.assign(this.c, {
+      scale: n / (b - a),
+      shift: n * a / (b - a)
+    })
   }
 
   _generator () {
     // Direct sampling by transforming Irwin-Hall variate
-    return super._generator() / this.c[this.p.n + 1] + this.p.a
+    return super._generator() / this.c.scale + this.p.a
   }
 
   _pdf (x) {
-    return this.c[this.p.n + 1] * super._pdf(this.c[this.p.n + 1] * x - this.c[this.p.n + 2])
+    const { scale, shift } = this.c
+    return scale * super._pdf(scale * x - shift)
   }
 
   _cdf (x) {
-    return super._cdf(this.c[this.p.n + 1] * x - this.c[this.p.n + 2])
+    const { scale, shift } = this.c
+    return super._cdf(scale * x - shift)
   }
 }

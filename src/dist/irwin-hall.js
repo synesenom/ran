@@ -37,8 +37,8 @@ export default class IrwinHall extends Distribution {
       closed: true
     }]
 
-    // Speed-up constants
-    this.c = Array.from({ length: ni + 1 }, (d, k) => logGamma(k + 1) + logGamma(ni - k + 1))
+    // Speed-up constants — logGammaTerms is a runtime-indexed lookup table, see decisions/0008-this-c-named-object-convention.md
+    this.c = { logGammaTerms: Array.from({ length: ni + 1 }, (d, k) => logGamma(k + 1) + logGamma(ni - k + 1)) }
   }
 
   _generator () {
@@ -49,10 +49,11 @@ export default class IrwinHall extends Distribution {
   _pdf (x) {
     // Use symmetry property for large x values
     const y = x < this.p.n / 2 ? x : this.p.n - x
+    const { logGammaTerms } = this.c
 
     // Compute terms
     const terms = Array.from({ length: Math.floor(y) + 1 }, (d, k) => {
-      const z = (this.p.n - 1) * Math.log(y - k) - this.c[k]
+      const z = (this.p.n - 1) * Math.log(y - k) - logGammaTerms[k]
 
       return k % 2 === 0 ? Math.exp(z) : -Math.exp(z)
     })
@@ -67,10 +68,11 @@ export default class IrwinHall extends Distribution {
   _cdf (x) {
     // Use symmetry property for large x values
     const y = x < this.p.n / 2 ? x : this.p.n - x
+    const { logGammaTerms } = this.c
 
     // Compute terms
     const terms = Array.from({ length: Math.floor(y) + 1 }, (d, k) => {
-      const z = this.p.n * Math.log(y - k) - this.c[k]
+      const z = this.p.n * Math.log(y - k) - logGammaTerms[k]
 
       return k % 2 === 0 ? Math.exp(z) : -Math.exp(z)
     })
