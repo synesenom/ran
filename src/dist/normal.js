@@ -3,7 +3,7 @@ import normal from './_normal'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [normal distribution]{@link https://en.wikipedia.org/wiki/Normal_distribution}:
+ * Probability density function for the [normal distribution]{@link https://en.wikipedia.org/wiki/Normal_distribution}:
  *
  * $f(x; \mu, \sigma) = \frac{1}{\sqrt{2 \pi \sigma^2}} e^{-\frac{(x - \mu)^2}{2\sigma^2}},$
  *

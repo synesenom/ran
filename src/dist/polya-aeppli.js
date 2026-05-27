@@ -3,7 +3,7 @@ import PreComputed from './_pre-computed'
 import poisson from './_poisson'
 
 /**
- * Generator for the [Pólya-Aeppli distribution]{@link https://arxiv.org/abs/1406.2780} (also known as geometric Poisson distribution):
+ * Probability mass function for the [Pólya-Aeppli distribution]{@link https://arxiv.org/abs/1406.2780} (also known as geometric Poisson distribution):
  *
  * $f(k; \lambda, \theta) = \begin{cases}e^{-\lambda} &\quad\text{if $k = 0$},\\\\ e^{-\lambda} \sum_{j = 1}^k \frac{\lambda^j}{j!} \begin{pmatrix}k - 1 \\\\ j - 1 \\\\ \end{pmatrix} \theta^{k - j} (1 - \theta)^j &\quad\text{otherwise}\\\\ \end{cases},$
  *

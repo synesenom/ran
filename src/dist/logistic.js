@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for the [logistic distribution]{@link https://en.wikipedia.org/wiki/Logistic_distribution}:
+ * Probability density function for the [logistic distribution]{@link https://en.wikipedia.org/wiki/Logistic_distribution}:
  *
  * $f(x; \mu, s) = \frac{e^{-z}}{s (1 + e^{-z})^2},$
  *

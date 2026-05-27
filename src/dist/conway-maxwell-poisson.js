@@ -2,7 +2,7 @@ import Distribution from './_distribution'
 import PreComputed from './_pre-computed'
 
 /**
- * Generator for the [Conway-Maxwell-Poisson distribution]{@link https://en.wikipedia.org/wiki/Conway%E2%80%93Maxwell%E2%80%93Poisson_distribution}:
+ * Probability mass function for the [Conway-Maxwell-Poisson distribution]{@link https://en.wikipedia.org/wiki/Conway%E2%80%93Maxwell%E2%80%93Poisson_distribution}:
  *
  * $f(k; \lambda, \nu) = \frac{\lambda^k}{(k!)^\nu Z(\lambda, \nu)},$
  *

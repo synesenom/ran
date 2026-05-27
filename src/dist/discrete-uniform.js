@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for the discrete
+ * Probability mass function for the discrete
  * [uniform distribution]{@link https://en.wikipedia.org/wiki/Discrete_uniform_distribution}:
  *
  * $f(k; x_\mathrm{min}, x_\mathrm{max}) = \frac{1}{x_\mathrm{max} - x_\mathrm{min} + 1},$

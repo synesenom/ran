@@ -1,7 +1,7 @@
 import LogNormal from './log-normal'
 
 /**
- * Generator for the [Gilbrat's distribution]{@link http://mathworld.wolfram.com/GibratsDistribution.html}:
+ * Probability density function for the [Gilbrat's distribution]{@link http://mathworld.wolfram.com/GibratsDistribution.html}:
  *
  * $$f(x) = \frac{1}{x \sqrt{2 \pi}}e^{-\frac{\ln x^2}{2}}.$$
  *

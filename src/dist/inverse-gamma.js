@@ -2,7 +2,7 @@ import { gammaUpperIncomplete, gammaLowerIncompleteInv } from '../special'
 import Gamma from './gamma'
 
 /**
- * Generator for the [inverse gamma distribution]{@link https://en.wikipedia.org/wiki/Inverse-gamma_distribution}:
+ * Probability density function for the [inverse gamma distribution]{@link https://en.wikipedia.org/wiki/Inverse-gamma_distribution}:
  *
  * $f(x; \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{-\alpha - 1} e^{-\beta/x},$
  *

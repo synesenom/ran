@@ -2,7 +2,7 @@ import GeneralizedPareto from './generalized-pareto'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [q-exponential distribution]{@link https://en.wikipedia.org/wiki/Q-exponential_distribution}:
+ * Probability density function for the [q-exponential distribution]{@link https://en.wikipedia.org/wiki/Q-exponential_distribution}:
  *
  * $f(x; q, \lambda) = (2 - q) \lambda e^{-\lambda x}_q,$
  *

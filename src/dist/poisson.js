@@ -3,7 +3,7 @@ import poisson from './_poisson'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Poisson distribution]{@link https://en.wikipedia.org/wiki/Poisson_distribution}:
+ * Probability mass function for the [Poisson distribution]{@link https://en.wikipedia.org/wiki/Poisson_distribution}:
  *
  * $f(k; \lambda) = \frac{\lambda^k e^{-\lambda}}{k!},$
  *

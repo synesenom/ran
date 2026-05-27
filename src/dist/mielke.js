@@ -2,7 +2,7 @@ import Dagum from './dagum'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Mielke distribution]{@link https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.mielke.html#r7049b665a02e-2}:
+ * Probability density function for the [Mielke distribution]{@link https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.mielke.html#r7049b665a02e-2}:
  *
  * $f(x; k, s) = \frac{k x^{k - 1}}{(1 + x^s)^{1 + k/s}},$
  *

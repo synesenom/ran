@@ -3,7 +3,7 @@ import { logGamma } from '../special'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Irwin-Hall distribution]{@link https://en.wikipedia.org/wiki/Irwin%E2%80%93Hall_distribution}:
+ * Probability density function for the [Irwin-Hall distribution]{@link https://en.wikipedia.org/wiki/Irwin%E2%80%93Hall_distribution}:
  *
  * $f(x; n) = \frac{1}{(n - 1)!} \sum_{k = 0}^{\lfloor x\rfloor} (-1)^k \begin{pmatrix}n \\\\ k \\\\ \end{pmatrix} (x - k)^{n - 1},$
  *

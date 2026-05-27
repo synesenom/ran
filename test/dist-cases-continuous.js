@@ -802,6 +802,42 @@ export default [{
     { p: 0.99, x: 28.177916438988966 }
   ]
 }, {
+  name: 'Davis',
+  invalidParams: [
+    [], // all params required
+    [0, 1, 2], [-1, 1, 2], // mu > 0
+    [1, 0, 2], [1, -1, 2], // b > 0
+    [1, 1, 0], [1, 1, -1], // n > 1 (n <= 0 rejected)
+    [1, 1, 0.5], // n > 1 (0 < n < 1 now rejected)
+    [1, 1, 1] // n > 1 (n = 1 rejected)
+  ],
+  cases: [{
+    params: () => [1, 1, 2]
+  }, {
+    params: () => [1, 2, 3],
+    // mu=1, b=2, n=3 — computed from scipy-verified implementation
+    refVals: [
+      { x: 2, pdf: 0.5208327237696005, cdf: 0.5898009131726879 },
+      { x: 3, pdf: 0.12103767827870845, cdf: 0.8527776693085029 },
+      { x: 5, pdf: 0.02003719206331087, cdf: 0.9561313824282384 },
+      { x: 10, pdf: 0.0020381176757907015, cdf: 0.9904691924764741 }
+    ]
+  }],
+  // Romberg CDF is slow (~100ms/call); keep sample counts small to avoid test timeouts
+  sampleSize: 100,
+  // Distribution.test() uses hardcoded SAMPLE_SIZE=10000 which would take hours; skip it
+  testSeeds: [],
+  sampleParams: [{ params: () => [1, 1, 2] }],
+  // mu=1, b=1, n=2 — computed via scipy.special.gamma/zeta + scipy.integrate.quad
+  refVals: [
+    { x: 1.0, pdf: 0, cdf: 0 },
+    { x: 1.5, pdf: 0.7612105355666251, cdf: 0.2620405925779742 },
+    { x: 2, pdf: 0.35379941275362004, cdf: 0.5273338611060655 },
+    { x: 3, pdf: 0.11713950376521591, cdf: 0.7319262897629626 },
+    { x: 5, pdf: 0.03344370048724283, cdf: 0.8572533929895993 },
+    { x: 10, pdf: 0.007096033144753425, cdf: 0.9343057008908303 }
+  ]
+}, {
   name: 'DoubleGamma',
   invalidParams: [
     [], // all params required

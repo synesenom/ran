@@ -4,7 +4,7 @@ import poisson from './_poisson'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Rice distribution]{@link https://en.wikipedia.org/wiki/Rice_distribution}:
+ * Probability density function for the [Rice distribution]{@link https://en.wikipedia.org/wiki/Rice_distribution}:
  *
  * $f(x; \nu, \sigma) = \frac{x}{\sigma^2} e^{-\frac{x^2 + \nu^2}{2 \sigma^2}} I_0\bigg(\frac{\nu x}{\sigma^2}\bigg),$
  *

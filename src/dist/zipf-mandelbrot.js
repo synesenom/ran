@@ -2,7 +2,7 @@ import Categorical from './categorical'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Zipf-Mandelbrot distribution]{@link https://en.wikipedia.org/wiki/Zipf%E2%80%93Mandelbrot_law}:
+ * Probability mass function for the [Zipf-Mandelbrot distribution]{@link https://en.wikipedia.org/wiki/Zipf%E2%80%93Mandelbrot_law}:
  *
  * $f(k; N, s, q) = \frac{(k+q)^{-s}}{H_{N,s,q}},$
  *

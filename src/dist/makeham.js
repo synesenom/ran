@@ -2,7 +2,7 @@ import { lambertW0 } from '../special'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Makeham distribution]{@link https://en.wikipedia.org/wiki/Gompertz%E2%80%93Makeham_law_of_mortality}
+ * Probability density function for the [Makeham distribution]{@link https://en.wikipedia.org/wiki/Gompertz%E2%80%93Makeham_law_of_mortality}
  * (also known as Gompertz-Makeham distribution):
  *
  * $f(x; \alpha, \beta, \lambda) = (\alpha e^{\beta x} + \lambda) \exp\Big\[{-\lambda x - \frac{\alpha}{\beta}(e^{\beta x} - 1)}\Big\],$

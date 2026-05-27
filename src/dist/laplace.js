@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Laplace distribution]{@link https://en.wikipedia.org/wiki/Laplace_distribution} (also known as double exponential distribution):
+ * Probability density function for the [Laplace distribution]{@link https://en.wikipedia.org/wiki/Laplace_distribution} (also known as double exponential distribution):
  *
  * $f(x; \mu, b) = \frac{1}{2b}e^{-\frac{|x - \mu|}{b}},$
  *

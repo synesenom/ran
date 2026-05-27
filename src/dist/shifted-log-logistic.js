@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for the [shifted log-logistic distribution]{@link https://en.wikipedia.org/wiki/Shifted_log-logistic_distribution}:
+ * Probability density function for the [shifted log-logistic distribution]{@link https://en.wikipedia.org/wiki/Shifted_log-logistic_distribution}:
  *
  * $f(x; \mu, \sigma, \xi) = \frac{(1 + \xi z)^{-(1/\xi + 1)}}{\sigma \[1 + (1 + \xi z)^{-1/\xi}\]^2},$
  *

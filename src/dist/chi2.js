@@ -2,7 +2,7 @@ import Distribution from './_distribution'
 import Gamma from './gamma'
 
 /**
- * Generator for the [$\chi^2$ distribution]{@link https://en.wikipedia.org/wiki/Chi-squared_distribution}:
+ * Probability density function for the [$\chi^2$ distribution]{@link https://en.wikipedia.org/wiki/Chi-squared_distribution}:
  *
  * $f(x; k) = \frac{1}{2^{k/2} \Gamma(k/2)} x^{k/2 - 1} e^{-x/2},$
  *

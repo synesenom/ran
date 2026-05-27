@@ -1,7 +1,7 @@
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Benini distribution]{@link https://en.wikipedia.org/wiki/Benini_distribution}:
+ * Probability density function for the [Benini distribution]{@link https://en.wikipedia.org/wiki/Benini_distribution}:
  *
  * $f(x; \alpha, \beta, \sigma) = \bigg(\frac{\alpha}{x} + \frac{2 \beta \ln \frac{x}{\sigma}}{x}\bigg) e^{-\alpha \ln \frac{x}{\sigma} - \beta \ln^2 \frac{x}{\sigma}},$
  *

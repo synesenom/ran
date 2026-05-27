@@ -2,7 +2,7 @@ import Normal from './normal'
 import { erfinv } from '../special'
 
 /**
- * Generator for the [half-normal distribution]{@link https://en.wikipedia.org/wiki/Half-normal_distribution}:
+ * Probability density function for the [half-normal distribution]{@link https://en.wikipedia.org/wiki/Half-normal_distribution}:
  *
  * $f(x; \sigma) = \frac{\sqrt{2}}{\sigma\sqrt{\pi}} e^{-\frac{x^2}{2\sigma^2}},$
  *

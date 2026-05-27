@@ -2,7 +2,7 @@ import { lambertW0 } from '../special'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Benktander type II distribution]{@link https://en.wikipedia.org/wiki/Benktander_type_II_distribution}:
+ * Probability density function for the [Benktander type II distribution]{@link https://en.wikipedia.org/wiki/Benktander_type_II_distribution}:
  *
  * $f(x; a, b) = e^{\frac{a}{b}(1 - x^b)} x^{b-2} (ax^b - b + 1),$
  *

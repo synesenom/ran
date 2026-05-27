@@ -2,7 +2,7 @@ import Exponential from './exponential'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Weibull distribution]{@link https://en.wikipedia.org/wiki/Weibull_distribution}:
+ * Probability density function for the [Weibull distribution]{@link https://en.wikipedia.org/wiki/Weibull_distribution}:
  *
  * $f(x; \lambda, k) = \frac{k}{\lambda}\bigg(\frac{x}{\lambda}\bigg)^{k - 1} e^{-(x / \lambda)^k},$
  *

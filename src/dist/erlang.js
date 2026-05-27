@@ -2,7 +2,7 @@ import Gamma from './gamma'
 import Distribution from './_distribution'
 
 /**
- * Generator for the [Erlang distribution]{@link https://en.wikipedia.org/wiki/Erlang_distribution}:
+ * Probability density function for the [Erlang distribution]{@link https://en.wikipedia.org/wiki/Erlang_distribution}:
  *
  * $f(x; k, \lambda) = \frac{\lambda^k x^{k - 1} e^{-\lambda x}}{(k - 1)!},$
  *
