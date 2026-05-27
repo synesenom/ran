@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `neumaier()` now returns `±Infinity` (instead of `NaN`) when the input array contains `±Infinity`; fixes `lnL()`, `aic()`, and `bic()` silently returning `NaN` when any observation falls outside a distribution's support (#442)
+
 ### Added
 
 - `Distribution.fit(data)` static method for maximum-likelihood parameter estimation via Nelder-Mead simplex optimizer (#404)

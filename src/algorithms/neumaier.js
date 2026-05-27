@@ -18,10 +18,13 @@ export default function (arr) {
   // Start summation.
   for (let i = 1; i < sorted.length; i++) {
     const t = s + sorted[i]
-    if (Math.abs(s) > Math.abs(sorted[i])) {
-      c += (s - t) + sorted[i]
-    } else {
-      c += (sorted[i] - t) + s
+    // Skip compensation when either operand is infinite: (±Inf - ±Inf) = NaN.
+    if (isFinite(s) && isFinite(t)) {
+      if (Math.abs(s) > Math.abs(sorted[i])) {
+        c += (s - t) + sorted[i]
+      } else {
+        c += (sorted[i] - t) + s
+      }
     }
     s = t
   }

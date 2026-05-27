@@ -120,6 +120,18 @@ describe('algorithms', () => {
       assert.equal(algorithms.neumaier(arr), 6)
       assert.deepEqual(arr, [3, 1, 2])
     })
+
+    it('should return -Infinity when input contains -Infinity', () => {
+      assert.equal(algorithms.neumaier([-Infinity, 1, 2, 3]), -Infinity)
+    })
+
+    it('should return Infinity when input contains Infinity', () => {
+      assert.equal(algorithms.neumaier([Infinity, 1, 2, 3]), Infinity)
+    })
+
+    it('should return NaN for indeterminate -Infinity + Infinity', () => {
+      assert(Number.isNaN(algorithms.neumaier([-Infinity, Infinity])))
+    })
   })
 
   describe('romberg()', () => {
