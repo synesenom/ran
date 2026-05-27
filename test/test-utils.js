@@ -471,5 +471,21 @@ export const Tests = {
       const cdfMinus = dist.cdf(center - x)
       assert(almostEqual(cdfPlus + cdfMinus, 1), `cdf(${center}+${x}) + cdf(${center}-${x}) = ${cdfPlus + cdfMinus} != 1`)
     }
+  },
+
+  // For discrete distributions: pmf(center+k) = pmf(center-k) and cdf(center+k) + cdf(center-k-1) = 1.
+  // Integer centers start at k=1 to avoid the trivial pmf(c)=pmf(c) at k=0.
+  // Half-integer centers (e.g. Binomial n/2 with odd n) use 0.5-spaced offsets so test points land on integers.
+  symmetryDiscrete (dist, center) {
+    const start = Number.isInteger(center) ? 1 : 0.5
+    for (let i = 0; i < 5; i++) {
+      const k = start + i
+      const pmfPlus = dist.pdf(center + k)
+      const pmfMinus = dist.pdf(center - k)
+      assert(almostEqual(pmfPlus, pmfMinus), `pmf(${center}+${k}) = ${pmfPlus} != pmf(${center}-${k}) = ${pmfMinus}`)
+      const cdfPlus = dist.cdf(center + k)
+      const cdfMinusLow = dist.cdf(center - k - 1)
+      assert(almostEqual(cdfPlus + cdfMinusLow, 1), `cdf(${center}+${k}) + cdf(${center}-${k}-1) = ${cdfPlus + cdfMinusLow} != 1`)
+    }
   }
 }

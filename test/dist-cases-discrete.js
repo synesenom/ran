@@ -86,7 +86,8 @@ export default [{
     [100, -1], [100, 2] // 0 <= p <= 1
   ],
   cases: [{
-    params: () => [25, 0.5]
+    params: () => [25, 0.5],
+    symmetryDiscrete: 12.5
   }, {
     name: 'small n, low p',
     params: () => [10, 0.1],
@@ -362,10 +363,12 @@ export default [{
     params: s => [s.reduce((sum, d) => d + sum, 0) / s.length]
   },
   cases: [{
-    params: () => [5, 50]
+    params: () => [5, 50],
+    symmetryDiscrete: 27.5
   }, {
     name: 'small range',
     params: () => [0, 9],
+    symmetryDiscrete: 4.5,
     refVals: [
       { x: 0, pmf: 0.1, cdf: 0.1 },
       { x: 1.0, pmf: 0.1, cdf: 0.2 },
@@ -886,7 +889,8 @@ export default [{
   name: 'Rademacher',
   invalidParams: [],
   cases: [{
-    params: () => []
+    params: () => [],
+    symmetryDiscrete: 0
   }],
   // Rademacher: P(X=-1) = P(X=1) = 0.5
   refVals: [
@@ -911,7 +915,8 @@ export default [{
     [1, -1], [1, 0] // mu2 > 0
   ],
   cases: [{
-    params: () => [5, 5]
+    params: () => [5, 5],
+    symmetryDiscrete: 0
   }, {
     name: 'asymmetric rates',
     params: () => [1, 4],

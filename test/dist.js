@@ -106,7 +106,8 @@ const UnitTests = {
       generate: () => new dist[tc.name](...c.params()),
       refVals: c.refVals,
       quantileVals: c.quantileVals,
-      symmetry: c.symmetry
+      symmetry: c.symmetry,
+      symmetryDiscrete: c.symmetryDiscrete
     }))
 
     cases.forEach(c => {
@@ -158,6 +159,12 @@ const UnitTests = {
         if (c.symmetry !== undefined) {
           it('pdf and cdf should be symmetric around the center', () => {
             Tests.symmetry(c.generate(), c.symmetry)
+          })
+        }
+
+        if (c.symmetryDiscrete !== undefined) {
+          it('pmf and cdf should be symmetric around the center (discrete)', () => {
+            Tests.symmetryDiscrete(c.generate(), c.symmetryDiscrete)
           })
         }
       })
