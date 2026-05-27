@@ -105,6 +105,9 @@
     "./dist/dagum": {
       "import": "./dist/dagum.esm.js"
     },
+    "./dist/davis": {
+      "import": "./dist/davis.esm.js"
+    },
     "./dist/degenerate": {
       "import": "./dist/degenerate.esm.js"
     },
