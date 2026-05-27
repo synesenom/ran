@@ -203,4 +203,36 @@ describe('algorithms', () => {
       assert(result.length === 1)
     })
   })
+
+  describe('.gaussLegendre()', () => {
+    it('should integrate x^2 over [0,1] exactly for n=5', () => {
+      // Degree-2 polynomial, n=5 is exact for polynomials up to degree 9
+      const result = algorithms.gaussLegendre(x => x * x, 0, 1, 5)
+      assert(Math.abs(result - 1 / 3) < Number.EPSILON * 10)
+    })
+
+    it('should integrate x^2 over [0,1] exactly for n=10', () => {
+      const result = algorithms.gaussLegendre(x => x * x, 0, 1, 10)
+      assert(Math.abs(result - 1 / 3) < Number.EPSILON * 10)
+    })
+
+    it('should integrate x^2 over [0,1] exactly for n=20', () => {
+      const result = algorithms.gaussLegendre(x => x * x, 0, 1, 20)
+      assert(Math.abs(result - 1 / 3) < Number.EPSILON * 10)
+    })
+
+    it('should integrate exp(x) over [0,1] for all supported orders', () => {
+      const exact = Math.E - 1
+      for (const n of [5, 10, 20]) {
+        const result = algorithms.gaussLegendre(x => Math.exp(x), 0, 1, n)
+        assert(Math.abs(result - exact) < 1e-10)
+      }
+    })
+
+    it('should handle a non-zero non-unit interval [a,b]', () => {
+      // ∫_2^5 x dx = (25 - 4) / 2 = 10.5
+      const result = algorithms.gaussLegendre(x => x, 2, 5, 5)
+      assert(Math.abs(result - 10.5) < Number.EPSILON * 100)
+    })
+  })
 })
