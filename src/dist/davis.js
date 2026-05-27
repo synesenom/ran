@@ -42,6 +42,7 @@ export default class Davis extends Distribution {
     }]
 
     // Pre-compute constants that appear in every _pdf call.
+    // See solutions/distribution/2026-05-27-1530-davis-romberg-boundary-guard-and-constant-cache.md
     this.c = {
       bn: Math.pow(b, n),
       gammaN: gammaFn(n),
