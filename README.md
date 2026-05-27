@@ -12,7 +12,7 @@ A comprehensive JavaScript library for probability distributions, random variate
 
 ## Features
 
-- **130+ probability distributions** — continuous and discrete, each with PDF/PMF, CDF, quantile, hazard, survival, likelihood, AIC/BIC, and built-in goodness-of-fit testing
+- **140+ probability distributions** — continuous and discrete, each with PDF/PMF, CDF, quantile, hazard, survival, likelihood, AIC/BIC, and built-in goodness-of-fit testing
 - **Statistical measures** — location (mean, median, mode, …), dispersion (variance, IQR, Gini, …), shape (skewness, kurtosis, …), and dependence (Pearson, Spearman, Kendall, …)
 - **Hypothesis tests** — Bartlett, Levene, Brown–Forsythe, Mann–Whitney U, HSIC
 - **MCMC samplers** — random-walk Metropolis and slice sampling with Gelman–Rubin convergence diagnostics
@@ -101,7 +101,7 @@ console.log(misfit.aic(data))   // => 66508.74299363888
 
 | Namespace | Contents |
 |-----------|----------|
-| `ran.dist` | 130+ probability distributions |
+| `ran.dist` | 140+ probability distributions |
 | `ran.location` | Mean, median, mode, geometric mean, harmonic mean, trimean, midrange |
 | `ran.dispersion` | Variance, standard deviation, IQR, Gini coefficient, entropy, CV, … |
 | `ran.shape` | Skewness, kurtosis, quantiles, moments, min, max, rank |

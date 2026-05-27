@@ -7,9 +7,9 @@ import { romberg } from '../algorithms'
 /**
  * Generator for the [Davis distribution]{@link https://en.wikipedia.org/wiki/Davis_distribution}:
  *
- * $f(x; \mu, b, n) = \frac{b^n (x - \mu)^{-1-n}}{\Gamma(n)\, \zeta(n)\, \left(e^{b/(x-\mu)} - 1\right)},$
+ * $f(x; \mu, b, n) = \frac{b^n (x - \mu)^{-1-n}}{\Gamma(n)\,\zeta(n)\,(e^{b/(x-\mu)} - 1)},$
  *
- * with $\mu > 0$, $b > 0$, and $n > 0, n \neq 1$. Support: $x \in (\mu, \infty)$.
+ * with $\mu > 0$, $b > 0$, and $n > 1$. Support: $x \in (\mu, \infty)$.
  *
  * @class Davis
  * @memberof ran.dist
@@ -40,6 +40,13 @@ export default class Davis extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Pre-compute constants that appear in every _pdf call.
+    this.c = {
+      bn: Math.pow(b, n),
+      gammaN: gammaFn(n),
+      zetaN: riemannZeta(n)
+    }
   }
 
   _generator () {
@@ -54,7 +61,7 @@ export default class Davis extends Distribution {
     const bOverY = this.p.b / y
     // exp(bOverY) overflows to Infinity for bOverY > ~709; PDF → 0 in that limit
     if (bOverY > 700) return 0
-    return Math.pow(this.p.b, this.p.n) * Math.pow(y, -1 - this.p.n) / (gammaFn(this.p.n) * riemannZeta(this.p.n) * (Math.exp(bOverY) - 1))
+    return this.c.bn * Math.pow(y, -1 - this.p.n) / (this.c.gammaN * this.c.zetaN * Math.expm1(bOverY))
   }
 
   _cdf (x) {
