@@ -56,4 +56,10 @@ export default class ExponentiatedWeibull extends Weibull {
   _q (p) {
     return this.p.lambda2 * Math.pow(-Math.log(1 - Math.pow(p, 1 / this.p.alpha)), 1 / this.p.k)
   }
+
+  static _fitInit (data) {
+    // alpha=1 collapses to Weibull; seed Nelder-Mead with Weibull Justus estimate and alpha=1
+    const [lambda, k] = super._fitInit(data)
+    return [lambda, k, 1]
+  }
 }

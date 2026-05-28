@@ -52,4 +52,14 @@ export default class InvertedWeibull extends Distribution {
   _q (p) {
     return Math.pow(-Math.log(p), -1 / this.p.c)
   }
+
+  static _fitInit (data) {
+    // 1/X ~ Weibull(1, c) when X ~ InvertedWeibull(c): Justus approximation on reciprocals yields c
+    const n = data.length
+    const recip = data.map(x => 1 / x)
+    const mean = recip.reduce((s, x) => s + x, 0) / n
+    const variance = recip.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    const cv = Math.sqrt(variance) / Math.max(mean, 1e-9)
+    return [Math.max(1.2 * Math.pow(cv, -1.086), 0.1)]
+  }
 }

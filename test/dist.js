@@ -1095,6 +1095,61 @@ describe('dist', () => {
         assert(Math.abs(result.p.mu - 2) < 0.4)
         assert(Math.abs(result.p.s - 3) < 0.4)
       })
+
+      it('Weibull.fit should recover lambda and k close to planted values', () => {
+        const data = new dist.Weibull(2, 1.5).seed(42).sample(200)
+        const result = dist.Weibull.fit(data)
+        assert(result instanceof dist.Weibull)
+        assert(Math.abs(result.p.lambda2 - 2) < 0.5)
+        assert(Math.abs(result.p.k - 1.5) < 0.3)
+      })
+
+      it('InvertedWeibull.fit should recover c close to planted value', () => {
+        const data = new dist.InvertedWeibull(3).seed(42).sample(200)
+        const result = dist.InvertedWeibull.fit(data)
+        assert(result instanceof dist.InvertedWeibull)
+        assert(Math.abs(result.p.c - 3) < 0.6)
+      })
+
+      it('DoubleWeibull.fit should recover lambda and k close to planted values', () => {
+        const data = new dist.DoubleWeibull(2, 1.5).seed(42).sample(200)
+        const result = dist.DoubleWeibull.fit(data)
+        assert(result instanceof dist.DoubleWeibull)
+        assert(Math.abs(result.p.lambda2 - 2) < 0.5)
+        assert(Math.abs(result.p.k - 1.5) < 0.4)
+      })
+
+      it('ExponentiatedWeibull.fit should recover lambda, k, and alpha close to planted values', () => {
+        const data = new dist.ExponentiatedWeibull(2, 1.5, 2).seed(42).sample(200)
+        const result = dist.ExponentiatedWeibull.fit(data)
+        assert(result instanceof dist.ExponentiatedWeibull)
+        assert(Math.abs(result.p.lambda2 - 2) < 0.8)
+        assert(Math.abs(result.p.k - 1.5) < 0.6)
+        assert(Math.abs(result.p.alpha - 2) < 0.8)
+      })
+
+      it('Frechet.fit should recover alpha and s close to planted values', () => {
+        const data = new dist.Frechet(2, 1, 0).seed(42).sample(200)
+        const result = dist.Frechet.fit(data)
+        assert(result instanceof dist.Frechet)
+        assert(Math.abs(result.p.alpha - 2) < 0.5)
+        assert(Math.abs(result.p.s - 1) < 0.4)
+      })
+
+      it('GeneralizedExtremeValue.fit should recover c close to planted value', () => {
+        const data = new dist.GeneralizedExtremeValue(0.5).seed(42).sample(200)
+        const result = dist.GeneralizedExtremeValue.fit(data)
+        assert(result instanceof dist.GeneralizedExtremeValue)
+        assert(Math.abs(result.p.c - 0.5) < 0.2)
+      })
+
+      it('ShiftedLogLogistic.fit should recover mu and sigma close to planted values', () => {
+        const data = new dist.ShiftedLogLogistic(1, 2, 0).seed(42).sample(200)
+        const result = dist.ShiftedLogLogistic.fit(data)
+        assert(result instanceof dist.ShiftedLogLogistic)
+        assert(Math.abs(result.p.mu - 1) < 0.4)
+        assert(Math.abs(result.p.sigma - 2) < 0.6)
+      })
     })
   })
 
