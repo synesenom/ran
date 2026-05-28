@@ -59,4 +59,13 @@ export default class LogLogistic extends Distribution {
   _q (p) {
     return this.p.alpha * Math.pow(1 / p - 1, -1 / this.p.beta)
   }
+
+  static _fitInit (data) {
+    // log(Y) ~ Logistic(log(alpha), 1/beta): MOM on log scale exploits the log-logistic/logistic link
+    const n = data.length
+    const logData = data.map(x => Math.log(x))
+    const meanLog = logData.reduce((s, x) => s + x, 0) / n
+    const stdLog = Math.sqrt(logData.reduce((s, x) => s + (x - meanLog) ** 2, 0) / n) || 1
+    return [Math.exp(meanLog), Math.PI / (stdLog * Math.sqrt(3))]
+  }
 }

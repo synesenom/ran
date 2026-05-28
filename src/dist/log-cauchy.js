@@ -49,4 +49,14 @@ export default class LogCauchy extends Cauchy {
   _q (p) {
     return Math.exp(this.p.x0 + this.p.gamma * Math.tan(Math.PI * (p - 0.5)))
   }
+
+  static _fitInit (data) {
+    // log(Y) ~ Cauchy(x0, gamma): IQR on log scale avoids reliance on moments that don't exist
+    const logData = data.map(x => Math.log(x)).sort((a, b) => a - b)
+    const n = logData.length
+    const mid = n % 2 ? logData[(n - 1) / 2] : (logData[n / 2 - 1] + logData[n / 2]) / 2
+    const q1 = logData[Math.floor(n / 4)]
+    const q3 = logData[Math.floor(3 * n / 4)]
+    return [mid, Math.max((q3 - q1) / 2, 1e-3)]
+  }
 }
