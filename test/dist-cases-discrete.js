@@ -286,6 +286,19 @@ export default [{
       { x: 5, pmf: 0.10081881344492456, cdf: 0.9160820579686972 },
       { x: 8, pmf: 0.008101511794681437, cdf: 0.9961970079383248 }
     ]
+  }, {
+    name: 'large lambda overflow check',
+    params: () => [800, 1],
+    // CMP(800, 1) = Poisson(800): logZ must converge to 800 (Z = e^lambda for nu=1).
+    // pmf(k) = e^(-800) * 800^k / k!; pmf(800) ≈ 1/sqrt(2*pi*800) ≈ 0.01412 (Stirling).
+    // pmf(0) = e^(-800) underflows to 0; cdf(800) ≈ 0.51 (slightly above 0.5, as expected for
+    // discrete Poisson). Primary purpose: verify no overflow/NaN for lambda > 710.
+    refVals: [
+      { x: 0, pmf: 0, cdf: 0 },
+      { x: 780, pmf: 0.0111000895525291, cdf: 0.246249019272150 },
+      { x: 800, pmf: 0.0141032704215892, cdf: 0.509401658000143 },
+      { x: 810, pmf: 0.0131701847329993, cdf: 0.646654547059622 }
+    ]
   }],
   // ConwayMaxwellPoisson(2, 1.5) — computed from Z(2,1.5) = 5.122675153816768
   refVals: [
