@@ -807,6 +807,88 @@ describe('dist', () => {
         assert(result.p.alpha > 0 && result.p.beta > 0 && result.p.lambda > 0)
         assert(Number.isFinite(result.pdf(3)) && result.pdf(3) > 0)
       })
+
+      it('Cauchy.fit should recover x0 and gamma close to planted values', () => {
+        const data = new dist.Cauchy(2, 1).seed(42).sample(500)
+        const result = dist.Cauchy.fit(data)
+        assert(result instanceof dist.Cauchy)
+        assert(Math.abs(result.p.x0 - 2) < 0.5)
+        assert(Math.abs(result.p.gamma - 1) < 0.5)
+      })
+
+      it('Laplace.fit should recover mu and b close to planted values', () => {
+        const data = new dist.Laplace(1, 2).seed(42).sample(200)
+        const result = dist.Laplace.fit(data)
+        assert(result instanceof dist.Laplace)
+        assert(Math.abs(result.p.mu - 1) < 0.3)
+        assert(Math.abs(result.p.b - 2) < 0.4)
+      })
+
+      it('Logistic.fit should recover mu and s close to planted values', () => {
+        const data = new dist.Logistic(1, 2).seed(42).sample(200)
+        const result = dist.Logistic.fit(data)
+        assert(result instanceof dist.Logistic)
+        assert(Math.abs(result.p.mu - 1) < 0.4)
+        assert(Math.abs(result.p.s - 2) < 0.4)
+      })
+
+      it('Gumbel.fit should recover mu and beta close to planted values', () => {
+        const data = new dist.Gumbel(1, 2).seed(42).sample(200)
+        const result = dist.Gumbel.fit(data)
+        assert(result instanceof dist.Gumbel)
+        assert(Math.abs(result.p.mu - 1) < 0.4)
+        assert(Math.abs(result.p.beta - 2) < 0.4)
+      })
+
+      it('Moyal.fit should recover mu and sigma close to planted values', () => {
+        const data = new dist.Moyal(1, 2).seed(42).sample(200)
+        const result = dist.Moyal.fit(data)
+        assert(result instanceof dist.Moyal)
+        assert(Math.abs(result.p.mu - 1) < 0.5)
+        assert(Math.abs(result.p.sigma - 2) < 0.5)
+      })
+
+      it('TukeyLambda.fit should recover lambda close to planted value', () => {
+        const data = new dist.TukeyLambda(0.5).seed(42).sample(500)
+        const result = dist.TukeyLambda.fit(data)
+        assert(result instanceof dist.TukeyLambda)
+        assert(Math.abs(result.p.lambda - 0.5) < 0.2)
+      })
+
+      it('SkewNormal.fit should recover xi, omega, and alpha close to planted values', () => {
+        const data = new dist.SkewNormal(1, 2, 3).seed(42).sample(300)
+        const result = dist.SkewNormal.fit(data)
+        assert(result instanceof dist.SkewNormal)
+        assert(Math.abs(result.p.xi - 1) < 0.5)
+        assert(Math.abs(result.p.omega - 2) < 0.5)
+        assert(Math.abs(result.p.alpha - 3) < 1.5)
+      })
+
+      it('GeneralizedNormal.fit should recover mu, alpha, and beta close to planted values', () => {
+        const data = new dist.GeneralizedNormal(1, 2, 2).seed(42).sample(300)
+        const result = dist.GeneralizedNormal.fit(data)
+        assert(result instanceof dist.GeneralizedNormal)
+        assert(Math.abs(result.p.mu - 1) < 0.3)
+        assert(Math.abs(result.p.alpha2 - 2) < 0.5)
+        assert(Math.abs(result.p.beta2 - 2) < 0.5)
+      })
+
+      it('HalfGeneralizedNormal.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.HalfGeneralizedNormal(2, 2).seed(42).sample(300)
+        const result = dist.HalfGeneralizedNormal.fit(data)
+        assert(result instanceof dist.HalfGeneralizedNormal)
+        assert(Math.abs(result.p.alpha2 - 2) < 0.5)
+        assert(Math.abs(result.p.beta2 - 2) < 0.5)
+      })
+
+      it('GeneralizedLogistic.fit should recover mu, s, and c close to planted values', () => {
+        const data = new dist.GeneralizedLogistic(1, 2, 2).seed(42).sample(300)
+        const result = dist.GeneralizedLogistic.fit(data)
+        assert(result instanceof dist.GeneralizedLogistic)
+        assert(Math.abs(result.p.mu - 1) < 0.5)
+        assert(Math.abs(result.p.s - 2) < 0.6)
+        assert(Math.abs(result.p.c - 2) < 0.6)
+      })
     })
   })
 

@@ -41,4 +41,11 @@ export default class HalfGeneralizedNormal extends GeneralizedNormal {
   _cdf (x) {
     return 2 * super._cdf(x) - 1
   }
+
+  static _fitInit (data) {
+    // At beta=2 (half-normal), E[X] = alpha/sqrt(pi); inverting gives alpha from the sample mean
+    const n = data.length
+    const meanAbs = data.reduce((s, x) => s + x, 0) / n
+    return [Math.max(meanAbs * Math.sqrt(Math.PI), 1e-3), 2]
+  }
 }

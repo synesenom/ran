@@ -62,4 +62,13 @@ export default class Moyal extends Distribution {
     // gammaUpperIncomplete avoids catastrophic cancellation when x << mu (large z, Q near zero)
     return gammaUpperIncomplete(0.5, 0.5 * Math.exp((this.p.mu - x) / this.p.sigma))
   }
+
+  static _fitInit (data) {
+    // Var[X] = pi^2 sigma^2 / 2 and mean = mu + sigma*(ln2 + gamma_EM) link sample moments to parameters
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const v = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n
+    const sigma = Math.max(Math.sqrt(2 * v) / Math.PI, 1e-3)
+    return [mean - sigma * (Math.LN2 + 0.5772156649015329), sigma]
+  }
 }

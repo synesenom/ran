@@ -57,4 +57,14 @@ export default class Cauchy extends Distribution {
   _q (p) {
     return this.p.x0 + this.p.gamma * (Math.tan(Math.PI * (p - 0.5)))
   }
+
+  static _fitInit (data) {
+    // Cauchy moments don't exist; median = x0 and IQR = 2*gamma give robust location and scale estimates
+    const sorted = data.slice().sort((a, b) => a - b)
+    const n = sorted.length
+    const mid = n % 2 ? sorted[(n - 1) / 2] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2
+    const q1 = sorted[Math.floor(n / 4)]
+    const q3 = sorted[Math.floor(3 * n / 4)]
+    return [mid, Math.max((q3 - q1) / 2, 1e-3)]
+  }
 }
