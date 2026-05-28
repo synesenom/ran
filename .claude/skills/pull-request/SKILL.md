@@ -127,12 +127,44 @@ EOF
 )"
 ```
 
-### 8. Report
+### 8. Watch the PR (CI + reviews)
+
+Immediately after the PR is created, **subscribe to its activity** so CI failures and
+review comments are handled without the user having to ask:
+
+```
+subscribe_pr_activity(<pr-number>)
+```
+
+> **Availability**: `subscribe_pr_activity` is provided by the remote-execution / GitHub
+> webhook integration. If the tool is unavailable (e.g. a purely local `gh` session),
+> skip this step and tell the user the PR can't be auto-watched here.
+
+After subscribing, **end the turn** — do not poll with `sleep` or repeated status checks.
+PR events arrive as `<github-webhook-activity>` messages that wake the session. When one
+arrives, investigate it and follow this loop:
+
+- **CI check failed** → reproduce locally, diagnose the root cause, push the fix, and update
+  a short status checklist. Re-kick on each failure until green; the green status IS the
+  deliverable, not a no-op to skip. Reply only when it resolves the task or raises a question.
+- **Review comment** → if the fix is unambiguous and not architecturally significant, apply
+  and push it. If there is **any** ambiguity (a comment open to interpretation, or a change
+  touching something significant), use `AskUserQuestion` to confirm before acting.
+- **Duplicate / no-action-needed event** → skip silently.
+- **Merge conflict reported** → fetch the base branch, merge it in, resolve conflicts,
+  re-run `npm run standard && npm test`, and push.
+
+Stop watching the moment the user asks — call `unsubscribe_pr_activity(<pr-number>)` and push
+no further changes to that PR.
+
+### 9. Report
 
 > "PR created: <URL>
 >
 > **Closes**: #<issue> (or "None")
-> **Non-trivial changes**: <count> (or "None")"
+> **Non-trivial changes**: <count> (or "None")
+> **Watching**: subscribed to PR activity — I'll auto-fix failing CI and respond to review
+> comments as they arrive (or "not available in this environment")."
 
 ## Rules
 
@@ -140,8 +172,12 @@ EOF
 - Read the FULL diff before categorizing
 - Always include `Closes #N` when an issue is detectable
 - Be specific about what changed in non-trivial items
+- Subscribe to PR activity after creation and follow through on CI/review events
+- Escalate ambiguous review comments via `AskUserQuestion` before acting
 
 ### DO NOT:
 - Create a PR if on `main`
 - Invent an issue number
 - Add `Closes #N` for an already-closed issue
+- Poll for CI/review status with `sleep` or repeated checks — react to webhook events instead
+- Keep pushing to a PR after the user asks you to stop watching it

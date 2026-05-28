@@ -19,7 +19,7 @@ This directory contains the skills and agents that power the development workflo
 │   ├── hotfix/SKILL.md       # Leaf: small targeted fix (no research/plan)
 │   ├── commit/SKILL.md       # Leaf: git commit
 │   ├── review/SKILL.md       # Leaf: code review
-│   ├── pull-request/SKILL.md # Leaf: GitHub PR creation
+│   ├── pull-request/SKILL.md # Leaf: GitHub PR creation + activity watch (CI autofix, review replies)
 │   ├── validate/SKILL.md     # Leaf: verify issue acceptance criteria
 │   └── compound/SKILL.md     # Leaf: document solved problems
 └── agents/         # Specialized subagents (not user-invocable)
@@ -73,7 +73,7 @@ Standalone skills that do one thing. Can be called directly or composed by orche
 | [`/commit`](skills/commit/SKILL.md) | Stage and commit with generated message | _(no args)_ |
 | [`/push`](skills/push/SKILL.md) | Push commits to remote | _(no args)_ |
 | [`/review`](skills/review/SKILL.md) | Code review against plan + quality checks | _(no args, reviews current branch)_ |
-| [`/pull-request`](skills/pull-request/SKILL.md) | Create a PR with change categorization | _(no args)_ |
+| [`/pull-request`](skills/pull-request/SKILL.md) | Create a PR with change categorization, then watch it (auto-fix CI, respond to reviews) | _(no args)_ |
 | [`/validate`](skills/validate/SKILL.md) | Verify issue acceptance criteria are met | `#issue` or issue URL |
 | [`/next`](skills/next/SKILL.md) | Pick the best next issue from the backlog | Milestone _(optional)_ |
 | [`/suggest`](skills/suggest/SKILL.md) | Suggest and create future issues from codebase analysis | _(no args)_ |
