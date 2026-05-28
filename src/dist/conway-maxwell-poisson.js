@@ -19,7 +19,8 @@ export default class ConwayMaxwellPoisson extends PreComputed {
    * @param {number} nu Dispersion parameter (nu > 0). nu = 1 gives Poisson, nu > 1 gives underdispersion.
    */
   constructor (lambda, nu) {
-    super()
+    // logP=true: _pk returns log-probabilities; PreComputed.advance exponentiates before CDF accumulation
+    super(true)
     this.k = 2
 
     this.p = { lambda, nu }
@@ -36,28 +37,30 @@ export default class ConwayMaxwellPoisson extends PreComputed {
       closed: false
     }]
 
-    // Compute Z = sum_{j=0}^inf lambda^j / (j!)^nu iteratively until the next term is
-    // negligible relative to the accumulated sum. The series always converges for lambda>0,
-    // nu>0 because term ratio lambda/(j+1)^nu -> 0 as j -> inf.
-    let Z = 0
-    let term = 1
+    // Compute log(Z) via log-space recurrence and running log-sum-exp.
+    // Direct accumulation overflows to Infinity for lambda >= ~710 (term ~ lambda^j/j! peaks
+    // near j=lambda, exceeding Number.MAX_VALUE); log-space avoids this entirely.
+    const logLambda = Math.log(lambda)
+    const LOG_TOL = Math.log(1e-14)
+    let logTerm = 0
+    let logZ = 0
     let j = 0
     do {
-      Z += term
       j++
-      term *= lambda / Math.pow(j, nu)
-    } while (term > 1e-14 * Z)
-    Z += term
+      logTerm += logLambda - nu * Math.log(j)
+      const m = Math.max(logZ, logTerm)
+      logZ = m + Math.log(Math.exp(logZ - m) + Math.exp(logTerm - m))
+    } while (logTerm > logZ + LOG_TOL)
 
     this.c = {
-      p0: 1 / Z
+      logP0: -logZ
     }
   }
 
   _pk (k) {
     if (k === 0) {
-      return this.c.p0
+      return this.c.logP0
     }
-    return this.pdfTable[k - 1] * this.p.lambda / Math.pow(k, this.p.nu)
+    return this.pdfTable[k - 1] + Math.log(this.p.lambda) - this.p.nu * Math.log(k)
   }
 }
