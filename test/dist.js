@@ -677,6 +677,136 @@ describe('dist', () => {
         const fittedMean = result.p.weights.reduce((s, w, i) => s + w / result.p.rates[i], 0)
         assert(Math.abs(fittedMean - sampleMean) < 0.2)
       })
+
+      it('Zeta.fit should recover s close to planted value', () => {
+        const data = new dist.Zeta(2.5).seed(42).sample(500)
+        const result = dist.Zeta.fit(data)
+        assert(result instanceof dist.Zeta)
+        assert(Math.abs(result.p.s - 2.5) < 0.3)
+      })
+
+      it('YuleSimon.fit should recover rho close to planted value', () => {
+        const data = new dist.YuleSimon(3).seed(42).sample(200)
+        const result = dist.YuleSimon.fit(data)
+        assert(result instanceof dist.YuleSimon)
+        assert(Math.abs(result.p.rho - 3) < 0.5)
+      })
+
+      it('LogSeries.fit should recover p close to planted value', () => {
+        const data = new dist.LogSeries(0.7).seed(42).sample(200)
+        const result = dist.LogSeries.fit(data)
+        assert(result instanceof dist.LogSeries)
+        assert(Math.abs(result.p.p - 0.7) < 0.05)
+      })
+
+      it('FlorySchulz.fit should recover a close to planted value', () => {
+        const data = new dist.FlorySchulz(0.4).seed(42).sample(200)
+        const result = dist.FlorySchulz.fit(data)
+        assert(result instanceof dist.FlorySchulz)
+        assert(Math.abs(result.p.a - 0.4) < 0.05)
+      })
+
+      it('NegativeBinomial.fit should return a usable NegativeBinomial instance', () => {
+        const data = new dist.NegativeBinomial(5, 0.4).seed(42).sample(200)
+        const result = dist.NegativeBinomial.fit(data)
+        assert(result instanceof dist.NegativeBinomial)
+        assert(result.p.r > 0 && result.p.p > 0 && result.p.p < 1)
+        assert(Number.isFinite(result.pdf(Math.round(5 * 0.4 / 0.6))) && result.pdf(Math.round(5 * 0.4 / 0.6)) > 0)
+      })
+
+      it('Skellam.fit should return a usable Skellam instance', () => {
+        const data = new dist.Skellam(4, 2).seed(42).sample(200)
+        const result = dist.Skellam.fit(data)
+        assert(result instanceof dist.Skellam)
+        assert(result.p.mu1 > 0 && result.p.mu2 > 0)
+        assert(Number.isFinite(result.pdf(2)) && result.pdf(2) > 0)
+      })
+
+      it('DiscreteWeibull.fit should return a usable DiscreteWeibull instance', () => {
+        const data = new dist.DiscreteWeibull(0.5, 1.5).seed(42).sample(200)
+        const result = dist.DiscreteWeibull.fit(data)
+        assert(result instanceof dist.DiscreteWeibull)
+        assert(result.p.q > 0 && result.p.q < 1 && result.p.beta > 0)
+        assert(Number.isFinite(result.pdf(0)) && result.pdf(0) > 0)
+      })
+
+      it('Logarithmic.fit should recover a and b close to planted values', () => {
+        const data = new dist.Logarithmic(1, 5).seed(42).sample(200)
+        const result = dist.Logarithmic.fit(data)
+        assert(result instanceof dist.Logarithmic)
+        assert(Math.abs(result.p.a - 1) < 0.2 && Math.abs(result.p.b - 5) < 0.3)
+      })
+
+      it('ExponentialLogarithmic.fit should return a usable ExponentialLogarithmic instance', () => {
+        const data = new dist.ExponentialLogarithmic(0.7, 1).seed(42).sample(200)
+        const result = dist.ExponentialLogarithmic.fit(data)
+        assert(result instanceof dist.ExponentialLogarithmic)
+        assert(result.p.p > 0 && result.p.p < 1 && result.p.beta > 0)
+        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      })
+
+      it('Borel.fit should recover mu close to planted value', () => {
+        const data = new dist.Borel(0.5).seed(42).sample(200)
+        const result = dist.Borel.fit(data)
+        assert(result instanceof dist.Borel)
+        assert(Math.abs(result.p.mu - 0.5) < 0.1)
+      })
+
+      it('HeadsMinusTails.fit should return a usable HeadsMinusTails instance', () => {
+        const data = new dist.HeadsMinusTails(5).seed(42).sample(200)
+        const result = dist.HeadsMinusTails.fit(data)
+        assert(result instanceof dist.HeadsMinusTails)
+        assert(result.p.n > 0)
+        assert(Number.isFinite(result.pdf(0)) && result.pdf(0) > 0)
+      })
+
+      it('BorelTanner.fit should return a usable BorelTanner instance', () => {
+        const data = new dist.BorelTanner(0.5, 3).seed(42).sample(200)
+        const result = dist.BorelTanner.fit(data)
+        assert(result instanceof dist.BorelTanner)
+        assert(result.p.mu >= 0 && result.p.mu < 1 && result.p.n > 0)
+        assert(Number.isFinite(result.pdf(result.p.n)) && result.pdf(result.p.n) > 0)
+      })
+
+      it('ConwayMaxwellPoisson.fit should return a usable ConwayMaxwellPoisson instance', () => {
+        const data = new dist.ConwayMaxwellPoisson(3, 2).seed(42).sample(200)
+        const result = dist.ConwayMaxwellPoisson.fit(data)
+        assert(result instanceof dist.ConwayMaxwellPoisson)
+        assert(result.p.lambda > 0 && result.p.nu > 0)
+        assert(Number.isFinite(result.pdf(3)) && result.pdf(3) > 0)
+      })
+
+      it('PolyaAeppli.fit should return a usable PolyaAeppli instance', () => {
+        const data = new dist.PolyaAeppli(2, 0.5).seed(42).sample(200)
+        const result = dist.PolyaAeppli.fit(data)
+        assert(result instanceof dist.PolyaAeppli)
+        assert(result.p.lambda > 0 && result.p.theta > 0 && result.p.theta < 1)
+        assert(Number.isFinite(result.pdf(2)) && result.pdf(2) > 0)
+      })
+
+      it('NeymanA.fit should return a usable NeymanA instance', () => {
+        const data = new dist.NeymanA(3, 2).seed(42).sample(200)
+        const result = dist.NeymanA.fit(data)
+        assert(result instanceof dist.NeymanA)
+        assert(result.p.lambda > 0 && result.p.phi > 0)
+        assert(Number.isFinite(result.pdf(6)) && result.pdf(6) > 0)
+      })
+
+      it('GeneralizedHermite.fit should return a usable GeneralizedHermite instance', () => {
+        const data = new dist.GeneralizedHermite(1, 0.5, 2).seed(42).sample(200)
+        const result = dist.GeneralizedHermite.fit(data)
+        assert(result instanceof dist.GeneralizedHermite)
+        assert(result.p.a1 > 0 && result.p.a2 > 0 && result.p.m > 1)
+        assert(Number.isFinite(result.pdf(2)) && result.pdf(2) > 0)
+      })
+
+      it('Delaporte.fit should return a usable Delaporte instance', () => {
+        const data = new dist.Delaporte(2, 1, 1).seed(42).sample(200)
+        const result = dist.Delaporte.fit(data)
+        assert(result instanceof dist.Delaporte)
+        assert(result.p.alpha > 0 && result.p.beta > 0 && result.p.lambda > 0)
+        assert(Number.isFinite(result.pdf(3)) && result.pdf(3) > 0)
+      })
     })
   })
 
@@ -701,6 +831,45 @@ describe('dist', () => {
       // cdfTable[0] = 0.5+eps, cdfTable[1] ≈ 1 + 2eps > 1; re-reading from cache must still return ≤ 1
       assert.isAtMost(d._cdf(0), 1)
       assert.isAtMost(d._cdf(1), 1)
+    })
+  })
+
+  describe('.fit() Categorical subclasses', () => {
+    it('Binomial.fit should recover PMF close to planted values', () => {
+      const data = new dist.Binomial(10, 0.3).seed(42).sample(200)
+      const result = dist.Binomial.fit(data)
+      assert(result instanceof dist.Binomial)
+      assert(Number.isFinite(result.pdf(3)) && result.pdf(3) > 0)
+      assert(Math.abs(result.pdf(3) - new dist.Binomial(10, 0.3).pdf(3)) < 0.05)
+    })
+
+    it('Zipf.fit should return a usable Zipf instance', () => {
+      const data = new dist.Zipf(2, 50).seed(42).sample(200)
+      const result = dist.Zipf.fit(data)
+      assert(result instanceof dist.Zipf)
+      assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      assert(Math.abs(result.pdf(1) - new dist.Zipf(2, 50).pdf(1)) < 0.1)
+    })
+
+    it('Hypergeometric.fit should return a usable Hypergeometric instance', () => {
+      const data = new dist.Hypergeometric(20, 10, 8).seed(42).sample(200)
+      const result = dist.Hypergeometric.fit(data)
+      assert(result instanceof dist.Hypergeometric)
+      assert(Number.isFinite(result.pdf(4)) && result.pdf(4) > 0)
+    })
+
+    it('NegativeHypergeometric.fit should return a usable NegativeHypergeometric instance', () => {
+      const data = new dist.NegativeHypergeometric(20, 10, 3).seed(42).sample(200)
+      const result = dist.NegativeHypergeometric.fit(data)
+      assert(result instanceof dist.NegativeHypergeometric)
+      assert(Number.isFinite(result.pdf(2)) && result.pdf(2) > 0)
+    })
+
+    it('BetaBinomial.fit should return a usable BetaBinomial instance', () => {
+      const data = new dist.BetaBinomial(10, 2, 3).seed(42).sample(200)
+      const result = dist.BetaBinomial.fit(data)
+      assert(result instanceof dist.BetaBinomial)
+      assert(Number.isFinite(result.pdf(4)) && result.pdf(4) > 0)
     })
   })
 

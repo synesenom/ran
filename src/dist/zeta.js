@@ -43,6 +43,12 @@ export default class Zeta extends Distribution {
     }
   }
 
+  static _fitInit (data) {
+    // Hill estimator gives MLE for the power-law exponent on integer support starting at 1.
+    const sumLog = data.reduce((s, x) => s + Math.log(x), 0)
+    return [sumLog <= 0 ? 2 : Math.max(1.01, Math.min(100, 1 + data.length / sumLog))]
+  }
+
   _generator () {
     // Rejection sampling
     return zeta(this.r, this.p.s)

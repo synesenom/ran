@@ -36,6 +36,12 @@ export default class DiscreteWeibull extends Distribution {
     }]
   }
 
+  static _fitInit (data) {
+    // PMF(0) = 1-q, so q ≈ fraction of nonzero observations; beta = 1 as neutral shape seed.
+    const zeroFraction = data.filter(x => x === 0).length / data.length
+    return [Math.max(0.01, Math.min(0.99, 1 - zeroFraction)), 1]
+  }
+
   _generator () {
     // Inverse transform sampling
     return this._q(this.r.next())

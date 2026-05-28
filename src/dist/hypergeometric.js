@@ -20,6 +20,16 @@ export default class Hypergeometric extends Categorical {
    * @param {number} K Total number of successes. If not an integer, it is rounded to the nearest one.
    * @param {number} n If not an integer, it is rounded to the nearest one. Number of draws.
    */
+  static _fitInit (data) {
+    // Rough seed: N = 2*max+2 ensures max(data) ≤ min(n, K); E[X] = nK/N seeds K.
+    const maxVal = data.reduce((m, x) => x > m ? x : m, 0)
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    const N = 2 * maxVal + 2
+    const n = Math.max(1, Math.round(N / 2))
+    const K = Math.max(1, Math.min(N - 1, Math.round(mean * N / n)))
+    return [N, K, n]
+  }
+
   constructor (N, K, n) {
     const Ni = Math.round(N)
     const Ki = Math.round(K)

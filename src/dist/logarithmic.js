@@ -44,6 +44,15 @@ export default class Logarithmic extends Distribution {
     }
   }
 
+  static _fitInit (data) {
+    // Support is [a, b]; sample min/max are the natural boundary estimators for bounded support.
+    const minVal = data.reduce((m, x) => x < m ? x : m, data[0])
+    const maxVal = data.reduce((m, x) => x > m ? x : m, data[0])
+    const a = Math.max(1, minVal)
+    const b = Math.max(a + 0.01, maxVal)
+    return [a, b]
+  }
+
   _generator () {
     // Inverse transform sampling
     return this._q(this.r.next())

@@ -54,6 +54,15 @@ export default class GeneralizedHermite extends PreComputed {
     }
   }
 
+  static _fitInit (data) {
+    // X = X1 + 2*X2 with m fixed at 2; E = a1+2*a2, Var = a1+4*a2 gives a2 = (V-E)/2.
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    const variance = data.reduce((s, x) => s + x * x, 0) / data.length - mean * mean
+    const a2 = Math.max(0.01, (variance - mean) / 2)
+    const a1 = Math.max(0.01, mean - 2 * a2)
+    return [a1, a2, 2]
+  }
+
   _pk (k) {
     if (k === 0) {
       return this.c.baseLogProb

@@ -47,6 +47,12 @@ export default class HeadsMinusTails extends PreComputed {
     }
   }
 
+  static _fitInit (data) {
+    // Support upper bound is 2n, so max(data) ≈ 2n for large samples.
+    const maxVal = data.reduce((m, x) => x > m ? x : m, 0)
+    return [Math.max(1, Math.round(maxVal / 2))]
+  }
+
   _pk (k) {
     if (k === 0) {
       return this.c.baseLogProb + logBinomial(2 * this.p.n, this.p.n)

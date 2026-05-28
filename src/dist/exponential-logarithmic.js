@@ -36,6 +36,12 @@ export default class ExponentialLogarithmic extends Distribution {
     }]
   }
 
+  static _fitInit (data) {
+    // beta ≈ 1/mean (exponential rate MLE); p = 0.5 as neutral shape seed for Nelder-Mead.
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    return [0.5, Math.max(0.01, 1 / mean)]
+  }
+
   _generator () {
     // Inverse transform sampling
     return this._q(this.r.next())
