@@ -366,4 +366,12 @@ export default class DoublyNoncentralT extends Distribution {
     }, t => t.p * t.f)
     return clamp(x < 0 ? 1 - z : z)
   }
+
+  static _fitInit (data) {
+    // Central T variance ν/(ν-2) → ν; sample mean for μ; θ seeded at 1
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    return [variance > 1 ? Math.max(3, Math.round(2 * variance / (variance - 1))) : 3, mean, 1]
+  }
 }

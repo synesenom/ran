@@ -49,4 +49,13 @@ export default class NoncentralChi extends NoncentralChi2 {
   _cdf (x) {
     return super._cdf(x * x)
   }
+
+  static _fitInit (data) {
+    // E[X²]=k+λ²; estimate E[X²]≈mean²+variance — see solutions/distribution/2026-05-28-1902-noncentral-fitinit-mom-stability.md
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    const half = Math.max(1, (mean * mean + variance) / 2)
+    return [Math.max(1, Math.round(half)), Math.max(1e-3, Math.sqrt(half))]
+  }
 }

@@ -423,10 +423,10 @@ describe('dist', () => {
       })
 
       it('Distribution._fitInit fallback should work for scalar-constructor distributions', () => {
-        // Burr has no _fitInit override so fit() exercises the base-class random-retry path
-        const data = new dist.Burr(2, 3).seed(42).sample(100)
-        const result = dist.Burr.fit(data)
-        assert(result instanceof dist.Burr)
+        // Alpha has no _fitInit override so fit() exercises the base-class random-retry path
+        const data = new dist.Alpha(2, 1).seed(42).sample(100)
+        const result = dist.Alpha.fit(data)
+        assert(result instanceof dist.Alpha)
       })
 
       it('Pareto.fit should recover xmin close to min(data)', () => {
@@ -1326,6 +1326,168 @@ describe('dist', () => {
         // constant data ⇒ variance 0 hits the degenerate fallback
         const init = dist.StudentZ._fitInit([1, 1, 1])
         assert(init[0] === 10)
+      })
+
+      it('BoundedPareto.fit should recover L and alpha and return a valid upper bound', () => {
+        const data = new dist.BoundedPareto(2, 20, 3).seed(42).sample(200)
+        const result = dist.BoundedPareto.fit(data)
+        assert(result instanceof dist.BoundedPareto)
+        assert(Math.abs(result.p.L - 2) < 0.5)
+        // MLE for H converges to max(data) since likelihood decreases for any H > max(data)
+        assert(result.p.H >= Math.max(...data))
+        assert(Math.abs(result.p.alpha - 3) < 0.8)
+      })
+
+      it('Lomax.fit should recover lambda and alpha close to planted values', () => {
+        const data = new dist.Lomax(2, 4).seed(42).sample(200)
+        const result = dist.Lomax.fit(data)
+        assert(result instanceof dist.Lomax)
+        assert(Math.abs(result.p.lambda - 2) < 0.8)
+        assert(Math.abs(result.p.alpha - 4) < 1.0)
+      })
+
+      it('GeneralizedPareto.fit should recover mu, sigma, and xi close to planted values', () => {
+        const data = new dist.GeneralizedPareto(1, 2, 0.2).seed(42).sample(200)
+        const result = dist.GeneralizedPareto.fit(data)
+        assert(result instanceof dist.GeneralizedPareto)
+        assert(Math.abs(result.p.mu - 1) < 0.3)
+        assert(Math.abs(result.p.sigma - 2) < 0.8)
+        assert(Math.abs(result.p.xi - 0.2) < 0.3)
+      })
+
+      it('Burr.fit should recover c and k close to planted values', () => {
+        const data = new dist.Burr(2, 3).seed(42).sample(200)
+        const result = dist.Burr.fit(data)
+        assert(result instanceof dist.Burr)
+        assert(Math.abs(result.p.c - 2) < 0.8)
+        assert(Math.abs(result.p.k - 3) < 1.0)
+      })
+
+      it('Dagum.fit should recover p, a, and b close to planted values', () => {
+        const data = new dist.Dagum(1, 2, 3).seed(42).sample(200)
+        const result = dist.Dagum.fit(data)
+        assert(result instanceof dist.Dagum)
+        assert(Math.abs(result.p.p - 1) < 0.4)
+        assert(Math.abs(result.p.a - 2) < 0.8)
+        assert(Math.abs(result.p.b - 3) < 1.0)
+      })
+
+      it('Champernowne.fit should recover alpha and x0 and return a valid lambda', () => {
+        const data = new dist.Champernowne(1, 0, 2).seed(42).sample(200)
+        const result = dist.Champernowne.fit(data)
+        assert(result instanceof dist.Champernowne)
+        assert(Math.abs(result.p.alpha - 1) < 0.4)
+        // lambda is poorly identified near 0 from n=200; check valid range instead
+        assert(result.p.lambda >= 0 && result.p.lambda < 1)
+        assert(Math.abs(result.p.x0 - 2) < 0.5)
+      })
+
+      it('Benini.fit should recover alpha, beta, and sigma close to planted values', () => {
+        const data = new dist.Benini(2, 1, 3).seed(42).sample(200)
+        const result = dist.Benini.fit(data)
+        assert(result instanceof dist.Benini)
+        assert(Math.abs(result.p.alpha - 2) < 0.8)
+        assert(Math.abs(result.p.beta - 1) < 0.4)
+        assert(Math.abs(result.p.sigma - 3) < 0.5)
+      })
+
+      it('BoundedPareto._fitInit should return valid params for constant data', () => {
+        const init = dist.BoundedPareto._fitInit([5, 5, 5])
+        assert(init[0] > 0 && init[1] > init[0] && init[2] > 0)
+      })
+
+      it('Lomax._fitInit should fall back to alpha=3 when CV <= 1', () => {
+        // near-constant data → CV ≈ 0 → triggers fallback
+        const init = dist.Lomax._fitInit([2, 2.001, 1.999, 2])
+        assert(init[0] > 0)
+        assert(init[1] === 3)
+      })
+
+      it('GeneralizedPareto._fitInit should return xi=0 for constant data', () => {
+        const init = dist.GeneralizedPareto._fitInit([3, 3, 3])
+        assert(Number.isFinite(init[0]))
+        assert(init[1] > 0)
+        assert(init[2] === 0)
+      })
+
+      it('Benini._fitInit should return positive alpha, beta, and sigma for any positive data', () => {
+        const init = dist.Benini._fitInit([2, 3, 4, 5])
+        assert(init[0] > 0)
+        assert(init[1] > 0)
+        assert(init[2] > 0)
+      })
+
+      it('NoncentralChi2.fit should recover k and lambda close to planted values', () => {
+        const data = new dist.NoncentralChi2(4, 2).seed(42).sample(300)
+        const result = dist.NoncentralChi2.fit(data)
+        assert(result instanceof dist.NoncentralChi2)
+        assert(Math.abs(result.p.k - 4) < 0.5)
+        assert(Math.abs(result.p.lambda - 2) < 0.5)
+      })
+
+      it('NoncentralChi.fit should recover k and lambda close to planted values', () => {
+        const data = new dist.NoncentralChi(4, 2).seed(42).sample(300)
+        const result = dist.NoncentralChi.fit(data)
+        assert(result instanceof dist.NoncentralChi)
+        assert(Math.abs(result.p.k - 4) < 0.5)
+        // result.p.lambda stores lambda² (NoncentralChi2 internal form); see #491
+        assert(Math.abs(Math.sqrt(result.p.lambda) - 2) < 0.5)
+      })
+
+      it('NoncentralT.fit should recover nu and mu close to planted values', () => {
+        const data = new dist.NoncentralT(5, 1).seed(42).sample(300)
+        const result = dist.NoncentralT.fit(data)
+        assert(result instanceof dist.NoncentralT)
+        assert(Math.abs(result.p.nu - 5) <= 1)
+        assert(Math.abs(result.p.mu - 1) < 0.3)
+      })
+
+      it('NoncentralBeta.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.NoncentralBeta(2, 3, 1).seed(42).sample(500)
+        const result = dist.NoncentralBeta.fit(data)
+        assert(result instanceof dist.NoncentralBeta)
+        assert(Math.abs(result.p.alpha - 2) < 0.75)
+        assert(Math.abs(result.p.beta - 3) < 0.75)
+      })
+
+      it('NoncentralF.fit should recover d1, d2 and lambda close to planted values', () => {
+        const data = new dist.NoncentralF(3, 8, 2).seed(42).sample(400)
+        const result = dist.NoncentralF.fit(data)
+        assert(result instanceof dist.NoncentralF)
+        assert(Math.abs(result.p.d1 - 3) <= 2)
+        assert(Math.abs(result.p.d2 - 8) <= 3)
+        assert(Math.abs(result.p.lambda - 2) <= 1.5)
+      })
+
+      it('DoublyNoncentralChi2.fit should recover total df and noncentrality close to planted values', () => {
+        const data = new dist.DoublyNoncentralChi2(2, 3, 1, 2).seed(42).sample(500)
+        const result = dist.DoublyNoncentralChi2.fit(data)
+        assert(result instanceof dist.DoublyNoncentralChi2)
+        assert(Math.abs((result.p.k1 + result.p.k2) - 5) <= 2)
+        assert(Math.abs((result.p.lambda1 + result.p.lambda2) - 3) <= 2)
+      })
+
+      it('DoublyNoncentralBeta.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.DoublyNoncentralBeta(2, 3, 1, 1).seed(42).sample(500)
+        const result = dist.DoublyNoncentralBeta.fit(data)
+        assert(result instanceof dist.DoublyNoncentralBeta)
+        assert(Math.abs(result.p.alpha - 2) < 0.75)
+        assert(Math.abs(result.p.beta - 3) < 0.75)
+      })
+
+      it('DoublyNoncentralF.fit should recover d1 and d2 close to planted values', () => {
+        const data = new dist.DoublyNoncentralF(3, 8, 1, 1).seed(42).sample(400)
+        const result = dist.DoublyNoncentralF.fit(data)
+        assert(result instanceof dist.DoublyNoncentralF)
+        assert(Math.abs(result.p.d1 - 3) <= 2)
+        assert(Math.abs(result.p.d2 - 8) <= 3)
+      })
+
+      it('DoublyNoncentralT.fit should recover mu close to planted value', () => {
+        const data = new dist.DoublyNoncentralT(5, 2, 1).seed(42).sample(300)
+        const result = dist.DoublyNoncentralT.fit(data)
+        assert(result instanceof dist.DoublyNoncentralT)
+        assert(Math.abs(result.p.mu - 2) < 0.5)
       })
     })
   })

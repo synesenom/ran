@@ -189,4 +189,13 @@ export default class NoncentralBeta extends Distribution {
     // Series can produce a small negative value via floating-point cancellation; symmetric guard with Math.min(1, ...).
     return Math.max(0, Math.min(1, z))
   }
+
+  static _fitInit (data) {
+    // Beta MOM for α, β; λ seeded at 1 since moment inversion for NoncentralBeta is degenerate
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1e-4
+    const factor = Math.max(mean * (1 - mean) / variance - 1, 0.1)
+    return [mean * factor, (1 - mean) * factor, 1]
+  }
 }

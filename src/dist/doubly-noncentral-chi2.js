@@ -41,4 +41,11 @@ export default class DoublyNoncentralChi2 extends NoncentralChi2 {
       'lambda2 >= 0'
     ])
   }
+
+  static _fitInit (data) {
+    // Collapses to NoncentralChi2(k1+k2, λ1+λ2); split totals symmetrically
+    const [kTot, lambdaTot] = super._fitInit(data)
+    const k = Math.max(1, Math.round(kTot / 2))
+    return [k, Math.max(1, kTot - k), lambdaTot / 2, lambdaTot / 2]
+  }
 }
