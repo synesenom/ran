@@ -1150,6 +1150,45 @@ describe('dist', () => {
         assert(Math.abs(result.p.mu - 1) < 0.4)
         assert(Math.abs(result.p.sigma - 2) < 0.6)
       })
+
+      it('Weibull._fitInit should handle constant data', () => {
+        // || 1 guard: zero variance in constant data falls back to 1
+        const init = dist.Weibull._fitInit([3, 3, 3])
+        assert(init[0] > 0 && init[1] > 0)
+      })
+
+      it('InvertedWeibull._fitInit should handle constant data', () => {
+        // || 1 guard: zero variance in constant reciprocals falls back to 1
+        const init = dist.InvertedWeibull._fitInit([2, 2, 2])
+        assert(init[0] > 0)
+      })
+
+      it('Frechet._fitInit should handle constant data', () => {
+        // || 1 guard: all equal → zero variance in reciprocals → fallback to 1
+        const init = dist.Frechet._fitInit([5, 5, 5])
+        assert(init[0] > 0 && init[1] > 0)
+      })
+
+      it('Frechet._fitInit should use mean fallback when alpha <= 1', () => {
+        // one near-zero and three large values → cv of reciprocals > 1 → Justus gives alpha ≤ 1
+        const init = dist.Frechet._fitInit([0.0001, 1000, 1000, 1000])
+        assert(init[0] > 0 && init[0] <= 1)
+        assert(init[1] > 0)
+      })
+
+      it('GeneralizedExtremeValue._fitInit should return negative c for right-skewed data', () => {
+        // c < 0 (Fréchet type) has heavier right tail with skewness > Gumbel limit ≈1.14
+        const data = new dist.GeneralizedExtremeValue(-0.5).seed(42).sample(200)
+        const init = dist.GeneralizedExtremeValue._fitInit(data)
+        assert(init[0] < 0)
+      })
+
+      it('ShiftedLogLogistic._fitInit should handle odd-n data', () => {
+        // odd-n path: median = sorted[(n-1)/2]
+        const init = dist.ShiftedLogLogistic._fitInit([1, 2, 3, 4, 5])
+        assert(Number.isFinite(init[0]))
+        assert(init[1] > 0)
+      })
     })
   })
 
