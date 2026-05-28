@@ -440,21 +440,21 @@ describe('dist', () => {
         const data = new dist.Bernoulli(0.7).seed(42).sample(1000)
         const result = dist.Bernoulli.fit(data)
         assert(result instanceof dist.Bernoulli)
-        assert(Math.abs(result.pdf(1) - 0.7) < 0.1)
+        assert(Math.abs(result.pdf(1) - 0.7) < 0.01)
       })
 
       it('Poisson.fit should recover lambda close to planted value', () => {
         const data = new dist.Poisson(3).seed(42).sample(1000)
         const result = dist.Poisson.fit(data)
         assert(result instanceof dist.Poisson)
-        assert(Math.abs(result.p.lambda - 3) < 0.1)
+        assert(Math.abs(result.p.lambda - 3) < 0.05)
       })
 
       it('Geometric.fit should recover p close to planted value', () => {
         const data = new dist.Geometric(0.4).seed(42).sample(1000)
         const result = dist.Geometric.fit(data)
         assert(result instanceof dist.Geometric)
-        assert(Math.abs(result.p.p - 0.4) < 0.05)
+        assert(Math.abs(result.p.p - 0.4) < 0.02)
       })
 
       it('DiscreteUniform.fit should recover xmin and xmax', () => {
