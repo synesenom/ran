@@ -53,4 +53,14 @@ export default class Lomax extends Distribution {
   _q (p) {
     return this.p.lambda * (Math.pow(1 - p, -1 / this.p.alpha) - 1)
   }
+
+  static _fitInit (data) {
+    // MOM: CV^2 = alpha/(alpha-2) links dispersion to tail index; lambda set via mean-alpha relation
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = Math.max(data.reduce((s, x) => s + (x - mean) ** 2, 0) / n, 1e-9)
+    const cv2 = variance / Math.max(mean * mean, 1e-9)
+    const alpha = cv2 > 1 ? 2 * cv2 / (cv2 - 1) : 3
+    return [Math.max(mean * (alpha - 1), 1e-3), alpha]
+  }
 }

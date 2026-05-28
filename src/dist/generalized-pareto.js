@@ -61,4 +61,18 @@ export default class GeneralizedPareto extends Distribution {
     const y = this.p.xi === 0 ? -Math.log(1 - p) : (Math.pow(1 - p, -this.p.xi) - 1) / this.p.xi
     return this.p.mu + this.p.sigma * y
   }
+
+  static _fitInit (data) {
+    // mu at data minimum as threshold; MOM on shifted excesses: Var/E^2 = 1/(1-2*xi) gives xi and sigma
+    const mu = Math.min(...data)
+    const n = data.length
+    const y = data.map(x => x - mu)
+    const mean = y.reduce((s, x) => s + x, 0) / n
+    const variance = y.reduce((s, x) => s + (x - mean) ** 2, 0) / n
+    if (variance < 1e-9) {
+      return [mu, Math.max(mean, 1e-3), 0]
+    }
+    const xi = Math.max(Math.min(0.5 * (1 - mean * mean / variance), 0.4), -5)
+    return [mu, Math.max(mean * (1 - xi), 1e-3), xi]
+  }
 }

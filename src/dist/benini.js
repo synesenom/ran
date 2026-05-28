@@ -65,4 +65,12 @@ export default class Benini extends Distribution {
   _q (p) {
     return this.p.sigma * Math.exp(this.c.halfInvBeta * (Math.sqrt(this.c.alpha2 - this.c.fourBeta * Math.log(1 - p)) - this.p.alpha))
   }
+
+  static _fitInit (data) {
+    // sigma ≈ min(data) seeds scale; Hill estimator on log-excesses assumes near-Pareto tail (beta → 0)
+    const sigma = Math.min(...data) * 0.99
+    const n = data.length
+    const meanLogExcess = Math.max(data.reduce((s, x) => s + Math.log(x / sigma), 0) / n, 1e-9)
+    return [1 / meanLogExcess, 1, sigma]
+  }
 }

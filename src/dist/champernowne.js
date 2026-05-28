@@ -63,4 +63,15 @@ export default class Champernowne extends Distribution {
   _q (p) {
     return this.p.x0 + (2 / this.p.alpha) * Math.atanh(Math.tan((2 * p - 1) * this.c.atanK) / this.c.k)
   }
+
+  static _fitInit (data) {
+    // Median seeds x0; Var[X] ≈ pi^2/(4*alpha^2) for the symmetric (lambda=0) hyperbolic secant case gives alpha
+    const sorted = data.slice().sort((a, b) => a - b)
+    const n = sorted.length
+    const x0 = n % 2 ? sorted[(n - 1) / 2] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const std = Math.sqrt(Math.max(data.reduce((s, x) => s + (x - mean) ** 2, 0) / n, 1e-9))
+    const alpha = Math.max(Math.PI / (2 * std), 1e-3)
+    return [alpha, 0, x0]
+  }
 }
