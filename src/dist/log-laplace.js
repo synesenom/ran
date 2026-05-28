@@ -48,4 +48,15 @@ export default class LogLaplace extends Laplace {
       ? Math.exp(this.p.mu + this.p.b * Math.log(2 * p))
       : Math.exp(this.p.mu - this.p.b * Math.log(2 - 2 * p))
   }
+
+  static _fitInit (data) {
+    // log(Y) ~ Laplace(mu, b): median is MOM for location; median absolute deviation / ln(2) for scale
+    // because median(|X-mu|) = b*ln(2) for Laplace, so b = MAD / ln(2)
+    const logData = data.map(x => Math.log(x)).sort((a, b) => a - b)
+    const n = logData.length
+    const mu = n % 2 ? logData[(n - 1) / 2] : (logData[n / 2 - 1] + logData[n / 2]) / 2
+    const devs = logData.map(x => Math.abs(x - mu)).sort((a, b) => a - b)
+    const mad = n % 2 ? devs[(n - 1) / 2] : (devs[n / 2 - 1] + devs[n / 2]) / 2
+    return [mu, Math.max(mad / Math.LN2, 1e-3)]
+  }
 }

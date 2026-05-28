@@ -61,4 +61,17 @@ export default class LogisticExponential extends Distribution {
       ? z / this.p.lambda
       : Math.log(1 + z) / this.p.lambda
   }
+
+  static _fitInit (data) {
+    // Median pins lambda via F^{-1}(0.5)=log(2)/lambda; 75th pctile solves kappa using the quantile inverse
+    const sorted = [...data].sort((a, b) => a - b)
+    const n = sorted.length
+    const median = n % 2 ? sorted[(n - 1) / 2] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2
+    const q75 = sorted[Math.floor(0.75 * n)]
+    const lambda = Math.log(2) / median
+    // expm1(lambda*q75) > 1 iff q75 > median, which holds for non-degenerate data; fall back to 1
+    const raw = Math.expm1(lambda * q75)
+    const kappa = raw > 1 ? Math.log(3) / Math.log(raw) : 1
+    return [lambda, kappa]
+  }
 }

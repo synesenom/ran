@@ -464,6 +464,96 @@ describe('dist', () => {
         assert(result.p.xmin === 2)
         assert(result.p.xmax === 8)
       })
+
+      it('LogNormal.fit should recover mu and sigma close to planted values', () => {
+        const data = new dist.LogNormal(1, 0.5).seed(42).sample(200)
+        const result = dist.LogNormal.fit(data)
+        assert(result instanceof dist.LogNormal)
+        assert(Math.abs(result.p.mu - 1) < 0.15)
+        assert(Math.abs(result.p.sigma - 0.5) < 0.15)
+      })
+
+      it('LogCauchy.fit should recover x0 and gamma close to planted values', () => {
+        const data = new dist.LogCauchy(0, 1).seed(42).sample(200)
+        const result = dist.LogCauchy.fit(data)
+        assert(result instanceof dist.LogCauchy)
+        assert(Math.abs(result.p.x0 - 0) < 0.5)
+        assert(Math.abs(result.p.gamma - 1) < 0.5)
+      })
+
+      it('LogLogistic.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.LogLogistic(2, 3).seed(42).sample(200)
+        const result = dist.LogLogistic.fit(data)
+        assert(result instanceof dist.LogLogistic)
+        assert(Math.abs(result.p.alpha - 2) < 0.3)
+        assert(Math.abs(result.p.beta - 3) < 0.5)
+      })
+
+      it('LogLaplace.fit should recover mu and b close to planted values', () => {
+        const data = new dist.LogLaplace(0, 1).seed(42).sample(200)
+        const result = dist.LogLaplace.fit(data)
+        assert(result instanceof dist.LogLaplace)
+        assert(Math.abs(result.p.mu - 0) < 0.2)
+        assert(Math.abs(result.p.b - 1) < 0.2)
+      })
+
+      it('LogisticExponential.fit should recover lambda and kappa close to planted values', () => {
+        const data = new dist.LogisticExponential(1, 2).seed(42).sample(200)
+        const result = dist.LogisticExponential.fit(data)
+        assert(result instanceof dist.LogisticExponential)
+        assert(Math.abs(result.p.lambda - 1) < 0.3)
+        assert(Math.abs(result.p.kappa - 2) < 0.5)
+      })
+
+      it('LogitNormal.fit should recover mu and sigma close to planted values', () => {
+        const data = new dist.LogitNormal(0, 1).seed(42).sample(200)
+        const result = dist.LogitNormal.fit(data)
+        assert(result instanceof dist.LogitNormal)
+        assert(Math.abs(result.p.mu - 0) < 0.2)
+        assert(Math.abs(result.p.sigma - 1) < 0.2)
+      })
+
+      it('LogNormal._fitInit should return sigma=1 for constant data', () => {
+        const init = dist.LogNormal._fitInit([2, 2, 2])
+        assert(Number.isFinite(init[0]))
+        assert(init[1] === 1)
+      })
+
+      it('LogCauchy._fitInit should return valid params for odd-n data', () => {
+        const init = dist.LogCauchy._fitInit(new dist.LogCauchy(0, 1).seed(1).sample(101))
+        assert(Number.isFinite(init[0]))
+        assert(init[1] > 0)
+      })
+
+      it('LogLogistic._fitInit should return positive params for constant data', () => {
+        const init = dist.LogLogistic._fitInit([2, 2, 2])
+        assert(init[0] > 0)
+        assert(init[1] > 0)
+      })
+
+      it('LogLaplace._fitInit should return valid params for odd-n data', () => {
+        const init = dist.LogLaplace._fitInit(new dist.LogLaplace(0, 1).seed(1).sample(101))
+        assert(Number.isFinite(init[0]))
+        assert(init[1] > 0)
+      })
+
+      it('LogisticExponential._fitInit should return valid params for odd-n data', () => {
+        const init = dist.LogisticExponential._fitInit(new dist.LogisticExponential(1, 2).seed(1).sample(101))
+        assert(init[0] > 0)
+        assert(init[1] > 0)
+      })
+
+      it('LogisticExponential._fitInit should fall back to kappa=1 for degenerate data', () => {
+        const init = dist.LogisticExponential._fitInit([5, 5, 5, 5])
+        assert(init[0] > 0)
+        assert(init[1] === 1)
+      })
+
+      it('LogitNormal._fitInit should return sigma=1 for constant data', () => {
+        const init = dist.LogitNormal._fitInit([0.5, 0.5, 0.5])
+        assert(Number.isFinite(init[0]))
+        assert(init[1] === 1)
+      })
     })
   })
 
