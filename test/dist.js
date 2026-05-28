@@ -464,6 +464,54 @@ describe('dist', () => {
         assert(result.p.xmin === 2)
         assert(result.p.xmax === 8)
       })
+
+      it('Gilbrat.fit should return a usable Gilbrat instance', () => {
+        const result = dist.Gilbrat.fit([0.5, 1, 2, 3])
+        assert(result instanceof dist.Gilbrat)
+        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      })
+
+      it('HalfLogistic.fit should return a usable HalfLogistic instance', () => {
+        const result = dist.HalfLogistic.fit([0.5, 1, 2, 3])
+        assert(result instanceof dist.HalfLogistic)
+        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      })
+
+      it('HyperbolicSecant.fit should return a usable HyperbolicSecant instance', () => {
+        const result = dist.HyperbolicSecant.fit([-1, 0, 1, 2])
+        assert(result instanceof dist.HyperbolicSecant)
+        assert(Number.isFinite(result.pdf(0)) && result.pdf(0) > 0)
+      })
+
+      it('InvalidDiscrete.fit should return an InvalidDiscrete instance', () => {
+        // data is irrelevant for k=0; instance is the only possible MLE
+        const result = dist.InvalidDiscrete.fit([-1, 1, -1, 1, 1])
+        assert(result instanceof dist.InvalidDiscrete)
+      })
+
+      it('Kolmogorov.fit should return a usable Kolmogorov instance', () => {
+        const result = dist.Kolmogorov.fit([0.3, 0.5, 0.7, 1.0])
+        assert(result instanceof dist.Kolmogorov)
+        assert(Number.isFinite(result.pdf(0.5)) && result.pdf(0.5) > 0)
+      })
+
+      it('Rademacher.fit should return a usable Rademacher instance', () => {
+        const result = dist.Rademacher.fit([-1, 1, -1, 1])
+        assert(result instanceof dist.Rademacher)
+        assert(result.pdf(-1) === 0.5 && result.pdf(1) === 0.5)
+      })
+
+      it('Slash.fit should return a usable Slash instance', () => {
+        const result = dist.Slash.fit([-1, 0, 1, 2])
+        assert(result instanceof dist.Slash)
+        assert(Number.isFinite(result.pdf(0)) && result.pdf(0) > 0)
+      })
+
+      it('UniformRatio.fit should return a usable UniformRatio instance', () => {
+        const result = dist.UniformRatio.fit([0.5, 1, 2, 3])
+        assert(result instanceof dist.UniformRatio)
+        assert(Number.isFinite(result.pdf(0.5)) && result.pdf(0.5) > 0)
+      })
     })
   })
 

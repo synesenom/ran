@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `gaussLegendre(f, a, b, n)` algorithm: fixed-order Gauss-Legendre quadrature with precomputed nodes and weights for n=5, 10, and 20; exact for polynomials of degree ≤ 2n−1 (#402).
 - `Distribution.fit(data)` static method for maximum-likelihood parameter estimation via Nelder-Mead simplex optimizer (#404)
+- `fit()` now works on zero-parameter distributions (`Gilbrat`, `HalfLogistic`, `HyperbolicSecant`, `Kolmogorov`, `Rademacher`, `Slash`, `UniformRatio`): calling `Cls.fit(data)` returns a fresh instance without optimization (#427)
 - `ConwayMaxwellPoisson` distribution: two-parameter count distribution generalizing Poisson (ν=1), supporting both overdispersion (ν<1) and underdispersion (ν>1).
 - `ConwayMaxwellPoisson`: normalizing constant Z computation refactored to log-space recurrence with running log-sum-exp; fixes silent overflow to `Infinity` (and therefore all-zero PDF/CDF) for λ ≥ ~710 (#420).
 - `ZipfMandelbrot` distribution: three-parameter finite discrete distribution with PMF `(k+q)^{-s} / H_{N,s,q}`, generalizing `Zipf` by the shift parameter `q ≥ 0` (#398).

@@ -764,6 +764,7 @@ class Distribution {
    * integer constraints), whereas random retries succeed for every distribution with a scalar
    * constructor. Subclasses should override with a data-aware (method-of-moments) estimate for
    * better convergence — see decisions/0012-distribution-fit-nelder-mead.md.
+   * For zero-parameter distributions (k=0), returns `[]` to signal `fit()` to skip optimization.
    *
    * @method _fitInit
    * @memberof ran.dist.Distribution
@@ -774,8 +775,9 @@ class Distribution {
    */
   static _fitInit (data) { // eslint-disable-line no-unused-vars
     const k = this.length
+    // k=0: no free parameters — any instance is the MLE; signal fit() to skip Nelder-Mead
     if (k === 0) {
-      throw Error(`${this.name}.fit() requires a _fitInit() implementation (non-scalar or zero-arity constructor)`)
+      return []
     }
     const MAX_TRIES = 500
     for (let t = 0; t < MAX_TRIES; t++) {
@@ -801,6 +803,10 @@ class Distribution {
   static fit (data) {
     const Cls = this
     const x0 = Cls._fitInit(data)
+    // k=0: the distribution is fully determined with no free parameters; every instance is the MLE
+    if (x0.length === 0) {
+      return new Cls()
+    }
     const best = nelderMead(
       params => {
         try {
