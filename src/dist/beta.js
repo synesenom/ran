@@ -47,6 +47,9 @@ export default class Beta extends Distribution {
   }
 
   static _fitInit (data) {
+    // Re-parametrizing subclasses (R, F, FisherZ, BaldingNichols) must override this — they
+    // inherit it otherwise and get Beta's [alpha, beta] vector with the wrong arity/domain.
+    // See solutions/correctness/2026-05-28-1851-reparametrizing-subclass-inherits-wrong-fitinit.md
     // Beta MOM: α = x̄·φ, β = (1−x̄)·φ, φ = x̄(1−x̄)/var − 1
     const n = data.length
     const mean = data.reduce((s, x) => s + x, 0) / n
