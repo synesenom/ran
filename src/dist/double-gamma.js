@@ -44,4 +44,13 @@ export default class DoubleGamma extends Gamma {
     const y = super._cdf(Math.abs(x))
     return (x > 0 ? 1 + y : 1 - y) / 2
   }
+
+  static _fitInit (data) {
+    // |X| ~ Gamma(α,β): gamma MOM on absolute values
+    const n = data.length
+    const absData = data.map(x => Math.abs(x))
+    const mean = absData.reduce((s, x) => s + x, 0) / n
+    const variance = absData.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    return [mean ** 2 / variance, mean / variance]
+  }
 }

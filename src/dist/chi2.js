@@ -25,4 +25,10 @@ export default class Chi2 extends Gamma {
       'k > 0'
     ])
   }
+
+  static _fitInit (data) {
+    // E[X] = k, so the sample mean directly estimates the degrees of freedom
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    return [Math.max(1, Math.round(mean))]
+  }
 }

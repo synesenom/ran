@@ -52,4 +52,10 @@ export default class InverseChi2 extends Distribution {
     // See solutions/correctness/2026-05-18-1133-inverse-chi2-cdf-complementary-gamma.md
     return gammaUpperIncomplete(this.p.nu / 2, 0.5 / x)
   }
+
+  static _fitInit (data) {
+    // E[X] = 1/(ν−2) for ν > 2, so ν ≈ 2 + 1/mean; floor mean to avoid Infinity from near-zero mean
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    return [Math.max(3, Math.round(2 + 1 / Math.max(mean, 1e-6)))]
+  }
 }

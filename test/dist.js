@@ -423,10 +423,10 @@ describe('dist', () => {
       })
 
       it('Distribution._fitInit fallback should work for scalar-constructor distributions', () => {
-        // Gamma has no _fitInit override so fit() exercises the base-class random-retry path
-        const data = new dist.Gamma(2, 0.5).seed(42).sample(100)
-        const result = dist.Gamma.fit(data)
-        assert(result instanceof dist.Gamma)
+        // BetaPrime has no _fitInit override so fit() exercises the base-class random-retry path
+        const data = new dist.BetaPrime(2, 3).seed(42).sample(100)
+        const result = dist.BetaPrime.fit(data)
+        assert(result instanceof dist.BetaPrime)
       })
 
       it('Pareto.fit should recover xmin close to min(data)', () => {
@@ -888,6 +888,76 @@ describe('dist', () => {
         assert(Math.abs(result.p.mu - 1) < 0.5)
         assert(Math.abs(result.p.s - 2) < 0.6)
         assert(Math.abs(result.p.c - 2) < 0.6)
+      })
+
+      it('Gamma.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.Gamma(2, 0.5).seed(42).sample(200)
+        const result = dist.Gamma.fit(data)
+        assert(result instanceof dist.Gamma)
+        assert(Math.abs(result.p.alpha - 2) < 0.4)
+        assert(Math.abs(result.p.beta - 0.5) < 0.15)
+      })
+
+      it('InverseGamma.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.InverseGamma(3, 2).seed(42).sample(200)
+        const result = dist.InverseGamma.fit(data)
+        assert(result instanceof dist.InverseGamma)
+        assert(Math.abs(result.p.alpha - 3) < 0.6)
+        assert(Math.abs(result.p.beta - 2) < 0.8)
+      })
+
+      it('Erlang.fit should recover k and lambda close to planted values', () => {
+        const data = new dist.Erlang(3, 1).seed(42).sample(200)
+        const result = dist.Erlang.fit(data)
+        assert(result instanceof dist.Erlang)
+        assert(Math.abs(result.p.alpha - 3) <= 1)
+        assert(Math.abs(result.p.beta - 1) < 0.25)
+      })
+
+      it('Chi2.fit should recover k close to planted value', () => {
+        const data = new dist.Chi2(4).seed(42).sample(200)
+        const result = dist.Chi2.fit(data)
+        assert(result instanceof dist.Chi2)
+        assert(Math.abs(result.p.alpha * 2 - 4) <= 1)
+      })
+
+      it('InverseChi2.fit should recover nu close to planted value', () => {
+        const data = new dist.InverseChi2(6).seed(42).sample(200)
+        const result = dist.InverseChi2.fit(data)
+        assert(result instanceof dist.InverseChi2)
+        assert(Math.abs(result.p.nu - 6) <= 1)
+      })
+
+      it('LogGamma.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.LogGamma(2, 1, 0).seed(42).sample(200)
+        const result = dist.LogGamma.fit(data)
+        assert(result instanceof dist.LogGamma)
+        assert(Math.abs(result.p.alpha - 2) < 0.6)
+        assert(Math.abs(result.p.beta - 1) < 0.4)
+      })
+
+      it('GeneralizedGamma.fit should return a usable GeneralizedGamma instance', () => {
+        const data = new dist.GeneralizedGamma(2, 3, 1).seed(42).sample(200)
+        const result = dist.GeneralizedGamma.fit(data)
+        assert(result instanceof dist.GeneralizedGamma)
+        assert(result.p.a > 0 && result.p.d > 0 && result.p.p > 0)
+        assert(Number.isFinite(result.pdf(4)) && result.pdf(4) > 0)
+      })
+
+      it('GammaGompertz.fit should return a usable GammaGompertz instance', () => {
+        const data = new dist.GammaGompertz(1, 2, 3).seed(42).sample(200)
+        const result = dist.GammaGompertz.fit(data)
+        assert(result instanceof dist.GammaGompertz)
+        assert(result.p.b > 0 && result.p.s > 0 && result.p.beta > 0)
+        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      })
+
+      it('DoubleGamma.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.DoubleGamma(2, 0.5).seed(42).sample(200)
+        const result = dist.DoubleGamma.fit(data)
+        assert(result instanceof dist.DoubleGamma)
+        assert(Math.abs(result.p.alpha - 2) < 0.4)
+        assert(Math.abs(result.p.beta - 0.5) < 0.15)
       })
     })
   })
