@@ -19,6 +19,13 @@ export default class Binomial extends Categorical {
    * @param {number} n Number of trials.
    * @param {number} p Probability of success.
    */
+  static _fitInit (data) {
+    // E[X] = np; n ≈ max(data) as the support upper bound, p = mean/n.
+    const n = Math.max(1, data.reduce((m, x) => x > m ? x : m, 0))
+    const p = Math.min(0.99, data.reduce((s, x) => s + x, 0) / (data.length * n))
+    return [n, Math.max(0.01, p)]
+  }
+
   constructor (n, p) {
     const ni = Math.round(n)
     super(Array.from({ length: ni + 1 }, (d, k) => Math.exp(logBinomial(n, k) + k * Math.log(p) + (n - k) * Math.log(1 - p))), 0)

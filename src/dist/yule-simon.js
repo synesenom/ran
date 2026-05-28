@@ -40,6 +40,12 @@ export default class YuleSimon extends Distribution {
     }
   }
 
+  static _fitInit (data) {
+    // E[X] = rho/(rho-1) for rho>1; solving gives rho = mean/(mean-1).
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    return [mean > 1 ? mean / (mean - 1) : 2]
+  }
+
   _generator () {
     // Direct sampling by compounding exponential and geometric
     const e1 = -Math.log(this.r.next())

@@ -20,6 +20,18 @@ export default class BetaBinomial extends Categorical {
    * @param {number} alpha First shape parameter.
    * @param {number} beta Second shape parameter.
    */
+  static _fitInit (data) {
+    // n = max(data); moment-match alpha, beta from mean proportion and overdispersion.
+    const n = Math.max(1, data.reduce((m, x) => x > m ? x : m, 0))
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    const variance = data.reduce((s, x) => s + x * x, 0) / data.length - mean * mean
+    const m1 = mean / n
+    const binVar = n * m1 * (1 - m1)
+    const v = binVar > 0 ? Math.max(1.01, variance / binVar) : 2
+    const phi = Math.max(0.1, (n - v) / (v - 1))
+    return [n, Math.max(0.1, m1 * phi), Math.max(0.1, (1 - m1) * phi)]
+  }
+
   constructor (n, alpha, beta) {
     const ni = Math.round(n)
     super(Array.from({ length: ni + 1 }, (d, i) => Math.exp(logBinomial(ni, i) + logBeta(i + alpha, ni - i + beta) - logBeta(alpha, beta))), 0)

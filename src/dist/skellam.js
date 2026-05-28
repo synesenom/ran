@@ -46,6 +46,13 @@ export default class Skellam extends Distribution {
     }
   }
 
+  static _fitInit (data) {
+    // E[X] = mu1-mu2, Var[X] = mu1+mu2; solving gives mu1 = (E+V)/2, mu2 = (V-E)/2.
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    const variance = data.reduce((s, x) => s + x * x, 0) / data.length - mean * mean
+    return [Math.max(0.01, (mean + variance) / 2), Math.max(0.01, (variance - mean) / 2)]
+  }
+
   _generator () {
     // Direct sampling
     return poisson(this.r, this.p.mu1) - poisson(this.r, this.p.mu2)

@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `_fitInit` data-aware method-of-moments initializers added to 22 discrete distributions (`Binomial`, `NegativeBinomial`, `Skellam`, `DiscreteWeibull`, `Zeta`, `YuleSimon`, `LogSeries`, `FlorySchulz`, `Borel`, `BorelTanner`, `HeadsMinus Tails`, `ConwayMaxwellPoisson`, `PolyaAeppli`, `NeymanA`, `GeneralizedHermite`, `Delaporte`, `Zipf`, `Hypergeometric`, `NegativeHypergeometric`, `BetaBinomial`, `Logarithmic`, `ExponentialLogarithmic`); `Cls.fit(data)` now starts Nelder-Mead from a moment-matched seed instead of a random draw (#438).
 - `gaussLegendre(f, a, b, n)` algorithm: fixed-order Gauss-Legendre quadrature with precomputed nodes and weights for n=5, 10, and 20; exact for polynomials of degree ≤ 2n−1 (#402).
 - `Distribution.fit(data)` static method for maximum-likelihood parameter estimation via Nelder-Mead simplex optimizer (#404)
 - `fit()` now works on zero-parameter distributions (`Gilbrat`, `HalfLogistic`, `HyperbolicSecant`, `Kolmogorov`, `Rademacher`, `Slash`, `UniformRatio`): calling `Cls.fit(data)` returns a fresh instance without optimization (#427)

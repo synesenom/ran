@@ -37,6 +37,12 @@ export default class Borel extends PreComputed {
     }]
   }
 
+  static _fitInit (data) {
+    // E[X] = 1/(1-mu); solving gives mu = 1 - 1/mean.
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    return [Math.max(0, Math.min(0.99, mean > 1 ? 1 - 1 / mean : 0))]
+  }
+
   _pk (k) {
     if (k < 1) {
       return -Infinity

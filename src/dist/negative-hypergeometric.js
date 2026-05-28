@@ -19,6 +19,14 @@ export default class NegativeHypergeometric extends Categorical {
    * @param {number} K Total number of successes. If not an integer, it is rounded to the nearest one.
    * @param {number} r Total number of failures to stop at. If not an integer, it is rounded to the nearest one.
    */
+  static _fitInit (data) {
+    // Rough seed: N = 2*max+2, K = N/2, r = 1; Nelder-Mead refines from this.
+    const maxVal = data.reduce((m, x) => x > m ? x : m, 0)
+    const N = 2 * maxVal + 2
+    const K = Math.max(1, Math.round(N / 2))
+    return [N, K, 1]
+  }
+
   constructor (N, K, r) {
     // Validate parameters
     const Ni = Math.round(N)

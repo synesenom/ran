@@ -18,6 +18,13 @@ export default class Zipf extends Categorical {
    * @param {number} s Exponent of the distribution.
    * @param {number} N Number of words. If not an integer, it is rounded to the nearest integer. Default is 100.
    */
+  static _fitInit (data) {
+    // N ≈ max(data) as support size; Hill estimator gives MLE for power-law exponent s.
+    const N = data.reduce((m, x) => x > m ? x : m, 1)
+    const sumLog = data.reduce((s, x) => s + Math.log(x), 0)
+    return [sumLog <= 0 ? 1 : Math.max(0.01, Math.min(100, 1 + data.length / sumLog)), N]
+  }
+
   constructor (s, N) {
     const Ni = Math.round(N)
     super(Array.from({ length: Ni }, (d, i) => Math.pow(i + 1, -s)), 1)

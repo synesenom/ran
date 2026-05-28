@@ -51,6 +51,14 @@ export default class Delaporte extends PreComputed {
     }
   }
 
+  static _fitInit (data) {
+    // Fixing beta=1: E = alpha+lambda, Var-E = alpha (overdispersion); lambda = E-alpha.
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    const variance = data.reduce((s, x) => s + x * x, 0) / data.length - mean * mean
+    const alpha = Math.max(0.1, variance - mean)
+    return [alpha, 1, Math.max(0.1, mean - alpha)]
+  }
+
   _pk (k) {
     // Set i = 0 term
     let ki = k

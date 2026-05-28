@@ -45,6 +45,18 @@ export default class PolyaAeppli extends PreComputed {
     }
   }
 
+  static _fitInit (data) {
+    // Var/E = (1+theta)/(1-theta); solving gives theta = (ratio-1)/(ratio+1), lambda = E*(1-theta).
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    const variance = data.reduce((s, x) => s + x * x, 0) / data.length - mean * mean
+    if (variance <= mean) {
+      return [Math.max(0.01, mean / 2), 0.5]
+    }
+    const ratio = variance / mean
+    const theta = Math.max(0.01, Math.min(0.99, (ratio - 1) / (ratio + 1)))
+    return [Math.max(0.01, mean * (1 - theta)), theta]
+  }
+
   _pk (k) {
     if (k === 0) {
       return -this.p.lambda

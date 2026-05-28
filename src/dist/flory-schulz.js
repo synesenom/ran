@@ -40,6 +40,12 @@ export default class FlorySchulz extends Distribution {
     }
   }
 
+  static _fitInit (data) {
+    // E[X] = 2/a; solving gives a = 2/mean.
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    return [Math.max(0.01, Math.min(0.99, 2 / mean))]
+  }
+
   _generator () {
     // FlorySchulz(a) = G1 + G2 + 1, G_i ~ Geom(a) (failures before success).
     // Geom(a) inverse-CDF: floor(log(U) / log(1-a)), O(1) regardless of a.

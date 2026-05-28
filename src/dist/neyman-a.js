@@ -46,6 +46,14 @@ export default class NeymanA extends PreComputed {
     }
   }
 
+  static _fitInit (data) {
+    // E[X] = lambda*phi, Var[X] = lambda*phi*(1+phi); solving gives phi = V/E - 1.
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    const variance = data.reduce((s, x) => s + x * x, 0) / data.length - mean * mean
+    const phi = Math.max(0.01, variance / mean - 1)
+    return [Math.max(0.01, mean / phi), phi]
+  }
+
   // Using Eq. (131) in Johnson, Kotz, Kemp: Univariate Discrete Distributions.
   _pk (k) {
     if (k === 0) {

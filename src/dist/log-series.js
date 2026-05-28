@@ -36,6 +36,13 @@ export default class LogSeries extends Distribution {
     }]
   }
 
+  static _fitInit (data) {
+    // E[X] ≈ 1/(1-p)^2 for p near 1; inverting gives p ≈ 1 - 1/sqrt(mean).
+    // See solutions/distribution/2026-05-28-1120-log-series-fitinit-asymptotic-inversion.md
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    return [Math.max(0.01, Math.min(0.99, 1 - 1 / Math.sqrt(mean)))]
+  }
+
   _generator () {
     // Direct sampling
     return Math.floor(1 + Math.log(this.r.next()) / Math.log(1 - Math.pow(1 - this.p.p, this.r.next())))

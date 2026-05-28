@@ -57,6 +57,13 @@ export default class ConwayMaxwellPoisson extends PreComputed {
     }
   }
 
+  static _fitInit (data) {
+    // Var[X] ≈ lambda/nu; E[X] ≈ lambda. Ratio mean/variance seeds the dispersion nu.
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    const variance = data.reduce((s, x) => s + x * x, 0) / data.length - mean * mean
+    return [Math.max(0.01, mean), Math.max(0.01, mean / Math.max(variance, 0.01))]
+  }
+
   _pk (k) {
     if (k === 0) {
       return this.c.logP0

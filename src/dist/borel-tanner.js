@@ -40,6 +40,14 @@ export default class BorelTanner extends PreComputed {
     }]
   }
 
+  static _fitInit (data) {
+    // Support starts at n; E[X] = n/(1-mu). Use min(data) for n and solve for mu.
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    const n = Math.max(1, data.reduce((m, x) => x < m ? x : m, data[0]))
+    const mu = mean > n ? 1 - n / mean : 0
+    return [Math.max(0, Math.min(0.99, mu)), n]
+  }
+
   _pk (k) {
     if (k < this.p.n) {
       return 0

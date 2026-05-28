@@ -42,6 +42,17 @@ export default class NegativeBinomial extends Distribution {
     }]
   }
 
+  static _fitInit (data) {
+    // Method-of-moments: Var/E = 1/(1-p) gives p = 1 - E/V; r = E*(1-p)/p.
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    const variance = data.reduce((s, x) => s + x * x, 0) / data.length - mean * mean
+    if (variance <= mean) {
+      return [Math.max(1, Math.round(mean)), 0.5]
+    }
+    const p = 1 - mean / variance
+    return [Math.max(1, Math.round(mean * (1 - p) / p)), Math.min(0.99, p)]
+  }
+
   _generator () {
     // p=0 is degenerate: all mass at 0
     if (this.p.p === 0) return 0
