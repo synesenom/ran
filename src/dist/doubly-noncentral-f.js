@@ -62,7 +62,7 @@ export default class DoublyNoncentralF extends DoublyNoncentralBeta {
     const d1formula = d2 > 4
       ? Math.round(2 * d2 * d2 * (d2 - 2) / (variance * (d2 - 2) ** 2 * (d2 - 4) - 2 * d2 * d2))
       : 0
-    const d1 = d1formula > 0 ? Math.max(1, d1formula) : d2
+    const d1 = d1formula > 0 && isFinite(d1formula) ? Math.max(1, d1formula) : d2
     const lambda = Math.max(1e-3, mean * d1 * (d2 - 2) / d2 - d1) / 2
     return [d1, d2, lambda, lambda]
   }
