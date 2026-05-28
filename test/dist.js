@@ -1297,6 +1297,36 @@ describe('dist', () => {
         assert(result instanceof dist.IrwinHall)
         assert(Math.abs(result.p.n - 4) <= 1)
       })
+
+      it('R._fitInit should clamp c for zero-variance data', () => {
+        // constant data ⇒ variance 0 hits the `|| 1` guard, then the Math.max(..., 1e-3) clamp
+        const init = dist.R._fitInit([0, 0, 0])
+        assert(Math.abs(init[0] - 1e-3) < 1e-12)
+      })
+
+      it('F._fitInit should fall back to defaults for mean<=1 data', () => {
+        // mean <= 1 ⇒ d2 defaults to 10; the resulting negative variance denominator ⇒ d1 defaults to 5
+        const init = dist.F._fitInit([0.1, 0.2, 0.3])
+        assert(init[0] === 5 && init[1] === 10)
+      })
+
+      it('F._fitInit should guard zero-variance data', () => {
+        // constant data ⇒ variance 0 hits the `|| 1` guard
+        const init = dist.F._fitInit([2, 2, 2])
+        assert(init[0] === 5 && Math.abs(init[1] - 4.1) < 1e-12)
+      })
+
+      it('StudentT._fitInit should fall back to nu=10 for low-variance data', () => {
+        // variance <= 1 has no real df solution from ν = 2·Var/(Var−1); use a heavy-tailed default
+        const init = dist.StudentT._fitInit([0.1, -0.1, 0.05, -0.05])
+        assert(init[0] === 10)
+      })
+
+      it('StudentZ._fitInit should fall back to n=10 for zero-variance data', () => {
+        // constant data ⇒ variance 0 hits the degenerate fallback
+        const init = dist.StudentZ._fitInit([1, 1, 1])
+        assert(init[0] === 10)
+      })
     })
   })
 
