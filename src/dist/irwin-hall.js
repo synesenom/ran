@@ -41,6 +41,12 @@ export default class IrwinHall extends Distribution {
     this.c = { logGammaTerms: Array.from({ length: ni + 1 }, (d, k) => logGamma(k + 1) + logGamma(ni - k + 1)) }
   }
 
+  static _fitInit (data) {
+    // Sum of n uniforms on [0,1]: E[X] = n/2 ⇒ n = round(2·mean)
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    return [Math.max(Math.round(2 * mean), 1)]
+  }
+
   _generator () {
     // Direct sampling
     return neumaier(Array.from({ length: this.p.n }, () => this.r.next()))

@@ -1189,6 +1189,114 @@ describe('dist', () => {
         assert(Number.isFinite(init[0]))
         assert(init[1] > 0)
       })
+
+      it('R.fit should recover c close to planted value', () => {
+        const data = new dist.R(3).seed(42).sample(200)
+        const result = dist.R.fit(data)
+        assert(result instanceof dist.R)
+        assert(Math.abs(result.p.c - 3) < 0.5)
+      })
+
+      it('BaldingNichols.fit should recover F and p close to planted values', () => {
+        const data = new dist.BaldingNichols(0.1, 0.3).seed(42).sample(200)
+        const result = dist.BaldingNichols.fit(data)
+        assert(result instanceof dist.BaldingNichols)
+        // BaldingNichols stores Beta's alpha/beta; back out F = 1/(a+b+1), p = a/(a+b)
+        const a = result.p.alpha
+        const b = result.p.beta
+        assert(Math.abs(1 / (a + b + 1) - 0.1) < 0.05)
+        assert(Math.abs(a / (a + b) - 0.3) < 0.05)
+      })
+
+      it('F.fit should return a usable F instance with positive degrees of freedom', () => {
+        const data = new dist.F(10, 20).seed(42).sample(200)
+        const result = dist.F.fit(data)
+        assert(result instanceof dist.F)
+        assert(result.p.d1 > 0 && result.p.d2 > 0)
+        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      })
+
+      it('FisherZ.fit should return a usable FisherZ instance with positive degrees of freedom', () => {
+        const data = new dist.FisherZ(10, 20).seed(42).sample(200)
+        const result = dist.FisherZ.fit(data)
+        assert(result instanceof dist.FisherZ)
+        assert(result.p.d1 > 0 && result.p.d2 > 0)
+        assert(Number.isFinite(result.pdf(0)) && result.pdf(0) > 0)
+      })
+
+      it('StudentT._fitInit should derive nu from sample variance', () => {
+        // variance = nu/(nu−2) ⇒ nu = 2·Var/(Var−1); Var≈5/3 for nu=5 ⇒ nu≈5
+        const data = new dist.StudentT(5).seed(42).sample(500)
+        const init = dist.StudentT._fitInit(data)
+        assert(init.length === 1)
+        assert(Math.abs(init[0] - 5) < 1.5)
+      })
+
+      it('StudentT.fit should recover nu close to planted value', () => {
+        const data = new dist.StudentT(5).seed(42).sample(500)
+        const result = dist.StudentT.fit(data)
+        assert(result instanceof dist.StudentT)
+        assert(Math.abs(result.p.nu - 5) < 1.5)
+      })
+
+      it('StudentZ._fitInit should derive n from sample variance', () => {
+        // Var[Z] = 1/(n−3) ⇒ n = 1/Var + 3; Var≈1/3 for n=6 ⇒ n≈6
+        const data = new dist.StudentZ(6).seed(42).sample(500)
+        const init = dist.StudentZ._fitInit(data)
+        assert(init.length === 1)
+        assert(init[0] > 1)
+        assert(Math.abs(init[0] - 6) < 1.5)
+      })
+
+      it('StudentZ.fit should recover n close to planted value', () => {
+        const data = new dist.StudentZ(6).seed(42).sample(500)
+        const result = dist.StudentZ.fit(data)
+        assert(result instanceof dist.StudentZ)
+        // StudentZ stores StudentT's nu = n − 1
+        assert(Math.abs(result.p.nu + 1 - 6) < 1.5)
+      })
+
+      it('Degenerate._fitInit should return the sample mean as location', () => {
+        const init = dist.Degenerate._fitInit([2, 2, 2])
+        assert(init.length === 1)
+        assert(Math.abs(init[0] - 2) < 1e-9)
+      })
+
+      it('Degenerate.fit should recover the point-mass location', () => {
+        const result = dist.Degenerate.fit([5, 5, 5])
+        assert(result instanceof dist.Degenerate)
+        // constant data ⇒ exact point-mass location, no MLE drift
+        assert(Math.abs(result.p.x0 - 5) < 1e-9)
+      })
+
+      it('Soliton._fitInit should lower-bound N by the largest observation', () => {
+        const init = dist.Soliton._fitInit([1, 2, 1, 5, 3])
+        assert(init.length === 1)
+        assert(init[0] === 5)
+      })
+
+      it('Soliton.fit should return a usable Soliton instance', () => {
+        const data = new dist.Soliton(5).seed(42).sample(200)
+        const result = dist.Soliton.fit(data)
+        assert(result instanceof dist.Soliton)
+        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+        // support must cover the largest observation (which reaches N=5 in a 200-draw sample)
+        assert(result.p.n >= 5)
+      })
+
+      it('IrwinHall._fitInit should derive n from E[X]=n/2', () => {
+        // mean = 2 for this sample ⇒ n = round(2·mean) = 4
+        const init = dist.IrwinHall._fitInit([1.5, 2, 2.5, 1, 3])
+        assert(init.length === 1)
+        assert(init[0] === 4)
+      })
+
+      it('IrwinHall.fit should recover n close to planted value', () => {
+        const data = new dist.IrwinHall(4).seed(42).sample(200)
+        const result = dist.IrwinHall.fit(data)
+        assert(result instanceof dist.IrwinHall)
+        assert(Math.abs(result.p.n - 4) <= 1)
+      })
     })
   })
 
