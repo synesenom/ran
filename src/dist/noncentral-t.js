@@ -167,6 +167,14 @@ class NoncentralT extends Distribution {
   _cdf (x) {
     return NoncentralT.fnm(this.p.nu, this.p.mu, x)
   }
+
+  static _fitInit (data) {
+    // Central T variance ν/(ν-2) → ν=2Var/(Var-1); central T has mean 0 so excess is μ_init
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    return [variance > 1 ? Math.max(3, Math.round(2 * variance / (variance - 1))) : 3, mean]
+  }
 }
 
 export default NoncentralT

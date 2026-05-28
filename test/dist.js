@@ -1278,6 +1278,78 @@ describe('dist', () => {
         assert(init[1] > 0)
         assert(init[2] > 0)
       })
+
+      it('NoncentralChi2.fit should recover k and lambda close to planted values', () => {
+        const data = new dist.NoncentralChi2(4, 2).seed(42).sample(300)
+        const result = dist.NoncentralChi2.fit(data)
+        assert(result instanceof dist.NoncentralChi2)
+        assert(Math.abs(result.p.k - 4) < 0.5)
+        assert(Math.abs(result.p.lambda - 2) < 0.5)
+      })
+
+      it('NoncentralChi.fit should recover k and lambda close to planted values', () => {
+        const data = new dist.NoncentralChi(4, 2).seed(42).sample(300)
+        const result = dist.NoncentralChi.fit(data)
+        assert(result instanceof dist.NoncentralChi)
+        assert(Math.abs(result.p.k - 4) < 0.5)
+        assert(Math.abs(Math.sqrt(result.p.lambda) - 2) < 0.5)
+      })
+
+      it('NoncentralT.fit should recover nu and mu close to planted values', () => {
+        const data = new dist.NoncentralT(5, 1).seed(42).sample(300)
+        const result = dist.NoncentralT.fit(data)
+        assert(result instanceof dist.NoncentralT)
+        assert(Math.abs(result.p.nu - 5) <= 1)
+        assert(Math.abs(result.p.mu - 1) < 0.3)
+      })
+
+      it('NoncentralBeta.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.NoncentralBeta(2, 3, 1).seed(42).sample(500)
+        const result = dist.NoncentralBeta.fit(data)
+        assert(result instanceof dist.NoncentralBeta)
+        assert(Math.abs(result.p.alpha - 2) < 0.75)
+        assert(Math.abs(result.p.beta - 3) < 0.75)
+      })
+
+      it('NoncentralF.fit should recover d1, d2 and lambda close to planted values', () => {
+        const data = new dist.NoncentralF(3, 8, 2).seed(42).sample(400)
+        const result = dist.NoncentralF.fit(data)
+        assert(result instanceof dist.NoncentralF)
+        assert(Math.abs(result.p.d1 - 3) <= 2)
+        assert(Math.abs(result.p.d2 - 8) <= 3)
+        assert(Math.abs(result.p.lambda - 2) <= 1.5)
+      })
+
+      it('DoublyNoncentralChi2.fit should recover total df and noncentrality close to planted values', () => {
+        const data = new dist.DoublyNoncentralChi2(2, 3, 1, 2).seed(42).sample(500)
+        const result = dist.DoublyNoncentralChi2.fit(data)
+        assert(result instanceof dist.DoublyNoncentralChi2)
+        assert(Math.abs((result.p.k1 + result.p.k2) - 5) <= 2)
+        assert(Math.abs((result.p.lambda1 + result.p.lambda2) - 3) <= 2)
+      })
+
+      it('DoublyNoncentralBeta.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.DoublyNoncentralBeta(2, 3, 1, 1).seed(42).sample(500)
+        const result = dist.DoublyNoncentralBeta.fit(data)
+        assert(result instanceof dist.DoublyNoncentralBeta)
+        assert(Math.abs(result.p.alpha - 2) < 0.75)
+        assert(Math.abs(result.p.beta - 3) < 0.75)
+      })
+
+      it('DoublyNoncentralF.fit should recover d1 and d2 close to planted values', () => {
+        const data = new dist.DoublyNoncentralF(3, 8, 1, 1).seed(42).sample(400)
+        const result = dist.DoublyNoncentralF.fit(data)
+        assert(result instanceof dist.DoublyNoncentralF)
+        assert(Math.abs(result.p.d1 - 3) <= 2)
+        assert(Math.abs(result.p.d2 - 8) <= 3)
+      })
+
+      it('DoublyNoncentralT.fit should recover mu close to planted value', () => {
+        const data = new dist.DoublyNoncentralT(5, 2, 1).seed(42).sample(300)
+        const result = dist.DoublyNoncentralT.fit(data)
+        assert(result instanceof dist.DoublyNoncentralT)
+        assert(Math.abs(result.p.mu - 2) < 0.5)
+      })
     })
   })
 

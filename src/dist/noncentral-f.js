@@ -58,4 +58,17 @@ export default class NoncentralF extends NoncentralBeta {
     const y = this.p.d1 * x
     return super._cdf(1 / (1 + this.p.d2 / y))
   }
+
+  static _fitInit (data) {
+    // Central F moments: E[X]=d2/(d2-2)→d2, Var[X]→d1; λ from E[NoncentralF]=d2(d1+λ)/(d1(d2-2))
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    const d2 = mean > 1 ? Math.max(3, Math.round(2 * mean / (mean - 1))) : 5
+    const d1formula = d2 > 4
+      ? Math.round(2 * d2 * d2 * (d2 - 2) / (variance * (d2 - 2) ** 2 * (d2 - 4) - 2 * d2 * d2))
+      : 0
+    const d1 = d1formula > 0 ? Math.max(1, d1formula) : d2
+    return [d1, d2, Math.max(1e-3, mean * d1 * (d2 - 2) / d2 - d1)]
+  }
 }
