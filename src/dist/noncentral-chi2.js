@@ -89,4 +89,13 @@ export default class NoncentralChi2 extends Distribution {
     // See solutions/special-functions/2026-05-18-1212-noncentral-chi2-cdf-complementary-marcum-q.md
     return marcumP(this.p.k / 2, this.p.lambda / 2, x / 2)
   }
+
+  static _fitInit (data) {
+    // Var[X]=2(k+2λ) and E[X]=k+λ solve simultaneously to λ=Var/2−mean
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    const lambda = Math.max(0, variance / 2 - mean)
+    return [Math.max(1, Math.round(mean - lambda)), lambda]
+  }
 }

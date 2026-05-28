@@ -36,6 +36,12 @@ export default class FisherZ extends F {
     }]
   }
 
+  static _fitInit (data) {
+    // X = ½·ln(F) ⇒ e^{2X} ~ F(d1, d2): seed from F's MOM on the back-transformed data.
+    // Clamp the exponent so extreme observations don't overflow to Infinity and poison the mean
+    return super._fitInit(data.map(x => Math.exp(Math.min(2 * x, 700))))
+  }
+
   _generator () {
     // Direct sampling by transforming F variate
     return 0.5 * Math.log(super._generator())

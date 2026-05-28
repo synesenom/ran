@@ -62,4 +62,15 @@ export default class Burr extends Distribution {
   _q (p) {
     return Math.pow(Math.pow(1 - p, this.c.negInvK) - 1, this.c.invC)
   }
+
+  static _fitInit (data) {
+    // log-scale variance gives c via log-logistic approximation; E[log(1+x^c)]=1/k (Exp identity) gives k
+    const n = data.length
+    const logData = data.map(x => Math.log(x))
+    const meanLog = logData.reduce((s, x) => s + x, 0) / n
+    const varLog = Math.max(logData.reduce((s, x) => s + (x - meanLog) ** 2, 0) / n, 1e-9)
+    const c = Math.max(Math.PI / Math.sqrt(3 * varLog), 0.1)
+    const k = Math.max(n / Math.max(data.reduce((s, x) => s + Math.log1p(Math.pow(x, c)), 0), 1e-9), 0.1)
+    return [c, k]
+  }
 }

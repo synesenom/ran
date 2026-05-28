@@ -62,4 +62,13 @@ export default class BoundedPareto extends Distribution {
   _q (p) {
     return Math.pow((this.c.Halpha + p * (this.c.Lalpha - this.c.Halpha)) / (this.c.Lalpha * this.c.Halpha), -1 / this.p.alpha)
   }
+
+  static _fitInit (data) {
+    // L ≈ min(data) seeds scale; Hill estimator gives shape α; H ≈ max(data) bounds the support
+    const L = Math.min(...data) * 0.99
+    const H = Math.max(...data) * 1.01
+    const n = data.length
+    const alpha = n / Math.max(data.reduce((s, x) => s + Math.log(x / L), 0), 1e-9)
+    return [L, H, alpha]
+  }
 }

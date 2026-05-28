@@ -49,6 +49,15 @@ export default class StudentT extends Distribution {
     }
   }
 
+  static _fitInit (data) {
+    // variance = ν/(ν−2) ⇒ ν = 2·Var/(Var−1) for Var>1; heavy-tailed default otherwise.
+    // Cap ν: variance just above 1 explodes the estimate into a near-degenerate (≈normal) seed
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n
+    return [variance > 1 ? Math.min(2 * variance / (variance - 1), 1000) : 10]
+  }
+
   _generator () {
     // Direct sampling using gamma variates
     return sign(this.r) * Math.sqrt(this.p.nu * gamma(this.r, 0.5) / gamma(this.r, this.p.nu / 2))

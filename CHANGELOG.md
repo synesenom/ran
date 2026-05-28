@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `R`, `F`, `FisherZ`, and `BaldingNichols` `.fit()` no longer inherit `Beta`'s `[alpha, beta]` initializer, which produced a wrong-arity (`R`) or wrong-parametrization init vector that made `fit()` throw or converge to nonsense; each now seeds Nelder-Mead from a distribution-correct method-of-moments estimate (#441).
+
 - `besselISpherical(n, x)` now uses a Taylor series for |x| < 1, eliminating catastrophic cancellation in the closed-form expressions for n ≥ 1; relative error is now bounded by 2ε for all small arguments (#425).
 
 - `Davis` distribution: `sample()` now produces genuine random variates via an exact Zeta-Gamma mixture sampler instead of always returning `1`; parameter constraint tightened to `n > 1`; `_pdf` NaN guard added for the lower support boundary (#447, #448)
@@ -21,8 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `JohnsonSU._fitInit` and `JohnsonSB._fitInit` added using the Slifker-Shapiro (1980) quantile method: four symmetric sample quantiles at Φ(±z)/Φ(±3z) levels (z=0.5) back-compute γ, δ, λ, ξ in closed form for SU; for SB, OLS on logit-transformed quantiles gives γ and δ with bounds seeded from the sample range (#440).
+- `_fitInit` data-aware method-of-moments initializers added to 9 noncentral distributions (`NoncentralChi2`, `NoncentralChi`, `NoncentralT`, `NoncentralBeta`, `NoncentralF`, `DoublyNoncentralChi2`, `DoublyNoncentralBeta`, `DoublyNoncentralF`, `DoublyNoncentralT`); degrees-of-freedom parameters are seeded from central-distribution moment equations and noncentrality parameters from the deviation of sample statistics from those central-case estimates (#439).
 - `_fitInit` data-aware initializers added to 10 bounded-support continuous distributions (`Bates`, `Triangular`, `Trapezoidal`, `PERT`, `BetaRectangular`, `UQuadratic`, `Uniform`, `UniformProduct`, `Anglit`, `RaisedCosine`); support endpoints are seeded from sample min/max and shape parameters from method-of-moments estimates, eliminating the random-retry fallback for these distributions (#433).
 - `_fitInit` data-aware method-of-moments initializers added to 22 discrete distributions (`Binomial`, `NegativeBinomial`, `Skellam`, `DiscreteWeibull`, `Zeta`, `YuleSimon`, `LogSeries`, `FlorySchulz`, `Borel`, `BorelTanner`, `HeadsMinus Tails`, `ConwayMaxwellPoisson`, `PolyaAeppli`, `NeymanA`, `GeneralizedHermite`, `Delaporte`, `Zipf`, `Hypergeometric`, `NegativeHypergeometric`, `BetaBinomial`, `Logarithmic`, `ExponentialLogarithmic`) and 7 Weibull/extreme-value family distributions (`Weibull`, `InvertedWeibull`, `DoubleWeibull`, `ExponentiatedWeibull`, `Frechet`, `GeneralizedExtremeValue`, `ShiftedLogLogistic`); `Cls.fit(data)` now starts Nelder-Mead from a moment-matched seed instead of a random draw (#438, #434).
+- `_fitInit` data-aware initializers added to `StudentT` (df from variance), `StudentZ` (df from variance), `Degenerate` (sample mean), `Soliton` (max observation), and `IrwinHall` (`n` from `E[X]=n/2`); `Cls.fit(data)` now starts Nelder-Mead from a data-derived seed instead of a random draw (#441).
 - `gaussLegendre(f, a, b, n)` algorithm: fixed-order Gauss-Legendre quadrature with precomputed nodes and weights for n=5, 10, and 20; exact for polynomials of degree ≤ 2n−1 (#402).
 - `Distribution.fit(data)` static method for maximum-likelihood parameter estimation via Nelder-Mead simplex optimizer (#404)
 - `fit()` now works on zero-parameter distributions (`Gilbrat`, `HalfLogistic`, `HyperbolicSecant`, `Kolmogorov`, `Rademacher`, `Slash`, `UniformRatio`): calling `Cls.fit(data)` returns a fresh instance without optimization (#427)

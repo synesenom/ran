@@ -381,4 +381,13 @@ export default class DoublyNoncentralBeta extends Distribution {
 
     return clamp(Math.exp(-l1 - l2) * z)
   }
+
+  static _fitInit (data) {
+    // Beta MOM for α, β; λ1=λ2 seeded at 0.5 since noncentrality is degenerate from moments
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1e-4
+    const factor = Math.max(mean * (1 - mean) / variance - 1, 0.1)
+    return [mean * factor, (1 - mean) * factor, 0.5, 0.5]
+  }
 }

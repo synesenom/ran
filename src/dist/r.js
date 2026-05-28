@@ -36,6 +36,14 @@ export default class R extends Beta {
     }]
   }
 
+  static _fitInit (data) {
+    // Var[X] = 1/(c+1) on [-1, 1] ⇒ c = 1/Var − 1; overrides Beta's [alpha, beta] init
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    return [Math.max(1 / variance - 1, 1e-3)]
+  }
+
   _generator () {
     return 2 * super._generator() - 1
   }
