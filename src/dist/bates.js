@@ -61,4 +61,18 @@ export default class Bates extends IrwinHall {
     const { scale, shift } = this.c
     return super._cdf(scale * x - shift)
   }
+
+  static _fitInit (data) {
+    // Endpoints from sample extremes; n from variance moment: Var(Bates) = (b-a)²/(12n) → n = (b-a)²/(12σ̂²)
+    const nData = data.length
+    const lo = Math.min(...data)
+    const hi = Math.max(...data)
+    const eps = (hi - lo) * 0.01 || 1e-6
+    const a = lo - eps
+    const b = hi + eps
+    const mean = data.reduce((s, x) => s + x, 0) / nData
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / nData || 1
+    const n = Math.max(1, Math.round((b - a) ** 2 / (12 * variance)))
+    return [n, a, b]
+  }
 }

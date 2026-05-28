@@ -48,4 +48,10 @@ export default class UniformProduct extends Distribution {
   _cdf (x) {
     return gammaUpperIncomplete(this.p.n, -Math.log(x))
   }
+
+  static _fitInit (data) {
+    // n from log-moment: -log(X) = sum of n Exp(1) variates, so E[-log X] = n
+    const meanNegLog = data.reduce((s, x) => s - Math.log(x), 0) / data.length
+    return [Math.max(2, Math.round(meanNegLog))]
+  }
 }

@@ -61,4 +61,12 @@ export default class BetaRectangular extends Beta {
     const y = x - this.p.a
     return this.p.theta * super._cdf(y / this.c.bMinusA) + this.c.oneMinusTheta * y / this.c.bMinusA
   }
+
+  static _fitInit (data) {
+    // Endpoints from sample extremes; neutral shape params (2,2) and theta=0.5 avoid degenerate beta boundary
+    const lo = Math.min(...data)
+    const hi = Math.max(...data)
+    const eps = (hi - lo) * 0.01 || 1e-6
+    return [2, 2, 0.5, lo - eps, hi + eps]
+  }
 }

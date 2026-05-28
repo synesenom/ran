@@ -50,4 +50,17 @@ export default class PERT extends Beta {
   _cdf (x) {
     return super._cdf((x - this.p.a) / (this.p.c - this.p.a))
   }
+
+  static _fitInit (data) {
+    // Endpoints from sample extremes; mode via PERT mean formula: E[X] = (a+4b+c)/6 → b = (6μ̂ - a - c)/4
+    const n = data.length
+    const lo = Math.min(...data)
+    const hi = Math.max(...data)
+    const eps = (hi - lo) * 0.01 || 1e-6
+    const a = lo - eps
+    const c = hi + eps
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const b = Math.max(a + eps, Math.min(c - eps, (6 * mean - a - c) / 4))
+    return [a, b, c]
+  }
 }
