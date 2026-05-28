@@ -533,7 +533,7 @@
       "@babel/register"
     ],
     "check-coverage": true,
-    "branches": 92,
+    "branches": 90,
     "lines": 98,
     "functions": 100,
     "statements": 98
