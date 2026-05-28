@@ -422,6 +422,13 @@ describe('dist', () => {
         assert(result instanceof dist.Exponential)
       })
 
+      it('Distribution._fitInit fallback should work for scalar-constructor distributions', () => {
+        // Gamma has no _fitInit override so fit() exercises the base-class random-retry path
+        const data = new dist.Gamma(2, 0.5).seed(42).sample(100)
+        const result = dist.Gamma.fit(data)
+        assert(result instanceof dist.Gamma)
+      })
+
       it('Pareto.fit should recover xmin close to min(data)', () => {
         const data = [1.5, 2.0, 3.1, 1.8, 2.5]
         const result = dist.Pareto.fit(data)
