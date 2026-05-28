@@ -23,9 +23,7 @@ export default class Slash extends Normal {
       value: Infinity,
       closed: false
     }]
-    this.c1 = [
-      0.5 / Math.sqrt(2 * Math.PI)
-    ]
+    Object.assign(this.c, { halfOverRoot2Pi: 0.5 / Math.sqrt(2 * Math.PI) })
   }
 
   _generator () {
@@ -35,7 +33,7 @@ export default class Slash extends Normal {
 
   _pdf (x) {
     return x === 0
-      ? this.c1[0]
+      ? this.c.halfOverRoot2Pi
       : (super._pdf(0) - super._pdf(x)) / (x * x)
   }
 
