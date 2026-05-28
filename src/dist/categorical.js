@@ -71,4 +71,41 @@ export default class Categorical extends Distribution {
   _cdf (x) {
     return Math.min(1, this.cdfTable[x - this.p.min])
   }
+
+  static _fitInit (data) {
+    // Subclasses (Bernoulli, Binomial, Zipf, ...) reuse Categorical's storage but have scalar
+    // constructors of their own; only override for Categorical itself so the base-class random
+    // retry still services the rest of the hierarchy.
+    if (this !== Categorical) {
+      return super._fitInit(data)
+    }
+    // Empirical frequencies are the unconstrained MLE for the categorical PMF, so this hook
+    // returns the closed-form optimum itself; fit() below skips Nelder-Mead because there is
+    // nothing left to optimise.
+    const min = Math.min(...data)
+    const max = Math.max(...data)
+    const counts = new Array(max - min + 1).fill(0)
+    for (const x of data) counts[x - min]++
+    return counts.map(c => c / data.length)
+  }
+
+  /**
+   * Estimates the categorical distribution from data via maximum likelihood. The MLE is
+   * closed-form (empirical frequencies of the observed integer categories) so this override
+   * skips Nelder-Mead. See [decisions/0012-distribution-fit-nelder-mead.md]{@link ../../decisions/0012-distribution-fit-nelder-mead.md}.
+   *
+   * @method fit
+   * @memberof ran.dist.Categorical
+   * @param {number[]} data Array of integer observations to fit.
+   * @returns {Categorical} A new Categorical instance with MLE parameters.
+   */
+  static fit (data) {
+    // Subclasses (Bernoulli, Binomial, etc.) have scalar constructors, so the (weights, min)
+    // construction here only applies to Categorical itself — delegate everything else to the
+    // base-class implementation, which still wires the subclass's own _fitInit into Nelder-Mead.
+    if (this !== Categorical) {
+      return super.fit(data)
+    }
+    return new this(this._fitInit(data), Math.min(...data))
+  }
 }

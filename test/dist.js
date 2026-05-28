@@ -654,6 +654,29 @@ describe('dist', () => {
         assert(result instanceof dist.Chi)
         assert(Math.abs(result.p.k - 4) <= 1)
       })
+
+      it('Categorical.fit should recover category probabilities close to planted values', () => {
+        const data = new dist.Categorical([0.2, 0.3, 0.5], 0).seed(42).sample(500)
+        const result = dist.Categorical.fit(data)
+        assert(result instanceof dist.Categorical)
+        assert(Math.abs(result.pdf(0) - 0.2) < 0.1)
+        assert(Math.abs(result.pdf(1) - 0.3) < 0.1)
+        assert(Math.abs(result.pdf(2) - 0.5) < 0.1)
+      })
+
+      it('Hyperexponential.fit should recover a mixture whose mean matches the data', () => {
+        const data = new dist.Hyperexponential([
+          { weight: 0.5, rate: 1 },
+          { weight: 0.5, rate: 5 }
+        ]).seed(42).sample(500)
+        const result = dist.Hyperexponential.fit(data)
+        assert(result instanceof dist.Hyperexponential)
+        // Component label-switching makes (weight, rate) pairs non-identifiable; use the mixture
+        // mean E[X] = Σ w_i / λ_i — a sufficient statistic invariant under that permutation.
+        const sampleMean = data.reduce((s, x) => s + x, 0) / data.length
+        const fittedMean = result.p.weights.reduce((s, w, i) => s + w / result.p.rates[i], 0)
+        assert(Math.abs(fittedMean - sampleMean) < 0.2)
+      })
     })
   })
 
