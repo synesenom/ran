@@ -126,6 +126,29 @@ export function besselI (n, x) {
   return x < 0 && n % 2 === 1 ? -y : y
 }
 
+// Relative error of the n=1 closed-form (cosh(x)-sinh(x)/x)/x from catastrophic
+// cancellation grows as 2ε/(x²/3). Using Taylor series for |x| < 1 keeps the
+// relative error below 2ε everywhere in that range; the series converges with
+// ratio x²/(2(k+1)(2n+2k+3)) per step, which is at most 1/10 per step at x=1.
+// decisions/0013-besselISpherical-small-x-taylor.md
+const _BESSEL_I_SPH_THRESHOLD = 1
+
+// Taylor series Σ_{k=0}^∞ x^{n+2k} / (2^k k! (2n+2k+1)!!) for i_n(x), n >= 1.
+// Naturally returns 0 at x = 0 without a special-case guard.
+function _besselISphericalTaylor (n, x) {
+  let t = 1
+  for (let j = 1; j <= n; j++) {
+    t *= x / (2 * j + 1)
+  }
+  let sum = t
+  const x2 = x * x
+  for (let k = 0; k < MAX_ITER && Math.abs(t) > EPS * Math.abs(sum); k++) {
+    t *= x2 / (2 * (k + 1) * (2 * n + 2 * k + 3))
+    sum += t
+  }
+  return sum
+}
+
 /**
  * Computes the modified spherical Bessel function of the first kind. Only integer order is supported.
  * Source: http://cpc.cs.qub.ac.uk/summaries/ADGM_v1_0.html (Numerical methods for special functions).
@@ -140,16 +163,19 @@ export function besselI (n, x) {
 export function besselISpherical (n, x) {
   switch (n) {
     case 0:
-      // i0 separately
       return x === 0 ? 1 : Math.sinh(x) / x
     case 1:
-      // i1 separately
-      return x === 0 ? 0 : (Math.cosh(x) - Math.sinh(x) / x) / x
+      return Math.abs(x) < _BESSEL_I_SPH_THRESHOLD
+        ? _besselISphericalTaylor(1, x)
+        : (Math.cosh(x) - Math.sinh(x) / x) / x
     default:
       if (n > 0) {
+        if (Math.abs(x) < _BESSEL_I_SPH_THRESHOLD) {
+          return _besselISphericalTaylor(n, x)
+        }
         // Use Wronskian with single run k-calculation
         const k = _kn(n + 1, x)
-        return x === 0 ? 0 : 1 / (x * x * (_hi(n + 1, x) * k[1] + k[0]))
+        return 1 / (x * x * (_hi(n + 1, x) * k[1] + k[0]))
       } else {
         // Backward recurrence for negative orders
         return (n + n + 3) * besselISpherical(n + 1, x) / x + besselISpherical(n + 2, x)

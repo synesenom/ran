@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `besselISpherical(n, x)` now uses a Taylor series for |x| < 1, eliminating catastrophic cancellation in the closed-form expressions for n ≥ 1; relative error is now bounded by 2ε for all small arguments (#425).
+
 - `Davis` distribution: `sample()` now produces genuine random variates via an exact Zeta-Gamma mixture sampler instead of always returning `1`; parameter constraint tightened to `n > 1`; `_pdf` NaN guard added for the lower support boundary (#447, #448)
 
 - `neumaier()` now returns `±Infinity` (instead of `NaN`) when the input array contains `±Infinity`; fixes `lnL()`, `aic()`, and `bic()` silently returning `NaN` when any observation falls outside a distribution's support (#442)
