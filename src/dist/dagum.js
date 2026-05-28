@@ -55,4 +55,15 @@ export default class Dagum extends Distribution {
   _q (p) {
     return this.p.b * Math.pow(Math.pow(p, -1 / this.p.p) - 1, -1 / this.p.a)
   }
+
+  static _fitInit (data) {
+    // Geometric mean seeds scale b; log-logistic approximation for shape a (p=1 special case is log-logistic); p seeded at 1
+    const n = data.length
+    const logData = data.map(x => Math.log(x))
+    const meanLog = logData.reduce((s, x) => s + x, 0) / n
+    const varLog = Math.max(logData.reduce((s, x) => s + (x - meanLog) ** 2, 0) / n, 1e-9)
+    const b = Math.exp(meanLog)
+    const a = Math.max(Math.PI / Math.sqrt(3 * varLog), 0.1)
+    return [1, a, b]
+  }
 }
