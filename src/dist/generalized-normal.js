@@ -51,4 +51,12 @@ export default class GeneralizedNormal extends GeneralizedGamma {
   _cdf (x) {
     return 0.5 * (1 + Math.sign(x - this.p.mu) * super._cdf(Math.abs(x - this.p.mu)))
   }
+
+  static _fitInit (data) {
+    // Seed at beta=2 (normal special case) with MOM estimates; beta's MOM inversion requires log-moment ratios unavailable from mean/std alone
+    const n = data.length
+    const mu = data.reduce((s, x) => s + x, 0) / n
+    const alpha = Math.sqrt(data.reduce((s, x) => s + (x - mu) ** 2, 0) / n) || 1
+    return [mu, alpha, 2]
+  }
 }

@@ -68,4 +68,10 @@ export default class TukeyLambda extends Distribution {
       ? Math.log(p / (1 - p))
       : (Math.pow(p, this.p.lambda) - Math.pow(1 - p, this.p.lambda)) / this.p.lambda
   }
+
+  static _fitInit (data) {
+    // Seed lambda so the bounded support covers all observations; no closed-form MOM inversion exists for this shape-only parameter
+    const maxAbs = data.reduce((m, x) => Math.max(m, Math.abs(x)), 0)
+    return [maxAbs > 1 ? 0.9 / maxAbs : 1]
+  }
 }

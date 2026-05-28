@@ -54,4 +54,12 @@ export default class Logistic extends Distribution {
   _q (p) {
     return this.p.mu - this.p.s * Math.log(1 / p - 1)
   }
+
+  static _fitInit (data) {
+    // Var[X] = pi^2 s^2 / 3 links sample variance to the scale parameter
+    const n = data.length
+    const mu = data.reduce((s, x) => s + x, 0) / n
+    const v = data.reduce((s, x) => s + (x - mu) ** 2, 0) / n
+    return [mu, Math.max(Math.sqrt(3 * v) / Math.PI, 1e-3)]
+  }
 }

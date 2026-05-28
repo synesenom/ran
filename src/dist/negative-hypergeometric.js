@@ -14,11 +14,6 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class NegativeHypergeometric extends Categorical {
-  /**
-   * @param {number} N Total number of elements to sample from. If not an integer, it is rounded to the nearest one.
-   * @param {number} K Total number of successes. If not an integer, it is rounded to the nearest one.
-   * @param {number} r Total number of failures to stop at. If not an integer, it is rounded to the nearest one.
-   */
   static _fitInit (data) {
     // Rough seed: N = 2*max+2, K = N/2, r = 1; Nelder-Mead refines from this.
     const maxVal = data.reduce((m, x) => x > m ? x : m, 0)
@@ -27,6 +22,11 @@ export default class NegativeHypergeometric extends Categorical {
     return [N, K, 1]
   }
 
+  /**
+   * @param {number} N Total number of elements to sample from. If not an integer, it is rounded to the nearest one.
+   * @param {number} K Total number of successes. If not an integer, it is rounded to the nearest one.
+   * @param {number} r Total number of failures to stop at. If not an integer, it is rounded to the nearest one.
+   */
   constructor (N, K, r) {
     // Validate parameters
     const Ni = Math.round(N)

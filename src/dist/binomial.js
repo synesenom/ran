@@ -14,11 +14,6 @@ import Categorical from './categorical'
  * @constructor
  */
 export default class Binomial extends Categorical {
-  // Special case of categorical
-  /**
-   * @param {number} n Number of trials.
-   * @param {number} p Probability of success.
-   */
   static _fitInit (data) {
     // E[X] = np; n ≈ max(data) as the support upper bound, p = mean/n.
     const n = Math.max(1, data.reduce((m, x) => x > m ? x : m, 0))
@@ -26,6 +21,10 @@ export default class Binomial extends Categorical {
     return [n, Math.max(0.01, p)]
   }
 
+  /**
+   * @param {number} n Number of trials.
+   * @param {number} p Probability of success.
+   */
   constructor (n, p) {
     const ni = Math.round(n)
     super(Array.from({ length: ni + 1 }, (d, k) => Math.exp(logBinomial(n, k) + k * Math.log(p) + (n - k) * Math.log(1 - p))), 0)

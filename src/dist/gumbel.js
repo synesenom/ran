@@ -52,4 +52,13 @@ export default class Gumbel extends Distribution {
   _q (p) {
     return this.p.mu - this.p.beta * Math.log(-Math.log(p))
   }
+
+  static _fitInit (data) {
+    // Var[X] = pi^2 beta^2 / 6 and mean = mu + beta*gamma_EM link sample moments to the two parameters
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const v = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n
+    const beta = Math.max(Math.sqrt(6 * v) / Math.PI, 1e-3)
+    return [mean - beta * 0.5772156649015329, beta]
+  }
 }

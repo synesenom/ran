@@ -56,4 +56,12 @@ export default class GeneralizedLogistic extends Distribution {
   _q (p) {
     return this.p.mu - this.p.s * Math.log(Math.pow(p, -1 / this.p.c) - 1)
   }
+
+  static _fitInit (data) {
+    // At c=1 (logistic special case) Var[X] = pi^2 s^2 / 3 and mean = mu give the same MOM as Logistic
+    const n = data.length
+    const mu = data.reduce((s, x) => s + x, 0) / n
+    const v = data.reduce((s, x) => s + (x - mu) ** 2, 0) / n
+    return [mu, Math.max(Math.sqrt(3 * v) / Math.PI, 1e-3), 1]
+  }
 }

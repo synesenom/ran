@@ -54,4 +54,13 @@ export default class Laplace extends Distribution {
       ? this.p.mu + this.p.b * Math.log(2 * p)
       : this.p.mu - this.p.b * Math.log(2 - 2 * p)
   }
+
+  static _fitInit (data) {
+    // MLE for Laplace is closed-form: mu = sample median, b = mean absolute deviation from the median
+    const sorted = data.slice().sort((a, b) => a - b)
+    const n = sorted.length
+    const mu = n % 2 ? sorted[(n - 1) / 2] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2
+    const b = data.reduce((s, x) => s + Math.abs(x - mu), 0) / n || 1
+    return [mu, b]
+  }
 }

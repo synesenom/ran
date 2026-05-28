@@ -72,4 +72,12 @@ export default class SkewNormal extends Normal {
   _q (p) {
     return this._qEstimateRoot(p)
   }
+
+  static _fitInit (data) {
+    // Seed alpha=0 (symmetric normal); MOM inversion for alpha requires sample skewness which is unreliable for small n
+    const n = data.length
+    const xi = data.reduce((s, x) => s + x, 0) / n
+    const omega = Math.sqrt(data.reduce((s, x) => s + (x - xi) ** 2, 0) / n) || 1
+    return [xi, omega, 0]
+  }
 }
