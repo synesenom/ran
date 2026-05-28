@@ -44,6 +44,7 @@ export default class DiscreteUniform extends Distribution {
   }
 
   static _fitInit (data) {
+    // MLEs for the support endpoints are the sample min and max.
     return [Math.min(...data), Math.max(...data)]
   }
 
