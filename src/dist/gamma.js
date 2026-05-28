@@ -56,4 +56,12 @@ export default class Gamma extends Distribution {
   _q (p) {
     return gammaLowerIncompleteInv(this.p.alpha, p) / this.p.beta
   }
+
+  static _fitInit (data) {
+    // MOM: E[X]=α/β, Var[X]=α/β² → α = mean²/var, β = mean/var
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    return [mean ** 2 / variance, mean / variance]
+  }
 }

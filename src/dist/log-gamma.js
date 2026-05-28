@@ -51,4 +51,13 @@ export default class LogGamma extends Gamma {
   _cdf (x) {
     return super._cdf(Math.log(x - this.p.mu + 1))
   }
+
+  static _fitInit (data) {
+    // log(x−μ+1) ~ Gamma(α,β) with μ=0: gamma MOM on log(x+1) seeds the Gamma parameters
+    const n = data.length
+    const transformed = data.map(x => Math.log(x + 1))
+    const mean = transformed.reduce((s, x) => s + x, 0) / n
+    const variance = transformed.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    return [mean ** 2 / variance, mean / variance, 0]
+  }
 }

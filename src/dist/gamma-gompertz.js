@@ -57,4 +57,10 @@ export default class GammaGompertz extends Distribution {
   _q (p) {
     return Math.log(1 + this.p.beta * (Math.pow(1 - p, -1 / this.p.s) - 1)) / this.p.b
   }
+
+  static _fitInit (data) {
+    // Seed b ≈ 1/mean as approximate rate; extra shapes s, β seeded at neutral values for Nelder-Mead
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    return [1 / Math.max(mean, 1e-6), 1, 2]
+  }
 }

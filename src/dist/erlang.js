@@ -28,4 +28,12 @@ export default class Erlang extends Gamma {
       'lambda > 0'
     ])
   }
+
+  static _fitInit (data) {
+    // MOM: E[X]=k/λ, Var[X]=k/λ² → k = round(mean²/var), λ = mean/var
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    return [Math.max(1, Math.round(mean ** 2 / variance)), mean / variance]
+  }
 }

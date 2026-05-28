@@ -53,4 +53,12 @@ export default class GeneralizedGamma extends Gamma {
   _cdf (x) {
     return super._cdf(Math.pow(x, this.p.p))
   }
+
+  static _fitInit (data) {
+    // p=1 collapses to Gamma(d, 1/a): E[X]=a·d, Var[X]=a²·d → d=mean²/var, a=var/mean
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    return [variance / mean, mean ** 2 / variance, 1]
+  }
 }
