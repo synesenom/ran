@@ -35,6 +35,11 @@ export default class Geometric extends Distribution {
     }]
   }
 
+  static _fitInit (data) {
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    return [1 / (1 + mean)]
+  }
+
   _generator () {
     // Inverse transform sampling
     return this._q(this.r.next())

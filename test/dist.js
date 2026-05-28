@@ -435,6 +435,35 @@ describe('dist', () => {
         const result = dist.Pareto.fit(data)
         assert(Math.abs(result.p.alpha - alphaExpected) < 0.05)
       })
+
+      it('Bernoulli.fit should recover p close to sample mean', () => {
+        const data = [1, 1, 1, 0, 1, 1, 1, 0]
+        const result = dist.Bernoulli.fit(data)
+        assert(result instanceof dist.Bernoulli)
+        assert(Math.abs(result.pdf(1) - 0.75) < 0.05)
+      })
+
+      it('Poisson.fit should recover lambda close to sample mean', () => {
+        const data = [2, 1, 3, 2, 2, 1, 3, 2]
+        const result = dist.Poisson.fit(data)
+        assert(result instanceof dist.Poisson)
+        assert(Math.abs(result.p.lambda - 2) < 0.1)
+      })
+
+      it('Geometric.fit should recover p close to closed-form MLE', () => {
+        const data = [1, 0, 2, 1, 0, 2, 1, 1]
+        const result = dist.Geometric.fit(data)
+        assert(result instanceof dist.Geometric)
+        assert(Math.abs(result.p.p - 0.5) < 0.05)
+      })
+
+      it('DiscreteUniform.fit should recover xmin and xmax', () => {
+        const data = [1, 2, 3, 4, 2, 3, 1, 4]
+        const result = dist.DiscreteUniform.fit(data)
+        assert(result instanceof dist.DiscreteUniform)
+        assert(result.p.xmin === 1)
+        assert(result.p.xmax === 4)
+      })
     })
   })
 

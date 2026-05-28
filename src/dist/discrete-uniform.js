@@ -43,6 +43,10 @@ export default class DiscreteUniform extends Distribution {
     }
   }
 
+  static _fitInit (data) {
+    return [Math.min(...data), Math.max(...data)]
+  }
+
   _generator () {
     // Direct sampling
     return this._q(this.r.next())

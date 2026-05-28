@@ -27,6 +27,11 @@ export default class Bernoulli extends Categorical {
     ])
   }
 
+  static _fitInit (data) {
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    return [mean]
+  }
+
   _q (p) {
     // this.p.weights[0] is the CDF at k=0; this.p.p is shadowed by the Categorical constructor.
     return p > this.p.weights[0] ? 1 : 0

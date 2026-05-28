@@ -37,6 +37,11 @@ export default class Poisson extends Distribution {
     }]
   }
 
+  static _fitInit (data) {
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    return [mean]
+  }
+
   _generator () {
     return poisson(this.r, this.p.lambda)
   }
