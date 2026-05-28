@@ -38,4 +38,10 @@ export default class MaxwellBoltzmann extends Gamma {
   _cdf (x) {
     return super._cdf(x * x)
   }
+
+  static _fitInit (data) {
+    // MLE: a = sqrt(mean(x²) / 3) from second-moment E[X²] = 3a²
+    const n = data.length
+    return [Math.sqrt(data.reduce((s, x) => s + x * x, 0) / (3 * n))]
+  }
 }

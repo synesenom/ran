@@ -46,4 +46,10 @@ export default class HalfNormal extends Normal {
   _q (p) {
     return this.p.sigma * 1.414213562373095 * erfinv(p)
   }
+
+  static _fitInit (data) {
+    // MLE: σ = sqrt(mean(x²)) from second-moment E[X²] = σ²
+    const n = data.length
+    return [Math.sqrt(data.reduce((s, x) => s + x * x, 0) / n)]
+  }
 }

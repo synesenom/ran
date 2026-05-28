@@ -51,4 +51,14 @@ export default class Levy extends Distribution {
   _cdf (x) {
     return x === this.p.mu ? 0 : erfc(Math.sqrt(0.5 * this.p.c / (x - this.p.mu)))
   }
+
+  static _fitInit (data) {
+    // μ ≈ min(data); solve Levy median formula c = 2*(median-μ)*erfinv(0.5)² for c
+    // erfinv(0.5)² ≈ 0.22747
+    const sorted = [...data].sort((a, b) => a - b)
+    const n = sorted.length
+    const mu = sorted[0]
+    const median = n % 2 === 0 ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2 : sorted[(n - 1) / 2]
+    return [mu, Math.max(2 * (median - mu) * 0.22747, 0.01)]
+  }
 }

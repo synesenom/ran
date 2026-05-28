@@ -57,4 +57,9 @@ export default class Exponential extends Distribution {
   _q (p) {
     return -Math.log(1 - p) / this.p.lambda
   }
+
+  static _fitInit (data) {
+    // MLE: rate = 1/mean
+    return [data.length / data.reduce((s, x) => s + x, 0)]
+  }
 }

@@ -19,4 +19,10 @@ export default class Rayleigh extends Weibull {
   constructor (sigma) {
     super(sigma * Math.SQRT2, 2)
   }
+
+  static _fitInit (data) {
+    // MLE: σ = sqrt(mean(x²) / 2) from second-moment E[X²] = 2σ²
+    const n = data.length
+    return [Math.sqrt(data.reduce((s, x) => s + x * x, 0) / (2 * n))]
+  }
 }

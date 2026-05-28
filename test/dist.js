@@ -602,6 +602,51 @@ describe('dist', () => {
         assert(Number.isFinite(init[0]))
         assert(init[1] === 1)
       })
+
+      it('Exponential.fit should recover lambda close to planted value', () => {
+        const data = new dist.Exponential(2).seed(42).sample(200)
+        const result = dist.Exponential.fit(data)
+        assert(result instanceof dist.Exponential)
+        assert(Math.abs(result.p.lambda - 2) < 0.3)
+      })
+
+      it('Rayleigh.fit should recover sigma close to planted value', () => {
+        const data = new dist.Rayleigh(1.5).seed(42).sample(200)
+        const result = dist.Rayleigh.fit(data)
+        assert(result instanceof dist.Rayleigh)
+        // cdf(σ) = 1−exp(−½) for any Rayleigh(σ); valid only when fitted σ ≈ planted 1.5
+        assert(Math.abs(result.cdf(1.5) - (1 - Math.exp(-0.5))) < 0.09)
+      })
+
+      it('MaxwellBoltzmann.fit should recover a close to planted value', () => {
+        const data = new dist.MaxwellBoltzmann(2).seed(42).sample(200)
+        const result = dist.MaxwellBoltzmann.fit(data)
+        assert(result instanceof dist.MaxwellBoltzmann)
+        // pdf(a; a) = sqrt(2/π)·exp(−½)/a for Maxwell-Boltzmann(a); checks a ≈ 2
+        assert(Math.abs(result.pdf(2) - Math.sqrt(2 / Math.PI) * Math.exp(-0.5) / 2) < 0.08)
+      })
+
+      it('HalfNormal.fit should recover sigma close to planted value', () => {
+        const data = new dist.HalfNormal(1.5).seed(42).sample(200)
+        const result = dist.HalfNormal.fit(data)
+        assert(result instanceof dist.HalfNormal)
+        assert(Math.abs(result.p.sigma - 1.5) < 0.2)
+      })
+
+      it('Levy.fit should recover mu and c close to planted values', () => {
+        const data = new dist.Levy(1, 2).seed(42).sample(200)
+        const result = dist.Levy.fit(data)
+        assert(result instanceof dist.Levy)
+        assert(Math.abs(result.p.mu - 1) < 0.3)
+        assert(Math.abs(result.p.c - 2) < 0.8)
+      })
+
+      it('Chi.fit should recover k close to planted value', () => {
+        const data = new dist.Chi(4).seed(42).sample(200)
+        const result = dist.Chi.fit(data)
+        assert(result instanceof dist.Chi)
+        assert(Math.abs(result.p.k - 4) <= 1)
+      })
     })
   })
 
