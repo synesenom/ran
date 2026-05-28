@@ -14,12 +14,6 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class BetaBinomial extends Categorical {
-  // Special case of categorical
-  /**
-   * @param {number} n Number of trials.
-   * @param {number} alpha First shape parameter.
-   * @param {number} beta Second shape parameter.
-   */
   static _fitInit (data) {
     // n = max(data); moment-match alpha, beta from mean proportion and overdispersion.
     const n = Math.max(1, data.reduce((m, x) => x > m ? x : m, 0))
@@ -32,6 +26,11 @@ export default class BetaBinomial extends Categorical {
     return [n, Math.max(0.1, m1 * phi), Math.max(0.1, (1 - m1) * phi)]
   }
 
+  /**
+   * @param {number} n Number of trials.
+   * @param {number} alpha First shape parameter.
+   * @param {number} beta Second shape parameter.
+   */
   constructor (n, alpha, beta) {
     const ni = Math.round(n)
     super(Array.from({ length: ni + 1 }, (d, i) => Math.exp(logBinomial(ni, i) + logBeta(i + alpha, ni - i + beta) - logBeta(alpha, beta))), 0)

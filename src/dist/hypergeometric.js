@@ -14,12 +14,6 @@ import Distribution from './_distribution'
  * @constructor
  */
 export default class Hypergeometric extends Categorical {
-  // Special case of categorical
-  /**
-   * @param {number} N Total number of elements to sample from. If not an integer, it is rounded to the nearest one.
-   * @param {number} K Total number of successes. If not an integer, it is rounded to the nearest one.
-   * @param {number} n If not an integer, it is rounded to the nearest one. Number of draws.
-   */
   static _fitInit (data) {
     // Rough seed: N = 2*max+2 ensures max(data) ≤ min(n, K); E[X] = nK/N seeds K.
     const maxVal = data.reduce((m, x) => x > m ? x : m, 0)
@@ -30,6 +24,11 @@ export default class Hypergeometric extends Categorical {
     return [N, K, n]
   }
 
+  /**
+   * @param {number} N Total number of elements to sample from. If not an integer, it is rounded to the nearest one.
+   * @param {number} K Total number of successes. If not an integer, it is rounded to the nearest one.
+   * @param {number} n Number of draws. If not an integer, it is rounded to the nearest one.
+   */
   constructor (N, K, n) {
     const Ni = Math.round(N)
     const Ki = Math.round(K)
