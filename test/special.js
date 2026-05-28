@@ -142,6 +142,48 @@ describe('special', () => {
           (2 * n + 1) * special.besselISpherical(n, x) / x))
       })
     })
+
+    it('should return accurate small-x values for n=1', () => {
+      // i_1(x) = x/3 + x³/30 + x⁵/840 + ...; (2*1+1)!! = 3
+      assert(special.besselISpherical(1, 0) === 0)
+      // At x=1e-6 the second term is ~3.7e-20, negligible vs 1e-10 relative tolerance
+      assert(equal(special.besselISpherical(1, 1e-6), 1e-6 / 3, 10))
+      // At x=1e-3 include two terms (third term ~3.6e-15 relative)
+      assert(equal(special.besselISpherical(1, 1e-3), 1e-3 / 3 + 1e-9 / 30, 10))
+      // At x=0.1 (Taylor branch): hand-computed from series
+      assert(equal(special.besselISpherical(1, 0.1), 0.03336667857363341, 10))
+    })
+
+    it('should return accurate small-x values for n=2', () => {
+      // i_2(x) = x²/15 + x⁴/210 + ...; (2*2+1)!! = 5!! = 15
+      assert(special.besselISpherical(2, 0) === 0)
+      // At x=1e-6 the second term is ~7e-14 relative
+      assert(equal(special.besselISpherical(2, 1e-6), 1e-12 / 15, 10))
+      // At x=1e-3 include two terms x²/15 + x⁴/210 (third term ~2e-15 relative)
+      assert(equal(special.besselISpherical(2, 1e-3), 1e-6 / 15 + 1e-12 / 210, 10))
+      // At x=0.1 (Taylor branch): hand-computed from series
+      assert(equal(special.besselISpherical(2, 0.1), 6.671429894380334e-4, 10))
+    })
+
+    it('should return accurate small-x values for n=5', () => {
+      // i_5(x) = x⁵/10395 + ...; (2*5+1)!! = 11!! = 10395, 13!! = 135135
+      assert(special.besselISpherical(5, 0) === 0)
+      // At x=1e-6 the second term is ~4e-14 relative
+      assert(equal(special.besselISpherical(5, 1e-6), 1e-30 / 10395, 10))
+      // At x=1e-3 include two terms x⁵/10395 + x⁷/270270 (third term ~6e-16 relative)
+      assert(equal(special.besselISpherical(5, 1e-3), 1e-15 / 10395 + 1e-21 / 270270, 10))
+      // At x=0.1 (Taylor branch): hand-computed from series
+      assert(equal(special.besselISpherical(5, 0.1), 9.62371024043737e-10, 10))
+    })
+
+    it('should satisfy positive-order recurrence in the Taylor branch', () => {
+      repeat(() => {
+        const n = Math.floor(1 + 10 * Math.random())
+        const x = 0.01 + 0.98 * Math.random()
+        assert(equal(special.besselISpherical(n - 1, x) - special.besselISpherical(n + 1, x),
+          (2 * n + 1) * special.besselISpherical(n, x) / x))
+      })
+    })
   })
 
   describe('.betaIncomplete()', () => {
