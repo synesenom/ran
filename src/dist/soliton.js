@@ -30,4 +30,9 @@ export default class Soliton extends Categorical {
       'N > 0'
     ])
   }
+
+  static _fitInit (data) {
+    // Support is {1,…,N}; the largest observation is a lower bound for N (reduce avoids spreading a large array onto the call stack)
+    return [Math.round(data.reduce((m, x) => x > m ? x : m, 1))]
+  }
 }

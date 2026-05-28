@@ -41,6 +41,17 @@ export default class F extends Beta {
     }]
   }
 
+  static _fitInit (data) {
+    // E[X] = d2/(d2−2) ⇒ d2 = 2·mean/(mean−1); d1 from Var = 2·d2²(d1+d2−2)/(d1(d2−2)²(d2−4))
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    const d2 = mean > 1 ? Math.max(2 * mean / (mean - 1), 4.1) : 10
+    const denom = variance * (d2 - 2) ** 2 * (d2 - 4) - 2 * d2 * d2
+    const d1 = denom > 0 ? Math.max(2 * d2 * d2 * (d2 - 2) / denom, 1) : 5
+    return [d1, d2]
+  }
+
   _generator () {
     // Direct sampling by transforming beta variate
     const x = super._generator()

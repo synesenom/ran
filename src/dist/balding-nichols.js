@@ -39,4 +39,14 @@ export default class BaldingNichols extends Beta {
       closed: false
     }]
   }
+
+  static _fitInit (data) {
+    // mean = p, Var = p(1−p)·F ⇒ p = mean, F = Var/(p(1−p)); clamp into (0, 1) since both are probabilities
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n
+    const p = Math.min(Math.max(mean, 1e-3), 1 - 1e-3)
+    const F = Math.min(Math.max(variance / (p * (1 - p)), 1e-3), 1 - 1e-3)
+    return [F, p]
+  }
 }

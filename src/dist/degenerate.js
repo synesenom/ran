@@ -31,6 +31,11 @@ export default class Degenerate extends Distribution {
     }]
   }
 
+  static _fitInit (data) {
+    // All mass sits at a single point; the sample mean is the natural location estimate
+    return [data.reduce((s, x) => s + x, 0) / data.length]
+  }
+
   _generator () {
     // Direct sampling
     return this.p.x0

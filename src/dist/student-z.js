@@ -25,6 +25,14 @@ export default class StudentZ extends StudentT {
     super(n - 1)
   }
 
+  static _fitInit (data) {
+    // Z = T/√ν with ν = n−1 ⇒ Var[Z] = 1/(n−3); invert for n, defaulting when variance is degenerate
+    const len = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / len
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / len
+    return [variance > 0 ? 1 / variance + 3 : 10]
+  }
+
   _generator () {
     return super._generator() / Math.sqrt(this.p.nu)
   }
