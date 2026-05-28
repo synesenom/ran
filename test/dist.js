@@ -1189,6 +1189,34 @@ describe('dist', () => {
         assert(Number.isFinite(init[0]))
         assert(init[1] > 0)
       })
+
+      it('JohnsonSU._fitInit should fall back to moments when quantile ratio is degenerate', () => {
+        // constant data → all four quantiles equal → p = 0 → ratio = NaN → moments fallback
+        const init = dist.JohnsonSU._fitInit([2, 2, 2, 2, 2])
+        assert(Array.isArray(init) && init.length === 4)
+        assert(init[1] > 0) // delta > 0
+        assert(init[2] > 0) // lambda > 0
+      })
+
+      it('JohnsonSU.fit should recover gamma, delta, lambda, xi close to planted values', () => {
+        const data = new dist.JohnsonSU(0, 2, 2, 0).seed(42).sample(300)
+        const result = dist.JohnsonSU.fit(data)
+        assert(result instanceof dist.JohnsonSU)
+        assert(Math.abs(result.p.gamma - 0) < 0.5)
+        assert(Math.abs(result.p.delta - 2) < 0.5)
+        assert(Math.abs(result.p.lambda - 2) < 0.6)
+        assert(Math.abs(result.p.xi - 0) < 0.5)
+      })
+
+      it('JohnsonSB.fit should recover gamma, delta, lambda, xi close to planted values', () => {
+        const data = new dist.JohnsonSB(0, 2, 2, 0).seed(42).sample(300)
+        const result = dist.JohnsonSB.fit(data)
+        assert(result instanceof dist.JohnsonSB)
+        assert(Math.abs(result.p.gamma - 0) < 0.5)
+        assert(Math.abs(result.p.delta - 2) < 0.5)
+        assert(Math.abs(result.p.lambda - 2) < 0.6)
+        assert(Math.abs(result.p.xi - 0) < 0.3)
+      })
     })
   })
 
