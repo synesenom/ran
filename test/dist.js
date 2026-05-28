@@ -423,10 +423,10 @@ describe('dist', () => {
       })
 
       it('Distribution._fitInit fallback should work for scalar-constructor distributions', () => {
-        // Burr has no _fitInit override so fit() exercises the base-class random-retry path
-        const data = new dist.Burr(2, 3).seed(42).sample(100)
-        const result = dist.Burr.fit(data)
-        assert(result instanceof dist.Burr)
+        // Alpha has no _fitInit override so fit() exercises the base-class random-retry path
+        const data = new dist.Alpha(2, 1).seed(42).sample(100)
+        const result = dist.Alpha.fit(data)
+        assert(result instanceof dist.Alpha)
       })
 
       it('Pareto.fit should recover xmin close to min(data)', () => {
