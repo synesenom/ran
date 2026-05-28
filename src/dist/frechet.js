@@ -1,4 +1,5 @@
 import Distribution from './_distribution'
+import { gamma } from '../special'
 
 /**
  * Probability density function for the [Frechet distribution]{@link https://en.wikipedia.org/wiki/Frechet_distribution}:
@@ -53,5 +54,22 @@ export default class Frechet extends Distribution {
 
   _q (p) {
     return this.p.m + this.p.s * Math.pow(-Math.log(p), -1 / this.p.alpha)
+  }
+
+  static _fitInit (data) {
+    // Shift by m = min-ε so (X-m)/s ~ InvertedWeibull(alpha); Justus on reciprocals gives alpha
+    const sorted = [...data].sort((a, b) => a - b)
+    const n = sorted.length
+    const m = sorted[0] - 1e-3
+    const shifted = sorted.map(x => x - m)
+    const recip = shifted.map(x => 1 / x)
+    const meanR = recip.reduce((s, x) => s + x, 0) / n
+    const varianceR = recip.reduce((s, x) => s + (x - meanR) ** 2, 0) / n || 1
+    const cv = Math.sqrt(varianceR) / Math.max(meanR, 1e-9)
+    const alpha = Math.max(1.2 * Math.pow(cv, -1.086), 0.5)
+    const meanY = shifted.reduce((s, x) => s + x, 0) / n
+    // Mean of InvertedWeibull(alpha) = Γ(1-1/alpha) for alpha > 1
+    const s = alpha > 1 ? Math.max(meanY / gamma(1 - 1 / alpha), 1e-3) : Math.max(meanY, 1e-3)
+    return [alpha, s, m]
   }
 }

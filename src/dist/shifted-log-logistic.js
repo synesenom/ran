@@ -71,4 +71,15 @@ export default class ShiftedLogLogistic extends Distribution {
       return this.p.mu + this.p.sigma * (Math.pow(1 / p - 1, -this.p.xi) - 1) / this.p.xi
     }
   }
+
+  static _fitInit (data) {
+    // xi=0 is the logistic limit where median = mu and IQR = 2σln3; seed xi=0 for Nelder-Mead
+    const sorted = [...data].sort((a, b) => a - b)
+    const n = sorted.length
+    const median = n % 2 === 0 ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2 : sorted[(n - 1) / 2]
+    const q1 = sorted[Math.floor(n * 0.25)]
+    const q3 = sorted[Math.floor(n * 0.75)]
+    const sigma = Math.max((q3 - q1) / (2 * Math.log(3)), 1e-3)
+    return [median, sigma, 0]
+  }
 }

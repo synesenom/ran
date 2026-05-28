@@ -1,5 +1,6 @@
 import Exponential from './exponential'
 import Distribution from './_distribution'
+import { gamma } from '../special'
 
 /**
  * Probability density function for the [Weibull distribution]{@link https://en.wikipedia.org/wiki/Weibull_distribution}:
@@ -54,5 +55,15 @@ export default class Weibull extends Exponential {
 
   _q (p) {
     return this.p.lambda2 * Math.pow(-Math.log(1 - p), 1 / this.p.k)
+  }
+
+  static _fitInit (data) {
+    // Justus approximation: k ≈ 1.2*(cv)^{-1.086} relates the Weibull CV to its shape parameter
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    const cv = Math.sqrt(variance) / Math.max(mean, 1e-9)
+    const k = Math.max(1.2 * Math.pow(cv, -1.086), 0.1)
+    return [Math.max(mean / gamma(1 + 1 / k), 1e-3), k]
   }
 }

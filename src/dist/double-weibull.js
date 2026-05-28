@@ -48,4 +48,9 @@ export default class DoubleWeibull extends Weibull {
       ? this.p.lambda2 * Math.pow(-Math.log(2 - 2 * p), 1 / this.p.k)
       : -(this.p.lambda2 * Math.pow(-Math.log(2 * p), 1 / this.p.k))
   }
+
+  static _fitInit (data) {
+    // |X| ~ Weibull(λ, k): apply Weibull Justus init to absolute values of the symmetric data
+    return super._fitInit(data.map(x => Math.abs(x)))
+  }
 }

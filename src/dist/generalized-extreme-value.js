@@ -50,4 +50,13 @@ export default class GeneralizedExtremeValue extends Distribution {
   _q (p) {
     return (1 - Math.pow(-Math.log(p), this.p.c)) / this.p.c
   }
+
+  static _fitInit (data) {
+    // GEV skewness exceeds the Gumbel limit (≈1.14) when c < 0 (heavier right tail)
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const m2 = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    const skewness = data.reduce((s, x) => s + Math.pow((x - mean) / Math.sqrt(m2), 3), 0) / n
+    return [skewness > 1.14 ? -0.1 : 0.1]
+  }
 }

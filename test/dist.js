@@ -1095,6 +1095,100 @@ describe('dist', () => {
         assert(Math.abs(result.p.mu - 2) < 0.4)
         assert(Math.abs(result.p.s - 3) < 0.4)
       })
+
+      it('Weibull.fit should recover lambda and k close to planted values', () => {
+        const data = new dist.Weibull(2, 1.5).seed(42).sample(200)
+        const result = dist.Weibull.fit(data)
+        assert(result instanceof dist.Weibull)
+        assert(Math.abs(result.p.lambda2 - 2) < 0.5)
+        assert(Math.abs(result.p.k - 1.5) < 0.3)
+      })
+
+      it('InvertedWeibull.fit should recover c close to planted value', () => {
+        const data = new dist.InvertedWeibull(3).seed(42).sample(200)
+        const result = dist.InvertedWeibull.fit(data)
+        assert(result instanceof dist.InvertedWeibull)
+        assert(Math.abs(result.p.c - 3) < 0.6)
+      })
+
+      it('DoubleWeibull.fit should recover lambda and k close to planted values', () => {
+        const data = new dist.DoubleWeibull(2, 1.5).seed(42).sample(200)
+        const result = dist.DoubleWeibull.fit(data)
+        assert(result instanceof dist.DoubleWeibull)
+        assert(Math.abs(result.p.lambda2 - 2) < 0.5)
+        assert(Math.abs(result.p.k - 1.5) < 0.4)
+      })
+
+      it('ExponentiatedWeibull.fit should recover lambda, k, and alpha close to planted values', () => {
+        const data = new dist.ExponentiatedWeibull(2, 1.5, 2).seed(42).sample(200)
+        const result = dist.ExponentiatedWeibull.fit(data)
+        assert(result instanceof dist.ExponentiatedWeibull)
+        assert(Math.abs(result.p.lambda2 - 2) < 0.8)
+        assert(Math.abs(result.p.k - 1.5) < 0.6)
+        assert(Math.abs(result.p.alpha - 2) < 0.8)
+      })
+
+      it('Frechet.fit should recover alpha and s close to planted values', () => {
+        const data = new dist.Frechet(2, 1, 0).seed(42).sample(200)
+        const result = dist.Frechet.fit(data)
+        assert(result instanceof dist.Frechet)
+        assert(Math.abs(result.p.alpha - 2) < 0.5)
+        assert(Math.abs(result.p.s - 1) < 0.4)
+      })
+
+      it('GeneralizedExtremeValue.fit should recover c close to planted value', () => {
+        const data = new dist.GeneralizedExtremeValue(0.5).seed(42).sample(200)
+        const result = dist.GeneralizedExtremeValue.fit(data)
+        assert(result instanceof dist.GeneralizedExtremeValue)
+        assert(Math.abs(result.p.c - 0.5) < 0.2)
+      })
+
+      it('ShiftedLogLogistic.fit should recover mu and sigma close to planted values', () => {
+        const data = new dist.ShiftedLogLogistic(1, 2, 0).seed(42).sample(200)
+        const result = dist.ShiftedLogLogistic.fit(data)
+        assert(result instanceof dist.ShiftedLogLogistic)
+        assert(Math.abs(result.p.mu - 1) < 0.4)
+        assert(Math.abs(result.p.sigma - 2) < 0.6)
+      })
+
+      it('Weibull._fitInit should handle constant data', () => {
+        // || 1 guard: zero variance in constant data falls back to 1
+        const init = dist.Weibull._fitInit([3, 3, 3])
+        assert(init[0] > 0 && init[1] > 0)
+      })
+
+      it('InvertedWeibull._fitInit should handle constant data', () => {
+        // || 1 guard: zero variance in constant reciprocals falls back to 1
+        const init = dist.InvertedWeibull._fitInit([2, 2, 2])
+        assert(init[0] > 0)
+      })
+
+      it('Frechet._fitInit should handle constant data', () => {
+        // || 1 guard: all equal → zero variance in reciprocals → fallback to 1
+        const init = dist.Frechet._fitInit([5, 5, 5])
+        assert(init[0] > 0 && init[1] > 0)
+      })
+
+      it('Frechet._fitInit should use mean fallback when alpha <= 1', () => {
+        // one near-zero and three large values → cv of reciprocals > 1 → Justus gives alpha ≤ 1
+        const init = dist.Frechet._fitInit([0.0001, 1000, 1000, 1000])
+        assert(init[0] > 0 && init[0] <= 1)
+        assert(init[1] > 0)
+      })
+
+      it('GeneralizedExtremeValue._fitInit should return negative c for right-skewed data', () => {
+        // c < 0 (Fréchet type) has heavier right tail with skewness > Gumbel limit ≈1.14
+        const data = new dist.GeneralizedExtremeValue(-0.5).seed(42).sample(200)
+        const init = dist.GeneralizedExtremeValue._fitInit(data)
+        assert(init[0] < 0)
+      })
+
+      it('ShiftedLogLogistic._fitInit should handle odd-n data', () => {
+        // odd-n path: median = sorted[(n-1)/2]
+        const init = dist.ShiftedLogLogistic._fitInit([1, 2, 3, 4, 5])
+        assert(Number.isFinite(init[0]))
+        assert(init[1] > 0)
+      })
     })
   })
 
