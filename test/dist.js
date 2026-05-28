@@ -423,10 +423,10 @@ describe('dist', () => {
       })
 
       it('Distribution._fitInit fallback should work for scalar-constructor distributions', () => {
-        // BetaPrime has no _fitInit override so fit() exercises the base-class random-retry path
-        const data = new dist.BetaPrime(2, 3).seed(42).sample(100)
-        const result = dist.BetaPrime.fit(data)
-        assert(result instanceof dist.BetaPrime)
+        // Burr has no _fitInit override so fit() exercises the base-class random-retry path
+        const data = new dist.Burr(2, 3).seed(42).sample(100)
+        const result = dist.Burr.fit(data)
+        assert(result instanceof dist.Burr)
       })
 
       it('Pareto.fit should recover xmin close to min(data)', () => {
@@ -958,6 +958,54 @@ describe('dist', () => {
         assert(result instanceof dist.DoubleGamma)
         assert(Math.abs(result.p.alpha - 2) < 0.4)
         assert(Math.abs(result.p.beta - 0.5) < 0.15)
+      })
+
+      it('Beta.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.Beta(2, 3).seed(42).sample(200)
+        const result = dist.Beta.fit(data)
+        assert(result instanceof dist.Beta)
+        assert(Math.abs(result.p.alpha - 2) < 0.6)
+        assert(Math.abs(result.p.beta - 3) < 0.8)
+      })
+
+      it('BetaPrime.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.BetaPrime(2, 3).seed(42).sample(200)
+        const result = dist.BetaPrime.fit(data)
+        assert(result instanceof dist.BetaPrime)
+        assert(Math.abs(result.p.alpha - 2) < 0.7)
+        assert(Math.abs(result.p.beta - 3) < 1.0)
+      })
+
+      it('Kumaraswamy.fit should recover a and b close to planted values', () => {
+        const data = new dist.Kumaraswamy(2, 3).seed(42).sample(200)
+        const result = dist.Kumaraswamy.fit(data)
+        assert(result instanceof dist.Kumaraswamy)
+        assert(Math.abs(result.p.a - 2) < 0.7)
+        assert(Math.abs(result.p.b - 3) < 1.0)
+      })
+
+      it('PowerLaw.fit should recover a close to planted value', () => {
+        const data = new dist.PowerLaw(2).seed(42).sample(200)
+        const result = dist.PowerLaw.fit(data)
+        assert(result instanceof dist.PowerLaw)
+        assert(Math.abs(result.p.a - 2) < 0.4)
+      })
+
+      it('Arcsine.fit should recover a and b close to planted values', () => {
+        const data = new dist.Arcsine(1, 5).seed(42).sample(200)
+        const result = dist.Arcsine.fit(data)
+        assert(result instanceof dist.Arcsine)
+        assert(Math.abs(result.p.a - 1) < 0.4)
+        assert(Math.abs(result.p.b - 5) < 0.4)
+      })
+
+      it('Mielke.fit should recover k and s close to planted values', () => {
+        const data = new dist.Mielke(2, 1).seed(42).sample(200)
+        const result = dist.Mielke.fit(data)
+        assert(result instanceof dist.Mielke)
+        // Mielke stores params via Dagum: p.p = k/s, p.a = s, so k = p.p * p.a
+        assert(Math.abs(result.p.p * result.p.a - 2) < 0.6)
+        assert(Math.abs(result.p.a - 1) < 0.5)
       })
     })
   })

@@ -46,6 +46,15 @@ export default class Arcsine extends Distribution {
     }
   }
 
+  static _fitInit (data) {
+    // E[X]=(a+b)/2, Var[X]=(b−a)²/8: invert to get a = mean−√(2·var), b = mean+√(2·var)
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    const halfRange = Math.sqrt(2 * variance)
+    return [mean - halfRange, mean + halfRange]
+  }
+
   _generator () {
     // Inverse transform sampling
     return this._q(this.r.next())

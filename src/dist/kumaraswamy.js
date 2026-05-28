@@ -37,6 +37,15 @@ export default class Kumaraswamy extends Distribution {
     }]
   }
 
+  static _fitInit (data) {
+    // Beta MOM on (0,1) data gives a close-enough (a,b) starting point for Nelder-Mead
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1e-4
+    const factor = Math.max(mean * (1 - mean) / variance - 1, 0.1)
+    return [mean * factor, (1 - mean) * factor]
+  }
+
   _generator () {
     // Inverse transform sampling
     return this._q(this.r.next())
