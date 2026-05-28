@@ -512,6 +512,48 @@ describe('dist', () => {
         assert(Math.abs(result.p.mu - 0) < 0.2)
         assert(Math.abs(result.p.sigma - 1) < 0.2)
       })
+
+      it('LogNormal._fitInit should return sigma=1 for constant data', () => {
+        const init = dist.LogNormal._fitInit([2, 2, 2])
+        assert(Number.isFinite(init[0]))
+        assert(init[1] === 1)
+      })
+
+      it('LogCauchy._fitInit should return valid params for odd-n data', () => {
+        const init = dist.LogCauchy._fitInit(new dist.LogCauchy(0, 1).seed(1).sample(101))
+        assert(Number.isFinite(init[0]))
+        assert(init[1] > 0)
+      })
+
+      it('LogLogistic._fitInit should return positive params for constant data', () => {
+        const init = dist.LogLogistic._fitInit([2, 2, 2])
+        assert(init[0] > 0)
+        assert(init[1] > 0)
+      })
+
+      it('LogLaplace._fitInit should return valid params for odd-n data', () => {
+        const init = dist.LogLaplace._fitInit(new dist.LogLaplace(0, 1).seed(1).sample(101))
+        assert(Number.isFinite(init[0]))
+        assert(init[1] > 0)
+      })
+
+      it('LogisticExponential._fitInit should return valid params for odd-n data', () => {
+        const init = dist.LogisticExponential._fitInit(new dist.LogisticExponential(1, 2).seed(1).sample(101))
+        assert(init[0] > 0)
+        assert(init[1] > 0)
+      })
+
+      it('LogisticExponential._fitInit should fall back to kappa=1 for degenerate data', () => {
+        const init = dist.LogisticExponential._fitInit([5, 5, 5, 5])
+        assert(init[0] > 0)
+        assert(init[1] === 1)
+      })
+
+      it('LogitNormal._fitInit should return sigma=1 for constant data', () => {
+        const init = dist.LogitNormal._fitInit([0.5, 0.5, 0.5])
+        assert(Number.isFinite(init[0]))
+        assert(init[1] === 1)
+      })
     })
   })
 
