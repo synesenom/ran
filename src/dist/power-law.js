@@ -19,4 +19,11 @@ export default class PowerLaw extends Kumaraswamy {
   constructor (a) {
     super(a, 1)
   }
+
+  static _fitInit (data) {
+    // f(x)=a·x^{a−1} → E[log X] = −1/a; MLE is a = −1/mean(log x), closed-form
+    const n = data.length
+    const logMean = data.reduce((s, x) => s + Math.log(x), 0) / n
+    return [Math.max(-1 / logMean, 0.1)]
+  }
 }

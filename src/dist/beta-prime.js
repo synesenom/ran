@@ -33,6 +33,16 @@ export default class BetaPrime extends Beta {
     }]
   }
 
+  static _fitInit (data) {
+    // y = x/(1+x) maps BetaPrime's (0,∞) support to (0,1); Beta MOM in that space recovers (α,β)
+    const n = data.length
+    const y = data.map(x => x / (1 + x))
+    const mean = y.reduce((s, x) => s + x, 0) / n
+    const variance = y.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1e-4
+    const factor = Math.max(mean * (1 - mean) / variance - 1, 0.1)
+    return [mean * factor, (1 - mean) * factor]
+  }
+
   _generator () {
     // Direct sampling from gamma (ignoring super)
     const x = gamma(this.r, this.p.alpha, 1)
