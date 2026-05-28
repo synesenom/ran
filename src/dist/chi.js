@@ -54,4 +54,10 @@ export default class Chi extends Chi2 {
   _cdf (x) {
     return super._cdf(x * x)
   }
+
+  static _fitInit (data) {
+    // MLE: k = mean(x²) since X² ~ Chi²(k) implies E[X²] = k
+    const n = data.length
+    return [data.reduce((s, x) => s + x * x, 0) / n]
+  }
 }
