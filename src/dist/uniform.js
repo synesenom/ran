@@ -58,4 +58,12 @@ export default class Uniform extends Distribution {
   _q (p) {
     return p * this.c.range + this.p.xmin
   }
+
+  static _fitInit (data) {
+    // MLEs for bounded-support endpoints are the sample extremes; small buffer satisfies xmin < xmax
+    const lo = Math.min(...data)
+    const hi = Math.max(...data)
+    const eps = (hi - lo) * 0.01 || 1e-6
+    return [lo - eps, hi + eps]
+  }
 }

@@ -59,4 +59,12 @@ export default class UQuadratic extends Distribution {
   _q (p) {
     return Math.cbrt(3 * p / this.c.alpha - this.c.halfRangeCubed) + this.c.beta
   }
+
+  static _fitInit (data) {
+    // MLEs for bounded-support endpoints are the sample extremes; small buffer satisfies a < b
+    const lo = Math.min(...data)
+    const hi = Math.max(...data)
+    const eps = (hi - lo) * 0.01 || 1e-6
+    return [lo - eps, hi + eps]
+  }
 }

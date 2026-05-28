@@ -81,4 +81,15 @@ export default class Trapezoidal extends Distribution {
       return this.p.d - Math.sqrt(this.c.scale * this.c.dc * (1 - p))
     }
   }
+
+  static _fitInit (data) {
+    // Endpoints from sample extremes; flat-region boundaries from quartiles as a balanced initial simplex
+    const sorted = [...data].sort((x, y) => x - y)
+    const lo = sorted[0]
+    const hi = sorted[sorted.length - 1]
+    const eps = (hi - lo) * 0.01 || 1e-6
+    const q1 = sorted[Math.floor(sorted.length * 0.25)]
+    const q3 = Math.max(sorted[Math.floor(sorted.length * 0.75)], q1 + eps)
+    return [lo - eps, q1, q3, hi + eps]
+  }
 }

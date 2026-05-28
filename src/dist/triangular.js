@@ -71,4 +71,17 @@ export default class Triangular extends Distribution {
       ? this.p.a + Math.sqrt(p * this.c.baCa)
       : this.p.b - Math.sqrt((1 - p) * this.c.baBc)
   }
+
+  static _fitInit (data) {
+    // Endpoints from sample extremes; mode via method-of-moments: E[X] = (a+b+c)/3 → c = 3μ̂ - a - b
+    const n = data.length
+    const lo = Math.min(...data)
+    const hi = Math.max(...data)
+    const eps = (hi - lo) * 0.01 || 1e-6
+    const a = lo - eps
+    const b = hi + eps
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const c = Math.max(a, Math.min(b, 3 * mean - a - b))
+    return [a, b, c]
+  }
 }

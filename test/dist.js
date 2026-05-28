@@ -1007,6 +1007,94 @@ describe('dist', () => {
         assert(Math.abs(result.p.p * result.p.a - 2) < 0.6)
         assert(Math.abs(result.p.a - 1) < 0.5)
       })
+
+      it('Uniform.fit should recover xmin and xmax close to planted values', () => {
+        const data = new dist.Uniform(1, 5).seed(42).sample(200)
+        const result = dist.Uniform.fit(data)
+        assert(result instanceof dist.Uniform)
+        assert(Math.abs(result.p.xmin - 1) < 0.2)
+        assert(Math.abs(result.p.xmax - 5) < 0.2)
+      })
+
+      it('UQuadratic.fit should recover a and b close to planted values', () => {
+        const data = new dist.UQuadratic(0, 4).seed(42).sample(200)
+        const result = dist.UQuadratic.fit(data)
+        assert(result instanceof dist.UQuadratic)
+        assert(Math.abs(result.p.a - 0) < 0.3)
+        assert(Math.abs(result.p.b - 4) < 0.3)
+      })
+
+      it('Triangular.fit should recover a, b, and c close to planted values', () => {
+        const data = new dist.Triangular(1, 5, 3).seed(42).sample(200)
+        const result = dist.Triangular.fit(data)
+        assert(result instanceof dist.Triangular)
+        assert(Math.abs(result.p.a - 1) < 0.3)
+        assert(Math.abs(result.p.b - 5) < 0.3)
+        assert(Math.abs(result.p.c - 3) < 0.5)
+      })
+
+      it('Bates.fit should return a usable Bates instance close to planted support', () => {
+        const data = new dist.Bates(3, 1, 5).seed(42).sample(200)
+        const result = dist.Bates.fit(data)
+        assert(result instanceof dist.Bates)
+        // n is integer-rounded so Nelder-Mead may land ±1 from planted n=3; allow [2,4]
+        assert(result.p.n >= 2 && result.p.n <= 4)
+        assert(Math.abs(result.p.b - result.p.a - 4) < 1)
+      })
+
+      it('Trapezoidal.fit should recover a, b, c, d close to planted values', () => {
+        const data = new dist.Trapezoidal(0, 1, 3, 5).seed(42).sample(200)
+        const result = dist.Trapezoidal.fit(data)
+        assert(result instanceof dist.Trapezoidal)
+        assert(Math.abs(result.p.a - 0) < 0.3)
+        assert(Math.abs(result.p.b - 1) < 0.5)
+        assert(Math.abs(result.p.c - 3) < 1.0)
+        assert(Math.abs(result.p.d - 5) < 0.3)
+      })
+
+      it('PERT.fit should recover a, b, and c close to planted values', () => {
+        const data = new dist.PERT(0, 3, 6).seed(42).sample(200)
+        const result = dist.PERT.fit(data)
+        assert(result instanceof dist.PERT)
+        assert(Math.abs(result.p.a - 0) < 0.3)
+        assert(Math.abs(result.p.c - 6) < 0.3)
+        assert(Math.abs(result.p.b - 3) < 0.5)
+      })
+
+      it('BetaRectangular.fit should return a valid instance close to planted values', () => {
+        const data = new dist.BetaRectangular(2, 3, 0.7, 0, 4).seed(42).sample(300)
+        const result = dist.BetaRectangular.fit(data)
+        assert(result instanceof dist.BetaRectangular)
+        // Shape params can be hard to disentangle with 5 params; check they're in a reasonable range
+        assert(result.p.alpha > 0.5 && result.p.alpha < 10)
+        assert(result.p.beta > 0.5 && result.p.beta < 10)
+        assert(result.p.theta > 0.1 && result.p.theta <= 1)
+        assert(Math.abs(result.p.a - 0) < 0.3)
+        assert(Math.abs(result.p.b - 4) < 0.3)
+      })
+
+      it('UniformProduct.fit should recover n close to planted value', () => {
+        const data = new dist.UniformProduct(3).seed(42).sample(200)
+        const result = dist.UniformProduct.fit(data)
+        assert(result instanceof dist.UniformProduct)
+        assert(result.p.n === 3)
+      })
+
+      it('Anglit.fit should recover mu and beta close to planted values', () => {
+        const data = new dist.Anglit(1, 1.5).seed(42).sample(200)
+        const result = dist.Anglit.fit(data)
+        assert(result instanceof dist.Anglit)
+        assert(Math.abs(result.p.mu - 1) < 0.3)
+        assert(Math.abs(result.p.beta - 1.5) < 0.4)
+      })
+
+      it('RaisedCosine.fit should recover mu and s close to planted values', () => {
+        const data = new dist.RaisedCosine(2, 3).seed(42).sample(200)
+        const result = dist.RaisedCosine.fit(data)
+        assert(result instanceof dist.RaisedCosine)
+        assert(Math.abs(result.p.mu - 2) < 0.4)
+        assert(Math.abs(result.p.s - 3) < 0.4)
+      })
     })
   })
 

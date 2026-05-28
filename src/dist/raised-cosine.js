@@ -55,4 +55,14 @@ export default class RaisedCosine extends Distribution {
     const z = (x - this.p.mu) / this.p.s
     return 0.5 * (1 + z + Math.sin(Math.PI * z) / Math.PI)
   }
+
+  static _fitInit (data) {
+    // mu from sample mean (equals center for a symmetric distribution); s from support half-range: range = 2s
+    const n = data.length
+    const mu = data.reduce((s, x) => s + x, 0) / n
+    const lo = Math.min(...data)
+    const hi = Math.max(...data)
+    const s = Math.max(1e-6, (hi - lo) / 2)
+    return [mu, s]
+  }
 }

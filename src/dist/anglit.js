@@ -62,4 +62,14 @@ export default class Anglit extends Distribution {
   _q (p) {
     return this.p.mu + this.p.beta * (Math.asin(Math.sqrt(p)) - Math.PI / 4)
   }
+
+  static _fitInit (data) {
+    // mu from sample mean (location); beta from support width: range = π·beta/2 → beta = 2·range/π
+    const n = data.length
+    const mu = data.reduce((s, x) => s + x, 0) / n
+    const lo = Math.min(...data)
+    const hi = Math.max(...data)
+    const beta = 2 * (hi - lo) / Math.PI || 1
+    return [mu, beta]
+  }
 }
