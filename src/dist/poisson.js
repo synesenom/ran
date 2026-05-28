@@ -37,6 +37,12 @@ export default class Poisson extends Distribution {
     }]
   }
 
+  static _fitInit (data) {
+    // MLE for lambda is the sample mean since E[X] = lambda.
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    return [mean]
+  }
+
   _generator () {
     return poisson(this.r, this.p.lambda)
   }

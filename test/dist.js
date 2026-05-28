@@ -435,6 +435,35 @@ describe('dist', () => {
         const result = dist.Pareto.fit(data)
         assert(Math.abs(result.p.alpha - alphaExpected) < 0.05)
       })
+
+      it('Bernoulli.fit should recover p close to planted value', () => {
+        const data = new dist.Bernoulli(0.7).seed(42).sample(200)
+        const result = dist.Bernoulli.fit(data)
+        assert(result instanceof dist.Bernoulli)
+        assert(Math.abs(result.pdf(1) - 0.7) < 0.05)
+      })
+
+      it('Poisson.fit should recover lambda close to planted value', () => {
+        const data = new dist.Poisson(3).seed(42).sample(200)
+        const result = dist.Poisson.fit(data)
+        assert(result instanceof dist.Poisson)
+        assert(Math.abs(result.p.lambda - 3) < 0.15)
+      })
+
+      it('Geometric.fit should recover p close to planted value', () => {
+        const data = new dist.Geometric(0.4).seed(42).sample(200)
+        const result = dist.Geometric.fit(data)
+        assert(result instanceof dist.Geometric)
+        assert(Math.abs(result.p.p - 0.4) < 0.05)
+      })
+
+      it('DiscreteUniform.fit should recover xmin and xmax', () => {
+        const data = new dist.DiscreteUniform(2, 8).seed(42).sample(200)
+        const result = dist.DiscreteUniform.fit(data)
+        assert(result instanceof dist.DiscreteUniform)
+        assert(result.p.xmin === 2)
+        assert(result.p.xmax === 8)
+      })
     })
   })
 
