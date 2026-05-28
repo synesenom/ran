@@ -48,4 +48,13 @@ export default class LogNormal extends Normal {
   _q (p) {
     return Math.exp(this.p.mu + this.c.sigmaRoot2 * erfinv(2 * p - 1))
   }
+
+  static _fitInit (data) {
+    // log(Y) ~ Normal(mu, sigma): MOM on log scale gives the natural parameterization
+    const n = data.length
+    const logData = data.map(x => Math.log(x))
+    const mu = logData.reduce((s, x) => s + x, 0) / n
+    const sigma = Math.sqrt(logData.reduce((s, x) => s + (x - mu) ** 2, 0) / n) || 1
+    return [mu, sigma]
+  }
 }

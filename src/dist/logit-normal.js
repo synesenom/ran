@@ -47,4 +47,13 @@ export default class LogitNormal extends Normal {
   _q (p) {
     return 1 / (1 + Math.exp(-(this.p.mu + this.c.sigmaRoot2 * erfinv(2 * p - 1))))
   }
+
+  static _fitInit (data) {
+    // logit(Y) ~ Normal(mu, sigma): MOM on logit scale gives the natural parameterization
+    const n = data.length
+    const logitData = data.map(x => Math.log(x / (1 - x)))
+    const mu = logitData.reduce((s, x) => s + x, 0) / n
+    const sigma = Math.sqrt(logitData.reduce((s, x) => s + (x - mu) ** 2, 0) / n) || 1
+    return [mu, sigma]
+  }
 }
