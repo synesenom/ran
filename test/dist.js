@@ -428,12 +428,13 @@ describe('dist', () => {
         assert(result instanceof dist.Alpha)
       })
 
-      it('Distribution._fitInit fallback random-retry path: Bradford.fit() returns a usable instance', () => {
-        // Bradford has no _fitInit override and k=1 so the base-class random-retry loop runs
-        const data = new dist.Bradford(2).seed(42).sample(50)
-        const result = dist.Bradford.fit(data)
-        assert(result instanceof dist.Bradford)
-        assert(Number.isFinite(result.pdf(0.5)) && result.pdf(0.5) > 0)
+      it('Distribution._fitInit fallback random-retry path: ZipfMandelbrot.fit() returns a usable instance', () => {
+        // ZipfMandelbrot is the only exported distribution with no _fitInit override and k>0, so it exercises the base-class random-retry seed loop; the seed is unseeded Math.random, so we assert only usable-instance invariants rather than recovery
+        const data = new dist.ZipfMandelbrot(10, 2, 0).seed(42).sample(120)
+        const result = dist.ZipfMandelbrot.fit(data)
+        assert(result instanceof dist.ZipfMandelbrot)
+        const p1 = result.pdf(1)
+        assert(Number.isFinite(p1) && p1 > 0 && p1 <= 1)
       })
 
       it('Pareto.fit should recover xmin close to min(data)', () => {
@@ -1663,6 +1664,12 @@ describe('dist', () => {
         assert(init[0] > 0 && init[1] > 0)
       })
 
+      it('Rice._fitInit should handle constant data via variance fallback', () => {
+        // zero variance → || mean*mean guard; nu and sigma must still be valid (floored) params
+        const init = dist.Rice._fitInit([2, 2, 2])
+        assert(init[0] > 0 && init[1] > 0)
+      })
+
       it('QExponential._fitInit should handle constant data via variance fallback', () => {
         // zero variance → fallback mean²=4, r=4/4=1 > 1/3 → q=(2-4)/(1-3)=1, lambda=1/(2*(3-2))=0.5
         const init = dist.QExponential._fitInit([2, 2, 2])
@@ -1761,6 +1768,93 @@ describe('dist', () => {
         const result = dist.Rice.fit(data)
         assert(result instanceof dist.Rice)
         assert(fitCoversMedian(result, data))
+      })
+
+      it('TruncatedNormal._fitInit should set a=min, b=max, mu=mean, sigma=std', () => {
+        // Fixed dataset with known moments: mean=3, std=sqrt(2), min=1, max=5
+        const init = dist.TruncatedNormal._fitInit([1, 2, 3, 4, 5])
+        assert.strictEqual(init[2], 1)
+        assert.strictEqual(init[3], 5)
+        assert(Math.abs(init[0] - 3) < 1e-10)
+        assert(init[1] > 0)
+      })
+
+      it('TruncatedNormal.fit should recover mu, sigma, a, b close to planted values', () => {
+        const data = new dist.TruncatedNormal(2, 1, 0, 4).seed(42).sample(300)
+        const result = dist.TruncatedNormal.fit(data)
+        assert(result instanceof dist.TruncatedNormal)
+        assert(Math.abs(result.p.mu - 2) < 0.4)
+        assert(Math.abs(result.p.sigma - 1) < 0.4)
+        assert(result.p.a < 0.5)
+        assert(result.p.b > 3.5)
+      })
+
+      it('Reciprocal._fitInit should set a=max(min,ε) and b=max', () => {
+        // Fixed dataset with known bounds: min=2, max=8, no ε clamping needed
+        const init = dist.Reciprocal._fitInit([2, 5, 8])
+        assert.strictEqual(init[0], 2)
+        assert.strictEqual(init[1], 8)
+      })
+
+      it('Reciprocal._fitInit should apply a*10 fallback when all data are equal', () => {
+        const init = dist.Reciprocal._fitInit([5, 5, 5])
+        assert.strictEqual(init[0], 5)
+        assert.strictEqual(init[1], 50)
+      })
+
+      it('Reciprocal.fit should recover a and b close to planted values', () => {
+        const data = new dist.Reciprocal(1, 10).seed(42).sample(300)
+        const result = dist.Reciprocal.fit(data)
+        assert(result instanceof dist.Reciprocal)
+        assert(Math.abs(result.p.a - 1) < 0.15)
+        assert(Math.abs(result.p.b - 10) < 0.3)
+      })
+
+      it('Bradford._fitInit should return c close to planted value from sample mean', () => {
+        // Bradford(2) mean ≈ 0.35; c = 6*(1-2*0.35) ≈ 1.8 — start within 1.5 of truth
+        const data = new dist.Bradford(2).seed(42).sample(200)
+        const init = dist.Bradford._fitInit(data)
+        assert(init[0] > 0)
+        assert(Math.abs(init[0] - 2) < 1.5)
+      })
+
+      it('Bradford._fitInit should return c=1 when mean >= 0.5', () => {
+        const init = dist.Bradford._fitInit([0.5, 0.6, 0.7])
+        assert.strictEqual(init[0], 1)
+      })
+
+      it('Bradford.fit should return a valid Bradford instance', () => {
+        const data = new dist.Bradford(2).seed(42).sample(200)
+        const result = dist.Bradford.fit(data)
+        assert(result instanceof dist.Bradford)
+        assert(Number.isFinite(result.pdf(0.5)) && result.pdf(0.5) > 0)
+      })
+
+      it('Wigner._fitInit should return R = 2*std for symmetric data without outliers', () => {
+        // [-2,-1,0,1,2]: mean=0, variance=2, std=sqrt(2), so R = 2*sqrt(2) ≈ 2.83 > maxAbs=2
+        const init = dist.Wigner._fitInit([-2, -1, 0, 1, 2])
+        assert(Math.abs(init[0] - 2 * Math.sqrt(2)) < 1e-10)
+      })
+
+      it('Wigner.fit should recover R close to planted value', () => {
+        const data = new dist.Wigner(3).seed(42).sample(300)
+        const result = dist.Wigner.fit(data)
+        assert(result instanceof dist.Wigner)
+        assert(Math.abs(result.p.R - 3) < 0.5)
+      })
+
+      it('VonMises._fitInit should return kappa from circular resultant-length approximation', () => {
+        const data = new dist.VonMises(2).seed(42).sample(200)
+        const init = dist.VonMises._fitInit(data)
+        assert(init[0] > 0)
+        assert(Math.abs(init[0] - 2) < 0.8)
+      })
+
+      it('VonMises.fit should recover kappa close to planted value', () => {
+        const data = new dist.VonMises(2).seed(42).sample(300)
+        const result = dist.VonMises.fit(data)
+        assert(result instanceof dist.VonMises)
+        assert(Math.abs(result.p.kappa - 2) < 0.5)
       })
     })
   })

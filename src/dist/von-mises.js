@@ -38,6 +38,18 @@ export default class VonMises extends Distribution {
     }]
   }
 
+  static _fitInit (data) {
+    // Circular MOM: resultant length R̄ → Fisher kappa approximation R̄(2−R̄²)/(1−R̄²)
+    const n = data.length
+    const C = data.reduce((s, x) => s + Math.cos(x), 0) / n
+    const S = data.reduce((s, x) => s + Math.sin(x), 0) / n
+    const Rbar = Math.sqrt(C * C + S * S)
+    const kappa = Rbar < 0.97
+      ? Rbar * (2 - Rbar * Rbar) / (1 - Rbar * Rbar)
+      : 10
+    return [Math.max(1e-3, kappa)]
+  }
+
   _generator () {
     // Sampling method from here: http://sa-ijas.stat.unipd.it/sites/sa-ijas.stat.unipd.it/files/417-426.pdf
     // Source: Barabesi. Generating von Mises variates by the ratio-of-uniforms method. Statistica Applicata 7 (4), 1995.

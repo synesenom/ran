@@ -36,6 +36,16 @@ export default class Wigner extends Distribution {
     }]
   }
 
+  static _fitInit (data) {
+    // Wigner Var[X] = R²/4 ⟹ R = 2·std; also enforce R ≥ max|x| to cover observed support
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    const rStd = 2 * Math.sqrt(variance)
+    const maxAbs = Math.max(...data.map(x => Math.abs(x)))
+    return [Math.max(rStd, maxAbs)]
+  }
+
   _generator () {
     // Direct sampling by transforming beta variate
     const x = gamma(this.r, 1.5, 1)

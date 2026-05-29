@@ -50,6 +50,16 @@ export default class TruncatedNormal extends Normal {
     })
   }
 
+  static _fitInit (data) {
+    // Method of moments: use observed min/max as bounds, sample mean and std as location/scale
+    const n = data.length
+    const a = Math.min(...data)
+    const b = Math.max(...data)
+    const mu = data.reduce((s, x) => s + x, 0) / n
+    const sigma = Math.sqrt(data.reduce((s, x) => s + (x - mu) ** 2, 0) / n) || 1
+    return [mu, sigma, a, b > a ? b : a + 1]
+  }
+
   _generator () {
     return this._q(this.r.next())
   }
