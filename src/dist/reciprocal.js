@@ -43,6 +43,13 @@ export default class Reciprocal extends Distribution {
     }
   }
 
+  static _fitInit (data) {
+    // Log-uniform: support bounds are observed range; clamp a away from zero to satisfy a>0
+    const a = Math.max(Math.min(...data), 1e-8)
+    const b = Math.max(...data)
+    return [a, b > a ? b : a * 10]
+  }
+
   _generator () {
     // Direct sampling
     return this.p.a * Math.exp((this.c.logB - this.c.logA) * this.r.next())

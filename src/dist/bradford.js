@@ -41,6 +41,12 @@ export default class Bradford extends Distribution {
     }
   }
 
+  static _fitInit (data) {
+    // Bradford E[X] ≈ ½ − c/12 for small c; invert as starting value, default c=1 when outside (0,½)
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    return [mean > 0 && mean < 0.5 ? Math.max(1e-3, 6 * (1 - 2 * mean)) : 1]
+  }
+
   _generator () {
     // Inverse transform sampling
     return this._q(this.r.next())
