@@ -1257,11 +1257,14 @@ describe('dist', () => {
         const data = new dist.BaldingNichols(0.1, 0.3).seed(42).sample(200)
         const result = dist.BaldingNichols.fit(data)
         assert(result instanceof dist.BaldingNichols)
-        // BaldingNichols stores Beta's alpha/beta; back out F = 1/(a+b+1), p = a/(a+b)
-        const a = result.p.alpha
-        const b = result.p.beta
-        assert(Math.abs(1 / (a + b + 1) - 0.1) < 0.05)
-        assert(Math.abs(a / (a + b) - 0.3) < 0.05)
+        assert(Math.abs(result.p.F - 0.1) < 0.05)
+        assert(Math.abs(result.p.p - 0.3) < 0.05)
+      })
+
+      it('BaldingNichols constructor should expose F and p on this.p', () => {
+        const d = new dist.BaldingNichols(0.1, 0.3)
+        assert(d.p.F === 0.1)
+        assert(d.p.p === 0.3)
       })
 
       it('F.fit should return a usable F instance with positive degrees of freedom', () => {

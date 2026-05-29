@@ -29,6 +29,7 @@ export default class BaldingNichols extends Beta {
     ])
     const f = (1 - F) / F
     super(f * p, f * (1 - p))
+    this.p = Object.assign(this.p, { F, p })
 
     // Set support
     this.s = [{

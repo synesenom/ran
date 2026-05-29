@@ -42,8 +42,8 @@ export default class Bates extends IrwinHall {
 
     // Extend speed-up constants with Bates affine transform coefficients
     Object.assign(this.c, {
-      scale: n / (b - a),
-      shift: n * a / (b - a)
+      scale: ni / (b - a),
+      shift: ni * a / (b - a)
     })
   }
 
