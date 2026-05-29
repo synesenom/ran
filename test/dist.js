@@ -422,11 +422,18 @@ describe('dist', () => {
         assert(result instanceof dist.Exponential)
       })
 
-      it('Distribution._fitInit fallback should work for scalar-constructor distributions', () => {
-        // Alpha has no _fitInit override so fit() exercises the base-class random-retry path
+      it('Distribution._fitInit fallback: Alpha.fit() returns a valid Alpha instance', () => {
         const data = new dist.Alpha(2, 1).seed(42).sample(100)
         const result = dist.Alpha.fit(data)
         assert(result instanceof dist.Alpha)
+      })
+
+      it('Distribution._fitInit fallback random-retry path: Muth.fit() returns a usable instance', () => {
+        // Muth has no _fitInit override and k=1 so the base-class random-retry loop runs
+        const data = new dist.Muth(0.5).seed(42).sample(50)
+        const result = dist.Muth.fit(data)
+        assert(result instanceof dist.Muth)
+        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
       })
 
       it('Pareto.fit should recover xmin close to min(data)', () => {
@@ -1516,6 +1523,158 @@ describe('dist', () => {
         const result = dist.DoublyNoncentralT.fit(data)
         assert(result instanceof dist.DoublyNoncentralT)
         assert(Math.abs(result.p.mu - 2) < 0.5)
+      })
+
+      it('InverseGaussian._fitInit should return mu=mean and lambda=mean³/var', () => {
+        // Exact MOM: mu = mean, lambda = mu³/Var; for [1,2,3,4]: mean=2.5, var=1.25
+        const init = dist.InverseGaussian._fitInit([1, 2, 3, 4])
+        const mean = 2.5
+        const variance = 1.25
+        assert(Math.abs(init[0] - mean) < 1e-10)
+        assert(Math.abs(init[1] - mean ** 3 / variance) < 1e-10)
+      })
+
+      it('InverseGaussian.fit should recover mu and lambda close to planted values', () => {
+        const data = new dist.InverseGaussian(2, 3).seed(42).sample(500)
+        const result = dist.InverseGaussian.fit(data)
+        assert(result instanceof dist.InverseGaussian)
+        assert(Math.abs(result.p.mu - 2) < 0.3)
+        assert(Math.abs(result.p.lambda - 3) < 1.0)
+      })
+
+      it('ReciprocalInverseGaussian._fitInit should apply IG MOM to reciprocal data', () => {
+        // X ~ RIG(mu, lambda) iff 1/X ~ IG(mu, lambda); init maps 1/x and applies IG MOM
+        const data = new dist.ReciprocalInverseGaussian(2, 4).seed(42).sample(200)
+        const init = dist.ReciprocalInverseGaussian._fitInit(data)
+        assert(Math.abs(init[0] - 2) < 0.5)
+        assert(Math.abs(init[1] - 4) < 2.0)
+      })
+
+      it('ReciprocalInverseGaussian.fit should recover mu and lambda close to planted values', () => {
+        const data = new dist.ReciprocalInverseGaussian(2, 4).seed(42).sample(500)
+        const result = dist.ReciprocalInverseGaussian.fit(data)
+        assert(result instanceof dist.ReciprocalInverseGaussian)
+        assert(Math.abs(result.p.mu - 2) < 0.5)
+        assert(Math.abs(result.p.lambda - 4) < 2.0)
+      })
+
+      it('Nakagami._fitInit should return m=E[X²]²/Var[X²] and omega=E[X²]', () => {
+        // Exact MOM on X²~Gamma(m, omega/m)
+        const data = new dist.Nakagami(2, 3).seed(42).sample(1000)
+        const init = dist.Nakagami._fitInit(data)
+        assert(init[0] >= 0.5 && Math.abs(init[0] - 2) < 0.5)
+        assert(Math.abs(init[1] - 3) < 0.5)
+      })
+
+      it('Nakagami.fit should recover m and omega close to planted values', () => {
+        const data = new dist.Nakagami(2, 3).seed(42).sample(500)
+        const result = dist.Nakagami.fit(data)
+        assert(result instanceof dist.Nakagami)
+        assert(Math.abs(result.p.m - 2) < 0.5)
+        assert(Math.abs(result.p.omega - 3) < 0.8)
+      })
+
+      it('Hoyt._fitInit should delegate to Nakagami and return valid params', () => {
+        // Hoyt is a deprecated alias for Nakagami; _fitInit delegates to Nakagami._fitInit
+        const data = new dist.Nakagami(2, 3).seed(42).sample(200)
+        const init = dist.Hoyt._fitInit(data)
+        assert(init[0] >= 0.5)
+        assert(init[1] > 0)
+      })
+
+      it('Hoyt.fit should return a usable Hoyt instance', () => {
+        const data = new dist.Nakagami(2, 3).seed(42).sample(500)
+        const result = dist.Hoyt.fit(data)
+        assert(result instanceof dist.Hoyt)
+        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      })
+
+      it('Lindley._fitInit should return the closed-form MOM estimate', () => {
+        // Exact: theta = (-(mean-1) + sqrt((mean-1)²+8·mean)) / (2·mean)
+        // For theta=1: mean=1.5, so theta_hat should be 1
+        const data = new dist.Lindley(1).seed(42).sample(1000)
+        const init = dist.Lindley._fitInit(data)
+        assert(init.length === 1)
+        assert(Math.abs(init[0] - 1) < 0.15)
+      })
+
+      it('Lindley.fit should recover theta close to planted value', () => {
+        const data = new dist.Lindley(1.5).seed(42).sample(500)
+        const result = dist.Lindley.fit(data)
+        assert(result instanceof dist.Lindley)
+        assert(Math.abs(result.p.theta - 1.5) < 0.3)
+      })
+
+      it('Alpha._fitInit should return positive alpha and beta from heuristic MOM', () => {
+        const data = new dist.Alpha(3, 1).seed(42).sample(200)
+        const init = dist.Alpha._fitInit(data)
+        assert(init[0] > 0 && init[1] > 0)
+        assert(Math.abs(init[0] - 3) < 1.5)
+      })
+
+      it('Alpha.fit should return a usable Alpha instance', () => {
+        const data = new dist.Alpha(2, 1).seed(42).sample(200)
+        const result = dist.Alpha.fit(data)
+        assert(result instanceof dist.Alpha)
+        assert(Number.isFinite(result.pdf(0.5)) && result.pdf(0.5) > 0)
+        assert(Math.abs(result.p.alpha - 2) < 0.5)
+      })
+
+      it('QExponential._fitInit should return q and lambda matching MOM for r>1/3', () => {
+        // For QExp(q=0.5, lambda=2): r = Var/E² = (2-q)/(4-3q) = 1.5/2.5 = 0.6 > 1/3
+        // MOM inverse gives q = (2-4·0.6)/(1-3·0.6) = 0.5, lambda = 1/(mean·(3-2·0.5)) = 2
+        const data = new dist.QExponential(0.5, 2).seed(42).sample(1000)
+        const init = dist.QExponential._fitInit(data)
+        assert(Math.abs(init[0] - 0.5) < 0.2)
+        assert(Math.abs(init[1] - 2) < 0.5)
+      })
+
+      it('QExponential.fit should recover q and lambda close to planted values', () => {
+        const data = new dist.QExponential(0.5, 2).seed(42).sample(500)
+        const result = dist.QExponential.fit(data)
+        assert(result instanceof dist.QExponential)
+        // Reconstruct q and lambda from GP params: xi=(q-1)/(2-q), sigma=1/(lambda*(2-q))
+        const q = (2 * result.p.xi + 1) / (result.p.xi + 1)
+        const lambda = (result.p.xi + 1) / result.p.sigma
+        assert(Math.abs(q - 0.5) < 0.2)
+        assert(Math.abs(lambda - 2) < 0.5)
+      })
+
+      it('InverseGaussian._fitInit should handle constant data via variance fallback', () => {
+        // zero variance → || mean*mean guard; result must still be valid params
+        const init = dist.InverseGaussian._fitInit([2, 2, 2])
+        assert(init[0] > 0 && init[1] > 0)
+      })
+
+      it('Nakagami._fitInit should handle constant data via variance fallback', () => {
+        // zero var(X²) → || mean2*mean2 guard; m is clamped to 0.5
+        const init = dist.Nakagami._fitInit([1, 1, 1])
+        assert(init[0] >= 0.5 && init[1] > 0)
+      })
+
+      it('Alpha._fitInit should handle constant data via variance fallback', () => {
+        // zero variance → || mean²·0.25 guard gives std = 0.5·mean, alpha = 2
+        const init = dist.Alpha._fitInit([3, 3, 3])
+        assert(init[0] > 0 && init[1] > 0)
+      })
+
+      it('ReciprocalInverseGaussian._fitInit should handle constant data via variance fallback', () => {
+        const init = dist.ReciprocalInverseGaussian._fitInit([2, 2, 2])
+        assert(init[0] > 0 && init[1] > 0)
+      })
+
+      it('QExponential._fitInit should handle constant data via variance fallback', () => {
+        // zero variance → fallback mean²=4, r=4/4=1 > 1/3 → q=(2-4)/(1-3)=1, lambda=1/(2*(3-2))=0.5
+        const init = dist.QExponential._fitInit([2, 2, 2])
+        assert(Math.abs(init[0] - 1) < 1e-10)
+        assert(Math.abs(init[1] - 0.5) < 1e-10)
+      })
+
+      it('QExponential._fitInit should use q=0 fallback when r<=1/3', () => {
+        // data with large mean, small variance gives r = Var/E² << 1/3 → else branch
+        const init = dist.QExponential._fitInit([9, 10, 11])
+        assert(init[0] === 0)
+        assert(init[1] > 0)
       })
     })
   })

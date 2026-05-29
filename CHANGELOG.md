@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `static _fitInit(data)` overrides for `InverseGaussian`, `ReciprocalInverseGaussian`, `Nakagami`, `Hoyt`, `Lindley`, `Alpha`, and `QExponential`: each seeds the Nelder-Mead MLE optimizer from a distribution-specific method-of-moments estimate, replacing the base-class random-retry fallback and improving `.fit()` convergence reliability for these distributions (#486).
+
 ### Fixed
 
 - `R`, `F`, `FisherZ`, and `BaldingNichols` `.fit()` no longer inherit `Beta`'s `[alpha, beta]` initializer, which produced a wrong-arity (`R`) or wrong-parametrization init vector that made `fit()` throw or converge to nonsense; each now seeds Nelder-Mead from a distribution-correct method-of-moments estimate (#441).

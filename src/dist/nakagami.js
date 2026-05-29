@@ -43,6 +43,14 @@ export default class Nakagami extends Distribution {
     }
   }
 
+  static _fitInit (data) {
+    // MOM on X²~Gamma(m, omega/m): E[X²]=omega, Var[X²]=omega²/m ⇒ m=E[X²]²/Var[X²], clamped ≥0.5
+    const n = data.length
+    const mean2 = data.reduce((s, x) => s + x * x, 0) / n
+    const var2 = data.reduce((s, x) => s + (x * x - mean2) ** 2, 0) / n || mean2 * mean2
+    return [Math.max(mean2 * mean2 / var2, 0.5), mean2]
+  }
+
   _generator () {
     // Direct sampling from gamma
     return Math.sqrt(gamma(this.r, this.p.m, this.p.m / this.p.omega))

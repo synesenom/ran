@@ -56,6 +56,14 @@ export default class InverseGaussian extends Distribution {
     return this.r.next() > this.p.mu / (this.p.mu + x) ? this.p.mu * this.p.mu / x : x
   }
 
+  static _fitInit (data) {
+    // MOM: E[X]=mu, Var[X]=mu³/lambda ⇒ mu=mean, lambda=mean³/var
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || mean * mean
+    return [mean, mean * mean * mean / variance]
+  }
+
   _pdf (x) {
     return Math.sqrt(this.p.lambda / (2 * Math.PI * Math.pow(x, 3))) * Math.exp(-this.p.lambda * Math.pow(x - this.p.mu, 2) / (2 * this.p.mu * this.p.mu * x))
   }

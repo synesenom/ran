@@ -41,6 +41,14 @@ export default class Lindley extends Distribution {
     }
   }
 
+  static _fitInit (data) {
+    // Closed-form MOM: positive root of m·θ² + (m−1)·θ − 2 = 0 where m = mean
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const disc = (mean - 1) * (mean - 1) + 8 * mean
+    return [Math.max((-(mean - 1) + Math.sqrt(disc)) / (2 * mean), 1e-3)]
+  }
+
   _generator () {
     // Inverse transform sampling using Lambert W.
     return -(lambertW1m(-this.r.next() * this.c.expFactor) + this.c.thetaP1) / this.p.theta
