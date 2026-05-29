@@ -29,7 +29,7 @@ body:has(.demo-controls) {
 // Sticky strip just below the top nav bar.
 .demo-controls {
   position: sticky;
-  top: $dimTopBarHeight;
+  top: 0;
   z-index: 80;
   display: flex;
   flex-wrap: wrap;
