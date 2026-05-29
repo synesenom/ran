@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `Mielke` distribution: `aic()` and `bic()` now use the correct parameter count of 2 (not 3 inherited from `Dagum`); the penalty term was over-counted by 1 in every AIC/BIC evaluation (#505).
+
 - `R`, `F`, `FisherZ`, and `BaldingNichols` `.fit()` no longer inherit `Beta`'s `[alpha, beta]` initializer, which produced a wrong-arity (`R`) or wrong-parametrization init vector that made `fit()` throw or converge to nonsense; each now seeds Nelder-Mead from a distribution-correct method-of-moments estimate (#441).
 
 - `besselISpherical(n, x)` now uses a Taylor series for |x| < 1, eliminating catastrophic cancellation in the closed-form expressions for n ≥ 1; relative error is now bounded by 2ε for all small arguments (#425).

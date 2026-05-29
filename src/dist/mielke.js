@@ -20,6 +20,9 @@ export default class Mielke extends Dagum {
   constructor (k, s) {
     super(k / s, s, 1)
 
+    // Mielke has 2 free parameters (k, s); override the 3 inherited from Dagum
+    this.k = 2
+
     // Validate parameters
     Distribution.validate({ k, s }, [
       'k > 0',
