@@ -46,6 +46,13 @@ export default class BenktanderII extends Distribution {
     }
   }
 
+  static _fitInit (data) {
+    // Heavy tail; at b=1 BenktanderII is a shifted exponential on [1,∞) with mean 1+1/a ⇒ a=1/(mean−1) (denominator floored for degenerate mean→1 data)
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    return [1 / Math.max(mean - 1, 1e-3), 1]
+  }
+
   _generator () {
     // Inverse transform sampling
     return this._q(this.r.next())
