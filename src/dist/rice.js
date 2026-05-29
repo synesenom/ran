@@ -54,6 +54,17 @@ export default class Rice extends Distribution {
     return this.p.sigma * Math.sqrt(x)
   }
 
+  static _fitInit (data) {
+    // Rayleigh-limit moment seed: σ≈std/√(2−π/2), then ν²=E[X²]−2σ² (mean/std inversion)
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || mean * mean
+    const sigma = Math.max(Math.sqrt(variance) / Math.sqrt(2 - Math.PI / 2), 1e-3)
+    const m2 = mean * mean + variance
+    const nu = Math.max(Math.sqrt(Math.max(m2 - 2 * sigma * sigma, 0)), 1e-3)
+    return [nu, sigma]
+  }
+
   _pdf (x) {
     const z = x * this.p.nu / this.c.sigma2
     const b = besselI(0, z)

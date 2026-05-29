@@ -47,6 +47,14 @@ export default class Makeham extends Distribution {
     }
   }
 
+  static _fitInit (data) {
+    // No closed-form MOM; in the small-alpha limit Makeham→Exponential(lambda), so seed lambda≈1/mean with conservative shape defaults (mean floored for degenerate all-zero data)
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const r = 1 / Math.max(mean, 1e-3)
+    return [0.1 * r, r, r]
+  }
+
   _generator () {
     // Inverse transform sampling.
     return this._q(this.r.next())

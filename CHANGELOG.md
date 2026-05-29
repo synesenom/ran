@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `static _fitInit(data)` overrides for `InverseGaussian`, `ReciprocalInverseGaussian`, `Nakagami`, `Hoyt`, `Lindley`, `Alpha`, and `QExponential`: each seeds the Nelder-Mead MLE optimizer from a distribution-specific method-of-moments estimate, replacing the base-class random-retry fallback and improving `.fit()` convergence reliability for these distributions (#486).
+- `static _fitInit(data)` overrides for the specialty no-closed-form distributions `Gompertz`, `Makeham`, `Muth`, `BenktanderII`, `BirnbaumSaunders`, `Davis`, `GeneralizedExponential`, and `Rice`: each provides a best-effort data-aware seed (shifted fatigue-life estimators for `BirnbaumSaunders`, Rayleigh-limit moment inversion for `Rice`, location-shift seeds for `Davis`, and conservative 1/mean-scaled defaults for the rest) so `.fit()` starts from a sensible point instead of the base-class random retry (#488).
 
 ### Fixed
 

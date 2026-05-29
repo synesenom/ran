@@ -50,6 +50,16 @@ export default class Davis extends Distribution {
     }
   }
 
+  static _fitInit (data) {
+    // mu≈min−ε (location, kept in (0,min)); fixed shape n=2.5, scale b from the mean of the shifted data
+    const n = data.length
+    const min = Math.min(...data)
+    // min*(1−1e-3) keeps mu strictly below min for any positive min; the 1e-6 floor keeps mu>0 even for degenerate (non-positive) data
+    const mu = Math.max(min - 1e-3 * (Math.abs(min) + 1), min * (1 - 1e-3), 1e-6)
+    const shiftedMean = data.reduce((s, x) => s + (x - mu), 0) / n
+    return [mu, Math.max(shiftedMean, 1e-3), 2.5]
+  }
+
   _generator () {
     // Zeta-Gamma mixture: Davis(mu, b, n) = mu + b / Gamma(n, Zeta(n))
     const k = zeta(this.r, this.p.n)

@@ -39,6 +39,14 @@ export default class GeneralizedExponential extends Distribution {
     }]
   }
 
+  static _fitInit (data) {
+    // No closed-form MOM; conservative small shape defaults scaled by 1/mean (initial hazard a+b sets the scale; mean floored for degenerate all-zero data)
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const r = 1 / Math.max(mean, 1e-3)
+    return [0.5 * r, 0.5 * r, r]
+  }
+
   _generator () {
     // Inverse transform sampling
     return this._q(this.r.next())

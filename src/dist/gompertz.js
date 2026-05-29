@@ -36,6 +36,13 @@ export default class Gompertz extends Distribution {
     }]
   }
 
+  static _fitInit (data) {
+    // No closed-form MOM; seed eta≈1 and b≈1/mean so the exponential growth scale matches the data (mean floored for degenerate all-zero data)
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    return [1, 1 / Math.max(mean, 1e-3)]
+  }
+
   _generator () {
     // Inverse transform sampling
     return this._q(this.r.next())

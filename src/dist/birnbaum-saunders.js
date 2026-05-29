@@ -40,6 +40,19 @@ export default class BirnbaumSaunders extends Normal {
     }]
   }
 
+  static _fitInit (data) {
+    // Fatigue-life modified-moment estimators on data shifted by mu≈min−ε: β=√(s·r), γ²=s/β+β/r−2 (s,r = arithmetic/harmonic means)
+    const n = data.length
+    const min = Math.min(...data)
+    const mu = min - 1e-3 * (Math.abs(min) + 1)
+    const y = data.map(x => x - mu)
+    const s = y.reduce((acc, v) => acc + v, 0) / n
+    const r = n / y.reduce((acc, v) => acc + 1 / v, 0)
+    const beta = Math.sqrt(s * r)
+    const gamma = Math.max(Math.sqrt(Math.max(s / beta + beta / r - 2, 0)), 1e-3)
+    return [mu, beta, gamma]
+  }
+
   _generator () {
     // Direct sampling by transforming normal variate
     const n = this.p.gamma * super._generator()

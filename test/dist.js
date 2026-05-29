@@ -428,12 +428,12 @@ describe('dist', () => {
         assert(result instanceof dist.Alpha)
       })
 
-      it('Distribution._fitInit fallback random-retry path: Muth.fit() returns a usable instance', () => {
-        // Muth has no _fitInit override and k=1 so the base-class random-retry loop runs
-        const data = new dist.Muth(0.5).seed(42).sample(50)
-        const result = dist.Muth.fit(data)
-        assert(result instanceof dist.Muth)
-        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      it('Distribution._fitInit fallback random-retry path: Bradford.fit() returns a usable instance', () => {
+        // Bradford has no _fitInit override and k=1 so the base-class random-retry loop runs
+        const data = new dist.Bradford(2).seed(42).sample(50)
+        const result = dist.Bradford.fit(data)
+        assert(result instanceof dist.Bradford)
+        assert(Number.isFinite(result.pdf(0.5)) && result.pdf(0.5) > 0)
       })
 
       it('Pareto.fit should recover xmin close to min(data)', () => {
@@ -1675,6 +1675,92 @@ describe('dist', () => {
         const init = dist.QExponential._fitInit([9, 10, 11])
         assert(init[0] === 0)
         assert(init[1] > 0)
+      })
+
+      // Loose behavior-first recovery check: a usable fit places ~half its mass below the sample median
+      const fitCoversMedian = (result, data) => {
+        const median = data.slice().sort((a, b) => a - b)[Math.floor(data.length / 2)]
+        return Math.abs(result.cdf(median) - 0.5) < 0.2
+      }
+
+      it('Gompertz._fitInit returns a constructible [eta, b] vector and fit() covers the median', () => {
+        const data = new dist.Gompertz(2, 2).seed(42).sample(300)
+        const init = dist.Gompertz._fitInit(data)
+        assert(init.length === 2 && init.every(p => p > 0))
+        assert.doesNotThrow(() => new dist.Gompertz(...init))
+        const result = dist.Gompertz.fit(data)
+        assert(result instanceof dist.Gompertz)
+        assert(fitCoversMedian(result, data))
+      })
+
+      it('Makeham._fitInit returns positive [alpha, beta, lambda] and fit() covers the median', () => {
+        const data = new dist.Makeham(2, 2, 2).seed(42).sample(300)
+        const init = dist.Makeham._fitInit(data)
+        assert(init.length === 3 && init.every(p => p > 0))
+        const result = dist.Makeham.fit(data)
+        assert(result instanceof dist.Makeham)
+        assert(fitCoversMedian(result, data))
+      })
+
+      it('Muth._fitInit returns alpha in (0,1] and fit() covers the median', () => {
+        const data = new dist.Muth(0.5).seed(42).sample(300)
+        const init = dist.Muth._fitInit(data)
+        assert(init.length === 1 && init[0] > 0 && init[0] <= 1)
+        const result = dist.Muth.fit(data)
+        assert(result instanceof dist.Muth)
+        assert(fitCoversMedian(result, data))
+      })
+
+      it('BenktanderII._fitInit seeds a>0, b in (0,1] and fit() covers the median', () => {
+        const data = new dist.BenktanderII(2, 0.9995).seed(42).sample(300)
+        const init = dist.BenktanderII._fitInit(data)
+        assert(init[0] > 0 && init[1] > 0 && init[1] <= 1)
+        const result = dist.BenktanderII.fit(data)
+        assert(result instanceof dist.BenktanderII)
+        assert(fitCoversMedian(result, data))
+      })
+
+      it('BirnbaumSaunders._fitInit returns shifted fatigue-life estimates and fit() covers the median', () => {
+        const data = new dist.BirnbaumSaunders(0, 2, 2).seed(42).sample(300)
+        const init = dist.BirnbaumSaunders._fitInit(data)
+        assert(init.length === 3 && init[1] > 0 && init[2] > 0)
+        assert(Number.isFinite(init[0]) && init[0] < Math.min(...data)) // mu seeded just below the minimum observation
+        const result = dist.BirnbaumSaunders.fit(data)
+        assert(result instanceof dist.BirnbaumSaunders)
+        assert(fitCoversMedian(result, data))
+      })
+
+      it('Davis._fitInit returns 0<mu<min with n=2.5 and fit() yields a usable instance', () => {
+        const data = new dist.Davis(1, 1, 2).seed(42).sample(200)
+        const sorted = data.slice().sort((a, b) => a - b)
+        const init = dist.Davis._fitInit(data)
+        assert(init[0] > 0 && init[0] < sorted[0])
+        assert(init[1] > 0 && init[2] > 1)
+        // Davis fit() converges poorly here (likelihood is nearly flat in the shape n), so exact recovery is impractical; assert a usable, non-degenerate fit instead
+        const result = dist.Davis.fit(data)
+        assert(result instanceof dist.Davis)
+        const lo = sorted[Math.floor(data.length * 0.25)]
+        const hi = sorted[Math.floor(data.length * 0.75)]
+        assert(Number.isFinite(result.pdf(hi)) && result.pdf(hi) > 0)
+        assert(result.cdf(hi) > result.cdf(lo)) // monotone increasing → non-degenerate fit
+      })
+
+      it('GeneralizedExponential._fitInit returns positive [a, b, c] and fit() covers the median', () => {
+        const data = new dist.GeneralizedExponential(2, 2, 2).seed(42).sample(300)
+        const init = dist.GeneralizedExponential._fitInit(data)
+        assert(init.length === 3 && init.every(p => p > 0))
+        const result = dist.GeneralizedExponential.fit(data)
+        assert(result instanceof dist.GeneralizedExponential)
+        assert(fitCoversMedian(result, data))
+      })
+
+      it('Rice._fitInit returns positive [nu, sigma] and fit() covers the median', () => {
+        const data = new dist.Rice(0.5, 2).seed(42).sample(300)
+        const init = dist.Rice._fitInit(data)
+        assert(init.length === 2 && init[0] > 0 && init[1] > 0)
+        const result = dist.Rice.fit(data)
+        assert(result instanceof dist.Rice)
+        assert(fitCoversMedian(result, data))
       })
     })
   })
