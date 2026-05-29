@@ -160,6 +160,12 @@ function parseEntry (entry) {
       output: 'porting-scipy.html',
       navLabel: 'SciPy Porting',
       data: {}
+    },
+    {
+      template: './docs/templates/parameter-estimation.pug',
+      output: 'parameter-estimation.html',
+      navLabel: 'Parameter Estimation',
+      data: {}
     }
   ]
 
