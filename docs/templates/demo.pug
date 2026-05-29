@@ -1,0 +1,374 @@
+extends _layout
+
+block content
+    .demo-controls
+        .demo-param-group
+            label(for="dist-select") Distribution
+            select#dist-select
+
+        div#param-inputs
+
+        .demo-param-group
+            label(for="sample-size") Samples
+            input#sample-size(type="number", value="500", min="50", max="5000", step="50")
+
+        button.demo-fit-btn#fit-btn Fit to samples
+
+    .demo-charts
+        .demo-chart-panel
+            h3 PDF / PMF
+            div#pdf-chart.demo-chart-wrap
+        .demo-chart-panel
+            h3 CDF
+            div#cdf-chart.demo-chart-wrap
+
+    .demo-fit-section#fit-section(style="display:none")
+        h3 MLE Fit Results
+        p.demo-fit-msg#fit-msg
+        table.demo-fit-table#fit-table
+            thead
+                tr
+                    th Param
+                    th Planted
+                    th Fitted
+                    th Deviation
+            tbody#fit-tbody
+
+block scripts
+    script(src="https://cdn.jsdelivr.net/npm/ranjs/dist/ranjs.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/dalian/dist/dalian.min.js")
+    script.
+        const DISTRIBUTIONS = {
+          Beta:            { type: 'continuous', args: [{name:'alpha', default:2},    {name:'beta', default:5}] },
+          Cauchy:          { type: 'continuous', args: [{name:'x0', default:0},       {name:'gamma', default:1}] },
+          Exponential:     { type: 'continuous', args: [{name:'lambda', default:1}] },
+          Gamma:           { type: 'continuous', args: [{name:'alpha', default:2},    {name:'beta', default:1}] },
+          LogNormal:       { type: 'continuous', args: [{name:'mu', default:0},       {name:'sigma', default:1}] },
+          Normal:          { type: 'continuous', args: [{name:'mu', default:0},       {name:'sigma', default:1}] },
+          Pareto:          { type: 'continuous', args: [{name:'xmin', default:1},     {name:'alpha', default:2}] },
+          StudentT:        { type: 'continuous', args: [{name:'nu', default:5}] },
+          Uniform:         { type: 'continuous', args: [{name:'xmin', default:0},     {name:'xmax', default:5}] },
+          Weibull:         { type: 'continuous', args: [{name:'lambda', pkey:'lambda2', default:1}, {name:'k', default:1.5}] },
+          Binomial:        { type: 'discrete',   fitDisplay: false, args: [{name:'n', default:10}, {name:'p', default:0.4}] },
+          Geometric:       { type: 'discrete',   args: [{name:'p', default:0.3}] },
+          NegativeBinomial:{ type: 'discrete',   args: [{name:'r', default:5},       {name:'p', default:0.4}] },
+          Poisson:         { type: 'discrete',   args: [{name:'lambda', default:4}] },
+          Zipf:            { type: 'discrete',   fitDisplay: false, args: [{name:'s', default:1}, {name:'N', default:20}] }
+        }
+
+        const distSelect = document.getElementById('dist-select')
+        const paramInputs = document.getElementById('param-inputs')
+        const sampleSizeInput = document.getElementById('sample-size')
+        const fitBtn = document.getElementById('fit-btn')
+        const fitSection = document.getElementById('fit-section')
+        const fitMsg = document.getElementById('fit-msg')
+        const fitTbody = document.getElementById('fit-tbody')
+
+        let currentSamples = null
+        let debounceTimer = null
+        let histChart, pdfLineChart, empCdfChart, theoCdfChart
+        const CHART_H = 380
+
+        // ---- Helpers -------------------------------------------------------
+
+        function chartWidth (id) {
+          return document.getElementById(id).offsetWidth || 600
+        }
+
+        function clamp (v, lo, hi) {
+          return v < lo ? lo : v > hi ? hi : v
+        }
+
+        function linspace (a, b, n) {
+          const step = (b - a) / (n - 1)
+          return Array.from({length: n}, (_, i) => a + i * step)
+        }
+
+        function computeXRange (dist, samples, cfg) {
+          if (cfg.type === 'continuous') {
+            let lo = dist.q(0.001)
+            let hi = dist.q(0.999)
+            // Clamp infinities to sample range with small padding
+            const smin = Math.min(...samples)
+            const smax = Math.max(...samples)
+            const pad = (smax - smin) * 0.1 || 1
+            if (!isFinite(lo)) lo = smin - pad
+            if (!isFinite(hi)) hi = smax + pad
+            return [lo, hi]
+          } else {
+            const smin = Math.min(...samples)
+            const smax = Math.max(...samples)
+            return [smin - 1, smax + 2]
+          }
+        }
+
+        function makeBins (samples, xMin, xMax, nBins) {
+          const binWidth = (xMax - xMin) / nBins
+          const counts = new Array(nBins).fill(0)
+          for (const v of samples) {
+            const i = clamp(Math.floor((v - xMin) / binWidth), 0, nBins - 1)
+            counts[i]++
+          }
+          const n = samples.length
+          return counts.map((c, i) => ({
+            name: 'bin_' + i,
+            value: c / (n * binWidth)
+          }))
+        }
+
+        function makeDiscreteBars (samples, xMin, xMax) {
+          const freq = {}
+          for (const v of samples) {
+            const k = Math.round(v)
+            freq[k] = (freq[k] || 0) + 1
+          }
+          const n = samples.length
+          const bars = []
+          for (let k = Math.round(xMin); k <= Math.round(xMax); k++) {
+            bars.push({ name: 'val_' + k, value: (freq[k] || 0) / n })
+          }
+          return bars
+        }
+
+        function makeEmpiricalCdf (samples) {
+          const sorted = samples.slice().sort((a, b) => a - b)
+          const n = sorted.length
+          return sorted.map((v, i) => ({x: v, y: (i + 1) / n}))
+        }
+
+        // ---- Chart init (called once after DOM ready) -----------------------
+
+        function initCharts () {
+          const wPdf = chartWidth('pdf-chart')
+          const wCdf = chartWidth('cdf-chart')
+
+          histChart = dalian.BarChart('hist', '#pdf-chart')
+            .width(wPdf).height(CHART_H)
+
+          pdfLineChart = dalian.LineChart('pdf-line', '#pdf-chart')
+            .width(wPdf).height(CHART_H)
+            .leftAxis.hideAxisLine(true).leftAxis.label('').leftAxis.values([])
+            .bottomAxis.hideAxisLine(true).bottomAxis.label('').bottomAxis.values([])
+
+          empCdfChart = dalian.LineChart('emp-cdf', '#cdf-chart')
+            .width(wCdf).height(CHART_H)
+
+          theoCdfChart = dalian.LineChart('theo-cdf', '#cdf-chart')
+            .width(wCdf).height(CHART_H)
+            .leftAxis.hideAxisLine(true).leftAxis.label('').leftAxis.values([])
+            .bottomAxis.hideAxisLine(true).bottomAxis.label('').bottomAxis.values([])
+        }
+
+        // ---- Core render ---------------------------------------------------
+
+        function renderDemo (name, params, n) {
+          const cfg = DISTRIBUTIONS[name]
+          const dist = new ranjs.dist[name](...params)
+          const samples = dist.sample(n)
+          const [xMin, xMax] = computeXRange(dist, samples, cfg)
+          const wPdf = chartWidth('pdf-chart')
+          const wCdf = chartWidth('cdf-chart')
+
+          if (cfg.type === 'continuous') {
+            const nBins = Math.min(50, Math.max(10, Math.ceil(Math.sqrt(n))))
+            const bins = makeBins(samples, xMin, xMax, nBins)
+            const xs = linspace(xMin, xMax, 200)
+            const pdfPoints = xs.map(x => ({x, y: dist.pdf(x)})).filter(p => isFinite(p.y))
+            const yPdfMax = Math.max(
+              ...bins.map(b => b.value),
+              ...pdfPoints.map(p => p.y)
+            ) * 1.25 || 1
+
+            histChart
+              .width(wPdf).height(CHART_H)
+              .xRange.min(xMin).xRange.max(xMax)
+              .yRange.min(0).yRange.max(yPdfMax)
+              .data(bins).render()
+
+            pdfLineChart
+              .width(wPdf).height(CHART_H)
+              .xRange.min(xMin).xRange.max(xMax)
+              .yRange.min(0).yRange.max(yPdfMax)
+              .data([{name: 'pdf', values: pdfPoints}]).render()
+
+          } else {
+            const bars = makeDiscreteBars(samples, xMin, xMax)
+            const xs = linspace(xMin, xMax, Math.round(xMax - xMin) + 1)
+            const pmfPoints = xs.map(x => ({x, y: dist.pdf(Math.round(x))})).filter(p => isFinite(p.y))
+            const yPmfMax = Math.max(
+              ...bars.map(b => b.value),
+              ...pmfPoints.map(p => p.y)
+            ) * 1.25 || 1
+
+            histChart
+              .width(wPdf).height(CHART_H)
+              .xRange.min(xMin).xRange.max(xMax)
+              .yRange.min(0).yRange.max(yPmfMax)
+              .data(bars).render()
+
+            pdfLineChart
+              .width(wPdf).height(CHART_H)
+              .xRange.min(xMin).xRange.max(xMax)
+              .yRange.min(0).yRange.max(yPmfMax)
+              .data([{name: 'pmf', values: pmfPoints}]).render()
+          }
+
+          // CDF panel
+          const empPoints = makeEmpiricalCdf(samples)
+          const cdfXs = linspace(xMin, xMax, 200)
+          const cdfPoints = cdfXs.map(x => ({x, y: dist.cdf(x)})).filter(p => isFinite(p.y))
+
+          empCdfChart
+            .width(wCdf).height(CHART_H)
+            .xRange.min(xMin).xRange.max(xMax)
+            .yRange.min(0).yRange.max(1.05)
+            .data([{name: 'empirical', values: empPoints}]).render()
+
+          theoCdfChart
+            .width(wCdf).height(CHART_H)
+            .xRange.min(xMin).xRange.max(xMax)
+            .yRange.min(0).yRange.max(1.05)
+            .data([{name: 'cdf', values: cdfPoints}]).render()
+
+          return samples
+        }
+
+        // ---- Parameter inputs ----------------------------------------------
+
+        function getCurrentParamInputs () {
+          return Array.from(paramInputs.querySelectorAll('input[type="number"]'))
+        }
+
+        function populateParams (name) {
+          const cfg = DISTRIBUTIONS[name]
+          paramInputs.innerHTML = ''
+          cfg.args.forEach(arg => {
+            const group = document.createElement('div')
+            group.className = 'demo-param-group'
+
+            const lbl = document.createElement('label')
+            lbl.textContent = arg.name
+            lbl.setAttribute('for', 'param-' + arg.name)
+
+            const inp = document.createElement('input')
+            inp.type = 'number'
+            inp.id = 'param-' + arg.name
+            inp.value = arg.default
+            inp.step = 'any'
+            inp.addEventListener('input', scheduleUpdate)
+
+            group.appendChild(lbl)
+            group.appendChild(inp)
+            paramInputs.appendChild(group)
+          })
+        }
+
+        // ---- Update loop ---------------------------------------------------
+
+        function scheduleUpdate () {
+          clearTimeout(debounceTimer)
+          debounceTimer = setTimeout(doUpdate, 300)
+        }
+
+        function doUpdate () {
+          const name = distSelect.value
+          const cfg = DISTRIBUTIONS[name]
+          const inputs = getCurrentParamInputs()
+          const params = cfg.args.map((a, i) => {
+            const v = parseFloat(inputs[i] && inputs[i].value)
+            return isNaN(v) ? a.default : v
+          })
+          const n = parseInt(sampleSizeInput.value) || 500
+          currentSamples = null
+          fitSection.style.display = 'none'
+          try {
+            currentSamples = renderDemo(name, params, n)
+          } catch (e) {
+            // Invalid params — charts remain stale; silently skip
+          }
+        }
+
+        // ---- Fit button ----------------------------------------------------
+
+        function showFitResults (rows) {
+          fitTbody.innerHTML = ''
+          rows.forEach(row => {
+            const tr = document.createElement('tr')
+            const devClass = !isFinite(row.deviation) ? 'dev-zero'
+              : row.deviation > 0 ? 'dev-pos' : row.deviation < 0 ? 'dev-neg' : 'dev-zero'
+            const devText = !isFinite(row.deviation) ? '—'
+              : (row.deviation > 0 ? '+' : '') + row.deviation.toFixed(2) + '%'
+            tr.innerHTML = '<td>' + row.name + '</td>'
+              + '<td>' + row.planted.toPrecision(4) + '</td>'
+              + '<td>' + row.fitted.toPrecision(4) + '</td>'
+              + '<td class="' + devClass + '">' + devText + '</td>'
+            fitTbody.appendChild(tr)
+          })
+          fitMsg.textContent = ''
+          fitSection.style.display = ''
+        }
+
+        fitBtn.addEventListener('click', () => {
+          if (!currentSamples) return
+          const name = distSelect.value
+          const cfg = DISTRIBUTIONS[name]
+          const inputs = getCurrentParamInputs()
+          const planted = cfg.args.map((a, i) => {
+            const v = parseFloat(inputs[i] && inputs[i].value)
+            return isNaN(v) ? a.default : v
+          })
+
+          if (cfg.fitDisplay === false) {
+            fitMsg.textContent = 'Fit display not supported for ' + name + ' (pre-computed table distribution).'
+            fitTbody.innerHTML = ''
+            fitSection.style.display = ''
+            return
+          }
+
+          fitBtn.disabled = true
+          fitBtn.textContent = 'Fitting…'
+
+          setTimeout(() => {
+            try {
+              const fitted = ranjs.dist[name].fit(currentSamples)
+              const rows = cfg.args.map((a, idx) => {
+                // See solutions/tooling/2026-05-29-1734-this-p-subclass-pkey-fit-display.md
+                const key = a.pkey || a.name
+                const fittedVal = fitted.p[key]
+                const plantedVal = planted[idx]
+                const dev = (plantedVal !== 0 && isFinite(plantedVal))
+                  ? (fittedVal - plantedVal) / plantedVal * 100
+                  : NaN
+                return {name: a.name, planted: plantedVal, fitted: fittedVal, deviation: dev}
+              })
+              showFitResults(rows)
+            } catch (e) {
+              fitMsg.textContent = 'Fit failed: ' + e.message
+              fitTbody.innerHTML = ''
+              fitSection.style.display = ''
+            }
+            fitBtn.disabled = false
+            fitBtn.textContent = 'Fit to samples'
+          }, 0)
+        })
+
+        // ---- Init ----------------------------------------------------------
+
+        document.addEventListener('DOMContentLoaded', () => {
+          Object.keys(DISTRIBUTIONS).forEach(name => {
+            const opt = document.createElement('option')
+            opt.value = name
+            opt.textContent = name
+            distSelect.appendChild(opt)
+          })
+          distSelect.value = 'Normal'
+          distSelect.addEventListener('change', () => {
+            populateParams(distSelect.value)
+            doUpdate()
+          })
+          sampleSizeInput.addEventListener('input', scheduleUpdate)
+
+          populateParams('Normal')
+          initCharts()
+          doUpdate()
+        })
