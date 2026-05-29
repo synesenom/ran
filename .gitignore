@@ -10,6 +10,7 @@
 /dist/**/*.d.ts
 /docs/index.html
 /docs/porting-scipy.html
+/docs/parameter-estimation.html
 /docs/styles/style.css
 
 # Idea
