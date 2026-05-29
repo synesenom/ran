@@ -29,6 +29,15 @@ export default class ReciprocalInverseGaussian extends InverseGaussian {
     }]
   }
 
+  static _fitInit (data) {
+    // X~RIG(mu,lambda) iff 1/X~IG(mu,lambda); apply IG MOM to the reciprocal sample
+    const inv = data.map(x => 1 / x)
+    const n = inv.length
+    const mean = inv.reduce((s, x) => s + x, 0) / n
+    const variance = inv.reduce((s, x) => s + (x - mean) ** 2, 0) / n || mean * mean
+    return [mean, mean * mean * mean / variance]
+  }
+
   _generator () {
     return 1 / super._generator()
   }

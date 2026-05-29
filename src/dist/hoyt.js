@@ -24,4 +24,9 @@ export default class Hoyt extends Nakagami {
     console.warn('ran.dist.Hoyt is deprecated and will be removed in a future major release; use ran.dist.Nakagami instead.')
     super(q, omega)
   }
+
+  static _fitInit (data) {
+    // Hoyt(q, omega) is a deprecated alias for Nakagami(m, omega); delegate MOM to parent
+    return Nakagami._fitInit(data)
+  }
 }

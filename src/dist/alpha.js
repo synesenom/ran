@@ -56,6 +56,15 @@ export default class Alpha extends Distribution {
     return Math.SQRT2 * erfinv(2 * x - 1)
   }
 
+  static _fitInit (data) {
+    // Large-alpha approximation: E[X]≈beta/alpha, CV≈1/alpha ⇒ alpha=mean/std, beta=mean²/std
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || mean * mean * 0.25
+    const std = Math.sqrt(variance)
+    return [Math.max(mean / std, 0.5), Math.max(mean * mean / std, 1e-3)]
+  }
+
   _generator () {
     // Inverse transform sampling
     return this._q(this.r.next())

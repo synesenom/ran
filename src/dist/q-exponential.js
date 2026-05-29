@@ -35,4 +35,15 @@ export default class QExponential extends GeneralizedPareto {
       closed: false
     }]
   }
+
+  static _fitInit (data) {
+    // MOM: r=Var/E²=(2−q)/(4−3q) inverts to q=(2−4r)/(1−3r) for r>1/3 (where variance exists)
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || mean * mean
+    const r = variance / (mean * mean)
+    const q = r > 1 / 3 ? Math.max((2 - 4 * r) / (1 - 3 * r), -5) : 0
+    const lambda = Math.max(1 / (mean * (3 - 2 * q)), 1e-3)
+    return [q, lambda]
+  }
 }
