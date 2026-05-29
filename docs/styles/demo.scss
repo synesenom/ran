@@ -1,0 +1,176 @@
+// Demo page styles. All rules are scoped under body:has(.demo-controls) or
+// .demo-* class selectors to avoid leaking into the API and porting pages.
+// See solutions/tooling/2026-05-24-1439-shared-stylesheet-cross-page-selector-leak.md
+@import "colors";
+@import "dimensions";
+
+
+// ---- Full-width layout override (demo only) ---------------------------------
+// The demo page omits the sidebar entirely. Without this override the desktop
+// rule in desktop.scss pushes main 260px right even when aside is absent.
+body:has(.demo-controls) {
+  main {
+    left: 0;
+    width: 100%;
+    padding: 0 0 64px;
+    max-width: none;
+  }
+
+  // Remove per-child max-width so charts can stretch to full column width.
+  main > * {
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+
+// ---- Control bar ------------------------------------------------------------
+// Sticky strip just below the top nav bar.
+.demo-controls {
+  position: sticky;
+  top: $dimTopBarHeight;
+  z-index: 80;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 20px;
+  background: $colorPanel;
+  border-bottom: 1px solid $colorLine;
+
+  label {
+    font-size: 13px;
+    color: $colorMuted;
+    white-space: nowrap;
+  }
+
+  select,
+  input[type="number"] {
+    font-family: inherit;
+    font-size: 13px;
+    color: $colorInk;
+    background: $colorBg;
+    border: 1px solid $colorLine;
+    border-radius: 4px;
+    padding: 4px 8px;
+    outline: none;
+
+    &:focus { border-color: $colorBlue; }
+  }
+
+  select { min-width: 160px; }
+
+  input[type="number"] { width: 72px; }
+}
+
+.demo-param-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.demo-fit-btn {
+  margin-left: auto;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: $colorBg;
+  background: $colorBlue;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 14px;
+  cursor: pointer;
+
+  &:hover { opacity: 0.88; }
+  &:disabled { opacity: 0.45; cursor: default; }
+}
+
+
+// ---- Chart area -------------------------------------------------------------
+.demo-charts {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  padding: 0 20px;
+  margin-top: 20px;
+
+  @media screen and (min-width: 800px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+}
+
+.demo-chart-panel {
+  h3 {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: $colorAccent;
+    margin: 0 0 8px;
+  }
+}
+
+// Container trick: height:0 + padding-bottom creates a fixed-aspect box;
+// both absolutely-positioned SVGs from dalian stack inside it.
+.demo-chart-wrap {
+  position: relative;
+  height: 0;
+  padding-bottom: 380px;
+  overflow: hidden;
+  background: $colorBg;
+  border: 1px solid $colorLine;
+  border-radius: 6px;
+  margin-bottom: 24px;
+}
+
+
+// ---- Fit results ------------------------------------------------------------
+.demo-fit-section {
+  padding: 0 20px;
+  margin-top: 4px;
+
+  h3 {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: $colorAccent;
+    margin: 0 0 10px;
+  }
+
+  p.demo-fit-msg {
+    font-size: 13px;
+    color: $colorMuted;
+    margin: 0 0 16px;
+  }
+}
+
+.demo-fit-table {
+  width: auto;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 24px;
+
+  th, td {
+    padding: 5px 14px;
+    border: 1px solid $colorLine;
+    text-align: right;
+  }
+
+  th {
+    background: $colorPanel;
+    font-weight: 600;
+    color: $colorMuted;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 11px;
+  }
+
+  td:first-child { text-align: left; font-family: 'IBM Plex Mono', monospace; }
+
+  .dev-pos { color: $colorAccent; }
+  .dev-neg { color: $colorBlue; }
+  .dev-zero { color: $colorMuted; }
+}

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Interactive distribution demo page (`docs/demo.html`): select from 15 curated distributions, adjust parameters, visualise histogram+PDF and empirical+theoretical CDF side-by-side (rendered with dalian), and run MLE fitting via `fit()` to see how closely the fitted parameters match the planted values (#504).
 - `Distribution.fit(data)` static method for maximum-likelihood parameter estimation via Nelder-Mead simplex optimizer (#404). Covers all 140 exported distributions. The `static _fitInit(data)` hook lets each distribution seed the optimizer from a data-aware method-of-moments estimate; the base-class fallback draws random positive values until the parameter constraints pass. Together with `sample()` and `test()`, `fit()` closes the full statistical cycle: define → sample → fit → test.
 
 - `static _fitInit(data)` overrides for `InverseGaussian`, `ReciprocalInverseGaussian`, `Nakagami`, `Hoyt`, `Lindley`, `Alpha`, and `QExponential`: each seeds the Nelder-Mead MLE optimizer from a distribution-specific method-of-moments estimate, replacing the base-class random-retry fallback and improving `.fit()` convergence reliability for these distributions (#486).

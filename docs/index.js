@@ -166,6 +166,12 @@ function parseEntry (entry) {
       output: 'parameter-estimation.html',
       navLabel: 'Parameter Estimation',
       data: {}
+    },
+    {
+      template: './docs/templates/demo.pug',
+      output: 'demo.html',
+      navLabel: 'Demo',
+      data: {}
     }
   ]
 
