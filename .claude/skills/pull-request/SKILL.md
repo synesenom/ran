@@ -21,7 +21,28 @@ Run in parallel:
 
 If the branch is `main`, stop. If no commits ahead of main, stop. If there are uncommitted changes, invoke `/commit` first.
 
-### 2. Detect the Issue Number
+### 2. Sync with Main
+
+Before opening the PR, merge the latest `main` into the current branch to eliminate post-open merge conflicts.
+
+Run in sequence:
+```bash
+git fetch origin main
+git merge origin/main --no-edit
+```
+
+If the merge **succeeds cleanly**, push the updated branch:
+```bash
+git push -u origin <current-branch>
+```
+
+If the merge **fails with conflicts**:
+1. Run `git status` to list conflicting files.
+2. Resolve each conflict automatically only when the resolution is unambiguous (e.g., the branch added a new file that `main` never touched).
+3. If any conflict is ambiguous, abort the merge (`git merge --abort`), report the conflicting files to the user, and stop — do not proceed to PR creation.
+4. After resolving, run `npm run standard && npm test` to confirm the merge didn't break anything, then `git commit --no-edit` and push.
+
+### 3. Detect the Issue Number
 
 Search in this order, stopping at the first match:
 
@@ -37,7 +58,7 @@ gh issue view <number> --json number,state -q '.state' 2>/dev/null
 ```
 Skip if `CLOSED` or lookup fails.
 
-### 3. Analyze Changes
+### 4. Analyze Changes
 
 Categorize every change:
 
@@ -56,7 +77,7 @@ Categorize every change:
 - Import reordering or cleanup
 - Docstring/comment additions only
 
-### 4. ADR Gate (non-trivial PRs only)
+### 5. ADR Gate (non-trivial PRs only)
 
 Check for ADR references in the diff and commits:
 ```bash
@@ -71,12 +92,12 @@ If non-trivial changes exist but no ADRs are found, add a warning block:
 > See `decisions/0000-template.md` for the format.
 ```
 
-### 5. Generate PR Title
+### 6. Generate PR Title
 
 - Concise (under 70 characters), imperative mood
 - e.g., "Add LogNormal distribution", "Fix CDF for discrete distributions"
 
-### 6. Generate PR Body
+### 7. Generate PR Body
 
 ```markdown
 <If an issue was detected:>
@@ -118,7 +139,7 @@ _No non-trivial changes — this PR is purely mechanical._
 *Generated with [Claude Code](https://claude.ai/code)*
 ```
 
-### 7. Create the PR
+### 8. Create the PR
 
 ```bash
 gh pr create --title "<title>" --body "$(cat <<'EOF'
@@ -127,7 +148,7 @@ EOF
 )"
 ```
 
-### 8. Watch the PR (CI + reviews)
+### 9. Watch the PR (CI + reviews)
 
 Immediately after the PR is created, **subscribe to its activity** so CI failures and
 review comments are handled without the user having to ask:
@@ -157,7 +178,7 @@ arrives, investigate it and follow this loop:
 Stop watching the moment the user asks — call `unsubscribe_pr_activity(<pr-number>)` and push
 no further changes to that PR.
 
-### 9. Report
+### 10. Report
 
 > "PR created: <URL>
 >
