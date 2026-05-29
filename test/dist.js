@@ -4,6 +4,7 @@ import { adTest, chiTest, Tests, checkRefVals, checkQuantileVals } from './test-
 import { float } from '../src/core'
 import * as dist from '../src/dist'
 import PreComputed from '../src/dist/_pre-computed'
+import Distribution from '../src/dist/_distribution'
 import continuousCases from './dist-cases-continuous'
 import discreteCases from './dist-cases-discrete'
 
@@ -422,10 +423,24 @@ describe('dist', () => {
         assert(result instanceof dist.Exponential)
       })
 
-      it('Distribution._fitInit fallback: Alpha.fit() returns a valid Alpha instance', () => {
+      it('Alpha.fit() returns a valid Alpha instance', () => {
         const data = new dist.Alpha(2, 1).seed(42).sample(100)
         const result = dist.Alpha.fit(data)
         assert(result instanceof dist.Alpha)
+      })
+
+      it('Distribution._fitInit fallback random-retry path covers try-success and catch', () => {
+        // All exported distributions now have _fitInit overrides, so call the base-class
+        // method directly via a fake 2-param class with an ordering constraint (a < b).
+        // ~50% of random draws in (0,5) violate a>=b, exercising both the catch and return paths.
+        class FakeDist {
+          static get length () { return 2 }
+          constructor (a, b) {
+            if (a >= b) throw new Error('invalid')
+          }
+        }
+        const params = Distribution._fitInit.call(FakeDist, [1, 2, 3])
+        assert(params.length === 2 && params[0] < params[1])
       })
 
       it('ZipfMandelbrot._fitInit should return valid params for typical data', () => {
