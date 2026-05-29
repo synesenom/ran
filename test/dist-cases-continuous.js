@@ -196,6 +196,19 @@ export default [{
       { x: 0.8, pdf: 0.539999999999999, cdf: 0.964 },
       { x: 0.9, pdf: 0.135, cdf: 0.9955 }
     ]
+  }, {
+    name: 'non-integer n rounds to 3, unit interval',
+    params: () => [2.7, 0, 1],
+    symmetry: 0.5,
+    refVals: [
+      { x: 0.1, pdf: 0.135, cdf: 0.0045 },
+      { x: 0.2, pdf: 0.54, cdf: 0.036 },
+      { x: 0.35, pdf: 1.6425, cdf: 0.192875 },
+      { x: 0.5, pdf: 2.25, cdf: 0.5 },
+      { x: 0.65, pdf: 1.6425, cdf: 0.807125 },
+      { x: 0.8, pdf: 0.539999999999999, cdf: 0.964 },
+      { x: 0.9, pdf: 0.135, cdf: 0.9955 }
+    ]
   }],
   // scipy.stats.irwinhall(10): pdf rescaled by n/(b-a)=0.5 at y=(x-5)*10/20
   refVals: [
