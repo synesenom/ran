@@ -4,6 +4,7 @@ import { adTest, chiTest, Tests, checkRefVals, checkQuantileVals } from './test-
 import { float } from '../src/core'
 import * as dist from '../src/dist'
 import PreComputed from '../src/dist/_pre-computed'
+import Distribution from '../src/dist/_distribution'
 import continuousCases from './dist-cases-continuous'
 import discreteCases from './dist-cases-discrete'
 
@@ -422,19 +423,39 @@ describe('dist', () => {
         assert(result instanceof dist.Exponential)
       })
 
-      it('Distribution._fitInit fallback: Alpha.fit() returns a valid Alpha instance', () => {
+      it('Alpha.fit() returns a valid Alpha instance', () => {
         const data = new dist.Alpha(2, 1).seed(42).sample(100)
         const result = dist.Alpha.fit(data)
         assert(result instanceof dist.Alpha)
       })
 
-      it('Distribution._fitInit fallback random-retry path: ZipfMandelbrot.fit() returns a usable instance', () => {
-        // ZipfMandelbrot is the only exported distribution with no _fitInit override and k>0, so it exercises the base-class random-retry seed loop; the seed is unseeded Math.random, so we assert only usable-instance invariants rather than recovery
+      it('Distribution._fitInit fallback random-retry path covers try-success and catch', () => {
+        // All exported distributions now have _fitInit overrides, so call the base-class
+        // method directly via a fake 2-param class with an ordering constraint (a < b).
+        // ~50% of random draws in (0,5) violate a>=b, exercising both the catch and return paths.
+        class FakeDist {
+          static get length () { return 2 }
+          constructor (a, b) {
+            if (a >= b) throw new Error('invalid')
+          }
+        }
+        const params = Distribution._fitInit.call(FakeDist, [1, 2, 3])
+        assert(params.length === 2 && params[0] < params[1])
+      })
+
+      it('ZipfMandelbrot._fitInit should return valid params for typical data', () => {
         const data = new dist.ZipfMandelbrot(10, 2, 0).seed(42).sample(120)
-        const result = dist.ZipfMandelbrot.fit(data)
-        assert(result instanceof dist.ZipfMandelbrot)
-        const p1 = result.pdf(1)
-        assert(Number.isFinite(p1) && p1 > 0 && p1 <= 1)
+        const init = dist.ZipfMandelbrot._fitInit(data)
+        assert(init.length === 3)
+        assert(Number.isFinite(init[0]) && init[0] >= 1) // N >= 1
+        assert(Number.isFinite(init[1]) && init[1] > 1) // s > 1
+        assert(Number.isFinite(init[2]) && init[2] >= 0) // q >= 0
+      })
+
+      it('ZipfMandelbrot._fitInit should fall back to q=0 when no rank-2 data exists', () => {
+        const init = dist.ZipfMandelbrot._fitInit([1, 1, 1, 1])
+        assert(init[2] === 0) // q falls back to 0 when only rank-1 observed
+        assert(init[1] > 1) // s still valid
       })
 
       it('Pareto.fit should recover xmin close to min(data)', () => {
@@ -1898,6 +1919,14 @@ describe('dist', () => {
       assert(result instanceof dist.Zipf)
       assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
       assert(Math.abs(result.pdf(1) - new dist.Zipf(2, 50).pdf(1)) < 0.1)
+    })
+
+    it('ZipfMandelbrot.fit should return a usable ZipfMandelbrot instance', () => {
+      const data = new dist.ZipfMandelbrot(20, 2, 1).seed(42).sample(300)
+      const result = dist.ZipfMandelbrot.fit(data)
+      assert(result instanceof dist.ZipfMandelbrot)
+      assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      assert(Math.abs(result.pdf(1) - new dist.ZipfMandelbrot(20, 2, 1).pdf(1)) < 0.1)
     })
 
     it('Hypergeometric.fit should return a usable Hypergeometric instance', () => {
