@@ -20,11 +20,17 @@ export default class Mielke extends Dagum {
   constructor (k, s) {
     super(k / s, s, 1)
 
+    // Mielke has 2 free parameters (k, s); override the 3 inherited from Dagum
+    this.k = 2
+
     // Validate parameters
     Distribution.validate({ k, s }, [
       'k > 0',
       's > 0'
     ])
+
+    // Dagum's constructor sets this.p = {p, a, b}; override with Mielke's own names
+    this.p = { k, s }
 
     // Set support
     this.s = [{
@@ -34,6 +40,18 @@ export default class Mielke extends Dagum {
       value: Infinity,
       closed: false
     }]
+  }
+
+  _pdf (x) {
+    return this.p.k * Math.pow(x, this.p.k - 1) / Math.pow(1 + Math.pow(x, this.p.s), 1 + this.p.k / this.p.s)
+  }
+
+  _cdf (x) {
+    return Math.pow(1 + Math.pow(x, -this.p.s), -this.p.k / this.p.s)
+  }
+
+  _q (p) {
+    return Math.pow(Math.pow(p, -this.p.s / this.p.k) - 1, -1 / this.p.s)
   }
 
   static _fitInit (data) {
