@@ -428,13 +428,19 @@ describe('dist', () => {
         assert(result instanceof dist.Alpha)
       })
 
-      it('Distribution._fitInit fallback random-retry path: ZipfMandelbrot.fit() returns a usable instance', () => {
-        // ZipfMandelbrot is the only exported distribution with no _fitInit override and k>0, so it exercises the base-class random-retry seed loop; the seed is unseeded Math.random, so we assert only usable-instance invariants rather than recovery
+      it('ZipfMandelbrot._fitInit should return valid params for typical data', () => {
         const data = new dist.ZipfMandelbrot(10, 2, 0).seed(42).sample(120)
-        const result = dist.ZipfMandelbrot.fit(data)
-        assert(result instanceof dist.ZipfMandelbrot)
-        const p1 = result.pdf(1)
-        assert(Number.isFinite(p1) && p1 > 0 && p1 <= 1)
+        const init = dist.ZipfMandelbrot._fitInit(data)
+        assert(init.length === 3)
+        assert(Number.isFinite(init[0]) && init[0] >= 1)   // N >= 1
+        assert(Number.isFinite(init[1]) && init[1] > 1)    // s > 1
+        assert(Number.isFinite(init[2]) && init[2] >= 0)   // q >= 0
+      })
+
+      it('ZipfMandelbrot._fitInit should fall back to q=0 when no rank-2 data exists', () => {
+        const init = dist.ZipfMandelbrot._fitInit([1, 1, 1, 1])
+        assert(init[2] === 0) // q falls back to 0 when only rank-1 observed
+        assert(init[1] > 1)   // s still valid
       })
 
       it('Pareto.fit should recover xmin close to min(data)', () => {
@@ -1898,6 +1904,14 @@ describe('dist', () => {
       assert(result instanceof dist.Zipf)
       assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
       assert(Math.abs(result.pdf(1) - new dist.Zipf(2, 50).pdf(1)) < 0.1)
+    })
+
+    it('ZipfMandelbrot.fit should return a usable ZipfMandelbrot instance', () => {
+      const data = new dist.ZipfMandelbrot(20, 2, 1).seed(42).sample(300)
+      const result = dist.ZipfMandelbrot.fit(data)
+      assert(result instanceof dist.ZipfMandelbrot)
+      assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      assert(Math.abs(result.pdf(1) - new dist.ZipfMandelbrot(20, 2, 1).pdf(1)) < 0.1)
     })
 
     it('Hypergeometric.fit should return a usable Hypergeometric instance', () => {
