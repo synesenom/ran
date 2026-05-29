@@ -432,15 +432,15 @@ describe('dist', () => {
         const data = new dist.ZipfMandelbrot(10, 2, 0).seed(42).sample(120)
         const init = dist.ZipfMandelbrot._fitInit(data)
         assert(init.length === 3)
-        assert(Number.isFinite(init[0]) && init[0] >= 1)   // N >= 1
-        assert(Number.isFinite(init[1]) && init[1] > 1)    // s > 1
-        assert(Number.isFinite(init[2]) && init[2] >= 0)   // q >= 0
+        assert(Number.isFinite(init[0]) && init[0] >= 1) // N >= 1
+        assert(Number.isFinite(init[1]) && init[1] > 1) // s > 1
+        assert(Number.isFinite(init[2]) && init[2] >= 0) // q >= 0
       })
 
       it('ZipfMandelbrot._fitInit should fall back to q=0 when no rank-2 data exists', () => {
         const init = dist.ZipfMandelbrot._fitInit([1, 1, 1, 1])
         assert(init[2] === 0) // q falls back to 0 when only rank-1 observed
-        assert(init[1] > 1)   // s still valid
+        assert(init[1] > 1) // s still valid
       })
 
       it('Pareto.fit should recover xmin close to min(data)', () => {
