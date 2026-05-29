@@ -21,6 +21,8 @@ export default class Dagum extends Distribution {
     super('continuous', 3)
 
     // Validate parameters
+    // Index signature allows subclasses (e.g. Mielke) to override this.p with different parameter names
+    /** @type {Object.<string, number>} */
     this.p = { p, a, b }
     Distribution.validate({ p, a, b }, [
       'p > 0',
