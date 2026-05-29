@@ -10,7 +10,7 @@ block content
 
         .demo-param-group
             label(for="sample-size") Samples
-            input#sample-size(type="number", value="500", min="50", max="5000", step="50")
+            input#sample-size(type="number", value="10000", min="10000", max="20000", step="1000")
 
         button.demo-fit-btn#fit-btn Fit to samples
 
@@ -35,7 +35,7 @@ block content
             tbody#fit-tbody
 
 block scripts
-    script(src="https://cdn.jsdelivr.net/npm/ranjs/dist/ranjs.min.js")
+    script(src="../dist/ranjs.min.js")
     script(src="https://cdn.jsdelivr.net/npm/dalian/dist/dalian.min.js")
     script.
         const DISTRIBUTIONS = {
@@ -215,8 +215,24 @@ block scripts
 
           // CDF panel
           const empPoints = makeEmpiricalCdf(samples)
-          const cdfXs = linspace(xMin, xMax, 200)
-          const cdfPoints = cdfXs.map(x => ({x, y: dist.cdf(x)})).filter(p => isFinite(p.y))
+          let cdfPoints
+          if (cfg.type === 'discrete') {
+            // For discrete dists, evaluate CDF at each integer and draw a
+            // staircase by duplicating points: (k-1, CDF(k-1)), (k, CDF(k-1))
+            // so the step rises at the integer, not between integers.
+            const kMin = Math.round(xMin)
+            const kMax = Math.round(xMax)
+            cdfPoints = []
+            for (let k = kMin; k <= kMax; k++) {
+              const prev = k > kMin ? dist.cdf(k - 1) : 0
+              cdfPoints.push({x: k, y: prev})
+              cdfPoints.push({x: k, y: dist.cdf(k)})
+            }
+            cdfPoints = cdfPoints.filter(p => isFinite(p.y))
+          } else {
+            const cdfXs = linspace(xMin, xMax, 200)
+            cdfPoints = cdfXs.map(x => ({x, y: dist.cdf(x)})).filter(p => isFinite(p.y))
+          }
 
           empCdfChart
             .width(wCdf).height(CHART_H)
