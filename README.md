@@ -61,7 +61,7 @@ const skellam = new ran.dist.Skellam(1, 3)
 const values  = skellam.sample(1e4)
 
 skellam.test(values)
-// => { statistic: 14.025360669436635, passed: true }
+// => { statistics: 14.025360669436635, passed: true }
 
 for (let k = -4; k <= 4; k++) {
   console.log(k, skellam.pdf(k), skellam.cdf(k))
@@ -96,6 +96,27 @@ const misfit   = new ran.dist.Skellam(1.2, 7.5)
 console.log(fitted.aic(data))   // => 41937.67252974663
 console.log(misfit.aic(data))   // => 66508.74299363888
 ```
+
+### Parameter estimation
+
+ranjs closes the full statistical cycle — define a model, generate data, fit parameters from data via MLE, then verify the fit:
+
+```javascript
+import { dist } from 'ranjs'
+
+// 1. Define and sample
+const model = new dist.Normal(3, 1)
+const data  = model.sample(500)
+
+// 2. Fit parameters from data via MLE
+const fitted = dist.Normal.fit(data)
+console.log(fitted.p)           // { mu: ~3, sigma: ~1 }
+
+// 3. Test goodness of fit
+console.log(fitted.test(data))  // { statistics: …, passed: true }
+```
+
+`fit()` is a **static** method called on the class, not on an instance: `dist.Normal.fit(data)`, not `model.fit(data)`. All 140 exported distributions support `fit()`. Most have a data-aware initial guess for reliable MLE convergence; zero-parameter distributions skip optimization and return a fresh instance.
 
 ## API Overview
 

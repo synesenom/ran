@@ -1,0 +1,118 @@
+extends _layout
+
+block sidebar
+    input(id="menu", type="checkbox")
+    label.menu-button(for="menu") ☰
+    label.menu-overlay(for="menu")
+    aside
+        ul.sections
+            li
+                label Contents
+                ul.methods
+                    li: a(href="#what-is-parameter-estimation") What is parameter estimation?
+                    li: a(href="#full-workflow") The full workflow
+                    li: a(href="#static-method") Static method
+                    li: a(href="#all-distributions") All distributions
+                    li: a(href="#goodness-of-fit") Goodness of fit
+
+block content
+    h1 Parameter estimation
+
+    h2#what-is-parameter-estimation What is parameter estimation?
+
+    p
+        | Parameter estimation is the process of finding the distribution parameters that best explain
+        | an observed dataset. ranjs uses #[strong maximum likelihood estimation (MLE)]: it finds the
+        | parameter values that maximise the probability of seeing the data under the assumed model.
+        | This is done by a derivative-free Nelder-Mead simplex optimizer, which makes it robust to
+        | distributions with non-smooth or discontinuous likelihoods.
+
+    p
+        | Once parameters are estimated you can inspect them, compare models by AIC/BIC, or run a
+        | built-in goodness-of-fit test — all with the same distribution instance returned by
+        | #[code fit()].
+
+    h2#full-workflow The full workflow
+
+    p
+        | #[code fit()] closes the full statistical cycle: define a model, generate (or collect) data,
+        | estimate parameters from that data, then test whether the fit is adequate.
+
+    pre: code.language-javascript.
+        import { dist } from 'ranjs'
+
+        // 1. Define and sample
+        const model = new dist.Normal(3, 1)
+        const data  = model.sample(500)
+
+        // 2. Fit parameters from data via MLE
+        const fitted = dist.Normal.fit(data)
+        console.log(fitted.p)           // { mu: ~3, sigma: ~1 }
+
+        // 3. Test goodness of fit
+        console.log(fitted.test(data))  // { statistics: …, passed: true }
+
+    p
+        | The same pattern works for any distribution in the library. Here is a discrete example
+        | fitting a Poisson model to count data:
+
+    pre: code.language-javascript.
+        import { dist } from 'ranjs'
+
+        const data   = new dist.Poisson(4.2).sample(200)
+        const fitted = dist.Poisson.fit(data)
+        console.log(fitted.p)           // { lambda: ~4.2 }
+        console.log(fitted.test(data))  // chi-squared test result
+
+    h2#static-method Static method
+
+    p.callout
+        strong Note:
+        |  #[code fit()] is a #[strong static] method called on the class, not on an instance.
+        | Use #[code dist.Normal.fit(data)], not #[code model.fit(data)].
+
+    table
+        thead
+            tr
+                th Correct
+                th Wrong
+        tbody
+            tr
+                td: code dist.Normal.fit(data)
+                td: code model.fit(data)   // TypeError
+
+    h2#all-distributions All distributions
+
+    p
+        | All 140 exported distributions support #[code fit()]. Most have a data-aware
+        | #[code static _fitInit(data)] override that seeds the Nelder-Mead optimizer from a
+        | method-of-moments estimate, improving convergence reliability. The base-class fallback
+        | uses random positive-value retries when no override is present.
+
+    p
+        | Zero-parameter distributions (e.g. #[code Gilbrat], #[code HalfLogistic]) skip
+        | optimisation entirely: #[code Cls.fit(data)] simply returns #[code new Cls()].
+
+    h2#goodness-of-fit Goodness of fit
+
+    p
+        | The instance returned by #[code fit()] is a fully-featured distribution object. You can
+        | chain any distribution method on it:
+
+    pre: code.language-javascript.
+        const fitted = dist.Gamma.fit(data)
+
+        fitted.test(data)        // KS goodness-of-fit test
+        fitted.aic(data)         // Akaike information criterion
+        fitted.bic(data)         // Bayesian information criterion
+        fitted.pdf(x)            // density at any point
+        fitted.sample(100)       // generate new variates from the fitted model
+
+    p
+        | See the #[a(href="index.html") API reference] for the full list of methods available on
+        | every distribution instance.
+
+block scripts
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js")
+    script.
+        hljs.highlightAll()
