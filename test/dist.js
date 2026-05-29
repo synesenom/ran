@@ -1032,9 +1032,8 @@ describe('dist', () => {
         const data = new dist.Mielke(2, 1).seed(42).sample(200)
         const result = dist.Mielke.fit(data)
         assert(result instanceof dist.Mielke)
-        // Mielke stores params via Dagum: p.p = k/s, p.a = s, so k = p.p * p.a
-        assert(Math.abs(result.p.p * result.p.a - 2) < 0.6)
-        assert(Math.abs(result.p.a - 1) < 0.5)
+        assert(Math.abs(result.p.k - 2) < 0.6)
+        assert(Math.abs(result.p.s - 1) < 0.5)
       })
 
       it('Uniform.fit should recover xmin and xmax close to planted values', () => {

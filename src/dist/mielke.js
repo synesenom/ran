@@ -26,6 +26,9 @@ export default class Mielke extends Dagum {
       's > 0'
     ])
 
+    // Dagum's constructor sets this.p = {p, a, b}; override with Mielke's own names
+    this.p = { k, s }
+
     // Set support
     this.s = [{
       value: 0,
@@ -34,6 +37,18 @@ export default class Mielke extends Dagum {
       value: Infinity,
       closed: false
     }]
+  }
+
+  _pdf (x) {
+    return this.p.k * Math.pow(x, this.p.k - 1) / Math.pow(1 + Math.pow(x, this.p.s), 1 + this.p.k / this.p.s)
+  }
+
+  _cdf (x) {
+    return Math.pow(1 + Math.pow(x, -this.p.s), -this.p.k / this.p.s)
+  }
+
+  _q (p) {
+    return Math.pow(Math.pow(p, -this.p.s / this.p.k) - 1, -1 / this.p.s)
   }
 
   static _fitInit (data) {
