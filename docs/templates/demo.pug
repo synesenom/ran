@@ -36,7 +36,7 @@ block content
 
 block scripts
     script(src="https://cdn.jsdelivr.net/npm/ranjs/dist/ranjs.min.js")
-    script(src="https://cdn.jsdelivr.net/npm/dalian/dist/dalian.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js")
     script.
         const DISTRIBUTIONS = {
           Beta:            { type: 'continuous', args: [{name:'alpha', default:2},    {name:'beta', default:5}] },
@@ -66,14 +66,15 @@ block scripts
 
         let currentSamples = null
         let debounceTimer = null
-        let histChart, pdfLineChart, empCdfChart, theoCdfChart
+
+        const MARGIN = { top: 10, right: 20, bottom: 36, left: 50 }
         const CHART_H = 380
+        const C_BLUE = '#2563b6'
+        const C_RED  = '#b23a2e'
+        const C_LINE = '#e4e9ef'
+        const C_MUTED = '#5c6b7a'
 
         // ---- Helpers -------------------------------------------------------
-
-        function chartWidth (id) {
-          return document.getElementById(id).offsetWidth || 600
-        }
 
         function clamp (v, lo, hi) {
           return v < lo ? lo : v > hi ? hi : v
@@ -88,7 +89,6 @@ block scripts
           if (cfg.type === 'continuous') {
             let lo = dist.q(0.001)
             let hi = dist.q(0.999)
-            // Clamp infinities to sample range with small padding
             const smin = Math.min(...samples)
             const smax = Math.max(...samples)
             const pad = (smax - smin) * 0.1 || 1
@@ -136,27 +136,93 @@ block scripts
           return sorted.map((v, i) => ({x: v, y: (i + 1) / n}))
         }
 
-        // ---- Chart init (called once after DOM ready) -----------------------
+        // ---- D3 chart helpers -----------------------------------------------
 
-        function initCharts () {
-          const wPdf = chartWidth('pdf-chart')
-          const wCdf = chartWidth('cdf-chart')
+        function chartSvg (id) {
+          const w = document.getElementById(id).offsetWidth || 600
+          let svg = d3.select('#' + id).select('svg')
+          if (svg.empty()) {
+            svg = d3.select('#' + id).append('svg').attr('height', CHART_H)
+            svg.append('g').attr('class', 'bars')
+            svg.append('g').attr('class', 'line-a').append('path').attr('fill', 'none')
+            svg.append('g').attr('class', 'line-b').append('path').attr('fill', 'none')
+            svg.append('g').attr('class', 'x-axis')
+            svg.append('g').attr('class', 'y-axis')
+          }
+          svg.attr('width', w)
+          return { svg, w }
+        }
 
-          histChart = dalian.BarChart('hist', '#pdf-chart')
-            .width(wPdf).height(CHART_H)
+        function styleAxis (sel) {
+          sel.selectAll('.domain').attr('stroke', C_LINE)
+          sel.selectAll('.tick line').attr('stroke', C_LINE)
+          sel.selectAll('.tick text').attr('fill', C_MUTED).style('font-size', '11px')
+        }
 
-          pdfLineChart = dalian.LineChart('pdf-line', '#pdf-chart')
-            .width(wPdf).height(CHART_H)
-            .leftAxis.hideAxisLine(true).leftAxis.label('').leftAxis.values([])
-            .bottomAxis.hideAxisLine(true).bottomAxis.label('').bottomAxis.values([])
+        function drawPdf (bins, curvePoints, xMin, xMax, yMax, isContinuous) {
+          const { svg, w } = chartSvg('pdf-chart')
+          const x = d3.scaleLinear().domain([xMin, xMax]).range([MARGIN.left, w - MARGIN.right])
+          const y = d3.scaleLinear().domain([0, yMax]).range([CHART_H - MARGIN.bottom, MARGIN.top])
 
-          empCdfChart = dalian.LineChart('emp-cdf', '#cdf-chart')
-            .width(wCdf).height(CHART_H)
+          if (isContinuous) {
+            const bw = (xMax - xMin) / bins.length
+            const pw = Math.max(0.5, x(xMin + bw) - x(xMin) - 0.5)
+            svg.select('.bars').selectAll('rect').data(bins).join('rect')
+              .attr('x', (d, i) => x(xMin + i * bw))
+              .attr('y', d => y(d.value))
+              .attr('width', pw)
+              .attr('height', d => Math.max(0, y(0) - y(d.value)))
+              .attr('fill', 'rgba(37,99,182,0.22)')
+              .attr('stroke', C_BLUE)
+              .attr('stroke-width', 0.5)
+          } else {
+            const xStart = Math.round(xMin)
+            const gap = x(xStart + 1) - x(xStart)
+            const pw = Math.max(2, gap * 0.7)
+            svg.select('.bars').selectAll('rect').data(bins).join('rect')
+              .attr('x', (d, i) => x(xStart + i) - pw / 2)
+              .attr('y', d => y(d.value))
+              .attr('width', pw)
+              .attr('height', d => Math.max(0, y(0) - y(d.value)))
+              .attr('fill', 'rgba(37,99,182,0.22)')
+              .attr('stroke', C_BLUE)
+              .attr('stroke-width', 1)
+          }
 
-          theoCdfChart = dalian.LineChart('theo-cdf', '#cdf-chart')
-            .width(wCdf).height(CHART_H)
-            .leftAxis.hideAxisLine(true).leftAxis.label('').leftAxis.values([])
-            .bottomAxis.hideAxisLine(true).bottomAxis.label('').bottomAxis.values([])
+          const line = d3.line().x(d => x(d.x)).y(d => y(d.y)).defined(d => isFinite(d.y))
+          svg.select('.line-a').select('path').datum(curvePoints)
+            .attr('d', line).attr('stroke', C_RED).attr('stroke-width', 2)
+          svg.select('.line-b').select('path').datum([]).attr('d', null)
+
+          const xAxis = svg.select('.x-axis').attr('transform', `translate(0,${CHART_H - MARGIN.bottom})`)
+            .call(d3.axisBottom(x).ticks(6))
+          const yAxis = svg.select('.y-axis').attr('transform', `translate(${MARGIN.left},0)`)
+            .call(d3.axisLeft(y).ticks(5))
+          styleAxis(xAxis)
+          styleAxis(yAxis)
+        }
+
+        function drawCdf (empPoints, cdfPoints, xMin, xMax) {
+          const { svg, w } = chartSvg('cdf-chart')
+          const x = d3.scaleLinear().domain([xMin, xMax]).range([MARGIN.left, w - MARGIN.right])
+          const y = d3.scaleLinear().domain([0, 1.05]).range([CHART_H - MARGIN.bottom, MARGIN.top])
+
+          svg.select('.bars').selectAll('rect').data([]).join('rect')
+
+          const stepLine = d3.line().x(d => x(d.x)).y(d => y(d.y)).curve(d3.curveStepAfter)
+          svg.select('.line-a').select('path').datum(empPoints)
+            .attr('d', stepLine).attr('stroke', C_BLUE).attr('stroke-width', 1.5)
+
+          const smoothLine = d3.line().x(d => x(d.x)).y(d => y(d.y)).defined(d => isFinite(d.y))
+          svg.select('.line-b').select('path').datum(cdfPoints)
+            .attr('d', smoothLine).attr('stroke', C_RED).attr('stroke-width', 2)
+
+          const xAxis = svg.select('.x-axis').attr('transform', `translate(0,${CHART_H - MARGIN.bottom})`)
+            .call(d3.axisBottom(x).ticks(6))
+          const yAxis = svg.select('.y-axis').attr('transform', `translate(${MARGIN.left},0)`)
+            .call(d3.axisLeft(y).ticks(5))
+          styleAxis(xAxis)
+          styleAxis(yAxis)
         }
 
         // ---- Core render ---------------------------------------------------
@@ -166,69 +232,26 @@ block scripts
           const dist = new ranjs.dist[name](...params)
           const samples = dist.sample(n)
           const [xMin, xMax] = computeXRange(dist, samples, cfg)
-          const wPdf = chartWidth('pdf-chart')
-          const wCdf = chartWidth('cdf-chart')
 
           if (cfg.type === 'continuous') {
             const nBins = Math.min(50, Math.max(10, Math.ceil(Math.sqrt(n))))
             const bins = makeBins(samples, xMin, xMax, nBins)
             const xs = linspace(xMin, xMax, 200)
             const pdfPoints = xs.map(x => ({x, y: dist.pdf(x)})).filter(p => isFinite(p.y))
-            const yPdfMax = Math.max(
-              ...bins.map(b => b.value),
-              ...pdfPoints.map(p => p.y)
-            ) * 1.25 || 1
-
-            histChart
-              .width(wPdf).height(CHART_H)
-              .xRange.min(xMin).xRange.max(xMax)
-              .yRange.min(0).yRange.max(yPdfMax)
-              .data(bins).render()
-
-            pdfLineChart
-              .width(wPdf).height(CHART_H)
-              .xRange.min(xMin).xRange.max(xMax)
-              .yRange.min(0).yRange.max(yPdfMax)
-              .data([{name: 'pdf', values: pdfPoints}]).render()
-
+            const yMax = Math.max(...bins.map(b => b.value), ...pdfPoints.map(p => p.y)) * 1.25 || 1
+            drawPdf(bins, pdfPoints, xMin, xMax, yMax, true)
           } else {
             const bars = makeDiscreteBars(samples, xMin, xMax)
             const xs = linspace(xMin, xMax, Math.round(xMax - xMin) + 1)
             const pmfPoints = xs.map(x => ({x, y: dist.pdf(Math.round(x))})).filter(p => isFinite(p.y))
-            const yPmfMax = Math.max(
-              ...bars.map(b => b.value),
-              ...pmfPoints.map(p => p.y)
-            ) * 1.25 || 1
-
-            histChart
-              .width(wPdf).height(CHART_H)
-              .xRange.min(xMin).xRange.max(xMax)
-              .yRange.min(0).yRange.max(yPmfMax)
-              .data(bars).render()
-
-            pdfLineChart
-              .width(wPdf).height(CHART_H)
-              .xRange.min(xMin).xRange.max(xMax)
-              .yRange.min(0).yRange.max(yPmfMax)
-              .data([{name: 'pmf', values: pmfPoints}]).render()
+            const yMax = Math.max(...bars.map(b => b.value), ...pmfPoints.map(p => p.y)) * 1.25 || 1
+            drawPdf(bars, pmfPoints, xMin, xMax, yMax, false)
           }
 
-          // CDF panel
           const empPoints = makeEmpiricalCdf(samples)
           const cdfXs = linspace(xMin, xMax, 200)
           const cdfPoints = cdfXs.map(x => ({x, y: dist.cdf(x)})).filter(p => isFinite(p.y))
-
-          empCdfChart
-            .width(wCdf).height(CHART_H)
-            .xRange.min(xMin).xRange.max(xMax)
-            .yRange.min(0).yRange.max(1.05)
-            .data([{name: 'empirical', values: empPoints}]).render()
-
-          theoCdfChart
-            .width(wCdf).height(CHART_H)
-            .xRange.min(xMin).xRange.max(xMax)
-            .yRange.min(0).yRange.max(1.05)
-            .data([{name: 'cdf', values: cdfPoints}]).render()
+          drawCdf(empPoints, cdfPoints, xMin, xMax)
 
           return samples
         }
@@ -369,6 +392,5 @@ block scripts
           sampleSizeInput.addEventListener('input', scheduleUpdate)
 
           populateParams('Normal')
-          initCharts()
           doUpdate()
         })

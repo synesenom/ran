@@ -112,17 +112,19 @@ body:has(.demo-controls) {
   }
 }
 
-// Container trick: height:0 + padding-bottom creates a fixed-aspect box;
-// both absolutely-positioned SVGs from dalian stack inside it.
 .demo-chart-wrap {
-  position: relative;
-  height: 0;
-  padding-bottom: 380px;
+  height: 380px;
   overflow: hidden;
   background: $colorBg;
   border: 1px solid $colorLine;
   border-radius: 6px;
   margin-bottom: 24px;
+
+  svg { display: block; }
+
+  .domain { stroke: $colorLine; }
+  .tick line { stroke: $colorLine; }
+  .tick text { fill: $colorMuted; font-size: 11px; }
 }
 
 
