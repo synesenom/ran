@@ -2086,4 +2086,23 @@ describe('dist', () => {
       assert.strictEqual(d.bic(sample), Math.log(sample.length) * 1 - 2 * d.lnL(sample))
     })
   })
+
+  // Mielke: AIC/BIC parameter-count regression — this.k must be 2, not 3 inherited from Dagum.
+  describe('Mielke', () => {
+    const sample = [0.1, 0.5, 1.0, 1.5, 2.0, 0.3, 0.8, 1.2, 2.5, 0.6]
+    const d = new dist.Mielke(2, 2)
+
+    it('should have paramCount k=2', () => {
+      assert.strictEqual(d.k, 2)
+    })
+
+    it('aic() should include the parameter penalty (k=2)', () => {
+      // AIC = 2*(k - lnL); with k=2 the penalty is 4. k=3 (inherited from Dagum) over-counts by 2.
+      assert.strictEqual(d.aic(sample), 2 * (2 - d.lnL(sample)))
+    })
+
+    it('bic() should include the parameter penalty (k=2)', () => {
+      assert.strictEqual(d.bic(sample), Math.log(sample.length) * 2 - 2 * d.lnL(sample))
+    })
+  })
 })
