@@ -24,6 +24,7 @@ class Distribution {
     this.k = k
 
     // The parameters — natural (user-facing) params only; see decisions/0014-categorical-this-c-natural-params-split.md
+    /** @type {Object} */
     this.p = {}
 
     // Distribution support

@@ -22,6 +22,7 @@ export default class Categorical extends Distribution {
 
     // decisions/0014-categorical-this-c-natural-params-split.md — n and min are lookup state, not natural parameters
     this.c = { n: weights.length, min }
+    /** @type {Object} */
     this.p = { weights }
     Distribution.validate({
       w_i: (() => {
