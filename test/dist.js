@@ -1489,8 +1489,7 @@ describe('dist', () => {
         const result = dist.NoncentralChi.fit(data)
         assert(result instanceof dist.NoncentralChi)
         assert(Math.abs(result.p.k - 4) < 0.5)
-        // result.p.lambda stores lambda² (NoncentralChi2 internal form); see #491
-        assert(Math.abs(Math.sqrt(result.p.lambda) - 2) < 0.5)
+        assert(Math.abs(result.p.lambda - 2) < 0.5)
       })
 
       it('NoncentralT.fit should recover nu and mu close to planted values', () => {
