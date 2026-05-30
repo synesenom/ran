@@ -633,6 +633,24 @@ export default [{
       { x: 2.0, pmf: 0.394736842105263, cdf: 0.894736842105263 },
       { x: 3.0, pmf: 0.105263157894737, cdf: 1.0 }
     ]
+  }, {
+    // scipy.stats.hypergeom(M=10, n=8, N=5) — lower support is max(0,n+K-N)=3, not 0
+    name: 'min > 0 (n+K>N)',
+    params: () => [10, 8, 5],
+    refVals: [
+      { x: 3, pmf: 0.2222222222222222, cdf: 0.2222222222222222 },
+      { x: 4, pmf: 0.5555555555555556, cdf: 0.7777777777777778 },
+      { x: 5, pmf: 0.2222222222222222, cdf: 1.0 }
+    ],
+    quantileVals: [
+      { p: 0.01, x: 3 },
+      { p: 0.2, x: 3 },
+      { p: 0.25, x: 4 },
+      { p: 0.5, x: 4 },
+      { p: 0.75, x: 4 },
+      { p: 0.9, x: 5 },
+      { p: 0.99, x: 5 }
+    ]
   }],
   // scipy.stats.hypergeom(M=30, n=10, N=5) — scipy n/N collide with ranjs K/n; see solutions/testing/2026-05-18-1443-discrete-refvals-scipy-parameterization-traps.md
   refVals: [
