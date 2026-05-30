@@ -94,12 +94,16 @@ export default class Bates extends IrwinHall {
     // would stall; instead fix each candidate n, optimize (a,b) continuously, pick best n.
     // See solutions/distribution/2026-05-30-1400-bates-fit-profile-likelihood.md
     const [nHat, a0, b0] = Cls._fitInit(data)
-    const nLo = Math.max(1, nHat - 10)
-    const nHi = nHat + 10
+    const nLo = Math.max(1, nHat - 5)
+    const nHi = nHat + 5
     let bestN = nHat
     let bestA = a0
     let bestB = b0
     let bestLnL = -Infinity
+    // Warm-start: consecutive integers share nearly the same optimal (a,b), so after the
+    // first cold start each subsequent n begins from the previous n's converged result.
+    let warmA = a0
+    let warmB = b0
     for (let n = nLo; n <= nHi; n++) {
       const result = nelderMead(
         ([a, b]) => {
@@ -110,11 +114,13 @@ export default class Bates extends IrwinHall {
             return Infinity
           }
         },
-        [a0, b0],
-        { maxIter: 200 }
+        [warmA, warmB],
+        { maxIter: 50, tol: 1e-4 }
       )
       try {
         const lnL = new Cls(n, result[0], result[1]).lnL(data)
+        warmA = result[0]
+        warmB = result[1]
         if (lnL > bestLnL) {
           bestLnL = lnL
           bestN = n
