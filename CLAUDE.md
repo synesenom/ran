@@ -142,7 +142,7 @@ TypeScript declarations are **generated** from JSDoc annotations via `tsc --allo
 - When editing multiple files, make all independent edits in parallel.
 - When performing multi-step tasks, show a progress list with checkboxes (e.g., `- [x]` done, `- [ ]` pending) and update it as you go.
 - **Always use selectable options** (via the `AskUserQuestion` tool) when asking the user to make a choice or design decision during planning or implementation. Never ask the user to type their choice as free text. Always include a final option labeled "Other" or "Type something" so the user can provide a custom answer if none of the options fit.
-- **Never stop mid-pipeline.** When a sub-skill (`/commit`, `/push`, `/pull-request`, etc.) is invoked from within a parent skill (`/hotfix`, `/build`, `/implement`, etc.), continue executing the parent workflow immediately after the sub-skill returns. Do not pause for user input between steps unless the parent skill explicitly requires it. Do not output text that implies completion (e.g. "Done!", "Committed!") between steps — save all status reporting for the parent skill's final report.
+- **Never stop mid-pipeline.** When a sub-skill (`/commit`, `/push`, `/pr`, etc.) is invoked from within a parent skill (`/hotfix`, `/build`, `/implement`, etc.), continue executing the parent workflow immediately after the sub-skill returns. Do not pause for user input between steps unless the parent skill explicitly requires it. Do not output text that implies completion (e.g. "Done!", "Committed!") between steps — save all status reporting for the parent skill's final report.
 
 ## Code Style
 
@@ -160,5 +160,5 @@ ADRs capture significant design decisions and their rationale. They live in `dec
 - **Status lifecycle:** Proposed → Accepted → (Superseded or Deprecated). Accepted ADRs are immutable — supersede, don't edit.
 - **Who writes them:** The `/plan` skill produces ADRs automatically for non-trivial design decisions. For manual work, write the ADR before or alongside the implementation.
 - **Inline references:** After writing an ADR, add a reference at the most relevant code location — a WHY comment at the affected class/function. Use the relative path format: `decisions/NNNN-slug.md — one-line rationale`.
-- **PR gate:** Non-trivial PRs must reference at least one ADR. The `/pull-request` skill enforces this.
+- **PR gate:** Non-trivial PRs must reference at least one ADR. The `/pr` skill enforces this.
 - **Location:** `decisions/` at the repo root.

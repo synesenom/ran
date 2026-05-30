@@ -177,9 +177,9 @@ Execute sequentially via the Skill tool **in a single uninterrupted sequence**:
 
 a. **Commit** — invoke `/commit`
 b. **Push** — invoke `/push`
-c. **Pull Request** — invoke `/pull-request`
+c. **Pull Request** — invoke `/pr`
 
-**Do NOT pause, confirm, or ask for permission before push or pull-request.** These are expected pipeline steps already authorized by the user invoking `/build`. Treat them identically to commit — run immediately.
+**Do NOT pause, confirm, or ask for permission before push or pr.** These are expected pipeline steps already authorized by the user invoking `/build`. Treat them identically to commit — run immediately.
 
 **Escalation**: Never.
 

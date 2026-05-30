@@ -8,7 +8,7 @@ Categorize every change as trivial or non-trivial so reviewers can focus their a
 
 ## Workflow
 
-When the user invokes `/pull-request`:
+When the user invokes `/pr`:
 
 ### 1. Gather Context
 
