@@ -16,6 +16,7 @@ self.addEventListener("message", function(event) {
     const SCALE = 44125;
     const model = event.data.model;
     const g = new ranjs.dist[model](... event.data.params);
+    ranjs.core.seed(42);
     const dataSamples = g.sample(DATA_SIZE)
         .filter(d => d > 2 && d < 7);
     const data = Object.entries(dataSamples
@@ -56,7 +57,7 @@ self.addEventListener("message", function(event) {
     // Sample
     let samples = rwm.sample(i => postMessage({type: "sampling", res: i}), SAMPLE_SIZE);
 
-    let modelSamples = samples.map((d) => new ran.dist[model](...d));
+    let modelSamples = samples.map((d) => new ranjs.dist[model](...d));
     let curve = new Array(1000)
         .fill(0)
         .map((d, i) => {
