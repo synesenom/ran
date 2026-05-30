@@ -16,7 +16,7 @@ self.addEventListener("message", function(event) {
     const SCALE = 44125;
     const model = event.data.model;
     const g = new ranjs.dist[model](... event.data.params);
-    ranjs.core.seed(42);
+    g.seed(42);
     const dataSamples = g.sample(DATA_SIZE)
         .filter(d => d > 2 && d < 7);
     const data = Object.entries(dataSamples
