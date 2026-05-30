@@ -22,6 +22,9 @@ export default class Weibull extends Exponential {
   constructor (lambda, k) {
     super(1)
 
+    // Weibull has 2 free parameters (lambda, k); override the 1 inherited from Exponential
+    this.k = 2
+
     // Validate parameters
     this.p = Object.assign(this.p, { lambda2: lambda, k })
     Distribution.validate({ lambda, k }, [

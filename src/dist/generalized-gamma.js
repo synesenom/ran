@@ -23,6 +23,9 @@ export default class GeneralizedGamma extends Gamma {
     super(d / p, Math.pow(a, -p))
     this._q = undefined // Gamma._q is wrong for the power transform; fall back to _qEstimateRoot
 
+    // GeneralizedGamma has 3 free parameters (a, d, p); override the 2 inherited from Gamma
+    this.k = 3
+
     // Validate parameters
     this.p = Object.assign(this.p, { a, d, p })
     Distribution.validate({ a, d, p }, [
