@@ -105,15 +105,15 @@ ranjs closes the full statistical cycle — define a model, generate data, fit p
 import { dist } from 'ranjs'
 
 // 1. Define and sample
-const model = new dist.Normal(3, 1)
+const model = new dist.Normal(3, 1).seed(42)
 const data  = model.sample(500)
 
 // 2. Fit parameters from data via MLE
 const fitted = dist.Normal.fit(data)
-console.log(fitted.p)           // { mu: ~3, sigma: ~1 }
+console.log(fitted.p)           // => { mu: 3.000, sigma: 1.000 }
 
 // 3. Test goodness of fit
-console.log(fitted.test(data))  // { statistics: …, passed: true }
+console.log(fitted.test(data))  // => { statistics: 0.031, passed: true }
 ```
 
 `fit()` is a **static** method called on the class, not on an instance: `dist.Normal.fit(data)`, not `model.fit(data)`. All 140 exported distributions support `fit()`. Most have a data-aware initial guess for reliable MLE convergence; zero-parameter distributions skip optimization and return a fresh instance.
