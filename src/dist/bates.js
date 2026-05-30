@@ -77,6 +77,17 @@ export default class Bates extends IrwinHall {
     return [n, a, b]
   }
 
+  /**
+   * Estimates distribution parameters from data using profile likelihood over integer n.
+   * Overrides the base-class Nelder-Mead because Math.round(n) makes the likelihood a
+   * staircase in n; instead, n is enumerated over a grid centred on the moment estimate
+   * and (a, b) are optimised continuously at each fixed n.
+   *
+   * @method fit
+   * @memberof ran.dist.Bates
+   * @param {number[]} data Array of sample values.
+   * @returns {Bates} Fitted distribution.
+   */
   static fit (data) {
     const Cls = this
     // Profile likelihood grid search: n is integer so Nelder-Mead on the staircase surface
