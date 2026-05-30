@@ -2073,8 +2073,11 @@ export default [{
   name: 'Hyperexponential',
   invalidParams: [
     [], // all params required
-    [{ weight: -1, rate: 1 }, { weight: 1, rate: 1 }],
-    [{ weight: 0, rate: 1 }, { weight: 1, rate: 1 }], // lambda_i > 0
+    [[{ weight: -1, rate: 1 }, { weight: 1, rate: 1 }]], // w_min > 0
+    [[{ weight: 0, rate: 1 }, { weight: 1, rate: 1 }]], // w_min > 0
+    [[{ weight: 1, rate: -1 }, { weight: 1, rate: 1 }]], // r_min > 0
+    [[{ weight: 1, rate: 0 }, { weight: 1, rate: 1 }]], // r_min > 0
+    [[{ weight: 1, rate: -2 }, { weight: 1, rate: -3 }]], // r_min > 0 (product of two negatives is positive, min-based check catches it)
     [[]] // n > 0
   ],
   cases: [{
