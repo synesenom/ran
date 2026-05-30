@@ -12,7 +12,7 @@ A comprehensive JavaScript library for probability distributions, random variate
 
 ## Features
 
-- **140+ probability distributions** — continuous and discrete, each with PDF/PMF, CDF, quantile, hazard, survival, likelihood, AIC/BIC, and built-in goodness-of-fit testing
+- **140+ probability distributions** — continuous and discrete, each with PDF/PMF, CDF, quantile (`q`), hazard, survival, log-likelihood (`lnL`), AIC/BIC, goodness-of-fit testing, and MLE fitting (`fit`)
 - **Statistical measures** — location (mean, median, mode, …), dispersion (variance, IQR, Gini, …), shape (skewness, kurtosis, …), and dependence (Pearson, Spearman, Kendall, …)
 - **Hypothesis tests** — Bartlett, Levene, Brown–Forsythe, Mann–Whitney U, HSIC
 - **MCMC samplers** — random-walk Metropolis and slice sampling with Gelman–Rubin convergence diagnostics
@@ -138,17 +138,26 @@ Every distribution exposes a consistent interface:
 ```javascript
 const d = new ran.dist.Gamma(2, 1)
 
+d.type()          // 'continuous' or 'discrete'
+d.params()        // current parameter object, e.g. { alpha: 2, beta: 1 }
+d.support()       // [{ value, closed }, { value, closed }] — lower/upper bounds
 d.sample(n)       // generate n random variates
 d.pdf(x)          // probability density / mass function
 d.cdf(x)          // cumulative distribution function
-d.quantile(p)     // inverse CDF
+d.q(p)            // inverse CDF (quantile function)
 d.survival(x)     // complementary CDF  (1 − CDF)
 d.hazard(x)       // hazard rate        (pdf / survival)
 d.cHazard(x)      // cumulative hazard  (−log survival)
-d.likelihood(xs)  // log-likelihood over an array of observations
-d.aic(xs)         // Akaike information criterion
-d.bic(xs)         // Bayesian information criterion
-d.test(xs)        // KS test (continuous) or chi-squared test (discrete)
+d.lnPdf(x)        // log probability density / mass
+d.lnL(data)       // log-likelihood over an array of observations
+d.aic(data)       // Akaike information criterion
+d.bic(data)       // Bayesian information criterion
+d.test(data)      // KS test (continuous) or chi-squared test (discrete)
+d.seed(value)     // set PRNG seed; returns the instance
+d.save()          // serialise PRNG state + parameters to a plain object
+d.load(state)     // restore from a saved state; returns the instance
+
+ran.dist.Gamma.fit(data)  // static — MLE fit; returns a new instance
 ```
 
 ## Documentation
