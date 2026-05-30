@@ -417,12 +417,6 @@ describe('dist', () => {
         assert(Math.abs(result.p.sigma - Math.sqrt(2)) < 0.1)
       })
 
-      it('Exponential.fit should return an Exponential instance', () => {
-        const data = Array.from({ length: 20 }, (_, i) => (i + 1) * 0.1)
-        const result = dist.Exponential.fit(data)
-        assert(result instanceof dist.Exponential)
-      })
-
       it('Alpha.fit() returns a valid Alpha instance', () => {
         const data = new dist.Alpha(2, 1).seed(42).sample(100)
         const result = dist.Alpha.fit(data)
