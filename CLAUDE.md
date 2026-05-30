@@ -18,8 +18,13 @@ npm run standard
 # Run JSDoc linter (eslint-plugin-jsdoc)
 npm run jsdoclint
 
-# Run tests (Mocha)
+# Run tests (Mocha + coverage thresholds)
 npm test
+# IMPORTANT: always run npm test directly — never pipe it through grep or other
+# commands. The mocha output prints "N passing" even when nyc's coverage
+# thresholds are breached; the failure is only visible in the exit code and the
+# "ERROR: Coverage for X does not meet global threshold" lines that a grep pipe
+# will swallow. Thresholds: branches 90%, lines 98%, functions 100%, statements 98%.
 
 # Build minified bundle
 npm run build
