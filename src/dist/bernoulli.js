@@ -19,6 +19,7 @@ export default class Bernoulli extends Categorical {
    */
   constructor (p) {
     super([1 - p, p], 0)
+    this.p = { p }
 
     // Validate parameter
     Distribution.validate({ p }, [
@@ -34,7 +35,6 @@ export default class Bernoulli extends Categorical {
   }
 
   _q (p) {
-    // this.p.weights[0] is the CDF at k=0; this.p.p is shadowed by the Categorical constructor.
-    return p > this.p.weights[0] ? 1 : 0
+    return p > this.pdfTable[0] ? 1 : 0
   }
 }

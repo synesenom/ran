@@ -44,5 +44,6 @@ export default class NegativeHypergeometric extends Categorical {
       weights.push(Math.exp(logBinomial(k + ri - 1, k) + logBinomial(Ni - ri - k, Ki - k) - logBinomial(Ni, Ki)))
     }
     super(weights, 0)
+    this.p = { N: Ni, K: Ki, r: ri }
   }
 }

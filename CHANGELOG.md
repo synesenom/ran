@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `Distribution.params()` public method returning the natural parameters of a distribution (#516). All nine `Categorical` subclasses (`Bernoulli`, `Binomial`, `Hypergeometric`, `Soliton`, `Zipf`, `ZipfMandelbrot`, `BetaBinomial`, `NegativeHypergeometric`, `Rademacher`) now expose their own named parameters (e.g. `new Bernoulli(0.7).params()` → `{ p: 0.7 }`) instead of inheriting the internal lookup state from `Categorical`.
+
 - Interactive distribution demo page (`docs/demo.html`): select from 15 curated distributions, adjust parameters, visualise histogram+PDF and empirical+theoretical CDF side-by-side (rendered with dalian), and run MLE fitting via `fit()` to see how closely the fitted parameters match the planted values (#504).
 - `Distribution.fit(data)` static method for maximum-likelihood parameter estimation via Nelder-Mead simplex optimizer (#404). Covers all 140 exported distributions. The `static _fitInit(data)` hook lets each distribution seed the optimizer from a data-aware method-of-moments estimate; the base-class fallback draws random positive values until the parameter constraints pass. Together with `sample()` and `test()`, `fit()` closes the full statistical cycle: define → sample → fit → test.
 

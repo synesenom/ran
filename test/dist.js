@@ -1340,7 +1340,7 @@ describe('dist', () => {
         assert(result instanceof dist.Soliton)
         assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
         // support must cover the largest observation (which reaches N=5 in a 200-draw sample)
-        assert(result.p.n >= 5)
+        assert(result.p.N >= 5)
       })
 
       it('IrwinHall._fitInit should derive n from E[X]=n/2', () => {
@@ -1877,6 +1877,80 @@ describe('dist', () => {
         const result = dist.VonMises.fit(data)
         assert(result instanceof dist.VonMises)
         assert(Math.abs(result.p.kappa - 2) < 0.5)
+      })
+    })
+
+    describe('.params()', () => {
+      it('Distribution.params() returns the parameter object for a non-Categorical distribution', () => {
+        const d = new dist.Normal(2, 3)
+        const p = d.params()
+        assert.strictEqual(p.mu, 2)
+        assert.strictEqual(p.sigma, 3)
+      })
+
+      it('Categorical.params() returns { weights } only', () => {
+        const d = new dist.Categorical([0.3, 0.7], 0)
+        const p = d.params()
+        assert.deepEqual(p.weights, [0.3, 0.7])
+        assert.strictEqual(p.n, undefined)
+        assert.strictEqual(p.min, undefined)
+      })
+
+      it('Bernoulli.params() returns { p }', () => {
+        const d = new dist.Bernoulli(0.7)
+        assert.deepEqual(d.params(), { p: 0.7 })
+      })
+
+      it('Binomial.params() returns { n, p }', () => {
+        const d = new dist.Binomial(10, 0.3)
+        assert.deepEqual(d.params(), { n: 10, p: 0.3 })
+      })
+
+      it('Hypergeometric.params() returns { N, K, n }', () => {
+        const d = new dist.Hypergeometric(10, 5, 3)
+        assert.deepEqual(d.params(), { N: 10, K: 5, n: 3 })
+      })
+
+      it('Soliton.params() returns { N }', () => {
+        const d = new dist.Soliton(5)
+        assert.deepEqual(d.params(), { N: 5 })
+      })
+
+      it('Zipf.params() returns { s, N }', () => {
+        const d = new dist.Zipf(2, 50)
+        assert.deepEqual(d.params(), { s: 2, N: 50 })
+      })
+
+      it('ZipfMandelbrot.params() returns { N, s, q }', () => {
+        const d = new dist.ZipfMandelbrot(100, 2, 1)
+        assert.deepEqual(d.params(), { N: 100, s: 2, q: 1 })
+      })
+
+      it('BetaBinomial.params() returns { n, alpha, beta }', () => {
+        const d = new dist.BetaBinomial(5, 2, 3)
+        assert.deepEqual(d.params(), { n: 5, alpha: 2, beta: 3 })
+      })
+
+      it('NegativeHypergeometric.params() returns { N, K, r }', () => {
+        const d = new dist.NegativeHypergeometric(10, 5, 2)
+        assert.deepEqual(d.params(), { N: 10, K: 5, r: 2 })
+      })
+
+      it('Rademacher.params() returns {}', () => {
+        assert.deepEqual(new dist.Rademacher().params(), {})
+      })
+
+      it('Bernoulli.fit().params().p recovers planted value within tolerance', () => {
+        const data = new dist.Bernoulli(0.7).seed(42).sample(500)
+        const result = dist.Bernoulli.fit(data)
+        assert(Math.abs(result.params().p - 0.7) < 0.05)
+      })
+
+      it('Zipf.fit().params() recovers planted s within tolerance', () => {
+        const data = new dist.Zipf(2, 50).seed(42).sample(200)
+        const result = dist.Zipf.fit(data)
+        assert(Math.abs(result.params().s - 2) < 0.3)
+        assert(result.params().N >= 10)
       })
     })
   })
