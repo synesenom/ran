@@ -148,10 +148,13 @@ d.q(p)            // inverse CDF (quantile function)
 d.survival(x)     // complementary CDF  (1 − CDF)
 d.hazard(x)       // hazard rate        (pdf / survival)
 d.cHazard(x)      // cumulative hazard  (−log survival)
+d.lnPdf(x)        // log probability density / mass
 d.lnL(data)       // log-likelihood over an array of observations
 d.aic(data)       // Akaike information criterion
 d.bic(data)       // Bayesian information criterion
 d.test(data)      // KS test (continuous) or chi-squared test (discrete)
+d.save()          // serialise PRNG state + parameters to a plain object
+d.load(state)     // restore from a saved state; returns the instance
 
 ran.dist.Gamma.fit(data)  // static — MLE fit; returns a new instance
 ```
