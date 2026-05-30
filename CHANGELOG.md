@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `NoncentralChi`: `.p.lambda` now stores the user-facing noncentrality parameter `λ` instead of `λ²`; constructing `new NoncentralChi(k, λ).p.lambda` and reading back after `NoncentralChi.fit(data)` now return `λ`, not `λ²` (#491).
+
 - `Mielke` distribution: `aic()` and `bic()` now use the correct parameter count of 2 (not 3 inherited from `Dagum`); the penalty term was over-counted by 1 in every AIC/BIC evaluation (#505).
 
 - Multi-level `Distribution` subclasses now report the correct free-parameter count `k`, fixing systematically wrong `aic()`/`bic()` values: `Weibull` (2), `ExponentiatedWeibull` (3), `Chi2` (1), `MaxwellBoltzmann` (1), `GeneralizedGamma` (3), `LogGamma` (3), and the downstream `Rayleigh` (1) and `HalfGeneralizedNormal` (2). Each previously inherited a mismatched `k` from a parent further up the inheritance chain (#510).
