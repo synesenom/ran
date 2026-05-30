@@ -19,6 +19,9 @@ export default class HalfGeneralizedNormal extends GeneralizedNormal {
   constructor (alpha, beta) {
     super(0, alpha, beta)
 
+    // HalfGeneralizedNormal has 2 free parameters (alpha, beta); override the 3 inherited from GeneralizedNormal
+    this.k = 2
+
     // Set support
     this.s = [{
       value: 0,
