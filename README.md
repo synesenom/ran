@@ -102,18 +102,19 @@ console.log(misfit.aic(data))   // => 66508.74299363888
 ranjs closes the full statistical cycle — define a model, generate data, fit parameters from data via MLE, then verify the fit:
 
 ```javascript
-import { dist } from 'ranjs'
+import { dist, core } from 'ranjs'
 
 // 1. Define and sample
+core.seed(42)
 const model = new dist.Normal(3, 1)
 const data  = model.sample(500)
 
 // 2. Fit parameters from data via MLE
 const fitted = dist.Normal.fit(data)
-console.log(fitted.p)           // { mu: ~3, sigma: ~1 }
+console.log(fitted.p)           // => { mu: 2.967, sigma: 1.001 }
 
 // 3. Test goodness of fit
-console.log(fitted.test(data))  // { statistics: …, passed: true }
+console.log(fitted.test(data))  // => { statistics: 0.033, passed: true }
 ```
 
 `fit()` is a **static** method called on the class, not on an instance: `dist.Normal.fit(data)`, not `model.fit(data)`. All 140 exported distributions support `fit()`. Most have a data-aware initial guess for reliable MLE convergence; zero-parameter distributions skip optimization and return a fresh instance.
