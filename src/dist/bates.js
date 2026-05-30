@@ -1,3 +1,4 @@
+import nelderMead from '../algorithms/nelder-mead'
 import IrwinHall from './irwin-hall'
 import Distribution from './_distribution'
 
@@ -74,5 +75,43 @@ export default class Bates extends IrwinHall {
     const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / nData || 1
     const n = Math.max(1, Math.round((b - a) ** 2 / (12 * variance)))
     return [n, a, b]
+  }
+
+  static fit (data) {
+    const Cls = this
+    // Profile likelihood grid search: n is integer so Nelder-Mead on the staircase surface
+    // would stall; instead fix each candidate n, optimize (a,b) continuously, pick best n.
+    // See solutions/distribution/2026-05-30-1400-bates-fit-profile-likelihood.md
+    const [nHat, a0, b0] = Cls._fitInit(data)
+    const nLo = Math.max(1, nHat - 10)
+    const nHi = nHat + 10
+    let bestN = nHat
+    let bestA = a0
+    let bestB = b0
+    let bestLnL = -Infinity
+    for (let n = nLo; n <= nHi; n++) {
+      const result = nelderMead(
+        ([a, b]) => {
+          try {
+            const v = -new Cls(n, a, b).lnL(data)
+            return isNaN(v) ? Infinity : v
+          } catch (_) {
+            return Infinity
+          }
+        },
+        [a0, b0],
+        { maxIter: 200 }
+      )
+      try {
+        const lnL = new Cls(n, result[0], result[1]).lnL(data)
+        if (lnL > bestLnL) {
+          bestLnL = lnL
+          bestN = n
+          bestA = result[0]
+          bestB = result[1]
+        }
+      } catch (_) {}
+    }
+    return new Cls(bestN, bestA, bestB)
   }
 }
