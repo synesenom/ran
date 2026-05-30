@@ -82,7 +82,7 @@ Invoke all three sub-skills in sequence **without any pause or output between th
 
 a. **Commit** — invoke `/commit`
 b. **Push** — invoke `/push` immediately after `/commit` returns
-c. **Pull Request** — invoke `/pull-request` immediately after `/push` returns
+c. **Pull Request** — invoke `/pr` immediately after `/push` returns
 
 ### 8. Report
 

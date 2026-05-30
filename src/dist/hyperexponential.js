@@ -23,21 +23,24 @@ export default class Hyperexponential extends Distribution {
   constructor (parameters) {
     super('continuous', parameters.length)
 
-    // Validate parameters
     const weights = parameters.map(d => d.weight)
+    const rates = parameters.map(d => d.rate)
+    Distribution.validate({
+      r_min: rates.reduce((m, x) => x < m ? x : m, Infinity),
+      w_min: weights.reduce((m, x) => x < m ? x : m, Infinity),
+      n: weights.length
+    }, [
+      'r_min > 0',
+      'w_min > 0',
+      'n > 0'
+    ])
+
     const norm = weights.reduce((acc, d) => d + acc, 0)
     this.p = Object.assign(this.p, {
       weights: weights.map(d => d / norm),
-      rates: parameters.map(d => d.rate),
+      rates,
       n: weights.length
     })
-    Distribution.validate({
-      lambda_i: parameters.reduce((acc, d) => acc * d.rate, 1),
-      n: weights.length
-    }, [
-      'lambda_i > 0',
-      'n > 0'
-    ])
 
     // Set support
     this.s = [{
@@ -49,7 +52,7 @@ export default class Hyperexponential extends Distribution {
     }]
 
     // Categorical generator for weight
-    this.aliasTable = new AliasTable(parameters.map(d => d.weight))
+    this.aliasTable = new AliasTable(weights)
   }
 
   _generator () {
