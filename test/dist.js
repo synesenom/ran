@@ -1525,6 +1525,15 @@ describe('dist', () => {
         assert(Math.abs((result.p.lambda1 + result.p.lambda2) - 3) <= 2)
       })
 
+      it('DoublyNoncentralChi2.fit should enforce k1>=1 and k2>=1 when collapsed fit returns k=1', () => {
+        // chi-squared(1) data: NoncentralChi2.fit returns k=1, triggering kTot<2 clamp
+        const data = new dist.NoncentralChi2(1, 0).seed(42).sample(500)
+        const result = dist.DoublyNoncentralChi2.fit(data)
+        assert(result instanceof dist.DoublyNoncentralChi2)
+        assert(result.p.k1 >= 1)
+        assert(result.p.k2 >= 1)
+      })
+
       it('DoublyNoncentralBeta.fit should recover alpha and beta close to planted values', () => {
         const data = new dist.DoublyNoncentralBeta(2, 3, 1, 1).seed(42).sample(500)
         const result = dist.DoublyNoncentralBeta.fit(data)
