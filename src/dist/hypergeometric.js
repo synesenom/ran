@@ -41,6 +41,7 @@ export default class Hypergeometric extends Categorical {
       weights.push(Math.exp(logBinomial(Ki, k) + logBinomial(Ni - Ki, ni - k) - logBinomial(Ni, ni)))
     }
     super(weights, 0)
+    this.p = { N: Ni, K: Ki, n: ni }
 
     // Validate parameters
     Distribution.validate({ N: Ni, K: Ki, n: ni }, [

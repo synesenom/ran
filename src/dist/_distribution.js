@@ -23,7 +23,7 @@ class Distribution {
     // Number of parameters
     this.k = k
 
-    // The parameters
+    // The parameters — natural (user-facing) params only; see decisions/0014-categorical-this-c-natural-params-split.md
     this.p = {}
 
     // Distribution support
@@ -287,6 +287,19 @@ class Distribution {
    */
   support () {
     return this.s
+  }
+
+  /**
+   * Returns the natural (user-facing) parameters of the distribution.
+   * Internal lookup state is not included.
+   * See [decisions/0014-categorical-this-c-natural-params-split.md]{@link ../../decisions/0014-categorical-this-c-natural-params-split.md}.
+   *
+   * @method params
+   * @memberof ran.dist.Distribution
+   * @returns {Object} The natural parameters of the distribution.
+   */
+  params () {
+    return this.p
   }
 
   /**

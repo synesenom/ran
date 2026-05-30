@@ -21,6 +21,7 @@ export default class Soliton extends Categorical {
     // Define weights
     const Ni = Math.round(N)
     super([1 / Ni].concat(Array.from({ length: Ni - 1 }, (d, i) => 1 / ((i + 1) * (i + 2)))), 1)
+    this.p = { N: Ni }
 
     // Update number of parameters.
     this.k = 1

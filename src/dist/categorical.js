@@ -20,8 +20,9 @@ export default class Categorical extends Distribution {
   constructor (weights, min) {
     super('discrete', 2)
 
-    // Validate parameters
-    this.p = { n: weights.length, weights, min }
+    // decisions/0014-categorical-this-c-natural-params-split.md — n and min are lookup state, not natural parameters
+    this.c = { n: weights.length, min }
+    this.p = { weights }
     Distribution.validate({
       w_i: (() => {
         const allPositive = weights.reduce((acc, d) => acc && (d >= 0), true)
@@ -57,19 +58,19 @@ export default class Categorical extends Distribution {
 
   _generator () {
     // Direct sampling
-    return this.p.min + this.aliasTable.sample(this.r)
+    return this.c.min + this.aliasTable.sample(this.r)
   }
 
   _pdf (x) {
-    if (this.p.n <= 1) {
+    if (this.c.n <= 1) {
       return 1
     } else {
-      return this.pdfTable[x - this.p.min]
+      return this.pdfTable[x - this.c.min]
     }
   }
 
   _cdf (x) {
-    return Math.min(1, this.cdfTable[x - this.p.min])
+    return Math.min(1, this.cdfTable[x - this.c.min])
   }
 
   static _fitInit (data) {
