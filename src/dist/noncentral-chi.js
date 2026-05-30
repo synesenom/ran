@@ -1,3 +1,5 @@
+import { marcumP, besselI, besselISpherical } from '../special'
+import noncentralChi2 from './_noncentral-chi2'
 import Distribution from './_distribution'
 import NoncentralChi2 from './noncentral-chi2'
 
@@ -27,6 +29,11 @@ export default class NoncentralChi extends NoncentralChi2 {
       'lambda > 0'
     ])
 
+    // Override p to expose user-facing lambda; super stored lambda²
+    this.p = { k: ki, lambda }
+    // Store lambda² for internal delegation to NoncentralChi2 logic
+    Object.assign(this.c, { lambda2: lambda * lambda })
+
     // Set support
     this.s = [{
       value: 0,
@@ -38,16 +45,24 @@ export default class NoncentralChi extends NoncentralChi2 {
   }
 
   _generator () {
-    // Direct sampling by transforming non-central chi2 variate
-    return Math.sqrt(super._generator())
+    return Math.sqrt(noncentralChi2(this.r, this.p.k, this.c.lambda2))
   }
 
   _pdf (x) {
-    return 2 * x * super._pdf(x * x)
+    if (x === 0) {
+      return 0
+    }
+    const x2 = x * x
+    const lambda2 = this.c.lambda2
+    if (this.c.kIsEven) {
+      return x * Math.exp(-0.5 * (x2 + lambda2) + (this.p.k / 4 - 0.5) * Math.log(x2 / lambda2)) * besselI(Math.round(this.p.k / 2) - 1, Math.sqrt(lambda2 * x2))
+    } else {
+      return x * Math.exp(-0.5 * (x2 + lambda2)) * Math.pow(x2 / lambda2, this.p.k / 4 - 0.5) * besselISpherical(Math.floor((this.p.k - 3) / 2), Math.sqrt(lambda2 * x2)) * Math.sqrt(2 * Math.sqrt(x2 * lambda2) / Math.PI)
+    }
   }
 
   _cdf (x) {
-    return super._cdf(x * x)
+    return marcumP(this.p.k / 2, this.c.lambda2 / 2, x * x / 2)
   }
 
   static _fitInit (data) {
