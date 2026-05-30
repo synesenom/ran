@@ -16,7 +16,7 @@ import rBeta from './_beta'
  * @param {number} beta Second shape parameter.
  * @constructor
  */
-export default class extends PreComputed {
+export default class BetaGeometric extends PreComputed {
   /**
    * @param {number} alpha First shape parameter.
    * @param {number} beta Second shape parameter.
