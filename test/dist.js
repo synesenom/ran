@@ -1061,13 +1061,21 @@ describe('dist', () => {
         assert(Math.abs(result.p.c - 3) < 0.5)
       })
 
-      it('Bates.fit should return a usable Bates instance close to planted support', () => {
-        const data = new dist.Bates(3, 1, 5).seed(42).sample(200)
-        const result = dist.Bates.fit(data)
-        assert(result instanceof dist.Bates)
-        // n is integer-rounded so Nelder-Mead may land ±1 from planted n=3; allow [2,4]
-        assert(result.p.n >= 2 && result.p.n <= 4)
-        assert(Math.abs(result.p.b - result.p.a - 4) < 1)
+      it('Bates.fit recovers integer n exactly for n = 1, 2, 3', () => {
+        // n >= 4 approaches Gaussian and n becomes weakly identified; test the identifiable range
+        const cases = [
+          [1, 0, 1],
+          [2, -1, 3],
+          [3, 1, 5]
+        ]
+        for (const [n, a, b] of cases) {
+          const data = new dist.Bates(n, a, b).seed(1).sample(1000)
+          const result = dist.Bates.fit(data)
+          assert(result instanceof dist.Bates)
+          assert.strictEqual(result.p.n, n)
+          assert(Math.abs(result.p.a - a) < 0.1)
+          assert(Math.abs(result.p.b - b) < 0.1)
+        }
       })
 
       it('Trapezoidal.fit should recover a, b, c, d close to planted values', () => {
