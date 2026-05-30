@@ -34,6 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `Bradford._fitInit`: the small-`c` mean approximation coefficient corrected from `3·(1−2·mean)` to `6·(1−2·mean)`, matching the correct first-order expansion `E[X] ≈ ½ − c/12`; the previous coefficient underestimated the starting value of `c` by a factor of 2 (#498).
+
 - `NoncentralChi`: `.p.lambda` now stores the user-facing noncentrality parameter `λ` instead of `λ²`; constructing `new NoncentralChi(k, λ).p.lambda` and reading back after `NoncentralChi.fit(data)` now return `λ`, not `λ²` (#491).
 
 - `Mielke` distribution: `aic()` and `bic()` now use the correct parameter count of 2 (not 3 inherited from `Dagum`); the penalty term was over-counted by 1 in every AIC/BIC evaluation (#505).
