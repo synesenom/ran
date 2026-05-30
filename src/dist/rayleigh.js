@@ -18,6 +18,9 @@ export default class Rayleigh extends Weibull {
    */
   constructor (sigma) {
     super(sigma * Math.SQRT2, 2)
+
+    // Rayleigh has 1 free parameter (sigma); override the 2 inherited from Weibull
+    this.k = 1
   }
 
   static _fitInit (data) {

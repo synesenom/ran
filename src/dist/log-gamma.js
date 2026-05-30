@@ -23,6 +23,9 @@ export default class LogGamma extends Gamma {
     super(alpha, beta)
     this._q = undefined // Gamma._q is wrong for the log transform; fall back to _qEstimateRoot
 
+    // LogGamma has 3 free parameters (alpha, beta, mu); override the 2 inherited from Gamma
+    this.k = 3
+
     // Validate parameters
     this.p = Object.assign(this.p, { mu })
     Distribution.validate({ mu }, [

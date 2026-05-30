@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Mielke` distribution: `aic()` and `bic()` now use the correct parameter count of 2 (not 3 inherited from `Dagum`); the penalty term was over-counted by 1 in every AIC/BIC evaluation (#505).
 
+- Multi-level `Distribution` subclasses now report the correct free-parameter count `k`, fixing systematically wrong `aic()`/`bic()` values: `Weibull` (2), `ExponentiatedWeibull` (3), `Chi2` (1), `MaxwellBoltzmann` (1), `GeneralizedGamma` (3), `LogGamma` (3), and the downstream `Rayleigh` (1) and `HalfGeneralizedNormal` (2). Each previously inherited a mismatched `k` from a parent further up the inheritance chain (#510).
+
 - `Mielke` distribution: `.p` now correctly exposes `{ k, s }` instead of Dagum's inherited `{ p, a, b }` bag; `_pdf`, `_cdf`, and `_q` are overridden to use `k` and `s` directly so that `fit()` parameter recovery and any code reading back `.p.k` / `.p.s` behaves as documented (#480).
 
 - `R`, `F`, `FisherZ`, and `BaldingNichols` `.fit()` no longer inherit `Beta`'s `[alpha, beta]` initializer, which produced a wrong-arity (`R`) or wrong-parametrization init vector that made `fit()` throw or converge to nonsense; each now seeds Nelder-Mead from a distribution-correct method-of-moments estimate (#441).

@@ -2104,4 +2104,38 @@ describe('dist', () => {
       assert.strictEqual(d.bic(sample), Math.log(sample.length) * 2 - 2 * d.lnL(sample))
     })
   })
+
+  // Multi-level inheritance parameter-count regressions (issue #510). Each subclass inherits the wrong
+  // this.k from a parent further up the chain unless it overrides; a wrong k silently distorts aic()/bic().
+  const paramCountCases = [
+    { name: 'Weibull', ctor: () => new dist.Weibull(1, 1), k: 2, inherited: '1 from Exponential' },
+    { name: 'DoubleWeibull', ctor: () => new dist.DoubleWeibull(1, 1), k: 2, inherited: '1 from Weibull' },
+    { name: 'ExponentiatedWeibull', ctor: () => new dist.ExponentiatedWeibull(1, 1, 1), k: 3, inherited: '2 from Weibull' },
+    { name: 'Rayleigh', ctor: () => new dist.Rayleigh(1), k: 1, inherited: '2 from Weibull' },
+    { name: 'Chi2', ctor: () => new dist.Chi2(4), k: 1, inherited: '2 from Gamma' },
+    { name: 'Chi', ctor: () => new dist.Chi(4), k: 1, inherited: '2 from Gamma via Chi2' },
+    { name: 'MaxwellBoltzmann', ctor: () => new dist.MaxwellBoltzmann(1), k: 1, inherited: '2 from Gamma' },
+    { name: 'GeneralizedGamma', ctor: () => new dist.GeneralizedGamma(1, 1, 1), k: 3, inherited: '2 from Gamma' },
+    { name: 'GeneralizedNormal', ctor: () => new dist.GeneralizedNormal(0, 1, 2), k: 3, inherited: '2 from Gamma via GeneralizedGamma' },
+    { name: 'HalfGeneralizedNormal', ctor: () => new dist.HalfGeneralizedNormal(1, 2), k: 2, inherited: '3 from GeneralizedNormal' },
+    { name: 'LogGamma', ctor: () => new dist.LogGamma(1, 1, 0), k: 3, inherited: '2 from Gamma' }
+  ]
+  paramCountCases.forEach(({ name, ctor, k, inherited }) => {
+    describe(`${name} parameter count`, () => {
+      const sample = [0.1, 0.5, 1.0, 1.5, 2.0, 0.3, 0.8, 1.2, 2.5, 0.6]
+      const d = ctor()
+
+      it(`should have paramCount k=${k}, not the ${inherited}`, () => {
+        assert.strictEqual(d.k, k)
+      })
+
+      it(`aic() should use the corrected parameter penalty (k=${k})`, () => {
+        assert.strictEqual(d.aic(sample), 2 * (k - d.lnL(sample)))
+      })
+
+      it(`bic() should use the corrected parameter penalty (k=${k})`, () => {
+        assert.strictEqual(d.bic(sample), Math.log(sample.length) * k - 2 * d.lnL(sample))
+      })
+    })
+  })
 })

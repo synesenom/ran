@@ -21,6 +21,9 @@ export default class MaxwellBoltzmann extends Gamma {
     super(1.5, 0.5 / (a * a))
     this._q = undefined // Gamma._q is wrong for the sqrt transform; fall back to _qEstimateRoot
 
+    // MaxwellBoltzmann has 1 free parameter (a); override the 2 inherited from Gamma
+    this.k = 1
+
     // Validate parameters
     Distribution.validate({ a }, [
       'a > 0'
