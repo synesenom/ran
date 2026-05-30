@@ -1061,17 +1061,15 @@ describe('dist', () => {
         assert(Math.abs(result.p.c - 3) < 0.5)
       })
 
-      it('Bates.fit recovers integer n exactly for a range of n values', () => {
-        // Seeds chosen so that profile-likelihood MLE lands on the planted n with N=200
+      it('Bates.fit recovers integer n exactly for n = 1, 2, 3', () => {
+        // n >= 4 approaches Gaussian and n becomes weakly identified; test the identifiable range
         const cases = [
-          [1, 0, 1, 1],
-          [2, -1, 3, 2],
-          [3, 1, 5, 9],
-          [4, -2, 2, 14],
-          [5, 0, 3, 34]
+          [1, 0, 1],
+          [2, -1, 3],
+          [3, 1, 5]
         ]
-        for (const [n, a, b, seed] of cases) {
-          const data = new dist.Bates(n, a, b).seed(seed).sample(200)
+        for (const [n, a, b] of cases) {
+          const data = new dist.Bates(n, a, b).seed(1).sample(1000)
           const result = dist.Bates.fit(data)
           assert(result instanceof dist.Bates)
           assert.strictEqual(result.p.n, n)
