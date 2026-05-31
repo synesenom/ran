@@ -73,8 +73,8 @@ Standalone skills that do one thing. Can be called directly or composed by orche
 | [`/hotfix`](skills/hotfix/SKILL.md) | Small targeted fix, skip research/plan | Description or `#issue` |
 | [`/commit`](skills/commit/SKILL.md) | Stage and commit with generated message | _(no args)_ |
 | [`/push`](skills/push/SKILL.md) | Push commits to remote | _(no args)_ |
-| [`/review`](skills/review/SKILL.md) | Code review against plan + quality checks | _(no args, reviews current branch)_ |
-| [`/review-pr`](skills/review-pr/SKILL.md) | Review a GitHub PR and approve+merge or request changes | PR URL or number |
+| [`/review`](skills/review/SKILL.md) | Pre-commit quality check of the **local** branch against `main`; used inside `/build` | _(no args)_ |
+| [`/review-pr`](skills/review-pr/SKILL.md) | Triage an **incoming contributor PR on GitHub**: post APPROVE+merge or REQUEST_CHANGES | PR URL or number |
 | [`/pr`](skills/pr/SKILL.md) | Create a PR with change categorization, then watch it (auto-fix CI, respond to reviews) | _(no args)_ |
 | [`/validate`](skills/validate/SKILL.md) | Verify issue acceptance criteria are met | `#issue` or issue URL |
 | [`/next`](skills/next/SKILL.md) | Pick the best next issue from the backlog | Milestone _(optional)_ |

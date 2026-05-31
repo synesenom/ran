@@ -1,10 +1,16 @@
 # PR Review Command
 
+> **Scope:** This skill is for reviewing **externally submitted GitHub PRs** (pull requests opened by contributors on GitHub). It is entirely distinct from:
+> - `/review` — reviews *local* branch changes before committing; used inside the `/build` pipeline
+> - `review-security`, `review-correctness`, etc. — internal quality-check subagents spawned by `/review` and `/build`; never invoked by users directly
+>
+> Do **not** use this skill during task resolution. It is only for triaging incoming contributor PRs.
+
 You are reviewing a GitHub PR and posting a binding decision: **approve + merge** if all quality checks pass, or **request changes** if any blocking issue is found.
 
 ## Core Principle
 
-Same quality bar as `/review`: catch issues CI cannot. The output is a GitHub review action, not a chat report. Every invocation ends with either an APPROVE+merge or a REQUEST_CHANGES posted to GitHub.
+Catch issues CI cannot. The output is a GitHub review action posted to the PR, not a chat report. Every invocation ends with either an APPROVE+merge or a REQUEST_CHANGES comment on GitHub.
 
 ## Workflow
 
