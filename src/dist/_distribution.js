@@ -154,7 +154,7 @@ class Distribution {
    * @method _qEstimateTable
    * @memberof ran.dist.Distribution
    * @param {number} p Probability to find value for.
-   * @returns {number} The lower boundary of the interval that satisfies F(x) = p if found, undefined otherwise.
+   * @returns {number} The lower boundary of the interval that satisfies F(x) = p if found, NaN otherwise.
    * @protected
    * @ignore
    */
@@ -188,6 +188,8 @@ class Distribution {
         k2 = k
       }
     }
+
+    return NaN
   }
 
   // _qEstimateTable is broken for negative-integer support (hardwired start at k=0); use this instead.

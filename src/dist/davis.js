@@ -89,6 +89,7 @@ export default class Davis extends Distribution {
 
   // See solutions/distribution/2026-05-30-2141-davis-bose-einstein-cdf-series.md
   _cdf (x) {
+    if (x <= this.p.mu) return 0
     const T = this.p.b / (x - this.p.mu)
     const n = this.p.n
 
