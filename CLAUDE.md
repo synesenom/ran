@@ -55,6 +55,23 @@ npm run typecheck
 
 **Distribution naming:** File names are kebab-case (`log-normal.js`); exported class names are PascalCase (`LogNormal`). Pre-computed table distributions extend `PreComputed` from `_pre-computed.js`.
 
+## Return Value and Error Conventions
+
+Every public function and method signals "no ordinary result" through exactly one of four channels. Pick the channel by **what kind of situation occurred**, not by convenience. See `decisions/0015-return-value-and-error-conventions.md`.
+
+| Situation | Channel | Rationale |
+| --- | --- | --- |
+| **Caller/programming error** — invalid or missing parameters, failed constraint, wrong arity, dimension mismatch, structurally impossible input (e.g. negative count) | **`throw Error(...)`** | Fail fast and loud. The caller has a bug that must be fixed, not handled at runtime. Matches the constructor contract (ADR-0004). |
+| **Valid in-domain query, but the answer is mathematically indeterminate / does not exist** — mean of Cauchy, skewness of a point mass, `0/0` | **`NaN`** | Keeps numeric methods typed `number` (the `.d.ts` are generated from JSDoc). Matches SciPy/R and JS-native math (`Math.sqrt(-1)`). |
+| **Valid query, but the answer diverges** — variance of Pareto with α ≤ 2, every moment of Lévy | **`Infinity` / `-Infinity`** | Carries strictly more information than `NaN`: "grows without bound" ≠ "no value at all". Never collapse divergence to `NaN`. |
+| **The mathematically correct value happens to be zero** — pdf/cdf/pmf evaluated outside the support | **`0`** | Not an error: probability really is zero there. Do not throw or return `NaN`. |
+
+**`undefined` is not an error sentinel.** Do not return `undefined` to mean "computation failed" or "value does not exist". It breaks generated TypeScript types (forces `number | undefined` across the whole numeric API), is silently dropped by `JSON.stringify`, and is foreign to the numerical-computing idiom. `undefined` is acceptable *only* for a genuinely optional/absent value where the caller is expected to branch on presence — never as a stand-in for `NaN`, `Infinity`, or a thrown error.
+
+**Applies everywhere, not just distributions.** `ran.core`, `ran.special`, `ran.algorithms`, and `ran.la` follow the same split: `throw` for contract violations (wrong arity, dimension mismatch, impossible input); `NaN`/`±Infinity` for out-of-domain or divergent math. **Never wrap hot numeric loops in `throw`/`try` for ordinary out-of-domain inputs** — let the math produce `NaN`/`Infinity`.
+
+**Known deviation:** `Distribution.q(p)` returns `undefined` for `p ∉ [0, 1]`. This predates the convention and is a caller error that *should* throw; correcting it is a breaking change that ships through the standard deprecation cycle in an ordinary minor release (see "Versioning and Changelog"). Do not copy this pattern into new code.
+
 ## Testing Conventions
 
 - Tests live in `test/` and mirror `src/` module structure.
@@ -71,8 +88,9 @@ npm run typecheck
 
 - **Always use the `ops-issue` agent** when creating GitHub issues. Never call `gh issue create` directly.
 - Every issue must have a **priority** label (`high`, `medium`, `low`) and a **difficulty** label (`difficult`, `moderate`, `trivial`).
-- Breaking-change issues also get a **`major`** label. Breaking means: constructor or public-method rename/removal, or intentional parameter convention changes. Bug fixes — including wrong-formula corrections — are not major even if they change computed values; document them in the changelog instead. Everything else gets no semver label.
-- Every issue must be assigned to a **milestone**: `v2.0.0` for `major` issues, `v1.25.0` for everything else. The `ops-issue` agent sets this automatically. A GitHub Actions workflow (`.github/workflows/require-milestone.yml`) flags any issue opened without a milestone.
+- Breaking-change issues also get a **`breaking`** label. Breaking means: constructor or public-method rename/removal, intentional parameter convention changes, or changed return shapes. Bug fixes — including wrong-formula corrections — are not breaking even if they change computed values; document them in the changelog instead. The `breaking` label is a **severity/communication marker**, not a milestone router — breaking changes ship in ordinary minor releases (see "Versioning"), so they get the same milestone as everything else.
+- A breaking change must first ship a **deprecation cycle** before the old behavior is removed. The issue that *introduces the deprecation warning* gets the `breaking` label; a separate follow-up issue (one release later) does the actual removal. See "Versioning and Changelog" for the cycle rules.
+- Every issue must be assigned to the **current next-release milestone** (the lowest open `vX.Y.0`). There is no separate breaking-change milestone. The `ops-issue` agent sets this automatically. A GitHub Actions workflow (`.github/workflows/require-milestone.yml`) flags any issue opened without a milestone.
 - **One concern per issue.** Reject titles that contain `+`, "and", or comma-separated lists of changes.
 - **PR size cap is enforced via the issue template.** Production-code diff must stay under ~400 lines (tests excluded). If a feature can't fit, decompose before filing.
 - **Mandatory bug triage on every fix/hotfix/build.** `/hotfix`, `/fix`, and `/build` each have a dedicated **Bug Triage** stage that invokes the `ops-triage` agent to classify observations into `definite` / `ambiguous` / `not_a_bug`. `definite` bugs are auto-filed via `ops-issue` in a batch; `ambiguous` cases are escalated to the user in a single prompt; `not_a_bug` is silent. Do not skip the stage even if the session feels clean — the agent will skim the diff for red flags as a safety net.
@@ -102,10 +120,19 @@ When a change touches many files (new base class method, convention rename acros
 
 **Release model: batched.** PRs are merged without bumping the version. When enough changes have accumulated, a dedicated release PR bumps the version, promotes `[Unreleased]` to the new version, and triggers the npm publish.
 
+**Versioning policy: numpy/scipy-style (NEP 23 / SPEC 0).** Breaking API changes are allowed in **minor** releases — we do **not** reserve a `vX.0.0` bump for each breaking change. The cost of doing so safely is a mandatory deprecation cycle (below). A major bump is reserved for rare, sweeping overhauls (the way numpy went 1.x → 2.0 once in ~18 years), not for individual breaking changes.
+
 **Semver tiers:**
 - **Patch** (`x.y.Z`): dependency updates, bug fixes, internal refactors with no API change.
-- **Minor** (`x.Y.0`): new distributions, new public methods, additive API changes.
-- **Major** (`X.0.0`): breaking API changes (parameter renames, removed methods, changed return shapes).
+- **Minor** (`x.Y.0`): new distributions, new public methods, additive API changes, **and breaking changes that have completed their deprecation cycle.**
+- **Major** (`X.0.0`): reserved for a sweeping, library-wide overhaul. Individual breaking changes do **not** trigger a major bump.
+
+**Deprecation cycle (required before any breaking removal):**
+1. **Introduce the warning.** In one minor release, keep the old behavior working but emit a `console.warn('[ranjs] <thing> is deprecated and will be removed in vX.Y.0; use <replacement>.')` on first use. Add a `### Deprecated` bullet to `CHANGELOG.md` naming the target removal version. The issue doing this carries the `breaking` label.
+2. **Hold.** The warning must remain for **at least one** released minor version so downstream users see it before the behavior changes.
+3. **Remove.** In a later minor release, a separate follow-up issue removes the old behavior. Add a `### Removed` changelog bullet referencing the deprecation. Never collapse steps 1 and 3 into a single release.
+
+Truly unavoidable immediate breaks (e.g. a security fix with no compatible path) may skip the cycle, but must be called out explicitly in the changelog with the rationale.
 
 **Per-PR changelog rule:** If a PR makes a user-visible change (bug fix, new feature, dependency security fix, removed dead code), add a bullet to the `## [Unreleased]` section of `CHANGELOG.md` following the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format. Pure refactors, test-only changes, and doc-only changes do not need a changelog entry.
 
