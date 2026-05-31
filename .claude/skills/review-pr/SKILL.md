@@ -34,7 +34,28 @@ Use the GitHub MCP tools in a single parallel call:
 - `draft === true` → "PR #N is a draft. Mark it ready for review first."
 - diff is empty → "PR #N has no diff. Nothing to review."
 
-### 3. Save Diff
+### 3. Check Out the PR Branch and Run the Suite
+
+Fetch the PR head into a local ref, run lint + tests, then return to the original branch:
+
+```bash
+git fetch origin pull/<N>/head:pr-<N>-review
+git checkout pr-<N>-review
+npm run standard 2>&1
+npm test 2>&1
+git checkout -
+git branch -D pr-<N>-review
+```
+
+Run lint and tests sequentially (tests depend on lint passing). Capture full output.
+
+**If either command exits non-zero**, record a **P1** finding:
+- `[tests] CI` — `npm run standard` failed: `<first error line(s)>`
+- `[tests] CI` — `npm test` failed: `<failing test names and coverage breach lines>`
+
+**Do not stop** — continue to Pass 1 and Pass 2 so the full picture is reported in one review comment.
+
+### 4. Save Diff
 
 ```bash
 mkdir -p .claude/tmp
@@ -43,7 +64,7 @@ mkdir -p .claude/tmp
 
 Save the diff text to `.claude/tmp/review-diff-pr-<N>.patch`.
 
-### 4. Pass 1 — Convention Compliance
+### 5. Pass 1 — Convention Compliance (against diff)
 
 External PRs have no local plan file, so Pass 1 checks project conventions from `CLAUDE.md` directly against the diff:
 
@@ -58,7 +79,7 @@ External PRs have no local plan file, so Pass 1 checks project conventions from 
 
 Each failed check is a **P2** finding. Record them alongside the agent findings from Pass 2.
 
-### 5. Pass 2 — Code Quality (Parallel Agents)
+### 6. Pass 2 — Code Quality (Parallel Agents)
 
 **CRITICAL: Launch exactly 6 review agents in a single parallel call. Verify all 6 returned before proceeding.**
 
@@ -73,13 +94,13 @@ Tell each agent to read `.claude/tmp/review-diff-pr-<N>.patch` and provide enoug
 
 Wait for all 6. Deduplicate overlapping findings. If you downgrade a finding's severity, note the original severity and your rationale.
 
-### 6. Verdict
+### 7. Verdict
 
 **PASS** — zero P1 or P2 findings across both passes. P3 items are informational and do not block.
 
 **FAIL** — one or more P1 or P2 findings.
 
-### 7. Act on Verdict
+### 8. Act on Verdict
 
 #### PASS → Approve and merge
 
@@ -117,7 +138,7 @@ mcp__github__pull_request_review_write(
 
 Do **not** merge.
 
-### 8. Review Body Format
+### 9. Review Body Format
 
 #### Approval body (PASS)
 
@@ -147,7 +168,7 @@ LGTM — all quality checks passed.
 - [domain] `file:line` — <note>
 ```
 
-### 9. Report to User
+### 10. Report to User
 
 After posting to GitHub, report back:
 
