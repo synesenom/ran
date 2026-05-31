@@ -10,7 +10,7 @@ const PRECISION = 1e-10
 
 describe('algorithms', () => {
   describe('.bracket()', () => {
-    it('should return undefined if initial bracket is invalid', () => {
+    it('should return NaN if initial bracket is invalid', () => {
       repeat(() => {
         const c = Math.random() * 10
         const bracket = algorithms.bracket(
@@ -18,7 +18,7 @@ describe('algorithms', () => {
           lambertW0(c) + 1,
           lambertW0(c) + 1
         )
-        assert(typeof bracket === 'undefined')
+        assert(Number.isNaN(bracket))
       }, LAPS)
     })
 
@@ -45,14 +45,14 @@ describe('algorithms', () => {
   })
 
   describe('.brent()', () => {
-    it('should return undefined if brackets are wrong', () => {
+    it('should return NaN if brackets are wrong', () => {
       const c = 5
       const sol = algorithms.brent(
         t => t * Math.exp(t) - c,
         lambertW0(c) + 1,
         lambertW0(c) + 2
       )
-      assert(typeof sol === 'undefined')
+      assert(Number.isNaN(sol))
     })
     it('should find the solution of exp(-x) = c x', () => {
       repeat(() => {
@@ -175,6 +175,12 @@ describe('algorithms', () => {
         const item = values.sort((a, b) => a - b)[k]
         assert(algorithms.quickselect(shuffle(values), k) === item)
       }, LAPS)
+    })
+
+    it('should throw for out-of-range k', () => {
+      const values = [1, 2, 3]
+      assert.throws(() => algorithms.quickselect(values, -1))
+      assert.throws(() => algorithms.quickselect(values, 3))
     })
   })
 

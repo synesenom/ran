@@ -231,8 +231,8 @@ class Distribution {
    * @method _qEstimateRoot
    * @memberof ran.dist.Distribution
    * @param {number} p Probability to find value for.
-   * @returns {number|undefined} The value where the probability coincides with the specified value if found,
-   * undefined otherwise.
+   * @returns {number} The value where the probability coincides with the specified value if found,
+   * NaN otherwise.
    * @protected
    * @ignore
    */
@@ -261,11 +261,13 @@ class Distribution {
     const bounds = bracket(t => this.cdf(t) - p, a0, b0, this.s)
 
     // Perform root-finding using Brent's method.
-    if (typeof bounds !== 'undefined') {
+    if (Array.isArray(bounds)) {
       return Math.min(Math.max(
         brent(t => this.cdf(t) - p, ...bounds), this.s[0].value), this.s[1].value
       )
     }
+
+    return NaN
   }
 
   /**
