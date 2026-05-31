@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Deprecated
+
+- `Distribution.q(p)` called with `p` outside `[0, 1]` now emits a one-time `console.warn`; the current behavior (returning `undefined`) is unchanged this release. The method will **throw** in v1.27.0 (see #594).
+
 ### Fixed
 
 - `Davis._cdf(x)` now uses a dual Bose-Einstein series (upper incomplete gamma series for x near μ, Bernoulli/Laurent series for large x) instead of Romberg integration; per-call cost drops from ~100ms to ~10µs, enabling full goodness-of-fit coverage with the standard sample size (#451).
