@@ -233,8 +233,7 @@ class Distribution {
    * @method _qEstimateRoot
    * @memberof ran.dist.Distribution
    * @param {number} p Probability to find value for.
-   * @returns {number} The value where the probability coincides with the specified value if found,
-   * NaN otherwise.
+   * @returns {number} The value where the probability coincides with the specified value if found, NaN otherwise.
    * @protected
    * @ignore
    */
