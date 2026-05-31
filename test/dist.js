@@ -315,6 +315,23 @@ describe('dist', () => {
       })
     })
 
+    describe('._qEstimateRoot()', () => {
+      it('returns NaN when bracket cannot be found (degenerate equal-bound open support)', () => {
+        // Support [5, 5] (both open, both equal) collapses delta to 0, so a0 === b0 and bracket() returns undefined.
+        class DegenerateContinuous extends Distribution {
+          constructor () {
+            super('continuous', 0)
+            this.s = [{ value: 5, closed: false }, { value: 5, closed: false }]
+          }
+
+          _pdf () { return 0 }
+          _cdf () { return 0.5 }
+        }
+        const d = new DegenerateContinuous()
+        assert(Number.isNaN(d.q(0.5)))
+      })
+    })
+
     describe('.survive()', () => {
       it('should throw not implemented error', () => {
         assert.throws(() => {
@@ -1987,6 +2004,16 @@ describe('dist', () => {
       // cdfTable[0] = 0.5+eps, cdfTable[1] ≈ 1 + 2eps > 1; re-reading from cache must still return ≤ 1
       assert.isAtMost(d._cdf(0), 1)
       assert.isAtMost(d._cdf(1), 1)
+    })
+
+    it('_generator returns NaN when all alias tables are exhausted (zero-probability PMF)', () => {
+      // _pk returns 0 for every k, so every alias table always routes to the overflow slot (TABLE_SIZE).
+      // After MAX_NUMBER_OF_TABLES tables the do-while exits without sampling, and must return NaN not undefined.
+      class ZeroMassDist extends PreComputed {
+        _pk () { return 0 }
+      }
+      const d = new ZeroMassDist()
+      assert(Number.isNaN(d._generator()))
     })
   })
 
