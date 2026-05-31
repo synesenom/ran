@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.26.0] - 2026-05-31
+
 ### Added
 
 - `Distribution.params()` public method returning the natural parameters of a distribution (#516). All nine `Categorical` subclasses (`Bernoulli`, `Binomial`, `Hypergeometric`, `Soliton`, `Zipf`, `ZipfMandelbrot`, `BetaBinomial`, `NegativeHypergeometric`, `Rademacher`) now expose their own named parameters (e.g. `new Bernoulli(0.7).params()` → `{ p: 0.7 }`) instead of inheriting the internal lookup state from `Categorical`.
