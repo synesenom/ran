@@ -8,15 +8,14 @@ import median from '../location/median'
  * @method yule
  * @memberof ran.shape
  * @param {number[]} values Array of values to calculate Yule's coefficient for.
- * @returns {number|undefined} Yule's coefficient of the values if the lower and upper quartiles differ, undefined
- * otherwise.
+ * @returns {number} Yule's coefficient, or NaN for an empty array or when the lower and upper quartiles are equal.
  * @example
  *
  * ran.shape.yule([])
- * // => undefined
+ * // => NaN
  *
  * ran.shape.yule([1, 1, 1])
- * // => undefined
+ * // => NaN
  *
  * ran.shape.yule([1, 1, 1, 2])
  * // => 1

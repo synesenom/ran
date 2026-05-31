@@ -8,18 +8,17 @@ import moment from './moment'
  * @method kurtosis
  * @memberof ran.shape
  * @param {number[]} values Array of values to calculate kurtosis for.
- * @returns {number|undefined} The sample kurtosis of values if there are more than two and their variance is nonzero,
- * undefined otherwise.
+ * @returns {number} The sample excess kurtosis, or NaN for fewer than 3 elements or zero variance.
  * @example
  *
  * ran.shape.kurtosis([])
- * // => undefined
+ * // => NaN
  *
  * ran.shape.kurtosis([1, 2])
- * // => undefined
+ * // => NaN
  *
  * ran.shape.kurtosis([1, 1, 1])
- * // => undefined
+ * // => NaN
  *
  * ran.shape.kurtosis([1, 1, 3, 1, 1])
  * // => 5.000000000000003

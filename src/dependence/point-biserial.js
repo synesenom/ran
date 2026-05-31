@@ -9,18 +9,15 @@ import mean from '../location/mean'
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values. Must contain 0s and 1s only.
- * @returns {number|undefined} The point-biserial correlation coefficient if none of the arrays are empty, they have
- * the same length and each has a positive variance, undefined otherwise.
+ * @returns {number} The point-biserial correlation coefficient, or NaN if arrays have fewer than 2 elements or
+ * zero variance. Throws if arrays have different lengths.
  * @example
  *
  * ran.dependence.pointBiserial([], [])
- * // => undefined
- *
- * ran.dependence.pointBiserial([1, 2, 3], [0, 0, 1, 1])
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.pointBiserial([2, 2, 2], [0, 0, 1])
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.pointBiserial([1, 2, 3], [4, 5, 6])
  * // => 0.8660254037844386

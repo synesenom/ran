@@ -7,12 +7,11 @@ import quantile from '../shape/quantile'
  * @method qcd
  * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate quartile coefficient of dispersion for.
- * @returns {number|undefined} The quartile coefficient of dispersion of the values if there is any, undefined
- * otherwise.
+ * @returns {number} The quartile coefficient of dispersion, or NaN for an empty array.
  * @example
  *
  * ran.dispersion.qcd([])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.qcd([1, 2, 3])
  * // => 0.25

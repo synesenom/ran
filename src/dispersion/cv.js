@@ -8,18 +8,17 @@ import mean from '../location/mean'
  * @method cv
  * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate coefficient of variation for.
- * @returns {number|undefined} Coefficient of variation of the values if there are more than two and the mean is not
- * zero, undefined otherwise.
+ * @returns {number} Coefficient of variation, or NaN for fewer than 2 elements, zero mean, or zero variance.
  * @example
  *
  * ran.dispersion.cv([])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.cv([1])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.cv([-1, 0, 1])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.cv([1, 2, 3, 4, 5])
  * // => 0.5270462766947299

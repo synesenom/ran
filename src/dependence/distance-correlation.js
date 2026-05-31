@@ -9,12 +9,12 @@ import mean from '../location/mean'
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
- * @returns {number|undefined} The distance correlation if none of the arrays are empty and they have the same length,
- * undefined otherwise.
+ * @returns {number} The distance correlation, or NaN for empty or constant arrays. Throws if arrays have different
+ * lengths.
  * @example
  *
- * ran.dependence.dCor([1, 2, 3], [])
- * // => undefined
+ * ran.dependence.dCor([], [])
+ * // => NaN
  *
  * ran.dependence.dCor([1, 2, 3], [2, 1, 2])
  * // => 0.5623413251903491

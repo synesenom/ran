@@ -8,18 +8,17 @@ import moment from './moment'
  * @method skewness
  * @memberof ran.shape
  * @param {number[]} values Array of values to calculate skewness for.
- * @returns {number|undefined} The sample skewness of values if there are more than two and their variance is nonzero,
- * undefined otherwise.
+ * @returns {number} The sample skewness, or NaN for fewer than 3 elements or zero variance.
  * @example
  *
  * ran.shape.skewness([])
- * // => undefined
+ * // => NaN
  *
  * ran.shape.skewness([1, 2])
- * // => undefined
+ * // => NaN
  *
  * ran.shape.skewness([1, 1, 1])
- * // => undefined
+ * // => NaN
  *
  * ran.shape.skewness([1, 1, 1, 2])
  * // => 2

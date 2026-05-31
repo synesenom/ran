@@ -15,15 +15,12 @@ function nTies (values) {
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
- * @returns {number|undefined} Kendall's correlation coefficient if none of the arrays are empty and they have the
- * same length, undefined otherwise.
+ * @returns {number} Kendall's correlation coefficient, or NaN for empty arrays. Throws if arrays have different
+ * lengths.
  * @example
  *
  * ran.dependence.kendall([], [])
- * // => undefined
- *
- * ran.dependence.kendall([1, 2, 3], [1, 2, 3, 4])
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.kendall([1, 2, 3], [4, 5, 6])
  * // => 1

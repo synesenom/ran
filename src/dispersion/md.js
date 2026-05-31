@@ -5,14 +5,14 @@
  * @method md
  * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate mean absolute difference for.
- * @returns {number|undefined} Mean absolute difference of the values if there are more than two, undefined otherwise.
+ * @returns {number} Mean absolute difference, or NaN for fewer than 2 elements.
  * @example
  *
  * ran.dispersion.md([])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.md([1])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.md([1, 2, 3, 4])
  * // => 1.25

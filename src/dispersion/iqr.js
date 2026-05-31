@@ -6,11 +6,11 @@ import quantile from '../shape/quantile'
  * @method iqr
  * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate the interquartile range for.
- * @returns {number|undefined} The interquartile range of the values if there is any, undefined otherwise.
+ * @returns {number} The interquartile range, or NaN for an empty array.
  * @example
  *
  * ran.dispersion.iqr([])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.iqr([1, 1, 2, 3, 3])
  * // => 2

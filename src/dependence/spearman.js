@@ -9,15 +9,12 @@ import pearson from './pearson'
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
- * @returns {number|undefined} Spearman's rank correlation coefficient if none of the arrays are empty and they have
- * the same length, undefined otherwise.
+ * @returns {number} Spearman's rank correlation coefficient, or NaN for empty arrays. Throws if arrays have
+ * different lengths.
  * @example
  *
  * ran.dependence.spearman([], [])
- * // => undefined
- *
- * ran.dependence.spearman([1, 2, 3], [1, 2, 3, 4])
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.spearman([1, 2, 3], [1, 4, 2])
  * // => 0.5

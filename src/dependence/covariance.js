@@ -8,18 +8,15 @@ import { mean } from '../location'
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
- * @returns {number|undefined} The sample covariance if both arrays have more than one element and they have the same
- * length, undefined otherwise.
+ * @returns {number} The sample covariance, or NaN if either array has fewer than 2 elements. Throws if arrays have
+ * different lengths.
  * @example
  *
  * ran.dependence.covariance([], [])
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.covariance([1], [2])
- * // => undefined
- *
- * ran.dependence.covariance([1, 2, 3], [1, 2, 3, 4])
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.covariance([1, 2, 3], [4, 5, 6])
  * // => 1

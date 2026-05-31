@@ -4,11 +4,11 @@
  * @method rank
  * @memberof ran.shape
  * @param {number[]} values Array of values to calculate ranks for.
- * @returns {number|undefined} The ranks of the values if there are any, undefined otherwise.
+ * @returns {number[]} The ranks of the values, or an empty array for empty input.
  * @example
  *
  * ran.shape.rank([])
- * // => undefined
+ * // => []
  *
  * ran.shape.rank([1, 2, 2, 3])
  * // => [1, 2.5, 2.5, 4]

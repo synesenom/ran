@@ -7,18 +7,17 @@ import mean from '../location/mean'
  * @method rmd
  * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate relative mean absolute difference for.
- * @returns {number|undefined} Relative mean absolute difference of the values if there are more than two, undefined
- * otherwise.
+ * @returns {number} Relative mean absolute difference, or NaN for fewer than 2 elements or zero mean.
  * @example
  *
  * ran.dispersion.rmd([])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.rmd([1])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.rmd([-1, 0, 1])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.rmd([1, 2, 3, 4])
  * // => 0.5

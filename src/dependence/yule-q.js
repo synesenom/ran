@@ -12,14 +12,15 @@ import oddsRatio from '../dependence/odds-ratio'
  * @param {number} p01 The probability of X = 0 and Y = 1.
  * @param {number} p10 The probability of X = 1 and Y = 0.
  * @param {number} p11 The probability of X = 1 and Y = 1.
- * @returns {number|undefined} Yule's Q if p01 and p10 are positive, undefined otherwise.
+ * @returns {number} Yule's Q, or NaN when p01 or p10 is zero (the odds ratio diverges, making the formula
+ * indeterminate).
  * @example
  *
  * ran.dependence.yuleQ(0.3, 0, 0.3, 0.4)
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.yuleQ(0.3, 0.3, 0, 0.4)
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.yuleQ(0.1, 0.2, 0.3, 0.4)
  * // => -0.19999999999999984
