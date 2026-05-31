@@ -28,6 +28,7 @@ export default class Binomial extends Categorical {
   constructor (n, p) {
     const ni = Math.round(n)
     super(Array.from({ length: ni + 1 }, (d, k) => Math.exp(logBinomial(n, k) + k * Math.log(p) + (n - k) * Math.log(1 - p))), 0)
+    this.p = { n: ni, p }
 
     // Validate parameters
     Distribution.validate({ n: ni, p }, [

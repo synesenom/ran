@@ -12,7 +12,7 @@ A comprehensive JavaScript library for probability distributions, random variate
 
 ## Features
 
-- **140+ probability distributions** — continuous and discrete, each with PDF/PMF, CDF, quantile, hazard, survival, likelihood, AIC/BIC, and built-in goodness-of-fit testing
+- **140+ probability distributions** — continuous and discrete, each with PDF/PMF, CDF, quantile (`q`), hazard, survival, log-likelihood (`lnL`), AIC/BIC, goodness-of-fit testing, and MLE fitting (`fit`)
 - **Statistical measures** — location (mean, median, mode, …), dispersion (variance, IQR, Gini, …), shape (skewness, kurtosis, …), and dependence (Pearson, Spearman, Kendall, …)
 - **Hypothesis tests** — Bartlett, Levene, Brown–Forsythe, Mann–Whitney U, HSIC
 - **MCMC samplers** — random-walk Metropolis and slice sampling with Gelman–Rubin convergence diagnostics
@@ -105,15 +105,15 @@ ranjs closes the full statistical cycle — define a model, generate data, fit p
 import { dist } from 'ranjs'
 
 // 1. Define and sample
-const model = new dist.Normal(3, 1)
+const model = new dist.Normal(3, 1).seed(42)
 const data  = model.sample(500)
 
 // 2. Fit parameters from data via MLE
 const fitted = dist.Normal.fit(data)
-console.log(fitted.p)           // { mu: ~3, sigma: ~1 }
+console.log(fitted.p)           // => { mu: 3.000, sigma: 1.000 }
 
 // 3. Test goodness of fit
-console.log(fitted.test(data))  // { statistics: …, passed: true }
+console.log(fitted.test(data))  // => { statistics: 0.031, passed: true }
 ```
 
 `fit()` is a **static** method called on the class, not on an instance: `dist.Normal.fit(data)`, not `model.fit(data)`. All 140 exported distributions support `fit()`. Most have a data-aware initial guess for reliable MLE convergence; zero-parameter distributions skip optimization and return a fresh instance.
@@ -138,17 +138,47 @@ Every distribution exposes a consistent interface:
 ```javascript
 const d = new ran.dist.Gamma(2, 1)
 
+d.type()          // 'continuous' or 'discrete'
+d.params()        // current parameter object, e.g. { alpha: 2, beta: 1 }
+d.support()       // [{ value, closed }, { value, closed }] — lower/upper bounds
 d.sample(n)       // generate n random variates
 d.pdf(x)          // probability density / mass function
 d.cdf(x)          // cumulative distribution function
-d.quantile(p)     // inverse CDF
+d.q(p)            // inverse CDF (quantile function)
 d.survival(x)     // complementary CDF  (1 − CDF)
 d.hazard(x)       // hazard rate        (pdf / survival)
 d.cHazard(x)      // cumulative hazard  (−log survival)
-d.likelihood(xs)  // log-likelihood over an array of observations
-d.aic(xs)         // Akaike information criterion
-d.bic(xs)         // Bayesian information criterion
-d.test(xs)        // KS test (continuous) or chi-squared test (discrete)
+d.lnPdf(x)        // log probability density / mass
+d.lnL(data)       // log-likelihood over an array of observations
+d.aic(data)       // Akaike information criterion
+d.bic(data)       // Bayesian information criterion
+d.test(data)      // KS test (continuous) or chi-squared test (discrete)
+d.seed(value)     // set PRNG seed; returns the instance
+d.save()          // serialise PRNG state + parameters to a plain object
+d.load(state)     // restore from a saved state; returns the instance
+
+ran.dist.Gamma.fit(data)  // static — MLE fit; returns a new instance
+```
+
+## Return values and errors
+
+`ranjs` signals an unusual result through one of four channels, chosen by the *kind* of situation:
+
+| Situation | What you get |
+| --- | --- |
+| Invalid input — missing/NaN parameters, broken constraints, wrong arity, mismatched dimensions | a **thrown `Error`** |
+| A valid query whose answer is mathematically undefined (e.g. the mean of a Cauchy distribution) | **`NaN`** |
+| A valid query whose answer diverges (e.g. the variance of a Pareto with shape ≤ 2, any moment of a Lévy) | **`Infinity`** (or `-Infinity`) |
+| A correct value that simply equals zero (e.g. a density evaluated outside the support) | **`0`** |
+
+Functions never return `undefined` to mean "failed" or "does not exist" — numeric results stay numbers (`NaN`/`Infinity`), and genuine misuse throws. `NaN` and `Infinity` are kept distinct on purpose: `NaN` means *no value exists*, `Infinity` means *the value grows without bound*. This mirrors the conventions of SciPy and R.
+
+```javascript
+const ran = require('ranjs')
+
+new ran.dist.Cauchy(0, 1).mean()       // => NaN       (undefined moment)
+new ran.dist.Pareto(1, 2).variance()   // => Infinity  (divergent moment)
+new ran.dist.Normal(0, 1).pdf(-Infinity) // => 0       (outside support)
 ```
 
 ## Documentation

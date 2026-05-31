@@ -39,10 +39,10 @@ export default class SkewNormal extends Normal {
 
     // Speed-up constants (be aware of the constants for the parent)
     const delta = this.p.alpha / Math.sqrt(1 + this.p.alpha * this.p.alpha)
-    this.c1 = [
+    Object.assign(this.c, {
       delta,
-      Math.sqrt(1 - delta * delta)
-    ]
+      deltaComplement: Math.sqrt(1 - delta * delta)
+    })
   }
 
   _generator () {
@@ -55,7 +55,7 @@ export default class SkewNormal extends Normal {
     const mag = Math.sqrt(-2 * Math.log(bmu))
     const u0 = mag * Math.sin(2 * Math.PI * bmv)
     const v = mag * Math.cos(2 * Math.PI * bmv)
-    const u1 = this.c1[0] * u0 + this.c1[1] * v
+    const u1 = this.c.delta * u0 + this.c.deltaComplement * v
     const z = u0 >= 0 ? u1 : -u1
     return this.p.xi + this.p.omega * z
   }

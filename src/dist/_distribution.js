@@ -15,6 +15,9 @@ import { MAX_ITER } from '../core/constants'
  * @class Distribution
  * @memberof ran.dist
  */
+// Warn once when q(p) is called with p outside [0,1]; removal tracked in #594
+let _qOutOfRangeWarned = false
+
 class Distribution {
   constructor (type, k) {
     // decisions/0009-rename-single-letter-instance-fields.md — descriptive names replace single-letter abbreviations
@@ -23,7 +26,8 @@ class Distribution {
     // Number of parameters
     this.k = k
 
-    // The parameters
+    // The parameters — natural (user-facing) params only; see decisions/0014-categorical-this-c-natural-params-split.md
+    /** @type {Object} */
     this.p = {}
 
     // Distribution support
@@ -150,7 +154,7 @@ class Distribution {
    * @method _qEstimateTable
    * @memberof ran.dist.Distribution
    * @param {number} p Probability to find value for.
-   * @returns {number} The lower boundary of the interval that satisfies F(x) = p if found, undefined otherwise.
+   * @returns {number} The lower boundary of the interval that satisfies F(x) = p if found, NaN otherwise.
    * @protected
    * @ignore
    */
@@ -184,6 +188,8 @@ class Distribution {
         k2 = k
       }
     }
+
+    return NaN
   }
 
   // _qEstimateTable is broken for negative-integer support (hardwired start at k=0); use this instead.
@@ -227,8 +233,7 @@ class Distribution {
    * @method _qEstimateRoot
    * @memberof ran.dist.Distribution
    * @param {number} p Probability to find value for.
-   * @returns {number|undefined} The value where the probability coincides with the specified value if found,
-   * undefined otherwise.
+   * @returns {number} The value where the probability coincides with the specified value if found, NaN otherwise.
    * @protected
    * @ignore
    */
@@ -257,11 +262,13 @@ class Distribution {
     const bounds = bracket(t => this.cdf(t) - p, a0, b0, this.s)
 
     // Perform root-finding using Brent's method.
-    if (typeof bounds !== 'undefined') {
+    if (Array.isArray(bounds)) {
       return Math.min(Math.max(
         brent(t => this.cdf(t) - p, ...bounds), this.s[0].value), this.s[1].value
       )
     }
+
+    return NaN
   }
 
   /**
@@ -287,6 +294,19 @@ class Distribution {
    */
   support () {
     return this.s
+  }
+
+  /**
+   * Returns the natural (user-facing) parameters of the distribution.
+   * Internal lookup state is not included.
+   * See [decisions/0014-categorical-this-c-natural-params-split.md]{@link ../../decisions/0014-categorical-this-c-natural-params-split.md}.
+   *
+   * @method params
+   * @memberof ran.dist.Distribution
+   * @returns {Object} The natural parameters of the distribution.
+   */
+  params () {
+    return this.p
   }
 
   /**
@@ -532,7 +552,10 @@ class Distribution {
    */
   q (p) {
     if (p < 0 || p > 1) {
-      // If out of bounds, return undefined
+      if (!_qOutOfRangeWarned) {
+        _qOutOfRangeWarned = true
+        console.warn('[ranjs] Distribution.q(p) with p outside [0,1] is deprecated and will throw in v1.27.0; currently returns undefined.')
+      }
       return undefined
     } else if (p === 0) {
       // If zero, return lower support boundary

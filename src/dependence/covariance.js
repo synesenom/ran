@@ -8,18 +8,15 @@ import { mean } from '../location'
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
- * @returns {number|undefined} The sample covariance if both arrays have more than one element and they have the same
- * length, undefined otherwise.
+ * @throws {Error} If the arrays have different lengths.
+ * @returns {number} The sample covariance, or NaN if either array has fewer than 2 elements.
  * @example
  *
  * ran.dependence.covariance([], [])
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.covariance([1], [2])
- * // => undefined
- *
- * ran.dependence.covariance([1, 2, 3], [1, 2, 3, 4])
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.covariance([1, 2, 3], [4, 5, 6])
  * // => 1
@@ -28,15 +25,15 @@ import { mean } from '../location'
  * // => 16.166666666666668
  */
 export default function (x, y) {
-  if (isInvalidInput(x, y)) {
-    return undefined
+  // Length mismatch = caller error (throw); degenerate input = indeterminate (NaN). See solutions/correctness/2026-05-31-1200-adr0015-la-stats-undefined-sentinel-audit.md
+  if (x.length !== y.length) {
+    throw Error('Arrays must have the same length')
+  }
+  if (x.length < 2) {
+    return NaN
   }
 
   const mx = mean(x)
   const my = mean(y)
   return x.length * mean(x.map((d, i) => (d - mx) * (y[i] - my))) / (x.length - 1)
-}
-
-function isInvalidInput (x, y) {
-  return x.length < 2 || y.length < 2 || x.length !== y.length
 }

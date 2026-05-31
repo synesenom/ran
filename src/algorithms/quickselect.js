@@ -77,8 +77,12 @@ function _select (arr, left, right, k) {
  * @param {number[]} values Array of values to select from.
  * @param {number} k The index of the item to select.
  * @return {number} The selected item.
+ * @throws {Error} If k is out of range.
  * @private
  */
 export default function (values, k) {
+  if (k < 0 || k >= values.length) {
+    throw new Error(`quickselect: index ${k} is out of range [0, ${values.length - 1}]`)
+  }
   return _select(values, 0, values.length - 1, k)
 }

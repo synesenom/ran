@@ -9,7 +9,7 @@ import { MAX_ITER, EPS } from '../core/constants'
  * @param {Function} f Function to find root for. Must accept a single variable.
  * @param {Function} df First derivative of the function. Must accept a single variable.
  * @param {number} x0 Starting point of the optimization.
- * @return {(number|undefined)} The root of the specified function.
+ * @return {number} The root of the specified function.
  * @private
  */
 export default function (f, df, x0) {

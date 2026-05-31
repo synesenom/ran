@@ -4,14 +4,14 @@
  * @method variance
  * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate variance for.
- * @returns {number|undefined} Variance of the values if there are more than two, undefined otherwise.
+ * @returns {number} Variance of the values, NaN for fewer than 2 elements.
  * @example
  *
  * ran.dispersion.variance([])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.variance([1])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.variance([1, 2, 3])
  * // => 2.5
@@ -29,4 +29,5 @@ export default function (values) {
     }
     return M / (n - 1)
   }
+  return NaN
 }

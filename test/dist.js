@@ -315,6 +315,23 @@ describe('dist', () => {
       })
     })
 
+    describe('._qEstimateRoot()', () => {
+      it('returns NaN when bracket cannot be found (degenerate equal-bound open support)', () => {
+        // Support [5, 5] (both open, both equal) collapses delta to 0, so a0 === b0 and bracket() returns undefined.
+        class DegenerateContinuous extends Distribution {
+          constructor () {
+            super('continuous', 0)
+            this.s = [{ value: 5, closed: false }, { value: 5, closed: false }]
+          }
+
+          _pdf () { return 0 }
+          _cdf () { return 0.5 }
+        }
+        const d = new DegenerateContinuous()
+        assert(Number.isNaN(d.q(0.5)))
+      })
+    })
+
     describe('.survive()', () => {
       it('should throw not implemented error', () => {
         assert.throws(() => {
@@ -415,12 +432,6 @@ describe('dist', () => {
       it('Normal.fit should recover sigma close to MLE std dev', () => {
         const result = dist.Normal.fit([1, 2, 3, 4, 5])
         assert(Math.abs(result.p.sigma - Math.sqrt(2)) < 0.1)
-      })
-
-      it('Exponential.fit should return an Exponential instance', () => {
-        const data = Array.from({ length: 20 }, (_, i) => (i + 1) * 0.1)
-        const result = dist.Exponential.fit(data)
-        assert(result instanceof dist.Exponential)
       })
 
       it('Alpha.fit() returns a valid Alpha instance', () => {
@@ -1061,13 +1072,21 @@ describe('dist', () => {
         assert(Math.abs(result.p.c - 3) < 0.5)
       })
 
-      it('Bates.fit should return a usable Bates instance close to planted support', () => {
-        const data = new dist.Bates(3, 1, 5).seed(42).sample(200)
-        const result = dist.Bates.fit(data)
-        assert(result instanceof dist.Bates)
-        // n is integer-rounded so Nelder-Mead may land ±1 from planted n=3; allow [2,4]
-        assert(result.p.n >= 2 && result.p.n <= 4)
-        assert(Math.abs(result.p.b - result.p.a - 4) < 1)
+      it('Bates.fit recovers integer n exactly for n = 1, 2, 3', () => {
+        // n >= 4 approaches Gaussian and n becomes weakly identified; test the identifiable range
+        const cases = [
+          [1, 0, 1],
+          [2, -1, 3],
+          [3, 1, 5]
+        ]
+        for (const [n, a, b] of cases) {
+          const data = new dist.Bates(n, a, b).seed(1).sample(1000)
+          const result = dist.Bates.fit(data)
+          assert(result instanceof dist.Bates)
+          assert.strictEqual(result.p.n, n)
+          assert(Math.abs(result.p.a - a) < 0.1)
+          assert(Math.abs(result.p.b - b) < 0.1)
+        }
       })
 
       it('Trapezoidal.fit should recover a, b, c, d close to planted values', () => {
@@ -1340,7 +1359,7 @@ describe('dist', () => {
         assert(result instanceof dist.Soliton)
         assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
         // support must cover the largest observation (which reaches N=5 in a 200-draw sample)
-        assert(result.p.n >= 5)
+        assert(result.p.N >= 5)
       })
 
       it('IrwinHall._fitInit should derive n from E[X]=n/2', () => {
@@ -1489,8 +1508,7 @@ describe('dist', () => {
         const result = dist.NoncentralChi.fit(data)
         assert(result instanceof dist.NoncentralChi)
         assert(Math.abs(result.p.k - 4) < 0.5)
-        // result.p.lambda stores lambda² (NoncentralChi2 internal form); see #491
-        assert(Math.abs(Math.sqrt(result.p.lambda) - 2) < 0.5)
+        assert(Math.abs(result.p.lambda - 2) < 0.5)
       })
 
       it('NoncentralT.fit should recover nu and mu close to planted values', () => {
@@ -1524,6 +1542,15 @@ describe('dist', () => {
         assert(result instanceof dist.DoublyNoncentralChi2)
         assert(Math.abs((result.p.k1 + result.p.k2) - 5) <= 2)
         assert(Math.abs((result.p.lambda1 + result.p.lambda2) - 3) <= 2)
+      })
+
+      it('DoublyNoncentralChi2.fit should enforce k1>=1 and k2>=1 when collapsed fit returns k=1', () => {
+        // chi-squared(1) data: NoncentralChi2.fit returns k=1, triggering kTot<2 clamp
+        const data = new dist.NoncentralChi2(1, 0).seed(42).sample(500)
+        const result = dist.DoublyNoncentralChi2.fit(data)
+        assert(result instanceof dist.DoublyNoncentralChi2)
+        assert(result.p.k1 >= 1)
+        assert(result.p.k2 >= 1)
       })
 
       it('DoublyNoncentralBeta.fit should recover alpha and beta close to planted values', () => {
@@ -1880,6 +1907,80 @@ describe('dist', () => {
         assert(Math.abs(result.p.kappa - 2) < 0.5)
       })
     })
+
+    describe('.params()', () => {
+      it('Distribution.params() returns the parameter object for a non-Categorical distribution', () => {
+        const d = new dist.Normal(2, 3)
+        const p = d.params()
+        assert.strictEqual(p.mu, 2)
+        assert.strictEqual(p.sigma, 3)
+      })
+
+      it('Categorical.params() returns { weights } only', () => {
+        const d = new dist.Categorical([0.3, 0.7], 0)
+        const p = d.params()
+        assert.deepEqual(p.weights, [0.3, 0.7])
+        assert.strictEqual(p.n, undefined)
+        assert.strictEqual(p.min, undefined)
+      })
+
+      it('Bernoulli.params() returns { p }', () => {
+        const d = new dist.Bernoulli(0.7)
+        assert.deepEqual(d.params(), { p: 0.7 })
+      })
+
+      it('Binomial.params() returns { n, p }', () => {
+        const d = new dist.Binomial(10, 0.3)
+        assert.deepEqual(d.params(), { n: 10, p: 0.3 })
+      })
+
+      it('Hypergeometric.params() returns { N, K, n }', () => {
+        const d = new dist.Hypergeometric(10, 5, 3)
+        assert.deepEqual(d.params(), { N: 10, K: 5, n: 3 })
+      })
+
+      it('Soliton.params() returns { N }', () => {
+        const d = new dist.Soliton(5)
+        assert.deepEqual(d.params(), { N: 5 })
+      })
+
+      it('Zipf.params() returns { s, N }', () => {
+        const d = new dist.Zipf(2, 50)
+        assert.deepEqual(d.params(), { s: 2, N: 50 })
+      })
+
+      it('ZipfMandelbrot.params() returns { N, s, q }', () => {
+        const d = new dist.ZipfMandelbrot(100, 2, 1)
+        assert.deepEqual(d.params(), { N: 100, s: 2, q: 1 })
+      })
+
+      it('BetaBinomial.params() returns { n, alpha, beta }', () => {
+        const d = new dist.BetaBinomial(5, 2, 3)
+        assert.deepEqual(d.params(), { n: 5, alpha: 2, beta: 3 })
+      })
+
+      it('NegativeHypergeometric.params() returns { N, K, r }', () => {
+        const d = new dist.NegativeHypergeometric(10, 5, 2)
+        assert.deepEqual(d.params(), { N: 10, K: 5, r: 2 })
+      })
+
+      it('Rademacher.params() returns {}', () => {
+        assert.deepEqual(new dist.Rademacher().params(), {})
+      })
+
+      it('Bernoulli.fit().params().p recovers planted value within tolerance', () => {
+        const data = new dist.Bernoulli(0.7).seed(42).sample(500)
+        const result = dist.Bernoulli.fit(data)
+        assert(Math.abs(result.params().p - 0.7) < 0.05)
+      })
+
+      it('Zipf.fit().params() recovers planted s within tolerance', () => {
+        const data = new dist.Zipf(2, 50).seed(42).sample(200)
+        const result = dist.Zipf.fit(data)
+        assert(Math.abs(result.params().s - 2) < 0.3)
+        assert(result.params().N >= 10)
+      })
+    })
   })
 
   describe('PreComputed', () => {
@@ -1903,6 +2004,16 @@ describe('dist', () => {
       // cdfTable[0] = 0.5+eps, cdfTable[1] ≈ 1 + 2eps > 1; re-reading from cache must still return ≤ 1
       assert.isAtMost(d._cdf(0), 1)
       assert.isAtMost(d._cdf(1), 1)
+    })
+
+    it('_generator returns NaN when all alias tables are exhausted (zero-probability PMF)', () => {
+      // _pk returns 0 for every k, so every alias table always routes to the overflow slot (TABLE_SIZE).
+      // After MAX_NUMBER_OF_TABLES tables the do-while exits without sampling, and must return NaN not undefined.
+      class ZeroMassDist extends PreComputed {
+        _pk () { return 0 }
+      }
+      const d = new ZeroMassDist()
+      assert(Number.isNaN(d._generator()))
     })
   })
 
@@ -2103,6 +2214,54 @@ describe('dist', () => {
 
     it('bic() should include the parameter penalty (k=2)', () => {
       assert.strictEqual(d.bic(sample), Math.log(sample.length) * 2 - 2 * d.lnL(sample))
+    })
+  })
+
+  // Multi-level inheritance parameter-count regressions (issue #510). Each subclass inherits the wrong
+  // this.k from a parent further up the chain unless it overrides; a wrong k silently distorts aic()/bic().
+  const paramCountCases = [
+    { name: 'Weibull', ctor: () => new dist.Weibull(1, 1), k: 2, inherited: '1 from Exponential' },
+    { name: 'DoubleWeibull', ctor: () => new dist.DoubleWeibull(1, 1), k: 2, inherited: '1 from Weibull' },
+    { name: 'ExponentiatedWeibull', ctor: () => new dist.ExponentiatedWeibull(1, 1, 1), k: 3, inherited: '2 from Weibull' },
+    { name: 'Rayleigh', ctor: () => new dist.Rayleigh(1), k: 1, inherited: '2 from Weibull' },
+    { name: 'Chi2', ctor: () => new dist.Chi2(4), k: 1, inherited: '2 from Gamma' },
+    { name: 'Chi', ctor: () => new dist.Chi(4), k: 1, inherited: '2 from Gamma via Chi2' },
+    { name: 'MaxwellBoltzmann', ctor: () => new dist.MaxwellBoltzmann(1), k: 1, inherited: '2 from Gamma' },
+    { name: 'GeneralizedGamma', ctor: () => new dist.GeneralizedGamma(1, 1, 1), k: 3, inherited: '2 from Gamma' },
+    { name: 'GeneralizedNormal', ctor: () => new dist.GeneralizedNormal(0, 1, 2), k: 3, inherited: '2 from Gamma via GeneralizedGamma' },
+    { name: 'HalfGeneralizedNormal', ctor: () => new dist.HalfGeneralizedNormal(1, 2), k: 2, inherited: '3 from GeneralizedNormal' },
+    { name: 'LogGamma', ctor: () => new dist.LogGamma(1, 1, 0), k: 3, inherited: '2 from Gamma' }
+  ]
+  describe('Davis', () => {
+    it('survival/hazard/cHazard below support return 1/0/0', () => {
+      const d = new dist.Davis(1, 1, 2.5)
+      // x well below support (tests the x < mu path)
+      assert.strictEqual(d.survival(0.5), 1)
+      assert.strictEqual(d.hazard(0.5), 0)
+      assert.strictEqual(d.cHazard(0.5), 0)
+      // x exactly at the open lower boundary mu (tests the x === mu path of x <= mu guard)
+      assert.strictEqual(d.survival(1), 1)
+      assert.strictEqual(d.hazard(1), 0)
+      assert.strictEqual(d.cHazard(1), 0)
+    })
+  })
+
+  paramCountCases.forEach(({ name, ctor, k, inherited }) => {
+    describe(`${name} parameter count`, () => {
+      const sample = [0.1, 0.5, 1.0, 1.5, 2.0, 0.3, 0.8, 1.2, 2.5, 0.6]
+      const d = ctor()
+
+      it(`should have paramCount k=${k}, not the ${inherited}`, () => {
+        assert.strictEqual(d.k, k)
+      })
+
+      it(`aic() should use the corrected parameter penalty (k=${k})`, () => {
+        assert.strictEqual(d.aic(sample), 2 * (k - d.lnL(sample)))
+      })
+
+      it(`bic() should use the corrected parameter penalty (k=${k})`, () => {
+        assert.strictEqual(d.bic(sample), Math.log(sample.length) * k - 2 * d.lnL(sample))
+      })
     })
   })
 })

@@ -27,6 +27,7 @@ export default class Zipf extends Categorical {
   constructor (s, N) {
     const Ni = Math.round(N)
     super(Array.from({ length: Ni }, (d, i) => Math.pow(i + 1, -s)), 1)
+    this.p = { s, N: Ni }
 
     // Validate parameters
     Distribution.validate({ s, N: Ni }, [

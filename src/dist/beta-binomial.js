@@ -34,6 +34,7 @@ export default class BetaBinomial extends Categorical {
   constructor (n, alpha, beta) {
     const ni = Math.round(n)
     super(Array.from({ length: ni + 1 }, (d, i) => Math.exp(logBinomial(ni, i) + logBeta(i + alpha, ni - i + beta) - logBeta(alpha, beta))), 0)
+    this.p = { n: ni, alpha, beta }
 
     // Validate parameters
     Distribution.validate({ n: ni, alpha, beta }, [

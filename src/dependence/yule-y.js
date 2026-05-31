@@ -12,24 +12,21 @@ import oddsRatio from '../dependence/odds-ratio'
  * @param {number} p01 The probability of X = 0 and Y = 1.
  * @param {number} p10 The probability of X = 1 and Y = 0.
  * @param {number} p11 The probability of X = 1 and Y = 1.
- * @returns {number|undefined} Yule's Y if p01 and p10 are positive, undefined otherwise.
+ * @returns {number} Yule's Y, or NaN when p01 or p10 is zero (the odds ratio diverges, making the formula
+ * indeterminate).
  * @example
  *
  * ran.dependence.yuleY(0.3, 0, 0.3, 0.4)
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.yuleY(0.3, 0.3, 0, 0.4)
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.yuleY(0.1, 0.2, 0.3, 0.4)
  * // => -0.10102051443364372
  */
 export default function (p00, p01, p10, p11) {
   const or = oddsRatio(p00, p01, p10, p11)
-  if (typeof or === 'undefined') {
-    return undefined
-  }
-
   const sqrtOr = Math.sqrt(or)
   return (sqrtOr - 1) / (sqrtOr + 1)
 }

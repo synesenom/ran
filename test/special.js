@@ -444,9 +444,35 @@ describe('special', () => {
   })
 
   describe('.lambertW0()', () => {
-    it('should satisfy the W * exp(W) = x equation', () => {
+    it('should return NaN for z < -1/e', () => {
+      assert(isNaN(special.lambertW0(-1)))
+      assert(isNaN(special.lambertW0(-0.5)))
+      assert(isNaN(special.lambertW0(-Math.exp(-1) - 1e-10)))
+    })
+
+    it('should return -1 at the branch point z = -1/e', () => {
+      assert(Math.abs(special.lambertW0(-Math.exp(-1)) + 1) < 1e-6)
+    })
+
+    it('should return 0 at z = 0', () => {
+      assert(special.lambertW0(0) === 0)
+    })
+
+    it('should return 1 at z = e', () => {
+      assert(equal(special.lambertW0(Math.E), 1))
+    })
+
+    it('should satisfy the W * exp(W) = x equation for x >= 0', () => {
       repeat(() => {
         const x = Math.random() * 10
+        const w = special.lambertW0(x)
+        assert(equal(w * Math.exp(w), x))
+      }, LAPS)
+    })
+
+    it('should satisfy the W * exp(W) = x equation for x in [-1/e, 0)', () => {
+      repeat(() => {
+        const x = -(Math.random() * (1 / Math.E - 1e-9) + 1e-9)
         const w = special.lambertW0(x)
         assert(equal(w * Math.exp(w), x))
       }, LAPS)
@@ -454,9 +480,29 @@ describe('special', () => {
   })
 
   describe('.lambertW1m()', () => {
+    it('should return NaN for z < -1/e', () => {
+      assert(isNaN(special.lambertW1m(-1)))
+      assert(isNaN(special.lambertW1m(-0.5)))
+      assert(isNaN(special.lambertW1m(-Math.exp(-1) - 1e-10)))
+    })
+
+    it('should return NaN for z >= 0', () => {
+      assert(isNaN(special.lambertW1m(0)))
+      assert(isNaN(special.lambertW1m(1)))
+      assert(isNaN(special.lambertW1m(0.1)))
+    })
+
+    it('should return -1 at the branch point z = -1/e', () => {
+      assert(Math.abs(special.lambertW1m(-Math.exp(-1)) + 1) < 1e-6)
+    })
+
+    it('should return known value at z = -0.1', () => {
+      assert(equal(special.lambertW1m(-0.1), -3.577152063957297))
+    })
+
     it('should satisfy the W * exp(W) = x equation', () => {
       repeat(() => {
-        const x = -1 * Math.random() / Math.E
+        const x = -(Math.random() * (1 / Math.E - 1e-9) + 1e-9)
         const w = special.lambertW1m(x)
         assert(equal(w * Math.exp(w), x))
       }, LAPS)

@@ -44,35 +44,34 @@ LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
 
 **If a `version` argument was provided**, use it as `VERSION` directly.
 
-**Otherwise, infer the bump type** by checking whether any `major`-labelled
-issues were closed since the last tag:
+**Otherwise, default to a minor bump**: `X.Y.Z` → `X.(Y+1).0`.
+
+Under the numpy/scipy-style versioning policy, **breaking changes ship in
+minor releases** (behind a deprecation cycle), so the `breaking` label does
+**not** trigger a major bump. A major bump (`X.Y.Z` → `(X+1).0.0`) is reserved
+for a rare, sweeping overhaul and is only ever done by passing an explicit
+`version` argument — never inferred automatically from issue labels.
+
+Surface any `breaking`-labelled issues closed since the last tag so the
+operator is aware of behavior changes in this minor release (informational
+only — it does not change the bump type):
 
 ```bash
 if [ -n "$LAST_TAG" ]; then
   LAST_TAG_DATE=$(git log -1 --format=%cI "$LAST_TAG")
-  MAJOR_CLOSED=$(gh issue list \
+  BREAKING_CLOSED=$(gh issue list \
     --state closed \
-    --label major \
+    --label breaking \
     --json number,closedAt,title \
     --jq ".[] | select(.closedAt > \"$LAST_TAG_DATE\") | \"#\(.number) \(.title)\"")
-else
-  MAJOR_CLOSED=$(gh issue list \
-    --state closed \
-    --label major \
-    --json number,title \
-    --jq '.[] | "#\(.number) \(.title)"')
 fi
 ```
 
-- If `MAJOR_CLOSED` is non-empty → **bump major**: `X.Y.Z` → `(X+1).0.0`
-- Otherwise → **bump minor**: `X.Y.Z` → `X.(Y+1).0`
-
-Compute `NEXT_VERSION` (the non-major milestone to create after this release):
+Compute `NEXT_VERSION` (the milestone to create after this release):
 - Any release `X.Y.0` → next is `X.(Y+1).0`
-- Major release `(X+1).0.0` → next is `(X+1).1.0`
 
-Print `VERSION`, the bump type (major/minor), any triggering major issues, and
-`NEXT_VERSION` so the operator can confirm before continuing.
+Print `VERSION`, the bump type, any `breaking`-labelled issues in the release,
+and `NEXT_VERSION` so the operator can confirm before continuing.
 
 ---
 
@@ -238,9 +237,9 @@ else
 fi
 ```
 
-Note: the `v2.0.0` major milestone (and any other future major milestone) is
-never touched by this skill — only the milestone whose title matches
-`v${VERSION}` is closed.
+Note: only the milestone whose title matches `v${VERSION}` is closed and
+rotated. Any future major-overhaul milestone, if one is ever created, is left
+untouched by this skill.
 
 ---
 
@@ -265,7 +264,7 @@ Milestone v{NEXT_VERSION}: created
   nothing is published to npm
 - **Milestone rotation is best-effort** — if the milestone is missing, warn
   and continue; do not abort the release
-- **Only touch the released milestone** — leave `v2.0.0` and any other future
-  major milestone untouched when releasing a minor version
+- **Only touch the released milestone** — leave any future major-overhaul
+  milestone untouched when releasing a minor version
 - **No interactive prompts mid-pipeline** — if anything is ambiguous, abort
   early with a clear message rather than pausing mid-release

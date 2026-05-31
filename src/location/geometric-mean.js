@@ -6,11 +6,11 @@ import mean from './mean'
  * @method geometricMean
  * @memberof ran.location
  * @param {number[]} values Array of values to calculate geometric mean for.
- * @returns {number|undefined} Gemoetric mean of the values if there are any, undefined otherwise.
+ * @returns {number} Geometric mean of the values, NaN for empty input.
  * @example
  *
  * ran.location.geometricMean([])
- * // => undefined
+ * // => NaN
  *
  * ran.location.geometricMean([1, 2, 3])
  * // => 1.8171205928321394

@@ -55,17 +55,29 @@ describe('la', () => {
       it('should add two vectors', () => {
         assert.deepEqual(new la.Vector([1, 2, 3]).add(new la.Vector([6, 7, 8])), new la.Vector([7, 9, 11]))
       })
+
+      it('should throw on dimension mismatch', () => {
+        assert.throws(() => new la.Vector([1, 2, 3]).add(new la.Vector([1, 2])))
+      })
     })
 
     describe('.sub()', () => {
       it('should subtract two vectors', () => {
         assert.deepEqual(new la.Vector([1, 2, 3]).sub(new la.Vector([6, 7, 8])), new la.Vector([-5, -5, -5]))
       })
+
+      it('should throw on dimension mismatch', () => {
+        assert.throws(() => new la.Vector([1, 2, 3]).sub(new la.Vector([1, 2])))
+      })
     })
 
     describe('.dot()', () => {
       it('should compute the dot product of two vectors', () => {
         assert.deepEqual(new la.Vector([1.2, 3.4, 5.6, 7.8]).dot(new la.Vector([1, 2, 3, 4])), 56)
+      })
+
+      it('should throw on dimension mismatch', () => {
+        assert.throws(() => new la.Vector([1, 2, 3]).dot(new la.Vector([1, 2])))
       })
     })
 
@@ -204,6 +216,10 @@ describe('la', () => {
           )
         }, 100)
       })
+
+      it('should throw on dimension mismatch', () => {
+        assert.throws(() => new la.Matrix(3).add(new la.Matrix(4)))
+      })
     })
 
     describe('.sub()', () => {
@@ -217,6 +233,10 @@ describe('la', () => {
             new la.Matrix(arr1.map((d, i) => d.map((dd, j) => dd - arr2[i][j])))
           )
         }, 100)
+      })
+
+      it('should throw on dimension mismatch', () => {
+        assert.throws(() => new la.Matrix(3).sub(new la.Matrix(4)))
       })
     })
 
@@ -232,9 +252,17 @@ describe('la', () => {
           )
         }, 100)
       })
+
+      it('should throw on dimension mismatch', () => {
+        assert.throws(() => new la.Matrix(3).apply(new la.Vector(4)))
+      })
     })
 
     describe('.mult()', () => {
+      it('should throw on dimension mismatch', () => {
+        assert.throws(() => new la.Matrix(3).mult(new la.Matrix(4)))
+      })
+
       it('should multiply two matrices', () => {
         // Test uses the Freivalds algorithm
         const n = 10
@@ -340,6 +368,10 @@ describe('la', () => {
             new la.Matrix(arr1.map((row, i) => row.map((d, j) => d * arr2[i][j])))
           )
         }, 100)
+      })
+
+      it('should throw on dimension mismatch', () => {
+        assert.throws(() => new la.Matrix(3).hadamard(new la.Matrix(4)))
       })
     })
   })

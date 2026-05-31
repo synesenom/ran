@@ -7,18 +7,18 @@ import min from '../shape/min'
  * @method range
  * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate range for.
- * @returns {number|undefined} The range of the values if there is any, undefined otherwise.
+ * @returns {number} The range of the values, or NaN for an empty array.
  * @example
  *
  * ran.dispersion.range([])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.range([0, 1, 2, 2])
  * // => 2
  */
 export default function (values) {
   if (values.length === 0) {
-    return undefined
+    return NaN
   }
 
   return max(values) - min(values)

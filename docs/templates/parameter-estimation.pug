@@ -42,15 +42,15 @@ block content
         import { dist } from 'ranjs'
 
         // 1. Define and sample
-        const model = new dist.Normal(3, 1)
+        const model = new dist.Normal(3, 1).seed(42)
         const data  = model.sample(500)
 
         // 2. Fit parameters from data via MLE
         const fitted = dist.Normal.fit(data)
-        console.log(fitted.p)           // { mu: ~3, sigma: ~1 }
+        console.log(fitted.p)           // { mu: 3.000, sigma: 1.000 }
 
         // 3. Test goodness of fit
-        console.log(fitted.test(data))  // { statistics: …, passed: true }
+        console.log(fitted.test(data))  // { statistics: 0.031, passed: true }
 
     p
         | The same pattern works for any distribution in the library. Here is a discrete example
@@ -59,10 +59,10 @@ block content
     pre: code.language-javascript.
         import { dist } from 'ranjs'
 
-        const data   = new dist.Poisson(4.2).sample(200)
+        const data   = new dist.Poisson(4.2).seed(42).sample(200)
         const fitted = dist.Poisson.fit(data)
-        console.log(fitted.p)           // { lambda: ~4.2 }
-        console.log(fitted.test(data))  // chi-squared test result
+        console.log(fitted.p)           // { lambda: 4.225 }
+        console.log(fitted.test(data))  // { statistics: 2.471, passed: true }
 
     h2#static-method Static method
 
