@@ -9,7 +9,7 @@ import { EPS, MAX_ITER } from '../core/constants'
  * @param {Function} f Function to find root for. Must accept a single variable.
  * @param {number} a0 Lower boundary of the bracket.
  * @param {number} b0 Upper boundary of the bracket.
- * @return {(number|undefined)} The root location if found, undefined otherwise.
+ * @return {number} The root location if found, NaN otherwise.
  * @private
  */
 // TODO Use pseudo code from wikipedia.
@@ -23,7 +23,7 @@ export default function (f, a0, b0) {
   let fc, p, q, r, s, eps, xm
 
   if ((fa > 0 && fb > 0) || (fa < 0 && fb < 0)) {
-    return
+    return NaN
   }
 
   fc = fb
@@ -87,4 +87,6 @@ export default function (f, a0, b0) {
     }
     fb = f(b)
   }
+
+  return NaN
 }

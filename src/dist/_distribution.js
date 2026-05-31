@@ -262,7 +262,7 @@ class Distribution {
     const bounds = bracket(t => this.cdf(t) - p, a0, b0, this.s)
 
     // Perform root-finding using Brent's method.
-    if (typeof bounds !== 'undefined') {
+    if (Array.isArray(bounds)) {
       return Math.min(Math.max(
         brent(t => this.cdf(t) - p, ...bounds), this.s[0].value), this.s[1].value
       )
