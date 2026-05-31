@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Deprecated
+
+- `Distribution.q(p)` called with `p` outside `[0, 1]` now emits a one-time `console.warn`; the current behavior (returning `undefined`) is unchanged this release. The method will **throw** in v1.27.0 (see #594).
+
 ### Fixed
 
 - `bracket`, `brent`, and `newton` in `src/algorithms/` now return `NaN` (instead of `undefined`) on failure paths; `quickselect` now throws for an out-of-range index. `Distribution._qEstimateRoot` propagates `NaN` on bracket failure (#589).

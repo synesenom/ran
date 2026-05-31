@@ -15,6 +15,9 @@ import { MAX_ITER } from '../core/constants'
  * @class Distribution
  * @memberof ran.dist
  */
+// Warn once when q(p) is called with p outside [0,1]; removal tracked in #594
+let _qOutOfRangeWarned = false
+
 class Distribution {
   constructor (type, k) {
     // decisions/0009-rename-single-letter-instance-fields.md — descriptive names replace single-letter abbreviations
@@ -548,7 +551,10 @@ class Distribution {
    */
   q (p) {
     if (p < 0 || p > 1) {
-      // Known deviation from decisions/0015-return-value-and-error-conventions.md — an out-of-range p is a caller error that should throw; deprecation+removal tracked in #592/#594.
+      if (!_qOutOfRangeWarned) {
+        _qOutOfRangeWarned = true
+        console.warn('[ranjs] Distribution.q(p) with p outside [0,1] is deprecated and will throw in v1.27.0; currently returns undefined.')
+      }
       return undefined
     } else if (p === 0) {
       // If zero, return lower support boundary
