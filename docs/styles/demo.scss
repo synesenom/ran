@@ -113,7 +113,7 @@ body:has(.demo-controls) {
 }
 
 // Container trick: height:0 + padding-bottom creates a fixed-aspect box;
-// both absolutely-positioned SVGs from dalian stack inside it.
+// the absolutely-positioned d3 SVG fills it.
 .demo-chart-wrap {
   position: relative;
   height: 0;
