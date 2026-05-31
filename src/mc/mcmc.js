@@ -1,112 +1,73 @@
+import { float } from '../core'
+
 /**
- * Base class implementing a general Markov chain Monte Carlo sampler. All MCMC sampler is extended from this class.
- * MCMC samplers can be used to approximate integrals by efficiently sampling a density that cannot be normalized or
+ * Base class implementing a general Markov chain Monte Carlo sampler. All MCMC samplers extend this class.
+ * MCMC samplers approximate integrals by efficiently sampling a density that cannot be normalized or
  * sampled directly.
  *
  * @class MCMC
  * @memberof ran.mc
- * @param {Function} logDensity The logarithm of the density function to estimate.
- * @param {Object=} config Object describing some configurations. Supported properties:
+ * @param {Function} logDensity The logarithm of the (unnormalized) target density.
+ * @param {Object=} config Sampler configuration. Supported properties:
  * <ul>
- *     <li>{dim}: Dimension of the state space to sample. Default is 1.</li>
- *     <li>{maxHistory}: Maximum length of history for aggregated computations. Default is 1000.</li>
+ *   <li>{dim}: Dimension of the state space. Default is 1.</li>
+ *   <li>{maxLag}: Maximum lag stored for autocorrelation estimation. Default is 100.</li>
  * </ul>
- * @param {Object=} initialState The initial internal state of the sampler. Supported properties: {x} (the
- * starting state), {samplingRate} (sampling rate) and {internal} for the child class' own internal parameters.
+ * @param {Object=} initialState Initial state of the sampler. Supported properties: {x} (starting
+ * position), {samplingRate} (thinning interval), and {internal} for subclass-specific state.
  * @constructor
  */
-export default class {
+export default class MCMC {
   constructor (logDensity, config = {}, initialState = {}) {
     this.dim = config.dim || 1
-    this.maxHistory = config.maxHistory || 1e4
+    this.maxLag = config.maxLag || 100
     this.lnp = logDensity
-    this.x = initialState.x || Array.from({ length: this.dim }, Math.random)
+    this.x = initialState.x || Array.from({ length: this.dim }, () => float())
     this.samplingRate = initialState.samplingRate || 1
     this.internal = initialState.internal || {}
+    this._initAccumulators()
+  }
 
-    /**
-     * State history of the sampler.
-     *
-     * @namespace history
-     * @memberof ran.mc.MCMC
-     * @private
-     */
-    this.history = (function (self) {
-      const _arr = Array.from({ length: self.dim }, () => [])
+  _initAccumulators () {
+    this._accepted = 0
+    this._totalIter = 0
+    // Welford online mean/variance per dimension
+    this._welford = Array.from({ length: this.dim }, () => ({ n: 0, mean: 0, M2: 0 }))
+    // Circular buffer + running cross-product sums for online autocorrelation per dimension
+    this._acN = 0
+    this._acBuf = Array.from({ length: this.dim }, () => new Float64Array(this.maxLag))
+    this._acCross = Array.from({ length: this.dim }, () => new Float64Array(this.maxLag))
+  }
 
-      return {
-        /**
-         * Returns the current history.
-         *
-         * @method get
-         * @memberof ran.mc.MCMC.history
-         * @return {Array} Current history.
-         * @private
-         */
-        get () {
-          return _arr
-        },
+  _updateAccumulators (x, accepted) {
+    this._totalIter++
+    if (accepted) this._accepted++
 
-        /**
-         * Updates state history with new data.
-         *
-         * @method update
-         * @memberof ran.mc.MCMC.history
-         * @param {Array} x Last state to update history with.
-         */
-        update (x) {
-          // Add new state
-          _arr.forEach((d, j) => d.push(x[j]))
+    for (let d = 0; d < this.dim; d++) {
+      const v = x[d]
 
-          // Remove old state
-          if (_arr[0].length >= self.maxHistory) {
-            _arr.forEach(d => d.shift())
-          }
-        }
+      // Welford update
+      const w = this._welford[d]
+      w.n++
+      const delta = v - w.mean
+      w.mean += delta / w.n
+      w.M2 += delta * (v - w.mean)
+
+      // Cross-product sums: cross[r] accumulates sum of x[i]*x[i-r]
+      const buf = this._acBuf[d]
+      const cross = this._acCross[d]
+      const n = this._acN
+      cross[0] += v * v
+      for (let r = 1; r < Math.min(n + 1, this.maxLag); r++) {
+        cross[r] += v * buf[((n - r) % this.maxLag + this.maxLag) % this.maxLag]
       }
-    })(this)
-
-    /**
-     * Acceptance ratio.
-     *
-     * @namespace acceptance
-     * @memberof ran.mc.MCMC
-     * @private
-     */
-    this.acceptance = (function (self) {
-      const _arr = []
-
-      return {
-        /**
-         * Computes acceptance for the current historical data.
-         *
-         * @method compute
-         * @memberof ran.mc.MCMC.acceptance
-         * @return {number} Acceptance ratio.
-         */
-        compute () {
-          return _arr.reduce((acc, d) => d + acc) / _arr.length
-        },
-
-        /**
-         * Updates acceptance history with new data.
-         *
-         * @method update
-         * @memberof ran.mc.MCMC.acceptance
-         * @param {number} a Acceptance: 1 if last state was accepted, 0 otherwise.
-         */
-        update (a) {
-          _arr.push(a)
-          if (_arr.length > self.maxHistory) {
-            _arr.shift()
-          }
-        }
-      }
-    })(this)
+      buf[n % this.maxLag] = v
+    }
+    this._acN++
   }
 
   /**
-   * Returns the internal variables of the class. Must be overridden.
+   * Returns the subclass's internal variables. Must be overridden.
    *
    * @method _internal
    * @memberof ran.mc.MCMC
@@ -123,9 +84,8 @@ export default class {
    * @method _iter
    * @memberof ran.mc.MCMC
    * @param {number[]} x Current state of the Markov chain.
-   * @param {boolean=} warmUp Whether iteration takes place during warm-up or not. Default is false.
-   * @returns {{x: Array, accepted: boolean}} Object containing the new state ({x}) and whether it is a
-   * genuinely new state or not ({accepted}).
+   * @param {boolean=} warmUp Whether the iteration takes place during warm-up. Default is false.
+   * @returns {{x: number[], accepted: boolean}} New state and whether it was accepted.
    * @private
    */
   _iter () {
@@ -133,11 +93,11 @@ export default class {
   }
 
   /**
-   * Adjusts internal parameters. Must be overridden.
+   * Adjusts internal parameters after an iteration. Must be overridden.
    *
    * @method _adjust
    * @memberof ran.mc.MCMC
-   * @param {Object} i Object containing the result of the last iteration.
+   * @param {Object} i Result of the last iteration.
    * @private
    */
   _adjust () {
@@ -145,12 +105,12 @@ export default class {
   }
 
   /**
-   * Returns the current state of the sampler. The return value of this method can be passed to a sampler of
-   * the same type to continue a previously warmed up sampler.
+   * Returns the current state of the sampler. The return value can be passed to a sampler of the
+   * same type to resume from this position.
    *
    * @method state
    * @memberof ran.mc.MCMC
-   * @returns {Object} Object containing all relevant parameters of the sampler.
+   * @returns {Object} Object containing the current position, sampling rate, and subclass internals.
    */
   state () {
     return {
@@ -161,174 +121,129 @@ export default class {
   }
 
   /**
-   * Computes basic statistics of the sampled state variables based on historical data. Returns mean,
-   * standard deviation and coefficient of variation.
+   * Computes mean, standard deviation, and coefficient of variation for each dimension based on
+   * observations seen since the last reset (start of sampling or construction).
    *
    * @method statistics
    * @memberof ran.mc.MCMC
-   * @returns {Object[]} Array containing objects for each dimension. Objects contain <code>mean</code>, <code>std</code> and <code>cv</code>.
+   * @returns {Object[]} Array of {mean, std, cv} objects, one per dimension.
    */
   statistics () {
-    return this.history.get().map(h => {
-      const m = h.reduce((sum, d) => sum + d, 0) / h.length
-
-      const s = h.reduce((sum, d) => sum + (d - m) * (d - m), 0) / h.length
-      return {
-        mean: m,
-        std: s,
-        cv: s / m
-      }
+    return this._welford.map(w => {
+      const variance = w.n > 1 ? w.M2 / (w.n - 1) : 0
+      const std = Math.sqrt(variance)
+      return { mean: w.mean, std, cv: w.mean !== 0 ? std / Math.abs(w.mean) : NaN }
     })
   }
 
   /**
-   * Computes acceptance rate based on historical data.
+   * Computes the cumulative acceptance rate since the last reset.
    *
    * @method ar
    * @memberof ran.mc.MCMC
-   * @returns {number} The acceptance rate in the last several iterations.
+   * @returns {number} Fraction of proposals accepted.
    */
   ar () {
-    return this.acceptance.compute()
+    return this._totalIter > 0 ? this._accepted / this._totalIter : 0
   }
 
   /**
-   * Computes the auto-correlation function for each dimension based on historical data.
+   * Computes the autocorrelation function for each dimension at lags 0 to maxLag-1. Uses an
+   * online estimator: O(dim * maxLag) memory, O(dim * maxLag) per update, O(1) per query.
    *
    * @method ac
    * @memberof ran.mc.MCMC
-   * @returns {number[][]} Array containing the correlation function (correlation versus lag) for each
-   * dimension.
+   * @returns {number[][]} Array of autocorrelation-vs-lag arrays, one per dimension. Lags with
+   * fewer than r+1 observations return NaN.
    */
   ac () {
-    // return this._ac.compute();
-    return this.history.get().map(h => {
-      // Get average
-      const m = h.reduce((s, d) => s + d) / h.length
-
-      const m2 = h.reduce((s, d) => s + d * d)
-
-      const rho = new Array(100).fill(0)
-      for (let i = 0; i < h.length; i++) {
-        for (let r = 0; r < rho.length; r++) {
-          if (i - r > 0) {
-            rho[r] += (h[i] - m) * (h[i - r] - m)
-          }
-        }
-      }
-
-      // Return auto-correlation for each dimension
-      return rho.map(function (d) {
-        return d / (m2 - h.length * m * m)
+    const n = this._acN
+    return this._acCross.map((cross, d) => {
+      const w = this._welford[d]
+      // Population variance for normalization — conventional for autocorrelation estimation
+      const variance = w.n > 0 ? w.M2 / w.n : 1
+      return Array.from({ length: this.maxLag }, (_, r) => {
+        if (r >= n) return NaN
+        return (cross[r] / (n - r) - w.mean * w.mean) / variance
       })
     })
   }
 
   /**
-   * Performs a single iteration.
+   * Performs a single iteration, updates accumulators, and optionally calls a callback.
    *
    * @method iterate
    * @memberof ran.mc.MCMC
-   * @param {Function=} callback Callback to trigger after the iteration.
-   * @param {boolean=} warmUp Whether iteration takes place during warm-up or not. Default is false.
-   * @returns {Object} Object containing the new state (<code>x</code>) and whether it is a
-   * genuinely new state or not (<code>accepted</code>).
+   * @param {Function=} callback Called with (x, accepted) after each iteration.
+   * @param {boolean=} warmUp Whether the iteration is part of warm-up. Default is false.
+   * @returns {{x: number[], accepted: boolean}} Result of the iteration.
    */
   iterate (callback = null, warmUp = false) {
-    // Get new state
     const i = this._iter(this.x, warmUp)
-
-    // Update accumulators
-    this.history.update(i.x)
-    this.acceptance.update(i.accepted)
-
-    // Update state
+    this._updateAccumulators(i.x, i.accepted)
     this.x = i.x
-
-    // Callback
     callback && callback(i.x, i.accepted)
-
     return i
   }
 
   /**
-   * Carries out the initial warm-up phase of the sampler. During this phase, internal parameters may change
-   * and therefore sampling does not take place. Instead, all relevant variables are adjusted.
+   * Carries out the warm-up phase. Runs batches of 10K iterations, adapts internal parameters
+   * via _adjust(), and tunes the thinning interval using the online autocorrelation estimate.
    *
    * @method warmUp
    * @memberof ran.mc.MCMC
-   * @param {Function} progress Callback function to call when an integer percentage of the warm-up is done.
-   * The percentage of the finished batches is passed as a parameter.
-   * @param {number=} maxBatches Maximum number of batches for warm-up. Each batch consists of 10K iterations.
-   * Default value is 100.
+   * @param {Function=} progress Called with the percentage complete (0–100) after each batch.
+   * @param {number=} maxBatches Number of warm-up batches. Default is 100.
    */
   warmUp (progress, maxBatches = 100) {
-    // Run specified batches
     for (let batch = 0; batch <= maxBatches; batch++) {
-      // Do some iterations
       for (let j = 0; j < 1e4; j++) {
         this._adjust(this.iterate(null, true))
-        // this._ac.update(this.x);
       }
 
-      // Adjust sampling rate
-      // Get highest zero point
+      // Set thinning interval to the first lag where all dimensions have |rho| <= 0.05
       const z = this.ac().reduce((first, d) => {
         for (let i = 0; i < d.length - 1; i++) {
-          if (Math.abs(d[i]) <= 0.05) {
+          if (!isNaN(d[i]) && Math.abs(d[i]) <= 0.05) {
             return Math.max(first, i)
           }
         }
         return first
       }, 0)
-      // Change sampling rate if zero point is different
       if (z > this.samplingRate) {
         this.samplingRate++
       } else if (z < this.samplingRate && this.samplingRate > 1) {
         this.samplingRate--
       }
 
-      // Call optional callback
-      if (typeof progress !== 'undefined') {
-        progress(100 * batch / maxBatches)
-      }
+      typeof progress === 'function' && progress(100 * batch / maxBatches)
     }
   }
 
   /**
-   * Performs the sampling of the target density. Note that during sampling, no parameter adjustment is
-   * taking place.
+   * Samples from the target density. Resets accumulators so that statistics() and ar() reflect
+   * the sampling phase only. Thins the chain by samplingRate (set during warm-up).
    *
    * @method sample
    * @memberof ran.mc.MCMC
-   * @param {Function} progress Callback function to call when an integer percentage of the samples is
-   * collected. The percentage of the samples already collected is passed as a parameter.
-   * @param {number=} size Size of the sampled set. Default is 1000.
-   * @returns {Array} Array containing the collected samples.
+   * @param {Function=} progress Called with the percentage complete (0–100) at 1% intervals.
+   * @param {number=} size Number of samples to collect. Default is 1000.
+   * @returns {number[][]} Array of sampled states.
    */
   sample (progress, size = 1000) {
-    // Calculate total iterations
+    this._initAccumulators()
     const iMax = this.samplingRate * size
-
     const batchSize = iMax / 100
-
     const samples = []
-
-    // Start sampling
     for (let i = 0; i < iMax; i++) {
       this.iterate()
-
-      // Adjust occasionally, also send progress status
-      if (i % batchSize === 0 && typeof progress !== 'undefined') {
+      if (i % batchSize === 0 && typeof progress === 'function') {
         progress(i / batchSize)
       }
-
-      // Collect sample
       if (i % this.samplingRate === 0) {
         samples.push(this.x)
       }
     }
-
     return samples
   }
 }

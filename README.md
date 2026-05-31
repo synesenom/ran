@@ -15,7 +15,6 @@ A comprehensive JavaScript library for probability distributions, random variate
 - **140+ probability distributions** — continuous and discrete, each with PDF/PMF, CDF, quantile (`q`), hazard, survival, log-likelihood (`lnL`), AIC/BIC, goodness-of-fit testing, and MLE fitting (`fit`)
 - **Statistical measures** — location (mean, median, mode, …), dispersion (variance, IQR, Gini, …), shape (skewness, kurtosis, …), and dependence (Pearson, Spearman, Kendall, …)
 - **Hypothesis tests** — Bartlett, Levene, Brown–Forsythe, Mann–Whitney U, HSIC
-- **MCMC samplers** — random-walk Metropolis and slice sampling with Gelman–Rubin convergence diagnostics
 - **Reproducible sampling** — every distribution accepts an optional seed for deterministic output
 - **TypeScript support** — declaration files generated from JSDoc, covering all public APIs
 - **Tree-shakeable** — import individual distributions without pulling in the full bundle
@@ -128,7 +127,6 @@ console.log(fitted.test(data))  // => { statistics: 0.031, passed: true }
 | `ran.shape` | Skewness, kurtosis, quantiles, moments, min, max, rank |
 | `ran.dependence` | Pearson, Spearman, Kendall, distance correlation, Kullback–Leibler, … |
 | `ran.test` | Bartlett, Levene, Brown–Forsythe, Mann–Whitney U, HSIC |
-| `ran.mc` | Random-walk Metropolis, slice sampling, Gelman–Rubin diagnostic |
 | `ran.core` | Seeded PRNG (xoshiro128+), uniform float/int/bool generators |
 
 ## Distribution API
