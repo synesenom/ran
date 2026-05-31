@@ -66,5 +66,5 @@ export default function (f, a0, b0, s) {
   }
 
   // Return boundary anyway.
-  return [a0 || a, b0 || b]
+  return [a0, b0]
 }
