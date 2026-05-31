@@ -9,7 +9,8 @@ import distanceMatrix from '../utils/distance-matrix'
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
- * @returns {number} The distance covariance, or NaN for empty arrays. Throws if arrays have different lengths.
+ * @throws {Error} If the arrays have different lengths.
+ * @returns {number} The distance covariance, or NaN for empty arrays.
  * @example
  *
  * ran.dependence.dCov([], [])

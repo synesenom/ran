@@ -143,6 +143,7 @@ class Matrix {
    * @method add
    * @memberof ran.la.Matrix
    * @param {ran.la.Matrix} mat The matrix to add.
+   * @throws {Error} If the matrix dimensions do not match.
    * @returns {ran.la.Matrix} The sum of the two matrices.
    * @example
    *
@@ -169,6 +170,7 @@ class Matrix {
    * @method sub
    * @memberof ran.la.Matrix
    * @param {ran.la.Matrix} mat The matrix to subtract.
+   * @throws {Error} If the matrix dimensions do not match.
    * @returns {ran.la.Matrix} The difference of the two matrices.
    * @example
    *
@@ -195,6 +197,7 @@ class Matrix {
    * @method mult
    * @memberof ran.la.Matrix
    * @param {Matrix} mat Matrix to multiply current matrix with.
+   * @throws {Error} If the matrix dimensions do not match.
    * @returns {Matrix} The product matrix.
    * @example
    *
@@ -252,6 +255,7 @@ class Matrix {
    * @method apply
    * @memberof ran.la.Matrix
    * @param {ran.la.Vector} vec Vector to apply matrix on.
+   * @throws {Error} If the vector dimension does not match the matrix row count.
    * @returns {ran.la.Vector} The mapped vector.
    * @example
    *
@@ -334,6 +338,7 @@ class Matrix {
    * @method hadamard
    * @memberof ran.la.Matrix
    * @param {ran.la.Matrix} mat Matrix to calculate element-wise product with.
+   * @throws {Error} If the matrix dimensions do not match.
    * @return {ran.la.Matrix} The result matrix.
    */
   hadamard (mat) {

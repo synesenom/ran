@@ -9,8 +9,8 @@ import covariance from './covariance'
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
+ * @throws {Error} If the arrays have different lengths.
  * @returns {number} The Pearson correlation coefficient, or NaN if arrays have fewer than two elements or zero variance.
- * Throws if arrays have different lengths.
  * @example
  *
  * ran.dependence.pearson([], [])

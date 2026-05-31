@@ -139,6 +139,7 @@ class Vector {
    * @method add
    * @memberof ran.la.Vector
    * @param {ran.la.Vector} vec The vector to add.
+   * @throws {Error} If the vector dimensions do not match.
    * @returns {ran.la.Vector} The sum vector.
    * @example
    *
@@ -162,6 +163,7 @@ class Vector {
    * @method sub
    * @memberof ran.la.Vector
    * @param {ran.la.Vector} vec The vector to subtract.
+   * @throws {Error} If the vector dimensions do not match.
    * @returns {ran.la.Vector} The difference vector.
    * @example
    *
@@ -185,6 +187,7 @@ class Vector {
    * @method dot
    * @memberof ran.la.Vector
    * @param {ran.la.Vector} vec Vector to multiply with.
+   * @throws {Error} If the vector dimensions do not match.
    * @returns {number} The dot product.
    * @example
    *

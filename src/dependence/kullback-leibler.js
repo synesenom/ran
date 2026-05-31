@@ -10,8 +10,9 @@ import neumaier from '../algorithms/neumaier'
  * @memberof ran.dependence
  * @param {number[]} p Array representing the probabilities for the i-th value in the base distribution (P).
  * @param {number[]} q Array representing the probabilities for the i-th value in compared distribution (Q).
+ * @throws {Error} If the arrays have different lengths.
  * @returns {number} The Kullback-Leibler divergence, NaN for empty input, Infinity if Q(x) = 0 and P(x) > 0 for
- * some x. Throws if arrays have different lengths.
+ * some x.
  * @example
  *
  * ran.dependence.kullbackLeibler([], [])
