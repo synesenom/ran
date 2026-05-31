@@ -175,6 +175,11 @@ function parseEntry (entry) {
     }
   ]
 
+  // Copy the minified bundle into docs/ so GitHub Pages (which deploys only
+  // docs/) can serve it — the template references it as ranjs.min.js.
+  console.log('Copying ranjs.min.js')
+  fs.copyFileSync('./dist/ranjs.min.js', './docs/ranjs.min.js')
+
   for (const pageDef of pages) {
     console.log(`Rendering ${pageDef.output}`)
     const template = pug.compileFile(pageDef.template)
