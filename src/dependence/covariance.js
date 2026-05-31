@@ -28,15 +28,15 @@ import { mean } from '../location'
  * // => 16.166666666666668
  */
 export default function (x, y) {
-  if (isInvalidInput(x, y)) {
-    return undefined
+  // Length mismatch = caller error (throw); degenerate input = indeterminate (NaN). See solutions/correctness/2026-05-31-1200-adr0015-la-stats-undefined-sentinel-audit.md
+  if (x.length !== y.length) {
+    throw Error('Arrays must have the same length')
+  }
+  if (x.length < 2) {
+    return NaN
   }
 
   const mx = mean(x)
   const my = mean(y)
   return x.length * mean(x.map((d, i) => (d - mx) * (y[i] - my))) / (x.length - 1)
-}
-
-function isInvalidInput (x, y) {
-  return x.length < 2 || y.length < 2 || x.length !== y.length
 }
