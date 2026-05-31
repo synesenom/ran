@@ -151,7 +151,7 @@ class Distribution {
    * @method _qEstimateTable
    * @memberof ran.dist.Distribution
    * @param {number} p Probability to find value for.
-   * @returns {number} The lower boundary of the interval that satisfies F(x) = p if found, undefined otherwise.
+   * @returns {number} The lower boundary of the interval that satisfies F(x) = p if found, NaN otherwise.
    * @protected
    * @ignore
    */
@@ -185,6 +185,8 @@ class Distribution {
         k2 = k
       }
     }
+
+    return NaN
   }
 
   // _qEstimateTable is broken for negative-integer support (hardwired start at k=0); use this instead.
@@ -228,8 +230,7 @@ class Distribution {
    * @method _qEstimateRoot
    * @memberof ran.dist.Distribution
    * @param {number} p Probability to find value for.
-   * @returns {number|undefined} The value where the probability coincides with the specified value if found,
-   * undefined otherwise.
+   * @returns {number} The value where the probability coincides with the specified value if found, NaN otherwise.
    * @protected
    * @ignore
    */
@@ -263,6 +264,8 @@ class Distribution {
         brent(t => this.cdf(t) - p, ...bounds), this.s[0].value), this.s[1].value
       )
     }
+
+    return NaN
   }
 
   /**
