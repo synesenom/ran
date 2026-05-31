@@ -19,6 +19,7 @@ This directory contains the skills and agents that power the development workflo
 │   ├── hotfix/SKILL.md       # Leaf: small targeted fix (no research/plan)
 │   ├── commit/SKILL.md       # Leaf: git commit
 │   ├── review/SKILL.md       # Leaf: code review
+│   ├── review-pr/SKILL.md    # Leaf: review a GitHub PR and approve+merge or request changes
 │   ├── pr/SKILL.md           # Leaf: GitHub PR creation + activity watch (CI autofix, review replies)
 │   ├── validate/SKILL.md     # Leaf: verify issue acceptance criteria
 │   └── compound/SKILL.md     # Leaf: document solved problems
@@ -72,7 +73,8 @@ Standalone skills that do one thing. Can be called directly or composed by orche
 | [`/hotfix`](skills/hotfix/SKILL.md) | Small targeted fix, skip research/plan | Description or `#issue` |
 | [`/commit`](skills/commit/SKILL.md) | Stage and commit with generated message | _(no args)_ |
 | [`/push`](skills/push/SKILL.md) | Push commits to remote | _(no args)_ |
-| [`/review`](skills/review/SKILL.md) | Code review against plan + quality checks | _(no args, reviews current branch)_ |
+| [`/review`](skills/review/SKILL.md) | Pre-commit quality check of the **local** branch against `main`; used inside `/build` | _(no args)_ |
+| [`/review-pr`](skills/review-pr/SKILL.md) | Triage an **incoming contributor PR on GitHub**: post APPROVE+merge or REQUEST_CHANGES | PR URL or number |
 | [`/pr`](skills/pr/SKILL.md) | Create a PR with change categorization, then watch it (auto-fix CI, respond to reviews) | _(no args)_ |
 | [`/validate`](skills/validate/SKILL.md) | Verify issue acceptance criteria are met | `#issue` or issue URL |
 | [`/next`](skills/next/SKILL.md) | Pick the best next issue from the backlog | Milestone _(optional)_ |
@@ -213,6 +215,15 @@ Launched **in parallel** by [`/suggest`](skills/suggest/SKILL.md). Each scout sc
               → review-tests       │
               → review-docs        │
               → review-correctness ┘
+
+/review-pr ──→ review-security    ┐
+              → review-performance │
+              → review-simplicity  │ parallel
+              → review-tests       │
+              → review-docs        │
+              → review-correctness ┘
+              → mcp__github__pull_request_review_write (APPROVE or REQUEST_CHANGES)
+              → mcp__github__merge_pull_request (on PASS only)
 
 /compound ───→ discovery-thoughts
               → ops-insight
