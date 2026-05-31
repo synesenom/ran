@@ -121,7 +121,33 @@ the file.
 
 ---
 
-### 6. Commit and push
+### 6. Consolidate CHANGELOG
+
+Read the new `## [VERSION]` section (everything between its heading and the
+next `## [` heading) and rewrite it in-place:
+
+1. **Order subsections** to the canonical Keep-a-Changelog sequence:
+   `Added` → `Changed` → `Deprecated` → `Removed` → `Fixed` → `Security`.
+   Drop any subsection that has no bullets.
+
+2. **Merge grouped bullets.** If multiple bullets describe the same logical
+   change applied to several items (e.g. "_fitInit MOM overrides added for
+   distributions A, B, C" appearing as separate bullets), collapse them into a
+   single bullet that names all items. The goal is one bullet per logical
+   change, not one bullet per file or distribution.
+
+3. **Keep every distinct change.** Do not silently drop a bullet that does not
+   fit an obvious group — prefer a slightly longer list over a lossy summary.
+
+4. **Do not touch** any section below the new versioned heading (prior
+   releases stay exactly as they are).
+
+After editing, verify the file parses correctly (no duplicate headings, no
+orphaned bullets outside a subsection).
+
+---
+
+### 7. Commit and push
 
 ```bash
 git add package.json package-lock.json CHANGELOG.md
@@ -131,7 +157,7 @@ git push -u origin "release/v${VERSION}"
 
 ---
 
-### 7. Create PR
+### 8. Create PR
 
 ```bash
 PR_URL=$(gh pr create \
@@ -155,7 +181,7 @@ echo "PR: ${PR_URL}"
 
 ---
 
-### 8. Merge PR
+### 9. Merge PR
 
 ```bash
 gh pr merge --merge --auto
@@ -178,7 +204,7 @@ done
 
 ---
 
-### 9. Tag the release
+### 10. Tag the release
 
 ```bash
 git checkout main
@@ -192,7 +218,42 @@ This push triggers `.github/workflows/release.yml` (lint → typecheck → tests
 
 ---
 
-### 10. Milestone rotation
+### 11. Update GitHub release notes
+
+CI creates the GitHub release as part of `release.yml`. Poll until it appears,
+then replace its body with the consolidated `## [VERSION]` section from
+`CHANGELOG.md` so the release page shows the canonical `### Added`,
+`### Changed`, `### Fixed`, `### Removed` sections.
+
+```bash
+# Poll until CI creates the GitHub release (15-minute timeout, 15-second interval)
+RELEASE_READY=0
+for i in $(seq 1 60); do
+  if gh release view "v${VERSION}" > /dev/null 2>&1; then
+    RELEASE_READY=1
+    break
+  fi
+  echo "Waiting for GitHub release v${VERSION}... ($((i * 15))s elapsed)"
+  sleep 15
+done
+
+if [ "$RELEASE_READY" -eq 0 ]; then
+  echo "Warning: GitHub release v${VERSION} not found after 15 minutes."
+  echo "         Edit manually: https://github.com/${REPO}/releases/tag/v${VERSION}"
+else
+  # Extract the versioned section body (skip the heading line itself)
+  RELEASE_NOTES=$(awk "/^## \[${VERSION}\]/{found=1; next} found && /^## \[/{exit} found{print}" CHANGELOG.md)
+  gh release edit "v${VERSION}" --notes "$RELEASE_NOTES"
+  echo "GitHub release v${VERSION} notes updated."
+fi
+```
+
+This step is best-effort — a timeout warns and continues rather than aborting
+the release.
+
+---
+
+### 12. Milestone rotation
 
 ```bash
 REPO=$(gh repo view --json nameWithOwner -q '.nameWithOwner')
@@ -243,7 +304,7 @@ untouched by this skill.
 
 ---
 
-### 11. Report
+### 13. Report
 
 End with a concise summary:
 
