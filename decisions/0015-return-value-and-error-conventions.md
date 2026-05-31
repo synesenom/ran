@@ -92,8 +92,9 @@ contributors in `CLAUDE.md`.
   explicit input guards. These are filed as follow-up issues.
 
 **Risk**:
-- Changing `q(p)` from `undefined` to a thrown error (or to `NaN`) is a
-  **breaking change** and must be routed to a major release (v2.0.0), not
-  bundled with the additive v1.26.0 cleanups. Non-breaking guard additions
-  (where the function currently produces a silently-wrong number) are not
-  breaking and land in v1.26.0.
+- Changing `q(p)` from `undefined` to a thrown error is a **breaking change**.
+  Per the project's numpy/scipy-style versioning policy it ships in an ordinary
+  minor release behind a deprecation cycle (warn first, remove a release later),
+  carrying the `breaking` label — not a `v2.0.0` major bump. Non-breaking guard
+  additions (where the function currently produces a silently-wrong number) are
+  not breaking and need no deprecation cycle.

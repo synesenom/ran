@@ -34,11 +34,8 @@ jobs:
             await github.rest.issues.createComment({
               owner, repo, issue_number,
               body: [
-                '**No milestone assigned.** Please assign this issue to the appropriate release milestone:',
+                '**No milestone assigned.** Please assign this issue to the current next-release milestone (the lowest open `vX.Y.0`).',
                 '',
-                '| Issue type | Milestone |',
-                '|---|---|',
-                '| Breaking change (has `major` label) | `v2.0.0` |',
-                '| Everything else | `v1.25.0` |',
+                'There is no separate breaking-change milestone: per the numpy/scipy-style versioning policy, breaking changes ship in ordinary minor releases (behind a deprecation cycle). Issues labelled `breaking` go to the same milestone as everything else.',
               ].join('\n'),
             })
