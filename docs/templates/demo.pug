@@ -69,12 +69,12 @@ block scripts
         let pdfSvg = null
         let cdfSvg = null
         let lastRenderState = null
-        const CHART_H = 380
+        const CHART_H = 304
         const MARGIN = {top: 12, right: 16, bottom: 36, left: 48}
-        const COLOR_HIST = '#e4e9ef'    // histogram bar fill
-        const COLOR_SAMPLES = '#8a98a8' // empirical CDF line
-        const COLOR_BLUE = '#2563b6'    // theoretical curve (planted params)
-        const COLOR_FIT = '#b23a2e'     // fitted overlay
+        const COLOR_HIST    = '#e4e9ef' // histogram bar fill
+        const COLOR_SAMPLES = '#5c6b7a' // empirical CDF / sample markers
+        const COLOR_BLUE    = '#2563b6' // theoretical curve (planted params)
+        const COLOR_FIT     = '#b23a2e' // fitted overlay
 
         // ---- Helpers -------------------------------------------------------
 
@@ -100,6 +100,14 @@ block scripts
             const pad = (smax - smin) * 0.1 || 1
             if (!isFinite(lo)) lo = smin - pad
             if (!isFinite(hi)) hi = smax + pad
+            // Hard cap: wide-tailed distributions (e.g. Cauchy) produce
+            // enormous quantile ranges that make charts uninformative.
+            const spread = hi - lo
+            if (spread > 100) {
+              const mid = (lo + hi) / 2
+              lo = mid - 50
+              hi = mid + 50
+            }
             return [lo, hi]
           } else {
             const smin = Math.min(...samples)
@@ -120,6 +128,32 @@ block scripts
           sel.selectAll('.tick text').attr('fill', '#5c6b7a').style('font-size', '11px').style('font-family', 'inherit')
         }
 
+        // Append one legend row at the given index.
+        // shape: 'rect' draws a filled rectangle, anything else draws a line.
+        function addLegendEntry (gLegend, idx, color, dashed, shape, label) {
+          const row = gLegend.append('g').attr('transform', `translate(0, ${idx * 15})`)
+          if (shape === 'rect') {
+            row.append('rect').attr('width', 14).attr('height', 8).attr('y', -7).attr('fill', color)
+          } else {
+            const ln = row.append('line').attr('x2', 14).attr('stroke', color).attr('stroke-width', 2)
+            if (dashed) ln.attr('stroke-dasharray', '5,3')
+          }
+          row.append('text').attr('x', 18).attr('fill', '#5c6b7a')
+            .style('font-size', '10px').style('font-family', 'inherit').text(label)
+        }
+
+        // Build the SVG scaffold for one chart panel: defs+clipPath, axes, clipped
+        // data group, unclipped legend group. Returns {gData, gLegend, xScale, iW, iH}.
+        function buildChart (svg, clipId, w, iW, iH) {
+          svg.attr('width', w).attr('height', CHART_H).selectAll('*').remove()
+          svg.append('defs').append('clipPath').attr('id', clipId)
+            .append('rect').attr('width', iW).attr('height', iH)
+          const g = svg.append('g').attr('transform', `translate(${MARGIN.left},${MARGIN.top})`)
+          const gData   = g.append('g').attr('class', 'data').attr('clip-path', `url(#${clipId})`)
+          const gLegend = g.append('g').attr('class', 'legend').attr('transform', 'translate(8, 6)')
+          return {g, gData, gLegend}
+        }
+
         // ---- Chart init (called once after DOM ready) -----------------------
 
         function initCharts () {
@@ -136,28 +170,30 @@ block scripts
         function overlayFit (fittedDist) {
           if (!lastRenderState) return
           const {cfg, xMin, xMax, yPdfMax, wPdf, wCdf, iPdf, iCdf, iH} = lastRenderState
-          const xPdf = d3.scaleLinear().domain([xMin, xMax]).range([0, iPdf])
-          const yPdf = d3.scaleLinear().domain([0, yPdfMax]).range([iH, 0])
-          const xCdf = d3.scaleLinear().domain([xMin, xMax]).range([0, iCdf])
-          const yCdf = d3.scaleLinear().domain([0, 1.05]).range([iH, 0])
-          const gPdf = pdfSvg.select('g')
-          const gCdf = cdfSvg.select('g')
+          const xPdf  = d3.scaleLinear().domain([xMin, xMax]).range([0, iPdf])
+          const yPdf  = d3.scaleLinear().domain([0, yPdfMax]).range([iH, 0])
+          const xCdf  = d3.scaleLinear().domain([xMin, xMax]).range([0, iCdf])
+          const yCdf  = d3.scaleLinear().domain([0, 1.05]).range([iH, 0])
+          const gPdfData   = pdfSvg.select('.data')
+          const gCdfData   = cdfSvg.select('.data')
+          const gPdfLegend = pdfSvg.select('.legend')
+          const gCdfLegend = cdfSvg.select('.legend')
 
           if (cfg.type === 'continuous') {
-            const fitPdfPts = linspace(xMin, xMax, 200)
+            const fitPts = linspace(xMin, xMax, 200)
               .map(x => ({x, y: fittedDist.pdf(x)})).filter(p => isFinite(p.y))
-            gPdf.append('path').datum(fitPdfPts)
+            gPdfData.append('path').datum(fitPts)
               .attr('fill', 'none').attr('stroke', COLOR_FIT).attr('stroke-width', 2)
               .attr('stroke-dasharray', '5,3')
               .attr('d', d3.line().x(d => xPdf(d.x)).y(d => yPdf(d.y)))
           } else {
             const kMin = Math.round(xMin), kMax = Math.round(xMax)
-            const fitPmfPts = []
+            const fitPts = []
             for (let k = kMin; k <= kMax; k++) {
               const y = fittedDist.pdf(k)
-              if (isFinite(y)) fitPmfPts.push({x: k, y})
+              if (isFinite(y)) fitPts.push({x: k, y})
             }
-            gPdf.selectAll('.fit-dot').data(fitPmfPts).join('circle')
+            gPdfData.selectAll('.fit-dot').data(fitPts).join('circle')
               .attr('class', 'fit-dot')
               .attr('cx', d => xPdf(d.x)).attr('cy', d => yPdf(d.y))
               .attr('r', 5).attr('fill', 'none')
@@ -177,10 +213,15 @@ block scripts
             fitCdfPts = linspace(xMin, xMax, 200)
               .map(x => ({x, y: fittedDist.cdf(x)})).filter(p => isFinite(p.y))
           }
-          gCdf.append('path').datum(fitCdfPts)
+          gCdfData.append('path').datum(fitCdfPts)
             .attr('fill', 'none').attr('stroke', COLOR_FIT).attr('stroke-width', 2)
             .attr('stroke-dasharray', '5,3')
             .attr('d', d3.line().x(d => xCdf(d.x)).y(d => yCdf(d.y)))
+
+          const nPdf = gPdfLegend.selectAll('g').size()
+          const nCdf = gCdfLegend.selectAll('g').size()
+          addLegendEntry(gPdfLegend, nPdf, COLOR_FIT, true, 'line', 'fitted')
+          addLegendEntry(gCdfLegend, nCdf, COLOR_FIT, true, 'line', 'fitted')
         }
 
         // ---- Core render ---------------------------------------------------
@@ -195,67 +236,69 @@ block scripts
           const wCdf = chartWidth('cdf-chart')
           const iPdf = wPdf - MARGIN.left - MARGIN.right
           const iCdf = wCdf - MARGIN.left - MARGIN.right
-          const iH = CHART_H - MARGIN.top - MARGIN.bottom
+          const iH   = CHART_H - MARGIN.top - MARGIN.bottom
 
           // ---- PDF panel ----
-          pdfSvg.attr('width', wPdf).attr('height', CHART_H).selectAll('*').remove()
-          const gPdf = pdfSvg.append('g').attr('transform', `translate(${MARGIN.left},${MARGIN.top})`)
+          const {g: gPdf, gData: gPdfData, gLegend: gPdfLegend} = buildChart(pdfSvg, 'pdf-clip', wPdf, iPdf, iH)
           const xPdf = d3.scaleLinear().domain([xMin, xMax]).range([0, iPdf])
 
           let yPdfMax
           if (cfg.type === 'continuous') {
             const nBins = Math.min(50, Math.max(10, Math.ceil(Math.sqrt(n))))
-            const binW = (xMax - xMin) / nBins
+            const binW  = (xMax - xMin) / nBins
             const counts = new Array(nBins).fill(0)
             for (const v of samples) counts[clamp(Math.floor((v - xMin) / binW), 0, nBins - 1)]++
-            const bins = counts.map((c, i) => ({x0: xMin + i * binW, x1: xMin + (i + 1) * binW, y: c / (n * binW)}))
+            const bins   = counts.map((c, i) => ({x0: xMin + i * binW, x1: xMin + (i + 1) * binW, y: c / (n * binW)}))
             const pdfPts = linspace(xMin, xMax, 200).map(x => ({x, y: dist.pdf(x)})).filter(p => isFinite(p.y))
             yPdfMax = Math.max(...bins.map(b => b.y), ...pdfPts.map(p => p.y)) * 1.25 || 1
             const yPdf = d3.scaleLinear().domain([0, yPdfMax]).range([iH, 0])
             gPdf.append('g').attr('transform', `translate(0,${iH})`).call(d3.axisBottom(xPdf).ticks(5)).call(applyAxisStyle)
             gPdf.append('g').call(d3.axisLeft(yPdf).ticks(4)).call(applyAxisStyle)
-            gPdf.selectAll('rect').data(bins).join('rect')
+            gPdfData.selectAll('rect').data(bins).join('rect')
               .attr('x', d => xPdf(d.x0) + 0.5)
               .attr('y', d => yPdf(d.y))
               .attr('width', d => Math.max(0, xPdf(d.x1) - xPdf(d.x0) - 1))
               .attr('height', d => iH - yPdf(d.y))
               .attr('fill', COLOR_HIST)
-            gPdf.append('path').datum(pdfPts)
+            gPdfData.append('path').datum(pdfPts)
               .attr('fill', 'none').attr('stroke', COLOR_BLUE).attr('stroke-width', 2)
               .attr('d', d3.line().x(d => xPdf(d.x)).y(d => yPdf(d.y)))
+            addLegendEntry(gPdfLegend, 0, COLOR_HIST,    false, 'rect', 'samples')
+            addLegendEntry(gPdfLegend, 1, COLOR_BLUE,    false, 'line', 'planted')
           } else {
             const kMin = Math.round(xMin), kMax = Math.round(xMax)
-            const freq = {}
+            const freq  = {}
             for (const v of samples) { const k = Math.round(v); freq[k] = (freq[k] || 0) + 1 }
-            const bars = []
+            const bars  = []
             for (let k = kMin; k <= kMax; k++) bars.push({k, y: (freq[k] || 0) / n})
             const pmfPts = bars.map(d => ({x: d.k, y: dist.pdf(d.k)})).filter(p => isFinite(p.y))
             yPdfMax = Math.max(...bars.map(b => b.y), ...pmfPts.map(p => p.y)) * 1.25 || 1
             const yPdf = d3.scaleLinear().domain([0, yPdfMax]).range([iH, 0])
-            const bW = Math.max(1, iPdf / (kMax - kMin + 2) * 0.6)
+            const bW   = Math.max(1, iPdf / (kMax - kMin + 2) * 0.6)
             gPdf.append('g').attr('transform', `translate(0,${iH})`).call(d3.axisBottom(xPdf).ticks(5)).call(applyAxisStyle)
             gPdf.append('g').call(d3.axisLeft(yPdf).ticks(4)).call(applyAxisStyle)
-            gPdf.selectAll('rect').data(bars).join('rect')
+            gPdfData.selectAll('rect').data(bars).join('rect')
               .attr('x', d => xPdf(d.k) - bW / 2)
               .attr('y', d => yPdf(d.y))
               .attr('width', bW)
               .attr('height', d => iH - yPdf(d.y))
               .attr('fill', COLOR_HIST)
-            gPdf.selectAll('circle').data(pmfPts).join('circle')
+            gPdfData.selectAll('circle').data(pmfPts).join('circle')
               .attr('cx', d => xPdf(d.x)).attr('cy', d => yPdf(d.y))
               .attr('r', 4).attr('fill', COLOR_BLUE)
+            addLegendEntry(gPdfLegend, 0, COLOR_HIST, false, 'rect', 'samples')
+            addLegendEntry(gPdfLegend, 1, COLOR_BLUE, false, 'line', 'planted')
           }
 
           // ---- CDF panel ----
-          cdfSvg.attr('width', wCdf).attr('height', CHART_H).selectAll('*').remove()
-          const gCdf = cdfSvg.append('g').attr('transform', `translate(${MARGIN.left},${MARGIN.top})`)
+          const {g: gCdf, gData: gCdfData, gLegend: gCdfLegend} = buildChart(cdfSvg, 'cdf-clip', wCdf, iCdf, iH)
           const xCdf = d3.scaleLinear().domain([xMin, xMax]).range([0, iCdf])
           const yCdf = d3.scaleLinear().domain([0, 1.05]).range([iH, 0])
           gCdf.append('g').attr('transform', `translate(0,${iH})`).call(d3.axisBottom(xCdf).ticks(5)).call(applyAxisStyle)
           gCdf.append('g').call(d3.axisLeft(yCdf).ticks(4)).call(applyAxisStyle)
 
           const empPts = makeEmpiricalCdf(samples)
-          gCdf.append('path').datum(empPts)
+          gCdfData.append('path').datum(empPts)
             .attr('fill', 'none').attr('stroke', COLOR_SAMPLES).attr('stroke-width', 1.5)
             .attr('d', d3.line().x(d => xCdf(d.x)).y(d => yCdf(d.y)).curve(d3.curveStepAfter))
 
@@ -272,9 +315,12 @@ block scripts
           } else {
             cdfPts = linspace(xMin, xMax, 200).map(x => ({x, y: dist.cdf(x)})).filter(p => isFinite(p.y))
           }
-          gCdf.append('path').datum(cdfPts)
+          gCdfData.append('path').datum(cdfPts)
             .attr('fill', 'none').attr('stroke', COLOR_BLUE).attr('stroke-width', 2)
             .attr('d', d3.line().x(d => xCdf(d.x)).y(d => yCdf(d.y)))
+
+          addLegendEntry(gCdfLegend, 0, COLOR_SAMPLES, false, 'line', 'samples')
+          addLegendEntry(gCdfLegend, 1, COLOR_BLUE,    false, 'line', 'planted')
 
           lastRenderState = {cfg, xMin, xMax, yPdfMax, wPdf, wCdf, iPdf, iCdf, iH}
           return samples
