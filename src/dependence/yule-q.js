@@ -26,9 +26,5 @@ import oddsRatio from '../dependence/odds-ratio'
  */
 export default function (p00, p01, p10, p11) {
   const or = oddsRatio(p00, p01, p10, p11)
-  if (typeof or === 'undefined') {
-    return undefined
-  }
-
   return (or - 1) / (or + 1)
 }

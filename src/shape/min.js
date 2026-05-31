@@ -7,6 +7,9 @@
  * @returns {number} The minimum of the values.
  */
 export default function (values) {
+  if (values.length === 0) {
+    return NaN
+  }
   let min = values[0]
   for (const x of values) {
     min = Math.min(x, min)

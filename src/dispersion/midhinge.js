@@ -17,7 +17,7 @@ import quantile from '../shape/quantile'
  */
 export default function (values) {
   if (values.length === 0) {
-    return undefined
+    return NaN
   }
 
   return (quantile(values, 0.25) + quantile(values, 0.75)) / 2

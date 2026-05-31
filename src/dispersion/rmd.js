@@ -26,5 +26,5 @@ import mean from '../location/mean'
 export default function (values) {
   const mad = md(values)
   const m = mean(values)
-  return m === 0 ? undefined : mad && mad / m
+  return m === 0 ? NaN : mad && mad / m
 }

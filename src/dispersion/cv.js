@@ -27,5 +27,5 @@ import mean from '../location/mean'
 export default function (values) {
   const s = stdev(values)
   const m = mean(values)
-  return m === 0 ? undefined : s && s / m
+  return m === 0 ? NaN : s && s / m
 }

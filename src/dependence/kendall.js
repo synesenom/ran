@@ -32,8 +32,11 @@ function nTies (values) {
  * // => 0.3333333333333333
  */
 export default function (x, y) {
-  if (invalidInput(x, y)) {
-    return undefined
+  if (x.length !== y.length) {
+    throw Error('Arrays must have the same length')
+  }
+  if (x.length === 0) {
+    return NaN
   }
 
   // Numerator.
@@ -46,8 +49,4 @@ export default function (x, y) {
 
   // Return the final value.
   return num / Math.sqrt((n0 - n1) * (n0 - n2))
-}
-
-function invalidInput (x, y) {
-  return x.length === 0 || y.length === 0 || x.length !== y.length
 }

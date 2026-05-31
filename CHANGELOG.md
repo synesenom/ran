@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `bracket`, `brent`, and `newton` in `src/algorithms/` now return `NaN` (instead of `undefined`) on failure paths; `quickselect` now throws for an out-of-range index. `Distribution._qEstimateRoot` propagates `NaN` on bracket failure (#589).
+- All statistics modules (`location`, `dispersion`, `shape`, `dependence`, `ts`) now comply with ADR-0015: mismatched-length array arguments throw `Error` (caller error), indeterminate results (empty sample, zero-variance) return `NaN`, divergent results (KL divergence with `Q=0,P>0`, zero-denominator odds ratio) return `Infinity`. `undefined` is no longer returned as a failure sentinel from any public function (#593).
 - `Davis._cdf(x)` now uses a dual Bose-Einstein series (upper incomplete gamma series for x near μ, Bernoulli/Laurent series for large x) instead of Romberg integration; per-call cost drops from ~100ms to ~10µs, enabling full goodness-of-fit coverage with the standard sample size (#451).
 - `Bates.fit()` now uses a profile likelihood grid search over integer `n` instead of the inherited 3-parameter Nelder-Mead, which stalled on the staircase likelihood surface caused by integer rounding; `n` is now reliably recovered (#481).
 - `Bradford._fitInit`: small-`c` mean approximation coefficient corrected from `3·(1−2·mean)` to `6·(1−2·mean)`, matching the correct first-order expansion `E[X] ≈ ½ − c/12`; the previous coefficient underestimated the starting value by a factor of 2 (#498).

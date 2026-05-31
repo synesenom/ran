@@ -7,8 +7,13 @@ import * as dist from '../src/dist'
 
 const SAMPLE_SIZE = 100
 
-// TODO Go through methods and check input conditions.
 describe('location', () => {
+  describe('.mean()', () => {
+    it('should return NaN for an empty sample', () => {
+      assert(Number.isNaN(location.mean([])))
+    })
+  })
+
   describe('.geometricMean()', () => {
     it('should return zero for sample containing zero', () => {
       repeat(() => {
@@ -28,19 +33,19 @@ describe('location', () => {
   })
 
   describe('.harmonicMean()', () => {
-    it('should return undefined for sample containing zero', () => {
+    it('should return NaN for sample containing zero', () => {
       repeat(() => {
         const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
           .concat([0])
-        assert(typeof location.harmonicMean(values) === 'undefined')
+        assert(Number.isNaN(location.harmonicMean(values)))
       })
     })
 
-    it('should return undefined for sample containing negative values', () => {
+    it('should return NaN for sample containing negative values', () => {
       repeat(() => {
         const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
           .concat([-1])
-        assert(typeof location.harmonicMean(values) === 'undefined')
+        assert(Number.isNaN(location.harmonicMean(values)))
       })
     })
 
@@ -54,8 +59,8 @@ describe('location', () => {
   })
 
   describe('.median()', () => {
-    it('should return undefined for a sample size less than 1', () => {
-      assert(typeof location.median([]) === 'undefined')
+    it('should return NaN for an empty sample', () => {
+      assert(Number.isNaN(location.median([])))
     })
 
     it('should return the median for odd sample size', () => {
@@ -78,8 +83,8 @@ describe('location', () => {
   })
 
   describe('.midrange()', () => {
-    it('should return undefined for an empty sample', () => {
-      assert(typeof location.midrange([]) === 'undefined')
+    it('should return NaN for an empty sample', () => {
+      assert(Number.isNaN(location.midrange([])))
     })
 
     it('should return the midrange for a finite sample', () => {
@@ -94,8 +99,8 @@ describe('location', () => {
   })
 
   describe('.mode()', () => {
-    it('should return undefined for a sample size less than 1', () => {
-      assert(typeof location.mode([]) === 'undefined')
+    it('should return empty array for an empty sample', () => {
+      assert.deepEqual(location.mode([]), [])
     })
 
     describe('discrete sample', () => {
@@ -143,8 +148,8 @@ describe('location', () => {
   })
 
   describe('.trimean()', () => {
-    it('should return undefined for an empty sample', () => {
-      assert(typeof location.trimean([]) === 'undefined')
+    it('should return NaN for an empty sample', () => {
+      assert(Number.isNaN(location.trimean([])))
     })
 
     it('should return the trimean for a finite sample', () => {

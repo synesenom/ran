@@ -29,13 +29,12 @@ function tau (a, b) {
  * // => -1
  */
 export default function (x, y) {
-  if (isInvalidInput(x, y)) {
-    return undefined
+  if (x.length !== y.length) {
+    throw Error('Arrays must have the same length')
+  }
+  if (x.length === 0) {
+    return NaN
   }
 
   return tau(x, y) / tau(x, x)
-}
-
-function isInvalidInput (x, y) {
-  return x.length === 0 || y.length === 0 || x.length !== y.length
 }

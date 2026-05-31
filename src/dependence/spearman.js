@@ -26,13 +26,12 @@ import pearson from './pearson'
  * // => 1
  */
 export default function (x, y) {
-  if (!isValidInput(x, y)) {
-    return undefined
+  if (x.length !== y.length) {
+    throw Error('Arrays must have the same length')
+  }
+  if (x.length === 0) {
+    return NaN
   }
 
   return pearson(rank(x), rank(y))
-}
-
-function isValidInput (x, y) {
-  return x.length !== 0 && y.length !== 0 && x.length === y.length
 }

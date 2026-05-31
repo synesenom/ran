@@ -28,5 +28,5 @@ export default function (values) {
   const q1 = quantile(values, 0.25)
   const q3 = quantile(values, 0.75)
 
-  return q1 === q3 ? undefined : (q1 + q3 - 2 * median(values)) / (q3 - q1)
+  return q1 === q3 ? NaN : (q1 + q3 - 2 * median(values)) / (q3 - q1)
 }

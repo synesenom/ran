@@ -19,7 +19,7 @@
  */
 export default function (values) {
   if (values.length < 2) {
-    return undefined
+    return NaN
   }
 
   let sum = 0

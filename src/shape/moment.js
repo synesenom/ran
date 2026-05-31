@@ -21,5 +21,5 @@ import mean from '../location/mean'
  * // => 4.666666666666667
  */
 export default function (values, k, c = 0) {
-  return values.length > 0 ? mean(values.map(d => Math.pow(d - c, k))) : undefined
+  return values.length > 0 ? mean(values.map(d => Math.pow(d - c, k))) : NaN
 }

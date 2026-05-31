@@ -18,7 +18,7 @@ import min from '../shape/min'
  */
 export default function (values) {
   if (values.length === 0) {
-    return undefined
+    return NaN
   }
 
   return max(values) - min(values)

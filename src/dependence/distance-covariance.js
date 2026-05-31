@@ -20,8 +20,11 @@ import distanceMatrix from '../utils/distance-matrix'
  * // => 0.31426968052735443
  */
 export default function (x, y) {
-  if (x.length * y.length === 0 || x.length !== y.length) {
-    return undefined
+  if (x.length !== y.length) {
+    throw Error('Arrays must have the same length')
+  }
+  if (x.length === 0) {
+    return NaN
   }
 
   const a = distanceMatrix(x)

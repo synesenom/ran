@@ -11,7 +11,7 @@ import quickselect from '../algorithms/quickselect'
  */
 export default function (values, p) {
   if (values.length === 0) {
-    return undefined
+    return NaN
   }
 
   const h = (values.length - 1) * p

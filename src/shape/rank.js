@@ -15,7 +15,7 @@
  */
 export default function (values) {
   if (values.length === 0) {
-    return undefined
+    return []
   }
 
   const sorted = values.slice().sort((a, b) => a - b)

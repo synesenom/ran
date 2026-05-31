@@ -29,12 +29,12 @@ import moment from './moment'
  */
 export default function (values) {
   if (values.length < 3) {
-    return undefined
+    return NaN
   }
 
   const n = values.length
   const m = mean(values)
   const m2 = moment(values, 2, m)
   const m4 = moment(values, 4, m)
-  return m2 === 0 ? undefined : (n - 1) * ((n + 1) * m4 / (m2 * m2) - 3 * (n - 1)) / ((n - 2) * (n - 3))
+  return m2 === 0 ? NaN : (n - 1) * ((n + 1) * m4 / (m2 * m2) - 3 * (n - 1)) / ((n - 2) * (n - 3))
 }

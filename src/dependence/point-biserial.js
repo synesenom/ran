@@ -26,13 +26,16 @@ import mean from '../location/mean'
  * // => 0.8660254037844386
  */
 export default function (x, y) {
-  if (!validInputs(x, y)) {
-    return undefined
+  if (x.length !== y.length) {
+    throw Error('Arrays must have the same length')
+  }
+  if (x.length < 2) {
+    return NaN
   }
 
   const s = stdev(x)
   if (s === 0) {
-    return undefined
+    return NaN
   }
 
   const x0 = x.filter((d, i) => y[i] === 0)
@@ -42,10 +45,4 @@ export default function (x, y) {
   const m0 = mean(x0)
   const m1 = mean(x1)
   return (m1 - m0) * Math.sqrt(n0 * n1 / (x.length * (x.length - 1))) / s
-}
-
-function validInputs (x, y) {
-  return (x.length !== 0 &&
-    y.length !== 0 &&
-    x.length === y.length)
 }

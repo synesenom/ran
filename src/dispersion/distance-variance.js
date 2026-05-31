@@ -19,7 +19,7 @@ import mean from '../location/mean'
  */
 export default function (x) {
   if (x.length === 0) {
-    return undefined
+    return NaN
   }
 
   // Calculate distance matrix.

@@ -157,6 +157,9 @@ class Matrix {
    */
   add (mat) {
     const m = mat.m()
+    if (m.length !== this._m.length) {
+      throw Error('Matrix dimensions must match')
+    }
     return new Matrix(this._m.map((row, i) => row.map((d, j) => d + m[i][j])))
   }
 
@@ -180,6 +183,9 @@ class Matrix {
    */
   sub (mat) {
     const m = mat.m()
+    if (m.length !== this._m.length) {
+      throw Error('Matrix dimensions must match')
+    }
     return new Matrix(this._m.map((row, i) => row.map((d, j) => d - m[i][j])))
   }
 
@@ -203,6 +209,9 @@ class Matrix {
    */
   mult (mat) {
     const m = mat.m()
+    if (m.length !== this._m.length) {
+      throw Error('Matrix dimensions must match')
+    }
     const n = this._m.length
     const r = new Matrix(n)
     for (let i = 0; i < n; i++) {
@@ -253,6 +262,9 @@ class Matrix {
    *
    */
   apply (vec) {
+    if (vec.dim() !== this._m.length) {
+      throw Error('Vector dimension must match matrix row count')
+    }
     return new Vector(this._m.map(d => vec.dot(new Vector(d))))
   }
 
@@ -326,6 +338,9 @@ class Matrix {
    */
   hadamard (mat) {
     const m = mat.m()
+    if (m.length !== this._m.length) {
+      throw Error('Matrix dimensions must match')
+    }
     return this.f((d, i, j) => d * m[i][j])
   }
 

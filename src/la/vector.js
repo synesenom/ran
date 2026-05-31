@@ -149,6 +149,9 @@ class Vector {
    *
    */
   add (vec) {
+    if (vec.dim() !== this._v.length) {
+      throw Error('Vector dimensions must match')
+    }
     const v = vec.v()
     return new Vector(this._v.map((d, i) => d + v[i]))
   }
@@ -169,6 +172,9 @@ class Vector {
    *
    */
   sub (vec) {
+    if (vec.dim() !== this._v.length) {
+      throw Error('Vector dimensions must match')
+    }
     const v = vec.v()
     return new Vector(this._v.map((d, i) => d - v[i]))
   }
@@ -189,6 +195,9 @@ class Vector {
    *
    */
   dot (vec) {
+    if (vec.dim() !== this._v.length) {
+      throw Error('Vector dimensions must match')
+    }
     const v = vec.v()
     return this._v.reduce((sum, d, i) => sum + d * v[i], 0)
   }

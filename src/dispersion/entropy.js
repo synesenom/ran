@@ -27,7 +27,7 @@ function _log (base) {
  */
 export default function (probabilities, base) {
   if (probabilities.length === 0) {
-    return undefined
+    return NaN
   }
 
   // Create logarithm using the specified base.

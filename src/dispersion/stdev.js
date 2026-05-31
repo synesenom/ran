@@ -6,14 +6,14 @@ import variance from './variance'
  * @method stdev
  * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate standard deviation for.
- * @returns {number|undefined} Standard deviation of the values if there are more than two, undefined otherwise.
+ * @returns {number} Standard deviation of the values, NaN for fewer than 2 elements.
  * @example
  *
  * ran.dispersion.stdev([])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.stdev([1])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.stdev([1, 2, 3, 4, 5])
  * // => 1.5811388300841898
