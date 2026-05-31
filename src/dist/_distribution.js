@@ -546,7 +546,7 @@ class Distribution {
    */
   q (p) {
     if (p < 0 || p > 1) {
-      // If out of bounds, return undefined
+      // Known deviation from decisions/0015-return-value-and-error-conventions.md — an out-of-range p is a caller error that should throw; kept as undefined for backward compatibility until a major release.
       return undefined
     } else if (p === 0) {
       // If zero, return lower support boundary

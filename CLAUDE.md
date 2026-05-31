@@ -55,6 +55,23 @@ npm run typecheck
 
 **Distribution naming:** File names are kebab-case (`log-normal.js`); exported class names are PascalCase (`LogNormal`). Pre-computed table distributions extend `PreComputed` from `_pre-computed.js`.
 
+## Return Value and Error Conventions
+
+Every public function and method signals "no ordinary result" through exactly one of four channels. Pick the channel by **what kind of situation occurred**, not by convenience. See `decisions/0015-return-value-and-error-conventions.md`.
+
+| Situation | Channel | Rationale |
+| --- | --- | --- |
+| **Caller/programming error** — invalid or missing parameters, failed constraint, wrong arity, dimension mismatch, structurally impossible input (e.g. negative count) | **`throw Error(...)`** | Fail fast and loud. The caller has a bug that must be fixed, not handled at runtime. Matches the constructor contract (ADR-0004). |
+| **Valid in-domain query, but the answer is mathematically indeterminate / does not exist** — mean of Cauchy, skewness of a point mass, `0/0` | **`NaN`** | Keeps numeric methods typed `number` (the `.d.ts` are generated from JSDoc). Matches SciPy/R and JS-native math (`Math.sqrt(-1)`). |
+| **Valid query, but the answer diverges** — variance of Pareto with α ≤ 2, every moment of Lévy | **`Infinity` / `-Infinity`** | Carries strictly more information than `NaN`: "grows without bound" ≠ "no value at all". Never collapse divergence to `NaN`. |
+| **The mathematically correct value happens to be zero** — pdf/cdf/pmf evaluated outside the support | **`0`** | Not an error: probability really is zero there. Do not throw or return `NaN`. |
+
+**`undefined` is not an error sentinel.** Do not return `undefined` to mean "computation failed" or "value does not exist". It breaks generated TypeScript types (forces `number | undefined` across the whole numeric API), is silently dropped by `JSON.stringify`, and is foreign to the numerical-computing idiom. `undefined` is acceptable *only* for a genuinely optional/absent value where the caller is expected to branch on presence — never as a stand-in for `NaN`, `Infinity`, or a thrown error.
+
+**Applies everywhere, not just distributions.** `ran.core`, `ran.special`, `ran.algorithms`, and `ran.la` follow the same split: `throw` for contract violations (wrong arity, dimension mismatch, impossible input); `NaN`/`±Infinity` for out-of-domain or divergent math. **Never wrap hot numeric loops in `throw`/`try` for ordinary out-of-domain inputs** — let the math produce `NaN`/`Infinity`.
+
+**Known deviation:** `Distribution.q(p)` returns `undefined` for `p ∉ [0, 1]`. This predates the convention and is a caller error that *should* throw; correcting it is a breaking change tracked for a major release. Do not copy this pattern into new code.
+
 ## Testing Conventions
 
 - Tests live in `test/` and mirror `src/` module structure.
