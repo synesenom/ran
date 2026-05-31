@@ -19,89 +19,44 @@ export default class RWM extends MCMC {
   constructor (logDensity, config, initialState) {
     super(logDensity, config, initialState)
     this.lastLnp = this.lnp(this.x)
-
-    /**
-     * Proposal distributions with per-dimension batch step-size adaptation.
-     *
-     * @namespace proposal
-     * @memberof ran.mc.RWM
-     * @private
-     */
-    this.proposal = (function (self) {
-      const _q = new Normal(0, 1)
-      const _acceptance = new Array(self.dim).fill(0)
-      const _sigma = self.internal.proposal || new Array(self.dim).fill(1)
-      const _ls = _sigma.map(d => Math.log(d))
-      let _n = 0
-      let _batch = 0
-      let _index = 0
-
-      return {
-        /**
-         * Proposes a new state. During warm-up uses single-dimension (Gibbs) updates;
-         * during sampling updates all dimensions jointly.
-         *
-         * @method jump
-         * @memberof ran.mc.RWM.proposal
-         * @param {number[]} x Current state.
-         * @param {boolean} warmUp Whether the jump is part of warm-up.
-         * @return {number[]} Proposed state.
-         */
-        jump (x, warmUp) {
-          return warmUp
-            ? x.map((d, i) => d + (i === _index ? _q.sample() * _sigma[_index] : 0))
-            : x.map((d, i) => d + _q.sample() * _sigma[i])
-        },
-
-        /**
-         * Updates proposal step sizes using batch Robbins-Monro adaptation targeting
-         * 0.44 per-component acceptance rate.
-         *
-         * @method update
-         * @memberof ran.mc.RWM.proposal
-         * @param {boolean} accepted Whether the last proposal was accepted.
-         */
-        update (accepted) {
-          accepted && _acceptance[_index]++
-          _n++
-          if (_n === 100) {
-            if (_acceptance[_index] / 100 > 0.44) {
-              _ls[_index] += Math.min(0.01, Math.pow(_batch, -0.5))
-            } else {
-              _ls[_index] -= Math.min(0.01, Math.pow(_batch, -0.5))
-            }
-            _sigma[_index] = Math.exp(_ls[_index])
-            _n = 0
-            _acceptance[_index] = 0
-            _index = (_index + 1) % self.dim
-            if (_index === 0) {
-              _batch++
-            }
-          }
-        },
-
-        /**
-         * Returns the current proposal scales.
-         *
-         * @method scales
-         * @memberof ran.mc.RWM.proposal
-         * @return {number[]} Copy of the per-dimension step sizes.
-         */
-        scales () {
-          return _sigma.slice()
-        }
-      }
-    })(this)
+    this._q = new Normal(0, 1)
+    this._sigma = (this.internal.proposal || new Array(this.dim).fill(1)).slice()
+    this._ls = this._sigma.map(d => Math.log(d))
+    this._pAccepted = new Array(this.dim).fill(0)
+    this._pN = 0
+    this._pBatch = 0
+    this._pIndex = 0
   }
 
-  _internal () {
-    return {
-      proposal: this.proposal.scales()
+  // Proposes a new state. During warm-up: single-dimension (Gibbs) update.
+  // During sampling: all dimensions updated jointly.
+  _jump (x, warmUp) {
+    return warmUp
+      ? x.map((d, i) => d + (i === this._pIndex ? this._q.sample() * this._sigma[this._pIndex] : 0))
+      : x.map((d, i) => d + this._q.sample() * this._sigma[i])
+  }
+
+  // Batch Robbins-Monro step-size adaptation targeting 0.44 per-component acceptance rate.
+  _updateProposal (accepted) {
+    if (accepted) this._pAccepted[this._pIndex]++
+    this._pN++
+    if (this._pN === 100) {
+      const delta = Math.min(0.01, Math.pow(this._pBatch, -0.5))
+      this._ls[this._pIndex] += this._pAccepted[this._pIndex] / 100 > 0.44 ? delta : -delta
+      this._sigma[this._pIndex] = Math.exp(this._ls[this._pIndex])
+      this._pAccepted[this._pIndex] = 0
+      this._pN = 0
+      this._pIndex = (this._pIndex + 1) % this.dim
+      if (this._pIndex === 0) this._pBatch++
     }
   }
 
+  _internal () {
+    return { proposal: this._sigma.slice() }
+  }
+
   _iter (x, warmUp) {
-    let x1 = this.proposal.jump(x, warmUp)
+    let x1 = this._jump(x, warmUp)
     const newLnp = this.lnp(x1)
     const accepted = float() < Math.exp(newLnp - this.lastLnp)
     if (accepted) {
@@ -113,6 +68,6 @@ export default class RWM extends MCMC {
   }
 
   _adjust (i) {
-    this.proposal.update(i.accepted)
+    this._updateProposal(i.accepted)
   }
 }
