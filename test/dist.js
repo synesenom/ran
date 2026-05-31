@@ -315,6 +315,23 @@ describe('dist', () => {
       })
     })
 
+    describe('._qEstimateRoot()', () => {
+      it('returns NaN when bracket cannot be found (degenerate equal-bound open support)', () => {
+        // Support [5, 5] (both open, both equal) collapses delta to 0, so a0 === b0 and bracket() returns undefined.
+        class DegenerateContinuous extends Distribution {
+          constructor () {
+            super('continuous', 0)
+            this.s = [{ value: 5, closed: false }, { value: 5, closed: false }]
+          }
+
+          _pdf () { return 0 }
+          _cdf () { return 0.5 }
+        }
+        const d = new DegenerateContinuous()
+        assert(Number.isNaN(d.q(0.5)))
+      })
+    })
+
     describe('.survive()', () => {
       it('should throw not implemented error', () => {
         assert.throws(() => {
@@ -1988,6 +2005,16 @@ describe('dist', () => {
       assert.isAtMost(d._cdf(0), 1)
       assert.isAtMost(d._cdf(1), 1)
     })
+
+    it('_generator returns NaN when all alias tables are exhausted (zero-probability PMF)', () => {
+      // _pk returns 0 for every k, so every alias table always routes to the overflow slot (TABLE_SIZE).
+      // After MAX_NUMBER_OF_TABLES tables the do-while exits without sampling, and must return NaN not undefined.
+      class ZeroMassDist extends PreComputed {
+        _pk () { return 0 }
+      }
+      const d = new ZeroMassDist()
+      assert(Number.isNaN(d._generator()))
+    })
   })
 
   describe('.fit() Categorical subclasses', () => {
@@ -2205,6 +2232,20 @@ describe('dist', () => {
     { name: 'HalfGeneralizedNormal', ctor: () => new dist.HalfGeneralizedNormal(1, 2), k: 2, inherited: '3 from GeneralizedNormal' },
     { name: 'LogGamma', ctor: () => new dist.LogGamma(1, 1, 0), k: 3, inherited: '2 from Gamma' }
   ]
+  describe('Davis', () => {
+    it('survival/hazard/cHazard below support return 1/0/0', () => {
+      const d = new dist.Davis(1, 1, 2.5)
+      // x well below support (tests the x < mu path)
+      assert.strictEqual(d.survival(0.5), 1)
+      assert.strictEqual(d.hazard(0.5), 0)
+      assert.strictEqual(d.cHazard(0.5), 0)
+      // x exactly at the open lower boundary mu (tests the x === mu path of x <= mu guard)
+      assert.strictEqual(d.survival(1), 1)
+      assert.strictEqual(d.hazard(1), 0)
+      assert.strictEqual(d.cHazard(1), 0)
+    })
+  })
+
   paramCountCases.forEach(({ name, ctor, k, inherited }) => {
     describe(`${name} parameter count`, () => {
       const sample = [0.1, 0.5, 1.0, 1.5, 2.0, 0.3, 0.8, 1.2, 2.5, 0.6]

@@ -112,8 +112,7 @@ export default class PreComputed extends Distribution {
       }
     } while (tableIndex < this.MAX_NUMBER_OF_TABLES)
 
-    // TODO Should throw an error
-    // If did not find sample in max number of tables, return undefined
+    return NaN
   }
 
   _pdf (x) {
