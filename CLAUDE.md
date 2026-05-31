@@ -136,6 +136,8 @@ Truly unavoidable immediate breaks (e.g. a security fix with no compatible path)
 
 **Per-PR changelog rule:** If a PR makes a user-visible change (bug fix, new feature, dependency security fix, removed dead code), add a bullet to the `## [Unreleased]` section of `CHANGELOG.md` following the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format. Pure refactors, test-only changes, and doc-only changes do not need a changelog entry.
 
+**Changelog entry placement:** Always add new entries under the existing `### Added`, `### Changed`, `### Fixed`, etc. subsections — never create a duplicate subsection. If the new change is the same category as an existing entry (e.g. another `_fitInit` seed, another `refVals` addition, another cancellation fix), extend or amend that entry rather than adding a separate bullet. The goal is one bullet per logical group, not one bullet per distribution or per file.
+
 **Release PR:** Rename `## [Unreleased]` to `## [x.y.z] - YYYY-MM-DD`, add a new empty `## [Unreleased]` above it, and bump `version` in `package.json`. For vulnerabilities that cannot be fixed without a breaking toolchain change, document the accepted risk in the changelog entry with a reference to the tracking issue.
 
 **Triggering a release:** Use the `/release` skill from a machine where `gh` and `git` are available. It handles the full pipeline end-to-end: version bump, changelog, release PR, merge, tag, and milestone rotation. Run it as:
