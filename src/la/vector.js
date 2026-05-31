@@ -139,6 +139,7 @@ class Vector {
    * @method add
    * @memberof ran.la.Vector
    * @param {ran.la.Vector} vec The vector to add.
+   * @throws {Error} If the vector dimensions do not match.
    * @returns {ran.la.Vector} The sum vector.
    * @example
    *
@@ -149,6 +150,9 @@ class Vector {
    *
    */
   add (vec) {
+    if (vec.dim() !== this._v.length) {
+      throw Error('Vector dimensions must match')
+    }
     const v = vec.v()
     return new Vector(this._v.map((d, i) => d + v[i]))
   }
@@ -159,6 +163,7 @@ class Vector {
    * @method sub
    * @memberof ran.la.Vector
    * @param {ran.la.Vector} vec The vector to subtract.
+   * @throws {Error} If the vector dimensions do not match.
    * @returns {ran.la.Vector} The difference vector.
    * @example
    *
@@ -169,6 +174,9 @@ class Vector {
    *
    */
   sub (vec) {
+    if (vec.dim() !== this._v.length) {
+      throw Error('Vector dimensions must match')
+    }
     const v = vec.v()
     return new Vector(this._v.map((d, i) => d - v[i]))
   }
@@ -179,6 +187,7 @@ class Vector {
    * @method dot
    * @memberof ran.la.Vector
    * @param {ran.la.Vector} vec Vector to multiply with.
+   * @throws {Error} If the vector dimensions do not match.
    * @returns {number} The dot product.
    * @example
    *
@@ -189,6 +198,9 @@ class Vector {
    *
    */
   dot (vec) {
+    if (vec.dim() !== this._v.length) {
+      throw Error('Vector dimensions must match')
+    }
     const v = vec.v()
     return this._v.reduce((sum, d, i) => sum + d * v[i], 0)
   }

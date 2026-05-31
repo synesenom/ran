@@ -6,18 +6,18 @@ import quantile from '../shape/quantile'
  * @method midhinge
  * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate midhinge for.
- * @returns {number|undefined} The midhinge of the values if there is any, undefined otherwise.
+ * @returns {number} The midhinge, or NaN for an empty array.
  * @example
  *
  * ran.dispersion.midhinge([])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.midhinge([1, 1, 1, 2, 3])
  * // => 1.5
  */
 export default function (values) {
   if (values.length === 0) {
-    return undefined
+    return NaN
   }
 
   return (quantile(values, 0.25) + quantile(values, 0.75)) / 2

@@ -12,15 +12,12 @@ function tau (a, b) {
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
- * @returns {number|undefined} Somers' D if none of the arrays are empty, they have the same length, undefined
- * otherwise.
+ * @throws {Error} If the arrays have different lengths.
+ * @returns {number} Somers' D, or NaN for empty arrays.
  * @example
  *
  * ran.dependence.somersD([], [])
- * // => undefined
- *
- * ran.dependence.somersD([1, 2, 3], [1, 2, 3, 4])
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.somersD([1, 2, 3], [4, 6, 6])
  * // => 0.6666666666666666
@@ -29,13 +26,12 @@ function tau (a, b) {
  * // => -1
  */
 export default function (x, y) {
-  if (isInvalidInput(x, y)) {
-    return undefined
+  if (x.length !== y.length) {
+    throw Error('Arrays must have the same length')
+  }
+  if (x.length === 0) {
+    return NaN
   }
 
   return tau(x, y) / tau(x, x)
-}
-
-function isInvalidInput (x, y) {
-  return x.length === 0 || y.length === 0 || x.length !== y.length
 }

@@ -8,11 +8,11 @@ import mean from '../location/mean'
  * @param {number[]} values Array of values to calculate moment for.
  * @param {number} k Order of the moment.
  * @param {number} [c = 0] Value to shift the distribution by before calculating the moment.
- * @returns {number|undefined} The k-th moment of the values if there is any, undefined otherwise.
+ * @returns {number} The k-th moment, or NaN for an empty array.
  * @example
  *
  * ran.shape.moment([], 2)
- * // => undefined
+ * // => NaN
  *
  * ran.shape.moment([1, 2, 3], 0)
  * // => 1
@@ -21,5 +21,5 @@ import mean from '../location/mean'
  * // => 4.666666666666667
  */
 export default function (values, k, c = 0) {
-  return values.length > 0 ? mean(values.map(d => Math.pow(d - c, k))) : undefined
+  return values.length > 0 ? mean(values.map(d => Math.pow(d - c, k))) : NaN
 }

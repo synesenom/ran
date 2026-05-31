@@ -15,15 +15,12 @@ function nTies (values) {
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
- * @returns {number|undefined} Kendall's correlation coefficient if none of the arrays are empty and they have the
- * same length, undefined otherwise.
+ * @throws {Error} If the arrays have different lengths.
+ * @returns {number} Kendall's correlation coefficient, or NaN for empty arrays.
  * @example
  *
  * ran.dependence.kendall([], [])
- * // => undefined
- *
- * ran.dependence.kendall([1, 2, 3], [1, 2, 3, 4])
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.kendall([1, 2, 3], [4, 5, 6])
  * // => 1
@@ -32,8 +29,11 @@ function nTies (values) {
  * // => 0.3333333333333333
  */
 export default function (x, y) {
-  if (invalidInput(x, y)) {
-    return undefined
+  if (x.length !== y.length) {
+    throw Error('Arrays must have the same length')
+  }
+  if (x.length === 0) {
+    return NaN
   }
 
   // Numerator.
@@ -46,8 +46,4 @@ export default function (x, y) {
 
   // Return the final value.
   return num / Math.sqrt((n0 - n1) * (n0 - n2))
-}
-
-function invalidInput (x, y) {
-  return x.length === 0 || y.length === 0 || x.length !== y.length
 }

@@ -9,30 +9,31 @@ import mean from '../location/mean'
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values. Must contain 0s and 1s only.
- * @returns {number|undefined} The point-biserial correlation coefficient if none of the arrays are empty, they have
- * the same length and each has a positive variance, undefined otherwise.
+ * @throws {Error} If the arrays have different lengths.
+ * @returns {number} The point-biserial correlation coefficient, or NaN if arrays have fewer than 2 elements or
+ * zero variance.
  * @example
  *
  * ran.dependence.pointBiserial([], [])
- * // => undefined
- *
- * ran.dependence.pointBiserial([1, 2, 3], [0, 0, 1, 1])
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.pointBiserial([2, 2, 2], [0, 0, 1])
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.pointBiserial([1, 2, 3], [4, 5, 6])
  * // => 0.8660254037844386
  */
 export default function (x, y) {
-  if (!validInputs(x, y)) {
-    return undefined
+  if (x.length !== y.length) {
+    throw Error('Arrays must have the same length')
+  }
+  if (x.length < 2) {
+    return NaN
   }
 
   const s = stdev(x)
   if (s === 0) {
-    return undefined
+    return NaN
   }
 
   const x0 = x.filter((d, i) => y[i] === 0)
@@ -42,10 +43,4 @@ export default function (x, y) {
   const m0 = mean(x0)
   const m1 = mean(x1)
   return (m1 - m0) * Math.sqrt(n0 * n1 / (x.length * (x.length - 1))) / s
-}
-
-function validInputs (x, y) {
-  return (x.length !== 0 &&
-    y.length !== 0 &&
-    x.length === y.length)
 }

@@ -7,11 +7,11 @@ import quickselect from '../algorithms/quickselect'
  * @memberof ran.shape
  * @param {number[]} values Array of values to calculate quantile for.
  * @param {number} p Value to calculate quantile at.
- * @returns {number|undefined} The quantile of the sample if there is any, undefined otherwise.
+ * @returns {number} The quantile of the sample, or NaN for an empty array.
  */
 export default function (values, p) {
   if (values.length === 0) {
-    return undefined
+    return NaN
   }
 
   const h = (values.length - 1) * p

@@ -5,15 +5,15 @@ import * as dependence from '../src/dependence'
 
 describe('dependence', () => {
   describe('.covariance()', () => {
-    it('should return undefined if any of the arrays has fewer than two elements', () => {
-      assert(typeof dependence.covariance([], [1, 2, 3]) === 'undefined')
-      assert(typeof dependence.covariance([1], [1, 2, 3]) === 'undefined')
-      assert(typeof dependence.covariance([1, 2, 3], []) === 'undefined')
-      assert(typeof dependence.covariance([1, 2, 3], [1]) === 'undefined')
+    it('should throw if arrays have different length', () => {
+      assert.throws(() => dependence.covariance([1, 2, 3], [4, 5]))
+      assert.throws(() => dependence.covariance([], [1, 2, 3]))
+      assert.throws(() => dependence.covariance([1, 2, 3], []))
     })
 
-    it('should return undefined if arrays have different length', () => {
-      assert(typeof dependence.covariance([1, 2, 3], [4, 5]) === 'undefined')
+    it('should return NaN if any of the arrays has fewer than two elements', () => {
+      assert(Number.isNaN(dependence.covariance([], [])))
+      assert(Number.isNaN(dependence.covariance([1], [1])))
     })
 
     it('should return the covariance of two arrays', () => {
@@ -46,9 +46,13 @@ describe('dependence', () => {
   })
 
   describe('.dCov()', () => {
-    it('should return undefined if any array is empty', () => {
-      assert(typeof dependence.dCov([], [1, 2, 3]) === 'undefined')
-      assert(typeof dependence.dCov([1, 2, 3], []) === 'undefined')
+    it('should throw if arrays have different length', () => {
+      assert.throws(() => dependence.dCov([], [1, 2, 3]))
+      assert.throws(() => dependence.dCov([1, 2, 3], []))
+    })
+
+    it('should return NaN for empty arrays', () => {
+      assert(Number.isNaN(dependence.dCov([], [])))
     })
 
     it('should return the distance covariance of two arrays', () => {
@@ -70,9 +74,17 @@ describe('dependence', () => {
   })
 
   describe('.dCor()', () => {
-    it('should return undefined if any array is empty', () => {
-      assert(typeof dependence.dCor([], [1, 2, 3]) === 'undefined')
-      assert(typeof dependence.dCor([1, 2, 3], []) === 'undefined')
+    it('should throw if arrays have different length', () => {
+      assert.throws(() => dependence.dCor([], [1, 2, 3]))
+      assert.throws(() => dependence.dCor([1, 2, 3], []))
+    })
+
+    it('should return NaN for empty arrays', () => {
+      assert(Number.isNaN(dependence.dCor([], [])))
+    })
+
+    it('should return NaN if one array is constant', () => {
+      assert(Number.isNaN(dependence.dCor([1, 1, 1], [1, 2, 3])))
     })
 
     it('should return the distance correlation of two arrays', () => {
@@ -94,13 +106,14 @@ describe('dependence', () => {
   })
 
   describe('.kendall()', () => {
-    it('should return undefined if any array is empty', () => {
-      assert(typeof dependence.kendall([], [1, 2, 3]) === 'undefined')
-      assert(typeof dependence.kendall([1, 2, 3], []) === 'undefined')
+    it('should throw if arrays have different length', () => {
+      assert.throws(() => dependence.kendall([], [1, 2, 3]))
+      assert.throws(() => dependence.kendall([1, 2, 3], []))
+      assert.throws(() => dependence.kendall([1, 2, 3], [4, 5]))
     })
 
-    it('should return undefined if arrays have different length', () => {
-      assert(typeof dependence.kendall([1, 2, 3], [4, 5]) === 'undefined')
+    it('should return NaN for empty arrays', () => {
+      assert(Number.isNaN(dependence.kendall([], [])))
     })
 
     it('should return Kendall\'s tau of two arrays', () => {
@@ -122,17 +135,18 @@ describe('dependence', () => {
   })
 
   describe('.kullbackLeibler()', () => {
-    it('should return undefined if any array is empty', () => {
-      assert(typeof dependence.kullbackLeibler([], [0.1, 0.2, 0.7]) === 'undefined')
-      assert(typeof dependence.kullbackLeibler([0.1, 0.2, 0.7], []) === 'undefined')
+    it('should throw if arrays have different length', () => {
+      assert.throws(() => dependence.kullbackLeibler([], [0.1, 0.2, 0.7]))
+      assert.throws(() => dependence.kullbackLeibler([0.1, 0.2, 0.7], []))
+      assert.throws(() => dependence.kullbackLeibler([0.1, 0.2, 0.7], [0.3, 0.7]))
     })
 
-    it('should return undefined if arrays have different length', () => {
-      assert(typeof dependence.kullbackLeibler([0.1, 0.2, 0.7], [0.3, 0.7]) === 'undefined')
+    it('should return NaN for empty input', () => {
+      assert(Number.isNaN(dependence.kullbackLeibler([], [])))
     })
 
-    it('should return undefined if Q(x) = 0 and P(x) > 0 for some x', () => {
-      assert(typeof dependence.kullbackLeibler([0.1, 0.2, 0.7], [0, 0.3, 0.7]) === 'undefined')
+    it('should return Infinity if Q(x) = 0 and P(x) > 0 for some x', () => {
+      assert(dependence.kullbackLeibler([0.1, 0.2, 0.7], [0, 0.3, 0.7]) === Infinity)
     })
 
     it('should return the Kullback-Leibler divergence of two arrays of probabilities', () => {
@@ -159,9 +173,9 @@ describe('dependence', () => {
   })
 
   describe('.oddsRatio()', () => {
-    it('should return undefined if any of p01 and p10 is zero', () => {
-      assert(typeof dependence.oddsRatio(0.1, 0, 0.3, 0.4) === 'undefined')
-      assert(typeof dependence.oddsRatio(0.1, 0.2, 0, 0.4) === 'undefined')
+    it('should return Infinity if p01 or p10 is zero', () => {
+      assert(dependence.oddsRatio(0.1, 0, 0.3, 0.4) === Infinity)
+      assert(dependence.oddsRatio(0.1, 0.2, 0, 0.4) === Infinity)
     })
 
     it('should return the odds ratio for contingency table of joint probabilities', () => {
@@ -176,13 +190,15 @@ describe('dependence', () => {
   })
 
   describe('.pearson()', () => {
-    it('should return undefined if any array is empty', () => {
-      assert(typeof dependence.pearson([], [1, 2, 3]) === 'undefined')
-      assert(typeof dependence.pearson([1, 2, 3], []) === 'undefined')
+    it('should throw if arrays have different length', () => {
+      assert.throws(() => dependence.pearson([], [1, 2, 3]))
+      assert.throws(() => dependence.pearson([1, 2, 3], []))
+      assert.throws(() => dependence.pearson([1, 2, 3], [4, 5]))
     })
 
-    it('should return undefined if arrays have different length', () => {
-      assert(typeof dependence.pearson([1, 2, 3], [4, 5]) === 'undefined')
+    it('should return NaN if any of the arrays has fewer than two elements', () => {
+      assert(Number.isNaN(dependence.pearson([], [])))
+      assert(Number.isNaN(dependence.pearson([1], [1])))
     })
 
     it('should return the Pearson correlation of two arrays', () => {
@@ -215,17 +231,19 @@ describe('dependence', () => {
   })
 
   describe('.pointBiserial()', () => {
-    it('should return undefined if any array is empty', () => {
-      assert(typeof dependence.pointBiserial([], [1, 2, 3]) === 'undefined')
-      assert(typeof dependence.pointBiserial([1, 2, 3], []) === 'undefined')
+    it('should throw if arrays have different length', () => {
+      assert.throws(() => dependence.pointBiserial([], [1, 2, 3]))
+      assert.throws(() => dependence.pointBiserial([1, 2, 3], []))
+      assert.throws(() => dependence.pointBiserial([1, 2, 3], [0, 1]))
     })
 
-    it('should return undefined if arrays have different length', () => {
-      assert(typeof dependence.pointBiserial([1, 2, 3], [0, 1]) === 'undefined')
+    it('should return NaN if any of the arrays has fewer than two elements', () => {
+      assert(Number.isNaN(dependence.pointBiserial([], [])))
+      assert(Number.isNaN(dependence.pointBiserial([1], [0])))
     })
 
-    it('should return undefined if standard deviation of x is 0', () => {
-      assert(typeof dependence.pointBiserial([1, 1, 1], [0, 0, 1]) === 'undefined')
+    it('should return NaN if standard deviation of x is 0', () => {
+      assert(Number.isNaN(dependence.pointBiserial([1, 1, 1], [0, 0, 1])))
     })
 
     it('should return the point-biserial correlation of two arrays', () => {
@@ -246,12 +264,13 @@ describe('dependence', () => {
   })
 
   describe('.somersD()', () => {
-    it('should return undefined if any of the samples is empty', () => {
-      assert(typeof dependence.somersD([], [1, 2, 3]) === 'undefined')
+    it('should throw if samples have different length', () => {
+      assert.throws(() => dependence.somersD([], [1, 2, 3]))
+      assert.throws(() => dependence.somersD([1, 2, 3], [1, 2, 3, 4]))
     })
 
-    it('should return undefined if samples have different sizes', () => {
-      assert(typeof dependence.somersD([1, 2, 3], [1, 2, 3, 4]) === 'undefined')
+    it('should return NaN for empty samples', () => {
+      assert(Number.isNaN(dependence.somersD([], [])))
     })
 
     it('should return Somers\' D', () => {
@@ -273,13 +292,14 @@ describe('dependence', () => {
   })
 
   describe('.spearman()', () => {
-    it('should return undefined if any array is empty', () => {
-      assert(typeof dependence.spearman([], [1, 2, 3]) === 'undefined')
-      assert(typeof dependence.spearman([1, 2, 3], []) === 'undefined')
+    it('should throw if arrays have different length', () => {
+      assert.throws(() => dependence.spearman([], [1, 2, 3]))
+      assert.throws(() => dependence.spearman([1, 2, 3], []))
+      assert.throws(() => dependence.spearman([1, 2, 3], [4, 5]))
     })
 
-    it('should return undefined if arrays have different length', () => {
-      assert(typeof dependence.spearman([1, 2, 3], [4, 5]) === 'undefined')
+    it('should return NaN for empty arrays', () => {
+      assert(Number.isNaN(dependence.spearman([], [])))
     })
 
     it('should return Spearman\'s rank correlation of two arrays', () => {
@@ -310,9 +330,9 @@ describe('dependence', () => {
   })
 
   describe('.yuleQ()', () => {
-    it('should return undefined if any of p01 and p10 is zero', () => {
-      assert(typeof dependence.yuleQ(0.1, 0, 0.3, 0.4) === 'undefined')
-      assert(typeof dependence.yuleQ(0.1, 0.2, 0, 0.4) === 'undefined')
+    it('should return NaN if p01 or p10 is zero', () => {
+      assert(Number.isNaN(dependence.yuleQ(0.1, 0, 0.3, 0.4)))
+      assert(Number.isNaN(dependence.yuleQ(0.1, 0.2, 0, 0.4)))
     })
 
     it('should return Yule\'s Q for a contingency table of joint probabilities', () => {
@@ -328,9 +348,9 @@ describe('dependence', () => {
   })
 
   describe('.yuleY()', () => {
-    it('should return undefined if any of p01 and p10 is zero', () => {
-      assert(typeof dependence.yuleY(0.1, 0, 0.3, 0.4) === 'undefined')
-      assert(typeof dependence.yuleY(0.1, 0.2, 0, 0.4) === 'undefined')
+    it('should return NaN if p01 or p10 is zero', () => {
+      assert(Number.isNaN(dependence.yuleY(0.1, 0, 0.3, 0.4)))
+      assert(Number.isNaN(dependence.yuleY(0.1, 0.2, 0, 0.4)))
     })
 
     it('should return Yule\'s Y for a contingency table of joint probabilities', () => {

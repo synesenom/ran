@@ -4,18 +4,18 @@
  * @method midrange
  * @memberof ran.location
  * @param {number[]} values Array of values to calculate mid-range for.
- * @returns {number|undefined} The mid-range of the values if there is any, undefined otherwise.
+ * @returns {number} The mid-range of the values, NaN for empty input.
  * @example
  *
  * ran.location.midrange([])
- * // => undefined
+ * // => NaN
  *
  * ran.location.midrange([0, 0, 0, 1, 2])
  * // => 1
  */
 export default function (values) {
   if (values.length === 0) {
-    return undefined
+    return NaN
   }
 
   let min = values[0]

@@ -9,18 +9,15 @@ import covariance from './covariance'
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
- * @returns {number|undefined} The Pearson correlation coefficient if none of the arrays are empty, they have the
- * same length and each has a positive variance, undefined otherwise.
+ * @throws {Error} If the arrays have different lengths.
+ * @returns {number} The Pearson correlation coefficient, or NaN if arrays have fewer than two elements or zero variance.
  * @example
  *
  * ran.dependence.pearson([], [])
- * // => undefined
- *
- * ran.dependence.pearson([1, 2, 3], [1, 2, 3, 4])
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.pearson([1, 2, 3], [1, 1, 1])
- * // => undefined
+ * // => NaN
  *
  * ran.dependence.pearson([1, 2, 3], [4, 5, 6])
  * // => 1
@@ -29,9 +26,8 @@ import covariance from './covariance'
  * // => 0.6643835616438358
  */
 export default function (x, y) {
-  // TODO Check if length is below 2.
   const cov = covariance(x, y)
   const sx = stdev(x)
   const sy = stdev(y)
-  return typeof cov === 'undefined' || sx * sy === 0 ? undefined : cov / (sx * sy)
+  return Number.isNaN(cov) || sx * sy === 0 ? NaN : cov / (sx * sy)
 }

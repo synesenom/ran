@@ -6,17 +6,16 @@ import * as shape from '../src/shape'
 
 const SAMPLE_SIZE = 100
 
-// TODO Go through methods and check input conditions.
 describe('dispersion', () => {
   describe('.kurtosis()', () => {
-    it('should return undefined if sample size is less than 3', () => {
-      assert(typeof shape.kurtosis([]) === 'undefined')
-      assert(typeof shape.kurtosis([1]) === 'undefined')
-      assert(typeof shape.kurtosis([1, 2]) === 'undefined')
+    it('should return NaN if sample size is less than 3', () => {
+      assert(Number.isNaN(shape.kurtosis([])))
+      assert(Number.isNaN(shape.kurtosis([1])))
+      assert(Number.isNaN(shape.kurtosis([1, 2])))
     })
 
-    it('should return undefined if the variance is 0', () => {
-      assert(typeof shape.kurtosis([1, 1, 1]) === 'undefined')
+    it('should return NaN if the variance is 0', () => {
+      assert(Number.isNaN(shape.kurtosis([1, 1, 1])))
     })
 
     it('should return the kurtosis', () => {
@@ -42,8 +41,8 @@ describe('dispersion', () => {
   })
 
   describe('.moment()', () => {
-    it('should return undefined for an empty sample', () => {
-      assert(typeof shape.moment([]) === 'undefined')
+    it('should return NaN for an empty sample', () => {
+      assert(Number.isNaN(shape.moment([], 2)))
     })
 
     it('should return the moment for finite sample for c = 0', () => {
@@ -79,8 +78,8 @@ describe('dispersion', () => {
   })
 
   describe('.quantile()', () => {
-    it('should return undefined for empty sample', () => {
-      assert(typeof shape.quantile([], 0.5) === 'undefined')
+    it('should return NaN for empty sample', () => {
+      assert(Number.isNaN(shape.quantile([], 0.5)))
     })
 
     it('should return quantile for finite sample', () => {
@@ -98,8 +97,8 @@ describe('dispersion', () => {
   })
 
   describe('.rank()', () => {
-    it('should return undefined for an empty sample', () => {
-      assert(typeof shape.rank([]) === 'undefined')
+    it('should return empty array for an empty sample', () => {
+      assert.deepEqual(shape.rank([]), [])
     })
 
     it('.should rank values using fractional rank', () => {
@@ -120,14 +119,14 @@ describe('dispersion', () => {
   })
 
   describe('.skewness()', () => {
-    it('should return undefined if sample size is less than 3', () => {
-      assert(typeof shape.skewness([]) === 'undefined')
-      assert(typeof shape.skewness([1]) === 'undefined')
-      assert(typeof shape.skewness([1, 2]) === 'undefined')
+    it('should return NaN if sample size is less than 3', () => {
+      assert(Number.isNaN(shape.skewness([])))
+      assert(Number.isNaN(shape.skewness([1])))
+      assert(Number.isNaN(shape.skewness([1, 2])))
     })
 
-    it('should return undefined if the variance is 0', () => {
-      assert(typeof shape.skewness([1, 1, 1]) === 'undefined')
+    it('should return NaN if the variance is 0', () => {
+      assert(Number.isNaN(shape.skewness([1, 1, 1])))
     })
 
     it('should return the skewness', () => {
@@ -155,12 +154,12 @@ describe('dispersion', () => {
   })
 
   describe('.yule()', () => {
-    it('should return undefined for an empty sample', () => {
-      assert(typeof shape.yule([]) === 'undefined')
+    it('should return NaN for an empty sample', () => {
+      assert(Number.isNaN(shape.yule([])))
     })
 
-    it('should return undefined if lower and upper quartiles are the same', () => {
-      assert(typeof shape.yule([1, 1, 1]) === 'undefined')
+    it('should return NaN if lower and upper quartiles are the same', () => {
+      assert(Number.isNaN(shape.yule([1, 1, 1])))
     })
 
     it('should return Yule\'s coefficient for a finite sample', () => {

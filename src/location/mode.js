@@ -71,12 +71,12 @@ function continuousMode (values) {
  * @method mode
  * @memberof ran.location
  * @param {number[]} values Array of values to calculate mode for.
- * @returns {number|number[]|undefined} The estimated mode (continuous sample), an array of modes (discrete sample) or
- * undefined (empty sample).
+ * @returns {number|number[]} The estimated mode (continuous sample) or an array of modes (discrete sample).
+ * Returns an empty array for empty input.
  * @example
  *
  * ran.location.mode([])
- * // => undefined
+ * // => []
  *
  * ran.location.mode([1])
  * // => [1]
@@ -92,7 +92,7 @@ function continuousMode (values) {
  */
 export default function (values) {
   if (values.length === 0) {
-    return undefined
+    return []
   }
 
   if (values.reduce((int, d) => int && Number.isInteger(d), true)) {
