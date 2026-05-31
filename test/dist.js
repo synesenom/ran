@@ -2232,6 +2232,20 @@ describe('dist', () => {
     { name: 'HalfGeneralizedNormal', ctor: () => new dist.HalfGeneralizedNormal(1, 2), k: 2, inherited: '3 from GeneralizedNormal' },
     { name: 'LogGamma', ctor: () => new dist.LogGamma(1, 1, 0), k: 3, inherited: '2 from Gamma' }
   ]
+  describe('Davis', () => {
+    it('survival/hazard/cHazard below support return 1/0/0', () => {
+      const d = new dist.Davis(1, 1, 2.5)
+      // x well below support (tests the x < mu path)
+      assert.strictEqual(d.survival(0.5), 1)
+      assert.strictEqual(d.hazard(0.5), 0)
+      assert.strictEqual(d.cHazard(0.5), 0)
+      // x exactly at the open lower boundary mu (tests the x === mu path of x <= mu guard)
+      assert.strictEqual(d.survival(1), 1)
+      assert.strictEqual(d.hazard(1), 0)
+      assert.strictEqual(d.cHazard(1), 0)
+    })
+  })
+
   paramCountCases.forEach(({ name, ctor, k, inherited }) => {
     describe(`${name} parameter count`, () => {
       const sample = [0.1, 0.5, 1.0, 1.5, 2.0, 0.3, 0.8, 1.2, 2.5, 0.6]
