@@ -10,7 +10,7 @@ block content
 
         .demo-param-group
             label(for="sample-size") Samples
-            input#sample-size(type="number", value="10000", min="10000", max="20000", step="1000")
+            input#sample-size(type="number", value="10000", min="1000", max="20000", step="1000")
 
         button.demo-fit-btn#fit-btn Fit to samples
 
@@ -68,10 +68,13 @@ block scripts
         let debounceTimer = null
         let pdfSvg = null
         let cdfSvg = null
+        let lastRenderState = null
         const CHART_H = 380
         const MARGIN = {top: 12, right: 16, bottom: 36, left: 48}
-        const COLOR_HIST = '#e4e9ef'
-        const COLOR_BLUE = '#2563b6'
+        const COLOR_HIST = '#e4e9ef'    // histogram bar fill
+        const COLOR_SAMPLES = '#8a98a8' // empirical CDF line
+        const COLOR_BLUE = '#2563b6'    // theoretical curve (planted params)
+        const COLOR_FIT = '#b23a2e'     // fitted overlay
 
         // ---- Helpers -------------------------------------------------------
 
@@ -128,6 +131,58 @@ block scripts
             .style('top', '0').style('left', '0')
         }
 
+        // ---- Fit overlay (appended on top of base render) ------------------
+
+        function overlayFit (fittedDist) {
+          if (!lastRenderState) return
+          const {cfg, xMin, xMax, yPdfMax, wPdf, wCdf, iPdf, iCdf, iH} = lastRenderState
+          const xPdf = d3.scaleLinear().domain([xMin, xMax]).range([0, iPdf])
+          const yPdf = d3.scaleLinear().domain([0, yPdfMax]).range([iH, 0])
+          const xCdf = d3.scaleLinear().domain([xMin, xMax]).range([0, iCdf])
+          const yCdf = d3.scaleLinear().domain([0, 1.05]).range([iH, 0])
+          const gPdf = pdfSvg.select('g')
+          const gCdf = cdfSvg.select('g')
+
+          if (cfg.type === 'continuous') {
+            const fitPdfPts = linspace(xMin, xMax, 200)
+              .map(x => ({x, y: fittedDist.pdf(x)})).filter(p => isFinite(p.y))
+            gPdf.append('path').datum(fitPdfPts)
+              .attr('fill', 'none').attr('stroke', COLOR_FIT).attr('stroke-width', 2)
+              .attr('stroke-dasharray', '5,3')
+              .attr('d', d3.line().x(d => xPdf(d.x)).y(d => yPdf(d.y)))
+          } else {
+            const kMin = Math.round(xMin), kMax = Math.round(xMax)
+            const fitPmfPts = []
+            for (let k = kMin; k <= kMax; k++) {
+              const y = fittedDist.pdf(k)
+              if (isFinite(y)) fitPmfPts.push({x: k, y})
+            }
+            gPdf.selectAll('.fit-dot').data(fitPmfPts).join('circle')
+              .attr('class', 'fit-dot')
+              .attr('cx', d => xPdf(d.x)).attr('cy', d => yPdf(d.y))
+              .attr('r', 5).attr('fill', 'none')
+              .attr('stroke', COLOR_FIT).attr('stroke-width', 2)
+          }
+
+          let fitCdfPts
+          if (cfg.type === 'discrete') {
+            const kMin = Math.round(xMin), kMax = Math.round(xMax)
+            fitCdfPts = []
+            for (let k = kMin; k <= kMax; k++) {
+              const prev = k > kMin ? fittedDist.cdf(k - 1) : 0
+              fitCdfPts.push({x: k, y: prev}, {x: k, y: fittedDist.cdf(k)})
+            }
+            fitCdfPts = fitCdfPts.filter(p => isFinite(p.y))
+          } else {
+            fitCdfPts = linspace(xMin, xMax, 200)
+              .map(x => ({x, y: fittedDist.cdf(x)})).filter(p => isFinite(p.y))
+          }
+          gCdf.append('path').datum(fitCdfPts)
+            .attr('fill', 'none').attr('stroke', COLOR_FIT).attr('stroke-width', 2)
+            .attr('stroke-dasharray', '5,3')
+            .attr('d', d3.line().x(d => xCdf(d.x)).y(d => yCdf(d.y)))
+        }
+
         // ---- Core render ---------------------------------------------------
 
         function renderDemo (name, params, n) {
@@ -147,6 +202,7 @@ block scripts
           const gPdf = pdfSvg.append('g').attr('transform', `translate(${MARGIN.left},${MARGIN.top})`)
           const xPdf = d3.scaleLinear().domain([xMin, xMax]).range([0, iPdf])
 
+          let yPdfMax
           if (cfg.type === 'continuous') {
             const nBins = Math.min(50, Math.max(10, Math.ceil(Math.sqrt(n))))
             const binW = (xMax - xMin) / nBins
@@ -154,8 +210,8 @@ block scripts
             for (const v of samples) counts[clamp(Math.floor((v - xMin) / binW), 0, nBins - 1)]++
             const bins = counts.map((c, i) => ({x0: xMin + i * binW, x1: xMin + (i + 1) * binW, y: c / (n * binW)}))
             const pdfPts = linspace(xMin, xMax, 200).map(x => ({x, y: dist.pdf(x)})).filter(p => isFinite(p.y))
-            const yMax = Math.max(...bins.map(b => b.y), ...pdfPts.map(p => p.y)) * 1.25 || 1
-            const yPdf = d3.scaleLinear().domain([0, yMax]).range([iH, 0])
+            yPdfMax = Math.max(...bins.map(b => b.y), ...pdfPts.map(p => p.y)) * 1.25 || 1
+            const yPdf = d3.scaleLinear().domain([0, yPdfMax]).range([iH, 0])
             gPdf.append('g').attr('transform', `translate(0,${iH})`).call(d3.axisBottom(xPdf).ticks(5)).call(applyAxisStyle)
             gPdf.append('g').call(d3.axisLeft(yPdf).ticks(4)).call(applyAxisStyle)
             gPdf.selectAll('rect').data(bins).join('rect')
@@ -174,8 +230,8 @@ block scripts
             const bars = []
             for (let k = kMin; k <= kMax; k++) bars.push({k, y: (freq[k] || 0) / n})
             const pmfPts = bars.map(d => ({x: d.k, y: dist.pdf(d.k)})).filter(p => isFinite(p.y))
-            const yMax = Math.max(...bars.map(b => b.y), ...pmfPts.map(p => p.y)) * 1.25 || 1
-            const yPdf = d3.scaleLinear().domain([0, yMax]).range([iH, 0])
+            yPdfMax = Math.max(...bars.map(b => b.y), ...pmfPts.map(p => p.y)) * 1.25 || 1
+            const yPdf = d3.scaleLinear().domain([0, yPdfMax]).range([iH, 0])
             const bW = Math.max(1, iPdf / (kMax - kMin + 2) * 0.6)
             gPdf.append('g').attr('transform', `translate(0,${iH})`).call(d3.axisBottom(xPdf).ticks(5)).call(applyAxisStyle)
             gPdf.append('g').call(d3.axisLeft(yPdf).ticks(4)).call(applyAxisStyle)
@@ -200,7 +256,7 @@ block scripts
 
           const empPts = makeEmpiricalCdf(samples)
           gCdf.append('path').datum(empPts)
-            .attr('fill', 'none').attr('stroke', COLOR_HIST).attr('stroke-width', 1.5)
+            .attr('fill', 'none').attr('stroke', COLOR_SAMPLES).attr('stroke-width', 1.5)
             .attr('d', d3.line().x(d => xCdf(d.x)).y(d => yCdf(d.y)).curve(d3.curveStepAfter))
 
           let cdfPts
@@ -220,6 +276,7 @@ block scripts
             .attr('fill', 'none').attr('stroke', COLOR_BLUE).attr('stroke-width', 2)
             .attr('d', d3.line().x(d => xCdf(d.x)).y(d => yCdf(d.y)))
 
+          lastRenderState = {cfg, xMin, xMax, yPdfMax, wPdf, wCdf, iPdf, iCdf, iH}
           return samples
         }
 
@@ -270,6 +327,7 @@ block scripts
           })
           const n = parseInt(sampleSizeInput.value) || 500
           currentSamples = null
+          lastRenderState = null
           fitSection.style.display = 'none'
           try {
             currentSamples = renderDemo(name, params, n)
@@ -332,6 +390,7 @@ block scripts
                 return {name: a.name, planted: plantedVal, fitted: fittedVal, deviation: dev}
               })
               showFitResults(rows)
+              overlayFit(fitted)
             } catch (e) {
               fitMsg.textContent = 'Fit failed: ' + e.message
               fitTbody.innerHTML = ''
