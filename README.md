@@ -160,6 +160,27 @@ d.load(state)     // restore from a saved state; returns the instance
 ran.dist.Gamma.fit(data)  // static — MLE fit; returns a new instance
 ```
 
+## Return values and errors
+
+`ranjs` signals an unusual result through one of four channels, chosen by the *kind* of situation:
+
+| Situation | What you get |
+| --- | --- |
+| Invalid input — missing/NaN parameters, broken constraints, wrong arity, mismatched dimensions | a **thrown `Error`** |
+| A valid query whose answer is mathematically undefined (e.g. the mean of a Cauchy distribution) | **`NaN`** |
+| A valid query whose answer diverges (e.g. the variance of a Pareto with shape ≤ 2, any moment of a Lévy) | **`Infinity`** (or `-Infinity`) |
+| A correct value that simply equals zero (e.g. a density evaluated outside the support) | **`0`** |
+
+Functions never return `undefined` to mean "failed" or "does not exist" — numeric results stay numbers (`NaN`/`Infinity`), and genuine misuse throws. `NaN` and `Infinity` are kept distinct on purpose: `NaN` means *no value exists*, `Infinity` means *the value grows without bound*. This mirrors the conventions of SciPy and R.
+
+```javascript
+const ran = require('ranjs')
+
+new ran.dist.Cauchy(0, 1).mean()       // => NaN       (undefined moment)
+new ran.dist.Pareto(1, 2).variance()   // => Infinity  (divergent moment)
+new ran.dist.Normal(0, 1).pdf(-Infinity) // => 0       (outside support)
+```
+
 ## Documentation
 
 Full API reference and distribution catalogue: [https://synesenom.github.io/ran/](https://synesenom.github.io/ran/)
