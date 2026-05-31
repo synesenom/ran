@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- `scripts/bench.js` and the 11 `jstat` / `@stdlib` devDependencies that backed it. The one-time comparative benchmark (issue #114) has served its purpose; keeping the packages inflated `npm install` and triggered false-positive alerts on snyk scans of the repo. ADR-0011 documents the original decision and rationale.
+
 ## [1.26.0] - 2026-05-31
 
 ### Added
