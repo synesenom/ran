@@ -109,6 +109,35 @@ describe('special', () => {
       assert(equal(special.besselI(1, 2), 1.590636854637329))
       assert(equal(special.besselI(1, 10), 2670.988303701254))
     })
+
+    it('I1(x) should match reference values at large arguments', () => {
+      // Independent sanity check: leading asymptotic I_1(x) ~ e^x/sqrt(2*pi*x) agrees
+      // with the Miller result to < 1% at x=50 (asymptotic is accurate to ~0.5% with
+      // one correction term), confirming the normalization is not off by any power of e^x.
+      assert(Math.abs(special.besselI(1, 50) * Math.sqrt(2 * Math.PI * 50) / Math.exp(50) - 1) < 0.01)
+      assert(equal(special.besselI(1, 50), 2.9030785901035533e+20))
+      assert(equal(special.besselI(1, 100), 1.0683693903381671e+42))
+      assert(equal(special.besselI(1, 200), 2.0345815493320935e+85))
+    })
+
+    it('I1(x) sign symmetry should hold at large arguments', () => {
+      // Exercises the x < 0 && n % 2 === 1 sign-correction branch for large |x|.
+      assert(equal(special.besselI(1, -50), -special.besselI(1, 50)))
+    })
+
+    it('I0(x) should match reference values at large arguments', () => {
+      // besselI(0, x) also used _I0(x) directly; this confirms the large-x fix.
+      assert(equal(special.besselI(0, 50), 2.9325537838493486e+20))
+      assert(equal(special.besselI(0, 100), 1.073751707131081e+42))
+      assert(equal(special.besselI(0, 200), 2.0396871734097203e+85))
+    })
+
+    it('I0(x) should be continuous across the |x|=10 routing boundary', () => {
+      // Verifies _I0 (|x|<=10) and _besselIBackward (|x|>10) agree near the crossover.
+      assert(equal(special.besselI(0, 9.9), 2560.9633532560433))
+      assert(equal(special.besselI(0, 10), 2815.716628466255))
+      assert(equal(special.besselI(0, 10.1), 3095.9756729321825))
+    })
   })
 
   describe('.besselISpherical()', () => {
