@@ -7,7 +7,7 @@
  */
 export { default as acceleratedSum } from './accelerated-sum'
 export { default as bracket } from './bracket'
-export { default as brent } from './brent'
+export { default as chandrupatla } from './chandrupatla'
 export { default as newton } from './newton'
 export { default as neumaier } from './neumaier'
 export { default as recursiveSum } from './recursive-sum'

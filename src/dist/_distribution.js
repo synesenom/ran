@@ -4,7 +4,7 @@ import nelderMead from '../algorithms/nelder-mead'
 import some from '../utils/some'
 import { chi2, kolmogorovSmirnov } from './_tests'
 import bracket from '../algorithms/bracket'
-import brent from '../algorithms/brent'
+import chandrupatla from '../algorithms/chandrupatla'
 import { MAX_ITER } from '../core/constants'
 
 /**
@@ -228,7 +228,7 @@ class Distribution {
   }
 
   /**
-   * Estimates the quantile function by solving F(x) = p using Brent's method.
+   * Estimates the quantile function by solving F(x) = p using Chandrupatla's method.
    *
    * @method _qEstimateRoot
    * @memberof ran.dist.Distribution
@@ -261,10 +261,10 @@ class Distribution {
     // Find brackets.
     const bounds = bracket(t => this.cdf(t) - p, a0, b0, this.s)
 
-    // Perform root-finding using Brent's method.
+    // Perform root-finding using Chandrupatla's method.
     if (Array.isArray(bounds)) {
       return Math.min(Math.max(
-        brent(t => this.cdf(t) - p, ...bounds), this.s[0].value), this.s[1].value
+        chandrupatla(t => this.cdf(t) - p, ...bounds), this.s[0].value), this.s[1].value
       )
     }
 

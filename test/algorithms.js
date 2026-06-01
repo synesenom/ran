@@ -44,26 +44,33 @@ describe('algorithms', () => {
     })
   })
 
-  describe('.brent()', () => {
-    it('should return NaN if brackets are wrong', () => {
+  describe('.chandrupatla()', () => {
+    it('should throw if brackets have the same sign', () => {
       const c = 5
-      const sol = algorithms.brent(
+      assert.throws(() => algorithms.chandrupatla(
         t => t * Math.exp(t) - c,
         lambertW0(c) + 1,
         lambertW0(c) + 2
-      )
-      assert(Number.isNaN(sol))
+      ))
     })
     it('should find the solution of exp(-x) = c x', () => {
       repeat(() => {
         const c = Math.random() * 10
-        const sol = algorithms.brent(
+        const sol = algorithms.chandrupatla(
           t => t * Math.exp(t) - c,
           lambertW0(c) - 1,
           lambertW0(c) + 1
         )
         assert(Math.abs((sol - lambertW0(c)) / sol) < PRECISION)
       }, LAPS)
+    })
+    it('should find roots near zero correctly', () => {
+      const sol = algorithms.chandrupatla(t => t, -1, 1)
+      assert(Math.abs(sol) < 1e-10)
+    })
+    it('should return the endpoint when it is an exact root', () => {
+      assert.equal(algorithms.chandrupatla(t => t, 0, 1), 0)
+      assert.equal(algorithms.chandrupatla(t => t - 1, 0, 1), 1)
     })
   })
 
