@@ -507,6 +507,19 @@ describe('special', () => {
         assert(equal(w * Math.exp(w), x))
       }, LAPS)
     })
+
+    it('should return known values near the branch cut', () => {
+      assert(equal(special.lambertW1m(-0.2), -2.5426413577735265))
+      assert(equal(special.lambertW1m(-0.05), -4.499755288523487))
+    })
+
+    it('should satisfy W * exp(W) = z near the branch cut (z in [-1/e, -0.1])', () => {
+      repeat(() => {
+        const x = -(Math.random() * (1 / Math.E - 0.1) + 0.1)
+        const w = special.lambertW1m(x)
+        assert(equal(w * Math.exp(w), x))
+      }, LAPS)
+    })
   })
 
   describe('.marcumQ()', () => {
