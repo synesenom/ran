@@ -470,6 +470,13 @@ describe('special', () => {
         }
       }, LAPS)
     })
+
+    it('should be accurate near s = 1 via Laurent expansion', () => {
+      // Reference values from three-term Laurent expansion (DLMF 25.2.8); two-term error at these points is < 5e-9 relative
+      assert(Math.abs(special.riemannZeta(1.0001) / 10000.577222946486 - 1) < 1e-8)
+      assert(Math.abs(special.riemannZeta(1.001) / 1000.5772884762018 - 1) < 1e-8)
+      assert(Math.abs(special.riemannZeta(1.01) / 100.5779433388382 - 1) < 1e-7)
+    })
   })
 
   describe('.lambertW0()', () => {

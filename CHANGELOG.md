@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `riemannZeta` now uses a two-term Laurent expansion (`1/(s−1) + γ − γ₁·(s−1)`) when `|s−1| < 0.01`, eliminating 4-digit precision loss caused by catastrophic cancellation in the denominator `1−2^(1−s)` near the pole (#551).
+
 ### Changed
 
 - `lambertW1m` Halley stopping criterion changed from pure-relative (`|Δw/w| < ε`) to hybrid absolute/relative (`|Δw| < ε·max(|w|,1)`) to avoid false convergence near w = 0; W₋₁ initial guess replaced with a region-adaptive approximation — Corless et al. (1996) branch-point series for z ∈ [−1/e, −0.1], logarithmic Laurent for z ∈ (−0.1, 0) — improving convergence from ~10 iterations to 2–3 (#550).
