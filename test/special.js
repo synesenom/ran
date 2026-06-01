@@ -471,11 +471,18 @@ describe('special', () => {
       }, LAPS)
     })
 
+    it('should return Infinity at the pole s = 1', () => {
+      assert(special.riemannZeta(1) === Infinity)
+    })
+
     it('should be accurate near s = 1 via Laurent expansion', () => {
-      // Reference values from three-term Laurent expansion (DLMF 25.2.8); two-term error at these points is < 5e-9 relative
+      // Reference values from three-term Laurent expansion (DLMF 25.2.8); two-term truncation error is O(d^2)
+      // s > 1 side
       assert(Math.abs(special.riemannZeta(1.0001) / 10000.577222946486 - 1) < 1e-8)
       assert(Math.abs(special.riemannZeta(1.001) / 1000.5772884762018 - 1) < 1e-8)
-      assert(Math.abs(special.riemannZeta(1.01) / 100.5779433388382 - 1) < 1e-7)
+      assert(Math.abs(special.riemannZeta(1.01) / 100.5779433388382 - 1) < 1e-7) // looser: truncation error scales as d^2
+      // s < 1 side (Laurent branch fires for |s-1| < 0.01 in both directions)
+      assert(Math.abs(special.riemannZeta(0.999) / (-999.422857150944) - 1) < 1e-8)
     })
   })
 
