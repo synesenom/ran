@@ -28,6 +28,11 @@ export default class Bernoulli extends Categorical {
     ])
   }
 
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
   static _fitInit (data) {
     // MLE for p is the sample mean since E[X] = p.
     const mean = data.reduce((s, x) => s + x, 0) / data.length

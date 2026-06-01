@@ -41,6 +41,11 @@ export default class Lindley extends Distribution {
     }
   }
 
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
   static _fitInit (data) {
     // Closed-form MOM: positive root of m·θ² + (m−1)·θ − 2 = 0 where m = mean
     const n = data.length

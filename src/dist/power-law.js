@@ -20,10 +20,17 @@ export default class PowerLaw extends Kumaraswamy {
     super(a, 1)
   }
 
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
   static _fitInit (data) {
-    // f(x)=a·x^{a−1} → E[log X] = −1/a; MLE is a = −1/mean(log x), closed-form
+    // f(x)=a·x^{a−1} on (0,1) → E[log X] = −1/a; the exact MLE is a = −1/mean(log x). For in-support
+    // data every log(x) < 0 so mean(log x) < 0 and a > 0 always; guard only the degenerate empty case.
     const n = data.length
     const logMean = data.reduce((s, x) => s + Math.log(x), 0) / n
-    return [Math.max(-1 / logMean, 0.1)]
+    const a = -1 / logMean
+    return [a > 0 && Number.isFinite(a) ? a : 0.1]
   }
 }

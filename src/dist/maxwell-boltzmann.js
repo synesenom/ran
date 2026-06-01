@@ -42,6 +42,11 @@ export default class MaxwellBoltzmann extends Gamma {
     return super._cdf(x * x)
   }
 
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
   static _fitInit (data) {
     // MLE: a = sqrt(mean(x²) / 3) from second-moment E[X²] = 3a²
     const n = data.length

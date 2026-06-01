@@ -23,6 +23,11 @@ export default class Rayleigh extends Weibull {
     this.k = 1
   }
 
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
   static _fitInit (data) {
     // MLE: σ = sqrt(mean(x²) / 2) from second-moment E[X²] = 2σ²
     const n = data.length

@@ -2,7 +2,7 @@ import exponential from './_exponential'
 import AliasTable from './_alias-table'
 import Distribution from './_distribution'
 import neumaier from '../algorithms/neumaier'
-import nelderMead from '../algorithms/nelder-mead'
+import powell from '../algorithms/powell'
 
 /**
  * Probability density function for the [hyperexponential distribution]{@link https://en.wikipedia.org/wiki/Hyperexponential_distribution}:
@@ -87,8 +87,8 @@ export default class Hyperexponential extends Distribution {
   /**
    * Estimates the hyperexponential distribution from data via maximum likelihood, using a fixed
    * two-component default mixture. Overrides the base-class fit() to pack and unpack the
-   * Nelder-Mead flat vector around the (Object[]) constructor signature. See
-   * [decisions/0012-distribution-fit-nelder-mead.md]{@link ../../decisions/0012-distribution-fit-nelder-mead.md}.
+   * optimizer's flat vector around the (Object[]) constructor signature. See
+   * [decisions/0016-distribution-fit-powell-and-exact-mle.md]{@link ../../decisions/0016-distribution-fit-powell-and-exact-mle.md}.
    *
    * @method fit
    * @memberof ran.dist.Hyperexponential
@@ -97,7 +97,7 @@ export default class Hyperexponential extends Distribution {
    */
   static fit (data) {
     // The constructor takes an Object[] of {weight, rate}, so the base-class fit() spread cannot
-    // reconstruct it from Nelder-Mead's flat numeric vector. Override to pack the optimiser's
+    // reconstruct it from the optimizer's flat numeric vector. Override to pack the optimiser's
     // [w_0..w_{k-1}, r_0..r_{k-1}] vector back into the required object-array shape on every
     // evaluation, then return the best fit.
     const Cls = this
@@ -108,7 +108,7 @@ export default class Hyperexponential extends Distribution {
       for (let i = 0; i < k; i++) params[i] = { weight: v[i], rate: v[i + k] }
       return params
     }
-    const best = nelderMead(
+    const best = powell(
       v => {
         try {
           const l = -new Cls(toParams(v)).lnL(data)

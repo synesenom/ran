@@ -55,6 +55,11 @@ export default class Laplace extends Distribution {
       : this.p.mu - this.p.b * Math.log(2 - 2 * p)
   }
 
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
   static _fitInit (data) {
     // MLE for Laplace is closed-form: mu = sample median, b = mean absolute deviation from the median
     const sorted = data.slice().sort((a, b) => a - b)

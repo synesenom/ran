@@ -74,10 +74,14 @@ export default class SkewNormal extends Normal {
   }
 
   static _fitInit (data) {
-    // Seed alpha=0 (symmetric normal); MOM inversion for alpha requires sample skewness which is unreliable for small n
     const n = data.length
     const xi = data.reduce((s, x) => s + x, 0) / n
     const omega = Math.sqrt(data.reduce((s, x) => s + (x - xi) ** 2, 0) / n) || 1
-    return [xi, omega, 0]
+    // alpha=0 is the symmetric saddle: the likelihood is even in alpha there, so a coordinate
+    // optimizer (Powell) cannot leave it. Seed alpha with the sign and rough scale of the sample
+    // skewness to break the symmetry; the magnitude need only be off the saddle, not accurate.
+    const g1 = data.reduce((s, x) => s + ((x - xi) / omega) ** 3, 0) / n
+    const alpha = clamp(Math.sign(g1) * Math.min(Math.abs(g1) * 4, 4), -4, 4)
+    return [xi, omega, alpha]
   }
 }

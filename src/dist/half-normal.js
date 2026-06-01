@@ -47,6 +47,11 @@ export default class HalfNormal extends Normal {
     return this.p.sigma * 1.414213562373095 * erfinv(p)
   }
 
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
   static _fitInit (data) {
     // MLE: σ = sqrt(mean(x²)) from second-moment E[X²] = σ²
     const n = data.length
