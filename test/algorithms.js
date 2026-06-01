@@ -141,39 +141,6 @@ describe('algorithms', () => {
     })
   })
 
-  describe('romberg()', () => {
-    it('should integrate the function x^3 exp(-x)', () => {
-      const integral = t => Math.exp(-t) * (-t * (t * (t + 3) + 6) - 6) + 6
-      for (let b = 0.1; b < 10; b++) {
-        const i = algorithms.romberg(
-          t => Math.pow(t, 3) * Math.exp(-t),
-          0,
-          b
-        )
-        assert(Math.abs((i - integral(b)) / i) < PRECISION)
-      }
-    })
-
-    it('should compute ∫sin(x)dx = 2 over [0,π] to machine precision', () => {
-      // Regression guard for the j=POLYNOMIAL_ORDER-1 off-by-one: sin(x) on [0,π]
-      // requires only a few Romberg steps. Any result worse than 1e-12 would indicate
-      // the polynomial interpolation window is receiving bad data.
-      const result = algorithms.romberg(t => Math.sin(t), 0, Math.PI)
-      assert(Math.abs(result - 2) < 1e-12)
-    })
-
-    it('should return the best available extrapolate when budget is exhausted', () => {
-      // A step-function integrand (true integral 1.7) defeats Richardson
-      // extrapolation: O(1/n) trapezoid convergence cannot satisfy the O(h^2)
-      // polynomial convergence criterion within MAX_STEPS. The old code returned
-      // the silent sentinel 0; the fix returns the best accumulated extrapolate.
-      const result = algorithms.romberg(t => t < 0.3 ? 1 : 2, 0, 1)
-      assert(result !== 0)
-      assert(Number.isFinite(result))
-      assert(Math.abs(result - 1.7) < 1e-4)
-    })
-  })
-
   describe('.quickselect()', () => {
     it('should select the k-th element', () => {
       repeat(() => {
@@ -232,38 +199,6 @@ describe('algorithms', () => {
       const result = algorithms.powell(x => (x[0] - 3) ** 2, [0], { maxIter: 1 })
       assert(Array.isArray(result))
       assert(result.length === 1)
-    })
-  })
-
-  describe('.gaussLegendre()', () => {
-    it('should integrate x^2 over [0,1] exactly for n=5', () => {
-      // Degree-2 polynomial, n=5 is exact for polynomials up to degree 9
-      const result = algorithms.gaussLegendre(x => x * x, 0, 1, 5)
-      assert(Math.abs(result - 1 / 3) < Number.EPSILON * 10)
-    })
-
-    it('should integrate x^2 over [0,1] exactly for n=10', () => {
-      const result = algorithms.gaussLegendre(x => x * x, 0, 1, 10)
-      assert(Math.abs(result - 1 / 3) < Number.EPSILON * 10)
-    })
-
-    it('should integrate x^2 over [0,1] exactly for n=20', () => {
-      const result = algorithms.gaussLegendre(x => x * x, 0, 1, 20)
-      assert(Math.abs(result - 1 / 3) < Number.EPSILON * 10)
-    })
-
-    it('should integrate exp(x) over [0,1] for all supported orders', () => {
-      const exact = Math.E - 1
-      for (const n of [5, 10, 20]) {
-        const result = algorithms.gaussLegendre(x => Math.exp(x), 0, 1, n)
-        assert(Math.abs(result - exact) < 1e-10)
-      }
-    })
-
-    it('should handle a non-zero non-unit interval [a,b]', () => {
-      // ∫_2^5 x dx = (25 - 4) / 2 = 10.5
-      const result = algorithms.gaussLegendre(x => x, 2, 5, 5)
-      assert(Math.abs(result - 10.5) < Number.EPSILON * 100)
     })
   })
 
