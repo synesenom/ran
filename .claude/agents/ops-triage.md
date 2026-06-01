@@ -65,7 +65,12 @@ For each observation:
    - `title` — imperative, ≤70 chars, starts with a verb (e.g. "Fix off-by-one in DiscreteUniform CDF").
    - `body` — uses the standard `ops-issue` template (Goal / Scope / Acceptance Criteria / Out of Scope). The "Goal" should describe the bug as seen by a user. The "Scope" should name the file(s) suspected of containing the bug.
    - `priority` — one of `high`/`medium`/`low`. Default to `medium` unless the bug returns NaN, wrong support, or silently accepts invalid input (then `high`).
-   - `difficulty` — one of `difficult`/`moderate`/`trivial`. Default to `moderate`.
+   - `difficulty` — one of `difficult`/`moderate`/`trivial`. Use these precise criteria:
+     - `trivial` — 1–5 lines, fix is fully obvious from the evidence (wrong constant, missing constraint, off-by-one), no design decision needed, can be described as a concrete edit.
+     - `moderate` — up to ~20 lines, may require reading adjacent code or verifying a formula but no architectural choice.
+     - `difficult` — deeper investigation needed, algorithm change, or multi-file coordination required.
+   - `fix_inline` — `true` if `difficulty == "trivial"` **and** you can describe the fix precisely enough for the orchestrator to apply it without additional context-gathering; `false` otherwise.
+   - `fix_suggestion` — only present when `fix_inline: true`. A concrete one-line description of the edit: file path, line reference, and what to change (e.g., `"src/dist/foo.js:42 — change \`x < 0\` to \`x <= 0\`"`). Omit for `fix_inline: false`.
    - `extra_labels` — should always include `bug`.
 
 ## Output Format
@@ -82,6 +87,8 @@ Return JSON wrapped in a markdown code block. No prose outside the block.
       "body": "<full markdown body using ops-issue template>",
       "priority": "high|medium|low",
       "difficulty": "difficult|moderate|trivial",
+      "fix_inline": true,
+      "fix_suggestion": "<file:line — what to change; only present when fix_inline is true>",
       "extra_labels": ["bug"]
     }
   ],
