@@ -97,6 +97,12 @@ describe('algorithms', () => {
         assert(Math.abs(sol) < PRECISION)
       })
     })
+
+    it('should converge to root at zero using hybrid stopping criterion', () => {
+      // |dx/x| = NaN when x = 0; hybrid criterion avoids the division
+      const sol = algorithms.newton(t => t, () => 1, 1)
+      assert(Math.abs(sol) < PRECISION)
+    })
   })
 
   describe('.neumaier()', () => {

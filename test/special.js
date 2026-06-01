@@ -982,4 +982,29 @@ describe('special', () => {
       assert(equal(special.erfc(7 / Math.SQRT2), 2.559625087771669924e-12), 'erfc(7/sqrt(2))')
     })
   })
+
+  describe('.erfinv()', () => {
+    it('should return zero for zero argument', () => {
+      assert(special.erfinv(0) === 0)
+    })
+
+    it('should be the inverse of erf', () => {
+      [-0.9, -0.5, -0.1, 0.1, 0.5, 0.9].forEach(x => {
+        assert(equal(special.erf(special.erfinv(x)), x), `erfinv(${x})`)
+      })
+    })
+
+    it('should satisfy erfinv(-x) = -erfinv(x)', () => {
+      [0.1, 0.5, 0.9].forEach(x => {
+        assert(equal(special.erfinv(-x), -special.erfinv(x)), `erfinv(-${x})`)
+      })
+    })
+
+    it('should be accurate at small arguments where Newton iterates near zero', () => {
+      // Newton stopping criterion must handle x near 0; hybrid |dx| < EPS*max(|x|,1) is correct
+      [1e-5, 1e-8, 1e-10].forEach(x => {
+        assert(equal(special.erf(special.erfinv(x)), x), `erfinv(${x})`)
+      })
+    })
+  })
 })

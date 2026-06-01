@@ -25,8 +25,8 @@ export default function (f, df, x0) {
     dx = f(x) / (Math.abs(d) > EPS ? d : df(x + EPS))
     x -= dx
 
-    // Exit if we reached precision level.
-    if (Math.abs(dx / x) < EPS) {
+    // Hybrid criterion: absolute floor prevents NaN at x=0 and unreachable thresholds for |x| < 1.
+    if (Math.abs(dx) < EPS * Math.max(Math.abs(x), 1)) {
       break
     }
   }
