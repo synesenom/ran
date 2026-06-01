@@ -1,4 +1,4 @@
-import quickselect from '../algorithms/quickselect'
+import introselect from '../algorithms/introselect'
 
 /**
  * Calculates the quantile at 0 < p < 1 using the R-7 algorithm.
@@ -16,9 +16,9 @@ export default function (values, p) {
 
   const h = (values.length - 1) * p
   const h0 = Math.floor(h)
-  const x0 = quickselect(values, h0)
+  const x0 = introselect(values, h0)
   if (h0 < values.length - 1) {
-    const x1 = quickselect(values, h0 + 1)
+    const x1 = introselect(values, h0 + 1)
     return x0 + (h - h0) * (x1 - x0)
   } else {
     return x0
