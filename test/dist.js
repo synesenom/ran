@@ -1576,13 +1576,13 @@ describe('dist', () => {
         assert(Math.abs(result.p.mu - 2) < 0.5)
       })
 
-      it('InverseGaussian._fitInit should return mu=mean and lambda=mean³/var', () => {
-        // Exact MOM: mu = mean, lambda = mu³/Var; for [1,2,3,4]: mean=2.5, var=1.25
-        const init = dist.InverseGaussian._fitInit([1, 2, 3, 4])
+      it('InverseGaussian._fitInit should return the exact MLE mu=mean, lambda=n/Σ(1/xᵢ−1/x̄)', () => {
+        const data = [1, 2, 3, 4]
+        const init = dist.InverseGaussian._fitInit(data)
         const mean = 2.5
-        const variance = 1.25
+        const lambda = data.length / data.reduce((s, x) => s + (1 / x - 1 / mean), 0)
         assert(Math.abs(init[0] - mean) < 1e-10)
-        assert(Math.abs(init[1] - mean ** 3 / variance) < 1e-10)
+        assert(Math.abs(init[1] - lambda) < 1e-10)
       })
 
       it('InverseGaussian.fit should recover mu and lambda close to planted values', () => {

@@ -56,10 +56,20 @@ export default class InverseGaussian extends Distribution {
     return this.r.next() > this.p.mu / (this.p.mu + x) ? this.p.mu * this.p.mu / x : x
   }
 
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
   static _fitInit (data) {
-    // MOM: E[X]=mu, Var[X]=mu³/lambda ⇒ mu=mean, lambda=mean³/var
+    // Exact MLE: mu = sample mean, lambda = n / Σ(1/xᵢ − 1/x̄). By the AM-HM inequality the sum
+    // is ≥ 0, vanishing only for constant data — fall back to the moment estimate there.
     const n = data.length
     const mean = data.reduce((s, x) => s + x, 0) / n
+    const invDev = data.reduce((s, x) => s + (1 / x - 1 / mean), 0)
+    if (invDev > 0) {
+      return [mean, n / invDev]
+    }
     const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || mean * mean
     return [mean, mean * mean * mean / variance]
   }

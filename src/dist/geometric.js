@@ -35,6 +35,11 @@ export default class Geometric extends Distribution {
     }]
   }
 
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
   static _fitInit (data) {
     // MLE for p: E[X] = (1-p)/p under the failures-before-success parameterization,
     // solved for p gives 1/(1+mean).

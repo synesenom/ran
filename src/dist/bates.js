@@ -1,4 +1,4 @@
-import nelderMead from '../algorithms/nelder-mead'
+import powell from '../algorithms/powell'
 import IrwinHall from './irwin-hall'
 import Distribution from './_distribution'
 
@@ -105,7 +105,7 @@ export default class Bates extends IrwinHall {
     let warmA = a0
     let warmB = b0
     for (let n = nLo; n <= nHi; n++) {
-      const result = nelderMead(
+      const result = powell(
         ([a, b]) => {
           try {
             const v = -new Cls(n, a, b).lnL(data)

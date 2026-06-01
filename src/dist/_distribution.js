@@ -1,6 +1,6 @@
 import Xoshiro128p from '../core/xoshiro'
 import neumaier from '../algorithms/neumaier'
-import nelderMead from '../algorithms/nelder-mead'
+import powell from '../algorithms/powell'
 import some from '../utils/some'
 import { chi2, kolmogorovSmirnov } from './_tests'
 import bracket from '../algorithms/bracket'
@@ -786,7 +786,7 @@ class Distribution {
    * ~22% of distributions in the library (ordering constraints like `a < b`, probability bounds,
    * integer constraints), whereas random retries succeed for every distribution with a scalar
    * constructor. Subclasses should override with a data-aware (method-of-moments) estimate for
-   * better convergence — see decisions/0012-distribution-fit-nelder-mead.md.
+   * better convergence — see decisions/0016-distribution-fit-powell-and-exact-mle.md.
    * For zero-parameter distributions (k=0), returns `[]` to signal `fit()` to skip optimization.
    *
    * @method _fitInit
@@ -798,7 +798,7 @@ class Distribution {
    */
   static _fitInit (data) { // eslint-disable-line no-unused-vars
     const k = this.length
-    // k=0: no free parameters — any instance is the MLE; signal fit() to skip Nelder-Mead
+    // k=0: no free parameters — any instance is the MLE; signal fit() to skip the optimizer
     if (k === 0) {
       return []
     }
@@ -814,9 +814,30 @@ class Distribution {
   }
 
   /**
+   * Flags that this distribution's `_fitInit` already returns the exact closed-form MLE, so
+   * `fit()` returns it directly instead of running an iterative optimizer (which would only add
+   * numerical drift to an answer that is already the maximizer). The base-class default is
+   * `false`; a distribution opts in by declaring its OWN `_fitInitIsExact` getter returning
+   * `true`. `fit()` deliberately checks for an *own* declaration (not an inherited one) so that
+   * a subclass with a different, approximate `_fitInit` (e.g. `Weibull extends Exponential`)
+   * never silently inherits the fast path. See
+   * decisions/0016-distribution-fit-powell-and-exact-mle.md.
+   *
+   * @method _fitInitIsExact
+   * @memberof ran.dist.Distribution
+   * @returns {boolean} Whether `_fitInit` returns the exact MLE.
+   * @protected
+   * @ignore
+   */
+  static get _fitInitIsExact () {
+    return false
+  }
+
+  /**
    * Estimates the distribution parameters from data using maximum likelihood estimation (MLE).
-   * Uses the Nelder-Mead simplex optimizer to maximise the log-likelihood lnL(data).
-   * See [decisions/0012-distribution-fit-nelder-mead.md]{@link ../../decisions/0012-distribution-fit-nelder-mead.md}.
+   * Distributions with a closed-form MLE return it directly (see `_fitInitIsExact`); all others
+   * maximise the log-likelihood lnL(data) with Powell's derivative-free conjugate-direction
+   * optimizer. See [decisions/0016-distribution-fit-powell-and-exact-mle.md]{@link ../../decisions/0016-distribution-fit-powell-and-exact-mle.md}.
    *
    * @method fit
    * @memberof ran.dist.Distribution
@@ -830,19 +851,58 @@ class Distribution {
     if (x0.length === 0) {
       return new Cls()
     }
-    const best = nelderMead(
-      params => {
-        try {
-          const v = -new Cls(...params).lnL(data)
-          // neumaier(-Infinity, ...) returns NaN; treat as invalid params
-          return isNaN(v) ? Infinity : v
-        } catch (_) {
-          return Infinity
-        }
-      },
-      x0
-    )
+    // Closed-form MLE fast path: only when the OWN class declares _fitInitIsExact, so an
+    // approximate _fitInit on a subclass cannot inherit the shortcut.
+    const exact = Object.getOwnPropertyDescriptor(Cls, '_fitInitIsExact')
+    if (exact && exact.get && exact.get.call(Cls)) {
+      return new Cls(...x0)
+    }
+    const objective = params => {
+      try {
+        const v = -new Cls(...params).lnL(data)
+        // Reject any non-finite objective: NaN (neumaier(-Infinity,...)), +Infinity (zero-density
+        // params), and -Infinity (an unbounded-likelihood singularity, e.g. Beta-type density as a
+        // shape parameter → 0). Without the last guard a strong optimizer walks into the singularity
+        // and returns a degenerate fit that Nelder-Mead was simply too weak to find.
+        return Number.isFinite(v) ? v : Infinity
+      } catch (_) {
+        return Infinity
+      }
+    }
+    const best = powell(objective, Distribution._feasibleStart(objective, x0))
     return new Cls(...best)
+  }
+
+  /**
+   * Returns a starting point at which the objective is finite. When `_fitInit` lands in the
+   * Infinity-barrier infeasible region (e.g. estimated bounded support that does not yet cover the
+   * data), Powell's coordinate line searches cannot escape the way a simplex can, so this probes
+   * for a feasible point by jittering all coordinates together — the diagonal moves Powell lacks.
+   * The probe uses a fixed PRNG seed so `fit()` stays deterministic.
+   *
+   * @method _feasibleStart
+   * @memberof ran.dist.Distribution
+   * @param {Function} objective Objective being minimised (returns Infinity for invalid params).
+   * @param {number[]} x0 Initial parameter vector from `_fitInit`.
+   * @returns {number[]} A vector at which `objective` is finite, or `x0` if none was found.
+   * @private
+   * @ignore
+   */
+  static _feasibleStart (objective, x0) {
+    if (Number.isFinite(objective(x0))) {
+      return x0
+    }
+    const rng = new Xoshiro128p()
+    rng.seed(0x5eed)
+    for (let spread = 0.5; spread <= 16; spread *= 2) {
+      for (let t = 0; t < 100; t++) {
+        const trial = x0.map(xi => xi + (2 * rng.next() - 1) * spread * (Math.abs(xi) + 1))
+        if (Number.isFinite(objective(trial))) {
+          return trial
+        }
+      }
+    }
+    return x0
   }
 }
 

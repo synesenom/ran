@@ -37,6 +37,11 @@ export default class Borel extends PreComputed {
     }]
   }
 
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
   static _fitInit (data) {
     // E[X] = 1/(1-mu); solving gives mu = 1 - 1/mean.
     const mean = data.reduce((s, x) => s + x, 0) / data.length

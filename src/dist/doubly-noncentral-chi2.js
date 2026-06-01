@@ -1,6 +1,6 @@
 import Distribution from './_distribution'
 import NoncentralChi2 from './noncentral-chi2'
-import nelderMead from '../algorithms/nelder-mead'
+import powell from '../algorithms/powell'
 
 /**
  * Probability density function for the [doubly non-central $\chi^2$ distribution]{@link https://doi.org/10.1093/biomet/36.1-2.202}:
@@ -71,7 +71,7 @@ export default class DoublyNoncentralChi2 extends NoncentralChi2 {
       // kTot=1 can't be split (both k1, k2 must be >= 1). Re-optimize lambda
       // for k=2 because the lambda fitted for k=1 is suboptimal for k=2.
       kTot = 2
-      const [optLambda] = nelderMead(
+      const [optLambda] = powell(
         ([lambda]) => {
           try {
             const v = -new NoncentralChi2(2, Math.max(0, lambda)).lnL(data)

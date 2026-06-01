@@ -1,7 +1,7 @@
 # ADR-0012: Distribution.fit() Static MLE Method via Nelder-Mead + _fitInit Hook
 
 **Date**: 2026-05-26
-**Status**: Accepted
+**Status**: Superseded by [ADR-0016](0016-distribution-fit-powell-and-exact-mle.md)
 
 ## Context
 

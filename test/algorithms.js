@@ -191,27 +191,45 @@ describe('algorithms', () => {
     })
   })
 
-  describe('.nelderMead()', () => {
+  describe('.powell()', () => {
     it('should minimise a 1D quadratic', () => {
-      const result = algorithms.nelderMead(x => (x[0] - 3) ** 2, [0])
+      const result = algorithms.powell(x => (x[0] - 3) ** 2, [0])
       assert(Math.abs(result[0] - 3) < 1e-6)
     })
 
     it('should minimise a 2D quadratic', () => {
-      const result = algorithms.nelderMead(x => (x[0] - 2) ** 2 + (x[1] - 5) ** 2, [0, 0])
+      const result = algorithms.powell(x => (x[0] - 2) ** 2 + (x[1] - 5) ** 2, [0, 0])
       assert(Math.abs(result[0] - 2) < 1e-6)
       assert(Math.abs(result[1] - 5) < 1e-6)
     })
 
     it('should minimise the Rosenbrock function', () => {
       const rosenbrock = x => 100 * (x[1] - x[0] ** 2) ** 2 + (1 - x[0]) ** 2
-      const result = algorithms.nelderMead(rosenbrock, [0, 0])
+      const result = algorithms.powell(rosenbrock, [-1.2, 1])
       assert(Math.abs(result[0] - 1) < 1e-3)
       assert(Math.abs(result[1] - 1) < 1e-3)
     })
 
+    it('should minimise an off-axis quadratic (exercises conjugate-direction update)', () => {
+      // Minimum 0 at x0=1, x1=2; the cross term forces non-coordinate (conjugate) directions.
+      const f = x => (x[0] + x[1] - 3) ** 2 + (x[0] - x[1] + 1) ** 2
+      const result = algorithms.powell(f, [5, -4])
+      assert(f(result) < 1e-8)
+      assert(Math.abs(result[0] - 1) < 1e-4)
+      assert(Math.abs(result[1] - 2) < 1e-4)
+    })
+
+    it('should not stall when the objective is an Infinity barrier outside a feasible region', () => {
+      // Mirrors the MLE objective: invalid (negative) inputs return Infinity. A derivative-free
+      // line search must still locate the constrained minimum at the boundary-adjacent optimum.
+      const f = x => (x[0] <= 0 || x[1] <= 0) ? Infinity : (x[0] - 0.5) ** 2 + (x[1] - 3) ** 2
+      const result = algorithms.powell(f, [1, 1])
+      assert(Math.abs(result[0] - 0.5) < 1e-4)
+      assert(Math.abs(result[1] - 3) < 1e-4)
+    })
+
     it('should respect maxIter option and return without throwing', () => {
-      const result = algorithms.nelderMead(x => (x[0] - 3) ** 2, [0], { maxIter: 1 })
+      const result = algorithms.powell(x => (x[0] - 3) ** 2, [0], { maxIter: 1 })
       assert(Array.isArray(result))
       assert(result.length === 1)
     })

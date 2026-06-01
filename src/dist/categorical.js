@@ -94,7 +94,7 @@ export default class Categorical extends Distribution {
   /**
    * Estimates the categorical distribution from data via maximum likelihood. The MLE is
    * closed-form (empirical frequencies of the observed integer categories) so this override
-   * skips Nelder-Mead. See [decisions/0012-distribution-fit-nelder-mead.md]{@link ../../decisions/0012-distribution-fit-nelder-mead.md}.
+   * skips the optimizer. See [decisions/0016-distribution-fit-powell-and-exact-mle.md]{@link ../../decisions/0016-distribution-fit-powell-and-exact-mle.md}.
    *
    * @method fit
    * @memberof ran.dist.Categorical

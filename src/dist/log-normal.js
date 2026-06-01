@@ -49,6 +49,11 @@ export default class LogNormal extends Normal {
     return Math.exp(this.p.mu + this.c.sigmaRoot2 * erfinv(2 * p - 1))
   }
 
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
   static _fitInit (data) {
     // log(Y) ~ Normal(mu, sigma): MOM on log scale gives the natural parameterization
     const n = data.length

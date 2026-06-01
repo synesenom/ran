@@ -37,6 +37,11 @@ export default class Poisson extends Distribution {
     }]
   }
 
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
   static _fitInit (data) {
     // MLE for lambda is the sample mean since E[X] = lambda.
     const mean = data.reduce((s, x) => s + x, 0) / data.length

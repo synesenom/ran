@@ -48,6 +48,11 @@ export default class LogitNormal extends Normal {
     return 1 / (1 + Math.exp(-(this.p.mu + this.c.sigmaRoot2 * erfinv(2 * p - 1))))
   }
 
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
   static _fitInit (data) {
     // logit(Y) ~ Normal(mu, sigma): MOM on logit scale gives the natural parameterization
     const n = data.length
