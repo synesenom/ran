@@ -28,6 +28,7 @@ export default class PowerLaw extends Kumaraswamy {
   static _fitInit (data) {
     // f(x)=a·x^{a−1} on (0,1) → E[log X] = −1/a; the exact MLE is a = −1/mean(log x). For in-support
     // data every log(x) < 0 so mean(log x) < 0 and a > 0 always; guard only the degenerate empty case.
+    // The MLE is biased in finite samples (cf. Pareto exponent, Newman 2006); see #626 for a correction.
     const n = data.length
     const logMean = data.reduce((s, x) => s + Math.log(x), 0) / n
     const a = -1 / logMean
