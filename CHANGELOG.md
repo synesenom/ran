@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Root-finding in `src/algorithms/` now uses Chandrupatla (1997) instead of the previous incomplete Brent implementation. The new algorithm correctly handles roots near zero with a mixed absolute/relative stopping criterion (`|dx| < ε·max(|x|,1)`), throws on invalid brackets (same-sign endpoints) instead of silently returning `NaN`, and returns the best approximation after iteration budget exhaustion (#541).
+- Replaced adaptive trapezoidal doubling (`src/algorithms/trap.js`) with double-exponential (tanh-sinh) quadrature (`src/algorithms/tanh-sinh.js`). The new algorithm achieves machine-epsilon precision in ~7 refinement levels (≤500 evaluations) versus the trapezoidal method's worst-case 2^24 evaluations, and naturally handles endpoint singularities (#542).
 
 ### Removed
 
