@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Root-finding in `src/algorithms/` now uses Chandrupatla (1997) instead of the previous incomplete Brent implementation. The new algorithm correctly handles roots near zero with a mixed absolute/relative stopping criterion (`|dx| < ε·max(|x|,1)`), throws on invalid brackets (same-sign endpoints) instead of silently returning `NaN`, and returns the best approximation after iteration budget exhaustion (#541).
+
 ### Removed
 
 - `scripts/bench.js` and the 11 `jstat` / `@stdlib` devDependencies that backed it. The one-time comparative benchmark (issue #114) has served its purpose; keeping the packages inflated `npm install` and triggered false-positive alerts on snyk scans of the repo. ADR-0011 documents the original decision and rationale.
