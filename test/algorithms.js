@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 import { repeat } from './test-utils'
 import { lambertW0 } from '../src/special/lambert-w'
 import * as algorithms from '../src/algorithms'
-import { int, shuffle } from '../src/core'
+import { int } from '../src/core'
 
 const LAPS = 100
 const PRECISION = 1e-10
@@ -141,20 +141,42 @@ describe('algorithms', () => {
     })
   })
 
-  describe('.quickselect()', () => {
-    it('should select the k-th element', () => {
+  describe('.introselect()', () => {
+    it('should select the k-th element across the full index range', () => {
       repeat(() => {
         const values = Array.from({ length: 100 }, Math.random)
-        const k = int(50, 99)
-        const item = values.sort((a, b) => a - b)[k]
-        assert(algorithms.quickselect(shuffle(values), k) === item)
+        const k = int(0, 99)
+        const sorted = [...values].sort((a, b) => a - b)
+        assert(algorithms.introselect([...values], k) === sorted[k])
       }, LAPS)
+    })
+
+    it('should select minimum (k=0) and maximum (k=n-1)', () => {
+      const values = [3, 1, 4, 1, 5, 9, 2, 6]
+      const sorted = [...values].sort((a, b) => a - b)
+      assert.equal(algorithms.introselect([...values], 0), sorted[0])
+      assert.equal(algorithms.introselect([...values], values.length - 1), sorted[values.length - 1])
+    })
+
+    it('should select correctly in large arrays (exercises Floyd-Rivest sampling branch)', () => {
+      const n = 1000
+      const values = Array.from({ length: n }, Math.random)
+      const sorted = [...values].sort((a, b) => a - b)
+      const k = int(0, n - 1)
+      assert.equal(algorithms.introselect([...values], k), sorted[k])
+    })
+
+    it('should handle arrays with duplicate values', () => {
+      const values = [1, 1, 1, 2, 1]
+      assert.equal(algorithms.introselect([...values], 2), 1)
+      assert.equal(algorithms.introselect([...values], 3), 1)
+      assert.equal(algorithms.introselect([...values], 4), 2)
     })
 
     it('should throw for out-of-range k', () => {
       const values = [1, 2, 3]
-      assert.throws(() => algorithms.quickselect(values, -1))
-      assert.throws(() => algorithms.quickselect(values, 3))
+      assert.throws(() => algorithms.introselect(values, -1))
+      assert.throws(() => algorithms.introselect(values, 3))
     })
   })
 

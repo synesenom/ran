@@ -1,4 +1,4 @@
-import { quickselect } from '../algorithms'
+import { introselect } from '../algorithms'
 
 /**
  * Calculates the median of a sample of values.
@@ -22,8 +22,8 @@ export default function (values) {
 
   const n = values.length
   if (n % 2 === 1) {
-    return quickselect(values, (n - 1) / 2)
+    return introselect(values, (n - 1) / 2)
   } else {
-    return 0.5 * (quickselect(values, n / 2 - 1) + quickselect(values, n / 2))
+    return 0.5 * (introselect(values, n / 2 - 1) + introselect(values, n / 2))
   }
 }
