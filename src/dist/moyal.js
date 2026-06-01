@@ -1,6 +1,5 @@
-import rejection from '../algorithms/rejection'
 import Distribution from './_distribution'
-import { gammaUpperIncomplete } from '../special'
+import { gammaUpperIncomplete, erfinv } from '../special'
 
 /**
  * Probability density function for the [Moyal distribution]{@link https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.moyal.html#r7049b665a02e-2}:
@@ -43,14 +42,8 @@ export default class Moyal extends Distribution {
   }
 
   _generator () {
-    return rejection(
-      this.r,
-      () => Math.PI * this.r.next() - Math.PI / 2,
-      t => {
-        const z = Math.tan(t)
-        return Math.exp(-0.5 * (z + Math.exp(-z))) / (Math.sqrt(2 * Math.PI) * Math.pow(Math.cos(t), 2))
-      }, t => this.p.sigma * Math.tan(t) + this.p.mu
-    )
+    // Invert F(x) = erfc(exp((mu-x)/(2*sigma)) / sqrt(2)) = u exactly via erfinv
+    return this.p.mu - 2 * this.p.sigma * Math.log(Math.SQRT2 * erfinv(1 - this.r.next()))
   }
 
   _pdf (x) {
