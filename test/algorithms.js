@@ -273,4 +273,43 @@ describe('algorithms', () => {
       assert(Math.abs(forward + reversed) < PRECISION)
     })
   })
+
+  describe('.recursiveSum()', () => {
+    it('should sum a geometric series correctly', () => {
+      // Σ_{k=0}^∞ (0.5)^k = 1/(1-0.5) = 2
+      const result = algorithms.recursiveSum(
+        { term: 1 },
+        t => ({ term: t.term * 0.5 }),
+        t => t.term
+      )
+      assert(Math.abs(result - 2) < PRECISION)
+    })
+
+    it('should converge when the running sum is near zero due to alternating signs', () => {
+      // Alternating geometric series: Σ_{k=0}^∞ (-0.5)^k = 1/(1+0.5) = 2/3.
+      // Running partial sums oscillate through small values near the true limit 2/3.
+      // A pure relative criterion |delta/sum| < EPS can fire prematurely when sum
+      // passes near zero; the hybrid criterion |delta| < EPS*max(|sum|,1) is stable.
+      const result = algorithms.recursiveSum(
+        { term: 1 },
+        t => ({ term: -t.term * 0.5 }),
+        t => t.term
+      )
+      assert(Math.abs(result - 2 / 3) < PRECISION)
+    })
+
+    it('should converge for a series whose sum is far below 1', () => {
+      // Geometric series with a small initial term: Σ_{k=0}^∞ s*(0.5)^k = 2s.
+      // With |sum| < 1 the hybrid criterion uses EPS*1 as the absolute floor,
+      // so the loop exits once individual terms fall below machine epsilon,
+      // rather than requiring them to fall below EPS*sum (a far tighter demand).
+      const s = 1e-6
+      const result = algorithms.recursiveSum(
+        { term: s },
+        t => ({ term: t.term * 0.5 }),
+        t => t.term
+      )
+      assert(Math.abs(result - 2 * s) / (2 * s) < 1e-6)
+    })
+  })
 })
