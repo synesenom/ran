@@ -60,8 +60,8 @@ export default class Pareto extends Distribution {
   }
 
   static _fitInit (data) {
-    // Exact MLE: xmin = min(data), alpha = n / Σ ln(x/xmin). This is the likelihood maximiser but is
-    // biased in finite samples (E[α̂] = α·n/(n−1)); an unbiased variant uses (n−1) — see #626.
+    // Exact MLE: xmin = min(data), alpha = n / Σ ln(x/xmin). This is the likelihood maximiser; note
+    // it is biased in finite samples (E[α̂] = α·n/(n−1)) — fit() returns the MLE by design.
     const xmin = Math.min(...data)
     const n = data.length
     const alpha = n / data.reduce((s, x) => s + Math.log(x / xmin), 0)
