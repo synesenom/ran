@@ -32,7 +32,7 @@ function _f11AsymptoticSeries (a, b, z) {
       if (Math.abs(next) >= Math.abs(term)) break
       term = next
       sum += term
-      if (Math.abs(term / sum) < Number.EPSILON) break
+      if (Math.abs(term) < Number.EPSILON * Math.max(Math.abs(sum), 1)) break
     }
     return prefactor * sum
   }
