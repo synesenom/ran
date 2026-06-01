@@ -1,6 +1,6 @@
 import { MAX_ITER, EPS, DELTA } from '../core/constants'
 import newton from '../algorithms/newton'
-import trap from '../algorithms/trap'
+import tanhSinh from '../algorithms/tanh-sinh'
 import logGamma from './log-gamma'
 import { erfc } from './error'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from './gamma-incomplete'
@@ -421,7 +421,7 @@ function _pqTrap (mu, x, y) {
   const b = Math.min(Math.PI, 14 / Math.sqrt(mu * wxis))
 
   // Q = e^{-mu zeta^2/2} / (2 pi) * integral over [-pi, pi]; integrand is even.
-  const pq = trap(integrand, 0, b) * Math.exp(-halfMuZeta2) / Math.PI
+  const pq = tanhSinh(integrand, 0, b) * Math.exp(-halfMuZeta2) / Math.PI
   return zeta < 0
     ? { q: pq, p: 1 - pq }
     : { q: 1 + pq, p: -pq }

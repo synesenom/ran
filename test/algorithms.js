@@ -248,4 +248,29 @@ describe('algorithms', () => {
       assert(Math.abs(result - 10.5) < Number.EPSILON * 100)
     })
   })
+
+  describe('.tanhSinh()', () => {
+    it('should integrate x^2 over [0, 1]', () => {
+      const result = algorithms.tanhSinh(x => x * x, 0, 1)
+      assert(Math.abs(result - 1 / 3) < PRECISION)
+    })
+
+    it('should integrate sqrt(x) over [0, 1] (infinite derivative at endpoint)', () => {
+      // sqrt(x) has f'(0) = Infinity; tanh-sinh handles this where trapezoidal struggles.
+      const result = algorithms.tanhSinh(x => Math.sqrt(x), 0, 1)
+      assert(Math.abs(result - 2 / 3) < PRECISION)
+    })
+
+    it('should return 0 for a degenerate interval (a = b)', () => {
+      // Exercises the newTerms.length > 0 guard: all weights are 0 when halfLen = 0.
+      const result = algorithms.tanhSinh(x => x * x, 3, 3)
+      assert(result === 0)
+    })
+
+    it('should negate the integral for a reversed interval (b < a)', () => {
+      const forward = algorithms.tanhSinh(x => x * x, 0, 1)
+      const reversed = algorithms.tanhSinh(x => x * x, 1, 0)
+      assert(Math.abs(forward + reversed) < PRECISION)
+    })
+  })
 })
