@@ -1,4 +1,4 @@
-import acceleratedSum from '../algorithms/accelerated-sum'
+import wynnEpsilon from '../algorithms/wynn-epsilon'
 
 // Euler-Mascheroni constant γ₀ (DLMF 5.2.3)
 const EULER_MASCHERONI = 0.5772156649015329
@@ -23,6 +23,6 @@ export default function (s) {
   if (Math.abs(d) < 0.01) {
     return 1 / d + EULER_MASCHERONI - STIELTJES_1 * d
   }
-  const z = acceleratedSum(k => Math.pow(k + 1, -s))
+  const z = wynnEpsilon(k => Math.pow(-1, k) * Math.pow(k + 1, -s))
   return z / (1 - Math.pow(2, 1 - s))
 }
