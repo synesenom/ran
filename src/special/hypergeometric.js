@@ -1,4 +1,5 @@
 import recursiveSum from '../algorithms/recursive-sum'
+import { MAX_SERIES_ITER } from '../core/constants'
 import logGamma from './log-gamma'
 // TODO Implementation: https://people.maths.ox.ac.uk/porterm/papers/hypergeometric-final.pdf
 
@@ -27,7 +28,7 @@ function _f11AsymptoticSeries (a, b, z) {
   if (Math.abs((b - a) * (1 - a)) <= z) {
     let term = 1
     let sum = 1
-    for (let s = 0; s < 100; s++) {
+    for (let s = 0; s < MAX_SERIES_ITER; s++) {
       const next = term * (b - a + s) * (1 - a + s) / ((s + 1) * z)
       if (Math.abs(next) >= Math.abs(term)) break
       term = next

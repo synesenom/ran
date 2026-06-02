@@ -3453,6 +3453,17 @@ export default [{
     // k=2, lambda=0, x=0 is the specific boundary where 0*log(0)=NaN without the guard; exercises that path
     name: 'central (lambda = 0), k=2',
     params: () => [2, 0]
+  }, {
+    // Large noncentrality: regression test verifying CDF/PDF accuracy at lambda=200. CDF routes through marcumP.
+    name: 'large lambda',
+    params: () => [11, 200],
+    refVals: [
+      { x: 150, pdf: 0.0012439951467277026, cdf: 0.011462077676265515 },
+      { x: 180, pdf: 0.008327869699204843, cdf: 0.13807566011417677 },
+      { x: 211, pdf: 0.013890177081036306, cdf: 0.5137989130715435 },
+      { x: 240, pdf: 0.007802392460401379, cdf: 0.8442056025065703 },
+      { x: 270, pdf: 0.0017906810865173052, cdf: 0.9750992735604973 }
+    ]
   }],
   // even and odd k share the same Gamma-based noncentralChi2 sampler; the even/odd branch is in _pdf only
   sampleParams: [{ name: 'odd k', params: () => [11, 2] }],

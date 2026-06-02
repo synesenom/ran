@@ -1,4 +1,4 @@
-import { EPS, MAX_ITER } from '../core/constants'
+import { EPS, MAX_SERIES_ITER } from '../core/constants'
 
 /**
  * Class implementing a recursive sum. It is initialized with the zeroth term of the sum, an updater for the term
@@ -30,7 +30,7 @@ export default function (x0, preUpdate, termFn, postUpdate) {
   }
 
   // Improve sum recursively.
-  for (let i = 1; i < MAX_ITER; i++) {
+  for (let i = 1; i < MAX_SERIES_ITER; i++) {
     // Update state before computing the current term.
     x = preUpdate(x, i)
 

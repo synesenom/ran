@@ -303,6 +303,11 @@ describe('special', () => {
           ))
         }, LAPS)
       })
+
+      it('f11(1, 2, 49) = (exp(49) - 1) / 49 at 12-digit precision', () => {
+        // Taylor series requires ~115 terms to converge at z=49; would fail at 10-digit precision with MAX_ITER=100.
+        assert(equal(special.f11(1, 2, 49), (Math.exp(49) - 1) / 49, 12))
+      })
     })
 
     describe('|z| >= 50', () => {
@@ -357,6 +362,14 @@ describe('special', () => {
             (b - a) * special.f11(a - 1, b, z) + (2 * a - b + z) * special.f11(a, b, z)
           ))
         })
+      })
+
+      it('f11(1, 2, 50) = (exp(50) - 1) / 50', () => {
+        assert(equal(special.f11(1, 2, 50), (Math.exp(50) - 1) / 50))
+      })
+
+      it('f11(1, 2, 100) = (exp(100) - 1) / 100', () => {
+        assert(equal(special.f11(1, 2, 100), (Math.exp(100) - 1) / 100))
       })
     })
   })
