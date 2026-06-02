@@ -55,8 +55,8 @@ export default class Lindley extends Distribution {
   }
 
   _generator () {
-    // Inverse transform sampling using Lambert W.
-    return -(lambertW1m(-this.r.next() * this.c.expFactor) + this.c.thetaP1) / this.p.theta
+    // Inverse transform sampling: q(u) for u ~ U(0,1).
+    return this._q(this.r.next())
   }
 
   _pdf (x) {
@@ -67,5 +67,11 @@ export default class Lindley extends Distribution {
     const tx = this.p.theta * x
     // -expm1(-tx) avoids catastrophic cancellation when theta*x is near 0
     return -Math.expm1(-tx) - Math.exp(-tx) * tx / this.c.thetaP1
+  }
+
+  _q (p) {
+    // F(x)=p inverts in closed form via Lambert W. x >= 0 forces the argument below -1, so
+    // the W_{-1} branch is the correct root. The (1 - p) tail mirrors _generator.
+    return -(lambertW1m(-(1 - p) * this.c.expFactor) + this.c.thetaP1) / this.p.theta
   }
 }

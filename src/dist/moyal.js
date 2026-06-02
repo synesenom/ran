@@ -42,8 +42,8 @@ export default class Moyal extends Distribution {
   }
 
   _generator () {
-    // Invert F(x) = erfc(exp((mu-x)/(2*sigma)) / sqrt(2)) = u exactly via erfinv
-    return this.p.mu - 2 * this.p.sigma * Math.log(Math.SQRT2 * erfinv(1 - this.r.next()))
+    // Inverse transform sampling: q(u) for u ~ U(0,1).
+    return this._q(this.r.next())
   }
 
   _pdf (x) {
@@ -54,6 +54,11 @@ export default class Moyal extends Distribution {
   _cdf (x) {
     // gammaUpperIncomplete avoids catastrophic cancellation when x << mu (large z, Q near zero)
     return gammaUpperIncomplete(0.5, 0.5 * Math.exp((this.p.mu - x) / this.p.sigma))
+  }
+
+  _q (p) {
+    // Same closed-form inversion as _generator: erfc(.) = p => erfcinv(p) = erfinv(1 - p)
+    return this.p.mu - 2 * this.p.sigma * Math.log(Math.SQRT2 * erfinv(1 - p))
   }
 
   static _fitInit (data) {

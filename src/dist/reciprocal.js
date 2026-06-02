@@ -56,8 +56,8 @@ export default class Reciprocal extends Distribution {
   }
 
   _generator () {
-    // Direct sampling
-    return this.p.a * Math.exp((this.c.logB - this.c.logA) * this.r.next())
+    // Inverse transform sampling: q(u) for u ~ U(0,1).
+    return this._q(this.r.next())
   }
 
   _pdf (x) {
@@ -66,5 +66,10 @@ export default class Reciprocal extends Distribution {
 
   _cdf (x) {
     return (Math.log(x) - this.c.logA) / (this.c.logB - this.c.logA)
+  }
+
+  _q (p) {
+    // Log-uniform CDF is linear in log x, so it inverts directly: x = a (b/a)^p
+    return this.p.a * Math.exp((this.c.logB - this.c.logA) * p)
   }
 }
