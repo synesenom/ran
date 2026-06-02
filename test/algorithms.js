@@ -36,11 +36,20 @@ describe('algorithms', () => {
 
     it('should return the specified boundaries if root was not found', () => {
       const bracket = algorithms.bracket(
-        t => Math.exp(-t) + 1,
+        t => 1,
         0,
         2
       )
-      assert(bracket[0] === 0 && bracket[1] === 2)
+      assert.strictEqual(bracket[0], 0)
+      assert.strictEqual(bracket[1], 2)
+
+      const reverseBracket = algorithms.bracket(
+        t => 1,
+        -2,
+        0
+      )
+      assert.strictEqual(reverseBracket[0], -2)
+      assert.strictEqual(reverseBracket[1], 0)
     })
   })
 
