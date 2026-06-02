@@ -144,8 +144,11 @@ export function gammaLowerIncompleteInv (a, p) {
     if (f1 === 0) break
     const u = f / f1
     const dx = u / (1 - u * (a - 1 - x) / (2 * x))
-    x -= dx
-    x = Math.max(x, 1e-300)
+    const xPrev = x
+    x = xPrev - dx
+    // Relative floor: prevent x from going to zero/negative while still allowing
+    // convergence to values far below 1e-300 (the old absolute floor blocked this).
+    x = Math.max(x, xPrev * 1e-15)
     if (Math.abs(dx) <= EPS * x) break
   }
   return x

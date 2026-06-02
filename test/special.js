@@ -423,6 +423,21 @@ describe('special', () => {
       assert(Math.abs(special.gammaLowerIncomplete(5, x) - 1e-10) < 1e-15)
     })
 
+    it('should converge for very small p (p = 1e-30, a = 1)', () => {
+      // mpmath: -log(1 - 1e-30) ≈ 1e-30; round-trip must recover p to relative 1e-10
+      const x = special.gammaLowerIncompleteInv(1, 1e-30)
+      assert(isFinite(x) && x > 0)
+      assert(Math.abs(special.gammaLowerIncomplete(1, x) - 1e-30) / 1e-30 < 1e-10)
+    })
+
+    it('should converge for p = 1e-31, a = 0.1 where x_true < 1e-300', () => {
+      // Leading-term inversion gives x_true ≈ (p * Gamma(1.1))^10 ≈ 6e-311, below 1e-300.
+      // The old absolute 1e-300 floor clamped the iterate upward and stalled convergence.
+      const x = special.gammaLowerIncompleteInv(0.1, 1e-31)
+      assert(isFinite(x) && x > 0 && x < 1e-300)
+      assert(Math.abs(special.gammaLowerIncomplete(0.1, x) - 1e-31) / 1e-31 < 1e-10)
+    })
+
     it('should handle extreme upper tail (p close to 1)', () => {
       const x = special.gammaLowerIncompleteInv(5, 1 - 1e-10)
       assert(isFinite(x) && x > 0)
