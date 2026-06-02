@@ -40,14 +40,16 @@ describe('algorithms', () => {
         0,
         2
       )
-      assert(bracket[0] === 0 && bracket[1] === 2)
+      assert.strictEqual(bracket[0], 0)
+      assert.strictEqual(bracket[1], 2)
 
       const reverseBracket = algorithms.bracket(
         t => 1,
         -2,
         0
       )
-      assert(reverseBracket[0] === -2 && reverseBracket[1] === 0)
+      assert.strictEqual(reverseBracket[0], -2)
+      assert.strictEqual(reverseBracket[1], 0)
     })
   })
 
