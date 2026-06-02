@@ -15,9 +15,6 @@ import { MAX_ITER } from '../core/constants'
  * @class Distribution
  * @memberof ran.dist
  */
-// Warn once when q(p) is called with p outside [0,1]; removal tracked in #594
-let _qOutOfRangeWarned = false
-
 class Distribution {
   constructor (type, k) {
     // decisions/0009-rename-single-letter-instance-fields.md — descriptive names replace single-letter abbreviations
@@ -547,16 +544,12 @@ class Distribution {
    * @method q
    * @memberof ran.dist.Distribution
    * @param {number} p The probability at which the quantile should be evaluated.
-   * @returns {number|undefined} The value of the quantile function at the specified probability if $p \in [0, 1]$ and the quantile could be found,
-   * undefined otherwise.
+   * @returns {number} The value of the quantile function at the specified probability.
+   * @throws {Error} If p is outside [0, 1].
    */
   q (p) {
     if (p < 0 || p > 1) {
-      if (!_qOutOfRangeWarned) {
-        _qOutOfRangeWarned = true
-        console.warn('[ranjs] Distribution.q(p) with p outside [0,1] is deprecated and will throw in v1.27.0; currently returns undefined.')
-      }
-      return undefined
+      throw Error('Invalid probability. p must be in [0, 1].')
     } else if (p === 0) {
       // If zero, return lower support boundary
       return this.s[0].value
