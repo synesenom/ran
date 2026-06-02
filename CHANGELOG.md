@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- `Distribution.q(p)` no longer returns `undefined` for `p` outside `[0, 1]`; it now throws `Error('Invalid probability. p must be in [0, 1].')`. The deprecation warning introduced in #592 (v1.26.0) is also removed (#594).
 - `scripts/bench.js` and the 11 `jstat` / `@stdlib` devDependencies that backed it. The one-time comparative benchmark (issue #114) has served its purpose; keeping the packages inflated `npm install` and triggered false-positive alerts on snyk scans of the repo. ADR-0011 documents the original decision and rationale.
 
 ## [1.26.0] - 2026-05-31

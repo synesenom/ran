@@ -70,8 +70,6 @@ Every public function and method signals "no ordinary result" through exactly on
 
 **Applies everywhere, not just distributions.** `ran.core`, `ran.special`, `ran.algorithms`, and `ran.la` follow the same split: `throw` for contract violations (wrong arity, dimension mismatch, impossible input); `NaN`/`±Infinity` for out-of-domain or divergent math. **Never wrap hot numeric loops in `throw`/`try` for ordinary out-of-domain inputs** — let the math produce `NaN`/`Infinity`.
 
-**Known deviation:** `Distribution.q(p)` returns `undefined` for `p ∉ [0, 1]`. This predates the convention and is a caller error that *should* throw; correcting it is a breaking change that ships through the standard deprecation cycle in an ordinary minor release (see "Versioning and Changelog"). Do not copy this pattern into new code.
-
 ## Testing Conventions
 
 - Tests live in `test/` and mirror `src/` module structure.

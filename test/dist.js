@@ -302,9 +302,9 @@ describe('dist', () => {
     })
 
     describe('.q()', () => {
-      it('should return undefined if p < 0 or p > 1', () => {
-        assert(typeof invalid.q(-1) === 'undefined')
-        assert(typeof invalid.q(2) === 'undefined')
+      it('should throw for p < 0 or p > 1', () => {
+        assert.throws(() => invalid.q(-1), Error)
+        assert.throws(() => invalid.q(2), Error)
       })
     })
 
