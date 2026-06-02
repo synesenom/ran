@@ -16,6 +16,7 @@ export default class Rademacher extends Categorical {
   /** */
   constructor () {
     super([0.5, 0, 0.5], -1)
+    this.p = {}
   }
 
   _q (p) {

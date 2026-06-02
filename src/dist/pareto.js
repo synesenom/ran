@@ -54,7 +54,14 @@ export default class Pareto extends Distribution {
     return this.p.xmin / Math.pow(1 - p, 1 / this.p.alpha)
   }
 
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
   static _fitInit (data) {
+    // Exact MLE: xmin = min(data), alpha = n / Σ ln(x/xmin). This is the likelihood maximiser; note
+    // it is biased in finite samples (E[α̂] = α·n/(n−1)) — fit() returns the MLE by design.
     const xmin = Math.min(...data)
     const n = data.length
     const alpha = n / data.reduce((s, x) => s + Math.log(x / xmin), 0)

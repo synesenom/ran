@@ -58,11 +58,12 @@ Compile observations noticed during steps 3–4 (pre-existing NaN at a boundary,
 Spawn the `ops-triage` agent with `branch`, `session_kind: "fix"`, `target_issue`, the `observations` list, and a `diff_path` (write `git diff main...HEAD` to `.claude/tmp/triage-diff-<branch>.patch` if not already done).
 
 Act on the result:
-- **`definite`**: invoke `ops-issue` once per entry with the drafted fields. Collect URLs.
+- **`definite` with `fix_inline: true`** (trivial): apply the fix on the fly using `fix_suggestion`, run `npm run standard && npm test`. Do **not** file an issue. Count as "fixed inline".
+- **`definite` with `fix_inline: false`** (non-trivial): invoke `ops-issue` once per entry with the drafted fields. Collect URLs.
 - **`ambiguous`**: one batched `AskUserQuestion` (File issue / Skip / Other). For each "File issue", invoke `ops-issue`.
 - **`not_a_bug`**: silent.
 
-Report: `> "Triage: <N> filed (<URLs>), <M> skipped, <K> not a bug."` or `> "Triage: clean."`
+Report: `> "Triage: <N> fixed inline, <M> filed (<URLs>), <K> skipped, <L> not a bug."` or `> "Triage: clean."`
 
 ### 6. Review (conditional)
 
@@ -82,7 +83,7 @@ Invoke all three sub-skills in sequence **without any pause or output between th
 
 a. **Commit** — invoke `/commit`
 b. **Push** — invoke `/push` immediately after `/commit` returns
-c. **Pull Request** — invoke `/pull-request` immediately after `/push` returns
+c. **Pull Request** — invoke `/pr` immediately after `/push` returns
 
 ### 8. Report
 

@@ -1,5 +1,5 @@
 import Distribution from './_distribution'
-import brent from '../algorithms/brent'
+import chandrupatla from '../algorithms/chandrupatla'
 
 /**
  * Probability density function for the [Tukey lambda distribution]{@link https://en.wikipedia.org/wiki/Tukey_lambda_distribution}:
@@ -57,7 +57,7 @@ export default class TukeyLambda extends Distribution {
     // If lambda != 0, F(x) is the inverse of quantile function
     return this.p.lambda === 0
       ? 1 / (1 + Math.exp(-x))
-      : brent(
+      : chandrupatla(
         t => (Math.pow(t, this.p.lambda) - Math.pow(1 - t, this.p.lambda)) / this.p.lambda - x,
         0, 1
       )

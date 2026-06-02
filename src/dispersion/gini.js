@@ -6,17 +6,17 @@ import rmd from './rmd'
  * @method gini
  * @memberof ran.dispersion
  * @param {number[]} values Array of values to calculate the Gini coefficient for.
- * @returns {number|undefined} The Gini coefficient of the values if there are more than one, undefined otherwise.
+ * @returns {number} The Gini coefficient, or NaN for fewer than 2 elements or zero mean.
  * @example
  *
  * ran.dispersion.gini([])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.gini([1])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.gini([-1, 0, 1])
- * // => undefined
+ * // => NaN
  *
  * ran.dispersion.gini([1, 2, 3, 4])
  * // => 0.25

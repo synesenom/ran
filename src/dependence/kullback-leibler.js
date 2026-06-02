@@ -10,15 +10,16 @@ import neumaier from '../algorithms/neumaier'
  * @memberof ran.dependence
  * @param {number[]} p Array representing the probabilities for the i-th value in the base distribution (P).
  * @param {number[]} q Array representing the probabilities for the i-th value in compared distribution (Q).
- * @returns {number|undefined} The Kullback-Leibler divergence if none of the distributions are empty and Q(x) = 0
- * implies that P(x) = 0 for all x, otherwise undefined.
+ * @throws {Error} If the arrays have different lengths.
+ * @returns {number} The Kullback-Leibler divergence, NaN for empty input, Infinity if Q(x) = 0 and P(x) > 0 for
+ * some x.
  * @example
  *
- * ran.dependence.kullbackLeibler([0.1, 0.2, 0.7], [])
- * // => undefined
+ * ran.dependence.kullbackLeibler([], [])
+ * // => NaN
  *
- * ran.dependence.kullbackLeibler([0.1, 0.2, 0.7], [0.1, 0.2, 0.3, 0.4])
- * // => undefined
+ * ran.dependence.kullbackLeibler([0.1, 0.2, 0.7], [0, 0.3, 0.7])
+ * // => Infinity
  *
  * ran.dependence.kullbackLeibler([0.1, 0.3, 0.6], [0.333, 0.333, 0.334])
  * // => 0.19986796234715937
@@ -27,21 +28,20 @@ import neumaier from '../algorithms/neumaier'
  * // => 0.2396882491444514
  */
 export default function (p, q) {
-  if (!isValid(p, q)) {
-    return undefined
+  if (p.length !== q.length) {
+    throw Error('Arrays must have the same length')
+  }
+  if (p.length === 0) {
+    return NaN
   }
 
-  // Check Q(x) = 0 => P(x) = 0 implication.
+  // Q(x) = 0 with P(x) > 0 causes a term to diverge.
   if (hasZeroQWithNonZeroP(p, q)) {
-    return undefined
+    return Infinity
   }
 
   // Calculate sum over all P(x) > 0 elements.
   return neumaier(p.filter(d => d > 0).map((pi, i) => pi * Math.log(pi / q[i])))
-}
-
-function isValid (p, q) {
-  return p.length !== 0 && q.length !== 0 && p.length === q.length
 }
 
 function hasZeroQWithNonZeroP (p, q) {

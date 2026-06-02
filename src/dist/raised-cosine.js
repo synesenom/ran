@@ -1,4 +1,4 @@
-import rejection from '../algorithms/rejection'
+import chandrupatla from '../algorithms/chandrupatla'
 import Distribution from './_distribution'
 
 /**
@@ -37,14 +37,11 @@ export default class RaisedCosine extends Distribution {
   }
 
   _generator () {
-    // Rejection sampling with uniform distribution as major
-    return rejection(
-      this.r,
-      () => this.p.mu - this.p.s + 2 * this.p.s * this.r.next(),
-      x => {
-        return 0.5 * (1 + Math.cos(Math.PI * (x - this.p.mu) / this.p.s))
-      }
-    )
+    const u = this.r.next()
+    // Bracket the quantile within the standardised support [-1, 1]; chandrupatla is stable
+    // where Newton diverges near the zero-derivative boundary at z = ±1.
+    const z = chandrupatla(z => 0.5 * (1 + z + Math.sin(Math.PI * z) / Math.PI) - u, -1, 1)
+    return this.p.mu + this.p.s * z
   }
 
   _pdf (x) {

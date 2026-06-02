@@ -18,6 +18,14 @@ export default class Rayleigh extends Weibull {
    */
   constructor (sigma) {
     super(sigma * Math.SQRT2, 2)
+
+    // Rayleigh has 1 free parameter (sigma); override the 2 inherited from Weibull
+    this.k = 1
+  }
+
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
   }
 
   static _fitInit (data) {

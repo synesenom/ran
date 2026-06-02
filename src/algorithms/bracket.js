@@ -17,13 +17,14 @@ const SCALE = 1.618
  * @param {Object[]=} s Object containing the constraints on the lower and upper bracket. Each constraint has a
  * <code>closed</code> and <code>value</code> property denoting if the constraint is a closed interval and the value of
  * the boundaries. If not set, (-inf, inf) is applied.
- * @return {(number[]|undefined)} Array containing the bracket around the root if successful, undefined otherwise.
+ * @return {(number[]|number)} Array `[a, b]` containing a bracket around the root if a sign change is
+ *   found, the original `[a0, b0]` if the search exhausts MAX_ITER iterations without converging, or
+ *   NaN if `a0 === b0`.
  * @private
  */
 export default function (f, a0, b0, s) {
-  // If initial boundaries are invalid, return undefined.
   if (a0 === b0) {
-    return
+    return NaN
   }
 
   // Initialize variables.
@@ -67,5 +68,5 @@ export default function (f, a0, b0, s) {
   }
 
   // Return boundary anyway.
-  return [a0 || a, b0 || b]
+  return [a0, b0]
 }

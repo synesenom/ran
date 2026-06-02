@@ -59,11 +59,21 @@ export default class Uniform extends Distribution {
     return p * this.c.range + this.p.xmin
   }
 
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
   static _fitInit (data) {
-    // MLEs for bounded-support endpoints are the sample extremes; small buffer satisfies xmin < xmax
+    // Exact MLE: the tightest support containing the data, i.e. [min, max] (the support is closed
+    // at both ends, so endpoints have finite density). Pad only for degenerate constant data,
+    // where xmin < xmax cannot otherwise hold and no Uniform MLE exists in the family.
     const lo = Math.min(...data)
     const hi = Math.max(...data)
-    const eps = (hi - lo) * 0.01 || 1e-6
+    if (hi > lo) {
+      return [lo, hi]
+    }
+    const eps = Math.abs(lo) * 0.01 || 1e-6
     return [lo - eps, hi + eps]
   }
 }

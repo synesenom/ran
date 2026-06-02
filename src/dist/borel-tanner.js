@@ -40,6 +40,11 @@ export default class BorelTanner extends PreComputed {
     }]
   }
 
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
   static _fitInit (data) {
     // Support starts at n; E[X] = n/(1-mu). Use min(data) for n and solve for mu.
     const mean = data.reduce((s, x) => s + x, 0) / data.length

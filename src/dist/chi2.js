@@ -20,6 +20,9 @@ export default class Chi2 extends Gamma {
   constructor (k) {
     super(Math.round(k) / 2, 0.5)
 
+    // Chi2 has 1 free parameter (k); override the 2 inherited from Gamma
+    this.k = 1
+
     // Validate parameters
     Distribution.validate({ k }, [
       'k > 0'

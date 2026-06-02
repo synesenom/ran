@@ -20,8 +20,10 @@ export default class Categorical extends Distribution {
   constructor (weights, min) {
     super('discrete', 2)
 
-    // Validate parameters
-    this.p = { n: weights.length, weights, min }
+    // decisions/0014-categorical-this-c-natural-params-split.md — n and min are lookup state, not natural parameters
+    this.c = { n: weights.length, min }
+    /** @type {Object} */
+    this.p = { weights }
     Distribution.validate({
       w_i: (() => {
         const allPositive = weights.reduce((acc, d) => acc && (d >= 0), true)
@@ -57,19 +59,19 @@ export default class Categorical extends Distribution {
 
   _generator () {
     // Direct sampling
-    return this.p.min + this.aliasTable.sample(this.r)
+    return this.c.min + this.aliasTable.sample(this.r)
   }
 
   _pdf (x) {
-    if (this.p.n <= 1) {
+    if (this.c.n <= 1) {
       return 1
     } else {
-      return this.pdfTable[x - this.p.min]
+      return this.pdfTable[x - this.c.min]
     }
   }
 
   _cdf (x) {
-    return Math.min(1, this.cdfTable[x - this.p.min])
+    return Math.min(1, this.cdfTable[x - this.c.min])
   }
 
   static _fitInit (data) {
@@ -92,7 +94,7 @@ export default class Categorical extends Distribution {
   /**
    * Estimates the categorical distribution from data via maximum likelihood. The MLE is
    * closed-form (empirical frequencies of the observed integer categories) so this override
-   * skips Nelder-Mead. See [decisions/0012-distribution-fit-nelder-mead.md]{@link ../../decisions/0012-distribution-fit-nelder-mead.md}.
+   * skips the optimizer. See [decisions/0016-distribution-fit-powell-and-exact-mle.md]{@link ../../decisions/0016-distribution-fit-powell-and-exact-mle.md}.
    *
    * @method fit
    * @memberof ran.dist.Categorical

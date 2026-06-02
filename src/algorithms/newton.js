@@ -9,7 +9,7 @@ import { MAX_ITER, EPS } from '../core/constants'
  * @param {Function} f Function to find root for. Must accept a single variable.
  * @param {Function} df First derivative of the function. Must accept a single variable.
  * @param {number} x0 Starting point of the optimization.
- * @return {(number|undefined)} The root of the specified function.
+ * @return {number} The root of the specified function.
  * @private
  */
 export default function (f, df, x0) {
@@ -25,8 +25,8 @@ export default function (f, df, x0) {
     dx = f(x) / (Math.abs(d) > EPS ? d : df(x + EPS))
     x -= dx
 
-    // Exit if we reached precision level.
-    if (Math.abs(dx / x) < EPS) {
+    // Hybrid criterion: absolute floor prevents NaN at x=0 and unreachable thresholds for |x| < 1.
+    if (Math.abs(dx) < EPS * Math.max(Math.abs(x), 1)) {
       break
     }
   }

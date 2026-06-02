@@ -1,6 +1,6 @@
 {
   "name": "ranjs",
-  "version": "1.25.0",
+  "version": "1.26.0",
   "description": "Library for generating various random variables.",
   "keywords": [
     "random",
@@ -465,8 +465,7 @@
     "typecheck": "./node_modules/.bin/tsc --noEmit",
     "check-decl": "node scripts/check-subpath-exports.js",
     "prepublishOnly": "npm run build",
-    "coverage": "cross-env NODE_ENV=test nyc --reporter=html _mocha --require @babel/register",
-    "bench": "npm run build && node scripts/bench.js"
+    "coverage": "cross-env NODE_ENV=test nyc --reporter=html _mocha --require @babel/register"
   },
   "devDependencies": {
     "@babel/core": "^7.18.6",
@@ -475,16 +474,6 @@
     "@babel/register": "^7.15.3",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^1.0.0",
-    "@stdlib/random-base-beta": "^0.2.2",
-    "@stdlib/random-base-exponential": "^0.2.2",
-    "@stdlib/random-base-gamma": "^0.2.2",
-    "@stdlib/random-base-normal": "^0.2.2",
-    "@stdlib/random-base-poisson": "^0.2.2",
-    "@stdlib/stats-base-dists-beta": "^0.3.1",
-    "@stdlib/stats-base-dists-exponential": "^0.3.1",
-    "@stdlib/stats-base-dists-gamma": "^0.3.1",
-    "@stdlib/stats-base-dists-normal": "^0.3.1",
-    "@stdlib/stats-base-dists-poisson": "^0.3.1",
     "babel-plugin-istanbul": "^6.0.0",
     "badge-maker": "^5.0.2",
     "chai": "^4.3.4",
@@ -495,7 +484,6 @@
     "eslint-plugin-jsdoc": "^50.8.0",
     "highlight.js": "^11.7.0",
     "istanbul": "^0.4.5",
-    "jstat": "^1.9.6",
     "lodash.flattendeep": "^4.4.0",
     "mathjax-node-page": "^3.2.0",
     "mocha": "^10.2.0",

@@ -43,6 +43,11 @@ export default class DiscreteUniform extends Distribution {
     }
   }
 
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
   static _fitInit (data) {
     // MLEs for the support endpoints are the sample min and max.
     return [Math.min(...data), Math.max(...data)]

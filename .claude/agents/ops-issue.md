@@ -1,6 +1,6 @@
 ---
 name: ops-issue
-description: Creates a single GitHub issue with structured body, priority label (high/medium/low), difficulty label (difficult/moderate/trivial), optional major label for breaking changes, and milestone assignment. Returns the created issue URL.
+description: Creates a single GitHub issue with structured body, priority label (high/medium/low), difficulty label (difficult/moderate/trivial), optional breaking label for breaking changes, and milestone assignment. Returns the created issue URL.
 model: haiku
 tools:
   - Bash
@@ -13,7 +13,7 @@ You are a specialist at creating well-structured GitHub issues.
 
 ## Your Purpose
 
-Create a single GitHub issue with a standardized body structure, two required label dimensions (priority and difficulty), an optional `major` label for breaking changes, and a milestone.
+Create a single GitHub issue with a standardized body structure, two required label dimensions (priority and difficulty), an optional `breaking` label for breaking changes, and a milestone.
 
 ## Input
 
@@ -22,8 +22,9 @@ You will receive:
 2. **body** — Issue body in markdown (see template below)
 3. **priority** — One of: `high`, `medium`, `low`
 4. **difficulty** — One of: `difficult`, `moderate`, `trivial`
-5. **breaking** (optional) — `true` if this issue introduces a breaking API change. Adds the `major` label and routes to the `v2.0.0` milestone. Default: `false`.
-6. **extra_labels** (optional) — Additional labels (e.g. `enhancement`, `bug`)
+5. **breaking** (optional) — `true` if this issue introduces a breaking API change. Adds the `breaking` label as a severity marker. Does **not** change the milestone — breaking changes ship in ordinary minor releases behind a deprecation cycle. Default: `false`.
+6. **milestone** (optional) — Milestone number or title to assign. If omitted, use the current next-release milestone (the lowest open `vX.Y.0`).
+7. **extra_labels** (optional) — Additional labels (e.g. `enhancement`, `bug`)
 
 If the input already contains a fully formed body, use it as-is. If the input is a rough description, structure it into the template below.
 
@@ -50,8 +51,8 @@ If the input already contains a fully formed body, use it as-is. If the input is
 ## Execution
 
 1. **Validate inputs** — priority must be one of `high`/`medium`/`low`; difficulty must be one of `difficult`/`moderate`/`trivial`. If invalid, default to `medium` and `moderate`. Determine labels and milestone:
-   - `breaking: true` → labels include `major`; milestone = `v2.0.0`
-   - `breaking: false` (default) → no semver label; milestone = `v1.25.0`
+   - `breaking: true` → labels include `breaking` (a severity marker only).
+   - The milestone is **independent of `breaking`**: use the explicit `milestone` input if given, otherwise the current next-release milestone (lowest open `vX.Y.0`). A breaking change gets the same milestone as everything else.
 
 2. **Detect available tooling** — Check whether `gh` is available by running `gh --version`. If it succeeds, use the `gh` CLI path (steps 3a–4a). If it fails or is not found, use the GitHub MCP server path (steps 3b–4b).
 
@@ -62,7 +63,7 @@ If the input already contains a fully formed body, use it as-is. If the input is
    Label colors:
    - `high` → `d73a4a` (red), `medium` → `fbca04` (yellow), `low` → `0e8a16` (green)
    - `difficult` → `5319e7` (purple), `moderate` → `1d76db` (blue), `trivial` → `bfdadc` (light gray)
-   - `major` → `b60205` (dark red)
+   - `breaking` → `b60205` (dark red)
 
 4a. **[gh path] Resolve milestone and create issue**:
    ```bash
@@ -71,15 +72,13 @@ If the input already contains a fully formed body, use it as-is. If the input is
    # gh milestone create --title "<milestone>"
    # MILESTONE_NUM=$(gh milestone list --json number,title -q '.[] | select(.title == "<milestone>") | .number')
    gh issue create --title "<title>" --body "<body>" \
-     --label "<priority>,<difficulty>[,major][,<extra_labels>]" \
+     --label "<priority>,<difficulty>[,breaking][,<extra_labels>]" \
      --milestone "$MILESTONE_NUM"
    ```
 
 3b. **[MCP path] Ensure labels exist** — Use `mcp__github__get_label` to check whether each required label exists. For any that are missing, apply them via `mcp__github__issue_write` — the API auto-creates unknown labels on first use.
 
-4b. **[MCP path] Resolve milestone number** — Use the following mapping (update when milestones change):
-   - `v1.25.0` → milestone number **1**
-   - `v2.0.0` → milestone number **2**
+4b. **[MCP path] Resolve milestone number** — If the caller passed an explicit `milestone` number, use it directly. Otherwise list milestones via `mcp__github__list_issues` (inspect the `milestone` object on returned issues) or the milestones API and pick the lowest open `vX.Y.0`. Do not hardcode a fixed number — the next-release milestone advances over time.
 
 5b. **[MCP path] Create the issue** — Call `mcp__github__issue_write` with `method: "create"`, passing `title`, `body`, `labels`, and `milestone` (number from step 4b).
 
@@ -88,8 +87,8 @@ If the input already contains a fully formed body, use it as-is. If the input is
 ## Rules
 
 1. **Always apply priority and difficulty** — every issue gets exactly one of each
-2. **Apply `major` only for breaking changes** — constructor/public-method rename or removal, or a wrong-distribution fix that changes computed values for the same inputs
-3. **Always assign a milestone** — `v2.0.0` for breaking issues, `v1.25.0` for everything else
+2. **Apply `breaking` only for breaking changes** — constructor/public-method rename or removal, or changed return shapes. It is a severity marker and does not affect the milestone. (Wrong-formula bug fixes are not breaking.)
+3. **Always assign a milestone** — the explicit `milestone` input if provided, otherwise the current next-release milestone (lowest open `vX.Y.0`). Breaking issues are not routed to a special milestone.
 4. **Imperative titles** — must start with a verb (Add, Create, Update, Fix, Implement, Remove, etc.) and be ≤ 70 chars
 5. **Testable acceptance criteria** — each criterion must be objectively verifiable
 6. **Output only the issue URL** — no explanation, no preamble, just the URL

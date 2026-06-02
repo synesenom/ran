@@ -40,7 +40,8 @@ export default class Hypergeometric extends Categorical {
     for (let k = min; k <= max; k++) {
       weights.push(Math.exp(logBinomial(Ki, k) + logBinomial(Ni - Ki, ni - k) - logBinomial(Ni, ni)))
     }
-    super(weights, 0)
+    super(weights, min)
+    this.p = { N: Ni, K: Ki, n: ni }
 
     // Validate parameters
     Distribution.validate({ N: Ni, K: Ki, n: ni }, [

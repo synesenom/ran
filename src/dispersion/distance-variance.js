@@ -8,18 +8,18 @@ import mean from '../location/mean'
  * @method dVar
  * @memberof ran.dispersion
  * @param {number[]} x Array of values.
- * @returns {number|undefined} The distance variance if the array os not empty, undefined otherwise.
+ * @returns {number} The distance variance, or NaN for an empty array.
  * @example
  *
- * ran.dependence.dVar([])
- * // => undefined
+ * ran.dispersion.dVar([])
+ * // => NaN
  *
- * ran.dependence.dVar([1, 2, 3])
+ * ran.dispersion.dVar([1, 2, 3])
  * // => 0.7027283689263066
  */
 export default function (x) {
   if (x.length === 0) {
-    return undefined
+    return NaN
   }
 
   // Calculate distance matrix.

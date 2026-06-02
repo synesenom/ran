@@ -24,6 +24,23 @@ describe('special', () => {
       assert(equal(special.digamma(-0.5), 2 - EM - 2 * Math.log(2)))
       // ψ(-1.5) = ψ(2.5) = ψ(1.5) + 2/3
       assert(equal(special.digamma(-1.5), 2 - EM - 2 * Math.log(2) + 2 / 3))
+      // mpmath mp.dps=50: mp.digamma(-2.5)
+      assert(equal(special.digamma(-2.5), 1.103156640645243, 14))
+    })
+
+    it('should return Infinity at the non-positive integer poles', () => {
+      // ADR-0015: divergence returns Infinity specifically (not NaN, not a huge finite).
+      assert.strictEqual(special.digamma(0), Infinity)
+      assert.strictEqual(special.digamma(-1), Infinity)
+      assert.strictEqual(special.digamma(-2), Infinity)
+    })
+
+    it('should stay full-precision within 1e-6 of a negative integer pole', () => {
+      // mpmath mp.dps=60 evaluated at the exact double of (-1+1e-7) / (-2+1e-7): the input
+      // itself only pins the offset to ~1e-9, but the dominant pole term -1/(z+n) is otherwise
+      // carried at machine precision (no argument-reduction loss in cot(πz)).
+      assert(equal(special.digamma(-1 + 1e-7), -9999999.582479, 13))
+      assert(equal(special.digamma(-2 + 1e-7), -9999999.071376376, 13))
     })
 
     it('should satisfy the recurrence ψ(z+1) = ψ(z) + 1/z', () => {
@@ -108,6 +125,35 @@ describe('special', () => {
       // scipy.stats cross-validation; these were the values broken by the old _I1 polynomial
       assert(equal(special.besselI(1, 2), 1.590636854637329))
       assert(equal(special.besselI(1, 10), 2670.988303701254))
+    })
+
+    it('I1(x) should match reference values at large arguments', () => {
+      // Independent sanity check: leading asymptotic I_1(x) ~ e^x/sqrt(2*pi*x) agrees
+      // with the Miller result to < 1% at x=50 (asymptotic is accurate to ~0.5% with
+      // one correction term), confirming the normalization is not off by any power of e^x.
+      assert(Math.abs(special.besselI(1, 50) * Math.sqrt(2 * Math.PI * 50) / Math.exp(50) - 1) < 0.01)
+      assert(equal(special.besselI(1, 50), 2.9030785901035533e+20))
+      assert(equal(special.besselI(1, 100), 1.0683693903381671e+42))
+      assert(equal(special.besselI(1, 200), 2.0345815493320935e+85))
+    })
+
+    it('I1(x) sign symmetry should hold at large arguments', () => {
+      // Exercises the x < 0 && n % 2 === 1 sign-correction branch for large |x|.
+      assert(equal(special.besselI(1, -50), -special.besselI(1, 50)))
+    })
+
+    it('I0(x) should match reference values at large arguments', () => {
+      // besselI(0, x) also used _I0(x) directly; this confirms the large-x fix.
+      assert(equal(special.besselI(0, 50), 2.9325537838493486e+20))
+      assert(equal(special.besselI(0, 100), 1.073751707131081e+42))
+      assert(equal(special.besselI(0, 200), 2.0396871734097203e+85))
+    })
+
+    it('I0(x) should be continuous across the |x|=10 routing boundary', () => {
+      // Verifies _I0 (|x|<=10) and _besselIBackward (|x|>10) agree near the crossover.
+      assert(equal(special.besselI(0, 9.9), 2560.9633532560433))
+      assert(equal(special.besselI(0, 10), 2815.716628466255))
+      assert(equal(special.besselI(0, 10.1), 3095.9756729321825))
     })
   })
 
@@ -326,6 +372,54 @@ describe('special', () => {
         assert(Math.abs(Math.log(g) - lng) / lng < 0.01)
       }
     })
+
+    describe('.gamma()', () => {
+      it('should return reference values (mpmath mp.dps=50)', () => {
+        // Positive baseline plus the reflection branch at negative half-integers.
+        assert(equal(special.gamma(0.5), 1.772453850905516, 14))
+        assert(equal(special.gamma(-0.5), -3.544907701811032, 14))
+        assert(equal(special.gamma(-1.5), 2.363271801207355, 14))
+        assert(equal(special.gamma(-2.5), -0.9453087204829419, 14))
+      })
+
+      it('should return Infinity at the non-positive integer poles', () => {
+        // ADR-0015: divergence returns Infinity specifically (not NaN, not a huge finite).
+        assert.strictEqual(special.gamma(0), Infinity)
+        assert.strictEqual(special.gamma(-1), Infinity)
+        assert.strictEqual(special.gamma(-2), Infinity)
+      })
+
+      it('should stay full-precision within 1e-6 of a negative integer pole', () => {
+        // mpmath mp.dps=60 evaluated at the exact double of (-1+1e-7) / (-2+1e-7); the
+        // (-1)^n-signed reduced sin(πz) must not lose the fractional offset.
+        assert(equal(special.gamma(-1 + 1e-7), -10000000.428048076, 13))
+        assert(equal(special.gamma(-2 + 1e-7), 5000000.458472761, 13))
+      })
+    })
+
+    describe('.logGamma()', () => {
+      it('should return reference values ln|Γ(z)| (mpmath mp.dps=50)', () => {
+        // Positive baseline plus the log-reflection branch at negative half-integers. The
+        // positive Lanczos path is itself accurate to ~1e-13, so the tolerance is 1e-13.
+        assert(equal(special.logGamma(0.5), 0.5723649429247001, 13))
+        assert(equal(special.logGamma(-0.5), 1.2655121234846454, 13))
+        assert(equal(special.logGamma(-1.5), 0.860047015376481, 13))
+        assert(equal(special.logGamma(-2.5), -0.056243716497674054, 13))
+      })
+
+      it('should return Infinity at the non-positive integer poles', () => {
+        // ADR-0015: divergence returns Infinity specifically (not NaN, not a huge finite).
+        assert.strictEqual(special.logGamma(0), Infinity)
+        assert.strictEqual(special.logGamma(-1), Infinity)
+        assert.strictEqual(special.logGamma(-2), Infinity)
+      })
+
+      it('should stay full-precision within 1e-6 of a negative integer pole', () => {
+        // mpmath mp.dps=60 at the exact double of (-1+1e-7) / (-2+1e-7); |sin(πz)| reduced mod π keeps the offset.
+        assert(equal(special.logGamma(-1 + 1e-7), 16.118095693763127, 13))
+        assert(equal(special.logGamma(-2 + 1e-7), 15.424948562092922, 13))
+      })
+    })
   })
 
   describe('.gammaLowerIncomplete(), .gammaUpperIncomplete()', () => {
@@ -446,9 +540,46 @@ describe('special', () => {
   })
 
   describe('.hurwitzZeta(), .riemannZeta()', () => {
+    it('hurwitzZeta should return Infinity at the pole s = 1', () => {
+      assert(special.hurwitzZeta(1, 1) === Infinity)
+      assert(special.hurwitzZeta(1, 2) === Infinity)
+      assert(special.hurwitzZeta(1, 0.5) === Infinity)
+      // Values just outside the EPS guard must be large but finite
+      assert(isFinite(special.hurwitzZeta(1 + 1e-10, 1)))
+      assert(special.hurwitzZeta(1 + 1e-10, 1) > 1e9)
+    })
+
+    it('hurwitzZeta should be accurate for s near 1', () => {
+      // Reference values from the 3-term Laurent ζ(s) = 1/(s-1) + γ₀ − γ₁(s−1) + γ₂(s−1)²/2
+      // (DLMF 25.2.8) using γ₀=0.5772156649, γ₁=−0.0728158455, γ₂=−0.0096903632.
+      // At s=1.01 the 4th-term error is ~3e-12; tolerances are set well above that.
+      assert(equal(special.hurwitzZeta(1.01, 1), 100.577943338838, 10))
+      assert(equal(special.hurwitzZeta(1.05, 1), 20.580844344222, 8))
+      assert(equal(special.hurwitzZeta(1.1, 1), 10.584448797634, 7))
+      // ζ(s, 2) = ζ(s, 1) − 1^{-s} = ζ(s) − 1; exercises a ≠ 1 with n-formula unchanged
+      assert(equal(special.hurwitzZeta(1.05, 2), 20.580844344222 - 1, 8))
+    })
+
+    it('hurwitzZeta should satisfy the recurrence ζ(s, a) = a^{-s} + ζ(s, a+1) for s near 1', () => {
+      // Verifies that the corrected partial-sum length produces consistent values across the
+      // recurrence, which the fixed-point tests at s=1.01/1.05/1.1 alone cannot catch.
+      repeat(() => {
+        const s = 1.05 + Math.random() * 0.45
+        const a = 0.5 + Math.random() * 4
+        assert(equal(
+          special.hurwitzZeta(s, a),
+          Math.pow(a, -s) + special.hurwitzZeta(s, a + 1),
+          6
+        ))
+      }, LAPS)
+    })
+
     it('riemannZeta(s) - hurwitzZeta(s, n+1) = H(s, n)', () => {
       repeat(() => {
-        const s = Math.random() * 10 + 1
+        // Avoid s < 1.5: riemannZeta uses Wynn-epsilon there with ~1e-7 absolute error
+        // while hurwitzZeta is now accurate to machine precision, so the identity check
+        // would see a spurious mismatch. The near-1 precision is covered by the test above.
+        const s = Math.random() * 9.5 + 1.5
         let sum = 0
         for (let n = 1; n < 100; n++) {
           sum += 1 / Math.pow(n, s)
@@ -456,12 +587,52 @@ describe('special', () => {
         }
       }, LAPS)
     })
+
+    it('should return Infinity at the pole s = 1', () => {
+      assert(special.riemannZeta(1) === Infinity)
+    })
+
+    it('should be accurate near s = 1 via Laurent expansion', () => {
+      // Reference values from three-term Laurent expansion (DLMF 25.2.8); two-term truncation error is O(d^2)
+      // s > 1 side
+      assert(Math.abs(special.riemannZeta(1.0001) / 10000.577222946486 - 1) < 1e-8)
+      assert(Math.abs(special.riemannZeta(1.001) / 1000.5772884762018 - 1) < 1e-8)
+      assert(Math.abs(special.riemannZeta(1.01) / 100.5779433388382 - 1) < 1e-7) // looser: truncation error scales as d^2
+      // s < 1 side (Laurent branch fires for |s-1| < 0.01 in both directions)
+      assert(Math.abs(special.riemannZeta(0.999) / (-999.422857150944) - 1) < 1e-8)
+    })
   })
 
   describe('.lambertW0()', () => {
-    it('should satisfy the W * exp(W) = x equation', () => {
+    it('should return NaN for z < -1/e', () => {
+      assert(isNaN(special.lambertW0(-1)))
+      assert(isNaN(special.lambertW0(-0.5)))
+      assert(isNaN(special.lambertW0(-Math.exp(-1) - 1e-10)))
+    })
+
+    it('should return -1 at the branch point z = -1/e', () => {
+      assert(Math.abs(special.lambertW0(-Math.exp(-1)) + 1) < 1e-6)
+    })
+
+    it('should return 0 at z = 0', () => {
+      assert(special.lambertW0(0) === 0)
+    })
+
+    it('should return 1 at z = e', () => {
+      assert(equal(special.lambertW0(Math.E), 1))
+    })
+
+    it('should satisfy the W * exp(W) = x equation for x >= 0', () => {
       repeat(() => {
         const x = Math.random() * 10
+        const w = special.lambertW0(x)
+        assert(equal(w * Math.exp(w), x))
+      }, LAPS)
+    })
+
+    it('should satisfy the W * exp(W) = x equation for x in [-1/e, 0)', () => {
+      repeat(() => {
+        const x = -(Math.random() * (1 / Math.E - 1e-9) + 1e-9)
         const w = special.lambertW0(x)
         assert(equal(w * Math.exp(w), x))
       }, LAPS)
@@ -469,9 +640,42 @@ describe('special', () => {
   })
 
   describe('.lambertW1m()', () => {
+    it('should return NaN for z < -1/e', () => {
+      assert(isNaN(special.lambertW1m(-1)))
+      assert(isNaN(special.lambertW1m(-0.5)))
+      assert(isNaN(special.lambertW1m(-Math.exp(-1) - 1e-10)))
+    })
+
+    it('should return NaN for z >= 0', () => {
+      assert(isNaN(special.lambertW1m(0)))
+      assert(isNaN(special.lambertW1m(1)))
+      assert(isNaN(special.lambertW1m(0.1)))
+    })
+
+    it('should return -1 at the branch point z = -1/e', () => {
+      assert(Math.abs(special.lambertW1m(-Math.exp(-1)) + 1) < 1e-6)
+    })
+
+    it('should return known value at z = -0.1', () => {
+      assert(equal(special.lambertW1m(-0.1), -3.577152063957297))
+    })
+
     it('should satisfy the W * exp(W) = x equation', () => {
       repeat(() => {
-        const x = -1 * Math.random() / Math.E
+        const x = -(Math.random() * (1 / Math.E - 1e-9) + 1e-9)
+        const w = special.lambertW1m(x)
+        assert(equal(w * Math.exp(w), x))
+      }, LAPS)
+    })
+
+    it('should return known values near the branch cut', () => {
+      assert(equal(special.lambertW1m(-0.2), -2.5426413577735265))
+      assert(equal(special.lambertW1m(-0.05), -4.499755288523487))
+    })
+
+    it('should satisfy W * exp(W) = z near the branch cut (z in [-1/e, -0.1])', () => {
+      repeat(() => {
+        const x = -(Math.random() * (1 / Math.E - 0.1) + 0.1)
         const w = special.lambertW1m(x)
         assert(equal(w * Math.exp(w), x))
       }, LAPS)
@@ -841,6 +1045,78 @@ describe('special', () => {
         assert(equal(special.owenT(d.h, d.a), d.t))
       })
     })
+
+    it('should return reference values at sector boundaries with 14 significant digits', () => {
+      [
+        { h: 0.5, a: 0.025, t: 0.003510520947201143 },
+        { h: 0.5, a: 0.09, t: 0.012602627267934824 },
+        { h: 0.5, a: 0.15, t: 0.02089267814596295 },
+        { h: 0.5, a: 0.36, t: 0.04828218926612005 },
+        { h: 0.5, a: 0.5, t: 0.06448860284750375 },
+        { h: 0.5, a: 0.9, t: 0.10007270175061386 },
+        { h: 0.5, a: 0.99999, t: 0.10667044320760354 },
+        { h: 2.0, a: 0.025, t: 0.000538145641532743 },
+        { h: 2.0, a: 0.09, t: 0.0019229592641905593 },
+        { h: 2.0, a: 0.15, t: 0.0031597998016760784 },
+        { h: 2.0, a: 0.36, t: 0.006865704986743918 },
+        { h: 2.0, a: 0.5, t: 0.00862507798552151 },
+        { h: 2.0, a: 0.9, t: 0.010928598829162459 },
+        { h: 2.0, a: 0.99999, t: 0.011116267146773112 },
+        { h: 0.02, a: 0.5, t: 0.07377589505496221 },
+        { h: 0.06, a: 0.5, t: 0.07364870894373357 },
+        { h: 0.09, a: 0.5, t: 0.07347022604865686 },
+        { h: 0.125, a: 0.5, t: 0.07317273327500384 },
+        { h: 0.26, a: 0.5, t: 0.07115073619192525 },
+        { h: 0.4, a: 0.5, t: 0.06769364453308699 },
+        { h: 0.6, a: 0.5, t: 0.06077755812641674 },
+        { h: 1.6, a: 0.5, t: 0.01863684908269017 },
+        { h: 1.7, a: 0.5, t: 0.015616899411410147 },
+        { h: 2.33, a: 0.5, t: 0.004025149112463264 },
+        { h: 2.4, a: 0.5, t: 0.0033746756355782564 },
+        { h: 3.36, a: 0.5, t: 0.00018077433066393216 },
+        { h: 3.4, a: 0.5, t: 0.0001567864305170142 },
+        { h: 4.8, a: 0.5, t: 3.915533232636861e-7 }
+      ].forEach(d => {
+        assert(equal(special.owenT(d.h, d.a), d.t, 14), `owenT(${d.h}, ${d.a})`)
+      })
+    })
+
+    it('should be continuous across sector boundaries', () => {
+      const eps = 1e-9
+      const aBoundaries = [
+        { h: 0.5, a: 0.025 },
+        { h: 0.5, a: 0.09 },
+        { h: 0.5, a: 0.15 },
+        { h: 0.5, a: 0.36 },
+        { h: 0.5, a: 0.5 },
+        { h: 0.5, a: 0.9 },
+        { h: 0.5, a: 0.99999 }
+      ]
+      aBoundaries.forEach(({ h, a }) => {
+        assert(equal(special.owenT(h, a), special.owenT(h, a * (1 + eps)), 8),
+          `owenT(${h}, ${a}) a-boundary continuity`)
+      })
+      const hBoundaries = [
+        { h: 0.02, a: 0.5 },
+        { h: 0.06, a: 0.5 },
+        { h: 0.09, a: 0.5 },
+        { h: 0.125, a: 0.5 },
+        { h: 0.26, a: 0.5 },
+        { h: 0.4, a: 0.5 },
+        { h: 0.6, a: 0.5 },
+        { h: 1.6, a: 0.5 },
+        { h: 1.7, a: 0.5 },
+        { h: 2.33, a: 0.5 },
+        { h: 2.4, a: 0.5 },
+        { h: 3.36, a: 0.5 },
+        { h: 3.4, a: 0.5 },
+        { h: 4.8, a: 0.5 }
+      ]
+      hBoundaries.forEach(({ h, a }) => {
+        assert(equal(special.owenT(h, a), special.owenT(h * (1 + eps), a), 7),
+          `owenT(${h}, ${a}) h-boundary continuity`)
+      })
+    })
   })
 
   describe('.erf()', () => {
@@ -893,6 +1169,31 @@ describe('special', () => {
     it('should maintain relative precision in the far tail', () => {
       // erfc(7/sqrt(2)) appears in Normal(0,2).cdf(14); CF branch must give full precision
       assert(equal(special.erfc(7 / Math.SQRT2), 2.559625087771669924e-12), 'erfc(7/sqrt(2))')
+    })
+  })
+
+  describe('.erfinv()', () => {
+    it('should return zero for zero argument', () => {
+      assert(special.erfinv(0) === 0)
+    })
+
+    it('should be the inverse of erf', () => {
+      [-0.9, -0.5, -0.1, 0.1, 0.5, 0.9].forEach(x => {
+        assert(equal(special.erf(special.erfinv(x)), x), `erfinv(${x})`)
+      })
+    })
+
+    it('should satisfy erfinv(-x) = -erfinv(x)', () => {
+      [0.1, 0.5, 0.9].forEach(x => {
+        assert(equal(special.erfinv(-x), -special.erfinv(x)), `erfinv(-${x})`)
+      })
+    })
+
+    it('should be accurate at small arguments where Newton iterates near zero', () => {
+      // Newton stopping criterion must handle x near 0; hybrid |dx| < EPS*max(|x|,1) is correct
+      [1e-5, 1e-8, 1e-10].forEach(x => {
+        assert(equal(special.erf(special.erfinv(x)), x), `erfinv(${x})`)
+      })
     })
   })
 })

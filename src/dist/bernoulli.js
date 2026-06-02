@@ -19,12 +19,18 @@ export default class Bernoulli extends Categorical {
    */
   constructor (p) {
     super([1 - p, p], 0)
+    this.p = { p }
 
     // Validate parameter
     Distribution.validate({ p }, [
       'p >= 0',
       'p <= 1'
     ])
+  }
+
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
   }
 
   static _fitInit (data) {
@@ -34,7 +40,6 @@ export default class Bernoulli extends Categorical {
   }
 
   _q (p) {
-    // this.p.weights[0] is the CDF at k=0; this.p.p is shadowed by the Categorical constructor.
-    return p > this.p.weights[0] ? 1 : 0
+    return p > this.pdfTable[0] ? 1 : 0
   }
 }

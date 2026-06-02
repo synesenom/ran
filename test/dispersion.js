@@ -5,16 +5,15 @@ import * as dispersion from '../src/dispersion'
 
 const SAMPLE_SIZE = 100
 
-// TODO Go through methods and check input conditions.
 describe('dispersion', () => {
   describe('.cv()', () => {
-    it('should return undefined if sample size is less than 2', () => {
-      assert(typeof dispersion.cv([]) === 'undefined')
-      assert(typeof dispersion.cv([1]) === 'undefined')
+    it('should return NaN if sample size is less than 2', () => {
+      assert(Number.isNaN(dispersion.cv([])))
+      assert(Number.isNaN(dispersion.cv([1])))
     })
 
-    it('should return undefined if mean is 0', () => {
-      assert(typeof dispersion.cv([-1, 0, 1]) === 'undefined')
+    it('should return NaN if mean is 0', () => {
+      assert(Number.isNaN(dispersion.cv([-1, 0, 1])))
     })
 
     it('should return the coefficient of variation', () => {
@@ -28,8 +27,8 @@ describe('dispersion', () => {
   })
 
   describe('.dVar()', () => {
-    it('should return undefined for empty array', () => {
-      assert(typeof dispersion.dVar([]) === 'undefined')
+    it('should return NaN for empty array', () => {
+      assert(Number.isNaN(dispersion.dVar([])))
     })
 
     it('should return the distance variance of an array', () => {
@@ -45,8 +44,8 @@ describe('dispersion', () => {
   })
 
   describe('.entropy()', () => {
-    it('should return undefined if sample is empty', () => {
-      assert(typeof dispersion.entropy([]) === 'undefined')
+    it('should return NaN for empty array', () => {
+      assert(Number.isNaN(dispersion.entropy([])))
     })
 
     it('should return the Shannon entropy of the probabilities using natural logarithm', () => {
@@ -106,13 +105,13 @@ describe('dispersion', () => {
   })
 
   describe('.gini()', () => {
-    it('should return undefined if sample size is less than 2', () => {
-      assert(typeof dispersion.gini([]) === 'undefined')
-      assert(typeof dispersion.gini([1]) === 'undefined')
+    it('should return NaN if sample size is less than 2', () => {
+      assert(Number.isNaN(dispersion.gini([])))
+      assert(Number.isNaN(dispersion.gini([1])))
     })
 
-    it('should return undefined if mean is zero', () => {
-      assert(typeof dispersion.gini([-1, 0, 1]) === 'undefined')
+    it('should return NaN if mean is zero', () => {
+      assert(Number.isNaN(dispersion.gini([-1, 0, 1])))
     })
 
     it('should return the relative mean absolute difference', () => {
@@ -134,8 +133,8 @@ describe('dispersion', () => {
   })
 
   describe('.iqr()', () => {
-    it('should return undefined for an empty sample', () => {
-      assert(typeof dispersion.iqr([]) === 'undefined')
+    it('should return NaN for an empty sample', () => {
+      assert(Number.isNaN(dispersion.iqr([])))
     })
 
     it('should return 0 for a sample of a single element', () => {
@@ -165,9 +164,9 @@ describe('dispersion', () => {
   })
 
   describe('.md()', () => {
-    it('should return undefined if sample size is less than 2', () => {
-      assert(typeof dispersion.md([]) === 'undefined')
-      assert(typeof dispersion.md([1]) === 'undefined')
+    it('should return NaN if sample size is less than 2', () => {
+      assert(Number.isNaN(dispersion.md([])))
+      assert(Number.isNaN(dispersion.md([1])))
     })
 
     it('should return the mean absolute difference', () => {
@@ -186,8 +185,8 @@ describe('dispersion', () => {
   })
 
   describe('.midhinge()', () => {
-    it('should return undefined for an empty sample', () => {
-      assert(typeof dispersion.midhinge([]) === 'undefined')
+    it('should return NaN for an empty sample', () => {
+      assert(Number.isNaN(dispersion.midhinge([])))
     })
 
     it('should return the midhinge for a finite sample', () => {
@@ -213,8 +212,8 @@ describe('dispersion', () => {
   })
 
   describe('.range()', () => {
-    it('should return undefined for an empty sample', () => {
-      assert(typeof dispersion.range([]) === 'undefined')
+    it('should return NaN for an empty sample', () => {
+      assert(Number.isNaN(dispersion.range([])))
     })
 
     it('should return the range for a finite sample', () => {
@@ -229,13 +228,13 @@ describe('dispersion', () => {
   })
 
   describe('.rmd()', () => {
-    it('should return undefined if sample size is less than 2', () => {
-      assert(typeof dispersion.rmd([]) === 'undefined')
-      assert(typeof dispersion.rmd([1]) === 'undefined')
+    it('should return NaN if sample size is less than 2', () => {
+      assert(Number.isNaN(dispersion.rmd([])))
+      assert(Number.isNaN(dispersion.rmd([1])))
     })
 
-    it('should return undefined if mean is zero', () => {
-      assert(typeof dispersion.rmd([-1, 0, 1]) === 'undefined')
+    it('should return NaN if mean is zero', () => {
+      assert(Number.isNaN(dispersion.rmd([-1, 0, 1])))
     })
 
     it('should return the relative mean absolute difference', () => {
@@ -257,8 +256,8 @@ describe('dispersion', () => {
   })
 
   describe('.qcd()', () => {
-    it('should return undefined for an empty sample', () => {
-      assert(typeof dispersion.qcd([]) === 'undefined')
+    it('should return NaN for an empty sample', () => {
+      assert(Number.isNaN(dispersion.qcd([])))
     })
 
     it('should return 0 for a sample of a single element', () => {
@@ -288,9 +287,9 @@ describe('dispersion', () => {
   })
 
   describe('.stdev()', () => {
-    it('should return undefined if sample size is less than 2', () => {
-      assert(typeof dispersion.stdev([]) === 'undefined')
-      assert(typeof dispersion.stdev([1]) === 'undefined')
+    it('should return NaN if sample size is less than 2', () => {
+      assert(Number.isNaN(dispersion.stdev([])))
+      assert(Number.isNaN(dispersion.stdev([1])))
     })
 
     it('should return the unbiased standard deviation', () => {
@@ -304,9 +303,9 @@ describe('dispersion', () => {
   })
 
   describe('.variance()', () => {
-    it('should return undefined if sample size is less than 2', () => {
-      assert(typeof dispersion.variance([]) === 'undefined')
-      assert(typeof dispersion.variance([1]) === 'undefined')
+    it('should return NaN if sample size is less than 2', () => {
+      assert(Number.isNaN(dispersion.variance([])))
+      assert(Number.isNaN(dispersion.variance([1])))
     })
 
     it('should return the unbiased variance', () => {
@@ -320,13 +319,13 @@ describe('dispersion', () => {
   })
 
   describe('.vmr()', () => {
-    it('should return undefined if sample size is less than 2', () => {
-      assert(typeof dispersion.vmr([]) === 'undefined')
-      assert(typeof dispersion.vmr([1]) === 'undefined')
+    it('should return NaN if sample size is less than 2', () => {
+      assert(Number.isNaN(dispersion.vmr([])))
+      assert(Number.isNaN(dispersion.vmr([1])))
     })
 
-    it('should return undefined if mean is 0', () => {
-      assert(typeof dispersion.vmr([-1, 0, 1]) === 'undefined')
+    it('should return NaN if mean is 0', () => {
+      assert(Number.isNaN(dispersion.vmr([-1, 0, 1])))
     })
 
     it('should return the coefficient of variation', () => {

@@ -21,6 +21,9 @@ export default class MaxwellBoltzmann extends Gamma {
     super(1.5, 0.5 / (a * a))
     this._q = undefined // Gamma._q is wrong for the sqrt transform; fall back to _qEstimateRoot
 
+    // MaxwellBoltzmann has 1 free parameter (a); override the 2 inherited from Gamma
+    this.k = 1
+
     // Validate parameters
     Distribution.validate({ a }, [
       'a > 0'
@@ -37,6 +40,11 @@ export default class MaxwellBoltzmann extends Gamma {
 
   _cdf (x) {
     return super._cdf(x * x)
+  }
+
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
   }
 
   static _fitInit (data) {

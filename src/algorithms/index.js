@@ -5,14 +5,12 @@
  * @memberof ran
  * @private
  */
-export { default as acceleratedSum } from './accelerated-sum'
+export { default as wynnEpsilon } from './wynn-epsilon'
 export { default as bracket } from './bracket'
-export { default as brent } from './brent'
+export { default as chandrupatla } from './chandrupatla'
 export { default as newton } from './newton'
 export { default as neumaier } from './neumaier'
 export { default as recursiveSum } from './recursive-sum'
-export { default as romberg } from './romberg'
-export { default as gaussLegendre } from './gauss-legendre'
-export { default as quickselect } from './quickselect'
-export { default as trap } from './trap'
-export { default as nelderMead } from './nelder-mead'
+export { default as introselect } from './introselect'
+export { default as tanhSinh } from './tanh-sinh'
+export { default as powell } from './powell'

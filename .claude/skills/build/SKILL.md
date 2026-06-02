@@ -135,13 +135,14 @@ The agent returns three buckets: `definite`, `ambiguous`, `not_a_bug`.
 
 **Step 4.5c — Act on the result.**
 
-- **`definite` (auto-file in batch)**: For each entry, invoke `ops-issue` with the drafted `title`/`body`/`priority`/`difficulty`/`extra_labels`. Collect the returned issue URLs.
+- **`definite` with `fix_inline: true`** (trivial): apply the fix on the fly using `fix_suggestion`, run `npm run standard && npm test`. Do **not** file an issue. Count as "fixed inline".
+- **`definite` with `fix_inline: false`** (non-trivial): invoke `ops-issue` once per entry with the drafted `title`/`body`/`priority`/`difficulty`/`extra_labels`. Collect the returned issue URLs.
 - **`ambiguous` (escalate in batch)**: Use a single `AskUserQuestion` with one question per entry, options "File issue" / "Skip", plus an "Other" fallback. For each "File issue" answer, invoke `ops-issue` using the `draft_title`. Skip the rest silently.
 - **`not_a_bug`**: silent.
 
 **Step 4.5d — Report.**
 
-> "Triage: <N> filed (<URLs>), <M> skipped, <K> not a bug."
+> "Triage: <N> fixed inline, <M> filed (<URLs>), <K> skipped, <L> not a bug."
 
 If all three buckets are empty: "Triage: clean."
 
@@ -177,9 +178,9 @@ Execute sequentially via the Skill tool **in a single uninterrupted sequence**:
 
 a. **Commit** — invoke `/commit`
 b. **Push** — invoke `/push`
-c. **Pull Request** — invoke `/pull-request`
+c. **Pull Request** — invoke `/pr`
 
-**Do NOT pause, confirm, or ask for permission before push or pull-request.** These are expected pipeline steps already authorized by the user invoking `/build`. Treat them identically to commit — run immediately.
+**Do NOT pause, confirm, or ask for permission before push or pr.** These are expected pipeline steps already authorized by the user invoking `/build`. Treat them identically to commit — run immediately.
 
 **Escalation**: Never.
 
@@ -194,7 +195,7 @@ c. **Pull Request** — invoke `/pull-request`
 > Implementation: <N> phases executed
 > Tests: All passing (lint + tests)
 > Validate: PASSED (<N> attempts) or SKIPPED
-> Triage: <N> filed / <M> skipped / clean
+> Triage: <N> fixed inline / <M> filed / <K> skipped / clean
 > Review: PASSED (<N> issues auto-fixed)
 > Compound: `<solution path>` (or SKIPPED)
 > Commit: `<hash>` <message>

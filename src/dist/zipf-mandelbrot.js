@@ -40,6 +40,7 @@ export default class ZipfMandelbrot extends Categorical {
     const Ni = Math.round(N)
     super(Array.from({ length: Ni }, (d, i) => Math.pow(i + 1 + q, -s)), 1)
     this.k = 3 // Categorical hardcodes k=2; see solutions/distribution/2026-05-27-1202-categorical-subclass-k-override.md
+    this.p = { N: Ni, s, q }
 
     // Validate parameters
     Distribution.validate({ N: Ni, s, q }, [

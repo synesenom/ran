@@ -39,7 +39,7 @@ export default function (x0, preUpdate, termFn, postUpdate) {
     sum += delta
 
     // Check if accuracy has been reached.
-    if (Math.abs(delta / sum) < EPS) {
+    if (Math.abs(delta) < EPS * Math.max(Math.abs(sum), 1)) {
       break
     } else {
       // Otherwise update state.

@@ -9,19 +9,22 @@ import distanceMatrix from '../utils/distance-matrix'
  * @memberof ran.dependence
  * @param {number[]} x First array of values.
  * @param {number[]} y Second array of values.
- * @returns {number|undefined} The distance covariance if none of the arrays are empty and they have the same length,
- * undefined otherwise.
+ * @throws {Error} If the arrays have different lengths.
+ * @returns {number} The distance covariance, or NaN for empty arrays.
  * @example
  *
- * ran.dependence.dCov([1, 2, 3], [])
- * // => undefined
+ * ran.dependence.dCov([], [])
+ * // => NaN
  *
  * ran.dependence.dCov([1, 2, 3], [2, 1, 2])
  * // => 0.31426968052735443
  */
 export default function (x, y) {
-  if (x.length * y.length === 0 || x.length !== y.length) {
-    return undefined
+  if (x.length !== y.length) {
+    throw Error('Arrays must have the same length')
+  }
+  if (x.length === 0) {
+    return NaN
   }
 
   const a = distanceMatrix(x)

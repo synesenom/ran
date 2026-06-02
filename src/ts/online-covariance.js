@@ -42,9 +42,9 @@ export default class {
    *
    * @method compute
    * @memberof ran.ts.OnlineCovariance
-   * @returns {(ran.la.Matrix | undefined)} The current covariance matrix if there was any update already, undefined otherwise.
+   * @returns {ran.la.Matrix} The current covariance matrix, or a NaN-filled matrix if no updates have been made yet.
    */
   compute () {
-    return this.n > 0 ? this.cov.scale(1 / this.n) : undefined
+    return this.n > 0 ? this.cov.scale(1 / this.n) : this.cov.scale(NaN)
   }
 }

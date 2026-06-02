@@ -44,35 +44,34 @@ LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
 
 **If a `version` argument was provided**, use it as `VERSION` directly.
 
-**Otherwise, infer the bump type** by checking whether any `major`-labelled
-issues were closed since the last tag:
+**Otherwise, default to a minor bump**: `X.Y.Z` → `X.(Y+1).0`.
+
+Under the numpy/scipy-style versioning policy, **breaking changes ship in
+minor releases** (behind a deprecation cycle), so the `breaking` label does
+**not** trigger a major bump. A major bump (`X.Y.Z` → `(X+1).0.0`) is reserved
+for a rare, sweeping overhaul and is only ever done by passing an explicit
+`version` argument — never inferred automatically from issue labels.
+
+Surface any `breaking`-labelled issues closed since the last tag so the
+operator is aware of behavior changes in this minor release (informational
+only — it does not change the bump type):
 
 ```bash
 if [ -n "$LAST_TAG" ]; then
   LAST_TAG_DATE=$(git log -1 --format=%cI "$LAST_TAG")
-  MAJOR_CLOSED=$(gh issue list \
+  BREAKING_CLOSED=$(gh issue list \
     --state closed \
-    --label major \
+    --label breaking \
     --json number,closedAt,title \
     --jq ".[] | select(.closedAt > \"$LAST_TAG_DATE\") | \"#\(.number) \(.title)\"")
-else
-  MAJOR_CLOSED=$(gh issue list \
-    --state closed \
-    --label major \
-    --json number,title \
-    --jq '.[] | "#\(.number) \(.title)"')
 fi
 ```
 
-- If `MAJOR_CLOSED` is non-empty → **bump major**: `X.Y.Z` → `(X+1).0.0`
-- Otherwise → **bump minor**: `X.Y.Z` → `X.(Y+1).0`
-
-Compute `NEXT_VERSION` (the non-major milestone to create after this release):
+Compute `NEXT_VERSION` (the milestone to create after this release):
 - Any release `X.Y.0` → next is `X.(Y+1).0`
-- Major release `(X+1).0.0` → next is `(X+1).1.0`
 
-Print `VERSION`, the bump type (major/minor), any triggering major issues, and
-`NEXT_VERSION` so the operator can confirm before continuing.
+Print `VERSION`, the bump type, any `breaking`-labelled issues in the release,
+and `NEXT_VERSION` so the operator can confirm before continuing.
 
 ---
 
@@ -122,7 +121,33 @@ the file.
 
 ---
 
-### 6. Commit and push
+### 6. Consolidate CHANGELOG
+
+Read the new `## [VERSION]` section (everything between its heading and the
+next `## [` heading) and rewrite it in-place:
+
+1. **Order subsections** to the canonical Keep-a-Changelog sequence:
+   `Added` → `Changed` → `Deprecated` → `Removed` → `Fixed` → `Security`.
+   Drop any subsection that has no bullets.
+
+2. **Merge grouped bullets.** If multiple bullets describe the same logical
+   change applied to several items (e.g. "_fitInit MOM overrides added for
+   distributions A, B, C" appearing as separate bullets), collapse them into a
+   single bullet that names all items. The goal is one bullet per logical
+   change, not one bullet per file or distribution.
+
+3. **Keep every distinct change.** Do not silently drop a bullet that does not
+   fit an obvious group — prefer a slightly longer list over a lossy summary.
+
+4. **Do not touch** any section below the new versioned heading (prior
+   releases stay exactly as they are).
+
+After editing, verify the file parses correctly (no duplicate headings, no
+orphaned bullets outside a subsection).
+
+---
+
+### 7. Commit and push
 
 ```bash
 git add package.json package-lock.json CHANGELOG.md
@@ -132,7 +157,7 @@ git push -u origin "release/v${VERSION}"
 
 ---
 
-### 7. Create PR
+### 8. Create PR
 
 ```bash
 PR_URL=$(gh pr create \
@@ -156,7 +181,7 @@ echo "PR: ${PR_URL}"
 
 ---
 
-### 8. Merge PR
+### 9. Merge PR
 
 ```bash
 gh pr merge --merge --auto
@@ -179,7 +204,7 @@ done
 
 ---
 
-### 9. Tag the release
+### 10. Tag the release
 
 ```bash
 git checkout main
@@ -193,7 +218,42 @@ This push triggers `.github/workflows/release.yml` (lint → typecheck → tests
 
 ---
 
-### 10. Milestone rotation
+### 11. Update GitHub release notes
+
+CI creates the GitHub release as part of `release.yml`. Poll until it appears,
+then replace its body with the consolidated `## [VERSION]` section from
+`CHANGELOG.md` so the release page shows the canonical `### Added`,
+`### Changed`, `### Fixed`, `### Removed` sections.
+
+```bash
+# Poll until CI creates the GitHub release (15-minute timeout, 15-second interval)
+RELEASE_READY=0
+for i in $(seq 1 60); do
+  if gh release view "v${VERSION}" > /dev/null 2>&1; then
+    RELEASE_READY=1
+    break
+  fi
+  echo "Waiting for GitHub release v${VERSION}... ($((i * 15))s elapsed)"
+  sleep 15
+done
+
+if [ "$RELEASE_READY" -eq 0 ]; then
+  echo "Warning: GitHub release v${VERSION} not found after 15 minutes."
+  echo "         Edit manually: https://github.com/${REPO}/releases/tag/v${VERSION}"
+else
+  # Extract the versioned section body (skip the heading line itself)
+  RELEASE_NOTES=$(awk "/^## \[${VERSION}\]/{found=1; next} found && /^## \[/{exit} found{print}" CHANGELOG.md)
+  gh release edit "v${VERSION}" --notes "$RELEASE_NOTES"
+  echo "GitHub release v${VERSION} notes updated."
+fi
+```
+
+This step is best-effort — a timeout warns and continues rather than aborting
+the release.
+
+---
+
+### 12. Milestone rotation
 
 ```bash
 REPO=$(gh repo view --json nameWithOwner -q '.nameWithOwner')
@@ -238,13 +298,13 @@ else
 fi
 ```
 
-Note: the `v2.0.0` major milestone (and any other future major milestone) is
-never touched by this skill — only the milestone whose title matches
-`v${VERSION}` is closed.
+Note: only the milestone whose title matches `v${VERSION}` is closed and
+rotated. Any future major-overhaul milestone, if one is ever created, is left
+untouched by this skill.
 
 ---
 
-### 11. Report
+### 13. Report
 
 End with a concise summary:
 
@@ -265,7 +325,7 @@ Milestone v{NEXT_VERSION}: created
   nothing is published to npm
 - **Milestone rotation is best-effort** — if the milestone is missing, warn
   and continue; do not abort the release
-- **Only touch the released milestone** — leave `v2.0.0` and any other future
-  major milestone untouched when releasing a minor version
+- **Only touch the released milestone** — leave any future major-overhaul
+  milestone untouched when releasing a minor version
 - **No interactive prompts mid-pipeline** — if anything is ambiguous, abort
   early with a clear message rather than pausing mid-release
