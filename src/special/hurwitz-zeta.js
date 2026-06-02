@@ -14,7 +14,15 @@ import logGamma from './log-gamma'
  * @private
  */
 export default function (s, a) {
-  const n = 20
+  // Pole at s = 1; return Infinity per ADR-0015 (divergent math → ±Infinity).
+  if (Math.abs(s - 1) < EPS) {
+    return Infinity
+  }
+
+  // Enough partial-sum terms that the Euler-Maclaurin tail is accurate: at s near 1 the
+  // series decays as k^{-(s-1)} which is slow, so n must grow as 1/(s-1). The floor of 20
+  // preserves accuracy for large s where ceil(1/(s-1)) < 20.
+  const n = Math.max(20, Math.min(100, Math.ceil(1 / Math.max(s - 1, EPS))))
 
   // First sum
   let z = 0
