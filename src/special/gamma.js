@@ -17,13 +17,24 @@ const SQRT_PI2 = Math.sqrt(2 * Math.PI)
    * @method gamma
    * @memberof ran.special
    * @param {number} z Value to evaluate Gamma function at.
-   * @returns {number} Gamma function value.
+   * @returns {number} Gamma function value; Infinity at the non-positive integer poles.
    * @private
    */
 function _gamma (z) {
+  // Simple poles at the non-positive integers: Γ diverges (ADR-0015 — divergence returns ±Infinity).
+  // Without this guard the reflection branch evaluates sin(πz) at a floating-point value that is
+  // ~1e-16 rather than exactly 0, yielding a huge finite number instead of Infinity.
+  if (z <= 0 && Number.isInteger(z)) {
+    return Infinity
+  }
+
   let y
   if (z < 0.5) {
-    y = Math.PI / (Math.sin(Math.PI * z) * _gamma(1 - z))
+    // Reduce sin(πz) modulo π and carry the (-1)^n sign separately: forming π·z directly rounds
+    // away the tiny fractional offset near a negative-integer pole, destroying precision there.
+    const n = Math.round(z)
+    const sign = n % 2 === 0 ? 1 : -1
+    y = Math.PI / (sign * Math.sin(Math.PI * (z - n)) * _gamma(1 - z))
   } else {
     z--
     let x = 0.99999999999980993
