@@ -56,8 +56,8 @@ export default class Reciprocal extends Distribution {
   }
 
   _generator () {
-    // Direct sampling
-    return this.p.a * Math.exp((this.c.logB - this.c.logA) * this.r.next())
+    // Inverse transform sampling: q(u) for u ~ U(0,1).
+    return this._q(this.r.next())
   }
 
   _pdf (x) {

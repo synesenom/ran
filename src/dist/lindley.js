@@ -55,8 +55,8 @@ export default class Lindley extends Distribution {
   }
 
   _generator () {
-    // Inverse transform sampling using Lambert W.
-    return -(lambertW1m(-this.r.next() * this.c.expFactor) + this.c.thetaP1) / this.p.theta
+    // Inverse transform sampling: q(u) for u ~ U(0,1).
+    return this._q(this.r.next())
   }
 
   _pdf (x) {

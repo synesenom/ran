@@ -42,8 +42,8 @@ export default class Moyal extends Distribution {
   }
 
   _generator () {
-    // Invert F(x) = erfc(exp((mu-x)/(2*sigma)) / sqrt(2)) = u exactly via erfinv
-    return this.p.mu - 2 * this.p.sigma * Math.log(Math.SQRT2 * erfinv(1 - this.r.next()))
+    // Inverse transform sampling: q(u) for u ~ U(0,1).
+    return this._q(this.r.next())
   }
 
   _pdf (x) {
