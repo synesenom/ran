@@ -232,6 +232,47 @@ describe('special', () => {
     })
   })
 
+  describe('.besselInu()', () => {
+    it('should return accurate small-x values (regression)', () => {
+      // These values must not change — they confirm the Taylor series is undisturbed at small x.
+      assert(equal(special.besselInu(0.5, 1), 0.9376748882454871))
+      assert(equal(special.besselInu(1.5, 1), 0.29352532634747946))
+      assert(equal(special.besselInu(2.3, 1), 0.08157483645893206))
+      assert(equal(special.besselInu(0.5, 10), 2778.7846038745683))
+      assert(equal(special.besselInu(1.5, 10), 2500.906154942116))
+      assert(equal(special.besselInu(2.3, 10), 2132.6900841622582))
+    })
+
+    it('should match the asymptotic leading term for nu=0.5 at x=50', () => {
+      // I_{0.5}(x) ~ e^x / sqrt(2*pi*x) exactly (all correction terms vanish for nu=0.5
+      // because mu = 4*0.25 = 1, so mu-1 = 0). Relative error < 1% verifies the
+      // normalization is not off by any power of e^x.
+      assert(Math.abs(special.besselInu(0.5, 50) * Math.sqrt(2 * Math.PI * 50) / Math.exp(50) - 1) < 0.01)
+    })
+
+    it('should return accurate large-argument values for nu=0.5 (exact formula)', () => {
+      // I_{0.5}(x) = sqrt(2/(pi*x)) * sinh(x); these are cross-validated against that formula.
+      assert(equal(special.besselInu(0.5, 50), 2.9251568529912876e+20))
+      assert(equal(special.besselInu(0.5, 100), 1.0724035825423096e+42))
+      assert(equal(special.besselInu(0.5, 200), 2.0384095654829366e+85))
+    })
+
+    it('should return accurate large-argument values for nu=1.5 (exact formula)', () => {
+      // I_{1.5}(x) = sqrt(2/(pi*x)) * (cosh(x) - sinh(x)/x); cross-validated against that formula.
+      assert(equal(special.besselInu(1.5, 50), 2.866653715931459e+20))
+      assert(equal(special.besselInu(1.5, 100), 1.0616795467168857e+42))
+      assert(equal(special.besselInu(1.5, 200), 2.0282175176555217e+85))
+    })
+
+    it('should return accurate large-argument values for nu=2.3 (asymptotic-validated)', () => {
+      // No closed form; values computed by the Taylor series and verified to 1e-15 relative
+      // error against the DLMF 10.40.1 asymptotic expansion with optimal truncation.
+      assert(equal(special.besselInu(2.3, 50), 2.779977151326617e+20))
+      assert(equal(special.besselInu(2.3, 100), 1.0455847305178129e+42))
+      assert(equal(special.besselInu(2.3, 200), 2.0128232824293037e+85))
+    })
+  })
+
   describe('.betaIncomplete()', () => {
     it('B(a, b, x) should be equal to 0 if b > 0 and x <= 0', () => {
       assert(special.betaIncomplete(Math.random(), Math.random() + 1, -Math.random()) === 0)
