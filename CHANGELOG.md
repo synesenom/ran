@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `hurwitzZeta` now uses a dynamic partial-sum length `n = max(20, min(100, ceil(1/(s−1))))` instead of the fixed `n = 20`, eliminating 3–6 significant digit precision loss when `s ∈ (1, 1.05)`. An early `Infinity` guard is also added for `|s−1| < ε` (#552).
 - `riemannZeta` now uses a two-term Laurent expansion (`1/(s−1) + γ − γ₁·(s−1)`) when `|s−1| < 0.01`, eliminating 4-digit precision loss caused by catastrophic cancellation in the denominator `1−2^(1−s)` near the pole (#551).
 
 ### Changed
