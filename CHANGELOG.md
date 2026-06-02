@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `gamma`, `logGamma`, and `digamma` now return `Infinity` at their non-positive integer poles (previously a huge finite number, because the floating-point `sin(πz)` / `tan(πz)` evaluated to ~1e-16 instead of exactly 0) and stay full-precision within 1e-6 of a pole by reducing the trigonometric argument modulo its period before evaluation, so the tiny fractional offset the pole term depends on is no longer rounded away. `logGamma(z)` for `z ≤ 0` is now defined as `ln|Γ(z)|` via the log-reflection formula instead of returning a meaningless value (#555).
 - `riemannZeta` now uses a two-term Laurent expansion (`1/(s−1) + γ − γ₁·(s−1)`) when `|s−1| < 0.01`, eliminating 4-digit precision loss caused by catastrophic cancellation in the denominator `1−2^(1−s)` near the pole (#551).
 
 ### Changed

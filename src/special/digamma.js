@@ -32,13 +32,20 @@ function _psiSeries (z) {
  * @method digamma
  * @memberof ran.special
  * @param {number} z Value to evaluate digamma at.
- * @returns {number} The digamma function at the specified value.
+ * @returns {number} The digamma function value; Infinity at the non-positive integer poles.
  * @private
  */
 function digamma (z) {
-  // Reflection for z < 0
+  // Simple poles at the non-positive integers (ADR-0015 — divergence returns ±Infinity).
+  if (z <= 0 && Number.isInteger(z)) {
+    return Infinity
+  }
+
+  // Reflection for z < 0. tan is π-periodic, so tan(πz) == tan(π·(z − round(z))); reducing the
+  // argument first keeps full precision in cot(πz) near a negative-integer pole, where forming
+  // π·z directly would round away the fractional offset that the pole term 1/(z−n) depends on.
   if (z < 0) {
-    return digamma(1 - z) - Math.PI / Math.tan(Math.PI * z)
+    return digamma(1 - z) - Math.PI / Math.tan(Math.PI * (z - Math.round(z)))
   }
 
   // Shift z
