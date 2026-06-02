@@ -3,7 +3,7 @@ import Distribution from './_distribution'
 import noncentralChi2 from './_noncentral-chi2'
 import normal from './_normal'
 import { f11, gamma, logGamma } from '../special'
-import { acceleratedSum, recursiveSum } from '../algorithms'
+import { wynnEpsilon, recursiveSum } from '../algorithms'
 import NoncentralT from './noncentral-t'
 
 /**
@@ -294,7 +294,7 @@ export default class DoublyNoncentralT extends Distribution {
       ]
 
       let gp = gp0
-      z += acceleratedSum(i => {
+      z += wynnEpsilon(i => {
         const j = j0 + i
         const j2 = i % 2
         const kj = (this.p.nu + j + 1) / 2
@@ -307,7 +307,8 @@ export default class DoublyNoncentralT extends Distribution {
         f2[j2] = f1[j2]
         f1[j2] = f
 
-        return g * f
+        // Series alternates because x*mu < 0 makes (x*mu)^j flip sign each step.
+        return (i % 2 === 0 ? 1 : -1) * g * f
       })
 
       // Backward
@@ -323,7 +324,7 @@ export default class DoublyNoncentralT extends Distribution {
           f11(kj0 + 1, nu2, thetatk),
           f11(kj0 + 0.5, nu2, thetatk)
         ]
-        z -= acceleratedSum(i => {
+        z -= wynnEpsilon(i => {
           const j = j0 - i
           const j2 = i % 2
           const kj = (this.p.nu + j) / 2
@@ -341,7 +342,8 @@ export default class DoublyNoncentralT extends Distribution {
             dz = g * f
           }
 
-          return dz
+          // Backward terms also alternate: (-1)^{j0-i} = (-1)^{j0} * (-1)^i; Math.abs(z) absorbs (-1)^{j0}.
+          return (i % 2 === 0 ? 1 : -1) * dz
         })
       }
     }

@@ -302,4 +302,38 @@ describe('algorithms', () => {
       assert(Math.abs(result - 2 * s) / (2 * s) < 1e-6)
     })
   })
+
+  describe('.wynnEpsilon()', () => {
+    it('should sum the alternating harmonic series to ln(2)', () => {
+      // Σ_{k=0}^∞ (-1)^k / (k+1) = ln(2)
+      const result = algorithms.wynnEpsilon(k => Math.pow(-1, k) / (k + 1))
+      assert(Math.abs(result - Math.log(2)) < PRECISION)
+    })
+
+    it('should sum the Leibniz series to pi/4', () => {
+      // Σ_{k=0}^∞ (-1)^k / (2k+1) = π/4
+      const result = algorithms.wynnEpsilon(k => Math.pow(-1, k) / (2 * k + 1))
+      assert(Math.abs(result - Math.PI / 4) < PRECISION)
+    })
+
+    it('should sum a monotone geometric series', () => {
+      // Σ_{k=0}^∞ (0.5)^k = 2
+      const result = algorithms.wynnEpsilon(k => Math.pow(0.5, k))
+      assert(Math.abs(result - 2) < PRECISION)
+    })
+
+    it('should recover zeta(2) via the Dirichlet eta series', () => {
+      // η(2) = Σ (-1)^k (k+1)^{-2}; ζ(2) = η(2) / (1 - 2^{1-2}) = π²/6
+      const eta2 = algorithms.wynnEpsilon(k => Math.pow(-1, k) * Math.pow(k + 1, -2))
+      const zeta2 = eta2 / (1 - Math.pow(2, 1 - 2))
+      assert(Math.abs(zeta2 - Math.PI * Math.PI / 6) < 1e-8)
+    })
+
+    it('should return a finite number close to 1 when consecutive partial sums are briefly equal', () => {
+      // a(0)=1 followed by 1e-20 terms: in float64, 1+1e-20 = 1 exactly, so the second partial sum
+      // equals the first, diff=0 triggers the DELTA guard, and the fallback returns S ≈ 1.
+      const result = algorithms.wynnEpsilon(k => (k === 0 ? 1 : 1e-20))
+      assert(Math.abs(result - 1) < 1e-9)
+    })
+  })
 })
