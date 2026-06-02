@@ -1,4 +1,4 @@
-import { erfc } from '../special'
+import { erfc, erfinv } from '../special'
 import normal from './_normal'
 import Distribution from './_distribution'
 
@@ -50,6 +50,12 @@ export default class Levy extends Distribution {
 
   _cdf (x) {
     return x === this.p.mu ? 0 : erfc(Math.sqrt(0.5 * this.p.c / (x - this.p.mu)))
+  }
+
+  _q (p) {
+    // solutions/distribution/2026-06-02-1729-levy-quantile-erfc-exact-inverse.md
+    const z = erfinv(1 - p)
+    return this.p.mu + 0.5 * this.p.c / (z * z)
   }
 
   static _fitInit (data) {
