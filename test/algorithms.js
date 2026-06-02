@@ -154,6 +154,10 @@ describe('algorithms', () => {
     it('should return NaN for indeterminate -Infinity + Infinity', () => {
       assert(Number.isNaN(algorithms.neumaier([-Infinity, Infinity])))
     })
+
+    it('should return Infinity for mixed finite/infinite inputs', () => {
+      assert.equal(algorithms.neumaier([1, Infinity, -1]), Infinity)
+    })
   })
 
   describe('.introselect()', () => {
