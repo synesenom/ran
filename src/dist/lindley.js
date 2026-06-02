@@ -68,4 +68,10 @@ export default class Lindley extends Distribution {
     // -expm1(-tx) avoids catastrophic cancellation when theta*x is near 0
     return -Math.expm1(-tx) - Math.exp(-tx) * tx / this.c.thetaP1
   }
+
+  _q (p) {
+    // F(x)=p inverts in closed form via Lambert W. x >= 0 forces the argument below -1, so
+    // the W_{-1} branch is the correct root. The (1 - p) tail mirrors _generator.
+    return -(lambertW1m(-(1 - p) * this.c.expFactor) + this.c.thetaP1) / this.p.theta
+  }
 }

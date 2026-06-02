@@ -56,6 +56,11 @@ export default class Moyal extends Distribution {
     return gammaUpperIncomplete(0.5, 0.5 * Math.exp((this.p.mu - x) / this.p.sigma))
   }
 
+  _q (p) {
+    // Same closed-form inversion as _generator: erfc(.) = p => erfcinv(p) = erfinv(1 - p)
+    return this.p.mu - 2 * this.p.sigma * Math.log(Math.SQRT2 * erfinv(1 - p))
+  }
+
   static _fitInit (data) {
     // Var[X] = pi^2 sigma^2 / 2 and mean = mu + sigma*(ln2 + gamma_EM) link sample moments to parameters
     const n = data.length

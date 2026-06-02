@@ -67,4 +67,9 @@ export default class Reciprocal extends Distribution {
   _cdf (x) {
     return (Math.log(x) - this.c.logA) / (this.c.logB - this.c.logA)
   }
+
+  _q (p) {
+    // Log-uniform CDF is linear in log x, so it inverts directly: x = a (b/a)^p
+    return this.p.a * Math.exp((this.c.logB - this.c.logA) * p)
+  }
 }
