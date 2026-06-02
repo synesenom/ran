@@ -201,6 +201,8 @@ export function besselISpherical (n, x) {
  * @returns {number} The modified Bessel function of the first kind.
  * @private
  */
+// Taylor series converges for x ≤ ~710 with MAX_SERIES_ITER=500; see
+// solutions/testing/2026-06-02-1200-besselInu-infrastructure-fix-coverage-gap.md
 export function besselInu (nu, x) {
   return Math.pow(x / 2, nu) * recursiveSum({
     c: 1 / gamma(nu + 1)
