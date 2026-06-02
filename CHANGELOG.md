@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `bracket()` now returns the caller-supplied initial `[a0, b0]` when no root is found and either boundary is `0` (#604).
 - `bracket`, `brent`, and `newton` in `src/algorithms/` now return `NaN` (instead of `undefined`) on failure paths; `quickselect` now throws for an out-of-range index. `Distribution._qEstimateRoot` propagates `NaN` on bracket failure (#589).
 - `Davis._cdf(x)` now uses a dual Bose-Einstein series (upper incomplete gamma series for x near μ, Bernoulli/Laurent series for large x) instead of Romberg integration; per-call cost drops from ~100ms to ~10µs, enabling full goodness-of-fit coverage with the standard sample size (#451).
 - `Bates.fit()` now uses a profile likelihood grid search over integer `n` instead of the inherited 3-parameter Nelder-Mead, which stalled on the staircase likelihood surface caused by integer rounding; `n` is now reliably recovered (#481).
