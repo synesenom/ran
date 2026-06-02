@@ -1,5 +1,6 @@
 import riemannZeta from './riemann-zeta'
 import hurwitzZeta from './hurwitz-zeta'
+import neumaier from '../algorithms/neumaier'
 
 /**
  * Computes the generalized harmonic number H(n, m).
@@ -12,13 +13,13 @@ import hurwitzZeta from './hurwitz-zeta'
  * @private
  */
 export default function (n, m) {
-  if (n < 20) {
-    // If n is small, just calculate it exactly.
-    let z = 0
+  if (n < 10) {
+    // Compensated sum avoids rounding errors for large m where terms drop off rapidly.
+    const terms = []
     for (let k = 1; k <= n; k++) {
-      z += 1 / k ** m
+      terms.push(1 / k ** m)
     }
-    return z
+    return neumaier(terms)
   }
 
   // Otherwise use the zeta functions.
