@@ -24,6 +24,23 @@ describe('special', () => {
       assert(equal(special.digamma(-0.5), 2 - EM - 2 * Math.log(2)))
       // ψ(-1.5) = ψ(2.5) = ψ(1.5) + 2/3
       assert(equal(special.digamma(-1.5), 2 - EM - 2 * Math.log(2) + 2 / 3))
+      // mpmath mp.dps=50: mp.digamma(-2.5)
+      assert(equal(special.digamma(-2.5), 1.103156640645243, 14))
+    })
+
+    it('should return Infinity at the non-positive integer poles', () => {
+      // ADR-0015: divergence returns Infinity specifically (not NaN, not a huge finite).
+      assert.strictEqual(special.digamma(0), Infinity)
+      assert.strictEqual(special.digamma(-1), Infinity)
+      assert.strictEqual(special.digamma(-2), Infinity)
+    })
+
+    it('should stay full-precision within 1e-6 of a negative integer pole', () => {
+      // mpmath mp.dps=60 evaluated at the exact double of (-1+1e-7) / (-2+1e-7): the input
+      // itself only pins the offset to ~1e-9, but the dominant pole term -1/(z+n) is otherwise
+      // carried at machine precision (no argument-reduction loss in cot(πz)).
+      assert(equal(special.digamma(-1 + 1e-7), -9999999.582479, 13))
+      assert(equal(special.digamma(-2 + 1e-7), -9999999.071376376, 13))
     })
 
     it('should satisfy the recurrence ψ(z+1) = ψ(z) + 1/z', () => {
@@ -354,6 +371,54 @@ describe('special', () => {
         const lng = special.logGamma(x)
         assert(Math.abs(Math.log(g) - lng) / lng < 0.01)
       }
+    })
+
+    describe('.gamma()', () => {
+      it('should return reference values (mpmath mp.dps=50)', () => {
+        // Positive baseline plus the reflection branch at negative half-integers.
+        assert(equal(special.gamma(0.5), 1.772453850905516, 14))
+        assert(equal(special.gamma(-0.5), -3.544907701811032, 14))
+        assert(equal(special.gamma(-1.5), 2.363271801207355, 14))
+        assert(equal(special.gamma(-2.5), -0.9453087204829419, 14))
+      })
+
+      it('should return Infinity at the non-positive integer poles', () => {
+        // ADR-0015: divergence returns Infinity specifically (not NaN, not a huge finite).
+        assert.strictEqual(special.gamma(0), Infinity)
+        assert.strictEqual(special.gamma(-1), Infinity)
+        assert.strictEqual(special.gamma(-2), Infinity)
+      })
+
+      it('should stay full-precision within 1e-6 of a negative integer pole', () => {
+        // mpmath mp.dps=60 evaluated at the exact double of (-1+1e-7) / (-2+1e-7); the
+        // (-1)^n-signed reduced sin(πz) must not lose the fractional offset.
+        assert(equal(special.gamma(-1 + 1e-7), -10000000.428048076, 13))
+        assert(equal(special.gamma(-2 + 1e-7), 5000000.458472761, 13))
+      })
+    })
+
+    describe('.logGamma()', () => {
+      it('should return reference values ln|Γ(z)| (mpmath mp.dps=50)', () => {
+        // Positive baseline plus the log-reflection branch at negative half-integers. The
+        // positive Lanczos path is itself accurate to ~1e-13, so the tolerance is 1e-13.
+        assert(equal(special.logGamma(0.5), 0.5723649429247001, 13))
+        assert(equal(special.logGamma(-0.5), 1.2655121234846454, 13))
+        assert(equal(special.logGamma(-1.5), 0.860047015376481, 13))
+        assert(equal(special.logGamma(-2.5), -0.056243716497674054, 13))
+      })
+
+      it('should return Infinity at the non-positive integer poles', () => {
+        // ADR-0015: divergence returns Infinity specifically (not NaN, not a huge finite).
+        assert.strictEqual(special.logGamma(0), Infinity)
+        assert.strictEqual(special.logGamma(-1), Infinity)
+        assert.strictEqual(special.logGamma(-2), Infinity)
+      })
+
+      it('should stay full-precision within 1e-6 of a negative integer pole', () => {
+        // mpmath mp.dps=60 at the exact double of (-1+1e-7) / (-2+1e-7); |sin(πz)| reduced mod π keeps the offset.
+        assert(equal(special.logGamma(-1 + 1e-7), 16.118095693763127, 13))
+        assert(equal(special.logGamma(-2 + 1e-7), 15.424948562092922, 13))
+      })
     })
   })
 
