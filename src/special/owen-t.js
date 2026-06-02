@@ -1,5 +1,6 @@
 /* eslint no-loss-of-precision: 0 */
 import { erf, erfc } from './error'
+import { EPS } from '../core/constants'
 
 // Constants
 const PI2_SQRT_INV = 1 / Math.sqrt(2 * Math.PI)
@@ -130,7 +131,9 @@ function _t1 (h, a, m) {
   let z = HALF_PI_INV * Math.atan(a)
 
   for (let i = 2, j = 1; i <= m; i++, j += 2) {
-    z += dj * aj / j
+    const term = dj * aj / j
+    z += term
+    if (Math.abs(term) < Math.abs(z) * EPS) break
     aj *= aa
     dj = gj - dj
     gj *= hh / i
@@ -150,6 +153,7 @@ function _t2 (h, a, ah, m) {
   const iMax = m + m + 1
   for (let i = 1; i < iMax; i += 2) {
     z += ph
+    if (Math.abs(ph) < Math.abs(z) * EPS) break
     ph = y * (vi - i * ph)
     vi *= aa
   }
@@ -166,7 +170,9 @@ function _t3 (h, a, ah, m) {
   let z = 0
 
   for (let i = 1, ii = 1; i <= m; i++, ii += 2) {
-    z += ph * C2[i - 1]
+    const term = ph * C2[i - 1]
+    z += term
+    if (Math.abs(term) < Math.abs(z) * EPS) break
     ph = y * (ii * ph - vi)
     vi *= aa
   }
@@ -183,7 +189,9 @@ function _t4 (h, a, m) {
 
   const iMax = m + m + 1
   for (let i = 3; i <= iMax; i += 2) {
-    z += ai * yi
+    const term = ai * yi
+    z += term
+    if (Math.abs(term) < Math.abs(z) * EPS) break
     yi = (1 - hh * yi) / i
     ai *= aa
   }
@@ -198,7 +206,9 @@ function _t5 (h, a, m) {
 
   for (let i = 0; i < m; i++) {
     const r = 1 + aa * PTS[i]
-    z += WTS[i] * Math.exp(hh * r) / r
+    const term = WTS[i] * Math.exp(hh * r) / r
+    z += term
+    if (Math.abs(term) < Math.abs(z) * EPS) break
   }
   return a * z
 }

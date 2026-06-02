@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Owen T iterative methods (T1–T5 in `src/special/owen-t.js`) now use convergence-checked loops (`|term| < |sum| · ε`) instead of fixed iteration counts. The `ORDERS` table remains as a safety cap (maximum iterations), but series terminate early once machine precision is reached, improving accuracy near sector boundaries from ~10 to ~15 significant digits (#554).
 - `generalizedHarmonic` direct-sum path now uses Neumaier compensated summation instead of raw accumulation, and the zeta-function switch threshold is lowered from n ≥ 20 to n ≥ 10. For large m the terms drop off rapidly, causing raw accumulation to lose ~2 decimal digits; compensated summation eliminates this rounding error (#553).
 - `RaisedCosine` and `Moyal` `_generator()` now use exact inverse-CDF samplers instead of rejection sampling: `RaisedCosine` uses Chandrupatla's bracketed root-finder on the standardised support [−1, 1]; `Moyal` uses `erfinv` to invert the `erfc`-based CDF analytically. Eliminates the silent-failure risk of the 100-iteration rejection cap (#548).
 - `lambertW1m` Halley stopping criterion changed from pure-relative (`|Δw/w| < ε`) to hybrid absolute/relative (`|Δw| < ε·max(|w|,1)`) to avoid false convergence near w = 0; W₋₁ initial guess replaced with a region-adaptive approximation — Corless et al. (1996) branch-point series for z ∈ [−1/e, −0.1], logarithmic Laurent for z ∈ (−0.1, 0) — improving convergence from ~10 iterations to 2–3 (#550).
