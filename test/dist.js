@@ -440,6 +440,11 @@ describe('dist', () => {
         assert(result instanceof dist.Alpha)
       })
 
+      it('Distribution._fitPenalty base class should return 0 for any params', () => {
+        assert.strictEqual(Distribution._fitPenalty({ p: { alpha: 1, beta: 1 } }), 0)
+        assert.strictEqual(Distribution._fitPenalty({ p: {} }), 0)
+      })
+
       it('Distribution._fitInit fallback random-retry path covers try-success and catch', () => {
         // All exported distributions now have _fitInit overrides, so call the base-class
         // method directly via a fake 2-param class with an ordering constraint (a < b).
@@ -1024,6 +1029,25 @@ describe('dist', () => {
         assert(Math.abs(result.p.beta - 3) < 1.0)
       })
 
+      it('Beta.fit should not converge to near-singular alpha or beta', () => {
+        // Beta(0.5, 0.5) is U-shaped and most susceptible to near-singularity: the optimizer
+        // can find near-zero shapes that fit data concentrated near the boundaries.
+        // Without the _fitPenalty log-barrier the optimizer can return alpha < 0.05.
+        const data = new dist.Beta(0.5, 0.5).seed(42).sample(200)
+        const result = dist.Beta.fit(data)
+        assert(result instanceof dist.Beta)
+        assert(result.p.alpha > 0.3 && result.p.alpha < 1.5, `alpha ${result.p.alpha} out of expected range`)
+        assert(result.p.beta > 0.3 && result.p.beta < 1.5, `beta ${result.p.beta} out of expected range`)
+      })
+
+      it('BetaPrime.fit should not converge to near-singular alpha or beta', () => {
+        const data = new dist.BetaPrime(1.5, 2.0).seed(42).sample(200)
+        const result = dist.BetaPrime.fit(data)
+        assert(result instanceof dist.BetaPrime)
+        assert(result.p.alpha > 0.5 && result.p.alpha < 8, `alpha ${result.p.alpha} out of expected range`)
+        assert(result.p.beta > 0.5 && result.p.beta < 8, `beta ${result.p.beta} out of expected range`)
+      })
+
       it('Kumaraswamy.fit should recover a and b close to planted values', () => {
         const data = new dist.Kumaraswamy(2, 3).seed(42).sample(200)
         const result = dist.Kumaraswamy.fit(data)
@@ -1120,12 +1144,24 @@ describe('dist', () => {
         const data = new dist.BetaRectangular(2, 3, 0.7, 0, 4).seed(42).sample(300)
         const result = dist.BetaRectangular.fit(data)
         assert(result instanceof dist.BetaRectangular)
-        // Shape params can be hard to disentangle with 5 params; check they're in a reasonable range
-        assert(result.p.alpha > 0.5 && result.p.alpha < 10)
-        assert(result.p.beta > 0.5 && result.p.beta < 10)
+        // alpha/beta > 0.5 ensures the optimizer did not converge to the near-singularity at 0.
+        // Without the _fitPenalty log-barrier the optimizer can return alpha/beta < 0.01.
+        assert(result.p.alpha > 0.5 && result.p.alpha < 10, `alpha ${result.p.alpha} out of range`)
+        assert(result.p.beta > 0.5 && result.p.beta < 10, `beta ${result.p.beta} out of range`)
         assert(result.p.theta > 0.1 && result.p.theta <= 1)
         assert(Math.abs(result.p.a - 0) < 0.3)
         assert(Math.abs(result.p.b - 4) < 0.3)
+      })
+
+      it('BetaRectangular.fit should not converge to near-singular alpha or beta', () => {
+        // Data from a near-uniform BetaRectangular is most likely to trigger the singularity:
+        // the optimizer can set alpha/beta ≈ 0 and theta ≈ 1 to concentrate mass at boundaries,
+        // exploiting the large-but-finite likelihood just above alpha = 0.
+        const data = new dist.BetaRectangular(0.8, 0.8, 0.6, 0, 10).seed(7).sample(300)
+        const result = dist.BetaRectangular.fit(data)
+        assert(result instanceof dist.BetaRectangular)
+        assert(result.p.alpha > 0.3, `alpha ${result.p.alpha} is near-singular`)
+        assert(result.p.beta > 0.3, `beta ${result.p.beta} is near-singular`)
       })
 
       it('UniformProduct.fit should recover n close to planted value', () => {
