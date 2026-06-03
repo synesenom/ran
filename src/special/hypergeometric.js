@@ -1,5 +1,5 @@
 import recursiveSum from '../algorithms/recursive-sum'
-import { MAX_SERIES_ITER } from '../core/constants'
+import { EPS, MAX_SERIES_ITER } from '../core/constants'
 import logGamma from './log-gamma'
 // TODO Implementation: https://people.maths.ox.ac.uk/porterm/papers/hypergeometric-final.pdf
 
@@ -33,7 +33,7 @@ function _f11AsymptoticSeries (a, b, z) {
       if (Math.abs(next) >= Math.abs(term)) break
       term = next
       sum += term
-      if (Math.abs(term) < Number.EPSILON * Math.max(Math.abs(sum), 1)) break
+      if (Math.abs(term) < EPS * Math.max(Math.abs(sum), 1)) break
     }
     return prefactor * sum
   }
