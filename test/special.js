@@ -1290,5 +1290,12 @@ describe('special', () => {
         assert(equal(special.erf(special.erfinv(x)), x), `erfinv(${x})`)
       })
     })
+
+    it('should be accurate at subnormal-range arguments (x^2 underflows to 0)', () => {
+      // For x ~ 1e-300, x^2 underflows to 0 so the polynomial initial guess collapses to x itself.
+      // Newton converges in one step because erf is linear at this scale; the hybrid stopping
+      // criterion must not exit prematurely before that step is taken.
+      assert(equal(special.erf(special.erfinv(1e-300)), 1e-300), 'erfinv(1e-300)')
+    })
   })
 })
