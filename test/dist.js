@@ -1123,6 +1123,10 @@ describe('dist', () => {
         assert(Math.abs(result.p.d - 5) < 0.3)
       })
 
+      it('PERT._fitPenalty should return 0', () => {
+        assert.strictEqual(dist.PERT._fitPenalty(), 0)
+      })
+
       it('PERT.fit should recover a, b, and c close to planted values', () => {
         const data = new dist.PERT(0, 3, 6).seed(42).sample(200)
         const result = dist.PERT.fit(data)
@@ -1301,11 +1305,19 @@ describe('dist', () => {
         assert(Math.abs(result.p.xi - 0) < 0.3)
       })
 
+      it('R._fitPenalty should return 0', () => {
+        assert.strictEqual(dist.R._fitPenalty(), 0)
+      })
+
       it('R.fit should recover c close to planted value', () => {
         const data = new dist.R(3).seed(42).sample(200)
         const result = dist.R.fit(data)
         assert(result instanceof dist.R)
         assert(Math.abs(result.p.c - 3) < 0.5)
+      })
+
+      it('BaldingNichols._fitPenalty should return 0', () => {
+        assert.strictEqual(dist.BaldingNichols._fitPenalty(), 0)
       })
 
       it('BaldingNichols.fit should recover F and p close to planted values', () => {
@@ -1322,12 +1334,20 @@ describe('dist', () => {
         assert(d.p.p === 0.3)
       })
 
+      it('F._fitPenalty should return 0', () => {
+        assert.strictEqual(dist.F._fitPenalty(), 0)
+      })
+
       it('F.fit should return a usable F instance with positive degrees of freedom', () => {
         const data = new dist.F(10, 20).seed(42).sample(200)
         const result = dist.F.fit(data)
         assert(result instanceof dist.F)
         assert(result.p.d1 > 0 && result.p.d2 > 0)
         assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      })
+
+      it('FisherZ._fitPenalty should return 0', () => {
+        assert.strictEqual(dist.FisherZ._fitPenalty(), 0)
       })
 
       it('FisherZ.fit should return a usable FisherZ instance with positive degrees of freedom', () => {

@@ -36,6 +36,9 @@ export default class R extends Beta {
     }]
   }
 
+  // Blocks Beta's log-barrier: fit() operates in native c space, not (alpha, beta). See decisions/0017-beta-fit-penalty.md §3.
+  static _fitPenalty () { return 0 }
+
   static _fitInit (data) {
     // Var[X] = 1/(c+1) on [-1, 1] ⇒ c = 1/Var − 1; overrides Beta's [alpha, beta] init
     const n = data.length

@@ -51,6 +51,9 @@ export default class PERT extends Beta {
     return super._cdf((x - this.p.a) / (this.p.c - this.p.a))
   }
 
+  // Blocks Beta's log-barrier: fit() operates in (a, b, c) space, not (alpha, beta). See decisions/0017-beta-fit-penalty.md §3.
+  static _fitPenalty () { return 0 }
+
   static _fitInit (data) {
     // Endpoints from sample extremes; mode via PERT mean formula: E[X] = (a+4b+c)/6 → b = (6μ̂ - a - c)/4
     const n = data.length

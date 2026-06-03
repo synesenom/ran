@@ -62,7 +62,7 @@ static _fitPenalty (dist) {
 No guard for `alpha > 0 && beta > 0` is needed: if a params vector would produce invalid
 alpha/beta the constructor throws and `fit()`'s `catch` block returns `Infinity` already.
 
-The coefficient `c = 0.5` corresponds to a Jeffreys-like improper prior `π(α,β) ∝ (αβ)^{-1/2}`.
+The coefficient `c = 0.5` corresponds to a MAP estimate under the improper prior `π(α,β) ∝ (αβ)^{+1/2}`: adding `−0.5·(log α + log β)` to the minimization objective is equivalent to maximizing `lnL + 0.5·log(αβ)`. Despite the "Jeffreys-like" label, the true Jeffreys prior for Beta involves trigamma functions; `(αβ)^{+1/2}` is chosen pragmatically — any log-barrier that diverges as `α → 0⁺` or `β → 0⁺` suffices to repel the optimizer.
 It creates a log-barrier at `α → 0⁺` and `β → 0⁺`:
 
 | `alpha` | penalty added to objective |
@@ -84,12 +84,26 @@ const v = -inst.lnL(data) + Cls._fitPenalty(inst)
 return Number.isFinite(v) ? v : Infinity
 ```
 
-### 3. Inheritance carries the penalty to all Beta subclasses
+### 3. Inheritance and selective overrides
 
-All Beta subclasses (`BetaRectangular`, `BetaPrime`, `F`, `R`, `PERT`, `BaldingNichols`) call
-`super(alpha, beta)` in their constructors, which causes `Beta` to store `this.p.alpha` and
-`this.p.beta`. The penalty reads those stored values, so it is correct regardless of each
-subclass's constructor parameter ordering. No subclass needs to override `_fitPenalty`.
+All Beta subclasses call `super(alpha, beta)` in their constructors, which causes `Beta` to store
+`this.p.alpha` and `this.p.beta`. The penalty reads those stored values, so it is mathematically
+correct regardless of each subclass's constructor parameter ordering.
+
+However, five re-parametrizing Beta subclasses override `_fitPenalty` to return `0` (#660):
+
+- `F`, `FisherZ` — degrees-of-freedom space; alpha/beta are always `d/2` with `d ≥ 1`
+- `R` — single shape parameter `c`; `alpha = beta = c/2`
+- `PERT` — geometric endpoints `(a, b, c)` space
+- `BaldingNichols` — fixation-index/allele-frequency `(F, p)` space
+
+Their `fit()` optimizers operate in native parameter spaces that do not map one-to-one to
+`(alpha, beta)`, so the inherited log-barrier introduces an unintended MAP bias: the optimizer is
+steered toward larger underlying `alpha`/`beta` even when the native parameter space has no
+singularity concern.
+
+Subclasses that fit directly in `(alpha, beta)` space — `BetaRectangular` and `BetaPrime` — do
+NOT override `_fitPenalty` and inherit the log-barrier as intended.
 
 The instance-based signature avoids the hazard present in a raw-params approach: `R` has a
 single constructor param `c` (with `alpha = beta = c/2` stored by `super`), so a params-based
