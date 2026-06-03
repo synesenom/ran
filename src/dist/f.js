@@ -41,6 +41,9 @@ export default class F extends Beta {
     }]
   }
 
+  // Blocks Beta's log-barrier: fit() operates in (d1, d2) space, not (alpha, beta). See decisions/0017-beta-fit-penalty.md §3.
+  static _fitPenalty () { return 0 }
+
   static _fitInit (data) {
     // E[X] = d2/(d2−2) ⇒ d2 = 2·mean/(mean−1); d1 from Var = 2·d2²(d1+d2−2)/(d1(d2−2)²(d2−4))
     const n = data.length

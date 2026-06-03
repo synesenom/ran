@@ -36,6 +36,9 @@ export default class FisherZ extends F {
     }]
   }
 
+  // Blocks Beta's log-barrier (inherited via F): fit() operates in (d1, d2) space. See decisions/0017-beta-fit-penalty.md §3.
+  static _fitPenalty () { return 0 }
+
   static _fitInit (data) {
     // X = ½·ln(F) ⇒ e^{2X} ~ F(d1, d2): seed from F's MOM on the back-transformed data.
     // Clamp the exponent so extreme observations don't overflow to Infinity and poison the mean
