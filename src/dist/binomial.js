@@ -1,6 +1,5 @@
 import { logBinomial, regularizedBetaIncomplete } from '../special'
 import Distribution from './_distribution'
-import Categorical from './categorical'
 
 /**
  * Probability mass function for the [binomial distribution]{@link https://en.wikipedia.org/wiki/Binomial_distribution}:
@@ -13,7 +12,7 @@ import Categorical from './categorical'
  * @memberof ran.dist
  * @constructor
  */
-export default class Binomial extends Categorical {
+export default class Binomial extends Distribution {
   static _fitInit (data) {
     // E[X] = np; n ≈ max(data) as the support upper bound, p = mean/n.
     const n = Math.max(1, data.reduce((m, x) => x > m ? x : m, 0))
@@ -26,11 +25,10 @@ export default class Binomial extends Categorical {
    * @param {number} p Probability of success.
    */
   constructor (n, p) {
-    const ni = Math.round(n)
-    super(Array.from({ length: ni + 1 }, (d, k) => Math.exp(logBinomial(n, k) + k * Math.log(p) + (n - k) * Math.log(1 - p))), 0)
-    this.p = { n: ni, p }
+    super('discrete', 2)
 
-    // Validate parameters
+    const ni = Math.round(n)
+    this.p = { n: ni, p }
     Distribution.validate({ n: ni, p }, [
       'n >= 0',
       'p >= 0', 'p <= 1'
@@ -44,6 +42,23 @@ export default class Binomial extends Categorical {
       value: ni,
       closed: true
     }]
+  }
+
+  _generator () {
+    if (this.p.p === 0) return 0
+    if (this.p.p === 1) return this.p.n
+    let k = 0
+    for (let i = 0; i < this.p.n; i++) {
+      if (this.r.next() < this.p.p) k++
+    }
+    return k
+  }
+
+  _pdf (x) {
+    // Degenerate: n=0 is a point mass at 0; p=0/p=1 force a single outcome
+    if (this.p.n === 0 || this.p.p === 0) return x === 0 ? 1 : 0
+    if (this.p.p === 1) return x === this.p.n ? 1 : 0
+    return Math.exp(logBinomial(this.p.n, x) + x * Math.log(this.p.p) + (this.p.n - x) * Math.log(1 - this.p.p))
   }
 
   _cdf (x) {
