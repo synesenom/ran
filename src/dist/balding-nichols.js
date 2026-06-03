@@ -41,6 +41,9 @@ export default class BaldingNichols extends Beta {
     }]
   }
 
+  // Blocks Beta's log-barrier: fit() operates in (F, p) space, not (alpha, beta). See decisions/0017-beta-fit-penalty.md §3.
+  static _fitPenalty () { return 0 }
+
   static _fitInit (data) {
     // mean = p, Var = p(1−p)·F ⇒ p = mean, F = Var/(p(1−p)); clamp into (0, 1) since both are probabilities
     const n = data.length
