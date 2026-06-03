@@ -827,6 +827,23 @@ class Distribution {
   }
 
   /**
+   * An additive penalty on the penalised log-likelihood objective inside `fit()`. The base-class
+   * default returns 0 (pure MLE, no penalty). Subclasses with a boundary singularity (e.g. Beta,
+   * where lnL can be large-but-finite near alpha=0) override this to repel the optimizer from
+   * near-degenerate regions. See decisions/0017-beta-fit-penalty.md.
+   *
+   * @method _fitPenalty
+   * @memberof ran.dist.Distribution
+   * @param {Distribution} dist An instance of the distribution at the candidate params.
+   * @returns {number} The penalty value to add to the minimisation objective.
+   * @protected
+   * @ignore
+   */
+  static _fitPenalty (dist) { // eslint-disable-line no-unused-vars
+    return 0
+  }
+
+  /**
    * Estimates the distribution parameters from data using maximum likelihood estimation (MLE).
    * Distributions with a closed-form MLE return it directly (see `_fitInitIsExact`); all others
    * maximise the log-likelihood lnL(data) with Powell's derivative-free conjugate-direction
@@ -852,7 +869,12 @@ class Distribution {
     }
     const objective = params => {
       try {
-        const v = -new Cls(...params).lnL(data)
+        const inst = new Cls(...params)
+        // Penalised negative log-likelihood: the base penalty is 0 (pure MLE); Beta-family
+        // distributions override _fitPenalty with a Jeffreys-like log-barrier to prevent the
+        // optimizer from sitting near shape-parameter singularities where lnL is large-but-finite.
+        // See decisions/0017-beta-fit-penalty.md.
+        const v = -inst.lnL(data) + Cls._fitPenalty(inst)
         // Reject any non-finite objective: NaN (neumaier(-Infinity,...)), +Infinity (zero-density
         // params), and -Infinity (an unbounded-likelihood singularity, e.g. Beta-type density as a
         // shape parameter → 0). Without the last guard a strong optimizer walks into the singularity
