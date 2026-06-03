@@ -53,6 +53,23 @@ export default class HeadsMinusTails extends PreComputed {
     return [Math.max(1, Math.round(maxVal / 2))]
   }
 
+  static fit (data) {
+    const Cls = this
+    const [nHat] = Cls._fitInit(data)
+    const nSeed = Math.round(nHat)
+    const nLo = Math.max(1, nSeed - 5)
+    const nHi = nSeed + 5
+    let bestN = nSeed
+    let bestLnL = -Infinity
+    for (let n = nLo; n <= nHi; n++) {
+      try {
+        const lnL = new Cls(n).lnL(data)
+        if (lnL > bestLnL) { bestLnL = lnL; bestN = n }
+      } catch (_) {}
+    }
+    return new Cls(bestN)
+  }
+
   _pk (k) {
     if (k === 0) {
       return this.c.baseLogProb + logBinomial(2 * this.p.n, this.p.n)

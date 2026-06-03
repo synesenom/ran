@@ -47,6 +47,23 @@ export default class IrwinHall extends Distribution {
     return [Math.max(Math.round(2 * mean), 1)]
   }
 
+  static fit (data) {
+    const Cls = this
+    const [nHat] = Cls._fitInit(data)
+    const nSeed = Math.round(nHat)
+    const nLo = Math.max(1, nSeed - 5)
+    const nHi = nSeed + 5
+    let bestN = nSeed
+    let bestLnL = -Infinity
+    for (let n = nLo; n <= nHi; n++) {
+      try {
+        const lnL = new Cls(n).lnL(data)
+        if (lnL > bestLnL) { bestLnL = lnL; bestN = n }
+      } catch (_) {}
+    }
+    return new Cls(bestN)
+  }
+
   _generator () {
     // Direct sampling
     return neumaier(Array.from({ length: this.p.n }, () => this.r.next()))

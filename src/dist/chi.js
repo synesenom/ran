@@ -60,4 +60,21 @@ export default class Chi extends Chi2 {
     const n = data.length
     return [data.reduce((s, x) => s + x * x, 0) / n]
   }
+
+  static fit (data) {
+    const Cls = this
+    const [kHat] = Cls._fitInit(data)
+    const kSeed = Math.round(kHat)
+    const kLo = Math.max(1, kSeed - 5)
+    const kHi = kSeed + 5
+    let bestK = kSeed
+    let bestLnL = -Infinity
+    for (let k = kLo; k <= kHi; k++) {
+      try {
+        const lnL = new Cls(k).lnL(data)
+        if (lnL > bestLnL) { bestLnL = lnL; bestK = k }
+      } catch (_) {}
+    }
+    return new Cls(bestK)
+  }
 }

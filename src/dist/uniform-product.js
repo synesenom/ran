@@ -54,4 +54,21 @@ export default class UniformProduct extends Distribution {
     const meanNegLog = data.reduce((s, x) => s - Math.log(x), 0) / data.length
     return [Math.max(2, Math.round(meanNegLog))]
   }
+
+  static fit (data) {
+    const Cls = this
+    const [nHat] = Cls._fitInit(data)
+    const nSeed = Math.round(nHat)
+    const nLo = Math.max(2, nSeed - 5)
+    const nHi = nSeed + 5
+    let bestN = nSeed
+    let bestLnL = -Infinity
+    for (let n = nLo; n <= nHi; n++) {
+      try {
+        const lnL = new Cls(n).lnL(data)
+        if (lnL > bestLnL) { bestLnL = lnL; bestN = n }
+      } catch (_) {}
+    }
+    return new Cls(bestN)
+  }
 }

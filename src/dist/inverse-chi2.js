@@ -58,4 +58,21 @@ export default class InverseChi2 extends Distribution {
     const mean = data.reduce((s, x) => s + x, 0) / data.length
     return [Math.max(3, Math.round(2 + 1 / Math.max(mean, 1e-6)))]
   }
+
+  static fit (data) {
+    const Cls = this
+    const [nuHat] = Cls._fitInit(data)
+    const nuSeed = Math.round(nuHat)
+    const nuLo = Math.max(1, nuSeed - 5)
+    const nuHi = nuSeed + 5
+    let bestNu = nuSeed
+    let bestLnL = -Infinity
+    for (let nu = nuLo; nu <= nuHi; nu++) {
+      try {
+        const lnL = new Cls(nu).lnL(data)
+        if (lnL > bestLnL) { bestLnL = lnL; bestNu = nu }
+      } catch (_) {}
+    }
+    return new Cls(bestNu)
+  }
 }

@@ -36,4 +36,20 @@ export default class Soliton extends Categorical {
     // Support is {1,…,N}; the largest observation is a lower bound for N (reduce avoids spreading a large array onto the call stack)
     return [Math.round(data.reduce((m, x) => x > m ? x : m, 1))]
   }
+
+  static fit (data) {
+    const Cls = this
+    const [NSeed] = Cls._fitInit(data)
+    const NLo = Math.max(1, NSeed - 5)
+    const NHi = NSeed + 5
+    let bestN = NSeed
+    let bestLnL = -Infinity
+    for (let N = NLo; N <= NHi; N++) {
+      try {
+        const lnL = new Cls(N).lnL(data)
+        if (lnL > bestLnL) { bestLnL = lnL; bestN = N }
+      } catch (_) {}
+    }
+    return new Cls(bestN)
+  }
 }

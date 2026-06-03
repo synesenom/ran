@@ -52,6 +52,29 @@ export default class F extends Beta {
     return [d1, d2]
   }
 
+  static fit (data) {
+    const Cls = this
+    const [d1Hat, d2Hat] = Cls._fitInit(data)
+    const d1Seed = Math.round(d1Hat)
+    const d2Seed = Math.round(d2Hat)
+    const d1Lo = Math.max(1, d1Seed - 5)
+    const d1Hi = d1Seed + 5
+    const d2Lo = Math.max(1, d2Seed - 5)
+    const d2Hi = d2Seed + 5
+    let bestD1 = d1Seed
+    let bestD2 = d2Seed
+    let bestLnL = -Infinity
+    for (let d1 = d1Lo; d1 <= d1Hi; d1++) {
+      for (let d2 = d2Lo; d2 <= d2Hi; d2++) {
+        try {
+          const lnL = new Cls(d1, d2).lnL(data)
+          if (lnL > bestLnL) { bestLnL = lnL; bestD1 = d1; bestD2 = d2 }
+        } catch (_) {}
+      }
+    }
+    return new Cls(bestD1, bestD2)
+  }
+
   _generator () {
     // Direct sampling by transforming beta variate
     const x = super._generator()

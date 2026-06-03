@@ -688,11 +688,11 @@ describe('dist', () => {
         assert(Math.abs(result.p.c - 2) < 0.8)
       })
 
-      it('Chi.fit should recover k close to planted value', () => {
+      it('Chi.fit should recover k exactly for planted k=4', () => {
         const data = new dist.Chi(4).seed(42).sample(200)
         const result = dist.Chi.fit(data)
         assert(result instanceof dist.Chi)
-        assert(Math.abs(result.p.k - 4) <= 1)
+        assert.strictEqual(result.p.k, 4)
       })
 
       it('Categorical.fit should recover category probabilities close to planted values', () => {
@@ -792,12 +792,12 @@ describe('dist', () => {
         assert(Math.abs(result.p.mu - 0.5) < 0.1)
       })
 
-      it('HeadsMinusTails.fit should return a usable HeadsMinusTails instance', () => {
-        const data = new dist.HeadsMinusTails(5).seed(42).sample(200)
+      it('HeadsMinusTails.fit should recover n exactly for planted n=5', () => {
+        // seed=4 produces a sample whose max reaches 10 (=2n), so nSeed=5 and n=5 is the MLE
+        const data = new dist.HeadsMinusTails(5).seed(4).sample(200)
         const result = dist.HeadsMinusTails.fit(data)
         assert(result instanceof dist.HeadsMinusTails)
-        assert(result.p.n > 0)
-        assert(Number.isFinite(result.pdf(0)) && result.pdf(0) > 0)
+        assert.strictEqual(result.p.n, 5)
       })
 
       it('BorelTanner.fit should return a usable BorelTanner instance', () => {
@@ -946,26 +946,34 @@ describe('dist', () => {
         assert(Math.abs(result.p.beta - 2) < 0.8)
       })
 
-      it('Erlang.fit should recover k and lambda close to planted values', () => {
+      it('Erlang.fit should recover k exactly for planted k=3', () => {
         const data = new dist.Erlang(3, 1).seed(42).sample(200)
         const result = dist.Erlang.fit(data)
         assert(result instanceof dist.Erlang)
-        assert(Math.abs(result.p.alpha - 3) <= 1)
+        assert.strictEqual(result.p.alpha, 3)
         assert(Math.abs(result.p.beta - 1) < 0.25)
       })
 
-      it('Chi2.fit should recover k close to planted value', () => {
+      it('Erlang.fit profile search recovers k=3 when moment seed gives k=4', () => {
+        // seed=20: mean²/var ≈ 4 so _fitInit seeds k=4; profile over [1..9] finds k=3 has higher lnL
+        const data = new dist.Erlang(3, 1).seed(20).sample(200)
+        const result = dist.Erlang.fit(data)
+        assert(result instanceof dist.Erlang)
+        assert.strictEqual(result.p.alpha, 3)
+      })
+
+      it('Chi2.fit should recover k exactly for planted k=4', () => {
         const data = new dist.Chi2(4).seed(42).sample(200)
         const result = dist.Chi2.fit(data)
         assert(result instanceof dist.Chi2)
-        assert(Math.abs(result.p.alpha * 2 - 4) <= 1)
+        assert.strictEqual(result.p.alpha * 2, 4)
       })
 
-      it('InverseChi2.fit should recover nu close to planted value', () => {
+      it('InverseChi2.fit should recover nu exactly for planted nu=6', () => {
         const data = new dist.InverseChi2(6).seed(42).sample(200)
         const result = dist.InverseChi2.fit(data)
         assert(result instanceof dist.InverseChi2)
-        assert(Math.abs(result.p.nu - 6) <= 1)
+        assert.strictEqual(result.p.nu, 6)
       })
 
       it('LogGamma.fit should recover alpha and beta close to planted values', () => {
@@ -1286,7 +1294,7 @@ describe('dist', () => {
         assert(d.p.p === 0.3)
       })
 
-      it('F.fit should return a usable F instance with positive degrees of freedom', () => {
+      it('F.fit should return a valid F instance', () => {
         const data = new dist.F(10, 20).seed(42).sample(200)
         const result = dist.F.fit(data)
         assert(result instanceof dist.F)
@@ -1294,7 +1302,16 @@ describe('dist', () => {
         assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
       })
 
-      it('FisherZ.fit should return a usable FisherZ instance with positive degrees of freedom', () => {
+      it('F.fit profile search finds higher lnL than moment seed when round(seed) is suboptimal', () => {
+        // seed=8: _fitInit gives d1Seed=4,d2Seed=14; profile grid finds (5,11) with higher lnL
+        const data = new dist.F(5, 10).seed(8).sample(200)
+        const result = dist.F.fit(data)
+        assert(result instanceof dist.F)
+        // Profile MLE has strictly higher lnL than the moment-seed answer
+        assert(new dist.F(result.p.d1, result.p.d2).lnL(data) > new dist.F(4, 14).lnL(data))
+      })
+
+      it('FisherZ.fit should return a FisherZ instance (not F)', () => {
         const data = new dist.FisherZ(10, 20).seed(42).sample(200)
         const result = dist.FisherZ.fit(data)
         assert(result instanceof dist.FisherZ)
@@ -1353,13 +1370,11 @@ describe('dist', () => {
         assert(init[0] === 5)
       })
 
-      it('Soliton.fit should return a usable Soliton instance', () => {
+      it('Soliton.fit should recover N exactly for planted N=5', () => {
         const data = new dist.Soliton(5).seed(42).sample(200)
         const result = dist.Soliton.fit(data)
         assert(result instanceof dist.Soliton)
-        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
-        // support must cover the largest observation (which reaches N=5 in a 200-draw sample)
-        assert(result.p.N >= 5)
+        assert.strictEqual(result.p.N, 5)
       })
 
       it('IrwinHall._fitInit should derive n from E[X]=n/2', () => {
@@ -1369,11 +1384,11 @@ describe('dist', () => {
         assert(init[0] === 4)
       })
 
-      it('IrwinHall.fit should recover n close to planted value', () => {
+      it('IrwinHall.fit should recover n exactly for planted n=4', () => {
         const data = new dist.IrwinHall(4).seed(42).sample(200)
         const result = dist.IrwinHall.fit(data)
         assert(result instanceof dist.IrwinHall)
-        assert(Math.abs(result.p.n - 4) <= 1)
+        assert.strictEqual(result.p.n, 4)
       })
 
       it('R._fitInit should clamp c for zero-variance data', () => {
