@@ -586,7 +586,7 @@ class Distribution {
    *
    */
   survival (x) {
-    return 1 - this._cdf(x)
+    return 1 - this.cdf(x)
   }
 
   /**
@@ -608,7 +608,7 @@ class Distribution {
    *
    */
   hazard (x) {
-    return this._pdf(x) / this.survival(x)
+    return this.pdf(x) / this.survival(x)
   }
 
   /**
