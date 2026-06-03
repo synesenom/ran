@@ -52,6 +52,11 @@ export default class F extends Beta {
     return [d1, d2]
   }
 
+  // See solutions/distribution/2026-06-03-1130-integer-param-fit-profile-grid-search.md
+  /**
+   * @param {number[]} data Array of sample values.
+   * @returns {F} Fitted distribution.
+   */
   static fit (data) {
     const Cls = this
     const [d1Hat, d2Hat] = Cls._fitInit(data)

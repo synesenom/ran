@@ -38,6 +38,10 @@ export default class Erlang extends Gamma {
     return [Math.max(1, Math.round(mean ** 2 / variance)), mean / variance]
   }
 
+  /**
+   * @param {number[]} data Array of sample values.
+   * @returns {Erlang} Fitted distribution.
+   */
   static fit (data) {
     const Cls = this
     const [kHat, lambda0] = Cls._fitInit(data)

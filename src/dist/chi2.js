@@ -35,6 +35,10 @@ export default class Chi2 extends Gamma {
     return [Math.max(1, Math.round(mean))]
   }
 
+  /**
+   * @param {number[]} data Array of sample values.
+   * @returns {Chi2} Fitted distribution.
+   */
   static fit (data) {
     const Cls = this
     const [kHat] = Cls._fitInit(data)

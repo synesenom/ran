@@ -55,6 +55,10 @@ export default class UniformProduct extends Distribution {
     return [Math.max(2, Math.round(meanNegLog))]
   }
 
+  /**
+   * @param {number[]} data Array of sample values.
+   * @returns {UniformProduct} Fitted distribution.
+   */
   static fit (data) {
     const Cls = this
     const [nHat] = Cls._fitInit(data)

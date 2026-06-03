@@ -53,6 +53,10 @@ export default class HeadsMinusTails extends PreComputed {
     return [Math.max(1, Math.round(maxVal / 2))]
   }
 
+  /**
+   * @param {number[]} data Array of sample values.
+   * @returns {HeadsMinusTails} Fitted distribution.
+   */
   static fit (data) {
     const Cls = this
     const [nHat] = Cls._fitInit(data)

@@ -37,6 +37,10 @@ export default class Soliton extends Categorical {
     return [Math.round(data.reduce((m, x) => x > m ? x : m, 1))]
   }
 
+  /**
+   * @param {number[]} data Array of sample values.
+   * @returns {Soliton} Fitted distribution.
+   */
   static fit (data) {
     const Cls = this
     const [NSeed] = Cls._fitInit(data)

@@ -61,6 +61,10 @@ export default class Chi extends Chi2 {
     return [data.reduce((s, x) => s + x * x, 0) / n]
   }
 
+  /**
+   * @param {number[]} data Array of sample values.
+   * @returns {Chi} Fitted distribution.
+   */
   static fit (data) {
     const Cls = this
     const [kHat] = Cls._fitInit(data)

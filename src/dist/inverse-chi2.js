@@ -59,6 +59,10 @@ export default class InverseChi2 extends Distribution {
     return [Math.max(3, Math.round(2 + 1 / Math.max(mean, 1e-6)))]
   }
 
+  /**
+   * @param {number[]} data Array of sample values.
+   * @returns {InverseChi2} Fitted distribution.
+   */
   static fit (data) {
     const Cls = this
     const [nuHat] = Cls._fitInit(data)

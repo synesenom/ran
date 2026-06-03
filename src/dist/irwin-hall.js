@@ -47,6 +47,10 @@ export default class IrwinHall extends Distribution {
     return [Math.max(Math.round(2 * mean), 1)]
   }
 
+  /**
+   * @param {number[]} data Array of sample values.
+   * @returns {IrwinHall} Fitted distribution.
+   */
   static fit (data) {
     const Cls = this
     const [nHat] = Cls._fitInit(data)
