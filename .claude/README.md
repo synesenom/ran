@@ -17,6 +17,7 @@ This directory contains the skills and agents that power the development workflo
 │   ├── implement/SKILL.md    # Leaf: plan execution (TDD)
 │   ├── fix/SKILL.md          # Leaf: fix straightforward issue (no research/plan)
 │   ├── hotfix/SKILL.md       # Leaf: small targeted fix (no research/plan)
+│   ├── resolve/SKILL.md      # Leaf: triage an issue and recommend hotfix/fix/build
 │   ├── commit/SKILL.md       # Leaf: git commit
 │   ├── review/SKILL.md       # Leaf: code review
 │   ├── review-pr/SKILL.md    # Leaf: review a GitHub PR and approve+merge or request changes
@@ -71,6 +72,7 @@ Standalone skills that do one thing. Can be called directly or composed by orche
 | [`/implement`](skills/implement/SKILL.md) | Execute a plan phase-by-phase (TDD) | Plan file, `#issue`, or description |
 | [`/fix`](skills/fix/SKILL.md) | Fix straightforward issue, skip research/plan | `#issue` or issue URL |
 | [`/hotfix`](skills/hotfix/SKILL.md) | Small targeted fix, skip research/plan | Description or `#issue` |
+| [`/resolve`](skills/resolve/SKILL.md) | Triage an issue and recommend `/hotfix`, `/fix`, or `/build` | `#issue` |
 | [`/commit`](skills/commit/SKILL.md) | Stage and commit with generated message | _(no args)_ |
 | [`/push`](skills/push/SKILL.md) | Push commits to remote | _(no args)_ |
 | [`/review`](skills/review/SKILL.md) | Pre-commit quality check of the **local** branch against `main`; used inside `/build` | _(no args)_ |
@@ -248,6 +250,8 @@ Launched **in parallel** by [`/suggest`](skills/suggest/SKILL.md). Each scout sc
 /commit ─────→ (no agents)
 /explore ────→ (no agents, uses web search + codebase reads)
 /next ───────→ (no agents, fetches GitHub issues via gh CLI)
+
+/resolve ────→ (no agents, fetches GitHub issue via mcp__github__issue_read + codebase Glob/Grep)
 
 /suggest ───→ suggest-distributions ┐
               → suggest-methods      │
