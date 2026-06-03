@@ -453,11 +453,21 @@ describe('special', () => {
 
     describe('.logGamma()', () => {
       it('should return reference values ln|Γ(z)| (mpmath mp.dps=50)', () => {
-        // Positive baseline plus the log-reflection branch at negative half-integers. The
-        // positive Lanczos path is itself accurate to ~1e-13, so the tolerance is 1e-13.
-        assert(equal(special.logGamma(0.5), 0.5723649429247001, 13))
-        assert(equal(special.logGamma(-0.5), 1.2655121234846454, 13))
-        assert(equal(special.logGamma(-1.5), 0.860047015376481, 13))
+        // Positive baseline (direct Lanczos path) and the log-reflection branch at negative
+        // half-integers. The g=7.5 9-term Lanczos achieves ~1e-15, so tolerance is 1e-14.
+        // z = 0.25 exercises the 0 < z < 0.5 positive-reflection branch.
+        assert(equal(special.logGamma(0.25), 1.2880225246980774, 14))
+        assert(equal(special.logGamma(0.5), 0.5723649429247001, 14))
+        assert(equal(special.logGamma(1.5), -0.12078223763524522, 14))
+        assert(equal(special.logGamma(2.5), 0.2846828704729192, 14))
+        // ln(2!) and ln(4!): pinned as mpmath literals, not Math.log() calls
+        assert(equal(special.logGamma(3), 0.6931471805599453, 14))
+        assert(equal(special.logGamma(5), 3.1780538303479458, 14))
+        assert(equal(special.logGamma(10), 12.801827480081469, 14))
+        assert(equal(special.logGamma(-0.5), 1.2655121234846454, 14))
+        assert(equal(special.logGamma(-1.5), 0.860047015376481, 14))
+        // z = -2.5: reflection subtracts log(π) - logGamma(3.5) ≈ 1.14 - 1.20; the ~5%
+        // cancellation costs ~1 digit, limiting accuracy to ~2e-14 for this argument.
         assert(equal(special.logGamma(-2.5), -0.056243716497674054, 13))
       })
 
@@ -470,8 +480,8 @@ describe('special', () => {
 
       it('should stay full-precision within 1e-6 of a negative integer pole', () => {
         // mpmath mp.dps=60 at the exact double of (-1+1e-7) / (-2+1e-7); |sin(πz)| reduced mod π keeps the offset.
-        assert(equal(special.logGamma(-1 + 1e-7), 16.118095693763127, 13))
-        assert(equal(special.logGamma(-2 + 1e-7), 15.424948562092922, 13))
+        assert(equal(special.logGamma(-1 + 1e-7), 16.118095693763127, 14))
+        assert(equal(special.logGamma(-2 + 1e-7), 15.424948562092922, 14))
       })
     })
   })

@@ -1,14 +1,18 @@
 /* eslint no-loss-of-precision: 0 */
 
-// Coefficients
+// g=7.5, n=9 Lanczos coefficients — identical to gamma.js, evaluated in log-space
+// for ~1e-15 relative accuracy. The old 6-term NR set was capped at ~1e-13.
 const COEFFS = [
-  76.18009172947146,
-  -86.50532032941677,
-  24.01409824083091,
-  -1.231739572450155,
-  0.1208650973866179e-2,
-  -0.5395239384953e-5
+  676.5203681218851,
+  -1259.1392167224028,
+  771.32342877765313,
+  -176.61502916214059,
+  12.507343278686905,
+  -0.13857109526572012,
+  9.9843695780195716e-6,
+  1.5056327351493116e-7
 ]
+const LOG_SQRT_2PI = Math.log(2 * Math.PI) / 2
 
 /**
    * Computes the logarithm of the absolute value of the gamma function, ln|Γ(z)|.
@@ -32,16 +36,17 @@ export default function logGamma (z) {
     return Math.log(Math.PI) - Math.log(Math.abs(Math.sin(Math.PI * (z - Math.round(z))))) - logGamma(1 - z)
   }
 
-  const x = z
-
-  let y = z
-
-  let res = x + 5.5
-  res = (x + 0.5) * Math.log(res) - res
-  let sum = 1.000000000190015
-  for (let j = 0; j < 6; j++) {
-    y++
-    sum += COEFFS[j] / y
+  if (z < 0.5) {
+    // Reflection keeps z in the Lanczos validity range [0.5, ∞).
+    return Math.log(Math.PI) - Math.log(Math.abs(Math.sin(Math.PI * z))) - logGamma(1 - z)
   }
-  return res + Math.log(2.5066282746310005 * sum / x)
+
+  z--
+  let x = 0.99999999999980993
+  const l = COEFFS.length
+  COEFFS.forEach((c, i) => {
+    x += c / (z + i + 1)
+  })
+  const t = z + l - 0.5
+  return LOG_SQRT_2PI + (z + 0.5) * Math.log(t) - t + Math.log(x)
 }
