@@ -1,4 +1,4 @@
-import { logBinomial } from '../special'
+import { logBinomial, regularizedBetaIncomplete } from '../special'
 import Distribution from './_distribution'
 import Categorical from './categorical'
 
@@ -44,5 +44,12 @@ export default class Binomial extends Categorical {
       value: ni,
       closed: true
     }]
+  }
+
+  _cdf (x) {
+    // solutions/distribution/2026-06-03-0848-binomial-prefix-sum-cdf-quantile-overshoot.md
+    // Guard ensures a > 0 in regularizedBetaIncomplete and handles n=0 cleanly
+    if (x >= this.p.n) return 1
+    return regularizedBetaIncomplete(this.p.n - x, x + 1, 1 - this.p.p)
   }
 }

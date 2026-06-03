@@ -87,7 +87,12 @@ export default [{
   ],
   cases: [{
     params: () => [25, 0.5],
-    symmetryDiscrete: 12.5
+    symmetryDiscrete: 12.5,
+    // scipy.stats.binom(25, 0.5) — median boundary exercises the regularizedBetaIncomplete _cdf fix; x=24 covers n-1 path
+    refVals: [
+      { x: 12, pmf: 0.15498101711273188, cdf: 0.5 },
+      { x: 24, pmf: 7.450580596923828e-7, cdf: 0.9999999701976776 }
+    ]
   }, {
     name: 'small n, low p',
     params: () => [10, 0.1],
@@ -98,6 +103,7 @@ export default [{
       { x: 3.0, pmf: 0.057395628, cdf: 0.9872048016 },
       { x: 5.0, pmf: 0.0014880348, cdf: 0.9998530974 },
       { x: 7.0, pmf: 8.748e-06, cdf: 0.9999996264 },
+      { x: 9.0, pmf: 9e-9, cdf: 0.9999999999 },
       { x: 10.0, pmf: 1e-10, cdf: 1.0 }
     ]
   }],
@@ -119,7 +125,7 @@ export default [{
     { p: 0.01, x: 7 },
     { p: 0.05, x: 8 },
     { p: 0.25, x: 11 },
-    { p: 0.5, x: 13 },
+    { p: 0.5, x: 12 },
     { p: 0.75, x: 14 },
     { p: 0.95, x: 17 },
     { p: 0.99, x: 18 }
