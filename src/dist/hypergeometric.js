@@ -50,4 +50,24 @@ export default class Hypergeometric extends Categorical {
       'n >= 0', 'n <= N'
     ])
   }
+
+  _cdf (x) {
+    // Bidirectional raw-PMF summation bypasses AliasTable normalisation bias
+    // that causes inherited prefix-sum CDF to fall ~1 ULP below exact boundaries.
+    // See solutions/distribution/2026-06-03-1300-categorical-subclass-bidirectional-cdf-quantile-overshoot.md
+    const { N, K, n } = this.p
+    const lo = Math.max(0, n + K - N)
+    const hi = Math.min(n, K)
+    if (x >= hi) return 1
+    const logBinNn = logBinomial(N, n)
+    let fwd = 0
+    for (let k = lo; k <= x; k++) {
+      fwd += Math.exp(logBinomial(K, k) + logBinomial(N - K, n - k) - logBinNn)
+    }
+    let bwd = 0
+    for (let k = hi; k > x; k--) {
+      bwd += Math.exp(logBinomial(K, k) + logBinomial(N - K, n - k) - logBinNn)
+    }
+    return Math.min(1, Math.max(fwd, 1 - bwd))
+  }
 }

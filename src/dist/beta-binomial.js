@@ -52,4 +52,23 @@ export default class BetaBinomial extends Categorical {
       closed: true
     }]
   }
+
+  _cdf (x) {
+    // Bidirectional raw-PMF summation bypasses AliasTable normalisation bias that
+    // causes prefix-sum CDF to fall ~1 ULP below exact boundaries (e.g. CDF(12) < 0.5
+    // for symmetric n=25, α=β=2), which makes q(0.5) overshoot by one.
+    // See solutions/distribution/2026-06-03-1300-categorical-subclass-bidirectional-cdf-quantile-overshoot.md
+    const { n, alpha, beta } = this.p
+    if (x >= n) return 1
+    const logBetaAB = logBeta(alpha, beta)
+    let fwd = 0
+    for (let k = 0; k <= x; k++) {
+      fwd += Math.exp(logBinomial(n, k) + logBeta(k + alpha, n - k + beta) - logBetaAB)
+    }
+    let bwd = 0
+    for (let k = n; k > x; k--) {
+      bwd += Math.exp(logBinomial(n, k) + logBeta(k + alpha, n - k + beta) - logBetaAB)
+    }
+    return Math.min(1, Math.max(fwd, 1 - bwd))
+  }
 }

@@ -56,6 +56,18 @@ export default [{
       { x: 7.0, pmf: 0.00765767786901183, cdf: 0.994732355184637 },
       { x: 10.0, pmf: 0.000322061191626409, cdf: 1.0 }
     ]
+  }, {
+    // exact fractions: PMF(0)=PMF(5)=3/28, PMF(2)=PMF(3)=3/14; CDF(2)=0.5 analytically
+    name: 'symmetric n=5 alpha=beta=2 midpoint boundary',
+    params: () => [5, 2, 2],
+    refVals: [
+      { x: 0, pmf: 3 / 28, cdf: 3 / 28 },
+      { x: 2, pmf: 3 / 14, cdf: 0.5 },
+      { x: 5, pmf: 3 / 28, cdf: 1 }
+    ],
+    quantileVals: [
+      { p: 0.5, x: 2 }
+    ]
   }],
   // scipy.stats.betabinom(n=25, a=2, b=2)
   refVals: [
@@ -68,12 +80,12 @@ export default [{
     { x: 20.0, pmf: 0.03846153846153849, cdf: 0.8931623931623933 },
     { x: 25.0, pmf: 0.007936507936507943, cdf: 1.0 }
   ],
-  // scipy.stats.betabinom(n=25, a=2, b=2)
+  // scipy.stats.betabinom(n=25, a=2, b=2); ppf(0.5)=12 (corrected from buggy fixture)
   quantileVals: [
     { p: 0.01, x: 1 },
     { p: 0.05, x: 3 },
     { p: 0.25, x: 8 },
-    { p: 0.5, x: 13 },
+    { p: 0.5, x: 12 },
     { p: 0.75, x: 17 },
     { p: 0.95, x: 22 },
     { p: 0.99, x: 24 }
@@ -640,6 +652,18 @@ export default [{
       { x: 3.0, pmf: 0.105263157894737, cdf: 1.0 }
     ]
   }, {
+    // PMF(k) = PMF(5-k) by symmetry; CDF(2) = 0.5 exactly — exercises round-boundary precision
+    name: 'symmetric N=10 K=5 n=5 midpoint boundary',
+    params: () => [10, 5, 5],
+    refVals: [
+      { x: 0, pmf: 1 / 252, cdf: 1 / 252 },
+      { x: 2, pmf: 100 / 252, cdf: 0.5 },
+      { x: 5, pmf: 1 / 252, cdf: 1 }
+    ],
+    quantileVals: [
+      { p: 0.5, x: 2 }
+    ]
+  }, {
     // scipy.stats.hypergeom(M=10, n=8, N=5) — lower support is max(0,n+K-N)=3, not 0
     name: 'min > 0 (n+K>N)',
     params: () => [10, 8, 5],
@@ -739,6 +763,28 @@ export default [{
       { x: 3.0, pmf: 0.297987616098999, cdf: 0.594169246645706 },
       { x: 4.0, pmf: 0.276702786377847, cdf: 0.870872033023553 },
       { x: 5.0, pmf: 0.129127966976447, cdf: 1.0 }
+    ]
+  }, {
+    // PMF(0) = C(0,0)*C(5,3)/C(6,3) = 10/20 = 0.5; CDF(0) = 0.5 exactly
+    name: 'round boundary at k=0',
+    params: () => [6, 3, 1],
+    refVals: [
+      { x: 0, pmf: 0.5, cdf: 0.5 }
+    ],
+    quantileVals: [
+      { p: 0.5, x: 0 }
+    ]
+  }, {
+    // CDF(2) = 0.5 exactly — exercises round-boundary precision for x > 0
+    // PMF(k) = C(k+2,k)*C(7-k,5-k)/C(10,5); PMF(0)=21/252, PMF(2)=60/252, CDF(2)=126/252=0.5
+    name: 'round boundary at k=2',
+    params: () => [10, 5, 3],
+    refVals: [
+      { x: 0, pmf: 21 / 252, cdf: 21 / 252 },
+      { x: 2, pmf: 60 / 252, cdf: 0.5 }
+    ],
+    quantileVals: [
+      { p: 0.5, x: 2 }
     ]
   }],
   // scipy.stats.nhypergeom(M=35, n=15, r=7)
