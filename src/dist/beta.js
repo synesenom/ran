@@ -63,7 +63,8 @@ export default class Beta extends Distribution {
     // from near-zero alpha/beta where lnL is large-but-finite, without distorting interior
     // solutions. Inherited by BetaRectangular, BetaPrime and all other Beta subclasses via
     // dist.p.alpha / dist.p.beta (set by super() in every constructor regardless of the
-    // subclass's own param ordering). See decisions/0017-beta-fit-penalty.md.
+    // subclass's own param ordering). See decisions/0017-beta-fit-penalty.md and
+    // solutions/correctness/2026-06-03-1200-beta-fit-log-barrier-and-survival-support-clipping.md.
     return -0.5 * (Math.log(dist.p.alpha) + Math.log(dist.p.beta))
   }
 
