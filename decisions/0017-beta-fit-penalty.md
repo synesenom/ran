@@ -25,20 +25,23 @@ to them rather than to the consistent interior MLE.
 
 ## Decision
 
-### 1. Add a `static _fitPenalty(params)` hook to `Distribution`
+### 1. Add a `static _fitPenalty(dist)` hook to `Distribution`
 
 The base-class default returns `0` (no penalty — pure MLE, unchanged for all existing
 distributions). A subclass overrides it to return an additive penalty that is subtracted from the
-penalised log-likelihood (equivalently, added to the minimisation objective).
+penalised log-likelihood (equivalently, added to the minimisation objective). The argument is the
+already-constructed distribution instance, so subclasses can read `dist.p.*` regardless of the
+constructor parameter ordering.
 
 ```javascript
-static _fitPenalty (params) { return 0 }  // default: no-op
+static _fitPenalty (dist) { return 0 }  // default: no-op
 ```
 
-`fit()` incorporates the penalty:
+`fit()` incorporates the penalty by constructing the instance once:
 
 ```javascript
-const v = -new Cls(...params).lnL(data) + Cls._fitPenalty(params)
+const inst = new Cls(...params)
+const v = -inst.lnL(data) + Cls._fitPenalty(inst)
 ```
 
 ### 2. Override `_fitPenalty` in `Beta` with a Jeffreys-like log-barrier

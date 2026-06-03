@@ -852,7 +852,9 @@ class Distribution {
    * @method fit
    * @memberof ran.dist.Distribution
    * @param {number[]} data Array of observations to fit.
-   * @returns {Distribution} A new instance of the same distribution with MLE parameters.
+   * @returns {Distribution} A new instance of the same distribution with MLE parameters (or MAP
+   *   parameters for distributions that override `_fitPenalty`, e.g. Beta-family). See
+   *   decisions/0017-beta-fit-penalty.md.
    */
   static fit (data) {
     const Cls = this

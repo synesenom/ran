@@ -1028,16 +1028,16 @@ describe('dist', () => {
         const data = new dist.Beta(0.5, 0.5).seed(42).sample(200)
         const result = dist.Beta.fit(data)
         assert(result instanceof dist.Beta)
-        assert(result.p.alpha > 0.2, `alpha ${result.p.alpha} is near-singular`)
-        assert(result.p.beta > 0.2, `beta ${result.p.beta} is near-singular`)
+        assert(result.p.alpha > 0.3 && result.p.alpha < 1.5, `alpha ${result.p.alpha} out of expected range`)
+        assert(result.p.beta > 0.3 && result.p.beta < 1.5, `beta ${result.p.beta} out of expected range`)
       })
 
       it('BetaPrime.fit should not converge to near-singular alpha or beta', () => {
         const data = new dist.BetaPrime(1.5, 2.0).seed(42).sample(200)
         const result = dist.BetaPrime.fit(data)
         assert(result instanceof dist.BetaPrime)
-        assert(result.p.alpha > 0.5, `alpha ${result.p.alpha} is near-singular`)
-        assert(result.p.beta > 0.5, `beta ${result.p.beta} is near-singular`)
+        assert(result.p.alpha > 0.5 && result.p.alpha < 8, `alpha ${result.p.alpha} out of expected range`)
+        assert(result.p.beta > 0.5 && result.p.beta < 8, `beta ${result.p.beta} out of expected range`)
       })
 
       it('Kumaraswamy.fit should recover a and b close to planted values', () => {
