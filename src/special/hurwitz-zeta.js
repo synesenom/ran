@@ -1,6 +1,5 @@
 import { EPS } from '../core/constants'
 import { B2k } from '../constants/bernoulli'
-import logGamma from './log-gamma'
 
 /**
  * Computes the Hurwitz zeta function (only real values outside the critical strip) using the alternating series.
@@ -20,9 +19,9 @@ export default function (s, a) {
   }
 
   // Enough partial-sum terms that the Euler-Maclaurin tail is accurate: at s near 1 the
-  // series decays as k^{-(s-1)} which is slow, so n must grow as 1/(s-1). The floor of 20
-  // preserves accuracy for large s where ceil(1/(s-1)) < 20.
-  const n = Math.max(20, Math.min(100, Math.ceil(1 / Math.max(s - 1, EPS))))
+  // series decays as k^{-(s-1)} which is slow, so n must grow as 1/(s-1). The floor of 50
+  // ensures the Bernoulli series reaches 1e-14 for all s ∈ (1, 3].
+  const n = Math.max(50, Math.min(100, Math.ceil(1 / Math.max(s - 1, EPS))))
 
   // First sum
   let z = 0
@@ -31,19 +30,15 @@ export default function (s, a) {
   }
   z += Math.pow(a + n, 1 - s) / (s - 1) - 0.5 / Math.pow(a + n, s)
 
-  // Second sum
-  let c = 1
-  for (let k = 1; k < B2k.length; k++) {
-    // Update coefficient
-    let m = logGamma(s + 4 * k - 3) - logGamma(s + 2 * k - 2)
-    m -= (s + 2 * k - 1) * Math.log(a + n)
-    m -= logGamma(2 * k + 1)
-    c *= B2k[k - 1] * Math.exp(m)
-
-    // Increment sum
+  // Bernoulli correction series using the ratio recurrence:
+  // T_k = B_{2k}/(2k)! * Γ(s+2k-1)/Γ(s) * N^{-(s+2k-1)}, with
+  // T_k/T_{k-1} = (B_{2k}/B_{2k-2}) * (s+2k-3)(s+2k-2) / ((2k)(2k-1)) / N^2
+  const N = a + n
+  let c = B2k[0] * s / (2 * Math.pow(N, s + 1))
+  z += c
+  for (let k = 2; k < B2k.length; k++) {
+    c *= (B2k[k - 1] / B2k[k - 2]) * (s + 2 * k - 3) * (s + 2 * k - 2) / ((2 * k) * (2 * k - 1)) / (N * N)
     z += c
-
-    // Stop if precision achieved
     if (Math.abs(c / z) < EPS) { break }
   }
 
