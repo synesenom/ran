@@ -1005,20 +1005,26 @@ describe('discrete-distribution precision gate', () => {
       // hook rather than silently skipping every assertion in this group.
       let d
       before(() => { d = new dist[name](...params) })
-      points.forEach(({ k, pmf, cdf, qp }) => {
-        it(`pmf at k=${k} to ${tol} relative error`, () => {
+      // One test per method (not per k): the message pinpoints the failing k, while
+      // pmf/cdf/quantile stay isolated so a regression in one does not mask the others.
+      it(`pmf to ${tol} relative error`, () => {
+        points.forEach(({ k, pmf }) => {
           // ranjs exposes the probability mass through pdf() for discrete distributions.
           // Guard the relative form against a zero reference (exact zero is checked directly).
-          if (pmf === 0) assert.strictEqual(d.pdf(k), 0)
-          else assert.approximately(d.pdf(k) / pmf, 1, tol)
+          if (pmf === 0) assert.strictEqual(d.pdf(k), 0, `pmf at k=${k}`)
+          else assert.approximately(d.pdf(k) / pmf, 1, tol, `pmf at k=${k}`)
         })
-        it(`cdf at k=${k} to ${tol} relative error`, () => {
-          if (cdf === 0) assert.strictEqual(d.cdf(k), 0)
-          else assert.approximately(d.cdf(k) / cdf, 1, tol)
+      })
+      it(`cdf to ${tol} relative error`, () => {
+        points.forEach(({ k, cdf }) => {
+          if (cdf === 0) assert.strictEqual(d.cdf(k), 0, `cdf at k=${k}`)
+          else assert.approximately(d.cdf(k) / cdf, 1, tol, `cdf at k=${k}`)
         })
-        it(`quantile midpoint at k=${k} returns k`, () => {
-          // ranjs exposes the quantile function as q(); the step-midpoint input must resolve to k
-          assert.strictEqual(d.q(qp), k)
+      })
+      it('quantile midpoint returns k', () => {
+        // ranjs exposes the quantile function as q(); the step-midpoint input must resolve to k
+        points.forEach(({ k, qp }) => {
+          assert.strictEqual(d.q(qp), k, `q(qp) at k=${k}`)
         })
       })
     })

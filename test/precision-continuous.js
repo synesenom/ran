@@ -4214,24 +4214,30 @@ describe('continuous-distribution precision gate', () => {
       // hook rather than silently skipping every assertion in this group.
       let d
       before(() => { d = new dist[name](...params) })
-      points.forEach(({ x, pdf, cdf }) => {
-        it(`pdf at x=${x} to ${tol} relative error`, () => {
+      // One test per method (not per point): the message pinpoints the failing x, while
+      // pdf/cdf/quantile stay isolated so a regression in one does not mask the others.
+      it(`pdf to ${tol} relative error`, () => {
+        points.forEach(({ x, pdf }) => {
           // Guard the relative form against an exact-zero reference (pdf can vanish at an
           // interior point, e.g. UQuadratic at its centre).
-          if (pdf === 0) assert.strictEqual(d.pdf(x), 0)
-          else assert.approximately(d.pdf(x) / pdf, 1, tol)
+          if (pdf === 0) assert.strictEqual(d.pdf(x), 0, `pdf at x=${x}`)
+          else assert.approximately(d.pdf(x) / pdf, 1, tol, `pdf at x=${x}`)
         })
-        it(`cdf at x=${x} to ${tol} relative error`, () => {
+      })
+      it(`cdf to ${tol} relative error`, () => {
+        points.forEach(({ x, cdf }) => {
           // Guard the relative form against an exact-zero reference (defensive: all current
           // probes have cdf >= 0.1, but a future grid change could include a near-zero p).
-          if (cdf === 0) assert.strictEqual(d.cdf(x), 0)
-          else assert.approximately(d.cdf(x) / cdf, 1, tol)
+          if (cdf === 0) assert.strictEqual(d.cdf(x), 0, `cdf at x=${x}`)
+          else assert.approximately(d.cdf(x) / cdf, 1, tol, `cdf at x=${x}`)
         })
-        it(`quantile round-trips q(cdf(${x})) = x to ${qtol}`, () => {
+      })
+      it(`quantile round-trips q(cdf(x)) = x to ${qtol}`, () => {
+        points.forEach(({ x, cdf }) => {
           const back = d.q(cdf)
           // Relative form for x away from 0; absolute fallback at x near 0 (relative error undefined).
-          if (Math.abs(x) > 1e-8) assert.approximately(back / x, 1, qtol)
-          else assert.approximately(back, x, qtol)
+          if (Math.abs(x) > 1e-8) assert.approximately(back / x, 1, qtol, `q(cdf(${x}))`)
+          else assert.approximately(back, x, qtol, `q(cdf(${x}))`)
         })
       })
     })
