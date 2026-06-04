@@ -147,6 +147,29 @@ export default [{
       { x: 9.0, pmf: 9e-9, cdf: 0.9999999999 },
       { x: 10.0, pmf: 1e-10, cdf: 1.0 }
     ]
+  }, {
+    name: 'degenerate p=0',
+    params: () => [5, 0],
+    refVals: [
+      { x: 0, pmf: 1, cdf: 1 },
+      { x: 3, pmf: 0, cdf: 1 },
+      { x: 5, pmf: 0, cdf: 1 }
+    ]
+  }, {
+    name: 'degenerate p=1',
+    params: () => [5, 1],
+    refVals: [
+      { x: 0, pmf: 0, cdf: 0 },
+      { x: 3, pmf: 0, cdf: 0 },
+      { x: 4, pmf: 0, cdf: 0 },
+      { x: 5, pmf: 1, cdf: 1 }
+    ]
+  }, {
+    name: 'n=0 degenerate',
+    params: () => [0, 0.5],
+    refVals: [
+      { x: 0, pmf: 1, cdf: 1 }
+    ]
   }],
   // scipy.stats.binom(25, 0.5) — endpoints x=0, x=25 included for boundary coverage.
   refVals: [
