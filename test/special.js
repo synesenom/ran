@@ -309,8 +309,11 @@ describe('special', () => {
       assert(special.betaIncomplete(Math.random(), Math.random() + 1, -Math.random()) === 0)
     })
 
-    it('B(a, b, x) should be equal to 1 if b > 0 and x >= 1', () => {
-      assert(special.betaIncomplete(Math.random(), Math.random() + 1, 1 + Math.random()) === 1)
+    it('B(a, b, x) should be equal to B(a,b) if b > 0 and x >= 1', () => {
+      const a = Math.random()
+      const b = Math.random() + 1
+      const expected = Math.exp(special.logGamma(a) + special.logGamma(b) - special.logGamma(a + b))
+      assert(special.betaIncomplete(a, b, 1 + Math.random()) === expected)
     })
   })
 

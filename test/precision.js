@@ -66,7 +66,7 @@ describe('special-function precision gate', () => {
 
   describe('betaIncomplete', () => {
     // mpmath: mp.dps=70; betainc(a, b, 0, x)  — unnormalized B(a,b,x)
-    // forward branch: x < (a+1)/(a+b+2); backward branch has a pre-existing bug (#675)
+    // forward branch: x < (a+1)/(a+b+2); backward branch fixed in #675
     it('returns B(2,3,0.3) to 1e-14 relative error', () => {
       assert.approximately(special.betaIncomplete(2, 3, 0.3) / 0.029025, 1, 1e-14)
     })
@@ -79,6 +79,10 @@ describe('special-function precision gate', () => {
     // Near the forward/backward branch switch at (a+1)/(a+b+2) = 3/7 ≈ 0.429 (forward side)
     it('returns B(2,3,0.4) near branch switch to 1e-14 relative error', () => {
       assert.approximately(special.betaIncomplete(2, 3, 0.4) / 0.04373333333333334, 1, 1e-14)
+    })
+    // Backward branch: x=0.5 > (a+1)/(a+b+2) = 3/7; mpmath: betainc(2,3,0,0.5) = 11/192
+    it('returns B(2,3,0.5) via backward branch to 1e-12 relative error', () => {
+      assert.approximately(special.betaIncomplete(2, 3, 0.5) / 0.05729166666666667, 1, 1e-12)
     })
   })
 
