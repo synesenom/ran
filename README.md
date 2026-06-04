@@ -179,6 +179,12 @@ new ran.dist.Pareto(1, 2).variance()   // => Infinity  (divergent moment)
 new ran.dist.Normal(0, 1).pdf(-Infinity) // => 0       (outside support)
 ```
 
+## Numerical precision
+
+ranjs targets **≤ 1e-14 relative error** for all public outputs in non-degenerate parameter regions. Outputs involving deeply composed operations (quantile inversion, extreme parameter regimes) have a documented floor of **~1e-12**.
+
+All 28 discrete distributions are verified against mpmath references at 50 decimal places. The following distributions cap at 1e-12 at certain parameter settings: BetaBinomial, Binomial, Hypergeometric, NegativeBinomial, NegativeHypergeometric, Poisson, Skellam.
+
 ## Documentation
 
 Full API reference and distribution catalogue: [https://synesenom.github.io/ran/](https://synesenom.github.io/ran/)
