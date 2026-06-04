@@ -349,22 +349,22 @@ describe('special-function precision gate', () => {
 
   describe('hurwitzZeta', () => {
     // mpmath: mp.dps=70; zeta(s, a)
-    it('returns hurwitzZeta(2, 1) = zeta(2) to 1e-8 relative error', () => {
-      // Euler-Maclaurin with dynamic partial-sum length (n=20 terms for s=2) achieves ~5e-9
-      assert.approximately(special.hurwitzZeta(2, 1) / 1.6449340668482264, 1, 1e-8)
+    it('returns hurwitzZeta(2, 1) = zeta(2) to 1e-14 relative error', () => {
+      assert.approximately(special.hurwitzZeta(2, 1) / 1.6449340668482264, 1, 1e-14)
     })
-    it('returns hurwitzZeta(2, 0.5) to 1e-8 relative error', () => {
-      // Same Euler-Maclaurin precision limitation as s=2, a=1 above
-      assert.approximately(special.hurwitzZeta(2, 0.5) / 4.934802200544679, 1, 1e-8)
+    it('returns hurwitzZeta(2, 0.5) to 1e-14 relative error', () => {
+      assert.approximately(special.hurwitzZeta(2, 0.5) / 4.934802200544679, 1, 1e-14)
     })
     it('returns hurwitzZeta(1.001, 0.5) to 1e-12 relative error (near-pole Euler-Maclaurin)', () => {
-      // Euler-Maclaurin with dynamic partial-sum length (issue #552); near s=1 precision
-      // is limited by the asymptotic nature of the Bernoulli series — 1e-14 not guaranteed
+      // Near s=1 precision is limited by the asymptotic nature of the Bernoulli series — 1e-14 not guaranteed
       assert.approximately(special.hurwitzZeta(1.001, 0.5) / 1001.9648639702457, 1, 1e-12)
     })
-    // s=3: n_min=20 Euler-Maclaurin; asymptotic Bernoulli tail limits precision to ~1e-9
-    it('returns hurwitzZeta(3, 1) = zeta(3) to 1e-9 relative error', () => {
-      assert.approximately(special.hurwitzZeta(3, 1) / 1.2020569031595942, 1, 1e-9)
+    // s=2.5: interior of the s ∈ (1,3] fix region; mpmath: zeta(2.5, 1) = 1.3414872572509172
+    it('returns hurwitzZeta(2.5, 1) = zeta(2.5) to 1e-14 relative error', () => {
+      assert.approximately(special.hurwitzZeta(2.5, 1) / 1.341487257250917, 1, 1e-14)
+    })
+    it('returns hurwitzZeta(3, 1) = zeta(3) to 1e-14 relative error', () => {
+      assert.approximately(special.hurwitzZeta(3, 1) / 1.2020569031595942, 1, 1e-14)
     })
     // Large s: rapidly convergent
     it('returns hurwitzZeta(10, 1) = zeta(10) to 1e-14 relative error', () => {
@@ -554,17 +554,14 @@ describe('special-function precision gate', () => {
   describe('generalizedHarmonic', () => {
     // mpmath: mp.dps=70; direct sum. See scripts/precision-refs.py.
     // n<10: direct compensated sum path; n>=10: riemannZeta - hurwitzZeta path.
-    // zeta-path precision with s=2 is limited by hurwitzZeta Euler-Maclaurin (~1e-8);
-    // s=3 converges faster so achieves ~1e-10.
     it('returns H(5,2) via direct sum to 1e-14 relative error', () => {
       assert.approximately(special.generalizedHarmonic(5, 2) / 1.4636111111111112, 1, 1e-14)
     })
-    it('returns H(20,3) via zeta path to 1e-10 relative error', () => {
-      assert.approximately(special.generalizedHarmonic(20, 3) / 1.2008678419584369, 1, 1e-10)
+    it('returns H(20,3) via zeta path to 1e-14 relative error', () => {
+      assert.approximately(special.generalizedHarmonic(20, 3) / 1.2008678419584369, 1, 1e-14)
     })
-    it('returns H(15,2) via zeta path to 1e-8 relative error', () => {
-      // s=2 Euler-Maclaurin limitation (same root cause as hurwitzZeta(2, a) gate above)
-      assert.approximately(special.generalizedHarmonic(15, 2) / 1.580440283444987, 1, 1e-8)
+    it('returns H(15,2) via zeta path to 1e-14 relative error', () => {
+      assert.approximately(special.generalizedHarmonic(15, 2) / 1.580440283444987, 1, 1e-14)
     })
     // m=1 harmonic number via direct sum (n<10): H(5,1) = 1+1/2+1/3+1/4+1/5 = 137/60
     it('returns H(5,1) = 137/60 via direct sum to 1e-14 relative error', () => {
