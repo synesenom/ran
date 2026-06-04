@@ -147,3 +147,42 @@ print('\n=== owenT(h, a) via custom quadrature ===')
 print(owenT(1.0, 0.5))   # 0.04306469112078536...
 print(owenT(2.0, 1.0))   # 0.01111628172225982...
 print(owenT(0.5, 2.0))   # 0.14158060365397839...
+
+print('\n=== besselInu(nu, x) - fractional order ===')
+print(besseli(0.5, 1.0))    # 0.9376748882454876...
+print(besseli(1.5, 2.0))    # 1.0994731886331097...
+print(besseli(2.3, 3.0))    # 1.787657392247681...
+
+print('\n=== besselISpherical(n, x) = sqrt(pi/(2x)) * I_{n+0.5}(x) ===')
+def spherical_besseli(n, x):
+    return mp.sqrt(pi / (2 * x)) * besseli(n + mp.mpf('0.5'), x)
+
+print(spherical_besseli(0, 1.0))   # 1.1752011936438014...  i_0(1) = sinh(1)/1
+print(spherical_besseli(1, 0.5))   # 0.17087070843777213...  i_1(0.5) Taylor path
+print(spherical_besseli(2, 3.0))   # 1.096501524700701...   i_2(3) Wronskian path
+
+print('\n=== beta(x, y) = exp(loggamma(x)+loggamma(y)-loggamma(x+y)) ===')
+from mpmath import beta as mpbeta
+print(mpbeta(2.0, 3.0))    # 0.08333333333333333...  = 1/12
+print(mpbeta(0.5, 0.5))    # 3.14159265358979323...  = pi
+print(mpbeta(1.5, 2.5))    # 0.19634954084936207...
+
+print('\n=== logBeta(x, y) = loggamma(x)+loggamma(y)-loggamma(x+y) ===')
+print(loggamma(2.0) + loggamma(3.0) - loggamma(5.0))    # -2.4849066497880004...  = log(1/12)
+print(loggamma(0.5) + loggamma(0.5) - loggamma(1.0))    # 1.1447298858494002...   = log(pi)
+print(loggamma(1.5) + loggamma(2.5) - loggamma(4.0))    # -1.627858836390381...
+
+print('\n=== logBinomial(n, k) = loggamma(n+1)-loggamma(k+1)-loggamma(n-k+1) ===')
+print(loggamma(11) - loggamma(4) - loggamma(8))    # 4.787491742782046...   = log C(10,3) = log(120)
+print(loggamma(21) - loggamma(8) - loggamma(14))   # 11.258291246564648...  = log C(20,7) = log(77520)
+print(loggamma(6) - loggamma(3) - loggamma(4))     # 2.302585092994046...   = log C(5,2) = log(10)
+
+print('\n=== generalizedHarmonic(n, m) = sum_{k=1}^n k^{-m} ===')
+print(sum(mp.mpf(1)/k**2 for k in range(1, 6)))     # 1.4636111111111112...  H(5,2)  direct-sum path (n<10)
+print(sum(mp.mpf(1)/k**3 for k in range(1, 21)))    # 1.2008678419584369...  H(20,3) zeta path (n>=10)
+print(sum(mp.mpf(1)/k**2 for k in range(1, 16)))    # 1.580440283444987...   H(15,2) zeta path (n>=10)
+
+print('\n=== marcumP(mu, x, y) = 1 - marcumQ(mu, x, y) (half-squared convention) ===')
+print(1 - marcumQ(1, sqrt(2), sqrt(2)))    # 0.3457458387231645...  P_1(1,1)
+print(1 - marcumQ(1, 2.0, sqrt(6)))        # 0.58528941476587...    P_1(2,3)
+print(1 - marcumQ(2, sqrt(3), 2.0))        # 0.284074131902398...   P_2(1.5,2)

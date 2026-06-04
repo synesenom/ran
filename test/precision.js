@@ -280,4 +280,100 @@ describe('special-function precision gate', () => {
       assert.approximately(special.owenT(0.5, 2) / 0.1415806036539784, 1, 1e-14)
     })
   })
+
+  describe('besselInu — fractional order', () => {
+    // mpmath: mp.dps=70; besseli(nu, x). See precision-refs.py.
+    it('returns I_{0.5}(1) to 1e-14 relative error', () => {
+      assert.approximately(special.besselInu(0.5, 1.0) / 0.9376748882454876, 1, 1e-14)
+    })
+    it('returns I_{1.5}(2) to 1e-14 relative error', () => {
+      assert.approximately(special.besselInu(1.5, 2.0) / 1.0994731886331097, 1, 1e-14)
+    })
+    it('returns I_{2.3}(3) to 1e-14 relative error', () => {
+      assert.approximately(special.besselInu(2.3, 3.0) / 1.787657392247681, 1, 1e-14)
+    })
+  })
+
+  describe('besselISpherical', () => {
+    // mpmath: mp.dps=70; sqrt(pi/(2x)) * besseli(n+0.5, x). See precision-refs.py.
+    it('returns i_0(1) = sinh(1)/1 to 1e-14 relative error', () => {
+      assert.approximately(special.besselISpherical(0, 1.0) / 1.1752011936438014, 1, 1e-14)
+    })
+    it('returns i_1(0.5) via Taylor series (|x|<1) to 1e-14 relative error', () => {
+      assert.approximately(special.besselISpherical(1, 0.5) / 0.17087070843777213, 1, 1e-14)
+    })
+    it('returns i_2(3) via Wronskian (|x|>=1) to 1e-14 relative error', () => {
+      assert.approximately(special.besselISpherical(2, 3.0) / 1.096501524700701, 1, 1e-14)
+    })
+  })
+
+  describe('beta', () => {
+    // mpmath: mp.dps=70; beta(x, y) = exp(loggamma(x)+loggamma(y)-loggamma(x+y)). See precision-refs.py.
+    it('returns B(2,3) = 1/12 to 1e-14 relative error', () => {
+      assert.approximately(special.beta(2.0, 3.0) / (1 / 12), 1, 1e-14)
+    })
+    it('returns B(0.5,0.5) = pi to 1e-14 relative error', () => {
+      assert.approximately(special.beta(0.5, 0.5) / Math.PI, 1, 1e-14)
+    })
+    it('returns B(1.5,2.5) to 1e-14 relative error', () => {
+      assert.approximately(special.beta(1.5, 2.5) / 0.19634954084936207, 1, 1e-14)
+    })
+  })
+
+  describe('logBeta', () => {
+    // mpmath: mp.dps=70; loggamma(x)+loggamma(y)-loggamma(x+y). See precision-refs.py.
+    it('returns logB(2,3) = log(1/12) to 1e-14 relative error', () => {
+      assert.approximately(special.logBeta(2.0, 3.0) / -2.4849066497880004, 1, 1e-14)
+    })
+    it('returns logB(0.5,0.5) = log(pi) to 1e-14 relative error', () => {
+      assert.approximately(special.logBeta(0.5, 0.5) / Math.log(Math.PI), 1, 1e-14)
+    })
+    it('returns logB(1.5,2.5) to 1e-14 relative error', () => {
+      assert.approximately(special.logBeta(1.5, 2.5) / -1.627858836390381, 1, 1e-14)
+    })
+  })
+
+  describe('logBinomial', () => {
+    // mpmath: mp.dps=70; loggamma(n+1)-loggamma(k+1)-loggamma(n-k+1). See precision-refs.py.
+    it('returns logC(10,3) = log(120) to 1e-14 relative error', () => {
+      assert.approximately(special.logBinomial(10, 3) / 4.787491742782046, 1, 1e-14)
+    })
+    it('returns logC(20,7) = log(77520) to 1e-14 relative error', () => {
+      assert.approximately(special.logBinomial(20, 7) / 11.258291246564648, 1, 1e-14)
+    })
+    it('returns logC(5,2) = log(10) to 1e-14 relative error', () => {
+      assert.approximately(special.logBinomial(5, 2) / Math.log(10), 1, 1e-14)
+    })
+  })
+
+  describe('generalizedHarmonic', () => {
+    // mpmath: mp.dps=70; direct sum. See precision-refs.py.
+    // n<10: direct compensated sum path; n>=10: riemannZeta - hurwitzZeta path.
+    // zeta-path precision with s=2 is limited by hurwitzZeta Euler-Maclaurin (~1e-8);
+    // s=3 converges faster so achieves ~1e-10.
+    it('returns H(5,2) via direct sum to 1e-14 relative error', () => {
+      assert.approximately(special.generalizedHarmonic(5, 2) / 1.4636111111111112, 1, 1e-14)
+    })
+    it('returns H(20,3) via zeta path to 1e-10 relative error', () => {
+      assert.approximately(special.generalizedHarmonic(20, 3) / 1.2008678419584369, 1, 1e-10)
+    })
+    it('returns H(15,2) via zeta path to 1e-8 relative error', () => {
+      // s=2 Euler-Maclaurin limitation (same root cause as hurwitzZeta(2, a) gate above)
+      assert.approximately(special.generalizedHarmonic(15, 2) / 1.580440283444987, 1, 1e-8)
+    })
+  })
+
+  describe('marcumP', () => {
+    // mpmath: mp.dps=70; 1 - marcumQ series (half-squared convention). See precision-refs.py.
+    it('returns P_1(1,1) to 1e-14 relative error', () => {
+      assert.approximately(special.marcumP(1, 1, 1) / 0.3457458387231645, 1, 1e-14)
+    })
+    it('returns P_1(2,3) to 1e-13 relative error', () => {
+      // y=3 = x+mu: on the series regime boundary; inherited from marcumQ boundary accumulation
+      assert.approximately(special.marcumP(1, 2, 3) / 0.58528941476587, 1, 1e-13)
+    })
+    it('returns P_2(1.5,2) to 1e-14 relative error', () => {
+      assert.approximately(special.marcumP(2, 1.5, 2) / 0.284074131902398, 1, 1e-14)
+    })
+  })
 })
