@@ -1,4 +1,3 @@
-import Categorical from './categorical'
 import Distribution from './_distribution'
 
 /**
@@ -12,16 +11,16 @@ import Distribution from './_distribution'
  * @memberof ran.dist
  * @constructor
  */
-export default class Bernoulli extends Categorical {
-  // Special case of categorical
+export default class Bernoulli extends Distribution {
   /**
    * @param {number} p Probability of the outcome 1.
    */
   constructor (p) {
-    super([1 - p, p], 0)
-    this.p = { p }
+    super('discrete', 1)
 
-    // Validate parameter
+    this.p = { p }
+    this.s = [{ value: 0, closed: true }, { value: 1, closed: true }]
+
     Distribution.validate({ p }, [
       'p >= 0',
       'p <= 1'
@@ -39,7 +38,23 @@ export default class Bernoulli extends Categorical {
     return [mean]
   }
 
+  _generator () {
+    return this.r.next() < this.p.p ? 1 : 0
+  }
+
+  _pdf (x) {
+    if (x === 0) return 1 - this.p.p
+    if (x === 1) return this.p.p
+    return 0
+  }
+
+  _cdf (x) {
+    if (x < 0) return 0
+    if (x < 1) return 1 - this.p.p
+    return 1
+  }
+
   _q (p) {
-    return p > this.pdfTable[0] ? 1 : 0
+    return p > 1 - this.p.p ? 1 : 0
   }
 }

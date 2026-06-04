@@ -17,6 +17,35 @@ export default [{
     refVals: [
       { x: 0, pmf: 0.9, cdf: 0.9 },
       { x: 1.0, pmf: 0.1, cdf: 1.0 }
+    ],
+    quantileVals: [
+      { p: 0.5, x: 0 },
+      { p: 0.9, x: 0 },
+      { p: 0.91, x: 1 }
+    ]
+  }, {
+    name: 'p=0 (point mass at 0)',
+    params: () => [0],
+    refVals: [
+      { x: 0, pmf: 1, cdf: 1 },
+      { x: 1, pmf: 0, cdf: 1 }
+    ],
+    quantileVals: [
+      { p: 0.01, x: 0 },
+      { p: 0.5, x: 0 },
+      { p: 0.99, x: 0 }
+    ]
+  }, {
+    name: 'p=1 (point mass at 1)',
+    params: () => [1],
+    refVals: [
+      { x: 0, pmf: 0, cdf: 0 },
+      { x: 1, pmf: 1, cdf: 1 }
+    ],
+    quantileVals: [
+      { p: 0.01, x: 1 },
+      { p: 0.5, x: 1 },
+      { p: 0.99, x: 1 }
     ]
   }],
   // scipy.stats.bernoulli(0.5)
