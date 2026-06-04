@@ -671,10 +671,7 @@ describe('special', () => {
 
     it('riemannZeta(s) - hurwitzZeta(s, n+1) = H(s, n)', () => {
       repeat(() => {
-        // Avoid s < 1.5: riemannZeta uses Wynn-epsilon there with ~1e-7 absolute error
-        // while hurwitzZeta is now accurate to machine precision, so the identity check
-        // would see a spurious mismatch. The near-1 precision is covered by the test above.
-        const s = Math.random() * 9.5 + 1.5
+        const s = Math.random() * 9.5 + 1.01
         let sum = 0
         for (let n = 1; n < 100; n++) {
           sum += 1 / Math.pow(n, s)
@@ -688,12 +685,16 @@ describe('special', () => {
     })
 
     it('should be accurate near s = 1 via Laurent expansion', () => {
-      // Reference values from three-term Laurent expansion (DLMF 25.2.8); two-term truncation error is O(d^2)
+      // Reference values from three-term Laurent expansion (DLMF 25.2.8); three-term truncation error is O(d^3)
       // s > 1 side
       assert(Math.abs(special.riemannZeta(1.0001) / 10000.577222946486 - 1) < 1e-8)
       assert(Math.abs(special.riemannZeta(1.001) / 1000.5772884762018 - 1) < 1e-8)
-      assert(Math.abs(special.riemannZeta(1.01) / 100.5779433388382 - 1) < 1e-7) // looser: truncation error scales as d^2
-      // s < 1 side (Laurent branch fires for |s-1| < 0.01 in both directions)
+      assert(Math.abs(special.riemannZeta(1.01) / 100.5779433388382 - 1) < 1e-8)
+      assert(Math.abs(special.riemannZeta(1.02) / 50.5786700377986 - 1) < 1e-8)
+      // s=1.05 and s=1.1 cross-checked against independent hurwitzZeta(s, 1) references (ζ(s) = ζ(s,1))
+      assert(Math.abs(special.riemannZeta(1.05) / 20.580844344222 - 1) < 1e-8)
+      assert(Math.abs(special.riemannZeta(1.1) / 10.584448797634 - 1) < 1e-8)
+      // s < 1 side (Laurent branch fires for |s-1| < 0.1 in both directions)
       assert(Math.abs(special.riemannZeta(0.999) / (-999.422857150944) - 1) < 1e-8)
     })
   })
