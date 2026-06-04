@@ -1,6 +1,10 @@
 import riemannZeta from './riemann-zeta'
 import hurwitzZeta from './hurwitz-zeta'
+import digamma from './digamma'
 import neumaier from '../algorithms/neumaier'
+
+// Euler-Mascheroni constant γ; used for the m=1 identity H_n = γ + ψ(n+1).
+const EULER_MASCHERONI = 0.5772156649015329
 
 /**
  * Computes the generalized harmonic number H(n, m).
@@ -22,6 +26,7 @@ export default function (n, m) {
     return neumaier(terms)
   }
 
-  // Otherwise use the zeta functions.
+  // m=1 avoids ζ(1)−ζ(1,n+1) = ∞−∞ (NaN); use the exact identity H_n = γ + ψ(n+1) instead.
+  if (m === 1) return EULER_MASCHERONI + digamma(n + 1)
   return riemannZeta(m) - hurwitzZeta(m, n + 1)
 }

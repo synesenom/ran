@@ -569,6 +569,14 @@ describe('special-function precision gate', () => {
     it('returns H(5,1) = 137/60 via direct sum to 1e-14 relative error', () => {
       assert.approximately(special.generalizedHarmonic(5, 1) / 2.283333333333333, 1, 1e-14)
     })
+    // m=1 harmonic number for n>=10: previously returned NaN (∞−∞ via zeta path); now uses γ+ψ(n+1)
+    // n=10 is the smallest n that hits the digamma path (boundary of n>=10 branch).
+    it('returns H(10,1) = 7381/2520 at path boundary to 1e-14 relative error', () => {
+      assert.approximately(special.generalizedHarmonic(10, 1) / 2.9289682539682538, 1, 1e-14)
+    })
+    it('returns H(15,1) via digamma path to 1e-14 relative error', () => {
+      assert.approximately(special.generalizedHarmonic(15, 1) / 3.3182289932289932, 1, 1e-14)
+    })
   })
 
   describe('marcumP', () => {
