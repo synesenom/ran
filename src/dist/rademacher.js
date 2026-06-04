@@ -1,4 +1,4 @@
-import Categorical from './categorical'
+import Distribution from './_distribution'
 
 /**
  * Probability mass function for the [Rademacher distribution]{@link https://en.wikipedia.org/wiki/Rademacher_distribution}:
@@ -11,12 +11,31 @@ import Categorical from './categorical'
  * @memberof ran.dist
  * @constructor
  */
-export default class Rademacher extends Categorical {
-  // Special case of categorical
+export default class Rademacher extends Distribution {
   /** */
   constructor () {
-    super([0.5, 0, 0.5], -1)
-    this.p = {}
+    super('discrete', 0)
+    this.s = [{
+      value: -1,
+      closed: true
+    }, {
+      value: 1,
+      closed: true
+    }]
+  }
+
+  _generator () {
+    return this.r.next() < 0.5 ? -1 : 1
+  }
+
+  _pdf (x) {
+    return x === -1 || x === 1 ? 0.5 : 0
+  }
+
+  _cdf (x) {
+    if (x < -1) return 0
+    if (x < 1) return 0.5
+    return 1
   }
 
   _q (p) {
