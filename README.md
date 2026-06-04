@@ -181,9 +181,11 @@ new ran.dist.Normal(0, 1).pdf(-Infinity) // => 0       (outside support)
 
 ## Numerical precision
 
-ranjs targets **≤ 1e-14 relative error** for all public outputs in non-degenerate parameter regions. Outputs involving deeply composed operations (quantile inversion, extreme parameter regimes) have a documented floor of **~1e-12**.
+ranjs targets **≤ 1e-14 relative error** for all public outputs in non-degenerate parameter regions. Outputs involving deeply composed operations (quantile inversion, extreme parameter regimes) have a documented floor of **~1e-12**, looser still for a handful of quantiles computed by numerical root-finding or near-boundary asymptotics (see below).
 
 All 28 discrete distributions are verified against mpmath references at 50 decimal places. The following distributions cap at 1e-12 at certain parameter settings: BetaBinomial, Binomial, Hypergeometric, NegativeBinomial, NegativeHypergeometric, Poisson, Skellam.
+
+All 110 continuous distributions are likewise verified against mpmath references at 50 decimal places (three parameter sets each). **pdf/cdf** cap at 1e-12–1e-13 at certain parameter settings for: Bates, IrwinHall, Levy, InverseGaussian, NoncentralBeta, NoncentralChi, NoncentralT, DoublyNoncentralT, SkewNormal, Rice, and R. **Quantiles** with a closed-form or Halley-refined inverse round-trip to 1e-14; those computed by numerical root-finding (BaldingNichols, Bates, BetaPrime, Davis, DoubleGamma, FisherZ, GeneralizedGamma, LogGamma, Muth, NoncentralChi2, NoncentralF, DoublyNoncentralChi2, DoublyNoncentralT, SkewNormal, Student's t/z, UniformProduct, R) round-trip to ~1e-13–1e-10, and BenktanderII's near-boundary asymptotic branch (b → 1) to ~1e-9.
 
 ## Documentation
 
