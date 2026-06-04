@@ -75,9 +75,8 @@ export default class Categorical extends Distribution {
   }
 
   static _fitInit (data) {
-    // Subclasses (Bernoulli, Binomial, Zipf, ...) reuse Categorical's storage but have scalar
-    // constructors of their own; only override for Categorical itself so the base-class random
-    // retry still services the rest of the hierarchy.
+    // Subclasses (Zipf, ...) that still extend Categorical have scalar constructors of their own;
+    // only override for Categorical itself so the base-class random retry still services the rest.
     if (this !== Categorical) {
       return super._fitInit(data)
     }
@@ -102,7 +101,7 @@ export default class Categorical extends Distribution {
    * @returns {Categorical} A new Categorical instance with MLE parameters.
    */
   static fit (data) {
-    // Subclasses (Bernoulli, Binomial, etc.) have scalar constructors, so the (weights, min)
+    // Subclasses that still extend Categorical have scalar constructors, so the (weights, min)
     // construction here only applies to Categorical itself — delegate everything else to the
     // base-class implementation, which still wires the subclass's own _fitInit into Nelder-Mead.
     if (this !== Categorical) {

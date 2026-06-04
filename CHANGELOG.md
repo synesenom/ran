@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `Bernoulli` now extends `Distribution` directly instead of `Categorical`, replacing alias-table construction with analytical `_pdf`, `_cdf`, and `_generator` implementations. Also corrects `this.k` from 2 (inherited from `Categorical`) to 1, fixing `aic()` and `bic()` penalty counts (#669).
 - `Binomial` now extends `Distribution` directly instead of `Categorical`. The constructor no longer builds an O(n) alias table; `_pmf` is computed analytically via `exp(logBinomial(n,x) + x·log(p) + (n−x)·log(1−p))` with explicit guards for `p=0`/`p=1`; and `sample()` sums `n` independent Bernoulli trials. The `_cdf` formula via `regularizedBetaIncomplete` is unchanged (#670).
 - `Rademacher` now subclasses `Distribution` directly instead of `Categorical`, implementing analytical `_pdf`, `_cdf`, and `_generator` methods. Eliminates unnecessary alias-table infrastructure for a two-point symmetric distribution (#668).
 - `Levy`, `Lindley`, `Moyal`, and `Reciprocal` now implement exact closed-form quantile functions (`_q`) instead of falling back to the root-finder: `Levy` and `Moyal` via `erfinv`, `Lindley` via the `W₋₁` branch of Lambert W, and `Reciprocal` (log-uniform) directly as `a·(b/a)^p`. Quantile values are unchanged but computation is now O(1) instead of O(iterations); the `Lindley`, `Moyal`, and `Reciprocal` `_generator()` samplers now reuse `_q` (#619).
