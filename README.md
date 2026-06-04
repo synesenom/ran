@@ -181,29 +181,9 @@ new ran.dist.Normal(0, 1).pdf(-Infinity) // => 0       (outside support)
 
 ## Numerical precision
 
-ranjs targets **≤ 1e-14 relative error** for all public outputs in non-degenerate parameter regions. v1.27.0 replaced or fixed 20 numerical algorithms and special functions across four algorithm families — root-finding, quadrature, series summation, and special functions — to meet this target. All iterative algorithms stop at `Number.EPSILON` (≈ 2.22×10⁻¹⁶); output precision is lower because floating-point errors accumulate across composed operations.
+ranjs targets **≤ 1e-14 relative error** for all public outputs in non-degenerate parameter regions. Outputs involving deeply composed operations (quantile inversion, extreme parameter regimes) have a documented floor of **~1e-12**.
 
-Achievable precision falls into three tiers depending on how many operations compose:
-
-| Tier | Examples | Achievable precision |
-|------|----------|----------------------|
-| Simple — one special-function call | Normal CDF, Gamma PDF | 1–5 ULP (~4×10⁻¹⁶) |
-| Composed — quantile via root-finding, noncentral families | Gamma quantile, Noncentral Chi-Squared | ~1e-14 |
-| Deeply nested series | Doubly Noncentral T, Marcum Q at extreme parameters | ~1e-12 (documented floor) |
-
-### Discrete distributions
-
-All 28 discrete distributions are verified by `test/precision-discrete.js` against mpmath references at 50 decimal places. PMF, CDF, and quantile are each checked to **relative error ≤ 1e-14** across the support.
-
-Ten parameter sets are guarded at a documented **1e-12** cap due to known floating-point limits:
-
-| Root cause | Affected distributions |
-|---|---|
-| logGamma/logBeta ratio + CDF summation | BetaBinomial, Hypergeometric, NegativeHypergeometric |
-| log-factorial PMF + tail CDF summation | Binomial, NegativeBinomial, Poisson |
-| Modified Bessel function series rounding | Skellam |
-
-Special-function precision is separately gated by `test/precision.js`.
+All 28 discrete distributions are verified against mpmath references at 50 decimal places. The following distributions cap at 1e-12 at certain parameter settings: BetaBinomial, Binomial, Hypergeometric, NegativeBinomial, NegativeHypergeometric, Poisson, Skellam.
 
 ## Documentation
 
