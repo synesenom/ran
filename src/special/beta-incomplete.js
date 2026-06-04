@@ -55,9 +55,12 @@ export function betaIncomplete (a, b, x) {
     ? 0
     : Math.exp(a * Math.log(x) + b * Math.log(1 - x))
   // Use I(b, a, x) only if b != 0
+  // Backward branch: B(a,b,x) = B(a,b) - B(b,a,1-x); B(a,b) != 1 for unnormalized form
+  // (regularizedBetaIncomplete uses 1 because its bt already encodes 1/B(a,b))
+  // See solutions/special-functions/2026-06-04-1805-betaIncomplete-backward-branch-complement-constant.md
   return a !== 0 && (x < (a + 1) / (a + b + 2) || b === 0)
     ? bt * _biContinuedFraction(a, b, x) / a
-    : 1 - bt * _biContinuedFraction(b, a, 1 - x) / b
+    : Math.exp(logGamma(a) + logGamma(b) - logGamma(a + b)) - bt * _biContinuedFraction(b, a, 1 - x) / b
 }
 
 /**
