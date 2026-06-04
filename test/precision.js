@@ -332,8 +332,9 @@ describe('special-function precision gate', () => {
       assert.approximately(special.riemannZeta(3) / 1.2020569031595942, 1, 1e-14)
     })
     it('returns zeta(1.001) to 1e-12 relative error (near-pole Laurent expansion)', () => {
-      // s = 1.001 is within the Laurent window (|s-1| < 0.1001); exercises the Laurent path
-      // Laurent expansion achieves ~1e-13 here; 1e-14 is not guaranteed
+      // s = 1.001 is within the Laurent window (|s-1| < 0.1001); exercises the Laurent path.
+      // 1e-14 is not achievable here: d = s-1 = 1.001-1 is 1 ULP below 0.001 in float64, so
+      // 1/d overshoots 1000 by ~1e-10 — the dominant error regardless of Laurent terms added.
       assert.approximately(special.riemannZeta(1.001) / 1000.5772884759015, 1, 1e-12)
     })
     // Alternating series path: s not in Laurent window, d = s-1 outside (-0.01, 0.1001)
