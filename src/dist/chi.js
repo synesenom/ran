@@ -39,6 +39,7 @@ export default class Chi extends Chi2 {
 
   _q (p) {
     // Chi = sqrt(Chi2) = sqrt(Gamma(k/2, 0.5)); invert by sqrt of Gamma quantile
+    // solutions/distribution/2026-06-05-0000-gamma-transform-quantile-closed-form.md
     return Math.sqrt(gammaLowerIncompleteInv(this.p.alpha, p) / this.p.beta)
   }
 
