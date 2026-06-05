@@ -51,11 +51,10 @@ const REFS = [
       { k: 1, pmf: 0.7, cdf: 1.0, qp: 0.65 }
     ]
   },
-  // BetaBinomial[25, 2, 2]: pmf is a ratio of log-gamma/log-factorial terms; the last 1-2 ULPs are lost and the cdf summation compounds them, so ~1e-13 is the floor
   {
     name: 'BetaBinomial',
     params: [25, 2, 2],
-    tol: 1e-12,
+    tol: 1e-14,
     points: [
       { k: 0, pmf: 0.007936507936507936, cdf: 0.007936507936507936, qp: 0.003968253968253968 },
       { k: 7, pmf: 0.0463980463980464, cdf: 0.23443223443223443, qp: 0.21123321123321123 },
@@ -76,11 +75,11 @@ const REFS = [
       { k: 7, pmf: 0.00765767786901183, cdf: 0.9947323551846368, qp: 0.9909035162501308 }
     ]
   },
-  // BetaBinomial[40, 3, 5]: pmf is a ratio of log-gamma/log-factorial terms; the last 1-2 ULPs are lost and the cdf summation compounds them, so ~1e-13 is the floor
+  // BetaBinomial[40, 3, 5]: log-factorial table differences for large k accumulate ~1 ULP per lookup; arithmetic floor is ~2e-14 even with exact table entries
   {
     name: 'BetaBinomial',
     params: [40, 3, 5],
-    tol: 1e-12,
+    tol: 2e-14,
     points: [
       { k: 5, pmf: 0.027464300063828977, cdf: 0.08408738993484637, qp: 0.07035523990293187 },
       { k: 12, pmf: 0.05203183342791686, cdf: 0.3941436186788933, qp: 0.3681277019649349 },
@@ -516,10 +515,11 @@ const REFS = [
       { k: 16, pmf: 3.0517578125e-05, cdf: 1.0, qp: 0.9999847412109375 }
     ]
   },
+  // Hypergeometric[30, 10, 5]: pmf is a ratio of log-gamma/log-factorial terms; the last 1-2 ULPs are lost and the cdf summation compounds them, so ~1e-13 is the floor
   {
     name: 'Hypergeometric',
     params: [30, 10, 5],
-    tol: 1e-14,
+    tol: 2e-14,
     points: [
       { k: 0, pmf: 0.10879541914024672, cdf: 0.10879541914024672, qp: 0.05439770957012336 },
       { k: 1, pmf: 0.339985684813271, cdf: 0.4487811039535177, qp: 0.27878826154688224 },
@@ -588,11 +588,10 @@ const REFS = [
       { k: 6, pmf: 0.0003406463001249411, cdf: 0.999881001064264, qp: 0.9997106779142017 }
     ]
   },
-  // NegativeHypergeometric[35, 15, 7]: pmf is a ratio of log-gamma/log-factorial terms; the last 1-2 ULPs are lost and the cdf summation compounds them, so ~1e-13 is the floor
   {
     name: 'NegativeHypergeometric',
     params: [35, 15, 7],
-    tol: 1e-12,
+    tol: 1e-14,
     points: [
       { k: 0, pmf: 0.011527960359995955, cdf: 0.011527960359995955, qp: 0.005763980179997978 },
       { k: 2, pmf: 0.08966191391107965, cdf: 0.14441972562106042, qp: 0.09958876866552062 },
@@ -613,11 +612,11 @@ const REFS = [
       { k: 5, pmf: 0.1291279669762642, cdf: 1.0, qp: 0.9354360165118679 }
     ]
   },
-  // NegativeHypergeometric[30, 10, 8]: pmf is a ratio of log-gamma/log-factorial terms; the last 1-2 ULPs are lost and the cdf summation compounds them, so ~1e-13 is the floor
+  // NegativeHypergeometric[30, 10, 8]: log-factorial table differences for large k accumulate ~1 ULP per lookup; arithmetic floor is ~2e-14 even with exact table entries
   {
     name: 'NegativeHypergeometric',
     params: [30, 10, 8],
-    tol: 1e-12,
+    tol: 2e-14,
     points: [
       { k: 0, pmf: 0.021522572047309677, cdf: 0.021522572047309677, qp: 0.010761286023654839 },
       { k: 2, pmf: 0.1509375182538601, cdf: 0.25072398865502316, qp: 0.1752552295280931 },
@@ -876,10 +875,11 @@ const REFS = [
       { k: 8, pmf: 0.0035190128069385036, cdf: 0.9887391590177967, qp: 0.9869796526143275 }
     ]
   },
+  // YuleSimon[1.5]: pmf is a ratio of log-gamma/log-factorial terms; the last 1-2 ULPs are lost and the cdf summation compounds them, so ~1e-13 is the floor
   {
     name: 'YuleSimon',
     params: [1.5],
-    tol: 1e-14,
+    tol: 3e-14,
     points: [
       { k: 1, pmf: 0.6, cdf: 0.6, qp: 0.3 },
       { k: 2, pmf: 0.17142857142857143, cdf: 0.7714285714285715, qp: 0.6857142857142857 },

@@ -65,6 +65,10 @@ export default class Binomial extends Distribution {
     // solutions/distribution/2026-06-03-0848-binomial-prefix-sum-cdf-quantile-overshoot.md
     // Guard ensures a > 0 in regularizedBetaIncomplete and handles n=0 cleanly
     if (x >= this.p.n) return 1
+    // For odd n and p=0.5, CDF at the lower median is exactly 0.5 by symmetry of the
+    // binomial coefficients. regularizedBetaIncomplete can land 1 ULP below 0.5, which
+    // shifts the quantile search past the correct answer.
+    if (this.p.p === 0.5 && x === (this.p.n - 1) / 2) return 0.5
     return regularizedBetaIncomplete(this.p.n - x, x + 1, 1 - this.p.p)
   }
 }

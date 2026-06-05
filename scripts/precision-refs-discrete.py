@@ -284,17 +284,18 @@ SPEC = [
 _LGAMMA = 'pmf is a ratio of log-gamma/log-factorial terms; the last 1-2 ULPs are lost and the cdf summation compounds them, so ~1e-13 is the floor'
 _TAIL = 'log-factorial pmf plus tail cdf summation accumulates a few ULPs beyond 1e-14'
 _BESSEL = 'pmf evaluates a modified Bessel function I_k; its series rounding limits precision to ~1e-13'
+_ARITH = 'log-factorial table differences for large k accumulate ~1 ULP per lookup; arithmetic floor is ~2e-14 even with exact table entries'
 TOL_OVERRIDE = {
-    ('BetaBinomial', '[25, 2, 2]'): (1e-12, _LGAMMA),
-    ('BetaBinomial', '[40, 3, 5]'): (1e-12, _LGAMMA),
+    ('BetaBinomial', '[40, 3, 5]'): (2e-14, _ARITH),
     ('Binomial', '[25, 0.5]'): (1e-12, _TAIL),
     ('Binomial', '[50, 0.3]'): (1e-12, _TAIL),
+    ('Hypergeometric', '[30, 10, 5]'): (2e-14, _LGAMMA),
     ('Hypergeometric', '[50, 20, 15]'): (1e-12, _LGAMMA),
     ('NegativeBinomial', '[20, 0.3]'): (1e-12, _TAIL),
-    ('NegativeHypergeometric', '[30, 10, 8]'): (1e-12, _LGAMMA),
-    ('NegativeHypergeometric', '[35, 15, 7]'): (1e-12, _LGAMMA),
+    ('NegativeHypergeometric', '[30, 10, 8]'): (2e-14, _ARITH),
     ('Poisson', '[40]'): (1e-12, _TAIL),
     ('Skellam', '[5, 5]'): (1e-12, _BESSEL),
+    ('YuleSimon', '[1.5]'): (3e-14, _LGAMMA),
 }
 
 
