@@ -1271,6 +1271,37 @@ describe('special', () => {
     })
   })
 
+  describe('.erfcx()', () => {
+    it('should return 1 at zero', () => {
+      assert(equal(special.erfcx(0), 1))
+    })
+
+    it('should return reference values', () => {
+      ;[
+        { x: 0.5, y: 0.6156903441929259 },
+        { x: 1.0, y: 0.427583576155807 },
+        { x: 2.0, y: 0.25539567631050569 },
+        { x: 5.0, y: 0.11070463773306866 }
+      ].forEach(d => {
+        assert(equal(special.erfcx(d.x), d.y), `erfcx(${d.x})`)
+      })
+    })
+
+    it('should remain finite for large x where erfc(x) underflows to 0', () => {
+      assert(special.erfc(30) === 0, 'erfc(30) underflows in float64')
+      assert(equal(special.erfcx(30), 0.018795888861416754), 'erfcx(30) reference value')
+    })
+
+    it('should return reference values for negative arguments', () => {
+      ;[
+        { x: -1, y: 5.0089800807622833 },
+        { x: -3, y: 16205.988853999588 }
+      ].forEach(d => {
+        assert(equal(special.erfcx(d.x), d.y), `erfcx(${d.x})`)
+      })
+    })
+  })
+
   describe('.erfinv()', () => {
     it('should return zero for zero argument', () => {
       assert(special.erfinv(0) === 0)
