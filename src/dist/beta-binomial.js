@@ -61,14 +61,28 @@ export default class BetaBinomial extends Categorical {
     const { n, alpha, beta } = this.p
     if (x >= n) return 1
     const logBetaAB = logBeta(alpha, beta)
+    // Upper half: backward sum has few terms, no catastrophic cancellation in 1-bwd.
+    if (x >= n / 2) {
+      let bwd = 0
+      for (let k = n; k > x; k--) {
+        bwd += Math.exp(logBinomial(n, k) + logBeta(k + alpha, n - k + beta) - logBetaAB)
+      }
+      return Math.min(1, 1 - bwd)
+    }
     let fwd = 0
     for (let k = 0; k <= x; k++) {
       fwd += Math.exp(logBinomial(n, k) + logBeta(k + alpha, n - k + beta) - logBetaAB)
     }
+    // When CDF is small (fwd < 0.25), 1-bwd suffers catastrophic cancellation amplified
+    // by ~1/CDF ≫ 1, so the forward sum alone is far more accurate.
+    // When CDF ≥ 0.25 (near the midpoint), cancellation is mild; use max(fwd, 1-bwd) so
+    // that exact-0.5 boundaries (symmetric distributions) never fall below 0.5 and
+    // cause quantile to overshoot by one.
+    if (fwd < 0.25) return fwd
     let bwd = 0
     for (let k = n; k > x; k--) {
       bwd += Math.exp(logBinomial(n, k) + logBeta(k + alpha, n - k + beta) - logBetaAB)
     }
-    return Math.min(1, Math.max(fwd, 1 - bwd))
+    return Math.max(fwd, 1 - bwd)
   }
 }

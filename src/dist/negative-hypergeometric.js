@@ -54,14 +54,27 @@ export default class NegativeHypergeometric extends Categorical {
     const { N, K, r } = this.p
     if (x >= K) return 1
     const logBinNK = logBinomial(N, K)
+    // Upper half: backward sum has few terms, no catastrophic cancellation in 1-bwd.
+    if (x >= K / 2) {
+      let bwd = 0
+      for (let k = K; k > x; k--) {
+        bwd += Math.exp(logBinomial(k + r - 1, k) + logBinomial(N - r - k, K - k) - logBinNK)
+      }
+      return Math.min(1, 1 - bwd)
+    }
     let fwd = 0
     for (let k = 0; k <= x; k++) {
       fwd += Math.exp(logBinomial(k + r - 1, k) + logBinomial(N - r - k, K - k) - logBinNK)
     }
+    // When CDF is small (fwd < 0.25), 1-bwd suffers catastrophic cancellation amplified
+    // by ~1/CDF ≫ 1, so the forward sum alone is far more accurate.
+    // When CDF ≥ 0.25 (near the midpoint), cancellation is mild; use max(fwd, 1-bwd) so
+    // that exact-0.5 boundaries never fall below 0.5 and cause quantile to overshoot.
+    if (fwd < 0.25) return fwd
     let bwd = 0
     for (let k = K; k > x; k--) {
       bwd += Math.exp(logBinomial(k + r - 1, k) + logBinomial(N - r - k, K - k) - logBinNK)
     }
-    return Math.min(1, Math.max(fwd, 1 - bwd))
+    return Math.max(fwd, 1 - bwd)
   }
 }
