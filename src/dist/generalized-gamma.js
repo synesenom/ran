@@ -1,3 +1,4 @@
+import { gammaLowerIncompleteInv } from '../special'
 import Gamma from './gamma'
 import Distribution from './_distribution'
 
@@ -21,8 +22,6 @@ export default class GeneralizedGamma extends Gamma {
    */
   constructor (a, d, p) {
     super(d / p, Math.pow(a, -p))
-    this._q = undefined // Gamma._q is wrong for the power transform; fall back to _qEstimateRoot
-
     // GeneralizedGamma has 3 free parameters (a, d, p); override the 2 inherited from Gamma
     this.k = 3
 
@@ -42,6 +41,11 @@ export default class GeneralizedGamma extends Gamma {
       value: Infinity,
       closed: false
     }]
+  }
+
+  _q (p) {
+    // GeneralizedGamma: X = Y^(1/p_shape) where Y ~ Gamma(d/p_shape, a^-p_shape)
+    return Math.pow(gammaLowerIncompleteInv(this.p.alpha, p) / this.p.beta, 1 / this.p.p)
   }
 
   _generator () {

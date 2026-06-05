@@ -1,3 +1,4 @@
+import { gammaLowerIncompleteInv } from '../special'
 import Gamma from './gamma'
 import Distribution from './_distribution'
 
@@ -21,8 +22,6 @@ export default class LogGamma extends Gamma {
    */
   constructor (alpha, beta, mu) {
     super(alpha, beta)
-    this._q = undefined // Gamma._q is wrong for the log transform; fall back to _qEstimateRoot
-
     // LogGamma has 3 free parameters (alpha, beta, mu); override the 2 inherited from Gamma
     this.k = 3
 
@@ -40,6 +39,11 @@ export default class LogGamma extends Gamma {
       value: Infinity,
       closed: false
     }]
+  }
+
+  _q (p) {
+    // LogGamma: X = exp(Y) + mu - 1 where Y ~ Gamma(alpha, beta); invert via exp
+    return Math.exp(gammaLowerIncompleteInv(this.p.alpha, p) / this.p.beta) + this.p.mu - 1
   }
 
   _generator () {

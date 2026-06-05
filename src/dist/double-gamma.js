@@ -1,3 +1,4 @@
+import { gammaLowerIncompleteInv } from '../special'
 import Gamma from './gamma'
 
 /**
@@ -20,8 +21,6 @@ export default class DoubleGamma extends Gamma {
    */
   constructor (alpha, beta) {
     super(alpha, beta)
-    this._q = undefined // Gamma._q is wrong for the double-sided transform; fall back to _qEstimateRoot
-
     // Set support
     this.s = [{
       value: -Infinity,
@@ -30,6 +29,13 @@ export default class DoubleGamma extends Gamma {
       value: Infinity,
       closed: false
     }]
+  }
+
+  _q (p) {
+    // DoubleGamma is symmetric: positive half when p > 0.5, negative when p <= 0.5
+    return p > 0.5
+      ? gammaLowerIncompleteInv(this.p.alpha, 2 * p - 1) / this.p.beta
+      : -gammaLowerIncompleteInv(this.p.alpha, 1 - 2 * p) / this.p.beta
   }
 
   _generator () {
