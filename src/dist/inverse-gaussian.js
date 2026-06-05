@@ -1,4 +1,4 @@
-import { erf, erfc } from '../special'
+import { erfc, erfcx } from '../special'
 import normal from './_normal'
 import Distribution from './_distribution'
 
@@ -41,7 +41,7 @@ export default class InverseGaussian extends Distribution {
     // Speed-up constants
     this.c = {
       halfMuOverLambda: 0.5 * mu / lambda,
-      expTwoLambdaOverMu: Math.exp(2 * lambda / mu),
+      twoLambdaOverMu: 2 * lambda / mu,
       sqrtLambdaOverMuSq: Math.sqrt(lambda / (mu * mu))
     }
   }
@@ -81,13 +81,11 @@ export default class InverseGaussian extends Distribution {
   _cdf (x) {
     const s = Math.sqrt(this.p.lambda / x)
     const st = Math.sqrt(x) * this.c.sqrtLambdaOverMuSq
-    const z = erf(Math.SQRT1_2 * (st - s))
-
-    // Handle 1 - z << 1 case
-    if (1 - z > Number.EPSILON) {
-      return Math.min(1, 0.5 * (1 + z + this.c.expTwoLambdaOverMu * erfc(Math.SQRT1_2 * (st + s))))
-    } else {
-      return Math.min(1, 0.5 * (erfc(Math.SQRT1_2 * (s - st)) + this.c.expTwoLambdaOverMu * erfc(Math.SQRT1_2 * (st + s))))
-    }
+    const a = Math.SQRT1_2 * (st - s)
+    const b = Math.SQRT1_2 * (st + s)
+    // erfc(-a) avoids 1+erf cancellation in the lower tail.
+    // erfcx(b)·exp(2λ/μ − b²) avoids overflow for large 2λ/μ; the exponent ≤ 0 always.
+    // See solutions/special-functions/2026-06-05-0000-inverse-gaussian-cdf-erfc-cancellation-cf-convergence.md
+    return Math.min(1, 0.5 * (erfc(-a) + erfcx(b) * Math.exp(this.c.twoLambdaOverMu - b * b)))
   }
 }

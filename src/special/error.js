@@ -22,12 +22,14 @@ function _erfSeries (x) {
   return sum * 2 / Math.sqrt(Math.PI)
 }
 
-// Laplace continued fraction for erfc: b_n = x, a_n = n/2 (DLMF 7.9.2)
-function _erfcCF (x) {
+// Laplace continued fraction (DLMF 7.9.2): b_n = x, a_n = n/2, evaluated via
+// Lentz's algorithm. Converges in ≤ 188 iters for x ≥ 1 (MAX_ITER=100 is insufficient).
+// See solutions/special-functions/2026-06-05-0000-inverse-gaussian-cdf-erfc-cancellation-cf-convergence.md
+function _erfcLaplaceCF (x) {
   let f = x
   let C = x
   let D = 0
-  for (let n = 1; n <= MAX_ITER; n++) {
+  for (let n = 1; n <= 250; n++) {
     const a = n / 2
     D = x + a * D
     if (Math.abs(D) < DELTA) D = DELTA
@@ -38,7 +40,17 @@ function _erfcCF (x) {
     f *= delta
     if (Math.abs(delta - 1) < EPS) break
   }
-  return Math.exp(-x * x) / Math.sqrt(Math.PI) / f
+  return f
+}
+
+function _erfcCF (x) {
+  return Math.exp(-x * x) / (Math.sqrt(Math.PI) * _erfcLaplaceCF(x))
+}
+
+// Returns erfcx(x) = exp(x²)·erfc(x) without the exp(−x²) factor, staying finite
+// for large x where erfc(x) underflows to 0.
+function _erfcxCF (x) {
+  return 1 / (Math.sqrt(Math.PI) * _erfcLaplaceCF(x))
 }
 
 /**
@@ -72,6 +84,23 @@ export function erfc (x) {
   // See solutions/special-functions/2026-05-17-1540-erfc-crossover-cancellation.md
   if (x <= 1) return 1 - _erfSeries(x)
   return _erfcCF(x)
+}
+
+/**
+ * Computes the scaled complementary error function erfcx(x) = exp(x²)·erfc(x).
+ * Avoids overflow for large positive x (where erfc(x) underflows) by using the
+ * Laplace CF without the exp(−x²) factor; remains finite as x → +∞ (~1/(x√π)).
+ *
+ * @method erfcx
+ * @memberof ran.special
+ * @param {number} x Value to evaluate the scaled complementary error function at.
+ * @returns {number} Scaled complementary error function value.
+ * @private
+ */
+export function erfcx (x) {
+  if (x <= 0) return Math.exp(x * x) * erfc(x)
+  if (x <= 1) return Math.exp(x * x) * (1 - _erfSeries(x))
+  return _erfcxCF(x)
 }
 
 /**

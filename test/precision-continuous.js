@@ -2004,12 +2004,11 @@ const REFS = [
       { x: 4.286067825914297, pdf: 0.04687594809350626, cdf: 0.9 }
     ]
   },
-  // InverseGaussian[1, 0.5]: cdf mixes erf and exp(2lambda/mu)*erfc; float64 cancellation caps accuracy near 5e-12 for small mu/lambda, and q() root-finds on it
   {
     name: 'InverseGaussian',
     params: [1, 0.5],
-    tol: 5e-12,
-    qtol: 1e-10,
+    tol: 1e-14,
+    qtol: 1e-14,
     points: [
       { x: 0.14383293648975035, pdf: 1.4463689505803858, cdf: 0.1 },
       { x: 0.291440323888161, pdf: 1.1655572205958422, cdf: 0.3 },
@@ -2018,12 +2017,11 @@ const REFS = [
       { x: 2.3582610418761214, pdf: 0.06405748139958603, cdf: 0.9 }
     ]
   },
-  // InverseGaussian[3, 1]: cdf mixes erf and exp(2lambda/mu)*erfc; float64 cancellation caps accuracy near 5e-12 for small mu/lambda, and q() root-finds on it
   {
     name: 'InverseGaussian',
     params: [3, 1],
-    tol: 5e-12,
-    qtol: 1e-11,
+    tol: 1e-14,
+    qtol: 1e-14,
     points: [
       { x: 0.31011741944534127, pdf: 0.6319657634488135, cdf: 0.1 },
       { x: 0.6638673599997754, pdf: 0.46713365816842656, cdf: 0.3 },
