@@ -1,3 +1,4 @@
+import { gammaLowerIncompleteInv } from '../special'
 import GeneralizedGamma from './generalized-gamma'
 import Distribution from './_distribution'
 
@@ -37,6 +38,12 @@ export default class GeneralizedNormal extends GeneralizedGamma {
       value: Infinity,
       closed: false
     }]
+  }
+
+  _q (p) {
+    // GeneralizedNormal folds GeneralizedGamma over mu; invert the fold then shift by mu
+    const gg = Math.pow(gammaLowerIncompleteInv(this.p.alpha, p > 0.5 ? 2 * p - 1 : 1 - 2 * p) / this.p.beta, 1 / this.p.p)
+    return p > 0.5 ? this.p.mu + gg : this.p.mu - gg
   }
 
   _generator () {

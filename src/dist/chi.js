@@ -1,3 +1,4 @@
+import { gammaLowerIncompleteInv } from '../special'
 import Distribution from './_distribution'
 import Chi2 from './chi2'
 
@@ -19,8 +20,6 @@ export default class Chi extends Chi2 {
    */
   constructor (k) {
     super(k)
-    this._q = undefined // Gamma._q is wrong for the sqrt transform; fall back to _qEstimateRoot — solutions/correctness/2026-05-23-1930-gamma-subclass-q-inheritance-guard.md
-
     // Validate parameters
     const ki = Math.round(k)
     this.p = Object.assign(this.p, { k: ki })
@@ -36,6 +35,11 @@ export default class Chi extends Chi2 {
       value: Infinity,
       closed: false
     }]
+  }
+
+  _q (p) {
+    // Chi = sqrt(Chi2) = sqrt(Gamma(k/2, 0.5)); invert by sqrt of Gamma quantile
+    return Math.sqrt(gammaLowerIncompleteInv(this.p.alpha, p) / this.p.beta)
   }
 
   _generator () {

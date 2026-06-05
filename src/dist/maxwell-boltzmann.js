@@ -1,3 +1,4 @@
+import { gammaLowerIncompleteInv } from '../special'
 import Gamma from './gamma'
 import Distribution from './_distribution'
 
@@ -19,8 +20,6 @@ export default class MaxwellBoltzmann extends Gamma {
   constructor (a) {
     // X = sqrt(Y) where Y ~ Gamma(3/2, rate=1/(2a²)); Jacobian gives Maxwell-Boltzmann PDF
     super(1.5, 0.5 / (a * a))
-    this._q = undefined // Gamma._q is wrong for the sqrt transform; fall back to _qEstimateRoot
-
     // MaxwellBoltzmann has 1 free parameter (a); override the 2 inherited from Gamma
     this.k = 1
 
@@ -28,6 +27,11 @@ export default class MaxwellBoltzmann extends Gamma {
     Distribution.validate({ a }, [
       'a > 0'
     ])
+  }
+
+  _q (p) {
+    // MaxwellBoltzmann: X = sqrt(Y) where Y ~ Gamma(3/2, 1/(2a²)); invert by sqrt
+    return Math.sqrt(gammaLowerIncompleteInv(this.p.alpha, p) / this.p.beta)
   }
 
   _generator () {

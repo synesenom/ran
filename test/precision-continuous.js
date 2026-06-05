@@ -826,12 +826,11 @@ const REFS = [
       { x: 1.497154173501061, pdf: 0.14992875295916813, cdf: 0.9 }
     ]
   },
-  // DoubleGamma[0.5, 2]: q() has no closed form (numerical root-finding), so the round-trip is accurate to a few ULPs beyond 1e-14
   {
     name: 'DoubleGamma',
     params: [0.5, 2],
     tol: 1e-14,
-    qtol: 1e-12,
+    qtol: 1e-14,
     points: [
       { x: -0.4105936037874541, pdf: 0.2738841520714121, cdf: 0.1 },
       { x: -0.06874897443211402, pdf: 1.326057491456539, cdf: 0.3 },
@@ -1496,12 +1495,11 @@ const REFS = [
       { x: 3.034854258770293, pdf: 0.15174271293851463, cdf: 0.9 }
     ]
   },
-  // GeneralizedGamma[0.5, 0.5, 0.5]: q() has no closed form (numerical root-finding), so the round-trip is accurate to a few ULPs beyond 1e-14
   {
     name: 'GeneralizedGamma',
     params: [0.5, 0.5, 0.5],
     tol: 1e-14,
-    qtol: 1e-13,
+    qtol: 1e-14,
     points: [
       { x: 0.005550419129841531, pdf: 8.542099422926913, cdf: 0.1 },
       { x: 0.06360850781684894, pdf: 1.9625712764399903, cdf: 0.3 },
@@ -2413,12 +2411,12 @@ const REFS = [
       { x: 7.9926534090196615, pdf: 0.022752144939716782, cdf: 0.9 }
     ]
   },
-  // LogGamma[0.5, 0.5, 1]: q() has no closed form (numerical root-finding), so the round-trip is accurate to a few ULPs beyond 1e-14
+  // LogGamma[0.5, 0.5, 1]: exp() in the log-transform amplifies the Halley error at the high tail; achieves 2e-14 (10x improvement over root-finding)
   {
     name: 'LogGamma',
     params: [0.5, 0.5, 1],
     tol: 1e-14,
-    qtol: 1e-13,
+    qtol: 2e-14,
     points: [
       { x: 1.0159161071999097, pdf: 3.100427544220107, cdf: 0.1 },
       { x: 1.1600601553482717, pdf: 0.8286425364745397, cdf: 0.3 },

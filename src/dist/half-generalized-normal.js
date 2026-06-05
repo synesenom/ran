@@ -1,3 +1,4 @@
+import { gammaLowerIncompleteInv } from '../special'
 import GeneralizedNormal from './generalized-normal'
 
 /**
@@ -30,6 +31,11 @@ export default class HalfGeneralizedNormal extends GeneralizedNormal {
       value: Infinity,
       closed: false
     }]
+  }
+
+  _q (p) {
+    // HalfGeneralizedNormal CDF = GenGamma.cdf(x); quantile is the plain GenGamma inverse
+    return Math.pow(gammaLowerIncompleteInv(this.p.alpha, p) / this.p.beta, 1 / this.p.p)
   }
 
   _generator () {
