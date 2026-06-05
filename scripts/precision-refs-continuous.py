@@ -1502,8 +1502,6 @@ PDFCDF_TOL = {
     ('Levy', '[0, 2]'): '1e-12',
     ('Levy', '[1, 0.5]'): '1e-12',
     ('Levy', '[-1, 1]'): '1e-12',
-    ('InverseGaussian', '[1, 0.5]'): '5e-12',
-    ('InverseGaussian', '[3, 1]'): '5e-12',
     ('NoncentralBeta', '[0.1, 2, 10]'): '1e-13',
     ('NoncentralChi', '[5, 2]'): '1e-13',
     ('NoncentralT', '[5, 1]'): '1e-12',
@@ -1530,8 +1528,6 @@ Q_TOL = {
     ('FisherZ', '[5, 5]'): '1e-12',
     ('FisherZ', '[8, 4]'): '1e-12',
     ('GeneralizedGamma', '[0.5, 0.5, 0.5]'): '1e-13',
-    ('InverseGaussian', '[1, 0.5]'): '1e-10',
-    ('InverseGaussian', '[3, 1]'): '1e-11',
     ('LogGamma', '[0.5, 0.5, 1]'): '1e-13',
     ('Muth', '[0.1]'): '1e-12',
     ('NoncentralF', '[2, 10, 0.5]'): '1e-13',
@@ -1548,7 +1544,6 @@ Q_TOL = {
 # Per-(name, json-params) one-line justification comment emitted above a loosened group.
 _N_SERIES = 'series/transform accumulates a few ULPs beyond 1e-14'
 _N_ERFC = 'cdf uses erfc; its rounding caps relative accuracy just below 1e-13'
-_N_IG = 'cdf mixes erf and exp(2lambda/mu)*erfc; float64 cancellation caps accuracy near 5e-12 for small mu/lambda, and q() root-finds on it'
 _N_NCT = 'pdf/cdf are noncentral-t (Poisson) mixtures; accumulated rounding caps accuracy near 1e-13'
 _N_POLY = 'piecewise-polynomial Neumaier sum loses ~1 ULP beyond 1e-14'
 _N_ROOT = 'q() has no closed form (numerical root-finding), so the round-trip is accurate to a few ULPs beyond 1e-14'
@@ -1561,8 +1556,6 @@ NOTES = {
     ('Levy', '[0, 2]'): _N_ERFC,
     ('Levy', '[1, 0.5]'): _N_ERFC,
     ('Levy', '[-1, 1]'): _N_ERFC,
-    ('InverseGaussian', '[1, 0.5]'): _N_IG,
-    ('InverseGaussian', '[3, 1]'): _N_IG,
     ('NoncentralBeta', '[0.1, 2, 10]'): _N_SERIES,
     ('NoncentralChi', '[5, 2]'): _N_SERIES,
     ('NoncentralT', '[5, 1]'): _N_NCT,
