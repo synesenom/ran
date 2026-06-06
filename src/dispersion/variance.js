@@ -13,7 +13,7 @@
  * ran.dispersion.variance([1])
  * // => NaN
  *
- * ran.dispersion.variance([1, 2, 3])
+ * ran.dispersion.variance([1, 2, 3, 4, 5])
  * // => 2.5
  */
 export default function (values) {
