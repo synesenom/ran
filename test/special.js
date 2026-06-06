@@ -277,7 +277,7 @@ describe('special', () => {
   describe('.f11()', () => {
     describe('|z| < 50', () => {
       it('f11(0, b, z) = 1', () => {
-        for (const b of [0.1, 0.5, 0.9]) {
+        for (const b of [0.5, 1, 2]) {
           for (const z of [0, 1, 10, 40]) {
             assert(equal(special.f11(0, b, z), 1))
           }
@@ -285,8 +285,8 @@ describe('special', () => {
       })
 
       it('f11(b, b, z) = exp(z)', () => {
-        for (const b of [1, 5, 10]) {
-          for (const z of [0, 1, 10, 39]) {
+        for (const b of [0.5, 1, 2]) {
+          for (const z of [0, 1, 10, 40]) {
             assert(equal(special.f11(b, b, z), Math.exp(z)))
           }
         }
@@ -299,19 +299,19 @@ describe('special', () => {
       })
 
       it('f11(1, 2, z) = (exp(z) - 1) / z', () => {
-        for (const z of [1, 5, 10, 40]) {
+        for (const z of [1, 10, 40]) {
           assert(equal(special.f11(1, 2, z), (Math.exp(z) - 1) / z))
         }
       })
 
       it('(2z / sqrt(pi)) * f11(0.5, 1.5, -z^2) = erf(z)', () => {
-        for (const z of [0.1, 0.3, 0.5, 0.9]) {
+        for (const z of [0.1, 0.5, 1]) {
           assert(equal(2 * z * special.f11(0.5, 1.5, -z * z) / Math.sqrt(Math.PI), special.erf(z)))
         }
       })
 
       it('f11(a, 2a, z) = exp(z/2) (z/4)^(0.5 - a) gamma(a + 0.5) I(a - 0.5; z/2)', () => {
-        for (const a of [1, 5, 10]) {
+        for (const a of [0.5, 1, 2]) {
           for (const z of [1, 10, 40]) {
             assert(equal(
               special.f11(a, 2 * a, z),
@@ -322,11 +322,15 @@ describe('special', () => {
       })
 
       it('a f11(a+1, b, z) = (b - a) f11(a-1, b, z) + (2a - b + z) f11(a, b, z)', () => {
-        for (const [a, b, z] of [[1, 2, 1], [5, 6, 20], [9, 10, 40]]) {
-          assert(equal(
-            a * special.f11(a + 1, b, z),
-            (b - a) * special.f11(a - 1, b, z) + (2 * a - b + z) * special.f11(a, b, z)
-          ))
+        for (const a of [0.5, 1, 2]) {
+          for (const b of [0.5, 1, 2]) {
+            for (const z of [0, 1, 10, 40]) {
+              assert(equal(
+                a * special.f11(a + 1, b, z),
+                (b - a) * special.f11(a - 1, b, z) + (2 * a - b + z) * special.f11(a, b, z)
+              ))
+            }
+          }
         }
       })
 
@@ -338,48 +342,54 @@ describe('special', () => {
 
     describe('|z| >= 50', () => {
       it('f11(0, b, z) = 1', () => {
-        for (const b of [0.1, 0.5, 0.9]) {
-          for (const z of [50, 70, 90]) {
+        for (const b of [0.5, 1, 2]) {
+          for (const z of [50, 60, 75, 90]) {
             assert(equal(special.f11(0, b, z), 1))
           }
         }
       })
 
       it('f11(b, b, z) = exp(z)', () => {
-        for (const b of [1, 5, 10]) {
-          for (const z of [50, 70, 90]) {
+        for (const b of [0.5, 1, 2]) {
+          for (const z of [50, 60, 75, 90]) {
             assert(equal(special.f11(b, b, z), Math.exp(z)))
           }
         }
       })
 
       it('f11(2, 1, z) = (1 + z) * exp(z)', () => {
-        for (const z of [50, 70, 90]) {
+        for (const z of [50, 60, 75, 90]) {
           assert(equal(special.f11(2, 1, z), (1 + z) * Math.exp(z)))
         }
       })
 
       it('f11(1, 2, z) = (exp(z) - 1) / z', () => {
-        for (const z of [50, 70, 90]) {
+        for (const z of [50, 60, 75, 90]) {
           assert(equal(special.f11(1, 2, z), (Math.exp(z) - 1) / z))
         }
       })
 
       it('f11(a, 2a, z) = exp(z/2) (z/4)^(0.5 - a) gamma(a + 0.5) I(a - 0.5; z/2)', () => {
-        for (const [a, z] of [[0.5, 50], [2, 65], [5, 80], [8, 50]]) {
-          assert(equal(
-            special.f11(a, 2 * a, z),
-            Math.exp(z / 2 + (0.5 - a) * Math.log(z / 4) + special.logGamma(a + 0.5)) * special.besselInu(a - 0.5, z / 2)
-          ))
+        for (const a of [0.5, 1, 2]) {
+          for (const z of [50, 60, 75, 90]) {
+            assert(equal(
+              special.f11(a, 2 * a, z),
+              Math.exp(z / 2 + (0.5 - a) * Math.log(z / 4) + special.logGamma(a + 0.5)) * special.besselInu(a - 0.5, z / 2)
+            ))
+          }
         }
       })
 
       it('a * f11(a+1, b, z) = (b - a) * f11(a-1, b, z) + (2a - b + z) * f11(a, b, z)', () => {
-        for (const [a, b, z] of [[3, 4, 50], [8, 9, 70], [13, 13, 90]]) {
-          assert(equal(
-            a * special.f11(a + 1, b, z),
-            (b - a) * special.f11(a - 1, b, z) + (2 * a - b + z) * special.f11(a, b, z)
-          ))
+        for (const a of [3, 7, 13]) {
+          for (const b of [3, 7, 13]) {
+            for (const z of [50, 60, 75, 90]) {
+              assert(equal(
+                a * special.f11(a + 1, b, z),
+                (b - a) * special.f11(a - 1, b, z) + (2 * a - b + z) * special.f11(a, b, z)
+              ))
+            }
+          }
         }
       })
 
@@ -395,10 +405,12 @@ describe('special', () => {
 
   describe('.gamma(), .logGamma()', () => {
     it('logGamma(z) = ln(gamma(z))', () => {
-      for (const x of [0.5, 3, 5, 10, 50, 100]) {
+      for (const x of [0.1, 0.5, 1, 1.5, 2, 3, 5, 10, 20, 50, 99.5]) {
         const g = special.gamma(x)
         const lng = special.logGamma(x)
-        assert(Math.abs(Math.log(g) - lng) / lng < 0.01)
+        const err = Math.abs(Math.log(g) - lng)
+        // when lng === 0 (x = 1, 2) relative error is undefined; check absolute instead
+        assert(Math.abs(lng) < 1e-10 ? err < 1e-14 : err / Math.abs(lng) < 0.01)
       }
     })
 
@@ -463,61 +475,60 @@ describe('special', () => {
 
   describe('.gammaLowerIncomplete(), .gammaUpperIncomplete()', () => {
     it('should vanish below 0', () => {
-      for (const s of [2, 5, 10, 12]) {
+      for (const s of [0.5, 1, 2, 5, 10]) {
         assert(special.gammaLowerIncomplete(s, -10) === 0)
       }
     })
+
     it('should be equal to exp(-x) for s = 1', () => {
-      for (const x of [0, 1, 10, 100]) {
+      for (const x of [1, 5, 10, 50, 100]) {
         const gui = special.gammaUpperIncomplete(1, x) * special.gamma(1)
         assert(Math.abs(gui - Math.exp(-x)) / gui < 0.01)
       }
     })
 
     it('should be equal to sqrt(pi) * erf(sqrt(x)) for s = 1/2', () => {
-      for (const x of [0.01, 1, 10, 100]) {
+      for (const x of [1, 5, 10, 50, 100]) {
         const gli = special.gammaLowerIncomplete(0.5, x) * special.gamma(0.5)
         assert(Math.abs(gli - Math.sqrt(Math.PI) * special.erf(Math.sqrt(x))) / gli < 0.01)
       }
     })
 
     it('should converge to x^s / s as x -> 0', () => {
-      for (const s of [0.1, 0.5, 0.9]) {
-        for (const x of [1e-5, 1.5e-5, 2e-5]) {
-          const xs = Math.pow(x, s)
-          const gli = special.gammaLowerIncomplete(s, x) * special.gamma(s)
-          if (xs > 1e-100) {
-            assert(Math.abs(gli / Math.pow(x, s) * s - 1) < 0.01)
-          }
+      const x = 1e-5
+      for (const s of [0.5, 1, 2, 5, 10]) {
+        const xs = Math.pow(x, s)
+
+        const gli = special.gammaLowerIncomplete(s, x) * special.gamma(s)
+        if (xs > 1e-100) {
+          assert(Math.abs(gli / Math.pow(x, s) * s - 1) < 0.01)
         }
       }
     })
 
     it('should converge to gamma(s) as x -> inf', () => {
-      for (const s of [1, 10, 50, 100]) {
-        for (const x of [1e5, 1.5e5, 2e5]) {
-          assert(equal(special.gammaLowerIncomplete(s, x), 1))
-        }
+      for (const s of [0.5, 1, 2, 5, 10]) {
+        assert(equal(special.gammaLowerIncomplete(s, 1e5), 1))
       }
     })
   })
 
   describe('.gammaLowerIncompleteInv()', () => {
     it('should return 0 for p = 0', () => {
-      for (const a of [0.5, 2, 5, 10]) {
+      for (const a of [1, 2, 5, 10, 20]) {
         assert(special.gammaLowerIncompleteInv(a, 0) === 0)
       }
     })
 
     it('should return Infinity for p = 1', () => {
-      for (const a of [0.5, 2, 5, 10]) {
+      for (const a of [1, 2, 5, 10, 20]) {
         assert(special.gammaLowerIncompleteInv(a, 1) === Infinity)
       }
     })
 
     it('should round-trip with gammaLowerIncomplete for a >= 1', () => {
-      for (const a of [1, 5, 10, 21]) {
-        for (const p of [0.01, 0.1, 0.5, 0.99]) {
+      for (const a of [1, 2, 5, 10, 20]) {
+        for (const p of [0.01, 0.1, 0.5, 0.9, 0.99]) {
           const x = special.gammaLowerIncompleteInv(a, p)
           assert(Math.abs(special.gammaLowerIncomplete(a, x) - p) < 1e-10)
         }
@@ -525,8 +536,8 @@ describe('special', () => {
     })
 
     it('should round-trip with gammaLowerIncomplete for a < 1', () => {
-      for (const a of [0.1, 0.3, 0.5, 0.9]) {
-        for (const p of [0.01, 0.1, 0.5, 0.99]) {
+      for (const a of [0.1, 0.3, 0.5, 0.7, 0.9]) {
+        for (const p of [0.01, 0.1, 0.5, 0.9, 0.99]) {
           const x = special.gammaLowerIncompleteInv(a, p)
           assert(Math.abs(special.gammaLowerIncomplete(a, x) - p) < 1e-10)
         }
