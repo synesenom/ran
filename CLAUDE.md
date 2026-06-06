@@ -78,6 +78,7 @@ Every subclass of `Distribution` **must** implement all of the following that ap
 | Item | File | What to add |
 | --- | --- | --- |
 | Distribution test cases | `test/dist-cases-continuous.js` or `test/dist-cases-discrete.js` | Entry with `invalidParams`, `params`/`cases` (each with `refVals` and `quantileVals`), and `sampleParams` |
+| Precision gate | `test/precision-continuous.js` or `test/precision-discrete.js` | 3 parameter sets × 5 interior points each, with `pmf`/`pdf`, `cdf`, and `qp` (= `cdf(k) − pmf(k)/2`) values. Use exact rational arithmetic or mpmath at `mp.dps=50` — **never derive references from the ranjs implementation itself**. See the existing entries for format. |
 | Fit test | `test/dist.js` explicit block | Explicit test alongside the other per-distribution tests — sample from the distribution, call `.fit()`, assert the result is a correct instance. This block is **not** auto-generated from `dist-cases-*.js`; add it by hand. |
 | Subpath export | `package.json` `exports` field | `"./dist/<name>": { "import": "./dist/<name>.esm.js" }` in alphabetical order |
 | Named export | `src/dist/index.js` | Add (or uncomment) the export line |
