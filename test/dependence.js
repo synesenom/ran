@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { repeat, equal } from './test-utils'
+import { equal } from './test-utils'
 import * as dependence from '../src/dependence'
 
 describe('dependence', () => {
@@ -179,13 +179,14 @@ describe('dependence', () => {
     })
 
     it('should return the odds ratio for contingency table of joint probabilities', () => {
-      repeat(() => {
-        const p00 = 0.01 + 0.99 * Math.random()
-        const p01 = 0.01 + 0.99 * Math.random()
-        const p10 = 0.01 + 0.99 * Math.random()
-        const p11 = 0.01 + 0.99 * Math.random()
+      // OR = 1 (independence), OR > 1, OR < 1
+      for (const [p00, p01, p10, p11] of [
+        [0.2, 0.3, 0.1, 0.15],
+        [0.4, 0.1, 0.1, 0.4],
+        [0.1, 0.4, 0.4, 0.1]
+      ]) {
         assert(equal(dependence.oddsRatio(p00, p01, p10, p11), p00 * p11 / (p01 * p10)))
-      })
+      }
     })
   })
 
@@ -336,14 +337,14 @@ describe('dependence', () => {
     })
 
     it('should return Yule\'s Q for a contingency table of joint probabilities', () => {
-      repeat(() => {
-        const p00 = 0.01 + 0.99 * Math.random()
-        const p01 = 0.01 + 0.99 * Math.random()
-        const p10 = 0.01 + 0.99 * Math.random()
-        const p11 = 0.01 + 0.99 * Math.random()
+      for (const [p00, p01, p10, p11] of [
+        [0.2, 0.3, 0.1, 0.15],
+        [0.4, 0.1, 0.1, 0.4],
+        [0.1, 0.4, 0.4, 0.1]
+      ]) {
         assert(equal(dependence.yuleQ(p00, p01, p10, p11),
           (p00 * p11 - p01 * p10) / (p00 * p11 + p01 * p10)))
-      })
+      }
     })
   })
 
@@ -354,14 +355,14 @@ describe('dependence', () => {
     })
 
     it('should return Yule\'s Y for a contingency table of joint probabilities', () => {
-      repeat(() => {
-        const p00 = 0.01 + 0.99 * Math.random()
-        const p01 = 0.01 + 0.99 * Math.random()
-        const p10 = 0.01 + 0.99 * Math.random()
-        const p11 = 0.01 + 0.99 * Math.random()
+      for (const [p00, p01, p10, p11] of [
+        [0.2, 0.3, 0.1, 0.15],
+        [0.4, 0.1, 0.1, 0.4],
+        [0.1, 0.4, 0.4, 0.1]
+      ]) {
         assert(equal(dependence.yuleY(p00, p01, p10, p11),
           (Math.sqrt(p00 * p11) - Math.sqrt(p01 * p10)) / (Math.sqrt(p00 * p11) + Math.sqrt(p01 * p10))))
-      })
+      }
     })
   })
 })
