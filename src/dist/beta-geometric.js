@@ -1,6 +1,5 @@
 import { logBeta } from '../special'
 import Distribution from './_distribution'
-import PreComputed from './_pre-computed'
 import rBeta from './_beta'
 
 /**
@@ -8,7 +7,7 @@ import rBeta from './_beta'
  *
  * $$f(k; \alpha, \beta) = \frac{\mathrm{B}(\alpha + 1, \beta + k - 1)}{\mathrm{B}(\alpha, \beta)},$$
  *
- * with $\alpha, \beta > 0$. Support: $k \in \{0, ..., n\}$.
+ * with $\alpha, \beta > 0$. Support: $k \in \{1, 2, 3, \ldots\}$.
  *
  * @class BetaGeometric
  * @memberof ran.dist
@@ -16,24 +15,20 @@ import rBeta from './_beta'
  * @param {number} beta Second shape parameter.
  * @constructor
  */
-export default class BetaGeometric extends PreComputed {
+export default class BetaGeometric extends Distribution {
   /**
    * @param {number} alpha First shape parameter.
    * @param {number} beta Second shape parameter.
    */
   constructor (alpha, beta) {
-    // TODO Use log PDF
-    super()
-    this.k = 2
+    super('discrete', 2)
 
-    // Validate parameters
     this.p = { alpha, beta }
     Distribution.validate({ alpha, beta }, [
       'alpha > 0',
       'beta > 0'
     ])
 
-    // Set support
     this.s = [{
       value: 1,
       closed: true
@@ -41,14 +36,18 @@ export default class BetaGeometric extends PreComputed {
       value: Infinity,
       closed: false
     }]
+
+    this.c = { logBetaNorm: logBeta(alpha, beta) }
   }
 
-  _pk (k) {
-    if (k < 1) {
-      return 0
-    }
+  _pdf (x) {
+    return x < 1 ? 0 : Math.exp(logBeta(this.p.alpha + 1, this.p.beta + x - 1) - this.c.logBetaNorm)
+  }
 
-    return Math.exp(logBeta(this.p.alpha + 1, this.p.beta + k - 1) - logBeta(this.p.alpha, this.p.beta))
+  // CDF derived via telescoping: B(α+1,β+k-1) = B(α,β+k-1) - B(α,β+k), so F(k) = 1 - B(α,β+k)/B(α,β)
+  // expm1 avoids cancellation when B(α,β+x)/B(α,β) ≈ 1 — see solutions/distribution/2026-06-06-1221-beta-geometric-telescoping-cdf.md
+  _cdf (x) {
+    return x < 1 ? 0 : -Math.expm1(logBeta(this.p.alpha, this.p.beta + x) - this.c.logBetaNorm)
   }
 
   _generator () {

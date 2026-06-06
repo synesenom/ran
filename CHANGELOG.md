@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `BetaGeometric` distribution: PMF `f(k;α,β)=B(α+1,β+k−1)/B(α,β)`, support `k∈{1,2,3,…}`. Implements a closed-form O(1) CDF derived via a telescoping Beta-function identity (`F(k)=1−B(α,β+k)/B(α,β)`), replacing the previous `PreComputed` accumulation stub. Accessible as `ran.dist.BetaGeometric(alpha, beta)` (#703).
+
 ### Changed
 
 - Tightened distribution test tolerance to `1e-14` in `test/dist.js` and `test/test-utils.js`: `refValTol` now uses `max(|expected|·1e-14, 1e-14)` for normal-range values and a `1e-4` relative guard for sub-1e-14 reference values, the finite-difference pdf–cdf consistency check retains its own `FD_FLOOR = 1e-9` floor, and reference values for Hoyt, Kolmogorov, NoncentralBeta, ConwayMaxwellPoisson, NegativeHypergeometric, and IrwinHall are updated from their pre-v1.27.0 external sources to the current double-precision computed values (#562).
