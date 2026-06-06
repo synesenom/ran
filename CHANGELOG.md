@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.28.0] - 2026-06-06
+
 ### Added
 
 - `BetaGeometric` distribution: PMF `f(k;α,β)=B(α+1,β+k−1)/B(α,β)`, support `k∈{1,2,3,…}`. Implements a closed-form O(1) CDF derived via a telescoping Beta-function identity (`F(k)=1−B(α,β+k)/B(α,β)`), replacing the previous `PreComputed` accumulation stub. Accessible as `ran.dist.BetaGeometric(alpha, beta)` (#703).
