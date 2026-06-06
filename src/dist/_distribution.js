@@ -921,6 +921,33 @@ class Distribution {
     }
     return x0
   }
+
+  /**
+   * Cramér-Rao half-width for the integer grid search in `fit()`, derived from the
+   * observed Fisher information at `seed` via a finite-difference second derivative of
+   * the total log-likelihood. Returns `max(5, ⌈3/√I_obs⌉)` so the window is always at
+   * least ±5 and widens automatically when the likelihood is flat. When `seed − 1 < lb`
+   * the backward point is unavailable; `lnLAt(seed)` is reused, collapsing the estimate
+   * to a one-sided difference that still respects the floor.
+   *
+   * @method _adaptiveHalfWidth
+   * @memberof ran.dist.Distribution
+   * @param {Function} lnLAt Maps an integer parameter value to the total log-likelihood
+   *   for the data; must return `-Infinity` (not throw) for invalid values.
+   * @param {number} seed Integer seed (result of `Math.round(momentEstimate)`).
+   * @param {number} lb Domain lower bound (e.g. 1 for most distributions, 2 for UniformProduct).
+   * @returns {number} Adaptive half-width `w ≥ 5`.
+   * @private
+   * @ignore
+   */
+  // See solutions/distribution/2026-06-06-1500-adaptive-fit-window-fisher-info.md
+  static _adaptiveHalfWidth (lnLAt, seed, lb) {
+    const lnL0 = lnLAt(seed)
+    const lnLp = lnLAt(seed + 1)
+    const lnLm = seed - 1 >= lb ? lnLAt(seed - 1) : lnL0
+    const iObs = 2 * lnL0 - lnLp - lnLm
+    return Math.max(5, Math.ceil(3 / Math.sqrt(Math.max(iObs, 1e-6))))
+  }
 }
 
 export default Distribution
