@@ -1,5 +1,4 @@
-import { logBeta } from '../special'
-import PreComputed from './_pre-computed'
+import { logBeta, logGamma } from '../special'
 import Distribution from './_distribution'
 import rBeta from './_beta'
 import gamma from './_gamma'
@@ -16,17 +15,15 @@ import poisson from './_poisson'
  * @memberof ran.dist
  * @constructor
  */
-export default class BetaNegativeBinomial extends PreComputed {
+export default class BetaNegativeBinomial extends Distribution {
   /**
    * @param {number} r Number of successes (rounded to nearest integer).
    * @param {number} alpha First shape parameter.
    * @param {number} beta Second shape parameter.
    */
   constructor (r, alpha, beta) {
-    super()
-    this.k = 3
+    super('discrete', 3)
 
-    // Validate parameters
     const ri = Math.round(r)
     this.p = { r: ri, alpha, beta }
     Distribution.validate({ r: ri, alpha, beta }, [
@@ -35,7 +32,6 @@ export default class BetaNegativeBinomial extends PreComputed {
       'beta > 0'
     ])
 
-    // Set support
     this.s = [{
       value: 0,
       closed: true
@@ -44,24 +40,48 @@ export default class BetaNegativeBinomial extends PreComputed {
       closed: false
     }]
 
-    // TODO Speed-up constants
-  }
-
-  _pk (k) {
-    if (k === 0) {
-      // return Math.exp(logGamma(this.p.r + k) - logGamma(k + 1) - logGamma(this.p.r) + logBeta(this.p.alpha + this.p.r, this.p.beta + k) - logBeta(this.p.alpha, this.p.beta))
-      return Math.exp(logBeta(this.p.alpha + this.p.r, this.p.beta) - logBeta(this.p.alpha, this.p.beta))
+    this.c = {
+      logGammaR: logGamma(ri),
+      logBetaAlphaBeta: logBeta(alpha, beta),
+      // Base case p(0) = B(α+r, β)/B(α,β); precomputed to avoid recomputing on every _cdf call
+      logBetaRatio: logBeta(alpha + ri, beta) - logBeta(alpha, beta)
     }
-
-    return this.pdfTable[k - 1] * (this.p.r + k - 1) * (this.p.beta + k - 1) / (k * (this.p.alpha + this.p.r + this.p.beta + k - 1))
-    // return this.pdfTable[k - 1] * (k + this.p.r - 1) * (k + (this.p.alpha - 1)) / (k * (k + this.p.alpha + this.p.beta + this.p.r - 1))
-    // return Math.exp(logGamma(this.p.r + k) - logGamma(k + 1) - logGamma(this.p.r) + logBeta(this.p.alpha + this.p.r, this.p.beta + k) - logBeta(this.p.alpha, this.p.beta))
   }
 
-  // TODO Direct sampling
+  _pdf (k) {
+    return Math.exp(
+      logGamma(this.p.r + k) - logGamma(k + 1) - this.c.logGammaR +
+      logBeta(this.p.alpha + this.p.r, this.p.beta + k) - this.c.logBetaAlphaBeta
+    )
+  }
+
+  _cdf (k) {
+    // Recurrence p(i) = p(i-1) * (r+i-1)*(β+i-1) / (i*(α+r+β+i-1)) from p(0) = exp(logBetaRatio)
+    const { r, alpha, beta } = this.p
+    let p = Math.exp(this.c.logBetaRatio)
+    let sum = p
+    for (let i = 1; i <= k; i++) {
+      p *= (r + i - 1) * (beta + i - 1) / (i * (alpha + r + beta + i - 1))
+      sum += p
+    }
+    return Math.min(1, sum)
+  }
+
+  static _fitInit (data) {
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    const variance = data.reduce((s, x) => s + x * x, 0) / data.length - mean * mean
+    const m = Math.max(mean, 0.1)
+    const v = Math.max(variance, m + 1)
+    // NegBin moment-match gives a starting r; alpha=3 guarantees finite variance (alpha>2);
+    // beta anchors E[k]=rβ/(α-1) to the sample mean
+    const r = Math.max(1, Math.round(m * m / (v - m)))
+    return [r, 3, Math.max(0.1, 2 * m / r)]
+  }
+
   _generator () {
-    // Direct sampling by compounding beta and negative binomial
+    // p ~ Beta(α,β); k|p ~ NegativeBinomial(r, 1-p) matches PMF B(α+r,β+k)/B(α,β)
+    // NegativeBinomial success prob = 1-p, so gamma rate = p/(1-p)
     const p = rBeta(this.r, this.p.alpha, this.p.beta)
-    return poisson(this.r, gamma(this.r, this.p.r, 1 / p - 1))
+    return poisson(this.r, gamma(this.r, this.p.r, p / (1 - p)))
   }
 }

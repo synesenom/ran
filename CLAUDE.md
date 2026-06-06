@@ -55,6 +55,51 @@ npm run typecheck
 
 **Distribution naming:** File names are kebab-case (`log-normal.js`); exported class names are PascalCase (`LogNormal`). Pre-computed table distributions extend `PreComputed` from `_pre-computed.js`.
 
+## Adding a New Distribution
+
+Every new distribution is a **complete implementation** — no partial stubs, no deferred methods. ranjs advertises that all distributions expose the full public API; shipping a distribution with missing methods is a contract violation regardless of how obscure the method seems.
+
+### Implementation checklist
+
+Every subclass of `Distribution` **must** implement all of the following that apply:
+
+| Method | Required | Rule |
+| --- | --- | --- |
+| `_pdf(x)` or `_pmf(x)` | Always | Probability density / mass function |
+| `_cdf(x)` | Always | Cumulative distribution function |
+| `_generator()` | Always | Direct or compound sampler for `sample()` |
+| `_q(p)` | When a closed form exists | Implement whenever the inverse CDF has a closed form. Omit only when numerical inversion is genuinely the only option. |
+| `static _fitInit(data)` | **Always — never omit** | The base class throws `Error` if this is missing, silently breaking `.fit()` for all callers. Use the **exact MLE** if one exists (and add `static get _fitInitIsExact() { return true }`). Otherwise use **method-of-moments** or moment-matching — an approximate initializer is always better than a thrown error. |
+
+**`_fitInit` is not optional.** It is not a nice-to-have. It is not something to file as a follow-up. Every distribution shipped without it has a broken `.fit()` method.
+
+### Test checklist
+
+| Item | File | What to add |
+| --- | --- | --- |
+| Distribution test cases | `test/dist-cases-continuous.js` or `test/dist-cases-discrete.js` | Entry with `invalidParams`, `params`/`cases` (each with `refVals` and `quantileVals`), and `sampleParams` |
+| Precision gate | `test/precision-continuous.js` or `test/precision-discrete.js` | 3 parameter sets × 5 interior points each, with `pmf`/`pdf`, `cdf`, and `qp` (= `cdf(k) − pmf(k)/2`) values derived from **mpmath at `mp.dps=50`** — never from the ranjs implementation itself. The canonical workflow is: add the PMF definition to `scripts/precision-refs-discrete.py` (or `-continuous.py`) and run `python3 scripts/precision-refs-<type>.py` to regenerate the JS file. If mpmath is unavailable, exact rational arithmetic is an acceptable substitute for distributions whose PMF has closed-form rational values. |
+| Fit test | `test/dist.js` explicit block | Explicit test alongside the other per-distribution tests — sample from the distribution, call `.fit()`, assert the result is a correct instance. This block is **not** auto-generated from `dist-cases-*.js`; add it by hand. |
+| Subpath export | `package.json` `exports` field | `"./dist/<name>": { "import": "./dist/<name>.esm.js" }` in alphabetical order |
+| Named export | `src/dist/index.js` | Add (or uncomment) the export line |
+| CHANGELOG entry | `CHANGELOG.md` `## [Unreleased]` section | A `### Added` bullet describing the new distribution. New distributions are always user-visible — a changelog entry is mandatory. |
+
+### Other required updates
+
+- **README.md** — The numerical precision section contains hardcoded distribution counts ("All N discrete distributions", "All M continuous distributions"). Increment the relevant count when adding a new distribution.
+- **JSDoc** — The class must have `@class`, `@memberof ran.dist`, and `@constructor` tags. The `constructor()` method must have a JSDoc block with `@param` tags for each parameter. Without these, TypeScript declarations will be incomplete. See the TypeScript Declarations section for details.
+
+### Pre-PR verification
+
+Run all four before opening a PR for a new distribution:
+
+```bash
+npm run standard                        # no lint errors
+npm run jsdoclint                       # JSDoc annotations valid
+npm test                                # all tests pass, coverage thresholds met
+node scripts/check-subpath-exports.js  # package.json subpath in sync
+```
+
 ## Return Value and Error Conventions
 
 Every public function and method signals "no ordinary result" through exactly one of four channels. Pick the channel by **what kind of situation occurred**, not by convenience. See `decisions/0015-return-value-and-error-conventions.md`.

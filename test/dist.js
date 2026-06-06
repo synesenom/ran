@@ -2132,6 +2132,20 @@ describe('dist', () => {
       assert(result instanceof dist.BetaBinomial)
       assert(Number.isFinite(result.pdf(4)) && result.pdf(4) > 0)
     })
+
+    it('BetaNegativeBinomial.fit should return a usable BetaNegativeBinomial instance', () => {
+      const data = new dist.BetaNegativeBinomial(3, 3, 4).seed(42).sample(200)
+      const result = dist.BetaNegativeBinomial.fit(data)
+      assert(result instanceof dist.BetaNegativeBinomial)
+      assert(Number.isFinite(result.pdf(3)) && result.pdf(3) > 0)
+    })
+
+    it('BetaGeometric.fit should return a usable BetaGeometric instance', () => {
+      const data = new dist.BetaGeometric(3, 4).seed(42).sample(200)
+      const result = dist.BetaGeometric.fit(data)
+      assert(result instanceof dist.BetaGeometric)
+      assert(Number.isFinite(result.pdf(2)) && result.pdf(2) > 0)
+    })
   })
 
   // Ordinary distributions.

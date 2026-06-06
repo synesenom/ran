@@ -40,6 +40,13 @@ export default class BetaGeometric extends Distribution {
     this.c = { logBetaNorm: logBeta(alpha, beta) }
   }
 
+  static _fitInit (data) {
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    const m = Math.max(mean, 1.5)
+    // alpha=3 guarantees finite variance (alpha>2); beta from BetaGeometric mean = (α+β-1)/(α-1)
+    return [3, Math.max(0.1, 2 * (m - 1))]
+  }
+
   _pdf (x) {
     return x < 1 ? 0 : Math.exp(logBeta(this.p.alpha + 1, this.p.beta + x - 1) - this.c.logBetaNorm)
   }

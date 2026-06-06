@@ -60,6 +60,9 @@
     "./dist/beta-geometric": {
       "import": "./dist/beta-geometric.esm.js"
     },
+    "./dist/beta-negative-binomial": {
+      "import": "./dist/beta-negative-binomial.esm.js"
+    },
     "./dist/beta-prime": {
       "import": "./dist/beta-prime.esm.js"
     },
