@@ -38,7 +38,7 @@ const UnitTests = {
 
     it('should give the same sample for the same seed', () => {
       const self = new dist[tc.name](...tc.cases[0].params())
-      const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+      const s = 123456789 // fixed seed so CI failures are reproducible
       self.seed(s)
       const values1 = self.sample(sampleSize)
       self.seed(s)
@@ -48,11 +48,11 @@ const UnitTests = {
 
     it('should give different samples for different seeds', () => {
       const self = new dist[tc.name](...tc.cases[0].params())
-      self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+      self.seed(123456789) // fixed seed so CI failures are reproducible
       const values1 = self.sample(sampleSize)
-      self.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+      self.seed(987654321) // different fixed seed to guarantee distinct sequence
       const values2 = self.sample(sampleSize)
-      assert(values1.reduce((acc, d, i) => acc || d !== values2[i], true))
+      assert(values1.reduce((acc, d, i) => acc || d !== values2[i], false))
     })
   },
 
@@ -62,7 +62,7 @@ const UnitTests = {
     it('loaded state should continue where it was saved at', () => {
       // Create generator and seed
       const generator = new dist[tc.name](...tc.cases[0].params())
-      const s = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+      const s = 123456789 // fixed seed so CI failures are reproducible
       const cut = Math.floor(sampleSize / 3)
 
       // Generate full sample
@@ -83,7 +83,7 @@ const UnitTests = {
     it('loaded state should copy full state of generator', () => {
       // Create seeded generator
       const generator1 = new dist[tc.name](...tc.cases[0].params())
-      generator1.seed(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+      generator1.seed(123456789) // fixed seed so CI failures are reproducible
 
       // Generate original sample
       generator1.sample(10)
@@ -2234,8 +2234,8 @@ describe('dist', () => {
           const x0 = float()
           const degenerate = new dist.Degenerate(x0)
           assert.equal(degenerate.pdf(x0), 1)
-          assert.equal(degenerate.pdf(x0 + Math.random() * 2 - 1), 0)
-          assert.equal(degenerate.cdf(x0 - Math.random()), 0)
+          assert.equal(degenerate.pdf(x0 + 1), 0) // fixed offset guarantees argument != x0
+          assert.equal(degenerate.cdf(x0 - 1), 0) // fixed offset guarantees argument < x0
           assert.equal(degenerate.cdf(x0), 1)
           assert.equal(degenerate.cdf(x0 + Math.random()), 1)
         })
