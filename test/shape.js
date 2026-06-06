@@ -1,12 +1,9 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { repeat, equal } from './test-utils'
-import { int } from '../src/core'
+import { equal } from './test-utils'
 import * as shape from '../src/shape'
 
-const SAMPLE_SIZE = 100
-
-describe('dispersion', () => {
+describe('shape', () => {
   describe('.kurtosis()', () => {
     it('should return NaN if sample size is less than 3', () => {
       assert(Number.isNaN(shape.kurtosis([])))
@@ -19,24 +16,10 @@ describe('dispersion', () => {
     })
 
     it('should return the kurtosis', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
-        const kurtosis = shape.kurtosis(values)
-        const n = values.length
-        let x1 = 0
-        for (let i = 0; i < values.length; i++) {
-          x1 += values[i]
-        }
-        x1 /= n
-
-        let x2 = 0
-        let x4 = 0
-        for (let i = 0; i < values.length; i++) {
-          x2 += Math.pow(values[i] - x1, 2)
-          x4 += Math.pow(values[i] - x1, 4)
-        }
-        assert(equal((n + 1) * n * (n - 1) * x4 / (x2 * x2 * (n - 2) * (n - 3)) - 3 * (n - 1) * (n - 1) / ((n - 2) * (n - 3)), kurtosis))
-      })
+      // [1, 2, 3, 4, 5]: symmetric, m2=2, m4=6.8, kurtosis=-1.2
+      assert(equal(shape.kurtosis([1, 2, 3, 4, 5]), -1.2))
+      // [2, 4, 4, 4, 5, 5, 7, 9]: mean=5, m2=4, m4=44.5, kurtosis=0.940625
+      assert(equal(shape.kurtosis([2, 4, 4, 4, 5, 5, 7, 9]), 0.940625))
     })
   })
 
@@ -46,34 +29,23 @@ describe('dispersion', () => {
     })
 
     it('should return the moment for finite sample for c = 0', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
-        const k = int(0, 10)
-        const moment = shape.moment(values, k)
-        const n = values.length
-        let xk = 0
-        for (let i = 0; i < values.length; i++) {
-          xk += Math.pow(values[i], k)
-        }
-        xk /= n
-        assert(equal(xk, moment))
-      })
+      // k=0: x^0=1 for all x, so moment=1
+      assert(equal(shape.moment([1, 2, 3], 0), 1))
+      // k=1: moment([1,2,3], 1) = mean = 2
+      assert(equal(shape.moment([1, 2, 3], 1), 2))
+      // k=2: moment([1,2,3], 2) = (1+4+9)/3 = 14/3
+      assert(equal(shape.moment([1, 2, 3], 2), 14 / 3))
+      // k=2: moment([1,2,3,4,5], 2) = (1+4+9+16+25)/5 = 11
+      assert(equal(shape.moment([1, 2, 3, 4, 5], 2), 11))
     })
 
     it('should return the moment for finite sample for c != 0', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
-        const k = int(0, 10)
-        const c = Math.random()
-        const moment = shape.moment(values, k, c)
-        const n = values.length
-        let xk = 0
-        for (let i = 0; i < values.length; i++) {
-          xk += Math.pow(values[i] - c, k)
-        }
-        xk /= n
-        assert(equal(xk, moment))
-      })
+      // moment([1,2,3], 1, 2) = mean([-1,0,1]) = 0
+      assert(equal(shape.moment([1, 2, 3], 1, 2), 0))
+      // moment([1,2,3,4,5], 2, 3) = mean([4,1,0,1,4]) = 2
+      assert(equal(shape.moment([1, 2, 3, 4, 5], 2, 3), 2))
+      // moment([2,4,6], 3, 4) = mean([-8,0,8]) = 0
+      assert(equal(shape.moment([2, 4, 6], 3, 4), 0))
     })
   })
 
@@ -83,16 +55,14 @@ describe('dispersion', () => {
     })
 
     it('should return quantile for finite sample', () => {
-      repeat(() => {
-        const p = Math.random()
-        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
-        const q = shape.quantile(values, p)
-        const h = (values.length - 1) * p
-        const q0 = values.sort((a, b) => a - b)[Math.floor(h)]
-        const q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
-        const qTest = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
-        assert(equal(qTest, q))
-      })
+      // Evenly-spaced [1..5]: quartile points land on exact integers
+      assert(equal(shape.quantile([1, 2, 3, 4, 5], 0), 1))
+      assert(equal(shape.quantile([1, 2, 3, 4, 5], 0.25), 2))
+      assert(equal(shape.quantile([1, 2, 3, 4, 5], 0.5), 3))
+      assert(equal(shape.quantile([1, 2, 3, 4, 5], 0.75), 4))
+      assert(equal(shape.quantile([1, 2, 3, 4, 5], 1), 5))
+      // Interpolation: h=2.25, Q=30+0.25*(40-30)=32.5
+      assert(equal(shape.quantile([10, 20, 30, 40], 0.75), 32.5))
     })
   })
 
@@ -130,26 +100,12 @@ describe('dispersion', () => {
     })
 
     it('should return the skewness', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
-        const skewness = shape.skewness(values)
-        const n = values.length
-        let x1 = 0
-        let x2 = 0
-        let x3 = 0
-        for (let i = 0; i < values.length; i++) {
-          x1 += values[i]
-          x2 += values[i] * values[i]
-          x3 += Math.pow(values[i], 3)
-        }
-        x1 /= n
-        x2 /= n
-        x3 /= n
-        const s = Math.sqrt(Math.abs(x2 - x1 * x1))
-        const c = Math.sqrt(n * (n - 1)) / (n - 2)
-        const ref = c * (x3 - 3 * x1 * s * s - x1 * x1 * x1) / (s * s * s)
-        assert(Math.abs(ref - skewness) <= 1e-10 * (1 + Math.abs(skewness)))
-      })
+      // [1, 2, 3, 4, 5]: symmetric, m3=0, skewness=0
+      assert(equal(shape.skewness([1, 2, 3, 4, 5]), 0))
+      // [1, 1, 1, 2]: positive skew = 2 (from docstring)
+      assert(equal(shape.skewness([1, 1, 1, 2]), 2))
+      // [1, 2, 2, 2]: negative skew = -2 (from docstring)
+      assert(equal(shape.skewness([1, 2, 2, 2]), -2))
     })
   })
 
@@ -163,29 +119,10 @@ describe('dispersion', () => {
     })
 
     it('should return Yule\'s coefficient for a finite sample', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
-        const yule = shape.yule(values)
-
-        // Lower quartile.
-        let h = (values.length - 1) * 0.25
-        let q0 = values.sort((a, b) => a - b)[Math.floor(h)]
-        let q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
-        const lo = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
-
-        // Upper quartile.
-        h = (values.length - 1) * 0.75
-        q0 = values.sort((a, b) => a - b)[Math.floor(h)]
-        q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
-        const hi = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
-
-        // Median.
-        const median = values.length % 2 === 0
-          ? 0.5 * (values[values.length / 2 - 1] + values[values.length / 2])
-          : values[(values.length - 1) / 2]
-
-        assert(equal((lo + hi - 2 * median) / (hi - lo), yule))
-      })
+      // [1, 2, 3, 4, 5]: Q1=2, Q3=4, median=3, yule=(2+4-6)/(4-2)=0
+      assert(equal(shape.yule([1, 2, 3, 4, 5]), 0))
+      // [1, 1, 2, 4, 8]: Q1=1, Q3=4, median=2, yule=(1+4-4)/(4-1)=1/3
+      assert(equal(shape.yule([1, 1, 2, 4, 8]), 1 / 3))
     })
   })
 })
