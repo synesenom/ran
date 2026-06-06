@@ -83,6 +83,6 @@ export default class BetaBinomial extends Categorical {
     for (let k = n; k > x; k--) {
       bwd += Math.exp(logBinomial(n, k) + logBeta(k + alpha, n - k + beta) - logBetaAB)
     }
-    return Math.max(fwd, 1 - bwd)
+    return Math.min(1, Math.max(fwd, 1 - bwd))
   }
 }
