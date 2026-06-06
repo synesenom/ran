@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Tightened distribution test tolerance to `1e-14` in `test/dist.js` and `test/test-utils.js`: `refValTol` now uses `max(|expected|·1e-14, 1e-14)` for normal-range values and a `1e-4` relative guard for sub-1e-14 reference values, the finite-difference pdf–cdf consistency check retains its own `FD_FLOOR = 1e-9` floor, and reference values for Hoyt, Kolmogorov, NoncentralBeta, ConwayMaxwellPoisson, NegativeHypergeometric, and IrwinHall are updated from their pre-v1.27.0 external sources to the current double-precision computed values (#562).
+
 ### Fixed
 
 - `logGamma` now returns exact IEEE 754 results for positive integer arguments `z ≤ 171` via a 171-entry `LOG_FACTORIAL` table (each entry independently rounded from mpmath at 50 decimal places, ≤ 0.5 ULP), eliminating the Lanczos drift that previously accumulated to 2–6 ULP when `logBeta`/`logBinomial` combined three calls. Combined with improved CDF summation strategies for `BetaBinomial` and `NegativeHypergeometric` — using the forward sum directly when `CDF(x) < 0.25` (avoiding catastrophic cancellation in `1 − bwd`) and `max(fwd, 1 − bwd)` near the midpoint (preserving the `CDF ≥ 0.5` invariant at exact probability boundaries) — this lifts `BetaBinomial` and `NegativeHypergeometric` pmf/cdf precision from ~1e-12 to the arithmetic floor of ~2e-14 (#684).
