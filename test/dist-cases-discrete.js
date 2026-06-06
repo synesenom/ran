@@ -101,6 +101,17 @@ export default [{
     quantileVals: [
       { p: 0.5, x: 2 }
     ]
+  }, {
+    name: 'symmetric n=25 alpha=beta=3 midpoint boundary',
+    params: () => [25, 3, 3],
+    // exact: CDF(12)=0.5 by symmetry (alpha=beta, n odd); exercises the fwd>=0.25
+    // midpoint path where Math.min(1,…) clamp guards against floating-point over-accumulation (#701)
+    refVals: [
+      { x: 12, pmf: 35 / 522, cdf: 0.5 }
+    ],
+    quantileVals: [
+      { p: 0.5, x: 12 }
+    ]
   }],
   // scipy.stats.betabinom(n=25, a=2, b=2)
   refVals: [
@@ -857,6 +868,19 @@ export default [{
     ],
     quantileVals: [
       { p: 0.5, x: 2 }
+    ]
+  }, {
+    name: 'balanced midpoint boundary N=20 K=10 r=5',
+    params: () => [20, 10, 5],
+    // exact: CDF(4) = sum_{k=0}^{4} C(k+4,k)·C(15-k,5) / C(20,10) = 92378/184756 = 0.5;
+    // PMF(4) = C(8,4)·C(11,6)/C(20,10) = 70·462/184756 = 735/4199;
+    // exercises the fwd>=0.25 midpoint path where Math.min(1,…) clamp guards against
+    // floating-point over-accumulation (#701 regression)
+    refVals: [
+      { x: 4, pmf: 735 / 4199, cdf: 0.5 }
+    ],
+    quantileVals: [
+      { p: 0.5, x: 4 }
     ]
   }],
   // scipy.stats.nhypergeom(M=35, n=15, r=7)
