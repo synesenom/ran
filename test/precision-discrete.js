@@ -88,6 +88,44 @@ const REFS = [
       { k: 35, pmf: 0.001334297978809505, cdf: 0.9985402478640237, qp: 0.997873098874619 }
     ]
   },
+  // BetaGeometric: reference values from exact rational arithmetic
+  // CDF(k) = 1 - B(α,β+k)/B(α,β); pmf/cdf are exact finite fractions for these parameter sets
+  {
+    name: 'BetaGeometric',
+    params: [0.5, 1.5],
+    tol: 1e-14,
+    points: [
+      { k: 1, pmf: 0.25, cdf: 0.25, qp: 0.125 },
+      { k: 2, pmf: 0.125, cdf: 0.375, qp: 0.3125 },
+      { k: 3, pmf: 0.078125, cdf: 0.453125, qp: 0.4140625 },
+      { k: 5, pmf: 0.041015625, cdf: 0.548828125, qp: 0.5283203125 },
+      { k: 8, pmf: 0.021820068359375, cdf: 0.629058837890625, qp: 0.6181488037109375 }
+    ]
+  },
+  {
+    name: 'BetaGeometric',
+    params: [2, 3],
+    tol: 1e-14,
+    points: [
+      { k: 1, pmf: 0.4, cdf: 0.4, qp: 0.2 },
+      { k: 2, pmf: 0.2, cdf: 0.6, qp: 0.5 },
+      { k: 3, pmf: 0.11428571428571428, cdf: 0.7142857142857143, qp: 0.6571428571428571 },
+      { k: 5, pmf: 0.047619047619047616, cdf: 0.8333333333333334, qp: 0.8095238095238095 },
+      { k: 8, pmf: 0.01818181818181818, cdf: 0.9090909090909091, qp: 0.9 }
+    ]
+  },
+  {
+    name: 'BetaGeometric',
+    params: [2, 1],
+    tol: 1e-14,
+    points: [
+      { k: 1, pmf: 0.6666666666666666, cdf: 0.6666666666666666, qp: 0.3333333333333333 },
+      { k: 2, pmf: 0.16666666666666666, cdf: 0.8333333333333334, qp: 0.75 },
+      { k: 3, pmf: 0.06666666666666667, cdf: 0.9, qp: 0.8666666666666667 },
+      { k: 5, pmf: 0.01904761904761905, cdf: 0.9523809523809523, qp: 0.9428571428571428 },
+      { k: 8, pmf: 0.005555555555555556, cdf: 0.9777777777777777, qp: 0.975 }
+    ]
+  },
   // BetaNegativeBinomial: reference values from exact rational arithmetic (recurrence from f(0)=B(α+r,β)/B(α,β))
   {
     name: 'BetaNegativeBinomial',
