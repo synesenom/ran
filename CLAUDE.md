@@ -78,17 +78,24 @@ Every subclass of `Distribution` **must** implement all of the following that ap
 | Item | File | What to add |
 | --- | --- | --- |
 | Distribution test cases | `test/dist-cases-continuous.js` or `test/dist-cases-discrete.js` | Entry with `invalidParams`, `params`/`cases` (each with `refVals` and `quantileVals`), and `sampleParams` |
-| Precision gate | `test/precision-continuous.js` or `test/precision-discrete.js` | 3 parameter sets × 5 interior points each, with `pmf`/`pdf`, `cdf`, and `qp` (= `cdf(k) − pmf(k)/2`) values. Use exact rational arithmetic or mpmath at `mp.dps=50` — **never derive references from the ranjs implementation itself**. See the existing entries for format. |
+| Precision gate | `test/precision-continuous.js` or `test/precision-discrete.js` | 3 parameter sets × 5 interior points each, with `pmf`/`pdf`, `cdf`, and `qp` (= `cdf(k) − pmf(k)/2`) values derived from **mpmath at `mp.dps=50`** — never from the ranjs implementation itself. The canonical workflow is: add the PMF definition to `scripts/precision-refs-discrete.py` (or `-continuous.py`) and run `python3 scripts/precision-refs-<type>.py` to regenerate the JS file. If mpmath is unavailable, exact rational arithmetic is an acceptable substitute for distributions whose PMF has closed-form rational values. |
 | Fit test | `test/dist.js` explicit block | Explicit test alongside the other per-distribution tests — sample from the distribution, call `.fit()`, assert the result is a correct instance. This block is **not** auto-generated from `dist-cases-*.js`; add it by hand. |
 | Subpath export | `package.json` `exports` field | `"./dist/<name>": { "import": "./dist/<name>.esm.js" }` in alphabetical order |
 | Named export | `src/dist/index.js` | Add (or uncomment) the export line |
+| CHANGELOG entry | `CHANGELOG.md` `## [Unreleased]` section | A `### Added` bullet describing the new distribution. New distributions are always user-visible — a changelog entry is mandatory. |
+
+### Other required updates
+
+- **README.md** — The numerical precision section contains hardcoded distribution counts ("All N discrete distributions", "All M continuous distributions"). Increment the relevant count when adding a new distribution.
+- **JSDoc** — The class must have `@class`, `@memberof ran.dist`, and `@constructor` tags. The `constructor()` method must have a JSDoc block with `@param` tags for each parameter. Without these, TypeScript declarations will be incomplete. See the TypeScript Declarations section for details.
 
 ### Pre-PR verification
 
-Run all three before opening a PR for a new distribution:
+Run all four before opening a PR for a new distribution:
 
 ```bash
 npm run standard                        # no lint errors
+npm run jsdoclint                       # JSDoc annotations valid
 npm test                                # all tests pass, coverage thresholds met
 node scripts/check-subpath-exports.js  # package.json subpath in sync
 ```
