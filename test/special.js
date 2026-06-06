@@ -563,7 +563,7 @@ describe('special', () => {
     })
 
     it('should converge to gamma(s) as x -> inf', () => {
-      for (let i = 0; i > LAPS; i++) {
+      for (let i = 0; i < LAPS; i++) {
         const s = Math.random() * 100
         const x = 1e5 + Math.random() * 1e5
         assert(equal(special.gammaLowerIncomplete(s, x), 1))
