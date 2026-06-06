@@ -50,7 +50,8 @@ const CHI_TABLE_HIGH = [
 ]
 
 export function equal (x, y, precision = 10) {
-  return Math.abs((x - y) / y) < Math.pow(10, -precision)
+  const tol = Math.pow(10, -precision)
+  return y === 0 ? Math.abs(x) < tol : Math.abs((x - y) / y) < tol
 }
 
 function almostEqual (a, b, tol = PRECISION) {

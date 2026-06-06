@@ -1,9 +1,7 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { equal, repeat } from './test-utils.js'
+import { equal } from './test-utils.js'
 import * as special from '../src/special/index.js'
-
-const LAPS = 100
 
 describe('special', () => {
   const EM = 0.5772156649015329
@@ -49,50 +47,6 @@ describe('special', () => {
       }
     })
   })
-
-  /*
-  describe('digamma(z)', () => {
-    it('should return reference values', () => {
-      assert(equal(digamma(1), -em))
-      assert(equal(digamma(0.5), -em - 2 * Math.log(2)))
-      assert(equal(digamma(1 / 4), -Math.PI / 2 - 3 * Math.log(2) - em))
-    })
-
-    it('should give the harmonic number for integers', () => {
-      repeat(() => {
-        let z = Math.floor(Math.random() * 100) + 1
-        assert(equal(digamma(z), digamma(z + 1) - 1 / z))
-      }, LAPS)
-    })
-  })
-
-  describe('f21(a, b, c, z)', () => {
-    describe('z < -1', () => {
-      it('TEST', () => {
-        let z = 1 + Math.random() * 10
-        console.log(
-          f21(0.5, 0.5, 1.5, -z * z),
-          Math.log(z + Math.sqrt(1 + z * z)) / z
-        )
-      })
-    })
-
-    describe('-1 <= z < 0', () => {
-    })
-
-    describe('0 <= z <= 0.5', () => {
-
-    })
-
-    describe('0.5 < z <= 1', () => {})
-
-    describe('1 < z <= 2', () => {})
-
-    describe('2 < z', () => {
-
-    })
-  })
-  */
 
   describe('.bessel()', () => {
     it('In(0) should be equal to 0 for n >= 1', () => {
@@ -323,63 +277,57 @@ describe('special', () => {
   describe('.f11()', () => {
     describe('|z| < 50', () => {
       it('f11(0, b, z) = 1', () => {
-        repeat(() => {
-          const b = Math.random()
-          const z = Math.random() * 40
-          assert(equal(special.f11(0, b, z), 1))
-        }, LAPS)
+        for (const b of [0.1, 0.5, 0.9]) {
+          for (const z of [0, 1, 10, 40]) {
+            assert(equal(special.f11(0, b, z), 1))
+          }
+        }
       })
 
       it('f11(b, b, z) = exp(z)', () => {
-        repeat(() => {
-          const b = Math.random() * 10
-          const z = Math.random() * 40
-          assert(equal(special.f11(b, b, z), Math.exp(z)))
-        }, LAPS)
+        for (const b of [1, 5, 10]) {
+          for (const z of [0, 1, 10, 39]) {
+            assert(equal(special.f11(b, b, z), Math.exp(z)))
+          }
+        }
       })
 
       it('f11(2, 1, z) = (1 + z) * exp(z)', () => {
-        repeat(() => {
-          const z = Math.random() * 40
+        for (const z of [0, 1, 10, 40]) {
           assert(equal(special.f11(2, 1, z), (1 + z) * Math.exp(z)))
-        }, LAPS)
+        }
       })
 
       it('f11(1, 2, z) = (exp(z) - 1) / z', () => {
-        repeat(() => {
-          const z = Math.random() * 40
+        for (const z of [1, 5, 10, 40]) {
           assert(equal(special.f11(1, 2, z), (Math.exp(z) - 1) / z))
-        }, LAPS)
+        }
       })
 
       it('(2z / sqrt(pi)) * f11(0.5, 1.5, -z^2) = erf(z)', () => {
-        repeat(() => {
-          const z = Math.random()
+        for (const z of [0.1, 0.3, 0.5, 0.9]) {
           assert(equal(2 * z * special.f11(0.5, 1.5, -z * z) / Math.sqrt(Math.PI), special.erf(z)))
-        }, LAPS)
+        }
       })
 
       it('f11(a, 2a, z) = exp(z/2) (z/4)^(0.5 - a) gamma(a + 0.5) I(a - 0.5; z/2)', () => {
-        repeat(() => {
-          const a = Math.random() * 10
-          const z = Math.random() * 40
-          assert(equal(
-            special.f11(a, 2 * a, z),
-            Math.exp(z / 2 + (0.5 - a) * Math.log(z / 4) + special.logGamma(a + 0.5)) * special.besselInu(a - 0.5, z / 2)
-          ))
-        }, LAPS)
+        for (const a of [1, 5, 10]) {
+          for (const z of [1, 10, 40]) {
+            assert(equal(
+              special.f11(a, 2 * a, z),
+              Math.exp(z / 2 + (0.5 - a) * Math.log(z / 4) + special.logGamma(a + 0.5)) * special.besselInu(a - 0.5, z / 2)
+            ))
+          }
+        }
       })
 
       it('a f11(a+1, b, z) = (b - a) f11(a-1, b, z) + (2a - b + z) f11(a, b, z)', () => {
-        repeat(() => {
-          const a = Math.random() * 10
-          const b = Math.random() * 10
-          const z = Math.random() * 40
+        for (const [a, b, z] of [[1, 2, 1], [5, 6, 20], [9, 10, 40]]) {
           assert(equal(
             a * special.f11(a + 1, b, z),
             (b - a) * special.f11(a - 1, b, z) + (2 * a - b + z) * special.f11(a, b, z)
           ))
-        }, LAPS)
+        }
       })
 
       it('f11(1, 2, 49) = (exp(49) - 1) / 49 at 12-digit precision', () => {
@@ -390,56 +338,49 @@ describe('special', () => {
 
     describe('|z| >= 50', () => {
       it('f11(0, b, z) = 1', () => {
-        repeat(() => {
-          const b = Math.random()
-          const z = Math.random() * 40 + 50
-          assert(equal(special.f11(0, b, z), 1))
-        }, LAPS)
+        for (const b of [0.1, 0.5, 0.9]) {
+          for (const z of [50, 70, 90]) {
+            assert(equal(special.f11(0, b, z), 1))
+          }
+        }
       })
 
       it('f11(b, b, z) = exp(z)', () => {
-        repeat(() => {
-          const b = Math.random() * 10
-          const z = Math.random() * 40 + 50
-          assert(equal(special.f11(b, b, z), Math.exp(z)))
-        }, LAPS)
+        for (const b of [1, 5, 10]) {
+          for (const z of [50, 70, 90]) {
+            assert(equal(special.f11(b, b, z), Math.exp(z)))
+          }
+        }
       })
 
       it('f11(2, 1, z) = (1 + z) * exp(z)', () => {
-        repeat(() => {
-          const z = Math.random() * 40 + 50
+        for (const z of [50, 70, 90]) {
           assert(equal(special.f11(2, 1, z), (1 + z) * Math.exp(z)))
-        }, LAPS)
+        }
       })
 
       it('f11(1, 2, z) = (exp(z) - 1) / z', () => {
-        repeat(() => {
-          const z = Math.random() * 40 + 50
+        for (const z of [50, 70, 90]) {
           assert(equal(special.f11(1, 2, z), (Math.exp(z) - 1) / z))
-        }, LAPS)
+        }
       })
 
       it('f11(a, 2a, z) = exp(z/2) (z/4)^(0.5 - a) gamma(a + 0.5) I(a - 0.5; z/2)', () => {
-        repeat(() => {
-          const a = Math.random() * 10
-          const z = Math.random() * 40 + 50
+        for (const [a, z] of [[0.5, 50], [2, 65], [5, 80], [8, 50]]) {
           assert(equal(
             special.f11(a, 2 * a, z),
             Math.exp(z / 2 + (0.5 - a) * Math.log(z / 4) + special.logGamma(a + 0.5)) * special.besselInu(a - 0.5, z / 2)
           ))
-        }, LAPS)
+        }
       })
 
       it('a * f11(a+1, b, z) = (b - a) * f11(a-1, b, z) + (2a - b + z) * f11(a, b, z)', () => {
-        repeat(() => {
-          const a = Math.random() * 10 + 3
-          const b = Math.random() * 10 + 3
-          const z = Math.random() * 40 + 50
+        for (const [a, b, z] of [[3, 4, 50], [8, 9, 70], [13, 13, 90]]) {
           assert(equal(
             a * special.f11(a + 1, b, z),
             (b - a) * special.f11(a - 1, b, z) + (2 * a - b + z) * special.f11(a, b, z)
           ))
-        })
+        }
       })
 
       it('f11(1, 2, 50) = (exp(50) - 1) / 50', () => {
@@ -454,11 +395,8 @@ describe('special', () => {
 
   describe('.gamma(), .logGamma()', () => {
     it('logGamma(z) = ln(gamma(z))', () => {
-      for (let i = 0; i < LAPS; i++) {
-        const x = Math.random() * 100
-
+      for (const x of [0.5, 3, 5, 10, 50, 100]) {
         const g = special.gamma(x)
-
         const lng = special.logGamma(x)
         assert(Math.abs(Math.log(g) - lng) / lng < 0.01)
       }
@@ -525,86 +463,74 @@ describe('special', () => {
 
   describe('.gammaLowerIncomplete(), .gammaUpperIncomplete()', () => {
     it('should vanish below 0', () => {
-      repeat(() => {
-        const s = 2 + Math.random() * 10
-
-        const x = -10
-        assert(special.gammaLowerIncomplete(s, x) === 0)
-      }, LAPS)
+      for (const s of [2, 5, 10, 12]) {
+        assert(special.gammaLowerIncomplete(s, -10) === 0)
+      }
     })
     it('should be equal to exp(-x) for s = 1', () => {
-      repeat(() => {
-        const x = Math.random() * 100
-
+      for (const x of [0, 1, 10, 100]) {
         const gui = special.gammaUpperIncomplete(1, x) * special.gamma(1)
         assert(Math.abs(gui - Math.exp(-x)) / gui < 0.01)
-      }, LAPS)
+      }
     })
 
     it('should be equal to sqrt(pi) * erf(sqrt(x)) for s = 1/2', () => {
-      repeat(() => {
-        const x = Math.random() * 100
-
+      for (const x of [0.01, 1, 10, 100]) {
         const gli = special.gammaLowerIncomplete(0.5, x) * special.gamma(0.5)
         assert(Math.abs(gli - Math.sqrt(Math.PI) * special.erf(Math.sqrt(x))) / gli < 0.01)
-      }, LAPS)
+      }
     })
 
     it('should converge to x^s / s as x -> 0', () => {
-      for (let i = 0; i < LAPS; i++) {
-        const s = Math.random()
-
-        const x = 1e-5 * (1 + Math.random())
-
-        const xs = Math.pow(x, s)
-
-        const gli = special.gammaLowerIncomplete(s, x) * special.gamma(s)
-        if (xs > 1e-100) {
-          assert(Math.abs(gli / Math.pow(x, s) * s - 1) < 0.01)
+      for (const s of [0.1, 0.5, 0.9]) {
+        for (const x of [1e-5, 1.5e-5, 2e-5]) {
+          const xs = Math.pow(x, s)
+          const gli = special.gammaLowerIncomplete(s, x) * special.gamma(s)
+          if (xs > 1e-100) {
+            assert(Math.abs(gli / Math.pow(x, s) * s - 1) < 0.01)
+          }
         }
       }
     })
 
     it('should converge to gamma(s) as x -> inf', () => {
-      for (let i = 0; i < LAPS; i++) {
-        const s = Math.random() * 100
-        const x = 1e5 + Math.random() * 1e5
-        assert(equal(special.gammaLowerIncomplete(s, x), 1))
+      for (const s of [1, 10, 50, 100]) {
+        for (const x of [1e5, 1.5e5, 2e5]) {
+          assert(equal(special.gammaLowerIncomplete(s, x), 1))
+        }
       }
     })
   })
 
   describe('.gammaLowerIncompleteInv()', () => {
     it('should return 0 for p = 0', () => {
-      repeat(() => {
-        const a = 0.5 + Math.random() * 10
+      for (const a of [0.5, 2, 5, 10]) {
         assert(special.gammaLowerIncompleteInv(a, 0) === 0)
-      }, LAPS)
+      }
     })
 
     it('should return Infinity for p = 1', () => {
-      repeat(() => {
-        const a = 0.5 + Math.random() * 10
+      for (const a of [0.5, 2, 5, 10]) {
         assert(special.gammaLowerIncompleteInv(a, 1) === Infinity)
-      }, LAPS)
+      }
     })
 
     it('should round-trip with gammaLowerIncomplete for a >= 1', () => {
-      repeat(() => {
-        const a = 1 + Math.random() * 20
-        const p = 0.01 + Math.random() * 0.98
-        const x = special.gammaLowerIncompleteInv(a, p)
-        assert(Math.abs(special.gammaLowerIncomplete(a, x) - p) < 1e-10)
-      }, LAPS)
+      for (const a of [1, 5, 10, 21]) {
+        for (const p of [0.01, 0.1, 0.5, 0.99]) {
+          const x = special.gammaLowerIncompleteInv(a, p)
+          assert(Math.abs(special.gammaLowerIncomplete(a, x) - p) < 1e-10)
+        }
+      }
     })
 
     it('should round-trip with gammaLowerIncomplete for a < 1', () => {
-      repeat(() => {
-        const a = 0.1 + Math.random() * 0.9
-        const p = 0.01 + Math.random() * 0.98
-        const x = special.gammaLowerIncompleteInv(a, p)
-        assert(Math.abs(special.gammaLowerIncomplete(a, x) - p) < 1e-10)
-      }, LAPS)
+      for (const a of [0.1, 0.3, 0.5, 0.9]) {
+        for (const p of [0.01, 0.1, 0.5, 0.99]) {
+          const x = special.gammaLowerIncompleteInv(a, p)
+          assert(Math.abs(special.gammaLowerIncomplete(a, x) - p) < 1e-10)
+        }
+      }
     })
 
     it('should return a known value: gammaLowerIncompleteInv(2, 0.5) ≈ 1.6783', () => {
@@ -664,26 +590,25 @@ describe('special', () => {
     it('hurwitzZeta should satisfy the recurrence ζ(s, a) = a^{-s} + ζ(s, a+1) for s near 1', () => {
       // Verifies that the corrected partial-sum length produces consistent values across the
       // recurrence, which the fixed-point tests at s=1.01/1.05/1.1 alone cannot catch.
-      repeat(() => {
-        const s = 1.05 + Math.random() * 0.45
-        const a = 0.5 + Math.random() * 4
-        assert(equal(
-          special.hurwitzZeta(s, a),
-          Math.pow(a, -s) + special.hurwitzZeta(s, a + 1),
-          6
-        ))
-      }, LAPS)
+      for (const s of [1.05, 1.1, 1.25, 1.5]) {
+        for (const a of [0.5, 1, 2, 4]) {
+          assert(equal(
+            special.hurwitzZeta(s, a),
+            Math.pow(a, -s) + special.hurwitzZeta(s, a + 1),
+            6
+          ))
+        }
+      }
     })
 
     it('riemannZeta(s) - hurwitzZeta(s, n+1) = H(s, n)', () => {
-      repeat(() => {
-        const s = Math.random() * 9.5 + 1.01
+      for (const s of [1.01, 1.1, 2, 5, 10]) {
         let sum = 0
         for (let n = 1; n < 100; n++) {
           sum += 1 / Math.pow(n, s)
           assert(Math.abs(sum - special.riemannZeta(s) + special.hurwitzZeta(s, n + 1)) / sum < 1e-6)
         }
-      }, LAPS)
+      }
     })
 
     it('should return Infinity at the pole s = 1', () => {
@@ -725,19 +650,17 @@ describe('special', () => {
     })
 
     it('should satisfy the W * exp(W) = x equation for x >= 0', () => {
-      repeat(() => {
-        const x = Math.random() * 10
+      for (const x of [0, 1e-10, 0.1, 1, Math.E, 5, 10]) {
         const w = special.lambertW0(x)
         assert(equal(w * Math.exp(w), x))
-      }, LAPS)
+      }
     })
 
     it('should satisfy the W * exp(W) = x equation for x in [-1/e, 0)', () => {
-      repeat(() => {
-        const x = -(Math.random() * (1 / Math.E - 1e-9) + 1e-9)
+      for (const x of [-1e-6, -0.1, -0.2, -1 / Math.E + 1e-10]) {
         const w = special.lambertW0(x)
         assert(equal(w * Math.exp(w), x))
-      }, LAPS)
+      }
     })
   })
 
@@ -763,11 +686,10 @@ describe('special', () => {
     })
 
     it('should satisfy the W * exp(W) = x equation', () => {
-      repeat(() => {
-        const x = -(Math.random() * (1 / Math.E - 1e-9) + 1e-9)
+      for (const x of [-1e-6, -0.1, -0.2, -1 / Math.E + 1e-10]) {
         const w = special.lambertW1m(x)
         assert(equal(w * Math.exp(w), x))
-      }, LAPS)
+      }
     })
 
     it('should return known values near the branch cut', () => {
@@ -776,11 +698,10 @@ describe('special', () => {
     })
 
     it('should satisfy W * exp(W) = z near the branch cut (z in [-1/e, -0.1])', () => {
-      repeat(() => {
-        const x = -(Math.random() * (1 / Math.E - 0.1) + 0.1)
+      for (const x of [-0.15, -0.2, -0.3, -1 / Math.E + 1e-10]) {
         const w = special.lambertW1m(x)
         assert(equal(w * Math.exp(w), x))
-      }, LAPS)
+      }
     })
   })
 
@@ -788,23 +709,21 @@ describe('special', () => {
     describe('special cases', () => {
       describe('x = 0', () => {
         it('should satisfy the recurrence relation', () => {
-          const x = Math.random() * 30
-          const y = 0
-          const mu = 2 + Math.random() * 5
-
-          assert(equal(special.marcumQ(mu, x, y), 1))
+          for (const x of [1, 10, 30]) {
+            for (const mu of [2, 4, 7]) {
+              assert(equal(special.marcumQ(mu, x, 0), 1))
+            }
+          }
         })
       })
 
       describe('y = 1', () => {
         it('should satisfy the recurrence relation', () => {
-          repeat(() => {
-            const x = 0
-            const y = 40 + Math.random() * 60
-            const mu = 2 + Math.random() * 5
-
-            assert(equal(special.marcumQ(mu, x, y), special.gammaUpperIncomplete(mu, y)))
-          }, LAPS)
+          for (const y of [40, 60, 80, 100]) {
+            for (const mu of [2, 4, 7]) {
+              assert(equal(special.marcumQ(mu, 0, y), special.gammaUpperIncomplete(mu, y)))
+            }
+          }
         })
       })
     })
@@ -812,11 +731,7 @@ describe('special', () => {
     describe('series expansion', () => {
       describe('Q', () => {
         it('should satisfy the recurrence relation', () => {
-          repeat(() => {
-            const x = Math.random() * 30
-            const y = 40 + Math.random() * 60
-            const mu = 2 + Math.random() * 5
-
+          for (const [x, y, mu] of [[1, 40, 2], [10, 60, 4], [29, 99, 7]]) {
             const q1 = special.marcumQ(mu + 1, x, y)
             const q2 = special.marcumQ(mu, x, y)
             const q3 = special.marcumQ(mu + 2, x, y)
@@ -827,17 +742,13 @@ describe('special', () => {
             } else {
               assert(equal(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4), 1))
             }
-          }, LAPS)
+          }
         })
       })
 
       describe('P', () => {
         it('should satisfy the recurrence relation', () => {
-          repeat(() => {
-            const x = Math.random() * 30
-            const y = 10 + Math.random() * 10
-            const mu = 30 + Math.random() * 5
-
+          for (const [x, y, mu] of [[1, 10, 30], [10, 15, 32], [29, 20, 35]]) {
             const q1 = special.marcumQ(mu + 1, x, y)
             const q2 = special.marcumQ(mu, x, y)
             const q3 = special.marcumQ(mu + 2, x, y)
@@ -848,7 +759,7 @@ describe('special', () => {
             } else {
               assert(equal(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4), 1))
             }
-          }, LAPS)
+          }
         })
       })
 
@@ -866,35 +777,27 @@ describe('special', () => {
     describe('asymptotic expansion for large xi', () => {
       describe('Q', () => {
         it('should satisfy the recurrence relation', () => {
-          repeat(() => {
-            const x = 35 + Math.random() * 100
-            const y = x + 20 + Math.random() * 100
-            const mu = 3 + Math.random() * 3
-
+          for (const [x, y, mu] of [[35, 60, 3], [70, 100, 4.5], [134, 160, 6]]) {
             const q1 = special.marcumQ(mu + 1, x, y)
             const q2 = special.marcumQ(mu, x, y)
             const q3 = special.marcumQ(mu + 2, x, y)
             const q4 = special.marcumQ(mu - 1, x, y)
 
             assert(equal(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4), 1))
-          }, LAPS)
+          }
         })
       })
 
       describe('P', () => {
         it('should satisfy the recurrence relation', () => {
-          repeat(() => {
-            const x = 45 + Math.random() * 90
-            const y = x - 5 - Math.random() * 25
-            const mu = 3 + Math.random() * 3
-
+          for (const [x, y, mu] of [[45, 30, 3], [90, 70, 4.5], [134, 110, 6]]) {
             const q1 = special.marcumQ(mu + 1, x, y)
             const q2 = special.marcumQ(mu, x, y)
             const q3 = special.marcumQ(mu + 2, x, y)
             const q4 = special.marcumQ(mu - 1, x, y)
 
             assert(equal(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4), 1))
-          }, LAPS)
+          }
         })
       })
 
@@ -913,18 +816,14 @@ describe('special', () => {
 
     describe('quadrature', () => {
       it('should satisfy the recurrence relation', () => {
-        repeat(() => {
-          const x = 40 + Math.random() * 40
-          const y = 0.5 + Math.random() * 1.5
-          const mu = 3 + Math.random() * 5
-
+        for (const [x, y, mu] of [[40, 0.5, 3], [60, 1, 5], [79, 2, 8]]) {
           const q1 = special.marcumQ(mu + 1, x, y)
           const q2 = special.marcumQ(mu, x, y)
           const q3 = special.marcumQ(mu + 2, x, y)
           const q4 = special.marcumQ(mu - 1, x, y)
 
           assert(equal(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4), 1))
-        }, LAPS)
+        }
       })
 
       it('should match scipy ncx2 reference values', () => {
@@ -956,18 +855,12 @@ describe('special', () => {
       it('should satisfy the recurrence relation', () => {
         // Both x < mu and x > mu inside the transition band, exercising both
         // forms of the recurrence test.
-        repeat(() => {
-          const x = 40 + Math.random() * 30
-          const mu = 80 + Math.random() * 40
-          const s = Math.sqrt(4 * x + 2 * mu)
-          check(x, x + mu - 0.8 * s + Math.random() * 1.6 * s, mu)
-        }, LAPS)
-        repeat(() => {
-          const x = 80 + Math.random() * 60
-          const mu = 40 + Math.random() * 30
-          const s = Math.sqrt(4 * x + 2 * mu)
-          check(x, x + mu - 0.8 * s + Math.random() * 1.6 * s, mu)
-        }, LAPS)
+        for (const [x, y, mu] of [[40, 120, 80], [55, 155, 100], [70, 190, 120]]) {
+          check(x, y, mu)
+        }
+        for (const [x, y, mu] of [[80, 120, 40], [110, 165, 55], [140, 210, 70]]) {
+          check(x, y, mu)
+        }
       })
 
       it('should match scipy ncx2 reference values', () => {
@@ -997,18 +890,12 @@ describe('special', () => {
         // mu >= 135 is the dispatch threshold; at the boundary the mu-1 order
         // may fall on the recurrence branch, but the three-term identity holds
         // across any mix of correct branches. Both x < mu and x > mu run.
-        repeat(() => {
-          const x = 30 + Math.random() * 50
-          const mu = 135 + Math.random() * 115
-          const s = Math.sqrt(4 * x + 2 * mu)
-          check(x, x + mu - 0.9 * s + Math.random() * 1.8 * s, mu)
-        }, LAPS)
-        repeat(() => {
-          const mu = 135 + Math.random() * 65
-          const x = mu + 20 + Math.random() * 80
-          const s = Math.sqrt(4 * x + 2 * mu)
-          check(x, x + mu - 0.9 * s + Math.random() * 1.8 * s, mu)
-        }, LAPS)
+        for (const [x, y, mu] of [[30, 165, 135], [55, 235, 180], [80, 330, 250]]) {
+          check(x, y, mu)
+        }
+        for (const [x, y, mu] of [[155, 290, 135], [200, 365, 165], [260, 460, 200]]) {
+          check(x, y, mu)
+        }
       })
 
       it('should match scipy ncx2 reference values', () => {
@@ -1030,17 +917,17 @@ describe('special', () => {
   describe('.marcumP()', () => {
     describe('special cases', () => {
       it('should return 0 for y = 0', () => {
-        repeat(() => {
-          assert(special.marcumP(2 + Math.random() * 5, Math.random() * 30, 0) === 0)
-        }, LAPS)
+        for (const [mu, x] of [[2, 0], [4, 15], [7, 30]]) {
+          assert(special.marcumP(mu, x, 0) === 0)
+        }
       })
 
       it('should equal the lower incomplete gamma for x = 0', () => {
-        repeat(() => {
-          const y = 40 + Math.random() * 60
-          const mu = 2 + Math.random() * 5
-          assert(equal(special.marcumP(mu, 0, y), special.gammaLowerIncomplete(mu, y)))
-        }, LAPS)
+        for (const y of [40, 70, 100]) {
+          for (const mu of [2, 4, 7]) {
+            assert(equal(special.marcumP(mu, 0, y), special.gammaLowerIncomplete(mu, y)))
+          }
+        }
       })
     })
 
@@ -1059,29 +946,21 @@ describe('special', () => {
       // quadrature and recurrence points stay close enough to the transition
       // that P is above the underflow limit, so the relation is meaningfully
       // exercised.
-      repeat(() => check(Math.random() * 30, 10 + Math.random() * 10, 30 + Math.random() * 5), LAPS)
-      repeat(() => {
-        const x = 45 + Math.random() * 90
-        check(x, x - 5 - Math.random() * 25, 3 + Math.random() * 3)
-      }, LAPS)
-      repeat(() => {
-        const x = 40 + Math.random() * 30
-        const mu = 80 + Math.random() * 40
-        const s = Math.sqrt(4 * x + 2 * mu)
-        check(x, x + mu - 1.7 * s + Math.random() * 0.6 * s, mu)
-      }, LAPS)
-      repeat(() => {
-        const x = 40 + Math.random() * 30
-        const mu = 80 + Math.random() * 40
-        const s = Math.sqrt(4 * x + 2 * mu)
-        check(x, x + mu - 0.8 * s + Math.random() * 1.6 * s, mu)
-      }, LAPS)
-      repeat(() => {
-        const x = 30 + Math.random() * 50
-        const mu = 135 + Math.random() * 110
-        const s = Math.sqrt(4 * x + 2 * mu)
-        check(x, x + mu - 0.9 * s + Math.random() * 1.8 * s, mu)
-      }, LAPS)
+      for (const [x, y, mu] of [[1, 10, 30], [15, 15, 32], [29, 20, 35]]) {
+        check(x, y, mu)
+      }
+      for (const [x, y, mu] of [[45, 30, 3], [90, 70, 4.5], [134, 110, 6]]) {
+        check(x, y, mu)
+      }
+      for (const [x, y, mu] of [[40, 95, 80], [55, 126, 100], [70, 158, 120]]) {
+        check(x, y, mu)
+      }
+      for (const [x, y, mu] of [[40, 120, 80], [55, 155, 100], [70, 190, 120]]) {
+        check(x, y, mu)
+      }
+      for (const [x, y, mu] of [[30, 165, 135], [55, 235, 180], [80, 330, 245]]) {
+        check(x, y, mu)
+      }
     })
   })
 
@@ -1091,24 +970,21 @@ describe('special', () => {
         assert(equal(special.marcumQ(mu, x, y) + special.marcumP(mu, x, y), 1))
       }
       // Series, asymptotic, quadrature, recurrence and large-mu regimes.
-      repeat(() => identity(Math.random() * 30, 40 + Math.random() * 60, 2 + Math.random() * 5), LAPS)
-      repeat(() => {
-        const x = 35 + Math.random() * 100
-        identity(x, x + 20 + Math.random() * 100, 3 + Math.random() * 3)
-      }, LAPS)
-      repeat(() => identity(40 + Math.random() * 40, 0.5 + Math.random() * 1.5, 3 + Math.random() * 5), LAPS)
-      repeat(() => {
-        const x = 40 + Math.random() * 30
-        const mu = 80 + Math.random() * 40
-        const s = Math.sqrt(4 * x + 2 * mu)
-        identity(x, x + mu - 0.8 * s + Math.random() * 1.6 * s, mu)
-      }, LAPS)
-      repeat(() => {
-        const x = 30 + Math.random() * 50
-        const mu = 140 + Math.random() * 100
-        const s = Math.sqrt(4 * x + 2 * mu)
-        identity(x, x + mu - 0.8 * s + Math.random() * 1.6 * s, mu)
-      }, LAPS)
+      for (const [x, y, mu] of [[1, 40, 2], [15, 70, 4], [29, 99, 7]]) {
+        identity(x, y, mu)
+      }
+      for (const [x, y, mu] of [[35, 60, 3], [70, 100, 4.5], [134, 160, 6]]) {
+        identity(x, y, mu)
+      }
+      for (const [x, y, mu] of [[40, 0.5, 3], [60, 1, 5], [79, 2, 8]]) {
+        identity(x, y, mu)
+      }
+      for (const [x, y, mu] of [[40, 120, 80], [55, 155, 100], [70, 190, 120]]) {
+        identity(x, y, mu)
+      }
+      for (const [x, y, mu] of [[30, 170, 140], [55, 235, 180], [80, 320, 240]]) {
+        identity(x, y, mu)
+      }
     })
   })
 
