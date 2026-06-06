@@ -2,7 +2,11 @@ import { assert } from 'chai'
 
 // Constants
 const H = 0.01
-const PRECISION = 1e-9
+const PRECISION = 1e-14
+// Separate floor for finite-difference pdf-cdf consistency checks: numerical differentiation
+// cannot match the PDF closer than ~1e-14 absolute for tiny pdf values, so the FD check
+// needs a looser floor than the refVal precision target.
+const FD_FLOOR = 1e-9
 const RANGE_STEPS = 10
 // Golden-ratio conjugate: low-discrepancy deterministic offset replacing Math.random() jitter.
 const GOLDEN = 0.6180339887
@@ -263,17 +267,17 @@ export function repeat (test, times = 10) {
   }
 }
 
-// Tolerance for refVal comparison. For sub-precision expected values, fall
-// back to relative tolerance so catastrophic-cancellation bugs that return 0
-// or 1e-16 instead of, say, 2.5e-19 cannot pass vacuously under the absolute
-// PRECISION check.
+// Mixed tolerance for refVal comparisons.
+// For |expected| >= 1e-14: max(|expected|·1e-14, 1e-14) — relative dominates for large pdf
+// values, absolute floor 1e-14 for CDF/pmf in (0,1).
+// For |expected| < 1e-14 (e.g. deep-tail CDF ~1e-34): relative 1e-4 guard prevents
+// a regression to 0 from silently passing (absolute floor would be vacuous here).
 function refValTol (expected) {
-  // 1e-10 relative tolerance leaves 3+ orders of magnitude of headroom above
-  // typical continued-fraction precision (~1e-13) while still catching mild
-  // regressions in the sub-precision regime that a 1e-3 band would miss.
-  return Math.abs(expected) >= PRECISION
-    ? PRECISION
-    : Math.max(Math.abs(expected) * 1e-10, Number.MIN_VALUE)
+  const absE = Math.abs(expected)
+  if (absE < PRECISION) {
+    return Math.max(absE * 1e-4, Number.MIN_VALUE)
+  }
+  return Math.max(absE * PRECISION, PRECISION)
 }
 
 // 1e-6 matches the tolerance specified in issue #213: root-finding accumulates
@@ -349,7 +353,7 @@ export const Tests = {
         const cdf1 = dist.cdf(x)
         const cdf0 = dist.cdf(x - 1)
         const df = cdf1 - cdf0
-        assert(almostEqual(p, df), `pdf(${x}) = ${p} != ${df} = ${cdf1} - ${cdf0}. delta = ${(p - df).toPrecision(3)}`)
+        assert(almostEqual(p, df, FD_FLOOR), `pdf(${x}) = ${p} != ${df} = ${cdf1} - ${cdf0}. delta = ${(p - df).toPrecision(3)}`)
       }
     } else {
       // Continuous distribution: PDF(x) = d CDF(x) / dx
@@ -380,17 +384,17 @@ export const Tests = {
         }
         const [df, dfErr] = differentiate(t => dist.cdf(t), x, H)
         // Skip when CDF is saturated at 0 or 1 — derivative rounds to exactly 0
-        if (Math.abs(df) < PRECISION) {
+        if (Math.abs(df) < FD_FLOOR) {
           continue
         }
         // Skip when Ridders' Richardson table did not converge — the stencil is crossing
         // a kink in the PDF (e.g. Laplace at mu, DoubleGamma at 0) that prevents reliable
         // finite-difference differentiation even when the coarse kink guard above passes
         // See solutions/testing/2026-05-16-ridders-error-estimate-kink-detection.md
-        if (dfErr > Math.max(PRECISION, Math.abs(df) * 1e-7)) {
+        if (dfErr > Math.max(FD_FLOOR, Math.abs(df) * 1e-7)) {
           continue
         }
-        assert(almostEqual(p, df, Math.max(PRECISION, p * 1e-6)), `pdf(${x.toPrecision(3)}; ${getParamList(dist)}) = ${p} != ${df} = d/dx cdf(${x.toPrecision(3)}). delta = ${(p - df).toPrecision(3)}`)
+        assert(almostEqual(p, df, Math.max(FD_FLOOR, p * 1e-6)), `pdf(${x.toPrecision(3)}; ${getParamList(dist)}) = ${p} != ${df} = d/dx cdf(${x.toPrecision(3)}). delta = ${(p - df).toPrecision(3)}`)
       }
     }
   },

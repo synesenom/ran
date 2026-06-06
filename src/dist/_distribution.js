@@ -240,19 +240,19 @@ class Distribution {
       (Number.isFinite(this.s[0].value) ? this.s[0].value : -10)) / 2
 
     // Set initial guess for lower boundary.
-    let a0 = Math.random()
+    let a0 = this.r.next()
     if (this.s[0].closed) {
       a0 = this.s[0].value + Number.EPSILON
     } else if (Number.isFinite(this.s[0].value)) {
-      a0 = this.s[0].value + delta * Math.random()
+      a0 = this.s[0].value + delta * this.r.next()
     }
 
     // Set initial guess for upper boundary.
-    let b0 = a0 + Math.random()
+    let b0 = a0 + this.r.next()
     if (this.s[1].closed) {
       b0 = this.s[1].value - Number.EPSILON
     } else if (Number.isFinite(this.s[1].value)) {
-      b0 = this.s[1].value - delta * Math.random()
+      b0 = this.s[1].value - delta * this.r.next()
     }
 
     // Find brackets.
