@@ -52,7 +52,7 @@ const UnitTests = {
       const values1 = self.sample(sampleSize)
       self.seed(987654321) // different fixed seed to guarantee distinct sequence
       const values2 = self.sample(sampleSize)
-      assert(values1.reduce((acc, d, i) => acc || d !== values2[i], true))
+      assert(values1.reduce((acc, d, i) => acc || d !== values2[i], false))
     })
   },
 
