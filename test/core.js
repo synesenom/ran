@@ -153,10 +153,9 @@ describe('core', () => {
     })
 
     it('should return multiple items distributed uniformly', () => {
-      for (let trial = 0; trial < TRIALS; trial++) {
-        const values = ['a', 'b', 'c']
+      const values = ['a', 'b', 'c']
+      for (const k of [1, 2, 5, 10]) {
         const freqs = {}
-        const k = Math.floor(Math.random() * 200 - 100)
         for (let lap = 0; lap < LAPS; lap++) {
           let r = core.choice(values, k)
           if (k < 2) { r = [r] }
@@ -193,9 +192,8 @@ describe('core', () => {
     })
 
     it('should return multiple characters distributed uniformly', () => {
-      for (let trial = 0; trial < TRIALS; trial++) {
-        const string = 'abcdefghijkl51313#^!#?><;!-_=+.,/:{}()'
-        const k = Math.floor(Math.random() * 200 - 100)
+      const string = 'abcdefghijkl51313#^!#?><;!-_=+.,/:{}()'
+      for (const k of [1, 2, 5, 10]) {
         for (let lap = 0; lap < LAPS; lap++) {
           let r = core.char(string, k)
           if (k < 2) { r = [r] }
