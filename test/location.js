@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { repeat, equal } from './test-utils'
+import { equal } from './test-utils'
 import { int } from '../src/core'
 import * as location from '../src/location'
 import * as dist from '../src/dist'
@@ -12,49 +12,80 @@ describe('location', () => {
     it('should return NaN for an empty sample', () => {
       assert(Number.isNaN(location.mean([])))
     })
+
+    it('should return the mean of the sample', () => {
+      // (1+2+3)/3 = 2
+      assert(equal(location.mean([1, 2, 3]), 2))
+      // (2+4+6+8)/4 = 5
+      assert(equal(location.mean([2, 4, 6, 8]), 5))
+    })
+
+    it('should return the single element for a one-element sample', () => {
+      assert(equal(location.mean([7]), 7))
+    })
+
+    it('should return the element itself for all-identical values', () => {
+      assert(equal(location.mean([3, 3, 3]), 3))
+    })
+
+    it('should return the midpoint for a two-element sample', () => {
+      // (1+3)/2 = 2
+      assert(equal(location.mean([1, 3]), 2))
+    })
   })
 
   describe('.geometricMean()', () => {
     it('should return zero for sample containing zero', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
-          .concat([0])
-        assert(location.geometricMean(values) === 0)
-      })
+      assert(location.geometricMean([1, 2, 0, 3]) === 0)
+      assert(location.geometricMean([0]) === 0)
     })
 
     it('should return the geometric mean of the sample', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
-        const mean = Math.pow(values.reduce((prod, d) => d * prod, 1), 1 / SAMPLE_SIZE)
-        assert(equal(location.geometricMean(values), mean))
-      })
+      // (1·2·3)^(1/3) = 6^(1/3)
+      assert(equal(location.geometricMean([1, 2, 3]), Math.pow(6, 1 / 3)))
+      // (1·4·9)^(1/3) = 36^(1/3)
+      assert(equal(location.geometricMean([1, 4, 9]), Math.pow(36, 1 / 3)))
+    })
+
+    it('should return the single element for a one-element sample', () => {
+      assert(equal(location.geometricMean([5]), 5))
+    })
+
+    it('should return the element itself for all-identical values', () => {
+      assert(equal(location.geometricMean([3, 3, 3]), 3))
+    })
+
+    it('should return the geometric mean for a two-element sample', () => {
+      // sqrt(2·8) = sqrt(16) = 4
+      assert(equal(location.geometricMean([2, 8]), 4))
     })
   })
 
   describe('.harmonicMean()', () => {
     it('should return NaN for sample containing zero', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
-          .concat([0])
-        assert(Number.isNaN(location.harmonicMean(values)))
-      })
+      assert(Number.isNaN(location.harmonicMean([1, 2, 0, 3])))
+      assert(Number.isNaN(location.harmonicMean([0])))
     })
 
     it('should return NaN for sample containing negative values', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
-          .concat([-1])
-        assert(Number.isNaN(location.harmonicMean(values)))
-      })
+      assert(Number.isNaN(location.harmonicMean([1, 2, -1])))
+      assert(Number.isNaN(location.harmonicMean([-1])))
     })
 
-    it('should return the geometric mean of the sample', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
-        const mean = values.length / values.reduce((sum, d) => sum + 1 / d, 0)
-        assert(equal(location.harmonicMean(values), mean))
-      })
+    it('should return the harmonic mean of the sample', () => {
+      // 3/(1+1/2+1/3) = 3/(11/6) = 18/11
+      assert(equal(location.harmonicMean([1, 2, 3]), 18 / 11))
+      // 3/(1/2+1/3+1/6) = 3/1 = 3
+      assert(equal(location.harmonicMean([2, 3, 6]), 3))
+    })
+
+    it('should return the element itself for all-identical values', () => {
+      assert(equal(location.harmonicMean([5, 5, 5]), 5))
+    })
+
+    it('should return the harmonic mean for a two-element sample', () => {
+      // 2/(1/2+1/6) = 2/(2/3) = 3
+      assert(equal(location.harmonicMean([2, 6]), 3))
     })
   })
 
@@ -64,21 +95,25 @@ describe('location', () => {
     })
 
     it('should return the median for odd sample size', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE + 1 }, Math.random)
-          .sort((a, b) => a - b)
-        const median = values[(values.length - 1) / 2]
-        assert(location.median(values) === median)
-      })
+      // sorted [1,2,3] → middle = 2
+      assert(equal(location.median([3, 1, 2]), 2))
+      // sorted [1,2,3,4,5] → middle = 3
+      assert(equal(location.median([5, 1, 3, 2, 4]), 3))
     })
 
     it('should return the median for even sample size', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
-          .sort((a, b) => a - b)
-        const median = 0.5 * (values[values.length / 2 - 1] + values[values.length / 2])
-        assert(equal(location.median(values), median))
-      })
+      // sorted [1,2,3,4] → (2+3)/2 = 2.5
+      assert(equal(location.median([1, 2, 3, 4]), 2.5))
+      // sorted [1,2] → (1+2)/2 = 1.5
+      assert(equal(location.median([1, 2]), 1.5))
+    })
+
+    it('should return the single element for a one-element sample', () => {
+      assert(equal(location.median([7]), 7))
+    })
+
+    it('should return the element itself for all-identical values', () => {
+      assert(equal(location.median([4, 4, 4]), 4))
     })
   })
 
@@ -88,13 +123,19 @@ describe('location', () => {
     })
 
     it('should return the midrange for a finite sample', () => {
-      repeat(() => {
-        const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
-        const mr = location.midrange(values)
-        const min = values.sort((a, b) => a - b)[0]
-        const max = values.sort((a, b) => b - a)[0]
-        assert(equal(0.5 * (min + max), mr))
-      })
+      // min=1, max=5 → (1+5)/2 = 3
+      assert(equal(location.midrange([3, 1, 5, 2, 4]), 3))
+      // min=0, max=2 → (0+2)/2 = 1
+      assert(equal(location.midrange([0, 0, 2]), 1))
+    })
+
+    it('should return the element itself for all-identical values', () => {
+      assert(equal(location.midrange([6, 6, 6]), 6))
+    })
+
+    it('should return the midpoint for a two-element sample', () => {
+      // (1+3)/2 = 2
+      assert(equal(location.midrange([1, 3]), 2))
     })
   })
 
@@ -153,27 +194,21 @@ describe('location', () => {
     })
 
     it('should return the trimean for a finite sample', () => {
-      const values = Array.from({ length: SAMPLE_SIZE }, Math.random)
-      const trimean = location.trimean(values)
+      // Q1=1.5, Q2=2, Q3=2.5 → (1.5+2·2+2.5)/4 = 2
+      assert(equal(location.trimean([1, 2, 3]), 2))
+      // Q1=1.75, Q2=2.5, Q3=3.25 → (1.75+2·2.5+3.25)/4 = 2.5
+      assert(equal(location.trimean([1, 2, 3, 4]), 2.5))
+      // asymmetric: Q1=1.75, Q2=3.5, Q3=6.25 → (1.75+2·3.5+6.25)/4 = 3.75 ≠ median
+      assert(equal(location.trimean([1, 2, 5, 10]), 3.75))
+    })
 
-      // Lower quartile.
-      let h = (values.length - 1) * 0.25
-      let q0 = values.sort((a, b) => a - b)[Math.floor(h)]
-      let q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
-      const lo = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
+    it('should return the element itself for all-identical values', () => {
+      assert(equal(location.trimean([2, 2, 2]), 2))
+    })
 
-      // Upper quartile.
-      h = (values.length - 1) * 0.75
-      q0 = values.sort((a, b) => a - b)[Math.floor(h)]
-      q1 = values.sort((a, b) => a - b)[Math.floor(h) + 1]
-      const hi = q0 + (typeof q1 === 'undefined' ? 0 : (h - Math.floor(h)) * (q1 - q0))
-
-      // Median.
-      const median = values.length % 2 === 0
-        ? 0.5 * (values[values.length / 2 - 1] + values[values.length / 2])
-        : values[(values.length - 1) / 2]
-
-      assert(equal(0.25 * (hi + lo + 2 * median), trimean))
+    it('should return the midpoint for a two-element sample', () => {
+      // Q1=1.25, Q2=1.5, Q3=1.75 → (1.25+2·1.5+1.75)/4 = 1.5
+      assert(equal(location.trimean([1, 2]), 1.5))
     })
   })
 })
