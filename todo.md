@@ -33,13 +33,10 @@ Moving the library from *auditable* to *publication-grade* requires systematic r
 | [#212](../../issues/212) | **Property tests** — automated checks that PDF ≥ 0, CDF is non-decreasing, and `quantile(cdf(x)) ≈ x` for all implemented distributions. |
 | [#213](../../issues/213) | **quantile() reference values** — cross-validate `quantile()` against scipy's `ppf()` for the 12 core continuous distributions, at p = 0.001, 0.01, 0.1, 0.5, 0.9, 0.99, 0.999. |
 | [#214](../../issues/214) | **Catastrophic cancellation audit** — find and fix `1 - exp(...)` and `1 - cdf(...)` patterns near boundaries that lose significant digits; replace with `expm1`/`log1p` equivalents or stable complementary forms. |
-| [#135](../../issues/135) | **Second parameter set per distribution** — every distribution should have at least two independent `params` entries in `test/dist-cases-*.js`, each with its own reference values. |
 
 ### Not Yet Filed
 
 - **Far-tail reference values for Normal/LogNormal** — add refVals at ±5σ and ±7σ to expose and track erf accuracy. Without these, regressions in tail precision are invisible.
-- **Complete refVals for all ~120 remaining distributions** — currently only 12 continuous distributions have reference values in `test/dist-cases-continuous.js`. Every distribution needs PDF, CDF, and quantile checks at several points per parameter set.
-- **RefVals and property tests for discrete distributions** — Binomial, Poisson, NegativeBinomial, and ~60 others lack systematic PMF/CDF reference values in `test/dist-cases-discrete.js`.
 - **Full-domain special function validation** — cross-validate `gammaLowerIncomplete`, `betaIncomplete`, `bessel`, `digamma`, and others against scipy or Boost across their entire representable input domains, not just spot-check values.
 - **Systematic parameter-space coverage** — for each distribution, construct a grid of parameter values (not just two hand-picked sets) to catch edge-case failure modes near parameter boundaries.
 - **Documented accuracy bounds** — for each special function and distribution CDF, state clearly: "accurate to X ULP for |x| ≤ Y" so users can reason about numerical error in downstream computations.
@@ -307,13 +304,6 @@ Discrete analogue of the Laplace distribution; symmetric about an integer locati
 - **PMF:** P(X = k) = ((1−p)/(1+p)) · p^|k−μ| for k ∈ ℤ, p ∈ (0,1)
 - **Sampling:** difference of two independent Geometric variates
 - Refs: [scipy `dlaplace`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.dlaplace.html)
-
-#### Conway-Maxwell-Poisson (COM-Poisson)
-The only distribution in the library that would cover *under-dispersion* (variance < mean). The Poisson, Negative Binomial, and Delaporte all cover over-dispersion; no existing discrete distribution handles count data with variance < mean, which arises in quality control, sports scoring, and retail transaction data.
-- **PMF:** f(k; λ, ν) = λᵏ / ((k!)^ν · Z(λ, ν)) where Z = Σ λʲ/(j!)^ν
-- **Sampling:** via the PreComputed table pattern (same as Delaporte, NeymanA, PolyaAeppli)
-- **Dependency:** `neumaier.js` for computing the normalizing constant Z; `PreComputed` base class — both already present
-- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Conway%E2%80%93Maxwell%E2%80%93Poisson_distribution); Shmueli et al. (2005) *JRSS-C* 54(1):127–142
 
 #### Waring
 Generalization of the Yule-Simon distribution (already `[partial]` below). Yule-Simon is the special case σ = 1.
