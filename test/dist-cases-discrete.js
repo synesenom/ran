@@ -135,6 +135,52 @@ export default [{
     { p: 0.99, x: 24 }
   ]
 }, {
+  name: 'BetaGeometric',
+  invalidParams: [
+    [], // all params required
+    [-1, 1], [0, 1], // alpha > 0
+    [1, -1], [1, 0] // beta > 0
+  ],
+  cases: [{
+    params: () => [0.5, 1.5]
+  }, {
+    name: 'integer-like parameters',
+    params: () => [2, 3],
+    // exact: PMF(k) = 24/((k+2)(k+3)(k+4)), CDF(k) = 1 - 12/((k+3)(k+4))
+    refVals: [
+      { x: 1, pmf: 0.4, cdf: 0.4 },
+      { x: 2, pmf: 0.2, cdf: 0.6 },
+      { x: 3, pmf: 4 / 35, cdf: 5 / 7 },
+      { x: 5, pmf: 1 / 21, cdf: 5 / 6 },
+      { x: 8, pmf: 1 / 55, cdf: 10 / 11 }
+    ],
+    quantileVals: [
+      { p: 0.25, x: 1 },
+      { p: 0.5, x: 2 },
+      { p: 0.75, x: 4 },
+      { p: 0.95, x: 12 },
+      { p: 0.99, x: 32 }
+    ]
+  }],
+  // alpha=0.5, beta=1.5 excluded from sampling: Q(0.95)=509, chi-squared GoF would need ~1000 bins
+  sampleParams: [{ name: 'integer-like parameters', params: () => [2, 3] }],
+  // Python math.lgamma: BetaGeometric(alpha=0.5, beta=1.5), pmf(k)=C(2k,k)/(4^k*(k+1)), cdf exact
+  refVals: [
+    { x: 0, pmf: 0, cdf: 0 },
+    { x: 1, pmf: 0.25, cdf: 0.25 },
+    { x: 2, pmf: 0.125, cdf: 0.375 },
+    { x: 3, pmf: 0.078125, cdf: 0.453125 },
+    { x: 5, pmf: 0.041015625, cdf: 0.548828125 },
+    { x: 8, pmf: 0.0218200683593751, cdf: 0.629058837890624 },
+    { x: 10, pmf: 0.0160179138183594, cdf: 0.663623809814453 }
+  ],
+  quantileVals: [
+    { p: 0.01, x: 1 },
+    { p: 0.25, x: 2 },
+    { p: 0.5, x: 4 },
+    { p: 0.75, x: 20 }
+  ]
+}, {
   name: 'BetaNegativeBinomial',
   invalidParams: [
     [], // all params required
