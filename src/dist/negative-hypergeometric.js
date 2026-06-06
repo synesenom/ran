@@ -75,6 +75,6 @@ export default class NegativeHypergeometric extends Categorical {
     for (let k = K; k > x; k--) {
       bwd += Math.exp(logBinomial(k + r - 1, k) + logBinomial(N - r - k, K - k) - logBinNK)
     }
-    return Math.max(fwd, 1 - bwd)
+    return Math.min(1, Math.max(fwd, 1 - bwd))
   }
 }
