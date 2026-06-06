@@ -44,10 +44,9 @@ describe('special', () => {
     })
 
     it('should satisfy the recurrence ψ(z+1) = ψ(z) + 1/z', () => {
-      repeat(() => {
-        const z = Math.random() * 100 + 0.1
+      for (const z of [0.1, 0.5, 1, 6, 100]) {
         assert(equal(special.digamma(z + 1), special.digamma(z) + 1 / z))
-      }, LAPS)
+      }
     })
   })
 
@@ -96,29 +95,26 @@ describe('special', () => {
   */
 
   describe('.bessel()', () => {
-    it('In(0) should be equal to 0 for n > 1', () => {
-      repeat(() => {
-        const n = Math.floor(1 + 10 * Math.random())
+    it('In(0) should be equal to 0 for n >= 1', () => {
+      for (const n of [1, 2, 3, 5, 10]) {
         assert(special.besselI(n, 0) === 0)
-      })
+      }
     })
 
     it('I1(-x) should be equal to -I1(x)', () => {
-      repeat(() => {
-        const x = 1 + 10 * Math.random()
+      for (const x of [0.1, 1, 9.9, 10, 10.1, 50]) {
         assert(equal(special.besselI(1, -x), -special.besselI(1, x)))
-      })
+      }
     })
 
     it('In(-x) should be equal to -In(x) for odd n >= 3', () => {
       // Regression for the backward-recurrence sign bug fixed in #255: abs(x) with no sign
       // correction caused I_n(-x) != -I_n(x) for odd n >= 3
-      repeat(() => {
-        const x = 1 + 10 * Math.random()
+      for (const x of [0.1, 1, 5, 9.9, 10, 10.1, 50]) {
         assert(equal(special.besselI(3, -x), -special.besselI(3, x)))
         assert(equal(special.besselI(5, -x), -special.besselI(5, x)))
         assert(equal(special.besselI(7, -x), -special.besselI(7, x)))
-      })
+      }
     })
 
     it('I1(x) should match scipy reference values', () => {
@@ -166,27 +162,28 @@ describe('special', () => {
       assert(special.besselISpherical(1, 0) === 0)
     })
 
-    it('i(n, 0) should be 1 for n > 0', () => {
-      const n = Math.floor(1 + 10 * Math.random())
-      assert(special.besselISpherical(n, 0) === 0)
+    it('i(n, 0) should be 0 for n > 0', () => {
+      for (const n of [1, 2, 5]) {
+        assert(special.besselISpherical(n, 0) === 0)
+      }
     })
 
     it('should satisfy the recurrence relation for negative order', () => {
-      repeat(() => {
-        const n = -Math.floor(1 + 10 * Math.random())
-        const x = 10 * Math.random()
-        assert(equal(special.besselISpherical(n - 1, x) - special.besselISpherical(n + 1, x),
-          (2 * n + 1) * special.besselISpherical(n, x) / x))
-      })
+      for (const n of [-1, -2, -3, -5]) {
+        for (const x of [0.5, 2, 9, 11]) {
+          assert(equal(special.besselISpherical(n - 1, x) - special.besselISpherical(n + 1, x),
+            (2 * n + 1) * special.besselISpherical(n, x) / x))
+        }
+      }
     })
 
     it('should satisfy the recurrence relation for positive order', () => {
-      repeat(() => {
-        const n = Math.floor(1 + 10 * Math.random())
-        const x = 10 * Math.random()
-        assert(equal(special.besselISpherical(n - 1, x) - special.besselISpherical(n + 1, x),
-          (2 * n + 1) * special.besselISpherical(n, x) / x))
-      })
+      for (const n of [1, 2, 3, 5]) {
+        for (const x of [0.5, 2, 9, 11]) {
+          assert(equal(special.besselISpherical(n - 1, x) - special.besselISpherical(n + 1, x),
+            (2 * n + 1) * special.besselISpherical(n, x) / x))
+        }
+      }
     })
 
     it('should return accurate small-x values for n=1', () => {
@@ -223,12 +220,12 @@ describe('special', () => {
     })
 
     it('should satisfy positive-order recurrence in the Taylor branch', () => {
-      repeat(() => {
-        const n = Math.floor(1 + 10 * Math.random())
-        const x = 0.01 + 0.98 * Math.random()
-        assert(equal(special.besselISpherical(n - 1, x) - special.besselISpherical(n + 1, x),
-          (2 * n + 1) * special.besselISpherical(n, x) / x))
-      })
+      for (const n of [1, 2, 5]) {
+        for (const x of [0.01, 0.1, 0.5, 0.99]) {
+          assert(equal(special.besselISpherical(n - 1, x) - special.besselISpherical(n + 1, x),
+            (2 * n + 1) * special.besselISpherical(n, x) / x))
+        }
+      }
     })
   })
 
@@ -306,14 +303,20 @@ describe('special', () => {
 
   describe('.betaIncomplete()', () => {
     it('B(a, b, x) should be equal to 0 if b > 0 and x <= 0', () => {
-      assert(special.betaIncomplete(Math.random(), Math.random() + 1, -Math.random()) === 0)
+      for (const a of [0.5, 1, 2]) {
+        for (const b of [1, 2]) {
+          assert(special.betaIncomplete(a, b, -1) === 0)
+        }
+      }
     })
 
     it('B(a, b, x) should be equal to B(a,b) if b > 0 and x >= 1', () => {
-      const a = Math.random()
-      const b = Math.random() + 1
-      const expected = Math.exp(special.logGamma(a) + special.logGamma(b) - special.logGamma(a + b))
-      assert(special.betaIncomplete(a, b, 1 + Math.random()) === expected)
+      for (const a of [0.5, 1, 2]) {
+        for (const b of [1, 2]) {
+          const expected = Math.exp(special.logGamma(a) + special.logGamma(b) - special.logGamma(a + b))
+          assert(special.betaIncomplete(a, b, 2) === expected)
+        }
+      }
     })
   })
 
