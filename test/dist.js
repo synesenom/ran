@@ -11,7 +11,6 @@ import discreteCases from './dist-cases-discrete'
 const testCases = [...continuousCases, ...discreteCases]
 
 // Constants.
-const PRECISION = 1e-10
 const SAMPLE_SIZE = 10000
 // Anderson-Darling has ~1.5–2× higher GoF power than KS at the same α, so half
 // the sample suffices for the same false-positive rate on the continuous
@@ -44,7 +43,7 @@ const UnitTests = {
       const values1 = self.sample(sampleSize)
       self.seed(s)
       const values2 = self.sample(sampleSize)
-      assert(values1.reduce((acc, d, i) => acc && Math.abs(d - values2[i]) < PRECISION, true))
+      assert(values1.reduce((acc, d, i) => acc && d === values2[i], true))
     })
 
     it('should give different samples for different seeds', () => {
