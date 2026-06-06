@@ -1,0 +1,1569 @@
+import { assert } from 'chai'
+import { describe, it } from 'mocha'
+import * as dist from '../src/dist'
+import Distribution from '../src/dist/_distribution'
+
+describe('dist', () => {
+  describe('Distribution', () => {
+    describe('.fit()', () => {
+      it('Normal.fit should return a Normal instance', () => {
+        const result = dist.Normal.fit([1, 2, 3, 4, 5])
+        assert(result instanceof dist.Normal)
+      })
+
+      it('Normal.fit should recover mu close to sample mean', () => {
+        const result = dist.Normal.fit([1, 2, 3, 4, 5])
+        assert(Math.abs(result.p.mu - 3) < 0.1)
+      })
+
+      it('Normal.fit should recover sigma close to MLE std dev', () => {
+        const result = dist.Normal.fit([1, 2, 3, 4, 5])
+        assert(Math.abs(result.p.sigma - Math.sqrt(2)) < 0.1)
+      })
+
+      it('Alpha.fit() returns a valid Alpha instance', () => {
+        const data = new dist.Alpha(2, 1).seed(42).sample(100)
+        const result = dist.Alpha.fit(data)
+        assert(result instanceof dist.Alpha)
+      })
+
+      it('Distribution._fitPenalty base class should return 0 for any params', () => {
+        assert.strictEqual(Distribution._fitPenalty({ p: { alpha: 1, beta: 1 } }), 0)
+        assert.strictEqual(Distribution._fitPenalty({ p: {} }), 0)
+      })
+
+      it('Distribution._fitInit fallback random-retry path covers try-success and catch', () => {
+        // All exported distributions now have _fitInit overrides, so call the base-class
+        // method directly via a fake 2-param class with an ordering constraint (a < b).
+        // ~50% of random draws in (0,5) violate a>=b, exercising both the catch and return paths.
+        class FakeDist {
+          static get length () { return 2 }
+          constructor (a, b) {
+            if (a >= b) throw new Error('invalid')
+          }
+        }
+        const params = Distribution._fitInit.call(FakeDist, [1, 2, 3])
+        assert(params.length === 2 && params[0] < params[1])
+      })
+
+      it('ZipfMandelbrot._fitInit should return valid params for typical data', () => {
+        const data = new dist.ZipfMandelbrot(10, 2, 0).seed(42).sample(120)
+        const init = dist.ZipfMandelbrot._fitInit(data)
+        assert(init.length === 3)
+        assert(Number.isFinite(init[0]) && init[0] >= 1) // N >= 1
+        assert(Number.isFinite(init[1]) && init[1] > 1) // s > 1
+        assert(Number.isFinite(init[2]) && init[2] >= 0) // q >= 0
+      })
+
+      it('ZipfMandelbrot._fitInit should fall back to q=0 when no rank-2 data exists', () => {
+        const init = dist.ZipfMandelbrot._fitInit([1, 1, 1, 1])
+        assert(init[2] === 0) // q falls back to 0 when only rank-1 observed
+        assert(init[1] > 1) // s still valid
+      })
+
+      it('Pareto.fit should recover xmin close to min(data)', () => {
+        const data = [1.5, 2.0, 3.1, 1.8, 2.5]
+        const result = dist.Pareto.fit(data)
+        assert(Math.abs(result.p.xmin - 1.5) < 1e-3)
+      })
+
+      it('Pareto.fit should recover alpha close to closed-form MLE', () => {
+        const data = [1.5, 2.0, 3.1, 1.8, 2.5]
+        const xmin = Math.min(...data)
+        const alphaExpected = data.length / data.reduce((s, x) => s + Math.log(x / xmin), 0)
+        const result = dist.Pareto.fit(data)
+        assert(Math.abs(result.p.alpha - alphaExpected) < 0.05)
+      })
+
+      it('Bernoulli.fit should recover p close to planted value', () => {
+        const data = new dist.Bernoulli(0.7).seed(42).sample(200)
+        const result = dist.Bernoulli.fit(data)
+        assert(result instanceof dist.Bernoulli)
+        assert(Math.abs(result.pdf(1) - 0.7) < 0.05)
+      })
+
+      it('Poisson.fit should recover lambda close to planted value', () => {
+        const data = new dist.Poisson(3).seed(42).sample(200)
+        const result = dist.Poisson.fit(data)
+        assert(result instanceof dist.Poisson)
+        assert(Math.abs(result.p.lambda - 3) < 0.15)
+      })
+
+      it('Geometric.fit should recover p close to planted value', () => {
+        const data = new dist.Geometric(0.4).seed(42).sample(200)
+        const result = dist.Geometric.fit(data)
+        assert(result instanceof dist.Geometric)
+        assert(Math.abs(result.p.p - 0.4) < 0.05)
+      })
+
+      it('DiscreteUniform.fit should recover xmin and xmax', () => {
+        const data = new dist.DiscreteUniform(2, 8).seed(42).sample(200)
+        const result = dist.DiscreteUniform.fit(data)
+        assert(result instanceof dist.DiscreteUniform)
+        assert(result.p.xmin === 2)
+        assert(result.p.xmax === 8)
+      })
+
+      it('Gilbrat.fit should return a usable Gilbrat instance', () => {
+        const result = dist.Gilbrat.fit([0.5, 1, 2, 3])
+        assert(result instanceof dist.Gilbrat)
+        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      })
+
+      it('HalfLogistic.fit should return a usable HalfLogistic instance', () => {
+        const result = dist.HalfLogistic.fit([0.5, 1, 2, 3])
+        assert(result instanceof dist.HalfLogistic)
+        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      })
+
+      it('HyperbolicSecant.fit should return a usable HyperbolicSecant instance', () => {
+        const result = dist.HyperbolicSecant.fit([-1, 0, 1, 2])
+        assert(result instanceof dist.HyperbolicSecant)
+        assert(Number.isFinite(result.pdf(0)) && result.pdf(0) > 0)
+      })
+
+      it('InvalidDiscrete.fit should return an InvalidDiscrete instance', () => {
+        // data is irrelevant for k=0; instance is the only possible MLE
+        const result = dist.InvalidDiscrete.fit([-1, 1, -1, 1, 1])
+        assert(result instanceof dist.InvalidDiscrete)
+      })
+
+      it('Kolmogorov.fit should return a usable Kolmogorov instance', () => {
+        const result = dist.Kolmogorov.fit([0.3, 0.5, 0.7, 1.0])
+        assert(result instanceof dist.Kolmogorov)
+        assert(Number.isFinite(result.pdf(0.5)) && result.pdf(0.5) > 0)
+      })
+
+      it('Rademacher.fit should return a usable Rademacher instance', () => {
+        const result = dist.Rademacher.fit([-1, 1, -1, 1])
+        assert(result instanceof dist.Rademacher)
+        assert(result.pdf(-1) === 0.5 && result.pdf(1) === 0.5)
+      })
+
+      it('Slash.fit should return a usable Slash instance', () => {
+        const result = dist.Slash.fit([-1, 0, 1, 2])
+        assert(result instanceof dist.Slash)
+        assert(Number.isFinite(result.pdf(0)) && result.pdf(0) > 0)
+      })
+
+      it('UniformRatio.fit should return a usable UniformRatio instance', () => {
+        const result = dist.UniformRatio.fit([0.5, 1, 2, 3])
+        assert(result instanceof dist.UniformRatio)
+        assert(Number.isFinite(result.pdf(0.5)) && result.pdf(0.5) > 0)
+      })
+
+      it('LogNormal.fit should recover mu and sigma close to planted values', () => {
+        const data = new dist.LogNormal(1, 0.5).seed(42).sample(200)
+        const result = dist.LogNormal.fit(data)
+        assert(result instanceof dist.LogNormal)
+        assert(Math.abs(result.p.mu - 1) < 0.15)
+        assert(Math.abs(result.p.sigma - 0.5) < 0.15)
+      })
+
+      it('LogCauchy.fit should recover x0 and gamma close to planted values', () => {
+        const data = new dist.LogCauchy(0, 1).seed(42).sample(200)
+        const result = dist.LogCauchy.fit(data)
+        assert(result instanceof dist.LogCauchy)
+        assert(Math.abs(result.p.x0 - 0) < 0.5)
+        assert(Math.abs(result.p.gamma - 1) < 0.5)
+      })
+
+      it('LogLogistic.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.LogLogistic(2, 3).seed(42).sample(200)
+        const result = dist.LogLogistic.fit(data)
+        assert(result instanceof dist.LogLogistic)
+        assert(Math.abs(result.p.alpha - 2) < 0.3)
+        assert(Math.abs(result.p.beta - 3) < 0.5)
+      })
+
+      it('LogLaplace.fit should recover mu and b close to planted values', () => {
+        const data = new dist.LogLaplace(0, 1).seed(42).sample(200)
+        const result = dist.LogLaplace.fit(data)
+        assert(result instanceof dist.LogLaplace)
+        assert(Math.abs(result.p.mu - 0) < 0.2)
+        assert(Math.abs(result.p.b - 1) < 0.2)
+      })
+
+      it('LogisticExponential.fit should recover lambda and kappa close to planted values', () => {
+        const data = new dist.LogisticExponential(1, 2).seed(42).sample(200)
+        const result = dist.LogisticExponential.fit(data)
+        assert(result instanceof dist.LogisticExponential)
+        assert(Math.abs(result.p.lambda - 1) < 0.3)
+        assert(Math.abs(result.p.kappa - 2) < 0.5)
+      })
+
+      it('LogitNormal.fit should recover mu and sigma close to planted values', () => {
+        const data = new dist.LogitNormal(0, 1).seed(42).sample(200)
+        const result = dist.LogitNormal.fit(data)
+        assert(result instanceof dist.LogitNormal)
+        assert(Math.abs(result.p.mu - 0) < 0.2)
+        assert(Math.abs(result.p.sigma - 1) < 0.2)
+      })
+
+      it('LogNormal._fitInit should return sigma=1 for constant data', () => {
+        const init = dist.LogNormal._fitInit([2, 2, 2])
+        assert(Number.isFinite(init[0]))
+        assert(init[1] === 1)
+      })
+
+      it('LogCauchy._fitInit should return valid params for odd-n data', () => {
+        const init = dist.LogCauchy._fitInit(new dist.LogCauchy(0, 1).seed(1).sample(101))
+        assert(Number.isFinite(init[0]))
+        assert(init[1] > 0)
+      })
+
+      it('LogLogistic._fitInit should return positive params for constant data', () => {
+        const init = dist.LogLogistic._fitInit([2, 2, 2])
+        assert(init[0] > 0)
+        assert(init[1] > 0)
+      })
+
+      it('LogLaplace._fitInit should return valid params for odd-n data', () => {
+        const init = dist.LogLaplace._fitInit(new dist.LogLaplace(0, 1).seed(1).sample(101))
+        assert(Number.isFinite(init[0]))
+        assert(init[1] > 0)
+      })
+
+      it('LogisticExponential._fitInit should return valid params for odd-n data', () => {
+        const init = dist.LogisticExponential._fitInit(new dist.LogisticExponential(1, 2).seed(1).sample(101))
+        assert(init[0] > 0)
+        assert(init[1] > 0)
+      })
+
+      it('LogisticExponential._fitInit should fall back to kappa=1 for degenerate data', () => {
+        const init = dist.LogisticExponential._fitInit([5, 5, 5, 5])
+        assert(init[0] > 0)
+        assert(init[1] === 1)
+      })
+
+      it('LogitNormal._fitInit should return sigma=1 for constant data', () => {
+        const init = dist.LogitNormal._fitInit([0.5, 0.5, 0.5])
+        assert(Number.isFinite(init[0]))
+        assert(init[1] === 1)
+      })
+
+      it('Exponential.fit should recover lambda close to planted value', () => {
+        const data = new dist.Exponential(2).seed(42).sample(200)
+        const result = dist.Exponential.fit(data)
+        assert(result instanceof dist.Exponential)
+        assert(Math.abs(result.p.lambda - 2) < 0.3)
+      })
+
+      it('Rayleigh.fit should recover sigma close to planted value', () => {
+        const data = new dist.Rayleigh(1.5).seed(42).sample(200)
+        const result = dist.Rayleigh.fit(data)
+        assert(result instanceof dist.Rayleigh)
+        // cdf(σ) = 1−exp(−½) for any Rayleigh(σ); valid only when fitted σ ≈ planted 1.5
+        assert(Math.abs(result.cdf(1.5) - (1 - Math.exp(-0.5))) < 0.09)
+      })
+
+      it('MaxwellBoltzmann.fit should recover a close to planted value', () => {
+        const data = new dist.MaxwellBoltzmann(2).seed(42).sample(200)
+        const result = dist.MaxwellBoltzmann.fit(data)
+        assert(result instanceof dist.MaxwellBoltzmann)
+        // pdf(a; a) = sqrt(2/π)·exp(−½)/a for Maxwell-Boltzmann(a); checks a ≈ 2
+        assert(Math.abs(result.pdf(2) - Math.sqrt(2 / Math.PI) * Math.exp(-0.5) / 2) < 0.08)
+      })
+
+      it('HalfNormal.fit should recover sigma close to planted value', () => {
+        const data = new dist.HalfNormal(1.5).seed(42).sample(200)
+        const result = dist.HalfNormal.fit(data)
+        assert(result instanceof dist.HalfNormal)
+        assert(Math.abs(result.p.sigma - 1.5) < 0.2)
+      })
+
+      it('Levy.fit should recover mu and c close to planted values', () => {
+        const data = new dist.Levy(1, 2).seed(42).sample(200)
+        const result = dist.Levy.fit(data)
+        assert(result instanceof dist.Levy)
+        assert(Math.abs(result.p.mu - 1) < 0.3)
+        assert(Math.abs(result.p.c - 2) < 0.8)
+      })
+
+      it('Chi.fit should recover k exactly for planted k=4', () => {
+        const data = new dist.Chi(4).seed(42).sample(200)
+        const result = dist.Chi.fit(data)
+        assert(result instanceof dist.Chi)
+        assert.strictEqual(result.p.k, 4)
+      })
+
+      it('Categorical.fit should recover category probabilities close to planted values', () => {
+        const data = new dist.Categorical([0.2, 0.3, 0.5], 0).seed(42).sample(500)
+        const result = dist.Categorical.fit(data)
+        assert(result instanceof dist.Categorical)
+        assert(Math.abs(result.pdf(0) - 0.2) < 0.1)
+        assert(Math.abs(result.pdf(1) - 0.3) < 0.1)
+        assert(Math.abs(result.pdf(2) - 0.5) < 0.1)
+      })
+
+      it('Hyperexponential.fit should recover a mixture whose mean matches the data', () => {
+        const data = new dist.Hyperexponential([
+          { weight: 0.5, rate: 1 },
+          { weight: 0.5, rate: 5 }
+        ]).seed(42).sample(500)
+        const result = dist.Hyperexponential.fit(data)
+        assert(result instanceof dist.Hyperexponential)
+        // Component label-switching makes (weight, rate) pairs non-identifiable; use the mixture
+        // mean E[X] = Σ w_i / λ_i — a sufficient statistic invariant under that permutation.
+        const sampleMean = data.reduce((s, x) => s + x, 0) / data.length
+        const fittedMean = result.p.weights.reduce((s, w, i) => s + w / result.p.rates[i], 0)
+        assert(Math.abs(fittedMean - sampleMean) < 0.2)
+      })
+
+      it('Zeta.fit should recover s close to planted value', () => {
+        const data = new dist.Zeta(2.5).seed(42).sample(500)
+        const result = dist.Zeta.fit(data)
+        assert(result instanceof dist.Zeta)
+        assert(Math.abs(result.p.s - 2.5) < 0.3)
+      })
+
+      it('YuleSimon.fit should recover rho close to planted value', () => {
+        const data = new dist.YuleSimon(3).seed(42).sample(200)
+        const result = dist.YuleSimon.fit(data)
+        assert(result instanceof dist.YuleSimon)
+        assert(Math.abs(result.p.rho - 3) < 0.5)
+      })
+
+      it('LogSeries.fit should recover p close to planted value', () => {
+        const data = new dist.LogSeries(0.7).seed(42).sample(200)
+        const result = dist.LogSeries.fit(data)
+        assert(result instanceof dist.LogSeries)
+        assert(Math.abs(result.p.p - 0.7) < 0.05)
+      })
+
+      it('FlorySchulz.fit should recover a close to planted value', () => {
+        const data = new dist.FlorySchulz(0.4).seed(42).sample(200)
+        const result = dist.FlorySchulz.fit(data)
+        assert(result instanceof dist.FlorySchulz)
+        assert(Math.abs(result.p.a - 0.4) < 0.05)
+      })
+
+      it('NegativeBinomial.fit should return a usable NegativeBinomial instance', () => {
+        const data = new dist.NegativeBinomial(5, 0.4).seed(42).sample(200)
+        const result = dist.NegativeBinomial.fit(data)
+        assert(result instanceof dist.NegativeBinomial)
+        assert(result.p.r > 0 && result.p.p > 0 && result.p.p < 1)
+        assert(Number.isFinite(result.pdf(Math.round(5 * 0.4 / 0.6))) && result.pdf(Math.round(5 * 0.4 / 0.6)) > 0)
+      })
+
+      it('Skellam.fit should return a usable Skellam instance', () => {
+        const data = new dist.Skellam(4, 2).seed(42).sample(200)
+        const result = dist.Skellam.fit(data)
+        assert(result instanceof dist.Skellam)
+        assert(result.p.mu1 > 0 && result.p.mu2 > 0)
+        assert(Number.isFinite(result.pdf(2)) && result.pdf(2) > 0)
+      })
+
+      it('DiscreteWeibull.fit should return a usable DiscreteWeibull instance', () => {
+        const data = new dist.DiscreteWeibull(0.5, 1.5).seed(42).sample(200)
+        const result = dist.DiscreteWeibull.fit(data)
+        assert(result instanceof dist.DiscreteWeibull)
+        assert(result.p.q > 0 && result.p.q < 1 && result.p.beta > 0)
+        assert(Number.isFinite(result.pdf(0)) && result.pdf(0) > 0)
+      })
+
+      it('Logarithmic.fit should recover a and b close to planted values', () => {
+        const data = new dist.Logarithmic(1, 5).seed(42).sample(200)
+        const result = dist.Logarithmic.fit(data)
+        assert(result instanceof dist.Logarithmic)
+        assert(Math.abs(result.p.a - 1) < 0.2 && Math.abs(result.p.b - 5) < 0.3)
+      })
+
+      it('ExponentialLogarithmic.fit should return a usable ExponentialLogarithmic instance', () => {
+        const data = new dist.ExponentialLogarithmic(0.7, 1).seed(42).sample(200)
+        const result = dist.ExponentialLogarithmic.fit(data)
+        assert(result instanceof dist.ExponentialLogarithmic)
+        assert(result.p.p > 0 && result.p.p < 1 && result.p.beta > 0)
+        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      })
+
+      it('Borel.fit should recover mu close to planted value', () => {
+        const data = new dist.Borel(0.5).seed(42).sample(200)
+        const result = dist.Borel.fit(data)
+        assert(result instanceof dist.Borel)
+        assert(Math.abs(result.p.mu - 0.5) < 0.1)
+      })
+
+      it('HeadsMinusTails.fit should recover n exactly for planted n=5', () => {
+        // seed=4 produces a sample whose max reaches 10 (=2n), so nSeed=5 and n=5 is the MLE
+        const data = new dist.HeadsMinusTails(5).seed(4).sample(200)
+        const result = dist.HeadsMinusTails.fit(data)
+        assert(result instanceof dist.HeadsMinusTails)
+        assert.strictEqual(result.p.n, 5)
+      })
+
+      it('BorelTanner.fit should return a usable BorelTanner instance', () => {
+        const data = new dist.BorelTanner(0.5, 3).seed(42).sample(200)
+        const result = dist.BorelTanner.fit(data)
+        assert(result instanceof dist.BorelTanner)
+        assert(result.p.mu >= 0 && result.p.mu < 1 && result.p.n > 0)
+        assert(Number.isFinite(result.pdf(result.p.n)) && result.pdf(result.p.n) > 0)
+      })
+
+      it('ConwayMaxwellPoisson.fit should return a usable ConwayMaxwellPoisson instance', () => {
+        const data = new dist.ConwayMaxwellPoisson(3, 2).seed(42).sample(200)
+        const result = dist.ConwayMaxwellPoisson.fit(data)
+        assert(result instanceof dist.ConwayMaxwellPoisson)
+        assert(result.p.lambda > 0 && result.p.nu > 0)
+        assert(Number.isFinite(result.pdf(3)) && result.pdf(3) > 0)
+      })
+
+      it('PolyaAeppli.fit should return a usable PolyaAeppli instance', () => {
+        const data = new dist.PolyaAeppli(2, 0.5).seed(42).sample(200)
+        const result = dist.PolyaAeppli.fit(data)
+        assert(result instanceof dist.PolyaAeppli)
+        assert(result.p.lambda > 0 && result.p.theta > 0 && result.p.theta < 1)
+        assert(Number.isFinite(result.pdf(2)) && result.pdf(2) > 0)
+      })
+
+      it('NeymanA.fit should return a usable NeymanA instance', () => {
+        const data = new dist.NeymanA(3, 2).seed(42).sample(200)
+        const result = dist.NeymanA.fit(data)
+        assert(result instanceof dist.NeymanA)
+        assert(result.p.lambda > 0 && result.p.phi > 0)
+        assert(Number.isFinite(result.pdf(6)) && result.pdf(6) > 0)
+      })
+
+      it('GeneralizedHermite.fit should return a usable GeneralizedHermite instance', () => {
+        const data = new dist.GeneralizedHermite(1, 0.5, 2).seed(42).sample(200)
+        const result = dist.GeneralizedHermite.fit(data)
+        assert(result instanceof dist.GeneralizedHermite)
+        assert(result.p.a1 > 0 && result.p.a2 > 0 && result.p.m > 1)
+        assert(Number.isFinite(result.pdf(2)) && result.pdf(2) > 0)
+      })
+
+      it('Delaporte.fit should return a usable Delaporte instance', () => {
+        const data = new dist.Delaporte(2, 1, 1).seed(42).sample(200)
+        const result = dist.Delaporte.fit(data)
+        assert(result instanceof dist.Delaporte)
+        assert(result.p.alpha > 0 && result.p.beta > 0 && result.p.lambda > 0)
+        assert(Number.isFinite(result.pdf(3)) && result.pdf(3) > 0)
+      })
+
+      it('Cauchy.fit should recover x0 and gamma close to planted values', () => {
+        const data = new dist.Cauchy(2, 1).seed(42).sample(500)
+        const result = dist.Cauchy.fit(data)
+        assert(result instanceof dist.Cauchy)
+        assert(Math.abs(result.p.x0 - 2) < 0.5)
+        assert(Math.abs(result.p.gamma - 1) < 0.5)
+      })
+
+      it('Laplace.fit should recover mu and b close to planted values', () => {
+        const data = new dist.Laplace(1, 2).seed(42).sample(200)
+        const result = dist.Laplace.fit(data)
+        assert(result instanceof dist.Laplace)
+        assert(Math.abs(result.p.mu - 1) < 0.3)
+        assert(Math.abs(result.p.b - 2) < 0.4)
+      })
+
+      it('Logistic.fit should recover mu and s close to planted values', () => {
+        const data = new dist.Logistic(1, 2).seed(42).sample(200)
+        const result = dist.Logistic.fit(data)
+        assert(result instanceof dist.Logistic)
+        assert(Math.abs(result.p.mu - 1) < 0.4)
+        assert(Math.abs(result.p.s - 2) < 0.4)
+      })
+
+      it('Gumbel.fit should recover mu and beta close to planted values', () => {
+        const data = new dist.Gumbel(1, 2).seed(42).sample(200)
+        const result = dist.Gumbel.fit(data)
+        assert(result instanceof dist.Gumbel)
+        assert(Math.abs(result.p.mu - 1) < 0.4)
+        assert(Math.abs(result.p.beta - 2) < 0.4)
+      })
+
+      it('Moyal.fit should recover mu and sigma close to planted values', () => {
+        const data = new dist.Moyal(1, 2).seed(42).sample(200)
+        const result = dist.Moyal.fit(data)
+        assert(result instanceof dist.Moyal)
+        assert(Math.abs(result.p.mu - 1) < 0.5)
+        assert(Math.abs(result.p.sigma - 2) < 0.5)
+      })
+
+      it('TukeyLambda.fit should recover lambda close to planted value', () => {
+        const data = new dist.TukeyLambda(0.5).seed(42).sample(500)
+        const result = dist.TukeyLambda.fit(data)
+        assert(result instanceof dist.TukeyLambda)
+        assert(Math.abs(result.p.lambda - 0.5) < 0.2)
+      })
+
+      it('SkewNormal.fit should recover xi, omega, and alpha close to planted values', () => {
+        const data = new dist.SkewNormal(1, 2, 3).seed(42).sample(300)
+        const result = dist.SkewNormal.fit(data)
+        assert(result instanceof dist.SkewNormal)
+        assert(Math.abs(result.p.xi - 1) < 0.5)
+        assert(Math.abs(result.p.omega - 2) < 0.5)
+        assert(Math.abs(result.p.alpha - 3) < 1.5)
+      })
+
+      it('GeneralizedNormal.fit should recover mu, alpha, and beta close to planted values', () => {
+        const data = new dist.GeneralizedNormal(1, 2, 2).seed(42).sample(300)
+        const result = dist.GeneralizedNormal.fit(data)
+        assert(result instanceof dist.GeneralizedNormal)
+        assert(Math.abs(result.p.mu - 1) < 0.3)
+        assert(Math.abs(result.p.alpha2 - 2) < 0.5)
+        assert(Math.abs(result.p.beta2 - 2) < 0.5)
+      })
+
+      it('HalfGeneralizedNormal.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.HalfGeneralizedNormal(2, 2).seed(42).sample(300)
+        const result = dist.HalfGeneralizedNormal.fit(data)
+        assert(result instanceof dist.HalfGeneralizedNormal)
+        assert(Math.abs(result.p.alpha2 - 2) < 0.5)
+        assert(Math.abs(result.p.beta2 - 2) < 0.5)
+      })
+
+      it('GeneralizedLogistic.fit should recover mu, s, and c close to planted values', () => {
+        const data = new dist.GeneralizedLogistic(1, 2, 2).seed(42).sample(300)
+        const result = dist.GeneralizedLogistic.fit(data)
+        assert(result instanceof dist.GeneralizedLogistic)
+        assert(Math.abs(result.p.mu - 1) < 0.5)
+        assert(Math.abs(result.p.s - 2) < 0.6)
+        assert(Math.abs(result.p.c - 2) < 0.6)
+      })
+
+      it('Gamma.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.Gamma(2, 0.5).seed(42).sample(200)
+        const result = dist.Gamma.fit(data)
+        assert(result instanceof dist.Gamma)
+        assert(Math.abs(result.p.alpha - 2) < 0.4)
+        assert(Math.abs(result.p.beta - 0.5) < 0.15)
+      })
+
+      it('InverseGamma.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.InverseGamma(3, 2).seed(42).sample(200)
+        const result = dist.InverseGamma.fit(data)
+        assert(result instanceof dist.InverseGamma)
+        assert(Math.abs(result.p.alpha - 3) < 0.6)
+        assert(Math.abs(result.p.beta - 2) < 0.8)
+      })
+
+      it('Erlang.fit should recover k exactly for planted k=3', () => {
+        const data = new dist.Erlang(3, 1).seed(42).sample(200)
+        const result = dist.Erlang.fit(data)
+        assert(result instanceof dist.Erlang)
+        assert.strictEqual(result.p.alpha, 3)
+        assert(Math.abs(result.p.beta - 1) < 0.25)
+      })
+
+      it('Erlang.fit profile search recovers k=3 when moment seed gives k=4', () => {
+        // seed=20: mean²/var ≈ 4 so _fitInit seeds k=4; profile over [1..9] finds k=3 has higher lnL
+        const data = new dist.Erlang(3, 1).seed(20).sample(200)
+        const result = dist.Erlang.fit(data)
+        assert(result instanceof dist.Erlang)
+        assert.strictEqual(result.p.alpha, 3)
+      })
+
+      it('Chi2.fit should recover k exactly for planted k=4', () => {
+        const data = new dist.Chi2(4).seed(42).sample(200)
+        const result = dist.Chi2.fit(data)
+        assert(result instanceof dist.Chi2)
+        assert.strictEqual(result.p.alpha * 2, 4)
+      })
+
+      it('InverseChi2.fit should recover nu exactly for planted nu=6', () => {
+        const data = new dist.InverseChi2(6).seed(42).sample(200)
+        const result = dist.InverseChi2.fit(data)
+        assert(result instanceof dist.InverseChi2)
+        assert.strictEqual(result.p.nu, 6)
+      })
+
+      it('LogGamma.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.LogGamma(2, 1, 0).seed(42).sample(200)
+        const result = dist.LogGamma.fit(data)
+        assert(result instanceof dist.LogGamma)
+        assert(Math.abs(result.p.alpha - 2) < 0.6)
+        assert(Math.abs(result.p.beta - 1) < 0.4)
+      })
+
+      it('GeneralizedGamma.fit should return a usable GeneralizedGamma instance', () => {
+        const data = new dist.GeneralizedGamma(2, 3, 1).seed(42).sample(200)
+        const result = dist.GeneralizedGamma.fit(data)
+        assert(result instanceof dist.GeneralizedGamma)
+        assert(result.p.a > 0 && result.p.d > 0 && result.p.p > 0)
+        assert(Number.isFinite(result.pdf(4)) && result.pdf(4) > 0)
+      })
+
+      it('GammaGompertz.fit should return a usable GammaGompertz instance', () => {
+        const data = new dist.GammaGompertz(1, 2, 3).seed(42).sample(200)
+        const result = dist.GammaGompertz.fit(data)
+        assert(result instanceof dist.GammaGompertz)
+        assert(result.p.b > 0 && result.p.s > 0 && result.p.beta > 0)
+        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      })
+
+      it('DoubleGamma.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.DoubleGamma(2, 0.5).seed(42).sample(200)
+        const result = dist.DoubleGamma.fit(data)
+        assert(result instanceof dist.DoubleGamma)
+        assert(Math.abs(result.p.alpha - 2) < 0.4)
+        assert(Math.abs(result.p.beta - 0.5) < 0.15)
+      })
+
+      it('Beta.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.Beta(2, 3).seed(42).sample(200)
+        const result = dist.Beta.fit(data)
+        assert(result instanceof dist.Beta)
+        assert(Math.abs(result.p.alpha - 2) < 0.6)
+        assert(Math.abs(result.p.beta - 3) < 0.8)
+      })
+
+      it('BetaPrime.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.BetaPrime(2, 3).seed(42).sample(200)
+        const result = dist.BetaPrime.fit(data)
+        assert(result instanceof dist.BetaPrime)
+        assert(Math.abs(result.p.alpha - 2) < 0.7)
+        assert(Math.abs(result.p.beta - 3) < 1.0)
+      })
+
+      it('Beta.fit should not converge to near-singular alpha or beta', () => {
+        // Beta(0.5, 0.5) is U-shaped and most susceptible to near-singularity: the optimizer
+        // can find near-zero shapes that fit data concentrated near the boundaries.
+        // Without the _fitPenalty log-barrier the optimizer can return alpha < 0.05.
+        const data = new dist.Beta(0.5, 0.5).seed(42).sample(200)
+        const result = dist.Beta.fit(data)
+        assert(result instanceof dist.Beta)
+        assert(result.p.alpha > 0.3 && result.p.alpha < 1.5, `alpha ${result.p.alpha} out of expected range`)
+        assert(result.p.beta > 0.3 && result.p.beta < 1.5, `beta ${result.p.beta} out of expected range`)
+      })
+
+      it('BetaPrime.fit should not converge to near-singular alpha or beta', () => {
+        const data = new dist.BetaPrime(1.5, 2.0).seed(42).sample(200)
+        const result = dist.BetaPrime.fit(data)
+        assert(result instanceof dist.BetaPrime)
+        assert(result.p.alpha > 0.5 && result.p.alpha < 8, `alpha ${result.p.alpha} out of expected range`)
+        assert(result.p.beta > 0.5 && result.p.beta < 8, `beta ${result.p.beta} out of expected range`)
+      })
+
+      it('Kumaraswamy.fit should recover a and b close to planted values', () => {
+        const data = new dist.Kumaraswamy(2, 3).seed(42).sample(200)
+        const result = dist.Kumaraswamy.fit(data)
+        assert(result instanceof dist.Kumaraswamy)
+        assert(Math.abs(result.p.a - 2) < 0.7)
+        assert(Math.abs(result.p.b - 3) < 1.0)
+      })
+
+      it('PowerLaw.fit should recover a close to planted value', () => {
+        const data = new dist.PowerLaw(2).seed(42).sample(200)
+        const result = dist.PowerLaw.fit(data)
+        assert(result instanceof dist.PowerLaw)
+        assert(Math.abs(result.p.a - 2) < 0.4)
+      })
+
+      it('Arcsine.fit should recover a and b close to planted values', () => {
+        const data = new dist.Arcsine(1, 5).seed(42).sample(200)
+        const result = dist.Arcsine.fit(data)
+        assert(result instanceof dist.Arcsine)
+        assert(Math.abs(result.p.a - 1) < 0.4)
+        assert(Math.abs(result.p.b - 5) < 0.4)
+      })
+
+      it('Mielke.fit should recover k and s close to planted values', () => {
+        const data = new dist.Mielke(2, 1).seed(42).sample(200)
+        const result = dist.Mielke.fit(data)
+        assert(result instanceof dist.Mielke)
+        assert(Math.abs(result.p.k - 2) < 0.6)
+        assert(Math.abs(result.p.s - 1) < 0.5)
+      })
+
+      it('Uniform.fit should recover xmin and xmax close to planted values', () => {
+        const data = new dist.Uniform(1, 5).seed(42).sample(200)
+        const result = dist.Uniform.fit(data)
+        assert(result instanceof dist.Uniform)
+        assert(Math.abs(result.p.xmin - 1) < 0.2)
+        assert(Math.abs(result.p.xmax - 5) < 0.2)
+      })
+
+      it('UQuadratic.fit should recover a and b close to planted values', () => {
+        const data = new dist.UQuadratic(0, 4).seed(42).sample(200)
+        const result = dist.UQuadratic.fit(data)
+        assert(result instanceof dist.UQuadratic)
+        assert(Math.abs(result.p.a - 0) < 0.3)
+        assert(Math.abs(result.p.b - 4) < 0.3)
+      })
+
+      it('Triangular.fit should recover a, b, and c close to planted values', () => {
+        const data = new dist.Triangular(1, 5, 3).seed(42).sample(200)
+        const result = dist.Triangular.fit(data)
+        assert(result instanceof dist.Triangular)
+        assert(Math.abs(result.p.a - 1) < 0.3)
+        assert(Math.abs(result.p.b - 5) < 0.3)
+        assert(Math.abs(result.p.c - 3) < 0.5)
+      })
+
+      it('Bates.fit recovers integer n exactly for n = 1, 2, 3', () => {
+        // n >= 4 approaches Gaussian and n becomes weakly identified; test the identifiable range
+        const cases = [
+          [1, 0, 1],
+          [2, -1, 3],
+          [3, 1, 5]
+        ]
+        for (const [n, a, b] of cases) {
+          const data = new dist.Bates(n, a, b).seed(1).sample(1000)
+          const result = dist.Bates.fit(data)
+          assert(result instanceof dist.Bates)
+          assert.strictEqual(result.p.n, n)
+          assert(Math.abs(result.p.a - a) < 0.1)
+          assert(Math.abs(result.p.b - b) < 0.1)
+        }
+      })
+
+      it('Trapezoidal.fit should recover a, b, c, d close to planted values', () => {
+        const data = new dist.Trapezoidal(0, 1, 3, 5).seed(42).sample(200)
+        const result = dist.Trapezoidal.fit(data)
+        assert(result instanceof dist.Trapezoidal)
+        assert(Math.abs(result.p.a - 0) < 0.3)
+        assert(Math.abs(result.p.b - 1) < 0.5)
+        assert(Math.abs(result.p.c - 3) < 1.0)
+        assert(Math.abs(result.p.d - 5) < 0.3)
+      })
+
+      it('PERT._fitPenalty should return 0', () => {
+        assert.strictEqual(dist.PERT._fitPenalty(), 0)
+      })
+
+      it('PERT.fit should recover a, b, and c close to planted values', () => {
+        const data = new dist.PERT(0, 3, 6).seed(42).sample(200)
+        const result = dist.PERT.fit(data)
+        assert(result instanceof dist.PERT)
+        assert(Math.abs(result.p.a - 0) < 0.3)
+        assert(Math.abs(result.p.c - 6) < 0.3)
+        assert(Math.abs(result.p.b - 3) < 0.5)
+      })
+
+      it('BetaRectangular.fit should return a valid instance close to planted values', () => {
+        const data = new dist.BetaRectangular(2, 3, 0.7, 0, 4).seed(42).sample(300)
+        const result = dist.BetaRectangular.fit(data)
+        assert(result instanceof dist.BetaRectangular)
+        // alpha/beta > 0.5 ensures the optimizer did not converge to the near-singularity at 0.
+        // Without the _fitPenalty log-barrier the optimizer can return alpha/beta < 0.01.
+        assert(result.p.alpha > 0.5 && result.p.alpha < 10, `alpha ${result.p.alpha} out of range`)
+        assert(result.p.beta > 0.5 && result.p.beta < 10, `beta ${result.p.beta} out of range`)
+        assert(result.p.theta > 0.1 && result.p.theta <= 1)
+        assert(Math.abs(result.p.a - 0) < 0.3)
+        assert(Math.abs(result.p.b - 4) < 0.3)
+      })
+
+      it('BetaRectangular.fit should not converge to near-singular alpha or beta', () => {
+        // Data from a near-uniform BetaRectangular is most likely to trigger the singularity:
+        // the optimizer can set alpha/beta ≈ 0 and theta ≈ 1 to concentrate mass at boundaries,
+        // exploiting the large-but-finite likelihood just above alpha = 0.
+        const data = new dist.BetaRectangular(0.8, 0.8, 0.6, 0, 10).seed(7).sample(300)
+        const result = dist.BetaRectangular.fit(data)
+        assert(result instanceof dist.BetaRectangular)
+        assert(result.p.alpha > 0.3, `alpha ${result.p.alpha} is near-singular`)
+        assert(result.p.beta > 0.3, `beta ${result.p.beta} is near-singular`)
+      })
+
+      it('UniformProduct.fit should recover n close to planted value', () => {
+        const data = new dist.UniformProduct(3).seed(42).sample(200)
+        const result = dist.UniformProduct.fit(data)
+        assert(result instanceof dist.UniformProduct)
+        assert(result.p.n === 3)
+      })
+
+      it('Anglit.fit should recover mu and beta close to planted values', () => {
+        const data = new dist.Anglit(1, 1.5).seed(42).sample(200)
+        const result = dist.Anglit.fit(data)
+        assert(result instanceof dist.Anglit)
+        assert(Math.abs(result.p.mu - 1) < 0.3)
+        assert(Math.abs(result.p.beta - 1.5) < 0.4)
+      })
+
+      it('RaisedCosine.fit should recover mu and s close to planted values', () => {
+        const data = new dist.RaisedCosine(2, 3).seed(42).sample(200)
+        const result = dist.RaisedCosine.fit(data)
+        assert(result instanceof dist.RaisedCosine)
+        assert(Math.abs(result.p.mu - 2) < 0.4)
+        assert(Math.abs(result.p.s - 3) < 0.4)
+      })
+
+      it('Weibull.fit should recover lambda and k close to planted values', () => {
+        const data = new dist.Weibull(2, 1.5).seed(42).sample(200)
+        const result = dist.Weibull.fit(data)
+        assert(result instanceof dist.Weibull)
+        assert(Math.abs(result.p.lambda2 - 2) < 0.5)
+        assert(Math.abs(result.p.k - 1.5) < 0.3)
+      })
+
+      it('InvertedWeibull.fit should recover c close to planted value', () => {
+        const data = new dist.InvertedWeibull(3).seed(42).sample(200)
+        const result = dist.InvertedWeibull.fit(data)
+        assert(result instanceof dist.InvertedWeibull)
+        assert(Math.abs(result.p.c - 3) < 0.6)
+      })
+
+      it('DoubleWeibull.fit should recover lambda and k close to planted values', () => {
+        const data = new dist.DoubleWeibull(2, 1.5).seed(42).sample(200)
+        const result = dist.DoubleWeibull.fit(data)
+        assert(result instanceof dist.DoubleWeibull)
+        assert(Math.abs(result.p.lambda2 - 2) < 0.5)
+        assert(Math.abs(result.p.k - 1.5) < 0.4)
+      })
+
+      it('ExponentiatedWeibull.fit should recover lambda, k, and alpha close to planted values', () => {
+        const data = new dist.ExponentiatedWeibull(2, 1.5, 2).seed(42).sample(200)
+        const result = dist.ExponentiatedWeibull.fit(data)
+        assert(result instanceof dist.ExponentiatedWeibull)
+        assert(Math.abs(result.p.lambda2 - 2) < 0.8)
+        assert(Math.abs(result.p.k - 1.5) < 0.6)
+        assert(Math.abs(result.p.alpha - 2) < 0.8)
+      })
+
+      it('Frechet.fit should recover alpha and s close to planted values', () => {
+        const data = new dist.Frechet(2, 1, 0).seed(42).sample(200)
+        const result = dist.Frechet.fit(data)
+        assert(result instanceof dist.Frechet)
+        assert(Math.abs(result.p.alpha - 2) < 0.5)
+        assert(Math.abs(result.p.s - 1) < 0.4)
+      })
+
+      it('GeneralizedExtremeValue.fit should recover c close to planted value', () => {
+        const data = new dist.GeneralizedExtremeValue(0.5).seed(42).sample(200)
+        const result = dist.GeneralizedExtremeValue.fit(data)
+        assert(result instanceof dist.GeneralizedExtremeValue)
+        assert(Math.abs(result.p.c - 0.5) < 0.2)
+      })
+
+      it('ShiftedLogLogistic.fit should recover mu and sigma close to planted values', () => {
+        const data = new dist.ShiftedLogLogistic(1, 2, 0).seed(42).sample(200)
+        const result = dist.ShiftedLogLogistic.fit(data)
+        assert(result instanceof dist.ShiftedLogLogistic)
+        assert(Math.abs(result.p.mu - 1) < 0.4)
+        assert(Math.abs(result.p.sigma - 2) < 0.6)
+      })
+
+      it('Weibull._fitInit should handle constant data', () => {
+        // || 1 guard: zero variance in constant data falls back to 1
+        const init = dist.Weibull._fitInit([3, 3, 3])
+        assert(init[0] > 0 && init[1] > 0)
+      })
+
+      it('InvertedWeibull._fitInit should handle constant data', () => {
+        // || 1 guard: zero variance in constant reciprocals falls back to 1
+        const init = dist.InvertedWeibull._fitInit([2, 2, 2])
+        assert(init[0] > 0)
+      })
+
+      it('Frechet._fitInit should handle constant data', () => {
+        // || 1 guard: all equal → zero variance in reciprocals → fallback to 1
+        const init = dist.Frechet._fitInit([5, 5, 5])
+        assert(init[0] > 0 && init[1] > 0)
+      })
+
+      it('Frechet._fitInit should use mean fallback when alpha <= 1', () => {
+        // one near-zero and three large values → cv of reciprocals > 1 → Justus gives alpha ≤ 1
+        const init = dist.Frechet._fitInit([0.0001, 1000, 1000, 1000])
+        assert(init[0] > 0 && init[0] <= 1)
+        assert(init[1] > 0)
+      })
+
+      it('GeneralizedExtremeValue._fitInit should return negative c for right-skewed data', () => {
+        // c < 0 (Fréchet type) has heavier right tail with skewness > Gumbel limit ≈1.14
+        const data = new dist.GeneralizedExtremeValue(-0.5).seed(42).sample(200)
+        const init = dist.GeneralizedExtremeValue._fitInit(data)
+        assert(init[0] < 0)
+      })
+
+      it('ShiftedLogLogistic._fitInit should handle odd-n data', () => {
+        // odd-n path: median = sorted[(n-1)/2]
+        const init = dist.ShiftedLogLogistic._fitInit([1, 2, 3, 4, 5])
+        assert(Number.isFinite(init[0]))
+        assert(init[1] > 0)
+      })
+
+      it('JohnsonSU._fitInit should fall back to moments when quantile ratio is degenerate', () => {
+        // constant data → all four quantiles equal → p = 0 → ratio = NaN → moments fallback
+        const init = dist.JohnsonSU._fitInit([2, 2, 2, 2, 2])
+        assert(Array.isArray(init) && init.length === 4)
+        assert(init[1] > 0) // delta > 0
+        assert(init[2] > 0) // lambda > 0
+      })
+
+      it('JohnsonSU.fit should recover gamma, delta, lambda, xi close to planted values', () => {
+        const data = new dist.JohnsonSU(0, 2, 2, 0).seed(42).sample(300)
+        const result = dist.JohnsonSU.fit(data)
+        assert(result instanceof dist.JohnsonSU)
+        assert(Math.abs(result.p.gamma - 0) < 0.5)
+        assert(Math.abs(result.p.delta - 2) < 0.5)
+        assert(Math.abs(result.p.lambda - 2) < 0.6)
+        assert(Math.abs(result.p.xi - 0) < 0.5)
+      })
+
+      it('JohnsonSB.fit should recover gamma, delta, lambda, xi close to planted values', () => {
+        const data = new dist.JohnsonSB(0, 2, 2, 0).seed(42).sample(300)
+        const result = dist.JohnsonSB.fit(data)
+        assert(result instanceof dist.JohnsonSB)
+        assert(Math.abs(result.p.gamma - 0) < 0.5)
+        assert(Math.abs(result.p.delta - 2) < 0.5)
+        assert(Math.abs(result.p.lambda - 2) < 0.6)
+        assert(Math.abs(result.p.xi - 0) < 0.3)
+      })
+
+      it('R._fitPenalty should return 0', () => {
+        assert.strictEqual(dist.R._fitPenalty(), 0)
+      })
+
+      it('R.fit should recover c close to planted value', () => {
+        const data = new dist.R(3).seed(42).sample(200)
+        const result = dist.R.fit(data)
+        assert(result instanceof dist.R)
+        assert(Math.abs(result.p.c - 3) < 0.5)
+      })
+
+      it('BaldingNichols._fitPenalty should return 0', () => {
+        assert.strictEqual(dist.BaldingNichols._fitPenalty(), 0)
+      })
+
+      it('BaldingNichols.fit should recover F and p close to planted values', () => {
+        const data = new dist.BaldingNichols(0.1, 0.3).seed(42).sample(200)
+        const result = dist.BaldingNichols.fit(data)
+        assert(result instanceof dist.BaldingNichols)
+        assert(Math.abs(result.p.F - 0.1) < 0.05)
+        assert(Math.abs(result.p.p - 0.3) < 0.05)
+      })
+
+      it('BaldingNichols constructor should expose F and p on this.p', () => {
+        const d = new dist.BaldingNichols(0.1, 0.3)
+        assert(d.p.F === 0.1)
+        assert(d.p.p === 0.3)
+      })
+
+      it('F._fitPenalty should return 0', () => {
+        assert.strictEqual(dist.F._fitPenalty(), 0)
+      })
+
+      it('F.fit should return a valid F instance', () => {
+        const data = new dist.F(10, 20).seed(42).sample(200)
+        const result = dist.F.fit(data)
+        assert(result instanceof dist.F)
+        assert(result.p.d1 > 0 && result.p.d2 > 0)
+        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      })
+
+      it('F.fit profile search finds higher lnL than moment seed when round(seed) is suboptimal', () => {
+        // seed=8: _fitInit gives d1Seed=4,d2Seed=14; profile grid finds (5,11) with higher lnL
+        const data = new dist.F(5, 10).seed(8).sample(200)
+        const result = dist.F.fit(data)
+        assert(result instanceof dist.F)
+        // Profile MLE has strictly higher lnL than the moment-seed answer
+        assert(new dist.F(result.p.d1, result.p.d2).lnL(data) > new dist.F(4, 14).lnL(data))
+      })
+
+      it('FisherZ._fitPenalty should return 0', () => {
+        assert.strictEqual(dist.FisherZ._fitPenalty(), 0)
+      })
+
+      it('FisherZ.fit should return a FisherZ instance (not F)', () => {
+        const data = new dist.FisherZ(10, 20).seed(42).sample(200)
+        const result = dist.FisherZ.fit(data)
+        assert(result instanceof dist.FisherZ)
+        assert(result.p.d1 > 0 && result.p.d2 > 0)
+        assert(Number.isFinite(result.pdf(0)) && result.pdf(0) > 0)
+      })
+
+      it('StudentT._fitInit should derive nu from sample variance', () => {
+        // variance = nu/(nu−2) ⇒ nu = 2·Var/(Var−1); Var≈5/3 for nu=5 ⇒ nu≈5
+        const data = new dist.StudentT(5).seed(42).sample(500)
+        const init = dist.StudentT._fitInit(data)
+        assert(init.length === 1)
+        assert(Math.abs(init[0] - 5) < 1.5)
+      })
+
+      it('StudentT.fit should recover nu close to planted value', () => {
+        const data = new dist.StudentT(5).seed(42).sample(500)
+        const result = dist.StudentT.fit(data)
+        assert(result instanceof dist.StudentT)
+        assert(Math.abs(result.p.nu - 5) < 1.5)
+      })
+
+      it('StudentZ._fitInit should derive n from sample variance', () => {
+        // Var[Z] = 1/(n−3) ⇒ n = 1/Var + 3; Var≈1/3 for n=6 ⇒ n≈6
+        const data = new dist.StudentZ(6).seed(42).sample(500)
+        const init = dist.StudentZ._fitInit(data)
+        assert(init.length === 1)
+        assert(init[0] > 1)
+        assert(Math.abs(init[0] - 6) < 1.5)
+      })
+
+      it('StudentZ.fit should recover n close to planted value', () => {
+        const data = new dist.StudentZ(6).seed(42).sample(500)
+        const result = dist.StudentZ.fit(data)
+        assert(result instanceof dist.StudentZ)
+        // StudentZ stores StudentT's nu = n − 1
+        assert(Math.abs(result.p.nu + 1 - 6) < 1.5)
+      })
+
+      it('Degenerate._fitInit should return the sample mean as location', () => {
+        const init = dist.Degenerate._fitInit([2, 2, 2])
+        assert(init.length === 1)
+        assert(Math.abs(init[0] - 2) < 1e-9)
+      })
+
+      it('Degenerate.fit should recover the point-mass location', () => {
+        const result = dist.Degenerate.fit([5, 5, 5])
+        assert(result instanceof dist.Degenerate)
+        // constant data ⇒ exact point-mass location, no MLE drift
+        assert(Math.abs(result.p.x0 - 5) < 1e-9)
+      })
+
+      it('Soliton._fitInit should lower-bound N by the largest observation', () => {
+        const init = dist.Soliton._fitInit([1, 2, 1, 5, 3])
+        assert(init.length === 1)
+        assert(init[0] === 5)
+      })
+
+      it('Soliton.fit should recover N exactly for planted N=5', () => {
+        const data = new dist.Soliton(5).seed(42).sample(200)
+        const result = dist.Soliton.fit(data)
+        assert(result instanceof dist.Soliton)
+        assert.strictEqual(result.p.N, 5)
+      })
+
+      it('IrwinHall._fitInit should derive n from E[X]=n/2', () => {
+        // mean = 2 for this sample ⇒ n = round(2·mean) = 4
+        const init = dist.IrwinHall._fitInit([1.5, 2, 2.5, 1, 3])
+        assert(init.length === 1)
+        assert(init[0] === 4)
+      })
+
+      it('IrwinHall.fit should recover n exactly for planted n=4', () => {
+        const data = new dist.IrwinHall(4).seed(42).sample(200)
+        const result = dist.IrwinHall.fit(data)
+        assert(result instanceof dist.IrwinHall)
+        assert.strictEqual(result.p.n, 4)
+      })
+
+      it('R._fitInit should clamp c for zero-variance data', () => {
+        // constant data ⇒ variance 0 hits the `|| 1` guard, then the Math.max(..., 1e-3) clamp
+        const init = dist.R._fitInit([0, 0, 0])
+        assert(Math.abs(init[0] - 1e-3) < 1e-12)
+      })
+
+      it('F._fitInit should fall back to defaults for mean<=1 data', () => {
+        // mean <= 1 ⇒ d2 defaults to 10; the resulting negative variance denominator ⇒ d1 defaults to 5
+        const init = dist.F._fitInit([0.1, 0.2, 0.3])
+        assert(init[0] === 5 && init[1] === 10)
+      })
+
+      it('F._fitInit should guard zero-variance data', () => {
+        // constant data ⇒ variance 0 hits the `|| 1` guard
+        const init = dist.F._fitInit([2, 2, 2])
+        assert(init[0] === 5 && Math.abs(init[1] - 4.1) < 1e-12)
+      })
+
+      it('StudentT._fitInit should fall back to nu=10 for low-variance data', () => {
+        // variance <= 1 has no real df solution from ν = 2·Var/(Var−1); use a heavy-tailed default
+        const init = dist.StudentT._fitInit([0.1, -0.1, 0.05, -0.05])
+        assert(init[0] === 10)
+      })
+
+      it('StudentZ._fitInit should fall back to n=10 for zero-variance data', () => {
+        // constant data ⇒ variance 0 hits the degenerate fallback
+        const init = dist.StudentZ._fitInit([1, 1, 1])
+        assert(init[0] === 10)
+      })
+
+      it('BoundedPareto.fit should recover L and alpha and return a valid upper bound', () => {
+        const data = new dist.BoundedPareto(2, 20, 3).seed(42).sample(200)
+        const result = dist.BoundedPareto.fit(data)
+        assert(result instanceof dist.BoundedPareto)
+        assert(Math.abs(result.p.L - 2) < 0.5)
+        // MLE for H converges to max(data) since likelihood decreases for any H > max(data)
+        assert(result.p.H >= Math.max(...data))
+        assert(Math.abs(result.p.alpha - 3) < 0.8)
+      })
+
+      it('Lomax.fit should recover lambda and alpha close to planted values', () => {
+        const data = new dist.Lomax(2, 4).seed(42).sample(200)
+        const result = dist.Lomax.fit(data)
+        assert(result instanceof dist.Lomax)
+        assert(Math.abs(result.p.lambda - 2) < 0.8)
+        assert(Math.abs(result.p.alpha - 4) < 1.0)
+      })
+
+      it('GeneralizedPareto.fit should recover mu, sigma, and xi close to planted values', () => {
+        const data = new dist.GeneralizedPareto(1, 2, 0.2).seed(42).sample(200)
+        const result = dist.GeneralizedPareto.fit(data)
+        assert(result instanceof dist.GeneralizedPareto)
+        assert(Math.abs(result.p.mu - 1) < 0.3)
+        assert(Math.abs(result.p.sigma - 2) < 0.8)
+        assert(Math.abs(result.p.xi - 0.2) < 0.3)
+      })
+
+      it('Burr.fit should recover c and k close to planted values', () => {
+        const data = new dist.Burr(2, 3).seed(42).sample(200)
+        const result = dist.Burr.fit(data)
+        assert(result instanceof dist.Burr)
+        assert(Math.abs(result.p.c - 2) < 0.8)
+        assert(Math.abs(result.p.k - 3) < 1.0)
+      })
+
+      it('Dagum.fit should recover p, a, and b close to planted values', () => {
+        const data = new dist.Dagum(1, 2, 3).seed(42).sample(200)
+        const result = dist.Dagum.fit(data)
+        assert(result instanceof dist.Dagum)
+        assert(Math.abs(result.p.p - 1) < 0.4)
+        assert(Math.abs(result.p.a - 2) < 0.8)
+        assert(Math.abs(result.p.b - 3) < 1.0)
+      })
+
+      it('Champernowne.fit should recover alpha and x0 and return a valid lambda', () => {
+        const data = new dist.Champernowne(1, 0, 2).seed(42).sample(200)
+        const result = dist.Champernowne.fit(data)
+        assert(result instanceof dist.Champernowne)
+        assert(Math.abs(result.p.alpha - 1) < 0.4)
+        // lambda is poorly identified near 0 from n=200; check valid range instead
+        assert(result.p.lambda >= 0 && result.p.lambda < 1)
+        assert(Math.abs(result.p.x0 - 2) < 0.5)
+      })
+
+      it('Benini.fit should recover alpha, beta, and sigma close to planted values', () => {
+        const data = new dist.Benini(2, 1, 3).seed(42).sample(200)
+        const result = dist.Benini.fit(data)
+        assert(result instanceof dist.Benini)
+        assert(Math.abs(result.p.alpha - 2) < 0.8)
+        assert(Math.abs(result.p.beta - 1) < 0.4)
+        assert(Math.abs(result.p.sigma - 3) < 0.5)
+      })
+
+      it('BoundedPareto._fitInit should return valid params for constant data', () => {
+        const init = dist.BoundedPareto._fitInit([5, 5, 5])
+        assert(init[0] > 0 && init[1] > init[0] && init[2] > 0)
+      })
+
+      it('Lomax._fitInit should fall back to alpha=3 when CV <= 1', () => {
+        // near-constant data → CV ≈ 0 → triggers fallback
+        const init = dist.Lomax._fitInit([2, 2.001, 1.999, 2])
+        assert(init[0] > 0)
+        assert(init[1] === 3)
+      })
+
+      it('GeneralizedPareto._fitInit should return xi=0 for constant data', () => {
+        const init = dist.GeneralizedPareto._fitInit([3, 3, 3])
+        assert(Number.isFinite(init[0]))
+        assert(init[1] > 0)
+        assert(init[2] === 0)
+      })
+
+      it('Benini._fitInit should return positive alpha, beta, and sigma for any positive data', () => {
+        const init = dist.Benini._fitInit([2, 3, 4, 5])
+        assert(init[0] > 0)
+        assert(init[1] > 0)
+        assert(init[2] > 0)
+      })
+
+      it('NoncentralChi2.fit should recover k and lambda close to planted values', () => {
+        const data = new dist.NoncentralChi2(4, 2).seed(42).sample(300)
+        const result = dist.NoncentralChi2.fit(data)
+        assert(result instanceof dist.NoncentralChi2)
+        assert(Math.abs(result.p.k - 4) < 0.5)
+        assert(Math.abs(result.p.lambda - 2) < 0.5)
+      })
+
+      it('NoncentralChi.fit should recover k and lambda close to planted values', () => {
+        const data = new dist.NoncentralChi(4, 2).seed(42).sample(300)
+        const result = dist.NoncentralChi.fit(data)
+        assert(result instanceof dist.NoncentralChi)
+        assert(Math.abs(result.p.k - 4) < 0.5)
+        assert(Math.abs(result.p.lambda - 2) < 0.5)
+      })
+
+      it('NoncentralT.fit should recover nu and mu close to planted values', () => {
+        const data = new dist.NoncentralT(5, 1).seed(42).sample(300)
+        const result = dist.NoncentralT.fit(data)
+        assert(result instanceof dist.NoncentralT)
+        assert(Math.abs(result.p.nu - 5) <= 1)
+        assert(Math.abs(result.p.mu - 1) < 0.3)
+      })
+
+      it('NoncentralBeta.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.NoncentralBeta(2, 3, 1).seed(42).sample(500)
+        const result = dist.NoncentralBeta.fit(data)
+        assert(result instanceof dist.NoncentralBeta)
+        assert(Math.abs(result.p.alpha - 2) < 0.75)
+        assert(Math.abs(result.p.beta - 3) < 0.75)
+      })
+
+      it('NoncentralF.fit should recover d1, d2 and lambda close to planted values', () => {
+        const data = new dist.NoncentralF(3, 8, 2).seed(42).sample(400)
+        const result = dist.NoncentralF.fit(data)
+        assert(result instanceof dist.NoncentralF)
+        assert(Math.abs(result.p.d1 - 3) <= 2)
+        assert(Math.abs(result.p.d2 - 8) <= 3)
+        assert(Math.abs(result.p.lambda - 2) <= 1.5)
+      })
+
+      it('DoublyNoncentralChi2.fit should recover total df and noncentrality close to planted values', () => {
+        const data = new dist.DoublyNoncentralChi2(2, 3, 1, 2).seed(42).sample(500)
+        const result = dist.DoublyNoncentralChi2.fit(data)
+        assert(result instanceof dist.DoublyNoncentralChi2)
+        assert(Math.abs((result.p.k1 + result.p.k2) - 5) <= 2)
+        assert(Math.abs((result.p.lambda1 + result.p.lambda2) - 3) <= 2)
+      })
+
+      it('DoublyNoncentralChi2.fit should enforce k1>=1 and k2>=1 when collapsed fit returns k=1', () => {
+        // chi-squared(1) data: NoncentralChi2.fit returns k=1, triggering kTot<2 clamp
+        const data = new dist.NoncentralChi2(1, 0).seed(42).sample(500)
+        const result = dist.DoublyNoncentralChi2.fit(data)
+        assert(result instanceof dist.DoublyNoncentralChi2)
+        assert(result.p.k1 >= 1)
+        assert(result.p.k2 >= 1)
+      })
+
+      it('DoublyNoncentralBeta.fit should recover alpha and beta close to planted values', () => {
+        const data = new dist.DoublyNoncentralBeta(2, 3, 1, 1).seed(42).sample(500)
+        const result = dist.DoublyNoncentralBeta.fit(data)
+        assert(result instanceof dist.DoublyNoncentralBeta)
+        assert(Math.abs(result.p.alpha - 2) < 0.75)
+        assert(Math.abs(result.p.beta - 3) < 0.75)
+      })
+
+      it('DoublyNoncentralF.fit should recover d1 and d2 close to planted values', () => {
+        const data = new dist.DoublyNoncentralF(3, 8, 1, 1).seed(42).sample(400)
+        const result = dist.DoublyNoncentralF.fit(data)
+        assert(result instanceof dist.DoublyNoncentralF)
+        assert(Math.abs(result.p.d1 - 3) <= 2)
+        assert(Math.abs(result.p.d2 - 8) <= 3)
+      })
+
+      it('DoublyNoncentralT.fit should recover mu close to planted value', () => {
+        const data = new dist.DoublyNoncentralT(5, 2, 1).seed(42).sample(300)
+        const result = dist.DoublyNoncentralT.fit(data)
+        assert(result instanceof dist.DoublyNoncentralT)
+        assert(Math.abs(result.p.mu - 2) < 0.5)
+      })
+
+      it('InverseGaussian._fitInit should return the exact MLE mu=mean, lambda=n/Σ(1/xᵢ−1/x̄)', () => {
+        const data = [1, 2, 3, 4]
+        const init = dist.InverseGaussian._fitInit(data)
+        const mean = 2.5
+        const lambda = data.length / data.reduce((s, x) => s + (1 / x - 1 / mean), 0)
+        assert(Math.abs(init[0] - mean) < 1e-10)
+        assert(Math.abs(init[1] - lambda) < 1e-10)
+      })
+
+      it('InverseGaussian.fit should recover mu and lambda close to planted values', () => {
+        const data = new dist.InverseGaussian(2, 3).seed(42).sample(500)
+        const result = dist.InverseGaussian.fit(data)
+        assert(result instanceof dist.InverseGaussian)
+        assert(Math.abs(result.p.mu - 2) < 0.3)
+        assert(Math.abs(result.p.lambda - 3) < 1.0)
+      })
+
+      it('ReciprocalInverseGaussian._fitInit should apply IG MOM to reciprocal data', () => {
+        // X ~ RIG(mu, lambda) iff 1/X ~ IG(mu, lambda); init maps 1/x and applies IG MOM
+        const data = new dist.ReciprocalInverseGaussian(2, 4).seed(42).sample(200)
+        const init = dist.ReciprocalInverseGaussian._fitInit(data)
+        assert(Math.abs(init[0] - 2) < 0.5)
+        assert(Math.abs(init[1] - 4) < 2.0)
+      })
+
+      it('ReciprocalInverseGaussian.fit should recover mu and lambda close to planted values', () => {
+        const data = new dist.ReciprocalInverseGaussian(2, 4).seed(42).sample(500)
+        const result = dist.ReciprocalInverseGaussian.fit(data)
+        assert(result instanceof dist.ReciprocalInverseGaussian)
+        assert(Math.abs(result.p.mu - 2) < 0.5)
+        assert(Math.abs(result.p.lambda - 4) < 2.0)
+      })
+
+      it('Nakagami._fitInit should return m=E[X²]²/Var[X²] and omega=E[X²]', () => {
+        // Exact MOM on X²~Gamma(m, omega/m)
+        const data = new dist.Nakagami(2, 3).seed(42).sample(1000)
+        const init = dist.Nakagami._fitInit(data)
+        assert(init[0] >= 0.5 && Math.abs(init[0] - 2) < 0.5)
+        assert(Math.abs(init[1] - 3) < 0.5)
+      })
+
+      it('Nakagami.fit should recover m and omega close to planted values', () => {
+        const data = new dist.Nakagami(2, 3).seed(42).sample(500)
+        const result = dist.Nakagami.fit(data)
+        assert(result instanceof dist.Nakagami)
+        assert(Math.abs(result.p.m - 2) < 0.5)
+        assert(Math.abs(result.p.omega - 3) < 0.8)
+      })
+
+      it('Hoyt._fitInit should delegate to Nakagami and return valid params', () => {
+        // Hoyt is a deprecated alias for Nakagami; _fitInit delegates to Nakagami._fitInit
+        const data = new dist.Nakagami(2, 3).seed(42).sample(200)
+        const init = dist.Hoyt._fitInit(data)
+        assert(init[0] >= 0.5)
+        assert(init[1] > 0)
+      })
+
+      it('Hoyt.fit should return a usable Hoyt instance', () => {
+        const data = new dist.Nakagami(2, 3).seed(42).sample(500)
+        const result = dist.Hoyt.fit(data)
+        assert(result instanceof dist.Hoyt)
+        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      })
+
+      it('Lindley._fitInit should return the closed-form MOM estimate', () => {
+        // Exact: theta = (-(mean-1) + sqrt((mean-1)²+8·mean)) / (2·mean)
+        // For theta=1: mean=1.5, so theta_hat should be 1
+        const data = new dist.Lindley(1).seed(42).sample(1000)
+        const init = dist.Lindley._fitInit(data)
+        assert(init.length === 1)
+        assert(Math.abs(init[0] - 1) < 0.15)
+      })
+
+      it('Lindley.fit should recover theta close to planted value', () => {
+        const data = new dist.Lindley(1.5).seed(42).sample(500)
+        const result = dist.Lindley.fit(data)
+        assert(result instanceof dist.Lindley)
+        assert(Math.abs(result.p.theta - 1.5) < 0.3)
+      })
+
+      it('Alpha._fitInit should return positive alpha and beta from heuristic MOM', () => {
+        const data = new dist.Alpha(3, 1).seed(42).sample(200)
+        const init = dist.Alpha._fitInit(data)
+        assert(init[0] > 0 && init[1] > 0)
+        assert(Math.abs(init[0] - 3) < 1.5)
+      })
+
+      it('Alpha.fit should return a usable Alpha instance', () => {
+        const data = new dist.Alpha(2, 1).seed(42).sample(200)
+        const result = dist.Alpha.fit(data)
+        assert(result instanceof dist.Alpha)
+        assert(Number.isFinite(result.pdf(0.5)) && result.pdf(0.5) > 0)
+        assert(Math.abs(result.p.alpha - 2) < 0.5)
+      })
+
+      it('QExponential._fitInit should return q and lambda matching MOM for r>1/3', () => {
+        // For QExp(q=0.5, lambda=2): r = Var/E² = (2-q)/(4-3q) = 1.5/2.5 = 0.6 > 1/3
+        // MOM inverse gives q = (2-4·0.6)/(1-3·0.6) = 0.5, lambda = 1/(mean·(3-2·0.5)) = 2
+        const data = new dist.QExponential(0.5, 2).seed(42).sample(1000)
+        const init = dist.QExponential._fitInit(data)
+        assert(Math.abs(init[0] - 0.5) < 0.2)
+        assert(Math.abs(init[1] - 2) < 0.5)
+      })
+
+      it('QExponential.fit should recover q and lambda close to planted values', () => {
+        const data = new dist.QExponential(0.5, 2).seed(42).sample(500)
+        const result = dist.QExponential.fit(data)
+        assert(result instanceof dist.QExponential)
+        // Reconstruct q and lambda from GP params: xi=(q-1)/(2-q), sigma=1/(lambda*(2-q))
+        const q = (2 * result.p.xi + 1) / (result.p.xi + 1)
+        const lambda = (result.p.xi + 1) / result.p.sigma
+        assert(Math.abs(q - 0.5) < 0.2)
+        assert(Math.abs(lambda - 2) < 0.5)
+      })
+
+      it('InverseGaussian._fitInit should handle constant data via variance fallback', () => {
+        // zero variance → || mean*mean guard; result must still be valid params
+        const init = dist.InverseGaussian._fitInit([2, 2, 2])
+        assert(init[0] > 0 && init[1] > 0)
+      })
+
+      it('Nakagami._fitInit should handle constant data via variance fallback', () => {
+        // zero var(X²) → || mean2*mean2 guard; m is clamped to 0.5
+        const init = dist.Nakagami._fitInit([1, 1, 1])
+        assert(init[0] >= 0.5 && init[1] > 0)
+      })
+
+      it('Alpha._fitInit should handle constant data via variance fallback', () => {
+        // zero variance → || mean²·0.25 guard gives std = 0.5·mean, alpha = 2
+        const init = dist.Alpha._fitInit([3, 3, 3])
+        assert(init[0] > 0 && init[1] > 0)
+      })
+
+      it('ReciprocalInverseGaussian._fitInit should handle constant data via variance fallback', () => {
+        const init = dist.ReciprocalInverseGaussian._fitInit([2, 2, 2])
+        assert(init[0] > 0 && init[1] > 0)
+      })
+
+      it('Rice._fitInit should handle constant data via variance fallback', () => {
+        // zero variance → || mean*mean guard; nu and sigma must still be valid (floored) params
+        const init = dist.Rice._fitInit([2, 2, 2])
+        assert(init[0] > 0 && init[1] > 0)
+      })
+
+      it('QExponential._fitInit should handle constant data via variance fallback', () => {
+        // zero variance → fallback mean²=4, r=4/4=1 > 1/3 → q=(2-4)/(1-3)=1, lambda=1/(2*(3-2))=0.5
+        const init = dist.QExponential._fitInit([2, 2, 2])
+        assert(Math.abs(init[0] - 1) < 1e-10)
+        assert(Math.abs(init[1] - 0.5) < 1e-10)
+      })
+
+      it('QExponential._fitInit should use q=0 fallback when r<=1/3', () => {
+        // data with large mean, small variance gives r = Var/E² << 1/3 → else branch
+        const init = dist.QExponential._fitInit([9, 10, 11])
+        assert(init[0] === 0)
+        assert(init[1] > 0)
+      })
+
+      // Loose behavior-first recovery check: a usable fit places ~half its mass below the sample median
+      const fitCoversMedian = (result, data) => {
+        const median = data.slice().sort((a, b) => a - b)[Math.floor(data.length / 2)]
+        return Math.abs(result.cdf(median) - 0.5) < 0.2
+      }
+
+      it('Gompertz._fitInit returns a constructible [eta, b] vector and fit() covers the median', () => {
+        const data = new dist.Gompertz(2, 2).seed(42).sample(300)
+        const init = dist.Gompertz._fitInit(data)
+        assert(init.length === 2 && init.every(p => p > 0))
+        assert.doesNotThrow(() => new dist.Gompertz(...init))
+        const result = dist.Gompertz.fit(data)
+        assert(result instanceof dist.Gompertz)
+        assert(fitCoversMedian(result, data))
+      })
+
+      it('Makeham._fitInit returns positive [alpha, beta, lambda] and fit() covers the median', () => {
+        const data = new dist.Makeham(2, 2, 2).seed(42).sample(300)
+        const init = dist.Makeham._fitInit(data)
+        assert(init.length === 3 && init.every(p => p > 0))
+        const result = dist.Makeham.fit(data)
+        assert(result instanceof dist.Makeham)
+        assert(fitCoversMedian(result, data))
+      })
+
+      it('Muth._fitInit returns alpha in (0,1] and fit() covers the median', () => {
+        const data = new dist.Muth(0.5).seed(42).sample(300)
+        const init = dist.Muth._fitInit(data)
+        assert(init.length === 1 && init[0] > 0 && init[0] <= 1)
+        const result = dist.Muth.fit(data)
+        assert(result instanceof dist.Muth)
+        assert(fitCoversMedian(result, data))
+      })
+
+      it('BenktanderII._fitInit seeds a>0, b in (0,1] and fit() covers the median', () => {
+        const data = new dist.BenktanderII(2, 0.9995).seed(42).sample(300)
+        const init = dist.BenktanderII._fitInit(data)
+        assert(init[0] > 0 && init[1] > 0 && init[1] <= 1)
+        const result = dist.BenktanderII.fit(data)
+        assert(result instanceof dist.BenktanderII)
+        assert(fitCoversMedian(result, data))
+      })
+
+      it('BirnbaumSaunders._fitInit returns shifted fatigue-life estimates and fit() covers the median', () => {
+        const data = new dist.BirnbaumSaunders(0, 2, 2).seed(42).sample(300)
+        const init = dist.BirnbaumSaunders._fitInit(data)
+        assert(init.length === 3 && init[1] > 0 && init[2] > 0)
+        assert(Number.isFinite(init[0]) && init[0] < Math.min(...data)) // mu seeded just below the minimum observation
+        const result = dist.BirnbaumSaunders.fit(data)
+        assert(result instanceof dist.BirnbaumSaunders)
+        assert(fitCoversMedian(result, data))
+      })
+
+      it('Davis._fitInit returns 0<mu<min with n=2.5 and fit() yields a usable instance', () => {
+        const data = new dist.Davis(1, 1, 2).seed(42).sample(200)
+        const sorted = data.slice().sort((a, b) => a - b)
+        const init = dist.Davis._fitInit(data)
+        assert(init[0] > 0 && init[0] < sorted[0])
+        assert(init[1] > 0 && init[2] > 1)
+        // Davis fit() converges poorly here (likelihood is nearly flat in the shape n), so exact recovery is impractical; assert a usable, non-degenerate fit instead
+        const result = dist.Davis.fit(data)
+        assert(result instanceof dist.Davis)
+        const lo = sorted[Math.floor(data.length * 0.25)]
+        const hi = sorted[Math.floor(data.length * 0.75)]
+        assert(Number.isFinite(result.pdf(hi)) && result.pdf(hi) > 0)
+        assert(result.cdf(hi) > result.cdf(lo)) // monotone increasing → non-degenerate fit
+      })
+
+      it('GeneralizedExponential._fitInit returns positive [a, b, c] and fit() covers the median', () => {
+        const data = new dist.GeneralizedExponential(2, 2, 2).seed(42).sample(300)
+        const init = dist.GeneralizedExponential._fitInit(data)
+        assert(init.length === 3 && init.every(p => p > 0))
+        const result = dist.GeneralizedExponential.fit(data)
+        assert(result instanceof dist.GeneralizedExponential)
+        assert(fitCoversMedian(result, data))
+      })
+
+      it('Rice._fitInit returns positive [nu, sigma] and fit() covers the median', () => {
+        const data = new dist.Rice(0.5, 2).seed(42).sample(300)
+        const init = dist.Rice._fitInit(data)
+        assert(init.length === 2 && init[0] > 0 && init[1] > 0)
+        const result = dist.Rice.fit(data)
+        assert(result instanceof dist.Rice)
+        assert(fitCoversMedian(result, data))
+      })
+
+      it('TruncatedNormal._fitInit should set a=min, b=max, mu=mean, sigma=std', () => {
+        // Fixed dataset with known moments: mean=3, std=sqrt(2), min=1, max=5
+        const init = dist.TruncatedNormal._fitInit([1, 2, 3, 4, 5])
+        assert.strictEqual(init[2], 1)
+        assert.strictEqual(init[3], 5)
+        assert(Math.abs(init[0] - 3) < 1e-10)
+        assert(init[1] > 0)
+      })
+
+      it('TruncatedNormal.fit should recover mu, sigma, a, b close to planted values', () => {
+        const data = new dist.TruncatedNormal(2, 1, 0, 4).seed(42).sample(300)
+        const result = dist.TruncatedNormal.fit(data)
+        assert(result instanceof dist.TruncatedNormal)
+        assert(Math.abs(result.p.mu - 2) < 0.4)
+        assert(Math.abs(result.p.sigma - 1) < 0.4)
+        assert(result.p.a < 0.5)
+        assert(result.p.b > 3.5)
+      })
+
+      it('Reciprocal._fitInit should set a=max(min,ε) and b=max', () => {
+        // Fixed dataset with known bounds: min=2, max=8, no ε clamping needed
+        const init = dist.Reciprocal._fitInit([2, 5, 8])
+        assert.strictEqual(init[0], 2)
+        assert.strictEqual(init[1], 8)
+      })
+
+      it('Reciprocal._fitInit should apply a*10 fallback when all data are equal', () => {
+        const init = dist.Reciprocal._fitInit([5, 5, 5])
+        assert.strictEqual(init[0], 5)
+        assert.strictEqual(init[1], 50)
+      })
+
+      it('Reciprocal.fit should recover a and b close to planted values', () => {
+        const data = new dist.Reciprocal(1, 10).seed(42).sample(300)
+        const result = dist.Reciprocal.fit(data)
+        assert(result instanceof dist.Reciprocal)
+        assert(Math.abs(result.p.a - 1) < 0.15)
+        assert(Math.abs(result.p.b - 10) < 0.3)
+      })
+
+      it('Bradford._fitInit should return c close to planted value from sample mean', () => {
+        // Bradford(2) mean ≈ 0.35; c = 6*(1-2*0.35) ≈ 1.8 — start within 1.5 of truth
+        const data = new dist.Bradford(2).seed(42).sample(200)
+        const init = dist.Bradford._fitInit(data)
+        assert(init[0] > 0)
+        assert(Math.abs(init[0] - 2) < 1.5)
+      })
+
+      it('Bradford._fitInit should return c=1 when mean >= 0.5', () => {
+        const init = dist.Bradford._fitInit([0.5, 0.6, 0.7])
+        assert.strictEqual(init[0], 1)
+      })
+
+      it('Bradford.fit should return a valid Bradford instance', () => {
+        const data = new dist.Bradford(2).seed(42).sample(200)
+        const result = dist.Bradford.fit(data)
+        assert(result instanceof dist.Bradford)
+        assert(Number.isFinite(result.pdf(0.5)) && result.pdf(0.5) > 0)
+      })
+
+      it('Wigner._fitInit should return R = 2*std for symmetric data without outliers', () => {
+        // [-2,-1,0,1,2]: mean=0, variance=2, std=sqrt(2), so R = 2*sqrt(2) ≈ 2.83 > maxAbs=2
+        const init = dist.Wigner._fitInit([-2, -1, 0, 1, 2])
+        assert(Math.abs(init[0] - 2 * Math.sqrt(2)) < 1e-10)
+      })
+
+      it('Wigner.fit should recover R close to planted value', () => {
+        const data = new dist.Wigner(3).seed(42).sample(300)
+        const result = dist.Wigner.fit(data)
+        assert(result instanceof dist.Wigner)
+        assert(Math.abs(result.p.R - 3) < 0.5)
+      })
+
+      it('VonMises._fitInit should return kappa from circular resultant-length approximation', () => {
+        const data = new dist.VonMises(2).seed(42).sample(200)
+        const init = dist.VonMises._fitInit(data)
+        assert(init[0] > 0)
+        assert(Math.abs(init[0] - 2) < 0.8)
+      })
+
+      it('VonMises.fit should recover kappa close to planted value', () => {
+        const data = new dist.VonMises(2).seed(42).sample(300)
+        const result = dist.VonMises.fit(data)
+        assert(result instanceof dist.VonMises)
+        assert(Math.abs(result.p.kappa - 2) < 0.5)
+      })
+    })
+  })
+})

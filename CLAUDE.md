@@ -18,13 +18,20 @@ npm run standard
 # Run JSDoc linter (eslint-plugin-jsdoc)
 npm run jsdoclint
 
-# Run tests (Mocha + coverage thresholds)
+# Run tests (Mocha + coverage thresholds). Runs in parallel (mocha `parallel: true`
+# in .mocharc.yml); the dist suite is sharded across test/dist-cases-{0..3}.js,
+# test/dist-fit.js and test/dist-fit-gate.js so the cores are kept busy.
 npm test
 # IMPORTANT: always run npm test directly — never pipe it through grep or other
 # commands. The mocha output prints "N passing" even when nyc's coverage
 # thresholds are breached; the failure is only visible in the exit code and the
 # "ERROR: Coverage for X does not meet global threshold" lines that a grep pipe
 # will swallow. Thresholds: branches 90%, lines 98%, functions 100%, statements 98%.
+
+# Fast local iteration: same tests, parallel, but WITHOUT nyc instrumentation
+# (~2x faster). Skips coverage, so it does NOT enforce the thresholds above —
+# always run the full `npm test` before pushing.
+npm run test:fast
 
 # Build minified bundle
 npm run build
@@ -76,7 +83,10 @@ Every public function and method signals "no ordinary result" through exactly on
 - Mocha test runner with Chai `assert` for assertions.
 - `test/test-utils.js` — shared helpers: `ksTest`, `chiTest`, `repeat`, `Tests`.
 - `test/dist-cases-continuous.js` and `test/dist-cases-discrete.js` — per-distribution test case definitions (`name`, `invalidParams`, `params`, `cases`), split by distribution type.
-- `test/dist.js` — runs the full distribution test suite against all entries in `dist-cases-continuous.js` and `dist-cases-discrete.js`.
+- `test/_dist-harness.js` — shared driver for the per-distribution suite: the `UnitTests` object (constructor/seed/load-save/analytical/sample/test) and `runCase(tc)`. Not a spec file itself.
+- `test/dist-cases-{0,1,2,3}.js` — four interleaved shards; each runs `runCase` over every 4th entry of `[...continuous, ...discrete]` so mocha `--parallel` can balance the sampling/GoF work across cores.
+- `test/dist-fit.js` and `test/dist-fit-gate.js` — the heavy `.fit()` suites and the fit precision/robustness gate, split out as their own parallel jobs.
+- `test/dist.js` — base-class `Distribution` unit tests plus special-cased distribution blocks (Degenerate, Kolmogorov, Lindley, Mielke, Davis, param-count regressions).
 - **Behavior-first assertions**: assert on the output of public methods given known inputs (hand-calculated expected values), not on internal state.
 - **Statistical verification**: use `ksTest` (Kolmogorov-Smirnov) for continuous distributions and `chiTest` (chi-squared) for discrete distributions when verifying that `sample()` produces correctly distributed values.
 - **New distributions must be added to the appropriate `test/dist-cases-*.js` file** with `invalidParams`, `params`, and `cases` entries before any implementation is written (TDD).
