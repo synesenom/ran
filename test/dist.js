@@ -2132,6 +2132,13 @@ describe('dist', () => {
       assert(result instanceof dist.BetaBinomial)
       assert(Number.isFinite(result.pdf(4)) && result.pdf(4) > 0)
     })
+
+    it('BetaNegativeBinomial.fit should return a usable BetaNegativeBinomial instance', () => {
+      const data = new dist.BetaNegativeBinomial(3, 3, 4).seed(42).sample(200)
+      const result = dist.BetaNegativeBinomial.fit(data)
+      assert(result instanceof dist.BetaNegativeBinomial)
+      assert(Number.isFinite(result.pdf(3)) && result.pdf(3) > 0)
+    })
   })
 
   // Ordinary distributions.

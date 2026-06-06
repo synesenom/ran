@@ -67,6 +67,17 @@ export default class BetaNegativeBinomial extends Distribution {
     return Math.min(1, sum)
   }
 
+  static _fitInit (data) {
+    const mean = data.reduce((s, x) => s + x, 0) / data.length
+    const variance = data.reduce((s, x) => s + x * x, 0) / data.length - mean * mean
+    const m = Math.max(mean, 0.1)
+    const v = Math.max(variance, m + 1)
+    // NegBin moment-match gives a starting r; alpha=3 guarantees finite variance (alpha>2);
+    // beta anchors E[k]=rβ/(α-1) to the sample mean
+    const r = Math.max(1, Math.round(m * m / (v - m)))
+    return [r, 3, Math.max(0.1, 2 * m / r)]
+  }
+
   _generator () {
     // p ~ Beta(α,β); k|p ~ NegativeBinomial(r, 1-p) matches PMF B(α+r,β+k)/B(α,β)
     // NegativeBinomial success prob = 1-p, so gamma rate = p/(1-p)
