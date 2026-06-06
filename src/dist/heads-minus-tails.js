@@ -61,8 +61,9 @@ export default class HeadsMinusTails extends PreComputed {
     const Cls = this
     const [nHat] = Cls._fitInit(data)
     const nSeed = Math.round(nHat)
-    const nLo = Math.max(1, nSeed - 5)
-    const nHi = nSeed + 5
+    const w = Distribution._adaptiveHalfWidth(n => { try { return new Cls(n).lnL(data) } catch (_) { return -Infinity } }, nSeed, 1)
+    const nLo = Math.max(1, nSeed - w)
+    const nHi = nSeed + w
     let bestN = nSeed
     let bestLnL = -Infinity
     for (let n = nLo; n <= nHi; n++) {

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `fit()` integer grid window for `Chi2`, `Chi`, `InverseChi2`, `IrwinHall`, `UniformProduct`, `HeadsMinusTails`, `Soliton`, `Erlang`, and `F` now adapts to the observed Fisher information at the seed via `w = max(5, ⌈3/√I_obs⌉)` instead of a fixed ±5 window. The window automatically widens for high-variance seeds (e.g., `F(5, 300)` from small samples) and narrows when the data strongly determines the integer parameter (#663).
 - Tightened distribution test tolerance to `1e-14` in `test/dist.js` and `test/test-utils.js`: `refValTol` now uses `max(|expected|·1e-14, 1e-14)` for normal-range values and a `1e-4` relative guard for sub-1e-14 reference values, the finite-difference pdf–cdf consistency check retains its own `FD_FLOOR = 1e-9` floor, and reference values for Hoyt, Kolmogorov, NoncentralBeta, ConwayMaxwellPoisson, NegativeHypergeometric, and IrwinHall are updated from their pre-v1.27.0 external sources to the current double-precision computed values (#562).
 
 ### Fixed
