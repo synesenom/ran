@@ -43,8 +43,9 @@ export default class Chi2 extends Gamma {
     const Cls = this
     const [kHat] = Cls._fitInit(data)
     const kSeed = Math.round(kHat)
-    const kLo = Math.max(1, kSeed - 5)
-    const kHi = kSeed + 5
+    const w = Distribution._adaptiveHalfWidth(k => { try { return new Cls(k).lnL(data) } catch (_) { return -Infinity } }, kSeed, 1)
+    const kLo = Math.max(1, kSeed - w)
+    const kHi = kSeed + w
     let bestK = kSeed
     let bestLnL = -Infinity
     for (let k = kLo; k <= kHi; k++) {

@@ -65,10 +65,12 @@ export default class F extends Beta {
     const [d1Hat, d2Hat] = Cls._fitInit(data)
     const d1Seed = Math.round(d1Hat)
     const d2Seed = Math.round(d2Hat)
-    const d1Lo = Math.max(1, d1Seed - 5)
-    const d1Hi = d1Seed + 5
-    const d2Lo = Math.max(1, d2Seed - 5)
-    const d2Hi = d2Seed + 5
+    const w1 = Distribution._adaptiveHalfWidth(d1 => { try { return new Cls(d1, d2Seed).lnL(data) } catch (_) { return -Infinity } }, d1Seed, 1)
+    const w2 = Distribution._adaptiveHalfWidth(d2 => { try { return new Cls(d1Seed, d2).lnL(data) } catch (_) { return -Infinity } }, d2Seed, 1)
+    const d1Lo = Math.max(1, d1Seed - w1)
+    const d1Hi = d1Seed + w1
+    const d2Lo = Math.max(1, d2Seed - w2)
+    const d2Hi = d2Seed + w2
     let bestD1 = d1Seed
     let bestD2 = d2Seed
     let bestLnL = -Infinity

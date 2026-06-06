@@ -46,8 +46,9 @@ export default class Erlang extends Gamma {
     const Cls = this
     const [kHat, lambda0] = Cls._fitInit(data)
     const kSeed = Math.round(kHat)
-    const kLo = Math.max(1, kSeed - 5)
-    const kHi = kSeed + 5
+    const w = Distribution._adaptiveHalfWidth(k => { try { return new Cls(k, lambda0).lnL(data) } catch (_) { return -Infinity } }, kSeed, 1)
+    const kLo = Math.max(1, kSeed - w)
+    const kHi = kSeed + w
     let bestK = kSeed
     let bestLambda = lambda0
     let bestLnL = -Infinity

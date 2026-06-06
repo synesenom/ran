@@ -44,8 +44,9 @@ export default class Soliton extends Categorical {
   static fit (data) {
     const Cls = this
     const [NSeed] = Cls._fitInit(data)
-    const NLo = Math.max(1, NSeed - 5)
-    const NHi = NSeed + 5
+    const w = Distribution._adaptiveHalfWidth(N => { try { return new Cls(N).lnL(data) } catch (_) { return -Infinity } }, NSeed, 1)
+    const NLo = Math.max(1, NSeed - w)
+    const NHi = NSeed + w
     let bestN = NSeed
     let bestLnL = -Infinity
     for (let N = NLo; N <= NHi; N++) {

@@ -67,8 +67,9 @@ export default class InverseChi2 extends Distribution {
     const Cls = this
     const [nuHat] = Cls._fitInit(data)
     const nuSeed = Math.round(nuHat)
-    const nuLo = Math.max(1, nuSeed - 5)
-    const nuHi = nuSeed + 5
+    const w = Distribution._adaptiveHalfWidth(nu => { try { return new Cls(nu).lnL(data) } catch (_) { return -Infinity } }, nuSeed, 1)
+    const nuLo = Math.max(1, nuSeed - w)
+    const nuHi = nuSeed + w
     let bestNu = nuSeed
     let bestLnL = -Infinity
     for (let nu = nuLo; nu <= nuHi; nu++) {
