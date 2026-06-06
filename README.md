@@ -183,6 +183,10 @@ new ran.dist.Normal(0, 1).pdf(-Infinity) // => 0       (outside support)
 
 ranjs targets **≤ 1e-14 relative error** for all public outputs in non-degenerate parameter regions. Outputs involving deeply composed operations (quantile inversion, extreme parameter regimes) have a documented floor of **~1e-12**, looser still for a handful of quantiles computed by numerical root-finding or near-boundary asymptotics (see below).
 
+### Test reference values
+
+All reference values in `test/dist-cases-continuous.js` and `test/dist-cases-discrete.js` are sourced from external tools — [mpmath](https://mpmath.org/) at `mp.dps = 50`, scipy.stats, or Wolfram Alpha — never computed from ranjs itself. Use `scripts/gen-dist-refs.py` to generate reference values when adding a new distribution, and verify at least one value per distribution against an independent source. pdf, cdf, and pmf reference-value assertions enforce **1e-14 relative tolerance** by default; distributions that cannot reach 1e-14 in specific regimes use **1e-12** with an explanatory comment.
+
 All 31 discrete distributions are verified against mpmath references at 50 decimal places. BetaBinomial and NegativeHypergeometric sit at the ~2e-14 float64 arithmetic floor. The following distributions cap at 1e-12 at certain parameter settings: Binomial, Hypergeometric, NegativeBinomial, Poisson, Skellam.
 
 All 110 continuous distributions are likewise verified against mpmath references at 50 decimal places (three parameter sets each). **pdf/cdf** cap at 1e-12–1e-13 at certain parameter settings for: Bates, IrwinHall, Levy, NoncentralBeta, NoncentralChi, NoncentralT, DoublyNoncentralT, SkewNormal, Rice, and R. **Quantiles** with a closed-form or Halley-refined inverse round-trip to 1e-14; those computed by numerical root-finding (BaldingNichols, Bates, BetaPrime, Davis, FisherZ, Muth, NoncentralChi2, NoncentralF, DoublyNoncentralChi2, DoublyNoncentralT, SkewNormal, Student's t/z, UniformProduct, R) round-trip to ~1e-13–1e-10, and BenktanderII's near-boundary asymptotic branch (b → 1) to ~1e-9.
