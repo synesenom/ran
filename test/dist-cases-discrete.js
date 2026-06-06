@@ -135,6 +135,54 @@ export default [{
     { p: 0.99, x: 24 }
   ]
 }, {
+  name: 'BetaNegativeBinomial',
+  invalidParams: [
+    [], // all params required
+    [0, 2, 4], [-1, 2, 4], [0.4, 2, 4], // r > 0 (0.4 rounds to 0)
+    [3, 0, 4], [3, -1, 4], // alpha > 0
+    [3, 2, 0], [3, 2, -1] // beta > 0
+  ],
+  cases: [{
+    params: () => [3, 2, 4]
+  }, {
+    name: 'r=1 fractional alpha',
+    params: () => [1, 0.5, 1],
+    // exact: rational values derived from recurrence with f(0)=B(1.5,1)/B(0.5,1)=1/3
+    refVals: [
+      { x: 0, pmf: 1 / 3, cdf: 1 / 3 },
+      { x: 1, pmf: 2 / 15, cdf: 7 / 15 },
+      { x: 2, pmf: 8 / 105, cdf: 19 / 35 },
+      { x: 3, pmf: 16 / 315, cdf: 187 / 315 },
+      { x: 4, pmf: 128 / 3465, cdf: 437 / 693 }
+    ],
+    quantileVals: [
+      { p: 0.05, x: 0 },
+      { p: 0.25, x: 0 },
+      { p: 0.5, x: 2 },
+      { p: 0.75, x: 11 }
+    ]
+  }],
+  // r=5,alpha=5,beta=3 has finite variance (alpha>2) for a reliable chi-squared test;
+  // (3,2,4) has infinite variance (alpha=2 boundary) which inflates the false-positive rate
+  sampleParams: [{ name: 'finite-variance params', params: () => [5, 5, 3] }],
+  // exact: rational values derived from recurrence with f(0)=B(5,4)/B(2,4)=1/14
+  refVals: [
+    { x: 0, pmf: 1 / 14, cdf: 1 / 14 },
+    { x: 1, pmf: 2 / 21, cdf: 1 / 6 },
+    { x: 2, pmf: 2 / 21, cdf: 11 / 42 },
+    { x: 3, pmf: 20 / 231, cdf: 23 / 66 },
+    { x: 5, pmf: 28 / 429, cdf: 70 / 143 },
+    { x: 7, pmf: 48 / 1001, cdf: 54 / 91 }
+  ],
+  quantileVals: [
+    { p: 0.05, x: 0 },
+    { p: 0.1, x: 1 },
+    { p: 0.25, x: 2 },
+    { p: 0.5, x: 6 },
+    { p: 0.75, x: 12 },
+    { p: 0.9, x: 25 }
+  ]
+}, {
   name: 'Binomial',
   invalidParams: [
     [], // all params required
