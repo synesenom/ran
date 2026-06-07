@@ -341,7 +341,6 @@ class Distribution {
   /**
    * Returns the natural (user-facing) parameters of the distribution.
    * Internal lookup state is not included.
-   * See [decisions/0014-categorical-this-c-natural-params-split.md]{@link ../../decisions/0014-categorical-this-c-natural-params-split.md}.
    *
    * @method params
    * @memberof ran.dist.Distribution
@@ -906,7 +905,7 @@ class Distribution {
    * ~22% of distributions in the library (ordering constraints like `a < b`, probability bounds,
    * integer constraints), whereas random retries succeed for every distribution with a scalar
    * constructor. Subclasses should override with a data-aware (method-of-moments) estimate for
-   * better convergence — see decisions/0016-distribution-fit-powell-and-exact-mle.md.
+   * better convergence.
    * For zero-parameter distributions (k=0), returns `[]` to signal `fit()` to skip optimization.
    *
    * @method _fitInit
@@ -940,8 +939,7 @@ class Distribution {
    * `false`; a distribution opts in by declaring its OWN `_fitInitIsExact` getter returning
    * `true`. `fit()` deliberately checks for an *own* declaration (not an inherited one) so that
    * a subclass with a different, approximate `_fitInit` (e.g. `Weibull extends Exponential`)
-   * never silently inherits the fast path. See
-   * decisions/0016-distribution-fit-powell-and-exact-mle.md.
+   * never silently inherits the fast path.
    *
    * @method _fitInitIsExact
    * @memberof ran.dist.Distribution
@@ -957,7 +955,7 @@ class Distribution {
    * An additive penalty on the penalised log-likelihood objective inside `fit()`. The base-class
    * default returns 0 (pure MLE, no penalty). Subclasses with a boundary singularity (e.g. Beta,
    * where lnL can be large-but-finite near alpha=0) override this to repel the optimizer from
-   * near-degenerate regions. See decisions/0017-beta-fit-penalty.md.
+   * near-degenerate regions.
    *
    * @method _fitPenalty
    * @memberof ran.dist.Distribution
@@ -972,16 +970,13 @@ class Distribution {
 
   /**
    * Estimates the distribution parameters from data using maximum likelihood estimation (MLE).
-   * Distributions with a closed-form MLE return it directly (see `_fitInitIsExact`); all others
-   * maximise the log-likelihood lnL(data) with Powell's derivative-free conjugate-direction
-   * optimizer. See [decisions/0016-distribution-fit-powell-and-exact-mle.md]{@link ../../decisions/0016-distribution-fit-powell-and-exact-mle.md}.
+   * Distributions with a closed-form MLE return it directly; all others maximise the
+   * log-likelihood lnL(data) with Powell's derivative-free conjugate-direction optimizer.
    *
    * @method fit
    * @memberof ran.dist.Distribution
    * @param {number[]} data Array of observations to fit.
-   * @returns {Distribution} A new instance of the same distribution with MLE parameters (or MAP
-   *   parameters for distributions that override `_fitPenalty`, e.g. Beta-family). See
-   *   decisions/0017-beta-fit-penalty.md.
+   * @returns {Distribution} A new instance of the same distribution with MLE parameters.
    */
   static fit (data) {
     const Cls = this
