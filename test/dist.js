@@ -459,7 +459,8 @@ describe('dist', () => {
       })
 
       it('Poisson(5) skewness should be within 1e-6 of 1/sqrt(5)', () => {
-        assert(Math.abs(new dist.Poisson(5).skewness() - 1 / Math.sqrt(5)) < 1e-6)
+        // mpmath: 1/sqrt(5) at mp.dps=50
+        assert(Math.abs(new dist.Poisson(5).skewness() - 0.44721359549995793928) < 1e-6)
       })
 
       it('Poisson(5) kurtosis should be within 1e-6 of 0.2', () => {
@@ -501,21 +502,23 @@ describe('dist', () => {
 
       // HalfNormal analytical moments
       it('HalfNormal(2) mean should be 2*sqrt(2/pi)', () => {
-        assert(Math.abs(new dist.HalfNormal(2).mean() - 2 * Math.sqrt(2 / Math.PI)) < 1e-14)
+        // mpmath: 2*sqrt(2/pi) at mp.dps=50
+        assert(Math.abs(new dist.HalfNormal(2).mean() - 1.5957691216057307118) < 1e-14)
       })
 
       it('HalfNormal(2) variance should be 4*(1 - 2/pi)', () => {
-        assert(Math.abs(new dist.HalfNormal(2).variance() - 4 * (1 - 2 / Math.PI)) < 1e-14)
+        // mpmath: 4*(1-2/pi) at mp.dps=50
+        assert(Math.abs(new dist.HalfNormal(2).variance() - 1.4535209105296746277) < 1e-14)
       })
 
       it('HalfNormal(2) skewness should match sqrt(2)*(4-pi)/(pi-2)^1.5', () => {
-        const expected = Math.SQRT2 * (4 - Math.PI) / Math.pow(Math.PI - 2, 1.5)
-        assert(Math.abs(new dist.HalfNormal(2).skewness() - expected) < 1e-14)
+        // mpmath: sqrt(2)*(4-pi)/(pi-2)**1.5 at mp.dps=50
+        assert(Math.abs(new dist.HalfNormal(2).skewness() - 0.99527174643115604244) < 1e-14)
       })
 
       it('HalfNormal(2) kurtosis should match 8*(pi-3)/(pi-2)^2', () => {
-        const expected = 8 * (Math.PI - 3) / (Math.PI - 2) ** 2
-        assert(Math.abs(new dist.HalfNormal(2).kurtosis() - expected) < 1e-14)
+        // mpmath: 8*(pi-3)/(pi-2)**2 at mp.dps=50
+        assert(Math.abs(new dist.HalfNormal(2).kurtosis() - 0.86917730360597411666) < 1e-14)
       })
 
       // SkewNormal analytical moments
@@ -536,17 +539,13 @@ describe('dist', () => {
       })
 
       it('SkewNormal(1,2,3) mean should match xi + omega*delta*sqrt(2/pi)', () => {
-        // delta = 3/sqrt(10); scipy.stats.skewnorm(3, loc=1, scale=2).mean() = 2.5139366...
-        const delta = 3 / Math.sqrt(10)
-        const expected = 1 + 2 * delta * Math.sqrt(2 / Math.PI)
-        assert(Math.abs(new dist.SkewNormal(1, 2, 3).mean() - expected) < 1e-12)
+        // mpmath: 1 + 2*(3/sqrt(10))*sqrt(2/pi) at mp.dps=50
+        assert(Math.abs(new dist.SkewNormal(1, 2, 3).mean() - 2.5138795132120960289) < 1e-12)
       })
 
       it('SkewNormal(1,2,3) variance should match omega^2*(1 - 2*delta^2/pi)', () => {
-        // scipy.stats.skewnorm(3, loc=1, scale=2).var() = 1.7081...
-        const delta = 3 / Math.sqrt(10)
-        const expected = 4 * (1 - 2 * delta ** 2 / Math.PI)
-        assert(Math.abs(new dist.SkewNormal(1, 2, 3).variance() - expected) < 1e-12)
+        // mpmath: 4*(1 - 2*(9/10)/pi) at mp.dps=50
+        assert(Math.abs(new dist.SkewNormal(1, 2, 3).variance() - 1.7081688194767071649) < 1e-12)
       })
 
       // TruncatedNormal analytical moments
@@ -559,11 +558,8 @@ describe('dist', () => {
       })
 
       it('TruncatedNormal(0,1,-1,1) variance should be 1 - 2*phi(1)/Z', () => {
-        // phi(1) = exp(-0.5)/sqrt(2*pi); Z = Phi(1) - Phi(-1)
-        const phi1 = Math.exp(-0.5) / Math.sqrt(2 * Math.PI)
-        const Z = 1 - 2 * 0.15865525393145707 // Phi(1) - Phi(-1)
-        const expected = 1 - 2 * phi1 / Z
-        assert(Math.abs(new dist.TruncatedNormal(0, 1, -1, 1).variance() - expected) < 1e-12)
+        // mpmath: 1 - 2*exp(-0.5)/sqrt(2*pi) / erf(1/sqrt(2)) at mp.dps=50
+        assert(Math.abs(new dist.TruncatedNormal(0, 1, -1, 1).variance() - 0.29112509477279321119) < 1e-12)
       })
 
       // GeneralizedNormal analytical moments
@@ -592,8 +588,9 @@ describe('dist', () => {
 
       // HalfGeneralizedNormal analytical moments
       it('HalfGeneralizedNormal(2,2) mean should be 2/sqrt(pi) (half-normal case)', () => {
-        // alpha=2, beta=2: E[X] = 2 * Gamma(1)/Gamma(0.5) = 2 * 1/sqrt(pi)
-        assert(Math.abs(new dist.HalfGeneralizedNormal(2, 2).mean() - 2 / Math.sqrt(Math.PI)) < 1e-12)
+        // alpha=2, beta=2: E[X] = 2*Gamma(1)/Gamma(0.5) = 2/sqrt(pi)
+        // mpmath: 2/sqrt(pi) at mp.dps=50
+        assert(Math.abs(new dist.HalfGeneralizedNormal(2, 2).mean() - 1.1283791670955125739) < 1e-12)
       })
 
       it('HalfGeneralizedNormal(1,1) mean should be Gamma(2)/Gamma(1) = 1 (exponential case)', () => {
