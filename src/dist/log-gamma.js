@@ -59,6 +59,55 @@ export default class LogGamma extends Gamma {
     return super._cdf(Math.log(x - this.p.mu + 1))
   }
 
+  // Moments of X = e^Y + μ − 1 with Y ~ Gamma(α, rate β) come from the gamma MGF
+  // E[e^{kY}] = (β/(β−k))^α, NOT from digamma/polygamma (those describe ln of a gamma
+  // variate, the opposite transform). The k-th raw moment diverges once β ≤ k.
+  _expMoment (k) {
+    return this.p.beta > k ? Math.pow(this.p.beta / (this.p.beta - k), this.p.alpha) : Infinity
+  }
+
+  /**
+   * @returns {number} The mean, $(\beta/(\beta-1))^\alpha + \mu - 1$; `Infinity` for $\beta \le 1$.
+   */
+  mean () {
+    return this._expMoment(1) + this.p.mu - 1
+  }
+
+  /**
+   * @returns {number} The variance; `Infinity` for $\beta \le 2$.
+   */
+  variance () {
+    const r2 = this._expMoment(2)
+    if (!Number.isFinite(r2)) return Infinity
+    const r1 = this._expMoment(1)
+    return r2 - r1 * r1
+  }
+
+  /**
+   * @returns {number} The skewness; `Infinity` for $\beta \le 3$.
+   */
+  skewness () {
+    const r3 = this._expMoment(3)
+    if (!Number.isFinite(r3)) return Infinity
+    const r1 = this._expMoment(1)
+    const r2 = this._expMoment(2)
+    const v = r2 - r1 * r1
+    return (r3 - 3 * r1 * r2 + 2 * r1 ** 3) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis; `Infinity` for $\beta \le 4$.
+   */
+  kurtosis () {
+    const r4 = this._expMoment(4)
+    if (!Number.isFinite(r4)) return Infinity
+    const r1 = this._expMoment(1)
+    const r2 = this._expMoment(2)
+    const r3 = this._expMoment(3)
+    const v = r2 - r1 * r1
+    return (r4 - 4 * r1 * r3 + 6 * r1 * r1 * r2 - 3 * r1 ** 4) / (v * v) - 3
+  }
+
   static _fitInit (data) {
     // log(x−μ+1) ~ Gamma(α,β) with μ=0: gamma MOM on log(x+1) seeds the Gamma parameters
     const n = data.length

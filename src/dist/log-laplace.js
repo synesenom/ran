@@ -49,6 +49,54 @@ export default class LogLaplace extends Laplace {
       : Math.exp(this.p.mu - this.p.b * Math.log(2 - 2 * p))
   }
 
+  // Moments of X = e^Y with Y ~ Laplace(μ, b) come from the Laplace MGF
+  // E[e^{kY}] = e^{μk}/(1 − b²k²), which diverges once kb ≥ 1.
+  _expMoment (k) {
+    return k * this.p.b < 1 ? Math.exp(this.p.mu * k) / (1 - this.p.b * this.p.b * k * k) : Infinity
+  }
+
+  /**
+   * @returns {number} The mean, $e^\mu/(1 - b^2)$; `Infinity` for $b \ge 1$.
+   */
+  mean () {
+    return this._expMoment(1)
+  }
+
+  /**
+   * @returns {number} The variance; `Infinity` for $b \ge 1/2$.
+   */
+  variance () {
+    const m2 = this._expMoment(2)
+    if (!Number.isFinite(m2)) return Infinity
+    const m1 = this._expMoment(1)
+    return m2 - m1 * m1
+  }
+
+  /**
+   * @returns {number} The skewness; `Infinity` for $b \ge 1/3$.
+   */
+  skewness () {
+    const m3 = this._expMoment(3)
+    if (!Number.isFinite(m3)) return Infinity
+    const m1 = this._expMoment(1)
+    const m2 = this._expMoment(2)
+    const v = m2 - m1 * m1
+    return (m3 - 3 * m1 * m2 + 2 * m1 ** 3) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis; `Infinity` for $b \ge 1/4$.
+   */
+  kurtosis () {
+    const m4 = this._expMoment(4)
+    if (!Number.isFinite(m4)) return Infinity
+    const m1 = this._expMoment(1)
+    const m2 = this._expMoment(2)
+    const m3 = this._expMoment(3)
+    const v = m2 - m1 * m1
+    return (m4 - 4 * m1 * m3 + 6 * m1 * m1 * m2 - 3 * m1 ** 4) / (v * v) - 3
+  }
+
   static _fitInit (data) {
     // log(Y) ~ Laplace(mu, b): median is MOM for location; median absolute deviation / ln(2) for scale
     // because median(|X-mu|) = b*ln(2) for Laplace, so b = MAD / ln(2)
