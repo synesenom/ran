@@ -738,8 +738,8 @@ export default [{
   moments: [
     { params: [1], mean: Math.sqrt(2 / Math.PI), tol: 1e-12 },
     { params: [2], mean: Math.sqrt(Math.PI / 2), tol: 1e-12 },
-    // Chi(3) ≡ Maxwell-Boltzmann(1); shape moments via the Maxwell-Boltzmann closed forms
-    { params: [3], variance: 3 - 8 / Math.PI, skewness: 2 * Math.SQRT2 * (16 - 5 * Math.PI) / (3 * Math.PI - 8) ** 1.5, kurtosis: 4 * (-96 + 40 * Math.PI - 3 * Math.PI ** 2) / (3 * Math.PI - 8) ** 2, tol: 1e-12 }
+    // Chi(3) ≡ Maxwell-Boltzmann(1); variance = 3 − 8/π, skewness/kurtosis from mpmath dps=50
+    { params: [3], variance: 3 - 8 / Math.PI, skewness: 0.4856928280495908, kurtosis: 0.10816384281629415, tol: 1e-12 }
   ],
   invalidParams: [
     [], // all params required
@@ -3275,7 +3275,8 @@ export default [{
 }, {
   name: 'MaxwellBoltzmann',
   moments: [
-    { params: [1], mean: 2 * Math.sqrt(2 / Math.PI), variance: (3 * Math.PI - 8) / Math.PI, skewness: 2 * Math.SQRT2 * (16 - 5 * Math.PI) / (3 * Math.PI - 8) ** 1.5, kurtosis: 4 * (-96 + 40 * Math.PI - 3 * Math.PI ** 2) / (3 * Math.PI - 8) ** 2, tol: 1e-12 },
+    // skewness/kurtosis from mpmath dps=50 (shape moments are scale-invariant)
+    { params: [1], mean: 2 * Math.sqrt(2 / Math.PI), variance: (3 * Math.PI - 8) / Math.PI, skewness: 0.4856928280495908, kurtosis: 0.10816384281629415, tol: 1e-12 },
     { params: [2], mean: 4 * Math.sqrt(2 / Math.PI), tol: 1e-12 }
   ],
   invalidParams: [
@@ -4612,7 +4613,8 @@ export default [{
 }, {
   name: 'TruncatedNormal',
   moments: [
-    { params: [0, 1, -1, 1], mean: 0, variance: 0.2911250947727932, skewness: 0, kurtosis: -1.0590800800968836, tol: { mean: 1e-14, variance: 1e-12, skewness: 1e-12, kurtosis: 1e-12 } }
+    // mean/skewness 0 by symmetry; variance/kurtosis from mpmath dps=50
+    { params: [0, 1, -1, 1], mean: 0, variance: 0.2911250947727932, skewness: 0, kurtosis: -1.0590800800968809, tol: { mean: 1e-14, variance: 1e-12, skewness: 1e-12, kurtosis: 1e-12 } }
   ],
   invalidParams: [
     [], // all params required
