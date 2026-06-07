@@ -1,5 +1,18 @@
+// Per-distribution test-case entries. Beyond the core fields (name, invalidParams, cases,
+// refVals, quantileVals, sampleParams), two optional data-driven fields are consumed by
+// UnitTests.fit / UnitTests.moments in test/dist.js:
+//   fit: { params, seed, n, tolerances?, exact? }
+//     Sample n points from `params` (seeded), refit, assert recovered params match the planted
+//     ones — `tolerances` is a { paramName: absTol } map, `exact` a [paramName] strict-equality list.
+//   moments: [{ params, mean?, variance?, skewness?, kurtosis?, tol?, name? }]
+//     Build the distribution from `params` and assert each present moment (finite within `tol`,
+//     or exact NaN / ±Infinity). `tol` is a single number for all moments, or a per-moment
+//     object { mean, variance, skewness, kurtosis } (each defaulting to 1e-12). Omitted moments
+//     are skipped.
 export default [{
   name: 'Alpha',
+  // instanceof-only: Alpha's heuristic-MOM fit is not reliably parameter-recovering
+  fit: { params: [2, 1], seed: 42, n: 100 },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // alpha > 0
@@ -45,6 +58,7 @@ export default [{
   ]
 }, {
   name: 'Anglit',
+  fit: { params: [1, 1.5], seed: 42, n: 200, tolerances: { mu: 0.3, beta: 0.4 } },
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // beta > 0
@@ -90,6 +104,7 @@ export default [{
   ]
 }, {
   name: 'Arcsine',
+  fit: { params: [1, 5], seed: 42, n: 200, tolerances: { a: 0.4, b: 0.4 } },
   invalidParams: [
     [], // all params required
     [1, 1], [2, 1] // a < b
@@ -134,6 +149,7 @@ export default [{
   ]
 }, {
   name: 'BaldingNichols',
+  fit: { params: [0.1, 0.3], seed: 42, n: 200, tolerances: { F: 0.05, p: 0.05 } },
   invalidParams: [
     [], // all params required
     [-1, 0.5], [0, 0.5], [1, 0.5], [2, 0.5], // 0 < F < 1
@@ -239,6 +255,7 @@ export default [{
   ]
 }, {
   name: 'Benini',
+  fit: { params: [2, 1, 3], seed: 42, n: 200, tolerances: { alpha: 0.8, beta: 0.4, sigma: 0.5 } },
   invalidParams: [
     [], // all params required
     [-1, 1, 1], [0, 1, 1], // alpha > 0
@@ -328,6 +345,7 @@ export default [{
   ]
 }, {
   name: 'Beta',
+  fit: { params: [2, 3], seed: 42, n: 200, tolerances: { alpha: 0.6, beta: 0.8 } },
   invalidParams: [
     [], // all params required
     [-1, 2], [0, 2], // alpha > 0
@@ -372,6 +390,7 @@ export default [{
   ]
 }, {
   name: 'BetaPrime',
+  fit: { params: [2, 3], seed: 42, n: 200, tolerances: { alpha: 0.7, beta: 1.0 } },
   invalidParams: [
     [], // all params required
     [-1, 2], [0, 2], // alpha > 0
@@ -582,6 +601,7 @@ export default [{
   ]
 }, {
   name: 'Burr',
+  fit: { params: [2, 3], seed: 42, n: 200, tolerances: { c: 0.8, k: 1.0 } },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // c > 0
@@ -628,6 +648,10 @@ export default [{
   ]
 }, {
   name: 'Cauchy',
+  fit: { params: [2, 1], seed: 42, n: 500, tolerances: { x0: 0.5, gamma: 0.5 } },
+  moments: [
+    { params: [0, 1], mean: NaN, variance: NaN, skewness: NaN, kurtosis: NaN }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // gamma > 0
@@ -710,6 +734,12 @@ export default [{
   ]
 }, {
   name: 'Chi',
+  fit: { params: [4], seed: 42, n: 200, exact: ['k'] },
+  moments: [
+    { params: [1], mean: Math.sqrt(2 / Math.PI), tol: 1e-12 },
+    { params: [2], mean: Math.sqrt(Math.PI / 2), tol: 1e-12 },
+    { params: [3], variance: 3 - 8 / Math.PI, tol: 1e-12 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // k > 0
@@ -748,6 +778,9 @@ export default [{
   ]
 }, {
   name: 'Chi2',
+  moments: [
+    { params: [4], mean: 4, variance: 8, kurtosis: 3, tol: 1e-14 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // k > 0
@@ -792,6 +825,7 @@ export default [{
   ]
 }, {
   name: 'Dagum',
+  fit: { params: [1, 2, 3], seed: 42, n: 200, tolerances: { p: 0.4, a: 0.8, b: 1.0 } },
   invalidParams: [
     [], // all params required
     [-1, 1, 1], [0, 1, 1], // p > 0
@@ -871,6 +905,11 @@ export default [{
   ]
 }, {
   name: 'DoubleGamma',
+  fit: { params: [2, 0.5], seed: 42, n: 200, tolerances: { alpha: 0.4, beta: 0.15 } },
+  moments: [
+    { params: [1, 1], mean: 0, variance: 2, skewness: 0, kurtosis: 3, tol: 1e-14 },
+    { params: [2, 1], variance: 6, kurtosis: 1 / 3, tol: 1e-14 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // alpha > 0
@@ -918,6 +957,7 @@ export default [{
   ]
 }, {
   name: 'DoubleWeibull',
+  fit: { params: [2, 1.5], seed: 42, n: 200, tolerances: { lambda2: 0.5, k: 0.4 } },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // lambda > 0
@@ -973,6 +1013,7 @@ export default [{
   ]
 }, {
   name: 'DoublyNoncentralBeta',
+  fit: { params: [2, 3, 1, 1], seed: 42, n: 500, tolerances: { alpha: 0.75, beta: 0.75 } },
   invalidParams: [
     [], // all params required
     [-1, 1, 1, 1], [0, 1, 1, 1], // alpha > 0
@@ -1108,6 +1149,7 @@ export default [{
   ]
 }, {
   name: 'DoublyNoncentralT',
+  fit: { params: [5, 2, 1], seed: 42, n: 300, tolerances: { mu: 0.5 } },
   invalidParams: [
     [], // all params required
     [-1, 1, 1], [0, 1, 1], // nu > 0
@@ -1157,6 +1199,10 @@ export default [{
   ]
 }, {
   name: 'Erlang',
+  fit: { params: [3, 1], seed: 42, n: 200, tolerances: { beta: 0.25 }, exact: ['alpha'] },
+  moments: [
+    { params: [3, 2], mean: 1.5, tol: 1e-14 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // k > 0
@@ -1202,6 +1248,10 @@ export default [{
   ]
 }, {
   name: 'Exponential',
+  fit: { params: [2], seed: 42, n: 200, tolerances: { lambda: 0.3 } },
+  moments: [
+    { params: [1], mean: 1, variance: 1, skewness: 2, kurtosis: 6, tol: 1e-6 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // lambda > 0
@@ -1293,6 +1343,7 @@ export default [{
   ]
 }, {
   name: 'ExponentiatedWeibull',
+  fit: { params: [2, 1.5, 2], seed: 42, n: 200, tolerances: { lambda2: 0.8, k: 0.6, alpha: 0.8 } },
   invalidParams: [
     [], // all params required
     [-1, 1, 1], [0, 1, 1], // lambda > 0
@@ -1424,6 +1475,7 @@ export default [{
   ]
 }, {
   name: 'Frechet',
+  fit: { params: [2, 1, 0], seed: 42, n: 200, tolerances: { alpha: 0.5, s: 0.4 } },
   invalidParams: [
     [], // all params required
     [-1, 1, 0], [0, 1, 0], // alpha > 0
@@ -1470,6 +1522,10 @@ export default [{
   ]
 }, {
   name: 'Gamma',
+  fit: { params: [2, 0.5], seed: 42, n: 200, tolerances: { alpha: 0.4, beta: 0.15 } },
+  moments: [
+    { params: [3, 2], mean: 1.5, variance: 0.75, skewness: 2 / Math.sqrt(3), kurtosis: 2, tol: 1e-14 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // alpha > 0
@@ -1605,6 +1661,7 @@ export default [{
   ]
 }, {
   name: 'GeneralizedExtremeValue',
+  fit: { params: [0.5], seed: 42, n: 200, tolerances: { c: 0.2 } },
   invalidParams: [
     [], // all params required
     [0] // c != 0
@@ -1640,6 +1697,10 @@ export default [{
   ]
 }, {
   name: 'GeneralizedGamma',
+  moments: [
+    { params: [2, 2, 1], mean: 4, tol: 1e-12 },
+    { params: [1, 1, 1], variance: 1, skewness: 2, kurtosis: 6, tol: 1e-10 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1, 1], [0, 1, 1], // a > 0
@@ -1681,6 +1742,7 @@ export default [{
   ]
 }, {
   name: 'GeneralizedLogistic',
+  fit: { params: [1, 2, 2], seed: 42, n: 300, tolerances: { mu: 0.5, s: 0.6, c: 0.6 } },
   invalidParams: [
     [], // all params required
     [0, -1, 1], [0, 0, 1], // s > 0
@@ -1725,6 +1787,12 @@ export default [{
   ]
 }, {
   name: 'GeneralizedNormal',
+  fit: { params: [1, 2, 2], seed: 42, n: 300, tolerances: { mu: 0.3, alpha2: 0.5, beta2: 0.5 } },
+  moments: [
+    { params: [3, Math.SQRT2, 2], mean: 3, variance: 1, skewness: 0, tol: { mean: 1e-14, variance: 1e-12, skewness: 1e-14 } },
+    { params: [0, 1, 1], kurtosis: 3, tol: 1e-10 },
+    { params: [0, 1, 2], kurtosis: 0, tol: 1e-12 }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1, 1], [0, 0, 1], // alpha > 0
@@ -1769,6 +1837,7 @@ export default [{
   ]
 }, {
   name: 'GeneralizedPareto',
+  fit: { params: [1, 2, 0.2], seed: 42, n: 200, tolerances: { mu: 0.3, sigma: 0.8, xi: 0.3 } },
   invalidParams: [
     [], // all params required
     [0, -1, 1], [0, 0, 1] // sigma > 0
@@ -1813,6 +1882,9 @@ export default [{
   ]
 }, {
   name: 'Gilbrat',
+  moments: [
+    { params: [], mean: 1.6487212707001282, variance: 4.670774270471605, skewness: 6.1848771386325545, kurtosis: 110.93639217631153, tol: { mean: 1e-13, variance: 1e-13, skewness: 1e-12, kurtosis: 1e-10 } }
+  ],
   invalidParams: [],
   cases: [{
     params: () => []
@@ -1884,6 +1956,7 @@ export default [{
   ]
 }, {
   name: 'Gumbel',
+  fit: { params: [1, 2], seed: 42, n: 200, tolerances: { mu: 0.4, beta: 0.4 } },
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // beta > 0
@@ -1930,6 +2003,11 @@ export default [{
   ]
 }, {
   name: 'HalfGeneralizedNormal',
+  fit: { params: [2, 2], seed: 42, n: 300, tolerances: { alpha2: 0.5, beta2: 0.5 } },
+  moments: [
+    { params: [2, 2], mean: 1.1283791670955126, tol: 1e-12 },
+    { params: [1, 1], mean: 1, variance: 1, skewness: 2, kurtosis: 6, tol: { mean: 1e-12, variance: 1e-12, skewness: 1e-10, kurtosis: 1e-10 } }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // alpha > 0
@@ -2000,6 +2078,10 @@ export default [{
   ]
 }, {
   name: 'HalfNormal',
+  fit: { params: [1.5], seed: 42, n: 200, tolerances: { sigma: 0.2 } },
+  moments: [
+    { params: [2], mean: 1.5957691216057308, variance: 1.4535209105296747, skewness: 0.995271746431156, kurtosis: 0.8691773036059741, tol: 1e-14 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // sigma > 0
@@ -2145,6 +2227,14 @@ export default [{
   ]
 }, {
   name: 'InverseChi2',
+  fit: { params: [6], seed: 42, n: 200, exact: ['nu'] },
+  moments: [
+    { params: [2], mean: Infinity },
+    { params: [4], mean: 0.5, variance: Infinity, tol: 1e-14 },
+    { params: [6], skewness: Infinity },
+    { params: [8], kurtosis: Infinity },
+    { params: [10], skewness: 2 * Math.sqrt(3), tol: 1e-14 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // nu > 0
@@ -2189,6 +2279,14 @@ export default [{
   ]
 }, {
   name: 'InverseGamma',
+  fit: { params: [3, 2], seed: 42, n: 200, tolerances: { alpha: 0.6, beta: 0.8 } },
+  moments: [
+    { params: [0.5, 1], mean: Infinity },
+    { params: [1.5, 2], mean: 4, variance: Infinity, tol: 1e-14 },
+    { params: [5, 2], mean: 0.5, variance: 1 / 12, skewness: 2 * Math.sqrt(3), kurtosis: 42, tol: 1e-14 },
+    { params: [3, 2], skewness: Infinity },
+    { params: [4, 2], kurtosis: Infinity }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // alpha > 0
@@ -2236,6 +2334,7 @@ export default [{
   ]
 }, {
   name: 'InverseGaussian',
+  fit: { params: [2, 3], seed: 42, n: 500, tolerances: { mu: 0.3, lambda: 1.0 } },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // mu > 0
@@ -2278,6 +2377,7 @@ export default [{
   ]
 }, {
   name: 'InvertedWeibull',
+  fit: { params: [3], seed: 42, n: 200, tolerances: { c: 0.6 } },
   invalidParams: [
     [], // all params required
     [-1], [0] // c > 0
@@ -2321,6 +2421,7 @@ export default [{
   ]
 }, {
   name: 'IrwinHall',
+  fit: { params: [4], seed: 42, n: 200, exact: ['n'] },
   invalidParams: [
     [], // all params required
     [-1], [0] // n > 0
@@ -2366,6 +2467,7 @@ export default [{
   ]
 }, {
   name: 'JohnsonSU',
+  fit: { params: [0, 2, 2, 0], seed: 42, n: 300, tolerances: { gamma: 0.5, delta: 0.5, lambda: 0.6, xi: 0.5 } },
   invalidParams: [
     [], // all params required
     [0, -1, 1, 0], [0, 0, 1, 0], // delta > 0
@@ -2410,6 +2512,7 @@ export default [{
   ]
 }, {
   name: 'JohnsonSB',
+  fit: { params: [0, 2, 2, 0], seed: 42, n: 300, tolerances: { gamma: 0.5, delta: 0.5, lambda: 0.6, xi: 0.3 } },
   invalidParams: [
     [], // all params required
     [0, -1, 1, 0], [0, 0, 1, 0], // delta > 0
@@ -2479,6 +2582,7 @@ export default [{
   ]
 }, {
   name: 'Kumaraswamy',
+  fit: { params: [2, 3], seed: 42, n: 200, tolerances: { a: 0.7, b: 1.0 } },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // a > 0
@@ -2520,6 +2624,7 @@ export default [{
   ]
 }, {
   name: 'Laplace',
+  fit: { params: [1, 2], seed: 42, n: 200, tolerances: { mu: 0.3, b: 0.4 } },
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // b > 0
@@ -2567,6 +2672,7 @@ export default [{
   ]
 }, {
   name: 'Levy',
+  fit: { params: [1, 2], seed: 42, n: 200, tolerances: { mu: 0.3, c: 0.8 } },
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // c > 0
@@ -2610,6 +2716,7 @@ export default [{
   ]
 }, {
   name: 'Lindley',
+  fit: { params: [1.5], seed: 42, n: 500, tolerances: { theta: 0.3 } },
   invalidParams: [
     [], // all params required
     [-1], [0] // theta > 0
@@ -2654,6 +2761,7 @@ export default [{
   ]
 }, {
   name: 'LogCauchy',
+  fit: { params: [0, 1], seed: 42, n: 200, tolerances: { x0: 0.5, gamma: 0.5 } },
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // sigma > 0
@@ -2696,6 +2804,16 @@ export default [{
   ]
 }, {
   name: 'LogGamma',
+  fit: { params: [2, 1, 0], seed: 42, n: 200, tolerances: { alpha: 0.6, beta: 0.4 } },
+  moments: [
+    { params: [2, 5, 0], mean: 0.5625, variance: 0.3363715277777778, skewness: 4.400909271598007, kurtosis: 74.30035379812695, tol: { mean: 1e-14, variance: 1e-14, skewness: 1e-12, kurtosis: 1e-11 } },
+    { params: [1.5, 6, 2], mean: 2.3145341380123985, variance: 0.10911730708738357, skewness: 3.512226133248932, kurtosis: 31.701516341694518, tol: { mean: 1e-14, variance: 1e-14, skewness: 1e-12, kurtosis: 1e-11 } },
+    { params: [2, 1, 0], mean: Infinity },
+    { params: [2, 0.5, 0], mean: Infinity },
+    { params: [2, 2, 2], mean: 5, variance: Infinity, skewness: Infinity, kurtosis: Infinity, tol: 1e-14 },
+    { params: [2, 2.5, 0], mean: 1.7777777777777777, variance: 17.28395061728395, skewness: Infinity, kurtosis: Infinity, tol: { mean: 1e-14, variance: 1e-12 } },
+    { params: [2, 3.5, 0], mean: 0.96, variance: 1.6028444444444445, skewness: 15.791857713882274, kurtosis: Infinity, tol: { mean: 1e-14, variance: 1e-13, skewness: 1e-11 } }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1, 0], [0, 1, 0], // alpha > 0
@@ -2739,6 +2857,16 @@ export default [{
   ]
 }, {
   name: 'LogLaplace',
+  fit: { params: [0, 1], seed: 42, n: 200, tolerances: { mu: 0.2, b: 0.2 } },
+  moments: [
+    { params: [0, 0.2], mean: 1.0416666666666667, variance: 0.10540674603174603, skewness: 3.0046141326124665, kurtosis: 40.717785467128024, tol: { mean: 1e-14, variance: 1e-14, skewness: 1e-13, kurtosis: 1e-12 } },
+    { params: [0.5, 0.2], mean: 1.7174179903126334, variance: 0.2865252423350928, skewness: 3.0046141326124665, kurtosis: 40.717785467128024, tol: { mean: 1e-13, variance: 1e-13, skewness: 1e-13, kurtosis: 1e-12 } },
+    { params: [0, 1], mean: Infinity },
+    { params: [0, 2], mean: Infinity },
+    { params: [0, 0.4], mean: 1.1904761904761905, variance: 1.3605442176870748, skewness: Infinity, kurtosis: Infinity, tol: { mean: 1e-14, variance: 1e-13 } },
+    { params: [0, 0.5], mean: 1.3333333333333333, variance: Infinity, skewness: Infinity, kurtosis: Infinity, tol: 1e-14 },
+    { params: [0, 0.3], mean: 1.098901098901099, variance: 0.35491637483395727, skewness: 13.08208855547686, kurtosis: Infinity, tol: { mean: 1e-14, variance: 1e-13, skewness: 1e-11 } }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // b > 0
@@ -2780,6 +2908,7 @@ export default [{
   ]
 }, {
   name: 'LogLogistic',
+  fit: { params: [2, 3], seed: 42, n: 200, tolerances: { alpha: 0.3, beta: 0.5 } },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // alpha > 0
@@ -2823,6 +2952,12 @@ export default [{
   ]
 }, {
   name: 'LogNormal',
+  fit: { params: [1, 0.5], seed: 42, n: 200, tolerances: { mu: 0.15, sigma: 0.15 } },
+  moments: [
+    { params: [0, 0.5], mean: 1.1331484530668263, variance: 0.3646958540123867, skewness: 1.7501896550697182, kurtosis: 5.898445673784779, tol: { mean: 1e-14, variance: 1e-14, skewness: 1e-13, kurtosis: 1e-12 } },
+    { params: [1, 0.25], mean: 2.8045693562372267, variance: 0.5072882141823729, skewness: 0.778251635797484, kurtosis: 1.095931274730182, tol: { mean: 1e-13, variance: 1e-13, skewness: 1e-13, kurtosis: 1e-12 } },
+    { params: [0, 1e-8], variance: 1.0000000000000001e-16, tol: 1e-30 }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // sigma > 0
@@ -2911,6 +3046,7 @@ export default [{
   ]
 }, {
   name: 'Logistic',
+  fit: { params: [1, 2], seed: 42, n: 200, tolerances: { mu: 0.4, s: 0.4 } },
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // s > 0
@@ -2958,6 +3094,7 @@ export default [{
   ]
 }, {
   name: 'LogisticExponential',
+  fit: { params: [1, 2], seed: 42, n: 200, tolerances: { lambda: 0.3, kappa: 0.5 } },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // lambda > 0
@@ -3003,6 +3140,7 @@ export default [{
   ]
 }, {
   name: 'LogitNormal',
+  fit: { params: [0, 1], seed: 42, n: 200, tolerances: { mu: 0.2, sigma: 0.2 } },
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // sigma > 0
@@ -3042,6 +3180,7 @@ export default [{
   ]
 }, {
   name: 'Lomax',
+  fit: { params: [2, 4], seed: 42, n: 200, tolerances: { lambda: 0.8, alpha: 1.0 } },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // lambda > 0
@@ -3132,6 +3271,10 @@ export default [{
   ]
 }, {
   name: 'MaxwellBoltzmann',
+  moments: [
+    { params: [1], mean: 2 * Math.sqrt(2 / Math.PI), variance: (3 * Math.PI - 8) / Math.PI, tol: 1e-12 },
+    { params: [2], mean: 4 * Math.sqrt(2 / Math.PI), tol: 1e-12 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // a > 0
@@ -3176,6 +3319,7 @@ export default [{
   ]
 }, {
   name: 'Mielke',
+  fit: { params: [2, 1], seed: 42, n: 200, tolerances: { k: 0.6, s: 0.5 } },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // k > 0
@@ -3220,6 +3364,7 @@ export default [{
   ]
 }, {
   name: 'Moyal',
+  fit: { params: [1, 2], seed: 42, n: 200, tolerances: { mu: 0.5, sigma: 0.5 } },
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // sigma > 0
@@ -3310,6 +3455,10 @@ export default [{
   ]
 }, {
   name: 'Nakagami',
+  fit: { params: [2, 3], seed: 42, n: 500, tolerances: { m: 0.5, omega: 0.8 } },
+  moments: [
+    { params: [1, 1], mean: Math.sqrt(Math.PI) / 2, variance: 1 - Math.PI / 4, skewness: 2 * Math.sqrt(Math.PI) * (Math.PI - 3) / Math.pow(4 - Math.PI, 1.5), kurtosis: (-16 + 24 * Math.PI - 6 * Math.PI ** 2) / (4 - Math.PI) ** 2, tol: { mean: 1e-12, variance: 1e-12, skewness: 1e-10, kurtosis: 1e-10 } }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], [0.3, 1], // m >= 0.5
@@ -3360,6 +3509,7 @@ export default [{
   // 500k-sample ECDF analysis confirmed no bias. See issue #267 and
   // solutions/testing/2026-05-20-0900-noncentral-ad-root-cause-errfix-artifact.md.
   name: 'NoncentralBeta',
+  fit: { params: [2, 3, 1], seed: 42, n: 500, tolerances: { alpha: 0.75, beta: 0.75 } },
   invalidParams: [
     [], // all params required
     [-1, 2, 1], [0, 2, 1], // alpha > 0
@@ -3459,6 +3609,7 @@ export default [{
   ]
 }, {
   name: 'NoncentralChi',
+  fit: { params: [4, 2], seed: 42, n: 300, tolerances: { k: 0.5, lambda: 0.5 } },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // k > 0
@@ -3501,6 +3652,7 @@ export default [{
   ]
 }, {
   name: 'NoncentralChi2',
+  fit: { params: [4, 2], seed: 42, n: 300, tolerances: { k: 0.5, lambda: 0.5 } },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // k > 0
@@ -3642,6 +3794,10 @@ export default [{
   ]
 }, {
   name: 'Normal',
+  moments: [
+    { params: [0, 1], mean: 0, variance: 1, skewness: 0, kurtosis: 0, tol: 1e-6 },
+    { params: [2, 3], mean: 2, variance: 9, skewness: 0, kurtosis: 0, tol: 1e-14 }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // sigma > 0
@@ -3746,6 +3902,7 @@ export default [{
   ]
 }, {
   name: 'PERT',
+  fit: { params: [0, 3, 6], seed: 42, n: 200, tolerances: { a: 0.3, c: 0.3, b: 0.5 } },
   invalidParams: [
     [], // all params required
     [0.5, 0.5, 1], [0.8, 0.5, 1], // a < b
@@ -3790,6 +3947,7 @@ export default [{
   ]
 }, {
   name: 'PowerLaw',
+  fit: { params: [2], seed: 42, n: 200, tolerances: { a: 0.4 } },
   invalidParams: [
     [], // all params required
     [-1], [0] // a > 0
@@ -3877,6 +4035,7 @@ export default [{
   ]
 }, {
   name: 'R',
+  fit: { params: [3], seed: 42, n: 200, tolerances: { c: 0.5 } },
   invalidParams: [
     [], // all params required
     [-1], [0] // c > 0
@@ -3925,6 +4084,7 @@ export default [{
   ]
 }, {
   name: 'RaisedCosine',
+  fit: { params: [2, 3], seed: 42, n: 200, tolerances: { mu: 0.4, s: 0.4 } },
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // s > 0
@@ -4012,6 +4172,7 @@ export default [{
   ]
 }, {
   name: 'Reciprocal',
+  fit: { params: [1, 10], seed: 42, n: 300, tolerances: { a: 0.15, b: 0.3 } },
   invalidParams: [
     [], // all params required
     [-1, 2], [0, 2], // a > 0
@@ -4057,6 +4218,7 @@ export default [{
   ]
 }, {
   name: 'ReciprocalInverseGaussian',
+  fit: { params: [2, 4], seed: 42, n: 500, tolerances: { mu: 0.5, lambda: 2.0 } },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // mu > 0
@@ -4146,6 +4308,7 @@ export default [{
   ]
 }, {
   name: 'ShiftedLogLogistic',
+  fit: { params: [1, 2, 0], seed: 42, n: 200, tolerances: { mu: 0.4, sigma: 0.6 } },
   invalidParams: [
     [], // all params required
     [0, -1, 1], [0, 0, 1] // sigma > 0
@@ -4188,6 +4351,11 @@ export default [{
   ]
 }, {
   name: 'SkewNormal',
+  fit: { params: [1, 2, 3], seed: 42, n: 300, tolerances: { xi: 0.5, omega: 0.5, alpha: 1.5 } },
+  moments: [
+    { params: [0, 1, 0], mean: 0, variance: 1, skewness: 0, kurtosis: 0, tol: 1e-14 },
+    { params: [1, 2, 3], mean: 2.513879513212096, variance: 1.708168819476707, tol: 1e-12 }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1, 1], [0, 0, 1] // omega > 0
@@ -4252,6 +4420,7 @@ export default [{
   ]
 }, {
   name: 'StudentT',
+  fit: { params: [5], seed: 42, n: 500, tolerances: { nu: 1.5 } },
   invalidParams: [
     [], // all params required
     [-1], [0] // nu > 0
@@ -4350,6 +4519,7 @@ export default [{
   ]
 }, {
   name: 'Trapezoidal',
+  fit: { params: [0, 1, 3, 5], seed: 42, n: 200, tolerances: { a: 0.3, b: 0.5, c: 1.0, d: 0.3 } },
   invalidParams: [
     [], // all params required
     [1, 0.33, 0.67, 1], [2, 0.33, 0.67, 1], // a < d
@@ -4395,6 +4565,7 @@ export default [{
   ]
 }, {
   name: 'Triangular',
+  fit: { params: [1, 5, 3], seed: 42, n: 200, tolerances: { a: 0.3, b: 0.3, c: 0.5 } },
   invalidParams: [
     [], // all params required
     [1, 1, 0.5], [2, 1, 0.5], // a < b
@@ -4437,6 +4608,9 @@ export default [{
   ]
 }, {
   name: 'TruncatedNormal',
+  moments: [
+    { params: [0, 1, -1, 1], mean: 0, variance: 0.2911250947727932, skewness: 0, tol: { mean: 1e-14, variance: 1e-12, skewness: 1e-12 } }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1, 0, 1], [0, 0, 0, 1], // sigma > 0
@@ -4488,6 +4662,7 @@ export default [{
   ]
 }, {
   name: 'TukeyLambda',
+  fit: { params: [0.5], seed: 42, n: 500, tolerances: { lambda: 0.2 } },
   invalidParams: [
     [] // all params required
   ],
@@ -4537,6 +4712,7 @@ export default [{
   ]
 }, {
   name: 'UQuadratic',
+  fit: { params: [0, 4], seed: 42, n: 200, tolerances: { a: 0.3, b: 0.3 } },
   invalidParams: [
     [], // all params required
     [1, 1], [2, 1] // a < b
@@ -4580,6 +4756,7 @@ export default [{
   ]
 }, {
   name: 'Uniform',
+  fit: { params: [1, 5], seed: 42, n: 200, tolerances: { xmin: 0.2, xmax: 0.2 } },
   invalidParams: [
     [], // all params required
     [1, 1], [2, 1] // a < b
@@ -4631,6 +4808,7 @@ export default [{
   ]
 }, {
   name: 'UniformProduct',
+  fit: { params: [3], seed: 42, n: 200, exact: ['n'] },
   invalidParams: [
     [], // all params required
     [-1], [0], [1] // n > 1
@@ -4703,6 +4881,7 @@ export default [{
   ]
 }, {
   name: 'VonMises',
+  fit: { params: [2], seed: 42, n: 300, tolerances: { kappa: 0.5 } },
   invalidParams: [
     [], // all params required
     [-1], [0] // kappa > 0
@@ -4751,6 +4930,7 @@ export default [{
   ]
 }, {
   name: 'Weibull',
+  fit: { params: [2, 1.5], seed: 42, n: 200, tolerances: { lambda2: 0.5, k: 0.3 } },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // lambda > 0
@@ -4795,6 +4975,7 @@ export default [{
   ]
 }, {
   name: 'Wigner',
+  fit: { params: [3], seed: 42, n: 300, tolerances: { R: 0.5 } },
   invalidParams: [
     [], // all params required
     [-1], [0] // R > 0

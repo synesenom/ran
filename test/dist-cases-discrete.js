@@ -1,3 +1,6 @@
+// Per-distribution test-case entries. See dist-cases-continuous.js for the full schema; the
+// optional `fit` and `moments` fields are consumed by UnitTests.fit / UnitTests.moments in
+// test/dist.js.
 export default [{
   name: 'Bernoulli',
   invalidParams: [
@@ -309,6 +312,7 @@ export default [{
   ]
 }, {
   name: 'Borel',
+  fit: { params: [0.5], seed: 42, n: 200, tolerances: { mu: 0.1 } },
   invalidParams: [
     [], // all params required
     [-1], [2] // 0 <= mu <= 1
@@ -550,6 +554,7 @@ export default [{
   ]
 }, {
   name: 'DiscreteUniform',
+  fit: { params: [2, 8], seed: 42, n: 200, exact: ['xmin', 'xmax'] },
   invalidParams: [
     [], // all params required
     [105, 100] // xmin <= xmax
@@ -641,6 +646,7 @@ export default [{
   ]
 }, {
   name: 'FlorySchulz',
+  fit: { params: [0.4], seed: 42, n: 200, tolerances: { a: 0.05 } },
   invalidParams: [
     [], // all params required
     [-1], [0], [1], [2] // 0 < a < 1
@@ -728,6 +734,7 @@ export default [{
   ]
 }, {
   name: 'Geometric',
+  fit: { params: [0.4], seed: 42, n: 200, tolerances: { p: 0.05 } },
   invalidParams: [
     [], // all params required
     [-1], [0], [2] // 0 < p <= 1
@@ -770,6 +777,7 @@ export default [{
   ]
 }, {
   name: 'HeadsMinusTails',
+  fit: { params: [5], seed: 4, n: 200, exact: ['n'] },
   invalidParams: [
     [], // all params required
     [-1], // n > 0
@@ -879,6 +887,7 @@ export default [{
   ]
 }, {
   name: 'LogSeries',
+  fit: { params: [0.7], seed: 42, n: 200, tolerances: { p: 0.05 } },
   invalidParams: [
     [], // all params required
     [-1], [0], [1], [2] // 0 < p < 1
@@ -1083,6 +1092,10 @@ export default [{
   ]
 }, {
   name: 'Poisson',
+  fit: { params: [3], seed: 42, n: 200, tolerances: { lambda: 0.15 } },
+  moments: [
+    { params: [5], mean: 5, variance: 5, skewness: 0.4472135954999579, kurtosis: 0.2, tol: 1e-6 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // lambda > 0
@@ -1233,6 +1246,7 @@ export default [{
   ]
 }, {
   name: 'Soliton',
+  fit: { params: [5], seed: 42, n: 200, exact: ['N'] },
   invalidParams: [
     [], // all params required
     [-1], [0] // N > 0
@@ -1274,6 +1288,7 @@ export default [{
   ]
 }, {
   name: 'YuleSimon',
+  fit: { params: [3], seed: 42, n: 200, tolerances: { rho: 0.5 } },
   invalidParams: [
     [], // all params required
     [-1], [0] // rho > 0
@@ -1317,6 +1332,7 @@ export default [{
   ]
 }, {
   name: 'Zeta',
+  fit: { params: [2.5], seed: 42, n: 500, tolerances: { s: 0.3 } },
   invalidParams: [
     [], // all params required
     [-1], [0], [1] // s > 1
