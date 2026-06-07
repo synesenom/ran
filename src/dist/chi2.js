@@ -23,6 +23,7 @@ export default class Chi2 extends Gamma {
     super(Math.round(k) / 2, 0.5)
 
     // Chi2 has 1 free parameter (k); override the 2 inherited from Gamma
+    // solutions/distribution/2026-06-07-2138-continuous-subclass-natural-params.md
     this.k = 1
 
     // Validate parameters
