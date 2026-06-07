@@ -11,6 +11,8 @@ export default function (arr) {
   // Sort array first.
   const sorted = [...arr].sort((a, b) => a - b)
 
+  if (sorted.length === 0) return 0
+
   // Init sum and correction.
   let s = sorted[0]
   let c = 0

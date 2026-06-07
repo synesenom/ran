@@ -417,6 +417,72 @@ describe('dist', () => {
       })
     })
 
+    describe('.mean(), .variance(), .skewness(), .kurtosis()', () => {
+      it('Normal(0,1) mean should be within 1e-6 of 0', () => {
+        assert(Math.abs(new dist.Normal(0, 1).mean()) < 1e-6)
+      })
+
+      it('Normal(0,1) variance should be within 1e-6 of 1', () => {
+        assert(Math.abs(new dist.Normal(0, 1).variance() - 1) < 1e-6)
+      })
+
+      it('Normal(0,1) skewness should be within 1e-6 of 0', () => {
+        assert(Math.abs(new dist.Normal(0, 1).skewness()) < 1e-6)
+      })
+
+      it('Normal(0,1) kurtosis should be within 1e-6 of 0', () => {
+        assert(Math.abs(new dist.Normal(0, 1).kurtosis()) < 1e-6)
+      })
+
+      it('Exponential(1) mean should be within 1e-6 of 1', () => {
+        assert(Math.abs(new dist.Exponential(1).mean() - 1) < 1e-6)
+      })
+
+      it('Exponential(1) variance should be within 1e-6 of 1', () => {
+        assert(Math.abs(new dist.Exponential(1).variance() - 1) < 1e-6)
+      })
+
+      it('Exponential(1) skewness should be within 1e-6 of 2', () => {
+        assert(Math.abs(new dist.Exponential(1).skewness() - 2) < 1e-6)
+      })
+
+      it('Exponential(1) kurtosis should be within 1e-6 of 6', () => {
+        assert(Math.abs(new dist.Exponential(1).kurtosis() - 6) < 1e-6)
+      })
+
+      it('Poisson(5) mean should be within 1e-6 of 5', () => {
+        assert(Math.abs(new dist.Poisson(5).mean() - 5) < 1e-6)
+      })
+
+      it('Poisson(5) variance should be within 1e-6 of 5', () => {
+        assert(Math.abs(new dist.Poisson(5).variance() - 5) < 1e-6)
+      })
+
+      it('Poisson(5) skewness should be within 1e-6 of 1/sqrt(5)', () => {
+        assert(Math.abs(new dist.Poisson(5).skewness() - 1 / Math.sqrt(5)) < 1e-6)
+      })
+
+      it('Poisson(5) kurtosis should be within 1e-6 of 0.2', () => {
+        assert(Math.abs(new dist.Poisson(5).kurtosis() - 0.2) < 1e-6)
+      })
+
+      it('Cauchy(0,1) mean should be NaN', () => {
+        assert(Number.isNaN(new dist.Cauchy(0, 1).mean()))
+      })
+
+      it('Cauchy(0,1) variance should be NaN', () => {
+        assert(Number.isNaN(new dist.Cauchy(0, 1).variance()))
+      })
+
+      it('Cauchy(0,1) skewness should be NaN', () => {
+        assert(Number.isNaN(new dist.Cauchy(0, 1).skewness()))
+      })
+
+      it('Cauchy(0,1) kurtosis should be NaN', () => {
+        assert(Number.isNaN(new dist.Cauchy(0, 1).kurtosis()))
+      })
+    })
+
     describe('.fit()', () => {
       it('Normal.fit should return a Normal instance', () => {
         const result = dist.Normal.fit([1, 2, 3, 4, 5])

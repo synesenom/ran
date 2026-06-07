@@ -1,5 +1,6 @@
 import Xoshiro128p from '../core/xoshiro'
 import neumaier from '../algorithms/neumaier'
+import tanhSinh from '../algorithms/tanh-sinh'
 import powell from '../algorithms/powell'
 import some from '../utils/some'
 import { chi2, kolmogorovSmirnov } from './_tests'
@@ -266,6 +267,50 @@ class Distribution {
     }
 
     return NaN
+  }
+
+  /**
+   * Computes a raw moment E[X^n] numerically. Continuous distributions use tanh-sinh
+   * quadrature; discrete distributions use compensated summation. Infinite support bounds
+   * are truncated at the 1e-12 / (1 - 1e-12) quantile. Distributions with undefined or
+   * divergent moments must override the public moment methods to return NaN / Infinity
+   * directly, because quantile truncation makes divergent integrals appear finite.
+   *
+   * @method _numericalRawMoment
+   * @memberof ran.dist.Distribution
+   * @param {number} n Moment order.
+   * @returns {number} E[X^n].
+   * @private
+   * @ignore
+   */
+  _numericalRawMoment (n) {
+    // 1e-12 tail cut: tighter than 1e-7 because x^4 tails contribute ~x^3·φ(x) which
+    // is still ~1e-4 at z≈5.2 (the 1e-7 quantile) — far too large for kurtosis precision.
+    const TAIL_P = 1e-12
+    if (this._type === 'discrete') {
+      const lo = Number.isFinite(this.s[0].value) ? this.s[0].value : Math.round(this.q(TAIL_P))
+      const hi = Number.isFinite(this.s[1].value) ? this.s[1].value : Math.round(this.q(1 - TAIL_P))
+      // Heavy-tailed discrete distributions (e.g. Zeta, YuleSimon) can have a 1-1e-12 quantile
+      // in the billions, making the loop effectively hang. Return NaN — the analytical override
+      // should handle these. 1e6 terms covers all practical well-behaved distributions.
+      if (!Number.isFinite(lo) || !Number.isFinite(hi) || hi - lo > 1e6) {
+        return NaN
+      }
+      const terms = []
+      for (let k = lo; k <= hi; k++) {
+        terms.push(Math.pow(k, n) * this.pdf(k))
+      }
+      return terms.length > 0 ? neumaier(terms) : NaN
+    } else {
+      const lo = Number.isFinite(this.s[0].value) ? this.s[0].value : this.q(TAIL_P)
+      const hi = Number.isFinite(this.s[1].value) ? this.s[1].value : this.q(1 - TAIL_P)
+      // Point-mass support (lo === hi): tanhSinh returns 0 (halfLen = 0), but E[X^n] = lo^n
+      // for a unit point mass. Handles Degenerate and any other single-point continuous type.
+      if (lo === hi) {
+        return Math.pow(lo, n)
+      }
+      return tanhSinh(x => Math.pow(x, n) * this.pdf(x), lo, hi)
+    }
   }
 
   /**
@@ -770,6 +815,88 @@ class Distribution {
       // Parameters are fixed in the constructor (known), not estimated from values — df correction is 0.
       ? chi2(values, x => this.pdf(x), 0)
       : kolmogorovSmirnov(values, x => this.cdf(x))
+  }
+
+  /**
+   * The theoretical [mean]{@link https://en.wikipedia.org/wiki/Expected_value} of the distribution:
+   *
+   * $$\mu = \mathrm{E}[X].$$
+   *
+   * Returns a finite number for well-behaved distributions, `NaN` when the moment is mathematically
+   * undefined, or `Infinity` / `-Infinity` when it diverges. Distributions with non-finite moments
+   * must override this method; the numerical fallback cannot detect divergence through truncated
+   * integration.
+   *
+   * @method mean
+   * @memberof ran.dist.Distribution
+   * @returns {number} The theoretical mean.
+   */
+  mean () {
+    return this._numericalRawMoment(1)
+  }
+
+  /**
+   * The theoretical [variance]{@link https://en.wikipedia.org/wiki/Variance} of the distribution:
+   *
+   * $$\sigma^2 = \mathrm{E}[X^2] - \mathrm{E}[X]^2.$$
+   *
+   * Returns a non-negative finite number for well-behaved distributions, `NaN` when the moment is
+   * mathematically undefined, or `Infinity` when it diverges. Distributions with non-finite moments
+   * must override this method.
+   *
+   * @method variance
+   * @memberof ran.dist.Distribution
+   * @returns {number} The theoretical variance.
+   */
+  variance () {
+    const m1 = this._numericalRawMoment(1)
+    const m2 = this._numericalRawMoment(2)
+    const v = m2 - m1 * m1
+    // Clamp floating-point negatives from catastrophic cancellation in E[X²] - E[X]²
+    return v < 0 ? 0 : v
+  }
+
+  /**
+   * The theoretical [skewness]{@link https://en.wikipedia.org/wiki/Skewness} of the distribution:
+   *
+   * $$\gamma_1 = \frac{\mathrm{E}[(X-\mu)^3]}{\sigma^3} = \frac{\mathrm{E}[X^3] - 3\mu\,\mathrm{E}[X^2] + 2\mu^3}{\sigma^3}.$$
+   *
+   * Returns `NaN` when undefined (zero variance, or moment does not exist). Distributions with
+   * non-finite moments must override this method.
+   *
+   * @method skewness
+   * @memberof ran.dist.Distribution
+   * @returns {number} The theoretical skewness.
+   */
+  skewness () {
+    const m1 = this._numericalRawMoment(1)
+    const m2 = this._numericalRawMoment(2)
+    const m3 = this._numericalRawMoment(3)
+    const v = m2 - m1 * m1
+    if (!(v > 0)) return NaN
+    return (m3 - 3 * m1 * m2 + 2 * Math.pow(m1, 3)) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * The theoretical [excess kurtosis]{@link https://en.wikipedia.org/wiki/Kurtosis#Excess_kurtosis} of the distribution:
+   *
+   * $$\gamma_2 = \frac{\mathrm{E}[(X-\mu)^4]}{\sigma^4} - 3 = \frac{\mathrm{E}[X^4] - 4\mu\,\mathrm{E}[X^3] + 6\mu^2\,\mathrm{E}[X^2] - 3\mu^4}{\sigma^4} - 3.$$
+   *
+   * Returns `NaN` when undefined (zero variance, or moment does not exist). Distributions with
+   * non-finite moments must override this method.
+   *
+   * @method kurtosis
+   * @memberof ran.dist.Distribution
+   * @returns {number} The theoretical excess kurtosis.
+   */
+  kurtosis () {
+    const m1 = this._numericalRawMoment(1)
+    const m2 = this._numericalRawMoment(2)
+    const m3 = this._numericalRawMoment(3)
+    const m4 = this._numericalRawMoment(4)
+    const v = m2 - m1 * m1
+    if (!(v > 0)) return NaN
+    return (m4 - 4 * m1 * m3 + 6 * m1 * m1 * m2 - 3 * Math.pow(m1, 4)) / (v * v) - 3
   }
 
   /**

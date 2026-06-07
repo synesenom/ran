@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `Distribution` base class now exposes `mean()`, `variance()`, `skewness()`, and `kurtosis()` methods. Each returns the theoretical value via a numerical fallback (tanh-sinh quadrature for continuous distributions, compensated summation for discrete) and can be overridden per-distribution with a closed-form formula. `Cauchy` overrides all four to return `NaN` (moments undefined) (#403).
+
 ## [1.28.0] - 2026-06-06
 
 ### Added
