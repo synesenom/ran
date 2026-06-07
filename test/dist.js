@@ -822,6 +822,20 @@ describe('dist', () => {
         assert(Math.abs(new dist.InverseChi2(10).skewness() - 2 * Math.sqrt(3)) < 1e-14)
       })
 
+      // Cross-validate: InverseChi2(nu) === InverseGamma(nu/2, 1/2) for all moments
+      it('InverseChi2(10) mean should match InverseGamma(5, 0.5) mean', () => {
+        assert(Math.abs(new dist.InverseChi2(10).mean() - new dist.InverseGamma(5, 0.5).mean()) < 1e-14)
+      })
+      it('InverseChi2(10) variance should match InverseGamma(5, 0.5) variance', () => {
+        assert(Math.abs(new dist.InverseChi2(10).variance() - new dist.InverseGamma(5, 0.5).variance()) < 1e-14)
+      })
+      it('InverseChi2(10) skewness should match InverseGamma(5, 0.5) skewness', () => {
+        assert(Math.abs(new dist.InverseChi2(10).skewness() - new dist.InverseGamma(5, 0.5).skewness()) < 1e-14)
+      })
+      it('InverseChi2(12) kurtosis should match InverseGamma(6, 0.5) kurtosis', () => {
+        assert(Math.abs(new dist.InverseChi2(12).kurtosis() - new dist.InverseGamma(6, 0.5).kurtosis()) < 1e-14)
+      })
+
       // Chi moments via logGamma ratios
       it('Chi(1) mean should be sqrt(2/pi)', () => {
         assert(Math.abs(new dist.Chi(1).mean() - Math.sqrt(2 / Math.PI)) < 1e-12)
