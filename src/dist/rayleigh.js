@@ -21,6 +21,28 @@ export default class Rayleigh extends Weibull {
 
     // Rayleigh has 1 free parameter (sigma); override the 2 inherited from Weibull
     this.k = 1
+
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p
+    this.p = { sigma }
+    Object.assign(this.c, { lambda2: sigma * Math.SQRT2 })
+  }
+
+  _generator () {
+    return this._q(this.r.next())
+  }
+
+  _pdf (x) {
+    const t = x / this.c.lambda2
+    return 2 * t * Math.exp(-t * t) / this.c.lambda2
+  }
+
+  _cdf (x) {
+    const t = x / this.c.lambda2
+    return 1 - Math.exp(-t * t)
+  }
+
+  _q (p) {
+    return this.c.lambda2 * Math.sqrt(-Math.log(1 - p))
   }
 
   static get _fitInitIsExact () {

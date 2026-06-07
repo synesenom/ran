@@ -779,8 +779,7 @@ export default [{
   ]
 }, {
   name: 'Chi2',
-  // Chi2(k) stores Gamma's alpha = k/2, so planted Chi2(4).p.alpha = 2
-  fit: { params: [4], seed: 42, n: 200, exact: ['alpha'] },
+  fit: { params: [4], seed: 42, n: 200, exact: ['k'] },
   moments: [
     { params: [4], mean: 4, variance: 8, kurtosis: 3, tol: 1e-14 }
   ],
@@ -960,7 +959,7 @@ export default [{
   ]
 }, {
   name: 'DoubleWeibull',
-  fit: { params: [2, 1.5], seed: 42, n: 200, tolerances: { lambda2: 0.5, k: 0.4 } },
+  fit: { params: [2, 1.5], seed: 42, n: 200, tolerances: { lambda: 0.5, k: 0.4 } },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // lambda > 0
@@ -1203,7 +1202,7 @@ export default [{
   ]
 }, {
   name: 'Erlang',
-  fit: { params: [3, 1], seed: 42, n: 200, tolerances: { beta: 0.25 }, exact: ['alpha'] },
+  fit: { params: [3, 1], seed: 42, n: 200, tolerances: { lambda: 0.25 }, exact: ['k'] },
   moments: [
     { params: [3, 2], mean: 1.5, tol: 1e-14 }
   ],
@@ -2767,7 +2766,7 @@ export default [{
   ]
 }, {
   name: 'LogCauchy',
-  fit: { params: [0, 1], seed: 42, n: 200, tolerances: { x0: 0.5, gamma: 0.5 } },
+  fit: { params: [0, 1], seed: 42, n: 200, tolerances: { mu: 0.5, sigma: 0.5 } },
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // sigma > 0
@@ -4485,8 +4484,7 @@ export default [{
   ]
 }, {
   name: 'StudentZ',
-  // StudentZ stores StudentT's nu = n − 1, so planted StudentZ(6).p.nu = 5
-  fit: { params: [6], seed: 42, n: 500, tolerances: { nu: 1.5 } },
+  fit: { params: [6], seed: 42, n: 500, tolerances: { n: 1.5 } },
   invalidParams: [
     [], // all params required
     [-1], [0], [1] // n > 1

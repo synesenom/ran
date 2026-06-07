@@ -23,6 +23,10 @@ export default class StudentZ extends StudentT {
     ])
 
     super(n - 1)
+
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p
+    // this.c.nu = n-1, this.c.sqrtNu = sqrt(n-1) set by StudentT constructor remain valid
+    this.p = { n }
   }
 
   static _fitInit (data) {
@@ -34,14 +38,15 @@ export default class StudentZ extends StudentT {
   }
 
   _generator () {
-    return super._generator() / Math.sqrt(this.p.nu)
+    // Z = T(ν)/√ν where ν = n-1; super._generator() uses this.c.nu via StudentT
+    return super._generator() / this.c.sqrtNu
   }
 
   _pdf (x) {
-    return super._pdf(x * Math.sqrt(this.p.nu)) * Math.sqrt(this.p.nu)
+    return super._pdf(x * this.c.sqrtNu) * this.c.sqrtNu
   }
 
   _cdf (x) {
-    return super._cdf(x * Math.sqrt(this.p.nu))
+    return super._cdf(x * this.c.sqrtNu)
   }
 }

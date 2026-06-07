@@ -1,3 +1,5 @@
+import { erf } from '../special'
+import normal from './_normal'
 import Normal from './normal'
 
 /**
@@ -16,6 +18,10 @@ export default class Slash extends Normal {
   /** */
   constructor () {
     super(0, 1)
+
+    // Slash has no free parameters; override the 2 inherited from Normal
+    this.k = 0
+
     this.s = [{
       value: -Infinity,
       closed: false
@@ -23,24 +29,28 @@ export default class Slash extends Normal {
       value: Infinity,
       closed: false
     }]
+
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p
+    this.p = {}
+    // this.c.sigmaRoot2Pi = sqrt(2π), this.c.sigmaRoot2 = sqrt(2) set by Normal constructor
     Object.assign(this.c, { halfOverRoot2Pi: 0.5 / Math.sqrt(2 * Math.PI) })
   }
 
   _generator () {
     // Direct sampling by the ratio of normal and uniform variates
-    return super._generator() / this.r.next()
+    return normal(this.r, 0, 1) / this.r.next()
   }
 
   _pdf (x) {
     return x === 0
       ? this.c.halfOverRoot2Pi
-      : (super._pdf(0) - super._pdf(x)) / (x * x)
+      : (1 - Math.exp(-0.5 * x * x)) / (x * x * this.c.sigmaRoot2Pi)
   }
 
   _cdf (x) {
     return x === 0
       ? 0.5
-      : super._cdf(x) - (super._pdf(0) - super._pdf(x)) / x
+      : 0.5 * (1 + erf(x / this.c.sigmaRoot2)) - (1 - Math.exp(-0.5 * x * x)) / (x * this.c.sigmaRoot2Pi)
   }
 
   _q (p) {

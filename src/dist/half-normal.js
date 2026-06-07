@@ -1,5 +1,6 @@
+import { erf, erfinv } from '../special'
+import normal from './_normal'
 import Normal from './normal'
-import { erfinv } from '../special'
 
 /**
  * Probability density function for the [half-normal distribution]{@link https://en.wikipedia.org/wiki/Half-normal_distribution}:
@@ -20,6 +21,9 @@ export default class HalfNormal extends Normal {
   constructor (sigma) {
     super(0, sigma)
 
+    // HalfNormal has 1 free parameter (sigma); override the 2 inherited from Normal
+    this.k = 1
+
     // Set support
     this.s = [{
       value: 0,
@@ -28,19 +32,23 @@ export default class HalfNormal extends Normal {
       value: Infinity,
       closed: false
     }]
+
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p
+    this.p = { sigma }
+    // this.c.sigmaRoot2Pi and this.c.sigmaRoot2 set by Normal constructor remain valid
   }
 
   _generator () {
     // Direct sampling by transforming normal variate
-    return Math.abs(super._generator())
+    return Math.abs(normal(this.r, 0, this.p.sigma))
   }
 
   _pdf (x) {
-    return 2 * super._pdf(x)
+    return 2 * Math.exp(-0.5 * Math.pow(x / this.p.sigma, 2)) / this.c.sigmaRoot2Pi
   }
 
   _cdf (x) {
-    return 2 * super._cdf(x) - 1
+    return erf(x / this.c.sigmaRoot2)
   }
 
   _q (p) {

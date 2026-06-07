@@ -1,4 +1,5 @@
-import { gammaLowerIncompleteInv } from '../special'
+import { gammaLowerIncomplete, gammaLowerIncompleteInv, logGamma } from '../special'
+import gamma from './_gamma'
 import Gamma from './gamma'
 import Distribution from './_distribution'
 
@@ -27,37 +28,41 @@ export default class MaxwellBoltzmann extends Gamma {
     Distribution.validate({ a }, [
       'a > 0'
     ])
+
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p
+    this.p = { a }
+    Object.assign(this.c, { alpha: 1.5, beta: 0.5 / (a * a) })
   }
 
   _q (p) {
-    // MaxwellBoltzmann: X = sqrt(Y) where Y ~ Gamma(3/2, 1/(2a²)); invert by sqrt
-    return Math.sqrt(gammaLowerIncompleteInv(this.p.alpha, p) / this.p.beta)
+    return Math.sqrt(gammaLowerIncompleteInv(this.c.alpha, p) / this.c.beta)
   }
 
   _generator () {
-    return Math.sqrt(super._generator())
+    return Math.sqrt(gamma(this.r, this.c.alpha, this.c.beta))
   }
 
   _pdf (x) {
-    return 2 * x * super._pdf(x * x)
+    const y = x * x
+    return 2 * x * Math.exp(this.c.alpha * Math.log(this.c.beta) - this.c.beta * y - logGamma(this.c.alpha)) * Math.pow(y, this.c.alpha - 1)
   }
 
   _cdf (x) {
-    return super._cdf(x * x)
+    return gammaLowerIncomplete(this.c.alpha, this.c.beta * x * x)
   }
 
   /**
    * @returns {number} Two times the scale times sqrt(2/pi).
    */
   mean () {
-    return 2 * Math.sqrt(1 / (this.p.beta * Math.PI))
+    return 2 * Math.sqrt(1 / (this.c.beta * Math.PI))
   }
 
   /**
    * @returns {number} Scale squared times (3*pi - 8) / pi.
    */
   variance () {
-    return (0.5 / this.p.beta) * (3 * Math.PI - 8) / Math.PI
+    return (0.5 / this.c.beta) * (3 * Math.PI - 8) / Math.PI
   }
 
   /**

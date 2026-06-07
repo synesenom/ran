@@ -36,16 +36,16 @@ export default class Chi extends Chi2 {
       closed: false
     }]
 
-    // Speed-up constants
-    this.c = {
+    // Speed-up constants — use Object.assign to preserve Chi2's this.c.alpha
+    Object.assign(this.c, {
       mu: Math.SQRT2 * Math.exp(logGamma((ki + 1) / 2) - logGamma(ki / 2))
-    }
+    })
   }
 
   _q (p) {
     // Chi = sqrt(Chi2) = sqrt(Gamma(k/2, 0.5)); invert by sqrt of Gamma quantile
     // solutions/distribution/2026-06-05-0000-gamma-transform-quantile-closed-form.md
-    return Math.sqrt(gammaLowerIncompleteInv(this.p.alpha, p) / this.p.beta)
+    return Math.sqrt(gammaLowerIncompleteInv(this.c.alpha, p) * 2)
   }
 
   _generator () {

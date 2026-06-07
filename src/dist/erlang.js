@@ -1,3 +1,5 @@
+import { gammaLowerIncomplete, gammaLowerIncompleteInv, logGamma } from '../special'
+import gamma from './_gamma'
 import powell from '../algorithms/powell'
 import Gamma from './gamma'
 import Distribution from './_distribution'
@@ -28,6 +30,54 @@ export default class Erlang extends Gamma {
       'k > 0',
       'lambda > 0'
     ])
+
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p
+    this.p = { k: ki, lambda }
+    Object.assign(this.c, { alpha: ki, beta: lambda })
+  }
+
+  _generator () {
+    return gamma(this.r, this.c.alpha, this.c.beta)
+  }
+
+  _pdf (x) {
+    return Math.exp(this.c.alpha * Math.log(this.c.beta) - this.c.beta * x - logGamma(this.c.alpha)) * Math.pow(x, this.c.alpha - 1)
+  }
+
+  _cdf (x) {
+    return gammaLowerIncomplete(this.c.alpha, this.c.beta * x)
+  }
+
+  _q (p) {
+    return gammaLowerIncompleteInv(this.c.alpha, p) / this.c.beta
+  }
+
+  /**
+   * @returns {number} Shape divided by rate.
+   */
+  mean () {
+    return this.c.alpha / this.c.beta
+  }
+
+  /**
+   * @returns {number} Shape divided by squared rate.
+   */
+  variance () {
+    return this.c.alpha / this.c.beta ** 2
+  }
+
+  /**
+   * @returns {number} Two divided by the square root of the shape.
+   */
+  skewness () {
+    return 2 / Math.sqrt(this.c.alpha)
+  }
+
+  /**
+   * @returns {number} Six divided by the shape.
+   */
+  kurtosis () {
+    return 6 / this.c.alpha
   }
 
   static _fitInit (data) {
