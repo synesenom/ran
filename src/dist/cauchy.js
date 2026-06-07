@@ -58,6 +58,13 @@ export default class Cauchy extends Distribution {
     return this.p.x0 + this.p.gamma * (Math.tan(Math.PI * (p - 0.5)))
   }
 
+  // Cauchy moments are all undefined — quantile truncation makes the numerical
+  // fallback return finite values (≈0 for mean by symmetry), so explicit NaN is required.
+  mean () { return NaN }
+  variance () { return NaN }
+  skewness () { return NaN }
+  kurtosis () { return NaN }
+
   static _fitInit (data) {
     // Cauchy moments don't exist; median = x0 and IQR = 2*gamma give robust location and scale estimates
     const sorted = data.slice().sort((a, b) => a - b)
