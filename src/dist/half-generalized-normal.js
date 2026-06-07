@@ -1,10 +1,10 @@
-import { gammaLowerIncompleteInv } from '../special'
+import { gammaLowerIncompleteInv, logGamma } from '../special'
 import GeneralizedNormal from './generalized-normal'
 
 /**
  * Probability density function for the [half generalized normal distribution]{@link https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.halfgennorm.html}:
  *
- * $f(x; \alpha, \beta) = \frac{\beta}{\Gamma\big(\frac{1}{\beta}\big)} e^{-|x|^\beta},$
+ * $f(x; \alpha, \beta) = \frac{\beta}{\alpha \, \Gamma\big(\frac{1}{\beta}\big)} e^{-\big(\frac{x}{\alpha}\big)^\beta},$
  *
  * with $\alpha, \beta > 0$. Support: $x > 0$.
  *
@@ -31,6 +31,49 @@ export default class HalfGeneralizedNormal extends GeneralizedNormal {
       value: Infinity,
       closed: false
     }]
+  }
+
+  /**
+   * @returns {number} Mean of the distribution.
+   */
+  mean () {
+    const lgInv = logGamma(1 / this.p.beta2)
+    return this.p.alpha2 * Math.exp(logGamma(2 / this.p.beta2) - lgInv)
+  }
+
+  /**
+   * @returns {number} Variance of the distribution.
+   */
+  variance () {
+    const lgInv = logGamma(1 / this.p.beta2)
+    const m1 = this.p.alpha2 * Math.exp(logGamma(2 / this.p.beta2) - lgInv)
+    const m2 = this.p.alpha2 ** 2 * Math.exp(logGamma(3 / this.p.beta2) - lgInv)
+    return m2 - m1 * m1
+  }
+
+  /**
+   * @returns {number} Skewness of the distribution.
+   */
+  skewness () {
+    const lgInv = logGamma(1 / this.p.beta2)
+    const m1 = this.p.alpha2 * Math.exp(logGamma(2 / this.p.beta2) - lgInv)
+    const m2 = this.p.alpha2 ** 2 * Math.exp(logGamma(3 / this.p.beta2) - lgInv)
+    const m3 = this.p.alpha2 ** 3 * Math.exp(logGamma(4 / this.p.beta2) - lgInv)
+    const v = m2 - m1 * m1
+    return (m3 - 3 * m1 * m2 + 2 * m1 ** 3) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} Excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const lgInv = logGamma(1 / this.p.beta2)
+    const m1 = this.p.alpha2 * Math.exp(logGamma(2 / this.p.beta2) - lgInv)
+    const m2 = this.p.alpha2 ** 2 * Math.exp(logGamma(3 / this.p.beta2) - lgInv)
+    const m3 = this.p.alpha2 ** 3 * Math.exp(logGamma(4 / this.p.beta2) - lgInv)
+    const m4 = this.p.alpha2 ** 4 * Math.exp(logGamma(5 / this.p.beta2) - lgInv)
+    const v = m2 - m1 * m1
+    return (m4 - 4 * m1 * m3 + 6 * m1 ** 2 * m2 - 3 * m1 ** 4) / (v * v) - 3
   }
 
   _q (p) {

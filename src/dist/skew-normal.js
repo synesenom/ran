@@ -73,6 +73,38 @@ export default class SkewNormal extends Normal {
     return this._qEstimateRoot(p)
   }
 
+  /**
+   * @returns {number} Mean of the distribution.
+   */
+  mean () {
+    return this.p.xi + this.p.omega * this.c.delta * Math.sqrt(2 / Math.PI)
+  }
+
+  /**
+   * @returns {number} Variance of the distribution.
+   */
+  variance () {
+    return this.p.omega ** 2 * (1 - 2 * this.c.delta ** 2 / Math.PI)
+  }
+
+  /**
+   * @returns {number} Skewness of the distribution.
+   */
+  skewness () {
+    const dz = this.c.delta * Math.sqrt(2 / Math.PI)
+    const v = 1 - dz * dz
+    return (4 - Math.PI) / 2 * dz ** 3 / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} Excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const dz = this.c.delta * Math.sqrt(2 / Math.PI)
+    const v = 1 - dz * dz
+    return 2 * (Math.PI - 3) * dz ** 4 / (v * v)
+  }
+
   static _fitInit (data) {
     const n = data.length
     const xi = data.reduce((s, x) => s + x, 0) / n

@@ -70,6 +70,34 @@ export default class Normal extends Distribution {
     return this.p.mu + this.p.sigma * z
   }
 
+  /**
+   * @returns {number} Location parameter.
+   */
+  mean () {
+    return this.p.mu
+  }
+
+  /**
+   * @returns {number} Squared scale parameter.
+   */
+  variance () {
+    return this.p.sigma ** 2
+  }
+
+  /**
+   * @returns {number} Zero (the normal distribution is symmetric and mesokurtic).
+   */
+  skewness () {
+    return 0
+  }
+
+  /**
+   * @returns {number} Zero (the normal distribution is mesokurtic).
+   */
+  kurtosis () {
+    return 0
+  }
+
   static get _fitInitIsExact () {
     // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
     return true

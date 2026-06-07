@@ -481,6 +481,145 @@ describe('dist', () => {
       it('Cauchy(0,1) kurtosis should be NaN', () => {
         assert(Number.isNaN(new dist.Cauchy(0, 1).kurtosis()))
       })
+
+      // Normal analytical moments
+      it('Normal(2,3) mean should be 2', () => {
+        assert(Math.abs(new dist.Normal(2, 3).mean() - 2) < 1e-14)
+      })
+
+      it('Normal(2,3) variance should be 9', () => {
+        assert(Math.abs(new dist.Normal(2, 3).variance() - 9) < 1e-14)
+      })
+
+      it('Normal(2,3) skewness should be 0', () => {
+        assert(Math.abs(new dist.Normal(2, 3).skewness()) < 1e-14)
+      })
+
+      it('Normal(2,3) kurtosis should be 0', () => {
+        assert(Math.abs(new dist.Normal(2, 3).kurtosis()) < 1e-14)
+      })
+
+      // HalfNormal analytical moments
+      it('HalfNormal(2) mean should be 2*sqrt(2/pi)', () => {
+        assert(Math.abs(new dist.HalfNormal(2).mean() - 2 * Math.sqrt(2 / Math.PI)) < 1e-14)
+      })
+
+      it('HalfNormal(2) variance should be 4*(1 - 2/pi)', () => {
+        assert(Math.abs(new dist.HalfNormal(2).variance() - 4 * (1 - 2 / Math.PI)) < 1e-14)
+      })
+
+      it('HalfNormal(2) skewness should match sqrt(2)*(4-pi)/(pi-2)^1.5', () => {
+        const expected = Math.SQRT2 * (4 - Math.PI) / Math.pow(Math.PI - 2, 1.5)
+        assert(Math.abs(new dist.HalfNormal(2).skewness() - expected) < 1e-14)
+      })
+
+      it('HalfNormal(2) kurtosis should match 8*(pi-3)/(pi-2)^2', () => {
+        const expected = 8 * (Math.PI - 3) / (Math.PI - 2) ** 2
+        assert(Math.abs(new dist.HalfNormal(2).kurtosis() - expected) < 1e-14)
+      })
+
+      // SkewNormal analytical moments
+      it('SkewNormal(0,1,0) mean should be 0 (reduces to standard normal)', () => {
+        assert(Math.abs(new dist.SkewNormal(0, 1, 0).mean()) < 1e-14)
+      })
+
+      it('SkewNormal(0,1,0) variance should be 1', () => {
+        assert(Math.abs(new dist.SkewNormal(0, 1, 0).variance() - 1) < 1e-14)
+      })
+
+      it('SkewNormal(0,1,0) skewness should be 0', () => {
+        assert(Math.abs(new dist.SkewNormal(0, 1, 0).skewness()) < 1e-14)
+      })
+
+      it('SkewNormal(0,1,0) kurtosis should be 0', () => {
+        assert(Math.abs(new dist.SkewNormal(0, 1, 0).kurtosis()) < 1e-14)
+      })
+
+      it('SkewNormal(1,2,3) mean should match xi + omega*delta*sqrt(2/pi)', () => {
+        // delta = 3/sqrt(10); scipy.stats.skewnorm(3, loc=1, scale=2).mean() = 2.5139366...
+        const delta = 3 / Math.sqrt(10)
+        const expected = 1 + 2 * delta * Math.sqrt(2 / Math.PI)
+        assert(Math.abs(new dist.SkewNormal(1, 2, 3).mean() - expected) < 1e-12)
+      })
+
+      it('SkewNormal(1,2,3) variance should match omega^2*(1 - 2*delta^2/pi)', () => {
+        // scipy.stats.skewnorm(3, loc=1, scale=2).var() = 1.7081...
+        const delta = 3 / Math.sqrt(10)
+        const expected = 4 * (1 - 2 * delta ** 2 / Math.PI)
+        assert(Math.abs(new dist.SkewNormal(1, 2, 3).variance() - expected) < 1e-12)
+      })
+
+      // TruncatedNormal analytical moments
+      it('TruncatedNormal(0,1,-1,1) mean should be 0 by symmetry', () => {
+        assert(Math.abs(new dist.TruncatedNormal(0, 1, -1, 1).mean()) < 1e-14)
+      })
+
+      it('TruncatedNormal(0,1,-1,1) skewness should be 0 by symmetry', () => {
+        assert(Math.abs(new dist.TruncatedNormal(0, 1, -1, 1).skewness()) < 1e-12)
+      })
+
+      it('TruncatedNormal(0,1,-1,1) variance should be 1 - 2*phi(1)/Z', () => {
+        // phi(1) = exp(-0.5)/sqrt(2*pi); Z = Phi(1) - Phi(-1)
+        const phi1 = Math.exp(-0.5) / Math.sqrt(2 * Math.PI)
+        const Z = 1 - 2 * 0.15865525393145707 // Phi(1) - Phi(-1)
+        const expected = 1 - 2 * phi1 / Z
+        assert(Math.abs(new dist.TruncatedNormal(0, 1, -1, 1).variance() - expected) < 1e-12)
+      })
+
+      // GeneralizedNormal analytical moments
+      it('GeneralizedNormal(3, sqrt(2), 2) mean should be 3 (matches Normal)', () => {
+        assert(Math.abs(new dist.GeneralizedNormal(3, Math.SQRT2, 2).mean() - 3) < 1e-14)
+      })
+
+      it('GeneralizedNormal(3, sqrt(2), 2) variance should be 1 (matches Normal(3,1))', () => {
+        // alpha=sqrt(2), beta=2: variance = alpha^2 * Gamma(3/2)/Gamma(1/2) = 2 * (sqrt(pi)/2)/sqrt(pi) = 1
+        assert(Math.abs(new dist.GeneralizedNormal(3, Math.SQRT2, 2).variance() - 1) < 1e-12)
+      })
+
+      it('GeneralizedNormal(3, sqrt(2), 2) skewness should be 0', () => {
+        assert(Math.abs(new dist.GeneralizedNormal(3, Math.SQRT2, 2).skewness()) < 1e-14)
+      })
+
+      it('GeneralizedNormal(0, 1, 1) kurtosis should be 3 (Laplace case)', () => {
+        // beta=1 is Laplace: Gamma(5)*Gamma(1)/Gamma(3)^2 - 3 = 24/4 - 3 = 3
+        assert(Math.abs(new dist.GeneralizedNormal(0, 1, 1).kurtosis() - 3) < 1e-10)
+      })
+
+      it('GeneralizedNormal(0, 1, 2) kurtosis should be 0 (Normal case)', () => {
+        // beta=2 is Normal: Gamma(5/2)*Gamma(1/2)/Gamma(3/2)^2 - 3 = 3 - 3 = 0
+        assert(Math.abs(new dist.GeneralizedNormal(0, 1, 2).kurtosis()) < 1e-12)
+      })
+
+      // HalfGeneralizedNormal analytical moments
+      it('HalfGeneralizedNormal(2,2) mean should be 2/sqrt(pi) (half-normal case)', () => {
+        // alpha=2, beta=2: E[X] = 2 * Gamma(1)/Gamma(0.5) = 2 * 1/sqrt(pi)
+        assert(Math.abs(new dist.HalfGeneralizedNormal(2, 2).mean() - 2 / Math.sqrt(Math.PI)) < 1e-12)
+      })
+
+      it('HalfGeneralizedNormal(1,1) mean should be Gamma(2)/Gamma(1) = 1 (exponential case)', () => {
+        // alpha=1, beta=1 is Exp(1): E[X] = Gamma(2)/Gamma(1) = 1! / 1 = 1
+        assert(Math.abs(new dist.HalfGeneralizedNormal(1, 1).mean() - 1) < 1e-12)
+      })
+
+      it('HalfGeneralizedNormal(1,1) variance should be 1 (exponential case)', () => {
+        // alpha=1, beta=1 is Exp(1): E[X^2] - (E[X])^2 = Gamma(3)/Gamma(1) - 1 = 2 - 1 = 1
+        assert(Math.abs(new dist.HalfGeneralizedNormal(1, 1).variance() - 1) < 1e-12)
+      })
+
+      it('HalfGeneralizedNormal(1,1) skewness should be 2 (exponential case)', () => {
+        // alpha=1, beta=1 is Exp(1): (m3 - 3*m1*m2 + 2*m1^3)/v^1.5 = (6 - 6 + 2)/1 = 2
+        assert(Math.abs(new dist.HalfGeneralizedNormal(1, 1).skewness() - 2) < 1e-10)
+      })
+
+      it('HalfGeneralizedNormal(1,1) kurtosis should be 6 (exponential case)', () => {
+        // alpha=1, beta=1 is Exp(1): (24 - 24 + 12 - 3)/1 - 3 = 9 - 3 = 6
+        assert(Math.abs(new dist.HalfGeneralizedNormal(1, 1).kurtosis() - 6) < 1e-10)
+      })
+
+      it('TruncatedNormal(0,1,-1,1) kurtosis should be negative (tails removed → sub-normal)', () => {
+        // Truncating to ±1σ removes tails, giving negative excess kurtosis
+        assert(new dist.TruncatedNormal(0, 1, -1, 1).kurtosis() < 0)
+      })
     })
 
     describe('.fit()', () => {

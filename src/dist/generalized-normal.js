@@ -1,4 +1,4 @@
-import { gammaLowerIncompleteInv } from '../special'
+import { gammaLowerIncompleteInv, logGamma } from '../special'
 import GeneralizedGamma from './generalized-gamma'
 import Distribution from './_distribution'
 
@@ -57,6 +57,34 @@ export default class GeneralizedNormal extends GeneralizedGamma {
 
   _cdf (x) {
     return 0.5 * (1 + Math.sign(x - this.p.mu) * super._cdf(Math.abs(x - this.p.mu)))
+  }
+
+  /**
+   * @returns {number} Location parameter.
+   */
+  mean () {
+    return this.p.mu
+  }
+
+  /**
+   * @returns {number} Variance of the distribution.
+   */
+  variance () {
+    return this.p.alpha2 ** 2 * Math.exp(logGamma(3 / this.p.beta2) - logGamma(1 / this.p.beta2))
+  }
+
+  /**
+   * @returns {number} Zero (the generalized normal distribution is symmetric about mu).
+   */
+  skewness () {
+    return 0
+  }
+
+  /**
+   * @returns {number} Excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    return Math.exp(logGamma(5 / this.p.beta2) + logGamma(1 / this.p.beta2) - 2 * logGamma(3 / this.p.beta2)) - 3
   }
 
   static _fitInit (data) {
