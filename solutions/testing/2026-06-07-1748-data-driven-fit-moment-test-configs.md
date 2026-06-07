@@ -49,6 +49,13 @@ Added `UnitTests.moments(tc)` and `UnitTests.fit(tc)` to the existing loop, plus
 
 Non-parametrizable cases were classified and intentionally retained as explicit `it()` blocks.
 
+Cross-distribution moment cross-validation (e.g. `InverseChi2(ν)` vs `InverseGamma(ν/2, ½)`,
+`Chi(3)` vs `MaxwellBoltzmann(1)`) was initially retained as hand-written, but on review was
+**replaced by independent ref-value moment entries** for each distribution. A cross-check is an
+internal-consistency test (A == B); a ref-value check is external ground truth (A == closed
+form), which is strictly stronger — it also catches a bug shared by both implementations, which
+a cross-check is blind to. The moment suite is therefore 100% config-driven.
+
 ## Prevention Strategy
 
 - Add a data-driven runner the moment the *first* distribution needs it, not after N hand-written
@@ -59,7 +66,9 @@ Non-parametrizable cases were classified and intentionally retained as explicit 
   pdf-shape recovery, array/mixture params, profile-search, multi-case loops, and
   cross-distribution comparisons are non-parametrizable and stay as `it()` blocks. A **moments**
   test is parametrizable iff the expected value is a single finite number / `NaN` / `±Infinity`
-  compared by absolute tolerance; anything comparing two live distributions is not.
+  compared by absolute tolerance. A cross-distribution identity (A's moment == B's moment) is
+  *not* a reason to keep a hand-written test: prefer an independent ref-value check on each side
+  (external ground truth beats internal consistency and catches bugs shared by both).
 - When collapsing per-assertion tolerances into a schema field, make the field support
   per-assertion granularity, or the loosest value silently weakens the tightest check.
 

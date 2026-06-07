@@ -738,7 +738,8 @@ export default [{
   moments: [
     { params: [1], mean: Math.sqrt(2 / Math.PI), tol: 1e-12 },
     { params: [2], mean: Math.sqrt(Math.PI / 2), tol: 1e-12 },
-    { params: [3], variance: 3 - 8 / Math.PI, tol: 1e-12 }
+    // Chi(3) ≡ Maxwell-Boltzmann(1); shape moments via the Maxwell-Boltzmann closed forms
+    { params: [3], variance: 3 - 8 / Math.PI, skewness: 2 * Math.SQRT2 * (16 - 5 * Math.PI) / (3 * Math.PI - 8) ** 1.5, kurtosis: 4 * (-96 + 40 * Math.PI - 3 * Math.PI ** 2) / (3 * Math.PI - 8) ** 2, tol: 1e-12 }
   ],
   invalidParams: [
     [], // all params required
@@ -2233,7 +2234,9 @@ export default [{
     { params: [4], mean: 0.5, variance: Infinity, tol: 1e-14 },
     { params: [6], skewness: Infinity },
     { params: [8], kurtosis: Infinity },
-    { params: [10], skewness: 2 * Math.sqrt(3), tol: 1e-14 }
+    // InverseChi2(ν) ≡ InverseGamma(ν/2, 1/2); closed-form moments of InverseGamma(5, 0.5) / (6, 0.5)
+    { params: [10], mean: 0.125, variance: 1 / 192, skewness: 2 * Math.sqrt(3), kurtosis: 42, tol: 1e-14 },
+    { params: [12], kurtosis: 19 }
   ],
   invalidParams: [
     [], // all params required
@@ -3272,7 +3275,7 @@ export default [{
 }, {
   name: 'MaxwellBoltzmann',
   moments: [
-    { params: [1], mean: 2 * Math.sqrt(2 / Math.PI), variance: (3 * Math.PI - 8) / Math.PI, tol: 1e-12 },
+    { params: [1], mean: 2 * Math.sqrt(2 / Math.PI), variance: (3 * Math.PI - 8) / Math.PI, skewness: 2 * Math.SQRT2 * (16 - 5 * Math.PI) / (3 * Math.PI - 8) ** 1.5, kurtosis: 4 * (-96 + 40 * Math.PI - 3 * Math.PI ** 2) / (3 * Math.PI - 8) ** 2, tol: 1e-12 },
     { params: [2], mean: 4 * Math.sqrt(2 / Math.PI), tol: 1e-12 }
   ],
   invalidParams: [
@@ -4609,7 +4612,7 @@ export default [{
 }, {
   name: 'TruncatedNormal',
   moments: [
-    { params: [0, 1, -1, 1], mean: 0, variance: 0.2911250947727932, skewness: 0, tol: { mean: 1e-14, variance: 1e-12, skewness: 1e-12 } }
+    { params: [0, 1, -1, 1], mean: 0, variance: 0.2911250947727932, skewness: 0, kurtosis: -1.0590800800968836, tol: { mean: 1e-14, variance: 1e-12, skewness: 1e-12, kurtosis: 1e-12 } }
   ],
   invalidParams: [
     [], // all params required

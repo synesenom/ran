@@ -488,39 +488,6 @@ describe('dist', () => {
       })
     })
 
-    describe('.mean(), .variance(), .skewness(), .kurtosis()', () => {
-      // Per-distribution analytical, divergent, and undefined moment values are data-driven
-      // via the `moments` field in dist-cases-*.js (see UnitTests.moments). Only assertions
-      // that cannot be expressed as a single value match remain here: a sign-only check and
-      // cross-distribution identities.
-      it('TruncatedNormal(0,1,-1,1) kurtosis should be negative (tails removed \u2192 sub-normal)', () => {
-        // Truncating to \u00b11\u03c3 removes tails, giving negative excess kurtosis
-        assert(new dist.TruncatedNormal(0, 1, -1, 1).kurtosis() < 0)
-      })
-
-      // Cross-validate: InverseChi2(nu) === InverseGamma(nu/2, 1/2) for all moments
-      it('InverseChi2(10) mean should match InverseGamma(5, 0.5) mean', () => {
-        assert(Math.abs(new dist.InverseChi2(10).mean() - new dist.InverseGamma(5, 0.5).mean()) < 1e-14)
-      })
-      it('InverseChi2(10) variance should match InverseGamma(5, 0.5) variance', () => {
-        assert(Math.abs(new dist.InverseChi2(10).variance() - new dist.InverseGamma(5, 0.5).variance()) < 1e-14)
-      })
-      it('InverseChi2(10) skewness should match InverseGamma(5, 0.5) skewness', () => {
-        assert(Math.abs(new dist.InverseChi2(10).skewness() - new dist.InverseGamma(5, 0.5).skewness()) < 1e-14)
-      })
-      it('InverseChi2(12) kurtosis should match InverseGamma(6, 0.5) kurtosis', () => {
-        assert(Math.abs(new dist.InverseChi2(12).kurtosis() - new dist.InverseGamma(6, 0.5).kurtosis()) < 1e-14)
-      })
-
-      // Chi(3) is the Maxwell-Boltzmann distribution \u2014 cross-validate shape moments
-      it('Chi(3) skewness should match MaxwellBoltzmann(1) skewness (Chi(3) = Maxwell-Boltzmann)', () => {
-        assert(Math.abs(new dist.Chi(3).skewness() - new dist.MaxwellBoltzmann(1).skewness()) < 1e-12)
-      })
-      it('Chi(3) kurtosis should match MaxwellBoltzmann(1) kurtosis', () => {
-        assert(Math.abs(new dist.Chi(3).kurtosis() - new dist.MaxwellBoltzmann(1).kurtosis()) < 1e-12)
-      })
-    })
-
     describe('.fit()', () => {
       it('Normal.fit should return a Normal instance', () => {
         const result = dist.Normal.fit([1, 2, 3, 4, 5])
