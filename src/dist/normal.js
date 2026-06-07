@@ -23,6 +23,7 @@ export default class Normal extends Distribution {
     super('continuous', 2)
 
     // Validate parameters
+    /** @type {*} */
     this.p = { mu, sigma }
     Distribution.validate({ mu, sigma }, [
       'sigma > 0'

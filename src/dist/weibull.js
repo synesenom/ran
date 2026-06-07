@@ -26,6 +26,7 @@ export default class Weibull extends Exponential {
     this.k = 2
 
     // Validate parameters
+    /** @type {*} */
     this.p = Object.assign(this.p, { lambda2: lambda, k })
     Distribution.validate({ lambda, k }, [
       'lambda > 0',

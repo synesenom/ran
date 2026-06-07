@@ -781,7 +781,7 @@ export default [{
   name: 'Chi2',
   fit: { params: [4], seed: 42, n: 200, exact: ['k'] },
   moments: [
-    { params: [4], mean: 4, variance: 8, kurtosis: 3, tol: 1e-14 }
+    { params: [4], mean: 4, variance: 8, skewness: Math.sqrt(2), kurtosis: 3, tol: 1e-14 }
   ],
   invalidParams: [
     [], // all params required
@@ -1204,7 +1204,7 @@ export default [{
   name: 'Erlang',
   fit: { params: [3, 1], seed: 42, n: 200, tolerances: { lambda: 0.25 }, exact: ['k'] },
   moments: [
-    { params: [3, 2], mean: 1.5, tol: 1e-14 }
+    { params: [3, 2], mean: 1.5, variance: 0.75, skewness: 2 / Math.sqrt(3), kurtosis: 2, tol: 1e-14 }
   ],
   invalidParams: [
     [], // all params required

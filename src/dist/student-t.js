@@ -23,6 +23,7 @@ export default class StudentT extends Distribution {
     super('continuous', 1)
 
     // Validate parameters
+    /** @type {*} */
     this.p = { nu }
     Distribution.validate({ nu }, [
       'nu > 0'
