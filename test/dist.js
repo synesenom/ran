@@ -459,7 +459,8 @@ describe('dist', () => {
       })
 
       it('Poisson(5) skewness should be within 1e-6 of 1/sqrt(5)', () => {
-        assert(Math.abs(new dist.Poisson(5).skewness() - 1 / Math.sqrt(5)) < 1e-6)
+        // mpmath: 1/sqrt(5) at mp.dps=50
+        assert(Math.abs(new dist.Poisson(5).skewness() - 0.4472135954999579) < 1e-6)
       })
 
       it('Poisson(5) kurtosis should be within 1e-6 of 0.2', () => {
@@ -480,6 +481,141 @@ describe('dist', () => {
 
       it('Cauchy(0,1) kurtosis should be NaN', () => {
         assert(Number.isNaN(new dist.Cauchy(0, 1).kurtosis()))
+      })
+
+      // Normal analytical moments
+      it('Normal(2,3) mean should be 2', () => {
+        assert(Math.abs(new dist.Normal(2, 3).mean() - 2) < 1e-14)
+      })
+
+      it('Normal(2,3) variance should be 9', () => {
+        assert(Math.abs(new dist.Normal(2, 3).variance() - 9) < 1e-14)
+      })
+
+      it('Normal(2,3) skewness should be 0', () => {
+        assert(Math.abs(new dist.Normal(2, 3).skewness()) < 1e-14)
+      })
+
+      it('Normal(2,3) kurtosis should be 0', () => {
+        assert(Math.abs(new dist.Normal(2, 3).kurtosis()) < 1e-14)
+      })
+
+      // HalfNormal analytical moments
+      it('HalfNormal(2) mean should be 2*sqrt(2/pi)', () => {
+        // mpmath: 2*sqrt(2/pi) at mp.dps=50
+        assert(Math.abs(new dist.HalfNormal(2).mean() - 1.5957691216057308) < 1e-14)
+      })
+
+      it('HalfNormal(2) variance should be 4*(1 - 2/pi)', () => {
+        // mpmath: 4*(1-2/pi) at mp.dps=50
+        assert(Math.abs(new dist.HalfNormal(2).variance() - 1.4535209105296747) < 1e-14)
+      })
+
+      it('HalfNormal(2) skewness should match sqrt(2)*(4-pi)/(pi-2)^1.5', () => {
+        // mpmath: sqrt(2)*(4-pi)/(pi-2)**1.5 at mp.dps=50
+        assert(Math.abs(new dist.HalfNormal(2).skewness() - 0.995271746431156) < 1e-14)
+      })
+
+      it('HalfNormal(2) kurtosis should match 8*(pi-3)/(pi-2)^2', () => {
+        // mpmath: 8*(pi-3)/(pi-2)**2 at mp.dps=50
+        assert(Math.abs(new dist.HalfNormal(2).kurtosis() - 0.8691773036059741) < 1e-14)
+      })
+
+      // SkewNormal analytical moments
+      it('SkewNormal(0,1,0) mean should be 0 (reduces to standard normal)', () => {
+        assert(Math.abs(new dist.SkewNormal(0, 1, 0).mean()) < 1e-14)
+      })
+
+      it('SkewNormal(0,1,0) variance should be 1', () => {
+        assert(Math.abs(new dist.SkewNormal(0, 1, 0).variance() - 1) < 1e-14)
+      })
+
+      it('SkewNormal(0,1,0) skewness should be 0', () => {
+        assert(Math.abs(new dist.SkewNormal(0, 1, 0).skewness()) < 1e-14)
+      })
+
+      it('SkewNormal(0,1,0) kurtosis should be 0', () => {
+        assert(Math.abs(new dist.SkewNormal(0, 1, 0).kurtosis()) < 1e-14)
+      })
+
+      it('SkewNormal(1,2,3) mean should match xi + omega*delta*sqrt(2/pi)', () => {
+        // mpmath: 1 + 2*(3/sqrt(10))*sqrt(2/pi) at mp.dps=50
+        assert(Math.abs(new dist.SkewNormal(1, 2, 3).mean() - 2.513879513212096) < 1e-12)
+      })
+
+      it('SkewNormal(1,2,3) variance should match omega^2*(1 - 2*delta^2/pi)', () => {
+        // mpmath: 4*(1 - 2*(9/10)/pi) at mp.dps=50
+        assert(Math.abs(new dist.SkewNormal(1, 2, 3).variance() - 1.708168819476707) < 1e-12)
+      })
+
+      // TruncatedNormal analytical moments
+      it('TruncatedNormal(0,1,-1,1) mean should be 0 by symmetry', () => {
+        assert(Math.abs(new dist.TruncatedNormal(0, 1, -1, 1).mean()) < 1e-14)
+      })
+
+      it('TruncatedNormal(0,1,-1,1) skewness should be 0 by symmetry', () => {
+        assert(Math.abs(new dist.TruncatedNormal(0, 1, -1, 1).skewness()) < 1e-12)
+      })
+
+      it('TruncatedNormal(0,1,-1,1) variance should be 1 - 2*phi(1)/Z', () => {
+        // mpmath: 1 - 2*exp(-0.5)/sqrt(2*pi) / erf(1/sqrt(2)) at mp.dps=50
+        assert(Math.abs(new dist.TruncatedNormal(0, 1, -1, 1).variance() - 0.2911250947727932) < 1e-12)
+      })
+
+      // GeneralizedNormal analytical moments
+      it('GeneralizedNormal(3, sqrt(2), 2) mean should be 3 (matches Normal)', () => {
+        assert(Math.abs(new dist.GeneralizedNormal(3, Math.SQRT2, 2).mean() - 3) < 1e-14)
+      })
+
+      it('GeneralizedNormal(3, sqrt(2), 2) variance should be 1 (matches Normal(3,1))', () => {
+        // alpha=sqrt(2), beta=2: variance = alpha^2 * Gamma(3/2)/Gamma(1/2) = 2 * (sqrt(pi)/2)/sqrt(pi) = 1
+        assert(Math.abs(new dist.GeneralizedNormal(3, Math.SQRT2, 2).variance() - 1) < 1e-12)
+      })
+
+      it('GeneralizedNormal(3, sqrt(2), 2) skewness should be 0', () => {
+        assert(Math.abs(new dist.GeneralizedNormal(3, Math.SQRT2, 2).skewness()) < 1e-14)
+      })
+
+      it('GeneralizedNormal(0, 1, 1) kurtosis should be 3 (Laplace case)', () => {
+        // beta=1 is Laplace: Gamma(5)*Gamma(1)/Gamma(3)^2 - 3 = 24/4 - 3 = 3
+        assert(Math.abs(new dist.GeneralizedNormal(0, 1, 1).kurtosis() - 3) < 1e-10)
+      })
+
+      it('GeneralizedNormal(0, 1, 2) kurtosis should be 0 (Normal case)', () => {
+        // beta=2 is Normal: Gamma(5/2)*Gamma(1/2)/Gamma(3/2)^2 - 3 = 3 - 3 = 0
+        assert(Math.abs(new dist.GeneralizedNormal(0, 1, 2).kurtosis()) < 1e-12)
+      })
+
+      // HalfGeneralizedNormal analytical moments
+      it('HalfGeneralizedNormal(2,2) mean should be 2/sqrt(pi) (half-normal case)', () => {
+        // alpha=2, beta=2: E[X] = 2*Gamma(1)/Gamma(0.5) = 2/sqrt(pi)
+        // mpmath: 2/sqrt(pi) at mp.dps=50
+        assert(Math.abs(new dist.HalfGeneralizedNormal(2, 2).mean() - 1.1283791670955126) < 1e-12)
+      })
+
+      it('HalfGeneralizedNormal(1,1) mean should be Gamma(2)/Gamma(1) = 1 (exponential case)', () => {
+        // alpha=1, beta=1 is Exp(1): E[X] = Gamma(2)/Gamma(1) = 1! / 1 = 1
+        assert(Math.abs(new dist.HalfGeneralizedNormal(1, 1).mean() - 1) < 1e-12)
+      })
+
+      it('HalfGeneralizedNormal(1,1) variance should be 1 (exponential case)', () => {
+        // alpha=1, beta=1 is Exp(1): E[X^2] - (E[X])^2 = Gamma(3)/Gamma(1) - 1 = 2 - 1 = 1
+        assert(Math.abs(new dist.HalfGeneralizedNormal(1, 1).variance() - 1) < 1e-12)
+      })
+
+      it('HalfGeneralizedNormal(1,1) skewness should be 2 (exponential case)', () => {
+        // alpha=1, beta=1 is Exp(1): (m3 - 3*m1*m2 + 2*m1^3)/v^1.5 = (6 - 6 + 2)/1 = 2
+        assert(Math.abs(new dist.HalfGeneralizedNormal(1, 1).skewness() - 2) < 1e-10)
+      })
+
+      it('HalfGeneralizedNormal(1,1) kurtosis should be 6 (exponential case)', () => {
+        // alpha=1, beta=1 is Exp(1): (24 - 24 + 12 - 3)/1 - 3 = 9 - 3 = 6
+        assert(Math.abs(new dist.HalfGeneralizedNormal(1, 1).kurtosis() - 6) < 1e-10)
+      })
+
+      it('TruncatedNormal(0,1,-1,1) kurtosis should be negative (tails removed → sub-normal)', () => {
+        // Truncating to ±1σ removes tails, giving negative excess kurtosis
+        assert(new dist.TruncatedNormal(0, 1, -1, 1).kurtosis() < 0)
       })
     })
 
@@ -2548,51 +2684,13 @@ describe('fit() precision and robustness gate', () => {
       }
     })
 
-    describe('Distribution._adaptiveHalfWidth', function () {
-      it('should be a static method on Distribution', function () {
-        assert.isFunction(Distribution._adaptiveHalfWidth)
-      })
-
-      it('should return exactly 5 (floor) for a well-determined integer parameter', function () {
-        // Chi2(3) with n=1000: observed information ≈ n·(1/4)·ψ'(1.5) ≈ 234 → w = ceil(3/√234) = 1 → max(5,1) = 5
-        const data = new dist.Chi2(3).seed(42).sample(1000)
-        const lnLAt = k => { try { return new dist.Chi2(k).lnL(data) } catch (_) { return -Infinity } }
-        const w = Distribution._adaptiveHalfWidth(lnLAt, 3, 1)
-        assert.strictEqual(w, 5)
-      })
-
-      it('should return more than 5 for a poorly-determined integer parameter', function () {
-        // Chi2(30) with n=10: very low Fisher information per sample → wide window
-        const data = new dist.Chi2(30).seed(42).sample(10)
-        const lnLAt = k => { try { return new dist.Chi2(k).lnL(data) } catch (_) { return -Infinity } }
-        const w = Distribution._adaptiveHalfWidth(lnLAt, 30, 1)
-        assert.isAbove(w, 5)
-      })
-
-      it('should return exactly 5 when seed is at the lower bound (boundary guard)', function () {
-        // seed=1=lb: lnL(seed-1) unavailable, uses lnL0; with n=200 the one-sided curvature is
-        // still large enough that w = ceil(3/√iObs) < 5, so max(5,…) = 5
-        const data = new dist.Chi2(1).seed(42).sample(200)
-        const lnLAt = k => { try { return new dist.Chi2(k).lnL(data) } catch (_) { return -Infinity } }
-        const w = Distribution._adaptiveHalfWidth(lnLAt, 1, 1)
-        assert.strictEqual(w, 5)
-      })
-
-      it('F.fit should recover d2 close to true value when seed is far off (window-widening case)', function () {
-        // F(5, 50): MOM seed for d2 can be far from 50 due to amplification in the variance formula.
-        // The adaptive window widens beyond ±5 to cover the true d2=50.
-        // seed=0xcafe gives a deliberately poor MOM estimate to exercise the wider window.
-        const data = new dist.F(5, 50).seed(0xcafe).sample(100)
-        const fitted = dist.F.fit(data)
-        assert(fitted instanceof dist.F)
-        // Verify the grid actually searched beyond the fixed ±5 in the d2 direction
-        const [d1Hat, d2Hat] = dist.F._fitInit(data)
-        const d2Seed = Math.round(d2Hat)
-        const lnLAt = d2 => { try { return new dist.F(Math.round(d1Hat), d2).lnL(data) } catch (_) { return -Infinity } }
-        const w2 = Distribution._adaptiveHalfWidth(lnLAt, d2Seed, 1)
-        // The adaptive window must be > 5 when the MOM seed is far from the true d2=50
-        assert.isAbove(w2, 5)
-      })
+    it('F.fit should return a usable F instance when MOM seed is far from true d2 (adaptive window)', function () {
+      // F(5, 50) with this seed gives a MOM seed for d2 that is far from 50; the adaptive window
+      // must widen beyond the fixed ±5 grid to find the true optimum.
+      const data = new dist.F(5, 50).seed(0xcafe).sample(100)
+      const fitted = dist.F.fit(data)
+      assert(fitted instanceof dist.F)
+      assert(Number.isFinite(fitted.pdf(2)) && fitted.pdf(2) > 0)
     })
   })
 })

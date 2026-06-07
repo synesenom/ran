@@ -44,10 +44,56 @@ export default class TruncatedNormal extends Normal {
     }]
 
     // Speed-up constants — merge with parent Normal constants.
+    const stdA = (a - mu) / sigma
+    const stdB = (b - mu) / sigma
     Object.assign(this.c, {
       phiA: super._cdf(a),
-      Z: super._cdf(b) - super._cdf(a)
+      Z: super._cdf(b) - super._cdf(a),
+      stdA,
+      stdB,
+      fStdA: Math.exp(-0.5 * stdA * stdA) / Math.sqrt(2 * Math.PI),
+      fStdB: Math.exp(-0.5 * stdB * stdB) / Math.sqrt(2 * Math.PI)
     })
+  }
+
+  /**
+   * @returns {number} Mean of the distribution.
+   */
+  mean () {
+    return this.p.mu + this.p.sigma * (this.c.fStdA - this.c.fStdB) / this.c.Z
+  }
+
+  /**
+   * @returns {number} Variance of the distribution.
+   */
+  variance () {
+    const mu1 = (this.c.fStdA - this.c.fStdB) / this.c.Z
+    return this.p.sigma ** 2 * (1 + (this.c.stdA * this.c.fStdA - this.c.stdB * this.c.fStdB) / this.c.Z - mu1 * mu1)
+  }
+
+  /**
+   * @returns {number} Skewness of the distribution.
+   */
+  skewness () {
+    const { fStdA, fStdB, stdA, stdB, Z } = this.c
+    const mu1 = (fStdA - fStdB) / Z
+    const mu2 = 1 + (stdA * fStdA - stdB * fStdB) / Z
+    const mu3 = 2 * mu1 + (stdA * stdA * fStdA - stdB * stdB * fStdB) / Z
+    const v = mu2 - mu1 * mu1
+    return (mu3 - 3 * mu1 * mu2 + 2 * mu1 ** 3) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} Excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { fStdA, fStdB, stdA, stdB, Z } = this.c
+    const mu1 = (fStdA - fStdB) / Z
+    const mu2 = 1 + (stdA * fStdA - stdB * fStdB) / Z
+    const mu3 = 2 * mu1 + (stdA * stdA * fStdA - stdB * stdB * fStdB) / Z
+    const mu4 = 3 * mu2 + (stdA ** 3 * fStdA - stdB ** 3 * fStdB) / Z
+    const v = mu2 - mu1 * mu1
+    return (mu4 - 4 * mu1 * mu3 + 6 * mu1 * mu1 * mu2 - 3 * mu1 ** 4) / (v * v) - 3
   }
 
   static _fitInit (data) {

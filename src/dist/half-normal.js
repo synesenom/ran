@@ -47,6 +47,34 @@ export default class HalfNormal extends Normal {
     return this.p.sigma * 1.414213562373095 * erfinv(p)
   }
 
+  /**
+   * @returns {number} Mean of the distribution.
+   */
+  mean () {
+    return this.p.sigma * Math.sqrt(2 / Math.PI)
+  }
+
+  /**
+   * @returns {number} Variance of the distribution.
+   */
+  variance () {
+    return this.p.sigma ** 2 * (1 - 2 / Math.PI)
+  }
+
+  /**
+   * @returns {number} Skewness of the distribution.
+   */
+  skewness () {
+    return Math.SQRT2 * (4 - Math.PI) / Math.pow(Math.PI - 2, 1.5)
+  }
+
+  /**
+   * @returns {number} Excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    return 8 * (Math.PI - 3) / (Math.PI - 2) ** 2
+  }
+
   static get _fitInitIsExact () {
     // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
     return true
