@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `Distribution` base class now exposes `mean()`, `variance()`, `skewness()`, and `kurtosis()` methods. Each returns the theoretical value via a numerical fallback (tanh-sinh quadrature for continuous distributions, compensated summation for discrete) and can be overridden per-distribution with a closed-form formula. `Cauchy` overrides all four to return `NaN` (moments undefined) (#403).
+- Analytical `mean()`, `variance()`, `skewness()`, and `kurtosis()` (excess) for the log-transformed distributions `LogNormal`, `Gilbrat`, `LogGamma`, and `LogLaplace`, overriding the numerical fallback from #403 and verified against mpmath (`mp.dps = 50`). `LogNormal`/`Gilbrat` use the standard log-normal formulas. `LogGamma` (Wolfram exp-gamma parameterization, `X = e^Y + μ − 1` with `Y ~ Gamma(α, β)`) and `LogLaplace` (`X = e^Y` with `Y ~ Laplace(μ, b)`) derive their raw moments from the underlying gamma/Laplace MGF and return `Infinity` for the parameter regimes where a moment diverges (`β ≤ k` and `kb ≥ 1` respectively for the `k`-th moment) (#572).
 
 ## [1.28.0] - 2026-06-06
 

@@ -617,6 +617,131 @@ describe('dist', () => {
         // Truncating to ±1σ removes tails, giving negative excess kurtosis
         assert(new dist.TruncatedNormal(0, 1, -1, 1).kurtosis() < 0)
       })
+
+      // LogNormal analytical moments (mpmath dps=50 reference values)
+      it('LogNormal(0,0.5) moments should match closed form', () => {
+        const d = new dist.LogNormal(0, 0.5)
+        assert(Math.abs(d.mean() - 1.1331484530668263) < 1e-14)
+        assert(Math.abs(d.variance() - 0.3646958540123867) < 1e-14)
+        assert(Math.abs(d.skewness() - 1.7501896550697182) < 1e-13)
+        assert(Math.abs(d.kurtosis() - 5.898445673784779) < 1e-12)
+      })
+
+      it('LogNormal(1,0.25) moments should match closed form', () => {
+        const d = new dist.LogNormal(1, 0.25)
+        assert(Math.abs(d.mean() - 2.8045693562372267) < 1e-13)
+        assert(Math.abs(d.variance() - 0.5072882141823729) < 1e-13)
+        assert(Math.abs(d.skewness() - 0.778251635797484) < 1e-13)
+        assert(Math.abs(d.kurtosis() - 1.095931274730182) < 1e-12)
+      })
+
+      it('LogNormal(0,1e-8) variance should stay ≈ σ² (expm1 avoids cancellation)', () => {
+        // Math.exp(1e-16) rounds to exactly 1, so a naive e^{σ²}−1 would return 0
+        const v = new dist.LogNormal(0, 1e-8).variance()
+        assert(Math.abs(v - 1.0000000000000001e-16) < 1e-30)
+      })
+
+      // Gilbrat = LogNormal(0,1); inherits the log-normal formulas
+      it('Gilbrat moments should match LogNormal(0,1) closed form', () => {
+        const d = new dist.Gilbrat()
+        assert(Math.abs(d.mean() - 1.6487212707001282) < 1e-13)
+        assert(Math.abs(d.variance() - 4.670774270471605) < 1e-13)
+        assert(Math.abs(d.skewness() - 6.1848771386325545) < 1e-12)
+        assert(Math.abs(d.kurtosis() - 110.93639217631153) < 1e-10)
+      })
+
+      // LogGamma (Wolfram exp-gamma param: X = exp(Y)+μ−1, Y~Gamma(α, rate β))
+      it('LogGamma(2,5,0) moments should match the gamma-MGF closed form', () => {
+        const d = new dist.LogGamma(2, 5, 0)
+        assert(Math.abs(d.mean() - 0.5625) < 1e-14)
+        assert(Math.abs(d.variance() - 0.3363715277777778) < 1e-14)
+        assert(Math.abs(d.skewness() - 4.400909271598007) < 1e-12)
+        assert(Math.abs(d.kurtosis() - 74.30035379812695) < 1e-11)
+      })
+
+      it('LogGamma(1.5,6,2) moments should match the gamma-MGF closed form', () => {
+        const d = new dist.LogGamma(1.5, 6, 2)
+        assert(Math.abs(d.mean() - 2.3145341380123985) < 1e-14)
+        assert(Math.abs(d.variance() - 0.10911730708738357) < 1e-14)
+        assert(Math.abs(d.skewness() - 3.512226133248932) < 1e-12)
+        assert(Math.abs(d.kurtosis() - 31.701516341694518) < 1e-11)
+      })
+
+      it('LogGamma mean should diverge for β ≤ 1', () => {
+        assert(new dist.LogGamma(2, 1, 0).mean() === Infinity)
+        assert(new dist.LogGamma(2, 0.5, 0).mean() === Infinity)
+      })
+
+      it('LogGamma(2,2,2) should diverge: finite mean, infinite higher moments', () => {
+        const d = new dist.LogGamma(2, 2, 2)
+        assert(Math.abs(d.mean() - 5) < 1e-14)
+        assert(d.variance() === Infinity)
+        assert(d.skewness() === Infinity)
+        assert(d.kurtosis() === Infinity)
+      })
+
+      it('LogGamma(2,2.5,0): finite variance but skewness/kurtosis diverge (2 < β ≤ 3)', () => {
+        const d = new dist.LogGamma(2, 2.5, 0)
+        assert(Math.abs(d.mean() - 1.7777777777777777) < 1e-14)
+        assert(Math.abs(d.variance() - 17.28395061728395) < 1e-12)
+        assert(d.skewness() === Infinity)
+        assert(d.kurtosis() === Infinity)
+      })
+
+      it('LogGamma(2,3.5,0) should have finite skewness but infinite kurtosis', () => {
+        const d = new dist.LogGamma(2, 3.5, 0)
+        assert(Math.abs(d.mean() - 0.96) < 1e-14)
+        assert(Math.abs(d.variance() - 1.6028444444444445) < 1e-13)
+        assert(Math.abs(d.skewness() - 15.791857713882274) < 1e-11)
+        assert(d.kurtosis() === Infinity)
+      })
+
+      // LogLaplace (X = exp(Y), Y~Laplace(μ, b); moments via the Laplace MGF)
+      it('LogLaplace(0,0.2) moments should match the Laplace-MGF closed form', () => {
+        const d = new dist.LogLaplace(0, 0.2)
+        assert(Math.abs(d.mean() - 1.0416666666666667) < 1e-14)
+        assert(Math.abs(d.variance() - 0.10540674603174603) < 1e-14)
+        assert(Math.abs(d.skewness() - 3.0046141326124665) < 1e-13)
+        assert(Math.abs(d.kurtosis() - 40.717785467128024) < 1e-12)
+      })
+
+      it('LogLaplace(0.5,0.2) moments should match the Laplace-MGF closed form', () => {
+        const d = new dist.LogLaplace(0.5, 0.2)
+        assert(Math.abs(d.mean() - 1.7174179903126334) < 1e-13)
+        assert(Math.abs(d.variance() - 0.2865252423350928) < 1e-13)
+        // skewness/kurtosis depend only on b, so they match the μ=0 case
+        assert(Math.abs(d.skewness() - 3.0046141326124665) < 1e-13)
+        assert(Math.abs(d.kurtosis() - 40.717785467128024) < 1e-12)
+      })
+
+      it('LogLaplace mean should diverge for b ≥ 1', () => {
+        assert(new dist.LogLaplace(0, 1).mean() === Infinity)
+        assert(new dist.LogLaplace(0, 2).mean() === Infinity)
+      })
+
+      it('LogLaplace(0,0.4): finite mean/variance but skewness/kurtosis diverge (1/3 ≤ b < 1/2)', () => {
+        const d = new dist.LogLaplace(0, 0.4)
+        assert(Math.abs(d.mean() - 1.1904761904761905) < 1e-14)
+        assert(Math.abs(d.variance() - 1.3605442176870748) < 1e-13)
+        assert(d.skewness() === Infinity)
+        assert(d.kurtosis() === Infinity)
+      })
+
+      it('LogLaplace(0,0.5) variance should diverge (b ≥ 1/2)', () => {
+        const d = new dist.LogLaplace(0, 0.5)
+        assert(Math.abs(d.mean() - 1.3333333333333333) < 1e-14)
+        assert(d.variance() === Infinity)
+        assert(d.skewness() === Infinity)
+        assert(d.kurtosis() === Infinity)
+      })
+
+      it('LogLaplace(0,0.3) kurtosis should diverge (b ≥ 1/4) but skewness finite', () => {
+        const d = new dist.LogLaplace(0, 0.3)
+        assert(Math.abs(d.mean() - 1.098901098901099) < 1e-14)
+        assert(Math.abs(d.variance() - 0.35491637483395727) < 1e-13)
+        assert(Math.abs(d.skewness() - 13.08208855547686) < 1e-11)
+        assert(d.kurtosis() === Infinity)
+      })
     })
 
     describe('.fit()', () => {
