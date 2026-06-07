@@ -552,13 +552,6 @@ describe('dist', () => {
         assert(Math.abs(result.p.alpha - alphaExpected) < 0.05)
       })
 
-      it('Bernoulli.fit should recover p close to planted value', () => {
-        const data = new dist.Bernoulli(0.7).seed(42).sample(200)
-        const result = dist.Bernoulli.fit(data)
-        assert(result instanceof dist.Bernoulli)
-        assert(Math.abs(result.pdf(1) - 0.7) < 0.05)
-      })
-
       it('Gilbrat.fit should return a usable Gilbrat instance', () => {
         const result = dist.Gilbrat.fit([0.5, 1, 2, 3])
         assert(result instanceof dist.Gilbrat)
@@ -712,13 +705,6 @@ describe('dist', () => {
         assert(Number.isFinite(result.pdf(0)) && result.pdf(0) > 0)
       })
 
-      it('Logarithmic.fit should recover a and b close to planted values', () => {
-        const data = new dist.Logarithmic(1, 5).seed(42).sample(200)
-        const result = dist.Logarithmic.fit(data)
-        assert(result instanceof dist.Logarithmic)
-        assert(Math.abs(result.p.a - 1) < 0.2 && Math.abs(result.p.b - 5) < 0.3)
-      })
-
       it('ExponentialLogarithmic.fit should return a usable ExponentialLogarithmic instance', () => {
         const data = new dist.ExponentialLogarithmic(0.7, 1).seed(42).sample(200)
         const result = dist.ExponentialLogarithmic.fit(data)
@@ -781,13 +767,6 @@ describe('dist', () => {
         const result = dist.Erlang.fit(data)
         assert(result instanceof dist.Erlang)
         assert.strictEqual(result.p.alpha, 3)
-      })
-
-      it('Chi2.fit should recover k exactly for planted k=4', () => {
-        const data = new dist.Chi2(4).seed(42).sample(200)
-        const result = dist.Chi2.fit(data)
-        assert(result instanceof dist.Chi2)
-        assert.strictEqual(result.p.alpha * 2, 4)
       })
 
       it('GeneralizedGamma.fit should return a usable GeneralizedGamma instance', () => {
@@ -981,14 +960,6 @@ describe('dist', () => {
         assert(Math.abs(init[0] - 6) < 1.5)
       })
 
-      it('StudentZ.fit should recover n close to planted value', () => {
-        const data = new dist.StudentZ(6).seed(42).sample(500)
-        const result = dist.StudentZ.fit(data)
-        assert(result instanceof dist.StudentZ)
-        // StudentZ stores StudentT's nu = n − 1
-        assert(Math.abs(result.p.nu + 1 - 6) < 1.5)
-      })
-
       it('Degenerate._fitInit should return the sample mean as location', () => {
         const init = dist.Degenerate._fitInit([2, 2, 2])
         assert(init.length === 1)
@@ -1099,15 +1070,6 @@ describe('dist', () => {
         assert(Math.abs(result.p.mu - 1) < 0.3)
       })
 
-      it('NoncentralF.fit should recover d1, d2 and lambda close to planted values', () => {
-        const data = new dist.NoncentralF(3, 8, 2).seed(42).sample(400)
-        const result = dist.NoncentralF.fit(data)
-        assert(result instanceof dist.NoncentralF)
-        assert(Math.abs(result.p.d1 - 3) <= 2)
-        assert(Math.abs(result.p.d2 - 8) <= 3)
-        assert(Math.abs(result.p.lambda - 2) <= 1.5)
-      })
-
       it('DoublyNoncentralChi2.fit should recover total df and noncentrality close to planted values', () => {
         const data = new dist.DoublyNoncentralChi2(2, 3, 1, 2).seed(42).sample(500)
         const result = dist.DoublyNoncentralChi2.fit(data)
@@ -1123,14 +1085,6 @@ describe('dist', () => {
         assert(result instanceof dist.DoublyNoncentralChi2)
         assert(result.p.k1 >= 1)
         assert(result.p.k2 >= 1)
-      })
-
-      it('DoublyNoncentralF.fit should recover d1 and d2 close to planted values', () => {
-        const data = new dist.DoublyNoncentralF(3, 8, 1, 1).seed(42).sample(400)
-        const result = dist.DoublyNoncentralF.fit(data)
-        assert(result instanceof dist.DoublyNoncentralF)
-        assert(Math.abs(result.p.d1 - 3) <= 2)
-        assert(Math.abs(result.p.d2 - 8) <= 3)
       })
 
       it('InverseGaussian._fitInit should return the exact MLE mu=mean, lambda=n/Σ(1/xᵢ−1/x̄)', () => {

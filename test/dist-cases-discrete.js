@@ -3,6 +3,8 @@
 // test/dist.js.
 export default [{
   name: 'Bernoulli',
+  // pdf(1) === p, so the planted-p tolerance reproduces the original pdf(1) check
+  fit: { params: [0.7], seed: 42, n: 200, tolerances: { p: 0.05 } },
   invalidParams: [
     [], // all params required
     [-1], [2] // 0 <= p <= 1

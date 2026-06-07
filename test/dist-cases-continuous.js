@@ -779,6 +779,8 @@ export default [{
   ]
 }, {
   name: 'Chi2',
+  // Chi2(k) stores Gamma's alpha = k/2, so planted Chi2(4).p.alpha = 2
+  fit: { params: [4], seed: 42, n: 200, exact: ['alpha'] },
   moments: [
     { params: [4], mean: 4, variance: 8, kurtosis: 3, tol: 1e-14 }
   ],
@@ -1104,6 +1106,7 @@ export default [{
   ]
 }, {
   name: 'DoublyNoncentralF',
+  fit: { params: [3, 8, 1, 1], seed: 42, n: 400, tolerances: { d1: 2, d2: 3 } },
   invalidParams: [
     [], // all params required
     [-1, 2, 1, 1], [0, 2, 1, 1], // n1 > 0
@@ -3004,6 +3007,7 @@ export default [{
   ]
 }, {
   name: 'Logarithmic',
+  fit: { params: [1, 5], seed: 42, n: 200, tolerances: { a: 0.2, b: 0.3 } },
   invalidParams: [
     [], // all params required
     [-1, 2], [0, 2], // a >= 1
@@ -3716,6 +3720,7 @@ export default [{
   // so failures are perfectly correlated — they share the same underlying source of
   // statistical noise. See issue #267.
   name: 'NoncentralF',
+  fit: { params: [3, 8, 2], seed: 42, n: 400, tolerances: { d1: 2, d2: 3, lambda: 1.5 } },
   invalidParams: [
     [], // all params required
     [-1, 2, 1], [0, 2, 1], // d1 > 0
@@ -4480,6 +4485,8 @@ export default [{
   ]
 }, {
   name: 'StudentZ',
+  // StudentZ stores StudentT's nu = n − 1, so planted StudentZ(6).p.nu = 5
+  fit: { params: [6], seed: 42, n: 500, tolerances: { nu: 1.5 } },
   invalidParams: [
     [], // all params required
     [-1], [0], [1] // n > 1

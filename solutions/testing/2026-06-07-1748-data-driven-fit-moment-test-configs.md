@@ -71,6 +71,14 @@ a cross-check is blind to. The moment suite is therefore 100% config-driven.
   (external ground truth beats internal consistency and catches bugs shared by both).
 - When collapsing per-assertion tolerances into a schema field, make the field support
   per-assertion granularity, or the loosest value silently weakens the tightest check.
+- A regex-based migration extractor must recognize equivalent *syntactic* forms of the same
+  assertion, or it leaves migratable tests behind: `&&`-combined comparisons, `<=` vs `<`, a
+  transformed parameter (`result.p.nu + 1 - 6` ≡ `nu` vs planted `5`; `result.p.alpha * 2 === 4`
+  ≡ `exact alpha`), and a proxy observable that equals a parameter (`pdf(1) === p` for Bernoulli).
+  Conversely, a one-sided bound (`b > 3.5`), a validity range (`0 ≤ λ < 1`), a parameter *sum*
+  (`k1 + k2`), a reparametrized internal key (Rayleigh stores `lambda2`, not `sigma`), or a `<=`
+  boundary hit exactly (NoncentralT Δ = 1.0 under a strict-`<` runner) are genuinely
+  non-parametrizable and must stay hand-written.
 
 ## Related Solutions
 
