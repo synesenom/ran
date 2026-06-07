@@ -1,4 +1,4 @@
-import { gammaLowerIncompleteInv } from '../special'
+import { gammaLowerIncompleteInv, logGamma } from '../special'
 import Gamma from './gamma'
 import Distribution from './_distribution'
 
@@ -41,6 +41,15 @@ export default class GeneralizedGamma extends Gamma {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
+    this.c = {
+      lG0: logGamma(d / p),
+      lG1: logGamma((d + 1) / p),
+      lG2: logGamma((d + 2) / p),
+      lG3: logGamma((d + 3) / p),
+      lG4: logGamma((d + 4) / p)
+    }
   }
 
   _q (p) {
@@ -59,6 +68,51 @@ export default class GeneralizedGamma extends Gamma {
 
   _cdf (x) {
     return super._cdf(Math.pow(x, this.p.p))
+  }
+
+  /**
+   * @returns {number} First raw moment: a*Gamma((d+1)/p)/Gamma(d/p).
+   */
+  mean () {
+    return this.p.a * Math.exp(this.c.lG1 - this.c.lG0)
+  }
+
+  /**
+   * @returns {number} Second central moment derived from first two raw moments.
+   */
+  variance () {
+    const { a } = this.p
+    const { lG0, lG1, lG2 } = this.c
+    const m1 = a * Math.exp(lG1 - lG0)
+    const m2 = a * a * Math.exp(lG2 - lG0)
+    return m2 - m1 * m1
+  }
+
+  /**
+   * @returns {number} Standardised third central moment from raw moments.
+   */
+  skewness () {
+    const { a } = this.p
+    const { lG0, lG1, lG2, lG3 } = this.c
+    const m1 = a * Math.exp(lG1 - lG0)
+    const m2 = a * a * Math.exp(lG2 - lG0)
+    const m3 = a ** 3 * Math.exp(lG3 - lG0)
+    const v = m2 - m1 * m1
+    return (m3 - 3 * m1 * m2 + 2 * m1 ** 3) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} Excess kurtosis from the first four raw moments.
+   */
+  kurtosis () {
+    const { a } = this.p
+    const { lG0, lG1, lG2, lG3, lG4 } = this.c
+    const m1 = a * Math.exp(lG1 - lG0)
+    const m2 = a * a * Math.exp(lG2 - lG0)
+    const m3 = a ** 3 * Math.exp(lG3 - lG0)
+    const m4 = a ** 4 * Math.exp(lG4 - lG0)
+    const v = m2 - m1 * m1
+    return (m4 - 4 * m1 * m3 + 6 * m1 * m1 * m2 - 3 * m1 ** 4) / (v * v) - 3
   }
 
   static _fitInit (data) {

@@ -1,4 +1,4 @@
-import { gammaLowerIncompleteInv } from '../special'
+import { gammaLowerIncompleteInv, logGamma } from '../special'
 import Distribution from './_distribution'
 import Chi2 from './chi2'
 
@@ -35,6 +35,11 @@ export default class Chi extends Chi2 {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
+    this.c = {
+      mu: Math.SQRT2 * Math.exp(logGamma((ki + 1) / 2) - logGamma(ki / 2))
+    }
   }
 
   _q (p) {
@@ -58,6 +63,40 @@ export default class Chi extends Chi2 {
 
   _cdf (x) {
     return super._cdf(x * x)
+  }
+
+  /**
+   * @returns {number} sqrt(2)*Gamma((k+1)/2)/Gamma(k/2).
+   */
+  mean () {
+    return this.c.mu
+  }
+
+  /**
+   * @returns {number} k minus the squared mean.
+   */
+  variance () {
+    const mu = this.c.mu
+    return this.p.k - mu * mu
+  }
+
+  /**
+   * @returns {number} Mean times (1 - 2*variance) divided by variance^(3/2).
+   */
+  skewness () {
+    const mu = this.c.mu
+    const v = this.p.k - mu * mu
+    return mu * (1 - 2 * v) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} (2/variance)*(1 - mean*sqrt(variance)*skewness - variance).
+   */
+  kurtosis () {
+    const mu = this.c.mu
+    const v = this.p.k - mu * mu
+    const g1 = mu * (1 - 2 * v) / Math.pow(v, 1.5)
+    return (2 / v) * (1 - mu * Math.sqrt(v) * g1 - v)
   }
 
   static _fitInit (data) {

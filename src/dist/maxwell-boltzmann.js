@@ -46,6 +46,36 @@ export default class MaxwellBoltzmann extends Gamma {
     return super._cdf(x * x)
   }
 
+  /**
+   * @returns {number} Two times the scale times sqrt(2/pi).
+   */
+  mean () {
+    return 2 * Math.sqrt(1 / (this.p.beta * Math.PI))
+  }
+
+  /**
+   * @returns {number} Scale squared times (3*pi - 8) / pi.
+   */
+  variance () {
+    return (0.5 / this.p.beta) * (3 * Math.PI - 8) / Math.PI
+  }
+
+  /**
+   * @returns {number} Constant 2*sqrt(2)*(16-5*pi)/(3*pi-8)^(3/2).
+   */
+  skewness () {
+    const v = 3 * Math.PI - 8
+    return 2 * Math.SQRT2 * (16 - 5 * Math.PI) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} Constant 4*(-96+40*pi-3*pi^2)/(3*pi-8)^2.
+   */
+  kurtosis () {
+    const v = 3 * Math.PI - 8
+    return 4 * (-96 + 40 * Math.PI - 3 * Math.PI ** 2) / (v * v)
+  }
+
   static get _fitInitIsExact () {
     // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
     return true
