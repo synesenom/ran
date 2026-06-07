@@ -60,9 +60,25 @@ export default class Cauchy extends Distribution {
 
   // Cauchy moments are all undefined — quantile truncation makes the numerical
   // fallback return finite values (≈0 for mean by symmetry), so explicit NaN is required.
+
+  /**
+   * @returns {number} NaN (mean is undefined for the Cauchy distribution).
+   */
   mean () { return NaN }
+
+  /**
+   * @returns {number} NaN (variance is undefined for the Cauchy distribution).
+   */
   variance () { return NaN }
+
+  /**
+   * @returns {number} NaN (skewness is undefined for the Cauchy distribution).
+   */
   skewness () { return NaN }
+
+  /**
+   * @returns {number} NaN (excess kurtosis is undefined for the Cauchy distribution).
+   */
   kurtosis () { return NaN }
 
   static _fitInit (data) {

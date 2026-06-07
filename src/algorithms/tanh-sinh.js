@@ -50,7 +50,7 @@ export default function (f, a, b) {
       if (wt === 0) break
       newTerms.push(wt * f(xNode(t)), wt * f(xNode(-t)))
     }
-    // neumaier([]) → NaN; guard fires when all level-k nodes underflow immediately.
+    // Guard fires when all level-k nodes underflow immediately (weight → 0 before first push).
     // See solutions/algorithm/2026-06-01-1002-tanh-sinh-neumaier-empty-array-and-trap-replacement.md
     const Snew = S / 2 + (newTerms.length > 0 ? h * neumaier(newTerms) : 0)
     if (Math.abs(Snew - S) <= EPS * Math.abs(Snew)) {

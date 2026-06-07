@@ -272,7 +272,7 @@ class Distribution {
   /**
    * Computes a raw moment E[X^n] numerically. Continuous distributions use tanh-sinh
    * quadrature; discrete distributions use compensated summation. Infinite support bounds
-   * are truncated at the 1e-7 / (1 - 1e-7) quantile. Distributions with undefined or
+   * are truncated at the 1e-12 / (1 - 1e-12) quantile. Distributions with undefined or
    * divergent moments must override the public moment methods to return NaN / Infinity
    * directly, because quantile truncation makes divergent integrals appear finite.
    *
@@ -290,6 +290,12 @@ class Distribution {
     if (this._type === 'discrete') {
       const lo = Number.isFinite(this.s[0].value) ? this.s[0].value : Math.round(this.q(TAIL_P))
       const hi = Number.isFinite(this.s[1].value) ? this.s[1].value : Math.round(this.q(1 - TAIL_P))
+      // Heavy-tailed discrete distributions (e.g. Zeta, YuleSimon) can have a 1-1e-12 quantile
+      // in the billions, making the loop effectively hang. Return NaN — the analytical override
+      // should handle these. 1e6 terms covers all practical well-behaved distributions.
+      if (!Number.isFinite(lo) || !Number.isFinite(hi) || hi - lo > 1e6) {
+        return NaN
+      }
       const terms = []
       for (let k = lo; k <= hi; k++) {
         terms.push(Math.pow(k, n) * this.pdf(k))
@@ -298,6 +304,11 @@ class Distribution {
     } else {
       const lo = Number.isFinite(this.s[0].value) ? this.s[0].value : this.q(TAIL_P)
       const hi = Number.isFinite(this.s[1].value) ? this.s[1].value : this.q(1 - TAIL_P)
+      // Point-mass support (lo === hi): tanhSinh returns 0 (halfLen = 0), but E[X^n] = lo^n
+      // for a unit point mass. Handles Degenerate and any other single-point continuous type.
+      if (lo === hi) {
+        return Math.pow(lo, n)
+      }
       return tanhSinh(x => Math.pow(x, n) * this.pdf(x), lo, hi)
     }
   }
