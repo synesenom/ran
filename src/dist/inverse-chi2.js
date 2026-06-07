@@ -53,6 +53,42 @@ export default class InverseChi2 extends Distribution {
     return gammaUpperIncomplete(this.p.nu / 2, 0.5 / x)
   }
 
+  /**
+   * @returns {number} 1/(nu - 2); `Infinity` for nu <= 2.
+   */
+  mean () {
+    const { nu } = this.p
+    if (nu <= 2) return Infinity
+    return 1 / (nu - 2)
+  }
+
+  /**
+   * @returns {number} 2/((nu-2)^2*(nu-4)); `Infinity` for nu <= 4.
+   */
+  variance () {
+    const { nu } = this.p
+    if (nu <= 4) return Infinity
+    return 2 / ((nu - 2) ** 2 * (nu - 4))
+  }
+
+  /**
+   * @returns {number} 4*sqrt(nu/2-2)/(nu/2-3); `Infinity` for nu <= 6.
+   */
+  skewness () {
+    const { nu } = this.p
+    if (nu <= 6) return Infinity
+    return 4 * Math.sqrt(nu / 2 - 2) / (nu / 2 - 3)
+  }
+
+  /**
+   * @returns {number} (15*nu-66)/((nu/2-3)*(nu/2-4)); `Infinity` for nu <= 8.
+   */
+  kurtosis () {
+    const { nu } = this.p
+    if (nu <= 8) return Infinity
+    return (15 * nu - 66) / ((nu / 2 - 3) * (nu / 2 - 4))
+  }
+
   static _fitInit (data) {
     // E[X] = 1/(ν−2) for ν > 2, so ν ≈ 2 + 1/mean; floor mean to avoid Infinity from near-zero mean
     const mean = data.reduce((s, x) => s + x, 0) / data.length

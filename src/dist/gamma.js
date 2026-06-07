@@ -57,6 +57,34 @@ export default class Gamma extends Distribution {
     return gammaLowerIncompleteInv(this.p.alpha, p) / this.p.beta
   }
 
+  /**
+   * @returns {number} Shape divided by rate.
+   */
+  mean () {
+    return this.p.alpha / this.p.beta
+  }
+
+  /**
+   * @returns {number} Shape divided by squared rate.
+   */
+  variance () {
+    return this.p.alpha / this.p.beta ** 2
+  }
+
+  /**
+   * @returns {number} Two divided by the square root of the shape.
+   */
+  skewness () {
+    return 2 / Math.sqrt(this.p.alpha)
+  }
+
+  /**
+   * @returns {number} Six divided by the shape.
+   */
+  kurtosis () {
+    return 6 / this.p.alpha
+  }
+
   static _fitInit (data) {
     // MOM: E[X]=α/β, Var[X]=α/β² → α = mean²/var, β = mean/var
     const n = data.length

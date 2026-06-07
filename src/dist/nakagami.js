@@ -39,7 +39,11 @@ export default class Nakagami extends Distribution {
 
     // Speed-up constants
     this.c = {
-      normFactor: 2 * Math.pow(this.p.m, this.p.m) / Math.pow(this.p.omega, this.p.m)
+      normFactor: 2 * Math.pow(m, m) / Math.pow(omega, m),
+      lGm: logGamma(m),
+      lGm05: logGamma(m + 0.5),
+      lGm15: logGamma(m + 1.5),
+      sqrtRatio: Math.sqrt(omega / m)
     }
   }
 
@@ -57,10 +61,51 @@ export default class Nakagami extends Distribution {
   }
 
   _pdf (x) {
-    return this.c.normFactor * Math.pow(x, 2 * this.p.m - 1) * Math.exp(-this.p.m * x * x / this.p.omega - logGamma(this.p.m))
+    return this.c.normFactor * Math.pow(x, 2 * this.p.m - 1) * Math.exp(-this.p.m * x * x / this.p.omega - this.c.lGm)
   }
 
   _cdf (x) {
     return gammaLowerIncomplete(this.p.m, this.p.m * x * x / this.p.omega)
+  }
+
+  /**
+   * @returns {number} sqrt(omega/m)*Gamma(m+1/2)/Gamma(m).
+   */
+  mean () {
+    return this.c.sqrtRatio * Math.exp(this.c.lGm05 - this.c.lGm)
+  }
+
+  /**
+   * @returns {number} omega minus the squared mean.
+   */
+  variance () {
+    const m1 = this.c.sqrtRatio * Math.exp(this.c.lGm05 - this.c.lGm)
+    return this.p.omega - m1 * m1
+  }
+
+  /**
+   * @returns {number} Standardised third central moment from raw moments.
+   */
+  skewness () {
+    const { sqrtRatio, lGm, lGm05, lGm15 } = this.c
+    const m1 = sqrtRatio * Math.exp(lGm05 - lGm)
+    const m2 = this.p.omega
+    const m3 = sqrtRatio ** 3 * Math.exp(lGm15 - lGm)
+    const v = m2 - m1 * m1
+    return (m3 - 3 * m1 * m2 + 2 * m1 ** 3) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} Excess kurtosis from the first four raw moments.
+   */
+  kurtosis () {
+    const { m, omega } = this.p
+    const { sqrtRatio, lGm, lGm05, lGm15 } = this.c
+    const m1 = sqrtRatio * Math.exp(lGm05 - lGm)
+    const m2 = omega
+    const m3 = sqrtRatio ** 3 * Math.exp(lGm15 - lGm)
+    const m4 = (omega / m) ** 2 * m * (m + 1)
+    const v = m2 - m1 * m1
+    return (m4 - 4 * m1 * m3 + 6 * m1 * m1 * m2 - 3 * m1 ** 4) / (v * v) - 3
   }
 }

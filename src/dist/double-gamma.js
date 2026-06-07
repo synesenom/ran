@@ -51,6 +51,35 @@ export default class DoubleGamma extends Gamma {
     return (x > 0 ? 1 + y : 1 - y) / 2
   }
 
+  /**
+   * @returns {number} Zero (symmetric about the origin).
+   */
+  mean () {
+    return 0
+  }
+
+  /**
+   * @returns {number} Second raw moment of the underlying gamma.
+   */
+  variance () {
+    return this.p.alpha * (this.p.alpha + 1) / this.p.beta ** 2
+  }
+
+  /**
+   * @returns {number} Zero (symmetric distribution).
+   */
+  skewness () {
+    return 0
+  }
+
+  /**
+   * @returns {number} Excess kurtosis from the fourth and second raw Gamma moments.
+   */
+  kurtosis () {
+    const { alpha } = this.p
+    return (alpha + 2) * (alpha + 3) / (alpha * (alpha + 1)) - 3
+  }
+
   static _fitInit (data) {
     // |X| ~ Gamma(α,β): gamma MOM on absolute values
     const n = data.length

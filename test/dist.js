@@ -742,6 +742,177 @@ describe('dist', () => {
         assert(Math.abs(d.skewness() - 13.08208855547686) < 1e-11)
         assert(d.kurtosis() === Infinity)
       })
+
+      // Gamma analytical moments
+      it('Gamma(3, 2) mean should be 1.5', () => {
+        assert(Math.abs(new dist.Gamma(3, 2).mean() - 1.5) < 1e-14)
+      })
+      it('Gamma(3, 2) variance should be 0.75', () => {
+        assert(Math.abs(new dist.Gamma(3, 2).variance() - 0.75) < 1e-14)
+      })
+      it('Gamma(3, 2) skewness should be 2/sqrt(3)', () => {
+        assert(Math.abs(new dist.Gamma(3, 2).skewness() - 2 / Math.sqrt(3)) < 1e-14)
+      })
+      it('Gamma(3, 2) kurtosis should be 2', () => {
+        assert(Math.abs(new dist.Gamma(3, 2).kurtosis() - 2) < 1e-14)
+      })
+
+      // Chi2 inherits Gamma moments
+      it('Chi2(4) mean should be 4 (inherited from Gamma)', () => {
+        assert(Math.abs(new dist.Chi2(4).mean() - 4) < 1e-14)
+      })
+      it('Chi2(4) variance should be 8', () => {
+        assert(Math.abs(new dist.Chi2(4).variance() - 8) < 1e-14)
+      })
+      it('Chi2(4) kurtosis should be 3', () => {
+        assert(Math.abs(new dist.Chi2(4).kurtosis() - 3) < 1e-14)
+      })
+
+      // Erlang inherits Gamma moments
+      it('Erlang(3, 2) mean should be 1.5 (inherited from Gamma)', () => {
+        assert(Math.abs(new dist.Erlang(3, 2).mean() - 1.5) < 1e-14)
+      })
+
+      // InverseGamma moments with divergence
+      it('InverseGamma(0.5, 1) mean should be Infinity', () => {
+        assert(new dist.InverseGamma(0.5, 1).mean() === Infinity)
+      })
+      it('InverseGamma(1.5, 2) mean should be 4', () => {
+        assert(Math.abs(new dist.InverseGamma(1.5, 2).mean() - 4) < 1e-14)
+      })
+      it('InverseGamma(1.5, 2) variance should be Infinity', () => {
+        assert(new dist.InverseGamma(1.5, 2).variance() === Infinity)
+      })
+      it('InverseGamma(5, 2) mean should be 0.5', () => {
+        assert(Math.abs(new dist.InverseGamma(5, 2).mean() - 0.5) < 1e-14)
+      })
+      it('InverseGamma(5, 2) variance should be 1/12', () => {
+        assert(Math.abs(new dist.InverseGamma(5, 2).variance() - 1 / 12) < 1e-14)
+      })
+      it('InverseGamma(5, 2) skewness should be 2*sqrt(3)', () => {
+        assert(Math.abs(new dist.InverseGamma(5, 2).skewness() - 2 * Math.sqrt(3)) < 1e-14)
+      })
+      it('InverseGamma(5, 2) kurtosis should be 42', () => {
+        assert(Math.abs(new dist.InverseGamma(5, 2).kurtosis() - 42) < 1e-14)
+      })
+      it('InverseGamma(3, 2) skewness should be Infinity (boundary)', () => {
+        assert(new dist.InverseGamma(3, 2).skewness() === Infinity)
+      })
+      it('InverseGamma(4, 2) kurtosis should be Infinity (boundary)', () => {
+        assert(new dist.InverseGamma(4, 2).kurtosis() === Infinity)
+      })
+
+      // InverseChi2 moments with divergence
+      it('InverseChi2(2) mean should be Infinity', () => {
+        assert(new dist.InverseChi2(2).mean() === Infinity)
+      })
+      it('InverseChi2(4) mean should be 0.5', () => {
+        assert(Math.abs(new dist.InverseChi2(4).mean() - 0.5) < 1e-14)
+      })
+      it('InverseChi2(4) variance should be Infinity', () => {
+        assert(new dist.InverseChi2(4).variance() === Infinity)
+      })
+      it('InverseChi2(6) skewness should be Infinity (boundary)', () => {
+        assert(new dist.InverseChi2(6).skewness() === Infinity)
+      })
+      it('InverseChi2(8) kurtosis should be Infinity (boundary)', () => {
+        assert(new dist.InverseChi2(8).kurtosis() === Infinity)
+      })
+      it('InverseChi2(10) skewness should be 2*sqrt(3)', () => {
+        assert(Math.abs(new dist.InverseChi2(10).skewness() - 2 * Math.sqrt(3)) < 1e-14)
+      })
+
+      // Cross-validate: InverseChi2(nu) === InverseGamma(nu/2, 1/2) for all moments
+      it('InverseChi2(10) mean should match InverseGamma(5, 0.5) mean', () => {
+        assert(Math.abs(new dist.InverseChi2(10).mean() - new dist.InverseGamma(5, 0.5).mean()) < 1e-14)
+      })
+      it('InverseChi2(10) variance should match InverseGamma(5, 0.5) variance', () => {
+        assert(Math.abs(new dist.InverseChi2(10).variance() - new dist.InverseGamma(5, 0.5).variance()) < 1e-14)
+      })
+      it('InverseChi2(10) skewness should match InverseGamma(5, 0.5) skewness', () => {
+        assert(Math.abs(new dist.InverseChi2(10).skewness() - new dist.InverseGamma(5, 0.5).skewness()) < 1e-14)
+      })
+      it('InverseChi2(12) kurtosis should match InverseGamma(6, 0.5) kurtosis', () => {
+        assert(Math.abs(new dist.InverseChi2(12).kurtosis() - new dist.InverseGamma(6, 0.5).kurtosis()) < 1e-14)
+      })
+
+      // Chi moments via logGamma ratios
+      it('Chi(1) mean should be sqrt(2/pi)', () => {
+        assert(Math.abs(new dist.Chi(1).mean() - Math.sqrt(2 / Math.PI)) < 1e-12)
+      })
+      it('Chi(2) mean should be sqrt(pi/2)', () => {
+        assert(Math.abs(new dist.Chi(2).mean() - Math.sqrt(Math.PI / 2)) < 1e-12)
+      })
+      it('Chi(3) variance should be 3 - 8/pi', () => {
+        assert(Math.abs(new dist.Chi(3).variance() - (3 - 8 / Math.PI)) < 1e-12)
+      })
+      it('Chi(3) skewness should match MaxwellBoltzmann(1) skewness (Chi(3) = Maxwell-Boltzmann)', () => {
+        assert(Math.abs(new dist.Chi(3).skewness() - new dist.MaxwellBoltzmann(1).skewness()) < 1e-12)
+      })
+      it('Chi(3) kurtosis should match MaxwellBoltzmann(1) kurtosis', () => {
+        assert(Math.abs(new dist.Chi(3).kurtosis() - new dist.MaxwellBoltzmann(1).kurtosis()) < 1e-12)
+      })
+
+      // GeneralizedGamma moments
+      it('GeneralizedGamma(2, 2, 1) mean should be 4 (reduces to Gamma(2,0.5))', () => {
+        assert(Math.abs(new dist.GeneralizedGamma(2, 2, 1).mean() - 4) < 1e-12)
+      })
+      it('GeneralizedGamma(1, 1, 1) variance should be 1 (reduces to Exponential)', () => {
+        assert(Math.abs(new dist.GeneralizedGamma(1, 1, 1).variance() - 1) < 1e-10)
+      })
+      it('GeneralizedGamma(1, 1, 1) skewness should be 2 (reduces to Exponential)', () => {
+        assert(Math.abs(new dist.GeneralizedGamma(1, 1, 1).skewness() - 2) < 1e-10)
+      })
+      it('GeneralizedGamma(1, 1, 1) kurtosis should be 6 (reduces to Exponential)', () => {
+        assert(Math.abs(new dist.GeneralizedGamma(1, 1, 1).kurtosis() - 6) < 1e-10)
+      })
+
+      // Nakagami moments
+      it('Nakagami(1, 1) mean should be sqrt(pi)/2 (reduces to Rayleigh)', () => {
+        assert(Math.abs(new dist.Nakagami(1, 1).mean() - Math.sqrt(Math.PI) / 2) < 1e-12)
+      })
+      it('Nakagami(1, 1) variance should be 1 - pi/4', () => {
+        assert(Math.abs(new dist.Nakagami(1, 1).variance() - (1 - Math.PI / 4)) < 1e-12)
+      })
+      it('Nakagami(1, 1) skewness should be 2*sqrt(pi)*(pi-3)/(4-pi)^(3/2) (Rayleigh special case)', () => {
+        const expected = 2 * Math.sqrt(Math.PI) * (Math.PI - 3) / Math.pow(4 - Math.PI, 1.5)
+        assert(Math.abs(new dist.Nakagami(1, 1).skewness() - expected) < 1e-10)
+      })
+      it('Nakagami(1, 1) kurtosis should be (-16+24*pi-6*pi^2)/(4-pi)^2 (Rayleigh special case)', () => {
+        const expected = (-16 + 24 * Math.PI - 6 * Math.PI ** 2) / (4 - Math.PI) ** 2
+        assert(Math.abs(new dist.Nakagami(1, 1).kurtosis() - expected) < 1e-10)
+      })
+
+      // MaxwellBoltzmann moments
+      it('MaxwellBoltzmann(1) mean should be 2*sqrt(2/pi)', () => {
+        assert(Math.abs(new dist.MaxwellBoltzmann(1).mean() - 2 * Math.sqrt(2 / Math.PI)) < 1e-12)
+      })
+      it('MaxwellBoltzmann(1) variance should be (3*pi-8)/pi', () => {
+        assert(Math.abs(new dist.MaxwellBoltzmann(1).variance() - (3 * Math.PI - 8) / Math.PI) < 1e-12)
+      })
+      it('MaxwellBoltzmann(2) mean should be 4*sqrt(2/pi)', () => {
+        assert(Math.abs(new dist.MaxwellBoltzmann(2).mean() - 4 * Math.sqrt(2 / Math.PI)) < 1e-12)
+      })
+
+      // DoubleGamma moments
+      it('DoubleGamma(1, 1) mean should be 0 (symmetric)', () => {
+        assert(Math.abs(new dist.DoubleGamma(1, 1).mean()) < 1e-14)
+      })
+      it('DoubleGamma(1, 1) variance should be 2 (reduces to Laplace)', () => {
+        assert(Math.abs(new dist.DoubleGamma(1, 1).variance() - 2) < 1e-14)
+      })
+      it('DoubleGamma(1, 1) skewness should be 0', () => {
+        assert(Math.abs(new dist.DoubleGamma(1, 1).skewness()) < 1e-14)
+      })
+      it('DoubleGamma(1, 1) kurtosis should be 3 (Laplace excess kurtosis)', () => {
+        assert(Math.abs(new dist.DoubleGamma(1, 1).kurtosis() - 3) < 1e-14)
+      })
+      it('DoubleGamma(2, 1) variance should be 6', () => {
+        assert(Math.abs(new dist.DoubleGamma(2, 1).variance() - 6) < 1e-14)
+      })
+      it('DoubleGamma(2, 1) kurtosis should be 1/3', () => {
+        assert(Math.abs(new dist.DoubleGamma(2, 1).kurtosis() - 1 / 3) < 1e-14)
+      })
     })
 
     describe('.fit()', () => {
