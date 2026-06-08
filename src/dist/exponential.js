@@ -20,6 +20,7 @@ export default class Exponential extends Distribution {
     super('continuous', 1)
 
     // Validate parameters
+    /** @type {*} */
     this.p = { lambda }
     Distribution.validate({ lambda }, [
       'lambda > 0'

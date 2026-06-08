@@ -23,6 +23,7 @@ export default class StudentT extends Distribution {
     super('continuous', 1)
 
     // Validate parameters
+    /** @type {*} */
     this.p = { nu }
     Distribution.validate({ nu }, [
       'nu > 0'
@@ -38,8 +39,11 @@ export default class StudentT extends Distribution {
     }]
 
     // Pre-compute constants for _pdf and the hot path in _q
+    // decisions/0018-continuous-subclass-natural-params.md — nu goes into this.c so that
+    // StudentZ can inherit _q after overriding this.p with its own natural parameter
     const nu2 = nu * nu
     this.c = {
+      nu,
       betaNorm: 1 / (Math.sqrt(nu) * beta(0.5, nu / 2)),
       sqrtNu: Math.sqrt(nu),
       halfNu1: (nu + 1) / 2,
@@ -60,23 +64,23 @@ export default class StudentT extends Distribution {
 
   _generator () {
     // Direct sampling using gamma variates
-    return sign(this.r) * Math.sqrt(this.p.nu * gamma(this.r, 0.5) / gamma(this.r, this.p.nu / 2))
+    return sign(this.r) * Math.sqrt(this.c.nu * gamma(this.r, 0.5) / gamma(this.r, this.c.nu / 2))
   }
 
   _pdf (x) {
-    return this.c.betaNorm * Math.pow(1 + x * x / this.p.nu, -this.c.halfNu1)
+    return this.c.betaNorm * Math.pow(1 + x * x / this.c.nu, -this.c.halfNu1)
   }
 
   _cdf (x) {
     return x > 0
-      ? 1 - 0.5 * regularizedBetaIncomplete(this.p.nu / 2, 0.5, this.p.nu / (x * x + this.p.nu))
-      : 0.5 * regularizedBetaIncomplete(this.p.nu / 2, 0.5, this.p.nu / (x * x + this.p.nu))
+      ? 1 - 0.5 * regularizedBetaIncomplete(this.c.nu / 2, 0.5, this.c.nu / (x * x + this.c.nu))
+      : 0.5 * regularizedBetaIncomplete(this.c.nu / 2, 0.5, this.c.nu / (x * x + this.c.nu))
   }
 
   _q (p) {
     // nu=1 is the Cauchy distribution with an exact closed-form quantile;
     // the Cornish-Fisher series diverges at nu=1 so this fast path is essential.
-    if (this.p.nu === 1) {
+    if (this.c.nu === 1) {
       return Math.tan(Math.PI * (p - 0.5))
     }
 
@@ -102,7 +106,7 @@ export default class StudentT extends Distribution {
     const z7 = z5 * z2
     const z9 = z7 * z2
     let t = z +
-      (z3 + z) / (4 * this.p.nu) +
+      (z3 + z) / (4 * this.c.nu) +
       (5 * z5 + 16 * z3 + 3 * z) / (96 * this.c.nu2) +
       (3 * z7 + 19 * z5 + 17 * z3 - 15 * z) / (384 * this.c.nu3) +
       (79 * z9 + 776 * z7 + 1482 * z5 - 1920 * z3 - 945 * z) / (92160 * this.c.nu4)
@@ -124,7 +128,7 @@ export default class StudentT extends Distribution {
         break
       }
       const tOld = t
-      t -= dt / (1 + dt * (this.p.nu + 1) * t / (2 * (this.p.nu + t * t)))
+      t -= dt / (1 + dt * (this.c.nu + 1) * t / (2 * (this.c.nu + t * t)))
       if (t === tPrev) {
         break
       }

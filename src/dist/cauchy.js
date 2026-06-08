@@ -20,6 +20,7 @@ export default class Cauchy extends Distribution {
     super('continuous', 2)
 
     // Validate parameters
+    /** @type {*} */
     this.p = { x0, gamma }
     Distribution.validate({ x0, gamma }, [
       'gamma > 0'

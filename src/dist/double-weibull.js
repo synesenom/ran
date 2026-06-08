@@ -28,25 +28,31 @@ export default class DoubleWeibull extends Weibull {
       value: Infinity,
       closed: false
     }]
+
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p
+    this.p = { lambda, k }
   }
 
   _generator () {
+    // super._generator() calls Weibull._generator = this._q(r.next()), which resolves to
+    // DoubleWeibull._q after the fix; the trailing ±1 flip is harmless for a symmetric distribution
     return super._generator() * (this.r.next() < 0.5 ? -1 : 1)
   }
 
   _pdf (x) {
-    return super._pdf(Math.abs(x)) / 2
+    const t = Math.abs(x) / this.p.lambda
+    return this.p.k / (2 * this.p.lambda) * Math.pow(t, this.p.k - 1) * Math.exp(-Math.pow(t, this.p.k))
   }
 
   _cdf (x) {
-    const y = super._cdf(Math.abs(x))
+    const y = 1 - Math.exp(-Math.pow(Math.abs(x) / this.p.lambda, this.p.k))
     return (x > 0 ? 1 + y : 1 - y) / 2
   }
 
   _q (p) {
     return p > 0.5
-      ? this.p.lambda2 * Math.pow(-Math.log(2 - 2 * p), 1 / this.p.k)
-      : -(this.p.lambda2 * Math.pow(-Math.log(2 * p), 1 / this.p.k))
+      ? this.p.lambda * Math.pow(-Math.log(2 - 2 * p), 1 / this.p.k)
+      : -(this.p.lambda * Math.pow(-Math.log(2 * p), 1 / this.p.k))
   }
 
   static _fitInit (data) {

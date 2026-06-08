@@ -766,7 +766,7 @@ describe('dist', () => {
         const data = new dist.Erlang(3, 1).seed(20).sample(200)
         const result = dist.Erlang.fit(data)
         assert(result instanceof dist.Erlang)
-        assert.strictEqual(result.p.alpha, 3)
+        assert.strictEqual(result.p.k, 3)
       })
 
       it('GeneralizedGamma.fit should return a usable GeneralizedGamma instance', () => {

@@ -1,5 +1,7 @@
-import Distribution from './_distribution'
+import { gammaLowerIncomplete, gammaLowerIncompleteInv, logGamma } from '../special'
+import gamma from './_gamma'
 import Gamma from './gamma'
+import Distribution from './_distribution'
 
 /**
  * Probability density function for the [$\chi^2$ distribution]{@link https://en.wikipedia.org/wiki/Chi-squared_distribution}:
@@ -21,12 +23,61 @@ export default class Chi2 extends Gamma {
     super(Math.round(k) / 2, 0.5)
 
     // Chi2 has 1 free parameter (k); override the 2 inherited from Gamma
+    // solutions/distribution/2026-06-07-2138-continuous-subclass-natural-params.md
     this.k = 1
 
     // Validate parameters
     Distribution.validate({ k }, [
       'k > 0'
     ])
+
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p
+    this.p = { k: Math.round(k) }
+    Object.assign(this.c, { alpha: Math.round(k) / 2 })
+  }
+
+  _generator () {
+    return gamma(this.r, this.c.alpha, 0.5)
+  }
+
+  _pdf (x) {
+    return Math.exp(this.c.alpha * Math.log(0.5) - 0.5 * x - logGamma(this.c.alpha)) * Math.pow(x, this.c.alpha - 1)
+  }
+
+  _cdf (x) {
+    return gammaLowerIncomplete(this.c.alpha, 0.5 * x)
+  }
+
+  _q (p) {
+    return gammaLowerIncompleteInv(this.c.alpha, p) * 2
+  }
+
+  /**
+   * @returns {number} Degrees of freedom.
+   */
+  mean () {
+    return 2 * this.c.alpha
+  }
+
+  /**
+   * @returns {number} Twice the degrees of freedom.
+   */
+  variance () {
+    return 4 * this.c.alpha
+  }
+
+  /**
+   * @returns {number} Two times the square root of two over degrees of freedom.
+   */
+  skewness () {
+    return 2 / Math.sqrt(this.c.alpha)
+  }
+
+  /**
+   * @returns {number} Twelve over degrees of freedom.
+   */
+  kurtosis () {
+    return 6 / this.c.alpha
   }
 
   static _fitInit (data) {

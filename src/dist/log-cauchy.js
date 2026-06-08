@@ -28,26 +28,31 @@ export default class LogCauchy extends Cauchy {
       value: Infinity,
       closed: false
     }]
+
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p
+    // this.c.piGamma = π·sigma set by Cauchy constructor remains valid
+    this.p = { mu, sigma }
   }
 
   _generator () {
     // Direct sampling by transforming Cauchy variate
-    const z = super._generator()
+    const z = this.p.mu + this.p.sigma * Math.tan(Math.PI * (this.r.next() - 0.5))
 
     // Handle |z| >> 1 cases
     return Math.max(Math.min(Number.MAX_VALUE, Math.exp(z)), Number.MIN_VALUE)
   }
 
   _pdf (x) {
-    return super._pdf(Math.log(x)) / x
+    const y = (Math.log(x) - this.p.mu) / this.p.sigma
+    return 1 / (this.c.piGamma * (1 + y * y) * x)
   }
 
   _cdf (x) {
-    return super._cdf(Math.log(x))
+    return 0.5 + Math.atan2(Math.log(x) - this.p.mu, this.p.sigma) / Math.PI
   }
 
   _q (p) {
-    return Math.exp(this.p.x0 + this.p.gamma * Math.tan(Math.PI * (p - 0.5)))
+    return Math.exp(this.p.mu + this.p.sigma * Math.tan(Math.PI * (p - 0.5)))
   }
 
   static _fitInit (data) {
