@@ -62,6 +62,75 @@ export default class BetaRectangular extends Beta {
     return this.p.theta * super._cdf(y / this.c.bMinusA) + this.c.oneMinusTheta * y / this.c.bMinusA
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { alpha, beta, theta, a, b } = this.p
+    const muBeta = a + (b - a) * alpha / (alpha + beta)
+    return theta * muBeta + (1 - theta) * (a + b) / 2
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { alpha, beta, theta, a, b } = this.p
+    const s = alpha + beta
+    const w = b - a
+    const muBeta = a + w * alpha / s
+    const varBeta = w * w * alpha * beta / (s * s * (s + 1))
+    const d = muBeta - (a + b) / 2
+    return theta * varBeta + (1 - theta) * w * w / 12 + theta * (1 - theta) * d * d
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { alpha, beta, theta, a, b } = this.p
+    const s = alpha + beta
+    const w = b - a
+    const muBeta = a + w * alpha / s
+    const muUnif = (a + b) / 2
+    const varBeta = w * w * alpha * beta / (s * s * (s + 1))
+    const varUnif = w * w / 12
+    const d = muBeta - muUnif
+    const v = theta * varBeta + (1 - theta) * varUnif + theta * (1 - theta) * d * d
+    const skewBeta = 2 * (beta - alpha) * Math.sqrt(s + 1) / ((s + 2) * Math.sqrt(alpha * beta))
+    const mu3Beta = skewBeta * Math.pow(varBeta, 1.5)
+    const dB = (1 - theta) * d
+    const dU = -theta * d
+    const mu3 = theta * (mu3Beta + 3 * varBeta * dB + dB ** 3) +
+      (1 - theta) * (3 * varUnif * dU + dU ** 3)
+    return mu3 / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { alpha, beta, theta, a, b } = this.p
+    const s = alpha + beta
+    const w = b - a
+    const muBeta = a + w * alpha / s
+    const muUnif = (a + b) / 2
+    const varBeta = w * w * alpha * beta / (s * s * (s + 1))
+    const varUnif = w * w / 12
+    const d = muBeta - muUnif
+    const v = theta * varBeta + (1 - theta) * varUnif + theta * (1 - theta) * d * d
+    const skewBeta = 2 * (beta - alpha) * Math.sqrt(s + 1) / ((s + 2) * Math.sqrt(alpha * beta))
+    const kurtBeta = 6 * ((alpha - beta) ** 2 * (s + 1) - alpha * beta * (s + 2)) /
+      (alpha * beta * (s + 2) * (s + 3))
+    const mu3Beta = skewBeta * Math.pow(varBeta, 1.5)
+    const mu4Beta = (kurtBeta + 3) * varBeta * varBeta
+    const dB = (1 - theta) * d
+    const dU = -theta * d
+    const mu4 = theta * (mu4Beta + 4 * mu3Beta * dB + 6 * varBeta * dB * dB + dB ** 4) +
+      (1 - theta) * (w ** 4 / 80 + 6 * varUnif * dU * dU + dU ** 4)
+    return mu4 / (v * v) - 3
+  }
+
   static _fitInit (data) {
     // Endpoints from sample extremes; neutral shape params (2,2) and theta=0.5 avoid degenerate beta boundary
     const lo = Math.min(...data)

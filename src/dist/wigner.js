@@ -62,4 +62,32 @@ export default class Wigner extends Distribution {
     const r = this.p.R * this.p.R
     return 0.5 + x * Math.sqrt(r - x * x) / (Math.PI * r) + Math.asin(x / this.p.R) / Math.PI
   }
+
+  /**
+   * @returns {number} The mean of the distribution (zero by symmetry).
+   */
+  mean () {
+    return 0
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return this.p.R * this.p.R / 4
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution (zero by symmetry).
+   */
+  skewness () {
+    return 0
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    return -1
+  }
 }

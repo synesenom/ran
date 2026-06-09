@@ -1,3 +1,4 @@
+import { beta } from '../special'
 import Distribution from './_distribution'
 
 /**
@@ -72,5 +73,50 @@ export default class Kumaraswamy extends Distribution {
 
   _q (p) {
     return Math.pow(1 - Math.pow(1 - p, 1 / this.p.b), 1 / this.p.a)
+  }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { a, b } = this.p
+    return b * beta(1 + 1 / a, b)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { a, b } = this.p
+    const m1 = b * beta(1 + 1 / a, b)
+    const m2 = b * beta(1 + 2 / a, b)
+    return m2 - m1 * m1
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { a, b } = this.p
+    const m1 = b * beta(1 + 1 / a, b)
+    const m2 = b * beta(1 + 2 / a, b)
+    const m3 = b * beta(1 + 3 / a, b)
+    const mu2 = m2 - m1 * m1
+    const mu3 = m3 - 3 * m2 * m1 + 2 * m1 ** 3
+    return mu3 / Math.pow(mu2, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { a, b } = this.p
+    const m1 = b * beta(1 + 1 / a, b)
+    const m2 = b * beta(1 + 2 / a, b)
+    const m3 = b * beta(1 + 3 / a, b)
+    const m4 = b * beta(1 + 4 / a, b)
+    const mu2 = m2 - m1 * m1
+    const mu4 = m4 - 4 * m3 * m1 + 6 * m2 * m1 ** 2 - 3 * m1 ** 4
+    return mu4 / (mu2 * mu2) - 3
   }
 }

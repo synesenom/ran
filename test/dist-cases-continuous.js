@@ -105,6 +105,11 @@ export default [{
 }, {
   name: 'Arcsine',
   fit: { params: [1, 5], seed: 42, n: 200, tolerances: { a: 0.4, b: 0.4 } },
+  // mean = (a+b)/2, var = (b-a)²/8, skewness = 0 (symmetric), kurtosis = -3/2 (exact)
+  moments: [
+    { params: [5, 25], mean: 15, variance: 50, skewness: 0, kurtosis: -1.5 },
+    { params: [0, 1], mean: 0.5, variance: 0.125, skewness: 0, kurtosis: -1.5 }
+  ],
   invalidParams: [
     [], // all params required
     [1, 1], [2, 1] // a < b
@@ -150,6 +155,11 @@ export default [{
 }, {
   name: 'BaldingNichols',
   fit: { params: [0.1, 0.3], seed: 42, n: 200, tolerances: { F: 0.05, p: 0.05 } },
+  // mean = p, var = p(1-p)F (exact); skew/kurt via underlying Beta(alpha,beta) — exact for symmetric case
+  moments: [
+    { params: [0.5, 0.5], mean: 0.5, variance: 0.125, skewness: 0, kurtosis: -1.5 },
+    { params: [0.1, 0.3], mean: 0.3, variance: 0.021 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 0.5], [0, 0.5], [1, 0.5], [2, 0.5], // 0 < F < 1
@@ -346,6 +356,11 @@ export default [{
 }, {
   name: 'Beta',
   fit: { params: [2, 3], seed: 42, n: 200, tolerances: { alpha: 0.6, beta: 0.8 } },
+  // mean = a/(a+b), var = ab/((a+b)²(a+b+1)), exact rational values
+  moments: [
+    { params: [2, 2], mean: 0.5, variance: 0.05, skewness: 0, kurtosis: -6 / 7 },
+    { params: [2, 5], mean: 2 / 7, variance: 5 / 196, skewness: 4 / (3 * Math.sqrt(5)), kurtosis: -3 / 25 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 2], [0, 2], // alpha > 0
@@ -391,6 +406,14 @@ export default [{
 }, {
   name: 'BetaPrime',
   fit: { params: [2, 3], seed: 42, n: 200, tolerances: { alpha: 0.7, beta: 1.0 } },
+  // Moments are Infinity below threshold: mean (β≤1), variance (β≤2), skewness (β≤3), kurtosis (β≤4)
+  moments: [
+    { params: [2, 5], mean: 0.5, variance: 0.25, skewness: 4, kurtosis: 66 },
+    { params: [2, 1], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [2, 2], mean: 2, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [2, 3], mean: 1, variance: 2, skewness: Infinity, kurtosis: Infinity },
+    { params: [2, 4], mean: 2 / 3, variance: 5 / 9, skewness: 14 / Math.sqrt(5), kurtosis: Infinity }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 2], [0, 2], // alpha > 0
@@ -432,6 +455,19 @@ export default [{
   ]
 }, {
   name: 'BetaRectangular',
+  // (2,2,0.5,5,25): muBeta=muUnif=15 so d=0; exact values from mixing formula
+  moments: [
+    // (2,2,0.5,5,25): muBeta=muUnif=15 → d=0 eliminates offset terms; exact from mixing formula
+    { params: [2, 2, 0.5, 5, 25], mean: 15, variance: 80 / 3, skewness: 0, kurtosis: -111 / 112 },
+    // (2,3,0.5,0,1): muBeta=2/5 ≠ muUnif=0.5 → d=-1/10 exercises offset terms; exact rational closed forms
+    {
+      params: [2, 3, 0.5, 0, 1],
+      mean: 9 / 20,
+      variance: 77 / 1200,
+      skewness: (123 / 28000) / Math.pow(77 / 1200, 1.5),
+      kurtosis: -35418 / 41503
+    }
+  ],
   invalidParams: [
     [], // all params required
     [1, 1, -1, 0, 1], [1, 1, 2, 0, 1], // 0 <= theta <= 1
@@ -2621,6 +2657,16 @@ export default [{
 }, {
   name: 'Kumaraswamy',
   fit: { params: [2, 3], seed: 42, n: 200, tolerances: { a: 0.7, b: 1.0 } },
+  // Raw moments m_n = b*B(1+n/a, b); exact rational closed forms for a=b=2
+  moments: [
+    {
+      params: [2, 2],
+      mean: 8 / 15,
+      variance: 11 / 225,
+      skewness: -32 / (77 * Math.sqrt(11)),
+      kurtosis: -1389 / 1694
+    }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // a > 0
@@ -3949,6 +3995,11 @@ export default [{
 }, {
   name: 'PERT',
   fit: { params: [0, 3, 6], seed: 42, n: 200, tolerances: { a: 0.3, c: 0.3, b: 0.5 } },
+  // alpha+beta always equals 6; var = (c-a)²*alpha*beta/252; skew/kurt scale-invariant from Beta(alpha,beta)
+  moments: [
+    { params: [0, 0.5, 1], mean: 0.5, variance: 1 / 28, skewness: 0, kurtosis: -2 / 3 },
+    { params: [5, 15, 25], mean: 15, variance: 100 / 7, skewness: 0, kurtosis: -2 / 3 }
+  ],
   invalidParams: [
     [], // all params required
     [0.5, 0.5, 1], [0.8, 0.5, 1], // a < b
@@ -4101,6 +4152,11 @@ export default [{
 }, {
   name: 'R',
   fit: { params: [3], seed: 42, n: 200, tolerances: { c: 0.5 } },
+  // X = 2U-1, U~Beta(c/2,c/2); mean=0, var=1/(c+1), skewness=0, kurtosis=-6/(c+3)
+  moments: [
+    { params: [4], mean: 0, variance: 0.2, skewness: 0, kurtosis: -6 / 7 },
+    { params: [1], mean: 0, variance: 0.5, skewness: 0, kurtosis: -1.5 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // c > 0
@@ -5043,6 +5099,11 @@ export default [{
 }, {
   name: 'Wigner',
   fit: { params: [3], seed: 42, n: 300, tolerances: { R: 0.5 } },
+  // mean=0 (symmetric), var=R²/4, skewness=0, kurtosis=-1 (exact)
+  moments: [
+    { params: [2], mean: 0, variance: 1, skewness: 0, kurtosis: -1 },
+    { params: [0.5], mean: 0, variance: 0.0625, skewness: 0, kurtosis: -1 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // R > 0

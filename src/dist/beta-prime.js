@@ -58,4 +58,41 @@ export default class BetaPrime extends Beta {
   _cdf (x) {
     return super._cdf(x / (1 + x))
   }
+
+  /**
+   * @returns {number} The mean of the distribution, or `Infinity` when `beta <= 1`.
+   */
+  mean () {
+    return this.p.beta > 1 ? this.p.alpha / (this.p.beta - 1) : Infinity
+  }
+
+  /**
+   * @returns {number} The variance of the distribution, or `Infinity` when `beta <= 2`.
+   */
+  variance () {
+    const { alpha, beta } = this.p
+    return beta > 2
+      ? alpha * (alpha + beta - 1) / ((beta - 2) * (beta - 1) ** 2)
+      : Infinity
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution, or `Infinity` when `beta <= 3`.
+   */
+  skewness () {
+    const { alpha, beta } = this.p
+    if (beta <= 3) return Infinity
+    return 2 * (2 * alpha + beta - 1) / (beta - 3) *
+      Math.sqrt((beta - 2) / (alpha * (alpha + beta - 1)))
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution, or `Infinity` when `beta <= 4`.
+   */
+  kurtosis () {
+    const { alpha, beta } = this.p
+    if (beta <= 4) return Infinity
+    return 6 * (alpha * (alpha + beta - 1) * (5 * beta - 11) + (beta - 1) ** 2 * (beta + 1)) /
+      (alpha * (alpha + beta - 1) * (beta - 3) * (beta - 4))
+  }
 }

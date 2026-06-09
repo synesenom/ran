@@ -51,6 +51,21 @@ export default class PERT extends Beta {
     return super._cdf((x - this.p.a) / (this.p.c - this.p.a))
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return (this.p.a + 4 * this.p.b + this.p.c) / 6
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    // alpha+beta = 6 always for PERT; variance of Beta(alpha,beta) on [a,c] = (c-a)^2 * alpha*beta / 252
+    return (this.p.c - this.p.a) ** 2 * this.p.alpha * this.p.beta / 252
+  }
+
   // Blocks Beta's log-barrier: fit() operates in (a, b, c) space, not (alpha, beta). See decisions/0017-beta-fit-penalty.md §3.
   static _fitPenalty () { return 0 }
 
