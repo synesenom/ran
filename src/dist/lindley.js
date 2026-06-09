@@ -69,6 +69,40 @@ export default class Lindley extends Distribution {
     return -Math.expm1(-tx) - Math.exp(-tx) * tx / this.c.thetaP1
   }
 
+  /**
+   * @returns {number} (θ+2) / (θ(θ+1)).
+   */
+  mean () {
+    return (this.p.theta + 2) / (this.p.theta * this.c.thetaP1)
+  }
+
+  /**
+   * @returns {number} (θ²+4θ+2) / (θ²(θ+1)²).
+   */
+  variance () {
+    const t = this.p.theta
+    return (t * t + 4 * t + 2) / (t * t * this.c.thetaP1 * this.c.thetaP1)
+  }
+
+  /**
+   * @returns {number} 2(θ³+6θ²+6θ+2) / (θ²+4θ+2)^(3/2).
+   */
+  skewness () {
+    const t = this.p.theta
+    const denom = t * t + 4 * t + 2
+    return 2 * (t * t * t + 6 * t * t + 6 * t + 2) / Math.pow(denom, 1.5)
+  }
+
+  /**
+   * @returns {number} (9θ⁴+72θ³+132θ²+96θ+24) / (θ²+4θ+2)² − 3.
+   */
+  kurtosis () {
+    const t = this.p.theta
+    const denom = t * t + 4 * t + 2
+    return (9 * t * t * t * t + 72 * t * t * t + 132 * t * t + 96 * t + 24) /
+      (denom * denom) - 3
+  }
+
   _q (p) {
     // F(x)=p inverts in closed form via Lambert W. x >= 0 forces the argument below -1, so
     // the W_{-1} branch is the correct root. The (1 - p) tail mirrors _generator.

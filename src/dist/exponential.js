@@ -59,6 +59,34 @@ export default class Exponential extends Distribution {
     return -Math.log(1 - p) / this.p.lambda
   }
 
+  /**
+   * @returns {number} Reciprocal of the rate.
+   */
+  mean () {
+    return 1 / this.p.lambda
+  }
+
+  /**
+   * @returns {number} Reciprocal of the squared rate.
+   */
+  variance () {
+    return 1 / (this.p.lambda * this.p.lambda)
+  }
+
+  /**
+   * @returns {number} 2 (constant for all exponential distributions).
+   */
+  skewness () {
+    return 2
+  }
+
+  /**
+   * @returns {number} 6 (constant excess kurtosis for all exponential distributions).
+   */
+  kurtosis () {
+    return 6
+  }
+
   static get _fitInitIsExact () {
     // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
     return true

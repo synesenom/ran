@@ -36,6 +36,44 @@ export default class QExponential extends GeneralizedPareto {
     }]
   }
 
+  /**
+   * @returns {number} sigma/(1-xi), or Infinity when xi >= 1.
+   */
+  mean () {
+    // See solutions/distribution/2026-06-09-1400-qexponential-parent-params-and-ieee754-boundaries.md
+    const xi = this.p.xi
+    if (xi >= 1) return Infinity
+    return this.p.sigma / (1 - xi)
+  }
+
+  /**
+   * @returns {number} sigma^2/((1-xi)^2*(1-2*xi)), or Infinity when xi >= 1/2.
+   */
+  variance () {
+    const xi = this.p.xi
+    if (xi >= 0.5) return Infinity
+    const om = 1 - xi
+    return this.p.sigma * this.p.sigma / (om * om * (1 - 2 * xi))
+  }
+
+  /**
+   * @returns {number} 2*(1+xi)*sqrt(1-2*xi)/(1-3*xi), or Infinity when xi >= 1/3.
+   */
+  skewness () {
+    const xi = this.p.xi
+    if (xi >= 1 / 3) return Infinity
+    return 2 * (1 + xi) * Math.sqrt(1 - 2 * xi) / (1 - 3 * xi)
+  }
+
+  /**
+   * @returns {number} Excess kurtosis of the GP distribution, or Infinity when xi >= 1/4.
+   */
+  kurtosis () {
+    const xi = this.p.xi
+    if (xi >= 0.25) return Infinity
+    return 3 * (1 - 2 * xi) * (2 * xi * xi + xi + 3) / ((1 - 3 * xi) * (1 - 4 * xi)) - 3
+  }
+
   static _fitInit (data) {
     // MOM: r=Var/E²=(2−q)/(4−3q) inverts to q=(2−4r)/(1−3r) for r>1/3 (where variance exists)
     const n = data.length

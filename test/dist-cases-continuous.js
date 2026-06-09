@@ -1253,7 +1253,8 @@ export default [{
   name: 'Exponential',
   fit: { params: [2], seed: 42, n: 200, tolerances: { lambda: 0.3 } },
   moments: [
-    { params: [1], mean: 1, variance: 1, skewness: 2, kurtosis: 6, tol: 1e-6 }
+    { params: [1], mean: 1, variance: 1, skewness: 2, kurtosis: 6, tol: 1e-6 },
+    { params: [2], mean: 0.5, variance: 0.25, skewness: 2, kurtosis: 6, tol: 1e-14 }
   ],
   invalidParams: [
     [], // all params required
@@ -1302,6 +1303,11 @@ export default [{
   ]
 }, {
   name: 'ExponentialLogarithmic',
+  // mpmath dps=50: E[X^r] = -r! * Li_{r+1}(1-p) / (beta^r * log(p))
+  moments: [
+    { params: [0.5, 1], mean: 0.8399955201356528, variance: 0.8444771467889185, skewness: 2.2661594902602507, kurtosis: 7.686896235585082, tol: 1e-12 },
+    { params: [0.9, 2], mean: 0.4869840967400797, variance: 0.24352316354391362, skewness: 2.0396737765878914, kurtosis: 6.240030844096259, tol: 1e-12 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], [1, 1], [2, 1], // 0 < p < 1
@@ -2189,6 +2195,28 @@ export default [{
   ]
 }, {
   name: 'Hyperexponential',
+  // mpmath dps=50: E[X^r] = sum_i w_i * r! / rate_i^r; central moments via cumulant expansion
+  moments: [
+    // Degenerate: all same rate → equals Exponential(2)
+    {
+      params: [[{ weight: 1, rate: 2 }, { weight: 1, rate: 2 }]],
+      mean: 0.5,
+      variance: 0.25,
+      skewness: 2,
+      kurtosis: 6,
+      tol: 1e-14
+    },
+    // Asymmetric: weights [1,3] (→ [0.25, 0.75] normalised), rates [0.5, 4]
+    {
+      name: 'asymmetric mixture',
+      params: [[{ weight: 1, rate: 0.5 }, { weight: 3, rate: 4 }]],
+      mean: 0.6875,
+      variance: 1.62109375,
+      skewness: 4.070642937853181,
+      kurtosis: 22.930712730439833,
+      tol: 1e-12
+    }
+  ],
   invalidParams: [
     [], // all params required
     [[{ weight: -1, rate: 1 }, { weight: 1, rate: 1 }]], // w_min > 0
@@ -2722,6 +2750,11 @@ export default [{
 }, {
   name: 'Lindley',
   fit: { params: [1.5], seed: 42, n: 500, tolerances: { theta: 0.3 } },
+  // mpmath dps=50: E[X^r] = r! * (theta+r+1) / (theta^r * (theta+1))
+  moments: [
+    { params: [1], mean: 1.5, variance: 1.75, skewness: 1.6198477414681167, kurtosis: 3.795918367346939, tol: 1e-14 },
+    { params: [2], mean: 2 / 3, variance: 7 / 18, skewness: 1.7562881611387888, kurtosis: 4.469387755102041, tol: 1e-14 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // theta > 0
@@ -3999,6 +4032,25 @@ export default [{
   ]
 }, {
   name: 'QExponential',
+  // GP canonical: xi=(q-1)/(2-q), sigma=1/(lam*(2-q)); mpmath dps=50
+  moments: [
+    // q=1 → standard Exponential: all moments match Exponential(1)
+    { params: [1, 1], mean: 1, variance: 1, skewness: 2, kurtosis: 6, tol: 1e-14 },
+    // q=0.5, λ=2: all four moments finite
+    { params: [0.5, 2], mean: 0.25, variance: 0.0375, skewness: 0.8606629658238705, kurtosis: 2 / 21, tol: 1e-14 },
+    // exact boundary q=5/4 (xi=1/3 in IEEE 754): skewness and kurtosis diverge; mean=2, var=12
+    { params: [1.25, 1], mean: 2, variance: 12, skewness: Infinity, kurtosis: Infinity, tol: 1e-14 },
+    // exact boundary q=3/2 (xi=1 in IEEE 754): all four moments diverge
+    { params: [1.5, 1], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    // above q=3/2 (xi > 1): all four moments diverge
+    { params: [1.501, 1], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    // above q=4/3 (xi > 1/2): variance and higher diverge; mean=10/3
+    { params: [1.35, 1], mean: 10 / 3, variance: Infinity, skewness: Infinity, kurtosis: Infinity, tol: 1e-14 },
+    // above q=5/4 (xi > 1/3): skewness and kurtosis diverge
+    { params: [1.26, 1], mean: 25 / 12, variance: 14.599116161616163, skewness: Infinity, kurtosis: Infinity, tol: 1e-12 },
+    // above q=6/5 (xi > 1/4): only kurtosis diverges
+    { params: [1.21, 1], mean: 1.7241379310344829, variance: 6.347012886846418, skewness: 8.554553158805867, kurtosis: Infinity, tol: 1e-12 }
+  ],
   invalidParams: [
     [], // all params required
     [2, 1], [3, 1], // q < 2
