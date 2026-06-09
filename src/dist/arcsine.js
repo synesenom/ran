@@ -72,4 +72,32 @@ export default class Arcsine extends Distribution {
     const s = Math.sin(this.c.halfPi * p)
     return (s * s) * this.c.range + this.p.a
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return (this.p.a + this.p.b) / 2
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return (this.p.b - this.p.a) ** 2 / 8
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution (zero by symmetry).
+   */
+  skewness () {
+    return 0
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    return -1.5
+  }
 }

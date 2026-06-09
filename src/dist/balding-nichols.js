@@ -41,6 +41,20 @@ export default class BaldingNichols extends Beta {
     }]
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.p
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return this.p.p * (1 - this.p.p) * this.p.F
+  }
+
   // Blocks Beta's log-barrier: fit() operates in (F, p) space, not (alpha, beta). See decisions/0017-beta-fit-penalty.md §3.
   static _fitPenalty () { return 0 }
 

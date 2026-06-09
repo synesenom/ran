@@ -58,4 +58,18 @@ export default class R extends Beta {
   _cdf (x) {
     return super._cdf((x + 1) / 2)
   }
+
+  /**
+   * @returns {number} The mean of the distribution (zero by symmetry).
+   */
+  mean () {
+    return 0
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return 1 / (this.p.c + 1)
+  }
 }

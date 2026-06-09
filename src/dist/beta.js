@@ -89,4 +89,39 @@ export default class Beta extends Distribution {
   _cdf (x) {
     return regularizedBetaIncomplete(this.p.alpha, this.p.beta, x)
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const s = this.p.alpha + this.p.beta
+    return this.p.alpha / s
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const s = this.p.alpha + this.p.beta
+    return this.p.alpha * this.p.beta / (s * s * (s + 1))
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { alpha, beta } = this.p
+    const s = alpha + beta
+    return 2 * (beta - alpha) * Math.sqrt(s + 1) / ((s + 2) * Math.sqrt(alpha * beta))
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { alpha, beta } = this.p
+    const s = alpha + beta
+    return 6 * ((alpha - beta) ** 2 * (s + 1) - alpha * beta * (s + 2)) /
+      (alpha * beta * (s + 2) * (s + 3))
+  }
 }
