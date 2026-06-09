@@ -70,6 +70,45 @@ export default class Hyperexponential extends Distribution {
     return Math.min(neumaier(this.p.rates.map((d, i) => this.p.weights[i] * -Math.expm1(-d * x))), 1)
   }
 
+  /**
+   * @returns {number} Weighted sum of reciprocal rates.
+   */
+  mean () {
+    return neumaier(this.p.rates.map((r, i) => this.p.weights[i] / r))
+  }
+
+  /**
+   * @returns {number} Second central moment of the mixture.
+   */
+  variance () {
+    const m1 = this.mean()
+    const m2 = 2 * neumaier(this.p.rates.map((r, i) => this.p.weights[i] / (r * r)))
+    return m2 - m1 * m1
+  }
+
+  /**
+   * @returns {number} Standardised third central moment of the mixture.
+   */
+  skewness () {
+    const m1 = this.mean()
+    const m2 = 2 * neumaier(this.p.rates.map((r, i) => this.p.weights[i] / (r * r)))
+    const m3 = 6 * neumaier(this.p.rates.map((r, i) => this.p.weights[i] / (r * r * r)))
+    const v = m2 - m1 * m1
+    return (m3 - 3 * m1 * m2 + 2 * m1 * m1 * m1) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} Excess kurtosis of the mixture.
+   */
+  kurtosis () {
+    const m1 = this.mean()
+    const m2 = 2 * neumaier(this.p.rates.map((r, i) => this.p.weights[i] / (r * r)))
+    const m3 = 6 * neumaier(this.p.rates.map((r, i) => this.p.weights[i] / (r * r * r)))
+    const m4 = 24 * neumaier(this.p.rates.map((r, i) => this.p.weights[i] / (r * r * r * r)))
+    const v = m2 - m1 * m1
+    return (m4 - 4 * m1 * m3 + 6 * m1 * m1 * m2 - 3 * m1 * m1 * m1 * m1) / (v * v) - 3
+  }
+
   static _fitInit (data) {
     // k=2 is the smallest non-trivial mixture and avoids over-fitting on default fit() calls; users
     // who need more components must construct the distribution manually. Splitting the sorted data
