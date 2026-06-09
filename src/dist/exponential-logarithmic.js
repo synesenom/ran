@@ -99,7 +99,6 @@ export default class ExponentialLogarithmic extends Distribution {
     const m2 = -2 * this.c.li3 / (b * b * this.c.lnp)
     const m3 = -6 * this.c.li4 / (b * b * b * this.c.lnp)
     const v = m2 - m1 * m1
-    if (!(v > 0)) return NaN
     return (m3 - 3 * m1 * m2 + 2 * m1 * m1 * m1) / Math.pow(v, 1.5)
   }
 
@@ -113,7 +112,6 @@ export default class ExponentialLogarithmic extends Distribution {
     const m3 = -6 * this.c.li4 / (b * b * b * this.c.lnp)
     const m4 = -24 * this.c.li5 / (b * b * b * b * this.c.lnp)
     const v = m2 - m1 * m1
-    if (!(v > 0)) return NaN
     return (m4 - 4 * m1 * m3 + 6 * m1 * m1 * m2 - 3 * m1 * m1 * m1 * m1) / (v * v) - 3
   }
 }

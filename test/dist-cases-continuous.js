@@ -2195,6 +2195,7 @@ export default [{
   ]
 }, {
   name: 'Hyperexponential',
+  fit: { params: [[{ weight: 1, rate: 0.5 }, { weight: 3, rate: 4 }]], seed: 42, n: 200 },
   // mpmath dps=50: E[X^r] = sum_i w_i * r! / rate_i^r; central moments via cumulant expansion
   moments: [
     // Degenerate: all same rate → equals Exponential(2)
@@ -2590,6 +2591,10 @@ export default [{
   ]
 }, {
   name: 'Kolmogorov',
+  // Numerical integration via base-class tanhSinh fallback; values cross-checked via scipy.stats.kstwobign.
+  moments: [
+    { params: [], mean: 0.8750290626060117, variance: 0.056841672954311306, skewness: 2.083444432904076, kurtosis: -2.747747898832202, tol: 1e-6 }
+  ],
   invalidParams: [],
   cases: [{
     params: () => []
