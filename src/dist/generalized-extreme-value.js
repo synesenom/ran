@@ -7,6 +7,10 @@ import Distribution from './_distribution'
  *
  * with $c \ne 0$. Support: $x \in (-\infty, 1 / c]$ if $c > 0$, $x \in [1 / c, \infty)$ otherwise.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; c) = \exp\!\left(-(1 - cx)^{1/c}\right)$
+ *
  * @class GeneralizedExtremeValue
  * @memberof ran.dist
  * @constructor

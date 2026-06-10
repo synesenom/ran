@@ -11,6 +11,10 @@ import Distribution from './_distribution'
  *
  * where $\alpha, \beta > 0$ and $\lambda \ge 0$. Support: $x \in \[0, 1\]$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \alpha, \beta, \lambda) = e^{-\lambda/2}\sum_{k=0}^{\infty} \frac{(\lambda/2)^k}{k!}\, I_x(\alpha + k,\, \beta)$
+ *
  * @class NoncentralBeta
  * @memberof ran.dist
  * @constructor

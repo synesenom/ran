@@ -9,6 +9,12 @@ import Distribution from './_distribution'
  *
  * with $k \in \mathbb{N}^+$, $\lambda \ge 0$ and $I_n(x)$ is the modified Bessel function of the first kind with order $n$. Support: $x \in [0, \infty)$. When $\lambda = 0$ the distribution degenerates to a central $\chi^2(k)$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; k, \lambda) = 1 - Q_{k/2}\!\left(\sqrt{\lambda},\, \sqrt{x}\right)$
+ *
+ * where $Q_M(a, b)$ is the Marcum Q-function.
+ *
  * @class NoncentralChi2
  * @memberof ran.dist
  * @constructor

@@ -8,6 +8,12 @@ import Distribution from './_distribution'
  *
  * with $n > 1$. Support: $x \in \mathbb{R}$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; n) = F_t\!\left(x\sqrt{n-1};\, n-1\right)$
+ *
+ * where $F_t$ is the Student's t CDF
+ *
  * @class StudentZ
  * @memberof ran.dist
  * @constructor

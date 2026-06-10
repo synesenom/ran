@@ -8,6 +8,10 @@ import Nakagami from './nakagami'
  *
  * where $m \ge 0.5$ and $\omega > 0$. Support: $x > 0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; m, \omega) = P\!\left(m,\, \frac{m}{\omega} x^2\right)$
+ *
  * @class Hoyt
  * @memberof ran.dist
  * @deprecated Use [ran.dist.Nakagami]{@link ran.dist.Nakagami} instead. This class will be removed in a future major release.

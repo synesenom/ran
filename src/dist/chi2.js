@@ -10,6 +10,10 @@ import Distribution from './_distribution'
  *
  * where $k \in \mathbb{N}^+$. Support: $x > 0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; k) = P(k/2,\, x/2)$
+ *
  * @class Chi2
  * @memberof ran.dist
  * @constructor

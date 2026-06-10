@@ -8,6 +8,10 @@ import Distribution from './_distribution'
  *
  * with $x_\mathrm{min}, x_\mathrm{max} \in \mathbb{Z}$ and $x_\mathrm{min} < x_\mathrm{max}$. Support: $k \in \{x_\mathrm{min}, ..., x_\mathrm{max}\}$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(k; x_{\min}, x_{\max}) = \frac{\lfloor k \rfloor - x_{\min} + 1}{x_{\max} - x_{\min} + 1}$
+ *
  * @class DiscreteUniform
  * @memberof ran.dist
  * @constructor

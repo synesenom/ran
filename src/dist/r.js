@@ -8,6 +8,10 @@ import Distribution from './_distribution'
  *
  * where $c > 0$. Support: $x \in \[-1, 1\]$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; c) = I_{(x+1)/2}(c/2,\, c/2)$
+ *
  * @class R
  * @memberof ran.dist
  * @constructor

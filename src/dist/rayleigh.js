@@ -7,6 +7,10 @@ import Weibull from './weibull'
  *
  * with $\sigma > 0$. Support: $x \ge 0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \sigma) = 1 - e^{-x^2/(2\sigma^2)}$
+ *
  * @class Rayleigh
  * @memberof ran.dist
  * @constructor

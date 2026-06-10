@@ -9,6 +9,10 @@ import Distribution from './_distribution'
  *
  * with $n \in \mathbb{N}^+$. Support: $x \in \[0, n\]$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; n) = \frac{1}{n!}\sum_{k=0}^{\lfloor x \rfloor} (-1)^k \binom{n}{k} (x - k)^n$
+ *
  * @class IrwinHall
  * @memberof ran.dist
  * value is 1.

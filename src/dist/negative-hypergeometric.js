@@ -9,6 +9,10 @@ import Distribution from './_distribution'
  *
  * with $N \in \mathbb{N}_0$, $K \in \{0, 1, ..., N\}$ and $r \in \{0, 1, ..., N - K\}$. Support: $k \in \{0, ..., K\}$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(k; N, K, r) = \sum_{i=0}^{k} \frac{\binom{i+r-1}{i}\binom{N-r-i}{K-i}}{\binom{N}{K}}$
+ *
  * @class NegativeHypergeometric
  * @memberof ran.dist
  * @constructor

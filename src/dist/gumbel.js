@@ -7,6 +7,10 @@ import Distribution from './_distribution'
  *
  * with $z = \frac{x - \mu}{\beta}$ and $\mu \in \mathbb{R}$, $\beta > 0$. Support: $x \in \mathbb{R}$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \mu, \beta) = \exp\!\left(-e^{-(x-\mu)/\beta}\right)$
+ *
  * @class Gumbel
  * @memberof ran.dist
  * @constructor

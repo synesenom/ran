@@ -9,6 +9,10 @@ import Distribution from './_distribution'
  *
  * where $\mu \in \[0, 1\]$. Support: $k \in \mathbb{N}^+$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(k; \mu) = \sum_{i=1}^{k} \frac{(\mu i)^{i-1} e^{-\mu i}}{i!}$
+ *
  * @class Borel
  * @memberof ran.dist
  * @constructor

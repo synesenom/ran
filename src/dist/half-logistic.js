@@ -7,6 +7,10 @@ import Distribution from './_distribution'
  *
  * Support: $x \in [0, \infty)$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x) = \tanh(x/2)$
+ *
  * @class HalfLogistic
  * @memberof ran.dist
  * @constructor

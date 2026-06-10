@@ -8,6 +8,10 @@ import NoncentralBeta from './noncentral-beta'
  *
  * where $d_1, d_2 \in \mathbb{N}^+$ and $\lambda > 0$. Support: $x \ge 0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; d_1, d_2, \lambda) = e^{-\lambda/2}\sum_{k=0}^{\infty} \frac{(\lambda/2)^k}{k!}\, I_{d_1 x / (d_2 + d_1 x)}\!\left(\tfrac{d_1}{2} + k,\, \tfrac{d_2}{2}\right)$
+ *
  * @class NoncentralF
  * @memberof ran.dist
  * @constructor

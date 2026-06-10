@@ -7,6 +7,10 @@ import F from './f'
  *
  * with $d_1, d_2 > 0$. Support: $x \in \mathbb{R}$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; d_1, d_2) = I_{d_1 e^{2x}/(d_2 + d_1 e^{2x})}(d_1/2,\, d_2/2)$
+ *
  * @class FisherZ
  * @memberof ran.dist
  * @constructor

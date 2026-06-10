@@ -11,6 +11,10 @@ import powell from '../algorithms/powell'
  *
  * where $w_i, \lambda_i > 0$. Support: $x \ge 0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \mathbf{w}, \boldsymbol{\lambda}) = \sum_{i=1}^{n} w_i \left(1 - e^{-\lambda_i x}\right)$
+ *
  * @class Hyperexponential
  * @memberof ran.dist
  * object with two properties: weight and rate.

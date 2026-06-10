@@ -7,6 +7,10 @@ import Distribution from './_distribution'
  *
  * with $a \in (0, 1)$. Support: $k \in \mathbb{N}^+$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(k; a) = 1 - (1 - a)^k (1 + ka)$
+ *
  * @class FlorySchulz
  * @memberof ran.dist
  * @constructor

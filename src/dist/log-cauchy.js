@@ -7,6 +7,10 @@ import Cauchy from './cauchy'
  *
  * with $\mu \in \mathbb{R}$ and $\sigma > 0$. Support: $x > 0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \mu, \sigma) = \frac{1}{2} + \frac{1}{\pi}\arctan\!\left(\frac{\ln x - \mu}{\sigma}\right)$
+ *
  * @class LogCauchy
  * @memberof ran.dist
  * @constructor

@@ -9,6 +9,10 @@ import rBeta from './_beta'
  *
  * with $\alpha, \beta > 0$. Support: $k \in \{1, 2, 3, \ldots\}$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(k; \alpha, \beta) = 1 - \frac{B(\alpha, \beta + k)}{B(\alpha, \beta)}$
+ *
  * @class BetaGeometric
  * @memberof ran.dist
  * @param {number} alpha First shape parameter.

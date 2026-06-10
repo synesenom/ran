@@ -9,6 +9,12 @@ import Distribution from './_distribution'
  *
  * with $\nu \in \mathbb{N}^+$. Support: $x > 0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \nu) = Q\!\left(\frac{\nu}{2},\, \frac{1}{2x}\right)$
+ *
+ * where $Q(a,x)$ is the regularized upper incomplete gamma function.
+ *
  * @class InverseChi2
  * @memberof ran.dist
  * @constructor

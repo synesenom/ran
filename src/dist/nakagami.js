@@ -9,6 +9,10 @@ import Distribution from './_distribution'
  *
  * where $m \in \mathbb{R}$, $m \ge 0.5$ and $\Omega > 0$. Support: $x > 0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; m, \Omega) = P\!\left(m,\, \frac{m}{\Omega} x^2\right)$
+ *
  * @class Nakagami
  * @memberof ran.dist
  * @constructor

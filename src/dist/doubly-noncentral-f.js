@@ -8,6 +8,10 @@ import DoublyNoncentralBeta from './doubly-noncentral-beta'
  * where $d_1, d_2 \in \mathbb{N}^+$ and $\lambda_1, \lambda_2 \ge 0$. Support: $x > 0$.
  * Formula from M. L. Tiku. Series expansions for the doubly non-central F-distribution. *Australian Journal of Statistics*, 7(2):78–89, 1965.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; d_1, d_2, \lambda_1, \lambda_2) = F_{\mathrm{DNB}}\!\left(\frac{d_1 x}{d_2 + d_1 x};\, \tfrac{d_1}{2}, \tfrac{d_2}{2}, \lambda_1, \lambda_2\right)$
+ *
  * @class DoublyNoncentralF
  * @memberof ran.dist
  * @constructor

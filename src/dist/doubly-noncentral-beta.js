@@ -14,6 +14,10 @@ import Distribution from './_distribution'
  * where $\alpha, \beta > 0$ and $\lambda_1, \lambda_2 \ge 0$. Support: $x \in (0, 1)$.
  * Formula from C. Orsi. New insights into non-central beta distributions. arXiv:1706.08557, 2017, Eq. (21).
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \alpha, \beta, \lambda_1, \lambda_2) = e^{-(\lambda_1 + \lambda_2)/2} \sum_{k=0}^{\infty} \sum_{l=0}^{\infty} \frac{(\lambda_1/2)^k}{k!} \frac{(\lambda_2/2)^l}{l!} I_x(\alpha + k,\, \beta + l)$
+ *
  * @class DoublyNoncentralBeta
  * @memberof ran.dist
  * @constructor

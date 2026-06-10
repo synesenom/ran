@@ -7,6 +7,10 @@ import Distribution from './_distribution'
  *
  * with $\alpha, \beta, \sigma > 0$. Support: $x \in (\sigma, \infty)$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \alpha, \beta, \sigma) = 1 - e^{-\alpha y - \beta y^2}$
+ *
  * @class Benini
  * @memberof ran.dist
  * @constructor

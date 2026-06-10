@@ -7,6 +7,10 @@ import Distribution from './_distribution'
  *
  * Support: $k \in \{-1, 1\}$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(k) = \begin{cases} 0 & k < -1 \\ \tfrac{1}{2} & -1 \le k < 1 \\ 1 & k \ge 1 \end{cases}$
+ *
  * @class Rademacher
  * @memberof ran.dist
  * @constructor

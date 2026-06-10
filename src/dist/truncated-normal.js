@@ -11,6 +11,10 @@ import { erfinv } from '../special'
  * The functions $\phi$ and $\Phi$ denote the probability density and cumulative distribution functions of the normal
  * distribution. Finally, $\mu \in \mathbb{R}$, $\sigma > 0$ and $b > a$. Support: $x \in [a, b]$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \mu, \sigma, a, b) = \frac{\Phi\!\left(\frac{x-\mu}{\sigma}\right) - \Phi\!\left(\frac{a-\mu}{\sigma}\right)}{\Phi\!\left(\frac{b-\mu}{\sigma}\right) - \Phi\!\left(\frac{a-\mu}{\sigma}\right)}$
+ *
  * @class TruncatedNormal
  * @memberof ran.dist
  * @constructor

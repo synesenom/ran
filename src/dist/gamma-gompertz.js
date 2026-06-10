@@ -7,6 +7,10 @@ import Distribution from './_distribution'
  *
  * with $b, s, \beta > 0$. Support: $x \ge 0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; b, s, \beta) = 1 - \left(\frac{\beta}{\beta + e^{bx} - 1}\right)^{s}$
+ *
  * @class GammaGompertz
  * @memberof ran.dist
  * @constructor

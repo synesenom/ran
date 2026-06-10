@@ -14,6 +14,10 @@ import NoncentralT from './noncentral-t'
  * where $\nu \in \mathbb{N}^+$, $\mu \in \mathbb{R}$ and $\theta > 0$. Support: $x \in \mathbb{R}$.
  * Implementation is based on Section 10.4.1.2 in Marc S. Paolella. Intermediate Probability: A Computational Approach. (2007)
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \nu, \mu, \theta) = e^{-\theta/2} \sum_{j=0}^{\infty} \frac{(\theta/2)^j}{j!}\, F_{t_{\mathrm{nc}}}(x;\, \nu + 2j,\, \mu)$
+ *
  * @class DoublyNoncentralT
  * @memberof ran.dist
  * @constructor

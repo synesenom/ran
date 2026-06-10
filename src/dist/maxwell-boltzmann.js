@@ -10,6 +10,10 @@ import Distribution from './_distribution'
  *
  * with $a > 0$. Support: $x > 0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; a) = P\!\left(\frac{3}{2},\, \frac{x^2}{2a^2}\right)$
+ *
  * @class MaxwellBoltzmann
  * @memberof ran.dist
  * @constructor

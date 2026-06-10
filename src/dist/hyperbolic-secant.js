@@ -7,6 +7,10 @@ import Distribution from './_distribution'
  *
  * Support: $x \in \mathbb{R}$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x) = \frac{2}{\pi}\arctan\!\left(e^{\pi x/2}\right)$
+ *
  * @class HyperbolicSecant
  * @memberof ran.dist
  * @constructor

@@ -7,6 +7,10 @@ import Distribution from './_distribution'
  *
  * with $a, b > 0$ and $a < b$. Support: $x \in \[a, b\]$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; a, b) = \frac{\ln x - \ln a}{\ln b - \ln a}$
+ *
  * @class Reciprocal
  * @memberof ran.dist
  * @constructor

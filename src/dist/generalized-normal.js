@@ -10,6 +10,10 @@ import Distribution from './_distribution'
  * where $\mu \in \mathbb{R}$ and $\alpha, \beta > 0$. Support: $x \in \mathbb{R}$. It is also a special case of the
  * [generalized gamma distribution]{@link #dist.GeneralizedGamma}.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \mu, \alpha, \beta) = \tfrac{1}{2} + \tfrac{1}{2}\operatorname{sgn}(x - \mu)\, P\!\left(\frac{1}{\beta},\, \left(\frac{|x - \mu|}{\alpha}\right)^{\beta}\right)$
+ *
  * @class GeneralizedNormal
  * @memberof ran.dist
  * @constructor

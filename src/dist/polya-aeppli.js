@@ -9,6 +9,10 @@ import poisson from './_poisson'
  *
  * where $\lambda > 0$ and $\theta \in (0, 1)$. Support: $k \in \mathbb{N}_0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(k; \lambda, \theta) = \sum_{i=0}^{k} f(i;\, \lambda, \theta)$
+ *
  * @class PolyaAeppli
  * @memberof ran.dist
  * @constructor

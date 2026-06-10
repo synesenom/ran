@@ -8,6 +8,10 @@ import Distribution from './_distribution'
  *
  * where $w_k > 0$. Support: $k \in \mathbb{N}_0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(k; \mathbf{w}) = \frac{\sum_{i=0}^{k} w_i}{\sum_{j} w_j}$
+ *
  * @class Categorical
  * @memberof ran.dist
  * @constructor

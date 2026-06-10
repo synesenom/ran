@@ -8,6 +8,10 @@ import Distribution from './_distribution'
  *
  * with $a > 0$ and $b \in (0, 1]$. Support: $x \in [1, \infty)$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; a, b) = 1 - x^{b-1} e^{a(1 - x^b)/b}$
+ *
  * @class BenktanderII
  * @memberof ran.dist
  * @constructor
