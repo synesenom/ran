@@ -1916,10 +1916,10 @@ export default [{
     { params: [0, 2, 0.5], mean: 4, variance: Infinity, skewness: NaN, kurtosis: NaN },
     // xi=1: mean threshold — exact boundary
     { params: [0, 2, 1], mean: Infinity, variance: Infinity, skewness: NaN, kurtosis: NaN },
-    // xi=1/3: skewness threshold — var finite (27), skew/kurt NaN
-    { params: [0, 2, 1 / 3], mean: 3, variance: 27, skewness: NaN, kurtosis: NaN },
-    // xi=0.25: kurtosis threshold — skew finite (5√2), kurt NaN; var=128/9
-    { params: [0, 2, 0.25], mean: 8 / 3, variance: 128 / 9, skewness: 5 * Math.SQRT2, kurtosis: NaN, tol: 1e-12 }
+    // xi=1/3: skewness threshold — var finite (27), third moment diverges so skew=Infinity; kurt=Infinity
+    { params: [0, 2, 1 / 3], mean: 3, variance: 27, skewness: Infinity, kurtosis: Infinity },
+    // xi=0.25: kurtosis threshold — skew finite (5√2), fourth moment diverges so kurt=Infinity; var=128/9
+    { params: [0, 2, 0.25], mean: 8 / 3, variance: 128 / 9, skewness: 5 * Math.SQRT2, kurtosis: Infinity, tol: 1e-12 }
   ],
   fit: { params: [1, 2, 0.2], seed: 42, n: 200, tolerances: { mu: 0.3, sigma: 0.8, xi: 0.3 } },
   invalidParams: [
@@ -3323,8 +3323,8 @@ export default [{
     { params: [2, 1], mean: Infinity, variance: Infinity, skewness: NaN, kurtosis: NaN },
     // alpha=2: variance threshold — mean finite, var/skew/kurt diverge
     { params: [2, 2], mean: 2, variance: Infinity, skewness: NaN, kurtosis: NaN },
-    // alpha=4: kurtosis threshold — skew finite (5√2), kurt NaN
-    { params: [2, 4], mean: 2 / 3, variance: 8 / 9, skewness: 5 * Math.SQRT2, kurtosis: NaN, tol: 1e-12 }
+    // alpha=4: kurtosis threshold — skew finite (5√2), fourth moment diverges so kurt=Infinity
+    { params: [2, 4], mean: 2 / 3, variance: 8 / 9, skewness: 5 * Math.SQRT2, kurtosis: Infinity, tol: 1e-12 }
   ],
   fit: { params: [2, 4], seed: 42, n: 200, tolerances: { lambda: 0.8, alpha: 1.0 } },
   invalidParams: [
@@ -4012,10 +4012,10 @@ export default [{
     { params: [1, 2], mean: 2, variance: Infinity, skewness: NaN, kurtosis: NaN },
     // alpha=1: mean threshold — exact boundary
     { params: [1, 1], mean: Infinity, variance: Infinity, skewness: NaN, kurtosis: NaN },
-    // alpha=3: skewness threshold — var finite, skew/kurt NaN
-    { params: [1, 3], mean: 1.5, variance: 0.75, skewness: NaN, kurtosis: NaN },
-    // alpha=4: kurtosis threshold — skew finite, kurt NaN; skew=5√2
-    { params: [1, 4], mean: 4 / 3, variance: 2 / 9, skewness: 5 * Math.SQRT2, kurtosis: NaN, tol: 1e-12 }
+    // alpha=3: skewness threshold — var finite, third moment diverges so skew=Infinity; kurt=Infinity
+    { params: [1, 3], mean: 1.5, variance: 0.75, skewness: Infinity, kurtosis: Infinity },
+    // alpha=4: kurtosis threshold — skew finite (5√2), fourth moment diverges so kurt=Infinity
+    { params: [1, 4], mean: 4 / 3, variance: 2 / 9, skewness: 5 * Math.SQRT2, kurtosis: Infinity, tol: 1e-12 }
   ],
   invalidParams: [
     [], // all params required

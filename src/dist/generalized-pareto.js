@@ -83,7 +83,9 @@ export default class GeneralizedPareto extends Distribution {
    */
   skewness () {
     const { xi } = this.p
-    return xi < 1 / 3 ? 2 * (1 + xi) * Math.sqrt(1 - 2 * xi) / (1 - 3 * xi) : NaN
+    if (xi < 1 / 3) return 2 * (1 + xi) * Math.sqrt(1 - 2 * xi) / (1 - 3 * xi)
+    // variance finite (xi<0.5) but third moment diverges: standardized ratio -> Infinity not NaN
+    return xi < 0.5 ? Infinity : NaN
   }
 
   /**
@@ -91,7 +93,8 @@ export default class GeneralizedPareto extends Distribution {
    */
   kurtosis () {
     const { xi } = this.p
-    return xi < 0.25 ? 3 * (1 - 2 * xi) * (2 * xi * xi + xi + 3) / ((1 - 3 * xi) * (1 - 4 * xi)) - 3 : NaN
+    if (xi < 0.25) return 3 * (1 - 2 * xi) * (2 * xi * xi + xi + 3) / ((1 - 3 * xi) * (1 - 4 * xi)) - 3
+    return xi < 0.5 ? Infinity : NaN
   }
 
   static _fitInit (data) {

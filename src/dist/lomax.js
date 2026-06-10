@@ -75,7 +75,8 @@ export default class Lomax extends Distribution {
    */
   skewness () {
     const { alpha } = this.p
-    return alpha > 3 ? 2 * (1 + alpha) / (alpha - 3) * Math.sqrt((alpha - 2) / alpha) : NaN
+    if (alpha > 3) return 2 * (1 + alpha) / (alpha - 3) * Math.sqrt((alpha - 2) / alpha)
+    return alpha > 2 ? Infinity : NaN
   }
 
   /**
@@ -83,7 +84,8 @@ export default class Lomax extends Distribution {
    */
   kurtosis () {
     const { alpha } = this.p
-    return alpha > 4 ? 6 * (alpha * alpha * alpha + alpha * alpha - 6 * alpha - 2) / (alpha * (alpha - 3) * (alpha - 4)) : NaN
+    if (alpha > 4) return 6 * (alpha * alpha * alpha + alpha * alpha - 6 * alpha - 2) / (alpha * (alpha - 3) * (alpha - 4))
+    return alpha > 2 ? Infinity : NaN
   }
 
   static _fitInit (data) {
