@@ -54,6 +54,38 @@ export default class Lomax extends Distribution {
     return this.p.lambda * (Math.pow(1 - p, -1 / this.p.alpha) - 1)
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { lambda, alpha } = this.p
+    return alpha > 1 ? lambda / (alpha - 1) : Infinity
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { lambda, alpha } = this.p
+    return alpha > 2 ? lambda * lambda * alpha / ((alpha - 1) * (alpha - 1) * (alpha - 2)) : Infinity
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { alpha } = this.p
+    return alpha > 3 ? 2 * (1 + alpha) / (alpha - 3) * Math.sqrt((alpha - 2) / alpha) : NaN
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { alpha } = this.p
+    return alpha > 4 ? 6 * (alpha * alpha * alpha + alpha * alpha - 6 * alpha - 2) / (alpha * (alpha - 3) * (alpha - 4)) : NaN
+  }
+
   static _fitInit (data) {
     // MOM: CV^2 = alpha/(alpha-2) links dispersion to tail index; lambda set via mean-alpha relation
     const n = data.length

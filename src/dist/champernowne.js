@@ -64,6 +64,21 @@ export default class Champernowne extends Distribution {
     return this.p.x0 + (2 / this.p.alpha) * Math.atanh(Math.tan((2 * p - 1) * this.c.atanK) / this.c.k)
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.x0
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    // The PDF is symmetric about x0 (cosh is even), so all odd central moments vanish.
+    return 0
+  }
+
   static _fitInit (data) {
     // Median seeds x0; Var[X] ≈ pi^2/(4*alpha^2) for the symmetric (lambda=0) hyperbolic secant case gives alpha
     const sorted = data.slice().sort((a, b) => a - b)

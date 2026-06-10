@@ -62,6 +62,38 @@ export default class GeneralizedPareto extends Distribution {
     return this.p.mu + this.p.sigma * y
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { mu, sigma, xi } = this.p
+    return xi < 1 ? mu + sigma / (1 - xi) : Infinity
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { sigma, xi } = this.p
+    return xi < 0.5 ? sigma * sigma / ((1 - xi) * (1 - xi) * (1 - 2 * xi)) : Infinity
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { xi } = this.p
+    return xi < 1 / 3 ? 2 * (1 + xi) * Math.sqrt(1 - 2 * xi) / (1 - 3 * xi) : NaN
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { xi } = this.p
+    return xi < 0.25 ? 3 * (1 - 2 * xi) * (2 * xi * xi + xi + 3) / ((1 - 3 * xi) * (1 - 4 * xi)) - 3 : NaN
+  }
+
   static _fitInit (data) {
     // mu at data minimum as threshold; MOM on shifted excesses: Var/E^2 = 1/(1-2*xi) gives xi and sigma
     const mu = Math.min(...data)
