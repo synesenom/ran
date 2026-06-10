@@ -55,6 +55,53 @@ export default class Reciprocal extends Distribution {
     return [a, b > a ? b : a * 10]
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const L = this.c.logB - this.c.logA
+    return (this.p.b - this.p.a) / L
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const L = this.c.logB - this.c.logA
+    const { a, b } = this.p
+    const mu = this.mean()
+    return (b * b - a * a) / (2 * L) - mu * mu
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const L = this.c.logB - this.c.logA
+    const { a, b } = this.p
+    const mu = this.mean()
+    const sigma2 = this.variance()
+    const e2 = (b * b - a * a) / (2 * L)
+    const e3 = (b * b * b - a * a * a) / (3 * L)
+    const mu3 = e3 - 3 * mu * e2 + 2 * mu * mu * mu
+    return mu3 / Math.pow(sigma2, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const L = this.c.logB - this.c.logA
+    const { a, b } = this.p
+    const mu = this.mean()
+    const sigma2 = this.variance()
+    const e2 = (b * b - a * a) / (2 * L)
+    const e3 = (b * b * b - a * a * a) / (3 * L)
+    const e4 = (b * b * b * b - a * a * a * a) / (4 * L)
+    const mu4 = e4 - 4 * mu * e3 + 6 * mu * mu * e2 - 3 * mu * mu * mu * mu
+    return mu4 / (sigma2 * sigma2) - 3
+  }
+
   _generator () {
     // Inverse transform sampling: q(u) for u ~ U(0,1).
     return this._q(this.r.next())

@@ -29,6 +29,34 @@ export default class HyperbolicSecant extends Distribution {
     return this._q(this.r.next())
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return 0
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return 1
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    return 0
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    return 2
+  }
+
   _pdf (x) {
     return 0.5 / Math.cosh(0.5 * Math.PI * x)
   }

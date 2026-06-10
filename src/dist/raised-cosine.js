@@ -36,6 +36,35 @@ export default class RaisedCosine extends Distribution {
     }]
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.mu
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return this.p.s * this.p.s * (1 / 3 - 2 / (Math.PI * Math.PI))
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    return 0
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const pi2 = Math.PI * Math.PI
+    return 6 * (90 - pi2 * pi2) / (5 * (pi2 - 6) * (pi2 - 6))
+  }
+
   _generator () {
     const u = this.r.next()
     // Bracket the quantile within the standardised support [-1, 1]; chandrupatla is stable

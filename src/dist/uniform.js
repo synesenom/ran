@@ -64,6 +64,34 @@ export default class Uniform extends Distribution {
     return true
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return (this.p.xmin + this.p.xmax) / 2
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return this.c.range * this.c.range / 12
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    return 0
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    return -1.2
+  }
+
   static _fitInit (data) {
     // Exact MLE: the tightest support containing the data, i.e. [min, max] (the support is closed
     // at both ends, so endpoints have finite density). Pad only for degenerate constant data,
