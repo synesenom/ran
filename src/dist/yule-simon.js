@@ -8,6 +8,12 @@ import Distribution from './_distribution'
  *
  * with $\rho > 0$ and $\mathrm{B}(x, y)$ is the beta function. Support: $k \in \mathbb{N}^+$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(k; \rho) = 1 - k\, B(k,\, \rho + 1)$
+ *
+ * where $B$ is the beta function
+ *
  * @class YuleSimon
  * @memberof ran.dist
  * @constructor

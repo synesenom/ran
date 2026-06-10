@@ -9,6 +9,10 @@ import Normal from './normal'
  *
  * with $\sigma > 0$. Support: $x \ge 0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \sigma) = \operatorname{erf}\!\left(\frac{x}{\sigma\sqrt{2}}\right)$
+ *
  * @class HalfNormal
  * @memberof ran.dist
  * @constructor

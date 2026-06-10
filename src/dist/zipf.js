@@ -8,6 +8,12 @@ import Distribution from './_distribution'
  *
  * with $s \ge 0$, $N \in \mathbb{N}^+$ and $H_{N, s}$ denotes the generalized harmonic number. Support: $k \in \{1, 2, ..., N\}$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(k; s, N) = \frac{H_{k, s}}{H_{N, s}}$
+ *
+ * where $H_{k, s} = \sum_{i=1}^{k} i^{-s}$.
+ *
  * @class Zipf
  * @memberof ran.dist
  * @constructor

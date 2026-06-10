@@ -11,6 +11,10 @@ import Distribution from './_distribution'
  *
  * with $\nu > 0$ and $\mathrm{B}(x, y)$ is the beta function. Support: $x \in \mathbb{R}$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \nu) = \begin{cases} \tfrac{1}{2} I_{\nu/(\nu+x^2)}(\nu/2,\, 1/2) & x \le 0 \\ 1 - \tfrac{1}{2} I_{\nu/(\nu+x^2)}(\nu/2,\, 1/2) & x > 0 \end{cases}$
+ *
  * @class StudentT
  * @memberof ran.dist
  * @constructor

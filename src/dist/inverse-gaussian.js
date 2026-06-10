@@ -9,6 +9,12 @@ import Distribution from './_distribution'
  *
  * with $\mu, \lambda > 0$. Support: $x > 0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \mu, \lambda) = \Phi\!\left(\sqrt{\frac{\lambda}{x}}\left(\frac{x}{\mu} - 1\right)\right) + e^{2\lambda/\mu}\,\Phi\!\left(-\sqrt{\frac{\lambda}{x}}\left(\frac{x}{\mu} + 1\right)\right)$
+ *
+ * where $\Phi$ is the standard normal CDF.
+ *
  * @class InverseGaussian
  * @memberof ran.dist
  * @see J. R. Michael, W. R. Schucany and R. W. Haas, "Generating Random Variates Using Transformations with Multiple Roots", Am. Stat. 30(2), 88–90, 1976.

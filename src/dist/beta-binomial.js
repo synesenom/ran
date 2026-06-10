@@ -9,6 +9,10 @@ import Distribution from './_distribution'
  *
  * with $n \in \mathbb{N}_0$ and $\alpha, \beta > 0$. Support: $k \in \{0, ..., n\}$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(k; n, \alpha, \beta) = \sum_{i=0}^{k} \binom{n}{i} \frac{B(i + \alpha,\, n - i + \beta)}{B(\alpha, \beta)}$
+ *
  * @class BetaBinomial
  * @memberof ran.dist
  * @constructor

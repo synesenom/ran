@@ -7,6 +7,10 @@ import Distribution from './_distribution'
  *
  * where $x_0 \in \mathbb{R}$. Support: $x \in \mathbb{R}$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; x_0) = \begin{cases} 0 & x < x_0 \\ 1 & x \ge x_0 \end{cases}$
+ *
  * @class Degenerate
  * @memberof ran.dist
  * @constructor

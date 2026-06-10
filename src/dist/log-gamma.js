@@ -10,6 +10,10 @@ import Distribution from './_distribution'
  *
  * where $\alpha, \beta > 0$ and $\mu \ge 0$. Support: $x \in [\mu, \infty)$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \alpha, \beta, \mu) = P\!\left(\alpha,\, \beta\ln(x - \mu + 1)\right)$
+ *
  * @class LogGamma
  * @memberof ran.dist
  * @constructor

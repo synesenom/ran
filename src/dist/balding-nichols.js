@@ -9,6 +9,10 @@ import Distribution from './_distribution'
  * where $\alpha = \frac{1 - F}{F} p$, $\beta = \frac{1 - F}{F} (1 - p)$ and $F, p \in (0, 1)$.
  * Support: $x \in (0, 1)$. It is simply a re-parametrization of the [beta distribution]{@link #dist.Beta}.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; F, p) = I_x\!\left(\frac{(1-F)p}{F},\, \frac{(1-F)(1-p)}{F}\right)$
+ *
  * @class BaldingNichols
  * @memberof ran.dist
  * @see D.J. Balding and R.A. Nichols, "A method for quantifying differentiation between populations at multi-allelic loci and its implications for investigating identity and paternity", Genetica 96, 3–12, 1995.

@@ -7,6 +7,10 @@ import Distribution from './_distribution'
  *
  * with $L, H > 0$, $H > L$ and $\alpha > 0$. Support: $x \in \[L, H\]$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; L, H, \alpha) = \frac{1 - (L/x)^{\alpha}}{1 - (L/H)^{\alpha}}$
+ *
  * @class BoundedPareto
  * @memberof ran.dist
  * @constructor

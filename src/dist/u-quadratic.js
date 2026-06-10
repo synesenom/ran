@@ -8,6 +8,12 @@ import Distribution from './_distribution'
  * where $\alpha = \frac{12}{(b - a)^3}$, $\beta = \frac{a + b}{2}$, $a, b \in \mathbb{R}$ and $a < b$.
  * Support: $x \in \[a, b\]$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; a, b) = \frac{\alpha}{3}\!\left[(x - \beta)^3 + \left(\frac{b-a}{2}\right)^3\right]$
+ *
+ * where $\alpha = 12/(b-a)^3$ and $\beta = (a+b)/2$
+ *
  * @class UQuadratic
  * @memberof ran.dist
  * @constructor

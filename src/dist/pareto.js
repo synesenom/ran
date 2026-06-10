@@ -7,6 +7,10 @@ import Distribution from './_distribution'
  *
  * with $x_\mathrm{min}, \alpha > 0$. Support: $x \in [x_\mathrm{min}, \infty)$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; x_{\min}, \alpha) = 1 - \left(\frac{x_{\min}}{x}\right)^{\alpha}$
+ *
  * @class Pareto
  * @memberof ran.dist
  * @constructor

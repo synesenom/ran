@@ -9,6 +9,10 @@ import { erfinv } from '../special'
  *
  * with $\mu \in \mathbb{R}$, $\beta, \gamma > 0$, $z = \sqrt{\frac{x - \mu}{\beta}}$ and $\phi(x)$ is the probability density function of the standard [normal distribution]{@link #dist.Normal}. Support: $x \in (\mu, \infty)$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \mu, \beta, \gamma) = \Phi\!\left(\frac{1}{\gamma}\left(\sqrt{\frac{x - \mu}{\beta}} - \sqrt{\frac{\beta}{x - \mu}}\right)\right)$
+ *
  * @class BirnbaumSaunders
  * @memberof ran.dist
  * @constructor

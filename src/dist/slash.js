@@ -10,6 +10,10 @@ import Normal from './normal'
  * where $\phi(x)$ is the probability density function of the standard [normal distribution]{@link #dist.Normal}.
  * Support: $x \in \mathbb{R}$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x) = \Phi(x) - \frac{\phi(x) - \phi(0)}{x}$
+ *
  * @class Slash
  * @memberof ran.dist
  * @constructor

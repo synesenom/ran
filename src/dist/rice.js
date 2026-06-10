@@ -10,6 +10,12 @@ import Distribution from './_distribution'
  *
  * with $\nu, \sigma > 0$ and $I_0(x)$ is the modified Bessel function of the first kind with order zero. Support: $x \in [0, \infty)$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \nu, \sigma) = 1 - Q_1\!\left(\frac{\nu}{\sigma},\, \frac{x}{\sigma}\right)$
+ *
+ * where $Q_1$ is the Marcum Q-function of order 1
+ *
  * @class Rice
  * @memberof ran.dist
  * @constructor

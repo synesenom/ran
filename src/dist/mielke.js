@@ -8,6 +8,10 @@ import Distribution from './_distribution'
  *
  * with $k, s > 0$. Support: $x > 0$. It can be viewed as a re-parametrization of the [Dagum distribution]{@link #dist.Dagum}.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; k, s) = \left(1 + x^{-s}\right)^{-k/s}$
+ *
  * @class Mielke
  * @memberof ran.dist
  * @constructor

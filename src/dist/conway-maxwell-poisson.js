@@ -9,6 +9,12 @@ import PreComputed from './_pre-computed'
  * where $\lambda > 0$, $\nu > 0$, and $Z(\lambda, \nu) = \sum_{j=0}^\infty \frac{\lambda^j}{(j!)^\nu}$.
  * Support: $k \in \mathbb{N}_0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(k; \lambda, \nu) = \sum_{i=0}^{k} \frac{\lambda^i}{(i!)^{\nu} Z(\lambda, \nu)}$
+ *
+ * where $Z(\lambda, \nu) = \sum_{j=0}^{\infty} \frac{\lambda^j}{(j!)^{\nu}}$ is the normalizing constant
+ *
  * @class ConwayMaxwellPoisson
  * @memberof ran.dist
  * @constructor

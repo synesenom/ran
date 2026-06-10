@@ -11,6 +11,10 @@ import Distribution from './_distribution'
  *
  * with $r \in \mathbb{N}^+$ and $p \in \[0, 1)$. Support: $k \in \mathbb{N}_0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(k; r, p) = 1 - I_p(k + 1,\, r)$
+ *
  * @class NegativeBinomial
  * @memberof ran.dist
  * integer.

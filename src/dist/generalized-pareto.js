@@ -7,6 +7,10 @@ import Distribution from './_distribution'
  *
  * with $\mu, \xi \in \mathbb{R}$, $\sigma > 0$ and $z = \frac{x - \mu}{\sigma}$. Support: $x \in [\mu, \infty)$ if $\xi \ge 0$, $x \in \[\mu, \mu - \sigma / \xi\]$ otherwise.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \mu, \sigma, \xi) = 1 - \left(1 + \xi\,\frac{x - \mu}{\sigma}\right)^{-1/\xi}$
+ *
  * @class GeneralizedPareto
  * @memberof ran.dist
  * @constructor

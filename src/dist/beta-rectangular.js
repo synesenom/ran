@@ -8,6 +8,10 @@ import Distribution from './_distribution'
  *
  * with $\alpha, \beta > 0$, $\theta \in \[0, 1\]$, $a, b \in \mathbb{R}$, $a < b$ and $\mathrm{B}(x, y)$ is the beta function. Support: $x \in \[a, b\]$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \alpha, \beta, \theta, a, b) = \theta\, I_z(\alpha, \beta) + (1 - \theta)\, z$
+ *
  * @class BetaRectangular
  * @memberof ran.dist
  * @constructor

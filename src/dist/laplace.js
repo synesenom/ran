@@ -7,6 +7,10 @@ import Distribution from './_distribution'
  *
  * where $\mu \in \mathbb{R}$ and $b > 0$. Support: $x \in \mathbb{R}$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \mu, b) = \begin{cases} \tfrac{1}{2} e^{(x-\mu)/b} & x < \mu \\ 1 - \tfrac{1}{2} e^{-(x-\mu)/b} & x \ge \mu \end{cases}$
+ *
  * @class Laplace
  * @memberof ran.dist
  * @constructor

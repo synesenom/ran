@@ -9,6 +9,10 @@ import Distribution from './_distribution'
  *
  * with $\mu_1, \mu_2 \ge 0$ and $I_n(x)$ is the modified Bessel function of the first kind with order $n$. Support: $k \in \mathbb{N}$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(k; \mu_1, \mu_2) = \sum_{i=-\infty}^{k} f(i;\, \mu_1, \mu_2)$
+ *
  * @class Skellam
  * @memberof ran.dist
  * @constructor

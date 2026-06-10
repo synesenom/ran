@@ -10,6 +10,10 @@ import { erf, erfinv } from '../special'
  * functions of the [normal distribution]{@link #dist.Normal}.
  * Support: $x > 0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; \alpha, \beta) = \frac{\Phi(\alpha - \beta/x)}{\Phi(\alpha)}$
+ *
  * @class Alpha
  * @memberof ran.dist
  * @see Johnson, Kotz, and Balakrishnan, Continuous Univariate Distributions Vol. 1, 2nd ed., John Wiley and Sons, 1994, p. 173.

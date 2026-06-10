@@ -7,6 +7,10 @@ import Distribution from './_distribution'
  *
  * where $a, b, c, d \in \mathbb{R}$, $a < d$, $a \le b < c$ and $c \le d$. Support: $x \in \[a, d\]$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; a, b, c, d) = \begin{cases} \dfrac{(x-a)^2}{(b-a)(d+c-a-b)} & a \le x < b \\[4pt] \dfrac{2x-a-b}{d+c-a-b} & b \le x < c \\[4pt] 1 - \dfrac{(d-x)^2}{(d-c)(d+c-a-b)} & c \le x \le d \end{cases}$
+ *
  * @class Trapezoidal
  * @memberof ran.dist
  * @constructor

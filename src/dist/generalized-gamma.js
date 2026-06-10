@@ -9,6 +9,10 @@ import Distribution from './_distribution'
  *
  * where $a, d, p > 0$. Support: $x > 0$.
  *
+ * Cumulative distribution function:
+ *
+ * $F(x; a, d, p) = P\!\left(\frac{d}{p},\, \left(\frac{x}{a}\right)^{p}\right)$
+ *
  * @class GeneralizedGamma
  * @memberof ran.dist
  * @constructor
