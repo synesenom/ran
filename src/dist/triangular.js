@@ -72,6 +72,37 @@ export default class Triangular extends Distribution {
       : this.p.b - Math.sqrt((1 - p) * this.c.baBc)
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return (this.p.a + this.p.b + this.p.c) / 3
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { a, b, c } = this.p
+    return (a * a + b * b + c * c - a * b - a * c - b * c) / 18
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { a, b, c } = this.p
+    const v = a * a + b * b + c * c - a * b - a * c - b * c
+    return Math.SQRT2 * (a + b - 2 * c) * (2 * a - b - c) * (a - 2 * b + c) / (5 * v * Math.sqrt(v))
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    return -0.6
+  }
+
   static _fitInit (data) {
     // Endpoints from sample extremes; mode via method-of-moments: E[X] = (a+b+c)/3 → c = 3μ̂ - a - b
     const n = data.length

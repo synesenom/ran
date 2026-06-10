@@ -60,6 +60,35 @@ export default class UQuadratic extends Distribution {
     return Math.cbrt(3 * p / this.c.alpha - this.c.halfRangeCubed) + this.c.beta
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.c.beta
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const r = (this.p.b - this.p.a) / 2
+    return 3 * r * r / 5
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    return 0
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    return -38 / 21
+  }
+
   static _fitInit (data) {
     // MLEs for bounded-support endpoints are the sample extremes; small buffer satisfies a < b
     const lo = Math.min(...data)

@@ -82,6 +82,58 @@ export default class Trapezoidal extends Distribution {
     }
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { a, b, c, d } = this.p
+    const h = this.c.scale
+    return (d * d + d * c + c * c - a * a - a * b - b * b) / (3 * h)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { a, b, c, d } = this.p
+    const h = this.c.scale
+    const mu = this.mean()
+    const e2 = ((d * d + c * c) * (d + c) - (a * a + b * b) * (a + b)) / (6 * h)
+    return e2 - mu * mu
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { a, b, c, d } = this.p
+    const h = this.c.scale
+    const mu = this.mean()
+    const sigma2 = this.variance()
+    const e2 = ((d * d + c * c) * (d + c) - (a * a + b * b) * (a + b)) / (6 * h)
+    const e3 = (d * d * d * d + d * d * d * c + d * d * c * c + d * c * c * c + c * c * c * c -
+      (a * a * a * a + a * a * a * b + a * a * b * b + a * b * b * b + b * b * b * b)) / (10 * h)
+    const mu3 = e3 - 3 * mu * e2 + 2 * mu * mu * mu
+    return mu3 / Math.pow(sigma2, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { a, b, c, d } = this.p
+    const h = this.c.scale
+    const mu = this.mean()
+    const sigma2 = this.variance()
+    const e2 = ((d * d + c * c) * (d + c) - (a * a + b * b) * (a + b)) / (6 * h)
+    const e3 = (d * d * d * d + d * d * d * c + d * d * c * c + d * c * c * c + c * c * c * c -
+      (a * a * a * a + a * a * a * b + a * a * b * b + a * b * b * b + b * b * b * b)) / (10 * h)
+    const e4 = (d * d * d * d * d + d * d * d * d * c + d * d * d * c * c + d * d * c * c * c + d * c * c * c * c + c * c * c * c * c -
+      (a * a * a * a * a + a * a * a * a * b + a * a * a * b * b + a * a * b * b * b + a * b * b * b * b + b * b * b * b * b)) / (15 * h)
+    const mu4 = e4 - 4 * mu * e3 + 6 * mu * mu * e2 - 3 * mu * mu * mu * mu
+    return mu4 / (sigma2 * sigma2) - 3
+  }
+
   static _fitInit (data) {
     // Endpoints from sample extremes; flat-region boundaries from quartiles as a balanced initial simplex
     const sorted = [...data].sort((x, y) => x - y)

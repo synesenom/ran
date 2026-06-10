@@ -47,6 +47,54 @@ export default class Bradford extends Distribution {
     return [mean > 0 && mean < 0.5 ? Math.max(1e-3, 6 * (1 - 2 * mean)) : 1]
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const L = this.c.log1pc
+    const c = this.p.c
+    return (c - L) / (c * L)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const L = this.c.log1pc
+    const c = this.p.c
+    const mu = this.mean()
+    return 1 / (2 * L) - 1 / (c * L) + 1 / (c * c) - mu * mu
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const L = this.c.log1pc
+    const c = this.p.c
+    const mu = this.mean()
+    const sigma2 = this.variance()
+    const e2 = 1 / (2 * L) - 1 / (c * L) + 1 / (c * c)
+    const e3 = 1 / (3 * L) - 1 / (2 * c * L) + 1 / (c * c * L) - 1 / (c * c * c)
+    const mu3 = e3 - 3 * mu * e2 + 2 * mu * mu * mu
+    return mu3 / Math.pow(sigma2, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const L = this.c.log1pc
+    const c = this.p.c
+    const mu = this.mean()
+    const sigma2 = this.variance()
+    const e2 = 1 / (2 * L) - 1 / (c * L) + 1 / (c * c)
+    const e3 = 1 / (3 * L) - 1 / (2 * c * L) + 1 / (c * c * L) - 1 / (c * c * c)
+    const e4 = 1 / (4 * L) - 1 / (3 * c * L) + 1 / (2 * c * c * L) - 1 / (c * c * c * L) + 1 / Math.pow(c, 4)
+    const mu4 = e4 - 4 * mu * e3 + 6 * mu * mu * e2 - 3 * Math.pow(mu, 4)
+    return mu4 / (sigma2 * sigma2) - 3
+  }
+
   _generator () {
     // Inverse transform sampling
     return this._q(this.r.next())

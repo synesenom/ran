@@ -63,6 +63,36 @@ export default class Anglit extends Distribution {
     return this.p.mu + this.p.beta * (Math.asin(Math.sqrt(p)) - Math.PI / 4)
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.mu
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const beta = this.p.beta
+    return beta * beta * (Math.PI * Math.PI - 8) / 16
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    return 0
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const pi2 = Math.PI * Math.PI
+    return 2 * (96 - pi2 * pi2) / ((pi2 - 8) * (pi2 - 8))
+  }
+
   static _fitInit (data) {
     // mu from sample mean (location); beta from support width: range = π·beta/2 → beta = 2·range/π
     const n = data.length

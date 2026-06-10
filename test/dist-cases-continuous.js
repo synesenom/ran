@@ -59,6 +59,11 @@ export default [{
 }, {
   name: 'Anglit',
   fit: { params: [1, 1.5], seed: 42, n: 200, tolerances: { mu: 0.3, beta: 0.4 } },
+  // Analytical formulas derived by integrating cos(2z) on [-pi/4, pi/4]; kurtosis = 2(96-pi^4)/(pi^2-8)^2
+  moments: [
+    { params: [0, 2], mean: 0, variance: 0.4674011002723395, skewness: 0, kurtosis: -0.8062497699541868 },
+    { params: [3, 0.5], mean: 3, variance: 0.02921256876702122, skewness: 0, kurtosis: -0.8062497699541868 }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // beta > 0
@@ -597,6 +602,11 @@ export default [{
   ]
 }, {
   name: 'Bradford',
+  // E[X^n] = integral of c*x^n / (L*(1+c*x)) dx = sum_{k=1}^{n} (-1)^{n-k} / (k*c^{n-k}*L) + (-1)^n / c^n
+  moments: [
+    { params: [2], mean: 0.4102392266268375, variance: 0.08170377693661426, skewness: 0.37753880703889264, kurtosis: -1.0438072281298791 },
+    { params: [0.5], mean: 0.46630346237643167, variance: 0.08310588741110442, skewness: 0.14030192707077652, kurtosis: -1.1784390580955626 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // c > 0
@@ -2203,6 +2213,10 @@ export default [{
   ]
 }, {
   name: 'HyperbolicSecant',
+  // Characteristic function sech(t); var=1, kurt=2 are textbook results for this distribution
+  moments: [
+    { params: [], mean: 0, variance: 1, skewness: 0, kurtosis: 2 }
+  ],
   invalidParams: [],
   cases: [{
     params: () => [],
@@ -4206,6 +4220,11 @@ export default [{
 }, {
   name: 'RaisedCosine',
   fit: { params: [2, 3], seed: 42, n: 200, tolerances: { mu: 0.4, s: 0.4 } },
+  // kurt = 6(90-pi^4)/(5(pi^2-6)^2) from integration of x^4*(1+cos(pi*x))/2 on [-1,1]
+  moments: [
+    { params: [0, 2], mean: 0, variance: 0.5227638641946311, skewness: 0, kurtosis: -0.5937628755982807 },
+    { params: [3, 0.5], mean: 3, variance: 0.03267274151216444, skewness: 0, kurtosis: -0.5937628755982807 }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // s > 0
@@ -4294,6 +4313,11 @@ export default [{
 }, {
   name: 'Reciprocal',
   fit: { params: [1, 10], seed: 42, n: 300, tolerances: { a: 0.15, b: 0.3 } },
+  // E[X^n] = (b^n - a^n) / (n * ln(b/a)); central moments assembled from raw moments
+  moments: [
+    { params: [5, 25], mean: 12.426698691192238, variance: 31.977640006204666, skewness: 0.5482226050475976, kurtosis: -0.8704658282274682 },
+    { params: [1, 10], mean: 3.908650337129266, variance: 6.220029396270236, skewness: 0.7716049867661023, kurtosis: -0.5465295828101011 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 2], [0, 2], // a > 0
@@ -4642,6 +4666,12 @@ export default [{
 }, {
   name: 'Trapezoidal',
   fit: { params: [0, 1, 3, 5], seed: 42, n: 200, tolerances: { a: 0.3, b: 0.5, c: 1.0, d: 0.3 } },
+  // E[X^n] derived by piecewise integration over rising/flat/falling regions
+  moments: [
+    { params: [-3, -1, 1, 3], mean: 0, variance: 5 / 3, skewness: 0, kurtosis: -102 / 125 },
+    { params: [0, 0.3, 0.7, 1], mean: 0.5, variance: 0.04833333333333323, skewness: 0, kurtosis: -0.8853745541022264 },
+    { params: [0, 0.2, 0.6, 1], mean: 0.45714285714285713, variance: 0.04911564625850337, skewness: 0.15427607069286195, kurtosis: -0.86519133524147 }
+  ],
   invalidParams: [
     [], // all params required
     [1, 0.33, 0.67, 1], [2, 0.33, 0.67, 1], // a < d
@@ -4688,6 +4718,11 @@ export default [{
 }, {
   name: 'Triangular',
   fit: { params: [1, 5, 3], seed: 42, n: 200, tolerances: { a: 0.3, b: 0.3, c: 0.5 } },
+  // var=(a^2+b^2+c^2-ab-ac-bc)/18; skew=sqrt(2)*(a+b-2c)*(2a-b-c)*(a-2b+c)/(5*var_unnorm^1.5); kurt=-3/5
+  moments: [
+    { params: [5, 25, 15], mean: 15, variance: 50 / 3, skewness: 0, kurtosis: -0.6 },
+    { params: [0, 1, 0.1], mean: 11 / 30, variance: 0.050555555555555555, skewness: 0.5447775197614776, kurtosis: -0.6 }
+  ],
   invalidParams: [
     [], // all params required
     [1, 1, 0.5], [2, 1, 0.5], // a < b
@@ -4836,6 +4871,11 @@ export default [{
 }, {
   name: 'UQuadratic',
   fit: { params: [0, 4], seed: 42, n: 200, tolerances: { a: 0.3, b: 0.3 } },
+  // var=3(b-a)^2/20; kurt=-38/21 (exact, from mu4=3r^4/7, sigma^4=9r^4/25, r=(b-a)/2)
+  moments: [
+    { params: [5, 25], mean: 15, variance: 60, skewness: 0, kurtosis: -38 / 21 },
+    { params: [0, 1], mean: 0.5, variance: 0.15, skewness: 0, kurtosis: -38 / 21 }
+  ],
   invalidParams: [
     [], // all params required
     [1, 1], [2, 1] // a < b
@@ -4880,6 +4920,11 @@ export default [{
 }, {
   name: 'Uniform',
   fit: { params: [1, 5], seed: 42, n: 200, tolerances: { xmin: 0.2, xmax: 0.2 } },
+  // Exact: mean=(a+b)/2, var=(b-a)^2/12, skew=0, kurt=-6/5
+  moments: [
+    { params: [5, 25], mean: 15, variance: 100 / 3, skewness: 0, kurtosis: -1.2 },
+    { params: [0, 1], mean: 0.5, variance: 1 / 12, skewness: 0, kurtosis: -1.2 }
+  ],
   invalidParams: [
     [], // all params required
     [1, 1], [2, 1] // a < b
