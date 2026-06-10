@@ -7,10 +7,6 @@ import Distribution from './_distribution'
  *
  * with $\lambda, \alpha > 0$. Support: $x \ge 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \lambda, \alpha) = 1 - \left(1 + \frac{x}{\lambda}\right)^{-\alpha}$
- *
  * @class Lomax
  * @memberof ran.dist
  * @constructor

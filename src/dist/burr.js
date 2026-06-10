@@ -8,10 +8,6 @@ import Distribution from './_distribution'
  *
  * with $c, k > 0$. Support: $x > 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; c, k) = 1 - (1 + x^c)^{-k}$
- *
  * @class Burr
  * @memberof ran.dist
  * @constructor

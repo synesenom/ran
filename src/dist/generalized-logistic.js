@@ -7,10 +7,6 @@ import Distribution from './_distribution'
  *
  * with $z = \frac{x - \mu}{s}$, $\mu \in \mathbb{R}$ and $s, c > 0$. Support: $x \in \mathbb{R}$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \mu, s, c) = \frac{1}{\left(1 + e^{-(x-\mu)/s}\right)^{c}}$
- *
  * @class GeneralizedLogistic
  * @memberof ran.dist
  * @constructor

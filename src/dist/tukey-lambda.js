@@ -8,10 +8,6 @@ import chandrupatla from '../algorithms/chandrupatla'
  *
  * where $Q(p) = \frac{p^\lambda - (1 - p)^\lambda}{\lambda}$ and $F(x) = Q^{-1}(x)$. Support: $x \in \[-1/\lambda, 1/\lambda\]$ if $\lambda > 0$, otherwise $x \in \mathbb{R}$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \lambda) = \int_{-\infty}^{x} f(t;\, \lambda)\, \mathrm{d}t$
- *
  * @class TukeyLambda
  * @memberof ran.dist
  * @constructor

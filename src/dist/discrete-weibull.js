@@ -7,10 +7,6 @@ import Distribution from './_distribution'
  *
  * with $q \in (0, 1)$ and $\beta > 0$. Support: $k \in \mathbb{N}_0$.
  *
- * Cumulative distribution function:
- *
- * $F(k; q, \beta) = 1 - q^{(k+1)^{\beta}}$
- *
  * @class DiscreteWeibull
  * @memberof ran.dist
  * @constructor

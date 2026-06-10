@@ -9,10 +9,6 @@ import Distribution from './_distribution'
  *
  * with $d_1, d_2 > 0$. Support: $x > 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; d_1, d_2) = I_{d_1 x / (d_2 + d_1 x)}(d_1/2,\, d_2/2)$
- *
  * @class F
  * @memberof ran.dist
  * @constructor

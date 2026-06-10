@@ -7,10 +7,6 @@ import Distribution from './_distribution'
  *
  * with $c > 0$. Support: $x \ge 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; c) = \exp(-x^{-c})$
- *
  * @class InvertedWeibull
  * @memberof ran.dist
  * @constructor

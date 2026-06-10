@@ -10,10 +10,6 @@ import Distribution from './_distribution'
  * with $\alpha, \beta > 0$ and $\mathrm{B}(\alpha, \beta)$ is the beta function.
  * Support: $x \in (0, 1)$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \alpha, \beta) = I_x(\alpha, \beta)$
- *
  * @class Beta
  * @memberof ran.dist
  * @constructor

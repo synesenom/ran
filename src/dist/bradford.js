@@ -7,10 +7,6 @@ import Distribution from './_distribution'
  *
  * with $c > 0$. Support: $x \in \[0, 1\]$.
  *
- * Cumulative distribution function:
- *
- * $F(x; c) = \frac{\ln(1 + cx)}{\ln(1 + c)}$
- *
  * @class Bradford
  * @memberof ran.dist
  * @constructor

@@ -9,10 +9,6 @@ import Distribution from './_distribution'
  *
  * with $R > 0$. Support: $x \in \[-R, R\]$.
  *
- * Cumulative distribution function:
- *
- * $F(x; R) = \frac{1}{2} + \frac{x\sqrt{R^2 - x^2}}{\pi R^2} + \frac{\arcsin(x/R)}{\pi}$
- *
  * @class Wigner
  * @memberof ran.dist
  * @constructor

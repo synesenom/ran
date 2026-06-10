@@ -7,10 +7,6 @@ import Distribution from './_distribution'
  *
  * with $a, b, c \in \mathbb{R}$, $a < b$ and $a \le c \le b$. Support: $x \in \[a, b\]$.
  *
- * Cumulative distribution function:
- *
- * $F(x; a, b, c) = \begin{cases} \dfrac{(x-a)^2}{(b-a)(c-a)} & a \le x < c \\[4pt] 1 - \dfrac{(b-x)^2}{(b-a)(b-c)} & c \le x \le b \end{cases}$
- *
  * @class Triangular
  * @memberof ran.dist
  * @constructor

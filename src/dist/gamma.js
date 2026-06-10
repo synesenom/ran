@@ -10,10 +10,6 @@ import Distribution from './_distribution'
  *
  * where $\alpha, \beta > 0$. Support: $x > 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \alpha, \beta) = P(\alpha,\, \beta x)$
- *
  * @class Gamma
  * @memberof ran.dist
  * @see G. Marsaglia and W. W. Tsang, "A Simple Method for Generating Gamma Variables", ACM Trans. Math. Softw. 26(3), 363–372, 2000.

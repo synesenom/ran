@@ -8,10 +8,6 @@ import Distribution from './_distribution'
  *
  * with $\lambda > 0$. Support: $x \ge 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \lambda) = 1 - e^{-\lambda x}$
- *
  * @class Exponential
  * @memberof ran.dist
  * @constructor

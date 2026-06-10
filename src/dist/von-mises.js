@@ -10,12 +10,6 @@ import { MAX_ITER } from '../core/constants'
  *
  * with $\kappa > 0$. Support: $x \in \[-\pi, \pi\]$. Note that originally this distribution is periodic and therefore it is defined over $\mathbb{R}$, but (without the loss of general usage) this implementation still does limit the support on the bounded interval $\[-\pi, \pi\]$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \kappa) = \frac{1}{2} + \frac{x}{2\pi} + \frac{1}{\pi} \sum_{k=1}^{\infty} \frac{I_k(\kappa)}{k\, I_0(\kappa)} \sin(kx)$
- *
- * where $I_k$ is the modified Bessel function of the first kind
- *
  * @class VonMises
  * @memberof ran.dist
  * @see L. Barabesi, "Generating von Mises variates by the ratio-of-uniforms method", Statistica Applicata 7(4), 417–426, 1995.

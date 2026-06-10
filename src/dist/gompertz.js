@@ -7,10 +7,6 @@ import Distribution from './_distribution'
  *
  * with $\eta, b > 0$. Support: $x \ge 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \eta, b) = 1 - \exp\left(-\eta\left(e^{bx} - 1\right)\right)$
- *
  * @class Gompertz
  * @memberof ran.dist
  * @constructor

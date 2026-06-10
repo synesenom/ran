@@ -10,10 +10,6 @@ import Beta from './beta'
  * with $\alpha, \beta > 0$ and $\mathrm{B}(x, y)$ is the beta function.
  * Support: $x > 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \alpha, \beta) = I_{x/(1+x)}(\alpha, \beta)$
- *
  * @class BetaPrime
  * @memberof ran.dist
  * @constructor

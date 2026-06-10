@@ -8,12 +8,6 @@ import Distribution from './_distribution'
  * with normalization constant $C = \frac{\alpha\sqrt{1 - \lambda^2}}{2\arccos(\lambda)}$,
  * where $\alpha > 0$, $0 \le \lambda < 1$, and $x_0 \in \mathbb{R}$. Support: $x \in \mathbb{R}$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \alpha, \lambda, x_0) = \frac{\arctan(k \tanh(\alpha(x - x_0)/2)) + \arctan(k)}{2\arctan(k)}$
- *
- * where $k = \sqrt{(1 - \lambda)/(1 + \lambda)}$
- *
  * @class Champernowne
  * @memberof ran.dist
  * @constructor

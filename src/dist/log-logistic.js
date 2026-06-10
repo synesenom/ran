@@ -7,10 +7,6 @@ import Distribution from './_distribution'
  *
  * with $\alpha, \beta > 0$. Support: $x \in [0, \infty)$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \alpha, \beta) = \frac{1}{1 + (x/\alpha)^{-\beta}}$
- *
  * @class LogLogistic
  * @memberof ran.dist
  * @constructor

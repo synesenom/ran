@@ -9,12 +9,6 @@ import Distribution from './_distribution'
  *
  * with $\lambda > 0$. Support: $k \in \mathbb{N}_0$.
  *
- * Cumulative distribution function:
- *
- * $F(k; \lambda) = 1 - P(k + 1,\, \lambda)$
- *
- * where $P(a,x)$ is the regularized lower incomplete gamma function
- *
  * @class Poisson
  * @memberof ran.dist
  * @see D. E. Knuth, "Seminumerical Algorithms", The Art of Computer Programming vol. 2, 1969 (small λ). A. C. Atkinson, "The Computer Generation of Poisson Random Variables", Appl. Stat. 28(1), 29–35, 1979 (large λ).

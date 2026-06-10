@@ -9,10 +9,6 @@ import Distribution from './_distribution'
  *
  * with $\mu \in \mathbb{R}$ and $\sigma > 0$. Support: $x \in \mathbb{R}$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \mu, \sigma) = \frac{1}{2}\left[1 + \operatorname{erf}\left(\frac{x - \mu}{\sigma\sqrt{2}}\right)\right]$
- *
  * @class Normal
  * @memberof ran.dist
  * @see https://en.wikipedia.org/wiki/Ziggurat_algorithm Improved Ziggurat algorithm (sampling algorithm)

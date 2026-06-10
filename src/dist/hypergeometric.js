@@ -9,10 +9,6 @@ import Distribution from './_distribution'
  *
  * with $N \in \mathbb{N}^+$, $K \in \{0, 1, ..., N\}$ and $n \in \{0, 1, ..., N\}$. Support: $k \in \{\mathrm{max}(0, n+K-N), ..., \mathrm{min}(n, K)\}$.
  *
- * Cumulative distribution function:
- *
- * $F(k; N, K, n) = \sum_{i=\max(0,\, n+K-N)}^{k} \frac{\binom{K}{i}\binom{N-K}{n-i}}{\binom{N}{n}}$
- *
  * @class Hypergeometric
  * @memberof ran.dist
  * @constructor

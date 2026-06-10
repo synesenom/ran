@@ -9,12 +9,6 @@ import { erfinv } from '../special'
  *
  * with $\gamma, \xi \in \mathbb{R}$, $\delta, \lambda > 0$ and $z = x - \xi$. Support: $x \in (\xi, \xi + \lambda)$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \gamma, \delta, \lambda, \xi) = \Phi\left(\gamma + \delta\ln\frac{z}{\lambda - z}\right)$
- *
- * where $z = x - \xi$.
- *
  * @class JohnsonSB
  * @memberof ran.dist
  * @constructor

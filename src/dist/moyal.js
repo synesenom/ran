@@ -8,10 +8,6 @@ import { gammaUpperIncomplete, erfinv } from '../special'
  *
  * where $z = \frac{x - \mu}{\sigma}$, $\mu \in \mathbb{R}$ and $\sigma > 0$. Support: $x \in \mathbb{R}$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \mu, \sigma) = \operatorname{erfc}\left(\frac{1}{\sqrt{2}} e^{-(x-\mu)/(2\sigma)}\right)$
- *
  * @class Moyal
  * @memberof ran.dist
  * @constructor

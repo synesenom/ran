@@ -8,10 +8,6 @@ import Distribution from './_distribution'
  *
  * where $a, b, c \in \mathbb{R}$, $a < b < c$, $\alpha = \frac{4b + c - 5a}{c - a}$, $\beta = \frac{5c - a -4b}{c - a}$ and $\mathrm{B}(x, y)$ is the beta function. Support: $x \in [a, c]$.
  *
- * Cumulative distribution function:
- *
- * $F(x; a, b, c) = I_{(x-a)/(c-a)}(\alpha, \beta)$
- *
  * @class PERT
  * @memberof ran.dist
  * @constructor

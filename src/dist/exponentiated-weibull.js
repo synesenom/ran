@@ -8,10 +8,6 @@ import Distribution from './_distribution'
  *
  * with $\lambda, k, \alpha > 0$. Support: $x \ge 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \lambda, k, \alpha) = \left(1 - e^{-(x/\lambda)^k}\right)^{\alpha}$
- *
  * @class ExponentiatedWeibull
  * @memberof ran.dist
  * @constructor

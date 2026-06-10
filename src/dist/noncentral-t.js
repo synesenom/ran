@@ -11,10 +11,6 @@ import Distribution from './_distribution'
  *
  * with $\nu \in \mathbb{N}^+$ and $\mu \in \mathbb{R}$. Support: $x \in \mathbb{R}$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \nu, \mu) = \int_{-\infty}^{x} f(t;\, \nu, \mu)\, \mathrm{d}t$
- *
  * @class NoncentralT
  * @memberof ran.dist
  * @param {number} nu Degrees of freedom. If not an integer, it is rounded to the nearest one.

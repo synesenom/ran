@@ -10,10 +10,6 @@ import Distribution from './_distribution'
  * with $z = \frac{x - a}{b - a}$, $n \in \mathbb{N}^+$ and $a, b \in \mathbb{R}, a < b$.
  * Support: $x \in \[a, b\]$.
  *
- * Cumulative distribution function:
- *
- * $F(x; n, a, b) = F_{\mathrm{IH}}\!\left(n\cdot\frac{x - a}{b - a};\, n\right)$
- *
  * @class Bates
  * @memberof ran.dist
  * @constructor

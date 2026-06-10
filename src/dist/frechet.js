@@ -8,10 +8,6 @@ import { gamma } from '../special'
  *
  * with $z = \frac{x - m}{s}$. and $\alpha, s > 0$, $m \in \mathbb{R}$. Support: $x \in \mathbb{R}, x > m$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \alpha, s, m) = \exp\left(-\left(\frac{x - m}{s}\right)^{-\alpha}\right)$
- *
  * @class Frechet
  * @memberof ran.dist
  * @constructor

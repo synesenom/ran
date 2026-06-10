@@ -10,10 +10,6 @@ import { lambertW1m } from '../special'
  *
  * with $\alpha \in (0, 1]$. Support: $x > 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \alpha) = 1 - \exp\left(\alpha x - \frac{e^{\alpha x} - 1}{\alpha}\right)$
- *
  * @class Muth
  * @memberof ran.dist
  * @constructor

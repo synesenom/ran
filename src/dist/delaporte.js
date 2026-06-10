@@ -11,10 +11,6 @@ import PreComputed from './_pre-computed'
  *
  * with $\alpha, \beta, \lambda > 0$. Support: $k \in \mathbb{N}_0$. For $\lambda = 0$, it is the [negative binomial]{@link #dist.NegativeBinomial}, and for $\alpha = \beta = 0$ it is the [Poisson distribution]{@link #dist.Poisson}. Note that these special cases are not covered by this class. For these distributions, please refer to the corresponding generators.
  *
- * Cumulative distribution function:
- *
- * $F(k; \alpha, \beta, \lambda) = \sum_{i=0}^{k} f(i;\, \alpha, \beta, \lambda)$
- *
  * @class Delaporte
  * @memberof ran.dist
  * @constructor

@@ -8,10 +8,6 @@ import Distribution from './_distribution'
  *
  * with $n \in \mathbb{N}_0$ and $p \in \[0, 1\]$. Support: $k \in \{0, ..., n\}$.
  *
- * Cumulative distribution function:
- *
- * $F(k; n, p) = I_{1-p}(n - k,\, k + 1)$
- *
  * @class Binomial
  * @memberof ran.dist
  * @constructor

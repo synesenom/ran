@@ -8,10 +8,6 @@ import { polylogarithm } from '../special'
  *
  * with $p \in (0, 1)$ and $\beta > 0$. Support: $x \ge 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; p, \beta) = 1 - \frac{\ln\left(1 - (1 - p)\,e^{-\beta x}\right)}{\ln p}$
- *
  * @class ExponentialLogarithmic
  * @memberof ran.dist
  * @constructor

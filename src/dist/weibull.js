@@ -9,10 +9,6 @@ import { gamma } from '../special'
  *
  * with $\lambda, k > 0$. Support: $x \ge 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \lambda, k) = 1 - e^{-(x/\lambda)^k}$
- *
  * @class Weibull
  * @memberof ran.dist
  * @constructor

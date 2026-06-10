@@ -11,10 +11,6 @@ import Distribution from './_distribution'
  *
  * where $k \in \mathbb{N}^+$ and $\lambda > 0$. Support: $x \ge 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; k, \lambda) = P(k,\, \lambda x)$
- *
  * @class Erlang
  * @memberof ran.dist
  * @constructor

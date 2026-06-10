@@ -9,10 +9,6 @@ import Gamma from './gamma'
  *
  * where $\alpha, \beta > 0$. Support: $x \in \mathbb{R}$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \alpha, \beta) = \begin{cases} \tfrac{1}{2}\bigl(1 - P(\alpha,\, \beta|x|)\bigr) & x \le 0 \\ \tfrac{1}{2}\bigl(1 + P(\alpha,\, \beta|x|)\bigr) & x > 0 \end{cases}$
- *
  * @class DoubleGamma
  * @memberof ran.dist
  * @constructor

@@ -16,10 +16,6 @@ import powell from '../algorithms/powell'
  * identifiable from data. After calling `fit()`, the individual parameters are
  * an arbitrary symmetric split of the fitted sums; do not interpret them individually.
  *
- * Cumulative distribution function:
- *
- * $F(x; k, \lambda_1, \lambda_2) = F_{\chi^2_{\mathrm{nc}}}(x;\, k,\, \lambda_1 + \lambda_2)$
- *
  * @class DoublyNoncentralChi2
  * @memberof ran.dist
  * @constructor

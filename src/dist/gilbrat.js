@@ -7,10 +7,6 @@ import LogNormal from './log-normal'
  *
  * Support: $x > 0$. Note that this distribution is simply a special case of the [log-normal]{@link #dist.LogNormal}.
  *
- * Cumulative distribution function:
- *
- * $F(x) = \Phi(\ln x)$
- *
  * @class Gilbrat
  * @memberof ran.dist
  * @constructor
