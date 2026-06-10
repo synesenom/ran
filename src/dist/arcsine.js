@@ -8,10 +8,6 @@ import Distribution from './_distribution'
  * where $a, b \in \mathbb{R}$ and $a < b$.
  * Support: $x \in \[a, b\]$.
  *
- * Cumulative distribution function:
- *
- * $F(x; a, b) = \frac{2}{\pi}\arcsin\left(\sqrt{\frac{x - a}{b - a}}\right)$
- *
  * @class Arcsine
  * @memberof ran.dist
  * @see W. Feller, An Introduction to Probability Theory and Its Applications Vol. 2, 2nd ed., John Wiley and Sons, 1991, p. 79.

@@ -8,10 +8,6 @@ import Distribution from './_distribution'
  *
  * where $q < 2$, $\lambda > 0$ and $e^x_q$ denotes the [q-exponential function]{@link https://en.wikipedia.org/wiki/Tsallis_statistics#q-exponential}. Support: $x > 0$ if $q \ge 1$, otherwise $x \in \big[0, \frac{1}{\lambda (1 - q)}\big)$.
  *
- * Cumulative distribution function:
- *
- * $F(x; q, \lambda) = 1 - \left(1 - (1-q)\lambda x\right)^{1/(1-q)}$
- *
  * @class QExponential
  * @memberof ran.dist
  * @constructor

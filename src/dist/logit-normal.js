@@ -8,12 +8,6 @@ import { erfinv } from '../special'
  *
  * with $\mu \in \mathbb{R}$, $\sigma > 0$ and $\mathrm{logit}(x) = \ln \frac{x}{1 - x}$. Support: $x \in (0, 1)$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \mu, \sigma) = \Phi\left(\frac{\operatorname{logit}(x) - \mu}{\sigma}\right)$
- *
- * where $\operatorname{logit}(x) = \ln(x/(1-x))$.
- *
  * @class LogitNormal
  * @memberof ran.dist
  * @constructor

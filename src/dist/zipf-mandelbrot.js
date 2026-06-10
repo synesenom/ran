@@ -8,10 +8,6 @@ import Distribution from './_distribution'
  *
  * with $s > 1$, $q \ge 0$, $N \in \mathbb{N}^+$ and $H_{N,s,q} = \sum_{j=1}^{N}(j+q)^{-s}$. Support: $k \in \{1, 2, \ldots, N\}$.
  *
- * Cumulative distribution function:
- *
- * $F(k; N, s, q) = \frac{1}{H_{N,s,q}} \sum_{i=1}^{k} (i + q)^{-s}$
- *
  * @class ZipfMandelbrot
  * @memberof ran.dist
  * @constructor

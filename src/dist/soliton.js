@@ -8,10 +8,6 @@ import Distribution from './_distribution'
  *
  * with $N \in \mathbb{N}^+$. Support: $k \in \{1, 2, ..., N\}$.
  *
- * Cumulative distribution function:
- *
- * $F(k; K) = \sum_{i=1}^{k} f(i;\, K)$
- *
  * @class Soliton
  * @memberof ran.dist
  * @constructor

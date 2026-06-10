@@ -9,10 +9,6 @@ import Distribution from './_distribution'
  *
  * with $a, b > 0$. Support: $x \in (0, 1)$.
  *
- * Cumulative distribution function:
- *
- * $F(x; a, b) = 1 - (1 - x^a)^b$
- *
  * @class Kumaraswamy
  * @memberof ran.dist
  * @constructor

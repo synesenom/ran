@@ -9,12 +9,6 @@ import Chi2 from './chi2'
  *
  * where $k \in \mathbb{N}^+$. Support: $x > 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; k) = P(k/2,\, x^2/2)$
- *
- * where $P(a,x)$ is the regularized lower incomplete gamma function
- *
  * @class Chi
  * @memberof ran.dist
  * @constructor

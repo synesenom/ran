@@ -23,10 +23,6 @@ const B2K_OVER_FACT = (() => {
  *
  * with $\mu > 0$, $b > 0$, and $n > 1$. Support: $x \in (\mu, \infty)$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \mu, b, n) = \int_{\mu}^{x} f(t;\, \mu, b, n)\, \mathrm{d}t$
- *
  * @class Davis
  * @memberof ran.dist
  * @constructor

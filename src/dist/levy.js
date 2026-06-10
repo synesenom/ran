@@ -9,10 +9,6 @@ import Distribution from './_distribution'
  *
  * with $\mu \in \mathbb{R}$ and $c > 0$. Support: $x \in [\mu, \infty)$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \mu, c) = \operatorname{erfc}\left(\sqrt{\frac{c}{2(x - \mu)}}\right)$
- *
  * @class Levy
  * @memberof ran.dist
  * @constructor

@@ -7,10 +7,6 @@ import Weibull from './weibull'
  *
  * with $\lambda, k > 0$. Support: $x \in \mathbb{R}$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \lambda, k) = \begin{cases} \tfrac{1}{2} e^{-(|x|/\lambda)^k} & x \le 0 \\ 1 - \tfrac{1}{2} e^{-(|x|/\lambda)^k} & x > 0 \end{cases}$
- *
  * @class DoubleWeibull
  * @memberof ran.dist
  * @constructor

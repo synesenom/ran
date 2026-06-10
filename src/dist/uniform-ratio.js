@@ -8,10 +8,6 @@ import Distribution from './_distribution'
  *
  * Support: $x > 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x) = \begin{cases} \tfrac{1}{2} x & 0 < x \le 1 \\ 1 - \tfrac{1}{2x} & x > 1 \end{cases}$
- *
  * @class UniformRatio
  * @memberof ran.dist
  * @constructor

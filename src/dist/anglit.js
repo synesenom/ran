@@ -8,10 +8,6 @@ import Distribution from './_distribution'
  * where $\mu \in \mathbb{R}$ and $\beta > 0$.
  * Support: $x \in \Big\[\mu-\frac{\beta \pi}{4}, \mu + \frac{\beta \pi}{4}\Big\]$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \mu, \beta) = \sin^2\left(\frac{x - \mu}{\beta} + \frac{\pi}{4}\right)$
- *
  * @class Anglit
  * @memberof ran.dist
  * @see M. King, Statistics for Process Control Engineers, John Wiley and Sons, 2017, p. 472.

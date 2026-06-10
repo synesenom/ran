@@ -7,12 +7,6 @@ import InverseGaussian from './inverse-gaussian'
  *
  * with $\mu, \lambda > 0$. Support: $x > 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \mu, \lambda) = 1 - F_{\mathrm{IG}}(1/x;\, \mu,\, \lambda)$
- *
- * where $F_{\mathrm{IG}}$ is the inverse Gaussian CDF
- *
  * @class ReciprocalInverseGaussian
  * @memberof ran.dist
  * @constructor

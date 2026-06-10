@@ -7,10 +7,6 @@ import Distribution from './_distribution'
  *
  * with $z = \frac{x - \mu}{\sigma}$, $\mu, \xi \in \mathbb{R}$ and $\sigma > 0$. Support: $x \ge \mu - \sigma/\xi$ if $\xi > 0$, $x \le \mu - \sigma/\xi$ if $\xi < 0$, $x \in \mathbb{R}$ otherwise.
  *
- * Cumulative distribution function:
- *
- * $F(x; \mu, \sigma, \xi) = \frac{1}{1 + \left(1 + \xi\,\frac{x - \mu}{\sigma}\right)^{-1/\xi}}$
- *
  * @class ShiftedLogLogistic
  * @memberof ran.dist
  * @constructor

@@ -8,10 +8,6 @@ import Gamma from './gamma'
  *
  * where $\alpha, \beta > 0$. Support: $x > 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \alpha, \beta) = Q(\alpha,\, \beta/x)$
- *
  * @class InverseGamma
  * @memberof ran.dist
  * @constructor

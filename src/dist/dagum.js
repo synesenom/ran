@@ -7,10 +7,6 @@ import Distribution from './_distribution'
  *
  * with $p, a, b > 0$. Support: $x > 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; p, a, b) = \left(1 + \left(\frac{x}{b}\right)^{-a}\right)^{-p}$
- *
  * @class Dagum
  * @memberof ran.dist
  * @constructor

@@ -7,10 +7,6 @@ import Distribution from './_distribution'
  *
  * where $\lambda, \kappa > 0$. Support: $x > 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \lambda, \kappa) = \frac{(e^{\lambda x} - 1)^{\kappa}}{1 + (e^{\lambda x} - 1)^{\kappa}}$
- *
  * @class LogisticExponential
  * @memberof ran.dist
  * @constructor

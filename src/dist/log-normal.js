@@ -8,12 +8,6 @@ import { erfinv } from '../special'
  *
  * where $\mu \in \mathbb{R}$ and $\sigma > 0$. Support: $x > 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \mu, \sigma) = \Phi\left(\frac{\ln x - \mu}{\sigma}\right)$
- *
- * where $\Phi$ is the standard normal CDF.
- *
  * @class LogNormal
  * @memberof ran.dist
  * @constructor

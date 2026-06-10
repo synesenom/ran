@@ -7,10 +7,6 @@ import Distribution from './_distribution'
  *
  * where $x_0 \in \mathbb{R}$ and $\gamma > 0$. Support: $x \in \mathbb{R}$.
  *
- * Cumulative distribution function:
- *
- * $F(x; x_0, \gamma) = \frac{1}{2} + \frac{1}{\pi}\arctan\!\left(\frac{x - x_0}{\gamma}\right)$
- *
  * @class Cauchy
  * @memberof ran.dist
  * @constructor

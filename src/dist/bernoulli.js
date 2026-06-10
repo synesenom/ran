@@ -7,10 +7,6 @@ import Distribution from './_distribution'
  *
  * where $p \in \[0, 1\]$. Support: $k \in \\{0, 1\\}$.
  *
- * Cumulative distribution function:
- *
- * $F(k; p) = \begin{cases} 0 & k < 0 \\ 1 - p & 0 \le k < 1 \\ 1 & k \ge 1 \end{cases}$
- *
  * @class Bernoulli
  * @memberof ran.dist
  * @constructor

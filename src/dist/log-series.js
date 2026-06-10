@@ -8,10 +8,6 @@ import Distribution from './_distribution'
  *
  * with $p \in (0, 1)$. Support: $k \in \mathbb{N}^+$.
  *
- * Cumulative distribution function:
- *
- * $F(k; p) = 1 + \frac{I_p(k+1, 0)}{\ln(1-p)}$
- *
  * @class LogSeries
  * @memberof ran.dist
  * @see A. Kemp, "Efficient generation of logarithmically distributed pseudo-random variables", Appl. Stat. 30(3), 249–253, 1981.

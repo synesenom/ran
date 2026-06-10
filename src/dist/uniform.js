@@ -9,10 +9,6 @@ import Distribution from './_distribution'
  * with $x_\mathrm{min}, x_\mathrm{max} \in \mathbb{R}$ and $x_\mathrm{min} < x_\mathrm{max}$.
  * Support: $x \in \[x_\mathrm{min}, x_\mathrm{max}\]$.
  *
- * Cumulative distribution function:
- *
- * $F(x; a, b) = \frac{x - a}{b - a}$
- *
  * @class Uniform
  * @memberof ran.dist
  * @constructor

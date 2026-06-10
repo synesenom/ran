@@ -13,10 +13,6 @@ import PreComputed from './_pre-computed'
  * Support: $k \in \mathbb{N}$. It is the distribution of $X_1 + m X_m$ where $X_1, X_2$ are Poisson variates with
  * parameters $a_1, a_m$ respectively.
  *
- * Cumulative distribution function:
- *
- * $F(k; a_1, a_m, m) = \sum_{i=0}^{k} f(i;\, a_1, a_m, m)$
- *
  * @class GeneralizedHermite
  * @memberof ran.dist
  * @constructor

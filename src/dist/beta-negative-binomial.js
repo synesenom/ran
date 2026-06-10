@@ -11,10 +11,6 @@ import poisson from './_poisson'
  *
  * with $r \in \mathbb{N}^+$ and $\alpha, \beta > 0$. Support: $k \in \mathbb{N}_0$.
  *
- * Cumulative distribution function:
- *
- * $F(k; r, \alpha, \beta) = \sum_{i=0}^{k} \binom{r + i - 1}{i} \frac{B(\alpha + r,\, \beta + i)}{B(\alpha, \beta)}$
- *
  * @class BetaNegativeBinomial
  * @memberof ran.dist
  * @constructor

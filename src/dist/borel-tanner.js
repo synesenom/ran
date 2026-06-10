@@ -9,10 +9,6 @@ import Distribution from './_distribution'
  *
  * where $\mu \in \[0, 1\]$ and $n \in \mathbb{N}^+$. Support: $k \ge n$.
  *
- * Cumulative distribution function:
- *
- * $F(k; \mu, n) = \sum_{i=n}^{k} \frac{n}{i} \frac{(\mu i)^{i-n} e^{-\mu i}}{(i - n)!}$
- *
  * @class BorelTanner
  * @memberof ran.dist
  * @constructor

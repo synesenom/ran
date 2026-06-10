@@ -8,10 +8,6 @@ import { lambertW0 } from '../special'
  *
  * where $a, b, c > 0$. Support> $x \ge 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; a, b, c) = 1 - e^{-(a + b)x + \frac{b}{c}(e^{-cx} - 1)}$
- *
  * @class GeneralizedExponential
  * @memberof ran.dist
  * @constructor

@@ -7,10 +7,6 @@ import Laplace from './laplace'
  *
  * where $\mu \in \mathbb{R}$ and $b > 0$. Support: $x > 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x; \mu, b) = \begin{cases} \tfrac{1}{2} e^{(\ln x - \mu)/b} & x < e^{\mu} \\ 1 - \tfrac{1}{2} e^{-(\ln x - \mu)/b} & x \ge e^{\mu} \end{cases}$
- *
  * @class LogLaplace
  * @memberof ran.dist
  * @constructor

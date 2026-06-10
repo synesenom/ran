@@ -9,12 +9,6 @@ import { gamma, gammaUpperIncomplete } from '../special'
  *
  * with $n \in \mathbb{N}, n > 1$. Support: $x \in (0, 1\]$.
  *
- * Cumulative distribution function:
- *
- * $F(x; n) = Q\left(n,\, -\ln x\right)$
- *
- * where $Q(a,x)$ is the regularized upper incomplete gamma function
- *
  * @class UniformProduct
  * @memberof ran.dist
  * @constructor

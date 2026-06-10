@@ -10,12 +10,6 @@ import NoncentralChi2 from './noncentral-chi2'
  *
  * with $k \in \mathbb{N}^+$, $\lambda > 0$ and $I_n(x)$ is the modified Bessel function of the first kind with order $n$. Support: $x \in [0, \infty)$.
  *
- * Cumulative distribution function:
- *
- * $F(x; k, \lambda) = 1 - Q_{k/2}\!\left(\lambda,\, x\right)$
- *
- * where $Q_M(a, b)$ is the Marcum Q-function.
- *
  * @class NoncentralChi
  * @memberof ran.dist
  * @constructor

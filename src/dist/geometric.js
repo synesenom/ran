@@ -8,10 +8,6 @@ import Distribution from './_distribution'
  *
  * with $p \in (0, 1]$. Support: $k \in \{0, 1, 2, ...\}$. Note that the [discrete exponential distribution]{@link https://docs.scipy.org/doc/scipy/reference/tutorial/stats/discrete_planck.html} is also a geometric distribution with rate parameter equal to $-\ln(1 - p)$.
  *
- * Cumulative distribution function:
- *
- * $F(k; p) = 1 - (1 - p)^{k+1}$
- *
  * @class Geometric
  * @memberof ran.dist
  * @constructor

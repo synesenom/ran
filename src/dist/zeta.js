@@ -9,12 +9,6 @@ import Distribution from './_distribution'
  *
  * with $s \in (1, \infty)$ and $\zeta(x)$ is the Riemann zeta function. Support: $k \in \mathbb{N}^+$.
  *
- * Cumulative distribution function:
- *
- * $F(k; s) = \frac{H(k, s)}{\zeta(s)}$
- *
- * where $H(k, s) = \sum_{i=1}^{k} i^{-s}$ is the generalized harmonic number.
- *
  * @class Zeta
  * @memberof ran.dist
  * @see L. Devroye, "Non-Uniform Random Variate Generation", Springer-Verlag, 1986, ch. 10.

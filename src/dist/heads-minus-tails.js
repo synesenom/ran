@@ -12,10 +12,6 @@ import { logBinomial } from '../special'
  *
  * where $n \in \mathbb{N}^+$. Support: $k \in \[0, 2n\]$.
  *
- * Cumulative distribution function:
- *
- * $F(k; n) = \sum_{i=0}^{k} f(i;\, n)$
- *
  * @class HeadsMinusTails
  * @memberof ran.dist
  * @see http://mathworld.wolfram.com/Heads-Minus-TailsDistribution.html

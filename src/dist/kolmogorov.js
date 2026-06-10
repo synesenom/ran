@@ -8,10 +8,6 @@ import { EPS, MAX_ITER } from '../core/constants'
  *
  * Support: $x > 0$.
  *
- * Cumulative distribution function:
- *
- * $F(x) = 1 + 2\sum_{k=1}^{\infty} (-1)^k e^{-2k^2 x^2}$
- *
  * @class Kolmogorov
  * @memberof ran.dist
  * @constructor
