@@ -11,7 +11,7 @@ import { erfinv } from '../special'
  *
  * Cumulative distribution function:
  *
- * $F(x; \gamma, \delta, \lambda, \xi) = \Phi\!\left(\gamma + \delta\sinh^{-1}\!\left(\frac{x - \xi}{\lambda}\right)\right)$
+ * $F(x; \gamma, \delta, \lambda, \xi) = \Phi\left(\gamma + \delta\sinh^{-1}\left(\frac{x - \xi}{\lambda}\right)\right)$
  *
  * @class JohnsonSU
  * @memberof ran.dist

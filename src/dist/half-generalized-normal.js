@@ -10,7 +10,7 @@ import GeneralizedNormal from './generalized-normal'
  *
  * Cumulative distribution function:
  *
- * $F(x; \alpha, \beta) = P\!\left(\frac{1}{\beta},\, \left(\frac{x}{\alpha}\right)^{\beta}\right)$
+ * $F(x; \alpha, \beta) = P\left(\frac{1}{\beta},\, \left(\frac{x}{\alpha}\right)^{\beta}\right)$
  *
  * @class HalfGeneralizedNormal
  * @memberof ran.dist

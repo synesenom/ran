@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  *
  * Cumulative distribution function:
  *
- * $F(x; \eta, b) = 1 - \exp\!\left(-\eta\left(e^{bx} - 1\right)\right)$
+ * $F(x; \eta, b) = 1 - \exp\left(-\eta\left(e^{bx} - 1\right)\right)$
  *
  * @class Gompertz
  * @memberof ran.dist

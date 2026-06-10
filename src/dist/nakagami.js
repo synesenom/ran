@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  *
  * Cumulative distribution function:
  *
- * $F(x; m, \Omega) = P\!\left(m,\, \frac{m}{\Omega} x^2\right)$
+ * $F(x; m, \Omega) = P\left(m,\, \frac{m}{\Omega} x^2\right)$
  *
  * @class Nakagami
  * @memberof ran.dist

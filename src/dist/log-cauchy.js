@@ -9,7 +9,7 @@ import Cauchy from './cauchy'
  *
  * Cumulative distribution function:
  *
- * $F(x; \mu, \sigma) = \frac{1}{2} + \frac{1}{\pi}\arctan\!\left(\frac{\ln x - \mu}{\sigma}\right)$
+ * $F(x; \mu, \sigma) = \frac{1}{2} + \frac{1}{\pi}\arctan\left(\frac{\ln x - \mu}{\sigma}\right)$
  *
  * @class LogCauchy
  * @memberof ran.dist

@@ -10,7 +10,7 @@ import { erfinv } from '../special'
  *
  * Cumulative distribution function:
  *
- * $F(x; \mu, \sigma) = \Phi\!\left(\frac{\ln x - \mu}{\sigma}\right)$
+ * $F(x; \mu, \sigma) = \Phi\left(\frac{\ln x - \mu}{\sigma}\right)$
  *
  * where $\Phi$ is the standard normal CDF.
  *

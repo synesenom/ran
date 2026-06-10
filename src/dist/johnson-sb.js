@@ -11,7 +11,7 @@ import { erfinv } from '../special'
  *
  * Cumulative distribution function:
  *
- * $F(x; \gamma, \delta, \lambda, \xi) = \Phi\!\left(\gamma + \delta\ln\frac{z}{\lambda - z}\right)$
+ * $F(x; \gamma, \delta, \lambda, \xi) = \Phi\left(\gamma + \delta\ln\frac{z}{\lambda - z}\right)$
  *
  * where $z = x - \xi$.
  *

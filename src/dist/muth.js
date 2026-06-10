@@ -12,7 +12,7 @@ import { lambertW1m } from '../special'
  *
  * Cumulative distribution function:
  *
- * $F(x; \alpha) = 1 - \exp\!\left(\alpha x - \frac{e^{\alpha x} - 1}{\alpha}\right)$
+ * $F(x; \alpha) = 1 - \exp\left(\alpha x - \frac{e^{\alpha x} - 1}{\alpha}\right)$
  *
  * @class Muth
  * @memberof ran.dist

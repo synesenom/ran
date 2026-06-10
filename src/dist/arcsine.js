@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  *
  * Cumulative distribution function:
  *
- * $F(x; a, b) = \frac{2}{\pi}\arcsin\!\left(\sqrt{\frac{x - a}{b - a}}\right)$
+ * $F(x; a, b) = \frac{2}{\pi}\arcsin\left(\sqrt{\frac{x - a}{b - a}}\right)$
  *
  * @class Arcsine
  * @memberof ran.dist

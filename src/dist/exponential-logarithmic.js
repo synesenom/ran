@@ -10,7 +10,7 @@ import { polylogarithm } from '../special'
  *
  * Cumulative distribution function:
  *
- * $F(x; p, \beta) = 1 - \frac{\ln\!\left(1 - (1 - p)\,e^{-\beta x}\right)}{\ln p}$
+ * $F(x; p, \beta) = 1 - \frac{\ln\left(1 - (1 - p)\,e^{-\beta x}\right)}{\ln p}$
  *
  * @class ExponentialLogarithmic
  * @memberof ran.dist

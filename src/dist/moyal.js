@@ -10,7 +10,7 @@ import { gammaUpperIncomplete, erfinv } from '../special'
  *
  * Cumulative distribution function:
  *
- * $F(x; \mu, \sigma) = \operatorname{erfc}\!\left(\frac{1}{\sqrt{2}} e^{-(x-\mu)/(2\sigma)}\right)$
+ * $F(x; \mu, \sigma) = \operatorname{erfc}\left(\frac{1}{\sqrt{2}} e^{-(x-\mu)/(2\sigma)}\right)$
  *
  * @class Moyal
  * @memberof ran.dist

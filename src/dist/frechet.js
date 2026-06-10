@@ -10,7 +10,7 @@ import { gamma } from '../special'
  *
  * Cumulative distribution function:
  *
- * $F(x; \alpha, s, m) = \exp\!\left(-\left(\frac{x - m}{s}\right)^{-\alpha}\right)$
+ * $F(x; \alpha, s, m) = \exp\left(-\left(\frac{x - m}{s}\right)^{-\alpha}\right)$
  *
  * @class Frechet
  * @memberof ran.dist
