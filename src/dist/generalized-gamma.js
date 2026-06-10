@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  *
  * Cumulative distribution function:
  *
- * $F(x; a, d, p) = P\!\left(\frac{d}{p},\, \left(\frac{x}{a}\right)^{p}\right)$
+ * $F(x; a, d, p) = P\left(\frac{d}{p},\, \left(\frac{x}{a}\right)^{p}\right)$
  *
  * @class GeneralizedGamma
  * @memberof ran.dist

@@ -11,7 +11,7 @@ import { erfinv } from '../special'
  *
  * Cumulative distribution function:
  *
- * $F(x; \mu, \beta, \gamma) = \Phi\!\left(\frac{1}{\gamma}\left(\sqrt{\frac{x - \mu}{\beta}} - \sqrt{\frac{\beta}{x - \mu}}\right)\right)$
+ * $F(x; \mu, \beta, \gamma) = \Phi\left(\frac{1}{\gamma}\left(\sqrt{\frac{x - \mu}{\beta}} - \sqrt{\frac{\beta}{x - \mu}}\right)\right)$
  *
  * @class BirnbaumSaunders
  * @memberof ran.dist

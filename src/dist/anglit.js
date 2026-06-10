@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  *
  * Cumulative distribution function:
  *
- * $F(x; \mu, \beta) = \sin^2\!\left(\frac{x - \mu}{\beta} + \frac{\pi}{4}\right)$
+ * $F(x; \mu, \beta) = \sin^2\left(\frac{x - \mu}{\beta} + \frac{\pi}{4}\right)$
  *
  * @class Anglit
  * @memberof ran.dist

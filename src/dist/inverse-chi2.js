@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  *
  * Cumulative distribution function:
  *
- * $F(x; \nu) = Q\!\left(\frac{\nu}{2},\, \frac{1}{2x}\right)$
+ * $F(x; \nu) = Q\left(\frac{\nu}{2},\, \frac{1}{2x}\right)$
  *
  * where $Q(a,x)$ is the regularized upper incomplete gamma function.
  *

@@ -10,7 +10,7 @@ import { lambertW1m } from '../special'
  *
  * Cumulative distribution function:
  *
- * $F(x; \theta) = 1 - e^{-\theta x}\!\left(1 + \frac{\theta x}{1 + \theta}\right)$
+ * $F(x; \theta) = 1 - e^{-\theta x}\left(1 + \frac{\theta x}{1 + \theta}\right)$
  *
  * @class Lindley
  * @memberof ran.dist

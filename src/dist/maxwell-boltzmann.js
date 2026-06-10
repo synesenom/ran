@@ -12,7 +12,7 @@ import Distribution from './_distribution'
  *
  * Cumulative distribution function:
  *
- * $F(x; a) = P\!\left(\frac{3}{2},\, \frac{x^2}{2a^2}\right)$
+ * $F(x; a) = P\left(\frac{3}{2},\, \frac{x^2}{2a^2}\right)$
  *
  * @class MaxwellBoltzmann
  * @memberof ran.dist

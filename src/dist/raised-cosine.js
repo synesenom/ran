@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  *
  * Cumulative distribution function:
  *
- * $F(x; \mu, s) = \frac{1}{2}\!\left(1 + \frac{x - \mu}{s} + \frac{\sin(\pi(x-\mu)/s)}{\pi}\right)$
+ * $F(x; \mu, s) = \frac{1}{2}\left(1 + \frac{x - \mu}{s} + \frac{\sin(\pi(x-\mu)/s)}{\pi}\right)$
  *
  * @class RaisedCosine
  * @memberof ran.dist

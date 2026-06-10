@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  *
  * Cumulative distribution function:
  *
- * $F(x; \mu, c) = \operatorname{erfc}\!\left(\sqrt{\frac{c}{2(x - \mu)}}\right)$
+ * $F(x; \mu, c) = \operatorname{erfc}\left(\sqrt{\frac{c}{2(x - \mu)}}\right)$
  *
  * @class Levy
  * @memberof ran.dist

@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  *
  * Cumulative distribution function:
  *
- * $F(x; c) = \exp\!\left(-(1 - cx)^{1/c}\right)$
+ * $F(x; c) = \exp\left(-(1 - cx)^{1/c}\right)$
  *
  * @class GeneralizedExtremeValue
  * @memberof ran.dist

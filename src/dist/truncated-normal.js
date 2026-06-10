@@ -13,7 +13,7 @@ import { erfinv } from '../special'
  *
  * Cumulative distribution function:
  *
- * $F(x; \mu, \sigma, a, b) = \frac{\Phi\!\left(\frac{x-\mu}{\sigma}\right) - \Phi\!\left(\frac{a-\mu}{\sigma}\right)}{\Phi\!\left(\frac{b-\mu}{\sigma}\right) - \Phi\!\left(\frac{a-\mu}{\sigma}\right)}$
+ * $F(x; \mu, \sigma, a, b) = \frac{\Phi\left(\frac{x-\mu}{\sigma}\right) - \Phi\left(\frac{a-\mu}{\sigma}\right)}{\Phi\left(\frac{b-\mu}{\sigma}\right) - \Phi\left(\frac{a-\mu}{\sigma}\right)}$
  *
  * @class TruncatedNormal
  * @memberof ran.dist

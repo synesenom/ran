@@ -10,7 +10,7 @@ import Nakagami from './nakagami'
  *
  * Cumulative distribution function:
  *
- * $F(x; m, \omega) = P\!\left(m,\, \frac{m}{\omega} x^2\right)$
+ * $F(x; m, \omega) = P\left(m,\, \frac{m}{\omega} x^2\right)$
  *
  * @class Hoyt
  * @memberof ran.dist

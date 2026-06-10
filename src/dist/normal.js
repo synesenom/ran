@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  *
  * Cumulative distribution function:
  *
- * $F(x; \mu, \sigma) = \frac{1}{2}\left[1 + \operatorname{erf}\!\left(\frac{x - \mu}{\sigma\sqrt{2}}\right)\right]$
+ * $F(x; \mu, \sigma) = \frac{1}{2}\left[1 + \operatorname{erf}\left(\frac{x - \mu}{\sigma\sqrt{2}}\right)\right]$
  *
  * @class Normal
  * @memberof ran.dist

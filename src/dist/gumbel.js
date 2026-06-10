@@ -9,7 +9,7 @@ import Distribution from './_distribution'
  *
  * Cumulative distribution function:
  *
- * $F(x; \mu, \beta) = \exp\!\left(-e^{-(x-\mu)/\beta}\right)$
+ * $F(x; \mu, \beta) = \exp\left(-e^{-(x-\mu)/\beta}\right)$
  *
  * @class Gumbel
  * @memberof ran.dist

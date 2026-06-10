@@ -10,7 +10,7 @@ import Distribution from './_distribution'
  *
  * Cumulative distribution function:
  *
- * $F(x; a, b) = \frac{\alpha}{3}\!\left[(x - \beta)^3 + \left(\frac{b-a}{2}\right)^3\right]$
+ * $F(x; a, b) = \frac{\alpha}{3}\left[(x - \beta)^3 + \left(\frac{b-a}{2}\right)^3\right]$
  *
  * where $\alpha = 12/(b-a)^3$ and $\beta = (a+b)/2$
  *

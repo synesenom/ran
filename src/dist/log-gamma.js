@@ -12,7 +12,7 @@ import Distribution from './_distribution'
  *
  * Cumulative distribution function:
  *
- * $F(x; \alpha, \beta, \mu) = P\!\left(\alpha,\, \beta\ln(x - \mu + 1)\right)$
+ * $F(x; \alpha, \beta, \mu) = P\left(\alpha,\, \beta\ln(x - \mu + 1)\right)$
  *
  * @class LogGamma
  * @memberof ran.dist

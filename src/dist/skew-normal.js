@@ -13,7 +13,7 @@ import Normal from './normal'
  *
  * Cumulative distribution function:
  *
- * $F(x; \xi, \omega, \alpha) = \Phi\!\left(\frac{x - \xi}{\omega}\right) - 2\,T\!\left(\frac{x - \xi}{\omega},\, \alpha\right)$
+ * $F(x; \xi, \omega, \alpha) = \Phi\left(\frac{x - \xi}{\omega}\right) - 2\,T\left(\frac{x - \xi}{\omega},\, \alpha\right)$
  *
  * where $T(h, a)$ is Owen's T function
  *

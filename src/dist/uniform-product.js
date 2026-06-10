@@ -11,7 +11,7 @@ import { gamma, gammaUpperIncomplete } from '../special'
  *
  * Cumulative distribution function:
  *
- * $F(x; n) = Q\!\left(n,\, -\ln x\right)$
+ * $F(x; n) = Q\left(n,\, -\ln x\right)$
  *
  * where $Q(a,x)$ is the regularized upper incomplete gamma function
  *

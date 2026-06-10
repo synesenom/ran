@@ -11,7 +11,7 @@ import Distribution from './_distribution'
  *
  * Cumulative distribution function:
  *
- * $F(x; \alpha, \beta, \lambda) = 1 - \exp\!\left(-\lambda x - \frac{\alpha}{\beta}\left(e^{\beta x} - 1\right)\right)$
+ * $F(x; \alpha, \beta, \lambda) = 1 - \exp\left(-\lambda x - \frac{\alpha}{\beta}\left(e^{\beta x} - 1\right)\right)$
  *
  * @class Makeham
  * @memberof ran.dist
