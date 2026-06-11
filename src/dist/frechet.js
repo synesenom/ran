@@ -38,6 +38,49 @@ export default class Frechet extends Distribution {
     }]
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    // E[X] = m + s·Γ(1−1/α); exists only for α > 1
+    return this.p.alpha > 1 ? this.p.m + this.p.s * gamma(1 - 1 / this.p.alpha) : Infinity
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    if (this.p.alpha <= 2) return Infinity
+    const g1 = gamma(1 - 1 / this.p.alpha)
+    const g2 = gamma(1 - 2 / this.p.alpha)
+    return this.p.s * this.p.s * (g2 - g1 * g1)
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    if (this.p.alpha <= 3) return Infinity
+    const g1 = gamma(1 - 1 / this.p.alpha)
+    const g2 = gamma(1 - 2 / this.p.alpha)
+    const g3 = gamma(1 - 3 / this.p.alpha)
+    const v = g2 - g1 * g1
+    return (g3 - 3 * g2 * g1 + 2 * g1 * g1 * g1) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    if (this.p.alpha <= 4) return Infinity
+    const g1 = gamma(1 - 1 / this.p.alpha)
+    const g2 = gamma(1 - 2 / this.p.alpha)
+    const g3 = gamma(1 - 3 / this.p.alpha)
+    const g4 = gamma(1 - 4 / this.p.alpha)
+    const v = g2 - g1 * g1
+    return (g4 - 4 * g3 * g1 + 6 * g2 * g1 * g1 - 3 * Math.pow(g1, 4)) / (v * v) - 3
+  }
+
   _generator () {
     // Inverse transform sampling
     return this._q(this.r.next())
