@@ -63,6 +63,55 @@ export default class BoundedPareto extends Distribution {
     return Math.pow((this.c.Halpha + p * (this.c.Lalpha - this.c.Halpha)) / (this.c.Lalpha * this.c.Halpha), -1 / this.p.alpha)
   }
 
+  _rawMoment (r) {
+    const { L, H, alpha } = this.p
+    if (Math.abs(r - alpha) < 1e-10) {
+      return alpha * this.c.Lalpha * Math.log(H / L) / this.c.denom
+    }
+    return alpha * this.c.Lalpha * (Math.pow(H, r - alpha) - Math.pow(L, r - alpha)) / ((r - alpha) * this.c.denom)
+  }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this._rawMoment(1)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const m1 = this._rawMoment(1)
+    const m2 = this._rawMoment(2)
+    return m2 - m1 * m1
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const m1 = this._rawMoment(1)
+    const m2 = this._rawMoment(2)
+    const m3 = this._rawMoment(3)
+    const mu2 = m2 - m1 * m1
+    const mu3 = m3 - 3 * m2 * m1 + 2 * m1 * m1 * m1
+    return mu3 / Math.pow(mu2, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const m1 = this._rawMoment(1)
+    const m2 = this._rawMoment(2)
+    const m3 = this._rawMoment(3)
+    const m4 = this._rawMoment(4)
+    const mu2 = m2 - m1 * m1
+    const mu4 = m4 - 4 * m3 * m1 + 6 * m2 * m1 * m1 - 3 * m1 * m1 * m1 * m1
+    return mu4 / (mu2 * mu2) - 3
+  }
+
   static _fitInit (data) {
     // L ≈ min(data) seeds scale; Hill estimator gives shape α; H ≈ max(data) bounds the support
     const L = Math.min(...data) * 0.99

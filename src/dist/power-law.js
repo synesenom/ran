@@ -20,6 +20,49 @@ export default class PowerLaw extends Kumaraswamy {
     super(a, 1)
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { a } = this.p
+    return a / (a + 1)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { a } = this.p
+    return a / ((a + 2) * (a + 1) * (a + 1))
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { a } = this.p
+    const m1 = a / (a + 1)
+    const m2 = a / (a + 2)
+    const m3 = a / (a + 3)
+    const mu2 = m2 - m1 * m1
+    const mu3 = m3 - 3 * m2 * m1 + 2 * m1 * m1 * m1
+    return mu3 / Math.pow(mu2, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { a } = this.p
+    const m1 = a / (a + 1)
+    const m2 = a / (a + 2)
+    const m3 = a / (a + 3)
+    const m4 = a / (a + 4)
+    const mu2 = m2 - m1 * m1
+    const mu4 = m4 - 4 * m3 * m1 + 6 * m2 * m1 * m1 - 3 * m1 * m1 * m1 * m1
+    return mu4 / (mu2 * mu2) - 3
+  }
+
   static get _fitInitIsExact () {
     // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
     return true

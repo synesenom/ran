@@ -270,6 +270,10 @@ export default [{
   ]
 }, {
   name: 'Benini',
+  // E[X^r] = sigma^r*(r*sqrt(pi/beta)/2*exp(u^2)*erfc(-u)+1), u=(r-alpha)/(2*sqrt(beta)); Gaussian integral.
+  moments: [
+    { params: [2, 1, 1], mean: 1.545641360765047, variance: 0.38344663479788954, skewness: 3.0329185366978315, kurtosis: 18.086329315201446, tol: 1e-10 }
+  ],
   fit: { params: [2, 1, 3], seed: 42, n: 200, tolerances: { alpha: 0.8, beta: 0.4, sigma: 0.5 } },
   invalidParams: [
     [], // all params required
@@ -555,6 +559,11 @@ export default [{
   ]
 }, {
   name: 'BoundedPareto',
+  // raw moment E[X^r] = alpha*L^alpha*(H^{r-alpha}-L^{r-alpha})/((r-alpha)*denom), log case when r=alpha
+  moments: [
+    // BoundedPareto(1,4,1.5): m_r = 1.5*(4^{r-1.5}-1^{r-1.5})/((r-1.5)*0.875); mean=12/7, var=24/49, skew=19/(6√6), kurt=113/120
+    { params: [1, 4, 1.5], mean: 12 / 7, variance: 24 / 49, skewness: 19 / (6 * Math.sqrt(6)), kurtosis: 113 / 120, tol: 1e-12 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 10, 1], [0, 10, 1], // L > 0
@@ -745,6 +754,11 @@ export default [{
   ]
 }, {
   name: 'Champernowne',
+  // PDF symmetric about x0, so mean=x0 and skewness=0 exactly; variance/kurtosis use numerical fallback.
+  moments: [
+    { params: [2, 0.5, 3], mean: 3, skewness: 0 },
+    { params: [1, 0, -1], mean: -1, skewness: 0 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 0.5, 0], [0, 0.5, 0], // alpha > 0
@@ -1892,6 +1906,21 @@ export default [{
   ]
 }, {
   name: 'GeneralizedPareto',
+  // xi<1: mean=mu+sigma/(1-xi); xi<0.5: var=sigma²/((1-xi)²(1-2xi)); xi<1/3: skew; xi<0.25: kurt
+  moments: [
+    // xi=0: reduces to exponential(1/sigma) shifted by mu; all moments exact rationals
+    { params: [0, 2, 0], mean: 2, variance: 4, skewness: 2, kurtosis: 6, tol: 1e-12 },
+    // xi=-0.5: all four finite; exact: mean=7/3, var=8/9, skew=2√2/5, kurt=-3/5
+    { params: [1, 2, -0.5], mean: 7 / 3, variance: 8 / 9, skewness: 2 * Math.SQRT2 / 5, kurtosis: -3 / 5, tol: 1e-12 },
+    // xi=0.5: mean finite, variance diverges (xi>=0.5)
+    { params: [0, 2, 0.5], mean: 4, variance: Infinity, skewness: NaN, kurtosis: NaN },
+    // xi=1: mean threshold — exact boundary
+    { params: [0, 2, 1], mean: Infinity, variance: Infinity, skewness: NaN, kurtosis: NaN },
+    // xi=1/3: skewness threshold — var finite (27), third moment diverges so skew=Infinity; kurt=Infinity
+    { params: [0, 2, 1 / 3], mean: 3, variance: 27, skewness: Infinity, kurtosis: Infinity },
+    // xi=0.25: kurtosis threshold — skew finite (5√2), fourth moment diverges so kurt=Infinity; var=128/9
+    { params: [0, 2, 0.25], mean: 8 / 3, variance: 128 / 9, skewness: 5 * Math.SQRT2, kurtosis: Infinity, tol: 1e-12 }
+  ],
   fit: { params: [1, 2, 0.2], seed: 42, n: 200, tolerances: { mu: 0.3, sigma: 0.8, xi: 0.3 } },
   invalidParams: [
     [], // all params required
@@ -3284,6 +3313,19 @@ export default [{
   ]
 }, {
   name: 'Lomax',
+  // mean=lambda/(alpha-1) for alpha>1; var=lambda²*alpha/((alpha-1)²*(alpha-2)) for alpha>2; skew/kurt same as Pareto
+  moments: [
+    // alpha=5: all four finite; exact: mean=1/2, var=5/12, skew=6√(3/5), kurt=354/5
+    { params: [2, 5], mean: 0.5, variance: 5 / 12, skewness: 6 * Math.sqrt(3 / 5), kurtosis: 70.8, tol: 1e-12 },
+    // alpha=1.5: mean finite, variance/skewness/kurtosis diverge
+    { params: [2, 1.5], mean: 4, variance: Infinity, skewness: NaN, kurtosis: NaN },
+    // alpha=1: mean threshold — exact boundary
+    { params: [2, 1], mean: Infinity, variance: Infinity, skewness: NaN, kurtosis: NaN },
+    // alpha=2: variance threshold — mean finite, var/skew/kurt diverge
+    { params: [2, 2], mean: 2, variance: Infinity, skewness: NaN, kurtosis: NaN },
+    // alpha=4: kurtosis threshold — skew finite (5√2), fourth moment diverges so kurt=Infinity
+    { params: [2, 4], mean: 2 / 3, variance: 8 / 9, skewness: 5 * Math.SQRT2, kurtosis: Infinity, tol: 1e-12 }
+  ],
   fit: { params: [2, 4], seed: 42, n: 200, tolerances: { lambda: 0.8, alpha: 1.0 } },
   invalidParams: [
     [], // all params required
@@ -3962,6 +4004,19 @@ export default [{
   ]
 }, {
   name: 'Pareto',
+  // mean=alpha*xmin/(alpha-1) for alpha>1; var=xmin²*alpha/((alpha-1)²*(alpha-2)) for alpha>2; skew/kurt standard
+  moments: [
+    // alpha=5: all four finite; exact: mean=5/2, var=5/12, skew=6√(3/5), kurt=354/5
+    { params: [2, 5], mean: 2.5, variance: 5 / 12, skewness: 6 * Math.sqrt(3 / 5), kurtosis: 70.8, tol: 1e-12 },
+    // alpha=2: mean finite, variance/skewness/kurtosis diverge (alpha<=2 needed for finite variance)
+    { params: [1, 2], mean: 2, variance: Infinity, skewness: NaN, kurtosis: NaN },
+    // alpha=1: mean threshold — exact boundary
+    { params: [1, 1], mean: Infinity, variance: Infinity, skewness: NaN, kurtosis: NaN },
+    // alpha=3: skewness threshold — var finite, third moment diverges so skew=Infinity; kurt=Infinity
+    { params: [1, 3], mean: 1.5, variance: 0.75, skewness: Infinity, kurtosis: Infinity },
+    // alpha=4: kurtosis threshold — skew finite (5√2), fourth moment diverges so kurt=Infinity
+    { params: [1, 4], mean: 4 / 3, variance: 2 / 9, skewness: 5 * Math.SQRT2, kurtosis: Infinity, tol: 1e-12 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // xmin > 0
@@ -4058,6 +4113,11 @@ export default [{
   ]
 }, {
   name: 'PowerLaw',
+  // E[X^r] = a/(a+r); exact closed forms: mean=a/(a+1), var=a/((a+2)(a+1)²)
+  moments: [
+    // a=2: exact: mean=2/3, var=1/18, skew=-2√2/5, kurt=-3/5
+    { params: [2], mean: 2 / 3, variance: 1 / 18, skewness: -2 * Math.SQRT2 / 5, kurtosis: -3 / 5, tol: 1e-12 }
+  ],
   fit: { params: [2], seed: 42, n: 200, tolerances: { a: 0.4 } },
   invalidParams: [
     [], // all params required

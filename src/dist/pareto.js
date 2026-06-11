@@ -54,6 +54,41 @@ export default class Pareto extends Distribution {
     return this.p.xmin / Math.pow(1 - p, 1 / this.p.alpha)
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { xmin, alpha } = this.p
+    return alpha > 1 ? alpha * xmin / (alpha - 1) : Infinity
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { xmin, alpha } = this.p
+    return alpha > 2 ? xmin * xmin * alpha / ((alpha - 1) * (alpha - 1) * (alpha - 2)) : Infinity
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { alpha } = this.p
+    if (alpha > 3) return 2 * (1 + alpha) / (alpha - 3) * Math.sqrt((alpha - 2) / alpha)
+    // variance finite (alpha>2) but third moment diverges: standardized ratio -> Infinity not NaN
+    return alpha > 2 ? Infinity : NaN
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { alpha } = this.p
+    if (alpha > 4) return 6 * (alpha * alpha * alpha + alpha * alpha - 6 * alpha - 2) / (alpha * (alpha - 3) * (alpha - 4))
+    return alpha > 2 ? Infinity : NaN
+  }
+
   static get _fitInitIsExact () {
     // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
     return true

@@ -1,3 +1,4 @@
+import { erfc } from '../special'
 import Distribution from './_distribution'
 
 /**
@@ -64,6 +65,55 @@ export default class Benini extends Distribution {
 
   _q (p) {
     return this.p.sigma * Math.exp(this.c.halfInvBeta * (Math.sqrt(this.c.alpha2 - this.c.fourBeta * Math.log(1 - p)) - this.p.alpha))
+  }
+
+  // E[X^r] = sigma^r * (r * sqrt(pi/beta)/2 * exp(u^2) * erfc(-u) + 1), u = (r-alpha)/(2*sqrt(beta))
+  // Derived by substituting y=log(x/sigma) and completing the square in the resulting Gaussian integral.
+  _rawMoment (r) {
+    const { alpha, beta: b, sigma } = this.p
+    const u = (r - alpha) / (2 * Math.sqrt(b))
+    return Math.pow(sigma, r) * (r * Math.sqrt(Math.PI / b) / 2 * Math.exp(u * u) * erfc(-u) + 1)
+  }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this._rawMoment(1)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const m1 = this._rawMoment(1)
+    const m2 = this._rawMoment(2)
+    return m2 - m1 * m1
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const m1 = this._rawMoment(1)
+    const m2 = this._rawMoment(2)
+    const m3 = this._rawMoment(3)
+    const mu2 = m2 - m1 * m1
+    const mu3 = m3 - 3 * m2 * m1 + 2 * m1 * m1 * m1
+    return mu3 / Math.pow(mu2, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const m1 = this._rawMoment(1)
+    const m2 = this._rawMoment(2)
+    const m3 = this._rawMoment(3)
+    const m4 = this._rawMoment(4)
+    const mu2 = m2 - m1 * m1
+    const mu4 = m4 - 4 * m3 * m1 + 6 * m2 * m1 * m1 - 3 * m1 * m1 * m1 * m1
+    return mu4 / (mu2 * mu2) - 3
   }
 
   static _fitInit (data) {
