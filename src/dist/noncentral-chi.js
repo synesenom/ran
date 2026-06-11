@@ -55,6 +55,7 @@ export default class NoncentralChi extends NoncentralChi2 {
 
   // Moment overrides shadow NoncentralChi2's: the inherited polynomials would describe the
   // chi-squared variate, not its square root. All moments are finite for every valid (k, lambda).
+  // See solutions/correctness/2026-06-11-1345-moment-override-inheritance-shadowing.md
   /**
    * @returns {number} The mean of the distribution.
    */
