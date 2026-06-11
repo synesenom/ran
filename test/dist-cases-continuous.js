@@ -3676,7 +3676,9 @@ export default [{
   moments: [
     { params: [3, 4, 2], mean: 0.4927905737538862, variance: 0.031115647771640238, skewness: -0.03773115556769964, kurtosis: -0.592608177765202, tol: 1e-12 },
     { params: [1.5, 2.5, 0.5], mean: 0.40499300580530595, variance: 0.04888283144369197, skewness: 0.2628855457558528, kurtosis: -0.7811853151386503, tol: 1e-12 },
-    { params: [2, 2, 5], mean: 0.6739834884227383, variance: 0.03664202448163452, skewness: -0.6621217199488272, kurtosis: -0.10247094851555626, tol: 1e-12 }
+    { params: [2, 2, 5], mean: 0.6739834884227383, variance: 0.03664202448163452, skewness: -0.6621217199488272, kurtosis: -0.10247094851555626, tol: 1e-12 },
+    // lambda=0 boundary: collapses to Beta(alpha, beta) — exercises the l2=0 guard in _rawMoment
+    { params: [3, 4, 0], mean: 0.42857142857142855, variance: 0.030612244897959183, skewness: 0.18144368465060579, kurtosis: -0.5555555555555556, tol: 1e-12 }
   ],
   fit: { params: [2, 3, 1], seed: 42, n: 500, tolerances: { alpha: 0.75, beta: 0.75 } },
   invalidParams: [
@@ -3836,7 +3838,10 @@ export default [{
   // Irrational refs from mpmath dps=50.
   moments: [
     { params: [4, 3], mean: 7, variance: 20, skewness: 1.1627553482998907, kurtosis: 1.92, tol: 1e-12 },
-    { params: [2, 0.5], mean: 2.5, variance: 6, skewness: 1.9051586888313607, kurtosis: 16 / 3, tol: 1e-12 }
+    { params: [2, 0.5], mean: 2.5, variance: 6, skewness: 1.9051586888313607, kurtosis: 16 / 3, tol: 1e-12 },
+    { params: [6, 4], mean: 10, variance: 28, skewness: 0.97190864488087, kurtosis: 66 / 49, tol: 1e-12 },
+    // lambda=0 boundary: collapses to central chi-squared(k) — exact: sqrt(8/k), 12/k
+    { params: [4, 0], mean: 4, variance: 8, skewness: Math.SQRT2, kurtosis: 3, tol: 1e-12 }
   ],
   fit: { params: [4, 2], seed: 42, n: 300, tolerances: { k: 0.5, lambda: 0.5 } },
   invalidParams: [
@@ -3906,6 +3911,8 @@ export default [{
     { params: [6, 12, 2.5], mean: 1.7, variance: 1.8225, skewness: 2.917305966231435, kurtosis: 22.082938651703575, tol: 1e-12 },
     // d2=7<=8: kurtosis threshold; exact: var=539/120
     { params: [4, 7, 1], mean: 1.75, variance: 539 / 120, skewness: 10.50919957620617, kurtosis: Infinity, tol: 1e-12 },
+    // d2=8: exact kurtosis boundary — skewness still finite; exact: mean=5/3, var=61/18
+    { params: [4, 8, 1], mean: 5 / 3, variance: 61 / 18, skewness: 6.186114582052742, kurtosis: Infinity, tol: 1e-12 },
     // d2=6: skewness threshold; exact: mean=15/8, var=441/64
     { params: [4, 6, 1], mean: 1.875, variance: 6.890625, skewness: Infinity, kurtosis: Infinity },
     // d2=4: variance threshold
@@ -4770,6 +4777,8 @@ export default [{
   // skew=0 for n>4; kurt=6/(n-5) for n>5 (Infinity for 3<n<=5); NaN below the t-style thresholds.
   moments: [
     { params: [8], mean: 0, variance: 0.2, skewness: 0, kurtosis: 2, tol: 1e-12 },
+    // n=5: exact kurtosis boundary — strict n>5 must yield Infinity here, skewness still 0
+    { params: [5], mean: 0, variance: 0.5, skewness: 0, kurtosis: Infinity },
     // 4<n<=5: kurtosis diverges, skewness finite
     { params: [4.5], mean: 0, variance: 2 / 3, skewness: 0, kurtosis: Infinity, tol: 1e-12 },
     // 3<n<=4: skewness undefined (symmetric divergence), kurtosis diverges
