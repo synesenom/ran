@@ -1,5 +1,6 @@
 import Weibull from './weibull'
 import Distribution from './_distribution'
+import { gamma } from '../special'
 
 /**
  * Probability density function for the [exponentiated Weibull distribution]{@link https://en.wikipedia.org/wiki/Exponentiated_Weibull_distribution}:
@@ -41,6 +42,60 @@ export default class ExponentiatedWeibull extends Weibull {
       value: Infinity,
       closed: false
     }]
+  }
+
+  _ewRawMoment (n) {
+    // E[X^n] = λ^n · α · Γ(1+n/k) · Σ_{j=0}^{∞} (−1)^j · C(α−1,j) / (j+1)^{1+n/k}
+    // Generalized binomial series; terminates in O(α) steps for integer α
+    const { lambda2: lambda, k, alpha } = this.p
+    const gn = gamma(1 + n / k)
+    let s = 0
+    let binom = 1
+    for (let j = 0; j < 500; j++) {
+      const term = binom / Math.pow(j + 1, 1 + n / k)
+      s += j % 2 === 0 ? term : -term
+      if (Math.abs(term) < 1e-15 * Math.abs(s) && j > 0) break
+      binom *= (alpha - 1 - j) / (j + 1)
+    }
+    return Math.pow(lambda, n) * alpha * gn * s
+  }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this._ewRawMoment(1)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const e1 = this._ewRawMoment(1)
+    return this._ewRawMoment(2) - e1 * e1
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const e1 = this._ewRawMoment(1)
+    const e2 = this._ewRawMoment(2)
+    const e3 = this._ewRawMoment(3)
+    const v = e2 - e1 * e1
+    return (e3 - 3 * e1 * e2 + 2 * e1 * e1 * e1) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const e1 = this._ewRawMoment(1)
+    const e2 = this._ewRawMoment(2)
+    const e3 = this._ewRawMoment(3)
+    const e4 = this._ewRawMoment(4)
+    const v = e2 - e1 * e1
+    return (e4 - 4 * e1 * e3 + 6 * e1 * e1 * e2 - 3 * Math.pow(e1, 4)) / (v * v) - 3
   }
 
   _generator () {

@@ -35,6 +35,36 @@ export default class Gumbel extends Distribution {
     }]
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    // Euler-Mascheroni constant γ ≈ 0.5772...
+    return this.p.mu + this.p.beta * 0.5772156649015329
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return Math.PI * Math.PI * this.p.beta * this.p.beta / 6
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    // 12√6·ζ(3)/π³ — fixed constant independent of parameters
+    return 1.1395470994046486
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    return 12 / 5
+  }
+
   _generator () {
     // Inverse transform sampling
     return this._q(this.r.next())

@@ -27,6 +27,37 @@ export default class Rayleigh extends Weibull {
     Object.assign(this.c, { lambda2: sigma * Math.SQRT2 })
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.sigma * Math.sqrt(Math.PI / 2)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return (4 - Math.PI) / 2 * this.p.sigma * this.p.sigma
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    // 2√π(π−3)/(4−π)^(3/2) — fixed constant independent of sigma
+    return 2 * Math.sqrt(Math.PI) * (Math.PI - 3) / Math.pow(4 - Math.PI, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    // (32−3π²)/(4−π)² − 3 — fixed constant independent of sigma
+    const d = 4 - Math.PI
+    return (32 - 3 * Math.PI * Math.PI) / (d * d) - 3
+  }
+
   _generator () {
     return this._q(this.r.next())
   }
