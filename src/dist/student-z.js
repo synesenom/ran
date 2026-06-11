@@ -37,6 +37,43 @@ export default class StudentZ extends StudentT {
     return [variance > 0 ? 1 / variance + 3 : 10]
   }
 
+  // Moment overrides shadow StudentT's, which read this.p.nu — replaced here by this.p.n;
+  // Z = T(n-1)/sqrt(n-1) shifts the t thresholds by one and rescales by 1/(n-1)
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.n > 2 ? 0 : NaN
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { n } = this.p
+    if (n > 3) return 1 / (n - 3)
+    // 2 < n <= 3: second moment diverges; n <= 2: mean undefined, so variance undefined
+    return n > 2 ? Infinity : NaN
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    // symmetric +/- divergence below the threshold has no signed limit: NaN, never Infinity
+    return this.p.n > 4 ? 0 : NaN
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { n } = this.p
+    if (n > 5) return 6 / (n - 5)
+    // 3 < n <= 5: fourth moment diverges over finite variance; n <= 3: variance undefined
+    return n > 3 ? Infinity : NaN
+  }
+
   _generator () {
     // Z = T(ν)/√ν where ν = n-1; super._generator() uses this.c.nu via StudentT
     return super._generator() / this.c.sqrtNu

@@ -1465,6 +1465,20 @@ export default [{
   ]
 }, {
   name: 'F',
+  // mean=d2/(d2-2) for d2>2; var=2d2²(d1+d2-2)/(d1(d2-2)²(d2-4)) for d2>4; skew for d2>6; kurt for d2>8.
+  // Positive support: every divergent moment is +Infinity. Irrational refs from mpmath dps=50.
+  moments: [
+    // all four finite; exact: mean=11/9, var=3388/2835, kurt=822/25
+    { params: [5, 11], mean: 11 / 9, variance: 3388 / 2835, skewness: 3.3988233257996803, kurtosis: 32.88, tol: 1e-12 },
+    // d2=8: kurtosis threshold — fourth moment diverges, skew still finite
+    { params: [3, 8], mean: 4 / 3, variance: 8 / 3, skewness: 6.531972647421808, kurtosis: Infinity, tol: 1e-12 },
+    // d2=6: skewness threshold
+    { params: [4, 6], mean: 1.5, variance: 4.5, skewness: Infinity, kurtosis: Infinity },
+    // d2=4: variance threshold
+    { params: [3, 4], mean: 2, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    // d2=2: mean threshold — exact boundary
+    { params: [5, 2], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 2], [0, 2], // d1 > 0
@@ -3656,6 +3670,14 @@ export default [{
   // 500k-sample ECDF analysis confirmed no bias. See issue #267 and
   // solutions/testing/2026-05-20-0900-noncentral-ad-root-cause-errfix-artifact.md.
   name: 'NoncentralBeta',
+  // All moments always finite (bounded support). Raw moments are the Poisson-weighted series
+  // E[X^j] = e^(-lambda/2) Σ_i (lambda/2)^i/i! · Π_{r<j}(alpha+i+r)/(alpha+beta+i+r).
+  // Refs from mpmath dps=50.
+  moments: [
+    { params: [3, 4, 2], mean: 0.4927905737538862, variance: 0.031115647771640238, skewness: -0.03773115556769964, kurtosis: -0.592608177765202, tol: 1e-12 },
+    { params: [1.5, 2.5, 0.5], mean: 0.40499300580530595, variance: 0.04888283144369197, skewness: 0.2628855457558528, kurtosis: -0.7811853151386503, tol: 1e-12 },
+    { params: [2, 2, 5], mean: 0.6739834884227383, variance: 0.03664202448163452, skewness: -0.6621217199488272, kurtosis: -0.10247094851555626, tol: 1e-12 }
+  ],
   fit: { params: [2, 3, 1], seed: 42, n: 500, tolerances: { alpha: 0.75, beta: 0.75 } },
   invalidParams: [
     [], // all params required
@@ -3756,6 +3778,16 @@ export default [{
   ]
 }, {
   name: 'NoncentralChi',
+  // All moments always finite. Odd raw moments via the confluent hypergeometric
+  // (generalized-Laguerre) form mu'_j = 2^(j/2)·Γ((k+j)/2)/Γ(k/2)·1F1(-j/2; k/2; -lambda²/2);
+  // even ones are polynomials in k, lambda². Refs from mpmath dps=50.
+  // Kurtosis tol is 1e-11: assembling the fourth central moment cancels O(50) raw moments down
+  // to O(1), amplifying the ~1e-14 relative error of f11/logGamma (measured worst case 1.2e-12).
+  moments: [
+    { params: [4, 2], mean: 2.6945435098890207, variance: 0.7394352733149564, skewness: 0.21660320158742472, kurtosis: -0.09662606558423543, tol: { kurtosis: 1e-11 } },
+    { params: [1, 0.5], mean: 0.8955931148026121, variance: 0.44791297271815533, skewness: 0.949923352906323, kurtosis: 0.7056448191224838, tol: { kurtosis: 1e-11 } },
+    { params: [6, 3], mean: 3.7681271523286037, variance: 0.8012177638839288, skewness: 0.11535850154352462, kurtosis: -0.05631337690862918, tol: { kurtosis: 1e-11 } }
+  ],
   fit: { params: [4, 2], seed: 42, n: 300, tolerances: { k: 0.5, lambda: 0.5 } },
   invalidParams: [
     [], // all params required
@@ -3799,6 +3831,13 @@ export default [{
   ]
 }, {
   name: 'NoncentralChi2',
+  // All moments always finite: mean=k+lambda, var=2(k+2lambda),
+  // skew=sqrt(8)(k+3lambda)/(k+2lambda)^1.5, excess kurt=12(k+4lambda)/(k+2lambda)².
+  // Irrational refs from mpmath dps=50.
+  moments: [
+    { params: [4, 3], mean: 7, variance: 20, skewness: 1.1627553482998907, kurtosis: 1.92, tol: 1e-12 },
+    { params: [2, 0.5], mean: 2.5, variance: 6, skewness: 1.9051586888313607, kurtosis: 16 / 3, tol: 1e-12 }
+  ],
   fit: { params: [4, 2], seed: 42, n: 300, tolerances: { k: 0.5, lambda: 0.5 } },
   invalidParams: [
     [], // all params required
@@ -3859,6 +3898,21 @@ export default [{
   // so failures are perfectly correlated — they share the same underlying source of
   // statistical noise. See issue #267.
   name: 'NoncentralF',
+  // mean=d2(d1+lambda)/(d1(d2-2)) for d2>2; var=2(d2/d1)²((d1+lambda)²+(d1+2lambda)(d2-2))/((d2-2)²(d2-4))
+  // for d2>4; skew for d2>6; kurt for d2>8 (raw moments from noncentral-chi2 cumulants).
+  // Positive support: every divergent moment is +Infinity. Irrational refs from mpmath dps=50.
+  moments: [
+    // all four finite; exact: mean=17/10, var=7290/4000
+    { params: [6, 12, 2.5], mean: 1.7, variance: 1.8225, skewness: 2.917305966231435, kurtosis: 22.082938651703575, tol: 1e-12 },
+    // d2=7<=8: kurtosis threshold; exact: var=539/120
+    { params: [4, 7, 1], mean: 1.75, variance: 539 / 120, skewness: 10.50919957620617, kurtosis: Infinity, tol: 1e-12 },
+    // d2=6: skewness threshold; exact: mean=15/8, var=441/64
+    { params: [4, 6, 1], mean: 1.875, variance: 6.890625, skewness: Infinity, kurtosis: Infinity },
+    // d2=4: variance threshold
+    { params: [4, 4, 1], mean: 2.5, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    // d2=2: mean threshold — exact boundary
+    { params: [4, 2, 1], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity }
+  ],
   fit: { params: [3, 8, 2], seed: 42, n: 400, tolerances: { d1: 2, d2: 3, lambda: 1.5 } },
   invalidParams: [
     [], // all params required
@@ -3904,6 +3958,23 @@ export default [{
   ]
 }, {
   name: 'NoncentralT',
+  // Raw moments E[T^j]=(nu/2)^(j/2)·Γ((nu-j)/2)/Γ(nu/2)·E[(Z+mu)^j] exist for nu>j (nu is integer,
+  // so thresholds land exactly). Third-moment divergence at nu=3 carries the sign of mu
+  // (ADR-0015: divergence keeps its sign); mu=0 is symmetric, so skewness is NaN there.
+  // Irrational refs from mpmath dps=50.
+  moments: [
+    { params: [7, 1.5], mean: 1.6888032982579009, variance: 1.6979434197932357, skewness: 0.9477211098157723, kurtosis: 3.6190796481837153, tol: 1e-12 },
+    // nu=4: kurtosis threshold — fourth moment diverges, variance finite
+    { params: [4, 1], mean: 1.2533141373155003, variance: 2.4292036732051034, skewness: 2.364063402354821, kurtosis: Infinity, tol: 1e-12 },
+    // nu=3: skewness threshold — signed divergence
+    { params: [3, 1], mean: 1.381976597885342, variance: 4.090140682897256, skewness: Infinity, kurtosis: Infinity, tol: 1e-12 },
+    { params: [3, -1], mean: -1.381976597885342, variance: 4.090140682897256, skewness: -Infinity, kurtosis: Infinity, tol: 1e-12 },
+    { params: [3, 0], mean: 0, variance: 3, skewness: NaN, kurtosis: Infinity },
+    // nu=2: variance threshold; mean=sqrt(pi) exactly for mu=1
+    { params: [2, 1], mean: 1.772453850905516, variance: Infinity, skewness: NaN, kurtosis: NaN, tol: 1e-12 },
+    // nu=1: Cauchy-like, nothing exists
+    { params: [1, 1], mean: NaN, variance: NaN, skewness: NaN, kurtosis: NaN }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1] // nu > 0
@@ -4625,6 +4696,20 @@ export default [{
   ]
 }, {
   name: 'StudentT',
+  // mean=0 for nu>1; var=nu/(nu-2) for nu>2 (Infinity for 1<nu<=2); skew=0 for nu>3; kurt=6/(nu-4)
+  // for nu>4 (Infinity for 2<nu<=4). Symmetric divergence carries no sign: skew is NaN below its
+  // threshold, never Infinity; everything is NaN once the defining lower moments are undefined.
+  moments: [
+    { params: [7], mean: 0, variance: 1.4, skewness: 0, kurtosis: 2, tol: 1e-12 },
+    // nu=4: kurtosis threshold — fourth moment diverges, variance finite
+    { params: [4], mean: 0, variance: 2, skewness: 0, kurtosis: Infinity },
+    // 2<nu<=3: third moment undefined (symmetric +/- divergence) -> NaN, fourth diverges -> Infinity
+    { params: [2.5], mean: 0, variance: 5, skewness: NaN, kurtosis: Infinity },
+    // 1<nu<=2: variance diverges
+    { params: [1.5], mean: 0, variance: Infinity, skewness: NaN, kurtosis: NaN },
+    // nu<=1: Cauchy-like, nothing exists
+    { params: [0.8], mean: NaN, variance: NaN, skewness: NaN, kurtosis: NaN }
+  ],
   fit: { params: [5], seed: 42, n: 500, tolerances: { nu: 1.5 } },
   invalidParams: [
     [], // all params required
@@ -4681,6 +4766,19 @@ export default [{
   ]
 }, {
   name: 'StudentZ',
+  // Z = T(n-1)/sqrt(n-1): mean=0 for n>2; var=1/(n-3) for n>3 (Infinity for 2<n<=3);
+  // skew=0 for n>4; kurt=6/(n-5) for n>5 (Infinity for 3<n<=5); NaN below the t-style thresholds.
+  moments: [
+    { params: [8], mean: 0, variance: 0.2, skewness: 0, kurtosis: 2, tol: 1e-12 },
+    // 4<n<=5: kurtosis diverges, skewness finite
+    { params: [4.5], mean: 0, variance: 2 / 3, skewness: 0, kurtosis: Infinity, tol: 1e-12 },
+    // 3<n<=4: skewness undefined (symmetric divergence), kurtosis diverges
+    { params: [3.5], mean: 0, variance: 2, skewness: NaN, kurtosis: Infinity },
+    // 2<n<=3: variance diverges
+    { params: [2.5], mean: 0, variance: Infinity, skewness: NaN, kurtosis: NaN },
+    // n<=2: nothing exists
+    { params: [1.5], mean: NaN, variance: NaN, skewness: NaN, kurtosis: NaN }
+  ],
   fit: { params: [6], seed: 42, n: 500, tolerances: { n: 1.5 } },
   invalidParams: [
     [], // all params required

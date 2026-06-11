@@ -1,4 +1,4 @@
-import { marcumP, besselI, besselISpherical } from '../special'
+import { marcumP, besselI, besselISpherical, f11, logGamma } from '../special'
 import noncentralChi2 from './_noncentral-chi2'
 import Distribution from './_distribution'
 import NoncentralChi2 from './noncentral-chi2'
@@ -42,6 +42,57 @@ export default class NoncentralChi extends NoncentralChi2 {
       value: Infinity,
       closed: false
     }]
+  }
+
+  // Odd raw moment mu'_j = 2^(j/2)·Γ((k+j)/2)/Γ(k/2)·1F1(-j/2; k/2; -h), h = lambda²/2, evaluated
+  // through the Kummer transform 1F1(a; b; -h) = e^(-h)·1F1(b-a; b; h) so the series has
+  // all-positive terms (no cancellation); even raw moments are polynomials inlined by the callers
+  _rawOdd (j) {
+    const { k } = this.p
+    const h = this.c.lambda2 / 2
+    return Math.pow(2, j / 2) * Math.exp(logGamma((k + j) / 2) - logGamma(k / 2) - h) * f11((k + j) / 2, k / 2, h)
+  }
+
+  // Moment overrides shadow NoncentralChi2's: the inherited polynomials would describe the
+  // chi-squared variate, not its square root. All moments are finite for every valid (k, lambda).
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this._rawOdd(1)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const m = this._rawOdd(1)
+    return this.p.k + this.c.lambda2 - m * m
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const r1 = this._rawOdd(1)
+    const r2 = this.p.k + this.c.lambda2
+    const r3 = this._rawOdd(3)
+    const v = r2 - r1 * r1
+    return (r3 - 3 * r1 * r2 + 2 * r1 * r1 * r1) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { k } = this.p
+    const lambda2 = this.c.lambda2
+    const r1 = this._rawOdd(1)
+    const r2 = k + lambda2
+    const r3 = this._rawOdd(3)
+    const r4 = r2 * r2 + 2 * (k + 2 * lambda2)
+    const v = r2 - r1 * r1
+    return (r4 - 4 * r1 * r3 + 6 * r1 * r1 * r2 - 3 * r1 * r1 * r1 * r1) / (v * v) - 3
   }
 
   _generator () {
