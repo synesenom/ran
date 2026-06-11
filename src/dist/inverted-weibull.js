@@ -1,4 +1,5 @@
 import Distribution from './_distribution'
+import { gamma } from '../special'
 
 /**
  * Probability density function for the [inverted Weibull distribution]{@link https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_invweibull.html}:
@@ -32,6 +33,49 @@ export default class InvertedWeibull extends Distribution {
       value: Infinity,
       closed: false
     }]
+  }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    // E[X] = Γ(1−1/c); exists only for c > 1
+    return this.p.c > 1 ? gamma(1 - 1 / this.p.c) : Infinity
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    if (this.p.c <= 2) return Infinity
+    const g1 = gamma(1 - 1 / this.p.c)
+    const g2 = gamma(1 - 2 / this.p.c)
+    return g2 - g1 * g1
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    if (this.p.c <= 3) return Infinity
+    const g1 = gamma(1 - 1 / this.p.c)
+    const g2 = gamma(1 - 2 / this.p.c)
+    const g3 = gamma(1 - 3 / this.p.c)
+    const v = g2 - g1 * g1
+    return (g3 - 3 * g2 * g1 + 2 * g1 * g1 * g1) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    if (this.p.c <= 4) return Infinity
+    const g1 = gamma(1 - 1 / this.p.c)
+    const g2 = gamma(1 - 2 / this.p.c)
+    const g3 = gamma(1 - 3 / this.p.c)
+    const g4 = gamma(1 - 4 / this.p.c)
+    const v = g2 - g1 * g1
+    return (g4 - 4 * g3 * g1 + 6 * g2 * g1 * g1 - 3 * Math.pow(g1, 4)) / (v * v) - 3
   }
 
   _generator () {

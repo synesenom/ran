@@ -43,6 +43,45 @@ export default class Weibull extends Exponential {
     }]
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.lambda2 * gamma(1 + 1 / this.p.k)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const g1 = gamma(1 + 1 / this.p.k)
+    const g2 = gamma(1 + 2 / this.p.k)
+    return this.p.lambda2 * this.p.lambda2 * (g2 - g1 * g1)
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const g1 = gamma(1 + 1 / this.p.k)
+    const g2 = gamma(1 + 2 / this.p.k)
+    const g3 = gamma(1 + 3 / this.p.k)
+    const v = g2 - g1 * g1
+    return (g3 - 3 * g2 * g1 + 2 * g1 * g1 * g1) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const g1 = gamma(1 + 1 / this.p.k)
+    const g2 = gamma(1 + 2 / this.p.k)
+    const g3 = gamma(1 + 3 / this.p.k)
+    const g4 = gamma(1 + 4 / this.p.k)
+    const v = g2 - g1 * g1
+    return (g4 - 4 * g3 * g1 + 6 * g2 * g1 * g1 - 3 * Math.pow(g1, 4)) / (v * v) - 3
+  }
+
   _generator () {
     // Inverse transform sampling.
     return this._q(this.r.next())

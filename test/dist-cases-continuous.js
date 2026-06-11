@@ -1020,6 +1020,11 @@ export default [{
 }, {
   name: 'DoubleWeibull',
   fit: { params: [2, 1.5], seed: 42, n: 200, tolerances: { lambda: 0.5, k: 0.4 } },
+  moments: [
+    { params: [2, 2], mean: 0, variance: 4, skewness: 0, kurtosis: -1 },
+    { params: [1, 0.5], mean: 0, variance: 24, skewness: 0, kurtosis: 67 },
+    { params: [2, 3], mean: 0, variance: 3.61098117180373, skewness: 0, kurtosis: -1.53900151379368 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // lambda > 0
@@ -1413,6 +1418,11 @@ export default [{
 }, {
   name: 'ExponentiatedWeibull',
   fit: { params: [2, 1.5, 2], seed: 42, n: 200, tolerances: { lambda2: 0.8, k: 0.6, alpha: 0.8 } },
+  moments: [
+    { params: [2, 2, 2], mean: 2.29159356449553, variance: 0.748598935162662, skewness: 0.50791025991201, kurtosis: 0.247917242170319, tol: 1e-10 },
+    { params: [1, 1, 3], mean: 11 / 6, variance: 49 / 36, skewness: 502 / 343, kurtosis: 3.48104956268221, tol: 1e-10 },
+    { params: [1, 2, 1.5], mean: 1.0394162121545658, variance: 0.19998627374003464, skewness: 0.5415751187240718, kurtosis: 0.2240640872723163, tol: 1e-10 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1, 1], [0, 1, 1], // lambda > 0
@@ -1559,6 +1569,13 @@ export default [{
 }, {
   name: 'Frechet',
   fit: { params: [2, 1, 0], seed: 42, n: 200, tolerances: { alpha: 0.5, s: 0.4 } },
+  moments: [
+    { params: [1, 1, 0], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [2, 1, 0], mean: 1.7724538509055159, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [3, 1, 0], mean: 1.3541179394264, variance: 0.8453031408313469, skewness: Infinity, kurtosis: Infinity },
+    { params: [4, 1, 0], mean: 1.2254167024651779, variance: 0.2708077562248856, skewness: 5.60513821689589, kurtosis: Infinity },
+    { params: [5, 2, 0], mean: 2.32845942745061, variance: 0.5350456899676628, skewness: 3.535071604621361, kurtosis: 45.09151212581576 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1, 0], [0, 1, 0], // alpha > 0
@@ -1745,6 +1762,11 @@ export default [{
 }, {
   name: 'GeneralizedExtremeValue',
   fit: { params: [0.5], seed: 42, n: 200, tolerances: { c: 0.2 } },
+  moments: [
+    { params: [0.5], mean: 0.227546149094484, variance: 0.8584073464102064, skewness: -0.631110657818942, kurtosis: 0.245089300687638 },
+    { params: [2], mean: -0.5, variance: 5, skewness: -6.618761213399377, kurtosis: 84.72 },
+    { params: [-0.5], mean: 1.54490770181103, variance: Infinity, skewness: Infinity, kurtosis: Infinity }
+  ],
   invalidParams: [
     [], // all params required
     [0] // c != 0
@@ -2055,6 +2077,10 @@ export default [{
 }, {
   name: 'Gumbel',
   fit: { params: [1, 2], seed: 42, n: 200, tolerances: { mu: 0.4, beta: 0.4 } },
+  moments: [
+    { params: [0, 1], mean: 0.5772156649015329, variance: 1.6449340668482264, skewness: 1.1395470994046486, kurtosis: 2.4 },
+    { params: [1, 2], mean: 2.1544313298030655, variance: 6.579736267392906, skewness: 1.1395470994046486, kurtosis: 2.4 }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // beta > 0
@@ -2505,6 +2531,13 @@ export default [{
 }, {
   name: 'InvertedWeibull',
   fit: { params: [3], seed: 42, n: 200, tolerances: { c: 0.6 } },
+  moments: [
+    { params: [1], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [2], mean: 1.7724538509055159, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [3], mean: 1.3541179394264, variance: 0.8453031408313469, skewness: Infinity, kurtosis: Infinity },
+    { params: [4], mean: 1.2254167024651779, variance: 0.2708077562248856, skewness: 5.60513821689589, kurtosis: Infinity },
+    { params: [5], mean: 1.1642297137253, variance: 0.1337614224919157, skewness: 3.535071604621361, kurtosis: 45.09151212581576 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // c > 0
@@ -4406,6 +4439,10 @@ export default [{
   ]
 }, {
   name: 'Rayleigh',
+  moments: [
+    { params: [1], mean: 1.2533141373155001, variance: 0.42920367320510344, skewness: 0.6311106578189364, kurtosis: 0.24508930068763934 },
+    { params: [2], mean: 2.5066282746310002, variance: 1.7168146928204138, skewness: 0.6311106578189364, kurtosis: 0.24508930068763934 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // sigma > 0
@@ -5266,6 +5303,11 @@ export default [{
 }, {
   name: 'Weibull',
   fit: { params: [2, 1.5], seed: 42, n: 200, tolerances: { lambda2: 0.5, k: 0.3 } },
+  moments: [
+    { params: [2, 2], mean: 1.7724538509055159, variance: 0.858407346410207, skewness: 0.631110657818942, kurtosis: 0.245089300687638 },
+    { params: [1, 0.5], mean: 2, variance: 20, skewness: 6.61876121339938, kurtosis: 84.72 },
+    { params: [3, 5], mean: 2.75450622719928, variance: 0.398069801848061, skewness: -0.25410960370686, kurtosis: -0.119709936217251, tol: 1e-11 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // lambda > 0
