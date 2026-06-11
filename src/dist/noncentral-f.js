@@ -42,6 +42,70 @@ export default class NoncentralF extends NoncentralBeta {
     }]
   }
 
+  // Raw moment E[X^j] = (d2/d1)^j · m_j / Π_{i=1..j}(d2 - 2i) for d2 > 2j, where m_j is the j-th
+  // raw moment of the numerator's noncentral chi2(d1, λ) assembled from its cumulants
+  // κ_n = 2^(n-1)·(n-1)!·(d1 + nλ); the Γ-ratio of E[(χ²_{d2})^(-j)] folds into the finite product.
+  _rawMoment (j) {
+    const { d1, d2, lambda } = this.p
+    const k1 = d1 + lambda
+    const k2 = 2 * (d1 + 2 * lambda)
+    const k3 = 8 * (d1 + 3 * lambda)
+    const k4 = 48 * (d1 + 4 * lambda)
+    const m = [1, k1, k2 + k1 * k1, k3 + 3 * k2 * k1 + k1 * k1 * k1, k4 + 4 * k3 * k1 + 3 * k2 * k2 + 6 * k2 * k1 * k1 + k1 * k1 * k1 * k1][j]
+    let denom = 1
+    for (let i = 1; i <= j; i++) {
+      denom *= d2 - 2 * i
+    }
+    return Math.pow(d2 / d1, j) * m / denom
+  }
+
+  // Moment overrides shadow NoncentralBeta's, which describe NcBeta(d1/2, d2/2, λ), not the
+  // transformed F variate. Positive support: every divergent moment is +Infinity, never NaN.
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { d1, d2, lambda } = this.p
+    return d2 > 2 ? d2 * (d1 + lambda) / (d1 * (d2 - 2)) : Infinity
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { d1, d2, lambda } = this.p
+    if (d2 > 4) {
+      const r = d2 / d1
+      return 2 * r * r * ((d1 + lambda) * (d1 + lambda) + (d1 + 2 * lambda) * (d2 - 2)) / ((d2 - 2) * (d2 - 2) * (d2 - 4))
+    }
+    return Infinity
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    if (this.p.d2 <= 6) return Infinity
+    const r1 = this._rawMoment(1)
+    const r2 = this._rawMoment(2)
+    const r3 = this._rawMoment(3)
+    const v = r2 - r1 * r1
+    return (r3 - 3 * r1 * r2 + 2 * r1 * r1 * r1) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    if (this.p.d2 <= 8) return Infinity
+    const r1 = this._rawMoment(1)
+    const r2 = this._rawMoment(2)
+    const r3 = this._rawMoment(3)
+    const r4 = this._rawMoment(4)
+    const v = r2 - r1 * r1
+    return (r4 - 4 * r1 * r3 + 6 * r1 * r1 * r2 - 3 * r1 * r1 * r1 * r1) / (v * v) - 3
+  }
+
   _generator () {
     // Direct sampling by transforming non-central beta variate
     const x = super._generator()

@@ -149,6 +149,72 @@ class NoncentralT extends Distribution {
     return Math.min(Math.max(x >= 0 ? z : 1 - z, 0), 1)
   }
 
+  // Raw moment E[T^j] = (nu/2)^(j/2) · Γ((nu-j)/2)/Γ(nu/2) · e for nu > j, where e = E[(Z+mu)^j]
+  // factors out since T = (Z+mu)/sqrt(chi2_nu/nu) with independent numerator and denominator
+  _rawMoment (j, e) {
+    const { nu } = this.p
+    return Math.pow(nu / 2, j / 2) * Math.exp(logGamma((nu - j) / 2) - logGamma(nu / 2)) * e
+  }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { nu, mu } = this.p
+    return nu > 1 ? this._rawMoment(1, mu) : NaN
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { nu, mu } = this.p
+    if (nu > 2) {
+      const m = this._rawMoment(1, mu)
+      return nu * (1 + mu * mu) / (nu - 2) - m * m
+    }
+    // nu = 2: second moment diverges; nu = 1: mean undefined, so variance undefined
+    return nu > 1 ? Infinity : NaN
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { nu, mu } = this.p
+    if (nu > 3) {
+      const r1 = this._rawMoment(1, mu)
+      const r2 = nu * (1 + mu * mu) / (nu - 2)
+      const r3 = this._rawMoment(3, mu * (mu * mu + 3))
+      const v = r2 - r1 * r1
+      return (r3 - 3 * r1 * r2 + 2 * r1 * r1 * r1) / Math.pow(v, 1.5)
+    }
+    if (nu === 3) {
+      // third moment diverges with the sign of mu (ADR-0015: divergence keeps its sign);
+      // mu = 0 is symmetric, so the divergence has no signed limit
+      return mu > 0 ? Infinity : mu < 0 ? -Infinity : NaN
+    }
+    return NaN
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { nu, mu } = this.p
+    const mu2 = mu * mu
+    if (nu > 4) {
+      const r1 = this._rawMoment(1, mu)
+      const r2 = nu * (1 + mu2) / (nu - 2)
+      const r3 = this._rawMoment(3, mu * (mu2 + 3))
+      const r4 = nu * nu * (mu2 * mu2 + 6 * mu2 + 3) / ((nu - 2) * (nu - 4))
+      const v = r2 - r1 * r1
+      return (r4 - 4 * r1 * r3 + 6 * r1 * r1 * r2 - 3 * r1 * r1 * r1 * r1) / (v * v) - 3
+    }
+    // nu in {3, 4}: fourth moment diverges over finite variance; nu <= 2: variance undefined
+    return nu > 2 ? Infinity : NaN
+  }
+
   _generator () {
     // Direct sampling from a normal and a chi2
     const x = normal(this.r)

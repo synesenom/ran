@@ -4041,11 +4041,13 @@ const REFS = [
       { x: 0.042770869392537054, pdf: 2.5922659044150964, cdf: 0.9 }
     ]
   },
+  // UniformProduct[2]: q() has no closed form (numerical root-finding); round-trip measured at
+  // 1.1e-14 on Node 20 (V8/libm rounding differs across Node versions) — gate at 1e-13 (#759)
   {
     name: 'UniformProduct',
     params: [2],
     tol: 1e-14,
-    qtol: 1e-14,
+    qtol: 1e-13,
     points: [
       { x: 0.020451068062390002, pdf: 3.889720169867429, cdf: 0.1 },
       { x: 0.08722917020735796, pdf: 2.4392164832802044, cdf: 0.3 },
@@ -4054,12 +4056,13 @@ const REFS = [
       { x: 0.587539613272788, pdf: 0.5318116083896121, cdf: 0.9 }
     ]
   },
-  // UniformProduct[4]: q() has no closed form (numerical root-finding), so the round-trip is accurate to a few ULPs beyond 1e-14
+  // UniformProduct[4]: q() has no closed form (numerical root-finding); round-trip measured at
+  // 1.4e-13 in JIT-order-dependent full-suite runs — gate at 5e-13 (#759)
   {
     name: 'UniformProduct',
     params: [4],
     tol: 1e-14,
-    qtol: 1e-13,
+    qtol: 5e-13,
     points: [
       { x: 0.0012547949976141116, pdf: 49.697078573957874, cdf: 0.1 },
       { x: 0.008546537092164278, pdf: 18.000294149929292, cdf: 0.3 },

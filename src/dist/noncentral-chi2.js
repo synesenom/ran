@@ -44,6 +44,38 @@ export default class NoncentralChi2 extends Distribution {
     }
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { k, lambda } = this.p
+    return k + lambda
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { k, lambda } = this.p
+    return 2 * (k + 2 * lambda)
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { k, lambda } = this.p
+    return Math.sqrt(8) * (k + 3 * lambda) / Math.pow(k + 2 * lambda, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { k, lambda } = this.p
+    return 12 * (k + 4 * lambda) / Math.pow(k + 2 * lambda, 2)
+  }
+
   _generator () {
     // Direct sampling
     return noncentralChi2(this.r, this.p.k, this.p.lambda)

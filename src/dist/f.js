@@ -85,6 +85,40 @@ export default class F extends Beta {
     return new Cls(bestD1, bestD2)
   }
 
+  // Moment overrides shadow Beta's, which describe Beta(d1/2, d2/2), not the transformed F
+  // variate. Positive support: every divergent moment is +Infinity, never NaN.
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { d2 } = this.p
+    return d2 > 2 ? d2 / (d2 - 2) : Infinity
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { d1, d2 } = this.p
+    return d2 > 4 ? 2 * d2 * d2 * (d1 + d2 - 2) / (d1 * (d2 - 2) * (d2 - 2) * (d2 - 4)) : Infinity
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { d1, d2 } = this.p
+    return d2 > 6 ? (2 * d1 + d2 - 2) * Math.sqrt(8 * (d2 - 4)) / ((d2 - 6) * Math.sqrt(d1 * (d1 + d2 - 2))) : Infinity
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { d1, d2 } = this.p
+    return d2 > 8 ? 12 * (d1 * (5 * d2 - 22) * (d1 + d2 - 2) + (d2 - 4) * (d2 - 2) * (d2 - 2)) / (d1 * (d2 - 6) * (d2 - 8) * (d1 + d2 - 2)) : Infinity
+  }
+
   _generator () {
     // Direct sampling by transforming beta variate
     const x = super._generator()

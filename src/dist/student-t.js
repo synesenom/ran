@@ -62,6 +62,41 @@ export default class StudentT extends Distribution {
     return [variance > 1 ? Math.min(2 * variance / (variance - 1), 1000) : 10]
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.nu > 1 ? 0 : NaN
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { nu } = this.p
+    if (nu > 2) return nu / (nu - 2)
+    // 1 < nu <= 2: second moment diverges; nu <= 1: mean undefined, so variance undefined
+    return nu > 1 ? Infinity : NaN
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    // symmetric +/- divergence below the threshold has no signed limit: NaN, never Infinity
+    return this.p.nu > 3 ? 0 : NaN
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { nu } = this.p
+    if (nu > 4) return 6 / (nu - 4)
+    // 2 < nu <= 4: fourth moment diverges over finite variance; nu <= 2: variance undefined
+    return nu > 2 ? Infinity : NaN
+  }
+
   _generator () {
     // Direct sampling using gamma variates
     return sign(this.r) * Math.sqrt(this.c.nu * gamma(this.r, 0.5) / gamma(this.r, this.c.nu / 2))

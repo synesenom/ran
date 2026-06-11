@@ -62,6 +62,86 @@ export default class NoncentralBeta extends Distribution {
     }
   }
 
+  // Raw moment E[X^j]: Poisson-weighted series of central Beta(alpha+i, beta) raw moments
+  // Π_{r<j}(alpha+i+r)/(alpha+beta+i+r), summed from the dominant Poisson index i0 outwards
+  // (mirroring _pdf) so recursiveSum's relative stop is not fooled by tiny i=0 weights at large lambda
+  _rawMoment (j) {
+    const { alpha, beta, lambda } = this.p
+    const l2 = lambda / 2
+    const i0 = Math.round(l2)
+    // Guard l2=0: 0*log(0) = NaN by IEEE 754, but the Poisson weight e^0 * 0^0 / 0! = 1.
+    const p0 = l2 === 0 ? 1 : Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
+    const betaMoment = i => {
+      let z = 1
+      for (let r = 0; r < j; r++) {
+        z *= (alpha + i + r) / (alpha + beta + i + r)
+      }
+      return z
+    }
+
+    // Forward sum.
+    let z = recursiveSum({ p: p0, i: i0 }, (t, i) => {
+      t.i = i0 + i
+      t.p *= l2 / t.i
+      return t
+    }, t => t.p * betaMoment(t.i))
+
+    // Backward sum.
+    if (i0 > 0) {
+      z += recursiveSum({ p: p0 * i0 / l2, i: i0 - 1 }, (t, i) => {
+        t.i = i0 - i - 1
+        if (t.i >= 0) {
+          t.p *= (t.i + 1) / l2
+        } else {
+          t.p = 0
+        }
+        return t
+        // i<0 must short-circuit: betaMoment(-1) divides by alpha+beta-1, which is 0 when
+        // alpha+beta=1, and 0 * Infinity = NaN would poison the (already converged) sum
+      }, t => (t.i < 0 ? 0 : t.p * betaMoment(t.i)))
+    }
+
+    return z
+  }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this._rawMoment(1)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const r1 = this._rawMoment(1)
+    return this._rawMoment(2) - r1 * r1
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const r1 = this._rawMoment(1)
+    const r2 = this._rawMoment(2)
+    const r3 = this._rawMoment(3)
+    const v = r2 - r1 * r1
+    return (r3 - 3 * r1 * r2 + 2 * r1 * r1 * r1) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const r1 = this._rawMoment(1)
+    const r2 = this._rawMoment(2)
+    const r3 = this._rawMoment(3)
+    const r4 = this._rawMoment(4)
+    const v = r2 - r1 * r1
+    return (r4 - 4 * r1 * r3 + 6 * r1 * r1 * r2 - 3 * r1 * r1 * r1 * r1) / (v * v) - 3
+  }
+
   _pdf (x) {
     // At x=0: x^(alpha+k-1) collapses to 0 for all k when alpha>1; only k=0 survives when alpha=1;
     // diverges for alpha<1 since x^(alpha-1) → +∞.
