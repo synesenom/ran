@@ -1848,6 +1848,12 @@ export default [{
 }, {
   name: 'GeneralizedLogistic',
   fit: { params: [1, 2, 2], seed: 42, n: 300, tolerances: { mu: 0.5, s: 0.6, c: 0.6 } },
+  // cumulant CGF: K(t)=log Gamma(t+c)+log Gamma(1-t)-log Gamma(c); verified via scipy.stats.genlogistic
+  moments: [
+    { params: [0, 2, 1], mean: 0, variance: 13.15947253478581, skewness: 0, kurtosis: 1.2 },
+    { params: [0, 2, 2], mean: 2, variance: 9.159472534785813, skewness: 0.5771840025973655, kurtosis: 1.3326755110753497 },
+    { params: [0, 2, 0.5], mean: -2.772588722239781, variance: 26.318945069571622, skewness: -0.8546603245534867, kurtosis: 2.4 }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1, 1], [0, 0, 1], // s > 0
@@ -2176,6 +2182,10 @@ export default [{
   ]
 }, {
   name: 'HalfLogistic',
+  // E[X^k] = 2*k!*(1 - 2^{1-k})*zeta(k); verified via scipy.stats.halflogistic
+  moments: [
+    { params: [], mean: 1.3862943611198906, variance: 1.3680560780236473, skewness: 1.5403288034048808, kurtosis: 3.583735664456711 }
+  ],
   invalidParams: [],
   cases: [{
     params: () => []
@@ -3088,6 +3098,14 @@ export default [{
 }, {
   name: 'LogLogistic',
   fit: { params: [2, 3], seed: 42, n: 200, tolerances: { alpha: 0.3, beta: 0.5 } },
+  // E[X^n] = alpha^n*(n*pi/beta)/sin(n*pi/beta) for beta>n; Infinity below threshold
+  moments: [
+    { params: [2, 5], mean: 2.13791866423119, variance: 0.7145293838425228, skewness: 2.4852755496867016, kurtosis: 26.556191909249094 },
+    { params: [1, 2.5], mean: 1.3213063996776497, variance: 2.529986726633266, skewness: Infinity, kurtosis: Infinity },
+    { params: [1, 1.5], mean: 2.41839915231229, variance: Infinity, skewness: NaN, kurtosis: NaN },
+    { name: 'LogLogistic beta=2 (var threshold)', params: [1, 2], variance: Infinity, skewness: NaN, kurtosis: NaN },
+    { name: 'LogLogistic beta=3 (skewness threshold)', params: [1, 3], skewness: Infinity, kurtosis: Infinity }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // alpha > 0
@@ -3227,6 +3245,11 @@ export default [{
 }, {
   name: 'Logistic',
   fit: { params: [1, 2], seed: 42, n: 200, tolerances: { mu: 0.4, s: 0.4 } },
+  // mean = mu; var = pi^2*s^2/3; skew = 0; excess kurt = 6/5 (exact)
+  moments: [
+    { params: [0, 2], mean: 0, variance: 13.159472534785811, skewness: 0, kurtosis: 1.2 },
+    { params: [3, 0.5], mean: 3, variance: 0.8224670334241132, skewness: 0, kurtosis: 1.2 }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // s > 0
@@ -4629,6 +4652,18 @@ export default [{
 }, {
   name: 'ShiftedLogLogistic',
   fit: { params: [1, 2, 0], seed: 42, n: 200, tolerances: { mu: 0.4, sigma: 0.6 } },
+  // B_k=Gamma(1+k*xi)*Gamma(1-k*xi)=k*pi*xi/sin(k*pi*xi); existence threshold |xi|<1/k
+  moments: [
+    { params: [0, 2, 0], mean: 0, variance: 13.159472534785811, skewness: 0, kurtosis: 1.2 },
+    { params: [1, 2, 0.2], mean: 1.6895933211559502, variance: 17.863234596063073, skewness: 2.485275549686701, kurtosis: 26.556191909249087 },
+    { params: [0, 1, -0.1], mean: -0.1664073846305203, variance: 3.540094101289526, skewness: -0.9366744121274009, kurtosis: 3.5102099427808664 },
+    { name: 'ShiftedLogLogistic xi=0.4 (var finite, 3rd/4th moments diverge)', params: [0, 1, 0.4], mean: 0.8032659991941243, variance: 15.812417041457913, skewness: Infinity, kurtosis: Infinity },
+    { name: 'ShiftedLogLogistic xi=-0.4 (skewness=-Inf)', params: [0, 1, -0.4], mean: -0.8032659991941243, variance: 15.812417041457913, skewness: -Infinity, kurtosis: Infinity },
+    { name: 'ShiftedLogLogistic xi=0.3 (var finite, 4th moment diverges)', params: [0, 1, 0.3], mean: 0.5498887441175992, variance: 6.942359625158489, skewness: 10.903542850755631, kurtosis: Infinity },
+    { name: 'ShiftedLogLogistic xi=0.6 (var diverges)', params: [0, 1, 0.6], mean: 1.6365993325274573, variance: Infinity, skewness: NaN, kurtosis: NaN },
+    { name: 'ShiftedLogLogistic xi=1.5 (mean diverges +Inf)', params: [0, 1, 1.5], mean: Infinity },
+    { name: 'ShiftedLogLogistic xi=-1.5 (mean diverges -Inf)', params: [0, 1, -1.5], mean: -Infinity }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1, 1], [0, 0, 1] // sigma > 0
