@@ -55,6 +55,34 @@ export default class Logistic extends Distribution {
     return this.p.mu - this.p.s * Math.log(1 / p - 1)
   }
 
+  /**
+   * @returns {number} The mean, $\mu$.
+   */
+  mean () {
+    return this.p.mu
+  }
+
+  /**
+   * @returns {number} The variance, $\frac{\pi^2 s^2}{3}$.
+   */
+  variance () {
+    return this.p.s * this.p.s * Math.PI * Math.PI / 3
+  }
+
+  /**
+   * @returns {number} The skewness, 0.
+   */
+  skewness () {
+    return 0
+  }
+
+  /**
+   * @returns {number} The excess kurtosis, $\frac{6}{5}$.
+   */
+  kurtosis () {
+    return 6 / 5
+  }
+
   static _fitInit (data) {
     // Var[X] = pi^2 s^2 / 3 links sample variance to the scale parameter
     const n = data.length
