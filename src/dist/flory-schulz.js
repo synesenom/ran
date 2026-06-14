@@ -41,9 +41,9 @@ export default class FlorySchulz extends Distribution {
   }
 
   static _fitInit (data) {
-    // E[X] = 2/a; solving gives a = 2/mean.
+    // E[X] = (2-a)/a; solving gives a = 2/(mean+1).
     const mean = data.reduce((s, x) => s + x, 0) / data.length
-    return [Math.max(0.01, Math.min(0.99, 2 / mean))]
+    return [Math.max(0.01, Math.min(0.99, 2 / (mean + 1)))]
   }
 
   _generator () {

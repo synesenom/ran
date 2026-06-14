@@ -89,7 +89,7 @@ export default class YuleSimon extends Distribution {
   skewness () {
     const rho = this.p.rho
     if (rho <= 3) return Infinity
-    return (rho + 1) / (rho - 3) * Math.sqrt((rho - 2) / rho)
+    return (rho + 1) * (rho + 1) * Math.sqrt(rho - 2) / (rho * (rho - 3))
   }
 
   /**
@@ -98,13 +98,13 @@ export default class YuleSimon extends Distribution {
   kurtosis () {
     const rho = this.p.rho
     if (rho <= 4) return Infinity
-    // Raw moments via falling factorial: E[K^(n)] = n! * rho / prod_{i=1}^{n}(rho-i)
-    // Convert to ordinary moments: K^n = sum_k S(n,k)*K^(k) (Stirling 2nd kind)
-    // S(2)={1,1}, S(3)={1,3,1}, S(4)={1,7,6,1}
+    // Factorial moments: E[K^(n)] = n!*(n-1)! * rho / prod_{i=1}^{n}(rho-i)
+    // (derivation: integral representation of B(k,rho+1) with generating function sum C(j+n,n)*t^j = 1/(1-t)^{n+1})
+    // Convert to ordinary moments via Stirling 2nd kind: S(2)={1,1}, S(3)={1,3,1}, S(4)={1,7,6,1}
     const f1 = rho / (rho - 1)
     const f2 = 2 * rho / ((rho - 1) * (rho - 2))
-    const f3 = 6 * rho / ((rho - 1) * (rho - 2) * (rho - 3))
-    const f4 = 24 * rho / ((rho - 1) * (rho - 2) * (rho - 3) * (rho - 4))
+    const f3 = 12 * rho / ((rho - 1) * (rho - 2) * (rho - 3))
+    const f4 = 144 * rho / ((rho - 1) * (rho - 2) * (rho - 3) * (rho - 4))
     const mu1 = f1
     const mu2 = f1 + f2
     const mu3 = f1 + 3 * f2 + f3
