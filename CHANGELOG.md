@@ -21,7 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Analytical `mean()`, `variance()`, `skewness()`, and `kurtosis()` (excess) for the Logistic family: `Logistic` (mean=μ, var=π²s²/3, skewness=0, excess kurtosis=6/5), `GeneralizedLogistic` (Type I, CDF=(1/(1+e^{−z}))^c — cumulants from K(t)=log Γ(t+c)+log Γ(1−t)−log Γ(c) via digamma and Hurwitz-zeta for polygamma), `HalfLogistic` (raw moments E[X^k]=2·k!·(1−2^{1−k})·ζ(k) from series expansion), `LogLogistic` (raw moments α^n·nπ/β/sin(nπ/β) with `Infinity`/`NaN` existence thresholds at β≤1/2/3/4), `ShiftedLogLogistic` (B_k=Γ(1+kξ)Γ(1−kξ)=kπξ/sin(kπξ) with `Infinity`/`NaN` thresholds at |ξ|≥1/½/⅓/¼). `LogisticExponential` retains the numerical fallback (#579).
 - Analytical `mean()`, `variance()`, `skewness()`, and `kurtosis()` (excess) for the F, Student-t and noncentral families, verified against mpmath (`mp.dps = 50`): `F` (existence thresholds d2 > 2/4/6/8, `Infinity` below — also fixes `F` wrongly inheriting `Beta`'s moment overrides, e.g. mean d1/(d1+d2) instead of d2/(d2−2)), `StudentT` (0, ν/(ν−2), 0, 6/(ν−4) with t-style thresholds: `Infinity` for divergent even moments, `NaN` for sign-indeterminate odd ones), `StudentZ` (t formulas shifted to n via Z = T(n−1)/√(n−1)), `NoncentralChi2` (k+λ, 2(k+2λ), √8(k+3λ)/(k+2λ)^{3/2}, 12(k+4λ)/(k+2λ)²), `NoncentralChi` (odd raw moments via the generalized-Laguerre/Kummer ₁F₁ form, evaluated through the Kummer transform for an all-positive series), `NoncentralF` (raw moments from noncentral-χ² cumulants with thresholds d2 > 2/4/6/8, `Infinity` below), `NoncentralBeta` (Poisson-weighted series of central Beta raw moments via `recursiveSum`), and `NoncentralT` (raw moments `(ν/2)^{j/2}·Γ((ν−j)/2)/Γ(ν/2)·E[(Z+μ)^j]` for ν > j; the ν = 3 skewness divergence carries the sign of μ, returning `±Infinity`) (#581).
 
-## [1.28.0] - 2026-06-06
+### Fixed
+
+- `YuleSimon.skewness()` now returns `(ρ+1)²·√(ρ−2)/(ρ·(ρ−3))`. The previous formula `(ρ+1)/(ρ−3)·√((ρ−2)/ρ)` was missing a factor of `(ρ+1)/√ρ` — e.g. at ρ=5 the old code returned 2.324 instead of 6.235 (#587).
+- `YuleSimon.kurtosis()` falling-factorial coefficients corrected: `E[K^(n)] = n!·(n-1)!·ρ/∏(ρ−i)`, so f3 = 12ρ and f4 = 144ρ (previously 6ρ and 24ρ, missing the `(n-1)!` factor for n≥3). At ρ=5 the old code returned excess kurtosis ≈19 instead of 118.8 (#587).
+- `FlorySchulz._fitInit` seed corrected from `2/mean` to `2/(mean+1)`, matching the distribution's mean formula `E[X]=(2−a)/a` (previously the comment and implementation used the wrong formula `E[X]=2/a`) (#587).
+
+
 
 ### Added
 
