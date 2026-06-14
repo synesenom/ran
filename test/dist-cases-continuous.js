@@ -314,6 +314,12 @@ export default [{
   ]
 }, {
   name: 'BenktanderII',
+  // mean = 1+1/a (exact); variance formula from E[X²] using unregularized upper incomplete gamma
+  moments: [
+    { params: [1, 1], mean: 2, variance: 1 },
+    { params: [1, 0.5], mean: 2, variance: 2 },
+    { params: [2, 0.5], mean: 1.5, variance: 0.375 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 0.5], [0, 0.5], // a > 0
@@ -519,6 +525,25 @@ export default [{
   ]
 }, {
   name: 'BirnbaumSaunders',
+  // moments: exact polynomial formulas in μ, β, γ
+  moments: [
+    {
+      params: [0, 1, 1],
+      mean: 1.5,
+      variance: 2.25,
+      skewness: 68 / 27,
+      kurtosis: 804 / 81
+    },
+    {
+      params: [1, 2, 0.5],
+      mean: 3.25,
+      variance: 1.3125,
+      // 4*0.5*(11*0.25+6)/(5*0.25+4)^1.5 = 17.5/(5.25)^1.5
+      skewness: 20 / (3 * Math.sqrt(21)),
+      // 6*0.25*(93*0.25+41)/(5*0.25+4)^2 = 96.375/27.5625 = 514/147
+      kurtosis: 514 / 147
+    }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1, 1], [0, 0, 1], // beta > 0
@@ -1671,6 +1696,16 @@ export default [{
   ]
 }, {
   name: 'GammaGompertz',
+  // mean: three branches — β=1 exact, s=1 closed form, general inline series
+  moments: [
+    { params: [1, 1, 1], mean: 1 },
+    { params: [1, 1, 2], mean: 2 * Math.LN2 },
+    // b=2,s=2,beta=2: mean = (1/b)*(1/s)*2F1(2,1;3;0.5) = (1/4)*2*(2ln2-1) = 2ln2-1
+    { params: [2, 2, 2], mean: 2 * Math.LN2 - 1 },
+    // s=1,beta=0.4: |z|=|(0.4-1)/0.4|=1.5≥1 → exercises super.mean() quadrature fallback;
+    // closed-form check: β·ln(β)/(b·(β-1)) = 0.4·ln(0.4)/(1·(0.4-1))
+    { params: [1, 1, 0.4], mean: 0.4 * Math.log(0.4) / (0.4 - 1), tol: 1e-8 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1, 1], [0, 1, 1], // b > 0
@@ -2038,6 +2073,15 @@ export default [{
   ]
 }, {
   name: 'Gompertz',
+  // mean = exp(η)/b * E₁(η); reference values from mpmath at 50 dps
+  moments: [
+    // e * E₁(1) = 0.596347362323...
+    { params: [1, 1], mean: 0.596347362323194, tol: 1e-12 },
+    // e² * E₁(2) = 0.36132861...
+    { params: [2, 1], mean: 0.3613286168882226, tol: 1e-12 },
+    // e * E₁(1) / 2
+    { params: [1, 2], mean: 0.298173681161597, tol: 1e-12 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // eta > 0
@@ -3442,6 +3486,13 @@ export default [{
   ]
 }, {
   name: 'Makeham',
+  // mean via inline Lentz CF: E[X] = Γ(-λ/β, α/β)·exp(α/β)·(α/β)^{λ/β}/β; reference from mpmath
+  moments: [
+    // Γ(-1,1)·e = (e⁻¹ - E₁(1))·e ≈ 0.40365
+    { params: [1, 1, 1], mean: 0.40365263767680676, tol: 1e-12 },
+    // Γ(-0.5,0.5)·e^0.5·0.5^0.5/2 ≈ 0.34432
+    { params: [1, 2, 1], mean: 0.34432045758120006, tol: 1e-12 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1, 1], [0, 1, 1], // alpha > 0
@@ -3628,6 +3679,13 @@ export default [{
   ]
 }, {
   name: 'Muth',
+  // mean = 1 (exact); variance = (2/α)·e^{1/α}·E₁(1/α) - 1
+  moments: [
+    // variance: 2·e·E₁(1) - 1 ≈ 0.19269
+    { params: [1], mean: 1, variance: 0.19269472464638882, tol: 1e-12 },
+    // variance: 4·e²·E₁(2) - 1 ≈ 0.44531
+    { params: [0.5], mean: 1, variance: 0.4453144675528904, tol: 1e-12 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0], [2] // 0 < alpha <= 1

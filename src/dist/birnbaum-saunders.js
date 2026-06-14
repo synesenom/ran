@@ -73,4 +73,37 @@ export default class BirnbaumSaunders extends Normal {
     const n = this.p.gamma * this.c.sigmaRoot2 * erfinv(2 * p - 1)
     return this.p.beta * 0.25 * Math.pow(n + Math.sqrt(4 + Math.pow(n, 2)), 2) + this.p.mu2
   }
+
+  /**
+   * @returns {number} Mean of the distribution.
+   */
+  mean () {
+    const { mu2, beta, gamma: gam } = this.p
+    return mu2 + beta * (1 + gam * gam / 2)
+  }
+
+  /**
+   * @returns {number} Variance of the distribution.
+   */
+  variance () {
+    const { beta, gamma: gam } = this.p
+    const g2 = gam * gam
+    return beta * beta * g2 * (1 + 5 * g2 / 4)
+  }
+
+  /**
+   * @returns {number} Skewness of the distribution.
+   */
+  skewness () {
+    const g2 = this.p.gamma * this.p.gamma
+    return 4 * this.p.gamma * (11 * g2 + 6) / Math.pow(5 * g2 + 4, 1.5)
+  }
+
+  /**
+   * @returns {number} Excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const g2 = this.p.gamma * this.p.gamma
+    return 6 * g2 * (93 * g2 + 41) / Math.pow(5 * g2 + 4, 2)
+  }
 }

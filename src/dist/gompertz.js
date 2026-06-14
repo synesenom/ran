@@ -1,4 +1,5 @@
 import Distribution from './_distribution'
+import { e1 } from '../special'
 
 /**
  * Probability density function for the [Gompertz distribution]{@link https://en.wikipedia.org/wiki/Gompertz_distribution}:
@@ -60,5 +61,12 @@ export default class Gompertz extends Distribution {
 
   _q (p) {
     return Math.log(1 - Math.log(1 - p) / this.p.eta) / this.p.b
+  }
+
+  /**
+   * @returns {number} Mean of the distribution.
+   */
+  mean () {
+    return Math.exp(this.p.eta) / this.p.b * e1(this.p.eta)
   }
 }
