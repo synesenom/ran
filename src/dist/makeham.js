@@ -88,4 +88,32 @@ export default class Makeham extends Distribution {
       return this.c.alphaOverBetaLambda - Math.log(1 - p) / this.p.lambda - (t - Math.log(t)) / this.p.beta
     }
   }
+
+  /**
+   * @returns {number} Mean of the distribution.
+   */
+  mean () {
+    const { alpha, beta, lambda } = this.p
+    const s = -lambda / beta
+    const x = alpha / beta
+    // E[X] = (exp(x)·x^{-s}/β)·Γ(s,x). The Lentz CF gives f = Γ(s,x)·exp(x)·x^{-s},
+    // so the leading factors cancel: E[X] = f/β. Works for all s including integer poles.
+    let b = x + 1 - s
+    let c = 1 / 1e-30
+    let d = 1 / b
+    let f = d
+    for (let i = 1; i <= 300; i++) {
+      const fi = i * (s - i)
+      b += 2
+      d = fi * d + b
+      d = Math.max(Math.abs(d), 1e-30)
+      d = 1 / d
+      c = b + fi / c
+      c = Math.max(Math.abs(c), 1e-30)
+      const y = c * d
+      f *= y
+      if (Math.abs(y - 1) < Number.EPSILON) break
+    }
+    return f / beta
+  }
 }

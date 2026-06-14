@@ -1,4 +1,4 @@
-import { lambertW0 } from '../special'
+import { lambertW0, gamma, gammaUpperIncomplete } from '../special'
 import Distribution from './_distribution'
 
 /**
@@ -109,5 +109,22 @@ export default class BenktanderII extends Distribution {
       // All other cases
       return Math.pow(this.c.bm1OverA * w, 1 / this.p.b)
     }
+  }
+
+  /**
+   * @returns {number} Mean of the distribution.
+   */
+  mean () {
+    return 1 + 1 / this.p.a
+  }
+
+  /**
+   * @returns {number} Variance of the distribution.
+   */
+  variance () {
+    const { a, b } = this.p
+    // Unregularized Γ(1/b, a/b) = gammaUpperIncomplete(1/b, a/b) × gamma(1/b)
+    return (-b + 2 * a * Math.exp(a / b) * Math.pow(a / b, -1 / b) *
+      gammaUpperIncomplete(1 / b, a / b) * gamma(1 / b)) / (a * a * b)
   }
 }

@@ -63,4 +63,38 @@ export default class GammaGompertz extends Distribution {
     const mean = data.reduce((s, x) => s + x, 0) / data.length
     return [1 / Math.max(mean, 1e-6), 1, 2]
   }
+
+  /**
+   * @returns {number} Mean of the distribution.
+   */
+  mean () {
+    const { b, s, beta } = this.p
+
+    if (Math.abs(beta - 1) < Number.EPSILON) {
+      return 1 / (b * s)
+    }
+
+    const z = (beta - 1) / beta
+
+    // Series ₂F₁(s,1;s+1;z) = Σ z^n/(s+n) diverges for |z|≥1, i.e., β≤0.5; fall back to quadrature
+    if (Math.abs(z) >= 1) {
+      return super.mean()
+    }
+
+    if (Math.abs(s - 1) < Number.EPSILON) {
+      // s=1 branch: Σ z^n/(n+1) = -ln(1-z)/z = β·ln(β)/(β-1) (exact closed form)
+      return beta * Math.log(beta) / (b * (beta - 1))
+    }
+
+    // General: mean = (1/b)·Σ_{n=0}^∞ z^n/(s+n)
+    let zn = 1
+    let sum = 0
+    for (let n = 0; n < 1000; n++) {
+      const term = zn / (s + n)
+      sum += term
+      zn *= z
+      if (Math.abs(zn / (s + n + 1)) < Number.EPSILON * Math.abs(sum)) break
+    }
+    return sum / b
+  }
 }

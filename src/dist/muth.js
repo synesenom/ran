@@ -1,7 +1,7 @@
 // https://journals.vgtu.lt/index.php/MMA/article/view/1001/767
 
 import Distribution from './_distribution'
-import { lambertW1m } from '../special'
+import { lambertW1m, e1 } from '../special'
 
 /**
  * Probability density function for the [Muth distribution]{@link https://www.tandfonline.com/doi/abs/10.3846/13926292.2015.1048540}:
@@ -65,5 +65,21 @@ export default class Muth extends Distribution {
   _q (p) {
     // Using Eq. (3.2) in Jodra et al: On the Muth Distribution
     return (Math.log(1 - p) - lambertW1m((p - 1) / (this.p.alpha * Math.exp(1 / this.p.alpha))) - 1 / this.p.alpha) / this.p.alpha
+  }
+
+  /**
+   * @returns {number} Mean of the distribution.
+   */
+  mean () {
+    // E[X] = 1 for all α: substitution u=(e^{αx}-1)/α transforms ∫S(x)dx into ∫e^{-u}du = 1
+    return 1
+  }
+
+  /**
+   * @returns {number} Variance of the distribution.
+   */
+  variance () {
+    // E[X²] = (2/α)·e^{1/α}·E₁(1/α) via ∫₀^∞ ln(1+αu)·e^{-u}du = e^{1/α}·E₁(1/α)
+    return 2 / this.p.alpha * Math.exp(1 / this.p.alpha) * e1(1 / this.p.alpha) - 1
   }
 }
