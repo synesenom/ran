@@ -71,4 +71,39 @@ export default class NegativeBinomial extends Distribution {
     if (this.p.p === 0) return 1
     return 1 - regularizedBetaIncomplete(x + 1, this.p.r, this.p.p)
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    // p is failure probability; mean failures before r successes = r*p/(1-p)
+    return this.p.r * this.p.p / (1 - this.p.p)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const q = 1 - this.p.p
+    return this.p.r * this.p.p / (q * q)
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    // Degenerate at p=0: variance is zero so skewness is undefined.
+    if (this.p.p === 0) return NaN
+    return (1 + this.p.p) / Math.sqrt(this.p.r * this.p.p)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    // Degenerate at p=0: variance is zero so kurtosis is undefined.
+    if (this.p.p === 0) return NaN
+    const q = 1 - this.p.p
+    return 6 / this.p.r + q * q / (this.p.r * this.p.p)
+  }
 }

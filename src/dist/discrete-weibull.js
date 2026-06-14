@@ -60,4 +60,8 @@ export default class DiscreteWeibull extends Distribution {
     // preventing the off-by-one when CDF(k) = p exactly.
     return Math.ceil(Math.pow(Math.log(1 - p) / Math.log(this.p.q), 1 / this.p.beta)) - 1
   }
+
+  // No closed-form moments exist for arbitrary β: the survival-sum identity
+  // E[X^n] = Σ S(k) reduces to a generalized polylogarithm in q^{k^β} for which
+  // no elementary closed form is known. The base-class numerical fallback (#403) is used.
 }

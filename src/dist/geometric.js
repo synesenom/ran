@@ -68,4 +68,36 @@ export default class Geometric extends Distribution {
     // See solutions/testing/2026-05-20-0459-discrete-quantile-ceil-minus-one-pattern.md
     return Math.ceil(Math.log(1 - p) / Math.log(1 - this.p.p)) - 1
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return (1 - this.p.p) / this.p.p
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return (1 - this.p.p) / (this.p.p * this.p.p)
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    // Degenerate at p=1: variance is zero so skewness is undefined.
+    if (this.p.p === 1) return NaN
+    return (2 - this.p.p) / Math.sqrt(1 - this.p.p)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    // Degenerate at p=1: variance is zero so kurtosis is undefined.
+    if (this.p.p === 1) return NaN
+    return 6 + this.p.p * this.p.p / (1 - this.p.p)
+  }
 }

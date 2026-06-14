@@ -63,4 +63,38 @@ export default class FlorySchulz extends Distribution {
     const kLnOma = x * this.c.lnOneMinusA
     return -Math.expm1(kLnOma) - Math.exp(kLnOma) * x * this.p.a
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    // X = G1 + G2 + 1 where G_i ~ Geometric(a) (failures before success); E[G_i]=(1-a)/a
+    return (2 - this.p.a) / this.p.a
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    // Var[G_i] = (1-a)/a²; two independent copies sum
+    return 2 * (1 - this.p.a) / (this.p.a * this.p.a)
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const a = this.p.a
+    // Skew scales as 1/√n for sum of n IID; skew[G_i]=(2-a)/√(1-a)
+    return (2 - a) / Math.sqrt(2 * (1 - a))
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const a = this.p.a
+    // Excess kurtosis scales as 1/n for sum of n IID; kurt[G_i]=6+a²/(1-a)
+    return 3 + a * a / (2 * (1 - a))
+  }
 }

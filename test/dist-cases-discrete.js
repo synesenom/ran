@@ -649,6 +649,11 @@ export default [{
 }, {
   name: 'FlorySchulz',
   fit: { params: [0.4], seed: 42, n: 200, tolerances: { a: 0.05 } },
+  // X = G1+G2+1, G_i ~ Geom(a); skew=(2-a)/√(2(1-a)), kurt=3+a²/(2(1-a))
+  moments: [
+    { params: [0.5], mean: 3, variance: 4, skewness: 1.5, kurtosis: 3.25 },
+    { params: [0.3], mean: 5.666666666666667, variance: 15.555555555555555, skewness: 1.4367622330384782, kurtosis: 3.06428571428571, tol: 1e-8 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0], [1], [2] // 0 < a < 1
@@ -737,6 +742,11 @@ export default [{
 }, {
   name: 'Geometric',
   fit: { params: [0.4], seed: 42, n: 200, tolerances: { p: 0.05 } },
+  // scipy.stats.geom(p, loc=-1) — 0-indexed: E=(1-p)/p, Var=(1-p)/p², Skew=(2-p)/√(1-p), EKurt=6+p²/(1-p)
+  moments: [
+    { params: [0.5], mean: 1, variance: 2, skewness: 2.1213203435596424, kurtosis: 6.5 },
+    { params: [0.25], mean: 3, variance: 12, skewness: 2.020725942163691, kurtosis: 6.083333333333333 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0], [2] // 0 < p <= 1
@@ -890,6 +900,10 @@ export default [{
 }, {
   name: 'LogSeries',
   fit: { params: [0.7], seed: 42, n: 200, tolerances: { p: 0.05 } },
+  // E[K^n]=(-1/L)*T_{n-1}, T_m=sum k^m p^k; assembled symbolically at p=0.5 with L=ln(1/2)
+  moments: [
+    { params: [0.5], mean: 1.4426950408889634, variance: 0.8040207290206582, skewness: 3.01484, kurtosis: 13.388, tol: 1e-3 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0], [1], [2] // 0 < p < 1
@@ -1009,6 +1023,11 @@ export default [{
   ]
 }, {
   name: 'NegativeBinomial',
+  // p is failure probability; mean=rp/(1-p), var=rp/(1-p)², skew=(1+p)/√(rp), kurt=6/r+(1-p)²/(rp)
+  moments: [
+    { params: [10, 0.4], mean: 6.666666666666667, variance: 11.11111111111111, skewness: 0.7, kurtosis: 0.69 },
+    { params: [5, 0.5], mean: 5, variance: 10, skewness: 0.9486832980505138, kurtosis: 1.3 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 0.5], [0, 0.5], // r > 0
@@ -1249,6 +1268,10 @@ export default [{
 }, {
   name: 'Soliton',
   fit: { params: [5], seed: 42, n: 200, exact: ['N'] },
+  // E[X]=1/N+H_{N-1}; E[X^k] via polynomial+harmonic closed forms; N=5 rationals: mean=137/60, var=3851/3600
+  moments: [
+    { params: [5], mean: 2.2833333333333332, variance: 1.0697222222222222, skewness: 0.9503, kurtosis: 0.528, tol: 1e-2 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // N > 0
@@ -1291,6 +1314,12 @@ export default [{
 }, {
   name: 'YuleSimon',
   fit: { params: [3], seed: 42, n: 200, tolerances: { rho: 0.5 } },
+  // Moments via falling-factorial: E[K^(n)]=n!*rho/prod(rho-i); existence: mean rho>1, var rho>2, skew rho>3, kurt rho>4
+  moments: [
+    { params: [1.5], mean: 3, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [3], mean: 1.5, variance: 2.25, skewness: Infinity, kurtosis: Infinity },
+    { params: [5], mean: 1.25, variance: 0.5208333333333334, skewness: 2.32379000772445, kurtosis: 22.032 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // rho > 0

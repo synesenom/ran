@@ -38,6 +38,63 @@ export default class Soliton extends Categorical {
   }
 
   /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const N = this.p.N
+    // E[X] = 1/N + H_{N-1} where H_m = sum_{k=1}^{m} 1/k
+    let H = 0
+    for (let k = 1; k < N; k++) H += 1 / k
+    return 1 / N + H
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const N = this.p.N
+    let H = 0
+    for (let k = 1; k < N; k++) H += 1 / k
+    const mu = 1 / N + H
+    // E[X²] = 1/N + (N-1) + H_{N-1}
+    const e2 = 1 / N + (N - 1) + H
+    return e2 - mu * mu
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const N = this.p.N
+    let H = 0
+    for (let k = 1; k < N; k++) H += 1 / k
+    const mu = 1 / N + H
+    const e2 = 1 / N + (N - 1) + H
+    // E[X³] = 1/N + (N-1)*N/2 + 2*(N-1) + H_{N-1}
+    const e3 = 1 / N + (N - 1) * N / 2 + 2 * (N - 1) + H
+    const v = e2 - mu * mu
+    const mu3 = e3 - 3 * mu * e2 + 2 * mu * mu * mu
+    return mu3 / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const N = this.p.N
+    let H = 0
+    for (let k = 1; k < N; k++) H += 1 / k
+    const mu = 1 / N + H
+    const e2 = 1 / N + (N - 1) + H
+    const e3 = 1 / N + (N - 1) * N / 2 + 2 * (N - 1) + H
+    // E[X⁴] = 1/N + (N-1)*N*(2*N-1)/6 + 3*(N-1)*N/2 + 3*(N-1) + H_{N-1}
+    const e4 = 1 / N + (N - 1) * N * (2 * N - 1) / 6 + 3 * (N - 1) * N / 2 + 3 * (N - 1) + H
+    const v = e2 - mu * mu
+    const mu4 = e4 - 4 * mu * e3 + 6 * mu * mu * e2 - 3 * mu * mu * mu * mu
+    return mu4 / (v * v) - 3
+  }
+
+  /**
    * @param {number[]} data Array of sample values.
    * @returns {Soliton} Fitted distribution.
    */
