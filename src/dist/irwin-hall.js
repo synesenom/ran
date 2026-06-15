@@ -69,6 +69,34 @@ export default class IrwinHall extends Distribution {
     return new Cls(bestN)
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.n / 2
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return this.p.n / 12
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    return 0
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    return -6 / (5 * this.p.n)
+  }
+
   _generator () {
     // Direct sampling
     return neumaier(Array.from({ length: this.p.n }, () => this.r.next()))

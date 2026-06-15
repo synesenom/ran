@@ -68,4 +68,32 @@ export default class Laplace extends Distribution {
     const b = data.reduce((s, x) => s + Math.abs(x - mu), 0) / n || 1
     return [mu, b]
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.mu
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return 2 * this.p.b * this.p.b
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    return 0
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    return 3
+  }
 }
