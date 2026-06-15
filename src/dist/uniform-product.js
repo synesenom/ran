@@ -37,6 +37,50 @@ export default class UniformProduct extends Distribution {
     }]
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return Math.pow(0.5, this.p.n)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const m1 = Math.pow(0.5, this.p.n)
+    const m2 = Math.pow(1 / 3, this.p.n)
+    return m2 - m1 * m1
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const n = this.p.n
+    const m1 = Math.pow(0.5, n)
+    const m2 = Math.pow(1 / 3, n)
+    const m3 = Math.pow(0.25, n)
+    const v = m2 - m1 * m1
+    const mu3 = m3 - 3 * m2 * m1 + 2 * m1 * m1 * m1
+    return mu3 / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const n = this.p.n
+    const m1 = Math.pow(0.5, n)
+    const m2 = Math.pow(1 / 3, n)
+    const m3 = Math.pow(0.25, n)
+    const m4 = Math.pow(0.2, n)
+    const v = m2 - m1 * m1
+    const m1sq = m1 * m1
+    const mu4 = m4 - 4 * m3 * m1 + 6 * m2 * m1sq - 3 * m1sq * m1sq
+    return mu4 / (v * v) - 3
+  }
+
   _generator () {
     return Math.exp(neumaier(Array.from({ length: this.p.n }, () => Math.log(this.r.next()))))
   }

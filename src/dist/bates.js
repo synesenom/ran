@@ -48,6 +48,35 @@ export default class Bates extends IrwinHall {
     })
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return (this.p.a + this.p.b) / 2
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const d = this.p.b - this.p.a
+    return d * d / (12 * this.p.n)
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    return 0
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    return -6 / (5 * this.p.n)
+  }
+
   _generator () {
     // Direct sampling by transforming Irwin-Hall variate
     return super._generator() / this.c.scale + this.p.a

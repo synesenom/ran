@@ -210,6 +210,11 @@ export default [{
   ]
 }, {
   name: 'Bates',
+  // mean=(a+b)/2; var=(b-a)²/(12n); skew=0; kurt=-6/(5n) — same as IrwinHall rescaled
+  moments: [
+    { params: [10, 5, 25], mean: 15, variance: 10 / 3, skewness: 0, kurtosis: -0.12, tol: 1e-14 },
+    { params: [3, 0, 1], mean: 0.5, variance: 1 / 36, skewness: 0, kurtosis: -0.4, tol: 1e-14 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 0, 1], [0, 0, 1], // n > 0
@@ -2636,6 +2641,11 @@ export default [{
 }, {
   name: 'IrwinHall',
   fit: { params: [4], seed: 42, n: 200, exact: ['n'] },
+  // mean=n/2; var=n/12; skew=0; kurt=-6/(5n)
+  moments: [
+    { params: [10], mean: 5, variance: 5 / 6, skewness: 0, kurtosis: -0.12, tol: 1e-14 },
+    { params: [3], mean: 1.5, variance: 0.25, skewness: 0, kurtosis: -0.4, tol: 1e-14 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // n > 0
@@ -2682,6 +2692,12 @@ export default [{
 }, {
   name: 'JohnsonSU',
   fit: { params: [0, 2, 2, 0], seed: 42, n: 300, tolerances: { gamma: 0.5, delta: 0.5, lambda: 0.6, xi: 0.5 } },
+  // Closed-form via E[e^{tU}] MGF, U~N(-γ/δ,1/δ²); ω=exp(1/δ²)
+  // mean=ξ−λ√ω·sinh(γ/δ); var=λ²(ω−1)(ω·cosh(2γ/δ)+1)/2
+  moments: [
+    { params: [0, 2, 2, 0], mean: 0, variance: 1.2974425414002557, skewness: 0, kurtosis: 1.5078621849296514, tol: 1e-12 },
+    { params: [1, 0.5, 0.5, 1], mean: -12.39953750828606, variance: 9995.91424262885, skewness: -413.73929984157127, kurtosis: 9202031.211490294, tol: { mean: 1e-10, variance: 1e-6, skewness: 1e-2, kurtosis: 1 } }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1, 1, 0], [0, 0, 1, 0], // delta > 0
@@ -2853,6 +2869,11 @@ export default [{
 }, {
   name: 'Laplace',
   fit: { params: [1, 2], seed: 42, n: 200, tolerances: { mu: 0.3, b: 0.4 } },
+  // mean=μ; var=2b²; skew=0; kurt=3
+  moments: [
+    { params: [0, 2], mean: 0, variance: 8, skewness: 0, kurtosis: 3, tol: 1e-14 },
+    { params: [3, 0.5], mean: 3, variance: 0.5, skewness: 0, kurtosis: 3, tol: 1e-14 }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // b > 0
@@ -5274,6 +5295,11 @@ export default [{
 }, {
   name: 'UniformProduct',
   fit: { params: [3], seed: 42, n: 200, exact: ['n'] },
+  // E[X^k]=(1/(k+1))^n; central moments assembled from raw moments
+  moments: [
+    { params: [2], mean: 0.25, variance: 0.048611111111111105, skewness: 0.9719086448808706, kurtosis: 0.1518367346938807, tol: 1e-12 },
+    { params: [6], mean: 0.015625, variance: 0.001127601487482853, skewness: 4.9510511275501194, kurtosis: 36.773792302883535, tol: 1e-12 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0], [1] // n > 1

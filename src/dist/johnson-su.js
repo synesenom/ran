@@ -59,6 +59,67 @@ export default class JohnsonSU extends Normal {
     return this.p.xi + this.p.lambda * Math.sinh((this.c.sigmaRoot2 * erfinv(2 * p - 1) - this.p.gamma) / this.p.delta)
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { gamma, delta, lambda, xi } = this.p
+    const sqrtOmega = Math.exp(0.5 / (delta * delta))
+    return xi - lambda * sqrtOmega * Math.sinh(gamma / delta)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { gamma, delta, lambda } = this.p
+    const omega = Math.exp(1 / (delta * delta))
+    return lambda * lambda * (omega - 1) * (omega * Math.cosh(2 * gamma / delta) + 1) / 2
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { gamma, delta } = this.p
+    const d2 = delta * delta
+    const g = gamma / delta
+    const w = Math.exp(0.5 / d2)
+    const omega = w * w
+    const omega2 = omega * omega
+
+    const s1 = -w * Math.sinh(g)
+    const s2 = (omega2 * Math.cosh(2 * g) - 1) / 2
+    const s3 = (3 * w * Math.sinh(g) - Math.pow(omega, 4.5) * Math.sinh(3 * g)) / 4
+
+    const v = s2 - s1 * s1
+    const mu3 = s3 - 3 * s2 * s1 + 2 * s1 * s1 * s1
+    return mu3 / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { gamma, delta } = this.p
+    const d2 = delta * delta
+    const g = gamma / delta
+    const w = Math.exp(0.5 / d2)
+    const omega = w * w
+    const omega2 = omega * omega
+    const omega8 = omega2 * omega2 * omega2 * omega2
+
+    const s1 = -w * Math.sinh(g)
+    const s2 = (omega2 * Math.cosh(2 * g) - 1) / 2
+    const s3 = (3 * w * Math.sinh(g) - Math.pow(omega, 4.5) * Math.sinh(3 * g)) / 4
+    const s4 = (3 - 4 * omega2 * Math.cosh(2 * g) + omega8 * Math.cosh(4 * g)) / 8
+
+    const v = s2 - s1 * s1
+    const s1sq = s1 * s1
+    const mu4 = s4 - 4 * s3 * s1 + 6 * s2 * s1sq - 3 * s1sq * s1sq
+    return mu4 / (v * v) - 3
+  }
+
   static _fitInit (data) {
     // Slifker-Shapiro (1980): cosh(2z/δ)=(m+n)/(2p) gives δ in closed form; back-compute γ,λ,ξ from the same four quantiles
     const n = data.length
