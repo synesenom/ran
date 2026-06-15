@@ -53,6 +53,60 @@ export default class BetaBinomial extends Categorical {
     }]
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { n, alpha, beta } = this.p
+    return n * alpha / (alpha + beta)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { n, alpha, beta } = this.p
+    const s = alpha + beta
+    return n * alpha * beta * (s + n) / (s * s * (s + 1))
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { n, alpha, beta } = this.p
+    const s = alpha + beta
+    const variance = n * alpha * beta * (s + n) / (s * s * (s + 1))
+    if (!(variance > 0)) return NaN
+    // Computed from factorial moments E[(X)_r] = (n)_r * (alpha)_r / (s)_r
+    const m1 = n * alpha / s
+    const b = n * (n - 1) * alpha * (alpha + 1) / (s * (s + 1))
+    const c3 = n * (n - 1) * (n - 2) * alpha * (alpha + 1) * (alpha + 2) / (s * (s + 1) * (s + 2))
+    const m2 = m1 + b
+    const m3 = m1 + 3 * b + c3
+    return (m3 - 3 * m1 * m2 + 2 * m1 * m1 * m1) / Math.pow(variance, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { n, alpha, beta } = this.p
+    const s = alpha + beta
+    const variance = n * alpha * beta * (s + n) / (s * s * (s + 1))
+    if (!(variance > 0)) return NaN
+    // Computed from factorial moments E[(X)_r] = (n)_r * (alpha)_r / (s)_r
+    const m1 = n * alpha / s
+    const b = n * (n - 1) * alpha * (alpha + 1) / (s * (s + 1))
+    const c3 = n * (n - 1) * (n - 2) * alpha * (alpha + 1) * (alpha + 2) / (s * (s + 1) * (s + 2))
+    const c4 = n * (n - 1) * (n - 2) * (n - 3) * alpha * (alpha + 1) * (alpha + 2) * (alpha + 3) / (s * (s + 1) * (s + 2) * (s + 3))
+    const m2 = m1 + b
+    const m3 = m1 + 3 * b + c3
+    const m4 = m1 + 7 * b + 6 * c3 + c4
+    const mu4 = m4 - 4 * m1 * m3 + 6 * m1 * m1 * m2 - 3 * m1 * m1 * m1 * m1
+    return mu4 / (variance * variance) - 3
+  }
+
   _cdf (x) {
     // Bidirectional raw-PMF summation bypasses AliasTable normalisation bias that
     // causes prefix-sum CDF to fall ~1 ULP below exact boundaries (e.g. CDF(12) < 0.5

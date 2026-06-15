@@ -57,4 +57,38 @@ export default class Bernoulli extends Distribution {
   _q (p) {
     return p > 1 - this.p.p ? 1 : 0
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.p
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return this.p.p * (1 - this.p.p)
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const v = this.p.p * (1 - this.p.p)
+    // Variance is zero at p=0 or p=1 (point mass); skewness is undefined.
+    if (!(v > 0)) return NaN
+    return (1 - 2 * this.p.p) / Math.sqrt(v)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const v = this.p.p * (1 - this.p.p)
+    // Variance is zero at p=0 or p=1 (point mass); kurtosis is undefined.
+    if (!(v > 0)) return NaN
+    return (1 - 6 * v) / v
+  }
 }

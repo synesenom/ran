@@ -91,6 +91,70 @@ export default class Categorical extends Distribution {
   }
 
   /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { min, n } = this.c
+    let m = 0
+    for (let i = 0; i < n; i++) {
+      m += (min + i) * this.pdfTable[i]
+    }
+    return m
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { min, n } = this.c
+    let m1 = 0; let m2 = 0
+    for (let i = 0; i < n; i++) {
+      const x = min + i
+      const p = this.pdfTable[i]
+      m1 += x * p
+      m2 += x * x * p
+    }
+    return m2 - m1 * m1
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { min, n } = this.c
+    let m1 = 0; let m2 = 0; let m3 = 0
+    for (let i = 0; i < n; i++) {
+      const x = min + i
+      const p = this.pdfTable[i]
+      m1 += x * p
+      m2 += x * x * p
+      m3 += x * x * x * p
+    }
+    const v = m2 - m1 * m1
+    if (!(v > 0)) return NaN
+    return (m3 - 3 * m1 * m2 + 2 * m1 * m1 * m1) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { min, n } = this.c
+    let m1 = 0; let m2 = 0; let m3 = 0; let m4 = 0
+    for (let i = 0; i < n; i++) {
+      const x = min + i
+      const p = this.pdfTable[i]
+      m1 += x * p
+      m2 += x * x * p
+      m3 += x * x * x * p
+      m4 += x * x * x * x * p
+    }
+    const v = m2 - m1 * m1
+    if (!(v > 0)) return NaN
+    return (m4 - 4 * m1 * m3 + 6 * m1 * m1 * m2 - 3 * m1 * m1 * m1 * m1) / (v * v) - 3
+  }
+
+  /**
    * Estimates the categorical distribution from data via maximum likelihood. The MLE is
    * closed-form (empirical frequencies of the observed integer categories) so this override
    * skips the optimizer. See [decisions/0016-distribution-fit-powell-and-exact-mle.md]{@link ../../decisions/0016-distribution-fit-powell-and-exact-mle.md}.

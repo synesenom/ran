@@ -44,4 +44,34 @@ export default class Degenerate extends Distribution {
   _pdf () {
     return 1
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.x0
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return 0
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    // Point mass has zero variance; skewness 0/0 is undefined.
+    return NaN
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    // Point mass has zero variance; kurtosis 0/0 is undefined.
+    return NaN
+  }
 }
