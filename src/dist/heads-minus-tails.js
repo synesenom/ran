@@ -92,4 +92,51 @@ export default class HeadsMinusTails extends PreComputed {
     }
     return Math.abs(2 * heads - 2 * this.p.n)
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const n = this.p.n
+    // A = C(2n,n)/4^n; E[X] = 2n*A derived from E[|H-n|] where H~Binomial(2n,1/2).
+    const A = Math.exp(logBinomial(2 * n, n) + this.c.baseLogProb)
+    return 2 * n * A
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const n = this.p.n
+    // E[X²] = 4*Var(H) = 4*(2n/4) = 2n; Var[X] = E[X²] - E[X]².
+    const A = Math.exp(logBinomial(2 * n, n) + this.c.baseLogProb)
+    return 2 * n - 4 * n * n * A * A
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const n = this.p.n
+    // E[|H-n|³] = n²*C(2n,n)/4^n (verified analytically for n=1,2,3).
+    const A = Math.exp(logBinomial(2 * n, n) + this.c.baseLogProb)
+    const variance = 2 * n - 4 * n * n * A * A
+    if (!(variance > 0)) return NaN
+    const mu3 = 4 * n * n * A * (4 * n * A * A - 1)
+    return mu3 / Math.pow(variance, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const n = this.p.n
+    // E[X⁴] = 16*μ₄(H) = 16*(κ₄(H)+3κ₂(H)²) where κ₂=-n/4, κ₄=κ₂ for Binomial(2n,1/2).
+    const A = Math.exp(logBinomial(2 * n, n) + this.c.baseLogProb)
+    const A2 = A * A
+    const variance = 2 * n - 4 * n * n * A2
+    if (!(variance > 0)) return NaN
+    const mu4 = 4 * n * (3 * n - 1) - 16 * n * n * n * A2 - 48 * n * n * n * n * A2 * A2
+    return mu4 / (variance * variance) - 3
+  }
 }

@@ -5,6 +5,13 @@ export default [{
   name: 'Bernoulli',
   // pdf(1) === p, so the planted-p tolerance reproduces the original pdf(1) check
   fit: { params: [0.7], seed: 42, n: 200, tolerances: { p: 0.05 } },
+  // Formulas: mean=p, var=p(1-p), skew=(1-2p)/sqrt(p(1-p)), kurt=(1-6p(1-p))/(p(1-p))
+  moments: [
+    { params: [0.3], mean: 0.3, variance: 0.21, skewness: 0.8728715609439696, kurtosis: -1.2380952380952381 },
+    { params: [0.5], mean: 0.5, variance: 0.25, skewness: 0, kurtosis: -2 },
+    { params: [0], mean: 0, variance: 0, skewness: NaN, kurtosis: NaN },
+    { params: [1], mean: 1, variance: 0, skewness: NaN, kurtosis: NaN }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [2] // 0 <= p <= 1
@@ -78,6 +85,13 @@ export default [{
     [-1, 1, 1], // n > 0
     [100, -1, 1], [100, 0, 1], // alpha > 0
     [100, 1, -1], [100, 1, 0] // beta > 0
+  ],
+  // Moments via factorial moments E[(X)_r]=(n)_r*(alpha)_r/(s)_r where s=alpha+beta.
+  // n=1,alpha=2,beta=3 degenerates to Bernoulli(0.4) — cross-validates against that closed form.
+  moments: [
+    { params: [25, 2, 2], mean: 12.5, variance: 36.25, skewness: 0, kurtosis: -0.865024630541872 },
+    { params: [1, 2, 3], mean: 0.4, variance: 0.24, skewness: 0.4082482904638631, kurtosis: -1.8333333333333333 },
+    { params: [0, 2, 3], mean: 0, variance: 0, skewness: NaN, kurtosis: NaN }
   ],
   cases: [{
     params: () => [25, 2, 2]
@@ -235,6 +249,13 @@ export default [{
   ]
 }, {
   name: 'Binomial',
+  // Formulas: mean=np, var=np(1-p), skew=(1-2p)/sqrt(np(1-p)), kurt=(1-6p(1-p))/(np(1-p))
+  moments: [
+    { params: [10, 0.3], mean: 3, variance: 2.1, skewness: 0.276026223736941, kurtosis: -0.12380952380952381 },
+    { params: [10, 0.5], mean: 5, variance: 2.5, skewness: 0, kurtosis: -0.2 },
+    { params: [5, 0], mean: 0, variance: 0, skewness: NaN, kurtosis: NaN },
+    { params: [5, 1], mean: 5, variance: 0, skewness: NaN, kurtosis: NaN }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 0.5], // n >= 0
@@ -392,6 +413,12 @@ export default [{
   ]
 }, {
   name: 'Categorical',
+  // Moments via direct sums over the normalized pdfTable.
+  // Uniform weights collapse to DiscreteUniform; two-weight case cross-validates against Bernoulli formulas.
+  moments: [
+    { params: [[1, 1, 1, 1, 1], 0], mean: 2, variance: 2, skewness: 0, kurtosis: -1.3 },
+    { params: [[1, 3], 0], mean: 0.75, variance: 0.1875, skewness: -1.1547005383792515, kurtosis: -0.6666666666666667 }
+  ],
   invalidParams: [
     [], // all params required
     [[-1, 1, 1], 0] // w_i > 0
@@ -557,6 +584,12 @@ export default [{
 }, {
   name: 'DiscreteUniform',
   fit: { params: [2, 8], seed: 42, n: 200, exact: ['xmin', 'xmax'] },
+  // Formulas: mean=(a+b)/2, var=(n²-1)/12, skew=0, kurt=-6(n²+1)/(5(n²-1)) where n=b-a+1.
+  moments: [
+    { params: [0, 4], mean: 2, variance: 2, skewness: 0, kurtosis: -1.3 },
+    { params: [2, 8], mean: 5, variance: 4, skewness: 0, kurtosis: -1.25 },
+    { params: [0, 0], mean: 0, variance: 0, skewness: NaN, kurtosis: NaN }
+  ],
   invalidParams: [
     [], // all params required
     [105, 100] // xmin <= xmax
@@ -791,6 +824,12 @@ export default [{
 }, {
   name: 'HeadsMinusTails',
   fit: { params: [5], seed: 4, n: 200, exact: ['n'] },
+  // Moments from X=2|H-n|, H~Binomial(2n,1/2). A=C(2n,n)/4^n.
+  // E[X]=2nA, Var=2n-4n²A², E[|H-n|³]=n²A (verified for n=1,2,3). n=1 gives exact integer moments.
+  moments: [
+    { params: [1], mean: 1, variance: 1, skewness: 0, kurtosis: -2 },
+    { params: [2], mean: 1.5, variance: 1.75, skewness: 0.32396954829362334, kurtosis: -0.7755102040816326, tol: 1e-10 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], // n > 0
@@ -1201,6 +1240,10 @@ export default [{
   ]
 }, {
   name: 'Rademacher',
+  // Exact constants: mean=0, var=1, skew=0, kurt=-2 (from the ±1 equal-probability structure).
+  moments: [
+    { params: [], mean: 0, variance: 1, skewness: 0, kurtosis: -2 }
+  ],
   invalidParams: [],
   cases: [{
     params: () => [],

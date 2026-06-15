@@ -71,4 +71,38 @@ export default class Binomial extends Distribution {
     if (this.p.p === 0.5 && x === (this.p.n - 1) / 2) return 0.5
     return regularizedBetaIncomplete(this.p.n - x, x + 1, 1 - this.p.p)
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.n * this.p.p
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return this.p.n * this.p.p * (1 - this.p.p)
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const v = this.p.n * this.p.p * (1 - this.p.p)
+    // Variance is zero when n=0 or p=0 or p=1 (degenerate); skewness is undefined.
+    if (!(v > 0)) return NaN
+    return (1 - 2 * this.p.p) / Math.sqrt(v)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const v = this.p.n * this.p.p * (1 - this.p.p)
+    // Variance is zero when n=0 or p=0 or p=1 (degenerate); kurtosis is undefined.
+    if (!(v > 0)) return NaN
+    return (1 - 6 * this.p.p * (1 - this.p.p)) / v
+  }
 }

@@ -71,4 +71,38 @@ export default class DiscreteUniform extends Distribution {
     // which is needed when p*N is exact so CDF(k) = p and the correct quantile is k, not k+1.
     return Math.ceil(p * this.c.n) - 1 + this.p.xmin
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return (this.p.xmin + this.p.xmax) / 2
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const n = this.c.n
+    return (n * n - 1) / 12
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    // n=1 is a degenerate point mass with undefined skewness.
+    if (this.c.n <= 1) return NaN
+    return 0
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const n = this.c.n
+    // n=1 is a degenerate point mass with undefined kurtosis.
+    if (n <= 1) return NaN
+    return -6 * (n * n + 1) / (5 * (n * n - 1))
+  }
 }

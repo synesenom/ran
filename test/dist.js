@@ -1559,6 +1559,25 @@ describe('dist', () => {
         assert.throws(() => new dist.Degenerate())
       })
     })
+
+    describe('moments', () => {
+      it('mean should equal x0', () => {
+        assert.strictEqual(new dist.Degenerate(3).mean(), 3)
+        assert.strictEqual(new dist.Degenerate(-1.5).mean(), -1.5)
+      })
+
+      it('variance should be 0', () => {
+        assert.strictEqual(new dist.Degenerate(3).variance(), 0)
+      })
+
+      it('skewness should be NaN (0/0 at point mass)', () => {
+        assert(Number.isNaN(new dist.Degenerate(3).skewness()))
+      })
+
+      it('kurtosis should be NaN (0/0 at point mass)', () => {
+        assert(Number.isNaN(new dist.Degenerate(3).kurtosis()))
+      })
+    })
   })
 
   // Kolmogorov: open lower boundary — x=0 is outside the support (x>0) and must return 0.
