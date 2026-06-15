@@ -2696,7 +2696,7 @@ export default [{
   // mean=ξ−λ√ω·sinh(γ/δ); var=λ²(ω−1)(ω·cosh(2γ/δ)+1)/2
   moments: [
     { params: [0, 2, 2, 0], mean: 0, variance: 1.2974425414002557, skewness: 0, kurtosis: 1.5078621849296514, tol: 1e-12 },
-    { params: [1, 0.5, 0.5, 1], mean: -12.39953750828606, variance: 9995.91424262885, skewness: 414.54825104436765, kurtosis: 9202475.24901527, tol: { mean: 1e-10, variance: 1e-6, skewness: 1e-2, kurtosis: 1 } }
+    { params: [1, 0.5, 0.5, 1], mean: -12.39953750828606, variance: 9995.91424262885, skewness: -413.73929984157127, kurtosis: 9202031.211490294, tol: { mean: 1e-10, variance: 1e-6, skewness: 1e-2, kurtosis: 1 } }
   ],
   invalidParams: [
     [], // all params required

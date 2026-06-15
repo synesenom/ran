@@ -90,7 +90,7 @@ export default class JohnsonSU extends Normal {
 
     const s1 = -w * Math.sinh(g)
     const s2 = (omega2 * Math.cosh(2 * g) - 1) / 2
-    const s3 = (-3 * w * Math.sinh(g) + Math.pow(omega, 4.5) * Math.sinh(3 * g)) / 4
+    const s3 = (3 * w * Math.sinh(g) - Math.pow(omega, 4.5) * Math.sinh(3 * g)) / 4
 
     const v = s2 - s1 * s1
     const mu3 = s3 - 3 * s2 * s1 + 2 * s1 * s1 * s1
@@ -111,7 +111,7 @@ export default class JohnsonSU extends Normal {
 
     const s1 = -w * Math.sinh(g)
     const s2 = (omega2 * Math.cosh(2 * g) - 1) / 2
-    const s3 = (-3 * w * Math.sinh(g) + Math.pow(omega, 4.5) * Math.sinh(3 * g)) / 4
+    const s3 = (3 * w * Math.sinh(g) - Math.pow(omega, 4.5) * Math.sinh(3 * g)) / 4
     const s4 = (3 - 4 * omega2 * Math.cosh(2 * g) + omega8 * Math.cosh(4 * g)) / 8
 
     const v = s2 - s1 * s1
