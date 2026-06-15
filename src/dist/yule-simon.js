@@ -65,4 +65,52 @@ export default class YuleSimon extends Distribution {
   _cdf (x) {
     return 1 - x * beta(x, this.c.rhoPlus1)
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    if (this.p.rho <= 1) return Infinity
+    return this.p.rho / (this.p.rho - 1)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const rho = this.p.rho
+    if (rho <= 2) return Infinity
+    return rho * rho / ((rho - 1) * (rho - 1) * (rho - 2))
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const rho = this.p.rho
+    if (rho <= 3) return Infinity
+    return (rho + 1) * (rho + 1) * Math.sqrt(rho - 2) / (rho * (rho - 3))
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const rho = this.p.rho
+    if (rho <= 4) return Infinity
+    // Factorial moments: E[K^(n)] = n!*(n-1)! * rho / prod_{i=1}^{n}(rho-i)
+    // (derivation: integral representation of B(k,rho+1) with generating function sum C(j+n,n)*t^j = 1/(1-t)^{n+1})
+    // Convert to ordinary moments via Stirling 2nd kind: S(2)={1,1}, S(3)={1,3,1}, S(4)={1,7,6,1}
+    const f1 = rho / (rho - 1)
+    const f2 = 2 * rho / ((rho - 1) * (rho - 2))
+    const f3 = 12 * rho / ((rho - 1) * (rho - 2) * (rho - 3))
+    const f4 = 144 * rho / ((rho - 1) * (rho - 2) * (rho - 3) * (rho - 4))
+    const mu1 = f1
+    const mu2 = f1 + f2
+    const mu3 = f1 + 3 * f2 + f3
+    const mu4 = f1 + 7 * f2 + 6 * f3 + f4
+    const v = mu2 - mu1 * mu1
+    const mu4c = mu4 - 4 * mu1 * mu3 + 6 * mu1 * mu1 * mu2 - 3 * mu1 * mu1 * mu1 * mu1
+    return mu4c / (v * v) - 3
+  }
 }

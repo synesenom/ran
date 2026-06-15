@@ -41,9 +41,9 @@ export default class FlorySchulz extends Distribution {
   }
 
   static _fitInit (data) {
-    // E[X] = 2/a; solving gives a = 2/mean.
+    // E[X] = (2-a)/a; solving gives a = 2/(mean+1).
     const mean = data.reduce((s, x) => s + x, 0) / data.length
-    return [Math.max(0.01, Math.min(0.99, 2 / mean))]
+    return [Math.max(0.01, Math.min(0.99, 2 / (mean + 1)))]
   }
 
   _generator () {
@@ -62,5 +62,39 @@ export default class FlorySchulz extends Distribution {
     // log1p/expm1 avoids 1-near-1 cancellation in 1-(1-a)^k*(1+ka) when a→0
     const kLnOma = x * this.c.lnOneMinusA
     return -Math.expm1(kLnOma) - Math.exp(kLnOma) * x * this.p.a
+  }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    // X = G1 + G2 + 1 where G_i ~ Geometric(a) (failures before success); E[G_i]=(1-a)/a
+    return (2 - this.p.a) / this.p.a
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    // Var[G_i] = (1-a)/a²; two independent copies sum
+    return 2 * (1 - this.p.a) / (this.p.a * this.p.a)
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const a = this.p.a
+    // Skew scales as 1/√n for sum of n IID; skew[G_i]=(2-a)/√(1-a)
+    return (2 - a) / Math.sqrt(2 * (1 - a))
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const a = this.p.a
+    // Excess kurtosis scales as 1/n for sum of n IID; kurt[G_i]=6+a²/(1-a)
+    return 3 + a * a / (2 * (1 - a))
   }
 }

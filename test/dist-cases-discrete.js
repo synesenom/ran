@@ -649,6 +649,11 @@ export default [{
 }, {
   name: 'FlorySchulz',
   fit: { params: [0.4], seed: 42, n: 200, tolerances: { a: 0.05 } },
+  // X = G1+G2+1, G_i ~ Geom(a); skew=(2-a)/√(2(1-a)), kurt=3+a²/(2(1-a))
+  moments: [
+    { params: [0.5], mean: 3, variance: 4, skewness: 1.5, kurtosis: 3.25 },
+    { params: [0.3], mean: 5.666666666666667, variance: 15.555555555555555, skewness: 1.4367622330384782, kurtosis: 3.06428571428571, tol: 1e-8 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0], [1], [2] // 0 < a < 1
@@ -737,6 +742,12 @@ export default [{
 }, {
   name: 'Geometric',
   fit: { params: [0.4], seed: 42, n: 200, tolerances: { p: 0.05 } },
+  // scipy.stats.geom(p, loc=-1) — 0-indexed: E=(1-p)/p, Var=(1-p)/p², Skew=(2-p)/√(1-p), EKurt=6+p²/(1-p)
+  moments: [
+    { params: [0.5], mean: 1, variance: 2, skewness: 2.1213203435596424, kurtosis: 6.5 },
+    { params: [0.25], mean: 3, variance: 12, skewness: 2.020725942163691, kurtosis: 6.083333333333333 },
+    { params: [1], mean: 0, variance: 0, skewness: NaN, kurtosis: NaN }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0], [2] // 0 < p <= 1
@@ -890,6 +901,12 @@ export default [{
 }, {
   name: 'LogSeries',
   fit: { params: [0.7], seed: 42, n: 200, tolerances: { p: 0.05 } },
+  // E[K^n]=(-1/L)*T_{n-1}, T_m=sum k^m p^k; raw moments: E[K]=p/(q*(-L)), E[K^2]=p/(q^2*(-L)), etc.
+  // Reference values computed analytically from closed-form raw moment formulas (Python, float64)
+  moments: [
+    { params: [0.5], mean: 1.4426950408889634, variance: 0.80402110077231903, skewness: 3.0148244318905424, kurtosis: 13.388420819538236, tol: 1e-10 },
+    { params: [0.9], mean: 3.9086503371292673, variance: 23.808955913351944, skewness: 3.475346035525535, kurtosis: 18.905563196881115, tol: 1e-10 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0], [1], [2] // 0 < p < 1
@@ -1009,6 +1026,12 @@ export default [{
   ]
 }, {
   name: 'NegativeBinomial',
+  // p is failure probability; mean=rp/(1-p), var=rp/(1-p)², skew=(1+p)/√(rp), kurt=6/r+(1-p)²/(rp)
+  moments: [
+    { params: [10, 0.4], mean: 6.666666666666667, variance: 11.11111111111111, skewness: 0.7, kurtosis: 0.69 },
+    { params: [5, 0.5], mean: 5, variance: 10, skewness: 0.9486832980505138, kurtosis: 1.3 },
+    { params: [5, 0], mean: 0, variance: 0, skewness: NaN, kurtosis: NaN }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 0.5], [0, 0.5], // r > 0
@@ -1249,6 +1272,11 @@ export default [{
 }, {
   name: 'Soliton',
   fit: { params: [5], seed: 42, n: 200, exact: ['N'] },
+  // E[X]=1/N+H_{N-1}; N=5 exact rationals: E[X]=137/60, E[X^2]=377/60, E[X^3]=1217/60, E[X^4]=4457/60
+  // var=3851/3600; mu3c=113543/108000; mu4c=17438999/4320000; skew/kurt from Fraction arithmetic
+  moments: [
+    { params: [5], mean: 2.2833333333333332, variance: 1.0697222222222222, skewness: 0.9502329429111255, kurtosis: 0.5277335081297956 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // N > 0
@@ -1291,6 +1319,14 @@ export default [{
 }, {
   name: 'YuleSimon',
   fit: { params: [3], seed: 42, n: 200, tolerances: { rho: 0.5 } },
+  // Moments via falling-factorial: E[K^(n)]=n!*rho/prod(rho-i); existence: mean rho>1, var rho>2, skew rho>3, kurt rho>4
+  // rho=5 kurtosis=2754/125=22.032 exactly; rho=5 skewness verified from Stirling-2nd-kind formula
+  moments: [
+    { params: [1.5], mean: 3, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [2.5], mean: 1.6666666666666667, variance: 5.555555555555556, skewness: Infinity, kurtosis: Infinity },
+    { params: [3], mean: 1.5, variance: 2.25, skewness: Infinity, kurtosis: Infinity },
+    { params: [5], mean: 1.25, variance: 0.5208333333333334, skewness: 6.235382907247958, kurtosis: 118.8 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0] // rho > 0
