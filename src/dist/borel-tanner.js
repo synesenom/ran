@@ -66,4 +66,40 @@ export default class BorelTanner extends PreComputed {
     const kn = k - this.p.n
     return (this.p.n / k) * Math.exp(kn * Math.log(this.p.mu * k) - this.p.mu * k - logGamma(kn + 1))
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.n / (1 - this.p.mu)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return this.p.n * this.p.mu / Math.pow(1 - this.p.mu, 3)
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { mu, n } = this.p
+    const v = this.variance()
+    if (!(v > 0)) return NaN
+    const kappa3 = n * mu * (1 + 2 * mu) / Math.pow(1 - mu, 5)
+    return kappa3 / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { mu, n } = this.p
+    const v = this.variance()
+    if (!(v > 0)) return NaN
+    const kappa4 = n * mu * (1 + 8 * mu + 6 * mu * mu) / Math.pow(1 - mu, 7)
+    return kappa4 / (v * v)
+  }
 }

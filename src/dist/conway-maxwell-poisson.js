@@ -70,4 +70,99 @@ export default class ConwayMaxwellPoisson extends PreComputed {
     }
     return this.pdfTable[k - 1] + Math.log(this.p.lambda) - this.p.nu * Math.log(k)
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { lambda, nu } = this.p
+    const logLambda = Math.log(lambda)
+    const LOG_TOL = Math.log(1e-14)
+    const mode = Math.pow(lambda, 1 / nu)
+    let sum = 0
+    let logTerm = 0
+    let k = 0
+    do {
+      k++
+      logTerm += logLambda - nu * Math.log(k)
+      sum += k * Math.exp(logTerm + this.c.logP0)
+    } while (k < mode || logTerm + this.c.logP0 > LOG_TOL)
+    return sum
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { lambda, nu } = this.p
+    const logLambda = Math.log(lambda)
+    const LOG_TOL = Math.log(1e-14)
+    const mode = Math.pow(lambda, 1 / nu)
+    let e1 = 0
+    let e2 = 0
+    let logTerm = 0
+    let k = 0
+    do {
+      k++
+      logTerm += logLambda - nu * Math.log(k)
+      const p = Math.exp(logTerm + this.c.logP0)
+      e1 += k * p
+      e2 += k * k * p
+    } while (k < mode || logTerm + this.c.logP0 > LOG_TOL)
+    return e2 - e1 * e1
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { lambda, nu } = this.p
+    const logLambda = Math.log(lambda)
+    const LOG_TOL = Math.log(1e-14)
+    const mode = Math.pow(lambda, 1 / nu)
+    let e1 = 0
+    let e2 = 0
+    let e3 = 0
+    let logTerm = 0
+    let k = 0
+    do {
+      k++
+      logTerm += logLambda - nu * Math.log(k)
+      const p = Math.exp(logTerm + this.c.logP0)
+      e1 += k * p
+      e2 += k * k * p
+      e3 += k * k * k * p
+    } while (k < mode || logTerm + this.c.logP0 > LOG_TOL)
+    const variance = e2 - e1 * e1
+    const kappa3 = e3 - 3 * e1 * e2 + 2 * Math.pow(e1, 3)
+    return kappa3 / Math.pow(variance, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { lambda, nu } = this.p
+    const logLambda = Math.log(lambda)
+    const LOG_TOL = Math.log(1e-14)
+    const mode = Math.pow(lambda, 1 / nu)
+    let e1 = 0
+    let e2 = 0
+    let e3 = 0
+    let e4 = 0
+    let logTerm = 0
+    let k = 0
+    do {
+      k++
+      logTerm += logLambda - nu * Math.log(k)
+      const p = Math.exp(logTerm + this.c.logP0)
+      e1 += k * p
+      e2 += k * k * p
+      e3 += k * k * k * p
+      e4 += k * k * k * k * p
+    } while (k < mode || logTerm + this.c.logP0 > LOG_TOL)
+    const variance = e2 - e1 * e1
+    const mu4 = e4 - 4 * e1 * e3 + 6 * e1 * e1 * e2 - 3 * Math.pow(e1, 4)
+    return mu4 / (variance * variance) - 3
+  }
 }

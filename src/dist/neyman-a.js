@@ -77,4 +77,39 @@ export default class NeymanA extends PreComputed {
     }
     return Math.round(z)
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.lambda * this.p.phi
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { lambda, phi } = this.p
+    return lambda * phi * (1 + phi)
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { lambda, phi } = this.p
+    const kappa2 = lambda * phi * (1 + phi)
+    const kappa3 = lambda * phi * (1 + 3 * phi + phi * phi)
+    return kappa3 / Math.pow(kappa2, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { lambda, phi } = this.p
+    const kappa2 = lambda * phi * (1 + phi)
+    const kappa4 = lambda * phi * (1 + 7 * phi + 6 * phi * phi + phi * phi * phi)
+    return kappa4 / (kappa2 * kappa2)
+  }
 }

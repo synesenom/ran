@@ -87,4 +87,40 @@ export default class Delaporte extends PreComputed {
     const j = gamma(this.r, this.p.alpha, 1 / this.p.beta)
     return poisson(this.r, this.p.lambda + j)
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { alpha, beta, lambda } = this.p
+    return lambda + alpha * beta
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { alpha, beta, lambda } = this.p
+    return lambda + alpha * beta * (1 + beta)
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { alpha, beta, lambda } = this.p
+    const kappa2 = lambda + alpha * beta * (1 + beta)
+    const kappa3 = lambda + alpha * beta * (1 + beta) * (1 + 2 * beta)
+    return kappa3 / Math.pow(kappa2, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { alpha, beta, lambda } = this.p
+    const kappa2 = lambda + alpha * beta * (1 + beta)
+    const kappa4 = lambda + alpha * beta * (1 + beta) * (1 + 6 * beta + 6 * beta * beta)
+    return kappa4 / (kappa2 * kappa2)
+  }
 }

@@ -77,4 +77,39 @@ export default class PolyaAeppli extends PreComputed {
     }
     return Math.round(z)
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.lambda / (1 - this.p.theta)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { lambda, theta } = this.p
+    return lambda * (1 + theta) / Math.pow(1 - theta, 2)
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { lambda, theta } = this.p
+    const kappa2 = lambda * (1 + theta) / Math.pow(1 - theta, 2)
+    const kappa3 = lambda * (1 + 4 * theta + theta * theta) / Math.pow(1 - theta, 3)
+    return kappa3 / Math.pow(kappa2, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { lambda, theta } = this.p
+    const kappa2 = lambda * (1 + theta) / Math.pow(1 - theta, 2)
+    const kappa4 = lambda * (1 + 11 * theta + 11 * theta * theta + theta * theta * theta) / Math.pow(1 - theta, 4)
+    return kappa4 / (kappa2 * kappa2)
+  }
 }

@@ -59,4 +59,32 @@ export default class Poisson extends Distribution {
   _cdf (x) {
     return 1 - gammaLowerIncomplete(x + 1, this.p.lambda)
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.lambda
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return this.p.lambda
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    return 1 / Math.sqrt(this.p.lambda)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    return 1 / this.p.lambda
+  }
 }

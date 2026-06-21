@@ -721,6 +721,20 @@ describe('dist', () => {
         assert(Number.isFinite(result.pdf(result.p.n)) && result.pdf(result.p.n) > 0)
       })
 
+      it('Borel._fitInit degenerate: constant data (mean = 1) clamps mu to 0', () => {
+        // mean > 1 branch false: data all equal 1 → mean = 1 → mu = 0
+        const result = dist.Borel.fit([1, 1, 1, 1, 1])
+        assert(result instanceof dist.Borel)
+        assert(result.p.mu === 0)
+      })
+
+      it('BorelTanner._fitInit degenerate: mean ≤ n clamps mu to 0', () => {
+        // mean > n branch false: all values equal n (= minimum) → mean = n → mu = 0
+        const result = dist.BorelTanner.fit([3, 3, 3, 3, 3])
+        assert(result instanceof dist.BorelTanner)
+        assert(result.p.mu === 0 && result.p.n === 3)
+      })
+
       it('ConwayMaxwellPoisson.fit should return a usable ConwayMaxwellPoisson instance', () => {
         const data = new dist.ConwayMaxwellPoisson(3, 2).seed(42).sample(200)
         const result = dist.ConwayMaxwellPoisson.fit(data)
@@ -735,6 +749,12 @@ describe('dist', () => {
         assert(result instanceof dist.PolyaAeppli)
         assert(result.p.lambda > 0 && result.p.theta > 0 && result.p.theta < 1)
         assert(Number.isFinite(result.pdf(2)) && result.pdf(2) > 0)
+      })
+
+      it('PolyaAeppli._fitInit fallback: variance ≤ mean seeds theta=0.5', () => {
+        // if (variance <= mean) branch: data with var=0.16 < mean=3.2 triggers fallback seed
+        const [lambda, theta] = dist.PolyaAeppli._fitInit([3, 3, 3, 3, 4])
+        assert(theta === 0.5 && lambda > 0)
       })
 
       it('NeymanA.fit should return a usable NeymanA instance', () => {
