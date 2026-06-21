@@ -2547,6 +2547,12 @@ export default [{
 }, {
   name: 'InverseGaussian',
   fit: { params: [2, 3], seed: 42, n: 500, tolerances: { mu: 0.3, lambda: 1.0 } },
+  // mean=mu, var=mu^3/lambda, skew=3*sqrt(mu/lambda), kurt=15*mu/lambda — exact polynomial formulas
+  moments: [
+    { params: [2, 2], mean: 2, variance: 4, skewness: 3, kurtosis: 15, tol: 1e-14 },
+    { params: [1, 0.5], mean: 1, variance: 2, skewness: 4.242640687119286, kurtosis: 30, tol: 1e-14 },
+    { params: [0.5, 1], mean: 0.5, variance: 0.125, skewness: 2.121320343559643, kurtosis: 7.5, tol: 1e-14 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // mu > 0
@@ -2922,6 +2928,11 @@ export default [{
 }, {
   name: 'Levy',
   fit: { params: [1, 2], seed: 42, n: 200, tolerances: { mu: 0.3, c: 0.8 } },
+  // All positive-order moments of Lévy diverge.
+  moments: [
+    { params: [0, 2], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [1, 0.5], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // c > 0
@@ -4641,6 +4652,12 @@ export default [{
 }, {
   name: 'ReciprocalInverseGaussian',
   fit: { params: [2, 4], seed: 42, n: 500, tolerances: { mu: 0.5, lambda: 2.0 } },
+  // a=1/mu, b=1/lambda; mean=a+b, var=b(a+2b), skew=√b(3a+8b)/(a+2b)^{3/2}, kurt=3b(5a+16b)/(a+2b)²
+  moments: [
+    { params: [2, 2], mean: 1, variance: 0.75, skewness: 2.116950987028628, kurtosis: 7, tol: 1e-14 },
+    { params: [1, 2], mean: 1.5, variance: 1, skewness: 1.75, kurtosis: 4.875, tol: 1e-14 },
+    { params: [2, 4], mean: 0.75, variance: 0.25, skewness: 1.75, kurtosis: 4.875, tol: 1e-14 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // mu > 0
@@ -4685,6 +4702,12 @@ export default [{
   ]
 }, {
   name: 'Rice',
+  // Moments via Laguerre–Bessel expressions; values from closed-form formulas at these params.
+  moments: [
+    { params: [2, 2], mean: 3.09714492110229, variance: 2.4076933376902883, skewness: 0.5171541178806969, kurtosis: 0.01537909577219887, tol: 1e-10 },
+    { params: [0.5, 2], mean: 2.545642141935532, variance: 1.769706085201876, skewness: 0.630092127556055, kurtosis: 0.2422469198442334, tol: 1e-10 },
+    { params: [1, 0.5], mean: 1.1361917140343711, variance: 0.20906838895963786, skewness: 0.20968196945744136, kurtosis: -0.18504860243676813, tol: 1e-10 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // nu > 0
