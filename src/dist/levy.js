@@ -58,6 +58,34 @@ export default class Levy extends Distribution {
     return this.p.mu + 0.5 * this.p.c / (z * z)
   }
 
+  /**
+   * @returns {number} Infinity (Lévy is stable with α=1/2; all positive-order moments diverge).
+   */
+  mean () {
+    return Infinity
+  }
+
+  /**
+   * @returns {number} Infinity.
+   */
+  variance () {
+    return Infinity
+  }
+
+  /**
+   * @returns {number} Infinity.
+   */
+  skewness () {
+    return Infinity
+  }
+
+  /**
+   * @returns {number} Infinity.
+   */
+  kurtosis () {
+    return Infinity
+  }
+
   static _fitInit (data) {
     // μ ≈ min(data); solve Levy median formula c = 2*(median-μ)*erfinv(0.5)² for c
     // erfinv(0.5)² ≈ 0.22747

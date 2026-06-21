@@ -88,4 +88,32 @@ export default class InverseGaussian extends Distribution {
     // See solutions/special-functions/2026-06-05-0000-inverse-gaussian-cdf-erfc-cancellation-cf-convergence.md
     return Math.min(1, 0.5 * (erfc(-a) + erfcx(b) * Math.exp(this.c.twoLambdaOverMu - b * b)))
   }
+
+  /**
+   * @returns {number} μ.
+   */
+  mean () {
+    return this.p.mu
+  }
+
+  /**
+   * @returns {number} μ³/λ.
+   */
+  variance () {
+    return Math.pow(this.p.mu, 3) / this.p.lambda
+  }
+
+  /**
+   * @returns {number} 3√(μ/λ).
+   */
+  skewness () {
+    return 3 * Math.sqrt(this.p.mu / this.p.lambda)
+  }
+
+  /**
+   * @returns {number} 15μ/λ.
+   */
+  kurtosis () {
+    return 15 * this.p.mu / this.p.lambda
+  }
 }

@@ -49,4 +49,38 @@ export default class ReciprocalInverseGaussian extends InverseGaussian {
   _cdf (x) {
     return 1 - super._cdf(1 / x)
   }
+
+  /**
+   * @returns {number} 1/μ + 1/λ.
+   */
+  mean () {
+    return 1 / this.p.mu + 1 / this.p.lambda
+  }
+
+  /**
+   * @returns {number} (1/λ)(1/μ + 2/λ).
+   */
+  variance () {
+    const b = 1 / this.p.lambda
+    return b * (1 / this.p.mu + 2 * b)
+  }
+
+  /**
+   * @returns {number} √(1/λ)·(3/μ + 8/λ) / (1/μ + 2/λ)^{3/2}.
+   */
+  skewness () {
+    const a = 1 / this.p.mu
+    const b = 1 / this.p.lambda
+    return Math.sqrt(b) * (3 * a + 8 * b) / Math.pow(a + 2 * b, 1.5)
+  }
+
+  /**
+   * @returns {number} 3(1/λ)(5/μ + 16/λ) / (1/μ + 2/λ)².
+   */
+  kurtosis () {
+    const a = 1 / this.p.mu
+    const b = 1 / this.p.lambda
+    const v = a + 2 * b
+    return 3 * (a + 4 * b) * (a + 5 * b) / (v * v) - 3
+  }
 }

@@ -2547,6 +2547,11 @@ export default [{
 }, {
   name: 'InverseGaussian',
   fit: { params: [2, 3], seed: 42, n: 500, tolerances: { mu: 0.3, lambda: 1.0 } },
+  // mpmath dps=50: mean=mu, var=mu^3/lam, skew=3*sqrt(mu/lam), kurt=15*mu/lam
+  moments: [
+    { params: [2, 2], mean: 2, variance: 4, skewness: 3, kurtosis: 15, tol: 1e-14 },
+    { params: [1, 0.5], mean: 1, variance: 2, skewness: 3 * Math.sqrt(2), kurtosis: 30, tol: 1e-14 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // mu > 0
@@ -2922,6 +2927,11 @@ export default [{
 }, {
   name: 'Levy',
   fit: { params: [1, 2], seed: 42, n: 200, tolerances: { mu: 0.3, c: 0.8 } },
+  // Lévy is stable with α=1/2; all positive-order moments diverge
+  moments: [
+    { params: [0, 2], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [1, 0.5], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // c > 0
@@ -4641,6 +4651,11 @@ export default [{
 }, {
   name: 'ReciprocalInverseGaussian',
   fit: { params: [2, 4], seed: 42, n: 500, tolerances: { mu: 0.5, lambda: 2.0 } },
+  // mpmath dps=50: mean=1/mu+1/lam, var=(1/lam)(1/mu+2/lam), closed-form rational/radical formulas
+  moments: [
+    { params: [2, 2], mean: 1, variance: 3 / 4, skewness: 11 * Math.sqrt(3) / 9, kurtosis: 7, tol: 1e-14 },
+    { params: [2, 4], mean: 3 / 4, variance: 1 / 4, skewness: 7 / 4, kurtosis: 39 / 8, tol: 1e-14 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // mu > 0
@@ -4685,6 +4700,26 @@ export default [{
   ]
 }, {
   name: 'Rice',
+  // Moments via E[R^k]=σ^k·2^{k/2}·Γ(1+k/2)·L_{k/2}(-t), t=ν²/(2σ²); even raw moments are
+  // polynomial in ν²/σ², odd raw moments use L_{1/2}/L_{3/2} via besselI; verified vs scipy
+  moments: [
+    {
+      params: [2, 2],
+      mean: 3.09714492110229,
+      variance: 2.4076933376902883,
+      skewness: 0.5171541178806949,
+      kurtosis: 0.01537909577219887,
+      tol: { mean: 1e-12, variance: 1e-12, skewness: 1e-10, kurtosis: 1e-10 }
+    },
+    {
+      params: [1, 2],
+      mean: 2.660894681221406,
+      variance: 1.9196394954476332,
+      skewness: 0.6177442462660604,
+      kurtosis: 0.2104694648826091,
+      tol: { mean: 1e-12, variance: 1e-12, skewness: 1e-10, kurtosis: 1e-10 }
+    }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // nu > 0
