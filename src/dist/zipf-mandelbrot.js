@@ -48,5 +48,53 @@ export default class ZipfMandelbrot extends Categorical {
       's > 1',
       'q >= 0'
     ])
+
+    // Precompute raw moment numerators from the normalized PMF (pdfTable[k-1] = P(X=k))
+    let mu1 = 0; let mu2 = 0; let mu3 = 0; let mu4 = 0
+    for (let k = 1; k <= Ni; k++) {
+      const p = this.pdfTable[k - 1]
+      mu1 += k * p
+      mu2 += k * k * p
+      mu3 += k * k * k * p
+      mu4 += k * k * k * k * p
+    }
+    Object.assign(this.c, { mu1, mu2, mu3, mu4 })
+  }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.c.mu1
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { mu1, mu2 } = this.c
+    return mu2 - mu1 * mu1
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { mu1, mu2, mu3 } = this.c
+    const v = mu2 - mu1 * mu1
+    if (!(v > 0)) return NaN
+    const cm3 = mu3 - 3 * mu1 * mu2 + 2 * mu1 * mu1 * mu1
+    return cm3 / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { mu1, mu2, mu3, mu4 } = this.c
+    const v = mu2 - mu1 * mu1
+    if (!(v > 0)) return NaN
+    const cm4 = mu4 - 4 * mu1 * mu3 + 6 * mu1 * mu1 * mu2 - 3 * mu1 * mu1 * mu1 * mu1
+    return cm4 / (v * v) - 3
   }
 }

@@ -868,6 +868,12 @@ export default [{
   ]
 }, {
   name: 'Hypergeometric',
+  // Formulas: E[(X)_m] = (n)_m * (K)_m / (N)_m (falling factorial moments); assemble central moments
+  moments: [
+    { params: [30, 10, 5], mean: 5 / 3, variance: 250 / 261, skewness: 0.24327694808466513, kurtosis: -93 / 350 },
+    { params: [20, 3, 10], mean: 1.5, variance: 0.6710526315789473, skewness: 0, kurtosis: -0.5236447520184666 },
+    { params: [10, 5, 5], mean: 2.5, variance: 25 / 36, skewness: 0, kurtosis: -6 / 35 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 5, 5], [0, 5, 5], // N > 0
@@ -989,6 +995,11 @@ export default [{
   ]
 }, {
   name: 'NegativeHypergeometric',
+  // Formulas: E[(X)_m] = r^(m) * (K)_m / (N-K+1)^(m) (rising-r, falling-K, rising-base)
+  moments: [
+    { params: [35, 15, 7], mean: 5, variance: 5.454545454545454, skewness: 0.31647674469174997, kurtosis: -0.18623188405796487 },
+    { params: [20, 5, 10], mean: 3.125, variance: 1575 / 1088, skewness: -0.30013387828627613, kurtosis: -0.4786410470621081 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 5, 5], // N >= 0
@@ -1414,6 +1425,13 @@ export default [{
 }, {
   name: 'Zeta',
   fit: { params: [2.5], seed: 42, n: 500, tolerances: { s: 0.3 } },
+  // mean=ζ(s-1)/ζ(s) for s>2; var=ζ(s-2)/ζ(s)-mean² for s>3; skew/kurt finite for s>4/s>5
+  moments: [
+    { params: [2.5], mean: 1.9473724663169567, variance: Infinity, skewness: Infinity, kurtosis: Infinity, tol: 1e-10 },
+    { params: [3.8], mean: 1.1362363598724141, variance: 0.42396600465009526, skewness: Infinity, kurtosis: Infinity, tol: 1e-10 },
+    { params: [5.0], mean: 1.0437788248434812, variance: 0.06977422469107242, skewness: 12.516969344281788, kurtosis: Infinity, tol: 1e-10 },
+    { params: [6.5], mean: 1.0130420979439072, variance: 0.01594072946042968, skewness: 12.561822565783675, kurtosis: 279.44610246008324, tol: 1e-8 }
+  ],
   invalidParams: [
     [], // all params required
     [-1], [0], [1] // s > 1
@@ -1456,6 +1474,11 @@ export default [{
   ]
 }, {
   name: 'Zipf',
+  // mean = H(N,s-1)/H(N,s); higher moments via H(N,s-r)/H(N,s) ratios
+  moments: [
+    { params: [3, 100], mean: 1.360211176143833, variance: 2.465420880242928, skewness: 18.24202324903978, kurtosis: 619.9203626923929, tol: 1e-10 },
+    { params: [1.5, 20], mean: 3.499017716693376, variance: 16.16544697021883, skewness: 2.1225999768322787, kurtosis: 4.123393628054826, tol: 1e-10 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 100], // s >= 1
@@ -1500,6 +1523,11 @@ export default [{
   ]
 }, {
   name: 'ZipfMandelbrot',
+  // Moments computed from precomputed E[X^r] = sum_{k=1}^{N} k^r * P(X=k) stored in this.c
+  moments: [
+    { params: [100, 2, 1], mean: 5.609034694354515, variance: 113.78065936217031, skewness: 4.5848907890157, kurtosis: 25.579707654658005, tol: 1e-10 },
+    { params: [20, 1.5, 2], mean: 5.548356655028758, variance: 24.871164423171187, skewness: 1.2017339524367423, kurtosis: 0.5050057869009406, tol: 1e-10 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 2, 0], [0, 2, 0], // N > 0

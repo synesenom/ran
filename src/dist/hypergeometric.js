@@ -2,6 +2,9 @@ import { logBinomial } from '../special'
 import Categorical from './categorical'
 import Distribution from './_distribution'
 
+// Falling factorial (a)_m = a(a-1)...(a-m+1)
+function fallFact (a, m) { let r = 1; for (let i = 0; i < m; i++) r *= (a - i); return r }
+
 /**
  * Probability mass function for the [hypergeometric distribution]{@link https://en.wikipedia.org/wiki/Hypergeometric_distribution}:
  *
@@ -49,6 +52,58 @@ export default class Hypergeometric extends Categorical {
       'K >= 0', 'K <= N',
       'n >= 0', 'n <= N'
     ])
+  }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { N, K, n } = this.p
+    return n * K / N
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { N, K, n } = this.p
+    if (N <= 1) return 0
+    return n * K * (N - K) * (N - n) / (N * N * (N - 1))
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { N, K, n } = this.p
+    // E[(X)_m] = (n)_m * (K)_m / (N)_m  (falling factorial moments)
+    const f1 = fallFact(n, 1) * fallFact(K, 1) / fallFact(N, 1)
+    const f2 = N >= 2 && n >= 2 && K >= 2 ? fallFact(n, 2) * fallFact(K, 2) / fallFact(N, 2) : 0
+    const f3 = N >= 3 && n >= 3 && K >= 3 ? fallFact(n, 3) * fallFact(K, 3) / fallFact(N, 3) : 0
+    const mu2 = f2 + f1
+    const v = mu2 - f1 * f1
+    if (!(v > 0)) return NaN
+    const mu3 = f3 + 3 * f2 + f1
+    const cm3 = mu3 - 3 * f1 * mu2 + 2 * f1 * f1 * f1
+    return cm3 / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { N, K, n } = this.p
+    const f1 = fallFact(n, 1) * fallFact(K, 1) / fallFact(N, 1)
+    const f2 = N >= 2 && n >= 2 && K >= 2 ? fallFact(n, 2) * fallFact(K, 2) / fallFact(N, 2) : 0
+    const f3 = N >= 3 && n >= 3 && K >= 3 ? fallFact(n, 3) * fallFact(K, 3) / fallFact(N, 3) : 0
+    const f4 = N >= 4 && n >= 4 && K >= 4 ? fallFact(n, 4) * fallFact(K, 4) / fallFact(N, 4) : 0
+    const mu2 = f2 + f1
+    const v = mu2 - f1 * f1
+    if (!(v > 0)) return NaN
+    const mu3 = f3 + 3 * f2 + f1
+    const mu4 = f4 + 6 * f3 + 7 * f2 + f1
+    const cm4 = mu4 - 4 * f1 * mu3 + 6 * f1 * f1 * mu2 - 3 * f1 * f1 * f1 * f1
+    return cm4 / (v * v) - 3
   }
 
   _cdf (x) {
