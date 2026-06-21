@@ -75,4 +75,33 @@ export default class Skellam extends Distribution {
   _q (p) {
     return this._qEstimateWalk(p, Math.floor(this.p.mu1 - this.p.mu2))
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.p.mu1 - this.p.mu2
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return this.p.mu1 + this.p.mu2
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { mu1, mu2 } = this.p
+    return (mu1 - mu2) / Math.pow(mu1 + mu2, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    return 1 / (this.p.mu1 + this.p.mu2)
+  }
 }

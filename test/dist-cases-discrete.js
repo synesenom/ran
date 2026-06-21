@@ -371,6 +371,12 @@ export default [{
     { p: 0.75, x: 2 },
     { p: 0.95, x: 6 },
     { p: 0.99, x: 10 }
+  ],
+  // mean=1/(1-μ); var=μ/(1-μ)³; kappa3=μ(1+2μ)/(1-μ)⁵; kappa4=μ(1+8μ+6μ²)/(1-μ)⁷
+  // μ=0 degenerates to point mass at 1: var=0 so skew/kurt are NaN
+  moments: [
+    { params: [0.5], mean: 2, variance: 4, skewness: 4, kurtosis: 26 },
+    { params: [0], mean: 1, variance: 0, skewness: NaN, kurtosis: NaN }
   ]
 }, {
   name: 'BorelTanner',
@@ -410,6 +416,12 @@ export default [{
     { p: 0.75, x: 12 },
     { p: 0.95, x: 19 },
     { p: 0.99, x: 26 }
+  ],
+  // BorelTanner(μ,n) = sum of n independent Borel(μ); skew=(1+2μ)/√(nμ(1-μ)); kurt=(1+8μ+6μ²)/(nμ(1-μ))
+  // μ=0 degenerates to point mass at n: var=0 so skew/kurt are NaN
+  moments: [
+    { params: [0.5, 5], mean: 10, variance: 20, skewness: 1.7888543819998317, kurtosis: 5.2 },
+    { params: [0, 5], mean: 5, variance: 0, skewness: NaN, kurtosis: NaN }
   ]
 }, {
   name: 'Categorical',
@@ -535,6 +547,12 @@ export default [{
     { p: 0.75, x: 2 },
     { p: 0.95, x: 3 },
     { p: 0.99, x: 4 }
+  ],
+  // CMP(3,1)=Poisson(3): exact values; tol=1e-10 for 4th-power accumulation error.
+  // CMP(2,1.5): series-computed; tol=1e-6 (no closed form).
+  moments: [
+    { params: [3, 1], mean: 3, variance: 3, skewness: 1 / Math.sqrt(3), kurtosis: 1 / 3, tol: 1e-10 },
+    { params: [2, 1.5], mean: 1.3957791943065858, variance: 1.0738062152865528, skewness: 0.6413420612636478, kurtosis: 0.3716815163945917, tol: 1e-6 }
   ]
 }, {
   name: 'Delaporte',
@@ -580,6 +598,11 @@ export default [{
     { p: 0.75, x: 8 },
     { p: 0.95, x: 13 },
     { p: 0.99, x: 18 }
+  ],
+  // kappa_r(Del) = lambda + kappa_r(NB): kappa1=αβ, kappa2=αβ(1+β), kappa3=αβ(1+β)(1+2β), kappa4=αβ(1+β)(1+6β+6β²)
+  moments: [
+    { params: [2, 2, 2], mean: 6, variance: 14, skewness: 62 / Math.pow(14, 1.5), kurtosis: 446 / 196 },
+    { params: [0.5, 0.5, 0.5], mean: 0.75, variance: 0.875, skewness: 1.25 / Math.pow(0.875, 1.5), kurtosis: 164 / 49 }
   ]
 }, {
   name: 'DiscreteUniform',
@@ -771,6 +794,11 @@ export default [{
     { p: 0.75, x: 20 },
     { p: 0.95, x: 30 },
     { p: 0.99, x: 38 }
+  ],
+  // kappa_r = a1 + m^r * a2; (2,2,6): kappa2=74, kappa3=434, kappa4=2594; (3,2,2): kappa2=11, kappa3=19, kappa4=35
+  moments: [
+    { params: [2, 2, 6], mean: 14, variance: 74, skewness: 434 / Math.pow(74, 1.5), kurtosis: 2594 / (74 * 74) },
+    { params: [3, 2, 2], mean: 7, variance: 11, skewness: 19 / Math.pow(11, 1.5), kurtosis: 35 / 121 }
   ]
 }, {
   name: 'Geometric',
@@ -1164,12 +1192,21 @@ export default [{
     { p: 0.75, x: 6 },
     { p: 0.95, x: 11 },
     { p: 0.99, x: 14 }
+  ],
+  // kappa_r = lambda * E[Y^r] where Y~Pois(phi); Touchard polynomials: E[Y^r]=T_r(phi)
+  // T_1=phi, T_2=phi(1+phi), T_3=phi(1+3phi+phi²), T_4=phi(1+7phi+6phi²+phi³)
+  moments: [
+    { params: [2, 2], mean: 4, variance: 12, skewness: 44 / Math.pow(12, 1.5), kurtosis: 188 / 144 },
+    { params: [0.5, 0.5], mean: 0.25, variance: 0.375, skewness: 0.6875 / Math.pow(0.375, 1.5), kurtosis: 98 / 9 }
   ]
 }, {
   name: 'Poisson',
   fit: { params: [3], seed: 42, n: 200, tolerances: { lambda: 0.15 } },
+  // Formulas: mean=λ, var=λ, skew=1/√λ, kurt=1/λ (all cumulants of Poisson(λ) equal λ)
   moments: [
-    { params: [5], mean: 5, variance: 5, skewness: 0.4472135954999579, kurtosis: 0.2, tol: 1e-6 }
+    { params: [5], mean: 5, variance: 5, skewness: 0.4472135954999579, kurtosis: 0.2 },
+    { params: [1], mean: 1, variance: 1, skewness: 1, kurtosis: 1 },
+    { params: [0.5], mean: 0.5, variance: 0.5, skewness: 1.4142135623730951, kurtosis: 2 }
   ],
   invalidParams: [
     [], // all params required
@@ -1248,6 +1285,12 @@ export default [{
     { p: 0.75, x: 6 },
     { p: 0.95, x: 11 },
     { p: 0.99, x: 15 }
+  ],
+  // kappa_r = lambda * E[Y^r] where Y~Geom(1-theta) on {1,2,...} (Eulerian polynomial moments)
+  // E[Y]=1/(1-θ); E[Y²]=(1+θ)/(1-θ)²; E[Y³]=(1+4θ+θ²)/(1-θ)³; E[Y⁴]=(1+11θ+11θ²+θ³)/(1-θ)⁴
+  moments: [
+    { params: [2, 0.5], mean: 4, variance: 12, skewness: 52 / Math.pow(12, 1.5), kurtosis: 25 / 12 },
+    { params: [0.5, 0.1], mean: 5 / 9, variance: 55 / 81, skewness: (235 / 243) / Math.pow(55 / 81, 1.5), kurtosis: 201 / 55 }
   ]
 }, {
   name: 'Rademacher',
@@ -1322,6 +1365,12 @@ export default [{
     { p: 0.75, x: 2 },
     { p: 0.95, x: 5 },
     { p: 0.99, x: 7 }
+  ],
+  // mean=μ1-μ2; var=μ1+μ2; skew=(μ1-μ2)/(μ1+μ2)^1.5; kurt=1/(μ1+μ2)
+  moments: [
+    { params: [5, 5], mean: 0, variance: 10, skewness: 0, kurtosis: 0.1 },
+    { params: [1, 4], mean: -3, variance: 5, skewness: -3 / Math.pow(5, 1.5), kurtosis: 0.2 },
+    { params: [3, 1], mean: 2, variance: 4, skewness: 0.25, kurtosis: 0.25 }
   ]
 }, {
   name: 'Soliton',

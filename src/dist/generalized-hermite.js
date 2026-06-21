@@ -80,4 +80,40 @@ export default class GeneralizedHermite extends PreComputed {
   _generator () {
     return poisson(this.r, this.p.a1) + this.p.m * poisson(this.r, this.p.a2)
   }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { a1, a2, m } = this.p
+    return a1 + m * a2
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { a1, a2, m } = this.p
+    return a1 + m * m * a2
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { a1, a2, m } = this.p
+    const kappa2 = a1 + m * m * a2
+    const kappa3 = a1 + Math.pow(m, 3) * a2
+    return kappa3 / Math.pow(kappa2, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { a1, a2, m } = this.p
+    const kappa2 = a1 + m * m * a2
+    const kappa4 = a1 + Math.pow(m, 4) * a2
+    return kappa4 / (kappa2 * kappa2)
+  }
 }
