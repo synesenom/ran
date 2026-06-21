@@ -58,6 +58,35 @@ export default class Levy extends Distribution {
     return this.p.mu + 0.5 * this.p.c / (z * z)
   }
 
+  /**
+   * @returns {number} Mean of the distribution (diverges for Lévy).
+   */
+  mean () {
+    // All positive-order moments of Lévy diverge; the first moment integral does not converge.
+    return Infinity
+  }
+
+  /**
+   * @returns {number} Variance of the distribution (diverges for Lévy).
+   */
+  variance () {
+    return Infinity
+  }
+
+  /**
+   * @returns {number} Skewness of the distribution (diverges for Lévy).
+   */
+  skewness () {
+    return Infinity
+  }
+
+  /**
+   * @returns {number} Excess kurtosis of the distribution (diverges for Lévy).
+   */
+  kurtosis () {
+    return Infinity
+  }
+
   static _fitInit (data) {
     // μ ≈ min(data); solve Levy median formula c = 2*(median-μ)*erfinv(0.5)² for c
     // erfinv(0.5)² ≈ 0.22747
