@@ -2,6 +2,10 @@ import { logBinomial } from '../special'
 import Categorical from './categorical'
 import Distribution from './_distribution'
 
+// Rising factorial a^(m) = a(a+1)...(a+m-1); falling factorial (a)_m = a(a-1)...(a-m+1)
+function riseFact (a, m) { let r = 1; for (let i = 0; i < m; i++) r *= (a + i); return r }
+function fallFact (a, m) { let r = 1; for (let i = 0; i < m; i++) r *= (a - i); return r }
+
 /**
  * Probability mass function for the [negative hypergeometric distribution]{@link https://en.wikipedia.org/wiki/Negative_hypergeometric_distribution}:
  *
@@ -45,6 +49,61 @@ export default class NegativeHypergeometric extends Categorical {
     }
     super(weights, 0)
     this.p = { N: Ni, K: Ki, r: ri }
+  }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { N, K, r } = this.p
+    // E[(X)_m] = r^(m) * (K)_m / (N-K+1)^(m) (rising-r, falling-K, rising-(N-K+1))
+    return riseFact(r, 1) * fallFact(K, 1) / riseFact(N - K + 1, 1)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { N, K, r } = this.p
+    const f1 = riseFact(r, 1) * fallFact(K, 1) / riseFact(N - K + 1, 1)
+    const f2 = K >= 2 ? riseFact(r, 2) * fallFact(K, 2) / riseFact(N - K + 1, 2) : 0
+    return f2 + f1 - f1 * f1
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { N, K, r } = this.p
+    const base = N - K + 1
+    const f1 = riseFact(r, 1) * fallFact(K, 1) / riseFact(base, 1)
+    const f2 = K >= 2 ? riseFact(r, 2) * fallFact(K, 2) / riseFact(base, 2) : 0
+    const f3 = K >= 3 ? riseFact(r, 3) * fallFact(K, 3) / riseFact(base, 3) : 0
+    const mu2 = f2 + f1
+    const v = mu2 - f1 * f1
+    if (!(v > 0)) return NaN
+    const mu3 = f3 + 3 * f2 + f1
+    const cm3 = mu3 - 3 * f1 * mu2 + 2 * f1 * f1 * f1
+    return cm3 / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { N, K, r } = this.p
+    const base = N - K + 1
+    const f1 = riseFact(r, 1) * fallFact(K, 1) / riseFact(base, 1)
+    const f2 = K >= 2 ? riseFact(r, 2) * fallFact(K, 2) / riseFact(base, 2) : 0
+    const f3 = K >= 3 ? riseFact(r, 3) * fallFact(K, 3) / riseFact(base, 3) : 0
+    const f4 = K >= 4 ? riseFact(r, 4) * fallFact(K, 4) / riseFact(base, 4) : 0
+    const mu2 = f2 + f1
+    const v = mu2 - f1 * f1
+    if (!(v > 0)) return NaN
+    const mu3 = f3 + 3 * f2 + f1
+    const mu4 = f4 + 6 * f3 + 7 * f2 + f1
+    const cm4 = mu4 - 4 * f1 * mu3 + 6 * f1 * f1 * mu2 - 3 * f1 * f1 * f1 * f1
+    return cm4 / (v * v) - 3
   }
 
   _cdf (x) {

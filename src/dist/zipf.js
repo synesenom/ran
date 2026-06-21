@@ -1,3 +1,4 @@
+import { generalizedHarmonic } from '../special'
 import Categorical from './categorical'
 import Distribution from './_distribution'
 
@@ -34,5 +35,55 @@ export default class Zipf extends Categorical {
       's >= 0',
       'N > 0'
     ])
+
+    // E[X^r] = H(N, s-r) / H(N, s); precompute for r=0..4
+    const h0 = generalizedHarmonic(Ni, s)
+    Object.assign(this.c, {
+      h0,
+      h1: generalizedHarmonic(Ni, s - 1),
+      h2: generalizedHarmonic(Ni, s - 2),
+      h3: generalizedHarmonic(Ni, s - 3),
+      h4: generalizedHarmonic(Ni, s - 4)
+    })
+  }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.c.h1 / this.c.h0
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { h0, h1, h2 } = this.c
+    const mu1 = h1 / h0
+    return h2 / h0 - mu1 * mu1
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { h0, h1, h2, h3 } = this.c
+    const mu1 = h1 / h0; const mu2 = h2 / h0; const mu3 = h3 / h0
+    const v = mu2 - mu1 * mu1
+    if (!(v > 0)) return NaN
+    const cm3 = mu3 - 3 * mu1 * mu2 + 2 * mu1 * mu1 * mu1
+    return cm3 / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { h0, h1, h2, h3, h4 } = this.c
+    const mu1 = h1 / h0; const mu2 = h2 / h0; const mu3 = h3 / h0; const mu4 = h4 / h0
+    const v = mu2 - mu1 * mu1
+    if (!(v > 0)) return NaN
+    const cm4 = mu4 - 4 * mu1 * mu3 + 6 * mu1 * mu1 * mu2 - 3 * mu1 * mu1 * mu1 * mu1
+    return cm4 / (v * v) - 3
   }
 }
