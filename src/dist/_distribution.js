@@ -527,7 +527,14 @@ class Distribution {
     }
 
     // Return value
-    return this._pdf(z)
+    const v = this._pdf(z)
+    // Formula divergences (e.g. log-barrier 0/0) at an exact closed boundary produce NaN even
+    // though the point is in the support. The limit is 0 by continuity, so return 0 instead of
+    // propagating NaN into tanhSinh and corrupting numerical moments.
+    if (Number.isNaN(v) && ((this.s[0].closed && z === this.s[0].value) || (this.s[1].closed && z === this.s[1].value))) {
+      return 0
+    }
+    return v
   }
 
   /**
