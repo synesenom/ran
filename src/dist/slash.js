@@ -56,4 +56,32 @@ export default class Slash extends Normal {
   _q (p) {
     return this._qEstimateRoot(p)
   }
+
+  /**
+   * @returns {number} Mean of the distribution (undefined for Slash).
+   */
+  mean () {
+    return NaN
+  }
+
+  /**
+   * @returns {number} Variance of the distribution (undefined for Slash).
+   */
+  variance () {
+    return NaN
+  }
+
+  /**
+   * @returns {number} Skewness of the distribution (undefined for Slash).
+   */
+  skewness () {
+    return NaN
+  }
+
+  /**
+   * @returns {number} Excess kurtosis of the distribution (undefined for Slash).
+   */
+  kurtosis () {
+    return NaN
+  }
 }
