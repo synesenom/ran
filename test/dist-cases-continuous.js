@@ -687,6 +687,12 @@ export default [{
 }, {
   name: 'Burr',
   fit: { params: [2, 3], seed: 42, n: 200, tolerances: { c: 0.8, k: 1.0 } },
+  moments: [
+    { params: [0.5, 1], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [2, 1], mean: 1.5707963267948961, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [2, 3], mean: 0.5890486225480874, variance: 0.1530217202742008, skewness: 1.9086486805418865, kurtosis: 9.463458388285664 },
+    { params: [5, 5], mean: 0.6824236376225955, variance: 0.028995094853257963, skewness: 0.040148934165263606, kurtosis: 0.07004326284974294 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // c > 0
@@ -918,6 +924,13 @@ export default [{
 }, {
   name: 'Dagum',
   fit: { params: [1, 2, 3], seed: 42, n: 200, tolerances: { p: 0.4, a: 0.8, b: 1.0 } },
+  moments: [
+    { params: [1, 1, 2], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [2, 2, 1], mean: 2.356194490192348, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [1, 3, 1], mean: 1.209199576156144, variance: 0.9562355373360956, skewness: Infinity, kurtosis: Infinity },
+    { params: [1, 5, 2], mean: 2.137918664231193, variance: 0.7145293838425202, skewness: 2.4852755496866745, kurtosis: 26.556191909249538 },
+    { params: [2, 6, 1], mean: 1.2217304763960308, variance: 0.11964074458665408, skewness: 2.273955183800628, kurtosis: 15.959952349217367 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1, 1], [0, 1, 1], // p > 0
@@ -963,6 +976,12 @@ export default [{
   ]
 }, {
   name: 'Davis',
+  moments: [
+    { params: [1, 1, 2.5], mean: 2.2982483108779705, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [1, 2, 3], mean: 2.368432777620206, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [1, 1, 4], mean: 1.3702088451087155, variance: 0.11624837010911523, skewness: Infinity, kurtosis: Infinity },
+    { params: [1, 1, 6], mean: 1.2038501649818532, variance: 0.011638731649098573, skewness: 3.268587216460474, kurtosis: 37.5944329681598 }
+  ],
   invalidParams: [
     [], // all params required
     [0, 1, 2], [-1, 1, 2], // mu > 0
@@ -1564,6 +1583,11 @@ export default [{
   ]
 }, {
   name: 'FisherZ',
+  moments: [
+    { params: [5, 5], mean: 0, variance: 0.24517887805011743, skewness: 0, kurtosis: 0.4655961114748152 },
+    { params: [2, 10], mean: -0.23694771044961638, variance: 0.4665642556463353, skewness: -0.923833036466842, kurtosis: 1.8706648647022273 },
+    { params: [4, 6], mean: -0.04726744594591781, variance: 0.2599670334241133, skewness: -0.2357613470293361, kurtosis: 0.5667846278190233 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 2], [0, 2], // d1 > 0
@@ -3620,6 +3644,12 @@ export default [{
 }, {
   name: 'Mielke',
   fit: { params: [2, 1], seed: 42, n: 200, tolerances: { k: 0.6, s: 0.5 } },
+  moments: [
+    { params: [2, 1], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [3, 2], mean: 2.0, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
+    { params: [3, 5], mean: 0.910178539675754, variance: 0.17157502591371165, skewness: 2.041824528535359, kurtosis: 19.68556145689434 },
+    { params: [2, 6], mean: 0.7468342002221858, variance: 0.12670208335821276, skewness: 1.0288851142217998, kurtosis: 4.865298136498457 }
+  ],
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // k > 0
@@ -3665,6 +3695,10 @@ export default [{
 }, {
   name: 'Moyal',
   fit: { params: [1, 2], seed: 42, n: 200, tolerances: { mu: 0.5, sigma: 0.5 } },
+  moments: [
+    { params: [0, 1], mean: 1.2703628454614782, variance: 4.934802200544679, skewness: 1.5351415907229062, kurtosis: 4 },
+    { params: [2, 3], mean: 5.8110885363844345, variance: 44.41321980490211, skewness: 1.5351415907229062, kurtosis: 4 }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // sigma > 0

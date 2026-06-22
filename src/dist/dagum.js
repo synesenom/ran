@@ -1,3 +1,4 @@
+import { beta } from '../special'
 import Distribution from './_distribution'
 
 /**
@@ -38,6 +39,52 @@ export default class Dagum extends Distribution {
       value: Infinity,
       closed: false
     }]
+  }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { p, a, b } = this.p
+    return a > 1 ? b * p * beta(p + 1 / a, 1 - 1 / a) : Infinity
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { p, a, b } = this.p
+    if (a <= 2) return Infinity
+    const m1 = b * p * beta(p + 1 / a, 1 - 1 / a)
+    const m2 = b * b * p * beta(p + 2 / a, 1 - 2 / a)
+    return m2 - m1 * m1
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { p, a, b } = this.p
+    if (a <= 3) return Infinity
+    const m1 = b * p * beta(p + 1 / a, 1 - 1 / a)
+    const m2 = b * b * p * beta(p + 2 / a, 1 - 2 / a)
+    const m3 = b ** 3 * p * beta(p + 3 / a, 1 - 3 / a)
+    const v = m2 - m1 * m1
+    return (m3 - 3 * m1 * m2 + 2 * m1 ** 3) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { p, a, b } = this.p
+    if (a <= 4) return Infinity
+    const m1 = b * p * beta(p + 1 / a, 1 - 1 / a)
+    const m2 = b * b * p * beta(p + 2 / a, 1 - 2 / a)
+    const m3 = b ** 3 * p * beta(p + 3 / a, 1 - 3 / a)
+    const m4 = b ** 4 * p * beta(p + 4 / a, 1 - 4 / a)
+    const v = m2 - m1 * m1
+    return (m4 - 4 * m1 * m3 + 6 * m1 ** 2 * m2 - 3 * m1 ** 4) / (v * v) - 3
   }
 
   _generator () {
