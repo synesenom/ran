@@ -1,5 +1,6 @@
 import Dagum from './dagum'
 import Distribution from './_distribution'
+import { beta } from '../special'
 
 /**
  * Probability density function for the [Mielke distribution]{@link https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.mielke.html#r7049b665a02e-2}:
@@ -40,6 +41,52 @@ export default class Mielke extends Dagum {
       value: Infinity,
       closed: false
     }]
+  }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { k, s } = this.p
+    return s > 1 ? (k / s) * beta((k + 1) / s, 1 - 1 / s) : Infinity
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { k, s } = this.p
+    if (s <= 2) return Infinity
+    const m1 = (k / s) * beta((k + 1) / s, 1 - 1 / s)
+    const m2 = (k / s) * beta((k + 2) / s, 1 - 2 / s)
+    return m2 - m1 * m1
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { k, s } = this.p
+    if (s <= 3) return Infinity
+    const m1 = (k / s) * beta((k + 1) / s, 1 - 1 / s)
+    const m2 = (k / s) * beta((k + 2) / s, 1 - 2 / s)
+    const m3 = (k / s) * beta((k + 3) / s, 1 - 3 / s)
+    const v = m2 - m1 * m1
+    return (m3 - 3 * m1 * m2 + 2 * m1 ** 3) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { k, s } = this.p
+    if (s <= 4) return Infinity
+    const m1 = (k / s) * beta((k + 1) / s, 1 - 1 / s)
+    const m2 = (k / s) * beta((k + 2) / s, 1 - 2 / s)
+    const m3 = (k / s) * beta((k + 3) / s, 1 - 3 / s)
+    const m4 = (k / s) * beta((k + 4) / s, 1 - 4 / s)
+    const v = m2 - m1 * m1
+    return (m4 - 4 * m1 * m3 + 6 * m1 ** 2 * m2 - 3 * m1 ** 4) / (v * v) - 3
   }
 
   _pdf (x) {

@@ -1,4 +1,5 @@
 import F from './f'
+import { digamma, hurwitzZeta } from '../special'
 
 /**
  * Generator for [Fisher's z distribution]{@link https://en.wikipedia.org/wiki/Fisher%27s_z-distribution}:
@@ -34,6 +35,44 @@ export default class FisherZ extends F {
       value: Infinity,
       closed: false
     }]
+  }
+
+  // Moments of Z = ½ln(F) derived from the cumulant generating function K(t) = log E[F^{t/2}];
+  // cumulants κ_r = K^(r)(0) expressed via polygamma ψ_m = (-1)^{m+1} m! ζ_H(m+1, ·).
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { d1, d2 } = this.p
+    return 0.5 * (Math.log(d2 / d1) + digamma(d1 / 2) - digamma(d2 / 2))
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { d1, d2 } = this.p
+    return 0.25 * (hurwitzZeta(2, d1 / 2) + hurwitzZeta(2, d2 / 2))
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { d1, d2 } = this.p
+    const k2 = 0.25 * (hurwitzZeta(2, d1 / 2) + hurwitzZeta(2, d2 / 2))
+    const k3 = 0.25 * (hurwitzZeta(3, d2 / 2) - hurwitzZeta(3, d1 / 2))
+    return k3 / Math.pow(k2, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { d1, d2 } = this.p
+    const k2 = 0.25 * (hurwitzZeta(2, d1 / 2) + hurwitzZeta(2, d2 / 2))
+    const k4 = 0.375 * (hurwitzZeta(4, d1 / 2) + hurwitzZeta(4, d2 / 2))
+    return k4 / (k2 * k2)
   }
 
   // Blocks Beta's log-barrier (inherited via F): fit() operates in (d1, d2) space. See decisions/0017-beta-fit-penalty.md §3.

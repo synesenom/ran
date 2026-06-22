@@ -62,6 +62,56 @@ export default class Davis extends Distribution {
     }
   }
 
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    const { mu, b, n } = this.p
+    if (n <= 2) return Infinity
+    return mu + b * gammaFn(n - 1) * riemannZeta(n - 1) / (this.c.gammaN * this.c.zetaN)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    const { b, n } = this.p
+    if (n <= 3) return Infinity
+    const norm = this.c.gammaN * this.c.zetaN
+    const m1 = b * gammaFn(n - 1) * riemannZeta(n - 1) / norm
+    const m2 = b * b * gammaFn(n - 2) * riemannZeta(n - 2) / norm
+    return m2 - m1 * m1
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { b, n } = this.p
+    if (n <= 4) return Infinity
+    const norm = this.c.gammaN * this.c.zetaN
+    const m1 = b * gammaFn(n - 1) * riemannZeta(n - 1) / norm
+    const m2 = b * b * gammaFn(n - 2) * riemannZeta(n - 2) / norm
+    const m3 = b ** 3 * gammaFn(n - 3) * riemannZeta(n - 3) / norm
+    const v = m2 - m1 * m1
+    return (m3 - 3 * m1 * m2 + 2 * m1 ** 3) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { b, n } = this.p
+    if (n <= 5) return Infinity
+    const norm = this.c.gammaN * this.c.zetaN
+    const m1 = b * gammaFn(n - 1) * riemannZeta(n - 1) / norm
+    const m2 = b * b * gammaFn(n - 2) * riemannZeta(n - 2) / norm
+    const m3 = b ** 3 * gammaFn(n - 3) * riemannZeta(n - 3) / norm
+    const m4 = b ** 4 * gammaFn(n - 4) * riemannZeta(n - 4) / norm
+    const v = m2 - m1 * m1
+    return (m4 - 4 * m1 * m3 + 6 * m1 ** 2 * m2 - 3 * m1 ** 4) / (v * v) - 3
+  }
+
   static _fitInit (data) {
     // mu≈min−ε (location, kept in (0,min)); fixed shape n=2.5, scale b from the mean of the shifted data
     const n = data.length

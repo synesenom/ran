@@ -1,5 +1,5 @@
 import Distribution from './_distribution'
-import { gammaUpperIncomplete, erfinv } from '../special'
+import { gammaUpperIncomplete, erfinv, riemannZeta } from '../special'
 
 /**
  * Probability density function for the [Moyal distribution]{@link https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.moyal.html#r7049b665a02e-2}:
@@ -39,6 +39,35 @@ export default class Moyal extends Distribution {
     this.c = {
       sigmaRoot2Pi: sigma * Math.sqrt(2 * Math.PI)
     }
+  }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    // 0.5772156649015329 is the Euler-Mascheroni constant γ
+    return this.p.mu + this.p.sigma * (0.5772156649015329 + Math.LN2)
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return this.p.sigma * this.p.sigma * Math.PI * Math.PI / 2
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    return 28 * Math.SQRT2 * riemannZeta(3) / Math.pow(Math.PI, 3)
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    return 4
   }
 
   _generator () {
