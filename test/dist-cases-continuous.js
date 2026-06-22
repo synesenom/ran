@@ -687,6 +687,7 @@ export default [{
 }, {
   name: 'Burr',
   fit: { params: [2, 3], seed: 42, n: 200, tolerances: { c: 0.8, k: 1.0 } },
+  // E[X^n] = k·B(k−n/c, 1+n/c); [2,1] mean=π/2, [2,3] mean=3π/16 (exact Beta values)
   moments: [
     { params: [0.5, 1], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
     { params: [2, 1], mean: 1.5707963267948961, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
@@ -924,6 +925,7 @@ export default [{
 }, {
   name: 'Dagum',
   fit: { params: [1, 2, 3], seed: 42, n: 200, tolerances: { p: 0.4, a: 0.8, b: 1.0 } },
+  // E[X^r] = b^r·p·B(p+r/a, 1−r/a); [2,2,1] mean=3π/4 (exact Beta value)
   moments: [
     { params: [1, 1, 2], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
     { params: [2, 2, 1], mean: 2.356194490192348, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
@@ -976,6 +978,7 @@ export default [{
   ]
 }, {
   name: 'Davis',
+  // E[(X−μ)^r] = b^r·Γ(n−r)·ζ(n−r) / (Γ(n)·ζ(n)); finite values via JS gammaFn/riemannZeta
   moments: [
     { params: [1, 1, 2.5], mean: 2.2982483108779705, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
     { params: [1, 2, 3], mean: 2.368432777620206, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
@@ -1583,6 +1586,7 @@ export default [{
   ]
 }, {
   name: 'FisherZ',
+  // κ_1=½(log(d2/d1)+ψ(d1/2)−ψ(d2/2)); κ_r via hurwitzZeta polygamma; [5,5] mean/skewness exact (symmetry)
   moments: [
     { params: [5, 5], mean: 0, variance: 0.24517887805011743, skewness: 0, kurtosis: 0.4655961114748152 },
     { params: [2, 10], mean: -0.23694771044961638, variance: 0.4665642556463353, skewness: -0.923833036466842, kurtosis: 1.8706648647022273 },
@@ -3644,6 +3648,7 @@ export default [{
 }, {
   name: 'Mielke',
   fit: { params: [2, 1], seed: 42, n: 200, tolerances: { k: 0.6, s: 0.5 } },
+  // E[X^r] = (k/s)·B((k+r)/s, 1−r/s); [3,2] mean=2 (exact: (3/2)·B(2,0.5)=2)
   moments: [
     { params: [2, 1], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
     { params: [3, 2], mean: 2.0, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
@@ -3695,6 +3700,7 @@ export default [{
 }, {
   name: 'Moyal',
   fit: { params: [1, 2], seed: 42, n: 200, tolerances: { mu: 0.5, sigma: 0.5 } },
+  // mean=μ+σ(γ+ln2); var=σ²π²/2; skew=28√2·ζ(3)/π³; kurt=4 — all closed-form constants
   moments: [
     { params: [0, 1], mean: 1.2703628454614782, variance: 4.934802200544679, skewness: 1.5351415907229062, kurtosis: 4 },
     { params: [2, 3], mean: 5.8110885363844345, variance: 44.41321980490211, skewness: 1.5351415907229062, kurtosis: 4 }
