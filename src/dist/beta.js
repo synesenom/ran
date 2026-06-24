@@ -78,12 +78,17 @@ export default class Beta extends Distribution {
       return 1
     }
 
-    const a = this.c.alphaM1 * Math.log(x)
+    // When one exponent is 0, its log term would be 0*log(boundary) = 0*(-Inf) = NaN; handle it
+    // separately so the correct finite limit is returned.
+    if (this.c.alphaM1 === 0) {
+      return Math.exp(this.c.betaM1 * Math.log(1 - x) - this.c.lnBeta)
+    }
 
-    const b = this.c.betaM1 * Math.log(1 - x)
+    if (this.c.betaM1 === 0) {
+      return Math.exp(this.c.alphaM1 * Math.log(x) - this.c.lnBeta)
+    }
 
-    // Handle x = 0 and x = 1 cases
-    return Math.exp(a + b - this.c.lnBeta)
+    return Math.exp(this.c.alphaM1 * Math.log(x) + this.c.betaM1 * Math.log(1 - x) - this.c.lnBeta)
   }
 
   _cdf (x) {

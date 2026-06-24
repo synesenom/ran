@@ -361,6 +361,24 @@ describe('dist', () => {
           invalid.pdf(0)
         }, 'Distribution._pdf() is not implemented')
       })
+
+      it('should return 0 when _pdf returns NaN at a closed boundary', () => {
+        // Simulates a log-barrier formula that yields 0/0 = NaN at the boundary endpoint.
+        class NaNBoundary extends Distribution {
+          constructor () {
+            super('continuous', 0)
+            this.s = [{ value: 0, closed: true }, { value: 1, closed: true }]
+            this.c = {}
+          }
+
+          _pdf (x) { return x === 0 ? NaN : 1 }
+          _cdf (x) { return x }
+        }
+        const d = new NaNBoundary()
+        assert.strictEqual(d.pdf(0), 0)
+        assert.strictEqual(d.pdf(0.5), 1)
+        assert.isFalse(isNaN(d.mean()))
+      })
     })
 
     describe('.cdf()', () => {
