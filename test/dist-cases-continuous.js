@@ -4750,11 +4750,15 @@ export default [{
   ]
 }, {
   name: 'Rice',
-  // Moments via Laguerre–Bessel expressions; values from closed-form formulas at these params.
+  // Moments computed with mpmath at mp.dps=50 via two independent methods:
+  // (A) direct quad on f(x;ν,σ)=(x/σ²)exp(-(x²+ν²)/(2σ²))I₀(xν/σ²) and
+  // (B) closed-form Bessel expressions from noncentral-χ² connection.
+  // Both agree to ~50 digits; float64 literals are the nearest representable value.
+  // See scripts/precision-refs-continuous.py for the Rice PDF/CDF definition.
   moments: [
-    { params: [2, 2], mean: 3.09714492110229, variance: 2.4076933376902883, skewness: 0.5171541178806969, kurtosis: 0.01537909577219887, tol: 1e-10 },
-    { params: [0.5, 2], mean: 2.545642141935532, variance: 1.769706085201876, skewness: 0.630092127556055, kurtosis: 0.2422469198442334, tol: 1e-10 },
-    { params: [1, 0.5], mean: 1.1361917140343711, variance: 0.20906838895963786, skewness: 0.20968196945744136, kurtosis: -0.18504860243676813, tol: 1e-10 }
+    { params: [2, 2], mean: 3.0971449211022906, variance: 2.407693337690285, skewness: 0.517154117880703, kurtosis: 0.015379095772178253, tol: 1e-10 },
+    { params: [0.5, 2], mean: 2.5456421419355326, variance: 1.7697060852018731, skewness: 0.6300921275560594, kurtosis: 0.24224691984423144, tol: 1e-10 },
+    { params: [1, 0.5], mean: 1.1361917140343714, variance: 0.20906838895963753, skewness: 0.20968196945744677, kurtosis: -0.18504860243684593, tol: 1e-10 }
   ],
   invalidParams: [
     [], // all params required
