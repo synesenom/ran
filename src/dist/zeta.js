@@ -72,6 +72,7 @@ export default class Zeta extends Distribution {
    */
   skewness () {
     const { s } = this.p
+    if (s <= 3) return NaN
     if (s <= 4) return Infinity
     const zs = this.c.zetaS
     const mu1 = riemannZeta(s - 1) / zs
@@ -87,6 +88,7 @@ export default class Zeta extends Distribution {
    */
   kurtosis () {
     const { s } = this.p
+    if (s <= 4) return NaN
     if (s <= 5) return Infinity
     const zs = this.c.zetaS
     const mu1 = riemannZeta(s - 1) / zs

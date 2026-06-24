@@ -1476,8 +1476,8 @@ export default [{
   fit: { params: [2.5], seed: 42, n: 500, tolerances: { s: 0.3 } },
   // mean=ζ(s-1)/ζ(s) for s>2; var=ζ(s-2)/ζ(s)-mean² for s>3; skew/kurt finite for s>4/s>5
   moments: [
-    { params: [2.5], mean: 1.9473724663169567, variance: Infinity, skewness: Infinity, kurtosis: Infinity, tol: 1e-10 },
-    { params: [3.8], mean: 1.1362363598724141, variance: 0.42396600465009526, skewness: Infinity, kurtosis: Infinity, tol: 1e-10 },
+    { params: [2.5], mean: 1.9473724663169567, variance: Infinity, skewness: NaN, kurtosis: NaN, tol: 1e-10 },
+    { params: [3.8], mean: 1.1362363598724141, variance: 0.42396600465009526, skewness: Infinity, kurtosis: NaN, tol: 1e-10 },
     { params: [5.0], mean: 1.0437788248434812, variance: 0.06977422469107242, skewness: 12.516969344281788, kurtosis: Infinity, tol: 1e-10 },
     { params: [6.5], mean: 1.0130420979439072, variance: 0.01594072946042968, skewness: 12.561822565783675, kurtosis: 279.44610246008324, tol: 1e-8 }
   ],
