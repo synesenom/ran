@@ -4758,7 +4758,9 @@ export default [{
   moments: [
     { params: [2, 2], mean: 3.0971449211022906, variance: 2.407693337690285, skewness: 0.517154117880703, kurtosis: 0.015379095772178253, tol: 1e-10 },
     { params: [0.5, 2], mean: 2.5456421419355326, variance: 1.7697060852018731, skewness: 0.6300921275560594, kurtosis: 0.24224691984423144, tol: 1e-10 },
-    { params: [1, 0.5], mean: 1.1361917140343714, variance: 0.20906838895963753, skewness: 0.20968196945744677, kurtosis: -0.18504860243684593, tol: 1e-10 }
+    { params: [1, 0.5], mean: 1.1361917140343714, variance: 0.20906838895963753, skewness: 0.20968196945744677, kurtosis: -0.18504860243684593, tol: 1e-10 },
+    // Bessel asymptotic regime (nu/sigma=60, z=900>709): leading kurtosis = −6σ²/ν² = −1/600.
+    { name: 'Bessel asymptotic regime', params: [60, 1], kurtosis: -6 / 3600, tol: 1e-12 }
   ],
   invalidParams: [
     [], // all params required
