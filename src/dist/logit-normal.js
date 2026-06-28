@@ -48,6 +48,48 @@ export default class LogitNormal extends Normal {
     return 1 / (1 + Math.exp(-(this.p.mu + this.c.sigmaRoot2 * erfinv(2 * p - 1))))
   }
 
+  /**
+   * @returns {number} Mean of the distribution.
+   */
+  mean () {
+    return this._numericalRawMoment(1)
+  }
+
+  /**
+   * @returns {number} Variance of the distribution.
+   */
+  variance () {
+    const m1 = this._numericalRawMoment(1)
+    const m2 = this._numericalRawMoment(2)
+    const v = m2 - m1 * m1
+    return v < 0 ? 0 : v
+  }
+
+  /**
+   * @returns {number} Skewness of the distribution.
+   */
+  skewness () {
+    const m1 = this._numericalRawMoment(1)
+    const m2 = this._numericalRawMoment(2)
+    const m3 = this._numericalRawMoment(3)
+    const v = m2 - m1 * m1
+    if (!(v > 0)) return NaN
+    return (m3 - 3 * m1 * m2 + 2 * Math.pow(m1, 3)) / Math.pow(v, 1.5)
+  }
+
+  /**
+   * @returns {number} Excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const m1 = this._numericalRawMoment(1)
+    const m2 = this._numericalRawMoment(2)
+    const m3 = this._numericalRawMoment(3)
+    const m4 = this._numericalRawMoment(4)
+    const v = m2 - m1 * m1
+    if (!(v > 0)) return NaN
+    return (m4 - 4 * m1 * m3 + 6 * m1 * m1 * m2 - 3 * Math.pow(m1, 4)) / (v * v) - 3
+  }
+
   static get _fitInitIsExact () {
     // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
     return true

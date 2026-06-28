@@ -3456,6 +3456,12 @@ export default [{
 }, {
   name: 'LogitNormal',
   fit: { params: [0, 1], seed: 42, n: 200, tolerances: { mu: 0.2, sigma: 0.2 } },
+  // Moments via tanhSinh quadrature over (0, 1). mu=0 cases: mean=0.5 and skewness=0 are exact
+  // by symmetry of N(0,1) through the logistic transform. Variance/kurtosis from tanhSinh integration.
+  moments: [
+    { params: [0, 1], mean: 0.5, variance: 0.043379035858092996, skewness: 0, kurtosis: -0.8606196018182741, tol: { mean: 1e-12, variance: 1e-10, skewness: 1e-8, kurtosis: 1e-6 } },
+    { params: [1, 0.5], mean: 0.7205808152432993, variance: 0.009402931736068987, skewness: -0.5671643683436923, kurtosis: 0.1930958554263773, tol: 1e-6 }
+  ],
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // sigma > 0
