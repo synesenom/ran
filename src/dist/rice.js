@@ -61,8 +61,8 @@ export default class Rice extends Distribution {
       z,
       eb0,
       eb1,
-      // Flag for asymptotic regime (z > ~709): kurtosis via raw moments suffers
-      // O(σ⁴) cancellation error from Bessel asymptotics; return Gaussian limit instead.
+      // Flag for asymptotic regime (z > ~709): μ₄ via raw moments suffers O(σ⁴) cancellation;
+      // use leading asymptotic kurtosis = −6σ²/ν² from noncentral-χ² expansion instead.
       asymptotic: !Number.isFinite(b0)
     }
   }
@@ -138,10 +138,11 @@ export default class Rice extends Distribution {
    * @returns {number} Excess kurtosis from raw moments.
    */
   kurtosis () {
-    // In the asymptotic regime the μ₄ formula suffers O(σ⁴) cancellation from
-    // Bessel errors; the exact limit is 0 (Gaussian), accurate to O((σ/ν)²).
+    // In the asymptotic regime (z > 709) the μ₄ formula suffers O(σ⁴) cancellation from
+    // Bessel errors. Use the leading asymptotic term −6σ²/ν² (from the noncentral-χ²
+    // 4th-cumulant expansion around the Gaussian limit) which is accurate to O((σ/ν)⁴).
     if (this.c.asymptotic) {
-      return 0
+      return -6 * this.c.sigma2 / this.c.nu2
     }
     const { sigma } = this.p
     const { sigma2, nu2, z, eb0, eb1 } = this.c
