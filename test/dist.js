@@ -72,9 +72,8 @@ const UnitTests = {
       generator.seed(s)
       const values1 = generator.sample(cut)
       const state = generator.save()
-      generator.seed(0)
-      generator.load(state)
-      const values2 = generator.sample(sampleSize - cut)
+      const restored = dist[tc.name].load(state)
+      const values2 = restored.sample(sampleSize - cut)
 
       // Compare samples
       assert(values1.concat(values2).reduce((acc, d, i) => acc || d === values[i], true))
@@ -90,8 +89,8 @@ const UnitTests = {
       const state = generator1.save()
       const values1 = generator1.sample(10)
 
-      // Generate new default generator and load state
-      const generator2 = new dist[tc.name](...tc.cases[0].params()).load(state)
+      // Generate new instance from saved state
+      const generator2 = dist[tc.name].load(state)
       const values2 = generator2.sample(10)
 
       // Compare samples
@@ -1581,7 +1580,7 @@ describe('dist', () => {
       describe(tc.name, () => {
         describe('constructor', () => UnitTests.constructor(tc))
         describe('.seed()', () => UnitTests.seed(tc))
-        describe('.load(), .save()', () => UnitTests.loadAndSave(tc))
+        describe('static .load(), .save()', () => UnitTests.loadAndSave(tc))
         describe('.pdf(), .cdf(), .q()', () => UnitTests.analytical(tc))
         describe('.sample()', () => UnitTests.sample(tc))
         describe('.test()', () => UnitTests.test(tc))

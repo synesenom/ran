@@ -52,9 +52,9 @@ export default class ConwayMaxwellPoisson extends PreComputed {
       logZ = m + Math.log(Math.exp(logZ - m) + Math.exp(logTerm - m))
     } while (logTerm > logZ + LOG_TOL)
 
-    this.c = {
+    Object.assign(this.c, {
       logP0: -logZ
-    }
+    })
   }
 
   static _fitInit (data) {

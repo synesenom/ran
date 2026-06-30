@@ -40,10 +40,10 @@ export default class NeymanA extends PreComputed {
     }]
 
     // Speed-up constants
-    this.c = {
+    Object.assign(this.c, {
       p0: Math.exp(-lambda * (1 - Math.exp(-phi))),
       r: lambda * phi * Math.exp(-phi)
-    }
+    })
   }
 
   static _fitInit (data) {
