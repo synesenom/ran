@@ -4910,7 +4910,7 @@ export default [{
 }, {
   name: 'Slash',
   moments: [
-    // All moments of the Slash distribution are undefined.
+    // Slash tails decay as 1/x² (same as Cauchy), so E[|X|] diverges and all moments are undefined.
     { params: [], mean: NaN, variance: NaN, skewness: NaN, kurtosis: NaN }
   ],
   invalidParams: [],

@@ -58,14 +58,14 @@ export default class Slash extends Normal {
   }
 
   /**
-   * @returns {number} Mean of the distribution (undefined for Slash).
+   * @returns {number} NaN (mean does not exist for the Slash distribution — E[|X|] diverges, same as Cauchy).
    */
   mean () {
     return NaN
   }
 
   /**
-   * @returns {number} Variance of the distribution (undefined for Slash).
+   * @returns {number} NaN (variance does not exist for the Slash distribution — Slash tails decay as 1/x², same as Cauchy, so E[|X|] diverges and all moments are undefined).
    */
   variance () {
     return NaN
