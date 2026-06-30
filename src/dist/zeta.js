@@ -88,7 +88,10 @@ export default class Zeta extends Distribution {
    */
   kurtosis () {
     const { s } = this.p
-    if (s <= 4) return NaN
+    // Variance is finite for s > 3 (E[X^2] = zeta(s-2)/zeta(s) converges); when the 4th
+    // central moment diverges over a finite variance the excess kurtosis is +Infinity, not
+    // undefined. Only s <= 3 (non-finite variance) makes the standardization undefined.
+    if (s <= 3) return NaN
     if (s <= 5) return Infinity
     const zs = this.c.zetaS
     const mu1 = riemannZeta(s - 1) / zs
