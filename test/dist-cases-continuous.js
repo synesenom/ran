@@ -428,7 +428,7 @@ export default [{
   fit: { params: [2, 3], seed: 42, n: 200, tolerances: { alpha: 0.7, beta: 1.0 } },
   // Moments are Infinity below threshold: mean (β≤1), variance (β≤2), skewness (β≤3), kurtosis (β≤4)
   moments: [
-    { params: [2, 5], mean: 0.5, variance: 0.25, skewness: 4, kurtosis: 66 },
+    { params: [2, 5], mean: 0.5, variance: 0.25, skewness: 4, kurtosis: 54 },
     { params: [2, 1], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
     { params: [2, 2], mean: 2, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
     { params: [2, 3], mean: 1, variance: 2, skewness: Infinity, kurtosis: Infinity },
@@ -4910,7 +4910,7 @@ export default [{
 }, {
   name: 'Slash',
   moments: [
-    // All moments of the Slash distribution are undefined.
+    // Slash tails decay as 1/x² (same as Cauchy), so E[|X|] diverges and all moments are undefined.
     { params: [], mean: NaN, variance: NaN, skewness: NaN, kurtosis: NaN }
   ],
   invalidParams: [],
