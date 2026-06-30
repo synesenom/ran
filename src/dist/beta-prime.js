@@ -92,7 +92,7 @@ export default class BetaPrime extends Beta {
   kurtosis () {
     const { alpha, beta } = this.p
     if (beta <= 4) return Infinity
-    return 6 * (alpha * (alpha + beta - 1) * (5 * beta - 11) + (beta - 1) ** 2 * (beta + 1)) /
+    return 6 * (alpha * (alpha + beta - 1) * (5 * beta - 11) + (beta - 1) ** 2 * (beta - 2)) /
       (alpha * (alpha + beta - 1) * (beta - 3) * (beta - 4))
   }
 }

@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `BetaPrime.kurtosis()` denominator factor corrected from `(beta + 1)` to `(beta - 2)`, matching the Wikipedia formula. The typo caused silently wrong excess kurtosis for all valid inputs (β > 4); e.g. `BetaPrime(2, 5).kurtosis()` returned 66 instead of 54 (#752).
 - `LogitNormal.mean()`, `.variance()`, `.skewness()`, and `.kurtosis()` now override the `Normal` base-class fallback with explicit tanh-sinh quadrature over `(0, 1)` instead of inheriting `Normal`'s hard-coded `μ`, `σ²`, `0`, `0` values. When `μ = 0` the distribution is symmetric about `x = 0.5`, giving `mean() = 0.5` and `skewness() = 0` exactly (#756).
 - `Rice.kurtosis()` returned `0` in the Bessel overflow regime (ν/σ > ~53.3, z = ν²/(4σ²) > 709). The correct leading-order asymptotic value is `−6σ²/ν²` from the noncentral-χ² 4th-cumulant expansion around the Gaussian limit; e.g. ≈ −0.00167 at ν/σ = 60 (#766).
 - `YuleSimon.skewness()` now returns `(ρ+1)²·√(ρ−2)/(ρ·(ρ−3))`. The previous formula `(ρ+1)/(ρ−3)·√((ρ−2)/ρ)` was missing a factor of `(ρ+1)/√ρ` — e.g. at ρ=5 the old code returned 2.324 instead of 6.235 (#587).
