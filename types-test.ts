@@ -29,7 +29,7 @@ const sp = n.support()
 const _sv: number = sp[0].value
 const _sc: boolean = sp[0].closed
 const state = n.save()
-n.load(state)
+ran.dist.Normal.load(state)
 n.seed(42)
 n.seed('test')
 const _fitted = ran.dist.Normal.fit([1, 2, 3, 4, 5])
