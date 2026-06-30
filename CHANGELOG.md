@@ -37,7 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `YuleSimon.kurtosis()` falling-factorial coefficients corrected: `E[K^(n)] = n!·(n-1)!·ρ/∏(ρ−i)`, so f3 = 12ρ and f4 = 144ρ (previously 6ρ and 24ρ, missing the `(n-1)!` factor for n≥3). At ρ=5 the old code returned excess kurtosis ≈19 instead of 118.8 (#587).
 - `FlorySchulz._fitInit` seed corrected from `2/mean` to `2/(mean+1)`, matching the distribution's mean formula `E[X]=(2−a)/a` (previously the comment and implementation used the wrong formula `E[X]=2/a`) (#587).
 
+### Changed
 
+- `Distribution.save()` now includes `type` and `k` fields in the snapshot. `Distribution.load()` is now a static factory method — call `ran.dist.Pareto.load(state)` instead of `new ran.dist.Pareto().load(state)`. The static form reconstructs an instance without a throw-away constructor call (#537).
 
 ### Added
 

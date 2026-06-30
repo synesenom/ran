@@ -44,11 +44,11 @@ export default class Delaporte extends PreComputed {
     }]
 
     // Speed-up constants
-    this.c = {
+    Object.assign(this.c, {
       r: beta / (lambda * (1 + beta)),
       baseLogProb: -lambda - alpha * Math.log(1 + beta),
       logLambda: Math.log(lambda)
-    }
+    })
   }
 
   static _fitInit (data) {

@@ -42,9 +42,9 @@ export default class HeadsMinusTails extends PreComputed {
     }]
 
     // Speed-up constants
-    this.c = {
+    Object.assign(this.c, {
       baseLogProb: 2 * ni * Math.log(0.5)
-    }
+    })
   }
 
   static _fitInit (data) {

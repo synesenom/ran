@@ -55,6 +55,10 @@ export default class Hyperexponential extends Distribution {
     this.aliasTable = new AliasTable(weights)
   }
 
+  _afterLoad () {
+    this.aliasTable = new AliasTable(this.p.weights)
+  }
+
   _generator () {
     // Direct sampling
     const i = this.aliasTable.sample(this.r)

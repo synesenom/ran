@@ -19,10 +19,20 @@ export default class PreComputed extends Distribution {
     this.TABLE_SIZE = 1000
     this.MAX_NUMBER_OF_TABLES = 100
 
-    // Logarithmic pdf
+    // Logarithmic pdf — stored in this.c so it survives a save()/load() round-trip
+    Object.assign(this.c, { logP })
     this.logP = logP
 
     // Look-up tables
+    this.aliasTables = []
+    this.pdfTable = []
+    this.cdfTable = []
+  }
+
+  _afterLoad () {
+    this.TABLE_SIZE = 1000
+    this.MAX_NUMBER_OF_TABLES = 100
+    this.logP = this.c.logP
     this.aliasTables = []
     this.pdfTable = []
     this.cdfTable = []

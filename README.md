@@ -153,9 +153,9 @@ d.bic(data)       // Bayesian information criterion
 d.test(data)      // KS test (continuous) or chi-squared test (discrete)
 d.seed(value)     // set PRNG seed; returns the instance
 d.save()          // serialise PRNG state + parameters to a plain object
-d.load(state)     // restore from a saved state; returns the instance
 
-ran.dist.Gamma.fit(data)  // static — MLE fit; returns a new instance
+ran.dist.Gamma.load(state)  // static — restore from a saved state; returns a new instance
+ran.dist.Gamma.fit(data)    // static — MLE fit; returns a new instance
 ```
 
 ## Return values and errors

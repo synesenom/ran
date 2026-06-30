@@ -402,14 +402,14 @@ class Distribution {
    *
    * @method save
    * @memberof ran.dist.Distribution
-   * @returns {{prngState: *, params: Object, constants: Object, support: {value: number, closed: boolean}[]}} Object representing the inner state of the current generator.
+   * @returns {{type: string, k: number, prngState: *, params: Object, constants: Object, support: {value: number, closed: boolean}[]}} Object representing the inner state of the current generator.
    * @example
    *
    * let pareto1 = new ran.dist.Pareto(1, 2).seed('test')
    * let sample1 = pareto1.sample(2)
    * let state = pareto1.save()
    *
-   * let pareto2 = new ran.dist.Pareto().load(state)
+   * let pareto2 = ran.dist.Pareto.load(state)
    * let sample2 = pareto2.sample(3)
    * // => [ 1.1315154468682591,
    * //      5.44269493220745,
@@ -418,6 +418,8 @@ class Distribution {
    */
   save () {
     return {
+      type: this._type,
+      k: this.k,
       prngState: this.r.save(),
       params: this.p,
       constants: this.c,
@@ -426,40 +428,41 @@ class Distribution {
   }
 
   /**
-   * Loads a new state for the generator.
+   * Reconstructs a distribution instance from a snapshot created by save(). No constructor call is needed.
    *
    * @method load
    * @memberof ran.dist.Distribution
-   * @param {Object} state The state to load.
-   * @returns {this} Reference to the current distribution.
+   * @param {Object} state The state to load, as returned by save().
+   * @returns {Distribution} New distribution instance with the restored state.
    * @example
    *
    * let pareto1 = new ran.dist.Pareto(1, 2).seed('test')
    * let sample1 = pareto1.sample(2)
    * let state = pareto1.save()
    *
-   * let pareto2 = new ran.dist.Pareto().load(state)
+   * let pareto2 = ran.dist.Pareto.load(state)
    * let sample2 = pareto2.sample(3)
    * // => [ 1.1315154468682591,
    * //      5.44269493220745,
    * //      1.2587482868229616 ]
    *
    */
-  load (state) {
-    // Set parameters
-    this.p = state.params
-
-    // Set helper constants
-    this.c = state.constants
-
-    // Set support
-    this.s = state.support
-
-    // Set PRNG state
-    this.r.load(state.prngState)
-
-    return this
+  static load (state) {
+    const instance = Object.create(this.prototype)
+    instance._type = state.type
+    instance.k = state.k
+    instance.p = state.params
+    instance.s = state.support
+    instance.c = state.constants
+    instance.r = new Xoshiro128p()
+    instance.r.load(state.prngState)
+    instance._afterLoad()
+    return instance
   }
+
+  // Hook for subclasses that store non-serializable state (AliasTable, lazy look-up tables, etc.)
+  // beyond the four standard fields. Override to rebuild those structures from this.p/this.c.
+  _afterLoad () {}
 
   /**
    * @overload

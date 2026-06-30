@@ -55,6 +55,19 @@ export default class Categorical extends Distribution {
       this.pdfTable.push(weight)
       this.cdfTable.push(this.cdfTable[i - 1] + weight)
     }
+
+    // Store normalized weights in this.c so they survive a save()/load() round-trip.
+    // Subclasses overwrite this.p, so this.c is the only stable serialized home for the table.
+    this.c.pdfTable = this.pdfTable
+  }
+
+  _afterLoad () {
+    this.aliasTable = new AliasTable(this.c.pdfTable)
+    this.pdfTable = this.c.pdfTable
+    this.cdfTable = [this.pdfTable[0]]
+    for (let i = 1; i < this.pdfTable.length; i++) {
+      this.cdfTable.push(this.cdfTable[i - 1] + this.pdfTable[i])
+    }
   }
 
   _generator () {

@@ -40,9 +40,9 @@ export default class PolyaAeppli extends PreComputed {
     }]
 
     // Speed-up constants
-    this.c = {
+    Object.assign(this.c, {
       logP1: Math.log(lambda * (1 - theta)) - lambda
-    }
+    })
   }
 
   static _fitInit (data) {

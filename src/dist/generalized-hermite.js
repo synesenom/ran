@@ -47,11 +47,11 @@ export default class GeneralizedHermite extends PreComputed {
     }]
 
     // Speed-up constants
-    this.c = {
+    Object.assign(this.c, {
       logMu: Math.log(a1 + m * a2),
       d: (a1 + m * m * a2) / (a1 + m * a2),
       baseLogProb: -a1 - a2
-    }
+    })
   }
 
   static _fitInit (data) {
