@@ -17,7 +17,7 @@ import Distribution from './_distribution'
 export default class Normal extends Distribution {
   /**
    * @param {number} mu Location parameter (mean).
-   * @param {number} sigma Squared scale parameter (variance).
+   * @param {number} sigma Scale parameter (standard deviation).
    */
   constructor (mu, sigma) {
     super('continuous', 2)
