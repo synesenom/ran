@@ -93,7 +93,7 @@ class Xoshiro128p {
    * @ignore
    */
   load (state) {
-    this._state = state
+    this._state = state.slice()
   }
 
   /**
@@ -106,7 +106,7 @@ class Xoshiro128p {
    * @ignore
    */
   save () {
-    return this._state
+    return this._state.slice()
   }
 }
 

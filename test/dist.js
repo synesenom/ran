@@ -65,7 +65,8 @@ const UnitTests = {
       const s = 123456789 // fixed seed so CI failures are reproducible
       const cut = Math.floor(sampleSize / 3)
 
-      // Generate full sample
+      // Generate full sample from seeded generator
+      generator.seed(s)
       const values = generator.sample(sampleSize)
 
       // Reset generator, create two sub samples
@@ -75,8 +76,8 @@ const UnitTests = {
       const restored = dist[tc.name].load(state)
       const values2 = restored.sample(sampleSize - cut)
 
-      // Compare samples
-      assert(values1.concat(values2).reduce((acc, d, i) => acc || d === values[i], true))
+      // All values must match the seeded reference sequence
+      assert(values1.concat(values2).reduce((acc, d, i) => acc && d === values[i], true))
     })
 
     it('loaded state should copy full state of generator', () => {
@@ -93,8 +94,8 @@ const UnitTests = {
       const generator2 = dist[tc.name].load(state)
       const values2 = generator2.sample(10)
 
-      // Compare samples
-      assert(values1.reduce((acc, d, i) => acc || d !== values2[i], true) === true)
+      // Both generators must produce identical sequences from the same restored state
+      assert(values2.every((d, i) => d === values1[i]))
     })
   },
 
