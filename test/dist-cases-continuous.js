@@ -2349,14 +2349,13 @@ export default [{
   testSeeds: [0, 5, 12345], // seed 42 shifts PRNG alignment after Ziggurat replacement
   // delegates to Nakagami; sampler is sqrt(Gamma(q, q/omega))
   sampleParams: [{ name: 'q at boundary', params: () => [0.5, 2] }],
-  // deprecated alias for Nakagami; case 1: scipy.stats.nakagami(nu=0.5, loc=0, scale=sqrt(2)); case 2: scipy.stats.nakagami(nu=2, loc=0, scale=1/sqrt(2))
+  // gen-dist-refs.py dps=50: Hoyt([0.5, 2])
   refVals: [
-    { x: 0.1, pdf: 0.5627808712130099, cdf: 0.056371977797014215 },
-    { x: 0.5, pdf: 0.5300070646880575, cdf: 0.27632639016823707 },
-    { x: 1, pdf: 0.43939128946772266, cdf: 0.5204998778130469 },
-    { x: 1.5, pdf: 0.32146553459760385, cdf: 0.7111556336535156 },
-    { x: 2, pdf: 0.20755374871029747, cdf: 0.8427007929497154 },
-    { x: 4, pdf: 0.010333492677046033, cdf: 0.9953222650189529 }
+    { x: 0.17771198098851537, pdf: 0.5597526272106225, cdf: 0.1 },
+    { x: 0.5449254294535087, pdf: 0.5238232955107917, cdf: 0.3 },
+    { x: 0.9538725524089398, pdf: 0.44940393889430363, cdf: 0.5 },
+    { x: 1.4657381559184337, pdf: 0.32973630215005784, cdf: 0.7 },
+    { x: 2.326174307353348, pdf: 0.14585582138288425, cdf: 0.9 }
   ],
   // scipy.stats.nakagami(nu=0.5, scale=sqrt(2))  # q=0.5, omega=2 (cases[0])
   quantileVals: [
@@ -2838,14 +2837,13 @@ export default [{
   cases: [{
     params: () => []
   }],
+  // gen-dist-refs.py dps=50: Kolmogorov([])
   refVals: [
-    { x: 0.5, pdf: 0.639582850940457, cdf: 0.0360547563351249 },
-    { x: 0.7, pdf: 1.66473426606707, cdf: 0.288764804970311 },
-    { x: 0.9, pdf: 1.3807270542377328, cdf: 0.607269292059346 },
-    { x: 1.0, pdf: 1.071948558356942, cdf: 0.730000328322645 },
-    { x: 1.2, pdf: 0.538512430720529, cdf: 0.887750333329275 },
-    { x: 1.5, pdf: 0.13330722741988, cdf: 0.977782037383475 },
-    { x: 2.0, pdf: 0.00536740204562968, cdf: 0.99932907474422 }
+    { x: 0.5711732651063401, pdf: 1.1490685928473872, cdf: 0.1 },
+    { x: 0.706732652306898, pdf: 1.6724974123620093, cdf: 0.3 },
+    { x: 0.8275735551899077, pdf: 1.572490433996602, cdf: 0.5 },
+    { x: 0.9730633753323726, pdf: 1.1556931774406534, cdf: 0.7 },
+    { x: 1.2238478702170823, pdf: 0.48935547920773725, cdf: 0.9 }
   ],
   // scipy.stats.kstwobign()
   quantileVals: [
@@ -3899,8 +3897,9 @@ export default [{
     // Reference values from mpmath (dps=20): ncbeta_cdf(2, 2, 100, x).
     name: 'large lambda',
     params: () => [2, 2, 100],
-    // mpmath dps=50: Poisson mixture of Beta(alpha+j,beta) for alpha=2,beta=2,lambda=100
+    // alpha=2>1 boundary: exact (guard returns 0); interior from mpmath dps=50: NoncentralBeta([2, 2, 100])
     refVals: [
+      { x: 0, pdf: 0, cdf: 0 },
       { x: 0.9, pdf: 1.3953614440406312, cdf: 0.031109101294777633 },
       { x: 0.95, pdf: 9.931823105374628, cdf: 0.25743394662178815 },
       { x: 0.99, pdf: 16.532312334652936, cdf: 0.9006079598703054 }
@@ -3959,15 +3958,13 @@ export default [{
     { name: 'asymmetric shapes', params: () => [0.5, 5, 10] },
     { name: 'alpha=0.1 lower-tail and mid-range', params: () => [0.1, 2, 10] }
   ],
-  // Reference values: pdf from R dbeta(x, 2, 2, ncp=2); cdf computed in JS (R pbeta was only ~1e-9 accurate)
+  // gen-dist-refs.py dps=50: NoncentralBeta([2, 2, 2])
   refVals: [
-    { x: 0, pdf: 0, cdf: 0 },
-    { x: 0.1, pdf: 2.41868290579682427e-01, cdf: 1.1749863166503314e-02 },
-    { x: 0.3, pdf: 8.22792189851986433e-01, cdf: 0.11664788786060205 },
-    { x: 0.5, pdf: 1.40260215058546489e+00, cdf: 0.34117349608835623 },
-    { x: 0.7, pdf: 1.66306282360838864e+00, cdf: 0.6570316799226157 },
-    { x: 0.9, pdf: 9.94325838679715801e-01, cdf: 0.9454646181057742 },
-    { x: 1, pdf: 0, cdf: 1 }
+    { x: 0.2789376120265098, pdf: 0.7580684790112991, cdf: 0.1 },
+    { x: 0.4698221344193273, pdf: 1.3251166526552274, cdf: 0.3 },
+    { x: 0.6048059624857023, pdf: 1.6090235715324712, cdf: 0.5 },
+    { x: 0.7259485654221578, pdf: 1.6460964253974355, cdf: 0.7 },
+    { x: 0.8596586474694818, pdf: 1.2473789137169515, cdf: 0.9 }
   ],
   // Poisson mixture of scipy.stats.beta (alpha=2, beta=2, lambda=2)
   quantileVals: [
