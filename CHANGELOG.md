@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `YuleSimon.kurtosis()` falling-factorial coefficients corrected: `E[K^(n)] = n!·(n-1)!·ρ/∏(ρ−i)`, so f3 = 12ρ and f4 = 144ρ (previously 6ρ and 24ρ, missing the `(n-1)!` factor for n≥3). At ρ=5 the old code returned excess kurtosis ≈19 instead of 118.8 (#587).
 - `FlorySchulz._fitInit` seed corrected from `2/mean` to `2/(mean+1)`, matching the distribution's mean formula `E[X]=(2−a)/a` (previously the comment and implementation used the wrong formula `E[X]=2/a`) (#587).
 - `Zeta.kurtosis()` now returns `Infinity` (not `NaN`) for `3 < s ≤ 4`, where the variance is finite (requires only `s > 3`) but the 4th central moment diverges. The previous `s ≤ 4 → NaN` boundary conflated a divergent moment with an undefined one, contradicting the divergence convention and the sibling `Zeta.skewness()` logic.
+- `Alpha.mean()`, `.variance()`, `.skewness()`, and `.kurtosis()` now correctly return `Infinity`/`NaN` (PDF f(x)~C/x² makes E[X] diverge; variance/skewness/kurtosis are undefined when the mean diverges). `UniformRatio` gets the same fix (PDF 1/(2x²) for x>1 gives a divergent mean). `LogCauchy.mean()` now returns `Infinity` — the integral ∫ x·f(x) dx substituting u=ln x converges only one-sidedly unlike the Cauchy case, so E[X]=+∞. `DoublyNoncentralF.skewness()` and `.kurtosis()` now guard on d2>6 / d2>8, returning `Infinity` when the moments do not exist — matching the analogous guards in `F` and `NoncentralF` (#570).
 
 ### Changed
 

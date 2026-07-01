@@ -1,6 +1,5 @@
 import Distribution from './_distribution'
 
-// TODO Docs
 /**
  * Probability density function for the [uniform ratio distribution]{@link https://en.wikipedia.org/wiki/Ratio_distribution#Uniform_ratio_distribution}:
  *
@@ -42,4 +41,24 @@ export default class UniformRatio extends Distribution {
   _q (p) {
     return p <= 0.5 ? 2 * p : 0.5 / (1 - p)
   }
+
+  /**
+   * @returns {number} Infinity (E[X] = ½∫₁^∞ 1/x dx diverges).
+   */
+  mean () { return Infinity }
+
+  /**
+   * @returns {number} Infinity (E[X²] diverges for the same reason).
+   */
+  variance () { return Infinity }
+
+  /**
+   * @returns {number} NaN (skewness undefined when mean and variance both diverge).
+   */
+  skewness () { return NaN }
+
+  /**
+   * @returns {number} NaN (kurtosis undefined when variance diverges).
+   */
+  kurtosis () { return NaN }
 }

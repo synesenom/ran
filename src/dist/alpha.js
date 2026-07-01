@@ -81,4 +81,24 @@ export default class Alpha extends Distribution {
   _q (p) {
     return this.p.beta / (this.p.alpha - this._phiInv(p * this.c.phiAlpha))
   }
+
+  /**
+   * @returns {number} Infinity (mean diverges — f(x) ~ C/x² as x→∞ so E[X] ~ ∫C/x dx = ∞).
+   */
+  mean () { return Infinity }
+
+  /**
+   * @returns {number} Infinity (E[X²] diverges — the second raw moment shares the same tail).
+   */
+  variance () { return Infinity }
+
+  /**
+   * @returns {number} NaN (skewness undefined when mean and variance both diverge).
+   */
+  skewness () { return NaN }
+
+  /**
+   * @returns {number} NaN (kurtosis undefined when variance diverges).
+   */
+  kurtosis () { return NaN }
 }
