@@ -58,7 +58,7 @@ function parseEntry (entry) {
   const throws = sourceThrows.map(ThrowsParser)
 
   const ctx = entry.context || {}
-  const relFile = ctx.file ? path.relative(REPO_ROOT, ctx.file) : null
+  const relFile = ctx.file ? path.relative(REPO_ROOT, ctx.file).split(path.sep).join('/') : null
   const line = ctx.loc && ctx.loc.start ? ctx.loc.start.line : null
   const source = relFile && line != null
     ? `https://github.com/synesenom/ran/blob/v${VERSION}/${relFile}#L${line}`
