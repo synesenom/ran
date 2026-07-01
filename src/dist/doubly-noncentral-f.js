@@ -53,6 +53,20 @@ export default class DoublyNoncentralF extends DoublyNoncentralBeta {
     return super._cdf(x / (this.p.d2 / this.p.d1 + x))
   }
 
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    return this.p.d2 > 6 ? super.skewness() : Infinity
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    return this.p.d2 > 8 ? super.kurtosis() : Infinity
+  }
+
   static _fitInit (data) {
     // Central F moment matching for d1, d2; total λ split symmetrically between λ1 and λ2
     const n = data.length

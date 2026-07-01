@@ -55,6 +55,11 @@ export default class LogCauchy extends Cauchy {
     return Math.exp(this.p.mu + this.p.sigma * Math.tan(Math.PI * (p - 0.5)))
   }
 
+  /**
+   * @returns {number} Infinity (E[X] = ∫ x·f(x) dx substituting u=ln x gives ∫ e^u·Cauchy(u) du, which diverges to +∞ one-sidedly).
+   */
+  mean () { return Infinity }
+
   static _fitInit (data) {
     // log(Y) ~ Cauchy(x0, gamma): IQR on log scale avoids reliance on moments that don't exist
     const logData = data.map(x => Math.log(x)).sort((a, b) => a - b)

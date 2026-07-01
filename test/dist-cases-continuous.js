@@ -23,6 +23,9 @@ export default [{
     [-1, 1], [0, 1], // alpha > 0
     [1, -1], [1, 0] // beta > 0
   ],
+  moments: [
+    { params: [3, 1], mean: Infinity, variance: Infinity, skewness: NaN, kurtosis: NaN }
+  ],
   cases: [{
     params: () => [2, 2]
   }, {
@@ -1152,6 +1155,9 @@ export default [{
     [1, 1, -1, 1], // lambda1 >= 0
     [1, 1, 1, -1] // lambda2 >= 0
   ],
+  moments: [
+    { params: [2, 3, 1, 1], mean: 0.4145532940573077, variance: 0.04010485941777667, skewness: 0.2277065418955376, kurtosis: -0.674101860008792, tol: 1e-4 }
+  ],
   cases: [{
     params: () => [2, 2, 2, 2]
   }, {
@@ -1198,6 +1204,10 @@ export default [{
     [1, 1, -1, 1], // lambda1 >= 0
     [1, 1, 1, -1] // lambda2 >= 0
   ],
+  // DNCχ²(k1,k2,λ1,λ2) ≡ NCχ²(k1+k2,λ1+λ2); exact formulas inherited from NoncentralChi2
+  moments: [
+    { params: [2, 3, 1, 1], mean: 7, variance: 18, skewness: 22 * Math.SQRT2 / 27, kurtosis: 52 / 27 }
+  ],
   cases: [{
     name: 'odd k',
     params: () => [3, 4, 2, 3]
@@ -1241,6 +1251,12 @@ export default [{
     [2, -1, 1, 1], [2, 0, 1, 1], // n2 > 0
     [2, 2, -1, 1], // lambda1 >= 0
     [2, 2, 1, -1] // lambda2 >= 0
+  ],
+  // d2=10>8 ensures all four moments exist; values from tanh-sinh fallback
+  // d2=5<=6: skewness and kurtosis both diverge; mean and variance still finite
+  moments: [
+    { params: [3, 10, 1, 1], mean: 1.5129555479435952, variance: 2.662960179035406, skewness: 4.088629901681505, kurtosis: 54.46393601139288, tol: 1e-4 },
+    { params: [5, 5, 2, 2], skewness: Infinity, kurtosis: Infinity }
   ],
   cases: [{
     params: () => [5, 5, 2, 2]
@@ -1286,6 +1302,10 @@ export default [{
     [], // all params required
     [-1, 1, 1], [0, 1, 1], // nu > 0
     [1, 1, -1] // theta >= 0
+  ],
+  // nu=5>4: all moments exist; values from tanh-sinh fallback (PRNG-seeded bounds → tol is wide)
+  moments: [
+    { params: [5, 1, 2], mean: 0.4197, variance: 1.226, skewness: 3.234, kurtosis: 16.60, tol: { mean: 0.003, variance: 0.005, skewness: 0.02, kurtosis: 0.1 } }
   ],
   cases: [{
     params: () => [5, 1, 2]
@@ -3085,6 +3105,9 @@ export default [{
   invalidParams: [
     [], // all params required
     [0, -1], [0, 0] // sigma > 0
+  ],
+  moments: [
+    { params: [0, 1], mean: Infinity, variance: NaN, skewness: NaN, kurtosis: NaN }
   ],
   cases: [{
     params: () => [0, 2]
@@ -5260,6 +5283,10 @@ export default [{
     generator: 'Exponential',
     params: () => [1]
   },
+  // lambda>0: bounded support [-1/lambda, 1/lambda]; mean=0 and skewness=0 exact by symmetry
+  moments: [
+    { params: [0.5], mean: 0, variance: 0.8584073464102088, skewness: 0, kurtosis: -0.9183035664374528, tol: { mean: 1e-12, variance: 1e-8, skewness: 1e-12, kurtosis: 1e-6 } }
+  ],
   cases: [{
     name: 'zero shape parameter',
     params: () => [0],
@@ -5460,6 +5487,9 @@ export default [{
   name: 'UniformRatio',
   fit: { data: [0.5, 1, 2, 3], usableAt: 0.5 },
   invalidParams: [],
+  moments: [
+    { params: [], mean: Infinity, variance: Infinity, skewness: NaN, kurtosis: NaN }
+  ],
   cases: [{
     params: () => []
   }],
@@ -5490,6 +5520,11 @@ export default [{
   invalidParams: [
     [], // all params required
     [-1], [0] // kappa > 0
+  ],
+  // bounded support [-pi, pi]; mean=0 and skewness=0 exact by symmetry
+  moments: [
+    { params: [2], mean: 0, variance: 0.7644618798111271, skewness: 0, kurtosis: 0.8847265900332291, tol: { mean: 1e-12, variance: 1e-6, skewness: 1e-12, kurtosis: 1e-6 } },
+    { params: [1], mean: 0, variance: 1.604254298825305, skewness: 0, kurtosis: -0.15414638902997568, tol: { mean: 1e-12, variance: 1e-6, skewness: 1e-12, kurtosis: 1e-6 } }
   ],
   cases: [{
     params: () => [2],
