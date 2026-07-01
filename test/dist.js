@@ -292,35 +292,56 @@ const UnitTests = {
     })
   },
 
-  // Data-driven fit check. tc.fit = { params, seed, n, tolerances?, exact? }: sample n points
-  // from the planted params, refit, and assert the recovered parameters match the planted ones
-  // (named tolerances as |result.p[name] - planted.p[name]| < tol, exact as strict equality).
+  // Data-driven fit check. tc.fit may be a single spec object or an array of specs.
+  // Spec fields:
+  //   params, seed, n         — sample n points from planted params; mutually exclusive with data
+  //   data                    — literal array to fit instead of sampling
+  //   tolerances              — { [paramName]: tol } max absolute deviation from planted param
+  //   exact                   — [paramName, ...] params that must match planted exactly
+  //   usableAt                — x: asserts pdf(x) is finite and positive after fit
+  //   fitCheck                — [{ at, fn, value, tol }] asserts |result[fn](at) - value| < tol
   // No-op when tc.fit is absent.
   fit (tc) {
     if (!tc.fit) {
       return
     }
-    const { params, seed, n, tolerances, exact } = tc.fit
-    it(`${tc.name}.fit should recover planted parameters`, () => {
-      const planted = new dist[tc.name](...params)
-      const data = new dist[tc.name](...params).seed(seed).sample(n)
-      const result = dist[tc.name].fit(data)
-      // Always verify fit returns the right type; tolerances/exact add parameter-recovery
-      // checks on top. An entry with neither (e.g. heuristic-MOM fits where recovery is not
-      // reliable) intentionally asserts only the instance type.
-      assert(result instanceof dist[tc.name])
-      if (tolerances) {
-        Object.entries(tolerances).forEach(([name, tol]) => {
-          assert(Math.abs(result.p[name] - planted.p[name]) < tol,
-            `${tc.name}.fit ${name} = ${result.p[name]}, expected ≈ ${planted.p[name]} (tol ${tol})`)
-        })
-      }
-      if (exact) {
-        exact.forEach(name => {
-          assert.strictEqual(result.p[name], planted.p[name],
-            `${tc.name}.fit ${name} = ${result.p[name]}, expected exactly ${planted.p[name]}`)
-        })
-      }
+    const specs = Array.isArray(tc.fit) ? tc.fit : [tc.fit]
+    specs.forEach((spec, i) => {
+      const { params, seed, n, data: fixedData, tolerances, exact, usableAt, fitCheck } = spec
+      const label = specs.length > 1
+        ? `${tc.name}.fit[${i}] should recover planted parameters`
+        : `${tc.name}.fit should recover planted parameters`
+      it(label, () => {
+        const data = fixedData != null ? fixedData : new dist[tc.name](...params).seed(seed).sample(n)
+        const planted = params != null ? new dist[tc.name](...params) : null
+        const result = dist[tc.name].fit(data)
+        // Always verify fit returns the right type; tolerances/exact/usableAt/fitCheck add
+        // further assertions. An entry with none of them (heuristic-MOM fits where recovery
+        // is not reliable) intentionally asserts only the instance type.
+        assert(result instanceof dist[tc.name])
+        if (tolerances && planted) {
+          Object.entries(tolerances).forEach(([name, tol]) => {
+            assert(Math.abs(result.p[name] - planted.p[name]) < tol,
+              `${tc.name}.fit ${name} = ${result.p[name]}, expected ≈ ${planted.p[name]} (tol ${tol})`)
+          })
+        }
+        if (exact && planted) {
+          exact.forEach(name => {
+            assert.strictEqual(result.p[name], planted.p[name],
+              `${tc.name}.fit ${name} = ${result.p[name]}, expected exactly ${planted.p[name]}`)
+          })
+        }
+        if (usableAt !== undefined) {
+          assert(Number.isFinite(result.pdf(usableAt)) && result.pdf(usableAt) > 0,
+            `${tc.name}.fit pdf(${usableAt}) = ${result.pdf(usableAt)}, expected finite and positive`)
+        }
+        if (fitCheck) {
+          fitCheck.forEach(({ at, fn, value, tol }) => {
+            assert(Math.abs(result[fn](at) - value) < tol,
+              `${tc.name}.fit ${fn}(${at}) = ${result[fn](at)}, expected ≈ ${value} (tol ${tol})`)
+          })
+        }
+      })
     })
   }
 }
@@ -506,21 +527,6 @@ describe('dist', () => {
     })
 
     describe('.fit()', () => {
-      it('Normal.fit should return a Normal instance', () => {
-        const result = dist.Normal.fit([1, 2, 3, 4, 5])
-        assert(result instanceof dist.Normal)
-      })
-
-      it('Normal.fit should recover mu close to sample mean', () => {
-        const result = dist.Normal.fit([1, 2, 3, 4, 5])
-        assert(Math.abs(result.p.mu - 3) < 0.1)
-      })
-
-      it('Normal.fit should recover sigma close to MLE std dev', () => {
-        const result = dist.Normal.fit([1, 2, 3, 4, 5])
-        assert(Math.abs(result.p.sigma - Math.sqrt(2)) < 0.1)
-      })
-
       it('Distribution._fitPenalty base class should return 0 for any params', () => {
         assert.strictEqual(Distribution._fitPenalty({ p: { alpha: 1, beta: 1 } }), 0)
         assert.strictEqual(Distribution._fitPenalty({ p: {} }), 0)
@@ -569,52 +575,16 @@ describe('dist', () => {
         assert(Math.abs(result.p.alpha - alphaExpected) < 0.05)
       })
 
-      it('Gilbrat.fit should return a usable Gilbrat instance', () => {
-        const result = dist.Gilbrat.fit([0.5, 1, 2, 3])
-        assert(result instanceof dist.Gilbrat)
-        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
-      })
-
-      it('HalfLogistic.fit should return a usable HalfLogistic instance', () => {
-        const result = dist.HalfLogistic.fit([0.5, 1, 2, 3])
-        assert(result instanceof dist.HalfLogistic)
-        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
-      })
-
-      it('HyperbolicSecant.fit should return a usable HyperbolicSecant instance', () => {
-        const result = dist.HyperbolicSecant.fit([-1, 0, 1, 2])
-        assert(result instanceof dist.HyperbolicSecant)
-        assert(Number.isFinite(result.pdf(0)) && result.pdf(0) > 0)
-      })
-
       it('InvalidDiscrete.fit should return an InvalidDiscrete instance', () => {
         // data is irrelevant for k=0; instance is the only possible MLE
         const result = dist.InvalidDiscrete.fit([-1, 1, -1, 1, 1])
         assert(result instanceof dist.InvalidDiscrete)
       })
 
-      it('Kolmogorov.fit should return a usable Kolmogorov instance', () => {
-        const result = dist.Kolmogorov.fit([0.3, 0.5, 0.7, 1.0])
-        assert(result instanceof dist.Kolmogorov)
-        assert(Number.isFinite(result.pdf(0.5)) && result.pdf(0.5) > 0)
-      })
-
       it('Rademacher.fit should return a usable Rademacher instance', () => {
         const result = dist.Rademacher.fit([-1, 1, -1, 1])
         assert(result instanceof dist.Rademacher)
         assert(result.pdf(-1) === 0.5 && result.pdf(1) === 0.5)
-      })
-
-      it('Slash.fit should return a usable Slash instance', () => {
-        const result = dist.Slash.fit([-1, 0, 1, 2])
-        assert(result instanceof dist.Slash)
-        assert(Number.isFinite(result.pdf(0)) && result.pdf(0) > 0)
-      })
-
-      it('UniformRatio.fit should return a usable UniformRatio instance', () => {
-        const result = dist.UniformRatio.fit([0.5, 1, 2, 3])
-        assert(result instanceof dist.UniformRatio)
-        assert(Number.isFinite(result.pdf(0.5)) && result.pdf(0.5) > 0)
       })
 
       it('LogNormal._fitInit should return sigma=1 for constant data', () => {
@@ -659,22 +629,6 @@ describe('dist', () => {
         assert(init[1] === 1)
       })
 
-      it('Rayleigh.fit should recover sigma close to planted value', () => {
-        const data = new dist.Rayleigh(1.5).seed(42).sample(200)
-        const result = dist.Rayleigh.fit(data)
-        assert(result instanceof dist.Rayleigh)
-        // cdf(σ) = 1−exp(−½) for any Rayleigh(σ); valid only when fitted σ ≈ planted 1.5
-        assert(Math.abs(result.cdf(1.5) - (1 - Math.exp(-0.5))) < 0.09)
-      })
-
-      it('MaxwellBoltzmann.fit should recover a close to planted value', () => {
-        const data = new dist.MaxwellBoltzmann(2).seed(42).sample(200)
-        const result = dist.MaxwellBoltzmann.fit(data)
-        assert(result instanceof dist.MaxwellBoltzmann)
-        // pdf(a; a) = sqrt(2/π)·exp(−½)/a for Maxwell-Boltzmann(a); checks a ≈ 2
-        assert(Math.abs(result.pdf(2) - Math.sqrt(2 / Math.PI) * Math.exp(-0.5) / 2) < 0.08)
-      })
-
       it('Categorical.fit should recover category probabilities close to planted values', () => {
         const data = new dist.Categorical([0.2, 0.3, 0.5], 0).seed(42).sample(500)
         const result = dist.Categorical.fit(data)
@@ -696,38 +650,6 @@ describe('dist', () => {
         const sampleMean = data.reduce((s, x) => s + x, 0) / data.length
         const fittedMean = result.p.weights.reduce((s, w, i) => s + w / result.p.rates[i], 0)
         assert(Math.abs(fittedMean - sampleMean) < 0.2)
-      })
-
-      it('NegativeBinomial.fit should return a usable NegativeBinomial instance', () => {
-        const data = new dist.NegativeBinomial(5, 0.4).seed(42).sample(200)
-        const result = dist.NegativeBinomial.fit(data)
-        assert(result instanceof dist.NegativeBinomial)
-        assert(result.p.r > 0 && result.p.p > 0 && result.p.p < 1)
-        assert(Number.isFinite(result.pdf(Math.round(5 * 0.4 / 0.6))) && result.pdf(Math.round(5 * 0.4 / 0.6)) > 0)
-      })
-
-      it('Skellam.fit should return a usable Skellam instance', () => {
-        const data = new dist.Skellam(4, 2).seed(42).sample(200)
-        const result = dist.Skellam.fit(data)
-        assert(result instanceof dist.Skellam)
-        assert(result.p.mu1 > 0 && result.p.mu2 > 0)
-        assert(Number.isFinite(result.pdf(2)) && result.pdf(2) > 0)
-      })
-
-      it('DiscreteWeibull.fit should return a usable DiscreteWeibull instance', () => {
-        const data = new dist.DiscreteWeibull(0.5, 1.5).seed(42).sample(200)
-        const result = dist.DiscreteWeibull.fit(data)
-        assert(result instanceof dist.DiscreteWeibull)
-        assert(result.p.q > 0 && result.p.q < 1 && result.p.beta > 0)
-        assert(Number.isFinite(result.pdf(0)) && result.pdf(0) > 0)
-      })
-
-      it('ExponentialLogarithmic.fit should return a usable ExponentialLogarithmic instance', () => {
-        const data = new dist.ExponentialLogarithmic(0.7, 1).seed(42).sample(200)
-        const result = dist.ExponentialLogarithmic.fit(data)
-        assert(result instanceof dist.ExponentialLogarithmic)
-        assert(result.p.p > 0 && result.p.p < 1 && result.p.beta > 0)
-        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
       })
 
       it('BorelTanner.fit should return a usable BorelTanner instance', () => {
@@ -752,50 +674,10 @@ describe('dist', () => {
         assert(result.p.mu === 0 && result.p.n === 3)
       })
 
-      it('ConwayMaxwellPoisson.fit should return a usable ConwayMaxwellPoisson instance', () => {
-        const data = new dist.ConwayMaxwellPoisson(3, 2).seed(42).sample(200)
-        const result = dist.ConwayMaxwellPoisson.fit(data)
-        assert(result instanceof dist.ConwayMaxwellPoisson)
-        assert(result.p.lambda > 0 && result.p.nu > 0)
-        assert(Number.isFinite(result.pdf(3)) && result.pdf(3) > 0)
-      })
-
-      it('PolyaAeppli.fit should return a usable PolyaAeppli instance', () => {
-        const data = new dist.PolyaAeppli(2, 0.5).seed(42).sample(200)
-        const result = dist.PolyaAeppli.fit(data)
-        assert(result instanceof dist.PolyaAeppli)
-        assert(result.p.lambda > 0 && result.p.theta > 0 && result.p.theta < 1)
-        assert(Number.isFinite(result.pdf(2)) && result.pdf(2) > 0)
-      })
-
       it('PolyaAeppli._fitInit fallback: variance ≤ mean seeds theta=0.5', () => {
         // if (variance <= mean) branch: data with var=0.16 < mean=3.2 triggers fallback seed
         const [lambda, theta] = dist.PolyaAeppli._fitInit([3, 3, 3, 3, 4])
         assert(theta === 0.5 && lambda > 0)
-      })
-
-      it('NeymanA.fit should return a usable NeymanA instance', () => {
-        const data = new dist.NeymanA(3, 2).seed(42).sample(200)
-        const result = dist.NeymanA.fit(data)
-        assert(result instanceof dist.NeymanA)
-        assert(result.p.lambda > 0 && result.p.phi > 0)
-        assert(Number.isFinite(result.pdf(6)) && result.pdf(6) > 0)
-      })
-
-      it('GeneralizedHermite.fit should return a usable GeneralizedHermite instance', () => {
-        const data = new dist.GeneralizedHermite(1, 0.5, 2).seed(42).sample(200)
-        const result = dist.GeneralizedHermite.fit(data)
-        assert(result instanceof dist.GeneralizedHermite)
-        assert(result.p.a1 > 0 && result.p.a2 > 0 && result.p.m > 1)
-        assert(Number.isFinite(result.pdf(2)) && result.pdf(2) > 0)
-      })
-
-      it('Delaporte.fit should return a usable Delaporte instance', () => {
-        const data = new dist.Delaporte(2, 1, 1).seed(42).sample(200)
-        const result = dist.Delaporte.fit(data)
-        assert(result instanceof dist.Delaporte)
-        assert(result.p.alpha > 0 && result.p.beta > 0 && result.p.lambda > 0)
-        assert(Number.isFinite(result.pdf(3)) && result.pdf(3) > 0)
       })
 
       it('Erlang.fit profile search recovers k=3 when moment seed gives k=4', () => {
@@ -804,22 +686,6 @@ describe('dist', () => {
         const result = dist.Erlang.fit(data)
         assert(result instanceof dist.Erlang)
         assert.strictEqual(result.p.k, 3)
-      })
-
-      it('GeneralizedGamma.fit should return a usable GeneralizedGamma instance', () => {
-        const data = new dist.GeneralizedGamma(2, 3, 1).seed(42).sample(200)
-        const result = dist.GeneralizedGamma.fit(data)
-        assert(result instanceof dist.GeneralizedGamma)
-        assert(result.p.a > 0 && result.p.d > 0 && result.p.p > 0)
-        assert(Number.isFinite(result.pdf(4)) && result.pdf(4) > 0)
-      })
-
-      it('GammaGompertz.fit should return a usable GammaGompertz instance', () => {
-        const data = new dist.GammaGompertz(1, 2, 3).seed(42).sample(200)
-        const result = dist.GammaGompertz.fit(data)
-        assert(result instanceof dist.GammaGompertz)
-        assert(result.p.b > 0 && result.p.s > 0 && result.p.beta > 0)
-        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
       })
 
       it('Beta.fit should not converge to near-singular alpha or beta', () => {
@@ -839,23 +705,6 @@ describe('dist', () => {
         assert(result instanceof dist.BetaPrime)
         assert(result.p.alpha > 0.5 && result.p.alpha < 8, `alpha ${result.p.alpha} out of expected range`)
         assert(result.p.beta > 0.5 && result.p.beta < 8, `beta ${result.p.beta} out of expected range`)
-      })
-
-      it('Bates.fit recovers integer n exactly for n = 1, 2, 3', () => {
-        // n >= 4 approaches Gaussian and n becomes weakly identified; test the identifiable range
-        const cases = [
-          [1, 0, 1],
-          [2, -1, 3],
-          [3, 1, 5]
-        ]
-        for (const [n, a, b] of cases) {
-          const data = new dist.Bates(n, a, b).seed(1).sample(1000)
-          const result = dist.Bates.fit(data)
-          assert(result instanceof dist.Bates)
-          assert.strictEqual(result.p.n, n)
-          assert(Math.abs(result.p.a - a) < 0.1)
-          assert(Math.abs(result.p.b - b) < 0.1)
-        }
       })
 
       it('PERT._fitPenalty should return 0', () => {
@@ -1157,13 +1006,6 @@ describe('dist', () => {
         assert(init[1] > 0)
       })
 
-      it('Hoyt.fit should return a usable Hoyt instance', () => {
-        const data = new dist.Nakagami(2, 3).seed(42).sample(500)
-        const result = dist.Hoyt.fit(data)
-        assert(result instanceof dist.Hoyt)
-        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
-      })
-
       it('Lindley._fitInit should return the closed-form MOM estimate', () => {
         // Exact: theta = (-(mean-1) + sqrt((mean-1)²+8·mean)) / (2·mean)
         // For theta=1: mean=1.5, so theta_hat should be 1
@@ -1178,14 +1020,6 @@ describe('dist', () => {
         const init = dist.Alpha._fitInit(data)
         assert(init[0] > 0 && init[1] > 0)
         assert(Math.abs(init[0] - 3) < 1.5)
-      })
-
-      it('Alpha.fit should return a usable Alpha instance', () => {
-        const data = new dist.Alpha(2, 1).seed(42).sample(200)
-        const result = dist.Alpha.fit(data)
-        assert(result instanceof dist.Alpha)
-        assert(Number.isFinite(result.pdf(0.5)) && result.pdf(0.5) > 0)
-        assert(Math.abs(result.p.alpha - 2) < 0.5)
       })
 
       it('QExponential._fitInit should return q and lambda matching MOM for r>1/3', () => {
@@ -1382,13 +1216,6 @@ describe('dist', () => {
         assert.strictEqual(init[0], 1)
       })
 
-      it('Bradford.fit should return a valid Bradford instance', () => {
-        const data = new dist.Bradford(2).seed(42).sample(200)
-        const result = dist.Bradford.fit(data)
-        assert(result instanceof dist.Bradford)
-        assert(Number.isFinite(result.pdf(0.5)) && result.pdf(0.5) > 0)
-      })
-
       it('Wigner._fitInit should return R = 2*std for symmetric data without outliers', () => {
         // [-2,-1,0,1,2]: mean=0, variance=2, std=sqrt(2), so R = 2*sqrt(2) ≈ 2.83 > maxAbs=2
         const init = dist.Wigner._fitInit([-2, -1, 0, 1, 2])
@@ -1509,67 +1336,6 @@ describe('dist', () => {
       }
       const d = new ZeroMassDist()
       assert(Number.isNaN(d._generator()))
-    })
-  })
-
-  describe('.fit() Categorical subclasses', () => {
-    it('Binomial.fit should recover PMF close to planted values', () => {
-      const data = new dist.Binomial(10, 0.3).seed(42).sample(200)
-      const result = dist.Binomial.fit(data)
-      assert(result instanceof dist.Binomial)
-      assert(Number.isFinite(result.pdf(3)) && result.pdf(3) > 0)
-      assert(Math.abs(result.pdf(3) - new dist.Binomial(10, 0.3).pdf(3)) < 0.05)
-    })
-
-    it('Zipf.fit should return a usable Zipf instance', () => {
-      const data = new dist.Zipf(2, 50).seed(42).sample(200)
-      const result = dist.Zipf.fit(data)
-      assert(result instanceof dist.Zipf)
-      assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
-      assert(Math.abs(result.pdf(1) - new dist.Zipf(2, 50).pdf(1)) < 0.1)
-    })
-
-    it('ZipfMandelbrot.fit should return a usable ZipfMandelbrot instance', () => {
-      const data = new dist.ZipfMandelbrot(20, 2, 1).seed(42).sample(300)
-      const result = dist.ZipfMandelbrot.fit(data)
-      assert(result instanceof dist.ZipfMandelbrot)
-      assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
-      assert(Math.abs(result.pdf(1) - new dist.ZipfMandelbrot(20, 2, 1).pdf(1)) < 0.1)
-    })
-
-    it('Hypergeometric.fit should return a usable Hypergeometric instance', () => {
-      const data = new dist.Hypergeometric(20, 10, 8).seed(42).sample(200)
-      const result = dist.Hypergeometric.fit(data)
-      assert(result instanceof dist.Hypergeometric)
-      assert(Number.isFinite(result.pdf(4)) && result.pdf(4) > 0)
-    })
-
-    it('NegativeHypergeometric.fit should return a usable NegativeHypergeometric instance', () => {
-      const data = new dist.NegativeHypergeometric(20, 10, 3).seed(42).sample(200)
-      const result = dist.NegativeHypergeometric.fit(data)
-      assert(result instanceof dist.NegativeHypergeometric)
-      assert(Number.isFinite(result.pdf(2)) && result.pdf(2) > 0)
-    })
-
-    it('BetaBinomial.fit should return a usable BetaBinomial instance', () => {
-      const data = new dist.BetaBinomial(10, 2, 3).seed(42).sample(200)
-      const result = dist.BetaBinomial.fit(data)
-      assert(result instanceof dist.BetaBinomial)
-      assert(Number.isFinite(result.pdf(4)) && result.pdf(4) > 0)
-    })
-
-    it('BetaNegativeBinomial.fit should return a usable BetaNegativeBinomial instance', () => {
-      const data = new dist.BetaNegativeBinomial(3, 3, 4).seed(42).sample(200)
-      const result = dist.BetaNegativeBinomial.fit(data)
-      assert(result instanceof dist.BetaNegativeBinomial)
-      assert(Number.isFinite(result.pdf(3)) && result.pdf(3) > 0)
-    })
-
-    it('BetaGeometric.fit should return a usable BetaGeometric instance', () => {
-      const data = new dist.BetaGeometric(3, 4).seed(42).sample(200)
-      const result = dist.BetaGeometric.fit(data)
-      assert(result instanceof dist.BetaGeometric)
-      assert(Number.isFinite(result.pdf(2)) && result.pdf(2) > 0)
     })
   })
 
