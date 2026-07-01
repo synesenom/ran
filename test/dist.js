@@ -43,7 +43,7 @@ const UnitTests = {
       const values1 = self.sample(sampleSize)
       self.seed(s)
       const values2 = self.sample(sampleSize)
-      assert(values1.reduce((acc, d, i) => acc && d === values2[i], true))
+      assert(values1.every((d, i) => d === values2[i]))
     })
 
     it('should give different samples for different seeds', () => {
@@ -77,7 +77,7 @@ const UnitTests = {
       const values2 = restored.sample(sampleSize - cut)
 
       // All values must match the seeded reference sequence
-      assert(values1.concat(values2).reduce((acc, d, i) => acc && d === values[i], true))
+      assert(values1.concat(values2).every((d, i) => d === values[i]))
     })
 
     it('loaded state should copy full state of generator', () => {
