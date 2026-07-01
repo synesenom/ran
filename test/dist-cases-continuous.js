@@ -3897,8 +3897,9 @@ export default [{
     // Reference values from mpmath (dps=20): ncbeta_cdf(2, 2, 100, x).
     name: 'large lambda',
     params: () => [2, 2, 100],
-    // mpmath dps=50: Poisson mixture of Beta(alpha+j,beta) for alpha=2,beta=2,lambda=100
+    // alpha=2>1 boundary: exact (guard returns 0); interior from mpmath dps=50: NoncentralBeta([2, 2, 100])
     refVals: [
+      { x: 0, pdf: 0, cdf: 0 },
       { x: 0.9, pdf: 1.3953614440406312, cdf: 0.031109101294777633 },
       { x: 0.95, pdf: 9.931823105374628, cdf: 0.25743394662178815 },
       { x: 0.99, pdf: 16.532312334652936, cdf: 0.9006079598703054 }
