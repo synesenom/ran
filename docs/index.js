@@ -2,6 +2,7 @@ const documentation = require('documentation')
 const pug = require('pug')
 const sass = require('sass')
 const fs = require('fs')
+const path = require('path')
 const hljs = require('highlight.js/lib/core')
 const { mjpage } = require('mathjax-node-page')
 const DescParser = require('./src/desc-parser')
@@ -9,6 +10,9 @@ const ParamParser = require('./src/param-parser')
 const TypeParser = require('./src/type-parser')
 const ThrowsParser = require('./src/throws-parser')
 const SeesParser = require('./src/sees-parser')
+
+const REPO_ROOT = path.resolve(__dirname, '..')
+const VERSION = require('../package.json').version
 
 // Register highlight languages.
 hljs.registerLanguage('bash', require('highlight.js/lib/languages/bash'))
@@ -53,6 +57,13 @@ function parseEntry (entry) {
   const params = sourceParams.map(ParamParser)
   const throws = sourceThrows.map(ThrowsParser)
 
+  const ctx = entry.context || {}
+  const relFile = ctx.file ? path.relative(REPO_ROOT, ctx.file).split(path.sep).join('/') : null
+  const line = ctx.loc && ctx.loc.start ? ctx.loc.start.line : null
+  const source = relFile && line != null
+    ? `https://github.com/synesenom/ran/blob/v${VERSION}/${relFile}#L${line}`
+    : null
+
   return {
     name,
     index: `${entry.memberof}.${name}`.slice(4).replace('.', '-'),
@@ -60,6 +71,7 @@ function parseEntry (entry) {
     signature: `${entry.memberof}.${name}(${params.map((d, i) => `${d.optional ? '[' : ''}${i > 0 ? ', ' : ''}${d.name}`)
       .join('')}${params.filter(d => d.optional).map(() => ']').join('')})`,
     desc: DescParser(entry),
+    source,
     params: params.length > 0 ? params : undefined,
     returns: (() => {
       const ret = entry.returns[0]

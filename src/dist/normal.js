@@ -79,7 +79,7 @@ export default class Normal extends Distribution {
   }
 
   /**
-   * @returns {number} Squared scale parameter.
+   * @returns {number} Variance of the distribution (σ²).
    */
   variance () {
     return this.p.sigma ** 2
