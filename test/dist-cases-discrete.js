@@ -1,6 +1,6 @@
-// Per-distribution test-case entries. See dist-cases-continuous.js for the full schema; the
-// optional `fit` and `moments` fields are consumed by UnitTests.fit / UnitTests.moments in
-// test/dist.js.
+// Per-distribution test-case entries. See dist-cases-continuous.js for the full schema description;
+// the optional `fit` (single spec or array) and `moments` fields are consumed by UnitTests.fit /
+// UnitTests.moments in test/dist.js.
 export default [{
   name: 'Bernoulli',
   // pdf(1) === p, so the planted-p tolerance reproduces the original pdf(1) check
@@ -80,6 +80,7 @@ export default [{
   ]
 }, {
   name: 'BetaBinomial',
+  fit: { params: [10, 2, 3], seed: 42, n: 200, usableAt: 4 },
   invalidParams: [
     [], // all params required
     [-1, 1, 1], // n > 0
@@ -155,6 +156,7 @@ export default [{
   ]
 }, {
   name: 'BetaGeometric',
+  fit: { params: [3, 4], seed: 42, n: 200, usableAt: 2 },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // alpha > 0
@@ -201,6 +203,7 @@ export default [{
   ]
 }, {
   name: 'BetaNegativeBinomial',
+  fit: { params: [3, 3, 4], seed: 42, n: 200, usableAt: 3 },
   invalidParams: [
     [], // all params required
     [0, 2, 4], [-1, 2, 4], [0.4, 2, 4], // r > 0 (0.4 rounds to 0)
@@ -249,6 +252,8 @@ export default [{
   ]
 }, {
   name: 'Binomial',
+  // Binomial(10,0.3).pdf(3) = C(10,3)*0.3³*0.7⁷
+  fit: { params: [10, 0.3], seed: 42, n: 200, fitCheck: [{ at: 3, fn: 'pdf', value: 120 * Math.pow(0.3, 3) * Math.pow(0.7, 7), tol: 0.05 }] },
   // Formulas: mean=np, var=np(1-p), skew=(1-2p)/sqrt(np(1-p)), kurt=(1-6p(1-p))/(np(1-p))
   moments: [
     { params: [10, 0.3], mean: 3, variance: 2.1, skewness: 0.276026223736941, kurtosis: -0.12380952380952381 },
@@ -469,6 +474,7 @@ export default [{
   ]
 }, {
   name: 'ConwayMaxwellPoisson',
+  fit: { params: [3, 2], seed: 42, n: 200, usableAt: 3 },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // lambda > 0
@@ -556,6 +562,7 @@ export default [{
   ]
 }, {
   name: 'Delaporte',
+  fit: { params: [2, 1, 1], seed: 42, n: 200, usableAt: 3 },
   invalidParams: [
     [], // all params required
     [-1, 1, 1], [0, 1, 1], // alpha > 0
@@ -660,6 +667,7 @@ export default [{
   ]
 }, {
   name: 'DiscreteWeibull',
+  fit: { params: [0.5, 1.5], seed: 42, n: 200, usableAt: 0 },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], [1, 1], [2, 1], // 0 < q < 1
@@ -752,6 +760,7 @@ export default [{
   ]
 }, {
   name: 'GeneralizedHermite',
+  fit: { params: [1, 0.5, 2], seed: 42, n: 200, usableAt: 2 },
   invalidParams: [
     [], // all params required
     [-1, 1, 2], // a1 > 0
@@ -896,6 +905,7 @@ export default [{
   ]
 }, {
   name: 'Hypergeometric',
+  fit: { params: [20, 10, 8], seed: 42, n: 200, usableAt: 4 },
   // Formulas: E[(X)_m] = (n)_m * (K)_m / (N)_m (falling factorial moments); assemble central moments
   moments: [
     { params: [30, 10, 5], mean: 5 / 3, variance: 250 / 261, skewness: 0.24327694808466513, kurtosis: -93 / 350 },
@@ -1023,6 +1033,7 @@ export default [{
   ]
 }, {
   name: 'NegativeHypergeometric',
+  fit: { params: [20, 10, 3], seed: 42, n: 200, usableAt: 2 },
   // Formulas: E[(X)_m] = r^(m) * (K)_m / (N-K+1)^(m) (rising-r, falling-K, rising-base)
   moments: [
     { params: [35, 15, 7], mean: 5, variance: 5.454545454545454, skewness: 0.31647674469174997, kurtosis: -0.18623188405796487 },
@@ -1104,6 +1115,7 @@ export default [{
   ]
 }, {
   name: 'NegativeBinomial',
+  fit: { params: [5, 0.4], seed: 42, n: 200, usableAt: 3 },
   // p is failure probability; mean=rp/(1-p), var=rp/(1-p)², skew=(1+p)/√(rp), kurt=6/r+(1-p)²/(rp)
   moments: [
     { params: [10, 0.4], mean: 6.666666666666667, variance: 11.11111111111111, skewness: 0.7, kurtosis: 0.69 },
@@ -1151,6 +1163,7 @@ export default [{
   ]
 }, {
   name: 'NeymanA',
+  fit: { params: [3, 2], seed: 42, n: 200, usableAt: 6 },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // lambda > 0
@@ -1244,6 +1257,7 @@ export default [{
   ]
 }, {
   name: 'PolyaAeppli',
+  fit: { params: [2, 0.5], seed: 42, n: 200, usableAt: 2 },
   invalidParams: [
     [], // all params required
     [-1, 0.5], [0, 0.5], // lambda > 0
@@ -1320,6 +1334,7 @@ export default [{
   ]
 }, {
   name: 'Skellam',
+  fit: { params: [4, 2], seed: 42, n: 200, usableAt: 2 },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // mu1 > 0
@@ -1523,6 +1538,8 @@ export default [{
   ]
 }, {
   name: 'Zipf',
+  // pdf(1) = 1/H(50,2); computed as inline IIFE to avoid importing dist here
+  fit: { params: [2, 50], seed: 42, n: 200, fitCheck: [{ at: 1, fn: 'pdf', value: (() => { let h = 0; for (let k = 1; k <= 50; k++) h += 1 / (k * k); return 1 / h })(), tol: 0.1 }] },
   // mean = H(N,s-1)/H(N,s); higher moments via H(N,s-r)/H(N,s) ratios
   moments: [
     { params: [3, 100], mean: 1.360211176143833, variance: 2.465420880242928, skewness: 18.24202324903978, kurtosis: 619.9203626923929, tol: 1e-10 },
@@ -1572,6 +1589,8 @@ export default [{
   ]
 }, {
   name: 'ZipfMandelbrot',
+  // pdf(1) = (1+1)^{-2} / H(20,2,1) where H(20,2,1) = Σ 1/(k+1)²
+  fit: { params: [20, 2, 1], seed: 42, n: 300, fitCheck: [{ at: 1, fn: 'pdf', value: (() => { let h = 0; for (let k = 1; k <= 20; k++) h += 1 / ((k + 1) * (k + 1)); return 0.25 / h })(), tol: 0.1 }] },
   // Moments computed from precomputed E[X^r] = sum_{k=1}^{N} k^r * P(X=k) stored in this.c
   moments: [
     { params: [100, 2, 1], mean: 5.609034694354515, variance: 113.78065936217031, skewness: 4.5848907890157, kurtosis: 25.579707654658005, tol: 1e-10 },

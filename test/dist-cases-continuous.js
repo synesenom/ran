@@ -1,9 +1,14 @@
 // Per-distribution test-case entries. Beyond the core fields (name, invalidParams, cases,
 // refVals, quantileVals, sampleParams), two optional data-driven fields are consumed by
 // UnitTests.fit / UnitTests.moments in test/dist.js:
-//   fit: { params, seed, n, tolerances?, exact? }
-//     Sample n points from `params` (seeded), refit, assert recovered params match the planted
-//     ones — `tolerances` is a { paramName: absTol } map, `exact` a [paramName] strict-equality list.
+//   fit: spec | spec[]  (array form runs one labelled it-block per spec)
+//   spec fields:
+//     params, seed, n   — sample n points from `params` (seeded) and refit
+//     data              — literal array to fit instead of sampling
+//     tolerances?       — { paramName: absTol } max absolute deviation from planted param
+//     exact?            — [paramName] params that must match planted exactly
+//     usableAt?         — x: asserts pdf(x) is finite and positive after fit
+//     fitCheck?         — [{ at, fn, value, tol }] asserts |result[fn](at) - value| < tol
 //   moments: [{ params, mean?, variance?, skewness?, kurtosis?, tol?, name? }]
 //     Build the distribution from `params` and assert each present moment (finite within `tol`,
 //     or exact NaN / ±Infinity). `tol` is a single number for all moments, or a per-moment
@@ -12,7 +17,7 @@
 export default [{
   name: 'Alpha',
   // instanceof-only: Alpha's heuristic-MOM fit is not reliably parameter-recovering
-  fit: { params: [2, 1], seed: 42, n: 100 },
+  fit: { params: [2, 1], seed: 42, n: 200, usableAt: 0.5 },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], // alpha > 0
@@ -210,6 +215,12 @@ export default [{
   ]
 }, {
   name: 'Bates',
+  // n >= 4 approaches Gaussian and n becomes weakly identified; test the identifiable range n=1,2,3
+  fit: [
+    { params: [1, 0, 1], seed: 1, n: 1000, exact: ['n'], tolerances: { a: 0.1, b: 0.1 } },
+    { params: [2, -1, 3], seed: 1, n: 1000, exact: ['n'], tolerances: { a: 0.1, b: 0.1 } },
+    { params: [3, 1, 5], seed: 1, n: 1000, exact: ['n'], tolerances: { a: 0.1, b: 0.1 } }
+  ],
   // mean=(a+b)/2; var=(b-a)²/(12n); skew=0; kurt=-6/(5n) — same as IrwinHall rescaled
   moments: [
     { params: [10, 5, 25], mean: 15, variance: 10 / 3, skewness: 0, kurtosis: -0.12, tol: 1e-14 },
@@ -641,6 +652,7 @@ export default [{
   ]
 }, {
   name: 'Bradford',
+  fit: { params: [2], seed: 42, n: 200, usableAt: 0.5 },
   // E[X^n] = integral of c*x^n / (L*(1+c*x)) dx = sum_{k=1}^{n} (-1)^{n-k} / (k*c^{n-k}*L) + (-1)^n / c^n
   moments: [
     { params: [2], mean: 0.4102392266268375, variance: 0.08170377693661426, skewness: 0.37753880703889264, kurtosis: -1.0438072281298791 },
@@ -1420,6 +1432,7 @@ export default [{
   ]
 }, {
   name: 'ExponentialLogarithmic',
+  fit: { params: [0.7, 1], seed: 42, n: 200, usableAt: 1 },
   // mpmath dps=50: E[X^r] = -r! * Li_{r+1}(1-p) / (beta^r * log(p))
   moments: [
     { params: [0.5, 1], mean: 0.8399955201356528, variance: 0.8444771467889185, skewness: 2.2661594902602507, kurtosis: 7.686896235585082, tol: 1e-12 },
@@ -1730,6 +1743,7 @@ export default [{
   ]
 }, {
   name: 'GammaGompertz',
+  fit: { params: [1, 2, 3], seed: 42, n: 200, usableAt: 1 },
   // mean: three branches — β=1 exact, s=1 closed form, general inline series
   moments: [
     { params: [1, 1, 1], mean: 1 },
@@ -1871,6 +1885,7 @@ export default [{
   ]
 }, {
   name: 'GeneralizedGamma',
+  fit: { params: [2, 3, 1], seed: 42, n: 200, usableAt: 4 },
   moments: [
     { params: [2, 2, 1], mean: 4, tol: 1e-12 },
     { params: [1, 1, 1], variance: 1, skewness: 2, kurtosis: 6, tol: 1e-10 }
@@ -2077,6 +2092,7 @@ export default [{
   ]
 }, {
   name: 'Gilbrat',
+  fit: { data: [0.5, 1, 2, 3], usableAt: 1 },
   moments: [
     { params: [], mean: 1.6487212707001282, variance: 4.670774270471605, skewness: 6.1848771386325545, kurtosis: 110.93639217631153, tol: { mean: 1e-13, variance: 1e-13, skewness: 1e-12, kurtosis: 1e-10 } }
   ],
@@ -2260,6 +2276,7 @@ export default [{
   ]
 }, {
   name: 'HalfLogistic',
+  fit: { data: [0.5, 1, 2, 3], usableAt: 1 },
   // E[X^k] = 2*k!*(1 - 2^{1-k})*zeta(k); verified via scipy.stats.halflogistic
   moments: [
     { params: [], mean: 1.3862943611198906, variance: 1.3680560780236473, skewness: 1.5403288034048808, kurtosis: 3.583735664456711 }
@@ -2334,6 +2351,7 @@ export default [{
   ]
 }, {
   name: 'Hoyt',
+  fit: { params: [0.7, 3], seed: 42, n: 500, usableAt: 1 },
   invalidParams: [
     [], // all params required
     [-1, 1], [0, 1], [0.25, 1], // q >= 0.5 (delegates to Nakagami)
@@ -2370,6 +2388,7 @@ export default [{
   ]
 }, {
   name: 'HyperbolicSecant',
+  fit: { data: [-1, 0, 1, 2], usableAt: 0 },
   // Characteristic function sech(t); var=1, kurt=2 are textbook results for this distribution
   moments: [
     { params: [], mean: 0, variance: 1, skewness: 0, kurtosis: 2 }
@@ -2830,6 +2849,7 @@ export default [{
   ]
 }, {
   name: 'Kolmogorov',
+  fit: { data: [0.3, 0.5, 0.7, 1.0], usableAt: 0.5 },
   // Numerical integration via base-class tanhSinh fallback; values cross-checked via scipy.stats.kstwobign.
   moments: [
     { params: [], mean: 0.8750290626060117, variance: 0.056841672954311306, skewness: 2.083444432904076, kurtosis: -2.747747898832202, tol: 1e-6 }
@@ -3613,6 +3633,8 @@ export default [{
   ]
 }, {
   name: 'MaxwellBoltzmann',
+  // pdf(a; a) = sqrt(2/π)·exp(−½)/a for Maxwell-Boltzmann(a); checks fitted a ≈ planted 2
+  fit: { params: [2], seed: 42, n: 200, fitCheck: [{ at: 2, fn: 'pdf', value: Math.sqrt(2 / Math.PI) * Math.exp(-0.5) / 2, tol: 0.08 }] },
   moments: [
     // skewness/kurtosis from mpmath dps=50 (shape moments are scale-invariant)
     { params: [1], mean: 2 * Math.sqrt(2 / Math.PI), variance: (3 * Math.PI - 8) / Math.PI, skewness: 0.4856928280495908, kurtosis: 0.10816384281629415, tol: 1e-12 },
@@ -4221,6 +4243,8 @@ export default [{
   ]
 }, {
   name: 'Normal',
+  // data=[1,2,3,4,5]: mean=3, MLE sigma=sqrt(2); use loose tolerances since n=5
+  fit: { data: [1, 2, 3, 4, 5], params: [3, Math.sqrt(2)], tolerances: { mu: 0.1, sigma: 0.1 } },
   moments: [
     { params: [0, 1], mean: 0, variance: 1, skewness: 0, kurtosis: 0, tol: 1e-6 },
     { params: [2, 3], mean: 2, variance: 9, skewness: 0, kurtosis: 0, tol: 1e-14 }
@@ -4607,6 +4631,8 @@ export default [{
   ]
 }, {
   name: 'Rayleigh',
+  // cdf(σ) = 1−exp(−½) for any Rayleigh(σ); valid only when fitted σ ≈ planted 1.5
+  fit: { params: [1.5], seed: 42, n: 200, fitCheck: [{ at: 1.5, fn: 'cdf', value: 1 - Math.exp(-0.5), tol: 0.09 }] },
   moments: [
     { params: [1], mean: 1.2533141373155001, variance: 0.42920367320510344, skewness: 0.6311106578189364, kurtosis: 0.24508930068763934 },
     { params: [2], mean: 2.5066282746310002, variance: 1.7168146928204138, skewness: 0.6311106578189364, kurtosis: 0.24508930068763934 }
@@ -4911,6 +4937,7 @@ export default [{
   ]
 }, {
   name: 'Slash',
+  fit: { data: [-1, 0, 1, 2], usableAt: 0 },
   moments: [
     // Slash tails decay as 1/x² (same as Cauchy), so E[|X|] diverges and all moments are undefined.
     { params: [], mean: NaN, variance: NaN, skewness: NaN, kurtosis: NaN }
@@ -5434,6 +5461,7 @@ export default [{
   ]
 }, {
   name: 'UniformRatio',
+  fit: { data: [0.5, 1, 2, 3], usableAt: 0.5 },
   invalidParams: [],
   cases: [{
     params: () => []
