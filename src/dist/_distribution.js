@@ -447,6 +447,7 @@ class Distribution {
    * //      1.2587482868229616 ]
    *
    */
+  // decisions/0019-distribution-load-static-factory.md — static factory bypasses the constructor so the instance is fully initialized before any method is called
   static load (state) {
     const instance = Object.create(this.prototype)
     instance._type = state.type
