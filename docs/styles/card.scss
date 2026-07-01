@@ -39,6 +39,17 @@
     line-height: 1.5;
   }
 
+  .source-link {
+    display: inline-block;
+    margin: 0 0 0.6em 0.4em;
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+    color: $colorMuted;
+    vertical-align: middle;
+
+    &:hover { color: $colorBlue; text-decoration: none; }
+  }
+
   &.deprecated .title {
     color: #92400e;
     background: #fff7ed;
