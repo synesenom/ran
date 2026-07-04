@@ -350,6 +350,12 @@ def pdf(name, p, x):
     if name == 'Arcsine':
         a, b = mpf(p[0]), mpf(p[1])
         return (1 / pi) / sqrt((x - a) * (b - x))
+    if name == 'AsymmetricLaplace':
+        mu, sigma, kappa = mpf(p[0]), mpf(p[1]), mpf(p[2])
+        C = SQRT2 * kappa / (sigma * (1 + kappa * kappa))
+        if x < mu:
+            return C * exp(-SQRT2 * kappa * (mu - x) / sigma)
+        return C * exp(-SQRT2 * (x - mu) / (kappa * sigma))
     if name in ('Beta', 'BaldingNichols'):
         if name == 'BaldingNichols':
             F, pp = mpf(p[0]), mpf(p[1])
@@ -749,6 +755,12 @@ def cdf(name, p, x):
     if name == 'Arcsine':
         a, b = mpf(p[0]), mpf(p[1])
         return 2 / pi * asin(sqrt((x - a) / (b - a)))
+    if name == 'AsymmetricLaplace':
+        mu, sigma, kappa = mpf(p[0]), mpf(p[1]), mpf(p[2])
+        k2 = kappa * kappa
+        if x < mu:
+            return 1 / (1 + k2) * exp(-SQRT2 * kappa * (mu - x) / sigma)
+        return 1 - k2 / (1 + k2) * exp(-SQRT2 * (x - mu) / (kappa * sigma))
     if name in ('Beta', 'BaldingNichols'):
         if name == 'BaldingNichols':
             F, pp = mpf(p[0]), mpf(p[1])
@@ -1182,6 +1194,7 @@ PARAM_SETS = {
     'Alpha': [[2, 2], [0.5, 0.5], [3, 1]],
     'Anglit': [[0, 2], [3, 0.5], [-1, 4]],
     'Arcsine': [[5, 25], [0, 1], [-2, 2]],
+    'AsymmetricLaplace': [[0, 1, 1], [1, 1, 2], [2, 0.5, 0.5]],
     'BaldingNichols': [[0.5, 0.5], [0.1, 0.1], [0.3, 0.7]],
     'Bates': [[10, 5, 25], [3, 0, 1], [5, -2, 2]],
     'Benini': [[2, 2, 2], [0.5, 0.5, 1], [1, 3, 2]],
@@ -1362,10 +1375,10 @@ def support(name, p):
     if name in ('Beta', 'BaldingNichols', 'Bradford', 'Kumaraswamy', 'LogitNormal',
                 'PowerLaw', 'UniformProduct', 'DoublyNoncentralBeta', 'NoncentralBeta'):
         return (mpf(0), mpf(1))
-    if name in ('Cauchy', 'Champernowne', 'DoubleGamma', 'DoubleWeibull', 'FisherZ', 'Gumbel',
-                'GeneralizedLogistic', 'GeneralizedNormal', 'HyperbolicSecant', 'Laplace',
-                'Logistic', 'Moyal', 'Normal', 'SkewNormal', 'Slash', 'StudentT', 'StudentZ',
-                'NoncentralT', 'DoublyNoncentralT'):
+    if name in ('AsymmetricLaplace', 'Cauchy', 'Champernowne', 'DoubleGamma', 'DoubleWeibull',
+                'FisherZ', 'Gumbel', 'GeneralizedLogistic', 'GeneralizedNormal',
+                'HyperbolicSecant', 'Laplace', 'Logistic', 'Moyal', 'Normal', 'SkewNormal',
+                'Slash', 'StudentT', 'StudentZ', 'NoncentralT', 'DoublyNoncentralT'):
         return (NONE, NONE)
     if name == 'Anglit':
         mu, beta = mpf(p[0]), mpf(p[1])

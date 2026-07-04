@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `AsymmetricLaplace(mu, sigma, kappa)` distribution: a three-parameter two-sided exponential family parameterized by location μ ∈ ℝ, scale σ > 0, and asymmetry κ > 0. Reduces to Laplace(μ, σ/√2) at κ = 1. Implements closed-form `_pdf`, `_cdf`, `_q` (inverse CDF), `mean`, `variance`, `skewness`, and `kurtosis`, with exact inverse-CDF sampling and method-of-moments `_fitInit` (#805).
+
 ## [1.29.0] - 2026-07-04
 
 ### Added
