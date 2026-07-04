@@ -253,7 +253,9 @@ class Distribution {
     } else if (Number.isFinite(this.s[0].value)) {
       a = this.s[0].value + delta * this.r.next()
     }
-    let b = a + this.r.next()
+    // Math.max(..., Number.EPSILON) guards against r.next()=0 (probability 2^-32), which would
+    // collapse b=a, make expansion=0, and cause the loop in _qEstimateRoot to break immediately.
+    let b = a + Math.max(this.r.next(), Number.EPSILON)
     if (Number.isFinite(this.s[1].value)) {
       b = this.s[1].value - delta * this.r.next()
     }
