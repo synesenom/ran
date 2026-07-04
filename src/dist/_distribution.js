@@ -226,6 +226,46 @@ class Distribution {
   }
 
   /**
+   * Returns an initial bracket [a, b] for quantile root-finding via Chandrupatla. Uses
+   * mean ± 4σ when the support is bounded and both moments are finite; falls back to a
+   * support-derived bracket otherwise.
+   *
+   * @method _qInitialGuess
+   * @memberof ran.dist.Distribution
+   * @param {number} p Probability to find quantile for (unused in base class; exposed for overrides).
+   * @returns {number[]} Initial bracket [a, b] with a < b.
+   * @protected
+   * @ignore
+   */
+  _qInitialGuess (p) {
+    // mean()/variance() call q() to set integration bounds for infinite-support distributions
+    // (via _numericalRawMoment), which would recurse back here. Restricting to bounded support
+    // guarantees _numericalRawMoment never calls q() and avoids the cycle entirely.
+    if (Number.isFinite(this.s[0].value) && Number.isFinite(this.s[1].value)) {
+      const mu = this.mean()
+      const sigma = Math.sqrt(this.variance())
+      if (Number.isFinite(mu) && Number.isFinite(sigma) && sigma > 0) {
+        const k = 4
+        return [Math.max(this.s[0].value, mu - k * sigma), Math.min(this.s[1].value, mu + k * sigma)]
+      }
+    }
+    // Fall back to support-derived bracket for unbounded support or non-finite moments.
+    const delta = ((Number.isFinite(this.s[1].value) ? this.s[1].value : 10) -
+      (Number.isFinite(this.s[0].value) ? this.s[0].value : -10)) / 2
+    let a = this.r.next()
+    if (this.s[0].closed) {
+      a = this.s[0].value + Number.EPSILON
+    } else if (Number.isFinite(this.s[0].value)) {
+      a = this.s[0].value + delta * this.r.next()
+    }
+    let b = a + this.r.next()
+    if (Number.isFinite(this.s[1].value)) {
+      b = this.s[1].value - delta * this.r.next()
+    }
+    return [a, b]
+  }
+
+  /**
    * Estimates the quantile function by solving F(x) = p using Chandrupatla's method.
    *
    * @method _qEstimateRoot
@@ -236,36 +276,13 @@ class Distribution {
    * @ignore
    */
   _qEstimateRoot (p) {
-    // Guess range.
-    const delta = ((Number.isFinite(this.s[1].value) ? this.s[1].value : 10) -
-      (Number.isFinite(this.s[0].value) ? this.s[0].value : -10)) / 2
-
-    // Set initial guess for lower boundary.
-    let a0 = this.r.next()
-    if (this.s[0].closed) {
-      a0 = this.s[0].value + Number.EPSILON
-    } else if (Number.isFinite(this.s[0].value)) {
-      a0 = this.s[0].value + delta * this.r.next()
-    }
-
-    // Set initial guess for upper boundary.
-    let b0 = a0 + this.r.next()
-    if (this.s[1].closed) {
-      b0 = this.s[1].value - Number.EPSILON
-    } else if (Number.isFinite(this.s[1].value)) {
-      b0 = this.s[1].value - delta * this.r.next()
-    }
-
-    // Find brackets.
+    const [a0, b0] = this._qInitialGuess(p)
     const bounds = bracket(t => this.cdf(t) - p, a0, b0, this.s)
-
-    // Perform root-finding using Chandrupatla's method.
     if (Array.isArray(bounds)) {
       return Math.min(Math.max(
         chandrupatla(t => this.cdf(t) - p, ...bounds), this.s[0].value), this.s[1].value
       )
     }
-
     return NaN
   }
 

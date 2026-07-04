@@ -41,6 +41,10 @@ export default class Degenerate extends Distribution {
     return this.p.x0
   }
 
+  _q () {
+    return this.p.x0
+  }
+
   _pdf () {
     return 1
   }
