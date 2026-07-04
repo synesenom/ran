@@ -991,6 +991,15 @@ describe('dist', () => {
         assert(result.p.k2 >= 1)
       })
 
+      it('DoublyNoncentralT moments should be identical across independent instances', () => {
+        const d1 = new dist.DoublyNoncentralT(5, 1, 2)
+        const d2 = new dist.DoublyNoncentralT(5, 1, 2)
+        assert.strictEqual(d1.mean(), d2.mean())
+        assert.strictEqual(d1.variance(), d2.variance())
+        assert.strictEqual(d1.skewness(), d2.skewness())
+        assert.strictEqual(d1.kurtosis(), d2.kurtosis())
+      })
+
       it('InverseGaussian._fitInit should return the exact MLE mu=mean, lambda=n/Σ(1/xᵢ−1/x̄)', () => {
         const data = [1, 2, 3, 4]
         const init = dist.InverseGaussian._fitInit(data)

@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `DoublyNoncentralT` moment estimates (`mean()`, `variance()`, `skewness()`, `kurtosis()`) were non-deterministic across runs because the numerical integration bounds were seeded through `_qInitialGuess`, which consumed PRNG state. Adding `_q(p)` with a deterministic bracket (center at μ, spread scaled by `√ν + √θ`) bypasses the PRNG-seeded fallback entirely; moment test tolerances tightened from ±0.003/0.005/0.02/0.1 to ±0.001/0.002/0.01/0.05 (#800).
 - `Distribution.load()` now correctly restores PRNG state. `Xoshiro128p.save()` was returning a live reference to the internal `_state` array; any sampling after `save()` mutated that array and corrupted the snapshot before `load()` could read it. Both `save()` and `load()` now copy the state array so each saved snapshot and each loaded generator hold independent copies (#792).
 
 - `BetaPrime.kurtosis()` denominator factor corrected from `(beta + 1)` to `(beta - 2)`, matching the Wikipedia formula. The typo caused silently wrong excess kurtosis for all valid inputs (β > 4); e.g. `BetaPrime(2, 5).kurtosis()` returned 66 instead of 54 (#752).

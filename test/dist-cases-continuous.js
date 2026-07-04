@@ -1303,9 +1303,9 @@ export default [{
     [-1, 1, 1], [0, 1, 1], // nu > 0
     [1, 1, -1] // theta >= 0
   ],
-  // nu=5>4: all moments exist; values from tanh-sinh fallback (PRNG-seeded bounds → tol is wide)
+  // nu=5>4: all moments exist; deterministic now that _q(p) bypasses PRNG-seeded bracket
   moments: [
-    { params: [5, 1, 2], mean: 0.4197, variance: 1.226, skewness: 3.234, kurtosis: 16.60, tol: { mean: 0.003, variance: 0.005, skewness: 0.02, kurtosis: 0.1 } }
+    { params: [5, 1, 2], mean: 0.4197, variance: 1.226, skewness: 3.234, kurtosis: 16.60, tol: { mean: 0.001, variance: 0.002, skewness: 0.01, kurtosis: 0.05 } }
   ],
   cases: [{
     params: () => [5, 1, 2]

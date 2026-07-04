@@ -47,7 +47,8 @@ export default class DoublyNoncentralT extends Distribution {
     // Speed-up constants
     this.c = {
       logScale: -0.5 * (theta + mu * mu + Math.log(Math.PI * nui)) - logGamma(nui / 2),
-      expHalfTheta: Math.exp(-theta / 2)
+      expHalfTheta: Math.exp(-theta / 2),
+      qSpread: Math.max(10, 5 * (Math.abs(mu) + Math.sqrt(nui) + Math.sqrt(theta)))
     }
   }
 
@@ -367,6 +368,12 @@ export default class DoublyNoncentralT extends Distribution {
       return t
     }, t => t.p * t.f)
     return clamp(x < 0 ? 1 - z : z)
+  }
+
+  _qInitialGuess () {
+    // Pre-computed spread bypasses the PRNG-seeded fallback in the base class,
+    // making _qEstimateRoot — and thus the numerical moments — deterministic.
+    return [this.p.mu - this.c.qSpread, this.p.mu + this.c.qSpread]
   }
 
   static _fitInit (data) {
