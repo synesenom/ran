@@ -6,7 +6,6 @@
  * @private
  */
 export { default as wynnEpsilon } from './wynn-epsilon'
-export { default as bracket } from './bracket'
 export { default as chandrupatla } from './chandrupatla'
 export { default as newton } from './newton'
 export { default as neumaier } from './neumaier'

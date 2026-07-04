@@ -7,48 +7,6 @@ import * as algorithms from '../src/algorithms'
 const PRECISION = 1e-10
 
 describe('algorithms', () => {
-  describe('.bracket()', () => {
-    it('should return NaN if initial bracket is invalid', () => {
-      for (const c of [1e-8, 0.01, 0.5, 1, Math.E, 5, 10]) {
-        const bracket = algorithms.bracket(
-          t => t * Math.exp(t) - c,
-          lambertW0(c) + 1,
-          lambertW0(c) + 1
-        )
-        assert(Number.isNaN(bracket))
-      }
-    })
-
-    it('should find an appropriate bracket for exp(-x) = c x', () => {
-      for (const c of [1e-8, 0.01, 0.5, 1, Math.E, 5, 10]) {
-        const bracket = algorithms.bracket(
-          t => t * Math.exp(t) - c,
-          lambertW0(c) + 1,
-          lambertW0(c) + 2
-        )
-        assert(bracket[0] * Math.exp(bracket[0]) < c && bracket[1] * Math.exp(bracket[1]) > c)
-      }
-    })
-
-    it('should return the specified boundaries if root was not found', () => {
-      const bracket = algorithms.bracket(
-        t => 1,
-        0,
-        2
-      )
-      assert.strictEqual(bracket[0], 0)
-      assert.strictEqual(bracket[1], 2)
-
-      const reverseBracket = algorithms.bracket(
-        t => 1,
-        -2,
-        0
-      )
-      assert.strictEqual(reverseBracket[0], -2)
-      assert.strictEqual(reverseBracket[1], 0)
-    })
-  })
-
   describe('.chandrupatla()', () => {
     it('should throw if brackets have the same sign', () => {
       const c = 5
