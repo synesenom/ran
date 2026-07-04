@@ -425,8 +425,9 @@ describe('dist', () => {
     })
 
     describe('._qEstimateRoot()', () => {
-      it('returns NaN when bracket cannot be found (degenerate equal-bound open support)', () => {
-        // Support [5, 5] (both open, both equal) collapses delta to 0, so a0 === b0 and bracket() returns undefined.
+      it('returns boundary value for open point-mass support [5, 5]', () => {
+        // CDF jumps 0 → 1 at the open boundary; expansion steps above 5, creating a sign change,
+        // and chandrupatla converges to 5, which is clamped to the support [5, 5].
         class DegenerateContinuous extends Distribution {
           constructor () {
             super('continuous', 0)
@@ -437,7 +438,23 @@ describe('dist', () => {
           _cdf () { return 0.5 }
         }
         const d = new DegenerateContinuous()
-        assert(Number.isNaN(d.q(0.5)))
+        assert.strictEqual(d.q(0.5), 5)
+      })
+
+      it('returns NaN when expansion exhausts MAX_ITER without a sign change', () => {
+        // Closed [0, 1] support with constant CDF 0.6: cdf(0)=0.6 and cdf(1)=1 are both > 0.3,
+        // so the bracket [0, 1] never straddles p=0.3 and the loop cannot expand outside the support.
+        class ConstantCDF extends Distribution {
+          constructor () {
+            super('continuous', 0)
+            this.s = [{ value: 0, closed: true }, { value: 1, closed: true }]
+          }
+
+          _pdf () { return 0 }
+          _cdf () { return 0.6 }
+        }
+        const d = new ConstantCDF()
+        assert(Number.isNaN(d.q(0.3)))
       })
     })
 

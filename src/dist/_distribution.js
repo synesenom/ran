@@ -4,7 +4,6 @@ import tanhSinh from '../algorithms/tanh-sinh'
 import powell from '../algorithms/powell'
 import some from '../utils/some'
 import { chi2, kolmogorovSmirnov } from './_tests'
-import bracket from '../algorithms/bracket'
 import chandrupatla from '../algorithms/chandrupatla'
 import { MAX_ITER } from '../core/constants'
 
@@ -226,30 +225,26 @@ class Distribution {
   }
 
   /**
-   * Returns an initial bracket [a, b] for quantile root-finding via Chandrupatla. Uses
-   * mean ± 4σ when the support is bounded and both moments are finite; falls back to a
-   * support-derived bracket otherwise.
+   * Returns a starting bracket [a, b] for quantile root-finding. For bounded support the full
+   * support range [lo, hi] is returned — CDF(lo)=0 and CDF(hi)=1 guarantee a sign change for
+   * any 0<p<1, so no further expansion is needed. For unbounded/semi-bounded support a
+   * support-derived starting point is returned; _qEstimateRoot will expand it until sign change.
    *
    * @method _qInitialGuess
    * @memberof ran.dist.Distribution
    * @param {number} p Probability to find quantile for (unused in base class; exposed for overrides).
-   * @returns {number[]} Initial bracket [a, b] with a < b.
+   * @returns {number[]} Starting bracket [a, b] with a < b.
    * @protected
    * @ignore
    */
   _qInitialGuess (p) {
-    // mean()/variance() call q() to set integration bounds for infinite-support distributions
-    // (via _numericalRawMoment), which would recurse back here. Restricting to bounded support
-    // guarantees _numericalRawMoment never calls q() and avoids the cycle entirely.
+    // Bounded support: CDF(lo)=0 and CDF(hi)=1 for any continuous distribution, so [lo, hi]
+    // is always a valid bracket — no expansion needed in _qEstimateRoot.
     if (Number.isFinite(this.s[0].value) && Number.isFinite(this.s[1].value)) {
-      const mu = this.mean()
-      const sigma = Math.sqrt(this.variance())
-      if (Number.isFinite(mu) && Number.isFinite(sigma) && sigma > 0) {
-        const k = 4
-        return [Math.max(this.s[0].value, mu - k * sigma), Math.min(this.s[1].value, mu + k * sigma)]
-      }
+      return [this.s[0].value, this.s[1].value]
     }
-    // Fall back to support-derived bracket for unbounded support or non-finite moments.
+    // Unbounded/semi-bounded: provide a compact starting point near the support boundary.
+    // _qEstimateRoot will expand until a sign change is found.
     const delta = ((Number.isFinite(this.s[1].value) ? this.s[1].value : 10) -
       (Number.isFinite(this.s[0].value) ? this.s[0].value : -10)) / 2
     let a = this.r.next()
@@ -258,7 +253,9 @@ class Distribution {
     } else if (Number.isFinite(this.s[0].value)) {
       a = this.s[0].value + delta * this.r.next()
     }
-    let b = a + this.r.next()
+    // Math.max(..., Number.EPSILON) guards against r.next()=0 (probability 2^-32), which would
+    // collapse b=a, make expansion=0, and cause the loop in _qEstimateRoot to break immediately.
+    let b = a + Math.max(this.r.next(), Number.EPSILON)
     if (Number.isFinite(this.s[1].value)) {
       b = this.s[1].value - delta * this.r.next()
     }
@@ -267,6 +264,8 @@ class Distribution {
 
   /**
    * Estimates the quantile function by solving F(x) = p using Chandrupatla's method.
+   * Expands the initial bracket from _qInitialGuess until a sign change is found, then
+   * solves with Chandrupatla.
    *
    * @method _qEstimateRoot
    * @memberof ran.dist.Distribution
@@ -276,14 +275,38 @@ class Distribution {
    * @ignore
    */
   _qEstimateRoot (p) {
-    const [a0, b0] = this._qInitialGuess(p)
-    const bounds = bracket(t => this.cdf(t) - p, a0, b0, this.s)
-    if (Array.isArray(bounds)) {
-      return Math.min(Math.max(
-        chandrupatla(t => this.cdf(t) - p, ...bounds), this.s[0].value), this.s[1].value
-      )
+    let [a, b] = this._qInitialGuess(p)
+    const min = this.s[0].value
+    const max = this.s[1].value
+    // deltaA/deltaB shrink toward zero to approach open boundaries without landing on them.
+    let deltaA = this.s[0].closed ? 0 : 1
+    let deltaB = this.s[1].closed ? 0 : 1
+    let fa = this.cdf(a) - p
+    let fb = this.cdf(b) - p
+    // Expand bracket by golden-ratio steps until sign change (immediately exits for bounded support).
+    // Only expand a side if it would actually move: when a side is clamped at its limit, switch to
+    // the other side to avoid an infinite no-progress loop.
+    for (let k = 0; k < MAX_ITER; k++) {
+      if (fa * fb < 0) break
+      const expansion = 1.618 * (b - a)
+      const newA = Math.max(a - expansion, min + deltaA)
+      const newB = Math.min(b + expansion, max - deltaB)
+      if (Math.abs(fa) <= Math.abs(fb) && newA !== a) {
+        a = newA
+        deltaA /= 1.618
+        fa = this.cdf(a) - p
+      } else if (newB !== b) {
+        b = newB
+        deltaB /= 1.618
+        fb = this.cdf(b) - p
+      } else {
+        break
+      }
     }
-    return NaN
+    if (fa * fb >= 0) return NaN
+    return Math.min(Math.max(
+      chandrupatla(t => this.cdf(t) - p, a, b), min), max
+    )
   }
 
   /**
