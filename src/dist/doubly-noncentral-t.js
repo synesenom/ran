@@ -3,7 +3,7 @@ import Distribution from './_distribution'
 import noncentralChi2 from './_noncentral-chi2'
 import normal from './_normal'
 import { f11, gamma, logGamma } from '../special'
-import { wynnEpsilon, recursiveSum } from '../algorithms'
+import { wynnEpsilon, recursiveSum, bracket, chandrupatla } from '../algorithms'
 import NoncentralT from './noncentral-t'
 
 /**
@@ -367,6 +367,19 @@ export default class DoublyNoncentralT extends Distribution {
       return t
     }, t => t.p * t.f)
     return clamp(x < 0 ? 1 - z : z)
+  }
+
+  _q (p) {
+    // Deterministic initial bracket: center at mu with spread scaled to distribution width.
+    // Avoids the PRNG-seeded fallback in _qInitialGuess, making moments deterministic.
+    const spread = Math.max(10, 5 * (Math.abs(this.p.mu) + Math.sqrt(this.p.nu) + Math.sqrt(this.p.theta)))
+    const bounds = bracket(t => this.cdf(t) - p, this.p.mu - spread, this.p.mu + spread, this.s)
+    if (Array.isArray(bounds)) {
+      return Math.min(Math.max(
+        chandrupatla(t => this.cdf(t) - p, ...bounds), this.s[0].value), this.s[1].value
+      )
+    }
+    return NaN
   }
 
   static _fitInit (data) {
