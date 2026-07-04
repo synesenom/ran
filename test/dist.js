@@ -1382,6 +1382,16 @@ describe('dist', () => {
         assert(Number.isNaN(new dist.Degenerate(3).kurtosis()))
       })
     })
+
+    describe('.q()', () => {
+      it('quantile should return x0 for all probabilities', () => {
+        assert.strictEqual(new dist.Degenerate(5).q(0), 5)
+        assert.strictEqual(new dist.Degenerate(5).q(0.5), 5)
+        assert.strictEqual(new dist.Degenerate(5).q(1), 5)
+        assert.strictEqual(new dist.Degenerate(-2).q(0.1), -2)
+        assert.strictEqual(new dist.Degenerate(0).q(0.99), 0)
+      })
+    })
   })
 
   // Kolmogorov: open lower boundary — x=0 is outside the support (x>0) and must return 0.
