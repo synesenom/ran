@@ -1,6 +1,6 @@
 # ranjs — Development Backlog
 
-> Structured from the raw `todo` file. Items marked **[done]** are already implemented in `src/dist/`.
+> Structured from the raw `todo` file.
 > Issues already filed on GitHub are linked where known.
 
 ---
@@ -29,10 +29,6 @@ Moving the library from *auditable* to *publication-grade* requires systematic r
 
 | # | Description |
 |---|-------------|
-| [#211](../../issues/211) ✓ | **erf/erfc precision** — replace the series expansion with a continued-fraction algorithm for |x| > ~3 to recover tail accuracy. |
-| [#212](../../issues/212) ✓ | **Property tests** — automated checks that PDF ≥ 0, CDF is non-decreasing, and `quantile(cdf(x)) ≈ x` for all implemented distributions. |
-| [#213](../../issues/213) ✓ | **quantile() reference values** — cross-validate `quantile()` against scipy's `ppf()` for the 12 core continuous distributions, at p = 0.001, 0.01, 0.1, 0.5, 0.9, 0.99, 0.999. |
-| [#214](../../issues/214) ✓ | **Catastrophic cancellation audit** — find and fix `1 - exp(...)` and `1 - cdf(...)` patterns near boundaries that lose significant digits; replace with `expm1`/`log1p` equivalents or stable complementary forms. |
 | [#808](../../issues/808) | **Far-tail Normal/LogNormal reference values** — add refVals at ±5σ and ±7σ to expose and track erf accuracy. Without these, regressions in tail precision are invisible. |
 | [#810](../../issues/810) | **gammaLowerIncomplete precision** — replace loose-tolerance tests with mpmath reference values across the full domain. |
 | [#811](../../issues/811) | **betaIncomplete precision** — add interior precision reference values in `test/special.js`. |
@@ -47,14 +43,9 @@ Moving the library from *auditable* to *publication-grade* requires systematic r
 
 ## Distributions
 
-> Entries marked **[duplicate]** are already covered by an existing distribution under a different name.
-> Entries marked **[done]** exist and are complete.
 > Within each subsection, entries are ordered from most broadly useful to most specialised.
 
 ### Continuous
-
-#### Truncated Exponential
-**[done]** — `src/dist/truncated-exponential.js` (closed: [#806](../../issues/806))
 
 #### Exponentially Modified Gaussian (EMG)
 Convolution of a Normal(μ, σ²) and an Exponential(λ) distribution; common in chromatography, neuroscience, and reaction-time modelling.
@@ -63,9 +54,6 @@ Convolution of a Normal(μ, σ²) and an Exponential(λ) distribution; common in
 - **Sampling:** trivially, sum an independent Normal(μ, σ) and Exponential(λ) variate
 - Requires accurate `error.js` (erfc in tail)
 - Refs: [Wikipedia](https://en.wikipedia.org/wiki/Exponentially_modified_Gaussian_distribution)
-
-#### Asymmetric Laplace
-**[done]** — `src/dist/asymmetric-laplace.js` (closed: [#805](../../issues/805))
 
 #### Tweedie (Compound Poisson-Gamma)
 Family parameterised by a power index p ∈ (1, 2): for fixed p the distribution is compound Poisson with Gamma-distributed cluster masses. Used in insurance loss models (exact-zero outcomes with a continuous positive tail), rainfall accumulation, and any GLM with a non-negative response. Special cases: p = 1 is Poisson, p = 2 is Gamma.
@@ -269,20 +257,6 @@ Two-shape-parameter extension of the existing `Benini` distribution used in actu
 
 ---
 
-#### Double Exponential
-**[duplicate]** — equivalent to the Laplace distribution; already implemented in `src/dist/laplace.js`.
-
-#### Error / Exponential Power
-**[duplicate]** — equivalent to the Generalized Normal (Subbotin) distribution; already implemented in `src/dist/generalized-normal.js`.
-
-#### Davis
-**[done]** — `src/dist/davis.js`
-
-#### Champernowne
-**[done]** — `src/dist/champernowne.js`
-
----
-
 ### Discrete
 
 #### Discrete Laplace (Bilateral Geometric)
@@ -292,7 +266,7 @@ Discrete analogue of the Laplace distribution; symmetric about an integer locati
 - Refs: [scipy `dlaplace`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.dlaplace.html)
 
 #### Waring
-Generalization of the Yule-Simon distribution (already `[partial]` below). Yule-Simon is the special case σ = 1.
+Generalization of the Yule-Simon distribution. Yule-Simon is the special case σ = 1.
 - **PMF:** P(X = k) = B(k + σ, ρ) / B(σ, ρ − 1) for k = 0, 1, 2, ..., where ρ > 1, σ > 0
 - **CDF:** at NIST reference
 - Refs: [NIST Dataplot](https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bgepdf.htm)
@@ -340,15 +314,6 @@ Marginal distribution of a Multinomial(n, p) when p is drawn from Dirichlet(α).
 - **PMF:** f(k; n, α) = C(n; k) · B(k+α) / B(α) where B is the multivariate beta function
 - **Prerequisite:** The `Distribution` base class (`_pdf(x)`, `_cdf(x)`, `_generator()`) is scalar-valued. A **multivariate distribution base class** must be designed and filed as a separate architectural issue before this or any other vector-valued distribution (Dirichlet, Multivariate Normal, Wishart) can be added.
 - Refs: [Wikipedia](https://en.wikipedia.org/wiki/Dirichlet-multinomial_distribution)
-
-#### Beta-Geometric
-**[done]** — `src/dist/beta-geometric.js`
-
-#### Beta-Negative Binomial
-**[done]** — `src/dist/beta-negative-binomial.js`
-
-#### Yule-Simon
-**[done]** — `src/dist/yule-simon.js`
 
 ---
 
