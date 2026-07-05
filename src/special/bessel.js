@@ -310,16 +310,6 @@ export function besselK (n, x) {
 }
 
 /**
- * Computes the modified Bessel function of the first kind for fractional order.
- *
- * @method besselInu
- * @memberof ran.special
- * @param {number} nu Order of the Bessel function. Should be fractional.
- * @param {number} x Value to evaluate the function at.
- * @returns {number} The modified Bessel function of the first kind.
- * @private
- */
-/**
  * Computes the modified Bessel function of the second kind for real order.
  * Uses the connection formula K_ν(x) = (π/2)·(I_{-ν}(x) − I_ν(x))/sin(νπ) (DLMF 10.27.4).
  * Dispatches to `besselK` for near-integer ν to avoid the 0/0 indeterminate form.
@@ -333,9 +323,10 @@ export function besselK (n, x) {
  */
 export function besselKnu (nu, x) {
   if (x === 0) return Infinity
-  // Near-integer ν: connection formula becomes 0/0; dispatch to integer path
+  // Near-integer ν: connection formula becomes 0/0; dispatch to integer path.
+  // Use Math.abs so negative integers forward the correct non-negative order to besselK.
   if (Math.abs(nu - Math.round(nu)) < 1e-8) {
-    return besselK(Math.round(nu), x)
+    return besselK(Math.abs(Math.round(nu)), x)
   }
   // Large x: connection formula loses ~2x/ln(10) digits from catastrophic cancellation
   // between I_{-ν}(x) and I_ν(x) (both O(exp(x)) while K_ν is O(exp(-x))).
@@ -346,6 +337,16 @@ export function besselKnu (nu, x) {
   return (Math.PI / 2) * (besselInu(-nu, x) - besselInu(nu, x)) / Math.sin(Math.PI * nu)
 }
 
+/**
+ * Computes the modified Bessel function of the first kind for fractional order.
+ *
+ * @method besselInu
+ * @memberof ran.special
+ * @param {number} nu Order of the Bessel function. Should be fractional.
+ * @param {number} x Value to evaluate the function at.
+ * @returns {number} The modified Bessel function of the first kind.
+ * @private
+ */
 // Taylor series converges for x ≤ ~710 with MAX_SERIES_ITER=500; see
 // solutions/testing/2026-06-02-1200-besselInu-infrastructure-fix-coverage-gap.md
 export function besselInu (nu, x) {

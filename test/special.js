@@ -310,6 +310,15 @@ describe('special', () => {
         assert.strictEqual(special.besselKnu(2, x), special.besselK(2, x))
       }
     })
+
+    it('should dispatch negative-integer nu to the correct absolute order', () => {
+      // K_ν is even in ν: K_{-n}(x) = K_n(x); negative-integer dispatch must abs() the order
+      for (const x of [1, 5]) {
+        assert.strictEqual(special.besselKnu(-1, x), special.besselK(1, x))
+        assert.strictEqual(special.besselKnu(-2, x), special.besselK(2, x))
+        assert.strictEqual(special.besselKnu(-3, x), special.besselK(3, x))
+      }
+    })
   })
 
   describe('.beta()', () => {
