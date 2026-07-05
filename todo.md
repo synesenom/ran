@@ -1,6 +1,6 @@
 # ranjs — Development Backlog
 
-> Structured from the raw `todo` file. Items marked **[done]** are already implemented in `src/dist/`.
+> Structured from the raw `todo` file.
 > Issues already filed on GitHub are linked where known.
 
 ---
@@ -29,15 +29,13 @@ Moving the library from *auditable* to *publication-grade* requires systematic r
 
 | # | Description |
 |---|-------------|
-| [#211](../../issues/211) | **erf/erfc precision** — replace the series expansion with a continued-fraction algorithm for |x| > ~3 to recover tail accuracy. |
-| [#212](../../issues/212) | **Property tests** — automated checks that PDF ≥ 0, CDF is non-decreasing, and `quantile(cdf(x)) ≈ x` for all implemented distributions. |
-| [#213](../../issues/213) | **quantile() reference values** — cross-validate `quantile()` against scipy's `ppf()` for the 12 core continuous distributions, at p = 0.001, 0.01, 0.1, 0.5, 0.9, 0.99, 0.999. |
-| [#214](../../issues/214) | **Catastrophic cancellation audit** — find and fix `1 - exp(...)` and `1 - cdf(...)` patterns near boundaries that lose significant digits; replace with `expm1`/`log1p` equivalents or stable complementary forms. |
+| [#808](../../issues/808) | **Far-tail Normal/LogNormal reference values** — add refVals at ±5σ and ±7σ to expose and track erf accuracy. Without these, regressions in tail precision are invisible. |
+| [#810](../../issues/810) | **gammaLowerIncomplete precision** — replace loose-tolerance tests with mpmath reference values across the full domain. |
+| [#811](../../issues/811) | **betaIncomplete precision** — add interior precision reference values in `test/special.js`. |
 
 ### Not Yet Filed
 
-- **Far-tail reference values for Normal/LogNormal** — add refVals at ±5σ and ±7σ to expose and track erf accuracy. Without these, regressions in tail precision are invisible.
-- **Full-domain special function validation** — cross-validate `gammaLowerIncomplete`, `betaIncomplete`, `bessel`, `digamma`, and others against scipy or Boost across their entire representable input domains, not just spot-check values.
+- **Full-domain validation for bessel and digamma** — cross-validate `bessel` and `digamma` against scipy or Boost across their entire representable input domains.
 - **Systematic parameter-space coverage** — for each distribution, construct a grid of parameter values (not just two hand-picked sets) to catch edge-case failure modes near parameter boundaries.
 - **Documented accuracy bounds** — for each special function and distribution CDF, state clearly: "accurate to X ULP for |x| ≤ Y" so users can reason about numerical error in downstream computations.
 
@@ -45,18 +43,9 @@ Moving the library from *auditable* to *publication-grade* requires systematic r
 
 ## Distributions
 
-> Entries marked **[duplicate]** are already covered by an existing distribution under a different name.
-> Entries marked **[partial]** exist in `src/dist/` but have open TODOs or incorrect/missing implementations.
 > Within each subsection, entries are ordered from most broadly useful to most specialised.
 
 ### Continuous
-
-#### Truncated Exponential
-Exponential distribution restricted to the interval [a, b], 0 ≤ a < b ≤ ∞. Among the simplest missing distributions; follows the same pattern as the existing `TruncatedNormal`.
-- **PDF:** f(x; λ, a, b) = λ·e^(−λx) / (e^(−λa) − e^(−λb))
-- **CDF:** (e^(−λa) − e^(−λx)) / (e^(−λa) − e^(−λb))
-- **Sampling:** inversion: x = −log(e^(−λa) − U·(e^(−λa)−e^(−λb))) / λ
-- Refs: [scipy `truncexpon`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.truncexpon.html)
 
 #### Exponentially Modified Gaussian (EMG)
 Convolution of a Normal(μ, σ²) and an Exponential(λ) distribution; common in chromatography, neuroscience, and reaction-time modelling.
@@ -65,13 +54,6 @@ Convolution of a Normal(μ, σ²) and an Exponential(λ) distribution; common in
 - **Sampling:** trivially, sum an independent Normal(μ, σ) and Exponential(λ) variate
 - Requires accurate `error.js` (erfc in tail)
 - Refs: [Wikipedia](https://en.wikipedia.org/wiki/Exponentially_modified_Gaussian_distribution)
-
-#### Asymmetric Laplace
-Two-sided exponential with an asymmetry parameter κ > 0. Reduces to symmetric Laplace when κ = 1. The likelihood kernel for Bayesian quantile regression and the prior implied by LASSO.
-- **PDF:** f(x; μ, σ, κ) = (√2/σ) · κ/(1+κ²) · exp(−√2·κ^(∓1)/σ · |x−μ|), sign depending on which side of μ
-- **CDF:** closed form involving exp
-- **Sampling:** inversion via closed-form quantile function
-- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Asymmetric_Laplace_distribution); Kozubowski & Podgórski (2001) *Statistical Inference for Stochastic Processes* 4:73–104
 
 #### Tweedie (Compound Poisson-Gamma)
 Family parameterised by a power index p ∈ (1, 2): for fixed p the distribution is compound Poisson with Gamma-distributed cluster masses. Used in insurance loss models (exact-zero outcomes with a continuous positive tail), rainfall accumulation, and any GLM with a non-negative response. Special cases: p = 1 is Poisson, p = 2 is Gamma.
@@ -92,14 +74,14 @@ Four-parameter family (α ∈ (0,2], β ∈ [−1,1], γ ≥ 0, δ ∈ ℝ) enco
 Special case of the Generalized Hyperbolic distribution with δ = 0. Popular in option pricing (Madan-Seneta model).
 - **PDF:** f(x; μ, σ, ν, θ) involves |x−μ|^(λ−½) · K_{λ−½}(α|x−μ|) where α = √(θ²/σ⁴ + 2/(σ²ν)), λ = 1/ν
 - **Sampling:** via variance-mean mixture: X | G ~ Normal(μ + θG, σ²G), G ~ Gamma(1/ν, ν)
-- **Dependency:** `bessel.js` (K_{λ−½}), `_gamma.js` — **`besselK` is currently absent from `src/special/`; must be added first**
+- **Dependency:** `bessel.js` (K_{λ−½}), `_gamma.js` — **blocked on [#809](../../issues/809) (besselK)**
 - Refs: [Wikipedia](https://en.wikipedia.org/wiki/Variance-gamma_distribution)
 
 #### Normal-Inverse Gaussian (NIG)
 Special case of the Generalized Hyperbolic distribution with λ = −½. Popular in financial return modelling and engineering.
 - **PDF:** f(x; μ, α, β, δ) = (αδ/π) · K₁(α√(δ²+(x−μ)²)) / √(δ²+(x−μ)²) · exp(δγ + β(x−μ))  where γ = √(α²−β²)
 - **Sampling:** via the representation X | V ~ Normal(μ + βV, V), V ~ InverseGaussian(δ/γ, δ²)
-- **Dependency:** `bessel.js` (K₁), `inverse-gaussian.js` — **`besselK` is currently absent from `src/special/`; must be added first**
+- **Dependency:** `bessel.js` (K₁), `inverse-gaussian.js` — **blocked on [#809](../../issues/809) (besselK)**
 - Refs: [scipy `norminvgauss`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.norminvgauss.html)
 
 #### Generalized Hyperbolic
@@ -110,7 +92,7 @@ A five-parameter family (λ, α, β, μ, δ) that unifies several heavy-tailed d
 - **Student-t:** α = 0 (limit)
 - **PDF:** involves modified Bessel function K_λ(·) — needs accurate `bessel.js`
 - **Sampling:** via the GIG (Generalized Inverse Gaussian) mixing representation
-- **Prerequisite:** `besselK` (second-kind modified Bessel, all real orders) is currently absent from `src/special/bessel.js` — must be added before this distribution can be implemented
+- **Prerequisite:** **blocked on [#809](../../issues/809) (besselK)**
 - Refs: [Wikipedia](https://en.wikipedia.org/wiki/Generalised_hyperbolic_distribution)
 
 #### Normal-Inverse Gamma
@@ -123,7 +105,7 @@ Conjugate prior for the mean and variance of a normal distribution in Bayesian a
 Distribution of Z = X·Y where X, Y ~ Normal(0, 1) independently. The sampler is trivial; the main work is implementing the PDF via K₀.
 - **PDF:** f(z) = K₀(|z|)/π where K₀ is the modified Bessel function of the second kind, order 0
 - **Sampling:** trivial — multiply two standard Normal samples
-- **Dependency:** `bessel.js` (K₀) — **`besselK` is currently absent from `src/special/`; must be added first**
+- **Dependency:** `bessel.js` (K₀) — **blocked on [#809](../../issues/809) (besselK)**
 - Refs: [MathWorld](http://mathworld.wolfram.com/NormalProductDistribution.html)
 
 #### Normal-Exponential-Gamma (NEG)
@@ -263,7 +245,7 @@ One-parameter distribution on [0, *c*] from particle physics (ARGUS experiment a
 Relativistic analogue of the `MaxwellBoltzmann` distribution (already in the library); describes particle momenta in a relativistic ideal gas. Used in plasma physics and astrophysics.
 - **PDF:** f(p; θ) = p² / (θ · K₂(1/θ)) · exp(−√(1+p²)/θ),  θ = kT/(mc²)
 - **Sampling:** rejection sampling against a Maxwellian envelope
-- **Prerequisite:** `besselK` (K₂ via recurrence K₂(z) = (2/z)·K₁(z) + K₀(z)) — must be added to `src/special/` first
+- **Prerequisite:** **blocked on [#809](../../issues/809) (besselK)**
 - Refs: [Wikipedia](https://en.wikipedia.org/wiki/Maxwell%E2%80%93J%C3%BCttner_distribution)
 
 #### Power Benini
@@ -275,38 +257,16 @@ Two-shape-parameter extension of the existing `Benini` distribution used in actu
 
 ---
 
-#### Double Exponential
-**[duplicate]** — equivalent to the Laplace distribution; already implemented in `src/dist/laplace.js`.
-
-#### Error / Exponential Power
-**[duplicate]** — equivalent to the Generalized Normal (Subbotin) distribution; already implemented in `src/dist/generalized-normal.js`.
-
-#### Davis
-**[partial]** — `src/dist/davis.js` — PDF is correct but two blockers remain:
-- `_generator()` returns a hardcoded `1` — needs actual implementation (rejection sampling with a bounding envelope over the power-law decay)
-- `_cdf()` has a stray `console.log` and uses Romberg integration; numerical CDF is acceptable (no closed form exists) but the debug statement must be removed before the distribution is usable
-- **refVals needed:** two parameter sets in `test/dist-cases-continuous.js` with PDF/CDF/quantile values cross-checked against scipy `davis` or manual integration
-- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Davis_distribution)
-
-#### Champernowne
-**[partial]** — `src/dist/champernowne.js` — Substantially incomplete:
-- `_generator()` body is empty — no sampler at all
-- `_pdf` is missing the normalization constant (`// TODO Add normalization factor`); the correct constant is C = α√(1−λ²)/π, derived from ∫ dx/(cosh(αx)+λ) = π/(α√(1−λ²))
-- `_cdf()` is wrong — returns the hardcoded constant `this.c[0] = 1` instead of F(x) = ½ + (√(1−λ²)/π)·arctan(sinh(α(x−x₀))/√(1−λ²))
-- **refVals needed:** two parameter sets in `test/dist-cases-continuous.js` with PDF/CDF/quantile values cross-checked against [Wikipedia](https://en.wikipedia.org/wiki/Champernowne_distribution) or numerical integration
-
----
-
 ### Discrete
 
 #### Discrete Laplace (Bilateral Geometric)
-Discrete analogue of the Laplace distribution; symmetric about an integer location parameter.
+Discrete analogue of the Laplace distribution; symmetric about an integer location parameter. See issue [#812](../../issues/812).
 - **PMF:** P(X = k) = ((1−p)/(1+p)) · p^|k−μ| for k ∈ ℤ, p ∈ (0,1)
 - **Sampling:** difference of two independent Geometric variates
 - Refs: [scipy `dlaplace`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.dlaplace.html)
 
 #### Waring
-Generalization of the Yule-Simon distribution (already `[partial]` below). Yule-Simon is the special case σ = 1.
+Generalization of the Yule-Simon distribution. Yule-Simon is the special case σ = 1.
 - **PMF:** P(X = k) = B(k + σ, ρ) / B(σ, ρ − 1) for k = 0, 1, 2, ..., where ρ > 1, σ > 0
 - **CDF:** at NIST reference
 - Refs: [NIST Dataplot](https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bgepdf.htm)
@@ -355,21 +315,6 @@ Marginal distribution of a Multinomial(n, p) when p is drawn from Dirichlet(α).
 - **Prerequisite:** The `Distribution` base class (`_pdf(x)`, `_cdf(x)`, `_generator()`) is scalar-valued. A **multivariate distribution base class** must be designed and filed as a separate architectural issue before this or any other vector-valued distribution (Dirichlet, Multivariate Normal, Wishart) can be added.
 - Refs: [Wikipedia](https://en.wikipedia.org/wiki/Dirichlet-multinomial_distribution)
 
-#### Beta-Geometric
-**[partial]** — `src/dist/beta-geometric.js` — PMF and generator are present but carry a `// TODO Use log PDF` note. The current `_pk` computes `Math.exp(logBeta(…) − logBeta(…))` directly; for large k the difference of log-betas should be returned as-is (log-PMF) to avoid underflow, and the PreComputed base class updated to consume log probabilities.
-- **refVals needed:** two parameter sets in `test/dist-cases-discrete.js` with PMF/CDF values cross-checked against [NIST](https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bgepdf.htm)
-
-#### Beta-Negative Binomial
-**[partial]** — `src/dist/beta-negative-binomial.js` — Three open issues:
-1. Speed-up constants not computed (`// TODO Speed-up constants`)
-2. The recurrence-based `_pk` has two commented-out alternative formulas alongside the active one, indicating the PMF is not yet finalised
-3. The generator comment says `// TODO Direct sampling`; the current implementation compounds Beta → Gamma → Poisson which is correct but has higher variance than a direct method
-- **refVals needed:** two parameter sets in `test/dist-cases-discrete.js` with PMF/CDF values cross-checked against [Wikipedia](https://en.wikipedia.org/wiki/Beta_negative_binomial_distribution) or [NIST](https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/bnbcdf.htm)
-
-#### Yule-Simon
-**[partial]** — `src/dist/yule-simon.js` — PMF and CDF formulas are correct. The generator uses an exponential-geometric compound representation which is mathematically sound, but the edge-case branch (`1 − z === 1 → Math.ceil(e1 / z)`) can produce `Infinity` when z underflows to exactly 0, since e1/0 = Infinity. That branch needs a large-sample approximation (e.g. return a Pareto-distributed integer) rather than the direct ratio.
-- **refVals needed:** two parameter sets in `test/dist-cases-discrete.js` with PMF/CDF values cross-checked against [Wikipedia](https://en.wikipedia.org/wiki/Yule%E2%80%93Simon_distribution)
-
 ---
 
 ### Reference Lists
@@ -397,10 +342,9 @@ Most powerful standard normality test for small samples (n ≤ ~50). Uses regres
 - Complexity: moderate (table look-up dominates)
 
 #### Anderson-Darling
-EDF-based goodness-of-fit test; more sensitive than Kolmogorov-Smirnov in the tails. Can test against any continuous distribution, not just normality.
+EDF-based goodness-of-fit test; more sensitive than Kolmogorov-Smirnov in the tails. Replacing KS with AD in `Distribution.test()` for continuous distributions is tracked in [#816](../../issues/816).
 - **Statistic:** A² = −N − (1/N) Σ(2i−1)[ln z_(i) + ln(1 − z_(N+1−i))]  where z_(i) = F(x_(i))
-- Critical values depend on the hypothesised distribution; for normality, Stephens (1974) tables
-- Already partially covered by `ksTest` in `test/test-utils.js`; Anderson-Darling is stronger
+- p-value: Marsaglia & Marsaglia (2004) asymptotic series — no lookup tables needed
 
 #### Cramér-von Mises
 EDF-based test, less sensitive at tails than Anderson-Darling but has a simpler asymptotic distribution.
@@ -424,7 +368,7 @@ Test for heteroscedasticity in a linear regression. Regresses squared residuals 
 - **Dependency:** Chi2 distribution (already in `src/dist/chi2.js`)
 
 ### Welch's t-test
-Two-sample t-test for equality of means when variances are unequal (does not assume homoscedasticity). Preferred over Student's t-test in practice.
+Two-sample t-test for equality of means when variances are unequal (does not assume homoscedasticity). Preferred over Student's t-test in practice. See issue [#815](../../issues/815).
 - **Degrees of freedom:** Welch-Satterthwaite approximation: ν = (s₁²/n₁ + s₂²/n₂)² / ((s₁²/n₁)²/(n₁−1) + (s₂²/n₂)²/(n₂−1))
 - **Dependency:** Student-t distribution (already in `src/dist/student-t.js`)
 
@@ -455,9 +399,9 @@ An online (streaming) aggregator that maintains running statistics in O(1) time 
 
 ---
 
-## Stochastic Processes (`src/process/` — not yet started)
+## Stochastic Processes (`src/process/`)
 
-A new module for discrete-time and continuous-time stochastic processes. Each process object should implement a standard interface:
+A new module for discrete-time and continuous-time stochastic processes tracked in [#818](../../issues/818). Each process object should implement a standard interface:
 
 | Method | Description |
 |--------|-------------|
@@ -495,46 +439,44 @@ Discrete-time process: Xₙ₊₁ = Σᵢ₌₁^Xₙ Zᵢ where Zᵢ are iid off
 
 ## MCMC (`src/mc/`)
 
-Currently implemented: `RWM` (random walk Metropolis), `SliceSampler`, `MCMC2`, `GelmanRubin`.
+Currently implemented: `RWM` (random walk Metropolis), `MCMC2`, `GelmanRubin`. (`SliceSampler` was removed in #615; re-add tracked in [#822](../../issues/822).)
 
 ### Gibbs Sampling
-Component-wise sampler: at each step, draw each coordinate xᵢ from its full conditional p(xᵢ | x₋ᵢ). Mixes well in low dimensions when conditionals are tractable.
+Component-wise sampler: at each step, draw each coordinate xᵢ from its full conditional p(xᵢ | x₋ᵢ). Mixes well in low dimensions when conditionals are tractable. See issue [#821](../../issues/821).
 - **Interface:** user supplies an array of conditional samplers `[p(x₁|…), p(x₂|…), …]`
 - No acceptance step; always accepted
 - Can be combined with Metropolis steps for intractable conditionals (Metropolis-within-Gibbs)
 
 ### Adaptive Metropolis (AM)
-Standard RWM with a covariance-adapting proposal: Σ_proposal = (2.38²/d) · Cov(x₁,…,xₙ) + ε·I (Haario-Saksman-Tamminen 2001).
+Standard RWM with a covariance-adapting proposal: Σ_proposal = (2.38²/d) · Cov(x₁,…,xₙ) + ε·I (Haario-Saksman-Tamminen 2001). See issue [#823](../../issues/823).
 - **Adaptation:** update the empirical covariance during burn-in; freeze after
 - **Dependency:** `src/la/matrix.js` (Cholesky for sampling from multivariate normal)
 - Note: Ergodicity requires careful scheduling of adaptation; stop adapting after a fixed number of steps
 
 ### Hamiltonian Monte Carlo (HMC)
-Uses gradient information to propose distant moves along Hamiltonian trajectories, dramatically reducing random-walk behaviour.
+Uses gradient information to propose distant moves along Hamiltonian trajectories, dramatically reducing random-walk behaviour. See issue [#824](../../issues/824).
 - **Algorithm:** leapfrog integrator for L steps of size ε, Metropolis accept/reject
 - **User supplies:** log-posterior and its gradient (∂log p(θ)/∂θ)
 - **Tuning:** step size ε and path length L are critical; NUTS automates this
+- **Step size jittering** (randomly perturbing ε each iteration to break periodicity) is included in #824's scope
 - Ref: Neal (2011) "MCMC using Hamiltonian dynamics" in *Handbook of Markov Chain Monte Carlo*
 
 ### NUTS (No-U-Turn Sampler)
-Extension of HMC that automatically tunes the trajectory length by building a binary tree until a U-turn criterion is met, eliminating the need to set L manually.
+Extension of HMC that automatically tunes the trajectory length by building a binary tree until a U-turn criterion is met, eliminating the need to set L manually. See issue [#825](../../issues/825).
 - **Algorithm:** recursive doubling of leapfrog steps; slice sampling selects the transition
 - **Dual averaging:** adapts step size ε during warm-up (Hoffman-Gelman 2014)
-- **Dependency:** HMC leapfrog integrator (implement HMC first)
+- **Dependency:** HMC leapfrog integrator ([#824](../../issues/824))
 - This is the sampler used by Stan, PyMC, and NumPyro
 
 ### Rejection Sampling for Log-Concave Distributions
-Adaptive Rejection Sampling (ARS, Gilks-Wild 1992): for log-concave densities, automatically constructs a piecewise-exponential envelope from evaluation points and tightens it adaptively.
+Adaptive Rejection Sampling (ARS, Gilks-Wild 1992): for log-concave densities, automatically constructs a piecewise-exponential envelope from evaluation points and tightens it adaptively. See issue [#820](../../issues/820).
 - Avoids the need for the user to specify a bounding constant
 - **Dependency:** log-concavity check or trust; works best for unimodal, differentiable log-densities
 
 ### Euclidean Metric Adaptation
-In HMC/NUTS, preconditioning by an estimated mass matrix M (the inverse of the parameter covariance) improves mixing by removing scale differences between dimensions.
+In HMC/NUTS, preconditioning by an estimated mass matrix M (the inverse of the parameter covariance) improves mixing by removing scale differences between dimensions. See issue [#826](../../issues/826).
 - **Warm-up phase:** accumulate sample covariance; set M = Cov(θ)⁻¹
 - **Dependency:** `src/la/matrix.js` (inversion or Cholesky)
-
-### Step Size Jittering
-Randomly perturb the leapfrog step size ε each iteration (e.g. ε ~ Uniform(0.9ε₀, 1.1ε₀)) to break periodicity artifacts in HMC trajectories.
 
 ### Inspiration
 - [Interactive MCMC visualisations](https://github.com/chi-feng/mcmc-demo)
@@ -549,7 +491,7 @@ Functions needed for the distributions above or otherwise missing:
 
 | Function | Needed by | Notes |
 |----------|-----------|-------|
-| **`besselK` — K_ν(x), all real ν** | NIG, Variance-Gamma, Normal Product, Generalized Hyperbolic, Maxwell-Jüttner | **Entirely absent.** `src/special/bessel.js` exports only first-kind functions (I_ν). K_ν must be added as a standalone prerequisite issue before any of the listed distributions can be implemented. Recurrence: K_{n+1}(x) = (2n/x)·K_n(x) + K_{n−1}(x); seed from K_0 and K_1 series. |
+| **`besselK` — K_ν(x), all real ν** | NIG, Variance-Gamma, Normal Product, Generalized Hyperbolic, Maxwell-Jüttner | **Tracked in [#809](../../issues/809).** `src/special/bessel.js` exports only first-kind functions (I_ν). K_ν must be added as a standalone prerequisite issue before any of the listed distributions can be implemented. Recurrence: K_{n+1}(x) = (2n/x)·K_n(x) + K_{n−1}(x); seed from K_0 and K_1 series. |
 | Polygamma ψₙ(x), n ≥ 1 | Various | Trigamma (n=1) most urgent; can derive from digamma recurrence + Euler-Maclaurin |
 | Exponential integral Eₙ(x), Ei(x) | Planck CDF | Related to incomplete gamma; Ei(x) = −E₁(−x) for x > 0 |
 | Polylogarithm Liₛ(z) | Planck CDF, Fermi-Dirac | Li₂ (dilogarithm) has known series; general Liₛ needs Lerch transcendent |
