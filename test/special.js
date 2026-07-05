@@ -224,6 +224,94 @@ describe('special', () => {
     })
   })
 
+  describe('.besselK()', () => {
+    it('K_n(0) should be Infinity for all n', () => {
+      // K_ν diverges at x=0 for all ν: ADR-0015 divergence → Infinity
+      for (const n of [0, 1, 2, 3]) {
+        assert.strictEqual(special.besselK(n, 0), Infinity)
+      }
+    })
+
+    it('K_0(x) should match mpmath reference values', () => {
+      // mpmath mp.dps=50: besselk(0, x) for x in {0.5, 1, 5, 10}
+      // x=10 uses asymptotic; optimal-truncation error bound ~3.7e-10 limits to 9 sig figs there
+      assert(equal(special.besselK(0, 0.5), 0.9244190712276659))
+      assert(equal(special.besselK(0, 1), 0.42102443824070834))
+      assert(equal(special.besselK(0, 5), 0.0036910983340425942))
+      assert(equal(special.besselK(0, 10), 1.778006231616765e-05, 9))
+    })
+
+    it('K_1(x) should match mpmath reference values', () => {
+      // mpmath mp.dps=50: besselk(1, x)
+      // x=10 uses asymptotic; optimal-truncation error bound limits to 9 sig figs there
+      assert(equal(special.besselK(1, 0.5), 1.656441120003301))
+      assert(equal(special.besselK(1, 1), 0.6019072301972346))
+      assert(equal(special.besselK(1, 5), 0.004044613445452165))
+      assert(equal(special.besselK(1, 10), 1.8648773453825585e-05, 9))
+    })
+
+    it('K_n(x) should match mpmath reference values for n=2,3,4', () => {
+      // mpmath mp.dps=50: besselk(n, x)
+      assert(equal(special.besselK(2, 1), 1.6248388986351774))
+      assert(equal(special.besselK(3, 1), 7.101262824737945))
+      assert(equal(special.besselK(4, 1), 44.232415847062846))
+      assert(equal(special.besselK(2, 5), 0.00530894371222346))
+      assert(equal(special.besselK(3, 5), 0.008291768415230933))
+    })
+
+    it('K_0(x) should satisfy the asymptotic leading term at large x', () => {
+      // K_ν(x) ~ sqrt(π/(2x)) * exp(-x) for large x; 1% tolerance at x=50
+      const x = 50
+      assert(Math.abs(special.besselK(0, x) * Math.exp(x) * Math.sqrt(2 * x / Math.PI) - 1) < 0.01)
+    })
+
+    it('should satisfy the recurrence K_{n+1}(x) = (2n/x)*K_n(x) + K_{n-1}(x)', () => {
+      for (const [n, x] of [[1, 1], [2, 1], [1, 5], [2, 5]]) {
+        const lhs = special.besselK(n + 1, x)
+        const rhs = (2 * n / x) * special.besselK(n, x) + special.besselK(n - 1, x)
+        assert(equal(lhs, rhs))
+      }
+    })
+  })
+
+  describe('.besselKnu()', () => {
+    it('K_nu(0) should be Infinity', () => {
+      assert.strictEqual(special.besselKnu(0.5, 0), Infinity)
+      assert.strictEqual(special.besselKnu(1.5, 0), Infinity)
+    })
+
+    it('K_{0.5}(x) should match the exact closed form sqrt(pi/(2x))*exp(-x)', () => {
+      // K_{1/2}(x) = sqrt(pi/(2x)) * exp(-x) exactly (DLMF 10.39.2)
+      for (const x of [1, 5, 10, 50]) {
+        const exact = Math.sqrt(Math.PI / (2 * x)) * Math.exp(-x)
+        assert(equal(special.besselKnu(0.5, x), exact))
+      }
+    })
+
+    it('K_{1.5}(x) should match the exact closed form sqrt(pi/(2x))*exp(-x)*(1+1/x)', () => {
+      // K_{3/2}(x) = sqrt(pi/(2x)) * exp(-x) * (1 + 1/x) exactly (DLMF 10.39.2)
+      for (const x of [1, 5, 10, 50]) {
+        const exact = Math.sqrt(Math.PI / (2 * x)) * Math.exp(-x) * (1 + 1 / x)
+        assert(equal(special.besselKnu(1.5, x), exact))
+      }
+    })
+
+    it('K_{2.5}(x) should match mpmath reference values', () => {
+      // mpmath mp.dps=50: besselk(2.5, x)
+      assert(equal(special.besselKnu(2.5, 1), 3.2274795311352618))
+      assert(equal(special.besselKnu(2.5, 5), 0.006495775004385758))
+      assert(equal(special.besselKnu(2.5, 10), 2.393132586462789e-05))
+    })
+
+    it('should dispatch to besselK for integer nu', () => {
+      for (const x of [1, 5]) {
+        assert.strictEqual(special.besselKnu(0, x), special.besselK(0, x))
+        assert.strictEqual(special.besselKnu(1, x), special.besselK(1, x))
+        assert.strictEqual(special.besselKnu(2, x), special.besselK(2, x))
+      }
+    })
+  })
+
   describe('.beta()', () => {
     it('should return exact values for small positive integer arguments', () => {
       // B(1,1) = 1 exactly

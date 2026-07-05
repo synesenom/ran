@@ -191,6 +191,124 @@ export function besselISpherical (n, x) {
   }
 }
 
+// Crossover from series to asymptotic expansion for K_0 and K_1.
+// Below X_K_SERIES the combined-series form (DLMF §10.31.2) retains ≥10 significant
+// figures; above it, the series accumulates O(e^{2x}) intermediate values that nearly
+// cancel against the tiny e^{-x} result, losing all precision.
+const _X_K_SERIES = 6
+
+/**
+ * Asymptotic expansion of K_ν(x) for large x (DLMF §10.40.2):
+ *   K_ν(x) ~ sqrt(π/(2x)) * exp(-x) * Σ_{k=0}^M a_k(ν) / x^k
+ * where a_0 = 1 and a_{k+1} = a_k * (4ν² − (2k+1)²) / (8(k+1)x).
+ * Optimal truncation (stop when |a_{k+1}/x| ≥ |a_k/x^k|) bounds the error by the
+ * first omitted term, avoiding divergence of the asymptotic series.
+ *
+ * @method _KAsymptotic
+ * @memberof ran.special
+ * @param {number} nu Order (real).
+ * @param {number} x Positive value to evaluate at.
+ * @returns {number} K_nu(x).
+ * @private
+ */
+function _KAsymptotic (nu, x) {
+  const nu2 = 4 * nu * nu
+  let term = 1
+  let sum = 1
+  for (let k = 1; k < MAX_ITER; k++) {
+    const next = term * (nu2 - (2 * k - 1) * (2 * k - 1)) / (8 * k * x)
+    // Optimal truncation: stop when the asymptotic series starts to diverge
+    if (Math.abs(next) >= Math.abs(term)) { break }
+    term = next
+    sum += term
+    if (Math.abs(term) < EPS * Math.abs(sum)) { break }
+  }
+  return Math.sqrt(Math.PI / (2 * x)) * Math.exp(-x) * sum
+}
+
+/**
+ * Computes the modified Bessel function of the second kind with order zero.
+ * For x ≤ _X_K_SERIES: combined series K_0(x) = Σ_{k=0}^∞ (x²/4)^k / (k!)² · (H_k − lnh)
+ * where H_k are harmonic numbers and lnh = ln(x/2) + γ (DLMF §10.31.2).
+ * The combined form avoids catastrophic cancellation by grouping the two large terms.
+ * For x > _X_K_SERIES: asymptotic expansion (DLMF §10.40.2).
+ *
+ * @method _K0
+ * @memberof ran.special
+ * @param {number} x Positive value to evaluate at.
+ * @returns {number} K_0(x).
+ * @private
+ */
+function _K0 (x) {
+  if (x > _X_K_SERIES) { return _KAsymptotic(0, x) }
+  const x2 = x * x / 4
+  // ln(x/2) + γ, where γ = 0.5772156649015329 (Euler–Mascheroni constant)
+  const lnh = Math.log(x / 2) + 0.5772156649015329
+  return recursiveSum(
+    { t: 1, h: 0 },
+    (s, i) => {
+      s.h += 1 / i
+      s.t *= x2 / (i * i)
+      return s
+    },
+    s => s.t * (s.h - lnh)
+  )
+}
+
+/**
+ * Computes the modified Bessel function of the second kind with order one.
+ * For x ≤ _X_K_SERIES: combined series K_1(x) = 1/x + (x/2)·Σ_{k=0}^∞ (x²/4)^k / (k!(k+1)!)
+ * · [(ln(x/2)+γ) − (H_k+H_{k+1})/2] where H_k are harmonic numbers (DLMF §10.31.2).
+ * For x > _X_K_SERIES: asymptotic expansion (DLMF §10.40.2).
+ *
+ * @method _K1
+ * @memberof ran.special
+ * @param {number} x Positive value to evaluate at.
+ * @returns {number} K_1(x).
+ * @private
+ */
+function _K1 (x) {
+  if (x > _X_K_SERIES) { return _KAsymptotic(1, x) }
+  const x2 = x * x / 4
+  const lnh = Math.log(x / 2) + 0.5772156649015329
+  const sum = recursiveSum(
+    { t: 1, hk: 0, hk1: 1 },
+    (s, i) => {
+      s.hk = s.hk1
+      s.hk1 += 1 / (i + 1)
+      s.t *= x2 / (i * (i + 1))
+      return s
+    },
+    s => s.t * (lnh - (s.hk + s.hk1) / 2)
+  )
+  return 1 / x + (x / 2) * sum
+}
+
+/**
+ * Computes the modified Bessel function of the second kind. Only integer order.
+ *
+ * @method besselK
+ * @memberof ran.special
+ * @param {number} n Order of the Bessel function. Must be a non-negative integer.
+ * @param {number} x Value to evaluate the function at.
+ * @returns {number} The modified Bessel function of the second kind.
+ */
+export function besselK (n, x) {
+  if (x === 0) return Infinity
+  if (n === 0) return _K0(x)
+  if (n === 1) return _K1(x)
+  // Upward recurrence K_{n+1}(x) = (2n/x)*K_n(x) + K_{n-1}(x) is forward-stable
+  // for K because K grows with n (dominant component is preserved). DLMF §10.29.1.
+  let k0 = _K0(x)
+  let k1 = _K1(x)
+  for (let i = 1; i < n; i++) {
+    const k = (2 * i / x) * k1 + k0
+    k0 = k1
+    k1 = k
+  }
+  return k1
+}
+
 /**
  * Computes the modified Bessel function of the first kind for fractional order.
  *
@@ -201,6 +319,33 @@ export function besselISpherical (n, x) {
  * @returns {number} The modified Bessel function of the first kind.
  * @private
  */
+/**
+ * Computes the modified Bessel function of the second kind for real order.
+ * Uses the connection formula K_ν(x) = (π/2)·(I_{-ν}(x) − I_ν(x))/sin(νπ) (DLMF 10.27.4).
+ * Dispatches to `besselK` for near-integer ν to avoid the 0/0 indeterminate form.
+ *
+ * @method besselKnu
+ * @memberof ran.special
+ * @param {number} nu Order of the Bessel function. Should be fractional.
+ * @param {number} x Value to evaluate the function at.
+ * @returns {number} The modified Bessel function of the second kind.
+ * @private
+ */
+export function besselKnu (nu, x) {
+  if (x === 0) return Infinity
+  // Near-integer ν: connection formula becomes 0/0; dispatch to integer path
+  if (Math.abs(nu - Math.round(nu)) < 1e-8) {
+    return besselK(Math.round(nu), x)
+  }
+  // Large x: connection formula loses ~2x/ln(10) digits from catastrophic cancellation
+  // between I_{-ν}(x) and I_ν(x) (both O(exp(x)) while K_ν is O(exp(-x))).
+  // Asymptotic expansion avoids this and terminates exactly for half-integer ν.
+  if (x > _X_K_SERIES) {
+    return _KAsymptotic(nu, x)
+  }
+  return (Math.PI / 2) * (besselInu(-nu, x) - besselInu(nu, x)) / Math.sin(Math.PI * nu)
+}
+
 // Taylor series converges for x ≤ ~710 with MAX_SERIES_ITER=500; see
 // solutions/testing/2026-06-02-1200-besselInu-infrastructure-fix-coverage-gap.md
 export function besselInu (nu, x) {
