@@ -1217,6 +1217,32 @@ describe('dist', () => {
         assert(result.p.b > 3.5)
       })
 
+      it('TruncatedExponential._fitInit should set a=min, b=max, lambda from MOM', () => {
+        // Fixed dataset: min=1, max=5, mean=3 → lambda ≈ 1/(3-1)=0.5
+        const init = dist.TruncatedExponential._fitInit([1, 2, 3, 4, 5])
+        assert.strictEqual(init[1], 1) // a = min(data)
+        assert.strictEqual(init[2], 5) // b = max(data)
+        assert(init[0] > 0) // lambda > 0
+      })
+
+      it('TruncatedExponential._fitInit should fall back to lambda=1 and b=a+1 for constant data', () => {
+        // constant data: min = max = 3 → b = a, mu = a; both fallback branches fire
+        const init = dist.TruncatedExponential._fitInit([3, 3, 3])
+        assert(init[0] === 1) // lambda falls back to 1
+        assert(init[1] === 3) // a = min(data)
+        assert(init[2] === 4) // b = a + 1 (fallback)
+      })
+
+      it('TruncatedExponential.fit should return a valid instance close to planted values', () => {
+        const data = new dist.TruncatedExponential(1, 0, 5).seed(42).sample(300)
+        const result = dist.TruncatedExponential.fit(data)
+        assert(result instanceof dist.TruncatedExponential)
+        assert(result.p.lambda > 0)
+        assert(result.p.a >= 0)
+        assert(result.p.b > result.p.a)
+        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      })
+
       it('Reciprocal._fitInit should set a=max(min,ε) and b=max', () => {
         // Fixed dataset with known bounds: min=2, max=8, no ε clamping needed
         const init = dist.Reciprocal._fitInit([2, 5, 8])

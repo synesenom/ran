@@ -5280,6 +5280,63 @@ export default [{
     { p: 0.99, x: 23.585786437626904 }
   ]
 }, {
+  name: 'TruncatedExponential',
+  moments: [
+    // mean and variance from mpmath dps=50
+    { params: [1, 0, 3], mean: 0.8428129105262322, variance: 0.5037309504814621, tol: 1e-12 }
+  ],
+  // b-MLE = max(data) (log-likelihood decreases as b increases), so b recovery is not reliable;
+  // check only lambda and a, and verify the result is usable.
+  fit: { params: [1, 0, 5], seed: 42, n: 300, tolerances: { lambda: 0.3, a: 0.2 }, usableAt: 1 },
+  invalidParams: [
+    [], // all params required
+    [0, 0, 1], [-1, 0, 1], // lambda > 0
+    [1, -1, 1], // a >= 0
+    [1, 0, 0], [1, 2, 1] // b > a
+  ],
+  cases: [{
+    params: () => [1, 0, 5]
+  }, {
+    name: 'shifted lower bound',
+    params: () => [2, 0.5, 3],
+    // mpmath dps=50: f(x)=lambda*exp(-lambda*x)/Z, F(x)=(exp(-lambda*a)-exp(-lambda*x))/Z
+    // where Z=exp(-lambda*a)-exp(-lambda*b); lambda=2, a=0.5, b=3
+    refVals: [
+      { x: 0.5, pdf: 2.0135673098126086, cdf: 0 },
+      { x: 1, pdf: 0.7407500166949469, cdf: 0.6364086465588308 },
+      { x: 1.5, pdf: 0.27250670218947365, cdf: 0.8705303038115674 },
+      { x: 2, pdf: 0.10024961331693621, cdf: 0.9566588482478361 },
+      { x: 2.5, pdf: 0.03687977172468768, cdf: 0.9883437690439604 },
+      { x: 3, pdf: 0.013567309812608463, cdf: 1 }
+    ],
+    // scipy: x = -log(exp(-lambda*a) - p*(exp(-lambda*a)-exp(-lambda*b)))/lambda
+    quantileVals: [
+      { p: 0.05, x: 0.525469364232026 },
+      { p: 0.25, x: 0.6427193042834255 },
+      { p: 0.5, x: 0.8432159160354136 },
+      { p: 0.75, x: 1.183141053880132 },
+      { p: 0.95, x: 1.9376337549255518 }
+    ]
+  }],
+  // mpmath dps=50: lambda=1, a=0, b=5
+  refVals: [
+    { x: 0, pdf: 1.0067836549063043, cdf: 0 },
+    { x: 0.5, pdf: 0.610645154398217, cdf: 0.39613850050808724 },
+    { x: 1, pdf: 0.37037500834747344, cdf: 0.6364086465588308 },
+    { x: 2, pdf: 0.13625335109473682, cdf: 0.8705303038115674 },
+    { x: 3, pdf: 0.05012480665846811, cdf: 0.9566588482478361 },
+    { x: 4, pdf: 0.01843988586234384, cdf: 0.9883437690439604 },
+    { x: 5, pdf: 0.006783654906304231, cdf: 1 }
+  ],
+  // x = -log(exp(-lambda*a) - p*(exp(-lambda*a)-exp(-lambda*b)))/lambda; lambda=1, a=0, b=5
+  quantileVals: [
+    { p: 0.05, x: 0.050938728464051855 },
+    { p: 0.25, x: 0.2854386085668509 },
+    { p: 0.5, x: 0.6864318320708273 },
+    { p: 0.75, x: 1.3662821077602636 },
+    { p: 0.95, x: 2.8752675098511036 }
+  ]
+}, {
   name: 'TruncatedNormal',
   moments: [
     // mean/skewness 0 by symmetry; variance/kurtosis from mpmath dps=50

@@ -215,6 +215,16 @@ TypeScript declarations are **generated** from JSDoc annotations via `tsc --allo
 - **Back opinions with evidence.** Cite numerical analysis principles, statistical references, or established mathematical results when pushing back. "This formula produces biased estimates because..." is better than "this might not be ideal."
 - **Reject bad ideas explicitly.** Do not find ways to make a bad idea work just to be agreeable. Say "this is the wrong approach because..." and propose what to do instead.
 
+## Test-Driven Development
+
+**Always follow TDD (red-green-refactor) for all implementations:**
+
+1. **Red** — Write the failing test(s) first. Add `invalidParams`, `params`/`cases`, `moments`, and `fit` entries to the appropriate `test/dist-cases-*.js` file, and any explicit `.fit()` blocks to `test/dist.js`, **before writing a single line of implementation code**. Run `npm test` and confirm the test suite fails with the expected errors (missing export, not-a-function, assertion failures). A test that passes before the implementation is written is not a test — it's dead code.
+2. **Green** — Write the minimal implementation that makes the tests pass. No extra methods, no speculative abstractions — only what the red tests require. Run `npm test` and confirm all tests pass.
+3. **Refactor** — Clean up the implementation (rename for clarity, extract shared constants, simplify expressions) without changing behaviour. Run `npm test` after each refactor step to confirm nothing broke.
+
+This cycle applies to every new distribution, every new method, every bug fix. Do not write implementation code before you have a red test that demands it.
+
 ## Workflow
 
 - When editing multiple files, make all independent edits in parallel.
