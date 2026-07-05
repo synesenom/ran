@@ -272,6 +272,18 @@ describe('special', () => {
         assert(equal(lhs, rhs))
       }
     })
+
+    it('K_0 and K_1 should be continuous across the series/asymptotic crossover at x=6', () => {
+      // x≤6 uses combined series; x>6 uses asymptotic (_X_K_SERIES=6)
+      // Over a 0.02 step the natural variation is ~2.2% (K decreases at ~1/unit near x=6)
+      // A large discontinuity would produce a ratio outside [1, 1.1] or a sign flip
+      const k0b = special.besselK(0, 5.99)
+      const k0a = special.besselK(0, 6.01)
+      const k1b = special.besselK(1, 5.99)
+      const k1a = special.besselK(1, 6.01)
+      assert(k0b > k0a && k0b / k0a < 1.1)
+      assert(k1b > k1a && k1b / k1a < 1.1)
+    })
   })
 
   describe('.besselKnu()', () => {
@@ -298,6 +310,8 @@ describe('special', () => {
 
     it('K_{2.5}(x) should match mpmath reference values', () => {
       // mpmath mp.dps=50: besselk(2.5, x)
+      // x=10 uses asymptotic; for nu=2.5 the series terminates at k=3 (4nu²-25=0),
+      // so the only error is floating-point rounding — precision=10 is correct here
       assert(equal(special.besselKnu(2.5, 1), 3.2274795311352618))
       assert(equal(special.besselKnu(2.5, 5), 0.006495775004385758))
       assert(equal(special.besselKnu(2.5, 10), 2.393132586462789e-05))

@@ -292,6 +292,7 @@ function _K1 (x) {
  * @param {number} n Order of the Bessel function. Must be a non-negative integer.
  * @param {number} x Value to evaluate the function at.
  * @returns {number} The modified Bessel function of the second kind.
+ * @private
  */
 export function besselK (n, x) {
   if (x === 0) return Infinity
