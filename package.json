@@ -36,6 +36,9 @@
     "./dist/arcsine": {
       "import": "./dist/arcsine.esm.js"
     },
+    "./dist/asymmetric-laplace": {
+      "import": "./dist/asymmetric-laplace.esm.js"
+    },
     "./dist/balding-nichols": {
       "import": "./dist/balding-nichols.esm.js"
     },
