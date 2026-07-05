@@ -1,4 +1,4 @@
-import { erf } from '../special'
+import { erfc } from '../special'
 import normal from './_normal'
 import Distribution from './_distribution'
 
@@ -55,18 +55,20 @@ export default class Normal extends Distribution {
   }
 
   _cdf (x) {
-    return 0.5 * (1 + erf((x - this.p.mu) / this.c.sigmaRoot2))
+    // erfc avoids the 1+erf(z) cancellation for z << 0 (far left tail)
+    return 0.5 * erfc(-(x - this.p.mu) / this.c.sigmaRoot2)
   }
 
   _q (p) {
-    // A&S §26.2.17 rational approximation as O(1) seed; two Newton steps correct to ~1e-11
+    // A&S §26.2.17 rational approximation as O(1) seed; three Newton steps reach machine precision
+    // even at 7σ (two steps leave ~1e-13 residual at extreme tails).
     const s = Math.sqrt(-2 * Math.log(p < 0.5 ? p : 1 - p))
     const z0 = s - (2.515517 + s * (0.802853 + s * 0.010328)) /
       (1 + s * (1.432788 + s * (0.189269 + s * 0.001308)))
     let z = p < 0.5 ? -z0 : z0
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 3; i++) {
       const phi = Math.exp(-0.5 * z * z) / Math.sqrt(2 * Math.PI)
-      z -= (0.5 * (1 + erf(z / Math.SQRT2)) - p) / phi
+      z -= (0.5 * erfc(-z / Math.SQRT2) - p) / phi
     }
     return this.p.mu + this.p.sigma * z
   }
