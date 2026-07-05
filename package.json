@@ -414,6 +414,9 @@
     "./dist/triangular": {
       "import": "./dist/triangular.esm.js"
     },
+    "./dist/truncated-exponential": {
+      "import": "./dist/truncated-exponential.esm.js"
+    },
     "./dist/truncated-normal": {
       "import": "./dist/truncated-normal.esm.js"
     },
