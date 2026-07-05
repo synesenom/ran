@@ -123,9 +123,12 @@ export function erfinv (x) {
   }
   x0 = (x0 + 1) * x
 
-  // Polish with Newton's method
+  // Three-way residual avoids catastrophic cancellation in erf(t)-x across all |x|:
+  // |x|<0.5 (t near 0): erf(t)-x, both small, no cancellation;
+  // x>0.5 (t>0): (1-x)-erfc(t), both small near root;
+  // x<-0.5 (t<0): erfc(-t)-(1+x), both small near root.
   return newton(
-    t => erf(t) - x,
+    t => x > 0.5 ? (1 - x) - erfc(t) : x < -0.5 ? erfc(-t) - (1 + x) : erf(t) - x,
     t => 2 * Math.exp(-t * t) / Math.sqrt(Math.PI),
     x0
   )

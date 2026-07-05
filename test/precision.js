@@ -170,6 +170,13 @@ describe('special-function precision gate', () => {
     it('returns erfinv(-0.99) near -1 to 1e-14 relative error', () => {
       assert.approximately(special.erfinv(-0.99) / -1.8213863677184494, 1, 1e-14)
     })
+    // Discriminating for three-way residual: erf(t)-x cancels ~11 digits here; erfc form does not
+    it('returns erfinv(0.9999) to 1e-14 relative error', () => {
+      assert.approximately(special.erfinv(0.9999) / 2.751063905712061, 1, 1e-14)
+    })
+    it('returns erfinv(-0.9999) to 1e-14 relative error', () => {
+      assert.approximately(special.erfinv(-0.9999) / -2.751063905712061, 1, 1e-14)
+    })
   })
 
   describe('besselI — small argument', () => {

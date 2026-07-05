@@ -1,5 +1,5 @@
 import Normal from './normal'
-import { erfinv } from '../special'
+import { erfc } from '../special'
 
 /**
  * Probability density function for the [log-normal distribution]{@link https://en.wikipedia.org/wiki/Log-normal_distribution}:
@@ -44,9 +44,18 @@ export default class LogNormal extends Normal {
     return super._cdf(Math.log(x))
   }
 
-  // Inlined Normal._q to avoid V8 megamorphic deoptimization — see solutions/performance/2026-05-23-1810-super-q-v8-megamorphic-deoptimization.md
+  // Inlined from Normal._q (Newton inversion, not erfinv) to avoid V8 megamorphic deoptimization;
+  // erfinv(2p−1) loses ~11 digits near p≈0, while 3 Newton steps reach machine precision even at 7σ.
   _q (p) {
-    return Math.exp(this.p.mu + this.c.sigmaRoot2 * erfinv(2 * p - 1))
+    const s = Math.sqrt(-2 * Math.log(p < 0.5 ? p : 1 - p))
+    const z0 = s - (2.515517 + s * (0.802853 + s * 0.010328)) /
+      (1 + s * (1.432788 + s * (0.189269 + s * 0.001308)))
+    let z = p < 0.5 ? -z0 : z0
+    for (let i = 0; i < 3; i++) {
+      const phi = Math.exp(-0.5 * z * z) / Math.sqrt(2 * Math.PI)
+      z -= (0.5 * erfc(-z / Math.SQRT2) - p) / phi
+    }
+    return Math.exp(this.p.mu + this.p.sigma * z)
   }
 
   // Closed-form moments override the inherited Normal moments (which describe the underlying
