@@ -505,8 +505,8 @@ describe('special', () => {
     it('should match mpmath reference values in the deep CF branch (x >> a)', () => {
       // Continued-fraction path: x >= s+1; upper incomplete gamma computed directly.
       assert(equal(special.gammaUpperIncomplete(1, 20.0), 2.061153622438558e-9))
-      assert(equal(special.gammaUpperIncomplete(5, 50.0), 5.4497019829205295e-17, 8))
-      assert(equal(special.gammaUpperIncomplete(10, 100.0), 1.1253473960842733e-31, 5))
+      assert(equal(special.gammaUpperIncomplete(5, 50.0), 5.4497019829205295e-17, 10))
+      assert(equal(special.gammaUpperIncomplete(10, 100.0), 1.1253473960842733e-31, 10))
     })
 
     it('should match mpmath reference values for large a', () => {
