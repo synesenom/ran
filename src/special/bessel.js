@@ -195,6 +195,7 @@ export function besselISpherical (n, x) {
 // Below X_K_SERIES the combined-series form (DLMF §10.31.2) retains ≥10 significant
 // figures; above it, the series accumulates O(e^{2x}) intermediate values that nearly
 // cancel against the tiny e^{-x} result, losing all precision.
+// See solutions/special-functions/2026-07-05-1530-bessel-k-second-kind-cancellation-strategy.md
 const _X_K_SERIES = 6
 
 /**
