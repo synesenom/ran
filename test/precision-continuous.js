@@ -2592,6 +2592,38 @@ const REFS = [
       { x: 1.3251843284113063, pdf: 0.1324331477288767, cdf: 0.9 }
     ]
   },
+  // Far-tail probes for LogNormal (issue #808): CDF = 0.5*(1+erf(z)) cancels ~12 digits
+  // for z<-3.5; peak error ~1.24e-4 at -7sigma. Newton q() hits the same path; ~4e-5 max.
+  {
+    name: 'LogNormal',
+    params: [0, 2],
+    tol: 1e-3,
+    qtol: 1e-4,
+    points: [
+      { x: 4.5399929762484854e-05, pdf: 0.016373588268883323, cdf: 2.866515718791939e-07 },
+      { x: 8.315287191035679e-07, pdf: 5.49272694887334e-06, cdf: 1.279812543885835e-12 }
+    ]
+  },
+  {
+    name: 'LogNormal',
+    params: [1, 0.5],
+    tol: 1e-3,
+    qtol: 1e-4,
+    points: [
+      { x: 0.22313016014842982, pdf: 1.3326029199686027e-05, cdf: 2.866515718791939e-07 },
+      { x: 0.0820849986238988, pdf: 2.2256735241523284e-10, cdf: 1.279812543885835e-12 }
+    ]
+  },
+  {
+    name: 'LogNormal',
+    params: [-1, 1],
+    tol: 1e-3,
+    qtol: 1e-4,
+    points: [
+      { x: 0.0024787521766663585, pdf: 0.0005997854600913624, cdf: 2.866515718791939e-07 },
+      { x: 0.00033546262790251185, pdf: 2.723021776070751e-08, cdf: 1.279812543885835e-12 }
+    ]
+  },
   {
     name: 'Logarithmic',
     params: [6, 30],
@@ -3261,6 +3293,38 @@ const REFS = [
       { x: -0.9247301379001702, pdf: 0.3978137654258625, cdf: 0.53 },
       { x: -0.4171584927287838, pdf: 0.3366233449356212, cdf: 0.72 },
       { x: 0.2815515655446005, pdf: 0.17549833193248682, cdf: 0.9 }
+    ]
+  },
+  // Far-tail probes for Normal (issue #808): CDF = 0.5*(1+erf(z)) cancels ~12 digits
+  // for z<-3.5; peak error ~1.24e-4 at -7sigma. Newton q() hits the same path; ~4e-5 max.
+  {
+    name: 'Normal',
+    params: [0, 2],
+    tol: 1e-3,
+    qtol: 1e-4,
+    points: [
+      { x: -10.0, pdf: 7.433597573671488e-07, cdf: 2.866515718791939e-07 },
+      { x: -14.0, pdf: 4.567360204182297e-12, cdf: 1.279812543885835e-12 }
+    ]
+  },
+  {
+    name: 'Normal',
+    params: [3, 0.5],
+    tol: 1e-3,
+    qtol: 1e-4,
+    points: [
+      { x: 0.5, pdf: 2.9734390294685954e-06, cdf: 2.866515718791939e-07 },
+      { x: -0.5, pdf: 1.8269440816729187e-11, cdf: 1.279812543885835e-12 }
+    ]
+  },
+  {
+    name: 'Normal',
+    params: [-1, 1],
+    tol: 1e-3,
+    qtol: 1e-4,
+    points: [
+      { x: -6.0, pdf: 1.4867195147342977e-06, cdf: 2.866515718791939e-07 },
+      { x: -8.0, pdf: 9.134720408364594e-12, cdf: 1.279812543885835e-12 }
     ]
   },
   {
