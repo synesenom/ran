@@ -171,7 +171,8 @@ export default [{
   // mean = μ + σ/√2·(κ−1/κ); var = σ²/2·(κ²+1/κ²); skew = 2(κ³−1/κ³)/(κ²+1/κ²)^(3/2); kurt = 6(κ⁴+1/κ⁴)/(κ²+1/κ²)²
   moments: [
     { params: [0, Math.SQRT2, 1], mean: 0, variance: 2, skewness: 0, kurtosis: 3, tol: 1e-14 },
-    { params: [1, 1, 2], mean: 2.060660171779821, variance: 2.125, skewness: 1.7976169855634092, kurtosis: 5.335640138408304, tol: 1e-14 }
+    { params: [1, 1, 2], mean: 2.060660171779821, variance: 2.125, skewness: 1.7976169855634092, kurtosis: 5.335640138408304, tol: 1e-14 },
+    { params: [2, 0.5, 0.5], mean: 1.4696699141100895, variance: 0.53125, skewness: -1.7976169855634092, kurtosis: 5.335640138408304, tol: 1e-14 }
   ],
   invalidParams: [
     [], // all params required
@@ -200,6 +201,13 @@ export default [{
       { x: 2, pdf: 0.27892177222108094, cdf: 0.6055450468838082 },
       { x: 3, pdf: 0.1375275932306895, cdf: 0.8055066124526287 },
       { x: 5, pdf: 0.03343525936084217, cdf: 0.952715402750435 }
+    ],
+    // tau=0.2: p=0.1 exercises the left branch, p=0.5/0.8 exercise the right branch
+    quantileVals: [
+      { p: 0.1, x: 0.7549354641328632 },
+      { p: 0.2, x: 1 },
+      { p: 0.5, x: 1.664685506843895 },
+      { p: 0.8, x: 2.9605162869370947 }
     ]
   }],
   // κ=1, mu=0, sigma=1: Q(p) = (1/√2)·log(2p) for p<0.5, −(1/√2)·log(2(1−p)) for p≥0.5

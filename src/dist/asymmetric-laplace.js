@@ -36,6 +36,18 @@ export default class AsymmetricLaplace extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    const k2 = kappa * kappa
+    const oneK2 = 1 + k2
+    this.c = {
+      k2,
+      oneK2,
+      tau: 1 / oneK2,
+      k2tau: k2 / oneK2,
+      C: Math.SQRT2 * kappa / (sigma * oneK2),
+      leftRate: Math.SQRT2 * kappa / sigma,
+      rightRate: Math.SQRT2 / (kappa * sigma)
+    }
   }
 
   _generator () {
@@ -43,31 +55,30 @@ export default class AsymmetricLaplace extends Distribution {
   }
 
   _pdf (x) {
-    const { mu, sigma, kappa } = this.p
-    const C = Math.SQRT2 * kappa / (sigma * (1 + kappa * kappa))
+    const { mu } = this.p
+    const { C, leftRate, rightRate } = this.c
     if (x < mu) {
-      return C * Math.exp(-Math.SQRT2 * kappa * (mu - x) / sigma)
+      return C * Math.exp(-leftRate * (mu - x))
     }
-    return C * Math.exp(-Math.SQRT2 * (x - mu) / (kappa * sigma))
+    return C * Math.exp(-rightRate * (x - mu))
   }
 
   _cdf (x) {
-    const { mu, sigma, kappa } = this.p
-    const k2 = kappa * kappa
+    const { mu } = this.p
+    const { tau, k2tau, leftRate, rightRate } = this.c
     if (x < mu) {
-      return 1 / (1 + k2) * Math.exp(-Math.SQRT2 * kappa * (mu - x) / sigma)
+      return tau * Math.exp(-leftRate * (mu - x))
     }
-    return 1 - k2 / (1 + k2) * Math.exp(-Math.SQRT2 * (x - mu) / (kappa * sigma))
+    return 1 - k2tau * Math.exp(-rightRate * (x - mu))
   }
 
   _q (p) {
     const { mu, sigma, kappa } = this.p
-    const k2 = kappa * kappa
-    const tau = 1 / (1 + k2)
+    const { tau, k2, oneK2 } = this.c
     if (p < tau) {
-      return mu + sigma / (Math.SQRT2 * kappa) * Math.log(p * (1 + k2))
+      return mu + sigma / (Math.SQRT2 * kappa) * Math.log(p * oneK2)
     }
-    return mu - kappa * sigma / Math.SQRT2 * Math.log((1 - p) * (1 + k2) / k2)
+    return mu - kappa * sigma / Math.SQRT2 * Math.log((1 - p) * oneK2 / k2)
   }
 
   static _fitInit (data) {
@@ -89,8 +100,9 @@ export default class AsymmetricLaplace extends Distribution {
    * @returns {number} The variance of the distribution.
    */
   variance () {
-    const { sigma, kappa } = this.p
-    return sigma * sigma / 2 * (kappa * kappa + 1 / (kappa * kappa))
+    const { sigma } = this.p
+    const { k2 } = this.c
+    return sigma * sigma / 2 * (k2 + 1 / k2)
   }
 
   /**
@@ -98,7 +110,7 @@ export default class AsymmetricLaplace extends Distribution {
    */
   skewness () {
     const { kappa } = this.p
-    const k2 = kappa * kappa
+    const { k2 } = this.c
     const t = k2 + 1 / k2
     return 2 * (kappa * k2 - 1 / (kappa * k2)) / Math.pow(t, 1.5)
   }
@@ -107,8 +119,7 @@ export default class AsymmetricLaplace extends Distribution {
    * @returns {number} The excess kurtosis of the distribution.
    */
   kurtosis () {
-    const { kappa } = this.p
-    const k2 = kappa * kappa
+    const { k2 } = this.c
     const t = k2 + 1 / k2
     return 6 * (k2 * k2 + 1 / (k2 * k2)) / (t * t)
   }
