@@ -123,6 +123,9 @@
     "./dist/delaporte": {
       "import": "./dist/delaporte.esm.js"
     },
+    "./dist/discrete-laplace": {
+      "import": "./dist/discrete-laplace.esm.js"
+    },
     "./dist/discrete-uniform": {
       "import": "./dist/discrete-uniform.esm.js"
     },

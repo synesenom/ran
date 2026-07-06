@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `DiscreteLaplace(p, mu)` distribution: the bilateral geometric distribution supported on all integers ℤ, parameterized by decay p ∈ (0, 1) and integer location μ. PMF `(1−p)/(1+p)·p^|k−μ|`. Implements closed-form `_pdf`, `_cdf`, `_q` (inverse CDF), `mean`, `variance`, `skewness` (= 0), `kurtosis` (= (p²+4p+1)/(2p)), O(1) difference-of-geometrics sampler, and method-of-moments `_fitInit` (#812).
 - `besselK(n, x)` and `besselKnu(nu, x)` — Modified Bessel function of the second kind K_ν(x) for integer orders (combined series seeded upward recurrence + asymptotic expansion) and real orders (connection formula via `besselInu` for x ≤ 6, asymptotic expansion for x > 6), exported from `ran.special` (#809).
 - `TruncatedExponential(lambda, a, b)` distribution: exponential distribution restricted to a finite interval [a, b] (λ > 0, a ≥ 0, b > a). Subclass of `Exponential`. Implements closed-form `_pdf`, `_cdf`, `_q` (inverse CDF), `mean`, `variance`, inverse-CDF sampling, and method-of-moments `_fitInit` (#806).
 - `AsymmetricLaplace(mu, sigma, kappa)` distribution: a three-parameter two-sided exponential family parameterized by location μ ∈ ℝ, scale σ > 0, and asymmetry κ > 0. Reduces to Laplace(μ, σ/√2) at κ = 1. Implements closed-form `_pdf`, `_cdf`, `_q` (inverse CDF), `mean`, `variance`, `skewness`, and `kurtosis`, with exact inverse-CDF sampling and method-of-moments `_fitInit` (#805).
