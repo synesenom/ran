@@ -1,6 +1,7 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { adTest, ksTest, _adinf, _adStatistic } from './test-utils'
+import { ksTest } from './test-utils'
+import { _adinf, _adStatistic, andersonDarling } from '../src/dist/_tests'
 import { float, seed } from '../src/core'
 
 // Hand-computed A² for the symmetric reference sample u = [0.1, 0.3, 0.5, 0.7, 0.9].
@@ -44,18 +45,22 @@ describe('test-utils', () => {
     })
   })
 
-  describe('adTest', () => {
+  describe('andersonDarling', () => {
     it('should compute the canonical A² statistic on a hand-checked reference sample', () => {
       const a2 = _adStatistic(REF_SAMPLE.slice(), x => x)
       assert(Math.abs(a2 - REF_A2) < 1e-12, `A² = ${a2}, expected ${REF_A2}`)
-      // Sanity: A² ≈ 0.13 is well below any critical value, so adTest accepts.
-      assert(adTest(REF_SAMPLE.slice(), x => x))
+      // Sanity: A² ≈ 0.13 is well below any critical value, so andersonDarling accepts.
+      assert(andersonDarling(REF_SAMPLE.slice(), x => x).passed)
     })
 
     it('should accept a uniform sample drawn from the model CDF', () => {
       seed(12345)
       const sample = Array.from({ length: 1000 }, () => float())
-      assert(adTest(sample, x => x))
+      assert(andersonDarling(sample, x => x).passed)
+    })
+
+    it('should throw for an empty sample', () => {
+      assert.throws(() => andersonDarling([], x => x), /not be empty/)
     })
 
     it('should reject a sample whose shape disagrees with the model', () => {
@@ -64,7 +69,7 @@ describe('test-utils', () => {
       // both supports are (0,1) so no clipping is triggered, rejection must come
       // from distributional shape rather than boundary saturation.
       const sample = Array.from({ length: 1000 }, () => (float() + float()) / 2)
-      assert(!adTest(sample, x => x))
+      assert(!andersonDarling(sample, x => x).passed)
     })
   })
 })
