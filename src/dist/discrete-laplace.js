@@ -1,8 +1,8 @@
 import Distribution from './_distribution'
 
 /**
- * Probability mass function for the [discrete Laplace distribution]{@link https://en.wikipedia.org/wiki/Discrete_Laplace_distribution}
- * (also called the bilateral geometric distribution):
+ * Probability mass function for the discrete Laplace distribution
+ * (also called the bilateral geometric distribution; Inusah &amp; Kozubowski, 2006):
  *
  * $f(k; p, \mu) = \frac{1-p}{1+p} \cdot p^{|k - \mu|},$
  *
