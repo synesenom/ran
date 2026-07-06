@@ -67,6 +67,9 @@ def pmf(name, p, k):
             gamma(a + i) * power(b, i) / (gamma(a) * power(1 + b, a + i) * factorial(i))
             * exp(-lam) * power(lam, k - i) / factorial(k - i)
             for i in range(0, k + 1))
+    if name == 'DiscreteLaplace':
+        pp, mu = mpf(p[0]), int(p[1])
+        return (1 - pp) / (1 + pp) * power(pp, abs(k - mu))
     if name == 'DiscreteUniform':
         lo, hi = int(p[0]), int(p[1])
         return mpf(1) / (hi - lo + 1)
@@ -160,6 +163,8 @@ def support_lo(name, p):
         return 1
     if name == 'Rademacher':
         return -1
+    if name == 'DiscreteLaplace':
+        return int(p[1]) - 200
     if name == 'Skellam':
         return -200
     return 0
@@ -186,6 +191,7 @@ CHECKS = [
     ('BorelTanner', [0.5, 5], 5, 0.0820849986238988),
     ('ConwayMaxwellPoisson', [3, 2], 0, 0.1396843810244923),
     ('Delaporte', [2, 2, 2], 2, 0.09022352215774179),
+    ('DiscreteLaplace', [0.5, 0], 0, 0.3333333333333333),
     ('DiscreteUniform', [5, 50], 5, 0.021739130434782608),
     ('DiscreteWeibull', [0.75, 2], 2, 0.241321563720703),
     ('FlorySchulz', [0.5], 3, 0.1875),
@@ -237,6 +243,8 @@ SPEC = [
                               ([1, 0.5], [0, 1, 2, 3, 5])], 1e-14),
     ('Delaporte', [([2, 2, 2], [0, 2, 5, 8, 12]), ([0.5, 0.5, 0.5], [0, 1, 2, 3, 5]),
                    ([3, 1, 4], [2, 5, 8, 12, 18])], 1e-14),
+    ('DiscreteLaplace', [([0.5, 0], [-3, -1, 0, 2, 3]), ([0.3, 2], [0, 1, 2, 3, 5]),
+                         ([0.7, -1], [-4, -2, -1, 0, 2])], 1e-14),
     ('DiscreteUniform', [([5, 50], [5, 15, 27, 40, 50]), ([0, 9], [0, 2, 4, 6, 9]),
                          ([-3, 3], [-3, -1, 0, 1, 3])], 1e-14),
     ('DiscreteWeibull', [([0.5, 2], [0, 1, 2, 3, 4]), ([0.75, 2], [0, 1, 2, 3, 5]),
