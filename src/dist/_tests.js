@@ -165,6 +165,7 @@ export function _adStatistic (values, cdf) {
  * @private
  */
 export function andersonDarling (values, cdf) {
+  if (values.length === 0) throw Error('andersonDarling: values must not be empty')
   const a2 = _adStatistic(values, cdf)
   const adinf = _adinf(a2)
   const p = 1 - (adinf + _errfix(values.length, adinf))

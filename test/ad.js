@@ -59,6 +59,10 @@ describe('test-utils', () => {
       assert(andersonDarling(sample, x => x).passed)
     })
 
+    it('should throw for an empty sample', () => {
+      assert.throws(() => andersonDarling([], x => x), /not be empty/)
+    })
+
     it('should reject a sample whose shape disagrees with the model', () => {
       seed(12345)
       // Triangular (centre-heavy) sample tested against the unit-uniform CDF —
