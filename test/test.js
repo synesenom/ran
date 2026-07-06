@@ -194,4 +194,48 @@ describe('test', () => {
       assert(!test.mannWhitney([sample1, sample2]).passed)
     })
   })
+
+  describe('welch', () => {
+    it('should throw exception if x has fewer than 2 elements', () => {
+      assert.throws(() => {
+        test.welch([1], [1, 2, 3])
+      }, 'x must have at least 2 elements')
+    })
+
+    it('should throw exception if y has fewer than 2 elements', () => {
+      assert.throws(() => {
+        test.welch([1, 2, 3], [1])
+      }, 'y must have at least 2 elements')
+    })
+
+    it('should pass for samples of the same mean', () => {
+      seed(0)
+      const mu = float(0, 5)
+      const sigma = float(1, 10)
+      const sample1 = (new Normal(mu, sigma)).seed(1).sample(SAMPLE_SIZE)
+      const sample2 = (new Normal(mu, sigma)).seed(2).sample(SAMPLE_SIZE)
+      assert(test.welch(sample1, sample2).passed)
+    })
+
+    it('should reject for samples of different means', () => {
+      seed(0)
+      const mu = float(0, 5)
+      const sigma = float(1, 3)
+      const sample1 = (new Normal(mu, sigma)).seed(1).sample(SAMPLE_SIZE)
+      const sample2 = (new Normal(mu + 10, sigma)).seed(2).sample(SAMPLE_SIZE)
+      assert(!test.welch(sample1, sample2).passed)
+    })
+
+    it('should return stat and passed properties', () => {
+      const result = test.welch([1, 2, 3, 4, 5], [6, 7, 8, 9, 10])
+      assert.isNumber(result.stat)
+      assert.isBoolean(result.passed)
+    })
+
+    it('should not throw for zero-variance samples with different means', () => {
+      const result = test.welch([1, 1, 1], [2, 2, 2])
+      assert(!result.passed)
+      assert(!isFinite(result.stat))
+    })
+  })
 })
