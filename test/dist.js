@@ -670,6 +670,17 @@ describe('dist', () => {
         assert(Math.abs(fittedMean - sampleMean) < 0.2)
       })
 
+      it('DiscreteLaplace.fit should return a usable instance', () => {
+        const data = new dist.DiscreteLaplace(0.5, 0).seed(42).sample(500)
+        const result = dist.DiscreteLaplace.fit(data)
+        assert(result instanceof dist.DiscreteLaplace)
+        assert(Number.isFinite(result.pdf(0)) && result.pdf(0) > 0)
+      })
+
+      it('DiscreteLaplace.fit should throw for empty data', () => {
+        assert.throws(() => dist.DiscreteLaplace.fit([]), Error)
+      })
+
       it('BorelTanner.fit should return a usable BorelTanner instance', () => {
         const data = new dist.BorelTanner(0.5, 3).seed(42).sample(200)
         const result = dist.BorelTanner.fit(data)

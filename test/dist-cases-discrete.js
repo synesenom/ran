@@ -612,6 +612,62 @@ export default [{
     { params: [0.5, 0.5, 0.5], mean: 0.75, variance: 0.875, skewness: 1.25 / Math.pow(0.875, 1.5), kurtosis: 164 / 49 }
   ]
 }, {
+  name: 'DiscreteLaplace',
+  fit: { params: [0.5, 0], seed: 42, n: 500, tolerances: { p: 0.15, mu: 1 } },
+  // Formulas: mean=mu, var=2p/(1-p)^2, skew=0, kurt=(p^2+4p+1)/(2p)
+  moments: [
+    { params: [0.5, 0], mean: 0, variance: 4, skewness: 0, kurtosis: 3.25 },
+    { params: [0.3, 2], mean: 2, variance: 2 * 0.3 / (0.7 * 0.7), skewness: 0, kurtosis: (0.09 + 1.2 + 1) / (2 * 0.3) },
+    { params: [0.7, -1], mean: -1, variance: 2 * 0.7 / (0.3 * 0.3), skewness: 0, kurtosis: (0.49 + 2.8 + 1) / (2 * 0.7) }
+  ],
+  invalidParams: [
+    [], // all params required
+    [0, 0], [1, 0], // 0 < p < 1
+    [-0.1, 0], [1.1, 0], // 0 < p < 1
+    [0.5, Infinity], [0.5, -Infinity] // mu must be finite
+  ],
+  cases: [{
+    params: () => [0.5, 0],
+    symmetryDiscrete: 0
+  }, {
+    name: 'location shift',
+    params: () => [0.5, 3],
+    symmetryDiscrete: 3,
+    // exact rational: PMF(k) = (1/3)*(1/2)^|k-3|, CDF(k<3) = 2^(k-2)/3, CDF(k>=3) = 1 - (1/3)*(1/2)^(k-3)
+    refVals: [
+      { x: 0, pmf: 1 / 24, cdf: 1 / 12 },
+      { x: 2, pmf: 1 / 6, cdf: 1 / 3 },
+      { x: 3, pmf: 1 / 3, cdf: 2 / 3 },
+      { x: 4, pmf: 1 / 6, cdf: 5 / 6 },
+      { x: 6, pmf: 1 / 24, cdf: 23 / 24 }
+    ],
+    quantileVals: [
+      { p: 0.05, x: 0 },
+      { p: 0.25, x: 2 },
+      { p: 0.5, x: 3 },
+      { p: 0.75, x: 4 },
+      { p: 0.95, x: 6 }
+    ]
+  }],
+  // exact rational: PMF(k) = (1/3)*(1/2)^|k|, CDF(k<0) = 2^(k+1)/3, CDF(k>=0) = 1 - (1/3)*(1/2)^k
+  refVals: [
+    { x: -3, pmf: 1 / 24, cdf: 1 / 12 },
+    { x: -1, pmf: 1 / 6, cdf: 1 / 3 },
+    { x: 0, pmf: 1 / 3, cdf: 2 / 3 },
+    { x: 1, pmf: 1 / 6, cdf: 5 / 6 },
+    { x: 3, pmf: 1 / 24, cdf: 23 / 24 }
+  ],
+  // exact rational: CDF(k<0)=2^(k+1)/3, CDF(k>=0)=1-(1/3)*(1/2)^k
+  quantileVals: [
+    { p: 0.01, x: -6 },
+    { p: 0.05, x: -3 },
+    { p: 0.25, x: -1 },
+    { p: 0.5, x: 0 },
+    { p: 0.75, x: 1 },
+    { p: 0.95, x: 3 },
+    { p: 0.99, x: 6 }
+  ]
+}, {
   name: 'DiscreteUniform',
   fit: { params: [2, 8], seed: 42, n: 200, exact: ['xmin', 'xmax'] },
   // Formulas: mean=(a+b)/2, var=(n²-1)/12, skew=0, kurt=-6(n²+1)/(5(n²-1)) where n=b-a+1.
