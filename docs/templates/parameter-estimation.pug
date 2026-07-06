@@ -50,7 +50,7 @@ block content
         console.log(fitted.p)           // { mu: 3.000, sigma: 1.000 }
 
         // 3. Test goodness of fit
-        console.log(fitted.test(data))  // { statistics: 0.031, passed: true }
+        console.log(fitted.test(data))  // { statistics: 0.42, passed: true }
 
     p
         | The same pattern works for any distribution in the library. Here is a discrete example
@@ -102,7 +102,7 @@ block content
     pre: code.language-javascript.
         const fitted = dist.Gamma.fit(data)
 
-        fitted.test(data)        // KS goodness-of-fit test
+        fitted.test(data)        // Anderson-Darling goodness-of-fit test
         fitted.aic(data)         // Akaike information criterion
         fitted.bic(data)         // Bayesian information criterion
         fitted.pdf(x)            // density at any point

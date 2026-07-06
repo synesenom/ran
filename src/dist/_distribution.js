@@ -3,7 +3,7 @@ import neumaier from '../algorithms/neumaier'
 import tanhSinh from '../algorithms/tanh-sinh'
 import powell from '../algorithms/powell'
 import some from '../utils/some'
-import { chi2, kolmogorovSmirnov } from './_tests'
+import { chi2, andersonDarling } from './_tests'
 import chandrupatla from '../algorithms/chandrupatla'
 import { MAX_ITER } from '../core/constants'
 
@@ -834,14 +834,14 @@ class Distribution {
 
   /**
    * Tests if an array of values is sampled from the specified distribution. For discrete distributions this
-   * method uses $\chi^2$ test, whereas for continuous distributions it uses the Kolmogorov-Smirnov test. In both cases, the probability of Type I error (rejecting a correct null hypotheses) is 1%.
+   * method uses $\chi^2$ test, whereas for continuous distributions it uses the Anderson-Darling test. In both cases, the probability of Type I error (rejecting a correct null hypotheses) is 1%.
    *
    * @method test
    * @memberof ran.dist.Distribution
    * @param {number[]} values Array of values to test.
    * @returns {{statistics: number, passed: boolean}} Object with two properties representing the result of the test:
    * <ul>
-   *     <li>{statistics}: The $\chi^2$ or D statistics depending on whether the distribution is discrete or
+   *     <li>{statistics}: The $\chi^2$ or A² statistics depending on whether the distribution is discrete or
    *     continuous.</li>
    *     <li>{passed}: Whether the sample passed the null hypothesis that it is sampled from the current
    *     distribution.</li>
@@ -853,18 +853,18 @@ class Distribution {
    *
    * let sample1 = pareto.sample(100)
    * pareto.test(sample1)
-   * // => { statistics: 0.08632443341496943, passed: true }
+   * // => { statistics: 0.312, passed: true }
    *
    * let sample2 = uniform.sample(100)
    * pareto.test(sample2)
-   * // => { statistics: 0.632890888159255, passed: false }
+   * // => { statistics: 9.47, passed: false }
    *
    */
   test (values) {
     return this._type === 'discrete'
       // Parameters are fixed in the constructor (known), not estimated from values — df correction is 0.
       ? chi2(values, x => this.pdf(x), 0)
-      : kolmogorovSmirnov(values, x => this.cdf(x))
+      : andersonDarling(values, x => this.cdf(x))
   }
 
   /**

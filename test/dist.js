@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { before, describe, it } from 'mocha'
-import { adTest, chiTest, Tests, checkRefVals, checkQuantileVals } from './test-utils'
+import { Tests, checkRefVals, checkQuantileVals } from './test-utils'
 import { float } from '../src/core'
 import * as dist from '../src/dist'
 import PreComputed from '../src/dist/_pre-computed'
@@ -12,16 +12,6 @@ const testCases = [...continuousCases, ...discreteCases]
 
 // Constants.
 const SAMPLE_SIZE = 10000
-// Anderson-Darling has ~1.5–2× higher GoF power than KS at the same α, so half
-// the sample suffices for the same false-positive rate on the continuous
-// goodness-of-fit assertion. SAMPLE_SIZE is unchanged for paths that still rely
-// on KS or chi² (Distribution.test() and chiTest). See issue #184.
-const AD_SAMPLE_SIZE = 5000
-// α = 0.001 matches the historical false-positive rate of the previous KS check
-// (its one-sided statistic with the two-sided 1.628/√N band rejects at an
-// effective rate well below the nominal α = 0.01).
-// See solutions/testing/2026-05-19-1132-gof-test-swap-effective-alpha-empirical-calibration.md
-const AD_ALPHA = 0.001
 
 // Unit test suite.
 const UnitTests = {
@@ -212,13 +202,10 @@ const UnitTests = {
         })
 
         it('sample values should be distributed correctly', () => {
-          for (const s of [0, 42, 12345]) {
+          for (const s of (tc.testSeeds ?? [0, 42, 12345])) {
             const generator = c.generate()
             generator.seed(s)
-            assert(generator.type() === 'continuous'
-              ? adTest(generator.sample(n ?? AD_SAMPLE_SIZE), x => generator.cdf(x), AD_ALPHA)
-              // c=0: parameters are known, not estimated from data — see solutions/testing/2026-05-16-1915-alias-table-chi2-df-correction.md
-              : chiTest(generator.sample(n ?? SAMPLE_SIZE), x => generator.pdf(x), 0), `seed ${s}`)
+            assert(generator.test(generator.sample(n ?? SAMPLE_SIZE)).passed, `seed ${s}`)
           }
         })
       })

@@ -112,7 +112,7 @@ const fitted = dist.Normal.fit(data)
 console.log(fitted.p)           // => { mu: 3.000, sigma: 1.000 }
 
 // 3. Test goodness of fit
-console.log(fitted.test(data))  // => { statistics: 0.031, passed: true }
+console.log(fitted.test(data))  // => { statistics: 0.42, passed: true }
 ```
 
 `fit()` is a **static** method called on the class, not on an instance: `dist.Normal.fit(data)`, not `model.fit(data)`. All 142 exported distributions support `fit()`. Most have a data-aware initial guess for reliable MLE convergence; zero-parameter distributions skip optimization and return a fresh instance.
@@ -150,7 +150,7 @@ d.lnPdf(x)        // log probability density / mass
 d.lnL(data)       // log-likelihood over an array of observations
 d.aic(data)       // Akaike information criterion
 d.bic(data)       // Bayesian information criterion
-d.test(data)      // KS test (continuous) or chi-squared test (discrete)
+d.test(data)      // Anderson-Darling test (continuous) or chi-squared test (discrete)
 d.seed(value)     // set PRNG seed; returns the instance
 
 ran.dist.Gamma.fit(data)    // static — MLE fit; returns a new instance
