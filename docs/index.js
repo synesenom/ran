@@ -93,10 +93,7 @@ function parseEntry (entry) {
 (async () => {
   // Compile style to disk so every page links the same external stylesheet.
   console.log('Compiling style')
-  const compiledStyle = sass.renderSync({
-    file: './docs/styles/index.scss',
-    outputStyle: 'compressed'
-  }).css.toString()
+  const compiledStyle = sass.compile('./docs/styles/index.scss', { style: 'compressed' }).css
   fs.writeFileSync('./docs/styles/style.css', compiledStyle)
 
   // Parse documentation strings starting from index.js.
