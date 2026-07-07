@@ -40,32 +40,28 @@ Compare the diff against the plan and check:
 
 ### 4. Pass 2 — Code Quality (Parallel Subagents)
 
-**CRITICAL: Launch exactly 11 review agents. Verify all 11 returned results before proceeding.**
+**CRITICAL: Launch exactly 7 review agents. Verify all 7 returned results before proceeding.**
 
 Save the diff to a temporary file:
 ```bash
 mkdir -p .claude/tmp && git diff main...HEAD > .claude/tmp/review-diff-$(git branch --show-current).patch
 ```
 
-Then launch all eleven **in a single parallel call**, telling each to read `.claude/tmp/review-diff-<branch-name>.patch`:
+Then launch all seven **in a single parallel call**, telling each to read `.claude/tmp/review-diff-<branch-name>.patch`:
 
-- **review-security** agent
-- **review-performance** agent
-- **review-simplicity** agent
-- **review-tests** agent
-- **review-docs** agent
-- **review-correctness** agent
-- **review-logic** agent — general code logic bugs (inverted conditions, null deref, wrong variable)
-- **review-removals** agent — dropped guards, removed invariants, deleted tests covering real behavior
-- **review-callers** agent — cross-file caller impact of changed function signatures
-- **review-altitude** agent — bandaid fixes layered on shared infrastructure instead of generalizing
-- **review-conventions** agent — CLAUDE.md rule violations, with exact rule quotes
+- **review-security** agent — injection risks, prototype pollution, DoS via input
+- **review-performance** agent — unnecessary allocations, redundant computation, hot-path issues
+- **review-structure** agent — over-engineering, wrong abstraction level, CLAUDE.md violations
+- **review-tests** agent — test quality: behavior-first, edge cases, statistical rigor
+- **review-docs** agent — missing/stale JSDoc, README, ADRs, what-comments
+- **review-correctness** agent — mathematical/statistical errors, numerical instability, general logic bugs
+- **review-impact** agent — dropped guards/invariants (deleted lines) and cross-file caller breakage
 
 Each agent returns `Block` findings (must fix before commit), `Warn` findings (real problem, file as issue), or `No issues found.`
 
-Wait for all eleven. Then:
+Wait for all seven. Then:
 1. Collect every `Block` and `Warn` line from all agents.
-2. Deduplicate: if two agents flag the same file:line for the same root cause, keep one and tag it with both domains (e.g. `[logic, correctness]`).
+2. Deduplicate: if two agents flag the same file:line for the same root cause, keep one and tag it with both domains (e.g. `[correctness, impact]`).
 3. Produce one flat merged list — `Block` items first, then `Warn` — each tagged with its source domain.
 
 ### 5. Generate Report
