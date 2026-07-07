@@ -18,7 +18,7 @@ export default class BrownianMotion extends Process {
    */
   constructor (mu = 0, sigma = 1, dt = 1) {
     super()
-    Process.validate({ sigma, dt }, ['sigma > 0', 'dt > 0'])
+    Process.validate({ mu, sigma, dt }, ['sigma > 0', 'dt > 0'])
     this.p = { mu, sigma, dt }
     this.x = 0
     this.x0 = 0
@@ -38,6 +38,7 @@ export default class BrownianMotion extends Process {
    * @returns {number} Expected value x₀ + μ·t.
    */
   mean (t) {
+    if (t < 0) return NaN
     return this.x0 + this.p.mu * t
   }
 
@@ -50,6 +51,7 @@ export default class BrownianMotion extends Process {
    * @returns {number} Variance σ²·t.
    */
   variance (t) {
+    if (t < 0) return NaN
     return this.p.sigma * this.p.sigma * t
   }
 }

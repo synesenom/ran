@@ -147,6 +147,10 @@ describe('process.BrownianMotion', () => {
       assert.throws(() => new BrownianMotion(0, 1, -0.5), /Invalid parameters/)
     })
 
+    it('should throw on mu = NaN', () => {
+      assert.throws(() => new BrownianMotion(NaN, 1, 1), /Invalid parameters/)
+    })
+
     it('should accept valid parameters', () => {
       assert.doesNotThrow(() => new BrownianMotion(0, 1, 1))
       assert.doesNotThrow(() => new BrownianMotion(-2, 0.5, 0.01))
@@ -174,6 +178,11 @@ describe('process.BrownianMotion', () => {
       const bm = new BrownianMotion(1, 1, 1)
       assert.strictEqual(bm.mean(0), 0)
     })
+
+    it('should return NaN for t < 0', () => {
+      const bm = new BrownianMotion(0, 1, 1)
+      assert(isNaN(bm.mean(-1)))
+    })
   })
 
   describe('.variance()', () => {
@@ -185,6 +194,11 @@ describe('process.BrownianMotion', () => {
     it('should return 0 at t=0', () => {
       const bm = new BrownianMotion(0, 1, 1)
       assert.strictEqual(bm.variance(0), 0)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const bm = new BrownianMotion(0, 1, 1)
+      assert(isNaN(bm.variance(-1)))
     })
   })
 
