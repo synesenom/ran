@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `ran.process`: new `Process` abstract base class (`src/process/_process.js`) with `next()`, `path(n)`, `reset()`, and `state()` public interface; prerequisite for BrownianMotion and OrnsteinUhlenbeck (#847).
 - `ran.test.welch(x, y, alpha)` — Welch's two-sample t-test for equality of means using the Welch–Satterthwaite degrees of freedom. Returns `{ stat, passed }` consistent with all other `ran.test` functions (#815).
 - `DiscreteLaplace(p, mu)` distribution: the bilateral geometric distribution supported on all integers ℤ, parameterized by decay p ∈ (0, 1) and integer location μ. PMF `(1−p)/(1+p)·p^|k−μ|`. Implements closed-form `_pdf`, `_cdf`, `_q` (inverse CDF), `mean`, `variance`, `skewness` (= 0), `kurtosis` (= (p²+4p+1)/(2p)), O(1) difference-of-geometrics sampler, and method-of-moments `_fitInit` (#812).
 - `besselK(n, x)` and `besselKnu(nu, x)` — Modified Bessel function of the second kind K_ν(x) for integer orders (combined series seeded upward recurrence + asymptotic expansion) and real orders (connection formula via `besselInu` for x ≤ 6, asymptotic expansion for x > 6), exported from `ran.special` (#809).
