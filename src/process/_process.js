@@ -8,13 +8,7 @@ import Xoshiro128p from '../core/xoshiro'
  * @constructor
  */
 export default class Process {
-  /**
-   * @param {string} type Type of the process.
-   */
-  constructor (type) {
-    // decisions/0009-rename-single-letter-instance-fields.md — _type follows the completed first rename
-    this._type = type
-
+  constructor () {
     // Parameters — subclass populates after super()
     /** @type {Object} */
     this.p = {}

@@ -49,7 +49,7 @@ describe('process._Process', () => {
 
 class StubProcess extends Process {
   constructor () {
-    super('discrete-time')
+    super()
     this.x = 0
     this.x0 = 0
   }
@@ -61,7 +61,7 @@ class StubProcess extends Process {
 
 class BareProcess extends Process {
   constructor () {
-    super('discrete-time')
+    super()
     this.x = 0
     this.x0 = 0
   }
