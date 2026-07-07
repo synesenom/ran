@@ -21,10 +21,9 @@ export default class PoissonProcess extends Process {
     this.p = { lambda, dt }
     this.x = 0
     this.x0 = 0
-    this.c = { rate: lambda * dt }
   }
 
   _next () {
-    return this.x + poisson(this.r, this.c.rate)
+    return this.x + poisson(this.r, this.p.lambda * this.p.dt)
   }
 }
