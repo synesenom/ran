@@ -48,30 +48,16 @@ You will receive a git diff. Analyze only the changed lines (additions and modif
 ## Output Format
 
 ```markdown
-## Performance Review
-
-### Findings
-
-**P1 (Critical — measurable slowdown):**
+**Block:**
 - <file:line> — <description, why it's slow, and how to fix>
 
-**P2 (Warning — potential concern):**
+**Warn:**
 - <file:line> — <description and recommendation>
 
-**P3 (Info — minor optimization):**
-- <file:line> — <minor suggestion>
-
-### Summary
-<N> findings: <X> critical, <Y> warnings, <Z> info
+No issues found.
 ```
 
-If no issues found, output:
-
-```markdown
-## Performance Review
-
-No performance issues found.
-```
+`Block` = measurable slowdown that must be fixed before commit. `Warn` = potential concern worth filing. Drop micro-optimizations entirely — only `Block` or `Warn` findings. If nothing to report, output only `No issues found.`
 
 ## Rules
 

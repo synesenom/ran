@@ -46,30 +46,16 @@ You will receive a git diff. Analyze only the changed lines (additions and modif
 ## Output Format
 
 ```markdown
-## Documentation Review
-
-### Findings
-
-**P1 (Critical — missing docs for public API or architectural change):**
+**Block:**
 - <file:line> — <what's missing and what should be documented>
 
-**P2 (Warning — stale or incomplete documentation):**
-- <file:line> — <what's outdated and what changed>
+**Warn:**
+- <file:line> — <what's outdated or incomplete and what to update>
 
-**P3 (Info — minor documentation improvement):**
-- <file:line> — <suggestion>
-
-### Summary
-<N> findings: <X> critical, <Y> warnings, <Z> info
+No issues found.
 ```
 
-If no issues found:
-
-```markdown
-## Documentation Review
-
-No documentation issues found.
-```
+`Block` = missing JSDoc on public API or missing ADR for architectural change. `Warn` = stale or incomplete documentation. Drop minor suggestions entirely. If nothing to report, output only `No issues found.`
 
 ## Rules
 

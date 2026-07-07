@@ -1,6 +1,9 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import Process from '../src/process/_process'
+import BrownianMotion from '../src/process/brownian-motion'
+import { Normal } from '../src/dist'
+import { ksTest } from './test-utils'
 
 describe('process._Process', () => {
   describe('.validate()', () => {
@@ -180,6 +183,119 @@ describe('process', () => {
         const p = new RngProcess()
         assert.strictEqual(p.seed(0), p)
       })
+    })
+  })
+})
+
+describe('process.BrownianMotion', () => {
+  describe('constructor', () => {
+    it('should throw on sigma = 0', () => {
+      assert.throws(() => new BrownianMotion(0, 0, 1), /Invalid parameters/)
+    })
+
+    it('should throw on sigma < 0', () => {
+      assert.throws(() => new BrownianMotion(0, -1, 1), /Invalid parameters/)
+    })
+
+    it('should throw on dt = 0', () => {
+      assert.throws(() => new BrownianMotion(0, 1, 0), /Invalid parameters/)
+    })
+
+    it('should throw on dt < 0', () => {
+      assert.throws(() => new BrownianMotion(0, 1, -0.5), /Invalid parameters/)
+    })
+
+    it('should throw on mu = NaN', () => {
+      assert.throws(() => new BrownianMotion(NaN, 1, 1), /Invalid parameters/)
+    })
+
+    it('should accept valid parameters', () => {
+      assert.doesNotThrow(() => new BrownianMotion(0, 1, 1))
+      assert.doesNotThrow(() => new BrownianMotion(-2, 0.5, 0.01))
+    })
+
+    it('should start at state 0', () => {
+      const bm = new BrownianMotion(0, 1, 1)
+      assert.strictEqual(bm.state(), 0)
+    })
+  })
+
+  describe('.mean()', () => {
+    it('should return mu*t for zero initial state', () => {
+      const bm = new BrownianMotion(0.5, 1, 1)
+      assert.closeTo(bm.mean(2), 1.0, 1e-10)
+    })
+
+    it('should return 0 for zero drift at any t', () => {
+      const bm = new BrownianMotion(0, 1, 1)
+      assert.strictEqual(bm.mean(3), 0)
+      assert.strictEqual(bm.mean(100), 0)
+    })
+
+    it('should return 0 at t=0', () => {
+      const bm = new BrownianMotion(1, 1, 1)
+      assert.strictEqual(bm.mean(0), 0)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const bm = new BrownianMotion(0, 1, 1)
+      assert(isNaN(bm.mean(-1)))
+    })
+  })
+
+  describe('.variance()', () => {
+    it('should return sigma^2 * t', () => {
+      const bm = new BrownianMotion(0, 2, 1)
+      assert.closeTo(bm.variance(3), 12, 1e-10)
+    })
+
+    it('should return 0 at t=0', () => {
+      const bm = new BrownianMotion(0, 1, 1)
+      assert.strictEqual(bm.variance(0), 0)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const bm = new BrownianMotion(0, 1, 1)
+      assert(isNaN(bm.variance(-1)))
+    })
+  })
+
+  describe('.path()', () => {
+    it('should have length n+1', () => {
+      const bm = new BrownianMotion(0, 1, 1)
+      assert.strictEqual(bm.path(10).length, 11)
+    })
+
+    it('first element should be initial state 0', () => {
+      const bm = new BrownianMotion(0, 1, 1)
+      assert.strictEqual(bm.path(5)[0], 0)
+    })
+  })
+
+  describe('.reset()', () => {
+    it('should restore initial state to 0', () => {
+      const bm = new BrownianMotion(0, 1, 1)
+      for (let i = 0; i < 10; i++) bm.next()
+      bm.reset()
+      assert.strictEqual(bm.state(), 0)
+    })
+  })
+
+  describe('increments', () => {
+    it('should be normally distributed (KS test)', () => {
+      const mu = 0.1
+      const sigma = 1.5
+      const dt = 0.5
+      const bm = new BrownianMotion(mu, sigma, dt)
+      const n = 1000
+      const increments = []
+      for (let i = 0; i < n; i++) {
+        const prev = bm.state()
+        bm.next()
+        increments.push(bm.state() - prev)
+      }
+      const ref = new Normal(mu * dt, sigma * Math.sqrt(dt))
+      assert(ksTest(increments, x => ref.cdf(x)))
     })
   })
 })

@@ -60,30 +60,16 @@ You will receive a git diff. Analyze only test files (files under `test/`) in th
 ## Output Format
 
 ```markdown
-## Test Quality Review
-
-### Findings
-
-**P1 (Critical — test verifies implementation details, not behavior):**
+**Block:**
 - <file:line> — <what's wrong and how to fix>
 
-**P2 (Warning — weak test that may miss bugs):**
+**Warn:**
 - <file:line> — <what's weak and how to strengthen>
 
-**P3 (Info — minor quality improvement):**
-- <file:line> — <suggestion>
-
-### Summary
-<N> findings: <X> critical, <Y> warnings, <Z> info
+No issues found.
 ```
 
-If no issues found, output:
-
-```markdown
-## Test Quality Review
-
-No test quality issues found.
-```
+`Block` = test verifies implementation details instead of behavior, or encodes a wrong expected value. `Warn` = weak assertion that may miss real bugs. Drop minor style improvements entirely. If nothing to report, output only `No issues found.`
 
 ## Rules
 

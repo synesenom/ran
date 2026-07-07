@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `ran.process.BrownianMotion(mu, sigma, dt)`: Brownian motion (Wiener process) with drift, using an exact O(1) discrete-time sampler (`x += μ·dt + σ·√dt·N(0,1)`). Exposes `mean(t)` and `variance(t)` with closed-form analytical values (#848).
 - `Process.seed(s)` method: seeds the internal PRNG for reproducible paths; delegates to `this.r.seed(s)` and returns `this` for chaining, mirroring `Distribution.seed()` (#861).
 - `ran.process`: new `Process` abstract base class (`src/process/_process.js`) with `next()`, `path(n)`, `reset()`, and `state()` public interface; prerequisite for BrownianMotion and OrnsteinUhlenbeck (#847).
 - `ran.test.welch(x, y, alpha)` — Welch's two-sample t-test for equality of means using the Welch–Satterthwaite degrees of freedom. Returns `{ stat, passed }` consistent with all other `ran.test` functions (#815).

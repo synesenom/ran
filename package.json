@@ -472,7 +472,7 @@
   ],
   "scripts": {
     "lint": "./node_modules/.bin/standard src/**/*.js test/*.js",
-    "jsdoclint": "./node_modules/.bin/eslint --no-eslintrc --config .eslintrc.jsdoc.js src/dist/_distribution.js 'src/dist/[!_]*.js' src/core/index.js src/location src/dispersion src/shape src/dependence src/test src/process/_process.js",
+    "jsdoclint": "./node_modules/.bin/eslint --no-eslintrc --config .eslintrc.jsdoc.js src/dist/_distribution.js 'src/dist/[!_]*.js' src/core/index.js src/location src/dispersion src/shape src/dependence src/test src/process/_process.js 'src/process/[!_]*.js'",
     "standard": "./node_modules/.bin/standard --fix src/**/*.js test/*.js",
     "test": "./node_modules/.bin/cross-env NODE_ENV=test ./node_modules/.bin/nyc ./node_modules/.bin/_mocha --require @babel/register",
     "docs": "npm run build && node ./docs/index.js",

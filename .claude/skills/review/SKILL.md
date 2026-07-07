@@ -40,56 +40,52 @@ Compare the diff against the plan and check:
 
 ### 4. Pass 2 — Code Quality (Parallel Subagents)
 
-**CRITICAL: Launch exactly 6 review agents. Verify all 6 returned results before proceeding.**
+**CRITICAL: Launch exactly 8 review agents. Verify all 8 returned results before proceeding.**
 
 Save the diff to a temporary file:
 ```bash
 mkdir -p .claude/tmp && git diff main...HEAD > .claude/tmp/review-diff-$(git branch --show-current).patch
 ```
 
-Then launch all six **in a single parallel call**, telling each to read `.claude/tmp/review-diff-<branch-name>.patch`:
+Then launch all eight **in a single parallel call**, telling each to read `.claude/tmp/review-diff-<branch-name>.patch`:
 
-- **review-security** agent
-- **review-performance** agent
-- **review-simplicity** agent
-- **review-tests** agent
-- **review-docs** agent
-- **review-correctness** agent
+- **review-security** agent — injection risks, prototype pollution, DoS via input
+- **review-performance** agent — unnecessary allocations, redundant computation, hot-path issues
+- **review-structure** agent — over-engineering and wrong abstraction level
+- **review-conventions** agent — CLAUDE.md rule violations (reads CLAUDE.md, quotes exact rules)
+- **review-tests** agent — test quality: behavior-first, edge cases, statistical rigor
+- **review-docs** agent — missing/stale JSDoc, README, ADRs, what-comments
+- **review-correctness** agent — mathematical/statistical errors, numerical instability, general logic bugs
+- **review-impact** agent — dropped guards/invariants (deleted lines) and cross-file caller breakage
 
-Each returns findings rated P1 (critical), P2 (warning), or P3 (info).
+Each agent returns `Block` findings (must fix before commit), `Warn` findings (real problem, file as issue), or `No issues found.`
 
-Wait for all six. Synthesize into a single deduplicated list sorted by severity.
-
-**Severity override transparency**: If you downgrade a finding, note the original severity and your reasoning.
+Wait for all eight. Then:
+1. Collect every `Block` and `Warn` line from all agents.
+2. Deduplicate: if two agents flag the same file:line for the same root cause, keep one and tag it with both domains (e.g. `[correctness, impact]`).
+3. Produce one flat merged list — `Block` items first, then `Warn` — each tagged with its source domain.
 
 ### 5. Generate Report
 
 > **Review: `<branch name>`**
 >
-> **Pass 1 — Spec Compliance**: PASS | FAIL | SKIPPED (no plan found)
+> **Spec**: PASS | FAIL | SKIPPED (no plan found)
+> <If FAIL: bulleted list of spec gaps>
 >
-> <If FAIL:>
-> - [ ] <Issue and what to fix>
+> **Block (<N>):**
+> - [ ] `[domain]` file:line — description and fix
 >
-> **Pass 2 — Code Quality**: PASS | FAIL
+> **Warn (<N>):**
+> - [ ] `[domain]` file:line — description and recommendation
 >
-> **P1 (Critical):**
-> - [ ] <[security|performance|simplicity|tests|docs|correctness] file:line — description and fix>
->
-> **P2 (Warning):**
-> - [ ] <[domain] file:line — description and fix>
->
-> **P3 (Info):**
-> - <[domain] file:line — note>
->
-> **Verdict**: PASS | FAIL (<N> issues to fix)
+> **Verdict**: PASS | FAIL (<N> to fix before commit, <M> to file)
 
-Pass 2 is FAIL if there are any P1 or P2 findings. P3 items are informational and do not block.
+Verdict is FAIL if there are any Block items. Warn items do not block — they should be filed as issues after committing. If both Block and Warn are empty, output `Verdict: PASS` with no lists.
 
 ### 6. Next Steps
 
 - **PASS**: "Review passed. Changes are ready to commit."
-- **FAIL**: "Review found <N> issue(s). Fix them and run `/review` again."
+- **FAIL**: "Review found <N> blocking issue(s). Fix them and run `/review` again. (<M> warn items — file as issues after committing.)"
 
 ## Rules
 

@@ -32,11 +32,18 @@ This directory contains the skills and agents that power the development workflo
     ├── design-critique.md     # Evaluates design options against conventions
     ├── recovery-fix.md        # Diagnoses test failures and proposes fix
     ├── recovery-validate.md   # Checks fixes don't deviate from plan
-    ├── review-correctness.md  # Reviews for mathematical/statistical bugs
+    ├── review-correctness.md  # Reviews for mathematical/statistical errors and general logic bugs
     ├── review-docs.md         # Reviews for documentation gaps
+    ├── review-impact.md       # Reviews for dropped invariants and cross-file caller breakage
     ├── review-performance.md  # Reviews for performance issues
     ├── review-security.md     # Reviews for security issues
-    ├── review-simplicity.md   # Reviews for over-engineering
+    ├── review-conventions.md  # Reviews for CLAUDE.md rule violations (exact quotes)
+    ├── review-correctness.md  # Reviews for mathematical/statistical errors and general logic bugs
+    ├── review-docs.md         # Reviews for documentation gaps
+    ├── review-impact.md       # Reviews for dropped invariants and cross-file caller breakage
+    ├── review-performance.md  # Reviews for performance issues
+    ├── review-security.md     # Reviews for security issues
+    ├── review-structure.md    # Reviews for over-engineering and wrong abstraction level
     ├── review-tests.md        # Reviews for test quality gaps
     ├── ops-insight.md         # Extracts problem/fix/insight from diffs
     ├── ops-issue.md           # Creates GitHub issues
@@ -104,9 +111,10 @@ research → plan → implement → validate → review → ship
     │         │        │           │         │         │
     ▼         ▼        ▼           ▼         ▼         ▼
  Understand  Design   TDD       Check     6 review   Commit, compound,
- codebase    options  phase by  issue     agents in  push, create PR
- context     auto-    phase     criteria  parallel,  (compound before
-             resolved           (loop)    auto-fix   push avoids 2x CI)
+ codebase    options  phase by  issue     8 review   Commit, compound,
+ context     auto-    phase     criteria  agents in  push, create PR
+             resolved           (loop)    parallel,  (compound before
+                                          auto-fix   push avoids 2x CI)
 ```
 
 ### Manual step-by-step
@@ -161,16 +169,18 @@ Launched by [`/implement`](skills/implement/SKILL.md) when tests fail. Auto-reco
 
 ### `review-*` — Parallel quality checks
 
-All launched **in parallel** by [`/review`](skills/review/SKILL.md). Each returns findings rated P1/P2/P3.
+All launched **in parallel** by [`/review`](skills/review/SKILL.md). Each returns `Block` (must fix before commit) and `Warn` (file as issue) findings. Results are merged into one flat list — no per-agent sections.
 
 | Agent | Model | Focus |
 |-------|-------|-------|
 | [`review-security`](agents/review-security.md) | Haiku | Injection risks, unsafe eval, path traversal |
 | [`review-performance`](agents/review-performance.md) | Haiku | Unnecessary allocations, O(n²) patterns, hot-path issues |
-| [`review-simplicity`](agents/review-simplicity.md) | Haiku | Over-engineering, dead weight, convention violations |
+| [`review-structure`](agents/review-structure.md) | Haiku | Over-engineering and wrong abstraction level |
+| [`review-conventions`](agents/review-conventions.md) | Haiku | CLAUDE.md rule violations with exact rule quotes and section citations |
 | [`review-tests`](agents/review-tests.md) | Sonnet | Test quality: behavior-first, edge cases, statistical rigor |
-| [`review-docs`](agents/review-docs.md) | Haiku | Missing/stale JSDoc, README, ADRs |
-| [`review-correctness`](agents/review-correctness.md) | Sonnet | Mathematical/statistical bugs: wrong formulas, numerical issues, off-by-one |
+| [`review-docs`](agents/review-docs.md) | Haiku | Missing/stale JSDoc, README, ADRs, what-comments |
+| [`review-correctness`](agents/review-correctness.md) | Opus | Mathematical/statistical errors, numerical instability, general code logic bugs |
+| [`review-impact`](agents/review-impact.md) | Sonnet | Dropped invariants (deleted lines) and cross-file caller breakage |
 
 ### `suggest-*` — Codebase improvement scouts
 
@@ -213,14 +223,16 @@ Launched **in parallel** by [`/suggest`](skills/suggest/SKILL.md). Each scout sc
 /review ─────→ discovery-thoughts
               → review-security    ┐
               → review-performance │
-              → review-simplicity  │ parallel
+              → review-structure   │
+              → review-conventions │ parallel (8 agents)
               → review-tests       │
               → review-docs        │
-              → review-correctness ┘
+              → review-correctness │
+              → review-impact      ┘
 
 /review-pr ──→ review-security    ┐
               → review-performance │
-              → review-simplicity  │ parallel
+              → review-structure   │ parallel
               → review-tests       │
               → review-docs        │
               → review-correctness ┘
