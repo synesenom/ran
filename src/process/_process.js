@@ -1,11 +1,11 @@
 import Xoshiro128p from '../core/xoshiro'
 
 /**
- * The stochastic process generator base class, all process generators extend this class.
+ * The stochastic process generator base class, all process generators extend this class. The methods listed here
+ * are available for all process generators.
  *
  * @class Process
  * @memberof ran.process
- * @constructor
  */
 export default class Process {
   constructor () {

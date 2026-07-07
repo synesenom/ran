@@ -23,6 +23,9 @@ hljs.registerLanguage('javascript', require('highlight.js/lib/languages/javascri
 const PRIORITY = {
   dist: [
     'Distribution'
+  ],
+  process: [
+    'Process'
   ]
 }
 
