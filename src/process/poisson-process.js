@@ -26,4 +26,30 @@ export default class PoissonProcess extends Process {
   _next () {
     return this.x + poisson(this.r, this.p.lambda * this.p.dt)
   }
+
+  /**
+   * Returns the analytical mean of the process at time t.
+   *
+   * @method mean
+   * @memberof ran.process.PoissonProcess
+   * @param {number} t Time.
+   * @returns {number} Expected value λ·t.
+   */
+  mean (t) {
+    if (t < 0) return NaN
+    return this.p.lambda * t
+  }
+
+  /**
+   * Returns the analytical variance of the process at time t.
+   *
+   * @method variance
+   * @memberof ran.process.PoissonProcess
+   * @param {number} t Time.
+   * @returns {number} Variance λ·t.
+   */
+  variance (t) {
+    if (t < 0) return NaN
+    return this.p.lambda * t
+  }
 }

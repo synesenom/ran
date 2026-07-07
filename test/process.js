@@ -495,4 +495,38 @@ describe('process.PoissonProcess', () => {
       assert(chiTest(increments, k => ref.pdf(k), 0))
     })
   })
+
+  describe('.mean()', () => {
+    it('should return lambda*t', () => {
+      const pp = new PoissonProcess(2, 0.5)
+      assert.closeTo(pp.mean(3), 6, 1e-10)
+    })
+
+    it('should return 0 at t=0', () => {
+      const pp = new PoissonProcess(2, 0.5)
+      assert.strictEqual(pp.mean(0), 0)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const pp = new PoissonProcess(2, 0.5)
+      assert(Number.isNaN(pp.mean(-1)))
+    })
+  })
+
+  describe('.variance()', () => {
+    it('should return lambda*t', () => {
+      const pp = new PoissonProcess(2, 0.5)
+      assert.closeTo(pp.variance(3), 6, 1e-10)
+    })
+
+    it('should return 0 at t=0', () => {
+      const pp = new PoissonProcess(2, 0.5)
+      assert.strictEqual(pp.variance(0), 0)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const pp = new PoissonProcess(2, 0.5)
+      assert(Number.isNaN(pp.variance(-1)))
+    })
+  })
 })
