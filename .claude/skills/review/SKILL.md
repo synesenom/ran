@@ -61,42 +61,34 @@ Then launch all eleven **in a single parallel call**, telling each to read `.cla
 - **review-altitude** agent — bandaid fixes layered on shared infrastructure instead of generalizing
 - **review-conventions** agent — CLAUDE.md rule violations, with exact rule quotes
 
-Each returns findings rated P1 (critical), P2 (warning), or P3 (info).
+Each agent returns `Block` findings (must fix before commit), `Warn` findings (real problem, file as issue), or `No issues found.`
 
-Wait for all eleven. Synthesize into a single deduplicated list sorted by severity.
-
-**Severity override / dedup**: Near-duplicate findings from multiple agents (same file, same line, same root cause) should be merged into one item. If you downgrade a finding, note the original severity and your reasoning.
+Wait for all eleven. Then:
+1. Collect every `Block` and `Warn` line from all agents.
+2. Deduplicate: if two agents flag the same file:line for the same root cause, keep one and tag it with both domains (e.g. `[logic, correctness]`).
+3. Produce one flat merged list — `Block` items first, then `Warn` — each tagged with its source domain.
 
 ### 5. Generate Report
 
 > **Review: `<branch name>`**
 >
-> **Pass 1 — Spec Compliance**: PASS | FAIL | SKIPPED (no plan found)
+> **Spec**: PASS | FAIL | SKIPPED (no plan found)
+> <If FAIL: bulleted list of spec gaps>
 >
-> <If FAIL:>
-> - [ ] <Issue and what to fix>
+> **Block (<N>):**
+> - [ ] `[domain]` file:line — description and fix
 >
-> **Pass 2 — Code Quality**: PASS | FAIL
+> **Warn (<N>):**
+> - [ ] `[domain]` file:line — description and recommendation
 >
-> **P1 (Critical):**
-> - [ ] <[security|performance|simplicity|tests|docs|correctness|logic|removals|callers|altitude|conventions] file:line — description and fix>
->
-> **P2 (Warning):**
-> - [ ] <[domain] file:line — description and fix>
->
-> _Domain tags: security · performance · simplicity · tests · docs · correctness · logic · removals · callers · altitude · conventions_
->
-> **P3 (Info):**
-> - <[domain] file:line — note>
->
-> **Verdict**: PASS | FAIL (<N> issues to fix)
+> **Verdict**: PASS | FAIL (<N> to fix before commit, <M> to file)
 
-Pass 2 is FAIL if there are any P1 or P2 findings. P3 items are informational and do not block.
+Verdict is FAIL if there are any Block items. Warn items do not block — they should be filed as issues after committing. If both Block and Warn are empty, output `Verdict: PASS` with no lists.
 
 ### 6. Next Steps
 
 - **PASS**: "Review passed. Changes are ready to commit."
-- **FAIL**: "Review found <N> issue(s). Fix them and run `/review` again."
+- **FAIL**: "Review found <N> blocking issue(s). Fix them and run `/review` again. (<M> warn items — file as issues after committing.)"
 
 ## Rules
 

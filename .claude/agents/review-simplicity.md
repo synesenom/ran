@@ -53,30 +53,16 @@ You will receive a git diff. Analyze only the changed lines (additions and modif
 ## Output Format
 
 ```markdown
-## Simplicity Review
-
-### Findings
-
-**P1 (Critical — clear over-engineering):**
+**Block:**
 - <file:line> — <what's over-engineered and how to simplify>
 
-**P2 (Warning — unnecessary complexity):**
+**Warn:**
 - <file:line> — <what's complex and a simpler alternative>
 
-**P3 (Info — minor convention issue):**
-- <file:line> — <convention deviation and what the convention is>
-
-### Summary
-<N> findings: <X> critical, <Y> warnings, <Z> info
+No issues found.
 ```
 
-If no issues found, output:
-
-```markdown
-## Simplicity Review
-
-No simplicity issues found.
-```
+`Block` = clear over-engineering that must be fixed before commit. `Warn` = unnecessary complexity worth addressing. Drop minor style notes entirely. If nothing to report, output only `No issues found.`
 
 ## Rules
 

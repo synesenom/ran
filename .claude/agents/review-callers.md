@@ -52,30 +52,16 @@ You will receive a git diff. Extract changed function names from it, then search
 ## Output Format
 
 ```markdown
-## Callers Review
-
-### Findings
-
-**P1 (Critical — existing caller breaks under reachable conditions):**
+**Block:**
 - <caller file:line> → calls <callee file:line> — <what breaks and under what conditions>
 
-**P2 (Warning — caller may break under non-obvious conditions):**
+**Warn:**
 - <caller file:line> → calls <callee file:line> — <the condition and recommended fix>
 
-**P3 (Info — worth verifying manually):**
-- <caller file:line> — <what to check>
-
-### Summary
-<N> findings: <X> critical, <Y> warnings, <Z> info
+No issues found.
 ```
 
-If no callers are found or no breakage is detected, output:
-
-```markdown
-## Callers Review
-
-No caller-side breakage found.
-```
+`Block` = existing caller breaks under reachable conditions. `Warn` = caller may break under a non-obvious but reachable condition. Drop theoretical concerns without a concrete failure path. If nothing to report, output only `No issues found.`
 
 ## Rules
 

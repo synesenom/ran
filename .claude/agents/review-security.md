@@ -43,30 +43,16 @@ You will receive a git diff. Analyze only the changed lines (additions and modif
 ## Output Format
 
 ```markdown
-## Security Review
-
-### Findings
-
-**P1 (Critical):**
+**Block:**
 - <file:line> — <description of vulnerability and how to fix>
 
-**P2 (Warning):**
+**Warn:**
 - <file:line> — <description and recommendation>
 
-**P3 (Info):**
-- <file:line> — <minor concern or suggestion>
-
-### Summary
-<N> findings: <X> critical, <Y> warnings, <Z> info
+No issues found.
 ```
 
-If no issues found, output:
-
-```markdown
-## Security Review
-
-No security issues found.
-```
+Emit only `Block` and `Warn` findings. Omit whichever section has no entries. If nothing to report, output only `No issues found.`
 
 ## Rules
 

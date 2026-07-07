@@ -51,30 +51,16 @@ You will receive a git diff. Focus on deleted lines (`-`) and replaced lines (`-
 ## Output Format
 
 ```markdown
-## Removals Review
-
-### Findings
-
-**P1 (Critical — invariant lost with no replacement):**
+**Block:**
 - <file:line of deletion> — <what invariant was enforced, what it guarded against, why its absence matters>
 
-**P2 (Warning — invariant may be covered elsewhere but not obviously):**
+**Warn:**
 - <file:line> — <what was removed and where to check if it is re-established>
 
-**P3 (Info — deleted test or minor guard):**
-- <file:line> — <what was removed and whether the behavior is still covered>
-
-### Summary
-<N> findings: <X> critical, <Y> warnings, <Z> info
+No issues found.
 ```
 
-If no issues found, output:
-
-```markdown
-## Removals Review
-
-No removed-behavior issues found.
-```
+`Block` = invariant lost with no replacement. `Warn` = invariant may be covered elsewhere but not obviously. Drop removals of clearly dead code or cosmetic cleanup. If nothing to report, output only `No issues found.`
 
 ## Rules
 

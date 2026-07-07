@@ -166,7 +166,7 @@ Launched by [`/implement`](skills/implement/SKILL.md) when tests fail. Auto-reco
 
 ### `review-*` — Parallel quality checks
 
-All launched **in parallel** by [`/review`](skills/review/SKILL.md). Each returns findings rated P1/P2/P3.
+All launched **in parallel** by [`/review`](skills/review/SKILL.md). Each returns `Block` (must fix before commit) and `Warn` (file as issue) findings. Results are merged into one flat list — no per-agent sections.
 
 | Agent | Model | Focus |
 |-------|-------|-------|

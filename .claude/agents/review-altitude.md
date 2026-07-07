@@ -55,30 +55,16 @@ You will receive a git diff. Read changed base classes, shared utilities, and al
 ## Output Format
 
 ```markdown
-## Altitude Review
-
-### Findings
-
-**P1 (Critical — bandaid on shared infrastructure that will need to be repeated):**
+**Block:**
 - <file:line> — <what the bandaid is, what it guards against, and what a proper fix would look like>
 
-**P2 (Warning — fix at wrong abstraction level):**
+**Warn:**
 - <file:line> — <where the fix should live instead>
 
-**P3 (Info — consider generalizing):**
-- <file:line> — <what might be worth lifting into a shared mechanism>
-
-### Summary
-<N> findings: <X> critical, <Y> warnings, <Z> info
+No issues found.
 ```
 
-If no issues found, output:
-
-```markdown
-## Altitude Review
-
-No altitude issues found.
-```
+`Block` = bandaid on shared infrastructure that will predictably need to be repeated for the next caller. `Warn` = fix at the wrong abstraction level but not shared infrastructure. Drop "consider generalizing" suggestions — only report objectively wrong abstraction levels. If nothing to report, output only `No issues found.`
 
 ## Rules
 

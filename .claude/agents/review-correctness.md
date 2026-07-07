@@ -65,30 +65,16 @@ You will receive a git diff. Analyze only the changed lines (additions and modif
 ## Output Format
 
 ```markdown
-## Correctness Review
-
-### Findings
-
-**P1 (Critical — produces wrong results):**
+**Block:**
 - <file:line> — <what's wrong, what the correct formula/behavior should be, and how to fix>
 
-**P2 (Warning — may produce wrong results under certain conditions):**
-- <file:line> — <the condition, why it's risky, and recommendation>
+**Warn:**
+- <file:line> — <the condition that triggers wrong results, why it's risky, and recommendation>
 
-**P3 (Info — worth verifying):**
-- <file:line> — <what to double-check>
-
-### Summary
-<N> findings: <X> critical, <Y> warnings, <Z> info
+No issues found.
 ```
 
-If no issues found, output:
-
-```markdown
-## Correctness Review
-
-No correctness issues found.
-```
+`Block` = produces wrong results on a reachable code path. `Warn` = may produce wrong results under a non-obvious but reachable condition. Drop "worth verifying" observations entirely. If nothing to report, output only `No issues found.`
 
 ## Rules
 

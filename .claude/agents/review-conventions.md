@@ -47,30 +47,16 @@ You will receive a git diff. Read `CLAUDE.md` directly from the repository — d
 ## Output Format
 
 ```markdown
-## Conventions Review
-
-### Findings
-
-**P1 (Critical — explicit rule clearly violated):**
+**Block:**
 - <file:line> — Rule: "<exact quote from CLAUDE.md>" (CLAUDE.md:<section>). Violation: <what the changed line does that breaks the rule>.
 
-**P2 (Warning — probable violation, rule is clear but application is ambiguous):**
+**Warn:**
 - <file:line> — Rule: "<exact quote>" (CLAUDE.md:<section>). Concern: <why this may violate the rule>.
 
-**P3 (Info — minor deviation worth noting):**
-- <file:line> — Rule: "<exact quote>" (CLAUDE.md:<section>). Note: <observation>.
-
-### Summary
-<N> findings: <X> critical, <Y> warnings, <Z> info
+No issues found.
 ```
 
-If no violations found, output:
-
-```markdown
-## Conventions Review
-
-No convention violations found.
-```
+`Block` = explicit rule clearly violated. `Warn` = rule is clear but application to this case is ambiguous. Drop minor deviations where the rule's application requires significant interpretation. If nothing to report, output only `No issues found.`
 
 ## Rules
 

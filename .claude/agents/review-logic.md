@@ -51,30 +51,16 @@ You will receive a git diff. Analyze only the changed and nearby lines (look at 
 ## Output Format
 
 ```markdown
-## Logic Review
-
-### Findings
-
-**P1 (Critical — wrong behavior on a reachable code path):**
+**Block:**
 - <file:line> — <what the bug is, what inputs trigger it, what the correct form should be>
 
-**P2 (Warning — wrong behavior under a non-obvious condition):**
-- <file:line> — <the condition that triggers it and the correct fix>
+**Warn:**
+- <file:line> — <the non-obvious condition that triggers it and the correct fix>
 
-**P3 (Info — worth a second look):**
-- <file:line> — <what looks suspicious and why>
-
-### Summary
-<N> findings: <X> critical, <Y> warnings, <Z> info
+No issues found.
 ```
 
-If no issues found, output:
-
-```markdown
-## Logic Review
-
-No logic issues found.
-```
+`Block` = wrong behavior on a reachable code path. `Warn` = wrong behavior under a non-obvious but reachable condition. Drop suspicions without a concrete failure scenario. If nothing to report, output only `No issues found.`
 
 ## Rules
 
