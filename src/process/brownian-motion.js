@@ -4,7 +4,11 @@ import Process from './_process'
 /**
  * Brownian motion (Wiener process) with drift, using an exact O(1) discrete-time sampler.
  *
- * The update rule per step is X(t + dt) = X(t) + μ·dt + σ·√dt·Z where Z ~ N(0,1).
+ * The update rule per step is
+ *
+ * $X(t + \mathrm{d}t) = X(t) + \mu\,\mathrm{d}t + \sigma\sqrt{\mathrm{d}t}\,Z,$
+ *
+ * where $Z \sim \mathcal{N}(0, 1)$.
  *
  * @class BrownianMotion
  * @memberof ran.process
@@ -35,7 +39,7 @@ export default class BrownianMotion extends Process {
    * @method mean
    * @memberof ran.process.BrownianMotion
    * @param {number} t Time.
-   * @returns {number} Expected value x₀ + μ·t.
+   * @returns {number} Expected value $x_0 + \mu t$.
    */
   mean (t) {
     if (t < 0) return NaN
@@ -48,7 +52,7 @@ export default class BrownianMotion extends Process {
    * @method variance
    * @memberof ran.process.BrownianMotion
    * @param {number} t Time.
-   * @returns {number} Variance σ²·t.
+   * @returns {number} Variance $\sigma^2 t$.
    */
   variance (t) {
     if (t < 0) return NaN
