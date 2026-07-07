@@ -82,6 +82,19 @@ export default class Process {
   }
 
   /**
+   * Seeds the internal PRNG for reproducible paths.
+   *
+   * @method seed
+   * @memberof ran.process.Process
+   * @param {number|string} value Seed value passed to the underlying Xoshiro128p PRNG.
+   * @returns {this} Reference to the current process.
+   */
+  seed (value) {
+    this.r.seed(value)
+    return this
+  }
+
+  /**
    * Generates the next state. Must be implemented by subclasses.
    *
    * @method _next

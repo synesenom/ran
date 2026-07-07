@@ -47,6 +47,18 @@ describe('process._Process', () => {
   })
 })
 
+class RngProcess extends Process {
+  constructor () {
+    super()
+    this.x = 0
+    this.x0 = 0
+  }
+
+  _next () {
+    return this.r.next()
+  }
+}
+
 class StubProcess extends Process {
   constructor () {
     super()
@@ -104,6 +116,20 @@ describe('process', () => {
         p.path(5)
         assert.strictEqual(p.state(), 1)
       })
+
+      it('should not advance the PRNG stream', () => {
+        const p1 = new RngProcess()
+        p1.seed(42)
+        p1.path(20)
+        const a1 = p1.next()
+        const a2 = p1.next()
+        const p2 = new RngProcess()
+        p2.seed(42)
+        const b1 = p2.next()
+        const b2 = p2.next()
+        assert.strictEqual(a1, b1)
+        assert.strictEqual(a2, b2)
+      })
     })
 
     describe('.reset()', () => {
@@ -121,6 +147,38 @@ describe('process', () => {
         const p = new StubProcess()
         p.next()
         assert.strictEqual(p.state(), 1)
+      })
+    })
+
+    describe('.seed()', () => {
+      it('should produce identical paths when seeded identically', () => {
+        const p = new RngProcess()
+        p.seed(42)
+        const path1 = p.path(20)
+        // Advance the PRNG past its post-seed state so that only a working
+        // seed() can restore it; without this, path()'s save/restore would
+        // make the test pass even if seed() were a no-op.
+        p.next()
+        p.next()
+        p.next()
+        p.seed(42)
+        const path2 = p.path(20)
+        assert.deepEqual(path1, path2)
+      })
+
+      it('should produce different paths for different seeds', () => {
+        const p = new RngProcess()
+        p.seed(1)
+        const path1 = p.path(20)
+        p.reset()
+        p.seed(2)
+        const path2 = p.path(20)
+        assert.notDeepEqual(path1, path2)
+      })
+
+      it('should return this for chaining', () => {
+        const p = new RngProcess()
+        assert.strictEqual(p.seed(0), p)
       })
     })
   })
