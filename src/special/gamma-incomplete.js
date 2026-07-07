@@ -20,7 +20,10 @@ function _gli (s, x) {
     let y = 1 / s
 
     let f = y
-    for (let i = 0; i < MAX_ITER; i++) {
+    // Near x ≈ s the series converges slowly: O(sqrt(s·log(1/ε))) terms needed.
+    // The fixed MAX_ITER=100 is insufficient for s ≳ ~120 with x near s.
+    const maxIter = Math.max(MAX_ITER, Math.ceil(Math.sqrt(2 * (s + 1) * Math.log(1 / EPS))))
+    for (let i = 0; i < maxIter; i++) {
       si++
       y *= x / si
       f += y
