@@ -40,14 +40,14 @@ Compare the diff against the plan and check:
 
 ### 4. Pass 2 — Code Quality (Parallel Subagents)
 
-**CRITICAL: Launch exactly 6 review agents. Verify all 6 returned results before proceeding.**
+**CRITICAL: Launch exactly 11 review agents. Verify all 11 returned results before proceeding.**
 
 Save the diff to a temporary file:
 ```bash
 mkdir -p .claude/tmp && git diff main...HEAD > .claude/tmp/review-diff-$(git branch --show-current).patch
 ```
 
-Then launch all six **in a single parallel call**, telling each to read `.claude/tmp/review-diff-<branch-name>.patch`:
+Then launch all eleven **in a single parallel call**, telling each to read `.claude/tmp/review-diff-<branch-name>.patch`:
 
 - **review-security** agent
 - **review-performance** agent
@@ -55,12 +55,17 @@ Then launch all six **in a single parallel call**, telling each to read `.claude
 - **review-tests** agent
 - **review-docs** agent
 - **review-correctness** agent
+- **review-logic** agent — general code logic bugs (inverted conditions, null deref, wrong variable)
+- **review-removals** agent — dropped guards, removed invariants, deleted tests covering real behavior
+- **review-callers** agent — cross-file caller impact of changed function signatures
+- **review-altitude** agent — bandaid fixes layered on shared infrastructure instead of generalizing
+- **review-conventions** agent — CLAUDE.md rule violations, with exact rule quotes
 
 Each returns findings rated P1 (critical), P2 (warning), or P3 (info).
 
-Wait for all six. Synthesize into a single deduplicated list sorted by severity.
+Wait for all eleven. Synthesize into a single deduplicated list sorted by severity.
 
-**Severity override transparency**: If you downgrade a finding, note the original severity and your reasoning.
+**Severity override / dedup**: Near-duplicate findings from multiple agents (same file, same line, same root cause) should be merged into one item. If you downgrade a finding, note the original severity and your reasoning.
 
 ### 5. Generate Report
 
@@ -74,10 +79,12 @@ Wait for all six. Synthesize into a single deduplicated list sorted by severity.
 > **Pass 2 — Code Quality**: PASS | FAIL
 >
 > **P1 (Critical):**
-> - [ ] <[security|performance|simplicity|tests|docs|correctness] file:line — description and fix>
+> - [ ] <[security|performance|simplicity|tests|docs|correctness|logic|removals|callers|altitude|conventions] file:line — description and fix>
 >
 > **P2 (Warning):**
 > - [ ] <[domain] file:line — description and fix>
+>
+> _Domain tags: security · performance · simplicity · tests · docs · correctness · logic · removals · callers · altitude · conventions_
 >
 > **P3 (Info):**
 > - <[domain] file:line — note>

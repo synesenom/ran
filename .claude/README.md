@@ -32,9 +32,14 @@ This directory contains the skills and agents that power the development workflo
     ├── design-critique.md     # Evaluates design options against conventions
     ├── recovery-fix.md        # Diagnoses test failures and proposes fix
     ├── recovery-validate.md   # Checks fixes don't deviate from plan
+    ├── review-altitude.md     # Reviews for bandaid fixes vs. proper abstraction
+    ├── review-callers.md      # Reviews cross-file caller impact of changed signatures
+    ├── review-conventions.md  # Reviews for CLAUDE.md rule violations (exact quotes)
     ├── review-correctness.md  # Reviews for mathematical/statistical bugs
     ├── review-docs.md         # Reviews for documentation gaps
+    ├── review-logic.md        # Reviews for general code logic bugs (not math)
     ├── review-performance.md  # Reviews for performance issues
+    ├── review-removals.md     # Reviews for dropped guards and removed invariants
     ├── review-security.md     # Reviews for security issues
     ├── review-simplicity.md   # Reviews for over-engineering
     ├── review-tests.md        # Reviews for test quality gaps
@@ -171,6 +176,11 @@ All launched **in parallel** by [`/review`](skills/review/SKILL.md). Each return
 | [`review-tests`](agents/review-tests.md) | Sonnet | Test quality: behavior-first, edge cases, statistical rigor |
 | [`review-docs`](agents/review-docs.md) | Haiku | Missing/stale JSDoc, README, ADRs |
 | [`review-correctness`](agents/review-correctness.md) | Sonnet | Mathematical/statistical bugs: wrong formulas, numerical issues, off-by-one |
+| [`review-logic`](agents/review-logic.md) | Haiku | General code logic bugs: inverted conditions, null deref, wrong variable, falsy-zero |
+| [`review-removals`](agents/review-removals.md) | Haiku | Dropped guards, removed invariants, deleted tests covering real behavior |
+| [`review-callers`](agents/review-callers.md) | Sonnet | Cross-file caller impact: changed signatures, new preconditions, new exceptions |
+| [`review-altitude`](agents/review-altitude.md) | Haiku | Bandaid fixes on shared infrastructure instead of generalizing the mechanism |
+| [`review-conventions`](agents/review-conventions.md) | Haiku | CLAUDE.md rule violations with exact rule quotes and line citations |
 
 ### `suggest-*` — Codebase improvement scouts
 
@@ -213,10 +223,15 @@ Launched **in parallel** by [`/suggest`](skills/suggest/SKILL.md). Each scout sc
 /review ─────→ discovery-thoughts
               → review-security    ┐
               → review-performance │
-              → review-simplicity  │ parallel
-              → review-tests       │
+              → review-simplicity  │
+              → review-tests       │ parallel (11 agents)
               → review-docs        │
-              → review-correctness ┘
+              → review-correctness │
+              → review-logic       │
+              → review-removals    │
+              → review-callers     │
+              → review-altitude    │
+              → review-conventions ┘
 
 /review-pr ──→ review-security    ┐
               → review-performance │
