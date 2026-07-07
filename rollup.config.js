@@ -50,4 +50,21 @@ const perDist = distNames.map(name => ({
   }
 }))
 
-export default [monolithic, ...perDist]
+// Parse actively-exported processes from src/process/index.js.
+// The leading-underscore guard (requiring [a-z0-9] as first char) automatically
+// excludes the abstract _process.js base class, mirroring the dist pattern.
+const processIndexSrc = readFileSync('./src/process/index.js', 'utf8')
+const processNames = [...processIndexSrc.matchAll(/^export.*from '\.\/([a-z0-9][a-z0-9-]*)'$/gm)]
+  .map(m => m[1])
+
+const perProcess = processNames.map(name => ({
+  input: `src/process/${name}.js`,
+  plugins: [nodeResolve()],
+  output: {
+    file: `dist/process/${name}.esm.js`,
+    format: 'es',
+    banner: copyright
+  }
+}))
+
+export default [monolithic, ...perDist, ...perProcess]

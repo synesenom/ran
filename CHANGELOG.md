@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `ran.process.BrownianMotion` and `ran.process.OrnsteinUhlenbeck` are now available as tree-shakeable subpath imports (`import BrownianMotion from 'ranjs/process/brownian-motion'`, `import OrnsteinUhlenbeck from 'ranjs/process/ornstein-uhlenbeck'`), matching the per-distribution subpath export pattern.
 - `ran.process.OrnsteinUhlenbeck(theta, mu, sigma, dt)`: mean-reverting stochastic process with exact discrete-time sampler (`x = x·exp(−θ·dt) + μ·(1−exp(−θ·dt)) + σ·√((1−exp(−2θ·dt))/(2θ))·N(0,1)`). Exposes `mean(t)` and `variance(t)` with closed-form analytical values; converges to stationary Normal(μ, σ²/(2θ)) (#846).
 - Demo page (`demo.html`) now includes an interactive **Stochastic Processes** section below the Distributions section. Select `BrownianMotion`, adjust parameters (μ, σ, dt) and path length, and see 7 semi-transparent sample paths with a theoretical mean E[X(t)] line and ±1σ envelope overlaid (#862).
 - `ran.process.BrownianMotion(mu, sigma, dt)`: Brownian motion (Wiener process) with drift, using an exact O(1) discrete-time sampler (`x += μ·dt + σ·√dt·N(0,1)`). Exposes `mean(t)` and `variance(t)` with closed-form analytical values (#848).

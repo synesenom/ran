@@ -458,6 +458,12 @@
     },
     "./dist/zipf-mandelbrot": {
       "import": "./dist/zipf-mandelbrot.esm.js"
+    },
+    "./process/brownian-motion": {
+      "import": "./dist/process/brownian-motion.esm.js"
+    },
+    "./process/ornstein-uhlenbeck": {
+      "import": "./dist/process/ornstein-uhlenbeck.esm.js"
     }
   },
   "sideEffects": false,
