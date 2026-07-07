@@ -2,6 +2,7 @@ import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import Process from '../src/process/_process'
 import BrownianMotion from '../src/process/brownian-motion'
+import OrnsteinUhlenbeck from '../src/process/ornstein-uhlenbeck'
 import { Normal } from '../src/dist'
 import { ksTest } from './test-utils'
 
@@ -296,6 +297,126 @@ describe('process.BrownianMotion', () => {
       }
       const ref = new Normal(mu * dt, sigma * Math.sqrt(dt))
       assert(ksTest(increments, x => ref.cdf(x)))
+    })
+  })
+})
+
+describe('process.OrnsteinUhlenbeck', () => {
+  describe('constructor', () => {
+    it('should throw on theta = 0', () => {
+      assert.throws(() => new OrnsteinUhlenbeck(0, 0, 1, 1), /Invalid parameters/)
+    })
+
+    it('should throw on theta < 0', () => {
+      assert.throws(() => new OrnsteinUhlenbeck(-1, 0, 1, 1), /Invalid parameters/)
+    })
+
+    it('should throw on sigma = 0', () => {
+      assert.throws(() => new OrnsteinUhlenbeck(1, 0, 0, 1), /Invalid parameters/)
+    })
+
+    it('should throw on sigma < 0', () => {
+      assert.throws(() => new OrnsteinUhlenbeck(1, 0, -1, 1), /Invalid parameters/)
+    })
+
+    it('should throw on dt = 0', () => {
+      assert.throws(() => new OrnsteinUhlenbeck(1, 0, 1, 0), /Invalid parameters/)
+    })
+
+    it('should throw on dt < 0', () => {
+      assert.throws(() => new OrnsteinUhlenbeck(1, 0, 1, -0.5), /Invalid parameters/)
+    })
+
+    it('should throw on mu = NaN', () => {
+      assert.throws(() => new OrnsteinUhlenbeck(1, NaN, 1, 1), /Invalid parameters/)
+    })
+
+    it('should accept valid parameters', () => {
+      assert.doesNotThrow(() => new OrnsteinUhlenbeck(2, 1, 0.5, 0.1))
+    })
+
+    it('should start at state 0', () => {
+      const ou = new OrnsteinUhlenbeck(1, 2, 0.5, 0.1)
+      assert.strictEqual(ou.state(), 0)
+    })
+  })
+
+  describe('.mean()', () => {
+    it('should return mu*(1 - exp(-theta*t)) for zero initial state', () => {
+      const ou = new OrnsteinUhlenbeck(2, 3, 1, 0.1)
+      assert.closeTo(ou.mean(1), 3 * (1 - Math.exp(-2)), 1e-10)
+    })
+
+    it('should return 0 at t=0', () => {
+      const ou = new OrnsteinUhlenbeck(1, 5, 1, 0.1)
+      assert.strictEqual(ou.mean(0), 0)
+    })
+
+    it('should approach mu as t -> infinity', () => {
+      const ou = new OrnsteinUhlenbeck(1, 4, 1, 0.1)
+      assert.closeTo(ou.mean(1000), 4, 1e-6)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const ou = new OrnsteinUhlenbeck(1, 0, 1, 1)
+      assert(isNaN(ou.mean(-1)))
+    })
+
+    it('should be stable after advancing the simulation', () => {
+      const ou = new OrnsteinUhlenbeck(2, 3, 1, 0.1)
+      const before = ou.mean(1)
+      for (let i = 0; i < 20; i++) ou.next()
+      assert.closeTo(ou.mean(1), before, 1e-10)
+    })
+  })
+
+  describe('.variance()', () => {
+    it('should return sigma^2*(1-exp(-2*theta*t))/(2*theta)', () => {
+      const theta = 2; const sigma = 0.5; const t = 1
+      const ou = new OrnsteinUhlenbeck(theta, 0, sigma, 0.1)
+      const expected = sigma * sigma * (1 - Math.exp(-2 * theta * t)) / (2 * theta)
+      assert.closeTo(ou.variance(t), expected, 1e-10)
+    })
+
+    it('should return 0 at t=0', () => {
+      const ou = new OrnsteinUhlenbeck(1, 0, 1, 1)
+      assert.strictEqual(ou.variance(0), 0)
+    })
+
+    it('should approach stationary variance sigma^2/(2*theta) as t -> infinity', () => {
+      const theta = 2; const sigma = 0.5
+      const ou = new OrnsteinUhlenbeck(theta, 0, sigma, 0.1)
+      assert.closeTo(ou.variance(1000), sigma * sigma / (2 * theta), 1e-6)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const ou = new OrnsteinUhlenbeck(1, 0, 1, 1)
+      assert(isNaN(ou.variance(-1)))
+    })
+  })
+
+  describe('.reset()', () => {
+    it('should restore initial state to 0', () => {
+      const ou = new OrnsteinUhlenbeck(1, 2, 0.5, 0.1)
+      for (let i = 0; i < 10; i++) ou.next()
+      ou.reset()
+      assert.strictEqual(ou.state(), 0)
+    })
+  })
+
+  describe('stationarity', () => {
+    it('should converge to stationary distribution (KS test)', () => {
+      const theta = 2; const mu = 3; const sigma = 1; const dt = 0.1
+      const ou = new OrnsteinUhlenbeck(theta, mu, sigma, dt)
+      for (let i = 0; i < 500; i++) ou.next()
+      const samples = []
+      for (let i = 0; i < 1000; i++) {
+        ou.next()
+        samples.push(ou.state())
+      }
+      const stationaryStd = sigma / Math.sqrt(2 * theta)
+      const ref = new Normal(mu, stationaryStd)
+      assert(ksTest(samples, x => ref.cdf(x)))
     })
   })
 })

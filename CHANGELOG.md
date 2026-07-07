@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `ran.process.OrnsteinUhlenbeck(theta, mu, sigma, dt)`: mean-reverting stochastic process with exact discrete-time sampler (`x = x·exp(−θ·dt) + μ·(1−exp(−θ·dt)) + σ·√((1−exp(−2θ·dt))/(2θ))·N(0,1)`). Exposes `mean(t)` and `variance(t)` with closed-form analytical values; converges to stationary Normal(μ, σ²/(2θ)) (#846).
 - `ran.process.BrownianMotion(mu, sigma, dt)`: Brownian motion (Wiener process) with drift, using an exact O(1) discrete-time sampler (`x += μ·dt + σ·√dt·N(0,1)`). Exposes `mean(t)` and `variance(t)` with closed-form analytical values (#848).
 - `Process.seed(s)` method: seeds the internal PRNG for reproducible paths; delegates to `this.r.seed(s)` and returns `this` for chaining, mirroring `Distribution.seed()` (#861).
 - `ran.process`: new `Process` abstract base class (`src/process/_process.js`) with `next()`, `path(n)`, `reset()`, and `state()` public interface; prerequisite for BrownianMotion and OrnsteinUhlenbeck (#847).
