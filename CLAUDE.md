@@ -231,6 +231,7 @@ This cycle applies to every new distribution, every new method, every bug fix. D
 - When performing multi-step tasks, show a progress list with checkboxes (e.g., `- [x]` done, `- [ ]` pending) and update it as you go.
 - **Always use selectable options** (via the `AskUserQuestion` tool) when asking the user to make a choice or design decision during planning or implementation. Never ask the user to type their choice as free text. Always include a final option labeled "Other" or "Type something" so the user can provide a custom answer if none of the options fit.
 - **Never stop mid-pipeline.** When a sub-skill (`/commit`, `/push`, `/pr`, etc.) is invoked from within a parent skill (`/hotfix`, `/build`, `/implement`, etc.), continue executing the parent workflow immediately after the sub-skill returns. Do not pause for user input between steps unless the parent skill explicitly requires it. Do not output text that implies completion (e.g. "Done!", "Committed!") between steps — save all status reporting for the parent skill's final report.
+- **`/review` vs `/code-review`**: `/code-review` is for standalone ad-hoc reviews only (e.g. the user types `/code-review` directly). When a parent skill (`/fix`, `/hotfix`, `/build`, `/implement`) instructs you to run a review step, **always** invoke `/review` via the Skill tool — never `/code-review`. `/review` runs spec-compliance + 8 parallel specialized agents; `/code-review` runs a single-agent inline scan and is not a substitute inside pipelines.
 
 ## Code Style
 
