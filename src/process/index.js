@@ -6,4 +6,5 @@
  */
 export { default as BrownianMotion } from './brownian-motion'
 export { default as OrnsteinUhlenbeck } from './ornstein-uhlenbeck'
+export { default as PoissonProcess } from './poisson-process'
 export { default as Process } from './_process'

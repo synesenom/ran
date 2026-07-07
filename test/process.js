@@ -3,8 +3,9 @@ import { describe, it } from 'mocha'
 import Process from '../src/process/_process'
 import BrownianMotion from '../src/process/brownian-motion'
 import OrnsteinUhlenbeck from '../src/process/ornstein-uhlenbeck'
-import { Normal } from '../src/dist'
-import { ksTest } from './test-utils'
+import PoissonProcess from '../src/process/poisson-process'
+import { Normal, Poisson } from '../src/dist'
+import { ksTest, chiTest } from './test-utils'
 
 describe('process._Process', () => {
   describe('.validate()', () => {
@@ -420,6 +421,112 @@ describe('process.OrnsteinUhlenbeck', () => {
       const stationaryStd = sigma / Math.sqrt(2 * theta)
       const ref = new Normal(mu, stationaryStd)
       assert(ksTest(samples, x => ref.cdf(x)))
+    })
+  })
+})
+
+describe('process.PoissonProcess', () => {
+  describe('constructor', () => {
+    it('should throw on lambda = 0', () => {
+      assert.throws(() => new PoissonProcess(0, 1), /Invalid parameters/)
+    })
+
+    it('should throw on lambda < 0', () => {
+      assert.throws(() => new PoissonProcess(-1, 1), /Invalid parameters/)
+    })
+
+    it('should throw on dt = 0', () => {
+      assert.throws(() => new PoissonProcess(1, 0), /Invalid parameters/)
+    })
+
+    it('should throw on dt < 0', () => {
+      assert.throws(() => new PoissonProcess(1, -0.5), /Invalid parameters/)
+    })
+
+    it('should throw on lambda = NaN', () => {
+      assert.throws(() => new PoissonProcess(NaN, 1), /Invalid parameters/)
+    })
+
+    it('should accept valid parameters', () => {
+      assert.doesNotThrow(() => new PoissonProcess(2, 0.5))
+    })
+
+    it('should accept default parameters', () => {
+      assert.doesNotThrow(() => new PoissonProcess())
+    })
+
+    it('should start at state 0', () => {
+      const pp = new PoissonProcess(1, 1)
+      assert.strictEqual(pp.state(), 0)
+    })
+  })
+
+  describe('path', () => {
+    it('should be non-decreasing', () => {
+      const pp = new PoissonProcess(2, 0.1)
+      const path = pp.path(200)
+      for (let i = 1; i < path.length; i++) {
+        assert(path[i] >= path[i - 1])
+      }
+    })
+
+    it('should be integer-valued', () => {
+      const pp = new PoissonProcess(2, 0.1)
+      const path = pp.path(200)
+      for (const x of path) {
+        assert.strictEqual(x, Math.floor(x))
+      }
+    })
+  })
+
+  describe('increments', () => {
+    it('should follow Poisson(lambda*dt) distribution (chi-squared test)', () => {
+      const lambda = 3
+      const dt = 0.5
+      const pp = new PoissonProcess(lambda, dt)
+      const n = 2000
+      const increments = []
+      for (let i = 0; i < n; i++) {
+        const prev = pp.state()
+        pp.next()
+        increments.push(pp.state() - prev)
+      }
+      const ref = new Poisson(lambda * dt)
+      assert(chiTest(increments, k => ref.pdf(k), 0))
+    })
+  })
+
+  describe('.mean()', () => {
+    it('should return lambda*t', () => {
+      const pp = new PoissonProcess(2, 0.5)
+      assert.closeTo(pp.mean(3), 6, 1e-10)
+    })
+
+    it('should return 0 at t=0', () => {
+      const pp = new PoissonProcess(2, 0.5)
+      assert.strictEqual(pp.mean(0), 0)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const pp = new PoissonProcess(2, 0.5)
+      assert(Number.isNaN(pp.mean(-1)))
+    })
+  })
+
+  describe('.variance()', () => {
+    it('should return lambda*t', () => {
+      const pp = new PoissonProcess(2, 0.5)
+      assert.closeTo(pp.variance(3), 6, 1e-10)
+    })
+
+    it('should return 0 at t=0', () => {
+      const pp = new PoissonProcess(2, 0.5)
+      assert.strictEqual(pp.variance(0), 0)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const pp = new PoissonProcess(2, 0.5)
+      assert(Number.isNaN(pp.variance(-1)))
     })
   })
 })
