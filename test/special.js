@@ -656,8 +656,8 @@ describe('special', () => {
       // Large shape parameter; series branch is used (x = a < a+1).
       assert(equal(special.gammaLowerIncomplete(100, 100.0), 0.5132987982791487))
       assert(equal(special.gammaUpperIncomplete(100, 100.0), 0.48670120172085135))
-      // s=1000 is excluded: MAX_ITER=100 truncates the series before convergence at this scale
-      // (~270 iterations needed), so 10-sig-fig accuracy is not achievable without an implementation change.
+      assert(equal(special.gammaLowerIncomplete(1000, 1000.0), 0.5042052441802155))
+      assert(equal(special.gammaUpperIncomplete(1000, 1000.0), 0.4957947558197845))
     })
 
     it('P + Q should equal 1 for all algorithm regions', () => {
