@@ -407,11 +407,15 @@ describe('process.OrnsteinUhlenbeck', () => {
     it('should converge to stationary distribution (KS test)', () => {
       const theta = 2; const mu = 3; const sigma = 1; const dt = 0.1
       const ou = new OrnsteinUhlenbeck(theta, mu, sigma, dt)
+      ou.seed(42)
       for (let i = 0; i < 500; i++) ou.next()
+      // lag-1 autocorrelation is exp(-theta*dt)=exp(-0.2)≈0.82; thin by 20 to get
+      // independent draws (lag-20 autocorrelation ≈ 0.018) so the KS critical
+      // value 1.628/sqrt(1000) is valid
       const samples = []
-      for (let i = 0; i < 1000; i++) {
+      for (let i = 0; i < 20000; i++) {
         ou.next()
-        samples.push(ou.state())
+        if (i % 20 === 0) samples.push(ou.state())
       }
       const stationaryStd = sigma / Math.sqrt(2 * theta)
       const ref = new Normal(mu, stationaryStd)
