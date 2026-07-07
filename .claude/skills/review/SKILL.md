@@ -40,18 +40,19 @@ Compare the diff against the plan and check:
 
 ### 4. Pass 2 — Code Quality (Parallel Subagents)
 
-**CRITICAL: Launch exactly 7 review agents. Verify all 7 returned results before proceeding.**
+**CRITICAL: Launch exactly 8 review agents. Verify all 8 returned results before proceeding.**
 
 Save the diff to a temporary file:
 ```bash
 mkdir -p .claude/tmp && git diff main...HEAD > .claude/tmp/review-diff-$(git branch --show-current).patch
 ```
 
-Then launch all seven **in a single parallel call**, telling each to read `.claude/tmp/review-diff-<branch-name>.patch`:
+Then launch all eight **in a single parallel call**, telling each to read `.claude/tmp/review-diff-<branch-name>.patch`:
 
 - **review-security** agent — injection risks, prototype pollution, DoS via input
 - **review-performance** agent — unnecessary allocations, redundant computation, hot-path issues
-- **review-structure** agent — over-engineering, wrong abstraction level, CLAUDE.md violations
+- **review-structure** agent — over-engineering and wrong abstraction level
+- **review-conventions** agent — CLAUDE.md rule violations (reads CLAUDE.md, quotes exact rules)
 - **review-tests** agent — test quality: behavior-first, edge cases, statistical rigor
 - **review-docs** agent — missing/stale JSDoc, README, ADRs, what-comments
 - **review-correctness** agent — mathematical/statistical errors, numerical instability, general logic bugs
@@ -59,7 +60,7 @@ Then launch all seven **in a single parallel call**, telling each to read `.clau
 
 Each agent returns `Block` findings (must fix before commit), `Warn` findings (real problem, file as issue), or `No issues found.`
 
-Wait for all seven. Then:
+Wait for all eight. Then:
 1. Collect every `Block` and `Warn` line from all agents.
 2. Deduplicate: if two agents flag the same file:line for the same root cause, keep one and tag it with both domains (e.g. `[correctness, impact]`).
 3. Produce one flat merged list — `Block` items first, then `Warn` — each tagged with its source domain.

@@ -37,7 +37,13 @@ This directory contains the skills and agents that power the development workflo
     ├── review-impact.md       # Reviews for dropped invariants and cross-file caller breakage
     ├── review-performance.md  # Reviews for performance issues
     ├── review-security.md     # Reviews for security issues
-    ├── review-structure.md    # Reviews for over-engineering, wrong abstraction level, CLAUDE.md violations
+    ├── review-conventions.md  # Reviews for CLAUDE.md rule violations (exact quotes)
+    ├── review-correctness.md  # Reviews for mathematical/statistical errors and general logic bugs
+    ├── review-docs.md         # Reviews for documentation gaps
+    ├── review-impact.md       # Reviews for dropped invariants and cross-file caller breakage
+    ├── review-performance.md  # Reviews for performance issues
+    ├── review-security.md     # Reviews for security issues
+    ├── review-structure.md    # Reviews for over-engineering and wrong abstraction level
     ├── review-tests.md        # Reviews for test quality gaps
     ├── ops-insight.md         # Extracts problem/fix/insight from diffs
     ├── ops-issue.md           # Creates GitHub issues
@@ -105,9 +111,10 @@ research → plan → implement → validate → review → ship
     │         │        │           │         │         │
     ▼         ▼        ▼           ▼         ▼         ▼
  Understand  Design   TDD       Check     6 review   Commit, compound,
- codebase    options  phase by  issue     agents in  push, create PR
- context     auto-    phase     criteria  parallel,  (compound before
-             resolved           (loop)    auto-fix   push avoids 2x CI)
+ codebase    options  phase by  issue     8 review   Commit, compound,
+ context     auto-    phase     criteria  agents in  push, create PR
+             resolved           (loop)    parallel,  (compound before
+                                          auto-fix   push avoids 2x CI)
 ```
 
 ### Manual step-by-step
@@ -168,7 +175,8 @@ All launched **in parallel** by [`/review`](skills/review/SKILL.md). Each return
 |-------|-------|-------|
 | [`review-security`](agents/review-security.md) | Haiku | Injection risks, unsafe eval, path traversal |
 | [`review-performance`](agents/review-performance.md) | Haiku | Unnecessary allocations, O(n²) patterns, hot-path issues |
-| [`review-structure`](agents/review-structure.md) | Haiku | Over-engineering, wrong abstraction level, CLAUDE.md convention violations |
+| [`review-structure`](agents/review-structure.md) | Haiku | Over-engineering and wrong abstraction level |
+| [`review-conventions`](agents/review-conventions.md) | Haiku | CLAUDE.md rule violations with exact rule quotes and section citations |
 | [`review-tests`](agents/review-tests.md) | Sonnet | Test quality: behavior-first, edge cases, statistical rigor |
 | [`review-docs`](agents/review-docs.md) | Haiku | Missing/stale JSDoc, README, ADRs, what-comments |
 | [`review-correctness`](agents/review-correctness.md) | Opus | Mathematical/statistical errors, numerical instability, general code logic bugs |
@@ -215,7 +223,8 @@ Launched **in parallel** by [`/suggest`](skills/suggest/SKILL.md). Each scout sc
 /review ─────→ discovery-thoughts
               → review-security    ┐
               → review-performance │
-              → review-structure   │ parallel (7 agents)
+              → review-structure   │
+              → review-conventions │ parallel (8 agents)
               → review-tests       │
               → review-docs        │
               → review-correctness │
@@ -223,7 +232,7 @@ Launched **in parallel** by [`/suggest`](skills/suggest/SKILL.md). Each scout sc
 
 /review-pr ──→ review-security    ┐
               → review-performance │
-              → review-simplicity  │ parallel
+              → review-structure   │ parallel
               → review-tests       │
               → review-docs        │
               → review-correctness ┘
