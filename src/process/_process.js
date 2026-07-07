@@ -86,7 +86,7 @@ export default class Process {
    *
    * @method _next
    * @memberof ran.process.Process
-   * @returns {*} Next state.
+   * @returns {number} Next state.
    * @protected
    * @ignore
    */
@@ -99,7 +99,7 @@ export default class Process {
    *
    * @method next
    * @memberof ran.process.Process
-   * @returns {*} The new state after the step.
+   * @returns {number} The new state after the step.
    */
   next () {
     this.x = this._next()
@@ -146,7 +146,7 @@ export default class Process {
    *
    * @method state
    * @memberof ran.process.Process
-   * @returns {*} Current state.
+   * @returns {number} Current state.
    */
   state () {
     return this.x
