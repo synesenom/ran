@@ -13,11 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `Process.path(n)` now advances the PRNG by n steps on each call (matching `Distribution.sample()` behaviour) instead of restoring the PRNG stream afterward. Consecutive calls return independent realizations; seeding before a call still guarantees reproducibility. Code that called `path()` twice without re-seeding and expected identical results will now receive two distinct paths. No deprecation cycle was applied: `ran.process` was introduced in the same release cycle and repeated idempotent `path()` calls without re-seeding have no legitimate use case (#869).
 - `Distribution.test()` now uses the Anderson-Darling test (Marsaglia & Marsaglia 2004 asymptotic series + finite-n correction, α = 0.01) instead of Kolmogorov-Smirnov for continuous distributions. The `passed` field is unaffected. The `statistics` field now carries the A² statistic (typical scale 0.2–5) rather than the KS D-statistic (scale 0–1); code that reads the raw value will silently see a different number (#816).
 
 ### Added
 
 - `ran.process.PoissonProcess(lambda, dt)`: Poisson counting process where arrivals in each interval Δt follow Poisson(λ·Δt); state is cumulative event count, guaranteed non-decreasing and integer-valued (#853).
+- `ran.process.BrownianMotion` and `ran.process.OrnsteinUhlenbeck` are now available as tree-shakeable subpath imports (`import BrownianMotion from 'ranjs/process/brownian-motion'`, `import OrnsteinUhlenbeck from 'ranjs/process/ornstein-uhlenbeck'`), matching the per-distribution subpath export pattern.
 - `ran.process.OrnsteinUhlenbeck(theta, mu, sigma, dt)`: mean-reverting stochastic process with exact discrete-time sampler (`x = x·exp(−θ·dt) + μ·(1−exp(−θ·dt)) + σ·√((1−exp(−2θ·dt))/(2θ))·N(0,1)`). Exposes `mean(t)` and `variance(t)` with closed-form analytical values; converges to stationary Normal(μ, σ²/(2θ)) (#846).
 - Demo page (`demo.html`) now includes an interactive **Stochastic Processes** section below the Distributions section. Select `BrownianMotion`, adjust parameters (μ, σ, dt) and path length, and see 7 semi-transparent sample paths with a theoretical mean E[X(t)] line and ±1σ envelope overlaid (#862).
 - `ran.process.BrownianMotion(mu, sigma, dt)`: Brownian motion (Wiener process) with drift, using an exact O(1) discrete-time sampler (`x += μ·dt + σ·√dt·N(0,1)`). Exposes `mean(t)` and `variance(t)` with closed-form analytical values (#848).

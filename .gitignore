@@ -6,6 +6,7 @@
 /coverage
 /.circleci/
 /dist/*.js
+/dist/**/*.js
 /dist/*.map
 /dist/**/*.d.ts
 /docs/index.html

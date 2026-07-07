@@ -120,8 +120,9 @@ export default class Process {
   }
 
   /**
-   * Generates a path of n steps starting from the initial state. Non-destructive: the current
-   * state is preserved after the call.
+   * Generates a path of n steps starting from the initial state. Advances the PRNG stream by n
+   * steps (like sample()), so consecutive calls return independent realizations. The process
+   * state is restored to its pre-call value after generation.
    *
    * @method path
    * @memberof ran.process.Process
@@ -131,15 +132,11 @@ export default class Process {
   path (n) {
     const states = [this.x0]
     const savedX = this.x
-    const savedRng = this.r.save()
     this.x = this.x0
     for (let i = 0; i < n; i++) {
       this.x = this._next()
       states.push(this.x)
     }
-    // restore — path() is non-destructive (state and PRNG)
-    // See solutions/correctness/2026-07-07-1500-path-prng-save-restore.md
-    this.r.load(savedRng)
     this.x = savedX
     return states
   }

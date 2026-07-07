@@ -122,18 +122,23 @@ describe('process', () => {
         assert.strictEqual(p.state(), 1)
       })
 
-      it('should not advance the PRNG stream', () => {
+      it('should advance the PRNG stream', () => {
         const p1 = new RngProcess()
         p1.seed(42)
         p1.path(20)
         const a1 = p1.next()
-        const a2 = p1.next()
         const p2 = new RngProcess()
         p2.seed(42)
         const b1 = p2.next()
-        const b2 = p2.next()
-        assert.strictEqual(a1, b1)
-        assert.strictEqual(a2, b2)
+        assert.notStrictEqual(a1, b1)
+      })
+
+      it('should return independent paths on consecutive calls', () => {
+        const p = new RngProcess()
+        p.seed(42)
+        const path1 = p.path(20)
+        const path2 = p.path(20)
+        assert.notDeepEqual(path1, path2)
       })
     })
 
@@ -160,12 +165,6 @@ describe('process', () => {
         const p = new RngProcess()
         p.seed(42)
         const path1 = p.path(20)
-        // Advance the PRNG past its post-seed state so that only a working
-        // seed() can restore it; without this, path()'s save/restore would
-        // make the test pass even if seed() were a no-op.
-        p.next()
-        p.next()
-        p.next()
         p.seed(42)
         const path2 = p.path(20)
         assert.deepEqual(path1, path2)
@@ -409,11 +408,15 @@ describe('process.OrnsteinUhlenbeck', () => {
     it('should converge to stationary distribution (KS test)', () => {
       const theta = 2; const mu = 3; const sigma = 1; const dt = 0.1
       const ou = new OrnsteinUhlenbeck(theta, mu, sigma, dt)
+      ou.seed(42)
       for (let i = 0; i < 500; i++) ou.next()
+      // lag-1 autocorrelation is exp(-theta*dt)=exp(-0.2)≈0.82; thin by 20 to get
+      // independent draws (lag-20 autocorrelation ≈ 0.018) so the KS critical
+      // value 1.628/sqrt(1000) is valid
       const samples = []
-      for (let i = 0; i < 1000; i++) {
+      for (let i = 0; i < 20000; i++) {
         ou.next()
-        samples.push(ou.state())
+        if (i % 20 === 0) samples.push(ou.state())
       }
       const stationaryStd = sigma / Math.sqrt(2 * theta)
       const ref = new Normal(mu, stationaryStd)

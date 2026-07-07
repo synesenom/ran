@@ -4,8 +4,11 @@ import Process from './_process'
 /**
  * Ornstein-Uhlenbeck mean-reverting process, using an exact discrete-time sampler.
  *
- * The update rule per step is X(t+dt) = X(t)·exp(−θ·dt) + μ·(1−exp(−θ·dt)) + σ·√((1−exp(−2θ·dt))/(2θ))·Z
- * where Z ~ N(0,1).
+ * The update rule per step is
+ *
+ * $X(t + \mathrm{d}t) = X(t)\,e^{-\theta\,\mathrm{d}t} + \mu\!\left(1 - e^{-\theta\,\mathrm{d}t}\right) + \sigma\sqrt{\frac{1 - e^{-2\theta\,\mathrm{d}t}}{2\theta}}\,Z,$
+ *
+ * where $Z \sim \mathcal{N}(0, 1)$.
  *
  * @class OrnsteinUhlenbeck
  * @memberof ran.process
@@ -43,7 +46,7 @@ export default class OrnsteinUhlenbeck extends Process {
    * @method mean
    * @memberof ran.process.OrnsteinUhlenbeck
    * @param {number} t Time.
-   * @returns {number} Expected value x₀·exp(−θ·t) + μ·(1−exp(−θ·t)).
+   * @returns {number} Expected value $x_0 e^{-\theta t} + \mu(1 - e^{-\theta t})$.
    */
   mean (t) {
     if (t < 0) return NaN
@@ -57,7 +60,7 @@ export default class OrnsteinUhlenbeck extends Process {
    * @method variance
    * @memberof ran.process.OrnsteinUhlenbeck
    * @param {number} t Time.
-   * @returns {number} Variance σ²·(1−exp(−2θ·t))/(2θ).
+   * @returns {number} Variance $\sigma^2 \frac{1 - e^{-2\theta t}}{2\theta}$.
    */
   variance (t) {
     if (t < 0) return NaN
