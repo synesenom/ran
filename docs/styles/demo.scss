@@ -25,6 +25,27 @@ body:has(.demo-controls) {
 }
 
 
+// ---- Section divider heading ------------------------------------------------
+// Used by #proc-section (and any future sections) to visually separate demo
+// sections without introducing tab JS. Each section#*-section acts as the
+// sticky containing block so its .demo-controls bar unsticks naturally on scroll.
+.demo-section-heading {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $colorMuted;
+  padding: 24px 20px 10px;
+  border-top: 1px solid $colorLine;
+  margin: 0;
+}
+
+// Process section: single-column chart grid (one path chart, not two).
+#proc-section .demo-charts {
+  grid-template-columns: 1fr;
+}
+
+
 // ---- Control bar ------------------------------------------------------------
 // Sticky strip just below the top nav bar.
 .demo-controls {

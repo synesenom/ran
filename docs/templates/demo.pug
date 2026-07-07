@@ -1,38 +1,58 @@
 extends _layout
 
 block content
-    .demo-controls
-        .demo-param-group
-            label(for="dist-select") Distribution
-            select#dist-select
+    section#dist-section
+        .demo-controls
+            .demo-param-group
+                label(for="dist-select") Distribution
+                select#dist-select
 
-        div#param-inputs
+            div#param-inputs
 
-        .demo-param-group
-            label(for="sample-size") Samples
-            input#sample-size(type="number", value="10000", min="1000", max="20000", step="1000")
+            .demo-param-group
+                label(for="sample-size") Samples
+                input#sample-size(type="number", value="10000", min="1000", max="20000", step="1000")
 
-        button.demo-fit-btn#fit-btn Fit to samples
+            button.demo-fit-btn#fit-btn Fit to samples
 
-    .demo-charts
-        .demo-chart-panel
-            h3 PDF / PMF
-            div#pdf-chart.demo-chart-wrap
-        .demo-chart-panel
-            h3 CDF
-            div#cdf-chart.demo-chart-wrap
+        .demo-charts
+            .demo-chart-panel
+                h3 PDF / PMF
+                div#pdf-chart.demo-chart-wrap
+            .demo-chart-panel
+                h3 CDF
+                div#cdf-chart.demo-chart-wrap
 
-    .demo-fit-section#fit-section(style="display:none")
-        h3 MLE Fit Results
-        p.demo-fit-msg#fit-msg
-        table.demo-fit-table#fit-table
-            thead
-                tr
-                    th Param
-                    th Planted
-                    th Fitted
-                    th Deviation
-            tbody#fit-tbody
+        .demo-fit-section#fit-section(style="display:none")
+            h3 MLE Fit Results
+            p.demo-fit-msg#fit-msg
+            table.demo-fit-table#fit-table
+                thead
+                    tr
+                        th Param
+                        th Planted
+                        th Fitted
+                        th Deviation
+                tbody#fit-tbody
+
+    section#proc-section
+        h2.demo-section-heading Stochastic Processes
+
+        .demo-controls
+            .demo-param-group
+                label(for="proc-select") Process
+                select#proc-select
+
+            div#proc-param-inputs
+
+            .demo-param-group
+                label(for="proc-steps") Steps
+                input#proc-steps(type="number", value="100", min="10", max="1000", step="10")
+
+        .demo-charts
+            .demo-chart-panel
+                h3 Sample Paths
+                div#path-chart.demo-chart-wrap
 
 block scripts
     script(src="ranjs.min.js")
@@ -56,6 +76,16 @@ block scripts
           Zipf:            { type: 'discrete',   fitDisplay: false, args: [{name:'s', default:1}, {name:'N', default:20}] }
         }
 
+        const PROCESSES = {
+          BrownianMotion: {
+            args: [
+              {name: 'mu', default: 0},
+              {name: 'sigma', default: 1},
+              {name: 'dt', default: 1}
+            ]
+          }
+        }
+
         const distSelect = document.getElementById('dist-select')
         const paramInputs = document.getElementById('param-inputs')
         const sampleSizeInput = document.getElementById('sample-size')
@@ -63,6 +93,13 @@ block scripts
         const fitSection = document.getElementById('fit-section')
         const fitMsg = document.getElementById('fit-msg')
         const fitTbody = document.getElementById('fit-tbody')
+
+        const procSelect = document.getElementById('proc-select')
+        const procParamInputs = document.getElementById('proc-param-inputs')
+        const procStepsInput = document.getElementById('proc-steps')
+        let pathSvg = null
+        let procDebounceTimer = null
+        const PATH_COUNT = 7
 
         let currentSamples = null
         let debounceTimer = null
@@ -447,6 +484,137 @@ block scripts
           }, 0)
         })
 
+        // ---- Process parameter inputs --------------------------------------
+
+        function getCurrentProcParamInputs () {
+          return Array.from(procParamInputs.querySelectorAll('input[type="number"]'))
+        }
+
+        function populateProcessParams (name) {
+          const cfg = PROCESSES[name]
+          procParamInputs.innerHTML = ''
+          cfg.args.forEach(arg => {
+            const group = document.createElement('div')
+            group.className = 'demo-param-group'
+            const lbl = document.createElement('label')
+            lbl.textContent = arg.name
+            lbl.setAttribute('for', 'proc-param-' + arg.name)
+            const inp = document.createElement('input')
+            inp.type = 'number'
+            inp.id = 'proc-param-' + arg.name
+            inp.value = arg.default
+            inp.step = 'any'
+            inp.addEventListener('input', scheduleProcUpdate)
+            group.appendChild(lbl)
+            group.appendChild(inp)
+            procParamInputs.appendChild(group)
+          })
+        }
+
+        // ---- Process render ------------------------------------------------
+
+        function renderProcess (name, params, steps) {
+          const proc = new ranjs.process[name](...params)
+          const dt = proc.p.dt || 1
+
+          // Generate PATH_COUNT distinct paths: seed once, then reset state
+          // before each path while letting the PRNG advance naturally.
+          // Do NOT call proc.path() repeatedly — it is non-destructive and
+          // returns the same sequence each time.
+          // See solutions/correctness/2026-07-07-1600-path-distinct-realizations-reset-not-path.md
+          proc.seed(42)
+          const paths = Array.from({length: PATH_COUNT}, () => {
+            proc.reset()
+            const pts = [proc.x0]
+            for (let i = 0; i < steps; i++) pts.push(proc.next())
+            return pts
+          })
+
+          // Compute mean ± σ reference overlay when the process exposes
+          // analytical moment methods (not all future subclasses will).
+          const hasRef = typeof proc.mean === 'function' && typeof proc.variance === 'function'
+          const refPts = hasRef
+            ? Array.from({length: steps + 1}, (_, i) => {
+                const t = i * dt
+                const mu = proc.mean(t)
+                const std = Math.sqrt(Math.max(0, proc.variance(t)))
+                return {t, mean: mu, lo: mu - std, hi: mu + std}
+              })
+            : []
+
+          const w = chartWidth('path-chart')
+          const iW = w - MARGIN.left - MARGIN.right
+          const iH = CHART_H - MARGIN.top - MARGIN.bottom
+
+          const {g, gData, gLegend} = buildChart(pathSvg, 'path-clip', w, iW, iH)
+
+          const xScale = d3.scaleLinear().domain([0, steps * dt]).range([0, iW])
+
+          const allVals = paths.flat().filter(isFinite)
+          if (hasRef) refPts.forEach(p => { allVals.push(p.hi); allVals.push(p.lo) })
+          const yMin = Math.min(...allVals)
+          const yMax = Math.max(...allVals)
+          const yPad = (yMax - yMin) * 0.1 || 1
+          const yScale = d3.scaleLinear().domain([yMin - yPad, yMax + yPad]).range([iH, 0])
+
+          g.append('g').attr('transform', `translate(0,${iH})`)
+            .call(d3.axisBottom(xScale).ticks(5)).call(applyAxisStyle)
+          g.append('g').call(d3.axisLeft(yScale).ticks(4)).call(applyAxisStyle)
+
+          // ±1σ band and mean line drawn first so sample paths render on top
+          if (hasRef) {
+            gData.append('path').datum(refPts)
+              .attr('fill', COLOR_BLUE).attr('fill-opacity', 0.12).attr('stroke', 'none')
+              .attr('d', d3.area()
+                .x((d, i) => xScale(i * dt))
+                .y0(d => yScale(d.lo))
+                .y1(d => yScale(d.hi)))
+            gData.append('path').datum(refPts)
+              .attr('fill', 'none').attr('stroke', COLOR_BLUE).attr('stroke-width', 2)
+              .attr('d', d3.line().x((d, i) => xScale(i * dt)).y(d => yScale(d.mean)))
+          }
+
+          // Sample paths rendered on top of reference overlays
+          const line = d3.line().x((d, i) => xScale(i * dt)).y(d => yScale(d))
+          paths.forEach(pts => {
+            gData.append('path').datum(pts)
+              .attr('fill', 'none')
+              .attr('stroke', COLOR_SAMPLES).attr('stroke-width', 1).attr('stroke-opacity', 0.35)
+              .attr('d', line)
+          })
+
+          if (hasRef) {
+            addLegendEntry(gLegend, 0, COLOR_SAMPLES, false, 'line', 'paths')
+            addLegendEntry(gLegend, 1, COLOR_BLUE,    false, 'line', 'E[X(t)]')
+            addLegendEntry(gLegend, 2, COLOR_BLUE,    false, 'rect', '±1σ')
+          } else {
+            addLegendEntry(gLegend, 0, COLOR_SAMPLES, false, 'line', 'paths')
+          }
+        }
+
+        // ---- Process update loop -------------------------------------------
+
+        function scheduleProcUpdate () {
+          clearTimeout(procDebounceTimer)
+          procDebounceTimer = setTimeout(doProcessUpdate, 300)
+        }
+
+        function doProcessUpdate () {
+          const name = procSelect.value
+          const cfg = PROCESSES[name]
+          const inputs = getCurrentProcParamInputs()
+          const params = cfg.args.map((a, i) => {
+            const v = parseFloat(inputs[i] && inputs[i].value)
+            return isNaN(v) ? a.default : v
+          })
+          const steps = parseInt(procStepsInput.value) || 100
+          try {
+            renderProcess(name, params, steps)
+          } catch (e) {
+            // Invalid params — chart remains stale; silently skip
+          }
+        }
+
         // ---- Init ----------------------------------------------------------
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -466,4 +634,25 @@ block scripts
           populateParams('Normal')
           initCharts()
           doUpdate()
+
+          // Process section init
+          Object.keys(PROCESSES).forEach(name => {
+            const opt = document.createElement('option')
+            opt.value = name
+            opt.textContent = name
+            procSelect.appendChild(opt)
+          })
+          procSelect.value = 'BrownianMotion'
+          procSelect.addEventListener('change', () => {
+            populateProcessParams(procSelect.value)
+            doProcessUpdate()
+          })
+          procStepsInput.addEventListener('input', scheduleProcUpdate)
+
+          pathSvg = d3.select('#path-chart').append('svg')
+            .style('display', 'block').style('position', 'absolute')
+            .style('top', '0').style('left', '0')
+
+          populateProcessParams('BrownianMotion')
+          doProcessUpdate()
         })

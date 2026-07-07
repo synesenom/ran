@@ -240,7 +240,7 @@ describe('process.BrownianMotion', () => {
 
     it('should return NaN for t < 0', () => {
       const bm = new BrownianMotion(0, 1, 1)
-      assert(isNaN(bm.mean(-1)))
+      assert(Number.isNaN(bm.mean(-1)))
     })
   })
 
@@ -257,7 +257,7 @@ describe('process.BrownianMotion', () => {
 
     it('should return NaN for t < 0', () => {
       const bm = new BrownianMotion(0, 1, 1)
-      assert(isNaN(bm.variance(-1)))
+      assert(Number.isNaN(bm.variance(-1)))
     })
   })
 

@@ -49,7 +49,7 @@ git branch -D pr-<N>-review
 
 Run lint and tests sequentially (tests depend on lint passing). Capture full output.
 
-**If either command exits non-zero**, record a **P1** finding:
+**If either command exits non-zero**, record a **Block** finding:
 - `[tests] CI` — `npm run standard` failed: `<first error line(s)>`
 - `[tests] CI` — `npm test` failed: `<failing test names and coverage breach lines>`
 
@@ -77,28 +77,30 @@ External PRs have no local plan file, so Pass 1 checks project conventions from 
 | **Subclass constants** | Leaf-subclass uses `this.c = { ... }` when a parent already sets `this.c` (should be `Object.assign`) |
 | **Error conventions** | `undefined` returned as an error sentinel (should be `NaN`, `Infinity`, or `throw`) |
 
-Each failed check is a **P2** finding. Record them alongside the agent findings from Pass 2.
+Each failed check is a **Warn** finding. Record them alongside the agent findings from Pass 2.
 
 ### 6. Pass 2 — Code Quality (Parallel Agents)
 
-**CRITICAL: Launch exactly 6 review agents in a single parallel call. Verify all 6 returned before proceeding.**
+**CRITICAL: Launch exactly 8 review agents in a single parallel call. Verify all 8 returned before proceeding.**
 
-Tell each agent to read `.claude/tmp/review-diff-pr-<N>.patch` and provide enough diff context so they can assess without needing extra file access. Each agent returns findings rated P1/P2/P3.
+Tell each agent to read `.claude/tmp/review-diff-pr-<N>.patch` and provide enough diff context so they can assess without needing extra file access. Each agent returns findings rated Block/Warn.
 
 - **review-security** agent
 - **review-performance** agent
-- **review-simplicity** agent
+- **review-structure** agent
+- **review-conventions** agent
+- **review-impact** agent
 - **review-tests** agent
 - **review-docs** agent
 - **review-correctness** agent
 
-Wait for all 6. Deduplicate overlapping findings. If you downgrade a finding's severity, note the original severity and your rationale.
+Wait for all 8. Deduplicate overlapping findings. If you downgrade a finding's severity, note the original severity and your rationale.
 
 ### 7. Verdict
 
-**PASS** — zero P1 or P2 findings across both passes. P3 items are informational and do not block.
+**PASS** — zero Block findings across both passes. Warn items are informational and do not block.
 
-**FAIL** — one or more P1 or P2 findings.
+**FAIL** — one or more Block findings.
 
 ### 8. Act on Verdict
 
@@ -147,7 +149,7 @@ LGTM — all quality checks passed.
 
 <One sentence describing what the PR does and why it looks correct.>
 
-<If any P3 items exist:>
+<If any Warn items exist:>
 **Notes (non-blocking):**
 - [domain] file:line — <note>
 ```
@@ -155,15 +157,11 @@ LGTM — all quality checks passed.
 #### Request-changes body (FAIL)
 
 ```
-<If P1 items:>
-## Required (P1 — blocking)
+<If Block items:>
+## Required (blocking)
 - [ ] [domain] `file:line` — <description and exact fix>
 
-<If P2 items:>
-## Required (P2 — blocking)
-- [ ] [domain] `file:line` — <description and exact fix>
-
-<If P3 items:>
+<If Warn items:>
 ## Informational (non-blocking)
 - [domain] `file:line` — <note>
 ```
@@ -174,23 +172,23 @@ After posting to GitHub, report back:
 
 **PASS:**
 > PR #N approved and merged.
-> P3 notes (if any): <list>
+> Warn notes (if any): <list>
 
 **FAIL:**
 > PR #N: changes requested — <N> blocking issue(s).
-> <Bulleted list of P1/P2 findings>
+> <Bulleted list of Block findings>
 
 ## Rules
 
 ### DO:
 - Fetch the full diff before running any agent
-- Launch all 6 review agents in a single parallel call and wait for all 6
+- Launch all 8 review agents in a single parallel call and wait for all 8
 - Post a GitHub review (APPROVE or REQUEST_CHANGES) — never just a comment
 - Merge immediately and automatically after approving — this is the contract
 - Be specific: cite file path and line number for every finding
 
 ### DO NOT:
-- Approve a PR that has any P1 or P2 finding
+- Approve a PR that has any Block finding
 - Merge without first posting an APPROVE review
 - Merge a draft PR or a non-open PR
 - Post REQUEST_CHANGES when the PR passes all checks
