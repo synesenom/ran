@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `gammaLowerIncomplete(s, x)` no longer silently returns a truncated (wrong) value for large shape parameters (e.g. `s = x = 1000`). The series loop in `_gli` now uses an adaptive per-call iteration limit `ceil(sqrt(2·(s+1)·log(1/ε)))` instead of the fixed `MAX_ITER = 100`; for s ≈ 1000 the old cap truncated at 100 iterations while convergence requires ~265. Downstream distributions (`Chi2`, `Gamma`, `Erlang`, `Poisson`, `Nakagami`) that delegate CDF computation to this function are also corrected (#837).
 - `docs/index.js` now uses `sass.compile()` instead of the deprecated `sass.renderSync()`, eliminating deprecation warnings on every `npm run docs` invocation (#817).
 
 ### Changed
