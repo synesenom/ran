@@ -3,6 +3,7 @@
  *
  * @namespace la
  * @memberof ran
+ * @ignore
  */
 export { default as Vector } from './vector'
 export { default as Matrix } from './matrix'
