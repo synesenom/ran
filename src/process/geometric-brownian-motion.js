@@ -40,11 +40,11 @@ export default class GeometricBrownianMotion extends Process {
    * @method mean
    * @memberof ran.process.GeometricBrownianMotion
    * @param {number} t Time.
-   * @returns {number} Expected value $e^{\mu t}$.
+   * @returns {number} Expected value $x_0 e^{\mu t}$.
    */
   mean (t) {
     if (t < 0) return NaN
-    return Math.exp(this.p.mu * t)
+    return this.x0 * Math.exp(this.p.mu * t)
   }
 
   /**
@@ -53,11 +53,11 @@ export default class GeometricBrownianMotion extends Process {
    * @method variance
    * @memberof ran.process.GeometricBrownianMotion
    * @param {number} t Time.
-   * @returns {number} Variance $e^{2\mu t}(e^{\sigma^2 t} - 1)$.
+   * @returns {number} Variance $x_0^2 e^{2\mu t}(e^{\sigma^2 t} - 1)$.
    */
   variance (t) {
     if (t < 0) return NaN
     const s2 = this.p.sigma * this.p.sigma
-    return Math.exp(2 * this.p.mu * t) * (Math.exp(s2 * t) - 1)
+    return this.x0 * this.x0 * Math.exp(2 * this.p.mu * t) * (Math.exp(s2 * t) - 1)
   }
 }

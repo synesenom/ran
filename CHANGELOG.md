@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `ran.process.BrownianBridge(sigma, T, dt)`: Brownian bridge process conditioned to return to 0 at time T, driven by the discrete-time rule `X_{n+1} = X_n − X_n·dt/(T−n·dt) + σ·√dt·N(0,1)` and pinned to 0 at step N = T/dt. Exposes `mean(t)` (always 0) and `variance(t)` (σ²·t·(T−t)/T for 0 ≤ t ≤ T, 0 for t > T). `reset()` restores both state and internal time index; `path(n)` always starts from the initial condition without corrupting the caller's time index (#855).
 - `ran.process.GeometricBrownianMotion(mu, sigma, dt)`: Geometric Brownian Motion with drift, using an exact discrete-time sampler (`X_{n+1} = X_n · exp((μ − σ²/2)·dt + σ·√dt·N(0,1))`). Starts at 1; paths stay positive by construction; log-returns are Normal((μ−σ²/2)·dt, σ²·dt) (#854).
 - `ran.process.PoissonProcess(lambda, dt)`: Poisson counting process where arrivals in each interval Δt follow Poisson(λ·Δt); state is cumulative event count, guaranteed non-decreasing and integer-valued (#853).
 - `ran.process.BrownianMotion` and `ran.process.OrnsteinUhlenbeck` are now available as tree-shakeable subpath imports (`import BrownianMotion from 'ranjs/process/brownian-motion'`, `import OrnsteinUhlenbeck from 'ranjs/process/ornstein-uhlenbeck'`), matching the per-distribution subpath export pattern.
