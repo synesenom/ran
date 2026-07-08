@@ -320,21 +320,13 @@ describe('process.GeometricBrownianMotion', () => {
       assert.throws(() => new GeometricBrownianMotion(0, 1, -0.5), /Invalid parameters/)
     })
 
-    it('should throw on x0 = 0', () => {
-      assert.throws(() => new GeometricBrownianMotion(0, 1, 1, 0), /Invalid parameters/)
-    })
-
-    it('should throw on x0 < 0', () => {
-      assert.throws(() => new GeometricBrownianMotion(0, 1, 1, -2), /Invalid parameters/)
-    })
-
     it('should throw on mu = NaN', () => {
       assert.throws(() => new GeometricBrownianMotion(NaN, 1, 1), /Invalid parameters/)
     })
 
     it('should accept valid parameters', () => {
       assert.doesNotThrow(() => new GeometricBrownianMotion(0, 1, 1))
-      assert.doesNotThrow(() => new GeometricBrownianMotion(0.05, 0.2, 0.01, 100))
+      assert.doesNotThrow(() => new GeometricBrownianMotion(0.05, 0.2, 0.01))
     })
 
     it('should use all defaults when called with no arguments', () => {
@@ -342,14 +334,9 @@ describe('process.GeometricBrownianMotion', () => {
       assert.strictEqual(gbm.state(), 1)
     })
 
-    it('should start at x0 (default 1)', () => {
+    it('should start at state 1', () => {
       const gbm = new GeometricBrownianMotion(0, 1, 1)
       assert.strictEqual(gbm.state(), 1)
-    })
-
-    it('should start at the specified x0', () => {
-      const gbm = new GeometricBrownianMotion(0, 1, 1, 50)
-      assert.strictEqual(gbm.state(), 50)
     })
   })
 
@@ -359,13 +346,13 @@ describe('process.GeometricBrownianMotion', () => {
       assert.strictEqual(gbm.path(10).length, 11)
     })
 
-    it('first element should equal x0', () => {
-      const gbm = new GeometricBrownianMotion(0, 1, 1, 5)
-      assert.strictEqual(gbm.path(5)[0], 5)
+    it('first element should be 1', () => {
+      const gbm = new GeometricBrownianMotion(0, 1, 1)
+      assert.strictEqual(gbm.path(5)[0], 1)
     })
 
     it('all path values should remain positive', () => {
-      const gbm = new GeometricBrownianMotion(0, 1, 1, 1)
+      const gbm = new GeometricBrownianMotion(0, 1, 1)
       gbm.seed(42)
       const path = gbm.path(500)
       assert(path.every(v => v > 0))
@@ -373,24 +360,24 @@ describe('process.GeometricBrownianMotion', () => {
   })
 
   describe('.reset()', () => {
-    it('should restore initial state to x0', () => {
-      const gbm = new GeometricBrownianMotion(0, 1, 1, 3)
+    it('should restore initial state to 1', () => {
+      const gbm = new GeometricBrownianMotion(0, 1, 1)
       for (let i = 0; i < 10; i++) gbm.next()
       gbm.reset()
-      assert.strictEqual(gbm.state(), 3)
+      assert.strictEqual(gbm.state(), 1)
     })
   })
 
   describe('.mean()', () => {
-    it('should return x0 at t=0', () => {
-      const gbm = new GeometricBrownianMotion(0.1, 0.2, 1, 5)
-      assert.strictEqual(gbm.mean(0), 5)
+    it('should return 1 at t=0', () => {
+      const gbm = new GeometricBrownianMotion(0.1, 0.2, 1)
+      assert.strictEqual(gbm.mean(0), 1)
     })
 
-    it('should return x0*exp(mu*t)', () => {
-      const gbm = new GeometricBrownianMotion(0.1, 0.2, 1, 2)
-      // 2 * exp(0.1 * 3) = 2.6997176151520064, computed independently
-      assert.closeTo(gbm.mean(3), 2.6997176151520064, 1e-10)
+    it('should return exp(mu*t)', () => {
+      const gbm = new GeometricBrownianMotion(0.1, 0.2, 1)
+      // exp(0.1 * 3) = 1.3498588075760032, computed independently
+      assert.closeTo(gbm.mean(3), 1.3498588075760032, 1e-10)
     })
 
     it('should return NaN for t < 0', () => {
@@ -399,7 +386,7 @@ describe('process.GeometricBrownianMotion', () => {
     })
 
     it('should be stable after advancing the simulation', () => {
-      const gbm = new GeometricBrownianMotion(0.05, 0.2, 1, 1)
+      const gbm = new GeometricBrownianMotion(0.05, 0.2, 1)
       const before = gbm.mean(2)
       for (let i = 0; i < 20; i++) gbm.next()
       assert.closeTo(gbm.mean(2), before, 1e-10)
@@ -408,14 +395,14 @@ describe('process.GeometricBrownianMotion', () => {
 
   describe('.variance()', () => {
     it('should return 0 at t=0', () => {
-      const gbm = new GeometricBrownianMotion(0.1, 0.2, 1, 3)
+      const gbm = new GeometricBrownianMotion(0.1, 0.2, 1)
       assert.strictEqual(gbm.variance(0), 0)
     })
 
-    it('should return x0^2*exp(2*mu*t)*(exp(sigma^2*t)-1)', () => {
-      const gbm = new GeometricBrownianMotion(0.05, 0.3, 1, 2)
-      // 4 * exp(0.1) * (exp(0.09) - 1) = 0.41631471832641564, computed independently
-      assert.closeTo(gbm.variance(1), 0.41631471832641564, 1e-10)
+    it('should return exp(2*mu*t)*(exp(sigma^2*t)-1)', () => {
+      const gbm = new GeometricBrownianMotion(0.05, 0.3, 1)
+      // exp(0.1) * (exp(0.09) - 1) = 0.10407867958160391, computed independently
+      assert.closeTo(gbm.variance(1), 0.10407867958160391, 1e-10)
     })
 
     it('should return NaN for t < 0', () => {

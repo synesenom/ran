@@ -17,14 +17,13 @@ export default class GeometricBrownianMotion extends Process {
    * @param {number} [mu=0] Drift rate.
    * @param {number} [sigma=1] Volatility (must be > 0).
    * @param {number} [dt=1] Time step (must be > 0).
-   * @param {number} [x0=1] Initial state (must be > 0).
    */
-  constructor (mu = 0, sigma = 1, dt = 1, x0 = 1) {
+  constructor (mu = 0, sigma = 1, dt = 1) {
     super()
-    Process.validate({ mu, sigma, dt, x0 }, ['sigma > 0', 'dt > 0', 'x0 > 0'])
+    Process.validate({ mu, sigma, dt }, ['sigma > 0', 'dt > 0'])
     this.p = { mu, sigma, dt }
-    this.x = x0
-    this.x0 = x0
+    this.x = 1
+    this.x0 = 1
     this.c = {
       drift: (mu - 0.5 * sigma * sigma) * dt,
       noise: sigma * Math.sqrt(dt)
@@ -41,11 +40,11 @@ export default class GeometricBrownianMotion extends Process {
    * @method mean
    * @memberof ran.process.GeometricBrownianMotion
    * @param {number} t Time.
-   * @returns {number} Expected value $x_0 e^{\mu t}$.
+   * @returns {number} Expected value $e^{\mu t}$.
    */
   mean (t) {
     if (t < 0) return NaN
-    return this.x0 * Math.exp(this.p.mu * t)
+    return Math.exp(this.p.mu * t)
   }
 
   /**
@@ -54,11 +53,11 @@ export default class GeometricBrownianMotion extends Process {
    * @method variance
    * @memberof ran.process.GeometricBrownianMotion
    * @param {number} t Time.
-   * @returns {number} Variance $x_0^2 e^{2\mu t}(e^{\sigma^2 t} - 1)$.
+   * @returns {number} Variance $e^{2\mu t}(e^{\sigma^2 t} - 1)$.
    */
   variance (t) {
     if (t < 0) return NaN
     const s2 = this.p.sigma * this.p.sigma
-    return this.x0 * this.x0 * Math.exp(2 * this.p.mu * t) * (Math.exp(s2 * t) - 1)
+    return Math.exp(2 * this.p.mu * t) * (Math.exp(s2 * t) - 1)
   }
 }
