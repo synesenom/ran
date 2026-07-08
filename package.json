@@ -476,6 +476,9 @@
     },
     "./process/poisson-process": {
       "import": "./dist/process/poisson-process.esm.js"
+    },
+    "./process/random-walk": {
+      "import": "./dist/process/random-walk.esm.js"
     }
   },
   "sideEffects": false,
