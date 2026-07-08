@@ -1,6 +1,7 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import Process from '../src/process/_process'
+import BrownianBridge from '../src/process/brownian-bridge'
 import BrownianMotion from '../src/process/brownian-motion'
 import GeometricBrownianMotion from '../src/process/geometric-brownian-motion'
 import OrnsteinUhlenbeck from '../src/process/ornstein-uhlenbeck'
@@ -552,6 +553,182 @@ describe('process.OrnsteinUhlenbeck', () => {
       const stationaryStd = sigma / Math.sqrt(2 * theta)
       const ref = new Normal(mu, stationaryStd)
       assert(ksTest(samples, x => ref.cdf(x)))
+    })
+  })
+})
+
+describe('process.BrownianBridge', () => {
+  describe('constructor', () => {
+    it('should throw on sigma = 0', () => {
+      assert.throws(() => new BrownianBridge(0, 1, 0.1), /Invalid parameters/)
+    })
+
+    it('should throw on sigma < 0', () => {
+      assert.throws(() => new BrownianBridge(-1, 1, 0.1), /Invalid parameters/)
+    })
+
+    it('should throw on T = 0', () => {
+      assert.throws(() => new BrownianBridge(1, 0, 0.1), /Invalid parameters/)
+    })
+
+    it('should throw on T < 0', () => {
+      assert.throws(() => new BrownianBridge(1, -1, 0.1), /Invalid parameters/)
+    })
+
+    it('should throw on dt = 0', () => {
+      assert.throws(() => new BrownianBridge(1, 1, 0), /Invalid parameters/)
+    })
+
+    it('should throw on dt < 0', () => {
+      assert.throws(() => new BrownianBridge(1, 1, -0.1), /Invalid parameters/)
+    })
+
+    it('should throw on sigma = NaN', () => {
+      assert.throws(() => new BrownianBridge(NaN, 1, 0.1), /Invalid parameters/)
+    })
+
+    it('should accept valid parameters', () => {
+      assert.doesNotThrow(() => new BrownianBridge(1, 1, 0.1))
+      assert.doesNotThrow(() => new BrownianBridge(0.5, 2, 0.5))
+    })
+
+    it('should start at state 0', () => {
+      const bb = new BrownianBridge(1, 1, 0.1)
+      assert.strictEqual(bb.state(), 0)
+    })
+  })
+
+  describe('terminal value', () => {
+    it('should return 0 exactly at terminal step N = T/dt', () => {
+      const T = 1
+      const dt = 0.1
+      const N = Math.round(T / dt)
+      const bb = new BrownianBridge(1, T, dt)
+      bb.seed(42)
+      for (let i = 0; i < N; i++) bb.next()
+      assert.strictEqual(bb.state(), 0)
+    })
+
+    it('should stay at 0 after terminal time', () => {
+      const bb = new BrownianBridge(1, 1, 0.1)
+      bb.seed(42)
+      const N = 10
+      for (let i = 0; i < N + 5; i++) bb.next()
+      assert.strictEqual(bb.state(), 0)
+    })
+  })
+
+  describe('.reset()', () => {
+    it('should restore initial state and time index', () => {
+      const T = 1
+      const dt = 0.1
+      const N = Math.round(T / dt)
+      const bb = new BrownianBridge(1, T, dt)
+      bb.seed(42)
+      for (let i = 0; i < N; i++) bb.next()
+      bb.reset()
+      assert.strictEqual(bb.state(), 0)
+      for (let i = 0; i < N; i++) bb.next()
+      assert.strictEqual(bb.state(), 0)
+    })
+  })
+
+  describe('.path()', () => {
+    it('should return N+1 states starting from 0', () => {
+      const bb = new BrownianBridge(1, 1, 0.1)
+      const path = bb.path(10)
+      assert.strictEqual(path.length, 11)
+      assert.strictEqual(path[0], 0)
+    })
+
+    it('should end at 0 at the terminal step', () => {
+      const T = 1
+      const dt = 0.1
+      const N = Math.round(T / dt)
+      const bb = new BrownianBridge(1, T, dt)
+      bb.seed(42)
+      const path = bb.path(N)
+      assert.strictEqual(path[N], 0)
+    })
+
+    it('should not mutate the current state or time index', () => {
+      const T = 1
+      const dt = 0.1
+      const N = Math.round(T / dt)
+      const bb = new BrownianBridge(1, T, dt)
+      bb.seed(42)
+      for (let i = 0; i < 5; i++) bb.next()
+      const stateBefore = bb.state()
+      bb.path(N)
+      assert.strictEqual(bb.state(), stateBefore)
+      // Remaining 5 steps should still reach 0
+      for (let i = 0; i < 5; i++) bb.next()
+      assert.strictEqual(bb.state(), 0)
+    })
+  })
+
+  describe('.mean()', () => {
+    it('should return 0 for t >= 0', () => {
+      const bb = new BrownianBridge(1, 1, 0.1)
+      assert.strictEqual(bb.mean(0), 0)
+      assert.strictEqual(bb.mean(0.5), 0)
+      assert.strictEqual(bb.mean(1), 0)
+      assert.strictEqual(bb.mean(2), 0)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const bb = new BrownianBridge(1, 1, 0.1)
+      assert(Number.isNaN(bb.mean(-1)))
+    })
+  })
+
+  describe('.variance()', () => {
+    it('should return sigma^2 * t * (T-t) / T for 0 < t < T', () => {
+      const sigma = 2
+      const T = 1
+      const bb = new BrownianBridge(sigma, T, 0.1)
+      // sigma^2 * 0.5 * 0.5 / 1 = 4 * 0.25 = 1
+      assert.closeTo(bb.variance(0.5), 1, 1e-10)
+    })
+
+    it('should return 0 at t=0', () => {
+      const bb = new BrownianBridge(1, 1, 0.1)
+      assert.strictEqual(bb.variance(0), 0)
+    })
+
+    it('should return 0 at t=T', () => {
+      const bb = new BrownianBridge(1, 1, 0.1)
+      assert.strictEqual(bb.variance(1), 0)
+    })
+
+    it('should return 0 for t > T', () => {
+      const bb = new BrownianBridge(1, 1, 0.1)
+      assert.strictEqual(bb.variance(2), 0)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const bb = new BrownianBridge(1, 1, 0.1)
+      assert(Number.isNaN(bb.variance(-1)))
+    })
+  })
+
+  describe('increments', () => {
+    it('should be normally distributed at t=0 (KS test)', () => {
+      // At t=0, X_0=0 so drift=0; increment is exactly sigma*sqrt(dt)*Z ~ N(0, sigma*sqrt(dt))
+      const sigma = 1.5
+      const T = 100
+      const dt = 1
+      const bb = new BrownianBridge(sigma, T, dt)
+      bb.seed(42)
+      const n = 1000
+      const increments = []
+      for (let i = 0; i < n; i++) {
+        bb.reset()
+        bb.next()
+        increments.push(bb.state())
+      }
+      const ref = new Normal(0, sigma * Math.sqrt(dt))
+      assert(ksTest(increments, x => ref.cdf(x)))
     })
   })
 })
