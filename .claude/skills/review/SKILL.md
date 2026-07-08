@@ -60,10 +60,16 @@ Then launch all eight **in a single parallel call**, telling each to read `.clau
 
 Each agent returns `Block` findings (must fix before commit), `Warn` findings (real problem, file as issue), or `No issues found.`
 
-Wait for all eight. Then:
-1. Collect every `Block` and `Warn` line from all agents.
-2. Deduplicate: if two agents flag the same file:line for the same root cause, keep one and tag it with both domains (e.g. `[correctness, impact]`).
-3. Produce one flat merged list — `Block` items first, then `Warn` — each tagged with its source domain.
+Wait for all eight. Then merge in three passes:
+
+**Pass A — Group by location.** Group all findings by the code location they target (same file + overlapping line range, or the same named method/constant when no line number is given).
+
+**Pass B — Classify each group:**
+- **Single finding**: keep as-is.
+- **Multiple findings, same direction** (compatible recommendations — e.g. two agents both say "this is a bug"): deduplicate into one entry, tag with both domains (e.g. `[correctness, impact]`), keep the higher severity (Block beats Warn).
+- **Multiple findings, opposing direction** (conflicting recommendations — e.g. performance says "cache this constant" while conventions says "leave it inline"): emit a single `Conflict` entry. State each domain's position in one sentence each. Do NOT pick a winner or suppress either view — surface the disagreement for the user to resolve.
+
+**Pass C — Produce the merged list:** Block first, then Conflict (needs a human decision), then Warn.
 
 ### 5. Generate Report
 
@@ -75,17 +81,21 @@ Wait for all eight. Then:
 > **Block (<N>):**
 > - [ ] `[domain]` file:line — description and fix
 >
+> **Conflict (<N>):**
+> - [ ] `[domain-A vs domain-B]` file:line — **Domain-A says**: <position>. **Domain-B says**: <position>. Needs human decision.
+>
 > **Warn (<N>):**
 > - [ ] `[domain]` file:line — description and recommendation
 >
-> **Verdict**: PASS | FAIL (<N> to fix before commit, <M> to file)
+> **Verdict**: PASS | FAIL (<N> to fix before commit, <C> to decide, <M> to file)
 
-Verdict is FAIL if there are any Block items. Warn items do not block — they should be filed as issues after committing. If both Block and Warn are empty, output `Verdict: PASS` with no lists.
+Verdict is FAIL if there are any Block items. Conflict and Warn items do not block commits — Conflicts need a human call, Warns should be filed as issues. If Block, Conflict, and Warn are all empty, output `Verdict: PASS` with no lists.
 
 ### 6. Next Steps
 
 - **PASS**: "Review passed. Changes are ready to commit."
-- **FAIL**: "Review found <N> blocking issue(s). Fix them and run `/review` again. (<M> warn items — file as issues after committing.)"
+- **FAIL**: "Review found <N> blocking issue(s). Fix them and run `/review` again. (<C> conflicts and <M> warn items — resolve/file after committing.)"
+- **Conflicts present**: After listing them, ask the user to pick a side for each one using `AskUserQuestion` before proceeding.
 
 ## Rules
 
