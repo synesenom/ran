@@ -1,6 +1,7 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import Process from '../src/process/_process'
+import AR1 from '../src/process/ar1'
 import BrownianBridge from '../src/process/brownian-bridge'
 import BrownianMotion from '../src/process/brownian-motion'
 import GeometricBrownianMotion from '../src/process/geometric-brownian-motion'
@@ -1101,6 +1102,207 @@ describe('process.BrownianBridge', () => {
       }
       const ref = new Normal(0, sigma * Math.sqrt(dt))
       assert(ksTest(increments, x => ref.cdf(x)))
+    })
+  })
+})
+
+describe('process.AR1', () => {
+  describe('constructor', () => {
+    it('should throw on sigma = 0', () => {
+      assert.throws(() => new AR1(0.5, 0), /Invalid parameters/)
+    })
+
+    it('should throw on sigma < 0', () => {
+      assert.throws(() => new AR1(0.5, -1), /Invalid parameters/)
+    })
+
+    it('should throw on sigma = NaN', () => {
+      assert.throws(() => new AR1(0.5, NaN), /Invalid parameters/)
+    })
+
+    it('should throw on phi = NaN', () => {
+      assert.throws(() => new AR1(NaN, 1), /Invalid parameters/)
+    })
+
+    it('should accept |phi| >= 1 without throwing (non-stationary)', () => {
+      assert.doesNotThrow(() => new AR1(1, 1))
+      assert.doesNotThrow(() => new AR1(1.5, 1))
+      assert.doesNotThrow(() => new AR1(-1.2, 1))
+    })
+
+    it('should accept valid stationary parameters', () => {
+      assert.doesNotThrow(() => new AR1(0.5, 1))
+      assert.doesNotThrow(() => new AR1(-0.9, 2))
+    })
+
+    it('should start at state 0', () => {
+      assert.strictEqual(new AR1(0.5, 1).state(), 0)
+    })
+
+    it('should use all defaults when called with no arguments', () => {
+      assert.doesNotThrow(() => new AR1())
+      assert.strictEqual(new AR1().state(), 0)
+    })
+  })
+
+  describe('.mean()', () => {
+    it('should return 0 for t >= 0', () => {
+      const ar1 = new AR1(0.5, 1)
+      assert.strictEqual(ar1.mean(0), 0)
+      assert.strictEqual(ar1.mean(5), 0)
+      assert.strictEqual(ar1.mean(100), 0)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const ar1 = new AR1(0.5, 1)
+      assert(Number.isNaN(ar1.mean(-1)))
+    })
+  })
+
+  describe('.variance()', () => {
+    it('should return 0 at t = 0', () => {
+      const ar1 = new AR1(0.5, 1)
+      assert.strictEqual(ar1.variance(0), 0)
+    })
+
+    it('should return sigma^2 at t = 1', () => {
+      const ar1 = new AR1(0.5, 2)
+      // exact rational: Var(X_1) = sigma^2 = 4
+      assert.closeTo(ar1.variance(1), 4, 1e-10)
+    })
+
+    it('should return sigma^2*(1+phi^2) at t = 2', () => {
+      const ar1 = new AR1(0.5, 2)
+      // exact rational: Var(X_2) = sigma^2*(1 + phi^2) = 4*(1+0.25) = 5
+      assert.closeTo(ar1.variance(2), 5, 1e-10)
+    })
+
+    it('should approach stationary variance sigma^2/(1-phi^2) as t -> infinity', () => {
+      const ar1 = new AR1(0.5, 1)
+      // exact rational: sigma^2/(1-phi^2) = 1/(1-0.25) = 4/3
+      assert.closeTo(ar1.variance(1000), 4 / 3, 1e-6)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const ar1 = new AR1(0.5, 1)
+      assert(Number.isNaN(ar1.variance(-1)))
+    })
+
+    it('should grow monotonically for |phi| > 1', () => {
+      const ar1 = new AR1(1.5, 1)
+      // exact rational: Var(X_3) = sigma^2*(1 + phi^2 + phi^4) = 1 + 2.25 + 5.0625 = 8.3125
+      assert.closeTo(ar1.variance(3), 8.3125, 1e-10)
+      assert(ar1.variance(10) > ar1.variance(5))
+      assert(ar1.variance(20) > ar1.variance(10))
+    })
+  })
+
+  describe('.pdf()', () => {
+    it('should return NaN for t = 0', () => {
+      const ar1 = new AR1(0.5, 1)
+      assert(Number.isNaN(ar1.pdf(0, 0)))
+    })
+
+    it('should return NaN for t < 0', () => {
+      const ar1 = new AR1(0.5, 1)
+      assert(Number.isNaN(ar1.pdf(0, -1)))
+    })
+
+    it('should return Normal(0, sigma^2) density at t = 1', () => {
+      const ar1 = new AR1(0.5, 1)
+      // scipy: stats.norm.pdf(0, 0, 1) = 0.3989422804014327
+      assert.closeTo(ar1.pdf(0, 1), 0.3989422804014327, 1e-10)
+    })
+
+    it('should return Normal(0, sigma^2*(1+phi^2)) density at t = 2', () => {
+      const ar1 = new AR1(0.5, 1)
+      // scipy: stats.norm.pdf(0, 0, sqrt(1.25)) = 0.3568248232305543
+      assert.closeTo(ar1.pdf(0, 2), 0.3568248232305543, 1e-10)
+    })
+
+    it('should be symmetric around 0', () => {
+      const ar1 = new AR1(0.5, 1)
+      // scipy: stats.norm.pdf(1, 0, sqrt(1.3125)) = 0.2379112029210874
+      assert.closeTo(ar1.pdf(1, 3), 0.2379112029210874, 1e-10)
+      assert.closeTo(ar1.pdf(-1, 3), ar1.pdf(1, 3), 1e-10)
+    })
+  })
+
+  describe('.covariogram()', () => {
+    it('should equal variance at s = t', () => {
+      const ar1 = new AR1(0.5, 1)
+      assert.closeTo(ar1.covariogram(2, 2), ar1.variance(2), 1e-10)
+    })
+
+    it('should be symmetric: covariogram(s, t) = covariogram(t, s)', () => {
+      const ar1 = new AR1(0.5, 1)
+      // exact rational: Cov(X_2, X_3) = phi * Var(X_2) = 0.5 * (1 + 0.25) = 0.625
+      assert.closeTo(ar1.covariogram(2, 3), 0.625, 1e-10)
+      assert.closeTo(ar1.covariogram(2, 3), ar1.covariogram(3, 2), 1e-10)
+    })
+
+    it('should return phi * Var(X_1) for s=1, t=2', () => {
+      const ar1 = new AR1(0.5, 1)
+      // exact rational: Cov(X_1, X_2) = phi^1 * Var(X_1) = 0.5 * 1 = 0.5
+      assert.closeTo(ar1.covariogram(1, 2), 0.5, 1e-10)
+    })
+
+    it('should return phi^2 * Var(X_1) for s=1, t=3', () => {
+      const ar1 = new AR1(0.5, 1)
+      // exact rational: Cov(X_1, X_3) = phi^2 * Var(X_1) = 0.25 * 1 = 0.25
+      assert.closeTo(ar1.covariogram(1, 3), 0.25, 1e-10)
+    })
+
+    it('should return NaN for s < 0', () => {
+      const ar1 = new AR1(0.5, 1)
+      assert(Number.isNaN(ar1.covariogram(-1, 2)))
+    })
+
+    it('should return NaN for t < 0', () => {
+      const ar1 = new AR1(0.5, 1)
+      assert(Number.isNaN(ar1.covariogram(2, -1)))
+    })
+  })
+
+  describe('.reset()', () => {
+    it('should restore initial state to 0', () => {
+      const ar1 = new AR1(0.5, 1)
+      ar1.seed(42)
+      for (let i = 0; i < 10; i++) ar1.next()
+      ar1.reset()
+      assert.strictEqual(ar1.state(), 0)
+    })
+  })
+
+  describe('stationarity', () => {
+    it('should converge to stationary distribution for |phi| < 1 (KS test)', () => {
+      const phi = 0.5
+      const sigma = 1
+      const ar1 = new AR1(phi, sigma)
+      ar1.seed(42)
+      // burn in to reach stationarity
+      for (let i = 0; i < 500; i++) ar1.next()
+      // thin by 10: lag-10 autocorrelation = phi^10 ≈ 0.001, effectively independent
+      const samples = []
+      for (let i = 0; i < 10000; i++) {
+        ar1.next()
+        if (i % 10 === 0) samples.push(ar1.state())
+      }
+      const stationarySd = sigma / Math.sqrt(1 - phi * phi)
+      const ref = new Normal(0, stationarySd)
+      assert(ksTest(samples, x => ref.cdf(x)))
+    })
+  })
+
+  describe('explosive growth', () => {
+    it('should exhibit growing variance for |phi| > 1', () => {
+      const ar1 = new AR1(1.5, 1)
+      ar1.seed(42)
+      // run ensemble of 30 paths; at step 30 theoretical Var ≈ phi^60/1.25 ≈ 3.5e10
+      const paths = ar1.ensemble(20, 30)
+      const earlyMSV = paths.map(p => p[1] * p[1]).reduce((a, b) => a + b) / paths.length
+      const lateMSV = paths.map(p => p[30] * p[30]).reduce((a, b) => a + b) / paths.length
+      assert(lateMSV > earlyMSV * 100)
     })
   })
 })
