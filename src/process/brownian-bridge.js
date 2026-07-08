@@ -2,11 +2,11 @@ import normal from '../dist/_normal'
 import Process from './_process'
 
 /**
- * Brownian bridge process conditioned to return to 0 at time T.
+ * Brownian bridge process conditioned to return to 0 at time T, using an exact discrete-time sampler.
  *
- * The update rule per step is
+ * The exact transition per step is
  *
- * $X_{n+1} = X_n + \frac{0 - X_n}{T - n\,\mathrm{d}t}\,\mathrm{d}t + \sigma\sqrt{\mathrm{d}t}\,Z,$
+ * $X(t + \mathrm{d}t) = X(t)\,\frac{T - t - \mathrm{d}t}{T - t} + \sigma\sqrt{\frac{\mathrm{d}t\,(T - t - \mathrm{d}t)}{T - t}}\,Z,$
  *
  * where $Z \sim \mathcal{N}(0, 1)$. The process pins to 0 at step $N = T/\mathrm{d}t$.
  *
@@ -28,23 +28,24 @@ export default class BrownianBridge extends Process {
     this.x = 0
     this.x0 = 0
     this.c = {
-      sqrtDt: Math.sqrt(dt),
       N: Math.round(T / dt)
     }
   }
 
   _next () {
     const { sigma, T, dt } = this.p
-    const { sqrtDt, N } = this.c
-    // Pin to 0 at the terminal step instead of applying the formula (which would
-    // blow up as T - t → 0 and leave residual noise at the endpoint).
+    const { N } = this.c
+    // Pin to 0 at the terminal step: the exact variance collapses to 0 here anyway,
+    // but computing sqrt of a near-zero ratio risks floating-point noise at the endpoint.
     if (this.n >= N - 1) {
       this.n++
       return 0
     }
     const t = this.n * dt
     this.n++
-    return this.x + (-this.x / (T - t)) * dt + sigma * sqrtDt * normal(this.r)
+    const remaining = T - t
+    const ratio = (remaining - dt) / remaining
+    return this.x * ratio + sigma * Math.sqrt(dt * ratio) * normal(this.r)
   }
 
   /** @inheritdoc */
