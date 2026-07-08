@@ -41,8 +41,15 @@ export default class CompoundPoissonProcess extends Process {
     }
   }
 
+  seed (value) {
+    super.seed(value)
+    // Seed jumpDist from this.r's post-warmup state so jump magnitudes are reproducible
+    // but the two PRNGs produce independent streams (different initial states).
+    this.p.jumpDist.seed(this.r.save()[0])
+    return this
+  }
+
   _next () {
-    // jumpDist.sample() uses its own internal PRNG; seeding this process controls only the arrival counts.
     const k = poisson(this.r, this.p.lambda * this.p.dt)
     let sum = 0
     for (let i = 0; i < k; i++) {

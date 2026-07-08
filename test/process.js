@@ -1618,6 +1618,31 @@ describe('process.CompoundPoissonProcess', () => {
     })
   })
 
+  describe('.seed()', () => {
+    it('should produce identical paths when seeded identically', () => {
+      const cpp = new CompoundPoissonProcess(2, new Normal(1, 1), 1)
+      cpp.seed(42)
+      const path1 = cpp.path(30)
+      cpp.seed(42)
+      const path2 = cpp.path(30)
+      assert.deepEqual(path1, path2)
+    })
+
+    it('should produce different paths for different seeds', () => {
+      const cpp = new CompoundPoissonProcess(2, new Normal(1, 1), 1)
+      cpp.seed(1)
+      const path1 = cpp.path(30)
+      cpp.seed(2)
+      const path2 = cpp.path(30)
+      assert.notDeepEqual(path1, path2)
+    })
+
+    it('should return this for chaining', () => {
+      const cpp = new CompoundPoissonProcess(2, new Normal(1, 1), 1)
+      assert.strictEqual(cpp.seed(0), cpp)
+    })
+  })
+
   describe('.reset()', () => {
     it('should restore initial state to 0', () => {
       const cpp = new CompoundPoissonProcess(2, new Normal(0, 1), 1)
