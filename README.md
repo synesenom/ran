@@ -180,16 +180,16 @@ Every process in `ran.process` extends a common `Process` base class and exposes
 ```javascript
 const bm = new ran.process.BrownianMotion(0, 1, 0.1)  // mu=0, sigma=1, dt=0.1
 
-bm.seed(42)           // seed the PRNG for reproducible paths; returns the instance
 bm.next()             // advance one step; returns the new state
-bm.path(100)          // generate a path of 100 steps; returns array of 101 states
-bm.ensemble(5, 100)   // generate 5 independent paths of 100 steps each
 bm.reset()            // reset to initial state
 bm.state()            // current state value
+bm.path(100)          // generate a path of 100 steps; returns array of 101 states
+bm.ensemble(5, 100)   // generate 5 independent paths of 100 steps each
+bm.pdf(x, t)          // marginal density at state x and time t
 bm.mean(t)            // theoretical mean at time t
 bm.variance(t)        // theoretical variance at time t
-bm.pdf(x, t)          // marginal density at state x and time t
 bm.covariogram(s, t)  // theoretical covariance Cov(X(s), X(t))
+bm.seed(42)           // seed the PRNG for reproducible paths; returns the instance
 ```
 
 Available processes:
