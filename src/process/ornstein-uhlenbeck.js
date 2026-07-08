@@ -66,4 +66,19 @@ export default class OrnsteinUhlenbeck extends Process {
     if (t < 0) return NaN
     return this.p.sigma * this.p.sigma * (1 - Math.exp(-2 * this.p.theta * t)) / (2 * this.p.theta)
   }
+
+  /**
+   * Returns the analytical covariance between process values at times s and t.
+   *
+   * @method covariogram
+   * @memberof ran.process.OrnsteinUhlenbeck
+   * @param {number} s First time point.
+   * @param {number} t Second time point.
+   * @returns {number} Covariance $\frac{\sigma^2}{2\theta}\left(e^{-\theta|t-s|} - e^{-\theta(t+s)}\right)$.
+   */
+  covariogram (s, t) {
+    if (s < 0 || t < 0) return NaN
+    const { theta, sigma } = this.p
+    return (sigma * sigma / (2 * theta)) * (Math.exp(-theta * Math.abs(t - s)) - Math.exp(-theta * (t + s)))
+  }
 }

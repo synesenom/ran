@@ -265,6 +265,33 @@ describe('process.BrownianMotion', () => {
     })
   })
 
+  describe('.covariogram()', () => {
+    it('should return sigma^2 * min(s, t)', () => {
+      const bm = new BrownianMotion(0, 2, 1)
+      assert.closeTo(bm.covariogram(2, 3), 4 * 2, 1e-10)
+    })
+
+    it('should be symmetric', () => {
+      const bm = new BrownianMotion(0, 2, 1)
+      assert.closeTo(bm.covariogram(1, 4), bm.covariogram(4, 1), 1e-10)
+    })
+
+    it('should equal variance at s = t', () => {
+      const bm = new BrownianMotion(0, 2, 1)
+      assert.closeTo(bm.covariogram(3, 3), bm.variance(3), 1e-10)
+    })
+
+    it('should return NaN for s < 0', () => {
+      const bm = new BrownianMotion(0, 1, 1)
+      assert(Number.isNaN(bm.covariogram(-1, 2)))
+    })
+
+    it('should return NaN for t < 0', () => {
+      const bm = new BrownianMotion(0, 1, 1)
+      assert(Number.isNaN(bm.covariogram(2, -1)))
+    })
+  })
+
   describe('.path()', () => {
     it('should have length n+1', () => {
       const bm = new BrownianMotion(0, 1, 1)
@@ -414,6 +441,35 @@ describe('process.GeometricBrownianMotion', () => {
     })
   })
 
+  describe('.covariogram()', () => {
+    it('should return exp(mu*(s+t)) * (exp(sigma^2*min(s,t)) - 1)', () => {
+      const mu = 0.05; const sigma = 0.2; const s = 1; const t = 3
+      const gbm = new GeometricBrownianMotion(mu, sigma, 1)
+      const expected = Math.exp(mu * (s + t)) * (Math.exp(sigma * sigma * Math.min(s, t)) - 1)
+      assert.closeTo(gbm.covariogram(s, t), expected, 1e-10)
+    })
+
+    it('should be symmetric', () => {
+      const gbm = new GeometricBrownianMotion(0.05, 0.2, 1)
+      assert.closeTo(gbm.covariogram(1, 4), gbm.covariogram(4, 1), 1e-10)
+    })
+
+    it('should equal variance at s = t', () => {
+      const gbm = new GeometricBrownianMotion(0.05, 0.3, 1)
+      assert.closeTo(gbm.covariogram(2, 2), gbm.variance(2), 1e-10)
+    })
+
+    it('should return NaN for s < 0', () => {
+      const gbm = new GeometricBrownianMotion(0, 1, 1)
+      assert(Number.isNaN(gbm.covariogram(-1, 2)))
+    })
+
+    it('should return NaN for t < 0', () => {
+      const gbm = new GeometricBrownianMotion(0, 1, 1)
+      assert(Number.isNaN(gbm.covariogram(2, -1)))
+    })
+  })
+
   describe('log-returns', () => {
     it('should be normally distributed (KS test)', () => {
       const mu = 0.05
@@ -527,6 +583,35 @@ describe('process.OrnsteinUhlenbeck', () => {
     it('should return NaN for t < 0', () => {
       const ou = new OrnsteinUhlenbeck(1, 0, 1, 1)
       assert(isNaN(ou.variance(-1)))
+    })
+  })
+
+  describe('.covariogram()', () => {
+    it('should return (sigma^2/2theta)*(exp(-theta*|t-s|) - exp(-theta*(t+s)))', () => {
+      const theta = 2; const sigma = 0.5; const s = 1; const t = 3
+      const ou = new OrnsteinUhlenbeck(theta, 0, sigma, 0.1)
+      const expected = (sigma * sigma / (2 * theta)) * (Math.exp(-theta * Math.abs(t - s)) - Math.exp(-theta * (t + s)))
+      assert.closeTo(ou.covariogram(s, t), expected, 1e-10)
+    })
+
+    it('should be symmetric', () => {
+      const ou = new OrnsteinUhlenbeck(2, 0, 0.5, 0.1)
+      assert.closeTo(ou.covariogram(1, 3), ou.covariogram(3, 1), 1e-10)
+    })
+
+    it('should equal variance at s = t', () => {
+      const ou = new OrnsteinUhlenbeck(2, 0, 0.5, 0.1)
+      assert.closeTo(ou.covariogram(2, 2), ou.variance(2), 1e-10)
+    })
+
+    it('should return NaN for s < 0', () => {
+      const ou = new OrnsteinUhlenbeck(1, 0, 1, 1)
+      assert(Number.isNaN(ou.covariogram(-1, 2)))
+    })
+
+    it('should return NaN for t < 0', () => {
+      const ou = new OrnsteinUhlenbeck(1, 0, 1, 1)
+      assert(Number.isNaN(ou.covariogram(2, -1)))
     })
   })
 
@@ -840,6 +925,33 @@ describe('process.PoissonProcess', () => {
     it('should return NaN for t < 0', () => {
       const pp = new PoissonProcess(2, 0.5)
       assert(Number.isNaN(pp.variance(-1)))
+    })
+  })
+
+  describe('.covariogram()', () => {
+    it('should return lambda * min(s, t)', () => {
+      const pp = new PoissonProcess(3, 0.5)
+      assert.closeTo(pp.covariogram(2, 5), 3 * 2, 1e-10)
+    })
+
+    it('should be symmetric', () => {
+      const pp = new PoissonProcess(3, 0.5)
+      assert.closeTo(pp.covariogram(2, 5), pp.covariogram(5, 2), 1e-10)
+    })
+
+    it('should equal variance at s = t', () => {
+      const pp = new PoissonProcess(3, 0.5)
+      assert.closeTo(pp.covariogram(4, 4), pp.variance(4), 1e-10)
+    })
+
+    it('should return NaN for s < 0', () => {
+      const pp = new PoissonProcess(1, 1)
+      assert(Number.isNaN(pp.covariogram(-1, 2)))
+    })
+
+    it('should return NaN for t < 0', () => {
+      const pp = new PoissonProcess(1, 1)
+      assert(Number.isNaN(pp.covariogram(2, -1)))
     })
   })
 })
