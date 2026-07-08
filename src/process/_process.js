@@ -142,6 +142,24 @@ export default class Process {
   }
 
   /**
+   * Generates m independent paths of n steps each by calling path(n) m times.
+   *
+   * @method ensemble
+   * @memberof ran.process.Process
+   * @param {number} m Number of paths.
+   * @param {number} n Number of steps per path.
+   * @returns {Array} Array of m arrays, each of length n+1 (initial state followed by n states).
+   */
+  ensemble (m, n) {
+    Process.validate({ m, n }, ['m >= 1', 'n >= 1'])
+    const paths = []
+    for (let i = 0; i < m; i++) {
+      paths.push(this.path(n))
+    }
+    return paths
+  }
+
+  /**
    * Resets the process to its initial state.
    *
    * @method reset

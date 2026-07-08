@@ -60,10 +60,30 @@ Then launch all eight **in a single parallel call**, telling each to read `.clau
 
 Each agent returns `Block` findings (must fix before commit), `Warn` findings (real problem, file as issue), or `No issues found.`
 
-Wait for all eight. Then:
-1. Collect every `Block` and `Warn` line from all agents.
-2. Deduplicate: if two agents flag the same file:line for the same root cause, keep one and tag it with both domains (e.g. `[correctness, impact]`).
-3. Produce one flat merged list — `Block` items first, then `Warn` — each tagged with its source domain.
+**Reviewer priority tiers** — used to resolve conflicts automatically (higher tier wins):
+
+| Tier | Domains | Rationale |
+|------|---------|-----------|
+| 1 (highest) | `security` | Vulnerabilities override everything else |
+| 2 | `correctness`, `impact` | Wrong results and broken callers are hard facts |
+| 3 | `conventions` | The project has already decided; one-off optimisations don't override it |
+| 4 | `tests`, `docs` | Quality improvements, but not load-bearing |
+| 5 (lowest) | `structure`, `performance` | Speculative; trade-offs often context-dependent |
+
+Wait for all eight. Then merge in four passes:
+
+**Pass A — Group by location.** Group all findings by the code location they target (same file + overlapping line range, or the same named method/constant when no line number is given).
+
+**Pass B — Classify each group:**
+- **Single finding**: keep as-is.
+- **Multiple findings, same direction** (compatible recommendations — e.g. two agents both say "this is a bug"): deduplicate into one entry, tag with both domains (e.g. `[correctness, impact]`), keep the higher severity (Block beats Warn).
+- **Multiple findings, opposing direction** (conflicting recommendations — e.g. performance says "cache this constant" while conventions says "leave it inline"):
+  - **Different tiers**: the higher-tier domain wins. Emit the winning finding tagged `[domain-A overrides domain-B]` with a one-line note: "domain-B suggestion suppressed: domain-A (tier N) takes precedence." Drop the losing finding entirely.
+  - **Same tier**: neither wins. Emit a single `Conflict` entry stating each domain's position. Surface for human decision.
+
+**Pass C — Cross-PR conflict check.** For every Warn that survived Pass B, search open GitHub issues for the same file path and method/constant name using `mcp__github__search_issues` (query: `repo:owner/repo is:open <filename> <method-or-constant-name>`). If an open issue exists whose recommended direction **opposes** the current Warn, apply the same tier rule: if the current finding outranks the existing issue's domain, keep the Warn and add a note to close the old issue. If the existing issue's domain outranks or ties the current finding, promote the Warn to a `Conflict` entry and reference the issue number: "Today's [domain] says: <position>. Open issue #N says: <opposing position>. Needs human decision — resolve the issue or close it before acting on this finding."
+
+**Pass D — Produce the merged list:** Block first, then Conflict (needs a human decision), then Warn.
 
 ### 5. Generate Report
 
@@ -75,17 +95,21 @@ Wait for all eight. Then:
 > **Block (<N>):**
 > - [ ] `[domain]` file:line — description and fix
 >
+> **Conflict (<N>):**
+> - [ ] `[domain-A vs domain-B]` file:line — **Domain-A says**: <position>. **Domain-B says**: <position>. Needs human decision.
+>
 > **Warn (<N>):**
 > - [ ] `[domain]` file:line — description and recommendation
 >
-> **Verdict**: PASS | FAIL (<N> to fix before commit, <M> to file)
+> **Verdict**: PASS | FAIL (<N> to fix before commit, <C> to decide, <M> to file)
 
-Verdict is FAIL if there are any Block items. Warn items do not block — they should be filed as issues after committing. If both Block and Warn are empty, output `Verdict: PASS` with no lists.
+Verdict is FAIL if there are any Block items. Conflict and Warn items do not block commits — Conflicts need a human call, Warns should be filed as issues. If Block, Conflict, and Warn are all empty, output `Verdict: PASS` with no lists.
 
 ### 6. Next Steps
 
 - **PASS**: "Review passed. Changes are ready to commit."
-- **FAIL**: "Review found <N> blocking issue(s). Fix them and run `/review` again. (<M> warn items — file as issues after committing.)"
+- **FAIL**: "Review found <N> blocking issue(s). Fix them and run `/review` again. (<C> conflicts and <M> warn items — resolve/file after committing.)"
+- **Conflicts present**: After listing them, ask the user to pick a side for each one using `AskUserQuestion` before proceeding.
 
 ## Rules
 
