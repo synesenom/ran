@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `ran.process.GeometricBrownianMotion(mu, sigma, dt, x0)`: Geometric Brownian Motion with drift, using an exact discrete-time sampler (`X_{n+1} = X_n · exp((μ − σ²/2)·dt + σ·√dt·N(0,1))`). Paths stay positive for any positive initial state x0; log-returns are Normal((μ−σ²/2)·dt, σ²·dt) by construction (#854).
+- `ran.process.PoissonProcess(lambda, dt)`: Poisson counting process where arrivals in each interval Δt follow Poisson(λ·Δt); state is cumulative event count, guaranteed non-decreasing and integer-valued (#853).
 - `ran.process.BrownianMotion` and `ran.process.OrnsteinUhlenbeck` are now available as tree-shakeable subpath imports (`import BrownianMotion from 'ranjs/process/brownian-motion'`, `import OrnsteinUhlenbeck from 'ranjs/process/ornstein-uhlenbeck'`), matching the per-distribution subpath export pattern.
 - `ran.process.OrnsteinUhlenbeck(theta, mu, sigma, dt)`: mean-reverting stochastic process with exact discrete-time sampler (`x = x·exp(−θ·dt) + μ·(1−exp(−θ·dt)) + σ·√((1−exp(−2θ·dt))/(2θ))·N(0,1)`). Exposes `mean(t)` and `variance(t)` with closed-form analytical values; converges to stationary Normal(μ, σ²/(2θ)) (#846).
 - Demo page (`demo.html`) now includes an interactive **Stochastic Processes** section below the Distributions section. Select `BrownianMotion`, adjust parameters (μ, σ, dt) and path length, and see 7 semi-transparent sample paths with a theoretical mean E[X(t)] line and ±1σ envelope overlaid (#862).

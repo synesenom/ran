@@ -467,6 +467,9 @@
     },
     "./process/ornstein-uhlenbeck": {
       "import": "./dist/process/ornstein-uhlenbeck.esm.js"
+    },
+    "./process/poisson-process": {
+      "import": "./dist/process/poisson-process.esm.js"
     }
   },
   "sideEffects": false,
