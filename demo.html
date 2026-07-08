@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ranjs — Stochastic Processes</title>
+  <script src="dist/ranjs.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f3f5f8;
+      color: #1c1e2b;
+      font-size: 14px;
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e0e4ec;
+      padding: 0 24px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+    }
+    header h1 { font-size: 1.05rem; font-weight: 700 }
+    header h1 span { color: #7a849a; font-weight: 400; margin-left: 6px }
+
+    nav {
+      background: #fff;
+      border-bottom: 1px solid #e0e4ec;
+      padding: 0 20px;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+    }
+    nav button {
+      padding: 12px 16px;
+      border: none;
+      background: none;
+      font-size: 13px;
+      font-weight: 500;
+      color: #6b7585;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: color 0.12s, border-color 0.12s;
+    }
+    nav button:hover { color: #1c1e2b }
+    nav button.active { color: #3a70d8; border-bottom-color: #3a70d8 }
+
+    .layout {
+      display: flex;
+      gap: 18px;
+      padding: 20px 24px;
+      max-width: 1160px;
+    }
+
+    /* ── Parameter panel ── */
+    aside { width: 216px; flex-shrink: 0 }
+    .card {
+      background: #fff;
+      border: 1px solid #e0e4ec;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .card + .card { margin-top: 12px }
+    .card-title {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #9aa0ae;
+      margin-bottom: 14px;
+    }
+
+    .param { margin-bottom: 12px }
+    .param:last-child { margin-bottom: 0 }
+    .param-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 5px;
+    }
+    .param-label { font-size: 12.5px; font-weight: 500; color: #333 }
+    .param-val {
+      font-size: 11.5px;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      color: #3a70d8;
+      min-width: 40px;
+      text-align: right;
+    }
+    input[type=range] {
+      width: 100%;
+      cursor: pointer;
+      accent-color: #3a70d8;
+    }
+
+    #btn-run {
+      display: block;
+      width: 100%;
+      margin-top: 14px;
+      padding: 8px;
+      background: #3a70d8;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+      transition: background 0.12s;
+    }
+    #btn-run:hover { background: #2d5dbe }
+
+    .proc-desc {
+      font-size: 12px;
+      color: #555;
+      line-height: 1.7;
+    }
+    .proc-desc code {
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      font-size: 11px;
+      background: #f0f3f9;
+      border-radius: 3px;
+      padding: 1px 4px;
+      color: #2a56b2;
+    }
+
+    /* ── Chart area ── */
+    section { flex: 1; min-width: 0 }
+    .chart-wrap {
+      background: #fff;
+      border: 1px solid #e0e4ec;
+      border-radius: 8px;
+      padding: 12px 12px 6px;
+    }
+    canvas { display: block; width: 100% }
+
+    .legend {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      margin-top: 12px;
+      padding: 0 4px;
+    }
+    .leg-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      color: #555;
+    }
+    .leg-swatches { display: flex; gap: 2px; align-items: center }
+    .leg-swatch { width: 4px; height: 16px; border-radius: 2px }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>ranjs <span>/ Stochastic Processes</span></h1>
+</header>
+
+<nav id="tabs"></nav>
+
+<div class="layout">
+  <aside>
+    <div class="card">
+      <div class="card-title">Parameters</div>
+      <div id="params"></div>
+      <button id="btn-run">Re-run ↺</button>
+    </div>
+    <div class="card">
+      <div class="card-title">About</div>
+      <div class="proc-desc" id="proc-desc"></div>
+    </div>
+  </aside>
+
+  <section>
+    <div class="chart-wrap">
+      <canvas id="chart" width="840" height="440"></canvas>
+    </div>
+    <div class="legend">
+      <div class="leg-item">
+        <div class="leg-swatches" id="leg-swatches"></div>
+        <span>7 sample paths</span>
+      </div>
+      <div class="leg-item">
+        <svg width="28" height="14" style="flex-shrink:0" aria-hidden="true">
+          <line x1="0" y1="7" x2="28" y2="7" stroke="#1c1e2b" stroke-width="2" stroke-dasharray="6,4"/>
+        </svg>
+        <span>E[X(t)]</span>
+      </div>
+      <div class="leg-item">
+        <div style="width:28px;height:14px;border-radius:3px;background:rgba(100,149,237,0.18);border:1px solid rgba(100,149,237,0.5);flex-shrink:0"></div>
+        <span>E[X(t)] ± √Var[X(t)]</span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ------------------------------------------------------------------ *
+ * Process specifications                                              *
+ * ------------------------------------------------------------------ */
+const SPECS = [
+  {
+    label: 'Brownian Motion',
+    desc:  'Update rule: <code>X(t+dt) = X(t) + μ·dt + σ·√dt·Z</code>, Z&nbsp;~&nbsp;N(0,1).<br>E[X(t)]&nbsp;=&nbsp;μt,  Var[X(t)]&nbsp;=&nbsp;σ²t.',
+    params: [
+      { key: 'mu',    label: 'μ (drift)',    min: -2,    max: 2,   step: 0.1,   def: 0    },
+      { key: 'sigma', label: 'σ',            min: 0.1,   max: 3,   step: 0.1,   def: 1    },
+      { key: 'dt',    label: 'dt',           min: 0.01,  max: 0.5, step: 0.01,  def: 0.1  },
+      { key: 'steps', label: 'steps',        min: 20,    max: 500, step: 10,    def: 100, int: true }
+    ],
+    create:   v => new ranjs.process.BrownianMotion(v.mu, v.sigma, v.dt),
+    getSteps: v => v.steps,
+    isStep:   false
+  },
+  {
+    label: 'Ornstein-Uhlenbeck',
+    desc:  'Update rule: <code>X(t+dt) = X·e^{−θdt} + μ(1−e^{−θdt}) + σ·noise·Z</code>.<br>Mean-reverting toward μ at speed θ.',
+    params: [
+      { key: 'theta', label: 'θ (speed)',    min: 0.1,   max: 5,   step: 0.1,  def: 1    },
+      { key: 'mu',    label: 'μ (mean)',     min: -2,    max: 2,   step: 0.1,  def: 0    },
+      { key: 'sigma', label: 'σ',            min: 0.1,   max: 3,   step: 0.1,  def: 1    },
+      { key: 'dt',    label: 'dt',           min: 0.01,  max: 0.5, step: 0.01, def: 0.1  },
+      { key: 'steps', label: 'steps',        min: 20,    max: 500, step: 10,   def: 100, int: true }
+    ],
+    create:   v => new ranjs.process.OrnsteinUhlenbeck(v.theta, v.mu, v.sigma, v.dt),
+    getSteps: v => v.steps,
+    isStep:   false
+  },
+  {
+    label: 'Geometric BM',
+    desc:  'Update rule: <code>X(t+dt) = X(t)·exp((μ−σ²/2)dt + σ·√dt·Z)</code>. Multiplicative model; paths stay positive. X(0)=1.',
+    params: [
+      { key: 'mu',    label: 'μ (drift)',    min: -0.5,  max: 0.5, step: 0.05, def: 0.05 },
+      { key: 'sigma', label: 'σ (vol)',      min: 0.05,  max: 1,   step: 0.05, def: 0.2  },
+      { key: 'dt',    label: 'dt',           min: 0.01,  max: 0.5, step: 0.01, def: 0.1  },
+      { key: 'steps', label: 'steps',        min: 20,    max: 500, step: 10,   def: 100, int: true }
+    ],
+    create:   v => new ranjs.process.GeometricBrownianMotion(v.mu, v.sigma, v.dt),
+    getSteps: v => v.steps,
+    isStep:   false
+  },
+  {
+    label: 'Poisson Process',
+    desc:  'Update rule: <code>N(t+dt) = N(t) + Poisson(λ·dt)</code>. Counting process: non-decreasing, integer-valued.',
+    params: [
+      { key: 'lambda', label: 'λ (rate)',   min: 0.5,   max: 10,  step: 0.5,  def: 2    },
+      { key: 'dt',     label: 'dt',         min: 0.01,  max: 0.5, step: 0.01, def: 0.1  },
+      { key: 'steps',  label: 'steps',      min: 20,    max: 500, step: 10,   def: 100, int: true }
+    ],
+    create:   v => new ranjs.process.PoissonProcess(v.lambda, v.dt),
+    getSteps: v => v.steps,
+    isStep:   true
+  },
+  {
+    label: 'Brownian Bridge',
+    desc:  'Update rule: <code>X(t+dt) = X(t) − X(t)·dt/(T−t) + σ·√dt·Z</code>. Pinned to 0 at t=0 and t=T.',
+    params: [
+      { key: 'sigma', label: 'σ',           min: 0.1,   max: 3,   step: 0.1,   def: 1    },
+      { key: 'T',     label: 'T (end)',      min: 0.5,   max: 5,   step: 0.5,   def: 1    },
+      { key: 'dt',    label: 'dt',           min: 0.005, max: 0.2, step: 0.005, def: 0.01 }
+    ],
+    create:   v => new ranjs.process.BrownianBridge(v.sigma, v.T, v.dt),
+    getSteps: v => Math.round(v.T / v.dt),
+    isStep:   false
+  }
+]
+
+const N_PATHS    = 7
+const BASE_SEED  = 0x1337
+const PATH_COLORS = [
+  'rgba(58, 112, 216, 0.45)',
+  'rgba(220, 88,  50, 0.45)',
+  'rgba(40,  158, 80, 0.45)',
+  'rgba(160, 60, 190, 0.45)',
+  'rgba(200, 150, 20, 0.45)',
+  'rgba(25,  175, 195, 0.45)',
+  'rgba(190, 70, 115, 0.45)'
+]
+
+/* ------------------------------------------------------------------ *
+ * State                                                               *
+ * ------------------------------------------------------------------ */
+let cur     = 0
+let vals    = {}
+let seedOff = 0
+
+/* ------------------------------------------------------------------ *
+ * Build tabs                                                          *
+ * ------------------------------------------------------------------ */
+const tabsEl = document.getElementById('tabs')
+SPECS.forEach((s, i) => {
+  const btn = document.createElement('button')
+  btn.textContent = s.label
+  if (i === 0) btn.className = 'active'
+  btn.onclick = () => selectProc(i)
+  tabsEl.appendChild(btn)
+})
+
+function selectProc (i) {
+  cur = i
+  seedOff = 0
+  tabsEl.querySelectorAll('button').forEach((b, j) => b.classList.toggle('active', j === i))
+  buildParams()
+  redraw()
+}
+
+/* ------------------------------------------------------------------ *
+ * Build parameter sliders                                             *
+ * ------------------------------------------------------------------ */
+function buildParams () {
+  const spec = SPECS[cur]
+  const container = document.getElementById('params')
+  container.innerHTML = ''
+  vals = {}
+
+  spec.params.forEach(p => {
+    vals[p.key] = p.def
+    const wrap  = document.createElement('div')
+    wrap.className = 'param'
+    const row   = document.createElement('div')
+    row.className = 'param-row'
+    const lbl   = document.createElement('span')
+    lbl.className = 'param-label'
+    lbl.textContent = p.label
+    const out   = document.createElement('span')
+    out.className = 'param-val'
+    out.id = 'val-' + p.key
+    out.textContent = fmtVal(p.def, p)
+    const rng   = document.createElement('input')
+    rng.type  = 'range'
+    rng.min   = p.min
+    rng.max   = p.max
+    rng.step  = p.step
+    rng.value = p.def
+    rng.oninput = () => {
+      const v = p.int ? parseInt(rng.value) : parseFloat(rng.value)
+      vals[p.key] = v
+      document.getElementById('val-' + p.key).textContent = fmtVal(v, p)
+      redraw()
+    }
+    row.appendChild(lbl)
+    row.appendChild(out)
+    wrap.appendChild(row)
+    wrap.appendChild(rng)
+    container.appendChild(wrap)
+  })
+
+  document.getElementById('proc-desc').innerHTML = spec.desc
+}
+
+function fmtVal (v, p) {
+  if (p.int) return String(v)
+  const d = p.step < 0.05 ? 3 : p.step < 0.5 ? 2 : 1
+  return v.toFixed(d)
+}
+
+/* ------------------------------------------------------------------ *
+ * Run simulation                                                      *
+ * ------------------------------------------------------------------ */
+function redraw () {
+  const spec  = SPECS[cur]
+  const n     = spec.getSteps(vals)
+  if (!isFinite(n) || n < 2) return
+
+  let proc
+  try { proc = spec.create(vals) } catch (_) { return }
+
+  proc.seed(BASE_SEED + seedOff)
+
+  // Consecutive path() calls advance the PRNG → each gives a distinct path
+  const paths = proc.ensemble(N_PATHS, n)
+
+  const dt    = vals.dt
+  const times = Array.from({ length: n + 1 }, (_, i) => i * dt)
+  const means = times.map(t => proc.mean(t))
+  const stds  = times.map(t => Math.sqrt(Math.max(0, proc.variance(t))))
+
+  drawChart(paths, means, stds, times, spec.isStep)
+}
+
+/* ------------------------------------------------------------------ *
+ * Canvas chart                                                        *
+ * ------------------------------------------------------------------ */
+function drawChart (paths, means, stds, times, isStep) {
+  const canvas = document.getElementById('chart')
+  const ctx    = canvas.getContext('2d')
+  const W = canvas.width, H = canvas.height
+  const M = { top: 22, right: 24, bottom: 48, left: 64 }
+  const pw = W - M.left - M.right
+  const ph = H - M.top  - M.bottom
+  const n  = times.length - 1
+
+  /* Y range: cover all path values and the ±1σ envelope */
+  let lo = Infinity, hi = -Infinity
+  for (const path of paths) {
+    for (const v of path) {
+      if (isFinite(v)) { lo = Math.min(lo, v); hi = Math.max(hi, v) }
+    }
+  }
+  for (let i = 0; i <= n; i++) {
+    if (isFinite(means[i] - stds[i])) lo = Math.min(lo, means[i] - stds[i])
+    if (isFinite(means[i] + stds[i])) hi = Math.max(hi, means[i] + stds[i])
+  }
+  if (!isFinite(lo) || !isFinite(hi)) return
+  const span = hi - lo || 1
+  lo -= span * 0.07
+  hi += span * 0.07
+
+  const tMax = times[n]
+  const sx = t => M.left + (t / tMax) * pw
+  const sy = v => M.top  + ph - ((v - lo) / (hi - lo)) * ph
+
+  /* Background */
+  ctx.clearRect(0, 0, W, H)
+  ctx.fillStyle = '#fff'
+  ctx.fillRect(0, 0, W, H)
+
+  /* Horizontal grid lines */
+  ctx.save()
+  ctx.strokeStyle = '#eceff5'
+  ctx.lineWidth = 1
+  const NY = 5
+  for (let i = 0; i <= NY; i++) {
+    const y = M.top + (i / NY) * ph
+    ctx.beginPath(); ctx.moveTo(M.left, y); ctx.lineTo(M.left + pw, y); ctx.stroke()
+  }
+  ctx.restore()
+
+  /* ±1σ envelope band */
+  ctx.save()
+  ctx.beginPath()
+  for (let i = 0; i <= n; i++) {
+    const x = sx(times[i]), y = sy(means[i] + stds[i])
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
+  }
+  for (let i = n; i >= 0; i--) {
+    ctx.lineTo(sx(times[i]), sy(means[i] - stds[i]))
+  }
+  ctx.closePath()
+  ctx.fillStyle   = 'rgba(100,149,237,0.16)'
+  ctx.strokeStyle = 'rgba(100,149,237,0.42)'
+  ctx.lineWidth   = 1
+  ctx.fill()
+  ctx.stroke()
+  ctx.restore()
+
+  /* Sample paths */
+  for (let pi = 0; pi < paths.length; pi++) {
+    ctx.save()
+    ctx.strokeStyle = PATH_COLORS[pi]
+    ctx.lineWidth   = 1.5
+    ctx.beginPath()
+    if (isStep) {
+      /* Staircase rendering for counting (step-function) processes */
+      ctx.moveTo(sx(times[0]), sy(paths[pi][0]))
+      for (let i = 0; i < n; i++) {
+        const xNext = sx(times[i + 1])
+        ctx.lineTo(xNext, sy(paths[pi][i]))      // horizontal hold
+        ctx.lineTo(xNext, sy(paths[pi][i + 1]))  // vertical jump
+      }
+    } else {
+      for (let i = 0; i <= n; i++) {
+        const x = sx(times[i]), y = sy(paths[pi][i])
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
+      }
+    }
+    ctx.stroke()
+    ctx.restore()
+  }
+
+  /* Theoretical mean (dashed) */
+  ctx.save()
+  ctx.strokeStyle = '#1c1e2b'
+  ctx.lineWidth   = 2
+  ctx.setLineDash([7, 4])
+  ctx.beginPath()
+  for (let i = 0; i <= n; i++) {
+    const x = sx(times[i]), y = sy(means[i])
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
+  }
+  ctx.stroke()
+  ctx.restore()
+
+  /* Axes */
+  ctx.save()
+  ctx.strokeStyle = '#c8cdd8'
+  ctx.lineWidth = 1
+  ctx.beginPath()
+  ctx.moveTo(M.left, M.top)
+  ctx.lineTo(M.left, M.top + ph)
+  ctx.lineTo(M.left + pw, M.top + ph)
+  ctx.stroke()
+
+  ctx.fillStyle = '#5a6070'
+  ctx.font = '11px monospace'
+
+  /* X ticks */
+  ctx.textAlign = 'center'
+  const NX = 6
+  for (let i = 0; i <= NX; i++) {
+    const t = (i / NX) * tMax
+    const x = sx(t)
+    ctx.beginPath(); ctx.moveTo(x, M.top + ph); ctx.lineTo(x, M.top + ph + 4); ctx.stroke()
+    const dec = tMax <= 2 ? 2 : tMax <= 20 ? 1 : 0
+    ctx.fillText(t.toFixed(dec), x, M.top + ph + 17)
+  }
+
+  /* Y ticks */
+  ctx.textAlign = 'right'
+  for (let i = 0; i <= NY; i++) {
+    const v = lo + (i / NY) * (hi - lo)
+    const y = sy(v)
+    ctx.beginPath(); ctx.moveTo(M.left, y); ctx.lineTo(M.left - 4, y); ctx.stroke()
+    const mag = Math.max(Math.abs(lo), Math.abs(hi))
+    const dec = mag < 2 ? 2 : mag < 20 ? 1 : 0
+    ctx.fillText(v.toFixed(dec), M.left - 8, y + 4)
+  }
+
+  /* Axis labels */
+  ctx.font = '12px system-ui, sans-serif'
+  ctx.fillStyle = '#444'
+  ctx.textAlign = 'center'
+  ctx.fillText('time', M.left + pw / 2, H - 6)
+  ctx.save()
+  ctx.translate(13, M.top + ph / 2)
+  ctx.rotate(-Math.PI / 2)
+  ctx.fillText('X(t)', 0, 0)
+  ctx.restore()
+  ctx.restore()
+}
+
+/* ------------------------------------------------------------------ *
+ * Re-run button — regenerates with a shifted seed                    *
+ * ------------------------------------------------------------------ */
+document.getElementById('btn-run').onclick = () => { seedOff++; redraw() }
+
+/* ------------------------------------------------------------------ *
+ * Build path-colour swatches in legend                               *
+ * ------------------------------------------------------------------ */
+const swatchesEl = document.getElementById('leg-swatches')
+PATH_COLORS.forEach(c => {
+  const d = document.createElement('div')
+  d.className = 'leg-swatch'
+  d.style.background = c
+  swatchesEl.appendChild(d)
+})
+
+/* ------------------------------------------------------------------ *
+ * Initialise                                                          *
+ * ------------------------------------------------------------------ */
+buildParams()
+redraw()
+</script>
+</body>
+</html>
