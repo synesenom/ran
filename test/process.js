@@ -4,6 +4,7 @@ import Process from '../src/process/_process'
 import AR1 from '../src/process/ar1'
 import BrownianBridge from '../src/process/brownian-bridge'
 import BrownianMotion from '../src/process/brownian-motion'
+import CoxIngersollRoss from '../src/process/cox-ingersoll-ross'
 import GeometricBrownianMotion from '../src/process/geometric-brownian-motion'
 import OrnsteinUhlenbeck from '../src/process/ornstein-uhlenbeck'
 import PoissonProcess from '../src/process/poisson-process'
@@ -1484,6 +1485,236 @@ describe('process.PoissonProcess', () => {
     it('should return NaN for t < 0', () => {
       const pp = new PoissonProcess(1, 1)
       assert(Number.isNaN(pp.covariogram(2, -1)))
+    })
+  })
+})
+describe('process.CoxIngersollRoss', () => {
+  describe('constructor', () => {
+    it('should throw on kappa = 0', () => {
+      assert.throws(() => new CoxIngersollRoss(0, 1, 1, 1), /Invalid parameters/)
+    })
+
+    it('should throw on kappa < 0', () => {
+      assert.throws(() => new CoxIngersollRoss(-1, 1, 1, 1), /Invalid parameters/)
+    })
+
+    it('should throw on theta = 0', () => {
+      assert.throws(() => new CoxIngersollRoss(1, 0, 1, 1), /Invalid parameters/)
+    })
+
+    it('should throw on theta < 0', () => {
+      assert.throws(() => new CoxIngersollRoss(1, -1, 1, 1), /Invalid parameters/)
+    })
+
+    it('should throw on sigma = 0', () => {
+      assert.throws(() => new CoxIngersollRoss(1, 1, 0, 1), /Invalid parameters/)
+    })
+
+    it('should throw on sigma < 0', () => {
+      assert.throws(() => new CoxIngersollRoss(1, 1, -1, 1), /Invalid parameters/)
+    })
+
+    it('should throw on dt = 0', () => {
+      assert.throws(() => new CoxIngersollRoss(1, 1, 1, 0), /Invalid parameters/)
+    })
+
+    it('should throw on dt < 0', () => {
+      assert.throws(() => new CoxIngersollRoss(1, 1, 1, -0.5), /Invalid parameters/)
+    })
+
+    it('should throw on kappa = NaN', () => {
+      assert.throws(() => new CoxIngersollRoss(NaN, 1, 1, 1), /Invalid parameters/)
+    })
+
+    it('should accept valid parameters', () => {
+      assert.doesNotThrow(() => new CoxIngersollRoss(2, 1, 0.5, 0.1))
+    })
+
+    it('should not throw when Feller condition is not met', () => {
+      // 2*0.5*1 = 1 <= 4 = sigma^2; Feller not satisfied, but only a warning
+      assert.doesNotThrow(() => new CoxIngersollRoss(0.5, 1, 2, 1))
+    })
+
+    it('should start at state 0', () => {
+      const cir = new CoxIngersollRoss(2, 1, 0.5, 0.1)
+      assert.strictEqual(cir.state(), 0)
+    })
+  })
+
+  describe('.mean()', () => {
+    it('should return theta*(1-exp(-kappa*t)) for zero initial state', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      // mpmath mp.dps=50: 3*(1-exp(-2)) → 2.59399415029016
+      assert.closeTo(cir.mean(1), 2.59399415029016, 1e-10)
+    })
+
+    it('should return 0 at t=0', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      assert.strictEqual(cir.mean(0), 0)
+    })
+
+    it('should approach theta as t -> infinity', () => {
+      const cir = new CoxIngersollRoss(1, 4, 1, 0.1)
+      assert.closeTo(cir.mean(1000), 4, 1e-6)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const cir = new CoxIngersollRoss(1, 1, 1, 1)
+      assert(isNaN(cir.mean(-1)))
+    })
+
+    it('should be stable after advancing the simulation', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      const before = cir.mean(1)
+      for (let i = 0; i < 20; i++) cir.next()
+      assert.closeTo(cir.mean(1), before, 1e-10)
+    })
+  })
+
+  describe('.variance()', () => {
+    it('should return theta*sigma^2/(2*kappa)*(1-exp(-kappa*t))^2 for zero initial state', () => {
+      const cir = new CoxIngersollRoss(2, 3, 0.5, 0.1)
+      // mpmath mp.dps=50: 3*(0.25/(2*2))*(1-exp(-2))^2 → 0.14018345107791
+      assert.closeTo(cir.variance(1), 0.14018345107791, 1e-10)
+    })
+
+    it('should return 0 at t=0', () => {
+      const cir = new CoxIngersollRoss(1, 1, 1, 1)
+      assert.strictEqual(cir.variance(0), 0)
+    })
+
+    it('should approach stationary variance theta*sigma^2/(2*kappa) as t -> infinity', () => {
+      const kappa = 2; const theta = 3; const sigma = 0.5
+      const cir = new CoxIngersollRoss(kappa, theta, sigma, 0.1)
+      // exact rational: theta*sigma^2/(2*kappa) = 3*0.25/4 = 0.1875
+      assert.closeTo(cir.variance(1000), 0.1875, 1e-6)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const cir = new CoxIngersollRoss(1, 1, 1, 1)
+      assert(isNaN(cir.variance(-1)))
+    })
+  })
+
+  describe('positivity', () => {
+    it('should produce non-negative paths when Feller condition holds', () => {
+      // 2*kappa*theta = 2*2*1 = 4 > 1 = sigma^2; Feller condition met
+      const cir = new CoxIngersollRoss(2, 1, 1, 0.01)
+      cir.seed(0)
+      const path = cir.path(10000)
+      assert(path.every(x => x >= 0))
+    })
+  })
+
+  describe('stationarity', () => {
+    it('should converge to stationary mean theta (time-average test)', () => {
+      const theta = 1.5
+      const cir = new CoxIngersollRoss(2, theta, 0.5, 0.01)
+      cir.seed(42)
+      for (let i = 0; i < 5000; i++) cir.next()
+      let sum = 0
+      const n = 10000
+      for (let i = 0; i < n; i++) sum += cir.next()
+      assert.closeTo(sum / n, theta, 0.05)
+    })
+  })
+
+  describe('.reset()', () => {
+    it('should restore initial state to 0', () => {
+      const cir = new CoxIngersollRoss(2, 1, 0.5, 0.1)
+      for (let i = 0; i < 10; i++) cir.next()
+      cir.reset()
+      assert.strictEqual(cir.state(), 0)
+    })
+  })
+
+  describe('.pdf()', () => {
+    it('should return NaN for t = 0', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      assert(Number.isNaN(cir.pdf(1, 0)))
+    })
+
+    it('should return NaN for t < 0', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      assert(Number.isNaN(cir.pdf(1, -1)))
+    })
+
+    it('should return 0 for x < 0', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      assert.strictEqual(cir.pdf(-0.1, 0.5), 0)
+    })
+
+    it('should return 0 for x = 0 when Feller condition holds (alpha > 1)', () => {
+      // kappa=2, theta=3, sigma=1: alpha = 2*kappa*theta/sigma^2 = 12 > 1
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      assert.strictEqual(cir.pdf(0, 0.5), 0)
+    })
+
+    it('should return Gamma density for x=0.5, kappa=2, theta=3, sigma=1, t=0.5', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      // alpha=12, scale=0.5/2*(1-exp(-1)); Python3 math: gamma_pdf = 0.002130824749883
+      assert.closeTo(cir.pdf(0.5, 0.5), 0.002130824749883, 1e-10)
+    })
+
+    it('should return Gamma density for x=2.0, kappa=2, theta=3, sigma=1, t=0.5', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      // alpha=12, scale=0.5/2*(1-exp(-1)); Python3 math: gamma_pdf = 0.674442782399143
+      assert.closeTo(cir.pdf(2.0, 0.5), 0.674442782399143, 1e-10)
+    })
+
+    it('should return Gamma density for x=1.5, kappa=2, theta=3, sigma=1, t=1', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      // alpha=12, scale=0.5/2*(1-exp(-2)); Python3 math: gamma_pdf = 0.201734321913609
+      assert.closeTo(cir.pdf(1.5, 1), 0.201734321913609, 1e-10)
+    })
+
+    it('should be stable after advancing the simulation', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      const before = cir.pdf(1.0, 0.5)
+      for (let i = 0; i < 20; i++) cir.next()
+      assert.closeTo(cir.pdf(1.0, 0.5), before, 1e-10)
+    })
+  })
+
+  describe('.covariogram()', () => {
+    it('should return NaN for s < 0', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      assert(Number.isNaN(cir.covariogram(-1, 2)))
+    })
+
+    it('should return NaN for t < 0', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      assert(Number.isNaN(cir.covariogram(2, -1)))
+    })
+
+    it('should be symmetric', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      assert.closeTo(cir.covariogram(1, 3), cir.covariogram(3, 1), 1e-10)
+    })
+
+    it('should equal variance at s = t', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      // Python3 math: cov(2,2) = variance(2) = 0.722778138637826
+      assert.closeTo(cir.covariogram(2, 2), cir.variance(2), 1e-10)
+    })
+
+    it('should return correct value for s=1, t=3, kappa=2, theta=3, sigma=1', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      // theta*sigma2OverKappa/2*(1-exp(-2))^2*exp(-4); Python3 math: 0.010270197872478
+      assert.closeTo(cir.covariogram(1, 3), 0.010270197872478, 1e-10)
+    })
+
+    it('should return correct value for s=0.5, t=2, kappa=2, theta=3, sigma=1', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      // Python3 math: 0.014920303192111
+      assert.closeTo(cir.covariogram(0.5, 2), 0.014920303192111, 1e-10)
+    })
+
+    it('should return 0 at s=0 or t=0', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      // exact rational: min(s,t)=0 so (1-exp(0))^2 = 0
+      assert.strictEqual(cir.covariogram(0, 2), 0)
+      assert.strictEqual(cir.covariogram(2, 0), 0)
     })
   })
 })

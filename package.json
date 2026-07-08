@@ -468,6 +468,9 @@
     "./process/brownian-motion": {
       "import": "./dist/process/brownian-motion.esm.js"
     },
+    "./process/cox-ingersoll-ross": {
+      "import": "./dist/process/cox-ingersoll-ross.esm.js"
+    },
     "./process/geometric-brownian-motion": {
       "import": "./dist/process/geometric-brownian-motion.esm.js"
     },
