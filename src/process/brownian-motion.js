@@ -60,6 +60,24 @@ export default class BrownianMotion extends Process {
   }
 
   /**
+   * Returns the marginal probability density of the process at state x and time t.
+   * X(t) ~ Normal(x₀ + μt, σ²t).
+   *
+   * @method pdf
+   * @memberof ran.process.BrownianMotion
+   * @param {number} x State value.
+   * @param {number} t Time (must be > 0).
+   * @returns {number} Marginal density at (x, t), or NaN for t ≤ 0.
+   */
+  pdf (x, t) {
+    if (t <= 0) return NaN
+    const mu = this.x0 + this.p.mu * t
+    const sigma = this.p.sigma * Math.sqrt(t)
+    const z = (x - mu) / sigma
+    return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI))
+  }
+
+  /**
    * Returns the analytical covariance between process values at times s and t.
    *
    * @method covariogram

@@ -118,4 +118,24 @@ export default class BrownianBridge extends Process {
     if (s > this.p.T || t > this.p.T) return 0
     return this.p.sigma * this.p.sigma * Math.min(s, t) * (this.p.T - Math.max(s, t)) / this.p.T
   }
+
+  /**
+   * Returns the marginal probability density of the process at state x and time t.
+   * X(t) ~ Normal(0, σ²t(T−t)/T) for 0 < t < T. At t = 0 or t ≥ T the process
+   * is pinned at 0 (Dirac delta), so the density is Infinity at x = 0 and 0 elsewhere.
+   *
+   * @method pdf
+   * @memberof ran.process.BrownianBridge
+   * @param {number} x State value.
+   * @param {number} t Time.
+   * @returns {number} Marginal density at (x, t), or NaN for t < 0.
+   */
+  pdf (x, t) {
+    if (t < 0) return NaN
+    const v = this.variance(t)
+    if (v === 0) return x === 0 ? Infinity : 0
+    const sigma = Math.sqrt(v)
+    const z = x / sigma
+    return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI))
+  }
 }
