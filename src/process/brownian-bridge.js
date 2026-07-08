@@ -47,27 +47,11 @@ export default class BrownianBridge extends Process {
     return this.x + (-this.x / (T - t)) * dt + sigma * sqrtDt * normal(this.r)
   }
 
-  /**
-   * Resets the process to its initial state and resets the internal time index to 0.
-   *
-   * @method reset
-   * @memberof ran.process.BrownianBridge
-   */
   reset () {
     super.reset()
     this.n = 0
   }
 
-  /**
-   * Generates a path of n steps starting from the initial state. Resets the internal time
-   * index for path generation and restores it afterward, leaving the caller's simulation
-   * position unchanged.
-   *
-   * @method path
-   * @memberof ran.process.BrownianBridge
-   * @param {number} n Number of steps.
-   * @returns {Array} Array of n+1 states (initial state followed by n successive states).
-   */
   path (n) {
     const savedN = this.n
     this.n = 0
