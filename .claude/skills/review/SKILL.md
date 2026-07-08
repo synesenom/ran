@@ -69,7 +69,9 @@ Wait for all eight. Then merge in three passes:
 - **Multiple findings, same direction** (compatible recommendations — e.g. two agents both say "this is a bug"): deduplicate into one entry, tag with both domains (e.g. `[correctness, impact]`), keep the higher severity (Block beats Warn).
 - **Multiple findings, opposing direction** (conflicting recommendations — e.g. performance says "cache this constant" while conventions says "leave it inline"): emit a single `Conflict` entry. State each domain's position in one sentence each. Do NOT pick a winner or suppress either view — surface the disagreement for the user to resolve.
 
-**Pass C — Produce the merged list:** Block first, then Conflict (needs a human decision), then Warn.
+**Pass C — Cross-PR conflict check.** For every Warn that survived Pass B, search open GitHub issues for the same file path and method/constant name using `mcp__github__search_issues` (query: `repo:owner/repo is:open <filename> <method-or-constant-name>`). If an open issue exists whose recommended direction **opposes** the current Warn (e.g. the Warn says "cache this constant" but an open issue says "remove the cache and inline it"), promote the Warn to a `Conflict` entry and reference the issue number: "Today's [domain] says: <position>. Open issue #N says: <opposing position>. Needs human decision — resolve the issue or close it before acting on this finding." This stops the implement-then-revert cycle at the point where a second opposing issue would otherwise be filed.
+
+**Pass D — Produce the merged list:** Block first, then Conflict (needs a human decision), then Warn.
 
 ### 5. Generate Report
 
