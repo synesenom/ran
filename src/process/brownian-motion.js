@@ -2,13 +2,19 @@ import normal from '../dist/_normal'
 import Process from './_process'
 
 /**
- * Brownian motion (Wiener process) with drift, using an exact O(1) discrete-time sampler.
+ * Brownian motion (Wiener process) with drift, using an exact discrete-time sampler.
  *
- * The update rule per step is
+ * The underlying SDE is
  *
- * $X(t + \mathrm{d}t) = X(t) + \mu\,\mathrm{d}t + \sigma\sqrt{\mathrm{d}t}\,Z,$
+ * $\mathrm{d}X_t = \mu\,\mathrm{d}t + \sigma\,\mathrm{d}W_t.$
  *
- * where $Z \sim \mathcal{N}(0, 1)$.
+ * Because the coefficients are constant (state-independent), the Euler–Maruyama step coincides
+ * with the exact transition: each increment is an independent draw from
+ * $\mathcal{N}(\mu\,\mathrm{d}t,\,\sigma^2\,\mathrm{d}t)$, giving the update rule
+ *
+ * $X(t + \mathrm{d}t) = X(t) + \mu\,\mathrm{d}t + \sigma\sqrt{\mathrm{d}t}\,Z, \quad Z \sim \mathcal{N}(0, 1).$
+ *
+ * There is no step-size discretization error.
  *
  * @class BrownianMotion
  * @memberof ran.process
