@@ -4,6 +4,7 @@
  * @namespace process
  * @memberof ran
  */
+export { default as AR1 } from './ar1'
 export { default as BrownianBridge } from './brownian-bridge'
 export { default as BrownianMotion } from './brownian-motion'
 export { default as GeometricBrownianMotion } from './geometric-brownian-motion'
