@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `covariogram(s, t)` method on all four `ran.process` subclasses (`BrownianMotion`, `OrnsteinUhlenbeck`, `GeometricBrownianMotion`, `PoissonProcess`): returns the theoretical covariance C(s, t) = Cov(X(s), X(t)) between process values at times s and t. Returns `NaN` when either argument is negative. Satisfies `covariogram(t, t) === variance(t)` and `covariogram(s, t) === covariogram(t, s)` (#876).
 - `ran.process.GeometricBrownianMotion(mu, sigma, dt)`: Geometric Brownian Motion with drift, using an exact discrete-time sampler (`X_{n+1} = X_n · exp((μ − σ²/2)·dt + σ·√dt·N(0,1))`). Starts at 1; paths stay positive by construction; log-returns are Normal((μ−σ²/2)·dt, σ²·dt) (#854).
 - `ran.process.PoissonProcess(lambda, dt)`: Poisson counting process where arrivals in each interval Δt follow Poisson(λ·Δt); state is cumulative event count, guaranteed non-decreasing and integer-valued (#853).
 - `ran.process.BrownianMotion` and `ran.process.OrnsteinUhlenbeck` are now available as tree-shakeable subpath imports (`import BrownianMotion from 'ranjs/process/brownian-motion'`, `import OrnsteinUhlenbeck from 'ranjs/process/ornstein-uhlenbeck'`), matching the per-distribution subpath export pattern.

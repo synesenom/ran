@@ -52,4 +52,18 @@ export default class PoissonProcess extends Process {
     if (t < 0) return NaN
     return this.p.lambda * t
   }
+
+  /**
+   * Returns the analytical covariance between process values at times s and t.
+   *
+   * @method covariogram
+   * @memberof ran.process.PoissonProcess
+   * @param {number} s First time point.
+   * @param {number} t Second time point.
+   * @returns {number} Covariance $\lambda \min(s, t)$.
+   */
+  covariogram (s, t) {
+    if (s < 0 || t < 0) return NaN
+    return this.p.lambda * Math.min(s, t)
+  }
 }

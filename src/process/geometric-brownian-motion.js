@@ -60,4 +60,20 @@ export default class GeometricBrownianMotion extends Process {
     const s2 = this.p.sigma * this.p.sigma
     return Math.exp(2 * this.p.mu * t) * (Math.exp(s2 * t) - 1)
   }
+
+  /**
+   * Returns the analytical covariance between process values at times s and t.
+   *
+   * @method covariogram
+   * @memberof ran.process.GeometricBrownianMotion
+   * @param {number} s First time point.
+   * @param {number} t Second time point.
+   * @returns {number} Covariance $e^{\mu(s+t)}\left(e^{\sigma^2 \min(s,t)} - 1\right)$.
+   */
+  covariogram (s, t) {
+    if (s < 0 || t < 0) return NaN
+    const { mu, sigma } = this.p
+    const s2 = sigma * sigma
+    return Math.exp(mu * (s + t)) * (Math.exp(s2 * Math.min(s, t)) - 1)
+  }
 }
