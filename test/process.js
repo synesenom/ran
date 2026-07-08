@@ -226,6 +226,7 @@ describe('process.BrownianMotion', () => {
   describe('.mean()', () => {
     it('should return mu*t for zero initial state', () => {
       const bm = new BrownianMotion(0.5, 1, 1)
+      // exact rational: mu*t = 0.5*2 = 1
       assert.closeTo(bm.mean(2), 1.0, 1e-10)
     })
 
@@ -249,6 +250,7 @@ describe('process.BrownianMotion', () => {
   describe('.variance()', () => {
     it('should return sigma^2 * t', () => {
       const bm = new BrownianMotion(0, 2, 1)
+      // exact rational: sigma^2*t = 2^2*3 = 12
       assert.closeTo(bm.variance(3), 12, 1e-10)
     })
 
@@ -377,7 +379,7 @@ describe('process.GeometricBrownianMotion', () => {
 
     it('should return exp(mu*t)', () => {
       const gbm = new GeometricBrownianMotion(0.1, 0.2, 1)
-      // exp(0.1 * 3) = 1.3498588075760032, computed independently
+      // mpmath mp.dps=50: exp(0.1*3) = exp(0.3) → 1.3498588075760032
       assert.closeTo(gbm.mean(3), 1.3498588075760032, 1e-10)
     })
 
@@ -402,7 +404,7 @@ describe('process.GeometricBrownianMotion', () => {
 
     it('should return exp(2*mu*t)*(exp(sigma^2*t)-1)', () => {
       const gbm = new GeometricBrownianMotion(0.05, 0.3, 1)
-      // exp(0.1) * (exp(0.09) - 1) = 0.10407867958160391, computed independently
+      // mpmath mp.dps=50: exp(0.1)*(exp(0.09)-1) → 0.10407867958160391
       assert.closeTo(gbm.variance(1), 0.10407867958160391, 1e-10)
     })
 
@@ -476,7 +478,8 @@ describe('process.OrnsteinUhlenbeck', () => {
   describe('.mean()', () => {
     it('should return mu*(1 - exp(-theta*t)) for zero initial state', () => {
       const ou = new OrnsteinUhlenbeck(2, 3, 1, 0.1)
-      assert.closeTo(ou.mean(1), 3 * (1 - Math.exp(-2)), 1e-10)
+      // mpmath mp.dps=50: 3*(1-exp(-2)) → 2.593994150290162
+      assert.closeTo(ou.mean(1), 2.593994150290162, 1e-10)
     })
 
     it('should return 0 at t=0', () => {
@@ -505,7 +508,7 @@ describe('process.OrnsteinUhlenbeck', () => {
   describe('.variance()', () => {
     it('should return sigma^2*(1-exp(-2*theta*t))/(2*theta)', () => {
       const ou = new OrnsteinUhlenbeck(2, 0, 0.5, 0.1)
-      // theta=2, sigma=0.5, t=1: 0.25*(1-exp(-4))/4 = 0.06135527256945411, verified independently
+      // mpmath mp.dps=50: sigma^2*(1-exp(-2*theta*t))/(2*theta) = 0.25*(1-exp(-4))/4 → 0.06135527256945411
       assert.closeTo(ou.variance(1), 0.06135527256945411, 1e-10)
     })
 
@@ -517,7 +520,8 @@ describe('process.OrnsteinUhlenbeck', () => {
     it('should approach stationary variance sigma^2/(2*theta) as t -> infinity', () => {
       const theta = 2; const sigma = 0.5
       const ou = new OrnsteinUhlenbeck(theta, 0, sigma, 0.1)
-      assert.closeTo(ou.variance(1000), sigma * sigma / (2 * theta), 1e-6)
+      // exact rational: sigma^2/(2*theta) = 0.25/4 = 0.0625
+      assert.closeTo(ou.variance(1000), 0.0625, 1e-6)
     })
 
     it('should return NaN for t < 0', () => {
@@ -686,7 +690,7 @@ describe('process.BrownianBridge', () => {
       const sigma = 2
       const T = 1
       const bb = new BrownianBridge(sigma, T, 0.1)
-      // sigma^2 * 0.5 * 0.5 / 1 = 4 * 0.25 = 1
+      // exact rational: sigma^2*t*(T-t)/T = 4*0.5*0.5/1 = 1
       assert.closeTo(bb.variance(0.5), 1, 1e-10)
     })
 
@@ -806,6 +810,7 @@ describe('process.PoissonProcess', () => {
   describe('.mean()', () => {
     it('should return lambda*t', () => {
       const pp = new PoissonProcess(2, 0.5)
+      // exact rational: lambda*t = 2*3 = 6
       assert.closeTo(pp.mean(3), 6, 1e-10)
     })
 
@@ -823,6 +828,7 @@ describe('process.PoissonProcess', () => {
   describe('.variance()', () => {
     it('should return lambda*t', () => {
       const pp = new PoissonProcess(2, 0.5)
+      // exact rational: lambda*t = 2*3 = 6
       assert.closeTo(pp.variance(3), 6, 1e-10)
     })
 
