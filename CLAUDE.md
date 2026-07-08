@@ -127,6 +127,7 @@ Every public function and method signals "no ordinary result" through exactly on
 - **Statistical verification**: use `ksTest` (Kolmogorov-Smirnov) for continuous distributions and `chiTest` (chi-squared) for discrete distributions when verifying that `sample()` produces correctly distributed values.
 - **New distributions must be added to the appropriate `test/dist-cases-*.js` file** with `invalidParams`, `params`, and `cases` entries before any implementation is written (TDD).
 - **No 100% line coverage enforcement** — test for meaningful behavior, not line counts.
+- **Reference values must be externally sourced**: All non-trivial numeric values in `closeTo` assertions — whether in distribution tests, process tests, or elsewhere — must be derived from one of three external tools: (1) **mpmath at `mp.dps=50`**, (2) **scipy**, or (3) **R**. Mark each with a comment naming the tool and showing the computation, e.g. `// mpmath mp.dps=50: exp(0.3) → 1.3498588075760032`. Exact rational results (e.g. `sigma²·t = 4·3 = 12`) are self-documenting and require only an `// exact rational: <formula>` comment. Never derive a reference value from the ranjs source itself, and never write the same formula in both the production method and the test assertion — such tests pass even when the formula is wrong.
 
 ## GitHub Issues
 

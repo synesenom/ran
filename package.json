@@ -459,6 +459,9 @@
     "./dist/zipf-mandelbrot": {
       "import": "./dist/zipf-mandelbrot.esm.js"
     },
+    "./process/brownian-bridge": {
+      "import": "./dist/process/brownian-bridge.esm.js"
+    },
     "./process/brownian-motion": {
       "import": "./dist/process/brownian-motion.esm.js"
     },

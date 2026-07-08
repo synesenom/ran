@@ -40,11 +40,11 @@ export default class GeometricBrownianMotion extends Process {
    * @method mean
    * @memberof ran.process.GeometricBrownianMotion
    * @param {number} t Time.
-   * @returns {number} Expected value $e^{\mu t}$.
+   * @returns {number} Expected value $x_0 e^{\mu t}$.
    */
   mean (t) {
     if (t < 0) return NaN
-    return Math.exp(this.p.mu * t)
+    return this.x0 * Math.exp(this.p.mu * t)
   }
 
   /**
@@ -53,12 +53,12 @@ export default class GeometricBrownianMotion extends Process {
    * @method variance
    * @memberof ran.process.GeometricBrownianMotion
    * @param {number} t Time.
-   * @returns {number} Variance $e^{2\mu t}(e^{\sigma^2 t} - 1)$.
+   * @returns {number} Variance $x_0^2 e^{2\mu t}(e^{\sigma^2 t} - 1)$.
    */
   variance (t) {
     if (t < 0) return NaN
     const s2 = this.p.sigma * this.p.sigma
-    return Math.exp(2 * this.p.mu * t) * (Math.exp(s2 * t) - 1)
+    return this.x0 * this.x0 * Math.exp(2 * this.p.mu * t) * (Math.exp(s2 * t) - 1)
   }
 
   /**
@@ -68,12 +68,12 @@ export default class GeometricBrownianMotion extends Process {
    * @memberof ran.process.GeometricBrownianMotion
    * @param {number} s First time point.
    * @param {number} t Second time point.
-   * @returns {number} Covariance $e^{\mu(s+t)}\left(e^{\sigma^2 \min(s,t)} - 1\right)$.
+   * @returns {number} Covariance $x_0^2 e^{\mu(s+t)}\left(e^{\sigma^2 \min(s,t)} - 1\right)$.
    */
   covariogram (s, t) {
     if (s < 0 || t < 0) return NaN
     const { mu, sigma } = this.p
     const s2 = sigma * sigma
-    return Math.exp(mu * (s + t)) * (Math.exp(s2 * Math.min(s, t)) - 1)
+    return this.x0 * this.x0 * Math.exp(mu * (s + t)) * (Math.exp(s2 * Math.min(s, t)) - 1)
   }
 }
