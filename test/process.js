@@ -504,10 +504,9 @@ describe('process.OrnsteinUhlenbeck', () => {
 
   describe('.variance()', () => {
     it('should return sigma^2*(1-exp(-2*theta*t))/(2*theta)', () => {
-      const theta = 2; const sigma = 0.5; const t = 1
-      const ou = new OrnsteinUhlenbeck(theta, 0, sigma, 0.1)
-      const expected = sigma * sigma * (1 - Math.exp(-2 * theta * t)) / (2 * theta)
-      assert.closeTo(ou.variance(t), expected, 1e-10)
+      const ou = new OrnsteinUhlenbeck(2, 0, 0.5, 0.1)
+      // theta=2, sigma=0.5, t=1: 0.25*(1-exp(-4))/4 = 0.06135527256945411, verified independently
+      assert.closeTo(ou.variance(1), 0.06135527256945411, 1e-10)
     })
 
     it('should return 0 at t=0', () => {

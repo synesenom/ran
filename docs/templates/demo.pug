@@ -517,18 +517,11 @@ block scripts
           const proc = new ranjs.process[name](...params)
           const dt = proc.p.dt || 1
 
-          // Generate PATH_COUNT distinct paths: seed once, then reset state
-          // before each path while letting the PRNG advance naturally.
-          // Do NOT call proc.path() repeatedly — it is non-destructive and
-          // returns the same sequence each time.
-          // See solutions/correctness/2026-07-07-1600-path-distinct-realizations-reset-not-path.md
+          // seed once so visualizations are deterministic across re-renders;
+          // path() advances the PRNG stream so consecutive calls produce
+          // independent realizations automatically.
           proc.seed(42)
-          const paths = Array.from({length: PATH_COUNT}, () => {
-            proc.reset()
-            const pts = [proc.x0]
-            for (let i = 0; i < steps; i++) pts.push(proc.next())
-            return pts
-          })
+          const paths = Array.from({length: PATH_COUNT}, () => proc.path(steps))
 
           // Compute mean ± σ reference overlay when the process exposes
           // analytical moment methods (not all future subclasses will).
