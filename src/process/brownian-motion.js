@@ -33,16 +33,19 @@ export default class BrownianMotion extends Process {
     return this.x + this.p.mu * this.p.dt + this.p.sigma * this.c.sqrtDt * normal(this.r)
   }
 
+  /** @inheritdoc */
   mean (t) {
     if (t < 0) return NaN
     return this.x0 + this.p.mu * t
   }
 
+  /** @inheritdoc */
   variance (t) {
     if (t < 0) return NaN
     return this.p.sigma * this.p.sigma * t
   }
 
+  /** @inheritdoc */
   pdf (x, t) {
     if (t <= 0) return NaN
     const mu = this.x0 + this.p.mu * t
@@ -51,6 +54,7 @@ export default class BrownianMotion extends Process {
     return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI))
   }
 
+  /** @inheritdoc */
   covariogram (s, t) {
     if (s < 0 || t < 0) return NaN
     return this.p.sigma * this.p.sigma * Math.min(s, t)

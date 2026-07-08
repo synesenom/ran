@@ -28,16 +28,19 @@ export default class PoissonProcess extends Process {
     return this.x + poisson(this.r, this.p.lambda * this.p.dt)
   }
 
+  /** @inheritdoc */
   mean (t) {
     if (t < 0) return NaN
     return this.p.lambda * t
   }
 
+  /** @inheritdoc */
   variance (t) {
     if (t < 0) return NaN
     return this.p.lambda * t
   }
 
+  /** @inheritdoc */
   pdf (x, t) {
     if (t < 0) return NaN
     if (!Number.isInteger(x) || x < 0) return 0
@@ -46,6 +49,7 @@ export default class PoissonProcess extends Process {
     return Math.exp(-lt + x * Math.log(lt) - logGamma(x + 1))
   }
 
+  /** @inheritdoc */
   covariogram (s, t) {
     if (s < 0 || t < 0) return NaN
     return this.p.lambda * Math.min(s, t)

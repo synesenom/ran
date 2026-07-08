@@ -40,17 +40,20 @@ export default class OrnsteinUhlenbeck extends Process {
     return this.x * decay + mu * (1 - decay) + noise * normal(this.r)
   }
 
+  /** @inheritdoc */
   mean (t) {
     if (t < 0) return NaN
     const e = Math.exp(-this.p.theta * t)
     return this.x0 * e + this.p.mu * (1 - e)
   }
 
+  /** @inheritdoc */
   variance (t) {
     if (t < 0) return NaN
     return this.p.sigma * this.p.sigma * (1 - Math.exp(-2 * this.p.theta * t)) / (2 * this.p.theta)
   }
 
+  /** @inheritdoc */
   pdf (x, t) {
     if (t <= 0) return NaN
     const mu = this.mean(t)
@@ -59,6 +62,7 @@ export default class OrnsteinUhlenbeck extends Process {
     return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI))
   }
 
+  /** @inheritdoc */
   covariogram (s, t) {
     if (s < 0 || t < 0) return NaN
     const { theta, sigma } = this.p

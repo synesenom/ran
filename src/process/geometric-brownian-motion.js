@@ -34,17 +34,20 @@ export default class GeometricBrownianMotion extends Process {
     return this.x * Math.exp(this.c.drift + this.c.noise * normal(this.r))
   }
 
+  /** @inheritdoc */
   mean (t) {
     if (t < 0) return NaN
     return this.x0 * Math.exp(this.p.mu * t)
   }
 
+  /** @inheritdoc */
   variance (t) {
     if (t < 0) return NaN
     const s2 = this.p.sigma * this.p.sigma
     return this.x0 * this.x0 * Math.exp(2 * this.p.mu * t) * (Math.exp(s2 * t) - 1)
   }
 
+  /** @inheritdoc */
   pdf (x, t) {
     if (t <= 0) return NaN
     if (x <= 0) return 0
@@ -54,6 +57,7 @@ export default class GeometricBrownianMotion extends Process {
     return Math.exp(-0.5 * z * z) / (x * s * Math.sqrt(2 * Math.PI))
   }
 
+  /** @inheritdoc */
   covariogram (s, t) {
     if (s < 0 || t < 0) return NaN
     const { mu, sigma } = this.p

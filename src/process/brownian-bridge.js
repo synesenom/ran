@@ -76,23 +76,27 @@ export default class BrownianBridge extends Process {
     return result
   }
 
+  /** @inheritdoc */
   mean (t) {
     if (t < 0) return NaN
     return 0
   }
 
+  /** @inheritdoc */
   variance (t) {
     if (t < 0) return NaN
     if (t >= this.p.T) return 0
     return this.p.sigma * this.p.sigma * t * (this.p.T - t) / this.p.T
   }
 
+  /** @inheritdoc */
   covariogram (s, t) {
     if (s < 0 || t < 0) return NaN
     if (s > this.p.T || t > this.p.T) return 0
     return this.p.sigma * this.p.sigma * Math.min(s, t) * (this.p.T - Math.max(s, t)) / this.p.T
   }
 
+  /** @inheritdoc */
   pdf (x, t) {
     if (t < 0) return NaN
     const v = this.variance(t)
