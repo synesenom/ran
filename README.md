@@ -122,7 +122,7 @@ console.log(fitted.test(data))  // => { statistics: 0.42, passed: true }
 | Namespace | Contents |
 |-----------|----------|
 | `ran.dist` | 140+ probability distributions |
-| `ran.process` | Stochastic processes: Brownian motion, Brownian bridge, geometric Brownian motion, Ornstein–Uhlenbeck, Poisson process |
+| `ran.process` | Stochastic processes: AR(1), Brownian motion, Brownian bridge, geometric Brownian motion, Ornstein–Uhlenbeck, Poisson process |
 | `ran.location` | Mean, median, mode, geometric mean, harmonic mean, trimean, midrange |
 | `ran.dispersion` | Variance, standard deviation, IQR, Gini coefficient, entropy, CV, … |
 | `ran.shape` | Skewness, kurtosis, quantiles, moments, min, max, rank |

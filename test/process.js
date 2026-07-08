@@ -1192,6 +1192,8 @@ describe('process.AR1', () => {
 
     it('should grow monotonically for |phi| > 1', () => {
       const ar1 = new AR1(1.5, 1)
+      // exact rational: Var(X_3) = sigma^2*(1 + phi^2 + phi^4) = 1 + 2.25 + 5.0625 = 8.3125
+      assert.closeTo(ar1.variance(3), 8.3125, 1e-10)
       assert(ar1.variance(10) > ar1.variance(5))
       assert(ar1.variance(20) > ar1.variance(10))
     })
@@ -1222,6 +1224,8 @@ describe('process.AR1', () => {
 
     it('should be symmetric around 0', () => {
       const ar1 = new AR1(0.5, 1)
+      // scipy: stats.norm.pdf(1, 0, sqrt(1.3125)) = 0.2379112029210874
+      assert.closeTo(ar1.pdf(1, 3), 0.2379112029210874, 1e-10)
       assert.closeTo(ar1.pdf(-1, 3), ar1.pdf(1, 3), 1e-10)
     })
   })
@@ -1234,6 +1238,8 @@ describe('process.AR1', () => {
 
     it('should be symmetric: covariogram(s, t) = covariogram(t, s)', () => {
       const ar1 = new AR1(0.5, 1)
+      // exact rational: Cov(X_2, X_3) = phi * Var(X_2) = 0.5 * (1 + 0.25) = 0.625
+      assert.closeTo(ar1.covariogram(2, 3), 0.625, 1e-10)
       assert.closeTo(ar1.covariogram(2, 3), ar1.covariogram(3, 2), 1e-10)
     })
 
