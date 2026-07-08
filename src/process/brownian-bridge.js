@@ -47,11 +47,13 @@ export default class BrownianBridge extends Process {
     return this.x + (-this.x / (T - t)) * dt + sigma * sqrtDt * normal(this.r)
   }
 
+  /** @inheritdoc */
   reset () {
     super.reset()
     this.n = 0
   }
 
+  /** @inheritdoc */
   path (n) {
     const savedN = this.n
     this.n = 0
