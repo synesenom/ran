@@ -40,43 +40,17 @@ export default class OrnsteinUhlenbeck extends Process {
     return this.x * decay + mu * (1 - decay) + noise * normal(this.r)
   }
 
-  /**
-   * Returns the analytical mean of the process at time t.
-   *
-   * @method mean
-   * @memberof ran.process.OrnsteinUhlenbeck
-   * @param {number} t Time.
-   * @returns {number} Expected value $x_0 e^{-\theta t} + \mu(1 - e^{-\theta t})$.
-   */
   mean (t) {
     if (t < 0) return NaN
     const e = Math.exp(-this.p.theta * t)
     return this.x0 * e + this.p.mu * (1 - e)
   }
 
-  /**
-   * Returns the analytical variance of the process at time t.
-   *
-   * @method variance
-   * @memberof ran.process.OrnsteinUhlenbeck
-   * @param {number} t Time.
-   * @returns {number} Variance $\sigma^2 \frac{1 - e^{-2\theta t}}{2\theta}$.
-   */
   variance (t) {
     if (t < 0) return NaN
     return this.p.sigma * this.p.sigma * (1 - Math.exp(-2 * this.p.theta * t)) / (2 * this.p.theta)
   }
 
-  /**
-   * Returns the marginal probability density of the process at state x and time t.
-   * X(t) ~ Normal(mean(t), variance(t)).
-   *
-   * @method pdf
-   * @memberof ran.process.OrnsteinUhlenbeck
-   * @param {number} x State value.
-   * @param {number} t Time (must be > 0).
-   * @returns {number} Marginal density at (x, t), or NaN for t ≤ 0.
-   */
   pdf (x, t) {
     if (t <= 0) return NaN
     const mu = this.mean(t)
@@ -85,15 +59,6 @@ export default class OrnsteinUhlenbeck extends Process {
     return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI))
   }
 
-  /**
-   * Returns the analytical covariance between process values at times s and t.
-   *
-   * @method covariogram
-   * @memberof ran.process.OrnsteinUhlenbeck
-   * @param {number} s First time point.
-   * @param {number} t Second time point.
-   * @returns {number} Covariance $\frac{\sigma^2}{2\theta}\left(e^{-\theta|t-s|} - e^{-\theta(t+s)}\right)$.
-   */
   covariogram (s, t) {
     if (s < 0 || t < 0) return NaN
     const { theta, sigma } = this.p

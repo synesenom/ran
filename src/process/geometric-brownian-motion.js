@@ -34,43 +34,17 @@ export default class GeometricBrownianMotion extends Process {
     return this.x * Math.exp(this.c.drift + this.c.noise * normal(this.r))
   }
 
-  /**
-   * Returns the analytical mean of the process at time t.
-   *
-   * @method mean
-   * @memberof ran.process.GeometricBrownianMotion
-   * @param {number} t Time.
-   * @returns {number} Expected value $x_0 e^{\mu t}$.
-   */
   mean (t) {
     if (t < 0) return NaN
     return this.x0 * Math.exp(this.p.mu * t)
   }
 
-  /**
-   * Returns the analytical variance of the process at time t.
-   *
-   * @method variance
-   * @memberof ran.process.GeometricBrownianMotion
-   * @param {number} t Time.
-   * @returns {number} Variance $x_0^2 e^{2\mu t}(e^{\sigma^2 t} - 1)$.
-   */
   variance (t) {
     if (t < 0) return NaN
     const s2 = this.p.sigma * this.p.sigma
     return this.x0 * this.x0 * Math.exp(2 * this.p.mu * t) * (Math.exp(s2 * t) - 1)
   }
 
-  /**
-   * Returns the marginal probability density of the process at state x and time t.
-   * log(X(t)) ~ Normal(log(x₀) + (μ − σ²/2)t, σ²t), so X(t) is log-normally distributed.
-   *
-   * @method pdf
-   * @memberof ran.process.GeometricBrownianMotion
-   * @param {number} x State value (must be > 0).
-   * @param {number} t Time (must be > 0).
-   * @returns {number} Marginal density at (x, t), or NaN for t ≤ 0 or x ≤ 0.
-   */
   pdf (x, t) {
     if (t <= 0) return NaN
     if (x <= 0) return 0
@@ -80,15 +54,6 @@ export default class GeometricBrownianMotion extends Process {
     return Math.exp(-0.5 * z * z) / (x * s * Math.sqrt(2 * Math.PI))
   }
 
-  /**
-   * Returns the analytical covariance between process values at times s and t.
-   *
-   * @method covariogram
-   * @memberof ran.process.GeometricBrownianMotion
-   * @param {number} s First time point.
-   * @param {number} t Second time point.
-   * @returns {number} Covariance $x_0^2 e^{\mu(s+t)}\left(e^{\sigma^2 \min(s,t)} - 1\right)$.
-   */
   covariogram (s, t) {
     if (s < 0 || t < 0) return NaN
     const { mu, sigma } = this.p

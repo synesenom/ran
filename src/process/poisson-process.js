@@ -28,43 +28,17 @@ export default class PoissonProcess extends Process {
     return this.x + poisson(this.r, this.p.lambda * this.p.dt)
   }
 
-  /**
-   * Returns the analytical mean of the process at time t.
-   *
-   * @method mean
-   * @memberof ran.process.PoissonProcess
-   * @param {number} t Time.
-   * @returns {number} Expected value λ·t.
-   */
   mean (t) {
     if (t < 0) return NaN
     return this.p.lambda * t
   }
 
-  /**
-   * Returns the analytical variance of the process at time t.
-   *
-   * @method variance
-   * @memberof ran.process.PoissonProcess
-   * @param {number} t Time.
-   * @returns {number} Variance λ·t.
-   */
   variance (t) {
     if (t < 0) return NaN
     return this.p.lambda * t
   }
 
-  /**
-   * Returns the marginal probability mass of the process at count x and time t.
-   * X(t) ~ Poisson(λt).
-   *
-   * @method pmf
-   * @memberof ran.process.PoissonProcess
-   * @param {number} x Count value (non-negative integer).
-   * @param {number} t Time.
-   * @returns {number} Marginal mass at (x, t), or NaN for t < 0.
-   */
-  pmf (x, t) {
+  pdf (x, t) {
     if (t < 0) return NaN
     if (!Number.isInteger(x) || x < 0) return 0
     if (t === 0) return x === 0 ? 1 : 0
@@ -72,15 +46,6 @@ export default class PoissonProcess extends Process {
     return Math.exp(-lt + x * Math.log(lt) - logGamma(x + 1))
   }
 
-  /**
-   * Returns the analytical covariance between process values at times s and t.
-   *
-   * @method covariogram
-   * @memberof ran.process.PoissonProcess
-   * @param {number} s First time point.
-   * @param {number} t Second time point.
-   * @returns {number} Covariance $\lambda \min(s, t)$.
-   */
   covariogram (s, t) {
     if (s < 0 || t < 0) return NaN
     return this.p.lambda * Math.min(s, t)

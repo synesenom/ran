@@ -122,6 +122,45 @@ export default class Process {
   }
 
   /**
+   * Returns the analytical mean of the process at time t. Must be implemented by subclasses.
+   *
+   * @method mean
+   * @memberof ran.process.Process
+   * @param {number} t Time.
+   * @returns {number} Expected value at time t, or NaN for t < 0.
+   */
+  mean (t) { // eslint-disable-line no-unused-vars
+    throw Error('Process.mean() is not implemented')
+  }
+
+  /**
+   * Returns the analytical variance of the process at time t. Must be implemented by subclasses.
+   *
+   * @method variance
+   * @memberof ran.process.Process
+   * @param {number} t Time.
+   * @returns {number} Variance at time t, or NaN for t < 0.
+   */
+  variance (t) { // eslint-disable-line no-unused-vars
+    throw Error('Process.variance() is not implemented')
+  }
+
+  /**
+   * Returns the marginal probability density or mass at state x and time t. For continuous
+   * processes this is a probability density; for discrete processes (e.g. Poisson) this is
+   * a probability mass. Must be implemented by subclasses.
+   *
+   * @method pdf
+   * @memberof ran.process.Process
+   * @param {number} x State value.
+   * @param {number} t Time.
+   * @returns {number} Marginal density or mass at (x, t), or NaN when t is out of domain.
+   */
+  pdf (x, t) { // eslint-disable-line no-unused-vars
+    throw Error('Process.pdf() is not implemented')
+  }
+
+  /**
    * Advances the process by one step, updates the current state, and returns the new state.
    *
    * @method next

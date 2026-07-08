@@ -102,6 +102,27 @@ describe('process', () => {
       })
     })
 
+    describe('.mean()', () => {
+      it('should throw when not implemented', () => {
+        const p = new BareProcess()
+        assert.throws(() => p.mean(1), 'Process.mean() is not implemented')
+      })
+    })
+
+    describe('.variance()', () => {
+      it('should throw when not implemented', () => {
+        const p = new BareProcess()
+        assert.throws(() => p.variance(1), 'Process.variance() is not implemented')
+      })
+    })
+
+    describe('.pdf()', () => {
+      it('should throw when not implemented', () => {
+        const p = new BareProcess()
+        assert.throws(() => p.pdf(0, 1), 'Process.pdf() is not implemented')
+      })
+    })
+
     describe('.next()', () => {
       it('should advance state and return the new value', () => {
         const p = new StubProcess()
@@ -1193,48 +1214,48 @@ describe('process.PoissonProcess', () => {
     })
   })
 
-  describe('.pmf()', () => {
+  describe('.pdf()', () => {
     it('should return NaN for t < 0', () => {
       const pp = new PoissonProcess(1, 1)
-      assert(Number.isNaN(pp.pmf(0, -1)))
+      assert(Number.isNaN(pp.pdf(0, -1)))
     })
 
     it('should return 0 for non-integer x', () => {
       const pp = new PoissonProcess(2, 1)
-      assert.strictEqual(pp.pmf(1.5, 1), 0)
+      assert.strictEqual(pp.pdf(1.5, 1), 0)
     })
 
     it('should return 0 for negative integer x', () => {
       const pp = new PoissonProcess(2, 1)
-      assert.strictEqual(pp.pmf(-1, 1), 0)
+      assert.strictEqual(pp.pdf(-1, 1), 0)
     })
 
     it('should return 1 for x=0 at t=0', () => {
       const pp = new PoissonProcess(1, 1)
-      assert.strictEqual(pp.pmf(0, 0), 1)
+      assert.strictEqual(pp.pdf(0, 0), 1)
     })
 
     it('should return 0 for x=1 at t=0', () => {
       const pp = new PoissonProcess(1, 1)
-      assert.strictEqual(pp.pmf(1, 0), 0)
+      assert.strictEqual(pp.pdf(1, 0), 0)
     })
 
     it('should return Poisson(lambda*t) PMF for lambda=2 t=1 x=2', () => {
       const pp = new PoissonProcess(2, 1)
       // scipy: stats.poisson.pmf(2, 2) = 0.2706705664732255
-      assert.closeTo(pp.pmf(2, 1), 0.2706705664732255, 1e-10)
+      assert.closeTo(pp.pdf(2, 1), 0.2706705664732255, 1e-10)
     })
 
     it('should return Poisson(lambda*t) PMF for lambda=0.5 t=3 x=1', () => {
       const pp = new PoissonProcess(0.5, 1)
       // scipy: stats.poisson.pmf(1, 1.5) = 0.3346952402226447
-      assert.closeTo(pp.pmf(1, 3), 0.3346952402226447, 1e-10)
+      assert.closeTo(pp.pdf(1, 3), 0.3346952402226447, 1e-10)
     })
 
     it('should return Poisson(lambda*t) PMF for lambda=3 t=2 x=5', () => {
       const pp = new PoissonProcess(3, 1)
       // scipy: stats.poisson.pmf(5, 6) = 0.1606231410479798
-      assert.closeTo(pp.pmf(5, 2), 0.1606231410479798, 1e-10)
+      assert.closeTo(pp.pdf(5, 2), 0.1606231410479798, 1e-10)
     })
   })
 
