@@ -462,6 +462,9 @@
     "./process/brownian-motion": {
       "import": "./dist/process/brownian-motion.esm.js"
     },
+    "./process/geometric-brownian-motion": {
+      "import": "./dist/process/geometric-brownian-motion.esm.js"
+    },
     "./process/ornstein-uhlenbeck": {
       "import": "./dist/process/ornstein-uhlenbeck.esm.js"
     }
