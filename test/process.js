@@ -144,6 +144,59 @@ describe('process', () => {
       })
     })
 
+    describe('.ensemble()', () => {
+      it('should return m paths', () => {
+        const p = new RngProcess()
+        p.seed(42)
+        assert.strictEqual(p.ensemble(5, 10).length, 5)
+      })
+
+      it('should return paths of length n+1', () => {
+        const p = new RngProcess()
+        p.seed(42)
+        const e = p.ensemble(3, 7)
+        for (const path of e) {
+          assert.strictEqual(path.length, 8)
+        }
+      })
+
+      it('should return independent paths', () => {
+        const p = new RngProcess()
+        p.seed(42)
+        const e = p.ensemble(3, 20)
+        assert.notDeepEqual(e[0], e[1])
+        assert.notDeepEqual(e[1], e[2])
+      })
+
+      it('should throw for m < 1', () => {
+        const p = new RngProcess()
+        assert.throws(() => p.ensemble(0, 5), /Parameters must satisfy/)
+      })
+
+      it('should throw for n < 1', () => {
+        const p = new RngProcess()
+        assert.throws(() => p.ensemble(3, 0), /Parameters must satisfy/)
+      })
+
+      it('should throw for NaN m', () => {
+        const p = new RngProcess()
+        assert.throws(() => p.ensemble(NaN, 5), /Required parameters missing/)
+      })
+
+      it('should throw for NaN n', () => {
+        const p = new RngProcess()
+        assert.throws(() => p.ensemble(3, NaN), /Required parameters missing/)
+      })
+
+      it('should produce different ensembles on consecutive calls', () => {
+        const p = new RngProcess()
+        p.seed(42)
+        const e1 = p.ensemble(2, 10)
+        const e2 = p.ensemble(2, 10)
+        assert.notDeepEqual(e1, e2)
+      })
+    })
+
     describe('.reset()', () => {
       it('should restore the initial state', () => {
         const p = new StubProcess()
