@@ -7,6 +7,7 @@ import BrownianMotion from '../src/process/brownian-motion'
 import GeometricBrownianMotion from '../src/process/geometric-brownian-motion'
 import OrnsteinUhlenbeck from '../src/process/ornstein-uhlenbeck'
 import PoissonProcess from '../src/process/poisson-process'
+import RandomWalk from '../src/process/random-walk'
 import { Normal, Poisson } from '../src/dist'
 import { ksTest, chiTest } from './test-utils'
 
@@ -1483,6 +1484,254 @@ describe('process.PoissonProcess', () => {
     it('should return NaN for t < 0', () => {
       const pp = new PoissonProcess(1, 1)
       assert(Number.isNaN(pp.covariogram(2, -1)))
+    })
+  })
+})
+
+describe('process.RandomWalk', () => {
+  describe('constructor', () => {
+    it('should throw on p = 0', () => {
+      assert.throws(() => new RandomWalk(0), /Invalid parameters/)
+    })
+
+    it('should throw on p = 1', () => {
+      assert.throws(() => new RandomWalk(1), /Invalid parameters/)
+    })
+
+    it('should throw on p < 0', () => {
+      assert.throws(() => new RandomWalk(-0.1), /Invalid parameters/)
+    })
+
+    it('should throw on p > 1', () => {
+      assert.throws(() => new RandomWalk(1.1), /Invalid parameters/)
+    })
+
+    it('should throw on p = NaN', () => {
+      assert.throws(() => new RandomWalk(NaN), /Invalid parameters/)
+    })
+
+    it('should accept valid probability', () => {
+      assert.doesNotThrow(() => new RandomWalk(0.3))
+      assert.doesNotThrow(() => new RandomWalk(0.7))
+    })
+
+    it('should use p = 0.5 by default', () => {
+      assert.doesNotThrow(() => new RandomWalk())
+    })
+
+    it('should start at state 0', () => {
+      assert.strictEqual(new RandomWalk(0.5).state(), 0)
+    })
+  })
+
+  describe('path', () => {
+    it('should be integer-valued', () => {
+      const rw = new RandomWalk(0.5)
+      rw.seed(42)
+      const path = rw.path(200)
+      for (const x of path) {
+        assert.strictEqual(x, Math.floor(x))
+      }
+    })
+
+    it('should change by exactly +1 or -1 at each step', () => {
+      const rw = new RandomWalk(0.3)
+      rw.seed(7)
+      const path = rw.path(100)
+      for (let i = 1; i < path.length; i++) {
+        const diff = path[i] - path[i - 1]
+        assert(diff === 1 || diff === -1, `step ${i} diff = ${diff}`)
+      }
+    })
+  })
+
+  describe('.mean()', () => {
+    it('should return t*(2p-1) for biased walk', () => {
+      const rw = new RandomWalk(0.7)
+      // exact rational: t*(2p-1) = 5*(2*0.7-1) = 5*0.4 = 2
+      assert.closeTo(rw.mean(5), 2, 1e-10)
+    })
+
+    it('should return 0 for symmetric walk (p=0.5)', () => {
+      const rw = new RandomWalk(0.5)
+      assert.strictEqual(rw.mean(10), 0)
+    })
+
+    it('should return negative mean for p < 0.5', () => {
+      const rw = new RandomWalk(0.3)
+      // exact rational: t*(2p-1) = 4*(0.6-1) = 4*(-0.4) = -1.6
+      assert.closeTo(rw.mean(4), -1.6, 1e-10)
+    })
+
+    it('should return 0 at t = 0', () => {
+      const rw = new RandomWalk(0.7)
+      assert.strictEqual(rw.mean(0), 0)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const rw = new RandomWalk(0.5)
+      assert(Number.isNaN(rw.mean(-1)))
+    })
+  })
+
+  describe('.variance()', () => {
+    it('should return 4p(1-p)*t for symmetric walk', () => {
+      const rw = new RandomWalk(0.5)
+      // exact rational: 4*0.5*0.5*10 = 10
+      assert.closeTo(rw.variance(10), 10, 1e-10)
+    })
+
+    it('should return 4p(1-p)*t for biased walk', () => {
+      const rw = new RandomWalk(0.7)
+      // exact rational: 4*0.7*0.3*5 = 4.2
+      assert.closeTo(rw.variance(5), 4.2, 1e-10)
+    })
+
+    it('should be reduced by bias (p != 0.5 has less variance than p = 0.5)', () => {
+      const sym = new RandomWalk(0.5)
+      const biased = new RandomWalk(0.3)
+      assert(biased.variance(10) < sym.variance(10))
+    })
+
+    it('should return 0 at t = 0', () => {
+      const rw = new RandomWalk(0.5)
+      assert.strictEqual(rw.variance(0), 0)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const rw = new RandomWalk(0.5)
+      assert(Number.isNaN(rw.variance(-1)))
+    })
+  })
+
+  describe('.pdf()', () => {
+    it('should return NaN for t < 0', () => {
+      const rw = new RandomWalk(0.5)
+      assert(Number.isNaN(rw.pdf(0, -1)))
+    })
+
+    it('should return NaN for non-integer t', () => {
+      const rw = new RandomWalk(0.5)
+      assert(Number.isNaN(rw.pdf(0, 1.5)))
+    })
+
+    it('should return 0 for non-integer x', () => {
+      const rw = new RandomWalk(0.5)
+      assert.strictEqual(rw.pdf(0.5, 4), 0)
+    })
+
+    it('should return 0 when |x| > t', () => {
+      const rw = new RandomWalk(0.5)
+      assert.strictEqual(rw.pdf(3, 2), 0)
+    })
+
+    it('should return 0 when x and t have different parity', () => {
+      const rw = new RandomWalk(0.5)
+      // t=4 (even), x=1 (odd) — unreachable
+      assert.strictEqual(rw.pdf(1, 4), 0)
+    })
+
+    it('should return 1 at x=0, t=0 (initial point mass)', () => {
+      const rw = new RandomWalk(0.5)
+      assert.strictEqual(rw.pdf(0, 0), 1)
+    })
+
+    it('should return 0 at x=1, t=0', () => {
+      const rw = new RandomWalk(0.5)
+      assert.strictEqual(rw.pdf(1, 0), 0)
+    })
+
+    it('should return exact binomial PMF for p=0.5, t=4, x=0', () => {
+      const rw = new RandomWalk(0.5)
+      // exact rational: C(4,2)*0.5^4 = 6/16 = 0.375
+      assert.closeTo(rw.pdf(0, 4), 0.375, 1e-10)
+    })
+
+    it('should return exact binomial PMF for p=0.5, t=4, x=2', () => {
+      const rw = new RandomWalk(0.5)
+      // exact rational: C(4,3)*0.5^4 = 4/16 = 0.25
+      assert.closeTo(rw.pdf(2, 4), 0.25, 1e-10)
+    })
+
+    it('should return exact binomial PMF for p=0.6, t=3, x=1', () => {
+      const rw = new RandomWalk(0.6)
+      // exact rational: C(3,2)*0.6^2*0.4 = 3*0.36*0.4 = 0.432
+      assert.closeTo(rw.pdf(1, 3), 0.432, 1e-10)
+    })
+
+    it('should return exact binomial PMF for p=0.7, t=5, x=3', () => {
+      const rw = new RandomWalk(0.7)
+      // exact rational: C(5,4)*0.7^4*0.3 = 5*0.2401*0.3 = 0.36015
+      assert.closeTo(rw.pdf(3, 5), 0.36015, 1e-10)
+    })
+
+    it('should sum to 1 over all reachable states at t=6', () => {
+      const rw = new RandomWalk(0.4)
+      let total = 0
+      for (let x = -6; x <= 6; x += 2) total += rw.pdf(x, 6)
+      // exact rational: sum of all binomial probabilities = 1
+      assert.closeTo(total, 1, 1e-10)
+    })
+  })
+
+  describe('.covariogram()', () => {
+    it('should return 4p(1-p)*min(s,t) for symmetric walk', () => {
+      const rw = new RandomWalk(0.5)
+      // exact rational: 4*0.5*0.5*min(3,5) = 3
+      assert.closeTo(rw.covariogram(3, 5), 3, 1e-10)
+    })
+
+    it('should return 4p(1-p)*min(s,t) for biased walk', () => {
+      const rw = new RandomWalk(0.7)
+      // exact rational: 4*0.7*0.3*min(2,4) = 4*0.21*2 = 1.68
+      assert.closeTo(rw.covariogram(2, 4), 1.68, 1e-10)
+    })
+
+    it('should be symmetric', () => {
+      const rw = new RandomWalk(0.7)
+      assert.closeTo(rw.covariogram(2, 4), rw.covariogram(4, 2), 1e-10)
+    })
+
+    it('should equal variance at s = t', () => {
+      const rw = new RandomWalk(0.6)
+      assert.closeTo(rw.covariogram(5, 5), rw.variance(5), 1e-10)
+    })
+
+    it('should return NaN for s < 0', () => {
+      const rw = new RandomWalk(0.5)
+      assert(Number.isNaN(rw.covariogram(-1, 2)))
+    })
+
+    it('should return NaN for t < 0', () => {
+      const rw = new RandomWalk(0.5)
+      assert(Number.isNaN(rw.covariogram(2, -1)))
+    })
+  })
+
+  describe('.reset()', () => {
+    it('should restore initial state to 0', () => {
+      const rw = new RandomWalk(0.5)
+      rw.seed(42)
+      for (let i = 0; i < 10; i++) rw.next()
+      rw.reset()
+      assert.strictEqual(rw.state(), 0)
+    })
+  })
+
+  describe('step distribution', () => {
+    it('should produce +1/-1 steps matching Bernoulli(p) (chi-squared test)', () => {
+      const p = 0.7
+      const rw = new RandomWalk(p)
+      rw.seed(42)
+      const n = 2000
+      const steps = []
+      for (let i = 0; i < n; i++) {
+        const prev = rw.state()
+        rw.next()
+        steps.push(rw.state() - prev)
+      }
+      // step ∈ {-1, +1}: model(-1) = 1-p, model(1) = p; c=1 estimated parameter
+      assert(chiTest(steps, k => k === 1 ? p : (1 - p), 1))
     })
   })
 })
