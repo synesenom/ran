@@ -76,60 +76,27 @@ export default class BrownianBridge extends Process {
     return result
   }
 
-  /**
-   * Returns the analytical mean of the process at time t.
-   *
-   * @method mean
-   * @memberof ran.process.BrownianBridge
-   * @param {number} t Time.
-   * @returns {number} Expected value 0 (bridge from 0 to 0).
-   */
+  /** @inheritdoc */
   mean (t) {
     if (t < 0) return NaN
     return 0
   }
 
-  /**
-   * Returns the analytical variance of the process at time t.
-   *
-   * @method variance
-   * @memberof ran.process.BrownianBridge
-   * @param {number} t Time.
-   * @returns {number} Variance $\sigma^2 t(T-t)/T$ for $0 \le t \le T$, 0 for $t > T$.
-   */
+  /** @inheritdoc */
   variance (t) {
     if (t < 0) return NaN
     if (t >= this.p.T) return 0
     return this.p.sigma * this.p.sigma * t * (this.p.T - t) / this.p.T
   }
 
-  /**
-   * Returns the analytical covariogram of the process at times s and t.
-   *
-   * @method covariogram
-   * @memberof ran.process.BrownianBridge
-   * @param {number} s First time point.
-   * @param {number} t Second time point.
-   * @returns {number} Covariance $\sigma^2 \min(s,t)(T - \max(s,t))/T$ for $0 \le s,t \le T$,
-   * 0 for $s > T$ or $t > T$.
-   */
+  /** @inheritdoc */
   covariogram (s, t) {
     if (s < 0 || t < 0) return NaN
     if (s > this.p.T || t > this.p.T) return 0
     return this.p.sigma * this.p.sigma * Math.min(s, t) * (this.p.T - Math.max(s, t)) / this.p.T
   }
 
-  /**
-   * Returns the marginal probability density of the process at state x and time t.
-   * X(t) ~ Normal(0, σ²t(T−t)/T) for 0 < t < T. At t = 0 or t ≥ T the process
-   * is pinned at 0 (Dirac delta), so the density is Infinity at x = 0 and 0 elsewhere.
-   *
-   * @method pdf
-   * @memberof ran.process.BrownianBridge
-   * @param {number} x State value.
-   * @param {number} t Time.
-   * @returns {number} Marginal density at (x, t), or NaN for t < 0.
-   */
+  /** @inheritdoc */
   pdf (x, t) {
     if (t < 0) return NaN
     const v = this.variance(t)
