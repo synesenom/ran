@@ -595,10 +595,9 @@ describe('process.GeometricBrownianMotion', () => {
 
   describe('.covariogram()', () => {
     it('should return exp(mu*(s+t)) * (exp(sigma^2*min(s,t)) - 1)', () => {
-      const mu = 0.05; const sigma = 0.2; const s = 1; const t = 3
-      const gbm = new GeometricBrownianMotion(mu, sigma, 1)
-      const expected = Math.exp(mu * (s + t)) * (Math.exp(sigma * sigma * Math.min(s, t)) - 1)
-      assert.closeTo(gbm.covariogram(s, t), expected, 1e-10)
+      const gbm = new GeometricBrownianMotion(0.05, 0.2, 1)
+      // scipy: exp(0.05*(1+3)) * (exp(0.2**2*min(1,3)) - 1) → 0.049846392161234841
+      assert.closeTo(gbm.covariogram(1, 3), 0.049846392161234841, 1e-10)
     })
 
     it('should be symmetric', () => {
@@ -770,10 +769,9 @@ describe('process.OrnsteinUhlenbeck', () => {
 
   describe('.covariogram()', () => {
     it('should return (sigma^2/2theta)*(exp(-theta*|t-s|) - exp(-theta*(t+s)))', () => {
-      const theta = 2; const sigma = 0.5; const s = 1; const t = 3
-      const ou = new OrnsteinUhlenbeck(theta, 0, sigma, 0.1)
-      const expected = (sigma * sigma / (2 * theta)) * (Math.exp(-theta * Math.abs(t - s)) - Math.exp(-theta * (t + s)))
-      assert.closeTo(ou.covariogram(s, t), expected, 1e-10)
+      const ou = new OrnsteinUhlenbeck(2, 0, 0.5, 0.1)
+      // scipy: (0.5**2/(2*2)) * (exp(-2*abs(3-1)) - exp(-2*(3+1))) → 0.0011237610163019791
+      assert.closeTo(ou.covariogram(1, 3), 0.0011237610163019791, 1e-10)
     })
 
     it('should be symmetric', () => {

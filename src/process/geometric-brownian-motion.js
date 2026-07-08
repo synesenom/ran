@@ -4,9 +4,17 @@ import Process from './_process'
 /**
  * Geometric Brownian Motion with drift, using an exact discrete-time sampler.
  *
- * The update rule per step is
+ * The underlying SDE is
  *
- * $X(t + \mathrm{d}t) = X(t)\,\exp\!\left((\mu - \tfrac{\sigma^2}{2})\,\mathrm{d}t + \sigma\sqrt{\mathrm{d}t}\,Z\right), \quad Z \sim \mathcal{N}(0, 1).$
+ * $\mathrm{d}X_t = \mu X_t\,\mathrm{d}t + \sigma X_t\,\mathrm{d}W_t.$
+ *
+ * By Itô's formula, $\log X_t$ follows Brownian motion with drift, yielding the closed-form
+ * solution $X_t = X_0\exp((\mu - \sigma^2/2)t + \sigma W_t)$. Each step is therefore an
+ * independent lognormal draw
+ *
+ * $X(t + \mathrm{d}t) = X(t)\,\exp\!\left((\mu - \tfrac{\sigma^2}{2})\,\mathrm{d}t + \sigma\sqrt{\mathrm{d}t}\,Z\right), \quad Z \sim \mathcal{N}(0, 1),$
+ *
+ * with no step-size discretization error.
  *
  * @class GeometricBrownianMotion
  * @memberof ran.process
