@@ -468,6 +468,9 @@
     "./process/brownian-motion": {
       "import": "./dist/process/brownian-motion.esm.js"
     },
+    "./process/compound-poisson-process": {
+      "import": "./dist/process/compound-poisson-process.esm.js"
+    },
     "./process/cox-ingersoll-ross": {
       "import": "./dist/process/cox-ingersoll-ross.esm.js"
     },
