@@ -1,4 +1,5 @@
 import poisson from '../dist/_poisson'
+import logGamma from '../special/log-gamma'
 import Process from './_process'
 
 /**
@@ -51,6 +52,24 @@ export default class PoissonProcess extends Process {
   variance (t) {
     if (t < 0) return NaN
     return this.p.lambda * t
+  }
+
+  /**
+   * Returns the marginal probability mass of the process at count x and time t.
+   * X(t) ~ Poisson(λt).
+   *
+   * @method pmf
+   * @memberof ran.process.PoissonProcess
+   * @param {number} x Count value (non-negative integer).
+   * @param {number} t Time.
+   * @returns {number} Marginal mass at (x, t), or NaN for t < 0.
+   */
+  pmf (x, t) {
+    if (t < 0) return NaN
+    if (!Number.isInteger(x) || x < 0) return 0
+    if (t === 0) return x === 0 ? 1 : 0
+    const lt = this.p.lambda * t
+    return Math.exp(-lt + x * Math.log(lt) - logGamma(x + 1))
   }
 
   /**

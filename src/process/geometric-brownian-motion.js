@@ -62,6 +62,25 @@ export default class GeometricBrownianMotion extends Process {
   }
 
   /**
+   * Returns the marginal probability density of the process at state x and time t.
+   * log(X(t)) ~ Normal(log(x₀) + (μ − σ²/2)t, σ²t), so X(t) is log-normally distributed.
+   *
+   * @method pdf
+   * @memberof ran.process.GeometricBrownianMotion
+   * @param {number} x State value (must be > 0).
+   * @param {number} t Time (must be > 0).
+   * @returns {number} Marginal density at (x, t), or NaN for t ≤ 0 or x ≤ 0.
+   */
+  pdf (x, t) {
+    if (t <= 0) return NaN
+    if (x <= 0) return 0
+    const m = Math.log(this.x0) + (this.p.mu - 0.5 * this.p.sigma * this.p.sigma) * t
+    const s = this.p.sigma * Math.sqrt(t)
+    const z = (Math.log(x) - m) / s
+    return Math.exp(-0.5 * z * z) / (x * s * Math.sqrt(2 * Math.PI))
+  }
+
+  /**
    * Returns the analytical covariance between process values at times s and t.
    *
    * @method covariogram

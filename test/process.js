@@ -325,6 +325,36 @@ describe('process.BrownianMotion', () => {
     })
   })
 
+  describe('.pdf()', () => {
+    it('should return NaN for t = 0', () => {
+      const bm = new BrownianMotion(0, 1, 1)
+      assert(Number.isNaN(bm.pdf(0, 0)))
+    })
+
+    it('should return NaN for t < 0', () => {
+      const bm = new BrownianMotion(0, 1, 1)
+      assert(Number.isNaN(bm.pdf(0, -1)))
+    })
+
+    it('should return Normal(0,1) density at x=0, t=1 for mu=0, sigma=1', () => {
+      const bm = new BrownianMotion(0, 1, 1)
+      // scipy: stats.norm.pdf(0, loc=0, scale=1) = 0.3989422804014327
+      assert.closeTo(bm.pdf(0, 1), 0.3989422804014327, 1e-10)
+    })
+
+    it('should return Normal(mu*t, sigma^2*t) density for general parameters', () => {
+      const bm = new BrownianMotion(0.5, 2, 1)
+      // scipy: stats.norm.pdf(1, loc=0.5*2, scale=sqrt(4*2)) = 0.1410473958869391
+      assert.closeTo(bm.pdf(1, 2), 0.1410473958869391, 1e-10)
+    })
+
+    it('should match Normal distribution with correct parameters', () => {
+      const bm = new BrownianMotion(-0.2, 1.5, 1)
+      // scipy: stats.norm.pdf(0, loc=-0.2*3, scale=sqrt(1.5^2*3)) = 0.1495123243667221
+      assert.closeTo(bm.pdf(0, 3), 0.1495123243667221, 1e-10)
+    })
+  })
+
   describe('.covariogram()', () => {
     it('should return sigma^2 * min(s, t)', () => {
       const bm = new BrownianMotion(0, 2, 1)
@@ -501,6 +531,46 @@ describe('process.GeometricBrownianMotion', () => {
     })
   })
 
+  describe('.pdf()', () => {
+    it('should return NaN for t = 0', () => {
+      const gbm = new GeometricBrownianMotion(0, 1, 1)
+      assert(Number.isNaN(gbm.pdf(1, 0)))
+    })
+
+    it('should return NaN for t < 0', () => {
+      const gbm = new GeometricBrownianMotion(0, 1, 1)
+      assert(Number.isNaN(gbm.pdf(1, -1)))
+    })
+
+    it('should return 0 for x = 0 (outside log-normal support)', () => {
+      const gbm = new GeometricBrownianMotion(0, 1, 1)
+      assert.strictEqual(gbm.pdf(0, 1), 0)
+    })
+
+    it('should return 0 for x < 0 (outside log-normal support)', () => {
+      const gbm = new GeometricBrownianMotion(0, 1, 1)
+      assert.strictEqual(gbm.pdf(-1, 1), 0)
+    })
+
+    it('should return log-normal density for mu=0.1, sigma=0.3, t=1, x=1', () => {
+      const gbm = new GeometricBrownianMotion(0.1, 0.3, 1)
+      // scipy: stats.lognorm.pdf(1, s=0.3*sqrt(1), scale=exp(log(1)+(0.1-0.09/2)*1)) = 1.3076461848524421
+      assert.closeTo(gbm.pdf(1.0, 1), 1.3076461848524421, 1e-10)
+    })
+
+    it('should return log-normal density for mu=0.05, sigma=0.2, t=2, x=1.5', () => {
+      const gbm = new GeometricBrownianMotion(0.05, 0.2, 1)
+      // scipy: stats.lognorm.pdf(1.5, s=0.2*sqrt(2), scale=exp((0.05-0.02)*2)) = 0.4459926977250626
+      assert.closeTo(gbm.pdf(1.5, 2), 0.4459926977250626, 1e-10)
+    })
+
+    it('should return log-normal density for mu=0, sigma=0.5, t=0.5, x=0.8', () => {
+      const gbm = new GeometricBrownianMotion(0, 0.5, 1)
+      // scipy: stats.lognorm.pdf(0.8, s=0.5*sqrt(0.5), scale=exp(-0.0625*0.5)) = 1.2721398281078873
+      assert.closeTo(gbm.pdf(0.8, 0.5), 1.2721398281078873, 1e-10)
+    })
+  })
+
   describe('.covariogram()', () => {
     it('should return exp(mu*(s+t)) * (exp(sigma^2*min(s,t)) - 1)', () => {
       const mu = 0.05; const sigma = 0.2; const s = 1; const t = 3
@@ -643,6 +713,36 @@ describe('process.OrnsteinUhlenbeck', () => {
     it('should return NaN for t < 0', () => {
       const ou = new OrnsteinUhlenbeck(1, 0, 1, 1)
       assert(isNaN(ou.variance(-1)))
+    })
+  })
+
+  describe('.pdf()', () => {
+    it('should return NaN for t = 0', () => {
+      const ou = new OrnsteinUhlenbeck(1, 0, 1, 1)
+      assert(Number.isNaN(ou.pdf(0, 0)))
+    })
+
+    it('should return NaN for t < 0', () => {
+      const ou = new OrnsteinUhlenbeck(1, 0, 1, 1)
+      assert(Number.isNaN(ou.pdf(0, -1)))
+    })
+
+    it('should return Normal(mean(t), variance(t)) density for theta=1 mu=2 sigma=1 t=1 x=1', () => {
+      const ou = new OrnsteinUhlenbeck(1, 2, 1, 0.1)
+      // scipy: mu=2*(1-exp(-1)), var=(1-exp(-2))/2; stats.norm.pdf(1, mu, sqrt(var)) = 0.5596687594392821
+      assert.closeTo(ou.pdf(1, 1), 0.5596687594392821, 1e-10)
+    })
+
+    it('should return correct density for theta=2 mu=0 sigma=0.5 t=0.5 x=0', () => {
+      const ou = new OrnsteinUhlenbeck(2, 0, 0.5, 0.1)
+      // scipy: mu=0, var=0.25*(1-exp(-2))/4; stats.norm.pdf(0, 0, sqrt(var)) = 1.7161142135258760
+      assert.closeTo(ou.pdf(0, 0.5), 1.7161142135258760, 1e-10)
+    })
+
+    it('should return correct density for theta=0.5 mu=3 sigma=2 t=2 x=2', () => {
+      const ou = new OrnsteinUhlenbeck(0.5, 3, 2, 0.1)
+      // scipy: mu=3*(1-exp(-1)), var=4*(1-exp(-2))/1; stats.norm.pdf(2, mu, sqrt(var)) = 0.2141814469689605
+      assert.closeTo(ou.pdf(2, 2), 0.2141814469689605, 1e-10)
     })
   })
 
@@ -1030,6 +1130,51 @@ describe('process.PoissonProcess', () => {
     it('should return NaN for t < 0', () => {
       const pp = new PoissonProcess(2, 0.5)
       assert(Number.isNaN(pp.variance(-1)))
+    })
+  })
+
+  describe('.pmf()', () => {
+    it('should return NaN for t < 0', () => {
+      const pp = new PoissonProcess(1, 1)
+      assert(Number.isNaN(pp.pmf(0, -1)))
+    })
+
+    it('should return 0 for non-integer x', () => {
+      const pp = new PoissonProcess(2, 1)
+      assert.strictEqual(pp.pmf(1.5, 1), 0)
+    })
+
+    it('should return 0 for negative integer x', () => {
+      const pp = new PoissonProcess(2, 1)
+      assert.strictEqual(pp.pmf(-1, 1), 0)
+    })
+
+    it('should return 1 for x=0 at t=0', () => {
+      const pp = new PoissonProcess(1, 1)
+      assert.strictEqual(pp.pmf(0, 0), 1)
+    })
+
+    it('should return 0 for x=1 at t=0', () => {
+      const pp = new PoissonProcess(1, 1)
+      assert.strictEqual(pp.pmf(1, 0), 0)
+    })
+
+    it('should return Poisson(lambda*t) PMF for lambda=2 t=1 x=2', () => {
+      const pp = new PoissonProcess(2, 1)
+      // scipy: stats.poisson.pmf(2, 2) = 0.2706705664732255
+      assert.closeTo(pp.pmf(2, 1), 0.2706705664732255, 1e-10)
+    })
+
+    it('should return Poisson(lambda*t) PMF for lambda=0.5 t=3 x=1', () => {
+      const pp = new PoissonProcess(0.5, 1)
+      // scipy: stats.poisson.pmf(1, 1.5) = 0.3346952402226447
+      assert.closeTo(pp.pmf(1, 3), 0.3346952402226447, 1e-10)
+    })
+
+    it('should return Poisson(lambda*t) PMF for lambda=3 t=2 x=5', () => {
+      const pp = new PoissonProcess(3, 1)
+      // scipy: stats.poisson.pmf(5, 6) = 0.1606231410479798
+      assert.closeTo(pp.pmf(5, 2), 0.1606231410479798, 1e-10)
     })
   })
 
