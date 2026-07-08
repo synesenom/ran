@@ -12,7 +12,7 @@ A comprehensive JavaScript library for probability distributions, random variate
 
 ## Features
 
-- **140+ probability distributions** — continuous and discrete, each with PDF/PMF, CDF, quantile (`q`), hazard, survival, log-likelihood (`lnL`), AIC/BIC, goodness-of-fit testing, and MLE fitting (`fit`)
+- **144 probability distributions** — continuous and discrete, each with PDF/PMF, CDF, quantile (`q`), hazard, survival, log-likelihood (`lnL`), AIC/BIC, goodness-of-fit testing, and MLE fitting (`fit`)
 - **Statistical measures** — location (mean, median, mode, …), dispersion (variance, IQR, Gini, …), shape (skewness, kurtosis, …), and dependence (Pearson, Spearman, Kendall, …)
 - **Hypothesis tests** — Bartlett, Levene, Brown–Forsythe, Mann–Whitney U, HSIC
 - **Reproducible sampling** — every distribution accepts an optional seed for deterministic output
@@ -115,13 +115,13 @@ console.log(fitted.p)           // => { mu: 3.000, sigma: 1.000 }
 console.log(fitted.test(data))  // => { statistics: 0.42, passed: true }
 ```
 
-`fit()` is a **static** method called on the class, not on an instance: `dist.Normal.fit(data)`, not `model.fit(data)`. All 142 exported distributions support `fit()`. Most have a data-aware initial guess for reliable MLE convergence; zero-parameter distributions skip optimization and return a fresh instance.
+`fit()` is a **static** method called on the class, not on an instance: `dist.Normal.fit(data)`, not `model.fit(data)`. All 144 exported distributions support `fit()`. Most have a data-aware initial guess for reliable MLE convergence; zero-parameter distributions skip optimization and return a fresh instance.
 
 ## API Overview
 
 | Namespace | Contents |
 |-----------|----------|
-| `ran.dist` | 140+ probability distributions |
+| `ran.dist` | 144 probability distributions |
 | `ran.process` | Stochastic processes: Brownian motion, Brownian bridge, geometric Brownian motion, Ornstein–Uhlenbeck, Poisson process |
 | `ran.location` | Mean, median, mode, geometric mean, harmonic mean, trimean, midrange |
 | `ran.dispersion` | Variance, standard deviation, IQR, Gini coefficient, entropy, CV, … |
@@ -173,6 +173,35 @@ d.sample(5)   // some sequence of variates
 d2.sample(5)  // identical sequence — same PRNG position, same parameters
 ```
 
+## Process API
+
+Every process in `ran.process` extends a common `Process` base class and exposes the same interface:
+
+```javascript
+const bm = new ran.process.BrownianMotion(0, 1, 0.1)  // mu=0, sigma=1, dt=0.1
+
+bm.seed(42)           // seed the PRNG for reproducible paths; returns the instance
+bm.next()             // advance one step; returns the new state
+bm.path(100)          // generate a path of 100 steps; returns array of 101 states
+bm.ensemble(5, 100)   // generate 5 independent paths of 100 steps each
+bm.reset()            // reset to initial state
+bm.state()            // current state value
+bm.mean(t)            // theoretical mean at time t
+bm.variance(t)        // theoretical variance at time t
+bm.pdf(x, t)          // marginal density at state x and time t
+bm.covariogram(s, t)  // theoretical covariance Cov(X(s), X(t))
+```
+
+Available processes:
+
+| Class | Description |
+|-------|-------------|
+| `ran.process.BrownianMotion(mu, sigma, dt)` | Brownian motion with drift; exact discrete-time sampler |
+| `ran.process.OrnsteinUhlenbeck(theta, mu, sigma, dt)` | Mean-reverting process; exact discrete-time sampler |
+| `ran.process.GeometricBrownianMotion(mu, sigma, dt)` | Multiplicative Brownian motion; log-normal increments |
+| `ran.process.BrownianBridge(sigma, T, dt)` | Brownian bridge pinned to 0 at time T |
+| `ran.process.PoissonProcess(lambda, dt)` | Counting process with Poisson(λ·dt) increments per step |
+
 ## Return values and errors
 
 `ranjs` signals an unusual result through one of four channels, chosen by the *kind* of situation:
@@ -202,7 +231,7 @@ ranjs targets **≤ 1e-14 relative error** for all public outputs in non-degener
 
 All reference values in `test/dist-cases-continuous.js` and `test/dist-cases-discrete.js` are sourced from external tools — [mpmath](https://mpmath.org/) at `mp.dps = 50`, scipy.stats, or Wolfram Alpha — never computed from ranjs itself. Use `scripts/gen-dist-refs.py` to generate reference values when adding a new distribution, and verify at least one value per distribution against an independent source. pdf, cdf, and pmf reference-value assertions enforce **1e-14 relative tolerance** by default; distributions that cannot reach 1e-14 in specific regimes use **1e-12** with an explanatory comment.
 
-All 32 discrete distributions are verified against mpmath references at 50 decimal places. BetaBinomial and NegativeHypergeometric sit at the ~2e-14 float64 arithmetic floor. The following distributions cap at 1e-12 at certain parameter settings: Binomial, Hypergeometric, NegativeBinomial, Poisson, Skellam.
+All 29 discrete distributions are verified against mpmath references at 50 decimal places. BetaBinomial and NegativeHypergeometric sit at the ~2e-14 float64 arithmetic floor. The following distributions cap at 1e-12 at certain parameter settings: Binomial, Hypergeometric, NegativeBinomial, Poisson, Skellam.
 
 All 112 continuous distributions are likewise verified against mpmath references at 50 decimal places (three parameter sets each). **pdf/cdf** cap at 1e-12–1e-13 at certain parameter settings for: Bates, IrwinHall, Levy, NoncentralBeta, NoncentralChi, NoncentralT, DoublyNoncentralT, SkewNormal, Rice, and R. **Quantiles** with a closed-form or Halley-refined inverse round-trip to 1e-14; those computed by numerical root-finding (BaldingNichols, Bates, BetaPrime, Davis, FisherZ, Muth, NoncentralChi2, NoncentralF, DoublyNoncentralChi2, DoublyNoncentralT, SkewNormal, Student's t/z, UniformProduct, R) round-trip to ~1e-13–1e-10, and BenktanderII's near-boundary asymptotic branch (b → 1) to ~1e-9.
 
