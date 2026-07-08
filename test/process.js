@@ -1005,6 +1005,66 @@ describe('process.BrownianBridge', () => {
     })
   })
 
+  describe('.pdf()', () => {
+    it('should return NaN for t < 0', () => {
+      const bb = new BrownianBridge(1, 2, 0.1)
+      assert(Number.isNaN(bb.pdf(0, -1)))
+    })
+
+    it('should return Infinity at x=0 when t=0 (point mass at origin)', () => {
+      const bb = new BrownianBridge(1, 2, 0.1)
+      assert.strictEqual(bb.pdf(0, 0), Infinity)
+    })
+
+    it('should return 0 at x≠0 when t=0', () => {
+      const bb = new BrownianBridge(1, 2, 0.1)
+      assert.strictEqual(bb.pdf(1, 0), 0)
+    })
+
+    it('should return Infinity at x=0 when t=T (pinned to 0)', () => {
+      const bb = new BrownianBridge(1, 2, 0.1)
+      assert.strictEqual(bb.pdf(0, 2), Infinity)
+    })
+
+    it('should return 0 at x≠0 when t=T', () => {
+      const bb = new BrownianBridge(1, 2, 0.1)
+      assert.strictEqual(bb.pdf(1, 2), 0)
+    })
+
+    it('should return Infinity at x=0 for t > T', () => {
+      const bb = new BrownianBridge(1, 2, 0.1)
+      assert.strictEqual(bb.pdf(0, 3), Infinity)
+    })
+
+    it('should return 0 at x≠0 for t > T', () => {
+      const bb = new BrownianBridge(1, 2, 0.1)
+      assert.strictEqual(bb.pdf(1, 3), 0)
+    })
+
+    it('should return Normal(0, sigma^2*t*(T-t)/T) density at x=0 for sigma=1, T=2, t=1', () => {
+      const bb = new BrownianBridge(1, 2, 0.1)
+      // scipy: stats.norm.pdf(0, 0, sqrt(1*1*1/2)) = 0.5641895835477563
+      assert.closeTo(bb.pdf(0, 1), 0.5641895835477563, 1e-10)
+    })
+
+    it('should return correct density at x=1 for sigma=1, T=2, t=1', () => {
+      const bb = new BrownianBridge(1, 2, 0.1)
+      // scipy: stats.norm.pdf(1, 0, sqrt(0.5)) = 0.20755374871029736
+      assert.closeTo(bb.pdf(1, 1), 0.20755374871029736, 1e-10)
+    })
+
+    it('should be symmetric around 0 (pdf(-x, t) = pdf(x, t))', () => {
+      const bb = new BrownianBridge(1, 2, 0.1)
+      assert.closeTo(bb.pdf(-1, 1), bb.pdf(1, 1), 1e-10)
+    })
+
+    it('should return correct density at x=0 for sigma=2, T=4, t=2', () => {
+      const bb = new BrownianBridge(2, 4, 0.1)
+      // scipy: stats.norm.pdf(0, 0, sqrt(4*2*2/4)) = stats.norm.pdf(0, 0, 2) = 0.19947114020071635
+      assert.closeTo(bb.pdf(0, 2), 0.19947114020071635, 1e-10)
+    })
+  })
+
   describe('increments', () => {
     it('should be normally distributed at t=0 (KS test)', () => {
       // At t=0, X_0=0 so drift=0; increment is exactly sigma*sqrt(dt)*Z ~ N(0, sigma*sqrt(dt))
