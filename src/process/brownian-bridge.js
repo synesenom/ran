@@ -102,4 +102,20 @@ export default class BrownianBridge extends Process {
     if (t >= this.p.T) return 0
     return this.p.sigma * this.p.sigma * t * (this.p.T - t) / this.p.T
   }
+
+  /**
+   * Returns the analytical covariogram of the process at times s and t.
+   *
+   * @method covariogram
+   * @memberof ran.process.BrownianBridge
+   * @param {number} s First time point.
+   * @param {number} t Second time point.
+   * @returns {number} Covariance $\sigma^2 \min(s,t)(T - \max(s,t))/T$ for $0 \le s,t \le T$,
+   * 0 for $s > T$ or $t > T$.
+   */
+  covariogram (s, t) {
+    if (s < 0 || t < 0) return NaN
+    if (s > this.p.T || t > this.p.T) return 0
+    return this.p.sigma * this.p.sigma * Math.min(s, t) * (this.p.T - Math.max(s, t)) / this.p.T
+  }
 }
