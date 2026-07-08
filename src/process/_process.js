@@ -108,6 +108,20 @@ export default class Process {
   }
 
   /**
+   * Returns the analytical covariogram (covariance function) of the process evaluated at times
+   * s and t. Must be implemented by subclasses.
+   *
+   * @method covariogram
+   * @memberof ran.process.Process
+   * @param {number} s First time point.
+   * @param {number} t Second time point.
+   * @returns {number} Covariance between the process values at times s and t.
+   */
+  covariogram (s, t) { // eslint-disable-line no-unused-vars
+    throw Error('Process.covariogram() is not implemented')
+  }
+
+  /**
    * Advances the process by one step, updates the current state, and returns the new state.
    *
    * @method next

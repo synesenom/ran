@@ -95,6 +95,13 @@ describe('process', () => {
       })
     })
 
+    describe('.covariogram()', () => {
+      it('should throw when not implemented', () => {
+        const p = new BareProcess()
+        assert.throws(() => p.covariogram(1, 2), 'Process.covariogram() is not implemented')
+      })
+    })
+
     describe('.next()', () => {
       it('should advance state and return the new value', () => {
         const p = new StubProcess()
@@ -850,6 +857,51 @@ describe('process.BrownianBridge', () => {
     it('should return NaN for t < 0', () => {
       const bb = new BrownianBridge(1, 1, 0.1)
       assert(Number.isNaN(bb.variance(-1)))
+    })
+  })
+
+  describe('.covariogram()', () => {
+    it('should return sigma^2 * min(s,t) * (T - max(s,t)) / T for 0 <= s <= t <= T', () => {
+      const sigma = 2; const T = 1
+      const bb = new BrownianBridge(sigma, T, 0.1)
+      // exact rational: sigma^2*s*(T-t)/T = 4*0.25*0.5/1 = 0.5
+      assert.closeTo(bb.covariogram(0.25, 0.5), 0.5, 1e-10)
+    })
+
+    it('should be symmetric', () => {
+      const bb = new BrownianBridge(1, 2, 0.1)
+      assert.closeTo(bb.covariogram(0.5, 1.5), bb.covariogram(1.5, 0.5), 1e-10)
+    })
+
+    it('should equal variance at s = t', () => {
+      const sigma = 2; const T = 1
+      const bb = new BrownianBridge(sigma, T, 0.1)
+      assert.closeTo(bb.covariogram(0.4, 0.4), bb.variance(0.4), 1e-10)
+    })
+
+    it('should return 0 for s > T', () => {
+      const bb = new BrownianBridge(1, 1, 0.1)
+      assert.strictEqual(bb.covariogram(1.5, 0.5), 0)
+    })
+
+    it('should return 0 for t > T', () => {
+      const bb = new BrownianBridge(1, 1, 0.1)
+      assert.strictEqual(bb.covariogram(0.5, 1.5), 0)
+    })
+
+    it('should return 0 at t = T', () => {
+      const bb = new BrownianBridge(1, 1, 0.1)
+      assert.strictEqual(bb.covariogram(0.5, 1), 0)
+    })
+
+    it('should return NaN for s < 0', () => {
+      const bb = new BrownianBridge(1, 1, 0.1)
+      assert(Number.isNaN(bb.covariogram(-0.5, 0.5)))
+    })
+
+    it('should return NaN for t < 0', () => {
+      const bb = new BrownianBridge(1, 1, 0.1)
+      assert(Number.isNaN(bb.covariogram(0.5, -0.5)))
     })
   })
 
