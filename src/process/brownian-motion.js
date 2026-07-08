@@ -58,4 +58,18 @@ export default class BrownianMotion extends Process {
     if (t < 0) return NaN
     return this.p.sigma * this.p.sigma * t
   }
+
+  /**
+   * Returns the analytical covariance between process values at times s and t.
+   *
+   * @method covariogram
+   * @memberof ran.process.BrownianMotion
+   * @param {number} s First time point.
+   * @param {number} t Second time point.
+   * @returns {number} Covariance $\sigma^2 \min(s, t)$.
+   */
+  covariogram (s, t) {
+    if (s < 0 || t < 0) return NaN
+    return this.p.sigma * this.p.sigma * Math.min(s, t)
+  }
 }
