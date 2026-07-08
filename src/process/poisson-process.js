@@ -3,9 +3,16 @@ import logGamma from '../special/log-gamma'
 import Process from './_process'
 
 /**
- * Poisson process: a counting process where arrivals in [t, t+Δt] follow Poisson(λ·Δt).
+ * Poisson process: a counting process of independent arrivals at rate $\lambda$, using an exact
+ * discrete-time sampler.
  *
- * The update rule is X_{n+1} = X_n + Poisson(λ·Δt).
+ * By the independent-increments property, the number of arrivals in any interval of length
+ * $\mathrm{d}t$ is exactly $\mathrm{Poisson}(\lambda\,\mathrm{d}t)$, independent of all other
+ * intervals. The sampler draws that count directly
+ *
+ * $X(t + \mathrm{d}t) = X(t) + K, \quad K \sim \mathrm{Poisson}(\lambda\,\mathrm{d}t),$
+ *
+ * with no step-size discretization error.
  *
  * @class PoissonProcess
  * @memberof ran.process

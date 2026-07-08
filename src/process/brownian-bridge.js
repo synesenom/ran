@@ -2,13 +2,19 @@ import normal from '../dist/_normal'
 import Process from './_process'
 
 /**
- * Brownian bridge process conditioned to return to 0 at time T.
+ * Brownian bridge process conditioned to return to 0 at time T, using an exact discrete-time sampler.
  *
- * The update rule per step is
+ * The underlying SDE is
  *
- * $X_{n+1} = X_n + \frac{0 - X_n}{T - n\,\mathrm{d}t}\,\mathrm{d}t + \sigma\sqrt{\mathrm{d}t}\,Z,$
+ * $\mathrm{d}X_t = -\frac{X_t}{T - t}\,\mathrm{d}t + \sigma\,\mathrm{d}W_t.$
  *
- * where $Z \sim \mathcal{N}(0, 1)$. The process pins to 0 at step $N = T/\mathrm{d}t$.
+ * Because the SDE is linear, the conditional distribution $X_{t+\mathrm{d}t} \mid X_t = x,\, X_T = 0$
+ * is Gaussian, derived from the covariance structure of the Wiener process. The sampler draws
+ * from that distribution directly
+ *
+ * $X(t + \mathrm{d}t) = X(t)\,\frac{T - t - \mathrm{d}t}{T - t} + \sigma\sqrt{\frac{\mathrm{d}t\,(T - t - \mathrm{d}t)}{T - t}}\,Z, \quad Z \sim \mathcal{N}(0, 1),$
+ *
+ * with no step-size discretization error. The process pins to 0 at step $N = T/\mathrm{d}t$.
  *
  * @class BrownianBridge
  * @memberof ran.process
@@ -28,46 +34,33 @@ export default class BrownianBridge extends Process {
     this.x = 0
     this.x0 = 0
     this.c = {
-      sqrtDt: Math.sqrt(dt),
       N: Math.round(T / dt)
     }
   }
 
   _next () {
     const { sigma, T, dt } = this.p
-    const { sqrtDt, N } = this.c
-    // Pin to 0 at the terminal step instead of applying the formula (which would
-    // blow up as T - t → 0 and leave residual noise at the endpoint).
+    const { N } = this.c
+    // Pin to 0 at the terminal step: the exact variance collapses to 0 here anyway,
+    // but computing sqrt of a near-zero ratio risks floating-point noise at the endpoint.
     if (this.n >= N - 1) {
       this.n++
       return 0
     }
     const t = this.n * dt
     this.n++
-    return this.x + (-this.x / (T - t)) * dt + sigma * sqrtDt * normal(this.r)
+    const remaining = T - t
+    const ratio = (remaining - dt) / remaining
+    return this.x * ratio + sigma * Math.sqrt(dt * ratio) * normal(this.r)
   }
 
-  /**
-   * Resets the process to its initial state and resets the internal time index to 0.
-   *
-   * @method reset
-   * @memberof ran.process.BrownianBridge
-   */
+  /** @inheritdoc */
   reset () {
     super.reset()
     this.n = 0
   }
 
-  /**
-   * Generates a path of n steps starting from the initial state. Resets the internal time
-   * index for path generation and restores it afterward, leaving the caller's simulation
-   * position unchanged.
-   *
-   * @method path
-   * @memberof ran.process.BrownianBridge
-   * @param {number} n Number of steps.
-   * @returns {Array} Array of n+1 states (initial state followed by n successive states).
-   */
+  /** @inheritdoc */
   path (n) {
     const savedN = this.n
     this.n = 0
