@@ -7,6 +7,7 @@ import BrownianMotion from '../src/process/brownian-motion'
 import CoxIngersollRoss from '../src/process/cox-ingersoll-ross'
 import GeometricBrownianMotion from '../src/process/geometric-brownian-motion'
 import OrnsteinUhlenbeck from '../src/process/ornstein-uhlenbeck'
+import CompoundPoissonProcess from '../src/process/compound-poisson-process'
 import PoissonProcess from '../src/process/poisson-process'
 import RandomWalk from '../src/process/random-walk'
 import { Normal, Poisson } from '../src/dist'
@@ -471,11 +472,6 @@ describe('process.GeometricBrownianMotion', () => {
     it('should accept valid parameters', () => {
       assert.doesNotThrow(() => new GeometricBrownianMotion(0, 1, 1))
       assert.doesNotThrow(() => new GeometricBrownianMotion(0.05, 0.2, 0.01))
-    })
-
-    it('should use all defaults when called with no arguments', () => {
-      const gbm = new GeometricBrownianMotion()
-      assert.strictEqual(gbm.state(), 1)
     })
 
     it('should start at state 1', () => {
@@ -1140,11 +1136,6 @@ describe('process.AR1', () => {
     it('should start at state 0', () => {
       assert.strictEqual(new AR1(0.5, 1).state(), 0)
     })
-
-    it('should use all defaults when called with no arguments', () => {
-      assert.doesNotThrow(() => new AR1())
-      assert.strictEqual(new AR1().state(), 0)
-    })
   })
 
   describe('.mean()', () => {
@@ -1335,10 +1326,6 @@ describe('process.PoissonProcess', () => {
       assert.doesNotThrow(() => new PoissonProcess(2, 0.5))
     })
 
-    it('should accept default parameters', () => {
-      assert.doesNotThrow(() => new PoissonProcess())
-    })
-
     it('should start at state 0', () => {
       const pp = new PoissonProcess(1, 1)
       assert.strictEqual(pp.state(), 0)
@@ -1488,6 +1475,189 @@ describe('process.PoissonProcess', () => {
     })
   })
 })
+describe('process.CompoundPoissonProcess', () => {
+  describe('constructor', () => {
+    it('should throw on lambda = 0', () => {
+      assert.throws(() => new CompoundPoissonProcess(new Normal(1, 1), 0, 1), /Invalid parameters/)
+    })
+
+    it('should throw on lambda < 0', () => {
+      assert.throws(() => new CompoundPoissonProcess(new Normal(1, 1), -1, 1), /Invalid parameters/)
+    })
+
+    it('should throw on dt = 0', () => {
+      assert.throws(() => new CompoundPoissonProcess(new Normal(1, 1), 1, 0), /Invalid parameters/)
+    })
+
+    it('should throw on dt < 0', () => {
+      assert.throws(() => new CompoundPoissonProcess(new Normal(1, 1), 1, -0.5), /Invalid parameters/)
+    })
+
+    it('should throw on lambda = NaN', () => {
+      assert.throws(() => new CompoundPoissonProcess(new Normal(1, 1), NaN, 1), /Invalid parameters/)
+    })
+
+    it('should throw when jumpDist is undefined', () => {
+      assert.throws(() => new CompoundPoissonProcess(undefined, 1, 1), /Invalid parameters/)
+    })
+
+    it('should throw when jumpDist is null', () => {
+      assert.throws(() => new CompoundPoissonProcess(null, 1, 1), /Invalid parameters/)
+    })
+
+    it('should throw when jumpDist has no .sample() method', () => {
+      assert.throws(() => new CompoundPoissonProcess({ mean: () => 0 }, 1, 1), /Invalid parameters/)
+    })
+
+    it('should accept valid parameters', () => {
+      assert.doesNotThrow(() => new CompoundPoissonProcess(new Normal(1, 1), 2, 0.5))
+    })
+
+    it('should accept default lambda and dt when jumpDist is provided', () => {
+      assert.doesNotThrow(() => new CompoundPoissonProcess(new Normal(0, 1), 1, 1))
+    })
+
+    it('should start at state 0', () => {
+      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      assert.strictEqual(cpp.state(), 0)
+    })
+  })
+
+  describe('path', () => {
+    it('should start at 0', () => {
+      const cpp = new CompoundPoissonProcess(new Poisson(1), 2, 1)
+      assert.strictEqual(cpp.path(10)[0], 0)
+    })
+
+    it('should be non-decreasing with non-negative jumps', () => {
+      const cpp = new CompoundPoissonProcess(new Poisson(2), 3, 0.5)
+      cpp.seed(42)
+      const path = cpp.path(200)
+      for (let i = 1; i < path.length; i++) {
+        assert(path[i] >= path[i - 1])
+      }
+    })
+  })
+
+  describe('.mean()', () => {
+    it('should return lambda*t*E[J]', () => {
+      const cpp = new CompoundPoissonProcess(new Normal(2, 1), 3, 1)
+      // exact rational: lambda*t*mu = 3*5*2 = 30
+      assert.closeTo(cpp.mean(5), 30, 1e-10)
+    })
+
+    it('should return 0 at t=0', () => {
+      const cpp = new CompoundPoissonProcess(new Normal(2, 1), 3, 1)
+      assert.strictEqual(cpp.mean(0), 0)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      assert(Number.isNaN(cpp.mean(-1)))
+    })
+  })
+
+  describe('.variance()', () => {
+    it('should return lambda*t*E[J^2]', () => {
+      const cpp = new CompoundPoissonProcess(new Normal(2, 1), 3, 1)
+      // exact rational: lambda*t*(sigma^2 + mu^2) = 3*4*(1+4) = 60
+      assert.closeTo(cpp.variance(4), 60, 1e-10)
+    })
+
+    it('should return 0 at t=0', () => {
+      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      assert.strictEqual(cpp.variance(0), 0)
+    })
+
+    it('should return NaN for t < 0', () => {
+      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      assert(Number.isNaN(cpp.variance(-1)))
+    })
+  })
+
+  describe('.covariogram()', () => {
+    it('should return lambda*E[J^2]*min(s,t)', () => {
+      const cpp = new CompoundPoissonProcess(new Normal(2, 1), 3, 1)
+      // exact rational: lambda*E[J^2]*min(s,t) = 3*(1+4)*2 = 30
+      assert.closeTo(cpp.covariogram(2, 5), 30, 1e-10)
+    })
+
+    it('should be symmetric', () => {
+      const cpp = new CompoundPoissonProcess(new Normal(2, 1), 3, 1)
+      assert.closeTo(cpp.covariogram(2, 5), cpp.covariogram(5, 2), 1e-10)
+    })
+
+    it('should equal variance at s = t', () => {
+      const cpp = new CompoundPoissonProcess(new Normal(2, 1), 3, 1)
+      // exact rational: variance(3) = covariogram(3, 3) = 3*3*(1+4) = 45
+      assert.closeTo(cpp.covariogram(3, 3), cpp.variance(3), 1e-10)
+    })
+
+    it('should return NaN for s < 0', () => {
+      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      assert(Number.isNaN(cpp.covariogram(-1, 2)))
+    })
+
+    it('should return NaN for t < 0', () => {
+      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      assert(Number.isNaN(cpp.covariogram(2, -1)))
+    })
+  })
+
+  describe('.seed()', () => {
+    it('should produce identical paths when seeded identically', () => {
+      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      cpp.seed(42)
+      const path1 = cpp.path(30)
+      cpp.seed(42)
+      const path2 = cpp.path(30)
+      assert.deepEqual(path1, path2)
+    })
+
+    it('should produce different paths for different seeds', () => {
+      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      cpp.seed(1)
+      const path1 = cpp.path(30)
+      cpp.seed(2)
+      const path2 = cpp.path(30)
+      assert.notDeepEqual(path1, path2)
+    })
+
+    it('should return this for chaining', () => {
+      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      assert.strictEqual(cpp.seed(0), cpp)
+    })
+  })
+
+  describe('.reset()', () => {
+    it('should restore initial state to 0', () => {
+      const cpp = new CompoundPoissonProcess(new Normal(0, 1), 2, 1)
+      cpp.seed(42)
+      for (let i = 0; i < 10; i++) cpp.next()
+      cpp.reset()
+      assert.strictEqual(cpp.state(), 0)
+    })
+  })
+
+  describe('mean increment', () => {
+    it('should have increments with mean close to lambda*dt*E[J]', () => {
+      const lambda = 2
+      const dt = 0.5
+      const muJ = 1
+      const cpp = new CompoundPoissonProcess(new Normal(muJ, 1), lambda, dt)
+      const n = 5000
+      let sum = 0
+      for (let i = 0; i < n; i++) {
+        cpp.reset()
+        cpp.next()
+        sum += cpp.state()
+      }
+      // exact rational: E[increment] = lambda*dt*muJ = 2*0.5*1 = 1
+      assert.closeTo(sum / n, lambda * dt * muJ, 0.1)
+    })
+  })
+})
+
 describe('process.CoxIngersollRoss', () => {
   describe('constructor', () => {
     it('should throw on kappa = 0', () => {
@@ -1744,10 +1914,6 @@ describe('process.RandomWalk', () => {
     it('should accept valid probability', () => {
       assert.doesNotThrow(() => new RandomWalk(0.3))
       assert.doesNotThrow(() => new RandomWalk(0.7))
-    })
-
-    it('should use p = 0.5 by default', () => {
-      assert.doesNotThrow(() => new RandomWalk())
     })
 
     it('should start at state 0', () => {

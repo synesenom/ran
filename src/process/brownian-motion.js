@@ -22,11 +22,11 @@ import Process from './_process'
  */
 export default class BrownianMotion extends Process {
   /**
-   * @param {number} [mu=0] Drift coefficient.
-   * @param {number} [sigma=1] Diffusion coefficient (must be > 0).
+   * @param {number} mu Drift coefficient.
+   * @param {number} sigma Diffusion coefficient (must be > 0).
    * @param {number} [dt=1] Time step (must be > 0).
    */
-  constructor (mu = 0, sigma = 1, dt = 1) {
+  constructor (mu, sigma, dt = 1) {
     super()
     Process.validate({ mu, sigma, dt }, ['sigma > 0', 'dt > 0'])
     this.p = { mu, sigma, dt }

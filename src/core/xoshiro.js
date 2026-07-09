@@ -78,7 +78,8 @@ class Xoshiro128p {
       2, 3, 4
     ]
 
-    // Run some iterations
+    // Warmup: the cold state [seed, 2, 3, 4] has three tiny fixed words; iterating
+    // lets xoshiro128+ diffuse the seed through all four words before first use.
     for (let i = 0; i < 100; i++) {
       this.next()
     }

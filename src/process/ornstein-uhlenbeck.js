@@ -21,12 +21,12 @@ import Process from './_process'
  */
 export default class OrnsteinUhlenbeck extends Process {
   /**
-   * @param {number} [theta=1] Mean-reversion speed (must be > 0).
-   * @param {number} [mu=0] Long-run mean.
-   * @param {number} [sigma=1] Diffusion coefficient (must be > 0).
+   * @param {number} theta Mean-reversion speed (must be > 0).
+   * @param {number} mu Long-run mean.
+   * @param {number} sigma Diffusion coefficient (must be > 0).
    * @param {number} [dt=1] Time step (must be > 0).
    */
-  constructor (theta = 1, mu = 0, sigma = 1, dt = 1) {
+  constructor (theta, mu, sigma, dt = 1) {
     super()
     Process.validate({ theta, mu, sigma, dt }, ['theta > 0', 'sigma > 0', 'dt > 0'])
     this.p = { theta, mu, sigma, dt }

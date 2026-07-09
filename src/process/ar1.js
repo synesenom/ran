@@ -20,10 +20,10 @@ import Process from './_process'
  */
 export default class AR1 extends Process {
   /**
-   * @param {number} [phi=0] Autoregressive coefficient.
-   * @param {number} [sigma=1] Innovation standard deviation (must be > 0).
+   * @param {number} phi Autoregressive coefficient.
+   * @param {number} sigma Innovation standard deviation (must be > 0).
    */
-  constructor (phi = 0, sigma = 1) {
+  constructor (phi, sigma) {
     super()
     Process.validate({ phi, sigma }, ['sigma > 0'])
     if (Math.abs(phi) >= 1) {

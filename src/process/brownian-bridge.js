@@ -22,11 +22,11 @@ import Process from './_process'
  */
 export default class BrownianBridge extends Process {
   /**
-   * @param {number} [sigma=1] Volatility (must be > 0).
-   * @param {number} [T=1] Terminal time (must be > 0).
+   * @param {number} sigma Volatility (must be > 0).
+   * @param {number} T Terminal time (must be > 0).
    * @param {number} [dt=0.1] Time step (must be > 0; T/dt must be a positive integer).
    */
-  constructor (sigma = 1, T = 1, dt = 0.1) {
+  constructor (sigma, T, dt = 0.1) {
     super()
     Process.validate({ sigma, T, dt }, ['sigma > 0', 'T > 0', 'dt > 0'])
     this.p = { sigma, T, dt }

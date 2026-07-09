@@ -18,9 +18,9 @@ import Process from './_process'
  */
 export default class RandomWalk extends Process {
   /**
-   * @param {number} [p=0.5] Probability of a +1 step (must satisfy 0 < p < 1).
+   * @param {number} p Probability of a +1 step (must satisfy 0 < p < 1).
    */
-  constructor (p = 0.5) {
+  constructor (p) {
     super()
     Process.validate({ p }, ['p > 0', 'p < 1'])
     this.p = { p }
