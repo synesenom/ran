@@ -6,16 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-
-- `CompoundPoissonProcess.seed(v)` now also seeds the jump distribution's internal PRNG with a derived seed, making consecutive `.path()` calls with the same seed before each produce identical arrays. Previously only the arrival PRNG (`this.r`) was seeded; jump magnitudes drawn from `jumpDist.r` were not reset, silently breaking the reproducibility contract advertised by `Process.seed()` (#893).
-- `gammaLowerIncomplete(s, x)` no longer silently returns a truncated (wrong) value for large shape parameters (e.g. `s = x = 1000`). The series loop in `_gli` now uses an adaptive per-call iteration limit `ceil(sqrt(2·(s+1)·log(1/ε)))` instead of the fixed `MAX_ITER = 100`; for s ≈ 1000 the old cap truncated at 100 iterations while convergence requires ~265. Downstream distributions (`Chi2`, `Gamma`, `Erlang`, `Poisson`, `Nakagami`) that delegate CDF computation to this function are also corrected (#837).
-- `docs/index.js` now uses `sass.compile()` instead of the deprecated `sass.renderSync()`, eliminating deprecation warnings on every `npm run docs` invocation (#817).
-
-### Changed
-
-- `Process.path(n)` now advances the PRNG by n steps on each call (matching `Distribution.sample()` behaviour) instead of restoring the PRNG stream afterward. Consecutive calls return independent realizations; seeding before a call still guarantees reproducibility. Code that called `path()` twice without re-seeding and expected identical results will now receive two distinct paths. No deprecation cycle was applied: `ran.process` was introduced in the same release cycle and repeated idempotent `path()` calls without re-seeding have no legitimate use case (#869).
-- `Distribution.test()` now uses the Anderson-Darling test (Marsaglia & Marsaglia 2004 asymptotic series + finite-n correction, α = 0.01) instead of Kolmogorov-Smirnov for continuous distributions. The `passed` field is unaffected. The `statistics` field now carries the A² statistic (typical scale 0.2–5) rather than the KS D-statistic (scale 0–1); code that reads the raw value will silently see a different number (#816).
+## [1.30.0] - 2026-07-09
 
 ### Added
 
@@ -41,6 +32,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `besselK(n, x)` and `besselKnu(nu, x)` — Modified Bessel function of the second kind K_ν(x) for integer orders (combined series seeded upward recurrence + asymptotic expansion) and real orders (connection formula via `besselInu` for x ≤ 6, asymptotic expansion for x > 6), exported from `ran.special` (#809).
 - `TruncatedExponential(lambda, a, b)` distribution: exponential distribution restricted to a finite interval [a, b] (λ > 0, a ≥ 0, b > a). Subclass of `Exponential`. Implements closed-form `_pdf`, `_cdf`, `_q` (inverse CDF), `mean`, `variance`, inverse-CDF sampling, and method-of-moments `_fitInit` (#806).
 - `AsymmetricLaplace(mu, sigma, kappa)` distribution: a three-parameter two-sided exponential family parameterized by location μ ∈ ℝ, scale σ > 0, and asymmetry κ > 0. Reduces to Laplace(μ, σ/√2) at κ = 1. Implements closed-form `_pdf`, `_cdf`, `_q` (inverse CDF), `mean`, `variance`, `skewness`, and `kurtosis`, with exact inverse-CDF sampling and method-of-moments `_fitInit` (#805).
+
+### Changed
+
+- `Process.path(n)` now advances the PRNG by n steps on each call (matching `Distribution.sample()` behaviour) instead of restoring the PRNG stream afterward. Consecutive calls return independent realizations; seeding before a call still guarantees reproducibility. Code that called `path()` twice without re-seeding and expected identical results will now receive two distinct paths. No deprecation cycle was applied: `ran.process` was introduced in the same release cycle and repeated idempotent `path()` calls without re-seeding have no legitimate use case (#869).
+- `Distribution.test()` now uses the Anderson-Darling test (Marsaglia & Marsaglia 2004 asymptotic series + finite-n correction, α = 0.01) instead of Kolmogorov-Smirnov for continuous distributions. The `passed` field is unaffected. The `statistics` field now carries the A² statistic (typical scale 0.2–5) rather than the KS D-statistic (scale 0–1); code that reads the raw value will silently see a different number (#816).
+
+### Fixed
+
+- `CompoundPoissonProcess.seed(v)` now also seeds the jump distribution's internal PRNG with a derived seed, making consecutive `.path()` calls with the same seed before each produce identical arrays. Previously only the arrival PRNG (`this.r`) was seeded; jump magnitudes drawn from `jumpDist.r` were not reset, silently breaking the reproducibility contract advertised by `Process.seed()` (#893).
+- `gammaLowerIncomplete(s, x)` no longer silently returns a truncated (wrong) value for large shape parameters (e.g. `s = x = 1000`). The series loop in `_gli` now uses an adaptive per-call iteration limit `ceil(sqrt(2·(s+1)·log(1/ε)))` instead of the fixed `MAX_ITER = 100`; for s ≈ 1000 the old cap truncated at 100 iterations while convergence requires ~265. Downstream distributions (`Chi2`, `Gamma`, `Erlang`, `Poisson`, `Nakagami`) that delegate CDF computation to this function are also corrected (#837).
+- `docs/index.js` now uses `sass.compile()` instead of the deprecated `sass.renderSync()`, eliminating deprecation warnings on every `npm run docs` invocation (#817).
 
 ## [1.29.0] - 2026-07-04
 
