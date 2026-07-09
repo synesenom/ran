@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class Anglit
  * @memberof ran.dist
- * @see M. King, Statistics for Process Control Engineers, John Wiley and Sons, 2017, p. 472.
  * @constructor
  */
 export default class Anglit extends Distribution {

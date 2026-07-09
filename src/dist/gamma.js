@@ -12,7 +12,6 @@ import Distribution from './_distribution'
  *
  * @class Gamma
  * @memberof ran.dist
- * @see G. Marsaglia and W. W. Tsang, "A Simple Method for Generating Gamma Variables", ACM Trans. Math. Softw. 26(3), 363–372, 2000.
  * @constructor
  */
 export default class Gamma extends Distribution {

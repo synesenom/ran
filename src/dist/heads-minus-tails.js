@@ -3,10 +3,7 @@ import PreComputed from './_pre-computed'
 import { logBinomial } from '../special'
 
 /**
- * Probability mass function for the absolute-value (folded) heads-minus-tails distribution, i.e. the distribution of
- * $|H - T|$ where $H$ is the number of heads in $2n$ fair coin flips and $T = 2n - H$ is the number
- * of tails. This is the non-negative folded variant; the signed $H - T$ distribution (support
- * $[-2n, 2n]$) is described at the MathWorld reference below:
+ * Probability mass function for the absolute-value (folded) [heads-minus-tails distribution]{@link http://mathworld.wolfram.com/Heads-Minus-TailsDistribution.html}:
  *
  * $f(k; n) = \begin{cases}\Big(\frac{1}{2}\Big)^{2n} \begin{pmatrix}2n \\\\ n \\\\ \end{pmatrix} &\quad\text{if $k = 0$},\\\\2 \Big(\frac{1}{2}\Big)^{2n} \begin{pmatrix}2n \\\\ m + n \\\\ \end{pmatrix} &\quad\text{if $k = 2m$},\\\\0 &\quad\text{else}\\\\ \end{cases}$
  *
@@ -14,7 +11,6 @@ import { logBinomial } from '../special'
  *
  * @class HeadsMinusTails
  * @memberof ran.dist
- * @see http://mathworld.wolfram.com/Heads-Minus-TailsDistribution.html
  * @constructor
  */
 export default class HeadsMinusTails extends PreComputed {

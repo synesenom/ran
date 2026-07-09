@@ -19,7 +19,7 @@ const B2K_OVER_FACT = (() => {
 /**
  * Probability density function for the [Davis distribution]{@link https://en.wikipedia.org/wiki/Davis_distribution}:
  *
- * $f(x; \mu, b, n) = \frac{b^n (x - \mu)^{-1-n}}{\Gamma(n)\,\zeta(n)\,(e^{b/(x-\mu)} - 1)},$
+ * $f(x; \mu, b, n) = \frac{b^n (x - \mu)^{-1-n}}{\Gamma(n) \zeta(n) (e^{b/(x-\mu)} - 1)},$
  *
  * with $\mu > 0$, $b > 0$, and $n > 1$. Support: $x \in (\mu, \infty)$.
  *

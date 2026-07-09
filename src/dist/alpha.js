@@ -12,7 +12,6 @@ import { erf, erfinv } from '../special'
  *
  * @class Alpha
  * @memberof ran.dist
- * @see Johnson, Kotz, and Balakrishnan, Continuous Univariate Distributions Vol. 1, 2nd ed., John Wiley and Sons, 1994, p. 173.
  * @constructor
  */
 export default class Alpha extends Distribution {

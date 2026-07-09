@@ -4,7 +4,7 @@ import GeneralizedNormal from './generalized-normal'
 /**
  * Probability density function for the [half generalized normal distribution]{@link https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.halfgennorm.html}:
  *
- * $f(x; \alpha, \beta) = \frac{\beta}{\alpha \, \Gamma\big(\frac{1}{\beta}\big)} e^{-\big(\frac{x}{\alpha}\big)^\beta},$
+ * $f(x; \alpha, \beta) = \frac{\beta}{\alpha \Gamma\big(\frac{1}{\beta}\big)} e^{-\big(\frac{x}{\alpha}\big)^\beta},$
  *
  * with $\alpha, \beta > 0$. Support: $x > 0$.
  *

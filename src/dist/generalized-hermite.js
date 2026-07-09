@@ -10,8 +10,7 @@ import PreComputed from './_pre-computed'
  *
  * where $p_0 = e^{\mu \big\[\frac{d - 1}{m} - 1\big\]}$, $\mu = a_1 + m a_m$, $d = \frac{a_1 + m^2 a_m}{a_1 + m a_m}$,
  * $a_1, a_m > 0$ and $m \in \mathbb{N}^+ \setminus \{ 1 \}$.
- * Support: $k \in \mathbb{N}$. It is the distribution of $X_1 + m X_m$ where $X_1, X_2$ are Poisson variates with
- * parameters $a_1, a_m$ respectively.
+ * Support: $k \in \mathbb{N}$.
  *
  * @class GeneralizedHermite
  * @memberof ran.dist
