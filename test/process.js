@@ -1136,7 +1136,6 @@ describe('process.AR1', () => {
     it('should start at state 0', () => {
       assert.strictEqual(new AR1(0.5, 1).state(), 0)
     })
-
   })
 
   describe('.mean()', () => {
