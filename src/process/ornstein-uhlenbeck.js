@@ -6,14 +6,14 @@ import Process from './_process'
  *
  * The underlying SDE is
  *
- * $\mathrm{d}X_t = \theta(\mu - X_t)\,\mathrm{d}t + \sigma\,\mathrm{d}W_t.$
+ * $\mathrm{d}X_t = \theta(\mu - X_t) \mathrm{d}t + \sigma \mathrm{d}W_t.$
  *
  * Because the SDE is linear, $X_{t+\mathrm{d}t} \mid X_t$ is Gaussian with closed-form mean and
  * variance. The sampler draws from that distribution directly
  *
- * $X(t + \mathrm{d}t) = X(t)\,e^{-\theta\,\mathrm{d}t} + \mu\!\left(1 - e^{-\theta\,\mathrm{d}t}\right) + \sigma\sqrt{\frac{1 - e^{-2\theta\,\mathrm{d}t}}{2\theta}}\,Z, \quad Z \sim \mathcal{N}(0, 1),$
+ * $X(t + \mathrm{d}t) = X(t) e^{-\theta\,\mathrm{d}t} + \mu \left(1 - e^{-\theta \mathrm{d}t}\right) + \sigma\sqrt{\frac{1 - e^{-2\theta \mathrm{d}t}}{2\theta}} Z,$
  *
- * with no step-size discretization error regardless of $\mathrm{d}t$.
+ * where $Z \sim \mathcal{N}(0, 1)$. There is no step-size discretization error regardless of $\mathrm{d}t$.
  *
  * @class OrnsteinUhlenbeck
  * @memberof ran.process

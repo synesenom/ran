@@ -8,9 +8,9 @@ import Process from './_process'
  *
  * The update rule is
  *
- * $X_{n+1} = X_n + \begin{cases} +1 & U < p \\ -1 & U \geq p \end{cases}, \quad U \sim \mathrm{Uniform}(0,1).$
+ * $X_{n+1} = X_n + \begin{cases} +1 &\quad\text{if $U < p$, \\ -1 &\quad\text{if $U \geq p$}, \end{cases},$
  *
- * After t steps from 0: $E[X_t] = t(2p-1)$, $\mathrm{Var}(X_t) = 4p(1-p)t$.
+ * where $U \sim \mathrm{Uniform}(0,1)$.
  *
  * @class RandomWalk
  * @memberof ran.process

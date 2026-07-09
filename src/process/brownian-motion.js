@@ -6,15 +6,15 @@ import Process from './_process'
  *
  * The underlying SDE is
  *
- * $\mathrm{d}X_t = \mu\,\mathrm{d}t + \sigma\,\mathrm{d}W_t.$
+ * $\mathrm{d}X_t = \mu \mathrm{d}t + \sigma \mathrm{d}W_t.$
  *
  * Because the coefficients are constant (state-independent), the Euler–Maruyama step coincides
  * with the exact transition: each increment is an independent draw from
- * $\mathcal{N}(\mu\,\mathrm{d}t,\,\sigma^2\,\mathrm{d}t)$, giving the update rule
+ * $\mathcal{N}(\mu \mathrm{d}t ,\sigma^2 \mathrm{d}t)$, giving the update rule
  *
- * $X(t + \mathrm{d}t) = X(t) + \mu\,\mathrm{d}t + \sigma\sqrt{\mathrm{d}t}\,Z, \quad Z \sim \mathcal{N}(0, 1).$
+ * $X(t + \mathrm{d}t) = X(t) + \mu \mathrm{d}t + \sigma\sqrt{\mathrm{d}t} Z,$
  *
- * There is no step-size discretization error.
+ * where $Z \sim \mathcal{N}(0, 1)$. There is no step-size discretization error.
  *
  * @class BrownianMotion
  * @memberof ran.process

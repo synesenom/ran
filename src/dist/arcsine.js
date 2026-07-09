@@ -10,7 +10,6 @@ import Distribution from './_distribution'
  *
  * @class Arcsine
  * @memberof ran.dist
- * @see W. Feller, An Introduction to Probability Theory and Its Applications Vol. 2, 2nd ed., John Wiley and Sons, 1991, p. 79.
  * @constructor
  */
 export default class Arcsine extends Distribution {

@@ -3,7 +3,7 @@ import Distribution from './_distribution'
 /**
  * Probability density function for the [Lomax distribution]{@link https://en.wikipedia.org/wiki/Lomax_distribution}:
  *
- * $f(x; \lambda, \alpha) = \frac{\alpha}{\lambda}\bigg\[1 + \frac{x}{\lambda}\bigg\]^{-(\alpha + 1)},$
+ * $f(x; \lambda, \alpha) = \frac{\alpha}{\lambda}\Big\[1 + \frac{x}{\lambda}\Big\]^{-(\alpha + 1)},$
  *
  * with $\lambda, \alpha > 0$. Support: $x \ge 0$.
  *

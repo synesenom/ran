@@ -3,9 +3,9 @@ import LogNormal from './log-normal'
 /**
  * Probability density function for the [Gilbrat's distribution]{@link http://mathworld.wolfram.com/GibratsDistribution.html}:
  *
- * $$f(x) = \frac{1}{x \sqrt{2 \pi}}e^{-\frac{\ln x^2}{2}}.$$
+ * $f(x) = \frac{1}{x \sqrt{2 \pi}}e^{-\frac{\ln x^2}{2}}.$
  *
- * Support: $x > 0$. Note that this distribution is simply a special case of the [log-normal]{@link #dist.LogNormal}.
+ * Support: $x > 0$.
  *
  * @class Gilbrat
  * @memberof ran.dist

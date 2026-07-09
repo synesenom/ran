@@ -8,13 +8,6 @@ import powell from '../algorithms/powell'
  * $f(x; k_1, k_2, \lambda_1, \lambda_2) = e^{-\frac{\lambda_1 + \lambda_2}{2}} \sum\_{j = 0}^\infty \sum\_{l = 0}^\infty \frac{\big(\frac{\lambda_1}{2}\big)^j}{j!} \frac{\big(\frac{\lambda_2}{2}\big)^l}{l!} f_{\chi^2}\big(x; k_1 + k_2 + 2j + 2l\big),$
  *
  * where $f_{\chi^2}(x; \nu)$ is the central $\chi^2$ density with $\nu$ degrees of freedom, $k_1, k_2 \in \mathbb{N}^+$ and $\lambda_1, \lambda_2 \ge 0$. Support: $x \in [0, \infty)$.
- * Formula follows from the Poisson-mixture representation of the non-central χ² in P. B. Patnaik. The non-central χ²- and F-distributions and their applications. *Biometrika*, 36(1–2):202–232, 1949.
- *
- * **Non-identifiability warning:** `DoublyNoncentralChi2(k1, k2, λ1, λ2)` is
- * statistically identical to `NoncentralChi2(k1+k2, λ1+λ2)` — the PDF and
- * CDF depend only on the sums. Only the sums `k1+k2` and `λ1+λ2` are
- * identifiable from data. After calling `fit()`, the individual parameters are
- * an arbitrary symmetric split of the fitted sums; do not interpret them individually.
  *
  * @class DoublyNoncentralChi2
  * @memberof ran.dist
@@ -49,17 +42,7 @@ export default class DoublyNoncentralChi2 extends NoncentralChi2 {
     ])
   }
 
-  /**
-   * Fits a DoublyNoncentralChi2 to data. Because DNCχ²(k1,k2,λ1,λ2) ≡
-   * ncχ²(k1+k2,λ1+λ2), only the sums are identifiable; fitting is performed
-   * in the collapsed 2D space and the result is split symmetrically.
-   *
-   * @method fit
-   * @memberof ran.dist.DoublyNoncentralChi2
-   * @param {number[]} data Array of sample values.
-   * @returns {DoublyNoncentralChi2} Fitted distribution with k1+k2 and
-   *   lambda1+lambda2 equal to the MLE sums, split symmetrically.
-   */
+  /** @inheritdoc */
   static fit (data) {
     // DNCχ²(k1,k2,λ1,λ2) ≡ ncχ²(k1+k2,λ1+λ2); fitting in 4D is degenerate
     // because the likelihood surface is flat in any direction that preserves

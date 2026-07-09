@@ -3,7 +3,7 @@ import Distribution from './_distribution'
 /**
  * Probability density function for the [asymmetric Laplace distribution]{@link https://en.wikipedia.org/wiki/Asymmetric_Laplace_distribution}:
  *
- * $f(x; \mu, \sigma, \kappa) = \frac{\sqrt{2}\kappa}{\sigma(1+\kappa^2)} \begin{cases} e^{-\frac{\sqrt{2}\kappa}{\sigma}(\mu - x)} & x < \mu \\ e^{-\frac{\sqrt{2}}{\kappa\sigma}(x - \mu)} & x \geq \mu \end{cases}$
+ * $f(x; \mu, \sigma, \kappa) = \frac{\sqrt{2}\kappa}{\sigma(1+\kappa^2)} \begin{cases} e^{-\frac{\sqrt{2}\kappa}{\sigma}(\mu - x)} &\quad\text{if $x < \mu$}, \\\ e^{-\frac{\sqrt{2}}{\kappa\sigma}(x - \mu)} &\quad\text{if $x \geq \mu$}, \end{cases}$
  *
  * where $\mu \in \mathbb{R}$, $\sigma > 0$, and $\kappa > 0$. At $\kappa = 1$ it reduces to
  * $\text{Laplace}(\mu, \sigma/\sqrt{2})$. Support: $x \in \mathbb{R}$.

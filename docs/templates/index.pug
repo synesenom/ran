@@ -54,7 +54,7 @@ block content
                     span.deprecated-label Deprecated
                     span.deprecated-message !{entry.deprecated}
             pre.title(id="" + entry.index) #{entry.signature}
-            if entry.source
+            // if entry.source
                 a.source-link(href=entry.source, target="_blank", rel="noopener noreferrer") source
             .desc.margined !{entry.desc}
             if entry.params

@@ -7,10 +7,10 @@ import Process from './_process'
  * discrete-time sampler.
  *
  * By the independent-increments property, the number of arrivals in any interval of length
- * $\mathrm{d}t$ is exactly $\mathrm{Poisson}(\lambda\,\mathrm{d}t)$, independent of all other
+ * $\mathrm{d}t$ is exactly $\mathrm{Poisson}(\lambda \mathrm{d}t)$, independent of all other
  * intervals. The sampler draws that count directly
  *
- * $X(t + \mathrm{d}t) = X(t) + K, \quad K \sim \mathrm{Poisson}(\lambda\,\mathrm{d}t),$
+ * $X(t + \mathrm{d}t) = X(t) + K, \quad K \sim \mathrm{Poisson}(\lambda \mathrm{d}t),$
  *
  * with no step-size discretization error.
  *

@@ -6,15 +6,15 @@ import Process from './_process'
  *
  * The underlying SDE is
  *
- * $\mathrm{d}X_t = -\frac{X_t}{T - t}\,\mathrm{d}t + \sigma\,\mathrm{d}W_t.$
+ * $\mathrm{d}X_t = -\frac{X_t}{T - t} \mathrm{d}t + \sigma \mathrm{d}W_t.$
  *
- * Because the SDE is linear, the conditional distribution $X_{t+\mathrm{d}t} \mid X_t = x,\, X_T = 0$
+ * Because the SDE is linear, the conditional distribution $X_{t+\mathrm{d}t} \mid X_t = x, X_T = 0$
  * is Gaussian, derived from the covariance structure of the Wiener process. The sampler draws
  * from that distribution directly
  *
- * $X(t + \mathrm{d}t) = X(t)\,\frac{T - t - \mathrm{d}t}{T - t} + \sigma\sqrt{\frac{\mathrm{d}t\,(T - t - \mathrm{d}t)}{T - t}}\,Z, \quad Z \sim \mathcal{N}(0, 1),$
+ * $X(t + \mathrm{d}t) = X(t) \frac{T - t - \mathrm{d}t}{T - t} + \sigma\sqrt{\frac{\mathrm{d}t (T - t - \mathrm{d}t)}{T - t}} Z,$
  *
- * with no step-size discretization error. The process pins to 0 at step $N = T/\mathrm{d}t$.
+ * where $Z \sim \mathcal{N}(0, 1)$. There is no step-size discretization error. The process pins to 0 at step $N = T/\mathrm{d}t$.
  *
  * @class BrownianBridge
  * @memberof ran.process

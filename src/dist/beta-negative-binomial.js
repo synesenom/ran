@@ -7,7 +7,7 @@ import poisson from './_poisson'
 /**
  * Probability mass function for the [beta-negative-binomial distribution]{@link https://en.wikipedia.org/wiki/Beta_negative_binomial_distribution}:
  *
- * $f(k; r, \alpha, \beta) = \frac{\Gamma(r + k)}{\Gamma(k + 1)\,\Gamma(r)} \frac{\mathrm{B}(\alpha + r,\, \beta + k)}{\mathrm{B}(\alpha,\, \beta)},$
+ * $f(k; r, \alpha, \beta) = \frac{\Gamma(r + k)}{\Gamma(k + 1) \Gamma(r)} \frac{\mathrm{B}(\alpha + r, \beta + k)}{\mathrm{B}(\alpha, \beta)},$
  *
  * with $r \in \mathbb{N}^+$ and $\alpha, \beta > 0$. Support: $k \in \mathbb{N}_0$.
  *

@@ -11,7 +11,6 @@ import Distribution from './_distribution'
  *
  * @class InverseGaussian
  * @memberof ran.dist
- * @see J. R. Michael, W. R. Schucany and R. W. Haas, "Generating Random Variates Using Transformations with Multiple Roots", Am. Stat. 30(2), 88–90, 1976.
  * @constructor
  */
 export default class InverseGaussian extends Distribution {
