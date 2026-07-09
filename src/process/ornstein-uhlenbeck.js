@@ -11,7 +11,7 @@ import Process from './_process'
  * Because the SDE is linear, $X_{t+\mathrm{d}t} \mid X_t$ is Gaussian with closed-form mean and
  * variance. The sampler draws from that distribution directly
  *
- * $X(t + \mathrm{d}t) = X(t) e^{-\theta\,\mathrm{d}t} + \mu \left(1 - e^{-\theta \mathrm{d}t}\right) + \sigma\sqrt{\frac{1 - e^{-2\theta \mathrm{d}t}}{2\theta}} Z,$
+ * $X_{t+\mathrm{d}t} = X_t\,e^{-\theta\,\mathrm{d}t} + \mu\left(1 - e^{-\theta\,\mathrm{d}t}\right) + \sigma\sqrt{\frac{1 - e^{-2\theta\,\mathrm{d}t}}{2\theta}}\,Z,$
  *
  * where $Z \sim \mathcal{N}(0, 1)$. There is no step-size discretization error regardless of $\mathrm{d}t$.
  *

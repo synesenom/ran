@@ -10,7 +10,7 @@ import Process from './_process'
  * $\mathrm{d}t$ is exactly $\mathrm{Poisson}(\lambda \mathrm{d}t)$, independent of all other
  * intervals. The sampler draws that count directly
  *
- * $X(t + \mathrm{d}t) = X(t) + K, \quad K \sim \mathrm{Poisson}(\lambda \mathrm{d}t),$
+ * $X_{t+\mathrm{d}t} = X_t + K, \quad K \sim \mathrm{Poisson}(\lambda\,\mathrm{d}t),$
  *
  * with no step-size discretization error.
  *
