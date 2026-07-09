@@ -514,6 +514,7 @@
     "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.15.6",
     "@babel/register": "^7.15.3",
+    "@codescene/codehealth-mcp": "^1.4.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^1.0.0",
     "babel-plugin-istanbul": "^6.0.0",

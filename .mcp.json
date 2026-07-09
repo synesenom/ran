@@ -1,7 +1,8 @@
 {
   "mcpServers": {
     "codescene": {
-      "command": "cs-mcp"
+      "command": "npx",
+      "args": ["-y", "@codescene/codehealth-mcp"]
     }
   }
 }

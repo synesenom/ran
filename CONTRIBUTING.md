@@ -25,6 +25,20 @@ npm run typecheck  # TypeScript declaration validation
 
 All three must pass before you open a PR. (`npm run standard` is the auto-fixing variant of the linter — useful during development, but `npm run lint` is what CI enforces.)
 
+## Code Health MCP server (CodeScene)
+
+The project ships a CodeScene Code Health MCP server, configured in `.mcp.json` and enabled in `.claude/settings.json`. It runs the same way in every environment (local laptop and Claude Code cloud):
+
+- **Binary** — `@codescene/codehealth-mcp` is a pinned `devDependency`, so `npm install` places it in `node_modules/.bin` and `.mcp.json` launches it with `npx`. No global install, nothing machine-specific. It works out of the box on any machine that has run `npm install`.
+- **Token** — the server authenticates with a personal access token read from the `CS_ACCESS_TOKEN` environment variable. This is a per-user secret and is **never committed**. On a new machine:
+  1. Create a PAT at <https://codescene.io/users/me/pat>.
+  2. Export it in your shell profile so `claude` (and its MCP subprocess) inherit it:
+     ```bash
+     echo 'export CS_ACCESS_TOKEN=pat_...' >> ~/.zshrc && source ~/.zshrc
+     ```
+
+The `SessionStart` hook (`.claude/hooks/session-start.sh`) prints a warning if `CS_ACCESS_TOKEN` is unset, so a missing token is self-diagnosing. In the Claude Code cloud environment the token is provisioned as an environment variable instead.
+
 ## Adding a new distribution
 
 1. **Write test cases first** (TDD). Add an entry to `test/dist-cases-continuous.js` (or `test/dist-cases-discrete.js` for discrete distributions) with `invalidParams`, `params`, and at least one `cases` entry before touching `src/`.
