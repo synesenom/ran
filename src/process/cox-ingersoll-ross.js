@@ -13,7 +13,7 @@ import Process from './_process'
  * The Euler-Maruyama step uses reflection to prevent the noise term from amplifying
  * negative states:
  *
- * $X_{n+1} = X_n + \kappa(\theta - X_n)\Delta t + \sigma\sqrt{\max(X_n, 0)} \sqrt{\Delta t} Z,$
+ * $X_{t+\mathrm{d}t} = X_t + \kappa(\theta - X_t)\,\mathrm{d}t + \sigma\sqrt{\max(X_t, 0)}\,\sqrt{\mathrm{d}t}\,Z,$
  *
  * where $Z \sim \mathcal{N}(0, 1)$. When the Feller condition $2\kappa\theta > \sigma^2$ holds, the continuous-time process
  * is strictly positive; below the Feller threshold, paths may occasionally become negative
