@@ -20,11 +20,11 @@ import Process from './_process'
  */
 export default class CompoundPoissonProcess extends Process {
   /**
-   * @param {number} [lambda=1] Arrival rate (must be > 0).
    * @param {Object} jumpDist A `ran.dist` Distribution instance whose `.sample()` method supplies jump sizes.
+   * @param {number} [lambda=1] Arrival rate (must be > 0).
    * @param {number} [dt=1] Time step (must be > 0).
    */
-  constructor (lambda = 1, jumpDist, dt = 1) {
+  constructor (jumpDist, lambda = 1, dt = 1) {
     super()
     Process.validate({ lambda, dt }, ['lambda > 0', 'dt > 0'])
     if (jumpDist == null || typeof jumpDist.sample !== 'function') {
