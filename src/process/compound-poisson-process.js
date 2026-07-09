@@ -41,6 +41,14 @@ export default class CompoundPoissonProcess extends Process {
     }
   }
 
+  /**
+   * Seeds both the arrival PRNG and the jump distribution for fully reproducible paths.
+   *
+   * @method seed
+   * @memberof ran.process.CompoundPoissonProcess
+   * @param {number|string} value Seed value.
+   * @returns {this} Reference to the current process.
+   */
   seed (value) {
     super.seed(value)
     // Seed jumpDist from this.r's post-warmup state so jump magnitudes are reproducible
