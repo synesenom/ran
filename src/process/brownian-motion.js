@@ -12,8 +12,8 @@ import Process from './_process'
  * with the exact transition: each increment is an independent draw from
  * $\mathcal{N}(\mu \mathrm{d}t ,\sigma^2 \mathrm{d}t)$, giving the update rule
  *
- * $X(t + \mathrm{d}t) = X(t) + \mu \mathrm{d}t + \sigma\sqrt{\mathrm{d}t} Z,$
- * 
+ * $X_{t+\mathrm{d}t} = X_t + \mu\,\mathrm{d}t + \sigma\sqrt{\mathrm{d}t}\,Z,$
+ *
  * where $Z \sim \mathcal{N}(0, 1)$. There is no step-size discretization error.
  *
  * @class BrownianMotion

@@ -12,8 +12,8 @@ import Process from './_process'
  * solution $X_t = X_0\exp((\mu - \sigma^2/2)t + \sigma W_t)$. Each step is therefore an
  * independent lognormal draw
  *
- * $X(t + \mathrm{d}t) = X(t) \exp\!\left((\mu - \tfrac{\sigma^2}{2}) \mathrm{d}t + \sigma\sqrt{\mathrm{d}t} Z\right),$
- * 
+ * $X_{t+\mathrm{d}t} = X_t \exp\!\left((\mu - \tfrac{\sigma^2}{2})\,\mathrm{d}t + \sigma\sqrt{\mathrm{d}t}\,Z\right),$
+ *
  * where $Z \sim \mathcal{N}(0, 1)$. There is no step-size discretization error.
  *
  * @class GeometricBrownianMotion
