@@ -251,6 +251,8 @@ Whenever you edit or create a `.js` file, check its Code Health immediately afte
 
 This rule applies to every `.js` file touched in any session, regardless of whether the edit was a bug fix, refactor, new feature, or incidental touch. If a smell cannot be fixed within reasonable scope (e.g., a god file that would require a major cross-file refactor), document why in the PR description and proceed.
 
+When the user asks about the code health of a file or requests a code health review, always use CodeScene's MCP server: call `code_health_score` to get the score, and `code_health_review` to get the detailed review with identified smells and improvement guidance.
+
 ## Architecture Decision Records (ADRs)
 
 ADRs capture significant design decisions and their rationale. They live in `decisions/` and follow the Nygard format.
