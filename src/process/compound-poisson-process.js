@@ -9,7 +9,7 @@ import Process from './_process'
  * the supplied distribution:
  *
  * $X_{n+1} = X_n + \sum_{i=1}^{K} J_i,$
- * 
+ *
  * where $K \sim \mathrm{Poisson}(\lambda \mathrm{d}t)$ and $J_i \sim \text{jumpDist}$.
  *
  * @class CompoundPoissonProcess

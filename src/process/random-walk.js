@@ -9,7 +9,7 @@ import Process from './_process'
  * The update rule is
  *
  * $X_{n+1} = X_n + \begin{cases} +1 &\quad\text{if $U < p$, \\ -1 &\quad\text{if $U \geq p$}, \end{cases},$
- * 
+ *
  * where $U \sim \mathrm{Uniform}(0,1)$.
  *
  * @class RandomWalk

@@ -13,7 +13,7 @@ import Process from './_process'
  * independent lognormal draw
  *
  * $X(t + \mathrm{d}t) = X(t) \exp\!\left((\mu - \tfrac{\sigma^2}{2}) \mathrm{d}t + \sigma\sqrt{\mathrm{d}t} Z\right),$
- * 
+ *
  * where $Z \sim \mathcal{N}(0, 1)$. There is no step-size discretization error.
  *
  * @class GeometricBrownianMotion

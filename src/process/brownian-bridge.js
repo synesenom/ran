@@ -13,7 +13,7 @@ import Process from './_process'
  * from that distribution directly
  *
  * $X(t + \mathrm{d}t) = X(t) \frac{T - t - \mathrm{d}t}{T - t} + \sigma\sqrt{\frac{\mathrm{d}t (T - t - \mathrm{d}t)}{T - t}} Z,$
- * 
+ *
  * where $Z \sim \mathcal{N}(0, 1)$. There is no step-size discretization error. The process pins to 0 at step $N = T/\mathrm{d}t$.
  *
  * @class BrownianBridge

@@ -14,7 +14,7 @@ import Process from './_process'
  * negative states:
  *
  * $X_{n+1} = X_n + \kappa(\theta - X_n)\Delta t + \sigma\sqrt{\max(X_n, 0)} \sqrt{\Delta t} Z,$
- * 
+ *
  * where $Z \sim \mathcal{N}(0, 1)$. When the Feller condition $2\kappa\theta > \sigma^2$ holds, the continuous-time process
  * is strictly positive; below the Feller threshold, paths may occasionally become negative
  * under Euler-Maruyama despite the reflection.
