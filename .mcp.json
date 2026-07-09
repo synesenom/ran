@@ -1,7 +1,8 @@
 {
   "mcpServers": {
     "codescene": {
-      "command": "cs-mcp"
+      "command": "bash",
+      "args": ["-c", "cs-mcp --version >/dev/null 2>&1; exec cs-mcp"]
     }
   }
 }
