@@ -241,6 +241,16 @@ This cycle applies to every new distribution, every new method, every bug fix. D
 - JSDoc comments on public Distribution methods follow the existing format. Skip on simple utility functions where name + parameters are self-explanatory.
 - Type hints are not used — plain JavaScript.
 
+## Code Health
+
+Whenever you edit or create a `.js` file, check its Code Health immediately after saving:
+
+1. Call the CodeScene `code_health_score` tool on the file.
+2. If the score is **below 10.0**, call `code_health_review` on the same file and fix the identified code smells following the guidance it returns (boy scout rule — leave the file healthier than you found it).
+3. After fixing, re-run `npm run standard` and `npm test` to confirm nothing broke.
+
+This rule applies to every `.js` file touched in any session, regardless of whether the edit was a bug fix, refactor, new feature, or incidental touch. If a smell cannot be fixed within reasonable scope (e.g., a god file that would require a major cross-file refactor), document why in the PR description and proceed.
+
 ## Architecture Decision Records (ADRs)
 
 ADRs capture significant design decisions and their rationale. They live in `decisions/` and follow the Nygard format.
