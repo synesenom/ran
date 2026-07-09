@@ -8,11 +8,9 @@ import Process from './_process'
  * $K \sim \mathrm{Poisson}(\lambda\,\mathrm{d}t)$ independent jumps drawn from
  * the supplied distribution:
  *
- * $X_{n+1} = X_n + \sum_{i=1}^{K} J_i, \quad K \sim \mathrm{Poisson}(\lambda\,\mathrm{d}t), \quad J_i \sim \text{jumpDist.}$
- *
- * The marginal moments satisfy the compound Poisson identities:
- * $\mathrm{E}[X(t)] = \lambda t\,\mathrm{E}[J]$ and
- * $\mathrm{Var}[X(t)] = \lambda t\,\mathrm{E}[J^2]$.
+ * $X_{n+1} = X_n + \sum_{i=1}^{K} J_i,$
+ * 
+ * where $K \sim \mathrm{Poisson}(\lambda \mathrm{d}t)$ and $J_i \sim \text{jumpDist}$.
  *
  * @class CompoundPoissonProcess
  * @memberof ran.process
@@ -41,14 +39,7 @@ export default class CompoundPoissonProcess extends Process {
     }
   }
 
-  /**
-   * Seeds both the arrival PRNG and the jump distribution for fully reproducible paths.
-   *
-   * @method seed
-   * @memberof ran.process.CompoundPoissonProcess
-   * @param {number|string} value Seed value.
-   * @returns {this} Reference to the current process.
-   */
+  /** @inheritdoc */
   seed (value) {
     super.seed(value)
     // Seed jumpDist from this.r's post-warmup state so jump magnitudes are reproducible

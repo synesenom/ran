@@ -7,7 +7,7 @@ import Process from './_process'
  *
  * The update rule per step is
  *
- * $X_{n+1} = \phi \cdot X_n + \sigma \cdot Z,$
+ * $X_{n+1} = \phi X_n + \sigma Z,$
  *
  * where $Z \sim \mathcal{N}(0, 1)$. For $|\phi| < 1$ the process is stationary with
  * marginal distribution $\mathcal{N}(0, \sigma^2/(1-\phi^2))$. For $|\phi| \geq 1$

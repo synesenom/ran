@@ -8,14 +8,14 @@ import Process from './_process'
  *
  * The underlying SDE is
  *
- * $\mathrm{d}X_t = \kappa(\theta - X_t)\,\mathrm{d}t + \sigma\sqrt{X_t}\,\mathrm{d}W_t.$
+ * $\mathrm{d}X_t = \kappa(\theta - X_t) \mathrm{d}t + \sigma\sqrt{X_t} \mathrm{d}W_t.$
  *
  * The Euler-Maruyama step uses reflection to prevent the noise term from amplifying
  * negative states:
  *
- * $X_{n+1} = X_n + \kappa(\theta - X_n)\Delta t + \sigma\sqrt{\max(X_n, 0)}\,\sqrt{\Delta t}\,Z,\quad Z \sim \mathcal{N}(0,1).$
- *
- * When the Feller condition $2\kappa\theta > \sigma^2$ holds, the continuous-time process
+ * $X_{n+1} = X_n + \kappa(\theta - X_n)\Delta t + \sigma\sqrt{\max(X_n, 0)} \sqrt{\Delta t} Z,$
+ * 
+ * where $Z \sim \mathcal{N}(0, 1)$. When the Feller condition $2\kappa\theta > \sigma^2$ holds, the continuous-time process
  * is strictly positive; below the Feller threshold, paths may occasionally become negative
  * under Euler-Maruyama despite the reflection.
  *
