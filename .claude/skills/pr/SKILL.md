@@ -35,7 +35,24 @@ npm run build && npm run typecheck
 Report format on failure:
 > "Pre-flight failed: `<step name>` — <first error line>. Fix the issue and run `/pr` again."
 
-### 3. Sync with Main
+### 3. Code Health Check
+
+Get the list of `.js` files changed in this branch:
+
+```bash
+git diff main...HEAD --name-only | grep '\.js$'
+```
+
+For each changed `.js` file, call the CodeScene `code_health_score` tool. If any file scores **below 10.0**:
+
+1. Call `code_health_review` on that file for detailed guidance.
+2. Fix the identified code smells following the MCP server's guidance.
+3. Re-run `npm run standard && npm test` to confirm nothing broke.
+4. Repeat until the score reaches 10.0, or document in the PR body why a remaining smell is out of scope for this change (e.g., a god file that can't be split without a major refactor).
+
+If no `.js` files were changed, skip this step.
+
+### 5. Sync with Main
 
 Before opening the PR, merge the latest `main` into the current branch to eliminate post-open merge conflicts.
 
@@ -56,7 +73,7 @@ If the merge **fails with conflicts**:
 3. If any conflict is ambiguous, abort the merge (`git merge --abort`), report the conflicting files to the user, and stop — do not proceed to PR creation.
 4. After resolving, run `npm run standard && npm test` to confirm the merge didn't break anything, then `git commit --no-edit` and push.
 
-### 4. Detect the Issue Number
+### 6. Detect the Issue Number
 
 Search in this order, stopping at the first match:
 
@@ -72,7 +89,7 @@ gh issue view <number> --json number,state -q '.state' 2>/dev/null
 ```
 Skip if `CLOSED` or lookup fails.
 
-### 5. Analyze Changes
+### 7. Analyze Changes
 
 Categorize every change:
 
@@ -91,7 +108,7 @@ Categorize every change:
 - Import reordering or cleanup
 - Docstring/comment additions only
 
-### 6. ADR Gate (non-trivial PRs only)
+### 8. ADR Gate (non-trivial PRs only)
 
 Check for ADR references in the diff and commits:
 ```bash
@@ -106,12 +123,12 @@ If non-trivial changes exist but no ADRs are found, add a warning block:
 > See `decisions/0000-template.md` for the format.
 ```
 
-### 7. Generate PR Title
+### 9. Generate PR Title
 
 - Concise (under 70 characters), imperative mood
 - e.g., "Add LogNormal distribution", "Fix CDF for discrete distributions"
 
-### 8. Generate PR Body
+### 10. Generate PR Body
 
 ```markdown
 <If an issue was detected:>
@@ -153,7 +170,7 @@ _No non-trivial changes — this PR is purely mechanical._
 *Generated with [Claude Code](https://claude.ai/code)*
 ```
 
-### 9. Create the PR
+### 11. Create the PR
 
 ```bash
 gh pr create --title "<title>" --body "$(cat <<'EOF'
@@ -162,7 +179,7 @@ EOF
 )"
 ```
 
-### 10. Watch the PR (CI + reviews)
+### 12. Watch the PR (CI + reviews)
 
 Immediately after the PR is created, **subscribe to its activity** so CI failures and
 review comments are handled without the user having to ask:
@@ -192,7 +209,7 @@ arrives, investigate it and follow this loop:
 Stop watching the moment the user asks — call `unsubscribe_pr_activity(<pr-number>)` and push
 no further changes to that PR.
 
-### 11. Report
+### 13. Report
 
 > "PR created: <URL>
 >

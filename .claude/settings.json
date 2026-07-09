@@ -9,6 +9,7 @@
       "Bash(mkdir .claude/tmp*)"
     ]
   },
+  "enabledMcpjsonServers": ["codescene"],
   "hooks": {
     "SessionStart": [
       {

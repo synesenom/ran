@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "codescene": {
+      "command": "cs-mcp"
+    }
+  }
+}
