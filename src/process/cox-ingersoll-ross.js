@@ -25,12 +25,12 @@ import Process from './_process'
  */
 export default class CoxIngersollRoss extends Process {
   /**
-   * @param {number} [kappa=1] Mean-reversion speed (must be > 0).
-   * @param {number} [theta=1] Long-run mean (must be > 0).
-   * @param {number} [sigma=1] Volatility (must be > 0).
+   * @param {number} kappa Mean-reversion speed (must be > 0).
+   * @param {number} theta Long-run mean (must be > 0).
+   * @param {number} sigma Volatility (must be > 0).
    * @param {number} [dt=1] Time step (must be > 0).
    */
-  constructor (kappa = 1, theta = 1, sigma = 1, dt = 1) {
+  constructor (kappa, theta, sigma, dt = 1) {
     super()
     Process.validate({ kappa, theta, sigma, dt }, ['kappa > 0', 'theta > 0', 'sigma > 0', 'dt > 0'])
     // Warn but do not throw: below the Feller threshold the Euler-Maruyama scheme

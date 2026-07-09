@@ -20,10 +20,10 @@ import Process from './_process'
  */
 export default class PoissonProcess extends Process {
   /**
-   * @param {number} [lambda=1] Event rate (must be > 0).
+   * @param {number} lambda Event rate (must be > 0).
    * @param {number} [dt=1] Time step (must be > 0).
    */
-  constructor (lambda = 1, dt = 1) {
+  constructor (lambda, dt = 1) {
     super()
     Process.validate({ lambda, dt }, ['lambda > 0', 'dt > 0'])
     this.p = { lambda, dt }

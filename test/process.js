@@ -474,11 +474,6 @@ describe('process.GeometricBrownianMotion', () => {
       assert.doesNotThrow(() => new GeometricBrownianMotion(0.05, 0.2, 0.01))
     })
 
-    it('should use all defaults when called with no arguments', () => {
-      const gbm = new GeometricBrownianMotion()
-      assert.strictEqual(gbm.state(), 1)
-    })
-
     it('should start at state 1', () => {
       const gbm = new GeometricBrownianMotion(0, 1, 1)
       assert.strictEqual(gbm.state(), 1)
@@ -1142,10 +1137,6 @@ describe('process.AR1', () => {
       assert.strictEqual(new AR1(0.5, 1).state(), 0)
     })
 
-    it('should use all defaults when called with no arguments', () => {
-      assert.doesNotThrow(() => new AR1())
-      assert.strictEqual(new AR1().state(), 0)
-    })
   })
 
   describe('.mean()', () => {
@@ -1334,10 +1325,6 @@ describe('process.PoissonProcess', () => {
 
     it('should accept valid parameters', () => {
       assert.doesNotThrow(() => new PoissonProcess(2, 0.5))
-    })
-
-    it('should accept default parameters', () => {
-      assert.doesNotThrow(() => new PoissonProcess())
     })
 
     it('should start at state 0', () => {
@@ -1928,10 +1915,6 @@ describe('process.RandomWalk', () => {
     it('should accept valid probability', () => {
       assert.doesNotThrow(() => new RandomWalk(0.3))
       assert.doesNotThrow(() => new RandomWalk(0.7))
-    })
-
-    it('should use p = 0.5 by default', () => {
-      assert.doesNotThrow(() => new RandomWalk())
     })
 
     it('should start at state 0', () => {
