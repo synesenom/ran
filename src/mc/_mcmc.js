@@ -127,22 +127,7 @@ export default class MCMC {
       for (let j = 0; j < 1e4; j++) {
         this._adjust(this.iterate(null, true))
       }
-
-      // Set thinning interval to the first lag where all dimensions have |rho| <= 0.05
-      const z = this.ac().reduce((first, d) => {
-        for (let i = 0; i < d.length - 1; i++) {
-          if (!isNaN(d[i]) && Math.abs(d[i]) <= 0.05) {
-            return Math.max(first, i)
-          }
-        }
-        return first
-      }, 0)
-      if (z > this.samplingRate) {
-        this.samplingRate++
-      } else if (z < this.samplingRate && this.samplingRate > 1) {
-        this.samplingRate--
-      }
-
+      this._adjustSamplingRate(this._thinningLag())
       typeof progress === 'function' && progress(100 * batch / maxBatches)
     }
   }
@@ -213,6 +198,26 @@ export default class MCMC {
    */
   _adjust () {
     throw Error('MCMC._adjust() is not implemented')
+  }
+
+  // First lag at which all dimensions have |autocorrelation| <= 0.05
+  _thinningLag () {
+    return this.ac().reduce((first, d) => {
+      for (let i = 0; i < d.length - 1; i++) {
+        if (!isNaN(d[i]) && Math.abs(d[i]) <= 0.05) {
+          return Math.max(first, i)
+        }
+      }
+      return first
+    }, 0)
+  }
+
+  _adjustSamplingRate (lag) {
+    if (lag > this.samplingRate) {
+      this.samplingRate++
+    } else if (lag < this.samplingRate && this.samplingRate > 1) {
+      this.samplingRate--
+    }
   }
 
   _initAccumulators () {
