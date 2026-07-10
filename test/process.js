@@ -434,6 +434,7 @@ describe('process.BrownianMotion', () => {
       const sigma = 1.5
       const dt = 0.5
       const bm = new BrownianMotion(mu, sigma, dt)
+      bm.seed(42)
       const n = 1000
       const increments = []
       for (let i = 0; i < n; i++) {
@@ -625,6 +626,7 @@ describe('process.GeometricBrownianMotion', () => {
       const sigma = 0.2
       const dt = 1
       const gbm = new GeometricBrownianMotion(mu, sigma, dt)
+      gbm.seed(42)
       const n = 1000
       const logReturns = []
       for (let i = 0; i < n; i++) {
@@ -1355,6 +1357,7 @@ describe('process.PoissonProcess', () => {
       const lambda = 3
       const dt = 0.5
       const pp = new PoissonProcess(lambda, dt)
+      pp.seed(42)
       const n = 2000
       const increments = []
       for (let i = 0; i < n; i++) {
