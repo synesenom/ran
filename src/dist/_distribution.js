@@ -38,6 +38,32 @@ class Distribution {
     this.c = {}
   }
 
+  static _parseConstraintTokens (constraint) {
+    let tokens = constraint.split(/ (<=|>=|!=) /)
+    if (tokens.length === 1) {
+      tokens = constraint.split(/ ([=<>]) /)
+    }
+    return tokens
+  }
+
+  static _resolveToken (token, params) {
+    return Object.prototype.hasOwnProperty.call(params, token) ? params[token] : parseFloat(token)
+  }
+
+  static _violatesConstraint (constraint, params) {
+    const tokens = Distribution._parseConstraintTokens(constraint)
+    const a = Distribution._resolveToken(tokens[0], params)
+    const b = Distribution._resolveToken(tokens[2], params)
+    switch (tokens[1]) {
+      case '<': return a >= b
+      case '<=': return a > b
+      case '>': return a <= b
+      case '>=': return a < b
+      case '!=': return a === b
+      default: return false
+    }
+  }
+
   /**
    * Validates a set of parameters using a list of constraints.
    *
@@ -57,35 +83,7 @@ class Distribution {
       throw Error(`Invalid parameters. Required parameters missing or not a number: ${missing.join(', ')}.`)
     }
 
-    // Go through parameters and check constraints
-    const errors = constraints.filter(constraint => {
-      // Tokenize constraint
-      let tokens = constraint.split(/ (<=|>=|!=) /)
-      if (tokens.length === 1) {
-        tokens = constraint.split(/ ([=<>]) /)
-      }
-
-      // Substitute parameters if there is any
-      const a = Object.prototype.hasOwnProperty.call(params, tokens[0]) ? params[tokens[0]] : parseFloat(tokens[0])
-      const b = Object.prototype.hasOwnProperty.call(params, tokens[2]) ? params[tokens[2]] : parseFloat(tokens[2])
-
-      // Check for errors
-      switch (tokens[1]) {
-        case '<':
-          return a >= b
-        case '<=':
-          return a > b
-        case '>':
-          return a <= b
-        case '>=':
-          return a < b
-        case '!=':
-          return a === b
-        default:
-          return false
-      }
-    })
-
+    const errors = constraints.filter(c => Distribution._violatesConstraint(c, params))
     if (errors.length > 0) {
       throw Error(`Invalid parameters. Parameters must satisfy the following constraints: ${constraints.join(', ')}. Got: ${Object.entries(params).map(([name, value]) => `${name} = ${value}`).join(', ')}`)
     }
@@ -155,38 +153,35 @@ class Distribution {
    * @protected
    * @ignore
    */
-  _qEstimateTable (p) {
-    // Find upper bound
+  _qTableBracket (p) {
     let k1 = 0
     let k2 = 0
     let delta = 1
     for (let i = 0; i < MAX_ITER; i++) {
-      const q = this.cdf(k2)
-      if (q >= p) {
-        break
-      }
-
+      if (this.cdf(k2) >= p) break
       k1 = k2
       k2 += delta
       delta = Math.ceil(1.618 * delta)
     }
+    return [k1, k2]
+  }
 
-    // Find quantile within bracket
+  _qTableBisect (p, k1, k2) {
     for (let i = 0; i < MAX_ITER; i++) {
-      if (k2 - k1 <= 1) {
-        return k2
-      }
-
+      if (k2 - k1 <= 1) return k2
       const k = Math.floor((k1 + k2) / 2)
-      const q = this.cdf(k)
-      if (p > q) {
+      if (p > this.cdf(k)) {
         k1 = k
       } else {
         k2 = k
       }
     }
-
     return NaN
+  }
+
+  _qEstimateTable (p) {
+    const [k1, k2] = this._qTableBracket(p)
+    return this._qTableBisect(p, k1, k2)
   }
 
   // _qEstimateTable is broken for negative-integer support (hardwired start at k=0); use this instead.
@@ -204,24 +199,22 @@ class Distribution {
    * @protected
    * @ignore
    */
-  _qEstimateWalk (p, start) {
-    if (p === 0) {
-      return this.s[0].value
-    }
-    if (p === 1) {
-      return this.s[1].value
-    }
-    let k = start
-    if (this.cdf(k) >= p) {
-      while (this.cdf(k - 1) >= p) {
-        k--
-      }
-    } else {
-      while (this.cdf(k) < p) {
-        k++
-      }
-    }
+  _walkDown (p, k) {
+    while (this.cdf(k - 1) >= p) k--
     return k
+  }
+
+  _walkUp (p, k) {
+    while (this.cdf(k) < p) k++
+    return k
+  }
+
+  _qEstimateWalk (p, start) {
+    if (p === 0) return this.s[0].value
+    if (p === 1) return this.s[1].value
+    return this.cdf(start) >= p
+      ? this._walkDown(p, start)
+      : this._walkUp(p, start)
   }
 
   /**
@@ -274,13 +267,17 @@ class Distribution {
    * @protected
    * @ignore
    */
+  _openBoundaryDelta (sideIdx) {
+    return this.s[sideIdx].closed ? 0 : 1
+  }
+
   _qEstimateRoot (p) {
     let [a, b] = this._qInitialGuess(p)
     const min = this.s[0].value
     const max = this.s[1].value
     // deltaA/deltaB shrink toward zero to approach open boundaries without landing on them.
-    let deltaA = this.s[0].closed ? 0 : 1
-    let deltaB = this.s[1].closed ? 0 : 1
+    let deltaA = this._openBoundaryDelta(0)
+    let deltaB = this._openBoundaryDelta(1)
     let fa = this.cdf(a) - p
     let fb = this.cdf(b) - p
     // Expand bracket by golden-ratio steps until sign change (immediately exits for bounded support).
@@ -323,34 +320,33 @@ class Distribution {
    * @private
    * @ignore
    */
+  _momentBounds (tailP, round) {
+    return [
+      Number.isFinite(this.s[0].value) ? this.s[0].value : round(this.q(tailP)),
+      Number.isFinite(this.s[1].value) ? this.s[1].value : round(this.q(1 - tailP))
+    ]
+  }
+
   _numericalRawMoment (n) {
     // 1e-12 tail cut: tighter than 1e-7 because x^4 tails contribute ~x^3·φ(x) which
     // is still ~1e-4 at z≈5.2 (the 1e-7 quantile) — far too large for kurtosis precision.
     const TAIL_P = 1e-12
     if (this._type === 'discrete') {
-      const lo = Number.isFinite(this.s[0].value) ? this.s[0].value : Math.round(this.q(TAIL_P))
-      const hi = Number.isFinite(this.s[1].value) ? this.s[1].value : Math.round(this.q(1 - TAIL_P))
+      const [lo, hi] = this._momentBounds(TAIL_P, Math.round)
       // Heavy-tailed discrete distributions (e.g. Zeta, YuleSimon) can have a 1-1e-12 quantile
       // in the billions, making the loop effectively hang. Return NaN — the analytical override
       // should handle these. 1e6 terms covers all practical well-behaved distributions.
-      if (!Number.isFinite(lo) || !Number.isFinite(hi) || hi - lo > 1e6) {
-        return NaN
-      }
+      const overflows = !Number.isFinite(lo) || !Number.isFinite(hi) || hi - lo > 1e6
+      if (overflows) return NaN
       const terms = []
-      for (let k = lo; k <= hi; k++) {
-        terms.push(Math.pow(k, n) * this.pdf(k))
-      }
+      for (let k = lo; k <= hi; k++) terms.push(Math.pow(k, n) * this.pdf(k))
       return terms.length > 0 ? neumaier(terms) : NaN
-    } else {
-      const lo = Number.isFinite(this.s[0].value) ? this.s[0].value : this.q(TAIL_P)
-      const hi = Number.isFinite(this.s[1].value) ? this.s[1].value : this.q(1 - TAIL_P)
-      // Point-mass support (lo === hi): tanhSinh returns 0 (halfLen = 0), but E[X^n] = lo^n
-      // for a unit point mass. Handles Degenerate and any other single-point continuous type.
-      if (lo === hi) {
-        return Math.pow(lo, n)
-      }
-      return tanhSinh(x => Math.pow(x, n) * this.pdf(x), lo, hi)
     }
+    const [lo, hi] = this._momentBounds(TAIL_P, Number)
+    // Point-mass support (lo === hi): tanhSinh returns 0 (halfLen = 0), but E[X^n] = lo^n
+    // for a unit point mass. Handles Degenerate and any other single-point continuous type.
+    if (lo === hi) return Math.pow(lo, n)
+    return tanhSinh(x => Math.pow(x, n) * this.pdf(x), lo, hi)
   }
 
   /**
@@ -556,28 +552,27 @@ class Distribution {
    * // => 0.07407407407407407
    *
    */
+  _belowSupport (z) {
+    return this.s[0].closed ? z < this.s[0].value : z <= this.s[0].value
+  }
+
+  _aboveSupport (z) {
+    return this.s[1].closed ? z > this.s[1].value : z >= this.s[1].value
+  }
+
+  _atClosedBoundary (z) {
+    return (this.s[0].closed && z === this.s[0].value) || (this.s[1].closed && z === this.s[1].value)
+  }
+
   pdf (x) {
-    // Convert to integer if discrete
     const z = this._toInt(x)
-
-    // Check against lower support
-    if ((this.s[0].closed && z < this.s[0].value) || (!this.s[0].closed && z <= this.s[0].value)) {
-      return 0
-    }
-
-    // Check against upper support
-    if ((this.s[1].closed && z > this.s[1].value) || (!this.s[1].closed && z >= this.s[1].value)) {
-      return 0
-    }
-
-    // Return value
+    if (this._belowSupport(z)) return 0
+    if (this._aboveSupport(z)) return 0
     const v = this._pdf(z)
     // Formula divergences (e.g. log-barrier 0/0) at an exact closed boundary produce NaN even
     // though the point is in the support. The limit is 0 by continuity, so return 0 instead of
     // propagating NaN into tanhSinh and corrupting numerical moments.
-    if (Number.isNaN(v) && ((this.s[0].closed && z === this.s[0].value) || (this.s[1].closed && z === this.s[1].value))) {
-      return 0
-    }
+    if (Number.isNaN(v) && this._atClosedBoundary(z)) return 0
     return v
   }
 
@@ -604,20 +599,9 @@ class Distribution {
    *
    */
   cdf (x) {
-    // Convert to integer if discrete
     const z = this._toInt(x)
-
-    // Check against lower support
-    if ((this.s[0].closed && z < this.s[0].value) || (!this.s[0].closed && z <= this.s[0].value)) {
-      return 0
-    }
-
-    // Check against upper support
-    if (z >= this.s[1].value) {
-      return 1
-    }
-
-    // Return value
+    if (this._belowSupport(z)) return 0
+    if (z >= this.s[1].value) return 1
     return this._cdf(z)
   }
 
@@ -1029,6 +1013,11 @@ class Distribution {
    * @param {number[]} data Array of observations to fit.
    * @returns {Distribution} A new instance of the same distribution with MLE parameters.
    */
+  static _isExactFit (Cls) {
+    const d = Object.getOwnPropertyDescriptor(Cls, '_fitInitIsExact')
+    return d && d.get && d.get.call(Cls)
+  }
+
   static fit (data) {
     const Cls = this
     const x0 = Cls._fitInit(data)
@@ -1038,8 +1027,7 @@ class Distribution {
     }
     // Closed-form MLE fast path: only when the OWN class declares _fitInitIsExact, so an
     // approximate _fitInit on a subclass cannot inherit the shortcut.
-    const exact = Object.getOwnPropertyDescriptor(Cls, '_fitInitIsExact')
-    if (exact && exact.get && exact.get.call(Cls)) {
+    if (Distribution._isExactFit(Cls)) {
       return new Cls(...x0)
     }
     const objective = params => {
