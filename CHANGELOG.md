@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Code Health of `src/dist/doubly-noncentral-beta.js` improved from 7.89 → 10.0 by extracting the r-direction and s-direction summation loops into named private helpers (`_pdfRForward`, `_pdfRBackward`, `_pdfSumOverS`, `_cdfRForward`, `_cdfRBackward`, `_cdfSumOverS`), eliminating deep nesting, bumpy road, large method, and complex method smells.
 - `Process.path(n)` now advances the PRNG by n steps on each call (matching `Distribution.sample()` behaviour) instead of restoring the PRNG stream afterward. Consecutive calls return independent realizations; seeding before a call still guarantees reproducibility. Code that called `path()` twice without re-seeding and expected identical results will now receive two distinct paths. No deprecation cycle was applied: `ran.process` was introduced in the same release cycle and repeated idempotent `path()` calls without re-seeding have no legitimate use case (#869).
 - `Distribution.test()` now uses the Anderson-Darling test (Marsaglia & Marsaglia 2004 asymptotic series + finite-n correction, α = 0.01) instead of Kolmogorov-Smirnov for continuous distributions. The `passed` field is unaffected. The `statistics` field now carries the A² statistic (typical scale 0.2–5) rather than the KS D-statistic (scale 0–1); code that reads the raw value will silently see a different number (#816).
 
