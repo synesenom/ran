@@ -1,4 +1,4 @@
-import MCMC from './mcmc'
+import MCMC from './_mcmc'
 import { float } from '../core'
 import { Normal } from '../dist'
 
