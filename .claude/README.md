@@ -89,6 +89,7 @@ Standalone skills that do one thing. Can be called directly or composed by orche
 | [`/next`](skills/next/SKILL.md) | Pick the best next issue from the backlog | Milestone _(optional)_ |
 | [`/suggest`](skills/suggest/SKILL.md) | Suggest and create future issues from codebase analysis | _(no args)_ |
 | [`/compound`](skills/compound/SKILL.md) | Document a solved problem for future learning | Description _(optional)_ |
+| [`/fix-smells`](skills/fix-smells/SKILL.md) | Eliminate all code smells in a file using CodeScene's Code Health analysis | File path |
 
 ## Typical Workflows
 
@@ -264,6 +265,8 @@ Launched **in parallel** by [`/suggest`](skills/suggest/SKILL.md). Each scout sc
 /next ───────→ (no agents, fetches GitHub issues via gh CLI)
 
 /resolve ────→ (no agents, fetches GitHub issue via mcp__github__issue_read + codebase Glob/Grep)
+
+/fix-smells ─→ (no agents; uses mcp__codescene__code_health_score + mcp__codescene__code_health_review directly)
 
 /suggest ───→ suggest-distributions ┐
               → suggest-methods      │
