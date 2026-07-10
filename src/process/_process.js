@@ -27,8 +27,6 @@ export default class Process {
     this.c = {}
   }
 
-  // ─── PUBLIC INSTANCE ──────────────────────────────────────────────────────
-
   /**
    * Seeds the internal PRNG for reproducible paths.
    *
@@ -168,8 +166,6 @@ export default class Process {
     return this.x
   }
 
-  // ─── PUBLIC STATIC ────────────────────────────────────────────────────────
-
   /**
    * Validates a set of parameters using a list of constraints.
    *
@@ -223,8 +219,6 @@ export default class Process {
       throw Error(`Invalid parameters. Parameters must satisfy the following constraints: ${constraints.join(', ')}. Got: ${Object.entries(params).map(([name, value]) => `${name} = ${value}`).join(', ')}`)
     }
   }
-
-  // ─── PROTECTED INSTANCE ───────────────────────────────────────────────────
 
   /**
    * Generates the next state. Must be implemented by subclasses.

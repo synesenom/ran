@@ -28,8 +28,6 @@ export default class MCMC {
     this._initAccumulators()
   }
 
-  // ─── PUBLIC INSTANCE ──────────────────────────────────────────────────────
-
   /**
    * Returns the current state of the sampler. The return value can be passed to a sampler of the
    * same type to resume from this position.
@@ -173,8 +171,6 @@ export default class MCMC {
     return samples
   }
 
-  // ─── PROTECTED INSTANCE ───────────────────────────────────────────────────
-
   /**
    * Returns the subclass's internal variables. Must be overridden.
    *
@@ -215,8 +211,6 @@ export default class MCMC {
   _adjust () {
     throw Error('MCMC._adjust() is not implemented')
   }
-
-  // ─── PRIVATE INSTANCE ─────────────────────────────────────────────────────
 
   _initAccumulators () {
     this._accepted = 0
