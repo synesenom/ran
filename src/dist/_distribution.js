@@ -38,316 +38,7 @@ class Distribution {
     this.c = {}
   }
 
-  static _parseConstraintTokens (constraint) {
-    let tokens = constraint.split(/ (<=|>=|!=) /)
-    if (tokens.length === 1) {
-      tokens = constraint.split(/ ([=<>]) /)
-    }
-    return tokens
-  }
-
-  static _resolveToken (token, params) {
-    return Object.prototype.hasOwnProperty.call(params, token) ? params[token] : parseFloat(token)
-  }
-
-  static _violatesConstraint (constraint, params) {
-    const tokens = Distribution._parseConstraintTokens(constraint)
-    const a = Distribution._resolveToken(tokens[0], params)
-    const b = Distribution._resolveToken(tokens[2], params)
-    switch (tokens[1]) {
-      case '<': return a >= b
-      case '<=': return a > b
-      case '>': return a <= b
-      case '>=': return a < b
-      case '!=': return a === b
-      default: return false
-    }
-  }
-
-  /**
-   * Validates a set of parameters using a list of constraints.
-   *
-   * @method validate
-   * @memberof Distribution
-   * @param {Object} params Object containing the parameters to validate.
-   * @param {string[]} constraints Array of strings defining the parameter constraints.
-   * @throws {Error} If any parameter is undefined, null, or NaN, or doesn't satisfy the constraints.
-   * @ignore
-   */
-  static validate (params, constraints) {
-    // See decisions/0004-validate-rejects-undefined-and-nan.md, solutions/correctness/2026-05-17-0847-validate-rejects-missing-params.md — comparison operators against undefined/null/NaN return false, so missing params would otherwise pass silently
-    const missing = Object.entries(params)
-      .filter(([, v]) => v === undefined || v === null || Number.isNaN(v))
-      .map(([name]) => name)
-    if (missing.length > 0) {
-      throw Error(`Invalid parameters. Required parameters missing or not a number: ${missing.join(', ')}.`)
-    }
-
-    const errors = constraints.filter(c => Distribution._violatesConstraint(c, params))
-    if (errors.length > 0) {
-      throw Error(`Invalid parameters. Parameters must satisfy the following constraints: ${constraints.join(', ')}. Got: ${Object.entries(params).map(([name, value]) => `${name} = ${value}`).join(', ')}`)
-    }
-  }
-
-  /**
-   * Rounds a value to an integer if the distribution is of discrete type.
-   *
-   * @method _toInt
-   * @memberof Distribution
-   * @param {number} x Value to round if necessary.
-   * @returns {number} The rounded or left intact value.
-   * @private
-   */
-  _toInt (x) {
-    return this._type === 'discrete' ? Math.round(x) : x
-  }
-
-  /**
-   * Generates a single random variate.
-   *
-   * @method _generator
-   * @memberof ran.dist.Distribution
-   * @returns {number} A single random variate.
-   * @protected
-   * @ignore
-   */
-  _generator () {
-    throw Error('Distribution._generator() is not implemented')
-  }
-
-  /**
-   * The probability distribution or probability mass function.
-   *
-   * @method _pdf
-   * @memberof ran.dist.Distribution
-   * @param {number} x Value to evaluate the distribution/mass function at.
-   * @returns {number} The probability density or probability at the specified value.
-   * @protected
-   * @ignore
-   */
-  _pdf (x) {
-    throw Error('Distribution._pdf() is not implemented')
-  }
-
-  /**
-   * The probability distribution function.
-   *
-   * @method _cdf
-   * @memberof ran.dist.Distribution
-   * @param {number} x Value to evaluate the probability distribution at.
-   * @returns {number} The value of the probability function at the specified value.
-   * @protected
-   * @ignore
-   */
-  _cdf (x) {
-    throw Error('Distribution._cdf() is not implemented')
-  }
-
-  /**
-   * Estimates the quantile function using a look-up table.
-   *
-   * @method _qEstimateTable
-   * @memberof ran.dist.Distribution
-   * @param {number} p Probability to find value for.
-   * @returns {number} The lower boundary of the interval that satisfies F(x) = p if found, NaN otherwise.
-   * @protected
-   * @ignore
-   */
-  _qTableBracket (p) {
-    let k1 = 0
-    let k2 = 0
-    let delta = 1
-    for (let i = 0; i < MAX_ITER; i++) {
-      if (this.cdf(k2) >= p) break
-      k1 = k2
-      k2 += delta
-      delta = Math.ceil(1.618 * delta)
-    }
-    return [k1, k2]
-  }
-
-  _qTableBisect (p, k1, k2) {
-    for (let i = 0; i < MAX_ITER; i++) {
-      if (k2 - k1 <= 1) return k2
-      const k = Math.floor((k1 + k2) / 2)
-      if (p > this.cdf(k)) {
-        k1 = k
-      } else {
-        k2 = k
-      }
-    }
-    return NaN
-  }
-
-  _qEstimateTable (p) {
-    const [k1, k2] = this._qTableBracket(p)
-    return this._qTableBisect(p, k1, k2)
-  }
-
-  // _qEstimateTable is broken for negative-integer support (hardwired start at k=0); use this instead.
-  // See solutions/algorithm/2026-05-20-0647-q-estimate-walk-infinite-support-discrete.md
-  /**
-   * Estimates the quantile function using a deterministic linear walk from a caller-supplied start.
-   * When p=0 returns the lower support bound; when p=1 returns the upper support bound.
-   * For 0 < p < 1, walks toward the infimum quantile until cdf(k) >= p and cdf(k-1) < p.
-   *
-   * @method _qEstimateWalk
-   * @memberof ran.dist.Distribution
-   * @param {number} p Probability to find value for.
-   * @param {number} start Integer to start the walk from.
-   * @returns {number} The smallest integer k such that F(k) >= p and F(k-1) < p.
-   * @protected
-   * @ignore
-   */
-  _walkDown (p, k) {
-    while (this.cdf(k - 1) >= p) k--
-    return k
-  }
-
-  _walkUp (p, k) {
-    while (this.cdf(k) < p) k++
-    return k
-  }
-
-  _qEstimateWalk (p, start) {
-    if (p === 0) return this.s[0].value
-    if (p === 1) return this.s[1].value
-    return this.cdf(start) >= p
-      ? this._walkDown(p, start)
-      : this._walkUp(p, start)
-  }
-
-  /**
-   * Returns a starting bracket [a, b] for quantile root-finding. For bounded support the full
-   * support range [lo, hi] is returned — CDF(lo)=0 and CDF(hi)=1 guarantee a sign change for
-   * any 0<p<1, so no further expansion is needed. For unbounded/semi-bounded support a
-   * support-derived starting point is returned; _qEstimateRoot will expand it until sign change.
-   *
-   * @method _qInitialGuess
-   * @memberof ran.dist.Distribution
-   * @param {number} p Probability to find quantile for (unused in base class; exposed for overrides).
-   * @returns {number[]} Starting bracket [a, b] with a < b.
-   * @protected
-   * @ignore
-   */
-  _qInitialGuess (p) {
-    // Bounded support: CDF(lo)=0 and CDF(hi)=1 for any continuous distribution, so [lo, hi]
-    // is always a valid bracket — no expansion needed in _qEstimateRoot.
-    if (Number.isFinite(this.s[0].value) && Number.isFinite(this.s[1].value)) {
-      return [this.s[0].value, this.s[1].value]
-    }
-    // Unbounded/semi-bounded: provide a compact starting point near the support boundary.
-    // _qEstimateRoot will expand until a sign change is found.
-    const delta = ((Number.isFinite(this.s[1].value) ? this.s[1].value : 10) -
-      (Number.isFinite(this.s[0].value) ? this.s[0].value : -10)) / 2
-    let a = this.r.next()
-    if (this.s[0].closed) {
-      a = this.s[0].value + Number.EPSILON
-    } else if (Number.isFinite(this.s[0].value)) {
-      a = this.s[0].value + delta * this.r.next()
-    }
-    // Math.max(..., Number.EPSILON) guards against r.next()=0 (probability 2^-32), which would
-    // collapse b=a, make expansion=0, and cause the loop in _qEstimateRoot to break immediately.
-    let b = a + Math.max(this.r.next(), Number.EPSILON)
-    if (Number.isFinite(this.s[1].value)) {
-      b = this.s[1].value - delta * this.r.next()
-    }
-    return [a, b]
-  }
-
-  /**
-   * Estimates the quantile function by solving F(x) = p using Chandrupatla's method.
-   * Expands the initial bracket from _qInitialGuess until a sign change is found, then
-   * solves with Chandrupatla.
-   *
-   * @method _qEstimateRoot
-   * @memberof ran.dist.Distribution
-   * @param {number} p Probability to find value for.
-   * @returns {number} The value where the probability coincides with the specified value if found, NaN otherwise.
-   * @protected
-   * @ignore
-   */
-  _openBoundaryDelta (sideIdx) {
-    return this.s[sideIdx].closed ? 0 : 1
-  }
-
-  _qEstimateRoot (p) {
-    let [a, b] = this._qInitialGuess(p)
-    const min = this.s[0].value
-    const max = this.s[1].value
-    // deltaA/deltaB shrink toward zero to approach open boundaries without landing on them.
-    let deltaA = this._openBoundaryDelta(0)
-    let deltaB = this._openBoundaryDelta(1)
-    let fa = this.cdf(a) - p
-    let fb = this.cdf(b) - p
-    // Expand bracket by golden-ratio steps until sign change (immediately exits for bounded support).
-    // Only expand a side if it would actually move: when a side is clamped at its limit, switch to
-    // the other side to avoid an infinite no-progress loop.
-    for (let k = 0; k < MAX_ITER; k++) {
-      if (fa * fb < 0) break
-      const expansion = 1.618 * (b - a)
-      const newA = Math.max(a - expansion, min + deltaA)
-      const newB = Math.min(b + expansion, max - deltaB)
-      if (Math.abs(fa) <= Math.abs(fb) && newA !== a) {
-        a = newA
-        deltaA /= 1.618
-        fa = this.cdf(a) - p
-      } else if (newB !== b) {
-        b = newB
-        deltaB /= 1.618
-        fb = this.cdf(b) - p
-      } else {
-        break
-      }
-    }
-    if (fa * fb >= 0) return NaN
-    return Math.min(Math.max(
-      chandrupatla(t => this.cdf(t) - p, a, b), min), max
-    )
-  }
-
-  /**
-   * Computes a raw moment E[X^n] numerically. Continuous distributions use tanh-sinh
-   * quadrature; discrete distributions use compensated summation. Infinite support bounds
-   * are truncated at the 1e-12 / (1 - 1e-12) quantile. Distributions with undefined or
-   * divergent moments must override the public moment methods to return NaN / Infinity
-   * directly, because quantile truncation makes divergent integrals appear finite.
-   *
-   * @method _numericalRawMoment
-   * @memberof ran.dist.Distribution
-   * @param {number} n Moment order.
-   * @returns {number} E[X^n].
-   * @private
-   * @ignore
-   */
-  _momentBounds (tailP, round) {
-    return [
-      Number.isFinite(this.s[0].value) ? this.s[0].value : round(this.q(tailP)),
-      Number.isFinite(this.s[1].value) ? this.s[1].value : round(this.q(1 - tailP))
-    ]
-  }
-
-  _numericalRawMoment (n) {
-    // 1e-12 tail cut: tighter than 1e-7 because x^4 tails contribute ~x^3·φ(x) which
-    // is still ~1e-4 at z≈5.2 (the 1e-7 quantile) — far too large for kurtosis precision.
-    const TAIL_P = 1e-12
-    if (this._type === 'discrete') {
-      const [lo, hi] = this._momentBounds(TAIL_P, Math.round)
-      // Heavy-tailed discrete distributions (e.g. Zeta, YuleSimon) can have a 1-1e-12 quantile
-      // in the billions, making the loop effectively hang. Return NaN — the analytical override
-      // should handle these. 1e6 terms covers all practical well-behaved distributions.
-      const overflows = !Number.isFinite(lo) || !Number.isFinite(hi) || hi - lo > 1e6
-      if (overflows) return NaN
-      const terms = []
-      for (let k = lo; k <= hi; k++) terms.push(Math.pow(k, n) * this.pdf(k))
-      return terms.length > 0 ? neumaier(terms) : NaN
-    }
-    const [lo, hi] = this._momentBounds(TAIL_P, Number)
-    // Point-mass support (lo === hi): tanhSinh returns 0 (halfLen = 0), but E[X^n] = lo^n
-    // for a unit point mass. Handles Degenerate and any other single-point continuous type.
-    if (lo === hi) return Math.pow(lo, n)
-    return tanhSinh(x => Math.pow(x, n) * this.pdf(x), lo, hi)
-  }
+  // ─── PUBLIC INSTANCE ──────────────────────────────────────────────────────
 
   /**
    * Returns the type of the distribution (either discrete or continuous).
@@ -464,44 +155,6 @@ class Distribution {
   }
 
   /**
-   * Reconstructs a distribution instance from a snapshot created by save(). No constructor call is needed.
-   *
-   * @method load
-   * @memberof ran.dist.Distribution
-   * @param {Object} state The state to load, as returned by save().
-   * @returns {Distribution} New distribution instance with the restored state.
-   * @example
-   *
-   * let pareto1 = new ran.dist.Pareto(1, 2).seed('test')
-   * let sample1 = pareto1.sample(2)
-   * let state = pareto1.save()
-   *
-   * let pareto2 = ran.dist.Pareto.load(state)
-   * let sample2 = pareto2.sample(3)
-   * // => [ 1.1315154468682591,
-   * //      5.44269493220745,
-   * //      1.2587482868229616 ]
-   *
-   */
-  // decisions/0019-distribution-load-static-factory.md — static factory bypasses the constructor so the instance is fully initialized before any method is called
-  static load (state) {
-    const instance = Object.create(this.prototype)
-    instance._type = state.type
-    instance.k = state.k
-    instance.p = state.params
-    instance.s = state.support
-    instance.c = state.constants
-    instance.r = new Xoshiro128p()
-    instance.r.load(state.prngState)
-    instance._afterLoad()
-    return instance
-  }
-
-  // Hook for subclasses that store non-serializable state (AliasTable, lazy look-up tables, etc.)
-  // beyond the four standard fields. Override to rebuild those structures from this.p/this.c.
-  _afterLoad () {}
-
-  /**
    * @overload
    * @returns {number}
    */
@@ -552,18 +205,6 @@ class Distribution {
    * // => 0.07407407407407407
    *
    */
-  _belowSupport (z) {
-    return this.s[0].closed ? z < this.s[0].value : z <= this.s[0].value
-  }
-
-  _aboveSupport (z) {
-    return this.s[1].closed ? z > this.s[1].value : z >= this.s[1].value
-  }
-
-  _atClosedBoundary (z) {
-    return (this.s[0].closed && z === this.s[0].value) || (this.s[1].closed && z === this.s[1].value)
-  }
-
   pdf (x) {
     const z = this._toInt(x)
     if (this._belowSupport(z)) return 0
@@ -933,6 +574,220 @@ class Distribution {
     return (m4 - 4 * m1 * m3 + 6 * m1 * m1 * m2 - 3 * Math.pow(m1, 4)) / (v * v) - 3
   }
 
+  // ─── PUBLIC STATIC ────────────────────────────────────────────────────────
+
+  /**
+   * Validates a set of parameters using a list of constraints.
+   *
+   * @method validate
+   * @memberof Distribution
+   * @param {Object} params Object containing the parameters to validate.
+   * @param {string[]} constraints Array of strings defining the parameter constraints.
+   * @throws {Error} If any parameter is undefined, null, or NaN, or doesn't satisfy the constraints.
+   * @ignore
+   */
+  static validate (params, constraints) {
+    // See decisions/0004-validate-rejects-undefined-and-nan.md, solutions/correctness/2026-05-17-0847-validate-rejects-missing-params.md — comparison operators against undefined/null/NaN return false, so missing params would otherwise pass silently
+    const missing = Object.entries(params)
+      .filter(([, v]) => v === undefined || v === null || Number.isNaN(v))
+      .map(([name]) => name)
+    if (missing.length > 0) {
+      throw Error(`Invalid parameters. Required parameters missing or not a number: ${missing.join(', ')}.`)
+    }
+
+    const errors = constraints.filter(c => Distribution._violatesConstraint(c, params))
+    if (errors.length > 0) {
+      throw Error(`Invalid parameters. Parameters must satisfy the following constraints: ${constraints.join(', ')}. Got: ${Object.entries(params).map(([name, value]) => `${name} = ${value}`).join(', ')}`)
+    }
+  }
+
+  /**
+   * Reconstructs a distribution instance from a snapshot created by save(). No constructor call is needed.
+   *
+   * @method load
+   * @memberof ran.dist.Distribution
+   * @param {Object} state The state to load, as returned by save().
+   * @returns {Distribution} New distribution instance with the restored state.
+   * @example
+   *
+   * let pareto1 = new ran.dist.Pareto(1, 2).seed('test')
+   * let sample1 = pareto1.sample(2)
+   * let state = pareto1.save()
+   *
+   * let pareto2 = ran.dist.Pareto.load(state)
+   * let sample2 = pareto2.sample(3)
+   * // => [ 1.1315154468682591,
+   * //      5.44269493220745,
+   * //      1.2587482868229616 ]
+   *
+   */
+  // decisions/0019-distribution-load-static-factory.md — static factory bypasses the constructor so the instance is fully initialized before any method is called
+  static load (state) {
+    const instance = Object.create(this.prototype)
+    instance._type = state.type
+    instance.k = state.k
+    instance.p = state.params
+    instance.s = state.support
+    instance.c = state.constants
+    instance.r = new Xoshiro128p()
+    instance.r.load(state.prngState)
+    instance._afterLoad()
+    return instance
+  }
+
+  /**
+   * Estimates the distribution parameters from data using maximum likelihood estimation (MLE).
+   * Distributions with a closed-form MLE return it directly; all others maximise the
+   * log-likelihood lnL(data) with Powell's derivative-free conjugate-direction optimizer.
+   *
+   * @method fit
+   * @memberof ran.dist.Distribution
+   * @param {number[]} data Array of observations to fit.
+   * @returns {Distribution} A new instance of the same distribution with MLE parameters.
+   */
+  static fit (data) {
+    const Cls = this
+    const x0 = Cls._fitInit(data)
+    // k=0: the distribution is fully determined with no free parameters; every instance is the MLE
+    if (x0.length === 0) {
+      return new Cls()
+    }
+    // Closed-form MLE fast path: only when the OWN class declares _fitInitIsExact, so an
+    // approximate _fitInit on a subclass cannot inherit the shortcut.
+    if (Distribution._isExactFit(Cls)) {
+      return new Cls(...x0)
+    }
+    const objective = params => {
+      try {
+        const inst = new Cls(...params)
+        // Penalised negative log-likelihood: the base penalty is 0 (pure MLE); Beta-family
+        // distributions override _fitPenalty with a Jeffreys-like log-barrier to prevent the
+        // optimizer from sitting near shape-parameter singularities where lnL is large-but-finite.
+        // See decisions/0017-beta-fit-penalty.md.
+        const v = -inst.lnL(data) + Cls._fitPenalty(inst)
+        // Reject any non-finite objective: NaN (neumaier(-Infinity,...)), +Infinity (zero-density
+        // params), and -Infinity (an unbounded-likelihood singularity, e.g. Beta-type density as a
+        // shape parameter → 0). Without the last guard a strong optimizer walks into the singularity
+        // and returns a degenerate fit that Nelder-Mead was simply too weak to find.
+        return Number.isFinite(v) ? v : Infinity
+      } catch (_) {
+        return Infinity
+      }
+    }
+    const best = powell(objective, Distribution._feasibleStart(objective, x0))
+    return new Cls(...best)
+  }
+
+  // ─── PROTECTED INSTANCE ───────────────────────────────────────────────────
+
+  /**
+   * Generates a single random variate.
+   *
+   * @method _generator
+   * @memberof ran.dist.Distribution
+   * @returns {number} A single random variate.
+   * @protected
+   * @ignore
+   */
+  _generator () {
+    throw Error('Distribution._generator() is not implemented')
+  }
+
+  /**
+   * The probability distribution or probability mass function.
+   *
+   * @method _pdf
+   * @memberof ran.dist.Distribution
+   * @param {number} x Value to evaluate the distribution/mass function at.
+   * @returns {number} The probability density or probability at the specified value.
+   * @protected
+   * @ignore
+   */
+  _pdf (x) {
+    throw Error('Distribution._pdf() is not implemented')
+  }
+
+  /**
+   * The probability distribution function.
+   *
+   * @method _cdf
+   * @memberof ran.dist.Distribution
+   * @param {number} x Value to evaluate the probability distribution at.
+   * @returns {number} The value of the probability function at the specified value.
+   * @protected
+   * @ignore
+   */
+  _cdf (x) {
+    throw Error('Distribution._cdf() is not implemented')
+  }
+
+  /**
+   * Returns a starting bracket [a, b] for quantile root-finding. For bounded support the full
+   * support range [lo, hi] is returned — CDF(lo)=0 and CDF(hi)=1 guarantee a sign change for
+   * any 0<p<1, so no further expansion is needed. For unbounded/semi-bounded support a
+   * support-derived starting point is returned; _qEstimateRoot will expand it until sign change.
+   *
+   * @method _qInitialGuess
+   * @memberof ran.dist.Distribution
+   * @param {number} p Probability to find quantile for (unused in base class; exposed for overrides).
+   * @returns {number[]} Starting bracket [a, b] with a < b.
+   * @protected
+   * @ignore
+   */
+  _qInitialGuess (p) {
+    // Bounded support: CDF(lo)=0 and CDF(hi)=1 for any continuous distribution, so [lo, hi]
+    // is always a valid bracket — no expansion needed in _qEstimateRoot.
+    if (Number.isFinite(this.s[0].value) && Number.isFinite(this.s[1].value)) {
+      return [this.s[0].value, this.s[1].value]
+    }
+    // Unbounded/semi-bounded: provide a compact starting point near the support boundary.
+    // _qEstimateRoot will expand until a sign change is found.
+    const delta = ((Number.isFinite(this.s[1].value) ? this.s[1].value : 10) -
+      (Number.isFinite(this.s[0].value) ? this.s[0].value : -10)) / 2
+    let a = this.r.next()
+    if (this.s[0].closed) {
+      a = this.s[0].value + Number.EPSILON
+    } else if (Number.isFinite(this.s[0].value)) {
+      a = this.s[0].value + delta * this.r.next()
+    }
+    // Math.max(..., Number.EPSILON) guards against r.next()=0 (probability 2^-32), which would
+    // collapse b=a, make expansion=0, and cause the loop in _qEstimateRoot to break immediately.
+    let b = a + Math.max(this.r.next(), Number.EPSILON)
+    if (Number.isFinite(this.s[1].value)) {
+      b = this.s[1].value - delta * this.r.next()
+    }
+    return [a, b]
+  }
+
+  // _qEstimateTable is broken for negative-integer support (hardwired start at k=0); use this instead.
+  // See solutions/algorithm/2026-05-20-0647-q-estimate-walk-infinite-support-discrete.md
+  /**
+   * Estimates the quantile function using a deterministic linear walk from a caller-supplied start.
+   * When p=0 returns the lower support bound; when p=1 returns the upper support bound.
+   * For 0 < p < 1, walks toward the infimum quantile until cdf(k) >= p and cdf(k-1) < p.
+   *
+   * @method _qEstimateWalk
+   * @memberof ran.dist.Distribution
+   * @param {number} p Probability to find value for.
+   * @param {number} start Integer to start the walk from.
+   * @returns {number} The smallest integer k such that F(k) >= p and F(k-1) < p.
+   * @protected
+   * @ignore
+   */
+  _qEstimateWalk (p, start) {
+    if (p === 0) return this.s[0].value
+    if (p === 1) return this.s[1].value
+    return this.cdf(start) >= p
+      ? this._walkDown(p, start)
+      : this._walkUp(p, start)
+  }
+
+  // Hook for subclasses that store non-serializable state (AliasTable, lazy look-up tables, etc.)
+  // beyond the four standard fields. Override to rebuild those structures from this.p/this.c.
+  _afterLoad () {}
+
+  // ─── PROTECTED STATIC ─────────────────────────────────────────────────────
+
   /**
    * Returns the initial parameter vector for the MLE optimizer. The base-class default takes
    * the constructor arity from `this.length` and draws random positive values in (0, 5) until
@@ -1003,52 +858,209 @@ class Distribution {
     return 0
   }
 
+  // ─── PRIVATE INSTANCE ─────────────────────────────────────────────────────
+
   /**
-   * Estimates the distribution parameters from data using maximum likelihood estimation (MLE).
-   * Distributions with a closed-form MLE return it directly; all others maximise the
-   * log-likelihood lnL(data) with Powell's derivative-free conjugate-direction optimizer.
+   * Rounds a value to an integer if the distribution is of discrete type.
    *
-   * @method fit
-   * @memberof ran.dist.Distribution
-   * @param {number[]} data Array of observations to fit.
-   * @returns {Distribution} A new instance of the same distribution with MLE parameters.
+   * @method _toInt
+   * @memberof Distribution
+   * @param {number} x Value to round if necessary.
+   * @returns {number} The rounded or left intact value.
+   * @private
    */
+  _toInt (x) {
+    return this._type === 'discrete' ? Math.round(x) : x
+  }
+
+  _belowSupport (z) {
+    return this.s[0].closed ? z < this.s[0].value : z <= this.s[0].value
+  }
+
+  _aboveSupport (z) {
+    return this.s[1].closed ? z > this.s[1].value : z >= this.s[1].value
+  }
+
+  _atClosedBoundary (z) {
+    return (this.s[0].closed && z === this.s[0].value) || (this.s[1].closed && z === this.s[1].value)
+  }
+
+  _qTableBracket (p) {
+    let k1 = 0
+    let k2 = 0
+    let delta = 1
+    for (let i = 0; i < MAX_ITER; i++) {
+      if (this.cdf(k2) >= p) break
+      k1 = k2
+      k2 += delta
+      delta = Math.ceil(1.618 * delta)
+    }
+    return [k1, k2]
+  }
+
+  _qTableBisect (p, k1, k2) {
+    for (let i = 0; i < MAX_ITER; i++) {
+      if (k2 - k1 <= 1) return k2
+      const k = Math.floor((k1 + k2) / 2)
+      if (p > this.cdf(k)) {
+        k1 = k
+      } else {
+        k2 = k
+      }
+    }
+    return NaN
+  }
+
+  /**
+   * Estimates the quantile function using a look-up table.
+   *
+   * @method _qEstimateTable
+   * @memberof ran.dist.Distribution
+   * @param {number} p Probability to find value for.
+   * @returns {number} The lower boundary of the interval that satisfies F(x) = p if found, NaN otherwise.
+   * @private
+   * @ignore
+   */
+  _qEstimateTable (p) {
+    const [k1, k2] = this._qTableBracket(p)
+    return this._qTableBisect(p, k1, k2)
+  }
+
+  _walkDown (p, k) {
+    while (this.cdf(k - 1) >= p) k--
+    return k
+  }
+
+  _walkUp (p, k) {
+    while (this.cdf(k) < p) k++
+    return k
+  }
+
+  _openBoundaryDelta (sideIdx) {
+    return this.s[sideIdx].closed ? 0 : 1
+  }
+
+  /**
+   * Estimates the quantile function by solving F(x) = p using Chandrupatla's method.
+   * Expands the initial bracket from _qInitialGuess until a sign change is found, then
+   * solves with Chandrupatla.
+   *
+   * @method _qEstimateRoot
+   * @memberof ran.dist.Distribution
+   * @param {number} p Probability to find value for.
+   * @returns {number} The value where the probability coincides with the specified value if found, NaN otherwise.
+   * @private
+   * @ignore
+   */
+  _qEstimateRoot (p) {
+    let [a, b] = this._qInitialGuess(p)
+    const min = this.s[0].value
+    const max = this.s[1].value
+    // deltaA/deltaB shrink toward zero to approach open boundaries without landing on them.
+    let deltaA = this._openBoundaryDelta(0)
+    let deltaB = this._openBoundaryDelta(1)
+    let fa = this.cdf(a) - p
+    let fb = this.cdf(b) - p
+    // Expand bracket by golden-ratio steps until sign change (immediately exits for bounded support).
+    // Only expand a side if it would actually move: when a side is clamped at its limit, switch to
+    // the other side to avoid an infinite no-progress loop.
+    for (let k = 0; k < MAX_ITER; k++) {
+      if (fa * fb < 0) break
+      const expansion = 1.618 * (b - a)
+      const newA = Math.max(a - expansion, min + deltaA)
+      const newB = Math.min(b + expansion, max - deltaB)
+      if (Math.abs(fa) <= Math.abs(fb) && newA !== a) {
+        a = newA
+        deltaA /= 1.618
+        fa = this.cdf(a) - p
+      } else if (newB !== b) {
+        b = newB
+        deltaB /= 1.618
+        fb = this.cdf(b) - p
+      } else {
+        break
+      }
+    }
+    if (fa * fb >= 0) return NaN
+    return Math.min(Math.max(
+      chandrupatla(t => this.cdf(t) - p, a, b), min), max
+    )
+  }
+
+  _momentBounds (tailP, round) {
+    return [
+      Number.isFinite(this.s[0].value) ? this.s[0].value : round(this.q(tailP)),
+      Number.isFinite(this.s[1].value) ? this.s[1].value : round(this.q(1 - tailP))
+    ]
+  }
+
+  /**
+   * Computes a raw moment E[X^n] numerically. Continuous distributions use tanh-sinh
+   * quadrature; discrete distributions use compensated summation. Infinite support bounds
+   * are truncated at the 1e-12 / (1 - 1e-12) quantile. Distributions with undefined or
+   * divergent moments must override the public moment methods to return NaN / Infinity
+   * directly, because quantile truncation makes divergent integrals appear finite.
+   *
+   * @method _numericalRawMoment
+   * @memberof ran.dist.Distribution
+   * @param {number} n Moment order.
+   * @returns {number} E[X^n].
+   * @private
+   * @ignore
+   */
+  _numericalRawMoment (n) {
+    // 1e-12 tail cut: tighter than 1e-7 because x^4 tails contribute ~x^3·φ(x) which
+    // is still ~1e-4 at z≈5.2 (the 1e-7 quantile) — far too large for kurtosis precision.
+    const TAIL_P = 1e-12
+    if (this._type === 'discrete') {
+      const [lo, hi] = this._momentBounds(TAIL_P, Math.round)
+      // Heavy-tailed discrete distributions (e.g. Zeta, YuleSimon) can have a 1-1e-12 quantile
+      // in the billions, making the loop effectively hang. Return NaN — the analytical override
+      // should handle these. 1e6 terms covers all practical well-behaved distributions.
+      const overflows = !Number.isFinite(lo) || !Number.isFinite(hi) || hi - lo > 1e6
+      if (overflows) return NaN
+      const terms = []
+      for (let k = lo; k <= hi; k++) terms.push(Math.pow(k, n) * this.pdf(k))
+      return terms.length > 0 ? neumaier(terms) : NaN
+    }
+    const [lo, hi] = this._momentBounds(TAIL_P, Number)
+    // Point-mass support (lo === hi): tanhSinh returns 0 (halfLen = 0), but E[X^n] = lo^n
+    // for a unit point mass. Handles Degenerate and any other single-point continuous type.
+    if (lo === hi) return Math.pow(lo, n)
+    return tanhSinh(x => Math.pow(x, n) * this.pdf(x), lo, hi)
+  }
+
+  // ─── PRIVATE STATIC ───────────────────────────────────────────────────────
+
+  static _parseConstraintTokens (constraint) {
+    let tokens = constraint.split(/ (<=|>=|!=) /)
+    if (tokens.length === 1) {
+      tokens = constraint.split(/ ([=<>]) /)
+    }
+    return tokens
+  }
+
+  static _resolveToken (token, params) {
+    return Object.prototype.hasOwnProperty.call(params, token) ? params[token] : parseFloat(token)
+  }
+
+  static _violatesConstraint (constraint, params) {
+    const tokens = Distribution._parseConstraintTokens(constraint)
+    const a = Distribution._resolveToken(tokens[0], params)
+    const b = Distribution._resolveToken(tokens[2], params)
+    switch (tokens[1]) {
+      case '<': return a >= b
+      case '<=': return a > b
+      case '>': return a <= b
+      case '>=': return a < b
+      case '!=': return a === b
+      default: return false
+    }
+  }
+
   static _isExactFit (Cls) {
     const d = Object.getOwnPropertyDescriptor(Cls, '_fitInitIsExact')
     return d && d.get && d.get.call(Cls)
-  }
-
-  static fit (data) {
-    const Cls = this
-    const x0 = Cls._fitInit(data)
-    // k=0: the distribution is fully determined with no free parameters; every instance is the MLE
-    if (x0.length === 0) {
-      return new Cls()
-    }
-    // Closed-form MLE fast path: only when the OWN class declares _fitInitIsExact, so an
-    // approximate _fitInit on a subclass cannot inherit the shortcut.
-    if (Distribution._isExactFit(Cls)) {
-      return new Cls(...x0)
-    }
-    const objective = params => {
-      try {
-        const inst = new Cls(...params)
-        // Penalised negative log-likelihood: the base penalty is 0 (pure MLE); Beta-family
-        // distributions override _fitPenalty with a Jeffreys-like log-barrier to prevent the
-        // optimizer from sitting near shape-parameter singularities where lnL is large-but-finite.
-        // See decisions/0017-beta-fit-penalty.md.
-        const v = -inst.lnL(data) + Cls._fitPenalty(inst)
-        // Reject any non-finite objective: NaN (neumaier(-Infinity,...)), +Infinity (zero-density
-        // params), and -Infinity (an unbounded-likelihood singularity, e.g. Beta-type density as a
-        // shape parameter → 0). Without the last guard a strong optimizer walks into the singularity
-        // and returns a degenerate fit that Nelder-Mead was simply too weak to find.
-        return Number.isFinite(v) ? v : Infinity
-      } catch (_) {
-        return Infinity
-      }
-    }
-    const best = powell(objective, Distribution._feasibleStart(objective, x0))
-    return new Cls(...best)
   }
 
   /**
