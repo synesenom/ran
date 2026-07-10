@@ -9,6 +9,10 @@ import Xoshiro128p from '../core/xoshiro'
  */
 export default class Process {
   constructor () {
+    if (new.target === Process) {
+      throw Error('Process is abstract and cannot be instantiated directly.')
+    }
+
     // Parameters — subclass populates after super()
     /** @type {Object} */
     this.p = {}

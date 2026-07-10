@@ -17,6 +17,10 @@ import { MAX_ITER } from '../core/constants'
  */
 class Distribution {
   constructor (type, k) {
+    if (new.target === Distribution) {
+      throw Error('Distribution is abstract and cannot be instantiated directly.')
+    }
+
     // decisions/0009-rename-single-letter-instance-fields.md — descriptive names replace single-letter abbreviations
     this._type = type
 
