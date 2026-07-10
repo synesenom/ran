@@ -28,81 +28,7 @@ export default class MCMC {
     this._initAccumulators()
   }
 
-  _initAccumulators () {
-    this._accepted = 0
-    this._totalIter = 0
-    // Welford online mean/variance per dimension
-    this._welford = Array.from({ length: this.dim }, () => ({ n: 0, mean: 0, M2: 0 }))
-    // Circular buffer + running cross-product sums for online autocorrelation per dimension
-    this._acN = 0
-    this._acBuf = Array.from({ length: this.dim }, () => new Float64Array(this.maxLag))
-    this._acCross = Array.from({ length: this.dim }, () => new Float64Array(this.maxLag))
-  }
-
-  _updateAccumulators (x, accepted) {
-    this._totalIter++
-    if (accepted) this._accepted++
-
-    for (let d = 0; d < this.dim; d++) {
-      const v = x[d]
-
-      // Welford update
-      const w = this._welford[d]
-      w.n++
-      const delta = v - w.mean
-      w.mean += delta / w.n
-      w.M2 += delta * (v - w.mean)
-
-      // Cross-product sums: cross[r] accumulates sum of x[i]*x[i-r]
-      const buf = this._acBuf[d]
-      const cross = this._acCross[d]
-      const n = this._acN
-      cross[0] += v * v
-      for (let r = 1; r < Math.min(n + 1, this.maxLag); r++) {
-        cross[r] += v * buf[((n - r) % this.maxLag + this.maxLag) % this.maxLag]
-      }
-      buf[n % this.maxLag] = v
-    }
-    this._acN++
-  }
-
-  /**
-   * Returns the subclass's internal variables. Must be overridden.
-   *
-   * @method _internal
-   * @memberof ran.mc.MCMC
-   * @returns {Object} Object containing the internal variables.
-   * @private
-   */
-  _internal () {
-    throw Error('MCMC._internal() is not implemented')
-  }
-
-  /**
-   * Performs a single iteration. Must be overridden.
-   *
-   * @method _iter
-   * @memberof ran.mc.MCMC
-   * @param {number[]} x Current state of the Markov chain.
-   * @param {boolean=} warmUp Whether the iteration takes place during warm-up. Default is false.
-   * @returns {{x: number[], accepted: boolean}} New state and whether it was accepted.
-   * @private
-   */
-  _iter () {
-    throw Error('MCMC._iter() is not implemented')
-  }
-
-  /**
-   * Adjusts internal parameters after an iteration. Must be overridden.
-   *
-   * @method _adjust
-   * @memberof ran.mc.MCMC
-   * @param {Object} i Result of the last iteration.
-   * @private
-   */
-  _adjust () {
-    throw Error('MCMC._adjust() is not implemented')
-  }
+  // ─── PUBLIC INSTANCE ──────────────────────────────────────────────────────
 
   /**
    * Returns the current state of the sampler. The return value can be passed to a sampler of the
@@ -245,5 +171,88 @@ export default class MCMC {
       }
     }
     return samples
+  }
+
+  // ─── PROTECTED INSTANCE ───────────────────────────────────────────────────
+
+  /**
+   * Returns the subclass's internal variables. Must be overridden.
+   *
+   * @method _internal
+   * @memberof ran.mc.MCMC
+   * @returns {Object} Object containing the internal variables.
+   * @protected
+   * @ignore
+   */
+  _internal () {
+    throw Error('MCMC._internal() is not implemented')
+  }
+
+  /**
+   * Performs a single iteration. Must be overridden.
+   *
+   * @method _iter
+   * @memberof ran.mc.MCMC
+   * @param {number[]} x Current state of the Markov chain.
+   * @param {boolean=} warmUp Whether the iteration takes place during warm-up. Default is false.
+   * @returns {{x: number[], accepted: boolean}} New state and whether it was accepted.
+   * @protected
+   * @ignore
+   */
+  _iter () {
+    throw Error('MCMC._iter() is not implemented')
+  }
+
+  /**
+   * Adjusts internal parameters after an iteration. Must be overridden.
+   *
+   * @method _adjust
+   * @memberof ran.mc.MCMC
+   * @param {Object} i Result of the last iteration.
+   * @protected
+   * @ignore
+   */
+  _adjust () {
+    throw Error('MCMC._adjust() is not implemented')
+  }
+
+  // ─── PRIVATE INSTANCE ─────────────────────────────────────────────────────
+
+  _initAccumulators () {
+    this._accepted = 0
+    this._totalIter = 0
+    // Welford online mean/variance per dimension
+    this._welford = Array.from({ length: this.dim }, () => ({ n: 0, mean: 0, M2: 0 }))
+    // Circular buffer + running cross-product sums for online autocorrelation per dimension
+    this._acN = 0
+    this._acBuf = Array.from({ length: this.dim }, () => new Float64Array(this.maxLag))
+    this._acCross = Array.from({ length: this.dim }, () => new Float64Array(this.maxLag))
+  }
+
+  _updateAccumulators (x, accepted) {
+    this._totalIter++
+    if (accepted) this._accepted++
+
+    for (let d = 0; d < this.dim; d++) {
+      const v = x[d]
+
+      // Welford update
+      const w = this._welford[d]
+      w.n++
+      const delta = v - w.mean
+      w.mean += delta / w.n
+      w.M2 += delta * (v - w.mean)
+
+      // Cross-product sums: cross[r] accumulates sum of x[i]*x[i-r]
+      const buf = this._acBuf[d]
+      const cross = this._acCross[d]
+      const n = this._acN
+      cross[0] += v * v
+      for (let r = 1; r < Math.min(n + 1, this.maxLag); r++) {
+        cross[r] += v * buf[((n - r) % this.maxLag + this.maxLag) % this.maxLag]
+      }
+      buf[n % this.maxLag] = v
+    }
+    this._acN++
   }
 }
