@@ -19,6 +19,9 @@ import { float } from '../core'
  */
 export default class MCMC {
   constructor (logDensity, config = {}, initialState = {}) {
+    if (new.target === MCMC) {
+      throw Error('MCMC is abstract and cannot be instantiated directly.')
+    }
     this.dim = config.dim || 1
     this.maxLag = config.maxLag || 100
     this.lnp = logDensity
