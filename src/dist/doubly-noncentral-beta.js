@@ -133,7 +133,6 @@ export default class DoublyNoncentralBeta extends Distribution {
   /** @private */
   _pdfRForward (ctx) {
     const { y, ab, l1, l2, r0, s0, ps0, yr0, pr0, ys0, b0 } = ctx
-    const sCtx = { y, ab, l2, s0, ps0 }
 
     let z = 0
     let bf0 = b0
@@ -144,7 +143,7 @@ export default class DoublyNoncentralBeta extends Distribution {
       const r = r0 + kr
       ysf0 *= 1 + y
       pyrf *= y * l1 / Math.max(r, 1)
-      const dz = this._pdfSumOverS({ ...sCtx, r, pyr: pyrf, ys: ysf0, b: bf0 })
+      const dz = this._pdfSumOverS({ y, ab, l2, s0, ps0, r, pyr: pyrf, ys: ysf0, b: bf0 })
       z += dz
       if (Math.abs(dz / z) < EPS) {
         break
@@ -159,7 +158,6 @@ export default class DoublyNoncentralBeta extends Distribution {
   /** @private */
   _pdfRBackward (ctx, z) {
     const { y, ab, l1, l2, r0, s0, ps0, yr0, pr0, ys0, b0 } = ctx
-    const sCtx = { y, ab, l2, s0, ps0 }
 
     let bb0 = b0
     let ysb0 = (1 + y) * ys0
@@ -169,7 +167,7 @@ export default class DoublyNoncentralBeta extends Distribution {
       ysb0 /= 1 + y
       pyrb *= (r + 1) / (y * l1)
       bb0 *= (ab + r + s0) / (this.p.alpha + r)
-      const dz = this._pdfSumOverS({ ...sCtx, r, pyr: pyrb, ys: ysb0, b: bb0 })
+      const dz = this._pdfSumOverS({ y, ab, l2, s0, ps0, r, pyr: pyrb, ys: ysb0, b: bb0 })
       z += dz
       if (Math.abs(dz / z) < EPS) {
         break
@@ -223,7 +221,6 @@ export default class DoublyNoncentralBeta extends Distribution {
   _cdfRForward (ctx) {
     const { l1, l2, r0, s0, pr0, ps0, sBeta0, xa0, xb0, b0, ib0, x } = ctx
     const betaParam = this.p.beta
-    const sCtx = { l2, s0, ps0, xb0, sBeta0, x }
 
     let z = 0
     let prf = pr0 * Math.max(r0, 1) / l1
@@ -235,7 +232,7 @@ export default class DoublyNoncentralBeta extends Distribution {
       const r = r0 + kr
       const rAlpha = this.p.alpha + r
       prf *= l1 / Math.max(r, 1)
-      const dz = this._cdfSumOverS({ ...sCtx, r, pr: prf, xa: xaf, b: bf0, ib: ibf0 })
+      const dz = this._cdfSumOverS({ l2, s0, ps0, xb0, sBeta0, x, r, pr: prf, xa: xaf, b: bf0, ib: ibf0 })
       z += dz
       if (Math.abs(dz / z) < EPS) {
         break
@@ -253,7 +250,6 @@ export default class DoublyNoncentralBeta extends Distribution {
   _cdfRBackward (ctx, z) {
     const { l1, l2, r0, s0, pr0, ps0, sBeta0, xa0, xb0, b0, ib0, x } = ctx
     const betaParam = this.p.beta
-    const sCtx = { l2, s0, ps0, xb0, sBeta0, x }
 
     let prb = pr0
     let xab = xa0
@@ -266,7 +262,7 @@ export default class DoublyNoncentralBeta extends Distribution {
       xab /= x
       bb0 *= (rAlpha + betaParam + s0) / rAlpha
       ibb0 += xab * xb0 / (rAlpha * bb0)
-      const dz = this._cdfSumOverS({ ...sCtx, r, pr: prb, xa: xab, b: bb0, ib: ibb0 })
+      const dz = this._cdfSumOverS({ l2, s0, ps0, xb0, sBeta0, x, r, pr: prb, xa: xab, b: bb0, ib: ibb0 })
       z += dz
       if (Math.abs(dz / z) < EPS) {
         break
