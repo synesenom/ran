@@ -218,6 +218,18 @@ function _phi (n, sigma, xi) {
   return Math.exp(-z) * Math.pow(xi, 0.5 - n) * cf
 }
 
+// Computes Phi_0 by either continued fraction or forward recurrence seed.
+// Extracted to reduce cyclomatic complexity of _aelx.
+function _initPhi (useCF, sigma, xi) {
+  if (useCF) {
+    return _phi(0, sigma, xi)
+  }
+  // At sigma = 0 (x = y) Phi_0 diverges, but every term that multiplies it
+  // carries a 0 factor so any finite placeholder is safe.
+  const sx = sigma * xi
+  return sigma === 0 ? 0 : Math.sqrt(Math.PI / sigma) * erfc(Math.sqrt(sx))
+}
+
 /**
  * Raw asymptotic-series sum for the Marcum function in the large-xi regime.
  * Section 4.1 in https://arxiv.org/pdf/1311.0681.pdf. Sums the Q-series
@@ -249,13 +261,9 @@ function _aelx (mu, x, y, complementary) {
   let am = 1
   let am1 = 1
 
-  // phic = e^{-sigma xi} xi^{1/2 - n}; phi = Phi_n. Eqs. (34)-(36). At sigma = 0
-  // (x = y) Phi_0 diverges, but every term that uses it carries a 0 factor, so
-  // any finite placeholder is safe.
+  // phic = e^{-sigma xi} xi^{1/2 - n}; phi = Phi_n. Eqs. (34)-(36).
   let phic = Math.exp(-sx) * Math.sqrt(xi)
-  let phi = useCF
-    ? _phi(0, sigma, xi)
-    : (sigma === 0 ? 0 : Math.sqrt(Math.PI / sigma) * erfc(Math.sqrt(sx)))
+  let phi = _initPhi(useCF, sigma, xi)
 
   // psic = (-1)^n rho^mu / (2 sqrt(2 pi)).
   let psic = 0.5 * Math.pow(rho, mu) / Math.sqrt(2 * Math.PI)
@@ -531,6 +539,30 @@ function _besselT (mu, xs, ys, eHalfMuZeta2) {
   return eHalfMuZeta2 * scaled
 }
 
+// Evaluates sum_j A_j(u) Psi_j for the large-mu expansion (Eq. 90). The triple
+// Horner loop is extracted here to keep _largeMu's cyclomatic complexity low.
+function _expansionSum (u, r, qPrimary, psi) {
+  const u2 = u * u
+  let sum = 0
+  let uj = 1
+  for (let j = 0; j < F_JK.length; j++) {
+    const col = F_JK[j]
+    let aj = 0
+    for (let k = col.length - 1; k >= 0; k--) {
+      const d = col[k]
+      let djk = 0
+      for (let m = d.length - 1; m >= 0; m--) {
+        djk = djk * u2 + d[m]
+      }
+      aj = aj * r + djk
+    }
+    aj *= uj
+    uj *= u
+    sum += (qPrimary || j % 2 === 0 ? aj : -aj) * psi[j]
+  }
+  return sum
+}
+
 /**
  * Large-mu uniform asymptotic expansion of the Marcum function. Section 4.2 in
  * https://arxiv.org/pdf/1311.0681.pdf. Evaluates the transition band y ~ x + mu
@@ -576,25 +608,7 @@ function _largeMu (mu, x, y) {
   // Expansion = sqrt(mu/2pi) sum_j A_j Psi_j with A_j = sum_k f_{jk}/mu^k and
   // f_{jk}(u) = u^(j+2k) D_{jk}(u^2). The P-expansion (Eq. 79) flips the sign
   // of the odd-j terms.
-  const r = u2 / mu
-  let sum = 0
-  let uj = 1
-  for (let j = 0; j <= jMax; j++) {
-    const col = F_JK[j]
-    let aj = 0
-    for (let k = col.length - 1; k >= 0; k--) {
-      const d = col[k]
-      let djk = 0
-      for (let m = d.length - 1; m >= 0; m--) {
-        djk = djk * u2 + d[m]
-      }
-      aj = aj * r + djk
-    }
-    aj *= uj
-    uj *= u
-    sum += (qPrimary || j % 2 === 0 ? aj : -aj) * psi[j]
-  }
-  const expansion = Math.sqrt(mu / (2 * Math.PI)) * sum
+  const expansion = Math.sqrt(mu / (2 * Math.PI)) * _expansionSum(u, u2 / mu, qPrimary, psi)
 
   // Q_mu = Q_{mu+1} - T (Eq. 75); P_mu = P_{mu+1} + T (Eq. 80).
   const tTerm = _besselT(mu, xs, ys, eHalfMuZeta2)
@@ -602,6 +616,18 @@ function _largeMu (mu, x, y) {
   return qPrimary
     ? { q: primary, p: 1 - primary }
     : { p: primary, q: 1 - primary }
+}
+
+// Returns the transition-band result when y ~ x + mu (where the quadrature
+// integrand is near-singular), or null when y is outside the band.
+// Below mu = 135 the three-term recurrence (Eq. 14) is used; at mu >= 135
+// the large-mu uniform asymptotic expansion (Section 4.2) is used instead.
+function _transitionBand (mu, x, y) {
+  const s = Math.sqrt(4 * x + 2 * mu)
+  if (y > x + mu - s && y < x + mu + s) {
+    return mu >= 135 ? _largeMu(mu, x, y) : _recurrence(mu, x, y)
+  }
+  return null
 }
 
 /**
@@ -636,13 +662,10 @@ function _marcum (mu, x, y) {
     return _asymptoticLargeXi(mu, x, y)
   }
 
-  // Transition band y = x + mu, where the quadrature integrand is near-
-  // singular. Below mu = 135 the three-term recurrence (Eq. 14) solves the
-  // band; at mu >= 135 the large-mu uniform asymptotic expansion (Section 4.2)
-  // evaluates it directly, avoiding the O(mu) recurrence steps.
-  const s = Math.sqrt(4 * x + 2 * mu)
-  if (y > x + mu - s && y < x + mu + s) {
-    return mu >= 135 ? _largeMu(mu, x, y) : _recurrence(mu, x, y)
+  // Transition band y = x + mu, where the quadrature integrand is near-singular.
+  const transitionResult = _transitionBand(mu, x, y)
+  if (transitionResult !== null) {
+    return transitionResult
   }
 
   // Quadrature. Section 5.
