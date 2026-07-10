@@ -130,7 +130,6 @@ export default class DoublyNoncentralBeta extends Distribution {
 
   // ─── PRIVATE INSTANCE ─────────────────────────────────────────────────────
 
-  /** @private */
   _pdfRForward (ctx) {
     const { y, ab, l1, l2, r0, s0, ps0, yr0, pr0, ys0, b0 } = ctx
 
@@ -155,7 +154,6 @@ export default class DoublyNoncentralBeta extends Distribution {
     return z
   }
 
-  /** @private */
   _pdfRBackward (ctx, z) {
     const { y, ab, l1, l2, r0, s0, ps0, yr0, pr0, ys0, b0 } = ctx
 
@@ -177,7 +175,6 @@ export default class DoublyNoncentralBeta extends Distribution {
     return z
   }
 
-  /** @private */
   _pdfSumOverS ({ y, ab, l2, s0, ps0, r, pyr, ys, b }) {
     const betaParam = this.p.beta
 
@@ -217,7 +214,6 @@ export default class DoublyNoncentralBeta extends Distribution {
     return dz
   }
 
-  /** @private */
   _cdfRForward (ctx) {
     const { l1, l2, r0, s0, pr0, ps0, sBeta0, xa0, xb0, b0, ib0, x } = ctx
     const betaParam = this.p.beta
@@ -246,7 +242,6 @@ export default class DoublyNoncentralBeta extends Distribution {
     return z
   }
 
-  /** @private */
   _cdfRBackward (ctx, z) {
     const { l1, l2, r0, s0, pr0, ps0, sBeta0, xa0, xb0, b0, ib0, x } = ctx
     const betaParam = this.p.beta
@@ -272,7 +267,6 @@ export default class DoublyNoncentralBeta extends Distribution {
     return z
   }
 
-  /** @private */
   _cdfSumOverS ({ l2, s0, ps0, xb0, sBeta0, x, r, pr, xa, b, ib }) {
     const betaParam = this.p.beta
     const rAlpha = this.p.alpha + r
