@@ -3,6 +3,7 @@ import neumaier from '../algorithms/neumaier'
 import tanhSinh from '../algorithms/tanh-sinh'
 import powell from '../algorithms/powell'
 import some from '../utils/some'
+import validateParams from '../utils/validate-params'
 import { chi2, andersonDarling } from './_tests'
 import chandrupatla from '../algorithms/chandrupatla'
 import { MAX_ITER } from '../core/constants'
@@ -591,18 +592,7 @@ class Distribution {
    * @ignore
    */
   static validate (params, constraints) {
-    // See decisions/0004-validate-rejects-undefined-and-nan.md, solutions/correctness/2026-05-17-0847-validate-rejects-missing-params.md — comparison operators against undefined/null/NaN return false, so missing params would otherwise pass silently
-    const missing = Object.entries(params)
-      .filter(([, v]) => v === undefined || v === null || Number.isNaN(v))
-      .map(([name]) => name)
-    if (missing.length > 0) {
-      throw Error(`Invalid parameters. Required parameters missing or not a number: ${missing.join(', ')}.`)
-    }
-
-    const errors = constraints.filter(c => Distribution._violatesConstraint(c, params))
-    if (errors.length > 0) {
-      throw Error(`Invalid parameters. Parameters must satisfy the following constraints: ${constraints.join(', ')}. Got: ${Object.entries(params).map(([name, value]) => `${name} = ${value}`).join(', ')}`)
-    }
+    validateParams(params, constraints)
   }
 
   /**
@@ -1035,32 +1025,6 @@ class Distribution {
   }
 
   // ─── PRIVATE STATIC ───────────────────────────────────────────────────────
-
-  static _parseConstraintTokens (constraint) {
-    let tokens = constraint.split(/ (<=|>=|!=) /)
-    if (tokens.length === 1) {
-      tokens = constraint.split(/ ([=<>]) /)
-    }
-    return tokens
-  }
-
-  static _resolveToken (token, params) {
-    return Object.prototype.hasOwnProperty.call(params, token) ? params[token] : parseFloat(token)
-  }
-
-  static _violatesConstraint (constraint, params) {
-    const tokens = Distribution._parseConstraintTokens(constraint)
-    const a = Distribution._resolveToken(tokens[0], params)
-    const b = Distribution._resolveToken(tokens[2], params)
-    switch (tokens[1]) {
-      case '<': return a >= b
-      case '<=': return a > b
-      case '>': return a <= b
-      case '>=': return a < b
-      case '!=': return a === b
-      default: return false
-    }
-  }
 
   static _isExactFit (Cls) {
     const d = Object.getOwnPropertyDescriptor(Cls, '_fitInitIsExact')
