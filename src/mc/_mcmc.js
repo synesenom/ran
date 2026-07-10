@@ -19,6 +19,9 @@ import { float } from '../core'
  */
 export default class MCMC {
   constructor (logDensity, config = {}, initialState = {}) {
+    if (new.target === MCMC) {
+      throw Error('MCMC is abstract and cannot be instantiated directly.')
+    }
     this.dim = config.dim || 1
     this.maxLag = config.maxLag || 100
     this.lnp = logDensity
@@ -26,82 +29,6 @@ export default class MCMC {
     this.samplingRate = initialState.samplingRate || 1
     this.internal = initialState.internal || {}
     this._initAccumulators()
-  }
-
-  _initAccumulators () {
-    this._accepted = 0
-    this._totalIter = 0
-    // Welford online mean/variance per dimension
-    this._welford = Array.from({ length: this.dim }, () => ({ n: 0, mean: 0, M2: 0 }))
-    // Circular buffer + running cross-product sums for online autocorrelation per dimension
-    this._acN = 0
-    this._acBuf = Array.from({ length: this.dim }, () => new Float64Array(this.maxLag))
-    this._acCross = Array.from({ length: this.dim }, () => new Float64Array(this.maxLag))
-  }
-
-  _updateAccumulators (x, accepted) {
-    this._totalIter++
-    if (accepted) this._accepted++
-
-    for (let d = 0; d < this.dim; d++) {
-      const v = x[d]
-
-      // Welford update
-      const w = this._welford[d]
-      w.n++
-      const delta = v - w.mean
-      w.mean += delta / w.n
-      w.M2 += delta * (v - w.mean)
-
-      // Cross-product sums: cross[r] accumulates sum of x[i]*x[i-r]
-      const buf = this._acBuf[d]
-      const cross = this._acCross[d]
-      const n = this._acN
-      cross[0] += v * v
-      for (let r = 1; r < Math.min(n + 1, this.maxLag); r++) {
-        cross[r] += v * buf[((n - r) % this.maxLag + this.maxLag) % this.maxLag]
-      }
-      buf[n % this.maxLag] = v
-    }
-    this._acN++
-  }
-
-  /**
-   * Returns the subclass's internal variables. Must be overridden.
-   *
-   * @method _internal
-   * @memberof ran.mc.MCMC
-   * @returns {Object} Object containing the internal variables.
-   * @private
-   */
-  _internal () {
-    throw Error('MCMC._internal() is not implemented')
-  }
-
-  /**
-   * Performs a single iteration. Must be overridden.
-   *
-   * @method _iter
-   * @memberof ran.mc.MCMC
-   * @param {number[]} x Current state of the Markov chain.
-   * @param {boolean=} warmUp Whether the iteration takes place during warm-up. Default is false.
-   * @returns {{x: number[], accepted: boolean}} New state and whether it was accepted.
-   * @private
-   */
-  _iter () {
-    throw Error('MCMC._iter() is not implemented')
-  }
-
-  /**
-   * Adjusts internal parameters after an iteration. Must be overridden.
-   *
-   * @method _adjust
-   * @memberof ran.mc.MCMC
-   * @param {Object} i Result of the last iteration.
-   * @private
-   */
-  _adjust () {
-    throw Error('MCMC._adjust() is not implemented')
   }
 
   /**
@@ -200,22 +127,7 @@ export default class MCMC {
       for (let j = 0; j < 1e4; j++) {
         this._adjust(this.iterate(null, true))
       }
-
-      // Set thinning interval to the first lag where all dimensions have |rho| <= 0.05
-      const z = this.ac().reduce((first, d) => {
-        for (let i = 0; i < d.length - 1; i++) {
-          if (!isNaN(d[i]) && Math.abs(d[i]) <= 0.05) {
-            return Math.max(first, i)
-          }
-        }
-        return first
-      }, 0)
-      if (z > this.samplingRate) {
-        this.samplingRate++
-      } else if (z < this.samplingRate && this.samplingRate > 1) {
-        this.samplingRate--
-      }
-
+      this._adjustSamplingRate(this._thinningLag())
       typeof progress === 'function' && progress(100 * batch / maxBatches)
     }
   }
@@ -245,5 +157,104 @@ export default class MCMC {
       }
     }
     return samples
+  }
+
+  /**
+   * Returns the subclass's internal variables. Must be overridden.
+   *
+   * @method _internal
+   * @memberof ran.mc.MCMC
+   * @returns {Object} Object containing the internal variables.
+   * @protected
+   * @ignore
+   */
+  _internal () {
+    throw Error('MCMC._internal() is not implemented')
+  }
+
+  /**
+   * Performs a single iteration. Must be overridden.
+   *
+   * @method _iter
+   * @memberof ran.mc.MCMC
+   * @param {number[]} x Current state of the Markov chain.
+   * @param {boolean=} warmUp Whether the iteration takes place during warm-up. Default is false.
+   * @returns {{x: number[], accepted: boolean}} New state and whether it was accepted.
+   * @protected
+   * @ignore
+   */
+  _iter () {
+    throw Error('MCMC._iter() is not implemented')
+  }
+
+  /**
+   * Adjusts internal parameters after an iteration. Must be overridden.
+   *
+   * @method _adjust
+   * @memberof ran.mc.MCMC
+   * @param {Object} i Result of the last iteration.
+   * @protected
+   * @ignore
+   */
+  _adjust () {
+    throw Error('MCMC._adjust() is not implemented')
+  }
+
+  // First lag at which all dimensions have |autocorrelation| <= 0.05
+  _thinningLag () {
+    return this.ac().reduce((first, d) => {
+      for (let i = 0; i < d.length - 1; i++) {
+        if (!isNaN(d[i]) && Math.abs(d[i]) <= 0.05) {
+          return Math.max(first, i)
+        }
+      }
+      return first
+    }, 0)
+  }
+
+  _adjustSamplingRate (lag) {
+    if (lag > this.samplingRate) {
+      this.samplingRate++
+    } else if (lag < this.samplingRate && this.samplingRate > 1) {
+      this.samplingRate--
+    }
+  }
+
+  _initAccumulators () {
+    this._accepted = 0
+    this._totalIter = 0
+    // Welford online mean/variance per dimension
+    this._welford = Array.from({ length: this.dim }, () => ({ n: 0, mean: 0, M2: 0 }))
+    // Circular buffer + running cross-product sums for online autocorrelation per dimension
+    this._acN = 0
+    this._acBuf = Array.from({ length: this.dim }, () => new Float64Array(this.maxLag))
+    this._acCross = Array.from({ length: this.dim }, () => new Float64Array(this.maxLag))
+  }
+
+  _updateAccumulators (x, accepted) {
+    this._totalIter++
+    if (accepted) this._accepted++
+
+    for (let d = 0; d < this.dim; d++) {
+      const v = x[d]
+
+      // Welford update
+      const w = this._welford[d]
+      w.n++
+      const delta = v - w.mean
+      w.mean += delta / w.n
+      w.M2 += delta * (v - w.mean)
+
+      // Cross-product sums: cross[r] accumulates sum of x[i]*x[i-r]
+      const buf = this._acBuf[d]
+      const cross = this._acCross[d]
+      const n = this._acN
+      cross[0] += v * v
+      for (let r = 1; r < Math.min(n + 1, this.maxLag); r++) {
+        cross[r] += v * buf[((n - r) % this.maxLag + this.maxLag) % this.maxLag]
+      }
+      buf[n % this.maxLag] = v
+    }
+    this._acN++
   }
 }

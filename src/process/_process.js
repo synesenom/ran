@@ -1,4 +1,5 @@
 import Xoshiro128p from '../core/xoshiro'
+import validateParams from '../utils/validate-params'
 
 /**
  * The stochastic process generator base class, all process generators extend this class. The methods listed here
@@ -9,6 +10,10 @@ import Xoshiro128p from '../core/xoshiro'
  */
 export default class Process {
   constructor () {
+    if (new.target === Process) {
+      throw Error('Process is abstract and cannot be instantiated directly.')
+    }
+
     // Parameters — subclass populates after super()
     /** @type {Object} */
     this.p = {}
@@ -28,60 +33,6 @@ export default class Process {
   }
 
   /**
-   * Validates a set of parameters using a list of constraints.
-   *
-   * @method validate
-   * @memberof ran.process.Process
-   * @param {Object} params Object containing the parameters to validate.
-   * @param {string[]} constraints Array of strings defining the parameter constraints.
-   * @throws {Error} If any parameter is undefined, null, or NaN, or doesn't satisfy the constraints.
-   * @ignore
-   */
-  static validate (params, constraints) {
-    // See decisions/0004-validate-rejects-undefined-and-nan.md — comparison operators against undefined/null/NaN return false, so missing params would otherwise pass silently
-    const missing = Object.entries(params)
-      .filter(([, v]) => v === undefined || v === null || Number.isNaN(v))
-      .map(([name]) => name)
-    if (missing.length > 0) {
-      throw Error(`Invalid parameters. Required parameters missing or not a number: ${missing.join(', ')}.`)
-    }
-
-    // Go through parameters and check constraints
-    const errors = constraints.filter(constraint => {
-      // Tokenize constraint
-      let tokens = constraint.split(/ (<=|>=|!=) /)
-      if (tokens.length === 1) {
-        tokens = constraint.split(/ ([=<>]) /)
-      }
-
-      // Substitute parameters if there is any
-      const a = Object.prototype.hasOwnProperty.call(params, tokens[0]) ? params[tokens[0]] : parseFloat(tokens[0])
-      const b = Object.prototype.hasOwnProperty.call(params, tokens[2]) ? params[tokens[2]] : parseFloat(tokens[2])
-
-      // Check for errors
-      switch (tokens[1]) {
-        case '<':
-          return a >= b
-        case '<=':
-          return a > b
-        case '>':
-          return a <= b
-        case '>=':
-          return a < b
-        case '!=':
-          return a === b
-        /* istanbul ignore next */
-        default:
-          return false
-      }
-    })
-
-    if (errors.length > 0) {
-      throw Error(`Invalid parameters. Parameters must satisfy the following constraints: ${constraints.join(', ')}. Got: ${Object.entries(params).map(([name, value]) => `${name} = ${value}`).join(', ')}`)
-    }
-  }
-
-  /**
    * Seeds the internal PRNG for reproducible paths.
    *
    * @method seed
@@ -92,19 +43,6 @@ export default class Process {
   seed (value) {
     this.r.seed(value)
     return this
-  }
-
-  /**
-   * Generates the next state. Must be implemented by subclasses.
-   *
-   * @method _next
-   * @memberof ran.process.Process
-   * @returns {number} Next state.
-   * @protected
-   * @ignore
-   */
-  _next () {
-    throw Error('Process._next() is not implemented')
   }
 
   /**
@@ -231,5 +169,32 @@ export default class Process {
    */
   state () {
     return this.x
+  }
+
+  /**
+   * Validates a set of parameters using a list of constraints.
+   *
+   * @method validate
+   * @memberof ran.process.Process
+   * @param {Object} params Object containing the parameters to validate.
+   * @param {string[]} constraints Array of strings defining the parameter constraints.
+   * @throws {Error} If any parameter is undefined, null, or NaN, or doesn't satisfy the constraints.
+   * @ignore
+   */
+  static validate (params, constraints) {
+    validateParams(params, constraints)
+  }
+
+  /**
+   * Generates the next state. Must be implemented by subclasses.
+   *
+   * @method _next
+   * @memberof ran.process.Process
+   * @returns {number} Next state.
+   * @protected
+   * @ignore
+   */
+  _next () {
+    throw Error('Process._next() is not implemented')
   }
 }
