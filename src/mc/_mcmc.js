@@ -43,7 +43,7 @@ export default class MCMC {
     return {
       x: this.x,
       samplingRate: this.samplingRate,
-      internal: this._internal()
+      internal: this._internal() // key must match what constructor reads; see solutions/correctness/2026-07-11-1230-mcmc-state-key-mismatch-silent-sigma-loss.md
     }
   }
 
