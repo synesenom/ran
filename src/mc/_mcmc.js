@@ -1,4 +1,4 @@
-import { float } from '../core'
+import Xoshiro128p from '../core/xoshiro'
 
 /**
  * Base class implementing a general Markov chain Monte Carlo sampler. All MCMC samplers extend this class.
@@ -16,19 +16,46 @@ import { float } from '../core'
  * @param {Object=} initialState Initial state of the sampler. Supported properties: {x} (starting
  * position), {samplingRate} (thinning interval), and {internal} for subclass-specific state.
  * @constructor
+ * @throws {Error} If config.dim is provided but is not a positive integer.
  */
 export default class MCMC {
   constructor (logDensity, config = {}, initialState = {}) {
     if (new.target === MCMC) {
       throw Error('MCMC is abstract and cannot be instantiated directly.')
     }
+    MCMC._validateDim(config.dim)
     this.dim = config.dim || 1
     this.maxLag = config.maxLag || 100
     this.lnp = logDensity
-    this.x = initialState.x || Array.from({ length: this.dim }, () => float())
+    this.r = new Xoshiro128p()
+    // Tracked so seed() can tell whether it should re-draw x — otherwise a random
+    // (unseeded) starting position chosen before seed() runs would make replay non-deterministic.
+    // Must agree with the this.x assignment below (both keyed on presence, not truthiness),
+    // or a falsy-but-explicit x (e.g. { x: null }) would report _xProvided while silently
+    // drawing a random position anyway, leaving seed() unable to make it reproducible.
+    this._xProvided = Object.prototype.hasOwnProperty.call(initialState, 'x')
+    this.x = this._xProvided ? initialState.x : Array.from({ length: this.dim }, () => this.r.next())
     this.samplingRate = initialState.samplingRate || 1
     this.internal = initialState.internal || {}
     this._initAccumulators()
+  }
+
+  /**
+   * Sets the seed for the sampler's pseudo random number generator. If the initial position
+   * was not explicitly provided at construction, it is redrawn from the newly seeded generator
+   * so that sampling is fully reproducible.
+   *
+   * @method seed
+   * @memberof ran.mc.MCMC
+   * @param {number|string} value The value of the seed, either a number or a string (for the ease of tracking seeds).
+   * @returns {this} Reference to the current sampler.
+   */
+  seed (value) {
+    this.r.seed(value)
+    if (!this._xProvided) {
+      this.x = Array.from({ length: this.dim }, () => this.r.next())
+    }
+    return this
   }
 
   /**
@@ -256,5 +283,17 @@ export default class MCMC {
       buf[n % this.maxLag] = v
     }
     this._acN++
+  }
+
+  // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
+  static _validateDim (dim) {
+    if (dim === undefined || MCMC._isPositiveInteger(dim)) {
+      return
+    }
+    throw Error('MCMC: dim must be a positive integer')
+  }
+
+  static _isPositiveInteger (dim) {
+    return Number.isInteger(dim) && dim >= 1
   }
 }
