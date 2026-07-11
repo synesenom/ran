@@ -418,6 +418,30 @@ describe('special', () => {
   })
 
   describe('.f11()', () => {
+    const checkBesselIdentity = (aVals, zVals) => {
+      for (const a of aVals) {
+        for (const z of zVals) {
+          assert(equal(
+            special.f11(a, 2 * a, z),
+            Math.exp(z / 2 + (0.5 - a) * Math.log(z / 4) + special.logGamma(a + 0.5)) * special.besselInu(a - 0.5, z / 2)
+          ))
+        }
+      }
+    }
+
+    const checkF11Recurrence = (aVals, bVals, zVals) => {
+      for (const a of aVals) {
+        for (const b of bVals) {
+          for (const z of zVals) {
+            assert(equal(
+              a * special.f11(a + 1, b, z),
+              (b - a) * special.f11(a - 1, b, z) + (2 * a - b + z) * special.f11(a, b, z)
+            ))
+          }
+        }
+      }
+    }
+
     describe('|z| < 50', () => {
       it('f11(0, b, z) = 1', () => {
         for (const b of [0.5, 1, 2]) {
@@ -454,27 +478,11 @@ describe('special', () => {
       })
 
       it('f11(a, 2a, z) = exp(z/2) (z/4)^(0.5 - a) gamma(a + 0.5) I(a - 0.5; z/2)', () => {
-        for (const a of [0.5, 1, 2]) {
-          for (const z of [1, 10, 40]) {
-            assert(equal(
-              special.f11(a, 2 * a, z),
-              Math.exp(z / 2 + (0.5 - a) * Math.log(z / 4) + special.logGamma(a + 0.5)) * special.besselInu(a - 0.5, z / 2)
-            ))
-          }
-        }
+        checkBesselIdentity([0.5, 1, 2], [1, 10, 40])
       })
 
       it('a f11(a+1, b, z) = (b - a) f11(a-1, b, z) + (2a - b + z) f11(a, b, z)', () => {
-        for (const a of [0.5, 1, 2]) {
-          for (const b of [0.5, 1, 2]) {
-            for (const z of [0, 1, 10, 40]) {
-              assert(equal(
-                a * special.f11(a + 1, b, z),
-                (b - a) * special.f11(a - 1, b, z) + (2 * a - b + z) * special.f11(a, b, z)
-              ))
-            }
-          }
-        }
+        checkF11Recurrence([0.5, 1, 2], [0.5, 1, 2], [0, 1, 10, 40])
       })
 
       it('f11(1, 2, 49) = (exp(49) - 1) / 49 at 12-digit precision', () => {
@@ -513,27 +521,11 @@ describe('special', () => {
       })
 
       it('f11(a, 2a, z) = exp(z/2) (z/4)^(0.5 - a) gamma(a + 0.5) I(a - 0.5; z/2)', () => {
-        for (const a of [0.5, 1, 2]) {
-          for (const z of [50, 60, 75, 90]) {
-            assert(equal(
-              special.f11(a, 2 * a, z),
-              Math.exp(z / 2 + (0.5 - a) * Math.log(z / 4) + special.logGamma(a + 0.5)) * special.besselInu(a - 0.5, z / 2)
-            ))
-          }
-        }
+        checkBesselIdentity([0.5, 1, 2], [50, 60, 75, 90])
       })
 
       it('a * f11(a+1, b, z) = (b - a) * f11(a-1, b, z) + (2a - b + z) * f11(a, b, z)', () => {
-        for (const a of [3, 7, 13]) {
-          for (const b of [3, 7, 13]) {
-            for (const z of [50, 60, 75, 90]) {
-              assert(equal(
-                a * special.f11(a + 1, b, z),
-                (b - a) * special.f11(a - 1, b, z) + (2 * a - b + z) * special.f11(a, b, z)
-              ))
-            }
-          }
-        }
+        checkF11Recurrence([3, 7, 13], [3, 7, 13], [50, 60, 75, 90])
       })
 
       it('f11(1, 2, 50) = (exp(50) - 1) / 50', () => {
@@ -885,6 +877,17 @@ describe('special', () => {
   })
 
   describe('.marcumQ()', () => {
+    const check = (x, y, mu) => {
+      const q1 = special.marcumQ(mu + 1, x, y)
+      const q2 = special.marcumQ(mu, x, y)
+      const q3 = special.marcumQ(mu + 2, x, y)
+      const q4 = special.marcumQ(mu - 1, x, y)
+      const r = x > mu
+        ? ((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4)
+        : ((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4)
+      assert(equal(r, 1))
+    }
+
     describe('special cases', () => {
       describe('x = 0', () => {
         it('should satisfy the recurrence relation', () => {
@@ -911,16 +914,7 @@ describe('special', () => {
       describe('Q', () => {
         it('should satisfy the recurrence relation', () => {
           for (const [x, y, mu] of [[1, 40, 2], [10, 60, 4], [29, 99, 7]]) {
-            const q1 = special.marcumQ(mu + 1, x, y)
-            const q2 = special.marcumQ(mu, x, y)
-            const q3 = special.marcumQ(mu + 2, x, y)
-            const q4 = special.marcumQ(mu - 1, x, y)
-
-            if (x > mu) {
-              assert(equal(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4), 1))
-            } else {
-              assert(equal(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4), 1))
-            }
+            check(x, y, mu)
           }
         })
       })
@@ -928,16 +922,7 @@ describe('special', () => {
       describe('P', () => {
         it('should satisfy the recurrence relation', () => {
           for (const [x, y, mu] of [[1, 10, 30], [10, 15, 32], [29, 20, 35]]) {
-            const q1 = special.marcumQ(mu + 1, x, y)
-            const q2 = special.marcumQ(mu, x, y)
-            const q3 = special.marcumQ(mu + 2, x, y)
-            const q4 = special.marcumQ(mu - 1, x, y)
-
-            if (x > mu) {
-              assert(equal(((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4), 1))
-            } else {
-              assert(equal(((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4), 1))
-            }
+            check(x, y, mu)
           }
         })
       })
@@ -1020,17 +1005,6 @@ describe('special', () => {
     })
 
     describe('recurrence relation', () => {
-      const check = (x, y, mu) => {
-        const q1 = special.marcumQ(mu + 1, x, y)
-        const q2 = special.marcumQ(mu, x, y)
-        const q3 = special.marcumQ(mu + 2, x, y)
-        const q4 = special.marcumQ(mu - 1, x, y)
-        const r = x > mu
-          ? ((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4)
-          : ((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4)
-        assert(equal(r, 1))
-      }
-
       it('should satisfy the recurrence relation', () => {
         // Both x < mu and x > mu inside the transition band, exercising both
         // forms of the recurrence test.
@@ -1054,17 +1028,6 @@ describe('special', () => {
     })
 
     describe('large mu asymptotic', () => {
-      const check = (x, y, mu) => {
-        const q1 = special.marcumQ(mu + 1, x, y)
-        const q2 = special.marcumQ(mu, x, y)
-        const q3 = special.marcumQ(mu + 2, x, y)
-        const q4 = special.marcumQ(mu - 1, x, y)
-        const r = x > mu
-          ? ((x - mu) * q1 + (y + mu) * q2) / (x * q3 + y * q4)
-          : ((y + mu) * q2) / (x * q3 + (mu - x) * q1 + y * q4)
-        assert(equal(r, 1))
-      }
-
       it('should satisfy the recurrence relation', () => {
         // mu >= 135 is the dispatch threshold; at the boundary the mu-1 order
         // may fall on the recurrence branch, but the three-term identity holds

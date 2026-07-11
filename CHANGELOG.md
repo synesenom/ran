@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Code Health of `test/special.js` improved from 8.28 → 9.09 by extracting shared `check`, `checkBesselIdentity`, and `checkF11Recurrence` helpers to eliminate duplicated recurrence and identity assertion logic.
 - Code Health of `src/special/marcum-q.js` improved from 8.67 → 10.0: extracted `_expansionSum`, `_transitionBand`, and `_initPhi` helpers to eliminate three Complex Method smells.
 
 ## [1.30.0] - 2026-07-09
