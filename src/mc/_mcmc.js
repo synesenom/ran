@@ -43,7 +43,7 @@ export default class MCMC {
     return {
       x: this.x,
       samplingRate: this.samplingRate,
-      internals: this._internal()
+      internal: this._internal()
     }
   }
 
