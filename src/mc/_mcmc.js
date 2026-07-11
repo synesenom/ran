@@ -37,7 +37,7 @@ export default class MCMC {
    *
    * @method state
    * @memberof ran.mc.MCMC
-   * @returns {Object} Object containing the current position, sampling rate, and subclass internals.
+   * @returns {Object} Object with properties: x (current position), samplingRate (thinning interval), and internal (subclass state).
    */
   state () {
     return {
