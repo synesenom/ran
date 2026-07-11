@@ -295,41 +295,51 @@ const UnitTests = {
     }
     const specs = Array.isArray(tc.fit) ? tc.fit : [tc.fit]
     specs.forEach((spec, i) => {
-      const { params, seed, n, data: fixedData, tolerances, exact, usableAt, fitCheck } = spec
       const label = specs.length > 1
         ? `${tc.name}.fit[${i}] should recover planted parameters`
         : `${tc.name}.fit should recover planted parameters`
-      it(label, () => {
-        const data = fixedData != null ? fixedData : new dist[tc.name](...params).seed(seed).sample(n)
-        const planted = params != null ? new dist[tc.name](...params) : null
-        const result = dist[tc.name].fit(data)
-        // Always verify fit returns the right type; tolerances/exact/usableAt/fitCheck add
-        // further assertions. An entry with none of them (heuristic-MOM fits where recovery
-        // is not reliable) intentionally asserts only the instance type.
-        assert(result instanceof dist[tc.name])
-        if (tolerances && planted) {
-          Object.entries(tolerances).forEach(([name, tol]) => {
-            assert(Math.abs(result.p[name] - planted.p[name]) < tol,
-              `${tc.name}.fit ${name} = ${result.p[name]}, expected ≈ ${planted.p[name]} (tol ${tol})`)
-          })
-        }
-        if (exact && planted) {
-          exact.forEach(name => {
-            assert.strictEqual(result.p[name], planted.p[name],
-              `${tc.name}.fit ${name} = ${result.p[name]}, expected exactly ${planted.p[name]}`)
-          })
-        }
-        if (usableAt !== undefined) {
-          assert(Number.isFinite(result.pdf(usableAt)) && result.pdf(usableAt) > 0,
-            `${tc.name}.fit pdf(${usableAt}) = ${result.pdf(usableAt)}, expected finite and positive`)
-        }
-        if (fitCheck) {
-          fitCheck.forEach(({ at, fn, value, tol }) => {
-            assert(Math.abs(result[fn](at) - value) < tol,
-              `${tc.name}.fit ${fn}(${at}) = ${result[fn](at)}, expected ≈ ${value} (tol ${tol})`)
-          })
-        }
-      })
+      it(label, () => assertFitSpec(tc, spec))
+    })
+  }
+}
+
+// Runs all assertions for one fit spec; extracted from UnitTests.fit to reduce cyclomatic complexity.
+function assertParamRecovery (tc, result, planted, { tolerances, exact }) {
+  if (!planted) {
+    return
+  }
+  if (tolerances) {
+    Object.entries(tolerances).forEach(([name, tol]) => {
+      assert(Math.abs(result.p[name] - planted.p[name]) < tol,
+        `${tc.name}.fit ${name} = ${result.p[name]}, expected ≈ ${planted.p[name]} (tol ${tol})`)
+    })
+  }
+  if (exact) {
+    exact.forEach(name => {
+      assert.strictEqual(result.p[name], planted.p[name],
+        `${tc.name}.fit ${name} = ${result.p[name]}, expected exactly ${planted.p[name]}`)
+    })
+  }
+}
+
+function assertFitSpec (tc, spec) {
+  const { params, seed, n, data: fixedData, usableAt, fitCheck } = spec
+  const data = fixedData != null ? fixedData : new dist[tc.name](...params).seed(seed).sample(n)
+  const planted = params != null ? new dist[tc.name](...params) : null
+  const result = dist[tc.name].fit(data)
+  // Always verify fit returns the right type; tolerances/exact/usableAt/fitCheck add
+  // further assertions. An entry with none of them (heuristic-MOM fits where recovery
+  // is not reliable) intentionally asserts only the instance type.
+  assert(result instanceof dist[tc.name])
+  assertParamRecovery(tc, result, planted, spec)
+  if (usableAt !== undefined) {
+    assert(Number.isFinite(result.pdf(usableAt)) && result.pdf(usableAt) > 0,
+      `${tc.name}.fit pdf(${usableAt}) = ${result.pdf(usableAt)}, expected finite and positive`)
+  }
+  if (fitCheck) {
+    fitCheck.forEach(({ at, fn, value, tol }) => {
+      assert(Math.abs(result[fn](at) - value) < tol,
+        `${tc.name}.fit ${fn}(${at}) = ${result[fn](at)}, expected ≈ ${value} (tol ${tol})`)
     })
   }
 }
