@@ -149,7 +149,7 @@ describe('mc.RWM', () => {
       const rwm2 = new RWM(lnp, { dim: 1 }, state)
       assert.deepEqual(rwm2.x, state.x)
       assert.strictEqual(rwm2.samplingRate, state.samplingRate)
-      assert.deepEqual(rwm2._sigma, state.internal.proposal)
+      assert.deepEqual(rwm2.state().internal.proposal, state.internal.proposal)
     })
   })
 
@@ -228,7 +228,7 @@ describe('mc.gelmanRubin', () => {
       const chain1 = Array.from({ length: 500 }, () => [normal.sample()])
       const chain2 = Array.from({ length: 500 }, () => [normal.sample()])
       const result = gelmanRubin([chain1, chain2])
-      assert.closeTo(result[0][result[0].length - 1], 1.0, 0.2)
+      assert.closeTo(result[0][result[0].length - 1], 1.0, 0.05)
     })
   })
 })
