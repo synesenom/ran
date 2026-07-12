@@ -46,7 +46,7 @@ npm run typecheck
 - `src/special/` — Special mathematical functions: gamma, log-gamma, incomplete gamma/beta, beta, log-beta, Bessel functions, error function, digamma, hypergeometric, Hurwitz zeta, Riemann zeta, Lambert W, Marcum Q, Owen T, Stirling numbers.
 - `src/core/` — PRNG (`xoshiro.js` — xoshiro128+), mathematical constants, seeding utilities. Exports `float` (uniform `[0,1)`), `int`, and `bool` generators.
 - `src/la/` — Linear algebra: `matrix.js` and `vector.js`.
-- `src/mc/` — Markov Chain Monte Carlo: `mcmc.js` (base), `rwm.js` (random walk Metropolis), `slice.js` (slice sampling), `mcmc2.js`, `gelman-rubin.js` (convergence diagnostic).
+- `src/mc/` — Markov Chain Monte Carlo: `_mcmc.js` (base), `rwm.js` (random walk Metropolis), `gelman-rubin.js` (convergence diagnostic). (`SliceSampler` was removed in PR #615; re-add tracked in #822.)
 - `src/location/`, `src/dispersion/`, `src/shape/`, `src/dependence/` — Statistical summary measures (mean, median, variance, skewness, Pearson, Spearman, Kendall, etc.).
 - `src/test/` — Statistical hypothesis tests (Bartlett, Levene, Brown-Forsythe, Mann-Whitney, HSIC).
 - `src/ts/` — Time series: online covariance.
