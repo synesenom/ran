@@ -2,6 +2,9 @@
   "permissions": {
     "allow": [
       "mcp__codescene__*",
+      "mcp__Claude_Code_Remote__subscribe_pr_activity",
+      "mcp__Claude_Code_Remote__unsubscribe_pr_activity",
+      "mcp__Claude_Code_Remote__send_later",
       "Edit(.claude/tmp*)",
       "Write(.claude/tmp*)",
       "Bash(git diff*)",
