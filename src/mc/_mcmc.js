@@ -17,6 +17,7 @@ import Xoshiro128p from '../core/xoshiro'
  * position), {samplingRate} (thinning interval), and {internal} for subclass-specific state.
  * @constructor
  * @throws {Error} If config.dim is provided but is not a positive integer, or exceeds the maximum allowed dimension.
+ * @throws {Error} If config.maxLag is provided but is not a positive integer, or exceeds the maximum allowed lag.
  */
 // decisions/0020-mcmc-design.md — accumulator design and the _iter/_adjust/_internal subclass contract
 export default class MCMC {
@@ -25,6 +26,7 @@ export default class MCMC {
       throw Error('MCMC is abstract and cannot be instantiated directly.')
     }
     MCMC._validateDim(config.dim)
+    MCMC._validateMaxLag(config.maxLag)
     this.dim = config.dim || 1
     this.maxLag = config.maxLag || 100
     this.lnp = logDensity
@@ -306,11 +308,30 @@ export default class MCMC {
     }
   }
 
+  // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
+  static _validateMaxLag (maxLag) {
+    if (maxLag === undefined) {
+      return
+    }
+    if (!MCMC._isPositiveInteger(maxLag)) {
+      throw Error('MCMC: maxLag must be a positive integer')
+    }
+    // Bounds the per-dimension _acBuf/_acCross Float64Array allocations in _initAccumulators();
+    // unbounded maxLag otherwise lets a caller trigger an OOM crash. See #922.
+    if (maxLag > MCMC._MAX_LAG) {
+      throw Error(`MCMC: maxLag must be at most ${MCMC._MAX_LAG}`)
+    }
+  }
+
   static _isPositiveInteger (dim) {
     return Number.isInteger(dim) && dim >= 1
   }
 
   static get _MAX_DIM () {
+    return 10000
+  }
+
+  static get _MAX_LAG () {
     return 10000
   }
 }

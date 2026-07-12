@@ -55,6 +55,32 @@ describe('mc.MCMC', () => {
       assert.doesNotThrow(() => new RWM(() => 0, { dim: 10000 }))
     })
 
+    it('should throw for maxLag: 0', () => {
+      assert.throws(() => new RWM(() => 0, { maxLag: 0 }), /maxLag must be a positive integer/)
+    })
+
+    it('should throw for a negative maxLag', () => {
+      assert.throws(() => new RWM(() => 0, { maxLag: -2 }), /maxLag must be a positive integer/)
+    })
+
+    it('should throw for a non-integer maxLag', () => {
+      assert.throws(() => new RWM(() => 0, { maxLag: 1.5 }), /maxLag must be a positive integer/)
+    })
+
+    it('should throw for a maxLag above the maximum allowed', () => {
+      assert.throws(() => new RWM(() => 0, { maxLag: 1e9 }), /maxLag must be at most/)
+      assert.throws(() => new RWM(() => 0, { maxLag: 10001 }), /maxLag must be at most/)
+    })
+
+    it('should not throw for a maxLag at the maximum allowed', () => {
+      assert.doesNotThrow(() => new RWM(() => 0, { maxLag: 10000 }))
+    })
+
+    it('should default to maxLag: 100 when omitted', () => {
+      const rwm = new RWM(x => -0.5 * x[0] * x[0])
+      assert.strictEqual(rwm.maxLag, 100)
+    })
+
     it('should default to dim: 1 when omitted', () => {
       const rwm = new RWM(x => -0.5 * x[0] * x[0])
       assert.strictEqual(rwm.dim, 1)
