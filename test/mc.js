@@ -33,6 +33,30 @@ describe('mc.MCMC', () => {
     it('should throw when instantiated directly', () => {
       assert.throws(() => new MCMC(() => 0), /abstract/)
     })
+
+    it('should throw for dim: 0', () => {
+      assert.throws(() => new RWM(() => 0, { dim: 0 }), /dim must be a positive integer/)
+    })
+
+    it('should throw for a negative dim', () => {
+      assert.throws(() => new RWM(() => 0, { dim: -2 }), /dim must be a positive integer/)
+    })
+
+    it('should throw for a non-integer dim', () => {
+      assert.throws(() => new RWM(() => 0, { dim: 1.5 }), /dim must be a positive integer/)
+    })
+
+    it('should default to dim: 1 when omitted', () => {
+      const rwm = new RWM(x => -0.5 * x[0] * x[0])
+      assert.strictEqual(rwm.dim, 1)
+      assert.strictEqual(rwm.sample(null, 1)[0].length, 1)
+    })
+
+    it('should not throw for a valid multi-dimensional dim', () => {
+      const rwm = new RWM(x => -0.5 * (x[0] * x[0] + x[1] * x[1] + x[2] * x[2]), { dim: 3 })
+      assert.strictEqual(rwm.dim, 3)
+      assert.strictEqual(rwm.sample(null, 1)[0].length, 3)
+    })
   })
 
   describe('.statistics()', () => {
@@ -173,6 +197,58 @@ describe('mc.RWM', () => {
       assert(ksTest(values, x => ref.cdf(x)))
     })
   })
+
+  describe('.seed()', () => {
+    const logDensity = x => -0.5 * x[0] ** 2;
+
+    [0, 42, 12345].forEach(seed => {
+      it(`should produce bitwise-identical samples when seed ${seed} is applied twice`, () => {
+        const rwm1 = new RWM(logDensity, { dim: 1 }).seed(seed)
+        rwm1.warmUp(null, 3)
+        const samples1 = rwm1.sample(null, 50)
+
+        const rwm2 = new RWM(logDensity, { dim: 1 }).seed(seed)
+        rwm2.warmUp(null, 3)
+        const samples2 = rwm2.sample(null, 50)
+
+        assert.deepEqual(samples1, samples2)
+      })
+    })
+
+    it('should produce different samples for different seeds', () => {
+      const rwm0 = new RWM(logDensity, { dim: 1 }).seed(0)
+      rwm0.warmUp(null, 3)
+      const samples0 = rwm0.sample(null, 50)
+
+      const rwm1 = new RWM(logDensity, { dim: 1 }).seed(1)
+      rwm1.warmUp(null, 3)
+      const samples1 = rwm1.sample(null, 50)
+
+      assert.notDeepEqual(samples0, samples1)
+    });
+
+    [0, 42, 12345].forEach(seed => {
+      it(`should recover the unit-Gaussian target's moments and a reasonable acceptance rate for seed ${seed}`, () => {
+        const rwm = new RWM(logDensity, { dim: 1 }).seed(seed)
+        rwm.warmUp(null, 10)
+        const samples = rwm.sample(null, 2000)
+        const values = samples.map(s => s[0])
+        const n = values.length
+        const mean = values.reduce((a, b) => a + b, 0) / n
+        const variance = values.reduce((a, b) => a + (b - mean) ** 2, 0) / (n - 1)
+
+        // true mean/variance of the unit-Gaussian target, not derived from the implementation
+        assert.closeTo(mean, 0, 0.05)
+        assert.closeTo(variance, 1.0, 0.1)
+
+        const ref = new Normal(0, 1)
+        assert(ksTest(values, x => ref.cdf(x)))
+
+        const ar = rwm.ar()
+        assert(ar > 0.2 && ar < 0.7, `acceptance rate ${ar} outside (0.2, 0.7)`)
+      })
+    })
+  })
 })
 
 describe('mc.gelmanRubin', () => {
@@ -229,6 +305,37 @@ describe('mc.gelmanRubin', () => {
       const chain2 = Array.from({ length: 500 }, () => [normal.sample()])
       const result = gelmanRubin([chain1, chain2])
       assert.closeTo(result[0][result[0].length - 1], 1.0, 0.05)
+    })
+  })
+
+  describe('seeded RWM chains', () => {
+    const logDensity = x => -0.5 * x[0] ** 2
+
+    it('should return an R-hat array for two chains seeded with different values', () => {
+      const rwm1 = new RWM(logDensity, { dim: 1 }).seed(1)
+      rwm1.warmUp(null, 3)
+      const chain1 = rwm1.sample(null, 50)
+
+      const rwm2 = new RWM(logDensity, { dim: 1 }).seed(2)
+      rwm2.warmUp(null, 3)
+      const chain2 = rwm2.sample(null, 50)
+
+      const result = gelmanRubin([chain1, chain2])
+      assert.strictEqual(result.length, 1)
+      assert.strictEqual(result[0].length, 49)
+    })
+
+    it('should converge to R-hat < 1.1 for two long, seeded chains from the same unit-Gaussian target', () => {
+      const rwm1 = new RWM(logDensity, { dim: 1 }).seed(100)
+      rwm1.warmUp(null, 10)
+      const chain1 = rwm1.sample(null, 500)
+
+      const rwm2 = new RWM(logDensity, { dim: 1 }).seed(200)
+      rwm2.warmUp(null, 10)
+      const chain2 = rwm2.sample(null, 500)
+
+      const result = gelmanRubin([chain1, chain2])
+      assert.isBelow(result[0][result[0].length - 1], 1.1)
     })
   })
 })
