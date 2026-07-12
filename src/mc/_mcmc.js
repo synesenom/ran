@@ -217,7 +217,7 @@ export default class MCMC {
    * @protected
    * @ignore
    */
-  _iter () {
+  _iter (x, warmUp) {
     throw Error('MCMC._iter() is not implemented')
   }
 
@@ -230,7 +230,7 @@ export default class MCMC {
    * @protected
    * @ignore
    */
-  _adjust () {
+  _adjust (i) {
     throw Error('MCMC._adjust() is not implemented')
   }
 

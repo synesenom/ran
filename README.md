@@ -27,6 +27,7 @@ A comprehensive JavaScript library for probability distributions, random variate
 - [Distribution API](#distribution-api)
   - [State serialisation](#state-serialisation)
 - [Process API](#process-api)
+- [MC API](#mc-api)
 - [Return values and errors](#return-values-and-errors)
 - [Numerical precision](#numerical-precision)
   - [Test reference values](#test-reference-values)
@@ -146,6 +147,7 @@ console.log(fitted.test(data))  // => { statistics: 0.42, passed: true }
 |-----------|----------|
 | `ran.dist` | 144 probability distributions |
 | `ran.process` | Stochastic processes: AR(1), Brownian motion, Brownian bridge, Cox–Ingersoll–Ross, geometric Brownian motion, Ornstein–Uhlenbeck, Poisson process, random walk |
+| `ran.mc` | Random-walk Metropolis sampler, Gelman–Rubin convergence diagnostic |
 | `ran.location` | Mean, median, mode, geometric mean, harmonic mean, trimean, midrange |
 | `ran.dispersion` | Variance, standard deviation, IQR, Gini coefficient, entropy, CV, … |
 | `ran.shape` | Skewness, kurtosis, quantiles, moments, min, max, rank |
@@ -225,6 +227,40 @@ Available processes:
 | `ran.process.GeometricBrownianMotion(mu, sigma, dt)` | Multiplicative Brownian motion; log-normal increments |
 | `ran.process.BrownianBridge(sigma, T, dt)` | Brownian bridge pinned to 0 at time T |
 | `ran.process.PoissonProcess(lambda, dt)` | Counting process with Poisson(λ·dt) increments per step |
+
+## MC API
+
+`ran.mc` provides Markov chain Monte Carlo sampling and convergence diagnostics for targets whose density is known only up to a normalizing constant.
+
+```javascript
+const rwm = new ran.mc.RWM(logDensity, { dim: 1 })  // logDensity: unnormalized log target density
+
+rwm.warmUp()           // tune proposal step size and the thinning interval
+rwm.sample(null, 1000) // draw 1000 (thinned) samples
+rwm.statistics()       // per-dimension { mean, std, cv } since the last reset
+rwm.ar()               // cumulative acceptance rate since the last reset
+rwm.ac()               // autocorrelation vs. lag, per dimension
+rwm.state()            // snapshot: { x, samplingRate, internal } for resuming a chain
+rwm.seed(42)           // seed the PRNG for reproducible chains; returns the instance
+```
+
+Available samplers:
+
+| Class | Description |
+|-------|-------------|
+| `ran.mc.RWM(logDensity, config, initialState)` | Random-walk Metropolis-Hastings sampler with Robbins-Monro step-size adaptation during warm-up |
+
+`ran.mc.gelmanRubin(samples, maxLength)` computes the R-hat convergence diagnostic across two or more independent chains (each an array of states returned by `sample()`):
+
+```javascript
+const chain1 = new ran.mc.RWM(logDensity, { dim: 1 }).seed(1)
+chain1.warmUp()
+const chain2 = new ran.mc.RWM(logDensity, { dim: 1 }).seed(2)
+chain2.warmUp()
+
+const rHat = ran.mc.gelmanRubin([chain1.sample(null, 500), chain2.sample(null, 500)])
+// rHat[0] → R-hat vs. iteration count for dimension 0; values near 1 indicate convergence
+```
 
 ## Return values and errors
 
