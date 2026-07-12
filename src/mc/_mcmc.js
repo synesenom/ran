@@ -12,6 +12,7 @@ import Xoshiro128p from '../core/xoshiro'
  * <ul>
  *   <li>{dim}: Dimension of the state space. Default is 1.</li>
  *   <li>{maxLag}: Maximum lag stored for autocorrelation estimation. Default is 100.</li>
+ *   <li>{arWindow}: Number of most recent iterations ar() averages over. Default is 1000.</li>
  * </ul>
  * @param {Object=} initialState Initial state of the sampler. Supported properties: {x} (starting
  * position), {samplingRate} (thinning interval), and {internal} for subclass-specific state.
@@ -25,8 +26,11 @@ export default class MCMC {
       throw Error('MCMC is abstract and cannot be instantiated directly.')
     }
     MCMC._validateDim(config.dim)
-    this.dim = config.dim || 1
-    this.maxLag = config.maxLag || 100
+    MCMC._validateArWindow(config.arWindow)
+    const resolved = MCMC._resolveConfig(config)
+    this.dim = resolved.dim
+    this.maxLag = resolved.maxLag
+    this._arWindow = resolved.arWindow
     this.lnp = logDensity
     this.r = new Xoshiro128p()
     // Tracked so seed() can tell whether it should re-draw x — otherwise a random
@@ -92,17 +96,18 @@ export default class MCMC {
   }
 
   /**
-   * Computes the cumulative acceptance rate since the last reset.
+   * Computes the acceptance rate over the most recent arWindow iterations (a sliding window,
+   * default 1000). During the partial-fill phase, before arWindow iterations have occurred since
+   * the last reset, this equals the exact cumulative rate.
    *
    * @method ar
    * @memberof ran.mc.MCMC
-   * @returns {number} Fraction of proposals accepted.
+   * @returns {number} Fraction of proposals accepted in the current window.
    */
-  // decisions/0021-mcmc-windowed-acceptance-rate.md — cumulative-since-reset today; a sliding-window
-  // replacement is scoped there (a follow-up issue implements it) so mid-warmUp() reads stop being
-  // dragged down by early untuned batches.
+  // decisions/0021-mcmc-windowed-acceptance-rate.md — sliding window over the last arWindow draws
+  // so mid-warmUp() reads aren't dragged down by early untuned batches.
   ar () {
-    return this._totalIter > 0 ? this._accepted / this._totalIter : 0
+    return this._arN > 0 ? this._arCount / Math.min(this._arN, this._arWindow) : 0
   }
 
   /**
@@ -164,8 +169,9 @@ export default class MCMC {
   }
 
   /**
-   * Samples from the target density. Resets accumulators so that statistics() and ar() reflect
-   * the sampling phase only. Thins the chain by samplingRate (set during warm-up).
+   * Samples from the target density. Resets accumulators so that statistics() reflects the
+   * sampling phase only, and ar() reflects at most its last arWindow draws (see ADR-0021). Thins
+   * the chain by samplingRate (set during warm-up).
    *
    * @method sample
    * @memberof ran.mc.MCMC
@@ -262,11 +268,23 @@ export default class MCMC {
     this._acN = 0
     this._acBuf = Array.from({ length: this.dim }, () => new Float64Array(this.maxLag))
     this._acCross = Array.from({ length: this.dim }, () => new Float64Array(this.maxLag))
+    // Circular buffer of accept/reject outcomes for the windowed ar() — decisions/0021-mcmc-windowed-acceptance-rate.md
+    this._arN = 0
+    this._arCount = 0
+    this._arBuf = new Uint8Array(this._arWindow)
   }
 
   _updateAccumulators (x, accepted) {
     this._totalIter++
     if (accepted) this._accepted++
+
+    // O(1) sliding window for ar() (decisions/0021-mcmc-windowed-acceptance-rate.md) instead of
+    // rescanning the last arWindow outcomes on every ar() call
+    const arCursor = this._arN % this._arWindow
+    const arValue = accepted ? 1 : 0
+    this._arCount += arValue - this._arBuf[arCursor]
+    this._arBuf[arCursor] = arValue
+    this._arN++
 
     for (let d = 0; d < this.dim; d++) {
       const v = x[d]
@@ -303,6 +321,27 @@ export default class MCMC {
     // in the constructor; unbounded dim otherwise lets a caller trigger an OOM crash. See #916.
     if (dim > MCMC._MAX_DIM) {
       throw Error(`MCMC: dim must be at most ${MCMC._MAX_DIM}`)
+    }
+  }
+
+  // Guards new Uint8Array(arWindow) in _initAccumulators() the same way _validateDim guards the
+  // per-dimension array allocations — an unvalidated non-integer arWindow silently corrupts the
+  // ring-buffer cursor arithmetic in _updateAccumulators() into permanent NaN.
+  static _validateArWindow (arWindow) {
+    if (arWindow === undefined) {
+      return
+    }
+    if (!MCMC._isPositiveInteger(arWindow)) {
+      throw Error('MCMC: arWindow must be a positive integer')
+    }
+  }
+
+  // Kept out of the constructor to avoid a Complex Method smell there.
+  static _resolveConfig (config) {
+    return {
+      dim: config.dim || 1,
+      maxLag: config.maxLag || 100,
+      arWindow: config.arWindow || 1000
     }
   }
 

@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `ran.mc.MCMC.ar()` now reports the acceptance rate over a sliding window of the most recent `config.arWindow` iterations (default 1000) instead of the cumulative rate since the last reset, so mid-`warmUp()` reads aren't dragged down by early untuned batches. During the partial-fill phase (fewer than `arWindow` iterations since reset) the value is unchanged from before. See ADR-0021 (#920, #926).
 - Code Health of `test/special.js` improved from 8.28 → 9.09 by extracting shared `check`, `checkBesselIdentity`, and `checkF11Recurrence` helpers to eliminate duplicated recurrence and identity assertion logic.
 - Code Health of `src/special/marcum-q.js` improved from 8.67 → 10.0: extracted `_expansionSum`, `_transitionBand`, and `_initPhi` helpers to eliminate three Complex Method smells.
 - Code Health of `test/dist.js` improved from 8.76 → 9.09: extracted `assertFitSpec`, `assertParamRecovery` helpers from the `fit` UnitTest method to eliminate a Complex Method (cc=13) and an Excess Number of Function Arguments smell.
