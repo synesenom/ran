@@ -19,7 +19,7 @@ function _gri (chains, dim) {
  * @method gelmanRubin
  * @memberof ran.mc
  * @param {Array} samples Array of chains, where each chain is an array of states returned by
- * {@link ran.mc.RWM#sample}. At least two chains are required.
+ * [RWM#sample]{@link ran.mc.RWM#sample}. At least two chains are required.
  * @param {number=} maxLength Maximum number of diagnostic values to return per dimension. Defaults
  * to the full chain length.
  * @returns {number[][]} Array of R-hat-vs-iteration arrays, one per state dimension.
