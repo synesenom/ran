@@ -98,6 +98,9 @@ export default class MCMC {
    * @memberof ran.mc.MCMC
    * @returns {number} Fraction of proposals accepted.
    */
+  // decisions/0021-mcmc-windowed-acceptance-rate.md — cumulative-since-reset today; a sliding-window
+  // replacement is scoped there (a follow-up issue implements it) so mid-warmUp() reads stop being
+  // dragged down by early untuned batches.
   ar () {
     return this._totalIter > 0 ? this._accepted / this._totalIter : 0
   }
