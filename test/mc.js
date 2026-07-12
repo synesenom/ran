@@ -46,6 +46,15 @@ describe('mc.MCMC', () => {
       assert.throws(() => new RWM(() => 0, { dim: 1.5 }), /dim must be a positive integer/)
     })
 
+    it('should throw for a dim above the maximum allowed', () => {
+      assert.throws(() => new RWM(() => 0, { dim: 1e9 }), /dim must be at most/)
+      assert.throws(() => new RWM(() => 0, { dim: 10001 }), /dim must be at most/)
+    })
+
+    it('should not throw for a dim at the maximum allowed', () => {
+      assert.doesNotThrow(() => new RWM(() => 0, { dim: 10000 }))
+    })
+
     it('should default to dim: 1 when omitted', () => {
       const rwm = new RWM(x => -0.5 * x[0] * x[0])
       assert.strictEqual(rwm.dim, 1)
