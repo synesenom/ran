@@ -9,8 +9,8 @@ import { ksTest } from './test-utils'
 // Concrete subclass that replays a pre-built sequence, enabling deterministic
 // accumulator testing without involving the PRNG.
 class TestMCMC extends MCMC {
-  constructor (sequence) {
-    super(() => 0, { dim: 1 }, { x: [0] })
+  constructor (sequence, config = {}) {
+    super(() => 0, { dim: 1, ...config }, { x: [0] })
     this._seq = sequence
     this._i = 0
   }
@@ -92,6 +92,25 @@ describe('mc.MCMC', () => {
       assert.strictEqual(rwm.dim, 3)
       assert.strictEqual(rwm.sample(null, 1)[0].length, 3)
     })
+
+    it('should throw for arWindow: 0', () => {
+      assert.throws(() => new RWM(() => 0, { arWindow: 0 }), /arWindow must be a positive integer/)
+    })
+
+    it('should throw for a negative arWindow', () => {
+      assert.throws(() => new RWM(() => 0, { arWindow: -2 }), /arWindow must be a positive integer/)
+    })
+
+    it('should throw for a non-integer arWindow', () => {
+      assert.throws(() => new RWM(() => 0, { arWindow: 2.5 }), /arWindow must be a positive integer/)
+    })
+
+    it('should not throw for a valid arWindow and use it for ar()', () => {
+      const mc = new TestMCMC([1, 2].map(v => ({ x: [v], accepted: true })), { arWindow: 2 })
+      assert.doesNotThrow(() => mc.iterate())
+      // exact rational: 1 accepted / min(1, 2) = 1
+      assert.strictEqual(mc.ar(), 1)
+    })
   })
 
   describe('.statistics()', () => {
@@ -137,6 +156,76 @@ describe('mc.MCMC', () => {
       for (let i = 0; i < 5; i++) mc.iterate()
       // exact rational: 3 accepted / 5 total = 0.6
       assert.closeTo(mc.ar(), 0.6, 1e-14)
+    })
+
+    it('should match the exact cumulative ratio during the partial-fill phase', () => {
+      const seq = [
+        { x: [1], accepted: true },
+        { x: [2], accepted: true },
+        { x: [3], accepted: false }
+      ]
+      // arWindow (1000) far exceeds the 3 iterations run, so the window is still partially filled
+      const mc = new TestMCMC(seq, { arWindow: 1000 })
+      for (let i = 0; i < 3; i++) mc.iterate()
+      // exact rational: 2 accepted / 3 total = 2/3, identical to the cumulative-since-reset formula
+      assert.closeTo(mc.ar(), 2 / 3, 1e-14)
+    })
+
+    it('should compute the exact rate at the window boundary', () => {
+      const seq = [
+        { x: [1], accepted: true },
+        { x: [2], accepted: true },
+        { x: [3], accepted: false }
+      ]
+      const mc = new TestMCMC(seq, { arWindow: 3 })
+      for (let i = 0; i < 3; i++) mc.iterate()
+      // exact rational: 2 accepted / 3 total (= arWindow, the transition point) = 2/3
+      assert.closeTo(mc.ar(), 2 / 3, 1e-14)
+    })
+
+    it('should reflect only the last arWindow iterations once the window is exceeded', () => {
+      const seq = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(v => ({ x: [v], accepted: v <= 5 }))
+      const mc = new TestMCMC(seq, { arWindow: 3 })
+      for (let i = 0; i < 10; i++) mc.iterate()
+      // exact rational: the last 3 iterations (8, 9, 10) are all rejected → 0 / 3 = 0,
+      // even though 5 of the 10 iterations overall were accepted
+      assert.strictEqual(mc.ar(), 0)
+    })
+
+    it('should use a custom config.arWindow to size the sliding window', () => {
+      const seq = [1, 2, 3, 4].map(v => ({ x: [v], accepted: v <= 2 }))
+      const mc = new TestMCMC(seq, { arWindow: 2 })
+      for (let i = 0; i < 4; i++) mc.iterate()
+      // exact rational: the last 2 iterations (3, 4) are both rejected → 0 / 2 = 0
+      assert.strictEqual(mc.ar(), 0)
+    })
+  })
+
+  describe('.ar() during warmUp()', () => {
+    // Deterministic subclass whose acceptance outcome step-changes partway through a run,
+    // used to verify ar() forgets an early untuned phase instead of staying cumulative over it.
+    class PhaseMCMC extends MCMC {
+      constructor (config, flipAt) {
+        super(() => 0, config, { x: [0] })
+        this._n = 0
+        this._flipAt = flipAt
+      }
+
+      _internal () { return {} }
+      _adjust () {}
+      _iter (x) {
+        this._n++
+        return { x, accepted: this._n > this._flipAt }
+      }
+    }
+
+    it('should reflect only the tuned phase, not the untuned start, after warmUp()', () => {
+      // maxBatches: 1 → warmUp() runs 2 batches of 1e4 iterations = 20000 total (batch <= maxBatches)
+      const mc = new PhaseMCMC({ dim: 1, arWindow: 500 }, 10000)
+      mc.warmUp(null, 1)
+      // exact rational: the last 500 iterations (19501-20000) all occur after the 10000-iteration
+      // flip point → 500/500 = 1, unlike the cumulative rate over all 20000 (which would be 0.5)
+      assert.strictEqual(mc.ar(), 1)
     })
   })
 
