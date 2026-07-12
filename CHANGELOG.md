@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `ran.mc.MCMC` (and all subclasses, e.g. `ran.mc.RWM`) now reject `config.dim` above 10000, throwing a clear `Error` instead of allocating oversized per-dimension arrays and crashing the process with an out-of-memory error (#916).
+
 ### Added
 
 - `seed(value)` method on `ran.mc.MCMC` (and `ran.mc.RWM`, which additionally reseeds its internal proposal distribution) for deterministic, reproducible sampling. Internally, both classes now use a per-instance `Xoshiro128p` PRNG instead of the shared module-level generator, so seeding a sampler no longer affects unrelated code sharing that singleton. If the initial position was not explicitly supplied, `seed()` also redraws it from the newly seeded generator so that `.seed(s).sample(n)` is fully reproducible (#912).

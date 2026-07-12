@@ -16,7 +16,7 @@ import Xoshiro128p from '../core/xoshiro'
  * @param {Object=} initialState Initial state of the sampler. Supported properties: {x} (starting
  * position), {samplingRate} (thinning interval), and {internal} for subclass-specific state.
  * @constructor
- * @throws {Error} If config.dim is provided but is not a positive integer.
+ * @throws {Error} If config.dim is provided but is not a positive integer, or exceeds the maximum allowed dimension.
  */
 // decisions/0020-mcmc-design.md — accumulator design and the _iter/_adjust/_internal subclass contract
 export default class MCMC {
@@ -293,13 +293,24 @@ export default class MCMC {
 
   // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
   static _validateDim (dim) {
-    if (dim === undefined || MCMC._isPositiveInteger(dim)) {
+    if (dim === undefined) {
       return
     }
-    throw Error('MCMC: dim must be a positive integer')
+    if (!MCMC._isPositiveInteger(dim)) {
+      throw Error('MCMC: dim must be a positive integer')
+    }
+    // Bounds per-dimension array allocations (Welford accumulators, autocorrelation buffers)
+    // in the constructor; unbounded dim otherwise lets a caller trigger an OOM crash. See #916.
+    if (dim > MCMC._MAX_DIM) {
+      throw Error(`MCMC: dim must be at most ${MCMC._MAX_DIM}`)
+    }
   }
 
   static _isPositiveInteger (dim) {
     return Number.isInteger(dim) && dim >= 1
+  }
+
+  static get _MAX_DIM () {
+    return 10000
   }
 }
