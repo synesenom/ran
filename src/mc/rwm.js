@@ -35,6 +35,7 @@ export default class RWM extends MCMC {
    * @memberof ran.mc.RWM
    * @param {number|string} value The value of the seed, either a number or a string (for the ease of tracking seeds).
    * @returns {this} Reference to the current sampler.
+   * @ignore
    */
   seed (value) {
     super.seed(value)

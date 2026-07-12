@@ -132,6 +132,13 @@ export default class MCMC {
   /**
    * Performs a single iteration, updates accumulators, and optionally calls a callback.
    *
+   * Advanced/low-level: most callers should use {@link ran.mc.MCMC#warmUp} and
+   * {@link ran.mc.MCMC#sample} instead, which drive `iterate()` internally. Calling it manually is
+   * for cases that need per-step control (e.g. live progress plotting, custom stopping rules).
+   * `sample()` resets the accumulators before it starts collecting, but interleaving manual
+   * `iterate()` calls with `warmUp()`/`sample()` otherwise does not — mixing manual draws in can
+   * blend adaptation-phase and equilibrium-phase observations into `statistics()`, `ar()`, and `ac()`.
+   *
    * @method iterate
    * @memberof ran.mc.MCMC
    * @param {Function=} callback Called with (x, accepted) after each iteration.
