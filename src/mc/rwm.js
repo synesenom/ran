@@ -1,5 +1,4 @@
 import MCMC from './_mcmc'
-import { float } from '../core'
 import { Normal } from '../dist'
 
 /**
@@ -26,6 +25,24 @@ export default class RWM extends MCMC {
     this._pN = 0
     this._pBatch = 0
     this._pIndex = 0
+  }
+
+  /**
+   * Sets the seed for the sampler's pseudo random number generator, including the internal
+   * proposal distribution's generator.
+   *
+   * @method seed
+   * @memberof ran.mc.RWM
+   * @param {number|string} value The value of the seed, either a number or a string (for the ease of tracking seeds).
+   * @returns {this} Reference to the current sampler.
+   */
+  seed (value) {
+    super.seed(value)
+    this._q.seed(value)
+    // super.seed() may have redrawn this.x from the newly seeded generator, so lastLnp
+    // (computed against the pre-seed x at construction time) must be recomputed to match.
+    this.lastLnp = this.lnp(this.x)
+    return this
   }
 
   // Proposes a new state. During warm-up: single-dimension (Gibbs) update.
@@ -58,7 +75,7 @@ export default class RWM extends MCMC {
   _iter (x, warmUp) {
     let x1 = this._jump(x, warmUp)
     const newLnp = this.lnp(x1)
-    const accepted = float() < Math.exp(newLnp - this.lastLnp)
+    const accepted = this.r.next() < Math.exp(newLnp - this.lastLnp)
     if (accepted) {
       this.lastLnp = newLnp
     } else {
