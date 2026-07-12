@@ -11,7 +11,56 @@ import CompoundPoissonProcess from '../src/process/compound-poisson-process'
 import PoissonProcess from '../src/process/poisson-process'
 import RandomWalk from '../src/process/random-walk'
 import { Normal, Poisson } from '../src/dist'
-import { ksTest, chiTest } from './test-utils'
+
+// Fixed seeds replace ksTest/chiTest significance-level checks: a random seed can produce
+// a false positive/negative at the chosen critical value on some runs, while a fixed seed
+// deterministically reproduces the same sample every run.
+const MOMENT_SEEDS = [0, 42, 12345]
+
+// Sample mean/variance are compared against an exact closed-form derived independently from
+// each process's SDE/update rule — never against the process's own mean()/variance() methods,
+// which would make the test a tautology against the code under test (decisions: never write
+// the same formula in both the production method and the test assertion). The comparison uses
+// a CLT-derived tolerance: SE(mean) = sqrt(variance/n), and SE(variance) ≈ variance*sqrt(2/(n-1))
+// (exact for Gaussian data, a reasonable order-of-magnitude bound for the Poisson/Bernoulli/
+// Gamma-like samples used elsewhere in this file). K standard errors keeps false failures
+// negligible at all three fixed seeds.
+const K_SIGMA = 8
+
+function assertSampleMoments (sample, expectedMean, expectedVariance, seed) {
+  const n = sample.length
+  const mean = sample.reduce((a, b) => a + b, 0) / n
+  const variance = sample.reduce((a, b) => a + (b - mean) * (b - mean), 0) / (n - 1)
+  const tolMean = K_SIGMA * Math.sqrt(expectedVariance / n)
+  const tolVariance = K_SIGMA * expectedVariance * Math.sqrt(2 / (n - 1))
+  assert.closeTo(mean, expectedMean, tolMean, `seed ${seed}: sample mean ${mean} vs expected ${expectedMean}`)
+  assert.closeTo(variance, expectedVariance, tolVariance, `seed ${seed}: sample variance ${variance} vs expected ${expectedVariance}`)
+}
+
+// Draws n single-step samples from a continuously evolving path, transforming each
+// (newState, prevState) pair. Relies on the step distribution being stationary and
+// independent of the current state (true for all processes this helper is used with).
+function sampleSteps (proc, n, transform = (curr, prev) => curr - prev) {
+  const samples = []
+  for (let i = 0; i < n; i++) {
+    const prev = proc.state()
+    proc.next()
+    samples.push(transform(proc.state(), prev))
+  }
+  return samples
+}
+
+// Draws n independent single-step samples from x0, resetting between draws. Needed
+// whenever the step distribution depends on the current state (e.g. a time-indexed bridge).
+function sampleResetSteps (proc, n) {
+  const samples = []
+  for (let i = 0; i < n; i++) {
+    proc.reset()
+    proc.next()
+    samples.push(proc.state())
+  }
+  return samples
+}
 
 describe('process._Process', () => {
   describe('.validate()', () => {
@@ -429,21 +478,17 @@ describe('process.BrownianMotion', () => {
   })
 
   describe('increments', () => {
-    it('should be normally distributed (KS test)', () => {
+    it('should have mean and variance matching mu*dt and sigma^2*dt across seeds', () => {
       const mu = 0.1
       const sigma = 1.5
       const dt = 0.5
-      const bm = new BrownianMotion(mu, sigma, dt)
-      bm.seed(42)
-      const n = 1000
-      const increments = []
-      for (let i = 0; i < n; i++) {
-        const prev = bm.state()
-        bm.next()
-        increments.push(bm.state() - prev)
+      const n = 5000
+      // exact rational: BM increment ~ N(mu*dt, sigma^2*dt) by definition of the SDE
+      for (const seed of MOMENT_SEEDS) {
+        const bm = new BrownianMotion(mu, sigma, dt)
+        bm.seed(seed)
+        assertSampleMoments(sampleSteps(bm, n), mu * dt, sigma * sigma * dt, seed)
       }
-      const ref = new Normal(mu * dt, sigma * Math.sqrt(dt))
-      assert(ksTest(increments, x => ref.cdf(x)))
     })
   })
 })
@@ -621,23 +666,21 @@ describe('process.GeometricBrownianMotion', () => {
   })
 
   describe('log-returns', () => {
-    it('should be normally distributed (KS test)', () => {
+    it('should have mean and variance matching the GBM/Itô log-return identity across seeds', () => {
       const mu = 0.05
       const sigma = 0.2
       const dt = 1
-      const gbm = new GeometricBrownianMotion(mu, sigma, dt)
-      gbm.seed(42)
-      const n = 1000
-      const logReturns = []
-      for (let i = 0; i < n; i++) {
-        const prev = gbm.state()
-        gbm.next()
-        logReturns.push(Math.log(gbm.state() / prev))
-      }
+      const n = 5000
+      // exact rational: log(X_{t+dt}/X_t) ~ N((mu - sigma^2/2)*dt, sigma^2*dt) by Itô's lemma,
+      // independent of the sampler implementation
       const meanLR = (mu - 0.5 * sigma * sigma) * dt
-      const stdLR = sigma * Math.sqrt(dt)
-      const ref = new Normal(meanLR, stdLR)
-      assert(ksTest(logReturns, x => ref.cdf(x)))
+      const varLR = sigma * sigma * dt
+      for (const seed of MOMENT_SEEDS) {
+        const gbm = new GeometricBrownianMotion(mu, sigma, dt)
+        gbm.seed(seed)
+        const logReturns = sampleSteps(gbm, n, (curr, prev) => Math.log(curr / prev))
+        assertSampleMoments(logReturns, meanLR, varLR, seed)
+      }
     })
   })
 })
@@ -805,22 +848,23 @@ describe('process.OrnsteinUhlenbeck', () => {
   })
 
   describe('stationarity', () => {
-    it('should converge to stationary distribution (KS test)', () => {
+    it('should converge to stationary mean mu and variance sigma^2/(2*theta) across seeds', () => {
       const theta = 2; const mu = 3; const sigma = 1; const dt = 0.1
-      const ou = new OrnsteinUhlenbeck(theta, mu, sigma, dt)
-      ou.seed(42)
-      for (let i = 0; i < 500; i++) ou.next()
-      // lag-1 autocorrelation is exp(-theta*dt)=exp(-0.2)≈0.82; thin by 20 to get
-      // independent draws (lag-20 autocorrelation ≈ 0.018) so the KS critical
-      // value 1.628/sqrt(1000) is valid
-      const samples = []
-      for (let i = 0; i < 20000; i++) {
-        ou.next()
-        if (i % 20 === 0) samples.push(ou.state())
+      // exact rational: OU stationary distribution is N(mu, sigma^2/(2*theta))
+      const stationaryVariance = sigma * sigma / (2 * theta)
+      for (const seed of MOMENT_SEEDS) {
+        const ou = new OrnsteinUhlenbeck(theta, mu, sigma, dt)
+        ou.seed(seed)
+        for (let i = 0; i < 500; i++) ou.next()
+        // lag-1 autocorrelation is exp(-theta*dt)=exp(-0.2)≈0.82; thin by 20 to get
+        // independent draws (lag-20 autocorrelation ≈ 0.018)
+        const samples = []
+        for (let i = 0; i < 20000; i++) {
+          ou.next()
+          if (i % 20 === 0) samples.push(ou.state())
+        }
+        assertSampleMoments(samples, mu, stationaryVariance, seed)
       }
-      const stationaryStd = sigma / Math.sqrt(2 * theta)
-      const ref = new Normal(mu, stationaryStd)
-      assert(ksTest(samples, x => ref.cdf(x)))
     })
   })
 })
@@ -1086,22 +1130,18 @@ describe('process.BrownianBridge', () => {
   })
 
   describe('increments', () => {
-    it('should be normally distributed at t=0 (KS test)', () => {
-      // At t=0, X_0=0 so drift=0; increment is exactly sigma*sqrt(dt)*Z ~ N(0, sigma*sqrt(dt))
+    it('should have mean and variance matching sigma^2*dt*(T-dt)/T at t=0 across seeds', () => {
       const sigma = 1.5
       const T = 100
       const dt = 1
-      const bb = new BrownianBridge(sigma, T, dt)
-      bb.seed(42)
-      const n = 1000
-      const increments = []
-      for (let i = 0; i < n; i++) {
-        bb.reset()
-        bb.next()
-        increments.push(bb.state())
+      const n = 5000
+      // exact rational: standard Brownian bridge variance formula sigma^2*t*(T-t)/T evaluated at t=dt
+      const expectedVariance = sigma * sigma * dt * (T - dt) / T
+      for (const seed of MOMENT_SEEDS) {
+        const bb = new BrownianBridge(sigma, T, dt)
+        bb.seed(seed)
+        assertSampleMoments(sampleResetSteps(bb, n), 0, expectedVariance, seed)
       }
-      const ref = new Normal(0, sigma * Math.sqrt(dt))
-      assert(ksTest(increments, x => ref.cdf(x)))
     })
   })
 })
@@ -1270,22 +1310,24 @@ describe('process.AR1', () => {
   })
 
   describe('stationarity', () => {
-    it('should converge to stationary distribution for |phi| < 1 (KS test)', () => {
+    it('should converge to stationary mean 0 and variance sigma^2/(1-phi^2) across seeds', () => {
       const phi = 0.5
       const sigma = 1
-      const ar1 = new AR1(phi, sigma)
-      ar1.seed(42)
-      // burn in to reach stationarity
-      for (let i = 0; i < 500; i++) ar1.next()
-      // thin by 10: lag-10 autocorrelation = phi^10 ≈ 0.001, effectively independent
-      const samples = []
-      for (let i = 0; i < 10000; i++) {
-        ar1.next()
-        if (i % 10 === 0) samples.push(ar1.state())
+      // exact rational: AR1 stationary variance = sigma^2/(1-phi^2) = 1/(1-0.25) = 4/3
+      const stationaryVariance = sigma * sigma / (1 - phi * phi)
+      for (const seed of MOMENT_SEEDS) {
+        const ar1 = new AR1(phi, sigma)
+        ar1.seed(seed)
+        // burn in to reach stationarity
+        for (let i = 0; i < 500; i++) ar1.next()
+        // thin by 10: lag-10 autocorrelation = phi^10 ≈ 0.001, effectively independent
+        const samples = []
+        for (let i = 0; i < 10000; i++) {
+          ar1.next()
+          if (i % 10 === 0) samples.push(ar1.state())
+        }
+        assertSampleMoments(samples, 0, stationaryVariance, seed)
       }
-      const stationarySd = sigma / Math.sqrt(1 - phi * phi)
-      const ref = new Normal(0, stationarySd)
-      assert(ksTest(samples, x => ref.cdf(x)))
     })
   })
 
@@ -1353,20 +1395,16 @@ describe('process.PoissonProcess', () => {
   })
 
   describe('increments', () => {
-    it('should follow Poisson(lambda*dt) distribution (chi-squared test)', () => {
+    it('should have mean and variance matching lambda*dt across seeds', () => {
       const lambda = 3
       const dt = 0.5
-      const pp = new PoissonProcess(lambda, dt)
-      pp.seed(42)
-      const n = 2000
-      const increments = []
-      for (let i = 0; i < n; i++) {
-        const prev = pp.state()
-        pp.next()
-        increments.push(pp.state() - prev)
+      const n = 5000
+      // exact rational: Poisson(lambda*dt) increment has mean = variance = lambda*dt
+      for (const seed of MOMENT_SEEDS) {
+        const pp = new PoissonProcess(lambda, dt)
+        pp.seed(seed)
+        assertSampleMoments(sampleSteps(pp, n), lambda * dt, lambda * dt, seed)
       }
-      const ref = new Poisson(lambda * dt)
-      assert(chiTest(increments, k => ref.pdf(k), 0))
     })
   })
 
@@ -1642,21 +1680,21 @@ describe('process.CompoundPoissonProcess', () => {
     })
   })
 
-  describe('mean increment', () => {
-    it('should have increments with mean close to lambda*dt*E[J]', () => {
+  describe('increments', () => {
+    it('should have mean and variance matching lambda*dt*E[J] and lambda*dt*E[J^2] across seeds', () => {
       const lambda = 2
       const dt = 0.5
       const muJ = 1
-      const cpp = new CompoundPoissonProcess(new Normal(muJ, 1), lambda, dt)
       const n = 5000
-      let sum = 0
-      for (let i = 0; i < n; i++) {
-        cpp.reset()
-        cpp.next()
-        sum += cpp.state()
+      // exact rational: compound Poisson increment has mean = lambda*dt*E[J], variance = lambda*dt*E[J^2];
+      // for jumpDist = Normal(muJ, 1), E[J] = muJ and E[J^2] = Var(J) + E[J]^2 = 1 + muJ^2
+      const expectedMean = lambda * dt * muJ
+      const expectedVariance = lambda * dt * (1 + muJ * muJ)
+      for (const seed of MOMENT_SEEDS) {
+        const cpp = new CompoundPoissonProcess(new Normal(muJ, 1), lambda, dt)
+        cpp.seed(seed)
+        assertSampleMoments(sampleResetSteps(cpp, n), expectedMean, expectedVariance, seed)
       }
-      // exact rational: E[increment] = lambda*dt*muJ = 2*0.5*1 = 1
-      assert.closeTo(sum / n, lambda * dt * muJ, 0.1)
     })
   })
 })
@@ -1780,15 +1818,22 @@ describe('process.CoxIngersollRoss', () => {
   })
 
   describe('stationarity', () => {
-    it('should converge to stationary mean theta (time-average test)', () => {
-      const theta = 1.5
-      const cir = new CoxIngersollRoss(2, theta, 0.5, 0.01)
-      cir.seed(42)
-      for (let i = 0; i < 5000; i++) cir.next()
-      let sum = 0
-      const n = 10000
-      for (let i = 0; i < n; i++) sum += cir.next()
-      assert.closeTo(sum / n, theta, 0.05)
+    it('should converge to stationary mean theta and variance sigma^2*theta/(2*kappa) across seeds', () => {
+      const kappa = 2; const theta = 1.5; const sigma = 0.5; const dt = 0.01
+      const burnInSteps = 500
+      const m = 3000
+      // exact rational: CIR stationary distribution is Gamma with mean theta and variance
+      // sigma^2*theta/(2*kappa); burn-in time = burnInSteps*dt = 5 with kappa=2 makes the
+      // finite-time bias (~exp(-kappa*burnInTime) = exp(-10)) negligible relative to the
+      // sampling tolerance
+      const stationaryVariance = sigma * sigma * theta / (2 * kappa)
+      for (const seed of MOMENT_SEEDS) {
+        const cir = new CoxIngersollRoss(kappa, theta, sigma, dt)
+        cir.seed(seed)
+        const paths = cir.ensemble(m, burnInSteps)
+        const samples = paths.map(path => path[burnInSteps])
+        assertSampleMoments(samples, theta, stationaryVariance, seed)
+      }
     })
   })
 
@@ -2119,19 +2164,15 @@ describe('process.RandomWalk', () => {
   })
 
   describe('step distribution', () => {
-    it('should produce +1/-1 steps matching Bernoulli(p) (chi-squared test)', () => {
+    it('should have mean and variance matching 2p-1 and 4p(1-p) across seeds', () => {
       const p = 0.7
-      const rw = new RandomWalk(p)
-      rw.seed(42)
-      const n = 2000
-      const steps = []
-      for (let i = 0; i < n; i++) {
-        const prev = rw.state()
-        rw.next()
-        steps.push(rw.state() - prev)
+      const n = 5000
+      // exact rational: a single ±1 step has mean = 2p-1, variance = 4p(1-p)
+      for (const seed of MOMENT_SEEDS) {
+        const rw = new RandomWalk(p)
+        rw.seed(seed)
+        assertSampleMoments(sampleSteps(rw, n), 2 * p - 1, 4 * p * (1 - p), seed)
       }
-      // step ∈ {-1, +1}: model(-1) = 1-p, model(1) = p; c=1 estimated parameter
-      assert(chiTest(steps, k => k === 1 ? p : (1 - p), 1))
     })
   })
 })
