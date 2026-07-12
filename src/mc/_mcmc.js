@@ -18,6 +18,7 @@ import Xoshiro128p from '../core/xoshiro'
  * @constructor
  * @throws {Error} If config.dim is provided but is not a positive integer.
  */
+// decisions/0020-mcmc-design.md — accumulator design and the _iter/_adjust/_internal subclass contract
 export default class MCMC {
   constructor (logDensity, config = {}, initialState = {}) {
     if (new.target === MCMC) {
@@ -170,6 +171,7 @@ export default class MCMC {
    * @returns {number[][]} Array of sampled states.
    */
   sample (progress, size = 1000) {
+    // Reset so warm-up's adaptation-phase draws don't blend into sampling-phase statistics — decisions/0020-mcmc-design.md
     this._initAccumulators()
     const iMax = this.samplingRate * size
     const batchSize = iMax / 100
@@ -227,7 +229,8 @@ export default class MCMC {
     throw Error('MCMC._adjust() is not implemented')
   }
 
-  // First lag at which all dimensions have |autocorrelation| <= 0.05
+  // Thins to where autocorrelation has decayed to near-zero so sample() returns closer-to-independent
+  // draws, using the slowest-mixing dimension as the bound — 0.05 cutoff rationale in decisions/0020-mcmc-design.md
   _thinningLag () {
     return this.ac().reduce((first, d) => {
       for (let i = 0; i < d.length - 1; i++) {
@@ -250,9 +253,9 @@ export default class MCMC {
   _initAccumulators () {
     this._accepted = 0
     this._totalIter = 0
-    // Welford online mean/variance per dimension
+    // Welford online mean/variance per dimension — O(1) per update, avoids naive-formula cancellation; decisions/0020-mcmc-design.md
     this._welford = Array.from({ length: this.dim }, () => ({ n: 0, mean: 0, M2: 0 }))
-    // Circular buffer + running cross-product sums for online autocorrelation per dimension
+    // Circular buffer + running cross-product sums for online autocorrelation — O(dim*maxLag) per query, replacing the old O(maxHistory) full rescan; decisions/0020-mcmc-design.md
     this._acN = 0
     this._acBuf = Array.from({ length: this.dim }, () => new Float64Array(this.maxLag))
     this._acCross = Array.from({ length: this.dim }, () => new Float64Array(this.maxLag))
