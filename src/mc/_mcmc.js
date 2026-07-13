@@ -169,12 +169,14 @@ export default class MCMC {
    * @param {number=} maxBatches Number of warm-up batches. Default is 100.
    */
   warmUp (progress, maxBatches = 100) {
-    for (let batch = 0; batch <= maxBatches; batch++) {
+    for (let batch = 0; batch < maxBatches; batch++) {
       for (let j = 0; j < 1e4; j++) {
         this._adjust(this.iterate(null, true))
       }
       this._adjustSamplingRate(this._thinningLag())
-      typeof progress === 'function' && progress(100 * batch / maxBatches)
+      // Report after each completed batch so the final call is exactly 100%; the old
+      // batch <= maxBatches / 100*batch bound ran one extra batch and fired a redundant 0%.
+      typeof progress === 'function' && progress(100 * (batch + 1) / maxBatches)
     }
   }
 
@@ -185,7 +187,7 @@ export default class MCMC {
    *
    * @method sample
    * @memberof ran.mc.MCMC
-   * @param {Function=} progress Called with the percentage complete (0–100) at 1% intervals.
+   * @param {Function=} progress Called with the integer percentage complete (0–99), once per percent.
    * @param {number=} size Number of samples to collect. Default is 1000.
    * @returns {number[][]} Array of sampled states.
    */
@@ -193,12 +195,18 @@ export default class MCMC {
     // Reset so warm-up's adaptation-phase draws don't blend into sampling-phase statistics — decisions/0020-mcmc-design.md
     this._initAccumulators()
     const iMax = this.samplingRate * size
-    const batchSize = iMax / 100
     const samples = []
+    // Integer-percent reporting: i % (iMax/100) mis-fired when iMax was not a multiple of 100
+    // (float modulus rarely hits 0), so track the last reported percent and emit each once.
+    let lastPct = -1
     for (let i = 0; i < iMax; i++) {
       this.iterate()
-      if (i % batchSize === 0 && typeof progress === 'function') {
-        progress(i / batchSize)
+      if (typeof progress === 'function') {
+        const pct = Math.floor(100 * i / iMax)
+        if (pct > lastPct) {
+          lastPct = pct
+          progress(pct)
+        }
       }
       if (i % this.samplingRate === 0) {
         samples.push(this.x)
@@ -252,12 +260,20 @@ export default class MCMC {
   // draws, using the slowest-mixing dimension as the bound — 0.05 cutoff rationale in decisions/0020-mcmc-design.md
   _thinningLag () {
     return this.ac().reduce((first, d) => {
+      let lastValid = 0
       for (let i = 0; i < d.length - 1; i++) {
-        if (!isNaN(d[i]) && Math.abs(d[i]) <= 0.05) {
+        if (isNaN(d[i])) continue
+        if (Math.abs(d[i]) <= 0.05) {
           return Math.max(first, i)
         }
+        lastValid = i
       }
-      return first
+      // No lag decorrelated within the measured range: the chain mixes slower than
+      // maxLag can resolve, so fall back to the largest lag we could actually
+      // evaluate. Returning 0 here would mark the slowest-mixing dimension as
+      // "already decorrelated" and drive samplingRate DOWN, inverting the
+      // "slowest dimension wins" rule — decisions/0020-mcmc-design.md §3.
+      return Math.max(first, lastValid)
     }, 0)
   }
 
@@ -269,9 +285,9 @@ export default class MCMC {
     }
   }
 
+  // Update recurrences, derivations, and invariants for all three accumulators
+  // below are contractual — see decisions/0023-mcmc-accumulator-mechanics.md.
   _initAccumulators () {
-    this._accepted = 0
-    this._totalIter = 0
     // Welford online mean/variance per dimension — O(1) per update, avoids naive-formula cancellation; decisions/0020-mcmc-design.md
     this._welford = Array.from({ length: this.dim }, () => ({ n: 0, mean: 0, M2: 0 }))
     // Circular buffer + running cross-product sums for online autocorrelation — O(dim*maxLag) per query, replacing the old O(maxHistory) full rescan; decisions/0020-mcmc-design.md
@@ -285,9 +301,6 @@ export default class MCMC {
   }
 
   _updateAccumulators (x, accepted) {
-    this._totalIter++
-    if (accepted) this._accepted++
-
     // O(1) sliding window for ar() (decisions/0021-mcmc-windowed-acceptance-rate.md) instead of
     // rescanning the last arWindow outcomes on every ar() call
     const arCursor = this._arN % this._arWindow

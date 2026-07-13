@@ -220,12 +220,26 @@ describe('mc.MCMC', () => {
     }
 
     it('should reflect only the tuned phase, not the untuned start, after warmUp()', () => {
-      // maxBatches: 1 → warmUp() runs 2 batches of 1e4 iterations = 20000 total (batch <= maxBatches)
+      // warmUp() runs exactly maxBatches batches of 1e4 iterations; maxBatches: 2 → 20000 total.
       const mc = new PhaseMCMC({ dim: 1, arWindow: 500 }, 10000)
-      mc.warmUp(null, 1)
+      mc.warmUp(null, 2)
       // exact rational: the last 500 iterations (19501-20000) all occur after the 10000-iteration
       // flip point → 500/500 = 1, unlike the cumulative rate over all 20000 (which would be 0.5)
       assert.strictEqual(mc.ar(), 1)
+    })
+  })
+
+  describe('.warmUp() batch count', () => {
+    it('should run exactly maxBatches batches and report 100% at completion', () => {
+      // 4e4 entries covers even the old off-by-one (maxBatches+1 = 4 batches × 1e4) without
+      // running dry, so the failure surfaces as a count assertion rather than a crash.
+      const seq = Array.from({ length: 4e4 }, () => ({ x: [0], accepted: true }))
+      const mc = new TestMCMC(seq)
+      const pcts = []
+      mc.warmUp(p => pcts.push(p), 3)
+      // one progress callback per batch → exactly maxBatches callbacks, not maxBatches + 1
+      assert.strictEqual(pcts.length, 3)
+      assert.strictEqual(pcts[pcts.length - 1], 100)
     })
   })
 
@@ -250,6 +264,32 @@ describe('mc.MCMC', () => {
       for (let i = 0; i < 5; i++) mc.iterate()
       const ac = mc.ac()
       assert(Number.isNaN(ac[0][5]))
+    })
+  })
+
+  describe('._thinningLag()', () => {
+    it('should return a small lag for a rapidly-decorrelating (alternating) sequence', () => {
+      // A ±1 alternating chain has ac(1) ≈ -1, ac(2) ≈ +1, ...; |ac| never stays
+      // below 0.05, so this exercises the "found nothing" path deliberately too —
+      // but its short-lag structure is the well-mixing baseline to contrast with
+      // the monotone case below. Here we only assert the direction is not inverted.
+      const seq = Array.from({ length: 50 }, (_, i) => ({ x: [i % 2 === 0 ? 1 : -1], accepted: true }))
+      const mc = new TestMCMC(seq, { maxLag: 5 })
+      for (let i = 0; i < seq.length; i++) mc.iterate()
+      // maxLag 5 → lags 0..3 inspected; alternating |ac|≈1 everywhere, no lag ≤ 0.05,
+      // so the fallback is the largest inspected lag (maxLag - 2 = 3), NOT 0.
+      assert.strictEqual(mc._thinningLag(), 3)
+    })
+
+    it('should fall back to the largest measured lag when a chain never decorrelates', () => {
+      // A strictly increasing ramp has |ac| > 0.05 at every measurable lag. A lag of 0
+      // would signal "already decorrelated" and drive samplingRate DOWN for the
+      // slowest-mixing dimension — inverting ADR-0020 §3. The correct fallback is the
+      // largest lag we could evaluate (maxLag - 2 = 3 for maxLag 5).
+      const seq = Array.from({ length: 50 }, (_, i) => ({ x: [i], accepted: true }))
+      const mc = new TestMCMC(seq, { maxLag: 5 })
+      for (let i = 0; i < seq.length; i++) mc.iterate()
+      assert.strictEqual(mc._thinningLag(), 3)
     })
   })
 
@@ -285,6 +325,41 @@ describe('mc.RWM', () => {
       const result = rwm.iterate()
       assert.strictEqual(result.accepted, false)
       assert.strictEqual(rwm.x[0], 42)
+    })
+  })
+
+  describe('joint proposals', () => {
+    it('should perturb every component during warm-up, not one at a time', () => {
+      // Constant log-density: exp(0) = 1 > any r in [0,1), so the proposal is always
+      // accepted and the accepted move reveals which components were perturbed. A joint
+      // proposal moves all three; the old Metropolis-within-Gibbs warm-up moved only one.
+      const rwm = new RWM(() => 0, { dim: 3 }, { x: [0, 0, 0] }).seed(42)
+      const prev = rwm.x.slice()
+      const { x } = rwm.iterate(null, true)
+      assert.strictEqual(x.filter((v, j) => v !== prev[j]).length, 3)
+    })
+
+    it('should recover both margins of an independent 2D standard Normal target', () => {
+      const rwm = new RWM(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }).seed(7)
+      rwm.warmUp(null, 10)
+      const samples = rwm.sample(null, 2000)
+      const ref = new Normal(0, 1)
+      assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
+      assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+    })
+  })
+
+  describe('.sample() progress reporting', () => {
+    it('should report each integer percent once, even when the iteration count is not a multiple of 100', () => {
+      // samplingRate 3, size 250 → 750 iterations, deliberately not a multiple of 100. The old
+      // `i % (iMax/100)` float-modulus check under-reported here (only even percents fired).
+      const rwm = new RWM(x => -0.5 * x[0] * x[0], { dim: 1 }, { x: [0], samplingRate: 3 })
+      const pcts = []
+      rwm.sample(p => pcts.push(p), 250)
+      assert.strictEqual(pcts.length, 100)
+      assert.strictEqual(new Set(pcts).size, 100)
+      assert(pcts.every(p => Number.isInteger(p) && p >= 0 && p < 100))
+      assert.deepEqual(pcts, pcts.slice().sort((a, b) => a - b))
     })
   })
 

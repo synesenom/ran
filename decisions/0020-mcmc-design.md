@@ -66,3 +66,7 @@ The ±1-per-batch adjustment (rather than jumping straight to the estimated lag)
 - Raw sample values are no longer retained by the base class; any future diagnostic that needs the actual sequence of draws (not sufficient statistics) must consume the values returned by `sample()`/`iterate()` directly rather than reading them back off the accumulators.
 - The 0.05 autocorrelation threshold and the ±1 sampling-rate step are hardcoded in the base class; a sampler family that needs a different thinning criterion would have to override `_thinningLag()`/`_adjustSamplingRate()` rather than configure them.
 - `_internal()`'s returned key must match what the constructor reads back from `initialState.internal` — this is a naming contract between two methods that is not statically enforced. It was violated once already (see `solutions/correctness/2026-07-11-1230-mcmc-state-key-mismatch-silent-sigma-loss.md`) and remains a manual invariant subclass authors must maintain.
+
+## Related
+
+- [ADR-0023](0023-mcmc-accumulator-mechanics.md) — the detailed, contractual mechanics and invariants of the three accumulators whose adoption this ADR decided.
