@@ -19,7 +19,8 @@ import Xoshiro128p from '../core/xoshiro'
  * @constructor
  * @throws {Error} If config.dim is provided but is not a positive integer, or exceeds the maximum allowed dimension.
  * @throws {Error} If config.maxLag is provided but is not a positive integer, or exceeds the maximum allowed lag.
- * @throws {Error} If config.arWindow is provided but is not a positive integer.
+ * @throws {Error} If config.arWindow is provided but is not a positive integer, or exceeds the maximum allowed window.
+ * @throws {Error} If the combined dim*maxLag accumulator footprint exceeds the maximum allowed memory budget.
  */
 // decisions/0020-mcmc-design.md — accumulator design and the _iter/_adjust/_internal subclass contract
 export default class MCMC {
@@ -34,6 +35,7 @@ export default class MCMC {
     this.dim = resolved.dim
     this.maxLag = resolved.maxLag
     this._arWindow = resolved.arWindow
+    MCMC._validateCombinedFootprint(this.dim, this.maxLag)
     this.lnp = logDensity
     this.r = new Xoshiro128p()
     // Tracked so seed() can tell whether it should re-draw x — otherwise a random
@@ -362,6 +364,15 @@ export default class MCMC {
     }
   }
 
+  // Kept out of the constructor to avoid a Complex Method smell there. Runs on
+  // the resolved dim/maxLag (after _resolveConfig), not raw config, so it
+  // doesn't duplicate _resolveConfig's default-filling logic — see #928.
+  static _validateCombinedFootprint (dim, maxLag) {
+    if (dim * maxLag * 16 > MCMC._MAX_ACCUMULATOR_BYTES) {
+      throw Error(`MCMC: dim * maxLag must be at most ${Math.floor(MCMC._MAX_ACCUMULATOR_BYTES / 16)} (got ${dim * maxLag})`)
+    }
+  }
+
   // Guards new Uint8Array(arWindow) in _initAccumulators() the same way _validateDim guards the
   // per-dimension array allocations — an unvalidated non-integer arWindow silently corrupts the
   // ring-buffer cursor arithmetic in _updateAccumulators() into permanent NaN.
@@ -371,6 +382,13 @@ export default class MCMC {
     }
     if (!MCMC._isPositiveInteger(arWindow)) {
       throw Error('MCMC: arWindow must be a positive integer')
+    }
+    // Bounds the new Uint8Array(arWindow) allocation in _initAccumulators();
+    // unbounded arWindow otherwise lets a caller trigger an OOM crash, the
+    // same gap _MAX_DIM/_MAX_LAG closed for dim/maxLag. See #928 and
+    // solutions/correctness/2026-07-13-1624-mcmc-arwindow-sibling-bound-gap.md
+    if (arWindow > MCMC._MAX_AR_WINDOW) {
+      throw Error(`MCMC: arWindow must be at most ${MCMC._MAX_AR_WINDOW}`)
     }
   }
 
@@ -393,5 +411,22 @@ export default class MCMC {
 
   static get _MAX_LAG () {
     return 10000
+  }
+
+  // _arBuf = new Uint8Array(arWindow) is a single flat allocation, 1 byte per
+  // element — same order-of-magnitude cap as _MAX_DIM/_MAX_LAG for
+  // consistency, even though a Uint8Array is far cheaper per element than the
+  // Float64Arrays those bounds guard. See #928.
+  static get _MAX_AR_WINDOW () {
+    return 10000
+  }
+
+  // _acBuf/_acCross together allocate dim*maxLag*16 bytes (two Float64Arrays
+  // per dimension, 8 bytes/element each); 100MB is an order-of-magnitude
+  // budget well below typical heap limits while still permitting dim at its
+  // individual maximum (_MAX_DIM = 10000) with the default maxLag (100) —
+  // 16MB. See #928.
+  static get _MAX_ACCUMULATOR_BYTES () {
+    return 100e6
   }
 }
