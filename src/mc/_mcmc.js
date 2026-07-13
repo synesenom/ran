@@ -169,12 +169,14 @@ export default class MCMC {
    * @param {number=} maxBatches Number of warm-up batches. Default is 100.
    */
   warmUp (progress, maxBatches = 100) {
-    for (let batch = 0; batch <= maxBatches; batch++) {
+    for (let batch = 0; batch < maxBatches; batch++) {
       for (let j = 0; j < 1e4; j++) {
         this._adjust(this.iterate(null, true))
       }
       this._adjustSamplingRate(this._thinningLag())
-      typeof progress === 'function' && progress(100 * batch / maxBatches)
+      // Report after each completed batch so the final call is exactly 100%; the old
+      // batch <= maxBatches / 100*batch bound ran one extra batch and fired a redundant 0%.
+      typeof progress === 'function' && progress(100 * (batch + 1) / maxBatches)
     }
   }
 
@@ -185,7 +187,7 @@ export default class MCMC {
    *
    * @method sample
    * @memberof ran.mc.MCMC
-   * @param {Function=} progress Called with the percentage complete (0–100) at 1% intervals.
+   * @param {Function=} progress Called with the integer percentage complete (0–99), once per percent.
    * @param {number=} size Number of samples to collect. Default is 1000.
    * @returns {number[][]} Array of sampled states.
    */
@@ -193,12 +195,18 @@ export default class MCMC {
     // Reset so warm-up's adaptation-phase draws don't blend into sampling-phase statistics — decisions/0020-mcmc-design.md
     this._initAccumulators()
     const iMax = this.samplingRate * size
-    const batchSize = iMax / 100
     const samples = []
+    // Integer-percent reporting: i % (iMax/100) mis-fired when iMax was not a multiple of 100
+    // (float modulus rarely hits 0), so track the last reported percent and emit each once.
+    let lastPct = -1
     for (let i = 0; i < iMax; i++) {
       this.iterate()
-      if (i % batchSize === 0 && typeof progress === 'function') {
-        progress(i / batchSize)
+      if (typeof progress === 'function') {
+        const pct = Math.floor(100 * i / iMax)
+        if (pct > lastPct) {
+          lastPct = pct
+          progress(pct)
+        }
       }
       if (i % this.samplingRate === 0) {
         samples.push(this.x)

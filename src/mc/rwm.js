@@ -1,11 +1,25 @@
 import MCMC from './_mcmc'
 import { Normal } from '../dist'
 
+// Optimal Metropolis acceptance rates for a random-walk proposal: 0.44 in one
+// dimension, 0.234 in the high-dimensional limit (Roberts, Gelman & Gilks 1997;
+// Roberts & Rosenthal 2001). 0.234 is the standard multivariate target used for
+// every d > 1 — the intermediate optima (d=2: ~0.35, d=3: ~0.28) converge to it
+// quickly and are not worth a per-dimension table.
+const TARGET_1D = 0.44
+const TARGET_ND = 0.234
+
+// Adaptation batch length: acceptance is estimated over this many joint proposals
+// before the global scale is nudged. Matches the batch cadence of the Robbins-Monro
+// schedule in Roberts & Rosenthal (2009), "Examples of Adaptive MCMC".
+const BATCH = 100
+
 /**
  * Class implementing the (random walk) [Metropolis]{@link https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm}
- * algorithm. Proposals are updated per dimension using the
- * [Metropolis-within-Gibbs]{@link http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.161.2424}
- * procedure during warm-up and joint proposals during sampling.
+ * algorithm as a diagonal [adaptive Metropolis]{@link https://projecteuclid.org/euclid.bj/1080222083} sampler.
+ * Proposals are joint (every component perturbed at once) in both warm-up and sampling; during warm-up a single
+ * global step scale is adapted via batch Robbins-Monro toward the optimal acceptance rate (0.44 in one dimension,
+ * 0.234 for higher dimensions) and the per-component scales track the running marginal standard deviations.
  *
  * @class RWM
  * @memberof ran.mc
@@ -14,17 +28,21 @@ import { Normal } from '../dist'
  * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
  * @constructor
  */
+// decisions/0022-rwm-joint-adaptive-metropolis.md — joint diagonal adaptive Metropolis in both phases
 export default class RWM extends MCMC {
   constructor (logDensity, config, initialState) {
     super(logDensity, config, initialState)
     this.lastLnp = this.lnp(this.x)
     this._q = new Normal(0, 1)
-    this._sigma = (this.internal.proposal || new Array(this.dim).fill(1)).slice()
-    this._ls = this._sigma.map(d => Math.log(d))
-    this._pAccepted = new Array(this.dim).fill(0)
+    // Per-component base proposal scale: seeded from the caller-supplied proposal
+    // (or 1) and replaced by the running marginal std once warm-up has data.
+    this._base = (this.internal.proposal || new Array(this.dim).fill(1)).slice()
+    // Global log step scale, adapted toward the acceptance target during warm-up.
+    this._ls = 0
+    this._target = this.dim === 1 ? TARGET_1D : TARGET_ND
+    this._pAccepted = 0
     this._pN = 0
     this._pBatch = 0
-    this._pIndex = 0
   }
 
   /**
@@ -46,35 +64,8 @@ export default class RWM extends MCMC {
     return this
   }
 
-  // Proposes a new state. During warm-up: single-dimension (Gibbs) update.
-  // During sampling: all dimensions updated jointly.
-  _jump (x, warmUp) {
-    return warmUp
-      ? x.map((d, i) => d + (i === this._pIndex ? this._q.sample() * this._sigma[this._pIndex] : 0))
-      : x.map((d, i) => d + this._q.sample() * this._sigma[i])
-  }
-
-  // Batch Robbins-Monro step-size adaptation targeting 0.44 per-component acceptance rate.
-  _updateProposal (accepted) {
-    if (accepted) this._pAccepted[this._pIndex]++
-    this._pN++
-    if (this._pN === 100) {
-      const delta = Math.min(0.01, Math.pow(this._pBatch, -0.5))
-      this._ls[this._pIndex] += this._pAccepted[this._pIndex] / 100 > 0.44 ? delta : -delta
-      this._sigma[this._pIndex] = Math.exp(this._ls[this._pIndex])
-      this._pAccepted[this._pIndex] = 0
-      this._pN = 0
-      this._pIndex = (this._pIndex + 1) % this.dim
-      if (this._pIndex === 0) this._pBatch++
-    }
-  }
-
-  _internal () {
-    return { proposal: this._sigma.slice() }
-  }
-
-  _iter (x, warmUp) {
-    let x1 = this._jump(x, warmUp)
+  _iter (x) {
+    let x1 = this._jump(x)
     const newLnp = this.lnp(x1)
     const accepted = this.r.next() < Math.exp(newLnp - this.lastLnp)
     if (accepted) {
@@ -87,5 +78,49 @@ export default class RWM extends MCMC {
 
   _adjust (i) {
     this._updateProposal(i.accepted)
+  }
+
+  _internal () {
+    // Serialize the effective per-component proposal std (global scale folded in)
+    // so a resumed sampler reproduces the same joint proposal.
+    const s = Math.exp(this._ls)
+    return { proposal: this._base.map(d => d * s) }
+  }
+
+  // Joint random-walk proposal: every component is perturbed at once, scaled by the
+  // global step exp(_ls) times its per-component base scale.
+  _jump (x) {
+    const s = Math.exp(this._ls)
+    return x.map((d, i) => d + this._q.sample() * s * this._base[i])
+  }
+
+  // Batch adaptation of the joint proposal (warm-up only): adapt one global log-scale
+  // toward the target acceptance rate (Robbins-Monro, delta = min(0.01, batch^-1/2), the
+  // Roberts & Rosenthal 2009 schedule), and refresh the per-component base scales from the
+  // running marginal standard deviations so heterogeneous marginals stay well scaled.
+  // A single joint accept/reject cannot attribute acceptance to individual components, so
+  // per-component scaling is learned from the marginal variances rather than the acceptance.
+  _updateProposal (accepted) {
+    if (accepted) this._pAccepted++
+    this._pN++
+    if (this._pN < BATCH) return
+    this._pBatch++
+    const rate = this._pAccepted / BATCH
+    const delta = Math.min(0.01, Math.pow(this._pBatch, -0.5))
+    this._ls += rate > this._target ? delta : -delta
+    this._refreshBase()
+    this._pAccepted = 0
+    this._pN = 0
+  }
+
+  _refreshBase () {
+    const stats = this.statistics()
+    for (let i = 0; i < this.dim; i++) {
+      // Keep the seeded base until a component has a positive spread estimate; a zero-std
+      // early batch (n <= 1) would otherwise collapse the proposal to a point mass.
+      if (stats[i].std > 0) {
+        this._base[i] = stats[i].std
+      }
+    }
   }
 }

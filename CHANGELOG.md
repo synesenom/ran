@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `ran.mc.MCMC` (and all subclasses, e.g. `ran.mc.RWM`) now reject `config.dim` above 10000 and `config.maxLag` above 10000, throwing a clear `Error` instead of allocating oversized arrays and crashing the process with an out-of-memory error (#916, #922).
 - `ran.mc.MCMC` warm-up thinning no longer inverts for slow-mixing chains: when a dimension's autocorrelation never decays to ≤ 0.05 within `maxLag`, `_thinningLag()` now falls back to the largest measured lag instead of reporting 0. Previously a chain that mixed slower than `maxLag` could resolve was treated as already-decorrelated, driving `samplingRate` down toward 1 and under-thinning `sample()` — the opposite of the intended "slowest-mixing dimension wins" rule (ADR-0020 §3).
+- `ran.mc.MCMC.warmUp(progress, maxBatches)` now runs exactly `maxBatches` batches (was `maxBatches + 1` due to a `batch <= maxBatches` loop bound) and reports `100` at completion instead of firing a redundant `0%` callback at the start.
+- `ran.mc.MCMC.sample(progress, size)` now reports each integer percentage of progress exactly once. Previously the `i % (iMax/100)` check used a fractional modulus whenever the total iteration count was not a multiple of 100, silently skipping most progress callbacks.
 
 ### Added
 
@@ -18,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `ran.mc.RWM` now uses a consistent joint diagonal adaptive-Metropolis proposal in both warm-up and sampling instead of tuning per-component (Metropolis-within-Gibbs, 0.44 target) during warm-up and switching to joint proposals for sampling. Warm-up adapts a single global step scale via batch Robbins-Monro toward the optimal acceptance rate (0.44 for `dim = 1`, 0.234 for `dim > 1`) and tracks per-component scales from the running marginal standard deviations, so the proposal that is tuned is the proposal that samples. Behavior for `dim = 1` is unchanged (the two schemes coincide); multi-dimensional targets are now correctly tuned. See ADR-0022.
 - `ran.mc.MCMC.ar()` now reports the acceptance rate over a sliding window of the most recent `config.arWindow` iterations (default 1000) instead of the cumulative rate since the last reset, so mid-`warmUp()` reads aren't dragged down by early untuned batches. During the partial-fill phase (fewer than `arWindow` iterations since reset) the value is unchanged from before. See ADR-0021 (#920, #926).
 - Code Health of `test/special.js` improved from 8.28 → 9.09 by extracting shared `check`, `checkBesselIdentity`, and `checkF11Recurrence` helpers to eliminate duplicated recurrence and identity assertion logic.
 - Code Health of `src/special/marcum-q.js` improved from 8.67 → 10.0: extracted `_expansionSum`, `_transitionBand`, and `_initPhi` helpers to eliminate three Complex Method smells.
