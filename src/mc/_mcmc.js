@@ -286,7 +286,7 @@ export default class MCMC {
   }
 
   // Update recurrences, derivations, and invariants for all three accumulators
-  // below are documented in src/mc/ACCUMULATORS.md.
+  // below are contractual — see decisions/0023-mcmc-accumulator-mechanics.md.
   _initAccumulators () {
     // Welford online mean/variance per dimension — O(1) per update, avoids naive-formula cancellation; decisions/0020-mcmc-design.md
     this._welford = Array.from({ length: this.dim }, () => ({ n: 0, mean: 0, M2: 0 }))
