@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `ran.mc.MCMC` (and all subclasses, e.g. `ran.mc.RWM`) now reject `config.dim` above 10000 and `config.maxLag` above 10000, throwing a clear `Error` instead of allocating oversized arrays and crashing the process with an out-of-memory error (#916, #922).
+- `ran.mc.MCMC` warm-up thinning no longer inverts for slow-mixing chains: when a dimension's autocorrelation never decays to ≤ 0.05 within `maxLag`, `_thinningLag()` now falls back to the largest measured lag instead of reporting 0. Previously a chain that mixed slower than `maxLag` could resolve was treated as already-decorrelated, driving `samplingRate` down toward 1 and under-thinning `sample()` — the opposite of the intended "slowest-mixing dimension wins" rule (ADR-0020 §3).
 
 ### Added
 

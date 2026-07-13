@@ -253,6 +253,32 @@ describe('mc.MCMC', () => {
     })
   })
 
+  describe('._thinningLag()', () => {
+    it('should return a small lag for a rapidly-decorrelating (alternating) sequence', () => {
+      // A ±1 alternating chain has ac(1) ≈ -1, ac(2) ≈ +1, ...; |ac| never stays
+      // below 0.05, so this exercises the "found nothing" path deliberately too —
+      // but its short-lag structure is the well-mixing baseline to contrast with
+      // the monotone case below. Here we only assert the direction is not inverted.
+      const seq = Array.from({ length: 50 }, (_, i) => ({ x: [i % 2 === 0 ? 1 : -1], accepted: true }))
+      const mc = new TestMCMC(seq, { maxLag: 5 })
+      for (let i = 0; i < seq.length; i++) mc.iterate()
+      // maxLag 5 → lags 0..3 inspected; alternating |ac|≈1 everywhere, no lag ≤ 0.05,
+      // so the fallback is the largest inspected lag (maxLag - 2 = 3), NOT 0.
+      assert.strictEqual(mc._thinningLag(), 3)
+    })
+
+    it('should fall back to the largest measured lag when a chain never decorrelates', () => {
+      // A strictly increasing ramp has |ac| > 0.05 at every measurable lag. A lag of 0
+      // would signal "already decorrelated" and drive samplingRate DOWN for the
+      // slowest-mixing dimension — inverting ADR-0020 §3. The correct fallback is the
+      // largest lag we could evaluate (maxLag - 2 = 3 for maxLag 5).
+      const seq = Array.from({ length: 50 }, (_, i) => ({ x: [i], accepted: true }))
+      const mc = new TestMCMC(seq, { maxLag: 5 })
+      for (let i = 0; i < seq.length; i++) mc.iterate()
+      assert.strictEqual(mc._thinningLag(), 3)
+    })
+  })
+
   describe('abstract method stubs', () => {
     it('_internal() should throw when not overridden', () => {
       const mc = new UnimplementedMCMC()

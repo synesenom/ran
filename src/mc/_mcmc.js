@@ -252,12 +252,20 @@ export default class MCMC {
   // draws, using the slowest-mixing dimension as the bound — 0.05 cutoff rationale in decisions/0020-mcmc-design.md
   _thinningLag () {
     return this.ac().reduce((first, d) => {
+      let lastValid = 0
       for (let i = 0; i < d.length - 1; i++) {
-        if (!isNaN(d[i]) && Math.abs(d[i]) <= 0.05) {
+        if (isNaN(d[i])) continue
+        if (Math.abs(d[i]) <= 0.05) {
           return Math.max(first, i)
         }
+        lastValid = i
       }
-      return first
+      // No lag decorrelated within the measured range: the chain mixes slower than
+      // maxLag can resolve, so fall back to the largest lag we could actually
+      // evaluate. Returning 0 here would mark the slowest-mixing dimension as
+      // "already decorrelated" and drive samplingRate DOWN, inverting the
+      // "slowest dimension wins" rule — decisions/0020-mcmc-design.md §3.
+      return Math.max(first, lastValid)
     }, 0)
   }
 
