@@ -76,6 +76,18 @@ describe('mc.MCMC', () => {
       assert.doesNotThrow(() => new RWM(() => 0, { maxLag: 10000 }))
     })
 
+    it('should throw when dim and maxLag are each individually valid but their product exceeds the combined bound', () => {
+      assert.throws(() => new RWM(() => 0, { dim: 10000, maxLag: 10000 }), /dim \* maxLag must be at most/)
+    })
+
+    it('should not throw when dim*maxLag is exactly at the combined bound', () => {
+      assert.doesNotThrow(() => new RWM(() => 0, { dim: 10000, maxLag: 625 }))
+    })
+
+    it('should throw when dim*maxLag is just above the combined bound', () => {
+      assert.throws(() => new RWM(() => 0, { dim: 10000, maxLag: 626 }), /dim \* maxLag must be at most/)
+    })
+
     it('should default to maxLag: 100 when omitted', () => {
       const rwm = new RWM(x => -0.5 * x[0] * x[0])
       assert.strictEqual(rwm.maxLag, 100)
@@ -103,6 +115,15 @@ describe('mc.MCMC', () => {
 
     it('should throw for a non-integer arWindow', () => {
       assert.throws(() => new RWM(() => 0, { arWindow: 2.5 }), /arWindow must be a positive integer/)
+    })
+
+    it('should throw for an arWindow above the maximum allowed', () => {
+      assert.throws(() => new RWM(() => 0, { arWindow: 1e9 }), /arWindow must be at most/)
+      assert.throws(() => new RWM(() => 0, { arWindow: 10001 }), /arWindow must be at most/)
+    })
+
+    it('should not throw for an arWindow at the maximum allowed', () => {
+      assert.doesNotThrow(() => new RWM(() => 0, { arWindow: 10000 }))
     })
 
     it('should not throw for a valid arWindow and use it for ar()', () => {
