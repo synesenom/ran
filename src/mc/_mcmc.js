@@ -286,8 +286,6 @@ export default class MCMC {
   }
 
   _initAccumulators () {
-    this._accepted = 0
-    this._totalIter = 0
     // Welford online mean/variance per dimension — O(1) per update, avoids naive-formula cancellation; decisions/0020-mcmc-design.md
     this._welford = Array.from({ length: this.dim }, () => ({ n: 0, mean: 0, M2: 0 }))
     // Circular buffer + running cross-product sums for online autocorrelation — O(dim*maxLag) per query, replacing the old O(maxHistory) full rescan; decisions/0020-mcmc-design.md
@@ -301,9 +299,6 @@ export default class MCMC {
   }
 
   _updateAccumulators (x, accepted) {
-    this._totalIter++
-    if (accepted) this._accepted++
-
     // O(1) sliding window for ar() (decisions/0021-mcmc-windowed-acceptance-rate.md) instead of
     // rescanning the last arWindow outcomes on every ar() call
     const arCursor = this._arN % this._arWindow
