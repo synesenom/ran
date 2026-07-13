@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- `ran.mc.MCMC` (and all subclasses, e.g. `ran.mc.RWM`) now reject `config.dim` above 10000 and `config.maxLag` above 10000, throwing a clear `Error` instead of allocating oversized arrays and crashing the process with an out-of-memory error (#916, #922).
+- `ran.mc.MCMC` (and all subclasses, e.g. `ran.mc.RWM`) now reject `config.dim` above 10000, `config.maxLag` above 10000, `config.arWindow` above 10000, and any individually-valid `dim`/`maxLag` combination whose combined accumulator footprint (`dim * maxLag * 16` bytes) exceeds 100MB, throwing a clear `Error` instead of allocating oversized arrays and crashing the process with an out-of-memory error (#916, #922, #928).
 - `ran.mc.MCMC` warm-up thinning no longer inverts for slow-mixing chains: when a dimension's autocorrelation never decays to ≤ 0.05 within `maxLag`, `_thinningLag()` now falls back to the largest measured lag instead of reporting 0. Previously a chain that mixed slower than `maxLag` could resolve was treated as already-decorrelated, driving `samplingRate` down toward 1 and under-thinning `sample()` — the opposite of the intended "slowest-mixing dimension wins" rule (ADR-0020 §3).
 - `ran.mc.MCMC.warmUp(progress, maxBatches)` now runs exactly `maxBatches` batches (was `maxBatches + 1` due to a `batch <= maxBatches` loop bound) and reports `100` at completion instead of firing a redundant `0%` callback at the start.
 - `ran.mc.MCMC.sample(progress, size)` now reports each integer percentage of progress exactly once. Previously the `i % (iMax/100)` check used a fractional modulus whenever the total iteration count was not a multiple of 100, silently skipping most progress callbacks.
