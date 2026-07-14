@@ -262,6 +262,14 @@ const rHat = ran.mc.gelmanRubin([chain1.sample(null, 500), chain2.sample(null, 5
 // rHat[0] → R-hat vs. iteration count for dimension 0; values near 1 indicate convergence
 ```
 
+`ran.mc.runChains(logDensity, config, options)` mechanizes the pattern above: it constructs multiple independently-seeded `RWM` chains, warms up and samples each, and returns their samples plus the `gelmanRubin()` diagnostic in one call — the recommended workflow for gating MCMC convergence (single-chain diagnostics cannot distinguish "converged" from "stuck"):
+
+```javascript
+const { samples, rhat } = ran.mc.runChains(logDensity, { dim: 1 })
+// samples → one sample array per chain (2 chains, seeded [1, 2] by default)
+// rhat    → the gelmanRubin() diagnostic across those chains
+```
+
 ## Return values and errors
 
 `ranjs` signals an unusual result through one of four channels, chosen by the *kind* of situation:
