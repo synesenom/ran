@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `ran.mc` namespace (`RWM`, `gelmanRubin`) is now exported from the library's entry point, wiring it up to `ran.mc` after it was inadvertently left unexported during PR #615's cleanup (#617).
 - `seed(value)` method on `ran.mc.MCMC` (and `ran.mc.RWM`, which additionally reseeds its internal proposal distribution) for deterministic, reproducible sampling. Internally, both classes now use a per-instance `Xoshiro128p` PRNG instead of the shared module-level generator, so seeding a sampler no longer affects unrelated code sharing that singleton. If the initial position was not explicitly supplied, `seed()` also redraws it from the newly seeded generator so that `.seed(s).sample(n)` is fully reproducible (#912).
+- `ran.mc.runChains(logDensity, config, options)`: runs multiple independently-seeded `RWM` chains and computes the `gelmanRubin()` diagnostic across them in one call — the recommended workflow (ADR-0024) for gating MCMC convergence, since no signal computable from a single chain can distinguish "converged" from "stuck". Defaults to 2 chains seeded `[1, 2]`; `options.chains`, `options.warmUpBatches`, `options.sampleSize`, `options.seeds`, and `options.maxLength` are all configurable. Returns `{ samples, rhat }` (#935).
 
 ### Changed
 
