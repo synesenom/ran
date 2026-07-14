@@ -165,6 +165,10 @@ export default class MCMC {
    * Carries out the warm-up phase. Runs batches of 10K iterations, adapts internal parameters
    * via _adjust(), and tunes the thinning interval using the online autocorrelation estimate.
    *
+   * decisions/0024-mcmc-warmup-convergence-strategy.md — deliberately fixed-length, no convergence-triggered
+   * early stop: no signal computable from a single chain can distinguish "converged" from "stuck". Gate
+   * convergence on gelmanRubin() across multiple independently-seeded chains instead.
+   *
    * @method warmUp
    * @memberof ran.mc.MCMC
    * @param {Function=} progress Called with the percentage complete (0–100) after each batch.
