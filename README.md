@@ -238,7 +238,7 @@ const rwm = new ran.mc.RWM(logDensity, { dim: 1 })  // logDensity: unnormalized 
 rwm.warmUp()           // tune proposal step size and the thinning interval
 rwm.sample(null, 1000) // draw 1000 (thinned) samples
 rwm.statistics()       // per-dimension { mean, std, cv } since the last reset
-rwm.ar()               // cumulative acceptance rate since the last reset
+rwm.ar()               // acceptance rate over the most recent config.arWindow iterations (sliding window)
 rwm.ac()               // autocorrelation vs. lag, per dimension
 rwm.state()            // snapshot: { x, samplingRate, internal } for resuming a chain
 rwm.seed(42)           // seed the PRNG for reproducible chains; returns the instance
@@ -249,6 +249,7 @@ Available samplers:
 | Class | Description |
 |-------|-------------|
 | `ran.mc.RWM(logDensity, config, initialState)` | Random-walk Metropolis-Hastings sampler with Robbins-Monro step-size adaptation during warm-up |
+| `ran.mc.Gibbs(conditionals, config, initialState)` | Component-wise (systematic-scan) Gibbs sampler; draws each dimension directly from its full conditional, so every iteration is accepted (`ar()` is always 1.0) |
 
 `ran.mc.gelmanRubin(samples, maxLength)` computes the R-hat convergence diagnostic across two or more independent chains (each an array of states returned by `sample()`):
 

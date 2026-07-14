@@ -2,6 +2,7 @@ import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import MCMC from '../src/mc/_mcmc'
 import RWM from '../src/mc/rwm'
+import Gibbs from '../src/mc/gibbs'
 import gelmanRubin from '../src/mc/gelman-rubin'
 import runChains from '../src/mc/run-chains'
 import { Normal } from '../src/dist'
@@ -468,6 +469,95 @@ describe('mc.RWM', () => {
         const ar = rwm.ar()
         assert(ar > 0.2 && ar < 0.7, `acceptance rate ${ar} outside (0.2, 0.7)`)
       })
+    })
+  })
+})
+
+describe('mc.Gibbs', () => {
+  // Full conditionals for a bivariate standard Normal with correlation rho:
+  // x_i | x_j ~ Normal(rho * x_j, sqrt(1 - rho^2))
+  const rho = 0.5
+  const sigma = Math.sqrt(1 - rho * rho)
+  const conditionals = [
+    x => new Normal(rho * x[1], sigma).sample(),
+    x => new Normal(rho * x[0], sigma).sample()
+  ]
+
+  describe('constructor', () => {
+    it('should instantiate without error when config.dim matches conditionals.length', () => {
+      assert.doesNotThrow(() => new Gibbs(conditionals, { dim: 2 }))
+    })
+
+    it('should default dim to conditionals.length when config.dim is omitted', () => {
+      const gibbs = new Gibbs(conditionals)
+      assert.strictEqual(gibbs.dim, 2)
+    })
+
+    it('should throw when conditionals is empty', () => {
+      assert.throws(() => new Gibbs([]), /conditionals must be a non-empty array/)
+    })
+
+    it('should throw when conditionals is not an array', () => {
+      assert.throws(() => new Gibbs(null), /conditionals must be a non-empty array/)
+    })
+
+    it('should throw when config.dim does not match conditionals.length', () => {
+      assert.throws(() => new Gibbs(conditionals, { dim: 3 }), /config.dim must match conditionals.length/)
+    })
+  })
+
+  describe('._iter()', () => {
+    it('should replace one coordinate at a time using the current full state', () => {
+      // Deterministic conditionals (no sampling) isolate the sweep order from randomness:
+      // dim 0 sees the state as constructed, dim 1 must see dim 0 already replaced.
+      const seen = []
+      const det = [
+        x => { seen.push(x.slice()); return 10 },
+        x => { seen.push(x.slice()); return 20 }
+      ]
+      const gibbs = new Gibbs(det, { dim: 2 }, { x: [1, 2] })
+      const result = gibbs.iterate()
+      assert.deepEqual(seen[0], [1, 2])
+      assert.deepEqual(seen[1], [10, 2])
+      assert.deepEqual(result.x, [10, 20])
+      assert.strictEqual(result.accepted, true)
+    })
+  })
+
+  describe('.ar()', () => {
+    it('should always be 1.0 regardless of the number of iterations', () => {
+      const gibbs = new Gibbs(conditionals, { dim: 2 }, { x: [0, 0] })
+      for (let i = 0; i < 5; i++) {
+        gibbs.iterate()
+        assert.strictEqual(gibbs.ar(), 1.0)
+      }
+      for (let i = 0; i < 200; i++) gibbs.iterate()
+      assert.strictEqual(gibbs.ar(), 1.0)
+    })
+  })
+
+  describe('.sample() distributional test', () => {
+    it('should recover both margins of a correlated bivariate Normal target (KS test)', () => {
+      const gibbs = new Gibbs(conditionals, { dim: 2 }, { x: [0, 0] }).seed(7)
+      gibbs.warmUp(null, 5)
+      const samples = gibbs.sample(null, 2000)
+      const ref = new Normal(0, 1)
+      assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
+      assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+    })
+  })
+
+  describe('.state() round-trip', () => {
+    it('should restore position and samplingRate, resuming the chain correctly', () => {
+      const gibbs1 = new Gibbs(conditionals, { dim: 2 }, { x: [0, 0] })
+      for (let i = 0; i < 50; i++) gibbs1.iterate()
+      const state = gibbs1.state()
+      assert.deepEqual(state.internal, {})
+
+      const gibbs2 = new Gibbs(conditionals, { dim: 2 }, state)
+      assert.deepEqual(gibbs2.x, state.x)
+      assert.strictEqual(gibbs2.samplingRate, state.samplingRate)
+      assert.doesNotThrow(() => gibbs2.iterate())
     })
   })
 })
