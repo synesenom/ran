@@ -5,5 +5,6 @@
  * @memberof ran
  */
 export { default as gelmanRubin } from './gelman-rubin'
+export { default as Gibbs } from './gibbs'
 export { default as runChains } from './run-chains'
 export { default as RWM } from './rwm'
