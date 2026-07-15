@@ -197,6 +197,28 @@ export function chiTest (values, model, c) {
   }
 }
 
+/**
+ * Computes a per-dimension effective sample size from a sampler's post-sample() autocorrelation
+ * (ac()), truncating each dimension's lag sum at the first non-positive or NaN value (the standard
+ * initial-positive-sequence rule), and returns the minimum across dimensions -- the slowest-mixing
+ * dimension bounds how many effectively independent draws the whole chain produced.
+ *
+ * @param {Object} sampler An MCMC instance on which `sample()` has just been called.
+ * @param {number} totalIterations The total (unthinned) iteration count fed to the accumulators
+ * since the last reset -- i.e. `samplingRate * samples.length`, not `samples.length`.
+ * @returns {number} The estimated effective sample size (minimum across dimensions).
+ */
+export function ess (sampler, totalIterations) {
+  return Math.min(...sampler.ac().map(rho => {
+    let tau = 1
+    for (let k = 1; k < rho.length; k++) {
+      if (Number.isNaN(rho[k]) || rho[k] < 0) break
+      tau += 2 * rho[k]
+    }
+    return totalIterations / tau
+  }))
+}
+
 export function repeat (test, times = 10) {
   for (let i = 0; i < times; i++) {
     test()
