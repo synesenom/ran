@@ -578,12 +578,22 @@ describe('mc.ARS', () => {
       assert.throws(() => new ARS(x => -0.5 * x * x, [2, 1]), /support/)
     })
 
+    it('should throw when support contains a non-finite bound', () => {
+      assert.throws(() => new ARS(x => -0.5 * x * x, [-Infinity, 8]), /support/)
+      assert.throws(() => new ARS(x => -0.5 * x * x, [-8, Infinity]), /support/)
+      assert.throws(() => new ARS(x => -0.5 * x * x, [NaN, 8]), /support/)
+    })
+
     it('should throw when logDensity is not a function', () => {
       assert.throws(() => new ARS(null, [-8, 8]), /logDensity/)
     })
 
     it('should not throw for a valid log-concave target and finite support', () => {
       assert.doesNotThrow(() => new ARS(x => -0.5 * x * x, [-8, 8], x => -x))
+    })
+
+    it('should throw when derivative is provided but is not a function', () => {
+      assert.throws(() => new ARS(x => -0.5 * x * x, [-8, 8], 5), /derivative/)
     })
   })
 
@@ -592,15 +602,19 @@ describe('mc.ARS', () => {
     // a KS test at this significance threshold has an inherent ~1% false-positive rate per draw,
     // so an unseeded test would flake at that rate on every CI run. Pinning specific seeds makes
     // the outcome deterministic and reproducible instead of trading flakiness for a coin flip.
+    // See solutions/testing/2026-07-15-1044-ars-unseeded-ks-test-flake-fixed-seeds.md
     const seeds = [0, 42, 12345]
 
     seeds.forEach(seed => {
       it(`should produce samples matching Normal(0,1) target (KS test, seed ${seed})`, () => {
+        const lo = -8
+        const hi = 8
         // unnormalized: dropping the -0.5*log(2*pi) constant does not change the sampled shape
-        const ars = new ARS(x => -0.5 * x * x, [-8, 8], x => -x).seed(seed)
+        const ars = new ARS(x => -0.5 * x * x, [lo, hi], x => -x).seed(seed)
         const samples = ars.sample(2000)
         const ref = new Normal(0, 1)
         assert(ksTest(samples, x => ref.cdf(x)))
+        assert(samples.every(x => x >= lo && x <= hi))
       })
     })
 
@@ -608,11 +622,14 @@ describe('mc.ARS', () => {
       it(`should produce samples matching a Gamma(3, 1.5) target without an explicit derivative (KS test, seed ${seed})`, () => {
         const alpha = 3
         const beta = 1.5
+        const lo = 1e-3
+        const hi = 15
         // unnormalized: dropping the log(beta^alpha / Gamma(alpha)) constant does not change the sampled shape
-        const ars = new ARS(x => (alpha - 1) * Math.log(x) - beta * x, [1e-3, 15]).seed(seed)
+        const ars = new ARS(x => (alpha - 1) * Math.log(x) - beta * x, [lo, hi]).seed(seed)
         const samples = ars.sample(2000)
         const ref = new Gamma(alpha, beta)
         assert(ksTest(samples, x => ref.cdf(x)))
+        assert(samples.every(x => x >= lo && x <= hi))
       })
     })
 
@@ -620,37 +637,51 @@ describe('mc.ARS', () => {
       it(`should produce samples matching a Beta(2, 3) target (KS test, seed ${seed})`, () => {
         const alpha = 2
         const beta = 3
+        const lo = 1e-3
+        const hi = 1 - 1e-3
         // unnormalized: dropping the -log(B(alpha, beta)) constant does not change the sampled shape
         const logDensity = x => (alpha - 1) * Math.log(x) + (beta - 1) * Math.log(1 - x)
         const derivative = x => (alpha - 1) / x - (beta - 1) / (1 - x)
-        const ars = new ARS(logDensity, [1e-3, 1 - 1e-3], derivative).seed(seed)
+        const ars = new ARS(logDensity, [lo, hi], derivative).seed(seed)
         const samples = ars.sample(2000)
         const ref = new Beta(alpha, beta)
         assert(ksTest(samples, x => ref.cdf(x)))
+        assert(samples.every(x => x >= lo && x <= hi))
       })
     })
   })
 
   describe('adaptive envelope tightening', () => {
-    it('should require fewer logDensity evaluations per accepted draw once the envelope has tightened', () => {
-      let calls = 0
-      const logDensity = x => { calls++; return -0.5 * x * x }
-      // Seeded for a deterministic, reproducible comparison: with only a handful of abscissae,
-      // almost all hull-tightening happens in the first few dozen draws, so comparing a small
-      // early block against a much larger later block (rather than asserting strict pairwise
-      // monotonicity across many same-sized blocks, which is dominated by sampling noise once
-      // the envelope has already converged) is the robust way to observe the tightening effect.
-      const ars = new ARS(logDensity, [-8, 8], x => -x).seed(1)
+    // Seeded for a deterministic, reproducible comparison: with only a handful of abscissae,
+    // almost all hull-tightening happens in the first few dozen draws, so comparing a small
+    // early block against a much larger later block (rather than asserting strict pairwise
+    // monotonicity across many same-sized blocks, which is dominated by sampling noise once
+    // the envelope has already converged) is the robust way to observe the tightening effect.
+    // Extra logDensity calls (beyond the one-per-draw baseline) are counted directly rather
+    // than as a ratio, so a block that happens to need zero extra evaluations can't produce a
+    // vacuous Infinity/Infinity comparison.
+    ;[0, 42, 12345].forEach(seed => {
+      it(`should require far fewer extra logDensity evaluations per draw once the envelope has tightened (seed ${seed})`, () => {
+        let calls = 0
+        const logDensity = x => { calls++; return -0.5 * x * x }
+        const ars = new ARS(logDensity, [-8, 8], x => -x).seed(seed)
 
-      const c0 = calls
-      ars.sample(50)
-      const earlyRate = 50 / (calls - c0)
+        const c0 = calls
+        ars.sample(50)
+        const earlyExtraCalls = calls - c0
 
-      const c1 = calls
-      ars.sample(3000)
-      const laterRate = 3000 / (calls - c1)
+        const c1 = calls
+        ars.sample(3000)
+        const laterExtraCalls = calls - c1
 
-      assert(laterRate >= earlyRate, `later rate ${laterRate} is lower than early rate ${earlyRate}`)
+        // the hull is still coarse after only 3 bootstrap points, so tightening it requires
+        // at least a few extra evaluations during the small early block
+        assert(earlyExtraCalls > 0, 'expected at least one extra logDensity call while the envelope is still forming')
+        // once converged, the vast majority of the later block's draws should be accepted via
+        // the squeeze test alone — an absolute bound, not just a relative one
+        assert(laterExtraCalls / 3000 < 0.05, `later block needed ${laterExtraCalls} extra calls over 3000 draws`)
+        assert(earlyExtraCalls / 50 > laterExtraCalls / 3000, 'evaluation rate did not improve from the early to the later block')
+      })
     })
   })
 

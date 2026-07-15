@@ -31,14 +31,14 @@ export default class ARS {
    * @param {Function=} derivative The derivative of `logDensity`. Estimated via finite differences
    * when omitted.
    * @throws {Error} If logDensity is not a function, or support is not a `[lo, hi]` array of two
-   * finite numbers with `lo < hi`, or the initial hull already reveals that logDensity is not
-   * log-concave.
+   * finite numbers with `lo < hi`, or derivative is provided but is not a function, or the initial
+   * hull already reveals that logDensity is not log-concave.
    */
   constructor (logDensity, support, derivative) {
-    ARS._validate(logDensity, support)
+    ARS._validate(logDensity, support, derivative)
 
     this._h = logDensity
-    this._dh = typeof derivative === 'function' ? derivative : undefined
+    this._dh = derivative
     this._lo = support[0]
     this._hi = support[1]
     this.r = new Xoshiro128p()
@@ -136,6 +136,7 @@ export default class ARS {
   // intersection escapes the bracketing interval entirely — the tangents must cross strictly
   // between pi.x and pj.x. Either violation means the "upper hull" would no longer bound the
   // true density, so sampling from it would be silently wrong rather than merely inefficient.
+  // See solutions/algorithm/2026-07-15-1043-ars-hull-validity-needs-breakpoint-bracket-check.md
   _assertValidHullSegment (pi, pj, z) {
     const tol = Math.cbrt(EPS) * Math.max(1, Math.abs(pi.x), Math.abs(pj.x), Math.abs(pi.dh), Math.abs(pj.dh))
     const slopeIncreased = pi.dh < pj.dh - tol
@@ -250,12 +251,15 @@ export default class ARS {
 
   // ─── PRIVATE STATIC ───
 
-  static _validate (logDensity, support) {
+  static _validate (logDensity, support, derivative) {
     if (typeof logDensity !== 'function') {
       throw Error('ARS: logDensity must be a function')
     }
     if (!ARS._isValidSupport(support)) {
       throw Error('ARS: support must be a [lo, hi] array of two finite numbers with lo < hi')
+    }
+    if (derivative !== undefined && typeof derivative !== 'function') {
+      throw Error('ARS: derivative must be a function')
     }
   }
 
