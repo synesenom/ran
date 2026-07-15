@@ -151,7 +151,8 @@ export default class MCMC {
    * @memberof ran.mc.MCMC
    * @param {Function=} callback Called with (x, accepted) after each iteration.
    * @param {boolean=} warmUp Whether the iteration is part of warm-up. Default is false.
-   * @returns {{x: number[], accepted: boolean}} Result of the iteration.
+   * @returns {{x: number[], accepted: boolean, alpha?: number}} Result of the iteration. `alpha`
+   * is optional and subclass-defined (see decisions/0025-hmc-iter-alpha-field.md).
    */
   iterate (callback = null, warmUp = false) {
     const i = this._iter(this.x, warmUp)
@@ -241,7 +242,11 @@ export default class MCMC {
    * @memberof ran.mc.MCMC
    * @param {number[]} x Current state of the Markov chain.
    * @param {boolean=} warmUp Whether the iteration takes place during warm-up. Default is false.
-   * @returns {{x: number[], accepted: boolean}} New state and whether it was accepted.
+   * @returns {{x: number[], accepted: boolean, alpha?: number}} New state and whether it was
+   * accepted. `alpha` is optional and subclass-defined — e.g. HMC returns the continuous
+   * Metropolis acceptance probability for dual-averaging step-size adaptation (see
+   * decisions/0025-hmc-iter-alpha-field.md). Ignored by the base class's own consumer of this
+   * return value.
    * @protected
    * @ignore
    */
