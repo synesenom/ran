@@ -151,7 +151,8 @@ export default class MCMC {
    * @memberof ran.mc.MCMC
    * @param {Function=} callback Called with (x, accepted) after each iteration.
    * @param {boolean=} warmUp Whether the iteration is part of warm-up. Default is false.
-   * @returns {{x: number[], accepted: boolean}} Result of the iteration.
+   * @returns {{x: number[], accepted: boolean, alpha?: number}} Result of the iteration. `alpha`
+   * is optional and subclass-defined (see decisions/0025-hmc-iter-alpha-field.md).
    */
   iterate (callback = null, warmUp = false) {
     const i = this._iter(this.x, warmUp)
