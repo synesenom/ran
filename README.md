@@ -249,8 +249,10 @@ Available samplers:
 | Class | Description |
 |-------|-------------|
 | `ran.mc.RWM(logDensity, config, initialState)` | Random-walk Metropolis-Hastings sampler with Robbins-Monro step-size adaptation during warm-up |
+| `ran.mc.AdaptiveMetropolis(logDensity, config, initialState)` | Full-covariance adaptive Metropolis (Haario-Saksman-Tamminen 2001); adapts the joint proposal covariance from the chain's own history during warm-up, then freezes it for sampling |
 | `ran.mc.Gibbs(conditionals, config, initialState)` | Component-wise (systematic-scan) Gibbs sampler; draws each dimension directly from its full conditional, so every iteration is accepted (`ar()` is always 1.0) |
 | `ran.mc.HMC(logDensity, gradLogDensity, config, initialState)` | Hamiltonian Monte Carlo sampler: proposes distant moves via a leapfrog integrator over `config.pathLength` steps of size `config.stepSize`, with Metropolis accept/reject on the augmented (position, momentum) system; step size is adapted during warm-up via Robbins-Monro dual averaging and jittered per iteration to avoid periodicity artifacts |
+| `ran.mc.SliceSampler(logDensity, config, initialState)` | Coordinate-wise slice sampler (Neal 2003) using stepping-out and shrinkage; no proposal tuning or gradient required, interval width `w` is adapted per dimension during warm-up, and `ar()` is always 1.0 |
 
 `ran.mc.gelmanRubin(samples, maxLength)` computes the R-hat convergence diagnostic across two or more independent chains (each an array of states returned by `sample()`):
 

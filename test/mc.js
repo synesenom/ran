@@ -2,12 +2,15 @@ import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import MCMC from '../src/mc/_mcmc'
 import RWM from '../src/mc/rwm'
+import AdaptiveMetropolis from '../src/mc/adaptive-metropolis'
 import Gibbs from '../src/mc/gibbs'
 import HMC from '../src/mc/hmc'
+import ARS from '../src/mc/ars'
+import SliceSampler from '../src/mc/slice'
 import gelmanRubin from '../src/mc/gelman-rubin'
 import runChains from '../src/mc/run-chains'
-import { Normal } from '../src/dist'
-import { ksTest } from './test-utils'
+import { Normal, Gamma, Beta } from '../src/dist'
+import { ksTest, ess } from './test-utils'
 
 // Concrete subclass that replays a pre-built sequence, enabling deterministic
 // accumulator testing without involving the PRNG.
@@ -474,6 +477,170 @@ describe('mc.RWM', () => {
   })
 })
 
+describe('mc.AdaptiveMetropolis', () => {
+  describe('constructor', () => {
+    it('should instantiate without error for a 1D Normal target', () => {
+      assert.doesNotThrow(() => new AdaptiveMetropolis(x => -0.5 * x[0] * x[0], { dim: 1 }))
+    })
+
+    it('should instantiate without error for a 5D target', () => {
+      assert.doesNotThrow(() => new AdaptiveMetropolis(x => -0.5 * x.reduce((s, v) => s + v * v, 0), { dim: 5 }))
+    })
+  })
+
+  describe('._iter() rejection', () => {
+    it('should return accepted: false and leave position unchanged when all proposals are rejected', () => {
+      // lnp = () => -Infinity: Math.exp(-Inf - (-Inf)) = NaN; float() < NaN = false always
+      const am = new AdaptiveMetropolis(() => -Infinity, { dim: 1 }, { x: [42] })
+      const result = am.iterate()
+      assert.strictEqual(result.accepted, false)
+      assert.strictEqual(am.x[0], 42)
+    })
+  })
+
+  describe('joint proposals', () => {
+    it('should perturb every component during warm-up, not one at a time', () => {
+      const am = new AdaptiveMetropolis(() => 0, { dim: 3 }, { x: [0, 0, 0] }).seed(42)
+      const prev = am.x.slice()
+      const { x } = am.iterate(null, true)
+      assert.strictEqual(x.filter((v, j) => v !== prev[j]).length, 3)
+    })
+
+    it('should recover both margins of an independent 2D standard Normal target', () => {
+      const am = new AdaptiveMetropolis(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }).seed(7)
+      am.warmUp(null, 10)
+      const samples = am.sample(null, 2000)
+      const ref = new Normal(0, 1)
+      assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
+      assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+    })
+  })
+
+  describe('.state() round-trip', () => {
+    it('should restore position, samplingRate, and proposal covariance', () => {
+      const lnp = x => -0.5 * x[0] * x[0]
+      const am1 = new AdaptiveMetropolis(lnp, { dim: 1 })
+      for (let i = 0; i < 100; i++) am1.iterate()
+      const state = am1.state()
+      const am2 = new AdaptiveMetropolis(lnp, { dim: 1 }, state)
+      assert.deepEqual(am2.x, state.x)
+      assert.strictEqual(am2.samplingRate, state.samplingRate)
+      assert.deepEqual(am2.state().internal.proposal, state.internal.proposal)
+    })
+  })
+
+  describe('frozen covariance during sampling', () => {
+    it('should not change the proposal covariance once sample() starts', () => {
+      const am = new AdaptiveMetropolis(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }).seed(3)
+      am.warmUp(null, 5)
+      const before = am.state().internal.proposal
+      am.sample(null, 500)
+      const after = am.state().internal.proposal
+      assert.deepEqual(before, after)
+    })
+  })
+
+  describe('.ar() during sampling', () => {
+    it('should lie in a reasonable range for a well-tuned 1D Normal target', () => {
+      const am = new AdaptiveMetropolis(x => -0.5 * x[0] * x[0], { dim: 1 })
+      am.warmUp(null, 5)
+      am.sample(null, 1000)
+      const ar = am.ar()
+      assert(ar >= 0.15 && ar <= 0.85, `acceptance rate ${ar} outside [0.15, 0.85]`)
+    })
+  })
+
+  describe('.sample() distributional test', () => {
+    it('should produce samples matching Normal(0,1) target (KS test)', () => {
+      const am = new AdaptiveMetropolis(x => -0.5 * x[0] * x[0], { dim: 1 })
+      am.warmUp(null, 10)
+      const samples = am.sample(null, 2000)
+      const values = samples.map(s => s[0])
+      const ref = new Normal(0, 1)
+      assert(ksTest(values, x => ref.cdf(x)))
+    })
+  })
+
+  describe('.seed()', () => {
+    const logDensity = x => -0.5 * x[0] ** 2;
+
+    [0, 42, 12345].forEach(seed => {
+      it(`should produce bitwise-identical samples when seed ${seed} is applied twice`, () => {
+        const am1 = new AdaptiveMetropolis(logDensity, { dim: 1 }).seed(seed)
+        am1.warmUp(null, 3)
+        const samples1 = am1.sample(null, 50)
+
+        const am2 = new AdaptiveMetropolis(logDensity, { dim: 1 }).seed(seed)
+        am2.warmUp(null, 3)
+        const samples2 = am2.sample(null, 50)
+
+        assert.deepEqual(samples1, samples2)
+      })
+    })
+
+    it('should produce different samples for different seeds', () => {
+      const am0 = new AdaptiveMetropolis(logDensity, { dim: 1 }).seed(0)
+      am0.warmUp(null, 3)
+      const samples0 = am0.sample(null, 50)
+
+      const am1 = new AdaptiveMetropolis(logDensity, { dim: 1 }).seed(1)
+      am1.warmUp(null, 3)
+      const samples1 = am1.sample(null, 50)
+
+      assert.notDeepEqual(samples0, samples1)
+    })
+  })
+
+  describe('5D correlated Normal ESS comparison', () => {
+    it('should achieve higher effective sample size than RWM for equal iteration counts', () => {
+      // AR(1)-correlation target: Sigma_ij = 0.7^|i-j|, dim = 5. The exact inverse of an
+      // AR(1) correlation matrix is tridiagonal (standard result), avoiding a runtime matrix
+      // inversion inside the test's hot log-density path.
+      const rho = 0.7
+      const denom = 1 - rho * rho
+      const diagEdge = 1 / denom
+      const diagMid = (1 + rho * rho) / denom
+      const offDiag = -rho / denom
+      const lnp = x => {
+        let q = 0
+        for (let i = 0; i < 5; i++) {
+          const dii = (i === 0 || i === 4) ? diagEdge : diagMid
+          q += dii * x[i] * x[i]
+        }
+        for (let i = 0; i < 4; i++) {
+          q += 2 * offDiag * x[i] * x[i + 1]
+        }
+        return -0.5 * q
+      }
+
+      const warmUpBatches = 20
+      const sampleSize = 2000
+
+      // A single seed's ESS estimate is a noisy point estimate (ess() truncates its
+      // autocorrelation sum at maxLag if it never crosses zero, so one unlucky chain could
+      // flip the comparison). Averaging the AM/RWM ESS ratio over several independent seeds
+      // and requiring a safety margin makes the assertion robust to that per-seed noise.
+      const seeds = [1, 2, 3, 4, 5]
+      const ratios = seeds.map(seed => {
+        const am = new AdaptiveMetropolis(lnp, { dim: 5 }).seed(seed)
+        am.warmUp(null, warmUpBatches)
+        const amSamples = am.sample(null, sampleSize)
+        const amEss = ess(am, am.samplingRate * amSamples.length)
+
+        const rwm = new RWM(lnp, { dim: 5 }).seed(seed)
+        rwm.warmUp(null, warmUpBatches)
+        const rwmSamples = rwm.sample(null, sampleSize)
+        const rwmEss = ess(rwm, rwm.samplingRate * rwmSamples.length)
+
+        return amEss / rwmEss
+      })
+      const meanRatio = ratios.reduce((a, b) => a + b, 0) / ratios.length
+
+      assert(meanRatio > 1.1, `AdaptiveMetropolis/RWM mean ESS ratio (${meanRatio}) over seeds ${seeds} should exceed 1.1`)
+    })
+  })
+})
+
 describe('mc.Gibbs', () => {
   // Full conditionals for a bivariate standard Normal with correlation rho:
   // x_i | x_j ~ Normal(rho * x_j, sqrt(1 - rho^2))
@@ -714,6 +881,271 @@ describe('mc.HMC', () => {
       const samples2 = hmc2.sample(null, 50)
 
       assert.notDeepEqual(samples1, samples2)
+    })
+  })
+})
+
+describe('mc.ARS', () => {
+  describe('constructor', () => {
+    it('should throw when support is missing', () => {
+      assert.throws(() => new ARS(x => -0.5 * x * x), /support/)
+    })
+
+    it('should throw when support does not have length 2', () => {
+      assert.throws(() => new ARS(x => -0.5 * x * x, [-1]), /support/)
+    })
+
+    it('should throw when support[0] >= support[1]', () => {
+      assert.throws(() => new ARS(x => -0.5 * x * x, [1, 1]), /support/)
+      assert.throws(() => new ARS(x => -0.5 * x * x, [2, 1]), /support/)
+    })
+
+    it('should throw when support contains a non-finite bound', () => {
+      assert.throws(() => new ARS(x => -0.5 * x * x, [-Infinity, 8]), /support/)
+      assert.throws(() => new ARS(x => -0.5 * x * x, [-8, Infinity]), /support/)
+      assert.throws(() => new ARS(x => -0.5 * x * x, [NaN, 8]), /support/)
+    })
+
+    it('should throw when logDensity is not a function', () => {
+      assert.throws(() => new ARS(null, [-8, 8]), /logDensity/)
+    })
+
+    it('should not throw for a valid log-concave target and finite support', () => {
+      assert.doesNotThrow(() => new ARS(x => -0.5 * x * x, [-8, 8], x => -x))
+    })
+
+    it('should throw when derivative is provided but is not a function', () => {
+      assert.throws(() => new ARS(x => -0.5 * x * x, [-8, 8], 5), /derivative/)
+    })
+  })
+
+  describe('.sample() distributional test', () => {
+    // Fixed seeds (matching the mc.RWM.seed() convention) rather than a single unseeded run:
+    // a KS test at this significance threshold has an inherent ~1% false-positive rate per draw,
+    // so an unseeded test would flake at that rate on every CI run. Pinning specific seeds makes
+    // the outcome deterministic and reproducible instead of trading flakiness for a coin flip.
+    // See solutions/testing/2026-07-15-1044-ars-unseeded-ks-test-flake-fixed-seeds.md
+    const seeds = [0, 42, 12345]
+
+    seeds.forEach(seed => {
+      it(`should produce samples matching Normal(0,1) target (KS test, seed ${seed})`, () => {
+        const lo = -8
+        const hi = 8
+        // unnormalized: dropping the -0.5*log(2*pi) constant does not change the sampled shape
+        const ars = new ARS(x => -0.5 * x * x, [lo, hi], x => -x).seed(seed)
+        const samples = ars.sample(2000)
+        const ref = new Normal(0, 1)
+        assert(ksTest(samples, x => ref.cdf(x)))
+        assert(samples.every(x => x >= lo && x <= hi))
+      })
+    })
+
+    seeds.forEach(seed => {
+      it(`should produce samples matching a Gamma(3, 1.5) target without an explicit derivative (KS test, seed ${seed})`, () => {
+        const alpha = 3
+        const beta = 1.5
+        const lo = 1e-3
+        const hi = 15
+        // unnormalized: dropping the log(beta^alpha / Gamma(alpha)) constant does not change the sampled shape
+        const ars = new ARS(x => (alpha - 1) * Math.log(x) - beta * x, [lo, hi]).seed(seed)
+        const samples = ars.sample(2000)
+        const ref = new Gamma(alpha, beta)
+        assert(ksTest(samples, x => ref.cdf(x)))
+        assert(samples.every(x => x >= lo && x <= hi))
+      })
+    })
+
+    seeds.forEach(seed => {
+      it(`should produce samples matching a Beta(2, 3) target (KS test, seed ${seed})`, () => {
+        const alpha = 2
+        const beta = 3
+        const lo = 1e-3
+        const hi = 1 - 1e-3
+        // unnormalized: dropping the -log(B(alpha, beta)) constant does not change the sampled shape
+        const logDensity = x => (alpha - 1) * Math.log(x) + (beta - 1) * Math.log(1 - x)
+        const derivative = x => (alpha - 1) / x - (beta - 1) / (1 - x)
+        const ars = new ARS(logDensity, [lo, hi], derivative).seed(seed)
+        const samples = ars.sample(2000)
+        const ref = new Beta(alpha, beta)
+        assert(ksTest(samples, x => ref.cdf(x)))
+        assert(samples.every(x => x >= lo && x <= hi))
+      })
+    })
+  })
+
+  describe('adaptive envelope tightening', () => {
+    // Seeded for a deterministic, reproducible comparison: with only a handful of abscissae,
+    // almost all hull-tightening happens in the first few dozen draws, so comparing a small
+    // early block against a much larger later block (rather than asserting strict pairwise
+    // monotonicity across many same-sized blocks, which is dominated by sampling noise once
+    // the envelope has already converged) is the robust way to observe the tightening effect.
+    // Extra logDensity calls (beyond the one-per-draw baseline) are counted directly rather
+    // than as a ratio, so a block that happens to need zero extra evaluations can't produce a
+    // vacuous Infinity/Infinity comparison.
+    ;[0, 42, 12345].forEach(seed => {
+      it(`should require far fewer extra logDensity evaluations per draw once the envelope has tightened (seed ${seed})`, () => {
+        let calls = 0
+        const logDensity = x => { calls++; return -0.5 * x * x }
+        const ars = new ARS(logDensity, [-8, 8], x => -x).seed(seed)
+
+        const c0 = calls
+        ars.sample(50)
+        const earlyExtraCalls = calls - c0
+
+        const c1 = calls
+        ars.sample(3000)
+        const laterExtraCalls = calls - c1
+
+        // the hull is still coarse after only 3 bootstrap points, so tightening it requires
+        // at least a few extra evaluations during the small early block
+        assert(earlyExtraCalls > 0, 'expected at least one extra logDensity call while the envelope is still forming')
+        // once converged, the vast majority of the later block's draws should be accepted via
+        // the squeeze test alone — an absolute bound, not just a relative one
+        assert(laterExtraCalls / 3000 < 0.05, `later block needed ${laterExtraCalls} extra calls over 3000 draws`)
+        assert(earlyExtraCalls / 50 > laterExtraCalls / 3000, 'evaluation rate did not improve from the early to the later block')
+      })
+    })
+  })
+
+  describe('non-log-concave target', () => {
+    it('should throw an Error for a clearly non-log-concave (bimodal) density', () => {
+      const logDensity = x => Math.log(
+        0.5 * Math.exp(-0.5 * (x + 3) * (x + 3)) + 0.5 * Math.exp(-0.5 * (x - 3) * (x - 3))
+      )
+      assert.throws(() => new ARS(logDensity, [-8, 8]), /log-concave/)
+    })
+  })
+
+  describe('.seed()', () => {
+    it('should produce bitwise-identical samples when the same seed is applied twice', () => {
+      const logDensity = x => -0.5 * x * x
+      const derivative = x => -x
+
+      const ars1 = new ARS(logDensity, [-8, 8], derivative).seed(42)
+      const samples1 = ars1.sample(50)
+
+      const ars2 = new ARS(logDensity, [-8, 8], derivative).seed(42)
+      const samples2 = ars2.sample(50)
+
+      assert.deepEqual(samples1, samples2)
+    })
+  })
+})
+
+describe('mc.SliceSampler', () => {
+  describe('constructor', () => {
+    it('should instantiate without error for a 1D Normal target', () => {
+      assert.doesNotThrow(() => new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 }))
+    })
+
+    it('should default w to 1.0 per dimension when omitted', () => {
+      const slice = new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 })
+      assert.deepEqual(slice.state().internal.w, [1.0])
+    })
+
+    it('should broadcast an explicit scalar w from initialState.internal to every dimension', () => {
+      const slice = new SliceSampler(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }, { internal: { w: 2.5 } })
+      assert.deepEqual(slice.state().internal.w, [2.5, 2.5])
+    })
+
+    it('should throw for w: 0', () => {
+      assert.throws(() => new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 }, { internal: { w: 0 } }), /w must be a positive number/)
+    })
+
+    it('should throw for a negative w', () => {
+      assert.throws(() => new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 }, { internal: { w: -1 } }), /w must be a positive number/)
+    })
+
+    it('should throw for a non-finite w', () => {
+      assert.throws(() => new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 }, { internal: { w: NaN } }), /w must be a positive number/)
+    })
+
+    it('should throw for w: Infinity', () => {
+      // Infinity passes a naive `typeof w === 'number' && w > 0` check but breaks _stepOut
+      // (l = x0 - Infinity * U = -Infinity, r = l + Infinity = NaN), so it must be rejected here.
+      assert.throws(() => new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 }, { internal: { w: Infinity } }), /w must be a positive number/)
+    })
+
+    it('should throw when a per-dimension w array contains a non-positive entry', () => {
+      assert.throws(() => new SliceSampler(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }, { internal: { w: [1, 0] } }), /w must be a positive number/)
+    })
+
+    it('should throw when a per-dimension w array length does not match dim', () => {
+      assert.throws(() => new SliceSampler(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }, { internal: { w: [1] } }), /w must be a positive number/)
+    })
+  })
+
+  describe('._iter()', () => {
+    it('should update every dimension within one sweep', () => {
+      // Continuous target: P(new coordinate === old coordinate) = 0, so any
+      // accepted draw differing in every dimension confirms the full sweep ran,
+      // not just a subset of dimensions.
+      const slice = new SliceSampler(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }, { x: [0, 0] }).seed(11)
+      const prev = slice.x.slice()
+      const { x, accepted } = slice.iterate()
+      assert.strictEqual(accepted, true)
+      assert.notStrictEqual(x[0], prev[0])
+      assert.notStrictEqual(x[1], prev[1])
+    })
+  })
+
+  describe('.ar()', () => {
+    it('should always be 1.0 regardless of the number of iterations', () => {
+      const slice = new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 })
+      for (let i = 0; i < 5; i++) {
+        slice.iterate()
+        assert.strictEqual(slice.ar(), 1.0)
+      }
+      for (let i = 0; i < 200; i++) slice.iterate()
+      assert.strictEqual(slice.ar(), 1.0)
+    })
+  })
+
+  describe('.state() round-trip', () => {
+    it('should restore position, samplingRate, and the adapted w', () => {
+      const lnp = x => -0.5 * x[0] * x[0]
+      const slice1 = new SliceSampler(lnp, { dim: 1 }).seed(3)
+      slice1.warmUp(null, 3)
+      const state = slice1.state()
+      const slice2 = new SliceSampler(lnp, { dim: 1 }, state)
+      assert.deepEqual(slice2.x, state.x)
+      assert.strictEqual(slice2.samplingRate, state.samplingRate)
+      assert.deepEqual(slice2.state().internal.w, state.internal.w)
+    })
+  })
+
+  describe('warm-up adaptation', () => {
+    it('should grow w toward the target scale, not diverge unboundedly', () => {
+      // Normal(0, 10): lnp(x) = -0.5 * x^2 / 100. Two-sided bound: a lower bound alone would
+      // still pass if the Robbins-Monro sign were inverted-but-always-grows (w can reach
+      // ~exp(1000 * 0.01) = ~22026 if the adaptation never settles toward an equilibrium), so
+      // the upper bound catches runaway growth that a one-sided check would miss.
+      const slice = new SliceSampler(x => -0.5 * x[0] * x[0] / 100, { dim: 1 }).seed(13)
+      slice.warmUp(null, 10)
+      const w = slice.state().internal.w[0]
+      assert(w > 2 && w < 200, `w = ${w}, expected to settle near the target's scale, neither stuck near the default nor diverging`)
+    })
+  })
+
+  describe('.sample() distributional test', () => {
+    it('should produce samples matching Normal(0,1) target (KS test)', () => {
+      const slice = new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 }).seed(5)
+      slice.warmUp(null, 10)
+      const samples = slice.sample(null, 2000)
+      const values = samples.map(s => s[0])
+      const ref = new Normal(0, 1)
+      assert(ksTest(values, x => ref.cdf(x)))
+    })
+
+    it('should recover both margins of a correlated bivariate Normal target (KS test)', () => {
+      const rho = 0.5
+      const lnp = x => -0.5 / (1 - rho * rho) * (x[0] * x[0] - 2 * rho * x[0] * x[1] + x[1] * x[1])
+      const slice = new SliceSampler(lnp, { dim: 2 }, { x: [0, 0] }).seed(7)
+      slice.warmUp(null, 10)
+      const samples = slice.sample(null, 2000)
+      const ref = new Normal(0, 1)
+      assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
+      assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
     })
   })
 })
