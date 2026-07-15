@@ -36,8 +36,10 @@ const JITTER_RANGE = 0.2
  * steps per iteration, default 10).
  * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
  * @constructor
- * @throws {Error} If gradLogDensity is not a function, config.stepSize is provided but is not a
- * positive number, or config.pathLength is provided but is not a positive integer.
+ * @throws {Error} If gradLogDensity is not a function, or a stepSize (config.stepSize or a
+ * resumed initialState.internal.stepSize) is provided but is not a positive finite number, or a
+ * pathLength (config.pathLength or a resumed initialState.internal.pathLength) is provided but
+ * is not a positive integer.
  */
 // decisions/0020-mcmc-design.md — gradLogDensity is an HMC-specific constructor argument, not
 // threaded through the shared MCMC base constructor
@@ -50,6 +52,11 @@ export default class HMC extends MCMC {
     HMC._validateGradLogDensity(gradLogDensity)
     HMC._validateStepSize(config.stepSize)
     HMC._validatePathLength(config.pathLength)
+    // A resumed sampler's initialState.internal is caller-supplied the same way config is (e.g.
+    // round-tripped through state()) — validating only config would let a corrupted/adversarial
+    // internal.pathLength (e.g. Infinity) reach _leapfrog's loop bound unchecked and hang.
+    HMC._validateStepSize(this.internal.stepSize)
+    HMC._validatePathLength(this.internal.pathLength)
 
     this._gradLnp = gradLogDensity
     this._stepSize = this.internal.stepSize || config.stepSize || 0.1
@@ -143,7 +150,7 @@ export default class HMC extends MCMC {
     if (stepSize === undefined) {
       return
     }
-    if (!(stepSize > 0)) {
+    if (!(Number.isFinite(stepSize) && stepSize > 0)) {
       throw Error('HMC: stepSize must be a positive number')
     }
   }

@@ -598,6 +598,26 @@ describe('mc.HMC', () => {
       assert.throws(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1, stepSize: -0.1 }), /stepSize must be a positive number/)
     })
 
+    it('should throw when stepSize is Infinity', () => {
+      assert.throws(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1, stepSize: Infinity }), /stepSize must be a positive number/)
+    })
+
+    it('should throw when a resumed initialState.internal.stepSize is invalid', () => {
+      // initialState.internal is caller-supplied the same way config is (e.g. round-tripped
+      // through state()) — a corrupted/adversarial value must be rejected the same way.
+      assert.throws(
+        () => new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }, { internal: { stepSize: Infinity, pathLength: 10 } }),
+        /stepSize must be a positive number/
+      )
+    })
+
+    it('should throw when a resumed initialState.internal.pathLength is invalid', () => {
+      assert.throws(
+        () => new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }, { internal: { stepSize: 0.1, pathLength: Infinity } }),
+        /pathLength must be a positive integer/
+      )
+    })
+
     it('should throw when pathLength is zero', () => {
       assert.throws(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1, pathLength: 0 }), /pathLength must be a positive integer/)
     })
@@ -628,9 +648,15 @@ describe('mc.HMC', () => {
 
   describe('.state() round-trip', () => {
     it('should restore position, samplingRate, and the full internal state', () => {
-      const hmc1 = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 })
+      const hmc1 = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(11)
+      // warmUp() first so dual averaging actually moves _stepSize away from its 0.1
+      // construction-time default — otherwise the round-trip would trivially "pass" against a
+      // corrupted read that silently falls back to the same default, the exact failure mode in
+      // solutions/correctness/2026-07-11-1230-mcmc-state-key-mismatch-silent-sigma-loss.md.
+      hmc1.warmUp(null, 5)
       for (let i = 0; i < 100; i++) hmc1.iterate()
       const state = hmc1.state()
+      assert.notStrictEqual(state.internal.stepSize, 0.1)
       const hmc2 = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }, state)
       assert.deepEqual(hmc2.x, state.x)
       assert.strictEqual(hmc2.samplingRate, state.samplingRate)
@@ -641,12 +667,14 @@ describe('mc.HMC', () => {
   })
 
   describe('.ar() during sampling', () => {
-    it('should lie in [0.6, 0.9] for a well-tuned 1D Normal target', () => {
-      const hmc = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(1)
-      hmc.warmUp(null, 10)
-      hmc.sample(null, 1000)
-      const ar = hmc.ar()
-      assert(ar >= 0.6 && ar <= 0.9, `acceptance rate ${ar} outside [0.6, 0.9]`)
+    [1, 2, 3].forEach(seed => {
+      it(`should lie in [0.6, 0.9] for a well-tuned 1D Normal target, seed ${seed}`, () => {
+        const hmc = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(seed)
+        hmc.warmUp(null, 10)
+        hmc.sample(null, 1000)
+        const ar = hmc.ar()
+        assert(ar >= 0.6 && ar <= 0.9, `acceptance rate ${ar} outside [0.6, 0.9]`)
+      })
     })
   })
 
@@ -662,16 +690,18 @@ describe('mc.HMC', () => {
   })
 
   describe('.seed()', () => {
-    it('should produce bitwise-identical samples when the same seed is applied twice', () => {
-      const hmc1 = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(42)
-      hmc1.warmUp(null, 3)
-      const samples1 = hmc1.sample(null, 50)
+    [0, 42, 12345].forEach(seed => {
+      it(`should produce bitwise-identical samples when seed ${seed} is applied twice`, () => {
+        const hmc1 = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(seed)
+        hmc1.warmUp(null, 3)
+        const samples1 = hmc1.sample(null, 50)
 
-      const hmc2 = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(42)
-      hmc2.warmUp(null, 3)
-      const samples2 = hmc2.sample(null, 50)
+        const hmc2 = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(seed)
+        hmc2.warmUp(null, 3)
+        const samples2 = hmc2.sample(null, 50)
 
-      assert.deepEqual(samples1, samples2)
+        assert.deepEqual(samples1, samples2)
+      })
     })
 
     it('should produce different samples for different seeds', () => {
