@@ -591,6 +591,12 @@ describe('mc.SliceSampler', () => {
       assert.throws(() => new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 }, { internal: { w: NaN } }), /w must be a positive number/)
     })
 
+    it('should throw for w: Infinity', () => {
+      // Infinity passes a naive `typeof w === 'number' && w > 0` check but breaks _stepOut
+      // (l = x0 - Infinity * U = -Infinity, r = l + Infinity = NaN), so it must be rejected here.
+      assert.throws(() => new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 }, { internal: { w: Infinity } }), /w must be a positive number/)
+    })
+
     it('should throw when a per-dimension w array contains a non-positive entry', () => {
       assert.throws(() => new SliceSampler(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }, { internal: { w: [1, 0] } }), /w must be a positive number/)
     })
@@ -640,12 +646,15 @@ describe('mc.SliceSampler', () => {
   })
 
   describe('warm-up adaptation', () => {
-    it('should grow w well beyond its default when the target scale is much wider', () => {
-      // Normal(0, 10): lnp(x) = -0.5 * x^2 / 100
+    it('should grow w toward the target scale, not diverge unboundedly', () => {
+      // Normal(0, 10): lnp(x) = -0.5 * x^2 / 100. Two-sided bound: a lower bound alone would
+      // still pass if the Robbins-Monro sign were inverted-but-always-grows (w can reach
+      // ~exp(1000 * 0.01) = ~22026 if the adaptation never settles toward an equilibrium), so
+      // the upper bound catches runaway growth that a one-sided check would miss.
       const slice = new SliceSampler(x => -0.5 * x[0] * x[0] / 100, { dim: 1 }).seed(13)
       slice.warmUp(null, 10)
       const w = slice.state().internal.w[0]
-      assert(w > 2, `w = ${w}, expected to grow well past the default 1.0 toward the target's scale`)
+      assert(w > 2 && w < 200, `w = ${w}, expected to settle near the target's scale, neither stuck near the default nor diverging`)
     })
   })
 

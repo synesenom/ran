@@ -35,6 +35,8 @@ const MAX_STEPS = 200
  * width `w` (default 1.0) may be seeded via `initialState.internal.w`, either as a single number
  * (broadcast to every dimension) or as a per-dimension array.
  * @constructor
+ * @throws {Error} If `w` (or any element of a per-dimension `w` array) is not a positive, finite
+ * number, or if a per-dimension `w` array's length does not equal `dim`.
  */
 // decisions/0020-mcmc-design.md — the _iter/_adjust/_internal contract was designed for exactly
 // this pattern: a per-dimension sweep with its own adaptive tunable and no gradient requirement.
@@ -47,20 +49,23 @@ export default class SliceSampler extends MCMC {
     this._bwSum = new Array(this.dim).fill(0)
     this._adjN = 0
     this._adjBatch = 0
+    // Reused across every _iter() call (up to millions per warmUp()/sample() run) instead of
+    // reallocating: the base class reads i.bracketWidths synchronously in _adjust() and never
+    // retains the result object afterward, so overwriting this array in place is safe.
+    this._bracketWidths = new Array(this.dim)
   }
 
   // ─── PROTECTED INSTANCE ───
 
   _iter (x) {
     const x1 = x.slice()
-    const bracketWidths = new Array(this.dim)
     for (let d = 0; d < this.dim; d++) {
       const logY = this.lnp(x1) - (-Math.log(this.r.next()))
       const bracket = this._stepOut(x1, d, logY)
-      bracketWidths[d] = bracket[1] - bracket[0]
+      this._bracketWidths[d] = bracket[1] - bracket[0]
       x1[d] = this._shrink(x1, d, logY, bracket)
     }
-    return { x: x1, accepted: true, bracketWidths }
+    return { x: x1, accepted: true, bracketWidths: this._bracketWidths }
   }
 
   _adjust (i) {
@@ -85,8 +90,9 @@ export default class SliceSampler extends MCMC {
     return { w: this._w.slice() }
   }
 
-  // Places a width-w bracket at random around x1[d], then steps each endpoint outward in
-  // increments of w until it falls outside the slice (or MAX_STEPS is reached).
+  // The bracket is placed at a uniformly random offset within [0, w) of x0, not flush against
+  // it, because a fixed offset would bias which side of the slice gets fewer expansion steps —
+  // Neal (2003) requires this randomization for detailed balance to hold.
   _stepOut (x1, d, logY) {
     const w = this._w[d]
     const x0 = x1[d]
@@ -106,8 +112,10 @@ export default class SliceSampler extends MCMC {
     return [l, r]
   }
 
-  // Repeatedly draws a candidate within [bracket[0], bracket[1]), shrinking the interval toward
-  // x1[d] whenever the candidate falls outside the slice, until one is found inside it.
+  // Shrinking toward x0 (rather than, say, halving the interval symmetrically) keeps x0 inside
+  // [l, r] at every step, which is what guarantees termination: x0 always satisfies
+  // lnp(x0) > logY by construction (logY was drawn strictly below it), so the loop cannot shrink
+  // past a valid candidate. This is also required for detailed balance — Neal (2003) Figure 5.
   _shrink (x1, d, logY, bracket) {
     const x0 = x1[d]
     let [l, r] = bracket
@@ -133,7 +141,12 @@ export default class SliceSampler extends MCMC {
     }
   }
 
+  // Number.isFinite (which also rejects non-numbers) rather than typeof/>0 alone: an infinite w
+  // makes _stepOut compute l = x0 - Infinity * U = -Infinity and r = l + Infinity = NaN, and
+  // _shrink's loop then draws NaN candidates forever since NaN > logY is always false — an
+  // unguarded infinite hang, not just an invalid-input rejection.
+  // See solutions/correctness/2026-07-15-1018-slice-sampler-infinite-w-hang.md
   static _isPositiveNumber (w) {
-    return typeof w === 'number' && w > 0
+    return Number.isFinite(w) && w > 0
   }
 }
