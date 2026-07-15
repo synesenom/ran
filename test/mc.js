@@ -3,6 +3,7 @@ import { describe, it } from 'mocha'
 import MCMC from '../src/mc/_mcmc'
 import RWM from '../src/mc/rwm'
 import Gibbs from '../src/mc/gibbs'
+import SliceSampler from '../src/mc/slice'
 import gelmanRubin from '../src/mc/gelman-rubin'
 import runChains from '../src/mc/run-chains'
 import { Normal } from '../src/dist'
@@ -558,6 +559,95 @@ describe('mc.Gibbs', () => {
       assert.deepEqual(gibbs2.x, state.x)
       assert.strictEqual(gibbs2.samplingRate, state.samplingRate)
       assert.doesNotThrow(() => gibbs2.iterate())
+    })
+  })
+})
+
+describe('mc.SliceSampler', () => {
+  describe('constructor', () => {
+    it('should instantiate without error for a 1D Normal target', () => {
+      assert.doesNotThrow(() => new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 }))
+    })
+
+    it('should default w to 1.0 per dimension when omitted', () => {
+      const slice = new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 })
+      assert.deepEqual(slice.state().internal.w, [1.0])
+    })
+
+    it('should broadcast an explicit scalar w from initialState.internal to every dimension', () => {
+      const slice = new SliceSampler(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }, { internal: { w: 2.5 } })
+      assert.deepEqual(slice.state().internal.w, [2.5, 2.5])
+    })
+  })
+
+  describe('._iter()', () => {
+    it('should update every dimension within one sweep', () => {
+      // Continuous target: P(new coordinate === old coordinate) = 0, so any
+      // accepted draw differing in every dimension confirms the full sweep ran,
+      // not just a subset of dimensions.
+      const slice = new SliceSampler(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }, { x: [0, 0] }).seed(11)
+      const prev = slice.x.slice()
+      const { x, accepted } = slice.iterate()
+      assert.strictEqual(accepted, true)
+      assert.notStrictEqual(x[0], prev[0])
+      assert.notStrictEqual(x[1], prev[1])
+    })
+  })
+
+  describe('.ar()', () => {
+    it('should always be 1.0 regardless of the number of iterations', () => {
+      const slice = new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 })
+      for (let i = 0; i < 5; i++) {
+        slice.iterate()
+        assert.strictEqual(slice.ar(), 1.0)
+      }
+      for (let i = 0; i < 200; i++) slice.iterate()
+      assert.strictEqual(slice.ar(), 1.0)
+    })
+  })
+
+  describe('.state() round-trip', () => {
+    it('should restore position, samplingRate, and the adapted w', () => {
+      const lnp = x => -0.5 * x[0] * x[0]
+      const slice1 = new SliceSampler(lnp, { dim: 1 }).seed(3)
+      slice1.warmUp(null, 3)
+      const state = slice1.state()
+      const slice2 = new SliceSampler(lnp, { dim: 1 }, state)
+      assert.deepEqual(slice2.x, state.x)
+      assert.strictEqual(slice2.samplingRate, state.samplingRate)
+      assert.deepEqual(slice2.state().internal.w, state.internal.w)
+    })
+  })
+
+  describe('warm-up adaptation', () => {
+    it('should grow w well beyond its default when the target scale is much wider', () => {
+      // Normal(0, 10): lnp(x) = -0.5 * x^2 / 100
+      const slice = new SliceSampler(x => -0.5 * x[0] * x[0] / 100, { dim: 1 }).seed(13)
+      slice.warmUp(null, 10)
+      const w = slice.state().internal.w[0]
+      assert(w > 2, `w = ${w}, expected to grow well past the default 1.0 toward the target's scale`)
+    })
+  })
+
+  describe('.sample() distributional test', () => {
+    it('should produce samples matching Normal(0,1) target (KS test)', () => {
+      const slice = new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 }).seed(5)
+      slice.warmUp(null, 10)
+      const samples = slice.sample(null, 2000)
+      const values = samples.map(s => s[0])
+      const ref = new Normal(0, 1)
+      assert(ksTest(values, x => ref.cdf(x)))
+    })
+
+    it('should recover both margins of a correlated bivariate Normal target (KS test)', () => {
+      const rho = 0.5
+      const lnp = x => -0.5 / (1 - rho * rho) * (x[0] * x[0] - 2 * rho * x[0] * x[1] + x[1] * x[1])
+      const slice = new SliceSampler(lnp, { dim: 2 }, { x: [0, 0] }).seed(7)
+      slice.warmUp(null, 10)
+      const samples = slice.sample(null, 2000)
+      const ref = new Normal(0, 1)
+      assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
+      assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
     })
   })
 })
