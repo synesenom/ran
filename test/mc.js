@@ -564,7 +564,6 @@ describe('mc.Gibbs', () => {
   })
 })
 
-
 describe('mc.ARS', () => {
   describe('constructor', () => {
     it('should throw when support is missing', () => {
@@ -712,7 +711,6 @@ describe('mc.ARS', () => {
   })
 })
 
-
 describe('mc.SliceSampler', () => {
   describe('constructor', () => {
     it('should instantiate without error for a 1D Normal target', () => {
@@ -830,7 +828,6 @@ describe('mc.SliceSampler', () => {
     })
   })
 })
-
 
 describe('mc.gelmanRubin', () => {
   describe('input validation', () => {
