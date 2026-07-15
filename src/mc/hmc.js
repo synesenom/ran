@@ -55,6 +55,7 @@ export default class HMC extends MCMC {
     // A resumed sampler's initialState.internal is caller-supplied the same way config is (e.g.
     // round-tripped through state()) — validating only config would let a corrupted/adversarial
     // internal.pathLength (e.g. Infinity) reach _leapfrog's loop bound unchecked and hang.
+    // See solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md
     HMC._validateStepSize(this.internal.stepSize)
     HMC._validatePathLength(this.internal.pathLength)
 
