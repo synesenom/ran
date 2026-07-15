@@ -5,6 +5,7 @@
  * @memberof ran
  */
 export { default as AdaptiveMetropolis } from './adaptive-metropolis'
+export { default as ARS } from './ars'
 export { default as gelmanRubin } from './gelman-rubin'
 export { default as Gibbs } from './gibbs'
 export { default as runChains } from './run-chains'
