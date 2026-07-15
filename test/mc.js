@@ -578,6 +578,26 @@ describe('mc.SliceSampler', () => {
       const slice = new SliceSampler(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }, { internal: { w: 2.5 } })
       assert.deepEqual(slice.state().internal.w, [2.5, 2.5])
     })
+
+    it('should throw for w: 0', () => {
+      assert.throws(() => new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 }, { internal: { w: 0 } }), /w must be a positive number/)
+    })
+
+    it('should throw for a negative w', () => {
+      assert.throws(() => new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 }, { internal: { w: -1 } }), /w must be a positive number/)
+    })
+
+    it('should throw for a non-finite w', () => {
+      assert.throws(() => new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 }, { internal: { w: NaN } }), /w must be a positive number/)
+    })
+
+    it('should throw when a per-dimension w array contains a non-positive entry', () => {
+      assert.throws(() => new SliceSampler(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }, { internal: { w: [1, 0] } }), /w must be a positive number/)
+    })
+
+    it('should throw when a per-dimension w array length does not match dim', () => {
+      assert.throws(() => new SliceSampler(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }, { internal: { w: [1] } }), /w must be a positive number/)
+    })
   })
 
   describe('._iter()', () => {

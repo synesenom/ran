@@ -43,6 +43,7 @@ export default class SliceSampler extends MCMC {
     super(logDensity, config, initialState)
     const w = this.internal.w
     this._w = Array.isArray(w) ? w.slice() : new Array(this.dim).fill(typeof w === 'number' ? w : 1.0)
+    SliceSampler._validateW(this._w, this.dim)
     this._bwSum = new Array(this.dim).fill(0)
     this._adjN = 0
     this._adjBatch = 0
@@ -122,5 +123,17 @@ export default class SliceSampler extends MCMC {
         r = candidate
       }
     }
+  }
+
+  // Kept out of the constructor to avoid a Complex Conditional smell there, matching the
+  // MCMC base class's _validateDim/_validateMaxLag/_validateArWindow pattern.
+  static _validateW (w, dim) {
+    if (w.length !== dim || !w.every(SliceSampler._isPositiveNumber)) {
+      throw Error('SliceSampler: w must be a positive number or an array of dim positive numbers')
+    }
+  }
+
+  static _isPositiveNumber (w) {
+    return typeof w === 'number' && w > 0
   }
 }
