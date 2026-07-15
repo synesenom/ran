@@ -705,13 +705,28 @@ describe('mc.Gibbs', () => {
   })
 
   describe('.sample() distributional test', () => {
-    it('should recover both margins of a correlated bivariate Normal target (KS test)', () => {
-      const gibbs = new Gibbs(conditionals, { dim: 2 }, { x: [0, 0] }).seed(7)
-      gibbs.warmUp(null, 5)
-      const samples = gibbs.sample(null, 2000)
-      const ref = new Normal(0, 1)
-      assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
-      assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+    // gibbs.seed() only reseeds Gibbs's own this.r, which _iter() never reads — Gibbs's actual
+    // randomness comes entirely from the caller-supplied conditionals. The module-scope
+    // `conditionals` above construct a fresh `new Normal(...)` on every call, and Distribution's
+    // constructor seeds its own PRNG from Math.random() when no seed is given, so those draws are
+    // never reproducible regardless of what gibbs.seed(x) is called with. Fixed here by reusing a
+    // single, explicitly-seeded standard-Normal generator across every conditional call instead
+    // of constructing a new (unseeded) one per call. See
+    // solutions/testing/2026-07-15-2015-gibbs-conditionals-fresh-normal-seed-noop.md
+    ;[0, 7, 42].forEach(seed => {
+      it(`should recover both margins of a correlated bivariate Normal target (KS test, seed ${seed})`, () => {
+        const z = new Normal(0, 1).seed(seed)
+        const seededConditionals = [
+          x => rho * x[1] + sigma * z.sample(),
+          x => rho * x[0] + sigma * z.sample()
+        ]
+        const gibbs = new Gibbs(seededConditionals, { dim: 2 }, { x: [0, 0] })
+        gibbs.warmUp(null, 5)
+        const samples = gibbs.sample(null, 2000)
+        const ref = new Normal(0, 1)
+        assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
+        assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+      })
     })
   })
 
