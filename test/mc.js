@@ -3,9 +3,10 @@ import { describe, it } from 'mocha'
 import MCMC from '../src/mc/_mcmc'
 import RWM from '../src/mc/rwm'
 import Gibbs from '../src/mc/gibbs'
+import ARS from '../src/mc/ars'
 import gelmanRubin from '../src/mc/gelman-rubin'
 import runChains from '../src/mc/run-chains'
-import { Normal } from '../src/dist'
+import { Normal, Gamma, Beta } from '../src/dist'
 import { ksTest } from './test-utils'
 
 // Concrete subclass that replays a pre-built sequence, enabling deterministic
@@ -558,6 +559,122 @@ describe('mc.Gibbs', () => {
       assert.deepEqual(gibbs2.x, state.x)
       assert.strictEqual(gibbs2.samplingRate, state.samplingRate)
       assert.doesNotThrow(() => gibbs2.iterate())
+    })
+  })
+})
+
+describe('mc.ARS', () => {
+  describe('constructor', () => {
+    it('should throw when support is missing', () => {
+      assert.throws(() => new ARS(x => -0.5 * x * x), /support/)
+    })
+
+    it('should throw when support does not have length 2', () => {
+      assert.throws(() => new ARS(x => -0.5 * x * x, [-1]), /support/)
+    })
+
+    it('should throw when support[0] >= support[1]', () => {
+      assert.throws(() => new ARS(x => -0.5 * x * x, [1, 1]), /support/)
+      assert.throws(() => new ARS(x => -0.5 * x * x, [2, 1]), /support/)
+    })
+
+    it('should throw when logDensity is not a function', () => {
+      assert.throws(() => new ARS(null, [-8, 8]), /logDensity/)
+    })
+
+    it('should not throw for a valid log-concave target and finite support', () => {
+      assert.doesNotThrow(() => new ARS(x => -0.5 * x * x, [-8, 8], x => -x))
+    })
+  })
+
+  describe('.sample() distributional test', () => {
+    // Fixed seeds (matching the mc.RWM.seed() convention) rather than a single unseeded run:
+    // a KS test at this significance threshold has an inherent ~1% false-positive rate per draw,
+    // so an unseeded test would flake at that rate on every CI run. Pinning specific seeds makes
+    // the outcome deterministic and reproducible instead of trading flakiness for a coin flip.
+    const seeds = [0, 42, 12345]
+
+    seeds.forEach(seed => {
+      it(`should produce samples matching Normal(0,1) target (KS test, seed ${seed})`, () => {
+        // unnormalized: dropping the -0.5*log(2*pi) constant does not change the sampled shape
+        const ars = new ARS(x => -0.5 * x * x, [-8, 8], x => -x).seed(seed)
+        const samples = ars.sample(2000)
+        const ref = new Normal(0, 1)
+        assert(ksTest(samples, x => ref.cdf(x)))
+      })
+    })
+
+    seeds.forEach(seed => {
+      it(`should produce samples matching a Gamma(3, 1.5) target without an explicit derivative (KS test, seed ${seed})`, () => {
+        const alpha = 3
+        const beta = 1.5
+        // unnormalized: dropping the log(beta^alpha / Gamma(alpha)) constant does not change the sampled shape
+        const ars = new ARS(x => (alpha - 1) * Math.log(x) - beta * x, [1e-3, 15]).seed(seed)
+        const samples = ars.sample(2000)
+        const ref = new Gamma(alpha, beta)
+        assert(ksTest(samples, x => ref.cdf(x)))
+      })
+    })
+
+    seeds.forEach(seed => {
+      it(`should produce samples matching a Beta(2, 3) target (KS test, seed ${seed})`, () => {
+        const alpha = 2
+        const beta = 3
+        // unnormalized: dropping the -log(B(alpha, beta)) constant does not change the sampled shape
+        const logDensity = x => (alpha - 1) * Math.log(x) + (beta - 1) * Math.log(1 - x)
+        const derivative = x => (alpha - 1) / x - (beta - 1) / (1 - x)
+        const ars = new ARS(logDensity, [1e-3, 1 - 1e-3], derivative).seed(seed)
+        const samples = ars.sample(2000)
+        const ref = new Beta(alpha, beta)
+        assert(ksTest(samples, x => ref.cdf(x)))
+      })
+    })
+  })
+
+  describe('adaptive envelope tightening', () => {
+    it('should require fewer logDensity evaluations per accepted draw once the envelope has tightened', () => {
+      let calls = 0
+      const logDensity = x => { calls++; return -0.5 * x * x }
+      // Seeded for a deterministic, reproducible comparison: with only a handful of abscissae,
+      // almost all hull-tightening happens in the first few dozen draws, so comparing a small
+      // early block against a much larger later block (rather than asserting strict pairwise
+      // monotonicity across many same-sized blocks, which is dominated by sampling noise once
+      // the envelope has already converged) is the robust way to observe the tightening effect.
+      const ars = new ARS(logDensity, [-8, 8], x => -x).seed(1)
+
+      const c0 = calls
+      ars.sample(50)
+      const earlyRate = 50 / (calls - c0)
+
+      const c1 = calls
+      ars.sample(3000)
+      const laterRate = 3000 / (calls - c1)
+
+      assert(laterRate >= earlyRate, `later rate ${laterRate} is lower than early rate ${earlyRate}`)
+    })
+  })
+
+  describe('non-log-concave target', () => {
+    it('should throw an Error for a clearly non-log-concave (bimodal) density', () => {
+      const logDensity = x => Math.log(
+        0.5 * Math.exp(-0.5 * (x + 3) * (x + 3)) + 0.5 * Math.exp(-0.5 * (x - 3) * (x - 3))
+      )
+      assert.throws(() => new ARS(logDensity, [-8, 8]), /log-concave/)
+    })
+  })
+
+  describe('.seed()', () => {
+    it('should produce bitwise-identical samples when the same seed is applied twice', () => {
+      const logDensity = x => -0.5 * x * x
+      const derivative = x => -x
+
+      const ars1 = new ARS(logDensity, [-8, 8], derivative).seed(42)
+      const samples1 = ars1.sample(50)
+
+      const ars2 = new ARS(logDensity, [-8, 8], derivative).seed(42)
+      const samples2 = ars2.sample(50)
+
+      assert.deepEqual(samples1, samples2)
     })
   })
 })
