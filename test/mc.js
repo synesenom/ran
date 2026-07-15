@@ -3,6 +3,7 @@ import { describe, it } from 'mocha'
 import MCMC from '../src/mc/_mcmc'
 import RWM from '../src/mc/rwm'
 import Gibbs from '../src/mc/gibbs'
+import HMC from '../src/mc/hmc'
 import gelmanRubin from '../src/mc/gelman-rubin'
 import runChains from '../src/mc/run-chains'
 import { Normal } from '../src/dist'
@@ -558,6 +559,131 @@ describe('mc.Gibbs', () => {
       assert.deepEqual(gibbs2.x, state.x)
       assert.strictEqual(gibbs2.samplingRate, state.samplingRate)
       assert.doesNotThrow(() => gibbs2.iterate())
+    })
+  })
+})
+
+describe('mc.HMC', () => {
+  // Log-density and analytical gradient for a standard bivariate Normal with correlation rho,
+  // mirroring the Gibbs bivariate-Normal test target (rho = 0.5) so both margins are themselves
+  // standard Normal regardless of the correlation.
+  const rho = 0.5
+  const c = 1 - rho * rho
+  const logDensity2D = x => -0.5 * (x[0] * x[0] - 2 * rho * x[0] * x[1] + x[1] * x[1]) / c
+  const gradLogDensity2D = x => [-(x[0] - rho * x[1]) / c, -(x[1] - rho * x[0]) / c]
+
+  const logDensity1D = x => -0.5 * x[0] * x[0]
+  const gradLogDensity1D = x => [-x[0]]
+
+  describe('constructor', () => {
+    it('should instantiate without error for a 2D correlated Normal target', () => {
+      assert.doesNotThrow(() => new HMC(logDensity2D, gradLogDensity2D, { dim: 2 }))
+    })
+
+    it('should default to stepSize: 0.1 and pathLength: 10 when omitted', () => {
+      const hmc = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 })
+      assert.strictEqual(hmc.state().internal.stepSize, 0.1)
+      assert.strictEqual(hmc.state().internal.pathLength, 10)
+    })
+
+    it('should throw when gradLogDensity is not a function', () => {
+      assert.throws(() => new HMC(logDensity1D, null, { dim: 1 }), /gradLogDensity must be a function/)
+    })
+
+    it('should throw when stepSize is zero', () => {
+      assert.throws(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1, stepSize: 0 }), /stepSize must be a positive number/)
+    })
+
+    it('should throw when stepSize is negative', () => {
+      assert.throws(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1, stepSize: -0.1 }), /stepSize must be a positive number/)
+    })
+
+    it('should throw when pathLength is zero', () => {
+      assert.throws(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1, pathLength: 0 }), /pathLength must be a positive integer/)
+    })
+
+    it('should throw when pathLength is negative', () => {
+      assert.throws(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1, pathLength: -5 }), /pathLength must be a positive integer/)
+    })
+
+    it('should throw when pathLength is not an integer', () => {
+      assert.throws(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1, pathLength: 2.5 }), /pathLength must be a positive integer/)
+    })
+
+    it('should not throw for valid stepSize and pathLength', () => {
+      assert.doesNotThrow(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1, stepSize: 0.2, pathLength: 5 }))
+    })
+  })
+
+  describe('._iter() rejection', () => {
+    it('should return accepted: false and leave position unchanged when the target is degenerate', () => {
+      // logDensity = -Infinity everywhere: the Hamiltonian difference is -Infinity - (-Infinity) = NaN,
+      // so exp(NaN) = NaN and float() < NaN is false always — mirrors RWM's analogous rejection test.
+      const hmc = new HMC(() => -Infinity, () => [0], { dim: 1 }, { x: [42] })
+      const result = hmc.iterate()
+      assert.strictEqual(result.accepted, false)
+      assert.strictEqual(hmc.x[0], 42)
+    })
+  })
+
+  describe('.state() round-trip', () => {
+    it('should restore position, samplingRate, and the full internal state', () => {
+      const hmc1 = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 })
+      for (let i = 0; i < 100; i++) hmc1.iterate()
+      const state = hmc1.state()
+      const hmc2 = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }, state)
+      assert.deepEqual(hmc2.x, state.x)
+      assert.strictEqual(hmc2.samplingRate, state.samplingRate)
+      // Full-object deepEqual, not a spot-checked field — see
+      // solutions/correctness/2026-07-11-1230-mcmc-state-key-mismatch-silent-sigma-loss.md
+      assert.deepEqual(hmc2.state().internal, state.internal)
+    })
+  })
+
+  describe('.ar() during sampling', () => {
+    it('should lie in [0.6, 0.9] for a well-tuned 1D Normal target', () => {
+      const hmc = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(1)
+      hmc.warmUp(null, 10)
+      hmc.sample(null, 1000)
+      const ar = hmc.ar()
+      assert(ar >= 0.6 && ar <= 0.9, `acceptance rate ${ar} outside [0.6, 0.9]`)
+    })
+  })
+
+  describe('.sample() distributional test', () => {
+    it('should recover both margins of a correlated bivariate Normal target (KS test)', () => {
+      const hmc = new HMC(logDensity2D, gradLogDensity2D, { dim: 2 }).seed(3)
+      hmc.warmUp(null, 10)
+      const samples = hmc.sample(null, 2000)
+      const ref = new Normal(0, 1)
+      assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
+      assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+    })
+  })
+
+  describe('.seed()', () => {
+    it('should produce bitwise-identical samples when the same seed is applied twice', () => {
+      const hmc1 = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(42)
+      hmc1.warmUp(null, 3)
+      const samples1 = hmc1.sample(null, 50)
+
+      const hmc2 = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(42)
+      hmc2.warmUp(null, 3)
+      const samples2 = hmc2.sample(null, 50)
+
+      assert.deepEqual(samples1, samples2)
+    })
+
+    it('should produce different samples for different seeds', () => {
+      const hmc1 = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(1)
+      hmc1.warmUp(null, 3)
+      const samples1 = hmc1.sample(null, 50)
+
+      const hmc2 = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(2)
+      hmc2.warmUp(null, 3)
+      const samples2 = hmc2.sample(null, 50)
+
+      assert.notDeepEqual(samples1, samples2)
     })
   })
 })
