@@ -1,5 +1,6 @@
 import MCMC from './_mcmc'
 import { Normal } from '../dist'
+import leapfrog from './_leapfrog'
 
 // Nesterov dual-averaging step-size adaptation (Hoffman & Gelman 2014, JMLR 15:1593-1623, S3.2):
 // gamma is the adaptation learning rate, t0 stabilizes the first few iterations against a large
@@ -108,7 +109,7 @@ export default class HMC extends MCMC {
 
     const eps = this._stepSize * (JITTER_LO + JITTER_RANGE * this.r.next())
     const r0 = Array.from({ length: this.dim }, () => this._q.sample())
-    const { x: xProp, r: rProp } = this._leapfrog(x, r0, eps)
+    const { x: xProp, r: rProp } = leapfrog(x, r0, this._gradLnp, eps, this._pathLength)
 
     const logPProp = this.lnp(xProp)
     const kineticCur = 0.5 * r0.reduce((s, ri) => s + ri * ri, 0)
@@ -165,24 +166,5 @@ export default class HMC extends MCMC {
 
   static _isPositiveInteger (value) {
     return Number.isInteger(value) && value > 0
-  }
-
-  // ─── PRIVATE INSTANCE ───
-
-  // Leapfrog integrator (Neal 2011, Algorithm 1): half-step momentum, full-step position,
-  // half-step momentum, repeated for pathLength steps. Uses the simple unmerged form (two half
-  // steps per leapfrog step) rather than the trailing/leading half-step merge optimization, for
-  // a direct, easily-verified match to the textbook algorithm.
-  _leapfrog (x, r, eps) {
-    let xCur = x.slice()
-    let rCur = r.slice()
-    for (let l = 0; l < this._pathLength; l++) {
-      const grad0 = this._gradLnp(xCur)
-      rCur = rCur.map((ri, i) => ri + 0.5 * eps * grad0[i])
-      xCur = xCur.map((xi, i) => xi + eps * rCur[i])
-      const grad1 = this._gradLnp(xCur)
-      rCur = rCur.map((ri, i) => ri + 0.5 * eps * grad1[i])
-    }
-    return { x: xCur, r: rCur }
   }
 }
