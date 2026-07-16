@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ran.mc.MCMC` warm-up thinning no longer inverts for slow-mixing chains: when a dimension's autocorrelation never decays to ≤ 0.05 within `maxLag`, `_thinningLag()` now falls back to the largest measured lag instead of reporting 0. Previously a chain that mixed slower than `maxLag` could resolve was treated as already-decorrelated, driving `samplingRate` down toward 1 and under-thinning `sample()` — the opposite of the intended "slowest-mixing dimension wins" rule (ADR-0020 §3).
 - `ran.mc.MCMC.warmUp(progress, maxBatches)` now runs exactly `maxBatches` batches (was `maxBatches + 1` due to a `batch <= maxBatches` loop bound) and reports `100` at completion instead of firing a redundant `0%` callback at the start.
 - `ran.mc.MCMC.sample(progress, size)` now reports each integer percentage of progress exactly once. Previously the `i % (iMax/100)` check used a fractional modulus whenever the total iteration count was not a multiple of 100, silently skipping most progress callbacks.
+- `ran.mc.Gibbs`'s conditionals now receive the sampler's own PRNG as a second argument (`conditionals[d](x, rng)`), so `seed()` can produce reproducible chains for conditionals that draw their randomness from `rng.next()` instead of an independently-seeded generator. Previously `Gibbs._iter()` never read `this.r`, so `gibbs.seed(42).sample(null, N)` silently failed to reproduce, violating the contract documented on `MCMC.seed()` (ADR-0026, #938).
 
 ### Added
 
