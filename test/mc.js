@@ -1105,6 +1105,8 @@ describe('mc.NUTS', () => {
       // rho=0.8, HMC's fixed length under-explores the elongated posterior on every iteration,
       // while NUTS's doubling adapts; empirically this gives NUTS a consistent ~4.7-7x ESS/iteration
       // advantage across seeds (well above the 2x margin asserted below).
+      // See solutions/testing/2026-07-16-1417-nuts-hmc-ess-comparison-target-choice.md — do not
+      // "simplify" this back to the shared rho=0.5 target; that silently flips the ratio below 1.
       const essRho = 0.8
       const essC = 1 - essRho * essRho
       const essLogDensity = x => -0.5 * (x[0] * x[0] - 2 * essRho * x[0] * x[1] + x[1] * x[1]) / essC
