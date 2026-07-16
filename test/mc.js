@@ -743,6 +743,51 @@ describe('mc.Gibbs', () => {
       assert.doesNotThrow(() => gibbs2.iterate())
     })
   })
+
+  describe('.seed()', () => {
+    // Deliberately not a statistically meaningful conditional (distributional
+    // correctness is already covered by the KS test above) — this exists only
+    // to exercise rng.next() so the assertion tests the actual seeded data
+    // path, not merely that .seed() was called. See
+    // solutions/testing/2026-07-15-2015-gibbs-conditionals-fresh-normal-seed-noop.md
+    const rngConditionals = [
+      (x, rng) => rho * x[1] + sigma * rng.next(),
+      (x, rng) => rho * x[0] + sigma * rng.next()
+    ];
+
+    [0, 42, 12345].forEach(seed => {
+      it(`should produce bitwise-identical samples when seed ${seed} is applied twice`, () => {
+        const gibbs1 = new Gibbs(rngConditionals, { dim: 2 }, { x: [0, 0] }).seed(seed)
+        gibbs1.warmUp(null, 3)
+        const samples1 = gibbs1.sample(null, 50)
+
+        const gibbs2 = new Gibbs(rngConditionals, { dim: 2 }, { x: [0, 0] }).seed(seed)
+        gibbs2.warmUp(null, 3)
+        const samples2 = gibbs2.sample(null, 50)
+
+        assert.deepEqual(samples1, samples2)
+      })
+    })
+
+    it('should produce different samples for different seeds', () => {
+      const gibbs0 = new Gibbs(rngConditionals, { dim: 2 }, { x: [0, 0] }).seed(0)
+      gibbs0.warmUp(null, 3)
+      const samples0 = gibbs0.sample(null, 50)
+
+      const gibbs1 = new Gibbs(rngConditionals, { dim: 2 }, { x: [0, 0] }).seed(1)
+      gibbs1.warmUp(null, 3)
+      const samples1 = gibbs1.sample(null, 50)
+
+      assert.notDeepEqual(samples0, samples1)
+    })
+
+    it('should still produce finite, well-formed samples for conditionals that ignore the second (rng) argument', () => {
+      const gibbs = new Gibbs(conditionals, { dim: 2 }, { x: [0, 0] }).seed(42)
+      const samples = gibbs.sample(null, 10)
+      assert.strictEqual(samples.length, 10)
+      assert(samples.every(s => s.length === 2 && s.every(Number.isFinite)))
+    })
+  })
 })
 
 describe('mc.HMC', () => {
