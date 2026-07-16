@@ -1404,6 +1404,51 @@ describe('mc.ARS', () => {
     })
   })
 
+  describe('._tangentIntersection()', () => {
+    it('should fall back to the midpoint when two slopes differ by less than the finite-difference noise floor', () => {
+      const ars = new ARS(x => -0.5 * x * x, [-8, 8], x => -x)
+      // A dh difference of 1e-10 is far above raw Number.EPSILON (~2.22e-16) -- so the old
+      // raw-EPS guard would not fire -- but far below the Math.cbrt(EPSILON) (~6.06e-6) noise
+      // floor the finite-difference slopes actually carry. Left ungated, the division puts the
+      // breakpoint at roughly -2e10, wildly outside the [pi.x, pj.x] = [-1, 1] bracket a hull
+      // breakpoint must lie in; the fix must instead return the midpoint.
+      const pi = { x: -1, h: 0, dh: 1 }
+      const pj = { x: 1, h: 0, dh: 1 - 1e-10 }
+      assert.strictEqual(ars._tangentIntersection(pi, pj), 0)
+    })
+
+    it('should compute the closed-form intersection when slopes differ by more than the noise floor', () => {
+      const ars = new ARS(x => -0.5 * x * x, [-8, 8], x => -x)
+      const pi = { x: -1, h: 1, dh: 2 }
+      const pj = { x: 3, h: -1, dh: -2 }
+      // exact rational: (pj.h - pi.h - pj.x*pj.dh + pi.x*pi.dh) / (pi.dh - pj.dh)
+      //               = (-1 - 1 - 3*(-2) + (-1)*2) / (2 - (-2)) = (-2 + 6 - 2) / 4 = 0.5
+      // distinct from the midpoint (pi.x + pj.x) / 2 = 1, confirming the closed-form branch ran
+      assert.strictEqual(ars._tangentIntersection(pi, pj), 0.5)
+    })
+
+    it('should switch branches on either side of the tolerance boundary', () => {
+      const ars = new ARS(x => -0.5 * x * x, [-8, 8], x => -x)
+      // With |pi.dh| = 1 and |pj.dh| close to 1, tol = CBRT_EPS * max(1, |pi.dh|, |pj.dh|)
+      // reduces to CBRT_EPS itself, so the two cases below straddle the guard's own threshold
+      // from just inside to just outside, rather than only exercising each branch deep in its
+      // interior as the two tests above do.
+      const tol = Math.cbrt(Number.EPSILON)
+      const pi = { x: -1, h: 0, dh: 1 }
+
+      const justInside = { x: 1, h: 0, dh: 1 - tol * 0.5 }
+      assert.strictEqual(ars._tangentIntersection(pi, justInside), 0)
+
+      const justOutside = { x: 1, h: 0, dh: 1 - tol * 1.5 }
+      // exact rational: (pj.h - pi.h - pj.x*pj.dh + pi.x*pi.dh) / (pi.dh - pj.dh)
+      //               = (0 - 0 - (1 - 1.5*tol) - 1) / (1.5*tol) = (1.5*tol - 2) / (1.5*tol)
+      // dominated by -2 / (1.5*tol) once tol is this small, landing far outside [pi.x, pj.x] --
+      // confirms the closed-form (division) branch ran rather than the midpoint fallback
+      assert(Math.abs(ars._tangentIntersection(pi, justOutside)) > 100,
+        'expected the closed-form division branch, not the midpoint fallback, just past the tolerance boundary')
+    })
+  })
+
   describe('.sample() distributional test', () => {
     // Fixed seeds (matching the mc.RWM.seed() convention) rather than a single unseeded run:
     // a KS test at this significance threshold has an inherent ~1% false-positive rate per draw,

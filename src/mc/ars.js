@@ -126,10 +126,17 @@ export default class ARS {
 
   // Closed-form x-coordinate where the tangent lines at pi and pj (pi.x < pj.x) intersect —
   // the breakpoint between their upper-hull segments. Falls back to the midpoint when the two
-  // slopes are numerically indistinguishable, avoiding division by ~0.
+  // slopes are numerically indistinguishable, avoiding division by ~0. The tolerance scales
+  // with |pi.dh|/|pj.dh| (the same shape _assertValidHullSegment uses for its slope
+  // comparison), not |pi.x|/|pj.x| (the shape _build/_sampleEnvelope use): this guard is a
+  // difference of two slope *values*, so the noise floor that matters is the finite-difference
+  // noise carried by dh itself, not a position-dependent step size — dh and x are different
+  // physical quantities, and scaling a slope-difference tolerance by x would be dimensionally
+  // arbitrary.
   _tangentIntersection (pi, pj) {
     const denom = pi.dh - pj.dh
-    if (Math.abs(denom) < EPS) {
+    const tol = CBRT_EPS * Math.max(1, Math.abs(pi.dh), Math.abs(pj.dh))
+    if (Math.abs(denom) < tol) {
       return (pi.x + pj.x) / 2
     }
     return (pj.h - pi.h - pj.x * pj.dh + pi.x * pi.dh) / denom
