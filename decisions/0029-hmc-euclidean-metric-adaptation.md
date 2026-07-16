@@ -1,4 +1,4 @@
-# ADR-0028: HMC Euclidean Metric (Mass Matrix) Adaptation
+# ADR-0029: HMC Euclidean Metric (Mass Matrix) Adaptation
 
 **Date**: 2026-07-16
 **Status**: Accepted

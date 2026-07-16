@@ -55,7 +55,7 @@ const EPS = 1e-6
 // threaded through the shared MCMC base constructor
 // decisions/0025-hmc-iter-alpha-field.md — _iter returns an additional alpha field so _adjust can
 // drive dual averaging from the continuous Metropolis acceptance probability
-// decisions/0028-hmc-euclidean-metric-adaptation.md — mass-matrix adaptation design: own
+// decisions/0029-hmc-euclidean-metric-adaptation.md — mass-matrix adaptation design: own
 // accumulator, EPS*I regularization, diagonal default, dense opt-in via hand-rolled LDL
 // forward/back substitution, batched dense refresh, dual averaging left uncoupled from metric
 // changes
@@ -159,7 +159,7 @@ export default class HMC extends MCMC {
     // stale step-size statistics under a changed metric as invalid, since the optimal step size
     // depends on the metric's local curvature. Doing this correctly needs the three-phase
     // windowed warm-up schedule decisions/0024-mcmc-warmup-convergence-strategy.md already rules
-    // out replacing this flat batch loop with. See decisions/0028-hmc-euclidean-metric-adaptation.md.
+    // out replacing this flat batch loop with. See decisions/0029-hmc-euclidean-metric-adaptation.md.
     this._daT++
     this._daHbar = (1 - 1 / (this._daT + T0)) * this._daHbar + (1 / (this._daT + T0)) * (DELTA - i.alpha)
     const logEps = this._daMu - (Math.sqrt(this._daT) / GAMMA) * this._daHbar
@@ -226,7 +226,7 @@ export default class HMC extends MCMC {
   // A dense metric's covariance accumulator and LDL factor are both dim*dim -- MCMC's own
   // _validateCombinedFootprint only bounds dim*maxLag (the autocorrelation buffers), so it does
   // not itself catch a dense-metric blowup at MCMC._MAX_DIM = 10000 (~800MB). See
-  // decisions/0028-hmc-euclidean-metric-adaptation.md.
+  // decisions/0029-hmc-euclidean-metric-adaptation.md.
   static _validateDenseMetricDim (metricType, dim) {
     if (metricType === 'dense' && dim > HMC._MAX_DENSE_METRIC_DIM) {
       throw Error(`HMC: metric: 'dense' requires dim to be at most ${HMC._MAX_DENSE_METRIC_DIM}`)
@@ -286,7 +286,7 @@ export default class HMC extends MCMC {
   // and AdaptiveMetropolis both do cheaply) would make dense warm-up cost scale with
   // O(dim^3) * iterations. This interval is a fixed, non-configurable HMC constant, deliberately
   // decoupled from MCMC.warmUp()'s own internal batch size so a future change to one cannot
-  // silently change the other's behavior. See decisions/0028-hmc-euclidean-metric-adaptation.md.
+  // silently change the other's behavior. See decisions/0029-hmc-euclidean-metric-adaptation.md.
   static get _DENSE_METRIC_REFRESH_INTERVAL () {
     return 1000
   }
@@ -295,7 +295,7 @@ export default class HMC extends MCMC {
 
   // Sets up the mass-matrix (metric) online accumulator and the effective (ready-to-use) metric
   // consulted by _sampleMomentum/_applyInverseMetric. Extracted out of the constructor to avoid
-  // a Complex Method smell there. See decisions/0028-hmc-euclidean-metric-adaptation.md.
+  // a Complex Method smell there. See decisions/0029-hmc-euclidean-metric-adaptation.md.
   _initMetricState (resumedMetric) {
     this._initMetricAccumulator()
     this._initEffectiveMetric(resumedMetric)
@@ -405,12 +405,12 @@ export default class HMC extends MCMC {
   }
 
   // Draws momentum p ~ N(0, M). The mass matrix is the *precision*, M = Sigma^-1, where Sigma is
-  // the estimated covariance/variance (decisions/0028-hmc-euclidean-metric-adaptation.md, per the
+  // the estimated covariance/variance (decisions/0029-hmc-euclidean-metric-adaptation.md, per the
   // issue's M = Cov(theta)^-1): a LARGER estimated variance means a MORE CONCENTRATED momentum
   // distribution, so the metric can compensate for wide target directions. Diagonal: elementwise,
   // no factorization needed. Dense: Sigma = L*D*L^T (from ldl()), and p ~ N(0, Sigma^-1) is drawn
   // as p solving L^T*p = z/sqrt(D) via back substitution -- see the momentum-sampling derivation
-  // backing decisions/0028-hmc-euclidean-metric-adaptation.md.
+  // backing decisions/0029-hmc-euclidean-metric-adaptation.md.
   // M and M^-1 are easy to swap here -- see solutions/correctness/2026-07-16-1422-hmc-mass-matrix-precision-inversion.md
   _sampleMomentum () {
     if (this._metricType === 'dense') {
