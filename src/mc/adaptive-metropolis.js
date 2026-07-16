@@ -36,8 +36,10 @@ export default class AdaptiveMetropolis extends MCMC {
     this._covMean = new Array(this.dim).fill(0)
     this._covS = Array.from({ length: this.dim }, () => new Array(this.dim).fill(0))
     // Reusable scratch buffers to avoid per-iteration array allocations in _iter/_updateCovariance.
+    // Only plain arrays are cached as fields here, never a Vector instance: a cached Vector field's
+    // type is inferred from its own JSDoc (ran.la.Vector), which breaks npm run typecheck the same
+    // way a cached Matrix field does — see solutions/tooling/2026-07-15-1330-adaptive-metropolis-ran-la-matrix-dts-leak.md
     this._zBuffer = new Array(this.dim).fill(0)
-    this._z = new Vector(this._zBuffer)
     this._delta = new Array(this.dim).fill(0)
     this._delta2 = new Array(this.dim).fill(0)
     // Seeded from an isotropic guess (matching RWM's all-ones default) since the covariance
@@ -70,7 +72,10 @@ export default class AdaptiveMetropolis extends MCMC {
     for (let i = 0; i < this.dim; i++) {
       this._zBuffer[i] = this._q.sample()
     }
-    const jump = this._A.apply(this._z).v()
+    // z wraps the reused _zBuffer; kept as a local rather than a cached field (see the
+    // constructor's typecheck note above), but no new array is allocated per iteration.
+    const z = new Vector(this._zBuffer)
+    const jump = this._A.apply(z).v()
     const x1 = x.map((d, i) => d + jump[i])
     const newLnp = this.lnp(x1)
     const accepted = this.r.next() < Math.exp(newLnp - this.lastLnp)
