@@ -1039,6 +1039,30 @@ describe('mc.ARS', () => {
         assert(samples.every(x => x >= lo && x <= hi))
       })
     })
+
+    // The middle of the three initial quartile abscissae falls exactly at the support midpoint
+    // (x = 0 for a symmetric bracket). A vanishingly small mu shifts its tangent slope away from
+    // the exact dh = 0 special case (already covered by the Normal(0,1) test above) into the
+    // near-degenerate regime: strictly nonzero but far below the finite-difference noise floor.
+    // This exercises the code path #941 fixed, but cannot regress-test the underlying
+    // catastrophic-cancellation bug itself to a tight bound: dividing by a near-zero dh in the
+    // buggy general-case inversion formula can in principle distort the drawn x away from the
+    // exponential shape the accept/reject step assumes, but any such distortion is bounded by
+    // the same tiny dh-scale error that motivated the fix -- far below what a 2000-sample KS
+    // test can resolve at any seed we could practically pin. This test's role is coverage of the
+    // near-degenerate branch, not a precision bound. See https://github.com/synesenom/ran/issues/941
+    ;[0, 42, 12345].forEach(seed => {
+      it(`should produce samples matching a Normal target whose midpoint abscissa has a near-zero-but-nonzero slope (KS test, seed ${seed})`, () => {
+        const lo = -8
+        const hi = 8
+        const mu = 1e-13
+        const ars = new ARS(x => -0.5 * (x - mu) * (x - mu), [lo, hi], x => -(x - mu)).seed(seed)
+        const samples = ars.sample(2000)
+        const ref = new Normal(mu, 1)
+        assert(ksTest(samples, x => ref.cdf(x)))
+        assert(samples.every(x => x >= lo && x <= hi))
+      })
+    })
   })
 
   describe('adaptive envelope tightening', () => {
