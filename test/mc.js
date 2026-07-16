@@ -1278,9 +1278,16 @@ describe('mc.ParallelTempering', () => {
 
     it('should auto-generate a strictly descending geometric ladder from nReplicas and tempMax', () => {
       const pt = new ParallelTempering(logDensity, { nReplicas: 4, tempMax: 100 })
-      // exact rational: beta_i = tempMax^(-i/(nReplicas-1)) for i = 0..3 -> [1, 100^(-1/3), 100^(-2/3), 0.01]
+      // beta_i = tempMax^(-i/(nReplicas-1)) for i = 0..3 -> [1, 100^(-1/3), 100^(-2/3), 0.01].
+      // Interior values checked against 10^(-2/3) and 10^(-4/3) (100^(-1/3) === 10^(-2/3) algebraically),
+      // a different exponent/base decomposition than the source's Math.pow(tempMax, -i/(n-1)) call,
+      // so this can't pass merely by re-deriving the same formula the implementation uses.
       assert.strictEqual(pt.temperatures.length, 4)
       assert.strictEqual(pt.temperatures[0], 1)
+      // exact rational: 10^(-2/3) -> 0.2154434690031884
+      assert.closeTo(pt.temperatures[1], 0.2154434690031884, 1e-12)
+      // exact rational: 10^(-4/3) -> 0.046415888336127795
+      assert.closeTo(pt.temperatures[2], 0.046415888336127795, 1e-12)
       assert.closeTo(pt.temperatures[3], 0.01, 1e-12)
       for (let i = 0; i < 3; i++) {
         assert.isBelow(pt.temperatures[i + 1], pt.temperatures[i])
@@ -1322,19 +1329,21 @@ describe('mc.ParallelTempering', () => {
     it('should count an attempted-but-rejected swap without exchanging positions', () => {
       const pt = new ParallelTempering(logDensity, { temperatures: [1, 0.5] })
       // Reversed positions: (beta_0 - beta_1) * (lnp(x1) - lnp(x0)) = 0.5 * (-12.5 - 0) = -6.25,
-      // acceptance probability exp(-6.25) ~= 0.00193 -- using a fixed seed and reading off whether
-      // the single r.next() draw exceeds that threshold keeps this deterministic.
-      pt.seed(1)
+      // acceptance probability exp(-6.25) ~= 0.00193. Stubbing r.next() to return a value
+      // comfortably above that threshold makes rejection deterministic instead of depending on
+      // a fixed seed happening to draw above it -- a future change to Xoshiro128p, the swap loop,
+      // or the seed-derivation in seed() could otherwise flip the draw and silently stop this test
+      // from exercising its own assertions.
       pt._replicas[0].x = [0]
       pt._replicas[1].x = [5]
       const before0 = pt._replicas[0].x.slice()
       const before1 = pt._replicas[1].x.slice()
+      pt.r.next = () => 0.99
       pt._proposeSwap(0)
       assert.strictEqual(pt._swapAttempts[0], 1)
-      if (pt._swapAccepts[0] === 0) {
-        assert.deepEqual(pt._replicas[0].x, before0)
-        assert.deepEqual(pt._replicas[1].x, before1)
-      }
+      assert.strictEqual(pt._swapAccepts[0], 0)
+      assert.deepEqual(pt._replicas[0].x, before0)
+      assert.deepEqual(pt._replicas[1].x, before1)
     })
   })
 
