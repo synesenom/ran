@@ -10,6 +10,7 @@ import SliceSampler from '../src/mc/slice'
 import gelmanRubin from '../src/mc/gelman-rubin'
 import runChains from '../src/mc/run-chains'
 import { Normal, Gamma, Beta } from '../src/dist'
+import pearson from '../src/dependence/pearson'
 import { ksTest, ess } from './test-utils'
 
 // Concrete subclass that replays a pre-built sequence, enabling deterministic
@@ -726,6 +727,12 @@ describe('mc.Gibbs', () => {
         const ref = new Normal(0, 1)
         assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
         assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+        // Both margins are standard Normal regardless of rho, so the KS tests above
+        // cannot detect a sign flip or a swapped source dimension in the conditionals;
+        // the joint correlation is the only statistic that distinguishes them.
+        // SE(r) ~= (1 - rho^2) / sqrt(n - 1) ~= 0.0168 for rho=0.5, n=2000, so 0.1 is ~6 SE.
+        const r = pearson(samples.map(s => s[0]), samples.map(s => s[1]))
+        assert.approximately(r, rho, 0.1)
       })
     })
   })

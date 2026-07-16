@@ -89,10 +89,7 @@ export default class HMC extends MCMC {
    */
   seed (value) {
     super.seed(value)
-    this._q.seed(value)
-    // super.seed() may have redrawn this.x from the newly seeded generator, so lastLnp
-    // (computed against the pre-seed x at construction time) must be recomputed to match.
-    this.lastLnp = this.lnp(this.x)
+    this._reseedCachedLogDensity(value)
     return this
   }
 

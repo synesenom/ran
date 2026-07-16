@@ -26,6 +26,11 @@ const EPS = 1e-6
  */
 // decisions/0022-rwm-joint-adaptive-metropolis.md — anticipates full-covariance AM as a separate sampler
 export default class AdaptiveMetropolis extends MCMC {
+  /**
+   * @param {Function} logDensity The logarithm of the (unnormalized) target density.
+   * @param {Object=} config AdaptiveMetropolis configuration (see MCMC base class for shared options).
+   * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
+   */
   constructor (logDensity, config, initialState) {
     super(logDensity, config, initialState)
     this.lastLnp = this.lnp(this.x)
@@ -35,6 +40,13 @@ export default class AdaptiveMetropolis extends MCMC {
     this._covN = 0
     this._covMean = new Array(this.dim).fill(0)
     this._covS = Array.from({ length: this.dim }, () => new Array(this.dim).fill(0))
+    // Reusable scratch buffers to avoid per-iteration array allocations in _iter/_updateCovariance.
+    // Only plain arrays are cached as fields here, never a Vector instance: a cached Vector field's
+    // type is inferred from its own JSDoc (ran.la.Vector), which breaks npm run typecheck the same
+    // way a cached Matrix field does — see solutions/tooling/2026-07-15-1330-adaptive-metropolis-ran-la-matrix-dts-leak.md
+    this._zBuffer = new Array(this.dim).fill(0)
+    this._delta = new Array(this.dim).fill(0)
+    this._delta2 = new Array(this.dim).fill(0)
     // Seeded from an isotropic guess (matching RWM's all-ones default) since the covariance
     // accumulator has no observations yet to base a better proposal on (see _adjust).
     this._A = this.internal.proposal
@@ -54,15 +66,17 @@ export default class AdaptiveMetropolis extends MCMC {
    */
   seed (value) {
     super.seed(value)
-    this._q.seed(value)
-    // super.seed() may have redrawn this.x from the newly seeded generator, so lastLnp
-    // (computed against the pre-seed x at construction time) must be recomputed to match.
-    this.lastLnp = this.lnp(this.x)
+    this._reseedCachedLogDensity(value)
     return this
   }
 
   _iter (x) {
-    const z = new Vector(Array.from({ length: this.dim }, () => this._q.sample()))
+    for (let i = 0; i < this.dim; i++) {
+      this._zBuffer[i] = this._q.sample()
+    }
+    // z wraps the reused _zBuffer; kept as a local rather than a cached field (see the
+    // constructor's typecheck note above), but no new array is allocated per iteration.
+    const z = new Vector(this._zBuffer)
     const jump = this._A.apply(z).v()
     const x1 = x.map((d, i) => d + jump[i])
     const newLnp = this.lnp(x1)
@@ -96,11 +110,17 @@ export default class AdaptiveMetropolis extends MCMC {
   _updateCovariance (x) {
     this._covN++
     const n = this._covN
-    const delta = x.map((v, i) => v - this._covMean[i])
+    const delta = this._delta
+    const delta2 = this._delta2
+    for (let i = 0; i < this.dim; i++) {
+      delta[i] = x[i] - this._covMean[i]
+    }
     for (let i = 0; i < this.dim; i++) {
       this._covMean[i] += delta[i] / n
     }
-    const delta2 = x.map((v, i) => v - this._covMean[i])
+    for (let i = 0; i < this.dim; i++) {
+      delta2[i] = x[i] - this._covMean[i]
+    }
     for (let i = 0; i < this.dim; i++) {
       for (let j = 0; j < this.dim; j++) {
         this._covS[i][j] += delta[i] * delta2[j]

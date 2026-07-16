@@ -74,6 +74,18 @@ const _spear: number | undefined = ran.dependence.spearman([1, 2], [3, 4])
 const _kend: number | undefined = ran.dependence.kendall([1, 2], [3, 4])
 const _cov: number | undefined = ran.dependence.covariance([1, 2], [3, 4])
 
+// mc namespace — constructor params typed via dedicated constructor JSDoc (issue #944)
+const logDensity: (x: number[]) => number = (x) => -0.5 * x[0] * x[0]
+const _rwm = new ran.mc.RWM(logDensity, { dim: 1 })
+const _am = new ran.mc.AdaptiveMetropolis(logDensity, { dim: 1 })
+const _gibbs = new ran.mc.Gibbs([(x: number[]) => x[0]], { dim: 1 })
+// @ts-expect-error - logDensity must be a Function, not a number; guards against the constructor JSDoc block being reverted and tsc widening back to `any`
+new ran.mc.RWM(42, { dim: 1 })
+// @ts-expect-error - logDensity must be a Function, not a number; guards against the constructor JSDoc block being reverted and tsc widening back to `any`
+new ran.mc.AdaptiveMetropolis(42, { dim: 1 })
+// @ts-expect-error - conditionals must be a Function[], not a number[]; guards against the constructor JSDoc block being reverted and tsc widening back to `any`
+new ran.mc.Gibbs([1, 2], { dim: 2 })
+
 // test namespace — all 5 functions
 const _bart = ran.test.bartlett([[1, 2, 3], [4, 5, 6]])
 const _bstat: number = _bart.stat
@@ -92,3 +104,4 @@ void _choice1; void _choice2; void _ch2; void _ch3; void _shuffled; void _coinSi
 void _gm; void _hm; void _med; void _var; void _sd; void _iqr
 void _skew; void _kurt; void _q50; void _pear; void _spear; void _kend; void _cov
 void _bstat; void _bpass; void _bf; void _lev; void _mw; void _hsic
+void _rwm; void _am; void _gibbs
