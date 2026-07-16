@@ -28,6 +28,7 @@ A comprehensive JavaScript library for probability distributions, random variate
   - [State serialisation](#state-serialisation)
 - [Process API](#process-api)
 - [MC API](#mc-api)
+  - [Choosing a sampler](#choosing-a-sampler)
 - [Return values and errors](#return-values-and-errors)
 - [Numerical precision](#numerical-precision)
   - [Test reference values](#test-reference-values)
@@ -256,6 +257,19 @@ Available samplers:
 | `ran.mc.NUTS(logDensity, gradLogDensity, config, initialState)` | No-U-Turn Sampler (Hoffman & Gelman 2014): extends `HMC` with a doubling-tree trajectory that automatically stops at a U-turn, eliminating the need to hand-tune `pathLength`; the transition is selected via slice sampling over the tree, and step size is adapted during warm-up via the same Robbins-Monro dual averaging as `HMC` |
 | `ran.mc.SliceSampler(logDensity, config, initialState)` | Coordinate-wise slice sampler (Neal 2003) using stepping-out and shrinkage; no proposal tuning or gradient required, interval width `w` is adapted per dimension during warm-up, and `ar()` is always 1.0 |
 | `ran.mc.ParallelTempering(logDensity, options)` | Parallel Tempering / Replica Exchange MCMC (Geyer 1991) for multimodal targets; not a subclass of `MCMC`, it coordinates an array of independent replica samplers (default `RWM`) at descending inverse temperatures, periodically swapping adjacent replicas' positions so the cold (β = 1) replica inherits the hot replicas' mode-crossing moves |
+
+### Choosing a sampler
+
+Work through these questions in order — each one narrows the field:
+
+1. **Do you know the full conditional distribution of every parameter, given the rest?** → `Gibbs`. Every draw comes directly from an exact conditional, so there's no accept/reject step and `ar()` is always 1.
+2. **Is the target univariate and log-concave on a known finite bracket?** → `ARS`. Every draw is an exact, independent sample from the target — no warm-up, no burn-in, and no chain to check for convergence.
+3. **Do you have the gradient of the log-density?** → `NUTS` is the default (self-tuning trajectory length via the doubling-tree/U-turn criterion); `HMC` if you want the trajectory length under direct control, or if your parameters span very different scales — its `config.metric` adapts a Euclidean mass matrix (`'diag'` by default, `'dense'` for correlated parameters) during warm-up; `MALA` if a single Langevin step per iteration is enough. **Note:** `NUTS` does not adapt a metric yet — momentum is drawn from a standard Normal (identity mass matrix) — so a poorly-scaled target currently mixes better under `HMC` with `config.metric` than under `NUTS`.
+4. **No gradient — low or high dimensional?** → `SliceSampler` for low-d (no proposal to tune, interval width self-adapts); `RWM` or `AdaptiveMetropolis` for higher-d (`AdaptiveMetropolis` when parameters are correlated, since it learns the full proposal covariance instead of a diagonal one).
+
+`Gibbs`, `NUTS`, `HMC`, `MALA`, `SliceSampler`, `RWM`, and `AdaptiveMetropolis` all explore the target locally around their current state, so a target with well-separated modes can trap any of them in a single mode. `ParallelTempering` is the library's remedy: wrap your chosen sampler in it whenever you suspect (or know) the target is multimodal. (`ARS` sidesteps the question entirely — it isn't a Markov chain, and only accepts log-concave, hence unimodal, targets in the first place.)
+
+Whichever sampler you pick, use `runChains` with `gelmanRubin` to check convergence — no signal computable from a single chain can distinguish "converged" from "stuck".
 
 `ran.mc.gelmanRubin(samples, maxLength)` computes the R-hat convergence diagnostic across two or more independent chains (each an array of states returned by `sample()`):
 
