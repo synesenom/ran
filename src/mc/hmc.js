@@ -47,6 +47,18 @@ const JITTER_RANGE = 0.2
 // decisions/0025-hmc-iter-alpha-field.md — _iter returns an additional alpha field so _adjust can
 // drive dual averaging from the continuous Metropolis acceptance probability
 export default class HMC extends MCMC {
+  // Missed by #944's manual sweep of RWM/AdaptiveMetropolis/Gibbs constructors; added here
+  // for correct tsc-generated param types. See
+  // solutions/correctness/2026-07-16-1602-hmc-jsdoc-sibling-sweep-gap.md
+  /**
+   * @param {Function} logDensity The logarithm of the (unnormalized) target density.
+   * @param {Function} gradLogDensity The gradient of logDensity: maps a state (number[]) to its
+   * gradient (number[]) of the same dimension.
+   * @param {Object=} config HMC configuration (see MCMC base class for shared options), plus
+   * `stepSize` (ε, the leapfrog step size, default 0.1) and `pathLength` (L, the number of leapfrog
+   * steps per iteration, default 10).
+   * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
+   */
   constructor (logDensity, gradLogDensity, config = {}, initialState = {}) {
     super(logDensity, config, initialState)
 
