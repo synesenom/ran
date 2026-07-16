@@ -236,6 +236,26 @@ export default class MCMC {
   }
 
   /**
+   * Reseeds a subclass-owned proposal/momentum generator (`this._q`) and recomputes a
+   * subclass-owned cached log-density (`this.lastLnp`) against the current `this.x`. Explicitly
+   * called by a subclass's own `seed()` override — never invoked automatically by base-class
+   * control flow — so subclasses without a `_q`/`lastLnp` pair (e.g. Gibbs, SliceSampler) are
+   * unaffected.
+   *
+   * @method _reseedCachedLogDensity
+   * @memberof ran.mc.MCMC
+   * @param {number|string} value The seed value passed to the sampler's `seed()` method.
+   * @protected
+   * @ignore
+   */
+  // decisions/0026-mcmc-reseed-cached-log-density-hook.md — extracted reseed-and-recompute logic
+  // shared by RWM, AdaptiveMetropolis, and HMC into one explicitly-called protected method
+  _reseedCachedLogDensity (value) {
+    this._q.seed(value)
+    this.lastLnp = this.lnp(this.x)
+  }
+
+  /**
    * Performs a single iteration. Must be overridden.
    *
    * @method _iter
