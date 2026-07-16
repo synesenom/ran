@@ -887,11 +887,8 @@ describe('mc.HMC', () => {
       assert.throws(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1001, metric: 'dense' }), /dense/i)
     })
 
-    it('should not throw for metric: dense at the dimension cap boundary', () => {
+    it('should not throw for metric: dense at the dimension cap boundary or at dim: 1', () => {
       assert.doesNotThrow(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1000, metric: 'dense' }))
-    })
-
-    it('should not throw for metric: dense at dim: 1', () => {
       const hmc = new HMC(logDensity1D, gradLogDensity1D, { dim: 1, metric: 'dense' })
       assert.doesNotThrow(() => hmc.iterate())
     })
@@ -987,24 +984,20 @@ describe('mc.HMC', () => {
     })
 
     describe('diagonal metric (default)', () => {
-      it('should balance per-dimension ESS on a target with very different scales, and leave it unbalanced without warm-up', () => {
-        // Independent 3D Normal, sigma = [1, 100, 0.1] -- a 1000x scale range. 0.1 (not the
-        // issue's example 0.01) keeps the *unadapted* baseline within the leapfrog integrator's
-        // stability margin (eps/sigma = stepSize/sigma must stay below ~2 for the default
-        // stepSize=0.1, or the unadapted chain diverges every proposal and gets rejected forever,
-        // which would make its "stuck" ESS look spuriously high via a zero-variance/NaN
-        // autocorrelation rather than genuinely low).
-        const sigma = [1, 100, 0.1]
-        const variance = sigma.map(s => s * s)
-        const lnp = x => -0.5 * (x[0] * x[0] / variance[0] + x[1] * x[1] / variance[1] + x[2] * x[2] / variance[2])
-        const grad = x => [-x[0] / variance[0], -x[1] / variance[1], -x[2] / variance[2]]
+      // Independent 3D Normal, sigma = [1, 100, 0.1] -- a 1000x scale range. 0.1 (not the issue's
+      // example 0.01) keeps the *unadapted* baseline within the leapfrog stability margin
+      // (eps/sigma must stay below ~2 for stepSize=0.1), avoiding a fully-stuck chain whose
+      // zero-variance autocorrelation would make its ESS look spuriously high instead of low.
+      const sigma = [1, 100, 0.1]
+      const variance = sigma.map(s => s * s)
+      const lnp = x => -0.5 * (x[0] * x[0] / variance[0] + x[1] * x[1] / variance[1] + x[2] * x[2] / variance[2])
+      const grad = x => [-x[0] / variance[0], -x[1] / variance[1], -x[2] / variance[2]]
 
+      it('should balance per-dimension ESS on a target with very different scales, and leave it unbalanced without warm-up', () => {
         const warmUpBatches = 20
         const sampleSize = 2000
-
-        // A single seed's per-dimension ESS ratio is a noisy point estimate (test/mc.js's own
-        // 5D correlated Normal ESS comparison test averages over several seeds for the same
-        // reason) -- average both ratios over 3 independent seeds instead of trusting seed 1 alone.
+        // A single seed's ratio is a noisy point estimate -- average over 3 independent seeds,
+        // as the 5D correlated Normal ESS comparison test below does for the same reason.
         const seeds = [1, 2, 3]
         const adaptedRatios = seeds.map(seed => {
           const adapted = new HMC(lnp, grad, { dim: 3 }, { x: [0, 0, 0] }).seed(seed)
@@ -1013,8 +1006,7 @@ describe('mc.HMC', () => {
           const adaptedEss = essPerDimension(adapted, adapted.samplingRate * adaptedSamples.length)
           return Math.max(...adaptedEss) / Math.min(...adaptedEss)
         })
-        // No warmUp(): _adjust never runs, so both the metric and the step size stay at their
-        // identity/construction defaults -- the "without adaptation" baseline.
+        // No warmUp(): _adjust never runs, so the metric/step size stay at their identity defaults.
         const unadaptedRatios = seeds.map(seed => {
           const unadapted = new HMC(lnp, grad, { dim: 3 }, { x: [0, 0, 0] }).seed(seed)
           const unadaptedSamples = unadapted.sample(null, sampleSize)
@@ -1029,16 +1021,8 @@ describe('mc.HMC', () => {
       })
 
       it('should still recover the correct per-dimension margins under metric adaptation (KS test)', () => {
-        // Guards against a sign/inversion bug in _sampleMomentum/_applyInverseMetric/_kineticEnergy
-        // (e.g. M and M^-1 swapped) that could improve ESS-style mixing diagnostics while silently
-        // biasing the sampled distribution -- neither the ESS-balance test above nor the state
-        // round-trip test would catch that, since both only inspect internal adaptation state
-        // or a mixing-efficiency statistic, never the actual sampled distribution.
-        const sigma = [1, 100, 0.1]
-        const variance = sigma.map(s => s * s)
-        const lnp = x => -0.5 * (x[0] * x[0] / variance[0] + x[1] * x[1] / variance[1] + x[2] * x[2] / variance[2])
-        const grad = x => [-x[0] / variance[0], -x[1] / variance[1], -x[2] / variance[2]]
-
+        // Guards against an M/M^-1 inversion bug that could improve ESS while silently biasing
+        // the sampled distribution -- neither test above inspects the distribution itself.
         const hmc = new HMC(lnp, grad, { dim: 3 }, { x: [0, 0, 0] }).seed(1)
         hmc.warmUp(null, 20)
         const samples = hmc.sample(null, 2000)
@@ -1074,25 +1058,19 @@ describe('mc.HMC', () => {
       })
 
       it('should achieve higher effective sample size than the diagonal metric on a strongly correlated target', () => {
-        // Strongly correlated 2D Normal (rho = 0.99): both margins have unit variance, so a
-        // diagonal metric cannot distinguish this target from an uncorrelated one -- only a dense
-        // metric captures the correlation itself, which is what should improve mixing here. rho
-        // this close to 1 (rather than e.g. 0.5-0.9) keeps the diagonal-metric chain's
-        // autocorrelation reliably positive and slowly-decaying rather than occasionally
-        // overshooting into a spuriously ESS-inflating negative lag-1 value.
+        // rho=0.99: both margins have unit variance, so only a dense metric (which captures the
+        // correlation) can improve mixing here -- and rho this close to 1 keeps the diagonal
+        // chain's autocorrelation positive/slowly-decaying instead of occasionally overshooting
+        // into a spuriously ESS-inflating negative lag-1 value.
         const rho = 0.99
         const c = 1 - rho * rho
         const lnp = x => -0.5 * (x[0] * x[0] - 2 * rho * x[0] * x[1] + x[1] * x[1]) / c
         const grad = x => [-(x[0] - rho * x[1]) / c, -(x[1] - rho * x[0]) / c]
 
         const warmUpBatches = 20
-        // Dense and diagonal metrics auto-tune very different samplingRate (thinning) values on
-        // this target, so comparing ess(sampler, samplingRate*sampleSize.length) -- as the
-        // existing AdaptiveMetropolis/RWM ESS test does -- would compare each sampler's ESS over a
-        // *different* raw-iteration budget (whichever one its own thinning happened to consume)
-        // rather than an equal one. Fixing a raw iteration count and reading ac() directly (via
-        // sample(null, 0) to reset the accumulators, then manual iterate() calls) isolates
-        // per-raw-iteration mixing efficiency from the confound of differing thinning intervals.
+        // Dense and diagonal auto-tune different samplingRate (thinning), so comparing
+        // ess(sampler, samplingRate*sampleSize.length) would compare different raw-iteration
+        // budgets -- fixing a raw count via sample(null, 0) + manual iterate() avoids that confound.
         const rawIterations = 6000
 
         const seeds = [1, 2, 3]
