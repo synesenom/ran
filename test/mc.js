@@ -973,6 +973,7 @@ describe('mc.MALA', () => {
       const mala = new MALA(logDensity1D, gradLogDensity1D, { dim: 1 })
       // Log-scale storage (Math.log/Math.exp round-trip) introduces a ~1e-17 float error,
       // unlike HMC's linear _stepSize storage which reports the input bit-exact.
+      // See solutions/testing/2026-07-16-1600-mala-log-scale-storage-strict-equal-trap.md
       assert.closeTo(mala.state().internal.stepSize, 0.1, 1e-15)
     })
 
@@ -1060,6 +1061,7 @@ describe('mc.MALA', () => {
   // analytical gradient (grad log p(x) = -Q x for a zero-mean Normal with precision Q).
   // Split into small single-purpose functions so no one function's cyclomatic complexity
   // combines the density loop, the gradient loop, and the diagonal-entry selection.
+  // See solutions/tooling/2026-07-16-1601-codescene-nested-closure-complexity-attribution.md
   function ar1PrecisionEntries (rho) {
     const denom = 1 - rho * rho
     return { diagEdge: 1 / denom, diagMid: (1 + rho * rho) / denom, offDiag: -rho / denom }
