@@ -26,6 +26,11 @@ const EPS = 1e-6
  */
 // decisions/0022-rwm-joint-adaptive-metropolis.md — anticipates full-covariance AM as a separate sampler
 export default class AdaptiveMetropolis extends MCMC {
+  /**
+   * @param {Function} logDensity The logarithm of the (unnormalized) target density.
+   * @param {Object=} config AdaptiveMetropolis configuration (see MCMC base class for shared options).
+   * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
+   */
   constructor (logDensity, config, initialState) {
     super(logDensity, config, initialState)
     this.lastLnp = this.lnp(this.x)
