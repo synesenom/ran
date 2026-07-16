@@ -241,6 +241,7 @@ rwm.sample(null, 1000) // draw 1000 (thinned) samples
 rwm.statistics()       // per-dimension { mean, std, cv } since the last reset
 rwm.ar()               // acceptance rate over the most recent config.arWindow iterations (sliding window)
 rwm.ac()               // autocorrelation vs. lag, per dimension
+rwm.ess()              // effective sample size, per dimension (Geyer's positive-part estimator)
 rwm.state()            // snapshot: { x, samplingRate, internal } for resuming a chain
 rwm.seed(42)           // seed the PRNG for reproducible chains; returns the instance
 ```
