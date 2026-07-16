@@ -8,7 +8,7 @@ const _MAX_REPLICAS = 10000
 
 /**
  * Class implementing [Parallel Tempering]{@link https://doi.org/10.1090/conm/026} (Replica Exchange MCMC,
- * Geyer 1991) to sample multimodal targets. Runs N independent {@link ran.mc.MCMC} replicas at inverse
+ * Geyer 1991) to sample multimodal targets. Runs N independent [MCMC]{@link ran.mc.MCMC} replicas at inverse
  * temperatures beta_1 = 1 > beta_2 > ... > beta_n, replica i targeting `beta_i * logDensity(x)`. Hot
  * replicas (small beta) have a flattened target and cross low-probability barriers between modes easily;
  * the cold replica (beta = 1) samples the true target. After each thinned step, a swap between one
@@ -17,7 +17,7 @@ const _MAX_REPLICAS = 10000
  * detailed balance on the joint replica distribution; see the `_proposeSwap` implementation comment),
  * letting the cold chain inherit the hot chains' mode-crossing moves.
  *
- * Unlike every other class in `ran.mc`, this is not an {@link ran.mc.MCMC} subclass: it has no single
+ * Unlike every other class in `ran.mc`, this is not an [MCMC]{@link ran.mc.MCMC} subclass: it has no single
  * position or target density of its own, only an array of independent replicas and the swap logic that
  * couples them (see decisions/0028-parallel-tempering-standalone-coordinator.md). Each replica keeps
  * its own proposal tuning pinned to its temperature slot; an accepted swap exchanges only the replicas'
