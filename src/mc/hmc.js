@@ -261,7 +261,7 @@ export default class HMC extends MCMC {
     if (!HMC._isPositiveFiniteVector(metric.D, dim)) {
       throw Error('HMC: resumed metric.D must be an array of dim positive finite numbers')
     }
-    if (!Array.isArray(metric.L) || metric.L.length !== dim || !metric.L.every(row => HMC._isFiniteVector(row, dim))) {
+    if (!HMC._isFiniteMatrix(metric.L, dim)) {
       throw Error('HMC: resumed metric.L must be a dim x dim array of finite numbers')
     }
   }
@@ -272,6 +272,10 @@ export default class HMC extends MCMC {
 
   static _isPositiveFiniteVector (arr, length) {
     return HMC._isFiniteVector(arr, length) && arr.every(v => v > 0)
+  }
+
+  static _isFiniteMatrix (rows, dim) {
+    return Array.isArray(rows) && rows.length === dim && rows.every(row => HMC._isFiniteVector(row, dim))
   }
 
   static get _MAX_DENSE_METRIC_DIM () {
