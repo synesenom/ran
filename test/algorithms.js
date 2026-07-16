@@ -3,6 +3,8 @@ import { describe, it } from 'mocha'
 import { repeat } from './test-utils'
 import { lambertW0 } from '../src/special/lambert-w'
 import * as algorithms from '../src/algorithms'
+import rejection from '../src/algorithms/rejection'
+import Xoshiro128p from '../src/core/xoshiro'
 
 const PRECISION = 1e-10
 
@@ -292,6 +294,26 @@ describe('algorithms', () => {
       // equals the first, diff=0 triggers the DELTA guard, and the fallback returns S ≈ 1.
       const result = algorithms.wynnEpsilon(k => (k === 0 ? 1 : 1e-20))
       assert(Math.abs(result - 1) < 1e-9)
+    })
+  })
+
+  describe('rejection()', () => {
+    it('should throw when MAX_ITER trials are exhausted without accepting a candidate', () => {
+      const r = new Xoshiro128p()
+      r.seed(1)
+      assert.throws(() => rejection(r, () => 0, () => 0), /exceeded MAX_ITER/)
+    })
+
+    it('should return the accepted sample without a transform', () => {
+      const r = new Xoshiro128p()
+      r.seed(1)
+      assert.equal(rejection(r, () => 5, () => 1), 5)
+    })
+
+    it('should apply the transform to the accepted sample', () => {
+      const r = new Xoshiro128p()
+      r.seed(1)
+      assert.equal(rejection(r, () => 5, () => 1, x => x * 2), 10)
     })
   })
 })

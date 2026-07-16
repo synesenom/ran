@@ -10,7 +10,7 @@ import { MAX_ITER } from '../core/constants'
  * @param {Function} accept The function that returns the acceptance threshold.
  * @param {Function=} transform Optional transformation to apply once the sample is accepted (for transformed
  * distributions).
- * @return {(number|undefined)} The sampled random variate.
+ * @return {number} The sampled random variate.
  * @ignore
  */
 export default function (r, g, accept, transform) {
@@ -20,4 +20,5 @@ export default function (r, g, accept, transform) {
       return typeof transform !== 'undefined' ? transform(x) : x
     }
   }
+  throw Error('rejection: exceeded MAX_ITER trials without accepting a sample')
 }
