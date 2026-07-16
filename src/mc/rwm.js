@@ -30,6 +30,11 @@ const BATCH = 100
  */
 // decisions/0022-rwm-joint-adaptive-metropolis.md — joint diagonal adaptive Metropolis in both phases
 export default class RWM extends MCMC {
+  /**
+   * @param {Function} logDensity The logarithm of the (unnormalized) target density.
+   * @param {Object=} config RWM configuration (see MCMC base class for shared options).
+   * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
+   */
   constructor (logDensity, config, initialState) {
     super(logDensity, config, initialState)
     this.lastLnp = this.lnp(this.x)

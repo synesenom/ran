@@ -31,6 +31,21 @@ import MCMC from './_mcmc'
 // solutions/correctness/2026-07-16-0600-gibbs-seed-rng-threading.md — root cause and prevention
 // strategy for this seed()/conditional-randomness gap.
 export default class Gibbs extends MCMC {
+  /**
+   * @param {Function[]} conditionals Array of samplers, one per dimension. The d-th function is
+   * called as `conditionals[d](x, rng)` with the current full state (an array where index d is
+   * about to be replaced) and the sampler's own PRNG (exposing `rng.next(): number`, a uniform
+   * variate in [0, 1)), and must return a single draw from the full conditional distribution of
+   * dimension d given the rest of the state. `seed()` only reproduces a conditional's draws if the
+   * conditional actually consumes `rng` for its own randomness (e.g. `rng.next()`); a conditional
+   * that ignores `rng` and constructs its own independent generator remains non-reproducible
+   * regardless of `seed()` — see decisions/0026-gibbs-seed-rng-threading.md.
+   * @param {Object=} config Sampler configuration (see MCMC base class for shared options). `dim`
+   * defaults to `conditionals.length`; if provided explicitly it must match `conditionals.length`.
+   * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
+   * @throws {Error} If conditionals is not a non-empty array, or config.dim is provided but does not
+   * match conditionals.length.
+   */
   constructor (conditionals, config = {}, initialState = {}) {
     if (!Array.isArray(conditionals) || conditionals.length === 0) {
       throw Error('Gibbs: conditionals must be a non-empty array')
