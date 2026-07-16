@@ -298,6 +298,67 @@ describe('mc.MCMC', () => {
     })
   })
 
+  describe('.ess()', () => {
+    it('should return 0 for an unstarted sampler (no observations)', () => {
+      // n = _acN = 0, ac()'s lag-1 entry is NaN, the loop breaks immediately with sum = 0,
+      // so ess() = 0/(1+0) = 0 -- deliberately not NaN, unlike ac()'s own no-data convention.
+      const mc = new TestMCMC([])
+      const essVal = mc.ess()
+      assert.strictEqual(essVal.length, 1)
+      assert.strictEqual(essVal[0], 0)
+    })
+
+    it('should match a hand-calculated value for a known sequence', () => {
+      const mc = new TestMCMC([1, 2, 3, 4, 5].map(v => ({ x: [v], accepted: true })))
+      for (let i = 0; i < 5; i++) mc.iterate()
+      const essVal = mc.ess()
+      // exact rational: rho[1] = 0.5, rho[2] = -1/6 (< 0, stops the sum), so
+      // ess = n / (1 + 2*rho[1]) = 5 / (1 + 1.0) = 2.5
+      assert.closeTo(essVal[0], 2.5, 1e-12)
+    })
+
+    it('should compute an independent ess() per dimension for a known 2D sequence', () => {
+      // dim 0 replays the [1,2,3,4,5] case above (ess = 2.5); dim 1 alternates sign, giving
+      // rho[1] < 0 (immediate truncation) and thus ess = n = 5 exactly.
+      const seq = [[1, 1], [2, -1], [3, 1], [4, -1], [5, 1]].map(x => ({ x, accepted: true }))
+      const mc = new TestMCMC(seq, { dim: 2 })
+      for (let i = 0; i < 5; i++) mc.iterate()
+      const essVal = mc.ess()
+      assert.strictEqual(essVal.length, 2)
+      assert.closeTo(essVal[0], 2.5, 1e-12)
+      assert.closeTo(essVal[1], 5, 1e-12)
+    })
+
+    it('should stay close to N for a genuinely independent (seeded) sequence', () => {
+      const normal = new Normal(0, 1).seed(42)
+      const n = 2000
+      const seq = Array.from({ length: n }, () => ({ x: [normal.sample()], accepted: true }))
+      const mc = new TestMCMC(seq)
+      for (let i = 0; i < n; i++) mc.iterate()
+      const essVal = mc.ess()
+      // Sample autocorrelation of a genuinely iid sequence is small and centered at 0, so
+      // Geyer's estimator truncates near lag 1 and ess() should stay close to N.
+      assert(essVal[0] > n * 0.8, `ess (${essVal[0]}) should stay close to N=${n} for an iid sequence`)
+    })
+
+    it('should fall well below N for a strongly autocorrelated (seeded AR(1)) sequence', () => {
+      const noise = new Normal(0, 0.1).seed(7)
+      const n = 2000
+      const phi = 0.98
+      let x = 0
+      const seq = Array.from({ length: n }, () => {
+        x = phi * x + noise.sample()
+        return { x: [x], accepted: true }
+      })
+      const mc = new TestMCMC(seq)
+      for (let i = 0; i < n; i++) mc.iterate()
+      const essVal = mc.ess()
+      // Theoretical AR(1) ESS is N*(1-phi)/(1+phi) = 2000*0.02/1.98 ~= 20, roughly two orders
+      // of magnitude below N -- n * 0.1 leaves comfortable margin without being a loose bound.
+      assert(essVal[0] < n * 0.1, `ess (${essVal[0]}) should be well below N=${n} for a strongly autocorrelated sequence`)
+    })
+  })
+
   describe('._thinningLag()', () => {
     it('should return a small lag for a rapidly-decorrelating (alternating) sequence', () => {
       // A ±1 alternating chain has ac(1) ≈ -1, ac(2) ≈ +1, ...; |ac| never stays
@@ -628,13 +689,13 @@ describe('mc.AdaptiveMetropolis', () => {
       const ratios = seeds.map(seed => {
         const am = new AdaptiveMetropolis(lnp, { dim: 5 }).seed(seed)
         am.warmUp(null, warmUpBatches)
-        const amSamples = am.sample(null, sampleSize)
-        const amEss = ess(am, am.samplingRate * amSamples.length)
+        am.sample(null, sampleSize)
+        const amEss = ess(am)
 
         const rwm = new RWM(lnp, { dim: 5 }).seed(seed)
         rwm.warmUp(null, warmUpBatches)
-        const rwmSamples = rwm.sample(null, sampleSize)
-        const rwmEss = ess(rwm, rwm.samplingRate * rwmSamples.length)
+        rwm.sample(null, sampleSize)
+        const rwmEss = ess(rwm)
 
         return amEss / rwmEss
       })
@@ -1111,13 +1172,13 @@ describe('mc.MALA', () => {
       const ratios = seeds.map(seed => {
         const mala = new MALA(lnp, gradLnp, { dim: 5 }).seed(seed)
         mala.warmUp(null, warmUpBatches)
-        const malaSamples = mala.sample(null, sampleSize)
-        const malaEss = ess(mala, mala.samplingRate * malaSamples.length)
+        mala.sample(null, sampleSize)
+        const malaEss = ess(mala)
 
         const rwm = new RWM(lnp, { dim: 5 }).seed(seed)
         rwm.warmUp(null, warmUpBatches)
-        const rwmSamples = rwm.sample(null, sampleSize)
-        const rwmEss = ess(rwm, rwm.samplingRate * rwmSamples.length)
+        rwm.sample(null, sampleSize)
+        const rwmEss = ess(rwm)
 
         return malaEss / rwmEss
       })
@@ -1326,12 +1387,12 @@ describe('mc.NUTS', () => {
         const nuts = new NUTS(essLogDensity, essGradLogDensity, { dim: 2 }).seed(seed)
         nuts.warmUp(null, warmUpBatches)
         const nutsSamples = nuts.sample(null, sampleSize)
-        const nutsEssPerIter = ess(nuts, nuts.samplingRate * nutsSamples.length) / (nuts.samplingRate * nutsSamples.length)
+        const nutsEssPerIter = ess(nuts) / (nuts.samplingRate * nutsSamples.length)
 
         const hmc = new HMC(essLogDensity, essGradLogDensity, { dim: 2 }).seed(seed)
         hmc.warmUp(null, warmUpBatches)
         const hmcSamples = hmc.sample(null, sampleSize)
-        const hmcEssPerIter = ess(hmc, hmc.samplingRate * hmcSamples.length) / (hmc.samplingRate * hmcSamples.length)
+        const hmcEssPerIter = ess(hmc) / (hmc.samplingRate * hmcSamples.length)
 
         return nutsEssPerIter / hmcEssPerIter
       })
