@@ -35,6 +35,11 @@ export default class AdaptiveMetropolis extends MCMC {
     this._covN = 0
     this._covMean = new Array(this.dim).fill(0)
     this._covS = Array.from({ length: this.dim }, () => new Array(this.dim).fill(0))
+    // Reusable scratch buffers to avoid per-iteration array allocations in _iter/_updateCovariance.
+    this._zBuffer = new Array(this.dim).fill(0)
+    this._z = new Vector(this._zBuffer)
+    this._delta = new Array(this.dim).fill(0)
+    this._delta2 = new Array(this.dim).fill(0)
     // Seeded from an isotropic guess (matching RWM's all-ones default) since the covariance
     // accumulator has no observations yet to base a better proposal on (see _adjust).
     this._A = this.internal.proposal
@@ -62,8 +67,10 @@ export default class AdaptiveMetropolis extends MCMC {
   }
 
   _iter (x) {
-    const z = new Vector(Array.from({ length: this.dim }, () => this._q.sample()))
-    const jump = this._A.apply(z).v()
+    for (let i = 0; i < this.dim; i++) {
+      this._zBuffer[i] = this._q.sample()
+    }
+    const jump = this._A.apply(this._z).v()
     const x1 = x.map((d, i) => d + jump[i])
     const newLnp = this.lnp(x1)
     const accepted = this.r.next() < Math.exp(newLnp - this.lastLnp)
@@ -96,11 +103,17 @@ export default class AdaptiveMetropolis extends MCMC {
   _updateCovariance (x) {
     this._covN++
     const n = this._covN
-    const delta = x.map((v, i) => v - this._covMean[i])
+    const delta = this._delta
+    const delta2 = this._delta2
+    for (let i = 0; i < this.dim; i++) {
+      delta[i] = x[i] - this._covMean[i]
+    }
     for (let i = 0; i < this.dim; i++) {
       this._covMean[i] += delta[i] / n
     }
-    const delta2 = x.map((v, i) => v - this._covMean[i])
+    for (let i = 0; i < this.dim; i++) {
+      delta2[i] = x[i] - this._covMean[i]
+    }
     for (let i = 0; i < this.dim; i++) {
       for (let j = 0; j < this.dim; j++) {
         this._covS[i][j] += delta[i] * delta2[j]
