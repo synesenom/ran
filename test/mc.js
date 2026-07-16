@@ -867,6 +867,75 @@ describe('mc.HMC', () => {
     it('should not throw for valid stepSize and pathLength', () => {
       assert.doesNotThrow(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1, stepSize: 0.2, pathLength: 5 }))
     })
+
+    it('should default to metric: diag when config.metric is omitted', () => {
+      const hmc = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 })
+      assert.strictEqual(hmc.state().internal.metric.type, 'diag')
+    })
+
+    it('should accept metric: dense', () => {
+      const hmc = new HMC(logDensity2D, gradLogDensity2D, { dim: 2, metric: 'dense' })
+      assert.strictEqual(hmc.state().internal.metric.type, 'dense')
+    })
+
+    it('should throw when metric is neither diag nor dense', () => {
+      assert.throws(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1, metric: 'bogus' }), /metric must be/)
+    })
+
+    it('should throw when metric: dense exceeds the dense dimension cap', () => {
+      assert.throws(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1001, metric: 'dense' }), /dense/i)
+    })
+
+    it('should not throw for metric: dense at the dimension cap boundary', () => {
+      assert.doesNotThrow(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1000, metric: 'dense' }))
+    })
+
+    it('should not throw for metric: dense at dim: 1', () => {
+      const hmc = new HMC(logDensity1D, gradLogDensity1D, { dim: 1, metric: 'dense' })
+      assert.doesNotThrow(() => hmc.iterate())
+    })
+
+    it('should throw when a resumed internal.metric.type mismatches the resolved metric type', () => {
+      assert.throws(
+        () => new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }, { internal: { stepSize: 0.1, pathLength: 10, metric: { type: 'dense', L: [[1]], D: [1] } } }),
+        /metric/i
+      )
+    })
+
+    it('should throw when a resumed diagonal internal.metric.variance has the wrong length', () => {
+      assert.throws(
+        () => new HMC(logDensity2D, gradLogDensity2D, { dim: 2 }, { internal: { stepSize: 0.1, pathLength: 10, metric: { type: 'diag', variance: [1] } } }),
+        /metric/i
+      )
+    })
+
+    it('should throw when a resumed diagonal internal.metric.variance contains a non-positive value', () => {
+      assert.throws(
+        () => new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }, { internal: { stepSize: 0.1, pathLength: 10, metric: { type: 'diag', variance: [0] } } }),
+        /metric/i
+      )
+    })
+
+    it('should throw when a resumed diagonal internal.metric.variance contains a non-finite value', () => {
+      assert.throws(
+        () => new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }, { internal: { stepSize: 0.1, pathLength: 10, metric: { type: 'diag', variance: [Infinity] } } }),
+        /metric/i
+      )
+    })
+
+    it('should throw when a resumed dense internal.metric.D has the wrong length', () => {
+      assert.throws(
+        () => new HMC(logDensity2D, gradLogDensity2D, { dim: 2, metric: 'dense' }, { internal: { stepSize: 0.1, pathLength: 10, metric: { type: 'dense', L: [[1, 0], [0, 1]], D: [1] } } }),
+        /metric/i
+      )
+    })
+
+    it('should throw when a resumed dense internal.metric.L is malformed', () => {
+      assert.throws(
+        () => new HMC(logDensity2D, gradLogDensity2D, { dim: 2, metric: 'dense' }, { internal: { stepSize: 0.1, pathLength: 10, metric: { type: 'dense', L: [[1, 0]], D: [1, 1] } } }),
+        /metric/i
+      )
+    })
   })
 
   describe('._iter() rejection', () => {
@@ -891,12 +960,162 @@ describe('mc.HMC', () => {
       for (let i = 0; i < 100; i++) hmc1.iterate()
       const state = hmc1.state()
       assert.notStrictEqual(state.internal.stepSize, 0.1)
+      // The diagonal metric adapts alongside stepSize; an empirical sample variance from a
+      // continuous target is never bit-for-bit equal to the identity default of 1.
+      assert.notStrictEqual(state.internal.metric.variance[0], 1)
       const hmc2 = new HMC(logDensity1D, gradLogDensity1D, { dim: 1 }, state)
       assert.deepEqual(hmc2.x, state.x)
       assert.strictEqual(hmc2.samplingRate, state.samplingRate)
       // Full-object deepEqual, not a spot-checked field — see
       // solutions/correctness/2026-07-11-1230-mcmc-state-key-mismatch-silent-sigma-loss.md
       assert.deepEqual(hmc2.state().internal, state.internal)
+    })
+  })
+
+  describe('mass matrix adaptation', () => {
+    // Per-dimension ESS, mirroring test-utils.js's ess() truncation rule but returning one value
+    // per dimension instead of collapsing to the minimum -- needed to compare dimensions against
+    // each other rather than just against a different sampler.
+    const essPerDimension = (sampler, totalIterations) => sampler.ac().map(rho => {
+      let tau = 1
+      for (let k = 1; k < rho.length; k++) {
+        if (Number.isNaN(rho[k]) || rho[k] < 0) break
+        tau += 2 * rho[k]
+      }
+      return totalIterations / tau
+    })
+
+    describe('diagonal metric (default)', () => {
+      it('should balance per-dimension ESS on a target with very different scales, and leave it unbalanced without warm-up', () => {
+        // Independent 3D Normal, sigma = [1, 100, 0.1] -- a 1000x scale range. 0.1 (not the
+        // issue's example 0.01) keeps the *unadapted* baseline within the leapfrog integrator's
+        // stability margin (eps/sigma = stepSize/sigma must stay below ~2 for the default
+        // stepSize=0.1, or the unadapted chain diverges every proposal and gets rejected forever,
+        // which would make its "stuck" ESS look spuriously high via a zero-variance/NaN
+        // autocorrelation rather than genuinely low).
+        const sigma = [1, 100, 0.1]
+        const variance = sigma.map(s => s * s)
+        const lnp = x => -0.5 * (x[0] * x[0] / variance[0] + x[1] * x[1] / variance[1] + x[2] * x[2] / variance[2])
+        const grad = x => [-x[0] / variance[0], -x[1] / variance[1], -x[2] / variance[2]]
+
+        const warmUpBatches = 20
+        const sampleSize = 2000
+
+        // A single seed's per-dimension ESS ratio is a noisy point estimate (test/mc.js's own
+        // 5D correlated Normal ESS comparison test averages over several seeds for the same
+        // reason) -- average both ratios over 3 independent seeds instead of trusting seed 1 alone.
+        const seeds = [1, 2, 3]
+        const adaptedRatios = seeds.map(seed => {
+          const adapted = new HMC(lnp, grad, { dim: 3 }, { x: [0, 0, 0] }).seed(seed)
+          adapted.warmUp(null, warmUpBatches)
+          const adaptedSamples = adapted.sample(null, sampleSize)
+          const adaptedEss = essPerDimension(adapted, adapted.samplingRate * adaptedSamples.length)
+          return Math.max(...adaptedEss) / Math.min(...adaptedEss)
+        })
+        // No warmUp(): _adjust never runs, so both the metric and the step size stay at their
+        // identity/construction defaults -- the "without adaptation" baseline.
+        const unadaptedRatios = seeds.map(seed => {
+          const unadapted = new HMC(lnp, grad, { dim: 3 }, { x: [0, 0, 0] }).seed(seed)
+          const unadaptedSamples = unadapted.sample(null, sampleSize)
+          const unadaptedEss = essPerDimension(unadapted, unadapted.samplingRate * unadaptedSamples.length)
+          return Math.max(...unadaptedEss) / Math.min(...unadaptedEss)
+        })
+        const meanAdaptedRatio = adaptedRatios.reduce((a, b) => a + b, 0) / adaptedRatios.length
+        const meanUnadaptedRatio = unadaptedRatios.reduce((a, b) => a + b, 0) / unadaptedRatios.length
+
+        assert(meanAdaptedRatio < 3, `mean adapted per-dimension ESS ratio (${meanAdaptedRatio}) over seeds ${seeds} should be roughly balanced`)
+        assert(meanUnadaptedRatio > 10, `mean unadapted per-dimension ESS ratio (${meanUnadaptedRatio}) over seeds ${seeds} should be markedly unbalanced`)
+      })
+
+      it('should still recover the correct per-dimension margins under metric adaptation (KS test)', () => {
+        // Guards against a sign/inversion bug in _sampleMomentum/_applyInverseMetric/_kineticEnergy
+        // (e.g. M and M^-1 swapped) that could improve ESS-style mixing diagnostics while silently
+        // biasing the sampled distribution -- neither the ESS-balance test above nor the state
+        // round-trip test would catch that, since both only inspect internal adaptation state
+        // or a mixing-efficiency statistic, never the actual sampled distribution.
+        const sigma = [1, 100, 0.1]
+        const variance = sigma.map(s => s * s)
+        const lnp = x => -0.5 * (x[0] * x[0] / variance[0] + x[1] * x[1] / variance[1] + x[2] * x[2] / variance[2])
+        const grad = x => [-x[0] / variance[0], -x[1] / variance[1], -x[2] / variance[2]]
+
+        const hmc = new HMC(lnp, grad, { dim: 3 }, { x: [0, 0, 0] }).seed(1)
+        hmc.warmUp(null, 20)
+        const samples = hmc.sample(null, 2000)
+        sigma.forEach((s, i) => {
+          const ref = new Normal(0, s)
+          assert(ksTest(samples.map(x => x[i]), x => ref.cdf(x)), `margin ${i} (sigma=${s}) failed KS test`)
+        })
+      })
+    })
+
+    describe('dense metric (opt-in)', () => {
+      it('should restore the adapted L/D factors on a state round-trip', () => {
+        const hmc1 = new HMC(logDensity2D, gradLogDensity2D, { dim: 2, metric: 'dense' }).seed(11)
+        hmc1.warmUp(null, 5)
+        for (let i = 0; i < 100; i++) hmc1.iterate()
+        const state = hmc1.state()
+        // An empirical sample covariance is never bit-for-bit equal to the identity default.
+        assert.notDeepEqual(state.internal.metric.D, [1, 1])
+        const hmc2 = new HMC(logDensity2D, gradLogDensity2D, { dim: 2, metric: 'dense' }, state)
+        assert.deepEqual(hmc2.state().internal, state.internal)
+      })
+
+      it('should still recover the correct margins of a correlated target under metric adaptation (KS test)', () => {
+        // Same rationale as the diagonal metric's KS test above, applied to the dense metric's
+        // sampling path (_sampleMomentum's back-substitution and _applyInverseMetric's L*D*L^T*p
+        // product) -- both margins are standard Normal regardless of rho (see logDensity2D above).
+        const hmc = new HMC(logDensity2D, gradLogDensity2D, { dim: 2, metric: 'dense' }).seed(3)
+        hmc.warmUp(null, 10)
+        const samples = hmc.sample(null, 2000)
+        const ref = new Normal(0, 1)
+        assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
+        assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+      })
+
+      it('should achieve higher effective sample size than the diagonal metric on a strongly correlated target', () => {
+        // Strongly correlated 2D Normal (rho = 0.99): both margins have unit variance, so a
+        // diagonal metric cannot distinguish this target from an uncorrelated one -- only a dense
+        // metric captures the correlation itself, which is what should improve mixing here. rho
+        // this close to 1 (rather than e.g. 0.5-0.9) keeps the diagonal-metric chain's
+        // autocorrelation reliably positive and slowly-decaying rather than occasionally
+        // overshooting into a spuriously ESS-inflating negative lag-1 value.
+        const rho = 0.99
+        const c = 1 - rho * rho
+        const lnp = x => -0.5 * (x[0] * x[0] - 2 * rho * x[0] * x[1] + x[1] * x[1]) / c
+        const grad = x => [-(x[0] - rho * x[1]) / c, -(x[1] - rho * x[0]) / c]
+
+        const warmUpBatches = 20
+        // Dense and diagonal metrics auto-tune very different samplingRate (thinning) values on
+        // this target, so comparing ess(sampler, samplingRate*sampleSize.length) -- as the
+        // existing AdaptiveMetropolis/RWM ESS test does -- would compare each sampler's ESS over a
+        // *different* raw-iteration budget (whichever one its own thinning happened to consume)
+        // rather than an equal one. Fixing a raw iteration count and reading ac() directly (via
+        // sample(null, 0) to reset the accumulators, then manual iterate() calls) isolates
+        // per-raw-iteration mixing efficiency from the confound of differing thinning intervals.
+        const rawIterations = 6000
+
+        const seeds = [1, 2, 3]
+        const ratios = seeds.map(seed => {
+          const dense = new HMC(lnp, grad, { dim: 2, metric: 'dense' }).seed(seed)
+          dense.warmUp(null, warmUpBatches)
+          dense.sample(null, 0)
+          for (let i = 0; i < rawIterations; i++) dense.iterate()
+          const denseEss = essPerDimension(dense, rawIterations)
+
+          const diag = new HMC(lnp, grad, { dim: 2 }).seed(seed)
+          diag.warmUp(null, warmUpBatches)
+          diag.sample(null, 0)
+          for (let i = 0; i < rawIterations; i++) diag.iterate()
+          const diagEss = essPerDimension(diag, rawIterations)
+
+          const meanDense = denseEss.reduce((a, b) => a + b, 0) / denseEss.length
+          const meanDiag = diagEss.reduce((a, b) => a + b, 0) / diagEss.length
+          return meanDense / meanDiag
+        })
+        const meanRatio = ratios.reduce((a, b) => a + b, 0) / ratios.length
+
+        assert(meanRatio > 1.1, `dense/diagonal mean ESS ratio (${meanRatio}) over seeds ${seeds} should exceed 1.1`)
+      })
     })
   })
 
