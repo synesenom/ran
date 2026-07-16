@@ -248,7 +248,7 @@ export default class MCMC {
    * @protected
    * @ignore
    */
-  // decisions/0026-mcmc-reseed-cached-log-density-hook.md — extracted reseed-and-recompute logic
+  // decisions/0027-mcmc-reseed-cached-log-density-hook.md — extracted reseed-and-recompute logic
   // shared by RWM, AdaptiveMetropolis, and HMC into one explicitly-called protected method
   _reseedCachedLogDensity (value) {
     this._q.seed(value)

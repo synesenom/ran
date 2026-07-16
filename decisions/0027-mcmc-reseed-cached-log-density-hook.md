@@ -1,4 +1,4 @@
-# ADR-0026: Shared `_reseedCachedLogDensity` Protected Method for Metropolis-Family Samplers
+# ADR-0027: Shared `_reseedCachedLogDensity` Protected Method for Metropolis-Family Samplers
 
 **Date**: 2026-07-15
 **Status**: Accepted
@@ -38,7 +38,7 @@ This was chosen over two alternatives considered:
 - **A standalone utility function** (e.g. `src/mc/_reseed-proposal.js` exporting `reseedProposal(sampler, value)`) — rejected because it introduces a duck-typing pattern (an external function reaching into `sampler._q`/`sampler.lastLnp`) with no precedent anywhere in `src/mc/` or `src/dist/`, where private helper files are self-contained algorithms or base classes, not object-mutating functions over parameters.
 - **A new intermediate `MetropolisMCMC` abstract class** between `MCMC` and the three subclasses, owning `_q`/`lastLnp` construction and `seed()` entirely — rejected because it was not one of the two mechanisms the issue named, is disproportionate to a `trivial`/`low` issue (a hierarchy change across three call sites to deduplicate roughly eight lines), and is complicated by `HMC`'s constructor carrying an extra `gradLogDensity` argument that the other two subclasses don't have, which a fully shared constructor cannot cleanly absorb.
 
-These three options were independently scored by a three-judge panel that split 1-1-1, each vote self-reporting "High confidence." See solutions/tooling/2026-07-16-0624-design-panel-confidence-vs-verified-premises.md for how the tie was broken (by re-verifying each vote's cited premise against the codebase rather than by vote count) and why trusting an issue's Scope section at face value would have missed `AdaptiveMetropolis` entirely.
+These three options were independently scored by a three-judge panel that split 1-1-1, each vote self-reporting "High confidence." See `solutions/tooling/2026-07-16-0624-design-panel-confidence-vs-verified-premises.md` for how the tie was broken (by re-verifying each vote's cited premise against the codebase rather than by vote count) and why trusting an issue's Scope section at face value would have missed `AdaptiveMetropolis` entirely.
 
 ## Consequences
 

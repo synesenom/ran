@@ -33,7 +33,7 @@ Two independent gaps compounded into this outcome:
 - Migrated all three affected subclasses (`RWM`, `AdaptiveMetropolis`, `HMC`) — not just the two the issue named — after research surfaced the third occurrence by reading the source directly instead of trusting the issue body's file list.
 - Added a plain protected instance method `_reseedCachedLogDensity(value)` to `MCMC` (`src/mc/_mcmc.js`), explicitly called (never auto-invoked) from each subclass's own `seed()` override — matching one of the two mechanisms the issue itself had named, and the issue's own suggested method name.
 - Broke the 1-1-1 judge tie by re-verifying each vote's cited premise against the actual codebase/ADR text rather than by counting votes or trusting the self-reported confidence labels: counting how many times the ADR-0022 "second family" threshold had actually been crossed (three, not zero) discredited the "do-nothing" vote; checking the issue's literal Scope wording discredited the "intermediate class" vote. The surviving "plain protected method" vote was the only one whose cited premises held up under direct verification.
-- Documented the decision, and the two rejected alternatives with their specific flaws, in `decisions/0026-mcmc-reseed-cached-log-density-hook.md`.
+- Documented the decision, and the two rejected alternatives with their specific flaws, in `decisions/0027-mcmc-reseed-cached-log-density-hook.md`.
 
 ## Prevention Strategy
 
