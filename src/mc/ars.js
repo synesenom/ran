@@ -6,6 +6,11 @@ import { EPS } from '../core/constants'
 // unlike classical (semi-)infinite-support ARS, a finite bracket needs no tail-decay condition.
 const INIT_POINTS = 3
 
+// Shared noise-floor scale for every near-zero/degenerate finite-difference-slope check in this
+// file. Computed once since Math.cbrt() is otherwise re-evaluated on every _slope(),
+// _assertValidHullSegment(), _build(), and _sampleEnvelope() call.
+const CBRT_EPS = Math.cbrt(EPS)
+
 /**
  * Class implementing [Adaptive Rejection Sampling]{@link https://doi.org/10.2307/2347565}
  * (Gilks & Wild, 1992) for a univariate log-concave target density on a finite support bracket.
@@ -108,12 +113,12 @@ export default class ARS {
   // ─── PRIVATE INSTANCE ───
 
   // Central difference with a relative step, one-sided near the support boundaries. The
-  // Math.cbrt(EPS) scaling balances truncation error (O(step^2)) against rounding error
-  // (O(EPS/step)) for the central case, and is reused as the log-concavity check's tolerance
-  // since it is also this method's own noise floor.
+  // CBRT_EPS scaling balances truncation error (O(step^2)) against rounding error (O(EPS/step))
+  // for the central case, and is reused as the log-concavity check's tolerance since it is also
+  // this method's own noise floor.
   _slope (x) {
     if (this._dh) return this._dh(x)
-    const e = Math.max(Math.abs(x), 1) * Math.cbrt(EPS)
+    const e = Math.max(Math.abs(x), 1) * CBRT_EPS
     if (x - e < this._lo) return (this._h(x + e) - this._h(x)) / e
     if (x + e > this._hi) return (this._h(x) - this._h(x - e)) / e
     return (this._h(x + e) - this._h(x - e)) / (2 * e)
@@ -138,7 +143,7 @@ export default class ARS {
   // true density, so sampling from it would be silently wrong rather than merely inefficient.
   // See solutions/algorithm/2026-07-15-1043-ars-hull-validity-needs-breakpoint-bracket-check.md
   _assertValidHullSegment (pi, pj, z) {
-    const tol = Math.cbrt(EPS) * Math.max(1, Math.abs(pi.x), Math.abs(pj.x), Math.abs(pi.dh), Math.abs(pj.dh))
+    const tol = CBRT_EPS * Math.max(1, Math.abs(pi.x), Math.abs(pj.x), Math.abs(pi.dh), Math.abs(pj.dh))
     const slopeIncreased = pi.dh < pj.dh - tol
     const breakpointOutOfRange = z < pi.x - tol || z > pj.x + tol
     if (slopeIncreased || breakpointOutOfRange) {
@@ -168,7 +173,10 @@ export default class ARS {
     for (let i = 0; i < k; i++) {
       const p = pts[i]
       const scale = Math.exp(p.h - M)
-      const segment = Math.abs(p.dh) < EPS
+      // Same CBRT_EPS noise floor as _slope()'s own finite-difference step: below it, dh is
+      // indistinguishable from zero, and exp(dh * width) - exp(dh * width) would otherwise hit
+      // catastrophic cancellation between two nearly-equal exponentials.
+      const segment = Math.abs(p.dh) < CBRT_EPS * Math.max(1, Math.abs(p.x))
         ? scale * (z[i + 1] - z[i])
         : scale * (Math.exp(p.dh * (z[i + 1] - p.x)) - Math.exp(p.dh * (z[i] - p.x))) / p.dh
       total += segment
@@ -203,7 +211,7 @@ export default class ARS {
     const into = Math.min(Math.max(u - (lo === 0 ? 0 : this._cum[lo - 1]), 0), this._mass[lo])
     const scale = Math.exp(p.h - this._M)
 
-    const x = Math.abs(p.dh) < EPS
+    const x = Math.abs(p.dh) < CBRT_EPS * Math.max(1, Math.abs(p.x))
       ? zLeft + into / scale
       : p.x + Math.log(Math.exp(p.dh * (zLeft - p.x)) + into * p.dh / scale) / p.dh
 
