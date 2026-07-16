@@ -81,6 +81,8 @@ export default class NUTS extends MCMC {
     this._daT = 0
   }
 
+  // ─── PUBLIC INSTANCE ───
+
   /**
    * Sets the seed for the sampler's pseudo random number generator, including the internal
    * momentum distribution's generator.
