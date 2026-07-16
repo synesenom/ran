@@ -254,6 +254,7 @@ Available samplers:
 | `ran.mc.HMC(logDensity, gradLogDensity, config, initialState)` | Hamiltonian Monte Carlo sampler: proposes distant moves via a leapfrog integrator over `config.pathLength` steps of size `config.stepSize`, with Metropolis accept/reject on the augmented (position, momentum) system; step size is adapted during warm-up via Robbins-Monro dual averaging and jittered per iteration to avoid periodicity artifacts |
 | `ran.mc.MALA(logDensity, gradLogDensity, config, initialState)` | Metropolis-Adjusted Langevin Algorithm: proposes a single gradient-informed Langevin step per iteration (`x' = x + (stepSize² / 2) · ∇log p(x) + stepSize · z`), with a Metropolis-Hastings correction for the proposal's asymmetry; step size is adapted during warm-up via batch Robbins-Monro toward the MALA-optimal 0.574 acceptance rate |
 | `ran.mc.SliceSampler(logDensity, config, initialState)` | Coordinate-wise slice sampler (Neal 2003) using stepping-out and shrinkage; no proposal tuning or gradient required, interval width `w` is adapted per dimension during warm-up, and `ar()` is always 1.0 |
+| `ran.mc.ParallelTempering(logDensity, options)` | Parallel Tempering / Replica Exchange MCMC (Geyer 1991) for multimodal targets; not a subclass of `MCMC`, it coordinates an array of independent replica samplers (default `RWM`) at descending inverse temperatures, periodically swapping adjacent replicas' positions so the cold (β = 1) replica inherits the hot replicas' mode-crossing moves |
 
 `ran.mc.gelmanRubin(samples, maxLength)` computes the R-hat convergence diagnostic across two or more independent chains (each an array of states returned by `sample()`):
 
@@ -273,6 +274,17 @@ const rHat = ran.mc.gelmanRubin([chain1.sample(null, 500), chain2.sample(null, 5
 const { samples, rhat } = ran.mc.runChains(logDensity, { dim: 1 })
 // samples → one sample array per chain (2 chains, seeded [1, 2] by default)
 // rhat    → the gelmanRubin() diagnostic across those chains
+```
+
+For multimodal targets that a single chain cannot mix across, `ran.mc.ParallelTempering` runs several replicas at a geometric ladder of inverse temperatures and swaps their positions so the cold replica benefits from the hot replicas' freer exploration:
+
+```javascript
+const pt = new ran.mc.ParallelTempering(logDensity, { nReplicas: 4, tempMax: 100 })
+// or: { temperatures: [1, 0.5, 0.25, 0.1] } for an explicit ladder
+
+pt.warmUp(null, 20)          // warms up every replica independently, no swaps
+const samples = pt.sample(null, 2000) // lockstep sampling with swap proposals; returns the cold replica's draws
+pt.swapRate()                 // accepted/attempted swap fraction per adjacent replica pair
 ```
 
 ## Return values and errors
