@@ -156,6 +156,7 @@ export default class ParallelTempering {
   // states (log p(x_i) - log p(x_j)); that is the reciprocal of the correct ratio and empirically
   // produces the wrong stationary distribution (an inflated-variance cold chain, verified against
   // a bimodal KS test during implementation) -- implemented here as derived, not as literally quoted.
+  // See solutions/correctness/2026-07-16-1400-parallel-tempering-issue-spec-swap-formula-reversed.md
   _proposeSwap (parity) {
     for (let i = parity; i + 1 < this._replicas.length; i += 2) {
       this._swapAttempts[i]++
