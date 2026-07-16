@@ -114,7 +114,9 @@ export default class NUTS extends MCMC {
     if (accepted) {
       this.lastLnp = logPNew
     }
-    return { x: xNew, accepted, alpha: nAlpha > 0 ? alphaSum / nAlpha : 0 }
+    // nAlpha is always >= 1 here: _growTree's while loop runs at least once (MAX_TREE_DEPTH > 0),
+    // and every _buildTree call bottoms out at a leaf that unconditionally contributes nAlpha: 1.
+    return { x: xNew, accepted, alpha: alphaSum / nAlpha }
   }
 
   _adjust (i) {
@@ -128,25 +130,6 @@ export default class NUTS extends MCMC {
 
   _internal () {
     return { stepSize: this._stepSize }
-  }
-
-  // ─── PROTECTED STATIC ───
-
-  // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
-  static _validateGradLogDensity (gradLogDensity) {
-    if (typeof gradLogDensity !== 'function') {
-      throw Error('NUTS: gradLogDensity must be a function')
-    }
-  }
-
-  // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
-  static _validateStepSize (stepSize) {
-    if (stepSize === undefined) {
-      return
-    }
-    if (!(Number.isFinite(stepSize) && stepSize > 0)) {
-      throw Error('NUTS: stepSize must be a positive number')
-    }
   }
 
   // ─── PRIVATE INSTANCE ───
@@ -279,12 +262,37 @@ export default class NUTS extends MCMC {
     }
   }
 
+  // ─── PRIVATE STATIC ───
+
+  // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
+  static _validateGradLogDensity (gradLogDensity) {
+    if (typeof gradLogDensity !== 'function') {
+      throw Error('NUTS: gradLogDensity must be a function')
+    }
+  }
+
+  // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
+  static _validateStepSize (stepSize) {
+    if (stepSize === undefined) {
+      return
+    }
+    if (!(Number.isFinite(stepSize) && stepSize > 0)) {
+      throw Error('NUTS: stepSize must be a positive number')
+    }
+  }
+
   // No-U-turn check (Hoffman & Gelman 2014): the trajectory's outer endpoints are still expanding
-  // apart, not curving back toward each other, along both the backward and forward momenta.
+  // apart, not curving back toward each other, along both the backward and forward momenta. Single
+  // pass over both dot products (rather than a mapped difference array plus two reduces) — called
+  // up to ~1000 times per NUTS iteration.
   static _noUTurn (xMinus, rMinus, xPlus, rPlus) {
-    const dx = xPlus.map((xi, i) => xi - xMinus[i])
-    const dotMinus = dx.reduce((s, d, i) => s + d * rMinus[i], 0)
-    const dotPlus = dx.reduce((s, d, i) => s + d * rPlus[i], 0)
+    let dotMinus = 0
+    let dotPlus = 0
+    for (let i = 0; i < xPlus.length; i++) {
+      const dx = xPlus[i] - xMinus[i]
+      dotMinus += dx * rMinus[i]
+      dotPlus += dx * rPlus[i]
+    }
     return (dotMinus >= 0 && dotPlus >= 0) ? 1 : 0
   }
 }
