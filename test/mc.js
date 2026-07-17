@@ -38,35 +38,21 @@ class UnimplementedMCMC extends MCMC {
   }
 }
 
-// Direct unit tests for the ess() test-utils helper (ESS = totalIterations / (1 + 2 *
-// sum(rho(k))), truncating the lag sum at the first negative-or-NaN autocorrelation) using
-// mock samplers, isolating the ESS arithmetic from any real MCMC sampling behaviour.
+// Direct unit tests for the ess() test-utils helper, which reduces a sampler's per-dimension
+// ess() (ran.mc.MCMC#ess) to a single scalar via Math.min -- the ESS truncation arithmetic
+// itself is covered directly against MCMC#ess() in the 'mc.MCMC .ess()' block above; these
+// tests isolate the min-reduction wrapper using mock samplers with a stubbed ess() method.
 describe('test-utils.ess', () => {
-  it('should truncate the lag sum before the first negative autocorrelation', () => {
-    const mock = { ac: () => [[1, 0.5, 0.25, -0.1]] }
-    // exact rational: 100 / (1 + 2 * (0.5 + 0.25)) = 100 / 2.5 = 40
-    assert.closeTo(ess(mock, 100), 40, 1e-12)
+  it('should pass through a single-dimension ess() value unchanged', () => {
+    const mock = { ess: () => [30] }
+    assert.strictEqual(ess(mock), 30)
   })
 
-  it('should return the total iterations for an i.i.d. sequence (zero autocorrelation)', () => {
-    const mock = { ac: () => [[1, 0, 0]] }
-    // exact rational: 100 / (1 + 2 * (0 + 0)) = 100
-    assert.closeTo(ess(mock, 100), 100, 1e-12)
-  })
-
-  it('should truncate the lag sum before a NaN autocorrelation', () => {
-    const mock = { ac: () => [[1, 0.5, NaN, 0.1]] }
-    // exact rational: 100 / (1 + 2 * 0.5) = 100 / 2 = 50
-    assert.closeTo(ess(mock, 100), 50, 1e-12)
-  })
-
-  it('should compute per-dimension ESS values and return the minimum across dimensions', () => {
-    // dim1's autocorrelation is deliberately smaller than dim0's so the two dimensions'
-    // ESS values differ, proving Math.min actually selects the slower-mixing dimension
-    // instead of coincidentally matching both.
-    const mock = { ac: () => [[1, 0.5, -0.1], [1, 0.1, 0.05]] }
-    // exact rational: dim0 = 100 / (1 + 2 * 0.5) = 50; dim1 = 100 / (1 + 2 * (0.1 + 0.05)) = 100 / 1.3 ≈ 76.92
-    assert.closeTo(ess(mock, 100), 50, 1e-12)
+  it('should return the minimum across dimensions, not the first or the maximum', () => {
+    // The first entry is deliberately larger than the second so a bug that picked
+    // Math.max, or just the first element, would be caught.
+    const mock = { ess: () => [76.923076923077, 50] }
+    assert.strictEqual(ess(mock), 50)
   })
 })
 
