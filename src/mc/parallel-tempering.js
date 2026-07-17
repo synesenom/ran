@@ -49,7 +49,7 @@ export default class ParallelTempering {
     }
     this.temperatures = ParallelTempering._resolveLadder(options)
     this._logDensity = logDensity
-    this._sampler = options.sampler || ((lnp, config) => new RWM(lnp, config))
+    this._sampler = options.sampler || ((lnp, config) => new RWM({ logDensity: lnp, config }))
     this._config = options.config || {}
     this._replicas = this.temperatures.map(beta => this._sampler(x => beta * this._logDensity(x), this._config))
     this._swapAttempts = new Array(this.temperatures.length - 1).fill(0)

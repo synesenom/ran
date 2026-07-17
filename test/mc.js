@@ -1,5 +1,5 @@
 import { assert } from 'chai'
-import { describe, it } from 'mocha'
+import { describe, it, beforeEach, afterEach } from 'mocha'
 import MCMC from '../src/mc/_mcmc'
 import RWM from '../src/mc/rwm'
 import AdaptiveMetropolis from '../src/mc/adaptive-metropolis'
@@ -425,6 +425,82 @@ describe('mc.RWM', () => {
   describe('constructor', () => {
     it('should instantiate without error for a 1D Normal target', () => {
       assert.doesNotThrow(() => new RWM(x => -0.5 * x[0] * x[0], { dim: 1 }))
+    })
+  })
+
+  describe('options-object constructor form', () => {
+    let originalWarn
+    let warnCalls
+
+    beforeEach(() => {
+      originalWarn = console.warn
+      warnCalls = []
+      console.warn = (...args) => warnCalls.push(args)
+    })
+
+    afterEach(() => {
+      console.warn = originalWarn
+    })
+
+    it('should behave identically to the positional form, including config defaults never explicitly passed', () => {
+      const logDensity = x => -0.5 * x[0] * x[0]
+      const positional = new RWM(logDensity, { dim: 1 }, { x: [2] })
+      const options = new RWM({ logDensity, config: { dim: 1 }, initialState: { x: [2] } })
+      assert.strictEqual(options.dim, positional.dim)
+      // maxLag/arWindow are not passed on either side, so a match here can only happen if
+      // _resolveConstructorArgs threads the options-form config through _resolveConfig's
+      // defaulting the same way the positional form's config does — a pass-through-only test
+      // (e.g. comparing an explicitly-passed field back to itself) couldn't catch that.
+      assert.strictEqual(options.maxLag, positional.maxLag)
+      assert.strictEqual(options._arWindow, positional._arWindow)
+      assert.deepStrictEqual(options.x, positional.x)
+      options.seed(11)
+      positional.seed(11)
+      assert.deepStrictEqual(options.iterate(), positional.iterate())
+    })
+
+    it('should default config and initialState when omitted entirely from the options object', () => {
+      const rwm = new RWM({ logDensity: x => -0.5 * x[0] * x[0] })
+      assert.strictEqual(rwm.dim, 1)
+      assert.strictEqual(rwm.maxLag, 100)
+    })
+
+    it('should resolve config when initialState is omitted from the options object', () => {
+      const rwm = new RWM({ logDensity: x => -0.5 * (x[0] * x[0] + x[1] * x[1]), config: { dim: 2 } })
+      assert.strictEqual(rwm.dim, 2)
+    })
+
+    it('should resolve initialState when config is omitted from the options object', () => {
+      const rwm = new RWM({ logDensity: () => 0, initialState: { x: [7] } })
+      assert.deepStrictEqual(rwm.x, [7])
+    })
+
+    it('should validate config the same way as the positional form', () => {
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { dim: 0 } }), /dim must be a positive integer/)
+    })
+
+    it('should not emit a deprecation warning for the options-object form', () => {
+      assert.doesNotThrow(() => new RWM({ logDensity: () => 0 }))
+      assert.strictEqual(warnCalls.length, 0)
+    })
+
+    it('should emit exactly one deprecation warning per instantiation for the positional form', () => {
+      assert.doesNotThrow(() => new RWM(() => 0))
+      assert.strictEqual(warnCalls.length, 1)
+      assert.match(warnCalls[0][0], /\[ranjs] positional MCMC constructor arguments are deprecated/)
+      assert.match(warnCalls[0][0], /new RWM\({ logDensity, config, initialState }\)/)
+
+      assert.doesNotThrow(() => new RWM(() => 0))
+      assert.strictEqual(warnCalls.length, 2)
+    })
+
+    it('should not emit a deprecation warning for a sampler not yet migrated to the options form', () => {
+      // Gibbs always forwards `null` (not a genuine logDensity function) to the MCMC base
+      // constructor and has no options-object support yet; warning here would point users at
+      // `new Gibbs({ logDensity, config, initialState })`, which Gibbs's own array-typed first
+      // argument would then reject outright. See MCMC._supportsOptionsConstructor (default false).
+      assert.doesNotThrow(() => new Gibbs([() => 0], { dim: 1 }))
+      assert.strictEqual(warnCalls.length, 0)
     })
   })
 
