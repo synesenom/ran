@@ -38,6 +38,24 @@ class UnimplementedMCMC extends MCMC {
   }
 }
 
+// Direct unit tests for the ess() test-utils helper, which reduces a sampler's per-dimension
+// ess() (ran.mc.MCMC#ess) to a single scalar via Math.min -- the ESS truncation arithmetic
+// itself is covered directly against MCMC#ess() in the 'mc.MCMC .ess()' block above; these
+// tests isolate the min-reduction wrapper using mock samplers with a stubbed ess() method.
+describe('test-utils.ess', () => {
+  it('should pass through a single-dimension ess() value unchanged', () => {
+    const mock = { ess: () => [30] }
+    assert.strictEqual(ess(mock), 30)
+  })
+
+  it('should return the minimum across dimensions, not the first or the maximum', () => {
+    // The first entry is deliberately larger than the second so a bug that picked
+    // Math.max, or just the first element, would be caught.
+    const mock = { ess: () => [76.923076923077, 50] }
+    assert.strictEqual(ess(mock), 50)
+  })
+})
+
 describe('mc.MCMC', () => {
   describe('constructor', () => {
     it('should throw when instantiated directly', () => {
