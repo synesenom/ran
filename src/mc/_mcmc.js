@@ -138,6 +138,30 @@ export default class MCMC {
   }
 
   /**
+   * Computes the effective sample size for each dimension using Geyer's positive-part estimator:
+   * ESS = N / (1 + 2 * sum_k rho_k), where the sum over lags k = 1, 2, ... stops at the first
+   * lag whose autocorrelation is not positive. Built directly on the same accumulators as ac()
+   * and statistics() — no additional accumulator state.
+   *
+   * @method ess
+   * @memberof ran.mc.MCMC
+   * @returns {number[]} Array of effective sample sizes, one per dimension.
+   */
+  ess () {
+    const n = this._acN
+    return this.ac().map(rho => {
+      let sum = 0
+      for (let k = 1; k < rho.length; k++) {
+        // NaN (insufficient observations at this lag) also stops the sum, same as a
+        // non-positive rho: neither contributes a valid positive-part term.
+        if (!(rho[k] > 0)) break
+        sum += rho[k]
+      }
+      return n / (1 + 2 * sum)
+    })
+  }
+
+  /**
    * Performs a single iteration, updates accumulators, and optionally calls a callback.
    *
    * Advanced/low-level: most callers should use [warmUp]{@link ran.mc.MCMC#warmUp} and
