@@ -51,6 +51,27 @@ class UnimplementedMCMC extends MCMC {
   }
 }
 
+// Shared parity check for a migrated sampler's two constructor forms, reused by every sampler's
+// options-object block (RWM, SliceSampler, ...) so the assertion lives in exactly one place.
+// Verifies the options-object form yields an identical sampler to the positional form: same
+// resolved config, same initial position, same serialized internal state (RWM's proposal,
+// SliceSampler's w, ...), and the same first iteration once both are seeded alike.
+// maxLag/arWindow are intentionally left out of `config` by callers so a match can only happen if
+// _resolveConstructorArgs threads the options-form config through _resolveConfig's defaulting the
+// same way the positional form does — a pass-through-only comparison couldn't catch that.
+function assertConstructorFormsMatch (Ctor, logDensity, config, initialState) {
+  const positional = new Ctor(logDensity, config, initialState)
+  const options = new Ctor({ logDensity, config, initialState })
+  assert.strictEqual(options.dim, positional.dim)
+  assert.strictEqual(options.maxLag, positional.maxLag)
+  assert.strictEqual(options._arWindow, positional._arWindow)
+  assert.deepStrictEqual(options.x, positional.x)
+  assert.deepStrictEqual(options.state().internal, positional.state().internal)
+  options.seed(11)
+  positional.seed(11)
+  assert.deepStrictEqual(options.iterate(), positional.iterate())
+}
+
 // Direct unit tests for the ess() test-utils helper, which reduces a sampler's per-dimension
 // ess() (ran.mc.MCMC#ess) to a single scalar via Math.min -- the ESS truncation arithmetic
 // itself is covered directly against MCMC#ess() in the 'mc.MCMC .ess()' block above; these
@@ -456,20 +477,7 @@ describe('mc.RWM', () => {
     })
 
     it('should behave identically to the positional form, including config defaults never explicitly passed', () => {
-      const logDensity = x => -0.5 * x[0] * x[0]
-      const positional = new RWM(logDensity, { dim: 1 }, { x: [2] })
-      const options = new RWM({ logDensity, config: { dim: 1 }, initialState: { x: [2] } })
-      assert.strictEqual(options.dim, positional.dim)
-      // maxLag/arWindow are not passed on either side, so a match here can only happen if
-      // _resolveConstructorArgs threads the options-form config through _resolveConfig's
-      // defaulting the same way the positional form's config does — a pass-through-only test
-      // (e.g. comparing an explicitly-passed field back to itself) couldn't catch that.
-      assert.strictEqual(options.maxLag, positional.maxLag)
-      assert.strictEqual(options._arWindow, positional._arWindow)
-      assert.deepStrictEqual(options.x, positional.x)
-      options.seed(11)
-      positional.seed(11)
-      assert.deepStrictEqual(options.iterate(), positional.iterate())
+      assertConstructorFormsMatch(RWM, x => -0.5 * x[0] * x[0], { dim: 1 }, { x: [2] })
     })
 
     it('should default config and initialState when omitted entirely from the options object', () => {
@@ -2036,6 +2044,67 @@ describe('mc.SliceSampler', () => {
 
     it('should throw when a per-dimension w array length does not match dim', () => {
       assert.throws(() => new SliceSampler(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }, { internal: { w: [1] } }), /w must be a positive number/)
+    })
+  })
+
+  describe('options-object constructor form', () => {
+    let originalWarn
+    let warnCalls
+
+    beforeEach(() => {
+      originalWarn = console.warn
+      warnCalls = []
+      console.warn = (...args) => warnCalls.push(args)
+    })
+
+    afterEach(() => {
+      console.warn = originalWarn
+    })
+
+    it('should behave identically to the positional form, including config defaults never explicitly passed', () => {
+      // internal.w exercises the SliceSampler-specific state channel: state().internal (compared
+      // wholesale inside the helper) covers w the same way it covers RWM's proposal.
+      assertConstructorFormsMatch(SliceSampler, x => -0.5 * x[0] * x[0], { dim: 1 }, { x: [2], internal: { w: 2.5 } })
+    })
+
+    it('should default config and initialState when omitted entirely from the options object', () => {
+      const slice = new SliceSampler({ logDensity: x => -0.5 * x[0] * x[0] })
+      assert.strictEqual(slice.dim, 1)
+      assert.strictEqual(slice.maxLag, 100)
+      assert.deepEqual(slice.state().internal.w, [1.0])
+    })
+
+    it('should resolve config when initialState is omitted from the options object', () => {
+      const slice = new SliceSampler({ logDensity: x => -0.5 * (x[0] * x[0] + x[1] * x[1]), config: { dim: 2 } })
+      assert.strictEqual(slice.dim, 2)
+    })
+
+    it('should resolve initialState when config is omitted from the options object', () => {
+      const slice = new SliceSampler({ logDensity: () => 0, initialState: { x: [7] } })
+      assert.deepStrictEqual(slice.x, [7])
+    })
+
+    it('should validate config the same way as the positional form', () => {
+      assert.throws(() => new SliceSampler({ logDensity: () => 0, config: { dim: 0 } }), /dim must be a positive integer/)
+    })
+
+    it('should validate w the same way as the positional form', () => {
+      assert.throws(() => new SliceSampler({ logDensity: () => 0, initialState: { internal: { w: 0 } } }), /w must be a positive number/)
+    })
+
+    it('should not emit a deprecation warning for the options-object form', () => {
+      assert.doesNotThrow(() => new SliceSampler({ logDensity: () => 0 }))
+      assert.strictEqual(warnCalls.length, 0)
+    })
+
+    it('should emit exactly one deprecation warning per instantiation for the positional form', () => {
+      assert.doesNotThrow(() => new SliceSampler(() => 0))
+      assert.strictEqual(warnCalls.length, 1)
+      assert.match(warnCalls[0][0], /\[ranjs] positional MCMC constructor arguments are deprecated/)
+      assert.match(warnCalls[0][0], /new SliceSampler\({ logDensity, config, initialState }\)/)
+
+      assert.doesNotThrow(() => new SliceSampler(() => 0))
+      assert.strictEqual(warnCalls.length, 2)
     })
   })
 
