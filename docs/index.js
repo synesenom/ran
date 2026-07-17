@@ -25,7 +25,9 @@ const PRIORITY = {
     'Distribution'
   ],
   mc: [
-    'MCMC'
+    'MCMC',
+    'gelmanRubin',
+    'runChains'
   ],
   process: [
     'Process'
@@ -38,8 +40,11 @@ function getSortedEntries (entries, priority) {
   if (typeof priority === 'undefined') {
     return entries.sort(comparator)
   }
+  // Priority order is the array's own order (not alphabetical) — e.g. mc's
+  // ['MCMC', 'gelmanRubin', 'runChains'] must keep MCMC first even though
+  // 'g' < 'M' < 'r' would otherwise interleave it between the two functions.
   return entries.filter(d => priority.indexOf(d.name) > -1)
-    .sort(comparator)
+    .sort((a, b) => priority.indexOf(a.name) - priority.indexOf(b.name))
     .concat(entries.filter(d => priority.indexOf(d.name) === -1)
       .sort(comparator)
     )
