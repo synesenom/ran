@@ -294,7 +294,7 @@ export default class MCMC {
    * Reseeds a subclass-owned proposal/momentum generator (`this._q`) and recomputes a
    * subclass-owned cached log-density (`this.lastLnp`) against the current `this.x`. Explicitly
    * called by a subclass's own `seed()` override — never invoked automatically by base-class
-   * control flow — so subclasses without a `_q`/`lastLnp` pair (e.g. Gibbs, SliceSampler) are
+   * control flow — so subclasses without a `_q`/`lastLnp` pair (e.g. Gibbs, Slice) are
    * unaffected.
    *
    * @method _reseedCachedLogDensity
