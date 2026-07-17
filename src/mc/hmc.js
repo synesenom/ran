@@ -47,7 +47,8 @@ const EPS = 1e-6
  * @throws {Error} If gradLogDensity is not a function, or a stepSize (config.stepSize or a
  * resumed initialState.internal.stepSize) is provided but is not a positive finite number, or a
  * pathLength (config.pathLength or a resumed initialState.internal.pathLength) is provided but
- * is not a positive integer, or metric is provided but is not `'diag'`/`'dense'`, or `'dense'` is
+ * is not a positive integer or exceeds `HMC._MAX_PATH_LENGTH` (10000), or metric is provided but
+ * is not `'diag'`/`'dense'`, or `'dense'` is
  * requested with a dimension exceeding the dense-metric cap, or a resumed
  * initialState.internal.metric does not match the resolved metric type/shape.
  */
@@ -219,6 +220,13 @@ export default class HMC extends MCMC {
     if (!HMC._isPositiveInteger(pathLength)) {
       throw Error('HMC: pathLength must be a positive integer')
     }
+    // pathLength directly multiplies the gradient evaluations per _iter() call via the leapfrog
+    // integrator; unbounded, it lets a caller-supplied config hang warmUp()/sample() indefinitely
+    // with no error, the same class of risk _MAX_DIM/_MAX_LAG/_MAX_AR_WINDOW guard for allocation
+    // footprint. See #947.
+    if (pathLength > HMC._MAX_PATH_LENGTH) {
+      throw Error(`HMC: pathLength must be at most ${HMC._MAX_PATH_LENGTH}`)
+    }
   }
 
   static _isPositiveInteger (value) {
@@ -292,6 +300,12 @@ export default class HMC extends MCMC {
 
   static get _MAX_DENSE_METRIC_DIM () {
     return 1000
+  }
+
+  // Same order-of-magnitude cap as MCMC._MAX_DIM/_MAX_LAG/_MAX_AR_WINDOW, applied here to bound
+  // per-iteration compute cost rather than allocation footprint. See #947.
+  static get _MAX_PATH_LENGTH () {
+    return 10000
   }
 
   // Matrix.ldl() is O(dim^3); refreshing the dense metric every iteration (as the diagonal case
