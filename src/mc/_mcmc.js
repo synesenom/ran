@@ -1,13 +1,34 @@
 import Xoshiro128p from '../core/xoshiro'
 
 /**
+ * @overload
+ * @param {Function} logDensity The logarithm of the (unnormalized) target density.
+ * @param {Object=} config Sampler configuration. Supported properties:
+ * <ul>
+ *   <li>{dim}: Dimension of the state space. Default is 1.</li>
+ *   <li>{maxLag}: Maximum lag stored for autocorrelation estimation. Default is 100.</li>
+ *   <li>{arWindow}: Number of most recent iterations ar() averages over. Default is 1000.</li>
+ * </ul>
+ * @param {Object=} initialState Initial state of the sampler. Supported properties: {x} (starting
+ * position), {samplingRate} (thinning interval), and {internal} for subclass-specific state.
+ */
+/**
+ * @overload
+ * @param {Object} options Sampler options, as a single object.
+ * @param {Function} options.logDensity The logarithm of the (unnormalized) target density.
+ * @param {Object=} options.config Sampler configuration (see the positional form).
+ * @param {Object=} options.initialState Initial state of the sampler (see the positional form).
+ */
+/**
  * Base class implementing a general Markov chain Monte Carlo sampler. All MCMC samplers extend this class.
  * MCMC samplers approximate integrals by efficiently sampling a density that cannot be normalized or
  * sampled directly.
  *
  * @class MCMC
  * @memberof ran.mc
- * @param {Function} logDensity The logarithm of the (unnormalized) target density.
+ * @param {Function|Object} logDensity The logarithm of the (unnormalized) target density (this
+ * positional form is deprecated — see the options-object overload above), or a single options
+ * object carrying {logDensity}, {config}, and {initialState}.
  * @param {Object=} config Sampler configuration. Supported properties:
  * <ul>
  *   <li>{dim}: Dimension of the state space. Default is 1.</li>
@@ -23,11 +44,16 @@ import Xoshiro128p from '../core/xoshiro'
  * @throws {Error} If the combined dim*maxLag accumulator footprint exceeds the maximum allowed memory budget.
  */
 // decisions/0020-mcmc-design.md — accumulator design and the _iter/_adjust/_internal subclass contract
+// decisions/0030-mcmc-options-object-constructor.md — options-object form and the base-class detection contract
 export default class MCMC {
   constructor (logDensity, config = {}, initialState = {}) {
     if (new.target === MCMC) {
       throw Error('MCMC is abstract and cannot be instantiated directly.')
     }
+    const resolvedArgs = MCMC._resolveConstructorArgs(logDensity, config, initialState, new.target)
+    logDensity = resolvedArgs.logDensity
+    config = resolvedArgs.config
+    initialState = resolvedArgs.initialState
     MCMC._validateDim(config.dim)
     MCMC._validateMaxLag(config.maxLag)
     MCMC._validateArWindow(config.arWindow)
@@ -450,6 +476,34 @@ export default class MCMC {
     }
   }
 
+  // Detects the options-object constructor form (a single { logDensity, config, initialState }
+  // argument) vs. the legacy positional form. Living here — rather than in each subclass — means
+  // every migrated sampler gets both forms for free by forwarding its own
+  // (logDensity, config, initialState) params to super() unchanged; see
+  // decisions/0030-mcmc-options-object-constructor.md. The deprecation warning is gated on
+  // target._supportsOptionsConstructor (opt-in per subclass, default false on MCMC) rather than
+  // firing unconditionally: subclasses with a different real arity (HMC/MALA/NUTS take an extra
+  // gradLogDensity argument the options object doesn't cover) or that never pass a genuine
+  // logDensity function through this slot at all (Gibbs always forwards null here) would otherwise
+  // get a warning pointing at a replacement call that is wrong or outright broken for them.
+  static _resolveConstructorArgs (logDensity, config, initialState, target) {
+    const isOptionsForm = logDensity !== null && typeof logDensity === 'object' &&
+      Object.prototype.hasOwnProperty.call(logDensity, 'logDensity')
+    if (isOptionsForm) {
+      return {
+        logDensity: logDensity.logDensity,
+        config: logDensity.config || {},
+        initialState: logDensity.initialState || {}
+      }
+    }
+    if (target._supportsOptionsConstructor) {
+      // Fired once per instantiation (not once per process) so every positional-form call site
+      // is visible in the console, not just the first.
+      console.warn(`[ranjs] positional MCMC constructor arguments are deprecated and will be removed in v1.32.0; use new ${target.name}({ logDensity, config, initialState }) instead.`)
+    }
+    return { logDensity, config, initialState }
+  }
+
   // Kept out of the constructor to avoid a Complex Method smell there.
   static _resolveConfig (config) {
     return {
@@ -461,6 +515,13 @@ export default class MCMC {
 
   static _isPositiveInteger (dim) {
     return Number.isInteger(dim) && dim >= 1
+  }
+
+  // Default "not migrated" for every subclass; a subclass flips this to true only once its own
+  // migration issue has confirmed the options-object form matches its real constructor arity (see
+  // decisions/0030-mcmc-options-object-constructor.md) — RWM is the first to do so.
+  static get _supportsOptionsConstructor () {
+    return false
   }
 
   static get _MAX_DIM () {

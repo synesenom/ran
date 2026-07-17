@@ -1,5 +1,5 @@
 import { assert } from 'chai'
-import { describe, it } from 'mocha'
+import { describe, it, beforeEach, afterEach } from 'mocha'
 import MCMC from '../src/mc/_mcmc'
 import RWM from '../src/mc/rwm'
 import AdaptiveMetropolis from '../src/mc/adaptive-metropolis'
@@ -15,6 +15,19 @@ import ParallelTempering from '../src/mc/parallel-tempering'
 import { Normal, Gamma, Beta } from '../src/dist'
 import pearson from '../src/dependence/pearson'
 import { ksTest, ess } from './test-utils'
+
+// ksTest's critical value (test/test-utils.js) is the standard two-sided KS asymptotic
+// constant at alpha=0.01 (D <= 1.628/sqrt(n)) -- every unseeded call has an inherent ~1%
+// false-positive rate per CI run. Every distributional/margin-recovery KS assertion in this
+// file therefore sweeps a fixed, pre-verified seed set -- [0, 42, 12345] (or, for Gibbs,
+// [0, 7, 42] -- see that block's own comment for why) -- instead of relying on a single seed,
+// so a real regression must break at least one of three independent trajectories reproducibly
+// instead of the whole block carrying a permanent flake rate or, worse, having its seed
+// hand-picked because it happened to pass. See
+// solutions/testing/2026-07-15-1044-ars-unseeded-ks-test-flake-fixed-seeds.md,
+// solutions/testing/2026-07-15-2015-gibbs-conditionals-fresh-normal-seed-noop.md, and
+// solutions/testing/2026-07-17-1615-mcmc-ks-test-seed-sweep-file-wide-policy.md
+const SEEDS = [0, 42, 12345]
 
 // Concrete subclass that replays a pre-built sequence, enabling deterministic
 // accumulator testing without involving the PRNG.
@@ -428,6 +441,82 @@ describe('mc.RWM', () => {
     })
   })
 
+  describe('options-object constructor form', () => {
+    let originalWarn
+    let warnCalls
+
+    beforeEach(() => {
+      originalWarn = console.warn
+      warnCalls = []
+      console.warn = (...args) => warnCalls.push(args)
+    })
+
+    afterEach(() => {
+      console.warn = originalWarn
+    })
+
+    it('should behave identically to the positional form, including config defaults never explicitly passed', () => {
+      const logDensity = x => -0.5 * x[0] * x[0]
+      const positional = new RWM(logDensity, { dim: 1 }, { x: [2] })
+      const options = new RWM({ logDensity, config: { dim: 1 }, initialState: { x: [2] } })
+      assert.strictEqual(options.dim, positional.dim)
+      // maxLag/arWindow are not passed on either side, so a match here can only happen if
+      // _resolveConstructorArgs threads the options-form config through _resolveConfig's
+      // defaulting the same way the positional form's config does — a pass-through-only test
+      // (e.g. comparing an explicitly-passed field back to itself) couldn't catch that.
+      assert.strictEqual(options.maxLag, positional.maxLag)
+      assert.strictEqual(options._arWindow, positional._arWindow)
+      assert.deepStrictEqual(options.x, positional.x)
+      options.seed(11)
+      positional.seed(11)
+      assert.deepStrictEqual(options.iterate(), positional.iterate())
+    })
+
+    it('should default config and initialState when omitted entirely from the options object', () => {
+      const rwm = new RWM({ logDensity: x => -0.5 * x[0] * x[0] })
+      assert.strictEqual(rwm.dim, 1)
+      assert.strictEqual(rwm.maxLag, 100)
+    })
+
+    it('should resolve config when initialState is omitted from the options object', () => {
+      const rwm = new RWM({ logDensity: x => -0.5 * (x[0] * x[0] + x[1] * x[1]), config: { dim: 2 } })
+      assert.strictEqual(rwm.dim, 2)
+    })
+
+    it('should resolve initialState when config is omitted from the options object', () => {
+      const rwm = new RWM({ logDensity: () => 0, initialState: { x: [7] } })
+      assert.deepStrictEqual(rwm.x, [7])
+    })
+
+    it('should validate config the same way as the positional form', () => {
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { dim: 0 } }), /dim must be a positive integer/)
+    })
+
+    it('should not emit a deprecation warning for the options-object form', () => {
+      assert.doesNotThrow(() => new RWM({ logDensity: () => 0 }))
+      assert.strictEqual(warnCalls.length, 0)
+    })
+
+    it('should emit exactly one deprecation warning per instantiation for the positional form', () => {
+      assert.doesNotThrow(() => new RWM(() => 0))
+      assert.strictEqual(warnCalls.length, 1)
+      assert.match(warnCalls[0][0], /\[ranjs] positional MCMC constructor arguments are deprecated/)
+      assert.match(warnCalls[0][0], /new RWM\({ logDensity, config, initialState }\)/)
+
+      assert.doesNotThrow(() => new RWM(() => 0))
+      assert.strictEqual(warnCalls.length, 2)
+    })
+
+    it('should not emit a deprecation warning for a sampler not yet migrated to the options form', () => {
+      // Gibbs always forwards `null` (not a genuine logDensity function) to the MCMC base
+      // constructor and has no options-object support yet; warning here would point users at
+      // `new Gibbs({ logDensity, config, initialState })`, which Gibbs's own array-typed first
+      // argument would then reject outright. See MCMC._supportsOptionsConstructor (default false).
+      assert.doesNotThrow(() => new Gibbs([() => 0], { dim: 1 }))
+      assert.strictEqual(warnCalls.length, 0)
+    })
+  })
+
   describe('._iter() rejection', () => {
     it('should return accepted: false and leave position unchanged when all proposals are rejected', () => {
       // lnp = () => -Infinity: Math.exp(-Inf - (-Inf)) = NaN; float() < NaN = false always
@@ -449,13 +538,15 @@ describe('mc.RWM', () => {
       assert.strictEqual(x.filter((v, j) => v !== prev[j]).length, 3)
     })
 
-    it('should recover both margins of an independent 2D standard Normal target', () => {
-      const rwm = new RWM(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }).seed(7)
-      rwm.warmUp(null, 10)
-      const samples = rwm.sample(null, 2000)
-      const ref = new Normal(0, 1)
-      assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
-      assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+    SEEDS.forEach(seed => {
+      it(`should recover both margins of an independent 2D standard Normal target (KS test, seed ${seed})`, () => {
+        const rwm = new RWM(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }).seed(seed)
+        rwm.warmUp(null, 10)
+        const samples = rwm.sample(null, 2000)
+        const ref = new Normal(0, 1)
+        assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
+        assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+      })
     })
   })
 
@@ -497,13 +588,15 @@ describe('mc.RWM', () => {
   })
 
   describe('.sample() distributional test', () => {
-    it('should produce samples matching Normal(0,1) target (KS test)', () => {
-      const rwm = new RWM(x => -0.5 * x[0] * x[0], { dim: 1 }).seed(42)
-      rwm.warmUp(null, 10)
-      const samples = rwm.sample(null, 2000)
-      const values = samples.map(s => s[0])
-      const ref = new Normal(0, 1)
-      assert(ksTest(values, x => ref.cdf(x)))
+    SEEDS.forEach(seed => {
+      it(`should produce samples matching Normal(0,1) target (KS test, seed ${seed})`, () => {
+        const rwm = new RWM(x => -0.5 * x[0] * x[0], { dim: 1 }).seed(seed)
+        rwm.warmUp(null, 10)
+        const samples = rwm.sample(null, 2000)
+        const values = samples.map(s => s[0])
+        const ref = new Normal(0, 1)
+        assert(ksTest(values, x => ref.cdf(x)))
+      })
     })
   })
 
@@ -607,13 +700,15 @@ describe('mc.AdaptiveMetropolis', () => {
       assert.strictEqual(x.filter((v, j) => v !== prev[j]).length, 3)
     })
 
-    it('should recover both margins of an independent 2D standard Normal target', () => {
-      const am = new AdaptiveMetropolis(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }).seed(7)
-      am.warmUp(null, 10)
-      const samples = am.sample(null, 2000)
-      const ref = new Normal(0, 1)
-      assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
-      assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+    SEEDS.forEach(seed => {
+      it(`should recover both margins of an independent 2D standard Normal target (KS test, seed ${seed})`, () => {
+        const am = new AdaptiveMetropolis(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }).seed(seed)
+        am.warmUp(null, 10)
+        const samples = am.sample(null, 2000)
+        const ref = new Normal(0, 1)
+        assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
+        assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+      })
     })
   })
 
@@ -652,13 +747,15 @@ describe('mc.AdaptiveMetropolis', () => {
   })
 
   describe('.sample() distributional test', () => {
-    it('should produce samples matching Normal(0,1) target (KS test)', () => {
-      const am = new AdaptiveMetropolis(x => -0.5 * x[0] * x[0], { dim: 1 })
-      am.warmUp(null, 10)
-      const samples = am.sample(null, 2000)
-      const values = samples.map(s => s[0])
-      const ref = new Normal(0, 1)
-      assert(ksTest(values, x => ref.cdf(x)))
+    SEEDS.forEach(seed => {
+      it(`should produce samples matching Normal(0,1) target (KS test, seed ${seed})`, () => {
+        const am = new AdaptiveMetropolis(x => -0.5 * x[0] * x[0], { dim: 1 }).seed(seed)
+        am.warmUp(null, 10)
+        const samples = am.sample(null, 2000)
+        const values = samples.map(s => s[0])
+        const ref = new Normal(0, 1)
+        assert(ksTest(values, x => ref.cdf(x)))
+      })
     })
   })
 
@@ -1128,15 +1225,17 @@ describe('mc.HMC', () => {
         assert(meanUnadaptedRatio > 10, `mean unadapted per-dimension ESS ratio (${meanUnadaptedRatio}) over seeds ${seeds} should be markedly unbalanced`)
       })
 
-      it('should still recover the correct per-dimension margins under metric adaptation (KS test)', () => {
-        // Guards against an M/M^-1 inversion bug that could improve ESS while silently biasing
-        // the sampled distribution -- neither test above inspects the distribution itself.
-        const hmc = new HMC(lnp, grad, { dim: 3 }, { x: [0, 0, 0] }).seed(1)
-        hmc.warmUp(null, 20)
-        const samples = hmc.sample(null, 2000)
-        sigma.forEach((s, i) => {
-          const ref = new Normal(0, s)
-          assert(ksTest(samples.map(x => x[i]), x => ref.cdf(x)), `margin ${i} (sigma=${s}) failed KS test`)
+      SEEDS.forEach(seed => {
+        it(`should still recover the correct per-dimension margins under metric adaptation (KS test, seed ${seed})`, () => {
+          // Guards against an M/M^-1 inversion bug that could improve ESS while silently biasing
+          // the sampled distribution -- neither test above inspects the distribution itself.
+          const hmc = new HMC(lnp, grad, { dim: 3 }, { x: [0, 0, 0] }).seed(seed)
+          hmc.warmUp(null, 20)
+          const samples = hmc.sample(null, 2000)
+          sigma.forEach((s, i) => {
+            const ref = new Normal(0, s)
+            assert(ksTest(samples.map(x => x[i]), x => ref.cdf(x)), `margin ${i} (sigma=${s}) failed KS test`)
+          })
         })
       })
     })
@@ -1153,16 +1252,18 @@ describe('mc.HMC', () => {
         assert.deepEqual(hmc2.state().internal, state.internal)
       })
 
-      it('should still recover the correct margins of a correlated target under metric adaptation (KS test)', () => {
-        // Same rationale as the diagonal metric's KS test above, applied to the dense metric's
-        // sampling path (_sampleMomentum's back-substitution and _applyInverseMetric's L*D*L^T*p
-        // product) -- both margins are standard Normal regardless of rho (see logDensity2D above).
-        const hmc = new HMC(logDensity2D, gradLogDensity2D, { dim: 2, metric: 'dense' }).seed(3)
-        hmc.warmUp(null, 10)
-        const samples = hmc.sample(null, 2000)
-        const ref = new Normal(0, 1)
-        assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
-        assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+      SEEDS.forEach(seed => {
+        it(`should still recover the correct margins of a correlated target under metric adaptation (KS test, seed ${seed})`, () => {
+          // Same rationale as the diagonal metric's KS test above, applied to the dense metric's
+          // sampling path (_sampleMomentum's back-substitution and _applyInverseMetric's L*D*L^T*p
+          // product) -- both margins are standard Normal regardless of rho (see logDensity2D above).
+          const hmc = new HMC(logDensity2D, gradLogDensity2D, { dim: 2, metric: 'dense' }).seed(seed)
+          hmc.warmUp(null, 10)
+          const samples = hmc.sample(null, 2000)
+          const ref = new Normal(0, 1)
+          assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
+          assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+        })
       })
 
       it('should achieve higher effective sample size than the diagonal metric on a strongly correlated target', () => {
@@ -1219,13 +1320,15 @@ describe('mc.HMC', () => {
   })
 
   describe('.sample() distributional test', () => {
-    it('should recover both margins of a correlated bivariate Normal target (KS test)', () => {
-      const hmc = new HMC(logDensity2D, gradLogDensity2D, { dim: 2 }).seed(3)
-      hmc.warmUp(null, 10)
-      const samples = hmc.sample(null, 2000)
-      const ref = new Normal(0, 1)
-      assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
-      assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+    SEEDS.forEach(seed => {
+      it(`should recover both margins of a correlated bivariate Normal target (KS test, seed ${seed})`, () => {
+        const hmc = new HMC(logDensity2D, gradLogDensity2D, { dim: 2 }).seed(seed)
+        hmc.warmUp(null, 10)
+        const samples = hmc.sample(null, 2000)
+        const ref = new Normal(0, 1)
+        assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
+        assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+      })
     })
   })
 
@@ -1352,13 +1455,15 @@ describe('mc.MALA', () => {
   })
 
   describe('.sample() distributional test', () => {
-    it('should recover both margins of a correlated bivariate Normal target (KS test)', () => {
-      const mala = new MALA(logDensity2D, gradLogDensity2D, { dim: 2 }).seed(3)
-      mala.warmUp(null, 10)
-      const samples = mala.sample(null, 2000)
-      const ref = new Normal(0, 1)
-      assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
-      assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+    SEEDS.forEach(seed => {
+      it(`should recover both margins of a correlated bivariate Normal target (KS test, seed ${seed})`, () => {
+        const mala = new MALA(logDensity2D, gradLogDensity2D, { dim: 2 }).seed(seed)
+        mala.warmUp(null, 10)
+        const samples = mala.sample(null, 2000)
+        const ref = new Normal(0, 1)
+        assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
+        assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+      })
     })
   })
 
@@ -1591,13 +1696,15 @@ describe('mc.NUTS', () => {
   })
 
   describe('.sample() distributional test', () => {
-    it('should recover both margins of a correlated bivariate Normal target (KS test)', () => {
-      const nuts = new NUTS(logDensity2D, gradLogDensity2D, { dim: 2 }).seed(3)
-      nuts.warmUp(null, 10)
-      const samples = nuts.sample(null, 2000)
-      const ref = new Normal(0, 1)
-      assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
-      assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+    SEEDS.forEach(seed => {
+      it(`should recover both margins of a correlated bivariate Normal target (KS test, seed ${seed})`, () => {
+        const nuts = new NUTS(logDensity2D, gradLogDensity2D, { dim: 2 }).seed(seed)
+        nuts.warmUp(null, 10)
+        const samples = nuts.sample(null, 2000)
+        const ref = new Normal(0, 1)
+        assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
+        assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+      })
     })
   })
 
@@ -1985,24 +2092,28 @@ describe('mc.SliceSampler', () => {
   })
 
   describe('.sample() distributional test', () => {
-    it('should produce samples matching Normal(0,1) target (KS test)', () => {
-      const slice = new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 }).seed(5)
-      slice.warmUp(null, 10)
-      const samples = slice.sample(null, 2000)
-      const values = samples.map(s => s[0])
-      const ref = new Normal(0, 1)
-      assert(ksTest(values, x => ref.cdf(x)))
+    SEEDS.forEach(seed => {
+      it(`should produce samples matching Normal(0,1) target (KS test, seed ${seed})`, () => {
+        const slice = new SliceSampler(x => -0.5 * x[0] * x[0], { dim: 1 }).seed(seed)
+        slice.warmUp(null, 10)
+        const samples = slice.sample(null, 2000)
+        const values = samples.map(s => s[0])
+        const ref = new Normal(0, 1)
+        assert(ksTest(values, x => ref.cdf(x)))
+      })
     })
 
-    it('should recover both margins of a correlated bivariate Normal target (KS test)', () => {
-      const rho = 0.5
-      const lnp = x => -0.5 / (1 - rho * rho) * (x[0] * x[0] - 2 * rho * x[0] * x[1] + x[1] * x[1])
-      const slice = new SliceSampler(lnp, { dim: 2 }, { x: [0, 0] }).seed(7)
-      slice.warmUp(null, 10)
-      const samples = slice.sample(null, 2000)
-      const ref = new Normal(0, 1)
-      assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
-      assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+    SEEDS.forEach(seed => {
+      it(`should recover both margins of a correlated bivariate Normal target (KS test, seed ${seed})`, () => {
+        const rho = 0.5
+        const lnp = x => -0.5 / (1 - rho * rho) * (x[0] * x[0] - 2 * rho * x[0] * x[1] + x[1] * x[1])
+        const slice = new SliceSampler(lnp, { dim: 2 }, { x: [0, 0] }).seed(seed)
+        slice.warmUp(null, 10)
+        const samples = slice.sample(null, 2000)
+        const ref = new Normal(0, 1)
+        assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
+        assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+      })
     })
   })
 })
