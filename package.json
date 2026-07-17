@@ -531,13 +531,16 @@
     "mathjax-node-page": "^3.2.0",
     "mocha": "^10.2.0",
     "nodemon": "^3.0.0",
-    "nyc": "^15.1.0",
+    "nyc": "^18.0.0",
     "pug": "^3.0.2",
     "rollup": "^4.60.4",
     "sass": "^1.77.8",
     "seedrandom": "^3.0.5",
     "standard": "^16.0.4",
     "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "serialize-javascript": "^7.0.7"
   },
   "babel": {
     "presets": [
