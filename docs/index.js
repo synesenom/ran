@@ -57,8 +57,6 @@ function parseEntry (entry) {
   const sourceThrows = entry.throws.length > 0
     ? entry.throws
     : (ctor ? ctor.throws : [])
-  const params = sourceParams.map(ParamParser)
-  const throws = sourceThrows.map(ThrowsParser)
 
   const ctx = entry.context || {}
   const relFile = ctx.file ? path.relative(REPO_ROOT, ctx.file).split(path.sep).join('/') : null
@@ -66,6 +64,12 @@ function parseEntry (entry) {
   const source = relFile && line != null
     ? `https://github.com/synesenom/ran/blob/v${VERSION}/${relFile}#L${line}`
     : null
+  // entry.params, entry.returns[0] and entry.deprecated don't carry their own context, so
+  // every DescParser call is given the enclosing entry's location for error reporting (#980).
+  const location = { file: relFile, line }
+
+  const params = sourceParams.map(p => ParamParser(p, location))
+  const throws = sourceThrows.map(ThrowsParser)
 
   return {
     name,
@@ -73,13 +77,13 @@ function parseEntry (entry) {
     path: entry.memberof,
     signature: `${entry.memberof}.${name}(${params.map((d, i) => `${d.optional ? '[' : ''}${i > 0 ? ', ' : ''}${d.name}`)
       .join('')}${params.filter(d => d.optional).map(() => ']').join('')})`,
-    desc: DescParser(entry),
+    desc: DescParser(entry, location),
     source,
     params: params.length > 0 ? params : undefined,
     returns: (() => {
       const ret = entry.returns[0]
       return ret && {
-        desc: DescParser(ret),
+        desc: DescParser(ret, location),
         type: TypeParser(ret.type)
       }
     })(),
@@ -88,7 +92,7 @@ function parseEntry (entry) {
       ? hljs.highlight(entry.examples[0].description, { language: 'javascript' }).value
       : undefined,
     sees: entry.sees.length > 0 ? entry.sees.map(SeesParser) : undefined,
-    deprecated: entry.deprecated ? DescParser({ description: entry.deprecated }) : undefined
+    deprecated: entry.deprecated ? DescParser({ description: entry.deprecated }, location) : undefined
   }
 }
 
