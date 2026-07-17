@@ -15,6 +15,19 @@ const TARGET_ND = 0.234
 const BATCH = 100
 
 /**
+ * @overload
+ * @param {Function} logDensity The logarithm of the (unnormalized) target density.
+ * @param {Object=} config RWM configuration (see MCMC base class for shared options).
+ * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
+ */
+/**
+ * @overload
+ * @param {Object} options Sampler options, as a single object.
+ * @param {Function} options.logDensity The logarithm of the (unnormalized) target density.
+ * @param {Object=} options.config RWM configuration (see MCMC base class for shared options).
+ * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class).
+ */
+/**
  * Class implementing the (random walk) [Metropolis]{@link https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm}
  * algorithm as a diagonal [adaptive Metropolis]{@link https://projecteuclid.org/euclid.bj/1080222083} sampler.
  * Proposals are joint (every component perturbed at once) in both warm-up and sampling; during warm-up a single
@@ -23,12 +36,15 @@ const BATCH = 100
  *
  * @class RWM
  * @memberof ran.mc
- * @param {Function} logDensity The logarithm of the (unnormalized) target density.
+ * @param {Function|Object} logDensity The logarithm of the (unnormalized) target density (this
+ * positional form is deprecated — see the options-object overload above), or a single options
+ * object carrying {logDensity}, {config}, and {initialState}.
  * @param {Object=} config RWM configuration (see MCMC base class for shared options).
  * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
  * @constructor
  */
 // decisions/0022-rwm-joint-adaptive-metropolis.md — joint diagonal adaptive Metropolis in both phases
+// decisions/0030-mcmc-options-object-constructor.md — options-object form, detected by the MCMC base class
 export default class RWM extends MCMC {
   /**
    * @param {Function} logDensity The logarithm of the (unnormalized) target density.
@@ -124,5 +140,12 @@ export default class RWM extends MCMC {
         this._base[i] = stats[i].std
       }
     }
+  }
+
+  // RWM forwards (logDensity, config, initialState) to super() unchanged and has no extra
+  // constructor arguments, so the options-object form already matches its real arity — see
+  // decisions/0030-mcmc-options-object-constructor.md.
+  static get _supportsOptionsConstructor () {
+    return true
   }
 }

@@ -44,7 +44,7 @@ export default function runChains (logDensity, config = {}, options = {}) {
   const resolvedSeeds = seeds || Array.from({ length: chains }, (_, i) => i + 1)
 
   const samples = resolvedSeeds.map(seed => {
-    const sampler = new RWM(logDensity, config).seed(seed)
+    const sampler = new RWM({ logDensity, config }).seed(seed)
     sampler.warmUp(null, warmUpBatches)
     return sampler.sample(null, sampleSize)
   })
