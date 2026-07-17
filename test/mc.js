@@ -946,6 +946,15 @@ describe('mc.HMC', () => {
       assert.throws(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1, pathLength: 2.5 }), /pathLength must be a positive integer/)
     })
 
+    it('should throw for a pathLength above the maximum allowed', () => {
+      assert.throws(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1, pathLength: 1e9 }), /pathLength must be at most/)
+      assert.throws(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1, pathLength: 10001 }), /pathLength must be at most/)
+    })
+
+    it('should not throw for a pathLength at the maximum allowed', () => {
+      assert.doesNotThrow(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1, pathLength: 10000 }))
+    })
+
     it('should not throw for valid stepSize and pathLength', () => {
       assert.doesNotThrow(() => new HMC(logDensity1D, gradLogDensity1D, { dim: 1, stepSize: 0.2, pathLength: 5 }))
     })
