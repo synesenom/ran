@@ -43,7 +43,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18, 20, 22]
+        # nyc@18 (bumped for GHSA-w5hq-g745-h8pq, #960) declares engines.node "20 || >=22", excluding 18
+        node-version: [20, 22]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
