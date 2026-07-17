@@ -498,7 +498,7 @@ describe('mc.RWM', () => {
 
   describe('.sample() distributional test', () => {
     it('should produce samples matching Normal(0,1) target (KS test)', () => {
-      const rwm = new RWM(x => -0.5 * x[0] * x[0], { dim: 1 })
+      const rwm = new RWM(x => -0.5 * x[0] * x[0], { dim: 1 }).seed(42)
       rwm.warmUp(null, 10)
       const samples = rwm.sample(null, 2000)
       const values = samples.map(s => s[0])
