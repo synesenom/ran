@@ -420,15 +420,22 @@ export default class HMC extends MCMC {
   // one applies the adapted metric's M^-1 to the position update -- combining the dense metric
   // with NUTS is explicitly out of scope (issue #826).
   _leapfrog (x, r, eps) {
-    let xCur = x.slice()
-    let rCur = r.slice()
+    const xCur = x.slice()
+    const rCur = r.slice()
+    const n = xCur.length
     for (let l = 0; l < this._pathLength; l++) {
       const grad0 = this._gradLnp(xCur)
-      rCur = rCur.map((ri, i) => ri + 0.5 * eps * grad0[i])
+      for (let i = 0; i < n; i++) {
+        rCur[i] += 0.5 * eps * grad0[i]
+      }
       const mInvR = this._applyInverseMetric(rCur)
-      xCur = xCur.map((xi, i) => xi + eps * mInvR[i])
+      for (let i = 0; i < n; i++) {
+        xCur[i] += eps * mInvR[i]
+      }
       const grad1 = this._gradLnp(xCur)
-      rCur = rCur.map((ri, i) => ri + 0.5 * eps * grad1[i])
+      for (let i = 0; i < n; i++) {
+        rCur[i] += 0.5 * eps * grad1[i]
+      }
     }
     return { x: xCur, r: rCur }
   }
