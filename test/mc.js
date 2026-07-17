@@ -2039,6 +2039,81 @@ describe('mc.SliceSampler', () => {
     })
   })
 
+  describe('options-object constructor form', () => {
+    let originalWarn
+    let warnCalls
+
+    beforeEach(() => {
+      originalWarn = console.warn
+      warnCalls = []
+      console.warn = (...args) => warnCalls.push(args)
+    })
+
+    afterEach(() => {
+      console.warn = originalWarn
+    })
+
+    it('should behave identically to the positional form, including config defaults never explicitly passed', () => {
+      const logDensity = x => -0.5 * x[0] * x[0]
+      const positional = new SliceSampler(logDensity, { dim: 1 }, { x: [2], internal: { w: 2.5 } })
+      const options = new SliceSampler({ logDensity, config: { dim: 1 }, initialState: { x: [2], internal: { w: 2.5 } } })
+      assert.strictEqual(options.dim, positional.dim)
+      // maxLag/arWindow are not passed on either side, so a match here can only happen if
+      // _resolveConstructorArgs threads the options-form config through _resolveConfig's
+      // defaulting the same way the positional form's config does — a pass-through-only test
+      // (e.g. comparing an explicitly-passed field back to itself) couldn't catch that.
+      assert.strictEqual(options.maxLag, positional.maxLag)
+      assert.strictEqual(options._arWindow, positional._arWindow)
+      assert.deepStrictEqual(options.x, positional.x)
+      // SliceSampler-specific: the interval width seeded via initialState.internal.w must survive
+      // the options-object unwrapping identically to the positional path.
+      assert.deepStrictEqual(options.state().internal.w, positional.state().internal.w)
+      options.seed(11)
+      positional.seed(11)
+      assert.deepStrictEqual(options.iterate(), positional.iterate())
+    })
+
+    it('should default config and initialState when omitted entirely from the options object', () => {
+      const slice = new SliceSampler({ logDensity: x => -0.5 * x[0] * x[0] })
+      assert.strictEqual(slice.dim, 1)
+      assert.strictEqual(slice.maxLag, 100)
+      assert.deepEqual(slice.state().internal.w, [1.0])
+    })
+
+    it('should resolve config when initialState is omitted from the options object', () => {
+      const slice = new SliceSampler({ logDensity: x => -0.5 * (x[0] * x[0] + x[1] * x[1]), config: { dim: 2 } })
+      assert.strictEqual(slice.dim, 2)
+    })
+
+    it('should resolve initialState when config is omitted from the options object', () => {
+      const slice = new SliceSampler({ logDensity: () => 0, initialState: { x: [7] } })
+      assert.deepStrictEqual(slice.x, [7])
+    })
+
+    it('should validate config the same way as the positional form', () => {
+      assert.throws(() => new SliceSampler({ logDensity: () => 0, config: { dim: 0 } }), /dim must be a positive integer/)
+    })
+
+    it('should validate w the same way as the positional form', () => {
+      assert.throws(() => new SliceSampler({ logDensity: () => 0, initialState: { internal: { w: 0 } } }), /w must be a positive number/)
+    })
+
+    it('should not emit a deprecation warning for the options-object form', () => {
+      assert.doesNotThrow(() => new SliceSampler({ logDensity: () => 0 }))
+      assert.strictEqual(warnCalls.length, 0)
+    })
+
+    it('should emit exactly one deprecation warning per instantiation for the positional form', () => {
+      assert.doesNotThrow(() => new SliceSampler(() => 0))
+      assert.strictEqual(warnCalls.length, 1)
+      assert.match(warnCalls[0][0], /\[ranjs] positional MCMC constructor arguments are deprecated/)
+      assert.match(warnCalls[0][0], /new SliceSampler\({ logDensity, config, initialState }\)/)
+
+      assert.doesNotThrow(() => new SliceSampler(() => 0))
+      assert.strictEqual(warnCalls.length, 2)
+    })
+  })
+
   describe('._iter()', () => {
     it('should update every dimension within one sweep', () => {
       // Continuous target: P(new coordinate === old coordinate) = 0, so any
