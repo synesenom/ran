@@ -51,6 +51,27 @@ class UnimplementedMCMC extends MCMC {
   }
 }
 
+// Shared parity check for a migrated sampler's two constructor forms, reused by every sampler's
+// options-object block (RWM, SliceSampler, ...) so the assertion lives in exactly one place.
+// Verifies the options-object form yields an identical sampler to the positional form: same
+// resolved config, same initial position, same serialized internal state (RWM's proposal,
+// SliceSampler's w, ...), and the same first iteration once both are seeded alike.
+// maxLag/arWindow are intentionally left out of `config` by callers so a match can only happen if
+// _resolveConstructorArgs threads the options-form config through _resolveConfig's defaulting the
+// same way the positional form does — a pass-through-only comparison couldn't catch that.
+function assertConstructorFormsMatch (Ctor, logDensity, config, initialState) {
+  const positional = new Ctor(logDensity, config, initialState)
+  const options = new Ctor({ logDensity, config, initialState })
+  assert.strictEqual(options.dim, positional.dim)
+  assert.strictEqual(options.maxLag, positional.maxLag)
+  assert.strictEqual(options._arWindow, positional._arWindow)
+  assert.deepStrictEqual(options.x, positional.x)
+  assert.deepStrictEqual(options.state().internal, positional.state().internal)
+  options.seed(11)
+  positional.seed(11)
+  assert.deepStrictEqual(options.iterate(), positional.iterate())
+}
+
 // Direct unit tests for the ess() test-utils helper, which reduces a sampler's per-dimension
 // ess() (ran.mc.MCMC#ess) to a single scalar via Math.min -- the ESS truncation arithmetic
 // itself is covered directly against MCMC#ess() in the 'mc.MCMC .ess()' block above; these
@@ -456,20 +477,7 @@ describe('mc.RWM', () => {
     })
 
     it('should behave identically to the positional form, including config defaults never explicitly passed', () => {
-      const logDensity = x => -0.5 * x[0] * x[0]
-      const positional = new RWM(logDensity, { dim: 1 }, { x: [2] })
-      const options = new RWM({ logDensity, config: { dim: 1 }, initialState: { x: [2] } })
-      assert.strictEqual(options.dim, positional.dim)
-      // maxLag/arWindow are not passed on either side, so a match here can only happen if
-      // _resolveConstructorArgs threads the options-form config through _resolveConfig's
-      // defaulting the same way the positional form's config does — a pass-through-only test
-      // (e.g. comparing an explicitly-passed field back to itself) couldn't catch that.
-      assert.strictEqual(options.maxLag, positional.maxLag)
-      assert.strictEqual(options._arWindow, positional._arWindow)
-      assert.deepStrictEqual(options.x, positional.x)
-      options.seed(11)
-      positional.seed(11)
-      assert.deepStrictEqual(options.iterate(), positional.iterate())
+      assertConstructorFormsMatch(RWM, x => -0.5 * x[0] * x[0], { dim: 1 }, { x: [2] })
     })
 
     it('should default config and initialState when omitted entirely from the options object', () => {
@@ -2054,23 +2062,9 @@ describe('mc.SliceSampler', () => {
     })
 
     it('should behave identically to the positional form, including config defaults never explicitly passed', () => {
-      const logDensity = x => -0.5 * x[0] * x[0]
-      const positional = new SliceSampler(logDensity, { dim: 1 }, { x: [2], internal: { w: 2.5 } })
-      const options = new SliceSampler({ logDensity, config: { dim: 1 }, initialState: { x: [2], internal: { w: 2.5 } } })
-      assert.strictEqual(options.dim, positional.dim)
-      // maxLag/arWindow are not passed on either side, so a match here can only happen if
-      // _resolveConstructorArgs threads the options-form config through _resolveConfig's
-      // defaulting the same way the positional form's config does — a pass-through-only test
-      // (e.g. comparing an explicitly-passed field back to itself) couldn't catch that.
-      assert.strictEqual(options.maxLag, positional.maxLag)
-      assert.strictEqual(options._arWindow, positional._arWindow)
-      assert.deepStrictEqual(options.x, positional.x)
-      // SliceSampler-specific: the interval width seeded via initialState.internal.w must survive
-      // the options-object unwrapping identically to the positional path.
-      assert.deepStrictEqual(options.state().internal.w, positional.state().internal.w)
-      options.seed(11)
-      positional.seed(11)
-      assert.deepStrictEqual(options.iterate(), positional.iterate())
+      // internal.w exercises the SliceSampler-specific state channel: state().internal (compared
+      // wholesale inside the helper) covers w the same way it covers RWM's proposal.
+      assertConstructorFormsMatch(SliceSampler, x => -0.5 * x[0] * x[0], { dim: 1 }, { x: [2], internal: { w: 2.5 } })
     })
 
     it('should default config and initialState when omitted entirely from the options object', () => {
