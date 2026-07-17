@@ -13,7 +13,11 @@ const KAPPA = 0.75
 const DELTA = 0.65
 // Multiplicative step-size jitter bounds: drawing epsilon ~ Uniform(0.9*eps, 1.1*eps) per
 // iteration avoids resonance artifacts a perfectly fixed step size can produce on periodic
-// trajectories (Neal 2011; standard practice in Stan/PyMC).
+// trajectories (Neal 2011; standard practice in Stan/PyMC). This jitters stepSize only --
+// pathLength stays fixed, so a fixed trajectory length (pathLength * stepSize) can still land
+// near a half-period of the target's natural oscillation at certain correlations, producing
+// genuine negative lag-1 autocorrelation that ess()'s Geyer truncation correctly reports (not a
+// bug in the online accumulator -- see #974).
 const JITTER_LO = 0.9
 const JITTER_RANGE = 0.2
 // Regularization added to the estimated metric (variance or covariance) before it is used,

@@ -167,7 +167,12 @@ export default class MCMC {
    * Computes the effective sample size for each dimension using Geyer's positive-part estimator:
    * ESS = N / (1 + 2 * sum_k rho_k), where the sum over lags k = 1, 2, ... stops at the first
    * lag whose autocorrelation is not positive. Built directly on the same accumulators as ac()
-   * and statistics() — no additional accumulator state.
+   * and statistics() — no additional accumulator state. If lag 1 itself is already non-positive,
+   * the sum is 0 and ess() equals N exactly: a legitimate output of this truncation rule when the
+   * sampler genuinely produces non-positive lag-1 autocorrelation (e.g. HMC's fixed pathLength
+   * resonating with the target's geometry, see hmc.js), not necessarily a sign of a broken
+   * sampler. See #974: verified against a brute-force autocorrelation over the raw iterate()
+   * sequence, which confirmed the online accumulator is exact and the anti-correlation is genuine.
    *
    * @method ess
    * @memberof ran.mc.MCMC
