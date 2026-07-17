@@ -24,6 +24,9 @@ const PRIORITY = {
   dist: [
     'Distribution'
   ],
+  mc: [
+    'MCMC'
+  ],
   process: [
     'Process'
   ]
