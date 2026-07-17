@@ -42,32 +42,53 @@ function getSortedEntries (entries, priority) {
     )
 }
 
+// Distribution classes carry @param/@throws on the constructor's own JSDoc (the
+// post-#306 layout: class block has no @param so tsc can pick the constructor
+// signature). documentation.js v14 surfaces that block as entry.constructorComment.
+// Fall back to it when the class entry itself has no params/throws, otherwise the
+// rendered cards show "Name()" with no Parameters table.
+function resolveEntrySource (entry) {
+  const ctor = entry.constructorComment
+  return {
+    params: entry.params.length > 0 ? entry.params : (ctor ? ctor.params : []),
+    throws: entry.throws.length > 0 ? entry.throws : (ctor ? ctor.throws : [])
+  }
+}
+
+function resolveLocation (entry) {
+  const ctx = entry.context || {}
+  return {
+    file: ctx.file ? path.relative(REPO_ROOT, ctx.file).split(path.sep).join('/') : null,
+    line: ctx.loc && ctx.loc.start ? ctx.loc.start.line : null
+  }
+}
+
+function sourceLink (location) {
+  return location.file && location.line != null
+    ? `https://github.com/synesenom/ran/blob/v${VERSION}/${location.file}#L${location.line}`
+    : null
+}
+
+function renderSignature (entry, params) {
+  const args = params.map((d, i) => `${d.optional ? '[' : ''}${i > 0 ? ', ' : ''}${d.name}`).join('')
+  const closers = params.filter(d => d.optional).map(() => ']').join('')
+  return `${entry.memberof}.${entry.name}(${args}${closers})`
+}
+
+function renderReturns (entry, location) {
+  const ret = entry.returns[0]
+  return ret && {
+    desc: DescParser(ret, location),
+    type: TypeParser(ret.type)
+  }
+}
+
 function parseEntry (entry) {
   const name = entry.name
-  // Distribution classes carry @param/@throws on the constructor's own
-  // JSDoc (the post-#306 layout: class block has no @param so tsc can
-  // pick the constructor signature). documentation.js v14 surfaces that
-  // block as entry.constructorComment. Fall back to it when the class
-  // entry itself has no params/throws, otherwise the rendered cards
-  // show "Name()" with no Parameters table.
-  const ctor = entry.constructorComment
-  const sourceParams = entry.params.length > 0
-    ? entry.params
-    : (ctor ? ctor.params : [])
-  const sourceThrows = entry.throws.length > 0
-    ? entry.throws
-    : (ctor ? ctor.throws : [])
-
-  const ctx = entry.context || {}
-  const relFile = ctx.file ? path.relative(REPO_ROOT, ctx.file).split(path.sep).join('/') : null
-  const line = ctx.loc && ctx.loc.start ? ctx.loc.start.line : null
-  const source = relFile && line != null
-    ? `https://github.com/synesenom/ran/blob/v${VERSION}/${relFile}#L${line}`
-    : null
+  const { params: sourceParams, throws: sourceThrows } = resolveEntrySource(entry)
+  const location = resolveLocation(entry)
   // entry.params, entry.returns[0] and entry.deprecated don't carry their own context, so
   // every DescParser call is given the enclosing entry's location for error reporting (#980).
-  const location = { file: relFile, line }
-
   const params = sourceParams.map(p => ParamParser(p, location))
   const throws = sourceThrows.map(ThrowsParser)
 
@@ -75,18 +96,11 @@ function parseEntry (entry) {
     name,
     index: `${entry.memberof}.${name}`.slice(4).replace('.', '-'),
     path: entry.memberof,
-    signature: `${entry.memberof}.${name}(${params.map((d, i) => `${d.optional ? '[' : ''}${i > 0 ? ', ' : ''}${d.name}`)
-      .join('')}${params.filter(d => d.optional).map(() => ']').join('')})`,
+    signature: renderSignature(entry, params),
     desc: DescParser(entry, location),
-    source,
+    source: sourceLink(location),
     params: params.length > 0 ? params : undefined,
-    returns: (() => {
-      const ret = entry.returns[0]
-      return ret && {
-        desc: DescParser(ret, location),
-        type: TypeParser(ret.type)
-      }
-    })(),
+    returns: renderReturns(entry, location),
     throws: throws.length > 0 ? throws : undefined,
     examples: entry.examples.length > 0
       ? hljs.highlight(entry.examples[0].description, { language: 'javascript' }).value
