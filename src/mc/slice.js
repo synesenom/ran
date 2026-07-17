@@ -37,13 +37,13 @@ const MAX_STEPS = 200
  * below the current point's density, an interval bracketing the resulting horizontal slice is
  * found by stepping outward in increments of `w`, and a point within that interval is accepted
  * once shrinkage finds one whose density exceeds the vertical level. No proposal distribution or
- * gradient is required, and every sweep produces an accepted draw, so [ar]{@link ran.mc.SliceSampler#ar}
+ * gradient is required, and every sweep produces an accepted draw, so [ar]{@link ran.mc.Slice#ar}
  * is always 1.
  *
  * A prior, non-functional `slice.js` (100% commented out, 1D only, never wired into the base
  * class) was deleted as dead code in PR #615; this is a fresh implementation, not a restoration.
  *
- * @class SliceSampler
+ * @class Slice
  * @memberof ran.mc
  * @param {Function|Object} logDensity The logarithm of the (unnormalized) target density (this
  * positional form is deprecated — see the options-object overload above), or a single options
@@ -59,7 +59,7 @@ const MAX_STEPS = 200
 // decisions/0020-mcmc-design.md — the _iter/_adjust/_internal contract was designed for exactly
 // this pattern: a per-dimension sweep with its own adaptive tunable and no gradient requirement.
 // decisions/0030-mcmc-options-object-constructor.md — options-object form, detected by the MCMC base class
-export default class SliceSampler extends MCMC {
+export default class Slice extends MCMC {
   /**
    * @param {Function} logDensity The logarithm of the (unnormalized) target density.
    * @param {Object=} config Sampler configuration (see MCMC base class for shared options).
@@ -71,7 +71,7 @@ export default class SliceSampler extends MCMC {
     super(logDensity, config, initialState)
     const w = this.internal.w
     this._w = Array.isArray(w) ? w.slice() : new Array(this.dim).fill(typeof w === 'number' ? w : 1.0)
-    SliceSampler._validateW(this._w, this.dim)
+    Slice._validateW(this._w, this.dim)
     this._bwSum = new Array(this.dim).fill(0)
     this._adjN = 0
     this._adjBatch = 0
@@ -159,7 +159,7 @@ export default class SliceSampler extends MCMC {
     }
   }
 
-  // SliceSampler forwards (logDensity, config, initialState) to super() unchanged and has no extra
+  // Slice forwards (logDensity, config, initialState) to super() unchanged and has no extra
   // constructor arguments, so the options-object form already matches its real arity — see
   // decisions/0030-mcmc-options-object-constructor.md.
   static get _supportsOptionsConstructor () {
@@ -169,8 +169,8 @@ export default class SliceSampler extends MCMC {
   // Kept out of the constructor to avoid a Complex Conditional smell there, matching the
   // MCMC base class's _validateDim/_validateMaxLag/_validateArWindow pattern.
   static _validateW (w, dim) {
-    if (w.length !== dim || !w.every(SliceSampler._isPositiveNumber)) {
-      throw Error('SliceSampler: w must be a positive number or an array of dim positive numbers')
+    if (w.length !== dim || !w.every(Slice._isPositiveNumber)) {
+      throw Error('Slice: w must be a positive number or an array of dim positive numbers')
     }
   }
 
