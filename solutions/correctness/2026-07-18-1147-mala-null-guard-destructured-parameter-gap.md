@@ -86,9 +86,13 @@ writing this validate-then-destructure pattern — `null` is specifically the ca
 destructured default parameter's own implicit guard, and is easy to omit if the test suite only
 covers the "caller forgot the argument entirely" case.
 
-This applies to any future `MCMC` subclass adopting an options-object-only constructor (`HMC` via
-#966, `NUTS`, or any other sampler), and to any other place in `ranjs` adopting the options-object
-convention established by ADR-0030/ADR-0031.
+This applies to any future `MCMC` subclass adopting an options-object-only constructor (`NUTS`, or
+any other sampler with no prior release), and to any other place in `ranjs` adopting the
+options-object convention established by ADR-0030/ADR-0032. `HMC`'s own migration (#966) took a
+different path — it has a released positional form to preserve, so it resolves both forms via a
+shared base-class helper (`MCMC._resolveGradientSamplerArgs`, ADR-0031) rather than rejecting the
+positional form outright — so this specific destructuring pitfall does not apply to it the same
+way.
 
 ## Related Solutions
 

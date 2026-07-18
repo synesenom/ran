@@ -532,13 +532,15 @@ describe('mc.RWM', () => {
     })
 
     it('should not emit a deprecation warning for a sampler not yet migrated to the options form', () => {
-      // MALA (like HMC and NUTS) takes an extra gradLogDensity positional argument between
+      // NUTS (like HMC before #966) takes an extra gradLogDensity positional argument between
       // logDensity and config, which the plain { logDensity, config, initialState } options shape
       // doesn't cover, so it has not opted in yet (see MCMC._supportsOptionsConstructor, default
-      // false, and decisions/0030-mcmc-options-object-constructor.md). Gibbs and HMC were the
-      // previous examples here but migrated to their own options forms in #965 and #966
-      // respectively (HMC via MCMC._resolveGradientSamplerArgs, decisions/0031-...md).
-      assert.doesNotThrow(() => new MALA(() => 0, () => [0], { dim: 1 }))
+      // false, and decisions/0030-mcmc-options-object-constructor.md). Gibbs, HMC, and MALA were
+      // the previous examples here but migrated to their own options forms in #965, #966, and #970
+      // respectively (HMC via MCMC._resolveGradientSamplerArgs, decisions/0031-...md; MALA via its
+      // own options-object-only guard, decisions/0032-...md, since it has no positional form to
+      // preserve).
+      assert.doesNotThrow(() => new NUTS(() => 0, () => [0], { dim: 1 }))
       assert.strictEqual(warnCalls.length, 0)
     })
   })

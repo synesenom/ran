@@ -36,7 +36,7 @@ const BATCH = 100
  * stepSize (config.stepSize or a resumed initialState.internal.stepSize) is provided but is not a
  * positive finite number.
  */
-// decisions/0031-mala-options-object-only-constructor.md — options-object-only constructor;
+// decisions/0032-mala-options-object-only-constructor.md — options-object-only constructor;
 // gradLogDensity is destructured locally and never forwarded to the MCMC base class, which
 // keeps super()'s own positional/options detection (and every other MCMC subclass) untouched.
 export default class MALA extends MCMC {

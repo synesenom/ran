@@ -1,4 +1,4 @@
-# ADR-0031: MALA ships an options-object-only constructor via parameter destructuring
+# ADR-0032: MALA ships an options-object-only constructor via parameter destructuring
 
 **Date**: 2026-07-18
 **Status**: Accepted
@@ -102,3 +102,30 @@ broken suggested replacement, if the warning path were ever accidentally reached
   rather than assuming this ADR settles the question for them.
 - `MALA`'s JSDoc collapses to a single constructor form (no `@overload` pair), unlike
   `RWM`/`AdaptiveMetropolis`/`Slice`, since there is only one supported shape.
+
+## Postscript: relationship to ADR-0031 (`MCMC._resolveGradientSamplerArgs`)
+
+Issue #966 (HMC's own migration) merged to `main` while this issue was in flight, adding
+`decisions/0031-gradient-sampler-options-object-constructor.md` and a shared base-class resolver,
+`MCMC._resolveGradientSamplerArgs`, which `HMC` calls before `super()`. That ADR's "Consequences"
+section states MALA's and NUTS's future migrations should each call the same resolver.
+
+`MALA` does **not** do so, and this is a deliberate deviation, not an oversight:
+`_resolveGradientSamplerArgs` unconditionally accepts the positional form — falling through to it
+and emitting a `console.warn` whenever its first argument isn't a plain object carrying a
+`logDensity` key, exactly like `_resolveConstructorArgs`. There is no parameter or override point
+to make it *reject* the positional form outright. Calling it from `MALA` would silently accept
+`new MALA(logDensity, gradLogDensity, config)` (with a warning) instead of throwing — directly
+violating issue #970's explicit acceptance criterion that the options-object form is "the only
+supported constructor form (no positional variant)". `MALA` has no prior release to keep that
+positional path working for, so silently accepting it would be a wrong default, not a lenient one.
+
+Reusing the resolver only for the options-form branch (gating the call behind the same
+`typeof options === 'object'` check this ADR's own guard already performs) would not actually
+reduce `MALA`'s code: the guard-then-reject logic still has to exist locally either way, and the
+resolver's own detection check is one line the guard already duplicates. The two mechanisms solve
+different problems — `_resolveGradientSamplerArgs` is for gradient samplers preserving backward
+compatibility with a released positional form; `MALA`'s guard is for a sampler with no positional
+form to preserve — and this ADR's Decision and Consequences sections above already anticipated
+exactly this outcome before ADR-0031 existed ("HMC's and NUTS's own migration issues ... need to
+independently decide ... because unlike MALA they must support the positional form too").
