@@ -532,12 +532,14 @@ describe('mc.RWM', () => {
     })
 
     it('should not emit a deprecation warning for a sampler not yet migrated to the options form', () => {
-      // MALA (like HMC and NUTS) takes an extra gradLogDensity positional argument between
-      // logDensity and config, which the plain { logDensity, config, initialState } options shape
-      // doesn't cover, so it has not opted in yet (see MCMC._supportsOptionsConstructor, default
-      // false, and decisions/0030-mcmc-options-object-constructor.md). Gibbs and HMC were the
-      // previous examples here but migrated to their own options forms in #965 and #966
-      // respectively (HMC via MCMC._resolveGradientSamplerArgs, decisions/0031-...md).
+      // MALA (like HMC) takes an extra gradLogDensity positional argument between logDensity and
+      // config, which the plain { logDensity, config, initialState } options shape doesn't cover,
+      // so it has not opted in yet (see MCMC._supportsOptionsConstructor, default false, and
+      // decisions/0030-mcmc-options-object-constructor.md). Gibbs and HMC were the previous
+      // examples here but migrated to their own options forms in #965 and #966 respectively (HMC
+      // via MCMC._resolveGradientSamplerArgs, decisions/0031-...md). NUTS shipped
+      // options-object-only from its first release (#972) and never had a positional form to
+      // "not opt in" from, so it isn't a fitting example here either.
       assert.doesNotThrow(() => new MALA(() => 0, () => [0], { dim: 1 }))
       assert.strictEqual(warnCalls.length, 0)
     })
@@ -1844,41 +1846,41 @@ describe('mc.NUTS', () => {
 
   describe('constructor', () => {
     it('should instantiate without error for a 2D correlated Normal target', () => {
-      assert.doesNotThrow(() => new NUTS(logDensity2D, gradLogDensity2D, { dim: 2 }))
+      assert.doesNotThrow(() => new NUTS({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2 } }))
     })
 
     it('should default to stepSize: 0.1 when omitted', () => {
-      const nuts = new NUTS(logDensity1D, gradLogDensity1D, { dim: 1 })
+      const nuts = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } })
       assert.strictEqual(nuts.state().internal.stepSize, 0.1)
     })
 
     it('should throw when gradLogDensity is not a function', () => {
-      assert.throws(() => new NUTS(logDensity1D, null, { dim: 1 }), /gradLogDensity must be a function/)
+      assert.throws(() => new NUTS({ logDensity: logDensity1D, gradLogDensity: null, config: { dim: 1 } }), /gradLogDensity must be a function/)
     })
 
     it('should throw when stepSize is zero', () => {
-      assert.throws(() => new NUTS(logDensity1D, gradLogDensity1D, { dim: 1, stepSize: 0 }), /stepSize must be a positive number/)
+      assert.throws(() => new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1, stepSize: 0 } }), /stepSize must be a positive number/)
     })
 
     it('should throw when stepSize is negative', () => {
-      assert.throws(() => new NUTS(logDensity1D, gradLogDensity1D, { dim: 1, stepSize: -0.1 }), /stepSize must be a positive number/)
+      assert.throws(() => new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1, stepSize: -0.1 } }), /stepSize must be a positive number/)
     })
 
     it('should throw when stepSize is Infinity', () => {
-      assert.throws(() => new NUTS(logDensity1D, gradLogDensity1D, { dim: 1, stepSize: Infinity }), /stepSize must be a positive number/)
+      assert.throws(() => new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1, stepSize: Infinity } }), /stepSize must be a positive number/)
     })
 
     it('should throw when a resumed initialState.internal.stepSize is invalid', () => {
       // initialState.internal is caller-supplied the same way config is (e.g. round-tripped
       // through state()) — a corrupted/adversarial value must be rejected the same way.
       assert.throws(
-        () => new NUTS(logDensity1D, gradLogDensity1D, { dim: 1 }, { internal: { stepSize: Infinity } }),
+        () => new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { stepSize: Infinity } } }),
         /stepSize must be a positive number/
       )
     })
 
     it('should not throw for a valid stepSize', () => {
-      assert.doesNotThrow(() => new NUTS(logDensity1D, gradLogDensity1D, { dim: 1, stepSize: 0.2 }))
+      assert.doesNotThrow(() => new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1, stepSize: 0.2 } }))
     })
   })
 
@@ -1886,7 +1888,7 @@ describe('mc.NUTS', () => {
     it('should return accepted: false and leave position unchanged when the target is degenerate', () => {
       // logDensity = -Infinity everywhere: every leapfrog point fails the slice/divergence
       // checks, so the tree never accepts a new point and the position is unchanged.
-      const nuts = new NUTS(() => -Infinity, () => [0], { dim: 1 }, { x: [42] })
+      const nuts = new NUTS({ logDensity: () => -Infinity, gradLogDensity: () => [0], config: { dim: 1 }, initialState: { x: [42] } })
       const result = nuts.iterate()
       assert.strictEqual(result.accepted, false)
       assert.strictEqual(nuts.x[0], 42)
@@ -1899,7 +1901,7 @@ describe('mc.NUTS', () => {
       // 2^MAX_TREE_DEPTH = 1024 leapfrog steps cover only a tiny fraction of the target's
       // oscillation period, so the doubling loop exhausts MAX_TREE_DEPTH on every iteration
       // instead of stopping on a U-turn — exercising the depth cap itself, not the U-turn path.
-      const nuts = new NUTS(logDensity1D, gradLogDensity1D, { dim: 1, stepSize: 1e-4 }, { x: [1] }).seed(1)
+      const nuts = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1, stepSize: 1e-4 }, initialState: { x: [1] } }).seed(1)
       for (let i = 0; i < 20; i++) {
         const result = nuts.iterate()
         assert(Number.isFinite(result.x[0]), `position ${result.x[0]} not finite at iteration ${i}`)
@@ -1913,7 +1915,7 @@ describe('mc.NUTS', () => {
       // guard (DELTA_MAX) path, distinct from the both-endpoints-Infinity/NaN case above.
       const logDensitySteep = x => -0.5 * Math.pow(x[0], 4)
       const gradLogDensitySteep = x => [-2 * Math.pow(x[0], 3)]
-      const nuts = new NUTS(logDensitySteep, gradLogDensitySteep, { dim: 1, stepSize: 5 }, { x: [1] }).seed(1)
+      const nuts = new NUTS({ logDensity: logDensitySteep, gradLogDensity: gradLogDensitySteep, config: { dim: 1, stepSize: 5 }, initialState: { x: [1] } }).seed(1)
       for (let i = 0; i < 10; i++) {
         const result = nuts.iterate()
         assert.strictEqual(result.accepted, false)
@@ -1925,7 +1927,7 @@ describe('mc.NUTS', () => {
 
   describe('.state() round-trip', () => {
     it('should restore position, samplingRate, and the full internal state', () => {
-      const nuts1 = new NUTS(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(11)
+      const nuts1 = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } }).seed(11)
       // warmUp() first so dual averaging actually moves _stepSize away from its 0.1
       // construction-time default — otherwise the round-trip would trivially "pass" against a
       // corrupted read that silently falls back to the same default.
@@ -1933,7 +1935,7 @@ describe('mc.NUTS', () => {
       for (let i = 0; i < 20; i++) nuts1.iterate()
       const state = nuts1.state()
       assert.notStrictEqual(state.internal.stepSize, 0.1)
-      const nuts2 = new NUTS(logDensity1D, gradLogDensity1D, { dim: 1 }, state)
+      const nuts2 = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: state })
       assert.deepEqual(nuts2.x, state.x)
       assert.strictEqual(nuts2.samplingRate, state.samplingRate)
       // Full-object deepEqual, not a spot-checked field.
@@ -1954,7 +1956,7 @@ describe('mc.NUTS', () => {
     // acceptance), not test fragility.
     [1, 2, 3].forEach(seed => {
       it(`should lie in [0.6, 0.9] for a well-tuned 1D Normal target, seed ${seed}`, () => {
-        const nuts = new NUTS(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(seed)
+        const nuts = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } }).seed(seed)
         nuts.warmUp(null, 10)
         nuts.sample(null, 1000)
         const ar = nuts.ar()
@@ -1966,7 +1968,7 @@ describe('mc.NUTS', () => {
   describe('.sample() distributional test', () => {
     SEEDS.forEach(seed => {
       it(`should recover both margins of a correlated bivariate Normal target (KS test, seed ${seed})`, () => {
-        const nuts = new NUTS(logDensity2D, gradLogDensity2D, { dim: 2 }).seed(seed)
+        const nuts = new NUTS({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2 } }).seed(seed)
         nuts.warmUp(null, 10)
         const samples = nuts.sample(null, 2000)
         const ref = new Normal(0, 1)
@@ -2001,7 +2003,7 @@ describe('mc.NUTS', () => {
       // ratio over several independent seeds.
       const seeds = [1, 2, 3, 4, 5]
       const ratios = seeds.map(seed => {
-        const nuts = new NUTS(essLogDensity, essGradLogDensity, { dim: 2 }).seed(seed)
+        const nuts = new NUTS({ logDensity: essLogDensity, gradLogDensity: essGradLogDensity, config: { dim: 2 } }).seed(seed)
         nuts.warmUp(null, warmUpBatches)
         const nutsSamples = nuts.sample(null, sampleSize)
         const nutsEssPerIter = ess(nuts) / (nuts.samplingRate * nutsSamples.length)
@@ -2022,11 +2024,11 @@ describe('mc.NUTS', () => {
   describe('.seed()', () => {
     [0, 42, 12345].forEach(seed => {
       it(`should produce bitwise-identical samples when seed ${seed} is applied twice`, () => {
-        const nuts1 = new NUTS(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(seed)
+        const nuts1 = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } }).seed(seed)
         nuts1.warmUp(null, 3)
         const samples1 = nuts1.sample(null, 20)
 
-        const nuts2 = new NUTS(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(seed)
+        const nuts2 = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } }).seed(seed)
         nuts2.warmUp(null, 3)
         const samples2 = nuts2.sample(null, 20)
 
@@ -2035,11 +2037,11 @@ describe('mc.NUTS', () => {
     })
 
     it('should produce different samples for different seeds', () => {
-      const nuts1 = new NUTS(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(1)
+      const nuts1 = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } }).seed(1)
       nuts1.warmUp(null, 3)
       const samples1 = nuts1.sample(null, 20)
 
-      const nuts2 = new NUTS(logDensity1D, gradLogDensity1D, { dim: 1 }).seed(2)
+      const nuts2 = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } }).seed(2)
       nuts2.warmUp(null, 3)
       const samples2 = nuts2.sample(null, 20)
 

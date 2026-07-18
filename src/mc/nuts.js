@@ -37,12 +37,13 @@ const DELTA_MAX = 1000
  *
  * @class NUTS
  * @memberof ran.mc
- * @param {Function} logDensity The logarithm of the (unnormalized) target density.
- * @param {Function} gradLogDensity The gradient of logDensity: maps a state (number[]) to its
- * gradient (number[]) of the same dimension.
- * @param {Object=} config NUTS configuration (see MCMC base class for shared options), plus
- * `stepSize` (ε, the leapfrog step size, default 0.1).
- * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
+ * @param {Object} options Sampler options, as a single object.
+ * @param {Function} options.logDensity The logarithm of the (unnormalized) target density.
+ * @param {Function} options.gradLogDensity The gradient of logDensity: maps a state (number[]) to
+ * its gradient (number[]) of the same dimension.
+ * @param {Object=} options.config NUTS configuration (see MCMC base class for shared options),
+ * plus `stepSize` (ε, the leapfrog step size, default 0.1).
+ * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class).
  * @constructor
  * @throws {Error} If gradLogDensity is not a function, or a stepSize (config.stepSize or a
  * resumed initialState.internal.stepSize) is provided but is not a positive finite number.
@@ -52,8 +53,23 @@ const DELTA_MAX = 1000
 // decisions/0025-hmc-iter-alpha-field.md — _iter returns an additional alpha field so _adjust can
 // drive dual averaging; NUTS's alpha is the tree-averaged acceptance statistic, not a single
 // leaf's Metropolis ratio (Hoffman & Gelman 2014 Algorithm 3)
+// decisions/0031-gradient-sampler-options-object-constructor.md — establishes the
+// {logDensity, gradLogDensity, config, initialState} options shape HMC resolves via
+// MCMC._resolveGradientSamplerArgs. NUTS has no prior release to stay backward compatible with
+// (#972), so it ships options-object-only: no positional form, no deprecation warning, and no
+// call to _resolveGradientSamplerArgs (that resolver always warns on its positional branch,
+// which would be wrong here since NUTS never had one).
 export default class NUTS extends MCMC {
-  constructor (logDensity, gradLogDensity, config = {}, initialState = {}) {
+  /**
+   * @param {Object} options Sampler options, as a single object.
+   * @param {Function} options.logDensity The logarithm of the (unnormalized) target density.
+   * @param {Function} options.gradLogDensity The gradient of logDensity: maps a state (number[])
+   * to its gradient (number[]) of the same dimension.
+   * @param {Object=} options.config NUTS configuration (see MCMC base class for shared options),
+   * plus `stepSize` (ε, the leapfrog step size, default 0.1).
+   * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class).
+   */
+  constructor ({ logDensity, gradLogDensity, config = {}, initialState = {} } = {}) {
     super(logDensity, config, initialState)
 
     NUTS._validateGradLogDensity(gradLogDensity)
