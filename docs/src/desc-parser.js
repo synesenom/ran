@@ -43,7 +43,11 @@ const assembleLinks = (children, location) => {
       const linkUrl = extractLinkURL(children[i + 1])
       children[i].value = `${context} <a href='${linkUrl}' target='_blank'>${linkText}</a>`
       delete children[i + 1]
-      i += 2
+      // Consumed (i, i+1); the loop's own i++ covers one step, so advance by
+      // 1 more to land on i+2 — the start of the next unconsumed pair — not
+      // i+3 (#997: the extra +1 here previously skipped that pair entirely).
+      // See solutions/tooling/2026-07-18-1806-desc-parser-double-increment-skip.md
+      i += 1
     }
   }
   return children
