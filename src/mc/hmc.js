@@ -342,7 +342,8 @@ export default class HMC extends MCMC {
   // expensive as NUTS's (it additionally applies the adapted mass-matrix metric via
   // _applyInverseMetric, absent from NUTS's identity-mass leapfrog), so borrowing NUTS's ceiling is
   // conservative. Neal (2011) gives no canonical fixed-L value -- this is the closest literature
-  // anchor available. See #989.
+  // anchor available. See #989 and
+  // solutions/correctness/2026-07-18-1526-hmc-max-path-length-sibling-bound-risk-class-mismatch.md
   static get _MAX_PATH_LENGTH () {
     return 1024
   }
