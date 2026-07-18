@@ -24,28 +24,41 @@ const BATCH = 100
  *
  * @class MALA
  * @memberof ran.mc
- * @param {Function} logDensity The logarithm of the (unnormalized) target density.
- * @param {Function} gradLogDensity The gradient of logDensity: maps a state (number[]) to its
- * gradient (number[]) of the same dimension.
- * @param {Object=} config MALA configuration (see MCMC base class for shared options), plus
- * `stepSize` (ε, default 0.1).
- * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
+ * @param {Object} options MALA options, as a single object.
+ * @param {Function} options.logDensity The logarithm of the (unnormalized) target density.
+ * @param {Function} options.gradLogDensity The gradient of logDensity: maps a state (number[]) to
+ * its gradient (number[]) of the same dimension.
+ * @param {Object=} options.config MALA configuration (see MCMC base class for shared options),
+ * plus `stepSize` (ε, default 0.1).
+ * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class).
  * @constructor
- * @throws {Error} If gradLogDensity is not a function, or a stepSize (config.stepSize or a
- * resumed initialState.internal.stepSize) is provided but is not a positive finite number.
+ * @throws {Error} If options is not a plain object, or gradLogDensity is not a function, or a
+ * stepSize (config.stepSize or a resumed initialState.internal.stepSize) is provided but is not a
+ * positive finite number.
  */
-// decisions/0020-mcmc-design.md — gradLogDensity is a MALA-specific constructor argument,
-// not threaded through the shared MCMC base constructor, mirroring HMC's precedent.
+// decisions/0031-mala-options-object-only-constructor.md — options-object-only constructor;
+// gradLogDensity is destructured locally and never forwarded to the MCMC base class, which
+// keeps super()'s own positional/options detection (and every other MCMC subclass) untouched.
 export default class MALA extends MCMC {
   /**
-   * @param {Function} logDensity The logarithm of the (unnormalized) target density.
-   * @param {Function} gradLogDensity The gradient of logDensity: maps a state (number[]) to its
-   * gradient (number[]) of the same dimension.
-   * @param {Object=} config MALA configuration (see MCMC base class for shared options), plus
-   * `stepSize` (ε, default 0.1).
-   * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
+   * @param {Object} options MALA options, as a single object.
+   * @param {Function} options.logDensity The logarithm of the (unnormalized) target density.
+   * @param {Function} options.gradLogDensity The gradient of logDensity: maps a state (number[])
+   * to its gradient (number[]) of the same dimension.
+   * @param {Object=} options.config MALA configuration (see MCMC base class for shared options),
+   * plus `stepSize` (ε, default 0.1).
+   * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class).
    */
-  constructor (logDensity, gradLogDensity, config = {}, initialState = {}) {
+  constructor (options) {
+    // Destructuring options directly in the parameter list would throw a generic,
+    // engine-dependent TypeError for null (default parameters only cover undefined) or the old
+    // positional shape, instead of this clear, MALA-specific message.
+    // See solutions/correctness/2026-07-18-1147-mala-null-guard-destructured-parameter-gap.md
+    if (options === undefined || options === null || typeof options !== 'object' || Array.isArray(options)) {
+      throw Error('MALA: constructor requires an options object: new MALA({ logDensity, gradLogDensity, config, initialState })')
+    }
+    const { logDensity, gradLogDensity, config = {}, initialState = {} } = options
+
     super(logDensity, config, initialState)
 
     MALA._validateGradLogDensity(gradLogDensity)
