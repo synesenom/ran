@@ -64,14 +64,17 @@ describe('mc.gelmanRubin', () => {
   describe('seeded RWM chains', () => {
     const logDensity = x => -0.5 * x[0] ** 2
 
-    it('should return an R-hat array for two chains seeded with different values', () => {
-      const rwm1 = new RWM(logDensity, { dim: 1 }).seed(1)
-      rwm1.warmUp(null, 3)
-      const chain1 = rwm1.sample(null, 50)
+    // Shared by both tests below so the construct/warmUp/sample boilerplate for a seeded
+    // RWM chain isn't repeated with only the seed/batch/size arguments differing.
+    function seededChain (seed, warmUpBatches, sampleSize) {
+      const rwm = new RWM(logDensity, { dim: 1 }).seed(seed)
+      rwm.warmUp(null, warmUpBatches)
+      return rwm.sample(null, sampleSize)
+    }
 
-      const rwm2 = new RWM(logDensity, { dim: 1 }).seed(2)
-      rwm2.warmUp(null, 3)
-      const chain2 = rwm2.sample(null, 50)
+    it('should return an R-hat array for two chains seeded with different values', () => {
+      const chain1 = seededChain(1, 3, 50)
+      const chain2 = seededChain(2, 3, 50)
 
       const result = gelmanRubin([chain1, chain2])
       assert.strictEqual(result.length, 1)
@@ -79,13 +82,8 @@ describe('mc.gelmanRubin', () => {
     })
 
     it('should converge to R-hat < 1.1 for two long, seeded chains from the same unit-Gaussian target', () => {
-      const rwm1 = new RWM(logDensity, { dim: 1 }).seed(100)
-      rwm1.warmUp(null, 10)
-      const chain1 = rwm1.sample(null, 500)
-
-      const rwm2 = new RWM(logDensity, { dim: 1 }).seed(200)
-      rwm2.warmUp(null, 10)
-      const chain2 = rwm2.sample(null, 500)
+      const chain1 = seededChain(100, 10, 500)
+      const chain2 = seededChain(200, 10, 500)
 
       const result = gelmanRubin([chain1, chain2])
       assert.isBelow(result[0][result[0].length - 1], 1.1)
