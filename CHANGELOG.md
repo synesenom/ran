@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code Health of `test/special.js` improved from 8.28 → 9.09 by extracting shared `check`, `checkBesselIdentity`, and `checkF11Recurrence` helpers to eliminate duplicated recurrence and identity assertion logic.
 - Code Health of `src/special/marcum-q.js` improved from 8.67 → 10.0: extracted `_expansionSum`, `_transitionBand`, and `_initPhi` helpers to eliminate three Complex Method smells.
 - Code Health of `test/dist.js` improved from 8.76 → 9.09: extracted `assertFitSpec`, `assertParamRecovery` helpers from the `fit` UnitTest method to eliminate a Complex Method (cc=13) and an Excess Number of Function Arguments smell.
+- `ran.mc.HMC`'s class-level documentation and `pathLength` parameter docs now disclose that a fixed `pathLength` can still produce genuine resonance-driven negative lag-1 autocorrelation at certain target correlations, even with the existing per-iteration `stepSize` jitter — confirmed empirically (an investigation swept both target correlation and `pathLength`, finding resonance bands as narrow as 2-3 integer `pathLength` steps that a ±10%-scale jitter cannot reliably escape) — and point affected users to `ran.mc.NUTS`, which adapts trajectory length automatically. No behavior change (#1005).
 
 ## [1.30.0] - 2026-07-09
 
