@@ -23,9 +23,11 @@ finish before any of that code runs.
 ## Decision
 
 Add a second, parallel static resolver to the `MCMC` base class,
-`MCMC._resolveGradientSamplerArgs(logDensity, gradLogDensity, config, initialState, target)`, living
-alongside `_resolveConstructorArgs` (not replacing it). It uses the identical own-property detection
-check (`logDensity` is a non-null object carrying an own `logDensity` key), but extracts and returns
+`MCMC._resolveGradientSamplerArgs({logDensity, gradLogDensity, config, initialState}, target)`, living
+alongside `_resolveConstructorArgs` (not replacing it). Its four constructor arguments are bundled
+into one object parameter (rather than four separate parameters plus `target`) to stay under the
+codebase's max-arguments-per-function limit. It uses the identical own-property detection check
+(`logDensity` is a non-null object carrying an own `logDensity` key), but extracts and returns
 four keys — `{logDensity, gradLogDensity, config, initialState}` — and its deprecation-warning text
 correctly includes `gradLogDensity`: `` new ${target.name}({ logDensity, gradLogDensity, config, initialState }) ``.
 
@@ -33,7 +35,7 @@ correctly includes `gradLogDensity`: `` new ${target.name}({ logDensity, gradLog
 
 ```js
 constructor (logDensity, gradLogDensity, config = {}, initialState = {}) {
-  const resolved = HMC._resolveGradientSamplerArgs(logDensity, gradLogDensity, config, initialState, new.target)
+  const resolved = HMC._resolveGradientSamplerArgs({ logDensity, gradLogDensity, config, initialState }, new.target)
   logDensity = resolved.logDensity
   gradLogDensity = resolved.gradLogDensity
   config = resolved.config

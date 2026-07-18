@@ -101,7 +101,7 @@ export default class HMC extends MCMC {
    * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
    */
   constructor (logDensity, gradLogDensity, config = {}, initialState = {}) {
-    const resolved = HMC._resolveGradientSamplerArgs(logDensity, gradLogDensity, config, initialState, new.target)
+    const resolved = HMC._resolveGradientSamplerArgs({ logDensity, gradLogDensity, config, initialState }, new.target)
     logDensity = resolved.logDensity
     gradLogDensity = resolved.gradLogDensity
     config = resolved.config

@@ -515,8 +515,10 @@ export default class MCMC {
   // three-key extraction has no concept of. Called by the subclass itself, before super(), so
   // gradLogDensity/config/initialState are fully resolved before any subclass constructor logic
   // (which reads config/initialState fields directly) runs. See
-  // decisions/0031-gradient-sampler-options-object-constructor.md.
-  static _resolveGradientSamplerArgs (logDensity, gradLogDensity, config, initialState, target) {
+  // decisions/0031-gradient-sampler-options-object-constructor.md. Takes its four constructor
+  // arguments bundled in one object (rather than four separate parameters) to stay under the
+  // codebase's max-arguments limit.
+  static _resolveGradientSamplerArgs ({ logDensity, gradLogDensity, config, initialState }, target) {
     if (MCMC._isOptionsForm(logDensity)) {
       return {
         logDensity: logDensity.logDensity,

@@ -51,17 +51,12 @@ class UnimplementedMCMC extends MCMC {
   }
 }
 
-// Shared parity check for a migrated sampler's two constructor forms, reused by every sampler's
-// options-object block (RWM, Slice, ...) so the assertion lives in exactly one place.
-// Verifies the options-object form yields an identical sampler to the positional form: same
-// resolved config, same initial position, same serialized internal state (RWM's proposal,
-// Slice's w, ...), and the same first iteration once both are seeded alike.
-// maxLag/arWindow are intentionally left out of `config` by callers so a match can only happen if
-// _resolveConstructorArgs threads the options-form config through _resolveConfig's defaulting the
-// same way the positional form does — a pass-through-only comparison couldn't catch that.
-function assertConstructorFormsMatch (Ctor, logDensity, config, initialState) {
-  const positional = new Ctor(logDensity, config, initialState)
-  const options = new Ctor({ logDensity, config, initialState })
+// Shared assertion body for assertConstructorFormsMatch/assertGradientConstructorFormsMatch --
+// factored out so the two wrappers (one per constructor arity) don't duplicate the actual
+// comparison logic. Verifies the options-object form yields an identical sampler to the
+// positional form: same resolved config, same initial position, same serialized internal state
+// (RWM's proposal, Slice's w, ...), and the same first iteration once both are seeded alike.
+function assertSamplerParity (positional, options) {
   assert.strictEqual(options.dim, positional.dim)
   assert.strictEqual(options.maxLag, positional.maxLag)
   assert.strictEqual(options._arWindow, positional._arWindow)
@@ -72,19 +67,25 @@ function assertConstructorFormsMatch (Ctor, logDensity, config, initialState) {
   assert.deepStrictEqual(options.iterate(), positional.iterate())
 }
 
+// Shared parity check for a migrated sampler's two constructor forms, reused by every sampler's
+// options-object block (RWM, Slice, ...) so the assertion lives in exactly one place.
+// maxLag/arWindow are intentionally left out of `config` by callers so a match can only happen if
+// _resolveConstructorArgs threads the options-form config through _resolveConfig's defaulting the
+// same way the positional form does — a pass-through-only comparison couldn't catch that.
+function assertConstructorFormsMatch (Ctor, logDensity, config, initialState) {
+  const positional = new Ctor(logDensity, config, initialState)
+  const options = new Ctor({ logDensity, config, initialState })
+  assertSamplerParity(positional, options)
+}
+
 // Same purpose as assertConstructorFormsMatch, extended for HMC/MALA/NUTS's extra
-// gradLogDensity argument between logDensity and config.
-function assertGradientConstructorFormsMatch (Ctor, logDensity, gradLogDensity, config, initialState) {
+// gradLogDensity argument between logDensity and config. Takes its four sampler-specific
+// arguments bundled in one object (mirroring MCMC._resolveGradientSamplerArgs's own signature)
+// to stay under the file's max-arguments limit.
+function assertGradientConstructorFormsMatch (Ctor, { logDensity, gradLogDensity, config, initialState }) {
   const positional = new Ctor(logDensity, gradLogDensity, config, initialState)
   const options = new Ctor({ logDensity, gradLogDensity, config, initialState })
-  assert.strictEqual(options.dim, positional.dim)
-  assert.strictEqual(options.maxLag, positional.maxLag)
-  assert.strictEqual(options._arWindow, positional._arWindow)
-  assert.deepStrictEqual(options.x, positional.x)
-  assert.deepStrictEqual(options.state().internal, positional.state().internal)
-  options.seed(11)
-  positional.seed(11)
-  assert.deepStrictEqual(options.iterate(), positional.iterate())
+  assertSamplerParity(positional, options)
 }
 
 // Direct unit tests for the ess() test-utils helper, which reduces a sampler's per-dimension
@@ -1246,7 +1247,9 @@ describe('mc.HMC', () => {
     })
 
     it('should behave identically to the positional form, including config defaults never explicitly passed', () => {
-      assertGradientConstructorFormsMatch(HMC, logDensity1D, gradLogDensity1D, { dim: 1 }, { x: [2] })
+      assertGradientConstructorFormsMatch(HMC, {
+        logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { x: [2] }
+      })
     })
 
     it('should thread non-default stepSize, pathLength, and metric through the options form identically to the positional form', () => {
@@ -1255,9 +1258,12 @@ describe('mc.HMC', () => {
       // fall back to the same default. Non-default values force the comparison to depend on
       // correct field-by-field extraction. See
       // solutions/testing/2026-07-18-0752-constructor-parity-test-default-value-tautology.md
-      assertGradientConstructorFormsMatch(
-        HMC, logDensity2D, gradLogDensity2D, { dim: 2, stepSize: 0.3, pathLength: 7, metric: 'dense' }, { x: [1, 1] }
-      )
+      assertGradientConstructorFormsMatch(HMC, {
+        logDensity: logDensity2D,
+        gradLogDensity: gradLogDensity2D,
+        config: { dim: 2, stepSize: 0.3, pathLength: 7, metric: 'dense' },
+        initialState: { x: [1, 1] }
+      })
     })
 
     it('should default config and initialState when omitted entirely from the options object', () => {
