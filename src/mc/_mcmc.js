@@ -476,6 +476,14 @@ export default class MCMC {
     }
   }
 
+  // Shared by _resolveConstructorArgs and _resolveGradientSamplerArgs: a plain object is never a
+  // valid logDensity value itself (which must be a Function), so an own 'logDensity' property is
+  // an unambiguous options-object signal for both the three-key and gradient-sampler resolvers.
+  static _isOptionsForm (logDensity) {
+    return logDensity !== null && typeof logDensity === 'object' &&
+      Object.prototype.hasOwnProperty.call(logDensity, 'logDensity')
+  }
+
   // Detects the options-object constructor form (a single { logDensity, config, initialState }
   // argument) vs. the legacy positional form. Living here — rather than in each subclass — means
   // every migrated sampler gets both forms for free by forwarding its own
@@ -487,9 +495,7 @@ export default class MCMC {
   // logDensity function through this slot at all (Gibbs always forwards null here) would otherwise
   // get a warning pointing at a replacement call that is wrong or outright broken for them.
   static _resolveConstructorArgs (logDensity, config, initialState, target) {
-    const isOptionsForm = logDensity !== null && typeof logDensity === 'object' &&
-      Object.prototype.hasOwnProperty.call(logDensity, 'logDensity')
-    if (isOptionsForm) {
+    if (MCMC._isOptionsForm(logDensity)) {
       return {
         logDensity: logDensity.logDensity,
         config: logDensity.config || {},
@@ -511,9 +517,7 @@ export default class MCMC {
   // (which reads config/initialState fields directly) runs. See
   // decisions/0031-gradient-sampler-options-object-constructor.md.
   static _resolveGradientSamplerArgs (logDensity, gradLogDensity, config, initialState, target) {
-    const isOptionsForm = logDensity !== null && typeof logDensity === 'object' &&
-      Object.prototype.hasOwnProperty.call(logDensity, 'logDensity')
-    if (isOptionsForm) {
+    if (MCMC._isOptionsForm(logDensity)) {
       return {
         logDensity: logDensity.logDensity,
         gradLogDensity: logDensity.gradLogDensity,

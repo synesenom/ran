@@ -1249,6 +1249,16 @@ describe('mc.HMC', () => {
       assertGradientConstructorFormsMatch(HMC, logDensity1D, gradLogDensity1D, { dim: 1 }, { x: [2] })
     })
 
+    it('should thread non-default stepSize, pathLength, and metric through the options form identically to the positional form', () => {
+      // Regression guard for _resolveGradientSamplerArgs itself: config defaults (the test above)
+      // could pass even if the resolver silently dropped a config field, since both sides would
+      // fall back to the same default. Non-default values force the comparison to depend on
+      // correct field-by-field extraction.
+      assertGradientConstructorFormsMatch(
+        HMC, logDensity2D, gradLogDensity2D, { dim: 2, stepSize: 0.3, pathLength: 7, metric: 'dense' }, { x: [1, 1] }
+      )
+    })
+
     it('should default config and initialState when omitted entirely from the options object', () => {
       const hmc = new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D })
       assert.strictEqual(hmc.dim, 1)
