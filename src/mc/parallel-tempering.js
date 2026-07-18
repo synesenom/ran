@@ -67,6 +67,7 @@ export default class ParallelTempering {
    * @memberof ran.mc.ParallelTempering
    * @param {number|string} value The value of the seed, either a number or a string.
    * @returns {this} Reference to the current sampler.
+   * @ignore
    */
   seed (value) {
     this.r.seed(value)
@@ -81,6 +82,7 @@ export default class ParallelTempering {
    * @memberof ran.mc.ParallelTempering
    * @param {Function=} progress Called with the percentage complete (0-100) after each replica finishes.
    * @param {number=} maxBatches Number of warm-up batches per replica. Default is 100.
+   * @ignore
    */
   warmUp (progress, maxBatches = 100) {
     this._replicas.forEach((replica, i) => {
@@ -99,6 +101,7 @@ export default class ParallelTempering {
    * @param {Function=} progress Called with the integer percentage complete (0-99), once per percent.
    * @param {number=} size Number of samples to collect from the cold (beta = 1) replica. Default is 1000.
    * @returns {number[][]} Array of sampled states from the cold replica.
+   * @ignore
    */
   sample (progress, size = 1000) {
     this._swapAttempts.fill(0)
@@ -129,6 +132,7 @@ export default class ParallelTempering {
    * @memberof ran.mc.ParallelTempering
    * @returns {number[]} Array of length `temperatures.length - 1`, one accepted/attempted fraction per
    * adjacent pair, in ladder order.
+   * @ignore
    */
   swapRate () {
     return this._swapAttempts.map((n, i) => n > 0 ? this._swapAccepts[i] / n : 0)

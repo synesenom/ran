@@ -66,6 +66,7 @@ export default class ARS {
    * @param {number} n Number of samples to generate.
    * @returns {number[]} The generated samples.
    * @throws {Error} If the target density turns out not to be log-concave.
+   * @ignore
    */
   sample (n) {
     const samples = new Array(n)
@@ -104,6 +105,7 @@ export default class ARS {
    * @param {number|string} value The value of the seed, either a number or a string (for the ease
    * of tracking seeds).
    * @returns {this} Reference to the current sampler.
+   * @ignore
    */
   seed (value) {
     this.r.seed(value)
