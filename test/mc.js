@@ -1253,7 +1253,8 @@ describe('mc.HMC', () => {
       // Regression guard for _resolveGradientSamplerArgs itself: config defaults (the test above)
       // could pass even if the resolver silently dropped a config field, since both sides would
       // fall back to the same default. Non-default values force the comparison to depend on
-      // correct field-by-field extraction.
+      // correct field-by-field extraction. See
+      // solutions/testing/2026-07-18-0752-constructor-parity-test-default-value-tautology.md
       assertGradientConstructorFormsMatch(
         HMC, logDensity2D, gradLogDensity2D, { dim: 2, stepSize: 0.3, pathLength: 7, metric: 'dense' }, { x: [1, 1] }
       )
