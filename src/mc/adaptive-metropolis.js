@@ -10,6 +10,19 @@ import Vector from '../la/vector'
 const EPS = 1e-6
 
 /**
+ * @overload
+ * @param {Function} logDensity The logarithm of the (unnormalized) target density.
+ * @param {Object=} config AdaptiveMetropolis configuration (see MCMC base class for shared options).
+ * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
+ */
+/**
+ * @overload
+ * @param {Object} options Sampler options, as a single object.
+ * @param {Function} options.logDensity The logarithm of the (unnormalized) target density.
+ * @param {Object=} options.config AdaptiveMetropolis configuration (see MCMC base class for shared options).
+ * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class).
+ */
+/**
  * Class implementing the full-covariance [adaptive Metropolis]{@link https://projecteuclid.org/euclid.bj/1080222083}
  * algorithm (Haario, Saksman & Tamminen, 2001). Unlike {@link ran.mc.RWM}, which adapts only the per-component
  * (diagonal) proposal scale, this sampler learns the full joint proposal covariance from the chain's own history
@@ -19,12 +32,15 @@ const EPS = 1e-6
  *
  * @class AdaptiveMetropolis
  * @memberof ran.mc
- * @param {Function} logDensity The logarithm of the (unnormalized) target density.
+ * @param {Function|Object} logDensity The logarithm of the (unnormalized) target density (this
+ * positional form is deprecated — see the options-object overload above), or a single options
+ * object carrying {logDensity}, {config}, and {initialState}.
  * @param {Object=} config AdaptiveMetropolis configuration (see MCMC base class for shared options).
  * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
  * @constructor
  */
 // decisions/0022-rwm-joint-adaptive-metropolis.md — anticipates full-covariance AM as a separate sampler
+// decisions/0030-mcmc-options-object-constructor.md — options-object form, detected by the MCMC base class
 export default class AdaptiveMetropolis extends MCMC {
   /**
    * @param {Function} logDensity The logarithm of the (unnormalized) target density.
@@ -138,5 +154,12 @@ export default class AdaptiveMetropolis extends MCMC {
     const cov = new Matrix(this._covS).scale(this._sd / (this._covN - 1)).add(new Matrix(this.dim).scale(EPS))
     const { D, L } = cov.ldl()
     this._A = L.mult(D.f(Math.sqrt))
+  }
+
+  // AdaptiveMetropolis forwards (logDensity, config, initialState) to super() unchanged and has no
+  // extra constructor arguments, so the options-object form already matches its real arity — see
+  // decisions/0030-mcmc-options-object-constructor.md.
+  static get _supportsOptionsConstructor () {
+    return true
   }
 }
