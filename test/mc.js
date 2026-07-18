@@ -51,17 +51,12 @@ class UnimplementedMCMC extends MCMC {
   }
 }
 
-// Shared parity check for a migrated sampler's two constructor forms, reused by every sampler's
-// options-object block (RWM, Slice, ...) so the assertion lives in exactly one place.
-// Verifies the options-object form yields an identical sampler to the positional form: same
-// resolved config, same initial position, same serialized internal state (RWM's proposal,
-// Slice's w, ...), and the same first iteration once both are seeded alike.
-// maxLag/arWindow are intentionally left out of `config` by callers so a match can only happen if
-// _resolveConstructorArgs threads the options-form config through _resolveConfig's defaulting the
-// same way the positional form does — a pass-through-only comparison couldn't catch that.
-function assertConstructorFormsMatch (Ctor, logDensity, config, initialState) {
-  const positional = new Ctor(logDensity, config, initialState)
-  const options = new Ctor({ logDensity, config, initialState })
+// Shared assertion body for assertConstructorFormsMatch/assertGradientConstructorFormsMatch --
+// factored out so the two wrappers (one per constructor arity) don't duplicate the actual
+// comparison logic. Verifies the options-object form yields an identical sampler to the
+// positional form: same resolved config, same initial position, same serialized internal state
+// (RWM's proposal, Slice's w, ...), and the same first iteration once both are seeded alike.
+function assertSamplerParity (positional, options) {
   assert.strictEqual(options.dim, positional.dim)
   assert.strictEqual(options.maxLag, positional.maxLag)
   assert.strictEqual(options._arWindow, positional._arWindow)
@@ -70,6 +65,27 @@ function assertConstructorFormsMatch (Ctor, logDensity, config, initialState) {
   options.seed(11)
   positional.seed(11)
   assert.deepStrictEqual(options.iterate(), positional.iterate())
+}
+
+// Shared parity check for a migrated sampler's two constructor forms, reused by every sampler's
+// options-object block (RWM, Slice, ...) so the assertion lives in exactly one place.
+// maxLag/arWindow are intentionally left out of `config` by callers so a match can only happen if
+// _resolveConstructorArgs threads the options-form config through _resolveConfig's defaulting the
+// same way the positional form does — a pass-through-only comparison couldn't catch that.
+function assertConstructorFormsMatch (Ctor, logDensity, config, initialState) {
+  const positional = new Ctor(logDensity, config, initialState)
+  const options = new Ctor({ logDensity, config, initialState })
+  assertSamplerParity(positional, options)
+}
+
+// Same purpose as assertConstructorFormsMatch, extended for HMC/MALA/NUTS's extra
+// gradLogDensity argument between logDensity and config. Takes its four sampler-specific
+// arguments bundled in one object (mirroring MCMC._resolveGradientSamplerArgs's own signature)
+// to stay under the file's max-arguments limit.
+function assertGradientConstructorFormsMatch (Ctor, { logDensity, gradLogDensity, config, initialState }) {
+  const positional = new Ctor(logDensity, gradLogDensity, config, initialState)
+  const options = new Ctor({ logDensity, gradLogDensity, config, initialState })
+  assertSamplerParity(positional, options)
 }
 
 // Direct unit tests for the ess() test-utils helper, which reduces a sampler's per-dimension
@@ -516,12 +532,13 @@ describe('mc.RWM', () => {
     })
 
     it('should not emit a deprecation warning for a sampler not yet migrated to the options form', () => {
-      // HMC takes an extra gradLogDensity positional argument between logDensity and config,
-      // which the plain { logDensity, config, initialState } options shape doesn't cover, so it
-      // has not opted in yet (see MCMC._supportsOptionsConstructor, default false, and
-      // decisions/0030-mcmc-options-object-constructor.md). Gibbs was the previous example here
-      // but migrated to its own conditionals-keyed options form in #965.
-      assert.doesNotThrow(() => new HMC(() => 0, () => [0], { dim: 1 }))
+      // MALA (like HMC and NUTS) takes an extra gradLogDensity positional argument between
+      // logDensity and config, which the plain { logDensity, config, initialState } options shape
+      // doesn't cover, so it has not opted in yet (see MCMC._supportsOptionsConstructor, default
+      // false, and decisions/0030-mcmc-options-object-constructor.md). Gibbs and HMC were the
+      // previous examples here but migrated to their own options forms in #965 and #966
+      // respectively (HMC via MCMC._resolveGradientSamplerArgs, decisions/0031-...md).
+      assert.doesNotThrow(() => new MALA(() => 0, () => [0], { dim: 1 }))
       assert.strictEqual(warnCalls.length, 0)
     })
   })
@@ -1301,6 +1318,94 @@ describe('mc.HMC', () => {
         () => new HMC(logDensity2D, gradLogDensity2D, { dim: 2, metric: 'dense' }, { internal: { stepSize: 0.1, pathLength: 10, metric: { type: 'dense', L: [[1, 0]], D: [1, 1] } } }),
         /metric/i
       )
+    })
+  })
+
+  describe('options-object constructor form', () => {
+    let originalWarn
+    let warnCalls
+
+    beforeEach(() => {
+      originalWarn = console.warn
+      warnCalls = []
+      console.warn = (...args) => warnCalls.push(args)
+    })
+
+    afterEach(() => {
+      console.warn = originalWarn
+    })
+
+    it('should behave identically to the positional form, including config defaults never explicitly passed', () => {
+      assertGradientConstructorFormsMatch(HMC, {
+        logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { x: [2] }
+      })
+    })
+
+    it('should thread non-default stepSize, pathLength, and metric through the options form identically to the positional form', () => {
+      // Regression guard for _resolveGradientSamplerArgs itself: config defaults (the test above)
+      // could pass even if the resolver silently dropped a config field, since both sides would
+      // fall back to the same default. Non-default values force the comparison to depend on
+      // correct field-by-field extraction. See
+      // solutions/testing/2026-07-18-0752-constructor-parity-test-default-value-tautology.md
+      assertGradientConstructorFormsMatch(HMC, {
+        logDensity: logDensity2D,
+        gradLogDensity: gradLogDensity2D,
+        config: { dim: 2, stepSize: 0.3, pathLength: 7, metric: 'dense' },
+        initialState: { x: [1, 1] }
+      })
+    })
+
+    it('should default config and initialState when omitted entirely from the options object', () => {
+      const hmc = new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D })
+      assert.strictEqual(hmc.dim, 1)
+      assert.strictEqual(hmc.maxLag, 100)
+    })
+
+    it('should resolve config when initialState is omitted from the options object', () => {
+      const hmc = new HMC({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2 } })
+      assert.strictEqual(hmc.dim, 2)
+    })
+
+    it('should resolve initialState when config is omitted from the options object', () => {
+      const hmc = new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, initialState: { x: [7] } })
+      assert.deepStrictEqual(hmc.x, [7])
+    })
+
+    it('should validate gradLogDensity the same way as the positional form', () => {
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: null, config: { dim: 1 } }),
+        /gradLogDensity must be a function/
+      )
+    })
+
+    it('should validate config the same way as the positional form', () => {
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1, stepSize: 0 } }),
+        /stepSize must be a positive number/
+      )
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1, pathLength: 0 } }),
+        /pathLength must be a positive integer/
+      )
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1, metric: 'bogus' } }),
+        /metric must be/
+      )
+    })
+
+    it('should not emit a deprecation warning for the options-object form', () => {
+      assert.doesNotThrow(() => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D }))
+      assert.strictEqual(warnCalls.length, 0)
+    })
+
+    it('should emit exactly one deprecation warning per instantiation for the positional form', () => {
+      assert.doesNotThrow(() => new HMC(logDensity1D, gradLogDensity1D))
+      assert.strictEqual(warnCalls.length, 1)
+      assert.match(warnCalls[0][0], /\[ranjs] positional MCMC constructor arguments are deprecated/)
+      assert.match(warnCalls[0][0], /new HMC\({ logDensity, gradLogDensity, config, initialState }\)/)
+
+      assert.doesNotThrow(() => new HMC(logDensity1D, gradLogDensity1D))
+      assert.strictEqual(warnCalls.length, 2)
     })
   })
 
