@@ -2935,4 +2935,114 @@ describe('mc.runChains', () => {
       assert.isBelow(rhat[0][rhat[0].length - 1], 1.1)
     })
   })
+
+  describe('new (Sampler, samplerOptions, runOptions) form', () => {
+    it('should match manually constructed AdaptiveMetropolis chains using non-default config', () => {
+      // Non-default maxLag/arWindow (not just dim) so a resolver bug that drops a
+      // config field would be caught instead of masked by every field already
+      // being at its default — see
+      // solutions/testing/2026-07-18-0752-constructor-parity-test-default-value-tautology.md
+      const samplerOptions = { logDensity, config: { dim: 1, maxLag: 20, arWindow: 50 } }
+      const { samples } = runChains(
+        AdaptiveMetropolis,
+        samplerOptions,
+        { chains: 3, seeds: [10, 20, 30], warmUpBatches: 2, sampleSize: 15 }
+      )
+
+      const manual = [10, 20, 30].map(seed => {
+        const am = new AdaptiveMetropolis(samplerOptions).seed(seed)
+        am.warmUp(null, 2)
+        return am.sample(null, 15)
+      })
+
+      assert.deepEqual(samples, manual)
+    })
+
+    it('should match manually constructed Gibbs chains driven by the sampler\'s own seeded rng', () => {
+      const rho = 0.5
+      const sigma = 1
+      // Consumes rng.next() (the sampler's own seeded generator) rather than
+      // constructing an independent distribution, so reproducibility actually
+      // exercises seed() instead of trivially passing regardless of it — see
+      // solutions/testing/2026-07-15-2015-gibbs-conditionals-fresh-normal-seed-noop.md
+      const conditionals = [
+        (x, rng) => rho * x[1] + sigma * rng.next(),
+        (x, rng) => rho * x[0] + sigma * rng.next()
+      ]
+      const samplerOptions = { conditionals, config: { dim: 2 } }
+
+      const { samples } = runChains(
+        Gibbs,
+        samplerOptions,
+        { chains: 2, seeds: [1, 2], warmUpBatches: 2, sampleSize: 10 }
+      )
+
+      const manual = [1, 2].map(seed => {
+        const gibbs = new Gibbs(samplerOptions).seed(seed)
+        gibbs.warmUp(null, 2)
+        return gibbs.sample(null, 10)
+      })
+
+      assert.deepEqual(samples, manual)
+    })
+
+    it('should match manually constructed HMC chains using a non-default stepSize (gradLogDensity carried through samplerOptions)', () => {
+      const gradLogDensity = x => [-x[0]]
+      const samplerOptions = { logDensity, gradLogDensity, config: { dim: 1, stepSize: 0.05 } }
+      const { samples } = runChains(
+        HMC,
+        samplerOptions,
+        { chains: 2, warmUpBatches: 2, sampleSize: 12 }
+      )
+
+      const manual = [1, 2].map(seed => {
+        const hmc = new HMC(samplerOptions).seed(seed)
+        hmc.warmUp(null, 2)
+        return hmc.sample(null, 12)
+      })
+
+      assert.deepEqual(samples, manual)
+    })
+
+    it('should fail fast with MCMC\'s own "abstract" error when the abstract MCMC class itself is passed as Sampler', () => {
+      // _isSamplerClass finds _iter on MCMC.prototype itself (MCMC._iter is the base hook every
+      // subclass overrides), so MCMC is detected as a sampler class rather than misrouted to the
+      // legacy logDensity path — construction then fails fast with MCMC's own guard instead of a
+      // confusing downstream error. See decisions/0033-generalized-runchains-sampler-driver.md.
+      assert.throws(
+        () => runChains(MCMC, { logDensity, config: { dim: 1 } }, { warmUpBatches: 1, sampleSize: 5 }),
+        /MCMC is abstract and cannot be instantiated directly/
+      )
+    })
+  })
+
+  describe('legacy (logDensity, config, options) form deprecation', () => {
+    let originalWarn
+    let warnCalls
+
+    beforeEach(() => {
+      originalWarn = console.warn
+      warnCalls = []
+      console.warn = (...args) => warnCalls.push(args)
+    })
+
+    afterEach(() => {
+      console.warn = originalWarn
+    })
+
+    it('should not emit a deprecation warning for the new (Sampler, samplerOptions, runOptions) form', () => {
+      runChains(RWM, { logDensity, config: { dim: 1 } }, { warmUpBatches: 1, sampleSize: 5 })
+      assert.strictEqual(warnCalls.length, 0)
+    })
+
+    it('should emit exactly one deprecation warning per call for the legacy form', () => {
+      runChains(logDensity, { dim: 1 }, { warmUpBatches: 1, sampleSize: 5 })
+      assert.strictEqual(warnCalls.length, 1)
+      assert.match(warnCalls[0][0], /\[ranjs] positional runChains\(/)
+      assert.match(warnCalls[0][0], /runChains\(Sampler, samplerOptions, runOptions\)/)
+
+      runChains(logDensity, { dim: 1 }, { warmUpBatches: 1, sampleSize: 5 })
+      assert.strictEqual(warnCalls.length, 2)
+    })
+  })
 })
