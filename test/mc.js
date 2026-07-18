@@ -1561,6 +1561,29 @@ describe('mc.HMC', () => {
 
         assert(meanRatio > 1.1, `dense/diagonal mean ESS ratio (${meanRatio}) over seeds ${seeds} should exceed 1.1`)
       })
+
+      it('should produce identical ESS-balance behavior whether the dense-metric sampler is constructed via the options-object or positional form', () => {
+        // The generic assertGradientConstructorFormsMatch check above only compares a single
+        // post-construction iterate() call, not the metric-adaptation pipeline (covariance
+        // accumulation across warm-up batches, periodic LDL refresh) that the ESS-balance test
+        // above exercises -- so parity is reconfirmed here after a full warm-up + sampling run.
+        const rho = 0.99
+        const c = 1 - rho * rho
+        const lnp = x => -0.5 * (x[0] * x[0] - 2 * rho * x[0] * x[1] + x[1] * x[1]) / c
+        const grad = x => [-(x[0] - rho * x[1]) / c, -(x[1] - rho * x[0]) / c]
+
+        const positional = new HMC(lnp, grad, { dim: 2, metric: 'dense' }).seed(7)
+        const options = new HMC({ logDensity: lnp, gradLogDensity: grad, config: { dim: 2, metric: 'dense' } }).seed(7)
+
+        const rawIterations = 6000;
+        [positional, options].forEach(hmc => {
+          hmc.warmUp(null, 20)
+          hmc.sample(null, 0)
+          for (let i = 0; i < rawIterations; i++) hmc.iterate()
+        })
+
+        assert.deepStrictEqual(essPerDimension(options, rawIterations), essPerDimension(positional, rawIterations))
+      })
     })
   })
 
