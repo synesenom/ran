@@ -45,8 +45,9 @@ const DELTA_MAX = 1000
  * plus `stepSize` (ε, the leapfrog step size, default 0.1).
  * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class).
  * @constructor
- * @throws {Error} If gradLogDensity is not a function, or a stepSize (config.stepSize or a
- * resumed initialState.internal.stepSize) is provided but is not a positive finite number.
+ * @throws {Error} If options is not a plain object, or gradLogDensity is not a function, or a
+ * stepSize (config.stepSize or a resumed initialState.internal.stepSize) is provided but is not
+ * a positive finite number.
  */
 // decisions/0020-mcmc-design.md — gradLogDensity is a NUTS-specific constructor argument, not
 // threaded through the shared MCMC base constructor
@@ -59,6 +60,12 @@ const DELTA_MAX = 1000
 // (#972), so it ships options-object-only: no positional form, no deprecation warning, and no
 // call to _resolveGradientSamplerArgs (that resolver always warns on its positional branch,
 // which would be wrong here since NUTS never had one).
+// decisions/0032-mala-options-object-only-constructor.md — MALA's sibling migration (#970)
+// establishes a guard-then-destructure pattern for options-object-only gradient samplers: a
+// _validateOptions check runs before destructuring, so misuse (null, no args, or the old
+// positional shape) throws a clear NUTS-specific error instead of a generic destructuring
+// TypeError or an incidental "gradLogDensity must be a function" from the wrong root cause.
+// NUTS follows the same pattern for consistency with its now-migrated sibling.
 export default class NUTS extends MCMC {
   /**
    * @param {Object} options Sampler options, as a single object.
@@ -69,7 +76,10 @@ export default class NUTS extends MCMC {
    * plus `stepSize` (ε, the leapfrog step size, default 0.1).
    * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class).
    */
-  constructor ({ logDensity, gradLogDensity, config = {}, initialState = {} } = {}) {
+  constructor (options) {
+    NUTS._validateOptions(options)
+    const { logDensity, gradLogDensity, config = {}, initialState = {} } = options
+
     super(logDensity, config, initialState)
 
     NUTS._validateGradLogDensity(gradLogDensity)
@@ -281,6 +291,23 @@ export default class NUTS extends MCMC {
   }
 
   // ─── PRIVATE STATIC ───
+
+  // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
+  // Destructuring options directly in the constructor's parameter list would throw a generic,
+  // engine-dependent TypeError for null (default parameters only cover undefined) or the old
+  // positional shape, instead of this clear, NUTS-specific message.
+  // See solutions/correctness/2026-07-18-1147-mala-null-guard-destructured-parameter-gap.md
+  static _validateOptions (options) {
+    if (!NUTS._isPlainObject(options)) {
+      throw Error('NUTS: constructor requires an options object: new NUTS({ logDensity, gradLogDensity, config, initialState })')
+    }
+  }
+
+  // Split from _validateOptions so the compound check is a single return expression rather than
+  // a branch condition, which is what the Complex Conditional smell flags.
+  static _isPlainObject (options) {
+    return options !== undefined && options !== null && typeof options === 'object' && !Array.isArray(options)
+  }
 
   // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
   static _validateGradLogDensity (gradLogDensity) {
