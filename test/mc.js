@@ -532,11 +532,13 @@ describe('mc.RWM', () => {
     })
 
     it('should not emit a deprecation warning for a sampler not yet migrated to the options form', () => {
-      // Gibbs always forwards `null` (not a genuine logDensity function) to the MCMC base
-      // constructor and has no options-object support yet; warning here would point users at
-      // `new Gibbs({ logDensity, config, initialState })`, which Gibbs's own array-typed first
-      // argument would then reject outright. See MCMC._supportsOptionsConstructor (default false).
-      assert.doesNotThrow(() => new Gibbs([() => 0], { dim: 1 }))
+      // MALA (like HMC and NUTS) takes an extra gradLogDensity positional argument between
+      // logDensity and config, which the plain { logDensity, config, initialState } options shape
+      // doesn't cover, so it has not opted in yet (see MCMC._supportsOptionsConstructor, default
+      // false, and decisions/0030-mcmc-options-object-constructor.md). Gibbs and HMC were the
+      // previous examples here but migrated to their own options forms in #965 and #966
+      // respectively (HMC via MCMC._resolveGradientSamplerArgs, decisions/0031-...md).
+      assert.doesNotThrow(() => new MALA(() => 0, () => [0], { dim: 1 }))
       assert.strictEqual(warnCalls.length, 0)
     })
   })
@@ -1081,6 +1083,93 @@ describe('mc.Gibbs', () => {
       const samples = gibbs.sample(null, 10)
       assert.strictEqual(samples.length, 10)
       assert(samples.every(s => s.length === 2 && s.every(Number.isFinite)))
+    })
+  })
+
+  // Gibbs's identifying key is `conditionals`, not `logDensity`, so it cannot reuse
+  // assertConstructorFormsMatch (hardcoded to the logDensity key); assertions are inlined instead.
+  describe('options-object constructor form', () => {
+    let originalWarn
+    let warnCalls
+
+    beforeEach(() => {
+      originalWarn = console.warn
+      warnCalls = []
+      console.warn = (...args) => warnCalls.push(args)
+    })
+
+    afterEach(() => {
+      console.warn = originalWarn
+    })
+
+    it('should behave identically to the positional form, including config defaults never explicitly passed', () => {
+      // Deterministic conditionals (not the module-scope `conditionals`, whose fresh
+      // `new Normal(...)` per call is a documented seed()-noop pitfall — see
+      // solutions/testing/2026-07-15-2015-gibbs-conditionals-fresh-normal-seed-noop.md) so the
+      // seeded iterate() comparison below is actually meaningful.
+      const det = [x => x[1] + 1, x => x[0] + 1]
+      const positional = new Gibbs(det, { dim: 2 }, { x: [0, 0] })
+      const options = new Gibbs({ conditionals: det, config: { dim: 2 }, initialState: { x: [0, 0] } })
+      assert.strictEqual(options.dim, positional.dim)
+      assert.strictEqual(options.maxLag, positional.maxLag)
+      assert.strictEqual(options._arWindow, positional._arWindow)
+      assert.deepStrictEqual(options.x, positional.x)
+      assert.deepStrictEqual(options.state().internal, positional.state().internal)
+      options.seed(11)
+      positional.seed(11)
+      assert.deepStrictEqual(options.iterate(), positional.iterate())
+    })
+
+    it('should default config and initialState when omitted entirely from the options object', () => {
+      const gibbs = new Gibbs({ conditionals })
+      assert.strictEqual(gibbs.dim, 2)
+      assert.strictEqual(gibbs.maxLag, 100)
+      assert.strictEqual(gibbs.x.length, 2)
+      assert(gibbs.x.every(Number.isFinite))
+    })
+
+    it('should not misdetect a positional conditionals array carrying a stray "conditionals" own-property as the options-object form', () => {
+      // Arrays can hold arbitrary own-properties in JS; a positional conditionals array that
+      // happens to have a `.conditionals` property must still resolve as the positional form,
+      // not be mistaken for { conditionals, config, initialState }.
+      const det = [x => x[1] + 1, x => x[0] + 1]
+      det.conditionals = [x => 999]
+      const gibbs = new Gibbs(det, { dim: 2 }, { x: [0, 0] })
+      assert.strictEqual(gibbs.dim, 2)
+      assert.deepEqual(gibbs.iterate().x, [1, 2])
+    })
+
+    it('should resolve config when initialState is omitted from the options object', () => {
+      const gibbs = new Gibbs({ conditionals, config: { dim: 2 } })
+      assert.strictEqual(gibbs.dim, 2)
+    })
+
+    it('should resolve initialState when config is omitted from the options object', () => {
+      const gibbs = new Gibbs({ conditionals, initialState: { x: [1, 1] } })
+      assert.deepStrictEqual(gibbs.x, [1, 1])
+    })
+
+    it('should validate config.dim against conditionals.length the same way as the positional form', () => {
+      assert.throws(() => new Gibbs({ conditionals, config: { dim: 3 } }), /config.dim must match conditionals.length/)
+    })
+
+    it('should throw when conditionals is empty in the options-object form', () => {
+      assert.throws(() => new Gibbs({ conditionals: [] }), /conditionals must be a non-empty array/)
+    })
+
+    it('should not emit a deprecation warning for the options-object form', () => {
+      assert.doesNotThrow(() => new Gibbs({ conditionals }))
+      assert.strictEqual(warnCalls.length, 0)
+    })
+
+    it('should emit exactly one deprecation warning per instantiation for the positional form', () => {
+      assert.doesNotThrow(() => new Gibbs(conditionals, { dim: 2 }))
+      assert.strictEqual(warnCalls.length, 1)
+      assert.match(warnCalls[0][0], /\[ranjs] positional MCMC constructor arguments are deprecated/)
+      assert.match(warnCalls[0][0], /new Gibbs\(\{ conditionals, config, initialState \}\)/)
+
+      assert.doesNotThrow(() => new Gibbs(conditionals, { dim: 2 }))
+      assert.strictEqual(warnCalls.length, 2)
     })
   })
 })
