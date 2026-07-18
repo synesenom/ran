@@ -1607,7 +1607,7 @@ describe('mc.HMC', () => {
           for (let i = 0; i < rawIterations; i++) hmc.iterate()
         })
 
-        assert.deepStrictEqual(essPerDimension(options, rawIterations), essPerDimension(positional, rawIterations))
+        assert.deepStrictEqual(options.ess(), positional.ess())
       })
     })
   })
