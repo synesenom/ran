@@ -70,7 +70,7 @@ const EPS = 1e-6
  * @throws {Error} If gradLogDensity is not a function, or a stepSize (config.stepSize or a
  * resumed initialState.internal.stepSize) is provided but is not a positive finite number, or a
  * pathLength (config.pathLength or a resumed initialState.internal.pathLength) is provided but
- * is not a positive integer or exceeds `HMC._MAX_PATH_LENGTH` (10000), or metric is provided but
+ * is not a positive integer or exceeds `HMC._MAX_PATH_LENGTH` (1024), or metric is provided but
  * is not `'diag'`/`'dense'`, or `'dense'` is
  * requested with a dimension exceeding the dense-metric cap, or a resumed
  * initialState.internal.metric does not match the resolved metric type/shape.
@@ -334,10 +334,17 @@ export default class HMC extends MCMC {
     return 1000
   }
 
-  // Same order-of-magnitude cap as MCMC._MAX_DIM/_MAX_LAG/_MAX_AR_WINDOW, applied here to bound
-  // per-iteration compute cost rather than allocation footprint. See #947.
+  // pathLength bounds per-iteration leapfrog steps -- compute cost (calls to the caller-supplied,
+  // arbitrary-cost gradLogDensity), not allocation footprint like _MAX_DIM/_MAX_LAG/_MAX_AR_WINDOW,
+  // which bound predictable bytes-per-unit typed-array allocations. 1024 = 2^10 matches the
+  // sibling NUTS sampler's own MAX_TREE_DEPTH ceiling (src/mc/nuts.js), itself the Stan/PyMC/NumPyro
+  // default -- real trajectories U-turn well before this. HMC's leapfrog step is at least as
+  // expensive as NUTS's (it additionally applies the adapted mass-matrix metric via
+  // _applyInverseMetric, absent from NUTS's identity-mass leapfrog), so borrowing NUTS's ceiling is
+  // conservative. Neal (2011) gives no canonical fixed-L value -- this is the closest literature
+  // anchor available. See #989.
   static get _MAX_PATH_LENGTH () {
-    return 10000
+    return 1024
   }
 
   // Matrix.ldl() is O(dim^3); refreshing the dense metric every iteration (as the diagonal case
