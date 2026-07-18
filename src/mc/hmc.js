@@ -30,7 +30,8 @@ const EPS = 1e-6
  * @overload
  * @param {Function} logDensity The logarithm of the (unnormalized) target density.
  * @param {Function} gradLogDensity The gradient of logDensity: maps a state (number[]) to its
- * gradient (number[]) of the same dimension.
+ * gradient (number[]) of the same dimension. The array passed in may be reused and mutated
+ * across subsequent leapfrog steps; read it synchronously and do not retain the reference.
  * @param {Object=} config HMC configuration (see MCMC base class for shared options), plus
  * `stepSize`, `pathLength`, and `metric` (see the class JSDoc below).
  * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
@@ -59,7 +60,8 @@ const EPS = 1e-6
  * positional form is deprecated — see the options-object overload above), or a single options
  * object carrying {logDensity}, {gradLogDensity}, {config}, and {initialState}.
  * @param {Function} gradLogDensity The gradient of logDensity: maps a state (number[]) to its
- * gradient (number[]) of the same dimension.
+ * gradient (number[]) of the same dimension. The array passed in may be reused and mutated
+ * across subsequent leapfrog steps; read it synchronously and do not retain the reference.
  * @param {Object=} config HMC configuration (see MCMC base class for shared options), plus
  * `stepSize` (ε, the leapfrog step size, default 0.1), `pathLength` (L, the number of leapfrog
  * steps per iteration, default 10), and `metric` (the mass matrix structure adapted during
@@ -94,7 +96,8 @@ export default class HMC extends MCMC {
    * positional form is deprecated — see the options-object overload above), or a single options
    * object carrying {logDensity}, {gradLogDensity}, {config}, and {initialState}.
    * @param {Function} gradLogDensity The gradient of logDensity: maps a state (number[]) to its
-   * gradient (number[]) of the same dimension.
+   * gradient (number[]) of the same dimension. The array passed in may be reused and mutated
+   * across subsequent leapfrog steps; read it synchronously and do not retain the reference.
    * @param {Object=} config HMC configuration (see MCMC base class for shared options), plus
    * `stepSize` (ε, the leapfrog step size, default 0.1) and `pathLength` (L, the number of leapfrog
    * steps per iteration, default 10).
