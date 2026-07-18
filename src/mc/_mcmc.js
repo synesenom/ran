@@ -164,15 +164,36 @@ export default class MCMC {
   }
 
   /**
-   * Computes the effective sample size for each dimension using Geyer's positive-part estimator:
-   * ESS = N / (1 + 2 * sum_k rho_k), where the sum over lags k = 1, 2, ... stops at the first
-   * lag whose autocorrelation is not positive. Built directly on the same accumulators as ac()
-   * and statistics() — no additional accumulator state. If lag 1 itself is already non-positive,
-   * the sum is 0 and ess() equals N exactly: a legitimate output of this truncation rule when the
-   * sampler genuinely produces non-positive lag-1 autocorrelation (e.g. HMC's fixed pathLength
-   * resonating with the target's geometry, see hmc.js), not necessarily a sign of a broken
-   * sampler. See #974: verified against a brute-force autocorrelation over the raw iterate()
-   * sequence, which confirmed the online accumulator is exact and the anti-correlation is genuine.
+   * Computes the effective sample size for each dimension using Geyer's initial positive
+   * monotone sequence estimator (IPSM; Geyer 1992, Vehtari et al. 2021 — the estimator used by
+   * Stan and ArviZ): Gamma_m = rho[2m] + rho[2m+1] pairs consecutive lags starting at lag 0 (so
+   * the first pair always includes rho[0] = 1), clamped to be no larger than Gamma_{m-1} (the
+   * true autocovariance sequence is convex, so a non-increasing sequence of pair sums has
+   * strictly lower variance than summing raw lags). The sum stops at the first pair whose
+   * clamped value is not positive; ESS = N / (-1 + 2 * sum_m Gamma_m), or ESS = N (tau = 1) if
+   * even the first pair is non-positive (sum = 0) -- that -1 + 2*0 = -1 would otherwise give a
+   * nonsensical negative tau. Anchoring the pairing at lag 0 means rho[1] alone can never
+   * prematurely truncate the sum: Gamma_0 = 1 + rho[1] is non-positive only when rho[1] <= -1, an
+   * extreme case, unlike the old single-lag rule which underestimated tau (overestimated ESS)
+   * whenever an otherwise well-mixing chain had one merely-negative early lag. Built directly on
+   * the same accumulators as ac() and statistics() — no additional accumulator state. If the
+   * first pair itself is already non-positive, ESS = N exactly: a legitimate output of this
+   * truncation rule when the sampler genuinely produces strong non-positive autocorrelation at
+   * that pair (e.g. HMC's fixed pathLength resonating with the target's geometry, see hmc.js),
+   * not necessarily a sign of a broken sampler. See #974: verified against a brute-force
+   * autocorrelation over the raw iterate() sequence, which confirmed the online accumulator is
+   * exact and the anti-correlation is genuine.
+   *
+   * A fully stuck (zero-variance) chain is a distinct case from the above: ac()'s divisor is the
+   * population variance, so a chain that never moves produces 0/0 = NaN at every lag including
+   * lag 0. That NaN is not a signal of non-positive autocorrelation to saturate on — it means the
+   * chain contributed zero effectively-independent samples, so ess() reports 1 rather than N (the
+   * n === 0 case, no observations at all yet, is unaffected and still reports 0).
+   *
+   * solutions/testing/2026-07-18-1641-ess-geyer-ipsm-pairing-offset-self-consistent-wrong-tests.md
+   * — the pairing must start at lag 0 (anchored by rho[0] = 1), not lag 1; an off-by-one-lag
+   * version of this method passed every hand-derived test because the tests were derived by hand
+   * using the same wrong pairing.
    *
    * @method ess
    * @memberof ran.mc.MCMC
@@ -181,14 +202,23 @@ export default class MCMC {
   ess () {
     const n = this._acN
     return this.ac().map(rho => {
+      // rho[0] is NaN only when the population variance is 0 (0/0) or n === 0 (ac()'s r >= n
+      // rule) -- distinguish the two since only the former is the degenerate-chain case.
+      if (isNaN(rho[0])) return n === 0 ? 0 : 1
       let sum = 0
-      for (let k = 1; k < rho.length; k++) {
-        // NaN (insufficient observations at this lag) also stops the sum, same as a
-        // non-positive rho: neither contributes a valid positive-part term.
-        if (!(rho[k] > 0)) break
-        sum += rho[k]
+      let prevGamma = Infinity
+      for (let k = 0; k + 1 < rho.length; k += 2) {
+        let gamma = rho[k] + rho[k + 1]
+        // NaN (insufficient observations for this pair) also stops the sum, same as a
+        // non-positive pair: neither contributes a valid positive-part term.
+        gamma = Math.min(gamma, prevGamma)
+        if (!(gamma > 0)) break
+        sum += gamma
+        prevGamma = gamma
       }
-      return n / (1 + 2 * sum)
+      // sum === 0 means even the first pair (which always includes rho[0] = 1) was non-positive;
+      // -1 + 2*0 = -1 would give a nonsensical negative tau, so saturate to N (tau = 1) instead.
+      return n / (sum === 0 ? 1 : -1 + 2 * sum)
     })
   }
 

@@ -201,8 +201,8 @@ export function chiTest (values, model, c) {
  * Reduces a sampler's per-dimension ess() (see ran.mc.MCMC#ess) to a single scalar: the minimum
  * across dimensions -- the slowest-mixing dimension bounds how many effectively independent draws
  * the whole chain produced. A ratio of exactly 1.0 against the raw iteration count
- * (samplingRate * sample count) is a legitimate output of Geyer's truncation rule when lag-1
- * autocorrelation is already non-positive (e.g. HMC's fixed pathLength on a strongly correlated
+ * (samplingRate * sample count) is a legitimate output of Geyer's IPSM truncation rule when the
+ * first pair of lags is already non-positive (e.g. HMC's fixed pathLength on a strongly correlated
  * target, see #974) -- it is not on its own a signal that the comparison target needs retuning.
  *
  * @param {Object} sampler An MCMC instance on which `sample()` has just been called.

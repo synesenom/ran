@@ -380,14 +380,20 @@ describe('mc.MCMC', () => {
       const mc = new TestMCMC([1, 2, 3, 4, 5].map(v => ({ x: [v], accepted: true })))
       for (let i = 0; i < 5; i++) mc.iterate()
       const essVal = mc.ess()
-      // exact rational: rho[1] = 0.5, rho[2] = -1/6 (< 0, stops the sum), so
-      // ess = n / (1 + 2*rho[1]) = 5 / (1 + 1.0) = 2.5
+      // exact rational: rho[0] = 1, rho[1] = 0.5, rho[2] = -1/6, rho[3] = -1, rho[4] = -2.
+      // Geyer's IPSM pairs lags starting at lag 0: Gamma_0 = rho[0]+rho[1] = 1.5 (> 0, kept,
+      // prevGamma = 1.5); Gamma_1 = rho[2]+rho[3] = -7/6, clamped to min(-7/6, 1.5) = -7/6
+      // (<= 0, stops the sum), so ess = n / (-1 + 2*Gamma_0) = 5 / (-1 + 3) = 5 / 2 = 2.5
       assert.closeTo(essVal[0], 2.5, 1e-12)
     })
 
     it('should compute an independent ess() per dimension for a known 2D sequence', () => {
       // dim 0 replays the [1,2,3,4,5] case above (ess = 2.5); dim 1 alternates sign, giving
-      // rho[1] < 0 (immediate truncation) and thus ess = n = 5 exactly.
+      // rho[1] ~= -1.0833 (< -1, this codebase's biased finite-sample ac() estimator is not
+      // bounded to [-1,1] -- decisions/0023-mcmc-accumulator-mechanics.md), so
+      // Gamma_0 = rho[0]+rho[1] ~= -0.0833 (<= 0, immediate truncation) and thus ess = n = 5
+      // exactly -- even anchoring the pair at the always-1 rho[0] can't save an ess = n
+      // saturation when the anti-correlation is this extreme.
       const seq = [[1, 1], [2, -1], [3, 1], [4, -1], [5, 1]].map(x => ({ x, accepted: true }))
       const mc = new TestMCMC(seq, { dim: 2 })
       for (let i = 0; i < 5; i++) mc.iterate()
@@ -395,6 +401,37 @@ describe('mc.MCMC', () => {
       assert.strictEqual(essVal.length, 2)
       assert.closeTo(essVal[0], 2.5, 1e-12)
       assert.closeTo(essVal[1], 5, 1e-12)
+    })
+
+    it('should not truncate prematurely on a single noisy negative lag-1 in an otherwise well-mixing chain', () => {
+      // exact rational (sequence [4, 0, 4, 3, 0, 0], n=6): rho[0] = 1, rho[1] = -173/625,
+      // rho[2] = 23/125, rho[3] = 23/125, rho[4] = -121/125, rho[5] = -121/125. The single-lag
+      // rule sees rho[1] < 0 and stops immediately, reporting ess = n = 6 -- as if the chain
+      // were perfectly independent, despite rho[2] and rho[3] showing real positive dependence
+      // right after. Geyer's IPSM anchors the first pair at rho[0] = 1, so
+      // Gamma_0 = rho[0]+rho[1] = 452/625 (> 0, kept -- a single mildly negative rho[1] can
+      // never flip this pair negative on its own); Gamma_1 = rho[2]+rho[3] = 230/625, clamped
+      // to min(230/625, 452/625) = 230/625 (> 0, also kept); Gamma_2 = rho[4]+rho[5] =
+      // -1210/625, clamped to min(-1210/625, 230/625) = -1210/625 (<= 0, stops the sum), giving
+      // tau = -1 + 2*(452/625 + 230/625) = 739/625 and ess = 6 / (739/625) = 3750/739 ~= 5.0744
+      // -- materially lower than the old rule's inflated ess = 6, confirming the noisy lag-1 no
+      // longer causes premature truncation to the maximum possible value.
+      const mc = new TestMCMC([4, 0, 4, 3, 0, 0].map(v => ({ x: [v], accepted: true })))
+      for (let i = 0; i < 6; i++) mc.iterate()
+      const essVal = mc.ess()
+      assert.closeTo(essVal[0], 3750 / 739, 1e-12)
+      assert(essVal[0] < 6, `ess (${essVal[0]}) should be below the old rule's inflated n=6`)
+    })
+
+    it('should return 1, not the total iteration count, for a fully stuck (zero-variance) chain', () => {
+      // A chain that never moves has population variance 0, so ac()'s lag-1 entry is 0/0 =
+      // NaN -- distinct from the n === 0 "no observations yet" case above, which must still
+      // return 0. A stuck chain produced zero effectively-independent samples, so ess() must
+      // not report ess === n (the old bug: NaN broke the loop immediately, giving ess = n/1 = n).
+      const mc = new TestMCMC(Array.from({ length: 10 }, () => ({ x: [5], accepted: true })))
+      for (let i = 0; i < 10; i++) mc.iterate()
+      const essVal = mc.ess()
+      assert.strictEqual(essVal[0], 1)
     })
 
     it('should stay close to N for a genuinely independent (seeded) sequence', () => {
@@ -1433,18 +1470,6 @@ describe('mc.HMC', () => {
   })
 
   describe('mass matrix adaptation', () => {
-    // Per-dimension ESS, mirroring test-utils.js's ess() truncation rule but returning one value
-    // per dimension instead of collapsing to the minimum -- needed to compare dimensions against
-    // each other rather than just against a different sampler.
-    const essPerDimension = (sampler, totalIterations) => sampler.ac().map(rho => {
-      let tau = 1
-      for (let k = 1; k < rho.length; k++) {
-        if (Number.isNaN(rho[k]) || rho[k] < 0) break
-        tau += 2 * rho[k]
-      }
-      return totalIterations / tau
-    })
-
     describe('diagonal metric (default)', () => {
       // Independent 3D Normal, sigma = [1, 100, 0.1] -- a 1000x scale range. 0.1 (not the issue's
       // example 0.01) keeps the *unadapted* baseline within the leapfrog stability margin
@@ -1464,15 +1489,15 @@ describe('mc.HMC', () => {
         const adaptedRatios = seeds.map(seed => {
           const adapted = new HMC(lnp, grad, { dim: 3 }, { x: [0, 0, 0] }).seed(seed)
           adapted.warmUp(null, warmUpBatches)
-          const adaptedSamples = adapted.sample(null, sampleSize)
-          const adaptedEss = essPerDimension(adapted, adapted.samplingRate * adaptedSamples.length)
+          adapted.sample(null, sampleSize)
+          const adaptedEss = adapted.ess()
           return Math.max(...adaptedEss) / Math.min(...adaptedEss)
         })
         // No warmUp(): _adjust never runs, so the metric/step size stay at their identity defaults.
         const unadaptedRatios = seeds.map(seed => {
           const unadapted = new HMC(lnp, grad, { dim: 3 }, { x: [0, 0, 0] }).seed(seed)
-          const unadaptedSamples = unadapted.sample(null, sampleSize)
-          const unadaptedEss = essPerDimension(unadapted, unadapted.samplingRate * unadaptedSamples.length)
+          unadapted.sample(null, sampleSize)
+          const unadaptedEss = unadapted.ess()
           return Math.max(...unadaptedEss) / Math.min(...unadaptedEss)
         })
         const meanAdaptedRatio = adaptedRatios.reduce((a, b) => a + b, 0) / adaptedRatios.length
@@ -1534,9 +1559,9 @@ describe('mc.HMC', () => {
         const grad = x => [-(x[0] - rho * x[1]) / c, -(x[1] - rho * x[0]) / c]
 
         const warmUpBatches = 20
-        // Dense and diagonal auto-tune different samplingRate (thinning), so comparing
-        // ess(sampler, samplingRate*sampleSize.length) would compare different raw-iteration
-        // budgets -- fixing a raw count via sample(null, 0) + manual iterate() avoids that confound.
+        // Dense and diagonal auto-tune different samplingRate (thinning), so calling sample()
+        // and reading its thinned sample count would compare different raw-iteration budgets --
+        // fixing a raw count via sample(null, 0) + manual iterate() avoids that confound.
         const rawIterations = 6000
 
         const seeds = [1, 2, 3]
@@ -1545,13 +1570,13 @@ describe('mc.HMC', () => {
           dense.warmUp(null, warmUpBatches)
           dense.sample(null, 0)
           for (let i = 0; i < rawIterations; i++) dense.iterate()
-          const denseEss = essPerDimension(dense, rawIterations)
+          const denseEss = dense.ess()
 
           const diag = new HMC(lnp, grad, { dim: 2 }).seed(seed)
           diag.warmUp(null, warmUpBatches)
           diag.sample(null, 0)
           for (let i = 0; i < rawIterations; i++) diag.iterate()
-          const diagEss = essPerDimension(diag, rawIterations)
+          const diagEss = diag.ess()
 
           const meanDense = denseEss.reduce((a, b) => a + b, 0) / denseEss.length
           const meanDiag = diagEss.reduce((a, b) => a + b, 0) / diagEss.length
@@ -1582,7 +1607,7 @@ describe('mc.HMC', () => {
           for (let i = 0; i < rawIterations; i++) hmc.iterate()
         })
 
-        assert.deepStrictEqual(essPerDimension(options, rawIterations), essPerDimension(positional, rawIterations))
+        assert.deepStrictEqual(options.ess(), positional.ess())
       })
     })
   })
