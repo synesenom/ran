@@ -17,7 +17,11 @@ const DELTA = 0.65
 // pathLength stays fixed, so a fixed trajectory length (pathLength * stepSize) can still land
 // near a half-period of the target's natural oscillation at certain correlations, producing
 // genuine negative lag-1 autocorrelation that ess()'s Geyer truncation correctly reports (not a
-// bug in the online accumulator -- see #974).
+// bug in the online accumulator -- see #974). #1005's empirical sweep confirmed the resonance
+// band can be as narrow as 2-3 integer pathLength steps, i.e. narrower than a +-10% jitter on
+// pathLength would reliably escape -- see the class JSDoc below for the resulting user-facing
+// guidance (try a different pathLength, or use NUTS) rather than a pathLength jitter here. See
+// solutions/algorithm/2026-07-18-1657-hmc-pathlength-jitter-band-width-check.md
 const JITTER_LO = 0.9
 const JITTER_RANGE = 0.2
 // Regularization added to the estimated metric (variance or covariance) before it is used,
@@ -54,6 +58,17 @@ const EPS = 1e-6
  * acceptance probability, and jittered multiplicatively each iteration to avoid periodicity
  * artifacts.
  *
+ * **Known limitation**: only `stepSize` is jittered — `pathLength` (the number of leapfrog
+ * steps) stays fixed for the sampler's entire lifetime. A fixed trajectory length
+ * (`pathLength * stepSize`) can still land near a half-period of the target's natural
+ * oscillation at certain target correlations, producing genuine negative low-lag autocorrelation
+ * that [ess()]{@link ran.mc.MCMC#ess} and [ac()]{@link ran.mc.MCMC#ac} faithfully report — this
+ * is a legitimate property of the chain, not a bug in those estimators. If you observe this
+ * (e.g. `ac()` reporting negative autocorrelation at low lags, or `ess()` reporting an effective
+ * sample size well above or below the raw sample count), try a different `pathLength`, or switch
+ * to [NUTS]{@link ran.mc.NUTS}, which adapts trajectory length automatically each iteration
+ * (Hoffman & Gelman 2014) and removes the need to hand-tune `pathLength`.
+ *
  * @class HMC
  * @memberof ran.mc
  * @param {Function|Object} logDensity The logarithm of the (unnormalized) target density (this
@@ -64,9 +79,11 @@ const EPS = 1e-6
  * across subsequent leapfrog steps; read it synchronously and do not retain the reference.
  * @param {Object=} config HMC configuration (see MCMC base class for shared options), plus
  * `stepSize` (ε, the leapfrog step size, default 0.1), `pathLength` (L, the number of leapfrog
- * steps per iteration, default 10), and `metric` (the mass matrix structure adapted during
- * warm-up: `'diag'` (default) estimates a per-dimension variance; `'dense'` estimates the full
- * covariance matrix, refactored through Matrix's LDL decomposition).
+ * steps per iteration, default 10 — fixed for the sampler's lifetime and not jittered like
+ * `stepSize`; see the class JSDoc's "Known limitation" note for the resonance risk this can
+ * produce), and `metric` (the mass matrix structure adapted during warm-up: `'diag'` (default)
+ * estimates a per-dimension variance; `'dense'` estimates the full covariance matrix, refactored
+ * through Matrix's LDL decomposition).
  * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
  * @constructor
  * @throws {Error} If gradLogDensity is not a function, or a stepSize (config.stepSize or a
@@ -100,7 +117,8 @@ export default class HMC extends MCMC {
    * across subsequent leapfrog steps; read it synchronously and do not retain the reference.
    * @param {Object=} config HMC configuration (see MCMC base class for shared options), plus
    * `stepSize` (ε, the leapfrog step size, default 0.1) and `pathLength` (L, the number of leapfrog
-   * steps per iteration, default 10).
+   * steps per iteration, default 10 — fixed for the sampler's lifetime; see the class JSDoc's
+   * "Known limitation" note for the resonance risk this can produce).
    * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
    */
   constructor (logDensity, gradLogDensity, config = {}, initialState = {}) {

@@ -19,6 +19,24 @@ describe('docs/desc-parser', () => {
     assert.strictEqual(html, "<p>Unlike <a href='ran.mc.RWM' target='_blank'>RWM</a></p>")
   })
 
+  it('converts every {@link} pair in a paragraph, not just the first', () => {
+    // Regression test for the assembleLinks() double-increment skip (#997):
+    // a paragraph with 3+ alternating (text, link) pairs must have all of
+    // them converted, not just the first.
+    const html = DescParser(entry(paragraph([
+      text('See [A]'),
+      jsdocLink('ran.dist.A'),
+      text(', [B]'),
+      jsdocLink('ran.dist.B'),
+      text(' and [C]'),
+      jsdocLink('ran.dist.C')
+    ])))
+    assert.strictEqual(
+      html,
+      "<p>See <a href='ran.dist.A' target='_blank'>A</a>, <a href='ran.dist.B' target='_blank'>B</a> and <a href='ran.dist.C' target='_blank'>C</a></p>"
+    )
+  })
+
   it('throws a localized error instead of crashing on a bare {@link}', () => {
     assert.throws(
       () => DescParser(entry(paragraph([
