@@ -21,8 +21,15 @@ tags: [mcmc, hmc, resonance, periodicity, jitter, design-escalation, nuts]
 `pathLength` (leapfrog steps per iteration) is fixed for the sampler's entire lifetime. Issue
 #1005 asked whether this asymmetry was a real gap needing a code fix (extend jitter to
 `pathLength` too) or whether the existing stepSize-only jitter was already sufficient, given
-users could observe genuine negative lag-1 autocorrelation — and `ess()` saturating to exactly
-the sample size — at certain target correlations (previously confirmed non-buggy in #974).
+users could observe genuine negative lag-1 autocorrelation at certain target correlations
+(previously confirmed non-buggy in #974). At the time this investigation started, `ess()` used a
+naive single-lag truncation rule under which such a lag-1 value could saturate `ess()` to exactly
+the sample size; issue #975 (merged into `main` concurrently with this investigation, see
+"Related Solutions") replaced that rule with Geyer's IPSM estimator, under which the same
+resonance instead tends to *inflate* the reported `ess()` (see "Root Cause" for measured values)
+rather than saturate it — the underlying resonance is unchanged, but its specific `ess()` symptom
+had to be re-verified against the corrected estimator before this investigation's JSDoc wording
+was finalized.
 
 ## Root Cause
 
@@ -30,7 +37,10 @@ An empirical sweep of a bivariate correlated-Normal target across both `rho` and
 (run against the live, unmodified `HMC` implementation, with `stepSize` jitter active throughout
 — it always is in production) showed resonance bands in lag-1 autocorrelation as narrow as 2-3
 integer `pathLength` values: at fixed rho=0.9, pathLength=8 → ac≈-0.35, pathLength=10 → ac≈-0.07,
-pathLength=12 → ac≈+0.41, pathLength=15 → ac≈+0.90.
+pathLength=12 → ac≈+0.41, pathLength=15 → ac≈+0.90. Re-run after #975's Geyer IPSM fix landed,
+the same pathLength=8 configuration (ac≈-0.35) reports `ess()` in the 6500-10500 range against a
+raw sample count around 2000 -- a several-times *inflation*, not the saturation-to-exactly-N the
+old naive-truncation `ess()` would have shown for a comparably negative lag-1 value.
 
 The "obvious" fix — reusing the existing ±10% jitter constants for `pathLength` too — was checked
 against this data before being written as code, and found ineffective: for the default
@@ -86,6 +96,22 @@ case where a reviewer panel's stated confidence didn't track the strength of its
   sampler's bound without independently checking it fit HMC's own risk class. Same general
   pattern as this issue: a parameter borrowed/reused from an existing convention (there, a
   numeric bound; here, a jitter range) needs its own justification, not just precedent.
+- `solutions/testing/2026-07-18-1641-ess-geyer-ipsm-pairing-offset-self-consistent-wrong-tests.md`
+  — merged into `main` while this investigation was in flight; replaced `ess()`'s naive
+  single-lag truncation with a Geyer IPSM estimator. Directly invalidated this investigation's
+  first-draft JSDoc wording ("`ess()` saturating to exactly the sample size"), which had to be
+  re-verified against the corrected estimator and rewritten before merging (see "Problem" and
+  "Root Cause" above). Concrete case of a cross-branch race: a doc claim about a *different*
+  method's behavior can go stale from a concurrent, unrelated PR, not just from later edits to
+  the same file — re-verify empirically after any `main` sync, not just after your own edits.
+  Separately, `_mcmc.js`'s own post-#975 `ess()` JSDoc still cites "HMC's fixed pathLength
+  resonating with the target's geometry" as the example for its new "first pair non-positive,
+  ESS = N exactly" case — but that case requires lag-1 autocorrelation `<= -1`, and this
+  investigation's own swept data never observed HMC resonance anywhere near that extreme (worst
+  observed was ≈-0.4). That citation may itself now be a stale carryover from the pre-#975
+  wording rather than an example that fits the corrected formula's actual threshold; flagged as a
+  candidate follow-up rather than fixed here, since `src/mc/_mcmc.js` is outside this
+  investigation's approved scope and was independently reviewed and merged by #975.
 
 ## Key Insight
 

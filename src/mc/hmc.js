@@ -60,10 +60,11 @@ const EPS = 1e-6
  * **Known limitation**: only `stepSize` is jittered — `pathLength` (the number of leapfrog
  * steps) stays fixed for the sampler's entire lifetime. A fixed trajectory length
  * (`pathLength * stepSize`) can still land near a half-period of the target's natural
- * oscillation at certain target correlations, producing genuine negative lag-1 autocorrelation
+ * oscillation at certain target correlations, producing genuine negative low-lag autocorrelation
  * that [ess()]{@link ran.mc.MCMC#ess} and [ac()]{@link ran.mc.MCMC#ac} faithfully report — this
  * is a legitimate property of the chain, not a bug in those estimators. If you observe this
- * (e.g. `ess()` saturating to exactly the sample size), try a different `pathLength`, or switch
+ * (e.g. `ac()` reporting negative autocorrelation at low lags, or `ess()` reporting an effective
+ * sample size well above or below the raw sample count), try a different `pathLength`, or switch
  * to [NUTS]{@link ran.mc.NUTS}, which adapts trajectory length automatically each iteration
  * (Hoffman & Gelman 2014) and removes the need to hand-tune `pathLength`.
  *
