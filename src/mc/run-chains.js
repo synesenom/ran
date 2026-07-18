@@ -88,7 +88,8 @@ export default function runChains (Sampler, samplerOptions = {}, runOptions = {}
 // logDensity has no .prototype at all; a function-expression logDensity has a .prototype but
 // no _iter on it; any MCMC subclass (even the abstract MCMC class itself, which fails fast
 // with its own "is abstract" error on construction) finds _iter via its prototype chain.
-// See decisions/0033-generalized-runchains-sampler-driver.md.
+// decisions/0033-generalized-runchains-sampler-driver.md — structural _iter check chosen over
+// instanceof MCMC to match the codebase's existing detection idiom.
 function _isSamplerClass (arg) {
   return typeof arg === 'function' && arg.prototype !== undefined && typeof arg.prototype._iter === 'function'
 }

@@ -2961,15 +2961,33 @@ describe('mc.runChains', () => {
       assert.deepEqual(samples, manual)
     })
 
-    it('should return the requested chain count and sample size for HMC (gradLogDensity carried through samplerOptions)', () => {
+    it('should match manually constructed HMC chains using a non-default stepSize (gradLogDensity carried through samplerOptions)', () => {
       const gradLogDensity = x => [-x[0]]
+      const samplerOptions = { logDensity, gradLogDensity, config: { dim: 1, stepSize: 0.05 } }
       const { samples } = runChains(
         HMC,
-        { logDensity, gradLogDensity, config: { dim: 1 } },
+        samplerOptions,
         { chains: 2, warmUpBatches: 2, sampleSize: 12 }
       )
-      assert.strictEqual(samples.length, 2)
-      samples.forEach(chain => assert.strictEqual(chain.length, 12))
+
+      const manual = [1, 2].map(seed => {
+        const hmc = new HMC(samplerOptions).seed(seed)
+        hmc.warmUp(null, 2)
+        return hmc.sample(null, 12)
+      })
+
+      assert.deepEqual(samples, manual)
+    })
+
+    it('should fail fast with MCMC\'s own "abstract" error when the abstract MCMC class itself is passed as Sampler', () => {
+      // _isSamplerClass finds _iter on MCMC.prototype itself (MCMC._iter is the base hook every
+      // subclass overrides), so MCMC is detected as a sampler class rather than misrouted to the
+      // legacy logDensity path — construction then fails fast with MCMC's own guard instead of a
+      // confusing downstream error. See decisions/0033-generalized-runchains-sampler-driver.md.
+      assert.throws(
+        () => runChains(MCMC, { logDensity, config: { dim: 1 } }, { warmUpBatches: 1, sampleSize: 5 }),
+        /MCMC is abstract and cannot be instantiated directly/
+      )
     })
   })
 
