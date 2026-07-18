@@ -177,10 +177,12 @@ export default class MCMC {
    * extreme case, unlike the old single-lag rule which underestimated tau (overestimated ESS)
    * whenever an otherwise well-mixing chain had one merely-negative early lag. Built directly on
    * the same accumulators as ac() and statistics() — no additional accumulator state. If the
-   * first pair itself is already non-positive, ESS = N exactly: a legitimate output of this
-   * truncation rule when the sampler genuinely produces strong non-positive autocorrelation at
-   * that pair (e.g. HMC's fixed pathLength resonating with the target's geometry, see hmc.js),
-   * not necessarily a sign of a broken sampler. See #974: verified against a brute-force
+   * first pair itself is already non-positive (rho[1] <= -1, an extreme case), ESS = N exactly: a
+   * legitimate output of this truncation rule when the sampler genuinely produces that strong an
+   * anti-correlation, not necessarily a sign of a broken sampler. A milder resonance -- e.g. HMC's
+   * fixed pathLength resonating with the target's geometry, see hmc.js -- typically lands well
+   * short of that rho[1] <= -1 boundary and instead inflates or deflates ESS relative to the raw
+   * sample count without saturating to N exactly. See #974: verified against a brute-force
    * autocorrelation over the raw iterate() sequence, which confirmed the online accumulator is
    * exact and the anti-correlation is genuine.
    *
