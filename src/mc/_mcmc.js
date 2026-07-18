@@ -504,6 +504,29 @@ export default class MCMC {
     return { logDensity, config, initialState }
   }
 
+  // Parallel resolver for gradient-based samplers (HMC, MALA, NUTS) whose real constructor takes
+  // an extra gradLogDensity argument between logDensity and config that _resolveConstructorArgs's
+  // three-key extraction has no concept of. Called by the subclass itself, before super(), so
+  // gradLogDensity/config/initialState are fully resolved before any subclass constructor logic
+  // (which reads config/initialState fields directly) runs. See
+  // decisions/0031-gradient-sampler-options-object-constructor.md.
+  static _resolveGradientSamplerArgs (logDensity, gradLogDensity, config, initialState, target) {
+    const isOptionsForm = logDensity !== null && typeof logDensity === 'object' &&
+      Object.prototype.hasOwnProperty.call(logDensity, 'logDensity')
+    if (isOptionsForm) {
+      return {
+        logDensity: logDensity.logDensity,
+        gradLogDensity: logDensity.gradLogDensity,
+        config: logDensity.config || {},
+        initialState: logDensity.initialState || {}
+      }
+    }
+    // Fired once per instantiation (not once per process), matching _resolveConstructorArgs, so
+    // every positional-form call site stays visible across a session.
+    console.warn(`[ranjs] positional MCMC constructor arguments are deprecated and will be removed in v1.32.0; use new ${target.name}({ logDensity, gradLogDensity, config, initialState }) instead.`)
+    return { logDensity, gradLogDensity, config, initialState }
+  }
+
   // Kept out of the constructor to avoid a Complex Method smell there.
   static _resolveConfig (config) {
     return {

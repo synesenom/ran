@@ -27,6 +27,23 @@ const JITTER_RANGE = 0.2
 const EPS = 1e-6
 
 /**
+ * @overload
+ * @param {Function} logDensity The logarithm of the (unnormalized) target density.
+ * @param {Function} gradLogDensity The gradient of logDensity: maps a state (number[]) to its
+ * gradient (number[]) of the same dimension.
+ * @param {Object=} config HMC configuration (see MCMC base class for shared options), plus
+ * `stepSize`, `pathLength`, and `metric` (see the class JSDoc below).
+ * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
+ */
+/**
+ * @overload
+ * @param {Object} options Sampler options, as a single object.
+ * @param {Function} options.logDensity The logarithm of the (unnormalized) target density.
+ * @param {Function} options.gradLogDensity The gradient of logDensity (see the positional form).
+ * @param {Object=} options.config HMC configuration (see the positional form).
+ * @param {Object=} options.initialState Initial state of the sampler (see the positional form).
+ */
+/**
  * Class implementing the [Hamiltonian Monte Carlo]{@link https://en.wikipedia.org/wiki/Hamiltonian_Monte_Carlo}
  * (HMC) sampler. Uses gradient information and a leapfrog integrator to simulate Hamiltonian
  * dynamics, proposing distant moves along the resulting trajectory and accepting/rejecting via
@@ -38,7 +55,9 @@ const EPS = 1e-6
  *
  * @class HMC
  * @memberof ran.mc
- * @param {Function} logDensity The logarithm of the (unnormalized) target density.
+ * @param {Function|Object} logDensity The logarithm of the (unnormalized) target density (this
+ * positional form is deprecated — see the options-object overload above), or a single options
+ * object carrying {logDensity}, {gradLogDensity}, {config}, and {initialState}.
  * @param {Function} gradLogDensity The gradient of logDensity: maps a state (number[]) to its
  * gradient (number[]) of the same dimension.
  * @param {Object=} config HMC configuration (see MCMC base class for shared options), plus
@@ -64,12 +83,16 @@ const EPS = 1e-6
 // accumulator, EPS*I regularization, diagonal default, dense opt-in via hand-rolled LDL
 // forward/back substitution, batched dense refresh, dual averaging left uncoupled from metric
 // changes
+// decisions/0031-gradient-sampler-options-object-constructor.md — options-object form for HMC's
+// extra gradLogDensity argument, resolved via MCMC._resolveGradientSamplerArgs before super()
 export default class HMC extends MCMC {
   // Missed by #944's manual sweep of RWM/AdaptiveMetropolis/Gibbs constructors; added here
   // for correct tsc-generated param types. See
   // solutions/correctness/2026-07-16-1602-hmc-jsdoc-sibling-sweep-gap.md
   /**
-   * @param {Function} logDensity The logarithm of the (unnormalized) target density.
+   * @param {Function|Object} logDensity The logarithm of the (unnormalized) target density (this
+   * positional form is deprecated — see the options-object overload above), or a single options
+   * object carrying {logDensity}, {gradLogDensity}, {config}, and {initialState}.
    * @param {Function} gradLogDensity The gradient of logDensity: maps a state (number[]) to its
    * gradient (number[]) of the same dimension.
    * @param {Object=} config HMC configuration (see MCMC base class for shared options), plus
@@ -78,6 +101,11 @@ export default class HMC extends MCMC {
    * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
    */
   constructor (logDensity, gradLogDensity, config = {}, initialState = {}) {
+    const resolved = HMC._resolveGradientSamplerArgs(logDensity, gradLogDensity, config, initialState, new.target)
+    logDensity = resolved.logDensity
+    gradLogDensity = resolved.gradLogDensity
+    config = resolved.config
+    initialState = resolved.initialState
     super(logDensity, config, initialState)
 
     HMC._validateGradLogDensity(gradLogDensity)

@@ -72,6 +72,21 @@ function assertConstructorFormsMatch (Ctor, logDensity, config, initialState) {
   assert.deepStrictEqual(options.iterate(), positional.iterate())
 }
 
+// Same purpose as assertConstructorFormsMatch, extended for HMC/MALA/NUTS's extra
+// gradLogDensity argument between logDensity and config.
+function assertGradientConstructorFormsMatch (Ctor, logDensity, gradLogDensity, config, initialState) {
+  const positional = new Ctor(logDensity, gradLogDensity, config, initialState)
+  const options = new Ctor({ logDensity, gradLogDensity, config, initialState })
+  assert.strictEqual(options.dim, positional.dim)
+  assert.strictEqual(options.maxLag, positional.maxLag)
+  assert.strictEqual(options._arWindow, positional._arWindow)
+  assert.deepStrictEqual(options.x, positional.x)
+  assert.deepStrictEqual(options.state().internal, positional.state().internal)
+  options.seed(11)
+  positional.seed(11)
+  assert.deepStrictEqual(options.iterate(), positional.iterate())
+}
+
 // Direct unit tests for the ess() test-utils helper, which reduces a sampler's per-dimension
 // ess() (ran.mc.MCMC#ess) to a single scalar via Math.min -- the ESS truncation arithmetic
 // itself is covered directly against MCMC#ess() in the 'mc.MCMC .ess()' block above; these
@@ -1213,6 +1228,78 @@ describe('mc.HMC', () => {
         () => new HMC(logDensity2D, gradLogDensity2D, { dim: 2, metric: 'dense' }, { internal: { stepSize: 0.1, pathLength: 10, metric: { type: 'dense', L: [[1, 0]], D: [1, 1] } } }),
         /metric/i
       )
+    })
+  })
+
+  describe('options-object constructor form', () => {
+    let originalWarn
+    let warnCalls
+
+    beforeEach(() => {
+      originalWarn = console.warn
+      warnCalls = []
+      console.warn = (...args) => warnCalls.push(args)
+    })
+
+    afterEach(() => {
+      console.warn = originalWarn
+    })
+
+    it('should behave identically to the positional form, including config defaults never explicitly passed', () => {
+      assertGradientConstructorFormsMatch(HMC, logDensity1D, gradLogDensity1D, { dim: 1 }, { x: [2] })
+    })
+
+    it('should default config and initialState when omitted entirely from the options object', () => {
+      const hmc = new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D })
+      assert.strictEqual(hmc.dim, 1)
+      assert.strictEqual(hmc.maxLag, 100)
+    })
+
+    it('should resolve config when initialState is omitted from the options object', () => {
+      const hmc = new HMC({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2 } })
+      assert.strictEqual(hmc.dim, 2)
+    })
+
+    it('should resolve initialState when config is omitted from the options object', () => {
+      const hmc = new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, initialState: { x: [7] } })
+      assert.deepStrictEqual(hmc.x, [7])
+    })
+
+    it('should validate gradLogDensity the same way as the positional form', () => {
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: null, config: { dim: 1 } }),
+        /gradLogDensity must be a function/
+      )
+    })
+
+    it('should validate config the same way as the positional form', () => {
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1, stepSize: 0 } }),
+        /stepSize must be a positive number/
+      )
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1, pathLength: 0 } }),
+        /pathLength must be a positive integer/
+      )
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1, metric: 'bogus' } }),
+        /metric must be/
+      )
+    })
+
+    it('should not emit a deprecation warning for the options-object form', () => {
+      assert.doesNotThrow(() => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D }))
+      assert.strictEqual(warnCalls.length, 0)
+    })
+
+    it('should emit exactly one deprecation warning per instantiation for the positional form', () => {
+      assert.doesNotThrow(() => new HMC(logDensity1D, gradLogDensity1D))
+      assert.strictEqual(warnCalls.length, 1)
+      assert.match(warnCalls[0][0], /\[ranjs] positional MCMC constructor arguments are deprecated/)
+      assert.match(warnCalls[0][0], /new HMC\({ logDensity, gradLogDensity, config, initialState }\)/)
+
+      assert.doesNotThrow(() => new HMC(logDensity1D, gradLogDensity1D))
+      assert.strictEqual(warnCalls.length, 2)
     })
   })
 
