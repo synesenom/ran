@@ -24,7 +24,7 @@ const EPS = 1e-6
  */
 /**
  * Class implementing the full-covariance [adaptive Metropolis]{@link https://projecteuclid.org/euclid.bj/1080222083}
- * algorithm (Haario, Saksman & Tamminen, 2001). Unlike {@link ran.mc.RWM}, which adapts only the per-component
+ * algorithm (Haario, Saksman & Tamminen, 2001). Unlike [RWM]{@link ran.mc.RWM}, which adapts only the per-component
  * (diagonal) proposal scale, this sampler learns the full joint proposal covariance from the chain's own history
  * during warm-up: `Sigma_proposal = (2.38^2 / dim) * Cov(x) + epsilon * I`. The covariance is refactorized via
  * `Matrix.ldl()` after every warm-up iteration and frozen once `sample()` is called, since `_adjust` is only ever
