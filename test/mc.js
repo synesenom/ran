@@ -1347,6 +1347,27 @@ describe('mc.HMC', () => {
     })
   })
 
+  describe('gradLogDensity array-reuse contract', () => {
+    it('should pass the same array object to gradLogDensity on every leapfrog step of one .iterate() call, mutated in place', () => {
+      // Pins #948's array-reuse optimization (issue #996) as observed through the public
+      // gradLogDensity callback: a caller that retains the raw reference instead of reading it
+      // synchronously would observe later steps' values.
+      const refs = []
+      const snapshots = []
+      const gradLogDensity = x => {
+        refs.push(x)
+        snapshots.push(x.slice())
+        return [-x[0]]
+      }
+      const hmc = new HMC(logDensity1D, gradLogDensity, { dim: 1, pathLength: 3 }, { x: [1] })
+      hmc.iterate()
+
+      refs.forEach(ref => assert.strictEqual(ref, refs[0]))
+      assert.notDeepEqual(refs[0], snapshots[0])
+      assert.deepEqual(refs[0], snapshots[snapshots.length - 1])
+    })
+  })
+
   describe('options-object constructor form', () => {
     let originalWarn
     let warnCalls
