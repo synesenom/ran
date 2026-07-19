@@ -478,10 +478,10 @@ export default class HMC extends MCMC {
   // Leapfrog integrator (Neal 2011, Algorithm 1): half-step momentum, full-step position,
   // half-step momentum, repeated for pathLength steps. Uses the simple unmerged form (two half
   // steps per leapfrog step) rather than the trailing/leading half-step merge optimization, for
-  // a direct, easily-verified match to the textbook algorithm. Deliberately NOT the shared
-  // src/mc/_leapfrog.js used by NUTS: that module hardcodes an identity mass matrix, while this
-  // one applies the adapted metric's M^-1 to the position update -- combining the dense metric
-  // with NUTS is explicitly out of scope (issue #826).
+  // a direct, easily-verified match to the textbook algorithm. Inline (not a shared module)
+  // because it applies the adapted metric's M^-1 to the position update, tightly coupled to this
+  // sampler's _applyInverseMetric -- NUTS has its own inline metric-aware leapfrog for the same
+  // reason (decisions/0034-nuts-euclidean-metric-adaptation.md).
   _leapfrog (x, r, eps) {
     const xCur = x.slice()
     const rCur = r.slice()
