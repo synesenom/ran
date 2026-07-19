@@ -571,7 +571,10 @@ export default class MCMC {
   // counters, dual-averaging state, covariance/mass-matrix accumulators) — a malformed field, if
   // silently accepted, corrupts the adaptation recursion (e.g. a non-finite pAccepted/daT) rather
   // than failing loudly, the same class of gap solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md
-  // fixed for stepSize/pathLength. decisions/0034-mcmc-exact-stream-reproducible-resume.md
+  // fixed for stepSize/pathLength. decisions/0034-mcmc-exact-stream-reproducible-resume.md — these
+  // validators were themselves added only after an independent /review pass caught their absence
+  // in the initial implementation, despite the ADR above stating the rule in the same commit; see
+  // solutions/correctness/2026-07-19-1400-mcmc-resume-accumulator-validation-gap.md.
   // `label` is the complete phrase preceding "must be" (e.g. 'RWM: resumed base'), matching the
   // subclass-specific `_validateOptions` error convention already used throughout this codebase.
   static _validateFiniteScalar (value, label) {
