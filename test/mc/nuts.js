@@ -508,6 +508,84 @@ describe('mc.NUTS', () => {
     })
   })
 
+  describe('sampler-health diagnostics', () => {
+    it('should expose boolean divergent and maxDepthHit fields on each iterate() result', () => {
+      const nuts = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } }).seed(0)
+      const i = nuts.iterate()
+      assert.strictEqual(typeof i.divergent, 'boolean')
+      assert.strictEqual(typeof i.maxDepthHit, 'boolean')
+      // Concrete values, not just types: a benign default-stepSize standard-Normal transition is
+      // neither divergent nor depth-saturated, so a bug that hard-codes either flag is caught here.
+      assert.strictEqual(i.divergent, false)
+      assert.strictEqual(i.maxDepthHit, false)
+    })
+
+    it('should report zero divergent transitions and zero max-depth hits for a well-behaved standard-Normal target', () => {
+      // A tuned standard Normal is the most benign NUTS target: no energy divergences and a
+      // trajectory that U-turns well before MAX_TREE_DEPTH. Swept over the fixed seed set so a
+      // regression must break reproducibly, not carry a flake rate (see _helpers.js).
+      SEEDS.forEach(seed => {
+        const nuts = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } }).seed(seed)
+        nuts.warmUp(null, 3)
+        nuts.sample(null, 200)
+        assert.strictEqual(nuts.divergenceCount(), 0, `seed ${seed}: expected no divergences`)
+        assert.strictEqual(nuts.maxDepthCount(), 0, `seed ${seed}: expected no max-depth hits`)
+      })
+    })
+
+    it('should report zero counts before any sampling (fresh construction)', () => {
+      const nuts = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } }).seed(0)
+      assert.strictEqual(nuts.divergenceCount(), 0)
+      assert.strictEqual(nuts.maxDepthCount(), 0)
+    })
+
+    it('should report divergent transitions for an aggressively oversized step size', () => {
+      // An untuned, deliberately huge fixed step size on a standard Normal makes every leapfrog leaf
+      // overshoot so far that its Hamiltonian drifts past DELTA_MAX, tripping the energy-divergence
+      // guard. No warm-up, so dual averaging never tunes the step down. Divergence must be counted
+      // distinctly from the U-turn stops a healthy chain produces.
+      SEEDS.forEach(seed => {
+        const nuts = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1, stepSize: 25 } }).seed(seed)
+        nuts.sample(null, 200)
+        // Bound well above 1: at stepSize 25 essentially every one of the 200 transitions diverges
+        // (measured 199–200 across the seed set). A plain > 0 would still pass if the counter
+        // fired once and then stopped incrementing, so require the diagnostic to fire on the vast
+        // majority of transitions, not merely at least one.
+        assert(nuts.divergenceCount() > 150, `seed ${seed}: expected divergenceCount > 150, got ${nuts.divergenceCount()}`)
+      })
+    })
+
+    it('should report max-depth hits for an aggressively undersized step size', () => {
+      // A tiny fixed step size means many transitions need more than 2^MAX_TREE_DEPTH leapfrog steps
+      // before the trajectory can U-turn, so the doubling loop saturates at MAX_TREE_DEPTH on a large
+      // fraction of the 30 transitions (measured 14–24 across the seed set — not literally every one,
+      // since some trajectories still U-turn within the cap). No divergences arise (tiny steps keep
+      // the energy error negligible). Bound above 1 so a fire-once-then-stop accumulation bug fails.
+      SEEDS.forEach(seed => {
+        const nuts = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1, stepSize: 1e-3 } }).seed(seed)
+        nuts.sample(null, 30)
+        assert(nuts.maxDepthCount() > 5, `seed ${seed}: expected maxDepthCount > 5, got ${nuts.maxDepthCount()}`)
+        assert.strictEqual(nuts.divergenceCount(), 0, `seed ${seed}: tiny step should not diverge`)
+      })
+    })
+
+    it('should reset counts at sample() start so warm-up divergences do not leak into the sampling phase', () => {
+      // Constructed with a huge step so early warm-up diverges; dual averaging then tunes the step
+      // down. Reading divergenceCount() after warmUp() sees the accumulated warm-up divergences
+      // (ADR-0023: no reset between/within warm-up), and sample() resets so the sampling-phase count
+      // starts fresh — proving the counter is per-phase, not cumulative. Swept over the fixed seed
+      // set per the _helpers.js policy, since the assertion depends on the RNG trajectory.
+      SEEDS.forEach(seed => {
+        const nuts = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1, stepSize: 25 } }).seed(seed)
+        nuts.warmUp(null, 1)
+        const warmUpDivergences = nuts.divergenceCount()
+        assert(warmUpDivergences > 0, `seed ${seed}: expected warm-up to record divergences, got ${warmUpDivergences}`)
+        nuts.sample(null, 200)
+        assert(nuts.divergenceCount() < warmUpDivergences, `seed ${seed}: sampling-phase count (${nuts.divergenceCount()}) should reset below the warm-up count (${warmUpDivergences})`)
+      })
+    })
+  })
+
   describe('.seed()', () => {
     [0, 42, 12345].forEach(seed => {
       it(`should produce bitwise-identical samples when seed ${seed} is applied twice`, () => {
