@@ -181,9 +181,6 @@ const UnitTests = {
       name: c.name || 'random parameters',
       generate: () => new dist[tc.name](...c.params())
     }))
-    // per-distribution override for GoF assertion only; support-range check always uses SAMPLE_SIZE
-    // See solutions/testing/2026-05-22-1820-per-distribution-gof-sample-size-override.md
-    const n = tc.sampleSize
 
     cases.forEach(c => {
       describe(c.name, () => {
@@ -200,14 +197,6 @@ const UnitTests = {
             assert(d <= supp[1].value, `Above upper bound: ${d} > ${supp[1].value}`)
           })
         })
-
-        it('sample values should be distributed correctly', () => {
-          for (const s of (tc.testSeeds ?? [0, 42, 12345])) {
-            const generator = c.generate()
-            generator.seed(s)
-            assert(generator.test(generator.sample(n ?? SAMPLE_SIZE)).passed, `seed ${s}`)
-          }
-        })
       })
     })
   },
@@ -222,6 +211,9 @@ const UnitTests = {
         return new dist[tc.name](...p)
       }
     }))
+    // per-distribution override for GoF assertion only; support-range check in .sample() always uses SAMPLE_SIZE
+    // See solutions/testing/2026-05-22-1820-per-distribution-gof-sample-size-override.md
+    const n = tc.sampleSize
 
     // Go through text cases.
     cases.forEach(c => {
@@ -230,7 +222,7 @@ const UnitTests = {
           for (const s of (tc.testSeeds ?? [0, 42, 12345])) {
             const generator = c.gen()
             generator.seed(s)
-            assert(generator.test(generator.sample(SAMPLE_SIZE)).passed, `seed ${s}`)
+            assert(generator.test(generator.sample(n ?? SAMPLE_SIZE)).passed, `seed ${s}`)
           }
         })
 
