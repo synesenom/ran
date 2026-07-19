@@ -1,6 +1,10 @@
 import MCMC from './_mcmc'
 import { Normal } from '../dist'
-import Matrix from '../la/matrix'
+import {
+  createMetricState, updateAccumulator, refreshMetric, sampleMomentum, applyInverseMetric,
+  kineticEnergy, snapshotMetric, snapshotAccumulator, validateMetric, validateDenseMetricDim,
+  validateResumedMetric, validateResumedMetricAccumulator, DENSE_METRIC_REFRESH_INTERVAL
+} from './_metric'
 
 // Nesterov dual-averaging step-size adaptation (Hoffman & Gelman 2014, JMLR 15:1593-1623, S3.2):
 // gamma is the adaptation learning rate, t0 stabilizes the first few iterations against a large
@@ -22,11 +26,6 @@ const MAX_TREE_DEPTH = 10
 // default): a leapfrog point whose Hamiltonian drifts more than this many nats from the trajectory's
 // start is numerically diverging and is excluded from the slice, stopping that branch of the tree.
 const DELTA_MAX = 1000
-// Regularization added to the estimated metric (variance or covariance) before it is used, matching
-// HMC's and AdaptiveMetropolis's EPS*I convention: keeps the diagonal variance away from exactly
-// zero and keeps ldl() -- which has no pivoting or singularity guard -- from hitting a non-positive
-// pivot while the dense covariance accumulator is still rank deficient.
-const EPS = 1e-6
 
 /**
  * Class implementing the [No-U-Turn Sampler]{@link https://jmlr.org/papers/v15/hoffman14a.html}
@@ -75,9 +74,11 @@ const EPS = 1e-6
 // positional shape) throws a clear NUTS-specific error instead of a generic destructuring
 // TypeError or an incidental "gradLogDensity must be a function" from the wrong root cause.
 // NUTS follows the same pattern for consistency with its now-migrated sibling.
-// decisions/0034-nuts-euclidean-metric-adaptation.md — Euclidean metric adaptation duplicates HMC's
-// machinery (extraction deferred to follow-up #1041), uses an inline velocity-returning leapfrog,
-// and evaluates the no-U-turn criterion on the velocity M^-1*r rather than the raw momentum
+// decisions/0034-nuts-euclidean-metric-adaptation.md — Euclidean metric adaptation, an inline
+// velocity-returning leapfrog, and the no-U-turn criterion evaluated on the velocity M^-1*r rather
+// than the raw momentum
+// decisions/0036-shared-metric-module.md — the accumulator/refresh/momentum/validator machinery now
+// lives in the shared ./_metric module (extraction of HMC's and NUTS's former duplicates, #1041)
 export default class NUTS extends MCMC {
   /**
    * @param {Object} options Sampler options, as a single object.
@@ -102,17 +103,17 @@ export default class NUTS extends MCMC {
     // internal.stepSize (e.g. Infinity) through unchecked.
     // See solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md
     NUTS._validateStepSize(this.internal.stepSize)
-    NUTS._validateMetric(config.metric)
+    validateMetric('NUTS', config.metric)
     this._metricType = config.metric === 'dense' ? 'dense' : 'diag'
-    NUTS._validateDenseMetricDim(this._metricType, this.dim)
-    NUTS._validateResumedMetric(this.internal.metric, this._metricType, this.dim)
-    NUTS._validateResumedMetricAccumulator(this.internal.metAccumulator, this._metricType, this.dim)
+    validateDenseMetricDim('NUTS', this._metricType, this.dim)
+    validateResumedMetric('NUTS', this.internal.metric, this._metricType, this.dim)
+    validateResumedMetricAccumulator('NUTS', this.internal.metAccumulator, this._metricType, this.dim)
 
     this._gradLnp = gradLogDensity
     this._stepSize = this.internal.stepSize || config.stepSize || 0.1
     // Momentum component sampler, one Normal(0,1) draw per dimension per iteration; scaled by the
-    // adapted metric in _sampleMomentum so momentum is drawn from N(0, M), not N(0, I). See
-    // decisions/0034-nuts-euclidean-metric-adaptation.md.
+    // adapted metric in sampleMomentum (./_metric) so momentum is drawn from N(0, M), not N(0, I).
+    // See decisions/0034-nuts-euclidean-metric-adaptation.md.
     this._q = new Normal(0, 1)
     // decisions/0035-mcmc-exact-stream-reproducible-resume.md — restoring _q's own PRNG stream
     // is what makes resumed momentum draws bit-for-bit identical, not just statistically equivalent.
@@ -120,7 +121,13 @@ export default class NUTS extends MCMC {
     this.lastLnp = this.lnp(this.x)
 
     this._restoreDualAveraging()
-    this._initMetricState(this.internal.metric, this.internal.metAccumulator)
+    // decisions/0036-shared-metric-module.md — shared metric machinery on plain-object state.
+    this._met = createMetricState({
+      type: this._metricType,
+      dim: this.dim,
+      resumedMetric: this.internal.metric,
+      resumedAccumulator: this.internal.metAccumulator
+    })
   }
 
   // ─── PUBLIC INSTANCE ───
@@ -146,8 +153,8 @@ export default class NUTS extends MCMC {
   _iter (x, warmUp) {
     this._maybeFreezeStepSize(warmUp)
 
-    const r0 = this._sampleMomentum()
-    const h0 = this.lastLnp - this._kineticEnergy(r0)
+    const r0 = sampleMomentum(this._met, this._q)
+    const h0 = this.lastLnp - kineticEnergy(this._met, r0)
     // log(u) for u ~ Uniform(0, exp(h0)): drawing log(u) directly avoids computing exp(h0), which
     // overflows/underflows long before the log-scale comparisons in _buildTree do.
     const logU = h0 + Math.log(this.r.next())
@@ -164,16 +171,16 @@ export default class NUTS extends MCMC {
   }
 
   _adjust (i) {
-    this._updateMetricAccumulator(i.x)
+    updateAccumulator(this._met, i.x)
     if (this._metricType === 'dense') {
-      if (this._metN >= 2 * this.dim && this._metN % NUTS._DENSE_METRIC_REFRESH_INTERVAL === 0) {
-        this._refreshMetric()
+      if (this._met.metN >= 2 * this.dim && this._met.metN % DENSE_METRIC_REFRESH_INTERVAL === 0) {
+        refreshMetric(this._met)
       }
-    } else if (this._metN >= 2 * this.dim) {
+    } else if (this._met.metN >= 2 * this.dim) {
       // Statistical-quality gate, not a numerical-safety one (mirrors HMC/AdaptiveMetropolis's
       // identical 2*dim gate): EPS alone already keeps the variance away from exactly zero.
       // Refreshed every iteration since this path is O(dim), unlike the dense LDL refresh above.
-      this._refreshMetric()
+      refreshMetric(this._met)
     }
 
     // Dual averaging is deliberately NOT reset when the metric changes above — the same documented
@@ -198,22 +205,13 @@ export default class NUTS extends MCMC {
   _internal () {
     return {
       stepSize: this._stepSize,
-      // The effective, ready-to-use metric — restoration uses this directly so a resumed sampler's
-      // momentum draws are correctly scaled even before the accumulator (below) next crosses its
-      // own refresh gate.
-      metric: this._metricType === 'dense'
-        ? { type: 'dense', L: this._metL.map(row => row.slice()), D: this._metD.slice() }
-        : { type: 'diag', variance: this._metVar.slice() },
+      metric: snapshotMetric(this._met),
       prngQ: this._q.r.save(),
       daMu: this._daMu,
       daHbar: this._daHbar,
       daLogEpsBar: this._daLogEpsBar,
       daT: this._daT,
-      // Raw mass-matrix accumulator (distinct from the effective metric above) — see
-      // decisions/0035-mcmc-exact-stream-reproducible-resume.md.
-      metAccumulator: this._metricType === 'dense'
-        ? { metN: this._metN, metMean: this._metMean.slice(), metCovS: this._metCovS.map(row => row.slice()) }
-        : { metN: this._metN, metMean: this._metMean.slice(), metM2: this._metM2.slice() }
+      metAccumulator: snapshotAccumulator(this._met)
     }
   }
 
@@ -245,7 +243,7 @@ export default class NUTS extends MCMC {
     // outer endpoints carry their velocities alongside their momenta. For the identity metric the
     // two coincide, keeping behavior bitwise-identical to the pre-metric sampler. See
     // decisions/0034-nuts-euclidean-metric-adaptation.md.
-    const v0 = this._applyInverseMetric(r0)
+    const v0 = applyInverseMetric(this._met, r0)
     let xMinus = x
     let rMinus = r0
     let velMinus = v0
@@ -300,7 +298,7 @@ export default class NUTS extends MCMC {
   _buildTreeLeaf (node, v, ctx) {
     const { x: xp, r: rp, vel: velp } = this._leapfrog(node.x, node.r, v * ctx.eps)
     const logPp = this.lnp(xp)
-    const h = logPp - this._kineticEnergy(rp)
+    const h = logPp - kineticEnergy(this._met, rp)
     const alphaSum = Math.min(1, Math.exp(h - ctx.h0))
     return {
       xMinus: xp,
@@ -377,7 +375,7 @@ export default class NUTS extends MCMC {
     for (let i = 0; i < n; i++) {
       rCur[i] += 0.5 * eps * grad0[i]
     }
-    const vMid = this._applyInverseMetric(rCur)
+    const vMid = applyInverseMetric(this._met, rCur)
     for (let i = 0; i < n; i++) {
       xCur[i] += eps * vMid[i]
     }
@@ -385,151 +383,7 @@ export default class NUTS extends MCMC {
     for (let i = 0; i < n; i++) {
       rCur[i] += 0.5 * eps * grad1[i]
     }
-    return { x: xCur, r: rCur, vel: this._applyInverseMetric(rCur) }
-  }
-
-  // Sets up the mass-matrix (metric) online accumulator and the effective (ready-to-use) metric
-  // consulted by _sampleMomentum/_applyInverseMetric. Structurally mirrors HMC. Extracted out of
-  // the constructor to avoid a Complex Method smell there. Extraction of this machinery into a
-  // shared module (deduplicating HMC and NUTS) is a deferred follow-up — see
-  // decisions/0034-nuts-euclidean-metric-adaptation.md.
-  _initMetricState (resumedMetric, resumedAccumulator) {
-    this._initMetricAccumulator(resumedAccumulator)
-    this._initEffectiveMetric(resumedMetric)
-  }
-
-  // `resumed` (decisions/0035-mcmc-exact-stream-reproducible-resume.md) restores the raw
-  // accumulator so a mid-warm-up resume's next refresh reads the same history the uninterrupted
-  // chain would have; deep-copies metCovS (a dim x dim nested array) so the live accumulator
-  // never aliases a caller-held snapshot's rows. Mirrors HMC's identical accumulator restore.
-  _initMetricAccumulator (resumed) {
-    this._metN = MCMC._resolveResumedField(resumed, 'metN', 0)
-    this._metMean = MCMC._resolveResumedField(resumed, 'metMean', new Array(this.dim).fill(0)).slice()
-    if (this._metricType === 'dense') {
-      this._metCovS = MCMC._resolveResumedField(
-        resumed, 'metCovS', Array.from({ length: this.dim }, () => new Array(this.dim).fill(0))
-      ).map(row => row.slice())
-      this._metDelta = new Array(this.dim).fill(0)
-      this._metDelta2 = new Array(this.dim).fill(0)
-      this._zBuffer = new Array(this.dim).fill(0)
-    } else {
-      this._metM2 = MCMC._resolveResumedField(resumed, 'metM2', new Array(this.dim).fill(0)).slice()
-    }
-  }
-
-  // Seeded from a resumed state or the identity default -- kept separate from the accumulator so a
-  // resumed sampler uses its adapted metric immediately without waiting for _metN to re-cross the
-  // refresh gate.
-  _initEffectiveMetric (resumedMetric) {
-    if (this._metricType === 'dense') {
-      this._metL = resumedMetric ? resumedMetric.L.map(row => row.slice()) : NUTS._identityRows(this.dim)
-      this._metD = resumedMetric ? resumedMetric.D.slice() : new Array(this.dim).fill(1)
-    } else {
-      this._metVar = resumedMetric ? resumedMetric.variance.slice() : new Array(this.dim).fill(1)
-    }
-  }
-
-  // Online (Welford-style) update of the metric accumulator, fed the post-accept/reject state per
-  // _adjust's contract. Entirely private to NUTS -- deliberately not reusing MCMC's own _welford
-  // accumulator (contractual per decisions/0023-mcmc-accumulator-mechanics.md), mirroring HMC.
-  _updateMetricAccumulator (x) {
-    this._metN++
-    if (this._metricType === 'dense') {
-      this._updateDenseMetricAccumulator(x)
-    } else {
-      this._updateDiagMetricAccumulator(x)
-    }
-  }
-
-  _updateDiagMetricAccumulator (x) {
-    const n = this._metN
-    for (let i = 0; i < this.dim; i++) {
-      const delta = x[i] - this._metMean[i]
-      this._metMean[i] += delta / n
-      this._metM2[i] += delta * (x[i] - this._metMean[i])
-    }
-  }
-
-  _updateDenseMetricAccumulator (x) {
-    const n = this._metN
-    const delta = this._metDelta
-    const delta2 = this._metDelta2
-    for (let i = 0; i < this.dim; i++) {
-      delta[i] = x[i] - this._metMean[i]
-    }
-    for (let i = 0; i < this.dim; i++) {
-      this._metMean[i] += delta[i] / n
-    }
-    for (let i = 0; i < this.dim; i++) {
-      delta2[i] = x[i] - this._metMean[i]
-    }
-    for (let i = 0; i < this.dim; i++) {
-      for (let j = 0; j < this.dim; j++) {
-        this._metCovS[i][j] += delta[i] * delta2[j]
-      }
-    }
-  }
-
-  // Refactorizes the effective metric from the accumulator. Diagonal: elementwise sample variance +
-  // EPS. Dense: Cov(x) + EPS*I via a transient Matrix, decomposed via ldl() and extracted to plain
-  // arrays -- the Matrix instance never becomes a field (see
-  // solutions/tooling/2026-07-15-1330-adaptive-metropolis-ran-la-matrix-dts-leak.md).
-  _refreshMetric () {
-    if (this._metricType === 'dense') {
-      const cov = new Matrix(this._metCovS).scale(1 / (this._metN - 1)).add(new Matrix(this.dim).scale(EPS))
-      const { D, L } = cov.ldl()
-      this._metL = L.m()
-      this._metD = Array.from({ length: this.dim }, (_, i) => D.ij(i, i))
-    } else {
-      this._metVar = this._metM2.map(m2 => m2 / (this._metN - 1) + EPS)
-    }
-  }
-
-  // Draws momentum p ~ N(0, M). The mass matrix is the *precision*, M = Sigma^-1, where Sigma is the
-  // estimated covariance/variance (decisions/0029-hmc-euclidean-metric-adaptation.md): a LARGER
-  // estimated variance means a MORE CONCENTRATED momentum distribution, so the metric compensates
-  // for wide target directions. Diagonal: elementwise. Dense: Sigma = L*D*L^T (from ldl()), and
-  // p ~ N(0, Sigma^-1) is drawn as p solving L^T*p = z/sqrt(D) via back substitution. For the
-  // identity default (variance all ones) this draws _q.sample()/sqrt(1) in the same order as the
-  // pre-metric sampler, keeping behavior bitwise-identical.
-  // M and M^-1 are easy to swap here -- see solutions/correctness/2026-07-16-1422-hmc-mass-matrix-precision-inversion.md
-  _sampleMomentum () {
-    if (this._metricType === 'dense') {
-      for (let i = 0; i < this.dim; i++) {
-        this._zBuffer[i] = this._q.sample()
-      }
-      const u = this._zBuffer.map((z, i) => z / Math.sqrt(this._metD[i]))
-      return NUTS._backSubstituteTranspose(this._metL, u)
-    }
-    return Array.from({ length: this.dim }, (_, i) => this._q.sample() / Math.sqrt(this._metVar[i]))
-  }
-
-  // Computes M^-1 * p (the velocity), needed for the leapfrog position update, the kinetic energy,
-  // and the no-U-turn check. Since M = Sigma^-1 (the precision), M^-1 * p = Sigma * p directly.
-  // Diagonal: elementwise. Dense: Sigma * p = L*D*L^T*p as three plain matrix-vector products.
-  _applyInverseMetric (p) {
-    if (this._metricType === 'dense') {
-      const L = this._metL
-      const n = this.dim
-      // v = L^T * p
-      const v = new Array(n).fill(0)
-      for (let i = 0; i < n; i++) {
-        for (let j = 0; j <= i; j++) {
-          v[j] += L[i][j] * p[i]
-        }
-      }
-      // w = D * v
-      const w = v.map((vi, i) => vi * this._metD[i])
-      // result = L * w
-      return L.map(row => row.reduce((s, lij, j) => s + lij * w[j], 0))
-    }
-    return p.map((pi, i) => pi * this._metVar[i])
-  }
-
-  // Kinetic energy K(p) = 1/2 * p^T * M^-1 * p.
-  _kineticEnergy (p) {
-    const mInvP = this._applyInverseMetric(p)
-    return 0.5 * p.reduce((s, pi, i) => s + pi * mInvP[i], 0)
+    return { x: xCur, r: rCur, vel: applyInverseMetric(this._met, rCur) }
   }
 
   // ─── PRIVATE STATIC ───
@@ -585,120 +439,5 @@ export default class NUTS extends MCMC {
       dotPlus += dx * velPlus[i]
     }
     return (dotMinus >= 0 && dotPlus >= 0) ? 1 : 0
-  }
-
-  // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
-  static _validateMetric (metric) {
-    if (metric === undefined) {
-      return
-    }
-    if (metric !== 'diag' && metric !== 'dense') {
-      throw Error("NUTS: metric must be 'diag' or 'dense'")
-    }
-  }
-
-  // A dense metric's covariance accumulator and LDL factor are both dim*dim -- MCMC's own
-  // _validateCombinedFootprint only bounds dim*maxLag (the autocorrelation buffers), so it does not
-  // itself catch a dense-metric blowup at MCMC._MAX_DIM = 10000 (~800MB). Mirrors HMC's identical
-  // guard. See decisions/0029-hmc-euclidean-metric-adaptation.md.
-  static _validateDenseMetricDim (metricType, dim) {
-    if (metricType === 'dense' && dim > NUTS._MAX_DENSE_METRIC_DIM) {
-      throw Error(`NUTS: metric: 'dense' requires dim to be at most ${NUTS._MAX_DENSE_METRIC_DIM}`)
-    }
-  }
-
-  // A resumed initialState.internal.metric is caller-supplied the same way config is -- see the
-  // stepSize validation above and
-  // solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md. Kept out of
-  // the constructor to avoid a Complex Conditional / Complex Method smell there.
-  static _validateResumedMetric (metric, metricType, dim) {
-    if (metric === undefined) {
-      return
-    }
-    if (metric.type !== metricType) {
-      throw Error('NUTS: resumed metric type does not match the resolved metric')
-    }
-    if (metricType === 'dense') {
-      NUTS._validateResumedDenseMetric(metric, dim)
-    } else {
-      NUTS._validateResumedDiagMetric(metric, dim)
-    }
-  }
-
-  static _validateResumedDiagMetric (metric, dim) {
-    if (!NUTS._isPositiveFiniteVector(metric.variance, dim)) {
-      throw Error('NUTS: resumed metric.variance must be an array of dim positive finite numbers')
-    }
-  }
-
-  static _validateResumedDenseMetric (metric, dim) {
-    if (!NUTS._isPositiveFiniteVector(metric.D, dim)) {
-      throw Error('NUTS: resumed metric.D must be an array of dim positive finite numbers')
-    }
-    if (!NUTS._isFiniteMatrix(metric.L, dim)) {
-      throw Error('NUTS: resumed metric.L must be a dim x dim array of finite numbers')
-    }
-  }
-
-  // A resumed initialState.internal.metAccumulator is caller-supplied the same way metric is
-  // above -- see solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md.
-  // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
-  // Mirrors HMC's identical accumulator validator.
-  static _validateResumedMetricAccumulator (resumed, metricType, dim) {
-    if (resumed === undefined) {
-      return
-    }
-    MCMC._validateNonNegativeInteger(resumed.metN, 'NUTS: resumed metAccumulator.metN')
-    MCMC._validateFiniteVector(resumed.metMean, dim, 'NUTS: resumed metAccumulator.metMean')
-    if (metricType === 'dense') {
-      MCMC._validateFiniteMatrix(resumed.metCovS, dim, 'NUTS: resumed metAccumulator.metCovS')
-    } else {
-      MCMC._validateFiniteVector(resumed.metM2, dim, 'NUTS: resumed metAccumulator.metM2')
-    }
-  }
-
-  static _isFiniteVector (arr, length) {
-    return Array.isArray(arr) && arr.length === length && arr.every(Number.isFinite)
-  }
-
-  static _isPositiveFiniteVector (arr, length) {
-    return NUTS._isFiniteVector(arr, length) && arr.every(v => v > 0)
-  }
-
-  static _isFiniteMatrix (rows, dim) {
-    return Array.isArray(rows) && rows.length === dim && rows.every(row => NUTS._isFiniteVector(row, dim))
-  }
-
-  static get _MAX_DENSE_METRIC_DIM () {
-    return 1000
-  }
-
-  // Matrix.ldl() is O(dim^3); refreshing the dense metric every iteration (as the diagonal case and
-  // AdaptiveMetropolis both do cheaply) would make dense warm-up cost scale with O(dim^3) *
-  // iterations. This interval is a fixed, non-configurable NUTS constant, deliberately decoupled
-  // from MCMC.warmUp()'s own internal batch size so a future change to one cannot silently change
-  // the other's behavior. Mirrors HMC. See decisions/0029-hmc-euclidean-metric-adaptation.md.
-  static get _DENSE_METRIC_REFRESH_INTERVAL () {
-    return 1000
-  }
-
-  // Dense metric's identity default (no observations yet to base a covariance estimate on).
-  static _identityRows (dim) {
-    return Array.from({ length: dim }, (_, i) => Array.from({ length: dim }, (_, j) => (i === j ? 1 : 0)))
-  }
-
-  // Solves L^T*y = v for y, where L is unit lower triangular so L^T is unit upper triangular
-  // (L^T[i][j] = L[j][i]).
-  static _backSubstituteTranspose (L, v) {
-    const n = v.length
-    const y = new Array(n)
-    for (let i = n - 1; i >= 0; i--) {
-      let s = v[i]
-      for (let j = i + 1; j < n; j++) {
-        s -= L[j][i] * y[j]
-      }
-      y[i] = s
-    }
-    return y
   }
 }

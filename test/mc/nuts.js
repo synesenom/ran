@@ -185,6 +185,27 @@ describe('mc.NUTS', () => {
     it('should not throw for a valid dense metric on a small dimension', () => {
       assert.doesNotThrow(() => new NUTS({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2, metric: 'dense' } }))
     })
+
+    it('should throw when a resumed metAccumulator has a malformed metN', () => {
+      assert.throws(
+        () => new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { metAccumulator: { metN: -1, metMean: [0], metM2: [0] } } } }),
+        /NUTS: resumed metAccumulator.metN must be a non-negative integer/
+      )
+    })
+
+    it('should throw when a resumed diagonal metAccumulator.metM2 has the wrong length', () => {
+      assert.throws(
+        () => new NUTS({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2 }, initialState: { internal: { metAccumulator: { metN: 5, metMean: [0, 0], metM2: [0] } } } }),
+        /NUTS: resumed metAccumulator.metM2 must be an array of 2 finite numbers/
+      )
+    })
+
+    it('should throw when a resumed dense metAccumulator.metCovS is not a dim x dim matrix', () => {
+      assert.throws(
+        () => new NUTS({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2, metric: 'dense' }, initialState: { internal: { metAccumulator: { metN: 5, metMean: [0, 0], metCovS: [[1, 2], [3]] } } } }),
+        /NUTS: resumed metAccumulator.metCovS must be a 2 x 2 array of finite numbers/
+      )
+    })
   })
 
   describe('._iter() rejection', () => {
