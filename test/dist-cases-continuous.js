@@ -1,6 +1,6 @@
 // Per-distribution test-case entries. Beyond the core fields (name, invalidParams, cases,
 // refVals, quantileVals, sampleParams), two optional data-driven fields are consumed by
-// UnitTests.fit / UnitTests.moments in test/dist.js:
+// UnitTests.fit / UnitTests.moments in test/dist-runner.js:
 //   fit: spec | spec[]  (array form runs one labelled it-block per spec)
 //   spec fields:
 //     params, seed, n   — sample n points from `params` (seeded) and refit

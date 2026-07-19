@@ -97,7 +97,7 @@ Use Glob and Grep to discover specific files — do not assume filenames.
 
    ### Tests
    - `test/dist-cases.js` - Test case entry for LogNormal
-   - `test/dist.js` - Runs the full distribution test suite
+   - `test/dist-runner.js`, `test/dist-shard-*.js` - Run the full distribution test suite (sharded for `mocha --parallel`)
 
    ### Related
    - `src/dist/_distribution.js` - Base Distribution class

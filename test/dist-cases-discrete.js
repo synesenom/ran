@@ -1,6 +1,6 @@
 // Per-distribution test-case entries. See dist-cases-continuous.js for the full schema description;
 // the optional `fit` (single spec or array) and `moments` fields are consumed by UnitTests.fit /
-// UnitTests.moments in test/dist.js.
+// UnitTests.moments in test/dist-runner.js.
 export default [{
   name: 'Bernoulli',
   // pdf(1) === p, so the planted-p tolerance reproduces the original pdf(1) check
@@ -346,7 +346,7 @@ export default [{
     [-1], [2] // 0 <= mu <= 1
   ],
   // 'positive parameter' is first so refVals (always evaluated against cases[0]
-  // per test/dist.js:133) exercises the non-degenerate distribution.
+  // per test/dist-runner.js:158) exercises the non-degenerate distribution.
   cases: [{
     name: 'positive parameter',
     params: () => [0.5]
@@ -391,7 +391,7 @@ export default [{
     [0.5, -1], [0.5, 0] // k > 0
   ],
   // 'positive parameter' is first so refVals (always evaluated against cases[0]
-  // per test/dist.js:133) exercises the non-degenerate distribution.
+  // per test/dist-runner.js:158) exercises the non-degenerate distribution.
   cases: [{
     name: 'positive parameter',
     params: () => [0.5, 5]
@@ -1290,7 +1290,7 @@ export default [{
   }],
   // Keep both sampleParams: Knuth (lambda < 30) and Atkinson (lambda >= 30) are separate code paths
   sampleParams: [{ name: 'low mean', params: () => [10] }, { name: 'high mean', params: () => [40] }],
-  // scipy.stats.poisson(10) — refVals always evaluated against cases[0] (test/dist.js:133)
+  // scipy.stats.poisson(10) — refVals always evaluated against cases[0] (test/dist-runner.js:158)
   refVals: [
     { x: 2, pmf: 0.0022699964881242435, cdf: 0.0027693957155115775 },
     { x: 5, pmf: 0.03783327480207079, cdf: 0.06708596287903189 },

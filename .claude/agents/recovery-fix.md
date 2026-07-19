@@ -39,7 +39,7 @@ You will receive:
 ```markdown
 ## Diagnosis & Fix
 
-**Failed Test(s)**: `test/dist.js::Normal::pdf should match known values`
+**Failed Test(s)**: `test/dist-shard-1.js::Normal::pdf should match known values`
 **Error Type**: <AssertionError / TypeError / RangeError / etc.>
 **Root Cause**: <Implementation bug / Test bug / Missing code / Plan issue>
 

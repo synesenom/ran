@@ -80,7 +80,7 @@ Every subclass of `Distribution` **must** implement all of the following that ap
 | --- | --- | --- |
 | Distribution test cases | `test/dist-cases-continuous.js` or `test/dist-cases-discrete.js` | Entry with `invalidParams`, `params`/`cases` (each with `refVals` and `quantileVals`), and `sampleParams` |
 | Precision gate | `test/precision-continuous.js` or `test/precision-discrete.js` | 3 parameter sets × 5 interior points each, with `pmf`/`pdf`, `cdf`, and `qp` (= `cdf(k) − pmf(k)/2`) values derived from **mpmath at `mp.dps=50`** — never from the ranjs implementation itself. The canonical workflow is: add the PMF definition to `scripts/precision-refs-discrete.py` (or `-continuous.py`) and run `python3 scripts/precision-refs-<type>.py` to regenerate the JS file. If mpmath is unavailable, exact rational arithmetic is an acceptable substitute for distributions whose PMF has closed-form rational values. |
-| Fit test | `test/dist.js` explicit block | Explicit test alongside the other per-distribution tests — sample from the distribution, call `.fit()`, assert the result is a correct instance. This block is **not** auto-generated from `dist-cases-*.js`; add it by hand. |
+| Fit test | `test/dist-base.js` explicit block (inside `describe('Distribution', () => { describe('.fit()', ...) })`) | Explicit test alongside the other per-distribution tests — sample from the distribution, call `.fit()`, assert the result is a correct instance. This block is **not** auto-generated from `dist-cases-*.js`; add it by hand. |
 | Subpath export | `package.json` `exports` field | `"./dist/<name>": { "import": "./dist/<name>.esm.js" }` in alphabetical order |
 | Named export | `src/dist/index.js` | Add (or uncomment) the export line |
 | CHANGELOG entry | `CHANGELOG.md` `## [Unreleased]` section | A `### Added` bullet describing the new distribution. New distributions are always user-visible — a changelog entry is mandatory. |
@@ -122,7 +122,9 @@ Every public function and method signals "no ordinary result" through exactly on
 - Mocha test runner with Chai `assert` for assertions.
 - `test/test-utils.js` — shared helpers: `ksTest`, `chiTest`, `repeat`, `Tests`.
 - `test/dist-cases-continuous.js` and `test/dist-cases-discrete.js` — per-distribution test case definitions (`name`, `invalidParams`, `params`, `cases`), split by distribution type.
-- `test/dist.js` — runs the full distribution test suite against all entries in `dist-cases-continuous.js` and `dist-cases-discrete.js`.
+- `test/dist-runner.js` — shared `registerDistributionTests(testCases)` used by the shard files to register the constructor/seed/load-save/analytical/sample/test/moments/fit tree for each case.
+- `test/dist-shard-0.js` .. `test/dist-shard-3.js` — deterministically partition `[...continuousCases, ...discreteCases]` by index modulo 4 and run their slice through `dist-runner.js`, so `mocha --parallel` can execute the full distribution suite across worker processes.
+- `test/dist-base.js` — the non-distribution-suite tests: the base `Distribution`/`PreComputed` classes, `Degenerate`/`Kolmogorov` special cases, parameter-count regressions, and the `fit()` precision gate.
 - **Behavior-first assertions**: assert on the output of public methods given known inputs (hand-calculated expected values), not on internal state.
 - **Statistical verification**: use `ksTest` (Kolmogorov-Smirnov) for continuous distributions and `chiTest` (chi-squared) for discrete distributions when verifying that `sample()` produces correctly distributed values.
 - **New distributions must be added to the appropriate `test/dist-cases-*.js` file** with `invalidParams`, `params`, and `cases` entries before any implementation is written (TDD).
@@ -220,7 +222,7 @@ TypeScript declarations are **generated** from JSDoc annotations via `tsc --allo
 
 **Always follow TDD (red-green-refactor) for all implementations:**
 
-1. **Red** — Write the failing test(s) first. Add `invalidParams`, `params`/`cases`, `moments`, and `fit` entries to the appropriate `test/dist-cases-*.js` file, and any explicit `.fit()` blocks to `test/dist.js`, **before writing a single line of implementation code**. Run `npm test` and confirm the test suite fails with the expected errors (missing export, not-a-function, assertion failures). A test that passes before the implementation is written is not a test — it's dead code.
+1. **Red** — Write the failing test(s) first. Add `invalidParams`, `params`/`cases`, `moments`, and `fit` entries to the appropriate `test/dist-cases-*.js` file, and any explicit `.fit()` blocks to `test/dist-base.js`, **before writing a single line of implementation code**. Run `npm test` and confirm the test suite fails with the expected errors (missing export, not-a-function, assertion failures). A test that passes before the implementation is written is not a test — it's dead code.
 2. **Green** — Write the minimal implementation that makes the tests pass. No extra methods, no speculative abstractions — only what the red tests require. Run `npm test` and confirm all tests pass.
 3. **Refactor** — Clean up the implementation (rename for clarity, extract shared constants, simplify expressions) without changing behaviour. Run `npm test` after each refactor step to confirm nothing broke.
 
