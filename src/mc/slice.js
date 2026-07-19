@@ -68,7 +68,12 @@ export default class Slice extends MCMC {
     Slice._validateW(this._w, this.dim)
     // decisions/0034-mcmc-exact-stream-reproducible-resume.md — restoring the batch-adaptation
     // accumulators (not just the derived w) is what makes a mid-warm-up resume bit-for-bit
-    // reproducible, since Slice's _adjust() depends only on these subclass-owned fields.
+    // reproducible, since Slice's _adjust() depends only on these subclass-owned fields. Validated
+    // the same way stepSize is on HMC/MALA: a malformed resumed field must fail loudly rather than
+    // silently corrupt the Robbins-Monro recursion — solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md.
+    MCMC._validateFiniteVector(this.internal.bwSum, this.dim, 'Slice: resumed bwSum')
+    MCMC._validateNonNegativeInteger(this.internal.adjN, 'Slice: resumed adjN')
+    MCMC._validateNonNegativeInteger(this.internal.adjBatch, 'Slice: resumed adjBatch')
     this._bwSum = (this.internal.bwSum || new Array(this.dim).fill(0)).slice()
     this._adjN = this.internal.adjN || 0
     this._adjBatch = this.internal.adjBatch || 0

@@ -79,6 +79,35 @@ describe('mc.NUTS', () => {
     it('should throw a clear error when called with an array', () => {
       assert.throws(() => new NUTS([logDensity1D, gradLogDensity1D]), /NUTS: constructor requires an options object/)
     })
+
+    it('should throw for a malformed resumed prngQ', () => {
+      assert.throws(
+        () => new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { prngQ: [1, 2, 3] } } }),
+        /NUTS: prng state must be an array of 4 finite numbers/
+      )
+    })
+
+    it('should throw when resumed daMu/daHbar/daLogEpsBar are not finite', () => {
+      assert.throws(
+        () => new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { daMu: Infinity } } }),
+        /NUTS: resumed daMu must be a finite number/
+      )
+      assert.throws(
+        () => new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { daHbar: NaN } } }),
+        /NUTS: resumed daHbar must be a finite number/
+      )
+      assert.throws(
+        () => new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { daLogEpsBar: Infinity } } }),
+        /NUTS: resumed daLogEpsBar must be a finite number/
+      )
+    })
+
+    it('should throw when resumed daT is not a non-negative integer', () => {
+      assert.throws(
+        () => new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { daT: -1 } } }),
+        /NUTS: resumed daT must be a non-negative integer/
+      )
+    })
   })
 
   describe('._iter() rejection', () => {

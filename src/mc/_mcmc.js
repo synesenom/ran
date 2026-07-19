@@ -338,6 +338,38 @@ export default class MCMC {
   }
 
   /**
+   * Restores Robbins-Monro dual-averaging state (Hoffman & Gelman 2014 S3.2) shared by HMC and
+   * NUTS: `_daMu` the shrinkage target, `_daHbar` the running acceptance-probability-deviation
+   * statistic, `_daLogEpsBar` the smoothed log step size, `_daT` the iteration counter. Explicitly
+   * called by each subclass's own constructor after `this._stepSize` is set — never invoked
+   * automatically by base-class control flow — so subclasses without dual averaging (RWM,
+   * AdaptiveMetropolis, Slice, MALA, Gibbs) are unaffected. Restoring these (rather than always
+   * restarting from t=0) is what makes a mid-warm-up resume's dual averaging continue from the
+   * exact same trajectory — decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+   *
+   * @method _restoreDualAveraging
+   * @memberof ran.mc.MCMC
+   * @protected
+   * @ignore
+   */
+  _restoreDualAveraging () {
+    // this.constructor.name resolves to the concrete subclass (HMC or NUTS) so error messages
+    // match each subclass's own `_validateOptions` labeling convention without a third parameter.
+    // Validated the same way stepSize already is: a malformed resumed field must fail loudly
+    // rather than silently corrupt the Robbins-Monro recursion — solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md.
+    const label = this.constructor.name
+    MCMC._validateFiniteScalar(this.internal.daMu, `${label}: resumed daMu`)
+    MCMC._validateFiniteScalar(this.internal.daHbar, `${label}: resumed daHbar`)
+    MCMC._validateFiniteScalar(this.internal.daLogEpsBar, `${label}: resumed daLogEpsBar`)
+    MCMC._validateNonNegativeInteger(this.internal.daT, `${label}: resumed daT`)
+
+    this._daMu = this.internal.daMu !== undefined ? this.internal.daMu : Math.log(10 * this._stepSize)
+    this._daHbar = this.internal.daHbar || 0
+    this._daLogEpsBar = this.internal.daLogEpsBar !== undefined ? this.internal.daLogEpsBar : Math.log(this._stepSize)
+    this._daT = this.internal.daT || 0
+  }
+
+  /**
    * Performs a single iteration. Must be overridden.
    *
    * @method _iter
@@ -533,6 +565,59 @@ export default class MCMC {
     if (prngQ) {
       q.r.load(prngQ)
     }
+  }
+
+  // Shared by every subclass restoring a resumed adaptation-batch accumulator field (Robbins-Monro
+  // counters, dual-averaging state, covariance/mass-matrix accumulators) — a malformed field, if
+  // silently accepted, corrupts the adaptation recursion (e.g. a non-finite pAccepted/daT) rather
+  // than failing loudly, the same class of gap solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md
+  // fixed for stepSize/pathLength. decisions/0034-mcmc-exact-stream-reproducible-resume.md
+  // `label` is the complete phrase preceding "must be" (e.g. 'RWM: resumed base'), matching the
+  // subclass-specific `_validateOptions` error convention already used throughout this codebase.
+  static _validateFiniteScalar (value, label) {
+    if (value === undefined) {
+      return
+    }
+    if (!Number.isFinite(value)) {
+      throw Error(`${label} must be a finite number`)
+    }
+  }
+
+  static _validateNonNegativeInteger (value, label) {
+    if (value === undefined) {
+      return
+    }
+    if (!(Number.isInteger(value) && value >= 0)) {
+      throw Error(`${label} must be a non-negative integer`)
+    }
+  }
+
+  static _validateFiniteVector (value, dim, label) {
+    if (value === undefined) {
+      return
+    }
+    if (!MCMC._isFiniteVectorOfLength(value, dim)) {
+      throw Error(`${label} must be an array of ${dim} finite numbers`)
+    }
+  }
+
+  static _validateFiniteMatrix (value, dim, label) {
+    if (value === undefined) {
+      return
+    }
+    if (!MCMC._isFiniteMatrixOfDim(value, dim)) {
+      throw Error(`${label} must be a ${dim} x ${dim} array of finite numbers`)
+    }
+  }
+
+  // Split out so each validator's compound check is a single return expression rather than a
+  // branch condition, which is what the Complex Conditional smell flags.
+  static _isFiniteVectorOfLength (value, length) {
+    return Array.isArray(value) && value.length === length && value.every(Number.isFinite)
+  }
+
+  static _isFiniteMatrixOfDim (value, dim) {
+    return Array.isArray(value) && value.length === dim && value.every(row => MCMC._isFiniteVectorOfLength(row, dim))
   }
 
   // Kept out of the constructor to avoid a Complex Method smell there.

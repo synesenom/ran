@@ -47,6 +47,42 @@ describe('mc.RWM', () => {
       assert.throws(() => new RWM(42), /RWM: constructor requires an options object/)
       assert.throws(() => new RWM('logDensity'), /RWM: constructor requires an options object/)
     })
+
+    it('should throw for a malformed resumed prngQ', () => {
+      assert.throws(
+        () => new RWM({ logDensity: () => 0, config: { dim: 1 }, initialState: { internal: { prngQ: [1, 2, 3] } } }),
+        /RWM: prng state must be an array of 4 finite numbers/
+      )
+    })
+
+    it('should throw when a resumed base has the wrong length', () => {
+      assert.throws(
+        () => new RWM({ logDensity: () => 0, config: { dim: 2 }, initialState: { internal: { base: [1] } } }),
+        /RWM: resumed base must be an array of 2 finite numbers/
+      )
+    })
+
+    it('should throw when a resumed ls is not finite', () => {
+      assert.throws(
+        () => new RWM({ logDensity: () => 0, config: { dim: 1 }, initialState: { internal: { ls: Infinity } } }),
+        /RWM: resumed ls must be a finite number/
+      )
+    })
+
+    it('should throw when resumed pAccepted/pN/pBatch are not non-negative integers', () => {
+      assert.throws(
+        () => new RWM({ logDensity: () => 0, config: { dim: 1 }, initialState: { internal: { pAccepted: -1 } } }),
+        /RWM: resumed pAccepted must be a non-negative integer/
+      )
+      assert.throws(
+        () => new RWM({ logDensity: () => 0, config: { dim: 1 }, initialState: { internal: { pN: 1.5 } } }),
+        /RWM: resumed pN must be a non-negative integer/
+      )
+      assert.throws(
+        () => new RWM({ logDensity: () => 0, config: { dim: 1 }, initialState: { internal: { pBatch: NaN } } }),
+        /RWM: resumed pBatch must be a non-negative integer/
+      )
+    })
   })
 
   describe('._iter() rejection', () => {
@@ -159,6 +195,13 @@ describe('mc.RWM', () => {
       runAdapted(rwm2, 50)
       assert.notDeepEqual(rwm1.state().internal.base, rwm2.state().internal.base)
       assert.strictEqual(rwm1.state().internal.ls, rwm2.state().internal.ls)
+
+      // Prove the practical consequence, not just the internal-field divergence: with different
+      // _base values now feeding _jump()'s proposal, the same PRNG stream produces different
+      // draws — the actual failure mode a caller relying on bit-for-bit resume would observe.
+      const divergedDraws1 = runAdapted(rwm1, 10)
+      const divergedDraws2 = runAdapted(rwm2, 10)
+      assert.notDeepEqual(divergedDraws1, divergedDraws2)
     })
   })
 

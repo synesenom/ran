@@ -83,6 +83,35 @@ describe('mc.MALA', () => {
     it('should throw a clear error when called with an array', () => {
       assert.throws(() => new MALA([logDensity1D, gradLogDensity1D]), /MALA: constructor requires an options object/)
     })
+
+    it('should throw for a malformed resumed prngQ', () => {
+      assert.throws(
+        () => new MALA({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { prngQ: 'oops' } } }),
+        /MALA: prng state must be an array of 4 finite numbers/
+      )
+    })
+
+    it('should throw when a resumed ls is not finite', () => {
+      assert.throws(
+        () => new MALA({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { ls: NaN } } }),
+        /MALA: resumed ls must be a finite number/
+      )
+    })
+
+    it('should throw when resumed pAccepted/pN/pBatch are not non-negative integers', () => {
+      assert.throws(
+        () => new MALA({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { pAccepted: -1 } } }),
+        /MALA: resumed pAccepted must be a non-negative integer/
+      )
+      assert.throws(
+        () => new MALA({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { pN: 1.5 } } }),
+        /MALA: resumed pN must be a non-negative integer/
+      )
+      assert.throws(
+        () => new MALA({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { pBatch: Infinity } } }),
+        /MALA: resumed pBatch must be a non-negative integer/
+      )
+    })
   })
 
   describe('._iter() rejection', () => {

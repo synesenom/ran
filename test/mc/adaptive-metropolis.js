@@ -52,6 +52,34 @@ describe('mc.AdaptiveMetropolis', () => {
       assert.throws(() => new AdaptiveMetropolis(42), /AdaptiveMetropolis: constructor requires an options object/)
       assert.throws(() => new AdaptiveMetropolis('logDensity'), /AdaptiveMetropolis: constructor requires an options object/)
     })
+
+    it('should throw for a malformed resumed prngQ', () => {
+      assert.throws(
+        () => new AdaptiveMetropolis({ logDensity: () => 0, config: { dim: 1 }, initialState: { internal: { prngQ: [1, 2, 3] } } }),
+        /AdaptiveMetropolis: prng state must be an array of 4 finite numbers/
+      )
+    })
+
+    it('should throw when a resumed covN is not a non-negative integer', () => {
+      assert.throws(
+        () => new AdaptiveMetropolis({ logDensity: () => 0, config: { dim: 1 }, initialState: { internal: { covN: -1 } } }),
+        /AdaptiveMetropolis: resumed covN must be a non-negative integer/
+      )
+    })
+
+    it('should throw when a resumed covMean has the wrong length', () => {
+      assert.throws(
+        () => new AdaptiveMetropolis({ logDensity: () => 0, config: { dim: 2 }, initialState: { internal: { covMean: [1] } } }),
+        /AdaptiveMetropolis: resumed covMean must be an array of 2 finite numbers/
+      )
+    })
+
+    it('should throw when a resumed covS is not a dim x dim matrix', () => {
+      assert.throws(
+        () => new AdaptiveMetropolis({ logDensity: () => 0, config: { dim: 2 }, initialState: { internal: { covS: [[1, 2], [3]] } } }),
+        /AdaptiveMetropolis: resumed covS must be a 2 x 2 array of finite numbers/
+      )
+    })
   })
 
   describe('._iter() rejection', () => {

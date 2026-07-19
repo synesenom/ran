@@ -159,8 +159,14 @@ export default class AdaptiveMetropolis extends MCMC {
 
   // Kept out of the constructor to avoid a Complex Method smell there. Deep-copies covS (a
   // dim x dim nested array) so the live accumulator never aliases a caller-held snapshot's rows —
-  // decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+  // decisions/0034-mcmc-exact-stream-reproducible-resume.md. Validated the same way stepSize is
+  // on HMC/MALA: a malformed resumed field must fail loudly rather than silently corrupt the
+  // covariance recursion — solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md.
   _restoreCovarianceAccumulator () {
+    MCMC._validateNonNegativeInteger(this.internal.covN, 'AdaptiveMetropolis: resumed covN')
+    MCMC._validateFiniteVector(this.internal.covMean, this.dim, 'AdaptiveMetropolis: resumed covMean')
+    MCMC._validateFiniteMatrix(this.internal.covS, this.dim, 'AdaptiveMetropolis: resumed covS')
+
     this._covN = this.internal.covN || 0
     this._covMean = (this.internal.covMean || new Array(this.dim).fill(0)).slice()
     this._covS = (this.internal.covS || Array.from({ length: this.dim }, () => new Array(this.dim).fill(0)))

@@ -120,6 +120,7 @@ export default class HMC extends MCMC {
     this._metricType = config.metric === 'dense' ? 'dense' : 'diag'
     HMC._validateDenseMetricDim(this._metricType, this.dim)
     HMC._validateResumedMetric(this.internal.metric, this._metricType, this.dim)
+    HMC._validateResumedMetricAccumulator(this.internal.metAccumulator, this._metricType, this.dim)
 
     this._gradLnp = gradLogDensity
     this._stepSize = this.internal.stepSize || config.stepSize || 0.1
@@ -346,6 +347,22 @@ export default class HMC extends MCMC {
     }
   }
 
+  // A resumed initialState.internal.metAccumulator is caller-supplied the same way metric is
+  // above -- see solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md.
+  // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
+  static _validateResumedMetricAccumulator (resumed, metricType, dim) {
+    if (resumed === undefined) {
+      return
+    }
+    MCMC._validateNonNegativeInteger(resumed.metN, 'HMC: resumed metAccumulator.metN')
+    MCMC._validateFiniteVector(resumed.metMean, dim, 'HMC: resumed metAccumulator.metMean')
+    if (metricType === 'dense') {
+      MCMC._validateFiniteMatrix(resumed.metCovS, dim, 'HMC: resumed metAccumulator.metCovS')
+    } else {
+      MCMC._validateFiniteVector(resumed.metM2, dim, 'HMC: resumed metAccumulator.metM2')
+    }
+  }
+
   static _isFiniteVector (arr, length) {
     return Array.isArray(arr) && arr.length === length && arr.every(Number.isFinite)
   }
@@ -386,18 +403,6 @@ export default class HMC extends MCMC {
   }
 
   // ─── PRIVATE INSTANCE ───
-
-  // Kept out of the constructor to avoid a Complex Method smell there. mu is the shrinkage
-  // target, Hbar the running acceptance-probability-deviation statistic, logEpsBar the smoothed
-  // log step size, t the iteration counter (Hoffman & Gelman 2014 S3.2). Restoring these (rather
-  // than always restarting from t=0) is what makes a mid-warm-up resume's dual averaging
-  // continue from the exact same trajectory — decisions/0034-mcmc-exact-stream-reproducible-resume.md.
-  _restoreDualAveraging () {
-    this._daMu = this.internal.daMu !== undefined ? this.internal.daMu : Math.log(10 * this._stepSize)
-    this._daHbar = this.internal.daHbar || 0
-    this._daLogEpsBar = this.internal.daLogEpsBar !== undefined ? this.internal.daLogEpsBar : Math.log(this._stepSize)
-    this._daT = this.internal.daT || 0
-  }
 
   // Sets up the mass-matrix (metric) online accumulator and the effective (ready-to-use) metric
   // consulted by _sampleMomentum/_applyInverseMetric. Extracted out of the constructor to avoid
@@ -577,10 +582,11 @@ export default class HMC extends MCMC {
   // ─── PRIVATE STATIC ───
 
   // Split out of _initMetricAccumulator so each field's fallback is a single expression rather
-  // than a repeated `(resumed && resumed[key]) || fallback` branch, which is what the Complex
-  // Method smell flags. decisions/0034-mcmc-exact-stream-reproducible-resume.md
+  // than a repeated branch, which is what the Complex Method smell flags. `!== undefined` (not
+  // `||`) so a legitimately-zero resumed value (e.g. metN: 0) is preserved rather than mistaken
+  // for absent. decisions/0034-mcmc-exact-stream-reproducible-resume.md
   static _resolveResumedField (resumed, key, fallback) {
-    return (resumed && resumed[key]) || fallback
+    return (resumed && resumed[key] !== undefined) ? resumed[key] : fallback
   }
 
   // Dense metric's identity default (no observations yet to base a covariance estimate on) --

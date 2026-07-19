@@ -142,7 +142,17 @@ export default class RWM extends MCMC {
   // Kept out of the constructor to avoid a Complex Method smell there. `base` (raw, decomposed)
   // is preferred over the legacy `proposal` (base*exp(ls) already folded together) so restoring
   // `ls` doesn't double-apply the global scale — decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+  // Validated the same way stepSize/pathLength already are on HMC/MALA: a malformed resumed field
+  // must fail loudly rather than silently corrupt every subsequent proposal — see
+  // solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md.
   _restoreAdaptationState () {
+    MCMC._validateFiniteVector(this.internal.base, this.dim, 'RWM: resumed base')
+    MCMC._validateFiniteVector(this.internal.proposal, this.dim, 'RWM: resumed proposal')
+    MCMC._validateFiniteScalar(this.internal.ls, 'RWM: resumed ls')
+    MCMC._validateNonNegativeInteger(this.internal.pAccepted, 'RWM: resumed pAccepted')
+    MCMC._validateNonNegativeInteger(this.internal.pN, 'RWM: resumed pN')
+    MCMC._validateNonNegativeInteger(this.internal.pBatch, 'RWM: resumed pBatch')
+
     this._base = (this.internal.base || this.internal.proposal || new Array(this.dim).fill(1)).slice()
     this._ls = this.internal.ls || 0
     this._pAccepted = this.internal.pAccepted || 0

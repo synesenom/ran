@@ -183,6 +183,56 @@ describe('mc.HMC', () => {
       assert.throws(() => new HMC(42), /HMC: constructor requires an options object/)
       assert.throws(() => new HMC('logDensity'), /HMC: constructor requires an options object/)
     })
+
+    it('should throw for a malformed resumed prngQ', () => {
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { prngQ: [1, 2, 3] } } }),
+        /HMC: prng state must be an array of 4 finite numbers/
+      )
+    })
+
+    it('should throw when resumed daMu/daHbar/daLogEpsBar are not finite', () => {
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { daMu: Infinity } } }),
+        /HMC: resumed daMu must be a finite number/
+      )
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { daHbar: NaN } } }),
+        /HMC: resumed daHbar must be a finite number/
+      )
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { daLogEpsBar: Infinity } } }),
+        /HMC: resumed daLogEpsBar must be a finite number/
+      )
+    })
+
+    it('should throw when resumed daT is not a non-negative integer', () => {
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { daT: -1 } } }),
+        /HMC: resumed daT must be a non-negative integer/
+      )
+    })
+
+    it('should throw when a resumed metAccumulator has a malformed metN', () => {
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { metAccumulator: { metN: -1, metMean: [0], metM2: [0] } } } }),
+        /HMC: resumed metAccumulator.metN must be a non-negative integer/
+      )
+    })
+
+    it('should throw when a resumed diagonal metAccumulator.metM2 has the wrong length', () => {
+      assert.throws(
+        () => new HMC({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2 }, initialState: { internal: { metAccumulator: { metN: 5, metMean: [0, 0], metM2: [0] } } } }),
+        /HMC: resumed metAccumulator.metM2 must be an array of 2 finite numbers/
+      )
+    })
+
+    it('should throw when a resumed dense metAccumulator.metCovS is not a dim x dim matrix', () => {
+      assert.throws(
+        () => new HMC({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2, metric: 'dense' }, initialState: { internal: { metAccumulator: { metN: 5, metMean: [0, 0], metCovS: [[1, 2], [3]] } } } }),
+        /HMC: resumed metAccumulator.metCovS must be a 2 x 2 array of finite numbers/
+      )
+    })
   })
 
   describe('gradLogDensity array-reuse contract', () => {

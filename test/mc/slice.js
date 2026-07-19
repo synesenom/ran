@@ -96,6 +96,24 @@ describe('mc.Slice', () => {
       assert.throws(() => new Slice(42), /Slice: constructor requires an options object/)
       assert.throws(() => new Slice('logDensity'), /Slice: constructor requires an options object/)
     })
+
+    it('should throw when a resumed bwSum has the wrong length', () => {
+      assert.throws(
+        () => new Slice({ logDensity: x => -0.5 * (x[0] * x[0] + x[1] * x[1]), config: { dim: 2 }, initialState: { internal: { bwSum: [1] } } }),
+        /Slice: resumed bwSum must be an array of 2 finite numbers/
+      )
+    })
+
+    it('should throw when resumed adjN/adjBatch are not non-negative integers', () => {
+      assert.throws(
+        () => new Slice({ logDensity: x => -0.5 * x[0] * x[0], config: { dim: 1 }, initialState: { internal: { adjN: -1 } } }),
+        /Slice: resumed adjN must be a non-negative integer/
+      )
+      assert.throws(
+        () => new Slice({ logDensity: x => -0.5 * x[0] * x[0], config: { dim: 1 }, initialState: { internal: { adjBatch: 1.5 } } }),
+        /Slice: resumed adjBatch must be a non-negative integer/
+      )
+    })
   })
 
   describe('._iter()', () => {

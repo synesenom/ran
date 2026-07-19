@@ -169,18 +169,6 @@ export default class NUTS extends MCMC {
 
   // ─── PRIVATE INSTANCE ───
 
-  // Kept out of the constructor to avoid a Complex Method smell there. mu is the shrinkage
-  // target, Hbar the running acceptance-probability-deviation statistic, logEpsBar the smoothed
-  // log step size, t the iteration counter (Hoffman & Gelman 2014 S3.2). Restoring these (rather
-  // than always restarting from t=0) is what makes a mid-warm-up resume's dual averaging
-  // continue from the exact same trajectory — decisions/0034-mcmc-exact-stream-reproducible-resume.md.
-  _restoreDualAveraging () {
-    this._daMu = this.internal.daMu !== undefined ? this.internal.daMu : Math.log(10 * this._stepSize)
-    this._daHbar = this.internal.daHbar || 0
-    this._daLogEpsBar = this.internal.daLogEpsBar !== undefined ? this.internal.daLogEpsBar : Math.log(this._stepSize)
-    this._daT = this.internal.daT || 0
-  }
-
   // Mirrors HMC's _iter freeze logic (hmc.js): switch from the actively-adapting exploration step
   // size to the dual-averaging-smoothed value on the first post-warm-up iteration, and reset the
   // shrinkage target so a later warmUp() call (after sample()) adapts from the tuned step size
