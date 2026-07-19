@@ -13,6 +13,13 @@ const _MAX_CHAINS = 10000
  * `MCMC` subclass — including `Gibbs`, whose options object has no `logDensity` at all — can
  * drive the diagnostic the same way (decisions/0033-generalized-runchains-sampler-driver.md).
  *
+ * <strong>Do not pass an explicit `initialState.x`.</strong> The same `samplerOptions` object is
+ * forwarded to every chain, and `MCMC.seed()` only redraws the starting position when `x` was
+ * <em>not</em> supplied. If you provide `initialState.x`, all chains start from the identical point,
+ * which defeats the over-dispersed-initialization that makes the Gelman-Rubin diagnostic
+ * meaningful — a chain family stuck in one mode then reports R-hat ≈ 1 ("converged") because every
+ * chain is stuck in the same place. Omit `initialState.x` so each seed draws its own random start.
+ *
  * @method runChains
  * @memberof ran.mc
  * @param {Function} Sampler An [MCMC]{@link ran.mc.MCMC} subclass (e.g. [RWM]{@link ran.mc.RWM},

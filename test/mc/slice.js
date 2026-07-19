@@ -43,6 +43,14 @@ describe('mc.Slice', () => {
       assert.throws(() => new Slice({ logDensity: x => -0.5 * (x[0] * x[0] + x[1] * x[1]), config: { dim: 2 }, initialState: { internal: { w: [1, 0] } } }), /w must be a positive number/)
     })
 
+    it('should throw when w is neither a number nor an array (e.g. a string)', () => {
+      assert.throws(() => new Slice({ logDensity: x => -0.5 * x[0] * x[0], config: { dim: 1 }, initialState: { internal: { w: 'oops' } } }), /w must be a positive number/)
+    })
+
+    it('should throw when w is null (an object, silently coerced to the default before this fix)', () => {
+      assert.throws(() => new Slice({ logDensity: x => -0.5 * x[0] * x[0], config: { dim: 1 }, initialState: { internal: { w: null } } }), /w must be a positive number/)
+    })
+
     it('should throw when a per-dimension w array length does not match dim', () => {
       assert.throws(() => new Slice({ logDensity: x => -0.5 * (x[0] * x[0] + x[1] * x[1]), config: { dim: 2 }, initialState: { internal: { w: [1] } } }), /w must be a positive number/)
     })
@@ -84,6 +92,15 @@ describe('mc.Slice', () => {
       assert.strictEqual(accepted, true)
       assert.notStrictEqual(x[0], prev[0])
       assert.notStrictEqual(x[1], prev[1])
+    })
+
+    it('should throw rather than hang when logDensity returns NaN inside the bracket', () => {
+      // logY = lnp(x1) - (-log U) becomes NaN when lnp is NaN, so lnp(candidate) > logY is always
+      // false and _shrink narrows the interval forever without ever accepting — the same
+      // infinite-loop failure class already guarded for w: Infinity, but in the shrink step. A
+      // bounded cap must convert the runaway into a thrown error instead of an unbounded hang.
+      const slice = new Slice({ logDensity: () => NaN, config: { dim: 1 }, initialState: { x: [0] } }).seed(1)
+      assert.throws(() => slice.iterate(), /shrink/i)
     })
   })
 

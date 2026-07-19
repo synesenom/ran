@@ -202,7 +202,13 @@ export default class HMC extends MCMC {
     // windowed warm-up schedule decisions/0024-mcmc-warmup-convergence-strategy.md already rules
     // out replacing this flat batch loop with. See decisions/0029-hmc-euclidean-metric-adaptation.md.
     this._daT++
-    this._daHbar = (1 - 1 / (this._daT + T0)) * this._daHbar + (1 / (this._daT + T0)) * (DELTA - i.alpha)
+    // A NaN acceptance probability (e.g. a hand-written gradient that returns NaN near a support
+    // boundary instead of a rigorous -Infinity) would otherwise be sticky: it flows through the
+    // Robbins-Monro recursion into _daHbar -> _daLogEpsBar -> stepSize and freezes the sampler
+    // forever with no error. Treat a non-finite alpha as 0 (a fully-rejected/divergent step), which
+    // drives the step size down and lets warm-up recover, matching Stan's divergent-proposal handling.
+    const alpha = Number.isFinite(i.alpha) ? i.alpha : 0
+    this._daHbar = (1 - 1 / (this._daT + T0)) * this._daHbar + (1 / (this._daT + T0)) * (DELTA - alpha)
     const logEps = this._daMu - (Math.sqrt(this._daT) / GAMMA) * this._daHbar
     const w = Math.pow(this._daT, -KAPPA)
     this._daLogEpsBar = w * logEps + (1 - w) * this._daLogEpsBar

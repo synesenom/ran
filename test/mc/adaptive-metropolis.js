@@ -48,19 +48,20 @@ describe('mc.AdaptiveMetropolis', () => {
   })
 
   describe('EPS regularization under near-singular covariance', () => {
-    it('should not throw and should regularize the proposal transform to exactly EPS * I when warmUp() sees an all-rejecting target', () => {
+    it('should not throw and should regularize the proposal transform to exactly s_d * EPS * I when warmUp() sees an all-rejecting target', () => {
       // lnp = () => -Infinity: every proposal is rejected (see "._iter() rejection" above), so x
       // never moves and the online covariance accumulator stays exactly rank-deficient (all-zero)
-      // throughout warm-up -- the near-singular case EPS * I exists to guard against.
+      // throughout warm-up -- the near-singular case s_d * EPS * I exists to guard against.
       const dim = 3
       const am = new AdaptiveMetropolis({ logDensity: () => -Infinity, config: { dim }, initialState: { x: new Array(dim).fill(0) } })
       assert.doesNotThrow(() => am.warmUp(null, 1))
       const { proposal } = am.state().internal
-      // exact rational: Sigma_proposal = _sd * Cov(x) + EPS * I collapses to EPS * I since Cov(x)
-      // is exactly zero (every proposal rejected), so ldl() yields L = I, D = EPS * I, and
-      // A = L * sqrt(D) = diag(sqrt(EPS), sqrt(EPS), sqrt(EPS)) with zero off-diagonal entries.
+      // exact rational: Sigma_proposal = _sd * (Cov(x) + EPS * I) collapses to _sd * EPS * I since
+      // Cov(x) is exactly zero (every proposal rejected), so ldl() yields L = I, D = _sd * EPS * I,
+      // and A = L * sqrt(D) = diag(sqrt(_sd*EPS), ...) with zero off-diagonal entries. _sd = 2.38^2/dim.
+      const sd = (2.38 * 2.38) / dim
       proposal.forEach((row, i) => row.forEach((v, j) => {
-        assert.closeTo(v, i === j ? Math.sqrt(1e-6) : 0, 1e-9)
+        assert.closeTo(v, i === j ? Math.sqrt(sd * 1e-6) : 0, 1e-9)
       }))
     })
   })

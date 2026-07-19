@@ -120,6 +120,19 @@ describe('mc.NUTS', () => {
         assert(Number.isFinite(result.alpha), `alpha ${result.alpha} not finite at iteration ${i}`)
       }
     })
+
+    it('should not let a NaN acceptance statistic permanently freeze the dual-averaging step size', () => {
+      // A hand-written gradient that returns NaN once the chain wanders past a boundary (instead of
+      // a rigorous -Infinity) makes the tree-averaged acceptance statistic NaN. Without a finiteness
+      // guard in _adjust, that NaN is sticky: it propagates through the Robbins-Monro recursion into
+      // stepSize and freezes the sampler permanently. The tuned step size must stay finite/positive.
+      const lnp = x => -0.5 * x[0] * x[0]
+      const grad = x => [x[0] > 1 ? NaN : -x[0]]
+      const nuts = new NUTS({ logDensity: lnp, gradLogDensity: grad, config: { dim: 1 }, initialState: { x: [0] } }).seed(42)
+      nuts.warmUp(null, 2)
+      const step = nuts.state().internal.stepSize
+      assert(Number.isFinite(step) && step > 0, `stepSize should stay finite and positive, got ${step}`)
+    })
   })
 
   describe('.state() round-trip', () => {

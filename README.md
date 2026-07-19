@@ -148,7 +148,7 @@ console.log(fitted.test(data))  // => { statistics: 0.42, passed: true }
 |-----------|----------|
 | `ran.dist` | 144 probability distributions |
 | `ran.process` | Stochastic processes: AR(1), Brownian motion, Brownian bridge, Cox–Ingersoll–Ross, geometric Brownian motion, Ornstein–Uhlenbeck, Poisson process, random walk |
-| `ran.mc` | Random-walk Metropolis sampler, Gelman–Rubin convergence diagnostic |
+| `ran.mc` | MCMC samplers (random-walk & adaptive Metropolis, slice, HMC, NUTS, MALA, Gibbs, adaptive rejection sampling), parallel tempering, multi-chain runner, Gelman–Rubin convergence diagnostic |
 | `ran.location` | Mean, median, mode, geometric mean, harmonic mean, trimean, midrange |
 | `ran.dispersion` | Variance, standard deviation, IQR, Gini coefficient, entropy, CV, … |
 | `ran.shape` | Skewness, kurtosis, quantiles, moments, min, max, rank |

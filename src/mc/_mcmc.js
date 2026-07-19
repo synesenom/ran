@@ -316,7 +316,13 @@ export default class MCMC {
   // decisions/0027-mcmc-reseed-cached-log-density-hook.md — extracted reseed-and-recompute logic
   // shared by RWM, AdaptiveMetropolis, and HMC into one explicitly-called protected method
   _reseedCachedLogDensity (value) {
-    this._q.seed(value)
+    // Derive _q's seed from `value` rather than reusing it verbatim: Xoshiro128p.seed() is a pure
+    // function of its argument with no per-instance salt (src/core/xoshiro.js), so seeding the
+    // proposal/momentum generator and this.r with the identical value aliases them into one shared
+    // stream — the Metropolis accept/reject uniform would then be a value already consumed to build
+    // an earlier proposal, breaking the independence the MH ratio assumes. The `${value}-q` suffix
+    // mirrors ParallelTempering's per-replica `${value}-${i}` seeding.
+    this._q.seed(`${value}-q`)
     this.lastLnp = this.lnp(this.x)
   }
 
