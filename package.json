@@ -459,6 +459,39 @@
     "./dist/zipf-mandelbrot": {
       "import": "./dist/zipf-mandelbrot.esm.js"
     },
+    "./mc/adaptive-metropolis": {
+      "import": "./dist/mc/adaptive-metropolis.esm.js"
+    },
+    "./mc/ars": {
+      "import": "./dist/mc/ars.esm.js"
+    },
+    "./mc/gelman-rubin": {
+      "import": "./dist/mc/gelman-rubin.esm.js"
+    },
+    "./mc/gibbs": {
+      "import": "./dist/mc/gibbs.esm.js"
+    },
+    "./mc/hmc": {
+      "import": "./dist/mc/hmc.esm.js"
+    },
+    "./mc/mala": {
+      "import": "./dist/mc/mala.esm.js"
+    },
+    "./mc/nuts": {
+      "import": "./dist/mc/nuts.esm.js"
+    },
+    "./mc/parallel-tempering": {
+      "import": "./dist/mc/parallel-tempering.esm.js"
+    },
+    "./mc/run-chains": {
+      "import": "./dist/mc/run-chains.esm.js"
+    },
+    "./mc/rwm": {
+      "import": "./dist/mc/rwm.esm.js"
+    },
+    "./mc/slice": {
+      "import": "./dist/mc/slice.esm.js"
+    },
     "./process/ar1": {
       "import": "./dist/process/ar1.esm.js"
     },
