@@ -37,8 +37,8 @@ const BATCH = 100
  * positive finite number.
  */
 // decisions/0032-mala-options-object-only-constructor.md — options-object-only constructor;
-// gradLogDensity is destructured locally and never forwarded to the MCMC base class, which
-// keeps super()'s own positional/options detection (and every other MCMC subclass) untouched.
+// gradLogDensity is destructured locally and never forwarded to the MCMC base class, whose own
+// constructor takes (logDensity, config, initialState) positionally as an internal contract only.
 export default class MALA extends MCMC {
   /**
    * @param {Object} options MALA options, as a single object.

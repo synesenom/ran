@@ -52,95 +52,95 @@ describe('mc.MCMC', () => {
     })
 
     it('should throw for dim: 0', () => {
-      assert.throws(() => new RWM(() => 0, { dim: 0 }), /dim must be a positive integer/)
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { dim: 0 } }), /dim must be a positive integer/)
     })
 
     it('should throw for a negative dim', () => {
-      assert.throws(() => new RWM(() => 0, { dim: -2 }), /dim must be a positive integer/)
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { dim: -2 } }), /dim must be a positive integer/)
     })
 
     it('should throw for a non-integer dim', () => {
-      assert.throws(() => new RWM(() => 0, { dim: 1.5 }), /dim must be a positive integer/)
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { dim: 1.5 } }), /dim must be a positive integer/)
     })
 
     it('should throw for a dim above the maximum allowed', () => {
-      assert.throws(() => new RWM(() => 0, { dim: 1e9 }), /dim must be at most/)
-      assert.throws(() => new RWM(() => 0, { dim: 10001 }), /dim must be at most/)
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { dim: 1e9 } }), /dim must be at most/)
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { dim: 10001 } }), /dim must be at most/)
     })
 
     it('should not throw for a dim at the maximum allowed', () => {
-      assert.doesNotThrow(() => new RWM(() => 0, { dim: 10000 }))
+      assert.doesNotThrow(() => new RWM({ logDensity: () => 0, config: { dim: 10000 } }))
     })
 
     it('should throw for maxLag: 0', () => {
-      assert.throws(() => new RWM(() => 0, { maxLag: 0 }), /maxLag must be a positive integer/)
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { maxLag: 0 } }), /maxLag must be a positive integer/)
     })
 
     it('should throw for a negative maxLag', () => {
-      assert.throws(() => new RWM(() => 0, { maxLag: -2 }), /maxLag must be a positive integer/)
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { maxLag: -2 } }), /maxLag must be a positive integer/)
     })
 
     it('should throw for a non-integer maxLag', () => {
-      assert.throws(() => new RWM(() => 0, { maxLag: 1.5 }), /maxLag must be a positive integer/)
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { maxLag: 1.5 } }), /maxLag must be a positive integer/)
     })
 
     it('should throw for a maxLag above the maximum allowed', () => {
-      assert.throws(() => new RWM(() => 0, { maxLag: 1e9 }), /maxLag must be at most/)
-      assert.throws(() => new RWM(() => 0, { maxLag: 10001 }), /maxLag must be at most/)
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { maxLag: 1e9 } }), /maxLag must be at most/)
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { maxLag: 10001 } }), /maxLag must be at most/)
     })
 
     it('should not throw for a maxLag at the maximum allowed', () => {
-      assert.doesNotThrow(() => new RWM(() => 0, { maxLag: 10000 }))
+      assert.doesNotThrow(() => new RWM({ logDensity: () => 0, config: { maxLag: 10000 } }))
     })
 
     it('should throw when dim and maxLag are each individually valid but their product exceeds the combined bound', () => {
-      assert.throws(() => new RWM(() => 0, { dim: 10000, maxLag: 10000 }), /dim \* maxLag must be at most/)
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { dim: 10000, maxLag: 10000 } }), /dim \* maxLag must be at most/)
     })
 
     it('should not throw when dim*maxLag is exactly at the combined bound', () => {
-      assert.doesNotThrow(() => new RWM(() => 0, { dim: 10000, maxLag: 625 }))
+      assert.doesNotThrow(() => new RWM({ logDensity: () => 0, config: { dim: 10000, maxLag: 625 } }))
     })
 
     it('should throw when dim*maxLag is just above the combined bound', () => {
-      assert.throws(() => new RWM(() => 0, { dim: 10000, maxLag: 626 }), /dim \* maxLag must be at most/)
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { dim: 10000, maxLag: 626 } }), /dim \* maxLag must be at most/)
     })
 
     it('should default to maxLag: 100 when omitted', () => {
-      const rwm = new RWM(x => -0.5 * x[0] * x[0])
+      const rwm = new RWM({ logDensity: x => -0.5 * x[0] * x[0] })
       assert.strictEqual(rwm.maxLag, 100)
     })
 
     it('should default to dim: 1 when omitted', () => {
-      const rwm = new RWM(x => -0.5 * x[0] * x[0])
+      const rwm = new RWM({ logDensity: x => -0.5 * x[0] * x[0] })
       assert.strictEqual(rwm.dim, 1)
       assert.strictEqual(rwm.sample(null, 1)[0].length, 1)
     })
 
     it('should not throw for a valid multi-dimensional dim', () => {
-      const rwm = new RWM(x => -0.5 * (x[0] * x[0] + x[1] * x[1] + x[2] * x[2]), { dim: 3 })
+      const rwm = new RWM({ logDensity: x => -0.5 * (x[0] * x[0] + x[1] * x[1] + x[2] * x[2]), config: { dim: 3 } })
       assert.strictEqual(rwm.dim, 3)
       assert.strictEqual(rwm.sample(null, 1)[0].length, 3)
     })
 
     it('should throw for arWindow: 0', () => {
-      assert.throws(() => new RWM(() => 0, { arWindow: 0 }), /arWindow must be a positive integer/)
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { arWindow: 0 } }), /arWindow must be a positive integer/)
     })
 
     it('should throw for a negative arWindow', () => {
-      assert.throws(() => new RWM(() => 0, { arWindow: -2 }), /arWindow must be a positive integer/)
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { arWindow: -2 } }), /arWindow must be a positive integer/)
     })
 
     it('should throw for a non-integer arWindow', () => {
-      assert.throws(() => new RWM(() => 0, { arWindow: 2.5 }), /arWindow must be a positive integer/)
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { arWindow: 2.5 } }), /arWindow must be a positive integer/)
     })
 
     it('should throw for an arWindow above the maximum allowed', () => {
-      assert.throws(() => new RWM(() => 0, { arWindow: 1e9 }), /arWindow must be at most/)
-      assert.throws(() => new RWM(() => 0, { arWindow: 10001 }), /arWindow must be at most/)
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { arWindow: 1e9 } }), /arWindow must be at most/)
+      assert.throws(() => new RWM({ logDensity: () => 0, config: { arWindow: 10001 } }), /arWindow must be at most/)
     })
 
     it('should not throw for an arWindow at the maximum allowed', () => {
-      assert.doesNotThrow(() => new RWM(() => 0, { arWindow: 10000 }))
+      assert.doesNotThrow(() => new RWM({ logDensity: () => 0, config: { arWindow: 10000 } }))
     })
 
     it('should not throw for a valid arWindow and use it for ar()', () => {

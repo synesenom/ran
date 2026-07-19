@@ -67,7 +67,7 @@ describe('mc.gelmanRubin', () => {
     // Shared by both tests below so the construct/warmUp/sample boilerplate for a seeded
     // RWM chain isn't repeated with only the seed/batch/size arguments differing.
     function seededChain (seed, warmUpBatches, sampleSize) {
-      const rwm = new RWM(logDensity, { dim: 1 }).seed(seed)
+      const rwm = new RWM({ logDensity, config: { dim: 1 } }).seed(seed)
       rwm.warmUp(null, warmUpBatches)
       return rwm.sample(null, sampleSize)
     }

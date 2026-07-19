@@ -1,5 +1,5 @@
 import { assert } from 'chai'
-import { describe, it, beforeEach, afterEach } from 'mocha'
+import { describe, it } from 'mocha'
 import runChains from '../../src/mc/run-chains'
 import MCMC from '../../src/mc/_mcmc'
 import AdaptiveMetropolis from '../../src/mc/adaptive-metropolis'
@@ -12,26 +12,26 @@ describe('mc.runChains', () => {
 
   describe('input validation', () => {
     it('should throw when chains is fewer than two', () => {
-      assert.throws(() => runChains(logDensity, { dim: 1 }, { chains: 1 }), /at least two chains/)
+      assert.throws(() => runChains(RWM, { logDensity, config: { dim: 1 } }, { chains: 1 }), /at least two chains/)
     })
 
     it('should throw when chains is zero', () => {
-      assert.throws(() => runChains(logDensity, { dim: 1 }, { chains: 0 }), /at least two chains/)
+      assert.throws(() => runChains(RWM, { logDensity, config: { dim: 1 } }, { chains: 0 }), /at least two chains/)
     })
 
     it('should throw when chains is not an integer', () => {
-      assert.throws(() => runChains(logDensity, { dim: 1 }, { chains: 2.5 }), /at least two chains/)
+      assert.throws(() => runChains(RWM, { logDensity, config: { dim: 1 } }, { chains: 2.5 }), /at least two chains/)
     })
 
     it('should throw when seeds.length does not match chains', () => {
-      assert.throws(() => runChains(logDensity, { dim: 1 }, { chains: 5, seeds: [1, 2, 3] }), /seeds.length must equal.*chains/)
+      assert.throws(() => runChains(RWM, { logDensity, config: { dim: 1 } }, { chains: 5, seeds: [1, 2, 3] }), /seeds.length must equal.*chains/)
     })
 
     it('should throw when chains exceeds the maximum allowed', () => {
       // warmUpBatches/sampleSize: 0 keeps this fast — the bound must be checked
       // before any chain is constructed, not discovered by running out of time.
       assert.throws(
-        () => runChains(logDensity, { dim: 1 }, { chains: 10001, warmUpBatches: 0, sampleSize: 0 }),
+        () => runChains(RWM, { logDensity, config: { dim: 1 } }, { chains: 10001, warmUpBatches: 0, sampleSize: 0 }),
         /chains must be at most/
       )
     })
@@ -39,10 +39,10 @@ describe('mc.runChains', () => {
 
   describe('defaults', () => {
     it('should default to two chains seeded 1 and 2 when chains/seeds are omitted', () => {
-      const { samples } = runChains(logDensity, { dim: 1 }, { warmUpBatches: 2, sampleSize: 20 })
+      const { samples } = runChains(RWM, { logDensity, config: { dim: 1 } }, { warmUpBatches: 2, sampleSize: 20 })
 
       const manual = [1, 2].map(seed => {
-        const rwm = new RWM(logDensity, { dim: 1 }).seed(seed)
+        const rwm = new RWM({ logDensity, config: { dim: 1 } }).seed(seed)
         rwm.warmUp(null, 2)
         return rwm.sample(null, 20)
       })
@@ -53,13 +53,13 @@ describe('mc.runChains', () => {
 
   describe('output shape', () => {
     it('should return samples for the requested chain count and sample size', () => {
-      const { samples } = runChains(logDensity, { dim: 1 }, { chains: 3, warmUpBatches: 2, sampleSize: 15 })
+      const { samples } = runChains(RWM, { logDensity, config: { dim: 1 } }, { chains: 3, warmUpBatches: 2, sampleSize: 15 })
       assert.strictEqual(samples.length, 3)
       samples.forEach(chain => assert.strictEqual(chain.length, 15))
     })
 
     it('should return one rhat array per state dimension, each of length sampleSize - 1', () => {
-      const { rhat } = runChains(logDensity, { dim: 1 }, { chains: 2, warmUpBatches: 2, sampleSize: 15 })
+      const { rhat } = runChains(RWM, { logDensity, config: { dim: 1 } }, { chains: 2, warmUpBatches: 2, sampleSize: 15 })
       assert.strictEqual(rhat.length, 1)
       assert.strictEqual(rhat[0].length, 14)
     })
@@ -67,10 +67,10 @@ describe('mc.runChains', () => {
 
   describe('seeded reproducibility', () => {
     it('should match manually constructed chains seeded with the same explicit seeds', () => {
-      const { samples } = runChains(logDensity, { dim: 1 }, { chains: 3, seeds: [10, 20, 30], warmUpBatches: 2, sampleSize: 15 })
+      const { samples } = runChains(RWM, { logDensity, config: { dim: 1 } }, { chains: 3, seeds: [10, 20, 30], warmUpBatches: 2, sampleSize: 15 })
 
       const manual = [10, 20, 30].map(seed => {
-        const rwm = new RWM(logDensity, { dim: 1 }).seed(seed)
+        const rwm = new RWM({ logDensity, config: { dim: 1 } }).seed(seed)
         rwm.warmUp(null, 2)
         return rwm.sample(null, 15)
       })
@@ -81,24 +81,22 @@ describe('mc.runChains', () => {
 
   describe('maxLength', () => {
     it('should cap rhat length the same way gelmanRubin does', () => {
-      const { rhat } = runChains(logDensity, { dim: 1 }, { chains: 2, warmUpBatches: 2, sampleSize: 15, maxLength: 3 })
+      const { rhat } = runChains(RWM, { logDensity, config: { dim: 1 } }, { chains: 2, warmUpBatches: 2, sampleSize: 15, maxLength: 3 })
       assert.strictEqual(rhat[0].length, 3)
     })
   })
 
   describe('convergence', () => {
     it('should converge to R-hat < 1.1 for a well-tuned unit-Gaussian target', () => {
-      const { rhat } = runChains(logDensity, { dim: 1 }, { chains: 2, warmUpBatches: 10, sampleSize: 500, seeds: [100, 200] })
+      const { rhat } = runChains(RWM, { logDensity, config: { dim: 1 } }, { chains: 2, warmUpBatches: 10, sampleSize: 500, seeds: [100, 200] })
       assert.isBelow(rhat[0][rhat[0].length - 1], 1.1)
     })
   })
 
-  describe('new (Sampler, samplerOptions, runOptions) form', () => {
+  describe('(Sampler, samplerOptions, runOptions) form', () => {
     it('should match manually constructed AdaptiveMetropolis chains using non-default config', () => {
-      // Non-default maxLag/arWindow (not just dim) so a resolver bug that drops a
-      // config field would be caught instead of masked by every field already
-      // being at its default — see
-      // solutions/testing/2026-07-18-0752-constructor-parity-test-default-value-tautology.md
+      // Non-default maxLag/arWindow (not just dim) so a bug that drops a config field
+      // would be caught instead of masked by every field already being at its default.
       const samplerOptions = { logDensity, config: { dim: 1, maxLag: 20, arWindow: 50 } }
       const { samples } = runChains(
         AdaptiveMetropolis,
@@ -162,44 +160,13 @@ describe('mc.runChains', () => {
     })
 
     it('should fail fast with MCMC\'s own "abstract" error when the abstract MCMC class itself is passed as Sampler', () => {
-      // _isSamplerClass finds _iter on MCMC.prototype itself (MCMC._iter is the base hook every
-      // subclass overrides), so MCMC is detected as a sampler class rather than misrouted to the
-      // legacy logDensity path — construction then fails fast with MCMC's own guard instead of a
-      // confusing downstream error. See decisions/0033-generalized-runchains-sampler-driver.md.
+      // The abstract-instantiation guard is the first line of MCMC's constructor, so it fires
+      // before any argument shape is inspected — passing the wrong class as Sampler still fails
+      // fast with a clear error rather than a confusing downstream one.
       assert.throws(
         () => runChains(MCMC, { logDensity, config: { dim: 1 } }, { warmUpBatches: 1, sampleSize: 5 }),
         /MCMC is abstract and cannot be instantiated directly/
       )
-    })
-  })
-
-  describe('legacy (logDensity, config, options) form deprecation', () => {
-    let originalWarn
-    let warnCalls
-
-    beforeEach(() => {
-      originalWarn = console.warn
-      warnCalls = []
-      console.warn = (...args) => warnCalls.push(args)
-    })
-
-    afterEach(() => {
-      console.warn = originalWarn
-    })
-
-    it('should not emit a deprecation warning for the new (Sampler, samplerOptions, runOptions) form', () => {
-      runChains(RWM, { logDensity, config: { dim: 1 } }, { warmUpBatches: 1, sampleSize: 5 })
-      assert.strictEqual(warnCalls.length, 0)
-    })
-
-    it('should emit exactly one deprecation warning per call for the legacy form', () => {
-      runChains(logDensity, { dim: 1 }, { warmUpBatches: 1, sampleSize: 5 })
-      assert.strictEqual(warnCalls.length, 1)
-      assert.match(warnCalls[0][0], /\[ranjs] positional runChains\(/)
-      assert.match(warnCalls[0][0], /runChains\(Sampler, samplerOptions, runOptions\)/)
-
-      runChains(logDensity, { dim: 1 }, { warmUpBatches: 1, sampleSize: 5 })
-      assert.strictEqual(warnCalls.length, 2)
     })
   })
 })

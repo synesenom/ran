@@ -55,11 +55,9 @@ const DELTA_MAX = 1000
 // drive dual averaging; NUTS's alpha is the tree-averaged acceptance statistic, not a single
 // leaf's Metropolis ratio (Hoffman & Gelman 2014 Algorithm 3)
 // decisions/0031-gradient-sampler-options-object-constructor.md — establishes the
-// {logDensity, gradLogDensity, config, initialState} options shape HMC resolves via
-// MCMC._resolveGradientSamplerArgs. NUTS has no prior release to stay backward compatible with
-// (#972), so it ships options-object-only: no positional form, no deprecation warning, and no
-// call to _resolveGradientSamplerArgs (that resolver always warns on its positional branch,
-// which would be wrong here since NUTS never had one).
+// {logDensity, gradLogDensity, config, initialState} options shape HMC also uses. NUTS has no
+// prior release to stay backward compatible with (#972), so it ships options-object-only from
+// day one, same as HMC after #968 removed HMC's own positional form.
 // decisions/0032-mala-options-object-only-constructor.md — MALA's sibling migration (#970)
 // establishes a guard-then-destructure pattern for options-object-only gradient samplers: a
 // _validateOptions check runs before destructuring, so misuse (null, no args, or the old

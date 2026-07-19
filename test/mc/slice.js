@@ -1,71 +1,50 @@
 import { assert } from 'chai'
-import { describe, it, beforeEach, afterEach } from 'mocha'
+import { describe, it } from 'mocha'
 import Slice from '../../src/mc/slice'
 import { Normal } from '../../src/dist'
 import { ksTest } from '../test-utils'
-import { SEEDS, assertConstructorFormsMatch } from './_helpers'
+import { SEEDS } from './_helpers'
 
 describe('mc.Slice', () => {
   describe('constructor', () => {
     it('should instantiate without error for a 1D Normal target', () => {
-      assert.doesNotThrow(() => new Slice(x => -0.5 * x[0] * x[0], { dim: 1 }))
+      assert.doesNotThrow(() => new Slice({ logDensity: x => -0.5 * x[0] * x[0], config: { dim: 1 } }))
     })
 
     it('should default w to 1.0 per dimension when omitted', () => {
-      const slice = new Slice(x => -0.5 * x[0] * x[0], { dim: 1 })
+      const slice = new Slice({ logDensity: x => -0.5 * x[0] * x[0], config: { dim: 1 } })
       assert.deepEqual(slice.state().internal.w, [1.0])
     })
 
     it('should broadcast an explicit scalar w from initialState.internal to every dimension', () => {
-      const slice = new Slice(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }, { internal: { w: 2.5 } })
+      const slice = new Slice({ logDensity: x => -0.5 * (x[0] * x[0] + x[1] * x[1]), config: { dim: 2 }, initialState: { internal: { w: 2.5 } } })
       assert.deepEqual(slice.state().internal.w, [2.5, 2.5])
     })
 
     it('should throw for w: 0', () => {
-      assert.throws(() => new Slice(x => -0.5 * x[0] * x[0], { dim: 1 }, { internal: { w: 0 } }), /w must be a positive number/)
+      assert.throws(() => new Slice({ logDensity: x => -0.5 * x[0] * x[0], config: { dim: 1 }, initialState: { internal: { w: 0 } } }), /w must be a positive number/)
     })
 
     it('should throw for a negative w', () => {
-      assert.throws(() => new Slice(x => -0.5 * x[0] * x[0], { dim: 1 }, { internal: { w: -1 } }), /w must be a positive number/)
+      assert.throws(() => new Slice({ logDensity: x => -0.5 * x[0] * x[0], config: { dim: 1 }, initialState: { internal: { w: -1 } } }), /w must be a positive number/)
     })
 
     it('should throw for a non-finite w', () => {
-      assert.throws(() => new Slice(x => -0.5 * x[0] * x[0], { dim: 1 }, { internal: { w: NaN } }), /w must be a positive number/)
+      assert.throws(() => new Slice({ logDensity: x => -0.5 * x[0] * x[0], config: { dim: 1 }, initialState: { internal: { w: NaN } } }), /w must be a positive number/)
     })
 
     it('should throw for w: Infinity', () => {
       // Infinity passes a naive `typeof w === 'number' && w > 0` check but breaks _stepOut
       // (l = x0 - Infinity * U = -Infinity, r = l + Infinity = NaN), so it must be rejected here.
-      assert.throws(() => new Slice(x => -0.5 * x[0] * x[0], { dim: 1 }, { internal: { w: Infinity } }), /w must be a positive number/)
+      assert.throws(() => new Slice({ logDensity: x => -0.5 * x[0] * x[0], config: { dim: 1 }, initialState: { internal: { w: Infinity } } }), /w must be a positive number/)
     })
 
     it('should throw when a per-dimension w array contains a non-positive entry', () => {
-      assert.throws(() => new Slice(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }, { internal: { w: [1, 0] } }), /w must be a positive number/)
+      assert.throws(() => new Slice({ logDensity: x => -0.5 * (x[0] * x[0] + x[1] * x[1]), config: { dim: 2 }, initialState: { internal: { w: [1, 0] } } }), /w must be a positive number/)
     })
 
     it('should throw when a per-dimension w array length does not match dim', () => {
-      assert.throws(() => new Slice(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }, { internal: { w: [1] } }), /w must be a positive number/)
-    })
-  })
-
-  describe('options-object constructor form', () => {
-    let originalWarn
-    let warnCalls
-
-    beforeEach(() => {
-      originalWarn = console.warn
-      warnCalls = []
-      console.warn = (...args) => warnCalls.push(args)
-    })
-
-    afterEach(() => {
-      console.warn = originalWarn
-    })
-
-    it('should behave identically to the positional form, including config defaults never explicitly passed', () => {
-      // internal.w exercises the Slice-specific state channel: state().internal (compared
-      // wholesale inside the helper) covers w the same way it covers RWM's proposal.
-      assertConstructorFormsMatch(Slice, x => -0.5 * x[0] * x[0], { dim: 1 }, { x: [2], internal: { w: 2.5 } })
+      assert.throws(() => new Slice({ logDensity: x => -0.5 * (x[0] * x[0] + x[1] * x[1]), config: { dim: 2 }, initialState: { internal: { w: [1] } } }), /w must be a positive number/)
     })
 
     it('should default config and initialState when omitted entirely from the options object', () => {
@@ -85,27 +64,12 @@ describe('mc.Slice', () => {
       assert.deepStrictEqual(slice.x, [7])
     })
 
-    it('should validate config the same way as the positional form', () => {
+    it('should validate config', () => {
       assert.throws(() => new Slice({ logDensity: () => 0, config: { dim: 0 } }), /dim must be a positive integer/)
     })
 
-    it('should validate w the same way as the positional form', () => {
+    it('should validate w when config is omitted', () => {
       assert.throws(() => new Slice({ logDensity: () => 0, initialState: { internal: { w: 0 } } }), /w must be a positive number/)
-    })
-
-    it('should not emit a deprecation warning for the options-object form', () => {
-      assert.doesNotThrow(() => new Slice({ logDensity: () => 0 }))
-      assert.strictEqual(warnCalls.length, 0)
-    })
-
-    it('should emit exactly one deprecation warning per instantiation for the positional form', () => {
-      assert.doesNotThrow(() => new Slice(() => 0))
-      assert.strictEqual(warnCalls.length, 1)
-      assert.match(warnCalls[0][0], /\[ranjs] positional MCMC constructor arguments are deprecated/)
-      assert.match(warnCalls[0][0], /new Slice\({ logDensity, config, initialState }\)/)
-
-      assert.doesNotThrow(() => new Slice(() => 0))
-      assert.strictEqual(warnCalls.length, 2)
     })
   })
 
@@ -114,7 +78,7 @@ describe('mc.Slice', () => {
       // Continuous target: P(new coordinate === old coordinate) = 0, so any
       // accepted draw differing in every dimension confirms the full sweep ran,
       // not just a subset of dimensions.
-      const slice = new Slice(x => -0.5 * (x[0] * x[0] + x[1] * x[1]), { dim: 2 }, { x: [0, 0] }).seed(11)
+      const slice = new Slice({ logDensity: x => -0.5 * (x[0] * x[0] + x[1] * x[1]), config: { dim: 2 }, initialState: { x: [0, 0] } }).seed(11)
       const prev = slice.x.slice()
       const { x, accepted } = slice.iterate()
       assert.strictEqual(accepted, true)
@@ -125,7 +89,7 @@ describe('mc.Slice', () => {
 
   describe('.ar()', () => {
     it('should always be 1.0 regardless of the number of iterations', () => {
-      const slice = new Slice(x => -0.5 * x[0] * x[0], { dim: 1 })
+      const slice = new Slice({ logDensity: x => -0.5 * x[0] * x[0], config: { dim: 1 } })
       for (let i = 0; i < 5; i++) {
         slice.iterate()
         assert.strictEqual(slice.ar(), 1.0)
@@ -138,10 +102,10 @@ describe('mc.Slice', () => {
   describe('.state() round-trip', () => {
     it('should restore position, samplingRate, and the adapted w', () => {
       const lnp = x => -0.5 * x[0] * x[0]
-      const slice1 = new Slice(lnp, { dim: 1 }).seed(3)
+      const slice1 = new Slice({ logDensity: lnp, config: { dim: 1 } }).seed(3)
       slice1.warmUp(null, 3)
       const state = slice1.state()
-      const slice2 = new Slice(lnp, { dim: 1 }, state)
+      const slice2 = new Slice({ logDensity: lnp, config: { dim: 1 }, initialState: state })
       assert.deepEqual(slice2.x, state.x)
       assert.strictEqual(slice2.samplingRate, state.samplingRate)
       assert.deepEqual(slice2.state().internal.w, state.internal.w)
@@ -154,7 +118,7 @@ describe('mc.Slice', () => {
       // still pass if the Robbins-Monro sign were inverted-but-always-grows (w can reach
       // ~exp(1000 * 0.01) = ~22026 if the adaptation never settles toward an equilibrium), so
       // the upper bound catches runaway growth that a one-sided check would miss.
-      const slice = new Slice(x => -0.5 * x[0] * x[0] / 100, { dim: 1 }).seed(13)
+      const slice = new Slice({ logDensity: x => -0.5 * x[0] * x[0] / 100, config: { dim: 1 } }).seed(13)
       slice.warmUp(null, 10)
       const w = slice.state().internal.w[0]
       assert(w > 2 && w < 200, `w = ${w}, expected to settle near the target's scale, neither stuck near the default nor diverging`)
@@ -164,7 +128,7 @@ describe('mc.Slice', () => {
   describe('.sample() distributional test', () => {
     SEEDS.forEach(seed => {
       it(`should produce samples matching Normal(0,1) target (KS test, seed ${seed})`, () => {
-        const slice = new Slice(x => -0.5 * x[0] * x[0], { dim: 1 }).seed(seed)
+        const slice = new Slice({ logDensity: x => -0.5 * x[0] * x[0], config: { dim: 1 } }).seed(seed)
         slice.warmUp(null, 10)
         const samples = slice.sample(null, 2000)
         const values = samples.map(s => s[0])
@@ -177,7 +141,7 @@ describe('mc.Slice', () => {
       it(`should recover both margins of a correlated bivariate Normal target (KS test, seed ${seed})`, () => {
         const rho = 0.5
         const lnp = x => -0.5 / (1 - rho * rho) * (x[0] * x[0] - 2 * rho * x[0] * x[1] + x[1] * x[1])
-        const slice = new Slice(lnp, { dim: 2 }, { x: [0, 0] }).seed(seed)
+        const slice = new Slice({ logDensity: lnp, config: { dim: 2 }, initialState: { x: [0, 0] } }).seed(seed)
         slice.warmUp(null, 10)
         const samples = slice.sample(null, 2000)
         const ref = new Normal(0, 1)
