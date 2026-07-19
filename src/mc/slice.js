@@ -15,22 +15,6 @@ const TARGET_RATIO = 2.0
 const MAX_STEPS = 200
 
 /**
- * @overload
- * @param {Function} logDensity The logarithm of the (unnormalized) target density.
- * @param {Object=} config Sampler configuration (see MCMC base class for shared options).
- * @param {Object=} initialState Initial state of the sampler (see MCMC base class). The interval
- * width `w` (default 1.0) may be seeded via `initialState.internal.w`, either as a single number
- * (broadcast to every dimension) or as a per-dimension array.
- */
-/**
- * @overload
- * @param {Object} options Sampler options, as a single object.
- * @param {Function} options.logDensity The logarithm of the (unnormalized) target density.
- * @param {Object=} options.config Sampler configuration (see MCMC base class for shared options).
- * @param {Object=} options.initialState Initial state of the sampler, including the `w` seeding
- * described in the positional form above.
- */
-/**
  * Class implementing coordinate-wise [slice sampling]{@link https://en.wikipedia.org/wiki/Slice_sampling}
  * (Neal, R.M. (2003) "Slice Sampling", Annals of Statistics 31(3):705-767) via the stepping-out
  * and shrinkage procedure. Each sweep updates every dimension in turn: a vertical level is drawn
@@ -45,29 +29,29 @@ const MAX_STEPS = 200
  *
  * @class Slice
  * @memberof ran.mc
- * @param {Function|Object} logDensity The logarithm of the (unnormalized) target density (this
- * positional form is deprecated — see the options-object overload above), or a single options
- * object carrying {logDensity}, {config}, and {initialState}.
- * @param {Object=} config Sampler configuration (see MCMC base class for shared options).
- * @param {Object=} initialState Initial state of the sampler (see MCMC base class). The interval
- * width `w` (default 1.0) may be seeded via `initialState.internal.w`, either as a single number
- * (broadcast to every dimension) or as a per-dimension array.
+ * @param {Object} options Sampler options, as a single object.
+ * @param {Function} options.logDensity The logarithm of the (unnormalized) target density.
+ * @param {Object=} options.config Sampler configuration (see MCMC base class for shared options).
+ * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class). The
+ * interval width `w` (default 1.0) may be seeded via `initialState.internal.w`, either as a single
+ * number (broadcast to every dimension) or as a per-dimension array.
  * @constructor
  * @throws {Error} If `w` (or any element of a per-dimension `w` array) is not a positive, finite
  * number, or if a per-dimension `w` array's length does not equal `dim`.
  */
 // decisions/0020-mcmc-design.md — the _iter/_adjust/_internal contract was designed for exactly
 // this pattern: a per-dimension sweep with its own adaptive tunable and no gradient requirement.
-// decisions/0030-mcmc-options-object-constructor.md — options-object form, detected by the MCMC base class
+// decisions/0030-mcmc-options-object-constructor.md — options-object-only constructor
 export default class Slice extends MCMC {
   /**
-   * @param {Function} logDensity The logarithm of the (unnormalized) target density.
-   * @param {Object=} config Sampler configuration (see MCMC base class for shared options).
-   * @param {Object=} initialState Initial state of the sampler (see MCMC base class). The interval
-   * width `w` (default 1.0) may be seeded via `initialState.internal.w`, either as a single number
-   * (broadcast to every dimension) or as a per-dimension array.
+   * @param {Object} options Sampler options, as a single object.
+   * @param {Function} options.logDensity The logarithm of the (unnormalized) target density.
+   * @param {Object=} options.config Sampler configuration (see MCMC base class for shared options).
+   * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class). The
+   * interval width `w` (default 1.0) may be seeded via `initialState.internal.w`, either as a
+   * single number (broadcast to every dimension) or as a per-dimension array.
    */
-  constructor (logDensity, config = {}, initialState = {}) {
+  constructor ({ logDensity, config = {}, initialState = {} } = {}) {
     super(logDensity, config, initialState)
     const w = this.internal.w
     this._w = Array.isArray(w) ? w.slice() : new Array(this.dim).fill(typeof w === 'number' ? w : 1.0)
@@ -157,13 +141,6 @@ export default class Slice extends MCMC {
         r = candidate
       }
     }
-  }
-
-  // Slice forwards (logDensity, config, initialState) to super() unchanged and has no extra
-  // constructor arguments, so the options-object form already matches its real arity — see
-  // decisions/0030-mcmc-options-object-constructor.md.
-  static get _supportsOptionsConstructor () {
-    return true
   }
 
   // Kept out of the constructor to avoid a Complex Conditional smell there, matching the

@@ -192,7 +192,7 @@ describe('mc.MALA', () => {
         mala.sample(null, sampleSize)
         const malaEss = ess(mala)
 
-        const rwm = new RWM(lnp, { dim: 5 }).seed(seed)
+        const rwm = new RWM({ logDensity: lnp, config: { dim: 5 } }).seed(seed)
         rwm.warmUp(null, warmUpBatches)
         rwm.sample(null, sampleSize)
         const rwmEss = ess(rwm)

@@ -234,7 +234,7 @@ Available processes:
 `ran.mc` provides Markov chain Monte Carlo sampling and convergence diagnostics for targets whose density is known only up to a normalizing constant.
 
 ```javascript
-const rwm = new ran.mc.RWM(logDensity, { dim: 1 })  // logDensity: unnormalized log target density
+const rwm = new ran.mc.RWM({ logDensity, config: { dim: 1 } })  // logDensity: unnormalized log target density
 
 rwm.warmUp()           // tune proposal step size and the thinning interval
 rwm.sample(null, 1000) // draw 1000 (thinned) samples
@@ -250,13 +250,13 @@ Available samplers:
 
 | Class | Description |
 |-------|-------------|
-| `ran.mc.RWM(logDensity, config, initialState)` | Random-walk Metropolis-Hastings sampler with Robbins-Monro step-size adaptation during warm-up |
-| `ran.mc.AdaptiveMetropolis(logDensity, config, initialState)` | Full-covariance adaptive Metropolis (Haario-Saksman-Tamminen 2001); adapts the joint proposal covariance from the chain's own history during warm-up, then freezes it for sampling |
-| `ran.mc.Gibbs(conditionals, config, initialState)` | Component-wise (systematic-scan) Gibbs sampler; draws each dimension directly from its full conditional, so every iteration is accepted (`ar()` is always 1.0). Each conditional is called as `conditionals[d](x, rng)` — `seed()` only reproduces a conditional's draws if it consumes `rng.next()` for its own randomness instead of an independently-seeded generator |
-| `ran.mc.HMC(logDensity, gradLogDensity, config, initialState)` | Hamiltonian Monte Carlo sampler: proposes distant moves via a leapfrog integrator over `config.pathLength` steps of size `config.stepSize`, with Metropolis accept/reject on the augmented (position, momentum) system; step size is adapted during warm-up via Robbins-Monro dual averaging and jittered per iteration to avoid periodicity artifacts. `config.metric` adapts a Euclidean mass matrix during warm-up: `'diag'` (default) estimates a per-dimension variance; `'dense'` estimates the full covariance matrix via `Matrix.ldl()` |
+| `ran.mc.RWM({ logDensity, config, initialState })` | Random-walk Metropolis-Hastings sampler with Robbins-Monro step-size adaptation during warm-up |
+| `ran.mc.AdaptiveMetropolis({ logDensity, config, initialState })` | Full-covariance adaptive Metropolis (Haario-Saksman-Tamminen 2001); adapts the joint proposal covariance from the chain's own history during warm-up, then freezes it for sampling |
+| `ran.mc.Gibbs({ conditionals, config, initialState })` | Component-wise (systematic-scan) Gibbs sampler; draws each dimension directly from its full conditional, so every iteration is accepted (`ar()` is always 1.0). Each conditional is called as `conditionals[d](x, rng)` — `seed()` only reproduces a conditional's draws if it consumes `rng.next()` for its own randomness instead of an independently-seeded generator |
+| `ran.mc.HMC({ logDensity, gradLogDensity, config, initialState })` | Hamiltonian Monte Carlo sampler: proposes distant moves via a leapfrog integrator over `config.pathLength` steps of size `config.stepSize`, with Metropolis accept/reject on the augmented (position, momentum) system; step size is adapted during warm-up via Robbins-Monro dual averaging and jittered per iteration to avoid periodicity artifacts. `config.metric` adapts a Euclidean mass matrix during warm-up: `'diag'` (default) estimates a per-dimension variance; `'dense'` estimates the full covariance matrix via `Matrix.ldl()` |
 | `ran.mc.MALA({ logDensity, gradLogDensity, config, initialState })` | Metropolis-Adjusted Langevin Algorithm: proposes a single gradient-informed Langevin step per iteration (`x' = x + (stepSize² / 2) · ∇log p(x) + stepSize · z`), with a Metropolis-Hastings correction for the proposal's asymmetry; step size is adapted during warm-up via batch Robbins-Monro toward the MALA-optimal 0.574 acceptance rate |
 | `ran.mc.NUTS({ logDensity, gradLogDensity, config, initialState })` | No-U-Turn Sampler (Hoffman & Gelman 2014): extends `HMC` with a doubling-tree trajectory that automatically stops at a U-turn, eliminating the need to hand-tune `pathLength`; the transition is selected via slice sampling over the tree, and step size is adapted during warm-up via the same Robbins-Monro dual averaging as `HMC` |
-| `ran.mc.Slice(logDensity, config, initialState)` | Coordinate-wise slice sampler (Neal 2003) using stepping-out and shrinkage; no proposal tuning or gradient required, interval width `w` is adapted per dimension during warm-up, and `ar()` is always 1.0 |
+| `ran.mc.Slice({ logDensity, config, initialState })` | Coordinate-wise slice sampler (Neal 2003) using stepping-out and shrinkage; no proposal tuning or gradient required, interval width `w` is adapted per dimension during warm-up, and `ar()` is always 1.0 |
 | `ran.mc.ParallelTempering(logDensity, options)` | Parallel Tempering / Replica Exchange MCMC (Geyer 1991) for multimodal targets; not a subclass of `MCMC`, it coordinates an array of independent replica samplers (default `RWM`) at descending inverse temperatures, periodically swapping adjacent replicas' positions so the cold (β = 1) replica inherits the hot replicas' mode-crossing moves |
 
 ### Choosing a sampler
@@ -275,19 +275,19 @@ Whichever sampler you pick, use `runChains` with `gelmanRubin` to check converge
 `ran.mc.gelmanRubin(samples, maxLength)` computes the R-hat convergence diagnostic across two or more independent chains (each an array of states returned by `sample()`):
 
 ```javascript
-const chain1 = new ran.mc.RWM(logDensity, { dim: 1 }).seed(1)
+const chain1 = new ran.mc.RWM({ logDensity, config: { dim: 1 } }).seed(1)
 chain1.warmUp()
-const chain2 = new ran.mc.RWM(logDensity, { dim: 1 }).seed(2)
+const chain2 = new ran.mc.RWM({ logDensity, config: { dim: 1 } }).seed(2)
 chain2.warmUp()
 
 const rHat = ran.mc.gelmanRubin([chain1.sample(null, 500), chain2.sample(null, 500)])
 // rHat[0] → R-hat vs. iteration count for dimension 0; values near 1 indicate convergence
 ```
 
-`ran.mc.runChains(logDensity, config, options)` mechanizes the pattern above: it constructs multiple independently-seeded `RWM` chains, warms up and samples each, and returns their samples plus the `gelmanRubin()` diagnostic in one call — the recommended workflow for gating MCMC convergence (single-chain diagnostics cannot distinguish "converged" from "stuck"):
+`ran.mc.runChains(Sampler, samplerOptions, runOptions)` mechanizes the pattern above: it constructs multiple independently-seeded chains of the given `MCMC` subclass, warms up and samples each, and returns their samples plus the `gelmanRubin()` diagnostic in one call — the recommended workflow for gating MCMC convergence (single-chain diagnostics cannot distinguish "converged" from "stuck"):
 
 ```javascript
-const { samples, rhat } = ran.mc.runChains(logDensity, { dim: 1 })
+const { samples, rhat } = ran.mc.runChains(ran.mc.RWM, { logDensity, config: { dim: 1 } })
 // samples → one sample array per chain (2 chains, seeded [1, 2] by default)
 // rhat    → the gelmanRubin() diagnostic across those chains
 ```

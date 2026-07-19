@@ -31,24 +31,6 @@ const JITTER_RANGE = 0.2
 const EPS = 1e-6
 
 /**
- * @overload
- * @param {Function} logDensity The logarithm of the (unnormalized) target density.
- * @param {Function} gradLogDensity The gradient of logDensity: maps a state (number[]) to its
- * gradient (number[]) of the same dimension. The array passed in may be reused and mutated
- * across subsequent leapfrog steps; read it synchronously and do not retain the reference.
- * @param {Object=} config HMC configuration (see MCMC base class for shared options), plus
- * `stepSize`, `pathLength`, and `metric` (see the class JSDoc below).
- * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
- */
-/**
- * @overload
- * @param {Object} options Sampler options, as a single object.
- * @param {Function} options.logDensity The logarithm of the (unnormalized) target density.
- * @param {Function} options.gradLogDensity The gradient of logDensity (see the positional form).
- * @param {Object=} options.config HMC configuration (see the positional form).
- * @param {Object=} options.initialState Initial state of the sampler (see the positional form).
- */
-/**
  * Class implementing the [Hamiltonian Monte Carlo]{@link https://en.wikipedia.org/wiki/Hamiltonian_Monte_Carlo}
  * (HMC) sampler. Uses gradient information and a leapfrog integrator to simulate Hamiltonian
  * dynamics, proposing distant moves along the resulting trajectory and accepting/rejecting via
@@ -71,20 +53,19 @@ const EPS = 1e-6
  *
  * @class HMC
  * @memberof ran.mc
- * @param {Function|Object} logDensity The logarithm of the (unnormalized) target density (this
- * positional form is deprecated — see the options-object overload above), or a single options
- * object carrying {logDensity}, {gradLogDensity}, {config}, and {initialState}.
- * @param {Function} gradLogDensity The gradient of logDensity: maps a state (number[]) to its
- * gradient (number[]) of the same dimension. The array passed in may be reused and mutated
+ * @param {Object} options Sampler options, as a single object.
+ * @param {Function} options.logDensity The logarithm of the (unnormalized) target density.
+ * @param {Function} options.gradLogDensity The gradient of logDensity: maps a state (number[]) to
+ * its gradient (number[]) of the same dimension. The array passed in may be reused and mutated
  * across subsequent leapfrog steps; read it synchronously and do not retain the reference.
- * @param {Object=} config HMC configuration (see MCMC base class for shared options), plus
+ * @param {Object=} options.config HMC configuration (see MCMC base class for shared options), plus
  * `stepSize` (ε, the leapfrog step size, default 0.1), `pathLength` (L, the number of leapfrog
  * steps per iteration, default 10 — fixed for the sampler's lifetime and not jittered like
  * `stepSize`; see the class JSDoc's "Known limitation" note for the resonance risk this can
  * produce), and `metric` (the mass matrix structure adapted during warm-up: `'diag'` (default)
  * estimates a per-dimension variance; `'dense'` estimates the full covariance matrix, refactored
  * through Matrix's LDL decomposition).
- * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
+ * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class).
  * @constructor
  * @throws {Error} If gradLogDensity is not a function, or a stepSize (config.stepSize or a
  * resumed initialState.internal.stepSize) is provided but is not a positive finite number, or a
@@ -102,31 +83,25 @@ const EPS = 1e-6
 // accumulator, EPS*I regularization, diagonal default, dense opt-in via hand-rolled LDL
 // forward/back substitution, batched dense refresh, dual averaging left uncoupled from metric
 // changes
-// decisions/0031-gradient-sampler-options-object-constructor.md — options-object form for HMC's
-// extra gradLogDensity argument, resolved via MCMC._resolveGradientSamplerArgs before super()
+// decisions/0031-gradient-sampler-options-object-constructor.md — options-object-only constructor
+// for HMC's extra gradLogDensity argument
 export default class HMC extends MCMC {
   // Missed by #944's manual sweep of RWM/AdaptiveMetropolis/Gibbs constructors; added here
   // for correct tsc-generated param types. See
   // solutions/correctness/2026-07-16-1602-hmc-jsdoc-sibling-sweep-gap.md
   /**
-   * @param {Function|Object} logDensity The logarithm of the (unnormalized) target density (this
-   * positional form is deprecated — see the options-object overload above), or a single options
-   * object carrying {logDensity}, {gradLogDensity}, {config}, and {initialState}.
-   * @param {Function} gradLogDensity The gradient of logDensity: maps a state (number[]) to its
-   * gradient (number[]) of the same dimension. The array passed in may be reused and mutated
-   * across subsequent leapfrog steps; read it synchronously and do not retain the reference.
-   * @param {Object=} config HMC configuration (see MCMC base class for shared options), plus
-   * `stepSize` (ε, the leapfrog step size, default 0.1) and `pathLength` (L, the number of leapfrog
-   * steps per iteration, default 10 — fixed for the sampler's lifetime; see the class JSDoc's
-   * "Known limitation" note for the resonance risk this can produce).
-   * @param {Object=} initialState Initial state of the sampler (see MCMC base class).
+   * @param {Object} options Sampler options, as a single object.
+   * @param {Function} options.logDensity The logarithm of the (unnormalized) target density.
+   * @param {Function} options.gradLogDensity The gradient of logDensity: maps a state (number[])
+   * to its gradient (number[]) of the same dimension. The array passed in may be reused and
+   * mutated across subsequent leapfrog steps; read it synchronously and do not retain the reference.
+   * @param {Object=} options.config HMC configuration (see MCMC base class for shared options),
+   * plus `stepSize` (ε, the leapfrog step size, default 0.1) and `pathLength` (L, the number of
+   * leapfrog steps per iteration, default 10 — fixed for the sampler's lifetime; see the class
+   * JSDoc's "Known limitation" note for the resonance risk this can produce).
+   * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class).
    */
-  constructor (logDensity, gradLogDensity, config = {}, initialState = {}) {
-    const resolved = HMC._resolveGradientSamplerArgs({ logDensity, gradLogDensity, config, initialState }, new.target)
-    logDensity = resolved.logDensity
-    gradLogDensity = resolved.gradLogDensity
-    config = resolved.config
-    initialState = resolved.initialState
+  constructor ({ logDensity, gradLogDensity, config = {}, initialState = {} } = {}) {
     super(logDensity, config, initialState)
 
     HMC._validateGradLogDensity(gradLogDensity)

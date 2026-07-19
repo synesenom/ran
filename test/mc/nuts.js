@@ -205,7 +205,7 @@ describe('mc.NUTS', () => {
         const nutsSamples = nuts.sample(null, sampleSize)
         const nutsEssPerIter = ess(nuts) / (nuts.samplingRate * nutsSamples.length)
 
-        const hmc = new HMC(essLogDensity, essGradLogDensity, { dim: 2 }).seed(seed)
+        const hmc = new HMC({ logDensity: essLogDensity, gradLogDensity: essGradLogDensity, config: { dim: 2 } }).seed(seed)
         hmc.warmUp(null, warmUpBatches)
         const hmcSamples = hmc.sample(null, sampleSize)
         const hmcEssPerIter = ess(hmc) / (hmc.samplingRate * hmcSamples.length)
