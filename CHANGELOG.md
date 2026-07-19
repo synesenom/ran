@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Deprecated
+
+- `ran.mc.ParallelTempering`'s positional constructor form `new ParallelTempering(logDensity, options)` is deprecated in favor of the options-object form `new ParallelTempering({ logDensity, ...options })`, bringing it in line with every other `ran.mc` sampler and coordinator (RWM, AdaptiveMetropolis, Slice, HMC, MALA, NUTS, Gibbs per ADR-0030; ARS per ADR-0031) and removing the last positional-constructor wart in `ran.mc`. The positional form still constructs and samples correctly but emits a one-time `console.warn` on first use; it will be removed in v1.32.0 (#1034).
+
 ### Removed
 
 - `ran.mc.RWM`'s, `ran.mc.AdaptiveMetropolis`'s, `ran.mc.Slice`'s, `ran.mc.HMC`'s, and `ran.mc.Gibbs`'s deprecated positional constructor arguments (e.g. `new RWM(logDensity, config, initialState)`) are removed; only the options-object form (`new RWM({ logDensity, config, initialState })`) remains. `ran.mc.runChains()`'s deprecated legacy call form, `runChains(logDensity, config, options)`, is likewise removed; only the generalized `runChains(Sampler, samplerOptions, runOptions)` form remains. This closes out the deprecation cycle introduced in #962–#967 (ADR-0030, ADR-0031, ADR-0033). **Note on the deprecation cycle:** CLAUDE.md's normal deprecation-cycle rule requires a released minor version containing the warning to ship and hold for a full release before the removal lands; here the #962–#967 `### Deprecated` entry never left the `[Unreleased]` section of this changelog (v1.30.0 predates it), so the removal is landing without that hold, at explicit maintainer request overriding the standard process (#968). No published version of `ranjs` ever carried the positional forms as deprecated-but-working, so no downstream user is exposed to a behavior change without warning — the positional forms and their `console.warn` deprecation notices are simply gone, as if they had never been introduced.

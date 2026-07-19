@@ -9,61 +9,63 @@ describe('mc.ParallelTempering', () => {
 
   describe('constructor', () => {
     it('should throw when logDensity is not a function', () => {
-      assert.throws(() => new ParallelTempering(null, { temperatures: [1, 0.5] }), /logDensity must be a function/)
+      assert.throws(() => new ParallelTempering({ logDensity: null, temperatures: [1, 0.5] }), /logDensity must be a function/)
+      assert.throws(() => new ParallelTempering({ temperatures: [1, 0.5] }), /logDensity must be a function/)
+      assert.throws(() => new ParallelTempering(), /logDensity must be a function/)
     })
 
     it('should throw when neither temperatures nor nReplicas/tempMax are provided', () => {
-      assert.throws(() => new ParallelTempering(logDensity, {}), /temperatures.*nReplicas.*tempMax|Either/)
+      assert.throws(() => new ParallelTempering({ logDensity }), /temperatures.*nReplicas.*tempMax|Either/)
     })
 
     it('should throw when temperatures is not an array', () => {
-      assert.throws(() => new ParallelTempering(logDensity, { temperatures: 'nope' }), /temperatures must be an array/)
+      assert.throws(() => new ParallelTempering({ logDensity, temperatures: 'nope' }), /temperatures must be an array/)
     })
 
     it('should throw when temperatures has fewer than two entries', () => {
-      assert.throws(() => new ParallelTempering(logDensity, { temperatures: [1] }), /temperatures must be an array of at least two/)
+      assert.throws(() => new ParallelTempering({ logDensity, temperatures: [1] }), /temperatures must be an array of at least two/)
     })
 
     it('should throw when temperatures does not start at 1', () => {
-      assert.throws(() => new ParallelTempering(logDensity, { temperatures: [0.9, 0.5] }), /temperatures\[0\] must equal 1/)
+      assert.throws(() => new ParallelTempering({ logDensity, temperatures: [0.9, 0.5] }), /temperatures\[0\] must equal 1/)
     })
 
     it('should throw when temperatures is not strictly descending', () => {
-      assert.throws(() => new ParallelTempering(logDensity, { temperatures: [1, 1, 0.5] }), /temperatures must be strictly descending/)
-      assert.throws(() => new ParallelTempering(logDensity, { temperatures: [1, 0.5, 0.6] }), /temperatures must be strictly descending/)
+      assert.throws(() => new ParallelTempering({ logDensity, temperatures: [1, 1, 0.5] }), /temperatures must be strictly descending/)
+      assert.throws(() => new ParallelTempering({ logDensity, temperatures: [1, 0.5, 0.6] }), /temperatures must be strictly descending/)
     })
 
     it('should throw when temperatures contains a non-positive or non-finite value', () => {
-      assert.throws(() => new ParallelTempering(logDensity, { temperatures: [1, 0] }), /temperatures must contain only positive finite/)
-      assert.throws(() => new ParallelTempering(logDensity, { temperatures: [1, NaN] }), /temperatures must contain only positive finite/)
-      assert.throws(() => new ParallelTempering(logDensity, { temperatures: [1, -Infinity] }), /temperatures must contain only positive finite/)
+      assert.throws(() => new ParallelTempering({ logDensity, temperatures: [1, 0] }), /temperatures must contain only positive finite/)
+      assert.throws(() => new ParallelTempering({ logDensity, temperatures: [1, NaN] }), /temperatures must contain only positive finite/)
+      assert.throws(() => new ParallelTempering({ logDensity, temperatures: [1, -Infinity] }), /temperatures must contain only positive finite/)
     })
 
     it('should not throw for a valid temperatures array', () => {
-      assert.doesNotThrow(() => new ParallelTempering(logDensity, { temperatures: [1, 0.5, 0.25] }))
+      assert.doesNotThrow(() => new ParallelTempering({ logDensity, temperatures: [1, 0.5, 0.25] }))
     })
 
     it('should throw when nReplicas is not an integer of at least two', () => {
-      assert.throws(() => new ParallelTempering(logDensity, { nReplicas: 1, tempMax: 10 }), /nReplicas must be an integer/)
-      assert.throws(() => new ParallelTempering(logDensity, { nReplicas: 2.5, tempMax: 10 }), /nReplicas must be an integer/)
+      assert.throws(() => new ParallelTempering({ logDensity, nReplicas: 1, tempMax: 10 }), /nReplicas must be an integer/)
+      assert.throws(() => new ParallelTempering({ logDensity, nReplicas: 2.5, tempMax: 10 }), /nReplicas must be an integer/)
     })
 
     it('should throw when nReplicas exceeds the maximum allowed', () => {
-      assert.throws(() => new ParallelTempering(logDensity, { nReplicas: 10001, tempMax: 10 }), /nReplicas must be at most/)
+      assert.throws(() => new ParallelTempering({ logDensity, nReplicas: 10001, tempMax: 10 }), /nReplicas must be at most/)
     })
 
     it('should throw when tempMax is not a finite number greater than 1', () => {
-      assert.throws(() => new ParallelTempering(logDensity, { nReplicas: 3, tempMax: 1 }), /tempMax must be a finite number greater than 1/)
-      assert.throws(() => new ParallelTempering(logDensity, { nReplicas: 3, tempMax: Infinity }), /tempMax must be a finite number greater than 1/)
-      assert.throws(() => new ParallelTempering(logDensity, { nReplicas: 3, tempMax: NaN }), /tempMax must be a finite number greater than 1/)
+      assert.throws(() => new ParallelTempering({ logDensity, nReplicas: 3, tempMax: 1 }), /tempMax must be a finite number greater than 1/)
+      assert.throws(() => new ParallelTempering({ logDensity, nReplicas: 3, tempMax: Infinity }), /tempMax must be a finite number greater than 1/)
+      assert.throws(() => new ParallelTempering({ logDensity, nReplicas: 3, tempMax: NaN }), /tempMax must be a finite number greater than 1/)
     })
 
     it('should not throw for valid nReplicas and tempMax', () => {
-      assert.doesNotThrow(() => new ParallelTempering(logDensity, { nReplicas: 4, tempMax: 100 }))
+      assert.doesNotThrow(() => new ParallelTempering({ logDensity, nReplicas: 4, tempMax: 100 }))
     })
 
     it('should auto-generate a strictly descending geometric ladder from nReplicas and tempMax', () => {
-      const pt = new ParallelTempering(logDensity, { nReplicas: 4, tempMax: 100 })
+      const pt = new ParallelTempering({ logDensity, nReplicas: 4, tempMax: 100 })
       // beta_i = tempMax^(-i/(nReplicas-1)) for i = 0..3 -> [1, 100^(-1/3), 100^(-2/3), 0.01].
       // Interior values checked against 10^(-2/3) and 10^(-4/3) (100^(-1/3) === 10^(-2/3) algebraically),
       // a different exponent/base decomposition than the source's Math.pow(tempMax, -i/(n-1)) call,
@@ -81,21 +83,51 @@ describe('mc.ParallelTempering', () => {
     })
 
     it('should expose the caller-supplied temperatures array unchanged', () => {
-      const pt = new ParallelTempering(logDensity, { temperatures: [1, 0.6, 0.3] })
+      const pt = new ParallelTempering({ logDensity, temperatures: [1, 0.6, 0.3] })
       assert.deepEqual(pt.temperatures, [1, 0.6, 0.3])
+    })
+  })
+
+  describe('positional constructor (deprecated)', () => {
+    // The "warns exactly once" assertion below depends on the source module's `warnedPositionalDeprecation`
+    // flag still being unset when this test runs. That holds only because this is the SOLE positional-form
+    // construction in this file/process — a second positional `new ParallelTempering(fn, ...)` added earlier
+    // in this file would pre-trip the flag and make `warnings.length` come back 0, failing here for a reason
+    // unrelated to the deprecation logic. Keep positional construction confined to this block.
+    it('should still construct and sample, warning exactly once regardless of how many positional instances are built', () => {
+      const warnings = []
+      const originalWarn = console.warn
+      // Capture instead of silencing so a regression that stops warning (or over-warns) is caught,
+      // and so the deprecation notice never leaks into the test runner's output.
+      console.warn = msg => warnings.push(msg)
+      try {
+        const pt = new ParallelTempering(logDensity, { nReplicas: 3, tempMax: 10 }).seed(1)
+        pt.warmUp(null, 3)
+        const samples = pt.sample(null, 50)
+        assert.strictEqual(samples.length, 50)
+        assert(samples.every(s => s.length === 1 && Number.isFinite(s[0])))
+        // A second positional instance must NOT emit another warning (module-level once-only flag).
+        assert(new ParallelTempering(logDensity, { temperatures: [1, 0.5] }) instanceof ParallelTempering)
+        // Positional form with the options argument omitted still routes through the deprecated path.
+        assert.throws(() => new ParallelTempering(logDensity), /either temperatures or nReplicas and tempMax/)
+      } finally {
+        console.warn = originalWarn
+      }
+      assert.strictEqual(warnings.length, 1)
+      assert.match(warnings[0], /ParallelTempering\(logDensity, options\) positional constructor is deprecated and will be removed in v1\.32\.0/)
     })
   })
 
   describe('.state', () => {
     it('should not be resumable — state() is not implemented', () => {
-      const pt = new ParallelTempering(logDensity, { temperatures: [1, 0.5] })
+      const pt = new ParallelTempering({ logDensity, temperatures: [1, 0.5] })
       assert.notStrictEqual(typeof pt.state, 'function')
     })
   })
 
   describe('swap mechanics', () => {
     it('should exchange positions and recompute each replica\'s cached scaled log-density on an accepted swap', () => {
-      const pt = new ParallelTempering(logDensity, { temperatures: [1, 0.5] })
+      const pt = new ParallelTempering({ logDensity, temperatures: [1, 0.5] })
       // Positions chosen so (beta_0 - beta_1) * (lnp(x1) - lnp(x0)) = 0.5 * (0 - (-12.5)) = 6.25 >= 0
       // (the hotter replica currently holds the higher-density position), making the acceptance
       // probability exp(6.25) > 1 -- the swap is accepted for ANY draw in [0,1), so the test is
@@ -113,7 +145,7 @@ describe('mc.ParallelTempering', () => {
     })
 
     it('should count an attempted-but-rejected swap without exchanging positions', () => {
-      const pt = new ParallelTempering(logDensity, { temperatures: [1, 0.5] })
+      const pt = new ParallelTempering({ logDensity, temperatures: [1, 0.5] })
       // Reversed positions: (beta_0 - beta_1) * (lnp(x1) - lnp(x0)) = 0.5 * (-12.5 - 0) = -6.25,
       // acceptance probability exp(-6.25) ~= 0.00193. Stubbing r.next() to return a value
       // comfortably above that threshold makes rejection deterministic instead of depending on
@@ -135,7 +167,7 @@ describe('mc.ParallelTempering', () => {
 
   describe('.warmUp() and .sample()', () => {
     it('should return size samples of the correct dimensionality from the cold replica', () => {
-      const pt = new ParallelTempering(logDensity, { nReplicas: 3, tempMax: 10 }).seed(1)
+      const pt = new ParallelTempering({ logDensity, nReplicas: 3, tempMax: 10 }).seed(1)
       pt.warmUp(null, 3)
       const samples = pt.sample(null, 50)
       assert.strictEqual(samples.length, 50)
@@ -143,7 +175,7 @@ describe('mc.ParallelTempering', () => {
     })
 
     it('should report warmUp() progress once per replica, ending at 100', () => {
-      const pt = new ParallelTempering(logDensity, { nReplicas: 3, tempMax: 10 })
+      const pt = new ParallelTempering({ logDensity, nReplicas: 3, tempMax: 10 })
       const pcts = []
       pt.warmUp(p => pcts.push(p), 2)
       assert.strictEqual(pcts.length, 3)
@@ -151,7 +183,7 @@ describe('mc.ParallelTempering', () => {
     })
 
     it('should report each integer percent of sample() progress once, in increasing order', () => {
-      const pt = new ParallelTempering(logDensity, { nReplicas: 3, tempMax: 10 }).seed(1)
+      const pt = new ParallelTempering({ logDensity, nReplicas: 3, tempMax: 10 }).seed(1)
       pt.warmUp(null, 3)
       const pcts = []
       pt.sample(p => pcts.push(p), 50)
@@ -163,7 +195,7 @@ describe('mc.ParallelTempering', () => {
 
   describe('.swapRate()', () => {
     it('should return one entry per adjacent pair, each in [0, 1], with at least one non-zero for a well-spaced ladder', () => {
-      const pt = new ParallelTempering(logDensity, { nReplicas: 4, tempMax: 20 }).seed(2)
+      const pt = new ParallelTempering({ logDensity, nReplicas: 4, tempMax: 20 }).seed(2)
       pt.warmUp(null, 5)
       pt.sample(null, 500)
       const rates = pt.swapRate()
@@ -175,11 +207,11 @@ describe('mc.ParallelTempering', () => {
 
   describe('.seed()', () => {
     it('should produce bitwise-identical samples when the same seed is applied twice', () => {
-      const pt1 = new ParallelTempering(logDensity, { nReplicas: 3, tempMax: 10 }).seed(42)
+      const pt1 = new ParallelTempering({ logDensity, nReplicas: 3, tempMax: 10 }).seed(42)
       pt1.warmUp(null, 3)
       const samples1 = pt1.sample(null, 50)
 
-      const pt2 = new ParallelTempering(logDensity, { nReplicas: 3, tempMax: 10 }).seed(42)
+      const pt2 = new ParallelTempering({ logDensity, nReplicas: 3, tempMax: 10 }).seed(42)
       pt2.warmUp(null, 3)
       const samples2 = pt2.sample(null, 50)
 
@@ -187,11 +219,11 @@ describe('mc.ParallelTempering', () => {
     })
 
     it('should produce different samples for different seeds', () => {
-      const pt1 = new ParallelTempering(logDensity, { nReplicas: 3, tempMax: 10 }).seed(1)
+      const pt1 = new ParallelTempering({ logDensity, nReplicas: 3, tempMax: 10 }).seed(1)
       pt1.warmUp(null, 3)
       const samples1 = pt1.sample(null, 50)
 
-      const pt2 = new ParallelTempering(logDensity, { nReplicas: 3, tempMax: 10 }).seed(2)
+      const pt2 = new ParallelTempering({ logDensity, nReplicas: 3, tempMax: 10 }).seed(2)
       pt2.warmUp(null, 3)
       const samples2 = pt2.sample(null, 50)
 
@@ -219,7 +251,7 @@ describe('mc.ParallelTempering', () => {
         // occupancy at a matched sample size, pushing the KS statistic above its critical value for
         // some seeds. warmUp: 15 / size: 4000 (vs. the 10/2000 used by unimodal samplers elsewhere in
         // the test suite) gives the swap relay enough rounds to equilibrate before and during sampling.
-        const pt = new ParallelTempering(bimodalLogDensity, { nReplicas: 4, tempMax: 100 }).seed(seed)
+        const pt = new ParallelTempering({ logDensity: bimodalLogDensity, nReplicas: 4, tempMax: 100 }).seed(seed)
         pt.warmUp(null, 15)
         const samples = pt.sample(null, 4000)
         const values = samples.map(s => s[0])

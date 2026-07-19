@@ -257,7 +257,7 @@ Available samplers:
 | `ran.mc.MALA({ logDensity, gradLogDensity, config, initialState })` | Metropolis-Adjusted Langevin Algorithm: proposes a single gradient-informed Langevin step per iteration (`x' = x + (stepSize² / 2) · ∇log p(x) + stepSize · z`), with a Metropolis-Hastings correction for the proposal's asymmetry; step size is adapted during warm-up via batch Robbins-Monro toward the MALA-optimal 0.574 acceptance rate |
 | `ran.mc.NUTS({ logDensity, gradLogDensity, config, initialState })` | No-U-Turn Sampler (Hoffman & Gelman 2014): extends `HMC` with a doubling-tree trajectory that automatically stops at a U-turn, eliminating the need to hand-tune `pathLength`; the transition is selected via slice sampling over the tree, and step size is adapted during warm-up via the same Robbins-Monro dual averaging as `HMC` |
 | `ran.mc.Slice({ logDensity, config, initialState })` | Coordinate-wise slice sampler (Neal 2003) using stepping-out and shrinkage; no proposal tuning or gradient required, interval width `w` is adapted per dimension during warm-up, and `ar()` is always 1.0 |
-| `ran.mc.ParallelTempering(logDensity, options)` | Parallel Tempering / Replica Exchange MCMC (Geyer 1991) for multimodal targets; not a subclass of `MCMC`, it coordinates an array of independent replica samplers (default `RWM`) at descending inverse temperatures, periodically swapping adjacent replicas' positions so the cold (β = 1) replica inherits the hot replicas' mode-crossing moves |
+| `ran.mc.ParallelTempering({ logDensity, ...options })` | Parallel Tempering / Replica Exchange MCMC (Geyer 1991) for multimodal targets; not a subclass of `MCMC`, it coordinates an array of independent replica samplers (default `RWM`) at descending inverse temperatures, periodically swapping adjacent replicas' positions so the cold (β = 1) replica inherits the hot replicas' mode-crossing moves |
 
 ### Choosing a sampler
 
@@ -295,8 +295,8 @@ const { samples, rhat } = ran.mc.runChains(ran.mc.RWM, { logDensity, config: { d
 For multimodal targets that a single chain cannot mix across, `ran.mc.ParallelTempering` runs several replicas at a geometric ladder of inverse temperatures and swaps their positions so the cold replica benefits from the hot replicas' freer exploration:
 
 ```javascript
-const pt = new ran.mc.ParallelTempering(logDensity, { nReplicas: 4, tempMax: 100 })
-// or: { temperatures: [1, 0.5, 0.25, 0.1] } for an explicit ladder
+const pt = new ran.mc.ParallelTempering({ logDensity, nReplicas: 4, tempMax: 100 })
+// or: { logDensity, temperatures: [1, 0.5, 0.25, 0.1] } for an explicit ladder
 
 pt.warmUp(null, 20)          // warms up every replica independently, no swaps
 const samples = pt.sample(null, 2000) // lockstep sampling with swap proposals; returns the cold replica's draws
