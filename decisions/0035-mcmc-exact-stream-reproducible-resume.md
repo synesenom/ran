@@ -1,4 +1,4 @@
-# ADR-0034: MCMC Exact-Stream Reproducible Resume
+# ADR-0035: MCMC Exact-Stream Reproducible Resume
 
 **Date**: 2026-07-19
 **Status**: Accepted

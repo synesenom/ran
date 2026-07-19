@@ -44,7 +44,7 @@ export default class AdaptiveMetropolis extends MCMC {
     super(logDensity, config, initialState)
     this.lastLnp = this.lnp(this.x)
     this._q = new Normal(0, 1)
-    // decisions/0034-mcmc-exact-stream-reproducible-resume.md — restoring _q's own PRNG stream
+    // decisions/0035-mcmc-exact-stream-reproducible-resume.md — restoring _q's own PRNG stream
     // is what makes resumed proposals bit-for-bit identical, not just statistically equivalent.
     MCMC._restoreQPrng(this._q, this.internal.prngQ, 'AdaptiveMetropolis')
     // Roberts-Gelman-Gilks (1997) asymptotically optimal scaling for a d-dimensional Gaussian target.
@@ -116,7 +116,7 @@ export default class AdaptiveMetropolis extends MCMC {
       covN: this._covN,
       covMean: this._covMean.slice(),
       // Deep copy: _covS is a dim x dim nested array, and a shallow .slice() on the outer
-      // array would alias inner rows with the live, mutating accumulator — decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+      // array would alias inner rows with the live, mutating accumulator — decisions/0035-mcmc-exact-stream-reproducible-resume.md.
       covS: this._covS.map(row => row.slice())
     }
   }
@@ -159,7 +159,7 @@ export default class AdaptiveMetropolis extends MCMC {
 
   // Kept out of the constructor to avoid a Complex Method smell there. Deep-copies covS (a
   // dim x dim nested array) so the live accumulator never aliases a caller-held snapshot's rows —
-  // decisions/0034-mcmc-exact-stream-reproducible-resume.md. Validated the same way stepSize is
+  // decisions/0035-mcmc-exact-stream-reproducible-resume.md. Validated the same way stepSize is
   // on HMC/MALA: a malformed resumed field must fail loudly rather than silently corrupt the
   // covariance recursion — solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md.
   _restoreCovarianceAccumulator () {

@@ -127,7 +127,7 @@ export default class HMC extends MCMC {
     this._pathLength = this.internal.pathLength || config.pathLength || 10
     // Momentum component sampler, one Normal(0,1) draw per dimension per iteration.
     this._q = new Normal(0, 1)
-    // decisions/0034-mcmc-exact-stream-reproducible-resume.md — restoring _q's own PRNG stream
+    // decisions/0035-mcmc-exact-stream-reproducible-resume.md — restoring _q's own PRNG stream
     // is what makes resumed momentum draws bit-for-bit identical, not just statistically equivalent.
     MCMC._restoreQPrng(this._q, this.internal.prngQ, 'HMC')
     this.lastLnp = this.lnp(this.x)
@@ -229,7 +229,7 @@ export default class HMC extends MCMC {
       daLogEpsBar: this._daLogEpsBar,
       daT: this._daT,
       // Raw mass-matrix accumulator (distinct from the effective metric above) — see
-      // decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+      // decisions/0035-mcmc-exact-stream-reproducible-resume.md.
       metAccumulator: this._metricType === 'dense'
         ? { metN: this._metN, metMean: this._metMean.slice(), metCovS: this._metCovS.map(row => row.slice()) }
         : { metN: this._metN, metMean: this._metMean.slice(), metM2: this._metM2.slice() }
@@ -415,7 +415,7 @@ export default class HMC extends MCMC {
   // Entirely private to HMC -- deliberately not reusing MCMC's own _welford accumulator (which
   // is contractual per decisions/0023-mcmc-accumulator-mechanics.md and tracks a different
   // lifecycle), mirroring AdaptiveMetropolis building its own _covMean/_covS instead of reaching
-  // into the base class. `resumed` (decisions/0034-mcmc-exact-stream-reproducible-resume.md)
+  // into the base class. `resumed` (decisions/0035-mcmc-exact-stream-reproducible-resume.md)
   // restores the raw accumulator so a mid-warm-up resume's next refresh reads the same history
   // the uninterrupted chain would have; deep-copies metCovS (a dim x dim nested array) so the
   // live accumulator never aliases a caller-held snapshot's rows.
@@ -584,7 +584,7 @@ export default class HMC extends MCMC {
   // Split out of _initMetricAccumulator so each field's fallback is a single expression rather
   // than a repeated branch, which is what the Complex Method smell flags. `!== undefined` (not
   // `||`) so a legitimately-zero resumed value (e.g. metN: 0) is preserved rather than mistaken
-  // for absent. decisions/0034-mcmc-exact-stream-reproducible-resume.md
+  // for absent. decisions/0035-mcmc-exact-stream-reproducible-resume.md
   static _resolveResumedField (resumed, key, fallback) {
     return (resumed && resumed[key] !== undefined) ? resumed[key] : fallback
   }

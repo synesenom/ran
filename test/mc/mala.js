@@ -165,7 +165,7 @@ describe('mc.MALA', () => {
 
       // 150 more iterations crosses a second adaptation-batch boundary post-resume. Unlike RWM,
       // MALA's _adjust() depends only on its own pAccepted/pN/pBatch (no base-class Welford
-      // dependency), so this is fully bit-for-bit reproducible — decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+      // dependency), so this is fully bit-for-bit reproducible — decisions/0035-mcmc-exact-stream-reproducible-resume.md.
       const continued1 = runAdapted(mala1, 150)
       const continued2 = runAdapted(mala2, 150)
       assert.deepEqual(continued1, continued2)

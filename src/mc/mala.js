@@ -62,7 +62,7 @@ export default class MALA extends MCMC {
     // way — see solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md
     MALA._validateStepSize(this.internal.stepSize)
     // Same rigor as stepSize above: a malformed resumed accumulator field must fail loudly
-    // rather than silently corrupt the Robbins-Monro recursion — decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+    // rather than silently corrupt the Robbins-Monro recursion — decisions/0035-mcmc-exact-stream-reproducible-resume.md.
     MCMC._validateFiniteScalar(this.internal.ls, 'MALA: resumed ls')
     MCMC._validateNonNegativeInteger(this.internal.pAccepted, 'MALA: resumed pAccepted')
     MCMC._validateNonNegativeInteger(this.internal.pN, 'MALA: resumed pN')
@@ -72,7 +72,7 @@ export default class MALA extends MCMC {
     // Log-scale storage: the Robbins-Monro update below is additive in log space, so this
     // keeps stepSize positivity a structural invariant instead of a runtime hope. `ls` (raw) is
     // preferred over re-deriving it from `stepSize` via Math.log(Math.exp(...)), which is not
-    // guaranteed bit-identical for every float — decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+    // guaranteed bit-identical for every float — decisions/0035-mcmc-exact-stream-reproducible-resume.md.
     this._ls = this.internal.ls !== undefined ? this.internal.ls : Math.log(this.internal.stepSize || config.stepSize || 0.1)
     this._q = new Normal(0, 1)
     MCMC._restoreQPrng(this._q, this.internal.prngQ, 'MALA')

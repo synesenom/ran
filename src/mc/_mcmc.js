@@ -42,7 +42,7 @@ export default class MCMC {
     MCMC._validateCombinedFootprint(this.dim, this.maxLag)
     this.lnp = logDensity
     this.r = new Xoshiro128p()
-    // decisions/0034-mcmc-exact-stream-reproducible-resume.md — restoring the PRNG stream
+    // decisions/0035-mcmc-exact-stream-reproducible-resume.md — restoring the PRNG stream
     // position (not just x) before x is drawn is what makes an unprovided x redraw from the
     // resumed stream rather than a fresh one, matching Distribution.load()'s prngState precedent.
     MCMC._validatePrngState(initialState.prng, 'MCMC')
@@ -88,7 +88,7 @@ export default class MCMC {
    * @returns {Object} Object with properties: x (current position), samplingRate (thinning
    * interval), internal (subclass state), and prng (the PRNG's exact stream position, restored
    * on reconstruction so a resumed sampler's subsequent draws are bit-for-bit identical to an
-   * uninterrupted run — decisions/0034-mcmc-exact-stream-reproducible-resume.md).
+   * uninterrupted run — decisions/0035-mcmc-exact-stream-reproducible-resume.md).
    */
   state () {
     return {
@@ -345,7 +345,7 @@ export default class MCMC {
    * automatically by base-class control flow — so subclasses without dual averaging (RWM,
    * AdaptiveMetropolis, Slice, MALA, Gibbs) are unaffected. Restoring these (rather than always
    * restarting from t=0) is what makes a mid-warm-up resume's dual averaging continue from the
-   * exact same trajectory — decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+   * exact same trajectory — decisions/0035-mcmc-exact-stream-reproducible-resume.md.
    *
    * @method _restoreDualAveraging
    * @memberof ran.mc.MCMC
@@ -539,7 +539,7 @@ export default class MCMC {
   // (initialState.internal.prngQ) — a malformed 4-element-array assumption, if silently
   // accepted, would corrupt every subsequent draw rather than fail loudly. See
   // solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md and
-  // decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+  // decisions/0035-mcmc-exact-stream-reproducible-resume.md.
   static _validatePrngState (state, label) {
     if (state === undefined) {
       return
@@ -559,7 +559,7 @@ export default class MCMC {
   // constructor collapses its validate-then-load branch into a single call, keeping the
   // constructor's own cyclomatic complexity low (see the per-file "Kept out of the constructor
   // to avoid a Complex Method smell there" convention already used throughout this codebase).
-  // decisions/0034-mcmc-exact-stream-reproducible-resume.md
+  // decisions/0035-mcmc-exact-stream-reproducible-resume.md
   static _restoreQPrng (q, prngQ, label) {
     MCMC._validatePrngState(prngQ, label)
     if (prngQ) {
@@ -571,7 +571,7 @@ export default class MCMC {
   // counters, dual-averaging state, covariance/mass-matrix accumulators) — a malformed field, if
   // silently accepted, corrupts the adaptation recursion (e.g. a non-finite pAccepted/daT) rather
   // than failing loudly, the same class of gap solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md
-  // fixed for stepSize/pathLength. decisions/0034-mcmc-exact-stream-reproducible-resume.md — these
+  // fixed for stepSize/pathLength. decisions/0035-mcmc-exact-stream-reproducible-resume.md — these
   // validators were themselves added only after an independent /review pass caught their absence
   // in the initial implementation, despite the ADR above stating the rule in the same commit; see
   // solutions/correctness/2026-07-19-1400-mcmc-resume-accumulator-validation-gap.md.

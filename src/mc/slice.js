@@ -66,7 +66,7 @@ export default class Slice extends MCMC {
     super(logDensity, config, initialState)
     this._w = Slice._resolveW(this.internal.w, this.dim)
     Slice._validateW(this._w, this.dim)
-    // decisions/0034-mcmc-exact-stream-reproducible-resume.md — restoring the batch-adaptation
+    // decisions/0035-mcmc-exact-stream-reproducible-resume.md — restoring the batch-adaptation
     // accumulators (not just the derived w) is what makes a mid-warm-up resume bit-for-bit
     // reproducible, since Slice's _adjust() depends only on these subclass-owned fields. Validated
     // the same way stepSize is on HMC/MALA: a malformed resumed field must fail loudly rather than

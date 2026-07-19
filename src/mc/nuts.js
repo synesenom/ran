@@ -93,7 +93,7 @@ export default class NUTS extends MCMC {
     // Momentum component sampler, one Normal(0,1) draw per dimension per iteration. Identity mass
     // matrix — Euclidean metric adaptation is out of scope (issue #826).
     this._q = new Normal(0, 1)
-    // decisions/0034-mcmc-exact-stream-reproducible-resume.md — restoring _q's own PRNG stream
+    // decisions/0035-mcmc-exact-stream-reproducible-resume.md — restoring _q's own PRNG stream
     // is what makes resumed momentum draws bit-for-bit identical, not just statistically equivalent.
     MCMC._restoreQPrng(this._q, this.internal.prngQ, 'NUTS')
     this.lastLnp = this.lnp(this.x)

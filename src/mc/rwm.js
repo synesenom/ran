@@ -46,7 +46,7 @@ export default class RWM extends MCMC {
     super(logDensity, config, initialState)
     this.lastLnp = this.lnp(this.x)
     this._q = new Normal(0, 1)
-    // decisions/0034-mcmc-exact-stream-reproducible-resume.md — restoring _q's own PRNG stream
+    // decisions/0035-mcmc-exact-stream-reproducible-resume.md — restoring _q's own PRNG stream
     // is what makes resumed proposals bit-for-bit identical, not just statistically equivalent.
     MCMC._restoreQPrng(this._q, this.internal.prngQ, 'RWM')
     this._target = this.dim === 1 ? TARGET_1D : TARGET_ND
@@ -89,7 +89,7 @@ export default class RWM extends MCMC {
     // proposal (effective std, global scale folded in) is kept for backward compatibility and
     // introspection; base+ls (raw, decomposed) are what restoration prefers, since re-deriving
     // ls from proposal alone would lose the Robbins-Monro trajectory's exact adaptation state —
-    // decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+    // decisions/0035-mcmc-exact-stream-reproducible-resume.md.
     const s = Math.exp(this._ls)
     return {
       proposal: this._base.map(d => d * s),
@@ -141,7 +141,7 @@ export default class RWM extends MCMC {
 
   // Kept out of the constructor to avoid a Complex Method smell there. `base` (raw, decomposed)
   // is preferred over the legacy `proposal` (base*exp(ls) already folded together) so restoring
-  // `ls` doesn't double-apply the global scale — decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+  // `ls` doesn't double-apply the global scale — decisions/0035-mcmc-exact-stream-reproducible-resume.md.
   // Validated the same way stepSize/pathLength already are on HMC/MALA: a malformed resumed field
   // must fail loudly rather than silently corrupt every subsequent proposal — see
   // solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md.

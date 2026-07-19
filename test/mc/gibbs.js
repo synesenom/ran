@@ -153,7 +153,7 @@ describe('mc.Gibbs', () => {
     // rng.next()-consuming conditionals, same shape as the .seed() block below: Gibbs's own
     // this.r is threaded into conditionals (ADR-0026), so restoring this.r alone (Phase 1's
     // base-class-only fix) is expected to make Gibbs fully bit-for-bit resumable with zero
-    // subclass changes — see decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+    // subclass changes — see decisions/0035-mcmc-exact-stream-reproducible-resume.md.
     const rngConditionals = [
       (x, rng) => rho * x[1] + sigma * rng.next(),
       (x, rng) => rho * x[0] + sigma * rng.next()
