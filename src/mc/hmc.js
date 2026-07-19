@@ -420,17 +420,17 @@ export default class HMC extends MCMC {
   // the uninterrupted chain would have; deep-copies metCovS (a dim x dim nested array) so the
   // live accumulator never aliases a caller-held snapshot's rows.
   _initMetricAccumulator (resumed) {
-    this._metN = HMC._resolveResumedField(resumed, 'metN', 0)
-    this._metMean = HMC._resolveResumedField(resumed, 'metMean', new Array(this.dim).fill(0)).slice()
+    this._metN = MCMC._resolveResumedField(resumed, 'metN', 0)
+    this._metMean = MCMC._resolveResumedField(resumed, 'metMean', new Array(this.dim).fill(0)).slice()
     if (this._metricType === 'dense') {
-      this._metCovS = HMC._resolveResumedField(
+      this._metCovS = MCMC._resolveResumedField(
         resumed, 'metCovS', Array.from({ length: this.dim }, () => new Array(this.dim).fill(0))
       ).map(row => row.slice())
       this._metDelta = new Array(this.dim).fill(0)
       this._metDelta2 = new Array(this.dim).fill(0)
       this._zBuffer = new Array(this.dim).fill(0)
     } else {
-      this._metM2 = HMC._resolveResumedField(resumed, 'metM2', new Array(this.dim).fill(0)).slice()
+      this._metM2 = MCMC._resolveResumedField(resumed, 'metM2', new Array(this.dim).fill(0)).slice()
     }
   }
 
@@ -505,10 +505,10 @@ export default class HMC extends MCMC {
   // Leapfrog integrator (Neal 2011, Algorithm 1): half-step momentum, full-step position,
   // half-step momentum, repeated for pathLength steps. Uses the simple unmerged form (two half
   // steps per leapfrog step) rather than the trailing/leading half-step merge optimization, for
-  // a direct, easily-verified match to the textbook algorithm. Deliberately NOT the shared
-  // src/mc/_leapfrog.js used by NUTS: that module hardcodes an identity mass matrix, while this
-  // one applies the adapted metric's M^-1 to the position update -- combining the dense metric
-  // with NUTS is explicitly out of scope (issue #826).
+  // a direct, easily-verified match to the textbook algorithm. Inline (not a shared module)
+  // because it applies the adapted metric's M^-1 to the position update, tightly coupled to this
+  // sampler's _applyInverseMetric -- NUTS has its own inline metric-aware leapfrog for the same
+  // reason (decisions/0034-nuts-euclidean-metric-adaptation.md).
   _leapfrog (x, r, eps) {
     const xCur = x.slice()
     const rCur = r.slice()
@@ -580,14 +580,6 @@ export default class HMC extends MCMC {
   }
 
   // ─── PRIVATE STATIC ───
-
-  // Split out of _initMetricAccumulator so each field's fallback is a single expression rather
-  // than a repeated branch, which is what the Complex Method smell flags. `!== undefined` (not
-  // `||`) so a legitimately-zero resumed value (e.g. metN: 0) is preserved rather than mistaken
-  // for absent. decisions/0035-mcmc-exact-stream-reproducible-resume.md
-  static _resolveResumedField (resumed, key, fallback) {
-    return (resumed && resumed[key] !== undefined) ? resumed[key] : fallback
-  }
 
   // Dense metric's identity default (no observations yet to base a covariance estimate on) --
   // isolated here rather than an inline nested-loop literal in the constructor.

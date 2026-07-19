@@ -110,6 +110,83 @@ describe('mc.NUTS', () => {
     })
   })
 
+  describe('constructor — metric', () => {
+    it('should default to a diagonal metric when config.metric is omitted', () => {
+      const nuts = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } })
+      assert.strictEqual(nuts.state().internal.metric.type, 'diag')
+    })
+
+    it('should throw when config.metric is neither diag nor dense', () => {
+      assert.throws(
+        () => new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1, metric: 'full' } }),
+        /metric must be 'diag' or 'dense'/
+      )
+    })
+
+    it('should throw when a dense metric is requested with a dimension above the dense cap', () => {
+      // Mirrors HMC's dense-dim guard: a dense covariance accumulator is dim x dim, which the base
+      // class's dim*maxLag footprint check does not bound.
+      assert.throws(
+        () => new NUTS({ logDensity: () => 0, gradLogDensity: () => new Array(1001).fill(0), config: { dim: 1001, metric: 'dense' } }),
+        /metric: 'dense' requires dim to be at most/
+      )
+    })
+
+    it('should throw when a resumed internal.metric type does not match the resolved metric', () => {
+      // initialState.internal is caller-supplied the same way config is — a mismatched resumed
+      // metric must be rejected, not silently reinterpreted.
+      assert.throws(
+        () => new NUTS({
+          logDensity: logDensity1D,
+          gradLogDensity: gradLogDensity1D,
+          config: { dim: 1 },
+          initialState: { internal: { metric: { type: 'dense', L: [[1]], D: [1] } } }
+        }),
+        /resumed metric type does not match/
+      )
+    })
+
+    it('should throw when a resumed diagonal metric.variance is not an array of positive finite numbers', () => {
+      assert.throws(
+        () => new NUTS({
+          logDensity: logDensity1D,
+          gradLogDensity: gradLogDensity1D,
+          config: { dim: 1 },
+          initialState: { internal: { metric: { type: 'diag', variance: [-1] } } }
+        }),
+        /resumed metric.variance must be an array of dim positive finite numbers/
+      )
+    })
+
+    it('should throw when a resumed dense metric.D is not an array of positive finite numbers', () => {
+      assert.throws(
+        () => new NUTS({
+          logDensity: logDensity2D,
+          gradLogDensity: gradLogDensity2D,
+          config: { dim: 2, metric: 'dense' },
+          initialState: { internal: { metric: { type: 'dense', L: [[1, 0], [0, 1]], D: [1, -1] } } }
+        }),
+        /resumed metric.D must be an array of dim positive finite numbers/
+      )
+    })
+
+    it('should throw when a resumed dense metric.L is not a dim x dim array of finite numbers', () => {
+      assert.throws(
+        () => new NUTS({
+          logDensity: logDensity2D,
+          gradLogDensity: gradLogDensity2D,
+          config: { dim: 2, metric: 'dense' },
+          initialState: { internal: { metric: { type: 'dense', L: [[1, 0]], D: [1, 1] } } }
+        }),
+        /resumed metric.L must be a dim x dim array of finite numbers/
+      )
+    })
+
+    it('should not throw for a valid dense metric on a small dimension', () => {
+      assert.doesNotThrow(() => new NUTS({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2, metric: 'dense' } }))
+    })
+  })
+
   describe('._iter() rejection', () => {
     it('should return accepted: false and leave position unchanged when the target is degenerate', () => {
       // logDensity = -Infinity everywhere: every leapfrog point fails the slice/divergence
@@ -207,6 +284,149 @@ describe('mc.NUTS', () => {
       const continued2 = runAdapted(nuts2, 20)
       assert.deepEqual(continued1, continued2)
       assert.deepEqual(nuts1.state().internal, nuts2.state().internal)
+    })
+
+    it('should produce bit-for-bit identical subsequent draws after resuming mid-warm-up (dense metric)', () => {
+      // NUTS gained Euclidean metric adaptation (diag/dense) after this issue's initial
+      // implementation landed — extending resume coverage to the metric accumulator here keeps
+      // NUTS at parity with HMC's own diag/dense resume coverage rather than leaving a gap.
+      const nuts1 = new NUTS({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2, metric: 'dense' } }).seed(11)
+      runAdapted(nuts1, 20)
+      const state = nuts1.state()
+
+      const nuts2 = new NUTS({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2, metric: 'dense' }, initialState: state })
+
+      const continued1 = runAdapted(nuts1, 20)
+      const continued2 = runAdapted(nuts2, 20)
+      assert.deepEqual(continued1, continued2)
+      assert.deepEqual(nuts1.state().internal, nuts2.state().internal)
+    })
+  })
+
+  describe('mass matrix adaptation', () => {
+    describe('diagonal metric (default)', () => {
+      // Independent 10D Normal with per-dimension sigma spanning ~60x — the issue's "10-dimensional
+      // differently-scaled Normal" acceptance target. With an identity metric a single step size
+      // cannot suit both the widest and narrowest directions, so per-dimension ESS is markedly
+      // imbalanced; the adapted diagonal metric rescales every direction to unit variance and
+      // balances it. Scales kept moderate (not 1000x) so the *unadapted* baseline's leapfrog stays
+      // within its stability margin instead of diverging, matching HMC's diagonal-metric test.
+      const sigma = [0.2, 0.3, 0.5, 0.8, 1, 1.5, 2.5, 4, 7, 12]
+      const variance = sigma.map(s => s * s)
+      const dim = sigma.length
+      const lnp = x => -0.5 * x.reduce((s, xi, i) => s + xi * xi / variance[i], 0)
+      const grad = x => x.map((xi, i) => -xi / variance[i])
+      const zeros = new Array(dim).fill(0)
+
+      it('should balance per-dimension ESS on a target with very different scales, and leave it unbalanced without warm-up', () => {
+        const warmUpBatches = 20
+        const sampleSize = 2000
+        // A single seed's ratio is a noisy point estimate — average over 3 independent seeds, as
+        // HMC's diagonal-metric ESS-balance test does for the same reason.
+        const seeds = [1, 2, 3]
+        const adaptedRatios = seeds.map(seed => {
+          const adapted = new NUTS({ logDensity: lnp, gradLogDensity: grad, config: { dim }, initialState: { x: zeros } }).seed(seed)
+          adapted.warmUp(null, warmUpBatches)
+          adapted.sample(null, sampleSize)
+          const e = adapted.ess()
+          return Math.max(...e) / Math.min(...e)
+        })
+        // No warmUp(): _adjust never runs, so the metric stays at its identity default (stepSize
+        // stays at 0.1 too) — the identity-metric baseline the issue compares against.
+        const unadaptedRatios = seeds.map(seed => {
+          const unadapted = new NUTS({ logDensity: lnp, gradLogDensity: grad, config: { dim }, initialState: { x: zeros } }).seed(seed)
+          unadapted.sample(null, sampleSize)
+          const e = unadapted.ess()
+          return Math.max(...e) / Math.min(...e)
+        })
+        const meanAdapted = adaptedRatios.reduce((a, b) => a + b, 0) / adaptedRatios.length
+        const meanUnadapted = unadaptedRatios.reduce((a, b) => a + b, 0) / unadaptedRatios.length
+
+        // Two independent absolute bounds (mirroring HMC's diagonal-metric ESS-balance test),
+        // not a single relative one: the adapted metric must be *well* balanced in absolute terms
+        // AND the identity baseline must be markedly imbalanced, so neither a mildly-imbalanced
+        // baseline nor a partially-balancing metric can trivially satisfy the assertion. Bounds
+        // derived empirically from the fixed seeds [1,2,3] (deterministic given the seed): observed
+        // meanAdapted ≈ 1.25 (per-seed 1.21–1.29), meanUnadapted ≈ 7.71 (per-seed 6.54–10.03).
+        assert(meanAdapted < 2, `adapted per-dimension ESS ratio (${meanAdapted}) should be well balanced (< 2)`)
+        assert(meanUnadapted > 5, `identity-baseline per-dimension ESS ratio (${meanUnadapted}) should be markedly imbalanced (> 5)`)
+      })
+
+      SEEDS.forEach(seed => {
+        it(`should still recover the correct per-dimension margins under metric adaptation (KS test, seed ${seed})`, () => {
+          // Guards against an *inconsistent* use of M vs M⁻¹ across the sampling paths (e.g.
+          // _sampleMomentum and _applyInverseMetric disagreeing), which biases the sampled
+          // distribution — the ESS-balance test above does not inspect the distribution. Note the
+          // limit of this guard: NUTS's stationary distribution is invariant under any consistent
+          // positive-definite metric, so a systematically-swapped-but-internally-consistent M/M⁻¹
+          // (a valid, merely inefficient metric) is invisible here and is caught only by the
+          // ESS-balance test's efficiency check.
+          const smallSigma = [1, 3, 0.5]
+          const smallVar = smallSigma.map(s => s * s)
+          const lnp3 = x => -0.5 * (x[0] * x[0] / smallVar[0] + x[1] * x[1] / smallVar[1] + x[2] * x[2] / smallVar[2])
+          const grad3 = x => [-x[0] / smallVar[0], -x[1] / smallVar[1], -x[2] / smallVar[2]]
+          const nuts = new NUTS({ logDensity: lnp3, gradLogDensity: grad3, config: { dim: 3 }, initialState: { x: [0, 0, 0] } }).seed(seed)
+          nuts.warmUp(null, 20)
+          const samples = nuts.sample(null, 2000)
+          smallSigma.forEach((s, i) => {
+            const ref = new Normal(0, s)
+            assert(ksTest(samples.map(x => x[i]), x => ref.cdf(x)), `margin ${i} (sigma=${s}) failed KS test`)
+          })
+        })
+      })
+    })
+
+    describe('dense metric (opt-in)', () => {
+      it('should restore the adapted L/D factors on a state round-trip', () => {
+        const nuts1 = new NUTS({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2, metric: 'dense' } }).seed(11)
+        nuts1.warmUp(null, 5)
+        for (let i = 0; i < 100; i++) nuts1.iterate()
+        const state = nuts1.state()
+        // An empirical sample covariance is never bit-for-bit equal to the identity default.
+        assert.notDeepEqual(state.internal.metric.D, [1, 1])
+        const nuts2 = new NUTS({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2, metric: 'dense' }, initialState: state })
+        assert.deepEqual(nuts2.state().internal, state.internal)
+      })
+
+      SEEDS.forEach(seed => {
+        it(`should still recover the correct margins of a correlated target under metric adaptation (KS test, seed ${seed})`, () => {
+          // Exercises the dense sampling path (_sampleMomentum back-substitution and
+          // _applyInverseMetric's L*D*L^T*p product) — both margins are standard Normal regardless
+          // of rho (see logDensity2D above).
+          const nuts = new NUTS({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2, metric: 'dense' } }).seed(seed)
+          nuts.warmUp(null, 10)
+          const samples = nuts.sample(null, 2000)
+          const ref = new Normal(0, 1)
+          assert(ksTest(samples.map(s => s[0]), x => ref.cdf(x)))
+          assert(ksTest(samples.map(s => s[1]), x => ref.cdf(x)))
+        })
+      })
+    })
+
+    it('should evaluate the no-U-turn criterion on the velocity M⁻¹r, not the raw momentum r', () => {
+      // The PR's central correctness fix: under a non-identity metric the U-turn test must dot
+      // (x⁺−x⁻) with the velocity M⁻¹r (Betancourt 2017), not the raw momentum. This locks that
+      // NUTS._noUTurn returns the verdict of whatever vectors it is handed as its 2nd/4th args, and
+      // exhibits a concrete case where the raw-momentum and velocity verdicts DIFFER — so a
+      // regression that reverted the tree to passing raw momenta would flip this result.
+      const xMinus = [0, 0]
+      const xPlus = [1, 1] // dx = (x⁺−x⁻) = [1, 1]
+      const momentum = [3, -1] // dx·r = 3 − 1 = 2 ≥ 0  → raw-momentum criterion says "keep going"
+      // Diagonal metric variance [0.1, 10] ⇒ M⁻¹ is elementwise multiply by variance, so the
+      // velocity is [0.1·3, 10·(−1)] = [0.3, −10]; dx·vel = 0.3 − 10 = −9.7 < 0 → "U-turn".
+      const velocity = [0.3, -10]
+      assert.strictEqual(NUTS._noUTurn(xMinus, velocity, xPlus, velocity), 0, 'velocity-based criterion should detect the U-turn')
+      assert.strictEqual(NUTS._noUTurn(xMinus, momentum, xPlus, momentum), 1, 'raw-momentum criterion would wrongly continue — confirming the two disagree')
+    })
+
+    it('should serialize the diagonal metric variance in state().internal.metric after warm-up', () => {
+      const nuts = new NUTS({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2 } }).seed(3)
+      nuts.warmUp(null, 10)
+      const metric = nuts.state().internal.metric
+      assert.strictEqual(metric.type, 'diag')
+      assert.strictEqual(metric.variance.length, 2)
+      // Adapted away from the all-ones identity default.
+      assert.notDeepEqual(metric.variance, [1, 1])
     })
   })
 

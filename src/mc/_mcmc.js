@@ -567,6 +567,14 @@ export default class MCMC {
     }
   }
 
+  // Shared by HMC and NUTS's mass-matrix accumulator restoration so each field's fallback is a
+  // single expression rather than a repeated branch, which is what the Complex Method smell
+  // flags. `!== undefined` (not `||`) so a legitimately-zero resumed value (e.g. metN: 0) is
+  // preserved rather than mistaken for absent. decisions/0035-mcmc-exact-stream-reproducible-resume.md
+  static _resolveResumedField (resumed, key, fallback) {
+    return (resumed && resumed[key] !== undefined) ? resumed[key] : fallback
+  }
+
   // Shared by every subclass restoring a resumed adaptation-batch accumulator field (Robbins-Monro
   // counters, dual-averaging state, covariance/mass-matrix accumulators) — a malformed field, if
   // silently accepted, corrupts the adaptation recursion (e.g. a non-finite pAccepted/daT) rather
