@@ -36,8 +36,9 @@ const MAX_STEPS = 200
  * interval width `w` (default 1.0) may be seeded via `initialState.internal.w`, either as a single
  * number (broadcast to every dimension) or as a per-dimension array.
  * @constructor
- * @throws {Error} If `w` (or any element of a per-dimension `w` array) is not a positive, finite
- * number, or if a per-dimension `w` array's length does not equal `dim`.
+ * @throws {Error} If options is not a plain object, or if `w` (or any element of a per-dimension
+ * `w` array) is not a positive, finite number, or if a per-dimension `w` array's length does not
+ * equal `dim`.
  */
 // decisions/0020-mcmc-design.md — the _iter/_adjust/_internal contract was designed for exactly
 // this pattern: a per-dimension sweep with its own adaptive tunable and no gradient requirement.
@@ -50,8 +51,11 @@ export default class Slice extends MCMC {
    * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class). The
    * interval width `w` (default 1.0) may be seeded via `initialState.internal.w`, either as a
    * single number (broadcast to every dimension) or as a per-dimension array.
+   * @throws {Error} If options is not a plain object.
    */
-  constructor ({ logDensity, config = {}, initialState = {} } = {}) {
+  constructor (options) {
+    Slice._validateOptions(options)
+    const { logDensity, config = {}, initialState = {} } = options
     super(logDensity, config, initialState)
     const w = this.internal.w
     this._w = Array.isArray(w) ? w.slice() : new Array(this.dim).fill(typeof w === 'number' ? w : 1.0)
@@ -141,6 +145,24 @@ export default class Slice extends MCMC {
         r = candidate
       }
     }
+  }
+
+  // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
+  // Destructuring options directly in the constructor's parameter list would throw a generic,
+  // engine-dependent TypeError for null (default parameters only cover undefined) instead of this
+  // clear, Slice-specific message.
+  // See decisions/0032-mala-options-object-only-constructor.md and
+  // solutions/correctness/2026-07-18-1147-mala-null-guard-destructured-parameter-gap.md
+  static _validateOptions (options) {
+    if (!Slice._isPlainObject(options)) {
+      throw Error('Slice: constructor requires an options object: new Slice({ logDensity, config, initialState })')
+    }
+  }
+
+  // Split from _validateOptions so the compound check is a single return expression rather than
+  // a branch condition, which is what the Complex Conditional smell flags.
+  static _isPlainObject (options) {
+    return options !== undefined && options !== null && typeof options === 'object' && !Array.isArray(options)
   }
 
   // Kept out of the constructor to avoid a Complex Conditional smell there, matching the

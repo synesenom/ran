@@ -166,6 +166,23 @@ describe('mc.HMC', () => {
       const hmc = new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, initialState: { x: [7] } })
       assert.deepStrictEqual(hmc.x, [7])
     })
+
+    it('should throw a clear error when called with no arguments', () => {
+      assert.throws(() => new HMC(), /HMC: constructor requires an options object/)
+    })
+
+    it('should throw a clear error when called with null', () => {
+      assert.throws(() => new HMC(null), /HMC: constructor requires an options object/)
+    })
+
+    it('should throw a clear error when called with an array', () => {
+      assert.throws(() => new HMC([logDensity1D, gradLogDensity1D]), /HMC: constructor requires an options object/)
+    })
+
+    it('should throw a clear error when called with a non-object primitive', () => {
+      assert.throws(() => new HMC(42), /HMC: constructor requires an options object/)
+      assert.throws(() => new HMC('logDensity'), /HMC: constructor requires an options object/)
+    })
   })
 
   describe('gradLogDensity array-reuse contract', () => {
