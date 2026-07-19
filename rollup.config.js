@@ -67,4 +67,21 @@ const perProcess = processNames.map(name => ({
   }
 }))
 
-export default [monolithic, ...perDist, ...perProcess]
+// Parse actively-exported Monte Carlo samplers from src/mc/index.js.
+// The leading-underscore guard excludes the abstract _mcmc.js base class,
+// mirroring the dist and process patterns.
+const mcIndexSrc = readFileSync('./src/mc/index.js', 'utf8')
+const mcNames = [...mcIndexSrc.matchAll(/^export.*from '\.\/([a-z0-9][a-z0-9-]*)'$/gm)]
+  .map(m => m[1])
+
+const perMc = mcNames.map(name => ({
+  input: `src/mc/${name}.js`,
+  plugins: [nodeResolve()],
+  output: {
+    file: `dist/mc/${name}.esm.js`,
+    format: 'es',
+    banner: copyright
+  }
+}))
+
+export default [monolithic, ...perDist, ...perProcess, ...perMc]
