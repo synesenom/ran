@@ -67,7 +67,7 @@ See `CLAUDE.md` for the full distribution pattern, parameter conventions, and JS
 ## Running a subset of tests
 
 ```bash
-./node_modules/.bin/_mocha --require @babel/register test/dist.js   # distribution suite only
+./node_modules/.bin/_mocha --require @babel/register test/dist-runner.js test/dist-base.js test/dist-shard-*.js # distribution suite only
 ./node_modules/.bin/_mocha --require @babel/register test/<file>.js # any single file
 ```
 
