@@ -6,6 +6,11 @@ import Xoshiro128p from '../core/xoshiro'
 // one replica at a time.
 const _MAX_REPLICAS = 10000
 
+// Module-level so the deprecated positional-constructor warning fires exactly once per process,
+// no matter how many positional instances are built — a per-instance flag would re-warn every time.
+// decisions/0030-mcmc-options-object-constructor.md — options-object constructor convention.
+let warnedPositionalDeprecation = false
+
 /**
  * Class implementing [Parallel Tempering]{@link https://doi.org/10.1090/conm/026} (Replica Exchange MCMC,
  * Geyer 1991) to sample multimodal targets. Runs N independent [MCMC]{@link ran.mc.MCMC} replicas at inverse
@@ -25,9 +30,9 @@ const _MAX_REPLICAS = 10000
  *
  * @class ParallelTempering
  * @memberof ran.mc
- * @param {Function} logDensity The logarithm of the (unnormalized) target density.
- * @param {Object=} options Configuration. Supported properties:
+ * @param {Object} options Coordinator options, as a single object. Supported properties:
  * <ul>
+ *   <li>{logDensity}: The logarithm of the (unnormalized) target density (required).</li>
  *   <li>{temperatures}: Explicit, strictly descending array of inverse temperatures starting at 1.
  *   At least two are required. Takes precedence over nReplicas/tempMax if provided.</li>
  *   <li>{nReplicas}: Number of replicas for an auto-generated geometric ladder. At least 2, at most 10000.</li>
@@ -36,6 +41,10 @@ const _MAX_REPLICAS = 10000
  *   <li>{sampler}: Factory `(scaledLogDensity, config) => MCMC` building one replica. Defaults to RWM.</li>
  *   <li>{config}: Configuration object forwarded unchanged to every replica's constructor.</li>
  * </ul>
+ * The deprecated positional form `new ParallelTempering(logDensity, options)` is still accepted, but
+ * emits a one-time deprecation warning on first use and will be removed in v1.32.0.
+ * @param {Object=} legacyOptions Deprecated positional-form options object, read only when the
+ * deprecated `new ParallelTempering(logDensity, options)` form is used. Do not use in new code.
  * @constructor
  * @throws {Error} If logDensity is not a function.
  * @throws {Error} If neither temperatures nor nReplicas and tempMax are provided, or if they are invalid.
@@ -43,14 +52,15 @@ const _MAX_REPLICAS = 10000
 // decisions/0028-parallel-tempering-standalone-coordinator.md — not an MCMC subclass; swaps positions
 // only, via direct field mutation, keeping adaptation state pinned to its temperature slot
 export default class ParallelTempering {
-  constructor (logDensity, options = {}) {
+  constructor (options, legacyOptions) {
+    const { logDensity, options: opts } = ParallelTempering._normalizeConstructorArgs(options, legacyOptions)
     if (typeof logDensity !== 'function') {
       throw Error('ParallelTempering: logDensity must be a function')
     }
-    this.temperatures = ParallelTempering._resolveLadder(options)
+    this.temperatures = ParallelTempering._resolveLadder(opts)
     this._logDensity = logDensity
-    this._sampler = options.sampler || ((lnp, config) => new RWM({ logDensity: lnp, config }))
-    this._config = options.config || {}
+    this._sampler = opts.sampler || ((lnp, config) => new RWM({ logDensity: lnp, config }))
+    this._config = opts.config || {}
     this._replicas = this.temperatures.map(beta => this._sampler(x => beta * this._logDensity(x), this._config))
     this._swapAttempts = new Array(this.temperatures.length - 1).fill(0)
     this._swapAccepts = new Array(this.temperatures.length - 1).fill(0)
@@ -189,6 +199,27 @@ export default class ParallelTempering {
   }
 
   // ─── PRIVATE STATIC ───
+
+  // Accepts the preferred options-object form `new ParallelTempering({ logDensity, ...options })` and
+  // the deprecated positional form `new ParallelTempering(logDensity, options)`. The two forms are
+  // told apart by the first argument's type: a function is the positional logDensity, anything else is
+  // the options object carrying logDensity as a property.
+  static _normalizeConstructorArgs (first, legacyOptions) {
+    if (typeof first === 'function') {
+      ParallelTempering._warnPositionalDeprecation()
+      return { logDensity: first, options: legacyOptions || {} }
+    }
+    const options = first || {}
+    return { logDensity: options.logDensity, options }
+  }
+
+  static _warnPositionalDeprecation () {
+    if (warnedPositionalDeprecation) {
+      return
+    }
+    warnedPositionalDeprecation = true
+    console.warn('[ranjs] ParallelTempering(logDensity, options) positional constructor is deprecated and will be removed in v1.32.0; use ParallelTempering({ logDensity, ...options }).')
+  }
 
   static _resolveLadder (options) {
     if (options.temperatures !== undefined) {
