@@ -83,6 +83,35 @@ describe('mc.MALA', () => {
     it('should throw a clear error when called with an array', () => {
       assert.throws(() => new MALA([logDensity1D, gradLogDensity1D]), /MALA: constructor requires an options object/)
     })
+
+    it('should throw for a malformed resumed prngQ', () => {
+      assert.throws(
+        () => new MALA({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { prngQ: 'oops' } } }),
+        /MALA: prng state must be an array of 4 finite numbers/
+      )
+    })
+
+    it('should throw when a resumed ls is not finite', () => {
+      assert.throws(
+        () => new MALA({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { ls: NaN } } }),
+        /MALA: resumed ls must be a finite number/
+      )
+    })
+
+    it('should throw when resumed pAccepted/pN/pBatch are not non-negative integers', () => {
+      assert.throws(
+        () => new MALA({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { pAccepted: -1 } } }),
+        /MALA: resumed pAccepted must be a non-negative integer/
+      )
+      assert.throws(
+        () => new MALA({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { pN: 1.5 } } }),
+        /MALA: resumed pN must be a non-negative integer/
+      )
+      assert.throws(
+        () => new MALA({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { pBatch: Infinity } } }),
+        /MALA: resumed pBatch must be a non-negative integer/
+      )
+    })
   })
 
   describe('._iter() rejection', () => {
@@ -109,6 +138,38 @@ describe('mc.MALA', () => {
       assert.deepEqual(mala2.x, state.x)
       assert.strictEqual(mala2.samplingRate, state.samplingRate)
       assert.deepEqual(mala2.state().internal, state.internal)
+    })
+  })
+
+  describe('.state() stream-level reproducible resume', () => {
+    // Mirrors what warmUp() does per-iteration (iterate(null, true) + _adjust), without its
+    // coarse 1e4-iteration batching, so a snapshot can land at an exact iteration count relative
+    // to MALA's BATCH=100 adaptation window — iterate() alone never calls _adjust().
+    const runAdapted = (mala, n) => {
+      const positions = []
+      for (let i = 0; i < n; i++) {
+        mala._adjust(mala.iterate(null, true))
+        positions.push(mala.x.slice())
+      }
+      return positions
+    }
+
+    it('should produce bit-for-bit identical subsequent draws after resuming mid-warm-up, including across a batch boundary', () => {
+      const mala1 = new MALA({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } }).seed(11)
+      // 150 iterations crosses one BATCH=100 adaptation window, so the snapshot below captures
+      // mid-second-window state, not just a fresh/aligned start.
+      runAdapted(mala1, 150)
+      const state = mala1.state()
+
+      const mala2 = new MALA({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: state })
+
+      // 150 more iterations crosses a second adaptation-batch boundary post-resume. Unlike RWM,
+      // MALA's _adjust() depends only on its own pAccepted/pN/pBatch (no base-class Welford
+      // dependency), so this is fully bit-for-bit reproducible — decisions/0035-mcmc-exact-stream-reproducible-resume.md.
+      const continued1 = runAdapted(mala1, 150)
+      const continued2 = runAdapted(mala2, 150)
+      assert.deepEqual(continued1, continued2)
+      assert.deepEqual(mala1.state().internal, mala2.state().internal)
     })
   })
 

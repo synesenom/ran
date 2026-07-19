@@ -52,6 +52,34 @@ describe('mc.AdaptiveMetropolis', () => {
       assert.throws(() => new AdaptiveMetropolis(42), /AdaptiveMetropolis: constructor requires an options object/)
       assert.throws(() => new AdaptiveMetropolis('logDensity'), /AdaptiveMetropolis: constructor requires an options object/)
     })
+
+    it('should throw for a malformed resumed prngQ', () => {
+      assert.throws(
+        () => new AdaptiveMetropolis({ logDensity: () => 0, config: { dim: 1 }, initialState: { internal: { prngQ: [1, 2, 3] } } }),
+        /AdaptiveMetropolis: prng state must be an array of 4 finite numbers/
+      )
+    })
+
+    it('should throw when a resumed covN is not a non-negative integer', () => {
+      assert.throws(
+        () => new AdaptiveMetropolis({ logDensity: () => 0, config: { dim: 1 }, initialState: { internal: { covN: -1 } } }),
+        /AdaptiveMetropolis: resumed covN must be a non-negative integer/
+      )
+    })
+
+    it('should throw when a resumed covMean has the wrong length', () => {
+      assert.throws(
+        () => new AdaptiveMetropolis({ logDensity: () => 0, config: { dim: 2 }, initialState: { internal: { covMean: [1] } } }),
+        /AdaptiveMetropolis: resumed covMean must be an array of 2 finite numbers/
+      )
+    })
+
+    it('should throw when a resumed covS is not a dim x dim matrix', () => {
+      assert.throws(
+        () => new AdaptiveMetropolis({ logDensity: () => 0, config: { dim: 2 }, initialState: { internal: { covS: [[1, 2], [3]] } } }),
+        /AdaptiveMetropolis: resumed covS must be a 2 x 2 array of finite numbers/
+      )
+    })
   })
 
   describe('._iter() rejection', () => {
@@ -113,6 +141,46 @@ describe('mc.AdaptiveMetropolis', () => {
       assert.deepEqual(am2.x, state.x)
       assert.strictEqual(am2.samplingRate, state.samplingRate)
       assert.deepEqual(am2.state().internal.proposal, state.internal.proposal)
+    })
+  })
+
+  describe('.state() stream-level reproducible resume', () => {
+    // Mirrors what warmUp() does per-iteration (iterate(null, true) + _adjust) — iterate() alone
+    // never calls _adjust(), so exercising the covariance accumulator requires driving both.
+    const runAdapted = (am, n) => {
+      const positions = []
+      for (let i = 0; i < n; i++) {
+        am._adjust(am.iterate(null, true))
+        positions.push(am.x.slice())
+      }
+      return positions
+    }
+
+    it('should produce bit-for-bit identical subsequent draws after resuming mid-warm-up', () => {
+      const lnp = x => -0.5 * x[0] * x[0]
+      const am1 = new AdaptiveMetropolis({ logDensity: lnp, config: { dim: 1 } }).seed(9)
+      runAdapted(am1, 30)
+      const state = am1.state()
+
+      const am2 = new AdaptiveMetropolis({ logDensity: lnp, config: { dim: 1 }, initialState: state })
+
+      const continued1 = runAdapted(am1, 30)
+      const continued2 = runAdapted(am2, 30)
+      assert.deepEqual(continued1, continued2)
+      assert.deepEqual(am1.state().internal, am2.state().internal)
+    })
+
+    it('should deep-copy the covariance accumulator so mutating a resumed instance does not corrupt a previously captured snapshot', () => {
+      const lnp = x => -0.5 * (x[0] * x[0] + x[1] * x[1])
+      const am1 = new AdaptiveMetropolis({ logDensity: lnp, config: { dim: 2 } }).seed(3)
+      runAdapted(am1, 10)
+      const snapshot = am1.state()
+      const snapshotCovS = snapshot.internal.covS.map(row => row.slice())
+
+      const am2 = new AdaptiveMetropolis({ logDensity: lnp, config: { dim: 2 }, initialState: snapshot })
+      runAdapted(am2, 10)
+
+      assert.deepEqual(snapshot.internal.covS, snapshotCovS)
     })
   })
 

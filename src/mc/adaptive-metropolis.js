@@ -44,11 +44,12 @@ export default class AdaptiveMetropolis extends MCMC {
     super(logDensity, config, initialState)
     this.lastLnp = this.lnp(this.x)
     this._q = new Normal(0, 1)
+    // decisions/0035-mcmc-exact-stream-reproducible-resume.md — restoring _q's own PRNG stream
+    // is what makes resumed proposals bit-for-bit identical, not just statistically equivalent.
+    MCMC._restoreQPrng(this._q, this.internal.prngQ, 'AdaptiveMetropolis')
     // Roberts-Gelman-Gilks (1997) asymptotically optimal scaling for a d-dimensional Gaussian target.
     this._sd = (2.38 * 2.38) / this.dim
-    this._covN = 0
-    this._covMean = new Array(this.dim).fill(0)
-    this._covS = Array.from({ length: this.dim }, () => new Array(this.dim).fill(0))
+    this._restoreCovarianceAccumulator()
     // Reusable scratch buffers to avoid per-iteration array allocations in _iter/_updateCovariance.
     // Only plain arrays are cached as fields here, never a Vector instance: a cached Vector field's
     // type is inferred from its own JSDoc (ran.la.Vector), which breaks npm run typecheck the same
@@ -107,10 +108,17 @@ export default class AdaptiveMetropolis extends MCMC {
   }
 
   _internal () {
-    // Serialize only the effective, ready-to-use proposal transform (mirrors RWM._internal()'s
-    // "serialize the effective proposal, not raw adaptation counters" convention) so a resumed
-    // sampler reproduces the same joint proposal directly, without recomputing ldl().
-    return { proposal: this._A.m() }
+    return {
+      // Effective, ready-to-use proposal transform, so a resumed sampler reproduces the same
+      // joint proposal directly without recomputing ldl().
+      proposal: this._A.m(),
+      prngQ: this._q.r.save(),
+      covN: this._covN,
+      covMean: this._covMean.slice(),
+      // Deep copy: _covS is a dim x dim nested array, and a shallow .slice() on the outer
+      // array would alias inner rows with the live, mutating accumulator — decisions/0035-mcmc-exact-stream-reproducible-resume.md.
+      covS: this._covS.map(row => row.slice())
+    }
   }
 
   // Online (Welford-style) update of the running mean and sum-of-outer-products accumulators,
@@ -147,6 +155,22 @@ export default class AdaptiveMetropolis extends MCMC {
     const cov = new Matrix(this._covS).scale(this._sd / (this._covN - 1)).add(new Matrix(this.dim).scale(this._sd * EPS))
     const { D, L } = cov.ldl()
     this._A = L.mult(D.f(Math.sqrt))
+  }
+
+  // Kept out of the constructor to avoid a Complex Method smell there. Deep-copies covS (a
+  // dim x dim nested array) so the live accumulator never aliases a caller-held snapshot's rows —
+  // decisions/0035-mcmc-exact-stream-reproducible-resume.md. Validated the same way stepSize is
+  // on HMC/MALA: a malformed resumed field must fail loudly rather than silently corrupt the
+  // covariance recursion — solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md.
+  _restoreCovarianceAccumulator () {
+    MCMC._validateNonNegativeInteger(this.internal.covN, 'AdaptiveMetropolis: resumed covN')
+    MCMC._validateFiniteVector(this.internal.covMean, this.dim, 'AdaptiveMetropolis: resumed covMean')
+    MCMC._validateFiniteMatrix(this.internal.covS, this.dim, 'AdaptiveMetropolis: resumed covS')
+
+    this._covN = this.internal.covN || 0
+    this._covMean = (this.internal.covMean || new Array(this.dim).fill(0)).slice()
+    this._covS = (this.internal.covS || Array.from({ length: this.dim }, () => new Array(this.dim).fill(0)))
+      .map(row => row.slice())
   }
 
   // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.

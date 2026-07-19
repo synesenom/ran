@@ -47,6 +47,42 @@ describe('mc.RWM', () => {
       assert.throws(() => new RWM(42), /RWM: constructor requires an options object/)
       assert.throws(() => new RWM('logDensity'), /RWM: constructor requires an options object/)
     })
+
+    it('should throw for a malformed resumed prngQ', () => {
+      assert.throws(
+        () => new RWM({ logDensity: () => 0, config: { dim: 1 }, initialState: { internal: { prngQ: [1, 2, 3] } } }),
+        /RWM: prng state must be an array of 4 finite numbers/
+      )
+    })
+
+    it('should throw when a resumed base has the wrong length', () => {
+      assert.throws(
+        () => new RWM({ logDensity: () => 0, config: { dim: 2 }, initialState: { internal: { base: [1] } } }),
+        /RWM: resumed base must be an array of 2 finite numbers/
+      )
+    })
+
+    it('should throw when a resumed ls is not finite', () => {
+      assert.throws(
+        () => new RWM({ logDensity: () => 0, config: { dim: 1 }, initialState: { internal: { ls: Infinity } } }),
+        /RWM: resumed ls must be a finite number/
+      )
+    })
+
+    it('should throw when resumed pAccepted/pN/pBatch are not non-negative integers', () => {
+      assert.throws(
+        () => new RWM({ logDensity: () => 0, config: { dim: 1 }, initialState: { internal: { pAccepted: -1 } } }),
+        /RWM: resumed pAccepted must be a non-negative integer/
+      )
+      assert.throws(
+        () => new RWM({ logDensity: () => 0, config: { dim: 1 }, initialState: { internal: { pN: 1.5 } } }),
+        /RWM: resumed pN must be a non-negative integer/
+      )
+      assert.throws(
+        () => new RWM({ logDensity: () => 0, config: { dim: 1 }, initialState: { internal: { pBatch: NaN } } }),
+        /RWM: resumed pBatch must be a non-negative integer/
+      )
+    })
   })
 
   describe('._iter() rejection', () => {
@@ -106,6 +142,66 @@ describe('mc.RWM', () => {
       assert.deepEqual(rwm2.x, state.x)
       assert.strictEqual(rwm2.samplingRate, state.samplingRate)
       assert.deepEqual(rwm2.state().internal.proposal, state.internal.proposal)
+    })
+  })
+
+  describe('.state() stream-level reproducible resume', () => {
+    // Mirrors what warmUp() does per-iteration (iterate(null, true) + _adjust), without its
+    // coarse 1e4-iteration batching, so a snapshot can land at an exact iteration count relative
+    // to RWM's BATCH=100 adaptation window — iterate() alone never calls _adjust().
+    const runAdapted = (rwm, n) => {
+      const positions = []
+      for (let i = 0; i < n; i++) {
+        rwm._adjust(rwm.iterate(null, true))
+        positions.push(rwm.x.slice())
+      }
+      return positions
+    }
+
+    it('should produce bit-for-bit identical subsequent draws when the resume snapshot lands on a batch boundary', () => {
+      const lnp = x => -0.5 * x[0] * x[0]
+      const rwm1 = new RWM({ logDensity: lnp, config: { dim: 1 } }).seed(11)
+      // Exactly one BATCH=100 window: _pN resets to 0 right at the snapshot point.
+      runAdapted(rwm1, 100)
+      const state = rwm1.state()
+
+      const rwm2 = new RWM({ logDensity: lnp, config: { dim: 1 }, initialState: state })
+
+      // 80 more iterations (< BATCH) stays inside the next window on both sides, so
+      // _refreshBase() never fires in the comparison window — the one case ADR-0034
+      // guarantees is bit-for-bit exact.
+      const continued1 = runAdapted(rwm1, 80)
+      const continued2 = runAdapted(rwm2, 80)
+      assert.deepEqual(continued1, continued2)
+      assert.deepEqual(rwm1.state().internal, rwm2.state().internal)
+    })
+
+    it('documents the known limitation: _base diverges after a batch boundary crossed post-resume mid-batch (ADR-0034)', () => {
+      const lnp = x => -0.5 * x[0] * x[0]
+      const rwm1 = new RWM({ logDensity: lnp, config: { dim: 1 } }).seed(11)
+      // Strictly mid-batch: 50 iterations into the second BATCH=100 window.
+      runAdapted(rwm1, 150)
+      const state = rwm1.state()
+
+      const rwm2 = new RWM({ logDensity: lnp, config: { dim: 1 }, initialState: state })
+
+      // 50 more iterations crosses the next batch boundary at the same global iteration count
+      // for both (since _pN/_pBatch/_pAccepted are restored exactly), but _refreshBase() reads
+      // this.statistics() — the base-class Welford accumulator, never serialized (ADR-0023) —
+      // which holds 200 observations for rwm1 (accrued since construction) versus only 50 for
+      // rwm2 (reset at its own construction). The proposal scale _ls is unaffected: it depends
+      // only on the now-fully-restored _pAccepted/_pBatch/_pN, not on the Welford accumulator.
+      runAdapted(rwm1, 50)
+      runAdapted(rwm2, 50)
+      assert.notDeepEqual(rwm1.state().internal.base, rwm2.state().internal.base)
+      assert.strictEqual(rwm1.state().internal.ls, rwm2.state().internal.ls)
+
+      // Prove the practical consequence, not just the internal-field divergence: with different
+      // _base values now feeding _jump()'s proposal, the same PRNG stream produces different
+      // draws — the actual failure mode a caller relying on bit-for-bit resume would observe.
+      const divergedDraws1 = runAdapted(rwm1, 10)
+      const divergedDraws2 = runAdapted(rwm2, 10)
+      assert.notDeepEqual(divergedDraws1, divergedDraws2)
     })
   })
 

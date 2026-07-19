@@ -106,6 +106,7 @@ export default class NUTS extends MCMC {
     this._metricType = config.metric === 'dense' ? 'dense' : 'diag'
     NUTS._validateDenseMetricDim(this._metricType, this.dim)
     NUTS._validateResumedMetric(this.internal.metric, this._metricType, this.dim)
+    NUTS._validateResumedMetricAccumulator(this.internal.metAccumulator, this._metricType, this.dim)
 
     this._gradLnp = gradLogDensity
     this._stepSize = this.internal.stepSize || config.stepSize || 0.1
@@ -113,18 +114,13 @@ export default class NUTS extends MCMC {
     // adapted metric in _sampleMomentum so momentum is drawn from N(0, M), not N(0, I). See
     // decisions/0034-nuts-euclidean-metric-adaptation.md.
     this._q = new Normal(0, 1)
+    // decisions/0035-mcmc-exact-stream-reproducible-resume.md — restoring _q's own PRNG stream
+    // is what makes resumed momentum draws bit-for-bit identical, not just statistically equivalent.
+    MCMC._restoreQPrng(this._q, this.internal.prngQ, 'NUTS')
     this.lastLnp = this.lnp(this.x)
 
-    // Dual-averaging state (Hoffman & Gelman 2014 S3.2): mu is the shrinkage target, Hbar the
-    // running acceptance-probability-deviation statistic, logEpsBar the smoothed log step size,
-    // t the iteration counter. Ephemeral — not part of _internal()'s serialized state, matching
-    // HMC's precedent of serializing only the effective proposal scale.
-    this._daMu = Math.log(10 * this._stepSize)
-    this._daHbar = 0
-    this._daLogEpsBar = Math.log(this._stepSize)
-    this._daT = 0
-
-    this._initMetricState(this.internal.metric)
+    this._restoreDualAveraging()
+    this._initMetricState(this.internal.metric, this.internal.metAccumulator)
   }
 
   // ─── PUBLIC INSTANCE ───
@@ -202,11 +198,22 @@ export default class NUTS extends MCMC {
   _internal () {
     return {
       stepSize: this._stepSize,
-      // Serializes only the effective, ready-to-use metric (mirrors HMC's _internal(): "serialize
-      // the effective proposal, not raw adaptation counters").
+      // The effective, ready-to-use metric — restoration uses this directly so a resumed sampler's
+      // momentum draws are correctly scaled even before the accumulator (below) next crosses its
+      // own refresh gate.
       metric: this._metricType === 'dense'
         ? { type: 'dense', L: this._metL.map(row => row.slice()), D: this._metD.slice() }
-        : { type: 'diag', variance: this._metVar.slice() }
+        : { type: 'diag', variance: this._metVar.slice() },
+      prngQ: this._q.r.save(),
+      daMu: this._daMu,
+      daHbar: this._daHbar,
+      daLogEpsBar: this._daLogEpsBar,
+      daT: this._daT,
+      // Raw mass-matrix accumulator (distinct from the effective metric above) — see
+      // decisions/0035-mcmc-exact-stream-reproducible-resume.md.
+      metAccumulator: this._metricType === 'dense'
+        ? { metN: this._metN, metMean: this._metMean.slice(), metCovS: this._metCovS.map(row => row.slice()) }
+        : { metN: this._metN, metMean: this._metMean.slice(), metM2: this._metM2.slice() }
     }
   }
 
@@ -386,21 +393,27 @@ export default class NUTS extends MCMC {
   // the constructor to avoid a Complex Method smell there. Extraction of this machinery into a
   // shared module (deduplicating HMC and NUTS) is a deferred follow-up — see
   // decisions/0034-nuts-euclidean-metric-adaptation.md.
-  _initMetricState (resumedMetric) {
-    this._initMetricAccumulator()
+  _initMetricState (resumedMetric, resumedAccumulator) {
+    this._initMetricAccumulator(resumedAccumulator)
     this._initEffectiveMetric(resumedMetric)
   }
 
-  _initMetricAccumulator () {
-    this._metN = 0
-    this._metMean = new Array(this.dim).fill(0)
+  // `resumed` (decisions/0035-mcmc-exact-stream-reproducible-resume.md) restores the raw
+  // accumulator so a mid-warm-up resume's next refresh reads the same history the uninterrupted
+  // chain would have; deep-copies metCovS (a dim x dim nested array) so the live accumulator
+  // never aliases a caller-held snapshot's rows. Mirrors HMC's identical accumulator restore.
+  _initMetricAccumulator (resumed) {
+    this._metN = MCMC._resolveResumedField(resumed, 'metN', 0)
+    this._metMean = MCMC._resolveResumedField(resumed, 'metMean', new Array(this.dim).fill(0)).slice()
     if (this._metricType === 'dense') {
-      this._metCovS = Array.from({ length: this.dim }, () => new Array(this.dim).fill(0))
+      this._metCovS = MCMC._resolveResumedField(
+        resumed, 'metCovS', Array.from({ length: this.dim }, () => new Array(this.dim).fill(0))
+      ).map(row => row.slice())
       this._metDelta = new Array(this.dim).fill(0)
       this._metDelta2 = new Array(this.dim).fill(0)
       this._zBuffer = new Array(this.dim).fill(0)
     } else {
-      this._metM2 = new Array(this.dim).fill(0)
+      this._metM2 = MCMC._resolveResumedField(resumed, 'metM2', new Array(this.dim).fill(0)).slice()
     }
   }
 
@@ -624,6 +637,23 @@ export default class NUTS extends MCMC {
     }
     if (!NUTS._isFiniteMatrix(metric.L, dim)) {
       throw Error('NUTS: resumed metric.L must be a dim x dim array of finite numbers')
+    }
+  }
+
+  // A resumed initialState.internal.metAccumulator is caller-supplied the same way metric is
+  // above -- see solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md.
+  // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
+  // Mirrors HMC's identical accumulator validator.
+  static _validateResumedMetricAccumulator (resumed, metricType, dim) {
+    if (resumed === undefined) {
+      return
+    }
+    MCMC._validateNonNegativeInteger(resumed.metN, 'NUTS: resumed metAccumulator.metN')
+    MCMC._validateFiniteVector(resumed.metMean, dim, 'NUTS: resumed metAccumulator.metMean')
+    if (metricType === 'dense') {
+      MCMC._validateFiniteMatrix(resumed.metCovS, dim, 'NUTS: resumed metAccumulator.metCovS')
+    } else {
+      MCMC._validateFiniteVector(resumed.metM2, dim, 'NUTS: resumed metAccumulator.metM2')
     }
   }
 

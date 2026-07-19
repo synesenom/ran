@@ -46,15 +46,11 @@ export default class RWM extends MCMC {
     super(logDensity, config, initialState)
     this.lastLnp = this.lnp(this.x)
     this._q = new Normal(0, 1)
-    // Per-component base proposal scale: seeded from the caller-supplied proposal
-    // (or 1) and replaced by the running marginal std once warm-up has data.
-    this._base = (this.internal.proposal || new Array(this.dim).fill(1)).slice()
-    // Global log step scale, adapted toward the acceptance target during warm-up.
-    this._ls = 0
+    // decisions/0035-mcmc-exact-stream-reproducible-resume.md — restoring _q's own PRNG stream
+    // is what makes resumed proposals bit-for-bit identical, not just statistically equivalent.
+    MCMC._restoreQPrng(this._q, this.internal.prngQ, 'RWM')
     this._target = this.dim === 1 ? TARGET_1D : TARGET_ND
-    this._pAccepted = 0
-    this._pN = 0
-    this._pBatch = 0
+    this._restoreAdaptationState()
   }
 
   /**
@@ -90,10 +86,20 @@ export default class RWM extends MCMC {
   }
 
   _internal () {
-    // Serialize the effective per-component proposal std (global scale folded in)
-    // so a resumed sampler reproduces the same joint proposal.
+    // proposal (effective std, global scale folded in) is kept for backward compatibility and
+    // introspection; base+ls (raw, decomposed) are what restoration prefers, since re-deriving
+    // ls from proposal alone would lose the Robbins-Monro trajectory's exact adaptation state —
+    // decisions/0035-mcmc-exact-stream-reproducible-resume.md.
     const s = Math.exp(this._ls)
-    return { proposal: this._base.map(d => d * s) }
+    return {
+      proposal: this._base.map(d => d * s),
+      base: this._base.slice(),
+      ls: this._ls,
+      prngQ: this._q.r.save(),
+      pAccepted: this._pAccepted,
+      pN: this._pN,
+      pBatch: this._pBatch
+    }
   }
 
   // Joint random-walk proposal: every component is perturbed at once, scaled by the
@@ -131,6 +137,27 @@ export default class RWM extends MCMC {
         this._base[i] = stats[i].std
       }
     }
+  }
+
+  // Kept out of the constructor to avoid a Complex Method smell there. `base` (raw, decomposed)
+  // is preferred over the legacy `proposal` (base*exp(ls) already folded together) so restoring
+  // `ls` doesn't double-apply the global scale — decisions/0035-mcmc-exact-stream-reproducible-resume.md.
+  // Validated the same way stepSize/pathLength already are on HMC/MALA: a malformed resumed field
+  // must fail loudly rather than silently corrupt every subsequent proposal — see
+  // solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md.
+  _restoreAdaptationState () {
+    MCMC._validateFiniteVector(this.internal.base, this.dim, 'RWM: resumed base')
+    MCMC._validateFiniteVector(this.internal.proposal, this.dim, 'RWM: resumed proposal')
+    MCMC._validateFiniteScalar(this.internal.ls, 'RWM: resumed ls')
+    MCMC._validateNonNegativeInteger(this.internal.pAccepted, 'RWM: resumed pAccepted')
+    MCMC._validateNonNegativeInteger(this.internal.pN, 'RWM: resumed pN')
+    MCMC._validateNonNegativeInteger(this.internal.pBatch, 'RWM: resumed pBatch')
+
+    this._base = (this.internal.base || this.internal.proposal || new Array(this.dim).fill(1)).slice()
+    this._ls = this.internal.ls || 0
+    this._pAccepted = this.internal.pAccepted || 0
+    this._pN = this.internal.pN || 0
+    this._pBatch = this.internal.pBatch || 0
   }
 
   // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.

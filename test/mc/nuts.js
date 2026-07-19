@@ -79,6 +79,35 @@ describe('mc.NUTS', () => {
     it('should throw a clear error when called with an array', () => {
       assert.throws(() => new NUTS([logDensity1D, gradLogDensity1D]), /NUTS: constructor requires an options object/)
     })
+
+    it('should throw for a malformed resumed prngQ', () => {
+      assert.throws(
+        () => new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { prngQ: [1, 2, 3] } } }),
+        /NUTS: prng state must be an array of 4 finite numbers/
+      )
+    })
+
+    it('should throw when resumed daMu/daHbar/daLogEpsBar are not finite', () => {
+      assert.throws(
+        () => new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { daMu: Infinity } } }),
+        /NUTS: resumed daMu must be a finite number/
+      )
+      assert.throws(
+        () => new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { daHbar: NaN } } }),
+        /NUTS: resumed daHbar must be a finite number/
+      )
+      assert.throws(
+        () => new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { daLogEpsBar: Infinity } } }),
+        /NUTS: resumed daLogEpsBar must be a finite number/
+      )
+    })
+
+    it('should throw when resumed daT is not a non-negative integer', () => {
+      assert.throws(
+        () => new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { daT: -1 } } }),
+        /NUTS: resumed daT must be a non-negative integer/
+      )
+    })
   })
 
   describe('constructor — metric', () => {
@@ -227,6 +256,50 @@ describe('mc.NUTS', () => {
       assert.strictEqual(nuts2.samplingRate, state.samplingRate)
       // Full-object deepEqual, not a spot-checked field.
       assert.deepEqual(nuts2.state().internal, state.internal)
+    })
+  })
+
+  describe('.state() stream-level reproducible resume', () => {
+    // Mirrors what warmUp() does per-iteration (iterate(null, true) + _adjust) — iterate() alone
+    // never calls _adjust(), so exercising dual averaging requires driving both explicitly. This
+    // also exercises this.r.next() draws NUTS consumes directly inside _growTree for
+    // direction/slice/subtree-selection, since this.r is restored by the base class alone.
+    const runAdapted = (nuts, n) => {
+      const positions = []
+      for (let i = 0; i < n; i++) {
+        nuts._adjust(nuts.iterate(null, true))
+        positions.push(nuts.x.slice())
+      }
+      return positions
+    }
+
+    it('should produce bit-for-bit identical subsequent draws after resuming mid-warm-up', () => {
+      const nuts1 = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } }).seed(11)
+      runAdapted(nuts1, 20)
+      const state = nuts1.state()
+
+      const nuts2 = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: state })
+
+      const continued1 = runAdapted(nuts1, 20)
+      const continued2 = runAdapted(nuts2, 20)
+      assert.deepEqual(continued1, continued2)
+      assert.deepEqual(nuts1.state().internal, nuts2.state().internal)
+    })
+
+    it('should produce bit-for-bit identical subsequent draws after resuming mid-warm-up (dense metric)', () => {
+      // NUTS gained Euclidean metric adaptation (diag/dense) after this issue's initial
+      // implementation landed — extending resume coverage to the metric accumulator here keeps
+      // NUTS at parity with HMC's own diag/dense resume coverage rather than leaving a gap.
+      const nuts1 = new NUTS({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2, metric: 'dense' } }).seed(11)
+      runAdapted(nuts1, 20)
+      const state = nuts1.state()
+
+      const nuts2 = new NUTS({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2, metric: 'dense' }, initialState: state })
+
+      const continued1 = runAdapted(nuts1, 20)
+      const continued2 = runAdapted(nuts2, 20)
+      assert.deepEqual(continued1, continued2)
+      assert.deepEqual(nuts1.state().internal, nuts2.state().internal)
     })
   })
 

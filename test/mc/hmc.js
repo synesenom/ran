@@ -183,6 +183,56 @@ describe('mc.HMC', () => {
       assert.throws(() => new HMC(42), /HMC: constructor requires an options object/)
       assert.throws(() => new HMC('logDensity'), /HMC: constructor requires an options object/)
     })
+
+    it('should throw for a malformed resumed prngQ', () => {
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { prngQ: [1, 2, 3] } } }),
+        /HMC: prng state must be an array of 4 finite numbers/
+      )
+    })
+
+    it('should throw when resumed daMu/daHbar/daLogEpsBar are not finite', () => {
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { daMu: Infinity } } }),
+        /HMC: resumed daMu must be a finite number/
+      )
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { daHbar: NaN } } }),
+        /HMC: resumed daHbar must be a finite number/
+      )
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { daLogEpsBar: Infinity } } }),
+        /HMC: resumed daLogEpsBar must be a finite number/
+      )
+    })
+
+    it('should throw when resumed daT is not a non-negative integer', () => {
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { daT: -1 } } }),
+        /HMC: resumed daT must be a non-negative integer/
+      )
+    })
+
+    it('should throw when a resumed metAccumulator has a malformed metN', () => {
+      assert.throws(
+        () => new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: { internal: { metAccumulator: { metN: -1, metMean: [0], metM2: [0] } } } }),
+        /HMC: resumed metAccumulator.metN must be a non-negative integer/
+      )
+    })
+
+    it('should throw when a resumed diagonal metAccumulator.metM2 has the wrong length', () => {
+      assert.throws(
+        () => new HMC({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2 }, initialState: { internal: { metAccumulator: { metN: 5, metMean: [0, 0], metM2: [0] } } } }),
+        /HMC: resumed metAccumulator.metM2 must be an array of 2 finite numbers/
+      )
+    })
+
+    it('should throw when a resumed dense metAccumulator.metCovS is not a dim x dim matrix', () => {
+      assert.throws(
+        () => new HMC({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2, metric: 'dense' }, initialState: { internal: { metAccumulator: { metN: 5, metMean: [0, 0], metCovS: [[1, 2], [3]] } } } }),
+        /HMC: resumed metAccumulator.metCovS must be a 2 x 2 array of finite numbers/
+      )
+    })
   })
 
   describe('gradLogDensity array-reuse contract', () => {
@@ -252,6 +302,53 @@ describe('mc.HMC', () => {
       // Full-object deepEqual, not a spot-checked field — see
       // solutions/correctness/2026-07-11-1230-mcmc-state-key-mismatch-silent-sigma-loss.md
       assert.deepEqual(hmc2.state().internal, state.internal)
+    })
+  })
+
+  describe('.state() stream-level reproducible resume', () => {
+    // Mirrors what warmUp() does per-iteration (iterate(null, true) + _adjust) — iterate() alone
+    // never calls _adjust(), so exercising dual-averaging and the metric accumulator requires
+    // driving both explicitly.
+    const runAdapted = (hmc, n) => {
+      const positions = []
+      for (let i = 0; i < n; i++) {
+        hmc._adjust(hmc.iterate(null, true))
+        positions.push(hmc.x.slice())
+      }
+      return positions
+    }
+
+    it('should produce bit-for-bit identical subsequent draws after resuming mid-warm-up (diagonal metric)', () => {
+      const hmc1 = new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } }).seed(11)
+      // dim=1 -> the 2*dim=2 metric-refresh gate fires almost immediately, so 30 iterations
+      // comfortably spans several refreshes both before and after the snapshot.
+      runAdapted(hmc1, 30)
+      const state = hmc1.state()
+
+      const hmc2 = new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: state })
+
+      const continued1 = runAdapted(hmc1, 30)
+      const continued2 = runAdapted(hmc2, 30)
+      assert.deepEqual(continued1, continued2)
+      assert.deepEqual(hmc1.state().internal, hmc2.state().internal)
+    })
+
+    it('should produce bit-for-bit identical subsequent draws after resuming mid-warm-up, spanning a dense-metric refresh interval', () => {
+      const hmc1 = new HMC({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2, metric: 'dense' } }).seed(11)
+      // 1500 iterations crosses one _DENSE_METRIC_REFRESH_INTERVAL=1000 boundary, so the
+      // snapshot captures mid-second-window accumulator state, not just a fresh/aligned start.
+      runAdapted(hmc1, 1500)
+      const state = hmc1.state()
+
+      const hmc2 = new HMC({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2, metric: 'dense' }, initialState: state })
+
+      // 1000 more iterations crosses a second dense-metric refresh boundary post-resume — a
+      // shorter window would silently pass even with a broken accumulator restoration, since the
+      // refresh gate would never fire inside it.
+      const continued1 = runAdapted(hmc1, 1000)
+      const continued2 = runAdapted(hmc2, 1000)
+      assert.deepEqual(continued1, continued2)
+      assert.deepEqual(hmc1.state().internal, hmc2.state().internal)
     })
   })
 

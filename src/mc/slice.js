@@ -66,9 +66,17 @@ export default class Slice extends MCMC {
     super(logDensity, config, initialState)
     this._w = Slice._resolveW(this.internal.w, this.dim)
     Slice._validateW(this._w, this.dim)
-    this._bwSum = new Array(this.dim).fill(0)
-    this._adjN = 0
-    this._adjBatch = 0
+    // decisions/0035-mcmc-exact-stream-reproducible-resume.md — restoring the batch-adaptation
+    // accumulators (not just the derived w) is what makes a mid-warm-up resume bit-for-bit
+    // reproducible, since Slice's _adjust() depends only on these subclass-owned fields. Validated
+    // the same way stepSize is on HMC/MALA: a malformed resumed field must fail loudly rather than
+    // silently corrupt the Robbins-Monro recursion — solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md.
+    MCMC._validateFiniteVector(this.internal.bwSum, this.dim, 'Slice: resumed bwSum')
+    MCMC._validateNonNegativeInteger(this.internal.adjN, 'Slice: resumed adjN')
+    MCMC._validateNonNegativeInteger(this.internal.adjBatch, 'Slice: resumed adjBatch')
+    this._bwSum = (this.internal.bwSum || new Array(this.dim).fill(0)).slice()
+    this._adjN = this.internal.adjN || 0
+    this._adjBatch = this.internal.adjBatch || 0
     // Reused across every _iter() call (up to millions per warmUp()/sample() run) instead of
     // reallocating: the base class reads i.bracketWidths synchronously in _adjust() and never
     // retains the result object afterward, so overwriting this array in place is safe.
@@ -107,7 +115,12 @@ export default class Slice extends MCMC {
   }
 
   _internal () {
-    return { w: this._w.slice() }
+    return {
+      w: this._w.slice(),
+      bwSum: this._bwSum.slice(),
+      adjN: this._adjN,
+      adjBatch: this._adjBatch
+    }
   }
 
   // The bracket is placed at a uniformly random offset within [0, w) of x0, not flush against
