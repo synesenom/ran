@@ -36,7 +36,7 @@ export default class AdaptiveMetropolis extends MCMC {
    * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class).
    * @throws {Error} If options is not a plain object.
    */
-  constructor (options = {}) {
+  constructor (options) {
     AdaptiveMetropolis._validateOptions(options)
     const { logDensity, config, initialState } = options
     super(logDensity, config, initialState)

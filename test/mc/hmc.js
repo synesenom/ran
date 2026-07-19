@@ -167,6 +167,10 @@ describe('mc.HMC', () => {
       assert.deepStrictEqual(hmc.x, [7])
     })
 
+    it('should throw a clear error when called with no arguments', () => {
+      assert.throws(() => new HMC(), /HMC: constructor requires an options object/)
+    })
+
     it('should throw a clear error when called with null', () => {
       assert.throws(() => new HMC(null), /HMC: constructor requires an options object/)
     })

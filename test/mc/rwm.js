@@ -31,6 +31,10 @@ describe('mc.RWM', () => {
       assert.throws(() => new RWM({ logDensity: () => 0, config: { dim: 0 } }), /dim must be a positive integer/)
     })
 
+    it('should throw a clear error when called with no arguments', () => {
+      assert.throws(() => new RWM(), /RWM: constructor requires an options object/)
+    })
+
     it('should throw a clear error when called with null', () => {
       assert.throws(() => new RWM(null), /RWM: constructor requires an options object/)
     })

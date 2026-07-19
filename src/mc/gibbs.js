@@ -55,7 +55,7 @@ export default class Gibbs extends MCMC {
    * @throws {Error} If options is not a plain object, or conditionals is not a non-empty array, or
    * config.dim is provided but does not match conditionals.length.
    */
-  constructor (options = {}) {
+  constructor (options) {
     Gibbs._validateOptions(options)
     const { conditionals, config = {}, initialState = {} } = options
     if (!Array.isArray(conditionals) || conditionals.length === 0) {

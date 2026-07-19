@@ -72,6 +72,10 @@ describe('mc.Slice', () => {
       assert.throws(() => new Slice({ logDensity: () => 0, initialState: { internal: { w: 0 } } }), /w must be a positive number/)
     })
 
+    it('should throw a clear error when called with no arguments', () => {
+      assert.throws(() => new Slice(), /Slice: constructor requires an options object/)
+    })
+
     it('should throw a clear error when called with null', () => {
       assert.throws(() => new Slice(null), /Slice: constructor requires an options object/)
     })

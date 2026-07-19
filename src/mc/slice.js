@@ -53,7 +53,7 @@ export default class Slice extends MCMC {
    * single number (broadcast to every dimension) or as a per-dimension array.
    * @throws {Error} If options is not a plain object.
    */
-  constructor (options = {}) {
+  constructor (options) {
     Slice._validateOptions(options)
     const { logDensity, config = {}, initialState = {} } = options
     super(logDensity, config, initialState)

@@ -55,6 +55,10 @@ describe('mc.Gibbs', () => {
       assert.deepStrictEqual(gibbs.x, [1, 1])
     })
 
+    it('should throw a clear error when called with no arguments', () => {
+      assert.throws(() => new Gibbs(), /Gibbs: constructor requires an options object/)
+    })
+
     it('should throw a clear error when called with null', () => {
       assert.throws(() => new Gibbs(null), /Gibbs: constructor requires an options object/)
     })

@@ -36,6 +36,10 @@ describe('mc.AdaptiveMetropolis', () => {
       assert.throws(() => new AdaptiveMetropolis({ logDensity: () => 0, config: { dim: 0 } }), /dim must be a positive integer/)
     })
 
+    it('should throw a clear error when called with no arguments', () => {
+      assert.throws(() => new AdaptiveMetropolis(), /AdaptiveMetropolis: constructor requires an options object/)
+    })
+
     it('should throw a clear error when called with null', () => {
       assert.throws(() => new AdaptiveMetropolis(null), /AdaptiveMetropolis: constructor requires an options object/)
     })
