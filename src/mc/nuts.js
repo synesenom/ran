@@ -41,6 +41,14 @@ const DELTA_MAX = 1000
  * the tree-averaged acceptance statistic accumulated across every leapfrog evaluation in that
  * iteration's tree.
  *
+ * Sampler-health diagnostics are exposed both per-transition and in aggregate: every
+ * [iterate]{@link ran.mc.MCMC#iterate} result carries `divergent` and `maxDepthHit` booleans, and
+ * [divergenceCount]{@link ran.mc.NUTS#divergenceCount} / [maxDepthCount]{@link ran.mc.NUTS#maxDepthCount}
+ * report the per-sampling-phase totals (reset like [ar]{@link ran.mc.MCMC#ar}). A well-behaved run
+ * reports both counts as 0; nonzero divergences flag a step size that is too large or a target too
+ * extreme, nonzero max-depth hits a step size that is too small. See
+ * decisions/0035-nuts-sampler-health-diagnostics.md.
+ *
  * @class NUTS
  * @memberof ran.mc
  * @param {Object} options Sampler options, as a single object.
@@ -148,6 +156,39 @@ export default class NUTS extends MCMC {
     return this
   }
 
+  /**
+   * Returns the number of divergent transitions recorded during the current sampling phase. A
+   * divergent transition is one whose leapfrog trajectory contained a leaf whose Hamiltonian drifted
+   * more than the energy-divergence threshold from the trajectory's start, indicating the step size
+   * is too large or the target geometry too extreme (biased exploration). Reset at construction and
+   * at the start of each [sample]{@link ran.mc.MCMC#sample} call, so a read afterwards reflects the
+   * sampling phase only — the same lifecycle as [ar]{@link ran.mc.MCMC#ar}. A well-behaved run reports 0.
+   *
+   * @method divergenceCount
+   * @memberof ran.mc.NUTS
+   * @returns {number} Count of divergent transitions since the last reset.
+   */
+  // decisions/0035-nuts-sampler-health-diagnostics.md — divergences surfaced as a per-phase count
+  divergenceCount () {
+    return this._divergenceCount
+  }
+
+  /**
+   * Returns the number of transitions that reached the maximum tree depth during the current sampling
+   * phase. A max-depth hit is a doubling that exhausted the tree-depth cap without the trajectory
+   * U-turning, indicating the step size is too small (inefficient sampling). Reset at construction and
+   * at the start of each [sample]{@link ran.mc.MCMC#sample} call, so a read afterwards reflects the
+   * sampling phase only — the same lifecycle as [ar]{@link ran.mc.MCMC#ar}. A well-behaved run reports 0.
+   *
+   * @method maxDepthCount
+   * @memberof ran.mc.NUTS
+   * @returns {number} Count of max-tree-depth-saturated transitions since the last reset.
+   */
+  // decisions/0035-nuts-sampler-health-diagnostics.md — max-depth saturation surfaced as a per-phase count
+  maxDepthCount () {
+    return this._maxDepthCount
+  }
+
   // ─── PROTECTED INSTANCE ───
 
   _iter (x, warmUp) {
@@ -160,14 +201,20 @@ export default class NUTS extends MCMC {
     const logU = h0 + Math.log(this.r.next())
     const ctx = { logU, eps: this._stepSize, h0 }
 
-    const { xNew, logPNew, alphaSum, nAlpha } = this._growTree(x, r0, ctx)
+    const { xNew, logPNew, alphaSum, nAlpha, divergent, maxDepthHit } = this._growTree(x, r0, ctx)
     const accepted = xNew !== x
     if (accepted) {
       this.lastLnp = logPNew
     }
+    // Sampler-health counters ride the ADR-0023 accumulator lifecycle: incremented once per iteration
+    // here (in both phases), reset only by _initAccumulators (construction + sample() start), so a
+    // read after sample() reflects the sampling phase — exactly how ar() behaves. Booleans are also
+    // returned per-transition so iterate() callers can inspect each step.
+    this._divergenceCount += divergent ? 1 : 0
+    this._maxDepthCount += maxDepthHit ? 1 : 0
     // nAlpha is always >= 1 here: _growTree's while loop runs at least once (MAX_TREE_DEPTH > 0),
     // and every _buildTree call bottoms out at a leaf that unconditionally contributes nAlpha: 1.
-    return { x: xNew, accepted, alpha: alphaSum / nAlpha }
+    return { x: xNew, accepted, alpha: alphaSum / nAlpha, divergent, maxDepthHit }
   }
 
   _adjust (i) {
@@ -217,6 +264,17 @@ export default class NUTS extends MCMC {
 
   // ─── PRIVATE INSTANCE ───
 
+  // Overrides the base accumulator reset to also zero the NUTS-local sampler-health counters, so they
+  // ride the ADR-0023 lifecycle (reset at construction and sample() start, never between/within
+  // warm-up) — first subclass to override this hook. Reads no NUTS-specific field, so it is safe under
+  // the base constructor's virtual-dispatch call before this subclass's constructor body runs.
+  // decisions/0035-nuts-sampler-health-diagnostics.md, decisions/0023-mcmc-accumulator-mechanics.md
+  _initAccumulators () {
+    super._initAccumulators()
+    this._divergenceCount = 0
+    this._maxDepthCount = 0
+  }
+
   // Mirrors HMC's _iter freeze logic (hmc.js): switch from the actively-adapting exploration step
   // size to the dual-averaging-smoothed value on the first post-warm-up iteration, and reset the
   // shrinkage target so a later warmUp() call (after sample()) adapts from the tuned step size
@@ -250,13 +308,13 @@ export default class NUTS extends MCMC {
     let xPlus = x
     let rPlus = r0
     let velPlus = v0
-    let xNew = x
-    let logPNew = this.lastLnp
+    let candidate = { x, logP: this.lastLnp }
     let n = 1
     let s = 1
     let alphaSum = 0
     let nAlpha = 0
     let j = 0
+    let divergent = false
 
     while (s === 1 && j < MAX_TREE_DEPTH) {
       const v = this.r.next() < 0.5 ? -1 : 1
@@ -270,18 +328,34 @@ export default class NUTS extends MCMC {
         rPlus = subtree.rPlus
         velPlus = subtree.velPlus
       }
-      if (subtree.sPrime === 1 && this.r.next() < Math.min(1, subtree.nPrime / n)) {
-        xNew = subtree.xPrime
-        logPNew = subtree.logPPrime
-      }
+      candidate = this._selectCandidate(subtree, n, candidate)
       n += subtree.nPrime
       alphaSum += subtree.alphaSum
       nAlpha += subtree.nAlpha
+      divergent = divergent || subtree.divergent
       s = subtree.sPrime * NUTS._noUTurn(xMinus, velMinus, xPlus, velPlus)
       j++
     }
 
-    return { xNew, logPNew, alphaSum, nAlpha }
+    // Saturation is the loop exhausting all MAX_TREE_DEPTH doublings with no stopping condition
+    // (s === 1). The s === 1 conjunct excludes a U-turn/divergence that stops the loop exactly at the
+    // last allowed doubling — there the trajectory was satisfied, not artificially capped.
+    const maxDepthHit = j === MAX_TREE_DEPTH && s === 1
+
+    return { xNew: candidate.x, logPNew: candidate.logP, alphaSum, nAlpha, divergent, maxDepthHit }
+  }
+
+  // Probabilistically replaces the running candidate with the subtree's proposal, weighted by
+  // min(1, n'/n) over the subtree's valid-point count (Hoffman & Gelman 2014, Algorithm 3). Extracted
+  // from _growTree to keep that method's cyclomatic complexity within the codebase threshold. Returns
+  // the passed-in candidate object unchanged on rejection (no allocation on the common reject path;
+  // a fresh object only when the proposal is accepted), and the this.r.next() draw stays inside the
+  // same short-circuit so the RNG order — and thus the bitwise-reproducible .seed() stream — is unchanged.
+  _selectCandidate (subtree, n, candidate) {
+    if (subtree.sPrime === 1 && this.r.next() < Math.min(1, subtree.nPrime / n)) {
+      return { x: subtree.xPrime, logP: subtree.logPPrime }
+    }
+    return candidate
   }
 
   // Recursive doubling-tree builder (Hoffman & Gelman 2014, Algorithm 3's BuildTree). Recursion
@@ -300,6 +374,12 @@ export default class NUTS extends MCMC {
     const logPp = this.lnp(xp)
     const h = logPp - kineticEnergy(this._met, rp)
     const alphaSum = Math.min(1, Math.exp(h - ctx.h0))
+    // At a leaf there is no U-turn check, so sPrime === 0 here is *exclusively* the energy-divergence
+    // guard — the sole origin of the divergent diagnostic threaded up the tree. Higher in the tree
+    // sPrime also absorbs U-turn stops, so divergence must be carried in its own flag rather than
+    // re-derived from sPrime. See decisions/0035-nuts-sampler-health-diagnostics.md and
+    // solutions/correctness/2026-07-19-1456-nuts-diagnostics-overloaded-sprime-signal.md.
+    const withinEnergyBound = ctx.logU < DELTA_MAX + h
     return {
       xMinus: xp,
       rMinus: rp,
@@ -310,7 +390,8 @@ export default class NUTS extends MCMC {
       xPrime: xp,
       logPPrime: logPp,
       nPrime: ctx.logU <= h ? 1 : 0,
-      sPrime: ctx.logU < DELTA_MAX + h ? 1 : 0,
+      sPrime: withinEnergyBound ? 1 : 0,
+      divergent: !withinEnergyBound,
       alphaSum,
       nAlpha: 1
     }
@@ -355,6 +436,9 @@ export default class NUTS extends MCMC {
       logPPrime: chosen.logPPrime,
       nPrime,
       sPrime: second.sPrime * NUTS._noUTurn(minus.xMinus, minus.velMinus, plus.xPlus, plus.velPlus),
+      // The U-turn factor above zeroes sPrime without implying divergence, so divergent is OR-merged
+      // independently of sPrime — a diverged leaf anywhere in either subtree marks the whole span.
+      divergent: first.divergent || second.divergent,
       alphaSum: first.alphaSum + second.alphaSum,
       nAlpha: first.nAlpha + second.nAlpha
     }
