@@ -20,7 +20,7 @@ Scan the test suite and production code to find areas where testing could be str
 - `test/` — Mocha test files mirroring `src/` structure
 - `test/dist-cases.js` — Distribution test case definitions
 - `test/test-utils.js` — Shared utilities (`trials`, `ksTest`, `chiTest`)
-- `test/dist.js` — Runs the full distribution test suite
+- `test/dist-runner.js`, `test/dist-shard-*.js` — Run the full distribution test suite (sharded for `mocha --parallel`)
 - Tests use Mocha and Chai `assert`
 - `todo.md` — Structured development backlog; the `## Publication-Grade Gaps` section lists specific testing gaps, split into already-filed GitHub issues and items not yet filed. Items in the "Not Yet Filed" subsection are untracked and strong candidates for promotion.
 

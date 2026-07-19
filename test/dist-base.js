@@ -4,6 +4,7 @@ import { float } from '../src/core'
 import * as dist from '../src/dist'
 import PreComputed from '../src/dist/_pre-computed'
 import Distribution from '../src/dist/_distribution'
+import { SHARD_COUNT, shardCases } from './dist-runner'
 
 describe('dist', () => {
   // Base class
@@ -1401,6 +1402,24 @@ describe('fit() precision and robustness gate', () => {
       const fitted = dist.F.fit(data)
       assert(fitted instanceof dist.F)
       assert(Number.isFinite(fitted.pdf(2)) && fitted.pdf(2) > 0)
+    })
+  })
+})
+
+// Regression guard for the dist-shard-*.js partition (see test/dist-runner.js): if SHARD_COUNT
+// is ever bumped without adding/removing a matching shard file, shardCases would silently drop
+// or duplicate cases across shards with no other test able to detect it.
+describe('dist-runner sharding', () => {
+  it('shardCases partitions any array into a complete, non-overlapping cover across SHARD_COUNT shards', () => {
+    const cases = Array.from({ length: 2 * SHARD_COUNT + 3 }, (_, i) => ({ name: `case-${i}` }))
+    const shards = Array.from({ length: SHARD_COUNT }, (_, i) => shardCases(cases, i))
+    const total = shards.reduce((sum, shard) => sum + shard.length, 0)
+    assert.strictEqual(total, cases.length, 'shards must collectively cover every case exactly once')
+
+    const seen = new Set()
+    shards.flat().forEach(c => {
+      assert.isFalse(seen.has(c.name), `case ${c.name} assigned to more than one shard`)
+      seen.add(c.name)
     })
   })
 })

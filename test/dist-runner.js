@@ -6,6 +6,10 @@ import * as dist from '../src/dist'
 // Constants.
 const SAMPLE_SIZE = 10000
 
+// Single source of truth for the shard files (dist-shard-0.js .. dist-shard-(SHARD_COUNT-1).js):
+// bumping this without adding/removing the matching shard file would silently drop or duplicate cases.
+export const SHARD_COUNT = 4
+
 // Unit test suite.
 const UnitTests = {
   constructor (tc) {
@@ -368,4 +372,16 @@ export function registerDistributionTests (testCases) {
         describe('.fit()', () => UnitTests.fit(tc))
       })
     })
+}
+
+/**
+ * Deterministically partitions `testCases` by array index modulo SHARD_COUNT, so each of
+ * the SHARD_COUNT shard files gets a disjoint, order-stable slice to register and run.
+ *
+ * @param {Array} testCases Full set of distribution test cases to partition.
+ * @param {number} shardIndex Shard index in [0, SHARD_COUNT).
+ * @returns {Array} The subset of `testCases` assigned to `shardIndex`.
+ */
+export function shardCases (testCases, shardIndex) {
+  return testCases.filter((tc, i) => i % SHARD_COUNT === shardIndex)
 }
