@@ -54,6 +54,19 @@ describe('mc.Gibbs', () => {
       const gibbs = new Gibbs({ conditionals, initialState: { x: [1, 1] } })
       assert.deepStrictEqual(gibbs.x, [1, 1])
     })
+
+    it('should throw a clear error when called with null', () => {
+      assert.throws(() => new Gibbs(null), /Gibbs: constructor requires an options object/)
+    })
+
+    it('should throw a clear error when called with an array', () => {
+      assert.throws(() => new Gibbs([conditionals]), /Gibbs: constructor requires an options object/)
+    })
+
+    it('should throw a clear error when called with a non-object primitive', () => {
+      assert.throws(() => new Gibbs(42), /Gibbs: constructor requires an options object/)
+      assert.throws(() => new Gibbs('conditionals'), /Gibbs: constructor requires an options object/)
+    })
   })
 
   describe('._iter()', () => {

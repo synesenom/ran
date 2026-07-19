@@ -30,6 +30,19 @@ describe('mc.RWM', () => {
     it('should validate config', () => {
       assert.throws(() => new RWM({ logDensity: () => 0, config: { dim: 0 } }), /dim must be a positive integer/)
     })
+
+    it('should throw a clear error when called with null', () => {
+      assert.throws(() => new RWM(null), /RWM: constructor requires an options object/)
+    })
+
+    it('should throw a clear error when called with an array', () => {
+      assert.throws(() => new RWM([1, 2]), /RWM: constructor requires an options object/)
+    })
+
+    it('should throw a clear error when called with a non-object primitive', () => {
+      assert.throws(() => new RWM(42), /RWM: constructor requires an options object/)
+      assert.throws(() => new RWM('logDensity'), /RWM: constructor requires an options object/)
+    })
   })
 
   describe('._iter() rejection', () => {

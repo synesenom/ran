@@ -71,6 +71,19 @@ describe('mc.Slice', () => {
     it('should validate w when config is omitted', () => {
       assert.throws(() => new Slice({ logDensity: () => 0, initialState: { internal: { w: 0 } } }), /w must be a positive number/)
     })
+
+    it('should throw a clear error when called with null', () => {
+      assert.throws(() => new Slice(null), /Slice: constructor requires an options object/)
+    })
+
+    it('should throw a clear error when called with an array', () => {
+      assert.throws(() => new Slice([1, 2]), /Slice: constructor requires an options object/)
+    })
+
+    it('should throw a clear error when called with a non-object primitive', () => {
+      assert.throws(() => new Slice(42), /Slice: constructor requires an options object/)
+      assert.throws(() => new Slice('logDensity'), /Slice: constructor requires an options object/)
+    })
   })
 
   describe('._iter()', () => {
