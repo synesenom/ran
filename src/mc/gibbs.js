@@ -23,8 +23,8 @@ import MCMC from './_mcmc'
  * `conditionals.length`.
  * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class).
  * @constructor
- * @throws {Error} If conditionals is not a non-empty array, or config.dim is provided but does not
- * match conditionals.length.
+ * @throws {Error} If options is not a plain object, or conditionals is not a non-empty array, or
+ * config.dim is provided but does not match conditionals.length.
  */
 // decisions/0020-mcmc-design.md — the _iter/_adjust/_internal contract was designed for exactly
 // this pattern: a full sweep that is always accepted, with no adaptive state to carry across.
@@ -52,10 +52,12 @@ export default class Gibbs extends MCMC {
    * options). `dim` defaults to `conditionals.length`; if provided explicitly it must match
    * `conditionals.length`.
    * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class).
-   * @throws {Error} If conditionals is not a non-empty array, or config.dim is provided but does not
-   * match conditionals.length.
+   * @throws {Error} If options is not a plain object, or conditionals is not a non-empty array, or
+   * config.dim is provided but does not match conditionals.length.
    */
-  constructor ({ conditionals, config = {}, initialState = {} } = {}) {
+  constructor (options) {
+    Gibbs._validateOptions(options)
+    const { conditionals, config = {}, initialState = {} } = options
     if (!Array.isArray(conditionals) || conditionals.length === 0) {
       throw Error('Gibbs: conditionals must be a non-empty array')
     }
@@ -88,5 +90,23 @@ export default class Gibbs extends MCMC {
 
   _internal () {
     return {}
+  }
+
+  // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
+  // Destructuring options directly in the constructor's parameter list would throw a generic,
+  // engine-dependent TypeError for null (default parameters only cover undefined) instead of this
+  // clear, Gibbs-specific message.
+  // See decisions/0032-mala-options-object-only-constructor.md and
+  // solutions/correctness/2026-07-18-1147-mala-null-guard-destructured-parameter-gap.md
+  static _validateOptions (options) {
+    if (!Gibbs._isPlainObject(options)) {
+      throw Error('Gibbs: constructor requires an options object: new Gibbs({ conditionals, config, initialState })')
+    }
+  }
+
+  // Split from _validateOptions so the compound check is a single return expression rather than
+  // a branch condition, which is what the Complex Conditional smell flags.
+  static _isPlainObject (options) {
+    return options !== undefined && options !== null && typeof options === 'object' && !Array.isArray(options)
   }
 }

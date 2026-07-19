@@ -26,6 +26,7 @@ const EPS = 1e-6
  * @param {Object=} options.config AdaptiveMetropolis configuration (see MCMC base class for shared options).
  * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class).
  * @constructor
+ * @throws {Error} If options is not a plain object.
  */
 // decisions/0022-rwm-joint-adaptive-metropolis.md — anticipates full-covariance AM as a separate sampler
 // decisions/0030-mcmc-options-object-constructor.md — options-object-only constructor
@@ -35,8 +36,11 @@ export default class AdaptiveMetropolis extends MCMC {
    * @param {Function} options.logDensity The logarithm of the (unnormalized) target density.
    * @param {Object=} options.config AdaptiveMetropolis configuration (see MCMC base class for shared options).
    * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class).
+   * @throws {Error} If options is not a plain object.
    */
-  constructor ({ logDensity, config, initialState } = {}) {
+  constructor (options) {
+    AdaptiveMetropolis._validateOptions(options)
+    const { logDensity, config, initialState } = options
     super(logDensity, config, initialState)
     this.lastLnp = this.lnp(this.x)
     this._q = new Normal(0, 1)
@@ -143,5 +147,23 @@ export default class AdaptiveMetropolis extends MCMC {
     const cov = new Matrix(this._covS).scale(this._sd / (this._covN - 1)).add(new Matrix(this.dim).scale(this._sd * EPS))
     const { D, L } = cov.ldl()
     this._A = L.mult(D.f(Math.sqrt))
+  }
+
+  // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
+  // Destructuring options directly in the constructor's parameter list would throw a generic,
+  // engine-dependent TypeError for null (default parameters only cover undefined) instead of this
+  // clear, AdaptiveMetropolis-specific message.
+  // See decisions/0032-mala-options-object-only-constructor.md and
+  // solutions/correctness/2026-07-18-1147-mala-null-guard-destructured-parameter-gap.md
+  static _validateOptions (options) {
+    if (!AdaptiveMetropolis._isPlainObject(options)) {
+      throw Error('AdaptiveMetropolis: constructor requires an options object: new AdaptiveMetropolis({ logDensity, config, initialState })')
+    }
+  }
+
+  // Split from _validateOptions so the compound check is a single return expression rather than
+  // a branch condition, which is what the Complex Conditional smell flags.
+  static _isPlainObject (options) {
+    return options !== undefined && options !== null && typeof options === 'object' && !Array.isArray(options)
   }
 }

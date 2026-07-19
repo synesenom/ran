@@ -67,7 +67,7 @@ const EPS = 1e-6
  * through Matrix's LDL decomposition).
  * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class).
  * @constructor
- * @throws {Error} If gradLogDensity is not a function, or a stepSize (config.stepSize or a
+ * @throws {Error} If options is not a plain object, or gradLogDensity is not a function, or a
  * resumed initialState.internal.stepSize) is provided but is not a positive finite number, or a
  * pathLength (config.pathLength or a resumed initialState.internal.pathLength) is provided but
  * is not a positive integer or exceeds `HMC._MAX_PATH_LENGTH` (1024), or metric is provided but
@@ -100,8 +100,11 @@ export default class HMC extends MCMC {
    * leapfrog steps per iteration, default 10 — fixed for the sampler's lifetime; see the class
    * JSDoc's "Known limitation" note for the resonance risk this can produce).
    * @param {Object=} options.initialState Initial state of the sampler (see MCMC base class).
+   * @throws {Error} If options is not a plain object.
    */
-  constructor ({ logDensity, gradLogDensity, config = {}, initialState = {} } = {}) {
+  constructor (options) {
+    HMC._validateOptions(options)
+    const { logDensity, gradLogDensity, config = {}, initialState = {} } = options
     super(logDensity, config, initialState)
 
     HMC._validateGradLogDensity(gradLogDensity)
@@ -228,6 +231,24 @@ export default class HMC extends MCMC {
   }
 
   // ─── PROTECTED STATIC ───
+
+  // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
+  // Destructuring options directly in the constructor's parameter list would throw a generic,
+  // engine-dependent TypeError for null (default parameters only cover undefined) instead of this
+  // clear, HMC-specific message.
+  // See decisions/0032-mala-options-object-only-constructor.md and
+  // solutions/correctness/2026-07-18-1147-mala-null-guard-destructured-parameter-gap.md
+  static _validateOptions (options) {
+    if (!HMC._isPlainObject(options)) {
+      throw Error('HMC: constructor requires an options object: new HMC({ logDensity, gradLogDensity, config, initialState })')
+    }
+  }
+
+  // Split from _validateOptions so the compound check is a single return expression rather than
+  // a branch condition, which is what the Complex Conditional smell flags.
+  static _isPlainObject (options) {
+    return options !== undefined && options !== null && typeof options === 'object' && !Array.isArray(options)
+  }
 
   // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.
   static _validateGradLogDensity (gradLogDensity) {
