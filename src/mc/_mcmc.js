@@ -42,6 +42,13 @@ export default class MCMC {
     MCMC._validateCombinedFootprint(this.dim, this.maxLag)
     this.lnp = logDensity
     this.r = new Xoshiro128p()
+    // decisions/0034-mcmc-exact-stream-reproducible-resume.md — restoring the PRNG stream
+    // position (not just x) before x is drawn is what makes an unprovided x redraw from the
+    // resumed stream rather than a fresh one, matching Distribution.load()'s prngState precedent.
+    MCMC._validatePrngState(initialState.prng, 'MCMC')
+    if (initialState.prng) {
+      this.r.load(initialState.prng)
+    }
     // Tracked so seed() can tell whether it should re-draw x — otherwise a random
     // (unseeded) starting position chosen before seed() runs would make replay non-deterministic.
     // Must agree with the this.x assignment below (both keyed on presence, not truthiness),
@@ -78,13 +85,17 @@ export default class MCMC {
    *
    * @method state
    * @memberof ran.mc.MCMC
-   * @returns {Object} Object with properties: x (current position), samplingRate (thinning interval), and internal (subclass state).
+   * @returns {Object} Object with properties: x (current position), samplingRate (thinning
+   * interval), internal (subclass state), and prng (the PRNG's exact stream position, restored
+   * on reconstruction so a resumed sampler's subsequent draws are bit-for-bit identical to an
+   * uninterrupted run — decisions/0034-mcmc-exact-stream-reproducible-resume.md).
    */
   state () {
     return {
       x: this.x,
       samplingRate: this.samplingRate,
-      internal: this._internal() // key must match what constructor reads; see solutions/correctness/2026-07-11-1230-mcmc-state-key-mismatch-silent-sigma-loss.md
+      internal: this._internal(), // key must match what constructor reads; see solutions/correctness/2026-07-11-1230-mcmc-state-key-mismatch-silent-sigma-loss.md
+      prng: this.r.save()
     }
   }
 
@@ -489,6 +500,38 @@ export default class MCMC {
     // solutions/correctness/2026-07-13-1624-mcmc-arwindow-sibling-bound-gap.md
     if (arWindow > MCMC._MAX_AR_WINDOW) {
       throw Error(`MCMC: arWindow must be at most ${MCMC._MAX_AR_WINDOW}`)
+    }
+  }
+
+  // Shared by the base constructor (initialState.prng) and every _q-owning subclass
+  // (initialState.internal.prngQ) — a malformed 4-element-array assumption, if silently
+  // accepted, would corrupt every subsequent draw rather than fail loudly. See
+  // solutions/correctness/2026-07-15-1230-hmc-resumed-internal-state-validation-gap.md and
+  // decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+  static _validatePrngState (state, label) {
+    if (state === undefined) {
+      return
+    }
+    if (!MCMC._isValidPrngState(state)) {
+      throw Error(`${label}: prng state must be an array of 4 finite numbers`)
+    }
+  }
+
+  // Split from _validatePrngState so the compound check is a single return expression rather
+  // than a branch condition, which is what the Complex Conditional smell flags.
+  static _isValidPrngState (state) {
+    return Array.isArray(state) && state.length === 4 && state.every(Number.isFinite)
+  }
+
+  // Shared by every _q-owning subclass (RWM, AdaptiveMetropolis, HMC, NUTS, MALA) so each
+  // constructor collapses its validate-then-load branch into a single call, keeping the
+  // constructor's own cyclomatic complexity low (see the per-file "Kept out of the constructor
+  // to avoid a Complex Method smell there" convention already used throughout this codebase).
+  // decisions/0034-mcmc-exact-stream-reproducible-resume.md
+  static _restoreQPrng (q, prngQ, label) {
+    MCMC._validatePrngState(prngQ, label)
+    if (prngQ) {
+      q.r.load(prngQ)
     }
   }
 

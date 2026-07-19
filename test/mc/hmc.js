@@ -255,6 +255,53 @@ describe('mc.HMC', () => {
     })
   })
 
+  describe('.state() stream-level reproducible resume', () => {
+    // Mirrors what warmUp() does per-iteration (iterate(null, true) + _adjust) — iterate() alone
+    // never calls _adjust(), so exercising dual-averaging and the metric accumulator requires
+    // driving both explicitly.
+    const runAdapted = (hmc, n) => {
+      const positions = []
+      for (let i = 0; i < n; i++) {
+        hmc._adjust(hmc.iterate(null, true))
+        positions.push(hmc.x.slice())
+      }
+      return positions
+    }
+
+    it('should produce bit-for-bit identical subsequent draws after resuming mid-warm-up (diagonal metric)', () => {
+      const hmc1 = new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } }).seed(11)
+      // dim=1 -> the 2*dim=2 metric-refresh gate fires almost immediately, so 30 iterations
+      // comfortably spans several refreshes both before and after the snapshot.
+      runAdapted(hmc1, 30)
+      const state = hmc1.state()
+
+      const hmc2 = new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: state })
+
+      const continued1 = runAdapted(hmc1, 30)
+      const continued2 = runAdapted(hmc2, 30)
+      assert.deepEqual(continued1, continued2)
+      assert.deepEqual(hmc1.state().internal, hmc2.state().internal)
+    })
+
+    it('should produce bit-for-bit identical subsequent draws after resuming mid-warm-up, spanning a dense-metric refresh interval', () => {
+      const hmc1 = new HMC({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2, metric: 'dense' } }).seed(11)
+      // 1500 iterations crosses one _DENSE_METRIC_REFRESH_INTERVAL=1000 boundary, so the
+      // snapshot captures mid-second-window accumulator state, not just a fresh/aligned start.
+      runAdapted(hmc1, 1500)
+      const state = hmc1.state()
+
+      const hmc2 = new HMC({ logDensity: logDensity2D, gradLogDensity: gradLogDensity2D, config: { dim: 2, metric: 'dense' }, initialState: state })
+
+      // 1000 more iterations crosses a second dense-metric refresh boundary post-resume — a
+      // shorter window would silently pass even with a broken accumulator restoration, since the
+      // refresh gate would never fire inside it.
+      const continued1 = runAdapted(hmc1, 1000)
+      const continued2 = runAdapted(hmc2, 1000)
+      assert.deepEqual(continued1, continued2)
+      assert.deepEqual(hmc1.state().internal, hmc2.state().internal)
+    })
+  })
+
   describe('mass matrix adaptation', () => {
     describe('diagonal metric (default)', () => {
       // Independent 3D Normal, sigma = [1, 100, 0.1] -- a 1000x scale range. 0.1 (not the issue's

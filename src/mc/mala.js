@@ -64,14 +64,17 @@ export default class MALA extends MCMC {
 
     this._gradLnp = gradLogDensity
     // Log-scale storage: the Robbins-Monro update below is additive in log space, so this
-    // keeps stepSize positivity a structural invariant instead of a runtime hope.
-    this._ls = Math.log(this.internal.stepSize || config.stepSize || 0.1)
+    // keeps stepSize positivity a structural invariant instead of a runtime hope. `ls` (raw) is
+    // preferred over re-deriving it from `stepSize` via Math.log(Math.exp(...)), which is not
+    // guaranteed bit-identical for every float — decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+    this._ls = this.internal.ls !== undefined ? this.internal.ls : Math.log(this.internal.stepSize || config.stepSize || 0.1)
     this._q = new Normal(0, 1)
+    MCMC._restoreQPrng(this._q, this.internal.prngQ, 'MALA')
     this.lastLnp = this.lnp(this.x)
 
-    this._pAccepted = 0
-    this._pN = 0
-    this._pBatch = 0
+    this._pAccepted = this.internal.pAccepted || 0
+    this._pN = this.internal.pN || 0
+    this._pBatch = this.internal.pBatch || 0
   }
 
   /**
@@ -130,7 +133,14 @@ export default class MALA extends MCMC {
   }
 
   _internal () {
-    return { stepSize: Math.exp(this._ls) }
+    return {
+      stepSize: Math.exp(this._ls),
+      ls: this._ls,
+      prngQ: this._q.r.save(),
+      pAccepted: this._pAccepted,
+      pN: this._pN,
+      pBatch: this._pBatch
+    }
   }
 
   // ─── PROTECTED STATIC ───

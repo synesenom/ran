@@ -112,6 +112,38 @@ describe('mc.MALA', () => {
     })
   })
 
+  describe('.state() stream-level reproducible resume', () => {
+    // Mirrors what warmUp() does per-iteration (iterate(null, true) + _adjust), without its
+    // coarse 1e4-iteration batching, so a snapshot can land at an exact iteration count relative
+    // to MALA's BATCH=100 adaptation window — iterate() alone never calls _adjust().
+    const runAdapted = (mala, n) => {
+      const positions = []
+      for (let i = 0; i < n; i++) {
+        mala._adjust(mala.iterate(null, true))
+        positions.push(mala.x.slice())
+      }
+      return positions
+    }
+
+    it('should produce bit-for-bit identical subsequent draws after resuming mid-warm-up, including across a batch boundary', () => {
+      const mala1 = new MALA({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } }).seed(11)
+      // 150 iterations crosses one BATCH=100 adaptation window, so the snapshot below captures
+      // mid-second-window state, not just a fresh/aligned start.
+      runAdapted(mala1, 150)
+      const state = mala1.state()
+
+      const mala2 = new MALA({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: state })
+
+      // 150 more iterations crosses a second adaptation-batch boundary post-resume. Unlike RWM,
+      // MALA's _adjust() depends only on its own pAccepted/pN/pBatch (no base-class Welford
+      // dependency), so this is fully bit-for-bit reproducible — decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+      const continued1 = runAdapted(mala1, 150)
+      const continued2 = runAdapted(mala2, 150)
+      assert.deepEqual(continued1, continued2)
+      assert.deepEqual(mala1.state().internal, mala2.state().internal)
+    })
+  })
+
   describe('.ar() during sampling', () => {
     [1, 2, 3].forEach(seed => {
       it(`should lie in [0.5, 0.65] for a well-tuned 1D Normal target, seed ${seed}`, () => {

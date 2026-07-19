@@ -109,6 +109,59 @@ describe('mc.RWM', () => {
     })
   })
 
+  describe('.state() stream-level reproducible resume', () => {
+    // Mirrors what warmUp() does per-iteration (iterate(null, true) + _adjust), without its
+    // coarse 1e4-iteration batching, so a snapshot can land at an exact iteration count relative
+    // to RWM's BATCH=100 adaptation window — iterate() alone never calls _adjust().
+    const runAdapted = (rwm, n) => {
+      const positions = []
+      for (let i = 0; i < n; i++) {
+        rwm._adjust(rwm.iterate(null, true))
+        positions.push(rwm.x.slice())
+      }
+      return positions
+    }
+
+    it('should produce bit-for-bit identical subsequent draws when the resume snapshot lands on a batch boundary', () => {
+      const lnp = x => -0.5 * x[0] * x[0]
+      const rwm1 = new RWM({ logDensity: lnp, config: { dim: 1 } }).seed(11)
+      // Exactly one BATCH=100 window: _pN resets to 0 right at the snapshot point.
+      runAdapted(rwm1, 100)
+      const state = rwm1.state()
+
+      const rwm2 = new RWM({ logDensity: lnp, config: { dim: 1 }, initialState: state })
+
+      // 80 more iterations (< BATCH) stays inside the next window on both sides, so
+      // _refreshBase() never fires in the comparison window — the one case ADR-0034
+      // guarantees is bit-for-bit exact.
+      const continued1 = runAdapted(rwm1, 80)
+      const continued2 = runAdapted(rwm2, 80)
+      assert.deepEqual(continued1, continued2)
+      assert.deepEqual(rwm1.state().internal, rwm2.state().internal)
+    })
+
+    it('documents the known limitation: _base diverges after a batch boundary crossed post-resume mid-batch (ADR-0034)', () => {
+      const lnp = x => -0.5 * x[0] * x[0]
+      const rwm1 = new RWM({ logDensity: lnp, config: { dim: 1 } }).seed(11)
+      // Strictly mid-batch: 50 iterations into the second BATCH=100 window.
+      runAdapted(rwm1, 150)
+      const state = rwm1.state()
+
+      const rwm2 = new RWM({ logDensity: lnp, config: { dim: 1 }, initialState: state })
+
+      // 50 more iterations crosses the next batch boundary at the same global iteration count
+      // for both (since _pN/_pBatch/_pAccepted are restored exactly), but _refreshBase() reads
+      // this.statistics() — the base-class Welford accumulator, never serialized (ADR-0023) —
+      // which holds 200 observations for rwm1 (accrued since construction) versus only 50 for
+      // rwm2 (reset at its own construction). The proposal scale _ls is unaffected: it depends
+      // only on the now-fully-restored _pAccepted/_pBatch/_pN, not on the Welford accumulator.
+      runAdapted(rwm1, 50)
+      runAdapted(rwm2, 50)
+      assert.notDeepEqual(rwm1.state().internal.base, rwm2.state().internal.base)
+      assert.strictEqual(rwm1.state().internal.ls, rwm2.state().internal.ls)
+    })
+  })
+
   describe('.ar() during sampling', () => {
     it('should lie in [0.2, 0.8] for a well-tuned 1D Normal target', () => {
       const rwm = new RWM({ logDensity: x => -0.5 * x[0] * x[0], config: { dim: 1 } })

@@ -8,8 +8,8 @@ import { ess } from '../test-utils'
 // Concrete subclass that replays a pre-built sequence, enabling deterministic
 // accumulator testing without involving the PRNG.
 class TestMCMC extends MCMC {
-  constructor (sequence, config = {}) {
-    super(() => 0, { dim: 1, ...config }, { x: [0] })
+  constructor (sequence, config = {}, initialState = { x: [0] }) {
+    super(() => 0, { dim: 1, ...config }, initialState)
     this._seq = sequence
     this._i = 0
   }
@@ -426,6 +426,47 @@ describe('mc.MCMC', () => {
       const mc = new TestMCMC(seq, { maxLag: 5 })
       for (let i = 0; i < seq.length; i++) mc.iterate()
       assert.strictEqual(mc._thinningLag(), 3)
+    })
+  })
+
+  describe('.state() prng round-trip', () => {
+    it('should include a 4-element prng array', () => {
+      const mc = new TestMCMC([])
+      mc.r.next()
+      const state = mc.state()
+      assert(Array.isArray(state.prng))
+      assert.strictEqual(state.prng.length, 4)
+    })
+
+    it('should resume the exact PRNG stream position via initialState.prng', () => {
+      const mc1 = new TestMCMC([])
+      for (let i = 0; i < 25; i++) mc1.r.next()
+      const state = mc1.state()
+      const expected = Array.from({ length: 10 }, () => mc1.r.next())
+
+      const mc2 = new TestMCMC([], {}, { x: [0], prng: state.prng })
+      const actual = Array.from({ length: 10 }, () => mc2.r.next())
+      assert.deepEqual(actual, expected)
+    })
+
+    it('should leave the PRNG fresh-seeded when initialState.prng is omitted', () => {
+      // No prng key at all — the pre-#1033 shape — must still construct a valid,
+      // fresh-seeded instance rather than throwing.
+      assert.doesNotThrow(() => new TestMCMC([], {}, { x: [0] }))
+    })
+
+    it('should throw for a malformed prng state', () => {
+      assert.throws(
+        () => new TestMCMC([], {}, { x: [0], prng: [1, 2, 3] }),
+        /prng state must be an array of 4 finite numbers/
+      )
+    })
+
+    it('should throw for a non-array prng state', () => {
+      assert.throws(
+        () => new TestMCMC([], {}, { x: [0], prng: 'not-an-array' }),
+        /prng state must be an array of 4 finite numbers/
+      )
     })
   })
 

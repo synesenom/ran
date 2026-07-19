@@ -146,6 +146,38 @@ describe('mc.Slice', () => {
     })
   })
 
+  describe('.state() stream-level reproducible resume', () => {
+    // Mirrors what warmUp() does per-iteration (iterate(null, true) + _adjust), without its
+    // coarse 1e4-iteration batching, so a snapshot can land strictly mid-adaptation-window —
+    // iterate() alone never calls _adjust() (only warmUp() does), so exercising the batch
+    // adaptation accumulators requires driving both explicitly.
+    const runAdapted = (slice, n) => {
+      const positions = []
+      for (let i = 0; i < n; i++) {
+        slice._adjust(slice.iterate(null, true))
+        positions.push(slice.x.slice())
+      }
+      return positions
+    }
+
+    it('should produce bit-for-bit identical subsequent draws (including w adaptation) after resuming mid-warm-up', () => {
+      const lnp = x => -0.5 * x[0] * x[0]
+      const slice1 = new Slice({ logDensity: lnp, config: { dim: 1 } }).seed(7)
+      // 150 iterations crosses one BATCH=100 adaptation window, so the snapshot below captures
+      // mid-second-window state, not just a fresh/aligned start.
+      runAdapted(slice1, 150)
+      const state = slice1.state()
+
+      const slice2 = new Slice({ logDensity: lnp, config: { dim: 1 }, initialState: state })
+
+      // 150 more iterations crosses a second adaptation-batch boundary post-resume.
+      const continued1 = runAdapted(slice1, 150)
+      const continued2 = runAdapted(slice2, 150)
+      assert.deepEqual(continued1, continued2)
+      assert.deepEqual(slice1.state().internal, slice2.state().internal)
+    })
+  })
+
   describe('warm-up adaptation', () => {
     it('should grow w toward the target scale, not diverge unboundedly', () => {
       // Normal(0, 10): lnp(x) = -0.5 * x^2 / 100. Two-sided bound: a lower bound alone would

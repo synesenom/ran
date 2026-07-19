@@ -93,16 +93,12 @@ export default class NUTS extends MCMC {
     // Momentum component sampler, one Normal(0,1) draw per dimension per iteration. Identity mass
     // matrix — Euclidean metric adaptation is out of scope (issue #826).
     this._q = new Normal(0, 1)
+    // decisions/0034-mcmc-exact-stream-reproducible-resume.md — restoring _q's own PRNG stream
+    // is what makes resumed momentum draws bit-for-bit identical, not just statistically equivalent.
+    MCMC._restoreQPrng(this._q, this.internal.prngQ, 'NUTS')
     this.lastLnp = this.lnp(this.x)
 
-    // Dual-averaging state (Hoffman & Gelman 2014 S3.2): mu is the shrinkage target, Hbar the
-    // running acceptance-probability-deviation statistic, logEpsBar the smoothed log step size,
-    // t the iteration counter. Ephemeral — not part of _internal()'s serialized state, matching
-    // HMC's precedent of serializing only the effective proposal scale.
-    this._daMu = Math.log(10 * this._stepSize)
-    this._daHbar = 0
-    this._daLogEpsBar = Math.log(this._stepSize)
-    this._daT = 0
+    this._restoreDualAveraging()
   }
 
   // ─── PUBLIC INSTANCE ───
@@ -161,10 +157,29 @@ export default class NUTS extends MCMC {
   }
 
   _internal () {
-    return { stepSize: this._stepSize }
+    return {
+      stepSize: this._stepSize,
+      prngQ: this._q.r.save(),
+      daMu: this._daMu,
+      daHbar: this._daHbar,
+      daLogEpsBar: this._daLogEpsBar,
+      daT: this._daT
+    }
   }
 
   // ─── PRIVATE INSTANCE ───
+
+  // Kept out of the constructor to avoid a Complex Method smell there. mu is the shrinkage
+  // target, Hbar the running acceptance-probability-deviation statistic, logEpsBar the smoothed
+  // log step size, t the iteration counter (Hoffman & Gelman 2014 S3.2). Restoring these (rather
+  // than always restarting from t=0) is what makes a mid-warm-up resume's dual averaging
+  // continue from the exact same trajectory — decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+  _restoreDualAveraging () {
+    this._daMu = this.internal.daMu !== undefined ? this.internal.daMu : Math.log(10 * this._stepSize)
+    this._daHbar = this.internal.daHbar || 0
+    this._daLogEpsBar = this.internal.daLogEpsBar !== undefined ? this.internal.daLogEpsBar : Math.log(this._stepSize)
+    this._daT = this.internal.daT || 0
+  }
 
   // Mirrors HMC's _iter freeze logic (hmc.js): switch from the actively-adapting exploration step
   // size to the dual-averaging-smoothed value on the first post-warm-up iteration, and reset the

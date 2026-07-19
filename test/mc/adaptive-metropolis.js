@@ -116,6 +116,46 @@ describe('mc.AdaptiveMetropolis', () => {
     })
   })
 
+  describe('.state() stream-level reproducible resume', () => {
+    // Mirrors what warmUp() does per-iteration (iterate(null, true) + _adjust) — iterate() alone
+    // never calls _adjust(), so exercising the covariance accumulator requires driving both.
+    const runAdapted = (am, n) => {
+      const positions = []
+      for (let i = 0; i < n; i++) {
+        am._adjust(am.iterate(null, true))
+        positions.push(am.x.slice())
+      }
+      return positions
+    }
+
+    it('should produce bit-for-bit identical subsequent draws after resuming mid-warm-up', () => {
+      const lnp = x => -0.5 * x[0] * x[0]
+      const am1 = new AdaptiveMetropolis({ logDensity: lnp, config: { dim: 1 } }).seed(9)
+      runAdapted(am1, 30)
+      const state = am1.state()
+
+      const am2 = new AdaptiveMetropolis({ logDensity: lnp, config: { dim: 1 }, initialState: state })
+
+      const continued1 = runAdapted(am1, 30)
+      const continued2 = runAdapted(am2, 30)
+      assert.deepEqual(continued1, continued2)
+      assert.deepEqual(am1.state().internal, am2.state().internal)
+    })
+
+    it('should deep-copy the covariance accumulator so mutating a resumed instance does not corrupt a previously captured snapshot', () => {
+      const lnp = x => -0.5 * (x[0] * x[0] + x[1] * x[1])
+      const am1 = new AdaptiveMetropolis({ logDensity: lnp, config: { dim: 2 } }).seed(3)
+      runAdapted(am1, 10)
+      const snapshot = am1.state()
+      const snapshotCovS = snapshot.internal.covS.map(row => row.slice())
+
+      const am2 = new AdaptiveMetropolis({ logDensity: lnp, config: { dim: 2 }, initialState: snapshot })
+      runAdapted(am2, 10)
+
+      assert.deepEqual(snapshot.internal.covS, snapshotCovS)
+    })
+  })
+
   describe('frozen covariance during sampling', () => {
     it('should not change the proposal covariance once sample() starts', () => {
       const am = new AdaptiveMetropolis({ logDensity: x => -0.5 * (x[0] * x[0] + x[1] * x[1]), config: { dim: 2 } }).seed(3)

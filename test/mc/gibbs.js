@@ -149,6 +149,29 @@ describe('mc.Gibbs', () => {
     })
   })
 
+  describe('.state() stream-level reproducible resume', () => {
+    // rng.next()-consuming conditionals, same shape as the .seed() block below: Gibbs's own
+    // this.r is threaded into conditionals (ADR-0026), so restoring this.r alone (Phase 1's
+    // base-class-only fix) is expected to make Gibbs fully bit-for-bit resumable with zero
+    // subclass changes — see decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+    const rngConditionals = [
+      (x, rng) => rho * x[1] + sigma * rng.next(),
+      (x, rng) => rho * x[0] + sigma * rng.next()
+    ]
+
+    it('should produce bit-for-bit identical subsequent draws after resuming from a mid-chain state()', () => {
+      const gibbs1 = new Gibbs({ conditionals: rngConditionals, config: { dim: 2 }, initialState: { x: [0, 0] } })
+      for (let i = 0; i < 37; i++) gibbs1.iterate()
+      const state = gibbs1.state()
+
+      const gibbs2 = new Gibbs({ conditionals: rngConditionals, config: { dim: 2 }, initialState: state })
+
+      const continued1 = Array.from({ length: 20 }, () => gibbs1.iterate().x)
+      const continued2 = Array.from({ length: 20 }, () => gibbs2.iterate().x)
+      assert.deepEqual(continued1, continued2)
+    })
+  })
+
   describe('.seed()', () => {
     // Deliberately not a statistically meaningful conditional (distributional
     // correctness is already covered by the KS test above) — this exists only

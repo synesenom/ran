@@ -126,19 +126,13 @@ export default class HMC extends MCMC {
     this._pathLength = this.internal.pathLength || config.pathLength || 10
     // Momentum component sampler, one Normal(0,1) draw per dimension per iteration.
     this._q = new Normal(0, 1)
+    // decisions/0034-mcmc-exact-stream-reproducible-resume.md — restoring _q's own PRNG stream
+    // is what makes resumed momentum draws bit-for-bit identical, not just statistically equivalent.
+    MCMC._restoreQPrng(this._q, this.internal.prngQ, 'HMC')
     this.lastLnp = this.lnp(this.x)
 
-    // Dual-averaging state (Hoffman & Gelman 2014 S3.2): mu is the shrinkage target, Hbar the
-    // running acceptance-probability-deviation statistic, logEpsBar the smoothed log step size,
-    // t the iteration counter. Ephemeral — not part of _internal()'s serialized state, matching
-    // RWM's precedent of serializing only the effective proposal scale, not its own Robbins-Monro
-    // batch counters.
-    this._daMu = Math.log(10 * this._stepSize)
-    this._daHbar = 0
-    this._daLogEpsBar = Math.log(this._stepSize)
-    this._daT = 0
-
-    this._initMetricState(this.internal.metric)
+    this._restoreDualAveraging()
+    this._initMetricState(this.internal.metric, this.internal.metAccumulator)
   }
 
   /**
@@ -222,11 +216,22 @@ export default class HMC extends MCMC {
     return {
       stepSize: this._stepSize,
       pathLength: this._pathLength,
-      // Serializes only the effective, ready-to-use metric (mirrors AdaptiveMetropolis's
-      // _internal(): "serialize the effective proposal, not raw adaptation counters").
+      // The effective, ready-to-use metric — restoration uses this directly so a resumed
+      // sampler's momentum draws are correctly scaled even before the accumulator (below)
+      // next crosses its own refresh gate.
       metric: this._metricType === 'dense'
         ? { type: 'dense', L: this._metL.map(row => row.slice()), D: this._metD.slice() }
-        : { type: 'diag', variance: this._metVar.slice() }
+        : { type: 'diag', variance: this._metVar.slice() },
+      prngQ: this._q.r.save(),
+      daMu: this._daMu,
+      daHbar: this._daHbar,
+      daLogEpsBar: this._daLogEpsBar,
+      daT: this._daT,
+      // Raw mass-matrix accumulator (distinct from the effective metric above) — see
+      // decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+      metAccumulator: this._metricType === 'dense'
+        ? { metN: this._metN, metMean: this._metMean.slice(), metCovS: this._metCovS.map(row => row.slice()) }
+        : { metN: this._metN, metMean: this._metMean.slice(), metM2: this._metM2.slice() }
     }
   }
 
@@ -382,28 +387,45 @@ export default class HMC extends MCMC {
 
   // ─── PRIVATE INSTANCE ───
 
+  // Kept out of the constructor to avoid a Complex Method smell there. mu is the shrinkage
+  // target, Hbar the running acceptance-probability-deviation statistic, logEpsBar the smoothed
+  // log step size, t the iteration counter (Hoffman & Gelman 2014 S3.2). Restoring these (rather
+  // than always restarting from t=0) is what makes a mid-warm-up resume's dual averaging
+  // continue from the exact same trajectory — decisions/0034-mcmc-exact-stream-reproducible-resume.md.
+  _restoreDualAveraging () {
+    this._daMu = this.internal.daMu !== undefined ? this.internal.daMu : Math.log(10 * this._stepSize)
+    this._daHbar = this.internal.daHbar || 0
+    this._daLogEpsBar = this.internal.daLogEpsBar !== undefined ? this.internal.daLogEpsBar : Math.log(this._stepSize)
+    this._daT = this.internal.daT || 0
+  }
+
   // Sets up the mass-matrix (metric) online accumulator and the effective (ready-to-use) metric
   // consulted by _sampleMomentum/_applyInverseMetric. Extracted out of the constructor to avoid
   // a Complex Method smell there. See decisions/0029-hmc-euclidean-metric-adaptation.md.
-  _initMetricState (resumedMetric) {
-    this._initMetricAccumulator()
+  _initMetricState (resumedMetric, resumedAccumulator) {
+    this._initMetricAccumulator(resumedAccumulator)
     this._initEffectiveMetric(resumedMetric)
   }
 
   // Entirely private to HMC -- deliberately not reusing MCMC's own _welford accumulator (which
   // is contractual per decisions/0023-mcmc-accumulator-mechanics.md and tracks a different
   // lifecycle), mirroring AdaptiveMetropolis building its own _covMean/_covS instead of reaching
-  // into the base class.
-  _initMetricAccumulator () {
-    this._metN = 0
-    this._metMean = new Array(this.dim).fill(0)
+  // into the base class. `resumed` (decisions/0034-mcmc-exact-stream-reproducible-resume.md)
+  // restores the raw accumulator so a mid-warm-up resume's next refresh reads the same history
+  // the uninterrupted chain would have; deep-copies metCovS (a dim x dim nested array) so the
+  // live accumulator never aliases a caller-held snapshot's rows.
+  _initMetricAccumulator (resumed) {
+    this._metN = HMC._resolveResumedField(resumed, 'metN', 0)
+    this._metMean = HMC._resolveResumedField(resumed, 'metMean', new Array(this.dim).fill(0)).slice()
     if (this._metricType === 'dense') {
-      this._metCovS = Array.from({ length: this.dim }, () => new Array(this.dim).fill(0))
+      this._metCovS = HMC._resolveResumedField(
+        resumed, 'metCovS', Array.from({ length: this.dim }, () => new Array(this.dim).fill(0))
+      ).map(row => row.slice())
       this._metDelta = new Array(this.dim).fill(0)
       this._metDelta2 = new Array(this.dim).fill(0)
       this._zBuffer = new Array(this.dim).fill(0)
     } else {
-      this._metM2 = new Array(this.dim).fill(0)
+      this._metM2 = HMC._resolveResumedField(resumed, 'metM2', new Array(this.dim).fill(0)).slice()
     }
   }
 
@@ -553,6 +575,13 @@ export default class HMC extends MCMC {
   }
 
   // ─── PRIVATE STATIC ───
+
+  // Split out of _initMetricAccumulator so each field's fallback is a single expression rather
+  // than a repeated `(resumed && resumed[key]) || fallback` branch, which is what the Complex
+  // Method smell flags. decisions/0034-mcmc-exact-stream-reproducible-resume.md
+  static _resolveResumedField (resumed, key, fallback) {
+    return (resumed && resumed[key]) || fallback
+  }
 
   // Dense metric's identity default (no observations yet to base a covariance estimate on) --
   // isolated here rather than an inline nested-loop literal in the constructor.

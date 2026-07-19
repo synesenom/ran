@@ -153,6 +153,34 @@ describe('mc.NUTS', () => {
     })
   })
 
+  describe('.state() stream-level reproducible resume', () => {
+    // Mirrors what warmUp() does per-iteration (iterate(null, true) + _adjust) — iterate() alone
+    // never calls _adjust(), so exercising dual averaging requires driving both explicitly. This
+    // also exercises this.r.next() draws NUTS consumes directly inside _growTree for
+    // direction/slice/subtree-selection, since this.r is restored by the base class alone.
+    const runAdapted = (nuts, n) => {
+      const positions = []
+      for (let i = 0; i < n; i++) {
+        nuts._adjust(nuts.iterate(null, true))
+        positions.push(nuts.x.slice())
+      }
+      return positions
+    }
+
+    it('should produce bit-for-bit identical subsequent draws after resuming mid-warm-up', () => {
+      const nuts1 = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } }).seed(11)
+      runAdapted(nuts1, 20)
+      const state = nuts1.state()
+
+      const nuts2 = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: state })
+
+      const continued1 = runAdapted(nuts1, 20)
+      const continued2 = runAdapted(nuts2, 20)
+      assert.deepEqual(continued1, continued2)
+      assert.deepEqual(nuts1.state().internal, nuts2.state().internal)
+    })
+  })
+
   describe('.ar() during sampling', () => {
     // The [0.6, 0.9] band is the issue's own acceptance criterion, carried over from HMC's test —
     // but the mechanism differs: HMC's `accepted` is a direct Bernoulli draw with parameter `alpha`
