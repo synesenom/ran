@@ -13,6 +13,13 @@ const TARGET_RATIO = 2.0
 // issue scopes only w as configurable. Hitting the cap is safe, not a correctness bug: the
 // shrinkage step's lnp(x1) > y check is what guarantees a valid sample, not full slice coverage.
 const MAX_STEPS = 200
+// Caps shrinkage draws per dimension. Unlike stepping-out (which cannot loop forever for a finite
+// w), _shrink relies on lnp(x0) > logY holding in a neighborhood of x0 to terminate; a logDensity
+// that returns NaN at the current point makes logY NaN, so lnp(candidate) > logY is always false
+// and the interval narrows forever. This cap converts that runaway into a thrown error rather than
+// an unbounded hang — the shrink analogue of the w: Infinity guard.
+// See solutions/correctness/2026-07-15-1018-slice-sampler-infinite-w-hang.md
+const MAX_SHRINK = 200
 
 /**
  * Class implementing coordinate-wise [slice sampling]{@link https://en.wikipedia.org/wiki/Slice_sampling}
@@ -57,8 +64,7 @@ export default class Slice extends MCMC {
     Slice._validateOptions(options)
     const { logDensity, config = {}, initialState = {} } = options
     super(logDensity, config, initialState)
-    const w = this.internal.w
-    this._w = Array.isArray(w) ? w.slice() : new Array(this.dim).fill(typeof w === 'number' ? w : 1.0)
+    this._w = Slice._resolveW(this.internal.w, this.dim)
     Slice._validateW(this._w, this.dim)
     this._bwSum = new Array(this.dim).fill(0)
     this._adjN = 0
@@ -133,7 +139,7 @@ export default class Slice extends MCMC {
   _shrink (x1, d, logY, bracket) {
     const x0 = x1[d]
     let [l, r] = bracket
-    for (;;) {
+    for (let k = 0; k < MAX_SHRINK; k++) {
       const candidate = l + (r - l) * this.r.next()
       x1[d] = candidate
       if (this.lnp(x1) > logY) {
@@ -145,6 +151,27 @@ export default class Slice extends MCMC {
         r = candidate
       }
     }
+    // Reaching the cap means no candidate ever cleared the level despite the interval collapsing
+    // toward x0 — logY is almost certainly NaN because logDensity returned NaN at the current point.
+    throw Error('Slice: shrinkage failed to converge; logDensity may return NaN inside the bracket')
+  }
+
+  // Resolves the seed width into a per-dimension array. A w that is neither undefined, a number,
+  // nor an array (e.g. a string, boolean, object, or null) is a caller/programming error and must
+  // throw here rather than be silently coerced to the 1.0 default — otherwise _validateW only ever
+  // sees the valid default and the bad input passes unchecked (a documented-parameter type error
+  // must throw, per the return-value conventions in CLAUDE.md).
+  static _resolveW (w, dim) {
+    if (w === undefined) {
+      return new Array(dim).fill(1.0)
+    }
+    if (Array.isArray(w)) {
+      return w.slice()
+    }
+    if (typeof w === 'number') {
+      return new Array(dim).fill(w)
+    }
+    throw Error('Slice: w must be a positive number or an array of dim positive numbers')
   }
 
   // Kept out of the constructor to avoid a Complex Conditional / Complex Method smell there.

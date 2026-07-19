@@ -3,17 +3,19 @@ import { Normal } from '../dist'
 import Matrix from '../la/matrix'
 import Vector from '../la/vector'
 
-// Regularization added to the proposal covariance (Sigma_proposal = s_d * Cov(x) + EPS * I) so
-// that ldl() -- which has no pivoting or singularity guard of its own -- never encounters a
+// Regularization added inside the proposal covariance (Sigma_proposal = s_d * (Cov(x) + EPS * I))
+// so that ldl() -- which has no pivoting or singularity guard of its own -- never encounters a
 // non-positive diagonal pivot, even while the online covariance accumulator is still rank
-// deficient (fewer than dim + 1 observations).
+// deficient (fewer than dim + 1 observations). EPS sits inside the s_d factor, matching Haario,
+// Saksman & Tamminen (2001)'s C_n = s_d * (Cov + epsilon * I): the regularization shrinks
+// proportionally with the proposal scale as dim grows, rather than staying at a fixed absolute floor.
 const EPS = 1e-6
 
 /**
  * Class implementing the full-covariance [adaptive Metropolis]{@link https://projecteuclid.org/euclid.bj/1080222083}
  * algorithm (Haario, Saksman & Tamminen, 2001). Unlike [RWM]{@link ran.mc.RWM}, which adapts only the per-component
  * (diagonal) proposal scale, this sampler learns the full joint proposal covariance from the chain's own history
- * during warm-up: `Sigma_proposal = (2.38^2 / dim) * Cov(x) + epsilon * I`. The covariance is refactorized via
+ * during warm-up: `Sigma_proposal = (2.38^2 / dim) * (Cov(x) + epsilon * I)`. The covariance is refactorized via
  * `Matrix.ldl()` after every warm-up iteration and frozen once `sample()` is called, since `_adjust` is only ever
  * invoked from `warmUp()`.
  *
@@ -142,7 +144,7 @@ export default class AdaptiveMetropolis extends MCMC {
   // own JSDoc (ran.la.Matrix), which breaks npm run typecheck since `la` isn't in the public API's
   // type graph — see solutions/tooling/2026-07-15-1330-adaptive-metropolis-ran-la-matrix-dts-leak.md
   _refreshFactor () {
-    const cov = new Matrix(this._covS).scale(this._sd / (this._covN - 1)).add(new Matrix(this.dim).scale(EPS))
+    const cov = new Matrix(this._covS).scale(this._sd / (this._covN - 1)).add(new Matrix(this.dim).scale(this._sd * EPS))
     const { D, L } = cov.ldl()
     this._A = L.mult(D.f(Math.sqrt))
   }

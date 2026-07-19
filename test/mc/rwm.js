@@ -159,6 +159,16 @@ describe('mc.RWM', () => {
       const samples1 = rwm1.sample(null, 50)
 
       assert.notDeepEqual(samples0, samples1)
+    })
+
+    it('should not alias the proposal generator with the acceptance-test generator', () => {
+      // Xoshiro128p.seed() is a pure function of its argument with no per-instance salt, so seeding
+      // the proposal generator (_q.r) and the accept/reject generator (this.r) with the identical
+      // value would make them one shared stream — the Metropolis acceptance uniform would no longer
+      // be independent of the proposal noise. x is provided so seed() does not advance this.r by a
+      // redraw, exposing the aliasing directly as an equal first draw from each generator.
+      const rwm = new RWM({ logDensity, initialState: { x: [0] } }).seed(42)
+      assert.notStrictEqual(rwm.r.next(), rwm._q.r.next())
     });
 
     [0, 42, 12345].forEach(seed => {

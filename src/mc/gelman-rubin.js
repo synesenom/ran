@@ -29,6 +29,14 @@ export default function gelmanRubin (samples, maxLength) {
   if (!Array.isArray(samples) || samples.length < 2) {
     throw Error('gelmanRubin requires at least two chains')
   }
+  // _gri divides by chains[0].length for every chain, so unequal lengths silently corrupt the
+  // R-hat (a shorter chain reads past its end as undefined -> NaN, and its (n-1) divisor mismatches
+  // its true sample count). runChains always produces equal-length chains, but gelmanRubin is a
+  // public, directly-callable export, so guard the contract here rather than assume the pipeline.
+  const n0 = samples[0].length
+  if (!samples.every(chain => Array.isArray(chain) && chain.length === n0)) {
+    throw Error('gelmanRubin requires all chains to have the same length')
+  }
   const nPoints = maxLength !== undefined
     ? Math.min(samples[0].length - 1, maxLength)
     : samples[0].length - 1

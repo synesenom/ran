@@ -46,7 +46,7 @@ npm run typecheck
 - `src/special/` — Special mathematical functions: gamma, log-gamma, incomplete gamma/beta, beta, log-beta, Bessel functions, error function, digamma, hypergeometric, Hurwitz zeta, Riemann zeta, Lambert W, Marcum Q, Owen T, Stirling numbers.
 - `src/core/` — PRNG (`xoshiro.js` — xoshiro128+), mathematical constants, seeding utilities. Exports `float` (uniform `[0,1)`), `int`, and `bool` generators.
 - `src/la/` — Linear algebra: `matrix.js` and `vector.js`.
-- `src/mc/` — Markov Chain Monte Carlo: `_mcmc.js` (base), `rwm.js` (random walk Metropolis), `gelman-rubin.js` (convergence diagnostic).
+- `src/mc/` — Markov Chain Monte Carlo: `_mcmc.js` (abstract base — accumulators, `warmUp`/`sample`, `ar`/`ac`/`ess`/`statistics`), and the sampler suite: `rwm.js` (random-walk / diagonal adaptive Metropolis), `adaptive-metropolis.js` (full-covariance Haario adaptive Metropolis), `slice.js` (coordinate-wise slice sampling), `hmc.js` (Hamiltonian Monte Carlo with `diag`/`dense` metric adaptation), `nuts.js` (No-U-Turn Sampler), `mala.js` (Metropolis-adjusted Langevin), `gibbs.js` (systematic-scan Gibbs), `ars.js` (adaptive rejection sampling — not an `MCMC` subclass), `_leapfrog.js` (shared leapfrog integrator for NUTS), `parallel-tempering.js` (replica-exchange coordinator over an array of replicas), `run-chains.js` (multi-chain driver), `gelman-rubin.js` (R-hat convergence diagnostic).
 - `src/location/`, `src/dispersion/`, `src/shape/`, `src/dependence/` — Statistical summary measures (mean, median, variance, skewness, Pearson, Spearman, Kendall, etc.).
 - `src/test/` — Statistical hypothesis tests (Bartlett, Levene, Brown-Forsythe, Mann-Whitney, HSIC).
 - `src/ts/` — Time series: online covariance.

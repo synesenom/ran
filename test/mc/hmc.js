@@ -217,6 +217,21 @@ describe('mc.HMC', () => {
     })
   })
 
+  describe('dual-averaging robustness', () => {
+    it('should not let a NaN acceptance probability permanently freeze the step size', () => {
+      // A hand-written gradient that returns NaN once the chain wanders past a boundary (instead of
+      // a rigorous -Infinity) makes the Metropolis acceptance probability NaN. Without a finiteness
+      // guard in _adjust, that NaN is sticky: it propagates through the Robbins-Monro recursion into
+      // stepSize and freezes the sampler permanently. The tuned step size must stay finite/positive.
+      const lnp = x => -0.5 * x[0] * x[0]
+      const grad = x => [x[0] > 1 ? NaN : -x[0]]
+      const hmc = new HMC({ logDensity: lnp, gradLogDensity: grad, config: { dim: 1 }, initialState: { x: [0] } }).seed(42)
+      hmc.warmUp(null, 2)
+      const step = hmc.state().internal.stepSize
+      assert(Number.isFinite(step) && step > 0, `stepSize should stay finite and positive, got ${step}`)
+    })
+  })
+
   describe('.state() round-trip', () => {
     it('should restore position, samplingRate, and the full internal state', () => {
       const hmc1 = new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 } }).seed(11)
@@ -284,7 +299,11 @@ describe('mc.HMC', () => {
           // the sampled distribution -- neither test above inspects the distribution itself.
           const hmc = new HMC({ logDensity: lnp, gradLogDensity: grad, config: { dim: 3 }, initialState: { x: [0, 0, 0] } }).seed(seed)
           hmc.warmUp(null, 20)
-          const samples = hmc.sample(null, 2000)
+          // 6000 (not the 2000 the other KS blocks use): the poorly-scaled sigma=[1,2,3] target
+          // retains enough autocorrelation post-adaptation that all three fixed SEEDS clear the
+          // alpha=0.01 KS bound only with the extra power — verified worst-case D/crit = 0.89 at
+          // this size across the seed sweep, vs a marginal seed-12345 trip at 2000.
+          const samples = hmc.sample(null, 6000)
           sigma.forEach((s, i) => {
             const ref = new Normal(0, s)
             assert(ksTest(samples.map(x => x[i]), x => ref.cdf(x)), `margin ${i} (sigma=${s}) failed KS test`)

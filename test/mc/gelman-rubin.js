@@ -24,6 +24,15 @@ describe('mc.gelmanRubin', () => {
       const chain2 = Array.from({ length: 5 }, (_, i) => [i * 2 + 0.5])
       assert.doesNotThrow(() => gelmanRubin([chain1, chain2]))
     })
+
+    it('should throw when chains have unequal lengths', () => {
+      // _gri uses chains[0].length as the sample-variance divisor for every chain; a shorter chain
+      // would silently read past its end (undefined -> NaN) and mismatch the divisor, producing a
+      // wrong/NaN R-hat instead of an error. Reachable only via direct calls, not through runChains.
+      const chain1 = Array.from({ length: 5 }, (_, i) => [i + 0.5])
+      const chain2 = Array.from({ length: 3 }, (_, i) => [i + 0.5])
+      assert.throws(() => gelmanRubin([chain1, chain2]), /same length/)
+    })
   })
 
   describe('maxLength', () => {
