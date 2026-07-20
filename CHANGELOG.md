@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Hot-path `_pdf`/`_cdf`/`_generator`/`_q` methods on 14 distributions now read parameter-only constants (log-gamma normalizers, log-binomial/log-beta terms, Bessel/Poisson-mixing terms) from `this.c` instead of recomputing them on every call: `Gamma` (and its subclasses `Chi2`, `Erlang`, which now share the parent's cached log-normalizer instead of each calling `logGamma` again), `InverseChi2`, `Poisson`, `NegativeBinomial`, `NoncentralChi2`, `NoncentralBeta` (also speeding up `NoncentralF`, which delegates to it), `DoublyNoncentralBeta`, `BetaBinomial`, `NegativeHypergeometric`, `Hypergeometric`, `Muth`, and `VonMises` (which also caches the ratio-of-uniforms sampling constant used by `_generator()`). No behavior or return-value change.
+
 ## [1.31.0] - 2026-07-20
 
 ### Added

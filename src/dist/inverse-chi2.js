@@ -35,6 +35,12 @@ export default class InverseChi2 extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
+    this.c = {
+      pow2NegHalfNu: Math.pow(2, -nui / 2),
+      logGammaHalfNu: logGamma(nui / 2)
+    }
   }
 
   _generator () {
@@ -43,7 +49,7 @@ export default class InverseChi2 extends Distribution {
   }
 
   _pdf (x) {
-    return Math.pow(2, -this.p.nu / 2) * Math.pow(x, -this.p.nu / 2 - 1) * Math.exp(-0.5 / x - logGamma(this.p.nu / 2))
+    return this.c.pow2NegHalfNu * Math.pow(x, -this.p.nu / 2 - 1) * Math.exp(-0.5 / x - this.c.logGammaHalfNu)
   }
 
   _cdf (x) {

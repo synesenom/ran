@@ -35,6 +35,12 @@ export default class VonMises extends Distribution {
       value: Math.PI,
       closed: true
     }]
+
+    // Speed-up constants
+    this.c = {
+      besselI0Kappa: besselI(0, kappa),
+      ratioUnifScale: kappa > 1.3 ? 1 / Math.sqrt(kappa) : Math.PI * Math.exp(-kappa)
+    }
   }
 
   static _fitInit (data) {
@@ -52,12 +58,10 @@ export default class VonMises extends Distribution {
   _generator () {
     // Sampling method from here: http://sa-ijas.stat.unipd.it/sites/sa-ijas.stat.unipd.it/files/417-426.pdf
     // Source: Barabesi. Generating von Mises variates by the ratio-of-uniforms method. Statistica Applicata 7 (4), 1995.
-    const s = this.p.kappa > 1.3 ? 1 / Math.sqrt(this.p.kappa) : Math.PI * Math.exp(-this.p.kappa)
-
     for (let i = 0; i < MAX_ITER; i++) {
       const R1 = this.r.next()
       const R2 = this.r.next()
-      const theta = s * (2 * R2 - 1) / R1
+      const theta = this.c.ratioUnifScale * (2 * R2 - 1) / R1
       if (Math.abs(theta) > Math.PI) {
         continue
       }
@@ -74,7 +78,7 @@ export default class VonMises extends Distribution {
   }
 
   _pdf (x) {
-    return Math.exp(this.p.kappa * Math.cos(x)) / (2 * Math.PI * besselI(0, this.p.kappa))
+    return Math.exp(this.p.kappa * Math.cos(x)) / (2 * Math.PI * this.c.besselI0Kappa)
   }
 
   _cdf (x) {
@@ -82,7 +86,7 @@ export default class VonMises extends Distribution {
     return 0.5 * (1 + x / Math.PI) + recursiveSum({
       c: 0
     }, (t, i) => {
-      t.c = besselI(i, this.p.kappa) * Math.sin(i * x) / (besselI(0, this.p.kappa) * i)
+      t.c = besselI(i, this.p.kappa) * Math.sin(i * x) / (this.c.besselI0Kappa * i)
       return t
     }, t => t.c) / Math.PI
   }

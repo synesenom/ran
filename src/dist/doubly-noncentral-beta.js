@@ -44,6 +44,25 @@ export default class DoublyNoncentralBeta extends Distribution {
       value: 1,
       closed: false
     }]
+
+    // Speed-up constants.
+    // r0/s0/pr0/ps0/b0 are the double Poisson-mixing terms shared verbatim by _pdf and _cdf
+    // (they depend only on alpha, beta, lambda1, lambda2, never on x).
+    const l1 = lambda1 / 2
+    const l2 = lambda2 / 2
+    const r0 = Math.round(l1)
+    const s0 = Math.round(l2)
+    this.c = {
+      l1,
+      l2,
+      r0,
+      s0,
+      // Guard l=0: 0*log(0) = NaN by IEEE 754, but the Poisson weight e^0 * 0^0 / 0! = 1.
+      // (Never actually read: _pdf/_cdf both short-circuit away from this path when lambda=0.)
+      pr0: l1 === 0 ? 1 : Math.exp(r0 * Math.log(l1) - logGamma(r0 + 1)),
+      ps0: l2 === 0 ? 1 : Math.exp(s0 * Math.log(l2) - logGamma(s0 + 1)),
+      b0: fnBeta(alpha + r0, beta + s0)
+    }
   }
 
   // ─── PROTECTED INSTANCE ───────────────────────────────────────────────────
@@ -74,16 +93,10 @@ export default class DoublyNoncentralBeta extends Distribution {
     }
 
     const y = x / (1 - x)
-    const l1 = this.p.lambda1 / 2
-    const l2 = this.p.lambda2 / 2
-    const r0 = Math.round(l1)
-    const s0 = Math.round(l2)
-    const pr0 = Math.exp(r0 * Math.log(l1) - logGamma(r0 + 1))
-    const ps0 = Math.exp(s0 * Math.log(l2) - logGamma(s0 + 1))
+    const { l1, l2, r0, s0, pr0, ps0, b0 } = this.c
     const ab = this.p.alpha + this.p.beta
     const yr0 = Math.pow(y, this.p.alpha + r0 - 2)
     const ys0 = Math.pow(1 + y, this.p.alpha + r0 + this.p.beta + s0 - 2)
-    const b0 = fnBeta(this.p.alpha + r0, this.p.beta + s0)
     const ctx = { y, ab, l1, l2, r0, s0, pr0, ps0, yr0, ys0, b0 }
 
     const z = this._pdfRBackward(ctx, this._pdfRForward(ctx))
@@ -100,17 +113,11 @@ export default class DoublyNoncentralBeta extends Distribution {
       return new NoncentralBeta(this.p.alpha, this.p.beta, this.p.lambda1)._cdf(x)
     }
 
-    const l1 = this.p.lambda1 / 2
-    const l2 = this.p.lambda2 / 2
+    const { l1, l2, r0, s0, pr0, ps0, b0 } = this.c
     const betaParam = this.p.beta
-    const r0 = Math.round(l1)
-    const s0 = Math.round(l2)
-    const pr0 = Math.exp(r0 * Math.log(l1) - logGamma(r0 + 1))
-    const ps0 = Math.exp(s0 * Math.log(l2) - logGamma(s0 + 1))
     const sBeta0 = betaParam + s0 - 1
     const xa0 = Math.pow(x, this.p.alpha + r0)
     const xb0 = Math.pow(1 - x, betaParam + s0)
-    const b0 = fnBeta(this.p.alpha + r0, betaParam + s0)
     const ib0 = regularizedBetaIncomplete(this.p.alpha + r0, betaParam + s0, x)
     const ctx = { l1, l2, r0, s0, pr0, ps0, sBeta0, xa0, xb0, b0, ib0, x }
 

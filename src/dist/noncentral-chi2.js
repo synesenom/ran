@@ -40,7 +40,8 @@ export default class NoncentralChi2 extends Distribution {
 
     // Speed-up constants
     this.c = {
-      kIsEven: this.p.k % 2 === 0
+      kIsEven: this.p.k % 2 === 0,
+      logGammaHalfK: logGamma(ki / 2)
     }
   }
 
@@ -90,7 +91,7 @@ export default class NoncentralChi2 extends Distribution {
       }
       return Math.exp(
         (this.p.k / 2 - 1) * Math.log(x) - x / 2 -
-        (this.p.k / 2) * Math.LN2 - logGamma(this.p.k / 2)
+        (this.p.k / 2) * Math.LN2 - this.c.logGammaHalfK
       )
     }
 

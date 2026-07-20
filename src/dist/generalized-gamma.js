@@ -43,13 +43,13 @@ export default class GeneralizedGamma extends Gamma {
     }]
 
     // Speed-up constants
-    this.c = {
+    Object.assign(this.c, {
       lG0: logGamma(d / p),
       lG1: logGamma((d + 1) / p),
       lG2: logGamma((d + 2) / p),
       lG3: logGamma((d + 3) / p),
       lG4: logGamma((d + 4) / p)
-    }
+    })
   }
 
   _q (p) {

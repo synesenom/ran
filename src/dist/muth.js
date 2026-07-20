@@ -35,6 +35,11 @@ export default class Muth extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
+    this.c = {
+      alphaExpInvAlpha: alpha * Math.exp(1 / alpha)
+    }
   }
 
   static _fitInit (data) {
@@ -64,7 +69,7 @@ export default class Muth extends Distribution {
 
   _q (p) {
     // Using Eq. (3.2) in Jodra et al: On the Muth Distribution
-    return (Math.log(1 - p) - lambertW1m((p - 1) / (this.p.alpha * Math.exp(1 / this.p.alpha))) - 1 / this.p.alpha) / this.p.alpha
+    return (Math.log(1 - p) - lambertW1m((p - 1) / this.c.alphaExpInvAlpha) - 1 / this.p.alpha) / this.p.alpha
   }
 
   /**
