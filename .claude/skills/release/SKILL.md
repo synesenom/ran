@@ -165,8 +165,8 @@ If the merge is blocked or times out, stop and report — do not force it.
 Once the PR is merged (the bumped `package.json` and consolidated `CHANGELOG.md`
 are now on `main`), trigger the workflow:
 
-- `mcp__github__actions_run_trigger` — `workflow_id` `release.yml`, `ref`
-  `main`, `inputs: { version: "VERSION" }`.
+- `mcp__github__actions_run_trigger` — `method` `run_workflow`, `workflow_id`
+  `release.yml`, `ref` `main`, `inputs: { version: "VERSION" }`.
 
 The workflow then, on the runner, does everything MCP cannot:
 
@@ -175,12 +175,12 @@ The workflow then, on the runner, does everything MCP cannot:
 - cuts the GitHub release with the consolidated `## [VERSION]` notes from
   `CHANGELOG.md`,
 - rotates the milestone (creates `v{NEXT_VERSION}`, moves open issues, closes
-  `v{VERSION}`).
+  `v{VERSION}`),
+- deletes the merged `release/v{VERSION}` branch (best-effort).
 
 Poll `mcp__github__actions_list` / `mcp__github__actions_get` for the run and
 report its conclusion. If the run fails on the tag step, the most likely cause
-is the `github-actions[bot]` tag-protection bypass not being configured (see
-Pre-conditions).
+is a missing or under-scoped `RELEASE_TOKEN` secret (see Pre-conditions).
 
 ---
 

@@ -146,3 +146,17 @@ jobs:
 
           gh api "repos/${REPO}/milestones/${CURRENT_MS}" -X PATCH -f state=closed
           echo "Milestone v${V}: closed (${MOVED} open issues moved to v${NEXT})"
+
+      # Best-effort: the release/v* branch is merged and no longer needed. A
+      # failure here (branch already gone, protected) must not fail the release.
+      - name: Delete merged release branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BR="release/v${{ steps.ver.outputs.version }}"
+          REF="repos/${{ github.repository }}/git/refs/heads/${BR}"
+          if gh api "$REF" >/dev/null 2>&1; then
+            gh api -X DELETE "$REF" && echo "Deleted ${BR}." || echo "Could not delete ${BR} (non-fatal)."
+          else
+            echo "Branch ${BR} not found — nothing to delete."
+          fi
