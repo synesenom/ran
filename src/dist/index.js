@@ -149,3 +149,6 @@ export { default as YuleSimon } from './yule-simon'
 export { default as Zeta } from './zeta'
 export { default as Zipf } from './zipf'
 export { default as ZipfMandelbrot } from './zipf-mandelbrot'
+
+// Not a Distribution subclass: a composable utility over the distributions above.
+export { guess } from './guess'

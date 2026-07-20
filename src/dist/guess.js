@@ -1,0 +1,189 @@
+import * as index from './index'
+import { cv, vmr } from '../dispersion'
+import { skewness } from '../shape'
+import { andersonDarlingPValue, chi2PValue } from './_tests'
+import {
+  SYMMETRIC,
+  POSITIVE_SKEW_ONLY,
+  CV_ONE_FAMILY,
+  POISSON_LIKE,
+  NEGATIVE_BINOMIAL_LIKE
+} from './_guess-meta'
+
+// Bessel-heavy distributions excluded from the default candidate pool: each evaluates a
+// Bessel function per data point with no constructor-level caching, making every lnL()
+// call (and therefore every Powell iteration inside fit()) expensive relative to the rest
+// of the catalog, for distributions that are rarely the right answer for generic data
+// exploration. Still usable via an explicit `candidates` override.
+const DEFAULT_EXCLUDED = new Set(['VonMises', 'Rice', 'NoncentralChi2', 'NoncentralChi', 'Skellam'])
+
+// Reads `index` (this module's own barrel, which re-exports guess() itself) only inside
+// the function body — never at module top level — so the circular import between
+// guess.js and index.js resolves safely: by the time a caller invokes guess(), the whole
+// module graph has already finished evaluating.
+function _defaultCandidates () {
+  return Object.entries(index)
+    .filter(([name]) => name !== 'guess' && !DEFAULT_EXCLUDED.has(name))
+    .map(([, Cls]) => Cls)
+}
+
+// Mirrors fit()'s own first step (see decisions/0016-distribution-fit-powell-and-exact-mle.md)
+// to read a candidate's type()/k/support() before running the expensive fit() call, without
+// needing arbitrary "default" constructor arguments. _fitInit is expected to be a cheap
+// moment-based/closed-form calculation, so the redundant call fit() makes later is
+// negligible next to Powell's cost.
+function _buildProbe (Cls, data) {
+  try {
+    return new Cls(...Cls._fitInit(data))
+  } catch (e) {
+    return null
+  }
+}
+
+function _withinSupport (probe, xmin, xmax) {
+  const [lo, hi] = probe.support()
+  if (xmin < lo.value || (xmin === lo.value && !lo.closed)) return false
+  if (xmax > hi.value || (xmax === hi.value && !hi.closed)) return false
+  return true
+}
+
+// Asymmetric by design: a positive-skew-only family is only ruled out by strongly
+// *negative* sample skewness, not by symmetric or already-positive sample skewness.
+function _skewnessFilterFails (name, skew, threshold) {
+  if (SYMMETRIC.has(name) && Math.abs(skew) > threshold) return true
+  return POSITIVE_SKEW_ONLY.has(name) && skew < -threshold
+}
+
+// cv() is NaN for non-positive-mean data; NaN comparisons are always false, so this
+// filter naturally never triggers on data for which it isn't meaningful.
+function _cvFilterFails (name, data, isDiscrete) {
+  if (isDiscrete || !CV_ONE_FAMILY.has(name)) return false
+  const c = cv(data)
+  return c < 0.1 || c > 10
+}
+
+// Same NaN-safe guard as _cvFilterFails, via vmr().
+function _dispersionFilterFails (name, data, isDiscrete) {
+  if (!isDiscrete) return false
+  const d = vmr(data)
+  if (POISSON_LIKE.has(name) && d > 3) return true
+  return NEGATIVE_BINOMIAL_LIKE.has(name) && d < 0.5
+}
+
+// Soft filters are statistically-principled pruning heuristics, not correctness guards:
+// a family absent from every _guess-meta.js set simply receives no soft filter, and an
+// incompatible family that slips through still gets caught by its BIC weight/p-value.
+function _passesSoftFilters (name, data, isDiscrete) {
+  const threshold = 2 * Math.sqrt(6 / data.length)
+  const skew = skewness(data)
+  if (_skewnessFilterFails(name, skew, threshold)) return false
+  if (_cvFilterFails(name, data, isDiscrete)) return false
+  return !_dispersionFilterFails(name, data, isDiscrete)
+}
+
+function _dataContext (data) {
+  return {
+    isDiscrete: data.every(Number.isInteger),
+    xmin: Math.min(...data),
+    xmax: Math.max(...data)
+  }
+}
+
+function _survivingCandidates (pool, data, context) {
+  const { isDiscrete, xmin, xmax } = context
+  const survivors = []
+  pool.forEach(Cls => {
+    const probe = _buildProbe(Cls, data)
+    if (!probe) return
+    if (probe.type() !== (isDiscrete ? 'discrete' : 'continuous')) return
+    if (!_withinSupport(probe, xmin, xmax)) return
+    if (!_passesSoftFilters(Cls.name, data, isDiscrete)) return
+    survivors.push({ Cls, probe })
+  })
+  return survivors
+}
+
+function _fitSurvivors (survivors, data, isDiscrete) {
+  const fitted = []
+  survivors.forEach(({ Cls }) => {
+    try {
+      const inst = Cls.fit(data)
+      const bic = inst.bic(data)
+      const pValue = isDiscrete
+        ? chi2PValue(data, x => inst.pdf(x), inst.k)
+        : andersonDarlingPValue(data, x => inst.cdf(x))
+      fitted.push({ name: Cls.name, params: inst.params(), bic, pValue })
+    } catch (e) {
+      // fit() itself never signals a bad candidate (decisions/0016) — this is the actual
+      // "candidate didn't work out" signal guess() relies on, so it is skipped, not thrown.
+    }
+  })
+  return fitted
+}
+
+function _rankByBicWeight (fitted) {
+  const minBic = Math.min(...fitted.map(f => f.bic))
+  const weights = fitted.map(f => Math.exp(-0.5 * (f.bic - minBic)))
+  const sumWeights = weights.reduce((a, b) => a + b, 0)
+
+  const result = fitted
+    .map((f, i) => ({ name: f.name, params: f.params, bicWeight: weights[i] / sumWeights, pValue: f.pValue }))
+    .sort((a, b) => b.bicWeight - a.bicWeight)
+
+  if (result.every(r => r.pValue < 0.05)) {
+    result.warning = 'no candidate passes goodness-of-fit at α=0.05'
+  }
+
+  return result
+}
+
+/**
+ * Fits a set of candidate distributions to a dataset and ranks them by BIC weight — the
+ * probability that each candidate is the best-fitting model in the candidate set, given
+ * the data. "Guess" is intentional: this is a heuristic exploratory tool, not a verdict.
+ *
+ * Candidates are pre-filtered before the expensive fit() call: hard filters (matching
+ * type and support against the data) are followed by soft, statistically-principled
+ * filters (skewness, coefficient of variation, dispersion index). A candidate whose
+ * fit() throws is skipped rather than propagating the error. Throws if the data is too
+ * small for the surviving candidate set's largest parameter count (BIC's asymptotic
+ * approximation requires roughly 20 observations per parameter).
+ *
+ * @method guess
+ * @memberof ran.dist
+ * @param {number[]} data Array of numbers to fit candidate distributions to.
+ * @param {Object=} options Options for the fitting procedure.
+ * @param {Function[]=} options.candidates Distribution constructors to try, overriding the
+ * default candidate pool (all distributions except VonMises, Rice, NoncentralChi2,
+ * NoncentralChi and Skellam, which are excluded by default for their per-point Bessel
+ * function evaluation cost).
+ * @returns {Object[]} Array of `{name, params, bicWeight, pValue}`, sorted by descending
+ * `bicWeight` (`bicWeight` values across the array sum to 1). Carries a `warning` string
+ * property when every surviving candidate fails goodness-of-fit at α=0.05.
+ * @throws {Error} If no candidate survives pre-filtering, if the data is too small for the
+ * surviving candidate set's largest parameter count, or if no candidate can be fitted.
+ */
+export function guess (data, { candidates } = {}) {
+  const pool = candidates || _defaultCandidates()
+  const context = _dataContext(data)
+
+  const survivors = _survivingCandidates(pool, data, context)
+  if (survivors.length === 0) {
+    throw new Error('guess(): no candidate distribution survives pre-filtering for this data')
+  }
+
+  const maxK = Math.max(...survivors.map(s => s.probe.k))
+  const minObservations = 20 * maxK
+  if (data.length < minObservations) {
+    throw new Error(
+      `guess(): at least ${minObservations} observations are required for the surviving candidate set (got ${data.length})`
+    )
+  }
+
+  const fitted = _fitSurvivors(survivors, data, context.isDiscrete)
+  if (fitted.length === 0) {
+    throw new Error('guess(): no candidate distribution could be fitted to this data')
+  }
+
+  return _rankByBicWeight(fitted)
+}

@@ -1,3 +1,5 @@
+import { gammaUpperIncomplete } from '../special'
+
 /**
  * Table containing critical values for the chi square test at 99% of confidence for low degrees of freedom.
  *
@@ -46,18 +48,20 @@ const _CHI_TABLE_HI = [
 ]
 
 /**
- * Performs a chi square test for an array of values and a probability mass function.
+ * Bins an observed sample against a probability mass function, merging consecutive
+ * (Map-insertion-order) distinct values until the expected count in the running bin
+ * exceeds 20 (for the central limit theorem to hold), and accumulates the chi-square
+ * statistic over the closed bins. A trailing partial bin that never exceeds 20 is
+ * dropped, matching the original chi2() binning behavior this helper was extracted from.
  *
- * @method chi2
+ * @method _chiSquareBins
  * @memberof ran.dist
- * @param values {number[]} Array of values to perform test for.
- * @param pmf {Function} Probability mass function to perform test against.
- * @param c {number} Number of parameters for the distribution.
- * @returns {{statistics: number, passed: boolean}} Test results, containing the raw chi square statistics and a
- * boolean to tell whether the distribution passed the test.
+ * @param values {number[]} Array of values to bin.
+ * @param pmf {Function} Probability mass function to bin against.
+ * @returns {{chi2: number, k: number}} The chi-square statistic and the number of closed bins.
  * @private
  */
-export function chi2 (values, pmf, c) {
+function _chiSquareBins (values, pmf) {
   // Calculate observed distribution
   const p = new Map()
   values.forEach(function (v) {
@@ -83,6 +87,24 @@ export function chi2 (values, pmf, c) {
     }
   })
 
+  return { chi2, k }
+}
+
+/**
+ * Performs a chi square test for an array of values and a probability mass function.
+ *
+ * @method chi2
+ * @memberof ran.dist
+ * @param values {number[]} Array of values to perform test for.
+ * @param pmf {Function} Probability mass function to perform test against.
+ * @param c {number} Number of parameters for the distribution.
+ * @returns {{statistics: number, passed: boolean}} Test results, containing the raw chi square statistics and a
+ * boolean to tell whether the distribution passed the test.
+ * @private
+ */
+export function chi2 (values, pmf, c) {
+  const { chi2: stat, k } = _chiSquareBins(values, pmf)
+
   // Get critical value
   const df = Math.max(1, k - c - 1)
 
@@ -90,9 +112,28 @@ export function chi2 (values, pmf, c) {
 
   // Return comparison results
   return {
-    statistics: chi2,
-    passed: chi2 <= crit
+    statistics: stat,
+    passed: stat <= crit
   }
+}
+
+/**
+ * Computes the chi-square goodness-of-fit p-value for an array of values and a probability
+ * mass function, using the same binning as chi2() but reporting the regularized upper
+ * incomplete gamma survival probability instead of a fixed-alpha pass/fail.
+ *
+ * @method chi2PValue
+ * @memberof ran.dist
+ * @param values {number[]} Array of values to perform test for.
+ * @param pmf {Function} Probability mass function to perform test against.
+ * @param c {number} Number of parameters for the distribution.
+ * @returns {number} The chi-square goodness-of-fit p-value.
+ * @private
+ */
+export function chi2PValue (values, pmf, c) {
+  const { chi2: stat, k } = _chiSquareBins(values, pmf)
+  const df = Math.max(1, k - c - 1)
+  return gammaUpperIncomplete(df / 2, stat / 2)
 }
 
 // Marsaglia & Marsaglia (2004), "Evaluating the Anderson-Darling Distribution",
@@ -119,7 +160,7 @@ export function _adinf (z) {
 // asymptotic CDF approximation by ~10⁻³ for moderate n; harmless as n → ∞.
 // See solutions/testing/2026-05-19-1132-marsaglia-errfix-transcription-branch-coverage.md
 // for the transcription pitfall around the g2 branch.
-function _errfix (n, x) {
+export function _errfix (n, x) {
   const c = 0.01265 + 0.1757 / n
   if (x < c) {
     const t = x / c
@@ -153,6 +194,13 @@ export function _adStatistic (values, cdf) {
   return -n - sum / n
 }
 
+// Shared by andersonDarling() and andersonDarlingPValue() so the asymptotic-plus-
+// finite-n-correction formula lives in exactly one place.
+function _adPValueFromStatistic (a2, n) {
+  const adinf = _adinf(a2)
+  return 1 - (adinf + _errfix(n, adinf))
+}
+
 /**
  * Performs an Anderson-Darling test for an array of values and a cumulative distribution function.
  *
@@ -167,10 +215,25 @@ export function _adStatistic (values, cdf) {
 export function andersonDarling (values, cdf) {
   if (values.length === 0) throw Error('andersonDarling: values must not be empty')
   const a2 = _adStatistic(values, cdf)
-  const adinf = _adinf(a2)
-  const p = 1 - (adinf + _errfix(values.length, adinf))
   return {
     statistics: a2,
-    passed: p >= 0.01
+    passed: _adPValueFromStatistic(a2, values.length) >= 0.01
   }
+}
+
+/**
+ * Computes the Anderson-Darling goodness-of-fit p-value for an array of values and a cumulative
+ * distribution function, using the Marsaglia & Marsaglia (2004) asymptotic approximation with
+ * finite-n correction.
+ *
+ * @method andersonDarlingPValue
+ * @memberof ran.dist
+ * @param values {number[]} Array of values to perform test for.
+ * @param cdf {Function} Cumulative distribution function to perform test against.
+ * @returns {number} The Anderson-Darling goodness-of-fit p-value.
+ * @private
+ */
+export function andersonDarlingPValue (values, cdf) {
+  if (values.length === 0) throw Error('andersonDarlingPValue: values must not be empty')
+  return _adPValueFromStatistic(_adStatistic(values, cdf), values.length)
 }
