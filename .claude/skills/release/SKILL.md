@@ -112,19 +112,39 @@ reads the finished section. Rewrite `CHANGELOG.md`:
 1. Replace the `## [Unreleased]` heading with `## [VERSION] - YYYY-MM-DD`
    (today's date) and prepend a fresh empty `## [Unreleased]` section above it.
 
-2. **Order subsections** in the new `## [VERSION]` section to the canonical
+2. **Write a one-paragraph Summary** immediately under the new
+   `## [VERSION] - YYYY-MM-DD` heading (before `### Added`), set off by blank
+   lines. This is the first thing a reader sees on the GitHub release page: the
+   workflow's notes extraction carries everything between the version heading
+   and the next one, so the paragraph reaches the release page automatically
+   with no workflow change. In 1–3 sentences, name the release's **dominant
+   theme**, inferred from the entries you are about to consolidate:
+   - One large feature/module dominates (a new namespace, a family of new
+     distributions, a sampler suite) → lead with it by name, e.g. "This release
+     exposes the `ran.mc` MCMC module as a first-class public API …".
+   - Mostly corrections, no headline feature → frame it as a stability release,
+     e.g. "A maintenance release focused on correctness and robustness fixes
+     across …".
+   - A broad additive mix → "A broad round of additive improvements spanning …".
+
+   Keep it factual and specific — name the affected modules/areas, do not invent
+   impact claims or restate every bullet. Derive it from the actual `### …`
+   entries in this section, never from memory.
+
+3. **Order subsections** in the new `## [VERSION]` section to the canonical
    Keep-a-Changelog sequence: `Added` → `Changed` → `Deprecated` → `Removed`
    → `Fixed` → `Security`. Drop any subsection with no bullets. Merge any
    duplicate subsections (e.g. two `### Added` blocks) into one.
 
-3. **Merge grouped bullets.** Collapse multiple bullets describing the same
+4. **Merge grouped bullets.** Collapse multiple bullets describing the same
    logical change applied to several items into a single bullet that names all
    items. One bullet per logical change, not per file.
 
-4. **Keep every distinct change.** Prefer a slightly longer list over a lossy
+5. **Keep every distinct change.** Prefer a slightly longer list over a lossy
    summary. **Do not touch** anything below the new versioned heading.
 
-Verify the file parses correctly (no duplicate headings, no orphaned bullets).
+Verify the file parses correctly (no duplicate headings; the only non-bullet
+prose inside the version section is the leading Summary paragraph).
 
 ---
 
