@@ -1,22 +1,66 @@
 name: Release
 
-# Requires an NPM_TOKEN secret in GitHub repository settings (Settings > Secrets)
-# with npm publish permission. Tag protection rules should restrict v* tag
-# creation to maintainers only (Settings > Rules > Tag protection).
+# Two entry points, one publish path:
+#   - workflow_dispatch (primary): the /release skill merges the version-bump PR
+#     via GitHub MCP, then triggers this workflow with the target version. The
+#     runner creates the v* tag, publishes to npm, cuts the GitHub release, and
+#     rotates the milestone — everything the MCP-only skill cannot do itself.
+#   - push tags 'v*' (fallback): a maintainer with a local git checkout can still
+#     push a tag directly and get the same publish path.
+#
+# Requires an NPM_TOKEN secret (npm publish permission). The v* tag-protection
+# rule must let github-actions[bot] bypass it so the workflow_dispatch path can
+# create the tag with the built-in GITHUB_TOKEN (Settings > Rules > Tag
+# protection > Bypass list). A tag pushed by GITHUB_TOKEN does not re-trigger the
+# 'push: tags' event (GitHub loop prevention), so the dispatch path publishes
+# inline in this same run rather than depending on the tag trigger.
 on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, e.g. 1.31.0 (must already be committed to main)'
+        required: true
   push:
     tags: ['v*']
 
 # id-token: write is required for npm provenance attestation generation.
+# issues: write is required for milestone rotation.
 permissions:
   contents: write
   id-token: write
+  issues: write
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            V="${{ inputs.version }}"
+          else
+            V="${GITHUB_REF_NAME#v}"
+          fi
+          if ! echo "$V" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::'$V' is not a valid semver version."
+            exit 1
+          fi
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+
+      - name: Verify package.json matches input (dispatch only)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          PKG=$(node -p "require('./package.json').version")
+          if [ "$PKG" != "${{ steps.ver.outputs.version }}" ]; then
+            echo "::error::package.json version ($PKG) does not match requested ${{ steps.ver.outputs.version }}. Merge the release PR first."
+            exit 1
+          fi
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -32,12 +76,77 @@ jobs:
       - run: npm run jsdoclint
       - run: npm run check-decl && ./node_modules/.bin/tsc -p tsconfig.build.json && npm run typecheck
       - run: npm test
+
       - run: npm whoami
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: npm publish --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: gh release create "${GITHUB_REF_NAME}" --title "${GITHUB_REF_NAME}" --generate-notes
+
+      # Tag only on dispatch — on the push-tags fallback the tag already exists.
+      # Publish is gated by tests above and runs first, so a failed publish never
+      # leaves a v* tag pointing at an unpublished version.
+      - name: Create and push tag (dispatch only)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "v${{ steps.ver.outputs.version }}"
+          git push origin "v${{ steps.ver.outputs.version }}"
+
+      # Notes come from the already-consolidated ## [version] CHANGELOG section
+      # (the skill does the semantic consolidation before merging), not
+      # --generate-notes. Idempotent: skip if the release already exists so a
+      # re-run never fails on the last step.
+      - name: Create GitHub release with consolidated notes
         env:
           GH_TOKEN: ${{ github.token }}
+        run: |
+          V="v${{ steps.ver.outputs.version }}"
+          NOTES=$(awk -v hdr="## [${{ steps.ver.outputs.version }}]" '
+            index($0, hdr) == 1 { f = 1; next }
+            f && /^## \[/ { exit }
+            f { print }
+          ' CHANGELOG.md)
+          if gh release view "$V" >/dev/null 2>&1; then
+            echo "Release $V already exists — leaving its notes unchanged."
+          else
+            gh release create "$V" --title "$V" --notes "$NOTES"
+          fi
+
+      # Best-effort: warn and continue if the milestone is missing.
+      - name: Milestone rotation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V="${{ steps.ver.outputs.version }}"
+          MAJOR=$(echo "$V" | cut -d. -f1)
+          MINOR=$(echo "$V" | cut -d. -f2)
+          NEXT="${MAJOR}.$((MINOR + 1)).0"
+          REPO="${{ github.repository }}"
+
+          CURRENT_MS=$(gh api "repos/${REPO}/milestones" \
+            --jq ".[] | select(.title == \"v${V}\") | .number")
+          if [ -z "$CURRENT_MS" ]; then
+            echo "Milestone v${V} not found — skipping milestone rotation."
+            exit 0
+          fi
+
+          if gh api "repos/${REPO}/milestones" --jq '.[].title' | grep -qx "v${NEXT}"; then
+            echo "Milestone v${NEXT} already exists — skipping create."
+          else
+            gh api "repos/${REPO}/milestones" -X POST \
+              -f title="v${NEXT}" \
+              -f description="Next release — bug fixes, new distributions, and non-breaking changes"
+          fi
+
+          MOVED=0
+          for NUM in $(gh issue list --milestone "v${V}" --state open --limit 200 \
+            --json number --jq '.[].number'); do
+            gh issue edit "$NUM" --milestone "v${NEXT}"
+            MOVED=$((MOVED + 1))
+          done
+
+          gh api "repos/${REPO}/milestones/${CURRENT_MS}" -X PATCH -f state=closed
+          echo "Milestone v${V}: closed (${MOVED} open issues moved to v${NEXT})"
