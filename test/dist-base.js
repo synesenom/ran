@@ -398,6 +398,11 @@ describe('dist', () => {
         assert(Math.abs(result.p.b - 4) < 0.3)
       })
 
+      it('BetaRectangular.k should reflect its 5 free parameters, not the 2 inherited from Beta', () => {
+        // solutions/distribution/2026-06-07-2138-continuous-subclass-natural-params.md
+        assert.strictEqual(new dist.BetaRectangular(2, 3, 0.7, 0, 4).k, 5)
+      })
+
       it('BetaRectangular.fit should not converge to near-singular alpha or beta', () => {
         // Data from a near-uniform BetaRectangular is most likely to trigger the singularity:
         // the optimizer can set alpha/beta ≈ 0 and theta ≈ 1 to concentrate mass at boundaries,
