@@ -33,6 +33,16 @@ export default class GeneralizedExtremeValue extends Distribution {
       value: c > 0 ? 1 / c : Infinity,
       closed: c > 0
     }]
+
+    // Speed-up constants
+    // g1..g4 are shared verbatim by mean/variance/skewness/kurtosis; guarded moment methods
+    // below may never read some of these when c is too small, but gamma() never throws.
+    this.c = {
+      g1: gamma(1 + c),
+      g2: gamma(1 + 2 * c),
+      g3: gamma(1 + 3 * c),
+      g4: gamma(1 + 4 * c)
+    }
   }
 
   /**
@@ -42,7 +52,7 @@ export default class GeneralizedExtremeValue extends Distribution {
     // ranjs shape c maps to standard GEV shape ξ = −c; g_r = Γ(1+r·c)
     // mean = (g1−1)/ξ = (Γ(1+c)−1)/(−c); exists when c > −1
     if (this.p.c <= -1) return Infinity
-    return (gamma(1 + this.p.c) - 1) / (-this.p.c)
+    return (this.c.g1 - 1) / (-this.p.c)
   }
 
   /**
@@ -50,8 +60,7 @@ export default class GeneralizedExtremeValue extends Distribution {
    */
   variance () {
     if (this.p.c <= -0.5) return Infinity
-    const g1 = gamma(1 + this.p.c)
-    const g2 = gamma(1 + 2 * this.p.c)
+    const { g1, g2 } = this.c
     return (g2 - g1 * g1) / (this.p.c * this.p.c)
   }
 
@@ -60,9 +69,7 @@ export default class GeneralizedExtremeValue extends Distribution {
    */
   skewness () {
     if (this.p.c <= -1 / 3) return Infinity
-    const g1 = gamma(1 + this.p.c)
-    const g2 = gamma(1 + 2 * this.p.c)
-    const g3 = gamma(1 + 3 * this.p.c)
+    const { g1, g2, g3 } = this.c
     const v = g2 - g1 * g1
     // sign(ξ) = sign(−c) flips the skewness direction relative to the raw central-moment numerator
     return Math.sign(-this.p.c) * (g3 - 3 * g2 * g1 + 2 * g1 * g1 * g1) / Math.pow(v, 1.5)
@@ -73,10 +80,7 @@ export default class GeneralizedExtremeValue extends Distribution {
    */
   kurtosis () {
     if (this.p.c <= -0.25) return Infinity
-    const g1 = gamma(1 + this.p.c)
-    const g2 = gamma(1 + 2 * this.p.c)
-    const g3 = gamma(1 + 3 * this.p.c)
-    const g4 = gamma(1 + 4 * this.p.c)
+    const { g1, g2, g3, g4 } = this.c
     const v = g2 - g1 * g1
     return (g4 - 4 * g3 * g1 + 6 * g2 * g1 * g1 - 3 * Math.pow(g1, 4)) / (v * v) - 3
   }

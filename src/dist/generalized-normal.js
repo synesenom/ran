@@ -1,4 +1,4 @@
-import { gammaLowerIncompleteInv, logGamma } from '../special'
+import { gammaLowerIncompleteInv } from '../special'
 import GeneralizedGamma from './generalized-gamma'
 import Distribution from './_distribution'
 
@@ -69,7 +69,8 @@ export default class GeneralizedNormal extends GeneralizedGamma {
    * @returns {number} Variance of the distribution.
    */
   variance () {
-    return this.p.alpha2 ** 2 * Math.exp(logGamma(3 / this.p.beta2) - logGamma(1 / this.p.beta2))
+    // lG0/lG2 = logGamma(1/beta2)/logGamma(3/beta2), already cached by GeneralizedGamma's constructor.
+    return this.p.alpha2 ** 2 * Math.exp(this.c.lG2 - this.c.lG0)
   }
 
   /**
@@ -83,7 +84,7 @@ export default class GeneralizedNormal extends GeneralizedGamma {
    * @returns {number} Excess kurtosis of the distribution.
    */
   kurtosis () {
-    return Math.exp(logGamma(5 / this.p.beta2) + logGamma(1 / this.p.beta2) - 2 * logGamma(3 / this.p.beta2)) - 3
+    return Math.exp(this.c.lG4 + this.c.lG0 - 2 * this.c.lG2) - 3
   }
 
   static _fitInit (data) {

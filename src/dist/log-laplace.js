@@ -28,6 +28,16 @@ export default class LogLaplace extends Laplace {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants: m1..m4 (E[X^k] via the Laplace MGF) are shared verbatim by
+    // mean/variance/skewness/kurtosis. Merged: Laplace's constructor already set this.c.*,
+    // which super._pdf/_cdf still rely on.
+    Object.assign(this.c, {
+      m1: this._expMoment(1, mu, b),
+      m2: this._expMoment(2, mu, b),
+      m3: this._expMoment(3, mu, b),
+      m4: this._expMoment(4, mu, b)
+    })
   }
 
   _generator () {
@@ -51,24 +61,23 @@ export default class LogLaplace extends Laplace {
 
   // Moments of X = e^Y with Y ~ Laplace(μ, b) come from the Laplace MGF
   // E[e^{kY}] = e^{μk}/(1 − b²k²), which diverges once kb ≥ 1.
-  _expMoment (k) {
-    return k * this.p.b < 1 ? Math.exp(this.p.mu * k) / (1 - this.p.b * this.p.b * k * k) : Infinity
+  _expMoment (k, mu, b) {
+    return k * b < 1 ? Math.exp(mu * k) / (1 - b * b * k * k) : Infinity
   }
 
   /**
    * @returns {number} The mean, $e^\mu/(1 - b^2)$; `Infinity` for $b \ge 1$.
    */
   mean () {
-    return this._expMoment(1)
+    return this.c.m1
   }
 
   /**
    * @returns {number} The variance; `Infinity` for $b \ge 1/2$.
    */
   variance () {
-    const m2 = this._expMoment(2)
-    if (!Number.isFinite(m2)) return Infinity
-    const m1 = this._expMoment(1)
+    if (!Number.isFinite(this.c.m2)) return Infinity
+    const { m1, m2 } = this.c
     return m2 - m1 * m1
   }
 
@@ -76,10 +85,8 @@ export default class LogLaplace extends Laplace {
    * @returns {number} The skewness; `Infinity` for $b \ge 1/3$.
    */
   skewness () {
-    const m3 = this._expMoment(3)
-    if (!Number.isFinite(m3)) return Infinity
-    const m1 = this._expMoment(1)
-    const m2 = this._expMoment(2)
+    if (!Number.isFinite(this.c.m3)) return Infinity
+    const { m1, m2, m3 } = this.c
     const v = m2 - m1 * m1
     return (m3 - 3 * m1 * m2 + 2 * m1 ** 3) / Math.pow(v, 1.5)
   }
@@ -88,11 +95,8 @@ export default class LogLaplace extends Laplace {
    * @returns {number} The excess kurtosis; `Infinity` for $b \ge 1/4$.
    */
   kurtosis () {
-    const m4 = this._expMoment(4)
-    if (!Number.isFinite(m4)) return Infinity
-    const m1 = this._expMoment(1)
-    const m2 = this._expMoment(2)
-    const m3 = this._expMoment(3)
+    if (!Number.isFinite(this.c.m4)) return Infinity
+    const { m1, m2, m3, m4 } = this.c
     const v = m2 - m1 * m1
     return (m4 - 4 * m1 * m3 + 6 * m1 * m1 * m2 - 3 * m1 ** 4) / (v * v) - 3
   }

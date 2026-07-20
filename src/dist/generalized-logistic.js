@@ -36,6 +36,13 @@ export default class GeneralizedLogistic extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants: kappa2/kappa3/kappa4 are shared verbatim by variance/skewness/kurtosis.
+    this.c = {
+      kappa2: s * s * (Math.PI * Math.PI / 6 + hurwitzZeta(2, c)),
+      kappa3: 2 * s * s * s * (hurwitzZeta(3, 1) - hurwitzZeta(3, c)),
+      kappa4: 6 * s * s * s * s * (hurwitzZeta(4, c) + hurwitzZeta(4, 1))
+    }
   }
 
   _generator () {
@@ -69,29 +76,21 @@ export default class GeneralizedLogistic extends Distribution {
    * @returns {number} The variance, $s^2(\psi'(1) + \psi'(c))$.
    */
   variance () {
-    return this.p.s * this.p.s * (Math.PI * Math.PI / 6 + hurwitzZeta(2, this.p.c))
+    return this.c.kappa2
   }
 
   /**
    * @returns {number} The skewness via the third cumulant $\kappa_3 = 2s^3(\zeta(3,1) - \zeta(3,c))$.
    */
   skewness () {
-    const { s, c } = this.p
-    const kappa2 = s * s * (Math.PI * Math.PI / 6 + hurwitzZeta(2, c))
-    // κ₃ = s³(ψ''(c) − ψ''(1)) = 2s³(ζ(3,1) − ζ(3,c))
-    const kappa3 = 2 * s * s * s * (hurwitzZeta(3, 1) - hurwitzZeta(3, c))
-    return kappa3 / Math.pow(kappa2, 1.5)
+    return this.c.kappa3 / Math.pow(this.c.kappa2, 1.5)
   }
 
   /**
    * @returns {number} The excess kurtosis via the fourth cumulant $\kappa_4 = 6s^4(\zeta(4,c) + \zeta(4,1))$.
    */
   kurtosis () {
-    const { s, c } = this.p
-    const kappa2 = s * s * (Math.PI * Math.PI / 6 + hurwitzZeta(2, c))
-    // κ₄ = s⁴(ψ'''(c) + ψ'''(1)) = 6s⁴(ζ(4,c) + ζ(4,1))
-    const kappa4 = 6 * s * s * s * s * (hurwitzZeta(4, c) + hurwitzZeta(4, 1))
-    return kappa4 / (kappa2 * kappa2)
+    return this.c.kappa4 / (this.c.kappa2 * this.c.kappa2)
   }
 
   static _fitInit (data) {

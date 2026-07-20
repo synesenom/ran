@@ -39,6 +39,23 @@ export default class JohnsonSU extends Normal {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants: s1..s4 are shared verbatim by mean/variance/skewness/kurtosis
+    // (skewness/kurtosis previously recomputed s1/s2/s3 independently). Merged: Normal's
+    // constructor already set this.c.sigmaRoot2/sigmaRoot2Pi, which _q still relies on.
+    const d2 = delta * delta
+    const g = gamma / delta
+    const w = Math.exp(0.5 / d2)
+    const omega = w * w
+    const omega2 = omega * omega
+    const omega8 = omega2 * omega2 * omega2 * omega2
+    Object.assign(this.c, {
+      omega,
+      s1: -w * Math.sinh(g),
+      s2: (omega2 * Math.cosh(2 * g) - 1) / 2,
+      s3: (3 * w * Math.sinh(g) - Math.pow(omega, 4.5) * Math.sinh(3 * g)) / 4,
+      s4: (3 - 4 * omega2 * Math.cosh(2 * g) + omega8 * Math.cosh(4 * g)) / 8
+    })
   }
 
   _generator () {
@@ -63,9 +80,7 @@ export default class JohnsonSU extends Normal {
    * @returns {number} The mean of the distribution.
    */
   mean () {
-    const { gamma, delta, lambda, xi } = this.p
-    const sqrtOmega = Math.exp(0.5 / (delta * delta))
-    return xi - lambda * sqrtOmega * Math.sinh(gamma / delta)
+    return this.p.xi + this.p.lambda * this.c.s1
   }
 
   /**
@@ -73,7 +88,7 @@ export default class JohnsonSU extends Normal {
    */
   variance () {
     const { gamma, delta, lambda } = this.p
-    const omega = Math.exp(1 / (delta * delta))
+    const { omega } = this.c
     return lambda * lambda * (omega - 1) * (omega * Math.cosh(2 * gamma / delta) + 1) / 2
   }
 
@@ -81,17 +96,7 @@ export default class JohnsonSU extends Normal {
    * @returns {number} The skewness of the distribution.
    */
   skewness () {
-    const { gamma, delta } = this.p
-    const d2 = delta * delta
-    const g = gamma / delta
-    const w = Math.exp(0.5 / d2)
-    const omega = w * w
-    const omega2 = omega * omega
-
-    const s1 = -w * Math.sinh(g)
-    const s2 = (omega2 * Math.cosh(2 * g) - 1) / 2
-    const s3 = (3 * w * Math.sinh(g) - Math.pow(omega, 4.5) * Math.sinh(3 * g)) / 4
-
+    const { s1, s2, s3 } = this.c
     const v = s2 - s1 * s1
     const mu3 = s3 - 3 * s2 * s1 + 2 * s1 * s1 * s1
     return mu3 / Math.pow(v, 1.5)
@@ -101,19 +106,7 @@ export default class JohnsonSU extends Normal {
    * @returns {number} The excess kurtosis of the distribution.
    */
   kurtosis () {
-    const { gamma, delta } = this.p
-    const d2 = delta * delta
-    const g = gamma / delta
-    const w = Math.exp(0.5 / d2)
-    const omega = w * w
-    const omega2 = omega * omega
-    const omega8 = omega2 * omega2 * omega2 * omega2
-
-    const s1 = -w * Math.sinh(g)
-    const s2 = (omega2 * Math.cosh(2 * g) - 1) / 2
-    const s3 = (3 * w * Math.sinh(g) - Math.pow(omega, 4.5) * Math.sinh(3 * g)) / 4
-    const s4 = (3 - 4 * omega2 * Math.cosh(2 * g) + omega8 * Math.cosh(4 * g)) / 8
-
+    const { s1, s2, s3, s4 } = this.c
     const v = s2 - s1 * s1
     const s1sq = s1 * s1
     const mu4 = s4 - 4 * s3 * s1 + 6 * s2 * s1sq - 3 * s1sq * s1sq

@@ -38,10 +38,16 @@ export default class Burr extends Distribution {
     }]
 
     // Speed-up constants
+    // m1..m4 are shared verbatim by mean/variance/skewness/kurtosis; guarded moment methods
+    // below may never read some of these when c*k is too small, but beta() never throws.
     this.c = {
       ck: c * k,
       negInvK: -1 / k,
-      invC: 1 / c
+      invC: 1 / c,
+      m1: k * beta(k - 1 / c, 1 + 1 / c),
+      m2: k * beta(k - 2 / c, 1 + 2 / c),
+      m3: k * beta(k - 3 / c, 1 + 3 / c),
+      m4: k * beta(k - 4 / c, 1 + 4 / c)
     }
   }
 
@@ -49,18 +55,15 @@ export default class Burr extends Distribution {
    * @returns {number} The mean of the distribution.
    */
   mean () {
-    const { c, k } = this.p
-    return c * k > 1 ? k * beta(k - 1 / c, 1 + 1 / c) : Infinity
+    return this.c.ck > 1 ? this.c.m1 : Infinity
   }
 
   /**
    * @returns {number} The variance of the distribution.
    */
   variance () {
-    const { c, k } = this.p
-    if (c * k <= 2) return Infinity
-    const m1 = k * beta(k - 1 / c, 1 + 1 / c)
-    const m2 = k * beta(k - 2 / c, 1 + 2 / c)
+    if (this.c.ck <= 2) return Infinity
+    const { m1, m2 } = this.c
     return m2 - m1 * m1
   }
 
@@ -68,11 +71,8 @@ export default class Burr extends Distribution {
    * @returns {number} The skewness of the distribution.
    */
   skewness () {
-    const { c, k } = this.p
-    if (c * k <= 3) return Infinity
-    const m1 = k * beta(k - 1 / c, 1 + 1 / c)
-    const m2 = k * beta(k - 2 / c, 1 + 2 / c)
-    const m3 = k * beta(k - 3 / c, 1 + 3 / c)
+    if (this.c.ck <= 3) return Infinity
+    const { m1, m2, m3 } = this.c
     const v = m2 - m1 * m1
     return (m3 - 3 * m1 * m2 + 2 * m1 ** 3) / Math.pow(v, 1.5)
   }
@@ -81,12 +81,8 @@ export default class Burr extends Distribution {
    * @returns {number} The excess kurtosis of the distribution.
    */
   kurtosis () {
-    const { c, k } = this.p
-    if (c * k <= 4) return Infinity
-    const m1 = k * beta(k - 1 / c, 1 + 1 / c)
-    const m2 = k * beta(k - 2 / c, 1 + 2 / c)
-    const m3 = k * beta(k - 3 / c, 1 + 3 / c)
-    const m4 = k * beta(k - 4 / c, 1 + 4 / c)
+    if (this.c.ck <= 4) return Infinity
+    const { m1, m2, m3, m4 } = this.c
     const v = m2 - m1 * m1
     return (m4 - 4 * m1 * m3 + 6 * m1 ** 2 * m2 - 3 * m1 ** 4) / (v * v) - 3
   }

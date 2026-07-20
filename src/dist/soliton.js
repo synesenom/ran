@@ -30,6 +30,12 @@ export default class Soliton extends Categorical {
     Distribution.validate({ N: Ni }, [
       'N > 0'
     ])
+
+    // Speed-up constant: the harmonic number H_{N-1} is shared verbatim by
+    // mean/variance/skewness/kurtosis (each previously re-ran its own O(N) summation loop).
+    let H = 0
+    for (let k = 1; k < Ni; k++) H += 1 / k
+    Object.assign(this.c, { H })
   }
 
   static _fitInit (data) {
@@ -43,9 +49,7 @@ export default class Soliton extends Categorical {
   mean () {
     const N = this.p.N
     // E[X] = 1/N + H_{N-1} where H_m = sum_{k=1}^{m} 1/k
-    let H = 0
-    for (let k = 1; k < N; k++) H += 1 / k
-    return 1 / N + H
+    return 1 / N + this.c.H
   }
 
   /**
@@ -53,8 +57,7 @@ export default class Soliton extends Categorical {
    */
   variance () {
     const N = this.p.N
-    let H = 0
-    for (let k = 1; k < N; k++) H += 1 / k
+    const H = this.c.H
     const mu = 1 / N + H
     // E[X²] = 1/N + (N-1) + H_{N-1}
     const e2 = 1 / N + (N - 1) + H
@@ -66,8 +69,7 @@ export default class Soliton extends Categorical {
    */
   skewness () {
     const N = this.p.N
-    let H = 0
-    for (let k = 1; k < N; k++) H += 1 / k
+    const H = this.c.H
     const mu = 1 / N + H
     const e2 = 1 / N + (N - 1) + H
     // E[X³] = 1/N + (N-1)*N/2 + 2*(N-1) + H_{N-1}
@@ -82,8 +84,7 @@ export default class Soliton extends Categorical {
    */
   kurtosis () {
     const N = this.p.N
-    let H = 0
-    for (let k = 1; k < N; k++) H += 1 / k
+    const H = this.c.H
     const mu = 1 / N + H
     const e2 = 1 / N + (N - 1) + H
     const e3 = 1 / N + (N - 1) * N / 2 + 2 * (N - 1) + H

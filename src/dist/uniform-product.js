@@ -35,21 +35,30 @@ export default class UniformProduct extends Distribution {
       value: 1,
       closed: true
     }]
+
+    // Speed-up constants: m1..m4 are shared verbatim by mean/variance/skewness/kurtosis;
+    // gammaN is the x-independent normalizer in _pdf.
+    this.c = {
+      m1: Math.pow(0.5, ni),
+      m2: Math.pow(1 / 3, ni),
+      m3: Math.pow(0.25, ni),
+      m4: Math.pow(0.2, ni),
+      gammaN: gamma(ni)
+    }
   }
 
   /**
    * @returns {number} The mean of the distribution.
    */
   mean () {
-    return Math.pow(0.5, this.p.n)
+    return this.c.m1
   }
 
   /**
    * @returns {number} The variance of the distribution.
    */
   variance () {
-    const m1 = Math.pow(0.5, this.p.n)
-    const m2 = Math.pow(1 / 3, this.p.n)
+    const { m1, m2 } = this.c
     return m2 - m1 * m1
   }
 
@@ -57,10 +66,7 @@ export default class UniformProduct extends Distribution {
    * @returns {number} The skewness of the distribution.
    */
   skewness () {
-    const n = this.p.n
-    const m1 = Math.pow(0.5, n)
-    const m2 = Math.pow(1 / 3, n)
-    const m3 = Math.pow(0.25, n)
+    const { m1, m2, m3 } = this.c
     const v = m2 - m1 * m1
     const mu3 = m3 - 3 * m2 * m1 + 2 * m1 * m1 * m1
     return mu3 / Math.pow(v, 1.5)
@@ -70,11 +76,7 @@ export default class UniformProduct extends Distribution {
    * @returns {number} The excess kurtosis of the distribution.
    */
   kurtosis () {
-    const n = this.p.n
-    const m1 = Math.pow(0.5, n)
-    const m2 = Math.pow(1 / 3, n)
-    const m3 = Math.pow(0.25, n)
-    const m4 = Math.pow(0.2, n)
+    const { m1, m2, m3, m4 } = this.c
     const v = m2 - m1 * m1
     const m1sq = m1 * m1
     const mu4 = m4 - 4 * m3 * m1 + 6 * m2 * m1sq - 3 * m1sq * m1sq
@@ -86,7 +88,7 @@ export default class UniformProduct extends Distribution {
   }
 
   _pdf (x) {
-    return Math.pow(-Math.log(x), this.p.n - 1) / gamma(this.p.n)
+    return Math.pow(-Math.log(x), this.p.n - 1) / this.c.gammaN
   }
 
   _cdf (x) {

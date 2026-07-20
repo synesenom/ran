@@ -41,21 +41,29 @@ export default class Weibull extends Exponential {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants (merged: Exponential's constructor already set this.c.expNegLambda,
+    // which Weibull's _pdf/_cdf still rely on via super._pdf/super._cdf)
+    Object.assign(this.c, {
+      g1: gamma(1 + 1 / k),
+      g2: gamma(1 + 2 / k),
+      g3: gamma(1 + 3 / k),
+      g4: gamma(1 + 4 / k)
+    })
   }
 
   /**
    * @returns {number} The mean of the distribution.
    */
   mean () {
-    return this.p.lambda2 * gamma(1 + 1 / this.p.k)
+    return this.p.lambda2 * this.c.g1
   }
 
   /**
    * @returns {number} The variance of the distribution.
    */
   variance () {
-    const g1 = gamma(1 + 1 / this.p.k)
-    const g2 = gamma(1 + 2 / this.p.k)
+    const { g1, g2 } = this.c
     return this.p.lambda2 * this.p.lambda2 * (g2 - g1 * g1)
   }
 
@@ -63,9 +71,7 @@ export default class Weibull extends Exponential {
    * @returns {number} The skewness of the distribution.
    */
   skewness () {
-    const g1 = gamma(1 + 1 / this.p.k)
-    const g2 = gamma(1 + 2 / this.p.k)
-    const g3 = gamma(1 + 3 / this.p.k)
+    const { g1, g2, g3 } = this.c
     const v = g2 - g1 * g1
     return (g3 - 3 * g2 * g1 + 2 * g1 * g1 * g1) / Math.pow(v, 1.5)
   }
@@ -74,10 +80,7 @@ export default class Weibull extends Exponential {
    * @returns {number} The excess kurtosis of the distribution.
    */
   kurtosis () {
-    const g1 = gamma(1 + 1 / this.p.k)
-    const g2 = gamma(1 + 2 / this.p.k)
-    const g3 = gamma(1 + 3 / this.p.k)
-    const g4 = gamma(1 + 4 / this.p.k)
+    const { g1, g2, g3, g4 } = this.c
     const v = g2 - g1 * g1
     return (g4 - 4 * g3 * g1 + 6 * g2 * g1 * g1 - 3 * Math.pow(g1, 4)) / (v * v) - 3
   }

@@ -31,6 +31,16 @@ export default class ShiftedLogLogistic extends Distribution {
       ? [{ value: -Infinity, closed: false }, { value: Infinity, closed: false }]
       : [{ value: xi > 0 ? mu - sigma / xi : -Infinity, closed: xi > 0 },
           { value: xi < 0 ? mu - sigma / xi : Infinity, closed: xi < 0 }]
+
+    // Speed-up constants: b1..b4 = j*pi*xi/sin(j*pi*xi) are shared verbatim by
+    // mean/variance/skewness/kurtosis. At xi=0 these are 0/0 = NaN, but every guarded
+    // moment method below returns before reading them in that case.
+    this.c = {
+      b1: Math.PI * xi / Math.sin(Math.PI * xi),
+      b2: 2 * Math.PI * xi / Math.sin(2 * Math.PI * xi),
+      b3: 3 * Math.PI * xi / Math.sin(3 * Math.PI * xi),
+      b4: 4 * Math.PI * xi / Math.sin(4 * Math.PI * xi)
+    }
   }
 
   _generator () {
@@ -80,8 +90,7 @@ export default class ShiftedLogLogistic extends Distribution {
     if (xi === 0) return mu
     if (Math.abs(xi) >= 1) return xi > 0 ? Infinity : -Infinity
     // B₁ = Γ(1+ξ)Γ(1−ξ) = πξ/sin(πξ) via reflection formula
-    const b1 = Math.PI * xi / Math.sin(Math.PI * xi)
-    return mu + sigma * (b1 - 1) / xi
+    return mu + sigma * (this.c.b1 - 1) / xi
   }
 
   /**
@@ -91,8 +100,7 @@ export default class ShiftedLogLogistic extends Distribution {
     const { sigma, xi } = this.p
     if (xi === 0) return sigma * sigma * Math.PI * Math.PI / 3
     if (Math.abs(xi) >= 0.5) return Infinity
-    const b1 = Math.PI * xi / Math.sin(Math.PI * xi)
-    const b2 = 2 * Math.PI * xi / Math.sin(2 * Math.PI * xi)
+    const { b1, b2 } = this.c
     return (sigma / xi) * (sigma / xi) * (b2 - b1 * b1)
   }
 
@@ -104,9 +112,7 @@ export default class ShiftedLogLogistic extends Distribution {
     if (xi === 0) return 0
     if (Math.abs(xi) >= 0.5) return NaN
     if (Math.abs(xi) >= 1 / 3) return xi > 0 ? Infinity : -Infinity
-    const b1 = Math.PI * xi / Math.sin(Math.PI * xi)
-    const b2 = 2 * Math.PI * xi / Math.sin(2 * Math.PI * xi)
-    const b3 = 3 * Math.PI * xi / Math.sin(3 * Math.PI * xi)
+    const { b1, b2, b3 } = this.c
     const sv = sigma / xi
     const kappa2 = sv * sv * (b2 - b1 * b1)
     const mu3 = sv * sv * sv * (b3 - 3 * b1 * b2 + 2 * b1 * b1 * b1)
@@ -121,10 +127,7 @@ export default class ShiftedLogLogistic extends Distribution {
     if (xi === 0) return 6 / 5
     if (Math.abs(xi) >= 0.5) return NaN
     if (Math.abs(xi) >= 1 / 4) return Infinity
-    const b1 = Math.PI * xi / Math.sin(Math.PI * xi)
-    const b2 = 2 * Math.PI * xi / Math.sin(2 * Math.PI * xi)
-    const b3 = 3 * Math.PI * xi / Math.sin(3 * Math.PI * xi)
-    const b4 = 4 * Math.PI * xi / Math.sin(4 * Math.PI * xi)
+    const { b1, b2, b3, b4 } = this.c
     const sv = sigma / xi
     const kappa2 = sv * sv * (b2 - b1 * b1)
     const mu4 = sv * sv * sv * sv * (b4 - 4 * b1 * b3 + 6 * b1 * b1 * b2 - 3 * b1 * b1 * b1 * b1)

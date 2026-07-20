@@ -27,6 +27,11 @@ export default class FisherZ extends F {
 
     this.c.logNorm = Math.LN2 + (this.p.d1 / 2) * Math.log(this.p.d1) + (this.p.d2 / 2) * Math.log(this.p.d2) - this.c.lnBeta
 
+    // Speed-up constants: k2/k3/k4 (cumulants) are shared verbatim by variance/skewness/kurtosis.
+    this.c.k2 = 0.25 * (hurwitzZeta(2, this.p.d1 / 2) + hurwitzZeta(2, this.p.d2 / 2))
+    this.c.k3 = 0.25 * (hurwitzZeta(3, this.p.d2 / 2) - hurwitzZeta(3, this.p.d1 / 2))
+    this.c.k4 = 0.375 * (hurwitzZeta(4, this.p.d1 / 2) + hurwitzZeta(4, this.p.d2 / 2))
+
     // Set support
     this.s = [{
       value: -Infinity,
@@ -51,28 +56,21 @@ export default class FisherZ extends F {
    * @returns {number} The variance of the distribution.
    */
   variance () {
-    const { d1, d2 } = this.p
-    return 0.25 * (hurwitzZeta(2, d1 / 2) + hurwitzZeta(2, d2 / 2))
+    return this.c.k2
   }
 
   /**
    * @returns {number} The skewness of the distribution.
    */
   skewness () {
-    const { d1, d2 } = this.p
-    const k2 = 0.25 * (hurwitzZeta(2, d1 / 2) + hurwitzZeta(2, d2 / 2))
-    const k3 = 0.25 * (hurwitzZeta(3, d2 / 2) - hurwitzZeta(3, d1 / 2))
-    return k3 / Math.pow(k2, 1.5)
+    return this.c.k3 / Math.pow(this.c.k2, 1.5)
   }
 
   /**
    * @returns {number} The excess kurtosis of the distribution.
    */
   kurtosis () {
-    const { d1, d2 } = this.p
-    const k2 = 0.25 * (hurwitzZeta(2, d1 / 2) + hurwitzZeta(2, d2 / 2))
-    const k4 = 0.375 * (hurwitzZeta(4, d1 / 2) + hurwitzZeta(4, d2 / 2))
-    return k4 / (k2 * k2)
+    return this.c.k4 / (this.c.k2 * this.c.k2)
   }
 
   // Blocks Beta's log-barrier (inherited via F): fit() operates in (d1, d2) space. See decisions/0017-beta-fit-penalty.md §3.

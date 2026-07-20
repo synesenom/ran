@@ -1,4 +1,4 @@
-import { gammaLowerIncompleteInv, logGamma } from '../special'
+import { gammaLowerIncompleteInv } from '../special'
 import GeneralizedNormal from './generalized-normal'
 
 /**
@@ -37,17 +37,17 @@ export default class HalfGeneralizedNormal extends GeneralizedNormal {
    * @returns {number} Mean of the distribution.
    */
   mean () {
-    const lgInv = logGamma(1 / this.p.beta2)
-    return this.p.alpha2 * Math.exp(logGamma(2 / this.p.beta2) - lgInv)
+    // lG0..lG4 = logGamma(j/beta2) for j=1..5, already cached by GeneralizedGamma's constructor.
+    return this.p.alpha2 * Math.exp(this.c.lG1 - this.c.lG0)
   }
 
   /**
    * @returns {number} Variance of the distribution.
    */
   variance () {
-    const lgInv = logGamma(1 / this.p.beta2)
-    const m1 = this.p.alpha2 * Math.exp(logGamma(2 / this.p.beta2) - lgInv)
-    const m2 = this.p.alpha2 ** 2 * Math.exp(logGamma(3 / this.p.beta2) - lgInv)
+    const { lG0, lG1, lG2 } = this.c
+    const m1 = this.p.alpha2 * Math.exp(lG1 - lG0)
+    const m2 = this.p.alpha2 ** 2 * Math.exp(lG2 - lG0)
     return m2 - m1 * m1
   }
 
@@ -55,10 +55,10 @@ export default class HalfGeneralizedNormal extends GeneralizedNormal {
    * @returns {number} Skewness of the distribution.
    */
   skewness () {
-    const lgInv = logGamma(1 / this.p.beta2)
-    const m1 = this.p.alpha2 * Math.exp(logGamma(2 / this.p.beta2) - lgInv)
-    const m2 = this.p.alpha2 ** 2 * Math.exp(logGamma(3 / this.p.beta2) - lgInv)
-    const m3 = this.p.alpha2 ** 3 * Math.exp(logGamma(4 / this.p.beta2) - lgInv)
+    const { lG0, lG1, lG2, lG3 } = this.c
+    const m1 = this.p.alpha2 * Math.exp(lG1 - lG0)
+    const m2 = this.p.alpha2 ** 2 * Math.exp(lG2 - lG0)
+    const m3 = this.p.alpha2 ** 3 * Math.exp(lG3 - lG0)
     const v = m2 - m1 * m1
     return (m3 - 3 * m1 * m2 + 2 * m1 ** 3) / Math.pow(v, 1.5)
   }
@@ -67,11 +67,11 @@ export default class HalfGeneralizedNormal extends GeneralizedNormal {
    * @returns {number} Excess kurtosis of the distribution.
    */
   kurtosis () {
-    const lgInv = logGamma(1 / this.p.beta2)
-    const m1 = this.p.alpha2 * Math.exp(logGamma(2 / this.p.beta2) - lgInv)
-    const m2 = this.p.alpha2 ** 2 * Math.exp(logGamma(3 / this.p.beta2) - lgInv)
-    const m3 = this.p.alpha2 ** 3 * Math.exp(logGamma(4 / this.p.beta2) - lgInv)
-    const m4 = this.p.alpha2 ** 4 * Math.exp(logGamma(5 / this.p.beta2) - lgInv)
+    const { lG0, lG1, lG2, lG3, lG4 } = this.c
+    const m1 = this.p.alpha2 * Math.exp(lG1 - lG0)
+    const m2 = this.p.alpha2 ** 2 * Math.exp(lG2 - lG0)
+    const m3 = this.p.alpha2 ** 3 * Math.exp(lG3 - lG0)
+    const m4 = this.p.alpha2 ** 4 * Math.exp(lG4 - lG0)
     const v = m2 - m1 * m1
     return (m4 - 4 * m1 * m3 + 6 * m1 ** 2 * m2 - 3 * m1 ** 4) / (v * v) - 3
   }

@@ -38,8 +38,11 @@ export default class HeadsMinusTails extends PreComputed {
     }]
 
     // Speed-up constants
+    const baseLogProb = 2 * ni * Math.log(0.5)
     Object.assign(this.c, {
-      baseLogProb: 2 * ni * Math.log(0.5)
+      baseLogProb,
+      // A = C(2n,n)/4^n; shared verbatim by mean/variance/skewness/kurtosis.
+      A: Math.exp(logBinomial(2 * ni, ni) + baseLogProb)
     })
   }
 
@@ -95,8 +98,7 @@ export default class HeadsMinusTails extends PreComputed {
   mean () {
     const n = this.p.n
     // A = C(2n,n)/4^n; E[X] = 2n*A derived from E[|H-n|] where H~Binomial(2n,1/2).
-    const A = Math.exp(logBinomial(2 * n, n) + this.c.baseLogProb)
-    return 2 * n * A
+    return 2 * n * this.c.A
   }
 
   /**
@@ -105,7 +107,7 @@ export default class HeadsMinusTails extends PreComputed {
   variance () {
     const n = this.p.n
     // E[X²] = 4*Var(H) = 4*(2n/4) = 2n; Var[X] = E[X²] - E[X]².
-    const A = Math.exp(logBinomial(2 * n, n) + this.c.baseLogProb)
+    const A = this.c.A
     return 2 * n - 4 * n * n * A * A
   }
 
@@ -115,7 +117,7 @@ export default class HeadsMinusTails extends PreComputed {
   skewness () {
     const n = this.p.n
     // E[|H-n|³] = n²*C(2n,n)/4^n (verified analytically for n=1,2,3).
-    const A = Math.exp(logBinomial(2 * n, n) + this.c.baseLogProb)
+    const A = this.c.A
     const variance = 2 * n - 4 * n * n * A * A
     if (!(variance > 0)) return NaN
     const mu3 = 4 * n * n * A * (4 * n * A * A - 1)
@@ -128,8 +130,7 @@ export default class HeadsMinusTails extends PreComputed {
   kurtosis () {
     const n = this.p.n
     // E[X⁴] = 16*μ₄(H) = 16*(κ₄(H)+3κ₂(H)²) where κ₂=-n/4, κ₄=κ₂ for Binomial(2n,1/2).
-    const A = Math.exp(logBinomial(2 * n, n) + this.c.baseLogProb)
-    const A2 = A * A
+    const A2 = this.c.A * this.c.A
     const variance = 2 * n - 4 * n * n * A2
     if (!(variance > 0)) return NaN
     const mu4 = 4 * n * (3 * n - 1) - 16 * n * n * n * A2 - 48 * n * n * n * n * A2 * A2

@@ -35,9 +35,13 @@ export default class LogLogistic extends Distribution {
       closed: false
     }]
 
-    // Speed-up constants
+    // Speed-up constants: m1..m4 are shared verbatim by mean/variance/skewness/kurtosis.
     this.c = {
-      betaOverAlpha: beta / alpha
+      betaOverAlpha: beta / alpha,
+      m1: alpha * Math.PI / beta / Math.sin(Math.PI / beta),
+      m2: alpha * alpha * 2 * Math.PI / beta / Math.sin(2 * Math.PI / beta),
+      m3: alpha * alpha * alpha * 3 * Math.PI / beta / Math.sin(3 * Math.PI / beta),
+      m4: alpha * alpha * alpha * alpha * 4 * Math.PI / beta / Math.sin(4 * Math.PI / beta)
     }
   }
 
@@ -64,18 +68,15 @@ export default class LogLogistic extends Distribution {
    * @returns {number} The mean, $\frac{\alpha\pi/\beta}{\sin(\pi/\beta)}$, or `Infinity` when $\beta \le 1$.
    */
   mean () {
-    const { alpha, beta } = this.p
-    return beta > 1 ? alpha * Math.PI / beta / Math.sin(Math.PI / beta) : Infinity
+    return this.p.beta > 1 ? this.c.m1 : Infinity
   }
 
   /**
    * @returns {number} The variance, or `Infinity` when $\beta \le 2$.
    */
   variance () {
-    const { alpha, beta } = this.p
-    if (beta <= 2) return Infinity
-    const m1 = alpha * Math.PI / beta / Math.sin(Math.PI / beta)
-    const m2 = alpha * alpha * 2 * Math.PI / beta / Math.sin(2 * Math.PI / beta)
+    if (this.p.beta <= 2) return Infinity
+    const { m1, m2 } = this.c
     return m2 - m1 * m1
   }
 
@@ -83,13 +84,10 @@ export default class LogLogistic extends Distribution {
    * @returns {number} The skewness, or `Infinity` when $2 < \beta \le 3$, `NaN` when $\beta \le 2$.
    */
   skewness () {
-    const { alpha, beta } = this.p
+    const { beta } = this.p
     if (beta <= 2) return NaN
     if (beta <= 3) return Infinity
-    const a = alpha
-    const m1 = a * Math.PI / beta / Math.sin(Math.PI / beta)
-    const m2 = a * a * 2 * Math.PI / beta / Math.sin(2 * Math.PI / beta)
-    const m3 = a * a * a * 3 * Math.PI / beta / Math.sin(3 * Math.PI / beta)
+    const { m1, m2, m3 } = this.c
     const v = m2 - m1 * m1
     return (m3 - 3 * m1 * m2 + 2 * m1 * m1 * m1) / Math.pow(v, 1.5)
   }
@@ -98,14 +96,10 @@ export default class LogLogistic extends Distribution {
    * @returns {number} The excess kurtosis, or `Infinity` when $2 < \beta \le 4$, `NaN` when $\beta \le 2$.
    */
   kurtosis () {
-    const { alpha, beta } = this.p
+    const { beta } = this.p
     if (beta <= 2) return NaN
     if (beta <= 4) return Infinity
-    const a = alpha
-    const m1 = a * Math.PI / beta / Math.sin(Math.PI / beta)
-    const m2 = a * a * 2 * Math.PI / beta / Math.sin(2 * Math.PI / beta)
-    const m3 = a * a * a * 3 * Math.PI / beta / Math.sin(3 * Math.PI / beta)
-    const m4 = a * a * a * a * 4 * Math.PI / beta / Math.sin(4 * Math.PI / beta)
+    const { m1, m2, m3, m4 } = this.c
     const v = m2 - m1 * m1
     return (m4 - 4 * m1 * m3 + 6 * m1 * m1 * m2 - 3 * m1 * m1 * m1 * m1) / (v * v) - 3
   }

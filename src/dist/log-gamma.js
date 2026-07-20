@@ -39,6 +39,15 @@ export default class LogGamma extends Gamma {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants: r1..r4 are shared verbatim by mean/variance/skewness/kurtosis.
+    // Merged: Gamma's constructor already set this.c.logNorm, which super._pdf still relies on.
+    Object.assign(this.c, {
+      r1: this._expMoment(1, alpha, beta),
+      r2: this._expMoment(2, alpha, beta),
+      r3: this._expMoment(3, alpha, beta),
+      r4: this._expMoment(4, alpha, beta)
+    })
   }
 
   _q (p) {
@@ -62,24 +71,23 @@ export default class LogGamma extends Gamma {
   // Moments of X = e^Y + μ − 1 with Y ~ Gamma(α, rate β) come from the gamma MGF
   // E[e^{kY}] = (β/(β−k))^α, NOT from digamma/polygamma (those describe ln of a gamma
   // variate, the opposite transform). The k-th raw moment diverges once β ≤ k.
-  _expMoment (k) {
-    return this.p.beta > k ? Math.pow(this.p.beta / (this.p.beta - k), this.p.alpha) : Infinity
+  _expMoment (k, alpha, beta) {
+    return beta > k ? Math.pow(beta / (beta - k), alpha) : Infinity
   }
 
   /**
    * @returns {number} The mean, $(\beta/(\beta-1))^\alpha + \mu - 1$; `Infinity` for $\beta \le 1$.
    */
   mean () {
-    return this._expMoment(1) + this.p.mu - 1
+    return this.c.r1 + this.p.mu - 1
   }
 
   /**
    * @returns {number} The variance; `Infinity` for $\beta \le 2$.
    */
   variance () {
-    const r2 = this._expMoment(2)
-    if (!Number.isFinite(r2)) return Infinity
-    const r1 = this._expMoment(1)
+    if (!Number.isFinite(this.c.r2)) return Infinity
+    const { r1, r2 } = this.c
     return r2 - r1 * r1
   }
 
@@ -87,10 +95,8 @@ export default class LogGamma extends Gamma {
    * @returns {number} The skewness; `Infinity` for $\beta \le 3$.
    */
   skewness () {
-    const r3 = this._expMoment(3)
-    if (!Number.isFinite(r3)) return Infinity
-    const r1 = this._expMoment(1)
-    const r2 = this._expMoment(2)
+    if (!Number.isFinite(this.c.r3)) return Infinity
+    const { r1, r2, r3 } = this.c
     const v = r2 - r1 * r1
     return (r3 - 3 * r1 * r2 + 2 * r1 ** 3) / Math.pow(v, 1.5)
   }
@@ -99,11 +105,8 @@ export default class LogGamma extends Gamma {
    * @returns {number} The excess kurtosis; `Infinity` for $\beta \le 4$.
    */
   kurtosis () {
-    const r4 = this._expMoment(4)
-    if (!Number.isFinite(r4)) return Infinity
-    const r1 = this._expMoment(1)
-    const r2 = this._expMoment(2)
-    const r3 = this._expMoment(3)
+    if (!Number.isFinite(this.c.r4)) return Infinity
+    const { r1, r2, r3, r4 } = this.c
     const v = r2 - r1 * r1
     return (r4 - 4 * r1 * r3 + 6 * r1 * r1 * r2 - 3 * r1 ** 4) / (v * v) - 3
   }
