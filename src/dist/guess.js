@@ -54,38 +54,41 @@ function _skewnessFilterFails (name, skew, threshold) {
   return POSITIVE_SKEW_ONLY.has(name) && skew < -threshold
 }
 
-// cv() is NaN for non-positive-mean data; NaN comparisons are always false, so this
+// cvValue is NaN for non-positive-mean data; NaN comparisons are always false, so this
 // filter naturally never triggers on data for which it isn't meaningful.
-function _cvFilterFails (name, data, isDiscrete) {
+function _cvFilterFails (name, cvValue, isDiscrete) {
   if (isDiscrete || !CV_ONE_FAMILY.has(name)) return false
-  const c = cv(data)
-  return c < 0.1 || c > 10
+  return cvValue < 0.1 || cvValue > 10
 }
 
-// Same NaN-safe guard as _cvFilterFails, via vmr().
-function _dispersionFilterFails (name, data, isDiscrete) {
+// Same NaN-safe guard as _cvFilterFails, via vmrValue.
+function _dispersionFilterFails (name, vmrValue, isDiscrete) {
   if (!isDiscrete) return false
-  const d = vmr(data)
-  if (POISSON_LIKE.has(name) && d > 3) return true
-  return NEGATIVE_BINOMIAL_LIKE.has(name) && d < 0.5
+  if (POISSON_LIKE.has(name) && vmrValue > 3) return true
+  return NEGATIVE_BINOMIAL_LIKE.has(name) && vmrValue < 0.5
 }
 
 // Soft filters are statistically-principled pruning heuristics, not correctness guards:
 // a family absent from every _guess-meta.js set simply receives no soft filter, and an
 // incompatible family that slips through still gets caught by its BIC weight/p-value.
-function _passesSoftFilters (name, data, isDiscrete) {
-  const threshold = 2 * Math.sqrt(6 / data.length)
-  const skew = skewness(data)
-  if (_skewnessFilterFails(name, skew, threshold)) return false
-  if (_cvFilterFails(name, data, isDiscrete)) return false
-  return !_dispersionFilterFails(name, data, isDiscrete)
+// Takes the pre-computed data context (rather than recomputing skewness/cv/vmr per
+// candidate) since these are properties of the data, not of the candidate.
+function _passesSoftFilters (name, context) {
+  const { isDiscrete, skew, skewnessThreshold, cvValue, vmrValue } = context
+  if (_skewnessFilterFails(name, skew, skewnessThreshold)) return false
+  if (_cvFilterFails(name, cvValue, isDiscrete)) return false
+  return !_dispersionFilterFails(name, vmrValue, isDiscrete)
 }
 
 function _dataContext (data) {
   return {
     isDiscrete: data.every(Number.isInteger),
     xmin: Math.min(...data),
-    xmax: Math.max(...data)
+    xmax: Math.max(...data),
+    skew: skewness(data),
+    skewnessThreshold: 2 * Math.sqrt(6 / data.length),
+    cvValue: cv(data),
+    vmrValue: vmr(data)
   }
 }
 
@@ -97,7 +100,7 @@ function _survivingCandidates (pool, data, context) {
     if (!probe) return
     if (probe.type() !== (isDiscrete ? 'discrete' : 'continuous')) return
     if (!_withinSupport(probe, xmin, xmax)) return
-    if (!_passesSoftFilters(Cls.name, data, isDiscrete)) return
+    if (!_passesSoftFilters(Cls.name, context)) return
     survivors.push({ Cls, probe })
   })
   return survivors
@@ -158,7 +161,10 @@ function _rankByBicWeight (fitted) {
  * NoncentralChi and Skellam, which are excluded by default for their per-point Bessel
  * function evaluation cost).
  * @returns {Object[]} Array of `{name, params, bicWeight, pValue}`, sorted by descending
- * `bicWeight` (`bicWeight` values across the array sum to 1). Carries a `warning` string
+ * `bicWeight` (`bicWeight` values across the array sum to 1). For continuous candidates,
+ * `pValue` uses the Marsaglia & Marsaglia (2004) Anderson-Darling asymptotic approximation,
+ * which can occasionally report a value slightly above 1 for a very small, near-perfectly-fit
+ * sample — an artifact of the published approximation itself. Carries a `warning` string
  * property when every surviving candidate fails goodness-of-fit at α=0.05.
  * @throws {Error} If no candidate survives pre-filtering, if the data is too small for the
  * surviving candidate set's largest parameter count, or if no candidate can be fitted.

@@ -150,5 +150,6 @@ export { default as Zeta } from './zeta'
 export { default as Zipf } from './zipf'
 export { default as ZipfMandelbrot } from './zipf-mandelbrot'
 
-// Not a Distribution subclass: a composable utility over the distributions above.
+// Placed after the alphabetical distribution list, not within it: guess() is a plain
+// function, not a Distribution subclass, so it doesn't fit that list's naming pattern.
 export { guess } from './guess'

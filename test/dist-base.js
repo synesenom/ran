@@ -403,6 +403,15 @@ describe('dist', () => {
         assert.strictEqual(new dist.BetaRectangular(2, 3, 0.7, 0, 4).k, 5)
       })
 
+      it('BetaRectangular.bic should apply the 5-parameter penalty, not the 2-parameter one inherited from Beta', () => {
+        // Ties the .k fix to its actual observable consequence: bic() = log(n)*k - 2*lnL(data),
+        // so a still-wrong k=2 would make this assertion fail even if .k itself weren't checked.
+        const inst = new dist.BetaRectangular(2, 3, 0.7, 0, 4)
+        const data = inst.seed(11).sample(300)
+        const expectedBic = Math.log(data.length) * 5 - 2 * inst.lnL(data)
+        assert(Math.abs(inst.bic(data) - expectedBic) < 1e-9)
+      })
+
       it('BetaRectangular.fit should not converge to near-singular alpha or beta', () => {
         // Data from a near-uniform BetaRectangular is most likely to trigger the singularity:
         // the optimizer can set alpha/beta ≈ 0 and theta ≈ 1 to concentrate mass at boundaries,

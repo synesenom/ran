@@ -135,6 +135,14 @@ describe('guess', () => {
     assert.throws(() => guess(data, { candidates: [dist.Poisson] }), Error)
   })
 
+  it('should throw (not fall back to the default pool) when candidates is explicitly an empty array', () => {
+    // An empty array is truthy, so `candidates || _defaultCandidates()` uses the empty
+    // pool as-is rather than falling back — this must still fail with the "no candidate
+    // survives pre-filtering" error, not silently run the default pool instead.
+    const data = new dist.Normal(0, 1).seed(4).sample(500)
+    assert.throws(() => guess(data, { candidates: [] }), /no candidate distribution survives pre-filtering/)
+  })
+
   it('should use the default candidate pool (all distributions minus the Bessel-heavy exclusions) when candidates is omitted', function () {
     this.timeout(60000)
     const data = new dist.Normal(5, 2).seed(42).sample(500)
@@ -142,6 +150,21 @@ describe('guess', () => {
     const excluded = ['VonMises', 'Rice', 'NoncentralChi2', 'NoncentralChi', 'Skellam', 'guess']
     result.forEach(r => assert.notInclude(excluded, r.name))
     assert(result.length > 0)
+  })
+
+  it('should exclude VonMises from the default pool even for data it would otherwise fit well', function () {
+    this.timeout(60000)
+    // Concentrated circular data squarely within [-π, π] and a genuinely good fit for
+    // VonMises: this isolates the exclusion-set logic from any incidental hard/soft
+    // filter exclusion (unlike Normal(5,2)-shaped data, which VonMises would already
+    // fail on support grounds regardless of whether the exclusion set works at all).
+    const data = new dist.VonMises(2).seed(5).sample(500)
+    const withoutOverride = guess(data)
+    withoutOverride.forEach(r => assert.notEqual(r.name, 'VonMises'))
+    // Confirms VonMises really is a viable, fittable candidate for this data — its
+    // absence above is specifically due to DEFAULT_EXCLUDED, not incidental filtering.
+    const withOverride = guess(data, { candidates: [dist.VonMises, dist.Normal] })
+    assert.strictEqual(withOverride[0].name, 'VonMises')
   })
 
   it('should exclude a symmetric-only candidate when sample skewness is strongly non-zero', () => {

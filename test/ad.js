@@ -76,7 +76,10 @@ describe('test-utils', () => {
   describe('andersonDarlingPValue', () => {
     // mpmath mp.dps=50: Marsaglia & Marsaglia (2004) asymptotic formula
     // (adinf + finite-n errfix correction) independently re-implemented and
-    // evaluated at A²=0.130083462905258 (REF_A2 above), n=5 → 1.000265361679237696.
+    // evaluated at A²=0.130083462905258 (REF_A2 above), n=5:
+    //   adinf(A²)      = 0.00042834374045306583827336095987252014365196433604468
+    //   errfix(5, adinf) = -0.00069370541969076225308643999857983989546401256503386
+    //   p = 1 - (adinf + errfix) = 1.000265361679237696414813079038707319751812048229
     // The finite-n correction can push the approximation slightly past 1 for a
     // tiny, very-well-fitting sample — an artifact of the published approximation
     // itself, not of this implementation, so this is the exact expected value.
@@ -90,9 +93,13 @@ describe('test-utils', () => {
     })
 
     it('should report a high p-value for a large uniform sample matching the model CDF', () => {
+      // Under a correctly-specified null the p-value is ~Uniform(0,1), so 0.5 (its own
+      // median) is the least robust bar to pick — use 0.05 to demonstrate "does not
+      // spuriously reject" without the test depending on which half of the null
+      // distribution this specific seed happens to land in.
       seed(12345)
       const sample = Array.from({ length: 1000 }, () => float())
-      assert(andersonDarlingPValue(sample, x => x) > 0.5)
+      assert(andersonDarlingPValue(sample, x => x) > 0.05)
     })
 
     it('should report a low p-value for a sample whose shape disagrees with the model', () => {
@@ -123,11 +130,13 @@ describe('test-utils', () => {
     })
 
     it('should report a high p-value for data that matches the model pmf', () => {
+      // Same reasoning as the andersonDarlingPValue test above: 0.05, not 0.5, since the
+      // null p-value distribution is ~Uniform(0,1) and 0.5 is its own fragile median.
       seed(12345)
       // Bernoulli(0.5)-like sample matching its own model pmf closely at n=2000
       const sample = Array.from({ length: 2000 }, () => (float() < 0.5 ? 0 : 1))
       const pmf = x => (x === 0 ? 0.5 : x === 1 ? 0.5 : 0)
-      assert(chi2PValue(sample, pmf, 0) > 0.5)
+      assert(chi2PValue(sample, pmf, 0) > 0.05)
     })
   })
 })
