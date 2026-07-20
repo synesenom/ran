@@ -1,27 +1,26 @@
 name: Release
 
-# Two entry points, one publish path:
-#   - workflow_dispatch (primary): the /release skill merges the version-bump PR
-#     via GitHub MCP, then triggers this workflow with the target version. The
-#     runner creates the v* tag, publishes to npm, cuts the GitHub release, and
-#     rotates the milestone — everything the MCP-only skill cannot do itself.
-#   - push tags 'v*' (fallback): a maintainer with a local git checkout can still
-#     push a tag directly and get the same publish path.
+# Dispatch-driven release. The /release skill merges the version-bump PR via
+# GitHub MCP, then triggers this workflow with the target version. The runner
+# creates the v* tag, publishes to npm, cuts the GitHub release, and rotates the
+# milestone — everything the MCP-only skill cannot do itself.
 #
-# Requires an NPM_TOKEN secret (npm publish permission). The v* tag-protection
-# rule must let github-actions[bot] bypass it so the workflow_dispatch path can
-# create the tag with the built-in GITHUB_TOKEN (Settings > Rules > Tag
-# protection > Bypass list). A tag pushed by GITHUB_TOKEN does not re-trigger the
-# 'push: tags' event (GitHub loop prevention), so the dispatch path publishes
-# inline in this same run rather than depending on the tag trigger.
+# Why a PAT: github-actions[bot] cannot be added to the v* tag-protection
+# ruleset's bypass list, so the built-in GITHUB_TOKEN cannot create the tag. A
+# RELEASE_TOKEN secret (a fine-grained PAT owned by a repo admin, Contents:
+# read+write) authenticates as that admin — who IS in the bypass list — and is
+# used ONLY for the tag push. Everything else uses GITHUB_TOKEN. The workflow is
+# dispatch-only: with a PAT, a 'push: tags' trigger would re-fire on the tag
+# push and double-publish, so there is no tag trigger.
+#
+# Requires: NPM_TOKEN (npm publish) and RELEASE_TOKEN (admin PAT) secrets in
+# Settings > Secrets > Actions.
 on:
   workflow_dispatch:
     inputs:
       version:
         description: 'Version to release, e.g. 1.31.0 (must already be committed to main)'
         required: true
-  push:
-    tags: ['v*']
 
 # id-token: write is required for npm provenance attestation generation.
 # issues: write is required for milestone rotation.
@@ -34,26 +33,24 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      # RELEASE_TOKEN so the later tag push authenticates as an admin and
+      # bypasses the v* tag-protection ruleset.
       - uses: actions/checkout@v4
         with:
+          token: ${{ secrets.RELEASE_TOKEN }}
           fetch-depth: 0
 
       - name: Resolve version
         id: ver
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            V="${{ inputs.version }}"
-          else
-            V="${GITHUB_REF_NAME#v}"
-          fi
+          V="${{ inputs.version }}"
           if ! echo "$V" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
             echo "::error::'$V' is not a valid semver version."
             exit 1
           fi
           echo "version=$V" >> "$GITHUB_OUTPUT"
 
-      - name: Verify package.json matches input (dispatch only)
-        if: github.event_name == 'workflow_dispatch'
+      - name: Verify package.json matches input
         run: |
           PKG=$(node -p "require('./package.json').version")
           if [ "$PKG" != "${{ steps.ver.outputs.version }}" ]; then
@@ -84,11 +81,10 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # Tag only on dispatch — on the push-tags fallback the tag already exists.
-      # Publish is gated by tests above and runs first, so a failed publish never
-      # leaves a v* tag pointing at an unpublished version.
-      - name: Create and push tag (dispatch only)
-        if: github.event_name == 'workflow_dispatch'
+      # Tag after a successful publish (publish is gated by the tests above), so
+      # a failed publish never leaves a v* tag pointing at an unpublished
+      # version. Pushed via the RELEASE_TOKEN remote configured by checkout.
+      - name: Create and push tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

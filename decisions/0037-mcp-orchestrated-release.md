@@ -32,12 +32,16 @@ Split the release across two actors, matched to what each can do:
 
 The skill hands off by triggering the workflow with `workflow_dispatch`
 (`mcp__github__actions_run_trigger`, passing the target `version`). The workflow
-keeps its `push: tags: ['v*']` trigger as a fallback for maintainers with a
-local checkout. Because a tag pushed by the built-in `GITHUB_TOKEN` does not
-re-trigger the `push: tags` event (GitHub loop prevention), the dispatch path
-publishes inline in the same run rather than depending on the tag trigger — so
-no PAT is required. The only setup cost is a one-time tag-protection **bypass
-for `github-actions[bot]`**.
+is dispatch-only and publishes inline in that run.
+
+Tag creation needs a credential the tag-protection ruleset will honor.
+`github-actions[bot]` cannot be added to a repository ruleset's bypass list
+(only roles and installed Apps are selectable), so the built-in `GITHUB_TOKEN`
+cannot create a `v*` tag. The workflow therefore uses a `RELEASE_TOKEN` secret —
+a fine-grained PAT owned by a repo admin (who is in the bypass list) — **solely
+for the tag push**; every other step (`npm publish`, GitHub release, milestone
+rotation) uses `GITHUB_TOKEN`. The `push: tags: ['v*']` trigger is deliberately
+omitted: a PAT-pushed tag would re-fire it and double-publish.
 
 ## Consequences
 
@@ -51,5 +55,10 @@ for `github-actions[bot]`**.
 - New coupling: the workflow trusts that `main`'s `package.json` version matches
   the dispatched `version` (guarded by an explicit check) and that the
   `## [version]` changelog section is present and consolidated before dispatch.
-- Requires the `github-actions[bot]` tag-protection bypass; without it the
-  dispatch path fails at the tag-creation step.
+- Requires a `RELEASE_TOKEN` admin PAT secret; without it the dispatch path
+  fails at the tag-creation step. The PAT is used only for the tag push, so its
+  blast radius is limited to Contents write. If the PAT is given an expiry it
+  must be rotated.
+- Dropping the `push: tags` trigger removes the local-tag-push fallback; a
+  maintainer with a checkout releases via `gh workflow run release.yml` or the
+  Actions UI instead.

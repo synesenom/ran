@@ -28,9 +28,11 @@ omitted, the version is computed by bumping the minor part of the current
 - GitHub MCP tools available (`mcp__github__*`).
 - `NPM_TOKEN` secret configured in repo Settings → Secrets → Actions (npm
   publish permission).
-- The `v*` tag-protection rule must let **`github-actions[bot]` bypass** it
-  (Settings → Rules → Tag protection → Bypass list), so the workflow's built-in
-  `GITHUB_TOKEN` can create the release tag. This is a one-time setup.
+- `RELEASE_TOKEN` secret configured — a fine-grained PAT owned by a repo admin
+  (repo: this one, Contents: read+write). `github-actions[bot]` cannot be added
+  to the `v*` tag-protection ruleset's bypass list, so the workflow uses this
+  PAT (which authenticates as an admin, who is in the bypass list) solely to
+  push the release tag. One-time setup.
 - `main` must be the default branch and there must be no in-flight release PR
   or existing `v{VERSION}` tag.
 
