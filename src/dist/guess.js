@@ -32,6 +32,7 @@ function _defaultCandidates () {
 // needing arbitrary "default" constructor arguments. _fitInit is expected to be a cheap
 // moment-based/closed-form calculation, so the redundant call fit() makes later is
 // negligible next to Powell's cost.
+// solutions/distribution/2026-07-20-2359-guess-probe-instance-pre-fit-introspection.md
 function _buildProbe (Cls, data) {
   try {
     return new Cls(...Cls._fitInit(data))
