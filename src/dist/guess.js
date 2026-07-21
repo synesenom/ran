@@ -148,10 +148,23 @@ function _rankByBicWeight (fitted) {
  *
  * Candidates are pre-filtered before the expensive fit() call: hard filters (matching
  * type and support against the data) are followed by soft, statistically-principled
- * filters (skewness, coefficient of variation, dispersion index). A candidate whose
- * fit() throws is skipped rather than propagating the error. Throws if the data is too
- * small for the surviving candidate set's largest parameter count (BIC's asymptotic
- * approximation requires roughly 20 observations per parameter).
+ * filters (skewness, coefficient of variation, dispersion index) that can, by design,
+ * silently exclude a candidate that would in fact have fit reasonably well. The soft
+ * filters' false-exclusion risk is not uniform: the skewness threshold (2·√(6/n)) is
+ * calibrated to roughly a 5% false-exclusion rate for a truly symmetric family (about
+ * 2 standard errors of the sample-skewness estimator under normality), and the
+ * positive-skew-only rule is deliberately asymmetric — it only excludes on strongly
+ * *negative* sample skewness, so ordinary sampling noise around zero or positive skew
+ * never triggers it. The coefficient-of-variation ([0.1, 10]) and dispersion-index
+ * (>3, <0.5) bounds, by contrast, are wide heuristic constants carried over from this
+ * function's original design rationale and have not been independently validated by
+ * simulation — treat their false-exclusion behavior as unquantified. A distribution
+ * excluded by a soft filter is never reported, with no diagnostic indicating it was
+ * screened out; callers with a specific hypothesis about their data should bypass all
+ * filtering via the `candidates` option rather than rely on the default pool. A
+ * candidate whose fit() throws is skipped rather than propagating the error. Throws if
+ * the data is too small for the surviving candidate set's largest parameter count
+ * (BIC's asymptotic approximation requires roughly 20 observations per parameter).
  *
  * @method guess
  * @memberof ran.dist
