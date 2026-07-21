@@ -34,6 +34,11 @@ export default class Poisson extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
+    this.c = {
+      logLambda: Math.log(lambda)
+    }
   }
 
   static get _fitInitIsExact () {
@@ -52,7 +57,7 @@ export default class Poisson extends Distribution {
   }
 
   _pdf (x) {
-    return Math.exp(x * Math.log(this.p.lambda) - this.p.lambda - logGamma(x + 1))
+    return Math.exp(x * this.c.logLambda - this.p.lambda - logGamma(x + 1))
   }
 
   _cdf (x) {

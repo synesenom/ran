@@ -1,4 +1,4 @@
-import { gammaLowerIncomplete, gammaLowerIncompleteInv, logGamma } from '../special'
+import { gammaLowerIncomplete, gammaLowerIncompleteInv } from '../special'
 import gamma from './_gamma'
 import Gamma from './gamma'
 import Distribution from './_distribution'
@@ -41,7 +41,7 @@ export default class Chi2 extends Gamma {
   }
 
   _pdf (x) {
-    return Math.exp(this.c.alpha * Math.log(0.5) - 0.5 * x - logGamma(this.c.alpha)) * Math.pow(x, this.c.alpha - 1)
+    return Math.exp(this.c.logNorm - 0.5 * x) * Math.pow(x, this.c.alpha - 1)
   }
 
   _cdf (x) {

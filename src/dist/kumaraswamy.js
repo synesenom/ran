@@ -36,6 +36,14 @@ export default class Kumaraswamy extends Distribution {
       value: 1,
       closed: true
     }]
+
+    // Speed-up constants: m1..m4 are shared verbatim by mean/variance/skewness/kurtosis.
+    this.c = {
+      m1: b * beta(1 + 1 / a, b),
+      m2: b * beta(1 + 2 / a, b),
+      m3: b * beta(1 + 3 / a, b),
+      m4: b * beta(1 + 4 / a, b)
+    }
   }
 
   static _fitInit (data) {
@@ -79,17 +87,14 @@ export default class Kumaraswamy extends Distribution {
    * @returns {number} The mean of the distribution.
    */
   mean () {
-    const { a, b } = this.p
-    return b * beta(1 + 1 / a, b)
+    return this.c.m1
   }
 
   /**
    * @returns {number} The variance of the distribution.
    */
   variance () {
-    const { a, b } = this.p
-    const m1 = b * beta(1 + 1 / a, b)
-    const m2 = b * beta(1 + 2 / a, b)
+    const { m1, m2 } = this.c
     return m2 - m1 * m1
   }
 
@@ -97,10 +102,7 @@ export default class Kumaraswamy extends Distribution {
    * @returns {number} The skewness of the distribution.
    */
   skewness () {
-    const { a, b } = this.p
-    const m1 = b * beta(1 + 1 / a, b)
-    const m2 = b * beta(1 + 2 / a, b)
-    const m3 = b * beta(1 + 3 / a, b)
+    const { m1, m2, m3 } = this.c
     const mu2 = m2 - m1 * m1
     const mu3 = m3 - 3 * m2 * m1 + 2 * m1 ** 3
     return mu3 / Math.pow(mu2, 1.5)
@@ -110,11 +112,7 @@ export default class Kumaraswamy extends Distribution {
    * @returns {number} The excess kurtosis of the distribution.
    */
   kurtosis () {
-    const { a, b } = this.p
-    const m1 = b * beta(1 + 1 / a, b)
-    const m2 = b * beta(1 + 2 / a, b)
-    const m3 = b * beta(1 + 3 / a, b)
-    const m4 = b * beta(1 + 4 / a, b)
+    const { m1, m2, m3, m4 } = this.c
     const mu2 = m2 - m1 * m1
     const mu4 = m4 - 4 * m3 * m1 + 6 * m2 * m1 ** 2 - 3 * m1 ** 4
     return mu4 / (mu2 * mu2) - 3

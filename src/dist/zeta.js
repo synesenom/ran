@@ -36,9 +36,16 @@ export default class Zeta extends Distribution {
     }]
 
     // Speed-up constants
+    // mu1..mu4 are shared verbatim by mean/variance/skewness/kurtosis; guarded moment methods
+    // below may never read some of these when s is too small, but riemannZeta() never throws.
+    const zetaS = riemannZeta(s)
     this.c = {
-      zetaS: riemannZeta(s),
-      pow2sm1: Math.pow(2, s - 1)
+      zetaS,
+      pow2sm1: Math.pow(2, s - 1),
+      mu1: riemannZeta(s - 1) / zetaS,
+      mu2: riemannZeta(s - 2) / zetaS,
+      mu3: riemannZeta(s - 3) / zetaS,
+      mu4: riemannZeta(s - 4) / zetaS
     }
   }
 
@@ -52,18 +59,16 @@ export default class Zeta extends Distribution {
    * @returns {number} The mean of the distribution.
    */
   mean () {
-    const { s } = this.p
-    return s > 2 ? riemannZeta(s - 1) / this.c.zetaS : Infinity
+    return this.p.s > 2 ? this.c.mu1 : Infinity
   }
 
   /**
    * @returns {number} The variance of the distribution.
    */
   variance () {
-    const { s } = this.p
-    if (s <= 3) return Infinity
-    const mu1 = riemannZeta(s - 1) / this.c.zetaS
-    return riemannZeta(s - 2) / this.c.zetaS - mu1 * mu1
+    if (this.p.s <= 3) return Infinity
+    const { mu1, mu2 } = this.c
+    return mu2 - mu1 * mu1
   }
 
   /**
@@ -73,10 +78,7 @@ export default class Zeta extends Distribution {
     const { s } = this.p
     if (s <= 3) return NaN
     if (s <= 4) return Infinity
-    const zs = this.c.zetaS
-    const mu1 = riemannZeta(s - 1) / zs
-    const mu2 = riemannZeta(s - 2) / zs
-    const mu3 = riemannZeta(s - 3) / zs
+    const { mu1, mu2, mu3 } = this.c
     const v = mu2 - mu1 * mu1
     const cm3 = mu3 - 3 * mu1 * mu2 + 2 * mu1 * mu1 * mu1
     return cm3 / Math.pow(v, 1.5)
@@ -92,11 +94,7 @@ export default class Zeta extends Distribution {
     // undefined. Only s <= 3 (non-finite variance) makes the standardization undefined.
     if (s <= 3) return NaN
     if (s <= 5) return Infinity
-    const zs = this.c.zetaS
-    const mu1 = riemannZeta(s - 1) / zs
-    const mu2 = riemannZeta(s - 2) / zs
-    const mu3 = riemannZeta(s - 3) / zs
-    const mu4 = riemannZeta(s - 4) / zs
+    const { mu1, mu2, mu3, mu4 } = this.c
     const v = mu2 - mu1 * mu1
     const cm4 = mu4 - 4 * mu1 * mu3 + 6 * mu1 * mu1 * mu2 - 3 * mu1 * mu1 * mu1 * mu1
     return cm4 / (v * v) - 3

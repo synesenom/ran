@@ -37,11 +37,12 @@ export default class Hypergeometric extends Categorical {
     const Ki = Math.round(K)
     const ni = Math.round(n)
 
+    const logBinNn = logBinomial(Ni, ni)
     const weights = []
     const min = Math.max(0, ni + Ki - Ni)
     const max = Math.min(ni, Ki)
     for (let k = min; k <= max; k++) {
-      weights.push(Math.exp(logBinomial(Ki, k) + logBinomial(Ni - Ki, ni - k) - logBinomial(Ni, ni)))
+      weights.push(Math.exp(logBinomial(Ki, k) + logBinomial(Ni - Ki, ni - k) - logBinNn))
     }
     super(weights, min)
     this.p = { N: Ni, K: Ki, n: ni }
@@ -52,6 +53,9 @@ export default class Hypergeometric extends Categorical {
       'K >= 0', 'K <= N',
       'n >= 0', 'n <= N'
     ])
+
+    // Speed-up constants
+    Object.assign(this.c, { logBinNn })
   }
 
   /**
@@ -114,7 +118,7 @@ export default class Hypergeometric extends Categorical {
     const lo = Math.max(0, n + K - N)
     const hi = Math.min(n, K)
     if (x >= hi) return 1
-    const logBinNn = logBinomial(N, n)
+    const { logBinNn } = this.c
     let fwd = 0
     for (let k = lo; k <= x; k++) {
       fwd += Math.exp(logBinomial(K, k) + logBinomial(N - K, n - k) - logBinNn)

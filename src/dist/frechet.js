@@ -36,6 +36,16 @@ export default class Frechet extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
+    // g1..g4 are shared verbatim by mean/variance/skewness/kurtosis; guarded moment methods
+    // below may never read some of these when alpha is too small, but gamma() never throws.
+    this.c = {
+      g1: gamma(1 - 1 / alpha),
+      g2: gamma(1 - 2 / alpha),
+      g3: gamma(1 - 3 / alpha),
+      g4: gamma(1 - 4 / alpha)
+    }
   }
 
   /**
@@ -43,7 +53,7 @@ export default class Frechet extends Distribution {
    */
   mean () {
     // E[X] = m + s·Γ(1−1/α); exists only for α > 1
-    return this.p.alpha > 1 ? this.p.m + this.p.s * gamma(1 - 1 / this.p.alpha) : Infinity
+    return this.p.alpha > 1 ? this.p.m + this.p.s * this.c.g1 : Infinity
   }
 
   /**
@@ -51,8 +61,7 @@ export default class Frechet extends Distribution {
    */
   variance () {
     if (this.p.alpha <= 2) return Infinity
-    const g1 = gamma(1 - 1 / this.p.alpha)
-    const g2 = gamma(1 - 2 / this.p.alpha)
+    const { g1, g2 } = this.c
     return this.p.s * this.p.s * (g2 - g1 * g1)
   }
 
@@ -61,9 +70,7 @@ export default class Frechet extends Distribution {
    */
   skewness () {
     if (this.p.alpha <= 3) return Infinity
-    const g1 = gamma(1 - 1 / this.p.alpha)
-    const g2 = gamma(1 - 2 / this.p.alpha)
-    const g3 = gamma(1 - 3 / this.p.alpha)
+    const { g1, g2, g3 } = this.c
     const v = g2 - g1 * g1
     return (g3 - 3 * g2 * g1 + 2 * g1 * g1 * g1) / Math.pow(v, 1.5)
   }
@@ -73,10 +80,7 @@ export default class Frechet extends Distribution {
    */
   kurtosis () {
     if (this.p.alpha <= 4) return Infinity
-    const g1 = gamma(1 - 1 / this.p.alpha)
-    const g2 = gamma(1 - 2 / this.p.alpha)
-    const g3 = gamma(1 - 3 / this.p.alpha)
-    const g4 = gamma(1 - 4 / this.p.alpha)
+    const { g1, g2, g3, g4 } = this.c
     const v = g2 - g1 * g1
     return (g4 - 4 * g3 * g1 + 6 * g2 * g1 * g1 - 3 * Math.pow(g1, 4)) / (v * v) - 3
   }

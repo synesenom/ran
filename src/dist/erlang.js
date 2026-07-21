@@ -1,4 +1,4 @@
-import { gammaLowerIncomplete, gammaLowerIncompleteInv, logGamma } from '../special'
+import { gammaLowerIncomplete, gammaLowerIncompleteInv } from '../special'
 import gamma from './_gamma'
 import powell from '../algorithms/powell'
 import Gamma from './gamma'
@@ -41,7 +41,7 @@ export default class Erlang extends Gamma {
   }
 
   _pdf (x) {
-    return Math.exp(this.c.alpha * Math.log(this.c.beta) - this.c.beta * x - logGamma(this.c.alpha)) * Math.pow(x, this.c.alpha - 1)
+    return Math.exp(this.c.logNorm - this.c.beta * x) * Math.pow(x, this.c.alpha - 1)
   }
 
   _cdf (x) {

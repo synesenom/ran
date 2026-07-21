@@ -51,6 +51,9 @@ export default class BetaBinomial extends Categorical {
       value: ni,
       closed: true
     }]
+
+    // Speed-up constants
+    Object.assign(this.c, { logBetaAB: logBeta(alpha, beta) })
   }
 
   /**
@@ -113,8 +116,8 @@ export default class BetaBinomial extends Categorical {
     // for symmetric n=25, α=β=2), which makes q(0.5) overshoot by one.
     // See solutions/distribution/2026-06-03-1300-categorical-subclass-bidirectional-cdf-quantile-overshoot.md
     const { n, alpha, beta } = this.p
+    const { logBetaAB } = this.c
     if (x >= n) return 1
-    const logBetaAB = logBeta(alpha, beta)
     // Upper half: backward sum has few terms, no catastrophic cancellation in 1-bwd.
     if (x >= n / 2) {
       let bwd = 0

@@ -40,6 +40,12 @@ export default class NegativeBinomial extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
+    this.c = {
+      logP: Math.log(p),
+      logQ: Math.log(1 - p)
+    }
   }
 
   static _fitInit (data) {
@@ -63,7 +69,7 @@ export default class NegativeBinomial extends Distribution {
   _pdf (x) {
     // p=0 is degenerate: point mass at 0
     if (this.p.p === 0) return x === 0 ? 1 : 0
-    return Math.exp(logBinomial(x + this.p.r - 1, x) + this.p.r * Math.log(1 - this.p.p) + x * Math.log(this.p.p))
+    return Math.exp(logBinomial(x + this.p.r - 1, x) + this.p.r * this.c.logQ + x * this.c.logP)
   }
 
   _cdf (x) {

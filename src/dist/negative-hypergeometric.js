@@ -43,12 +43,16 @@ export default class NegativeHypergeometric extends Categorical {
     ])
 
     // Build weights
+    const logBinNK = logBinomial(Ni, Ki)
     const weights = []
     for (let k = 0; k <= Ki; k++) {
-      weights.push(Math.exp(logBinomial(k + ri - 1, k) + logBinomial(Ni - ri - k, Ki - k) - logBinomial(Ni, Ki)))
+      weights.push(Math.exp(logBinomial(k + ri - 1, k) + logBinomial(Ni - ri - k, Ki - k) - logBinNK))
     }
     super(weights, 0)
     this.p = { N: Ni, K: Ki, r: ri }
+
+    // Speed-up constants
+    Object.assign(this.c, { logBinNK })
   }
 
   /**
@@ -111,8 +115,8 @@ export default class NegativeHypergeometric extends Categorical {
     // that causes inherited prefix-sum CDF to fall ~1 ULP below exact boundaries.
     // See solutions/distribution/2026-06-03-1300-categorical-subclass-bidirectional-cdf-quantile-overshoot.md
     const { N, K, r } = this.p
+    const { logBinNK } = this.c
     if (x >= K) return 1
-    const logBinNK = logBinomial(N, K)
     // Upper half: backward sum has few terms, no catastrophic cancellation in 1-bwd.
     if (x >= K / 2) {
       let bwd = 0

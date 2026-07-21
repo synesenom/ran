@@ -33,6 +33,16 @@ export default class InvertedWeibull extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
+    // g1..g4 are shared verbatim by mean/variance/skewness/kurtosis; guarded moment methods
+    // below may never read some of these when c is too small, but gamma() never throws.
+    this.c = {
+      g1: gamma(1 - 1 / c),
+      g2: gamma(1 - 2 / c),
+      g3: gamma(1 - 3 / c),
+      g4: gamma(1 - 4 / c)
+    }
   }
 
   /**
@@ -40,7 +50,7 @@ export default class InvertedWeibull extends Distribution {
    */
   mean () {
     // E[X] = Γ(1−1/c); exists only for c > 1
-    return this.p.c > 1 ? gamma(1 - 1 / this.p.c) : Infinity
+    return this.p.c > 1 ? this.c.g1 : Infinity
   }
 
   /**
@@ -48,8 +58,7 @@ export default class InvertedWeibull extends Distribution {
    */
   variance () {
     if (this.p.c <= 2) return Infinity
-    const g1 = gamma(1 - 1 / this.p.c)
-    const g2 = gamma(1 - 2 / this.p.c)
+    const { g1, g2 } = this.c
     return g2 - g1 * g1
   }
 
@@ -58,9 +67,7 @@ export default class InvertedWeibull extends Distribution {
    */
   skewness () {
     if (this.p.c <= 3) return Infinity
-    const g1 = gamma(1 - 1 / this.p.c)
-    const g2 = gamma(1 - 2 / this.p.c)
-    const g3 = gamma(1 - 3 / this.p.c)
+    const { g1, g2, g3 } = this.c
     const v = g2 - g1 * g1
     return (g3 - 3 * g2 * g1 + 2 * g1 * g1 * g1) / Math.pow(v, 1.5)
   }
@@ -70,10 +77,7 @@ export default class InvertedWeibull extends Distribution {
    */
   kurtosis () {
     if (this.p.c <= 4) return Infinity
-    const g1 = gamma(1 - 1 / this.p.c)
-    const g2 = gamma(1 - 2 / this.p.c)
-    const g3 = gamma(1 - 3 / this.p.c)
-    const g4 = gamma(1 - 4 / this.p.c)
+    const { g1, g2, g3, g4 } = this.c
     const v = g2 - g1 * g1
     return (g4 - 4 * g3 * g1 + 6 * g2 * g1 * g1 - 3 * Math.pow(g1, 4)) / (v * v) - 3
   }

@@ -42,9 +42,21 @@ export default class NoncentralBeta extends Distribution {
     }]
 
     // Speed-up constants.
+    // l2/i0/p0/iAlpha0/b0 are the Poisson-mixing terms shared verbatim by _pdf, _cdf and
+    // _rawMoment (they depend only on alpha, beta, lambda, never on x or the moment order).
+    const l2 = lambda / 2
+    const i0 = Math.round(l2)
+    const iAlpha0 = alpha + i0
+    // Guard l2=0: 0*log(0) = NaN by IEEE 754, but the Poisson weight e^0 * 0^0 / 0! = 1.
+    const p0 = l2 === 0 ? 1 : Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
     this.c = {
       expHalfLambda: Math.exp(-lambda / 2),
-      beta: fnBeta(alpha, beta)
+      beta: fnBeta(alpha, beta),
+      l2,
+      i0,
+      iAlpha0,
+      p0,
+      b0: fnBeta(iAlpha0, beta)
     }
   }
 
@@ -66,11 +78,8 @@ export default class NoncentralBeta extends Distribution {
   // Π_{r<j}(alpha+i+r)/(alpha+beta+i+r), summed from the dominant Poisson index i0 outwards
   // (mirroring _pdf) so recursiveSum's relative stop is not fooled by tiny i=0 weights at large lambda
   _rawMoment (j) {
-    const { alpha, beta, lambda } = this.p
-    const l2 = lambda / 2
-    const i0 = Math.round(l2)
-    // Guard l2=0: 0*log(0) = NaN by IEEE 754, but the Poisson weight e^0 * 0^0 / 0! = 1.
-    const p0 = l2 === 0 ? 1 : Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
+    const { alpha, beta } = this.p
+    const { l2, i0, p0 } = this.c
     const betaMoment = i => {
       let z = 1
       for (let r = 0; r < j; r++) {
@@ -153,16 +162,12 @@ export default class NoncentralBeta extends Distribution {
     }
 
     // Speed-up variables.
-    const l2 = this.p.lambda / 2
-    const i0 = Math.round(l2)
-    let iAlpha0 = this.p.alpha + i0
+    const { l2, i0, p0, b0 } = this.c
+    let iAlpha0 = this.c.iAlpha0
 
     // Init variables.
-    // Guard l2=0: 0*log(0) = NaN by IEEE 754, but the Poisson weight e^0 * 0^0 / 0! = 1.
-    const p0 = l2 === 0 ? 1 : Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
     const xa0 = Math.pow(x, iAlpha0 - 1)
     const xb = Math.pow(1 - x, this.p.beta - 1)
-    const b0 = fnBeta(iAlpha0, this.p.beta)
 
     // Forward sum.
     let z = recursiveSum({
@@ -211,16 +216,12 @@ export default class NoncentralBeta extends Distribution {
     if (x === 0) return 0
 
     // Speed-up variables
-    const l2 = this.p.lambda / 2
-    const i0 = Math.round(l2)
-    let iAlpha0 = this.p.alpha + i0
+    const { l2, i0, p0, b0 } = this.c
+    let iAlpha0 = this.c.iAlpha0
 
     // Init variables
-    // Guard l2=0: 0*log(0) = NaN by IEEE 754, but the Poisson weight e^0 * 0^0 / 0! = 1.
-    const p0 = l2 === 0 ? 1 : Math.exp(-l2 + i0 * Math.log(l2) - logGamma(i0 + 1))
     const xa0 = Math.pow(x, iAlpha0)
     const xb = Math.pow(1 - x, this.p.beta)
-    const b0 = fnBeta(iAlpha0, this.p.beta)
     const ib0 = regularizedBetaIncomplete(iAlpha0, this.p.beta, x)
 
     // Forward sum.

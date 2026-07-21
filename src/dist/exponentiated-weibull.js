@@ -42,6 +42,16 @@ export default class ExponentiatedWeibull extends Weibull {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants: e1..e4 are shared verbatim by mean/variance/skewness/kurtosis
+    // (each previously re-ran its own 500-term series independently). Merged: Weibull's
+    // constructor already cached g1..g4/expNegLambda.
+    Object.assign(this.c, {
+      e1: this._ewRawMoment(1),
+      e2: this._ewRawMoment(2),
+      e3: this._ewRawMoment(3),
+      e4: this._ewRawMoment(4)
+    })
   }
 
   _ewRawMoment (n) {
@@ -64,24 +74,22 @@ export default class ExponentiatedWeibull extends Weibull {
    * @returns {number} The mean of the distribution.
    */
   mean () {
-    return this._ewRawMoment(1)
+    return this.c.e1
   }
 
   /**
    * @returns {number} The variance of the distribution.
    */
   variance () {
-    const e1 = this._ewRawMoment(1)
-    return this._ewRawMoment(2) - e1 * e1
+    const { e1, e2 } = this.c
+    return e2 - e1 * e1
   }
 
   /**
    * @returns {number} The skewness of the distribution.
    */
   skewness () {
-    const e1 = this._ewRawMoment(1)
-    const e2 = this._ewRawMoment(2)
-    const e3 = this._ewRawMoment(3)
+    const { e1, e2, e3 } = this.c
     const v = e2 - e1 * e1
     return (e3 - 3 * e1 * e2 + 2 * e1 * e1 * e1) / Math.pow(v, 1.5)
   }
@@ -90,10 +98,7 @@ export default class ExponentiatedWeibull extends Weibull {
    * @returns {number} The excess kurtosis of the distribution.
    */
   kurtosis () {
-    const e1 = this._ewRawMoment(1)
-    const e2 = this._ewRawMoment(2)
-    const e3 = this._ewRawMoment(3)
-    const e4 = this._ewRawMoment(4)
+    const { e1, e2, e3, e4 } = this.c
     const v = e2 - e1 * e1
     return (e4 - 4 * e1 * e3 + 6 * e1 * e1 * e2 - 3 * Math.pow(e1, 4)) / (v * v) - 3
   }

@@ -1,5 +1,4 @@
 import Weibull from './weibull'
-import { gamma } from '../special'
 
 /**
  * Probability density function for the [double Weibull distribution]{@link https://docs.scipy.org/doc/scipy/tutorial/stats/continuous_dweibull.html}:
@@ -45,8 +44,8 @@ export default class DoubleWeibull extends Weibull {
    * @returns {number} The variance of the distribution.
    */
   variance () {
-    // E[X²] = λ²·Γ(1+2/k); mean = 0 so Var = E[X²]
-    return this.p.lambda * this.p.lambda * gamma(1 + 2 / this.p.k)
+    // E[X²] = λ²·Γ(1+2/k); mean = 0 so Var = E[X²]. g2 inherited from Weibull's constructor cache.
+    return this.p.lambda * this.p.lambda * this.c.g2
   }
 
   /**
@@ -60,8 +59,7 @@ export default class DoubleWeibull extends Weibull {
    * @returns {number} The excess kurtosis of the distribution.
    */
   kurtosis () {
-    const g2 = gamma(1 + 2 / this.p.k)
-    const g4 = gamma(1 + 4 / this.p.k)
+    const { g2, g4 } = this.c
     return g4 / (g2 * g2) - 3
   }
 

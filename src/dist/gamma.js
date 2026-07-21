@@ -38,6 +38,11 @@ export default class Gamma extends Distribution {
       value: Infinity,
       closed: false
     }]
+
+    // Speed-up constants
+    this.c = {
+      logNorm: alpha * Math.log(beta) - logGamma(alpha)
+    }
   }
 
   _generator () {
@@ -46,7 +51,7 @@ export default class Gamma extends Distribution {
   }
 
   _pdf (x) {
-    return Math.exp(this.p.alpha * Math.log(this.p.beta) - this.p.beta * x - logGamma(this.p.alpha)) * Math.pow(x, this.p.alpha - 1)
+    return Math.exp(this.c.logNorm - this.p.beta * x) * Math.pow(x, this.p.alpha - 1)
   }
 
   _cdf (x) {

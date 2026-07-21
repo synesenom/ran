@@ -42,7 +42,10 @@ export default class BenktanderII extends Distribution {
       expNegAOverB: Math.exp(-a / b),
       bOverBm1: b / (b - 1),
       logScaled: Math.log(a / (1 - b)) + a / (1 - b),
-      bIsOne: 1 - b < Number.EPSILON
+      bIsOne: 1 - b < Number.EPSILON,
+      // Used by variance(); parameter-only, so computed once here instead of on every call.
+      gammaInvB: gamma(1 / b),
+      gammaUpperInvBAOverB: gammaUpperIncomplete(1 / b, a / b)
     }
   }
 
@@ -125,6 +128,6 @@ export default class BenktanderII extends Distribution {
     const { a, b } = this.p
     // Unregularized Γ(1/b, a/b) = gammaUpperIncomplete(1/b, a/b) × gamma(1/b)
     return (-b + 2 * a * Math.exp(a / b) * Math.pow(a / b, -1 / b) *
-      gammaUpperIncomplete(1 / b, a / b) * gamma(1 / b)) / (a * a * b)
+      this.c.gammaUpperInvBAOverB * this.c.gammaInvB) / (a * a * b)
   }
 }
