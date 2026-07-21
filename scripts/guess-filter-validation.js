@@ -137,6 +137,7 @@ function measure (config, n) {
 // below measure a true rate near 0 (the CV/dispersion filters), where Wald degenerates to
 // exactly ±0 at excluded=0 and so understates the real uncertainty — Wilson stays valid at
 // the boundary and gives a non-zero upper bound (~rule-of-three) even for a zero count.
+// solutions/testing/2026-07-21-1131-wald-ci-degenerate-at-zero-wilson-score-fix.md
 function wilsonInterval (rate, n) {
   const Z = 1.96
   const z2 = Z * Z
