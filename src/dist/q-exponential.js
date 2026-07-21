@@ -87,11 +87,6 @@ export default class QExponential extends GeneralizedPareto {
     return 3 * (1 - 2 * xi) * (2 * xi * xi + xi + 3) / ((1 - 3 * xi) * (1 - 4 * xi)) - 3
   }
 
-  _generator () {
-    // GeneralizedPareto.prototype._generator reads this.p.mu/sigma/xi, no longer present
-    return this._q(this.r.next())
-  }
-
   _pdf (x) {
     // GeneralizedPareto.prototype._pdf specialized to this.c (GP canonical params)
     const z = (x - this.c.mu) / this.c.sigma

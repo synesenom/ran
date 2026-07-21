@@ -4548,6 +4548,13 @@ export default [{
 }, {
   name: 'QExponential',
   // GP canonical: xi=(q-1)/(2-q), sigma=1/(lam*(2-q)); mpmath dps=50
+  // No representable q maps exactly to xi=1/2 (q=4/3 gives xi=0.49999999999999983, the nearest
+  // representable q above gives xi=0.5000000000000003 — the exact boundary is unreachable in IEEE-754,
+  // same class of gap as the q=1.2/q=4/3 cases excluded by
+  // solutions/distribution/2026-06-09-1400-qexponential-parent-params-and-ieee754-boundaries.md).
+  // The xi>=0.5 -> NaN threshold itself is exercised directly on GeneralizedPareto, whose formulas
+  // QExponential's skewness()/kurtosis() reuse verbatim: see the xi=0.5 case at line ~2124 below
+  // (`{ params: [0, 2, 0.5], mean: 4, variance: Infinity, skewness: NaN, kurtosis: NaN }`).
   moments: [
     // q=1 → standard Exponential: all moments match Exponential(1)
     { params: [1, 1], mean: 1, variance: 1, skewness: 2, kurtosis: 6, tol: 1e-14 },
