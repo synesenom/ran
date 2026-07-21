@@ -1243,7 +1243,35 @@ describe('dist', () => {
     { name: 'GeneralizedGamma', ctor: () => new dist.GeneralizedGamma(1, 1, 1), k: 3, inherited: '2 from Gamma' },
     { name: 'GeneralizedNormal', ctor: () => new dist.GeneralizedNormal(0, 1, 2), k: 3, inherited: '2 from Gamma via GeneralizedGamma' },
     { name: 'HalfGeneralizedNormal', ctor: () => new dist.HalfGeneralizedNormal(1, 2), k: 2, inherited: '3 from GeneralizedNormal' },
-    { name: 'LogGamma', ctor: () => new dist.LogGamma(1, 1, 0), k: 3, inherited: '2 from Gamma' }
+    { name: 'LogGamma', ctor: () => new dist.LogGamma(1, 1, 0), k: 3, inherited: '2 from Gamma' },
+    // issue #1049
+    { name: 'PERT', ctor: () => new dist.PERT(0, 1, 3), k: 3, inherited: '2 from Beta' },
+    { name: 'Bates', ctor: () => new dist.Bates(2, 0, 3), k: 3, inherited: '1 from IrwinHall' },
+    { name: 'BetaBinomial', ctor: () => new dist.BetaBinomial(5, 2, 3), k: 3, inherited: '2 from Categorical' },
+    { name: 'SkewNormal', ctor: () => new dist.SkewNormal(0, 1, 2), k: 3, inherited: '2 from Normal' },
+    { name: 'BirnbaumSaunders', ctor: () => new dist.BirnbaumSaunders(0, 1, 1), k: 3, inherited: '2 from Normal' },
+    { name: 'JohnsonSB', ctor: () => new dist.JohnsonSB(0, 1, 3, 0), k: 4, inherited: '2 from Normal' },
+    { name: 'JohnsonSU', ctor: () => new dist.JohnsonSU(0, 1, 1, 0), k: 4, inherited: '2 from Normal' },
+    { name: 'Gilbrat', ctor: () => new dist.Gilbrat(), k: 0, inherited: '2 from LogNormal via Normal' },
+    {
+      name: 'PowerLaw',
+      ctor: () => new dist.PowerLaw(2),
+      k: 1,
+      inherited: '2 from Kumaraswamy',
+      // PowerLaw's support is fixed to (0, 1) regardless of its parameter, so the default sample (which
+      // includes values > 1) would drive lnL to -Infinity and make aic()/bic() match by coincidence.
+      sample: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.15, 0.25, 0.35]
+    },
+    { name: 'QExponential', ctor: () => new dist.QExponential(1.5, 1), k: 2, inherited: '3 from GeneralizedPareto' },
+    {
+      name: 'R',
+      ctor: () => new dist.R(2),
+      k: 1,
+      inherited: '2 from Beta',
+      // R's support is fixed to [-1, 1] regardless of its parameter, so the default sample (which
+      // includes values > 1) would drive lnL to -Infinity and make aic()/bic() match by coincidence.
+      sample: [-0.5, -0.2, 0, 0.2, 0.5, 0.1, 0.3, -0.1, 0.4, -0.3]
+    }
   ]
   describe('Davis', () => {
     it('survival/hazard/cHazard below support return 1/0/0', () => {
@@ -1259,9 +1287,12 @@ describe('dist', () => {
     })
   })
 
-  paramCountCases.forEach(({ name, ctor, k, inherited }) => {
+  paramCountCases.forEach(({ name, ctor, k, inherited, sample: customSample }) => {
     describe(`${name} parameter count`, () => {
-      const sample = [0.1, 0.5, 1.0, 1.5, 2.0, 0.3, 0.8, 1.2, 2.5, 0.6]
+      // customSample lets cases whose support can't cover the default range (e.g. fixed to (0,1) or [-1,1])
+      // still exercise a finite (non -Infinity) lnL, so aic()/bic() actually discriminate on k.
+      // solutions/testing/2026-07-21-0835-paramcountcases-shared-sample-vacuous-pass.md
+      const sample = customSample || [0.1, 0.5, 1.0, 1.5, 2.0, 0.3, 0.8, 1.2, 2.5, 0.6]
       const d = ctor()
 
       it(`should have paramCount k=${k}, not the ${inherited}`, () => {

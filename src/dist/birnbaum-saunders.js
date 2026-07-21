@@ -23,6 +23,10 @@ export default class BirnbaumSaunders extends Normal {
   constructor (mu, beta, gamma) {
     super(0, 1)
 
+    // BirnbaumSaunders has 3 free parameters (mu, beta, gamma); override the 2 inherited from Normal
+    // solutions/distribution/2026-06-07-2138-continuous-subclass-natural-params.md
+    this.k = 3
+
     // Validate parameters
     this.p = Object.assign(this.p, { mu2: mu, beta, gamma })
     Distribution.validate({ mu, beta, gamma }, [
