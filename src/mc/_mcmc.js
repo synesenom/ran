@@ -155,31 +155,33 @@ export default class MCMC {
   /**
    * Computes the effective sample size for each dimension using Geyer's initial positive
    * monotone sequence estimator (IPSM; Geyer 1992, Vehtari et al. 2021 — the estimator used by
-   * Stan and ArviZ): Gamma_m = rho[2m] + rho[2m+1] pairs consecutive lags starting at lag 0 (so
-   * the first pair always includes rho[0] = 1), clamped to be no larger than Gamma_{m-1} (the
-   * true autocovariance sequence is convex, so a non-increasing sequence of pair sums has
-   * strictly lower variance than summing raw lags). The sum stops at the first pair whose
-   * clamped value is not positive; ESS = N / (-1 + 2 * sum_m Gamma_m), or ESS = N (tau = 1) if
-   * even the first pair is non-positive (sum = 0) -- that -1 + 2*0 = -1 would otherwise give a
-   * nonsensical negative tau. Anchoring the pairing at lag 0 means rho[1] alone can never
-   * prematurely truncate the sum: Gamma_0 = 1 + rho[1] is non-positive only when rho[1] <= -1, an
-   * extreme case, unlike the old single-lag rule which underestimated tau (overestimated ESS)
-   * whenever an otherwise well-mixing chain had one merely-negative early lag. Built directly on
-   * the same accumulators as ac() and statistics() — no additional accumulator state. If the
-   * first pair itself is already non-positive (rho[1] <= -1, an extreme case), ESS = N exactly: a
+   * Stan and ArviZ): $\Gamma_m = \rho_{2m} + \rho_{2m+1}$ pairs consecutive lags starting at lag
+   * 0 (so the first pair always includes $\rho_0 = 1$), clamped to be no larger than
+   * $\Gamma_{m-1}$ (the true autocovariance sequence is convex, so a non-increasing sequence of
+   * pair sums has strictly lower variance than summing raw lags). The sum stops at the first pair
+   * whose clamped value is not positive;
+   * $$\mathrm{ESS} = \frac{N}{-1 + 2 \sum_m \Gamma_m},$$
+   * or $\mathrm{ESS} = N$ ($\tau = 1$) if even the first pair is non-positive (sum = 0) -- that
+   * $-1 + 2 \cdot 0 = -1$ would otherwise give a nonsensical negative $\tau$. Anchoring the
+   * pairing at lag 0 means $\rho_1$ alone can never prematurely truncate the sum:
+   * $\Gamma_0 = 1 + \rho_1$ is non-positive only when $\rho_1 \le -1$, an extreme case, unlike the
+   * old single-lag rule which underestimated $\tau$ (overestimated ESS) whenever an otherwise
+   * well-mixing chain had one merely-negative early lag. Built directly on the same accumulators
+   * as ac() and statistics() — no additional accumulator state. If the first pair itself is
+   * already non-positive ($\rho_1 \le -1$, an extreme case), $\mathrm{ESS} = N$ exactly: a
    * legitimate output of this truncation rule when the sampler genuinely produces that strong an
    * anti-correlation, not necessarily a sign of a broken sampler. A milder resonance -- e.g. HMC's
    * fixed pathLength resonating with the target's geometry, see hmc.js -- typically lands well
-   * short of that rho[1] <= -1 boundary and instead inflates or deflates ESS relative to the raw
-   * sample count without saturating to N exactly. See #974: verified against a brute-force
+   * short of that $\rho_1 \le -1$ boundary and instead inflates or deflates ESS relative to the
+   * raw sample count without saturating to $N$ exactly. See #974: verified against a brute-force
    * autocorrelation over the raw iterate() sequence, which confirmed the online accumulator is
    * exact and the anti-correlation is genuine.
    *
    * A fully stuck (zero-variance) chain is a distinct case from the above: ac()'s divisor is the
-   * population variance, so a chain that never moves produces 0/0 = NaN at every lag including
-   * lag 0. That NaN is not a signal of non-positive autocorrelation to saturate on — it means the
-   * chain contributed zero effectively-independent samples, so ess() reports 1 rather than N (the
-   * n === 0 case, no observations at all yet, is unaffected and still reports 0).
+   * population variance, so a chain that never moves produces $0/0 = \mathrm{NaN}$ at every lag
+   * including lag 0. That NaN is not a signal of non-positive autocorrelation to saturate on — it
+   * means the chain contributed zero effectively-independent samples, so ess() reports 1 rather
+   * than $N$ (the $n = 0$ case, no observations at all yet, is unaffected and still reports 0).
    *
    * solutions/testing/2026-07-18-1641-ess-geyer-ipsm-pairing-offset-self-consistent-wrong-tests.md
    * — the pairing must start at lag 0 (anchored by rho[0] = 1), not lag 1; an off-by-one-lag
