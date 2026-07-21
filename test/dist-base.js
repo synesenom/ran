@@ -1291,6 +1291,7 @@ describe('dist', () => {
     describe(`${name} parameter count`, () => {
       // customSample lets cases whose support can't cover the default range (e.g. fixed to (0,1) or [-1,1])
       // still exercise a finite (non -Infinity) lnL, so aic()/bic() actually discriminate on k.
+      // solutions/testing/2026-07-21-0835-paramcountcases-shared-sample-vacuous-pass.md
       const sample = customSample || [0.1, 0.5, 1.0, 1.5, 2.0, 0.3, 0.8, 1.2, 2.5, 0.6]
       const d = ctor()
 
