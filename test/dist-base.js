@@ -1347,6 +1347,13 @@ describe('dist', () => {
         assert.strictEqual(d.k, k)
       })
 
+      // A sample outside the distribution's support drives lnL(sample) to -Infinity, which makes
+      // aic()/bic() below both evaluate to Infinity regardless of k, passing by Infinity === Infinity
+      // coincidence. This guard fails loudly instead, so a future case needs its own sample override.
+      it('lnL(sample) should be finite so aic()/bic() below genuinely discriminate on k', () => {
+        assert(Number.isFinite(d.lnL(sample)), `lnL(sample) is ${d.lnL(sample)} for ${name} - add a custom sample override for this case`)
+      })
+
       it(`aic() should use the corrected parameter penalty (k=${k})`, () => {
         assert.strictEqual(d.aic(sample), 2 * (k - d.lnL(sample)))
       })
