@@ -47,9 +47,11 @@ export default class YuleSimon extends Distribution {
   }
 
   _generator () {
-    // Direct sampling by compounding exponential and geometric
-    const e1 = -Math.log(this.r.next())
-    const e2 = -Math.log(this.r.next())
+    // Direct sampling by compounding exponential and geometric.
+    // 1 - this.r.next() (not this.r.next() directly) since next() is uniform on [0, 1) and can
+    // return exactly 0, which would make Math.log(0) = -Infinity and leak an Infinity sample.
+    const e1 = -Math.log(1 - this.r.next())
+    const e2 = -Math.log(1 - this.r.next())
     const z = Math.exp(-e2 / this.p.rho)
 
     // Handle z << 1 case
