@@ -98,8 +98,9 @@ function _chiSquareBins (values, pmf) {
  * @param values {number[]} Array of values to perform test for.
  * @param pmf {Function} Probability mass function to perform test against.
  * @param c {number} Number of parameters for the distribution.
- * @returns {{statistics: number, passed: boolean}} Test results, containing the raw chi square statistics and a
- * boolean to tell whether the distribution passed the test.
+ * @returns {{statistics: number, passed: boolean, pValue: number}} Test results, containing the raw chi square
+ * statistics, a boolean to tell whether the distribution passed the test, and the chi-square goodness-of-fit
+ * p-value (the regularized upper incomplete gamma survival probability).
  * @private
  */
 export function chi2 (values, pmf, c) {
@@ -113,27 +114,9 @@ export function chi2 (values, pmf, c) {
   // Return comparison results
   return {
     statistics: stat,
-    passed: stat <= crit
+    passed: stat <= crit,
+    pValue: gammaUpperIncomplete(df / 2, stat / 2)
   }
-}
-
-/**
- * Computes the chi-square goodness-of-fit p-value for an array of values and a probability
- * mass function, using the same binning as chi2() but reporting the regularized upper
- * incomplete gamma survival probability instead of a fixed-alpha pass/fail.
- *
- * @method chi2PValue
- * @memberof ran.dist
- * @param values {number[]} Array of values to perform test for.
- * @param pmf {Function} Probability mass function to perform test against.
- * @param c {number} Number of parameters for the distribution.
- * @returns {number} The chi-square goodness-of-fit p-value.
- * @private
- */
-export function chi2PValue (values, pmf, c) {
-  const { chi2: stat, k } = _chiSquareBins(values, pmf)
-  const df = Math.max(1, k - c - 1)
-  return gammaUpperIncomplete(df / 2, stat / 2)
 }
 
 // Marsaglia & Marsaglia (2004), "Evaluating the Anderson-Darling Distribution",

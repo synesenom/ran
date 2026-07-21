@@ -475,8 +475,8 @@ class Distribution {
    *     continuous.</li>
    *     <li>{passed}: Whether the sample passed the null hypothesis that it is sampled from the current
    *     distribution.</li>
-   *     <li>{pValue}: The goodness-of-fit p-value. Only present for continuous distributions (the A² test);
-   *     discrete distributions use the $\chi^2$ test, which does not currently report a p-value here.</li>
+   *     <li>{pValue}: The goodness-of-fit p-value, from the $\chi^2$ or A² test depending on whether the
+   *     distribution is discrete or continuous.</li>
    * </ul>
    * @example
    *

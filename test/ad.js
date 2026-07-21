@@ -1,7 +1,7 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import { ksTest } from './test-utils'
-import { _adinf, _adStatistic, andersonDarling, chi2PValue } from '../src/dist/_tests'
+import { _adinf, _adStatistic, andersonDarling, chi2 } from '../src/dist/_tests'
 import { float, seed } from '../src/core'
 
 // Hand-computed A² for the symmetric reference sample u = [0.1, 0.3, 0.5, 0.7, 0.9].
@@ -103,7 +103,7 @@ describe('test-utils', () => {
     })
   })
 
-  describe('chi2PValue', () => {
+  describe('chi2', () => {
     // scipy 1.17.1: scipy.stats.chi2.sf(2/3, 1) == scipy.special.gammaincc(0.5, 1/3)
     // == 0.4142161782425251. Hand-crafted binning: values = 20 copies each of
     // {1,2,3,4} (n=80), pmf = {1: 0.3, 2: 0.2, 3: 0.3, 4: 0.2} (uniform true
@@ -119,7 +119,7 @@ describe('test-utils', () => {
         3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
         4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
       const pmf = x => ({ 1: 0.3, 2: 0.2, 3: 0.3, 4: 0.2 }[x])
-      const p = chi2PValue(values, pmf, 0)
+      const p = chi2(values, pmf, 0).pValue
       assert(Math.abs(p - 0.4142161782425251) < 1e-9, `p = ${p}, expected 0.4142161782425251`)
     })
 
@@ -130,7 +130,7 @@ describe('test-utils', () => {
       // Bernoulli(0.5)-like sample matching its own model pmf closely at n=2000
       const sample = Array.from({ length: 2000 }, () => (float() < 0.5 ? 0 : 1))
       const pmf = x => (x === 0 ? 0.5 : x === 1 ? 0.5 : 0)
-      assert(chi2PValue(sample, pmf, 0) > 0.05)
+      assert(chi2(sample, pmf, 0).pValue > 0.05)
     })
   })
 })

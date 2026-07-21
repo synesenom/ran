@@ -1,7 +1,7 @@
 import * as index from './index'
 import { cv, vmr } from '../dispersion'
 import { skewness } from '../shape'
-import { andersonDarling, chi2PValue } from './_tests'
+import { andersonDarling, chi2 } from './_tests'
 import {
   SYMMETRIC,
   POSITIVE_SKEW_ONLY,
@@ -114,7 +114,7 @@ function _fitSurvivors (survivors, data, isDiscrete) {
       const inst = Cls.fit(data)
       const bic = inst.bic(data)
       const pValue = isDiscrete
-        ? chi2PValue(data, x => inst.pdf(x), inst.k)
+        ? chi2(data, x => inst.pdf(x), inst.k).pValue
         : andersonDarling(data, x => inst.cdf(x)).pValue
       fitted.push({ name: Cls.name, params: inst.params(), bic, pValue })
     } catch (e) {
