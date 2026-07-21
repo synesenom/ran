@@ -84,7 +84,10 @@ export default class UniformProduct extends Distribution {
   }
 
   _generator () {
-    return Math.exp(neumaier(Array.from({ length: this.p.n }, () => Math.log(this.r.next()))))
+    // 1 - this.r.next() (not this.r.next() directly) since next() is uniform on [0, 1) and can
+    // return exactly 0, which would make one term -Infinity and collapse the sum to -Infinity
+    // — exp() of that is 0, silently violating this distribution's open lower bound (0, 1].
+    return Math.exp(neumaier(Array.from({ length: this.p.n }, () => Math.log(1 - this.r.next()))))
   }
 
   _pdf (x) {

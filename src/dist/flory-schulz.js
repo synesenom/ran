@@ -49,8 +49,10 @@ export default class FlorySchulz extends Distribution {
   _generator () {
     // FlorySchulz(a) = G1 + G2 + 1, G_i ~ Geom(a) (failures before success).
     // Geom(a) inverse-CDF: floor(log(U) / log(1-a)), O(1) regardless of a.
-    const g1 = Math.floor(Math.log(this.r.next()) / this.c.lnOneMinusA)
-    const g2 = Math.floor(Math.log(this.r.next()) / this.c.lnOneMinusA)
+    // 1 - this.r.next() (not this.r.next() directly) since next() is uniform on [0, 1) and can
+    // return exactly 0, which would make Math.log(0) = -Infinity and leak an Infinity sample.
+    const g1 = Math.floor(Math.log(1 - this.r.next()) / this.c.lnOneMinusA)
+    const g2 = Math.floor(Math.log(1 - this.r.next()) / this.c.lnOneMinusA)
     return g1 + g2 + 1
   }
 
