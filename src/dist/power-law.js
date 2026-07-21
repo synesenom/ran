@@ -18,6 +18,10 @@ export default class PowerLaw extends Kumaraswamy {
    */
   constructor (a) {
     super(a, 1)
+
+    // PowerLaw has 1 free parameter (a); override the 2 inherited from Kumaraswamy
+    // solutions/distribution/2026-06-07-2138-continuous-subclass-natural-params.md
+    this.k = 1
   }
 
   /**

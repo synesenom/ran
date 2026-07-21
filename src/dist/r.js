@@ -20,6 +20,10 @@ export default class R extends Beta {
     // Affine reduction: U = (X+1)/2 ~ Beta(c/2, c/2). See solutions/correctness/2026-05-19-1730-r-distribution-mixed-beta-reductions.md — one-to-one map onto [-1, 1] avoids the 0·∞ corner that the squared-variable reduction hits at x=0 for c<2.
     super(c / 2, c / 2)
 
+    // R has 1 free parameter (c); override the 2 inherited from Beta
+    // solutions/distribution/2026-06-07-2138-continuous-subclass-natural-params.md
+    this.k = 1
+
     // Validate parameters
     this.p = Object.assign(this.p, { c })
     Distribution.validate({ c }, [

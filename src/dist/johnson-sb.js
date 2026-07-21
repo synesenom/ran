@@ -24,6 +24,10 @@ export default class JohnsonSB extends Normal {
   constructor (gamma, delta, lambda, xi) {
     super(0, 1)
 
+    // JohnsonSB has 4 free parameters (gamma, delta, lambda, xi); override the 2 inherited from Normal
+    // solutions/distribution/2026-06-07-2138-continuous-subclass-natural-params.md
+    this.k = 4
+
     // Validate parameters
     this.p = Object.assign(this.p, { gamma, delta, lambda, xi })
     Distribution.validate({ gamma, delta, lambda, xi }, [

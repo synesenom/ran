@@ -469,12 +469,14 @@ class Distribution {
    * @method test
    * @memberof ran.dist.Distribution
    * @param {number[]} values Array of values to test.
-   * @returns {{statistics: number, passed: boolean}} Object with two properties representing the result of the test:
+   * @returns {{statistics: number, passed: boolean, pValue: number}} Object representing the result of the test:
    * <ul>
    *     <li>{statistics}: The $\chi^2$ or A² statistics depending on whether the distribution is discrete or
    *     continuous.</li>
    *     <li>{passed}: Whether the sample passed the null hypothesis that it is sampled from the current
    *     distribution.</li>
+   *     <li>{pValue}: The goodness-of-fit p-value, from the $\chi^2$ or A² test depending on whether the
+   *     distribution is discrete or continuous.</li>
    * </ul>
    * @example
    *

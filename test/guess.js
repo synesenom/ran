@@ -216,7 +216,7 @@ describe('guess', () => {
     // variance = r*p/(1-p)^2, so vmr = 1/(1-p) regardless of r): vmr = 1/0.2 = 5 > 3,
     // excluding Poisson via the dispersion-index soft filter. NegativeBinomial itself is
     // not excluded, since its own dispersion index is not below the NB-like threshold of
-    // 0.5 — it should survive filtering and fit, exercising the discrete chi2PValue path.
+    // 0.5 — it should survive filtering and fit, exercising the discrete chi2() pValue path.
     const data = new dist.NegativeBinomial(5, 0.8).seed(11).sample(1000)
     const result = guess(data, { candidates: [dist.Poisson, dist.NegativeBinomial] })
     assert.strictEqual(result.length, 1)

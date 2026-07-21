@@ -36,6 +36,10 @@ export default class BetaBinomial extends Categorical {
     super(Array.from({ length: ni + 1 }, (d, i) => Math.exp(logBinomial(ni, i) + logBeta(i + alpha, ni - i + beta) - logBeta(alpha, beta))), 0)
     this.p = { n: ni, alpha, beta }
 
+    // BetaBinomial has 3 free parameters (n, alpha, beta); override the 2 hardcoded by Categorical
+    // solutions/distribution/2026-06-07-2138-continuous-subclass-natural-params.md
+    this.k = 3
+
     // Validate parameters
     Distribution.validate({ n: ni, alpha, beta }, [
       'n >= 0',
