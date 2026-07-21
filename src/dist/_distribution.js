@@ -469,7 +469,7 @@ class Distribution {
    * @method test
    * @memberof ran.dist.Distribution
    * @param {number[]} values Array of values to test.
-   * @returns {{statistics: number, passed: boolean, pValue: number|undefined}} Object with properties representing
+   * @returns {{statistics: number, passed: boolean, pValue?: number}} Object with properties representing
    * the result of the test:
    * <ul>
    *     <li>{statistics}: The $\chi^2$ or A² statistics depending on whether the distribution is discrete or
