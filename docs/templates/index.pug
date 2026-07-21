@@ -68,7 +68,7 @@ block content
                     tbody
                         each param in entry.params
                             tr
-                                td.param-name #{param.name}
+                                td.param-name(style=`padding-left: ${1 + param.depth * 1.25}em`) #{param.name}
                                 td.param-type
                                     each type in param.type
                                         code.type #{type}

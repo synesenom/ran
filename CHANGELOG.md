@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `ran.dist.BetaRectangular`'s parameter count (`.k`) was inherited from `Beta`'s constructor (2) despite `BetaRectangular` having 5 free parameters (`alpha`, `beta`, `theta`, `a`, `b`), causing `.aic()`/`.bic()` to under-penalize its complexity. `.k` now correctly reports 5.
+- The generated API docs (`npm run docs`) now render the individual fields of every options-object constructor (e.g. `ran.mc.RWM`'s `options.logDensity`, `options.config`, `options.initialState`; `ran.mc.HMC`'s additional `options.gradLogDensity`) as indented rows in the Parameters table, instead of silently dropping them behind a single opaque `options: Object` row. `documentation.js` nests dotted `@param` tags (e.g. `@param {Object} options.config`) under the parent param's `properties` array rather than returning them as flat top-level params; `docs/src/param-parser.js` never read that array, so every JSDoc'd nested field for every options-object constructor in the codebase (`RWM`, `AdaptiveMetropolis`, `HMC`, `NUTS`, `MALA`, `Gibbs`, `Slice`, `ParallelTempering`) was invisible in the rendered docs even though it was correctly documented in the source JSDoc. `docs/index.js`'s call-signature renderer is updated alongside to use only the top-level (depth-0) params, so signatures still read e.g. `RWM(options)` rather than incorrectly listing the newly-surfaced nested fields as separate positional arguments.
 
 ## [1.31.0] - 2026-07-20
 
