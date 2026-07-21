@@ -38,6 +38,12 @@ export default class QExponential extends GeneralizedPareto {
       value: q < 1 ? 1 / (lambda * (1 - q)) : Infinity,
       closed: false
     }]
+
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p;
+    // GP canonical params relocated to this.c for methods that still need them.
+    const { mu, sigma, xi } = this.p
+    this.p = { q, lambda }
+    Object.assign(this.c, { mu, sigma, xi })
   }
 
   /**
@@ -45,26 +51,27 @@ export default class QExponential extends GeneralizedPareto {
    */
   mean () {
     // See solutions/distribution/2026-06-09-1400-qexponential-parent-params-and-ieee754-boundaries.md
-    const xi = this.p.xi
+    // xi/sigma live in this.c — this.p holds only the natural params (q, lambda)
+    const xi = this.c.xi
     if (xi >= 1) return Infinity
-    return this.p.sigma / (1 - xi)
+    return this.c.sigma / (1 - xi)
   }
 
   /**
    * @returns {number} sigma^2/((1-xi)^2*(1-2*xi)), or Infinity when xi >= 1/2.
    */
   variance () {
-    const xi = this.p.xi
+    const xi = this.c.xi
     if (xi >= 0.5) return Infinity
     const om = 1 - xi
-    return this.p.sigma * this.p.sigma / (om * om * (1 - 2 * xi))
+    return this.c.sigma * this.c.sigma / (om * om * (1 - 2 * xi))
   }
 
   /**
    * @returns {number} 2*(1+xi)*sqrt(1-2*xi)/(1-3*xi), or Infinity when xi >= 1/3.
    */
   skewness () {
-    const xi = this.p.xi
+    const xi = this.c.xi
     if (xi >= 1 / 3) return Infinity
     return 2 * (1 + xi) * Math.sqrt(1 - 2 * xi) / (1 - 3 * xi)
   }
@@ -73,9 +80,36 @@ export default class QExponential extends GeneralizedPareto {
    * @returns {number} Excess kurtosis of the GP distribution, or Infinity when xi >= 1/4.
    */
   kurtosis () {
-    const xi = this.p.xi
+    const xi = this.c.xi
     if (xi >= 0.25) return Infinity
     return 3 * (1 - 2 * xi) * (2 * xi * xi + xi + 3) / ((1 - 3 * xi) * (1 - 4 * xi)) - 3
+  }
+
+  _generator () {
+    // GeneralizedPareto.prototype._generator reads this.p.mu/sigma/xi, no longer present
+    return this._q(this.r.next())
+  }
+
+  _pdf (x) {
+    // GeneralizedPareto.prototype._pdf specialized to this.c (GP canonical params)
+    const z = (x - this.c.mu) / this.c.sigma
+    return this.c.xi === 0
+      ? Math.exp(-z) / this.c.sigma
+      : Math.pow(1 + this.c.xi * z, -1 / this.c.xi - 1) / this.c.sigma
+  }
+
+  _cdf (x) {
+    // GeneralizedPareto.prototype._cdf specialized to this.c (GP canonical params)
+    const z = (x - this.c.mu) / this.c.sigma
+    return this.c.xi === 0
+      ? -Math.expm1(-z)
+      : -Math.expm1(-Math.log1p(this.c.xi * z) / this.c.xi)
+  }
+
+  _q (p) {
+    // GeneralizedPareto.prototype._q specialized to this.c (GP canonical params)
+    const y = this.c.xi === 0 ? -Math.log(1 - p) : (Math.pow(1 - p, -this.c.xi) - 1) / this.c.xi
+    return this.c.mu + this.c.sigma * y
   }
 
   static _fitInit (data) {
