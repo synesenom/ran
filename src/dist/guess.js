@@ -10,20 +10,13 @@ import {
   NEGATIVE_BINOMIAL_LIKE
 } from './_guess-meta'
 
-// Bessel-heavy distributions excluded from the default candidate pool: each evaluates a
-// Bessel function per data point with no constructor-level caching, making every lnL()
-// call (and therefore every Powell iteration inside fit()) expensive relative to the rest
-// of the catalog, for distributions that are rarely the right answer for generic data
-// exploration. Still usable via an explicit `candidates` override.
-const DEFAULT_EXCLUDED = new Set(['VonMises', 'Rice', 'NoncentralChi2', 'NoncentralChi', 'Skellam'])
-
 // Reads `index` (this module's own barrel, which re-exports guess() itself) only inside
 // the function body — never at module top level — so the circular import between
 // guess.js and index.js resolves safely: by the time a caller invokes guess(), the whole
 // module graph has already finished evaluating.
 function _defaultCandidates () {
   return Object.entries(index)
-    .filter(([name]) => name !== 'guess' && !DEFAULT_EXCLUDED.has(name))
+    .filter(([name]) => name !== 'guess')
     .map(([, Cls]) => Cls)
 }
 
@@ -183,9 +176,7 @@ function _rankByBicWeight (fitted) {
  * @param {number[]} data Array of numbers to fit candidate distributions to.
  * @param {Object=} options Options for the fitting procedure.
  * @param {Function[]=} options.candidates Distribution constructors to try, overriding the
- * default candidate pool (all distributions except VonMises, Rice, NoncentralChi2,
- * NoncentralChi and Skellam, which are excluded by default for their per-point Bessel
- * function evaluation cost).
+ * default candidate pool (all distributions).
  * @returns {Object[]} Array of `{name, params, bicWeight, pValue}`, sorted by descending
  * `bicWeight` (`bicWeight` values across the array sum to 1). For continuous candidates,
  * `pValue` uses the Marsaglia & Marsaglia (2004) Anderson-Darling asymptotic approximation,
