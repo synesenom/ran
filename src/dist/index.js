@@ -149,3 +149,7 @@ export { default as YuleSimon } from './yule-simon'
 export { default as Zeta } from './zeta'
 export { default as Zipf } from './zipf'
 export { default as ZipfMandelbrot } from './zipf-mandelbrot'
+
+// Placed after the alphabetical distribution list, not within it: guess() is a plain
+// function, not a Distribution subclass, so it doesn't fit that list's naming pattern.
+export { guess } from './guess'

@@ -22,6 +22,7 @@ hljs.registerLanguage('javascript', require('highlight.js/lib/languages/javascri
 // Prioritized entries.
 const PRIORITY = {
   dist: [
+    'guess',
     'Distribution'
   ],
   mc: [
@@ -79,8 +80,11 @@ function sourceLink (location) {
 }
 
 function renderSignature (entry, params) {
-  const args = params.map((d, i) => `${d.optional ? '[' : ''}${i > 0 ? ', ' : ''}${d.name}`).join('')
-  const closers = params.filter(d => d.optional).map(() => ']').join('')
+  // `params` now includes flattened nested properties (e.g. options.config) alongside the
+  // actual positional arguments (depth 0) — only the latter belong in a call signature.
+  const topLevel = params.filter(d => d.depth === 0)
+  const args = topLevel.map((d, i) => `${d.optional ? '[' : ''}${i > 0 ? ', ' : ''}${d.name}`).join('')
+  const closers = topLevel.filter(d => d.optional).map(() => ']').join('')
   return `${entry.memberof}.${entry.name}(${args}${closers})`
 }
 
@@ -98,7 +102,9 @@ function parseEntry (entry) {
   const location = resolveLocation(entry)
   // entry.params, entry.returns[0] and entry.deprecated don't carry their own context, so
   // every DescParser call is given the enclosing entry's location for error reporting (#980).
-  const params = sourceParams.map(p => ParamParser(p, location))
+  // ParamParser returns a param plus its flattened nested properties (e.g. options.config),
+  // so this must flatMap rather than map or nested fields collapse back into arrays-of-arrays.
+  const params = sourceParams.flatMap(p => ParamParser(p, location))
   const throws = sourceThrows.map(ThrowsParser)
 
   return {

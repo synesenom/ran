@@ -23,6 +23,11 @@ export default class BetaRectangular extends Beta {
   constructor (alpha, beta, theta, a, b) {
     super(alpha, beta)
 
+    // BetaRectangular has 5 free parameters (alpha, beta, theta, a, b); override the 2 inherited from Beta
+    // solutions/distribution/2026-06-07-2138-continuous-subclass-natural-params.md
+    // solutions/correctness/2026-07-20-2359-beta-rectangular-inherited-k-bic-bias.md
+    this.k = 5
+
     // Validate parameters
     this.p = Object.assign(this.p, { theta, a, b })
     Distribution.validate({ theta, a, b }, [
