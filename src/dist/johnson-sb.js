@@ -1,6 +1,7 @@
 import Normal from './normal'
 import Distribution from './_distribution'
-import { erfinv } from '../special'
+import { erfc, erfinv } from '../special'
+import normal from './_normal'
 
 /**
  * Generator for [Johnson's $S_B$ distribution]{@link https://en.wikipedia.org/wiki/Johnson%27s_SU-distribution#Johnson's_SB-distribution}:
@@ -29,7 +30,9 @@ export default class JohnsonSB extends Normal {
     this.k = 4
 
     // Validate parameters
-    this.p = Object.assign(this.p, { gamma, delta, lambda, xi })
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p;
+    // mu/sigma leaked from Normal(0,1) are dropped
+    this.p = { gamma, delta, lambda, xi }
     Distribution.validate({ gamma, delta, lambda, xi }, [
       'delta > 0',
       'lambda > 0'
@@ -46,19 +49,22 @@ export default class JohnsonSB extends Normal {
   }
 
   _generator () {
-    // Direct sampling by transforming normal variate
-    return this.p.xi + this.p.lambda / (1 + Math.exp(-(super._generator() - this.p.gamma) / this.p.delta))
+    // Direct sampling by transforming a standard normal variate
+    return this.p.xi + this.p.lambda / (1 + Math.exp(-(normal(this.r, 0, 1) - this.p.gamma) / this.p.delta))
   }
 
   _pdf (x) {
+    // Standard-normal density inlined (Normal.prototype._pdf read this.p.mu/this.p.sigma, no longer set)
     const z = x - this.p.xi
-    return this.p.delta * this.p.lambda * super._pdf(this.p.gamma + this.p.delta * Math.log(z / (this.p.lambda - z))) / (z * (this.p.lambda - z))
+    const z2 = this.p.gamma + this.p.delta * Math.log(z / (this.p.lambda - z))
+    return this.p.delta * this.p.lambda * (Math.exp(-0.5 * z2 * z2) / this.c.sigmaRoot2Pi) / (z * (this.p.lambda - z))
   }
 
   _cdf (x) {
+    // Standard-normal CDF inlined (Normal.prototype._cdf read this.p.mu/this.p.sigma, no longer set)
     const z = x - this.p.xi
     const lnz = Math.log(z / (this.p.lambda - z))
-    return Number.isFinite(lnz) ? super._cdf(this.p.gamma + this.p.delta * lnz) : 0
+    return Number.isFinite(lnz) ? 0.5 * erfc(-(this.p.gamma + this.p.delta * lnz) / this.c.sigmaRoot2) : 0
   }
 
   _q (p) {

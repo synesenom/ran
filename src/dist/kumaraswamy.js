@@ -22,6 +22,7 @@ export default class Kumaraswamy extends Distribution {
     super('continuous', 2)
 
     // Validate parameters
+    /** @type {*} */
     this.p = { a, b }
     Distribution.validate({ a, b }, [
       'a > 0',

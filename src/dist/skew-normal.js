@@ -1,5 +1,5 @@
 import clamp from '../utils/clamp'
-import { erf, owenT } from '../special'
+import { erf, erfc, owenT } from '../special'
 import Normal from './normal'
 
 /**
@@ -28,8 +28,10 @@ export default class SkewNormal extends Normal {
     // solutions/distribution/2026-06-07-2138-continuous-subclass-natural-params.md
     this.k = 3
 
-    // Add new parameter
-    this.p = Object.assign(this.p, { xi, omega, alpha })
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p;
+    // mu/sigma (===xi/omega numerically) are dropped, this.c.sigmaRoot2Pi and this.c.sigmaRoot2 set
+    // by Normal(xi, omega) above remain valid since they used the real omega
+    this.p = { xi, omega, alpha }
 
     // Set support
     this.s = [{
@@ -64,11 +66,15 @@ export default class SkewNormal extends Normal {
   }
 
   _pdf (x) {
-    return super._pdf(x) * (1 + erf(this.p.alpha * Math.SQRT1_2 * (x - this.p.xi) / this.p.omega))
+    // Normal density inlined (Normal.prototype._pdf read this.p.mu/this.p.sigma, no longer set)
+    const phi = Math.exp(-0.5 * Math.pow((x - this.p.xi) / this.p.omega, 2)) / this.c.sigmaRoot2Pi
+    return phi * (1 + erf(this.p.alpha * Math.SQRT1_2 * (x - this.p.xi) / this.p.omega))
   }
 
   _cdf (x) {
-    const z = super._cdf(x) - 2 * owenT((x - this.p.xi) / this.p.omega, this.p.alpha)
+    // Normal CDF inlined (Normal.prototype._cdf read this.p.mu/this.p.sigma, no longer set)
+    const Phi = 0.5 * erfc(-(x - this.p.xi) / this.c.sigmaRoot2)
+    const z = Phi - 2 * owenT((x - this.p.xi) / this.p.omega, this.p.alpha)
     return clamp(z)
   }
 

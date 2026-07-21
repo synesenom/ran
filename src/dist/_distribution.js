@@ -79,6 +79,10 @@ class Distribution {
    * @returns {Object} The natural parameters of the distribution.
    */
   params () {
+    // Trusts this.p to already hold only natural params — a reparametrizing subclass that merges
+    // via Object.assign(this.p, {...}) instead of replacing it will leak the parent's keys here.
+    // See decisions/0018-continuous-subclass-natural-params.md and
+    // solutions/distribution/2026-07-21-1252-reparametrizing-subclass-this-p-merge-vs-replace.md
     return this.p
   }
 

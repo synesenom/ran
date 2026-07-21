@@ -23,6 +23,7 @@ export default class Beta extends Distribution {
     super('continuous', 2)
 
     // Validate parameters
+    /** @type {*} */
     this.p = { alpha, beta }
     Distribution.validate({ alpha, beta }, [
       'alpha > 0',
