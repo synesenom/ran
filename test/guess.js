@@ -191,6 +191,15 @@ describe('guess', () => {
     })
   })
 
+  it('should not exclude a symmetric candidate when sample skewness is within its family-specific (not normal-only) tolerance', () => {
+    // Laplace(0,1), seed 6, n=500 has sample skewness ~0.449: beyond the old
+    // normal-only threshold 2*sqrt(6/500)~0.219 (which would wrongly exclude it) but
+    // safely within the corrected Laplace threshold 2*sqrt(63/500)~0.710 (which must not).
+    const data = new dist.Laplace(0, 1).seed(6).sample(500)
+    const result = guess(data, { candidates: [dist.Laplace, dist.Normal] })
+    assert(result.some(r => r.name === 'Laplace'))
+  })
+
   it('should exclude a symmetric-only candidate when sample skewness is strongly non-zero', () => {
     // Exponential(1) has population skewness 2 — far outside a symmetric family's
     // tolerance — while Exponential itself (positive-skew-only) is not excluded by the

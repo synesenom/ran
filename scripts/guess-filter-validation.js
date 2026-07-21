@@ -15,14 +15,26 @@ const SAMPLE_SIZES = [50, 100, 200, 500, 1000]
 // meant to be a light, mostly-harmless prune ahead of the expensive fit() call.
 const FLAG_THRESHOLD = 0.15
 
-// Duplicated from src/dist/guess.js:53-69,90 rather than imported: the three predicates and
-// the threshold formula are module-private (only `guess` itself is exported), and exporting
-// them just for this one-off validation script would be a production-code change outside this
-// issue's investigate-and-document scope. If guess.js's filter logic ever changes, this copy
-// must be updated in lockstep — a future threshold-changing PR re-runs this script anyway,
-// which is where that drift would surface.
-function skewnessThreshold (n) {
-  return 2 * Math.sqrt(6 / n)
+// Duplicated from src/dist/guess.js and src/dist/_guess-meta.js rather than imported: the
+// predicates and the per-family threshold constants are module-private (only `guess` itself
+// is exported), and exporting them just for this one-off validation script would be a
+// production-code change outside this issue's investigate-and-document scope. If guess.js's
+// filter logic or _guess-meta.js's SYMMETRIC constants ever change, this copy must be updated
+// in lockstep — a future threshold-changing PR re-runs this script anyway, which is where
+// that drift would surface.
+const NORMAL_SKEWNESS_VARIANCE = 6
+const SYMMETRIC_SKEWNESS_VARIANCE = {
+  Normal: 6,
+  Uniform: 72 / 35,
+  Laplace: 63
+}
+
+function symmetricThreshold (familyKey, n) {
+  return 2 * Math.sqrt(SYMMETRIC_SKEWNESS_VARIANCE[familyKey] / n)
+}
+
+function positiveSkewOnlyThreshold (n) {
+  return 2 * Math.sqrt(NORMAL_SKEWNESS_VARIANCE / n)
 }
 
 function symmetricFails (skew, threshold) {
@@ -48,14 +60,16 @@ function dispersionNegBinomFails (vmrValue) {
 // Each handler pairs the data-context statistic guess.js's filter reads with the predicate
 // that decides exclusion, keyed by the same filter name used in CONFIGS below — replaces a
 // switch/case in measure() so adding or reusing a filter type is a table entry, not a branch.
+// `symmetric`'s threshold is per-family (config.familyKey), not just per-n, since each
+// SYMMETRIC member has its own asymptotic skewness-estimator variance (issue #1064).
 const FILTER_HANDLERS = {
   symmetric: {
     statistic: r.shape.skewness,
-    fails: (skew, n) => symmetricFails(skew, skewnessThreshold(n))
+    fails: (skew, n, config) => symmetricFails(skew, symmetricThreshold(config.familyKey, n))
   },
   positiveSkewOnly: {
     statistic: r.shape.skewness,
-    fails: (skew, n) => positiveSkewOnlyFails(skew, skewnessThreshold(n))
+    fails: (skew, n) => positiveSkewOnlyFails(skew, positiveSkewOnlyThreshold(n))
   },
   cv: {
     statistic: r.dispersion.cv,
@@ -72,17 +86,27 @@ const FILTER_HANDLERS = {
 }
 
 // One representative per family, plus a stress-case second member for the two families whose
-// filter is skewness-based (SYMMETRIC, POSITIVE_SKEW_ONLY) and has more than one member.
+// filter is skewness-based (SYMMETRIC, POSITIVE_SKEW_ONLY) and has more than one member. All
+// three SYMMETRIC members are covered so each one's own per-family threshold is validated.
 const CONFIGS = [
   {
     family: 'SYMMETRIC',
     name: 'Normal(0,1)',
+    familyKey: 'Normal',
     filter: 'symmetric',
     factory: () => new r.dist.Normal(0, 1)
   },
   {
     family: 'SYMMETRIC',
+    name: 'Uniform(-1,1)',
+    familyKey: 'Uniform',
+    filter: 'symmetric',
+    factory: () => new r.dist.Uniform(-1, 1)
+  },
+  {
+    family: 'SYMMETRIC',
     name: 'Laplace(0,1)',
+    familyKey: 'Laplace',
     filter: 'symmetric',
     factory: () => new r.dist.Laplace(0, 1)
   },
@@ -127,7 +151,7 @@ function measure (config, n) {
     const stat = handler.statistic(sample)
     if (Number.isNaN(stat)) continue
     evaluated++
-    if (handler.fails(stat, n)) excluded++
+    if (handler.fails(stat, n, config)) excluded++
   }
   const rate = excluded / evaluated
   return { rate, ...wilsonInterval(rate, evaluated), evaluated }
@@ -150,7 +174,18 @@ function wilsonInterval (rate, n) {
 const SKEWNESS_FILTERS = new Set(['symmetric', 'positiveSkewOnly'])
 const TARGET_RATE = 0.05
 
+// Issue #1064's acceptance bar for SYMMETRIC configs specifically: Normal must stay at or
+// below its pre-existing ~5%-target tolerance, while any other (heavier-tailed) SYMMETRIC
+// member gets a looser bound to account for the asymptotic threshold formula's weaker
+// accuracy away from normality, especially at small n. Not applied to other filter kinds —
+// those are out of scope for this issue and keep their existing informal 5%-target display.
+function acceptanceBound (config) {
+  if (config.filter !== 'symmetric') return null
+  return config.familyKey === 'Normal' ? 0.06 : 0.10
+}
+
 let flagCount = 0
+let acceptanceFailCount = 0
 console.log(`Monte Carlo soft-filter false-exclusion validation (${DRAWS} draws per configuration)\n`)
 console.log(
   'family'.padEnd(24) +
@@ -167,6 +202,10 @@ CONFIGS.forEach(config => {
     const flagged = rate > FLAG_THRESHOLD
     if (flagged) flagCount++
 
+    const bound = acceptanceBound(config)
+    const acceptanceFailed = bound !== null && rate > bound
+    if (acceptanceFailed) acceptanceFailCount++
+
     const targetCol = SKEWNESS_FILTERS.has(config.filter)
       ? `Δ=${((rate - TARGET_RATE) * 100).toFixed(2)}pp`
       : ''
@@ -179,9 +218,11 @@ CONFIGS.forEach(config => {
       `[${(ciLow * 100).toFixed(2)}%, ${(ciHigh * 100).toFixed(2)}%]`.padEnd(18) +
       targetCol +
       (evaluated < DRAWS ? ` (${DRAWS - evaluated} NaN draws skipped)` : '') +
-      (flagged ? ' FLAGGED' : '')
+      (flagged ? ' FLAGGED' : '') +
+      (acceptanceFailed ? ` ISSUE-1064-ACCEPTANCE-FAIL(>${(bound * 100).toFixed(0)}%)` : '')
     console.log(line)
   })
 })
 
 console.log(`\n${flagCount === 0 ? 'No' : flagCount} configuration(s) exceeded the ${(FLAG_THRESHOLD * 100).toFixed(0)}% flag threshold.`)
+console.log(`${acceptanceFailCount === 0 ? 'All' : acceptanceFailCount + ' of the'} SYMMETRIC configuration(s) meet issue #1064's acceptance bound (Normal <=6%, other SYMMETRIC members <=10%).`)

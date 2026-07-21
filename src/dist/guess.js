@@ -41,11 +41,21 @@ function _withinSupport (probe, xmin, xmax) {
   return true
 }
 
+// The normal-only asymptotic variance of the skewness estimator (Var(g1)*n = 6), still
+// used for POSITIVE_SKEW_ONLY: that filter is one-sided (only strongly negative sample
+// skewness excludes a candidate) and measured at ~0% false exclusion, so recalibrating it
+// per-family is out of scope for issue #1064.
+const NORMAL_SKEWNESS_VARIANCE = 6
+
 // Asymmetric by design: a positive-skew-only family is only ruled out by strongly
 // *negative* sample skewness, not by symmetric or already-positive sample skewness.
-function _skewnessFilterFails (name, skew, threshold) {
-  if (SYMMETRIC.has(name) && Math.abs(skew) > threshold) return true
-  return POSITIVE_SKEW_ONLY.has(name) && skew < -threshold
+// SYMMETRIC's threshold is per-family (not a single shared value) since the skewness
+// estimator's asymptotic variance is distribution-dependent, not just sample-size-
+// dependent — see the derivation in _guess-meta.js's SYMMETRIC doc comment.
+function _skewnessFilterFails (name, skew, n) {
+  const symmetricVariance = SYMMETRIC.get(name)
+  if (symmetricVariance !== undefined && Math.abs(skew) > 2 * Math.sqrt(symmetricVariance / n)) return true
+  return POSITIVE_SKEW_ONLY.has(name) && skew < -2 * Math.sqrt(NORMAL_SKEWNESS_VARIANCE / n)
 }
 
 // cvValue is NaN for non-positive-mean data; NaN comparisons are always false, so this
@@ -68,8 +78,8 @@ function _dispersionFilterFails (name, vmrValue, isDiscrete) {
 // Takes the pre-computed data context (rather than recomputing skewness/cv/vmr per
 // candidate) since these are properties of the data, not of the candidate.
 function _passesSoftFilters (name, context) {
-  const { isDiscrete, skew, skewnessThreshold, cvValue, vmrValue } = context
-  if (_skewnessFilterFails(name, skew, skewnessThreshold)) return false
+  const { isDiscrete, skew, n, cvValue, vmrValue } = context
+  if (_skewnessFilterFails(name, skew, n)) return false
   if (_cvFilterFails(name, cvValue, isDiscrete)) return false
   return !_dispersionFilterFails(name, vmrValue, isDiscrete)
 }
@@ -80,7 +90,7 @@ function _dataContext (data) {
     xmin: Math.min(...data),
     xmax: Math.max(...data),
     skew: skewness(data),
-    skewnessThreshold: 2 * Math.sqrt(6 / data.length),
+    n: data.length,
     cvValue: cv(data),
     vmrValue: vmr(data)
   }
@@ -145,16 +155,21 @@ function _rankByBicWeight (fitted) {
  * silently exclude a candidate that would in fact have fit reasonably well. The soft
  * filters' false-exclusion risk is not uniform, and has been empirically measured by
  * Monte Carlo simulation (`scripts/guess-filter-validation.js`, 10 000 seeded draws per
- * configuration, n = 50..1000; see issue #1054). The skewness threshold (2·√(6/n)) is
- * calibrated to roughly a 5% false-exclusion rate for a truly symmetric family (about
- * 2 standard errors of the sample-skewness estimator under normality) — confirmed for
- * `Normal(0, 1)` (measured 4.2%-4.7% across the tested n range) — but that calibration
- * does **not** generalize to every `SYMMETRIC` member: `Laplace(0, 1)`, whose heavier
- * tails (excess kurtosis 3 vs. Normal's 0) inflate the sample-skewness estimator's
- * variance roughly tenfold, measured 34.7%-51.1% false exclusion over the same n range
- * — 7-10× the target, and worsening rather than improving as n grows. A fix is tracked
- * separately (issue #1064) since this function's own validation is measurement-only.
- * The positive-skew-only rule is deliberately asymmetric — it only excludes on strongly
+ * configuration, n = 50..1000; see issues #1054 and #1064). The skewness threshold used
+ * for a `SYMMETRIC` candidate is `2·√(c/n)`, where `c` is that family's own asymptotic
+ * skewness-estimator variance factor (`Var(g1)·n ≈ μ6/μ2³ − 6·μ4/μ2² + 9`, using
+ * population central moments — see `_guess-meta.js`'s `SYMMETRIC` doc for the per-family
+ * derivation), **not** a single normal-only constant: the naive `6/n` (roughly 2 standard
+ * errors of the sample-skewness estimator under normality) only holds for `Normal(0, 1)`
+ * (measured 4.2%-4.7% false exclusion across the tested n range, unaffected by this fix)
+ * and understates the true variance for heavier-tailed symmetric families —
+ * `Laplace(0, 1)`'s heavier tails (excess kurtosis 3 vs. Normal's 0) inflate it roughly
+ * tenfold (`c ≈ 63` vs. Normal's `c = 6`), which the per-family threshold now accounts for
+ * directly instead of sharing Normal's bound: measured false exclusion dropped from
+ * 34.7%-51.1% under the old shared threshold to 1.4%-4.2% across the same n range.
+ * `Uniform(-1, 1)`'s `c = 72/35 ≈ 2.06` is already lower than Normal's, so its measured
+ * 4.4%-5.6% rate was safe both before and after this fix. The positive-skew-only rule is
+ * deliberately asymmetric — it only excludes on strongly
  * *negative* sample skewness, so ordinary sampling noise around zero or positive skew
  * never triggers it; measured false-exclusion was ~0% for both `Exponential(1)` and
  * `Gamma(20, 1)` (the latter's skewness, 2/√20 ≈ 0.45, is the family's lowest at that
