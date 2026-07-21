@@ -1295,7 +1295,15 @@ describe('dist', () => {
     // issue #1049
     { name: 'PERT', ctor: () => new dist.PERT(0, 1, 3), k: 3, inherited: '2 from Beta' },
     { name: 'Bates', ctor: () => new dist.Bates(2, 0, 3), k: 3, inherited: '1 from IrwinHall' },
-    { name: 'BetaBinomial', ctor: () => new dist.BetaBinomial(5, 2, 3), k: 3, inherited: '2 from Categorical' },
+    {
+      name: 'BetaBinomial',
+      ctor: () => new dist.BetaBinomial(5, 2, 3),
+      k: 3,
+      inherited: '2 from Categorical',
+      // BetaBinomial is discrete with support {0, ..., n}, so the default (continuous-oriented) sample
+      // would only work via Distribution.pdf()'s implicit _toInt() rounding; use explicit integers instead.
+      sample: [0, 1, 2, 3, 4, 5, 1, 2, 3, 4]
+    },
     { name: 'SkewNormal', ctor: () => new dist.SkewNormal(0, 1, 2), k: 3, inherited: '2 from Normal' },
     { name: 'BirnbaumSaunders', ctor: () => new dist.BirnbaumSaunders(0, 1, 1), k: 3, inherited: '2 from Normal' },
     { name: 'JohnsonSB', ctor: () => new dist.JohnsonSB(0, 1, 3, 0), k: 4, inherited: '2 from Normal' },
