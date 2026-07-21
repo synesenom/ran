@@ -194,8 +194,7 @@ export function _adStatistic (values, cdf) {
   return -n - sum / n
 }
 
-// Shared by andersonDarling() and andersonDarlingPValue() so the asymptotic-plus-
-// finite-n-correction formula lives in exactly one place.
+// Marsaglia & Marsaglia (2004) asymptotic approximation with finite-n correction.
 function _adPValueFromStatistic (a2, n) {
   const adinf = _adinf(a2)
   return 1 - (adinf + _errfix(n, adinf))
@@ -208,32 +207,18 @@ function _adPValueFromStatistic (a2, n) {
  * @memberof ran.dist
  * @param values {number[]} Array of values to perform test for.
  * @param cdf {Function} Cumulative distribution function to perform test against.
- * @returns {{statistics: number, passed: boolean}} Test results, containing the raw A² statistics and a
- * boolean to tell whether the distribution passed the test at α = 0.01.
+ * @returns {{statistics: number, passed: boolean, pValue: number}} Test results, containing the raw A²
+ * statistics, a boolean to tell whether the distribution passed the test at α = 0.01, and the goodness-of-fit
+ * p-value (Marsaglia & Marsaglia 2004 asymptotic approximation with finite-n correction).
  * @private
  */
 export function andersonDarling (values, cdf) {
   if (values.length === 0) throw Error('andersonDarling: values must not be empty')
   const a2 = _adStatistic(values, cdf)
+  const pValue = _adPValueFromStatistic(a2, values.length)
   return {
     statistics: a2,
-    passed: _adPValueFromStatistic(a2, values.length) >= 0.01
+    passed: pValue >= 0.01,
+    pValue
   }
-}
-
-/**
- * Computes the Anderson-Darling goodness-of-fit p-value for an array of values and a cumulative
- * distribution function, using the Marsaglia & Marsaglia (2004) asymptotic approximation with
- * finite-n correction.
- *
- * @method andersonDarlingPValue
- * @memberof ran.dist
- * @param values {number[]} Array of values to perform test for.
- * @param cdf {Function} Cumulative distribution function to perform test against.
- * @returns {number} The Anderson-Darling goodness-of-fit p-value.
- * @private
- */
-export function andersonDarlingPValue (values, cdf) {
-  if (values.length === 0) throw Error('andersonDarlingPValue: values must not be empty')
-  return _adPValueFromStatistic(_adStatistic(values, cdf), values.length)
 }
