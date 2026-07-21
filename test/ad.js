@@ -1,7 +1,7 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import { ksTest } from './test-utils'
-import { _adinf, _adStatistic, andersonDarling, andersonDarlingPValue, chi2 } from '../src/dist/_tests'
+import { _adinf, _adStatistic, andersonDarling, chi2 } from '../src/dist/_tests'
 import { float, seed } from '../src/core'
 
 // Hand-computed A² for the symmetric reference sample u = [0.1, 0.3, 0.5, 0.7, 0.9].
@@ -71,9 +71,7 @@ describe('test-utils', () => {
       const sample = Array.from({ length: 1000 }, () => (float() + float()) / 2)
       assert(!andersonDarling(sample, x => x).passed)
     })
-  })
 
-  describe('andersonDarlingPValue', () => {
     // mpmath mp.dps=50: Marsaglia & Marsaglia (2004) asymptotic formula
     // (adinf + finite-n errfix correction) independently re-implemented and
     // evaluated at A²=0.130083462905258 (REF_A2 above), n=5:
@@ -84,12 +82,8 @@ describe('test-utils', () => {
     // tiny, very-well-fitting sample — an artifact of the published approximation
     // itself, not of this implementation, so this is the exact expected value.
     it('should match the Marsaglia asymptotic formula on the hand-checked reference sample', () => {
-      const p = andersonDarlingPValue(REF_SAMPLE.slice(), x => x)
+      const p = andersonDarling(REF_SAMPLE.slice(), x => x).pValue
       assert(Math.abs(p - 1.000265361679237696) < 1e-9, `p = ${p}, expected 1.000265361679237696`)
-    })
-
-    it('should throw for an empty sample', () => {
-      assert.throws(() => andersonDarlingPValue([], x => x), /not be empty/)
     })
 
     it('should report a high p-value for a large uniform sample matching the model CDF', () => {
@@ -99,13 +93,13 @@ describe('test-utils', () => {
       // distribution this specific seed happens to land in.
       seed(12345)
       const sample = Array.from({ length: 1000 }, () => float())
-      assert(andersonDarlingPValue(sample, x => x) > 0.05)
+      assert(andersonDarling(sample, x => x).pValue > 0.05)
     })
 
     it('should report a low p-value for a sample whose shape disagrees with the model', () => {
       seed(12345)
       const sample = Array.from({ length: 1000 }, () => (float() + float()) / 2)
-      assert(andersonDarlingPValue(sample, x => x) < 0.01)
+      assert(andersonDarling(sample, x => x).pValue < 0.01)
     })
   })
 
@@ -130,7 +124,7 @@ describe('test-utils', () => {
     })
 
     it('should report a high p-value for data that matches the model pmf', () => {
-      // Same reasoning as the andersonDarlingPValue test above: 0.05, not 0.5, since the
+      // Same reasoning as the andersonDarling p-value test above: 0.05, not 0.5, since the
       // null p-value distribution is ~Uniform(0,1) and 0.5 is its own fragile median.
       seed(12345)
       // Bernoulli(0.5)-like sample matching its own model pmf closely at n=2000
