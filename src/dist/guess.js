@@ -143,18 +143,30 @@ function _rankByBicWeight (fitted) {
  * type and support against the data) are followed by soft, statistically-principled
  * filters (skewness, coefficient of variation, dispersion index) that can, by design,
  * silently exclude a candidate that would in fact have fit reasonably well. The soft
- * filters' false-exclusion risk is not uniform: the skewness threshold (2·√(6/n)) is
+ * filters' false-exclusion risk is not uniform, and has been empirically measured by
+ * Monte Carlo simulation (`scripts/guess-filter-validation.js`, 10 000 seeded draws per
+ * configuration, n = 50..1000; see issue #1054). The skewness threshold (2·√(6/n)) is
  * calibrated to roughly a 5% false-exclusion rate for a truly symmetric family (about
- * 2 standard errors of the sample-skewness estimator under normality), and the
- * positive-skew-only rule is deliberately asymmetric — it only excludes on strongly
+ * 2 standard errors of the sample-skewness estimator under normality) — confirmed for
+ * `Normal(0, 1)` (measured 4.2%-4.7% across the tested n range) — but that calibration
+ * does **not** generalize to every `SYMMETRIC` member: `Laplace(0, 1)`, whose heavier
+ * tails (excess kurtosis 3 vs. Normal's 0) inflate the sample-skewness estimator's
+ * variance roughly tenfold, measured 34.7%-51.1% false exclusion over the same n range
+ * — 7-10× the target, and worsening rather than improving as n grows. A fix is tracked
+ * separately (issue #1064) since this function's own validation is measurement-only.
+ * The positive-skew-only rule is deliberately asymmetric — it only excludes on strongly
  * *negative* sample skewness, so ordinary sampling noise around zero or positive skew
- * never triggers it. The coefficient-of-variation ([0.1, 10]) and dispersion-index
- * (>3, <0.5) bounds, by contrast, are wide heuristic constants carried over from this
- * function's original design rationale and have not been independently validated by
- * simulation — treat their false-exclusion behavior as unquantified. A distribution
- * excluded by a soft filter is never reported, with no diagnostic indicating it was
- * screened out; callers with a specific hypothesis about their data should bypass all
- * filtering via the `candidates` option rather than rely on the default pool. A
+ * never triggers it; measured false-exclusion was ~0% for both `Exponential(1)` and
+ * `Gamma(20, 1)` (the latter's skewness, 2/√20 ≈ 0.45, is the family's lowest at that
+ * shape, making it the closest a `POSITIVE_SKEW_ONLY` member gets to the symmetric
+ * boundary). The coefficient-of-variation ([0.1, 10]) and dispersion-index (>3, <0.5)
+ * bounds were also measured at ~0% false exclusion for their respective representative
+ * distributions (`Exponential(1)`, `Poisson(5)`, `NegativeBinomial(5, 0.5)`) across the
+ * same n range — comfortably safe heuristics for those families, not merely unvalidated
+ * ones. A distribution excluded by a soft filter is never reported, with no diagnostic
+ * indicating it was screened out; callers with a specific hypothesis about their data
+ * should bypass all filtering via the `candidates` option rather than rely on the
+ * default pool. A
  * candidate whose fit() throws is skipped rather than propagating the error. Throws if
  * the data is too small for the surviving candidate set's largest parameter count
  * (BIC's asymptotic approximation requires roughly 20 observations per parameter).
