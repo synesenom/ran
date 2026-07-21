@@ -130,8 +130,20 @@ function measure (config, n) {
     if (handler.fails(stat, n)) excluded++
   }
   const rate = excluded / evaluated
-  const ci95 = 1.96 * Math.sqrt((rate * (1 - rate)) / evaluated)
-  return { rate, ci95, evaluated }
+  return { rate, ...wilsonInterval(rate, evaluated), evaluated }
+}
+
+// Wilson score interval, not the plain Wald `rate ± z·SE` interval: several configurations
+// below measure a true rate near 0 (the CV/dispersion filters), where Wald degenerates to
+// exactly ±0 at excluded=0 and so understates the real uncertainty — Wilson stays valid at
+// the boundary and gives a non-zero upper bound (~rule-of-three) even for a zero count.
+function wilsonInterval (rate, n) {
+  const Z = 1.96
+  const z2 = Z * Z
+  const denom = 1 + z2 / n
+  const center = (rate + z2 / (2 * n)) / denom
+  const halfWidth = (Z * Math.sqrt(rate * (1 - rate) / n + z2 / (4 * n * n))) / denom
+  return { ciLow: Math.max(0, center - halfWidth), ciHigh: Math.min(1, center + halfWidth) }
 }
 
 const SKEWNESS_FILTERS = new Set(['symmetric', 'positiveSkewOnly'])
@@ -144,13 +156,13 @@ console.log(
   'distribution'.padEnd(20) +
   'n'.padEnd(8) +
   'rate'.padEnd(12) +
-  '±95% CI'.padEnd(12) +
+  '95% CI'.padEnd(18) +
   'vs 5% target (skewness filters only)'
 )
 
 CONFIGS.forEach(config => {
   SAMPLE_SIZES.forEach(n => {
-    const { rate, ci95, evaluated } = measure(config, n)
+    const { rate, ciLow, ciHigh, evaluated } = measure(config, n)
     const flagged = rate > FLAG_THRESHOLD
     if (flagged) flagCount++
 
@@ -163,7 +175,7 @@ CONFIGS.forEach(config => {
       config.name.padEnd(20) +
       String(n).padEnd(8) +
       `${(rate * 100).toFixed(2)}%`.padEnd(12) +
-      `±${(ci95 * 100).toFixed(2)}pp`.padEnd(12) +
+      `[${(ciLow * 100).toFixed(2)}%, ${(ciHigh * 100).toFixed(2)}%]`.padEnd(18) +
       targetCol +
       (evaluated < DRAWS ? ` (${DRAWS - evaluated} NaN draws skipped)` : '') +
       (flagged ? ' FLAGGED' : '')
