@@ -56,8 +56,13 @@ export default class LogSeries extends Distribution {
   }
 
   _generator () {
-    // Direct sampling
-    return Math.floor(1 + Math.log(this.r.next()) / Math.log(1 - Math.pow(1 - this.p.p, this.r.next())))
+    // Direct sampling.
+    // 1 - this.r.next() (not this.r.next() directly) in the numerator since next() is uniform
+    // on [0, 1) and can return exactly 0, which would make Math.log(0) = -Infinity and leak an
+    // Infinity sample. The denominator's next() doesn't need the same guard: if it draws exactly
+    // 0, Math.pow(1 - p, 0) = 1, making the denominator -Infinity too, and a finite-negative
+    // numerator divided by -Infinity is 0 — floor(1 + 0) = 1, already a valid support value.
+    return Math.floor(1 + Math.log(1 - this.r.next()) / Math.log(1 - Math.pow(1 - this.p.p, this.r.next())))
   }
 
   _pdf (x) {

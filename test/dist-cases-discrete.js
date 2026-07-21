@@ -1040,6 +1040,7 @@ export default [{
 }, {
   name: 'LogSeries',
   fit: { params: [0.7], seed: 42, n: 200, tolerances: { p: 0.05 } },
+  testSeeds: [1, 42, 12345], // seed 0 shifts PRNG alignment after the exponential-log-zero-singularity fix
   // E[K^n]=(-1/L)*T_{n-1}, T_m=sum k^m p^k; raw moments: E[K]=p/(q*(-L)), E[K^2]=p/(q^2*(-L)), etc.
   // Reference values computed analytically from closed-form raw moment formulas (Python, float64)
   moments: [

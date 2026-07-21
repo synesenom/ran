@@ -73,7 +73,9 @@ export default class PolyaAeppli extends PreComputed {
     const N = poisson(this.r, this.p.lambda)
     let z = 0
     for (let i = 0; i < N; i++) {
-      z += Math.floor(Math.log(this.r.next()) / Math.log(this.p.theta)) + 1
+      // 1 - this.r.next() (not this.r.next() directly) since next() is uniform on [0, 1) and can
+      // return exactly 0, which would make Math.log(0) = -Infinity and leak an Infinity sample.
+      z += Math.floor(Math.log(1 - this.r.next()) / Math.log(this.p.theta)) + 1
     }
     return Math.round(z)
   }
