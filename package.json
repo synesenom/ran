@@ -210,6 +210,9 @@
     "./dist/gompertz": {
       "import": "./dist/gompertz.esm.js"
     },
+    "./dist/guess": {
+      "import": "./dist/guess.esm.js"
+    },
     "./dist/gumbel": {
       "import": "./dist/gumbel.esm.js"
     },

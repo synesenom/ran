@@ -1,7 +1,7 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import { ksTest } from './test-utils'
-import { _adinf, _adStatistic, andersonDarling } from '../src/dist/_tests'
+import { _adinf, _adStatistic, andersonDarling, andersonDarlingPValue, chi2PValue } from '../src/dist/_tests'
 import { float, seed } from '../src/core'
 
 // Hand-computed A² for the symmetric reference sample u = [0.1, 0.3, 0.5, 0.7, 0.9].
@@ -70,6 +70,73 @@ describe('test-utils', () => {
       // from distributional shape rather than boundary saturation.
       const sample = Array.from({ length: 1000 }, () => (float() + float()) / 2)
       assert(!andersonDarling(sample, x => x).passed)
+    })
+  })
+
+  describe('andersonDarlingPValue', () => {
+    // mpmath mp.dps=50: Marsaglia & Marsaglia (2004) asymptotic formula
+    // (adinf + finite-n errfix correction) independently re-implemented and
+    // evaluated at A²=0.130083462905258 (REF_A2 above), n=5:
+    //   adinf(A²)      = 0.00042834374045306583827336095987252014365196433604468
+    //   errfix(5, adinf) = -0.00069370541969076225308643999857983989546401256503386
+    //   p = 1 - (adinf + errfix) = 1.000265361679237696414813079038707319751812048229
+    // The finite-n correction can push the approximation slightly past 1 for a
+    // tiny, very-well-fitting sample — an artifact of the published approximation
+    // itself, not of this implementation, so this is the exact expected value.
+    it('should match the Marsaglia asymptotic formula on the hand-checked reference sample', () => {
+      const p = andersonDarlingPValue(REF_SAMPLE.slice(), x => x)
+      assert(Math.abs(p - 1.000265361679237696) < 1e-9, `p = ${p}, expected 1.000265361679237696`)
+    })
+
+    it('should throw for an empty sample', () => {
+      assert.throws(() => andersonDarlingPValue([], x => x), /not be empty/)
+    })
+
+    it('should report a high p-value for a large uniform sample matching the model CDF', () => {
+      // Under a correctly-specified null the p-value is ~Uniform(0,1), so 0.5 (its own
+      // median) is the least robust bar to pick — use 0.05 to demonstrate "does not
+      // spuriously reject" without the test depending on which half of the null
+      // distribution this specific seed happens to land in.
+      seed(12345)
+      const sample = Array.from({ length: 1000 }, () => float())
+      assert(andersonDarlingPValue(sample, x => x) > 0.05)
+    })
+
+    it('should report a low p-value for a sample whose shape disagrees with the model', () => {
+      seed(12345)
+      const sample = Array.from({ length: 1000 }, () => (float() + float()) / 2)
+      assert(andersonDarlingPValue(sample, x => x) < 0.01)
+    })
+  })
+
+  describe('chi2PValue', () => {
+    // scipy 1.17.1: scipy.stats.chi2.sf(2/3, 1) == scipy.special.gammaincc(0.5, 1/3)
+    // == 0.4142161782425251. Hand-crafted binning: values = 20 copies each of
+    // {1,2,3,4} (n=80), pmf = {1: 0.3, 2: 0.2, 3: 0.3, 4: 0.2} (uniform true
+    // proportions are 0.25 each). The chi-square binning rule (merge consecutive
+    // Map-insertion-order entries until expected count > 20) closes exactly two
+    // bins — {1} alone (expected 24 > 20) and {2,3} together (expected 40 > 20) —
+    // leaving trailing {4} (expected 16) uncounted, giving statistic (20-24)^2/24
+    // + (40-40)^2/40 = 2/3 exactly and k=2 closed bins. With c=0 parameters,
+    // df = max(1, k-c-1) = 1.
+    it('should match the chi-square survival function on a hand-crafted binning case', () => {
+      const values = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+        4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+      const pmf = x => ({ 1: 0.3, 2: 0.2, 3: 0.3, 4: 0.2 }[x])
+      const p = chi2PValue(values, pmf, 0)
+      assert(Math.abs(p - 0.4142161782425251) < 1e-9, `p = ${p}, expected 0.4142161782425251`)
+    })
+
+    it('should report a high p-value for data that matches the model pmf', () => {
+      // Same reasoning as the andersonDarlingPValue test above: 0.05, not 0.5, since the
+      // null p-value distribution is ~Uniform(0,1) and 0.5 is its own fragile median.
+      seed(12345)
+      // Bernoulli(0.5)-like sample matching its own model pmf closely at n=2000
+      const sample = Array.from({ length: 2000 }, () => (float() < 0.5 ? 0 : 1))
+      const pmf = x => (x === 0 ? 0.5 : x === 1 ? 0.5 : 0)
+      assert(chi2PValue(sample, pmf, 0) > 0.05)
     })
   })
 })
