@@ -1,6 +1,7 @@
 import Normal from './normal'
 import Distribution from './_distribution'
-import { erfinv } from '../special'
+import { erfc, erfinv } from '../special'
+import normal from './_normal'
 
 /**
  * Probability density function for the [Birnbaum-Saunders distribution]{@link https://en.wikipedia.org/wiki/Birnbaum%E2%80%93Saunders_distribution} (also known as fatigue life distribution):
@@ -28,7 +29,10 @@ export default class BirnbaumSaunders extends Normal {
     this.k = 3
 
     // Validate parameters
-    this.p = Object.assign(this.p, { mu2: mu, beta, gamma })
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p;
+    // mu/sigma leaked from Normal(0,1) are dropped, and the constructor's own mu now occupies its
+    // natural key instead of the renamed mu2
+    this.p = { mu, beta, gamma }
     Distribution.validate({ mu, beta, gamma }, [
       'beta > 0',
       'gamma > 0'
@@ -58,32 +62,36 @@ export default class BirnbaumSaunders extends Normal {
   }
 
   _generator () {
-    // Direct sampling by transforming normal variate
-    const n = this.p.gamma * super._generator()
-    return this.p.beta * 0.25 * Math.pow(n + Math.sqrt(4 + Math.pow(n, 2)), 2) + this.p.mu2
+    // Direct sampling by transforming a standard normal variate
+    const n = this.p.gamma * normal(this.r, 0, 1)
+    return this.p.beta * 0.25 * Math.pow(n + Math.sqrt(4 + Math.pow(n, 2)), 2) + this.p.mu
   }
 
   _pdf (x) {
-    const z = Math.sqrt((x - this.p.mu2) / this.p.beta)
-    return (z + 1 / z) * super._pdf((z - 1 / z) / this.p.gamma) / (2 * this.p.gamma * (x - this.p.mu2))
+    // Standard-normal density inlined (Normal.prototype._pdf read this.p.mu/this.p.sigma, no longer set)
+    const z = Math.sqrt((x - this.p.mu) / this.p.beta)
+    const w = (z - 1 / z) / this.p.gamma
+    const phi = Math.exp(-0.5 * w * w) / this.c.sigmaRoot2Pi
+    return (z + 1 / z) * phi / (2 * this.p.gamma * (x - this.p.mu))
   }
 
   _cdf (x) {
-    const z = Math.sqrt((x - this.p.mu2) / this.p.beta)
-    return super._cdf((z - 1 / z) / this.p.gamma)
+    // Standard-normal CDF inlined (Normal.prototype._cdf read this.p.mu/this.p.sigma, no longer set)
+    const z = Math.sqrt((x - this.p.mu) / this.p.beta)
+    return 0.5 * erfc(-(z - 1 / z) / (this.p.gamma * this.c.sigmaRoot2))
   }
 
   _q (p) {
     const n = this.p.gamma * this.c.sigmaRoot2 * erfinv(2 * p - 1)
-    return this.p.beta * 0.25 * Math.pow(n + Math.sqrt(4 + Math.pow(n, 2)), 2) + this.p.mu2
+    return this.p.beta * 0.25 * Math.pow(n + Math.sqrt(4 + Math.pow(n, 2)), 2) + this.p.mu
   }
 
   /**
    * @returns {number} Mean of the distribution.
    */
   mean () {
-    const { mu2, beta, gamma: gam } = this.p
-    return mu2 + beta * (1 + gam * gam / 2)
+    const { mu, beta, gamma: gam } = this.p
+    return mu + beta * (1 + gam * gam / 2)
   }
 
   /**

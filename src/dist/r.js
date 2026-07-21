@@ -1,5 +1,7 @@
 import Beta from './beta'
 import Distribution from './_distribution'
+import { regularizedBetaIncomplete } from '../special'
+import rBeta from './_beta'
 
 /**
  * Probability density function for the [R distribution]{@link https://docs.scipy.org/doc/scipy-1.5.4/reference/tutorial/stats/continuous_rdist.html}:
@@ -24,8 +26,13 @@ export default class R extends Beta {
     // solutions/distribution/2026-06-07-2138-continuous-subclass-natural-params.md
     this.k = 1
 
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p;
+    // Beta's alpha/beta move to this.c for _generator/_cdf, which otherwise delegated to
+    // Beta.prototype and read them off this.p.
+    Object.assign(this.c, { alpha: c / 2, beta: c / 2 })
+
     // Validate parameters
-    this.p = Object.assign(this.p, { c })
+    this.p = { c }
     Distribution.validate({ c }, [
       'c > 0'
     ])
@@ -52,15 +59,17 @@ export default class R extends Beta {
   }
 
   _generator () {
-    return 2 * super._generator() - 1
+    return 2 * rBeta(this.r, this.c.alpha, this.c.beta) - 1
   }
 
+  // Beta.prototype._pdf reads only this.c.{alphaM1,betaM1,lnBeta} (set by Beta's own constructor,
+  // unaffected by moving alpha/beta out of this.p), so delegating to it remains safe.
   _pdf (x) {
     return 0.5 * super._pdf((x + 1) / 2)
   }
 
   _cdf (x) {
-    return super._cdf((x + 1) / 2)
+    return regularizedBetaIncomplete(this.c.alpha, this.c.beta, (x + 1) / 2)
   }
 
   /**
@@ -75,5 +84,22 @@ export default class R extends Beta {
    */
   variance () {
     return 1 / (this.p.c + 1)
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution (zero by construction: alpha === beta === c/2).
+   */
+  skewness () {
+    return 0
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { alpha, beta } = this.c
+    const s = alpha + beta
+    return 6 * ((alpha - beta) ** 2 * (s + 1) - alpha * beta * (s + 2)) /
+      (alpha * beta * (s + 2) * (s + 3))
   }
 }

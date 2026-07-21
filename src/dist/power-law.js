@@ -22,6 +22,10 @@ export default class PowerLaw extends Kumaraswamy {
     // PowerLaw has 1 free parameter (a); override the 2 inherited from Kumaraswamy
     // solutions/distribution/2026-06-07-2138-continuous-subclass-natural-params.md
     this.k = 1
+
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p;
+    // b=1 is Kumaraswamy's fixed constant, not a PowerLaw param.
+    this.p = { a }
   }
 
   /**
@@ -80,5 +84,25 @@ export default class PowerLaw extends Kumaraswamy {
     const logMean = data.reduce((s, x) => s + Math.log(x), 0) / n
     const a = -1 / logMean
     return [a > 0 && Number.isFinite(a) ? a : 0.1]
+  }
+
+  _generator () {
+    // Inverse transform sampling; Kumaraswamy.prototype._generator reads this.p.b, no longer present
+    return this._q(this.r.next())
+  }
+
+  _pdf (x) {
+    // b=1 specialization of Kumaraswamy's pdf: a·b·x^(a-1)·(1-x^a)^(b-1) = a·x^(a-1)
+    return this.p.a * Math.pow(x, this.p.a - 1)
+  }
+
+  _cdf (x) {
+    // b=1 specialization of Kumaraswamy's cdf: 1-(1-x^a)^b = x^a
+    return Math.pow(x, this.p.a)
+  }
+
+  _q (p) {
+    // b=1 specialization of Kumaraswamy's quantile: (1-(1-p)^(1/b))^(1/a) = p^(1/a)
+    return Math.pow(p, 1 / this.p.a)
   }
 }

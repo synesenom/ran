@@ -1,6 +1,7 @@
 import Normal from './normal'
 import Distribution from './_distribution'
-import { erfinv } from '../special'
+import { erfc, erfinv } from '../special'
+import normal from './_normal'
 
 /**
  * Generator for [Johnson's $S_U$ distribution]{@link https://en.wikipedia.org/wiki/Johnson%27s_SU-distribution}:
@@ -29,7 +30,9 @@ export default class JohnsonSU extends Normal {
     this.k = 4
 
     // Validate parameters
-    this.p = Object.assign(this.p, { gamma, delta, lambda, xi })
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p;
+    // mu/sigma leaked from Normal(0,1) are dropped
+    this.p = { gamma, delta, lambda, xi }
     Distribution.validate({ gamma, delta, lambda, xi }, [
       'delta > 0',
       'lambda > 0'
@@ -63,17 +66,21 @@ export default class JohnsonSU extends Normal {
   }
 
   _generator () {
-    // Direct sampling by transforming normal variate
-    return this.p.xi + this.p.lambda * Math.sinh((super._generator() - this.p.gamma) / this.p.delta)
+    // Direct sampling by transforming a standard normal variate
+    return this.p.xi + this.p.lambda * Math.sinh((normal(this.r, 0, 1) - this.p.gamma) / this.p.delta)
   }
 
   _pdf (x) {
+    // Standard-normal density inlined (Normal.prototype._pdf read this.p.mu/this.p.sigma, no longer set)
     const z = (x - this.p.xi) / this.p.lambda
-    return this.p.delta * super._pdf(this.p.gamma + this.p.delta * Math.asinh(z)) / (this.p.lambda * Math.sqrt(1 + z * z))
+    const z2 = this.p.gamma + this.p.delta * Math.asinh(z)
+    return this.p.delta * (Math.exp(-0.5 * z2 * z2) / this.c.sigmaRoot2Pi) / (this.p.lambda * Math.sqrt(1 + z * z))
   }
 
   _cdf (x) {
-    return super._cdf(this.p.gamma + this.p.delta * Math.asinh((x - this.p.xi) / this.p.lambda))
+    // Standard-normal CDF inlined (Normal.prototype._cdf read this.p.mu/this.p.sigma, no longer set)
+    const z2 = this.p.gamma + this.p.delta * Math.asinh((x - this.p.xi) / this.p.lambda)
+    return 0.5 * erfc(-z2 / this.c.sigmaRoot2)
   }
 
   _q (p) {

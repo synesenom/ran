@@ -1013,6 +1013,54 @@ describe('dist', () => {
         assert.deepEqual(new dist.Rademacher().params(), {})
       })
 
+      it('PowerLaw.params() returns { a }', () => {
+        const d = new dist.PowerLaw(2)
+        assert.deepEqual(d.params(), { a: 2 })
+      })
+
+      it('Gilbrat.params() returns {}', () => {
+        assert.deepEqual(new dist.Gilbrat().params(), {})
+      })
+
+      it('R.params() returns { c }', () => {
+        const d = new dist.R(4)
+        assert.deepEqual(d.params(), { c: 4 })
+      })
+
+      it('PERT.params() returns { a, b, c }', () => {
+        const d = new dist.PERT(5, 15, 25)
+        assert.deepEqual(d.params(), { a: 5, b: 15, c: 25 })
+      })
+
+      it('JohnsonSU.params() returns { gamma, delta, lambda, xi }', () => {
+        // Distinct values so a key transposition (e.g. gamma/xi or delta/lambda swapped) would fail
+        const d = new dist.JohnsonSU(1, 2, 3, 4)
+        assert.deepEqual(d.params(), { gamma: 1, delta: 2, lambda: 3, xi: 4 })
+      })
+
+      it('JohnsonSB.params() returns { gamma, delta, lambda, xi }', () => {
+        // Distinct values so a key transposition (e.g. gamma/xi or delta/lambda swapped) would fail
+        const d = new dist.JohnsonSB(1, 2, 3, 4)
+        assert.deepEqual(d.params(), { gamma: 1, delta: 2, lambda: 3, xi: 4 })
+      })
+
+      it('SkewNormal.params() returns { xi, omega, alpha }', () => {
+        // Distinct values so an omega/alpha transposition would fail
+        const d = new dist.SkewNormal(1, 2, 3)
+        assert.deepEqual(d.params(), { xi: 1, omega: 2, alpha: 3 })
+      })
+
+      it('BirnbaumSaunders.params() returns { mu, beta, gamma }', () => {
+        // Distinct values so a beta/gamma transposition would fail
+        const d = new dist.BirnbaumSaunders(1, 2, 3)
+        assert.deepEqual(d.params(), { mu: 1, beta: 2, gamma: 3 })
+      })
+
+      it('BirnbaumSaunders.params().mu holds the constructor value, not the leaked Normal(0,1) placeholder', () => {
+        const d = new dist.BirnbaumSaunders(5, 2, 2)
+        assert.strictEqual(d.params().mu, 5)
+      })
+
       it('Bernoulli.fit().params().p recovers planted value within tolerance', () => {
         const data = new dist.Bernoulli(0.7).seed(42).sample(500)
         const result = dist.Bernoulli.fit(data)
