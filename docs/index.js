@@ -22,6 +22,7 @@ hljs.registerLanguage('javascript', require('highlight.js/lib/languages/javascri
 // Prioritized entries.
 const PRIORITY = {
   dist: [
+    'guess',
     'Distribution'
   ],
   mc: [
