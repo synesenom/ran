@@ -68,20 +68,22 @@ export default class QExponential extends GeneralizedPareto {
   }
 
   /**
-   * @returns {number} 2*(1+xi)*sqrt(1-2*xi)/(1-3*xi), or Infinity when xi >= 1/3.
+   * @returns {number} 2*(1+xi)*sqrt(1-2*xi)/(1-3*xi); Infinity when 1/3 <= xi < 1/2 (finite variance,
+   * divergent third moment); NaN when xi >= 1/2 (variance itself infinite — indeterminate ratio).
    */
   skewness () {
     const xi = this.c.xi
-    if (xi >= 1 / 3) return Infinity
+    if (xi >= 1 / 3) return xi < 0.5 ? Infinity : NaN
     return 2 * (1 + xi) * Math.sqrt(1 - 2 * xi) / (1 - 3 * xi)
   }
 
   /**
-   * @returns {number} Excess kurtosis of the GP distribution, or Infinity when xi >= 1/4.
+   * @returns {number} Excess kurtosis of the GP distribution; Infinity when 1/4 <= xi < 1/2 (finite
+   * variance, divergent fourth moment); NaN when xi >= 1/2 (variance itself infinite — indeterminate ratio).
    */
   kurtosis () {
     const xi = this.c.xi
-    if (xi >= 0.25) return Infinity
+    if (xi >= 0.25) return xi < 0.5 ? Infinity : NaN
     return 3 * (1 - 2 * xi) * (2 * xi * xi + xi + 3) / ((1 - 3 * xi) * (1 - 4 * xi)) - 3
   }
 

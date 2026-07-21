@@ -4555,12 +4555,13 @@ export default [{
     { params: [0.5, 2], mean: 0.25, variance: 0.0375, skewness: 0.8606629658238705, kurtosis: 2 / 21, tol: 1e-14 },
     // exact boundary q=5/4 (xi=1/3 in IEEE 754): skewness and kurtosis diverge; mean=2, var=12
     { params: [1.25, 1], mean: 2, variance: 12, skewness: Infinity, kurtosis: Infinity, tol: 1e-14 },
-    // exact boundary q=3/2 (xi=1 in IEEE 754): all four moments diverge
-    { params: [1.5, 1], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
-    // above q=3/2 (xi > 1): all four moments diverge
-    { params: [1.501, 1], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
-    // above q=4/3 (xi > 1/2): variance and higher diverge; mean=10/3
-    { params: [1.35, 1], mean: 10 / 3, variance: Infinity, skewness: Infinity, kurtosis: Infinity, tol: 1e-14 },
+    // exact boundary q=3/2 (xi=1 in IEEE 754): mean/variance diverge; xi>=1/2 makes the standardized
+    // skewness/kurtosis ratios indeterminate (∞/∞), matching GeneralizedPareto's own NaN convention
+    { params: [1.5, 1], mean: Infinity, variance: Infinity, skewness: NaN, kurtosis: NaN },
+    // above q=3/2 (xi > 1): mean/variance diverge; skewness/kurtosis NaN (xi>=1/2, see above)
+    { params: [1.501, 1], mean: Infinity, variance: Infinity, skewness: NaN, kurtosis: NaN },
+    // above q=4/3 (xi > 1/2): variance diverges; skewness/kurtosis NaN (xi>=1/2, see above); mean=10/3
+    { params: [1.35, 1], mean: 10 / 3, variance: Infinity, skewness: NaN, kurtosis: NaN, tol: 1e-14 },
     // above q=5/4 (xi > 1/3): skewness and kurtosis diverge
     { params: [1.26, 1], mean: 25 / 12, variance: 14.599116161616163, skewness: Infinity, kurtosis: Infinity, tol: 1e-12 },
     // above q=6/5 (xi > 1/4): only kurtosis diverges
