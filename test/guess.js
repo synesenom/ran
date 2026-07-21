@@ -143,28 +143,52 @@ describe('guess', () => {
     assert.throws(() => guess(data, { candidates: [] }), /no candidate distribution survives pre-filtering/)
   })
 
-  it('should use the default candidate pool (all distributions minus the Bessel-heavy exclusions) when candidates is omitted', function () {
+  it('should use the default candidate pool (all distributions) when candidates is omitted', function () {
     this.timeout(60000)
     const data = new dist.Normal(5, 2).seed(42).sample(500)
     const result = guess(data)
-    const excluded = ['VonMises', 'Rice', 'NoncentralChi2', 'NoncentralChi', 'Skellam', 'guess']
+    const excluded = ['guess']
     result.forEach(r => assert.notInclude(excluded, r.name))
     assert(result.length > 0)
   })
 
-  it('should exclude VonMises from the default pool even for data it would otherwise fit well', function () {
-    this.timeout(60000)
-    // Concentrated circular data squarely within [-π, π] and a genuinely good fit for
-    // VonMises: this isolates the exclusion-set logic from any incidental hard/soft
-    // filter exclusion (unlike Normal(5,2)-shaped data, which VonMises would already
-    // fail on support grounds regardless of whether the exclusion set works at all).
-    const data = new dist.VonMises(2).seed(5).sample(500)
-    const withoutOverride = guess(data)
-    withoutOverride.forEach(r => assert.notEqual(r.name, 'VonMises'))
-    // Confirms VonMises really is a viable, fittable candidate for this data — its
-    // absence above is specifically due to DEFAULT_EXCLUDED, not incidental filtering.
-    const withOverride = guess(data, { candidates: [dist.VonMises, dist.Normal] })
-    assert.strictEqual(withOverride[0].name, 'VonMises')
+  // The five distributions formerly listed in guess.js's removed DEFAULT_EXCLUDED set,
+  // each with a data-generating instance and a contrasting alternative whose support or
+  // shape makes it a clearly worse fit — isolates "is this candidate genuinely reachable
+  // and competitive in the unfiltered default pool" from incidental pool composition.
+  //
+  // `unfilteredPool: false` for Rice, NoncentralChi2, and NoncentralChi is a deliberate
+  // omission, not an oversight: their non-negative-continuous sample data also survives
+  // DoublyNoncentralF's (and several other unrelated distributions') hard filters, and
+  // DoublyNoncentralF's nested double-Poisson-mixing _pdf series takes 13-30s+ per fit()
+  // call on data shaped like this — an unrelated, pre-existing latency issue (#1063) whose
+  // cost varies enough between runs (observed 24s in isolation, >60s inside the full suite
+  // for the same seeded data) that asserting on the unfiltered guess(data) call here would
+  // be flaky. VonMises's bounded [-π, π] support hard-filters away that whole non-negative
+  // candidate group before fit() is ever reached, and Skellam is discrete (a disjoint,
+  // much cheaper candidate set) — both measured reliably fast.
+  // See solutions/testing/2026-07-21-1055-guess-default-pool-latent-fit-cliff.md
+  const FORMERLY_EXCLUDED = [
+    { name: 'VonMises', instance: new dist.VonMises(2), alternative: dist.Normal, unfilteredPool: true },
+    { name: 'Rice', instance: new dist.Rice(5, 1), alternative: dist.Normal, unfilteredPool: false },
+    { name: 'NoncentralChi2', instance: new dist.NoncentralChi2(3, 10), alternative: dist.Exponential, unfilteredPool: false },
+    { name: 'NoncentralChi', instance: new dist.NoncentralChi(3, 3), alternative: dist.Exponential, unfilteredPool: false },
+    { name: 'Skellam', instance: new dist.Skellam(3, 8), alternative: dist.Poisson, unfilteredPool: true }
+  ]
+
+  FORMERLY_EXCLUDED.forEach(({ name, instance, alternative, unfilteredPool }) => {
+    it(`should include ${name} in the default pool for data it fits well`, function () {
+      this.timeout(60000)
+      const data = instance.seed(5).sample(500)
+      if (unfilteredPool) {
+        const withoutOverride = guess(data)
+        assert(withoutOverride.some(r => r.name === name))
+      }
+      // Confirms the distribution really is a viable, fittable candidate for this data,
+      // not just incidentally present in the default-pool result.
+      const withOverride = guess(data, { candidates: [instance.constructor, alternative] })
+      assert.strictEqual(withOverride[0].name, name)
+    })
   })
 
   it('should exclude a symmetric-only candidate when sample skewness is strongly non-zero', () => {
