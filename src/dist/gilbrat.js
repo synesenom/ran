@@ -16,5 +16,9 @@ export default class Gilbrat extends LogNormal {
   /** */
   constructor () {
     super(0, 1)
+
+    // Gilbrat has 0 free parameters (both mu and sigma are fixed constants); override the 2 inherited from LogNormal/Normal
+    // solutions/distribution/2026-06-07-2138-continuous-subclass-natural-params.md
+    this.k = 0
   }
 }

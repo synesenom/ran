@@ -25,6 +25,10 @@ export default class Bates extends IrwinHall {
     const ni = Math.round(n)
     super(ni)
 
+    // Bates has 3 free parameters (n, a, b); override the 1 inherited from IrwinHall
+    // solutions/distribution/2026-06-07-2138-continuous-subclass-natural-params.md
+    this.k = 3
+
     // Validate parameters
     this.p = Object.assign(this.p, { a, b })
     Distribution.validate({ a, b, n: ni }, [

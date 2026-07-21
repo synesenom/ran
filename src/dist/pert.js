@@ -21,6 +21,10 @@ export default class PERT extends Beta {
   constructor (a, b, c) {
     super((4 * b + c - 5 * a) / (c - a), (5 * c - a - 4 * b) / (c - a))
 
+    // PERT has 3 free parameters (a, b, c); override the 2 inherited from Beta
+    // solutions/distribution/2026-06-07-2138-continuous-subclass-natural-params.md
+    this.k = 3
+
     // Validate parameters
     this.p = Object.assign(this.p, { a, b, c })
     Distribution.validate({ a, b, c }, [

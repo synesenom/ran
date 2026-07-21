@@ -20,6 +20,10 @@ export default class QExponential extends GeneralizedPareto {
   constructor (q, lambda) {
     super(0, 1 / (lambda * (2 - q)), (q - 1) / (2 - q))
 
+    // QExponential has 2 free parameters (q, lambda); override the 3 inherited from GeneralizedPareto
+    // solutions/distribution/2026-06-07-2138-continuous-subclass-natural-params.md
+    this.k = 2
+
     // Validate parameters
     Distribution.validate({ q, lambda }, [
       'q < 2',
