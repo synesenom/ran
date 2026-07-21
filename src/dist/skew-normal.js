@@ -24,6 +24,10 @@ export default class SkewNormal extends Normal {
   constructor (xi, omega, alpha) {
     super(xi, omega)
 
+    // SkewNormal has 3 free parameters (xi, omega, alpha); override the 2 inherited from Normal
+    // solutions/distribution/2026-06-07-2138-continuous-subclass-natural-params.md
+    this.k = 3
+
     // Add new parameter
     this.p = Object.assign(this.p, { xi, omega, alpha })
 
