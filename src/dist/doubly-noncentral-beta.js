@@ -80,6 +80,8 @@ export default class DoublyNoncentralBeta extends Distribution {
    * the default optimizer's result within ordinary finite-sample noise) while bounding worst-case
    * cost to roughly 1-2s instead of 13-30s+ on mismatched data.
    *
+   * @method fit
+   * @memberof ran.dist.DoublyNoncentralBeta
    * @param {number[]} data Array of observations to fit.
    * @returns {DoublyNoncentralBeta} A new instance of the same distribution with MLE parameters.
    */

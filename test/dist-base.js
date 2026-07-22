@@ -253,9 +253,16 @@ describe('dist', () => {
           dist.DoublyNoncentralBeta.prototype._pdf = origPdf
         }
 
-        assert(pdfCalls < 300000, `fit() made ${pdfCalls} _pdf calls, expected well under 300000`)
+        // Lower bound guards against a future regression where fit() short-circuits without
+        // actually running Powell (which would trivially satisfy an upper-bound-only assertion).
+        assert(pdfCalls > data.length, `fit() made only ${pdfCalls} _pdf calls, expected the optimizer to run`)
+        assert(pdfCalls < 200000, `fit() made ${pdfCalls} _pdf calls, expected well under 200000`)
         assert(result instanceof dist.DoublyNoncentralF)
         assert(Number.isFinite(result.p.d1) && Number.isFinite(result.p.d2))
+        // Confirms the bounded search still improves on the initial guess rather than merely
+        // terminating early with an unoptimized fit.
+        const init = new dist.DoublyNoncentralF(...dist.DoublyNoncentralF._fitInit(data))
+        assert(result.lnL(data) >= init.lnL(data), 'fit() result should not be worse than the initial guess')
       })
 
       it('Pareto.fit should recover xmin close to min(data)', () => {
