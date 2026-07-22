@@ -411,15 +411,49 @@ export default class DoublyNoncentralBeta extends Distribution {
    * @private
    */
   static _poissonWeights (l1, l2, r0, s0) {
-    // Guard l=0: 0*log(0) = NaN by IEEE 754, but the Poisson weight e^0 * 0^0 / 0! = 1.
-    // (Never actually read: _pdf/_cdf both short-circuit away from this path when lambda=0.)
-    const rawR = l1 === 0 ? 0 : r0 * Math.log(l1) - logGamma(r0 + 1)
-    const rawS = l2 === 0 ? 0 : s0 * Math.log(l2) - logGamma(s0 + 1)
+    const rawR = DoublyNoncentralBeta._rawPoissonExponent(l1, r0)
+    const rawS = DoublyNoncentralBeta._rawPoissonExponent(l2, s0)
     const deferScale = rawR < 700 && rawS < 700 && l1 + l2 < 700
     return {
-      pr0: l1 === 0 ? 1 : Math.exp(deferScale ? rawR : rawR - l1),
-      ps0: l2 === 0 ? 1 : Math.exp(deferScale ? rawS : rawS - l2),
+      pr0: DoublyNoncentralBeta._normalizedWeight(l1, rawR, deferScale),
+      ps0: DoublyNoncentralBeta._normalizedWeight(l2, rawS, deferScale),
       outerScale: deferScale ? Math.exp(-l1 - l2) : 1
     }
+  }
+
+  /**
+   * Unnormalized log-Poisson-weight exponent r*log(l) - logGamma(r+1) (i.e. log(l^r/r!)).
+   * Guards l=0: 0*log(0) = NaN by IEEE 754, but the Poisson weight e^0 * 0^0 / 0! = 1, so the
+   * exponent is 0 (never actually read downstream: _pdf/_cdf both short-circuit away from this
+   * path when lambda=0).
+   *
+   * @method _rawPoissonExponent
+   * @memberof ran.dist.DoublyNoncentralBeta
+   * @param {number} l lambda / 2.
+   * @param {number} r round(l).
+   * @returns {number} The unnormalized log-Poisson-weight exponent.
+   * @private
+   */
+  static _rawPoissonExponent (l, r) {
+    return l === 0 ? 0 : r * Math.log(l) - logGamma(r + 1)
+  }
+
+  /**
+   * exp(raw) if deferring exp(-l) to _pdf/_cdf's outerScale is safe, otherwise exp(raw - l)
+   * (folding -l in directly) — see _poissonWeights for the full rationale.
+   *
+   * @method _normalizedWeight
+   * @memberof ran.dist.DoublyNoncentralBeta
+   * @param {number} l lambda / 2.
+   * @param {number} raw The unnormalized log-Poisson-weight exponent from _rawPoissonExponent.
+   * @param {boolean} deferScale Whether deferring exp(-l) to a later outerScale multiplication is safe.
+   * @returns {number} pr0 or ps0.
+   * @private
+   */
+  static _normalizedWeight (l, raw, deferScale) {
+    if (l === 0) {
+      return 1
+    }
+    return Math.exp(deferScale ? raw : raw - l)
   }
 }
