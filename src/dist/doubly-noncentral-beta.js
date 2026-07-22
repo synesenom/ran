@@ -60,8 +60,12 @@ export default class DoublyNoncentralBeta extends Distribution {
       s0,
       // Guard l=0: 0*log(0) = NaN by IEEE 754, but the Poisson weight e^0 * 0^0 / 0! = 1.
       // (Never actually read: _pdf/_cdf both short-circuit away from this path when lambda=0.)
-      pr0: l1 === 0 ? 1 : Math.exp(r0 * Math.log(l1) - logGamma(r0 + 1)),
-      ps0: l2 === 0 ? 1 : Math.exp(s0 * Math.log(l2) - logGamma(s0 + 1)),
+      // -l1/-l2 folded in directly (mirroring NoncentralBeta's p0) rather than deferred to a
+      // separate exp(-l1-l2) factor in _pdf/_cdf: the unnormalized l1^r0/r0! alone overflows
+      // Number.MAX_VALUE once l1 exceeds ~709 (lambda1 exceeds ~1418), long before the
+      // compensating exp(-l1) is ever applied (issue #1075).
+      pr0: l1 === 0 ? 1 : Math.exp(-l1 + r0 * Math.log(l1) - logGamma(r0 + 1)),
+      ps0: l2 === 0 ? 1 : Math.exp(-l2 + s0 * Math.log(l2) - logGamma(s0 + 1)),
       b0: fnBeta(alpha + r0, beta + s0)
     }
   }
@@ -143,7 +147,7 @@ export default class DoublyNoncentralBeta extends Distribution {
     const ctx = { y, ab, l1, l2, r0, s0, pr0, ps0, yr0, ys0, b0 }
 
     const z = this._pdfRBackward(ctx, this._pdfRForward(ctx))
-    return Math.exp(-l1 - l2) * z / Math.pow(1 - x, 2)
+    return z / Math.pow(1 - x, 2)
   }
 
   _cdf (x) {
@@ -164,7 +168,7 @@ export default class DoublyNoncentralBeta extends Distribution {
     const ib0 = regularizedBetaIncomplete(this.p.alpha + r0, betaParam + s0, x)
     const ctx = { l1, l2, r0, s0, pr0, ps0, sBeta0, xa0, xb0, b0, ib0, x }
 
-    return clamp(Math.exp(-l1 - l2) * this._cdfRBackward(ctx, this._cdfRForward(ctx)))
+    return clamp(this._cdfRBackward(ctx, this._cdfRForward(ctx)))
   }
 
   // ─── PROTECTED STATIC ─────────────────────────────────────────────────────
