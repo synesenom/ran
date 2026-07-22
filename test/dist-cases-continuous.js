@@ -4548,6 +4548,13 @@ export default [{
 }, {
   name: 'QExponential',
   // GP canonical: xi=(q-1)/(2-q), sigma=1/(lam*(2-q)); mpmath dps=50
+  // No representable q maps exactly to xi=1/2 (q=4/3 gives xi=0.49999999999999983, the nearest
+  // representable q above gives xi=0.5000000000000003 — the exact boundary is unreachable in IEEE-754,
+  // same class of gap as the q=1.2/q=4/3 cases excluded by
+  // solutions/distribution/2026-06-09-1400-qexponential-parent-params-and-ieee754-boundaries.md).
+  // The xi>=0.5 -> NaN threshold itself is exercised directly on GeneralizedPareto, whose formulas
+  // QExponential's skewness()/kurtosis() reuse verbatim: see the xi=0.5 case at line ~2124 below
+  // (`{ params: [0, 2, 0.5], mean: 4, variance: Infinity, skewness: NaN, kurtosis: NaN }`).
   moments: [
     // q=1 → standard Exponential: all moments match Exponential(1)
     { params: [1, 1], mean: 1, variance: 1, skewness: 2, kurtosis: 6, tol: 1e-14 },
@@ -4555,12 +4562,13 @@ export default [{
     { params: [0.5, 2], mean: 0.25, variance: 0.0375, skewness: 0.8606629658238705, kurtosis: 2 / 21, tol: 1e-14 },
     // exact boundary q=5/4 (xi=1/3 in IEEE 754): skewness and kurtosis diverge; mean=2, var=12
     { params: [1.25, 1], mean: 2, variance: 12, skewness: Infinity, kurtosis: Infinity, tol: 1e-14 },
-    // exact boundary q=3/2 (xi=1 in IEEE 754): all four moments diverge
-    { params: [1.5, 1], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
-    // above q=3/2 (xi > 1): all four moments diverge
-    { params: [1.501, 1], mean: Infinity, variance: Infinity, skewness: Infinity, kurtosis: Infinity },
-    // above q=4/3 (xi > 1/2): variance and higher diverge; mean=10/3
-    { params: [1.35, 1], mean: 10 / 3, variance: Infinity, skewness: Infinity, kurtosis: Infinity, tol: 1e-14 },
+    // exact boundary q=3/2 (xi=1 in IEEE 754): mean/variance diverge; xi>=1/2 makes the standardized
+    // skewness/kurtosis ratios indeterminate (∞/∞), matching GeneralizedPareto's own NaN convention
+    { params: [1.5, 1], mean: Infinity, variance: Infinity, skewness: NaN, kurtosis: NaN },
+    // above q=3/2 (xi > 1): mean/variance diverge; skewness/kurtosis NaN (xi>=1/2, see above)
+    { params: [1.501, 1], mean: Infinity, variance: Infinity, skewness: NaN, kurtosis: NaN },
+    // above q=4/3 (xi > 1/2): variance diverges; skewness/kurtosis NaN (xi>=1/2, see above); mean=10/3
+    { params: [1.35, 1], mean: 10 / 3, variance: Infinity, skewness: NaN, kurtosis: NaN, tol: 1e-14 },
     // above q=5/4 (xi > 1/3): skewness and kurtosis diverge
     { params: [1.26, 1], mean: 25 / 12, variance: 14.599116161616163, skewness: Infinity, kurtosis: Infinity, tol: 1e-12 },
     // above q=6/5 (xi > 1/4): only kurtosis diverges

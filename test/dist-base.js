@@ -732,11 +732,8 @@ describe('dist', () => {
         const data = new dist.QExponential(0.5, 2).seed(42).sample(500)
         const result = dist.QExponential.fit(data)
         assert(result instanceof dist.QExponential)
-        // Reconstruct q and lambda from GP params: xi=(q-1)/(2-q), sigma=1/(lambda*(2-q))
-        const q = (2 * result.p.xi + 1) / (result.p.xi + 1)
-        const lambda = (result.p.xi + 1) / result.p.sigma
-        assert(Math.abs(q - 0.5) < 0.2)
-        assert(Math.abs(lambda - 2) < 0.5)
+        assert(Math.abs(result.params().q - 0.5) < 0.2)
+        assert(Math.abs(result.params().lambda - 2) < 0.5)
       })
 
       it('InverseGaussian._fitInit should handle constant data via variance fallback', () => {
@@ -1059,6 +1056,12 @@ describe('dist', () => {
       it('BirnbaumSaunders.params().mu holds the constructor value, not the leaked Normal(0,1) placeholder', () => {
         const d = new dist.BirnbaumSaunders(5, 2, 2)
         assert.strictEqual(d.params().mu, 5)
+      })
+
+      it('QExponential.params() returns { q, lambda }', () => {
+        // Distinct values so a q/lambda transposition would fail
+        const d = new dist.QExponential(0.5, 2)
+        assert.deepEqual(d.params(), { q: 0.5, lambda: 2 })
       })
 
       it('Bernoulli.fit().params().p recovers planted value within tolerance', () => {
