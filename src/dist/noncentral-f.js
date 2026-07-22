@@ -1,5 +1,7 @@
 import Distribution from './_distribution'
 import NoncentralBeta from './noncentral-beta'
+import noncentralChi2 from './_noncentral-chi2'
+import chi2 from './_chi2'
 
 /**
  * Probability density function for the [non-central F distribution]{@link https://en.wikipedia.org/wiki/Noncentral_F-distribution}:
@@ -24,8 +26,14 @@ export default class NoncentralF extends NoncentralBeta {
     const d2i = Math.round(d2)
     super(d1i / 2, d2i / 2, lambda)
 
+    // decisions/0039-reparametrizing-subclass-nontrivial-parent-delegate.md — NoncentralBeta's
+    // _pdf/_cdf are non-trivial series algorithms reading this.p.alpha/this.p.beta throughout, not
+    // a one-liner; cache a correctly-parameterized NoncentralBeta instance and delegate to it
+    // instead of duplicating its internals or rewriting NoncentralBeta itself.
+    this.ncBeta = new NoncentralBeta(d1i / 2, d2i / 2, lambda)
+
     // Validate parameters
-    this.p = Object.assign(this.p, { d1: d1i, d2: d2i, lambda })
+    this.p = { d1: d1i, d2: d2i, lambda }
     Distribution.validate({ d1: d1i, d2: d2i, lambda }, [
       'd1 > 0',
       'd2 > 0',
@@ -107,20 +115,29 @@ export default class NoncentralF extends NoncentralBeta {
   }
 
   _generator () {
-    // Direct sampling by transforming non-central beta variate
-    const x = super._generator()
-    return this.p.d2 * x / (this.p.d1 * (1 - x))
+    // Direct sampling by transforming non-central beta variate. Reimplemented against this.r
+    // directly (mirroring NoncentralBeta.prototype._generator) rather than delegating to the
+    // cached this.ncBeta, which owns its own independent PRNG stream.
+    const x = noncentralChi2(this.r, this.p.d1, this.p.lambda)
+    const y = chi2(this.r, this.p.d2)
+    const z = x / (x + y)
+    const beta = Math.abs(1 - z) < Number.EPSILON ? 1 - y / x : z
+    return this.p.d2 * beta / (this.p.d1 * (1 - beta))
   }
 
   _pdf (x) {
     if (x === 0) return 0
-    return this.p.d1 * this.p.d2 * super._pdf(this.p.d1 * x / (this.p.d2 + this.p.d1 * x)) / Math.pow(this.p.d2 + this.p.d1 * x, 2)
+    return this.p.d1 * this.p.d2 * this.ncBeta._pdf(this.p.d1 * x / (this.p.d2 + this.p.d1 * x)) / Math.pow(this.p.d2 + this.p.d1 * x, 2)
   }
 
   _cdf (x) {
     if (x === 0) return 0
     const y = this.p.d1 * x
-    return super._cdf(1 / (1 + this.p.d2 / y))
+    return this.ncBeta._cdf(1 / (1 + this.p.d2 / y))
+  }
+
+  _afterLoad () {
+    this.ncBeta = new NoncentralBeta(this.p.d1 / 2, this.p.d2 / 2, this.p.lambda)
   }
 
   static _fitInit (data) {

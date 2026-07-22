@@ -1580,7 +1580,7 @@ export default [{
   ]
 }, {
   name: 'ExponentiatedWeibull',
-  fit: { params: [2, 1.5, 2], seed: 42, n: 200, tolerances: { lambda2: 0.8, k: 0.6, alpha: 0.8 } },
+  fit: { params: [2, 1.5, 2], seed: 42, n: 200, tolerances: { lambda: 0.8, k: 0.6, alpha: 0.8 } },
   moments: [
     { params: [2, 2, 2], mean: 2.29159356449553, variance: 0.748598935162662, skewness: 0.50791025991201, kurtosis: 0.247917242170319, tol: 1e-10 },
     { params: [1, 1, 3], mean: 11 / 6, variance: 49 / 36, skewness: 502 / 343, kurtosis: 3.48104956268221, tol: 1e-10 },
@@ -2080,7 +2080,7 @@ export default [{
   ]
 }, {
   name: 'GeneralizedNormal',
-  fit: { params: [1, 2, 2], seed: 42, n: 300, tolerances: { mu: 0.3, alpha2: 0.5, beta2: 0.5 } },
+  fit: { params: [1, 2, 2], seed: 42, n: 300, tolerances: { mu: 0.3, alpha: 0.5, beta: 0.5 } },
   moments: [
     { params: [3, Math.SQRT2, 2], mean: 3, variance: 1, skewness: 0, tol: { mean: 1e-14, variance: 1e-12, skewness: 1e-14 } },
     { params: [0, 1, 1], kurtosis: 3, tol: 1e-10 },
@@ -2325,7 +2325,7 @@ export default [{
   ]
 }, {
   name: 'HalfGeneralizedNormal',
-  fit: { params: [2, 2], seed: 42, n: 300, tolerances: { alpha2: 0.5, beta2: 0.5 } },
+  fit: { params: [2, 2], seed: 42, n: 300, tolerances: { alpha: 0.5, beta: 0.5 } },
   moments: [
     { params: [2, 2], mean: 1.1283791670955126, tol: 1e-12 },
     { params: [1, 1], mean: 1, variance: 1, skewness: 2, kurtosis: 6, tol: { mean: 1e-12, variance: 1e-12, skewness: 1e-10, kurtosis: 1e-10 } }
@@ -5713,7 +5713,7 @@ export default [{
   ]
 }, {
   name: 'Weibull',
-  fit: { params: [2, 1.5], seed: 42, n: 200, tolerances: { lambda2: 0.5, k: 0.3 } },
+  fit: { params: [2, 1.5], seed: 42, n: 200, tolerances: { lambda: 0.5, k: 0.3 } },
   moments: [
     { params: [2, 2], mean: 1.7724538509055159, variance: 0.858407346410207, skewness: 0.631110657818942, kurtosis: 0.245089300687638 },
     { params: [1, 0.5], mean: 2, variance: 20, skewness: 6.61876121339938, kurtosis: 84.72 },

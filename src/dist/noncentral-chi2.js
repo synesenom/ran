@@ -23,6 +23,7 @@ export default class NoncentralChi2 extends Distribution {
 
     // Validate parameters
     const ki = Math.round(k)
+    /** @type {*} */
     this.p = { k: ki, lambda }
     Distribution.validate({ k: ki, lambda }, [
       'k > 0',

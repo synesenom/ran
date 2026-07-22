@@ -1,5 +1,7 @@
 import Beta from './beta'
 import Distribution from './_distribution'
+import { regularizedBetaIncomplete } from '../special'
+import rBeta from './_beta'
 
 /**
  * Probability density function for the [F distribution]{@link https://en.wikipedia.org/wiki/F-distribution} (or Fisher-Snedecor's F
@@ -24,8 +26,13 @@ export default class F extends Beta {
     const d2i = Math.round(d2)
     super(d1i / 2, d2i / 2)
 
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p;
+    // Beta's alpha/beta move to this.c for _generator/_cdf, which otherwise delegated to
+    // Beta.prototype and read them off this.p.
+    Object.assign(this.c, { alpha: d1i / 2, beta: d2i / 2 })
+
     // Validate parameters
-    this.p = Object.assign(this.p, { d1: d1i, d2: d2i })
+    this.p = { d1: d1i, d2: d2i }
     Distribution.validate({ d1: d1i, d2: d2i }, [
       'd1 > 0',
       'd2 > 0'
@@ -121,7 +128,7 @@ export default class F extends Beta {
 
   _generator () {
     // Direct sampling by transforming beta variate
-    const x = super._generator()
+    const x = rBeta(this.r, this.c.alpha, this.c.beta)
     return this.p.d2 * x / (this.p.d1 * (1 - x))
   }
 
@@ -132,6 +139,6 @@ export default class F extends Beta {
 
   _cdf (x) {
     const y = this.p.d1 * x
-    return super._cdf(1 / (1 + this.p.d2 / y))
+    return regularizedBetaIncomplete(this.c.alpha, this.c.beta, 1 / (1 + this.p.d2 / y))
   }
 }

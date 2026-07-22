@@ -1,4 +1,5 @@
-import { gammaLowerIncompleteInv, logGamma } from '../special'
+import { gammaLowerIncomplete, gammaLowerIncompleteInv, logGamma } from '../special'
+import gamma from './_gamma'
 import Gamma from './gamma'
 import Distribution from './_distribution'
 
@@ -25,8 +26,14 @@ export default class GeneralizedGamma extends Gamma {
     // GeneralizedGamma has 3 free parameters (a, d, p); override the 2 inherited from Gamma
     this.k = 3
 
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p;
+    // Gamma's alpha/beta move to this.c for _q/_generator/_pdf/_cdf, which otherwise delegated
+    // to Gamma.prototype and read them off this.p.
+    Object.assign(this.c, { alpha: d / p, beta: Math.pow(a, -p) })
+
     // Validate parameters
-    this.p = Object.assign(this.p, { a, d, p })
+    /** @type {*} */
+    this.p = { a, d, p }
     Distribution.validate({ a, d, p }, [
       'a > 0',
       'd > 0',
@@ -54,49 +61,45 @@ export default class GeneralizedGamma extends Gamma {
 
   _q (p) {
     // GeneralizedGamma: X = Y^(1/p_shape) where Y ~ Gamma(d/p_shape, a^-p_shape)
-    return Math.pow(gammaLowerIncompleteInv(this.p.alpha, p) / this.p.beta, 1 / this.p.p)
+    return Math.pow(gammaLowerIncompleteInv(this.c.alpha, p) / this.c.beta, 1 / this.p.p)
   }
 
   _generator () {
     // Direct sampling by transforming gamma variate
-    return Math.pow(super._generator(), 1 / this.p.p)
+    return Math.pow(gamma(this.r, this.c.alpha, this.c.beta), 1 / this.p.p)
   }
 
   _pdf (x) {
-    return this.p.p * Math.pow(x, this.p.p - 1) * super._pdf(Math.pow(x, this.p.p))
+    const y = Math.pow(x, this.p.p)
+    return this.p.p * Math.pow(x, this.p.p - 1) * Math.exp(this.c.logNorm - this.c.beta * y) * Math.pow(y, this.c.alpha - 1)
   }
 
   _cdf (x) {
-    return super._cdf(Math.pow(x, this.p.p))
+    return gammaLowerIncomplete(this.c.alpha, this.c.beta * Math.pow(x, this.p.p))
   }
 
   /**
    * @returns {number} First raw moment: a*Gamma((d+1)/p)/Gamma(d/p).
    */
   mean () {
-    return this.p.a * Math.exp(this.c.lG1 - this.c.lG0)
+    return this._rawMoment(1)
   }
 
   /**
    * @returns {number} Second central moment derived from first two raw moments.
    */
   variance () {
-    const { a } = this.p
-    const { lG0, lG1, lG2 } = this.c
-    const m1 = a * Math.exp(lG1 - lG0)
-    const m2 = a * a * Math.exp(lG2 - lG0)
-    return m2 - m1 * m1
+    const m1 = this._rawMoment(1)
+    return this._rawMoment(2) - m1 * m1
   }
 
   /**
    * @returns {number} Standardised third central moment from raw moments.
    */
   skewness () {
-    const { a } = this.p
-    const { lG0, lG1, lG2, lG3 } = this.c
-    const m1 = a * Math.exp(lG1 - lG0)
-    const m2 = a * a * Math.exp(lG2 - lG0)
-    const m3 = a ** 3 * Math.exp(lG3 - lG0)
+    const m1 = this._rawMoment(1)
+    const m2 = this._rawMoment(2)
+    const m3 = this._rawMoment(3)
     const v = m2 - m1 * m1
     return (m3 - 3 * m1 * m2 + 2 * m1 ** 3) / Math.pow(v, 1.5)
   }
@@ -105,12 +108,10 @@ export default class GeneralizedGamma extends Gamma {
    * @returns {number} Excess kurtosis from the first four raw moments.
    */
   kurtosis () {
-    const { a } = this.p
-    const { lG0, lG1, lG2, lG3, lG4 } = this.c
-    const m1 = a * Math.exp(lG1 - lG0)
-    const m2 = a * a * Math.exp(lG2 - lG0)
-    const m3 = a ** 3 * Math.exp(lG3 - lG0)
-    const m4 = a ** 4 * Math.exp(lG4 - lG0)
+    const m1 = this._rawMoment(1)
+    const m2 = this._rawMoment(2)
+    const m3 = this._rawMoment(3)
+    const m4 = this._rawMoment(4)
     const v = m2 - m1 * m1
     return (m4 - 4 * m1 * m3 + 6 * m1 * m1 * m2 - 3 * m1 ** 4) / (v * v) - 3
   }
@@ -121,5 +122,11 @@ export default class GeneralizedGamma extends Gamma {
     const mean = data.reduce((s, x) => s + x, 0) / n
     const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
     return [variance / mean, mean ** 2 / variance, 1]
+  }
+
+  // Shared by mean/variance/skewness/kurtosis so each doesn't independently recompute the same
+  // lower-order raw moments.
+  _rawMoment (n) {
+    return this.p.a ** n * Math.exp(this.c['lG' + n] - this.c.lG0)
   }
 }

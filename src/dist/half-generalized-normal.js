@@ -37,8 +37,8 @@ export default class HalfGeneralizedNormal extends GeneralizedNormal {
    * @returns {number} Mean of the distribution.
    */
   mean () {
-    // lG0..lG4 = logGamma(j/beta2) for j=1..5, already cached by GeneralizedGamma's constructor.
-    return this.p.alpha2 * Math.exp(this.c.lG1 - this.c.lG0)
+    // lG0..lG4 = logGamma(j/beta) for j=1..5, already cached by GeneralizedGamma's constructor.
+    return this.p.alpha * Math.exp(this.c.lG1 - this.c.lG0)
   }
 
   /**
@@ -46,8 +46,8 @@ export default class HalfGeneralizedNormal extends GeneralizedNormal {
    */
   variance () {
     const { lG0, lG1, lG2 } = this.c
-    const m1 = this.p.alpha2 * Math.exp(lG1 - lG0)
-    const m2 = this.p.alpha2 ** 2 * Math.exp(lG2 - lG0)
+    const m1 = this.p.alpha * Math.exp(lG1 - lG0)
+    const m2 = this.p.alpha ** 2 * Math.exp(lG2 - lG0)
     return m2 - m1 * m1
   }
 
@@ -56,9 +56,9 @@ export default class HalfGeneralizedNormal extends GeneralizedNormal {
    */
   skewness () {
     const { lG0, lG1, lG2, lG3 } = this.c
-    const m1 = this.p.alpha2 * Math.exp(lG1 - lG0)
-    const m2 = this.p.alpha2 ** 2 * Math.exp(lG2 - lG0)
-    const m3 = this.p.alpha2 ** 3 * Math.exp(lG3 - lG0)
+    const m1 = this.p.alpha * Math.exp(lG1 - lG0)
+    const m2 = this.p.alpha ** 2 * Math.exp(lG2 - lG0)
+    const m3 = this.p.alpha ** 3 * Math.exp(lG3 - lG0)
     const v = m2 - m1 * m1
     return (m3 - 3 * m1 * m2 + 2 * m1 ** 3) / Math.pow(v, 1.5)
   }
@@ -68,17 +68,19 @@ export default class HalfGeneralizedNormal extends GeneralizedNormal {
    */
   kurtosis () {
     const { lG0, lG1, lG2, lG3, lG4 } = this.c
-    const m1 = this.p.alpha2 * Math.exp(lG1 - lG0)
-    const m2 = this.p.alpha2 ** 2 * Math.exp(lG2 - lG0)
-    const m3 = this.p.alpha2 ** 3 * Math.exp(lG3 - lG0)
-    const m4 = this.p.alpha2 ** 4 * Math.exp(lG4 - lG0)
+    const m1 = this.p.alpha * Math.exp(lG1 - lG0)
+    const m2 = this.p.alpha ** 2 * Math.exp(lG2 - lG0)
+    const m3 = this.p.alpha ** 3 * Math.exp(lG3 - lG0)
+    const m4 = this.p.alpha ** 4 * Math.exp(lG4 - lG0)
     const v = m2 - m1 * m1
     return (m4 - 4 * m1 * m3 + 6 * m1 ** 2 * m2 - 3 * m1 ** 4) / (v * v) - 3
   }
 
   _q (p) {
-    // HalfGeneralizedNormal CDF = GenGamma.cdf(x); quantile is the plain GenGamma inverse
-    return Math.pow(gammaLowerIncompleteInv(this.p.alpha, p) / this.p.beta, 1 / this.p.p)
+    // HalfGeneralizedNormal CDF = GenGamma.cdf(x); quantile is the plain GenGamma inverse.
+    // this.c.alpha/this.c.beta are GeneralizedGamma's own Gamma-space constants (unaffected by
+    // this class); the GG-level shape exponent equals this class's own natural beta.
+    return Math.pow(gammaLowerIncompleteInv(this.c.alpha, p) / this.c.beta, 1 / this.p.beta)
   }
 
   _generator () {

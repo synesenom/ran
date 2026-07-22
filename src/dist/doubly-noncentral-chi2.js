@@ -1,5 +1,6 @@
 import Distribution from './_distribution'
 import NoncentralChi2 from './noncentral-chi2'
+import noncentralChi2 from './_noncentral-chi2'
 import powell from '../algorithms/powell'
 
 /**
@@ -30,8 +31,14 @@ export default class DoublyNoncentralChi2 extends NoncentralChi2 {
     // See solutions/distribution/2026-05-21-1300-doubly-noncentral-chi2-inherit-noncentral-chi2.md
     super(k1i + k2i, lambda1 + lambda2)
 
-    // Merge original params alongside the collapsed k/lambda set by super
-    this.p = Object.assign(this.p, { k1: k1i, k2: k2i, lambda1, lambda2 })
+    // decisions/0039-reparametrizing-subclass-nontrivial-parent-delegate.md — NoncentralChi2's
+    // _pdf/_cdf/_generator/moments are non-trivial (Bessel-function branches), not one-liners;
+    // cache a correctly-parameterized NoncentralChi2 instance and delegate every currently-inherited
+    // method to it instead of duplicating its internals or rewriting NoncentralChi2 itself.
+    this.ncChi2 = new NoncentralChi2(k1i + k2i, lambda1 + lambda2)
+
+    // Natural params only in this.p — no leaked collapsed k/lambda
+    this.p = { k1: k1i, k2: k2i, lambda1, lambda2 }
 
     // Validate the four individual parameters (super already validated collapsed form)
     Distribution.validate({ k1: k1i, k2: k2i, lambda1, lambda2 }, [
@@ -40,6 +47,34 @@ export default class DoublyNoncentralChi2 extends NoncentralChi2 {
       'lambda1 >= 0',
       'lambda2 >= 0'
     ])
+  }
+
+  /**
+   * @returns {number} The mean of the distribution.
+   */
+  mean () {
+    return this.ncChi2.mean()
+  }
+
+  /**
+   * @returns {number} The variance of the distribution.
+   */
+  variance () {
+    return this.ncChi2.variance()
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    return this.ncChi2.skewness()
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    return this.ncChi2.kurtosis()
   }
 
   /** @inheritdoc */
@@ -67,5 +102,23 @@ export default class DoublyNoncentralChi2 extends NoncentralChi2 {
     }
     const k = Math.max(1, Math.round(kTot / 2))
     return new DoublyNoncentralChi2(k, Math.max(1, kTot - k), lambdaTot / 2, lambdaTot / 2)
+  }
+
+  _pdf (x) {
+    return this.ncChi2._pdf(x)
+  }
+
+  _cdf (x) {
+    return this.ncChi2._cdf(x)
+  }
+
+  _generator () {
+    // Reimplemented against this.r directly rather than delegating to the cached this.ncChi2,
+    // which owns its own independent PRNG stream.
+    return noncentralChi2(this.r, this.ncChi2.p.k, this.ncChi2.p.lambda)
+  }
+
+  _afterLoad () {
+    this.ncChi2 = new NoncentralChi2(this.p.k1 + this.p.k2, this.p.lambda1 + this.p.lambda2)
   }
 }

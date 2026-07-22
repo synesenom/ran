@@ -25,9 +25,11 @@ export default class Weibull extends Exponential {
     // Weibull has 2 free parameters (lambda, k); override the 1 inherited from Exponential
     this.k = 2
 
-    // Validate parameters
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p;
+    // this.c.expNegLambda (= exp(-1), set by Exponential's own super(1) call) already holds the
+    // dummy rate-1 constant that _pdf/_cdf inline below need — no new this.c value required.
     /** @type {*} */
-    this.p = Object.assign(this.p, { lambda2: lambda, k })
+    this.p = { lambda, k }
     Distribution.validate({ lambda, k }, [
       'lambda > 0',
       'k > 0'
@@ -43,7 +45,7 @@ export default class Weibull extends Exponential {
     }]
 
     // Speed-up constants (merged: Exponential's constructor already set this.c.expNegLambda,
-    // which Weibull's _pdf/_cdf still rely on via super._pdf/super._cdf)
+    // which Weibull's _pdf/_cdf inline directly)
     Object.assign(this.c, {
       g1: gamma(1 + 1 / k),
       g2: gamma(1 + 2 / k),
@@ -56,7 +58,7 @@ export default class Weibull extends Exponential {
    * @returns {number} The mean of the distribution.
    */
   mean () {
-    return this.p.lambda2 * this.c.g1
+    return this.p.lambda * this.c.g1
   }
 
   /**
@@ -64,7 +66,7 @@ export default class Weibull extends Exponential {
    */
   variance () {
     const { g1, g2 } = this.c
-    return this.p.lambda2 * this.p.lambda2 * (g2 - g1 * g1)
+    return this.p.lambda * this.p.lambda * (g2 - g1 * g1)
   }
 
   /**
@@ -90,17 +92,21 @@ export default class Weibull extends Exponential {
     return this._q(this.r.next())
   }
 
+  // Exponential.prototype._pdf/_cdf read this.p.lambda directly (unlike Beta's this.c-only _pdf),
+  // so once this.p.lambda holds the real scale (not the dummy rate-1 passed to super(1)),
+  // delegating to super._pdf/_cdf would evaluate the wrong-rate exponential; inlined instead using
+  // the dummy's cached this.c.expNegLambda (= exp(-1)).
   _pdf (x) {
-    const t = x / this.p.lambda2
-    return this.p.k * Math.pow(t, this.p.k - 1) * super._pdf(Math.pow(t, this.p.k)) / this.p.lambda2
+    const t = x / this.p.lambda
+    return this.p.k * Math.pow(t, this.p.k - 1) * Math.pow(this.c.expNegLambda, Math.pow(t, this.p.k)) / this.p.lambda
   }
 
   _cdf (x) {
-    return super._cdf(Math.pow(x / this.p.lambda2, this.p.k))
+    return -Math.expm1(-Math.pow(x / this.p.lambda, this.p.k))
   }
 
   _q (p) {
-    return this.p.lambda2 * Math.pow(-Math.log(1 - p), 1 / this.p.k)
+    return this.p.lambda * Math.pow(-Math.log(1 - p), 1 / this.p.k)
   }
 
   static _fitInit (data) {

@@ -25,6 +25,7 @@ export default class NoncentralBeta extends Distribution {
     super('continuous', 3)
 
     // Validate parameters.
+    /** @type {*} */
     this.p = { alpha, beta, lambda }
     Distribution.validate({ alpha, beta, lambda }, [
       'alpha > 0',
