@@ -23,7 +23,7 @@ export default class DoublyNoncentralF extends DoublyNoncentralBeta {
   constructor (d1, d2, lambda1, lambda2) {
     super(d1 / 2, d2 / 2, lambda1, lambda2)
 
-    // decisions/0038-reparametrizing-subclass-nontrivial-parent-delegate.md — DoublyNoncentralBeta's
+    // decisions/0039-reparametrizing-subclass-nontrivial-parent-delegate.md — DoublyNoncentralBeta's
     // _pdf/_cdf (plus six private helpers) are non-trivial series algorithms reading this.p.alpha/
     // this.p.beta throughout, not a one-liner; cache a correctly-parameterized DoublyNoncentralBeta
     // instance (built from the un-rounded d1/d2, preserving today's exact behavior) and delegate to

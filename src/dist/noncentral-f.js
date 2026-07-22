@@ -26,7 +26,7 @@ export default class NoncentralF extends NoncentralBeta {
     const d2i = Math.round(d2)
     super(d1i / 2, d2i / 2, lambda)
 
-    // decisions/0038-reparametrizing-subclass-nontrivial-parent-delegate.md — NoncentralBeta's
+    // decisions/0039-reparametrizing-subclass-nontrivial-parent-delegate.md — NoncentralBeta's
     // _pdf/_cdf are non-trivial series algorithms reading this.p.alpha/this.p.beta throughout, not
     // a one-liner; cache a correctly-parameterized NoncentralBeta instance and delegate to it
     // instead of duplicating its internals or rewriting NoncentralBeta itself.

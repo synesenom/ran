@@ -1,4 +1,4 @@
-# ADR-0038: Reparametrizing Subclasses of Non-Trivial Parents Use a Cached Delegate Instance
+# ADR-0039: Reparametrizing Subclasses of Non-Trivial Parents Use a Cached Delegate Instance
 
 **Date**: 2026-07-22
 **Status**: Accepted

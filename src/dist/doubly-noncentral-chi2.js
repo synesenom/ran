@@ -31,7 +31,7 @@ export default class DoublyNoncentralChi2 extends NoncentralChi2 {
     // See solutions/distribution/2026-05-21-1300-doubly-noncentral-chi2-inherit-noncentral-chi2.md
     super(k1i + k2i, lambda1 + lambda2)
 
-    // decisions/0038-reparametrizing-subclass-nontrivial-parent-delegate.md — NoncentralChi2's
+    // decisions/0039-reparametrizing-subclass-nontrivial-parent-delegate.md — NoncentralChi2's
     // _pdf/_cdf/_generator/moments are non-trivial (Bessel-function branches), not one-liners;
     // cache a correctly-parameterized NoncentralChi2 instance and delegate every currently-inherited
     // method to it instead of duplicating its internals or rewriting NoncentralChi2 itself.
