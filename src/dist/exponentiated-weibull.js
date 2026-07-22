@@ -27,7 +27,9 @@ export default class ExponentiatedWeibull extends Weibull {
     this.k = 3
 
     // Validate parameters.
-    this.p = Object.assign(this.p, { lambda2: lambda, alpha })
+    // Weibull (fixed) already sets this.p = { lambda, k } with the real lambda — no leaked/dummy
+    // key to drop, so adding alpha is a plain read-then-replace, not a merge.
+    this.p = { lambda: this.p.lambda, k: this.p.k, alpha }
     Distribution.validate({ lambda, k, alpha }, [
       'lambda > 0',
       'k > 0',
@@ -57,7 +59,7 @@ export default class ExponentiatedWeibull extends Weibull {
   _ewRawMoment (n) {
     // E[X^n] = λ^n · α · Γ(1+n/k) · Σ_{j=0}^{∞} (−1)^j · C(α−1,j) / (j+1)^{1+n/k}
     // Generalized binomial series; terminates in O(α) steps for integer α
-    const { lambda2: lambda, k, alpha } = this.p
+    const { lambda, k, alpha } = this.p
     const gn = gamma(1 + n / k)
     let s = 0
     let binom = 1
@@ -117,7 +119,7 @@ export default class ExponentiatedWeibull extends Weibull {
   }
 
   _q (p) {
-    return this.p.lambda2 * Math.pow(-Math.log(1 - Math.pow(p, 1 / this.p.alpha)), 1 / this.p.k)
+    return this.p.lambda * Math.pow(-Math.log(1 - Math.pow(p, 1 / this.p.alpha)), 1 / this.p.k)
   }
 
   static _fitInit (data) {

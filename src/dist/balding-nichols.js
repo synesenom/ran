@@ -1,5 +1,7 @@
 import Beta from './beta'
 import Distribution from './_distribution'
+import { regularizedBetaIncomplete } from '../special'
+import rBeta from './_beta'
 
 /**
  * Probability density function for the [Balding-Nichols distribution]{@link https://en.wikipedia.org/wiki/Balding%E2%80%93Nichols_model}:
@@ -27,8 +29,15 @@ export default class BaldingNichols extends Beta {
       'p > 0', 'p < 1'
     ])
     const f = (1 - F) / F
+
     super(f * p, f * (1 - p))
-    this.p = Object.assign(this.p, { F, p })
+
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p;
+    // Beta's alpha/beta move to this.c for _generator/_cdf/skewness/kurtosis, which otherwise
+    // delegated to Beta.prototype and read them off this.p.
+    Object.assign(this.c, { alpha: f * p, beta: f * (1 - p) })
+
+    this.p = { F, p }
 
     // Set support
     this.s = [{
@@ -52,6 +61,34 @@ export default class BaldingNichols extends Beta {
    */
   variance () {
     return this.p.p * (1 - this.p.p) * this.p.F
+  }
+
+  /**
+   * @returns {number} The skewness of the distribution.
+   */
+  skewness () {
+    const { alpha, beta } = this.c
+    const s = alpha + beta
+    return 2 * (beta - alpha) * Math.sqrt(s + 1) / ((s + 2) * Math.sqrt(alpha * beta))
+  }
+
+  /**
+   * @returns {number} The excess kurtosis of the distribution.
+   */
+  kurtosis () {
+    const { alpha, beta } = this.c
+    const s = alpha + beta
+    return 6 * ((alpha - beta) ** 2 * (s + 1) - alpha * beta * (s + 2)) /
+      (alpha * beta * (s + 2) * (s + 3))
+  }
+
+  _generator () {
+    // Direct generation
+    return rBeta(this.r, this.c.alpha, this.c.beta)
+  }
+
+  _cdf (x) {
+    return regularizedBetaIncomplete(this.c.alpha, this.c.beta, x)
   }
 
   // Blocks Beta's log-barrier: fit() operates in (F, p) space, not (alpha, beta). See decisions/0017-beta-fit-penalty.md §3.

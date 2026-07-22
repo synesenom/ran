@@ -118,6 +118,65 @@ describe('dist', () => {
         assert.deepEqual(d.params(), { q: 0.5, lambda: 2 })
       })
 
+      it('F.params() returns { d1, d2 }', () => {
+        const d = new dist.F(4, 6)
+        assert.deepEqual(d.params(), { d1: 4, d2: 6 })
+      })
+
+      it('BaldingNichols.params() returns { F, p }', () => {
+        // Distinct values so an F/p transposition would fail
+        const d = new dist.BaldingNichols(0.2, 0.3)
+        assert.deepEqual(d.params(), { F: 0.2, p: 0.3 })
+      })
+
+      it('Weibull.params() returns { lambda, k }', () => {
+        const d = new dist.Weibull(2, 3)
+        assert.deepEqual(d.params(), { lambda: 2, k: 3 })
+      })
+
+      it('Weibull.params().lambda holds the constructor value, not the leaked Exponential(1) placeholder', () => {
+        const d = new dist.Weibull(2, 3)
+        assert.strictEqual(d.params().lambda, 2)
+      })
+
+      it('ExponentiatedWeibull.params() returns { lambda, k, alpha }', () => {
+        const d = new dist.ExponentiatedWeibull(2, 3, 1.5)
+        assert.deepEqual(d.params(), { lambda: 2, k: 3, alpha: 1.5 })
+      })
+
+      it('GeneralizedGamma.params() returns { a, d, p }', () => {
+        const d = new dist.GeneralizedGamma(2, 3, 1.5)
+        assert.deepEqual(d.params(), { a: 2, d: 3, p: 1.5 })
+      })
+
+      it('GeneralizedNormal.params() returns { mu, alpha, beta }', () => {
+        const d = new dist.GeneralizedNormal(1, 2, 3)
+        assert.deepEqual(d.params(), { mu: 1, alpha: 2, beta: 3 })
+      })
+
+      it('GeneralizedNormal.params().alpha/.beta hold the constructor values, not routed through the alpha2/beta2 workaround', () => {
+        const d = new dist.GeneralizedNormal(1, 2, 3)
+        assert.strictEqual(d.params().alpha, 2)
+        assert.strictEqual(d.params().beta, 3)
+      })
+
+      it('NoncentralF.params() returns { d1, d2, lambda }', () => {
+        const d = new dist.NoncentralF(4, 6, 2)
+        assert.deepEqual(d.params(), { d1: 4, d2: 6, lambda: 2 })
+      })
+
+      it('DoublyNoncentralF.params() returns { d1, d2, lambda1, lambda2 }', () => {
+        // Distinct values so a lambda1/lambda2 transposition would fail
+        const d = new dist.DoublyNoncentralF(4, 6, 1, 2)
+        assert.deepEqual(d.params(), { d1: 4, d2: 6, lambda1: 1, lambda2: 2 })
+      })
+
+      it('DoublyNoncentralChi2.params() returns { k1, k2, lambda1, lambda2 }', () => {
+        // Distinct values so a k1/k2 or lambda1/lambda2 transposition would fail
+        const d = new dist.DoublyNoncentralChi2(2, 3, 1, 2)
+        assert.deepEqual(d.params(), { k1: 2, k2: 3, lambda1: 1, lambda2: 2 })
+      })
+
       it('Bernoulli.fit().params().p recovers planted value within tolerance', () => {
         const data = new dist.Bernoulli(0.7).seed(42).sample(500)
         const result = dist.Bernoulli.fit(data)

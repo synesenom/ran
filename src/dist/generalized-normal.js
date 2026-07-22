@@ -1,4 +1,5 @@
-import { gammaLowerIncompleteInv } from '../special'
+import { gammaLowerIncomplete, gammaLowerIncompleteInv } from '../special'
+import gamma from './_gamma'
 import GeneralizedGamma from './generalized-gamma'
 import Distribution from './_distribution'
 
@@ -22,8 +23,11 @@ export default class GeneralizedNormal extends GeneralizedGamma {
   constructor (mu, alpha, beta) {
     super(alpha, 1, beta)
 
-    // Validate parameters
-    this.p = Object.assign(this.p, { mu, alpha2: alpha, beta2: beta })
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p.
+    // GeneralizedGamma's own fix (this file's parent) already replaces its this.p with its own
+    // { a, d, p } keys — no leaked Gamma-space alpha/beta to collide with here, so alpha/beta no
+    // longer need the alpha2/beta2 rename.
+    this.p = { mu, alpha, beta }
     Distribution.validate({ mu, alpha, beta }, [
       'alpha > 0',
       'beta > 0'
@@ -40,22 +44,32 @@ export default class GeneralizedNormal extends GeneralizedGamma {
   }
 
   _q (p) {
-    // GeneralizedNormal folds GeneralizedGamma over mu; invert the fold then shift by mu
-    const gg = Math.pow(gammaLowerIncompleteInv(this.p.alpha, p > 0.5 ? 2 * p - 1 : 1 - 2 * p) / this.p.beta, 1 / this.p.p)
+    // GeneralizedNormal folds GeneralizedGamma over mu; invert the fold then shift by mu.
+    // this.c.alpha/this.c.beta are GeneralizedGamma's own Gamma-space constants (unaffected by
+    // this class); the GG-level shape exponent equals this class's own natural beta.
+    const gg = Math.pow(gammaLowerIncompleteInv(this.c.alpha, p > 0.5 ? 2 * p - 1 : 1 - 2 * p) / this.c.beta, 1 / this.p.beta)
     return p > 0.5 ? this.p.mu + gg : this.p.mu - gg
   }
 
+  // GeneralizedGamma.prototype._generator/_pdf/_cdf read this.p.p (GeneralizedGamma's own natural
+  // shape key, numerically equal to this class's own beta) — no longer present once this.p is
+  // replaced with { mu, alpha, beta } — so these are inlined directly against this.c.alpha/
+  // this.c.beta/this.c.logNorm (GeneralizedGamma's/Gamma's own cached constants, unaffected by
+  // this class) and this.p.beta, instead of delegating to super.
   _generator () {
     // Transforming generalized gamma variate
-    return (this.r.next() > 0.5 ? 1 : -1) * Math.abs(super._generator()) + this.p.mu
+    return (this.r.next() > 0.5 ? 1 : -1) * Math.pow(gamma(this.r, this.c.alpha, this.c.beta), 1 / this.p.beta) + this.p.mu
   }
 
   _pdf (x) {
-    return super._pdf(Math.abs(x - this.p.mu)) / 2
+    const y = Math.abs(x - this.p.mu)
+    const t = Math.pow(y, this.p.beta)
+    return this.p.beta * Math.pow(y, this.p.beta - 1) * Math.exp(this.c.logNorm - this.c.beta * t) * Math.pow(t, this.c.alpha - 1) / 2
   }
 
   _cdf (x) {
-    return 0.5 * (1 + Math.sign(x - this.p.mu) * super._cdf(Math.abs(x - this.p.mu)))
+    const y = Math.abs(x - this.p.mu)
+    return 0.5 * (1 + Math.sign(x - this.p.mu) * gammaLowerIncomplete(this.c.alpha, this.c.beta * Math.pow(y, this.p.beta)))
   }
 
   /**
@@ -69,8 +83,8 @@ export default class GeneralizedNormal extends GeneralizedGamma {
    * @returns {number} Variance of the distribution.
    */
   variance () {
-    // lG0/lG2 = logGamma(1/beta2)/logGamma(3/beta2), already cached by GeneralizedGamma's constructor.
-    return this.p.alpha2 ** 2 * Math.exp(this.c.lG2 - this.c.lG0)
+    // lG0/lG2 = logGamma(1/beta)/logGamma(3/beta), already cached by GeneralizedGamma's constructor.
+    return this.p.alpha ** 2 * Math.exp(this.c.lG2 - this.c.lG0)
   }
 
   /**

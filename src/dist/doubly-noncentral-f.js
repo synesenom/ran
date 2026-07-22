@@ -1,4 +1,5 @@
 import DoublyNoncentralBeta from './doubly-noncentral-beta'
+import noncentralChi2 from './_noncentral-chi2'
 
 /**
  * Probability density function for the [doubly non-central F distribution]{@link https://doi.org/10.1111/j.1467-842X.1965.tb00036.x}:
@@ -22,10 +23,23 @@ export default class DoublyNoncentralF extends DoublyNoncentralBeta {
   constructor (d1, d2, lambda1, lambda2) {
     super(d1 / 2, d2 / 2, lambda1, lambda2)
 
+    // decisions/0038-reparametrizing-subclass-nontrivial-parent-delegate.md — DoublyNoncentralBeta's
+    // _pdf/_cdf (plus six private helpers) are non-trivial series algorithms reading this.p.alpha/
+    // this.p.beta throughout, not a one-liner; cache a correctly-parameterized DoublyNoncentralBeta
+    // instance (built from the un-rounded d1/d2, preserving today's exact behavior) and delegate to
+    // it instead of duplicating its internals or rewriting DoublyNoncentralBeta itself.
+    // NOTE: rounding d1/d2 before this use (matching the documented "rounded to the nearest
+    // integer" contract) was tried and reverted here: it discretizes the log-likelihood surface
+    // fit() searches, which trips the #1063 bounded-Powell-search regression guard (_pdf call
+    // count roughly doubles on that guard's pathological dataset). Tracked as #1084 instead of
+    // fixed here, since a correct fix needs to reconcile with #1063's fit() budget, not just round
+    // earlier.
+    this.dncBeta = new DoublyNoncentralBeta(d1 / 2, d2 / 2, lambda1, lambda2)
+
     // Validate parameters
     const d1i = Math.round(d1)
     const d2i = Math.round(d2)
-    this.p = Object.assign(this.p, { d1: d1i, d2: d2i })
+    this.p = { d1: d1i, d2: d2i, lambda1: this.p.lambda1, lambda2: this.p.lambda2 }
 
     // Set support
     this.s = [{
@@ -38,18 +52,23 @@ export default class DoublyNoncentralF extends DoublyNoncentralBeta {
   }
 
   _generator () {
-    // Direct sampling by transforming a doubly non-central beta
-    const x = super._generator()
-    return this.p.d2 * x / (this.p.d1 * (1 - x))
+    // Direct sampling by transforming a doubly non-central beta. Reimplemented against this.r
+    // directly (mirroring DoublyNoncentralBeta.prototype._generator) rather than delegating to
+    // the cached this.dncBeta, which owns its own independent PRNG stream.
+    const x = noncentralChi2(this.r, 2 * this.dncBeta.p.alpha, this.p.lambda1)
+    const y = noncentralChi2(this.r, 2 * this.dncBeta.p.beta, this.p.lambda2)
+    const z = x / (x + y)
+    const beta = z === 1 ? 1 - y / x : z
+    return this.p.d2 * beta / (this.p.d1 * (1 - beta))
   }
 
   _pdf (x) {
     const n = this.p.d1 / this.p.d2
-    return n * super._pdf(x / (1 / n + x)) / Math.pow(1 + n * x, 2)
+    return n * this.dncBeta._pdf(x / (1 / n + x)) / Math.pow(1 + n * x, 2)
   }
 
   _cdf (x) {
-    return super._cdf(x / (this.p.d2 / this.p.d1 + x))
+    return this.dncBeta._cdf(x / (this.p.d2 / this.p.d1 + x))
   }
 
   /**
@@ -64,6 +83,12 @@ export default class DoublyNoncentralF extends DoublyNoncentralBeta {
    */
   kurtosis () {
     return this.p.d2 > 8 ? super.kurtosis() : Infinity
+  }
+
+  _afterLoad () {
+    // Reconstructed from the rounded this.p.d1/d2 (the un-rounded originals are not preserved
+    // across save()/load()) — d1/d2 are conceptually integer degrees of freedom regardless.
+    this.dncBeta = new DoublyNoncentralBeta(this.p.d1 / 2, this.p.d2 / 2, this.p.lambda1, this.p.lambda2)
   }
 
   static _fitInit (data) {
