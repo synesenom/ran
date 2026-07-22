@@ -79,6 +79,7 @@ export default class DoublyNoncentralBeta extends Distribution {
    * recovers parameters within this class's existing fit tolerances on well-matched data (matching
    * the default optimizer's result within ordinary finite-sample noise) while bounding worst-case
    * cost to roughly 1-2s instead of 13-30s+ on mismatched data.
+   * See solutions/performance/2026-07-22-0702-doubly-noncentral-fit-powell-ridge-cost.md
    *
    * @method fit
    * @memberof ran.dist.DoublyNoncentralBeta
