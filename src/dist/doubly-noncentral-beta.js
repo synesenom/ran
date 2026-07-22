@@ -47,8 +47,8 @@ export default class DoublyNoncentralBeta extends Distribution {
     }]
 
     // Speed-up constants.
-    // r0/s0/pr0/ps0/b0 are the double Poisson-mixing terms shared verbatim by _pdf and _cdf
-    // (they depend only on alpha, beta, lambda1, lambda2, never on x).
+    // r0/s0/pr0/ps0/outerScale/logB0 are the double Poisson-mixing terms shared verbatim by
+    // _pdf and _cdf (they depend only on alpha, beta, lambda1, lambda2, never on x).
     const l1 = lambda1 / 2
     const l2 = lambda2 / 2
     const r0 = Math.round(l1)

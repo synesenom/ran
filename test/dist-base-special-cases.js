@@ -169,27 +169,68 @@ describe('dist', () => {
   // (bypassing dist-runner.js's full per-case suite) because quantile root-finding at this
   // scale costs ~1s/call (MAX_ITER=100-bounded series, #1063) — too expensive to run through
   // qMonotonicity/qGalois/quantileRoundtrip for every lambda value in the acceptance criteria.
+  // cdf monotonicity is checked here too (free — same x values, ascending order already):
+  // structurally sound even under #1063's MAX_ITER truncation, since each Poisson-weighted term
+  // is individually monotonic in x and truncation only drops mass, it doesn't invert ordering.
+  // A pdf(x)=pdf(1-x)/cdf(x)+cdf(1-x)=1 symmetry check (valid here since alpha=beta and
+  // lambda1=lambda2) is deliberately NOT added: verified empirically that MAX_ITER=100
+  // truncation already breaks it by orders of magnitude once lambda1+lambda2 is large and x is
+  // away from 0.5 (e.g. lambda=8000: cdf(0.5+x)+cdf(0.5-x) as low as 0.886, not ~1) — this is
+  // the exact, already-tracked, out-of-scope truncation limitation (#1086), not a #1075 defect,
+  // and asserting symmetry here would just rediscover it as a spurious new failure.
   describe('DoublyNoncentralBeta/F large lambda (regression #1075)', () => {
-    it('DoublyNoncentralBeta pdf/cdf should be finite for lambda1 = lambda2 up to 50000', () => {
+    it('DoublyNoncentralBeta pdf/cdf should be finite and cdf monotonic for lambda1 = lambda2 up to 50000', () => {
       for (const lambda of [1200, 8000, 20000, 50000]) {
         const d = new dist.DoublyNoncentralBeta(2, 2, lambda, lambda)
-        for (const x of [0.1, 0.3, 0.5, 0.7, 0.9]) {
+        let prevCdf = -Infinity
+        for (const x of [0.001, 0.1, 0.3, 0.5, 0.7, 0.9, 0.999]) {
           const pdf = d.pdf(x)
           const cdf = d.cdf(x)
           assert(Number.isFinite(pdf) && pdf >= 0, `pdf(${x}; lambda=${lambda}) = ${pdf}`)
           assert(Number.isFinite(cdf) && cdf >= 0 && cdf <= 1, `cdf(${x}; lambda=${lambda}) = ${cdf}`)
+          assert(cdf >= prevCdf, `cdf(${x}; lambda=${lambda}) = ${cdf} < previous ${prevCdf}`)
+          prevCdf = cdf
         }
       }
     })
 
-    it('DoublyNoncentralF pdf/cdf should be finite for lambda1 = lambda2 up to 50000', () => {
+    // Asymmetric pair: r0 (~lambda1/2) and s0 (~lambda2/2) operate at very different scales,
+    // exercising the outer r-loop and inner s-recurrence independently rather than in lockstep.
+    it('DoublyNoncentralBeta pdf/cdf should be finite for asymmetric large lambda1/lambda2', () => {
+      for (const [lambda1, lambda2] of [[50000, 10], [10, 50000]]) {
+        const d = new dist.DoublyNoncentralBeta(2, 2, lambda1, lambda2)
+        for (const x of [0.001, 0.1, 0.5, 0.9, 0.999]) {
+          const pdf = d.pdf(x)
+          const cdf = d.cdf(x)
+          assert(Number.isFinite(pdf) && pdf >= 0, `pdf(${x}; lambda1=${lambda1}, lambda2=${lambda2}) = ${pdf}`)
+          assert(Number.isFinite(cdf) && cdf >= 0 && cdf <= 1, `cdf(${x}; lambda1=${lambda1}, lambda2=${lambda2}) = ${cdf}`)
+        }
+      }
+    })
+
+    it('DoublyNoncentralF pdf/cdf should be finite and cdf monotonic for lambda1 = lambda2 up to 50000', () => {
       for (const lambda of [1200, 2000, 8000, 20000, 50000]) {
         const d = new dist.DoublyNoncentralF(5, 5, lambda, lambda)
-        for (const x of [0.5, 1, 2, 4]) {
+        let prevCdf = -Infinity
+        for (const x of [0.001, 0.5, 1, 2, 4, 100]) {
           const pdf = d.pdf(x)
           const cdf = d.cdf(x)
           assert(Number.isFinite(pdf) && pdf >= 0, `pdf(${x}; lambda=${lambda}) = ${pdf}`)
           assert(Number.isFinite(cdf) && cdf >= 0 && cdf <= 1, `cdf(${x}; lambda=${lambda}) = ${cdf}`)
+          assert(cdf >= prevCdf, `cdf(${x}; lambda=${lambda}) = ${cdf} < previous ${prevCdf}`)
+          prevCdf = cdf
+        }
+      }
+    })
+
+    it('DoublyNoncentralF pdf/cdf should be finite for asymmetric large lambda1/lambda2', () => {
+      for (const [lambda1, lambda2] of [[50000, 10], [10, 50000]]) {
+        const d = new dist.DoublyNoncentralF(5, 5, lambda1, lambda2)
+        for (const x of [0.001, 0.5, 1, 2, 4, 100]) {
+          const pdf = d.pdf(x)
+          const cdf = d.cdf(x)
+          assert(Number.isFinite(pdf) && pdf >= 0, `pdf(${x}; lambda1=${lambda1}, lambda2=${lambda2}) = ${pdf}`)
+          assert(Number.isFinite(cdf) && cdf >= 0 && cdf <= 1, `cdf(${x}; lambda1=${lambda1}, lambda2=${lambda2}) = ${cdf}`)
         }
       }
     })
