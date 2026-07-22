@@ -773,11 +773,8 @@ describe('dist', () => {
         const data = new dist.QExponential(0.5, 2).seed(42).sample(500)
         const result = dist.QExponential.fit(data)
         assert(result instanceof dist.QExponential)
-        // Reconstruct q and lambda from GP params: xi=(q-1)/(2-q), sigma=1/(lambda*(2-q))
-        const q = (2 * result.p.xi + 1) / (result.p.xi + 1)
-        const lambda = (result.p.xi + 1) / result.p.sigma
-        assert(Math.abs(q - 0.5) < 0.2)
-        assert(Math.abs(lambda - 2) < 0.5)
+        assert(Math.abs(result.params().q - 0.5) < 0.2)
+        assert(Math.abs(result.params().lambda - 2) < 0.5)
       })
 
       it('InverseGaussian._fitInit should handle constant data via variance fallback', () => {
@@ -1102,6 +1099,12 @@ describe('dist', () => {
         assert.strictEqual(d.params().mu, 5)
       })
 
+      it('QExponential.params() returns { q, lambda }', () => {
+        // Distinct values so a q/lambda transposition would fail
+        const d = new dist.QExponential(0.5, 2)
+        assert.deepEqual(d.params(), { q: 0.5, lambda: 2 })
+      })
+
       it('Bernoulli.fit().params().p recovers planted value within tolerance', () => {
         const data = new dist.Bernoulli(0.7).seed(42).sample(500)
         const result = dist.Bernoulli.fit(data)
@@ -1336,7 +1339,15 @@ describe('dist', () => {
     // issue #1049
     { name: 'PERT', ctor: () => new dist.PERT(0, 1, 3), k: 3, inherited: '2 from Beta' },
     { name: 'Bates', ctor: () => new dist.Bates(2, 0, 3), k: 3, inherited: '1 from IrwinHall' },
-    { name: 'BetaBinomial', ctor: () => new dist.BetaBinomial(5, 2, 3), k: 3, inherited: '2 from Categorical' },
+    {
+      name: 'BetaBinomial',
+      ctor: () => new dist.BetaBinomial(5, 2, 3),
+      k: 3,
+      inherited: '2 from Categorical',
+      // BetaBinomial is discrete with support {0, ..., n}, so the default (continuous-oriented) sample
+      // would only work via Distribution.pdf()'s implicit _toInt() rounding; use explicit integers instead.
+      sample: [0, 1, 2, 3, 4, 5, 1, 2, 3, 4]
+    },
     { name: 'SkewNormal', ctor: () => new dist.SkewNormal(0, 1, 2), k: 3, inherited: '2 from Normal' },
     { name: 'BirnbaumSaunders', ctor: () => new dist.BirnbaumSaunders(0, 1, 1), k: 3, inherited: '2 from Normal' },
     { name: 'JohnsonSB', ctor: () => new dist.JohnsonSB(0, 1, 3, 0), k: 4, inherited: '2 from Normal' },
