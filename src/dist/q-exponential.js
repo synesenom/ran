@@ -41,6 +41,7 @@ export default class QExponential extends GeneralizedPareto {
 
     // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p;
     // GP canonical params relocated to this.c for methods that still need them.
+    // solutions/distribution/2026-07-22-0635-qexponential-exception-reversal-and-derived-boundary-gap.md
     const { mu, sigma, xi } = this.p
     this.p = { q, lambda }
     Object.assign(this.c, { mu, sigma, xi })
