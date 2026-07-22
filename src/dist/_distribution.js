@@ -602,12 +602,16 @@ class Distribution {
   }
 
   /**
-   * Reconstructs a distribution instance from a snapshot created by save(). No constructor call is needed.
+   * Reconstructs a distribution instance from a snapshot created by save(). The returned instance is
+   * still built without a constructor call; a throwaway probe instance is constructed only to validate
+   * that the restored state's shape matches what the current class definition expects.
    *
    * @method load
    * @memberof ran.dist.Distribution
    * @param {Object} state The state to load, as returned by save().
    * @returns {Distribution} New distribution instance with the restored state.
+   * @throws {Error} If the restored params/constants keys do not match the shape the current class
+   * definition would produce (e.g. a snapshot saved by an older, incompatible version of the class).
    * @example
    *
    * let pareto1 = new ran.dist.Pareto(1, 2).seed('test')
@@ -622,7 +626,30 @@ class Distribution {
    *
    */
   // decisions/0019-distribution-load-static-factory.md — static factory bypasses the constructor so the instance is fully initialized before any method is called
+  // decisions/0038-distribution-load-probe-validation.md — a throwaway probe instance validates the restored shape without becoming the returned instance
   static load (state) {
+    const actualP = Object.keys(state.params).sort()
+    const actualC = Object.keys(state.constants).sort()
+
+    // Positional probe args: pad with 0 up to the constructor's declared arity, since some
+    // distributions intentionally store fewer natural params than constructor arguments
+    // (e.g. Categorical's `min` lives in this.c, not this.p — see
+    // decisions/0014-categorical-this-c-natural-params-split.md). The pad value's magnitude is
+    // irrelevant to the resulting key set — this.p/this.c are populated unconditionally by every
+    // constructor in the codebase, never gated on a parameter's numeric value — so padding only
+    // has to satisfy "defined and not NaN" for the probe to expose the correct key shape. Extra
+    // restored values beyond arity are safely ignored by JS's positional-argument semantics.
+    const probeArgs = Object.values(state.params)
+    while (probeArgs.length < this.length) probeArgs.push(0)
+    const probe = new this(...probeArgs)
+    const expectedP = Object.keys(probe.p).sort()
+    const expectedC = Object.keys(probe.c).sort()
+    if (expectedP.join(' ') !== actualP.join(' ') || expectedC.join(' ') !== actualC.join(' ')) {
+      throw Error(
+        `Distribution.load(): restored state shape does not match ${this.name} (expected params [${expectedP}], constants [${expectedC}]; got params [${actualP}], constants [${actualC}])`
+      )
+    }
+
     const instance = Object.create(this.prototype)
     instance._type = state.type
     instance.k = state.k

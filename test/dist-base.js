@@ -69,6 +69,63 @@ describe('dist', () => {
       })
     })
 
+    describe('.load()', () => {
+      it('should throw when state.constants is missing a key the current class expects', () => {
+        const state = new dist.Chi2(3).save()
+        delete state.constants.alpha
+        assert.throws(() => dist.Chi2.load(state), Error)
+      })
+
+      it('should throw when state.constants has an extra key the current class does not expect', () => {
+        const state = new dist.Chi2(3).save()
+        state.constants.bogus = 1
+        assert.throws(() => dist.Chi2.load(state), Error)
+      })
+
+      it('should throw when state.params is missing a key the current class expects', () => {
+        const state = new dist.QExponential(0.5, 2).save()
+        delete state.params.lambda
+        assert.throws(() => dist.QExponential.load(state), Error)
+      })
+
+      it('should throw when loading a pre-migration QExponential snapshot shaped like the old this.p/this.c split', () => {
+        // Pre-#1058 shape: this.p held the inherited GeneralizedPareto params {mu, sigma, xi}
+        // directly and this.c was empty, before ADR-0018 moved them into this.c under {q, lambda}.
+        const state = new dist.QExponential(0.5, 2).save()
+        state.params = { mu: state.constants.mu, sigma: state.constants.sigma, xi: state.constants.xi }
+        state.constants = {}
+        assert.throws(() => dist.QExponential.load(state), Error)
+      })
+
+      it('should not throw and should round-trip correctly for a valid state', () => {
+        const original = new dist.QExponential(0.5, 2).seed(123456789)
+        original.sample(5)
+        const state = original.save()
+        const restored = dist.QExponential.load(state)
+        assert.deepEqual(restored.p, original.p)
+        assert.deepEqual(restored.c, original.c)
+        assert(restored.sample(5).every((d, i) => typeof d === 'number' && !isNaN(d)))
+      })
+
+      it('should round-trip correctly for a distribution whose this.p intentionally holds fewer keys than its constructor arity', () => {
+        // Categorical.this.p = { weights } only; `min` is required by the constructor but lives in
+        // this.c per decisions/0014-categorical-this-c-natural-params-split.md — the probe must still
+        // pad its positional args to reconstruct successfully and validate this shape without error.
+        const original = new dist.Categorical([1, 2, 3], 5).seed(123456789)
+        original.sample(5)
+        const state = original.save()
+        const restored = dist.Categorical.load(state)
+        assert.deepEqual(restored.p, original.p)
+        assert.deepEqual(restored.c, original.c)
+      })
+
+      it('should throw when state.constants is missing a key for a distribution whose this.p holds fewer keys than its constructor arity', () => {
+        const state = new dist.Categorical([1, 2, 3], 5).save()
+        delete state.constants.min
+        assert.throws(() => dist.Categorical.load(state), Error)
+      })
+    })
+
     describe('._qEstimateRoot()', () => {
       it('returns boundary value for open point-mass support [5, 5]', () => {
         // CDF jumps 0 → 1 at the open boundary; expansion steps above 5, creating a sign change,
