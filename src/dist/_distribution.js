@@ -722,7 +722,7 @@ class Distribution {
         return Infinity
       }
     }
-    const best = powell(objective, Distribution._feasibleStart(objective, x0))
+    const best = powell(objective, Distribution._feasibleStart(objective, x0), Cls._powellOptions())
     return new Cls(...best)
   }
 
@@ -904,6 +904,23 @@ class Distribution {
    */
   static _fitPenalty (dist) { // eslint-disable-line no-unused-vars
     return 0
+  }
+
+  /**
+   * The search budget passed to `fit()`'s Powell optimizer as its `options` argument. The
+   * base-class default returns `{}` (no override, so `powell()` falls back to its own
+   * defaults). Subclasses whose log-likelihood surface carries a long, near-flat ridge that a
+   * full-precision search chases almost indefinitely (e.g. `DoublyNoncentralBeta`, see #1077)
+   * override this to return a bounded `{ tol, maxIter }` instead of duplicating `fit()`'s body.
+   *
+   * @method _powellOptions
+   * @memberof ran.dist.Distribution
+   * @returns {Object} The options object to pass to `powell()`.
+   * @protected
+   * @ignore
+   */
+  static _powellOptions () {
+    return {}
   }
 
   // ─── PRIVATE INSTANCE ─────────────────────────────────────────────────────
