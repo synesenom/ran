@@ -1,6 +1,5 @@
 import clamp from '../utils/clamp'
 import { recursiveSum } from '../algorithms'
-import powell from '../algorithms/powell'
 import { EPS, MAX_ITER } from '../core/constants'
 import { regularizedBetaIncomplete, logBeta, logGamma } from '../special'
 import noncentralChi2 from './_noncentral-chi2'
@@ -64,48 +63,6 @@ export default class DoublyNoncentralBeta extends Distribution {
       // start so it never has to be materialized as an unrepresentable linear double (#1075).
       logB0: logBeta(alpha + r0, beta + s0)
     }
-  }
-
-  // ─── PUBLIC STATIC ────────────────────────────────────────────────────────
-
-  /**
-   * Fits the distribution to a data set with a bounded Powell search budget. On data that
-   * genuinely mismatches this family (also inherited by DoublyNoncentralF, which delegates its
-   * _pdf/_cdf here), the nested double-Poisson-mixing log-likelihood carries a long, near-flat
-   * ridge between the shape and non-centrality parameters: a full-precision Powell search (the
-   * base class's default tol=1e-8, maxIter=200) chases negligible log-likelihood gains along this
-   * ridge almost indefinitely, at ever-increasing per-point cost since larger non-centrality
-   * parameters require more series terms to evaluate (#1063). Empirically, tol=1e-2/maxIter=15
-   * recovers parameters within this class's existing fit tolerances on well-matched data (matching
-   * the default optimizer's result within ordinary finite-sample noise) while bounding worst-case
-   * cost to roughly 1-2s instead of 13-30s+ on mismatched data.
-   * See solutions/performance/2026-07-22-0702-doubly-noncentral-fit-powell-ridge-cost.md
-   *
-   * @method fit
-   * @memberof ran.dist.DoublyNoncentralBeta
-   * @param {number[]} data Array of observations to fit.
-   * @returns {DoublyNoncentralBeta} A new instance of the same distribution with MLE parameters.
-   */
-  static fit (data) {
-    const Cls = this
-    const x0 = Cls._fitInit(data)
-    if (x0.length === 0) {
-      return new Cls()
-    }
-    if (Distribution._isExactFit(Cls)) {
-      return new Cls(...x0)
-    }
-    const objective = params => {
-      try {
-        const inst = new Cls(...params)
-        const v = -inst.lnL(data) + Cls._fitPenalty(inst)
-        return Number.isFinite(v) ? v : Infinity
-      } catch (_) {
-        return Infinity
-      }
-    }
-    const best = powell(objective, Distribution._feasibleStart(objective, x0), { tol: 1e-2, maxIter: 15 })
-    return new Cls(...best)
   }
 
   // ─── PROTECTED INSTANCE ───────────────────────────────────────────────────
@@ -186,6 +143,27 @@ export default class DoublyNoncentralBeta extends Distribution {
     const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1e-4
     const factor = Math.max(mean * (1 - mean) / variance - 1, 0.1)
     return [mean * factor, (1 - mean) * factor, 0.5, 0.5]
+  }
+
+  /**
+   * Bounds fit()'s Powell search budget. On data that genuinely mismatches this family (also
+   * inherited by DoublyNoncentralF, which delegates its _pdf/_cdf here), the nested
+   * double-Poisson-mixing log-likelihood carries a long, near-flat ridge between the shape and
+   * non-centrality parameters: a full-precision Powell search (the base class's default
+   * tol=1e-8, maxIter=200) chases negligible log-likelihood gains along this ridge almost
+   * indefinitely, at ever-increasing per-point cost since larger non-centrality parameters
+   * require more series terms to evaluate (#1063). Empirically, tol=1e-2/maxIter=15 recovers
+   * parameters within this class's existing fit tolerances on well-matched data (matching the
+   * default optimizer's result within ordinary finite-sample noise) while bounding worst-case
+   * cost to roughly 1-2s instead of 13-30s+ on mismatched data.
+   * See solutions/performance/2026-07-22-0702-doubly-noncentral-fit-powell-ridge-cost.md
+   *
+   * @method _powellOptions
+   * @memberof ran.dist.DoublyNoncentralBeta
+   * @returns {Object} The bounded Powell search options.
+   */
+  static _powellOptions () {
+    return { tol: 1e-2, maxIter: 15 }
   }
 
   // ─── PRIVATE INSTANCE ─────────────────────────────────────────────────────
