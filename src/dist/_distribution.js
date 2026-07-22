@@ -602,12 +602,16 @@ class Distribution {
   }
 
   /**
-   * Reconstructs a distribution instance from a snapshot created by save(). No constructor call is needed.
+   * Reconstructs a distribution instance from a snapshot created by save(). The returned instance is
+   * still built without a constructor call; a throwaway probe instance is constructed only to validate
+   * that the restored state's shape matches what the current class definition expects.
    *
    * @method load
    * @memberof ran.dist.Distribution
    * @param {Object} state The state to load, as returned by save().
    * @returns {Distribution} New distribution instance with the restored state.
+   * @throws {Error} If the restored params/constants keys do not match the shape the current class
+   * definition would produce (e.g. a snapshot saved by an older, incompatible version of the class).
    * @example
    *
    * let pareto1 = new ran.dist.Pareto(1, 2).seed('test')
@@ -622,7 +626,51 @@ class Distribution {
    *
    */
   // decisions/0019-distribution-load-static-factory.md — static factory bypasses the constructor so the instance is fully initialized before any method is called
+  // decisions/0038-distribution-load-probe-validation.md — a throwaway probe instance validates the restored shape without becoming the returned instance
   static load (state) {
+    const actualP = Object.keys(state.params).sort()
+    const actualC = Object.keys(state.constants).sort()
+
+    // Some distributions intentionally store fewer natural params than constructor arguments
+    // (e.g. Categorical's `min` lives in this.c, not this.p — see
+    // decisions/0014-categorical-this-c-natural-params-split.md), so probe args are padded with 0
+    // up to the constructor's declared arity. Reparametrizing subclasses that merge into this.p
+    // via Object.assign (e.g. BaldingNichols, DoublyNoncentralChi2) can also end up with more
+    // this.p keys than the constructor's own arity, in an order that doesn't align with the
+    // constructor's positional parameters — passing restored values through unchanged (rather
+    // than attempting to reorder them, which has no reliable general rule across inheritance
+    // patterns) can drive an intermediate parameter arbitrarily out of range. That's harmless
+    // here: only the resulting KEY SET is compared, and this.p/this.c are populated
+    // unconditionally by every constructor in the codebase, never gated on a parameter's numeric
+    // value, so Distribution.validate() is suppressed for the duration of the probe call — it
+    // exists to reject bad values for real instances, not to gate which keys a structural probe
+    // is allowed to expose. Deprecation warnings some constructors emit unconditionally (e.g.
+    // Hoyt) are suppressed the same way, so probing never produces console noise as a side effect
+    // of validating a restored snapshot.
+    // solutions/correctness/2026-07-22-1030-distribution-load-probe-ordering-assumption.md — an
+    // earlier version passed restored values through positionally without suppressing validate(),
+    // which broke load() for valid BaldingNichols/DoublyNoncentralChi2 states
+    const probeArgs = Object.values(state.params)
+    while (probeArgs.length < this.length) probeArgs.push(0)
+    const originalValidate = Distribution.validate
+    const originalWarn = console.warn
+    Distribution.validate = () => {}
+    console.warn = () => {}
+    let probe
+    try {
+      probe = new this(...probeArgs)
+    } finally {
+      Distribution.validate = originalValidate
+      console.warn = originalWarn
+    }
+    const expectedP = Object.keys(probe.p).sort()
+    const expectedC = Object.keys(probe.c).sort()
+    if (expectedP.join('\0') !== actualP.join('\0') || expectedC.join('\0') !== actualC.join('\0')) {
+      throw Error(
+        `Distribution.load(): restored state shape does not match ${this.name} (expected params [${expectedP}], constants [${expectedC}]; got params [${actualP}], constants [${actualC}])`
+      )
+    }
+
     const instance = Object.create(this.prototype)
     instance._type = state.type
     instance.k = state.k
