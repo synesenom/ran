@@ -1235,6 +1235,37 @@ export default [{
     // Both zero collapses to central Beta(alpha, beta).
     name: 'both lambdas = 0',
     params: () => [2, 2, 0, 0]
+  }, {
+    // Regression #1075: Beta(alpha+r0, beta+s0) underflows to exact 0 in double precision once
+    // r0=round(lambda1/2), s0=round(lambda2/2) are both large (e.g. Beta(602,602) ~ 1e-364),
+    // colliding with comparably-extreme power-of-x/power-of-y terms and producing NaN via
+    // 0 * Infinity. Only manifests when BOTH lambda1 and lambda2 are large simultaneously.
+    name: 'large lambda1 = lambda2 = 1200 (regression #1075)',
+    params: () => [2, 2, 1200, 1200]
+  }, {
+    name: 'large lambda1 = lambda2 = 8000 (regression #1075)',
+    params: () => [2, 2, 8000, 8000]
+  }, {
+    name: 'large lambda1 = lambda2 = 20000 (regression #1075)',
+    params: () => [2, 2, 20000, 20000]
+  }, {
+    name: 'large lambda1 = lambda2 = 50000 (regression #1075)',
+    params: () => [2, 2, 50000, 50000]
+  }],
+  // Exclude the large-lambda regression cases above from the (expensive, cdf()-heavy) GoF/sample
+  // suite — their series-sum cost grows with lambda, and .sample() draws from noncentralChi2
+  // regardless, so the analytical/precision checks above are this fix's real regression coverage.
+  sampleParams: [{
+    params: () => [2, 2, 2, 2]
+  }, {
+    name: 'lambda1 = 0',
+    params: () => [2, 2, 0, 2]
+  }, {
+    name: 'lambda2 = 0',
+    params: () => [2, 2, 2, 0]
+  }, {
+    name: 'both lambdas = 0',
+    params: () => [2, 2, 0, 0]
   }],
   // mpmath: DNCBeta double-Poisson mixture of central Beta @ 50 dps
   refVals: [
