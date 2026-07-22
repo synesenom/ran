@@ -178,61 +178,48 @@ describe('dist', () => {
   // away from 0.5 (e.g. lambda=8000: cdf(0.5+x)+cdf(0.5-x) as low as 0.886, not ~1) — this is
   // the exact, already-tracked, out-of-scope truncation limitation (#1086), not a #1075 defect,
   // and asserting symmetry here would just rediscover it as a spurious new failure.
-  describe('DoublyNoncentralBeta/F large lambda (regression #1075)', () => {
-    it('DoublyNoncentralBeta pdf/cdf should be finite and cdf monotonic for lambda1 = lambda2 up to 50000', () => {
-      for (const lambda of [1200, 8000, 20000, 50000]) {
-        const d = new dist.DoublyNoncentralBeta(2, 2, lambda, lambda)
-        let prevCdf = -Infinity
-        for (const x of [0.001, 0.1, 0.3, 0.5, 0.7, 0.9, 0.999]) {
-          const pdf = d.pdf(x)
-          const cdf = d.cdf(x)
-          assert(Number.isFinite(pdf) && pdf >= 0, `pdf(${x}; lambda=${lambda}) = ${pdf}`)
-          assert(Number.isFinite(cdf) && cdf >= 0 && cdf <= 1, `cdf(${x}; lambda=${lambda}) = ${cdf}`)
-          assert(cdf >= prevCdf, `cdf(${x}; lambda=${lambda}) = ${cdf} < previous ${prevCdf}`)
+  //
+  // Shared by the four cases below: constructs `new dist[name](...params)` for each entry in
+  // `lambdaCases` and walks `xValues` in ascending order, asserting pdf/cdf stay finite and
+  // in-range (and, when `checkMonotonic` is set, that cdf never decreases).
+  function assertFinitePdfCdf (name, lambdaCases, xValues, checkMonotonic) {
+    for (const params of lambdaCases) {
+      const d = new dist[name](...params)
+      let prevCdf = -Infinity
+      for (const x of xValues) {
+        const pdf = d.pdf(x)
+        const cdf = d.cdf(x)
+        assert(Number.isFinite(pdf) && pdf >= 0, `pdf(${x}; params=${params}) = ${pdf}`)
+        assert(Number.isFinite(cdf) && cdf >= 0 && cdf <= 1, `cdf(${x}; params=${params}) = ${cdf}`)
+        if (checkMonotonic) {
+          assert(cdf >= prevCdf, `cdf(${x}; params=${params}) = ${cdf} < previous ${prevCdf}`)
           prevCdf = cdf
         }
       }
+    }
+  }
+
+  describe('DoublyNoncentralBeta/F large lambda (regression #1075)', () => {
+    it('DoublyNoncentralBeta pdf/cdf should be finite and cdf monotonic for lambda1 = lambda2 up to 50000', () => {
+      const lambdaCases = [1200, 8000, 20000, 50000].map(lambda => [2, 2, lambda, lambda])
+      assertFinitePdfCdf('DoublyNoncentralBeta', lambdaCases, [0.001, 0.1, 0.3, 0.5, 0.7, 0.9, 0.999], true)
     })
 
     // Asymmetric pair: r0 (~lambda1/2) and s0 (~lambda2/2) operate at very different scales,
     // exercising the outer r-loop and inner s-recurrence independently rather than in lockstep.
     it('DoublyNoncentralBeta pdf/cdf should be finite for asymmetric large lambda1/lambda2', () => {
-      for (const [lambda1, lambda2] of [[50000, 10], [10, 50000]]) {
-        const d = new dist.DoublyNoncentralBeta(2, 2, lambda1, lambda2)
-        for (const x of [0.001, 0.1, 0.5, 0.9, 0.999]) {
-          const pdf = d.pdf(x)
-          const cdf = d.cdf(x)
-          assert(Number.isFinite(pdf) && pdf >= 0, `pdf(${x}; lambda1=${lambda1}, lambda2=${lambda2}) = ${pdf}`)
-          assert(Number.isFinite(cdf) && cdf >= 0 && cdf <= 1, `cdf(${x}; lambda1=${lambda1}, lambda2=${lambda2}) = ${cdf}`)
-        }
-      }
+      const lambdaCases = [[2, 2, 50000, 10], [2, 2, 10, 50000]]
+      assertFinitePdfCdf('DoublyNoncentralBeta', lambdaCases, [0.001, 0.1, 0.5, 0.9, 0.999], false)
     })
 
     it('DoublyNoncentralF pdf/cdf should be finite and cdf monotonic for lambda1 = lambda2 up to 50000', () => {
-      for (const lambda of [1200, 2000, 8000, 20000, 50000]) {
-        const d = new dist.DoublyNoncentralF(5, 5, lambda, lambda)
-        let prevCdf = -Infinity
-        for (const x of [0.001, 0.5, 1, 2, 4, 100]) {
-          const pdf = d.pdf(x)
-          const cdf = d.cdf(x)
-          assert(Number.isFinite(pdf) && pdf >= 0, `pdf(${x}; lambda=${lambda}) = ${pdf}`)
-          assert(Number.isFinite(cdf) && cdf >= 0 && cdf <= 1, `cdf(${x}; lambda=${lambda}) = ${cdf}`)
-          assert(cdf >= prevCdf, `cdf(${x}; lambda=${lambda}) = ${cdf} < previous ${prevCdf}`)
-          prevCdf = cdf
-        }
-      }
+      const lambdaCases = [1200, 2000, 8000, 20000, 50000].map(lambda => [5, 5, lambda, lambda])
+      assertFinitePdfCdf('DoublyNoncentralF', lambdaCases, [0.001, 0.5, 1, 2, 4, 100], true)
     })
 
     it('DoublyNoncentralF pdf/cdf should be finite for asymmetric large lambda1/lambda2', () => {
-      for (const [lambda1, lambda2] of [[50000, 10], [10, 50000]]) {
-        const d = new dist.DoublyNoncentralF(5, 5, lambda1, lambda2)
-        for (const x of [0.001, 0.5, 1, 2, 4, 100]) {
-          const pdf = d.pdf(x)
-          const cdf = d.cdf(x)
-          assert(Number.isFinite(pdf) && pdf >= 0, `pdf(${x}; lambda1=${lambda1}, lambda2=${lambda2}) = ${pdf}`)
-          assert(Number.isFinite(cdf) && cdf >= 0 && cdf <= 1, `cdf(${x}; lambda1=${lambda1}, lambda2=${lambda2}) = ${cdf}`)
-        }
-      }
+      const lambdaCases = [[5, 5, 50000, 10], [5, 5, 10, 50000]]
+      assertFinitePdfCdf('DoublyNoncentralF', lambdaCases, [0.001, 0.5, 1, 2, 4, 100], false)
     })
   })
 })

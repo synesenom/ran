@@ -53,31 +53,12 @@ export default class DoublyNoncentralBeta extends Distribution {
     const l2 = lambda2 / 2
     const r0 = Math.round(l1)
     const s0 = Math.round(l2)
-    // Guard l=0: 0*log(0) = NaN by IEEE 754, but the Poisson weight e^0 * 0^0 / 0! = 1.
-    // (Never actually read: _pdf/_cdf both short-circuit away from this path when lambda=0.)
-    const rawR = l1 === 0 ? 0 : r0 * Math.log(l1) - logGamma(r0 + 1)
-    const rawS = l2 === 0 ? 0 : s0 * Math.log(l2) - logGamma(s0 + 1)
-    // Deferring exp(-l1-l2) to a single outer-scale multiplication in _pdf/_cdf (matching this
-    // class's pre-#1075 formulation) is the more precise option: multiplying an exact 1.0
-    // through the whole recurrence chain rounds nowhere, whereas folding -l1/-l2 into pr0/ps0
-    // multiplies every single step of that chain by a non-trivial constant instead — measurably
-    // worse (e.g. DoublyNoncentralBeta(2,2,2,2).pdf(0.95) loses precision from ~1e-15 to ~1e-14
-    // once folded unconditionally). Deferring is unsafe in two ways, both guarded here with
-    // margin below the hard IEEE 754 limits: rawR/rawS themselves overflow Number.MAX_VALUE
-    // past ~709 (lambda1/lambda2 past ~1418, issue #1075's own reported threshold), AND —
-    // independently, e.g. lambda1=lambda2=1200 trips this while leaving rawR/rawS individually
-    // safe — outerScale = exp(-l1-l2) underflows to exact 0 past l1+l2 ~745, which would then
-    // multiply an unnormalized (and, left deferred, correspondingly huge) z by 0 and produce
-    // NaN the moment z itself is Infinity rather than the intended finite cancellation.
-    const deferScale = rawR < 700 && rawS < 700 && l1 + l2 < 700
     this.c = {
       l1,
       l2,
       r0,
       s0,
-      pr0: l1 === 0 ? 1 : Math.exp(deferScale ? rawR : rawR - l1),
-      ps0: l2 === 0 ? 1 : Math.exp(deferScale ? rawS : rawS - l2),
-      outerScale: deferScale ? Math.exp(-l1 - l2) : 1,
+      ...DoublyNoncentralBeta._poissonWeights(l1, l2, r0, s0),
       // Beta(alpha+r0, beta+s0) underflows to exact 0 once r0 and s0 are both large (e.g.
       // Beta(1002,1002) ~ 1e-604, far below Number.MIN_VALUE) — tracked as a log from the
       // start so it never has to be materialized as an unrepresentable linear double (#1075).
@@ -401,5 +382,44 @@ export default class DoublyNoncentralBeta extends Distribution {
     }
 
     return dz
+  }
+
+  // ─── PRIVATE STATIC ───────────────────────────────────────────────────────
+
+  /**
+   * Poisson-weight speed-up constants pr0/ps0, deferring exp(-l1-l2) to a single outerScale
+   * multiplication in _pdf/_cdf (this class's pre-#1075, most precise formulation) whenever
+   * it's safe: multiplying an exact 1.0 through the whole recurrence chain rounds nowhere,
+   * whereas folding -l1/-l2 into pr0/ps0 multiplies every step of that chain by a non-trivial
+   * constant instead — measurably worse (e.g. DoublyNoncentralBeta(2,2,2,2).pdf(0.95) loses
+   * precision from ~1e-15 to ~1e-14 once folded unconditionally). Deferring is unsafe in two
+   * ways, both guarded here with margin below the hard IEEE 754 limits: the unnormalized
+   * Poisson-weight exponent (rawR/rawS) overflows Number.MAX_VALUE past ~709 (lambda1/lambda2
+   * past ~1418, issue #1075's own reported threshold), and — independently, e.g.
+   * lambda1=lambda2=1200 trips this while leaving rawR/rawS individually safe — outerScale =
+   * exp(-l1-l2) underflows to exact 0 past l1+l2 ~745, which would then multiply an
+   * unnormalized (and, left deferred, correspondingly huge) sum by 0 and produce NaN the
+   * moment that sum is Infinity rather than the intended finite cancellation.
+   *
+   * @method _poissonWeights
+   * @memberof ran.dist.DoublyNoncentralBeta
+   * @param {number} l1 lambda1 / 2.
+   * @param {number} l2 lambda2 / 2.
+   * @param {number} r0 round(l1).
+   * @param {number} s0 round(l2).
+   * @returns {Object} { pr0, ps0, outerScale }.
+   * @private
+   */
+  static _poissonWeights (l1, l2, r0, s0) {
+    // Guard l=0: 0*log(0) = NaN by IEEE 754, but the Poisson weight e^0 * 0^0 / 0! = 1.
+    // (Never actually read: _pdf/_cdf both short-circuit away from this path when lambda=0.)
+    const rawR = l1 === 0 ? 0 : r0 * Math.log(l1) - logGamma(r0 + 1)
+    const rawS = l2 === 0 ? 0 : s0 * Math.log(l2) - logGamma(s0 + 1)
+    const deferScale = rawR < 700 && rawS < 700 && l1 + l2 < 700
+    return {
+      pr0: l1 === 0 ? 1 : Math.exp(deferScale ? rawR : rawR - l1),
+      ps0: l2 === 0 ? 1 : Math.exp(deferScale ? rawS : rawS - l2),
+      outerScale: deferScale ? Math.exp(-l1 - l2) : 1
+    }
   }
 }
