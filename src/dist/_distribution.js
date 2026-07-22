@@ -631,20 +631,41 @@ class Distribution {
     const actualP = Object.keys(state.params).sort()
     const actualC = Object.keys(state.constants).sort()
 
-    // Positional probe args: pad with 0 up to the constructor's declared arity, since some
-    // distributions intentionally store fewer natural params than constructor arguments
+    // Some distributions intentionally store fewer natural params than constructor arguments
     // (e.g. Categorical's `min` lives in this.c, not this.p — see
-    // decisions/0014-categorical-this-c-natural-params-split.md). The pad value's magnitude is
-    // irrelevant to the resulting key set — this.p/this.c are populated unconditionally by every
-    // constructor in the codebase, never gated on a parameter's numeric value — so padding only
-    // has to satisfy "defined and not NaN" for the probe to expose the correct key shape. Extra
-    // restored values beyond arity are safely ignored by JS's positional-argument semantics.
+    // decisions/0014-categorical-this-c-natural-params-split.md), so probe args are padded with 0
+    // up to the constructor's declared arity. Reparametrizing subclasses that merge into this.p
+    // via Object.assign (e.g. BaldingNichols, DoublyNoncentralChi2) can also end up with more
+    // this.p keys than the constructor's own arity, in an order that doesn't align with the
+    // constructor's positional parameters — passing restored values through unchanged (rather
+    // than attempting to reorder them, which has no reliable general rule across inheritance
+    // patterns) can drive an intermediate parameter arbitrarily out of range. That's harmless
+    // here: only the resulting KEY SET is compared, and this.p/this.c are populated
+    // unconditionally by every constructor in the codebase, never gated on a parameter's numeric
+    // value, so Distribution.validate() is suppressed for the duration of the probe call — it
+    // exists to reject bad values for real instances, not to gate which keys a structural probe
+    // is allowed to expose. Deprecation warnings some constructors emit unconditionally (e.g.
+    // Hoyt) are suppressed the same way, so probing never produces console noise as a side effect
+    // of validating a restored snapshot.
+    // solutions/correctness/2026-07-22-1030-distribution-load-probe-ordering-assumption.md — an
+    // earlier version passed restored values through positionally without suppressing validate(),
+    // which broke load() for valid BaldingNichols/DoublyNoncentralChi2 states
     const probeArgs = Object.values(state.params)
     while (probeArgs.length < this.length) probeArgs.push(0)
-    const probe = new this(...probeArgs)
+    const originalValidate = Distribution.validate
+    const originalWarn = console.warn
+    Distribution.validate = () => {}
+    console.warn = () => {}
+    let probe
+    try {
+      probe = new this(...probeArgs)
+    } finally {
+      Distribution.validate = originalValidate
+      console.warn = originalWarn
+    }
     const expectedP = Object.keys(probe.p).sort()
     const expectedC = Object.keys(probe.c).sort()
-    if (expectedP.join(' ') !== actualP.join(' ') || expectedC.join(' ') !== actualC.join(' ')) {
+    if (expectedP.join('\0') !== actualP.join('\0') || expectedC.join('\0') !== actualC.join('\0')) {
       throw Error(
         `Distribution.load(): restored state shape does not match ${this.name} (expected params [${expectedP}], constants [${expectedC}]; got params [${actualP}], constants [${actualC}])`
       )

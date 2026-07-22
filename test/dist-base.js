@@ -88,6 +88,12 @@ describe('dist', () => {
         assert.throws(() => dist.QExponential.load(state), Error)
       })
 
+      it('should throw when state.params has an extra key the current class does not expect', () => {
+        const state = new dist.QExponential(0.5, 2).save()
+        state.params.bogus = 1
+        assert.throws(() => dist.QExponential.load(state), Error)
+      })
+
       it('should throw when loading a pre-migration QExponential snapshot shaped like the old this.p/this.c split', () => {
         // Pre-#1058 shape: this.p held the inherited GeneralizedPareto params {mu, sigma, xi}
         // directly and this.c was empty, before ADR-0018 moved them into this.c under {q, lambda}.
@@ -98,25 +104,40 @@ describe('dist', () => {
       })
 
       it('should not throw and should round-trip correctly for a valid state', () => {
-        const original = new dist.QExponential(0.5, 2).seed(123456789)
-        original.sample(5)
+        const sampleSize = 30
+        const cut = 10
+        const original = new dist.QExponential(0.5, 2)
+        const seed = 123456789
+        original.seed(seed)
+        const expected = original.sample(sampleSize)
+
+        original.seed(seed)
+        original.sample(cut)
         const state = original.save()
         const restored = dist.QExponential.load(state)
-        assert.deepEqual(restored.p, original.p)
-        assert.deepEqual(restored.c, original.c)
-        assert(restored.sample(5).every((d, i) => typeof d === 'number' && !isNaN(d)))
+        assert.deepEqual(restored.params(), original.params())
+        const rest = restored.sample(sampleSize - cut)
+        assert(rest.every((d, i) => d === expected[cut + i]))
       })
 
       it('should round-trip correctly for a distribution whose this.p intentionally holds fewer keys than its constructor arity', () => {
         // Categorical.this.p = { weights } only; `min` is required by the constructor but lives in
         // this.c per decisions/0014-categorical-this-c-natural-params-split.md — the probe must still
         // pad its positional args to reconstruct successfully and validate this shape without error.
-        const original = new dist.Categorical([1, 2, 3], 5).seed(123456789)
-        original.sample(5)
+        const sampleSize = 30
+        const cut = 10
+        const original = new dist.Categorical([1, 2, 3], 5)
+        const seed = 123456789
+        original.seed(seed)
+        const expected = original.sample(sampleSize)
+
+        original.seed(seed)
+        original.sample(cut)
         const state = original.save()
         const restored = dist.Categorical.load(state)
-        assert.deepEqual(restored.p, original.p)
-        assert.deepEqual(restored.c, original.c)
+        assert.deepEqual(restored.params(), original.params())
+        const rest = restored.sample(sampleSize - cut)
+        assert(rest.every((d, i) => d === expected[cut + i]))
       })
 
       it('should throw when state.constants is missing a key for a distribution whose this.p holds fewer keys than its constructor arity', () => {
