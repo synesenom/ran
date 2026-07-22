@@ -162,4 +162,36 @@ describe('dist', () => {
       })
     })
   })
+
+  // Regression #1075: DoublyNoncentralBeta/F pdf/cdf returned NaN once both non-centrality
+  // parameters were large (Beta(alpha+r0, beta+s0) underflows to exact 0 in double precision
+  // when r0=round(lambda1/2), s0=round(lambda2/2) are both large). Checked directly here
+  // (bypassing dist-runner.js's full per-case suite) because quantile root-finding at this
+  // scale costs ~1s/call (MAX_ITER=100-bounded series, #1063) — too expensive to run through
+  // qMonotonicity/qGalois/quantileRoundtrip for every lambda value in the acceptance criteria.
+  describe('DoublyNoncentralBeta/F large lambda (regression #1075)', () => {
+    it('DoublyNoncentralBeta pdf/cdf should be finite for lambda1 = lambda2 up to 50000', () => {
+      for (const lambda of [1200, 8000, 20000, 50000]) {
+        const d = new dist.DoublyNoncentralBeta(2, 2, lambda, lambda)
+        for (const x of [0.1, 0.3, 0.5, 0.7, 0.9]) {
+          const pdf = d.pdf(x)
+          const cdf = d.cdf(x)
+          assert(Number.isFinite(pdf) && pdf >= 0, `pdf(${x}; lambda=${lambda}) = ${pdf}`)
+          assert(Number.isFinite(cdf) && cdf >= 0 && cdf <= 1, `cdf(${x}; lambda=${lambda}) = ${cdf}`)
+        }
+      }
+    })
+
+    it('DoublyNoncentralF pdf/cdf should be finite for lambda1 = lambda2 up to 50000', () => {
+      for (const lambda of [1200, 2000, 8000, 20000, 50000]) {
+        const d = new dist.DoublyNoncentralF(5, 5, lambda, lambda)
+        for (const x of [0.5, 1, 2, 4]) {
+          const pdf = d.pdf(x)
+          const cdf = d.cdf(x)
+          assert(Number.isFinite(pdf) && pdf >= 0, `pdf(${x}; lambda=${lambda}) = ${pdf}`)
+          assert(Number.isFinite(cdf) && cdf >= 0 && cdf <= 1, `cdf(${x}; lambda=${lambda}) = ${cdf}`)
+        }
+      }
+    })
+  })
 })

@@ -41,7 +41,7 @@ describe('dist', () => {
       })
 
       it('DoublyNoncentralF.fit should complete quickly on data shaped like the reported regression (#1063)', function () {
-        this.timeout(20000)
+        this.timeout(40000)
         // Exact reproduction from the issue report: Rice(5, 1)-sampled data (which does not
         // genuinely belong to this family) previously drove DoublyNoncentralF.fit() to ~30s
         // because the log-likelihood surface carries a long, near-flat ridge between d2 and
@@ -53,7 +53,14 @@ describe('dist', () => {
         // time alone varies more than 5x under mocha's --parallel workers contending for CPU
         // (matching the exact flakiness this codebase's own solutions doc already documented
         // for full-pool guess() timing assertions — see
-        // solutions/testing/2026-07-21-1055-guess-default-pool-latent-fit-cliff.md).
+        // solutions/testing/2026-07-21-1055-guess-default-pool-latent-fit-cliff.md). Timeout
+        // raised from 20000 to 40000 alongside #1075: fixing that issue's NaN-at-large-lambda
+        // bug requires _pdf/_cdf's Poisson-mixing sum to combine its Beta-function/power-of-x
+        // terms via log()/exp() per term instead of plain multiplication (the isolated-linear
+        // form is what overflows/underflows), a real but bounded ~1.5x per-call cost that this
+        // already-slow sandboxed environment's ~13s baseline for the *unfixed* code left little
+        // margin against (measured ~19.6s post-fix, isolated) — the pdfCalls bounds above remain
+        // the deterministic guard against the original runaway-Powell-search regression.
         const data = new dist.Rice(5, 1).seed(5).sample(500)
 
         let pdfCalls = 0

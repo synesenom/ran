@@ -2,7 +2,7 @@ import clamp from '../utils/clamp'
 import { recursiveSum } from '../algorithms'
 import powell from '../algorithms/powell'
 import { EPS, MAX_ITER } from '../core/constants'
-import { regularizedBetaIncomplete, beta as fnBeta, logGamma } from '../special'
+import { regularizedBetaIncomplete, logBeta, logGamma } from '../special'
 import noncentralChi2 from './_noncentral-chi2'
 import NoncentralBeta from './noncentral-beta'
 import Distribution from './_distribution'
@@ -53,20 +53,35 @@ export default class DoublyNoncentralBeta extends Distribution {
     const l2 = lambda2 / 2
     const r0 = Math.round(l1)
     const s0 = Math.round(l2)
+    // Guard l=0: 0*log(0) = NaN by IEEE 754, but the Poisson weight e^0 * 0^0 / 0! = 1.
+    // (Never actually read: _pdf/_cdf both short-circuit away from this path when lambda=0.)
+    const rawR = l1 === 0 ? 0 : r0 * Math.log(l1) - logGamma(r0 + 1)
+    const rawS = l2 === 0 ? 0 : s0 * Math.log(l2) - logGamma(s0 + 1)
+    // Deferring exp(-l1-l2) to a single outer-scale multiplication in _pdf/_cdf (matching this
+    // class's pre-#1075 formulation) is the more precise option: multiplying an exact 1.0
+    // through the whole recurrence chain rounds nowhere, whereas folding -l1/-l2 into pr0/ps0
+    // multiplies every single step of that chain by a non-trivial constant instead — measurably
+    // worse (e.g. DoublyNoncentralBeta(2,2,2,2).pdf(0.95) loses precision from ~1e-15 to ~1e-14
+    // once folded unconditionally). Deferring is unsafe in two ways, both guarded here with
+    // margin below the hard IEEE 754 limits: rawR/rawS themselves overflow Number.MAX_VALUE
+    // past ~709 (lambda1/lambda2 past ~1418, issue #1075's own reported threshold), AND —
+    // independently, e.g. lambda1=lambda2=1200 trips this while leaving rawR/rawS individually
+    // safe — outerScale = exp(-l1-l2) underflows to exact 0 past l1+l2 ~745, which would then
+    // multiply an unnormalized (and, left deferred, correspondingly huge) z by 0 and produce
+    // NaN the moment z itself is Infinity rather than the intended finite cancellation.
+    const deferScale = rawR < 700 && rawS < 700 && l1 + l2 < 700
     this.c = {
       l1,
       l2,
       r0,
       s0,
-      // Guard l=0: 0*log(0) = NaN by IEEE 754, but the Poisson weight e^0 * 0^0 / 0! = 1.
-      // (Never actually read: _pdf/_cdf both short-circuit away from this path when lambda=0.)
-      // -l1/-l2 folded in directly (mirroring NoncentralBeta's p0) rather than deferred to a
-      // separate exp(-l1-l2) factor in _pdf/_cdf: the unnormalized l1^r0/r0! alone overflows
-      // Number.MAX_VALUE once l1 exceeds ~709 (lambda1 exceeds ~1418), long before the
-      // compensating exp(-l1) is ever applied (issue #1075).
-      pr0: l1 === 0 ? 1 : Math.exp(-l1 + r0 * Math.log(l1) - logGamma(r0 + 1)),
-      ps0: l2 === 0 ? 1 : Math.exp(-l2 + s0 * Math.log(l2) - logGamma(s0 + 1)),
-      b0: fnBeta(alpha + r0, beta + s0)
+      pr0: l1 === 0 ? 1 : Math.exp(deferScale ? rawR : rawR - l1),
+      ps0: l2 === 0 ? 1 : Math.exp(deferScale ? rawS : rawS - l2),
+      outerScale: deferScale ? Math.exp(-l1 - l2) : 1,
+      // Beta(alpha+r0, beta+s0) underflows to exact 0 once r0 and s0 are both large (e.g.
+      // Beta(1002,1002) ~ 1e-604, far below Number.MIN_VALUE) — tracked as a log from the
+      // start so it never has to be materialized as an unrepresentable linear double (#1075).
+      logB0: logBeta(alpha + r0, beta + s0)
     }
   }
 
@@ -140,14 +155,19 @@ export default class DoublyNoncentralBeta extends Distribution {
     }
 
     const y = x / (1 - x)
-    const { l1, l2, r0, s0, pr0, ps0, b0 } = this.c
+    // y^(alpha+r0-2) and (1+y)^(alpha+r0+beta+s0-2) are tracked as logs alongside logB0: for x
+    // near/above 0.5 with large r0+s0, the linear power itself overflows to Infinity (e.g.
+    // (1+y)^2000 at y=1) well before it ever combines with the underflowed Beta constant (#1075).
+    const logY = Math.log(y)
+    const log1py = Math.log(1 + y)
+    const { l1, l2, r0, s0, pr0, ps0, outerScale, logB0 } = this.c
     const ab = this.p.alpha + this.p.beta
-    const yr0 = Math.pow(y, this.p.alpha + r0 - 2)
-    const ys0 = Math.pow(1 + y, this.p.alpha + r0 + this.p.beta + s0 - 2)
-    const ctx = { y, ab, l1, l2, r0, s0, pr0, ps0, yr0, ys0, b0 }
+    const logYr0 = (this.p.alpha + r0 - 2) * logY
+    const logYs0 = (ab + r0 + s0 - 2) * log1py
+    const ctx = { logY, log1py, ab, l1, l2, r0, s0, pr0, ps0, logYr0, logYs0, logB0 }
 
     const z = this._pdfRBackward(ctx, this._pdfRForward(ctx))
-    return z / Math.pow(1 - x, 2)
+    return outerScale * z / Math.pow(1 - x, 2)
   }
 
   _cdf (x) {
@@ -160,15 +180,20 @@ export default class DoublyNoncentralBeta extends Distribution {
       return new NoncentralBeta(this.p.alpha, this.p.beta, this.p.lambda1)._cdf(x)
     }
 
-    const { l1, l2, r0, s0, pr0, ps0, b0 } = this.c
+    const { l1, l2, r0, s0, pr0, ps0, outerScale, logB0 } = this.c
     const betaParam = this.p.beta
     const sBeta0 = betaParam + s0 - 1
-    const xa0 = Math.pow(x, this.p.alpha + r0)
-    const xb0 = Math.pow(1 - x, betaParam + s0)
+    // x^(alpha+r0) and (1-x)^(beta+s0) underflow toward 0 as r0/s0 grow (x, 1-x < 1), colliding
+    // with the underflowed Beta constant the same way the pdf's power terms do (#1075) — tracked
+    // as logs so the ib-recurrence's correction term is combined before ever exponentiating.
+    const logX = Math.log(x)
+    const log1mx = Math.log(1 - x)
+    const logXa0 = (this.p.alpha + r0) * logX
+    const logXb0 = (betaParam + s0) * log1mx
     const ib0 = regularizedBetaIncomplete(this.p.alpha + r0, betaParam + s0, x)
-    const ctx = { l1, l2, r0, s0, pr0, ps0, sBeta0, xa0, xb0, b0, ib0, x }
+    const ctx = { l1, l2, r0, s0, pr0, ps0, sBeta0, logX, log1mx, logXa0, logXb0, logB0, ib0 }
 
-    return clamp(this._cdfRBackward(ctx, this._cdfRForward(ctx)))
+    return clamp(outerScale * this._cdfRBackward(ctx, this._cdfRForward(ctx)))
   }
 
   // ─── PROTECTED STATIC ─────────────────────────────────────────────────────
@@ -185,23 +210,25 @@ export default class DoublyNoncentralBeta extends Distribution {
   // ─── PRIVATE INSTANCE ─────────────────────────────────────────────────────
 
   _pdfRForward (ctx) {
-    const { y, ab, l1, l2, r0, s0, ps0, yr0, pr0, ys0, b0 } = ctx
+    const { logY, log1py, ab, l1, l2, r0, s0, ps0, pr0, logYr0, logYs0, logB0 } = ctx
 
     let z = 0
-    let bf0 = b0
-    let ysf0 = ys0
-    let pyrf = yr0 * pr0 * Math.max(r0, 1) / l1
+    let logBf0 = logB0
+    let logYsf0 = logYs0
+    let prf = pr0 * Math.max(r0, 1) / l1
+    let logYrf = logYr0
 
     for (let kr = 0; kr < MAX_ITER; kr++) {
       const r = r0 + kr
-      ysf0 *= 1 + y
-      pyrf *= y * l1 / Math.max(r, 1)
-      const dz = this._pdfSumOverS({ y, ab, l2, s0, ps0, r, pyr: pyrf, ys: ysf0, b: bf0 })
+      logYsf0 += log1py
+      logYrf += logY
+      prf *= l1 / Math.max(r, 1)
+      const dz = this._pdfSumOverS({ log1py, ab, l2, s0, ps0, r, pr: prf, logYr: logYrf, logYs: logYsf0, logB: logBf0 })
       z += dz
       if (Math.abs(dz / z) < EPS) {
         break
       } else {
-        bf0 *= (this.p.alpha + r) / (ab + r + s0)
+        logBf0 += Math.log((this.p.alpha + r) / (ab + r + s0))
       }
     }
 
@@ -209,20 +236,22 @@ export default class DoublyNoncentralBeta extends Distribution {
   }
 
   _pdfRBackward (ctx, z) {
-    const { y, ab, l1, l2, r0, s0, ps0, yr0, pr0, ys0, b0 } = ctx
+    const { logY, log1py, ab, l1, l2, r0, s0, ps0, pr0, logYr0, logYs0, logB0 } = ctx
 
-    let bb0 = b0
-    let ysb0 = (1 + y) * ys0
-    let pyrb = y * yr0 * pr0
+    let logBb0 = logB0
+    let logYsb0 = logYs0 + log1py
+    let prb = pr0
+    let logYrb = logYr0 + logY
 
     // Cap symmetrically with _pdfRForward's MAX_ITER bound: r0 (~lambda1/2) is unbounded, so
     // without this cap a large trial lambda1 during fit()'s Powell search makes this loop run
     // arbitrarily long (see decisions/0016-distribution-fit-powell-and-exact-mle.md).
     for (let r = r0 - 1; r >= Math.max(0, r0 - MAX_ITER); r--) {
-      ysb0 /= 1 + y
-      pyrb *= (r + 1) / (y * l1)
-      bb0 *= (ab + r + s0) / (this.p.alpha + r)
-      const dz = this._pdfSumOverS({ y, ab, l2, s0, ps0, r, pyr: pyrb, ys: ysb0, b: bb0 })
+      logYsb0 -= log1py
+      prb *= (r + 1) / l1
+      logYrb -= logY
+      logBb0 += Math.log((ab + r + s0) / (this.p.alpha + r))
+      const dz = this._pdfSumOverS({ log1py, ab, l2, s0, ps0, r, pr: prb, logYr: logYrb, logYs: logYsb0, logB: logBb0 })
       z += dz
       if (Math.abs(dz / z) < EPS) {
         break
@@ -232,67 +261,67 @@ export default class DoublyNoncentralBeta extends Distribution {
     return z
   }
 
-  _pdfSumOverS ({ y, ab, l2, s0, ps0, r, pyr, ys, b }) {
+  _pdfSumOverS ({ log1py, ab, l2, s0, ps0, r, pr, logYr, logYs, logB }) {
     const betaParam = this.p.beta
 
     let dz = recursiveSum({
-      y: ys * (1 + y),
+      logYs: logYs + log1py,
       p: ps0,
-      b
+      logB
     }, (t, i) => {
       const s = s0 + i
-      t.y *= 1 + y
+      t.logYs += log1py
       t.p *= l2 / Math.max(s, 1)
       return t
-    }, t => pyr * t.p / (t.b * t.y), (t, i) => {
+    }, t => pr * t.p * Math.exp(logYr - t.logB - t.logYs), (t, i) => {
       const s = s0 + i
-      t.b *= (betaParam + s) / (ab + r + s)
+      t.logB += Math.log((betaParam + s) / (ab + r + s))
       return t
     })
 
     if (s0 > 0) {
       dz += recursiveSum({
-        y: ys,
+        logYs,
         p: s0 * ps0 / l2,
-        b: b * (ab + r + s0 - 1) / (betaParam + s0 - 1)
+        logB: logB + Math.log((ab + r + s0 - 1) / (betaParam + s0 - 1))
       }, (t, i) => {
         const s = s0 - i - 1
         if (s >= 0) {
-          t.y /= 1 + y
+          t.logYs -= log1py
           t.p *= (s + 1) / l2
-          t.b *= (ab + r + s) / (betaParam + s)
+          t.logB += Math.log((ab + r + s) / (betaParam + s))
         } else {
           t.p = 0
         }
         return t
-      }, t => pyr * t.p / (t.b * t.y))
+      }, t => pr * t.p * Math.exp(logYr - t.logB - t.logYs))
     }
 
     return dz
   }
 
   _cdfRForward (ctx) {
-    const { l1, l2, r0, s0, pr0, ps0, sBeta0, xa0, xb0, b0, ib0, x } = ctx
+    const { l1, l2, r0, s0, pr0, ps0, sBeta0, logX, log1mx, logXa0, logXb0, logB0, ib0 } = ctx
     const betaParam = this.p.beta
 
     let z = 0
     let prf = pr0 * Math.max(r0, 1) / l1
-    let xaf = xa0
-    let bf0 = b0
+    let logXaf = logXa0
+    let logBf0 = logB0
     let ibf0 = ib0
 
     for (let kr = 0; kr < MAX_ITER; kr++) {
       const r = r0 + kr
       const rAlpha = this.p.alpha + r
       prf *= l1 / Math.max(r, 1)
-      const dz = this._cdfSumOverS({ l2, s0, ps0, xb0, sBeta0, x, r, pr: prf, xa: xaf, b: bf0, ib: ibf0 })
+      const dz = this._cdfSumOverS({ l2, s0, ps0, logXb0, sBeta0, log1mx, r, pr: prf, logXa: logXaf, logB: logBf0, ib: ibf0 })
       z += dz
       if (Math.abs(dz / z) < EPS) {
         break
       } else {
-        ibf0 -= xaf * xb0 / (rAlpha * bf0)
-        bf0 *= rAlpha / (rAlpha + betaParam + s0)
-        xaf *= x
+        ibf0 -= Math.exp(logXaf + logXb0 - logBf0) / rAlpha
+        logBf0 += Math.log(rAlpha / (rAlpha + betaParam + s0))
+        logXaf += logX
       }
     }
 
@@ -300,22 +329,22 @@ export default class DoublyNoncentralBeta extends Distribution {
   }
 
   _cdfRBackward (ctx, z) {
-    const { l1, l2, r0, s0, pr0, ps0, sBeta0, xa0, xb0, b0, ib0, x } = ctx
+    const { l1, l2, r0, s0, pr0, ps0, sBeta0, logX, log1mx, logXa0, logXb0, logB0, ib0 } = ctx
     const betaParam = this.p.beta
 
     let prb = pr0
-    let xab = xa0
-    let bb0 = b0
+    let logXab = logXa0
+    let logBb0 = logB0
     let ibb0 = ib0
 
     // Cap symmetrically with _cdfRForward's MAX_ITER bound; see _pdfRBackward for rationale.
     for (let r = r0 - 1; r >= Math.max(0, r0 - MAX_ITER); r--) {
       const rAlpha = this.p.alpha + r
       prb *= (r + 1) / l1
-      xab /= x
-      bb0 *= (rAlpha + betaParam + s0) / rAlpha
-      ibb0 += xab * xb0 / (rAlpha * bb0)
-      const dz = this._cdfSumOverS({ l2, s0, ps0, xb0, sBeta0, x, r, pr: prb, xa: xab, b: bb0, ib: ibb0 })
+      logXab -= logX
+      logBb0 += Math.log((rAlpha + betaParam + s0) / rAlpha)
+      ibb0 += Math.exp(logXab + logXb0 - logBb0) / rAlpha
+      const dz = this._cdfSumOverS({ l2, s0, ps0, logXb0, sBeta0, log1mx, r, pr: prb, logXa: logXab, logB: logBb0, ib: ibb0 })
       z += dz
       if (Math.abs(dz / z) < EPS) {
         break
@@ -325,14 +354,14 @@ export default class DoublyNoncentralBeta extends Distribution {
     return z
   }
 
-  _cdfSumOverS ({ l2, s0, ps0, xb0, sBeta0, x, r, pr, xa, b, ib }) {
+  _cdfSumOverS ({ l2, s0, ps0, logXb0, sBeta0, log1mx, r, pr, logXa, logB, ib }) {
     const betaParam = this.p.beta
     const rAlpha = this.p.alpha + r
 
     let dz = recursiveSum({
       p: ps0,
-      xb: xb0,
-      b,
+      logXb: logXb0,
+      logB,
       ib
     }, (t, i) => {
       const s = s0 + i
@@ -341,28 +370,28 @@ export default class DoublyNoncentralBeta extends Distribution {
     }, t => pr * t.p * t.ib, (t, i) => {
       const s = s0 + i
       const sBeta = betaParam + s
-      t.ib += xa * t.xb / (sBeta * t.b)
-      t.b *= sBeta / (rAlpha + sBeta)
-      t.xb *= 1 - x
+      t.ib += Math.exp(logXa + t.logXb - t.logB) / sBeta
+      t.logB += Math.log(sBeta / (rAlpha + sBeta))
+      t.logXb += log1mx
       return t
     })
 
     if (s0 > 0) {
-      const xbBack = xb0 / (1 - x)
-      const bBack = b * (rAlpha + sBeta0) / sBeta0
+      const logXbBack = logXb0 - log1mx
+      const logBBack = logB + Math.log((rAlpha + sBeta0) / sBeta0)
       dz += recursiveSum({
         p: ps0 * s0 / l2,
-        xb: xbBack,
-        b: bBack,
-        ib: ib - xa * xbBack / (sBeta0 * bBack)
+        logXb: logXbBack,
+        logB: logBBack,
+        ib: ib - Math.exp(logXa + logXbBack - logBBack) / sBeta0
       }, (t, i) => {
         const s = s0 - i - 1
         const sBeta = betaParam + s
         if (s >= 0) {
           t.p *= (s + 1) / l2
-          t.xb /= 1 - x
-          t.b *= (rAlpha + sBeta) / sBeta
-          t.ib -= xa * t.xb / (sBeta * t.b)
+          t.logXb -= log1mx
+          t.logB += Math.log((rAlpha + sBeta) / sBeta)
+          t.ib -= Math.exp(logXa + t.logXb - t.logB) / sBeta
         } else {
           t.p = 0
           t.ib = 0
