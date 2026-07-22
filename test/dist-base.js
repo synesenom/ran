@@ -224,6 +224,47 @@ describe('dist', () => {
         assert(init[1] > 1) // s still valid
       })
 
+      it('DoublyNoncentralF.fit should complete quickly on data shaped like the reported regression (#1063)', function () {
+        this.timeout(20000)
+        // Exact reproduction from the issue report: Rice(5, 1)-sampled data (which does not
+        // genuinely belong to this family) previously drove DoublyNoncentralF.fit() to ~30s
+        // because the log-likelihood surface carries a long, near-flat ridge between d2 and
+        // lambda1/lambda2 that a full-precision Powell search chases almost indefinitely, at
+        // ever-increasing per-point cost as the ridge is followed to larger parameter values.
+        // DoublyNoncentralBeta.fit's bounded Powell search budget caps this. Asserting on the
+        // actual _pdf call count (not wall-clock time) is the deterministic, load-independent
+        // regression guard: an isolated run measured ~113500 calls and ~1.5s, but wall-clock
+        // time alone varies more than 5x under mocha's --parallel workers contending for CPU
+        // (matching the exact flakiness this codebase's own solutions doc already documented
+        // for full-pool guess() timing assertions — see
+        // solutions/testing/2026-07-21-1055-guess-default-pool-latent-fit-cliff.md).
+        const data = new dist.Rice(5, 1).seed(5).sample(500)
+
+        let pdfCalls = 0
+        const origPdf = dist.DoublyNoncentralBeta.prototype._pdf
+        dist.DoublyNoncentralBeta.prototype._pdf = function (x) {
+          pdfCalls++
+          return origPdf.call(this, x)
+        }
+        let result
+        try {
+          result = dist.DoublyNoncentralF.fit(data)
+        } finally {
+          dist.DoublyNoncentralBeta.prototype._pdf = origPdf
+        }
+
+        // Lower bound guards against a future regression where fit() short-circuits without
+        // actually running Powell (which would trivially satisfy an upper-bound-only assertion).
+        assert(pdfCalls > data.length, `fit() made only ${pdfCalls} _pdf calls, expected the optimizer to run`)
+        assert(pdfCalls < 200000, `fit() made ${pdfCalls} _pdf calls, expected well under 200000`)
+        assert(result instanceof dist.DoublyNoncentralF)
+        assert(Number.isFinite(result.p.d1) && Number.isFinite(result.p.d2))
+        // Confirms the bounded search still improves on the initial guess rather than merely
+        // terminating early with an unoptimized fit.
+        const init = new dist.DoublyNoncentralF(...dist.DoublyNoncentralF._fitInit(data))
+        assert(result.lnL(data) >= init.lnL(data), 'fit() result should not be worse than the initial guess')
+      })
+
       it('Pareto.fit should recover xmin close to min(data)', () => {
         const data = [1.5, 2.0, 3.1, 1.8, 2.5]
         const result = dist.Pareto.fit(data)
