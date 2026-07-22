@@ -96,7 +96,13 @@ describe('dist', () => {
       // R's support is fixed to [-1, 1] regardless of its parameter, so the default sample (which
       // includes values > 1) would drive lnL to -Infinity and make aic()/bic() match by coincidence.
       sample: [-0.5, -0.2, 0, 0.2, 0.5, 0.1, 0.3, -0.1, 0.4, -0.3]
-    }
+    },
+    // issue #1083: audited and found k=2 (not 4) is correct — DoublyNoncentralChi2's pdf/cdf
+    // depend on k1, k2, lambda1, lambda2 only through the sums k1+k2 and lambda1+lambda2, so only
+    // 2 of the 4 constructor arguments are statistically identifiable. This guards against a future
+    // regression to this.k = 4, which would over-penalize aic()/bic() for a non-identifiability
+    // the model doesn't actually have.
+    { name: 'DoublyNoncentralChi2', ctor: () => new dist.DoublyNoncentralChi2(2, 3, 1, 2), k: 2, inherited: '4 (the nominal constructor arity, not the identifiable dimension)' }
   ]
   describe('Davis', () => {
     it('survival/hazard/cHazard below support return 1/0/0', () => {
