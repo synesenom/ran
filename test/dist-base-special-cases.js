@@ -162,4 +162,64 @@ describe('dist', () => {
       })
     })
   })
+
+  // Regression #1075: DoublyNoncentralBeta/F pdf/cdf returned NaN once both non-centrality
+  // parameters were large (Beta(alpha+r0, beta+s0) underflows to exact 0 in double precision
+  // when r0=round(lambda1/2), s0=round(lambda2/2) are both large). Checked directly here
+  // (bypassing dist-runner.js's full per-case suite) because quantile root-finding at this
+  // scale costs ~1s/call (MAX_ITER=100-bounded series, #1063) — too expensive to run through
+  // qMonotonicity/qGalois/quantileRoundtrip for every lambda value in the acceptance criteria.
+  // cdf monotonicity is checked here too (free — same x values, ascending order already):
+  // structurally sound even under #1063's MAX_ITER truncation, since each Poisson-weighted term
+  // is individually monotonic in x and truncation only drops mass, it doesn't invert ordering.
+  // A pdf(x)=pdf(1-x)/cdf(x)+cdf(1-x)=1 symmetry check (valid here since alpha=beta and
+  // lambda1=lambda2) is deliberately NOT added: verified empirically that MAX_ITER=100
+  // truncation already breaks it by orders of magnitude once lambda1+lambda2 is large and x is
+  // away from 0.5 (e.g. lambda=8000: cdf(0.5+x)+cdf(0.5-x) as low as 0.886, not ~1) — this is
+  // the exact, already-tracked, out-of-scope truncation limitation (#1086), not a #1075 defect,
+  // and asserting symmetry here would just rediscover it as a spurious new failure.
+  //
+  // Shared by the four cases below: constructs `new dist[name](...params)` for each entry in
+  // `lambdaCases` and walks `xValues` in ascending order, asserting pdf/cdf stay finite and
+  // in-range (and, when `checkMonotonic` is set, that cdf never decreases).
+  function assertFinitePdfCdf (name, lambdaCases, xValues, checkMonotonic) {
+    for (const params of lambdaCases) {
+      const d = new dist[name](...params)
+      let prevCdf = -Infinity
+      for (const x of xValues) {
+        const pdf = d.pdf(x)
+        const cdf = d.cdf(x)
+        assert(Number.isFinite(pdf) && pdf >= 0, `pdf(${x}; params=${params}) = ${pdf}`)
+        assert(Number.isFinite(cdf) && cdf >= 0 && cdf <= 1, `cdf(${x}; params=${params}) = ${cdf}`)
+        if (checkMonotonic) {
+          assert(cdf >= prevCdf, `cdf(${x}; params=${params}) = ${cdf} < previous ${prevCdf}`)
+          prevCdf = cdf
+        }
+      }
+    }
+  }
+
+  describe('DoublyNoncentralBeta/F large lambda (regression #1075)', () => {
+    it('DoublyNoncentralBeta pdf/cdf should be finite and cdf monotonic for lambda1 = lambda2 up to 50000', () => {
+      const lambdaCases = [1200, 8000, 20000, 50000].map(lambda => [2, 2, lambda, lambda])
+      assertFinitePdfCdf('DoublyNoncentralBeta', lambdaCases, [0.001, 0.1, 0.3, 0.5, 0.7, 0.9, 0.999], true)
+    })
+
+    // Asymmetric pair: r0 (~lambda1/2) and s0 (~lambda2/2) operate at very different scales,
+    // exercising the outer r-loop and inner s-recurrence independently rather than in lockstep.
+    it('DoublyNoncentralBeta pdf/cdf should be finite for asymmetric large lambda1/lambda2', () => {
+      const lambdaCases = [[2, 2, 50000, 10], [2, 2, 10, 50000]]
+      assertFinitePdfCdf('DoublyNoncentralBeta', lambdaCases, [0.001, 0.1, 0.5, 0.9, 0.999], false)
+    })
+
+    it('DoublyNoncentralF pdf/cdf should be finite and cdf monotonic for lambda1 = lambda2 up to 50000', () => {
+      const lambdaCases = [1200, 2000, 8000, 20000, 50000].map(lambda => [5, 5, lambda, lambda])
+      assertFinitePdfCdf('DoublyNoncentralF', lambdaCases, [0.001, 0.5, 1, 2, 4, 100], true)
+    })
+
+    it('DoublyNoncentralF pdf/cdf should be finite for asymmetric large lambda1/lambda2', () => {
+      const lambdaCases = [[5, 5, 50000, 10], [5, 5, 10, 50000]]
+      assertFinitePdfCdf('DoublyNoncentralF', lambdaCases, [0.001, 0.5, 1, 2, 4, 100], false)
+    })
+  })
 })
