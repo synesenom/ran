@@ -21,6 +21,7 @@ export default class GeneralizedPareto extends Distribution {
     super('continuous', 3)
 
     // Validate parameters
+    /** @type {*} */
     this.p = { mu, sigma, xi }
     Distribution.validate({ mu, sigma, xi }, [
       'sigma > 0'
