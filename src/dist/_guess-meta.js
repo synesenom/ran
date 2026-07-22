@@ -15,7 +15,10 @@
  * depend on the family's parameterization:
  * - Normal: μ2=1, μ4=3, μ6=15 → 15 − 6·3 + 9 = 6
  * - Uniform: μ2=1/3, μ4=1/5, μ6=1/7 → 27/7 − 6·(9/5) + 9 = 72/35
- * - Laplace: μ2=2, μ4=24, μ6=720 → 90 − 6·36 + 9 = 63 (using E[X^2k] = (2k)!·b^{2k})
+ * - Laplace: μ2=2, μ4=24, μ6=720 → 90 − 6·6 + 9 = 63 (using E[X^2k] = (2k)!·b^{2k})
+ *
+ * See solutions/correctness/2026-07-22-0647-guess-skewness-filter-normality-assumption.md
+ * for why a normal-only constant cannot be shared across every SYMMETRIC member.
  *
  * @var {Map<string, number>} SYMMETRIC
  * @memberof ran.dist

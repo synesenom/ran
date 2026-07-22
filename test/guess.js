@@ -200,6 +200,19 @@ describe('guess', () => {
     assert(result.some(r => r.name === 'Laplace'))
   })
 
+  it('should still exclude a symmetric candidate when sample skewness exceeds its own family-specific threshold', () => {
+    // Laplace(0,1), seed 7, n=50 has sample skewness ~2.929, beyond the corrected
+    // Laplace threshold 2*sqrt(63/50)~2.245 — confirms the per-family threshold still
+    // excludes on genuinely extreme skew rather than becoming a de facto no-op.
+    const data = new dist.Laplace(0, 1).seed(7).sample(50)
+    // Cauchy is untagged in _guess-meta.js (no soft skewness filter applies to it), so it
+    // always survives to give the result array something left to assert against — Uniform
+    // or Normal would themselves also be excluded by this same extreme sample skewness.
+    const result = guess(data, { candidates: [dist.Laplace, dist.Cauchy] })
+    assert(result.length > 0)
+    result.forEach(r => assert.notEqual(r.name, 'Laplace'))
+  })
+
   it('should exclude a symmetric-only candidate when sample skewness is strongly non-zero', () => {
     // Exponential(1) has population skewness 2 — far outside a symmetric family's
     // tolerance — while Exponential itself (positive-skew-only) is not excluded by the
