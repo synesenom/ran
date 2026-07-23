@@ -175,9 +175,16 @@ def dncbeta_cdf(a, b, l1, l2, x):
         log_ws = mpf(0) if h2 == 0 else -h2
         si = 0
         while True:
-            wr_ws = exp(log_wr + log_ws)
-            inner += wr_ws * Ireg(a + r, b + si, x)
-            if si > h2 + 5 and wr_ws < mpf('1e-55'):
+            # Convergence must track the actual accumulated term (Poisson weight * Ireg), not the
+            # raw Poisson-weight product alone: for r far from its Poisson mean r0, log_wr is
+            # already enormously negative, so wr_ws < 1e-55 trivially regardless of whether the
+            # Ireg-weighted term has converged, silently truncating real probability mass whenever
+            # the joint (r,s) peak shifts far from the nominal center (#1108). Same relative
+            # term-vs-running-sum check as recursiveSum's useFloor=False branch in
+            # src/algorithms/recursive-sum.js, the precedent from #1086's JS-side fix.
+            term = exp(log_wr + log_ws) * Ireg(a + r, b + si, x)
+            inner += term
+            if si > h2 + 5 and fabs(term) < fabs(inner) * mpf('1e-55'):
                 break
             if h2 != 0:
                 log_ws = log_ws + log_h2 - log(si + 1)
@@ -185,7 +192,7 @@ def dncbeta_cdf(a, b, l1, l2, x):
             if si > 5000:
                 break
         s += inner
-        if r > h1 + 5 and exp(log_wr) < mpf('1e-55'):
+        if r > h1 + 5 and fabs(inner) < fabs(s) * mpf('1e-55'):
             break
         if h1 != 0:
             log_wr = log_wr + log_h1 - log(r + 1)
@@ -220,9 +227,12 @@ def dncbeta_pdf(a, b, l1, l2, x):
         logB = logB_r0
         si = 0
         while True:
-            wr_ws = exp(log_wr + log_ws)
-            inner += exp(log_wr + log_ws + (a + r - 1) * logx + (b + si - 1) * log1mx - logB)
-            if si > h2 + 5 and wr_ws < mpf('1e-55'):
+            # See dncbeta_cdf's comment (#1108): convergence must track the actual accumulated
+            # term, not the raw Poisson-weight product, or real probability mass gets silently
+            # truncated whenever the joint (r,s) peak shifts far from the nominal center.
+            term = exp(log_wr + log_ws + (a + r - 1) * logx + (b + si - 1) * log1mx - logB)
+            inner += term
+            if si > h2 + 5 and fabs(term) < fabs(inner) * mpf('1e-55'):
                 break
             logB = logB + log(b + si) - log(a + r + b + si)
             if h2 != 0:
@@ -231,7 +241,7 @@ def dncbeta_pdf(a, b, l1, l2, x):
             if si > 5000:
                 break
         s += inner
-        if r > h1 + 5 and exp(log_wr) < mpf('1e-55'):
+        if r > h1 + 5 and fabs(inner) < fabs(s) * mpf('1e-55'):
             break
         logB_r0 = logB_r0 + log(a + r) - log(a + r + b)
         if h1 != 0:
