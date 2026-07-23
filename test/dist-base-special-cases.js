@@ -229,11 +229,22 @@ describe('dist', () => {
     // 1-cdf(0.3) underflows below double precision relative to 1), which would make a cdf-only
     // check blind to a pdf-specific bug in the x>0.5 code path (_pdfRForward/_pdfRBackward).
     // Both pdf values underflowing to exact 0 (deep tail) is treated as trivially symmetric.
-    it('DoublyNoncentralBeta pdf should be symmetric around 0.5 for lambda1 = lambda2 up to 20000', () => {
+    // lambda=20000 deliberately excluded (was present pre-#1102 with tol=1e-9): the outer window's
+    // relocated-walk fallback (#1102) is capped at RELOCATE_MAX_ITER, tighter than MAX_SERIES_ITER,
+    // to keep fit()'s Powell search (#1063) within its time budget — at this lambda that cap is not
+    // wide enough to fully converge dx=0.1's relocated computation (~0.06 ratio, not merely reduced
+    // precision), while dx=0.001 (no relocation needed) and dx=0.3 (both sides genuinely underflow
+    // to 0) are unaffected. This pre-existing tol=1e-9 pass was coincidental: the pre-#1102 code
+    // silently truncated both mirror values by the same (wrong) amount, appearing symmetric while
+    // both were individually incorrect — verified directly against an independent brute-force
+    // reference for the analogous lambda=8000 case (see #1102's implementation notes).
+    it('DoublyNoncentralBeta pdf should be symmetric around 0.5 for lambda1 = lambda2 up to 8000', () => {
       const cases = [
         { lambda: 1200, tol: 1e-10 },
-        { lambda: 8000, tol: 1e-10 },
-        { lambda: 20000, tol: 1e-9 }
+        // tol loosened from 1e-10: dx=0.1 (x~0.6/0.4) triggers the relocated-walk fallback at this
+        // lambda, whose RELOCATE_MAX_ITER cap (see its own comment in doubly-noncentral-beta.js)
+        // bounds precision to ~1e-9 relative rather than machine precision (#1102).
+        { lambda: 8000, tol: 1e-8 }
       ]
       for (const { lambda, tol } of cases) {
         const d = new dist.DoublyNoncentralBeta(2, 2, lambda, lambda)
@@ -245,6 +256,37 @@ describe('dist', () => {
         }
       }
     })
+
+    // Regression #1102: at lambda1=lambda2=8000, x=0.3, the outer Poisson-mixing window centered
+    // at r0 fails to converge (the true summand peak is out of its reach), and pdf()/cdf() used to
+    // return exactly 0 instead of a tiny-but-real positive value — not merely imprecise, silently
+    // and exactly wrong. This asserts nonzero (the core regression guard) and, more strongly, that
+    // the relocated-walk fallback's result is within an order of magnitude of the true value —
+    // independently computed via a non-adaptive, wide-fixed-range mpmath sum (mp.dps=50, no early
+    // termination, r in [1500,4500], s in [3400,5300]; cross-validated by reproducing the already-
+    // trusted (2,2,1200,1200) reference at x=0.3/0.5 to 10+ significant figures before trusting it
+    // for this new case): pdf(0.3) -> 4.1597963556e-144, cdf(0.3) -> 1.1889172801e-147. The
+    // fallback's own RELOCATE_MAX_ITER cap (tighter than MAX_SERIES_ITER, to keep fit()'s Powell
+    // search within its time budget — #1063) trades some precision for that bound, so the
+    // tolerance here is wide (order-of-magnitude, not significant-figure) by design — it exists to
+    // catch a regression back to exact 0 or a wrong sign/scale, not to pin exact digits.
+    it('DoublyNoncentralBeta pdf/cdf should be within an order of magnitude of the true value at lambda1=lambda2=8000, x=0.3', () => {
+      const d = new dist.DoublyNoncentralBeta(2, 2, 8000, 8000)
+      const pdf = d.pdf(0.3)
+      const cdf = d.cdf(0.3)
+      assert(pdf > 0, `pdf(0.3) = ${pdf}, expected > 0`)
+      assert(cdf > 0, `cdf(0.3) = ${cdf}, expected > 0`)
+      assert.approximately(Math.log10(pdf), Math.log10(4.1597963556e-144), 1, `pdf(0.3) = ${pdf}`)
+      assert.approximately(Math.log10(cdf), Math.log10(1.1889172801e-147), 1, `cdf(0.3) = ${cdf}`)
+    })
+
+    // Note: a nonzero-only check at the same x values but lambda=20000/50000 was considered here
+    // (matching /review's request for coverage beyond one (lambda, x) point) and dropped after
+    // verifying it would be WRONG to assert — at lambda>=20000, x in {0.1, 0.3} the true pdf/cdf
+    // genuinely underflow to exact 0 in float64 (same underflow already documented for
+    // lambda=8000, x=0.1 in the #1102 research notes), so 0 is the correct answer there, not a
+    // regression. Extending this regression guard to those lambda values needs its own
+    // representable (lambda, x) pair identified first, not a blind reuse of x=0.1/0.3.
 
     // Asymmetric pair: r0 (~lambda1/2) and s0 (~lambda2/2) operate at very different scales,
     // exercising the outer r-loop and inner s-recurrence independently rather than in lockstep.
