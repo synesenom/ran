@@ -241,6 +241,9 @@ describe('dist', () => {
     it('DoublyNoncentralBeta pdf should be symmetric around 0.5 for lambda1 = lambda2 up to 8000', () => {
       const cases = [
         { lambda: 1200, tol: 1e-10 },
+        // tol loosened from 1e-10: dx=0.1 (x~0.6/0.4) triggers the relocated-walk fallback at this
+        // lambda, whose RELOCATE_MAX_ITER cap (see its own comment in doubly-noncentral-beta.js)
+        // bounds precision to ~1e-9 relative rather than machine precision (#1102).
         { lambda: 8000, tol: 1e-8 }
       ]
       for (const { lambda, tol } of cases) {
@@ -276,6 +279,14 @@ describe('dist', () => {
       assert.approximately(Math.log10(pdf), Math.log10(4.1597963556e-144), 1, `pdf(0.3) = ${pdf}`)
       assert.approximately(Math.log10(cdf), Math.log10(1.1889172801e-147), 1, `cdf(0.3) = ${cdf}`)
     })
+
+    // Note: a nonzero-only check at the same x values but lambda=20000/50000 was considered here
+    // (matching /review's request for coverage beyond one (lambda, x) point) and dropped after
+    // verifying it would be WRONG to assert — at lambda>=20000, x in {0.1, 0.3} the true pdf/cdf
+    // genuinely underflow to exact 0 in float64 (same underflow already documented for
+    // lambda=8000, x=0.1 in the #1102 research notes), so 0 is the correct answer there, not a
+    // regression. Extending this regression guard to those lambda values needs its own
+    // representable (lambda, x) pair identified first, not a blind reuse of x=0.1/0.3.
 
     // Asymmetric pair: r0 (~lambda1/2) and s0 (~lambda2/2) operate at very different scales,
     // exercising the outer r-loop and inner s-recurrence independently rather than in lockstep.
