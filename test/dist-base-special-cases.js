@@ -241,4 +241,52 @@ describe('dist', () => {
       assertFinitePdfCdf('DoublyNoncentralF', lambdaCases, [0.001, 0.5, 1, 2, 4, 100], false)
     })
   })
+
+  // Regression #1084: DoublyNoncentralF's constructor documents d1/d2 as rounded to the nearest
+  // integer, and .params() reports the rounded values, but pdf()/cdf()/sample() must be computed
+  // from those SAME rounded values, not from the raw un-rounded constructor arguments. Checked by
+  // comparing a non-integer-constructed instance directly against the equivalent
+  // already-integer-constructed instance (self-consistency), rather than against new external
+  // reference values — the rounded case is already covered by test/dist-cases-continuous.js.
+  describe('DoublyNoncentralF non-integer d1/d2 internal consistency (regression #1084)', () => {
+    it('params() should report d1/d2 rounded to the nearest integer', () => {
+      const d = new dist.DoublyNoncentralF(3.7, 8.2, 1, 2)
+      assert.deepEqual(d.params(), { d1: 4, d2: 8, lambda1: 1, lambda2: 2 })
+    })
+
+    it('pdf/cdf of a non-integer-constructed instance should match the rounded-equivalent instance', () => {
+      const raw = new dist.DoublyNoncentralF(3.7, 8.2, 1, 2)
+      const rounded = new dist.DoublyNoncentralF(4, 8, 1, 2)
+      ;[0.5, 1, 2, 5].forEach(x => {
+        assert.strictEqual(raw.pdf(x), rounded.pdf(x), `pdf(${x})`)
+        assert.strictEqual(raw.cdf(x), rounded.cdf(x), `cdf(${x})`)
+      })
+    })
+
+    it('sample() of a non-integer-constructed instance should match the rounded-equivalent instance for the same seed', () => {
+      const raw = new dist.DoublyNoncentralF(3.7, 8.2, 1, 2).seed(123456789)
+      const rounded = new dist.DoublyNoncentralF(4, 8, 1, 2).seed(123456789)
+      const values1 = raw.sample(50)
+      const values2 = rounded.sample(50)
+      assert(values1.every((v, i) => v === values2[i]))
+    })
+
+    it('save() + load() should reproduce identical pdf/cdf/sample output for non-integer d1/d2', () => {
+      const original = new dist.DoublyNoncentralF(3.7, 8.2, 1, 2).seed(123456789)
+      const xValues = [0.5, 1, 2, 5]
+      const pdfBefore = xValues.map(x => original.pdf(x))
+      const cdfBefore = xValues.map(x => original.cdf(x))
+      const state = original.save()
+      const sampleBefore = original.sample(20)
+
+      const restored = dist.DoublyNoncentralF.load(state)
+      const pdfAfter = xValues.map(x => restored.pdf(x))
+      const cdfAfter = xValues.map(x => restored.cdf(x))
+      const sampleAfter = restored.sample(20)
+
+      assert.deepEqual(pdfAfter, pdfBefore)
+      assert.deepEqual(cdfAfter, cdfBefore)
+      assert.deepEqual(sampleAfter, sampleBefore)
+    })
+  })
 })

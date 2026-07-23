@@ -1,10 +1,15 @@
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import * as dist from '../src/dist'
+import Distribution from '../src/dist/_distribution'
 
 describe('dist', () => {
   describe('Distribution', () => {
     describe('.fit()', () => {
+      it('Distribution._powellOptions base class should return {} (no override)', () => {
+        assert.deepEqual(Distribution._powellOptions(), {})
+      })
+
       it('Frechet._fitInit should handle constant data', () => {
         // || 1 guard: all equal → zero variance in reciprocals → fallback to 1
         const init = dist.Frechet._fitInit([5, 5, 5])

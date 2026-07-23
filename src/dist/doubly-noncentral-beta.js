@@ -158,6 +158,17 @@ export default class DoublyNoncentralBeta extends Distribution {
    * cost to roughly 1-2s instead of 13-30s+ on mismatched data.
    * See solutions/performance/2026-07-22-0702-doubly-noncentral-fit-powell-ridge-cost.md
    *
+   * maxIter also bounds each inner Brent line search powell() runs per outer sweep, not just the
+   * outer sweep count itself (#1078). Investigated across 35 well-matched fits (7 parameter sets
+   * x 5 seeds): a decoupled, much larger inner-Brent budget produced bit-identical results,
+   * confirming maxIter=15 is not starving convergence there. On the same family-mismatched ridge
+   * data this fix targets, a larger inner budget did recover a meaningfully better log-likelihood
+   * (~16-32%) — but at the cost of reintroducing multi-second-plus fit() runs on that same data,
+   * i.e. exactly the cost blowup this fix exists to bound. The coupled maxIter=15 is kept as-is:
+   * on mismatched data, looser convergence is the deliberate, already-documented tradeoff above,
+   * not an unrelated defect to fix separately. See
+   * solutions/performance/2026-07-22-1600-doubly-noncentral-fit-inner-line-search-budget.md
+   *
    * @method _powellOptions
    * @memberof ran.dist.DoublyNoncentralBeta
    * @returns {Object} The bounded Powell search options.
