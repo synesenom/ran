@@ -51,6 +51,9 @@ export default class NegativeHypergeometric extends Categorical {
     super(weights, 0)
     this.p = { N: Ni, K: Ki, r: ri }
 
+    // NegativeHypergeometric has 3 free parameters (N, K, r); override the 2 hardcoded by Categorical
+    this.k = 3
+
     // Speed-up constants
     Object.assign(this.c, { logBinNK })
   }
