@@ -976,7 +976,11 @@ const REFS = [
     // orders of magnitude. tol/qtol are looser than this file's usual 1e-14: the fix's widened
     // MAX_SERIES_ITER-bounded series still carries more residual truncation error at this scale
     // than the typical small-lambda case (measured ~5e-12 relative error against the mpmath
-    // reference below).
+    // reference below). qtol is tighter than tol despite root-finding running on top of an
+    // already-imprecise cdf(): at this x, pdf is steep enough (~1e-21 changing by orders of
+    // magnitude per 0.1 in x) that a 1e-11 relative error in the cdf target translates to a much
+    // smaller relative error in the x the root-finder converges to (empirically ~2e-14, not a
+    // typo).
     name: 'DoublyNoncentralBeta',
     params: [2, 2, 1200, 1200],
     tol: 1e-11,
