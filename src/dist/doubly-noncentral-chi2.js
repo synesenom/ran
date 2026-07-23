@@ -31,6 +31,15 @@ export default class DoublyNoncentralChi2 extends NoncentralChi2 {
     // See solutions/distribution/2026-05-21-1300-doubly-noncentral-chi2-inherit-noncentral-chi2.md
     super(k1i + k2i, lambda1 + lambda2)
 
+    // Only 2 of the 4 constructor arguments are statistically identifiable: the pdf/cdf above
+    // (and fit(), below) depend on k1, k2, lambda1, lambda2 only through the sums k1+k2 and
+    // lambda1+lambda2, so distinct tuples with the same sums produce the bit-for-bit identical
+    // distribution. aic()/bic() must therefore use the identifiable parameter count (2), matching
+    // NoncentralChi2's own this.k = 2, not the 4 nominal constructor arguments — explicit here
+    // (rather than left implicit via inheritance) to guard against a future regression to 4.
+    // See issue #1083.
+    this.k = 2
+
     // decisions/0039-reparametrizing-subclass-nontrivial-parent-delegate.md — NoncentralChi2's
     // _pdf/_cdf/_generator/moments are non-trivial (Bessel-function branches), not one-liners;
     // cache a correctly-parameterized NoncentralChi2 instance and delegate every currently-inherited
