@@ -23,6 +23,7 @@ export default class HalfGeneralizedNormal extends GeneralizedNormal {
 
     // HalfGeneralizedNormal has 2 free parameters (alpha, beta); override the 3 inherited from GeneralizedNormal
     this.k = 2
+    // decisions/0018-continuous-subclass-natural-params.md — natural params only in this.p.
     /** @type {*} */
     this.p = { alpha, beta }
 
