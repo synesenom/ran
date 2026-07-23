@@ -17,10 +17,15 @@ import { EPS, MAX_SERIES_ITER } from '../core/constants'
  * to the state.
  * @param {Function=} postUpdate Function that takes the current state of the variables, the current index and returns
  * the next state of the variables after calculating the last term.
+ * @param {Object=} options Optional settings. `useFloor` (default true) applies the
+ * `Math.max(|sum|, 1)` absolute-EPS floor to the convergence check, which is appropriate when the
+ * series' converged value can plausibly be near or above 1. Callers whose target sum is always far
+ * below 1 in magnitude (so the floor would falsely declare convergence after only 1-2 terms) should
+ * pass `{ useFloor: false }` for a purely relative check instead.
  * @returns {number} The approximated sum.
  * @private
  */
-export default function (x0, preUpdate, termFn, postUpdate) {
+export default function (x0, preUpdate, termFn, postUpdate, { useFloor = true } = {}) {
   // Init state and sum for the zeroth term.
   let x = x0
   let delta
@@ -39,7 +44,7 @@ export default function (x0, preUpdate, termFn, postUpdate) {
     sum += delta
 
     // Check if accuracy has been reached.
-    if (Math.abs(delta) < EPS * Math.max(Math.abs(sum), 1)) {
+    if (Math.abs(delta) < EPS * (useFloor ? Math.max(Math.abs(sum), 1) : Math.abs(sum))) {
       break
     } else {
       // Otherwise update state.
