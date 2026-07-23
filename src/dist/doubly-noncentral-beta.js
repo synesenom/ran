@@ -394,6 +394,7 @@ export default class DoublyNoncentralBeta extends Distribution {
    * one structurally cannot. Local to this file rather than changing recursiveSum itself, since
    * that helper is shared by many unrelated series summations (Kummer's ₁F₁, other noncentral
    * CDFs) whose typical magnitudes make the floor appropriate for them.
+   * See solutions/correctness/2026-07-23-1108-doubly-noncentral-beta-recursivesum-absolute-floor-truncation.md
    *
    * @method _seriesSum
    * @memberof ran.dist.DoublyNoncentralBeta
