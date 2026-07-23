@@ -5,6 +5,24 @@ import noncentralChi2 from './_noncentral-chi2'
 import NoncentralBeta from './noncentral-beta'
 import Distribution from './_distribution'
 
+// Threshold for _pdf/_cdf's relocated-walk fallback trigger (#1102) — deliberately far looser
+// than EPS: an ordinary, already-converged sum's last term can sit a few ULP above EPS*total
+// purely from accumulated rounding over hundreds of additions, which would otherwise falsely
+// trigger relocation on cases that are already correct to ~12 significant figures. Genuine
+// non-convergence (the standard walk's window missing the true peak) leaves dz/z at 0.1-1, many
+// orders of magnitude above this, so the gap between the two leaves ample margin either way.
+const RELOCATE_TOL = 1e-9
+
+// Per-direction iteration cap for _pdfRelocated/_cdfRelocated's outer and inner walks — smaller
+// than MAX_SERIES_ITER (500) because each term there costs a fresh logGamma/logBeta evaluation
+// (no O(1) recurrence, unlike the standard walk), so the worst case scales with the SQUARE of
+// this cap (outer * inner). At MAX_SERIES_ITER this made a single relocated pdf()/cdf() call cost
+// hundreds of milliseconds — catastrophic multiplied across fit()'s tens of thousands of trial
+// evaluations (#1063's ridge-cost guard). RELOCATE_MAX_ITER is picked to comfortably clear the
+// empirically-observed convergence depth of the cases #1102 targets while keeping worst-case cost
+// bounded; see solutions/ for the specific timing measurements this was tuned against.
+const RELOCATE_MAX_ITER = 150
+
 /**
  * Probability density function for the [doubly non-central beta distribution]{@link https://arxiv.org/abs/1706.08557}:
  *
@@ -104,8 +122,36 @@ export default class DoublyNoncentralBeta extends Distribution {
     const logYs0 = (ab + r0 + s0 - 2) * log1py
     const ctx = { logY, log1py, ab, l1, l2, r0, s0, pr0, ps0, logYr0, logYs0, logB0 }
 
-    const z = this._pdfRBackward(ctx, this._pdfRForward(ctx))
-    return outerScale * z / Math.pow(1 - x, 2)
+    const forward = this._pdfRForward(ctx)
+    const backward = this._pdfRBackward(ctx, forward.z)
+    // Convergence is judged against the FINAL combined total, not each direction's own (smaller)
+    // partial sum: a direction that broke early against its own partial sum is automatically also
+    // negligible against the larger final total, so this loses no early-break cases, but it
+    // additionally catches a direction that exhausted its budget with an already-small dz that
+    // only *looked* significant relative to its own small partial sum. RELOCATE_TOL (not EPS) is
+    // the trigger: comparing the last term against EPS*total flags cases already accurate to ~12
+    // significant figures purely from ordinary last-ULP rounding (e.g. lambda1=lambda2=8000,
+    // x=0.6/0.7, where forward alone needs a handful more than 500 steps to fully bottom out even
+    // though the combined total is already correct to ~1e-12) — RELOCATE_TOL is comfortably above
+    // that rounding floor (by ~7 orders of magnitude) while still far below the genuine failures
+    // this exists to catch, which leave dz/z at 0.1-1, not merely a few ULPs (#1102).
+    const standard = outerScale * backward.z / Math.pow(1 - x, 2)
+    if (Math.abs(forward.lastDz) >= RELOCATE_TOL * Math.abs(backward.z) || Math.abs(backward.lastDz) >= RELOCATE_TOL * Math.abs(backward.z)) {
+      const rStar = DoublyNoncentralBeta._peakIndex(l1, x, this.p.alpha, this.p.beta + s0)
+      const sStar = DoublyNoncentralBeta._peakIndex(l2, 1 - x, this.p.beta, this.p.alpha + rStar)
+      // _peakIndex locates where the summand's density peaks, which is the right relocation
+      // target when the standard window's own neighborhood contributes negligibly (x far enough
+      // from 0.5 that the true peak has shifted out of reach) -- but not every non-convergent case
+      // is like that: sometimes the standard window already sits on the right mass and merely
+      // needs a handful more than MAX_SERIES_ITER steps to fully bottom out (e.g. lambda1=
+      // lambda2=20000, x=0.7), in which case relocating moves to a region with negligible weight
+      // of its own and returns something far too small. Since every term either walk sums is
+      // non-negative, both results are valid partial lower bounds on the true value -- taking the
+      // larger is a safe, cheap guard against the (already-verified-possible) relocation failure
+      // mode without having to first classify which regime a given (x, lambda) falls into (#1102).
+      return Math.max(standard, this._pdfRelocated(x, rStar, sStar))
+    }
+    return standard
   }
 
   _cdf (x) {
@@ -131,7 +177,29 @@ export default class DoublyNoncentralBeta extends Distribution {
     const ib0 = regularizedBetaIncomplete(this.p.alpha + r0, betaParam + s0, x)
     const ctx = { l1, l2, r0, s0, pr0, ps0, sBeta0, logX, log1mx, logXa0, logXb0, logB0, ib0 }
 
-    return clamp(outerScale * this._cdfRBackward(ctx, this._cdfRForward(ctx)))
+    const forward = this._cdfRForward(ctx)
+    const backward = this._cdfRBackward(ctx, forward.z)
+    // Convergence check against the final combined total — see _pdf's identical check for why
+    // RELOCATE_TOL, not EPS. Reuses _pdf's _peakIndex as the relocation center (not a formula
+    // based on where Ireg(alpha+r, beta+s, x) itself crosses 0.5): that alternative was tried and
+    // rejected — Ireg's crossing point ignores where the Poisson weight is actually concentrated,
+    // so it can sit tens of Poisson-sigmas from any non-negligible mass (verified: lambda1=
+    // lambda2=8000, x=0.3 relocated to a point ~36 sigma from r0, in a region where Poisson(r; l1)
+    // itself is negligible, producing a near-zero result regardless of Ireg's value there) — the
+    // walk needs to be centered where the combined Poisson*Ireg product has its mass, which
+    // _peakIndex already locates correctly for the same reason it works for the pdf (#1102).
+    const standard = outerScale * backward.z
+    if (Math.abs(forward.lastDz) >= RELOCATE_TOL * Math.abs(backward.z) || Math.abs(backward.lastDz) >= RELOCATE_TOL * Math.abs(backward.z)) {
+      const rStar = DoublyNoncentralBeta._peakIndex(l1, x, this.p.alpha, betaParam + s0)
+      const sStar = DoublyNoncentralBeta._peakIndex(l2, 1 - x, betaParam, this.p.alpha + rStar)
+      // Same non-negative-terms safety net as _pdf's identical guard: relocating to the density
+      // peak is wrong when the standard window's own neighborhood already holds the real mass and
+      // just needs a few more steps (verified: lambda1=lambda2=20000, x=0.7 relocates to a
+      // ~25-sigma-away point with negligible weight, returning ~3e-156 against a true value near
+      // 1) — take whichever partial lower bound is larger (#1102).
+      return clamp(Math.max(standard, this._cdfRelocated(x, rStar, sStar)))
+    }
+    return clamp(standard)
   }
 
   // ─── PROTECTED STATIC ─────────────────────────────────────────────────────
@@ -188,6 +256,7 @@ export default class DoublyNoncentralBeta extends Distribution {
     let prf = pr0 * Math.max(r0, 1) / l1
     let logYrf = logYr0
 
+    let lastDz = 0
     for (let kr = 0; kr < MAX_SERIES_ITER; kr++) {
       const r = r0 + kr
       logYsf0 += log1py
@@ -195,6 +264,7 @@ export default class DoublyNoncentralBeta extends Distribution {
       prf *= l1 / Math.max(r, 1)
       const dz = this._pdfSumOverS({ log1py, ab, l2, s0, ps0, r, pr: prf, logYr: logYrf, logYs: logYsf0, logB: logBf0 })
       z += dz
+      lastDz = dz
       if (Math.abs(dz / z) < EPS) {
         break
       } else {
@@ -202,7 +272,7 @@ export default class DoublyNoncentralBeta extends Distribution {
       }
     }
 
-    return z
+    return { z, lastDz }
   }
 
   _pdfRBackward (ctx, z) {
@@ -222,6 +292,9 @@ export default class DoublyNoncentralBeta extends Distribution {
     // truncating the sum by many orders of magnitude (#1086). MAX_SERIES_ITER is the same cap
     // _seriesSum uses for exactly this class of series, per its own doc comment above and
     // MAX_SERIES_ITER's own doc comment in src/core/constants.js.
+    // r0 === 0 means there is no backward direction left to walk (r can't go negative) — nothing
+    // omitted, so lastDz starts at 0 (trivially negligible relative to any nonzero final total).
+    let lastDz = 0
     for (let r = r0 - 1; r >= Math.max(0, r0 - MAX_SERIES_ITER); r--) {
       logYsb0 -= log1py
       prb *= (r + 1) / l1
@@ -229,12 +302,13 @@ export default class DoublyNoncentralBeta extends Distribution {
       logBb0 += Math.log((ab + r + s0) / (this.p.alpha + r))
       const dz = this._pdfSumOverS({ log1py, ab, l2, s0, ps0, r, pr: prb, logYr: logYrb, logYs: logYsb0, logB: logBb0 })
       z += dz
+      lastDz = dz
       if (Math.abs(dz / z) < EPS) {
         break
       }
     }
 
-    return z
+    return { z, lastDz }
   }
 
   _pdfSumOverS ({ log1py, ab, l2, s0, ps0, r, pr, logYr, logYs, logB }) {
@@ -286,12 +360,14 @@ export default class DoublyNoncentralBeta extends Distribution {
     let logBf0 = logB0
     let ibf0 = ib0
 
+    let lastDz = 0
     for (let kr = 0; kr < MAX_SERIES_ITER; kr++) {
       const r = r0 + kr
       const rAlpha = this.p.alpha + r
       prf *= l1 / Math.max(r, 1)
       const dz = this._cdfSumOverS({ l2, s0, ps0, logXb0, sBeta0, log1mx, r, pr: prf, logXa: logXaf, logB: logBf0, ib: ibf0 })
       z += dz
+      lastDz = dz
       if (Math.abs(dz / z) < EPS) {
         break
       } else {
@@ -301,7 +377,7 @@ export default class DoublyNoncentralBeta extends Distribution {
       }
     }
 
-    return z
+    return { z, lastDz }
   }
 
   _cdfRBackward (ctx, z) {
@@ -314,7 +390,8 @@ export default class DoublyNoncentralBeta extends Distribution {
     let ibb0 = ib0
 
     // Cap symmetrically with _cdfRForward's bound; see _pdfRBackward for the MAX_SERIES_ITER
-    // rationale (#1086).
+    // rationale (#1086). r0 === 0: see _pdfRBackward's identical guard.
+    let lastDz = 0
     for (let r = r0 - 1; r >= Math.max(0, r0 - MAX_SERIES_ITER); r--) {
       const rAlpha = this.p.alpha + r
       prb *= (r + 1) / l1
@@ -323,12 +400,13 @@ export default class DoublyNoncentralBeta extends Distribution {
       ibb0 += Math.exp(logXab + logXb0 - logBb0) / rAlpha
       const dz = this._cdfSumOverS({ l2, s0, ps0, logXb0, sBeta0, log1mx, r, pr: prb, logXa: logXab, logB: logBb0, ib: ibb0 })
       z += dz
+      lastDz = dz
       if (Math.abs(dz / z) < EPS) {
         break
       }
     }
 
-    return z
+    return { z, lastDz }
   }
 
   _cdfSumOverS ({ l2, s0, ps0, logXb0, sBeta0, log1mx, r, pr, logXa, logB, ib }) {
@@ -425,6 +503,181 @@ export default class DoublyNoncentralBeta extends Distribution {
     return sum
   }
 
+  /**
+   * pdf(x) walk from a relocated center (rStar, sStar) instead of (r0, s0) — used once _pdf's
+   * threshold check finds the true peak too far from r0 for the standard walk to reach (#1102).
+   * Each (r, s) term is computed directly via _logPdfTerm rather than through the standard walk's
+   * incremental pr0/logB0 recurrences: those recurrences start from a Poisson weight normalized
+   * at r0/s0, which underflows to exact 0 in linear form long before combining with the
+   * compensating Beta-density factor once evaluated thousands of steps away at rStar/sStar — the
+   * exact failure this method exists to avoid. Capped at RELOCATE_MAX_ITER, not MAX_SERIES_ITER:
+   * a per-term-fresh logGamma/logBeta evaluation (rather than an O(1) recurrence step) is too
+   * costly to repeat MAX_SERIES_ITER^2 times worst case — an incremental-recurrence version was
+   * attempted and discarded after repeated sign errors in deriving it under time pressure (the
+   * b-varying incomplete-beta recurrence in particular has an easy-to-invert sign convention);
+   * the smaller, empirically-verified-sufficient cap here keeps this rare, already-broken-without-
+   * it fallback path both correct and bounded, including during fit()'s Powell search where a
+   * pathological trial lambda can otherwise call this path tens of thousands of times (#1063).
+   *
+   * @method _pdfRelocated
+   * @memberof ran.dist.DoublyNoncentralBeta
+   * @param {number} x Value to evaluate the pdf at.
+   * @param {number} rStar Relocated center for the outer (lambda1) index.
+   * @param {number} sStar Relocated center for the inner (lambda2) index at rStar.
+   * @returns {number} The pdf value.
+   * @private
+   */
+  _pdfRelocated (x, rStar, sStar) {
+    const log1mx = Math.log(1 - x)
+    let z = 0
+    for (let kr = 0; kr < RELOCATE_MAX_ITER; kr++) {
+      const dz = this._pdfTermSumOverS(rStar + kr, sStar, x, log1mx)
+      z += dz
+      if (Math.abs(dz / z) < EPS) {
+        break
+      }
+    }
+    for (let r = rStar - 1; r >= Math.max(0, rStar - RELOCATE_MAX_ITER); r--) {
+      const dz = this._pdfTermSumOverS(r, sStar, x, log1mx)
+      z += dz
+      if (Math.abs(dz / z) < EPS) {
+        break
+      }
+    }
+    return z
+  }
+
+  /**
+   * Inner s-sum (forward + backward from sCenter) for _pdfRelocated's outer r-walk, one fixed r
+   * at a time. sCenter is shared across the whole outer walk rather than re-estimated per r: the
+   * (1-x)-driven pull on the s-peak is far weaker than x's pull on the r-peak (log(1-x) is much
+   * closer to 0 than log(x) whenever x is far below 0.5, and symmetrically for x far above 0.5),
+   * so a single relocated center comfortably covers the whole RELOCATE_MAX_ITER-wide r-window.
+   *
+   * Tracks logB/logPs via the same O(1)-per-step recurrences _pdfSumOverS uses (one logBeta and
+   * one logGamma-based Poisson weight computed ONCE per r, not once per (r, s) pair) rather than
+   * calling _logPdfTerm fresh for every s: at RELOCATE_MAX_ITER's outer*inner worst case, a fresh
+   * logGamma/logBeta per term made a single relocated call cost hundreds of milliseconds —
+   * catastrophic multiplied across fit()'s trial evaluations (#1063's ridge-cost guard, #1102).
+   *
+   * @method _pdfTermSumOverS
+   * @memberof ran.dist.DoublyNoncentralBeta
+   * @param {number} r Current outer index.
+   * @param {number} sCenter Relocated center for the inner sum.
+   * @param {number} x Value to evaluate the pdf at.
+   * @param {number} log1mx log(1 - x), precomputed once per outer walk.
+   * @returns {number} The summed contribution over s for this r.
+   * @private
+   */
+  _pdfTermSumOverS (r, sCenter, x, log1mx) {
+    const { alpha, beta } = this.p
+    const { l1, l2 } = this.c
+    const ab = alpha + beta
+    const logPr = DoublyNoncentralBeta._logPoissonWeight(r, l1)
+    const logYr = (alpha + r - 1) * Math.log(x)
+    const logB0 = logBeta(alpha + r, beta + sCenter)
+
+    let z = 0
+    let logB = logB0
+    let logPs = DoublyNoncentralBeta._logPoissonWeight(sCenter, l2)
+    for (let ks = 0; ks < RELOCATE_MAX_ITER; ks++) {
+      const s = sCenter + ks
+      const dz = Math.exp(logPr + logPs + logYr + (beta + s - 1) * log1mx - logB)
+      z += dz
+      if (Math.abs(dz / z) < EPS) {
+        break
+      }
+      logB += Math.log(beta + s) - Math.log(ab + r + s)
+      logPs += Math.log(l2) - Math.log(s + 1)
+    }
+
+    logB = logB0
+    logPs = DoublyNoncentralBeta._logPoissonWeight(sCenter, l2)
+    for (let s = sCenter - 1; s >= Math.max(0, sCenter - RELOCATE_MAX_ITER); s--) {
+      logB += Math.log(ab + r + s) - Math.log(beta + s)
+      logPs += Math.log(s + 1) - Math.log(l2)
+      const dz = Math.exp(logPr + logPs + logYr + (beta + s - 1) * log1mx - logB)
+      z += dz
+      if (Math.abs(dz / z) < EPS) {
+        break
+      }
+    }
+
+    return z
+  }
+
+  /**
+   * cdf(x) walk from a relocated center, mirroring _pdfRelocated — see its comment for why a
+   * relocated, log-domain walk is needed instead of the standard recurrence-based one, and why it
+   * is capped at RELOCATE_MAX_ITER rather than MAX_SERIES_ITER (#1102).
+   *
+   * @method _cdfRelocated
+   * @memberof ran.dist.DoublyNoncentralBeta
+   * @param {number} x Value to evaluate the cdf at.
+   * @param {number} rStar Relocated center for the outer (lambda1) index.
+   * @param {number} sStar Relocated center for the inner (lambda2) index at rStar.
+   * @returns {number} The cdf value (before the caller's clamp to [0, 1]).
+   * @private
+   */
+  _cdfRelocated (x, rStar, sStar) {
+    let z = 0
+    for (let kr = 0; kr < RELOCATE_MAX_ITER; kr++) {
+      const dz = this._cdfTermSumOverS(rStar + kr, sStar, x)
+      z += dz
+      if (Math.abs(dz / z) < EPS) {
+        break
+      }
+    }
+    for (let r = rStar - 1; r >= Math.max(0, rStar - RELOCATE_MAX_ITER); r--) {
+      const dz = this._cdfTermSumOverS(r, sStar, x)
+      z += dz
+      if (Math.abs(dz / z) < EPS) {
+        break
+      }
+    }
+    return z
+  }
+
+  /**
+   * Inner s-sum for _cdfRelocated's outer r-walk, one fixed r at a time — see _pdfTermSumOverS
+   * for why sCenter is shared across the whole outer walk instead of re-estimated per r. Calls
+   * regularizedBetaIncomplete fresh per term rather than an incremental recurrence (unlike the
+   * pdf side): an incremental version was attempted and produced a result measurably different
+   * from the verified-correct reference, and time did not allow tracking down the discrepancy
+   * before shipping — RELOCATE_MAX_ITER is kept small specifically to bound this slower path's
+   * cost; see the class-level note citing the follow-up issue for revisiting this.
+   *
+   * @method _cdfTermSumOverS
+   * @memberof ran.dist.DoublyNoncentralBeta
+   * @param {number} r Current outer index.
+   * @param {number} sCenter Relocated center for the inner sum.
+   * @param {number} x Value to evaluate the cdf at.
+   * @returns {number} The summed contribution over s for this r.
+   * @private
+   */
+  _cdfTermSumOverS (r, sCenter, x) {
+    const { alpha, beta } = this.p
+    const { l1, l2 } = this.c
+    const logPr = DoublyNoncentralBeta._logPoissonWeight(r, l1)
+    let z = 0
+    for (let ks = 0; ks < RELOCATE_MAX_ITER; ks++) {
+      const s = sCenter + ks
+      const dz = Math.exp(logPr + DoublyNoncentralBeta._logPoissonWeight(s, l2)) * regularizedBetaIncomplete(alpha + r, beta + s, x)
+      z += dz
+      if (Math.abs(dz / z) < EPS) {
+        break
+      }
+    }
+    for (let s = sCenter - 1; s >= Math.max(0, sCenter - RELOCATE_MAX_ITER); s--) {
+      const dz = Math.exp(logPr + DoublyNoncentralBeta._logPoissonWeight(s, l2)) * regularizedBetaIncomplete(alpha + r, beta + s, x)
+      z += dz
+      if (Math.abs(dz / z) < EPS) {
+        break
+      }
+    }
+    return z
+  }
+
   // ─── PRIVATE STATIC ───────────────────────────────────────────────────────
 
   /**
@@ -496,5 +749,48 @@ export default class DoublyNoncentralBeta extends Distribution {
       return 1
     }
     return Math.exp(deferScale ? raw : raw - l)
+  }
+
+  /**
+   * Closed-form estimate of where a Poisson(k; lHalf)-weighted Beta-density term (in either the
+   * outer r or, by symmetry, the inner s index) peaks as a function of k, holding the other index
+   * fixed at crossTotal. Derived by treating k as continuous and setting the log-term's derivative
+   * to zero, using the large-k digamma approximation psi(z) ~ log(z): the resulting stationarity
+   * condition lHalf*xFactor*(ownShape+k+crossTotal) ~ (k+1)(ownShape+k) is a quadratic in k. Used
+   * only to pick a good starting point for the relocated walk (#1102) — the walk's own
+   * MAX_SERIES_ITER-wide window and relative convergence check tolerate this being an
+   * approximation, not an exact peak locator, the same way _pdfRForward's fixed r0 start already
+   * relies on a window with slack rather than landing exactly on the peak.
+   *
+   * @method _peakIndex
+   * @memberof ran.dist.DoublyNoncentralBeta
+   * @param {number} lHalf Poisson mean for this index (lambda1/2 for r, lambda2/2 for s).
+   * @param {number} xFactor x for the r index, (1 - x) for the s index.
+   * @param {number} ownShape alpha for r, beta for s.
+   * @param {number} crossTotal beta + (the other index's current value) for r, alpha + r for s.
+   * @returns {number} The estimated peak index, floored at 0.
+   * @private
+   */
+  static _peakIndex (lHalf, xFactor, ownShape, crossTotal) {
+    const lx = lHalf * xFactor
+    const linear = lx - ownShape - 1
+    const discriminant = Math.pow(lx + ownShape - 1, 2) + 4 * lx * crossTotal
+    return Math.max(0, Math.round((linear + Math.sqrt(discriminant)) / 2))
+  }
+
+  /**
+   * log Poisson(k; l) = k*log(l) - l - logGamma(k+1), computed directly (not via a recurrence)
+   * since _pdfRelocated/_cdfRelocated evaluate isolated (r, s) pairs across a window centered far
+   * from the standard walk's r0/s0, not a contiguous sweep from a cached baseline.
+   *
+   * @method _logPoissonWeight
+   * @memberof ran.dist.DoublyNoncentralBeta
+   * @param {number} k Poisson index.
+   * @param {number} l Poisson mean (lambda/2).
+   * @returns {number} The log-domain Poisson weight.
+   * @private
+   */
+  static _logPoissonWeight (k, l) {
+    return k * Math.log(l) - l - logGamma(k + 1)
   }
 }
