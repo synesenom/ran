@@ -224,6 +224,28 @@ describe('dist', () => {
       }
     })
 
+    // pdf(0.5+x)=pdf(0.5-x) by the same symmetry, checked directly (not via cdf(0.5+x)+cdf(0.5-x))
+    // since near x=1 the cdf side saturates to exactly 1.0 in float64 (e.g. lambda=1200, x=0.7:
+    // 1-cdf(0.3) underflows below double precision relative to 1), which would make a cdf-only
+    // check blind to a pdf-specific bug in the x>0.5 code path (_pdfRForward/_pdfRBackward).
+    // Both pdf values underflowing to exact 0 (deep tail) is treated as trivially symmetric.
+    it('DoublyNoncentralBeta pdf should be symmetric around 0.5 for lambda1 = lambda2 up to 20000', () => {
+      const cases = [
+        { lambda: 1200, tol: 1e-10 },
+        { lambda: 8000, tol: 1e-10 },
+        { lambda: 20000, tol: 1e-9 }
+      ]
+      for (const { lambda, tol } of cases) {
+        const d = new dist.DoublyNoncentralBeta(2, 2, lambda, lambda)
+        for (const dx of [0.001, 0.1, 0.3]) {
+          const a = d.pdf(0.5 + dx)
+          const b = d.pdf(0.5 - dx)
+          if (a === 0 && b === 0) continue
+          assert.approximately(a / b, 1, tol, `lambda=${lambda}, dx=${dx}: pdf(0.5+dx)=${a}, pdf(0.5-dx)=${b}`)
+        }
+      }
+    })
+
     // Asymmetric pair: r0 (~lambda1/2) and s0 (~lambda2/2) operate at very different scales,
     // exercising the outer r-loop and inner s-recurrence independently rather than in lockstep.
     it('DoublyNoncentralBeta pdf/cdf should be finite for asymmetric large lambda1/lambda2', () => {

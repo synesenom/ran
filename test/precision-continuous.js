@@ -980,7 +980,11 @@ const REFS = [
     // already-imprecise cdf(): at this x, pdf is steep enough (~1e-21 changing by orders of
     // magnitude per 0.1 in x) that a 1e-11 relative error in the cdf target translates to a much
     // smaller relative error in the x the root-finder converges to (empirically ~2e-14, not a
-    // typo).
+    // typo). No x > 0.5 point here: at this lambda, cdf(0.7) underflows to exactly 1.0 in float64
+    // (1 - cdf(0.3) is below double precision relative to 1), which would make q(cdf(0.7)) trivially
+    // return the support boundary and silently break the quantile round-trip check rather than
+    // testing anything at x=0.7 — the x>0.5 pdf/cdf code path is instead exercised directly by
+    // test/dist-base-special-cases.js's "pdf/cdf should be symmetric around 0.5" checks.
     name: 'DoublyNoncentralBeta',
     params: [2, 2, 1200, 1200],
     tol: 1e-11,
