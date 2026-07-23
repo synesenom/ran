@@ -233,7 +233,11 @@ export default [{
   // mean = p, var = p(1-p)F (exact); skew/kurt via underlying Beta(alpha,beta) — exact for symmetric case
   moments: [
     { params: [0.5, 0.5], mean: 0.5, variance: 0.125, skewness: 0, kurtosis: -1.5 },
-    { params: [0.1, 0.3], mean: 0.3, variance: 0.021 }
+    { params: [0.1, 0.3], mean: 0.3, variance: 0.021 },
+    // F=0.2, p=0.7 → alpha=f*p=2.8, beta=f*(1-p)=1.2, f=(1-F)/F=4
+    // scipy.stats.beta(a=2.8, b=1.2).stats(moments='mvsk') → mean=0.7, variance=0.042, skewness=-0.6506000486323553, kurtosis=-0.31292517006802756
+    // asymmetric (alpha != beta) so a transposed alpha/beta in skewness()/kurtosis() flips the sign / changes the value
+    { params: [0.2, 0.7], mean: 0.7, variance: 0.042, skewness: -0.6506000486323553, kurtosis: -0.31292517006802756 }
   ],
   invalidParams: [
     [], // all params required
