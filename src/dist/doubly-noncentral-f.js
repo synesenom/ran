@@ -3,7 +3,6 @@ import noncentralChi2 from './_noncentral-chi2'
 import powell from '../algorithms/powell'
 import neumaier from '../algorithms/neumaier'
 import Distribution from './_distribution'
-import { MAX_ITER } from '../core/constants'
 
 /**
  * Probability density function for the [doubly non-central F distribution]{@link https://doi.org/10.1111/j.1467-842X.1965.tb00036.x}:
@@ -67,22 +66,29 @@ export default class DoublyNoncentralF extends DoublyNoncentralBeta {
     // (decisions/0017-beta-fit-penalty.md) but with a zero-penalty region instead of none:
     // - d1/d2: relative to the moment-matched _fitInit guess x0 (log-ratio, so a 10x deviation
     //   either way is free).
-    // - lambda1/lambda2: relative to an ABSOLUTE, algorithm-derived threshold instead of x0 —
-    //   _fitInit's lambda estimate floors at 1e-3 whenever the moment-matched value is
-    //   non-positive (common even for well-matched, modest-lambda data), which would make any
-    //   realistic lambda look implausibly far from x0 in log-ratio terms and wrongly penalize
-    //   legitimate fits. r0 = round(lambda/2) is DoublyNoncentralBeta's Poisson-mixing summation
-    //   index, capped at MAX_ITER regardless of magnitude (src/dist/doubly-noncentral-beta.js),
-    //   so 2*MAX_ITER is where a trial lambda genuinely starts to exceed what the series can
-    //   represent with full precision anyway — not an arbitrary constant.
+    // - lambda1/lambda2: relative to an ABSOLUTE threshold instead of x0 — _fitInit's lambda
+    //   estimate floors at 1e-3 whenever the moment-matched value is non-positive (common even
+    //   for well-matched, modest-lambda data), which would make any realistic lambda look
+    //   implausibly far from x0 in log-ratio terms and wrongly penalize legitimate fits.
+    //   r0 = round(lambda/2) is DoublyNoncentralBeta's Poisson-mixing summation index: cost grows
+    //   well before its MAX_ITER=100 hard cap, since convergence needs exploring roughly a full
+    //   Poisson standard deviation's (sqrt(r0)) worth of terms around the mode. RIDGE_LAMBDA_THRESHOLD
+    //   is empirically calibrated (matching this codebase's DoublyNoncentralBeta._powellOptions()
+    //   precedent, itself an empirically-tuned budget) against three checks: #1063's pathological
+    //   dataset (this file's own dist-base-fit-1.js test) stays well under both its 200000-call
+    //   ceiling and 40s timeout with real margin; the well-matched fit-recovery case
+    //   (dist-cases-continuous.js's [3,8,1,1] entry) is unaffected; and a genuinely large-lambda
+    //   well-matched case (d1=5,d2=10,lambda1=lambda2=50) still recovers a fit whose log-likelihood
+    //   matches the unconstrained optimum (confirming large legitimate lambda is not silently
+    //   underfit by this threshold, just costlier to reach).
     // See solutions/performance/2026-07-22-0702-doubly-noncentral-fit-powell-ridge-cost.md and
     // solutions/correctness/2026-07-22-1955-doubly-noncentral-f-rounding-fix-broke-fit-ridge-guard.md
     // (the latter documents why "the search surface stays smooth" was NOT a safe assumption here —
     // the pre-#1084 bug this file fixes was itself an accidental stabilizer for this exact ridge).
     const x0 = DoublyNoncentralF._fitInit(data)
     const RIDGE_LOG_RADIUS = Math.log(10)
-    const RIDGE_LAMBDA_THRESHOLD = 2 * MAX_ITER
-    const RIDGE_PENALTY = 10
+    const RIDGE_LAMBDA_THRESHOLD = 15
+    const RIDGE_PENALTY = 30
     const hinge2 = excess => Math.max(0, excess) ** 2
     const objective = ([d1, d2, lambda1, lambda2]) => {
       try {
