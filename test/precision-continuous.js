@@ -970,6 +970,23 @@ const REFS = [
     ]
   },
   {
+    // Large-lambda regression (#1086): the outer Poisson-mixing series' summand peak shifts
+    // away from (r0, s0) as x moves from 0.5 (e.g. ~146 steps at x=0.3 for r0=s0=600), which a
+    // MAX_ITER=100 window previously missed entirely, producing pdf/cdf wrong by up to ~10
+    // orders of magnitude. tol/qtol are looser than this file's usual 1e-14: the fix's widened
+    // MAX_SERIES_ITER-bounded series still carries more residual truncation error at this scale
+    // than the typical small-lambda case (measured ~5e-12 relative error against the mpmath
+    // reference below).
+    name: 'DoublyNoncentralBeta',
+    params: [2, 2, 1200, 1200],
+    tol: 1e-11,
+    qtol: 1e-13,
+    points: [
+      { x: 0.3, pdf: 3.031637276579777e-21, cdf: 5.709664737795533e-24 },
+      { x: 0.5, pdf: 19.58073930064019, cdf: 0.5 }
+    ]
+  },
+  {
     name: 'DoublyNoncentralChi2',
     params: [3, 4, 2, 3],
     tol: 1e-14,
