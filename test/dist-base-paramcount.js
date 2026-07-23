@@ -73,6 +73,23 @@ describe('dist', () => {
       // would only work via Distribution.pdf()'s implicit _toInt() rounding; use explicit integers instead.
       sample: [0, 1, 2, 3, 4, 5, 1, 2, 3, 4]
     },
+    // issue #1094
+    {
+      name: 'Hypergeometric',
+      ctor: () => new dist.Hypergeometric(20, 7, 5),
+      k: 3,
+      inherited: '2 from Categorical',
+      // Support is {max(0, n+K-N), ..., min(n, K)} = {0, ..., 5} here; use explicit integers.
+      sample: [0, 1, 2, 3, 4, 5, 2, 3, 1, 4]
+    },
+    {
+      name: 'NegativeHypergeometric',
+      ctor: () => new dist.NegativeHypergeometric(20, 5, 3),
+      k: 3,
+      inherited: '2 from Categorical',
+      // Support is {0, ..., K} = {0, ..., 5} here; use explicit integers.
+      sample: [0, 1, 2, 3, 4, 5, 1, 2, 3, 4]
+    },
     { name: 'SkewNormal', ctor: () => new dist.SkewNormal(0, 1, 2), k: 3, inherited: '2 from Normal' },
     { name: 'BirnbaumSaunders', ctor: () => new dist.BirnbaumSaunders(0, 1, 1), k: 3, inherited: '2 from Normal' },
     { name: 'JohnsonSB', ctor: () => new dist.JohnsonSB(0, 1, 3, 0), k: 4, inherited: '2 from Normal' },
