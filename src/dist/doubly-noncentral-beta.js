@@ -1,6 +1,7 @@
 import clamp from '../utils/clamp'
 import { EPS, MAX_SERIES_ITER } from '../core/constants'
 import { regularizedBetaIncomplete, logBeta, logGamma } from '../special'
+import recursiveSum from '../algorithms/recursive-sum'
 import noncentralChi2 from './_noncentral-chi2'
 import NoncentralBeta from './noncentral-beta'
 import Distribution from './_distribution'
@@ -220,8 +221,9 @@ export default class DoublyNoncentralBeta extends Distribution {
     // from 0.5 (e.g. lambda1=lambda2=1200, x=0.3 shifts the peak ~146 steps below r0), so a
     // window of only MAX_ITER=100 steps can end before ever reaching the true peak, silently
     // truncating the sum by many orders of magnitude (#1086). MAX_SERIES_ITER is the same cap
-    // _seriesSum uses for exactly this class of series, per its own doc comment above and
-    // MAX_SERIES_ITER's own doc comment in src/core/constants.js.
+    // recursiveSum uses for exactly this class of series, per its own doc comment in
+    // src/algorithms/recursive-sum.js and MAX_SERIES_ITER's own doc comment in
+    // src/core/constants.js.
     for (let r = r0 - 1; r >= Math.max(0, r0 - MAX_SERIES_ITER); r--) {
       logYsb0 -= log1py
       prb *= (r + 1) / l1
@@ -240,7 +242,7 @@ export default class DoublyNoncentralBeta extends Distribution {
   _pdfSumOverS ({ log1py, ab, l2, s0, ps0, r, pr, logYr, logYs, logB }) {
     const betaParam = this.p.beta
 
-    let dz = this._seriesSum({
+    let dz = recursiveSum({
       logYs: logYs + log1py,
       p: ps0,
       logB
@@ -253,10 +255,10 @@ export default class DoublyNoncentralBeta extends Distribution {
       const s = s0 + i
       t.logB += Math.log((betaParam + s) / (ab + r + s))
       return t
-    })
+    }, { useFloor: false })
 
     if (s0 > 0) {
-      dz += this._seriesSum({
+      dz += recursiveSum({
         logYs,
         p: s0 * ps0 / l2,
         logB: logB + Math.log((ab + r + s0 - 1) / (betaParam + s0 - 1))
@@ -270,7 +272,7 @@ export default class DoublyNoncentralBeta extends Distribution {
           t.p = 0
         }
         return t
-      }, t => pr * t.p * Math.exp(logYr - t.logB - t.logYs))
+      }, t => pr * t.p * Math.exp(logYr - t.logB - t.logYs), undefined, { useFloor: false })
     }
 
     return dz
@@ -335,7 +337,7 @@ export default class DoublyNoncentralBeta extends Distribution {
     const betaParam = this.p.beta
     const rAlpha = this.p.alpha + r
 
-    let dz = this._seriesSum({
+    let dz = recursiveSum({
       p: ps0,
       logXb: logXb0,
       logB,
@@ -351,12 +353,12 @@ export default class DoublyNoncentralBeta extends Distribution {
       t.logB += Math.log(sBeta / (rAlpha + sBeta))
       t.logXb += log1mx
       return t
-    })
+    }, { useFloor: false })
 
     if (s0 > 0) {
       const logXbBack = logXb0 - log1mx
       const logBBack = logB + Math.log((rAlpha + sBeta0) / sBeta0)
-      dz += this._seriesSum({
+      dz += recursiveSum({
         p: ps0 * s0 / l2,
         logXb: logXbBack,
         logB: logBBack,
@@ -374,55 +376,10 @@ export default class DoublyNoncentralBeta extends Distribution {
           t.ib = 0
         }
         return t
-      }, t => pr * t.p * t.ib)
+      }, t => pr * t.p * t.ib, undefined, { useFloor: false })
     }
 
     return dz
-  }
-
-  /**
-   * Same accumulation algorithm as recursiveSum (src/algorithms/recursive-sum.js), but without
-   * its Math.max(Math.abs(sum), 1) absolute-EPS floor: that floor treats any running sum below 1
-   * as if it were exactly 1 for convergence purposes, so it falsely declares convergence after
-   * only 1-2 terms whenever the true converged value is itself far below 1 in magnitude —
-   * routine for this distribution's pdf/cdf at large lambda1/lambda2 away from x=0.5 (e.g.
-   * ~1e-21), silently truncating the s-sum by tens of orders of magnitude (#1086). A purely
-   * relative check is safe here specifically because every term _pdfSumOverS/_cdfSumOverS
-   * accumulates is a non-negative probability-weighted density or incomplete-beta value (no
-   * cancellation), so the running sum never legitimately converges to exactly 0 while
-   * significant terms remain — recursiveSum's floor exists to guard series that can, which this
-   * one structurally cannot. Local to this file rather than changing recursiveSum itself, since
-   * that helper is shared by many unrelated series summations (Kummer's ₁F₁, other noncentral
-   * CDFs) whose typical magnitudes make the floor appropriate for them.
-   * See solutions/correctness/2026-07-23-1108-doubly-noncentral-beta-recursivesum-absolute-floor-truncation.md
-   *
-   * @method _seriesSum
-   * @memberof ran.dist.DoublyNoncentralBeta
-   * @param {Object} x0 Initial term-computation state.
-   * @param {Function} preUpdate State updater invoked before computing each term after the first.
-   * @param {Function} termFn Computes the term value from the current state.
-   * @param {Function=} postUpdate State updater invoked after a term, only if not yet converged.
-   * @returns {number} The accumulated sum.
-   * @private
-   */
-  _seriesSum (x0, preUpdate, termFn, postUpdate) {
-    let x = x0
-    let delta
-    let sum = termFn(x)
-    if (postUpdate) {
-      x = postUpdate(x, 0)
-    }
-    for (let i = 1; i < MAX_SERIES_ITER; i++) {
-      x = preUpdate(x, i)
-      delta = termFn(x)
-      sum += delta
-      if (Math.abs(delta) < EPS * Math.abs(sum)) {
-        break
-      } else if (postUpdate) {
-        x = postUpdate(x, i)
-      }
-    }
-    return sum
   }
 
   // ─── PRIVATE STATIC ───────────────────────────────────────────────────────
