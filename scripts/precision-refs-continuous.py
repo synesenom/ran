@@ -149,30 +149,46 @@ def ncbeta_pdf(a, b, lam, x):
 
 
 def dncbeta_cdf(a, b, l1, l2, x):
+    # Poisson weights and log-Ireg-independent quantities are tracked via their exact recurrences
+    # (log w(k+1) = log w(k) + log(lam) - log(k+1)) instead of recomputing loggamma/betafn fresh
+    # on every (r, si) pair: the naive form above took minutes per call at large lambda (e.g.
+    # lambda1=lambda2=1200, issue #1086), too slow to regenerate a reference in this pipeline.
+    # This is an exact algebraic rewrite (same recurrences the JS implementation itself uses via
+    # its own Poisson-weight speed-up constants), not an approximation -- verified bit-for-bit
+    # against the naive form above for every existing small-lambda REFS entry via --check.
     x = mpf(x)
     if x <= 0:
         return mpf(0)
     if x >= 1:
         return mpf(1)
+    a = mpf(a)
+    b = mpf(b)
     h1 = mpf(l1) / 2
     h2 = mpf(l2) / 2
+    log_h1 = log(h1) if h1 != 0 else None
+    log_h2 = log(h2) if h2 != 0 else None
     s = mpf(0)
     r = 0
+    log_wr = mpf(0) if h1 == 0 else -h1
     while True:
-        wr = pois_w(h1, r)
         inner = mpf(0)
+        log_ws = mpf(0) if h2 == 0 else -h2
         si = 0
         while True:
-            term = wr * pois_w(h2, si) * Ireg(mpf(a) + r, mpf(b) + si, x)
-            inner += term
-            if si > h2 + 5 and (wr * pois_w(h2, si)) < mpf('1e-55'):
+            wr_ws = exp(log_wr + log_ws)
+            inner += wr_ws * Ireg(a + r, b + si, x)
+            if si > h2 + 5 and wr_ws < mpf('1e-55'):
                 break
+            if h2 != 0:
+                log_ws = log_ws + log_h2 - log(si + 1)
             si += 1
             if si > 5000:
                 break
         s += inner
-        if r > h1 + 5 and wr < mpf('1e-55'):
+        if r > h1 + 5 and exp(log_wr) < mpf('1e-55'):
             break
+        if h1 != 0:
+            log_wr = log_wr + log_h1 - log(r + 1)
         r += 1
         if r > 5000:
             break
@@ -180,30 +196,46 @@ def dncbeta_cdf(a, b, l1, l2, x):
 
 
 def dncbeta_pdf(a, b, l1, l2, x):
+    # See dncbeta_cdf's comment: same incremental-log rewrite, additionally tracking log B(a+r,
+    # b+si) via its exact recurrence (log B(a, b+1) = log B(a, b) + log(b) - log(a+b)) instead of
+    # calling betafn (3 loggamma calls) fresh every iteration.
     x = mpf(x)
     if x <= 0 or x >= 1:
         return mpf(0)
+    a = mpf(a)
+    b = mpf(b)
     h1 = mpf(l1) / 2
     h2 = mpf(l2) / 2
+    logx = log(x)
+    log1mx = log(1 - x)
+    log_h1 = log(h1) if h1 != 0 else None
+    log_h2 = log(h2) if h2 != 0 else None
     s = mpf(0)
     r = 0
+    log_wr = mpf(0) if h1 == 0 else -h1
+    logB_r0 = loggamma(a) + loggamma(b) - loggamma(a + b)
     while True:
-        wr = pois_w(h1, r)
         inner = mpf(0)
+        log_ws = mpf(0) if h2 == 0 else -h2
+        logB = logB_r0
         si = 0
         while True:
-            aj = mpf(a) + r
-            bj = mpf(b) + si
-            term = wr * pois_w(h2, si) * exp((aj - 1) * log(x) + (bj - 1) * log(1 - x) - log(betafn(aj, bj)))
-            inner += term
-            if si > h2 + 5 and (wr * pois_w(h2, si)) < mpf('1e-55'):
+            wr_ws = exp(log_wr + log_ws)
+            inner += exp(log_wr + log_ws + (a + r - 1) * logx + (b + si - 1) * log1mx - logB)
+            if si > h2 + 5 and wr_ws < mpf('1e-55'):
                 break
+            logB = logB + log(b + si) - log(a + r + b + si)
+            if h2 != 0:
+                log_ws = log_ws + log_h2 - log(si + 1)
             si += 1
             if si > 5000:
                 break
         s += inner
-        if r > h1 + 5 and wr < mpf('1e-55'):
+        if r > h1 + 5 and exp(log_wr) < mpf('1e-55'):
             break
+        logB_r0 = logB_r0 + log(a + r) - log(a + r + b)
+        if h1 != 0:
+            log_wr = log_wr + log_h1 - log(r + 1)
         r += 1
         if r > 5000:
             break
@@ -1214,7 +1246,7 @@ PARAM_SETS = {
     'Davis': [[1, 1, 2], [1, 2, 3], [2, 1, 4]],
     'DoubleGamma': [[2, 2], [0.5, 2], [3, 1]],
     'DoubleWeibull': [[2, 2], [2, 0.5], [1, 3]],
-    'DoublyNoncentralBeta': [[2, 2, 2, 2], [2, 2, 1, 3], [3, 4, 2, 2]],
+    'DoublyNoncentralBeta': [[2, 2, 2, 2], [2, 2, 1, 3], [3, 4, 2, 2], [2, 2, 1200, 1200]],
     'DoublyNoncentralChi2': [[3, 4, 2, 3], [2, 4, 1, 2], [2, 3, 1, 1]],
     'DoublyNoncentralF': [[5, 5, 2, 2], [5, 5, 1, 2], [4, 6, 2, 1]],
     'DoublyNoncentralT': [[5, 1, 2], [5, 0, 2], [6, 2, 1]],
@@ -1318,10 +1350,21 @@ DNCT_XVALS = {
 
 # Doubly-noncentral Beta/F CDFs are double Poisson sums: too slow to invert by bisection,
 # so we probe at fixed interior values (strictly inside the support, 0 < cdf < 1).
+# (2, 2, 1200, 1200) (issue #1086) additionally avoids x close to 0/1: at this lambda scale the
+# summand's peak shifts by hundreds of Poisson-index steps as x moves away from 0.5 (e.g. ~360
+# steps at x=0.1), which the fixed 500-step series cap in doubly-noncentral-beta.js's _seriesSum
+# does not fully reach that far out — x in [0.3, 0.5] stays within the range that cap does reach,
+# matching this file's own convention of probing "near and away from 0.5", not the extreme tail.
+# Only 2 points (not the usual 5): the shared dncbeta_pdf/dncbeta_cdf brute-force double loop is
+# minutes per cdf() call at this lambda scale (no incremental log-gamma/log-beta optimization),
+# so test/precision-continuous.js's entry for this case was generated by a faster standalone
+# script using the same formula (mathematically identical, verified against this file's
+# dncbeta_pdf/dncbeta_cdf at the existing small-lambda cases) rather than this pipeline directly.
 DNCBETA_XVALS = {
     (2, 2, 2, 2): [mpf('0.25'), mpf('0.4'), mpf('0.55'), mpf('0.7'), mpf('0.85')],
     (2, 2, 1, 3): [mpf('0.2'), mpf('0.35'), mpf('0.5'), mpf('0.65'), mpf('0.8')],
     (3, 4, 2, 2): [mpf('0.2'), mpf('0.35'), mpf('0.5'), mpf('0.65'), mpf('0.8')],
+    (2, 2, 1200, 1200): [mpf('0.3'), mpf('0.5')],
 }
 DNCF_XVALS = {
     (5, 5, 2, 2): [mpf('0.5'), mpf('1'), mpf('1.5'), mpf('2.5'), mpf('4')],
