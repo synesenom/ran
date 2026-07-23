@@ -170,13 +170,17 @@ def dncbeta_cdf(a, b, l1, l2, x):
         while True:
             term = wr * pois_w(h2, si) * Ireg(mpf(a) + r, mpf(b) + si, x)
             inner += term
-            if si > h2 + 5 and (wr * pois_w(h2, si)) < mpf('1e-55'):
+            # Convergence must track the actual accumulated term, not the raw Poisson-weight
+            # product alone: for si far from its Poisson mean, wr * pois_w(h2, si) is already
+            # vanishingly small while the Ireg-weighted term has not converged, silently
+            # truncating real probability mass (#1108, #1111).
+            if si > h2 + 5 and fabs(term) < fabs(inner) * mpf('1e-55'):
                 break
             si += 1
             if si > 5000:
                 break
         s += inner
-        if r > h1 + 5 and wr < mpf('1e-55'):
+        if r > h1 + 5 and fabs(inner) < fabs(s) * mpf('1e-55'):
             break
         r += 1
         if r > 5000:
@@ -201,13 +205,15 @@ def dncbeta_pdf(a, b, l1, l2, x):
             bj = mpf(b) + si
             term = wr * pois_w(h2, si) * exp((aj - 1) * log(x) + (bj - 1) * log(1 - x) - log(betafn(aj, bj)))
             inner += term
-            if si > h2 + 5 and (wr * pois_w(h2, si)) < mpf('1e-55'):
+            # See dncbeta_cdf's comment (#1108, #1111): convergence must track the actual
+            # accumulated term, not the raw Poisson-weight product.
+            if si > h2 + 5 and fabs(term) < fabs(inner) * mpf('1e-55'):
                 break
             si += 1
             if si > 5000:
                 break
         s += inner
-        if r > h1 + 5 and wr < mpf('1e-55'):
+        if r > h1 + 5 and fabs(inner) < fabs(s) * mpf('1e-55'):
             break
         r += 1
         if r > 5000:
