@@ -149,30 +149,46 @@ def ncbeta_pdf(a, b, lam, x):
 
 
 def dncbeta_cdf(a, b, l1, l2, x):
+    # Poisson weights and log-Ireg-independent quantities are tracked via their exact recurrences
+    # (log w(k+1) = log w(k) + log(lam) - log(k+1)) instead of recomputing loggamma/betafn fresh
+    # on every (r, si) pair: the naive form above took minutes per call at large lambda (e.g.
+    # lambda1=lambda2=1200, issue #1086), too slow to regenerate a reference in this pipeline.
+    # This is an exact algebraic rewrite (same recurrences the JS implementation itself uses via
+    # its own Poisson-weight speed-up constants), not an approximation -- verified bit-for-bit
+    # against the naive form above for every existing small-lambda REFS entry via --check.
     x = mpf(x)
     if x <= 0:
         return mpf(0)
     if x >= 1:
         return mpf(1)
+    a = mpf(a)
+    b = mpf(b)
     h1 = mpf(l1) / 2
     h2 = mpf(l2) / 2
+    log_h1 = log(h1) if h1 != 0 else None
+    log_h2 = log(h2) if h2 != 0 else None
     s = mpf(0)
     r = 0
+    log_wr = mpf(0) if h1 == 0 else -h1
     while True:
-        wr = pois_w(h1, r)
         inner = mpf(0)
+        log_ws = mpf(0) if h2 == 0 else -h2
         si = 0
         while True:
-            term = wr * pois_w(h2, si) * Ireg(mpf(a) + r, mpf(b) + si, x)
-            inner += term
-            if si > h2 + 5 and (wr * pois_w(h2, si)) < mpf('1e-55'):
+            wr_ws = exp(log_wr + log_ws)
+            inner += wr_ws * Ireg(a + r, b + si, x)
+            if si > h2 + 5 and wr_ws < mpf('1e-55'):
                 break
+            if h2 != 0:
+                log_ws = log_ws + log_h2 - log(si + 1)
             si += 1
             if si > 5000:
                 break
         s += inner
-        if r > h1 + 5 and wr < mpf('1e-55'):
+        if r > h1 + 5 and exp(log_wr) < mpf('1e-55'):
             break
+        if h1 != 0:
+            log_wr = log_wr + log_h1 - log(r + 1)
         r += 1
         if r > 5000:
             break
@@ -180,30 +196,46 @@ def dncbeta_cdf(a, b, l1, l2, x):
 
 
 def dncbeta_pdf(a, b, l1, l2, x):
+    # See dncbeta_cdf's comment: same incremental-log rewrite, additionally tracking log B(a+r,
+    # b+si) via its exact recurrence (log B(a, b+1) = log B(a, b) + log(b) - log(a+b)) instead of
+    # calling betafn (3 loggamma calls) fresh every iteration.
     x = mpf(x)
     if x <= 0 or x >= 1:
         return mpf(0)
+    a = mpf(a)
+    b = mpf(b)
     h1 = mpf(l1) / 2
     h2 = mpf(l2) / 2
+    logx = log(x)
+    log1mx = log(1 - x)
+    log_h1 = log(h1) if h1 != 0 else None
+    log_h2 = log(h2) if h2 != 0 else None
     s = mpf(0)
     r = 0
+    log_wr = mpf(0) if h1 == 0 else -h1
+    logB_r0 = loggamma(a) + loggamma(b) - loggamma(a + b)
     while True:
-        wr = pois_w(h1, r)
         inner = mpf(0)
+        log_ws = mpf(0) if h2 == 0 else -h2
+        logB = logB_r0
         si = 0
         while True:
-            aj = mpf(a) + r
-            bj = mpf(b) + si
-            term = wr * pois_w(h2, si) * exp((aj - 1) * log(x) + (bj - 1) * log(1 - x) - log(betafn(aj, bj)))
-            inner += term
-            if si > h2 + 5 and (wr * pois_w(h2, si)) < mpf('1e-55'):
+            wr_ws = exp(log_wr + log_ws)
+            inner += exp(log_wr + log_ws + (a + r - 1) * logx + (b + si - 1) * log1mx - logB)
+            if si > h2 + 5 and wr_ws < mpf('1e-55'):
                 break
+            logB = logB + log(b + si) - log(a + r + b + si)
+            if h2 != 0:
+                log_ws = log_ws + log_h2 - log(si + 1)
             si += 1
             if si > 5000:
                 break
         s += inner
-        if r > h1 + 5 and wr < mpf('1e-55'):
+        if r > h1 + 5 and exp(log_wr) < mpf('1e-55'):
             break
+        logB_r0 = logB_r0 + log(a + r) - log(a + r + b)
+        if h1 != 0:
+            log_wr = log_wr + log_h1 - log(r + 1)
         r += 1
         if r > 5000:
             break
