@@ -47,6 +47,9 @@ export default class Hypergeometric extends Categorical {
     super(weights, min)
     this.p = { N: Ni, K: Ki, n: ni }
 
+    // Hypergeometric has 3 free parameters (N, K, n); override the 2 hardcoded by Categorical
+    this.k = 3
+
     // Validate parameters
     Distribution.validate({ N: Ni, K: Ki, n: ni }, [
       'N > 0',

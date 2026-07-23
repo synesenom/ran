@@ -970,6 +970,35 @@ const REFS = [
     ]
   },
   {
+    // Large-lambda regression (#1086): the outer Poisson-mixing series' summand peak shifts
+    // away from (r0, s0) as x moves from 0.5 (e.g. ~146 steps at x=0.3 for r0=s0=600), which a
+    // MAX_ITER=100 window previously missed entirely, producing pdf/cdf wrong by up to ~10
+    // orders of magnitude. tol/qtol are looser than this file's usual 1e-14: the fix's widened
+    // MAX_SERIES_ITER-bounded series still carries more residual truncation error at this scale
+    // than the typical small-lambda case (measured ~5e-12 relative error against the mpmath
+    // reference below). qtol is tighter than tol despite root-finding running on top of an
+    // already-imprecise cdf(): at this x, pdf is steep enough (~1e-21 changing by orders of
+    // magnitude per 0.1 in x) that a 1e-11 relative error in the cdf target translates to a much
+    // smaller relative error in the x the root-finder converges to (empirically ~2e-14, not a
+    // typo). No x > 0.5 point here: at this lambda, cdf(0.7) underflows to exactly 1.0 in float64
+    // (1 - cdf(0.3) is below double precision relative to 1), which would make q(cdf(0.7)) trivially
+    // return the support boundary and silently break the quantile round-trip check rather than
+    // testing anything at x=0.7 — the x>0.5 pdf/cdf code path is instead exercised directly by
+    // test/dist-base-special-cases.js's "pdf/cdf should be symmetric around 0.5" checks.
+    name: 'DoublyNoncentralBeta',
+    params: [2, 2, 1200, 1200],
+    tol: 1e-11,
+    qtol: 1e-13,
+    points: [
+      // mpmath mp.dps=50: dncbeta_pdf(2,2,1200,1200,0.3) -> 3.0316372765797769783596369206865530229083184183873e-21,
+      //                    dncbeta_cdf(2,2,1200,1200,0.3) -> 5.7096647377955332145923607223757816671099888691186e-24
+      { x: 0.3, pdf: 3.031637276579777e-21, cdf: 5.709664737795533e-24 },
+      // mpmath mp.dps=50: dncbeta_pdf(2,2,1200,1200,0.5) -> 19.580739300640188123670649665079314539696410511919,
+      //                    dncbeta_cdf(2,2,1200,1200,0.5) -> 0.4999999999999999999999999999999999999999999999881
+      { x: 0.5, pdf: 19.58073930064019, cdf: 0.5 }
+    ]
+  },
+  {
     name: 'DoublyNoncentralChi2',
     params: [3, 4, 2, 3],
     tol: 1e-14,
