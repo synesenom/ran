@@ -160,6 +160,11 @@ describe('dist', () => {
         assert.strictEqual(d.params().beta, 3)
       })
 
+      it('HalfGeneralizedNormal.params() returns { alpha, beta }, no leaked mu', () => {
+        const d = new dist.HalfGeneralizedNormal(2, 3)
+        assert.deepEqual(d.params(), { alpha: 2, beta: 3 })
+      })
+
       it('NoncentralF.params() returns { d1, d2, lambda }', () => {
         const d = new dist.NoncentralF(4, 6, 2)
         assert.deepEqual(d.params(), { d1: 4, d2: 6, lambda: 2 })

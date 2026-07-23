@@ -1,4 +1,5 @@
-import { gammaLowerIncompleteInv } from '../special'
+import { gammaLowerIncomplete, gammaLowerIncompleteInv } from '../special'
+import gamma from './_gamma'
 import GeneralizedNormal from './generalized-normal'
 
 /**
@@ -22,6 +23,7 @@ export default class HalfGeneralizedNormal extends GeneralizedNormal {
 
     // HalfGeneralizedNormal has 2 free parameters (alpha, beta); override the 3 inherited from GeneralizedNormal
     this.k = 2
+    this.p = { alpha, beta }
 
     // Set support
     this.s = [{
@@ -83,17 +85,24 @@ export default class HalfGeneralizedNormal extends GeneralizedNormal {
     return Math.pow(gammaLowerIncompleteInv(this.c.alpha, p) / this.c.beta, 1 / this.p.beta)
   }
 
+  // GeneralizedNormal.prototype._generator/_pdf/_cdf read this.p.mu directly — no longer present
+  // once this.p is replaced with { alpha, beta } — so these are inlined against the folded-over-0
+  // formulas instead of delegating to super.
   _generator () {
-    // Direct sampling by transforming normal variate
-    return Math.abs(super._generator())
+    // Direct sampling by transforming generalized gamma variate (mu = 0 fold). The sign draw is
+    // discarded (folded distribution is unsigned) but still consumed so the PRNG stream, and thus
+    // .seed()-determined samples, match GeneralizedNormal's own draw order exactly.
+    this.r.next()
+    return Math.pow(gamma(this.r, this.c.alpha, this.c.beta), 1 / this.p.beta)
   }
 
   _pdf (x) {
-    return 2 * super._pdf(x)
+    const t = Math.pow(x, this.p.beta)
+    return this.p.beta * Math.pow(x, this.p.beta - 1) * Math.exp(this.c.logNorm - this.c.beta * t) * Math.pow(t, this.c.alpha - 1)
   }
 
   _cdf (x) {
-    return 2 * super._cdf(x) - 1
+    return gammaLowerIncomplete(this.c.alpha, this.c.beta * Math.pow(x, this.p.beta))
   }
 
   static _fitInit (data) {
