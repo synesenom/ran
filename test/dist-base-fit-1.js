@@ -88,6 +88,56 @@ describe('dist', () => {
         assert(result.lnL(data) >= init.lnL(data), 'fit() result should not be worse than the initial guess')
       })
 
+      it('DoublyNoncentralBeta.fit should show no quality loss from the coupled Powell maxIter budget on well-matched data (#1078 Concern 3)', () => {
+        // Locks in the invariant verified in
+        // solutions/performance/2026-07-22-1600-doubly-noncentral-fit-inner-line-search-budget.md
+        // and documented in the _powellOptions() JSDoc (src/dist/doubly-noncentral-beta.js): on
+        // well-matched data, powell.js's shared maxIter=15 budget (coupling the outer Powell sweep
+        // and every inner Brent line search) causes zero quality loss, because the outer loop's
+        // own convergence bound is always reached first. Rather than pinning a hardcoded lnL
+        // (which the ranjs implementation itself would have to produce, an inadmissible reference
+        // per this repo's externally-sourced-reference convention), this reproduces the
+        // investigation's own bounded-vs-relaxed comparison live: a much larger maxIter budget
+        // (200, well above the 15 outer sweeps this data needs to converge) must reach the same
+        // optimum as the shipped bounded budget. A future change that starves the coupled budget
+        // on well-matched data would widen this gap well outside tolerance. One well-matched
+        // parameter set/seed is checked here, matching #1097's scope; the underlying investigation
+        // itself surveyed 35 (7 sets x 5 seeds) — this is a fast spot-check regression guard, not
+        // a re-run of that full sweep. Tolerance (1e-4) sits well above the observed gap (measured
+        // bit-identical, diff = 0) but well below the 16-32% relative divergence the investigation
+        // measured once maxIter genuinely starves the line search, leaving margin against
+        // platform-dependent floating-point summation order without weakening the regression guard.
+        const data = new dist.DoublyNoncentralBeta(2, 3, 1, 1).seed(42).sample(500)
+        const bounded = dist.DoublyNoncentralBeta.fit(data)
+        const origOptions = dist.DoublyNoncentralBeta._powellOptions
+        dist.DoublyNoncentralBeta._powellOptions = () => ({ tol: 1e-2, maxIter: 200 })
+        let relaxed
+        try {
+          relaxed = dist.DoublyNoncentralBeta.fit(data)
+        } finally {
+          dist.DoublyNoncentralBeta._powellOptions = origOptions
+        }
+        assert(Math.abs(bounded.lnL(data) - relaxed.lnL(data)) < 1e-4)
+      })
+
+      it('DoublyNoncentralF.fit should show no quality loss from the coupled Powell maxIter budget on well-matched data (#1078 Concern 3)', () => {
+        // Same coupling invariant as the DoublyNoncentralBeta case above, verified for the F
+        // family. DoublyNoncentralF._powellOptions() resolves to the inherited
+        // DoublyNoncentralBeta static method (src/dist/doubly-noncentral-f.js does not override
+        // it), so overriding it here also governs this fit() call.
+        const data = new dist.DoublyNoncentralF(3, 8, 1, 1).seed(42).sample(400)
+        const bounded = dist.DoublyNoncentralF.fit(data)
+        const origOptions = dist.DoublyNoncentralBeta._powellOptions
+        dist.DoublyNoncentralBeta._powellOptions = () => ({ tol: 1e-2, maxIter: 200 })
+        let relaxed
+        try {
+          relaxed = dist.DoublyNoncentralF.fit(data)
+        } finally {
+          dist.DoublyNoncentralBeta._powellOptions = origOptions
+        }
+        assert(Math.abs(bounded.lnL(data) - relaxed.lnL(data)) < 1e-4)
+      })
+
       it('Pareto.fit should recover xmin close to min(data)', () => {
         const data = [1.5, 2.0, 3.1, 1.8, 2.5]
         const result = dist.Pareto.fit(data)
