@@ -1239,13 +1239,14 @@ export default [{
   // Regression #1075 (Beta(alpha+r0, beta+s0) underflows to exact 0 once r0=round(lambda1/2),
   // s0=round(lambda2/2) are both large, e.g. Beta(602,602) ~ 1e-364, colliding with comparably
   // extreme power-of-x/power-of-y terms and producing NaN via 0 * Infinity — only when BOTH
-  // lambda1 and lambda2 are large simultaneously) is deliberately NOT a case here: MAX_ITER=100
-  // (#1063) caps the outer Poisson-mixing loop well below the ~sqrt(lambda) spread this scale
-  // needs, so cdf2pdf's finite-difference derivative check fails on the resulting ~1e-5-level
-  // truncation noise even though pdf/cdf are correctly no longer NaN — a pre-existing, orthogonal
-  // limitation of this distribution (#1063), not a defect in this fix. Coverage for lambda1 =
-  // lambda2 up to 50000 lives in test/dist-base-special-cases.js as direct finite-value checks,
-  // bypassing the fragile finite-difference/quantile-root-finding machinery entirely.
+  // lambda1 and lambda2 are large simultaneously) is deliberately NOT a case here: pdf/cdf are
+  // now accurate at this scale (#1086 fixed the truncation that previously left ~1e-5-level
+  // error even once #1075 stopped the NaN), but dist-runner.js's qMonotonicity/qGalois/
+  // quantileRoundtrip checks make enough extra pdf/cdf calls per case that this scale is still
+  // too expensive to run through here. Coverage for lambda1 = lambda2 up to 50000 lives in
+  // test/dist-base-special-cases.js as direct finite-value checks, bypassing that machinery
+  // entirely, and a large-lambda precision-gate case (verified against mpmath) lives in
+  // test/precision-continuous.js.
   // mpmath: DNCBeta double-Poisson mixture of central Beta @ 50 dps
   refVals: [
     { x: 0.05, pdf: 0.24021945141148757, cdf: 0.006001327381395799 },

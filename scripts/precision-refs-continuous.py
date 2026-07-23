@@ -1214,7 +1214,7 @@ PARAM_SETS = {
     'Davis': [[1, 1, 2], [1, 2, 3], [2, 1, 4]],
     'DoubleGamma': [[2, 2], [0.5, 2], [3, 1]],
     'DoubleWeibull': [[2, 2], [2, 0.5], [1, 3]],
-    'DoublyNoncentralBeta': [[2, 2, 2, 2], [2, 2, 1, 3], [3, 4, 2, 2]],
+    'DoublyNoncentralBeta': [[2, 2, 2, 2], [2, 2, 1, 3], [3, 4, 2, 2], [2, 2, 1200, 1200]],
     'DoublyNoncentralChi2': [[3, 4, 2, 3], [2, 4, 1, 2], [2, 3, 1, 1]],
     'DoublyNoncentralF': [[5, 5, 2, 2], [5, 5, 1, 2], [4, 6, 2, 1]],
     'DoublyNoncentralT': [[5, 1, 2], [5, 0, 2], [6, 2, 1]],
@@ -1318,10 +1318,16 @@ DNCT_XVALS = {
 
 # Doubly-noncentral Beta/F CDFs are double Poisson sums: too slow to invert by bisection,
 # so we probe at fixed interior values (strictly inside the support, 0 < cdf < 1).
+# (2, 2, 1200, 1200) (issue #1086) additionally avoids x close to 0/1: at this lambda scale the
+# summand's peak shifts by hundreds of Poisson-index steps as x moves away from 0.5 (e.g. ~360
+# steps at x=0.1), which the fixed 500-step series cap in doubly-noncentral-beta.js's _seriesSum
+# does not fully reach that far out — x in [0.3, 0.7] stays within the range that cap does reach,
+# matching this file's own convention of probing "near and away from 0.5", not the extreme tail.
 DNCBETA_XVALS = {
     (2, 2, 2, 2): [mpf('0.25'), mpf('0.4'), mpf('0.55'), mpf('0.7'), mpf('0.85')],
     (2, 2, 1, 3): [mpf('0.2'), mpf('0.35'), mpf('0.5'), mpf('0.65'), mpf('0.8')],
     (3, 4, 2, 2): [mpf('0.2'), mpf('0.35'), mpf('0.5'), mpf('0.65'), mpf('0.8')],
+    (2, 2, 1200, 1200): [mpf('0.3'), mpf('0.4'), mpf('0.5'), mpf('0.6'), mpf('0.7')],
 }
 DNCF_XVALS = {
     (5, 5, 2, 2): [mpf('0.5'), mpf('1'), mpf('1.5'), mpf('2.5'), mpf('4')],
