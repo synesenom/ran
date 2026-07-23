@@ -21,7 +21,9 @@ const RELOCATE_TOL = 1e-9
 // hundreds of milliseconds — catastrophic multiplied across fit()'s tens of thousands of trial
 // evaluations (#1063's ridge-cost guard). RELOCATE_MAX_ITER is picked to comfortably clear the
 // empirically-observed convergence depth of the cases #1102 targets while keeping worst-case cost
-// bounded; see solutions/ for the specific timing measurements this was tuned against.
+// bounded; see solutions/correctness/2026-07-23-1707-doubly-noncentral-beta-relocated-walk-and-issue-premise.md
+// for the specific timing measurements this was tuned against, and why the issue's own cited
+// "true value" turned out to be wrong.
 const RELOCATE_MAX_ITER = 150
 
 /**
