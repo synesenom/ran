@@ -103,7 +103,10 @@ export default class ExponentiallyModifiedGaussian extends Distribution {
    * InverseGaussian's CDF (solutions/special-functions/2026-06-05-0000-inverse-gaussian-cdf-erfc-cancellation-cf-convergence.md).
    * For arg <= 0, erfc(arg) is already O(1) and exponent is bounded above by -lambda^2*sigma^2/2,
    * so the naive form is safe outright -- erfcx(arg) would instead overflow there, since
-   * erfcx(z) = exp(z^2)*erfc(z) diverges as z -> -Infinity.
+   * erfcx(z) = exp(z^2)*erfc(z) diverges as z -> -Infinity. A single-branch erfcx rewrite (valid
+   * for InverseGaussian, whose argument is sign-guaranteed) is NOT sufficient here, since EMG's
+   * unbounded support lets arg take either sign:
+   * solutions/special-functions/2026-07-24-1930-emg-erfcx-single-branch-tail-overflow.md
    *
    * @param {number} x Value to evaluate the term at.
    * @returns {number} exp(exponent) * erfc(arg).
