@@ -35,8 +35,6 @@ Moving the library from *auditable* to *publication-grade* requires systematic r
 
 ### Not Yet Filed
 
-- **Full-domain validation for bessel and digamma** — cross-validate `bessel` and `digamma` against scipy or Boost across their entire representable input domains.
-- **Systematic parameter-space coverage** — for each distribution, construct a grid of parameter values (not just two hand-picked sets) to catch edge-case failure modes near parameter boundaries.
 - **Documented accuracy bounds** — for each special function and distribution CDF, state clearly: "accurate to X ULP for |x| ≤ Y" so users can reason about numerical error in downstream computations.
 
 ---
@@ -46,21 +44,6 @@ Moving the library from *auditable* to *publication-grade* requires systematic r
 > Within each subsection, entries are ordered from most broadly useful to most specialised.
 
 ### Continuous
-
-#### Exponentially Modified Gaussian (EMG)
-Convolution of a Normal(μ, σ²) and an Exponential(λ) distribution; common in chromatography, neuroscience, and reaction-time modelling.
-- **PDF:** f(x; μ, σ, λ) = (λ/2) · exp(λ/2·(2μ + λσ² − 2x)) · erfc((μ + λσ² − x)/(σ√2))
-- **CDF:** combination of Φ and erfc terms
-- **Sampling:** trivially, sum an independent Normal(μ, σ) and Exponential(λ) variate
-- Requires accurate `error.js` (erfc in tail)
-- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Exponentially_modified_Gaussian_distribution)
-
-#### Tweedie (Compound Poisson-Gamma)
-Family parameterised by a power index p ∈ (1, 2): for fixed p the distribution is compound Poisson with Gamma-distributed cluster masses. Used in insurance loss models (exact-zero outcomes with a continuous positive tail), rainfall accumulation, and any GLM with a non-negative response. Special cases: p = 1 is Poisson, p = 2 is Gamma.
-- **PMF/PDF:** no closed form; computed via a rapidly converging series over the compound Poisson terms
-- **Sampling:** exact via compound structure — draw N ~ Poisson(λ), then sum N independent Gamma(α, β) variates
-- **Dependency:** `_poisson.js`, `_gamma.js` (both already in `src/dist/`); `neumaier.js` for the series PDF
-- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Tweedie_distribution); Jørgensen (1987) *JRSS-B* 49(2):127–162
 
 #### Stable (Lévy α-stable)
 Four-parameter family (α ∈ (0,2], β ∈ [−1,1], γ ≥ 0, δ ∈ ℝ) encompassing all distributions that are limits of normalized sums of iid random variables. No closed-form PDF/CDF except for special cases (Cauchy: α=1, β=0; Gaussian: α=2; Lévy: α=½, β=1).
@@ -163,14 +146,6 @@ The classical Hoyt distribution — not to be confused with `ran.dist.Hoyt`, whi
 - **Sampling:** rejection sampling against a Rayleigh envelope, or inversion via Brent root-finding on the Marcum Q CDF
 - **Dependency:** `bessel.js` (I₀ — already present); `marcum-q.js` (marcumQ — already present)
 - Refs: [Wikipedia — Hoyt distribution](https://en.wikipedia.org/wiki/Hoyt_distribution); Simon, M.K. (2002) "A new twist on the Marcum Q-function and its application", *IEEE Commun. Lett.* 2(2):39–41
-
-#### Wrapped Cauchy
-Heavy-tailed circular distribution on [−π, π); the stereographic projection of a Cauchy distribution onto the circle. Used in wind direction modelling, paleomagnetism, and neuroscience (head direction cells). The only other circular distribution in the library is `VonMises`.
-- **PDF:** f(θ; μ, ρ) = (1/(2π)) · (1−ρ²) / (1 + ρ² − 2ρ·cos(θ−μ)),  ρ ∈ (0,1)
-- **CDF:** closed form via arctan
-- **Sampling:** exact inversion via closed-form quantile
-- No special functions required
-- Refs: [Wikipedia](https://en.wikipedia.org/wiki/Wrapped_Cauchy_distribution)
 
 #### Wrapped Normal
 Circular diffusion model; the standard distribution for random-walk turning angles in animal movement ecology, ocean current headings, and wind direction statistics.
@@ -341,16 +316,6 @@ Most powerful standard normality test for small samples (n ≤ ~50). Uses regres
 - **Dependency:** requires precomputed coefficient table (Royston 1992 approximation covers n up to ~5000)
 - Complexity: moderate (table look-up dominates)
 
-#### Anderson-Darling
-EDF-based goodness-of-fit test; more sensitive than Kolmogorov-Smirnov in the tails. Replacing KS with AD in `Distribution.test()` for continuous distributions is tracked in [#816](../../issues/816).
-- **Statistic:** A² = −N − (1/N) Σ(2i−1)[ln z_(i) + ln(1 − z_(N+1−i))]  where z_(i) = F(x_(i))
-- p-value: Marsaglia & Marsaglia (2004) asymptotic series — no lookup tables needed
-
-#### Cramér-von Mises
-EDF-based test, less sensitive at tails than Anderson-Darling but has a simpler asymptotic distribution.
-- **Statistic:** W² = Σ(z_(i) − (2i−1)/(2N))² + 1/(12N)
-- Asymptotic distribution is tabulated; exact distribution computable via eigenvalue method
-
 ### ANOVA (Analysis of Variance)
 One-way F-test for equality of means across k ≥ 2 independent groups. Assumes normality and homoscedasticity (use Welch's or Kruskal-Wallis as alternatives).
 - **Statistic:** F = (SSB / (k−1)) / (SSW / (N−k))  where SSB = between-group SS, SSW = within-group SS
@@ -492,7 +457,6 @@ Functions needed for the distributions above or otherwise missing:
 | Function | Needed by | Notes |
 |----------|-----------|-------|
 | **`besselK` — K_ν(x), all real ν** | NIG, Variance-Gamma, Normal Product, Generalized Hyperbolic, Maxwell-Jüttner | **Tracked in [#809](../../issues/809).** `src/special/bessel.js` exports only first-kind functions (I_ν). K_ν must be added as a standalone prerequisite issue before any of the listed distributions can be implemented. Recurrence: K_{n+1}(x) = (2n/x)·K_n(x) + K_{n−1}(x); seed from K_0 and K_1 series. |
-| Polygamma ψₙ(x), n ≥ 1 | Various | Trigamma (n=1) most urgent; can derive from digamma recurrence + Euler-Maclaurin |
 | Exponential integral Eₙ(x), Ei(x) | Planck CDF | Related to incomplete gamma; Ei(x) = −E₁(−x) for x > 0 |
 | Polylogarithm Liₛ(z) | Planck CDF, Fermi-Dirac | Li₂ (dilogarithm) has known series; general Liₛ needs Lerch transcendent |
 | Elliptic integrals K(k), E(k) | Some special distributions | Carlson symmetric forms most numerically stable |
