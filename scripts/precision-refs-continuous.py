@@ -580,6 +580,8 @@ def pdf(name, p, x):
     if name == 'InverseGaussian':
         return ig_pdf(p[0], p[1], x)
     if name == 'InvertedWeibull':
+        if x <= 0:
+            return mpf(0)
         c = mpf(p[0])
         return c * power(x, -1 - c) * exp(-1 / power(x, c))
     if name == 'IrwinHall':
@@ -897,6 +899,8 @@ def cdf(name, p, x):
         lam, k, alpha = mpf(p[0]), mpf(p[1]), mpf(p[2])
         return power(cdf('Weibull', [lam, k], x), alpha)
     if name == 'F':
+        if x <= 0:
+            return mpf(0)
         d1, d2 = int(round(p[0])), int(round(p[1]))
         y = d1 * x
         return Ireg(mpf(d1) / 2, mpf(d2) / 2, 1 / (1 + mpf(d2) / y))
@@ -966,6 +970,8 @@ def cdf(name, p, x):
     if name == 'InverseGaussian':
         return ig_cdf(p[0], p[1], x)
     if name == 'InvertedWeibull':
+        if x <= 0:
+            return mpf(0)
         c = mpf(p[0])
         return exp(-1 / power(x, c))
     if name == 'IrwinHall':
@@ -1051,6 +1057,8 @@ def cdf(name, p, x):
     if name == 'NoncentralChi2':
         return ncx2_cdf(int(round(p[0])), p[1], x)
     if name == 'NoncentralF':
+        if x <= 0:
+            return mpf(0)
         d1, d2, lam = int(round(p[0])), int(round(p[1])), mpf(p[2])
         y = d1 * x
         return ncbeta_cdf(mpf(d1) / 2, mpf(d2) / 2, lam, 1 / (1 + mpf(d2) / y))
