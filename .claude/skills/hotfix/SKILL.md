@@ -66,8 +66,8 @@ Compile observations noticed during step 4 (a flaky test, a pre-existing NaN at 
 Spawn the `ops-triage` agent with `branch`, `session_kind: "hotfix"`, `target_issue`, the `observations` list, and a `diff_path` (write `git diff main...HEAD` to `.claude/tmp/triage-diff-<branch>.patch` first).
 
 Act on the result:
-- **`definite` with `fix_inline: true`** (trivial): apply the fix on the fly using `fix_suggestion`, run `npm run standard && npm test`. Do **not** file an issue. Count as "fixed inline".
-- **`definite` with `fix_inline: false`** (non-trivial): invoke `ops-issue` once per entry with the drafted fields. Collect URLs.
+- **`definite` with `route: "fix"`** (trivial/moderate): spawn the `ops-fix` agent with `summary`, `difficulty`, `fix_context`, and `branch`, one bug at a time (sequentially — they share the working tree). On `status: "fixed"`, count as "fixed inline". On `status: "escalated"`, fall back to `ops-issue` using the entry's drafted `title`/`priority`/`extra_labels` and a body built from `summary` + the escalation reason.
+- **`definite` with `route: "file"`** (difficult): invoke `ops-issue` once per entry with the drafted fields. Collect URLs.
 - **`ambiguous`**: one batched `AskUserQuestion` (File issue / Skip / Other). For each "File issue", invoke `ops-issue`.
 - **`not_a_bug`**: silent.
 
