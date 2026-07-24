@@ -4,7 +4,7 @@ You are triaging a GitHub issue to pick and launch the fastest, safest workflow:
 
 ## Core Principle
 
-Match the issue's complexity to the right pipeline. Picking too lightweight a skill (e.g., `/hotfix` for something that needs design decisions) wastes time when the pipeline hits a wall mid-flow. Picking too heavy a skill (e.g., `/build` for a one-liner) slows delivery unnecessarily. This skill reads the issue, does a lightweight codebase probe to produce a confident recommendation, and then automatically launches that recommended skill — no manual selection step.
+Match the issue's complexity to the right pipeline. Picking too lightweight a skill (e.g., `/hotfix` for something that needs design decisions) wastes time when the pipeline hits a wall mid-flow. Picking too heavy a skill (e.g., `/build` for a one-liner) slows delivery unnecessarily. This skill reads the issue, does a lightweight codebase probe to produce a confident recommendation, and then automatically launches that recommended skill — no manual selection step. When no issue is named, it also picks *which* issue from the open backlog before triaging it, using the same priority/difficulty ranking as `/next`.
 
 ## Skill Selection Criteria
 
@@ -26,7 +26,20 @@ Match the issue's complexity to the right pipeline. Picking too lightweight a sk
 
 ## Workflow
 
-When the user invokes `/resolve <number>`:
+When the user invokes `/resolve <number>` or bare `/resolve` (no issue given):
+
+### 0. Pick an Issue (only when no `<number>` was given)
+
+Skip straight to Step 1 if the user passed a number or URL.
+
+Otherwise, select the top candidate from the open backlog using the **same ranking as `/next`**: priority tier desc (high > medium > low > unlabeled), then difficulty desc (trivial > moderate > difficult > unlabeled) as the tiebreak, then issue number asc. Do not invent a different ranking — reuse this one so `/resolve` and `/next` never disagree on what "next" means.
+
+1. Run `python3 .claude/skills/next/rank_issues.py` and take `ranked[0]` (the top of the unblocked list; entries in `blocked` are excluded — never pick a blocked issue).
+   - **`gh` unavailable:** fall back to `mcp__github__list_issues` (`state: OPEN`, paginate via `after`/`pageInfo` until exhausted), extract each issue's priority/difficulty labels, and rank them in memory using the same rule above (skip dependency/`blocked` detection in this fallback — priority and difficulty alone are enough).
+2. If there are no open issues (or every open issue is blocked in the script path), stop and report: "No open, unblocked issues found — nothing to resolve."
+3. Report the pick before continuing:
+   > "No issue given — picking from the backlog: **#\<number\> — \<title\>** (priority: \<p\>, difficulty: \<d\>)."
+4. Continue to Step 1 using this issue's number.
 
 ### 1. Fetch the Issue
 
@@ -106,9 +119,11 @@ Then invoke the skill and let it run its own workflow (branching, coding, tests,
 - Base the recommendation on signals from both the issue text and the codebase probe
 - Explain exactly why you picked the recommendation before launching it
 - Auto-launch the recommended skill via the Skill tool — do not wait for user approval
+- When no issue is given, reuse `/next`'s exact ranking (priority tier, then difficulty) instead of inventing a new one
 
 ### DO NOT:
 - Recommend `/build` because the issue body is long — verbosity is not a complexity proxy
 - Skip the codebase probe — an issue that sounds simple may touch many files
 - Recommend `/hotfix` if any design decision is open, even a small one
 - Ask the user to choose when the tiebreaker rules already resolve the ambiguity — only escalate on a genuine, unresolved toss-up
+- Pick a blocked issue (one with open, unresolved dependencies) when auto-selecting from the backlog
