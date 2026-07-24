@@ -384,6 +384,9 @@ def ih_cdf(n, x):
 
 def pdf(name, p, x):
     x = mpf(x)
+    lo, hi = support(name, p)
+    if (lo is not None and x < lo) or (hi is not None and x > hi):
+        return mpf(0)
     if name == 'Alpha':
         alpha, beta = mpf(p[0]), mpf(p[1])
         return beta * exp(-HALF * (alpha - beta / x) ** 2) / (x * x * Phi(alpha) * SQRT2PI)
@@ -787,6 +790,11 @@ def pdf(name, p, x):
 
 def cdf(name, p, x):
     x = mpf(x)
+    lo, hi = support(name, p)
+    if lo is not None and x < lo:
+        return mpf(0)
+    if hi is not None and x > hi:
+        return mpf(1)
     if name == 'Alpha':
         alpha, beta = mpf(p[0]), mpf(p[1])
         return Phi(alpha - beta / x) / Phi(alpha)
