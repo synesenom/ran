@@ -185,6 +185,20 @@ describe('dist', () => {
         assert(Math.abs(result.p.x0 - 2) < 0.5)
       })
 
+      it('ExponentiallyModifiedGaussian.fit should recover mu, sigma, and lambda close to planted values', () => {
+        const data = new dist.ExponentiallyModifiedGaussian(1, 2, 0.5).seed(42).sample(500)
+        const result = dist.ExponentiallyModifiedGaussian.fit(data)
+        assert(result instanceof dist.ExponentiallyModifiedGaussian)
+        assert(Math.abs(result.p.mu - 1) < 1.5)
+        assert(Math.abs(result.p.sigma - 2) < 1)
+        assert(Math.abs(result.p.lambda - 0.5) < 0.4)
+      })
+
+      it('ExponentiallyModifiedGaussian._fitInit should return valid params for constant data', () => {
+        const init = dist.ExponentiallyModifiedGaussian._fitInit([3, 3, 3, 3])
+        assert(init[1] > 0 && init[2] > 0)
+      })
+
       it('BoundedPareto._fitInit should return valid params for constant data', () => {
         const init = dist.BoundedPareto._fitInit([5, 5, 5])
         assert(init[0] > 0 && init[1] > init[0] && init[2] > 0)
