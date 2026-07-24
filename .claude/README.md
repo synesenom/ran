@@ -38,16 +38,12 @@ This directory contains the skills and agents that power the development workflo
     ├── review-performance.md  # Reviews for performance issues
     ├── review-security.md     # Reviews for security issues
     ├── review-conventions.md  # Reviews for CLAUDE.md rule violations (exact quotes)
-    ├── review-correctness.md  # Reviews for mathematical/statistical errors and general logic bugs
-    ├── review-docs.md         # Reviews for documentation gaps
-    ├── review-impact.md       # Reviews for dropped invariants and cross-file caller breakage
-    ├── review-performance.md  # Reviews for performance issues
-    ├── review-security.md     # Reviews for security issues
     ├── review-structure.md    # Reviews for over-engineering and wrong abstraction level
     ├── review-tests.md        # Reviews for test quality gaps
     ├── ops-insight.md         # Extracts problem/fix/insight from diffs
     ├── ops-issue.md           # Creates GitHub issues
-    ├── ops-triage.md          # Classifies surfaced-bug observations into definite/ambiguous/not-a-bug
+    ├── ops-triage.md          # Classifies surfaced-bug observations into definite/ambiguous/not-a-bug; sizes and routes them
+    ├── ops-fix.md             # Fixes a single trivial/moderate bug in place (TDD)
     ├── suggest-distributions.md  # Suggests new probability distributions
     ├── suggest-methods.md        # Suggests new statistical methods/metrics
     ├── suggest-testing.md        # Suggests test coverage improvements
@@ -170,7 +166,7 @@ Launched by [`/implement`](skills/implement/SKILL.md) when tests fail. Auto-reco
 
 ### `review-*` — Parallel quality checks
 
-All launched **in parallel** by [`/review`](skills/review/SKILL.md). Each returns `Block` (must fix before commit) and `Warn` (file as issue) findings. Results are merged into one flat list — no per-agent sections.
+All launched **in parallel** by [`/review`](skills/review/SKILL.md). Each returns `Block` (must fix before commit) and `Warn` (real problem, not commit-blocking) findings. Results are merged into one flat list — no per-agent sections. Merged `Warn` findings are then routed through `ops-triage` → `ops-fix`/`ops-issue` (see `ops-*` below): trivial/moderate ones are fixed in place, only difficult ones are filed.
 
 | Agent | Model | Focus |
 |-------|-------|-------|
@@ -196,13 +192,16 @@ Launched **in parallel** by [`/suggest`](skills/suggest/SKILL.md). Each scout sc
 | [`suggest-wildcard`](agents/suggest-wildcard.md) | Sonnet | Unconstrained brainstorming across all dimensions |
 | [`suggest-rank`](agents/suggest-rank.md) | Sonnet | Dedup against open issues, score and rank |
 
-### `ops-*` — Capture outcomes
+### `ops-*` — Triage, fix, and capture outcomes
+
+`ops-triage` classifies and sizes; `ops-fix` resolves what's fixable now; `ops-issue` files only what's genuinely `difficult`. The guiding principle across `/fix`, `/hotfix`, `/build`, and `/review`: only hard bugs reach the backlog.
 
 | Agent | Model | Used by | Purpose |
 |-------|-------|---------|---------|
 | [`ops-insight`](agents/ops-insight.md) | Sonnet | compound | Extract problem/root-cause/fix/prevention from diffs and plans |
 | [`ops-issue`](agents/ops-issue.md) | Haiku | (manual, ops-triage) | Create GitHub issues with priority + difficulty labels |
-| [`ops-triage`](agents/ops-triage.md) | Sonnet | fix, hotfix, build | Classify surfaced-bug observations into definite/ambiguous/not-a-bug; draft `ops-issue` input for definite bugs |
+| [`ops-triage`](agents/ops-triage.md) | Sonnet | fix, hotfix, build, review | Classify surfaced-bug observations into definite/ambiguous/not-a-bug; size definite bugs trivial/moderate/difficult; route to `ops-fix` (trivial/moderate) or draft `ops-issue` input (difficult) |
+| [`ops-fix`](agents/ops-fix.md) | Sonnet | fix, hotfix, build, review (via ops-triage) | Fix a single trivial/moderate bug in place: TDD (failing test → minimal fix → lint/test/code-health verification → changelog entry); escalates back to filing if it turns out harder than described |
 
 ## Command → Agent Dependency Map
 
@@ -230,6 +229,7 @@ Launched **in parallel** by [`/suggest`](skills/suggest/SKILL.md). Each scout sc
               → review-docs        │
               → review-correctness │
               → review-impact      ┘
+              → ops-triage (sizes merged Warn findings) → ops-fix (trivial/moderate) | ops-issue (difficult)
 
 /review-pr ──→ review-security    ┐
               → review-performance │
@@ -248,18 +248,18 @@ Launched **in parallel** by [`/suggest`](skills/suggest/SKILL.md). Each scout sc
 /pr → (no agents, ADR gate for non-trivial PRs)
 
 /build ──────→ research → plan → implement → validate → triage → review → ship(commit, compound, push, PR)
-               Uses all agents: discovery-*, design-*, recovery-*, ops-triage, review-*, ops-*
+               Uses all agents: discovery-*, design-*, recovery-*, ops-triage, ops-fix, ops-issue, review-*
 
 /validate ───→ discovery-thoughts
 
 /release ────→ (no agents; GitHub MCP for PR/merge, then triggers .github/workflows/release.yml for tag/publish/release/milestone)
 
 /fix ────────→ ops-triage
-              → ops-issue (per definite bug)
-              → review-* (conditional, only when .js files changed)
+              → ops-fix (per definite trivial/moderate bug) | ops-issue (per definite difficult bug)
+              → review-* (conditional, only when .js files changed; includes its own ops-triage/ops-fix/ops-issue pass on Warn findings)
 /hotfix ─────→ ops-triage
-              → ops-issue (per definite bug)
-              → review-correctness (lightweight check before commit)
+              → ops-fix (per definite trivial/moderate bug) | ops-issue (per definite difficult bug)
+              → /review (includes its own ops-triage/ops-fix/ops-issue pass on Warn findings)
 /commit ─────→ (no agents)
 /explore ────→ (no agents, uses web search + codebase reads)
 /next ───────→ (no agents, fetches GitHub issues via gh CLI)
