@@ -133,19 +133,28 @@ def ncbeta_cdf(a, b, lam, x):
 def ncbeta_pdf(a, b, lam, x):
     x = mpf(x)
     a = mpf(a)
-    if x < 0 or x >= 1:
+    if x < 0 or x > 1:
         return mpf(0)
     l2 = mpf(lam) / 2
     if x == 0:
         # Only the j=0 term (aj=a) can be nonzero at x=0: every j>=1 term has aj=a+j>1 once
         # a>=0, so x^(aj-1) vanishes. a==1 leaves the finite e^(-lam/2)/B(1,b) = e^(-lam/2)*b;
-        # a<1 diverges (all terms nonnegative, j=0 term alone -> inf); a>1 -> 0. Right-edge
-        # (x>=1) boundary is a separate, out-of-scope bug -- not touched here (issue #1116).
+        # a<1 diverges (all terms nonnegative, j=0 term alone -> inf); a>1 -> 0 (issue #1116).
         if a > 1:
             return mpf(0)
         if a == 1:
             return pois_w(l2, 0) / betafn(1, mpf(b))
         return inf
+    if x == 1:
+        # Right edge (1-x)^(b-1): a blanket 0 here silently understated the b<=1 boundary (#1121).
+        # b<1 diverges (dominated by the j=0 Poisson term regardless of a); b==1 is the finite
+        # Poisson mean a+lambda/2 (Beta(a+j,1) pdf at x=1 is a+j); b>1 vanishes.
+        b = mpf(b)
+        if b < 1:
+            return inf
+        if b == 1:
+            return a + mpf(lam) / 2
+        return mpf(0)
     s = mpf(0)
     j = 0
     while True:

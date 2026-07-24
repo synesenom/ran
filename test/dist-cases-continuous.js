@@ -4075,6 +4075,33 @@ export default [{
       { x: 0.5, pdf: 0.908333820260523, cdf: 0.17615242720060734 },
       { x: 0.9, pdf: 2.017917581572161, cdf: 0.8762537019781295 }
     ]
+  }, {
+    // beta<1 right-edge divergence: (1-x)^(beta-1) → +∞ as x→1, dominated by the j=0 Poisson term
+    // regardless of alpha (issue #1121). Guards the JS _pdf x===1 branch (the base pdf() NaN→0
+    // closed-boundary guard used to mask this to 0) and the mpmath generator's ncbeta_pdf x==1 fix.
+    name: 'beta<1 (divergent pdf at x=1)',
+    params: () => [2, 0.5, 3],
+    refVals: [
+      { x: 1, pdf: Infinity, cdf: 1 }
+    ]
+  }, {
+    // beta=1 right edge: Beta(alpha+j,1) pdf at x=1 is (alpha+j), so the Poisson-weighted sum is
+    // the finite value alpha + lambda/2 (mpmath dps=50, x→1: 3 + 4/2 = 5). Verifies the finite
+    // branch of both the JS _pdf and the reference generator's ncbeta_pdf at x=1 (issue #1121).
+    name: 'beta=1 (finite pdf at x=1)',
+    params: () => [3, 1, 4],
+    refVals: [
+      { x: 1, pdf: 5, cdf: 1 }
+    ]
+  }, {
+    // beta>1 right edge: (1-x)^(beta-1) → 0 as x→1, so the pdf vanishes. Guards the fallthrough
+    // path — neither the JS _pdf (series → 0) nor the generator's explicit b>1 branch special-cases
+    // it beyond returning 0, and no other case probes x=1 exactly for beta>1 (issue #1121).
+    name: 'beta>1 (zero pdf at x=1)',
+    params: () => [2, 3, 5],
+    refVals: [
+      { x: 1, pdf: 0, cdf: 1 }
+    ]
   }],
   testSeeds: [0, 5, 12345], // seed 42 shifts PRNG alignment after Ziggurat replacement
   // [2,2,5] replaces [2,2,2] to avoid seed-12345 PRNG alignment false positive; all other cases preserved
