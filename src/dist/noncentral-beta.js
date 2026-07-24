@@ -162,6 +162,13 @@ export default class NoncentralBeta extends Distribution {
       return this.c.expHalfLambda / this.c.beta
     }
 
+    // At x=1: (1-x)^(beta-1) diverges for beta<1, dominated by the k=0 Poisson term regardless of
+    // alpha/lambda. The series below instead yields Infinity-Infinity = NaN, which base pdf()
+    // silently collapses to 0 via its NaN→closed-boundary guard; short-circuit to the true +∞
+    // here (issue #1121). beta>=1 needs no special case: (1-x)^(beta-1) is 0 (beta>1) or 1
+    // (beta===1, giving the finite Poisson mean alpha+lambda/2), both handled cleanly by the series.
+    if (x === 1 && this.p.beta < 1) return Infinity
+
     // Speed-up variables.
     const { l2, i0, p0, b0 } = this.c
     let iAlpha0 = this.c.iAlpha0

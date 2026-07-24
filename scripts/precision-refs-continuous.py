@@ -132,7 +132,19 @@ def ncbeta_cdf(a, b, lam, x):
 
 def ncbeta_pdf(a, b, lam, x):
     x = mpf(x)
-    if x <= 0 or x >= 1:
+    if x <= 0:
+        return mpf(0)
+    if x > 1:
+        return mpf(0)
+    if x == 1:
+        # Right edge (1-x)^(b-1): a blanket 0 here silently understated the b<=1 boundary (#1121).
+        # b<1 diverges (dominated by the j=0 Poisson term regardless of a); b==1 is the finite
+        # Poisson mean a+lambda/2 (Beta(a+j,1) pdf at x=1 is a+j); b>1 vanishes.
+        b = mpf(b)
+        if b < 1:
+            return inf
+        if b == 1:
+            return mpf(a) + mpf(lam) / 2
         return mpf(0)
     l2 = mpf(lam) / 2
     s = mpf(0)
