@@ -284,6 +284,9 @@ def nct_cdf(nu, mu, t):
     # F(t) = integral_0^inf Phi(t*sqrt(v/nu) - mu) * chi2_pdf(nu, v) dv.
     # 35 working digits keep the quadrature ~1e-30 accurate (far below float64) while
     # roughly halving the adaptive-subdivision cost that dominates the (doubly-)noncentral-t runs.
+    # Relies on nu >= 2 so chi2_pdf(nu, v) stays finite as v->0 (chi2_pdf returns +inf for
+    # df<2, which quad()'s tanh-sinh rule never literally samples at the v=0 endpoint anyway,
+    # but a future nu<2 param set or a quadrature-rule change would feed +inf into f() directly).
     f = lambda v: Phi(t * sqrt(v / nu) - mu) * chi2_pdf(nu, v)
     with mp.workdps(35):
         return +quad(f, [0, nu, inf])
@@ -486,6 +489,11 @@ def pdf(name, p, x):
         return 2 * x * pdf('Chi2', [k], x * x)
     if name == 'Chi2':
         k = int(round(p[0]))
+        # Unlike 'Chi' above, no x==0 special case is needed here: chi2_pdf(k,0) returning
+        # +inf for k<2 *is* the correct chi-squared density at its pole, not a 0*inf artifact
+        # to unwrap. Currently unreached in practice because xvalues()/invcdf() never probe the
+        # literal left support edge (see invcdf()'s "never evaluate cdf at the lower boundary"
+        # comment) -- a manual x-value override at x=0 would exercise this branch directly.
         return chi2_pdf(k, x)
     if name in ('Dagum',):
         pp, a, b = mpf(p[0]), mpf(p[1]), mpf(p[2])
