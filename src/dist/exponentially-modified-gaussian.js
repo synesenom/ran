@@ -45,6 +45,7 @@ export default class ExponentiallyModifiedGaussian extends Distribution {
     // Speed-up constants
     this.c = {
       sigmaSq: sigma * sigma,
+      twoSigmaSq: 2 * sigma * sigma,
       sigmaRoot2: sigma * Math.SQRT2,
       lambdaSigmaSq: lambda * sigma * sigma
     }
@@ -81,7 +82,8 @@ export default class ExponentiallyModifiedGaussian extends Distribution {
   }
 
   _generator () {
-    // Sum of independent Normal and Exponential draws
+    // Exact by construction: EMG is defined as X+Y for independent X~Normal, Y~Exponential,
+    // so summing one draw from each reproduces the target distribution with no rejection step
     return normal(this.r, this.p.mu, this.p.sigma) + exponential(this.r, this.p.lambda)
   }
 
@@ -113,7 +115,7 @@ export default class ExponentiallyModifiedGaussian extends Distribution {
       const exponent = this.p.lambda * (this.p.mu + this.c.lambdaSigmaSq / 2 - x)
       return Math.exp(exponent) * erfc(arg)
     }
-    return Math.exp(-(x - this.p.mu) * (x - this.p.mu) / (2 * this.c.sigmaSq)) * erfcx(arg)
+    return Math.exp(-(x - this.p.mu) * (x - this.p.mu) / this.c.twoSigmaSq) * erfcx(arg)
   }
 
   static _fitInit (data) {

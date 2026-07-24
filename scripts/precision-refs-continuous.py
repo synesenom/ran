@@ -1361,7 +1361,7 @@ PARAM_SETS = {
     'Erlang': [[5, 2], [2, 0.5], [3, 1]],
     'Exponential': [[2], [0.5], [1]],
     'ExponentialLogarithmic': [[0.5, 2], [0.9, 0.5], [0.3, 1]],
-    'ExponentiallyModifiedGaussian': [[0, 1, 1], [2, 0.5, 5], [-1, 2, 0.2]],
+    'ExponentiallyModifiedGaussian': [[0, 1, 1], [1, 0.3, 5], [-1, 2, 0.2]],
     'ExponentiatedWeibull': [[2, 2, 2], [0.5, 0.5, 0.5], [1, 2, 3]],
     'F': [[5, 5], [2, 20], [10, 4]],
     'FisherZ': [[5, 5], [1, 1], [8, 4]],

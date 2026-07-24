@@ -1250,16 +1250,19 @@ const REFS = [
     ]
   },
   {
+    // params chosen so the 0.9-quantile point crosses mu + lambda*sigma^2 = 1.45, the
+    // _erfcTerm branch boundary -- unlike a wider-spread stress case, this exercises both
+    // the erfcx(arg>0) and naive-erfc(arg<=0) branches at 1e-14 tolerance
     name: 'ExponentiallyModifiedGaussian',
-    params: [2, 0.5, 5],
+    params: [1, 0.3, 5],
     tol: 1e-14,
     qtol: 1e-14,
     points: [
-      { x: 1.5177320134617807, pdf: 0.33694320527284444, cdf: 0.1 },
-      { x: 1.914282666411195, pdf: 0.6597049944688976, cdf: 0.3 },
-      { x: 2.232357788392934, pdf: 0.7446621200949604, cdf: 0.53 },
-      { x: 2.5055739052182595, pdf: 0.6201357742574573, cdf: 0.72 },
-      { x: 2.890652692253945, pdf: 0.31284356164766997, cdf: 0.9 }
+      { x: 0.7559878151694747, pdf: 0.5400092261974838, cdf: 0.1 },
+      { x: 1.0055956026756214, pdf: 1.0372032176973605, cdf: 0.3 },
+      { x: 1.2102796063949952, pdf: 1.14163640071139, cdf: 0.53 },
+      { x: 1.3912854241193913, pdf: 0.9196587151635259, cdf: 0.72 },
+      { x: 1.6600523914914789, pdf: 0.4305137325963476, cdf: 0.9 }
     ]
   },
   {

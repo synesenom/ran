@@ -194,9 +194,17 @@ describe('dist', () => {
         assert(Math.abs(result.p.lambda - 0.5) < 0.4)
       })
 
-      it('ExponentiallyModifiedGaussian._fitInit should return valid params for constant data', () => {
+      it('ExponentiallyModifiedGaussian._fitInit should return the 1e-6-clamped params for constant data', () => {
+        // Constant data drives variance to exactly 0, which forces both clamps: g1 (raw
+        // skewness 0/1^3 = 0) floors to 1e-6, and sigma^2 (0 * anything) floors to 1e-6 exactly
+        // (sigma = sqrt(1e-6) = 0.001, exact rational -- independent of the (1-(g1/2)^(2/3))
+        // factor it multiplies). tau = std(=1, variance-fallback) * cbrt(1e-6/2) exceeds the
+        // 1e-6 floor, so tau = cbrt(5e-7) and lambda = 1/tau, both plain cube-root algebra.
+        // mpmath dps=50: cbrt(5e-7) = 0.0079370052598409963737585281963615413019574666394993
         const init = dist.ExponentiallyModifiedGaussian._fitInit([3, 3, 3, 3])
-        assert(init[1] > 0 && init[2] > 0)
+        assert.approximately(init[0], 3 - 0.007937005259840996, 1e-12) // mu = mean - tau
+        assert.approximately(init[1], 0.001, 1e-12) // sigma = sqrt(1e-6), exact
+        assert.approximately(init[2], 1 / 0.007937005259840996, 1e-6) // lambda = 1/tau
       })
 
       it('BoundedPareto._fitInit should return valid params for constant data', () => {
