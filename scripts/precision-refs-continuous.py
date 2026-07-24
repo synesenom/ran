@@ -711,6 +711,10 @@ def pdf(name, p, x):
         return ncbeta_pdf(p[0], p[1], p[2], x)
     if name == 'NoncentralChi':
         k, lam = int(round(p[0])), mpf(p[1])
+        if x == 0:
+            # k=1: only the j=0 Poisson term of ncx2_pdf diverges as v^(-1/2) near
+            # v=0, so 2*x*ncx2_pdf(1, lam^2, x^2) has a finite 0*inf limit as x->0.
+            return 2 * exp(-lam * lam / 2) / SQRT2PI if k == 1 else mpf(0)
         return 2 * x * ncx2_pdf(k, lam * lam, x * x)
     if name == 'NoncentralChi2':
         return ncx2_pdf(int(round(p[0])), p[1], x)

@@ -102,7 +102,9 @@ export default class NoncentralChi extends NoncentralChi2 {
 
   _pdf (x) {
     if (x === 0) {
-      return 0
+      // k=1: only the j=0 term of the underlying ncx2 pdf diverges as v^(-1/2) near v=0, so
+      // 2*x*ncx2Pdf(1, lambda^2, x^2) has a finite 0*inf limit as x -> 0 (mirrors chi.js's k=1 case)
+      return this.p.k === 1 ? Math.sqrt(2 / Math.PI) * Math.exp(-0.5 * this.c.lambda2) : 0
     }
     const x2 = x * x
     const lambda2 = this.c.lambda2

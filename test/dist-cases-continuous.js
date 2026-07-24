@@ -4156,6 +4156,8 @@ export default [{
     params: () => [2, 0.5],
     // mpmath: x*exp(-0.5*(x^2+lam^2))*(x/lam)^(k/2-1)*I_{k/2-1}(lam*x), NcX2_CDF(x^2;k,lam^2)  (k=2,lam=0.5)
     refVals: [
+      // k=2 stays at the pre-#1122 pdf(0)=0 (only k=1 diverges to a nonzero limit); pins the untouched branch
+      { x: 0, pdf: 0, cdf: 0 },
       { x: 0.1, pdf: 0.08786443263223488, cdf: 0.004402846120818446 },
       { x: 0.5, pdf: 0.3955085810698597, cdf: 0.10449141893014031 },
       { x: 1.0, pdf: 0.5692416282291918, cdf: 0.35728576972745624 },
@@ -4163,6 +4165,19 @@ export default [{
       { x: 2.0, pdf: 0.3024200116022643, cdf: 0.8308593614905329 },
       { x: 3.0, pdf: 0.04843171827606476, cdf: 0.9821563266135178 },
       { x: 4.0, pdf: 0.002699436861886624, cdf: 0.9992629646931951 }
+    ]
+  }, {
+    name: 'k=1 boundary at x=0',
+    params: () => [1, 0.5],
+    // mpmath dps=50: pdf(0) = 2*exp(-lam^2/2)/sqrt(2*pi) (finite 0*inf limit of the ncx2 j=0 term); other
+    // points via 2*x*ncx2_pdf(1, lam^2, x^2), NcX2_CDF(x^2; 1, lam^2)
+    refVals: [
+      { x: 0, pdf: 0.7041306535285990, cdf: 0 },
+      { x: 0.1, pdf: 0.7014947431951229, cdf: 0.07032514063960226 },
+      { x: 0.5, pdf: 0.640913004920576, cdf: 0.3413447460685429 },
+      { x: 1.0, pdf: 0.4815829224301912, cdf: 0.6246552600051550 },
+      { x: 1.5, pdf: 0.2959616910323314, cdf: 0.8185946141203637 },
+      { x: 2.0, pdf: 0.1470458961594603, cdf: 0.9269831334053658 }
     ]
   }],
   // Reference values via sqrt-transform of NoncentralChi2: 2x*ncx2.pdf(x^2, 5, 4), ncx2.cdf(x^2, 5, 4)
