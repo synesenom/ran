@@ -132,9 +132,20 @@ def ncbeta_cdf(a, b, lam, x):
 
 def ncbeta_pdf(a, b, lam, x):
     x = mpf(x)
-    if x <= 0 or x >= 1:
+    a = mpf(a)
+    if x < 0 or x >= 1:
         return mpf(0)
     l2 = mpf(lam) / 2
+    if x == 0:
+        # Only the j=0 term (aj=a) can be nonzero at x=0: every j>=1 term has aj=a+j>1 once
+        # a>=0, so x^(aj-1) vanishes. a==1 leaves the finite e^(-lam/2)/B(1,b) = e^(-lam/2)*b;
+        # a<1 diverges (all terms nonnegative, j=0 term alone -> inf); a>1 -> 0. Right-edge
+        # (x>=1) boundary is a separate, out-of-scope bug -- not touched here (issue #1116).
+        if a > 1:
+            return mpf(0)
+        if a == 1:
+            return pois_w(l2, 0) / betafn(1, mpf(b))
+        return inf
     s = mpf(0)
     j = 0
     while True:
@@ -256,8 +267,13 @@ def dncbeta_pdf(a, b, l1, l2, x):
 def chi2_pdf(df, v):
     v = mpf(v)
     df = mpf(df)
-    if v <= 0:
+    if v < 0:
         return mpf(0)
+    if v == 0:
+        # v=0 is a genuine density pole for df<2 (e.g. df=1 -> +inf), not a finite value: the
+        # finite sqrt(2/pi) some callers expect belongs to Chi's pdf (via the 2*x*chi2_pdf(k,x^2)
+        # limit as x->0), not to chi2_pdf in isolation -- see the 'Chi' dispatch branch below.
+        return mpf(0) if df > 2 else (HALF if df == 2 else inf)
     return exp((df / 2 - 1) * log(v) - v / 2 - (df / 2) * log(2) - loggamma(df / 2))
 
 
@@ -460,6 +476,13 @@ def pdf(name, p, x):
         return norm / (cosh(alpha * (x - x0)) + lam)
     if name == 'Chi':
         k = int(round(p[0]))
+        if x == 0:
+            # 2*x*chi2_pdf(k,x^2) can't be evaluated literally at x=0 once chi2_pdf(1,0)=inf
+            # (fixed above): mpf(0)*inf is nan in mpmath, not the true 0*inf limit. k is always
+            # a positive integer here (Chi's invalidParams reject k<=0), so k<1 (-> inf) is
+            # unreachable and intentionally omitted.
+            # See solutions/testing/2026-07-24-1456-chi-noncentralbeta-pdf0-zero-times-inf-boundary.md
+            return mpf(0) if k > 1 else sqrt(2 / pi)
         return 2 * x * pdf('Chi2', [k], x * x)
     if name == 'Chi2':
         k = int(round(p[0]))
