@@ -17,6 +17,7 @@ Usage:    python3 scripts/precision-refs-continuous.py            # rewrites the
           python3 scripts/precision-refs-continuous.py --check    # self-check only
 """
 import json
+import subprocess
 import sys
 from mpmath import (mp, mpf, pi, sqrt, exp, log, expm1, log1p, cosh, tanh,
                     atan, asin, asinh, acos, sin, cos, gamma as gammafn, loggamma,
@@ -674,11 +675,7 @@ def pdf(name, p, x):
         return d1 * d2 / power(d2 + d1 * x, 2) * ncbeta_pdf(mpf(d1) / 2, mpf(d2) / 2, lam, y)
     if name == 'NoncentralT':
         nu, mu = int(round(p[0])), mpf(p[1])
-        # f(x) = nu/x * (F_{nu+2}(x*sqrt(1+2/nu), mu) - F_nu(x, mu)) (ranjs NoncentralT._pdf)
-        if x == 0:
-            from mpmath import diff
-            return diff(lambda t: nct_cdf(nu, mu, t), mpf('1e-30'))
-        return mpf(nu) * (nct_cdf(nu + 2, mu, x * sqrt(1 + mpf(2) / nu)) - nct_cdf(nu, mu, x)) / x
+        return nct_pdf(nu, mu, x)
     if name == 'Normal':
         mu, sigma = mpf(p[0]), mpf(p[1])
         return exp(-HALF * ((x - mu) / sigma) ** 2) / (sigma * SQRT2PI)
@@ -1180,13 +1177,43 @@ def cdf(name, p, x):
 # self-check against scipy refVals already vetted in dist-cases-continuous.js
 # =========================================================================
 
+# Frozen regression anchor for the #1108/#1086 premature-convergence bug -- values are the
+# mpmath mp.dps=50 references already recorded in test/precision-continuous.js:993-998,
+# duplicated here (not re-derived from dncbeta_pdf/dncbeta_cdf) so this check is non-tautological.
+LARGE_LAMBDA_ANCHORS = [{
+    'name': 'DoublyNoncentralBeta',
+    'refVals': None,
+    'cases': [{
+        'params': [2, 2, 1200, 1200],
+        'refVals': [
+            {'x': 0.3, 'pdf': 3.031637276579777e-21, 'cdf': 5.709664737795533e-24},
+            {'x': 0.5, 'pdf': 19.58073930064019, 'cdf': 0.5}
+        ]
+    }]
+}]
+
+
 def self_check(only=None):
-    with open('test/cases-continuous.json') as fh:
-        data = json.load(fh)
+    # dist-cases-continuous.js is a real ES module (cases[*].params is a closure); dump-dist-cases-
+    # json.js loads it exactly the way mocha does (via @babel/register) and evaluates every closure,
+    # so this always checks against the live file instead of a stale or nonexistent snapshot.
+    # See solutions/testing/2026-07-24-1141-precision-refs-self-check-never-ran.md
+    result = subprocess.run(['node', 'scripts/dump-dist-cases-json.js'], capture_output=True, text=True)
+    if result.returncode != 0:
+        print(result.stderr, flush=True)
+        raise RuntimeError('dump-dist-cases-json.js failed')
+    data = json.loads(result.stdout)
+    # PARAM_SETS is this generator's registry of distributions it actually implements pdf()/cdf()
+    # for; test/dist-cases-continuous.js covers a couple more (e.g. TruncatedExponential) that this
+    # script never implemented, which would otherwise show up as a spurious ERROR, not a mismatch.
+    implemented = set(PARAM_SETS.keys())
     bad = 0
     checked = 0
-    for d in data:
+    for d in data + LARGE_LAMBDA_ANCHORS:
         name = d['name']
+        if name not in implemented:
+            print(f'  ... skipping {name} (not implemented in this generator)', flush=True)
+            continue
         if only and name not in only:
             continue
         print(f'  ... {name}', flush=True)
