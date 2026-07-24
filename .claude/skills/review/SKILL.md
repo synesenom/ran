@@ -85,7 +85,23 @@ Wait for all eight. Then merge in four passes:
 
 **Pass D — Produce the merged list:** Block first, then Conflict (needs a human decision), then Warn.
 
-### 5. Generate Report
+### 5. Auto-fix Warn Findings (fully autonomous)
+
+Warn findings are real problems — each review agent only emits `Warn` for something it's already confident is wrong, just not commit-blocking. Rather than leaving them for a human to notice and file later, size and route them exactly like any other bug the pipeline finds: **fix what's fixable now, file only what's genuinely hard.**
+
+**Skip this step** if the merged Warn list from Pass D is empty.
+
+a. Spawn `ops-triage` with `branch`, `session_kind: "review"`, `target_issue` (the branch's linked issue if known, else `null`), and `observations` built from every Warn entry: `summary` = the finding's one-line description, `stage: "review"`, `evidence` = the file:line and the reviewing agent's rationale, `orchestrator_call: "bug"` (Warn findings are already vetted as real by a specialized reviewer — `ops-triage` is sizing them for routing, not re-litigating whether they're real).
+
+b. Act on the result the same way every other triage stage in this codebase does:
+   - **`definite` with `route: "fix"`** (trivial/moderate): spawn `ops-fix` with `summary`, `difficulty`, `fix_context`, `branch` — one bug at a time, sequentially (they share the working tree). On `status: "fixed"`, mark that Warn entry **fixed inline**. On `status: "escalated"`, fall through to filing (next bullet) using the entry's `title`, `priority: "medium"` (default), `extra_labels: ["bug"]`, and a body built from `summary` plus the escalation reason.
+   - **`definite` with `route: "file"`** (difficult): invoke `ops-issue` with the drafted fields. Mark that Warn entry **filed** with the returned URL.
+   - **`ambiguous`**: treat conservatively as filed, not skipped — invoke `ops-issue` using `draft_title` and a body built from `summary` plus the triage `reason`. Warn findings already passed one round of specialist review; don't silently drop them, and don't break full autonomy to ask a human mid-review.
+   - **`not_a_bug`**: drop silently — `ops-triage` is allowed to override a reviewer's false positive.
+
+c. After every `ops-fix` call has returned, run `npm run standard && npm test` once more as a final check across the combined set of in-place fixes. If it fails, **stop** — report the failure instead of proceeding to Step 6 with a broken tree.
+
+### 6. Generate Report
 
 > **Review: `<branch name>`**
 >
@@ -99,16 +115,16 @@ Wait for all eight. Then merge in four passes:
 > - [ ] `[domain-A vs domain-B]` file:line — **Domain-A says**: <position>. **Domain-B says**: <position>. Needs human decision.
 >
 > **Warn (<N>):**
-> - [ ] `[domain]` file:line — description and recommendation
+> - [x] `[domain]` file:line — description and recommendation — **fixed inline** | **filed: <URL>**
 >
-> **Verdict**: PASS | FAIL (<N> to fix before commit, <C> to decide, <M> to file)
+> **Verdict**: PASS | FAIL (<N> to fix before commit, <C> to decide)
 
-Verdict is FAIL if there are any Block items. Conflict and Warn items do not block commits — Conflicts need a human call, Warns should be filed as issues. If Block, Conflict, and Warn are all empty, output `Verdict: PASS` with no lists.
+Verdict is FAIL if there are any Block items. Conflict items do not block commits but need a human call. Warn items never block commits and are always resolved by Step 5 before this report is generated — every Warn line ends in "fixed inline" or "filed: `<URL>`", never left open. If Block, Conflict, and Warn are all empty, output `Verdict: PASS` with no lists.
 
-### 6. Next Steps
+### 7. Next Steps
 
 - **PASS**: "Review passed. Changes are ready to commit."
-- **FAIL**: "Review found <N> blocking issue(s). Fix them and run `/review` again. (<C> conflicts and <M> warn items — resolve/file after committing.)"
+- **FAIL**: "Review found <N> blocking issue(s). Fix them and run `/review` again. (<C> conflicts still need a human call.)"
 - **Conflicts present**: After listing them, ask the user to pick a side for each one using `AskUserQuestion` before proceeding.
 
 ## Rules
@@ -117,8 +133,9 @@ Verdict is FAIL if there are any Block items. Conflict and Warn items do not blo
 - Read the FULL diff before making any judgments
 - Be specific — cite file paths and line ranges for each issue
 - Focus on issues CI cannot catch
+- Resolve every Warn finding in Step 5 — fix trivial/moderate ones via `ops-fix`, file only difficult ones via `ops-issue`
 
 ### DO NOT:
 - Block on style preferences — only flag naming that breaks existing conventions
 - Duplicate what `npm run standard` already catches
-- Auto-fix issues — report them and let the user decide
+- Auto-fix Block or Conflict findings — report them and let the calling skill's auto-fix loop, or the user, decide. (Warn findings are the deliberate exception: Step 5 always resolves them via `ops-fix`/`ops-issue`.)

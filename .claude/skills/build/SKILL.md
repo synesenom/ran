@@ -135,8 +135,8 @@ The agent returns three buckets: `definite`, `ambiguous`, `not_a_bug`.
 
 **Step 4.5c — Act on the result.**
 
-- **`definite` with `fix_inline: true`** (trivial): apply the fix on the fly using `fix_suggestion`, run `npm run standard && npm test`. Do **not** file an issue. Count as "fixed inline".
-- **`definite` with `fix_inline: false`** (non-trivial): invoke `ops-issue` once per entry with the drafted `title`/`body`/`priority`/`difficulty`/`extra_labels`. Collect the returned issue URLs.
+- **`definite` with `route: "fix"`** (trivial/moderate): spawn the `ops-fix` agent with `summary`, `difficulty`, `fix_context`, and `branch`, one bug at a time (sequentially — they share the working tree). On `status: "fixed"`, count as "fixed inline". On `status: "escalated"`, fall back to `ops-issue` using the entry's drafted `title`/`priority`/`extra_labels` and a body built from `summary` + the escalation reason.
+- **`definite` with `route: "file"`** (difficult): invoke `ops-issue` once per entry with the drafted `title`/`body`/`priority`/`extra_labels`. Collect the returned issue URLs.
 - **`ambiguous` (escalate in batch)**: Use a single `AskUserQuestion` with one question per entry, options "File issue" / "Skip", plus an "Other" fallback. For each "File issue" answer, invoke `ops-issue` using the `draft_title`. Skip the rest silently.
 - **`not_a_bug`**: silent.
 
