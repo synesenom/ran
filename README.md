@@ -37,7 +37,7 @@ A comprehensive JavaScript library for probability distributions, random variate
 
 ## Features
 
-- **145 probability distributions** — continuous and discrete, each with PDF/PMF, CDF, quantile (`q`), hazard, survival, log-likelihood (`lnL`), AIC/BIC, goodness-of-fit testing, and MLE fitting (`fit`)
+- **146 probability distributions** — continuous and discrete, each with PDF/PMF, CDF, quantile (`q`), hazard, survival, log-likelihood (`lnL`), AIC/BIC, goodness-of-fit testing, and MLE fitting (`fit`)
 - **Statistical measures** — location (mean, median, mode, …), dispersion (variance, IQR, Gini, …), shape (skewness, kurtosis, …), and dependence (Pearson, Spearman, Kendall, …)
 - **Hypothesis tests** — Bartlett, Levene, Brown–Forsythe, Cramér-von Mises, Mann–Whitney U, HSIC
 - **Reproducible sampling** — every distribution accepts an optional seed for deterministic output
@@ -140,13 +140,13 @@ console.log(fitted.p)           // => { mu: 3.000, sigma: 1.000 }
 console.log(fitted.test(data))  // => { statistics: 0.42, passed: true }
 ```
 
-`fit()` is a **static** method called on the class, not on an instance: `dist.Normal.fit(data)`, not `model.fit(data)`. All 145 exported distributions support `fit()`. Most have a data-aware initial guess for reliable MLE convergence; zero-parameter distributions skip optimization and return a fresh instance.
+`fit()` is a **static** method called on the class, not on an instance: `dist.Normal.fit(data)`, not `model.fit(data)`. All 146 exported distributions support `fit()`. Most have a data-aware initial guess for reliable MLE convergence; zero-parameter distributions skip optimization and return a fresh instance.
 
 ## API Overview
 
 | Namespace | Contents |
 |-----------|----------|
-| `ran.dist` | 145 probability distributions |
+| `ran.dist` | 146 probability distributions |
 | `ran.process` | Stochastic processes: AR(1), Brownian motion, Brownian bridge, Cox–Ingersoll–Ross, geometric Brownian motion, Ornstein–Uhlenbeck, Poisson process, random walk |
 | `ran.mc` | MCMC samplers (random-walk & adaptive Metropolis, slice, HMC, NUTS, MALA, Gibbs, adaptive rejection sampling), parallel tempering, multi-chain runner, Gelman–Rubin convergence diagnostic |
 | `ran.location` | Mean, median, mode, geometric mean, harmonic mean, trimean, midrange |
