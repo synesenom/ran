@@ -1,4 +1,5 @@
 import normal from '../dist/_normal'
+import LogNormal from '../dist/log-normal'
 import Process from './_process'
 
 /**
@@ -71,5 +72,16 @@ export default class GeometricBrownianMotion extends Process {
     const { mu, sigma } = this.p
     const s2 = sigma * sigma
     return this.x0 * this.x0 * Math.exp(mu * (s + t)) * (Math.exp(s2 * Math.min(s, t)) - 1)
+  }
+
+  /** @inheritdoc */
+  marginal (t) {
+    if (t <= 0) {
+      throw Error('GeometricBrownianMotion.marginal(): t must be > 0')
+    }
+    // log(X_t) is Normal(m, s); LogNormal(mu, sigma) parameterizes exactly that underlying normal.
+    const m = Math.log(this.x0) + (this.p.mu - 0.5 * this.p.sigma * this.p.sigma) * t
+    const s = this.p.sigma * Math.sqrt(t)
+    return new LogNormal(m, s)
   }
 }

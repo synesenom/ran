@@ -1,4 +1,5 @@
 import normal from '../dist/_normal'
+import Normal from '../dist/normal'
 import Process from './_process'
 
 /**
@@ -64,5 +65,13 @@ export default class BrownianMotion extends Process {
   covariogram (s, t) {
     if (s < 0 || t < 0) return NaN
     return this.p.sigma * this.p.sigma * Math.min(s, t)
+  }
+
+  /** @inheritdoc */
+  marginal (t) {
+    if (t <= 0) {
+      throw Error('BrownianMotion.marginal(): t must be > 0')
+    }
+    return new Normal(this.mean(t), Math.sqrt(this.variance(t)))
   }
 }

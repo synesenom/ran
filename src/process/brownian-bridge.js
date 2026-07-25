@@ -1,4 +1,5 @@
 import normal from '../dist/_normal'
+import Normal from '../dist/normal'
 import Process from './_process'
 
 /**
@@ -97,5 +98,15 @@ export default class BrownianBridge extends Process {
     const sigma = Math.sqrt(v)
     const z = x / sigma
     return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI))
+  }
+
+  /** @inheritdoc */
+  marginal (t) {
+    // Variance collapses to 0 at t=0 (fixed start) and t=T (pinned end), where the marginal
+    // is a point mass rather than a Normal distribution — outside what Normal can represent.
+    if (t <= 0 || t >= this.p.T) {
+      throw Error('BrownianBridge.marginal(): t must satisfy 0 < t < T')
+    }
+    return new Normal(0, Math.sqrt(this.variance(t)))
   }
 }
