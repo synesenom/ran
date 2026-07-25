@@ -198,6 +198,102 @@ describe('test', () => {
     })
   })
 
+  describe('kolmogorovSmirnov', () => {
+    it('should throw exception if x is empty', () => {
+      assert.throws(() => {
+        test.kolmogorovSmirnov([], [1, 2, 3])
+      }, 'x must not be empty')
+    })
+
+    it('should throw exception if y is empty', () => {
+      assert.throws(() => {
+        test.kolmogorovSmirnov([1, 2, 3], [])
+      }, 'y must not be empty')
+    })
+
+    it('should return zero statistic, p-value of one, and pass for identical samples', () => {
+      seed(0)
+      const sample = (new Normal(0, 1)).seed(0).sample(SAMPLE_SIZE)
+      const result = test.kolmogorovSmirnov(sample, sample)
+      assert.equal(result.stat, 0)
+      assert.equal(result.pValue, 1)
+      assert(result.passed)
+    })
+
+    it('should handle single-element samples', () => {
+      const result = test.kolmogorovSmirnov([1], [2])
+      assert.equal(result.stat, 1)
+    })
+
+    // Reference stat/pValue below are cross-checked against scipy 1.17.1:
+    // D = scipy.stats.ks_2samp(x, y, method='asymp').statistic, and
+    // pValue = scipy.stats.kstwobign.sf(sqrt(n1*n2/(n1+n2)) * D) — the pure n->infinity
+    // asymptotic Kolmogorov distribution, matching this implementation's use of
+    // ran.dist.Kolmogorov per issue #1138's acceptance criteria ("asymptotic p-value
+    // via Kolmogorov.cdf()/survival()"). scipy's own ks_2samp(method='asymp') default
+    // instead reports the exact finite-n one-sample KS distribution (kstwo at
+    // n=round(n1*n2/(n1+n2)), via the Marsaglia-Wong-Wei algorithm), a strictly more
+    // precise finite-sample correction that is out of scope here — it would require a
+    // new special-function/algorithm prerequisite (CLAUDE.md's "Prerequisite
+    // extraction" decomposition pattern) rather than fitting inside this issue.
+    it('should match external reference values for equal-sized samples with a mid statistic', () => {
+      const result = test.kolmogorovSmirnov([1, 2, 3, 4, 5], [2, 4, 6, 8, 10])
+      assert.closeTo(result.stat, 0.6, 1e-15) // exact rational: 3/5
+      assert.closeTo(result.pValue, 0.3291047890978151, 1e-12)
+      assert(result.passed)
+    })
+
+    it('should match external reference values for unequal-sized samples', () => {
+      const result = test.kolmogorovSmirnov([0.5, 1.5, 2.5, 10.0], [0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9, 1.0])
+      assert.closeTo(result.stat, 0.75, 1e-15) // exact rational: 3/4
+      assert.closeTo(result.pValue, 0.08871513799100886, 1e-12)
+      assert(result.passed)
+    })
+
+    it('should match external reference values for samples with tied values', () => {
+      const result = test.kolmogorovSmirnov([1, 2, 2, 3], [2, 2, 4, 5])
+      assert.closeTo(result.stat, 0.5, 1e-15) // exact rational: 1/2
+      assert.closeTo(result.pValue, 0.6993741991310154, 1e-12)
+      assert(result.passed)
+    })
+
+    it('should pass for samples of the same discrete distribution', () => {
+      seed(0)
+      const lambda = int(1, 10)
+      const sample1 = (new Poisson(lambda)).seed(1).sample(SAMPLE_SIZE)
+      const sample2 = (new Poisson(lambda)).seed(2).sample(SAMPLE_SIZE)
+      assert(test.kolmogorovSmirnov(sample1, sample2).passed)
+    })
+
+    it('should reject for samples of different discrete distributions', () => {
+      seed(0)
+      const lambda = int(1, 10)
+      const sample1 = (new Poisson(lambda)).seed(1).sample(SAMPLE_SIZE)
+      const sample2 = (new Poisson(lambda + 10)).seed(2).sample(SAMPLE_SIZE)
+      assert(!test.kolmogorovSmirnov(sample1, sample2).passed)
+    })
+
+    it('should pass for samples of the same continuous distribution', () => {
+      seed(0)
+      const mu = float(0, 5)
+      const sigma = float(1, 10)
+      const sample1 = (new Normal(mu, sigma)).seed(1).sample(SAMPLE_SIZE)
+      const sample2 = (new Normal(mu, sigma)).seed(2).sample(SAMPLE_SIZE)
+      assert(test.kolmogorovSmirnov(sample1, sample2).passed)
+    })
+
+    it('should reject for samples of different continuous distributions', () => {
+      seed(0)
+      const mu = float(0, 5)
+      const sigma = float(1, 10)
+      const sample1 = (new Normal(mu, sigma)).seed(1).sample(SAMPLE_SIZE)
+      const sample2 = (new Normal(mu + 10, sigma)).seed(2).sample(SAMPLE_SIZE)
+      const result = test.kolmogorovSmirnov(sample1, sample2)
+      assert(!result.passed)
+      assert(result.pValue < 0.05)
+    })
+  })
+
   describe('levene', () => {
     it('should throw exception for less than two data sets', () => {
       assert.throws(() => {
