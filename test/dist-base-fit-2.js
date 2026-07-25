@@ -273,8 +273,10 @@ describe('dist', () => {
         const data = new dist.Tweedie(5, 1, 1.5).seed(42).sample(500)
         const result = dist.Tweedie.fit(data)
         assert(result instanceof dist.Tweedie)
-        assert(Math.abs(result.p.mu - 5) < 1)
-        assert(Math.abs(result.p.phi - 1) < 0.5)
+        // Through the public API (mean()/variance()), not the raw parameter dict, so this also
+        // exercises the closed-form moment formulas the fit is meant to recover.
+        assert(Math.abs(result.mean() - 5) < 1)
+        assert(Math.abs(result.variance() - 1 * Math.pow(5, 1.5)) < 3)
         assert(result.p.p > 1 && result.p.p < 2)
         assert(Math.abs(result.p.p - 1.5) < 0.3)
         assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
@@ -285,7 +287,15 @@ describe('dist', () => {
         assert.strictEqual(init.length, 3)
         assert.strictEqual(init[2], 1.5)
         assert.approximately(init[0], 3, 1e-9) // mu = sample mean
-        assert(init[1] > 0)
+        // phi = variance / mean^p; population variance of [1..5] is 2, mean is 3, p=1.5
+        assert.approximately(init[1], 2 / Math.pow(3, 1.5), 1e-9)
+      })
+
+      it('Tweedie._fitInit should handle constant data', () => {
+        // constant data ⇒ variance 0 hits the `|| 1` guard, then the Math.max(..., 1e-8) clamp
+        const init = dist.Tweedie._fitInit([4, 4, 4])
+        assert.strictEqual(init[0], 4)
+        assert.approximately(init[1], 1 / Math.pow(4, 1.5), 1e-9)
       })
     })
   })

@@ -5572,12 +5572,13 @@ export default [{
 }, {
   name: 'Tweedie',
   fit: { params: [5, 1, 1.5], seed: 42, n: 500, tolerances: { mu: 0.5, phi: 0.6, p: 0.3 } },
-  // mean=mu, variance=phi*mu^p; skewness/kurtosis derived from EDM cumulant theory
-  // (c_n = phi^(n-1)*kappa^(n)(theta)): skewness=p*sqrt(phi)*mu^((p-2)/2),
-  // kurtosis=p*(2p-1)*phi*mu^(p-2) -- cross-validated at the p=2 (Gamma) and p=3
-  // (InverseGaussian) boundary cases in thoughts/research/2026-07-25-1100-tweedie-distribution.md
+  // Independent check: numerically integrated raw moments (mpmath mp.dps=50, quad over the
+  // Dunn & Smyth series tweedie_pdf in scripts/precision-refs-continuous.py -- NOT the closed-form
+  // cumulant formula src/dist/tweedie.js itself uses for mean()/variance()/skewness()/kurtosis(),
+  // so this catches a wrong exponent/sign there instead of only reproducing it) agree with the
+  // closed-form values to ~1e-10 relative error; tol reflects the quadrature's own precision floor.
   moments: [
-    { params: [3, 2, 1.7], mean: 3, variance: 12.946015679847559, skewness: 2.0388990851480893, kurtosis: 5.868860441530893, tol: 1e-10 }
+    { params: [3, 2, 1.7], mean: 3, variance: 12.946015679847559, skewness: 2.0388990851480893, kurtosis: 5.868860441530893, tol: 1e-9 }
   ],
   invalidParams: [
     [], // all params required
@@ -5614,6 +5615,15 @@ export default [{
       { x: 20.0, pdf: 0.013279915447336112, cdf: 0.8479262403662048 },
       { x: 40.0, pdf: 0.0023197981153005452, cdf: 0.9740408805914255 }
     ]
+  }, {
+    // Precise pdf/cdf spot-checks for these two boundary parameter sets live in the
+    // precision-continuous.js gate (tol overrides supported there); this entry exists to
+    // exercise sampling/moments/quantile round-trips at the series machinery's numerical edge.
+    name: 'p near 1 (near-Poisson): series peak jPeak stays small, exercises the low-p tail',
+    params: () => [5, 0.5, 1.02]
+  }, {
+    name: 'p near 2 (near-Gamma boundary): jPeak grows largest here, exercises the series truncation',
+    params: () => [5, 0.5, 1.98]
   }],
   // mpmath mp.dps=50 via scripts/precision-refs-continuous.py (tweedie_pdf/tweedie_cdf, Dunn & Smyth 2005 series);
   // x=0 is the point mass P(Y=0)=exp(-lambda), returned by both pdf(0) and cdf(0) per convention
@@ -5630,6 +5640,10 @@ export default [{
     { x: 20, pdf: 0.0004715649460589018, cdf: 0.9990574863453123 }
   ],
   quantileVals: [
+    // p at/below the point mass P(Y=0)=exp(-lambda)=0.011422890993466942: cdf(x)-p has no sign
+    // change anywhere in the support, so q() must special-case this to 0 rather than root-find
+    { p: 0.005, x: 0 },
+    { p: 0.011422890993466942, x: 0 },
     { p: 0.05, x: 0.6311586280614908 },
     { p: 0.2, x: 2.0968640250135184 },
     { p: 0.5, x: 4.429027210944412 },

@@ -2,6 +2,7 @@ import { logGamma, gammaLowerIncomplete } from '../special'
 import { EPS, MAX_SERIES_ITER } from '../core/constants'
 import poisson from './_poisson'
 import gamma from './_gamma'
+import clamp from '../utils/clamp'
 import Distribution from './_distribution'
 
 // Builds the Dunn & Smyth (2005) log-space series term j -> log(W_j) for the compound
@@ -27,7 +28,11 @@ function logDensitySeries (y, phi, p, alpha) {
   const jPeak = Math.max(1, Math.round(Math.pow(y, 2 - p) / ((2 - p) * phi)))
   const logMax = logWj(jPeak)
   let sum = 0
-  for (let j = 1; j < MAX_SERIES_ITER; j++) {
+  // MAX_SERIES_ITER alone is not always enough: jPeak itself grows past 500 for large y, small
+  // phi, or p close to 2, in which case the loop would exit before ever reaching the series'
+  // dominant terms (matching the dynamic cap pattern in special/gamma-incomplete.js's _gli).
+  const iterCap = Math.max(MAX_SERIES_ITER, jPeak + 50)
+  for (let j = 1; j < iterCap; j++) {
     const term = Math.exp(logWj(j) - logMax)
     sum += term
     if (j > jPeak + 10 && term < sum * EPS) {
@@ -95,8 +100,38 @@ export default class Tweedie extends Distribution {
     }
   }
 
+  /**
+   * @returns {number} The mean parameter mu.
+   */
+  mean () {
+    return this.p.mu
+  }
+
+  /**
+   * @returns {number} Dispersion times mean to the power of p.
+   */
+  variance () {
+    return this.p.phi * Math.pow(this.p.mu, this.p.p)
+  }
+
+  /**
+   * @returns {number} Power times square root of dispersion times mean to the power of (p - 2) / 2.
+   */
+  skewness () {
+    return this.p.p * Math.sqrt(this.p.phi) * Math.pow(this.p.mu, (this.p.p - 2) / 2)
+  }
+
+  /**
+   * @returns {number} Power times (2 * power - 1) times dispersion times mean to the power of (p - 2).
+   */
+  kurtosis () {
+    return this.p.p * (2 * this.p.p - 1) * this.p.phi * Math.pow(this.p.mu, this.p.p - 2)
+  }
+
   _generator () {
-    // Compound Poisson-Gamma simulation: N ~ Poisson(lambda), Y = sum of N Gamma draws.
+    // Exact compound Poisson-Gamma simulation (not an approximation): sampling this way makes
+    // sample() correct by construction from the distribution's own generative definition, with
+    // no dependence on the _pdf/_cdf series machinery below.
     const n = poisson(this.r, this.c.lambda)
     if (n === 0) {
       return 0
@@ -125,7 +160,10 @@ export default class Tweedie extends Distribution {
     // exactly the Poisson(N=0) weight -- gammaLowerIncomplete(0, ...) is not the point-mass CDF.
     let sum = Math.exp(-lambda)
     let logPoissonTerm = -lambda
-    for (let j = 1; j < MAX_SERIES_ITER; j++) {
+    // See logDensitySeries: MAX_SERIES_ITER alone is not always enough when the Poisson weight
+    // peaks (near j=lambda) past 500 terms in.
+    const iterCap = Math.max(MAX_SERIES_ITER, Math.ceil(lambda) + 50)
+    for (let j = 1; j < iterCap; j++) {
       logPoissonTerm += this.c.logLambda - Math.log(j)
       const term = Math.exp(logPoissonTerm) * gammaLowerIncomplete(j * gammaShape, gammaRate * x)
       sum += term
@@ -136,35 +174,18 @@ export default class Tweedie extends Distribution {
         break
       }
     }
-    return sum
+    // Summing many small positive floating-point terms can overshoot 1 by a few ULPs.
+    return clamp(sum)
   }
 
-  /**
-   * @returns {number} The mean parameter mu.
-   */
-  mean () {
-    return this.p.mu
-  }
-
-  /**
-   * @returns {number} Dispersion times mean to the power of p.
-   */
-  variance () {
-    return this.p.phi * Math.pow(this.p.mu, this.p.p)
-  }
-
-  /**
-   * @returns {number} Power times square root of dispersion times mean to the power of (p - 2) / 2.
-   */
-  skewness () {
-    return this.p.p * Math.sqrt(this.p.phi) * Math.pow(this.p.mu, (this.p.p - 2) / 2)
-  }
-
-  /**
-   * @returns {number} Power times (2 * power - 1) times dispersion times mean to the power of (p - 2).
-   */
-  kurtosis () {
-    return this.p.p * (2 * this.p.p - 1) * this.p.phi * Math.pow(this.p.mu, this.p.p - 2)
+  _q (p) {
+    // cdf(x) - p >= 0 for every x >= 0 whenever p is at or below the point mass P(Y=0), so the
+    // base class's root-finder never finds a sign change and returns NaN; the correct quantile
+    // there is the support's lower boundary itself.
+    if (p <= Math.exp(-this.c.lambda)) {
+      return 0
+    }
+    return this._qEstimateRoot(p)
   }
 
   static _fitInit (data) {

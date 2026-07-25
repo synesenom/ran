@@ -4208,6 +4208,35 @@ const REFS = [
       { x: 24.78577737318644, pdf: 0.00878586825414959, cdf: 0.9 }
     ]
   },
+  // Tweedie[5, 0.5, 1.02]: p near 1 (near-Poisson boundary) -- the series' Stirling-estimated
+  // peak term sits closest to the pole in Gamma(-j*alpha) here, accumulating a few ULPs beyond 1e-14
+  {
+    name: 'Tweedie',
+    params: [5, 0.5, 1.02],
+    tol: 1e-12,
+    qtol: 4e-14,
+    points: [
+      { x: 3.0004161365226647, pdf: 0.15214039715921182, cdf: 0.1 },
+      { x: 4.088811183367179, pdf: 0.2442765894329823, cdf: 0.3 },
+      { x: 5.035025291598702, pdf: 0.2540694760107149, cdf: 0.53 },
+      { x: 5.879394679665832, pdf: 0.19315808975019114, cdf: 0.72 },
+      { x: 7.113597182676574, pdf: 0.09692593743943335, cdf: 0.9 }
+    ]
+  },
+  // Tweedie[5, 0.5, 1.98]: p near 2 (near-Gamma boundary) -- jPeak grows largest here
+  {
+    name: 'Tweedie',
+    params: [5, 0.5, 1.98],
+    tol: 3e-14,
+    qtol: 1e-13,
+    points: [
+      { x: 1.3593129264803283, pdf: 0.12332196169945109, cdf: 0.1 },
+      { x: 2.7809260189123646, pdf: 0.14662831998094003, cdf: 0.3 },
+      { x: 4.467443357618983, pdf: 0.12153492131641701, cdf: 0.53 },
+      { x: 6.340878939903902, pdf: 0.08170395553956346, cdf: 0.72 },
+      { x: 9.65512866865178, pdf: 0.03260011215207819, cdf: 0.9 }
+    ]
+  },
   {
     name: 'UQuadratic',
     params: [5, 25],
