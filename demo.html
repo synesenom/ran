@@ -254,7 +254,7 @@ const SPECS = [
       { key: 'dt',     label: 'dt',         min: 0.01,  max: 0.5, step: 0.01, def: 0.1  },
       { key: 'steps',  label: 'steps',      min: 20,    max: 500, step: 10,   def: 100, int: true }
     ],
-    create:   v => new ranjs.process.PoissonProcess(v.lambda, v.dt),
+    create:   v => new ranjs.process.Poisson(v.lambda, v.dt),
     getSteps: v => v.steps,
     isStep:   true
   },

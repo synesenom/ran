@@ -228,7 +228,7 @@ Available processes:
 | `ran.process.OrnsteinUhlenbeck(theta, mu, sigma, dt)` | Mean-reverting process; exact discrete-time sampler |
 | `ran.process.GeometricBrownianMotion(mu, sigma, dt)` | Multiplicative Brownian motion; log-normal increments |
 | `ran.process.BrownianBridge(sigma, T, dt)` | Brownian bridge pinned to 0 at time T |
-| `ran.process.PoissonProcess(lambda, dt)` | Counting process with Poisson(λ·dt) increments per step |
+| `ran.process.Poisson(lambda, dt)` | Counting process with Poisson(λ·dt) increments per step |
 
 ## MC API
 

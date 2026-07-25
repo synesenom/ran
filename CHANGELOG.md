@@ -67,6 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 
 - `ran.mc.ParallelTempering`'s positional constructor form `new ParallelTempering(logDensity, options)` is deprecated in favor of the options-object form `new ParallelTempering({ logDensity, ...options })`, bringing it in line with every other `ran.mc` sampler and coordinator (RWM, AdaptiveMetropolis, Slice, HMC, MALA, NUTS, Gibbs per ADR-0030; ARS per ADR-0031) and removing the last positional-constructor wart in `ran.mc`. The positional form still constructs and samples correctly but emits a one-time `console.warn` on first use; it will be removed in v1.32.0 (#1034).
+- `ran.process.PoissonProcess` and `ran.process.CompoundPoissonProcess` are renamed to `ran.process.Poisson` and `ran.process.CompoundPoisson`: no `ran.process.Process` subclass name should redundantly repeat "Process" (every other subclass — `BrownianMotion`, `OrnsteinUhlenbeck`, `AR1`, `RandomWalk`, etc. — already follows this). The old names still construct and behave identically (`PoissonProcess extends Poisson`, `CompoundPoissonProcess extends CompoundPoisson`) but emit a `console.warn` on construction and will be removed in v1.33.0 (ADR-0041).
 
 ### Removed
 

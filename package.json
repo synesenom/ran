@@ -510,6 +510,9 @@
     "./process/brownian-motion": {
       "import": "./dist/process/brownian-motion.esm.js"
     },
+    "./process/compound-poisson": {
+      "import": "./dist/process/compound-poisson.esm.js"
+    },
     "./process/compound-poisson-process": {
       "import": "./dist/process/compound-poisson-process.esm.js"
     },
@@ -521,6 +524,9 @@
     },
     "./process/ornstein-uhlenbeck": {
       "import": "./dist/process/ornstein-uhlenbeck.esm.js"
+    },
+    "./process/poisson": {
+      "import": "./dist/process/poisson.esm.js"
     },
     "./process/poisson-process": {
       "import": "./dist/process/poisson-process.esm.js"

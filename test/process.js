@@ -7,7 +7,12 @@ import BrownianMotion from '../src/process/brownian-motion'
 import CoxIngersollRoss from '../src/process/cox-ingersoll-ross'
 import GeometricBrownianMotion from '../src/process/geometric-brownian-motion'
 import OrnsteinUhlenbeck from '../src/process/ornstein-uhlenbeck'
+import CompoundPoisson from '../src/process/compound-poisson'
 import CompoundPoissonProcess from '../src/process/compound-poisson-process'
+// Aliased to avoid colliding with ran.dist.Poisson (imported below and used as a jump
+// distribution in the CompoundPoisson tests) — the two are unrelated classes that happen
+// to share a bare name (decisions/0041-process-subclass-naming-no-process-suffix.md).
+import ProcessPoisson from '../src/process/poisson'
 import PoissonProcess from '../src/process/poisson-process'
 import RandomWalk from '../src/process/random-walk'
 import { Normal, LogNormal, Gamma, Poisson } from '../src/dist'
@@ -1484,41 +1489,41 @@ describe('process.AR1', () => {
   })
 })
 
-describe('process.PoissonProcess', () => {
+describe('process.Poisson', () => {
   describe('constructor', () => {
     it('should throw on lambda = 0', () => {
-      assert.throws(() => new PoissonProcess(0, 1), /Invalid parameters/)
+      assert.throws(() => new ProcessPoisson(0, 1), /Invalid parameters/)
     })
 
     it('should throw on lambda < 0', () => {
-      assert.throws(() => new PoissonProcess(-1, 1), /Invalid parameters/)
+      assert.throws(() => new ProcessPoisson(-1, 1), /Invalid parameters/)
     })
 
     it('should throw on dt = 0', () => {
-      assert.throws(() => new PoissonProcess(1, 0), /Invalid parameters/)
+      assert.throws(() => new ProcessPoisson(1, 0), /Invalid parameters/)
     })
 
     it('should throw on dt < 0', () => {
-      assert.throws(() => new PoissonProcess(1, -0.5), /Invalid parameters/)
+      assert.throws(() => new ProcessPoisson(1, -0.5), /Invalid parameters/)
     })
 
     it('should throw on lambda = NaN', () => {
-      assert.throws(() => new PoissonProcess(NaN, 1), /Invalid parameters/)
+      assert.throws(() => new ProcessPoisson(NaN, 1), /Invalid parameters/)
     })
 
     it('should accept valid parameters', () => {
-      assert.doesNotThrow(() => new PoissonProcess(2, 0.5))
+      assert.doesNotThrow(() => new ProcessPoisson(2, 0.5))
     })
 
     it('should start at state 0', () => {
-      const pp = new PoissonProcess(1, 1)
+      const pp = new ProcessPoisson(1, 1)
       assert.strictEqual(pp.state(), 0)
     })
   })
 
   describe('path', () => {
     it('should be non-decreasing', () => {
-      const pp = new PoissonProcess(2, 0.1)
+      const pp = new ProcessPoisson(2, 0.1)
       const path = pp.path(200)
       for (let i = 1; i < path.length; i++) {
         assert(path[i] >= path[i - 1])
@@ -1526,7 +1531,7 @@ describe('process.PoissonProcess', () => {
     })
 
     it('should be integer-valued', () => {
-      const pp = new PoissonProcess(2, 0.1)
+      const pp = new ProcessPoisson(2, 0.1)
       const path = pp.path(200)
       for (const x of path) {
         assert.strictEqual(x, Math.floor(x))
@@ -1541,7 +1546,7 @@ describe('process.PoissonProcess', () => {
       const n = 5000
       // exact rational: Poisson(lambda*dt) increment has mean = variance = lambda*dt
       for (const seed of MOMENT_SEEDS) {
-        const pp = new PoissonProcess(lambda, dt)
+        const pp = new ProcessPoisson(lambda, dt)
         pp.seed(seed)
         assertSampleMoments(sampleSteps(pp, n), lambda * dt, lambda * dt, seed)
       }
@@ -1550,80 +1555,80 @@ describe('process.PoissonProcess', () => {
 
   describe('.mean()', () => {
     it('should return lambda*t', () => {
-      const pp = new PoissonProcess(2, 0.5)
+      const pp = new ProcessPoisson(2, 0.5)
       // exact rational: lambda*t = 2*3 = 6
       assert.closeTo(pp.mean(3), 6, 1e-10)
     })
 
     it('should return 0 at t=0', () => {
-      const pp = new PoissonProcess(2, 0.5)
+      const pp = new ProcessPoisson(2, 0.5)
       assert.strictEqual(pp.mean(0), 0)
     })
 
     it('should return NaN for t < 0', () => {
-      const pp = new PoissonProcess(2, 0.5)
+      const pp = new ProcessPoisson(2, 0.5)
       assert(Number.isNaN(pp.mean(-1)))
     })
   })
 
   describe('.variance()', () => {
     it('should return lambda*t', () => {
-      const pp = new PoissonProcess(2, 0.5)
+      const pp = new ProcessPoisson(2, 0.5)
       // exact rational: lambda*t = 2*3 = 6
       assert.closeTo(pp.variance(3), 6, 1e-10)
     })
 
     it('should return 0 at t=0', () => {
-      const pp = new PoissonProcess(2, 0.5)
+      const pp = new ProcessPoisson(2, 0.5)
       assert.strictEqual(pp.variance(0), 0)
     })
 
     it('should return NaN for t < 0', () => {
-      const pp = new PoissonProcess(2, 0.5)
+      const pp = new ProcessPoisson(2, 0.5)
       assert(Number.isNaN(pp.variance(-1)))
     })
   })
 
   describe('.pdf()', () => {
     it('should return NaN for t < 0', () => {
-      const pp = new PoissonProcess(1, 1)
+      const pp = new ProcessPoisson(1, 1)
       assert(Number.isNaN(pp.pdf(0, -1)))
     })
 
     it('should return 0 for non-integer x', () => {
-      const pp = new PoissonProcess(2, 1)
+      const pp = new ProcessPoisson(2, 1)
       assert.strictEqual(pp.pdf(1.5, 1), 0)
     })
 
     it('should return 0 for negative integer x', () => {
-      const pp = new PoissonProcess(2, 1)
+      const pp = new ProcessPoisson(2, 1)
       assert.strictEqual(pp.pdf(-1, 1), 0)
     })
 
     it('should return 1 for x=0 at t=0', () => {
-      const pp = new PoissonProcess(1, 1)
+      const pp = new ProcessPoisson(1, 1)
       assert.strictEqual(pp.pdf(0, 0), 1)
     })
 
     it('should return 0 for x=1 at t=0', () => {
-      const pp = new PoissonProcess(1, 1)
+      const pp = new ProcessPoisson(1, 1)
       assert.strictEqual(pp.pdf(1, 0), 0)
     })
 
     it('should return Poisson(lambda*t) PMF for lambda=2 t=1 x=2', () => {
-      const pp = new PoissonProcess(2, 1)
+      const pp = new ProcessPoisson(2, 1)
       // scipy: stats.poisson.pmf(2, 2) = 0.2706705664732255
       assert.closeTo(pp.pdf(2, 1), 0.2706705664732255, 1e-10)
     })
 
     it('should return Poisson(lambda*t) PMF for lambda=0.5 t=3 x=1', () => {
-      const pp = new PoissonProcess(0.5, 1)
+      const pp = new ProcessPoisson(0.5, 1)
       // scipy: stats.poisson.pmf(1, 1.5) = 0.3346952402226447
       assert.closeTo(pp.pdf(1, 3), 0.3346952402226447, 1e-10)
     })
 
     it('should return Poisson(lambda*t) PMF for lambda=3 t=2 x=5', () => {
-      const pp = new PoissonProcess(3, 1)
+      const pp = new ProcessPoisson(3, 1)
       // scipy: stats.poisson.pmf(5, 6) = 0.1606231410479798
       assert.closeTo(pp.pdf(5, 2), 0.1606231410479798, 1e-10)
     })
@@ -1631,87 +1636,117 @@ describe('process.PoissonProcess', () => {
 
   describe('.covariogram()', () => {
     it('should return lambda * min(s, t)', () => {
-      const pp = new PoissonProcess(3, 0.5)
+      const pp = new ProcessPoisson(3, 0.5)
       assert.closeTo(pp.covariogram(2, 5), 3 * 2, 1e-10)
     })
 
     it('should be symmetric', () => {
-      const pp = new PoissonProcess(3, 0.5)
+      const pp = new ProcessPoisson(3, 0.5)
       assert.closeTo(pp.covariogram(2, 5), pp.covariogram(5, 2), 1e-10)
     })
 
     it('should equal variance at s = t', () => {
-      const pp = new PoissonProcess(3, 0.5)
+      const pp = new ProcessPoisson(3, 0.5)
       assert.closeTo(pp.covariogram(4, 4), pp.variance(4), 1e-10)
     })
 
     it('should return NaN for s < 0', () => {
-      const pp = new PoissonProcess(1, 1)
+      const pp = new ProcessPoisson(1, 1)
       assert(Number.isNaN(pp.covariogram(-1, 2)))
     })
 
     it('should return NaN for t < 0', () => {
-      const pp = new PoissonProcess(1, 1)
+      const pp = new ProcessPoisson(1, 1)
       assert(Number.isNaN(pp.covariogram(2, -1)))
     })
   })
 })
-describe('process.CompoundPoissonProcess', () => {
+
+describe('process.PoissonProcess (deprecated alias)', () => {
+  it('should be an instance of Poisson and behave identically', () => {
+    const originalWarn = console.warn
+    console.warn = () => {}
+    let pp
+    try {
+      pp = new PoissonProcess(2, 0.5)
+    } finally {
+      console.warn = originalWarn
+    }
+    assert(pp instanceof ProcessPoisson)
+    assert.strictEqual(pp.mean(3), new ProcessPoisson(2, 0.5).mean(3))
+    assert.strictEqual(pp.pdf(1, 3), new ProcessPoisson(2, 0.5).pdf(1, 3))
+  })
+
+  it('should emit a deprecation warning naming the replacement', () => {
+    const originalWarn = console.warn
+    const warnings = []
+    console.warn = msg => warnings.push(msg)
+    try {
+      new PoissonProcess(2, 0.5)
+    } finally {
+      console.warn = originalWarn
+    }
+    assert.strictEqual(warnings.length, 1)
+    assert.match(warnings[0], /ran\.process\.PoissonProcess is deprecated and will be removed in v1\.33\.0; use ran\.process\.Poisson instead\./)
+  })
+})
+
+describe('process.CompoundPoisson', () => {
   describe('constructor', () => {
     it('should throw on lambda = 0', () => {
-      assert.throws(() => new CompoundPoissonProcess(new Normal(1, 1), 0, 1), /Invalid parameters/)
+      assert.throws(() => new CompoundPoisson(new Normal(1, 1), 0, 1), /Invalid parameters/)
     })
 
     it('should throw on lambda < 0', () => {
-      assert.throws(() => new CompoundPoissonProcess(new Normal(1, 1), -1, 1), /Invalid parameters/)
+      assert.throws(() => new CompoundPoisson(new Normal(1, 1), -1, 1), /Invalid parameters/)
     })
 
     it('should throw on dt = 0', () => {
-      assert.throws(() => new CompoundPoissonProcess(new Normal(1, 1), 1, 0), /Invalid parameters/)
+      assert.throws(() => new CompoundPoisson(new Normal(1, 1), 1, 0), /Invalid parameters/)
     })
 
     it('should throw on dt < 0', () => {
-      assert.throws(() => new CompoundPoissonProcess(new Normal(1, 1), 1, -0.5), /Invalid parameters/)
+      assert.throws(() => new CompoundPoisson(new Normal(1, 1), 1, -0.5), /Invalid parameters/)
     })
 
     it('should throw on lambda = NaN', () => {
-      assert.throws(() => new CompoundPoissonProcess(new Normal(1, 1), NaN, 1), /Invalid parameters/)
+      assert.throws(() => new CompoundPoisson(new Normal(1, 1), NaN, 1), /Invalid parameters/)
     })
 
     it('should throw when jumpDist is undefined', () => {
-      assert.throws(() => new CompoundPoissonProcess(undefined, 1, 1), /Invalid parameters/)
+      assert.throws(() => new CompoundPoisson(undefined, 1, 1), /Invalid parameters/)
     })
 
     it('should throw when jumpDist is null', () => {
-      assert.throws(() => new CompoundPoissonProcess(null, 1, 1), /Invalid parameters/)
+      assert.throws(() => new CompoundPoisson(null, 1, 1), /Invalid parameters/)
     })
 
     it('should throw when jumpDist has no .sample() method', () => {
-      assert.throws(() => new CompoundPoissonProcess({ mean: () => 0 }, 1, 1), /Invalid parameters/)
+      assert.throws(() => new CompoundPoisson({ mean: () => 0 }, 1, 1), /Invalid parameters/)
     })
 
     it('should accept valid parameters', () => {
-      assert.doesNotThrow(() => new CompoundPoissonProcess(new Normal(1, 1), 2, 0.5))
+      assert.doesNotThrow(() => new CompoundPoisson(new Normal(1, 1), 2, 0.5))
     })
 
     it('should accept default lambda and dt when jumpDist is provided', () => {
-      assert.doesNotThrow(() => new CompoundPoissonProcess(new Normal(0, 1), 1, 1))
+      assert.doesNotThrow(() => new CompoundPoisson(new Normal(0, 1), 1, 1))
     })
 
     it('should start at state 0', () => {
-      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      const cpp = new CompoundPoisson(new Normal(1, 1), 2, 1)
       assert.strictEqual(cpp.state(), 0)
     })
   })
 
   describe('path', () => {
     it('should start at 0', () => {
-      const cpp = new CompoundPoissonProcess(new Poisson(1), 2, 1)
+      const cpp = new CompoundPoisson(new Poisson(1), 2, 1)
       assert.strictEqual(cpp.path(10)[0], 0)
     })
 
     it('should be non-decreasing with non-negative jumps', () => {
-      const cpp = new CompoundPoissonProcess(new Poisson(2), 3, 0.5)
+      const cpp = new CompoundPoisson(new Poisson(2), 3, 0.5)
       cpp.seed(42)
       const path = cpp.path(200)
       for (let i = 1; i < path.length; i++) {
@@ -1722,72 +1757,72 @@ describe('process.CompoundPoissonProcess', () => {
 
   describe('.mean()', () => {
     it('should return lambda*t*E[J]', () => {
-      const cpp = new CompoundPoissonProcess(new Normal(2, 1), 3, 1)
+      const cpp = new CompoundPoisson(new Normal(2, 1), 3, 1)
       // exact rational: lambda*t*mu = 3*5*2 = 30
       assert.closeTo(cpp.mean(5), 30, 1e-10)
     })
 
     it('should return 0 at t=0', () => {
-      const cpp = new CompoundPoissonProcess(new Normal(2, 1), 3, 1)
+      const cpp = new CompoundPoisson(new Normal(2, 1), 3, 1)
       assert.strictEqual(cpp.mean(0), 0)
     })
 
     it('should return NaN for t < 0', () => {
-      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      const cpp = new CompoundPoisson(new Normal(1, 1), 2, 1)
       assert(Number.isNaN(cpp.mean(-1)))
     })
   })
 
   describe('.variance()', () => {
     it('should return lambda*t*E[J^2]', () => {
-      const cpp = new CompoundPoissonProcess(new Normal(2, 1), 3, 1)
+      const cpp = new CompoundPoisson(new Normal(2, 1), 3, 1)
       // exact rational: lambda*t*(sigma^2 + mu^2) = 3*4*(1+4) = 60
       assert.closeTo(cpp.variance(4), 60, 1e-10)
     })
 
     it('should return 0 at t=0', () => {
-      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      const cpp = new CompoundPoisson(new Normal(1, 1), 2, 1)
       assert.strictEqual(cpp.variance(0), 0)
     })
 
     it('should return NaN for t < 0', () => {
-      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      const cpp = new CompoundPoisson(new Normal(1, 1), 2, 1)
       assert(Number.isNaN(cpp.variance(-1)))
     })
   })
 
   describe('.covariogram()', () => {
     it('should return lambda*E[J^2]*min(s,t)', () => {
-      const cpp = new CompoundPoissonProcess(new Normal(2, 1), 3, 1)
+      const cpp = new CompoundPoisson(new Normal(2, 1), 3, 1)
       // exact rational: lambda*E[J^2]*min(s,t) = 3*(1+4)*2 = 30
       assert.closeTo(cpp.covariogram(2, 5), 30, 1e-10)
     })
 
     it('should be symmetric', () => {
-      const cpp = new CompoundPoissonProcess(new Normal(2, 1), 3, 1)
+      const cpp = new CompoundPoisson(new Normal(2, 1), 3, 1)
       assert.closeTo(cpp.covariogram(2, 5), cpp.covariogram(5, 2), 1e-10)
     })
 
     it('should equal variance at s = t', () => {
-      const cpp = new CompoundPoissonProcess(new Normal(2, 1), 3, 1)
+      const cpp = new CompoundPoisson(new Normal(2, 1), 3, 1)
       // exact rational: variance(3) = covariogram(3, 3) = 3*3*(1+4) = 45
       assert.closeTo(cpp.covariogram(3, 3), cpp.variance(3), 1e-10)
     })
 
     it('should return NaN for s < 0', () => {
-      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      const cpp = new CompoundPoisson(new Normal(1, 1), 2, 1)
       assert(Number.isNaN(cpp.covariogram(-1, 2)))
     })
 
     it('should return NaN for t < 0', () => {
-      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      const cpp = new CompoundPoisson(new Normal(1, 1), 2, 1)
       assert(Number.isNaN(cpp.covariogram(2, -1)))
     })
   })
 
   describe('.seed()', () => {
     it('should produce identical paths when seeded identically', () => {
-      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      const cpp = new CompoundPoisson(new Normal(1, 1), 2, 1)
       cpp.seed(42)
       const path1 = cpp.path(30)
       cpp.seed(42)
@@ -1796,7 +1831,7 @@ describe('process.CompoundPoissonProcess', () => {
     })
 
     it('should produce different paths for different seeds', () => {
-      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      const cpp = new CompoundPoisson(new Normal(1, 1), 2, 1)
       cpp.seed(1)
       const path1 = cpp.path(30)
       cpp.seed(2)
@@ -1805,14 +1840,14 @@ describe('process.CompoundPoissonProcess', () => {
     })
 
     it('should return this for chaining', () => {
-      const cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      const cpp = new CompoundPoisson(new Normal(1, 1), 2, 1)
       assert.strictEqual(cpp.seed(0), cpp)
     })
   })
 
   describe('.reset()', () => {
     it('should restore initial state to 0', () => {
-      const cpp = new CompoundPoissonProcess(new Normal(0, 1), 2, 1)
+      const cpp = new CompoundPoisson(new Normal(0, 1), 2, 1)
       cpp.seed(42)
       for (let i = 0; i < 10; i++) cpp.next()
       cpp.reset()
@@ -1831,11 +1866,39 @@ describe('process.CompoundPoissonProcess', () => {
       const expectedMean = lambda * dt * muJ
       const expectedVariance = lambda * dt * (1 + muJ * muJ)
       for (const seed of MOMENT_SEEDS) {
-        const cpp = new CompoundPoissonProcess(new Normal(muJ, 1), lambda, dt)
+        const cpp = new CompoundPoisson(new Normal(muJ, 1), lambda, dt)
         cpp.seed(seed)
         assertSampleMoments(sampleResetSteps(cpp, n), expectedMean, expectedVariance, seed)
       }
     })
+  })
+})
+
+describe('process.CompoundPoissonProcess (deprecated alias)', () => {
+  it('should be an instance of CompoundPoisson and behave identically', () => {
+    const originalWarn = console.warn
+    console.warn = () => {}
+    let cpp
+    try {
+      cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+    } finally {
+      console.warn = originalWarn
+    }
+    assert(cpp instanceof CompoundPoisson)
+    assert.strictEqual(cpp.mean(3), new CompoundPoisson(new Normal(1, 1), 2, 1).mean(3))
+  })
+
+  it('should emit a deprecation warning naming the replacement', () => {
+    const originalWarn = console.warn
+    const warnings = []
+    console.warn = msg => warnings.push(msg)
+    try {
+      new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+    } finally {
+      console.warn = originalWarn
+    }
+    assert.strictEqual(warnings.length, 1)
+    assert.match(warnings[0], /ran\.process\.CompoundPoissonProcess is deprecated and will be removed in v1\.33\.0; use ran\.process\.CompoundPoisson instead\./)
   })
 })
 
