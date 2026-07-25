@@ -343,7 +343,7 @@ An online (streaming) aggregator that maintains running statistics in O(1) time 
 
 ## Stochastic Processes (`src/process/`)
 
-The module now exists with a `Process` base class (`_process.js`) plus `BrownianMotion`, `OrnsteinUhlenbeck`, `BrownianBridge`, `GeometricBrownianMotion`, `CoxIngersollRoss`, `AR1`, `RandomWalk`, and `PoissonProcess`/`CompoundPoissonProcess`. The base class currently exposes `next()` and `mean(t)`; `trend()`, `noise()`, and `correlation(lag)` from the original design note are not implemented on the base class yet.
+The module now exists with a `Process` base class (`_process.js`) plus `BrownianMotion`, `OrnsteinUhlenbeck`, `BrownianBridge`, `GeometricBrownianMotion`, `CoxIngersollRoss`, `AR1`, `RandomWalk`, and `Poisson`/`CompoundPoisson` (formerly `PoissonProcess`/`CompoundPoissonProcess`, deprecated per ADR-0041). The base class currently exposes `next()` and `mean(t)`; `trend()`, `noise()`, and `correlation(lag)` from the original design note are not implemented on the base class yet.
 
 ### Gaussian Process
 A distribution over functions; fully specified by a mean function m(t) and a covariance (kernel) function k(t, t′).
