@@ -1,0 +1,28 @@
+name: Dependabot Conflict Rebase
+
+# Grouped Dependabot updates (babel, lint, test, build, docs groups) all touch
+# package-lock.json, so merging one group's PR can leave sibling group PRs
+# conflicting. Dependabot resolves its own conflicts on request, so nudge it
+# instead of trying to resolve package-lock.json conflicts by hand.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  rebase-conflicting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment @dependabot rebase on conflicting PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr list --repo "$GITHUB_REPOSITORY" --author "dependabot[bot]" --state open \
+            --json number,mergeable --jq '.[] | select(.mergeable == "CONFLICTING") | .number' |
+          while read -r pr; do
+            echo "Requesting rebase for dependabot PR #$pr"
+            gh pr comment "$pr" --repo "$GITHUB_REPOSITORY" --body "@dependabot rebase"
+          done
