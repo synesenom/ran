@@ -17,6 +17,9 @@
     "email": "enys.mones@gmail.com"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "main": "./dist/ranjs.min.js",
   "module": "./dist/ranjs.esm.js",
   "types": "./dist/index.d.ts",
