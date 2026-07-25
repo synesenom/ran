@@ -273,22 +273,17 @@ describe('test', () => {
       assert(!test.kolmogorovSmirnov(sample1, sample2).passed)
     })
 
-    it('should pass for samples of the same continuous distribution', () => {
+    it('should pass or reject for samples of the same or a different continuous distribution', () => {
       seed(0)
       const mu = float(0, 5)
       const sigma = float(1, 10)
-      const sample1 = (new Normal(mu, sigma)).seed(1).sample(SAMPLE_SIZE)
-      const sample2 = (new Normal(mu, sigma)).seed(2).sample(SAMPLE_SIZE)
-      assert(test.kolmogorovSmirnov(sample1, sample2).passed)
-    })
+      const reference = (new Normal(mu, sigma)).seed(1).sample(SAMPLE_SIZE)
+      const same = (new Normal(mu, sigma)).seed(2).sample(SAMPLE_SIZE)
+      const different = (new Normal(mu + 10, sigma)).seed(2).sample(SAMPLE_SIZE)
 
-    it('should reject for samples of different continuous distributions', () => {
-      seed(0)
-      const mu = float(0, 5)
-      const sigma = float(1, 10)
-      const sample1 = (new Normal(mu, sigma)).seed(1).sample(SAMPLE_SIZE)
-      const sample2 = (new Normal(mu + 10, sigma)).seed(2).sample(SAMPLE_SIZE)
-      const result = test.kolmogorovSmirnov(sample1, sample2)
+      assert(test.kolmogorovSmirnov(reference, same).passed)
+
+      const result = test.kolmogorovSmirnov(reference, different)
       assert(!result.passed)
       assert(result.pValue < 0.05)
     })
