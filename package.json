@@ -159,6 +159,9 @@
     "./dist/exponential-logarithmic": {
       "import": "./dist/exponential-logarithmic.esm.js"
     },
+    "./dist/exponentially-modified-gaussian": {
+      "import": "./dist/exponentially-modified-gaussian.esm.js"
+    },
     "./dist/exponentiated-weibull": {
       "import": "./dist/exponentiated-weibull.esm.js"
     },

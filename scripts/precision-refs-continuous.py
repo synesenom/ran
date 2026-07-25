@@ -542,6 +542,12 @@ def pdf(name, p, x):
         pp, beta = mpf(p[0]), mpf(p[1])
         y = (1 - pp) * exp(-beta * x)
         return beta * y / ((y - 1) * log(pp))
+    if name == 'ExponentiallyModifiedGaussian':
+        mu, sigma, lam = mpf(p[0]), mpf(p[1]), mpf(p[2])
+        # textbook form (mpmath's arbitrary exponent range avoids the overflow/underflow
+        # that motivates ranjs's erfcx-based rewrite in the production implementation)
+        return (lam / 2) * exp(lam / 2 * (2 * mu + lam * sigma * sigma - 2 * x)) * \
+            erfc((mu + lam * sigma * sigma - x) / (SQRT2 * sigma))
     if name == 'ExponentiatedWeibull':
         lam, k, alpha = mpf(p[0]), mpf(p[1]), mpf(p[2])
         base = cdf('Weibull', [lam, k], x)
@@ -947,6 +953,11 @@ def cdf(name, p, x):
     if name == 'ExponentialLogarithmic':
         pp, beta = mpf(p[0]), mpf(p[1])
         return 1 - log(1 - (1 - pp) * exp(-beta * x)) / log(pp)
+    if name == 'ExponentiallyModifiedGaussian':
+        mu, sigma, lam = mpf(p[0]), mpf(p[1]), mpf(p[2])
+        return Phi((x - mu) / sigma) - HALF * \
+            exp(lam / 2 * (2 * mu + lam * sigma * sigma - 2 * x)) * \
+            erfc((mu + lam * sigma * sigma - x) / (SQRT2 * sigma))
     if name == 'ExponentiatedWeibull':
         lam, k, alpha = mpf(p[0]), mpf(p[1]), mpf(p[2])
         return power(cdf('Weibull', [lam, k], x), alpha)
@@ -1350,6 +1361,7 @@ PARAM_SETS = {
     'Erlang': [[5, 2], [2, 0.5], [3, 1]],
     'Exponential': [[2], [0.5], [1]],
     'ExponentialLogarithmic': [[0.5, 2], [0.9, 0.5], [0.3, 1]],
+    'ExponentiallyModifiedGaussian': [[0, 1, 1], [1, 0.3, 5], [-1, 2, 0.2]],
     'ExponentiatedWeibull': [[2, 2, 2], [0.5, 0.5, 0.5], [1, 2, 3]],
     'F': [[5, 5], [2, 20], [10, 4]],
     'FisherZ': [[5, 5], [1, 1], [8, 4]],
@@ -1547,9 +1559,10 @@ def support(name, p):
                 'PowerLaw', 'UniformProduct', 'DoublyNoncentralBeta', 'NoncentralBeta'):
         return (mpf(0), mpf(1))
     if name in ('AsymmetricLaplace', 'Cauchy', 'Champernowne', 'DoubleGamma', 'DoubleWeibull',
-                'FisherZ', 'Gumbel', 'GeneralizedLogistic', 'GeneralizedNormal',
-                'HyperbolicSecant', 'Laplace', 'Logistic', 'Moyal', 'Normal', 'SkewNormal',
-                'Slash', 'StudentT', 'StudentZ', 'NoncentralT', 'DoublyNoncentralT'):
+                'ExponentiallyModifiedGaussian', 'FisherZ', 'Gumbel', 'GeneralizedLogistic',
+                'GeneralizedNormal', 'HyperbolicSecant', 'Laplace', 'Logistic', 'Moyal',
+                'Normal', 'SkewNormal', 'Slash', 'StudentT', 'StudentZ', 'NoncentralT',
+                'DoublyNoncentralT'):
         return (NONE, NONE)
     if name == 'Anglit':
         mu, beta = mpf(p[0]), mpf(p[1])

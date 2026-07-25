@@ -1237,6 +1237,48 @@ const REFS = [
     ]
   },
   {
+    name: 'ExponentiallyModifiedGaussian',
+    params: [0, 1, 1],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: -0.6603338527916173, pdf: 0.15451980519754432, cdf: 0.1 },
+      { x: 0.2233826011031505, pdf: 0.2883811277325418, cdf: 0.3 },
+      { x: 0.9734280676603754, pdf: 0.30482970261071185, cdf: 0.53 },
+      { x: 1.669102402776741, pdf: 0.23245145639641906, cdf: 0.72 },
+      { x: 2.7918740866932765, pdf: 0.09737981280965449, cdf: 0.9 }
+    ]
+  },
+  {
+    // params chosen so the 0.9-quantile point crosses mu + lambda*sigma^2 = 1.45, the
+    // _erfcTerm branch boundary -- unlike a wider-spread stress case, this exercises both
+    // the erfcx(arg>0) and naive-erfc(arg<=0) branches at 1e-14 tolerance
+    name: 'ExponentiallyModifiedGaussian',
+    params: [1, 0.3, 5],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: 0.7559878151694747, pdf: 0.5400092261974838, cdf: 0.1 },
+      { x: 1.0055956026756214, pdf: 1.0372032176973605, cdf: 0.3 },
+      { x: 1.2102796063949952, pdf: 1.14163640071139, cdf: 0.53 },
+      { x: 1.3912854241193913, pdf: 0.9196587151635259, cdf: 0.72 },
+      { x: 1.6600523914914789, pdf: 0.4305137325963476, cdf: 0.9 }
+    ]
+  },
+  {
+    name: 'ExponentiallyModifiedGaussian',
+    params: [-1, 2, 0.2],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: -1.3829894673599437, pdf: 0.06481380061114406, cdf: 0.1 },
+      { x: 0.8635791419804341, pdf: 0.10485547146299386, cdf: 0.3 },
+      { x: 3.1408335406300303, pdf: 0.09015866672823285, cdf: 0.53 },
+      { x: 5.764093093157726, pdf: 0.05592805204752308, cdf: 0.72 },
+      { x: 10.912925460585075, pdf: 0.019999999742244142, cdf: 0.9 }
+    ]
+  },
+  {
     name: 'ExponentiatedWeibull',
     params: [2, 2, 2],
     tol: 1e-14,

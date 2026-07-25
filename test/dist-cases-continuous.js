@@ -1584,6 +1584,59 @@ export default [{
     { p: 0.99, x: 2.1409998300129267 }
   ]
 }, {
+  name: 'ExponentiallyModifiedGaussian',
+  fit: { params: [1, 2, 0.5], seed: 42, n: 300, tolerances: { mu: 1.5, sigma: 1, lambda: 0.4 } },
+  // mpmath dps=50: mean = mu+1/lambda, variance = sigma^2+1/lambda^2,
+  // skewness = (2/(sigma^3*lambda^3))*(1+1/(sigma^2*lambda^2))^(-3/2),
+  // kurtosis = 3*(1+2/(sigma^2*lambda^2)+3/(sigma^4*lambda^4))/(1+1/(sigma^2*lambda^2))^2 - 3
+  moments: [
+    { params: [0, 1, 2], mean: 0.5, variance: 1.25, skewness: 0.17888543819998317, kurtosis: 0.24, tol: 1e-14 }
+  ],
+  invalidParams: [
+    [], // all params required
+    [0, -1, 1], [0, 0, 1], // sigma > 0
+    [0, 1, -1], [0, 1, 0] // lambda > 0
+  ],
+  cases: [{
+    params: () => [0, 1, 1]
+  }, {
+    name: 'small sigma, large lambda*sigma (erfcx tail stress)',
+    params: () => [2, 0.5, 5],
+    // mpmath dps=50: pdf=(lambda/2)*exp(lambda/2*(2*mu+lambda*sigma^2-2*x))*erfc((mu+lambda*sigma^2-x)/(sqrt(2)*sigma)),
+    // cdf=Phi((x-mu)/sigma)-0.5*exp(lambda/2*(2*mu+lambda*sigma^2-2*x))*erfc((mu+lambda*sigma^2-x)/(sqrt(2)*sigma))
+    refVals: [
+      { x: 0.5, pdf: 0.003907183722078917, cdf: 0.0005684612872143111 },
+      { x: 1, pdf: 0.05738445545167343, cdf: 0.011273240857844521 },
+      { x: 1.5, pdf: 0.3225079809534636, cdf: 0.09415365774076433 },
+      { x: 2, pdf: 0.7066566569028766, cdf: 0.3586686686194247 },
+      { x: 2.5, pdf: 0.6240614184895246, cdf: 0.7165324623706381 },
+      { x: 3, pdf: 0.23657882010869777, cdf: 0.9299341040300813 },
+      { x: 4, pdf: 0.004821329576659343, cdf: 0.999004062842835 }
+    ]
+  }],
+  // mpmath dps=50: ExponentiallyModifiedGaussian(mu=0, sigma=1, lambda=1)
+  refVals: [
+    { x: -2, pdf: 0.016445124617899133, cdf: 0.006305007330280075 },
+    { x: -1, pdf: 0.10195901770090358, cdf: 0.056696236230553476 },
+    { x: -0.5, pdf: 0.18160080121934294, cdf: 0.12693673750664394 },
+    { x: 0, pdf: 0.2615782918651234, cdf: 0.23842170813487662 },
+    { x: 0.5, pdf: 0.3085375387259869, cdf: 0.3829249225480262 },
+    { x: 1, pdf: 0.3032653298563167, cdf: 0.5380794162122262 },
+    { x: 2, pdf: 0.18772938793031402, cdf: 0.7895204801215068 },
+    { x: 3, pdf: 0.08021755407423899, cdf: 0.9184325478941309 },
+    { x: 5, pdf: 0.01110864470252642, cdf: 0.9888910686459017 }
+  ],
+  // mpmath dps=50: root-find cdf(x) = p for ExponentiallyModifiedGaussian(0, 1, 1)
+  quantileVals: [
+    { p: 0.01, x: -1.81778904030405 },
+    { p: 0.05, x: -1.0688777812338255 },
+    { p: 0.25, x: 0.04376771028293673 },
+    { p: 0.5, x: 0.8757983436982718 },
+    { p: 0.75, x: 1.8033779062569646 },
+    { p: 0.95, x: 3.4941663855992835 },
+    { p: 0.99, x: 5.105166509901067 }
+  ]
+}, {
   name: 'ExponentiatedWeibull',
   fit: { params: [2, 1.5, 2], seed: 42, n: 200, tolerances: { lambda: 0.8, k: 0.6, alpha: 0.8 } },
   moments: [
