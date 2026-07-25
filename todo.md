@@ -11,9 +11,6 @@
 
 The functions in `src/special/` are the numerical foundation for almost every distribution CDF, quantile, and likelihood. Known gaps:
 
-- **`error.js` (erf/erfc)** — currently uses a series expansion that loses accuracy in the tail (|x| ≫ 1). Continued-fraction representations converge much faster in the tail and give near-machine-precision accuracy. See issue #211. This directly affects `Normal`, `LogNormal`, `Erfc`-based CDFs.
-- **`gamma-incomplete.js`** — the regularized lower/upper incomplete gamma (P and Q) is used by Chi2, Gamma, Poisson CDF, and many others. Accuracy near `x=a` (where P≈Q≈0.5) and for large `a` is most critical; should be cross-validated against scipy/Boost.
-- **`beta-incomplete.js`** — regularized incomplete beta `I_x(a,b)` underlies Beta, Binomial CDF, F, t. Known to lose digits when `x` is very close to 0 or 1 and `a,b` differ by orders of magnitude.
 - **`bessel.js`** — large-order and large-argument Bessel functions (used by Rice, Noncentral distributions) rely on asymptotic expansions whose accuracy degrades near the transition region.
 - **`digamma.js`** — used in Dirichlet-related computations; polygamma (derivatives beyond ψ₀) is not yet implemented.
 
@@ -24,14 +21,6 @@ The functions in `src/special/` are the numerical foundation for almost every di
 ## Publication-Grade Gaps
 
 Moving the library from *auditable* to *publication-grade* requires systematic reference-value coverage and documented accuracy bounds.
-
-### Filed as GitHub Issues
-
-| # | Description |
-|---|-------------|
-| [#808](../../issues/808) | **Far-tail Normal/LogNormal reference values** — add refVals at ±5σ and ±7σ to expose and track erf accuracy. Without these, regressions in tail precision are invisible. |
-| [#810](../../issues/810) | **gammaLowerIncomplete precision** — replace loose-tolerance tests with mpmath reference values across the full domain. |
-| [#811](../../issues/811) | **betaIncomplete precision** — add interior precision reference values in `test/special.js`. |
 
 ### Not Yet Filed
 
@@ -57,14 +46,14 @@ Four-parameter family (α ∈ (0,2], β ∈ [−1,1], γ ≥ 0, δ ∈ ℝ) enco
 Special case of the Generalized Hyperbolic distribution with δ = 0. Popular in option pricing (Madan-Seneta model).
 - **PDF:** f(x; μ, σ, ν, θ) involves |x−μ|^(λ−½) · K_{λ−½}(α|x−μ|) where α = √(θ²/σ⁴ + 2/(σ²ν)), λ = 1/ν
 - **Sampling:** via variance-mean mixture: X | G ~ Normal(μ + θG, σ²G), G ~ Gamma(1/ν, ν)
-- **Dependency:** `bessel.js` (K_{λ−½}), `_gamma.js` — **blocked on [#809](../../issues/809) (besselK)**
+- **Dependency:** `bessel.js` (`besselKnu` — already implemented), `_gamma.js`
 - Refs: [Wikipedia](https://en.wikipedia.org/wiki/Variance-gamma_distribution)
 
 #### Normal-Inverse Gaussian (NIG)
 Special case of the Generalized Hyperbolic distribution with λ = −½. Popular in financial return modelling and engineering.
 - **PDF:** f(x; μ, α, β, δ) = (αδ/π) · K₁(α√(δ²+(x−μ)²)) / √(δ²+(x−μ)²) · exp(δγ + β(x−μ))  where γ = √(α²−β²)
 - **Sampling:** via the representation X | V ~ Normal(μ + βV, V), V ~ InverseGaussian(δ/γ, δ²)
-- **Dependency:** `bessel.js` (K₁), `inverse-gaussian.js` — **blocked on [#809](../../issues/809) (besselK)**
+- **Dependency:** `bessel.js` (`besselK` — already implemented), `inverse-gaussian.js`
 - Refs: [scipy `norminvgauss`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.norminvgauss.html)
 
 #### Generalized Hyperbolic
@@ -73,9 +62,8 @@ A five-parameter family (λ, α, β, μ, δ) that unifies several heavy-tailed d
 - **Variance-Gamma:** δ = 0
 - **Hyperbolic:** λ = 1
 - **Student-t:** α = 0 (limit)
-- **PDF:** involves modified Bessel function K_λ(·) — needs accurate `bessel.js`
+- **PDF:** involves modified Bessel function K_λ(·) — `besselKnu` already implemented in `bessel.js`
 - **Sampling:** via the GIG (Generalized Inverse Gaussian) mixing representation
-- **Prerequisite:** **blocked on [#809](../../issues/809) (besselK)**
 - Refs: [Wikipedia](https://en.wikipedia.org/wiki/Generalised_hyperbolic_distribution)
 
 #### Normal-Inverse Gamma
@@ -88,7 +76,7 @@ Conjugate prior for the mean and variance of a normal distribution in Bayesian a
 Distribution of Z = X·Y where X, Y ~ Normal(0, 1) independently. The sampler is trivial; the main work is implementing the PDF via K₀.
 - **PDF:** f(z) = K₀(|z|)/π where K₀ is the modified Bessel function of the second kind, order 0
 - **Sampling:** trivial — multiply two standard Normal samples
-- **Dependency:** `bessel.js` (K₀) — **blocked on [#809](../../issues/809) (besselK)**
+- **Dependency:** `bessel.js` (`besselK` with n=0 — already implemented)
 - Refs: [MathWorld](http://mathworld.wolfram.com/NormalProductDistribution.html)
 
 #### Normal-Exponential-Gamma (NEG)
@@ -220,7 +208,7 @@ One-parameter distribution on [0, *c*] from particle physics (ARGUS experiment a
 Relativistic analogue of the `MaxwellBoltzmann` distribution (already in the library); describes particle momenta in a relativistic ideal gas. Used in plasma physics and astrophysics.
 - **PDF:** f(p; θ) = p² / (θ · K₂(1/θ)) · exp(−√(1+p²)/θ),  θ = kT/(mc²)
 - **Sampling:** rejection sampling against a Maxwellian envelope
-- **Prerequisite:** **blocked on [#809](../../issues/809) (besselK)**
+- **Dependency:** `bessel.js` (`besselKnu` — already implemented)
 - Refs: [Wikipedia](https://en.wikipedia.org/wiki/Maxwell%E2%80%93J%C3%BCttner_distribution)
 
 #### Power Benini
@@ -233,12 +221,6 @@ Two-shape-parameter extension of the existing `Benini` distribution used in actu
 ---
 
 ### Discrete
-
-#### Discrete Laplace (Bilateral Geometric)
-Discrete analogue of the Laplace distribution; symmetric about an integer location parameter. See issue [#812](../../issues/812).
-- **PMF:** P(X = k) = ((1−p)/(1+p)) · p^|k−μ| for k ∈ ℤ, p ∈ (0,1)
-- **Sampling:** difference of two independent Geometric variates
-- Refs: [scipy `dlaplace`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.dlaplace.html)
 
 #### Waring
 Generalization of the Yule-Simon distribution. Yule-Simon is the special case σ = 1.
@@ -305,7 +287,7 @@ Marginal distribution of a Multinomial(n, p) when p is drawn from Dirichlet(α).
 
 ## Statistical Tests
 
-Currently in `src/test/`: `bartlett`, `levene`, `brown-forsythe`, `mann-whitney`, `hsic`.
+Currently in `src/test/`: `bartlett`, `levene`, `brown-forsythe`, `mann-whitney`, `hsic`, `welch`.
 
 ### Normality Tests (category)
 Several tests specifically target whether a sample comes from a normal distribution. Implement as a group since they share the framework of testing against a theoretical normal:
@@ -331,11 +313,6 @@ Non-parametric test for differences between groups based on a pairwise dissimila
 Test for heteroscedasticity in a linear regression. Regresses squared residuals on the predictors; a large R² indicates variance is not constant.
 - **Statistic:** LM = n · R²_{auxiliary} ~ χ²(k) under H₀
 - **Dependency:** Chi2 distribution (already in `src/dist/chi2.js`)
-
-### Welch's t-test
-Two-sample t-test for equality of means when variances are unequal (does not assume homoscedasticity). Preferred over Student's t-test in practice. See issue [#815](../../issues/815).
-- **Degrees of freedom:** Welch-Satterthwaite approximation: ν = (s₁²/n₁ + s₂²/n₂)² / ((s₁²/n₁)²/(n₁−1) + (s₂²/n₂)²/(n₂−1))
-- **Dependency:** Student-t distribution (already in `src/dist/student-t.js`)
 
 ### Wilcoxon Signed-Rank Test
 Non-parametric test for the median of a single sample (or paired differences). Alternative to one-sample t-test.
@@ -366,26 +343,7 @@ An online (streaming) aggregator that maintains running statistics in O(1) time 
 
 ## Stochastic Processes (`src/process/`)
 
-A new module for discrete-time and continuous-time stochastic processes tracked in [#818](../../issues/818). Each process object should implement a standard interface:
-
-| Method | Description |
-|--------|-------------|
-| `next()` | Advance one step; return the new state |
-| `trend()` | Extract the deterministic drift component |
-| `noise()` | Extract the stochastic (noise) component |
-| `mean(power)` | Compute the p-th power mean of the trajectory |
-| `correlation(lag)` | Autocovariance / autocorrelation at given lag |
-
-### Brownian Motion / Standard Wiener Process
-The foundational continuous-time process: W(t) − W(s) ~ Normal(0, t − s) for s < t, independent increments.
-- **Discrete simulation:** Wₙ = Wₙ₋₁ + √(Δt) · Z,  Z ~ Normal(0,1)
-- Serves as the building block for all Itô diffusions below
-
-### Ornstein-Uhlenbeck (OU) Process
-Mean-reverting diffusion: dX = θ(μ − X)dt + σ dW.
-- **Exact discrete update:** Xₙ₊₁ = Xₙ · e^(−θΔt) + μ(1 − e^(−θΔt)) + σ√((1−e^(−2θΔt))/(2θ)) · Z
-- Used in finance (Vasicek interest rate model), physics (Langevin equation)
-- **Dependency:** none beyond core PRNG
+The module now exists with a `Process` base class (`_process.js`) plus `BrownianMotion`, `OrnsteinUhlenbeck`, `BrownianBridge`, `GeometricBrownianMotion`, `CoxIngersollRoss`, `AR1`, `RandomWalk`, and `PoissonProcess`/`CompoundPoissonProcess`. The base class currently exposes `next()` and `mean(t)`; `trend()`, `noise()`, and `correlation(lag)` from the original design note are not implemented on the base class yet.
 
 ### Gaussian Process
 A distribution over functions; fully specified by a mean function m(t) and a covariance (kernel) function k(t, t′).
@@ -404,62 +362,19 @@ Discrete-time process: Xₙ₊₁ = Σᵢ₌₁^Xₙ Zᵢ where Zᵢ are iid off
 
 ## MCMC (`src/mc/`)
 
-Currently implemented: `RWM` (random walk Metropolis), `MCMC2`, `GelmanRubin`. (`SliceSampler` was removed in #615; re-add tracked in [#822](../../issues/822).)
-
-### Gibbs Sampling
-Component-wise sampler: at each step, draw each coordinate xᵢ from its full conditional p(xᵢ | x₋ᵢ). Mixes well in low dimensions when conditionals are tractable. See issue [#821](../../issues/821).
-- **Interface:** user supplies an array of conditional samplers `[p(x₁|…), p(x₂|…), …]`
-- No acceptance step; always accepted
-- Can be combined with Metropolis steps for intractable conditionals (Metropolis-within-Gibbs)
-
-### Adaptive Metropolis (AM)
-Standard RWM with a covariance-adapting proposal: Σ_proposal = (2.38²/d) · Cov(x₁,…,xₙ) + ε·I (Haario-Saksman-Tamminen 2001). See issue [#823](../../issues/823).
-- **Adaptation:** update the empirical covariance during burn-in; freeze after
-- **Dependency:** `src/la/matrix.js` (Cholesky for sampling from multivariate normal)
-- Note: Ergodicity requires careful scheduling of adaptation; stop adapting after a fixed number of steps
-
-### Hamiltonian Monte Carlo (HMC)
-Uses gradient information to propose distant moves along Hamiltonian trajectories, dramatically reducing random-walk behaviour. See issue [#824](../../issues/824).
-- **Algorithm:** leapfrog integrator for L steps of size ε, Metropolis accept/reject
-- **User supplies:** log-posterior and its gradient (∂log p(θ)/∂θ)
-- **Tuning:** step size ε and path length L are critical; NUTS automates this
-- **Step size jittering** (randomly perturbing ε each iteration to break periodicity) is included in #824's scope
-- Ref: Neal (2011) "MCMC using Hamiltonian dynamics" in *Handbook of Markov Chain Monte Carlo*
-
-### NUTS (No-U-Turn Sampler)
-Extension of HMC that automatically tunes the trajectory length by building a binary tree until a U-turn criterion is met, eliminating the need to set L manually. See issue [#825](../../issues/825).
-- **Algorithm:** recursive doubling of leapfrog steps; slice sampling selects the transition
-- **Dual averaging:** adapts step size ε during warm-up (Hoffman-Gelman 2014)
-- **Dependency:** HMC leapfrog integrator ([#824](../../issues/824))
-- This is the sampler used by Stan, PyMC, and NumPyro
-
-### Rejection Sampling for Log-Concave Distributions
-Adaptive Rejection Sampling (ARS, Gilks-Wild 1992): for log-concave densities, automatically constructs a piecewise-exponential envelope from evaluation points and tightens it adaptively. See issue [#820](../../issues/820).
-- Avoids the need for the user to specify a bounding constant
-- **Dependency:** log-concavity check or trust; works best for unimodal, differentiable log-densities
-
-### Euclidean Metric Adaptation
-In HMC/NUTS, preconditioning by an estimated mass matrix M (the inverse of the parameter covariance) improves mixing by removing scale differences between dimensions. See issue [#826](../../issues/826).
-- **Warm-up phase:** accumulate sample covariance; set M = Cov(θ)⁻¹
-- **Dependency:** `src/la/matrix.js` (inversion or Cholesky)
-
-### Inspiration
-- [Interactive MCMC visualisations](https://github.com/chi-feng/mcmc-demo)
+Fully implemented: `RWM`, `AdaptiveMetropolis`, `Slice`, `HMC`, `NUTS`, `MALA`, `Gibbs`, `ARS`, `ParallelTempering`, `runChains`, `gelmanRubin`, plus shared Euclidean metric adaptation (diagonal/dense) for HMC/NUTS. No open items remain from the original backlog for this module.
 
 ---
 
 ## Special Functions (`src/special/`)
 
-Currently implemented: `gamma`, `log-gamma`, `beta`, `log-beta`, `beta-incomplete`, `gamma-incomplete`, `error` (erf/erfc), `digamma`, `bessel`, `hypergeometric`, `lambert-w`, `marcum-q`, `owen-t`, `hurwitz-zeta`, `riemann-zeta`, `generalized-harmonic`, `stirling`, `log-binomial`.
+Currently implemented: `gamma`, `log-gamma`, `beta`, `log-beta`, `beta-incomplete`, `gamma-incomplete`, `error` (erf/erfc), `digamma`, `bessel` (including `besselK`/`besselKnu`), `hypergeometric`, `lambert-w`, `marcum-q`, `owen-t`, `hurwitz-zeta`, `riemann-zeta`, `generalized-harmonic`, `stirling`, `log-binomial`, `e1` (exponential integral), `polylogarithm`.
 
-Functions needed for the distributions above or otherwise missing:
+Functions still needed for the distributions above or otherwise missing:
 
 | Function | Needed by | Notes |
 |----------|-----------|-------|
-| **`besselK` — K_ν(x), all real ν** | NIG, Variance-Gamma, Normal Product, Generalized Hyperbolic, Maxwell-Jüttner | **Tracked in [#809](../../issues/809).** `src/special/bessel.js` exports only first-kind functions (I_ν). K_ν must be added as a standalone prerequisite issue before any of the listed distributions can be implemented. Recurrence: K_{n+1}(x) = (2n/x)·K_n(x) + K_{n−1}(x); seed from K_0 and K_1 series. |
-| Exponential integral Eₙ(x), Ei(x) | Planck CDF | Related to incomplete gamma; Ei(x) = −E₁(−x) for x > 0 |
-| Polylogarithm Liₛ(z) | Planck CDF, Fermi-Dirac | Li₂ (dilogarithm) has known series; general Liₛ needs Lerch transcendent |
 | Elliptic integrals K(k), E(k) | Some special distributions | Carlson symmetric forms most numerically stable |
-| `log1p(x)`, `expm1(x)` | Catastrophic cancellation (#214) | Use `Math.log1p` / `Math.expm1` (native in JS); ensure they are used consistently |
+| `log1p(x)`, `expm1(x)` | Catastrophic cancellation (#214) | `Math.log1p`/`Math.expm1` are used in several places (e.g. `error.js`), but manual `Math.log(1 + …)`/`Math.exp(…) - 1` patterns remain in `gamma-gompertz.js`, `delaporte.js`, `logistic-exponential.js`, `geometric-brownian-motion.js` — audit and replace where precision-sensitive |
 
 - Full reference: [Boost.Math special functions](https://www.boost.org/doc/libs/1_77_0/libs/math/doc/html/special.html)
