@@ -1,0 +1,36 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+    groups:
+      babel:
+        patterns:
+          - "@babel/*"
+      lint:
+        patterns:
+          - "eslint*"
+          - "standard"
+      test:
+        patterns:
+          - "chai"
+          - "mocha"
+          - "nyc"
+          - "istanbul"
+          - "babel-plugin-istanbul"
+          - "cross-env"
+      build:
+        patterns:
+          - "rollup"
+          - "@rollup/*"
+          - "typescript"
+      docs:
+        patterns:
+          - "documentation"
+          - "highlight.js"
+          - "mathjax-node-page"
+          - "pug"
+          - "sass"
