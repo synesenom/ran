@@ -5570,6 +5570,87 @@ export default [{
     { p: 0.99, x: 4.595119850134589 }
   ]
 }, {
+  name: 'Tweedie',
+  fit: { params: [5, 1, 1.5], seed: 42, n: 500, tolerances: { mu: 0.5, phi: 0.6, p: 0.3 } },
+  // Independent check: numerically integrated raw moments (mpmath mp.dps=50, quad over the
+  // Dunn & Smyth series tweedie_pdf in scripts/precision-refs-continuous.py -- NOT the closed-form
+  // cumulant formula src/dist/tweedie.js itself uses for mean()/variance()/skewness()/kurtosis(),
+  // so this catches a wrong exponent/sign there instead of only reproducing it) agree with the
+  // closed-form values to ~1e-10 relative error; tol reflects the quadrature's own precision floor.
+  moments: [
+    { params: [3, 2, 1.7], mean: 3, variance: 12.946015679847559, skewness: 2.0388990851480893, kurtosis: 5.868860441530893, tol: 1e-9 }
+  ],
+  invalidParams: [
+    [], // all params required
+    [-1, 1, 1.5], [0, 1, 1.5], // mu > 0
+    [1, -1, 1.5], [1, 0, 1.5], // phi > 0
+    [1, 1, 0.9], [1, 1, 1], // p > 1
+    [1, 1, 2], [1, 1, 2.5] // p < 2
+  ],
+  cases: [{
+    params: () => [5, 1, 1.5]
+  }, {
+    name: 'small power parameter (near-Poisson)',
+    params: () => [3, 0.5, 1.2],
+    // mpmath mp.dps=50 via scripts/precision-refs-continuous.py (tweedie_pdf/tweedie_cdf, Dunn & Smyth 2005 series)
+    refVals: [
+      { x: 0.0, pdf: 0.0024283052007722356, cdf: 0.0024283052007722356 },
+      { x: 0.5, pdf: 0.045514535490789466, cdf: 0.013120267351229594 },
+      { x: 1.0, pdf: 0.11455837739357647, cdf: 0.05191425338192402 },
+      { x: 2.0, pdf: 0.26545570170385757, cdf: 0.2469622613306696 },
+      { x: 3.0, pdf: 0.28635478516269824, cdf: 0.5364582226305181 },
+      { x: 5.0, pdf: 0.0898609448244961, cdf: 0.9172629493282127 },
+      { x: 8.0, pdf: 0.0022583719076892635, cdf: 0.9985802665363928 }
+    ]
+  }, {
+    name: 'large power parameter (near-Gamma)',
+    params: () => [10, 2, 1.8],
+    // mpmath mp.dps=50 via scripts/precision-refs-continuous.py (tweedie_pdf/tweedie_cdf, Dunn & Smyth 2005 series)
+    refVals: [
+      { x: 0.0, pdf: 0.01902059420762599, cdf: 0.01902059420762599 },
+      { x: 0.5, pdf: 0.1157165727027584, cdf: 0.13038945197594945 },
+      { x: 2.0, pdf: 0.07209722368324172, cdf: 0.26119002153941345 },
+      { x: 5.0, pdf: 0.04975305798141377, cdf: 0.43899231489360513 },
+      { x: 10.0, pdf: 0.031432310138002156, cdf: 0.6374386349086387 },
+      { x: 20.0, pdf: 0.013279915447336112, cdf: 0.8479262403662048 },
+      { x: 40.0, pdf: 0.0023197981153005452, cdf: 0.9740408805914255 }
+    ]
+  }, {
+    // Precise pdf/cdf spot-checks for these two boundary parameter sets live in the
+    // precision-continuous.js gate (tol overrides supported there); this entry exists to
+    // exercise sampling/moments/quantile round-trips at the series machinery's numerical edge.
+    name: 'p near 1 (near-Poisson): series peak jPeak stays small, exercises the low-p tail',
+    params: () => [5, 0.5, 1.02]
+  }, {
+    name: 'p near 2 (near-Gamma boundary): jPeak grows largest here, exercises the series truncation',
+    params: () => [5, 0.5, 1.98]
+  }],
+  // mpmath mp.dps=50 via scripts/precision-refs-continuous.py (tweedie_pdf/tweedie_cdf, Dunn & Smyth 2005 series);
+  // x=0 is the point mass P(Y=0)=exp(-lambda), returned by both pdf(0) and cdf(0) per convention
+  refVals: [
+    { x: -0.1, pdf: 0, cdf: 0 },
+    { x: 0, pdf: 0.011422890993466942, cdf: 0.011422890993466942 },
+    { x: 0.5, pdf: 0.0699662953354966, cdf: 0.04043290661900463 },
+    { x: 1, pdf: 0.09115641823563843, cdf: 0.08087073368026075 },
+    { x: 2, pdf: 0.12047402301066248, cdf: 0.18823977851954585 },
+    { x: 3, pdf: 0.13149747206141804, cdf: 0.31566071159681663 },
+    { x: 5, pdf: 0.1141138933546635, cdf: 0.5676963183749454 },
+    { x: 8, pdf: 0.05918401069327814, cdf: 0.82714455905847 },
+    { x: 12, pdf: 0.015614076515879382, cdf: 0.962255100979514 },
+    { x: 20, pdf: 0.0004715649460589018, cdf: 0.9990574863453123 }
+  ],
+  quantileVals: [
+    // p at/below the point mass P(Y=0)=exp(-lambda)=0.011422890993466942: cdf(x)-p has no sign
+    // change anywhere in the support, so q() must special-case this to 0 rather than root-find
+    { p: 0.005, x: 0 },
+    { p: 0.011422890993466942, x: 0 },
+    { p: 0.05, x: 0.6311586280614908 },
+    { p: 0.2, x: 2.0968640250135184 },
+    { p: 0.5, x: 4.429027210944412 },
+    { p: 0.8, x: 7.567956820610454 },
+    { p: 0.95, x: 11.311764351170584 }
+  ]
+}, {
   name: 'UQuadratic',
   fit: { params: [0, 4], seed: 42, n: 200, tolerances: { a: 0.3, b: 0.3 } },
   // var=3(b-a)^2/20; kurt=-38/21 (exact, from mu4=3r^4/7, sigma^4=9r^4/25, r=(b-a)/2)

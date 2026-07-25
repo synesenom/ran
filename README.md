@@ -37,7 +37,7 @@ A comprehensive JavaScript library for probability distributions, random variate
 
 ## Features
 
-- **144 probability distributions** — continuous and discrete, each with PDF/PMF, CDF, quantile (`q`), hazard, survival, log-likelihood (`lnL`), AIC/BIC, goodness-of-fit testing, and MLE fitting (`fit`)
+- **146 probability distributions** — continuous and discrete, each with PDF/PMF, CDF, quantile (`q`), hazard, survival, log-likelihood (`lnL`), AIC/BIC, goodness-of-fit testing, and MLE fitting (`fit`)
 - **Statistical measures** — location (mean, median, mode, …), dispersion (variance, IQR, Gini, …), shape (skewness, kurtosis, …), and dependence (Pearson, Spearman, Kendall, …)
 - **Hypothesis tests** — Bartlett, Levene, Brown–Forsythe, Cramér-von Mises, Mann–Whitney U, HSIC
 - **Reproducible sampling** — every distribution accepts an optional seed for deterministic output
@@ -140,13 +140,13 @@ console.log(fitted.p)           // => { mu: 3.000, sigma: 1.000 }
 console.log(fitted.test(data))  // => { statistics: 0.42, passed: true }
 ```
 
-`fit()` is a **static** method called on the class, not on an instance: `dist.Normal.fit(data)`, not `model.fit(data)`. All 144 exported distributions support `fit()`. Most have a data-aware initial guess for reliable MLE convergence; zero-parameter distributions skip optimization and return a fresh instance.
+`fit()` is a **static** method called on the class, not on an instance: `dist.Normal.fit(data)`, not `model.fit(data)`. All 146 exported distributions support `fit()`. Most have a data-aware initial guess for reliable MLE convergence; zero-parameter distributions skip optimization and return a fresh instance.
 
 ## API Overview
 
 | Namespace | Contents |
 |-----------|----------|
-| `ran.dist` | 144 probability distributions |
+| `ran.dist` | 146 probability distributions |
 | `ran.process` | Stochastic processes: AR(1), Brownian motion, Brownian bridge, Cox–Ingersoll–Ross, geometric Brownian motion, Ornstein–Uhlenbeck, Poisson process, random walk |
 | `ran.mc` | MCMC samplers (random-walk & adaptive Metropolis, slice, HMC, NUTS, MALA, Gibbs, adaptive rejection sampling), parallel tempering, multi-chain runner, Gelman–Rubin convergence diagnostic |
 | `ran.location` | Mean, median, mode, geometric mean, harmonic mean, trimean, midrange |
@@ -335,7 +335,7 @@ All reference values in `test/dist-cases-continuous.js` and `test/dist-cases-dis
 
 All 31 discrete distributions are verified against mpmath references at 50 decimal places. BetaBinomial and NegativeHypergeometric sit at the ~2e-14 float64 arithmetic floor. The following distributions cap at 1e-12 at certain parameter settings: Binomial, Hypergeometric, NegativeBinomial, Poisson, Skellam.
 
-All 113 continuous distributions are likewise verified against mpmath references at 50 decimal places (three parameter sets each). **pdf/cdf** cap at 1e-12–1e-13 at certain parameter settings for: Bates, IrwinHall, Levy, NoncentralBeta, NoncentralChi, NoncentralT, DoublyNoncentralT, SkewNormal, Rice, and R. **Quantiles** with a closed-form or Halley-refined inverse round-trip to 1e-14; those computed by numerical root-finding (BaldingNichols, Bates, BetaPrime, Davis, FisherZ, Muth, NoncentralChi2, NoncentralF, DoublyNoncentralChi2, DoublyNoncentralT, SkewNormal, Student's t/z, UniformProduct, R) round-trip to ~1e-13–1e-10, and BenktanderII's near-boundary asymptotic branch (b → 1) to ~1e-9.
+All 114 continuous distributions are likewise verified against mpmath references at 50 decimal places (three parameter sets each). **pdf/cdf** cap at 1e-12–1e-13 at certain parameter settings for: Bates, IrwinHall, Levy, NoncentralBeta, NoncentralChi, NoncentralT, DoublyNoncentralT, SkewNormal, Rice, Tweedie, and R. **Quantiles** with a closed-form or Halley-refined inverse round-trip to 1e-14; those computed by numerical root-finding (BaldingNichols, Bates, BetaPrime, Davis, FisherZ, Muth, NoncentralChi2, NoncentralF, DoublyNoncentralChi2, DoublyNoncentralT, SkewNormal, Student's t/z, UniformProduct, R) round-trip to ~1e-13–1e-10, and BenktanderII's near-boundary asymptotic branch (b → 1) to ~1e-9.
 
 ## Documentation
 
