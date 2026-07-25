@@ -1,0 +1,42 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+    # devDependencies are build tooling, not shipped to consumers; minor/major
+    # bumps (e.g. ESLint 7→9, Rollup majors) often carry breaking config or
+    # plugin-API changes that warrant manual review rather than an automated PR.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
+    groups:
+      babel:
+        patterns:
+          - "@babel/*"
+      lint:
+        patterns:
+          - "eslint*"
+          - "standard"
+      test:
+        patterns:
+          - "chai"
+          - "mocha"
+          - "nyc"
+          - "istanbul"
+          - "babel-plugin-istanbul"
+          - "cross-env"
+      build:
+        patterns:
+          - "rollup"
+          - "@rollup/*"
+          - "typescript"
+      docs:
+        patterns:
+          - "documentation"
+          - "highlight.js"
+          - "mathjax-node-page"
+          - "pug"
+          - "sass"
