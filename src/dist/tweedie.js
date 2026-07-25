@@ -31,6 +31,7 @@ function logDensitySeries (y, phi, p, alpha) {
   // MAX_SERIES_ITER alone is not always enough: jPeak itself grows past 500 for large y, small
   // phi, or p close to 2, in which case the loop would exit before ever reaching the series'
   // dominant terms (matching the dynamic cap pattern in special/gamma-incomplete.js's _gli).
+  // See solutions/correctness/2026-07-25-1257-tweedie-series-peak-exceeds-fixed-iter-cap.md
   const iterCap = Math.max(MAX_SERIES_ITER, jPeak + 50)
   for (let j = 1; j < iterCap; j++) {
     const term = Math.exp(logWj(j) - logMax)
@@ -182,6 +183,7 @@ export default class Tweedie extends Distribution {
     // cdf(x) - p >= 0 for every x >= 0 whenever p is at or below the point mass P(Y=0), so the
     // base class's root-finder never finds a sign change and returns NaN; the correct quantile
     // there is the support's lower boundary itself.
+    // See solutions/correctness/2026-07-25-1257-tweedie-point-mass-quantile-nan.md
     if (p <= Math.exp(-this.c.lambda)) {
       return 0
     }
