@@ -111,7 +111,7 @@ export default class Process {
    * @method marginal
    * @memberof ran.process.Process
    * @param {number} t Time.
-   * @returns {ran.dist.Distribution} Distribution instance representing the marginal at time t.
+   * @returns {import('../dist/_distribution').default} Distribution instance representing the marginal at time t.
    * @throws {Error} If not implemented by the subclass, or if t is outside the process's domain.
    */
   marginal (t) { // eslint-disable-line no-unused-vars
