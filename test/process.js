@@ -10,7 +10,7 @@ import OrnsteinUhlenbeck from '../src/process/ornstein-uhlenbeck'
 import CompoundPoissonProcess from '../src/process/compound-poisson-process'
 import PoissonProcess from '../src/process/poisson-process'
 import RandomWalk from '../src/process/random-walk'
-import { Normal, Poisson } from '../src/dist'
+import { Normal, LogNormal, Gamma, Poisson } from '../src/dist'
 
 // Fixed seeds replace ksTest/chiTest significance-level checks: a random seed can produce
 // a false positive/negative at the chosen critical value on some runs, while a fixed seed
@@ -173,6 +173,13 @@ describe('process', () => {
       it('should throw when not implemented', () => {
         const p = new BareProcess()
         assert.throws(() => p.pdf(0, 1), 'Process.pdf() is not implemented')
+      })
+    })
+
+    describe('.marginal()', () => {
+      it('should throw when not implemented', () => {
+        const p = new BareProcess()
+        assert.throws(() => p.marginal(1), 'Process.marginal() is not implemented')
       })
     })
 
@@ -456,6 +463,38 @@ describe('process.BrownianMotion', () => {
     })
   })
 
+  describe('.marginal()', () => {
+    it('should return a Normal distribution with mean and variance matching mean()/variance()', () => {
+      const bm = new BrownianMotion(0.5, 2, 1)
+      const marginal = bm.marginal(3)
+      assert.instanceOf(marginal, Normal)
+      assert.closeTo(marginal.mean(), bm.mean(3), 1e-10)
+      assert.closeTo(marginal.variance(), bm.variance(3), 1e-10)
+    })
+
+    it('should match pdf() at a given point', () => {
+      const bm = new BrownianMotion(0.5, 2, 1)
+      const marginal = bm.marginal(3)
+      assert.closeTo(marginal.pdf(1), bm.pdf(1, 3), 1e-10)
+    })
+
+    it('should round-trip quantile(cdf(x)) = x, exercising the Distribution API beyond pdf/mean/variance', () => {
+      const bm = new BrownianMotion(0.5, 2, 1)
+      const marginal = bm.marginal(3)
+      assert.closeTo(marginal.q(marginal.cdf(1)), 1, 1e-10)
+    })
+
+    it('should throw for t = 0', () => {
+      const bm = new BrownianMotion(0, 1, 1)
+      assert.throws(() => bm.marginal(0), /t must be > 0/)
+    })
+
+    it('should throw for t < 0', () => {
+      const bm = new BrownianMotion(0, 1, 1)
+      assert.throws(() => bm.marginal(-1), /t must be > 0/)
+    })
+  })
+
   describe('.path()', () => {
     it('should have length n+1', () => {
       const bm = new BrownianMotion(0, 1, 1)
@@ -665,6 +704,38 @@ describe('process.GeometricBrownianMotion', () => {
     })
   })
 
+  describe('.marginal()', () => {
+    it('should return a LogNormal distribution matching pdf() at a given point', () => {
+      const gbm = new GeometricBrownianMotion(0.05, 0.2, 1)
+      const marginal = gbm.marginal(2)
+      assert.instanceOf(marginal, LogNormal)
+      assert.closeTo(marginal.pdf(1.5), gbm.pdf(1.5, 2), 1e-10)
+    })
+
+    it('should have mean and variance matching mean()/variance()', () => {
+      const gbm = new GeometricBrownianMotion(0.05, 0.2, 1)
+      const marginal = gbm.marginal(2)
+      assert.closeTo(marginal.mean(), gbm.mean(2), 1e-10)
+      assert.closeTo(marginal.variance(), gbm.variance(2), 1e-10)
+    })
+
+    it('should round-trip quantile(cdf(x)) = x, exercising the Distribution API beyond pdf/mean/variance', () => {
+      const gbm = new GeometricBrownianMotion(0.05, 0.2, 1)
+      const marginal = gbm.marginal(2)
+      assert.closeTo(marginal.q(marginal.cdf(1.5)), 1.5, 1e-10)
+    })
+
+    it('should throw for t = 0', () => {
+      const gbm = new GeometricBrownianMotion(0, 1, 1)
+      assert.throws(() => gbm.marginal(0), /t must be > 0/)
+    })
+
+    it('should throw for t < 0', () => {
+      const gbm = new GeometricBrownianMotion(0, 1, 1)
+      assert.throws(() => gbm.marginal(-1), /t must be > 0/)
+    })
+  })
+
   describe('log-returns', () => {
     it('should have mean and variance matching the GBM/Itô log-return identity across seeds', () => {
       const mu = 0.05
@@ -835,6 +906,38 @@ describe('process.OrnsteinUhlenbeck', () => {
     it('should return NaN for t < 0', () => {
       const ou = new OrnsteinUhlenbeck(1, 0, 1, 1)
       assert(Number.isNaN(ou.covariogram(2, -1)))
+    })
+  })
+
+  describe('.marginal()', () => {
+    it('should return a Normal distribution with mean and variance matching mean()/variance()', () => {
+      const ou = new OrnsteinUhlenbeck(0.5, 3, 2, 0.1)
+      const marginal = ou.marginal(2)
+      assert.instanceOf(marginal, Normal)
+      assert.closeTo(marginal.mean(), ou.mean(2), 1e-10)
+      assert.closeTo(marginal.variance(), ou.variance(2), 1e-10)
+    })
+
+    it('should match pdf() at a given point', () => {
+      const ou = new OrnsteinUhlenbeck(0.5, 3, 2, 0.1)
+      const marginal = ou.marginal(2)
+      assert.closeTo(marginal.pdf(2), ou.pdf(2, 2), 1e-10)
+    })
+
+    it('should round-trip quantile(cdf(x)) = x, exercising the Distribution API beyond pdf/mean/variance', () => {
+      const ou = new OrnsteinUhlenbeck(0.5, 3, 2, 0.1)
+      const marginal = ou.marginal(2)
+      assert.closeTo(marginal.q(marginal.cdf(2)), 2, 1e-10)
+    })
+
+    it('should throw for t = 0', () => {
+      const ou = new OrnsteinUhlenbeck(1, 0, 1, 1)
+      assert.throws(() => ou.marginal(0), /t must be > 0/)
+    })
+
+    it('should throw for t < 0', () => {
+      const ou = new OrnsteinUhlenbeck(1, 0, 1, 1)
+      assert.throws(() => ou.marginal(-1), /t must be > 0/)
     })
   })
 
@@ -1126,6 +1229,43 @@ describe('process.BrownianBridge', () => {
       const bb = new BrownianBridge(2, 4, 0.1)
       // scipy: stats.norm.pdf(0, 0, sqrt(4*2*2/4)) = stats.norm.pdf(0, 0, 2) = 0.19947114020071635
       assert.closeTo(bb.pdf(0, 2), 0.19947114020071635, 1e-10)
+    })
+  })
+
+  describe('.marginal()', () => {
+    it('should return a Normal distribution with variance matching variance()', () => {
+      const bb = new BrownianBridge(2, 4, 0.1)
+      const marginal = bb.marginal(2)
+      assert.instanceOf(marginal, Normal)
+      assert.strictEqual(marginal.mean(), 0)
+      assert.closeTo(marginal.variance(), bb.variance(2), 1e-10)
+    })
+
+    it('should match pdf() at a given point', () => {
+      const bb = new BrownianBridge(1, 2, 0.1)
+      const marginal = bb.marginal(1)
+      assert.closeTo(marginal.pdf(1), bb.pdf(1, 1), 1e-10)
+    })
+
+    it('should round-trip quantile(cdf(x)) = x, exercising the Distribution API beyond pdf/mean/variance', () => {
+      const bb = new BrownianBridge(1, 2, 0.1)
+      const marginal = bb.marginal(1)
+      assert.closeTo(marginal.q(marginal.cdf(1)), 1, 1e-10)
+    })
+
+    it('should throw for t = 0', () => {
+      const bb = new BrownianBridge(1, 2, 0.1)
+      assert.throws(() => bb.marginal(0), /0 < t < T/)
+    })
+
+    it('should throw for t = T', () => {
+      const bb = new BrownianBridge(1, 2, 0.1)
+      assert.throws(() => bb.marginal(2), /0 < t < T/)
+    })
+
+    it('should throw for t > T', () => {
+      const bb = new BrownianBridge(1, 2, 0.1)
+      assert.throws(() => bb.marginal(3), /0 < t < T/)
     })
   })
 
@@ -1933,6 +2073,46 @@ describe('process.CoxIngersollRoss', () => {
       // exact rational: min(s,t)=0 so (1-exp(0))^2 = 0
       assert.strictEqual(cir.covariogram(0, 2), 0)
       assert.strictEqual(cir.covariogram(2, 0), 0)
+    })
+  })
+
+  describe('.marginal()', () => {
+    it('should return a Gamma distribution matching pdf() at a given point', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      const marginal = cir.marginal(0.5)
+      assert.instanceOf(marginal, Gamma)
+      assert.closeTo(marginal.pdf(0.5), cir.pdf(0.5, 0.5), 1e-10)
+      assert.closeTo(marginal.pdf(2.0), cir.pdf(2.0, 0.5), 1e-10)
+    })
+
+    it('should have mean and variance matching mean()/variance()', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      const marginal = cir.marginal(1)
+      assert.closeTo(marginal.mean(), cir.mean(1), 1e-10)
+      assert.closeTo(marginal.variance(), cir.variance(1), 1e-10)
+    })
+
+    it('should match pdf() at x=0 when alpha <= 1 (Feller condition violated)', () => {
+      // alpha = 2*kappa*theta/sigma^2 = 2*1*0.4/4 = 0.2 < 1
+      const cir = new CoxIngersollRoss(1, 0.4, 2, 0.1)
+      const marginal = cir.marginal(0.5)
+      assert.strictEqual(marginal.pdf(0), cir.pdf(0, 0.5))
+    })
+
+    it('should round-trip quantile(cdf(x)) = x, exercising the Distribution API beyond pdf/mean/variance', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      const marginal = cir.marginal(1)
+      assert.closeTo(marginal.q(marginal.cdf(2)), 2, 1e-10)
+    })
+
+    it('should throw for t = 0', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      assert.throws(() => cir.marginal(0), /t must be > 0/)
+    })
+
+    it('should throw for t < 0', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
+      assert.throws(() => cir.marginal(-1), /t must be > 0/)
     })
   })
 })

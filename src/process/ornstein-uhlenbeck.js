@@ -1,4 +1,5 @@
 import normal from '../dist/_normal'
+import Normal from '../dist/normal'
 import Process from './_process'
 
 /**
@@ -72,5 +73,13 @@ export default class OrnsteinUhlenbeck extends Process {
     if (s < 0 || t < 0) return NaN
     const { theta, sigma } = this.p
     return (sigma * sigma / (2 * theta)) * (Math.exp(-theta * Math.abs(t - s)) - Math.exp(-theta * (t + s)))
+  }
+
+  /** @inheritdoc */
+  marginal (t) {
+    if (t <= 0) {
+      throw Error('OrnsteinUhlenbeck.marginal(): t must be > 0')
+    }
+    return new Normal(this.mean(t), Math.sqrt(this.variance(t)))
   }
 }

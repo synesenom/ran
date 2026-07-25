@@ -99,6 +99,26 @@ export default class Process {
   }
 
   /**
+   * Returns the marginal distribution of the process at time t as a fully-functional
+   * Distribution instance, unlocking the entire Distribution API (quantile, hazard, survival,
+   * likelihood, aic, bic, test) on the marginal without additional numerical machinery. Must be
+   * implemented by subclasses.
+   *
+   * decisions/0040-process-marginal-distribution-instance.md — returns an existing Distribution
+   * instance built from already-derived mean()/variance()/pdf() parameters, instead of
+   * duplicating Distribution's numerical machinery on Process.
+   *
+   * @method marginal
+   * @memberof ran.process.Process
+   * @param {number} t Time.
+   * @returns {ran.dist.Distribution} Distribution instance representing the marginal at time t.
+   * @throws {Error} If not implemented by the subclass, or if t is outside the process's domain.
+   */
+  marginal (t) { // eslint-disable-line no-unused-vars
+    throw Error('Process.marginal() is not implemented')
+  }
+
+  /**
    * Advances the process by one step, updates the current state, and returns the new state.
    *
    * @method next

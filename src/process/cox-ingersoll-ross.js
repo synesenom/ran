@@ -1,5 +1,6 @@
 import normal from '../dist/_normal'
 import logGamma from '../special/log-gamma'
+import Gamma from '../dist/gamma'
 import Process from './_process'
 
 /**
@@ -79,9 +80,12 @@ export default class CoxIngersollRoss extends Process {
     const alpha = 2 * theta / sigma2OverKappa
     const scale = sigma2OverKappa / 2 * (1 - Math.exp(-kappa * t))
     if (x === 0) {
-      if (alpha < 1) return Infinity
-      if (alpha > 1) return 0
-      return 1 / scale
+      // The transition density is a Gamma(alpha, 1/scale) (see marginal()), whose own support is
+      // open at 0 whenever alpha < 1 — matching the Gamma/Beta/Weibull convention used throughout
+      // ran.dist where a divergent boundary point is excluded from the support and pdf() returns
+      // 0 there. Mirror that here so pdf(0, t) stays consistent with marginal(t).pdf(0).
+      if (alpha === 1) return 1 / scale
+      return 0
     }
     return Math.exp((alpha - 1) * Math.log(x) - x / scale - logGamma(alpha) - alpha * Math.log(scale))
   }
@@ -93,5 +97,19 @@ export default class CoxIngersollRoss extends Process {
     const { sigma2OverKappa } = this.c
     const em = Math.exp(-kappa * Math.min(s, t))
     return theta * sigma2OverKappa / 2 * (1 - em) * (1 - em) * Math.exp(-kappa * Math.abs(t - s))
+  }
+
+  /** @inheritdoc */
+  marginal (t) {
+    if (t <= 0) {
+      throw Error('CoxIngersollRoss.marginal(): t must be > 0')
+    }
+    // Starting from x0 = 0, the CIR transition density's noncentrality vanishes and the
+    // noncentral chi-squared collapses to a plain Gamma — the same shape/scale used by pdf().
+    const { kappa, theta } = this.p
+    const { sigma2OverKappa } = this.c
+    const alpha = 2 * theta / sigma2OverKappa
+    const scale = sigma2OverKappa / 2 * (1 - Math.exp(-kappa * t))
+    return new Gamma(alpha, 1 / scale)
   }
 }
