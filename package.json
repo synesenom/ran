@@ -435,6 +435,9 @@
     "./dist/tukey-lambda": {
       "import": "./dist/tukey-lambda.esm.js"
     },
+    "./dist/tweedie": {
+      "import": "./dist/tweedie.esm.js"
+    },
     "./dist/u-quadratic": {
       "import": "./dist/u-quadratic.esm.js"
     },

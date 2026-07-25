@@ -273,6 +273,75 @@ def dncbeta_pdf(a, b, l1, l2, x):
     return s
 
 
+# ---- Tweedie helpers (compound Poisson-Gamma EDM, 1 < p < 2; Dunn & Smyth 2005) ----
+
+def tweedie_lambda(mu, phi, p):
+    return power(mu, 2 - p) / (phi * (2 - p))
+
+
+def tweedie_gamma_shape(p):
+    return (2 - p) / (p - 1)
+
+
+def tweedie_gamma_rate(mu, phi, p):
+    return 1 / (phi * (p - 1) * power(mu, p - 1))
+
+
+def tweedie_log_wj(y, phi, p, alpha, j):
+    j = mpf(j)
+    return ((-j * alpha) * log(y) + (alpha * j) * log(p - 1) - (j * (1 - alpha)) * log(phi)
+            - j * log(2 - p) - loggamma(j + 1) - loggamma(-j * alpha))
+
+
+def tweedie_pdf(mu, phi, p, y):
+    mu, phi, p, y = mpf(mu), mpf(phi), mpf(p), mpf(y)
+    lam = tweedie_lambda(mu, phi, p)
+    if y < 0:
+        return mpf(0)
+    if y == 0:
+        return exp(-lam)
+    alpha = (2 - p) / (1 - p)
+    theta = power(mu, 1 - p) / (1 - p)
+    kappa = power(mu, 2 - p) / (2 - p)
+    jpeak = power(y, 2 - p) / ((2 - p) * phi)
+    s = mpf(0)
+    j = 1
+    while True:
+        term = exp(tweedie_log_wj(y, phi, p, alpha, j))
+        s += term
+        if j > jpeak + 10 and term < s * mpf('1e-55'):
+            break
+        j += 1
+        if j > 200000:
+            break
+    return (s / y) * exp((y * theta - kappa) / phi)
+
+
+def tweedie_cdf(mu, phi, p, y):
+    mu, phi, p, y = mpf(mu), mpf(phi), mpf(p), mpf(y)
+    lam = tweedie_lambda(mu, phi, p)
+    if y < 0:
+        return mpf(0)
+    if y == 0:
+        return exp(-lam)
+    shape = tweedie_gamma_shape(p)
+    rate = tweedie_gamma_rate(mu, phi, p)
+    # j=0 term: Gamma(shape=0) is a point mass at 0, so its CDF is exactly 1 for any y>0 --
+    # NOT what Preg(0, x) would give (shape-0 regularized incomplete gamma is not the point-mass
+    # CDF), so it is added directly as the Poisson(N=0) weight rather than routed through Preg.
+    s = pois_w(lam, 0)
+    j = 1
+    while True:
+        term = pois_w(lam, j) * Preg(j * shape, rate * y)
+        s += term
+        if j > lam + 10 and term < s * mpf('1e-55'):
+            break
+        j += 1
+        if j > 200000:
+            break
+    return s
+
+
 def chi2_pdf(df, v):
     v = mpf(v)
     df = mpf(df)
@@ -811,6 +880,9 @@ def pdf(name, p, x):
             return y / power(1 + y, 2)
         z = cdf('TukeyLambda', [lam], x)
         return 1 / (power(z, lam - 1) + power(1 - z, lam - 1))
+    if name == 'Tweedie':
+        mu, phi, pw = mpf(p[0]), mpf(p[1]), mpf(p[2])
+        return tweedie_pdf(mu, phi, pw, x)
     if name == 'UQuadratic':
         a, b = mpf(p[0]), mpf(p[1])
         alpha = 12 / power(b - a, 3)
@@ -1217,6 +1289,9 @@ def cdf(name, p, x):
             else:
                 hi = m
         return (lo + hi) / 2
+    if name == 'Tweedie':
+        mu, phi, pw = mpf(p[0]), mpf(p[1]), mpf(p[2])
+        return tweedie_cdf(mu, phi, pw, x)
     if name == 'UQuadratic':
         a, b = mpf(p[0]), mpf(p[1])
         alpha = 12 / power(b - a, 3)
@@ -1440,6 +1515,7 @@ PARAM_SETS = {
     'Triangular': [[5, 25, 15], [0, 1, 0.1], [-2, 2, 0]],
     'TruncatedNormal': [[2.5, 2, 0, 5], [0, 1, -2, 2], [1, 2, -1, 4]],
     'TukeyLambda': [[0], [2], [-2]],
+    'Tweedie': [[5, 1, 1.5], [3, 0.5, 1.2], [10, 2, 1.8]],
     'UQuadratic': [[5, 25], [0, 1], [-2, 2]],
     'Uniform': [[5, 25], [0, 1], [-2, 2]],
     'UniformProduct': [[6], [2], [4]],
@@ -1553,7 +1629,8 @@ def support(name, p):
                 'LogLogistic', 'LogNormal', 'LogisticExponential', 'Lomax', 'Makeham',
                 'MaxwellBoltzmann', 'Mielke', 'Muth', 'Nakagami', 'NoncentralChi',
                 'NoncentralChi2', 'NoncentralF', 'Rayleigh', 'ReciprocalInverseGaussian',
-                'Rice', 'UniformRatio', 'Weibull', 'DoublyNoncentralChi2', 'DoublyNoncentralF'):
+                'Rice', 'UniformRatio', 'Weibull', 'DoublyNoncentralChi2', 'DoublyNoncentralF',
+                'Tweedie'):
         return (mpf(0), NONE)
     if name in ('Beta', 'BaldingNichols', 'Bradford', 'Kumaraswamy', 'LogitNormal',
                 'PowerLaw', 'UniformProduct', 'DoublyNoncentralBeta', 'NoncentralBeta'):
@@ -1701,6 +1778,7 @@ PDFCDF_TOL = {
     ('Levy', '[-1, 1]'): '1e-12',
     ('NoncentralBeta', '[0.1, 2, 10]'): '1e-13',
     ('NoncentralChi', '[5, 2]'): '1e-13',
+    ('Tweedie', '[3, 0.5, 1.2]'): '2e-14',
     ('NoncentralT', '[5, 0]'): '2e-14',
     ('NoncentralT', '[5, 1]'): '1e-12',
     ('NoncentralT', '[8, 2]'): '2e-14',
@@ -1760,6 +1838,7 @@ NOTES = {
     ('Levy', '[-1, 1]'): _N_ERFC,
     ('NoncentralBeta', '[0.1, 2, 10]'): _N_SERIES,
     ('NoncentralChi', '[5, 2]'): _N_SERIES,
+    ('Tweedie', '[3, 0.5, 1.2]'): _N_SERIES,
     ('NoncentralT', '[5, 0]'): _N_NCT,
     ('NoncentralT', '[5, 1]'): _N_NCT,
     ('NoncentralT', '[8, 2]'): _N_NCT,

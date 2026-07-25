@@ -266,6 +266,27 @@ describe('dist', () => {
         assert.strictEqual(d1.skewness(), d2.skewness())
         assert.strictEqual(d1.kurtosis(), d2.kurtosis())
       })
+
+      it('Tweedie.fit should recover mu, phi, and p close to planted values', () => {
+        // No closed-form MLE exists for p; _fitInit seeds it at a fixed 1.5 and lets Powell
+        // refine all three parameters, so tolerances stay looser than a MOM-only fit.
+        const data = new dist.Tweedie(5, 1, 1.5).seed(42).sample(500)
+        const result = dist.Tweedie.fit(data)
+        assert(result instanceof dist.Tweedie)
+        assert(Math.abs(result.p.mu - 5) < 1)
+        assert(Math.abs(result.p.phi - 1) < 0.5)
+        assert(result.p.p > 1 && result.p.p < 2)
+        assert(Math.abs(result.p.p - 1.5) < 0.3)
+        assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
+      })
+
+      it('Tweedie._fitInit should seed p at 1.5 and mu/phi via method of moments', () => {
+        const init = dist.Tweedie._fitInit([1, 2, 3, 4, 5])
+        assert.strictEqual(init.length, 3)
+        assert.strictEqual(init[2], 1.5)
+        assert.approximately(init[0], 3, 1e-9) // mu = sample mean
+        assert(init[1] > 0)
+      })
     })
   })
 })
