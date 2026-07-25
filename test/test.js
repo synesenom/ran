@@ -83,6 +83,86 @@ describe('test', () => {
     })
   })
 
+  describe('cramerVonMises', () => {
+    it('should throw exception for empty values', () => {
+      assert.throws(() => {
+        test.cramerVonMises([], x => (new Normal(0, 1)).cdf(x))
+      }, 'cramerVonMises: values must not be empty')
+    })
+
+    it('should return stat, pValue and passed properties', () => {
+      const n01 = new Normal(0, 1)
+      const result = test.cramerVonMises([1, 2, 3, 4, 5], x => n01.cdf(x))
+      assert.isNumber(result.stat)
+      assert.isNumber(result.pValue)
+      assert.isBoolean(result.passed)
+    })
+
+    it('should pass for samples drawn from the tested distribution', () => {
+      seed(0)
+      const mu = float(0, 5)
+      const sigma = float(1, 10)
+      assert(test.cramerVonMises((new Normal(mu, sigma)).sample(SAMPLE_SIZE), x => (new Normal(mu, sigma)).cdf(x)).passed)
+    })
+
+    it('should reject for samples drawn from a different distribution', () => {
+      seed(0)
+      const mu = float(0, 5)
+      const sigma = float(1, 10)
+      assert(!test.cramerVonMises((new Normal(mu + 10, sigma)).sample(SAMPLE_SIZE), x => (new Normal(mu, sigma)).cdf(x)).passed)
+    })
+
+    // Reference stat/pValue below are cross-checked against scipy 1.17.1:
+    // scipy.stats.cramervonmises(values, 'norm', args=(0, 1)).statistic for stat, and
+    // 1 - scipy.stats._hypotests._cdf_cvm_inf(stat) for pValue — the pure n->infinity
+    // asymptotic CDF (Csorgo & Faraway 1996, eq. 1.2), matching this implementation's
+    // scope. scipy's public cramervonmises() additionally applies a finite-sample
+    // correction (eq. 1.8), which is out of scope here per issue #1134 ("advanced
+    // asymptotic theory beyond standard approximations" is explicitly excluded).
+    // solutions/testing/2026-07-25-1032-cvm-scipy-public-wrapper-scope-mismatch.md
+    it('should match external reference values for a well-fitting sample (small stat)', () => {
+      const n01 = new Normal(0, 1)
+      // Exact quantiles of N(0,1) at u_i = (2i-1)/(2n), n=10, so all deviations
+      // are exactly 0 and stat reduces to the exact rational 1/(12n) = 1/120.
+      const values = [
+        -1.6448536269514729, -1.0364333894937898, -0.6744897501960817, -0.38532046640756773,
+        -0.12566134685507402, 0.12566134685507416, 0.38532046640756773, 0.6744897501960817,
+        1.0364333894937898, 1.6448536269514722
+      ]
+      const result = test.cramerVonMises(values, x => n01.cdf(x))
+      assert.closeTo(result.stat, 1 / 120, 1e-15) // exact rational: 1/(12n) = 1/120
+      assert.closeTo(result.pValue, 0.9999995175587484, 1e-8)
+      assert(result.passed)
+    })
+
+    it('should match external reference values for a moderately mismatched sample (mid stat)', () => {
+      const n01 = new Normal(0, 1)
+      const values = [
+        1.1047170797544315, -0.2399841062404955, 1.5504511958064573, 1.740564716391214,
+        -1.1510351886538364, -0.502179506862318, 0.9278404031672854, 0.48375740765641784,
+        0.7831988424957113, -0.05304392757358001, 1.6793979748628285, 1.5777919354289485,
+        0.8660306975612161, 1.927241206968033, 1.2675093422520456
+      ]
+      const result = test.cramerVonMises(values, x => n01.cdf(x))
+      assert.closeTo(result.stat, 1.0058374170069035, 1e-12)
+      assert.closeTo(result.pValue, 0.0023841598592814206, 1e-6)
+      assert(!result.passed)
+    })
+
+    it('should match external reference values for a badly mismatched sample (large stat, x > 4)', () => {
+      const n01 = new Normal(0, 1)
+      const values = [
+        3.4407075371167615, 4.668750784082499, 3.341117399171001, 5.178450301307272,
+        4.250074089013747, 4.115137636454739, 3.6190704555960584, 5.52254133867403,
+        4.145470517931198, 3.8716721778368925, 3.9478664495117703, 4.832309185553348
+      ]
+      const result = test.cramerVonMises(values, x => n01.cdf(x))
+      assert.closeTo(result.stat, 3.998287338892591, 1e-12)
+      assert.closeTo(result.pValue, 7.108186261817195e-10, 1e-12)
+      assert(!result.passed)
+    })
+  })
+
   describe('hsic', () => {
     it('should throw exception for less or more than two data sets', () => {
       assert.throws(() => {
