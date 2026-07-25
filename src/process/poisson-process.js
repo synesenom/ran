@@ -1,7 +1,7 @@
 import Poisson from './poisson'
 
 /**
- * Deprecated alias for {@link ran.process.Poisson}. `Process` must not appear in `Process`
+ * Deprecated alias for `ran.process.Poisson`. `Process` must not appear in `Process`
  * subclass names (decisions/0041-process-subclass-naming-no-process-suffix.md).
  *
  * @class PoissonProcess

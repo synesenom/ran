@@ -1,7 +1,7 @@
 import CompoundPoisson from './compound-poisson'
 
 /**
- * Deprecated alias for {@link ran.process.CompoundPoisson}. `Process` must not appear in
+ * Deprecated alias for `ran.process.CompoundPoisson`. `Process` must not appear in
  * `Process` subclass names (decisions/0041-process-subclass-naming-no-process-suffix.md).
  *
  * @class CompoundPoissonProcess
