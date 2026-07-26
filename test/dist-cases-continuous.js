@@ -1590,7 +1590,7 @@ export default [{
   // skewness = (2/(sigma^3*lambda^3))*(1+1/(sigma^2*lambda^2))^(-3/2),
   // kurtosis = 3*(1+2/(sigma^2*lambda^2)+3/(sigma^4*lambda^4))/(1+1/(sigma^2*lambda^2))^2 - 3
   moments: [
-    { params: [0, 1, 2], mean: 0.5, variance: 1.25, skewness: 0.17888543819998317, kurtosis: 0.24, tol: 1e-14 }
+    { params: [0, 1, 2], mean: 0.5, variance: 1.25, skewness: 0.17888543819998318, kurtosis: 0.24, tol: 1e-14 }
   ],
   invalidParams: [
     [], // all params required
@@ -4226,7 +4226,7 @@ export default [{
     // points via 2*x*ncx2_pdf(1, lam^2, x^2), NcX2_CDF(x^2; 1, lam^2)
     refVals: [
       { x: 0, pdf: 0.7041306535285990, cdf: 0 },
-      { x: 0.1, pdf: 0.7014947431951229, cdf: 0.07032514063960226 },
+      { x: 0.1, pdf: 0.7014947431951229, cdf: 0.07032514063960225 },
       { x: 0.5, pdf: 0.640913004920576, cdf: 0.3413447460685429 },
       { x: 1.0, pdf: 0.4815829224301912, cdf: 0.6246552600051550 },
       { x: 1.5, pdf: 0.2959616910323314, cdf: 0.8185946141203637 },
@@ -5908,10 +5908,10 @@ export default [{
     symmetry: 0,
     // mpmath mp.dps=50: exp(kappa*cos(x))/(2*pi*besseli(0,kappa)), quad(pdf, -pi, x)  (kappa=9)
     refVals: [
-      { x: -Math.PI / 2, pdf: 0.00014553459940875762, cdf: 0.00001640263657504267 },
-      { x: -Math.PI / 4, pdf: 0.08448885284466174, cdf: 0.011927070236412886 },
-      { x: -Math.PI / 8, pdf: 0.5944130027504404, cdf: 0.12445129108997708 },
-      { x: -1, pdf: 0.018828644027619654, cdf: 0.0023412300572219505 },
+      { x: -Math.PI / 2, pdf: 0.0001455345994087576, cdf: 0.00001640263657504267 },
+      { x: -Math.PI / 4, pdf: 0.08448885284466175, cdf: 0.011927070236412885 },
+      { x: -Math.PI / 8, pdf: 0.5944130027504404, cdf: 0.12445129108997709 },
+      { x: -1, pdf: 0.018828644027619655, cdf: 0.0023412300572219504 },
       { x: -0.9, pdf: 0.03914013027583153, cdf: 0.005128950622327126 }
     ]
   }, {

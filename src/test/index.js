@@ -4,6 +4,7 @@
  * @namespace test
  * @memberof ran
  */
+export { default as andersonDarling } from './anderson-darling'
 export { default as bartlett } from './bartlett'
 export { default as brownForsythe } from './brown-forsythe'
 export { default as cramerVonMises } from './cramer-von-mises'

@@ -1681,11 +1681,13 @@ describe('process.PoissonProcess (deprecated alias)', () => {
     const originalWarn = console.warn
     const warnings = []
     console.warn = msg => warnings.push(msg)
+    let pp
     try {
-      new PoissonProcess(2, 0.5)
+      pp = new PoissonProcess(2, 0.5)
     } finally {
       console.warn = originalWarn
     }
+    assert(pp instanceof ProcessPoisson)
     assert.strictEqual(warnings.length, 1)
     assert.match(warnings[0], /ran\.process\.PoissonProcess is deprecated and will be removed in v1\.33\.0; use ran\.process\.Poisson instead\./)
   })
@@ -1892,11 +1894,13 @@ describe('process.CompoundPoissonProcess (deprecated alias)', () => {
     const originalWarn = console.warn
     const warnings = []
     console.warn = msg => warnings.push(msg)
+    let cpp
     try {
-      new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
+      cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
     } finally {
       console.warn = originalWarn
     }
+    assert(cpp instanceof CompoundPoisson)
     assert.strictEqual(warnings.length, 1)
     assert.match(warnings[0], /ran\.process\.CompoundPoissonProcess is deprecated and will be removed in v1\.33\.0; use ran\.process\.CompoundPoisson instead\./)
   })
