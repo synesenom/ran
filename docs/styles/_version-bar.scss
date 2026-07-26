@@ -51,7 +51,11 @@
 // Sits right after .version-select — points at what changed in the version
 // currently on screen. a:visited set explicitly for the same reason as
 // .version-banner above (specificity tie with links.scss's global rule).
+// Negative margin pulls it in from .top's uniform 14px gap — it should
+// read as attached to the version picker, not evenly spaced like the
+// unrelated items around it.
 .version-notes-link, .version-notes-link:visited {
+  margin-left: -10px;
   color: $colorBlue;
   font-size: 13px;
   text-decoration: none;
