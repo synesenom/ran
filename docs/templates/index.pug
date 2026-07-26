@@ -30,8 +30,14 @@ block content
         code.hljs !{install.node}
 
     h2 Use in browser
-    pre.install
-        code.hljs !{install.browser}
+    if install.browser
+        pre.install
+            code.hljs !{install.browser}
+    else
+        p.callout
+            strong Note:
+            |  Unreleased builds aren't published to a CDN yet — use npm install above, or
+            | switch to the latest release with the version picker.
 
     h2 Demo
     p

@@ -196,8 +196,13 @@ function parseEntry (entry) {
       navLabel: 'API',
       data: {
         install: {
-          browser: hljs.highlight('<script type="text/javascript" src="ran.min.js"></script>', { language: 'xml' })
-            .value,
+          // No CDN URL for 'unreleased' — nothing published to npm yet
+          // matches tip-of-main, so a script tag here would either 404 or
+          // silently serve the latest *release* instead of the code this
+          // page documents. Handled in index.pug via a fallback message.
+          browser: CHANNEL === 'unreleased'
+            ? null
+            : hljs.highlight(`<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ranjs@${CHANNEL}/dist/ranjs.min.js"></script>`, { language: 'xml' }).value,
           node: hljs.highlight('npm install --save ranjs', { language: 'bash' }).value
         },
         demo: 'https://beta.observablehq.com/@synesenom/ranjs-demo',
