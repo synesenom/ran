@@ -376,17 +376,17 @@ describe('dist', () => {
     // deep-in-range kappa = 9/11 cases already covered below.
     it('cdf should match mpmath at kappa = 7 (near the onset of the affected kappa range)', () => {
       const d = new dist.VonMises(7)
-      assert.approximately(d.cdf(-Math.PI / 4), 0.023708922761434122781853740791644863290637475251062, 1e-12)
-      assert.approximately(d.cdf(-1), 0.0065572208963968429709678172329006037034353336873716, 1e-12)
-      assert.approximately(d.cdf(-0.9), 0.012160399210262777300257337168840102614155160976983, 1e-12)
+      assert.approximately(d.cdf(-Math.PI / 4), 0.023708922761434124, 1e-12)
+      assert.approximately(d.cdf(-1), 0.006557220896396843, 1e-12)
+      assert.approximately(d.cdf(-0.9), 0.012160399210262776, 1e-12)
     })
 
     // mpmath mp.dps=50: quad(t => exp(kappa*cos(t))/(2*pi*besseli(0,kappa)), [-pi, x])
     it('cdf should match mpmath at kappa = 9 (besselI(0,9) itself is accurate here)', () => {
       const d = new dist.VonMises(9)
-      assert.approximately(d.cdf(-Math.PI / 4), 0.011927070236412886, 1e-12)
-      assert.approximately(d.cdf(-1), 0.0023412300572219505, 1e-12)
-      assert.approximately(d.cdf(-0.9), 0.0051289506223271259601593828985188964665244503906922, 1e-12)
+      assert.approximately(d.cdf(-Math.PI / 4), 0.011927070236412885, 1e-12)
+      assert.approximately(d.cdf(-1), 0.0023412300572219504, 1e-12)
+      assert.approximately(d.cdf(-0.9), 0.005128950622327126, 1e-12)
     })
 
     // Same mpmath source as above (kappa = 11). Tolerance is 1e-8, not machine precision: besselI's
@@ -398,7 +398,7 @@ describe('dist', () => {
       const d = new dist.VonMises(11)
       assert.approximately(d.cdf(-Math.PI / 4), 0.006110362138173876, 1e-8)
       assert.approximately(d.cdf(-1), 0.0008536976551769042, 1e-8)
-      assert.approximately(d.cdf(-0.9), 0.0022064544592800050434174504717302462134232459292122, 1e-8)
+      assert.approximately(d.cdf(-0.9), 0.002206454459280005, 1e-8)
     })
 
     // Concrete repro from the bug report: q() root-finds on cdf(x) - p, so a corrupted cdf() at an
