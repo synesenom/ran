@@ -51,6 +51,15 @@
 
     a.active { color: $colorInk; }
     a:hover { color: $colorInk; text-decoration: none; }
+
+    // Icon link (GitHub) sits at text baseline height among the text
+    // links; display:flex + its own height keeps the svg vertically
+    // centered instead of stretching the row to the icon's intrinsic size.
+    .icon-github {
+      display: flex;
+      align-items: center;
+      height: 14px;
+    }
   }
 }
 
