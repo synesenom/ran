@@ -94,6 +94,7 @@ function _besselIBackward (n, x) {
   // Math.max(n, 1) inside the sqrt: at n=0 the margin term would otherwise degenerate to
   // 0 (sqrt(40*0)=0), leaving no run-up headroom and a ~1e-9 relative-error gap for
   // x in (10, 14] (issue #1185) -- n=0 borrows n=1's already-validated margin instead.
+  // See solutions/special-functions/2026-07-26-1839-bessel-i-miller-n0-margin-degeneration.md
   for (let j = 2 * (n + Math.round(Math.sqrt(40 * Math.max(n, 1)))) + Math.ceil(2 * x); j > 0; j--) {
     const bim = bip + j * tox * bi
     bip = bi
