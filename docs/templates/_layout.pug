@@ -1,5 +1,5 @@
 doctype html
-html(lang="en")
+html(lang="en", data-ranjs-channel=channel)
     head
         meta(charset="utf-8")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
@@ -13,6 +13,7 @@ html(lang="en")
         link(rel="stylesheet", type="text/css", href="styles/style.css")
         title #{name}
     body
+        div#ranjs-version-banner.version-banner(hidden)
         div.top
             img.mark(src="assets/ran.svg", alt="然")
             span.nm
@@ -23,7 +24,9 @@ html(lang="en")
                     each pg in pages
                         a(href=pg.output, class=(pg.output === currentPage ? 'active' : ''))= pg.navLabel
                 a(href="https://github.com/synesenom/ran", target="_blank", rel="noopener") GitHub
+                select#ranjs-version-select.version-select(aria-label="Documentation version")
         block sidebar
         main
             block content
             block scripts
+        script(src="assets/version-switcher.js", defer)

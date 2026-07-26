@@ -7,7 +7,7 @@
 // <div class="top"><img class="mark"><span class="nm">ran<b>js</b></span><nav>…</nav></div>
 .top {
   position: fixed;
-  top: 0; left: 0; right: 0;
+  top: var(--ranjs-banner-height, 0px); left: 0; right: 0;
   height: $dimTopBarHeight;
   display: flex;
   align-items: center;
@@ -58,7 +58,7 @@
 // landing under the fixed top bar.
 main {
   position: absolute;
-  top: $dimTopBarHeight;
+  top: calc(#{$dimTopBarHeight} + var(--ranjs-banner-height, 0px));
   right: 0;
   bottom: 0;
   width: 100%;

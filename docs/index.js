@@ -14,6 +14,12 @@ const SeesParser = require('./src/sees-parser')
 const REPO_ROOT = path.resolve(__dirname, '..')
 const VERSION = require('../package.json').version
 
+// Set by docs-deploy.yml to 'unreleased' (built from tip-of-main) or the
+// release version being deployed; local `npm run docs` runs default to
+// 'unreleased' since they never represent a tagged release. See
+// decisions/0043-versioned-docs-deployment.md.
+const CHANNEL = process.env.RANJS_DOCS_CHANNEL || 'unreleased'
+
 // Register highlight languages.
 hljs.registerLanguage('bash', require('highlight.js/lib/languages/bash'))
 hljs.registerLanguage('xml', require('highlight.js/lib/languages/xml'))
@@ -232,7 +238,8 @@ function parseEntry (entry) {
       name: 'ranjs',
       ...pageDef.data,
       pages,
-      currentPage: pageDef.output
+      currentPage: pageDef.output,
+      channel: CHANNEL
     })
 
     // mjpage is callback-based; wrap so the loop awaits each page. Note:

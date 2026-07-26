@@ -40,7 +40,7 @@ label.menu-button {
 
 .menu-overlay {
   position: fixed;
-  top: $dimTopBarHeight;
+  top: calc(#{$dimTopBarHeight} + var(--ranjs-banner-height, 0px));
   bottom: 0;
   left: 0;
   right: 0;
@@ -53,7 +53,7 @@ label.menu-button {
 
 aside {
   position: fixed;
-  top: $dimTopBarHeight;
+  top: calc(#{$dimTopBarHeight} + var(--ranjs-banner-height, 0px));
   bottom: 0;
   left: 0;
   width: $dimAsideMobile;
