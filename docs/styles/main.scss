@@ -41,24 +41,29 @@
   nav {
     margin-left: auto;
     display: flex;
+    // Without this, items default to align-items: stretch and each <a>
+    // stretches to the row's tallest child instead of sizing to its own
+    // content — the .icon-github svg (18px) then centered inside a box
+    // forced to a mismatched fixed height, throwing off alignment.
+    align-items: center;
     gap: 22px;
 
     a, a:visited {
       color: $colorMuted;
       font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
       text-decoration: none;
     }
 
     a.active { color: $colorInk; }
     a:hover { color: $colorInk; text-decoration: none; }
 
-    // Icon link (GitHub) sits at text baseline height among the text
-    // links; display:flex + its own height keeps the svg vertically
-    // centered instead of stretching the row to the icon's intrinsic size.
+    // display:flex centers the svg on its own box regardless of the
+    // baseline-alignment quirks inline SVGs otherwise have inside an <a>.
     .icon-github {
       display: flex;
       align-items: center;
-      height: 14px;
     }
   }
 }
