@@ -14,6 +14,19 @@ const SeesParser = require('./src/sees-parser')
 const REPO_ROOT = path.resolve(__dirname, '..')
 const VERSION = require('../package.json').version
 
+// Set by docs-deploy.yml to 'unreleased' (built from tip-of-main) or the
+// release version being deployed; local `npm run docs` runs default to
+// 'unreleased' since they never represent a tagged release. See
+// decisions/0043-versioned-docs-deployment.md.
+const CHANNEL = process.env.RANJS_DOCS_CHANNEL || 'unreleased'
+
+// Ties the version indicator to what changed in it — 'unreleased' has no
+// tag yet, so it points at the Unreleased section of CHANGELOG.md instead
+// of a release that doesn't exist.
+const RELEASE_NOTES_URL = CHANNEL === 'unreleased'
+  ? 'https://github.com/synesenom/ran/blob/main/CHANGELOG.md#unreleased'
+  : `https://github.com/synesenom/ran/releases/tag/v${CHANNEL}`
+
 // Register highlight languages.
 hljs.registerLanguage('bash', require('highlight.js/lib/languages/bash'))
 hljs.registerLanguage('xml', require('highlight.js/lib/languages/xml'))
@@ -190,9 +203,18 @@ function parseEntry (entry) {
       navLabel: 'API',
       data: {
         install: {
-          browser: hljs.highlight('<script type="text/javascript" src="ran.min.js"></script>', { language: 'xml' })
-            .value,
+          // No CDN URL for 'unreleased' — nothing published to npm yet
+          // matches tip-of-main, so a script tag here would either 404 or
+          // silently serve the latest *release* instead of the code this
+          // page documents. Handled in index.pug via a fallback message.
+          browser: CHANNEL === 'unreleased'
+            ? null
+            : hljs.highlight(`<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ranjs@${CHANNEL}/dist/ranjs.min.js"></script>`, { language: 'xml' }).value,
           node: hljs.highlight('npm install --save ranjs', { language: 'bash' }).value
+        },
+        treeShaking: {
+          barrel: hljs.highlight("import { dist } from 'ranjs'\n\nconst model = new dist.Normal(0, 1)\nmodel.sample(100)", { language: 'javascript' }).value,
+          subpath: hljs.highlight("import Normal from 'ranjs/dist/normal'\n\nconst model = new Normal(0, 1)\nmodel.sample(100)", { language: 'javascript' }).value
         },
         demo: 'https://beta.observablehq.com/@synesenom/ranjs-demo',
         menu,
@@ -201,15 +223,9 @@ function parseEntry (entry) {
       }
     },
     {
-      template: './docs/templates/porting-scipy.pug',
-      output: 'porting-scipy.html',
-      navLabel: 'SciPy Porting',
-      data: {}
-    },
-    {
-      template: './docs/templates/parameter-estimation.pug',
-      output: 'parameter-estimation.html',
-      navLabel: 'Parameter Estimation',
+      template: './docs/templates/guides.pug',
+      output: 'guides.html',
+      navLabel: 'Guides',
       data: {}
     },
     {
@@ -232,7 +248,9 @@ function parseEntry (entry) {
       name: 'ranjs',
       ...pageDef.data,
       pages,
-      currentPage: pageDef.output
+      currentPage: pageDef.output,
+      channel: CHANNEL,
+      releaseNotesUrl: RELEASE_NOTES_URL
     })
 
     // mjpage is callback-based; wrap so the loop awaits each page. Note:

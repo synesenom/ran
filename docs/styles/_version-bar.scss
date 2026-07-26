@@ -1,0 +1,66 @@
+// Sits directly under the fixed top bar, which stays pinned at top: 0 and
+// never moves. version-switcher.js reveals this banner and reports its
+// measured height via --ranjs-banner-height so scrolling content (main,
+// aside) shifts down without hardcoding a banner height (the text wraps to
+// two lines on narrow viewports). See decisions/0043-versioned-docs-deployment.md.
+@import "colors";
+@import "dimensions";
+
+.version-banner {
+  position: fixed;
+  top: $dimTopBarHeight;
+  left: 0;
+  right: 0;
+  z-index: 95;
+  padding: 8px 22px;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+  color: $colorFontSelect;
+  background: $colorAccent;
+
+  // a:visited explicitly, not just a — links.scss's global a:visited rule
+  // has the same specificity (0,1,1) as .version-banner a and is imported
+  // later in index.scss, so it was winning for any already-visited link,
+  // rendering blue text on the red/accent background (barely visible).
+  a, a:visited {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+// Link-styled, not button-styled — matches links.scss's plain `a` so it
+// reads as an in-line control next to the wordmark rather than a UI widget.
+.version-select {
+  appearance: none;
+  border: none;
+  background: none;
+  color: $colorBlue;
+  font: inherit;
+  font-size: 13px;
+  padding: 0;
+  cursor: pointer;
+
+  &:focus { outline: none; }
+}
+
+// Sits right after .version-select — points at what changed in the version
+// currently on screen. a:visited set explicitly for the same reason as
+// .version-banner above (specificity tie with links.scss's global rule).
+// Negative margin pulls it in from .top's uniform 14px gap — it should
+// read as attached to the version picker, not evenly spaced like the
+// unrelated items around it.
+.version-notes-link, .version-notes-link:visited {
+  margin-left: -10px;
+  color: $colorBlue;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.version-notes-link:hover {
+  text-decoration: underline;
+}

@@ -1,12 +1,15 @@
-// Main column, sticky top bar, hero, pills, namenote, section headings.
+// Main column, sticky top bar, hero, namenote, section headings.
 @import "colors";
 @import "dimensions";
 
 
 // ---- Top navigation bar -----------------------------------------------------
-// <div class="top"><img class="mark"><span class="nm">ran<b>js</b></span><nav>…</nav></div>
+// <div class="top"><img class="mark"><span class="nm">ran<b>js</b></span><select class="version-select">…</select><nav>…</nav></div>
 .top {
   position: fixed;
+  // Stays pinned at the very top — the banner sits in its own strip
+  // directly underneath (.version-banner: top: $dimTopBarHeight), not the
+  // other way around, so the nav bar never jumps when the banner toggles.
   top: 0; left: 0; right: 0;
   height: $dimTopBarHeight;
   display: flex;
@@ -37,7 +40,14 @@
 
   nav {
     margin-left: auto;
+    // Match .top's own height exactly rather than sizing to content and
+    // relying on .top's align-items: center to position that shorter box —
+    // align-items: center below then centers every child (text links and
+    // the octocat svg alike) against the bar's true full height, not just
+    // against each other's line-height.
+    height: 100%;
     display: flex;
+    align-items: center;
     gap: 22px;
 
     a, a:visited {
@@ -48,6 +58,13 @@
 
     a.active { color: $colorInk; }
     a:hover { color: $colorInk; text-decoration: none; }
+
+    // display:flex centers the svg on its own box regardless of the
+    // baseline-alignment quirks inline SVGs otherwise have inside an <a>.
+    .icon-github {
+      display: flex;
+      align-items: center;
+    }
   }
 }
 
@@ -58,7 +75,7 @@
 // landing under the fixed top bar.
 main {
   position: absolute;
-  top: $dimTopBarHeight;
+  top: calc(#{$dimTopBarHeight} + var(--ranjs-banner-height, 0px));
   right: 0;
   bottom: 0;
   width: 100%;
@@ -88,7 +105,11 @@ main > * {
 // <div class="hero"><img class="mark"><div><h1>…</h1><p class="sub">…</p></div></div>
 .hero {
   display: flex;
-  align-items: center;
+  // flex-start, not center: centering against the cross-axis vertically
+  // centers the mark against the *whole* h1+sub column, so once .sub wraps
+  // to two lines (narrow viewports), the mark's center drifts down and no
+  // longer lines up with the h1 title's own line.
+  align-items: flex-start;
   gap: 26px;
   margin: 18px auto 14px;
 
@@ -119,26 +140,6 @@ main > * {
     .zh { color: $colorAccent; font-weight: 500; }
     .gloss { font-style: italic; color: $colorMuted; }
   }
-}
-
-
-// ---- Metadata pills ---------------------------------------------------------
-// <div class="pills"><span class="pill">…</span></div>
-.pills {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin: 22px auto 8px;
-}
-
-.pill {
-  font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
-  font-size: 12px;
-  color: $colorMuted;
-  background: $colorPanel;
-  border: 1px solid $colorLine;
-  border-radius: 999px;
-  padding: 4px 11px;
 }
 
 

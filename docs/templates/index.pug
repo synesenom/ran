@@ -25,22 +25,39 @@ block content
             p.sub
                 | #[span.zh rán · 然] #[span.gloss &ldquo;so; correct&rdquo;] &mdash; robust random variates, distribution testing &amp; statistics for JavaScript.
 
-    .pills
-        span.pill 140+ distributions
-        span.pill seedable
-        span.pill zero deps
-        span.pill MIT
-
-    h2 What is this?
-    p A small library for robust generation of various random variates, testing data against distributions or calculating different statistical properties.
-
     h2 Install in node
     pre.install
         code.hljs !{install.node}
 
+    p Includes TypeScript declarations generated from JSDoc — no #[code @types] package needed.
+
     h2 Use in browser
+    if install.browser
+        pre.install
+            code.hljs !{install.browser}
+    else
+        p.callout
+            strong Note:
+            |  Unreleased builds aren't published to a CDN yet — use npm install above, or
+            | switch to the latest release with the version picker.
+
+    h2 Tree-shaking
+
+    p
+        | ranjs ships as ESM with #[code sideEffects: false], so modern bundlers (Rollup, esbuild,
+        | Webpack 5+) can drop everything you don't use from the barrel entry point:
+
     pre.install
-        code.hljs !{install.browser}
+        code.hljs !{treeShaking.barrel}
+
+    p
+        | That relies on the bundler seeing through the #[code export * as dist from './dist'] namespace
+        | re-export, which not every bundler configuration does equally well. For a result that doesn't
+        | depend on the bundler, import a distribution directly from its own subpath instead — every
+        | distribution has one:
+
+    pre.install
+        code.hljs !{treeShaking.subpath}
 
     h2 Demo
     p
@@ -48,14 +65,16 @@ block content
 
     h2 API
     each entry in api
-        .card(class=entry.deprecated ? 'deprecated' : '')
+        .card(class=entry.deprecated ? 'deprecated' : '', data-index=entry.index)
             if entry.deprecated
                 .deprecated-banner.margined
                     span.deprecated-label Deprecated
                     span.deprecated-message !{entry.deprecated}
-            pre.title(id="" + entry.index) #{entry.signature}
-            // if entry.source
-                a.source-link(href=entry.source, target="_blank", rel="noopener noreferrer") source
+            pre.title(id="" + entry.index)
+                if entry.source
+                    a(href=entry.source, target="_blank", rel="noopener noreferrer") #{entry.signature}
+                else
+                    | #{entry.signature}
             .desc.margined !{entry.desc}
             if entry.params
                 h3 Parameters
@@ -107,13 +126,26 @@ block scripts
         document.getElementById("search").addEventListener("input", function () {
           // Find names containing the search keyword.
           const token = this.value.toLowerCase();
-          const ids = new Set(
+          const matches = new Set(
             list.filter(d => d.split('.').slice(-1)[0].toLowerCase().indexOf(token) > -1)
-              .map(d => `toc-${d}`)
           );
 
-          // Highlight matching entries.
+          // Sidebar entries and their content cards share the same `index`
+          // (toc-entry id is `toc-`-prefixed, the card's is bare), so both
+          // are filtered from the same match set — search narrows the page
+          // itself, not just the nav.
           Array.from(document.getElementsByClassName('toc-entry')).forEach(entry => {
-            entry.style.display = ids.has(entry.id) ? 'block' : 'none';
+            entry.style.display = matches.has(entry.id.slice('toc-'.length)) ? 'block' : 'none';
+          });
+          Array.from(document.getElementsByClassName('card')).forEach(card => {
+            card.style.display = matches.has(card.dataset.index) ? '' : 'none';
+          });
+
+          // Hide a whole section (its header + list) once none of its
+          // entries match, the way lodash's docs sidebar search does.
+          document.querySelectorAll('ul.sections > li').forEach(section => {
+            const hasMatch = Array.from(section.getElementsByClassName('toc-entry'))
+              .some(entry => entry.style.display !== 'none');
+            section.style.display = hasMatch ? '' : 'none';
           });
         });

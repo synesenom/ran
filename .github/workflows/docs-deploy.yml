@@ -1,0 +1,104 @@
+name: Docs Deploy
+
+# Publishes to the gh-pages branch, which accumulates every channel's own
+# directory rather than being replaced wholesale on each run:
+#   - push to main         -> rebuilds /unreleased/
+#   - push of a vX.Y.Z tag -> writes /vX.Y.Z/ once, and mirrors it to the
+#                              site root (so '/' always reflects the latest
+#                              tagged release)
+# GitHub Pages must be configured (Settings > Pages) to deploy from the
+# gh-pages branch for this to actually go live — see
+# decisions/0043-versioned-docs-deployment.md.
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine channel
+        id: channel
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            V="${GITHUB_REF#refs/tags/v}"
+            echo "target=v${V}" >> "$GITHUB_OUTPUT"
+            echo "version=${V}" >> "$GITHUB_OUTPUT"
+            echo "is_release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "target=unreleased" >> "$GITHUB_OUTPUT"
+            echo "version=unreleased" >> "$GITHUB_OUTPUT"
+            echo "is_release=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/cache@v4
+        id: node-cache
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npm ci
+        if: steps.node-cache.outputs.cache-hit != 'true'
+
+      - name: Build docs
+        run: npm run docs
+        env:
+          RANJS_DOCS_CHANNEL: ${{ steps.channel.outputs.version }}
+      - run: test -f docs/index.html && test -f docs/guides.html && test -f docs/demo.html && test -f docs/styles/style.css
+
+      - name: Publish to gh-pages
+        env:
+          TARGET: ${{ steps.channel.outputs.target }}
+          IS_RELEASE: ${{ steps.channel.outputs.is_release }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          SITE=/tmp/gh-pages-site
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            git fetch origin gh-pages
+            git worktree add "$SITE" gh-pages
+          else
+            git worktree add --orphan -b gh-pages "$SITE"
+          fi
+          touch "$SITE/.nojekyll"
+
+          DEST="$SITE/$TARGET"
+          rm -rf "$DEST"
+          mkdir -p "$DEST/styles" "$DEST/assets"
+          cp docs/index.html docs/guides.html docs/demo.html docs/ranjs.min.js "$DEST/"
+          cp docs/styles/style.css "$DEST/styles/style.css"
+          cp -r docs/assets/. "$DEST/assets/"
+
+          if [ "$IS_RELEASE" = "true" ]; then
+            # '/' always mirrors the latest tagged release, never tip-of-main.
+            find "$SITE" -mindepth 1 -maxdepth 1 ! -name "$TARGET" ! -name 'unreleased' ! -name 'v*' -exec rm -rf {} +
+            cp -r "$DEST"/. "$SITE/"
+          fi
+
+          node scripts/build-docs-versions-manifest.js "$SITE"
+
+          cd "$SITE"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to publish."
+          else
+            git commit -m "docs: publish ${TARGET}"
+            git push origin gh-pages
+          fi

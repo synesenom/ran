@@ -83,6 +83,11 @@ jobs:
       - run: ./node_modules/.bin/tsc -p tsconfig.build.json
       - run: npm run typecheck
 
+  # Build-sanity check only — no deploy. Actual publishing (unreleased/ on
+  # push to main, vX.Y.Z/ + root on release tags) is docs-deploy.yml, kept
+  # separate so a plain PR build failure here still fails CI without needing
+  # pages: write permissions on every PR run. See
+  # decisions/0043-versioned-docs-deployment.md.
   docs-build:
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -99,26 +104,7 @@ jobs:
       - run: npm ci
         if: steps.node-cache.outputs.cache-hit != 'true'
       - run: npm run docs
-      - run: test -f docs/index.html && test -f docs/porting-scipy.html && test -f docs/parameter-estimation.html && test -f docs/demo.html && test -f docs/styles/style.css
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./docs
-
-  # deploy-pages@v4 requires upload-pages-artifact@v3 specifically — see solutions/tooling/2026-05-16-1730-docs-pages-deploy-artifact-action.md
-  docs-deploy:
-    needs: [docs-build]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - run: test -f docs/index.html && test -f docs/guides.html && test -f docs/demo.html && test -f docs/styles/style.css
 
   build:
     needs: [lint, jsdoclint, test, typecheck]

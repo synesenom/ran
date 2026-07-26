@@ -55,8 +55,12 @@ npm install ranjs
 ### CDN (browser)
 
 ```html
-<script src="https://unpkg.com/ranjs/dist/ranjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ranjs@1.31.0/dist/ranjs.min.js"></script>
 ```
+
+Pin an exact version — ranjs follows a numpy/scipy-style versioning policy where breaking changes can ship in
+minor releases, so an unpinned or range-based CDN URL can change behavior under you. Bump `1.31.0` to whichever
+version you're targeting; the [full API docs](https://synesenom.github.io/ran/) let you browse any past release.
 
 The library is exported globally as `ranjs`.
 
@@ -141,6 +145,8 @@ console.log(fitted.test(data))  // => { statistics: 0.42, passed: true }
 ```
 
 `fit()` is a **static** method called on the class, not on an instance: `dist.Normal.fit(data)`, not `model.fit(data)`. All 146 exported distributions support `fit()`. Most have a data-aware initial guess for reliable MLE convergence; zero-parameter distributions skip optimization and return a fresh instance.
+
+Full walkthrough (chaining `aic`/`bic`/`sample` off a fitted instance, a discrete-distribution example): [Parameter estimation guide](https://synesenom.github.io/ran/guides.html#what-is-parameter-estimation).
 
 ## API Overview
 
