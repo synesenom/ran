@@ -102,14 +102,18 @@ describe('test', () => {
       seed(0)
       const mu = float(0, 5)
       const sigma = float(1, 10)
-      assert(test.cramerVonMises((new Normal(mu, sigma)).sample(SAMPLE_SIZE), x => (new Normal(mu, sigma)).cdf(x)).passed)
+      // seed(0) above only reseeds the module-level generator behind float()/int() (src/core/index.js);
+      // Normal owns its own Xoshiro128p instance (src/dist/_distribution.js) that self-seeds from
+      // Math.random() unless .seed() is called on it directly, so .sample() must be seeded here too or
+      // the drawn sample - and thus the CvM statistic - is different on every run.
+      assert(test.cramerVonMises((new Normal(mu, sigma)).seed(0).sample(SAMPLE_SIZE), x => (new Normal(mu, sigma)).cdf(x)).passed)
     })
 
     it('should reject for samples drawn from a different distribution', () => {
       seed(0)
       const mu = float(0, 5)
       const sigma = float(1, 10)
-      assert(!test.cramerVonMises((new Normal(mu + 10, sigma)).sample(SAMPLE_SIZE), x => (new Normal(mu, sigma)).cdf(x)).passed)
+      assert(!test.cramerVonMises((new Normal(mu + 10, sigma)).seed(0).sample(SAMPLE_SIZE), x => (new Normal(mu, sigma)).cdf(x)).passed)
     })
 
     // Reference stat/pValue below are cross-checked against scipy 1.17.1:
