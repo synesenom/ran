@@ -40,6 +40,29 @@
     document.documentElement.style.setProperty('--ranjs-banner-height', banner.offsetHeight + 'px')
   }
 
+  // A native <select> sizes itself to its widest <option> (e.g. "unreleased"),
+  // not the selected one, so a short selection like "v1.31.0" leaves visible
+  // slack. Measure the selected option's own text and set an explicit width.
+  function sizeToSelectedOption (select) {
+    const selected = select.options[select.selectedIndex]
+    if (!selected) {
+      return
+    }
+    const style = window.getComputedStyle(select)
+    const probe = document.createElement('span')
+    probe.style.position = 'absolute'
+    probe.style.visibility = 'hidden'
+    probe.style.whiteSpace = 'pre'
+    probe.style.font = style.font
+    probe.textContent = selected.text
+    document.body.appendChild(probe)
+    const textWidth = probe.getBoundingClientRect().width
+    probe.remove()
+    const horizontalChrome = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) +
+      parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth)
+    select.style.width = Math.ceil(textWidth + horizontalChrome) + 'px'
+  }
+
   function renderSelect (manifest, channel, page) {
     const select = document.getElementById('ranjs-version-select')
     if (!select) {
@@ -53,6 +76,7 @@
       const selected = entry.value === channel ? ' selected' : ''
       return '<option value="' + entry.value + '"' + selected + '>' + entry.label + '</option>'
     }).join('')
+    sizeToSelectedOption(select)
     select.addEventListener('change', function () {
       window.location.href = BASE_URL + pathFor(select.value) + '/' + page
     })
