@@ -21,14 +21,6 @@ describe('test', () => {
       }, /andersonDarling: values must not be empty/)
     })
 
-    it('should return stat, pValue and passed properties', () => {
-      const n01 = new Normal(0, 1)
-      const result = test.andersonDarling([1, 2, 3, 4, 5], x => n01.cdf(x))
-      assert.isNumber(result.stat)
-      assert.isNumber(result.pValue)
-      assert.isBoolean(result.passed)
-    })
-
     // See test/ad.js for the independent derivation/verification of these values
     // against the Marsaglia & Marsaglia (2004) asymptotic formula.
     it('should match the hand-checked reference stat and pValue', () => {
