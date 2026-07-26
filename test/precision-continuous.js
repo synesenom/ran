@@ -3208,7 +3208,7 @@ const REFS = [
       { x: 2.870032352632938, pdf: 0.19862324918959134, cdf: 0.9 }
     ]
   },
-  // NoncentralChi[5,7.5]: x sits near marcumQ's series/asymptotic dispatch threshold (x=30); pdf/cdf/quantile measured up to ~1.2e-13 in JIT-order-dependent full-suite runs (V8 rounding differs from an isolated run) -- gate at 5e-13
+  // NoncentralChi[5, 7.5]: x sits near marcumQ's series/asymptotic dispatch threshold (x=30); pdf/cdf/quantile measured up to ~1.2e-13 in JIT-order-dependent full-suite runs (V8 rounding differs from an isolated run) -- gate at 5e-13
   {
     name: 'NoncentralChi',
     params: [5, 7.5],
@@ -3220,6 +3220,19 @@ const REFS = [
       { x: 7.836839592589605, pdf: 0.4045565271965982, cdf: 0.53 },
       { x: 8.336294189382912, pdf: 0.3418700397177332, cdf: 0.72 },
       { x: 9.024839527808627, pdf: 0.17795311131153096, cdf: 0.9 }
+    ]
+  },
+  {
+    name: 'NoncentralChi',
+    params: [5, 0.5],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: 1.3009124591122097, pdf: 0.30081198252263913, cdf: 0.1 },
+      { x: 1.7753901436984245, pdf: 0.5213182371076946, cdf: 0.3 },
+      { x: 2.1920180020153532, pdf: 0.5518647678145459, cdf: 0.53 },
+      { x: 2.5678298023723367, pdf: 0.44357281285387773, cdf: 0.72 },
+      { x: 3.113593904152331, pdf: 0.2189303473349283, cdf: 0.9 }
     ]
   },
   {
@@ -3262,7 +3275,7 @@ const REFS = [
       { x: 6.770130260953069, pdf: 0.0365587760021899, cdf: 0.9 }
     ]
   },
-  // NoncentralChi2[5,58]: x sits near marcumQ's series/asymptotic dispatch threshold (x=30); pdf/cdf/quantile measured up to ~1.2e-13 in JIT-order-dependent full-suite runs (V8 rounding differs from an isolated run) -- gate at 5e-13
+  // NoncentralChi2[5, 58]: x sits near marcumQ's series/asymptotic dispatch threshold (x=30); pdf/cdf/quantile measured up to ~1.2e-13 in JIT-order-dependent full-suite runs (V8 rounding differs from an isolated run) -- gate at 5e-13
   {
     name: 'NoncentralChi2',
     params: [5, 58],
@@ -3276,7 +3289,7 @@ const REFS = [
       { x: 83.48958891740753, pdf: 0.009734204702816305, cdf: 0.9 }
     ]
   },
-  // NoncentralChi2[5,62]: x sits near marcumQ's series/asymptotic dispatch threshold (x=30); pdf/cdf/quantile measured up to ~1.2e-13 in JIT-order-dependent full-suite runs (V8 rounding differs from an isolated run) -- gate at 5e-13
+  // NoncentralChi2[5, 62]: x sits near marcumQ's series/asymptotic dispatch threshold (x=30); pdf/cdf/quantile measured up to ~1.2e-13 in JIT-order-dependent full-suite runs (V8 rounding differs from an isolated run) -- gate at 5e-13
   {
     name: 'NoncentralChi2',
     params: [5, 62],
@@ -3288,6 +3301,19 @@ const REFS = [
       { x: 67.2203921302756, pdf: 0.02463494199742843, cdf: 0.53 },
       { x: 75.67191039556722, pdf: 0.01962409906652587, cdf: 0.72 },
       { x: 88.1410880548629, pdf: 0.009466611488950172, cdf: 0.9 }
+    ]
+  },
+  {
+    name: 'NoncentralChi2',
+    params: [5, 0.5],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: 1.777534378440969, pdf: 0.11017336598436178, cdf: 0.1 },
+      { x: 3.308177215154932, pdf: 0.1401051177378646, cdf: 0.3 },
+      { x: 5.039003755137682, pdf: 0.12030352932495529, cdf: 0.53 },
+      { x: 6.909331762254181, pdf: 0.08266685134919813, cdf: 0.72 },
+      { x: 10.145187518904622, pdf: 0.03372676539369522, cdf: 0.9 }
     ]
   },
   {
@@ -3840,7 +3866,7 @@ const REFS = [
       { x: 2.6019473978067023, pdf: 0.19024802417179226, cdf: 0.9 }
     ]
   },
-  // Rice[7,1]: x sits near marcumQ's series/asymptotic dispatch threshold (x=30); pdf/cdf/quantile measured up to ~1.2e-13 in JIT-order-dependent full-suite runs (V8 rounding differs from an isolated run) -- gate at 5e-13
+  // Rice[7, 1]: x sits near marcumQ's series/asymptotic dispatch threshold (x=30); pdf/cdf/quantile measured up to ~1.2e-13 in JIT-order-dependent full-suite runs (V8 rounding differs from an isolated run) -- gate at 5e-13
   {
     name: 'Rice',
     params: [7, 1],
@@ -4236,8 +4262,7 @@ const REFS = [
       { x: 9.528131719622236, pdf: 0.03730560772525917, cdf: 0.9 }
     ]
   },
-  // Tweedie[3, 0.5, 1.2]: pdf's log-space series/EDM-exponential-factor combination accumulates
-  // a few ULPs beyond 1e-14 at this parameter set
+  // Tweedie[3, 0.5, 1.2]: series/transform accumulates a few ULPs beyond 1e-14
   {
     name: 'Tweedie',
     params: [3, 0.5, 1.2],
@@ -4264,8 +4289,7 @@ const REFS = [
       { x: 24.78577737318644, pdf: 0.00878586825414959, cdf: 0.9 }
     ]
   },
-  // Tweedie[5, 0.5, 1.02]: p near 1 (near-Poisson boundary) -- the series' Stirling-estimated
-  // peak term sits closest to the pole in Gamma(-j*alpha) here, accumulating a few ULPs beyond 1e-14
+  // Tweedie[5, 0.5, 1.02]: series peaks nearest the Gamma(-j*alpha) pole (p->1) here, accumulating a few ULPs beyond 1e-14
   {
     name: 'Tweedie',
     params: [5, 0.5, 1.02],
@@ -4279,7 +4303,7 @@ const REFS = [
       { x: 7.113597182676574, pdf: 0.09692593743943335, cdf: 0.9 }
     ]
   },
-  // Tweedie[5, 0.5, 1.98]: p near 2 (near-Gamma boundary) -- jPeak grows largest here
+  // Tweedie[5, 0.5, 1.98]: series/transform accumulates a few ULPs beyond 1e-14
   {
     name: 'Tweedie',
     params: [5, 0.5, 1.98],
@@ -4385,8 +4409,7 @@ const REFS = [
       { x: 0.042770869392537054, pdf: 2.5922659044150964, cdf: 0.9 }
     ]
   },
-  // UniformProduct[2]: q() has no closed form (numerical root-finding); round-trip measured at
-  // 1.1e-14 on Node 20 (V8/libm rounding differs across Node versions) — gate at 1e-13 (#759)
+  // UniformProduct[2]: q() has no closed form (numerical root-finding); round-trip measured at 1.1e-14 on Node 20 (V8/libm rounding differs across Node versions) — gate at 1e-13 (#759)
   {
     name: 'UniformProduct',
     params: [2],
@@ -4400,8 +4423,7 @@ const REFS = [
       { x: 0.587539613272788, pdf: 0.5318116083896121, cdf: 0.9 }
     ]
   },
-  // UniformProduct[4]: q() has no closed form (numerical root-finding); round-trip measured at
-  // 1.4e-13 in JIT-order-dependent full-suite runs — gate at 5e-13 (#759)
+  // UniformProduct[4]: q() has no closed form (numerical root-finding); round-trip measured at 1.4e-13 in JIT-order-dependent full-suite runs — gate at 5e-13 (#759)
   {
     name: 'UniformProduct',
     params: [4],
