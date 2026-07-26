@@ -1,0 +1,591 @@
+<!DOCTYPE html><html lang="en" data-ranjs-channel="unreleased"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="icon" type="image/svg+xml" href="assets/ran.svg"><link rel="icon" type="image/svg+xml" href="assets/ran-white.svg" media="(prefers-color-scheme: dark)"><link rel="icon" type="image/png" sizes="256x256" href="assets/ran-256.png"><link rel="icon" type="image/png" sizes="256x256" href="assets/ran-white.png" media="(prefers-color-scheme: dark)"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet"><link rel="stylesheet" type="text/css" href="styles/style.css"><title>ranjs</title></head><body><div class="version-banner" id="ranjs-version-banner" hidden=""></div><div class="top"><img class="mark" src="assets/ran.svg" alt="然"><span class="nm">ran<b>js</b></span><nav><a href="index.html">API</a><a href="porting-scipy.html">SciPy Porting</a><a href="parameter-estimation.html">Parameter Estimation</a><a class="active" href="demo.html">Demo</a><a href="https://github.com/synesenom/ran" target="_blank" rel="noopener">GitHub</a><select class="version-select" id="ranjs-version-select" aria-label="Documentation version"></select></nav></div><main><section id="dist-section"><div class="demo-controls"><div class="demo-param-group"><label for="dist-select">Distribution</label><select id="dist-select"></select></div><div id="param-inputs"></div><div class="demo-param-group"><label for="sample-size">Samples</label><input id="sample-size" type="number" value="10000" min="1000" max="20000" step="1000"></div><button class="demo-fit-btn" id="fit-btn">Fit to samples</button></div><div class="demo-charts"><div class="demo-chart-panel"><h3>PDF / PMF</h3><div class="demo-chart-wrap" id="pdf-chart"></div></div><div class="demo-chart-panel"><h3>CDF</h3><div class="demo-chart-wrap" id="cdf-chart"></div></div></div><div class="demo-fit-section" id="fit-section" style="display:none"><h3>MLE Fit Results</h3><p class="demo-fit-msg" id="fit-msg"></p><table class="demo-fit-table" id="fit-table"><thead><tr><th>Param</th><th>Planted</th><th>Fitted</th><th>Deviation</th></tr></thead><tbody id="fit-tbody"></tbody></table></div></section><section id="proc-section"><h2 class="demo-section-heading">Stochastic Processes</h2><div class="demo-controls"><div class="demo-param-group"><label for="proc-select">Process</label><select id="proc-select"></select></div><div id="proc-param-inputs"></div><div class="demo-param-group"><label for="proc-steps">Steps</label><input id="proc-steps" type="number" value="100" min="10" max="1000" step="10"></div></div><div class="demo-charts"><div class="demo-chart-panel"><h3>Sample Paths</h3><div class="demo-chart-wrap" id="path-chart"></div></div></div></section><script src="ranjs.min.js"></script><script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script><script>const DISTRIBUTIONS = {
+  Beta:            { type: 'continuous', args: [{name:'alpha', default:2},    {name:'beta', default:5}] },
+  Cauchy:          { type: 'continuous', args: [{name:'x0', default:0},       {name:'gamma', default:1}] },
+  Exponential:     { type: 'continuous', args: [{name:'lambda', default:1}] },
+  Gamma:           { type: 'continuous', args: [{name:'alpha', default:2},    {name:'beta', default:1}] },
+  LogNormal:       { type: 'continuous', args: [{name:'mu', default:0},       {name:'sigma', default:1}] },
+  Normal:          { type: 'continuous', args: [{name:'mu', default:0},       {name:'sigma', default:1}] },
+  Pareto:          { type: 'continuous', args: [{name:'xmin', default:1},     {name:'alpha', default:2}] },
+  StudentT:        { type: 'continuous', args: [{name:'nu', default:5}] },
+  Uniform:         { type: 'continuous', args: [{name:'xmin', default:0},     {name:'xmax', default:5}] },
+  Weibull:         { type: 'continuous', args: [{name:'lambda', pkey:'lambda2', default:1}, {name:'k', default:1.5}] },
+  Binomial:        { type: 'discrete',   fitDisplay: false, args: [{name:'n', default:10}, {name:'p', default:0.4}] },
+  Geometric:       { type: 'discrete',   args: [{name:'p', default:0.3}] },
+  NegativeBinomial:{ type: 'discrete',   args: [{name:'r', default:5},       {name:'p', default:0.4}] },
+  Poisson:         { type: 'discrete',   args: [{name:'lambda', default:4}] },
+  Zipf:            { type: 'discrete',   fitDisplay: false, args: [{name:'s', default:1}, {name:'N', default:20}] }
+}
+
+const PROCESSES = {
+  BrownianMotion: {
+    args: [
+      {name: 'mu', default: 0},
+      {name: 'sigma', default: 1},
+      {name: 'dt', default: 1}
+    ]
+  }
+}
+
+const distSelect = document.getElementById('dist-select')
+const paramInputs = document.getElementById('param-inputs')
+const sampleSizeInput = document.getElementById('sample-size')
+const fitBtn = document.getElementById('fit-btn')
+const fitSection = document.getElementById('fit-section')
+const fitMsg = document.getElementById('fit-msg')
+const fitTbody = document.getElementById('fit-tbody')
+
+const procSelect = document.getElementById('proc-select')
+const procParamInputs = document.getElementById('proc-param-inputs')
+const procStepsInput = document.getElementById('proc-steps')
+let pathSvg = null
+let procDebounceTimer = null
+const PATH_COUNT = 7
+
+let currentSamples = null
+let debounceTimer = null
+let pdfSvg = null
+let cdfSvg = null
+let lastRenderState = null
+const CHART_H = 304
+const MARGIN = {top: 12, right: 16, bottom: 36, left: 48}
+const COLOR_HIST    = '#e4e9ef' // histogram bar fill
+const COLOR_SAMPLES = '#5c6b7a' // empirical CDF / sample markers
+const COLOR_BLUE    = '#2563b6' // theoretical curve (planted params)
+const COLOR_FIT     = '#b23a2e' // fitted overlay
+
+// ---- Helpers -------------------------------------------------------
+
+function chartWidth (id) {
+  return document.getElementById(id).offsetWidth || 600
+}
+
+function clamp (v, lo, hi) {
+  return v < lo ? lo : v > hi ? hi : v
+}
+
+function linspace (a, b, n) {
+  const step = (b - a) / (n - 1)
+  return Array.from({length: n}, (_, i) => a + i * step)
+}
+
+function computeXRange (dist, samples, cfg) {
+  if (cfg.type === 'continuous') {
+    let lo = dist.q(0.001)
+    let hi = dist.q(0.999)
+    const smin = Math.min(...samples)
+    const smax = Math.max(...samples)
+    const pad = (smax - smin) * 0.1 || 1
+    if (!isFinite(lo)) lo = smin - pad
+    if (!isFinite(hi)) hi = smax + pad
+    // Hard cap: wide-tailed distributions (e.g. Cauchy) produce
+    // enormous quantile ranges that make charts uninformative.
+    const spread = hi - lo
+    if (spread > 100) {
+      const mid = (lo + hi) / 2
+      lo = mid - 50
+      hi = mid + 50
+    }
+    return [lo, hi]
+  } else {
+    const smin = Math.min(...samples)
+    const smax = Math.max(...samples)
+    return [smin - 1, smax + 2]
+  }
+}
+
+function makeEmpiricalCdf (samples) {
+  const sorted = samples.slice().sort((a, b) => a - b)
+  const n = sorted.length
+  return sorted.map((v, i) => ({x: v, y: (i + 1) / n}))
+}
+
+function applyAxisStyle (sel) {
+  sel.select('.domain').attr('stroke', COLOR_HIST)
+  sel.selectAll('.tick line').attr('stroke', COLOR_HIST)
+  sel.selectAll('.tick text').attr('fill', '#5c6b7a').style('font-size', '11px').style('font-family', 'inherit')
+}
+
+// Append one legend row at the given index.
+// shape: 'rect' draws a filled rectangle, anything else draws a line.
+function addLegendEntry (gLegend, idx, color, dashed, shape, label) {
+  const row = gLegend.append('g').attr('transform', `translate(0, ${idx * 15})`)
+  if (shape === 'rect') {
+    row.append('rect').attr('width', 14).attr('height', 8).attr('y', -7).attr('fill', color)
+  } else {
+    const ln = row.append('line').attr('x2', 14).attr('stroke', color).attr('stroke-width', 2)
+    if (dashed) ln.attr('stroke-dasharray', '5,3')
+  }
+  row.append('text').attr('x', 18).attr('fill', '#5c6b7a')
+    .style('font-size', '10px').style('font-family', 'inherit').text(label)
+}
+
+// Build the SVG scaffold for one chart panel: defs+clipPath, axes, clipped
+// data group, unclipped legend group. Returns {gData, gLegend, xScale, iW, iH}.
+function buildChart (svg, clipId, w, iW, iH) {
+  svg.attr('width', w).attr('height', CHART_H).selectAll('*').remove()
+  svg.append('defs').append('clipPath').attr('id', clipId)
+    .append('rect').attr('width', iW).attr('height', iH)
+  const g = svg.append('g').attr('transform', `translate(${MARGIN.left},${MARGIN.top})`)
+  const gData   = g.append('g').attr('class', 'data').attr('clip-path', `url(#${clipId})`)
+  const gLegend = g.append('g').attr('class', 'legend').attr('transform', 'translate(8, 6)')
+  return {g, gData, gLegend}
+}
+
+// ---- Chart init (called once after DOM ready) -----------------------
+
+function initCharts () {
+  pdfSvg = d3.select('#pdf-chart').append('svg')
+    .style('display', 'block').style('position', 'absolute')
+    .style('top', '0').style('left', '0')
+  cdfSvg = d3.select('#cdf-chart').append('svg')
+    .style('display', 'block').style('position', 'absolute')
+    .style('top', '0').style('left', '0')
+}
+
+// ---- Fit overlay (appended on top of base render) ------------------
+
+function overlayFit (fittedDist) {
+  if (!lastRenderState) return
+  const {cfg, xMin, xMax, yPdfMax, wPdf, wCdf, iPdf, iCdf, iH} = lastRenderState
+  const xPdf  = d3.scaleLinear().domain([xMin, xMax]).range([0, iPdf])
+  const yPdf  = d3.scaleLinear().domain([0, yPdfMax]).range([iH, 0])
+  const xCdf  = d3.scaleLinear().domain([xMin, xMax]).range([0, iCdf])
+  const yCdf  = d3.scaleLinear().domain([0, 1.05]).range([iH, 0])
+  const gPdfData   = pdfSvg.select('.data')
+  const gCdfData   = cdfSvg.select('.data')
+  const gPdfLegend = pdfSvg.select('.legend')
+  const gCdfLegend = cdfSvg.select('.legend')
+
+  if (cfg.type === 'continuous') {
+    const fitPts = linspace(xMin, xMax, 200)
+      .map(x => ({x, y: fittedDist.pdf(x)})).filter(p => isFinite(p.y))
+    gPdfData.append('path').datum(fitPts)
+      .attr('fill', 'none').attr('stroke', COLOR_FIT).attr('stroke-width', 2)
+      .attr('stroke-dasharray', '5,3')
+      .attr('d', d3.line().x(d => xPdf(d.x)).y(d => yPdf(d.y)))
+  } else {
+    const kMin = Math.round(xMin), kMax = Math.round(xMax)
+    const fitPts = []
+    for (let k = kMin; k <= kMax; k++) {
+      const y = fittedDist.pdf(k)
+      if (isFinite(y)) fitPts.push({x: k, y})
+    }
+    gPdfData.selectAll('.fit-dot').data(fitPts).join('circle')
+      .attr('class', 'fit-dot')
+      .attr('cx', d => xPdf(d.x)).attr('cy', d => yPdf(d.y))
+      .attr('r', 5).attr('fill', 'none')
+      .attr('stroke', COLOR_FIT).attr('stroke-width', 2)
+  }
+
+  let fitCdfPts
+  if (cfg.type === 'discrete') {
+    const kMin = Math.round(xMin), kMax = Math.round(xMax)
+    fitCdfPts = []
+    for (let k = kMin; k <= kMax; k++) {
+      const prev = k > kMin ? fittedDist.cdf(k - 1) : 0
+      fitCdfPts.push({x: k, y: prev}, {x: k, y: fittedDist.cdf(k)})
+    }
+    fitCdfPts = fitCdfPts.filter(p => isFinite(p.y))
+  } else {
+    fitCdfPts = linspace(xMin, xMax, 200)
+      .map(x => ({x, y: fittedDist.cdf(x)})).filter(p => isFinite(p.y))
+  }
+  gCdfData.append('path').datum(fitCdfPts)
+    .attr('fill', 'none').attr('stroke', COLOR_FIT).attr('stroke-width', 2)
+    .attr('stroke-dasharray', '5,3')
+    .attr('d', d3.line().x(d => xCdf(d.x)).y(d => yCdf(d.y)))
+
+  const nPdf = gPdfLegend.selectAll('g').size()
+  const nCdf = gCdfLegend.selectAll('g').size()
+  addLegendEntry(gPdfLegend, nPdf, COLOR_FIT, true, 'line', 'fitted')
+  addLegendEntry(gCdfLegend, nCdf, COLOR_FIT, true, 'line', 'fitted')
+}
+
+// ---- Core render ---------------------------------------------------
+
+function renderDemo (name, params, n) {
+  const cfg = DISTRIBUTIONS[name]
+  const dist = new ranjs.dist[name](...params)
+  const samples = dist.sample(n)
+  const [xMin, xMax] = computeXRange(dist, samples, cfg)
+
+  const wPdf = chartWidth('pdf-chart')
+  const wCdf = chartWidth('cdf-chart')
+  const iPdf = wPdf - MARGIN.left - MARGIN.right
+  const iCdf = wCdf - MARGIN.left - MARGIN.right
+  const iH   = CHART_H - MARGIN.top - MARGIN.bottom
+
+  // ---- PDF panel ----
+  const {g: gPdf, gData: gPdfData, gLegend: gPdfLegend} = buildChart(pdfSvg, 'pdf-clip', wPdf, iPdf, iH)
+  const xPdf = d3.scaleLinear().domain([xMin, xMax]).range([0, iPdf])
+
+  let yPdfMax
+  if (cfg.type === 'continuous') {
+    const nBins = Math.min(50, Math.max(10, Math.ceil(Math.sqrt(n))))
+    const binW  = (xMax - xMin) / nBins
+    const counts = new Array(nBins).fill(0)
+    for (const v of samples) counts[clamp(Math.floor((v - xMin) / binW), 0, nBins - 1)]++
+    const bins   = counts.map((c, i) => ({x0: xMin + i * binW, x1: xMin + (i + 1) * binW, y: c / (n * binW)}))
+    const pdfPts = linspace(xMin, xMax, 200).map(x => ({x, y: dist.pdf(x)})).filter(p => isFinite(p.y))
+    yPdfMax = Math.max(...bins.map(b => b.y), ...pdfPts.map(p => p.y)) * 1.25 || 1
+    const yPdf = d3.scaleLinear().domain([0, yPdfMax]).range([iH, 0])
+    gPdf.append('g').attr('transform', `translate(0,${iH})`).call(d3.axisBottom(xPdf).ticks(5)).call(applyAxisStyle)
+    gPdf.append('g').call(d3.axisLeft(yPdf).ticks(4)).call(applyAxisStyle)
+    gPdfData.selectAll('rect').data(bins).join('rect')
+      .attr('x', d => xPdf(d.x0) + 0.5)
+      .attr('y', d => yPdf(d.y))
+      .attr('width', d => Math.max(0, xPdf(d.x1) - xPdf(d.x0) - 1))
+      .attr('height', d => iH - yPdf(d.y))
+      .attr('fill', COLOR_HIST)
+    gPdfData.append('path').datum(pdfPts)
+      .attr('fill', 'none').attr('stroke', COLOR_BLUE).attr('stroke-width', 2)
+      .attr('d', d3.line().x(d => xPdf(d.x)).y(d => yPdf(d.y)))
+    addLegendEntry(gPdfLegend, 0, COLOR_HIST,    false, 'rect', 'samples')
+    addLegendEntry(gPdfLegend, 1, COLOR_BLUE,    false, 'line', 'planted')
+  } else {
+    const kMin = Math.round(xMin), kMax = Math.round(xMax)
+    const freq  = {}
+    for (const v of samples) { const k = Math.round(v); freq[k] = (freq[k] || 0) + 1 }
+    const bars  = []
+    for (let k = kMin; k <= kMax; k++) bars.push({k, y: (freq[k] || 0) / n})
+    const pmfPts = bars.map(d => ({x: d.k, y: dist.pdf(d.k)})).filter(p => isFinite(p.y))
+    yPdfMax = Math.max(...bars.map(b => b.y), ...pmfPts.map(p => p.y)) * 1.25 || 1
+    const yPdf = d3.scaleLinear().domain([0, yPdfMax]).range([iH, 0])
+    const bW   = Math.max(1, iPdf / (kMax - kMin + 2) * 0.6)
+    gPdf.append('g').attr('transform', `translate(0,${iH})`).call(d3.axisBottom(xPdf).ticks(5)).call(applyAxisStyle)
+    gPdf.append('g').call(d3.axisLeft(yPdf).ticks(4)).call(applyAxisStyle)
+    gPdfData.selectAll('rect').data(bars).join('rect')
+      .attr('x', d => xPdf(d.k) - bW / 2)
+      .attr('y', d => yPdf(d.y))
+      .attr('width', bW)
+      .attr('height', d => iH - yPdf(d.y))
+      .attr('fill', COLOR_HIST)
+    gPdfData.selectAll('circle').data(pmfPts).join('circle')
+      .attr('cx', d => xPdf(d.x)).attr('cy', d => yPdf(d.y))
+      .attr('r', 4).attr('fill', COLOR_BLUE)
+    addLegendEntry(gPdfLegend, 0, COLOR_HIST, false, 'rect', 'samples')
+    addLegendEntry(gPdfLegend, 1, COLOR_BLUE, false, 'line', 'planted')
+  }
+
+  // ---- CDF panel ----
+  const {g: gCdf, gData: gCdfData, gLegend: gCdfLegend} = buildChart(cdfSvg, 'cdf-clip', wCdf, iCdf, iH)
+  const xCdf = d3.scaleLinear().domain([xMin, xMax]).range([0, iCdf])
+  const yCdf = d3.scaleLinear().domain([0, 1.05]).range([iH, 0])
+  gCdf.append('g').attr('transform', `translate(0,${iH})`).call(d3.axisBottom(xCdf).ticks(5)).call(applyAxisStyle)
+  gCdf.append('g').call(d3.axisLeft(yCdf).ticks(4)).call(applyAxisStyle)
+
+  const empPts = makeEmpiricalCdf(samples)
+  gCdfData.append('path').datum(empPts)
+    .attr('fill', 'none').attr('stroke', COLOR_SAMPLES).attr('stroke-width', 1.5)
+    .attr('d', d3.line().x(d => xCdf(d.x)).y(d => yCdf(d.y)).curve(d3.curveStepAfter))
+
+  let cdfPts
+  if (cfg.type === 'discrete') {
+    // Staircase: duplicate each k so the step rises at the integer.
+    const kMin = Math.round(xMin), kMax = Math.round(xMax)
+    cdfPts = []
+    for (let k = kMin; k <= kMax; k++) {
+      const prev = k > kMin ? dist.cdf(k - 1) : 0
+      cdfPts.push({x: k, y: prev}, {x: k, y: dist.cdf(k)})
+    }
+    cdfPts = cdfPts.filter(p => isFinite(p.y))
+  } else {
+    cdfPts = linspace(xMin, xMax, 200).map(x => ({x, y: dist.cdf(x)})).filter(p => isFinite(p.y))
+  }
+  gCdfData.append('path').datum(cdfPts)
+    .attr('fill', 'none').attr('stroke', COLOR_BLUE).attr('stroke-width', 2)
+    .attr('d', d3.line().x(d => xCdf(d.x)).y(d => yCdf(d.y)))
+
+  addLegendEntry(gCdfLegend, 0, COLOR_SAMPLES, false, 'line', 'samples')
+  addLegendEntry(gCdfLegend, 1, COLOR_BLUE,    false, 'line', 'planted')
+
+  lastRenderState = {cfg, xMin, xMax, yPdfMax, wPdf, wCdf, iPdf, iCdf, iH}
+  return samples
+}
+
+// ---- Parameter inputs ----------------------------------------------
+
+function getCurrentParamInputs () {
+  return Array.from(paramInputs.querySelectorAll('input[type="number"]'))
+}
+
+function populateParams (name) {
+  const cfg = DISTRIBUTIONS[name]
+  paramInputs.innerHTML = ''
+  cfg.args.forEach(arg => {
+    const group = document.createElement('div')
+    group.className = 'demo-param-group'
+
+    const lbl = document.createElement('label')
+    lbl.textContent = arg.name
+    lbl.setAttribute('for', 'param-' + arg.name)
+
+    const inp = document.createElement('input')
+    inp.type = 'number'
+    inp.id = 'param-' + arg.name
+    inp.value = arg.default
+    inp.step = 'any'
+    inp.addEventListener('input', scheduleUpdate)
+
+    group.appendChild(lbl)
+    group.appendChild(inp)
+    paramInputs.appendChild(group)
+  })
+}
+
+// ---- Update loop ---------------------------------------------------
+
+function scheduleUpdate () {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(doUpdate, 300)
+}
+
+function doUpdate () {
+  const name = distSelect.value
+  const cfg = DISTRIBUTIONS[name]
+  const inputs = getCurrentParamInputs()
+  const params = cfg.args.map((a, i) => {
+    const v = parseFloat(inputs[i] && inputs[i].value)
+    return isNaN(v) ? a.default : v
+  })
+  const n = parseInt(sampleSizeInput.value) || 500
+  currentSamples = null
+  lastRenderState = null
+  fitSection.style.display = 'none'
+  try {
+    currentSamples = renderDemo(name, params, n)
+  } catch (e) {
+    // Invalid params — charts remain stale; silently skip
+  }
+}
+
+// ---- Fit button ----------------------------------------------------
+
+function showFitResults (rows) {
+  fitTbody.innerHTML = ''
+  rows.forEach(row => {
+    const tr = document.createElement('tr')
+    const devClass = !isFinite(row.deviation) ? 'dev-zero'
+      : row.deviation > 0 ? 'dev-pos' : row.deviation < 0 ? 'dev-neg' : 'dev-zero'
+    const devText = !isFinite(row.deviation) ? '—'
+      : (row.deviation > 0 ? '+' : '') + row.deviation.toFixed(2) + '%'
+    tr.innerHTML = '<td>' + row.name + '</td>'
+      + '<td>' + row.planted.toPrecision(4) + '</td>'
+      + '<td>' + row.fitted.toPrecision(4) + '</td>'
+      + '<td class="' + devClass + '">' + devText + '</td>'
+    fitTbody.appendChild(tr)
+  })
+  fitMsg.textContent = ''
+  fitSection.style.display = ''
+}
+
+fitBtn.addEventListener('click', () => {
+  if (!currentSamples) return
+  const name = distSelect.value
+  const cfg = DISTRIBUTIONS[name]
+  const inputs = getCurrentParamInputs()
+  const planted = cfg.args.map((a, i) => {
+    const v = parseFloat(inputs[i] && inputs[i].value)
+    return isNaN(v) ? a.default : v
+  })
+
+  if (cfg.fitDisplay === false) {
+    fitMsg.textContent = 'Fit display not supported for ' + name + ' (pre-computed table distribution).'
+    fitTbody.innerHTML = ''
+    fitSection.style.display = ''
+    return
+  }
+
+  fitBtn.disabled = true
+  fitBtn.textContent = 'Fitting…'
+
+  setTimeout(() => {
+    try {
+      const fitted = ranjs.dist[name].fit(currentSamples)
+      const rows = cfg.args.map((a, idx) => {
+        // See solutions/tooling/2026-05-29-1734-this-p-subclass-pkey-fit-display.md
+        const key = a.pkey || a.name
+        const fittedVal = fitted.p[key]
+        const plantedVal = planted[idx]
+        const dev = (plantedVal !== 0 && isFinite(plantedVal))
+          ? (fittedVal - plantedVal) / plantedVal * 100
+          : NaN
+        return {name: a.name, planted: plantedVal, fitted: fittedVal, deviation: dev}
+      })
+      showFitResults(rows)
+      overlayFit(fitted)
+    } catch (e) {
+      fitMsg.textContent = 'Fit failed: ' + e.message
+      fitTbody.innerHTML = ''
+      fitSection.style.display = ''
+    }
+    fitBtn.disabled = false
+    fitBtn.textContent = 'Fit to samples'
+  }, 0)
+})
+
+// ---- Process parameter inputs --------------------------------------
+
+function getCurrentProcParamInputs () {
+  return Array.from(procParamInputs.querySelectorAll('input[type="number"]'))
+}
+
+function populateProcessParams (name) {
+  const cfg = PROCESSES[name]
+  procParamInputs.innerHTML = ''
+  cfg.args.forEach(arg => {
+    const group = document.createElement('div')
+    group.className = 'demo-param-group'
+    const lbl = document.createElement('label')
+    lbl.textContent = arg.name
+    lbl.setAttribute('for', 'proc-param-' + arg.name)
+    const inp = document.createElement('input')
+    inp.type = 'number'
+    inp.id = 'proc-param-' + arg.name
+    inp.value = arg.default
+    inp.step = 'any'
+    inp.addEventListener('input', scheduleProcUpdate)
+    group.appendChild(lbl)
+    group.appendChild(inp)
+    procParamInputs.appendChild(group)
+  })
+}
+
+// ---- Process render ------------------------------------------------
+
+function renderProcess (name, params, steps) {
+  const proc = new ranjs.process[name](...params)
+  const dt = proc.p.dt || 1
+
+  // seed once so visualizations are deterministic across re-renders;
+  // path() advances the PRNG stream so consecutive calls produce
+  // independent realizations automatically.
+  proc.seed(42)
+  const paths = Array.from({length: PATH_COUNT}, () => proc.path(steps))
+
+  // Compute mean ± σ reference overlay when the process exposes
+  // analytical moment methods (not all future subclasses will).
+  const hasRef = typeof proc.mean === 'function' && typeof proc.variance === 'function'
+  const refPts = hasRef
+    ? Array.from({length: steps + 1}, (_, i) => {
+        const t = i * dt
+        const mu = proc.mean(t)
+        const std = Math.sqrt(Math.max(0, proc.variance(t)))
+        return {t, mean: mu, lo: mu - std, hi: mu + std}
+      })
+    : []
+
+  const w = chartWidth('path-chart')
+  const iW = w - MARGIN.left - MARGIN.right
+  const iH = CHART_H - MARGIN.top - MARGIN.bottom
+
+  const {g, gData, gLegend} = buildChart(pathSvg, 'path-clip', w, iW, iH)
+
+  const xScale = d3.scaleLinear().domain([0, steps * dt]).range([0, iW])
+
+  const allVals = paths.flat().filter(isFinite)
+  if (hasRef) refPts.forEach(p => { allVals.push(p.hi); allVals.push(p.lo) })
+  const yMin = Math.min(...allVals)
+  const yMax = Math.max(...allVals)
+  const yPad = (yMax - yMin) * 0.1 || 1
+  const yScale = d3.scaleLinear().domain([yMin - yPad, yMax + yPad]).range([iH, 0])
+
+  g.append('g').attr('transform', `translate(0,${iH})`)
+    .call(d3.axisBottom(xScale).ticks(5)).call(applyAxisStyle)
+  g.append('g').call(d3.axisLeft(yScale).ticks(4)).call(applyAxisStyle)
+
+  // ±1σ band and mean line drawn first so sample paths render on top
+  if (hasRef) {
+    gData.append('path').datum(refPts)
+      .attr('fill', COLOR_BLUE).attr('fill-opacity', 0.12).attr('stroke', 'none')
+      .attr('d', d3.area()
+        .x((d, i) => xScale(i * dt))
+        .y0(d => yScale(d.lo))
+        .y1(d => yScale(d.hi)))
+    gData.append('path').datum(refPts)
+      .attr('fill', 'none').attr('stroke', COLOR_BLUE).attr('stroke-width', 2)
+      .attr('d', d3.line().x((d, i) => xScale(i * dt)).y(d => yScale(d.mean)))
+  }
+
+  // Sample paths rendered on top of reference overlays
+  const line = d3.line().x((d, i) => xScale(i * dt)).y(d => yScale(d))
+  paths.forEach(pts => {
+    gData.append('path').datum(pts)
+      .attr('fill', 'none')
+      .attr('stroke', COLOR_SAMPLES).attr('stroke-width', 1).attr('stroke-opacity', 0.35)
+      .attr('d', line)
+  })
+
+  if (hasRef) {
+    addLegendEntry(gLegend, 0, COLOR_SAMPLES, false, 'line', 'paths')
+    addLegendEntry(gLegend, 1, COLOR_BLUE,    false, 'line', 'E[X(t)]')
+    addLegendEntry(gLegend, 2, COLOR_BLUE,    false, 'rect', '±1σ')
+  } else {
+    addLegendEntry(gLegend, 0, COLOR_SAMPLES, false, 'line', 'paths')
+  }
+}
+
+// ---- Process update loop -------------------------------------------
+
+function scheduleProcUpdate () {
+  clearTimeout(procDebounceTimer)
+  procDebounceTimer = setTimeout(doProcessUpdate, 300)
+}
+
+function doProcessUpdate () {
+  const name = procSelect.value
+  const cfg = PROCESSES[name]
+  const inputs = getCurrentProcParamInputs()
+  const params = cfg.args.map((a, i) => {
+    const v = parseFloat(inputs[i] && inputs[i].value)
+    return isNaN(v) ? a.default : v
+  })
+  const steps = parseInt(procStepsInput.value) || 100
+  try {
+    renderProcess(name, params, steps)
+  } catch (e) {
+    // Invalid params — chart remains stale; silently skip
+  }
+}
+
+// ---- Init ----------------------------------------------------------
+
+document.addEventListener('DOMContentLoaded', () => {
+  Object.keys(DISTRIBUTIONS).forEach(name => {
+    const opt = document.createElement('option')
+    opt.value = name
+    opt.textContent = name
+    distSelect.appendChild(opt)
+  })
+  distSelect.value = 'Normal'
+  distSelect.addEventListener('change', () => {
+    populateParams(distSelect.value)
+    doUpdate()
+  })
+  sampleSizeInput.addEventListener('input', scheduleUpdate)
+
+  populateParams('Normal')
+  initCharts()
+  doUpdate()
+
+  // Process section init
+  Object.keys(PROCESSES).forEach(name => {
+    const opt = document.createElement('option')
+    opt.value = name
+    opt.textContent = name
+    procSelect.appendChild(opt)
+  })
+  procSelect.value = 'BrownianMotion'
+  procSelect.addEventListener('change', () => {
+    populateProcessParams(procSelect.value)
+    doProcessUpdate()
+  })
+  procStepsInput.addEventListener('input', scheduleProcUpdate)
+
+  pathSvg = d3.select('#path-chart').append('svg')
+    .style('display', 'block').style('position', 'absolute')
+    .style('top', '0').style('left', '0')
+
+  populateProcessParams('BrownianMotion')
+  doProcessUpdate()
+})</script></main><script src="assets/version-switcher.js" defer=""></script></body></html>

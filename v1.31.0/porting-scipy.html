@@ -1,0 +1,148 @@
+<!DOCTYPE html><html lang="en" data-ranjs-channel="1.31.0"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="icon" type="image/svg+xml" href="assets/ran.svg"><link rel="icon" type="image/svg+xml" href="assets/ran-white.svg" media="(prefers-color-scheme: dark)"><link rel="icon" type="image/png" sizes="256x256" href="assets/ran-256.png"><link rel="icon" type="image/png" sizes="256x256" href="assets/ran-white.png" media="(prefers-color-scheme: dark)"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet"><link rel="stylesheet" type="text/css" href="styles/style.css"><title>ranjs</title></head><body><div class="version-banner" id="ranjs-version-banner" hidden=""></div><div class="top"><img class="mark" src="assets/ran.svg" alt="然"><span class="nm">ran<b>js</b></span><nav><a href="index.html">API</a><a class="active" href="porting-scipy.html">SciPy Porting</a><a href="parameter-estimation.html">Parameter Estimation</a><a href="demo.html">Demo</a><a href="https://github.com/synesenom/ran" target="_blank" rel="noopener">GitHub</a><select class="version-select" id="ranjs-version-select" aria-label="Documentation version"></select></nav></div><input id="menu" type="checkbox"><label class="menu-button" for="menu">☰</label><label class="menu-overlay" for="menu"></label><aside><ul class="sections"><li><label>Methods</label><ul class="methods"><li><a href="#methods">Method mapping</a></li></ul></li><li><label>Distributions</label><ul class="methods"><li><a href="#dist-normal">Normal</a></li><li><a href="#dist-uniform">Uniform</a></li><li><a href="#dist-exponential">Exponential</a></li><li><a href="#dist-gamma">Gamma</a></li><li><a href="#dist-beta">Beta</a></li><li><a href="#dist-chi2">Chi-squared</a></li><li><a href="#dist-studentt">Student's t</a></li><li><a href="#dist-f">F</a></li><li><a href="#dist-lognormal">Log-normal</a></li><li><a href="#dist-weibull">Weibull</a></li><li><a href="#dist-pareto">Pareto</a></li><li><a href="#dist-cauchy">Cauchy</a></li><li><a href="#dist-laplace">Laplace</a></li><li><a href="#dist-logistic">Logistic</a></li><li><a href="#dist-triangular">Triangular</a></li><li><a href="#dist-poisson">Poisson</a></li><li><a href="#dist-binomial">Binomial</a></li><li><a href="#dist-negativebinomial">Negative Binomial</a></li><li><a href="#dist-geometric">Geometric</a></li><li><a href="#dist-hypergeometric">Hypergeometric</a></li></ul></li></ul></aside><main><h1>Porting from scipy.stats</h1><p>This guide maps scipy.stats APIs to their ranjs equivalents for the 20 most-used
+distributions. Each section shows the constructor parameters side-by-side and a
+brief usage example in both Python and JavaScript.</p><h1 id="methods">Method mapping</h1><p>All ranjs distribution instances share the same methods regardless of distribution type.</p><table><thead><tr><th>scipy.stats</th><th>ranjs</th><th>Notes</th></tr></thead><tbody><tr><td><code>dist.rvs(size=n)</code></td><td><code>dist.sample(n)</code></td><td>returns Array of length n</td></tr><tr><td><code>dist.rvs()</code></td><td><code>dist.sample()</code></td><td>returns a single number</td></tr><tr><td><code>dist.pdf(x)</code></td><td><code>dist.pdf(x)</code></td><td>same name; also covers discrete pmf</td></tr><tr><td><code>dist.pmf(k)</code></td><td><code>dist.pdf(k)</code></td><td>ranjs uses pdf() for both continuous and discrete</td></tr><tr><td><code>dist.cdf(x)</code></td><td><code>dist.cdf(x)</code></td><td>same name</td></tr><tr><td><code>dist.ppf(q)</code></td><td><code>dist.q(q)</code></td><td>quantile / percent-point function</td></tr><tr><td><code>dist.sf(x)</code></td><td><code>dist.survival(x)</code></td><td>survival function = 1 − CDF</td></tr><tr><td><code>dist.logpdf(x)</code></td><td><code>dist.lnPdf(x)</code></td><td>log-density</td></tr><tr><td><code>scipy.stats.kstest(data, dist)</code></td><td><code>new Dist(...).test(data)</code></td><td>built-in KS goodness-of-fit test</td></tr></tbody></table><h1>Distributions</h1><h2 id="dist-normal">Normal</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>norm(loc=0, scale=1)</code></td><td><code>new Normal(mu=0, sigma=1)</code></td><td>loc → mu, scale → sigma</td></tr></tbody></table><div class="code-pair"><pre><code class="language-python">from scipy.stats import norm
+d = norm(loc=2, scale=0.5)
+d.pdf(2.0)      # 0.7979
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">const d = new ranjs.dist.Normal(2, 0.5)
+d.pdf(2.0)      // 0.7979
+d.sample(5)
+</code></pre></div><h2 id="dist-uniform">Uniform</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>uniform(loc=0, scale=1)</code></td><td><code>new Uniform(xmin=0, xmax=1)</code></td><td>loc → xmin; xmax = loc + scale</td></tr></tbody></table><p class="callout"><strong>⚠ Parameter difference:</strong> scipy uses start + width (loc, scale); ranjs uses start + end (xmin, xmax).
+ Convert: xmin = loc, xmax = loc + scale.</p><div class="code-pair"><pre><code class="language-python">from scipy.stats import uniform
+d = uniform(loc=1, scale=3)   # support [1, 4]
+d.pdf(2.5)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">const d = new ranjs.dist.Uniform(1, 4)  // support [1, 4]
+d.pdf(2.5)
+d.sample(5)
+</code></pre></div><h2 id="dist-exponential">Exponential</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>expon(loc=0, scale=1)</code></td><td><code>new Exponential(lambda=1)</code></td><td>scale = 1/lambda (scipy uses mean; ranjs uses rate)</td></tr></tbody></table><p class="callout"><strong>⚠ Parameter difference:</strong> scipy's scale is the mean (1/λ); ranjs lambda is the rate (λ).
+ Convert: lambda = 1 / scale.</p><div class="code-pair"><pre><code class="language-python">from scipy.stats import expon
+d = expon(scale=0.5)   # rate = 2
+d.pdf(1.0)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">const d = new ranjs.dist.Exponential(2)  // rate = 2
+d.pdf(1.0)
+d.sample(5)
+</code></pre></div><h2 id="dist-gamma">Gamma</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>gamma(a, loc=0, scale=1)</code></td><td><code>new Gamma(alpha, beta=1)</code></td><td>a → alpha; beta = 1/scale (rate parameterization)</td></tr></tbody></table><p class="callout"><strong>⚠ Parameter difference:</strong> scipy uses a scale parameter (mean/shape); ranjs uses a rate parameter (beta = 1/scale).
+ Convert: beta = 1 / scale.</p><div class="code-pair"><pre><code class="language-python">from scipy.stats import gamma
+d = gamma(a=2, scale=0.5)   # rate = 2
+d.pdf(1.0)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">const d = new ranjs.dist.Gamma(2, 2)  // alpha=2, beta=2 (rate)
+d.pdf(1.0)
+d.sample(5)
+</code></pre></div><h2 id="dist-beta">Beta</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>beta(a, b)</code></td><td><code>new Beta(alpha, beta)</code></td><td>a → alpha, b → beta (rename only)</td></tr></tbody></table><div class="code-pair"><pre><code class="language-python">from scipy.stats import beta
+d = beta(a=2, b=5)
+d.pdf(0.3)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">const d = new ranjs.dist.Beta(2, 5)
+d.pdf(0.3)
+d.sample(5)
+</code></pre></div><h2 id="dist-chi2">Chi-squared</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>chi2(df)</code></td><td><code>new Chi2(k)</code></td><td>df → k (rename only)</td></tr></tbody></table><div class="code-pair"><pre><code class="language-python">from scipy.stats import chi2
+d = chi2(df=4)
+d.pdf(2.0)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">const d = new ranjs.dist.Chi2(4)
+d.pdf(2.0)
+d.sample(5)
+</code></pre></div><h2 id="dist-studentt">Student's t</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>t(df)</code></td><td><code>new StudentT(nu)</code></td><td>df → nu (rename only)</td></tr></tbody></table><div class="code-pair"><pre><code class="language-python">from scipy.stats import t
+d = t(df=10)
+d.pdf(0.0)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">const d = new ranjs.dist.StudentT(10)
+d.pdf(0.0)
+d.sample(5)
+</code></pre></div><h2 id="dist-f">F</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>f(dfn, dfd)</code></td><td><code>new F(d1, d2)</code></td><td>dfn → d1, dfd → d2 (rename only)</td></tr></tbody></table><div class="code-pair"><pre><code class="language-python">from scipy.stats import f
+d = f(dfn=5, dfd=10)
+d.pdf(1.0)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">const d = new ranjs.dist.F(5, 10)
+d.pdf(1.0)
+d.sample(5)
+</code></pre></div><h2 id="dist-lognormal">Log-normal</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>lognorm(s, loc=0, scale=1)</code></td><td><code>new LogNormal(mu=0, sigma=1)</code></td><td>s → sigma; mu = log(scale)</td></tr></tbody></table><p class="callout"><strong>⚠ Non-trivial conversion:</strong> scipy parameterizes lognorm with s (shape = σ of ln X) and scale (= exp(μ of ln X)).
+ ranjs uses log-space parameters directly: mu = mean of ln X, sigma = std dev of ln X.
+ Convert: mu = Math.log(scale), sigma = s.</p><div class="code-pair"><pre><code class="language-python">from scipy.stats import lognorm
+import numpy as np
+# X ~ LogNormal with log-mean=1, log-sd=0.5
+d = lognorm(s=0.5, scale=np.exp(1))
+d.pdf(3.0)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">// mu=1, sigma=0.5 are log-space parameters
+const d = new ranjs.dist.LogNormal(1, 0.5)
+d.pdf(3.0)
+d.sample(5)
+</code></pre></div><h2 id="dist-weibull">Weibull</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>weibull_min(c, loc=0, scale=1)</code></td><td><code>new Weibull(lambda=1, k=1)</code></td><td>c → k (shape); scale → lambda (scale) — order reversed</td></tr></tbody></table><p class="callout"><strong>⚠ Parameter order reversed:</strong> scipy's first positional argument c is the shape (k in ranjs); scipy's scale is ranjs lambda.
+ Convert: Weibull(lambda=scale, k=c).</p><div class="code-pair"><pre><code class="language-python">from scipy.stats import weibull_min
+d = weibull_min(c=1.5, scale=2.0)
+d.pdf(1.0)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">// Weibull(lambda, k): lambda=scale=2.0, k=c=1.5
+const d = new ranjs.dist.Weibull(2.0, 1.5)
+d.pdf(1.0)
+d.sample(5)
+</code></pre></div><h2 id="dist-pareto">Pareto</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>pareto(b, loc=0, scale=1)</code></td><td><code>new Pareto(xmin=1, alpha=1)</code></td><td>b → alpha (shape); scale → xmin (minimum value)</td></tr></tbody></table><div class="code-pair"><pre><code class="language-python">from scipy.stats import pareto
+d = pareto(b=3, scale=1)   # xmin=1, alpha=3
+d.pdf(2.0)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">const d = new ranjs.dist.Pareto(1, 3)  // xmin=1, alpha=3
+d.pdf(2.0)
+d.sample(5)
+</code></pre></div><h2 id="dist-cauchy">Cauchy</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>cauchy(loc=0, scale=1)</code></td><td><code>new Cauchy(x0=0, gamma=1)</code></td><td>loc → x0, scale → gamma (rename only)</td></tr></tbody></table><div class="code-pair"><pre><code class="language-python">from scipy.stats import cauchy
+d = cauchy(loc=0, scale=1)
+d.pdf(0.0)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">const d = new ranjs.dist.Cauchy(0, 1)
+d.pdf(0.0)
+d.sample(5)
+</code></pre></div><h2 id="dist-laplace">Laplace</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>laplace(loc=0, scale=1)</code></td><td><code>new Laplace(mu=0, b=1)</code></td><td>loc → mu, scale → b (rename only)</td></tr></tbody></table><div class="code-pair"><pre><code class="language-python">from scipy.stats import laplace
+d = laplace(loc=0, scale=1)
+d.pdf(0.0)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">const d = new ranjs.dist.Laplace(0, 1)
+d.pdf(0.0)
+d.sample(5)
+</code></pre></div><h2 id="dist-logistic">Logistic</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>logistic(loc=0, scale=1)</code></td><td><code>new Logistic(mu=0, s=1)</code></td><td>loc → mu, scale → s (rename only)</td></tr></tbody></table><div class="code-pair"><pre><code class="language-python">from scipy.stats import logistic
+d = logistic(loc=0, scale=1)
+d.pdf(0.0)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">const d = new ranjs.dist.Logistic(0, 1)
+d.pdf(0.0)
+d.sample(5)
+</code></pre></div><h2 id="dist-triangular">Triangular</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>triang(c, loc=0, scale=1)</code></td><td><code>new Triangular(a=0, b=1, c=0.5)</code></td><td>a=loc, b=loc+scale, c=a+c_scipy*scale</td></tr></tbody></table><p class="callout"><strong>⚠ Non-trivial conversion:</strong> scipy's c is the normalized mode (0–1 within [loc, loc+scale]).
+ ranjs uses absolute bounds a (lower), b (upper), and c (mode).
+ Convert: a = loc, b = loc + scale, c = loc + c_scipy * scale.</p><div class="code-pair"><pre><code class="language-python">from scipy.stats import triang
+# lower=1, upper=4, mode=2: c=(2-1)/(4-1)=0.333
+d = triang(c=0.333, loc=1, scale=3)
+d.pdf(2.0)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">// Triangular(a, b, c): a=1, b=4, mode=2
+const d = new ranjs.dist.Triangular(1, 4, 2)
+d.pdf(2.0)
+d.sample(5)
+</code></pre></div><h2 id="dist-poisson">Poisson</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>poisson(mu)</code></td><td><code>new Poisson(lambda=1)</code></td><td>mu → lambda (rename only)</td></tr></tbody></table><div class="code-pair"><pre><code class="language-python">from scipy.stats import poisson
+d = poisson(mu=3)
+d.pmf(2)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">const d = new ranjs.dist.Poisson(3)
+d.pdf(2)    // pdf() covers pmf for discrete
+d.sample(5)
+</code></pre></div><h2 id="dist-binomial">Binomial</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>binom(n, p)</code></td><td><code>new Binomial(n, p)</code></td><td>identical</td></tr></tbody></table><div class="code-pair"><pre><code class="language-python">from scipy.stats import binom
+d = binom(n=10, p=0.3)
+d.pmf(3)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">const d = new ranjs.dist.Binomial(10, 0.3)
+d.pdf(3)
+d.sample(5)
+</code></pre></div><h2 id="dist-negativebinomial">Negative Binomial</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>nbinom(n, p)</code></td><td><code>new NegativeBinomial(r, p)</code></td><td>n → r; p_ranjs = 1 − p_scipy (p convention differs)</td></tr></tbody></table><p class="callout"><strong>⚠ p convention differs:</strong> scipy nbinom counts failures before n successes, with p = P(success).
+ ranjs NegativeBinomial counts successes before r failures, with p = P(success).
+ The PMFs are duals: scipy uses p^n·(1−p)^k; ranjs uses (1−p)^r·p^x.
+ Convert: r = n, p_ranjs = 1 − p_scipy.</p><div class="code-pair"><pre><code class="language-python">from scipy.stats import nbinom
+d = nbinom(n=5, p=0.4)
+d.pmf(3)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">// p_ranjs = 1 - p_scipy = 0.6
+const d = new ranjs.dist.NegativeBinomial(5, 0.6)
+d.pdf(3)
+d.sample(5)
+</code></pre></div><h2 id="dist-geometric">Geometric</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>geom(p)</code></td><td><code>new Geometric(p)</code></td><td>same p; different support convention</td></tr></tbody></table><p class="callout"><strong>⚠ Different support:</strong> scipy geom has support {1, 2, 3, …} and counts trials until the first success.
+ ranjs Geometric has support {0, 1, 2, …} and counts failures before the first success.
+ Convert: ranjs_value = scipy_value − 1.</p><div class="code-pair"><pre><code class="language-python">from scipy.stats import geom
+d = geom(p=0.3)   # support {1, 2, 3, ...}
+d.pmf(1)          # P(X=1) = p = 0.3
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">const d = new ranjs.dist.Geometric(0.3)  // support {0, 1, 2, ...}
+d.pdf(0)          // P(X=0) = p = 0.3
+d.sample(5)
+</code></pre></div><h2 id="dist-hypergeometric">Hypergeometric</h2><table><thead><tr><th>scipy</th><th>ranjs</th><th>Parameter mapping</th></tr></thead><tbody><tr><td><code>hypergeom(M, n, N)</code></td><td><code>new Hypergeometric(N, K, n)</code></td><td>M → N (population); n → K (successes in pop.); N → n (draws)</td></tr></tbody></table><p class="callout"><strong>⚠ Parameter name collision:</strong> scipy and ranjs both use N, but they mean different things.
+ scipy: M = population size, n = successes in population, N = number of draws.
+ ranjs: N = population size, K = successes in population, n = number of draws.
+ Convert: Hypergeometric(N=M, K=n_scipy, n=N_scipy).</p><div class="code-pair"><pre><code class="language-python">from scipy.stats import hypergeom
+# population=20, successes_in_pop=7, draws=5
+d = hypergeom(M=20, n=7, N=5)
+d.pmf(2)
+d.rvs(size=5)</code></pre><pre><code class="language-javascript">// Hypergeometric(N, K, n): N=20, K=7, n=5
+const d = new ranjs.dist.Hypergeometric(20, 7, 5)
+d.pdf(2)
+d.sample(5)
+</code></pre></div><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/python.min.js"></script><script>hljs.highlightAll()</script></main><script src="assets/version-switcher.js" defer=""></script></body></html>

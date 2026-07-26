@@ -1,0 +1,41 @@
+<!DOCTYPE html><html lang="en" data-ranjs-channel="1.31.0"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="icon" type="image/svg+xml" href="assets/ran.svg"><link rel="icon" type="image/svg+xml" href="assets/ran-white.svg" media="(prefers-color-scheme: dark)"><link rel="icon" type="image/png" sizes="256x256" href="assets/ran-256.png"><link rel="icon" type="image/png" sizes="256x256" href="assets/ran-white.png" media="(prefers-color-scheme: dark)"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet"><link rel="stylesheet" type="text/css" href="styles/style.css"><title>ranjs</title></head><body><div class="version-banner" id="ranjs-version-banner" hidden=""></div><div class="top"><img class="mark" src="assets/ran.svg" alt="然"><span class="nm">ran<b>js</b></span><nav><a href="index.html">API</a><a href="porting-scipy.html">SciPy Porting</a><a class="active" href="parameter-estimation.html">Parameter Estimation</a><a href="demo.html">Demo</a><a href="https://github.com/synesenom/ran" target="_blank" rel="noopener">GitHub</a><select class="version-select" id="ranjs-version-select" aria-label="Documentation version"></select></nav></div><input id="menu" type="checkbox"><label class="menu-button" for="menu">☰</label><label class="menu-overlay" for="menu"></label><aside><ul class="sections"><li><label>Contents</label><ul class="methods"><li><a href="#what-is-parameter-estimation">What is parameter estimation?</a></li><li><a href="#full-workflow">The full workflow</a></li><li><a href="#static-method">Static method</a></li><li><a href="#all-distributions">All distributions</a></li><li><a href="#goodness-of-fit">Goodness of fit</a></li></ul></li></ul></aside><main><h1>Parameter estimation</h1><h2 id="what-is-parameter-estimation">What is parameter estimation?</h2><p>Parameter estimation is the process of finding the distribution parameters that best explain
+an observed dataset. ranjs uses <strong>maximum likelihood estimation (MLE)</strong>: it finds the
+parameter values that maximise the probability of seeing the data under the assumed model.
+This is done by a derivative-free Nelder-Mead simplex optimizer, which makes it robust to
+distributions with non-smooth or discontinuous likelihoods.</p><p>Once parameters are estimated you can inspect them, compare models by AIC/BIC, or run a
+built-in goodness-of-fit test — all with the same distribution instance returned by
+<code>fit()</code>.</p><h2 id="full-workflow">The full workflow</h2><p><code>fit()</code> closes the full statistical cycle: define a model, generate (or collect) data,
+estimate parameters from that data, then test whether the fit is adequate.</p><pre><code class="language-javascript">import { dist } from 'ranjs'
+
+// 1. Define and sample
+const model = new dist.Normal(3, 1).seed(42)
+const data  = model.sample(500)
+
+// 2. Fit parameters from data via MLE
+const fitted = dist.Normal.fit(data)
+console.log(fitted.p)           // { mu: 3.000, sigma: 1.000 }
+
+// 3. Test goodness of fit
+console.log(fitted.test(data))  // { statistics: 0.42, passed: true }
+</code></pre><p>The same pattern works for any distribution in the library. Here is a discrete example
+fitting a Poisson model to count data:</p><pre><code class="language-javascript">import { dist } from 'ranjs'
+
+const data   = new dist.Poisson(4.2).seed(42).sample(200)
+const fitted = dist.Poisson.fit(data)
+console.log(fitted.p)           // { lambda: 4.225 }
+console.log(fitted.test(data))  // { statistics: 2.471, passed: true }
+</code></pre><h2 id="static-method">Static method</h2><p class="callout"><strong>Note:</strong> <code>fit()</code> is a <strong>static</strong> method called on the class, not on an instance.
+Use <code>dist.Normal.fit(data)</code>, not <code>model.fit(data)</code>.</p><table><thead><tr><th>Correct</th><th>Wrong</th></tr></thead><tbody><tr><td><code>dist.Normal.fit(data)</code></td><td><code>model.fit(data)   // TypeError</code></td></tr></tbody></table><h2 id="all-distributions">All distributions</h2><p>All 140 exported distributions support <code>fit()</code>. Most have a data-aware
+<code>static _fitInit(data)</code> override that seeds the Nelder-Mead optimizer from a
+method-of-moments estimate, improving convergence reliability. The base-class fallback
+uses random positive-value retries when no override is present.</p><p>Zero-parameter distributions (e.g. <code>Gilbrat</code>, <code>HalfLogistic</code>) skip
+optimisation entirely: <code>Cls.fit(data)</code> simply returns <code>new Cls()</code>.</p><h2 id="goodness-of-fit">Goodness of fit</h2><p>The instance returned by <code>fit()</code> is a fully-featured distribution object. You can
+chain any distribution method on it:</p><pre><code class="language-javascript">const fitted = dist.Gamma.fit(data)
+
+fitted.test(data)        // Anderson-Darling goodness-of-fit test
+fitted.aic(data)         // Akaike information criterion
+fitted.bic(data)         // Bayesian information criterion
+fitted.pdf(x)            // density at any point
+fitted.sample(100)       // generate new variates from the fitted model
+</code></pre><p>See the <a href="index.html">API reference</a> for the full list of methods available on
+every distribution instance.</p><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script><script>hljs.highlightAll()</script></main><script src="assets/version-switcher.js" defer=""></script></body></html>
