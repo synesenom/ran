@@ -2,7 +2,7 @@
 // self_check() -- @babel/register lets require() load the ESM-syntax test file the same way mocha
 // does, and evaluating params() here (rather than parsing the source as text) survives any future
 // closure shape, including Hyperexponential's nested { weight, rate } objects.
-require('@babel/register')()
+require('@babel/register').default()
 
 const cases = require('../test/dist-cases-continuous.js').default
 

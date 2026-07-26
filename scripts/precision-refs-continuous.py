@@ -1405,6 +1405,15 @@ P_GRID = [mpf('0.1'), mpf('0.3'), mpf('0.53'), mpf('0.72'), mpf('0.9')]
 
 # Three parameter sets per distribution (two from dist-cases-continuous.js, one fresh).
 # Parameter-free distributions naturally have a single set.
+#
+# NoncentralChi/NoncentralChi2/Rice get extra sets approaching marcumQ's x<30
+# series/asymptotic dispatch threshold (src/special/marcum-q.js) -- every prior set for
+# these three left the dispatched x well under 30 (0.03-2), so this crossover had zero
+# precision-gate coverage (issue #1143). NoncentralChi2 gets both a below-30 and an
+# above-30 set (both pass); NoncentralChi/Rice get only the below-30 set -- their
+# above-30 sets ([5, 8] / [8, 1]) hit a genuine _zetaxy() cancellation bug in the
+# quadrature branch (2*eps/d2 vs eps^2/(d1*d2) near-cancel once d2 underflows for
+# y << 1), filed separately rather than papered over here.
 PARAM_SETS = {
     'Alpha': [[2, 2], [0.5, 0.5], [3, 1]],
     'Anglit': [[0, 2], [3, 0.5], [-1, 4]],
@@ -1491,8 +1500,8 @@ PARAM_SETS = {
     'Muth': [[0.5], [0.1], [1]],
     'Nakagami': [[2.5, 2], [0.5, 0.5], [1, 3]],
     'NoncentralBeta': [[2, 2, 2], [0.5, 5, 10], [0.1, 2, 10]],
-    'NoncentralChi': [[5, 2], [2, 0.5], [3, 1]],
-    'NoncentralChi2': [[11, 2], [5, 3], [2, 1]],
+    'NoncentralChi': [[5, 2], [2, 0.5], [3, 1], [5, 7.5]],
+    'NoncentralChi2': [[11, 2], [5, 3], [2, 1], [5, 58], [5, 62]],
     'NoncentralF': [[5, 5, 2], [2, 10, 0.5], [4, 6, 3]],
     'NoncentralT': [[5, 1], [5, 0], [8, 2]],
     'Normal': [[0, 2], [3, 0.5], [-1, 1]],
@@ -1505,7 +1514,7 @@ PARAM_SETS = {
     'Rayleigh': [[2], [0.5], [1]],
     'Reciprocal': [[5, 25], [1, 10], [2, 8]],
     'ReciprocalInverseGaussian': [[2, 2], [0.5, 4], [1, 1]],
-    'Rice': [[2, 2], [0.5, 2], [1, 1]],
+    'Rice': [[2, 2], [0.5, 2], [1, 1], [7, 1]],
     'ShiftedLogLogistic': [[0, 2, 2], [0, 2, -2], [0, 2, 0]],
     'SkewNormal': [[0, 2, 2], [0, 2, -2], [1, 1, 3]],
     'Slash': [[]],
@@ -1789,6 +1798,10 @@ PDFCDF_TOL = {
     ('DoublyNoncentralT', '[6, 2, 1]'): '1e-12',
     ('SkewNormal', '[1, 1, 3]'): '1e-12',
     ('Rice', '[0.5, 2]'): '1e-13',
+    ('Rice', '[7, 1]'): '5e-13',
+    ('NoncentralChi', '[5, 7.5]'): '5e-13',
+    ('NoncentralChi2', '[5, 58]'): '5e-13',
+    ('NoncentralChi2', '[5, 62]'): '5e-13',
     ('R', '[0.5]'): '1e-13',
 }
 # Per-(name, json-params) quantile round-trip tolerance (default 1e-14; per-group empirical:
@@ -1801,6 +1814,10 @@ Q_TOL = {
     ('Davis', '[2, 1, 4]'): '1e-12',
     ('DoublyNoncentralChi2', '[2, 3, 1, 1]'): '1e-13',
     ('NoncentralChi2', '[2, 1]'): '1e-13',
+    ('NoncentralChi2', '[5, 58]'): '5e-13',
+    ('NoncentralChi2', '[5, 62]'): '5e-13',
+    ('NoncentralChi', '[5, 7.5]'): '5e-13',
+    ('Rice', '[7, 1]'): '5e-13',
     ('DoublyNoncentralT', '[5, 1, 2]'): '1e-12',
     ('DoublyNoncentralT', '[6, 2, 1]'): '1e-12',
     ('FisherZ', '[1, 1]'): '4e-14',
@@ -1833,6 +1850,9 @@ _N_POLY = 'piecewise-polynomial Neumaier sum loses ~1 ULP beyond 1e-14'
 _N_ROOT = 'q() has no closed form (numerical root-finding), so the round-trip is accurate to a few ULPs beyond 1e-14'
 _N_BENK = 'q() switches to a Lambert-W asymptotic branch as b->1 (here b=0.9995); round-trip accurate to ~1e-9'
 _N_HALLEY = 'q() is a Cornish-Fisher/Halley approximation; the cdf-round-trip loses a few ULPs beyond 1e-14'
+_N_MARCUM = ('x sits near marcumQ\'s series/asymptotic dispatch threshold (x=30); pdf/cdf/quantile '
+             'measured up to ~1.2e-13 in JIT-order-dependent full-suite runs (V8 rounding differs '
+             'from an isolated run) -- gate at 5e-13')
 NOTES = {
     ('Bates', '[10, 5, 25]'): _N_POLY,
     ('Bates', '[5, -2, 2]'): _N_POLY,
@@ -1853,6 +1873,10 @@ NOTES = {
     ('DoublyNoncentralT', '[6, 2, 1]'): _N_NCT,
     ('SkewNormal', '[1, 1, 3]'): 'cdf uses Owen T and q() root-finds on it; both lose a few ULPs beyond 1e-14',
     ('Rice', '[0.5, 2]'): _N_SERIES,
+    ('Rice', '[7, 1]'): _N_MARCUM,
+    ('NoncentralChi', '[5, 7.5]'): _N_MARCUM,
+    ('NoncentralChi2', '[5, 58]'): _N_MARCUM,
+    ('NoncentralChi2', '[5, 62]'): _N_MARCUM,
     ('R', '[0.5]'): _N_SERIES,
     ('R', '[2]'): _N_SERIES,
     ('BaldingNichols', '[0.1, 0.1]'): _N_ROOT,
