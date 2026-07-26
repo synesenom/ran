@@ -3208,6 +3208,20 @@ const REFS = [
       { x: 2.870032352632938, pdf: 0.19862324918959134, cdf: 0.9 }
     ]
   },
+  // NoncentralChi[5,7.5]: x sits near marcumQ's series/asymptotic dispatch threshold (x=30); pdf/cdf/quantile measured up to ~1.2e-13 in JIT-order-dependent full-suite runs (V8 rounding differs from an isolated run) -- gate at 5e-13
+  {
+    name: 'NoncentralChi',
+    params: [5, 7.5],
+    tol: 5e-13,
+    qtol: 5e-13,
+    points: [
+      { x: 6.505569010691933, pdf: 0.17932022377048565, cdf: 0.1 },
+      { x: 7.247694376427309, pdf: 0.3542420602230855, cdf: 0.3 },
+      { x: 7.836839592589605, pdf: 0.4045565271965982, cdf: 0.53 },
+      { x: 8.336294189382912, pdf: 0.3418700397177332, cdf: 0.72 },
+      { x: 9.024839527808627, pdf: 0.17795311131153096, cdf: 0.9 }
+    ]
+  },
   {
     name: 'NoncentralChi2',
     params: [11, 2],
@@ -3246,6 +3260,34 @@ const REFS = [
       { x: 2.3631809667597996, pdf: 0.1566774646603099, cdf: 0.53 },
       { x: 3.8847437382582997, pdf: 0.09712966357108083, cdf: 0.72 },
       { x: 6.770130260953069, pdf: 0.0365587760021899, cdf: 0.9 }
+    ]
+  },
+  // NoncentralChi2[5,58]: x sits near marcumQ's series/asymptotic dispatch threshold (x=30); pdf/cdf/quantile measured up to ~1.2e-13 in JIT-order-dependent full-suite runs (V8 rounding differs from an isolated run) -- gate at 5e-13
+  {
+    name: 'NoncentralChi2',
+    params: [5, 58],
+    tol: 5e-13,
+    qtol: 5e-13,
+    points: [
+      { x: 43.78099019226955, pdf: 0.013541095426963547, cdf: 0.1 },
+      { x: 54.15946113115637, pdf: 0.024054046277784912, cdf: 0.3 },
+      { x: 63.18284944152266, pdf: 0.025435465133139268, cdf: 0.53 },
+      { x: 71.37623716721646, pdf: 0.020224060019314875, cdf: 0.72 },
+      { x: 83.48958891740753, pdf: 0.009734204702816305, cdf: 0.9 }
+    ]
+  },
+  // NoncentralChi2[5,62]: x sits near marcumQ's series/asymptotic dispatch threshold (x=30); pdf/cdf/quantile measured up to ~1.2e-13 in JIT-order-dependent full-suite runs (V8 rounding differs from an isolated run) -- gate at 5e-13
+  {
+    name: 'NoncentralChi2',
+    params: [5, 62],
+    tol: 5e-13,
+    qtol: 5e-13,
+    points: [
+      { x: 47.13037051154166, pdf: 0.013032297643811988, cdf: 0.1 },
+      { x: 57.892488444582135, pdf: 0.023238388717002373, cdf: 0.3 },
+      { x: 67.2203921302756, pdf: 0.02463494199742843, cdf: 0.53 },
+      { x: 75.67191039556722, pdf: 0.01962409906652587, cdf: 0.72 },
+      { x: 88.1410880548629, pdf: 0.009466611488950172, cdf: 0.9 }
     ]
   },
   {
@@ -3796,6 +3838,20 @@ const REFS = [
       { x: 1.5372641174371435, pdf: 0.48170928886664116, cdf: 0.53 },
       { x: 1.9709753266487888, pdf: 0.38288034076859595, cdf: 0.72 },
       { x: 2.6019473978067023, pdf: 0.19024802417179226, cdf: 0.9 }
+    ]
+  },
+  // Rice[7,1]: x sits near marcumQ's series/asymptotic dispatch threshold (x=30); pdf/cdf/quantile measured up to ~1.2e-13 in JIT-order-dependent full-suite runs (V8 rounding differs from an isolated run) -- gate at 5e-13
+  {
+    name: 'Rice',
+    params: [7, 1],
+    tol: 5e-13,
+    qtol: 5e-13,
+    points: [
+      { x: 5.797155731308308, pdf: 0.17666362533966992, cdf: 0.1 },
+      { x: 6.5497028587527515, pdf: 0.3496541744812064, cdf: 0.3 },
+      { x: 7.146200232866974, pdf: 0.399809886771418, cdf: 0.53 },
+      { x: 7.651351863957296, pdf: 0.3381634294981794, cdf: 0.72 },
+      { x: 8.347062470169687, pdf: 0.17621165107377856, cdf: 0.9 }
     ]
   },
   {
