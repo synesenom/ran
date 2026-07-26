@@ -1,4 +1,4 @@
-// Main column, sticky top bar, hero, pills, namenote, section headings.
+// Main column, sticky top bar, hero, namenote, section headings.
 @import "colors";
 @import "dimensions";
 
@@ -126,26 +126,6 @@ main > * {
     .zh { color: $colorAccent; font-weight: 500; }
     .gloss { font-style: italic; color: $colorMuted; }
   }
-}
-
-
-// ---- Metadata pills ---------------------------------------------------------
-// <div class="pills"><span class="pill">…</span></div>
-.pills {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin: 22px auto 8px;
-}
-
-.pill {
-  font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
-  font-size: 12px;
-  color: $colorMuted;
-  background: $colorPanel;
-  border: 1px solid $colorLine;
-  border-radius: 999px;
-  padding: 4px 11px;
 }
 
 
