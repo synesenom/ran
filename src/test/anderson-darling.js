@@ -30,6 +30,7 @@ export default function (values, cdf, alpha = 0.05) {
   // {stat, passed} shape the other src/test/* functions use, not _tests.js's {statistics, ...}.
   // The A² statistic and its Marsaglia & Marsaglia (2004) p-value are intentionally not
   // duplicated here — src/dist/_tests.js already implements and tests them.
+  // See solutions/tooling/2026-07-26-1630-ad-private-implementation-already-existed.md
   return {
     stat: statistics,
     pValue,
