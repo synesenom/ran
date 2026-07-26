@@ -91,7 +91,11 @@ main > * {
 // <div class="hero"><img class="mark"><div><h1>…</h1><p class="sub">…</p></div></div>
 .hero {
   display: flex;
-  align-items: center;
+  // flex-start, not center: centering against the cross-axis vertically
+  // centers the mark against the *whole* h1+sub column, so once .sub wraps
+  // to two lines (narrow viewports), the mark's center drifts down and no
+  // longer lines up with the h1 title's own line.
+  align-items: flex-start;
   gap: 26px;
   margin: 18px auto 14px;
 
