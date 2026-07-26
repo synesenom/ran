@@ -83,7 +83,7 @@ describe('test-utils', () => {
     // itself, not of this implementation, so this is the exact expected value.
     it('should match the Marsaglia asymptotic formula on the hand-checked reference sample', () => {
       const p = andersonDarling(REF_SAMPLE.slice(), x => x).pValue
-      assert(Math.abs(p - 1.000265361679237696) < 1e-9, `p = ${p}, expected 1.000265361679237696`)
+      assert(Math.abs(p - 1.0002653616792376) < 1e-9, `p = ${p}, expected 1.0002653616792376`)
     })
 
     it('should report a high p-value for a large uniform sample matching the model CDF', () => {
