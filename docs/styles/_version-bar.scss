@@ -47,3 +47,16 @@
 
   &:focus { outline: none; }
 }
+
+// Sits right after .version-select — points at what changed in the version
+// currently on screen. a:visited set explicitly for the same reason as
+// .version-banner above (specificity tie with links.scss's global rule).
+.version-notes-link, .version-notes-link:visited {
+  color: $colorBlue;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.version-notes-link:hover {
+  text-decoration: underline;
+}

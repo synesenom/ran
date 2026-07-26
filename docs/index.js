@@ -20,6 +20,13 @@ const VERSION = require('../package.json').version
 // decisions/0043-versioned-docs-deployment.md.
 const CHANNEL = process.env.RANJS_DOCS_CHANNEL || 'unreleased'
 
+// Ties the version indicator to what changed in it — 'unreleased' has no
+// tag yet, so it points at the Unreleased section of CHANGELOG.md instead
+// of a release that doesn't exist.
+const RELEASE_NOTES_URL = CHANNEL === 'unreleased'
+  ? 'https://github.com/synesenom/ran/blob/main/CHANGELOG.md#unreleased'
+  : `https://github.com/synesenom/ran/releases/tag/v${CHANNEL}`
+
 // Register highlight languages.
 hljs.registerLanguage('bash', require('highlight.js/lib/languages/bash'))
 hljs.registerLanguage('xml', require('highlight.js/lib/languages/xml'))
@@ -242,7 +249,8 @@ function parseEntry (entry) {
       ...pageDef.data,
       pages,
       currentPage: pageDef.output,
-      channel: CHANNEL
+      channel: CHANNEL,
+      releaseNotesUrl: RELEASE_NOTES_URL
     })
 
     // mjpage is callback-based; wrap so the loop awaits each page. Note:
