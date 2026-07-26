@@ -20,7 +20,7 @@ html(lang="en", data-ranjs-channel=channel)
                 | ran
                 b js
             select#ranjs-version-select.version-select(aria-label="Documentation version")
-            a.version-notes-link(href=releaseNotesUrl, target="_blank", rel="noopener") notes
+            a.version-notes-link(href=releaseNotesUrl, target="_blank", rel="noopener", aria-label="Release notes") ↗
             nav
                 if pages && pages.length > 1
                     each pg in pages
