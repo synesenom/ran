@@ -103,7 +103,19 @@ describe('special', () => {
       // Verifies _I0 (|x|<=10) and _besselIBackward (|x|>10) agree near the crossover.
       assert(equal(special.besselI(0, 9.9), 2560.9633532560433))
       assert(equal(special.besselI(0, 10), 2815.716628466255))
-      assert(equal(special.besselI(0, 10.1), 3095.9756729321825))
+      // mpmath mp.dps=50: besseli(0, mpf(10.1)) -> 3095.9756707889824
+      assert(equal(special.besselI(0, 10.1), 3095.9756707889824))
+    })
+
+    it('I0(x) should match mpmath reference values in the Miller warm-up band (10, 15]', () => {
+      // Issue #1185: _besselIBackward's j_max margin term degenerates to 0 at n=0
+      // (sqrt(40*0)=0), leaving a ~1e-9 relative-error precision gap in this band.
+      // mpmath mp.dps=50: besseli(0, mpf(x))
+      assert(equal(special.besselI(0, 10.5), 4527.441714638888, 13))
+      assert(equal(special.besselI(0, 11), 7288.489339821248, 13))
+      assert(equal(special.besselI(0, 12), 18948.925349296307, 13))
+      assert(equal(special.besselI(0, 13), 49444.489582217575, 13))
+      assert(equal(special.besselI(0, 14), 129418.56270064856, 13))
     })
   })
 

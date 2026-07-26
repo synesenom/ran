@@ -276,14 +276,13 @@ SPEC = [
     ('PolyaAeppli', [([2, 0.5], [0, 1, 2, 4, 8]), ([0.5, 0.1], [0, 1, 2, 3, 5]),
                      ([3, 0.7], [0, 2, 5, 9, 15])], 1e-14),
     ('Rademacher', [([], [-1, 1])], 1e-14),
-    # A [6, 5] set (k including 0) was attempted to straddle besselI(0, twoSqrtProd)'s
-    # |x|=10 Taylor/backward-recurrence dispatch (src/special/bessel.js:122-127) the same
-    # way as the existing [5,5] set (which sits exactly at the threshold, Taylor side) --
-    # it surfaced the same _besselIBackward warm-up precision gap documented in
-    # precision-refs-continuous.py, so it is filed separately rather than added here
-    # (issue #1143).
+    # [6, 5] (k grid including 0) straddles besselI(0, twoSqrtProd)'s |x|=10
+    # Taylor/backward-recurrence dispatch (src/special/bessel.js:122-127) the same way as
+    # the existing [5,5] set (which sits exactly at the threshold, Taylor side) --
+    # twoSqrtProd = 2*sqrt(30) ~ 10.95 lands in the _besselIBackward n=0 warm-up gap
+    # (issue #1185, previously withheld here during #1143's boundary-grid work).
     ('Skellam', [([5, 5], [-7, -3, 0, 3, 7]), ([1, 4], [-8, -4, -2, 0, 2]),
-                 ([3, 6], [-6, -2, 1, 4, 8])], 1e-14),
+                 ([3, 6], [-6, -2, 1, 4, 8]), ([6, 5], [-6, -2, 0, 3, 8])], 1e-14),
     ('Soliton', [([10], [1, 2, 3, 5, 10]), ([3], [1, 2, 3]),
                  ([20], [1, 2, 5, 10, 20])], 1e-14),
     ('YuleSimon', [([3], [1, 2, 3, 6, 10]), ([2.5], [1, 2, 3, 5, 8]),

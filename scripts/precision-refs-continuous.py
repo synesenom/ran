@@ -1429,16 +1429,19 @@ P_GRID = [mpf('0.1'), mpf('0.3'), mpf('0.53'), mpf('0.72'), mpf('0.9')]
 # besselI(0,x)'s OWN Taylor/backward-recurrence dispatch at |x|=10 (bessel.js:122-127) was
 # also attempted for Rice/NoncentralChi/NoncentralChi2/Skellam/VonMises, straddling the
 # threshold via nu*x/sigma^2 (Rice), lambda*x (NoncentralChi), sqrt(lambda*x)
-# (NoncentralChi2), twoSqrtProd (Skellam) and kappa itself (VonMises). Every probe landing
-# in roughly (10, 14] surfaced a genuine ~1e-9-1e-10 relative-error warm-up gap in
-# _besselIBackward's Miller recurrence (it needs several more units of run-up past the
-# dispatch threshold than it currently gets before precision recovers below 1e-12) --
-# filed separately rather than masked with a tolerance far looser than this file's usual
-# cap. VonMises at kappa>=9 additionally surfaced an unrelated, more severe bug: _cdf's
+# (NoncentralChi2), twoSqrtProd (Skellam, see precision-refs-discrete.py) and kappa itself
+# (VonMises). Every probe landing in roughly (10, 14] surfaced a genuine ~1e-9-1e-10
+# relative-error warm-up gap in _besselIBackward's Miller recurrence, caused by the n=0
+# margin term degenerating to 0 (sqrt(40*0)=0) -- filed separately as issue #1185 rather
+# than masked with a tolerance far looser than this file's usual cap. Fixed by #1185
+# (_besselIBackward now uses sqrt(40*max(n,1))); the Rice[3.16,1]/NoncentralChi[2,3.5]/
+# NoncentralChi2[2,8] sets above are the ones that surfaced it and are now included.
+# VonMises at kappa>=9 additionally surfaced an unrelated, more severe bug: _cdf's
 # Fourier series (recursiveSum over besselI(i,kappa)*sin(i*x)) returns out-of-[0,1] values
 # (e.g. VonMises(9).cdf(-pi/4) = -0.0074) for sufficiently concentrated kappa, which corrupts
-# the general quantile root-finder for arbitrary p -- also filed separately. No VonMises
-# boundary set is included here as a result.
+# the general quantile root-finder for arbitrary p -- filed and fixed separately (see
+# solutions/correctness/2026-07-26-1339-vonmises-cdf-oscillating-term-premature-convergence.md).
+# No VonMises boundary set is added here; out of scope for #1185.
 PARAM_SETS = {
     'Alpha': [[2, 2], [0.5, 0.5], [3, 1]],
     'Anglit': [[0, 2], [3, 0.5], [-1, 4]],
@@ -1527,10 +1530,16 @@ PARAM_SETS = {
     'NoncentralBeta': [[2, 2, 2], [0.5, 5, 10], [0.1, 2, 10]],
     # [5, 0.5]: besselISpherical(1, lambda*x) argument spans ~0.65-1.56, straddling the
     # |x|=1 Taylor/closed-form dispatch (order = floor((k-3)/2) = 1 at the lowest odd k>=5).
-    'NoncentralChi': [[5, 2], [2, 0.5], [3, 1], [5, 7.5], [5, 0.5]],
+    # [2, 3.5]: besselI(0, lambda*x) argument spans into (10, 14], straddling
+    # _besselIBackward's n=0 warm-up margin gap (issue #1185; previously withheld here
+    # during #1143's boundary-grid work, see the comment above PARAM_SETS).
+    'NoncentralChi': [[5, 2], [2, 0.5], [3, 1], [5, 7.5], [5, 0.5], [2, 3.5]],
     # [5, 0.5]: besselISpherical(1, sqrt(lambda*x)) argument spans ~0.94-2.25, straddling
     # the |x|=1 Taylor/closed-form dispatch (order = floor((k-3)/2) = 1 at the lowest odd k>=5).
-    'NoncentralChi2': [[11, 2], [5, 3], [2, 1], [5, 58], [5, 62], [5, 0.5]],
+    # [2, 8]: besselI(0, sqrt(lambda*x)) argument spans into (10, 14], straddling
+    # _besselIBackward's n=0 warm-up margin gap (issue #1185; previously withheld here
+    # during #1143's boundary-grid work, see the comment above PARAM_SETS).
+    'NoncentralChi2': [[11, 2], [5, 3], [2, 1], [5, 58], [5, 62], [5, 0.5], [2, 8]],
     'NoncentralF': [[5, 5, 2], [2, 10, 0.5], [4, 6, 3]],
     'NoncentralT': [[5, 1], [5, 0], [8, 2]],
     'Normal': [[0, 2], [3, 0.5], [-1, 1]],
@@ -1543,7 +1552,10 @@ PARAM_SETS = {
     'Rayleigh': [[2], [0.5], [1]],
     'Reciprocal': [[5, 25], [1, 10], [2, 8]],
     'ReciprocalInverseGaussian': [[2, 2], [0.5, 4], [1, 1]],
-    'Rice': [[2, 2], [0.5, 2], [1, 1], [7, 1]],
+    # [3.16, 1]: besselI(0, nu*x/sigma^2) argument spans into (10, 14], straddling
+    # _besselIBackward's n=0 warm-up margin gap (issue #1185; previously withheld here
+    # during #1143's boundary-grid work, see the comment above PARAM_SETS).
+    'Rice': [[2, 2], [0.5, 2], [1, 1], [7, 1], [3.16, 1]],
     'ShiftedLogLogistic': [[0, 2, 2], [0, 2, -2], [0, 2, 0]],
     'SkewNormal': [[0, 2, 2], [0, 2, -2], [1, 1, 3]],
     'Slash': [[]],

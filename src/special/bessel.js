@@ -91,7 +91,10 @@ function _besselIBackward (n, x) {
   let sum = 0
   // j_max must exceed both n and x: when j < x the ratio I_{j+1}/I_j ≈ 1
   // and the backward recurrence hasn't contracted enough to suppress the K_n component.
-  for (let j = 2 * (n + Math.round(Math.sqrt(40 * n))) + Math.ceil(2 * x); j > 0; j--) {
+  // Math.max(n, 1) inside the sqrt: at n=0 the margin term would otherwise degenerate to
+  // 0 (sqrt(40*0)=0), leaving no run-up headroom and a ~1e-9 relative-error gap for
+  // x in (10, 14] (issue #1185) -- n=0 borrows n=1's already-validated margin instead.
+  for (let j = 2 * (n + Math.round(Math.sqrt(40 * Math.max(n, 1)))) + Math.ceil(2 * x); j > 0; j--) {
     const bim = bip + j * tox * bi
     bip = bi
     bi = bim
