@@ -207,15 +207,9 @@ function parseEntry (entry) {
       }
     },
     {
-      template: './docs/templates/porting-scipy.pug',
-      output: 'porting-scipy.html',
-      navLabel: 'SciPy Porting',
-      data: {}
-    },
-    {
-      template: './docs/templates/parameter-estimation.pug',
-      output: 'parameter-estimation.html',
-      navLabel: 'Parameter Estimation',
+      template: './docs/templates/guides.pug',
+      output: 'guides.html',
+      navLabel: 'Guides',
       data: {}
     },
     {

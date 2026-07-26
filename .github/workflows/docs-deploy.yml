@@ -59,7 +59,7 @@ jobs:
         run: npm run docs
         env:
           RANJS_DOCS_CHANNEL: ${{ steps.channel.outputs.version }}
-      - run: test -f docs/index.html && test -f docs/porting-scipy.html && test -f docs/parameter-estimation.html && test -f docs/demo.html && test -f docs/styles/style.css
+      - run: test -f docs/index.html && test -f docs/guides.html && test -f docs/demo.html && test -f docs/styles/style.css
 
       - name: Publish to gh-pages
         env:
@@ -82,7 +82,7 @@ jobs:
           DEST="$SITE/$TARGET"
           rm -rf "$DEST"
           mkdir -p "$DEST/styles" "$DEST/assets"
-          cp docs/index.html docs/porting-scipy.html docs/parameter-estimation.html docs/demo.html docs/ranjs.min.js "$DEST/"
+          cp docs/index.html docs/guides.html docs/demo.html docs/ranjs.min.js "$DEST/"
           cp docs/styles/style.css "$DEST/styles/style.css"
           cp -r docs/assets/. "$DEST/assets/"
 
