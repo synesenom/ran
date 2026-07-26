@@ -878,10 +878,11 @@ const REFS = [
       { k: 8, pmf: 0.00012607548839395192, cdf: 0.9999519277218876, qp: 0.9998888899776905 }
     ]
   },
+  // Skellam[6, 5]: pmf evaluates a modified Bessel function I_k; its series rounding limits precision to ~1e-13
   {
     name: 'Skellam',
     params: [6, 5],
-    tol: 1e-14,
+    tol: 2e-14,
     points: [
       { k: -6, pmf: 0.012610932585140238, cdf: 0.024220827478116574, qp: 0.017915361185546458 },
       { k: -2, pmf: 0.08022750425985244, cdf: 0.2230277197355548, qp: 0.18291396760562859 },

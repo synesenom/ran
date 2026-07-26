@@ -313,6 +313,7 @@ TOL_OVERRIDE = {
     ('Poisson', '[40]'): (1e-12, _TAIL),
     ('Poisson', '[50]'): (1e-12, _TAIL),
     ('Skellam', '[5, 5]'): (1e-12, _BESSEL),
+    ('Skellam', '[6, 5]'): (2e-14, _BESSEL),
     ('YuleSimon', '[1.5]'): (3e-14, _LGAMMA),
 }
 
