@@ -39,6 +39,24 @@ block content
             |  Unreleased builds aren't published to a CDN yet — use npm install above, or
             | switch to the latest release with the version picker.
 
+    h2 Tree-shaking
+
+    p
+        | ranjs ships as ESM with #[code sideEffects: false], so modern bundlers (Rollup, esbuild,
+        | Webpack 5+) can drop everything you don't use from the barrel entry point:
+
+    pre.install
+        code.hljs !{treeShaking.barrel}
+
+    p
+        | That relies on the bundler seeing through the #[code export * as dist from './dist'] namespace
+        | re-export, which not every bundler configuration does equally well. For a result that doesn't
+        | depend on the bundler, import a distribution directly from its own subpath instead — every
+        | distribution has one:
+
+    pre.install
+        code.hljs !{treeShaking.subpath}
+
     h2 Demo
     p
         | #[a(href="https://observablehq.com/d/bb01e148548b6ef9", target="_blank") Continuous distributions] &middot; #[a(href="https://observablehq.com/d/b2f210c305445d4e", target="_blank") Discrete distributions]

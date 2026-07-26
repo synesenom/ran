@@ -205,6 +205,10 @@ function parseEntry (entry) {
             : hljs.highlight(`<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ranjs@${CHANNEL}/dist/ranjs.min.js"></script>`, { language: 'xml' }).value,
           node: hljs.highlight('npm install --save ranjs', { language: 'bash' }).value
         },
+        treeShaking: {
+          barrel: hljs.highlight("import { dist } from 'ranjs'\n\nconst model = new dist.Normal(0, 1)\nmodel.sample(100)", { language: 'javascript' }).value,
+          subpath: hljs.highlight("import Normal from 'ranjs/dist/normal'\n\nconst model = new Normal(0, 1)\nmodel.sample(100)", { language: 'javascript' }).value
+        },
         demo: 'https://beta.observablehq.com/@synesenom/ranjs-demo',
         menu,
         searchList: JSON.stringify(searchList),
