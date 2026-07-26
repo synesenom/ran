@@ -881,8 +881,12 @@ def pdf(name, p, x):
         z = cdf('TukeyLambda', [lam], x)
         return 1 / (power(z, lam - 1) + power(1 - z, lam - 1))
     if name == 'Tweedie':
-        mu, phi, pw = mpf(p[0]), mpf(p[1]), mpf(p[2])
-        return tweedie_pdf(mu, phi, pw, x)
+        # Local var named 'disp' (not 'phi') -- Python's lexical scoping would otherwise
+        # shadow the module-level phi() Gaussian-density helper for this entire dispatcher
+        # function, breaking every other branch that calls phi() (BirnbaumSaunders, JohnsonSU,
+        # JohnsonSB) with UnboundLocalError.
+        mu, disp, pw = mpf(p[0]), mpf(p[1]), mpf(p[2])
+        return tweedie_pdf(mu, disp, pw, x)
     if name == 'UQuadratic':
         a, b = mpf(p[0]), mpf(p[1])
         alpha = 12 / power(b - a, 3)
@@ -1290,8 +1294,10 @@ def cdf(name, p, x):
                 hi = m
         return (lo + hi) / 2
     if name == 'Tweedie':
-        mu, phi, pw = mpf(p[0]), mpf(p[1]), mpf(p[2])
-        return tweedie_cdf(mu, phi, pw, x)
+        # See the matching comment in pdf() -- 'disp' avoids shadowing the module-level
+        # phi() helper (this cdf() dispatcher calls it directly in the Slash branch).
+        mu, disp, pw = mpf(p[0]), mpf(p[1]), mpf(p[2])
+        return tweedie_cdf(mu, disp, pw, x)
     if name == 'UQuadratic':
         a, b = mpf(p[0]), mpf(p[1])
         alpha = 12 / power(b - a, 3)
@@ -1414,6 +1420,25 @@ P_GRID = [mpf('0.1'), mpf('0.3'), mpf('0.53'), mpf('0.72'), mpf('0.9')]
 # above-30 sets ([5, 8] / [8, 1]) hit a genuine _zetaxy() cancellation bug in the
 # quadrature branch (2*eps/d2 vs eps^2/(d1*d2) near-cancel once d2 underflows for
 # y << 1), filed separately rather than papered over here.
+#
+# NoncentralChi/NoncentralChi2 also get sets straddling besselISpherical(order>=1,x)'s
+# Taylor/closed-form dispatch at |x|=1 (src/special/bessel.js:171-192, order=floor((k-3)/2)
+# is >=1 at the lowest odd k>=5) -- this threshold had zero precision-gate coverage before
+# this (issue #1143).
+#
+# besselI(0,x)'s OWN Taylor/backward-recurrence dispatch at |x|=10 (bessel.js:122-127) was
+# also attempted for Rice/NoncentralChi/NoncentralChi2/Skellam/VonMises, straddling the
+# threshold via nu*x/sigma^2 (Rice), lambda*x (NoncentralChi), sqrt(lambda*x)
+# (NoncentralChi2), twoSqrtProd (Skellam) and kappa itself (VonMises). Every probe landing
+# in roughly (10, 14] surfaced a genuine ~1e-9-1e-10 relative-error warm-up gap in
+# _besselIBackward's Miller recurrence (it needs several more units of run-up past the
+# dispatch threshold than it currently gets before precision recovers below 1e-12) --
+# filed separately rather than masked with a tolerance far looser than this file's usual
+# cap. VonMises at kappa>=9 additionally surfaced an unrelated, more severe bug: _cdf's
+# Fourier series (recursiveSum over besselI(i,kappa)*sin(i*x)) returns out-of-[0,1] values
+# (e.g. VonMises(9).cdf(-pi/4) = -0.0074) for sufficiently concentrated kappa, which corrupts
+# the general quantile root-finder for arbitrary p -- also filed separately. No VonMises
+# boundary set is included here as a result.
 PARAM_SETS = {
     'Alpha': [[2, 2], [0.5, 0.5], [3, 1]],
     'Anglit': [[0, 2], [3, 0.5], [-1, 4]],
@@ -1500,8 +1525,12 @@ PARAM_SETS = {
     'Muth': [[0.5], [0.1], [1]],
     'Nakagami': [[2.5, 2], [0.5, 0.5], [1, 3]],
     'NoncentralBeta': [[2, 2, 2], [0.5, 5, 10], [0.1, 2, 10]],
-    'NoncentralChi': [[5, 2], [2, 0.5], [3, 1], [5, 7.5]],
-    'NoncentralChi2': [[11, 2], [5, 3], [2, 1], [5, 58], [5, 62]],
+    # [5, 0.5]: besselISpherical(1, lambda*x) argument spans ~0.65-1.56, straddling the
+    # |x|=1 Taylor/closed-form dispatch (order = floor((k-3)/2) = 1 at the lowest odd k>=5).
+    'NoncentralChi': [[5, 2], [2, 0.5], [3, 1], [5, 7.5], [5, 0.5]],
+    # [5, 0.5]: besselISpherical(1, sqrt(lambda*x)) argument spans ~0.94-2.25, straddling
+    # the |x|=1 Taylor/closed-form dispatch (order = floor((k-3)/2) = 1 at the lowest odd k>=5).
+    'NoncentralChi2': [[11, 2], [5, 3], [2, 1], [5, 58], [5, 62], [5, 0.5]],
     'NoncentralF': [[5, 5, 2], [2, 10, 0.5], [4, 6, 3]],
     'NoncentralT': [[5, 1], [5, 0], [8, 2]],
     'Normal': [[0, 2], [3, 0.5], [-1, 1]],

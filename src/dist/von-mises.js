@@ -1,7 +1,6 @@
-import recursiveSum from '../algorithms/recursive-sum'
 import { besselI } from '../special'
 import Distribution from './_distribution'
-import { MAX_ITER } from '../core/constants'
+import { EPS, MAX_ITER, MAX_SERIES_ITER } from '../core/constants'
 
 /**
  * Probability density function for the [von Mises distribution]{@link https://en.wikipedia.org/wiki/Von_Mises_distribution}:
@@ -83,11 +82,24 @@ export default class VonMises extends Distribution {
 
   _cdf (x) {
     // F(x) is computed according to the sum in https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_vonmises.html
-    return 0.5 * (1 + x / Math.PI) + recursiveSum({
-      c: 0
-    }, (t, i) => {
-      t.c = besselI(i, this.p.kappa) * Math.sin(i * x) / (this.c.besselI0Kappa * i)
-      return t
-    }, t => t.c) / Math.PI
+    //
+    // Convergence cannot be checked on the raw term besselI(i, kappa) * sin(i*x) / i: at
+    // x = k*pi/4, sin(4x) (and sin(8x), ...) vanishes to machine-epsilon by pure floating-point
+    // coincidence, independent of how far besselI(i, kappa)/besselI0Kappa has actually decayed.
+    // For kappa gtrsim 6-9 that ratio is still large at i=4, so a check on the raw oscillating
+    // term declares convergence ~10+ orders too early. |sin| <= 1 bounds the term by its envelope
+    // besselI(i, kappa) / (besselI0Kappa * i), so checking convergence on the envelope instead
+    // is both immune to the spurious sin zero and never terminates later than the true term would
+    // require.
+    // See solutions/correctness/2026-07-26-1339-vonmises-cdf-oscillating-term-premature-convergence.md
+    let sum = 0
+    for (let i = 1; i < MAX_SERIES_ITER; i++) {
+      const envelope = besselI(i, this.p.kappa) / (this.c.besselI0Kappa * i)
+      sum += envelope * Math.sin(i * x)
+      if (envelope < EPS * Math.max(Math.abs(sum), 1)) {
+        break
+      }
+    }
+    return 0.5 * (1 + x / Math.PI) + sum / Math.PI
   }
 }
