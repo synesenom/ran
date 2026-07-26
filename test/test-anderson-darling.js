@@ -82,8 +82,13 @@ describe('test', () => {
       // A² = -1 - (1)*(ln(0.5) + ln(1 - 0.5)) = -1 + 2*ln(2)
       const result = test.andersonDarling([0], x => n01.cdf(x))
       assert.closeTo(result.stat, 2 * Math.log(2) - 1, 1e-12)
-      assert.isNumber(result.pValue)
-      assert(!Number.isNaN(result.pValue))
+      // Marsaglia & Marsaglia (2004) asymptotic formula (adinf + finite-n errfix
+      // correction), independently re-implemented (not sourced from src/dist/_tests.js)
+      // and evaluated at a2 = 2*ln(2) - 1 ≈ 0.3862943611198906, n=1:
+      //   adinf(a2) = 0.13777910963793707 (branch z < 2: exp(-1.2337141/z)/sqrt(z) * poly1(z))
+      //   errfix(1, adinf) = -0.068971611217126 (branch x < c, c = 0.01265 + 0.1757/1 = 0.19035)
+      //   pValue = 1 - (adinf + errfix) = 0.9311925015791889
+      assert.closeTo(result.pValue, 0.9311925015791889, 1e-9)
     })
 
     it('should not throw for a sample with tied values', () => {
