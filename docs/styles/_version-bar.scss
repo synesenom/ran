@@ -29,14 +29,17 @@
   }
 }
 
+// Link-styled, not button-styled — matches links.scss's plain `a` so it
+// reads as an in-line control next to the wordmark rather than a UI widget.
 .version-select {
   appearance: none;
-  border: 1px solid $colorLine;
-  border-radius: 6px;
-  background: $colorPanel;
-  color: $colorInk;
+  border: none;
+  background: none;
+  color: $colorBlue;
   font: inherit;
   font-size: 13px;
-  padding: 4px 8px;
+  padding: 0;
   cursor: pointer;
+
+  &:hover { text-decoration: underline; }
 }
