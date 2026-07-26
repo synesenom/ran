@@ -40,19 +40,19 @@
 
   nav {
     margin-left: auto;
+    // Match .top's own height exactly rather than sizing to content and
+    // relying on .top's align-items: center to position that shorter box —
+    // align-items: center below then centers every child (text links and
+    // the octocat svg alike) against the bar's true full height, not just
+    // against each other's line-height.
+    height: 100%;
     display: flex;
-    // Without this, items default to align-items: stretch and each <a>
-    // stretches to the row's tallest child instead of sizing to its own
-    // content — the .icon-github svg (18px) then centered inside a box
-    // forced to a mismatched fixed height, throwing off alignment.
     align-items: center;
     gap: 22px;
 
     a, a:visited {
       color: $colorMuted;
       font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
       text-decoration: none;
     }
 
