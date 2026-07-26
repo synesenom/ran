@@ -353,4 +353,66 @@ describe('dist', () => {
       assert.deepEqual(sampleAfter, sampleBefore)
     })
   })
+
+  // Both of Tweedie's series (the Dunn & Smyth W_j density sum and the Poisson-weighted CDF sum)
+  // are unimodal in j with a peak whose width grows as sqrt(peak index), so the number of terms
+  // they need past that peak grows too. Capping them a CONSTANT number of terms past the peak
+  // therefore truncates further and further into the peak as lambda rises, and the error is
+  // silent: every term is positive, so a truncated sum is simply too small, with nothing (no NaN,
+  // no sign flip) to signal it. These cases start at lambda = 707, just past the point where the
+  // peak clears the shared MAX_SERIES_ITER floor and the cap — rather than the convergence test —
+  // starts deciding where each sum stops.
+  describe('Tweedie large lambda', () => {
+    const cases = [
+      // mpmath mp.dps=60, computed twice by independent routes agreeing to 40 significant digits:
+      // the Dunn & Smyth series (scripts/precision-refs-continuous.py) and a direct compound
+      // Poisson-Gamma mixture sum, f(y) = sum_j Pois(j; lambda) GammaPdf(y; j*shape, rate)
+      { params: [50, 0.02, 1.5], lambda: 707.1, pdf: 0.14998656682251219, cdf: 0.5053047017514233, tol: 1e-12 },
+      { params: [100, 0.01, 1.9], lambda: 1584.9, pdf: 0.05019626130112679, cdf: 0.5100359044816676, tol: 1e-11 },
+      { params: [20, 0.002, 1.5], lambda: 4472.1, pdf: 0.9432012374616195, cdf: 0.5021091799934682, tol: 1e-10 }
+    ]
+
+    // Tolerances loosen with lambda because both sums inherit a per-term relative error that grows
+    // with the size of the arguments they feed their special functions, and thousands of terms
+    // carry it coherently into the total: the density's logGamma arguments reach ~lambda, where a
+    // 1e-16 relative error is ~1e-12 absolute in the exponent, and the CDF's gammaLowerIncomplete
+    // calls sit in its slowly-converging s ~ x regime (at lambda = 4472 it returns 7e-12 relative
+    // error against mpmath on its own). Both are floors of the underlying special functions, not
+    // slack for truncation: a cap one sigma short of where it belongs costs 0.5% at lambda = 707
+    // and worsens from there, eight or more orders of magnitude above these numbers.
+    it('pdf and cdf at the mean should match mpmath references', () => {
+      for (const { params, lambda, pdf, cdf, tol } of cases) {
+        const d = new dist.Tweedie(...params)
+        const mu = params[0]
+        assert.approximately(d.pdf(mu) / pdf, 1, tol, `lambda=${lambda}: pdf(${mu})=${d.pdf(mu)}`)
+        assert.approximately(d.cdf(mu) / cdf, 1, tol, `lambda=${lambda}: cdf(${mu})=${d.cdf(mu)}`)
+      }
+    })
+
+    // Reference-free companion to the check above, and the sharpest witness of a truncated sum:
+    // a CDF missing the upper part of its Poisson peak converges to that peak's partial mass
+    // instead of to 1, so it plateaus below 1 no matter how far into the tail it is evaluated
+    // (at lambda = 1584.9 it flattened at 0.8932, leaving q(p) NaN for every p above that).
+    it('cdf should reach 1 in the far upper tail', () => {
+      for (const { params, lambda, tol } of cases) {
+        const d = new dist.Tweedie(...params)
+        const far = params[0] * 10
+        assert.approximately(d.cdf(far), 1, tol, `lambda=${lambda}: cdf(${far})=${d.cdf(far)}`)
+      }
+    })
+
+    // q() root-finds on cdf(x) - p, so a CDF plateauing below 1 leaves the upper probabilities
+    // with no sign change to bracket and q() returns NaN there rather than a quantile.
+    it('quantile should be finite and increasing through the upper tail', () => {
+      for (const { params, lambda } of cases) {
+        const d = new dist.Tweedie(...params)
+        let previous = 0
+        for (const p of [0.5, 0.9, 0.99, 0.999, 0.9999]) {
+          const x = d.q(p)
+          assert(Number.isFinite(x) && x > previous, `lambda=${lambda}: q(${p})=${x}`)
+          previous = x
+        }
+      }
+    })
+  })
 })

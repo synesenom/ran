@@ -5624,6 +5624,37 @@ export default [{
   }, {
     name: 'p near 2 (near-Gamma boundary): jPeak grows largest here, exercises the series truncation',
     params: () => [5, 0.5, 1.98]
+  }, {
+    // Regression for the series-truncation bug: lambda = 707.1 pushes both the pdf's W_j peak and
+    // the cdf's Poisson weight peak past MAX_SERIES_ITER, so the iteration cap -- not the
+    // convergence test -- decides where each sum stops. A cap that allowed only a CONSTANT number
+    // of terms past the peak covered under 2 standard deviations of a peak whose width grows as
+    // sqrt(peak), so pdf(50) was 0.5% low, cdf(100) returned 0.970 instead of 1, and every
+    // q(p >= 0.97) returned NaN.
+    name: 'large lambda (both series peak past MAX_SERIES_ITER)',
+    params: () => [50, 0.02, 1.5],
+    // mpmath mp.dps=60, computed twice by independent routes that agree to 20 significant digits:
+    // the Dunn & Smyth series (scripts/precision-refs-continuous.py tweedie_pdf/tweedie_cdf) and a
+    // direct compound Poisson-Gamma mixture sum, f(y) = sum_j Pois(j; lambda) GammaPdf(y; j*shape, rate),
+    // summed explicitly over j in lambda +/- 40*sqrt(lambda)
+    refVals: [
+      { x: 20, pdf: 9.764082525248192e-43, cdf: 1.1837173260062401e-43 },
+      { x: 35, pdf: 1.25600907866698e-9, cdf: 4.448143534473643e-10 }
+      // Lower-tail rows only. From the mode upwards, thousands of terms carry the special
+      // functions' own relative error coherently into both sums, holding pdf and cdf to ~1e-13 --
+      // past checkRefVals' fixed 1e-14 gate but still six orders of magnitude tighter than the
+      // truncation this case exists to catch. Those points are pinned, with the tolerance stated
+      // and justified, by dist-base-special-cases.js's 'Tweedie large lambda' block.
+    ],
+    // mpmath mp.dps=40: findroot on the same independent mixture CDF
+    quantileVals: [
+      { p: 0.05, x: 45.68717145977044 },
+      { p: 0.25, x: 48.187475851651485 },
+      { p: 0.5, x: 49.96464049102981 },
+      { p: 0.9, x: 53.42994673364445 },
+      { p: 0.99, x: 56.341011383728826 },
+      { p: 0.999, x: 58.51823809827016 }
+    ]
   }],
   // mpmath mp.dps=50 via scripts/precision-refs-continuous.py (tweedie_pdf/tweedie_cdf, Dunn & Smyth 2005 series);
   // x=0 is the point mass P(Y=0)=exp(-lambda), returned by both pdf(0) and cdf(0) per convention
