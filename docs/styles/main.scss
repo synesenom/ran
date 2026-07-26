@@ -49,6 +49,11 @@
     a.active { color: $colorInk; }
     a:hover { color: $colorInk; text-decoration: none; }
   }
+
+  // Own margin-left: auto (not just a child of nav) so it stays pinned to
+  // the right edge even when nav collapses on mobile (main.scss:188) —
+  // the version picker must survive that, unlike the page-nav links.
+  .version-select { margin-left: auto; }
 }
 
 
