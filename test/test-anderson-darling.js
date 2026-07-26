@@ -1,0 +1,138 @@
+import { assert } from 'chai'
+import { describe, it } from 'mocha'
+import { float, seed } from '../src/core'
+import { Normal, Uniform, Exponential } from '../src/dist'
+import * as test from '../src/test'
+
+const SAMPLE_SIZE = 1000
+
+// Reused verbatim from test/ad.js, where these are independently re-derived and
+// verified against the Marsaglia & Marsaglia (2004) formula this wrapper reuses —
+// re-deriving them again here would just restate the same math, not add coverage.
+const REF_SAMPLE = [0.1, 0.3, 0.5, 0.7, 0.9]
+const REF_A2 = 0.130083462905258
+const REF_PVALUE = 1.0002653616792376
+
+describe('test', () => {
+  describe('andersonDarling', () => {
+    it('should throw exception for empty values', () => {
+      assert.throws(() => {
+        test.andersonDarling([], x => x)
+      }, /andersonDarling: values must not be empty/)
+    })
+
+    it('should return stat, pValue and passed properties', () => {
+      const n01 = new Normal(0, 1)
+      const result = test.andersonDarling([1, 2, 3, 4, 5], x => n01.cdf(x))
+      assert.isNumber(result.stat)
+      assert.isNumber(result.pValue)
+      assert.isBoolean(result.passed)
+    })
+
+    // See test/ad.js for the independent derivation/verification of these values
+    // against the Marsaglia & Marsaglia (2004) asymptotic formula.
+    it('should match the hand-checked reference stat and pValue', () => {
+      const result = test.andersonDarling(REF_SAMPLE.slice(), x => x)
+      assert.closeTo(result.stat, REF_A2, 1e-12)
+      assert.closeTo(result.pValue, REF_PVALUE, 1e-9)
+    })
+
+    it('should use the caller-supplied alpha rather than the private default of 0.01', () => {
+      seed(12345)
+      // Sample drawn from Uniform(0,1) tested against a badly mismatched Normal(0,1)
+      // CDF: pValue is near 0, so alpha=0 always passes (pValue >= 0) while a
+      // near-1 alpha always fails (pValue < alpha) — demonstrating the public
+      // wrapper's alpha decouples from _tests.js's hardcoded 0.01, without relying
+      // on a specific externally-sourced pValue.
+      const n01 = new Normal(0, 1)
+      const sample = Array.from({ length: SAMPLE_SIZE }, () => float())
+      const lenient = test.andersonDarling(sample, x => n01.cdf(x), 0)
+      const strict = test.andersonDarling(sample, x => n01.cdf(x), 0.999999)
+      assert.strictEqual(lenient.stat, strict.stat)
+      assert(lenient.passed)
+      assert(!strict.passed)
+    })
+
+    it('should pass at alpha=0.05 for a sample drawn from the tested distribution', () => {
+      seed(12345)
+      const mu = float(0, 5)
+      const sigma = float(1, 10)
+      const dist = new Normal(mu, sigma)
+      dist.seed(12345)
+      assert(test.andersonDarling(dist.sample(SAMPLE_SIZE), x => dist.cdf(x), 0.05).passed)
+    })
+
+    it('should reject at alpha=0.05 for a sample drawn from a different distribution', () => {
+      seed(12345)
+      const mu = float(0, 5)
+      const sigma = float(1, 10)
+      const shifted = new Normal(mu + 10, sigma)
+      shifted.seed(12345)
+      const target = new Normal(mu, sigma)
+      assert(!test.andersonDarling(shifted.sample(SAMPLE_SIZE), x => target.cdf(x), 0.05).passed)
+    })
+
+    it('should pass at alpha=0.05 for a Uniform sample matching its own CDF', () => {
+      const dist = new Uniform(0, 1)
+      dist.seed(12345)
+      assert(test.andersonDarling(dist.sample(SAMPLE_SIZE), x => dist.cdf(x), 0.05).passed)
+    })
+
+    it('should pass at alpha=0.05 for an Exponential sample matching its own CDF', () => {
+      const dist = new Exponential(1.5)
+      dist.seed(12345)
+      assert(test.andersonDarling(dist.sample(SAMPLE_SIZE), x => dist.cdf(x), 0.05).passed)
+    })
+
+    it('should not throw for a single-value sample', () => {
+      const n01 = new Normal(0, 1)
+      // Exact closed form from the A² definition at n=1, u_1 = F(0) = 0.5:
+      // A² = -1 - (1)*(ln(0.5) + ln(1 - 0.5)) = -1 + 2*ln(2)
+      const result = test.andersonDarling([0], x => n01.cdf(x))
+      assert.closeTo(result.stat, 2 * Math.log(2) - 1, 1e-12)
+      assert.isNumber(result.pValue)
+      assert(!Number.isNaN(result.pValue))
+    })
+
+    it('should not throw for a sample with tied values', () => {
+      const n01 = new Normal(0, 1)
+      const result = test.andersonDarling([1, 1, 1, 1, 1], x => n01.cdf(x))
+      assert.isNumber(result.stat)
+      assert(!Number.isNaN(result.stat))
+      assert.isNumber(result.pValue)
+    })
+
+    it('should propagate NaN rather than throw when a sample value is NaN', () => {
+      const n01 = new Normal(0, 1)
+      const result = test.andersonDarling([1, 2, NaN, 4, 5], x => n01.cdf(x))
+      assert(Number.isNaN(result.stat))
+      assert(Number.isNaN(result.pValue))
+      assert.isFalse(result.passed)
+    })
+
+    it('should reject a sample whose shape disagrees with the model at alpha=0.05', () => {
+      seed(12345)
+      // Triangular (centre-heavy) sample tested against the Uniform(0,1) CDF —
+      // both supports are (0,1) so no boundary clipping is triggered, rejection
+      // must come from distributional shape rather than boundary saturation.
+      const sample = Array.from({ length: SAMPLE_SIZE }, () => (float() + float()) / 2)
+      assert(!test.andersonDarling(sample, x => x, 0.05).passed)
+    })
+
+    it('should reject roughly 5% of null-true samples at alpha=0.05 (Monte Carlo calibration)', () => {
+      seed(12345)
+      const trials = 200
+      let rejections = 0
+      for (let i = 0; i < trials; i++) {
+        const sample = Array.from({ length: 100 }, () => float())
+        if (!test.andersonDarling(sample, x => x, 0.05).passed) {
+          rejections++
+        }
+      }
+      // Rejection rate under the null is Binomial(200, 0.05); mean 10, sd ~3.08.
+      // A generous +/-3 sd band (1..19) keeps this from being flaky while still
+      // catching a badly miscalibrated p-value (e.g. off by an order of magnitude).
+      assert(rejections >= 1 && rejections <= 19, `rejections = ${rejections}, expected roughly 10`)
+    })
+  })
+})
