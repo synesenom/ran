@@ -354,6 +354,67 @@ describe('dist', () => {
     })
   })
 
+  // Regression: VonMises._cdf's Fourier series (besselI(i, kappa) * sin(i*x) / (besselI0Kappa * i))
+  // used to check convergence on that raw, oscillating term. At x = k*pi/4, sin(4x) (and sin(8x),
+  // ...) collapses to machine-epsilon by floating-point coincidence, independent of kappa or of
+  // how far besselI(i, kappa)/besselI0Kappa has actually decayed. For kappa gtrsim 6-9 that ratio
+  // is still large at i=4, so the old check declared convergence ~10+ orders too early, leaving
+  // cdf() far outside [0, 1] and corrupting q()'s root-finder whenever it happened to sample x at
+  // or near such a point.
+  describe('VonMises premature Fourier-series truncation at x = k*pi/4', () => {
+    it('cdf should stay within [0, 1] at x = -pi/4 for kappa = 7, 9 and 11', () => {
+      assert.isAtLeast(new dist.VonMises(7).cdf(-Math.PI / 4), 0)
+      assert.isAtMost(new dist.VonMises(7).cdf(-Math.PI / 4), 1)
+      assert.isAtLeast(new dist.VonMises(9).cdf(-Math.PI / 4), 0)
+      assert.isAtMost(new dist.VonMises(9).cdf(-Math.PI / 4), 1)
+      assert.isAtLeast(new dist.VonMises(11).cdf(-Math.PI / 4), 0)
+      assert.isAtMost(new dist.VonMises(11).cdf(-Math.PI / 4), 1)
+    })
+
+    // mpmath mp.dps=50: quad(t => exp(kappa*cos(t))/(2*pi*besseli(0,kappa)), [-pi, x])
+    // kappa = 7 sits near the documented onset of the truncation bug (gtrsim 6-9), below the
+    // deep-in-range kappa = 9/11 cases already covered below.
+    it('cdf should match mpmath at kappa = 7 (near the onset of the affected kappa range)', () => {
+      const d = new dist.VonMises(7)
+      assert.approximately(d.cdf(-Math.PI / 4), 0.023708922761434122781853740791644863290637475251062, 1e-12)
+      assert.approximately(d.cdf(-1), 0.0065572208963968429709678172329006037034353336873716, 1e-12)
+      assert.approximately(d.cdf(-0.9), 0.012160399210262777300257337168840102614155160976983, 1e-12)
+    })
+
+    // mpmath mp.dps=50: quad(t => exp(kappa*cos(t))/(2*pi*besseli(0,kappa)), [-pi, x])
+    it('cdf should match mpmath at kappa = 9 (besselI(0,9) itself is accurate here)', () => {
+      const d = new dist.VonMises(9)
+      assert.approximately(d.cdf(-Math.PI / 4), 0.011927070236412886, 1e-12)
+      assert.approximately(d.cdf(-1), 0.0023412300572219505, 1e-12)
+      assert.approximately(d.cdf(-0.9), 0.0051289506223271259601593828985188964665244503906922, 1e-12)
+    })
+
+    // Same mpmath source as above (kappa = 11). Tolerance is 1e-8, not machine precision: besselI's
+    // own approximation carries a pre-existing ~1e-10 relative error at kappa gtrsim 11 (unrelated
+    // to this fix -- verified by comparing ranjs' besselI(0, 11) directly against mpmath), which
+    // this loose bound still comfortably distinguishes from the truncation bug's ~1e-1 to 1e-2-scale
+    // errors (e.g. cdf(-pi/4) was -0.0201 pre-fix, not merely imprecise).
+    it('cdf should match mpmath at kappa = 11 within the pre-existing besselI precision floor', () => {
+      const d = new dist.VonMises(11)
+      assert.approximately(d.cdf(-Math.PI / 4), 0.006110362138173876, 1e-8)
+      assert.approximately(d.cdf(-1), 0.0008536976551769042, 1e-8)
+      assert.approximately(d.cdf(-0.9), 0.0022064544592800050434174504717302462134232459292122, 1e-8)
+    })
+
+    // Concrete repro from the bug report: q() root-finds on cdf(x) - p, so a corrupted cdf() at an
+    // internally-sampled bracket point silently pulls the returned quantile to the wrong value
+    // (pre-fix: q(cdf(-1)) at kappa=9 returned -pi/4 instead of -1).
+    it('q(cdf(x)) should round-trip for kappa = 7, 9 and 11 at x values that previously triggered the bug', () => {
+      for (const kappa of [7, 9, 11]) {
+        const d = new dist.VonMises(kappa)
+        for (const x of [-1, -Math.PI / 4, -0.9]) {
+          const roundTripped = d.q(d.cdf(x))
+          assert.approximately(roundTripped, x, 1e-6, `kappa=${kappa}, x=${x}: q(cdf(x))=${roundTripped}`)
+        }
+      }
+    })
+  })
+
   // Both of Tweedie's series (the Dunn & Smyth W_j density sum and the Poisson-weighted CDF sum)
   // are unimodal in j with a peak whose width grows as sqrt(peak index), so the number of terms
   // they need past that peak grows too. Capping them a CONSTANT number of terms past the peak

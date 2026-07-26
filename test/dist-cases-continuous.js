@@ -5898,6 +5898,32 @@ export default [{
       { x: 2.0, pdf: 0.12154141575557528, cdf: 0.8848231100868919 },
       { x: 3.0, pdf: 0.09122529764618403, cdf: 0.9871261559598887 }
     ]
+  }, {
+    // Regression for issue: premature Fourier-series truncation at x = k*pi/4. At kappa >= ~6-9,
+    // sin(4x) vanishes to machine-epsilon at x = -pi/4 while besselI(4,kappa)/besselI0Kappa has not
+    // yet decayed, so a convergence check on the raw (oscillating) term stops the series ~10+ orders
+    // early. -pi/2 (k=2) and -pi/8 (i=8 zero) are included as adjacent multiples of pi/4.
+    name: 'large kappa at x = k*pi/4 (premature series truncation regression)',
+    params: () => [9],
+    symmetry: 0,
+    // mpmath mp.dps=50: exp(kappa*cos(x))/(2*pi*besseli(0,kappa)), quad(pdf, -pi, x)  (kappa=9)
+    refVals: [
+      { x: -Math.PI / 2, pdf: 0.00014553459940875762, cdf: 0.00001640263657504267 },
+      { x: -Math.PI / 4, pdf: 0.08448885284466174, cdf: 0.011927070236412886 },
+      { x: -Math.PI / 8, pdf: 0.5944130027504404, cdf: 0.12445129108997708 },
+      { x: -1, pdf: 0.018828644027619654, cdf: 0.0023412300572219505 },
+      { x: -0.9, pdf: 0.03914013027583153, cdf: 0.005128950622327126 }
+    ]
+  }, {
+    // No refVals here: besselI(0, 11) itself carries a pre-existing ~1e-10 relative error
+    // (unrelated to this fix -- a besselI accuracy limit at kappa gtrsim 11, out of scope for
+    // this bug) that would fail the harness's tight 1e-14 refValTol regardless of correctness.
+    // Coverage for kappa=11 (cdf in [0,1]/monotonic/roundtrip/symmetric, all of which the
+    // premature-truncation bug violated) comes from the generic checks below plus the explicit,
+    // appropriately-toleranced mpmath comparison in dist-base-special-cases.js.
+    name: 'large kappa at x = k*pi/4 (premature series truncation regression)',
+    params: () => [11],
+    symmetry: 0
   }],
   // scipy.stats.vonmises(kappa=2); interior CDF values required fixing besselI(1, x) precision (#255)
   refVals: [
