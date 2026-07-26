@@ -19,12 +19,12 @@ html(lang="en", data-ranjs-channel=channel)
             span.nm
                 | ran
                 b js
+            select#ranjs-version-select.version-select(aria-label="Documentation version")
             nav
                 if pages && pages.length > 1
                     each pg in pages
                         a(href=pg.output, class=(pg.output === currentPage ? 'active' : ''))= pg.navLabel
                 a(href="https://github.com/synesenom/ran", target="_blank", rel="noopener") GitHub
-            select#ranjs-version-select.version-select(aria-label="Documentation version")
         block sidebar
         main
             block content

@@ -1,8 +1,8 @@
-// Sits directly under the fixed top bar; version-switcher.js reveals it and
-// reports its measured height via --ranjs-banner-height so the top bar and
-// scrolling content shift down without hardcoding a banner height (the text
-// wraps to two lines on narrow viewports). See
-// decisions/0043-versioned-docs-deployment.md.
+// Sits directly under the fixed top bar, which stays pinned at top: 0 and
+// never moves. version-switcher.js reveals this banner and reports its
+// measured height via --ranjs-banner-height so scrolling content (main,
+// aside) shifts down without hardcoding a banner height (the text wraps to
+// two lines on narrow viewports). See decisions/0043-versioned-docs-deployment.md.
 @import "colors";
 @import "dimensions";
 

@@ -4,10 +4,13 @@
 
 
 // ---- Top navigation bar -----------------------------------------------------
-// <div class="top"><img class="mark"><span class="nm">ran<b>js</b></span><nav>…</nav></div>
+// <div class="top"><img class="mark"><span class="nm">ran<b>js</b></span><select class="version-select">…</select><nav>…</nav></div>
 .top {
   position: fixed;
-  top: var(--ranjs-banner-height, 0px); left: 0; right: 0;
+  // Stays pinned at the very top — the banner sits in its own strip
+  // directly underneath (.version-banner: top: $dimTopBarHeight), not the
+  // other way around, so the nav bar never jumps when the banner toggles.
+  top: 0; left: 0; right: 0;
   height: $dimTopBarHeight;
   display: flex;
   align-items: center;
@@ -49,11 +52,6 @@
     a.active { color: $colorInk; }
     a:hover { color: $colorInk; text-decoration: none; }
   }
-
-  // Own margin-left: auto (not just a child of nav) so it stays pinned to
-  // the right edge even when nav collapses on mobile (main.scss:188) —
-  // the version picker must survive that, unlike the page-nav links.
-  .version-select { margin-left: auto; }
 }
 
 
