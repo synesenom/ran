@@ -19,7 +19,11 @@
   color: $colorFontSelect;
   background: $colorAccent;
 
-  a {
+  // a:visited explicitly, not just a — links.scss's global a:visited rule
+  // has the same specificity (0,1,1) as .version-banner a and is imported
+  // later in index.scss, so it was winning for any already-visited link,
+  // rendering blue text on the red/accent background (barely visible).
+  a, a:visited {
     color: inherit;
     text-decoration: underline;
   }
