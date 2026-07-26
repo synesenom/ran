@@ -267,8 +267,12 @@ SPEC = [
                           ([20, 0.3], [3, 6, 9, 12, 18])], 1e-14),
     ('NeymanA', [([2, 2], [0, 1, 3, 6, 10]), ([0.5, 0.5], [0, 1, 2, 3, 5]),
                  ([3, 1.5], [0, 2, 4, 6, 9])], 1e-14),
+    # Poisson[15]/[50] straddle gammaLowerIncomplete's x<s+1 series/CF dispatch
+    # (src/special/gamma-incomplete.js:86-88), i.e. lambda ~ k+2 in Poisson's own
+    # parameterization -- no prior set deliberately crossed this boundary (issue #1143).
     ('Poisson', [([10], [2, 5, 8, 10, 15]), ([40], [25, 33, 40, 48, 55]),
-                 ([3], [0, 1, 2, 3, 5])], 1e-14),
+                 ([3], [0, 1, 2, 3, 5]), ([15], [10, 12, 13, 14, 17]),
+                 ([50], [44, 47, 48, 49, 52])], 1e-14),
     ('PolyaAeppli', [([2, 0.5], [0, 1, 2, 4, 8]), ([0.5, 0.1], [0, 1, 2, 3, 5]),
                      ([3, 0.7], [0, 2, 5, 9, 15])], 1e-14),
     ('Rademacher', [([], [-1, 1])], 1e-14),
@@ -302,6 +306,7 @@ TOL_OVERRIDE = {
     ('NegativeBinomial', '[20, 0.3]'): (1e-12, _TAIL),
     ('NegativeHypergeometric', '[30, 10, 8]'): (2e-14, _ARITH),
     ('Poisson', '[40]'): (1e-12, _TAIL),
+    ('Poisson', '[50]'): (1e-12, _TAIL),
     ('Skellam', '[5, 5]'): (1e-12, _BESSEL),
     ('YuleSimon', '[1.5]'): (3e-14, _LGAMMA),
 }
