@@ -93,10 +93,27 @@ describe('test', () => {
 
     it('should not throw for a sample with tied values', () => {
       const n01 = new Normal(0, 1)
+      // Standard normal CDF at x=1, Phi(1) = 0.8413447460685429 (matches
+      // scipy.stats.norm.cdf(1) to this precision) -- hardcoded as an external
+      // constant, not obtained via n01.cdf(1), so the reference below is not
+      // derived from ranjs's own implementation.
+      const u = 0.8413447460685429
+      // With all 5 sample values tied, every order statistic maps to the same
+      // CDF value u = Phi(1), so every term of the A^2 sum collapses to the same
+      // ln(u) + ln(1 - u), and sum_{i=1}^{n} (2i-1) = n^2 (sum of the first n odd
+      // numbers). Hence A^2 = -n - (1/n)*n^2*(ln(u)+ln(1-u)) = -n*(1+ln(u)+ln(1-u)).
+      // For n=5: A^2 = -5*(1 + ln(0.8413447460685429) + ln(1-0.8413447460685429))
+      //             ~= 5.068877120163567
       const result = test.andersonDarling([1, 1, 1, 1, 1], x => n01.cdf(x))
-      assert.isNumber(result.stat)
-      assert(!Number.isNaN(result.stat))
-      assert.isNumber(result.pValue)
+      assert.closeTo(result.stat, -5 * (1 + Math.log(u) + Math.log(1 - u)), 1e-9)
+      // Marsaglia & Marsaglia (2004) asymptotic formula (adinf + finite-n errfix
+      // correction), independently re-implemented (not sourced from src/dist/_tests.js)
+      // by transcribing the published coefficients fresh in a standalone Node
+      // script, and evaluated at a2 = 5.068877120163567, n=5:
+      //   adinf(a2) = 0.9973430639169235 (branch z >= 2: exp(-exp(poly2(z))))
+      //   errfix(5, adinf) = -0.0003615943570252966 (branch x >= 0.8)
+      //   pValue = 1 - (adinf + errfix) = 0.0030185304401018076
+      assert.closeTo(result.pValue, 0.0030185304401018076, 1e-9)
     })
 
     it('should propagate NaN rather than throw when a sample value is NaN', () => {
