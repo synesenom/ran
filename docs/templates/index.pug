@@ -25,9 +25,6 @@ block content
             p.sub
                 | #[span.zh rán · 然] #[span.gloss &ldquo;so; correct&rdquo;] &mdash; robust random variates, distribution testing &amp; statistics for JavaScript.
 
-    h2 What is this?
-    p A small library for robust generation of various random variates, testing data against distributions or calculating different statistical properties.
-
     h2 Install in node
     pre.install
         code.hljs !{install.node}
@@ -42,7 +39,7 @@ block content
 
     h2 API
     each entry in api
-        .card(class=entry.deprecated ? 'deprecated' : '')
+        .card(class=entry.deprecated ? 'deprecated' : '', data-index=entry.index)
             if entry.deprecated
                 .deprecated-banner.margined
                     span.deprecated-label Deprecated
@@ -101,13 +98,26 @@ block scripts
         document.getElementById("search").addEventListener("input", function () {
           // Find names containing the search keyword.
           const token = this.value.toLowerCase();
-          const ids = new Set(
+          const matches = new Set(
             list.filter(d => d.split('.').slice(-1)[0].toLowerCase().indexOf(token) > -1)
-              .map(d => `toc-${d}`)
           );
 
-          // Highlight matching entries.
+          // Sidebar entries and their content cards share the same `index`
+          // (toc-entry id is `toc-`-prefixed, the card's is bare), so both
+          // are filtered from the same match set — search narrows the page
+          // itself, not just the nav.
           Array.from(document.getElementsByClassName('toc-entry')).forEach(entry => {
-            entry.style.display = ids.has(entry.id) ? 'block' : 'none';
+            entry.style.display = matches.has(entry.id.slice('toc-'.length)) ? 'block' : 'none';
+          });
+          Array.from(document.getElementsByClassName('card')).forEach(card => {
+            card.style.display = matches.has(card.dataset.index) ? '' : 'none';
+          });
+
+          // Hide a whole section (its header + list) once none of its
+          // entries match, the way lodash's docs sidebar search does.
+          document.querySelectorAll('ul.sections > li').forEach(section => {
+            const hasMatch = Array.from(section.getElementsByClassName('toc-entry'))
+              .some(entry => entry.style.display !== 'none');
+            section.style.display = hasMatch ? '' : 'none';
           });
         });
