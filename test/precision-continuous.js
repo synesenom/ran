@@ -4530,6 +4530,20 @@ const REFS = [
       { x: 2.5, pdf: 0.05641980438908635, cdf: 0.9682095163056197 }
     ]
   },
+  // VonMises[11]: series/transform accumulates a few ULPs beyond 1e-14; q() has no closed form (numerical root-finding), which loosens the round-trip further
+  {
+    name: 'VonMises',
+    params: [11],
+    tol: 1e-13,
+    qtol: 1e-11,
+    points: [
+      { x: -1.0, pdf: 0.008324075654520296, cdf: 0.0008536976551769042 },
+      { x: -0.7853981633974483, pdf: 0.05214358825274366, cdf: 0.006110362138173876 },
+      { x: 0.15, pdf: 1.15552317984488, cdf: 0.6883262995038191 },
+      { x: 0.7853981633974483, pdf: 0.05214358825274366, cdf: 0.9938896378618262 },
+      { x: 1.5707963267948966, pdf: 2.1836478819052325e-05, cdf: 0.999997996827892 }
+    ]
+  },
   {
     name: 'Weibull',
     params: [2, 2],
