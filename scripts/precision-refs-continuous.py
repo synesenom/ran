@@ -1447,7 +1447,9 @@ P_GRID = [mpf('0.1'), mpf('0.3'), mpf('0.53'), mpf('0.72'), mpf('0.9')]
 # (e.g. VonMises(9).cdf(-pi/4) = -0.0074) for sufficiently concentrated kappa, which corrupts
 # the general quantile root-finder for arbitrary p -- filed and fixed separately (see
 # solutions/correctness/2026-07-26-1339-vonmises-cdf-oscillating-term-premature-convergence.md).
-# No VonMises boundary set is added here; out of scope for #1185.
+# Both fixes have since landed, so the VonMises[11] set below (in PARAM_SETS/VONMISES_XVALS)
+# is now included -- its three k*pi/4 x-values directly regression-test the oscillating-term
+# envelope fix, and kappa=11 keeps it inside the besselI(0,x) dispatch band #1185 fixed.
 PARAM_SETS = {
     'Alpha': [[2, 2], [0.5, 0.5], [3, 1]],
     'Anglit': [[0, 2], [3, 0.5], [-1, 4]],
@@ -1594,7 +1596,7 @@ PARAM_SETS = {
     'Uniform': [[5, 25], [0, 1], [-2, 2]],
     'UniformProduct': [[6], [2], [4]],
     'UniformRatio': [[]],
-    'VonMises': [[2], [0.5], [1]],
+    'VonMises': [[2], [0.5], [1], [11]],
     'Weibull': [[2, 2], [0.5, 0.5], [1, 3]],
     'Wigner': [[2], [0.5], [1]],
 }
@@ -1697,6 +1699,14 @@ VONMISES_XVALS = {
     (2,): [mpf('-2'), mpf('-0.8'), mpf('0.4'), mpf('1.2'), mpf('2.5')],
     (0.5,): [mpf('-2.5'), mpf('-1'), mpf('0.4'), mpf('1.4'), mpf('2.5')],
     (1,): [mpf('-2.5'), mpf('-1'), mpf('0.4'), mpf('1.4'), mpf('2.5')],
+    # kappa=11 straddles besselI(0,x)'s Miller-recurrence dispatch band (10, 14] (bessel.js)
+    # and includes three k*pi/4 phase points (-pi/4, pi/4, pi/2) where _cdf's Fourier-series
+    # envelope convergence check (see src/dist/von-mises.js) was previously fooled by sin(i*x)
+    # coincidentally vanishing at those exact phases -- see the withheld-set note above. The
+    # remaining two points, -1 and 0.15, are generic interior probes (one moderate-tail, one
+    # near-mode) added to round the group out to this file's standard 5-points-per-group shape,
+    # matching how other groups here combine targeted boundary probes with generic coverage.
+    (11,): [mpf('-1'), -pi / 4, mpf('0.15'), pi / 4, pi / 2],
 }
 # Davis is inverted by bisection like the rest (its quadrature CDF is slow but tolerable for
 # one distribution) so its probes span the full support {0.1..0.9} rather than fixed points.
@@ -1929,6 +1939,7 @@ PDFCDF_TOL = {
     ('NoncentralChi2', '[5, 58]'): '5e-13',
     ('NoncentralChi2', '[5, 62]'): '5e-13',
     ('R', '[0.5]'): '1e-13',
+    ('VonMises', '[11]'): '1e-13',
 }
 # Per-(name, json-params) quantile round-trip tolerance (default 1e-14; per-group empirical:
 # closed-form/Halley quantiles stay at 1e-14, root-finding/approximate ones are looser).
@@ -1967,6 +1978,7 @@ Q_TOL = {
     ('UniformProduct', '[4]'): '5e-13',
     ('UniformProduct', '[6]'): '1e-11',
     ('LogGamma', '[0.5, 0.5, 1]'): '2e-14',
+    ('VonMises', '[11]'): '1e-11',
 }
 # Per-(name, json-params) one-line justification comment emitted above a loosened group.
 _N_SERIES = 'series/transform accumulates a few ULPs beyond 1e-14'
@@ -2026,6 +2038,7 @@ NOTES = {
     ('UniformProduct', '[2]'): 'q() has no closed form (numerical root-finding); round-trip measured at 1.1e-14 on Node 20 (V8/libm rounding differs across Node versions) — gate at 1e-13 (#759)',
     ('UniformProduct', '[4]'): 'q() has no closed form (numerical root-finding); round-trip measured at 1.4e-13 in JIT-order-dependent full-suite runs — gate at 5e-13 (#759)',
     ('UniformProduct', '[6]'): _N_ROOT,
+    ('VonMises', '[11]'): 'series/transform accumulates a few ULPs beyond 1e-14; q() has no closed form (numerical root-finding), which loosens the round-trip further',
 }
 
 
@@ -2049,6 +2062,9 @@ def compute_cache(only=None):
                 for g in json.load(fh):
                     prev_by_name.setdefault(g['name'], []).append(g)
         else:
+            # --only scopes cache REUSE, not computation -- with no prior cache this recomputes
+            # every distribution, including the ~65-minute DoublyNoncentralBeta[1200,1200] set.
+            # See solutions/tooling/2026-07-26-2200-precision-refs-only-flag-cache-scope-not-compute-scope.md
             print(f'  --only given but no cache at {CACHE} yet; computing everything', flush=True)
 
     cache = []
