@@ -1450,6 +1450,31 @@ P_GRID = [mpf('0.1'), mpf('0.3'), mpf('0.53'), mpf('0.72'), mpf('0.9')]
 # Both fixes have since landed, so the VonMises[11] set below (in PARAM_SETS/VONMISES_XVALS)
 # is now included -- its three k*pi/4 x-values directly regression-test the oscillating-term
 # envelope fix, and kappa=11 keeps it inside the besselI(0,x) dispatch band #1185 fixed.
+#
+# Gamma/Chi2/InverseGamma/GeneralizedGamma get sets straddling gammaLowerIncompleteInv's
+# a>=1 initial-guess dispatch (Wilson-Hilferty rational approximation vs. leading-term-series
+# inversion, src/special/gamma-incomplete.js:123,144-156) -- this crossover had zero
+# boundary-adjacent precision-gate coverage before this (issue #1188, continuation of #1143).
+# These four cover distinct call patterns onto the same primitive: Gamma calls it directly
+# (this.p.alpha, p); Chi2 derives a half-integer shape (round(k)/2) and post-scales the
+# result by 2; InverseGamma complements the probability (1-p) and reciprocates the result;
+# GeneralizedGamma derives a composite shape (d/p) and post-transforms by a power law
+# (1/p). Erlang/Chi share Gamma's/Chi2's own call shape (Chi is literally Chi2's this.c.alpha
+# reused under a sqrt), and LogGamma/GeneralizedNormal/HalfGeneralizedNormal/DoubleGamma only
+# add a further monotonic wrapper (exp/abs-sign/power) around the same GeneralizedGamma-family
+# dispatch already covered here, so a representative subset was judged sufficient rather than
+# giving every family member (see #1188's own out-of-scope note) its own boundary set.
+# MaxwellBoltzmann is excluded outright: its shape is pinned to alpha=1.5 regardless of the
+# sigma parameter (src/dist/maxwell-boltzmann.js), so no parameterization can move it across
+# a=1.
+# Gamma[0.9,1]/[1.1,1] and InverseGamma[0.9,2]/[1.1,2] straddle the boundary directly (0.9
+# dispatches the series-inversion branch, 1.1 the Wilson-Hilferty branch). Chi2 already had
+# an a>=1 set (k=2 -> alpha=1.0, exactly the boundary) but nothing below it, so only the
+# below-boundary partner (k=1 -> alpha=0.5) is added. GeneralizedGamma already had two sets
+# landing exactly on alpha=d/p=1 ([2,2,2] and [0.5,0.5,0.5]) but nothing below it either, so
+# its below-boundary partner (alpha=0.9, via d=1.8/p=2) is added -- p=2 keeps the power-law
+# post-transform (1/p) non-trivial, unlike p=1 which would degenerate the call into a plain
+# Gamma(alpha, beta) and add no coverage beyond the Gamma[0.9,1] set above.
 PARAM_SETS = {
     'Alpha': [[2, 2], [0.5, 0.5], [3, 1]],
     'Anglit': [[0, 2], [3, 0.5], [-1, 4]],
@@ -1469,7 +1494,7 @@ PARAM_SETS = {
     'Cauchy': [[0, 2], [3, 0.5], [-1, 1]],
     'Champernowne': [[2, 0.5, 1], [1, 0, 0], [3, 0.8, -1]],
     'Chi': [[1], [5], [3]],
-    'Chi2': [[5], [2], [9]],
+    'Chi2': [[5], [2], [9], [1]],
     'Dagum': [[2, 2, 2], [0.5, 0.5, 2], [1, 3, 1]],
     'Davis': [[1, 1, 2], [1, 2, 3], [2, 1, 4]],
     'DoubleGamma': [[2, 2], [0.5, 2], [3, 1]],
@@ -1486,11 +1511,11 @@ PARAM_SETS = {
     'F': [[5, 5], [2, 20], [10, 4]],
     'FisherZ': [[5, 5], [1, 1], [8, 4]],
     'Frechet': [[2, 2, 0], [0.5, 1, 0], [3, 2, 1]],
-    'Gamma': [[2, 2], [0.5, 0.5], [3, 1]],
+    'Gamma': [[2, 2], [0.5, 0.5], [3, 1], [0.9, 1], [1.1, 1]],
     'GammaGompertz': [[2, 2, 2], [0.5, 0.5, 0.5], [1, 3, 2]],
     'GeneralizedExponential': [[2, 2, 2], [2, 0.5, 4], [1, 3, 2]],
     'GeneralizedExtremeValue': [[2], [-2], [0.5]],
-    'GeneralizedGamma': [[2, 2, 2], [0.5, 0.5, 0.5], [1, 3, 2]],
+    'GeneralizedGamma': [[2, 2, 2], [0.5, 0.5, 0.5], [1, 3, 2], [1, 1.8, 2]],
     'GeneralizedLogistic': [[0, 2, 2], [3, 0.5, 0.5], [-1, 1, 3]],
     'GeneralizedNormal': [[0, 2, 2], [3, 0.5, 0.5], [-1, 1, 3]],
     'GeneralizedPareto': [[0, 2, 2], [0, 2, -2], [0, 2, 0]],
@@ -1508,7 +1533,7 @@ PARAM_SETS = {
         [[{'weight': 1, 'rate': 1}, {'weight': 2, 'rate': 3}]],
     ],
     'InverseChi2': [[6], [2], [4]],
-    'InverseGamma': [[2, 2], [0.5, 0.5], [3, 1]],
+    'InverseGamma': [[2, 2], [0.5, 0.5], [3, 1], [0.9, 2], [1.1, 2]],
     'InverseGaussian': [[2, 2], [1, 0.5], [3, 1]],
     'InvertedWeibull': [[2], [0.5], [3]],
     'IrwinHall': [[10], [3], [5]],
