@@ -4232,6 +4232,32 @@ export default [{
       { x: 1.5, pdf: 0.2959616910323314, cdf: 0.8185946141203637 },
       { x: 2.0, pdf: 0.1470458961594603, cdf: 0.9269831334053658 }
     ]
+  }, {
+    // #1179: lambda=8 pushes marcumP's dispatched x (=lambda^2/2=32) past the x<30
+    // series threshold into the quadrature branch, where _zetaxy(xs,ys) catastrophically
+    // cancelled for the ys=y/mu<<1 regime these small-x refVals/quantileVals exercise
+    // (previously NaN/wrong; withheld from the precision gate, see
+    // scripts/precision-refs-continuous.py). x values chosen to stay above _pqTrap's
+    // underflow shortcut so the quadrature itself is exercised, not just the shortcut.
+    name: 'deep lower tail, marcumQ quadrature branch (#1179)',
+    params: () => [5, 8],
+    // mpmath dps=50: series P_mu(x,y) = e^-x * sum_n (x^n/n!) * P_(mu+n)(y) with
+    // mu=k/2=2.5, x=lambda^2/2=32, y=x_input^2/2 (Eq. 7 of arXiv:1311.0681)
+    refVals: [
+      { x: 0.001, pdf: 3.3682005946631044e-27, cdf: 6.736389833710898e-31 },
+      { x: 0.01, pdf: 3.3701683381656714e-23, cdf: 6.739200772312725e-26 },
+      { x: 0.1, pdf: 3.570831411733158e-19, cdf: 7.024608021301539e-21 }
+    ],
+    // mpmath dps=50: bisection root of the same series-based cdf against P_GRID
+    quantileVals: [
+      { p: 0.01, x: 5.963320686968405 },
+      { p: 0.1, x: 6.98660656789279 },
+      { p: 0.25, x: 7.582981368206432 },
+      { p: 0.5, x: 8.246829301189035 },
+      { p: 0.75, x: 8.911760948632066 },
+      { p: 0.9, x: 9.511003483015747 },
+      { p: 0.99, x: 10.543788294863331 }
+    ]
   }],
   // Reference values via sqrt-transform of NoncentralChi2: 2x*ncx2.pdf(x^2, 5, 4), ncx2.cdf(x^2, 5, 4)
   refVals: [
@@ -4294,6 +4320,30 @@ export default [{
       { x: 211.0, pdf: 0.013890177081036428, cdf: 0.5137989130715415 },
       { x: 240.0, pdf: 0.007802392460401308, cdf: 0.8442056025065701 },
       { x: 270.0, pdf: 0.0017906810865173086, cdf: 0.9750992735604973 }
+    ]
+  }, {
+    // #1179: k=10, lambda=64 pushes marcumP's dispatched x (=lambda/2=32) past the x<30
+    // series threshold into the quadrature branch, where _zetaxy(xs,ys) catastrophically
+    // cancelled for the ys=y/mu<<1 regime these small-x refVals/quantileVals exercise
+    // (.q(p) is exposed to this regime via _qEstimateRoot's Number.EPSILON bracket probe).
+    name: 'deep lower tail, marcumQ quadrature branch (#1179)',
+    params: () => [10, 64],
+    // mpmath dps=50: series P_mu(x,y) = e^-x * sum_n (x^n/n!) * P_(mu+n)(y) with mu=k/2=5,
+    // x=lambda/2=32, y=x_input/2 (Eq. 7 of arXiv:1311.0681)
+    refVals: [
+      { x: 0.01, pdf: 1.693965162093538e-25, cdf: 3.37282459580626e-28 },
+      { x: 0.1, pdf: 2.14278528542578e-21, cdf: 4.108935994493068e-23 },
+      { x: 0.5, pdf: 3.3673580655592523e-18, cdf: 2.8426640616862323e-19 }
+    ],
+    // mpmath dps=50: bisection root of the same series-based cdf against P_GRID
+    quantileVals: [
+      { p: 0.01, x: 39.79187671220305 },
+      { p: 0.1, x: 53.41380851340095 },
+      { p: 0.25, x: 62.30271489592543 },
+      { p: 0.5, x: 73.02208863294335 },
+      { p: 0.75, x: 84.63144224183868 },
+      { p: 0.9, x: 95.84296416362325 },
+      { p: 0.99, x: 116.83469755356327 }
     ]
   }],
   // even and odd k share the same Gamma-based noncentralChi2 sampler; the even/odd branch is in _pdf only
@@ -5020,6 +5070,31 @@ export default [{
       { x: 4.0, pdf: 0.1394986603748469, cdf: 0.8562067168899313 },
       { x: 6.0, pdf: 0.018503126841666297, cdf: 0.9872983219788449 },
       { x: 10.0, pdf: 1.2917118601656784e-05, cdf: 0.9999946947236644 }
+    ]
+  }, {
+    // #1179: nu=8, sigma=1 pushes marcumP's dispatched x (=0.5*(nu/sigma)^2=32) past the
+    // x<30 series threshold into the quadrature branch, where _zetaxy(xs,ys)
+    // catastrophically cancelled for the ys=y/mu<<1 regime these small-x refVals/
+    // quantileVals exercise (previously NaN/wrong; this is the exact Rice(8,1).q(0.1)
+    // reproduction from #1179, which used to return 1.86e-9 instead of ~6.79).
+    name: 'deep lower tail, marcumQ quadrature branch (#1179)',
+    params: () => [8, 1],
+    // mpmath dps=50: series P_mu(x,y) = e^-x * sum_n (x^n/n!) * P_(mu+n)(y) with mu=1,
+    // x=0.5*(nu/sigma)^2=32, y=0.5*(x_input/sigma)^2 (Eq. 7 of arXiv:1311.0681)
+    refVals: [
+      { x: 1e-8, pdf: 1.2664165549094196e-22, cdf: 6.332082774547093e-31 },
+      { x: 1e-4, pdf: 1.2664167512039906e-18, cdf: 6.332083265283515e-23 },
+      { x: 1e-2, pdf: 1.268380211451898e-16, cdf: 6.336991323457111e-19 }
+    ],
+    // mpmath dps=50: bisection root of the same series-based cdf against P_GRID
+    quantileVals: [
+      { p: 0.01, x: 5.747334639066048 },
+      { p: 0.1, x: 6.786444727597504 },
+      { p: 0.25, x: 7.390705246758277 },
+      { p: 0.5, x: 8.06241951101088 },
+      { p: 0.75, x: 8.734427327444184 },
+      { p: 0.9, x: 9.339465824330071 },
+      { p: 0.99, x: 10.381165485447534 }
     ]
   }],
   // Boundary x=1e-4 and x=1e-2 entries lock in the #246 fix (complementary
