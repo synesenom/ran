@@ -21,10 +21,10 @@ Usage:    python3 scripts/precision-refs-continuous.py                        # 
               # unconditionally re-paying DoublyNoncentralBeta[2,2,1200,1200]'s ~65-minute
               # cost (issue #1149) when regenerating references for an unrelated distribution
           python3 scripts/precision-refs-continuous.py --emit --allow-prune
-              # skip the drop-guard (see render() below) that otherwise refuses to overwrite
-              # test/precision-continuous.js when doing so would silently delete a group this
-              # script does not know how to reproduce (e.g. a hand-maintained group whose name
-              # was intentionally never added to PARAM_SETS) -- use only when the drop is deliberate
+              # by default, render() (below) preserves any existing group verbatim when the
+              # fresh cache doesn't reproduce it (e.g. TruncatedExponential, which has no
+              # PARAM_SETS entry at all) instead of silently deleting it -- pass --allow-prune
+              # to actually let such a group be dropped when that removal is deliberate
 """
 import json
 import os
@@ -2041,37 +2041,56 @@ def compute_cache(only=None):
 OUTPUT_PATH = 'test/precision-continuous.js'
 
 
-def existing_group_keys(path):
+def existing_groups(path):
     # A handful of groups in the output file (e.g. TruncatedExponential, and the
     # Normal/LogNormal far-tail sets in NORMAL_FAR_TAIL_XVALS) are hand-maintained and
     # intentionally outside PARAM_SETS's scope -- see the comments near PARAM_SETS and
-    # NORMAL_FAR_TAIL_XVALS. render() below refuses to prune them by surprise (issue #1186
-    # follow-up); this reads the CURRENT file's group identities to check against.
-    # A Counter, not a set: Normal/LogNormal's far-tail groups share the exact same
-    # (name, params) key as their standard 5-point sibling (only the points differ), so a
-    # plain set would treat "2 groups with this key" and "1 group with this key" as identical.
+    # NORMAL_FAR_TAIL_XVALS. compute_cache() can NEVER reproduce them (TruncatedExponential
+    # has no PARAM_SETS entry at all; NORMAL_FAR_TAIL_XVALS is never wired into compute_cache),
+    # so a plain "would this run drop an existing group" check trips on every real invocation
+    # -- render() below instead preserves each group's ORIGINAL raw text (including any
+    # leading comment) whenever the fresh cache doesn't reproduce it, rather than erroring
+    # (issue #1186 follow-up). Returns an ordered list of (key, raw_group_text); key is a
+    # (name, params-literal-text) pair matching how render() below builds js_lit(p) keys --
+    # NOT js_params()/json.dumps, which can't match nested-object params like
+    # Hyperexponential's [[{ weight: 1, ... }]] (unquoted JS keys, not JSON).
     if not os.path.exists(path):
-        return Counter()
+        return []
     with open(path) as fh:
         src = fh.read()
     m = re.search(r'const REFS = \[', src)
     if not m:
-        return Counter()
+        return []
     start = m.end() - 1
     depth = 0
-    end = None
+    spans = []
+    span_start = None
     for i in range(start, len(src)):
-        if src[i] == '[':
+        if src[i] == '[' or src[i] == '{':
+            if src[i] == '{' and depth == 1:
+                span_start = i
             depth += 1
-        elif src[i] == ']':
+        elif src[i] == ']' or src[i] == '}':
             depth -= 1
+            if src[i] == '}' and depth == 1:
+                spans.append((span_start, i + 1))
             if depth == 0:
-                end = i
                 break
-    arr_text = src[start:end + 1]
-    return Counter(
-        (gm.group(1), re.sub(r'\s+', ' ', gm.group(2).strip()))
-        for gm in re.finditer(r"name:\s*'([^']+)',\s*params:\s*([\s\S]*?),\n\s*tol:", arr_text))
+    groups = []
+    prev_end = start
+    for span_start, span_end in spans:
+        # Attach any comment lines directly above this group (e.g. the SkewNormal[1, 1, 3]
+        # tolerance-justification comments) so they travel with a preserved group verbatim.
+        gap = src[prev_end:span_start]
+        comment_lines = [ln for ln in gap.splitlines() if ln.strip().startswith('//')]
+        comment = ('\n'.join(comment_lines) + '\n') if comment_lines else ''
+        text = comment + src[span_start:span_end]
+        gm = re.search(r"name:\s*'([^']+)',\s*params:\s*([\s\S]*?),\n\s*tol:", text)
+        if gm:
+            key = (gm.group(1), re.sub(r'\s+', ' ', gm.group(2).strip()))
+            groups.append((key, text))
+        prev_end = span_end
+    return groups
 
 
 def render(cache, allow_prune=False):
@@ -2081,7 +2100,7 @@ def render(cache, allow_prune=False):
         name, p = g['name'], g['params']
         jp = js_params(p)
         key = (name, jp)
-        # existing_group_keys() reads the on-disk JS literal (unquoted keys, e.g.
+        # existing_groups() reads the on-disk JS literal (unquoted keys, e.g.
         # Hyperexponential's [[{ weight: 1, ... }]]), which json.dumps-based jp can never
         # match for nested-object params -- js_lit(p) is what actually gets written to disk.
         new_keys[(name, re.sub(r'\s+', ' ', js_lit(p)))] += 1
@@ -2096,15 +2115,21 @@ def render(cache, allow_prune=False):
             f"    tol: {tol},\n    qtol: {qtol},\n    points: [\n      {pts}\n    ]\n  }}")
 
     if not allow_prune:
-        dropped = sorted((existing_group_keys(OUTPUT_PATH) - new_keys).elements())
-        if dropped:
-            raise RuntimeError(
-                f'refusing to write {OUTPUT_PATH}: this run would silently delete '
-                f'{len(dropped)} existing group(s) this script does not reproduce '
-                f'(e.g. {dropped[0][0]}{dropped[0][1]}). These are likely hand-maintained '
-                'groups outside PARAM_SETS/MANUAL_XVALS scope (see the comments near '
-                'PARAM_SETS and NORMAL_FAR_TAIL_XVALS) -- re-run with --allow-prune if this '
-                'removal is deliberate.')
+        # Walk existing groups in file order, "consuming" one occurrence of new_keys[key] per
+        # group seen; any group beyond what the fresh cache reproduces for its key (e.g. the
+        # far-tail Normal/LogNormal groups, which come right after their same-key standard
+        # sibling in the file) is preserved verbatim instead of silently dropped.
+        remaining = Counter(new_keys)
+        preserved = []
+        for key, text in existing_groups(OUTPUT_PATH):
+            if remaining[key] > 0:
+                remaining[key] -= 1
+            else:
+                preserved.append(text.rstrip('\n'))
+        if preserved:
+            groups.extend(preserved)
+            print(f'preserved {len(preserved)} hand-maintained group(s) not reproduced by '
+                  'PARAM_SETS (pass --allow-prune to actually remove them)', flush=True)
 
     data = '[\n' + ',\n'.join(groups) + '\n]'
     with open(OUTPUT_PATH, 'w') as fh:
