@@ -1475,6 +1475,24 @@ P_GRID = [mpf('0.1'), mpf('0.3'), mpf('0.53'), mpf('0.72'), mpf('0.9')]
 # its below-boundary partner (alpha=0.9, via d=1.8/p=2) is added -- p=2 keeps the power-law
 # post-transform (1/p) non-trivial, unlike p=1 which would degenerate the call into a plain
 # Gamma(alpha, beta) and add no coverage beyond the Gamma[0.9,1] set above.
+#
+# Lindley/Muth/GeneralizedExponential/Makeham/BenktanderII/Logarithmic get sets straddling
+# lambertW0/lambertW1m's initial-guess dispatch (src/special/lambert-w.js:35,62 --
+# lambertW1m switches Laurent-vs-branch-point series at z=-0.1, lambertW0 switches
+# w0=0-vs-log(z) at z=1), which had zero precision-gate coverage before this (issue #1187,
+# continuing #1143). This crossover only picks the Halley refinement's starting point, not
+# its convergence target, so every set below round-trips to full float64 precision on both
+# sides of the threshold -- no bug, unlike besselI/marcumQ's real track record at their own
+# thresholds. lambertW1m's argument in Lindley[1.5]/Muth[0.35]'s _q() call is
+# -(1-p)*expFactor, spanning roughly -0.18 to -0.02 across P_GRID and crossing -0.1 between
+# p=0.3 and p=0.53. Makeham[1,2,3]/BenktanderII[0.1,0.6]'s lambertW0 argument spans roughly
+# 0.5-2.2 / 0.4-10, crossing 1 between p=0.53 and p=0.72. Logarithmic[1,6.25]'s raw argument
+# (passed to lambertW0 as z/e) spans roughly -0.4 to 4.6, crossing e=2.71828... between
+# p=0.53 and p=0.72. GeneralizedExponential has NO set here: its lambertW0 argument
+# -b*exp((c*ln(1-p)-b)/(a+b))/(a+b) factors as z0*(1-p)^(c/(a+b)) with z0 = -b/(a+b) *
+# exp(-b/(a+b)) confined to the open interval (-1/e, 0) for every a,b>0 -- it can never reach the z>=1
+# threshold for any valid parameters, so this crossover is provably unreachable via this
+# distribution's _q(p) and is omitted rather than faked with an unreachable-in-practice set.
 PARAM_SETS = {
     'Alpha': [[2, 2], [0.5, 0.5], [3, 1]],
     'Anglit': [[0, 2], [3, 0.5], [-1, 4]],
@@ -1483,8 +1501,13 @@ PARAM_SETS = {
     'BaldingNichols': [[0.5, 0.5], [0.1, 0.1], [0.3, 0.7]],
     'Bates': [[10, 5, 25], [3, 0, 1], [5, -2, 2]],
     'Benini': [[2, 2, 2], [0.5, 0.5, 1], [1, 3, 2]],
-    'BenktanderII': [[2, 0.9995], [2, 1], [2, 0.5]],
-    'Beta': [[2, 2], [0.5, 0.5], [3, 5]],
+    # [0.1, 0.6]: lambertW0 argument in _q() spans ~0.38-10.15, straddling the z=1
+    # initial-guess dispatch (issue #1187).
+    'BenktanderII': [[2, 0.9995], [2, 1], [2, 0.5], [0.1, 0.6]],
+    # [4, 3]: x straddles regularizedBetaIncomplete's direct/complementary continued-fraction
+    # dispatch at x=(a+1)/(a+b+2)=5/9 (src/special/beta-incomplete.js) -- unprobed before
+    # this (issue #1178).
+    'Beta': [[2, 2], [0.5, 0.5], [3, 5], [4, 3]],
     'BetaPrime': [[2, 2], [0.5, 4], [3, 3]],
     'BetaRectangular': [[2, 2, 0.5, 5, 25], [0.5, 0.5, 0.9, 5, 25], [3, 2, 0.3, 0, 10]],
     'BirnbaumSaunders': [[0, 2, 2], [0, 0.5, 0.5], [1, 1, 1]],
@@ -1508,7 +1531,10 @@ PARAM_SETS = {
     'ExponentialLogarithmic': [[0.5, 2], [0.9, 0.5], [0.3, 1]],
     'ExponentiallyModifiedGaussian': [[0, 1, 1], [1, 0.3, 5], [-1, 2, 0.2]],
     'ExponentiatedWeibull': [[2, 2, 2], [0.5, 0.5, 0.5], [1, 2, 3]],
-    'F': [[5, 5], [2, 20], [10, 4]],
+    # [6, 8]: x straddles regularizedBetaIncomplete's direct/complementary continued-fraction
+    # dispatch, here at internal beta-argument z=d1*x/(d1*x+d2)=(a+1)/(a+b+2)=4/9 -- unprobed
+    # before this (issue #1178).
+    'F': [[5, 5], [2, 20], [10, 4], [6, 8]],
     'FisherZ': [[5, 5], [1, 1], [8, 4]],
     'Frechet': [[2, 2, 0], [0.5, 1, 0], [3, 2, 1]],
     'Gamma': [[2, 2], [0.5, 0.5], [3, 1], [0.9, 1], [1.1, 1]],
@@ -1534,7 +1560,9 @@ PARAM_SETS = {
     ],
     'InverseChi2': [[6], [2], [4]],
     'InverseGamma': [[2, 2], [0.5, 0.5], [3, 1], [0.9, 2], [1.1, 2]],
-    'InverseGaussian': [[2, 2], [1, 0.5], [3, 1]],
+    # [2, 3]: x straddles _cdf's erfc(-a) series/continued-fraction dispatch at -a=1
+    # (src/special/error.js's erfc: x<=1 series, x>1 CF) -- unprobed before this (issue #1178).
+    'InverseGaussian': [[2, 2], [1, 0.5], [3, 1], [2, 3]],
     'InvertedWeibull': [[2], [0.5], [3]],
     'IrwinHall': [[10], [3], [5]],
     'JohnsonSU': [[0, 2, 2, 0], [1, 0.5, 0.5, 1], [-1, 1.5, 2, 0]],
@@ -1542,25 +1570,39 @@ PARAM_SETS = {
     'Kolmogorov': [[]],
     'Kumaraswamy': [[2, 2], [0.5, 0.5], [3, 1]],
     'Laplace': [[0, 2], [3, 0.5], [-1, 1]],
-    'Levy': [[0, 2], [1, 0.5], [-1, 1]],
-    'Lindley': [[2], [0.5], [1]],
+    # [2, 3]: x straddles _cdf's erfc series/continued-fraction dispatch at z=1
+    # (src/special/error.js) -- Normal/LogNormal's far-tail crossover coverage (issue #808)
+    # never probed this close to z=1 for Levy; unprobed before this (issue #1178).
+    'Levy': [[0, 2], [1, 0.5], [-1, 1], [2, 3]],
+    # [1.5]: lambertW1m argument in _q() spans ~-0.18 to -0.02, straddling the z=-0.1
+    # initial-guess dispatch (issue #1187).
+    'Lindley': [[2], [0.5], [1], [1.5]],
     'LogCauchy': [[0, 2], [1, 0.5], [-1, 1]],
     'LogGamma': [[2, 2, 2], [0.5, 0.5, 1], [3, 1, 0]],
     'LogLaplace': [[0, 2], [1, 0.5], [-1, 1]],
     'LogLogistic': [[2, 2], [0.5, 0.5], [3, 1]],
     'LogNormal': [[0, 2], [1, 0.5], [-1, 1]],
-    'Logarithmic': [[6, 30], [2, 10], [1, 5]],
+    # [1, 6.25]: raw argument passed to lambertW0 as z/e in _q() spans ~-0.4 to 4.6,
+    # straddling the z/e=1 (raw z=e) initial-guess dispatch (issue #1187).
+    'Logarithmic': [[6, 30], [2, 10], [1, 5], [1, 6.25]],
     'Logistic': [[0, 2], [3, 0.5], [-1, 1]],
     'LogisticExponential': [[2, 2], [0.5, 0.5], [1, 3]],
     'LogitNormal': [[0, 2], [1, 0.5], [-1, 1]],
     'Lomax': [[2, 2], [0.5, 0.5], [3, 1]],
-    'Makeham': [[2, 2, 2], [0.5, 0.5, 0.5], [1, 1, 3]],
+    # [1, 2, 3]: lambertW0 argument in _q() spans ~0.5-2.2, straddling the z=1
+    # initial-guess dispatch (issue #1187).
+    'Makeham': [[2, 2, 2], [0.5, 0.5, 0.5], [1, 1, 3], [1, 2, 3]],
     'MaxwellBoltzmann': [[2], [0.5], [1]],
     'Mielke': [[2, 2], [0.5, 4], [3, 1]],
     'Moyal': [[0, 2], [3, 0.5], [-1, 1]],
-    'Muth': [[0.5], [0.1], [1]],
+    # [0.35]: lambertW1m argument in _q() spans ~-0.15 to -0.02, straddling the z=-0.1
+    # initial-guess dispatch (issue #1187).
+    'Muth': [[0.5], [0.1], [1], [0.35]],
     'Nakagami': [[2.5, 2], [0.5, 0.5], [1, 3]],
-    'NoncentralBeta': [[2, 2, 2], [0.5, 5, 10], [0.1, 2, 10]],
+    # [2, 3, 4]: x straddles _cdf's regularizedBetaIncomplete(iAlpha0, beta, x) direct/
+    # complementary continued-fraction dispatch at x=(iAlpha0+1)/(iAlpha0+beta+2)=5/9, where
+    # iAlpha0=alpha+round(lambda/2)=4 -- unprobed before this (issue #1178).
+    'NoncentralBeta': [[2, 2, 2], [0.5, 5, 10], [0.1, 2, 10], [2, 3, 4]],
     # [5, 0.5]: besselISpherical(1, lambda*x) argument spans ~0.65-1.56, straddling the
     # |x|=1 Taylor/closed-form dispatch (order = floor((k-3)/2) = 1 at the lowest odd k>=5).
     # [2, 3.5]: besselI(0, lambda*x) argument spans into (10, 14], straddling
@@ -1573,7 +1615,11 @@ PARAM_SETS = {
     # _besselIBackward's n=0 warm-up margin gap (issue #1185; previously withheld here
     # during #1143's boundary-grid work, see the comment above PARAM_SETS).
     'NoncentralChi2': [[11, 2], [5, 3], [2, 1], [5, 58], [5, 62], [5, 0.5], [2, 8]],
-    'NoncentralF': [[5, 5, 2], [2, 10, 0.5], [4, 6, 3]],
+    # [6, 8, 4]: x straddles the underlying NoncentralBeta._cdf's regularizedBetaIncomplete
+    # direct/complementary dispatch, here at internal beta-argument
+    # z=d1*x/(d1*x+d2)=(iAlpha0+1)/(iAlpha0+beta+2)=6/11, where iAlpha0=alpha+round(lambda/2)=5
+    # -- unprobed before this (issue #1178).
+    'NoncentralF': [[5, 5, 2], [2, 10, 0.5], [4, 6, 3], [6, 8, 4]],
     'NoncentralT': [[5, 1], [5, 0], [8, 2]],
     'Normal': [[0, 2], [3, 0.5], [-1, 1]],
     'Pareto': [[2, 2], [1, 0.5], [3, 1]],
@@ -1649,6 +1695,47 @@ DNCF_XVALS = {
     (4, 6, 2, 1): [mpf('0.5'), mpf('1'), mpf('1.5'), mpf('2.5'), mpf('4')],
 }
 
+# erfc-family and incomplete-beta-family boundary-crossover probes (issue #1178, continuation
+# of #1143). P_GRID's probability-driven inversion cannot pin the internal special-function
+# argument to a specific value, so these fixed x-values were solved (in plain float64, then
+# evaluated here at mp.dps=50) to place the internal argument at 1%/0.1%/exactly the crossover
+# on each side, mirroring #1143's marcumQ boundary-grid intent but for erfc (x<=1 series/CF,
+# src/special/error.js) and regularizedBetaIncomplete (x<(a+1)/(a+b+2) direct/complementary CF,
+# src/special/beta-incomplete.js).
+LEVY_XVALS = {
+    # z = sqrt(0.5*c/(x-mu)) crosses erfc's x<=1 dispatch at z=1 <=> x=mu+0.5*c=3.5.
+    (2, 3): [mpf('3.5304560759106214'), mpf('3.503004506007509'), mpf('3.5'),
+             mpf('3.4970044940074914'), mpf('3.4704440741103815')],
+}
+INVERSE_GAUSSIAN_XVALS = {
+    # erfc(-a) crosses its x<=1 dispatch at -a=1 <=> a=-1, where
+    # a = (sqrt(lambda*x)/mu - sqrt(lambda/x)) / sqrt(2).
+    (2, 3): [mpf('0.6600414797517227'), mpf('0.6660004164792253'), mpf('0.6666666666666665'),
+             mpf('0.6673337501875585'), mpf('0.6733751880868137')],
+}
+BETA_XVALS = {
+    # x crosses regularizedBetaIncomplete's dispatch directly at x=(alpha+1)/(alpha+beta+2)=5/9.
+    (4, 3): [mpf('0.55'), mpf('0.555'), mpf('0.5555555555555556'),
+             mpf('0.5561111111111111'), mpf('0.5611111111111111')],
+}
+F_XVALS = {
+    # internal beta-argument z=d1*x/(d1*x+d2) crosses the dispatch at z=(alpha+1)/(alpha+beta+2)=4/9.
+    (6, 8): [mpf('1.0476190476190474'), mpf('1.0647482014388487'), mpf('1.0666666666666667'),
+             mpf('1.0685882038964503'), mpf('1.086021505376344')],
+}
+NONCENTRAL_BETA_XVALS = {
+    # x crosses regularizedBetaIncomplete(iAlpha0, beta, x)'s dispatch directly at
+    # x=(iAlpha0+1)/(iAlpha0+beta+2)=5/9, where iAlpha0=alpha+round(lambda/2)=4.
+    (2, 3, 4): [mpf('0.55'), mpf('0.555'), mpf('0.5555555555555556'),
+                mpf('0.5561111111111111'), mpf('0.5611111111111111')],
+}
+NONCENTRAL_F_XVALS = {
+    # internal beta-argument z=d1*x/(d1*x+d2) crosses the underlying NoncentralBeta dispatch at
+    # z=(iAlpha0+1)/(iAlpha0+beta+2)=6/11, where iAlpha0=alpha+round(lambda/2)=5.
+    (6, 8, 4): [mpf('1.5652173913043472'), mpf('1.596484218937275'), mpf('1.5999999999999996'),
+                mpf('1.6035242290748895'), mpf('1.6356275303643726')],
+}
+
 # Quadrature-based CDFs (Davis, noncentral-t, SkewNormal, VonMises): inverting by bisection
 # would re-run the integral 70x per point, so we probe at fixed interior values instead.
 NCT_XVALS = {
@@ -1683,6 +1770,12 @@ MANUAL_XVALS = {
     'NoncentralT': NCT_XVALS,
     'SkewNormal': SKEWNORMAL_XVALS,
     'VonMises': VONMISES_XVALS,
+    'Levy': LEVY_XVALS,
+    'InverseGaussian': INVERSE_GAUSSIAN_XVALS,
+    'Beta': BETA_XVALS,
+    'F': F_XVALS,
+    'NoncentralBeta': NONCENTRAL_BETA_XVALS,
+    'NoncentralF': NONCENTRAL_F_XVALS,
 }
 
 # Far-tail x-values for Normal and LogNormal (issue #808): x = mu - k*sigma at k=5,7.
@@ -1836,7 +1929,10 @@ def invcdf(name, p, pv):
 
 
 def xvalues(name, p):
-    if name in MANUAL_XVALS:
+    # Some distributions only have manual overrides for the boundary-crossover set added
+    # in #1178, alongside other param sets that still use the standard P_GRID inversion below
+    # -- fall through instead of unconditionally indexing when the specific tuple isn't listed.
+    if name in MANUAL_XVALS and tuple(p) in MANUAL_XVALS[name]:
         return MANUAL_XVALS[name][tuple(p)]
     if name == 'TukeyLambda':
         # exact closed-form quantile avoids root-finding inside bisection at the support edge
