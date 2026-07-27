@@ -395,6 +395,21 @@ const REFS = [
       { x: 0.596179727848044, pdf: 0.9924215278592065, cdf: 0.9 }
     ]
   },
+  // Beta[4, 3]: x straddles regularizedBetaIncomplete's direct/complementary continued-fraction
+  // dispatch at x=(alpha+1)/(alpha+beta+2)=5/9 (issue #1178)
+  {
+    name: 'Beta',
+    params: [4, 3],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: 0.55, pdf: 2.02145625, cdf: 0.4415176562500001 },
+      { x: 0.555, pdf: 2.0311884658125, cdf: 0.45164966682515634 },
+      { x: 0.5555555555555556, pdf: 2.0322105370116343, cdf: 0.4527783893226154 },
+      { x: 0.5561111111111111, pdf: 2.033220668982755, cdf: 0.45390767632197815 },
+      { x: 0.5611111111111111, pdf: 2.0417709892419853, cdf: 0.46409556245689787 }
+    ]
+  },
   {
     name: 'BetaPrime',
     params: [2, 2],
@@ -1369,6 +1384,21 @@ const REFS = [
       { x: 3.919875603731213, pdf: 0.04036748484151186, cdf: 0.9 }
     ]
   },
+  // F[6, 8]: internal beta-argument z=d1*x/(d1*x+d2) straddles regularizedBetaIncomplete's
+  // direct/complementary continued-fraction dispatch at z=(alpha+1)/(alpha+beta+2)=4/9 (issue #1178)
+  {
+    name: 'F',
+    params: [6, 8],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: 1.0476190476190474, pdf: 0.47979752325120006, cdf: 0.5381720678399999 },
+      { x: 1.0647482014388487, pdf: 0.4713596600178616, cdf: 0.5463182259195494 },
+      { x: 1.0666666666666667, pdf: 0.4704191057897302, cdf: 0.5472216106773847 },
+      { x: 1.0685882038964503, pdf: 0.46947798705698607, cdf: 0.5481246341537657 },
+      { x: 1.086021505376344, pdf: 0.4609842211770551, cdf: 0.5562350295181603 }
+    ]
+  },
   // FisherZ[5, 5]: q() has no closed form (numerical root-finding), so the round-trip is accurate to a few ULPs beyond 1e-14
   {
     name: 'FisherZ',
@@ -2152,6 +2182,21 @@ const REFS = [
       { x: 7.265187538585993, pdf: 0.017726594661409047, cdf: 0.9 }
     ]
   },
+  // InverseGaussian[2, 3]: x straddles _cdf's erfc(-a) series/continued-fraction dispatch at
+  // -a=1 (issue #1178)
+  {
+    name: 'InverseGaussian',
+    params: [2, 3],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: 0.6600414797517227, pdf: 0.4646115995885947, cdf: 0.12254090504329164 },
+      { x: 0.6660004164792253, pdf: 0.46676194070821664, cdf: 0.12531595461348216 },
+      { x: 0.6666666666666665, pdf: 0.466995934598169, cdf: 0.1256270128644982 },
+      { x: 0.6673337501875585, pdf: 0.46722893612230915, cdf: 0.1259386159439316 },
+      { x: 0.6733751880868137, pdf: 0.46928103845924357, cdf: 0.1287676018137991 }
+    ]
+  },
   {
     name: 'InvertedWeibull',
     params: [2],
@@ -2440,6 +2485,21 @@ const REFS = [
       { x: 1.5355512546538017, pdf: 0.08112606983314283, cdf: 0.53 },
       { x: 6.782542897236661, pdf: 0.01723161347571413, cdf: 0.72 },
       { x: 62.32811767701674, pdf: 0.0007853916387698619, cdf: 0.9 }
+    ]
+  },
+  // Levy[2, 3]: x straddles _cdf's erfc series/continued-fraction dispatch at
+  // z=sqrt(0.5*c/(x-mu))=1 (issue #1178)
+  {
+    name: 'Levy',
+    params: [2, 3],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: 3.5304560759106214, pdf: 0.13695798779782292, cdf: 0.1614919304446302 },
+      { x: 3.503004506007509, pdf: 0.13823052008751838, cdf: 0.15771472979350307 },
+      { x: 3.5, pdf: 0.1383691658068649, cdf: 0.15729920705028513 },
+      { x: 3.4970044940074914, pdf: 0.1385072580501478, cdf: 0.15688451452192373 },
+      { x: 3.4704440741103815, pdf: 0.13972500214520003, cdf: 0.15318950377172333 }
     ]
   },
   {
@@ -3233,6 +3293,22 @@ const REFS = [
       { x: 0.912096673134829, pdf: 1.9038127634365016, cdf: 0.9 }
     ]
   },
+  // NoncentralBeta[2, 3, 4]: x straddles regularizedBetaIncomplete(iAlpha0, beta, x)'s direct/
+  // complementary continued-fraction dispatch at x=(iAlpha0+1)/(iAlpha0+beta+2)=5/9, where
+  // iAlpha0=alpha+round(lambda/2)=4 (issue #1178)
+  {
+    name: 'NoncentralBeta',
+    params: [2, 3, 4],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: 0.55, pdf: 1.7988380086325535, cdf: 0.4665231967893618 },
+      { x: 0.555, pdf: 1.8078525222376394, cdf: 0.4755401763558644 },
+      { x: 0.5555555555555556, pdf: 1.8088164107690712, cdf: 0.4765448069676411 },
+      { x: 0.5561111111111111, pdf: 1.8097726716830562, cdf: 0.4775499709553081 },
+      { x: 0.5611111111111111, pdf: 1.818032059759644, cdf: 0.48661974439675726 }
+    ]
+  },
   // NoncentralChi[5, 2]: series/transform accumulates a few ULPs beyond 1e-14
   {
     name: 'NoncentralChi',
@@ -3446,6 +3522,22 @@ const REFS = [
       { x: 1.8283547451496789, pdf: 0.23963434190768756, cdf: 0.53 },
       { x: 2.889723635149361, pdf: 0.12939440016942425, cdf: 0.72 },
       { x: 5.465891080861805, pdf: 0.0344547085561269, cdf: 0.9 }
+    ]
+  },
+  // NoncentralF[6, 8, 4]: internal beta-argument z=d1*x/(d1*x+d2) straddles the underlying
+  // NoncentralBeta dispatch at z=(iAlpha0+1)/(iAlpha0+beta+2)=6/11, where
+  // iAlpha0=alpha+round(lambda/2)=5 (issue #1178)
+  {
+    name: 'NoncentralF',
+    params: [6, 8, 4],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: 1.5652173913043472, pdf: 0.33506779419030264, cdf: 0.4714445902137505 },
+      { x: 1.596484218937275, pdf: 0.32930643378405494, cdf: 0.48183110641636145 },
+      { x: 1.5999999999999996, pdf: 0.32865688620541067, cdf: 0.4829877339899027 },
+      { x: 1.6035242290748895, pdf: 0.32800550202064943, cdf: 0.48414484840865185 },
+      { x: 1.6356275303643726, pdf: 0.32206234246460486, cdf: 0.49457954853049313 }
     ]
   },
   // NoncentralT[5, 1]: pdf/cdf are noncentral-t (Poisson) mixtures; accumulated rounding caps accuracy near 1e-13
