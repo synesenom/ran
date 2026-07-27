@@ -2089,6 +2089,16 @@ def existing_groups(path):
         if gm:
             key = (gm.group(1), re.sub(r'\s+', ' ', gm.group(2).strip()))
             groups.append((key, text))
+        else:
+            # Silently dropping an unparseable span here would defeat the whole point of
+            # existing_groups(): render() relies on its return value to decide what counts as
+            # "already preserved", so a group that fails to parse would be neither reproduced
+            # by compute_cache() nor preserved by render() -- the exact silent-data-loss failure
+            # mode this mechanism exists to prevent (issue #1186). Fail loud instead.
+            snippet = text.strip()[:80]
+            raise RuntimeError(
+                f'existing_groups(): could not parse a REFS group in {path!r} -- expected a '
+                f"name: '...', params: ..., tol: ... shape; got: {snippet!r}")
         prev_end = span_end
     return groups
 
@@ -2221,8 +2231,9 @@ if __name__ == '__main__':
     allow_prune = '--allow-prune' in sys.argv
     if len(sys.argv) > 1 and sys.argv[1] == '--emit':
         emit_only = None
-        if len(sys.argv) > 3 and sys.argv[2] == '--only':
-            emit_only = set(sys.argv[3].split(','))
+        if '--only' in sys.argv:
+            idx = sys.argv.index('--only')
+            emit_only = set(sys.argv[idx + 1].split(','))
         emit(emit_only, allow_prune)
     elif len(sys.argv) > 1 and sys.argv[1] == '--render':
         # Fast re-render from the cached mpmath values (no recomputation) after editing tolerances.
@@ -2230,6 +2241,7 @@ if __name__ == '__main__':
             render(json.load(fh), allow_prune)
     else:
         only = None
-        if len(sys.argv) > 2 and sys.argv[1] == '--only':
-            only = set(sys.argv[2].split(','))
+        if '--only' in sys.argv:
+            idx = sys.argv.index('--only')
+            only = set(sys.argv[idx + 1].split(','))
         self_check(only)
