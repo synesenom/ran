@@ -20,11 +20,18 @@ Usage:    python3 scripts/precision-refs-continuous.py                        # 
               # points (/tmp/precision-continuous-cache.json) for everything else -- avoids
               # unconditionally re-paying DoublyNoncentralBeta[2,2,1200,1200]'s ~65-minute
               # cost (issue #1149) when regenerating references for an unrelated distribution
+          python3 scripts/precision-refs-continuous.py --emit --allow-prune
+              # skip the drop-guard (see render() below) that otherwise refuses to overwrite
+              # test/precision-continuous.js when doing so would silently delete a group this
+              # script does not know how to reproduce (e.g. a hand-maintained group whose name
+              # was intentionally never added to PARAM_SETS) -- use only when the drop is deliberate
 """
 import json
 import os
+import re
 import subprocess
 import sys
+from collections import Counter
 from mpmath import (mp, mpf, pi, sqrt, exp, log, expm1, log1p, cosh, tanh,
                     atan, asin, asinh, acos, sin, cos, gamma as gammafn, loggamma,
                     beta as betafn, erf, erfc, besseli, power, fsum, factorial, zeta,
@@ -1565,7 +1572,13 @@ PARAM_SETS = {
     # during #1143's boundary-grid work, see the comment above PARAM_SETS).
     'Rice': [[2, 2], [0.5, 2], [1, 1], [7, 1], [3.16, 1]],
     'ShiftedLogLogistic': [[0, 2, 2], [0, 2, -2], [0, 2, 0]],
-    'SkewNormal': [[0, 2, 2], [0, 2, -2], [1, 1, 3]],
+    # [0, 1, 1] and [0, 1, 2] straddle owenT's own |a|=1 and |h|=0.67 dispatch boundaries
+    # (src/special/owen-t.js:303-311) -- every prior SkewNormal set here has |alpha| in {2, 3},
+    # so owenT always took its aAbs>1 branches and the |a|<=1 branch had zero precision-gate
+    # coverage (issue #1186). alpha=1 forces the exact aAbs<=1 edge; alpha=2 with x values
+    # 0.66/0.67/0.68 straddles the |h|<=0.67 edge from both sides. Both matched mpmath to
+    # ~1e-16 relative error (no bug surfaced), so no PDFCDF_TOL/Q_TOL/NOTES override is needed.
+    'SkewNormal': [[0, 2, 2], [0, 2, -2], [1, 1, 3], [0, 1, 1], [0, 1, 2]],
     'Slash': [[]],
     'StudentT': [[2], [0.5], [5]],
     'StudentZ': [[3], [2], [5]],
@@ -1635,6 +1648,12 @@ SKEWNORMAL_XVALS = {
     (0, 2, 2): [mpf('-1'), mpf('0.5'), mpf('2'), mpf('4'), mpf('6')],
     (0, 2, -2): [mpf('-6'), mpf('-4'), mpf('-2'), mpf('-0.5'), mpf('1')],
     (1, 1, 3): [mpf('0.2'), mpf('0.7'), mpf('1.3'), mpf('2'), mpf('3')],
+    # alpha=1 forces owenT's aAbs<=1 branch for every point regardless of h; spread across
+    # the support rather than clustering near h=0.67 since that boundary is irrelevant here.
+    (0, 1, 1): [mpf('-2'), mpf('-0.5'), mpf('0.4'), mpf('1.2'), mpf('2.5')],
+    # alpha=2 keeps aAbs>1 fixed; 0.66/0.67/0.68 straddle owenT's |h|<=0.67 dispatch edge
+    # (h = x/omega = x here) from both sides, with 0.67 landing exactly on the cut value.
+    (0, 1, 2): [mpf('0.3'), mpf('0.66'), mpf('0.67'), mpf('0.68'), mpf('1.5')],
 }
 VONMISES_XVALS = {
     (2,): [mpf('-2'), mpf('-0.8'), mpf('0.4'), mpf('1.2'), mpf('2.5')],
@@ -2019,12 +2038,53 @@ def compute_cache(only=None):
     return cache
 
 
-def render(cache):
+OUTPUT_PATH = 'test/precision-continuous.js'
+
+
+def existing_group_keys(path):
+    # A handful of groups in the output file (e.g. TruncatedExponential, and the
+    # Normal/LogNormal far-tail sets in NORMAL_FAR_TAIL_XVALS) are hand-maintained and
+    # intentionally outside PARAM_SETS's scope -- see the comments near PARAM_SETS and
+    # NORMAL_FAR_TAIL_XVALS. render() below refuses to prune them by surprise (issue #1186
+    # follow-up); this reads the CURRENT file's group identities to check against.
+    # A Counter, not a set: Normal/LogNormal's far-tail groups share the exact same
+    # (name, params) key as their standard 5-point sibling (only the points differ), so a
+    # plain set would treat "2 groups with this key" and "1 group with this key" as identical.
+    if not os.path.exists(path):
+        return Counter()
+    with open(path) as fh:
+        src = fh.read()
+    m = re.search(r'const REFS = \[', src)
+    if not m:
+        return Counter()
+    start = m.end() - 1
+    depth = 0
+    end = None
+    for i in range(start, len(src)):
+        if src[i] == '[':
+            depth += 1
+        elif src[i] == ']':
+            depth -= 1
+            if depth == 0:
+                end = i
+                break
+    arr_text = src[start:end + 1]
+    return Counter(
+        (gm.group(1), re.sub(r'\s+', ' ', gm.group(2).strip()))
+        for gm in re.finditer(r"name:\s*'([^']+)',\s*params:\s*([\s\S]*?),\n\s*tol:", arr_text))
+
+
+def render(cache, allow_prune=False):
     groups = []
+    new_keys = Counter()
     for g in cache:
         name, p = g['name'], g['params']
         jp = js_params(p)
         key = (name, jp)
+        # existing_group_keys() reads the on-disk JS literal (unquoted keys, e.g.
+        # Hyperexponential's [[{ weight: 1, ... }]]), which json.dumps-based jp can never
+        # match for nested-object params -- js_lit(p) is what actually gets written to disk.
+        new_keys[(name, re.sub(r'\s+', ' ', js_lit(p)))] += 1
         tol = PDFCDF_TOL.get(key, '1e-14')
         qtol = Q_TOL.get(key, '1e-14')
         note = NOTES.get(key)
@@ -2034,14 +2094,26 @@ def render(cache):
         groups.append(
             f"{comment}  {{\n    name: '{name}',\n    params: {js_lit(p)},\n"
             f"    tol: {tol},\n    qtol: {qtol},\n    points: [\n      {pts}\n    ]\n  }}")
+
+    if not allow_prune:
+        dropped = sorted((existing_group_keys(OUTPUT_PATH) - new_keys).elements())
+        if dropped:
+            raise RuntimeError(
+                f'refusing to write {OUTPUT_PATH}: this run would silently delete '
+                f'{len(dropped)} existing group(s) this script does not reproduce '
+                f'(e.g. {dropped[0][0]}{dropped[0][1]}). These are likely hand-maintained '
+                'groups outside PARAM_SETS/MANUAL_XVALS scope (see the comments near '
+                'PARAM_SETS and NORMAL_FAR_TAIL_XVALS) -- re-run with --allow-prune if this '
+                'removal is deliberate.')
+
     data = '[\n' + ',\n'.join(groups) + '\n]'
-    with open('test/precision-continuous.js', 'w') as fh:
+    with open(OUTPUT_PATH, 'w') as fh:
         fh.write(TEMPLATE.format(data=data))
-    print(f'wrote test/precision-continuous.js with {len(groups)} groups', flush=True)
+    print(f'wrote {OUTPUT_PATH} with {len(groups)} groups', flush=True)
 
 
-def emit(only=None):
-    render(compute_cache(only))
+def emit(only=None, allow_prune=False):
+    render(compute_cache(only), allow_prune)
 
 
 TEMPLATE = '''/* eslint-disable no-loss-of-precision */
@@ -2121,15 +2193,16 @@ describe('continuous-distribution precision gate', () => {{
 
 
 if __name__ == '__main__':
+    allow_prune = '--allow-prune' in sys.argv
     if len(sys.argv) > 1 and sys.argv[1] == '--emit':
         emit_only = None
         if len(sys.argv) > 3 and sys.argv[2] == '--only':
             emit_only = set(sys.argv[3].split(','))
-        emit(emit_only)
+        emit(emit_only, allow_prune)
     elif len(sys.argv) > 1 and sys.argv[1] == '--render':
         # Fast re-render from the cached mpmath values (no recomputation) after editing tolerances.
         with open(CACHE) as fh:
-            render(json.load(fh))
+            render(json.load(fh), allow_prune)
     else:
         only = None
         if len(sys.argv) > 2 and sys.argv[1] == '--only':

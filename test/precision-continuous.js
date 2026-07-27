@@ -4000,6 +4000,35 @@ const REFS = [
       { x: 3.0, pdf: 0.10798193291984247, cdf: 0.9544997361087307 }
     ]
   },
+  // SkewNormal[0, 1, 1] and SkewNormal[0, 1, 2] straddle owenT's own |a|=1 and |h|=0.67
+  // dispatch boundaries (src/special/owen-t.js:303-311, issue #1186); both matched mpmath
+  // to ~1e-16 relative error, so the default tol/qtol apply.
+  {
+    name: 'SkewNormal',
+    params: [0, 1, 1],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: -2.0, pdf: 0.0024566032243695064, cdf: 0.0005175685036595643 },
+      { x: -0.5, pdf: 0.21725073878123458, cdf: 0.09519541280308987 },
+      { x: 0.4, pdf: 0.4827445134813652, cdf: 0.4295776593755105 },
+      { x: 1.2, pdf: 0.34368225934928026, cdf: 0.7831016885615162 },
+      { x: 2.5, pdf: 0.03483891122754768, cdf: 0.9876192292919059 }
+    ]
+  },
+  {
+    name: 'SkewNormal',
+    params: [0, 1, 2],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: 0.3, pdf: 0.5535820359971713, cdf: 0.2927028103234079 },
+      { x: 0.66, pdf: 0.5817790129933988, cdf: 0.5026952032538969 },
+      { x: 0.67, pdf: 0.5800233914846522, cdf: 0.5085043123470008 },
+      { x: 0.68, pdf: 0.5781524943689671, cdf: 0.514295286826615 },
+      { x: 1.5, pdf: 0.25868552023688174, cdf: 0.8664263080068073 }
+    ]
+  },
   {
     name: 'Slash',
     params: [],
