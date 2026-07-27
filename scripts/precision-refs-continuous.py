@@ -1450,6 +1450,24 @@ P_GRID = [mpf('0.1'), mpf('0.3'), mpf('0.53'), mpf('0.72'), mpf('0.9')]
 # Both fixes have since landed, so the VonMises[11] set below (in PARAM_SETS/VONMISES_XVALS)
 # is now included -- its three k*pi/4 x-values directly regression-test the oscillating-term
 # envelope fix, and kappa=11 keeps it inside the besselI(0,x) dispatch band #1185 fixed.
+#
+# Lindley/Muth/GeneralizedExponential/Makeham/BenktanderII/Logarithmic get sets straddling
+# lambertW0/lambertW1m's initial-guess dispatch (src/special/lambert-w.js:35,62 --
+# lambertW1m switches Laurent-vs-branch-point series at z=-0.1, lambertW0 switches
+# w0=0-vs-log(z) at z=1), which had zero precision-gate coverage before this (issue #1187,
+# continuing #1143). This crossover only picks the Halley refinement's starting point, not
+# its convergence target, so every set below round-trips to full float64 precision on both
+# sides of the threshold -- no bug, unlike besselI/marcumQ's real track record at their own
+# thresholds. lambertW1m's argument in Lindley[1.5]/Muth[0.35]'s _q() call is
+# -(1-p)*expFactor, spanning roughly -0.18 to -0.02 across P_GRID and crossing -0.1 between
+# p=0.3 and p=0.53. Makeham[1,2,3]/BenktanderII[0.1,0.6]'s lambertW0 argument spans roughly
+# 0.5-2.2 / 0.4-10, crossing 1 between p=0.53 and p=0.72. Logarithmic[1,6.25]'s raw argument
+# (passed to lambertW0 as z/e) spans roughly -0.4 to 4.6, crossing e=2.71828... between
+# p=0.53 and p=0.72. GeneralizedExponential has NO set here: its lambertW0 argument
+# -b*exp((c*ln(1-p)-b)/(a+b))/(a+b) factors as z0*(1-p)^(c/(a+b)) with z0 = -b/(a+b) *
+# exp(-b/(a+b)) confined to the open interval (-1/e, 0) for every a,b>0 -- it can never reach the z>=1
+# threshold for any valid parameters, so this crossover is provably unreachable via this
+# distribution's _q(p) and is omitted rather than faked with an unreachable-in-practice set.
 PARAM_SETS = {
     'Alpha': [[2, 2], [0.5, 0.5], [3, 1]],
     'Anglit': [[0, 2], [3, 0.5], [-1, 4]],
@@ -1458,7 +1476,9 @@ PARAM_SETS = {
     'BaldingNichols': [[0.5, 0.5], [0.1, 0.1], [0.3, 0.7]],
     'Bates': [[10, 5, 25], [3, 0, 1], [5, -2, 2]],
     'Benini': [[2, 2, 2], [0.5, 0.5, 1], [1, 3, 2]],
-    'BenktanderII': [[2, 0.9995], [2, 1], [2, 0.5]],
+    # [0.1, 0.6]: lambertW0 argument in _q() spans ~0.38-10.15, straddling the z=1
+    # initial-guess dispatch (issue #1187).
+    'BenktanderII': [[2, 0.9995], [2, 1], [2, 0.5], [0.1, 0.6]],
     'Beta': [[2, 2], [0.5, 0.5], [3, 5]],
     'BetaPrime': [[2, 2], [0.5, 4], [3, 3]],
     'BetaRectangular': [[2, 2, 0.5, 5, 25], [0.5, 0.5, 0.9, 5, 25], [3, 2, 0.3, 0, 10]],
@@ -1518,22 +1538,30 @@ PARAM_SETS = {
     'Kumaraswamy': [[2, 2], [0.5, 0.5], [3, 1]],
     'Laplace': [[0, 2], [3, 0.5], [-1, 1]],
     'Levy': [[0, 2], [1, 0.5], [-1, 1]],
-    'Lindley': [[2], [0.5], [1]],
+    # [1.5]: lambertW1m argument in _q() spans ~-0.18 to -0.02, straddling the z=-0.1
+    # initial-guess dispatch (issue #1187).
+    'Lindley': [[2], [0.5], [1], [1.5]],
     'LogCauchy': [[0, 2], [1, 0.5], [-1, 1]],
     'LogGamma': [[2, 2, 2], [0.5, 0.5, 1], [3, 1, 0]],
     'LogLaplace': [[0, 2], [1, 0.5], [-1, 1]],
     'LogLogistic': [[2, 2], [0.5, 0.5], [3, 1]],
     'LogNormal': [[0, 2], [1, 0.5], [-1, 1]],
-    'Logarithmic': [[6, 30], [2, 10], [1, 5]],
+    # [1, 6.25]: raw argument passed to lambertW0 as z/e in _q() spans ~-0.4 to 4.6,
+    # straddling the z/e=1 (raw z=e) initial-guess dispatch (issue #1187).
+    'Logarithmic': [[6, 30], [2, 10], [1, 5], [1, 6.25]],
     'Logistic': [[0, 2], [3, 0.5], [-1, 1]],
     'LogisticExponential': [[2, 2], [0.5, 0.5], [1, 3]],
     'LogitNormal': [[0, 2], [1, 0.5], [-1, 1]],
     'Lomax': [[2, 2], [0.5, 0.5], [3, 1]],
-    'Makeham': [[2, 2, 2], [0.5, 0.5, 0.5], [1, 1, 3]],
+    # [1, 2, 3]: lambertW0 argument in _q() spans ~0.5-2.2, straddling the z=1
+    # initial-guess dispatch (issue #1187).
+    'Makeham': [[2, 2, 2], [0.5, 0.5, 0.5], [1, 1, 3], [1, 2, 3]],
     'MaxwellBoltzmann': [[2], [0.5], [1]],
     'Mielke': [[2, 2], [0.5, 4], [3, 1]],
     'Moyal': [[0, 2], [3, 0.5], [-1, 1]],
-    'Muth': [[0.5], [0.1], [1]],
+    # [0.35]: lambertW1m argument in _q() spans ~-0.15 to -0.02, straddling the z=-0.1
+    # initial-guess dispatch (issue #1187).
+    'Muth': [[0.5], [0.1], [1], [0.35]],
     'Nakagami': [[2.5, 2], [0.5, 0.5], [1, 3]],
     'NoncentralBeta': [[2, 2, 2], [0.5, 5, 10], [0.1, 2, 10]],
     # [5, 0.5]: besselISpherical(1, lambda*x) argument spans ~0.65-1.56, straddling the
