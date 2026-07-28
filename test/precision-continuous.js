@@ -1160,6 +1160,26 @@ const REFS = [
       { x: 5.0, pdf: 0.02904800414951377, cdf: 0.9663690203336275 }
     ]
   },
+  // DoublyNoncentralT[5, 0, 120] (issue #1189, continuation of #1143): mu=0 keeps _pdf on its
+  // single-f11-call fast path (src/dist/doubly-noncentral-t.js); z = theta/(2*(1+x^2/nu))
+  // crosses f11's |z|=50 dispatch threshold (src/special/hypergeometric.js) exactly at x=1.
+  // Points kept close to x=1 (rather than ranging further into the tail) because pdf(x) is the
+  // quantile round-trip's local sensitivity 1/pdf(x): it collapses fast away from the peak at
+  // this theta, amplifying the inherent ~1e-13-relative mpmath-vs-ranjs cdf gap into an
+  // unbounded-looking quantile error for points much past x=1.2.
+  {
+    name: 'DoublyNoncentralT',
+    params: [5, 0, 120],
+    tol: 1e-13,
+    qtol: 5e-10,
+    points: [
+      { x: 0.5, pdf: 0.09627499415782743, cdf: 0.9924736051384567 },
+      { x: 0.8, pdf: 0.0014424026321766222, cdf: 0.9999133734927208 },
+      { x: 1.0, pdf: 4.780728694511164e-05, cdf: 0.9999973597532423 },
+      { x: 1.1, pdf: 7.819580843074595e-06, cdf: 0.9999995775740489 },
+      { x: 1.2, pdf: 1.2272297432244359e-06, cdf: 0.999999934444974 }
+    ]
+  },
   {
     name: 'Erlang',
     params: [5, 2],
