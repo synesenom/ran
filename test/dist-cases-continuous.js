@@ -4248,7 +4248,8 @@ export default [{
       { x: 0.01, pdf: 3.3701683381656714e-23, cdf: 6.739200772312725e-26 },
       { x: 0.1, pdf: 3.570831411733158e-19, cdf: 7.024608021301539e-21 }
     ],
-    // mpmath dps=50: bisection root of the same series-based cdf against P_GRID
+    // mpmath dps=50: bisection root of the same series-based cdf at p = [0.01, 0.1,
+    // 0.25, 0.5, 0.75, 0.9, 0.99] (custom grid, not the repo's P_GRID constant)
     quantileVals: [
       { p: 0.01, x: 5.963320686968405 },
       { p: 0.1, x: 6.98660656789279 },
@@ -4335,7 +4336,8 @@ export default [{
       { x: 0.1, pdf: 2.14278528542578e-21, cdf: 4.108935994493068e-23 },
       { x: 0.5, pdf: 3.3673580655592523e-18, cdf: 2.8426640616862323e-19 }
     ],
-    // mpmath dps=50: bisection root of the same series-based cdf against P_GRID
+    // mpmath dps=50: bisection root of the same series-based cdf at p = [0.01, 0.1,
+    // 0.25, 0.5, 0.75, 0.9, 0.99] (custom grid, not the repo's P_GRID constant)
     quantileVals: [
       { p: 0.01, x: 39.79187671220305 },
       { p: 0.1, x: 53.41380851340095 },
@@ -5086,7 +5088,8 @@ export default [{
       { x: 1e-4, pdf: 1.2664167512039906e-18, cdf: 6.332083265283515e-23 },
       { x: 1e-2, pdf: 1.268380211451898e-16, cdf: 6.336991323457111e-19 }
     ],
-    // mpmath dps=50: bisection root of the same series-based cdf against P_GRID
+    // mpmath dps=50: bisection root of the same series-based cdf at p = [0.01, 0.1,
+    // 0.25, 0.5, 0.75, 0.9, 0.99] (custom grid, not the repo's P_GRID constant)
     quantileVals: [
       { p: 0.01, x: 5.747334639066048 },
       { p: 0.1, x: 6.786444727597504 },

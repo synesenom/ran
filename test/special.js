@@ -1032,7 +1032,11 @@ describe('special', () => {
           // the shortcut. mpmath dps=50: series Eq. 7.
           { mu: 1, x: 32, y: 1e-16, p: 1.2664165549094195e-30, q: 1 },
           { mu: 1, x: 32, y: 1e-10, p: 1.2664165568723631e-24, q: 1 },
-          { mu: 1, x: 32, y: 1e-4, p: 1.2683804484834176e-18, q: 1 }
+          { mu: 1, x: 32, y: 1e-4, p: 1.2683804484834176e-18, q: 1 },
+          // u = 4 * (x/mu) * (y/mu) = 0.4992, just below the u < 0.5 branch
+          // boundary in _zetaxy(): locks in that the rationalized d2 formula
+          // agrees with the unchanged u >= 0.5 branch near the switchover.
+          { mu: 1, x: 32, y: 0.0039, p: 5.243259585512871e-17, q: 1 }
         ].forEach(d => {
           assert(equal(special.marcumQ(d.mu, d.x, d.y), d.q), `marcumQ(${d.mu}, ${d.x}, ${d.y})`)
           assert(equal(special.marcumP(d.mu, d.x, d.y), d.p), `marcumP(${d.mu}, ${d.x}, ${d.y})`)
