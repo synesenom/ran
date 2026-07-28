@@ -6157,4 +6157,122 @@ export default [{
     { p: 0.95, x: 1.6107672730402394 },
     { p: 0.99, x: 1.8686659867936162 }
   ]
+}, {
+  name: 'WrappedCauchy',
+  fit: { params: [0.5, 0.4], seed: 42, n: 300, tolerances: { mu: 0.3, rho: 0.15 } },
+  invalidParams: [
+    [], // all params required
+    [0, 0], [0, -0.1], [0, 1], [0, 1.5] // rho in (0,1): rho > 0, rho < 1
+  ],
+  // bounded, mu-centred support [mu-pi, mu+pi]; mean=0 and skewness=0 exact by symmetry at mu=0
+  // -- at mu != 0 the arithmetic mean over that shifted window still equals mu by symmetry, but
+  // moments here are pinned only at mu=0 to keep the regression values simple to verify by hand
+  moments: [
+    // mpmath mp.dps=50: quadrature of x^n*pdf(x) over [-pi,pi]  (mu=0, rho=0.3)
+    {
+      params: [0, 0.3],
+      mean: -2.721102942096541e-52,
+      variance: 2.169570798658121,
+      skewness: -2.8617987785322965e-52,
+      kurtosis: -0.5541558976198885,
+      tol: { mean: 1e-10, variance: 1e-6, skewness: 1e-10, kurtosis: 1e-6 }
+    },
+    // mpmath mp.dps=50: quadrature of x^n*pdf(x) over [-pi,pi]  (mu=0, rho=0.8)
+    {
+      params: [0, 0.8],
+      mean: -5.614916164462773e-53,
+      variance: 0.5707417823577285,
+      skewness: -1.0622815112571317e-51,
+      kurtosis: 4.777077357731695,
+      tol: { mean: 1e-10, variance: 1e-6, skewness: 1e-10, kurtosis: 1e-6 }
+    }
+  ],
+  cases: [{
+    params: () => [0, 0.3],
+    symmetry: 0,
+    // mpmath mp.dps=50, 1e-9 inside the support boundary (mu-pi, mu+pi) -- close enough to
+    // exercise _cdf's atan2 near-singularity handling without landing on the boundary itself,
+    // where cdf(mu-pi)/cdf(mu+pi) are ambiguous to the bit (JS's Math.PI and mpmath's higher-
+    // precision pi round oppositely there, so a cross-tool reference is unstable exactly at it)
+    refVals: [
+      { x: -3.141592652589793, pdf: 0.08569881551102057, cdf: 8.569881551102057e-11 },
+      { x: 3.141592652589793, pdf: 0.08569881551102057, cdf: 0.9999999999143012 }
+    ]
+  }, {
+    name: 'off-centre location, high concentration',
+    params: () => [1.0, 0.7],
+    symmetry: 1.0,
+    // mpmath mp.dps=50: (1-rho^2)/(2*pi*(1+rho^2-2*rho*cos(x-mu))), closed-form atan2 cdf  (mu=1, rho=0.7)
+    // support is the mu-centred window [mu-pi, mu+pi] =~ [-2.14, 4.14]; x values stay inside it
+    refVals: [
+      { x: -2.0, pdf: 0.028222989378504492, cdf: 0.003983244308897117 },
+      { x: -1.0, pdf: 0.039162792045957316, cdf: 0.03591465701355088 },
+      { x: 1.0, pdf: 0.9018780108540736, cdf: 0.5 },
+      { x: 2.0, pdf: 0.11064829762725881, cdf: 0.9005451658720941 },
+      { x: 3.0, pdf: 0.039162792045957316, cdf: 0.9640853429864491 },
+      // 1e-9 inside the boundary -- see the mu=0 case above for why not exactly at it
+      { x: -2.141592652589793, pdf: 0.02808616642798153, cdf: 2.808616642798153e-11 },
+      { x: 4.141592652589793, pdf: 0.02808616642798153, cdf: 0.9999999999719138 }
+    ],
+    // mpmath mp.dps=50: mu + 2*atan(((1-rho)/(1+rho))*tan(pi*(p-0.5)))  (mu=1, rho=0.7)
+    quantileVals: [
+      { p: 0.01, x: -1.789123292108765 },
+      { p: 0.05, x: -0.6787152148023764 },
+      { p: 0.25, x: 0.6506556019835206 },
+      { p: 0.5, x: 1.0 },
+      { p: 0.75, x: 1.3493443980164794 },
+      { p: 0.95, x: 2.6787152148023763 },
+      { p: 0.99, x: 3.7891232921087648 }
+    ]
+  }, {
+    name: 'near-uniform, negative location wrapping near boundary',
+    params: () => [-2.0, 0.05],
+    symmetry: -2.0,
+    // mpmath mp.dps=50: (1-rho^2)/(2*pi*(1+rho^2-2*rho*cos(x-mu))), closed-form atan2 cdf  (mu=-2, rho=0.05)
+    // support is the mu-centred window [mu-pi, mu+pi] =~ [-5.14, 1.14]; x values stay inside it
+    refVals: [
+      { x: -3.1, pdf: 0.16586600852727895, cdf: 0.3104264456310436 },
+      { x: -2.0, pdf: 0.17590809499630536, cdf: 0.5 },
+      { x: -0.5, pdf: 0.1594865023663663, cdf: 0.7546511053924994 },
+      { x: 1.0, pdf: 0.14412815604110737, cdf: 0.9796048594312114 },
+      { x: 1.1, pdf: 0.14400862613719875, cdf: 0.9940106123340902 },
+      // 1e-9 inside the boundary -- see the mu=0 case above for why not exactly at it
+      { x: -5.141592652589793, pdf: 0.14399732946409577, cdf: 1.4399732946409578e-10 },
+      { x: 1.1415926525897933, pdf: 0.14399732946409577, cdf: 0.9999999998560026 }
+    ],
+    // mpmath mp.dps=50: mu + 2*atan(((1-rho)/(1+rho))*tan(pi*(p-0.5)))  (mu=-2, rho=0.05)
+    quantileVals: [
+      { p: 0.01, x: -5.07215198257128 },
+      { p: 0.05, x: -4.794991705388233 },
+      { p: 0.25, x: -3.470879535351011 },
+      { p: 0.5, x: -2.0 },
+      { p: 0.75, x: -0.5291204646489889 },
+      { p: 0.95, x: 0.7949917053882326 },
+      { p: 0.99, x: 1.0721519825712802 }
+    ]
+  }],
+  // mpmath mp.dps=50: (1-rho^2)/(2*pi*(1+rho^2-2*rho*cos(x-mu))), closed-form atan2 cdf  (mu=0, rho=0.3)
+  refVals: [
+    { x: -3, pdf: 0.08600438563467107, cdf: 0.012148733971528429 },
+    { x: -2, pdf: 0.10810799767883411, cdf: 0.10595792381765143 },
+    { x: -1.5, pdf: 0.13825586993163622, cdf: 0.1668214235507408 },
+    { x: -1, pdf: 0.18911919232192534, cdf: 0.2476992149344916 },
+    { x: -0.5, pdf: 0.257043001574614, cdf: 0.3590521750392099 },
+    { x: 0, pdf: 0.2955734657420913, cdf: 0.5 },
+    { x: 0.5, pdf: 0.257043001574614, cdf: 0.6409478249607902 },
+    { x: 1, pdf: 0.18911919232192534, cdf: 0.7523007850655085 },
+    { x: 1.5, pdf: 0.13825586993163622, cdf: 0.8331785764492592 },
+    { x: 2, pdf: 0.10810799767883411, cdf: 0.8940420761823485 },
+    { x: 3, pdf: 0.08600438563467107, cdf: 0.9878512660284716 }
+  ],
+  // mpmath mp.dps=50: mu + 2*atan(((1-rho)/(1+rho))*tan(pi*(p-0.5)))  (mu=0, rho=0.3)
+  quantileVals: [
+    { p: 0.01, x: -3.0249987850594615 },
+    { p: 0.05, x: -2.5694439630940544 },
+    { p: 0.25, x: -0.9878827378391625 },
+    { p: 0.5, x: 0.0 },
+    { p: 0.75, x: 0.9878827378391625 },
+    { p: 0.95, x: 2.5694439630940544 },
+    { p: 0.99, x: 3.0249987850594615 }
+  ]
 }]

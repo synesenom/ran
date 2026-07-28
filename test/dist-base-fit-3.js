@@ -284,6 +284,17 @@ describe('dist', () => {
         assert(init[1] > 0)
         assert(Math.abs(init[1] - 2) < 0.8)
       })
+
+      it('WrappedCauchy._fitInit returns valid [mu, rho] and fit() covers the median', () => {
+        const data = new dist.WrappedCauchy(0.5, 0.4).seed(42).sample(300)
+        const init = dist.WrappedCauchy._fitInit(data)
+        assert(init.length === 2 && init[1] > 0 && init[1] < 1)
+        assert(Math.abs(init[0] - 0.5) < 0.5)
+        assert(Math.abs(init[1] - 0.4) < 0.3)
+        const result = dist.WrappedCauchy.fit(data)
+        assert(result instanceof dist.WrappedCauchy)
+        assert(fitCoversMedian(result, data))
+      })
     })
   })
 })

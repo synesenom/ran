@@ -4898,6 +4898,50 @@ const REFS = [
       { x: 0.353053312989266, pdf: 0.5956234997272449, cdf: 0.72 },
       { x: 0.6870488261325406, pdf: 0.4625750893997651, cdf: 0.9 }
     ]
+  },
+  {
+    name: 'WrappedCauchy',
+    params: [0, 0.3],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: -2.055728467012632, pdf: 0.10574006126383884, cdf: 0.1 },
+      { x: -0.7458208314087285, pdf: 0.22306355743150538, cdf: 0.3 },
+      { x: 0.10171142645910279, pdf: 0.29371473721311775, cdf: 0.53 },
+      { x: 0.8381342973139316, pdf: 0.21029943455581454, cdf: 0.72 },
+      { x: 2.055728467012632, pdf: 0.10574006126383884, cdf: 0.9 }
+    ]
+  },
+  {
+    // qtol loosened to 1e-13: the p=0.1 quantile lands at x~=0.0049 for this parameter set,
+    // and the atan2-based cdf / atan-based quantile round-trip differs by ~1 ULP in absolute
+    // terms -- ~6e-14 relative error once amplified by x being this close to zero
+    name: 'WrappedCauchy',
+    params: [1.0, 0.7],
+    tol: 1e-14,
+    qtol: 1e-13,
+    points: [
+      { x: 0.004907595054443522, pdf: 0.11152586279755822, cdf: 0.1 },
+      { x: 0.7449646325181583, pdf: 0.5999903533779738, cdf: 0.3 },
+      { x: 1.0333596698600611, pdf: 0.8941393829262554, cdf: 0.53 },
+      { x: 1.2899301665833824, pdf: 0.5468482208824506, cdf: 0.72 },
+      { x: 1.9950924049455565, pdf: 0.11152586279755822, cdf: 0.9 }
+    ]
+  },
+  {
+    // support is the mu-centred window [mu-pi, mu+pi] (matching scipy's vonmises(loc=mu)
+    // convention), so these x-values fall outside the canonical [-pi,pi] range -- expected here
+    name: 'WrappedCauchy',
+    params: [-2.0, 0.05],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: -4.4520368680964575, pdf: 0.14704453642066465, cdf: 0.1 },
+      { x: -3.1630468878067663, pdf: 0.1648831966566841, cdf: 0.3 },
+      { x: -1.8293648705060335, pdf: 0.17562548130184155, cdf: 0.53 },
+      { x: -0.714939493375574, pdf: 0.1629424528276317, cdf: 0.72 },
+      { x: 0.4520368680964579, pdf: 0.14704453642066465, cdf: 0.9 }
+    ]
   }
 ]
 
