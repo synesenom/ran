@@ -42,8 +42,8 @@ export default class Cauchy extends Distribution {
   }
 
   _generator () {
-    // Inverse transform sampling
-    return this.p.x0 + this.p.gamma * (Math.tan(Math.PI * (this.r.next() - 0.5)))
+    // Inverse transform sampling: reuse the closed-form quantile
+    return this._q(this.r.next())
   }
 
   _pdf (x) {

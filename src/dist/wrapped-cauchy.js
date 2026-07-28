@@ -56,8 +56,8 @@ export default class WrappedCauchy extends Distribution {
   // circular distribution.
 
   _generator () {
-    // Inverse transform sampling: same closed-form quantile as _q, applied to a uniform draw
-    return this.p.mu + 2 * Math.atan(this.c.tanRatio * Math.tan(Math.PI * (this.r.next() - 0.5)))
+    // Inverse transform sampling: reuse the closed-form quantile
+    return this._q(this.r.next())
   }
 
   _pdf (x) {
