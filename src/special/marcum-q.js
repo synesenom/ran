@@ -354,11 +354,21 @@ function _log1pmx (u) {
   return sum
 }
 
+// See solutions/special-functions/2026-07-28-0833-marcum-q-zetaxy-small-y-cancellation.md
 /**
  * Computes the saddle-point variable zeta of the quadrature representation,
  * Eqs. (56), (84) in https://arxiv.org/pdf/1311.0681.pdf, in scaled variables.
- * The half-square is assembled so every term is O((xs - ys + 1)^2), avoiding
- * the cancellation of the raw formula near the transition line ys = xs + 1.
+ * Two algebraically equivalent assemblies are used depending on u = 4*xs*ys:
+ * near the transition line ys = xs + 1 (u >= 0.5), every term of the direct
+ * formula is O((xs - ys + 1)^2), avoiding cancellation there. For u < 0.5
+ * (e.g. ys << 1, the Rice/NoncentralChi/NoncentralChi2 deep-lower-tail
+ * regime, #1179), w = sqrt(1+u) rounds to 1 once u underflows its ULP,
+ * collapsing d2 = w + 2*ys - 1 to exactly 0 in the direct formula. Using the
+ * exact identity d1 - eps = d2, the 2*eps^2/(d1*d2) + log1pmx(2*eps/d2) part
+ * of that formula is algebraically identical to -2*eps/d1 + log1p(2*eps/d2)
+ * -- this folds the two near-cancelling O(1/ys) terms into one
+ * well-conditioned term before either is evaluated, and d2 is rationalized
+ * via u/(w+1) to avoid the w - 1 subtraction.
  *
  * @method _zetaxy
  * @memberof ran.special
@@ -368,11 +378,19 @@ function _log1pmx (u) {
  * @private
  */
 function _zetaxy (xs, ys) {
-  const w = Math.sqrt(1 + 4 * xs * ys)
+  const u = 4 * xs * ys
+  const w = Math.sqrt(1 + u)
   const eps = xs - ys + 1
   const d1 = xs + ys + w
-  const d2 = w + 2 * ys - 1
-  const halfZetaSq = eps * eps / d1 + 2 * eps * eps / (d1 * d2) + _log1pmx(2 * eps / d2)
+
+  let halfZetaSq
+  if (u < 0.5) {
+    const d2 = u / (w + 1) + 2 * ys
+    halfZetaSq = eps * (eps - 2) / d1 + Math.log1p(2 * eps / d2)
+  } else {
+    const d2 = w + 2 * ys - 1
+    halfZetaSq = eps * eps / d1 + 2 * eps * eps / (d1 * d2) + _log1pmx(2 * eps / d2)
+  }
   return Math.sign(eps) * Math.sqrt(2 * Math.max(halfZetaSq, 0))
 }
 

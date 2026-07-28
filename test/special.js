@@ -1014,6 +1014,34 @@ describe('special', () => {
           assert(equal(special.marcumP(d.mu, d.x, d.y), d.p), `marcumP(${d.mu}, ${d.x}, ${d.y})`)
         })
       })
+
+      // #1179: ys = y/mu far below 1 catastrophically cancelled in _zetaxy(), producing
+      // NaN (or, if naively rationalized, a silently-wrong finite plateau) instead of the
+      // correct deep-lower-tail value. Reference values from mpmath at mp.dps=50 via the
+      // series P_mu(x,y) = e^-x * sum_n (x^n/n!) * P_(mu+n)(y) (Eq. 7 of the paper), which
+      // is cancellation-free for any y and independent of the ranjs implementation.
+      it('should match reference values for y << mu (deep lower tail, #1179)', () => {
+        [
+          // Below _pqTrap's underflow threshold (halfMuZeta2 > -log(DELTA)): the
+          // fixed zeta must stay finite so the shortcut branch fires cleanly instead
+          // of falling through to a NaN-tainted quadrature. Exact reproduction from #1179.
+          { mu: 1, x: 32, y: 2.4623e-32, p: 0, q: 1 },
+          { mu: 2.5, x: 40, y: 1e-20, p: 0, q: 1 },
+          // Above the underflow threshold: the quadrature itself executes with the
+          // fixed zeta, so these lock in correctness of _pqTrap's full path, not just
+          // the shortcut. mpmath dps=50: series Eq. 7.
+          { mu: 1, x: 32, y: 1e-16, p: 1.2664165549094195e-30, q: 1 },
+          { mu: 1, x: 32, y: 1e-10, p: 1.2664165568723631e-24, q: 1 },
+          { mu: 1, x: 32, y: 1e-4, p: 1.2683804484834176e-18, q: 1 },
+          // u = 4 * (x/mu) * (y/mu) = 0.4992, just below the u < 0.5 branch
+          // boundary in _zetaxy(): locks in that the rationalized d2 formula
+          // agrees with the unchanged u >= 0.5 branch near the switchover.
+          { mu: 1, x: 32, y: 0.0039, p: 5.243259585512871e-17, q: 1 }
+        ].forEach(d => {
+          assert(equal(special.marcumQ(d.mu, d.x, d.y), d.q), `marcumQ(${d.mu}, ${d.x}, ${d.y})`)
+          assert(equal(special.marcumP(d.mu, d.x, d.y), d.p), `marcumP(${d.mu}, ${d.x}, ${d.y})`)
+        })
+      })
     })
 
     describe('recurrence relation', () => {
