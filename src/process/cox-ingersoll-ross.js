@@ -126,7 +126,9 @@ export default class CoxIngersollRoss extends Process {
    * efficient (unlike BrownianMotion/GeometricBrownianMotion/OrnsteinUhlenbeck's exact MLE),
    * and its accuracy degrades near the Feller boundary and at large dt, where _next()'s own
    * Euler-Maruyama discretization diverges further from the exact continuous-time conditional
-   * moments this estimator targets. See decisions/0044-process-fit-static-factory.md.
+   * moments this estimator targets. See decisions/0044-process-fit-static-factory.md and
+   * solutions/correctness/2026-07-28-1600-cir-conditional-vs-marginal-gamma-mismatch.md (why the
+   * issue's literal "gamma transition density" ask is a marginal, not the true conditional).
    *
    * @method fit
    * @memberof ran.process.CoxIngersollRoss
