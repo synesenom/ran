@@ -2,6 +2,7 @@ import normal from '../dist/_normal'
 import logGamma from '../special/log-gamma'
 import Gamma from '../dist/gamma'
 import Process from './_process'
+import ols from './_ols'
 
 /**
  * Cox-Ingersoll-Ross (CIR) mean-reverting process, using an Euler-Maruyama discretization
@@ -111,5 +112,60 @@ export default class CoxIngersollRoss extends Process {
     const alpha = 2 * theta / sigma2OverKappa
     const scale = sigma2OverKappa / 2 * (1 - Math.exp(-kappa * t))
     return new Gamma(alpha, 1 / scale)
+  }
+
+  /**
+   * Estimates kappa, theta, and sigma from an observed path via Conditional Least Squares
+   * (Overbeck & Ryden, 1997). The true one-step conditional transition of CIR is a scaled
+   * noncentral chi-squared with generally non-integer degrees of freedom — this codebase has
+   * no machinery to represent that exactly (ran.dist.NoncentralChi2 rounds its k to the
+   * nearest integer), so this estimator instead matches the first two conditional moments,
+   * both of which are affine in the previous observation: stage 1 regresses X_{n+1} on X_n
+   * (identical algebra to OrnsteinUhlenbeck.fit()) for kappa and theta; stage 2 regresses the
+   * squared stage-1 residuals on X_n for sigma. This is consistent but not maximally
+   * efficient (unlike BrownianMotion/GeometricBrownianMotion/OrnsteinUhlenbeck's exact MLE),
+   * and its accuracy degrades near the Feller boundary and at large dt, where _next()'s own
+   * Euler-Maruyama discretization diverges further from the exact continuous-time conditional
+   * moments this estimator targets. See decisions/0044-process-fit-static-factory.md and
+   * solutions/correctness/2026-07-28-1600-cir-conditional-vs-marginal-gamma-mismatch.md (why the
+   * issue's literal "gamma transition density" ask is a marginal, not the true conditional).
+   *
+   * @method fit
+   * @memberof ran.process.CoxIngersollRoss
+   * @param {Array} path Array of observed states (as returned by path()).
+   * @param {number} [dt=1] Time step between consecutive path observations (must be > 0).
+   * @returns {CoxIngersollRoss} A new instance with estimated kappa, theta, and sigma.
+   * @throws {Error} If path has fewer than 4 states, if dt is not > 0, if the estimated
+   * AR(1) slope falls outside (0,1), or if the estimated sigma^2 is not positive.
+   */
+  static fit (path, dt = 1) {
+    Process.validate({ dt }, ['dt > 0'])
+    if (!Array.isArray(path) || path.length < 4) {
+      throw Error('CoxIngersollRoss.fit(): path must contain at least 4 states')
+    }
+    const n = path.length - 1
+    const xs = path.slice(0, n)
+    const ys = path.slice(1)
+    const { slope: b, intercept: a } = ols(xs, ys)
+    if (!(b > 0 && b < 1)) {
+      throw Error('CoxIngersollRoss.fit(): estimated AR(1) slope is out of (0,1); path is too short or too noisy to recover a mean-reverting parameter set')
+    }
+    const kappa = -Math.log(b) / dt
+    const theta = a / (1 - b)
+    if (!(theta > 0)) {
+      throw Error('CoxIngersollRoss.fit(): estimated theta is not positive; path is too short or too noisy for this estimator')
+    }
+
+    // Stage 2: regress squared stage-1 residuals on X_n (Var[X_{n+1}|X_n] is affine in X_n).
+    const e2 = xs.map((xi, i) => {
+      const e = ys[i] - a - b * xi
+      return e * e
+    })
+    const { slope: alpha } = ols(xs, e2)
+    const sigma2 = alpha * kappa / (b - b * b)
+    if (!(sigma2 > 0)) {
+      throw Error('CoxIngersollRoss.fit(): estimated sigma^2 is non-positive; path is too short or noise-dominated for this estimator')
+    }
+    return new CoxIngersollRoss(kappa, theta, Math.sqrt(sigma2), dt)
   }
 }

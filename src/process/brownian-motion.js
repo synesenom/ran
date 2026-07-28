@@ -74,4 +74,34 @@ export default class BrownianMotion extends Process {
     }
     return new Normal(this.mean(t), Math.sqrt(this.variance(t)))
   }
+
+  /**
+   * Estimates mu and sigma from an observed path via the exact MLE: increments are i.i.d.
+   * Normal(mu*dt, sigma^2*dt), so sample mean/variance of the increments (divided by dt)
+   * recovers the parameters to machine precision as the path length grows.
+   *
+   * @method fit
+   * @memberof ran.process.BrownianMotion
+   * @param {Array} path Array of observed states (as returned by path()).
+   * @param {number} [dt=1] Time step between consecutive path observations (must be > 0).
+   * @returns {BrownianMotion} A new instance with estimated mu and sigma.
+   * @throws {Error} If path has fewer than 3 states, or if dt is not > 0.
+   */
+  static fit (path, dt = 1) {
+    Process.validate({ dt }, ['dt > 0'])
+    if (!Array.isArray(path) || path.length < 3) {
+      throw Error('BrownianMotion.fit(): path must contain at least 3 states')
+    }
+    const n = path.length - 1
+    let sum = 0
+    for (let i = 0; i < n; i++) sum += path[i + 1] - path[i]
+    const meanIncrement = sum / n
+    let sq = 0
+    for (let i = 0; i < n; i++) {
+      const d = path[i + 1] - path[i] - meanIncrement
+      sq += d * d
+    }
+    const varIncrement = sq / (n - 1)
+    return new BrownianMotion(meanIncrement / dt, Math.sqrt(varIncrement / dt), dt)
+  }
 }

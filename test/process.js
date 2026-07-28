@@ -188,6 +188,12 @@ describe('process', () => {
       })
     })
 
+    describe('.fit()', () => {
+      it('should throw when not implemented', () => {
+        assert.throws(() => BareProcess.fit([0, 1, 2]), 'Process.fit() is not implemented')
+      })
+    })
+
     describe('.next()', () => {
       it('should advance state and return the new value', () => {
         const p = new StubProcess()
@@ -500,6 +506,38 @@ describe('process.BrownianMotion', () => {
     })
   })
 
+  describe('.fit()', () => {
+    it('should recover mu and sigma from a long simulated path across seeds', () => {
+      const mu = 0.3
+      const sigma = 1.2
+      const dt = 0.5
+      const n = 20000
+      // CLT tolerance for the exact increment-based MLE: mu_hat ~ N(mu, sigma^2/(n*dt)),
+      // sigma_hat's variance via the delta method on the sample-variance's own CLT tolerance.
+      const tolMu = K_SIGMA * sigma / Math.sqrt(n * dt)
+      const tolSigma = K_SIGMA * sigma * Math.sqrt(1 / (2 * (n - 1)))
+      for (const seed of MOMENT_SEEDS) {
+        const bm = new BrownianMotion(mu, sigma, dt)
+        bm.seed(seed)
+        const fitted = BrownianMotion.fit(bm.path(n), dt)
+        assert.instanceOf(fitted, BrownianMotion)
+        assert.closeTo(fitted.p.mu, mu, tolMu, `seed ${seed}`)
+        assert.closeTo(fitted.p.sigma, sigma, tolSigma, `seed ${seed}`)
+      }
+    })
+
+    it('should default dt to 1', () => {
+      const bm = new BrownianMotion(0.1, 1, 1)
+      bm.seed(1)
+      const fitted = BrownianMotion.fit(bm.path(5000))
+      assert.strictEqual(fitted.p.dt, 1)
+    })
+
+    it('should throw when path has fewer than 3 states', () => {
+      assert.throws(() => BrownianMotion.fit([0, 1], 1), /at least 3 states/)
+    })
+  })
+
   describe('.path()', () => {
     it('should have length n+1', () => {
       const bm = new BrownianMotion(0, 1, 1)
@@ -741,6 +779,43 @@ describe('process.GeometricBrownianMotion', () => {
     })
   })
 
+  describe('.fit()', () => {
+    it('should recover mu and sigma from a long simulated path across seeds', () => {
+      const mu = 0.05
+      const sigma = 0.3
+      const dt = 0.5
+      const n = 20000
+      // Same CLT-derived tolerance style as BrownianMotion.fit(), applied to log-returns
+      // (which are i.i.d. N((mu-sigma^2/2)*dt, sigma^2*dt), same as BM increments).
+      const tolSigma = K_SIGMA * sigma * Math.sqrt(1 / (2 * (n - 1)))
+      // mu_hat = mean(logReturns)/dt + sigma_hat^2/2, so its tolerance also absorbs sigma_hat's error
+      const tolMu = K_SIGMA * sigma / Math.sqrt(n * dt) + tolSigma * sigma
+      for (const seed of MOMENT_SEEDS) {
+        const gbm = new GeometricBrownianMotion(mu, sigma, dt)
+        gbm.seed(seed)
+        const fitted = GeometricBrownianMotion.fit(gbm.path(n), dt)
+        assert.instanceOf(fitted, GeometricBrownianMotion)
+        assert.closeTo(fitted.p.sigma, sigma, tolSigma, `seed ${seed}`)
+        assert.closeTo(fitted.p.mu, mu, tolMu, `seed ${seed}`)
+      }
+    })
+
+    it('should default dt to 1', () => {
+      const gbm = new GeometricBrownianMotion(0.05, 0.2, 1)
+      gbm.seed(1)
+      const fitted = GeometricBrownianMotion.fit(gbm.path(5000))
+      assert.strictEqual(fitted.p.dt, 1)
+    })
+
+    it('should throw when path has fewer than 3 states', () => {
+      assert.throws(() => GeometricBrownianMotion.fit([1, 1.1], 1), /at least 3 states/)
+    })
+
+    it('should throw when path contains a non-positive state', () => {
+      assert.throws(() => GeometricBrownianMotion.fit([1, 1.1, 0, 1.2], 1), /positive states/)
+    })
+  })
+
   describe('log-returns', () => {
     it('should have mean and variance matching the GBM/Itô log-return identity across seeds', () => {
       const mu = 0.05
@@ -943,6 +1018,69 @@ describe('process.OrnsteinUhlenbeck', () => {
     it('should throw for t < 0', () => {
       const ou = new OrnsteinUhlenbeck(1, 0, 1, 1)
       assert.throws(() => ou.marginal(-1), /t must be > 0/)
+    })
+  })
+
+  describe('.fit()', () => {
+    it('should recover theta, mu, and sigma from a long simulated path across seeds', () => {
+      const theta = 0.8
+      const mu = 2
+      const sigma = 1.5
+      const dt = 0.2
+      const n = 30000
+      // fit() is OLS on the exact AR(1) transition y = a + b*x + eps, b = exp(-theta*dt),
+      // a = mu*(1-b), eps ~ N(0, s2) with s2 = sigma^2*(1-b^2)/(2*theta). Tolerances below are
+      // the classical AR(1)-OLS asymptotic standard errors (Hamilton, "Time Series Analysis",
+      // eq. 8.2.16: sqrt(n)(bHat-b) -> N(0, 1-b^2)) propagated through theta/mu/sigma's
+      // back-substitution formulas via the delta method, replacing the old flat 15% band
+      // (which was loose enough to pass even with a systematic back-substitution bug — see
+      // solutions/testing/2026-07-28-1601-flat-tolerance-masks-estimator-bugs.md).
+      const b = Math.exp(-theta * dt)
+      const s2 = sigma * sigma * (1 - b * b) / (2 * theta)
+      const varB = (1 - b * b) / n
+      // theta = -ln(b)/dt, d(theta)/d(b) = -1/(b*dt)
+      const varTheta = varB / (b * b * dt * dt)
+      // mu = a/(1-b); propagating Var(a), Var(b), and Cov(a,b) from OLS through the delta
+      // method makes every mu^2 term cancel, leaving this parameter-free closed form.
+      const varMu = s2 / (n * (1 - b) * (1 - b))
+      // sigma^2 = s2*2*theta/(1-b^2) = s2*(-2*ln(b)/dt)/(1-b^2); by Cochran's theorem s2 and b
+      // are exactly independent (conditional on the path) for Gaussian OLS, so their variance
+      // contributions add without a covariance cross-term. varS2 uses the same chi-squared-type
+      // sampling-variance form as assertSampleMoments's tolVariance (expected*sqrt(2/(n-1))).
+      const dSigma2dS2 = 2 * theta / (1 - b * b)
+      const dSigma2dB = -(2 * s2 / dt) * ((1 - b * b) / b + 2 * b * Math.log(b)) / ((1 - b * b) * (1 - b * b))
+      const varS2 = 2 * s2 * s2 / n
+      const varSigma2 = dSigma2dS2 * dSigma2dS2 * varS2 + dSigma2dB * dSigma2dB * varB
+      const varSigma = varSigma2 / (4 * sigma * sigma)
+      const tolTheta = K_SIGMA * Math.sqrt(varTheta)
+      const tolMu = K_SIGMA * Math.sqrt(varMu)
+      const tolSigma = K_SIGMA * Math.sqrt(varSigma)
+      for (const seed of MOMENT_SEEDS) {
+        const ou = new OrnsteinUhlenbeck(theta, mu, sigma, dt)
+        ou.seed(seed)
+        const fitted = OrnsteinUhlenbeck.fit(ou.path(n), dt)
+        assert.instanceOf(fitted, OrnsteinUhlenbeck)
+        assert.closeTo(fitted.p.theta, theta, tolTheta, `seed ${seed}: theta`)
+        assert.closeTo(fitted.p.mu, mu, tolMu, `seed ${seed}: mu`)
+        assert.closeTo(fitted.p.sigma, sigma, tolSigma, `seed ${seed}: sigma`)
+      }
+    })
+
+    it('should default dt to 1', () => {
+      const ou = new OrnsteinUhlenbeck(0.5, 1, 1, 1)
+      ou.seed(1)
+      const fitted = OrnsteinUhlenbeck.fit(ou.path(20000))
+      assert.strictEqual(fitted.p.dt, 1)
+    })
+
+    it('should throw when path has fewer than 4 states', () => {
+      assert.throws(() => OrnsteinUhlenbeck.fit([0, 1, 2], 1), /at least 4 states/)
+    })
+
+    it('should throw when the AR(1) slope estimate is out of (0,1)', () => {
+      // A perfectly linear path drives the OLS slope to exactly 1 (X_{n+1}-X_n constant),
+      // outside the valid exp(-theta*dt) in (0,1) range for any theta, dt > 0.
+      assert.throws(() => OrnsteinUhlenbeck.fit([0, 1, 2, 3, 4, 5], 1), /AR\(1\) slope/)
     })
   })
 
@@ -2180,6 +2318,94 @@ describe('process.CoxIngersollRoss', () => {
     it('should throw for t < 0', () => {
       const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
       assert.throws(() => cir.marginal(-1), /t must be > 0/)
+    })
+  })
+
+  describe('.fit()', () => {
+    it('should recover kappa, theta, and sigma from a long simulated path across seeds', () => {
+      const kappa = 2
+      const theta = 3
+      const sigma = 1
+      const dt = 0.01
+      const n = 100000
+      // Stage 1 (kappa, theta) regresses X_{n+1} on X_n exactly like OrnsteinUhlenbeck.fit() —
+      // same b = exp(-kappa*dt), a = theta*(1-b) back-substitution — so Hamilton's classical
+      // AR(1)-OLS asymptotic slope variance (sqrt(n)(bHat-b) -> N(0, 1-b^2)) applies to kappa via
+      // the same delta method OU uses for its theta. Unlike OU, CIR's one-step conditional
+      // variance is heteroskedastic (proportional to X_n, from the sigma*sqrt(X) diffusion term)
+      // rather than OU's flat s2; evaluating the exact conditional variance (the same
+      // Var[X_{n+1}|X_n] = X_n*sigma^2/kappa*(b-b^2) + theta*sigma^2/(2*kappa)*(1-b)^2 that
+      // fit()'s stage 2 estimates) at the stationary mean X_n = theta gives the representative
+      // constant-variance analogue of OU's s2, used below for theta's tolerance.
+      const b = Math.exp(-kappa * dt)
+      const s2 = theta * sigma * sigma / (2 * kappa) * (1 - b * b)
+      const varB = (1 - b * b) / n
+      // kappa = -ln(b)/dt, d(kappa)/d(b) = -1/(b*dt) — identical delta method to OU's theta.
+      const varKappa = varB / (b * b * dt * dt)
+      // theta = a/(1-b) — same OLS delta-method form as OU's varMu, with CIR's heteroskedastic
+      // s2 (above) standing in for OU's constant one.
+      const varTheta = s2 / (n * (1 - b) * (1 - b))
+      // sigma^2 = alpha*kappa/(b-b^2), where alpha is stage 2's OLS slope of e_i^2 on X_i. Unlike
+      // OU's s2Hat (a plain sample mean of homoskedastic squared Gaussian residuals), alpha_hat
+      // is itself a regression slope on heteroskedastic, non-Gaussian e_i^2, so its sampling
+      // variance needs the OLS-slope sandwich form, not a chi-squared sample-variance one. dt is
+      // small here (kappa*dt = 0.02), so the noncentral chi-squared driving each step has
+      // noncentrality far exceeding its degrees of freedom (~1000x at X = theta) and is close to
+      // Gaussian by the standard noncentral-chi-squared-to-normal limit; under that
+      // approximation e_i^2's residual variance around its mean s2 is ~2*s2^2 (a Gaussian
+      // fourth-moment), giving the same sandwich form used for varB: Var(alpha_hat) ~
+      // 2*s2^2/(n*Var(X)), Var(X) = the stationary variance theta*sigma^2/(2*kappa). We
+      // conservatively double this estimate: e_i^2's true distribution (noncentral-chi-squared-
+      // driven, not exactly Gaussian) has excess kurtosis this approximation doesn't capture, and
+      // CLS is documented to be less efficient than exact MLE on this second-moment stage.
+      const vStat = theta * sigma * sigma / (2 * kappa)
+      const varAlpha = 2 * (2 * s2 * s2 / (n * vStat))
+      const alpha = sigma * sigma / kappa * (b - b * b)
+      const dSigma2dAlpha = kappa / (b - b * b)
+      // Stage 1's kappa/b uncertainty also feeds into sigma^2 = alpha*kappa/(b-b^2); propagated
+      // the same way as OU's dSigma2dB (kappa = -ln(b)/dt substituted in before differentiating).
+      const dSigma2dB = alpha * ((b - 1) + Math.log(b) * (1 - 2 * b)) / (dt * (b - b * b) * (b - b * b))
+      const varSigma2 = dSigma2dAlpha * dSigma2dAlpha * varAlpha + dSigma2dB * dSigma2dB * varB
+      const varSigma = varSigma2 / (4 * sigma * sigma)
+      // These three MOMENT_SEEDS are fixed and deterministic — unlike a test that resamples a
+      // fresh seed every run, they never change, so K_SIGMA=8's enormous margin (guarding against
+      // flakiness on arbitrary future seeds) buys nothing extra here. K=5 still corresponds to a
+      // ~5.7e-7 two-sided tail probability under the CLT normal approximation above — vastly more
+      // than three already-known, fixed outcomes need — while giving a materially tighter band
+      // than the old flat 20% (verified empirically to hold with comfortable margin, including
+      // against a 300-seed sweep well beyond the 3 seeds actually asserted below).
+      const K = 5
+      const tolKappa = K * Math.sqrt(varKappa)
+      const tolTheta = K * Math.sqrt(varTheta)
+      const tolSigma = K * Math.sqrt(varSigma)
+      for (const seed of MOMENT_SEEDS) {
+        const cir = new CoxIngersollRoss(kappa, theta, sigma, dt)
+        cir.seed(seed)
+        const fitted = CoxIngersollRoss.fit(cir.path(n), dt)
+        assert.instanceOf(fitted, CoxIngersollRoss)
+        assert.closeTo(fitted.p.kappa, kappa, tolKappa, `seed ${seed}: kappa`)
+        assert.closeTo(fitted.p.theta, theta, tolTheta, `seed ${seed}: theta`)
+        assert.closeTo(fitted.p.sigma, sigma, tolSigma, `seed ${seed}: sigma`)
+      }
+    })
+
+    it('should default dt to 1', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.01)
+      cir.seed(1)
+      const fitted = CoxIngersollRoss.fit(cir.path(20000))
+      assert.strictEqual(fitted.p.dt, 1)
+    })
+
+    it('should throw when path has fewer than 4 states', () => {
+      assert.throws(() => CoxIngersollRoss.fit([1, 2, 3], 1), /at least 4 states/)
+    })
+
+    it('should throw when the AR(1) slope estimate is out of (0,1)', () => {
+      assert.throws(() => CoxIngersollRoss.fit([1, 5, 2, 5, 3, 5], 1), /AR\(1\) slope/)
+    })
+
+    it('should throw when the estimated sigma^2 is non-positive', () => {
+      assert.throws(() => CoxIngersollRoss.fit([5, 4, 3, 2, 1, 2], 1), /sigma\^2 is non-positive/)
     })
   })
 })

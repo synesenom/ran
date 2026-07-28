@@ -206,6 +206,25 @@ export default class Process {
   }
 
   /**
+   * Estimates process parameters from an observed discrete-time path and returns a new,
+   * calibrated instance of the concrete subclass. Must be implemented by subclasses.
+   *
+   * Static rather than an instance method (unlike the analytical hooks above): fit() is a
+   * factory that builds a new instance from data, with no existing instance to query — the
+   * same shape as ran.dist.Distribution.static fit(data) — decisions/0044-process-fit-static-factory.md.
+   *
+   * @method fit
+   * @memberof ran.process.Process
+   * @param {Array} path Array of observed states (e.g. as returned by path()).
+   * @param {number} [dt=1] Time step between consecutive path observations (must be > 0).
+   * @returns {Process} A new instance of the concrete subclass with estimated parameters.
+   * @throws {Error} If not implemented by the subclass, or if path/dt are invalid for the estimator.
+   */
+  static fit (path, dt) { // eslint-disable-line no-unused-vars
+    throw Error('Process.fit() is not implemented')
+  }
+
+  /**
    * Generates the next state. Must be implemented by subclasses.
    *
    * @method _next

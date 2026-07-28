@@ -1,6 +1,7 @@
 import normal from '../dist/_normal'
 import Normal from '../dist/normal'
 import Process from './_process'
+import ols from './_ols'
 
 /**
  * Ornstein-Uhlenbeck mean-reverting process, using an exact discrete-time sampler.
@@ -81,5 +82,42 @@ export default class OrnsteinUhlenbeck extends Process {
       throw Error('OrnsteinUhlenbeck.marginal(): t must be > 0')
     }
     return new Normal(this.mean(t), Math.sqrt(this.variance(t)))
+  }
+
+  /**
+   * Estimates theta, mu, and sigma from an observed path via OLS regression of X_{n+1} on
+   * X_n. Because _next() is already the exact AR(1) transition X_{n+1} = a + b*X_n + eps
+   * (b = exp(-theta*dt), a = mu*(1-b)), this OLS regression coincides exactly with the MLE.
+   *
+   * @method fit
+   * @memberof ran.process.OrnsteinUhlenbeck
+   * @param {Array} path Array of observed states (as returned by path()).
+   * @param {number} [dt=1] Time step between consecutive path observations (must be > 0).
+   * @returns {OrnsteinUhlenbeck} A new instance with estimated theta, mu, and sigma.
+   * @throws {Error} If path has fewer than 4 states, if dt is not > 0, or if the estimated
+   * AR(1) slope falls outside (0,1) (too short or too noisy a path to recover mean reversion).
+   */
+  static fit (path, dt = 1) {
+    Process.validate({ dt }, ['dt > 0'])
+    if (!Array.isArray(path) || path.length < 4) {
+      throw Error('OrnsteinUhlenbeck.fit(): path must contain at least 4 states')
+    }
+    const n = path.length - 1
+    const xs = path.slice(0, n)
+    const ys = path.slice(1)
+    const { slope: b, intercept: a } = ols(xs, ys)
+    if (!(b > 0 && b < 1)) {
+      throw Error('OrnsteinUhlenbeck.fit(): estimated AR(1) slope is out of (0,1); path is too short or too noisy to recover a mean-reverting parameter set')
+    }
+    let ss = 0
+    for (let i = 0; i < n; i++) {
+      const e = ys[i] - a - b * xs[i]
+      ss += e * e
+    }
+    const s2 = ss / (n - 2)
+    const theta = -Math.log(b) / dt
+    const mu = a / (1 - b)
+    const sigma = Math.sqrt(s2 * 2 * theta / (1 - b * b))
+    return new OrnsteinUhlenbeck(theta, mu, sigma, dt)
   }
 }
