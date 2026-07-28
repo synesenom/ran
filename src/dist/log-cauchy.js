@@ -35,11 +35,8 @@ export default class LogCauchy extends Cauchy {
   }
 
   _generator () {
-    // Direct sampling by transforming Cauchy variate
-    const z = this.p.mu + this.p.sigma * Math.tan(Math.PI * (this.r.next() - 0.5))
-
-    // Handle |z| >> 1 cases
-    return Math.max(Math.min(Number.MAX_VALUE, Math.exp(z)), Number.MIN_VALUE)
+    // Inverse transform sampling: reuse the closed-form quantile, clamped for |z| >> 1 cases
+    return Math.max(Math.min(Number.MAX_VALUE, this._q(this.r.next())), Number.MIN_VALUE)
   }
 
   _pdf (x) {

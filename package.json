@@ -459,6 +459,9 @@
     "./dist/wigner": {
       "import": "./dist/wigner.esm.js"
     },
+    "./dist/wrapped-cauchy": {
+      "import": "./dist/wrapped-cauchy.esm.js"
+    },
     "./dist/yule-simon": {
       "import": "./dist/yule-simon.esm.js"
     },
