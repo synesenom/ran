@@ -5995,15 +5995,21 @@ export default [{
       { x: -0.9, pdf: 0.03914013027583153, cdf: 0.005128950622327126 }
     ]
   }, {
-    // No refVals here: besselI(0, 11) itself carries a pre-existing ~1e-10 relative error
-    // (unrelated to this fix -- a besselI accuracy limit at kappa gtrsim 11, out of scope for
-    // this bug) that would fail the harness's tight 1e-14 refValTol regardless of correctness.
-    // Coverage for kappa=11 (cdf in [0,1]/monotonic/roundtrip/symmetric, all of which the
-    // premature-truncation bug violated) comes from the generic checks below plus the explicit,
-    // appropriately-toleranced mpmath comparison in dist-base-special-cases.js.
+    // Regression for issue: premature Fourier-series truncation at x = k*pi/4 (same as kappa=9
+    // above). besselI(0, 11)'s former ~1e-10 relative error (the "cold start" gap in
+    // _besselIBackward's run-up margin for x in (10, 14]) was fixed by #1185, so refVals here now
+    // hold to the harness's tight 1e-14 refValTol like any other case.
     name: 'large kappa at x = k*pi/4 (premature series truncation regression)',
     params: () => [0, 11],
-    symmetry: 0
+    symmetry: 0,
+    // mpmath mp.dps=50: exp(kappa*cos(x))/(2*pi*besseli(0,kappa)), quad(pdf, -pi, x)  (kappa=11)
+    refVals: [
+      { x: -Math.PI / 2, pdf: 0.00002183647881905232, cdf: 0.000002003172107986403 },
+      { x: -Math.PI / 4, pdf: 0.05214358825274366, cdf: 0.006110362138173876 },
+      { x: -Math.PI / 8, pdf: 0.5659475976651105, cdf: 0.10055267458189562 },
+      { x: -1, pdf: 0.008324075654520296, cdf: 0.0008536976551769042 },
+      { x: -0.9, pdf: 0.02035926892537725, cdf: 0.0022064544592800056 }
+    ]
   }, {
     // mu != 0: f(x; mu, kappa) = f(x-mu; 0, kappa) is an exact translation identity, so shifting
     // the already scipy-sourced kappa=2 refVals/quantileVals below by mu=1.5 (x -> x+1.5, pdf/cdf
