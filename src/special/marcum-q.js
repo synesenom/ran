@@ -354,6 +354,7 @@ function _log1pmx (u) {
   return sum
 }
 
+// See solutions/special-functions/2026-07-28-0833-marcum-q-zetaxy-small-y-cancellation.md
 /**
  * Computes the saddle-point variable zeta of the quadrature representation,
  * Eqs. (56), (84) in https://arxiv.org/pdf/1311.0681.pdf, in scaled variables.
