@@ -1160,6 +1160,33 @@ const REFS = [
       { x: 5.0, pdf: 0.02904800414951377, cdf: 0.9663690203336275 }
     ]
   },
+  // DoublyNoncentralT[5, 0, 120] (issue #1189, continuation of #1143): mu=0 keeps _pdf on its
+  // single-f11-call fast path (src/dist/doubly-noncentral-t.js); z = theta/(2*(1+x^2/nu))
+  // crosses f11's |z|=50 dispatch threshold (src/special/hypergeometric.js) exactly at x=1.
+  // theta=120 is load-bearing for a second, independent reason: it is the only DoublyNoncentralT
+  // group in this file with theta large enough that exp(-theta/2) < Number.EPSILON, making it the
+  // sole regression coverage for the { useFloor: false } fix to _cdf's recursiveSum call (see
+  // src/dist/doubly-noncentral-t.js) -- every other group above uses theta in {1, 2}.
+  // qtol: 5e-10 is an empirical gate, not derived from the tol: 1e-13 cdf bound: qtol: 1e-10
+  // was measured to fail (q(cdf(1.1)) landed ~1.14e-10 off), while qtol: 5e-10 passed stably
+  // across repeated runs, so 5e-10 keeps margin over the measured error for other environments.
+  // The x-range is kept close to x=1 (rather than ranging further into the tail) for a separate
+  // reason: pdf(x) is the quantile round-trip's local sensitivity 1/pdf(x), and it collapses
+  // fast away from the peak at this theta -- x=1.3/x=1.8 were tried and measured at ~2.07e-9
+  // and ~1.24e-5 respectively, which is why the range was narrowed to {0.5, 0.8, 1.0, 1.1, 1.2}.
+  {
+    name: 'DoublyNoncentralT',
+    params: [5, 0, 120],
+    tol: 1e-13,
+    qtol: 5e-10,
+    points: [
+      { x: 0.5, pdf: 0.09627499415782743, cdf: 0.9924736051384567 },
+      { x: 0.8, pdf: 0.0014424026321766222, cdf: 0.9999133734927208 },
+      { x: 1.0, pdf: 4.780728694511164e-05, cdf: 0.9999973597532423 },
+      { x: 1.1, pdf: 7.819580843074595e-06, cdf: 0.9999995775740489 },
+      { x: 1.2, pdf: 1.2272297432244359e-06, cdf: 0.999999934444974 }
+    ]
+  },
   {
     name: 'Erlang',
     params: [5, 2],

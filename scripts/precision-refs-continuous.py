@@ -1539,7 +1539,7 @@ PARAM_SETS = {
     'DoublyNoncentralBeta': [[2, 2, 2, 2], [2, 2, 1, 3], [3, 4, 2, 2], [2, 2, 1200, 1200]],
     'DoublyNoncentralChi2': [[3, 4, 2, 3], [2, 4, 1, 2], [2, 3, 1, 1]],
     'DoublyNoncentralF': [[5, 5, 2, 2], [5, 5, 1, 2], [4, 6, 2, 1]],
-    'DoublyNoncentralT': [[5, 1, 2], [5, 0, 2], [6, 2, 1]],
+    'DoublyNoncentralT': [[5, 1, 2], [5, 0, 2], [6, 2, 1], [5, 0, 120]],
     'Erlang': [[5, 2], [2, 0.5], [3, 1]],
     'Exponential': [[2], [0.5], [1]],
     'ExponentialLogarithmic': [[0.5, 2], [0.9, 0.5], [0.3, 1]],
@@ -1677,10 +1677,25 @@ PARAM_SETS = {
 
 # DoublyNoncentralT CDF is a Poisson mixture of noncentral-t quadratures: too slow to invert
 # by bisection, so we probe at fixed interior t-values instead.
+# (5, 0, 120) (issue #1189, continuation of #1143): straddles f11's |z|=50 dispatch threshold
+# (src/special/hypergeometric.js), exercised through DoublyNoncentralT._pdf's internal argument
+# z = theta/(2*(1+x^2/nu)). mu=0 deliberately keeps _pdf on its "mu=0" fast path (a single
+# f11(kj0, nu/2, z) call with the small fixed kj0=(nu+1)/2=3, matching the near-x=0 special case)
+# rather than the general mu != 0 path's forward/backward series over growing kj -- an earlier
+# mu=5 attempt at the same theta pushed kj into the 10-30 range and surfaced a genuine ~13%
+# _pdf error there (see solutions/correctness/2026-07-28-1024-doubly-noncentral-t-cdf-recursivesum-absolute-floor-truncation.md's
+# "Fix" section), which is a separate, unrelated bug filed independently rather than papered over
+# here. x=1 lands exactly on z=50; x in {0.5, 0.8} give z > 50 (asymptotic-series minimum-term
+# branch), x in {1.1, 1.2} give z < 50 (Taylor-series branch). Kept close to x=1 (rather than
+# ranging further, e.g. x=1.8) because pdf(x) -- the quantile round-trip's local sensitivity
+# 1/pdf(x) -- collapses fast away from the peak at this theta; x=1.8's pdf ~2e-11 amplifies the
+# ~1e-13-relative mpmath-vs-ranjs cdf gap into a ~1e-5 quantile round-trip error, swamping any
+# meaningful qtol. This range keeps that amplification within a documentable qtol below.
 DNCT_XVALS = {
     (5, 1, 2): [mpf('-2'), mpf('-0.5'), mpf('1'), mpf('2.5'), mpf('4')],
     (5, 0, 2): [mpf('-3'), mpf('-1.2'), mpf('0.7'), mpf('2'), mpf('3.5')],
     (6, 2, 1): [mpf('-1'), mpf('0.5'), mpf('2'), mpf('3.5'), mpf('5')],
+    (5, 0, 120): [mpf('0.5'), mpf('0.8'), mpf('1'), mpf('1.1'), mpf('1.2')],
 }
 
 # Doubly-noncentral Beta/F CDFs are double Poisson sums: too slow to invert by bisection,
@@ -2018,6 +2033,7 @@ PDFCDF_TOL = {
     ('DoublyNoncentralT', '[5, 0, 2]'): '1e-13',
     ('DoublyNoncentralT', '[5, 1, 2]'): '1e-12',
     ('DoublyNoncentralT', '[6, 2, 1]'): '1e-12',
+    ('DoublyNoncentralT', '[5, 0, 120]'): '1e-13',
     ('SkewNormal', '[1, 1, 3]'): '1e-12',
     ('Rice', '[0.5, 2]'): '1e-13',
     ('Rice', '[7, 1]'): '5e-13',
@@ -2044,6 +2060,7 @@ Q_TOL = {
     ('Rice', '[7, 1]'): '5e-13',
     ('DoublyNoncentralT', '[5, 1, 2]'): '1e-12',
     ('DoublyNoncentralT', '[6, 2, 1]'): '1e-12',
+    ('DoublyNoncentralT', '[5, 0, 120]'): '5e-10',
     ('FisherZ', '[1, 1]'): '4e-14',
     ('FisherZ', '[5, 5]'): '1e-12',
     ('FisherZ', '[8, 4]'): '1e-12',
@@ -2078,6 +2095,15 @@ _N_HALLEY = 'q() is a Cornish-Fisher/Halley approximation; the cdf-round-trip lo
 _N_MARCUM = ('x sits near marcumQ\'s series/asymptotic dispatch threshold (x=30); pdf/cdf/quantile '
              'measured up to ~1.2e-13 in JIT-order-dependent full-suite runs (V8 rounding differs '
              'from an isolated run) -- gate at 5e-13')
+_N_F11_BOUNDARY = (_N_NCT + '; additionally, x sits near f11\'s |z|=50 dispatch threshold '
+                   '(issue #1189); qtol: 1e-10 was measured to fail (~1.14e-10 error at '
+                   'x=1.1), qtol: 5e-10 passes with margin -- gate empirically at 5e-10. '
+                   'The x-range itself is kept narrow (0.5-1.2) because pdf(x), the quantile '
+                   'round-trip\'s local sensitivity 1/pdf(x), collapses fast away from the peak '
+                   'at this theta. theta=120 is also the only DoublyNoncentralT group here with '
+                   'theta large enough that exp(-theta/2) < Number.EPSILON, making it the sole '
+                   'regression coverage for the { useFloor: false } fix to _cdf\'s recursiveSum '
+                   'call in src/dist/doubly-noncentral-t.js')
 NOTES = {
     ('Bates', '[10, 5, 25]'): _N_POLY,
     ('Bates', '[5, -2, 2]'): _N_POLY,
@@ -2097,6 +2123,7 @@ NOTES = {
     ('DoublyNoncentralT', '[5, 0, 2]'): _N_NCT,
     ('DoublyNoncentralT', '[5, 1, 2]'): _N_NCT,
     ('DoublyNoncentralT', '[6, 2, 1]'): _N_NCT,
+    ('DoublyNoncentralT', '[5, 0, 120]'): _N_F11_BOUNDARY,
     ('SkewNormal', '[1, 1, 3]'): 'cdf uses Owen T and q() root-finds on it; both lose a few ULPs beyond 1e-14',
     ('Rice', '[0.5, 2]'): _N_SERIES,
     ('Rice', '[3.16, 1]'): _N_SERIES,
