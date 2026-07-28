@@ -4757,7 +4757,7 @@ const REFS = [
   },
   {
     name: 'VonMises',
-    params: [2],
+    params: [0, 2],
     tol: 1e-14,
     qtol: 1e-14,
     points: [
@@ -4770,7 +4770,7 @@ const REFS = [
   },
   {
     name: 'VonMises',
-    params: [0.5],
+    params: [0, 0.5],
     tol: 1e-14,
     qtol: 1e-14,
     points: [
@@ -4783,7 +4783,7 @@ const REFS = [
   },
   {
     name: 'VonMises',
-    params: [1],
+    params: [0, 1],
     tol: 1e-14,
     qtol: 1e-14,
     points: [
@@ -4794,10 +4794,10 @@ const REFS = [
       { x: 2.5, pdf: 0.05641980438908635, cdf: 0.9682095163056197 }
     ]
   },
-  // VonMises[11]: series/transform accumulates a few ULPs beyond 1e-14; q() has no closed form (numerical root-finding), which loosens the round-trip further
+  // VonMises[0, 11]: series/transform accumulates a few ULPs beyond 1e-14; q() has no closed form (numerical root-finding), which loosens the round-trip further
   {
     name: 'VonMises',
-    params: [11],
+    params: [0, 11],
     tol: 1e-13,
     qtol: 1e-11,
     points: [
@@ -4806,6 +4806,19 @@ const REFS = [
       { x: 0.15, pdf: 1.15552317984488, cdf: 0.6883262995038191 },
       { x: 0.7853981633974483, pdf: 0.05214358825274366, cdf: 0.9938896378618262 },
       { x: 1.5707963267948966, pdf: 2.1836478819052325e-05, cdf: 0.999997996827892 }
+    ]
+  },
+  {
+    name: 'VonMises',
+    params: [1.5, 2],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: -0.5, pdf: 0.03037412206385855, cdf: 0.017309793630677795 },
+      { x: 0.7, pdf: 0.28126522623682415, cdf: 0.15892740650833864 },
+      { x: 1.9, pdf: 0.4405423841823203, cdf: 0.6959356933122229 },
+      { x: 2.7, pdf: 0.1441133553799924, cdf: 0.9243006978974344 },
+      { x: 4.0, pdf: 0.01406370605215536, cdf: 0.9930149943054618 }
     ]
   },
   {

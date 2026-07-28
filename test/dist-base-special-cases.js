@@ -363,19 +363,19 @@ describe('dist', () => {
   // or near such a point.
   describe('VonMises premature Fourier-series truncation at x = k*pi/4', () => {
     it('cdf should stay within [0, 1] at x = -pi/4 for kappa = 7, 9 and 11', () => {
-      assert.isAtLeast(new dist.VonMises(7).cdf(-Math.PI / 4), 0)
-      assert.isAtMost(new dist.VonMises(7).cdf(-Math.PI / 4), 1)
-      assert.isAtLeast(new dist.VonMises(9).cdf(-Math.PI / 4), 0)
-      assert.isAtMost(new dist.VonMises(9).cdf(-Math.PI / 4), 1)
-      assert.isAtLeast(new dist.VonMises(11).cdf(-Math.PI / 4), 0)
-      assert.isAtMost(new dist.VonMises(11).cdf(-Math.PI / 4), 1)
+      assert.isAtLeast(new dist.VonMises(0, 7).cdf(-Math.PI / 4), 0)
+      assert.isAtMost(new dist.VonMises(0, 7).cdf(-Math.PI / 4), 1)
+      assert.isAtLeast(new dist.VonMises(0, 9).cdf(-Math.PI / 4), 0)
+      assert.isAtMost(new dist.VonMises(0, 9).cdf(-Math.PI / 4), 1)
+      assert.isAtLeast(new dist.VonMises(0, 11).cdf(-Math.PI / 4), 0)
+      assert.isAtMost(new dist.VonMises(0, 11).cdf(-Math.PI / 4), 1)
     })
 
     // mpmath mp.dps=50: quad(t => exp(kappa*cos(t))/(2*pi*besseli(0,kappa)), [-pi, x])
     // kappa = 7 sits near the documented onset of the truncation bug (gtrsim 6-9), below the
     // deep-in-range kappa = 9/11 cases already covered below.
     it('cdf should match mpmath at kappa = 7 (near the onset of the affected kappa range)', () => {
-      const d = new dist.VonMises(7)
+      const d = new dist.VonMises(0, 7)
       assert.approximately(d.cdf(-Math.PI / 4), 0.023708922761434124, 1e-12)
       assert.approximately(d.cdf(-1), 0.006557220896396843, 1e-12)
       assert.approximately(d.cdf(-0.9), 0.012160399210262776, 1e-12)
@@ -383,7 +383,7 @@ describe('dist', () => {
 
     // mpmath mp.dps=50: quad(t => exp(kappa*cos(t))/(2*pi*besseli(0,kappa)), [-pi, x])
     it('cdf should match mpmath at kappa = 9 (besselI(0,9) itself is accurate here)', () => {
-      const d = new dist.VonMises(9)
+      const d = new dist.VonMises(0, 9)
       assert.approximately(d.cdf(-Math.PI / 4), 0.011927070236412885, 1e-12)
       assert.approximately(d.cdf(-1), 0.0023412300572219504, 1e-12)
       assert.approximately(d.cdf(-0.9), 0.005128950622327126, 1e-12)
@@ -395,7 +395,7 @@ describe('dist', () => {
     // this loose bound still comfortably distinguishes from the truncation bug's ~1e-1 to 1e-2-scale
     // errors (e.g. cdf(-pi/4) was -0.0201 pre-fix, not merely imprecise).
     it('cdf should match mpmath at kappa = 11 within the pre-existing besselI precision floor', () => {
-      const d = new dist.VonMises(11)
+      const d = new dist.VonMises(0, 11)
       assert.approximately(d.cdf(-Math.PI / 4), 0.006110362138173876, 1e-8)
       assert.approximately(d.cdf(-1), 0.0008536976551769042, 1e-8)
       assert.approximately(d.cdf(-0.9), 0.002206454459280005, 1e-8)
@@ -406,12 +406,40 @@ describe('dist', () => {
     // (pre-fix: q(cdf(-1)) at kappa=9 returned -pi/4 instead of -1).
     it('q(cdf(x)) should round-trip for kappa = 7, 9 and 11 at x values that previously triggered the bug', () => {
       for (const kappa of [7, 9, 11]) {
-        const d = new dist.VonMises(kappa)
+        const d = new dist.VonMises(0, kappa)
         for (const x of [-1, -Math.PI / 4, -0.9]) {
           const roundTripped = d.q(d.cdf(x))
           assert.approximately(roundTripped, x, 1e-6, `kappa=${kappa}, x=${x}: q(cdf(x))=${roundTripped}`)
         }
       }
+    })
+  })
+
+  // The single-argument new VonMises(kappa) form (implicitly mu = 0) is deprecated in favor of
+  // new VonMises(mu, kappa), but must keep working identically until its removal in v1.33.0.
+  // The "warns exactly once" assertion depends on this being the SOLE legacy single-argument
+  // VonMises construction in this file/process (module-level once-only flag) -- keep legacy
+  // construction confined to this block, matching the ParallelTempering deprecation test's
+  // convention (test/mc/parallel-tempering.js).
+  describe('VonMises legacy single-argument constructor (deprecated)', () => {
+    it('should behave identically to new VonMises(0, kappa), warning exactly once', () => {
+      const warnings = []
+      const originalWarn = console.warn
+      console.warn = msg => warnings.push(msg)
+      let legacy
+      try {
+        legacy = new dist.VonMises(3)
+        // A second legacy instance must NOT emit another warning (module-level once-only flag).
+        assert(new dist.VonMises(5) instanceof dist.VonMises)
+      } finally {
+        console.warn = originalWarn
+      }
+      const modern = new dist.VonMises(0, 3)
+      assert.strictEqual(legacy.pdf(1), modern.pdf(1))
+      assert.strictEqual(legacy.cdf(1), modern.cdf(1))
+      assert.deepEqual(legacy.support(), modern.support())
+      assert.strictEqual(warnings.length, 1)
+      assert.match(warnings[0], /new VonMises\(kappa\) positional constructor is deprecated and will be removed in v1\.33\.0/)
     })
   })
 

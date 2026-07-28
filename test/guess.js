@@ -169,7 +169,7 @@ describe('guess', () => {
   // much cheaper candidate set) — both measured reliably fast.
   // See solutions/testing/2026-07-21-1055-guess-default-pool-latent-fit-cliff.md
   const FORMERLY_EXCLUDED = [
-    { name: 'VonMises', instance: new dist.VonMises(2), alternative: dist.Normal, unfilteredPool: true },
+    { name: 'VonMises', instance: new dist.VonMises(0, 2), alternative: dist.Normal, unfilteredPool: true },
     { name: 'Rice', instance: new dist.Rice(5, 1), alternative: dist.Normal, unfilteredPool: false },
     { name: 'NoncentralChi2', instance: new dist.NoncentralChi2(3, 10), alternative: dist.Exponential, unfilteredPool: false },
     { name: 'NoncentralChi', instance: new dist.NoncentralChi(3, 3), alternative: dist.Exponential, unfilteredPool: false },

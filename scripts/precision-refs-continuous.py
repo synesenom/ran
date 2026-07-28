@@ -914,8 +914,8 @@ def pdf(name, p, x):
     if name == 'UniformRatio':
         return HALF if x <= 1 else HALF / (x * x)
     if name == 'VonMises':
-        kappa = mpf(p[0])
-        return exp(kappa * cos(x)) / (2 * pi * besseli(0, kappa))
+        mu, kappa = mpf(p[0]), mpf(p[1])
+        return exp(kappa * cos(x - mu)) / (2 * pi * besseli(0, kappa))
     if name == 'Weibull':
         lam, k = mpf(p[0]), mpf(p[1])
         t = x / lam
@@ -1329,8 +1329,8 @@ def cdf(name, p, x):
     if name == 'UniformRatio':
         return HALF * x if x <= 1 else 1 - HALF / x
     if name == 'VonMises':
-        kappa = mpf(p[0])
-        return quad(lambda t: pdf('VonMises', p, t), [-pi, x])
+        mu = mpf(p[0])
+        return quad(lambda t: pdf('VonMises', p, t), [mu - pi, x])
     if name == 'Weibull':
         lam, k = mpf(p[0]), mpf(p[1])
         return -expm1(-power(x / lam, k))
@@ -1669,7 +1669,7 @@ PARAM_SETS = {
     'Uniform': [[5, 25], [0, 1], [-2, 2]],
     'UniformProduct': [[6], [2], [4]],
     'UniformRatio': [[]],
-    'VonMises': [[2], [0.5], [1], [11]],
+    'VonMises': [[0, 2], [0, 0.5], [0, 1], [0, 11], [1.5, 2]],
     'Weibull': [[2, 2], [0.5, 0.5], [1, 3]],
     'Wigner': [[2], [0.5], [1]],
     'WrappedCauchy': [[0, 0.3], [1.0, 0.7], [-2.0, 0.05]],
@@ -1776,9 +1776,9 @@ SKEWNORMAL_XVALS = {
     (0, 1, 2): [mpf('0.3'), mpf('0.66'), mpf('0.67'), mpf('0.68'), mpf('1.5')],
 }
 VONMISES_XVALS = {
-    (2,): [mpf('-2'), mpf('-0.8'), mpf('0.4'), mpf('1.2'), mpf('2.5')],
-    (0.5,): [mpf('-2.5'), mpf('-1'), mpf('0.4'), mpf('1.4'), mpf('2.5')],
-    (1,): [mpf('-2.5'), mpf('-1'), mpf('0.4'), mpf('1.4'), mpf('2.5')],
+    (0, 2): [mpf('-2'), mpf('-0.8'), mpf('0.4'), mpf('1.2'), mpf('2.5')],
+    (0, 0.5): [mpf('-2.5'), mpf('-1'), mpf('0.4'), mpf('1.4'), mpf('2.5')],
+    (0, 1): [mpf('-2.5'), mpf('-1'), mpf('0.4'), mpf('1.4'), mpf('2.5')],
     # kappa=11 straddles besselI(0,x)'s Miller-recurrence dispatch band (10, 14] (bessel.js)
     # and includes three k*pi/4 phase points (-pi/4, pi/4, pi/2) where _cdf's Fourier-series
     # envelope convergence check (see src/dist/von-mises.js) was previously fooled by sin(i*x)
@@ -1786,7 +1786,10 @@ VONMISES_XVALS = {
     # remaining two points, -1 and 0.15, are generic interior probes (one moderate-tail, one
     # near-mode) added to round the group out to this file's standard 5-points-per-group shape,
     # matching how other groups here combine targeted boundary probes with generic coverage.
-    (11,): [mpf('-1'), -pi / 4, mpf('0.15'), pi / 4, pi / 2],
+    (0, 11): [mpf('-1'), -pi / 4, mpf('0.15'), pi / 4, pi / 2],
+    # mu=1.5 exercises the location-shift parameterization added alongside kappa; the same
+    # kappa=2 x-values above, translated by mu, since f(x; mu, kappa) = f(x-mu; 0, kappa).
+    (1.5, 2): [mpf('-0.5'), mpf('0.7'), mpf('1.9'), mpf('2.7'), mpf('4')],
 }
 # Davis is inverted by bisection like the rest (its quadrature CDF is slow but tolerable for
 # one distribution) so its probes span the full support {0.1..0.9} rather than fixed points.
@@ -1920,7 +1923,8 @@ def support(name, p):
         lam = mpf(p[0])
         return (-1 / lam, 1 / lam) if lam > 0 else (NONE, NONE)
     if name == 'VonMises':
-        return (-pi, pi)
+        mu = mpf(p[0])
+        return (mu - pi, mu + pi)
     if name == 'Wigner':
         return (-mpf(p[0]), mpf(p[0]))
     if name == 'WrappedCauchy':
@@ -2022,7 +2026,7 @@ PDFCDF_TOL = {
     ('NoncentralChi2', '[5, 58]'): '5e-13',
     ('NoncentralChi2', '[5, 62]'): '5e-13',
     ('R', '[0.5]'): '1e-13',
-    ('VonMises', '[11]'): '1e-13',
+    ('VonMises', '[0, 11]'): '1e-13',
 }
 # Per-(name, json-params) quantile round-trip tolerance (default 1e-14; per-group empirical:
 # closed-form/Halley quantiles stay at 1e-14, root-finding/approximate ones are looser).
@@ -2061,7 +2065,7 @@ Q_TOL = {
     ('UniformProduct', '[4]'): '5e-13',
     ('UniformProduct', '[6]'): '1e-11',
     ('LogGamma', '[0.5, 0.5, 1]'): '2e-14',
-    ('VonMises', '[11]'): '1e-11',
+    ('VonMises', '[0, 11]'): '1e-11',
 }
 # Per-(name, json-params) one-line justification comment emitted above a loosened group.
 _N_SERIES = 'series/transform accumulates a few ULPs beyond 1e-14'
@@ -2121,7 +2125,7 @@ NOTES = {
     ('UniformProduct', '[2]'): 'q() has no closed form (numerical root-finding); round-trip measured at 1.1e-14 on Node 20 (V8/libm rounding differs across Node versions) — gate at 1e-13 (#759)',
     ('UniformProduct', '[4]'): 'q() has no closed form (numerical root-finding); round-trip measured at 1.4e-13 in JIT-order-dependent full-suite runs — gate at 5e-13 (#759)',
     ('UniformProduct', '[6]'): _N_ROOT,
-    ('VonMises', '[11]'): 'series/transform accumulates a few ULPs beyond 1e-14; q() has no closed form (numerical root-finding), which loosens the round-trip further',
+    ('VonMises', '[0, 11]'): 'series/transform accumulates a few ULPs beyond 1e-14; q() has no closed form (numerical root-finding), which loosens the round-trip further',
 }
 
 

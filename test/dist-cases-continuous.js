@@ -5949,22 +5949,24 @@ export default [{
   ]
 }, {
   name: 'VonMises',
-  fit: { params: [2], seed: 42, n: 300, tolerances: { kappa: 0.5 } },
+  fit: { params: [0.7, 2], seed: 42, n: 300, tolerances: { mu: 0.3, kappa: 0.5 } },
   invalidParams: [
     [], // all params required
-    [-1], [0] // kappa > 0
+    [0, -1], [0, 0] // kappa > 0
   ],
-  // bounded support [-pi, pi]; mean=0 and skewness=0 exact by symmetry
+  // bounded support [mu-pi, mu+pi]; mean=mu and skewness=0 exact by symmetry around mu
   moments: [
-    { params: [2], mean: 0, variance: 0.7644618798111271, skewness: 0, kurtosis: 0.8847265900332291, tol: { mean: 1e-12, variance: 1e-6, skewness: 1e-12, kurtosis: 1e-6 } },
-    { params: [1], mean: 0, variance: 1.604254298825305, skewness: 0, kurtosis: -0.15414638902997568, tol: { mean: 1e-12, variance: 1e-6, skewness: 1e-12, kurtosis: 1e-6 } }
+    { params: [0, 2], mean: 0, variance: 0.7644618798111271, skewness: 0, kurtosis: 0.8847265900332291, tol: { mean: 1e-12, variance: 1e-6, skewness: 1e-12, kurtosis: 1e-6 } },
+    { params: [0, 1], mean: 0, variance: 1.604254298825305, skewness: 0, kurtosis: -0.15414638902997568, tol: { mean: 1e-12, variance: 1e-6, skewness: 1e-12, kurtosis: 1e-6 } },
+    // translation invariance: shifting mu shifts the mean by the same amount and leaves variance/skewness/kurtosis unchanged
+    { params: [1.5, 2], mean: 1.5, variance: 0.7644618798111271, skewness: 0, kurtosis: 0.8847265900332291, tol: { mean: 1e-12, variance: 1e-6, skewness: 1e-12, kurtosis: 1e-6 } }
   ],
   cases: [{
-    params: () => [2],
+    params: () => [0, 2],
     symmetry: 0
   }, {
     name: 'near-zero kappa (near-uniform)',
-    params: () => [0.5],
+    params: () => [0, 0.5],
     symmetry: 0,
     // mpmath: exp(kappa*cos(x))/(2*pi*besseli(0,kappa)), quadrature CDF  (kappa=0.5)
     refVals: [
@@ -5982,7 +5984,7 @@ export default [{
     // yet decayed, so a convergence check on the raw (oscillating) term stops the series ~10+ orders
     // early. -pi/2 (k=2) and -pi/8 (i=8 zero) are included as adjacent multiples of pi/4.
     name: 'large kappa at x = k*pi/4 (premature series truncation regression)',
-    params: () => [9],
+    params: () => [0, 9],
     symmetry: 0,
     // mpmath mp.dps=50: exp(kappa*cos(x))/(2*pi*besseli(0,kappa)), quad(pdf, -pi, x)  (kappa=9)
     refVals: [
@@ -6000,8 +6002,37 @@ export default [{
     // premature-truncation bug violated) comes from the generic checks below plus the explicit,
     // appropriately-toleranced mpmath comparison in dist-base-special-cases.js.
     name: 'large kappa at x = k*pi/4 (premature series truncation regression)',
-    params: () => [11],
+    params: () => [0, 11],
     symmetry: 0
+  }, {
+    // mu != 0: f(x; mu, kappa) = f(x-mu; 0, kappa) is an exact translation identity, so shifting
+    // the already scipy-sourced kappa=2 refVals/quantileVals below by mu=1.5 (x -> x+1.5, pdf/cdf
+    // unchanged) yields an equally valid external reference without deriving anything from ranjs.
+    name: 'non-zero mu (location shift)',
+    params: () => [1.5, 2],
+    symmetry: 1.5,
+    refVals: [
+      { x: -1.5, pdf: 0.009639793409942664, cdf: 0.0013468622889293118 },
+      { x: -0.5, pdf: 0.030374122063858554, cdf: 0.017309793630677750 },
+      { x: 0, pdf: 0.080427734601054388, cdf: 0.042833151658980412 },
+      { x: 0.5, pdf: 0.20571449951559539, cdf: 0.11042226304496344 },
+      { x: 1, pdf: 0.40385253335183779, cdf: 0.26180778558147377 },
+      { x: 1.5, pdf: 0.51588541201901372, cdf: 0.5 },
+      { x: 2, pdf: 0.40385253335183779, cdf: 0.73819221441852612 },
+      { x: 2.5, pdf: 0.20571449951559539, cdf: 0.88957773695503661 },
+      { x: 3, pdf: 0.080427734601054388, cdf: 0.95716684834101962 },
+      { x: 3.5, pdf: 0.030374122063858554, cdf: 0.98269020636932236 },
+      { x: 4.5, pdf: 0.009639793409942664, cdf: 0.99865313771107067 }
+    ],
+    quantileVals: [
+      { p: 0.01, x: -0.8108291390361662 },
+      { p: 0.05, x: 0.08203380646787317 },
+      { p: 0.25, x: 0.9703368163193302 },
+      { p: 0.5, x: 1.5 },
+      { p: 0.75, x: 2.02966318368067 },
+      { p: 0.95, x: 2.917966193532126 },
+      { p: 0.99, x: 3.8108291390361613 }
+    ]
   }],
   // scipy.stats.vonmises(kappa=2); interior CDF values required fixing besselI(1, x) precision (#255)
   refVals: [
