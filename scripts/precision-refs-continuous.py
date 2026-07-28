@@ -33,7 +33,7 @@ import subprocess
 import sys
 from collections import Counter
 from mpmath import (mp, mpf, pi, sqrt, exp, log, expm1, log1p, cosh, tanh,
-                    atan, asin, asinh, acos, sin, cos, gamma as gammafn, loggamma,
+                    atan, atan2, asin, asinh, acos, sin, cos, gamma as gammafn, loggamma,
                     beta as betafn, erf, erfc, besseli, power, fsum, factorial, zeta,
                     quad, inf, fabs, sign, nsum, gammainc, betainc)
 
@@ -924,6 +924,9 @@ def pdf(name, p, x):
         R = mpf(p[0])
         r = R * R
         return 2 * sqrt(r - x * x) / (pi * r)
+    if name == 'WrappedCauchy':
+        mu, rho = mpf(p[0]), mpf(p[1])
+        return (1 - rho * rho) / (2 * pi * (1 + rho * rho - 2 * rho * cos(x - mu)))
     raise ValueError('pdf: ' + name)
 
 
@@ -1335,6 +1338,10 @@ def cdf(name, p, x):
         R = mpf(p[0])
         r = R * R
         return HALF + x * sqrt(r - x * x) / (pi * r) + asin(x / R) / pi
+    if name == 'WrappedCauchy':
+        mu, rho = mpf(p[0]), mpf(p[1])
+        d = atan2(sin(x - mu), cos(x - mu))
+        return HALF + atan2((1 + rho) * sin(d / 2), (1 - rho) * cos(d / 2)) / pi
     raise ValueError('cdf: ' + name)
 
 
@@ -1665,6 +1672,7 @@ PARAM_SETS = {
     'VonMises': [[2], [0.5], [1], [11]],
     'Weibull': [[2, 2], [0.5, 0.5], [1, 3]],
     'Wigner': [[2], [0.5], [1]],
+    'WrappedCauchy': [[0, 0.3], [1.0, 0.7], [-2.0, 0.05]],
 }
 
 # DoublyNoncentralT CDF is a Poisson mixture of noncentral-t quadratures: too slow to invert
@@ -1915,6 +1923,9 @@ def support(name, p):
         return (-pi, pi)
     if name == 'Wigner':
         return (-mpf(p[0]), mpf(p[0]))
+    if name == 'WrappedCauchy':
+        mu = mpf(p[0])
+        return (mu - pi, mu + pi)
     raise ValueError('support: ' + name)
 
 
