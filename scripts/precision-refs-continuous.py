@@ -2081,9 +2081,14 @@ _N_MARCUM = ('x sits near marcumQ\'s series/asymptotic dispatch threshold (x=30)
              'measured up to ~1.2e-13 in JIT-order-dependent full-suite runs (V8 rounding differs '
              'from an isolated run) -- gate at 5e-13')
 _N_F11_BOUNDARY = (_N_NCT + '; additionally, x sits near f11\'s |z|=50 dispatch threshold '
-                   '(issue #1189) where pdf(x) -- the quantile round-trip\'s local sensitivity '
-                   '1/pdf(x) -- is small enough to amplify the pdf/cdf-level rounding into a '
-                   '~1e-10 quantile round-trip error')
+                   '(issue #1189); qtol: 1e-10 was measured to fail (~1.14e-10 error at '
+                   'x=1.1), qtol: 5e-10 passes with margin -- gate empirically at 5e-10. '
+                   'The x-range itself is kept narrow (0.5-1.2) because pdf(x), the quantile '
+                   'round-trip\'s local sensitivity 1/pdf(x), collapses fast away from the peak '
+                   'at this theta. theta=120 is also the only DoublyNoncentralT group here with '
+                   'theta large enough that exp(-theta/2) < Number.EPSILON, making it the sole '
+                   'regression coverage for the { useFloor: false } fix to _cdf\'s recursiveSum '
+                   'call in src/dist/doubly-noncentral-t.js')
 NOTES = {
     ('Bates', '[10, 5, 25]'): _N_POLY,
     ('Bates', '[5, -2, 2]'): _N_POLY,
