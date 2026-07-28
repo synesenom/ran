@@ -188,6 +188,12 @@ describe('process', () => {
       })
     })
 
+    describe('.fit()', () => {
+      it('should throw when not implemented', () => {
+        assert.throws(() => BareProcess.fit([0, 1, 2]), 'Process.fit() is not implemented')
+      })
+    })
+
     describe('.next()', () => {
       it('should advance state and return the new value', () => {
         const p = new StubProcess()
@@ -500,6 +506,38 @@ describe('process.BrownianMotion', () => {
     })
   })
 
+  describe('.fit()', () => {
+    it('should recover mu and sigma from a long simulated path across seeds', () => {
+      const mu = 0.3
+      const sigma = 1.2
+      const dt = 0.5
+      const n = 20000
+      // CLT tolerance for the exact increment-based MLE: mu_hat ~ N(mu, sigma^2/(n*dt)),
+      // sigma_hat's variance via the delta method on the sample-variance's own CLT tolerance.
+      const tolMu = K_SIGMA * sigma / Math.sqrt(n * dt)
+      const tolSigma = K_SIGMA * sigma * Math.sqrt(1 / (2 * (n - 1)))
+      for (const seed of MOMENT_SEEDS) {
+        const bm = new BrownianMotion(mu, sigma, dt)
+        bm.seed(seed)
+        const fitted = BrownianMotion.fit(bm.path(n), dt)
+        assert.instanceOf(fitted, BrownianMotion)
+        assert.closeTo(fitted.p.mu, mu, tolMu, `seed ${seed}`)
+        assert.closeTo(fitted.p.sigma, sigma, tolSigma, `seed ${seed}`)
+      }
+    })
+
+    it('should default dt to 1', () => {
+      const bm = new BrownianMotion(0.1, 1, 1)
+      bm.seed(1)
+      const fitted = BrownianMotion.fit(bm.path(5000))
+      assert.strictEqual(fitted.p.dt, 1)
+    })
+
+    it('should throw when path has fewer than 3 states', () => {
+      assert.throws(() => BrownianMotion.fit([0, 1], 1), /at least 3 states/)
+    })
+  })
+
   describe('.path()', () => {
     it('should have length n+1', () => {
       const bm = new BrownianMotion(0, 1, 1)
@@ -741,6 +779,43 @@ describe('process.GeometricBrownianMotion', () => {
     })
   })
 
+  describe('.fit()', () => {
+    it('should recover mu and sigma from a long simulated path across seeds', () => {
+      const mu = 0.05
+      const sigma = 0.3
+      const dt = 0.5
+      const n = 20000
+      // Same CLT-derived tolerance style as BrownianMotion.fit(), applied to log-returns
+      // (which are i.i.d. N((mu-sigma^2/2)*dt, sigma^2*dt), same as BM increments).
+      const tolSigma = K_SIGMA * sigma * Math.sqrt(1 / (2 * (n - 1)))
+      // mu_hat = mean(logReturns)/dt + sigma_hat^2/2, so its tolerance also absorbs sigma_hat's error
+      const tolMu = K_SIGMA * sigma / Math.sqrt(n * dt) + tolSigma * sigma
+      for (const seed of MOMENT_SEEDS) {
+        const gbm = new GeometricBrownianMotion(mu, sigma, dt)
+        gbm.seed(seed)
+        const fitted = GeometricBrownianMotion.fit(gbm.path(n), dt)
+        assert.instanceOf(fitted, GeometricBrownianMotion)
+        assert.closeTo(fitted.p.sigma, sigma, tolSigma, `seed ${seed}`)
+        assert.closeTo(fitted.p.mu, mu, tolMu, `seed ${seed}`)
+      }
+    })
+
+    it('should default dt to 1', () => {
+      const gbm = new GeometricBrownianMotion(0.05, 0.2, 1)
+      gbm.seed(1)
+      const fitted = GeometricBrownianMotion.fit(gbm.path(5000))
+      assert.strictEqual(fitted.p.dt, 1)
+    })
+
+    it('should throw when path has fewer than 3 states', () => {
+      assert.throws(() => GeometricBrownianMotion.fit([1, 1.1], 1), /at least 3 states/)
+    })
+
+    it('should throw when path contains a non-positive state', () => {
+      assert.throws(() => GeometricBrownianMotion.fit([1, 1.1, 0, 1.2], 1), /positive states/)
+    })
+  })
+
   describe('log-returns', () => {
     it('should have mean and variance matching the GBM/Itô log-return identity across seeds', () => {
       const mu = 0.05
@@ -943,6 +1018,42 @@ describe('process.OrnsteinUhlenbeck', () => {
     it('should throw for t < 0', () => {
       const ou = new OrnsteinUhlenbeck(1, 0, 1, 1)
       assert.throws(() => ou.marginal(-1), /t must be > 0/)
+    })
+  })
+
+  describe('.fit()', () => {
+    it('should recover theta, mu, and sigma from a long simulated path across seeds', () => {
+      const theta = 0.8
+      const mu = 2
+      const sigma = 1.5
+      const dt = 0.2
+      const n = 30000
+      for (const seed of MOMENT_SEEDS) {
+        const ou = new OrnsteinUhlenbeck(theta, mu, sigma, dt)
+        ou.seed(seed)
+        const fitted = OrnsteinUhlenbeck.fit(ou.path(n), dt)
+        assert.instanceOf(fitted, OrnsteinUhlenbeck)
+        assert.closeTo(fitted.p.theta, theta, 0.15 * theta, `seed ${seed}: theta`)
+        assert.closeTo(fitted.p.mu, mu, 0.15 * Math.abs(mu), `seed ${seed}: mu`)
+        assert.closeTo(fitted.p.sigma, sigma, 0.15 * sigma, `seed ${seed}: sigma`)
+      }
+    })
+
+    it('should default dt to 1', () => {
+      const ou = new OrnsteinUhlenbeck(0.5, 1, 1, 1)
+      ou.seed(1)
+      const fitted = OrnsteinUhlenbeck.fit(ou.path(20000))
+      assert.strictEqual(fitted.p.dt, 1)
+    })
+
+    it('should throw when path has fewer than 4 states', () => {
+      assert.throws(() => OrnsteinUhlenbeck.fit([0, 1, 2], 1), /at least 4 states/)
+    })
+
+    it('should throw when the AR(1) slope estimate is out of (0,1)', () => {
+      // A perfectly linear path drives the OLS slope to exactly 1 (X_{n+1}-X_n constant),
+      // outside the valid exp(-theta*dt) in (0,1) range for any theta, dt > 0.
+      assert.throws(() => OrnsteinUhlenbeck.fit([0, 1, 2, 3, 4, 5], 1), /AR\(1\) slope/)
     })
   })
 
@@ -2180,6 +2291,48 @@ describe('process.CoxIngersollRoss', () => {
     it('should throw for t < 0', () => {
       const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
       assert.throws(() => cir.marginal(-1), /t must be > 0/)
+    })
+  })
+
+  describe('.fit()', () => {
+    it('should recover kappa, theta, and sigma from a long simulated path across seeds', () => {
+      const kappa = 2
+      const theta = 3
+      const sigma = 1
+      const dt = 0.01
+      const n = 100000
+      // Conditional Least Squares is consistent but less efficient than exact MLE (unlike
+      // BrownianMotion/GeometricBrownianMotion/OrnsteinUhlenbeck), so this tolerance is wider
+      // than theirs — a documented estimator tradeoff (decisions/0044-process-fit-static-factory.md),
+      // not a loosened bound papering over a bug.
+      for (const seed of MOMENT_SEEDS) {
+        const cir = new CoxIngersollRoss(kappa, theta, sigma, dt)
+        cir.seed(seed)
+        const fitted = CoxIngersollRoss.fit(cir.path(n), dt)
+        assert.instanceOf(fitted, CoxIngersollRoss)
+        assert.closeTo(fitted.p.kappa, kappa, 0.2 * kappa, `seed ${seed}: kappa`)
+        assert.closeTo(fitted.p.theta, theta, 0.2 * theta, `seed ${seed}: theta`)
+        assert.closeTo(fitted.p.sigma, sigma, 0.2 * sigma, `seed ${seed}: sigma`)
+      }
+    })
+
+    it('should default dt to 1', () => {
+      const cir = new CoxIngersollRoss(2, 3, 1, 0.01)
+      cir.seed(1)
+      const fitted = CoxIngersollRoss.fit(cir.path(20000))
+      assert.strictEqual(fitted.p.dt, 1)
+    })
+
+    it('should throw when path has fewer than 4 states', () => {
+      assert.throws(() => CoxIngersollRoss.fit([1, 2, 3], 1), /at least 4 states/)
+    })
+
+    it('should throw when the AR(1) slope estimate is out of (0,1)', () => {
+      assert.throws(() => CoxIngersollRoss.fit([1, 5, 2, 5, 3, 5], 1), /AR\(1\) slope/)
+    })
+
+    it('should throw when the estimated sigma^2 is non-positive', () => {
+      assert.throws(() => CoxIngersollRoss.fit([5, 4, 3, 2, 1, 2], 1), /sigma\^2 is non-positive/)
     })
   })
 })

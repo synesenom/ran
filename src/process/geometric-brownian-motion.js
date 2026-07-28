@@ -84,4 +84,40 @@ export default class GeometricBrownianMotion extends Process {
     const s = this.p.sigma * Math.sqrt(t)
     return new LogNormal(m, s)
   }
+
+  /**
+   * Estimates mu and sigma from an observed path via the exact MLE: log-returns are i.i.d.
+   * Normal((mu-sigma^2/2)*dt, sigma^2*dt) by Ito's lemma, so sample mean/variance of the
+   * log-returns (divided by dt) recovers the parameters to machine precision as the path
+   * length grows.
+   *
+   * @method fit
+   * @memberof ran.process.GeometricBrownianMotion
+   * @param {Array} path Array of observed states (as returned by path()); every value must be > 0.
+   * @param {number} [dt=1] Time step between consecutive path observations (must be > 0).
+   * @returns {GeometricBrownianMotion} A new instance with estimated mu and sigma.
+   * @throws {Error} If path has fewer than 3 states, contains a non-positive state, or if dt is not > 0.
+   */
+  static fit (path, dt = 1) {
+    Process.validate({ dt }, ['dt > 0'])
+    if (!Array.isArray(path) || path.length < 3) {
+      throw Error('GeometricBrownianMotion.fit(): path must contain at least 3 states')
+    }
+    if (path.some(x => x <= 0)) {
+      throw Error('GeometricBrownianMotion.fit(): path must contain only positive states')
+    }
+    const n = path.length - 1
+    let sum = 0
+    for (let i = 0; i < n; i++) sum += Math.log(path[i + 1] / path[i])
+    const meanLogReturn = sum / n
+    let sq = 0
+    for (let i = 0; i < n; i++) {
+      const d = Math.log(path[i + 1] / path[i]) - meanLogReturn
+      sq += d * d
+    }
+    const varLogReturn = sq / (n - 1)
+    const sigma = Math.sqrt(varLogReturn / dt)
+    const mu = meanLogReturn / dt + sigma * sigma / 2
+    return new GeometricBrownianMotion(mu, sigma, dt)
+  }
 }
