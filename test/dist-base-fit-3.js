@@ -277,11 +277,12 @@ describe('dist', () => {
         assert(Math.abs(init[0] - 2 * Math.sqrt(2)) < 1e-10)
       })
 
-      it('VonMises._fitInit should return kappa from circular resultant-length approximation', () => {
-        const data = new dist.VonMises(2).seed(42).sample(200)
+      it('VonMises._fitInit should return mu and kappa from the circular resultant vector', () => {
+        const data = new dist.VonMises(0.7, 2).seed(42).sample(200)
         const init = dist.VonMises._fitInit(data)
-        assert(init[0] > 0)
-        assert(Math.abs(init[0] - 2) < 0.8)
+        assert(Math.abs(init[0] - 0.7) < 0.3)
+        assert(init[1] > 0)
+        assert(Math.abs(init[1] - 2) < 0.8)
       })
     })
   })
