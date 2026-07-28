@@ -357,6 +357,10 @@ export default class DoublyNoncentralT extends Distribution {
 
     const y = Math.abs(x)
     const mu = x < 0 ? -this.p.mu : this.p.mu
+    // useFloor: false -- for large theta, the leading term (expHalfTheta = exp(-theta/2)) can
+    // itself underflow below EPS well before the Poisson(theta/2) weight's true peak, which
+    // falsely satisfies recursiveSum's default absolute-floor convergence check after 1 term.
+    // See solutions/correctness/2026-07-28-1024-doubly-noncentral-t-cdf-recursivesum-absolute-floor-truncation.md
     const z = recursiveSum({
       p: this.c.expHalfTheta,
       f: NoncentralT.fnm(this.p.nu, mu, y)
@@ -365,7 +369,7 @@ export default class DoublyNoncentralT extends Distribution {
       t.p *= this.p.theta / i2
       t.f = NoncentralT.fnm(this.p.nu + i2, mu, y * Math.sqrt(1 + i2 / this.p.nu))
       return t
-    }, t => t.p * t.f)
+    }, t => t.p * t.f, undefined, { useFloor: false })
     return clamp(x < 0 ? 1 - z : z)
   }
 
