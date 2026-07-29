@@ -16,13 +16,6 @@ import * as special from '../src/special/index.js'
 // generator's own --check step compares straight against ranjs's src/special/ implementation,
 // which is the entire point of this gate. Any tolerance looser than the 1e-13 default carries
 // a comment naming the specific numerical mechanism (never a blind loosening).
-//
-// besselInu(nu, x) for nu in {-1.5, -2.5, -3.3} at x approaching the documented ~710 series
-// boundary is WITHHELD here: it returns Infinity where the true value is a large finite number
-// (Math.pow(x/2, nu)'s tiny prefactor times an internally-overflowing recursiveSum) -- a genuine
-// accuracy-cliff bug out of scope for this test-only issue (#1140). See
-// scripts/precision-refs-special.py's WITHHELD dict for the exact points and measured true
-// values; filed for follow-up via the standard bug-triage process.
 const REFS = [
   { fn: 'besselI', args: [0.0, 0.001], ref: 1.0000002500000156, tol: 1e-13, note: 'besselI n=0: _I0/_besselIBackward crossover at x=10, issue #1185 band (10,14]' },
   { fn: 'besselI', args: [0.0, 0.5], ref: 1.0634833707413236, tol: 1e-13, note: 'besselI n=0: _I0/_besselIBackward crossover at x=10, issue #1185 band (10,14]' },
@@ -247,6 +240,8 @@ const REFS = [
   { fn: 'besselInu', args: [-1.5, 300.0], ref: 4.459066436556231e+128, tol: 1e-13, note: 'besselInu nu=-1.5: large-x series behavior, overflow boundary ~710' },
   { fn: 'besselInu', args: [-1.5, 500.0], ref: 2.49917435966537e+215, tol: 1e-13, note: 'besselInu nu=-1.5: large-x series behavior, overflow boundary ~710' },
   { fn: 'besselInu', args: [-1.5, 700.0], ref: 1.5271352921243865e+302, tol: 1e-13, note: 'besselInu nu=-1.5: large-x series behavior, overflow boundary ~710' },
+  { fn: 'besselInu', args: [-1.5, 709.0], ref: 1.2295937306183464e+306, tol: 1e-13, note: 'besselInu nu=-1.5: large-x series behavior, overflow boundary ~710' },
+  { fn: 'besselInu', args: [-1.5, 710.0], ref: 3.34003431903645e+306, tol: 1e-13, note: 'besselInu nu=-1.5: large-x series behavior, overflow boundary ~710' },
   { fn: 'besselInu', args: [-2.5, 0.001], ref: 75693963.04494534, tol: 1e-13, note: 'besselInu nu=-2.5: large-x series behavior, overflow boundary ~710' },
   { fn: 'besselInu', args: [-2.5, 0.5], ref: 13.013106895650544, tol: 1e-13, note: 'besselInu nu=-2.5: large-x series behavior, overflow boundary ~710' },
   { fn: 'besselInu', args: [-2.5, 1.0], ref: 2.1117761936354067, tol: 1e-13, note: 'besselInu nu=-2.5: large-x series behavior, overflow boundary ~710' },
@@ -256,6 +251,9 @@ const REFS = [
   { fn: 'besselInu', args: [-2.5, 100.0], ref: 1.0405531961408039e+42, tol: 1e-13, note: 'besselInu nu=-2.5: large-x series behavior, overflow boundary ~710' },
   { fn: 'besselInu', args: [-2.5, 300.0], ref: 4.42938903786477e+128, tol: 1e-13, note: 'besselInu nu=-2.5: large-x series behavior, overflow boundary ~710' },
   { fn: 'besselInu', args: [-2.5, 500.0], ref: 2.489187678957609e+215, tol: 1e-13, note: 'besselInu nu=-2.5: large-x series behavior, overflow boundary ~710' },
+  { fn: 'besselInu', args: [-2.5, 700.0], ref: 1.5227751694938985e+302, tol: 1e-13, note: 'besselInu nu=-2.5: large-x series behavior, overflow boundary ~710' },
+  { fn: 'besselInu', args: [-2.5, 709.0], ref: 1.2261276505803663e+306, tol: 1e-13, note: 'besselInu nu=-2.5: large-x series behavior, overflow boundary ~710' },
+  { fn: 'besselInu', args: [-2.5, 710.0], ref: 3.3306324067416597e+306, tol: 1e-13, note: 'besselInu nu=-2.5: large-x series behavior, overflow boundary ~710' },
   { fn: 'besselInu', args: [-3.3, 0.001], ref: -54062755321.55573, tol: 1e-13, note: 'besselInu nu=-3.3: large-x series behavior, overflow boundary ~710' },
   { fn: 'besselInu', args: [-3.3, 0.5], ref: -65.25341417409624, tol: 1e-13, note: 'besselInu nu=-3.3: large-x series behavior, overflow boundary ~710' },
   { fn: 'besselInu', args: [-3.3, 1.0], ref: -6.115862688812229, tol: 1e-13, note: 'besselInu nu=-3.3: large-x series behavior, overflow boundary ~710' },
@@ -265,6 +263,9 @@ const REFS = [
   { fn: 'besselInu', args: [-3.3, 100.0], ref: 1.0165744860563181e+42, tol: 1e-13, note: 'besselInu nu=-3.3: large-x series behavior, overflow boundary ~710' },
   { fn: 'besselInu', args: [-3.3, 300.0], ref: 4.395210893211525e+128, tol: 1e-13, note: 'besselInu nu=-3.3: large-x series behavior, overflow boundary ~710' },
   { fn: 'besselInu', args: [-3.3, 500.0], ref: 2.4776531470899324e+215, tol: 1e-13, note: 'besselInu nu=-3.3: large-x series behavior, overflow boundary ~710' },
+  { fn: 'besselInu', args: [-3.3, 700.0], ref: 1.5177330278732656e+302, tol: 1e-13, note: 'besselInu nu=-3.3: large-x series behavior, overflow boundary ~710' },
+  { fn: 'besselInu', args: [-3.3, 709.0], ref: 1.2221192420941822e+306, tol: 1e-13, note: 'besselInu nu=-3.3: large-x series behavior, overflow boundary ~710' },
+  { fn: 'besselInu', args: [-3.3, 710.0], ref: 3.3197593551403374e+306, tol: 1e-13, note: 'besselInu nu=-3.3: large-x series behavior, overflow boundary ~710' },
   { fn: 'besselK', args: [0.0, 0.0], ref: Infinity, tol: 1e-13, note: 'besselK n=0: x=0 boundary (diverges to +Infinity)' },
   { fn: 'besselK', args: [1.0, 0.0], ref: Infinity, tol: 1e-13, note: 'besselK n=1: x=0 boundary (diverges to +Infinity)' },
   { fn: 'besselK', args: [2.0, 0.0], ref: Infinity, tol: 1e-13, note: 'besselK n=2: x=0 boundary (diverges to +Infinity)' },
