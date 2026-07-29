@@ -11,8 +11,8 @@
 
 The functions in `src/special/` are the numerical foundation for almost every distribution CDF, quantile, and likelihood. Known gaps:
 
-- **`bessel.js`** — large-order and large-argument Bessel functions (used by Rice, Noncentral distributions) rely on asymptotic expansions whose accuracy degrades near the transition region.
-- **`digamma.js`** — used in Dirichlet-related computations; polygamma (derivatives beyond ψ₀) is not yet implemented.
+- **`bessel.js`** — large-order and large-argument Bessel functions (used by Rice, Noncentral distributions) rely on asymptotic expansions whose accuracy degrades near the transition region. Quantified by the threshold-focused precision gate in `test/precision-special.js` (issue #1140): `besselK`/`besselKnu`'s series/asymptotic crossover at `x=6` is accurate to only ~1e-7 for `x` just past the crossover (vs. the library's usual ~1e-13), improving to ~1e-10 by `x=10` — the residual gap is tracked for follow-up, not yet fixed.
+- **`digamma.js`** — used in Dirichlet-related computations; polygamma (derivatives beyond ψ₀) is not yet implemented (tracked by issue #1141).
 
 **Goal:** every special function should be accurate to within a few ULP for all representable inputs, as documented in accuracy tables (see publication-grade section below).
 
