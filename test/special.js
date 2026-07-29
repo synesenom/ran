@@ -234,6 +234,14 @@ describe('special', () => {
       assert(equal(special.besselInu(2.3, 100), 1.0455847305178129e+42))
       assert(equal(special.besselInu(2.3, 200), 2.0128232824293037e+85))
     })
+
+    it('should return finite values for very negative fractional order near the x~710 overflow boundary (issue #1215)', () => {
+      // mpmath mp.dps=50: besseli(nu, x). Previously returned Infinity because the
+      // recursiveSum accumulator overflowed before the tiny (x/2)^nu prefactor was applied.
+      assert(equal(special.besselInu(-1.5, 709), 1.2295937306183464e+306, 13))
+      assert(equal(special.besselInu(-2.5, 700), 1.5227751694938985e+302, 13))
+      assert(equal(special.besselInu(-3.3, 710), 3.3197593551403374e+306, 13))
+    })
   })
 
   describe('.besselK()', () => {

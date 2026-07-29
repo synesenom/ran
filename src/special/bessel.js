@@ -1,4 +1,4 @@
-import { EPS, MAX_ITER } from '../core/constants'
+import { EPS, MAX_ITER, MAX_SERIES_ITER } from '../core/constants'
 import gamma from './gamma'
 import recursiveSum from '../algorithms/recursive-sum'
 
@@ -354,12 +354,45 @@ export function besselKnu (nu, x) {
  * @private
  */
 // Taylor series converges for x ≤ ~710 with MAX_SERIES_ITER=500; see
-// solutions/testing/2026-06-02-1200-besselInu-infrastructure-fix-coverage-gap.md
+// solutions/testing/2026-06-02-1200-besselInu-infrastructure-fix-coverage-gap.md -- but for
+// very negative fractional nu, I_nu(x) itself stays far below Number.MAX_VALUE at x~710 even
+// though the *unnormalized* series sum (before the tiny (x/2)^nu prefactor is applied) does
+// not, so a hand-written loop tracks a log-scale offset and rescales in lockstep whenever the
+// running sum approaches double overflow, mirroring _besselIBackward's pattern above. The
+// rescale threshold is chosen close to Number.MAX_VALUE rather than 1/EPS (as _besselIBackward
+// uses) because 1/EPS triggers far more rescale round-trips than this series' magnitude range
+// actually needs, and each round-trip's log/exp pair compounds rounding error.
+// See solutions/special-functions/2026-07-29-0810-besselinu-negative-order-overflow.md
+const _BESSEL_INU_OVERFLOW_GUARD = 1e290
+
 export function besselInu (nu, x) {
-  return Math.pow(x / 2, nu) * recursiveSum({
-    c: 1 / gamma(nu + 1)
-  }, (t, i) => {
-    t.c *= x * x / (4 * i * (nu + i))
-    return t
-  }, t => t.c)
+  // x=0: every series term past the zeroth vanishes, so the old
+  // Math.pow(x/2, nu) * recursiveSum(...) reduces to Math.pow(0, nu) * (1/gamma(nu+1)) --
+  // preserved verbatim here since gamma(nu+1) can be negative (e.g. nu=-1.5), which the
+  // log-space combination below cannot express through 0 * -Infinity.
+  if (x === 0) {
+    return Math.pow(0, nu) * (1 / gamma(nu + 1))
+  }
+
+  const x2 = x * x / 4
+  const logEPS = -Math.log(EPS)
+  let c = 1 / gamma(nu + 1)
+  let sum = c
+  let logScale = 0
+  for (let i = 1; i < MAX_SERIES_ITER; i++) {
+    c *= x2 / (i * (nu + i))
+    sum += c
+    if (Math.abs(sum) > _BESSEL_INU_OVERFLOW_GUARD) {
+      sum *= EPS
+      c *= EPS
+      logScale += logEPS
+    }
+    if (Math.abs(c) < EPS * Math.abs(sum)) { break }
+  }
+  // No rescale occurred: combine directly (bit-identical to the pre-fix formula) rather than
+  // through log/exp, which loses a couple of ULP that besselKnu's connection-formula
+  // cancellation (bessel.js:343) amplifies past its precision-gate tolerance.
+  return logScale === 0
+    ? Math.pow(x / 2, nu) * sum
+    : Math.sign(sum) * Math.exp(nu * Math.log(x / 2) + Math.log(Math.abs(sum)) + logScale)
 }
