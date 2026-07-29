@@ -59,7 +59,7 @@ describe('special', () => {
       assert(equal(special.trigamma(2), Math.PI * Math.PI / 6 - 1))
       assert(equal(special.trigamma(0.5), Math.PI * Math.PI / 2))
       assert(equal(special.trigamma(1.5), Math.PI * Math.PI / 2 - 4))
-      assert(equal(special.trigamma(0.25), Math.PI * Math.PI + 8 * CATALAN, 8))
+      assert(equal(special.trigamma(0.25), Math.PI * Math.PI + 8 * CATALAN))
     })
 
     it('should satisfy the reflection formula psi1(1-z) + psi1(z) = (pi / sin(pi*z))^2', () => {
@@ -79,7 +79,11 @@ describe('special', () => {
     })
 
     it('should stay full-precision near a negative integer pole', () => {
-      // mpmath mp.dps=50: mp.polygamma(1, z)
+      // mpmath mp.dps=50 evaluated at the exact double of (-1+1e-6) / (-2+1e-6): the input
+      // itself only pins the offset to ~1e-10, but the dominant pole term 1/(z+n)^2 is
+      // otherwise carried at machine precision (no argument-reduction loss in sin^2(πz), since
+      // squaring away the sign removes the sensitivity digamma's linear -1/(z+n) pole avoids
+      // by a different route).
       assert(equal(special.trigamma(-1 + 1e-6), 999999999945.1335, 13))
       assert(equal(special.trigamma(-2 + 1e-6), 1000000000167.4282, 13))
     })
