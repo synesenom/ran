@@ -52,7 +52,8 @@ function trigamma (z) {
     return (Math.PI * Math.PI) / (s * s) - trigamma(1 - z)
   }
 
-  // Shift z upward via psi1(z) = psi1(z+1) + 1/z^2, accumulating the correction terms.
+  // The Stirling series below only converges to full precision once z is comfortably large,
+  // so small z is walked up via psi1(z) = psi1(z+1) + 1/z^2 until it clears that threshold.
   let s = 0
   while (z < 10) {
     s = s + 1 / (z * z)
