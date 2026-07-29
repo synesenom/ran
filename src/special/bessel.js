@@ -365,15 +365,11 @@ export function besselKnu (nu, x) {
 // See solutions/special-functions/2026-07-29-0810-besselinu-negative-order-overflow.md
 const _BESSEL_INU_OVERFLOW_GUARD = 1e290
 
-export function besselInu (nu, x) {
-  // x=0: every series term past the zeroth vanishes, so the old
-  // Math.pow(x/2, nu) * recursiveSum(...) reduces to Math.pow(0, nu) * (1/gamma(nu+1)) --
-  // preserved verbatim here since gamma(nu+1) can be negative (e.g. nu=-1.5), which the
-  // log-space combination below cannot express through 0 * -Infinity.
-  if (x === 0) {
-    return Math.pow(0, nu) * (1 / gamma(nu + 1))
-  }
-
+// Accumulates besselInu's unnormalized Taylor series sum, rescaling the running sum and
+// current term in lockstep (mirroring _besselIBackward's pattern above) whenever the sum
+// approaches double overflow, and tracking the accumulated log-scale offset for the caller
+// to fold into its final combination.
+function _besselInuSeries (nu, x) {
   const x2 = x * x / 4
   const logEPS = -Math.log(EPS)
   let c = 1 / gamma(nu + 1)
@@ -389,6 +385,19 @@ export function besselInu (nu, x) {
     }
     if (Math.abs(c) < EPS * Math.abs(sum)) { break }
   }
+  return { sum, logScale }
+}
+
+export function besselInu (nu, x) {
+  // x=0: every series term past the zeroth vanishes, so the old
+  // Math.pow(x/2, nu) * recursiveSum(...) reduces to Math.pow(0, nu) * (1/gamma(nu+1)) --
+  // preserved verbatim here since gamma(nu+1) can be negative (e.g. nu=-1.5), which the
+  // log-space combination below cannot express through 0 * -Infinity.
+  if (x === 0) {
+    return Math.pow(0, nu) * (1 / gamma(nu + 1))
+  }
+
+  const { sum, logScale } = _besselInuSeries(nu, x)
   // No rescale occurred: combine directly (bit-identical to the pre-fix formula) rather than
   // through log/exp, which loses a couple of ULP that besselKnu's connection-formula
   // cancellation (bessel.js:343) amplifies past its precision-gate tolerance.
