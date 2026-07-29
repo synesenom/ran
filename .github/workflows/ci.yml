@@ -124,14 +124,24 @@ jobs:
       - run: npm run build
       - run: test -f dist/ranjs.esm.js && test -f dist/ranjs.cjs.js && test -f dist/ranjs.min.js && test -f dist/index.d.ts
       - name: Check bundle size budget
-        # Budget and rationale documented in README.md's "Bundle size budget" section.
+        # Budgets and rationale documented in README.md's "Bundle size budget" section.
         run: |
-          BUDGET=358400
-          SIZE=$(wc -c < dist/ranjs.min.js)
-          echo "dist/ranjs.min.js: $SIZE bytes (budget: $BUDGET bytes)"
-          if [ "$SIZE" -gt "$BUDGET" ]; then
-            echo "ERROR: dist/ranjs.min.js grew to $SIZE bytes, exceeding the $BUDGET byte budget."
-            echo "If the growth is intentional (e.g. a new distribution), raise BUDGET in .github/workflows/ci.yml and update README.md's Bundle size budget section."
+          RAW_BUDGET=358400
+          GZIP_BUDGET=98304
+          RAW_SIZE=$(wc -c < dist/ranjs.min.js)
+          GZIP_SIZE=$(gzip -9 -c dist/ranjs.min.js | wc -c)
+          echo "dist/ranjs.min.js: $RAW_SIZE bytes raw (budget: $RAW_BUDGET), $GZIP_SIZE bytes gzipped (budget: $GZIP_BUDGET)"
+          FAILED=0
+          if [ "$RAW_SIZE" -gt "$RAW_BUDGET" ]; then
+            echo "ERROR: dist/ranjs.min.js grew to $RAW_SIZE raw bytes, exceeding the $RAW_BUDGET byte budget."
+            FAILED=1
+          fi
+          if [ "$GZIP_SIZE" -gt "$GZIP_BUDGET" ]; then
+            echo "ERROR: dist/ranjs.min.js grew to $GZIP_SIZE gzipped bytes, exceeding the $GZIP_BUDGET byte budget."
+            FAILED=1
+          fi
+          if [ "$FAILED" -eq 1 ]; then
+            echo "If the growth is intentional (e.g. a new distribution), raise the relevant budget in .github/workflows/ci.yml and update README.md's Bundle size budget section."
             echo "Otherwise, check for accidentally-broken tree-shaking (e.g. a helper imported unconditionally by every distribution)."
             exit 1
           fi
