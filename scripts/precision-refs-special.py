@@ -2,8 +2,8 @@
 Reference value generation for test/precision-special.js (issue #1140).
 
 All reference values are mpmath (mp.dps = 50) evaluations of besselI, besselISpherical,
-besselInu, besselK, besselKnu, and digamma, rounded to the nearest float64 (shortest
-round-tripping decimal) and emitted as JS literals.
+besselInu, besselK, besselKnu, digamma, and trigamma, rounded to the nearest float64
+(shortest round-tripping decimal) and emitted as JS literals.
 
 Unlike scripts/precision-refs-continuous.py / -discrete.py, there is no existing
 independently-vetted reference file (analogous to test/dist-cases-*.js) to self-check the
@@ -15,13 +15,13 @@ grid point and reports any mismatch beyond that point's tolerance.
 Because there is no second reference source, review this generator's own reference formulas
 (besselISpherical_ref etc.) with the same rigor as production code: confirm the grid actually
 exercises every special case those formulas branch on (e.g. x=0, negative-order divergence),
-not just every branch in src/special/bessel.js/digamma.js -- a wrong x=0 guard in this file is
-exactly as dangerous as a bug in the code under test. See
+not just every branch in src/special/bessel.js/digamma.js/trigamma.js -- a wrong x=0 guard in
+this file is exactly as dangerous as a bug in the code under test. See
 solutions/testing/2026-07-29-0637-bessel-digamma-precision-gate-reference-generator-own-bugs.md
 
 The grid is deliberately threshold-focused rather than a brute-force Cartesian sweep: every
-documented internal dispatch threshold in src/special/bessel.js and src/special/digamma.js
-gets a small cluster of points straddling it (issue #1185 was found exactly this way -- a
+documented internal dispatch threshold in src/special/bessel.js, src/special/digamma.js, and
+src/special/trigamma.js gets a small cluster of points straddling it (issue #1185 was found exactly this way -- a
 bug in the (10, 14] band around besselI(0, x)'s crossover), supplemented by a modest spread
 of interior points per branch. Reference math (the i_n(x) = sqrt(pi/(2x))*I_{n+1/2}(x)
 spherical-Bessel identity, the direct besseli/besselk/digamma calls) is independent of ranjs's
@@ -40,6 +40,7 @@ import sys
 
 from mpmath import mp, mpf, pi, sqrt, besseli, besselk
 from mpmath import digamma as mp_digamma
+from mpmath import polygamma as mp_polygamma
 
 mp.dps = 50
 
@@ -119,6 +120,11 @@ def digamma_ref(z):
     return mp_digamma(z)
 
 
+def trigamma_ref(z):
+    # psi_1(z), independent of ranjs's own Stirling-series/shift-and-sum/reflection code.
+    return mp_polygamma(1, z)
+
+
 REF_FN = {
     'besselI': besselI_ref,
     'besselISpherical': besselISpherical_ref,
@@ -126,6 +132,7 @@ REF_FN = {
     'besselK': besselK_ref,
     'besselKnu': besselKnu_ref,
     'digamma': digamma_ref,
+    'trigamma': trigamma_ref,
 }
 
 
@@ -230,6 +237,28 @@ def _digamma_grid(add):
         add('digamma', (z,), 'digamma: near-pole reflection-formula precision')
 
 
+def _trigamma_grid(add):
+    # Threshold z=10 (shift-and-sum vs Stirling series) -- same crossover as digamma, since
+    # trigamma.js reuses digamma's shift threshold (independently re-verified during
+    # implementation to hit the same ~1e-14 truncation error there).
+    for z in [0.01, 0.1, 0.5, 0.9, 1, 1.5, 2, 5, 9, 9.9, 9.99, 10, 10.01, 10.1, 15, 50, 100, 500]:
+        add('trigamma', (z,), 'trigamma: shift-and-sum/Stirling crossover at z=10')
+    # Positive-side near-zero pole: analogous to the negative-side near-pole cluster below,
+    # but on the z=0 pole approached from the positive-argument (no-reflection) branch.
+    for z in [1e-6]:
+        add('trigamma', (z,), 'trigamma: near-zero positive-side pole precision')
+    # Negative non-integer: reflection formula psi1(1-z) + psi1(z) = (pi/sin(pi*z))^2.
+    # -2.3 is not a half-integer, so it exercises the general (non ±0.5) argument-reduction
+    # path in the reflection branch, unlike the other clustered points here.
+    for z in [-0.5, -1.5, -2.5, -2.3, -9.5, -10.5, -100.5]:
+        add('trigamma', (z,), 'trigamma: reflection formula for negative z')
+    # Near-pole (bracketing the existing test/special.js pole spot-checks). Includes both
+    # signs of the offset, since the +offset and -offset points approach the pole from
+    # opposite sides and are not guaranteed to share the same argument-reduction path.
+    for z in [-1 + 1e-6, -2 + 1e-6, -5 + 1e-7, -1 - 1e-6, -2 - 1e-6]:
+        add('trigamma', (z,), 'trigamma: near-pole reflection-formula precision')
+
+
 def grid():
     """Threshold-focused (fn, args, note, tol) tuples. See the module docstring for the
     rationale; each cluster's comment names the exact dispatch threshold in src/special/ it
@@ -246,6 +275,7 @@ def grid():
     _besselK_grid(add)
     _besselKnu_grid(add)
     _digamma_grid(add)
+    _trigamma_grid(add)
 
     return points
 
