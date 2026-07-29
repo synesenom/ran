@@ -234,6 +234,29 @@ describe('special', () => {
       assert(equal(special.besselInu(2.3, 100), 1.0455847305178129e+42))
       assert(equal(special.besselInu(2.3, 200), 2.0128232824293037e+85))
     })
+
+    it('should return finite values for very negative fractional order near the x~710 overflow boundary (issue #1215)', () => {
+      // mpmath mp.dps=50: besseli(nu, x). Previously returned Infinity because the
+      // recursiveSum accumulator overflowed before the tiny (x/2)^nu prefactor was applied.
+      assert(equal(special.besselInu(-1.5, 709), 1.2295937306183464e+306, 13))
+      assert(equal(special.besselInu(-2.5, 700), 1.5227751694938985e+302, 13))
+      assert(equal(special.besselInu(-3.3, 710), 3.3197593551403374e+306, 13))
+    })
+
+    it('should handle the x=0 boundary for all three sign/order sub-cases', () => {
+      // nu > 0: Math.pow(0, nu) = 0, gamma(nu+1) finite and positive => I_nu(0) = 0.
+      assert.strictEqual(special.besselInu(2.3, 0), 0)
+
+      // nu === 0: Math.pow(0, 0) === 1 (JS convention) and gamma(1) = 1 mathematically;
+      // ranjs' gamma() is a floating-point approximation (not exactly 1 at x=1), so this
+      // uses the tolerant `equal` helper rather than strictEqual.
+      assert(equal(special.besselInu(0, 0), 1))
+
+      // nu = -1.5 (non-integer, negative): gamma(-0.5) = -2*sqrt(pi) ~= -3.5449077018110322
+      // (negative), and Math.pow(0, -1.5) is +Infinity per IEEE 754 (+0 raised to a negative
+      // exponent), so the product +Infinity * (1 / negative) diverges to -Infinity.
+      assert.strictEqual(special.besselInu(-1.5, 0), -Infinity)
+    })
   })
 
   describe('.besselK()', () => {

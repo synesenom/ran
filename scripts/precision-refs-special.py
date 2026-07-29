@@ -78,21 +78,13 @@ _TOL_KASYMP_X10 = 1e-9
 _TOL_KNUASYMP_X10 = 1e-9
 
 # besselInu(nu, x) for very negative fractional nu at x approaching the documented ~710 series
-# boundary returns Infinity (Math.pow(x/2, nu)'s tiny prefactor times an internally-overflowing
-# recursiveSum) where the true value is a large but finite number (~1e302-1e306) -- a genuine
-# accuracy-cliff bug, not a reduced-precision-but-finite case. Per issue #1140's scope (document,
-# don't fix), these points are withheld from the emitted gate rather than asserted against, the
-# same way VonMises[11]'s refVals were withheld pending issue #1185 -- see the WITHHELD report
-# printed by --check/--emit; file this as its own bug via the follow-up triage process.
+# boundary used to return Infinity (Math.pow(x/2, nu)'s tiny prefactor times an internally-
+# overflowing recursiveSum) where the true value is a large but finite number (~1e302-1e306).
+# Fixed in issue #1215 (a hand-written rescaling loop in src/special/bessel.js); no points
+# remain withheld. This dict is kept (empty) as the reusable mechanism for any future
+# accuracy-cliff bug of this shape, the same way VonMises[11]'s refVals were withheld pending
+# issue #1185 -- see the WITHHELD report printed by --check/--emit.
 WITHHELD = {
-    ('besselInu', (-1.5, 709.0)): 'returns Infinity; true value ~1.23e+306',
-    ('besselInu', (-1.5, 710.0)): 'returns Infinity; true value ~3.34e+306',
-    ('besselInu', (-2.5, 700.0)): 'returns Infinity; true value ~1.52e+302',
-    ('besselInu', (-2.5, 709.0)): 'returns Infinity; true value ~1.23e+306',
-    ('besselInu', (-2.5, 710.0)): 'returns Infinity; true value ~3.33e+306',
-    ('besselInu', (-3.3, 700.0)): 'returns Infinity; true value ~1.52e+302',
-    ('besselInu', (-3.3, 709.0)): 'returns Infinity; true value ~1.22e+306',
-    ('besselInu', (-3.3, 710.0)): 'returns Infinity; true value ~3.32e+306',
 }
 
 
@@ -367,13 +359,6 @@ import * as special from '../src/special/index.js'
 // generator's own --check step compares straight against ranjs's src/special/ implementation,
 // which is the entire point of this gate. Any tolerance looser than the 1e-13 default carries
 // a comment naming the specific numerical mechanism (never a blind loosening).
-//
-// besselInu(nu, x) for nu in {{-1.5, -2.5, -3.3}} at x approaching the documented ~710 series
-// boundary is WITHHELD here: it returns Infinity where the true value is a large finite number
-// (Math.pow(x/2, nu)'s tiny prefactor times an internally-overflowing recursiveSum) -- a genuine
-// accuracy-cliff bug out of scope for this test-only issue (#1140). See
-// scripts/precision-refs-special.py's WITHHELD dict for the exact points and measured true
-// values; filed for follow-up via the standard bug-triage process.
 const REFS = [
 {entries}
 ]

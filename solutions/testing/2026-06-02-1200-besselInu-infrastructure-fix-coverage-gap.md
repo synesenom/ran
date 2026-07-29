@@ -44,7 +44,16 @@ Added a `describe('.besselInu()')` block to `test/special.js` (lines 235-273) wi
   1e-15 relative error against DLMF 10.40.1 with optimal truncation)
 
 No production code changes were needed; the Taylor series with `MAX_SERIES_ITER=500` converges
-correctly for all x ≤ 710 (beyond which I_ν(x) > 1.8e308, making Infinity the correct result).
+correctly for all x ≤ 710.
+
+**Correction (2026-07-29, issue #1215):** the parenthetical above — "beyond which I_ν(x) >
+1.8e308, making Infinity the correct result" — is false for sufficiently negative fractional ν.
+For those orders, I_ν(x) stays well under `Number.MAX_VALUE` even at x=710, but the series'
+*unnormalized* intermediate sum (before the `(x/2)^ν` prefactor is applied) does not, and
+silently overflowed to `Infinity` inside `recursiveSum`. See
+`solutions/special-functions/2026-07-29-0810-besselinu-negative-order-overflow.md` for the fix.
+The lesson from this file's own "Prevention Strategy" below still holds; it just didn't go far
+enough to catch nu's sign as its own axis of the fix's scope.
 
 ## Prevention Strategy
 

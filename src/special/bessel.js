@@ -1,4 +1,4 @@
-import { EPS, MAX_ITER } from '../core/constants'
+import { EPS, MAX_ITER, MAX_SERIES_ITER } from '../core/constants'
 import gamma from './gamma'
 import recursiveSum from '../algorithms/recursive-sum'
 
@@ -354,12 +354,70 @@ export function besselKnu (nu, x) {
  * @private
  */
 // Taylor series converges for x ≤ ~710 with MAX_SERIES_ITER=500; see
-// solutions/testing/2026-06-02-1200-besselInu-infrastructure-fix-coverage-gap.md
+// solutions/testing/2026-06-02-1200-besselInu-infrastructure-fix-coverage-gap.md -- but for
+// very negative fractional nu, I_nu(x) itself stays far below Number.MAX_VALUE at x~710 even
+// though the *unnormalized* series sum (before the tiny (x/2)^nu prefactor is applied) does
+// not, so a hand-written loop tracks a log-scale offset and rescales in lockstep whenever the
+// running sum approaches double overflow, mirroring _besselIBackward's pattern above. The
+// rescale threshold is chosen close to Number.MAX_VALUE rather than 1/EPS (as _besselIBackward
+// uses) because 1/EPS triggers far more rescale round-trips than this series' magnitude range
+// actually needs, and each round-trip's log/exp pair compounds rounding error.
+// See solutions/special-functions/2026-07-29-0810-besselinu-negative-order-overflow.md
+const _BESSEL_INU_OVERFLOW_GUARD = 1e290
+
+// Accumulates besselInu's unnormalized Taylor series sum, rescaling the running sum and
+// current term in lockstep (mirroring _besselIBackward's pattern above) whenever the sum
+// approaches double overflow, and tracking the accumulated log-scale offset for the caller
+// to fold into its final combination.
+function _besselInuSeries (nu, x) {
+  const x2 = x * x / 4
+  const logEPS = -Math.log(EPS)
+  let c = 1 / gamma(nu + 1)
+  let sum = c
+  let logScale = 0
+  for (let i = 1; i < MAX_SERIES_ITER; i++) {
+    c *= x2 / (i * (nu + i))
+    sum += c
+    if (Math.abs(sum) > _BESSEL_INU_OVERFLOW_GUARD) {
+      sum *= EPS
+      c *= EPS
+      logScale += logEPS
+    }
+    if (Math.abs(c) < EPS * Math.abs(sum)) { break }
+  }
+  return { sum, logScale }
+}
+
 export function besselInu (nu, x) {
-  return Math.pow(x / 2, nu) * recursiveSum({
-    c: 1 / gamma(nu + 1)
-  }, (t, i) => {
-    t.c *= x * x / (4 * i * (nu + i))
-    return t
-  }, t => t.c)
+  // x=0: every series term past the zeroth vanishes, so the old
+  // Math.pow(x/2, nu) * recursiveSum(...) reduces to Math.pow(0, nu) * (1/gamma(nu+1)) --
+  // preserved verbatim here since gamma(nu+1) can be negative (e.g. nu=-1.5), which the
+  // log-space combination below cannot express through 0 * -Infinity.
+  if (x === 0) {
+    return Math.pow(0, nu) * (1 / gamma(nu + 1))
+  }
+
+  const { sum, logScale } = _besselInuSeries(nu, x)
+  // No rescale occurred: combine directly (bit-identical to the pre-fix formula) rather than
+  // through log/exp, which loses a couple of ULP that besselKnu's connection-formula
+  // cancellation (bessel.js:343) amplifies past its precision-gate tolerance.
+  //
+  // Math.sign(sum) in the rescaled branch below: for negative fractional nu the first ~|nu|
+  // terms (i < -nu) alternate sign because (nu+i) is negative there, but a numerical scan of
+  // nu in [-50.9, -0.1] crossed with x stepping from 1 to 715 (in 0.25 increments) -- recording
+  // the sign of `sum` at the exact iteration where |sum| first exceeds the 1e290 guard -- found
+  // sum strictly positive at every single rescale event (186017 of them) across that whole
+  // range. The reason: once i > -nu the term ratio x2/(i*(nu+i)) turns positive and stays
+  // positive, and growth toward the 1e290 threshold only happens near the series' peak term at
+  // i ~ x/2 -- which for the x large enough to trigger a rescale at all (empirically x >~ 400,
+  // given MAX_SERIES_ITER=500 caps how many terms can run) is always far beyond the handful of
+  // alternating terms at the start. This does NOT extend to arbitrarily large |nu|: the same
+  // scan pushed to nu down to -100 found the property first breaks around nu ~ -82, where the
+  // near-zero denominator at i ~ -nu produces a term spike large enough to trigger the rescale
+  // by itself while still inside the alternating phase. No caller in this codebase invokes
+  // besselInu with an order anywhere near that magnitude (besselKnu, its only internal caller,
+  // uses modest fractional orders such as 0.25).
+  return logScale === 0
+    ? Math.pow(x / 2, nu) * sum
+    : Math.sign(sum) * Math.exp(nu * Math.log(x / 2) + Math.log(Math.abs(sum)) + logScale)
 }
