@@ -63,7 +63,9 @@ describe('special', () => {
     })
 
     it('should satisfy the reflection formula psi1(1-z) + psi1(z) = (pi / sin(pi*z))^2', () => {
-      for (const z of [-0.5, -1.5, -2.5]) {
+      // -2.3 is not a half-integer, so z - Math.round(z) in the reflection branch's
+      // argument reduction is not exactly ±0.5 here, unlike the other three points.
+      for (const z of [-0.5, -1.5, -2.5, -2.3]) {
         const lhs = special.trigamma(1 - z) + special.trigamma(z)
         const rhs = Math.pow(Math.PI / Math.sin(Math.PI * z), 2)
         assert(equal(lhs, rhs))
@@ -86,6 +88,10 @@ describe('special', () => {
       // by a different route).
       assert(equal(special.trigamma(-1 + 1e-6), 999999999945.1335, 13))
       assert(equal(special.trigamma(-2 + 1e-6), 1000000000167.4282, 13))
+      // Opposite-sign offset: approaching the same poles from below rather than above.
+      // mpmath mp.dps=50 evaluated at the exact double of (-1-1e-6) / (-2-1e-6).
+      assert(equal(special.trigamma(-1 - 1e-6), 1000000000167.1782, 13))
+      assert(equal(special.trigamma(-2 - 1e-6), 999999999723.339, 13))
     })
 
     it('should satisfy the recurrence psi1(z+1) = psi1(z) - 1/z^2', () => {

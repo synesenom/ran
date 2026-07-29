@@ -476,15 +476,19 @@ const REFS = [
   { fn: 'trigamma', args: [50.0], ref: 0.020201333226697125, tol: 1e-13, note: 'trigamma: shift-and-sum/Stirling crossover at z=10' },
   { fn: 'trigamma', args: [100.0], ref: 0.010050166663333571, tol: 1e-13, note: 'trigamma: shift-and-sum/Stirling crossover at z=10' },
   { fn: 'trigamma', args: [500.0], ref: 0.0020020013333322665, tol: 1e-13, note: 'trigamma: shift-and-sum/Stirling crossover at z=10' },
+  { fn: 'trigamma', args: [1e-06], ref: 1000000000001.645, tol: 1e-13, note: 'trigamma: near-zero positive-side pole precision' },
   { fn: 'trigamma', args: [-0.5], ref: 8.934802200544679, tol: 1e-13, note: 'trigamma: reflection formula for negative z' },
   { fn: 'trigamma', args: [-1.5], ref: 9.379246644989124, tol: 1e-13, note: 'trigamma: reflection formula for negative z' },
   { fn: 'trigamma', args: [-2.5], ref: 9.539246644989124, tol: 1e-13, note: 'trigamma: reflection formula for negative z' },
+  { fn: 'trigamma', args: [-2.3], ref: 14.725912160961292, tol: 1e-13, note: 'trigamma: reflection formula for negative z' },
   { fn: 'trigamma', args: [-9.5], ref: 9.769687445030232, tol: 1e-13, note: 'trigamma: reflection formula for negative z' },
   { fn: 'trigamma', args: [-10.5], ref: 9.778757739814813, tol: 1e-13, note: 'trigamma: reflection formula for negative z' },
   { fn: 'trigamma', args: [-100.5], ref: 9.859703491870086, tol: 1e-13, note: 'trigamma: reflection formula for negative z' },
   { fn: 'trigamma', args: [-0.999999], ref: 999999999945.1335, tol: 1e-13, note: 'trigamma: near-pole reflection-formula precision' },
   { fn: 'trigamma', args: [-1.999999], ref: 1000000000167.4282, tol: 1e-13, note: 'trigamma: near-pole reflection-formula precision' },
-  { fn: 'trigamma', args: [-4.9999999], ref: 99999999439140.47, tol: 1e-13, note: 'trigamma: near-pole reflection-formula precision' }
+  { fn: 'trigamma', args: [-4.9999999], ref: 99999999439140.47, tol: 1e-13, note: 'trigamma: near-pole reflection-formula precision' },
+  { fn: 'trigamma', args: [-1.000001], ref: 1000000000167.1782, tol: 1e-13, note: 'trigamma: near-pole reflection-formula precision' },
+  { fn: 'trigamma', args: [-2.000001], ref: 999999999723.339, tol: 1e-13, note: 'trigamma: near-pole reflection-formula precision' }
 ]
 
 describe('special function precision gate', () => {

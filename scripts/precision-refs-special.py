@@ -243,11 +243,19 @@ def _trigamma_grid(add):
     # implementation to hit the same ~1e-14 truncation error there).
     for z in [0.01, 0.1, 0.5, 0.9, 1, 1.5, 2, 5, 9, 9.9, 9.99, 10, 10.01, 10.1, 15, 50, 100, 500]:
         add('trigamma', (z,), 'trigamma: shift-and-sum/Stirling crossover at z=10')
+    # Positive-side near-zero pole: analogous to the negative-side near-pole cluster below,
+    # but on the z=0 pole approached from the positive-argument (no-reflection) branch.
+    for z in [1e-6]:
+        add('trigamma', (z,), 'trigamma: near-zero positive-side pole precision')
     # Negative non-integer: reflection formula psi1(1-z) + psi1(z) = (pi/sin(pi*z))^2.
-    for z in [-0.5, -1.5, -2.5, -9.5, -10.5, -100.5]:
+    # -2.3 is not a half-integer, so it exercises the general (non ±0.5) argument-reduction
+    # path in the reflection branch, unlike the other clustered points here.
+    for z in [-0.5, -1.5, -2.5, -2.3, -9.5, -10.5, -100.5]:
         add('trigamma', (z,), 'trigamma: reflection formula for negative z')
-    # Near-pole (bracketing the existing test/special.js pole spot-checks).
-    for z in [-1 + 1e-6, -2 + 1e-6, -5 + 1e-7]:
+    # Near-pole (bracketing the existing test/special.js pole spot-checks). Includes both
+    # signs of the offset, since the +offset and -offset points approach the pole from
+    # opposite sides and are not guaranteed to share the same argument-reduction path.
+    for z in [-1 + 1e-6, -2 + 1e-6, -5 + 1e-7, -1 - 1e-6, -2 - 1e-6]:
         add('trigamma', (z,), 'trigamma: near-pole reflection-formula precision')
 
 
