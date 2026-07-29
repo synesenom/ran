@@ -1,6 +1,7 @@
 // Bernoulli numbers B_2, B_4, ..., B_12: the trigamma asymptotic series coefficients
 // carry their sign directly (unlike digamma's series, which factors out an extra 1/(2k)
 // and folds the alternation into the recursion instead), so no sign trick is needed here.
+// See solutions/special-functions/2026-07-29-1454-trigamma-digamma-structural-twin-sign-divergence.md
 const coeffs = [
   1 / 6,
   -1 / 30,
