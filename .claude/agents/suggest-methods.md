@@ -48,7 +48,7 @@ Scan the statistical infrastructure (special functions, algorithms, summary stat
      - Missing special functions needed by standard distributions (check what distributions use workarounds)
      - Missing numerical algorithms that would improve distribution implementations
      - Missing statistical measures that are commonly needed
-     - Missing MCMC diagnostics or samplers
+     - Missing MCMC diagnostics (e.g. a new convergence check alongside `gelmanRubin`) — new sampler *classes* belong to `suggest-distributions`, not here
      - Missing linear algebra operations needed by multivariate distributions
 
 5. **Generate 2-3 concrete suggestions**, each with:
