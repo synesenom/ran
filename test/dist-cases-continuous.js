@@ -4537,6 +4537,7 @@ export default [{
   // below ~1e-14 absolute at these magnitudes, so this assertion alone would pass with either the
   // stale or the corrected value — the actual regression authority for this precision level is
   // test/precision-continuous.js's Normal far-tail block (params [0, 2], tol: 1e-14 relative).
+  // See solutions/testing/2026-07-29-2007-normal-far-tail-refvals-absolute-tolerance-blind-spot.md
   refVals: [
     { x: -6, pdf: 0.0022159242059690038, cdf: 0.0013498980316300933 },
     { x: -3, pdf: 0.06475879783294587, cdf: 0.06680720126885807 },
