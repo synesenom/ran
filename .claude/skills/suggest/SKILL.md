@@ -21,15 +21,16 @@ Store the result for deduplication.
 
 ### 2. Spawn Scout Agents in Parallel
 
-Launch all five scout agents **in parallel**:
+Launch the active scout agents **in parallel**:
 
 | Agent | Domain | What it scans |
 |-------|--------|---------------|
 | `suggest-distributions` | New distributions | Existing distributions, special functions, missing families |
-| `suggest-methods` | Statistical methods | Special functions, algorithms, summary statistics, hypothesis tests |
-| `suggest-testing` | Test quality | Test suite, dist-cases.js, edge cases, correctness gaps |
+| `suggest-methods` | Statistical methods | Special functions, algorithms, summary statistics, hypothesis tests, and hardening/speed of existing ones |
+| `suggest-testing` | Test quality | Test suite (distributions, processes, MCMC samplers), edge cases, statistical correctness gaps |
 | `suggest-infra` | Build & tooling | package.json, rollup, docs, CI, developer experience |
-| `suggest-wildcard` | Anything | Unconstrained brainstorming across all dimensions |
+
+`suggest-wildcard` is **paused** (unconstrained brainstorming skews toward net-new features/dimensions, which is off-focus while the project is prioritizing statistical rigor over scope growth — see `.claude/README.md`). Do not launch it. Re-enable by restoring its row above once the project's priority shifts back toward expansion.
 
 Each agent returns 2-3 suggestions with title, description, priority, difficulty, and rationale.
 
@@ -99,7 +100,7 @@ If any `todo.md` entries were removed, add a line noting which ones and for whic
 ## Rules
 
 ### DO:
-- Launch all 5 scout agents in parallel
+- Launch all active scout agents in parallel (currently 4 — `suggest-wildcard` is paused, see Step 2)
 - Always deduplicate against existing open issues
 - Let the user pick — never auto-create issues
 - Use `ops-issue` for issue creation — never call `gh issue create` directly

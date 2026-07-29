@@ -45,10 +45,10 @@ This directory contains the skills and agents that power the development workflo
     ├── ops-triage.md          # Classifies surfaced-bug observations into definite/ambiguous/not-a-bug; sizes and routes them
     ├── ops-fix.md             # Fixes a single trivial/moderate bug in place (TDD)
     ├── suggest-distributions.md  # Suggests new probability distributions
-    ├── suggest-methods.md        # Suggests new statistical methods/metrics
-    ├── suggest-testing.md        # Suggests test coverage improvements
+    ├── suggest-methods.md        # Suggests new statistical methods/metrics, and hardening/speed of existing ones
+    ├── suggest-testing.md        # Suggests test coverage improvements (distributions, processes, MCMC samplers)
     ├── suggest-infra.md          # Suggests infrastructure improvements
-    ├── suggest-wildcard.md       # Unconstrained brainstorming
+    ├── suggest-wildcard.md       # Unconstrained brainstorming (paused — not launched by /suggest)
     └── suggest-rank.md           # Deduplicates and ranks suggestions
 ```
 
@@ -186,10 +186,10 @@ Launched **in parallel** by [`/suggest`](skills/suggest/SKILL.md). Each scout sc
 | Agent | Model | Domain |
 |-------|-------|--------|
 | [`suggest-distributions`](agents/suggest-distributions.md) | Sonnet | New probability distributions to implement |
-| [`suggest-methods`](agents/suggest-methods.md) | Sonnet | New statistical methods, tests, and metrics |
-| [`suggest-testing`](agents/suggest-testing.md) | Sonnet | Test scenarios, edge cases, statistical correctness gaps |
+| [`suggest-methods`](agents/suggest-methods.md) | Sonnet | New statistical methods, tests, and metrics — weighted equally with hardening/speeding up existing algorithms without sacrificing precision |
+| [`suggest-testing`](agents/suggest-testing.md) | Sonnet | Test scenarios, edge cases, statistical correctness gaps — across distributions, processes (`src/process/`), and MCMC samplers (`src/mc/`) |
 | [`suggest-infra`](agents/suggest-infra.md) | Sonnet | Build, tooling, docs pipeline, utility gaps |
-| [`suggest-wildcard`](agents/suggest-wildcard.md) | Sonnet | Unconstrained brainstorming across all dimensions |
+| [`suggest-wildcard`](agents/suggest-wildcard.md) | Sonnet | Unconstrained brainstorming across all dimensions — **paused**: skews toward net-new features/dimensions, which is off-focus while the project prioritizes statistical rigor over scope growth. Not launched by `/suggest` until re-enabled. |
 | [`suggest-rank`](agents/suggest-rank.md) | Sonnet | Dedup against open issues, score and rank |
 
 ### `ops-*` — Triage, fix, and capture outcomes
@@ -269,10 +269,9 @@ Launched **in parallel** by [`/suggest`](skills/suggest/SKILL.md). Each scout sc
 /fix-smells ─→ (no agents; uses mcp__codescene__code_health_score + mcp__codescene__code_health_review directly)
 
 /suggest ───→ suggest-distributions ┐
-              → suggest-methods      │
-              → suggest-testing      │ parallel scouts
-              → suggest-infra        │
-              → suggest-wildcard     ┘
+              → suggest-methods      │ parallel scouts (suggest-wildcard paused, see below)
+              → suggest-testing      │
+              → suggest-infra        ┘
               → suggest-rank           (sequential, after scouts)
               → ops-issue              (parallel, for each selected suggestion)
 ```
