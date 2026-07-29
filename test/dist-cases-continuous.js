@@ -4529,6 +4529,15 @@ export default [{
   }],
   // Ziggurat sampler; analytic erf CDF. AD converges well below 5000.
   sampleSize: 2500,
+  // x=-14/14 re-verified via mpmath mp.dps=50 (erf, erfc, and ncdf formulations all agree to
+  // ~44 digits): Normal(0,2).pdf(-14) -> 4.567360204182297e-12, .cdf(-14) -> 1.279812543885835e-12.
+  // The previous values were stale by 1 ULP (pdf) and ~2.3e-6 relative (cdf), undetected by this
+  // file's own loose refValTol but caught by precision-refs-continuous.py's self_check() (issue
+  // #1193). refValTol's flat 1e-14 absolute floor (test/test-utils.js) cannot resolve precision
+  // below ~1e-14 absolute at these magnitudes, so this assertion alone would pass with either the
+  // stale or the corrected value — the actual regression authority for this precision level is
+  // test/precision-continuous.js's Normal far-tail block (params [0, 2], tol: 1e-14 relative).
+  // See solutions/testing/2026-07-29-2007-normal-far-tail-refvals-absolute-tolerance-blind-spot.md
   refVals: [
     { x: -6, pdf: 0.0022159242059690038, cdf: 0.0013498980316300933 },
     { x: -3, pdf: 0.06475879783294587, cdf: 0.06680720126885807 },
@@ -4540,8 +4549,8 @@ export default [{
     { x: 7, pdf: 0.0004363413475228801, cdf: 0.9997673709209645 },
     { x: -10, pdf: 7.433597573671489e-7, cdf: 2.866515718680240354e-7 },
     { x: 10, pdf: 7.433597573671489e-7, cdf: 0.9999997133484281 },
-    { x: -14, pdf: 4.567360204182298e-12, cdf: 1.279809591636649e-12 },
-    { x: 14, pdf: 4.567360204182298e-12, cdf: 0.9999999999987202 }
+    { x: -14, pdf: 4.567360204182297e-12, cdf: 1.279812543885835e-12 },
+    { x: 14, pdf: 4.567360204182297e-12, cdf: 0.9999999999987201 }
   ],
   // scipy.stats.norm(loc=0, scale=2)
   quantileVals: [
