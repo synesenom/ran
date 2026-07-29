@@ -27,7 +27,7 @@ Launch the active scout agents **in parallel**:
 |-------|--------|---------------|
 | `suggest-distributions` | New distributions | Existing distributions, special functions, missing families |
 | `suggest-methods` | Statistical methods | Special functions, algorithms, summary statistics, hypothesis tests, and hardening/speed of existing ones |
-| `suggest-testing` | Test quality | Test suite (distributions, processes, MCMC samplers), edge cases, statistical correctness gaps |
+| `suggest-testing` | Test quality | Test suite (distributions, processes, MCMC samplers, and location/dispersion/shape/dependence/test as first-class families), edge cases, statistical correctness gaps |
 | `suggest-infra` | Build & tooling | package.json, rollup, docs, CI, developer experience |
 
 `suggest-wildcard` is **paused** (unconstrained brainstorming skews toward net-new features/dimensions, which is off-focus while the project is prioritizing statistical rigor over scope growth — see `.claude/README.md`). Do not launch it. Re-enable by restoring its row above once the project's priority shifts back toward expansion.

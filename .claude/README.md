@@ -46,7 +46,7 @@ This directory contains the skills and agents that power the development workflo
     ├── ops-fix.md             # Fixes a single trivial/moderate bug in place (TDD)
     ├── suggest-distributions.md  # Suggests new distributions, processes, and MCMC samplers (stochastic objects)
     ├── suggest-methods.md        # Suggests new statistical methods/metrics (location/dispersion/shape/dependence/test as first-class families), and hardening/speed of existing ones
-    ├── suggest-testing.md        # Suggests test coverage improvements (distributions, processes, MCMC samplers)
+    ├── suggest-testing.md        # Suggests test coverage improvements (distributions, processes, MCMC samplers, and location/dispersion/shape/dependence/test as first-class families)
     ├── suggest-infra.md          # Suggests infrastructure improvements
     ├── suggest-wildcard.md       # Unconstrained brainstorming (paused — not launched by /suggest)
     └── suggest-rank.md           # Deduplicates and ranks suggestions
@@ -187,7 +187,7 @@ Launched **in parallel** by [`/suggest`](skills/suggest/SKILL.md). Each scout sc
 |-------|-------|--------|
 | [`suggest-distributions`](agents/suggest-distributions.md) | Sonnet | New distributions, stochastic processes, and MCMC samplers — the three "stochastic object" families sharing an abstract-base-class contract |
 | [`suggest-methods`](agents/suggest-methods.md) | Sonnet | New statistical methods, tests, and metrics (MCMC diagnostics, not sampler classes) — weighted equally with hardening/speeding up existing algorithms without sacrificing precision. `location`/`dispersion`/`shape`/`dependence`/`test` are first-class families here, held to the same reference-value/edge-case rigor as `suggest-distributions`' base-class families |
-| [`suggest-testing`](agents/suggest-testing.md) | Sonnet | Test scenarios, edge cases, statistical correctness gaps — across distributions, processes (`src/process/`), and MCMC samplers (`src/mc/`) |
+| [`suggest-testing`](agents/suggest-testing.md) | Sonnet | Test scenarios, edge cases, statistical correctness gaps — across distributions, processes (`src/process/`), MCMC samplers (`src/mc/`), and `location`/`dispersion`/`shape`/`dependence`/`test` as first-class families held to the same precision-gate/external-reference rigor bar |
 | [`suggest-infra`](agents/suggest-infra.md) | Sonnet | Build, tooling, docs pipeline, utility gaps |
 | [`suggest-wildcard`](agents/suggest-wildcard.md) | Sonnet | Unconstrained brainstorming across all dimensions — **paused**: skews toward net-new features/dimensions, which is off-focus while the project prioritizes statistical rigor over scope growth. Not launched by `/suggest` until re-enabled. |
 | [`suggest-rank`](agents/suggest-rank.md) | Sonnet | Dedup against open issues, score and rank |
