@@ -32,6 +32,7 @@ A comprehensive JavaScript library for probability distributions, random variate
 - [Return values and errors](#return-values-and-errors)
 - [Numerical precision](#numerical-precision)
   - [Test reference values](#test-reference-values)
+- [Bundle size budget](#bundle-size-budget)
 - [Documentation](#documentation)
 - [License](#license)
 
@@ -342,6 +343,10 @@ All reference values in `test/dist-cases-continuous.js` and `test/dist-cases-dis
 All 31 discrete distributions are verified against mpmath references at 50 decimal places. BetaBinomial and NegativeHypergeometric sit at the ~2e-14 float64 arithmetic floor. The following distributions cap at 1e-12 at certain parameter settings: Binomial, Hypergeometric, NegativeBinomial, Poisson, Skellam.
 
 All 115 continuous distributions are likewise verified against mpmath references at 50 decimal places (three parameter sets each). **pdf/cdf** cap at 1e-12–1e-13 at certain parameter settings for: Bates, IrwinHall, Levy, NoncentralBeta, NoncentralChi, NoncentralT, DoublyNoncentralT, SkewNormal, Rice, Tweedie, and R. **Quantiles** with a closed-form or Halley-refined inverse round-trip to 1e-14; those computed by numerical root-finding (BaldingNichols, Bates, BetaPrime, Davis, FisherZ, Muth, NoncentralChi2, NoncentralF, DoublyNoncentralChi2, DoublyNoncentralT, SkewNormal, Student's t/z, UniformProduct, R) round-trip to ~1e-13–1e-10, and BenktanderII's near-boundary asymptotic branch (b → 1) to ~1e-9.
+
+## Bundle size budget
+
+CI fails the `build` job if `dist/ranjs.min.js` exceeds **350 KiB (358400 bytes)**, checked with a plain `wc -c` against the `BUDGET` value in `.github/workflows/ci.yml`. The budget carries roughly 25% headroom over the current minified size, so it catches an accidental tree-shaking break (e.g. a helper imported unconditionally by every distribution, defeating the per-distribution subpath exports) without needing a bump on every ordinary PR. When growth is intentional — a new distribution, process, or MCMC sampler — raise `BUDGET` in the same PR and note the new size here.
 
 ## Documentation
 

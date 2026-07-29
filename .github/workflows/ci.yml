@@ -123,3 +123,15 @@ jobs:
         if: steps.node-cache.outputs.cache-hit != 'true'
       - run: npm run build
       - run: test -f dist/ranjs.esm.js && test -f dist/ranjs.cjs.js && test -f dist/ranjs.min.js && test -f dist/index.d.ts
+      - name: Check bundle size budget
+        # Budget and rationale documented in README.md's "Bundle size budget" section.
+        run: |
+          BUDGET=358400
+          SIZE=$(wc -c < dist/ranjs.min.js)
+          echo "dist/ranjs.min.js: $SIZE bytes (budget: $BUDGET bytes)"
+          if [ "$SIZE" -gt "$BUDGET" ]; then
+            echo "ERROR: dist/ranjs.min.js grew to $SIZE bytes, exceeding the $BUDGET byte budget."
+            echo "If the growth is intentional (e.g. a new distribution), raise BUDGET in .github/workflows/ci.yml and update README.md's Bundle size budget section."
+            echo "Otherwise, check for accidentally-broken tree-shaking (e.g. a helper imported unconditionally by every distribution)."
+            exit 1
+          fi
