@@ -32,6 +32,7 @@ A comprehensive JavaScript library for probability distributions, random variate
 - [Return values and errors](#return-values-and-errors)
 - [Numerical precision](#numerical-precision)
   - [Test reference values](#test-reference-values)
+- [Bundle size budget](#bundle-size-budget)
 - [Documentation](#documentation)
 - [License](#license)
 
@@ -342,6 +343,12 @@ All reference values in `test/dist-cases-continuous.js` and `test/dist-cases-dis
 All 31 discrete distributions are verified against mpmath references at 50 decimal places. BetaBinomial and NegativeHypergeometric sit at the ~2e-14 float64 arithmetic floor. The following distributions cap at 1e-12 at certain parameter settings: Binomial, Hypergeometric, NegativeBinomial, Poisson, Skellam.
 
 All 115 continuous distributions are likewise verified against mpmath references at 50 decimal places (three parameter sets each). **pdf/cdf** cap at 1e-12–1e-13 at certain parameter settings for: Bates, IrwinHall, Levy, NoncentralBeta, NoncentralChi, NoncentralT, DoublyNoncentralT, SkewNormal, Rice, Tweedie, and R. **Quantiles** with a closed-form or Halley-refined inverse round-trip to 1e-14; those computed by numerical root-finding (BaldingNichols, Bates, BetaPrime, Davis, FisherZ, Muth, NoncentralChi2, NoncentralF, DoublyNoncentralChi2, DoublyNoncentralT, SkewNormal, Student's t/z, UniformProduct, R) round-trip to ~1e-13–1e-10, and BenktanderII's near-boundary asymptotic branch (b → 1) to ~1e-9.
+
+## Bundle size budget
+
+CI fails the `build` job if `dist/ranjs.min.js` exceeds **350 KiB raw (358400 bytes)** or **96 KiB gzipped (98304 bytes)**, checked with plain `wc -c` (raw) and `gzip -9 -c | wc -c` (gzipped) against the `RAW_BUDGET`/`GZIP_BUDGET` values in `.github/workflows/ci.yml` — no size-analysis dependency needed. Both budgets carry roughly 25-30% headroom over the current size, enough to catch an accidental tree-shaking break (e.g. a helper imported unconditionally by every distribution, defeating the per-distribution subpath exports) without needing a bump on every ordinary PR. When growth is intentional — a new distribution, process, or MCMC sampler — raise the relevant budget in the same PR and note the new size here.
+
+The gzipped figure is the one that reflects real download cost, since npm/CDN delivery is compressed. The full bundle's ~74 KiB gzipped is not what most consumers actually ship, though: this project's own guidance (see [ESM — single distribution import](#esm--single-distribution-import)) is to import individual distributions via their subpath exports, which gzip to roughly 30 KiB each (e.g. `dist/beta.esm.js`, `dist/normal.esm.js`) — well inside the range the community treats as unremarkable for a library that does real work (for reference, lodash's full, non-tree-shaken build is ~24 KiB gzipped; moment.js's oft-cited ~67 KiB gzipped is the anchor most commonly pointed to as "too big" and a reason to look elsewhere).
 
 ## Documentation
 
