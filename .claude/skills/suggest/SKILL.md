@@ -21,15 +21,17 @@ Store the result for deduplication.
 
 ### 2. Spawn Scout Agents in Parallel
 
-Launch all five scout agents **in parallel**:
+Launch the active scout agents **in parallel**:
 
 | Agent | Domain | What it scans |
 |-------|--------|---------------|
 | `suggest-distributions` | New distributions | Existing distributions, special functions, missing families |
-| `suggest-methods` | Statistical methods | Special functions, algorithms, summary statistics, hypothesis tests |
-| `suggest-testing` | Test quality | Test suite, dist-cases.js, edge cases, correctness gaps |
+| `suggest-methods` | Statistical methods | Special functions, algorithms, summary statistics, hypothesis tests, and hardening/speed of existing ones |
+| `suggest-testing` | Test quality | Test suite (distributions, processes, MCMC samplers, and location/dispersion/shape/dependence/test as first-class families), edge cases, statistical correctness gaps |
 | `suggest-infra` | Build & tooling | package.json, rollup, docs, CI, developer experience |
-| `suggest-wildcard` | Anything | Unconstrained brainstorming across all dimensions |
+| `suggest-docs` | Maintainer docs | Thin WHY-comments, un-cited algorithm/paper sources, and unreferenced ADRs/solution docs in complex code — not public-facing docs |
+
+`suggest-wildcard` is **paused** (unconstrained brainstorming skews toward net-new features/dimensions, which is off-focus while the project is prioritizing statistical rigor over scope growth — see `.claude/README.md`). Do not launch it. Re-enable by restoring its row above once the project's priority shifts back toward expansion.
 
 Each agent returns 2-3 suggestions with title, description, priority, difficulty, and rationale.
 
@@ -82,7 +84,7 @@ For each issue created in Step 6:
    - A table row (e.g. under a "Filed as GitHub Issues" table) — this only applies to entries that were *not yet* filed, so new rows are never added here as a result of this step.
    - Do not leave behind a placeholder, an "already filed" note, or a dangling link — the point is removal, not annotation.
    - If removing the entry leaves its parent section (e.g. a "Not Yet Filed" list) completely empty, remove that now-empty parent heading too rather than leaving a heading with no content under it.
-3. If no match is found, skip — not every suggestion originates from `todo.md` (e.g. `suggest-testing` and `suggest-infra` findings usually don't).
+3. If no match is found, skip — not every suggestion originates from `todo.md` (e.g. `suggest-testing`, `suggest-infra`, and `suggest-docs` findings usually don't).
 
 If any entries were removed, commit `todo.md` with a message referencing the filed issue number(s) (e.g. `Remove filed todo.md entries (#830, #831)`) and push to the current branch.
 
@@ -99,7 +101,7 @@ If any `todo.md` entries were removed, add a line noting which ones and for whic
 ## Rules
 
 ### DO:
-- Launch all 5 scout agents in parallel
+- Launch all active scout agents in parallel (currently 5 — `suggest-wildcard` is paused, see Step 2)
 - Always deduplicate against existing open issues
 - Let the user pick — never auto-create issues
 - Use `ops-issue` for issue creation — never call `gh issue create` directly

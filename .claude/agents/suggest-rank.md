@@ -50,7 +50,7 @@ Produce a ranked list in this format:
 ## Ranked Suggestions
 
 ### Rank 1: <Title>
-- **Domain**: <distributions/methods/testing/infra/wildcard>
+- **Domain**: <distributions/methods/testing/infra/docs/wildcard>
 - **Priority**: <high/medium/low>
 - **Difficulty**: <trivial/moderate/difficult>
 - **Score**: <N>/9
