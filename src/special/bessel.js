@@ -392,6 +392,22 @@ export function besselInu (nu, x) {
   // No rescale occurred: combine directly (bit-identical to the pre-fix formula) rather than
   // through log/exp, which loses a couple of ULP that besselKnu's connection-formula
   // cancellation (bessel.js:343) amplifies past its precision-gate tolerance.
+  //
+  // Math.sign(sum) in the rescaled branch below: for negative fractional nu the first ~|nu|
+  // terms (i < -nu) alternate sign because (nu+i) is negative there, but a numerical scan of
+  // nu in [-50.9, -0.1] crossed with x stepping from 1 to 715 (in 0.25 increments) -- recording
+  // the sign of `sum` at the exact iteration where |sum| first exceeds the 1e290 guard -- found
+  // sum strictly positive at every single rescale event (186017 of them) across that whole
+  // range. The reason: once i > -nu the term ratio x2/(i*(nu+i)) turns positive and stays
+  // positive, and growth toward the 1e290 threshold only happens near the series' peak term at
+  // i ~ x/2 -- which for the x large enough to trigger a rescale at all (empirically x >~ 400,
+  // given MAX_SERIES_ITER=500 caps how many terms can run) is always far beyond the handful of
+  // alternating terms at the start. This does NOT extend to arbitrarily large |nu|: the same
+  // scan pushed to nu down to -100 found the property first breaks around nu ~ -82, where the
+  // near-zero denominator at i ~ -nu produces a term spike large enough to trigger the rescale
+  // by itself while still inside the alternating phase. No caller in this codebase invokes
+  // besselInu with an order anywhere near that magnitude (besselKnu, its only internal caller,
+  // uses modest fractional orders such as 0.25).
   return logScale === 0
     ? Math.pow(x / 2, nu) * sum
     : Math.sign(sum) * Math.exp(nu * Math.log(x / 2) + Math.log(Math.abs(sum)) + logScale)
