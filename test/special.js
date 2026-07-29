@@ -48,6 +48,49 @@ describe('special', () => {
     })
   })
 
+  describe('trigamma(z)', () => {
+    // Catalan's constant, used in the ψ1(1/4) closed form below.
+    const CATALAN = 0.9159655941772190
+
+    it('should return reference values at closed-form points', () => {
+      // Closed forms (Wikipedia "Trigamma function"): psi1(1) = pi^2/6, psi1(1/2) = pi^2/2,
+      // psi1(1/4) = pi^2 + 8G; psi1(2) and psi1(3/2) follow from the recurrence at z=1 and z=1/2.
+      assert(equal(special.trigamma(1), Math.PI * Math.PI / 6))
+      assert(equal(special.trigamma(2), Math.PI * Math.PI / 6 - 1))
+      assert(equal(special.trigamma(0.5), Math.PI * Math.PI / 2))
+      assert(equal(special.trigamma(1.5), Math.PI * Math.PI / 2 - 4))
+      assert(equal(special.trigamma(0.25), Math.PI * Math.PI + 8 * CATALAN, 8))
+    })
+
+    it('should satisfy the reflection formula psi1(1-z) + psi1(z) = (pi / sin(pi*z))^2', () => {
+      for (const z of [-0.5, -1.5, -2.5]) {
+        const lhs = special.trigamma(1 - z) + special.trigamma(z)
+        const rhs = Math.pow(Math.PI / Math.sin(Math.PI * z), 2)
+        assert(equal(lhs, rhs))
+      }
+    })
+
+    it('should return Infinity at the non-positive integer poles', () => {
+      // ADR-0015: divergence returns Infinity specifically (not NaN, not a huge finite).
+      assert.strictEqual(special.trigamma(0), Infinity)
+      assert.strictEqual(special.trigamma(-1), Infinity)
+      assert.strictEqual(special.trigamma(-2), Infinity)
+      assert.strictEqual(special.trigamma(-3), Infinity)
+    })
+
+    it('should stay full-precision near a negative integer pole', () => {
+      // mpmath mp.dps=50: mp.polygamma(1, z)
+      assert(equal(special.trigamma(-1 + 1e-6), 999999999945.1335, 13))
+      assert(equal(special.trigamma(-2 + 1e-6), 1000000000167.4282, 13))
+    })
+
+    it('should satisfy the recurrence psi1(z+1) = psi1(z) - 1/z^2', () => {
+      for (const z of [0.1, 0.5, 1, 6, 100]) {
+        assert(equal(special.trigamma(z + 1), special.trigamma(z) - 1 / (z * z)))
+      }
+    })
+  })
+
   describe('.bessel()', () => {
     it('In(0) should be equal to 0 for n >= 1', () => {
       for (const n of [1, 2, 3, 5, 10]) {
