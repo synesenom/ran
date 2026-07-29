@@ -1366,6 +1366,17 @@ LARGE_LAMBDA_ANCHORS = [{
 
 
 def self_check(only=None):
+    # A MISMATCH here does not by itself mean this script's mpmath formula is wrong: it means
+    # this script's "got" and dist-cases-continuous.js's frozen "want" disagree, and either side
+    # could be the stale one. Normal[0,2].cdf(-14) mismatched (issue #1193) because dist-cases-
+    # continuous.js's far-tail refVals predated the cancellation-safe fix already applied to
+    # test/precision-continuous.js (issue #808) and were never back-ported; this script's plain
+    # erf-based formula was already correct (mpmath computes erf to full mp.dps precision
+    # regardless of how close the result sits to +-1, so there is no cancellation loss at
+    # mp.dps=50 the way there would be at float64) -- independently reconfirmed against an
+    # erfc-based reformulation and mpmath's built-in ncdf, both agreeing to ~44 digits. Each
+    # mismatch should be independently re-derived before deciding which side to correct.
+    #
     # dist-cases-continuous.js is a real ES module (cases[*].params is a closure); dump-dist-cases-
     # json.js loads it exactly the way mocha does (via @babel/register) and evaluates every closure,
     # so this always checks against the live file instead of a stale or nonexistent snapshot.
