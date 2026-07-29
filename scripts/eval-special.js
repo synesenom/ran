@@ -11,8 +11,7 @@ const FN = {
   besselInu: special.besselInu,
   besselK: special.besselK,
   besselKnu: special.besselKnu,
-  digamma: special.digamma,
-  trigamma: special.trigamma
+  digamma: special.digamma
 }
 
 // JSON has no Infinity/NaN literal (JSON.stringify silently emits `null` for both), so encode
