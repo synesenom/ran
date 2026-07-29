@@ -46,7 +46,8 @@ const perDist = distNames.map(name => ({
   output: {
     file: `dist/${name}.esm.js`,
     format: 'es',
-    banner: copyright
+    banner: copyright,
+    plugins: [terser({ module: true, keep_classnames: true })]
   }
 }))
 
@@ -63,7 +64,8 @@ const perProcess = processNames.map(name => ({
   output: {
     file: `dist/process/${name}.esm.js`,
     format: 'es',
-    banner: copyright
+    banner: copyright,
+    plugins: [terser({ module: true, keep_classnames: true })]
   }
 }))
 
@@ -80,7 +82,8 @@ const perMc = mcNames.map(name => ({
   output: {
     file: `dist/mc/${name}.esm.js`,
     format: 'es',
-    banner: copyright
+    banner: copyright,
+    plugins: [terser({ module: true, keep_classnames: true })]
   }
 }))
 
