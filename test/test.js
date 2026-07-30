@@ -6,6 +6,51 @@ import * as test from '../src/test'
 
 const SAMPLE_SIZE = 50
 
+// Wilson score interval for a binomial proportion: more reliable than the naive Wald
+// (mean +/- z*sd) approximation when the expected count (trials * alpha) is small, since it
+// stays inside [0, 1] and is not centered on the raw sample proportion. z = 3 gives a ~99.7%
+// two-sided CI -- wide enough to avoid Monte Carlo flakiness across repeated CI runs, while
+// still catching a test whose critical value is off by an order of magnitude (e.g. a 1 - alpha
+// swap, or a wrong degrees-of-freedom).
+function wilsonInterval (successes, trials, z = 3) {
+  const phat = successes / trials
+  const z2 = z * z
+  const denom = 1 + z2 / trials
+  const center = (phat + z2 / (2 * trials)) / denom
+  const halfWidth = z * Math.sqrt((phat * (1 - phat) + z2 / (4 * trials)) / trials) / denom
+  return [center - halfWidth, center + halfWidth]
+}
+
+// Asserts that a nominal significance level alpha is consistent with an empirical rejection
+// rate (successes/trials) observed under H0, via the Wilson interval above.
+function assertTypeIError (rejections, trials, alpha) {
+  const [lower, upper] = wilsonInterval(rejections, trials)
+  assert(alpha >= lower && alpha <= upper,
+    `rejection rate ${rejections}/${trials} = ${(rejections / trials).toFixed(3)}; Wilson 99.7% CI [${lower.toFixed(3)}, ${upper.toFixed(3)}] excludes nominal alpha = ${alpha}`)
+}
+
+// Repeats a hypothesis test under a caller-supplied H0 case generator and verifies the
+// empirical rejection rate is consistent with the nominal alpha. Shared across the Type-I
+// error blocks below to avoid restating the same trial-loop/rejection-count boilerplate.
+function checkTypeIError (trials, alpha, generateNullCase, runTest) {
+  let rejections = 0
+  for (let i = 0; i < trials; i++) {
+    if (!runTest(generateNullCase(i)).passed) {
+      rejections++
+    }
+  }
+  assertTypeIError(rejections, trials, alpha)
+}
+
+// A pair of independently-seeded Normal(0, 1) samples of equal size: the shared H0 case
+// generator for the two-sample tests (mannWhitney, welch) whose null is "same distribution".
+function nullNormalPair (trialIndex) {
+  return [
+    (new Normal(0, 1)).seed(2 * trialIndex).sample(SAMPLE_SIZE),
+    (new Normal(0, 1)).seed(2 * trialIndex + 1).sample(SAMPLE_SIZE)
+  ]
+}
+
 describe('test', () => {
   describe('bartlett', () => {
     it('should throw exception for less than two data sets', () => {
@@ -46,6 +91,19 @@ describe('test', () => {
       const k = int(3, 5)
       assert(!test.bartlett(Array.from({ length: k }, (_, i) => (new Normal(float(0, 5), float(1, 10))).seed(i).sample(SAMPLE_SIZE))).passed)
     })
+
+    // Type-I error (test size) verification: under H0 (identical-variance samples), the
+    // rejection rate at alpha should itself be close to alpha. scipy has no direct bartlett
+    // equivalent with a matching finite-sample correction to cross-check against, so this
+    // verifies internal calibration via repeated simulation instead of a single external value.
+    it('should reject roughly alpha fraction of null-true samples across repeated trials (Type-I error)', () => {
+      const alpha = 0.05
+      const k = 3
+      const groupSize = 50
+      checkTypeIError(200, alpha,
+        i => Array.from({ length: k }, (_, g) => (new Normal(0, 1)).seed(i * k + g).sample(groupSize)),
+        groups => test.bartlett(groups, alpha))
+    })
   })
 
   describe('brownForsythe', () => {
@@ -80,6 +138,17 @@ describe('test', () => {
       seed(0)
       const k = int(3, 5)
       assert(!test.brownForsythe(Array.from({ length: k }, (_, i) => (new Normal(float(0, 5), float(1, 10))).seed(i).sample(SAMPLE_SIZE))).passed)
+    })
+
+    // Type-I error (test size) verification: under H0 (identical-variance samples), the
+    // rejection rate at alpha should itself be close to alpha.
+    it('should reject roughly alpha fraction of null-true samples across repeated trials (Type-I error)', () => {
+      const alpha = 0.05
+      const k = 3
+      const groupSize = 50
+      checkTypeIError(200, alpha,
+        i => Array.from({ length: k }, (_, g) => (new Normal(0, 1)).seed(i * k + g).sample(groupSize)),
+        groups => test.brownForsythe(groups, alpha))
     })
   })
 
@@ -199,6 +268,16 @@ describe('test', () => {
       const sample1 = Array.from({ length: SAMPLE_SIZE }, (d, i) => i)
       const sample2 = sample1.map(d => d + normal.sample())
       assert(!test.hsic([sample1, sample2]).passed)
+    })
+
+    // Type-I error (test size) verification: under H0 (statistically independent samples), the
+    // rejection rate at alpha should itself be close to alpha.
+    it('should reject roughly alpha fraction of null-true samples across repeated trials (Type-I error)', () => {
+      seed(12345)
+      const alpha = 0.05
+      checkTypeIError(200, alpha,
+        () => [float(0, 10, SAMPLE_SIZE), float(0, 10, SAMPLE_SIZE)],
+        samples => test.hsic(samples, alpha))
     })
   })
 
@@ -326,6 +405,17 @@ describe('test', () => {
       const k = int(3, 5)
       assert(!test.levene(Array.from({ length: k }, (_, i) => (new Normal(float(0, 5), float(1, 10))).seed(i).sample(SAMPLE_SIZE))).passed)
     })
+
+    // Type-I error (test size) verification: under H0 (identical-variance samples), the
+    // rejection rate at alpha should itself be close to alpha.
+    it('should reject roughly alpha fraction of null-true samples across repeated trials (Type-I error)', () => {
+      const alpha = 0.05
+      const k = 3
+      const groupSize = 50
+      checkTypeIError(200, alpha,
+        i => Array.from({ length: k }, (_, g) => (new Normal(0, 1)).seed(i * k + g).sample(groupSize)),
+        groups => test.levene(groups, alpha))
+    })
   })
 
   describe('mannWhitney', () => {
@@ -367,6 +457,13 @@ describe('test', () => {
       const sample1 = (new Normal(mu, sigma)).seed(1).sample(SAMPLE_SIZE)
       const sample2 = (new Normal(mu + 10, sigma)).seed(2).sample(SAMPLE_SIZE)
       assert(!test.mannWhitney([sample1, sample2]).passed)
+    })
+
+    // Type-I error (test size) verification: under H0 (identical-distribution samples), the
+    // rejection rate at alpha should itself be close to alpha.
+    it('should reject roughly alpha fraction of null-true samples across repeated trials (Type-I error)', () => {
+      const alpha = 0.05
+      checkTypeIError(200, alpha, nullNormalPair, samples => test.mannWhitney(samples, alpha))
     })
   })
 
@@ -411,6 +508,13 @@ describe('test', () => {
       const result = test.welch([1, 1, 1], [2, 2, 2])
       assert(!result.passed)
       assert(!isFinite(result.stat))
+    })
+
+    // Type-I error (test size) verification: under H0 (identical-mean samples), the
+    // rejection rate at alpha should itself be close to alpha.
+    it('should reject roughly alpha fraction of null-true samples across repeated trials (Type-I error)', () => {
+      const alpha = 0.05
+      checkTypeIError(200, alpha, nullNormalPair, ([x, y]) => test.welch(x, y, alpha))
     })
   })
 })

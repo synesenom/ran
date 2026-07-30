@@ -112,9 +112,12 @@ export default function (dataSets, alpha = 0.05) {
   const m = n1 * n2 / 2
   const s = Math.sqrt(n1 * n2 * (n1 + n2 + 1) / 12)
 
-  // Compare against critical value.
+  // U is already folded to the smaller of U1/U2 (a two-sided statistic), so the critical
+  // value is the alpha/2 tail of the standard normal, not the alpha tail: P(U1 <= c or
+  // U2 <= c) = 2*Phi((c-m)/s) = alpha requires z = q(1 - alpha/2). Using q(1 - 2*alpha)
+  // here inflated the empirical Type-I error to ~3x the nominal alpha. See issue #1229.
   return {
     stat: U,
-    passed: Math.abs((U - m) / s) <= (new Normal(0, 1)).q(1 - 2 * alpha)
+    passed: Math.abs((U - m) / s) <= (new Normal(0, 1)).q(1 - alpha / 2)
   }
 }
