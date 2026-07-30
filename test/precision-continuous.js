@@ -1187,6 +1187,32 @@ const REFS = [
       { x: 1.2, pdf: 1.2272297432244359e-06, cdf: 0.999999934444974 }
     ]
   },
+  // DoublyNoncentralT[5, 5, 120] (issue #1207): non-zero mu combined with theta=120 drives _pdf's
+  // general (mu != 0) branch's peak index j0 into the 17-30+ range, the regime where the ₁F₁
+  // three-term contiguous recurrence (formerly _f11Forward/_f11Backward) was numerically unstable
+  // in both directions -- see solutions/correctness/2026-07-30-1600-doubly-noncentral-t-pdf-f11-recurrence-instability.md.
+  // Every other DoublyNoncentralT group above either uses mu=0 (fast path, bypasses the general
+  // branch entirely) or a small theta that never pushes j0 past ~5-10, where the old recurrence
+  // happened to still be accurate enough to pass -- this is the only group that exercises the
+  // previously-broken regime. Reference pdf/cdf via mpmath mp.dps=50, independent Poisson(theta/2)
+  // mixture of singly-noncentral-t formula (scripts/precision-refs-continuous.py's dnct_pdf/dnct_cdf),
+  // not derived from ranjs's own ₁F₁-series _pdf.
+  // qtol: 1e-12 was measured to fail (q(cdf(2.2)) landed ~2.6e-12 off), while qtol: 1e-11 passed
+  // stably across repeated runs, so 1e-11 keeps margin over the measured error for other
+  // environments (same empirical-gate approach as the [5, 0, 120] group's qtol above).
+  {
+    name: 'DoublyNoncentralT',
+    params: [5, 5, 120],
+    tol: 1e-11,
+    qtol: 1e-11,
+    points: [
+      { x: 0.7, pdf: 0.692770087981292, cdf: 0.07412974139872573 },
+      { x: 1.0, pdf: 1.8170631884809803, cdf: 0.49279888377770137 },
+      { x: 1.3, pdf: 0.718181855844681, cdf: 0.8992518892279195 },
+      { x: 1.8, pdf: 0.010558777834557508, cdf: 0.9990304544278005 },
+      { x: 2.2, pdf: 0.0001166815151832735, cdf: 0.9999900880337178 }
+    ]
+  },
   {
     name: 'Erlang',
     params: [5, 2],

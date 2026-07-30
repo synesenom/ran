@@ -109,40 +109,6 @@ export default class DoublyNoncentralT extends Distribution {
   }
 
   /**
-   * Advances the hypergeometric function forward in its first argument.
-   *
-   * @method _f11Forward
-   * @memberof ran.dist.DoublyNoncentralT
-   * @param {number} f1 Function value for one iteration before.
-   * @param {number} f2 Function value for two iterations before.
-   * @param {number} a First argument.
-   * @param {number} b Second argument.
-   * @param {number} z Third argument.
-   * @returns {number} The function value at the current iteration.
-   * @private
-   */
-  _f11Forward (f1, f2, a, b, z) {
-    return ((2 * a - b + z) * f1 + (b - a) * f2) / a
-  }
-
-  /**
-   * Advances the hypergeometric function backward in its first argument.
-   *
-   * @method _f11Backward
-   * @memberof ran.dist.DoublyNoncentralT
-   * @param {number} f1 Function value for one iteration ahead.
-   * @param {number} f2 Function value for two iterations ahead.
-   * @param {number} a First argument.
-   * @param {number} b Second argument.
-   * @param {number} z Third argument.
-   * @returns {number} The function value at the current iteration.
-   * @private
-   */
-  _f11Backward (f1, f2, a, b, z) {
-    return (a * f2 - (2 * a - b + z) * f1) / (b - a)
-  }
-
-  /**
    * Logarithm of the term in the probability density function.
    *
    * @method _logA
@@ -196,13 +162,16 @@ export default class DoublyNoncentralT extends Distribution {
     // Find index with highest amplitude
     const j0 = this._findStartIndex(j => this._logA(x, j))
 
+    // ₁F₁ is evaluated directly (f11()) at every series index below rather than advanced via a
+    // three-term contiguous recurrence in its first argument: that recurrence is numerically
+    // unstable in both directions once kj grows large relative to nu/2 (see
+    // solutions/correctness/2026-07-30-1600-doubly-noncentral-t-pdf-f11-recurrence-instability.md).
     let z = 0
     if (x * this.p.mu >= 0) {
       // Init terms
       let kj0 = (this.p.nu + j0 + 1) / 2
       let gp = Math.exp(this.c.logScale + j0 * lntmuk - logGamma(j0 + 1) - kj0 * lntk)
       let gk0 = gamma(kj0)
-      let f10 = f11(kj0, nu2, thetatk)
 
       // Forward
       z = recursiveSum({
@@ -212,15 +181,7 @@ export default class DoublyNoncentralT extends Distribution {
           gamma(kj0 - 0.5)
         ],
         g: gp * gk0,
-        f1: [
-          f10,
-          f11(kj0 - 0.5, nu2, thetatk)
-        ],
-        f2: [
-          f11(kj0 - 1, nu2, thetatk),
-          f11(kj0 - 1.5, nu2, thetatk)
-        ],
-        f: f10
+        f: f11(kj0, nu2, thetatk)
       }, (t, i) => {
         const j = j0 + i
         const j2 = i % 2
@@ -228,10 +189,7 @@ export default class DoublyNoncentralT extends Distribution {
         t.gp *= tmuk / (j * srtk)
         t.gk[j2] *= kj - 1
         t.g = t.gp * t.gk[j2]
-
-        t.f = this._f11Forward(t.f1[j2], t.f2[j2], kj - 1, nu2, thetatk)
-        t.f2[j2] = t.f1[j2]
-        t.f1[j2] = t.f
+        t.f = f11(kj, nu2, thetatk)
         return t
       }, t => t.g * t.f)
 
@@ -240,7 +198,6 @@ export default class DoublyNoncentralT extends Distribution {
         kj0 -= 0.5
         gp *= j0 * srtk / tmuk
         gk0 = gamma(kj0)
-        f10 = f11(kj0, nu2, thetatk)
         z += recursiveSum({
           gp: gp,
           gk: [
@@ -248,15 +205,7 @@ export default class DoublyNoncentralT extends Distribution {
             gamma(kj0 + 0.5)
           ],
           g: gp * gk0,
-          f1: [
-            f10,
-            f11(kj0 + 0.5, this.p.nu / 2, thetatk)
-          ],
-          f2: [
-            f11(kj0 + 1, this.p.nu / 2, thetatk),
-            f11(kj0 + 1.5, this.p.nu / 2, thetatk)
-          ],
-          f: f10
+          f: f11(kj0, nu2, thetatk)
         }, (t, i) => {
           const j = j0 - i
           if (j > 0) {
@@ -266,10 +215,7 @@ export default class DoublyNoncentralT extends Distribution {
             t.gp /= tmuk / (j * srtk)
             t.gk[j2] /= kj
             t.g = t.gp * t.gk[j2]
-
-            t.f = this._f11Backward(t.f1[j2], t.f2[j2], kj + 1, nu2, thetatk)
-            t.f2[j2] = t.f1[j2]
-            t.f1[j2] = t.f
+            t.f = f11(kj, nu2, thetatk)
           } else {
             t.g = 0
             t.f = 0
@@ -284,14 +230,6 @@ export default class DoublyNoncentralT extends Distribution {
       const gk0 = gamma(kj0 - 1)
       const gk1 = gamma(kj0 - 0.5)
       let gk = [gk0, gk1]
-      let f2 = [
-        f11(kj0 - 2, nu2, thetatk),
-        f11(kj0 - 1.5, nu2, thetatk)
-      ]
-      let f1 = [
-        f11(kj0 - 1, nu2, thetatk),
-        f11(kj0 - 0.5, nu2, thetatk)
-      ]
 
       let gp = gp0
       z += wynnEpsilon(i => {
@@ -303,9 +241,7 @@ export default class DoublyNoncentralT extends Distribution {
         gk[j2] *= kj - 1
         const g = gp * gk[j2]
 
-        const f = this._f11Forward(f1[j2], f2[j2], kj - 1, nu2, thetatk)
-        f2[j2] = f1[j2]
-        f1[j2] = f
+        const f = f11(kj, nu2, thetatk)
 
         // Series alternates because x*mu < 0 makes (x*mu)^j flip sign each step.
         return (i % 2 === 0 ? 1 : -1) * g * f
@@ -316,14 +252,6 @@ export default class DoublyNoncentralT extends Distribution {
         kj0 -= 0.5
         let gp = gp0 * tmuk / (j0 * srtk)
         gk = [gk1 * kj0, gk0 * (kj0 - 0.5)]
-        f2 = [
-          f11(kj0 + 2, nu2, thetatk),
-          f11(kj0 + 1.5, nu2, thetatk)
-        ]
-        f1 = [
-          f11(kj0 + 1, nu2, thetatk),
-          f11(kj0 + 0.5, nu2, thetatk)
-        ]
         z -= wynnEpsilon(i => {
           const j = j0 - i
           const j2 = i % 2
@@ -335,9 +263,7 @@ export default class DoublyNoncentralT extends Distribution {
             gk[j2] /= kj
             const g = gp * gk[j2]
 
-            const f = this._f11Backward(f1[j2], f2[j2], kj + 1, nu2, thetatk)
-            f2[j2] = f1[j2]
-            f1[j2] = f
+            const f = f11(kj, nu2, thetatk)
 
             dz = g * f
           }
