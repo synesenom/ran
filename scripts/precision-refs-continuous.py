@@ -1550,7 +1550,7 @@ PARAM_SETS = {
     'DoublyNoncentralBeta': [[2, 2, 2, 2], [2, 2, 1, 3], [3, 4, 2, 2], [2, 2, 1200, 1200]],
     'DoublyNoncentralChi2': [[3, 4, 2, 3], [2, 4, 1, 2], [2, 3, 1, 1]],
     'DoublyNoncentralF': [[5, 5, 2, 2], [5, 5, 1, 2], [4, 6, 2, 1]],
-    'DoublyNoncentralT': [[5, 1, 2], [5, 0, 2], [6, 2, 1], [5, 0, 120]],
+    'DoublyNoncentralT': [[5, 1, 2], [5, 0, 2], [6, 2, 1], [5, 0, 120], [5, 5, 120]],
     'Erlang': [[5, 2], [2, 0.5], [3, 1]],
     'Exponential': [[2], [0.5], [1]],
     'ExponentialLogarithmic': [[0.5, 2], [0.9, 0.5], [0.3, 1]],
@@ -1707,6 +1707,14 @@ DNCT_XVALS = {
     (5, 0, 2): [mpf('-3'), mpf('-1.2'), mpf('0.7'), mpf('2'), mpf('3.5')],
     (6, 2, 1): [mpf('-1'), mpf('0.5'), mpf('2'), mpf('3.5'), mpf('5')],
     (5, 0, 120): [mpf('0.5'), mpf('0.8'), mpf('1'), mpf('1.1'), mpf('1.2')],
+    # (5, 5, 120) (issue #1207): non-zero mu combined with theta=120 drives _pdf's general
+    # (mu != 0) branch's peak index j0 into the 17-30+ range, the regime where the ₁F₁ recurrence
+    # (formerly _f11Forward/_f11Backward) was numerically unstable in both directions. x in
+    # {0.7, 1.0, 1.3, 1.8} are the exact points confirmed wrong in the issue; x=2.2 extends one
+    # point further into the tail while still landing well inside the quantile round-trip's
+    # sensitivity range (unlike (5, 0, 120) above, this group's mu != 0 so it does not need the
+    # same tight peak-adjacent x-range).
+    (5, 5, 120): [mpf('0.7'), mpf('1.0'), mpf('1.3'), mpf('1.8'), mpf('2.2')],
 }
 
 # Doubly-noncentral Beta/F CDFs are double Poisson sums: too slow to invert by bisection,
@@ -2045,6 +2053,7 @@ PDFCDF_TOL = {
     ('DoublyNoncentralT', '[5, 1, 2]'): '1e-12',
     ('DoublyNoncentralT', '[6, 2, 1]'): '1e-12',
     ('DoublyNoncentralT', '[5, 0, 120]'): '1e-13',
+    ('DoublyNoncentralT', '[5, 5, 120]'): '1e-11',
     ('SkewNormal', '[1, 1, 3]'): '1e-12',
     ('Rice', '[0.5, 2]'): '1e-13',
     ('Rice', '[7, 1]'): '5e-13',
@@ -2072,6 +2081,7 @@ Q_TOL = {
     ('DoublyNoncentralT', '[5, 1, 2]'): '1e-12',
     ('DoublyNoncentralT', '[6, 2, 1]'): '1e-12',
     ('DoublyNoncentralT', '[5, 0, 120]'): '5e-10',
+    ('DoublyNoncentralT', '[5, 5, 120]'): '1e-11',
     ('FisherZ', '[1, 1]'): '4e-14',
     ('FisherZ', '[5, 5]'): '1e-12',
     ('FisherZ', '[8, 4]'): '1e-12',
@@ -2115,6 +2125,11 @@ _N_F11_BOUNDARY = (_N_NCT + '; additionally, x sits near f11\'s |z|=50 dispatch 
                    'theta large enough that exp(-theta/2) < Number.EPSILON, making it the sole '
                    'regression coverage for the { useFloor: false } fix to _cdf\'s recursiveSum '
                    'call in src/dist/doubly-noncentral-t.js')
+_N_F11_RECURRENCE = ('non-zero mu combined with theta=120 drives _pdf\'s general (mu != 0) '
+                     'branch\'s peak index j0 into the 17-30+ range, the regime where the '
+                     '₁F₁ three-term contiguous recurrence (formerly '
+                     '_f11Forward/_f11Backward) was numerically unstable in both directions '
+                     '(issue #1207) -- see solutions/correctness/2026-07-30-1600-doubly-noncentral-t-pdf-f11-recurrence-instability.md')
 NOTES = {
     ('Bates', '[10, 5, 25]'): _N_POLY,
     ('Bates', '[5, -2, 2]'): _N_POLY,
@@ -2135,6 +2150,7 @@ NOTES = {
     ('DoublyNoncentralT', '[5, 1, 2]'): _N_NCT,
     ('DoublyNoncentralT', '[6, 2, 1]'): _N_NCT,
     ('DoublyNoncentralT', '[5, 0, 120]'): _N_F11_BOUNDARY,
+    ('DoublyNoncentralT', '[5, 5, 120]'): _N_F11_RECURRENCE,
     ('SkewNormal', '[1, 1, 3]'): 'cdf uses Owen T and q() root-finds on it; both lose a few ULPs beyond 1e-14',
     ('Rice', '[0.5, 2]'): _N_SERIES,
     ('Rice', '[3.16, 1]'): _N_SERIES,
