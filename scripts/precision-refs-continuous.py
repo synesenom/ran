@@ -190,6 +190,23 @@ def dncbeta_cdf(a, b, l1, l2, x):
     # This is an exact algebraic rewrite (same recurrences the JS implementation itself uses via
     # its own Poisson-weight speed-up constants), not an approximation -- verified bit-for-bit
     # against the naive form above for every existing small-lambda REFS entry via --check.
+    #
+    # Ireg(a+r, b+si, x) itself is ALSO tracked via an exact recurrence (issue #1194) instead of
+    # a fresh betainc() call per (r, si) pair -- the true cost driver at large lambda (e.g.
+    # lambda1=lambda2=1200: ~800k-1M betainc() calls per cdf() call, 20-44 minutes, vs.
+    # dncbeta_pdf's ~30s, which never calls betainc() at all and was never the bottleneck).
+    # Contiguous relations for the regularized incomplete beta function (DLMF 8.17.20-style):
+    #   I_x(a, b+1) = I_x(a, b) + x^a (1-x)^b / (b B(a,b))      [b-direction, si loop]
+    #   I_x(a+1, b) = I_x(a, b) - x^a (1-x)^b / (a B(a,b))      [a-direction, r loop]
+    # verified to 0 relative error against direct betainc() calls at both small scale (a,b in
+    # 1-5) and at the actual production scale (a,b in the hundreds, matching lambda=1200) before
+    # use here. The JS side's #1102 fix attempted (and abandoned) the same idea for its relocated
+    # walk due to an unresolved sign error -- the signs above were independently re-derived and
+    # numerically verified, not carried over from that attempt; see
+    # solutions/performance/2026-07-30-dncbeta-self-check-incremental-ireg.md for the derivation,
+    # the verification method, and why this makes peak relocation unnecessary: eliminating the
+    # per-term betainc() cost (not repositioning the walk) is what removes the hang, so the
+    # original forward-from-0 walk and its floor/convergence logic are otherwise unchanged.
     x = mpf(x)
     if x <= 0:
         return mpf(0)
@@ -199,14 +216,22 @@ def dncbeta_cdf(a, b, l1, l2, x):
     b = mpf(b)
     h1 = mpf(l1) / 2
     h2 = mpf(l2) / 2
+    logx = log(x)
+    log1mx = log(1 - x)
     log_h1 = log(h1) if h1 != 0 else None
     log_h2 = log(h2) if h2 != 0 else None
     s = mpf(0)
     r = 0
     log_wr = mpf(0) if h1 == 0 else -h1
+    logB_r0 = loggamma(a) + loggamma(b) - loggamma(a + b)
+    xp_r0 = a * logx + b * log1mx
+    I_r0 = Ireg(a, b, x)
     while True:
         inner = mpf(0)
         log_ws = mpf(0) if h2 == 0 else -h2
+        logB = logB_r0
+        xp = xp_r0
+        I_val = I_r0
         si = 0
         while True:
             # Convergence must track the actual accumulated term (Poisson weight * Ireg), not the
@@ -216,10 +241,13 @@ def dncbeta_cdf(a, b, l1, l2, x):
             # the joint (r,s) peak shifts far from the nominal center (#1108). Same relative
             # term-vs-running-sum check as recursiveSum's useFloor=False branch in
             # src/algorithms/recursive-sum.js, the precedent from #1086's JS-side fix.
-            term = exp(log_wr + log_ws) * Ireg(a + r, b + si, x)
+            term = exp(log_wr + log_ws) * I_val
             inner += term
             if si > h2 + 5 and fabs(term) < fabs(inner) * mpf('1e-55'):
                 break
+            I_val = I_val + exp(xp - logB) / (b + si)
+            logB = logB + log(b + si) - log(a + r + b + si)
+            xp = xp + log1mx
             if h2 != 0:
                 log_ws = log_ws + log_h2 - log(si + 1)
             si += 1
@@ -228,6 +256,9 @@ def dncbeta_cdf(a, b, l1, l2, x):
         s += inner
         if r > h1 + 5 and fabs(inner) < fabs(s) * mpf('1e-55'):
             break
+        I_r0 = I_r0 - exp(xp_r0 - logB_r0) / (a + r)
+        logB_r0 = logB_r0 + log(a + r) - log(a + r + b)
+        xp_r0 = xp_r0 + logx
         if h1 != 0:
             log_wr = log_wr + log_h1 - log(r + 1)
         r += 1
