@@ -38,6 +38,8 @@ describe('dispersion', () => {
         17, 6, 17, 25, 8, 1, 18, 18, 0, 35, 46, 13, 21, 20, 11, 39, 41, 23, 37, 29, 27, 18, 17, 15, 42, 33, 3, 11, 8,
         45, 2, 31, 26, 21, 37, 25, 5, 11, 47, 16, 25
       ]
+      // mpmath mp.dps=50: dVar(x) via scripts/precision-refs-summary-stats.py's dvar_ref
+      // (Szekely-Rizzo double-centered |x_i-x_j| distance matrix) → 9.422636422997547
       const dVar = 9.422636422997547
       assert(equal(dispersion.dVar(x), dVar))
     })
