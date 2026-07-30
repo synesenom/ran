@@ -182,6 +182,20 @@ describe('dist', () => {
           invalid.survival(0)
         }, 'Distribution._cdf() is not implemented')
       })
+
+      it('InverseGaussian.survival() should override the base 1 - cdf(x) with a numerically stable value', () => {
+        const ig = new dist.InverseGaussian(0.5, 4)
+        // mpmath mp.dps=50: 1 - ig_cdf(0.5, 4, 5) -> 7.373070012124583e-17 (see
+        // test/dist-cases-continuous.js's ReciprocalInverseGaussian 'small mu, large lambda'
+        // case, whose x=0.2 refVal is this same value under the reciprocal mapping y=1/x=5)
+        const ref = 7.373070012124583e-17
+        assert.isBelow(Math.abs(ig.survival(5) - ref) / ref, 1e-11)
+        // Below the open (0, Infinity) support: survival = 1 - cdf = 1 - 0.
+        assert.strictEqual(ig.survival(0), 1)
+        assert.strictEqual(ig.survival(-1), 1)
+        // At the open upper support boundary: survival = 1 - cdf = 1 - 1.
+        assert.strictEqual(ig.survival(Infinity), 0)
+      })
     })
 
     describe('.hazard()', () => {

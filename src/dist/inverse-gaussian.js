@@ -45,49 +45,6 @@ export default class InverseGaussian extends Distribution {
     }
   }
 
-  _generator () {
-    // Direct sampling
-    const nu = normal(this.r)
-
-    const y = nu * nu
-
-    const x = this.p.mu + this.c.halfMuOverLambda * this.p.mu * y - this.c.halfMuOverLambda * Math.sqrt(this.p.mu * y * (4 * this.p.lambda + this.p.mu * y))
-    return this.r.next() > this.p.mu / (this.p.mu + x) ? this.p.mu * this.p.mu / x : x
-  }
-
-  static get _fitInitIsExact () {
-    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
-    return true
-  }
-
-  static _fitInit (data) {
-    // Exact MLE: mu = sample mean, lambda = n / Σ(1/xᵢ − 1/x̄). By the AM-HM inequality the sum
-    // is ≥ 0, vanishing only for constant data — fall back to the moment estimate there.
-    const n = data.length
-    const mean = data.reduce((s, x) => s + x, 0) / n
-    const invDev = data.reduce((s, x) => s + (1 / x - 1 / mean), 0)
-    if (invDev > 0) {
-      return [mean, n / invDev]
-    }
-    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || mean * mean
-    return [mean, mean * mean * mean / variance]
-  }
-
-  _pdf (x) {
-    return Math.sqrt(this.p.lambda / (2 * Math.PI * Math.pow(x, 3))) * Math.exp(-this.p.lambda * Math.pow(x - this.p.mu, 2) / (2 * this.p.mu * this.p.mu * x))
-  }
-
-  _cdf (x) {
-    const s = Math.sqrt(this.p.lambda / x)
-    const st = Math.sqrt(x) * this.c.sqrtLambdaOverMuSq
-    const a = Math.SQRT1_2 * (st - s)
-    const b = Math.SQRT1_2 * (st + s)
-    // erfc(-a) avoids 1+erf cancellation in the lower tail.
-    // erfcx(b)·exp(2λ/μ − b²) avoids overflow for large 2λ/μ; the exponent ≤ 0 always.
-    // See solutions/special-functions/2026-06-05-0000-inverse-gaussian-cdf-erfc-cancellation-cf-convergence.md
-    return Math.min(1, 0.5 * (erfc(-a) + erfcx(b) * Math.exp(this.c.twoLambdaOverMu - b * b)))
-  }
-
   /**
    * @returns {number} Mean of the distribution (equals μ).
    */
@@ -114,5 +71,90 @@ export default class InverseGaussian extends Distribution {
    */
   kurtosis () {
     return 15 * this.p.mu / this.p.lambda
+  }
+
+  /**
+   * Overrides the base class's `1 - this.cdf(x)`, which suffers the same upper-tail
+   * cancellation `_survival` (below) exists to avoid. Below/at-boundary support checks are
+   * duplicated here (matching `cdf()`'s own `_belowSupport`/upper-bound guards) since
+   * `_survival`'s formula is undefined outside the open `(0, Infinity)` support and does not
+   * go through the base class's `cdf()` wrapper that normally supplies them.
+   *
+   * @param {number} x Value to evaluate survival function at.
+   * @returns {number} The survival value.
+   */
+  survival (x) {
+    if (x <= 0) {
+      return 1
+    }
+    if (x === Infinity) {
+      return 0
+    }
+    return this._survival(x)
+  }
+
+  _generator () {
+    // Direct sampling
+    const nu = normal(this.r)
+
+    const y = nu * nu
+
+    const x = this.p.mu + this.c.halfMuOverLambda * this.p.mu * y - this.c.halfMuOverLambda * Math.sqrt(this.p.mu * y * (4 * this.p.lambda + this.p.mu * y))
+    return this.r.next() > this.p.mu / (this.p.mu + x) ? this.p.mu * this.p.mu / x : x
+  }
+
+  _pdf (x) {
+    return Math.sqrt(this.p.lambda / (2 * Math.PI * Math.pow(x, 3))) * Math.exp(-this.p.lambda * Math.pow(x - this.p.mu, 2) / (2 * this.p.mu * this.p.mu * x))
+  }
+
+  _cdf (x) {
+    const s = Math.sqrt(this.p.lambda / x)
+    const st = Math.sqrt(x) * this.c.sqrtLambdaOverMuSq
+    const a = Math.SQRT1_2 * (st - s)
+    const b = Math.SQRT1_2 * (st + s)
+    // erfc(-a) avoids 1+erf cancellation in the lower tail.
+    // erfcx(b)·exp(2λ/μ − b²) avoids overflow for large 2λ/μ; the exponent ≤ 0 always.
+    // See solutions/special-functions/2026-06-05-0000-inverse-gaussian-cdf-erfc-cancellation-cf-convergence.md
+    return Math.min(1, 0.5 * (erfc(-a) + erfcx(b) * Math.exp(this.c.twoLambdaOverMu - b * b)))
+  }
+
+  /**
+   * Numerically stable survival function 1 - CDF(x), computed directly instead of via
+   * `1 - this._cdf(x)`. In the upper tail CDF(x) rounds to within 1 ULP of 1, so a naive
+   * `1 - cdf` subtraction destroys almost all precision (quantizes to multiples of 2^-53).
+   * Mirrors _cdf's own erfc/erfcx cancellation fix, applied symmetrically: erfc(-a) → erfc(a),
+   * and the second term's sign flips (1 - Φ(z) = Φ(-z) identity).
+   * ReciprocalInverseGaussian's small-x tail maps to this distribution's large-x tail, so it
+   * calls this method instead of `1 - super._cdf(1 / x)`.
+   * See solutions/correctness/2026-07-30-1907-reciprocal-inverse-gaussian-cdf-cancellation.md
+   *
+   * @protected
+   * @param {number} x Value to evaluate survival function at.
+   * @returns {number} The survival value.
+   */
+  _survival (x) {
+    const s = Math.sqrt(this.p.lambda / x)
+    const st = Math.sqrt(x) * this.c.sqrtLambdaOverMuSq
+    const a = Math.SQRT1_2 * (st - s)
+    const b = Math.SQRT1_2 * (st + s)
+    return Math.max(0, 0.5 * (erfc(a) - erfcx(b) * Math.exp(this.c.twoLambdaOverMu - b * b)))
+  }
+
+  static get _fitInitIsExact () {
+    // _fitInit returns the exact closed-form MLE, so fit() skips the optimizer (ADR-0016).
+    return true
+  }
+
+  static _fitInit (data) {
+    // Exact MLE: mu = sample mean, lambda = n / Σ(1/xᵢ − 1/x̄). By the AM-HM inequality the sum
+    // is ≥ 0, vanishing only for constant data — fall back to the moment estimate there.
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const invDev = data.reduce((s, x) => s + (1 / x - 1 / mean), 0)
+    if (invDev > 0) {
+      return [mean, n / invDev]
+    }
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || mean * mean
+    return [mean, mean * mean * mean / variance]
   }
 }

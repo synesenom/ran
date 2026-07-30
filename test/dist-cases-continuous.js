@@ -5016,9 +5016,16 @@ export default [{
   }, {
     name: 'small mu, large lambda',
     params: () => [0.5, 4],
-    // mpmath: ig_pdf(mu,lam,1/x)/x^2, 1-IG_CDF(mu,lam,1/x)  (mu=0.5, lambda=4)
+    // mpmath mp.dps=50: ig_pdf(mu,lam,1/x)/x^2, 1-IG_CDF(mu,lam,1/x)  (mu=0.5, lambda=4)
+    // cdf at x=0.1/0.2 (y=1/x=10/5): IG_CDF uses the textbook Phi(a)+exp(2*lam/mu)*Phi(-b)
+    // form (scripts/precision-refs-continuous.py's ig_cdf, independent of ranjs's
+    // erfcx-based production formula), then 1-IG_CDF(y) is subtracted at mp.dps=50 -- no
+    // cancellation occurs there since arbitrary precision has no ULP floor: mpmath ->
+    // 1.3672842541209368e-34 (x=0.1), 7.373070012124583e-17 (x=0.2). x=0.1 covers deeper
+    // into the same upper-tail-cancellation regime than x=0.2 alone would.
     refVals: [
-      { x: 0.2, pdf: 1.5145508183913452e-14, cdf: 1.1102230246251565e-16 },
+      { x: 0.1, pdf: 1.1114206664573402e-31, cdf: 1.3672842541209369e-34 },
+      { x: 0.2, pdf: 1.5145508183913452e-14, cdf: 7.373070012124583e-17 },
       { x: 0.5, pdf: 0.00013925305194674786, cdf: 4.214229672230305e-06 },
       { x: 1.0, pdf: 0.1079819330263761, cdf: 0.013983205096206631 },
       { x: 2.0, pdf: 0.5641895835477563, cdf: 0.4315002711874693 },

@@ -47,7 +47,10 @@ export default class ReciprocalInverseGaussian extends InverseGaussian {
   }
 
   _cdf (x) {
-    return 1 - super._cdf(1 / x)
+    // 1 - super._cdf(1/x) catastrophically cancels for small x: 1/x lands in IG's upper
+    // tail, where CDF rounds to within 1 ULP of 1, and subtracting from 1 in float64
+    // quantizes the result to multiples of 2^-53 (see inverse-gaussian.js's _survival).
+    return super._survival(1 / x)
   }
 
   /**
