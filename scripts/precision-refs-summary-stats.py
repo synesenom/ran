@@ -466,14 +466,20 @@ PROB_PAIR_PROFILES = [
 # `mode`'s continuous (Bickel-Fruehwirth half-sample) branch only fires when at least one
 # array element is non-integer -- REAL_PROFILES['small_ties'] uses whole-number floats
 # (Number.isInteger(3.0) is true in JS) and would silently dispatch to the discrete branch
-# instead, so `mode` gets its own always-continuous small-n profile.
-MODE_SMALL_PROFILE = {'key': 'mode_small', 'n': 6, 'note': 'small n=6, continuous values',
-                       'gen': lambda seed: _gen_real(seed, 6, 0, 5)}
+# instead, so `mode`'s grid substitutes an always-continuous small-n profile in its place,
+# by name rather than by a REAL_PROFILES[i] position (which would silently desync if
+# REAL_PROFILES is ever reordered).
+_MODE_SMALL_SUBSTITUTE = {'key': 'mode_small', 'n': 6, 'note': 'small n=6, continuous values',
+                          'gen': lambda seed: _gen_real(seed, 6, 0, 5)}
+MODE_PROFILES = [_MODE_SMALL_SUBSTITUTE if p['key'] == 'small_ties' else p for p in REAL_PROFILES]
 
 PROB_PROFILES = [
-    {'key': 'entropy_small', 'n': 5, 'note': 'small n=5 probability array'},
-    {'key': 'entropy_medium', 'n': 8, 'note': 'medium n=8 probability array'},
-    {'key': 'entropy_large', 'n': 12, 'note': 'larger n=12 probability array'},
+    {'key': 'entropy_small', 'n': 5, 'note': 'small n=5 probability array',
+     'gen': lambda seed: _gen_prob(seed, 5)},
+    {'key': 'entropy_medium', 'n': 8, 'note': 'medium n=8 probability array',
+     'gen': lambda seed: _gen_prob(seed, 8)},
+    {'key': 'entropy_large', 'n': 12, 'note': 'larger n=12 probability array',
+     'gen': lambda seed: _gen_prob(seed, 12)},
 ]
 
 
@@ -523,15 +529,7 @@ def _contingency_tuples(seed_base):
     return [_gen_contingency(seed_base + i) for i in range(5)]
 
 
-def grid():
-    """Threshold-focused (fn, args, note, tol, at) tuples. See the module docstring for the
-    "parameter set = profile, point = replicate draw (or argument variation)" rationale."""
-    points = []
-
-    def add(fn, args, note, tol=DEFAULT_TOL, at=None):
-        points.append((fn, list(args), note, tol, at))
-
-    # ─── location ───
+def _location_grid(add):
     for i, profile in enumerate(REAL_PROFILES):
         for arr in _real_arrays(profile, 1000 + 100 * i):
             add('mean', [arr], f'mean: {profile["note"]}')
@@ -540,7 +538,7 @@ def grid():
             add('midrange', [arr], f'midrange: {profile["note"]}')
             add('trimean', [arr], f'trimean: {profile["note"]}')
 
-    for i, profile in enumerate([MODE_SMALL_PROFILE, REAL_PROFILES[1], REAL_PROFILES[2]]):
+    for i, profile in enumerate(MODE_PROFILES):
         for arr in _real_arrays(profile, 1500 + 100 * i):
             add('mode', [arr], f'mode: {profile["note"]} (continuous half-sample mode)', tol=1e-14)
 
@@ -548,7 +546,10 @@ def grid():
         for arr in _pos_arrays(profile, 4000 + 100 * i):
             add('harmonicMean', [arr], f'harmonicMean: {profile["note"]}')
 
-    # ─── shape: parameterized (fixed array, vary the extra argument) ───
+
+def _shape_param_grid(add):
+    # Functions with an extra scalar argument: parameter set = one fixed array,
+    # points = 5 distinct argument values evaluated against that same array.
     for i, profile in enumerate(REAL_PROFILES):
         arr = profile['gen'](5000 + 100 * i)
         m = mean_ref(arr)
@@ -559,7 +560,10 @@ def grid():
         for at in range(5):
             add('rank', [arr], f'rank: {profile["note"]}, index={at}', tol=1e-14, at=at)
 
-    # ─── shape / dispersion: pure array-in, scalar-out ───
+
+def _scalar_stats_grid(add):
+    # Pure array-in, scalar-out shape/dispersion functions: parameter set = profile,
+    # points = 5 independently-drawn arrays from that profile.
     for i, profile in enumerate(REAL_PROFILES):
         for arr in _real_arrays(profile, 6000 + 100 * i):
             add('skewness', [arr], f'skewness: {profile["note"]}')
@@ -578,7 +582,8 @@ def grid():
             add('variance', [arr], f'variance: {profile["note"]}')
             add('dVar', [arr], f'dVar: {profile["note"]}', tol=1e-10)
 
-    # ─── dependence: two-array general pairs ───
+
+def _dependence_pair_grid(add):
     for i, profile in enumerate(PAIR_PROFILES):
         for x, y in _pair_arrays(profile, 7000 + 100 * i):
             add('covariance', [x, y], f'covariance: {profile["note"]}')
@@ -589,27 +594,51 @@ def grid():
             add('dCov', [x, y], f'dCov: {profile["note"]}', tol=1e-10)
             add('dCor', [x, y], f'dCor: {profile["note"]}', tol=1e-10)
 
-    # ─── dependence: domain-constrained pairs ───
+
+def _point_biserial_grid(add):
     for i, profile in enumerate(BINARY_PROFILES):
         for x, y in _binary_pairs(profile, 8000 + 100 * i):
             add('pointBiserial', [x, y], f'pointBiserial: {profile["note"]}')
 
+
+def _kullback_leibler_grid(add):
     for i, profile in enumerate(PROB_PAIR_PROFILES):
         for p, q in _prob_pairs(profile, 9000 + 100 * i):
             add('kullbackLeibler', [p, q], f'kullbackLeibler: {profile["note"]}')
 
+
+def _entropy_grid(add):
     for i, profile in enumerate(PROB_PROFILES):
-        probs = profile['gen'](10000 + 100 * i) if 'gen' in profile else _gen_prob(10000 + 100 * i, profile['n'])
+        probs = profile['gen'](10000 + 100 * i)
         for base in [None, 2, 10, math.e, 5]:
             add('entropy', [probs] if base is None else [probs, base],
                 f'entropy: {profile["note"]}, base={"natural" if base is None else base}')
 
-    # ─── dependence: contingency-table scalars ───
+
+def _contingency_grid(add):
     for i in range(3):
         for p00, p01, p10, p11 in _contingency_tuples(11000 + 100 * i):
             add('oddsRatio', [p00, p01, p10, p11], f'oddsRatio: contingency set {i}')
             add('yuleQ', [p00, p01, p10, p11], f'yuleQ: contingency set {i}')
             add('yuleY', [p00, p01, p10, p11], f'yuleY: contingency set {i}')
+
+
+def grid():
+    """Threshold-focused (fn, args, note, tol, at) tuples. See the module docstring for the
+    "parameter set = profile, point = replicate draw (or argument variation)" rationale."""
+    points = []
+
+    def add(fn, args, note, tol=DEFAULT_TOL, at=None):
+        points.append((fn, list(args), note, tol, at))
+
+    _location_grid(add)
+    _shape_param_grid(add)
+    _scalar_stats_grid(add)
+    _dependence_pair_grid(add)
+    _point_biserial_grid(add)
+    _kullback_leibler_grid(add)
+    _entropy_grid(add)
+    _contingency_grid(add)
 
     return points
 
