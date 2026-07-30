@@ -55,7 +55,18 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUTPUT_PATH = os.path.join(REPO_ROOT, 'test', 'precision-summary-stats.js')
 EVAL_SCRIPT = os.path.join(REPO_ROOT, 'scripts', 'eval-summary-stats.js')
 
-DEFAULT_TOL = 1e-12
+DEFAULT_TOL = 1e-14
+
+# Named-mechanism tolerance (mirrors precision-refs-continuous.py's/-special.py's convention):
+# looser than DEFAULT_TOL only where --check has empirically confirmed the gap and the
+# mechanism is understood -- never a blind loosening. cv/vmr/rmd/gini all divide by the
+# sample mean; when |mean| is small relative to the array's spread (e.g. a near-zero-mean,
+# wide-range sample), the mean's own ~1e-16 rounding error is amplified by the division,
+# pushing relative error to ~2.7e-14 -- just past the 1e-14 default. skewness's cubed central
+# moment sum hits the same ~2.7e-14 ceiling from cancellation between same-magnitude terms of
+# opposite sign. Every other function here (including the O(n^2) distance-covariance and
+# tau-b/Somers'-D combinatorial ones) passes at the strict 1e-14 default with no override.
+_TOL_DIVISION_OR_CANCELLATION = 1e-13
 
 
 # ─── independent mpmath reference formulas ───
@@ -542,7 +553,7 @@ def _location_grid(add):
 
     for i, profile in enumerate(MODE_PROFILES):
         for arr in _real_arrays(profile, 1500 + 100 * i):
-            add('mode', [arr], f'mode: {profile["note"]} (continuous half-sample mode)', tol=1e-14)
+            add('mode', [arr], f'mode: {profile["note"]} (continuous half-sample mode)')
 
     for i, profile in enumerate(POS_PROFILES):
         for arr in _pos_arrays(profile, 4000 + 100 * i):
@@ -560,7 +571,7 @@ def _shape_param_grid(add):
         for k, c in [(1, 0), (2, 0), (3, 0), (4, 0), (2, float(m))]:
             add('moment', [arr, k, c], f'moment: {profile["note"]}, k={k} c={"mean" if c else 0}')
         for at in range(5):
-            add('rank', [arr], f'rank: {profile["note"]}, index={at}', tol=1e-14, at=at)
+            add('rank', [arr], f'rank: {profile["note"]}, index={at}', at=at)
 
 
 def _scalar_stats_grid(add):
@@ -568,21 +579,21 @@ def _scalar_stats_grid(add):
     # points = 5 independently-drawn arrays from that profile.
     for i, profile in enumerate(REAL_PROFILES):
         for arr in _real_arrays(profile, 6000 + 100 * i):
-            add('skewness', [arr], f'skewness: {profile["note"]}')
+            add('skewness', [arr], f'skewness: {profile["note"]}', tol=_TOL_DIVISION_OR_CANCELLATION)
             add('kurtosis', [arr], f'kurtosis: {profile["note"]}')
             add('yule', [arr], f'yule: {profile["note"]}')
-            add('cv', [arr], f'cv: {profile["note"]}')
-            add('vmr', [arr], f'vmr: {profile["note"]}')
+            add('cv', [arr], f'cv: {profile["note"]}', tol=_TOL_DIVISION_OR_CANCELLATION)
+            add('vmr', [arr], f'vmr: {profile["note"]}', tol=_TOL_DIVISION_OR_CANCELLATION)
             add('md', [arr], f'md: {profile["note"]}')
-            add('rmd', [arr], f'rmd: {profile["note"]}')
-            add('gini', [arr], f'gini: {profile["note"]}')
+            add('rmd', [arr], f'rmd: {profile["note"]}', tol=_TOL_DIVISION_OR_CANCELLATION)
+            add('gini', [arr], f'gini: {profile["note"]}', tol=_TOL_DIVISION_OR_CANCELLATION)
             add('range', [arr], f'range: {profile["note"]}')
             add('iqr', [arr], f'iqr: {profile["note"]}')
             add('midhinge', [arr], f'midhinge: {profile["note"]}')
             add('qcd', [arr], f'qcd: {profile["note"]}')
             add('stdev', [arr], f'stdev: {profile["note"]}')
             add('variance', [arr], f'variance: {profile["note"]}')
-            add('dVar', [arr], f'dVar: {profile["note"]}', tol=1e-10)
+            add('dVar', [arr], f'dVar: {profile["note"]}')
 
 
 def _dependence_pair_grid(add):
@@ -590,11 +601,11 @@ def _dependence_pair_grid(add):
         for x, y in _pair_arrays(profile, 7000 + 100 * i):
             add('covariance', [x, y], f'covariance: {profile["note"]}')
             add('pearson', [x, y], f'pearson: {profile["note"]}')
-            add('spearman', [x, y], f'spearman: {profile["note"]}', tol=1e-13)
-            add('kendall', [x, y], f'kendall: {profile["note"]}', tol=1e-13)
-            add('somersD', [x, y], f'somersD: {profile["note"]}', tol=1e-13)
-            add('dCov', [x, y], f'dCov: {profile["note"]}', tol=1e-10)
-            add('dCor', [x, y], f'dCor: {profile["note"]}', tol=1e-10)
+            add('spearman', [x, y], f'spearman: {profile["note"]}')
+            add('kendall', [x, y], f'kendall: {profile["note"]}')
+            add('somersD', [x, y], f'somersD: {profile["note"]}')
+            add('dCov', [x, y], f'dCov: {profile["note"]}')
+            add('dCor', [x, y], f'dCor: {profile["note"]}')
 
 
 def _point_biserial_grid(add):
