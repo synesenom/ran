@@ -36,6 +36,14 @@ function assertClassName (instance, expected, label) {
   assertEqual(instance.constructor.name, expected, `${label} constructor.name`)
 }
 
+function assertArrayClose (actual, expected, label) {
+  assertEqual(actual.length, expected.length, `${label} length`)
+  actual.forEach((row, i) => {
+    assertEqual(row.length, expected[i].length, `${label}[${i}] length`)
+    row.forEach((value, j) => assertClose(value, expected[i][j], `${label}[${i}][${j}]`))
+  })
+}
+
 const CHECKS = [
   {
     category: 'distribution',
@@ -79,10 +87,20 @@ const CHECKS = [
     run: RWM => {
       const rwm = new RWM({ logDensity: x => -0.5 * x[0] * x[0] })
       assertClassName(rwm, 'RWM', 'RWM')
-      // Skips warmUp() (expensive) — a smoke test only needs to confirm sample() shape, not mixing
+      // Skips warmUp() (expensive) — a smoke test only needs to confirm sample() shape and values, not mixing
+      rwm.seed(42)
       const samples = rwm.sample(null, 5)
       assertEqual(samples.length, 5, 'RWM.sample() length')
       assertEqual(samples[0].length, 1, 'RWM.sample()[0] dimensionality')
+      // Golden value captured from the built dist/mc/rwm.esm.js seeded at 42 (node -e importing the
+      // built bundle) — a build-output regression pin, not a distributional correctness claim.
+      assertArrayClose(samples, [
+        [1.412437156246122],
+        [1.4224037135447933],
+        [1.4224037135447933],
+        [1.1084990347553145],
+        [1.1084990347553145]
+      ], 'RWM.sample()')
     }
   }
 ]
