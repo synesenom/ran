@@ -40,7 +40,9 @@ describe('dependence', () => {
         38.8844731226, 20.1815896825, 14.7361716832, 3.30405464947, 46.9223081836, -4.31084985771, 29.175292425,
         6.50624080152, 45.6088094234
       ]
-      const covariance = 230.118283877
+      // mpmath mp.dps=50: covariance(x, y) via scripts/precision-refs-summary-stats.py's
+      // covariance_ref → 230.1182838768254
+      const covariance = 230.1182838768254
       assert(equal(dependence.covariance(x, y), covariance))
     })
   })
@@ -68,7 +70,9 @@ describe('dependence', () => {
         43, 21, 2, 45, 28, 39, 13, 19, 30, 28, 24, 32, 15, 29, 32, 32, 52, 18, 31, 18, -17, 16, 14, 37, 38, 6, 2, 24,
         37, 18, 4, 23, 20, 39, 32, 46, -4, 40, 28, 0, 30, 20, 4
       ]
-      const dCov = 9.212925676461312
+      // mpmath mp.dps=50: dCov(x, y) via scripts/precision-refs-summary-stats.py's
+      // dcov_ref → 9.212925676461305
+      const dCov = 9.212925676461305
       assert(equal(dependence.dCov(x, y), dCov))
     })
   })
@@ -100,7 +104,9 @@ describe('dependence', () => {
         38, 5, 40, 26, 68, 71, 32, 57, 34, 24, 5, 38, 33, 33, 12, 29, 24, 47, 12, 0, 56, 10, 6, 23, 35, 43, 28, 27, 16,
         -6, 41, 26, 9, -8, 11, 17, 61, 40, 24, 52, 38, 18, 33, 36
       ]
-      const dCor = 0.8679753723517001
+      // mpmath mp.dps=50: dCor(x, y) via scripts/precision-refs-summary-stats.py's
+      // dcor_ref → 0.8679753723517005
+      const dCor = 0.8679753723517005
       assert(equal(dependence.dCor(x, y), dCor))
     })
   })
@@ -129,7 +135,9 @@ describe('dependence', () => {
         31, 20, 17, 10, 34, 26, 28, 44, 20, 46, 32, 22, -2, 4, 14, 50, 29, 16, 32, 41, 43, 47, 26, 33, 5, 33, -10, 14,
         35, 21, 21, 30, 12, 43, 16, 24, 26, 5, 50, 16, 34, 8
       ]
-      const kendall = 0.59839502219923779
+      // mpmath mp.dps=50: kendall(x, y) via scripts/precision-refs-summary-stats.py's
+      // kendall_ref (tau-b, tie-corrected) → 0.5983950221992378
+      const kendall = 0.5983950221992378
       assert(equal(dependence.kendall(x, y), kendall))
     })
   })
@@ -165,8 +173,11 @@ describe('dependence', () => {
         0.0333333333333, 0.0333333333333, 0.0333333333333, 0.0333333333333, 0.0333333333333, 0.0333333333333,
         0.0333333333333, 0.0333333333333, 0.0333333333333, 0.0333333333333, 0.0333333333333, 0.0333333333333
       ]
-      const dPQ = 1.98225894872
-      const dQP = 45.1010744902
+      // mpmath mp.dps=50: kullbackLeibler(p, q) / (q, p) via
+      // scripts/precision-refs-summary-stats.py's kullback_leibler_ref →
+      // 1.9822589646785145 / 45.101074484829766
+      const dPQ = 1.9822589646785145
+      const dQP = 45.101074484829766
       assert(equal(dependence.kullbackLeibler(p, q), dPQ, 8))
       assert(equal(dependence.kullbackLeibler(q, p), dQP, 8))
     })
@@ -259,7 +270,9 @@ describe('dependence', () => {
         1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0,
         0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0
       ]
-      const pointBiserial = 0.11845990445247673
+      // mpmath mp.dps=50: pointBiserial(x, y) via scripts/precision-refs-summary-stats.py's
+      // point_biserial_ref → 0.11845990445247669
+      const pointBiserial = 0.11845990445247669
       assert(equal(dependence.pointBiserial(x, y), pointBiserial))
     })
   })
@@ -287,7 +300,9 @@ describe('dependence', () => {
         30, 63, 18, 64, 16, 46, 34, 34, 37, 49, 25, 17, 40, 25, 12, -11, 37, 46, 37, 28, 12, 18, 25, 7, 16, 20, 37, 25,
         5, 34, 12, 19, 22, 10, 37, 44, 6, 51, 22, 29, 46
       ]
-      const somersD = 0.626187525816
+      // mpmath mp.dps=50: somersD(x, y) via scripts/precision-refs-summary-stats.py's
+      // somers_d_ref → 0.6261875258157786
+      const somersD = 0.6261875258157786
       assert(equal(dependence.somersD(x, y), somersD))
     })
   })
@@ -325,7 +340,9 @@ describe('dependence', () => {
         10.6523010328, 48.4384925893, 12.0968623412, 10.6206898351, 49.7619994944, 25.6531836083, 37.115764526,
         12.7279797363, -7.49966399967, 21.8226617586
       ]
-      const spearman = 0.83504820055660411
+      // mpmath mp.dps=50: spearman(x, y) via scripts/precision-refs-summary-stats.py's
+      // spearman_ref → 0.8350482005566042
+      const spearman = 0.8350482005566042
       assert(equal(dependence.spearman(x, y), spearman))
     })
   })
