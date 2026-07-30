@@ -123,6 +123,11 @@ jobs:
         if: steps.node-cache.outputs.cache-hit != 'true'
       - run: npm run build
       - run: test -f dist/ranjs.esm.js && test -f dist/ranjs.cjs.js && test -f dist/ranjs.min.js && test -f dist/index.d.ts
+      - name: Check subpath build runtime behavior
+        # A representative distribution/process/MCMC-sampler subpath build is actually imported
+        # and run here — npm test never touches dist/, so a terser option change could otherwise
+        # silently break or rename a minified subpath export without any test noticing (#1227).
+        run: node scripts/check-subpath-runtime.js
       - name: Check bundle size budget
         # Budgets and rationale documented in README.md's "Bundle size budget" section.
         run: |
