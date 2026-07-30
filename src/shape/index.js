@@ -5,6 +5,8 @@
  * @memberof ran
  */
 export { default as kurtosis } from './kurtosis'
+export { default as max } from './max'
+export { default as min } from './min'
 export { default as moment } from './moment'
 export { default as quantile } from './quantile'
 export { default as rank } from './rank'

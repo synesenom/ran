@@ -23,6 +23,26 @@ describe('shape', () => {
     })
   })
 
+  describe('.max()', () => {
+    it('should return NaN for an empty sample', () => {
+      assert(Number.isNaN(shape.max([])))
+    })
+
+    it('should return the maximum of the values', () => {
+      assert(equal(shape.max([3, 1, 4, 1, 5, 9]), 9))
+    })
+  })
+
+  describe('.min()', () => {
+    it('should return NaN for an empty sample', () => {
+      assert(Number.isNaN(shape.min([])))
+    })
+
+    it('should return the minimum of the values', () => {
+      assert(equal(shape.min([3, 1, 4, 1, 5, 9]), 1))
+    })
+  })
+
   describe('.moment()', () => {
     it('should return NaN for an empty sample', () => {
       assert(Number.isNaN(shape.moment([], 2)))
