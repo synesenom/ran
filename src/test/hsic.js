@@ -128,14 +128,20 @@ export default function hsic (dataSets, alpha = 0.05) {
   const muY = L.apply(ones).dot(ones) / (n * (n - 1))
   const mean = (1 + muX * muY - muX - muY) / n
 
-  // Gamma distribution parameters.
+  // Gamma distribution shape (a) and scale (b) parameters, per Gretton et al.'s
+  // hsicTestGamma.m reference (scale convention: Gamma mean = a * b). ran.dist.Gamma is
+  // rate-parametrized (mean = a / rate), so the scale must be inverted to 1 / b when
+  // constructing it -- passing b directly as the rate silently fit a far more concentrated
+  // distribution and (combined with the tail direction below) suppressed Type-I error to
+  // near zero instead of the nominal alpha. See issue #1229.
   const a = mean * mean / variance
   const b = variance * n / mean
 
-  // Test statistics and threshold.
+  // Large stat indicates dependence, so the null is rejected in the upper tail:
+  // compare against the (1 - alpha) quantile, not the alpha quantile.
   const stat = neumaier(Kc.t().hadamard(Lc).rowSum()) / n
   return {
     stat,
-    passed: stat < new Gamma(a, b).q(alpha)
+    passed: stat < new Gamma(a, 1 / b).q(1 - alpha)
   }
 }
