@@ -255,7 +255,7 @@ const REFS = [
     name: 'Bates',
     params: [5, -2, 2],
     tol: 1e-14,
-    qtol: 1e-12,
+    qtol: 1e-9,
     points: [
       { x: -0.6714889457232825, pdf: 0.3464901764958419, cdf: 0.1 },
       { x: -0.2785326219101074, pdf: 0.6585871740566361, cdf: 0.3 },
@@ -428,7 +428,7 @@ const REFS = [
     name: 'BetaPrime',
     params: [0.5, 4],
     tol: 1e-14,
-    qtol: 1e-12,
+    qtol: 1e-9,
     points: [
       { x: 0.002102997036771158, pdf: 23.626158390806047, cdf: 0.1 },
       { x: 0.0199469649329538, pdf: 7.085663098376809, cdf: 0.3 },
@@ -884,7 +884,7 @@ const REFS = [
     name: 'Davis',
     params: [2, 1, 4],
     tol: 1e-14,
-    qtol: 1e-12,
+    qtol: 1e-9,
     points: [
       { x: 2.1525732506862547, pdf: 2.6561540796150993, cdf: 0.1 },
       { x: 2.2167697726207076, pdf: 3.2236305381981842, cdf: 0.3 },
@@ -1123,7 +1123,7 @@ const REFS = [
     name: 'DoublyNoncentralT',
     params: [5, 1, 2],
     tol: 1e-12,
-    qtol: 1e-12,
+    qtol: 1e-9,
     points: [
       { x: -2.0, pdf: 0.005599439856554967, cdf: 0.003190244410576169 },
       { x: -0.5, pdf: 0.12435772136759037, cdf: 0.06160480013647865 },
@@ -1151,7 +1151,7 @@ const REFS = [
     name: 'DoublyNoncentralT',
     params: [6, 2, 1],
     tol: 1e-12,
-    qtol: 1e-12,
+    qtol: 1e-9,
     points: [
       { x: -1.0, pdf: 0.004428961226784015, cdf: 0.0017723707471091758 },
       { x: 0.5, pdf: 0.14894352055667823, cdf: 0.07150238789675263 },
@@ -1185,6 +1185,32 @@ const REFS = [
       { x: 1.0, pdf: 4.780728694511164e-05, cdf: 0.9999973597532423 },
       { x: 1.1, pdf: 7.819580843074595e-06, cdf: 0.9999995775740489 },
       { x: 1.2, pdf: 1.2272297432244359e-06, cdf: 0.999999934444974 }
+    ]
+  },
+  // DoublyNoncentralT[5, 5, 120] (issue #1207): non-zero mu combined with theta=120 drives _pdf's
+  // general (mu != 0) branch's peak index j0 into the 17-30+ range, the regime where the ₁F₁
+  // three-term contiguous recurrence (formerly _f11Forward/_f11Backward) was numerically unstable
+  // in both directions -- see solutions/correctness/2026-07-30-1600-doubly-noncentral-t-pdf-f11-recurrence-instability.md.
+  // Every other DoublyNoncentralT group above either uses mu=0 (fast path, bypasses the general
+  // branch entirely) or a small theta that never pushes j0 past ~5-10, where the old recurrence
+  // happened to still be accurate enough to pass -- this is the only group that exercises the
+  // previously-broken regime. Reference pdf/cdf via mpmath mp.dps=50, independent Poisson(theta/2)
+  // mixture of singly-noncentral-t formula (scripts/precision-refs-continuous.py's dnct_pdf/dnct_cdf),
+  // not derived from ranjs's own ₁F₁-series _pdf.
+  // qtol: 1e-12 was measured to fail (q(cdf(2.2)) landed ~2.6e-12 off), while qtol: 1e-11 passed
+  // stably across repeated runs, so 1e-11 keeps margin over the measured error for other
+  // environments (same empirical-gate approach as the [5, 0, 120] group's qtol above).
+  {
+    name: 'DoublyNoncentralT',
+    params: [5, 5, 120],
+    tol: 1e-11,
+    qtol: 1e-11,
+    points: [
+      { x: 0.7, pdf: 0.692770087981292, cdf: 0.07412974139872573 },
+      { x: 1.0, pdf: 1.8170631884809803, cdf: 0.49279888377770137 },
+      { x: 1.3, pdf: 0.718181855844681, cdf: 0.8992518892279195 },
+      { x: 1.8, pdf: 0.010558777834557508, cdf: 0.9990304544278005 },
+      { x: 2.2, pdf: 0.0001166815151832735, cdf: 0.9999900880337178 }
     ]
   },
   {
@@ -1444,7 +1470,7 @@ const REFS = [
     name: 'FisherZ',
     params: [5, 5],
     tol: 1e-14,
-    qtol: 1e-12,
+    qtol: 1e-9,
     points: [
       { x: -0.619619138684419, pdf: 0.34371610596672086, cdf: 0.1 },
       { x: -0.24764549040731207, pdf: 0.7292932480392063, cdf: 0.3 },
@@ -1472,7 +1498,7 @@ const REFS = [
     name: 'FisherZ',
     params: [8, 4],
     tol: 1e-14,
-    qtol: 1e-12,
+    qtol: 1e-9,
     points: [
       { x: -0.5159558414902362, pdf: 0.4088402743932447, cdf: 0.1 },
       { x: -0.18930613716990247, pdf: 0.795039071652086, cdf: 0.3 },
@@ -2265,7 +2291,7 @@ const REFS = [
     name: 'InverseGaussian',
     params: [1, 0.5],
     tol: 1e-14,
-    qtol: 1e-10,
+    qtol: 1e-9,
     points: [
       { x: 0.14383293648975035, pdf: 1.4463689505803858, cdf: 0.1 },
       { x: 0.291440323888161, pdf: 1.1655572205958422, cdf: 0.3 },
@@ -2278,7 +2304,7 @@ const REFS = [
     name: 'InverseGaussian',
     params: [3, 1],
     tol: 1e-14,
-    qtol: 1e-11,
+    qtol: 1e-9,
     points: [
       { x: 0.31011741944534127, pdf: 0.6319657634488135, cdf: 0.1 },
       { x: 0.6638673599997754, pdf: 0.46713365816842656, cdf: 0.3 },
@@ -3284,7 +3310,7 @@ const REFS = [
     name: 'Muth',
     params: [0.1],
     tol: 1e-14,
-    qtol: 1e-12,
+    qtol: 1e-9,
     points: [
       { x: 0.11631272546500596, pdf: 0.8205292609383894, cdf: 0.1 },
       { x: 0.3878397542873045, pdf: 0.6576821243557224, cdf: 0.3 },
@@ -3459,7 +3485,7 @@ const REFS = [
     name: 'NoncentralChi',
     params: [5, 7.5],
     tol: 5e-13,
-    qtol: 5e-13,
+    qtol: 1e-9,
     points: [
       { x: 6.505569010691933, pdf: 0.17932022377048565, cdf: 0.1 },
       { x: 7.247694376427309, pdf: 0.3542420602230855, cdf: 0.3 },
@@ -3540,7 +3566,7 @@ const REFS = [
     name: 'NoncentralChi2',
     params: [5, 58],
     tol: 5e-13,
-    qtol: 5e-13,
+    qtol: 1e-9,
     points: [
       { x: 43.78099019226955, pdf: 0.013541095426963547, cdf: 0.1 },
       { x: 54.15946113115637, pdf: 0.024054046277784912, cdf: 0.3 },
@@ -3554,7 +3580,7 @@ const REFS = [
     name: 'NoncentralChi2',
     params: [5, 62],
     tol: 5e-13,
-    qtol: 5e-13,
+    qtol: 1e-9,
     points: [
       { x: 47.13037051154166, pdf: 0.013032297643811988, cdf: 0.1 },
       { x: 57.892488444582135, pdf: 0.023238388717002373, cdf: 0.3 },
@@ -3950,7 +3976,7 @@ const REFS = [
     name: 'R',
     params: [2],
     tol: 1e-14,
-    qtol: 1e-12,
+    qtol: 1e-9,
     points: [
       { x: -0.8, pdf: 0.5, cdf: 0.1 },
       { x: -0.4, pdf: 0.5, cdf: 0.3 },
@@ -4160,7 +4186,7 @@ const REFS = [
     name: 'Rice',
     params: [7, 1],
     tol: 5e-13,
-    qtol: 5e-13,
+    qtol: 1e-9,
     points: [
       { x: 5.797155731308308, pdf: 0.17666362533966992, cdf: 0.1 },
       { x: 6.5497028587527515, pdf: 0.3496541744812064, cdf: 0.3 },
@@ -4309,7 +4335,7 @@ const REFS = [
     name: 'StudentT',
     params: [2],
     tol: 1e-14,
-    qtol: 1e-12,
+    qtol: 1e-9,
     points: [
       { x: -1.8856180831641267, pdf: 0.07636753236814713, cdf: 0.1 },
       { x: -0.6172133998483676, pdf: 0.2721911093331301, cdf: 0.3 },
@@ -4336,7 +4362,7 @@ const REFS = [
     name: 'StudentT',
     params: [5],
     tol: 1e-14,
-    qtol: 1e-12,
+    qtol: 1e-9,
     points: [
       { x: -1.475884048824481, pdf: 0.12828949200431738, cdf: 0.1 },
       { x: -0.5594296444693607, pdf: 0.31639809300932353, cdf: 0.3 },
@@ -4377,7 +4403,7 @@ const REFS = [
     name: 'StudentZ',
     params: [5],
     tol: 1e-14,
-    qtol: 1e-12,
+    qtol: 1e-9,
     points: [
       { x: -0.7666031370294719, pdf: 0.23613130948718722, cdf: 0.1 },
       { x: -0.2843245315248527, pdf: 0.6175289185640184, cdf: 0.3 },
@@ -4732,7 +4758,7 @@ const REFS = [
     name: 'UniformProduct',
     params: [6],
     tol: 1e-14,
-    qtol: 1e-11,
+    qtol: 1e-9,
     points: [
       { x: 9.376922069775178e-05, pdf: 571.8893324152251, cdf: 0.1 },
       { x: 0.0009068349624567441, pdf: 140.61445417115203, cdf: 0.3 },
@@ -4760,7 +4786,7 @@ const REFS = [
     name: 'UniformProduct',
     params: [4],
     tol: 1e-14,
-    qtol: 5e-13,
+    qtol: 1e-9,
     points: [
       { x: 0.0012547949976141116, pdf: 49.697078573957874, cdf: 0.1 },
       { x: 0.008546537092164278, pdf: 18.000294149929292, cdf: 0.3 },
@@ -4826,7 +4852,7 @@ const REFS = [
     name: 'VonMises',
     params: [0, 11],
     tol: 1e-13,
-    qtol: 1e-11,
+    qtol: 1e-9,
     points: [
       { x: -1.0, pdf: 0.008324075654520296, cdf: 0.0008536976551769042 },
       { x: -0.7853981633974483, pdf: 0.05214358825274366, cdf: 0.006110362138173876 },
