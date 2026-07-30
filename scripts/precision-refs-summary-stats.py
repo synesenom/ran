@@ -417,7 +417,9 @@ def _gen_binary(seed, n, n_ones):
 
 def _gen_prob(seed, n):
     r = random.Random(seed)
-    return [r.uniform(0.05, 1.0) for _ in range(n)]
+    w = [r.uniform(0.05, 1.0) for _ in range(n)]
+    s = sum(w)
+    return [x / s for x in w]
 
 
 def _gen_contingency(seed):
