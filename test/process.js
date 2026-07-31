@@ -1866,6 +1866,44 @@ describe('process.Poisson', () => {
       assert.throws(() => pp.marginal(-1), /t must be > 0/)
     })
   })
+
+  describe('.fit()', () => {
+    it('should recover lambda from a long simulated path across seeds', () => {
+      const lambda = 3
+      const dt = 0.5
+      const n = 20000
+      // fit() is the exact MLE: the total count over n*dt observed time is itself exactly
+      // Poisson(n*dt*lambda) (sum of n i.i.d. Poisson(lambda*dt) increments), so
+      // Var(lambdaHat) = Var(totalCount)/(n*dt)^2 = lambda/(n*dt).
+      const tol = K_SIGMA * Math.sqrt(lambda / (n * dt))
+      for (const seed of MOMENT_SEEDS) {
+        const pp = new ProcessPoisson(lambda, dt)
+        pp.seed(seed)
+        const fitted = ProcessPoisson.fit(pp.path(n), dt)
+        assert.instanceOf(fitted, ProcessPoisson)
+        assert.closeTo(fitted.p.lambda, lambda, tol, `seed ${seed}: lambda`)
+      }
+    })
+
+    it('should default dt to 1', () => {
+      const pp = new ProcessPoisson(2, 1)
+      pp.seed(1)
+      const fitted = ProcessPoisson.fit(pp.path(20000))
+      assert.strictEqual(fitted.p.dt, 1)
+    })
+
+    it('should throw when path has fewer than 2 states', () => {
+      assert.throws(() => ProcessPoisson.fit([0], 1), /at least 2 states/)
+    })
+
+    it('should throw when the path decreases', () => {
+      assert.throws(() => ProcessPoisson.fit([0, 1, 2, 1], 1), /non-decreasing/)
+    })
+
+    it('should throw when no arrivals are observed', () => {
+      assert.throws(() => ProcessPoisson.fit([0, 0, 0], 1), /lambda is not positive/)
+    })
+  })
 })
 
 describe('process.PoissonProcess (deprecated alias)', () => {
@@ -2141,6 +2179,60 @@ describe('process.CompoundPoisson', () => {
       }
       assert.closeTo(marginal.pdf(mu), pdfRef, 1e-8)
       assert.closeTo(marginal.cdf(mu), cdfRef, 1e-8)
+    })
+  })
+
+  describe('.fit()', () => {
+    it('should recover lambda and the jump distribution from a long simulated path across seeds', () => {
+      const muJ = 2
+      const sigmaJ = 0.5
+      const lambda = 0.5
+      const dt = 0.02
+      const n = 200000
+      // fit() treats every non-zero increment as exactly one jump, since individual arrival
+      // counts within a dt interval are not observable from the cumulative path alone. This is
+      // exact only when at most one jump ever lands in the same interval; at lambda*dt = 0.01
+      // the probability of a merged 2+-jump interval is negligible (~5e-5), so the systematic
+      // bias this approximation introduces is far below the sampling noise below.
+      const p = 1 - Math.exp(-lambda * dt)
+      const m = n * p // expected number of detected jumps
+      const tolLambda = K_SIGMA * Math.sqrt(lambda / (n * dt))
+      const tolMuJ = K_SIGMA * sigmaJ / Math.sqrt(m)
+      const tolSigmaJ = K_SIGMA * sigmaJ / Math.sqrt(2 * (m - 1))
+      for (const seed of MOMENT_SEEDS) {
+        const cpp = new CompoundPoisson(new Normal(muJ, sigmaJ), lambda, dt)
+        cpp.seed(seed)
+        const fitted = CompoundPoisson.fit(cpp.path(n), dt, Normal)
+        assert.instanceOf(fitted, CompoundPoisson)
+        assert.closeTo(fitted.p.lambda, lambda, tolLambda, `seed ${seed}: lambda`)
+        assert.instanceOf(fitted.p.jumpDist, Normal)
+        const { mu: fittedMuJ, sigma: fittedSigmaJ } = fitted.p.jumpDist.params()
+        assert.closeTo(fittedMuJ, muJ, tolMuJ, `seed ${seed}: muJ`)
+        assert.closeTo(fittedSigmaJ, sigmaJ, tolSigmaJ, `seed ${seed}: sigmaJ`)
+      }
+    })
+
+    it('should default dt to 1', () => {
+      const cpp = new CompoundPoisson(new Normal(0, 1), 2, 1)
+      cpp.seed(1)
+      const fitted = CompoundPoisson.fit(cpp.path(20000), undefined, Normal)
+      assert.strictEqual(fitted.p.dt, 1)
+    })
+
+    it('should throw when path has fewer than 2 states', () => {
+      assert.throws(() => CompoundPoisson.fit([0], 1, Normal), /at least 2 states/)
+    })
+
+    it('should throw when jumpDistConstructor has no static fit()', () => {
+      assert.throws(() => CompoundPoisson.fit([0, 1, 2], 1, {}), /static fit\(\) method/)
+    })
+
+    it('should throw when jumpDistConstructor is missing', () => {
+      assert.throws(() => CompoundPoisson.fit([0, 1, 2], 1), /static fit\(\) method/)
+    })
+
+    it('should throw when the path has no non-zero increments', () => {
+      assert.throws(() => CompoundPoisson.fit([0, 0, 0], 1, Normal), /no non-zero increments/)
     })
   })
 })

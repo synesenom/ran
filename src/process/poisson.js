@@ -3,6 +3,13 @@ import PoissonDistribution from '../dist/poisson'
 import logGamma from '../special/log-gamma'
 import Process from './_process'
 
+function isNonDecreasing (path) {
+  for (let i = 1; i < path.length; i++) {
+    if (path[i] < path[i - 1]) return false
+  }
+  return true
+}
+
 /**
  * Poisson process: a counting process of independent arrivals at rate $\lambda$, using an exact
  * discrete-time sampler.
@@ -69,5 +76,35 @@ export default class Poisson extends Process {
       throw Error('Poisson.marginal(): t must be > 0')
     }
     return new PoissonDistribution(this.p.lambda * t)
+  }
+
+  /**
+   * Estimates lambda from an observed path via the exact MLE: the total arrival count
+   * (the path's net increase) divided by the total observed time, since increments are
+   * i.i.d. Poisson(lambda*dt) by the independent-increments property _next() already
+   * relies on.
+   *
+   * @method fit
+   * @memberof ran.process.Poisson
+   * @param {Array} path Array of observed states (as returned by path()).
+   * @param {number} [dt=1] Time step between consecutive path observations (must be > 0).
+   * @returns {Poisson} A new instance with estimated lambda.
+   * @throws {Error} If path has fewer than 2 states, if dt is not > 0, if the path
+   * decreases anywhere, or if the estimated lambda is not positive (no arrivals observed).
+   */
+  static fit (path, dt = 1) {
+    Process.validate({ dt }, ['dt > 0'])
+    if (!Array.isArray(path) || path.length < 2) {
+      throw Error('Poisson.fit(): path must contain at least 2 states')
+    }
+    if (!isNonDecreasing(path)) {
+      throw Error('Poisson.fit(): path must be non-decreasing')
+    }
+    const n = path.length - 1
+    const lambda = (path[n] - path[0]) / (n * dt)
+    if (!(lambda > 0)) {
+      throw Error('Poisson.fit(): estimated lambda is not positive; path shows no arrivals')
+    }
+    return new Poisson(lambda, dt)
   }
 }
