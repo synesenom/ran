@@ -137,7 +137,7 @@ export default class CompoundPoisson extends Process {
    * @memberof ran.process.CompoundPoisson
    * @param {Array} path Array of observed states (as returned by path()).
    * @param {number} [dt=1] Time step between consecutive path observations (must be > 0).
-   * @param {Function} jumpDistConstructor A `ran.dist` Distribution class with a static `fit()` method, used to fit the recovered jump sizes.
+   * @param {Function} [jumpDistConstructor] A `ran.dist` Distribution class with a static `fit()` method, used to fit the recovered jump sizes. Required at runtime (throws if omitted); optional here only so the generated TypeScript signature stays assignable to `Process.fit`'s `(path, dt?)`.
    * @returns {CompoundPoisson} A new instance with estimated lambda and a fitted jumpDist.
    * @throws {Error} If path has fewer than 2 states, if dt is not > 0, if jumpDistConstructor
    * does not expose a static fit() method, or if the path contains no non-zero increments to
