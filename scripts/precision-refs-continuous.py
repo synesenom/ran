@@ -1581,7 +1581,7 @@ PARAM_SETS = {
     'DoublyNoncentralBeta': [[2, 2, 2, 2], [2, 2, 1, 3], [3, 4, 2, 2], [2, 2, 1200, 1200]],
     'DoublyNoncentralChi2': [[3, 4, 2, 3], [2, 4, 1, 2], [2, 3, 1, 1]],
     'DoublyNoncentralF': [[5, 5, 2, 2], [5, 5, 1, 2], [4, 6, 2, 1]],
-    'DoublyNoncentralT': [[5, 1, 2], [5, 0, 2], [6, 2, 1], [5, 0, 120], [5, 5, 120]],
+    'DoublyNoncentralT': [[5, 1, 2], [5, 0, 2], [6, 2, 1], [5, 0, 120], [5, 5, 120], [5, 2, 120]],
     'Erlang': [[5, 2], [2, 0.5], [3, 1]],
     'Exponential': [[2], [0.5], [1]],
     'ExponentialLogarithmic': [[0.5, 2], [0.9, 0.5], [0.3, 1]],
@@ -1746,6 +1746,18 @@ DNCT_XVALS = {
     # sensitivity range (unlike (5, 0, 120) above, this group's mu != 0 so it does not need the
     # same tight peak-adjacent x-range).
     (5, 5, 120): [mpf('0.7'), mpf('1.0'), mpf('1.3'), mpf('1.8'), mpf('2.2')],
+    # (5, 2, 120) (issue #1235): covers the x*mu<0 branch of _pdf (the wynnEpsilon-based
+    # alternating series, replaced by a cancellation-free Poisson-mixture sum -- see
+    # solutions/correctness/2026-07-31-1300-doubly-noncentral-t-pdf-cancellation-x-mu-negative.md).
+    # mu=2 (not the issue's own mu=5) is deliberate: at mu=5 (same theta=120), the fix's own
+    # NoncentralT.fnm(nu0, mu, z) building block saturates to exactly 1.0 near the Poisson(60)
+    # peak (nu0 ~ 105-145), because the true tail probability being represented is far below
+    # Number.EPSILON there -- a separate, deeper double-precision floor inside NoncentralT.fnm,
+    # not fixable from DoublyNoncentralT._pdf. mu=2 keeps that saturation from reaching the
+    # Poisson weight's significant region, letting these 5 points demonstrate the actual fix
+    # (wynnEpsilon cancellation, previously up to ~130x relative pdf error at x=-1.0) to near
+    # full float64 precision instead.
+    (5, 2, 120): [mpf('-0.1'), mpf('-0.2'), mpf('-0.3'), mpf('-0.5'), mpf('-0.7')],
 }
 
 # Doubly-noncentral Beta/F CDFs are double Poisson sums: too slow to invert by bisection,
@@ -2085,6 +2097,7 @@ PDFCDF_TOL = {
     ('DoublyNoncentralT', '[6, 2, 1]'): '1e-12',
     ('DoublyNoncentralT', '[5, 0, 120]'): '1e-13',
     ('DoublyNoncentralT', '[5, 5, 120]'): '1e-11',
+    ('DoublyNoncentralT', '[5, 2, 120]'): '3e-9',
     ('SkewNormal', '[1, 1, 3]'): '1e-12',
     ('Rice', '[0.5, 2]'): '1e-13',
     ('Rice', '[7, 1]'): '5e-13',
@@ -2094,6 +2107,13 @@ PDFCDF_TOL = {
     ('NoncentralChi2', '[5, 62]'): '5e-13',
     ('R', '[0.5]'): '1e-13',
     ('VonMises', '[0, 11]'): '1e-13',
+}
+# Per-(name, json-params) cdf-only tolerance override, for the rare group where pdf and cdf
+# hit genuinely different floors and sharing PDFCDF_TOL's single value would either loosen
+# the tight method's gate or fail the loose one. Only emitted (as `cdfTol:`, alongside `tol:`
+# which stays pdf-facing) when present here; every other group keeps the single shared `tol`.
+CDF_TOL = {
+    ('DoublyNoncentralT', '[5, 2, 120]'): '1e-7',
 }
 # Per-(name, json-params) quantile round-trip tolerance (default 1e-14; per-group empirical:
 # closed-form/Halley quantiles stay at 1e-14, root-finding/approximate ones are looser).
@@ -2113,6 +2133,7 @@ Q_TOL = {
     ('DoublyNoncentralT', '[6, 2, 1]'): '1e-12',
     ('DoublyNoncentralT', '[5, 0, 120]'): '5e-10',
     ('DoublyNoncentralT', '[5, 5, 120]'): '1e-11',
+    ('DoublyNoncentralT', '[5, 2, 120]'): '1e-8',
     ('FisherZ', '[1, 1]'): '4e-14',
     ('FisherZ', '[5, 5]'): '1e-12',
     ('FisherZ', '[8, 4]'): '1e-12',
@@ -2161,6 +2182,16 @@ _N_F11_RECURRENCE = ('non-zero mu combined with theta=120 drives _pdf\'s general
                      '₁F₁ three-term contiguous recurrence (formerly '
                      '_f11Forward/_f11Backward) was numerically unstable in both directions '
                      '(issue #1207) -- see solutions/correctness/2026-07-30-1600-doubly-noncentral-t-pdf-f11-recurrence-instability.md')
+_N_PDF_CANCELLATION = ('x*mu<0 branch of _pdf (issue #1235): replaced the wynnEpsilon-based '
+                       'alternating j-series (previously up to ~130x relative pdf error at '
+                       'x=-1.0) with the cancellation-free Poisson(theta/2)-mixture-of-noncentral-t '
+                       'formula _cdf already uses -- see '
+                       'solutions/correctness/2026-07-31-1300-doubly-noncentral-t-pdf-cancellation-x-mu-negative.md. '
+                       'tol: 3e-9 gates pdf to its own measured accuracy (~7e-10 worst case, at '
+                       'x=-0.5); cdfTol: 1e-7 stays loose separately because the UNCHANGED _cdf '
+                       'has its own, unrelated floor -- ~2.1e-8 relative at x=-0.7 -- that this '
+                       'fix does not touch; qtol: 1e-8 covers the round-trip, which inherits '
+                       'cdf\'s floor (~1.3e-9 measured at x=-0.7)')
 NOTES = {
     ('Bates', '[10, 5, 25]'): _N_POLY,
     ('Bates', '[5, -2, 2]'): _N_POLY,
@@ -2182,6 +2213,7 @@ NOTES = {
     ('DoublyNoncentralT', '[6, 2, 1]'): _N_NCT,
     ('DoublyNoncentralT', '[5, 0, 120]'): _N_F11_BOUNDARY,
     ('DoublyNoncentralT', '[5, 5, 120]'): _N_F11_RECURRENCE,
+    ('DoublyNoncentralT', '[5, 2, 120]'): _N_PDF_CANCELLATION,
     ('SkewNormal', '[1, 1, 3]'): 'cdf uses Owen T and q() root-finds on it; both lose a few ULPs beyond 1e-14',
     ('Rice', '[0.5, 2]'): _N_SERIES,
     ('Rice', '[3.16, 1]'): _N_SERIES,
@@ -2336,6 +2368,12 @@ def render(cache, allow_prune=False):
         # match for nested-object params -- js_lit(p) is what actually gets written to disk.
         new_keys[(name, re.sub(r'\s+', ' ', js_lit(p)))] += 1
         tol = PDFCDF_TOL.get(key, '1e-14')
+        # cdfTol is only emitted for the rare group in CDF_TOL whose cdf floor genuinely
+        # diverges from pdf's; every other group keeps the single shared `tol` line so this
+        # change is a no-op for the ~200 other groups (test/precision-continuous.js defaults
+        # cdfTol to tol when the field is absent).
+        cdf_tol = CDF_TOL.get(key)
+        cdf_tol_line = f'    cdfTol: {cdf_tol},\n' if cdf_tol else ''
         qtol = Q_TOL.get(key, '1e-14')
         note = NOTES.get(key)
         comment = f'  // {name}{jp}: {note}\n' if note else ''
@@ -2343,7 +2381,7 @@ def render(cache, allow_prune=False):
             f'{{ x: {x}, pdf: {pv}, cdf: {cv} }}' for x, pv, cv in g['points'])
         groups.append(
             f"{comment}  {{\n    name: '{name}',\n    params: {js_lit(p)},\n"
-            f"    tol: {tol},\n    qtol: {qtol},\n    points: [\n      {pts}\n    ]\n  }}")
+            f"    tol: {tol},\n{cdf_tol_line}    qtol: {qtol},\n    points: [\n      {pts}\n    ]\n  }}")
 
     if not allow_prune:
         # Walk existing groups in file order, "consuming" one occurrence of new_keys[key] per

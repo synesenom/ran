@@ -1213,6 +1213,39 @@ const REFS = [
       { x: 2.2, pdf: 0.0001166815151832735, cdf: 0.9999900880337178 }
     ]
   },
+  // DoublyNoncentralT[5, 2, 120] (issue #1235): covers the x*mu<0 branch of _pdf (the
+  // wynnEpsilon-based alternating series, previously up to ~130x relative pdf error at x=-1.0),
+  // now a cancellation-free Poisson(theta/2)-mixture-of-noncentral-t sum -- see
+  // solutions/correctness/2026-07-31-1300-doubly-noncentral-t-pdf-cancellation-x-mu-negative.md.
+  // mu=2 (not the issue's own mu=5) is deliberate: at mu=5 with this same theta=120, the fix's
+  // own NoncentralT.fnm(nu0, mu, z) building block saturates to exactly 1.0 near the Poisson(60)
+  // peak (nu0 ~ 105-145) -- a separate, deeper double-precision floor inside NoncentralT.fnm
+  // itself (out of scope here; the true tail probability being represented is far below
+  // Number.EPSILON there). mu=2 keeps that saturation out of the Poisson weight's significant
+  // region, so pdf here measures ~1e-13 to 7e-10 relative error at every point (worst case at
+  // x=-0.5). tol is gated to that actual pdf accuracy (3e-9, ~4x margin over the measured
+  // 6.96e-10 worst case) rather than the group-wide 1e-7 this group previously shared between
+  // pdf and cdf -- that shared value masked the fix's true precision behind cdf's floor (below).
+  // cdfTol: 1e-7 stays loose because the group-level floor for cdf comes from the UNCHANGED
+  // _cdf, not from this fix's pdf: _cdf's own relative error at x=-0.7 measured ~2.1e-8
+  // (unrelated pre-existing accumulated-rounding behavior, same class as the _N_NCT groups
+  // elsewhere in this file; out of scope for issue #1235). qtol: 1e-8 keeps ~8x margin over
+  // the measured q(cdf(x)) round-trip error, which inherits cdf's floor and measures up to
+  // ~1.3e-9 at x=-0.7.
+  {
+    name: 'DoublyNoncentralT',
+    params: [5, 2, 120],
+    tol: 3e-9,
+    cdfTol: 1e-7,
+    qtol: 1e-8,
+    points: [
+      { x: -0.1, pdf: 0.08731113573386305, cdf: 0.0062876468126633715 },
+      { x: -0.2, pdf: 0.02249929148445704, cdf: 0.001420945339993741 },
+      { x: -0.3, pdf: 0.0046920072911948996, cdf: 0.0002665259567531051 },
+      { x: -0.5, pdf: 0.00011926259655702153, cdf: 5.832913967064171e-6 },
+      { x: -0.7, pdf: 1.7852739570545148e-6, cdf: 8.034659857942625e-8 }
+    ]
+  },
   {
     name: 'Erlang',
     params: [5, 2],
@@ -5006,7 +5039,12 @@ describe('continuous-distribution precision gate', () => {
   beforeEach(() => { _rng = Math.random; Math.random = () => 0.5 })
   afterEach(() => { Math.random = _rng })
 
-  REFS.forEach(({ name, params, tol, qtol, points }) => {
+  // pdfTol/cdfTol default to the group's shared tol so the vast majority of groups (which
+  // hit the same double-precision floor for both methods) are unaffected; only a group whose
+  // pdf and cdf floors genuinely diverge (e.g. DoublyNoncentralT[5, 2, 120], issue #1235 --
+  // pdf is gated tight while cdf keeps a pre-existing, out-of-scope looser floor) needs to
+  // set them explicitly.
+  REFS.forEach(({ name, params, tol, qtol, pdfTol = tol, cdfTol = tol, points }) => {
     describe(`${name}(${JSON.stringify(params)})`, () => {
       // Construct in a before() hook so a constructor regression surfaces as a failing
       // hook rather than silently skipping every assertion in this group.
@@ -5014,20 +5052,20 @@ describe('continuous-distribution precision gate', () => {
       before(() => { d = new dist[name](...params) })
       // One test per method (not per point): the message pinpoints the failing x, while
       // pdf/cdf/quantile stay isolated so a regression in one does not mask the others.
-      it(`pdf to ${tol} relative error`, () => {
+      it(`pdf to ${pdfTol} relative error`, () => {
         points.forEach(({ x, pdf }) => {
           // Guard the relative form against an exact-zero reference (pdf can vanish at an
           // interior point, e.g. UQuadratic at its centre).
           if (pdf === 0) assert.strictEqual(d.pdf(x), 0, `pdf at x=${x}`)
-          else assert.approximately(d.pdf(x) / pdf, 1, tol, `pdf at x=${x}`)
+          else assert.approximately(d.pdf(x) / pdf, 1, pdfTol, `pdf at x=${x}`)
         })
       })
-      it(`cdf to ${tol} relative error`, () => {
+      it(`cdf to ${cdfTol} relative error`, () => {
         points.forEach(({ x, cdf }) => {
           // Guard the relative form against an exact-zero reference (defensive: all current
           // probes have cdf >= 0.1, but a future grid change could include a near-zero p).
           if (cdf === 0) assert.strictEqual(d.cdf(x), 0, `cdf at x=${x}`)
-          else assert.approximately(d.cdf(x) / cdf, 1, tol, `cdf at x=${x}`)
+          else assert.approximately(d.cdf(x) / cdf, 1, cdfTol, `cdf at x=${x}`)
         })
       })
       it(`quantile round-trips q(cdf(x)) = x to ${qtol}`, () => {

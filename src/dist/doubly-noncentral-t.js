@@ -3,7 +3,7 @@ import Distribution from './_distribution'
 import noncentralChi2 from './_noncentral-chi2'
 import normal from './_normal'
 import { f11, gamma, logGamma } from '../special'
-import { wynnEpsilon, recursiveSum } from '../algorithms'
+import { recursiveSum } from '../algorithms'
 import NoncentralT from './noncentral-t'
 
 /**
@@ -128,6 +128,40 @@ export default class DoublyNoncentralT extends Distribution {
       Math.log(f11(kj, this.p.nu / 2, this.p.theta / (2 * tk)))
   }
 
+  /**
+   * Probability density for the x*mu < 0 branch via a Poisson(theta/2) mixture of noncentral-t
+   * densities -- the term-by-term derivative of _cdf's mixture formula below. Every term is a
+   * Poisson weight times a difference of two NoncentralT.fnm (CDF) values, never an
+   * alternating-sign series term, so there is no cancellation to accelerate away (unlike the
+   * deleted wynnEpsilon-based j-series, which could not recover precision already lost between
+   * huge, opposite-sign terms).
+   * See solutions/correctness/2026-07-31-1300-doubly-noncentral-t-pdf-cancellation-x-mu-negative.md
+   *
+   * @method _pdfPoissonMixture
+   * @memberof ran.dist.DoublyNoncentralT
+   * @param {number} x Value to evaluate density at.
+   * @returns {number} The signed sum whose absolute value is the density.
+   * @private
+   */
+  _pdfPoissonMixture (x) {
+    const y = Math.abs(x)
+    const mu = x < 0 ? -this.p.mu : this.p.mu
+    const sHi0 = Math.sqrt(1 + 2 / this.p.nu)
+    return recursiveSum({
+      p: this.c.expHalfTheta,
+      nu0: this.p.nu,
+      f: NoncentralT.fnm(this.p.nu + 2, mu, y * sHi0) - NoncentralT.fnm(this.p.nu, mu, y)
+    }, (t, i) => {
+      const i2 = 2 * i
+      t.p *= this.p.theta / i2
+      t.nu0 = this.p.nu + i2
+      const sLo = Math.sqrt(1 + i2 / this.p.nu)
+      const sHi = Math.sqrt(1 + (i2 + 2) / this.p.nu)
+      t.f = NoncentralT.fnm(t.nu0 + 2, mu, y * sHi) - NoncentralT.fnm(t.nu0, mu, y * sLo)
+      return t
+    }, t => t.p * t.nu0 * t.f, undefined, { useFloor: false }) / y
+  }
+
   _generator () {
     // Direct sampling from a normal and a non-central chi2
     const x = normal(this.r, this.p.mu)
@@ -224,54 +258,7 @@ export default class DoublyNoncentralT extends Distribution {
         }, t => t.g * t.f)
       }
     } else {
-      // Forward
-      let kj0 = (this.p.nu + j0 + 1) / 2
-      const gp0 = Math.exp(this.c.logScale + (j0 - 1) * lntmuk - logGamma(j0) - (kj0 - 0.5) * lntk)
-      const gk0 = gamma(kj0 - 1)
-      const gk1 = gamma(kj0 - 0.5)
-      let gk = [gk0, gk1]
-
-      let gp = gp0
-      z += wynnEpsilon(i => {
-        const j = j0 + i
-        const j2 = i % 2
-        const kj = (this.p.nu + j + 1) / 2
-
-        gp *= tmuk / (j * srtk)
-        gk[j2] *= kj - 1
-        const g = gp * gk[j2]
-
-        const f = f11(kj, nu2, thetatk)
-
-        // Series alternates because x*mu < 0 makes (x*mu)^j flip sign each step.
-        return (i % 2 === 0 ? 1 : -1) * g * f
-      })
-
-      // Backward
-      if (j0 > 0) {
-        kj0 -= 0.5
-        let gp = gp0 * tmuk / (j0 * srtk)
-        gk = [gk1 * kj0, gk0 * (kj0 - 0.5)]
-        z -= wynnEpsilon(i => {
-          const j = j0 - i
-          const j2 = i % 2
-          const kj = (this.p.nu + j) / 2
-          let dz = 0
-
-          if (j > 0) {
-            gp /= tmuk / (j * srtk)
-            gk[j2] /= kj
-            const g = gp * gk[j2]
-
-            const f = f11(kj, nu2, thetatk)
-
-            dz = g * f
-          }
-
-          // Backward terms also alternate: (-1)^{j0-i} = (-1)^{j0} * (-1)^i; Math.abs(z) absorbs (-1)^{j0}.
-          return (i % 2 === 0 ? 1 : -1) * dz
-        })
-      }
+      z = this._pdfPoissonMixture(x)
     }
 
     return Math.abs(z)
