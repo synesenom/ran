@@ -1456,6 +1456,14 @@ describe('process.BrownianBridge', () => {
       assert.strictEqual(fitted.p.dt, 0.1)
     })
 
+    it('should throw when T is not > 0', () => {
+      assert.throws(() => BrownianBridge.fit([0, 0], -1, 1), /Invalid parameters/)
+    })
+
+    it('should throw when dt is not > 0', () => {
+      assert.throws(() => BrownianBridge.fit([0, 0], 10, 0), /Invalid parameters/)
+    })
+
     it('should throw when T/dt is less than 2', () => {
       assert.throws(() => BrownianBridge.fit([0, 0], 1, 1), /at least 2/)
     })
