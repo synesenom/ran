@@ -3,6 +3,15 @@ import PoissonDistribution from '../dist/poisson'
 import logGamma from '../special/log-gamma'
 import Process from './_process'
 
+// A counting-process path must never decrease; broken out of fit() to keep it under
+// CodeScene's cyclomatic-complexity gate.
+function isNonDecreasing (path) {
+  for (let i = 1; i < path.length; i++) {
+    if (path[i] < path[i - 1]) return false
+  }
+  return true
+}
+
 /**
  * Poisson process: a counting process of independent arrivals at rate $\lambda$, using an exact
  * discrete-time sampler.
@@ -90,12 +99,10 @@ export default class Poisson extends Process {
     if (!Array.isArray(path) || path.length < 2) {
       throw Error('Poisson.fit(): path must contain at least 2 states')
     }
-    const n = path.length - 1
-    for (let i = 0; i < n; i++) {
-      if (path[i + 1] < path[i]) {
-        throw Error('Poisson.fit(): path must be non-decreasing')
-      }
+    if (!isNonDecreasing(path)) {
+      throw Error('Poisson.fit(): path must be non-decreasing')
     }
+    const n = path.length - 1
     const lambda = (path[n] - path[0]) / (n * dt)
     if (!(lambda > 0)) {
       throw Error('Poisson.fit(): estimated lambda is not positive; path shows no arrivals')

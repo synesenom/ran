@@ -69,6 +69,30 @@ function sampleResetSteps (proc, n) {
   return samples
 }
 
+// Deprecated-alias tests construct through a console.warn-emitting constructor; both silencing
+// it and capturing its message need the same save/restore-on-throw bracketing around the call.
+function withSuppressedWarnings (fn) {
+  const originalWarn = console.warn
+  console.warn = () => {}
+  try {
+    return fn()
+  } finally {
+    console.warn = originalWarn
+  }
+}
+
+function captureWarnings (fn) {
+  const warnings = []
+  const originalWarn = console.warn
+  console.warn = msg => warnings.push(msg)
+  try {
+    fn()
+  } finally {
+    console.warn = originalWarn
+  }
+  return warnings
+}
+
 describe('process._Process', () => {
   describe('.validate()', () => {
     it('should throw on undefined parameter', () => {
@@ -1916,46 +1940,27 @@ describe('process.Poisson', () => {
 
 describe('process.PoissonProcess (deprecated alias)', () => {
   it('should be an instance of Poisson and behave identically', () => {
-    const originalWarn = console.warn
-    console.warn = () => {}
-    let pp
-    try {
-      pp = new PoissonProcess(2, 0.5)
-    } finally {
-      console.warn = originalWarn
-    }
+    const pp = withSuppressedWarnings(() => new PoissonProcess(2, 0.5))
     assert(pp instanceof ProcessPoisson)
     assert.strictEqual(pp.mean(3), new ProcessPoisson(2, 0.5).mean(3))
     assert.strictEqual(pp.pdf(1, 3), new ProcessPoisson(2, 0.5).pdf(1, 3))
   })
 
   it('should emit a deprecation warning naming the replacement', () => {
-    const originalWarn = console.warn
-    const warnings = []
-    console.warn = msg => warnings.push(msg)
     let pp
-    try {
-      pp = new PoissonProcess(2, 0.5)
-    } finally {
-      console.warn = originalWarn
-    }
+    const warnings = captureWarnings(() => { pp = new PoissonProcess(2, 0.5) })
     assert(pp instanceof ProcessPoisson)
     assert.strictEqual(warnings.length, 1)
     assert.match(warnings[0], /ran\.process\.PoissonProcess is deprecated and will be removed in v1\.33\.0; use ran\.process\.Poisson instead\./)
   })
 
   it('should have .fit() return a PoissonProcess instance, not a plain Poisson', () => {
-    const originalWarn = console.warn
-    console.warn = () => {}
-    let pp
-    try {
-      pp = new PoissonProcess(2, 1)
+    const fitted = withSuppressedWarnings(() => {
+      const pp = new PoissonProcess(2, 1)
       pp.seed(1)
-      const fitted = PoissonProcess.fit(pp.path(5000))
-      assert.instanceOf(fitted, PoissonProcess)
-    } finally {
-      console.warn = originalWarn
-    }
+      return PoissonProcess.fit(pp.path(5000))
+    })
+    assert.instanceOf(fitted, PoissonProcess)
   })
 })
 
@@ -2269,45 +2274,26 @@ describe('process.CompoundPoisson', () => {
 
 describe('process.CompoundPoissonProcess (deprecated alias)', () => {
   it('should be an instance of CompoundPoisson and behave identically', () => {
-    const originalWarn = console.warn
-    console.warn = () => {}
-    let cpp
-    try {
-      cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
-    } finally {
-      console.warn = originalWarn
-    }
+    const cpp = withSuppressedWarnings(() => new CompoundPoissonProcess(new Normal(1, 1), 2, 1))
     assert(cpp instanceof CompoundPoisson)
     assert.strictEqual(cpp.mean(3), new CompoundPoisson(new Normal(1, 1), 2, 1).mean(3))
   })
 
   it('should emit a deprecation warning naming the replacement', () => {
-    const originalWarn = console.warn
-    const warnings = []
-    console.warn = msg => warnings.push(msg)
     let cpp
-    try {
-      cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
-    } finally {
-      console.warn = originalWarn
-    }
+    const warnings = captureWarnings(() => { cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1) })
     assert(cpp instanceof CompoundPoisson)
     assert.strictEqual(warnings.length, 1)
     assert.match(warnings[0], /ran\.process\.CompoundPoissonProcess is deprecated and will be removed in v1\.33\.0; use ran\.process\.CompoundPoisson instead\./)
   })
 
   it('should have .fit() return a CompoundPoissonProcess instance, not a plain CompoundPoisson', () => {
-    const originalWarn = console.warn
-    console.warn = () => {}
-    let cpp
-    try {
-      cpp = new CompoundPoissonProcess(new Normal(2, 0.5), 2, 1)
+    const fitted = withSuppressedWarnings(() => {
+      const cpp = new CompoundPoissonProcess(new Normal(2, 0.5), 2, 1)
       cpp.seed(1)
-      const fitted = CompoundPoissonProcess.fit(cpp.path(5000), 1, Normal)
-      assert.instanceOf(fitted, CompoundPoissonProcess)
-    } finally {
-      console.warn = originalWarn
-    }
+      return CompoundPoissonProcess.fit(cpp.path(5000), 1, Normal)
+    })
+    assert.instanceOf(fitted, CompoundPoissonProcess)
   })
 })
 
