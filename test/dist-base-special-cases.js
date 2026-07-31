@@ -389,16 +389,16 @@ describe('dist', () => {
       assert.approximately(d.cdf(-0.9), 0.005128950622327126, 1e-12)
     })
 
-    // Same mpmath source as above (kappa = 11). Tolerance is 1e-8, not machine precision: besselI's
-    // own approximation carries a pre-existing ~1e-10 relative error at kappa gtrsim 11 (unrelated
-    // to this fix -- verified by comparing ranjs' besselI(0, 11) directly against mpmath), which
-    // this loose bound still comfortably distinguishes from the truncation bug's ~1e-1 to 1e-2-scale
-    // errors (e.g. cdf(-pi/4) was -0.0201 pre-fix, not merely imprecise).
-    it('cdf should match mpmath at kappa = 11 within the pre-existing besselI precision floor', () => {
+    // mpmath mp.dps=50: quad(t => exp(11*cos(t))/(2*pi*besseli(0,11)), [-pi, x])
+    // #1185 fixed _besselIBackward's n=0 margin degeneration for x in (10, 14], which covers
+    // kappa=11: besselI(0, 11) now matches mpmath to ~2.5e-16 relative error (re-verified
+    // directly against mpmath), not the ~1e-10 this test used to attribute to a "pre-existing"
+    // floor. Tolerance tightened to match the kappa = 9 case.
+    it('cdf should match mpmath at kappa = 11', () => {
       const d = new dist.VonMises(0, 11)
-      assert.approximately(d.cdf(-Math.PI / 4), 0.006110362138173876, 1e-8)
-      assert.approximately(d.cdf(-1), 0.0008536976551769042, 1e-8)
-      assert.approximately(d.cdf(-0.9), 0.002206454459280005, 1e-8)
+      assert.approximately(d.cdf(-Math.PI / 4), 0.006110362138173876, 1e-12)
+      assert.approximately(d.cdf(-1), 0.0008536976551769042, 1e-12)
+      assert.approximately(d.cdf(-0.9), 0.002206454459280005, 1e-12)
     })
 
     // Concrete repro from the bug report: q() root-finds on cdf(x) - p, so a corrupted cdf() at an
