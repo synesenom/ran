@@ -588,11 +588,11 @@
     "nodemon": "^3.0.0",
     "nyc": "^18.0.0",
     "pug": "^3.0.2",
-    "rollup": "^4.60.4",
+    "rollup": "^4.62.2",
     "sass": "^1.102.0",
     "seedrandom": "^3.0.5",
     "standard": "^16.0.4",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   },
   "overrides": {
     "serialize-javascript": "^7.0.7"
