@@ -3,6 +3,28 @@ import ShiftedBinomial from '../dist/_shifted-binomial'
 import Process from './_process'
 
 /**
+ * Fraction of +1 steps among an observed path's increments, i.e. the exact MLE for p.
+ *
+ * @param {Array} path Array of observed states.
+ * @returns {number} Fraction of +1 steps.
+ * @throws {Error} If any step is not +1 or -1.
+ * @ignore
+ */
+function upFraction (path) {
+  const n = path.length - 1
+  let ups = 0
+  for (let i = 0; i < n; i++) {
+    const step = path[i + 1] - path[i]
+    if (step === 1) {
+      ups++
+    } else if (step !== -1) {
+      throw Error('RandomWalk.fit(): path contains a step that is not +1 or -1')
+    }
+  }
+  return ups / n
+}
+
+/**
  * Discrete-time random walk on the integers: at each step the state moves by +1 with
  * probability p and by −1 with probability 1 − p. For p = 0.5 the walk is symmetric
  * (unbiased); for p ≠ 0.5 it has drift 2p − 1 per step.
@@ -68,5 +90,29 @@ export default class RandomWalk extends Process {
       throw Error('RandomWalk.marginal(): t must be a non-negative integer')
     }
     return new ShiftedBinomial(t, this.p.p)
+  }
+
+  /**
+   * Estimates p from an observed path as the exact MLE: the fraction of +1 steps among all
+   * observed increments. Since every increment is exactly +1 or -1, this coincides with
+   * recovering p from the sample mean of increments (mean = 2p-1, so p = (mean+1)/2) — the two
+   * are algebraically identical, not two competing estimators.
+   *
+   * @method fit
+   * @memberof ran.process.RandomWalk
+   * @param {Array} path Array of observed states (as returned by path()).
+   * @returns {RandomWalk} A new instance with estimated p.
+   * @throws {Error} If path has fewer than 2 states, if any step is not +1 or -1, or if the
+   * estimated p falls outside (0,1) (path contains only up-steps or only down-steps).
+   */
+  static fit (path) {
+    if (!Array.isArray(path) || path.length < 2) {
+      throw Error('RandomWalk.fit(): path must contain at least 2 states')
+    }
+    const p = upFraction(path)
+    if (!(p > 0 && p < 1)) {
+      throw Error('RandomWalk.fit(): estimated p is out of (0,1); path contains only up-steps or only down-steps')
+    }
+    return new RandomWalk(p)
   }
 }

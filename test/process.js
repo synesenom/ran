@@ -1453,6 +1453,64 @@ describe('process.BrownianBridge', () => {
       }
     })
   })
+
+  describe('.fit()', () => {
+    it('should recover sigma from a long simulated path across seeds', () => {
+      const sigma = 1.4
+      const T = 2000
+      const dt = 1
+      const N = T / dt
+      // Every step's conditional draw is exact (no discretization error), so the MLE's
+      // sigma^2 estimate is exactly sigma^2/(N-1) times a chi-square(N-1) variate; propagating
+      // its variance (2*sigma^4/(N-1)) through the delta method gives sigma_hat's own tolerance.
+      const tolSigma = K_SIGMA * sigma * Math.sqrt(1 / (2 * (N - 1)))
+      for (const seed of MOMENT_SEEDS) {
+        const bb = new BrownianBridge(sigma, T, dt)
+        bb.seed(seed)
+        const fitted = BrownianBridge.fit(bb.path(N), T, dt)
+        assert.instanceOf(fitted, BrownianBridge)
+        assert.closeTo(fitted.p.sigma, sigma, tolSigma, `seed ${seed}`)
+      }
+    })
+
+    it('should default dt to 0.1', () => {
+      const bb = new BrownianBridge(1, 10, 0.1)
+      bb.seed(1)
+      const fitted = BrownianBridge.fit(bb.path(100), 10)
+      assert.strictEqual(fitted.p.dt, 0.1)
+    })
+
+    it('should throw when T is not > 0', () => {
+      assert.throws(() => BrownianBridge.fit([0, 0], -1, 1), /Invalid parameters/)
+    })
+
+    it('should throw when dt is not > 0', () => {
+      assert.throws(() => BrownianBridge.fit([0, 0], 10, 0), /Invalid parameters/)
+    })
+
+    it('should throw when T/dt is less than 2', () => {
+      assert.throws(() => BrownianBridge.fit([0, 0], 1, 1), /at least 2/)
+    })
+
+    it('should succeed at exactly T/dt = 2 (the minimum estimable case)', () => {
+      const sigma = 1.5
+      const T = 1
+      const dt = 0.5
+      const bb = new BrownianBridge(sigma, T, dt)
+      bb.seed(1)
+      const fitted = BrownianBridge.fit(bb.path(2), T, dt)
+      assert.instanceOf(fitted, BrownianBridge)
+      assert.isAbove(fitted.p.sigma, 0)
+    })
+
+    it('should throw when path is not an array', () => {
+      assert.throws(() => BrownianBridge.fit(null, 10, 1), /exactly T\/dt \+ 1 states/)
+    })
+
+    it('should throw when path length does not match T/dt + 1', () => {
+      assert.throws(() => BrownianBridge.fit([0, 1, 0], 4, 1), /exactly T\/dt \+ 1 states/)
+    })
+  })
 })
 
 describe('process.AR1', () => {
@@ -1683,6 +1741,55 @@ describe('process.AR1', () => {
     it('should throw for t < 0', () => {
       const ar1 = new AR1(0.5, 1)
       assert.throws(() => ar1.marginal(-1), /t must be > 0/)
+    })
+  })
+
+  describe('.fit()', () => {
+    it('should recover phi and sigma from a long simulated path across seeds', () => {
+      const phi = 0.6
+      const sigma = 1.3
+      const n = 20000
+      // AR(1) OLS slope asymptotic variance (Hamilton, "Time Series Analysis", eq. 8.2.16):
+      // sqrt(n)(phiHat-phi) -> N(0, 1-phi^2), same formula OrnsteinUhlenbeck.fit()'s test uses
+      // for its OLS slope, since the true intercept being 0 here doesn't change the leading term.
+      const tolPhi = K_SIGMA * Math.sqrt((1 - phi * phi) / n)
+      // s2 = ss/(n-2) is the usual OLS residual-variance estimator; Var(s2) ~ 2*sigma^4/n
+      // (same approximation OrnsteinUhlenbeck.fit()'s test uses for its own varS2), propagated
+      // through the delta method (sigma = sqrt(s2)) for sigma_hat's tolerance.
+      const varS2 = 2 * Math.pow(sigma, 4) / n
+      const tolSigma = K_SIGMA * Math.sqrt(varS2) / (2 * sigma)
+      for (const seed of MOMENT_SEEDS) {
+        const ar1 = new AR1(phi, sigma)
+        ar1.seed(seed)
+        const fitted = AR1.fit(ar1.path(n))
+        assert.instanceOf(fitted, AR1)
+        assert.closeTo(fitted.p.phi, phi, tolPhi, `seed ${seed}: phi`)
+        assert.closeTo(fitted.p.sigma, sigma, tolSigma, `seed ${seed}: sigma`)
+      }
+    })
+
+    it('should throw when path has fewer than 4 states', () => {
+      assert.throws(() => AR1.fit([0, 1, 2]), /at least 4 states/)
+    })
+
+    it('should throw when path is not an array', () => {
+      assert.throws(() => AR1.fit(null), /at least 4 states/)
+    })
+
+    it('should succeed at exactly 4 states when the path is not perfectly collinear', () => {
+      // [0, 1, 2, 2] is not collinear (the last step breaks the straight line), so OLS
+      // residuals are not all 0 and sigma2 = ss/(n-2) is strictly positive.
+      const fitted = AR1.fit([0, 1, 2, 2])
+      assert.instanceOf(fitted, AR1)
+      assert.isTrue(Number.isFinite(fitted.p.phi))
+      assert.isAbove(fitted.p.sigma, 0)
+    })
+
+    it('should throw when a perfectly collinear path drives sigma to 0', () => {
+      // A perfectly linear path drives the OLS residuals to exactly 0, so sigma2 = 0
+      // and the AR1 constructor's Process.validate('sigma > 0') rejects it, unlike
+      // OrnsteinUhlenbeck.fit() which has its own slope-range check for the analogous case.
+      assert.throws(() => AR1.fit([0, 1, 2, 3, 4]), /sigma > 0/)
     })
   })
 })
@@ -3039,6 +3146,51 @@ describe('process.RandomWalk', () => {
       assert.isTrue(result.passed)
       assert.isNumber(result.statistics)
       assert.isNumber(result.pValue)
+    })
+  })
+
+  describe('.fit()', () => {
+    it('should recover p from a long simulated path across seeds', () => {
+      const p = 0.65
+      const n = 20000
+      // exact rational: p_hat is the sample mean of n iid Bernoulli(p) up-step indicators,
+      // so Var(p_hat) = p*(1-p)/n exactly (no asymptotic approximation needed).
+      const tolP = K_SIGMA * Math.sqrt(p * (1 - p) / n)
+      for (const seed of MOMENT_SEEDS) {
+        const rw = new RandomWalk(p)
+        rw.seed(seed)
+        const fitted = RandomWalk.fit(rw.path(n))
+        assert.instanceOf(fitted, RandomWalk)
+        assert.closeTo(fitted.p.p, p, tolP, `seed ${seed}`)
+      }
+    })
+
+    it('should throw when path has fewer than 2 states', () => {
+      assert.throws(() => RandomWalk.fit([0]), /at least 2 states/)
+    })
+
+    it('should throw when path is not an array', () => {
+      assert.throws(() => RandomWalk.fit(undefined), /at least 2 states/)
+    })
+
+    it('should throw when a step is not +1 or -1', () => {
+      assert.throws(() => RandomWalk.fit([0, 2, 1]), /not \+1 or -1/)
+    })
+
+    it('should throw when the estimated p is out of (0,1) (all up-steps)', () => {
+      assert.throws(() => RandomWalk.fit([0, 1, 2, 3]), /out of \(0,1\)/)
+    })
+
+    it('should throw for every 2-state path (a single Bernoulli trial can never yield a ' +
+      'fraction strictly between 0 and 1)', () => {
+      assert.throws(() => RandomWalk.fit([0, 1]), /out of \(0,1\)/)
+      assert.throws(() => RandomWalk.fit([0, -1]), /out of \(0,1\)/)
+    })
+
+    it('should succeed at 3 states (the minimum length where p_hat can land strictly inside (0,1))', () => {
+      const fitted = RandomWalk.fit([0, 1, 0])
+      assert.instanceOf(fitted, RandomWalk)
+      assert.strictEqual(fitted.p.p, 0.5)
     })
   })
 })

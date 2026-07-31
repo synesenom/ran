@@ -109,4 +109,44 @@ export default class BrownianBridge extends Process {
     }
     return new Normal(0, Math.sqrt(this.variance(t)))
   }
+
+  /**
+   * Estimates sigma from an observed path via the exact MLE. Unlike BrownianMotion/
+   * OrnsteinUhlenbeck/CoxIngersollRoss, T is a given/fixed endpoint (the bridge is conditioned
+   * to return to 0 at T), not something to estimate from data — so it is a required argument,
+   * mirroring the constructor. Each step's conditional variance is known exactly from _next()'s
+   * own formula (sigma^2 * dt * ratio, ratio = (remaining-dt)/remaining), leaving sigma as the
+   * only free scale parameter: Y_i = X_{i+1} - X_i*ratio_i is exactly sigma*sqrt(dt*ratio_i)*Z_i,
+   * so sigma^2's MLE is the mean of Y_i^2/(dt*ratio_i) over all non-degenerate steps. The final
+   * step (i = N-1) is excluded because _next() pins it to exactly 0 (ratio = 0), carrying no
+   * information about sigma.
+   *
+   * @method fit
+   * @memberof ran.process.BrownianBridge
+   * @param {Array} path Array of observed states (as returned by path()).
+   * @param {number} T Terminal time (must be > 0), matching the constructor's T.
+   * @param {number} [dt=0.1] Time step (must be > 0; T/dt must be a positive integer).
+   * @returns {BrownianBridge} A new instance with estimated sigma.
+   * @throws {Error} If T or dt is not > 0, if T/dt is not at least 2, or if path does not
+   * contain exactly T/dt + 1 states.
+   */
+  static fit (path, T, dt = 0.1) {
+    Process.validate({ T, dt }, ['T > 0', 'dt > 0'])
+    const N = Math.round(T / dt)
+    if (N < 2) {
+      throw Error('BrownianBridge.fit(): T/dt must be at least 2 to have an estimable step')
+    }
+    if (!Array.isArray(path) || path.length !== N + 1) {
+      throw Error('BrownianBridge.fit(): path must contain exactly T/dt + 1 states')
+    }
+    let ss = 0
+    for (let i = 0; i < N - 1; i++) {
+      const remaining = T - i * dt
+      const ratio = (remaining - dt) / remaining
+      const e = path[i + 1] - path[i] * ratio
+      ss += e * e / (dt * ratio)
+    }
+    const sigma2 = ss / (N - 1)
+    return new BrownianBridge(Math.sqrt(sigma2), T, dt)
+  }
 }
