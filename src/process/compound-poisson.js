@@ -1,4 +1,6 @@
 import poisson from '../dist/_poisson'
+import Gamma from '../dist/gamma'
+import Tweedie from '../dist/tweedie'
 import Process from './_process'
 
 /**
@@ -11,6 +13,13 @@ import Process from './_process'
  * $X_{t+\mathrm{d}t} = X_t + \sum_{i=1}^{K} J_i,$
  *
  * where $K \sim \mathrm{Poisson}(\lambda\,\mathrm{d}t)$ and $J_i \sim \text{jumpDist}$.
+ *
+ * Unlike the other processes in this module, `marginal(t)` is unsupported for a general
+ * `jumpDist`: because `jumpDist` is an arbitrary caller-supplied `ran.dist` instance, $X_t$ is a
+ * Poisson mixture over sums of an unknown distribution, which has no general closed form
+ * reducible to a single existing `ran.dist` class. The one documented exception is Gamma-
+ * distributed jumps, whose mixture is by definition the compound Poisson-gamma total that
+ * `ran.dist.Tweedie` already represents (see `marginal()` below for the parameter mapping).
  *
  * @class CompoundPoisson
  * @memberof ran.process
@@ -73,5 +82,44 @@ export default class CompoundPoisson extends Process {
   covariogram (s, t) {
     if (s < 0 || t < 0) return NaN
     return this.p.lambda * this.c.eJ2 * Math.min(s, t)
+  }
+
+  /**
+   * Returns the marginal distribution of $X_t$ when `jumpDist` is a `ran.dist.Gamma` instance,
+   * and throws for every other `jumpDist`. $X_t$ is by definition $\sum_{i=1}^{N} J_i$ with
+   * $N \sim \mathrm{Poisson}(\lambda t)$ and $J_i \sim \mathrm{Gamma}(\alpha, \beta)$ (shape,
+   * rate) — exactly the compound Poisson-gamma total `ran.dist.Tweedie` represents as
+   * $\mathrm{Tweedie}(\mu, \phi, p)$, so no new special function or Distribution subclass is
+   * needed. The mapping is derived by matching the two representations' Poisson rate and gamma
+   * shape/rate:
+   *
+   * $p = \frac{\alpha + 2}{\alpha + 1}, \qquad \mu = \frac{\lambda t \alpha}{\beta}, \qquad
+   * \phi = \frac{\alpha + 1}{\beta\, \mu^{1 / (\alpha + 1)}}.$
+   *
+   * No other jump distribution admits a closed form reducible to an existing `ran.dist` class
+   * (arbitrary `jumpDist` makes $X_t$ a Poisson mixture over an unknown distribution's sums);
+   * adding another allowed case would require new distribution machinery and must be scoped as
+   * a separate prerequisite issue (CLAUDE.md "Prerequisite extraction").
+   *
+   * @method marginal
+   * @memberof ran.process.CompoundPoisson
+   * @param {number} t Time.
+   * @returns {import('../dist/_distribution').default} A `Tweedie` instance when `jumpDist` is `Gamma`.
+   * @throws {Error} If `t <= 0`, or if `jumpDist` is not a `ran.dist.Gamma` instance.
+   */
+  marginal (t) {
+    if (t <= 0) {
+      throw Error('CompoundPoisson.marginal(): t must be > 0')
+    }
+    const { jumpDist, lambda } = this.p
+    if (!(jumpDist instanceof Gamma)) {
+      throw Error('CompoundPoisson.marginal(): no closed form exists for an arbitrary jump distribution; only Gamma-distributed jumps are supported')
+    }
+    const { alpha, beta } = jumpDist.params()
+    const lambdaT = lambda * t
+    const mu = lambdaT * alpha / beta
+    const p = (alpha + 2) / (alpha + 1)
+    const phi = (alpha + 1) / (beta * Math.pow(mu, 1 / (alpha + 1)))
+    return new Tweedie(mu, phi, p)
   }
 }
