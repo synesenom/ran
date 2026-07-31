@@ -1468,6 +1468,17 @@ describe('process.BrownianBridge', () => {
       assert.throws(() => BrownianBridge.fit([0, 0], 1, 1), /at least 2/)
     })
 
+    it('should succeed at exactly T/dt = 2 (the minimum estimable case)', () => {
+      const sigma = 1.5
+      const T = 1
+      const dt = 0.5
+      const bb = new BrownianBridge(sigma, T, dt)
+      bb.seed(1)
+      const fitted = BrownianBridge.fit(bb.path(2), T, dt)
+      assert.instanceOf(fitted, BrownianBridge)
+      assert.isAbove(fitted.p.sigma, 0)
+    })
+
     it('should throw when path is not an array', () => {
       assert.throws(() => BrownianBridge.fit(null, 10, 1), /exactly T\/dt \+ 1 states/)
     })
@@ -1739,6 +1750,15 @@ describe('process.AR1', () => {
 
     it('should throw when path is not an array', () => {
       assert.throws(() => AR1.fit(null), /at least 4 states/)
+    })
+
+    it('should succeed at exactly 4 states when the path is not perfectly collinear', () => {
+      // [0, 1, 2, 2] is not collinear (the last step breaks the straight line), so OLS
+      // residuals are not all 0 and sigma2 = ss/(n-2) is strictly positive.
+      const fitted = AR1.fit([0, 1, 2, 2])
+      assert.instanceOf(fitted, AR1)
+      assert.isTrue(Number.isFinite(fitted.p.phi))
+      assert.isAbove(fitted.p.sigma, 0)
     })
 
     it('should throw when a perfectly collinear path drives sigma to 0', () => {
@@ -3037,6 +3057,18 @@ describe('process.RandomWalk', () => {
 
     it('should throw when the estimated p is out of (0,1) (all up-steps)', () => {
       assert.throws(() => RandomWalk.fit([0, 1, 2, 3]), /out of \(0,1\)/)
+    })
+
+    it('should throw for every 2-state path (a single Bernoulli trial can never yield a ' +
+      'fraction strictly between 0 and 1)', () => {
+      assert.throws(() => RandomWalk.fit([0, 1]), /out of \(0,1\)/)
+      assert.throws(() => RandomWalk.fit([0, -1]), /out of \(0,1\)/)
+    })
+
+    it('should succeed at 3 states (the minimum length where p_hat can land strictly inside (0,1))', () => {
+      const fitted = RandomWalk.fit([0, 1, 0])
+      assert.instanceOf(fitted, RandomWalk)
+      assert.strictEqual(fitted.p.p, 0.5)
     })
   })
 })
