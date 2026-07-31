@@ -16,7 +16,7 @@ import ProcessPoisson from '../src/process/poisson'
 import PoissonProcess from '../src/process/poisson-process'
 import RandomWalk from '../src/process/random-walk'
 import ShiftedBinomial from '../src/dist/_shifted-binomial'
-import { Normal, LogNormal, Gamma, Poisson } from '../src/dist'
+import { Normal, LogNormal, Gamma, Poisson, Tweedie } from '../src/dist'
 import { chiTest } from './test-utils'
 
 // Fixed seeds replace ksTest/chiTest significance-level checks: a random seed can produce
@@ -2078,6 +2078,69 @@ describe('process.CompoundPoisson', () => {
         cpp.seed(seed)
         assertSampleMoments(sampleResetSteps(cpp, n), expectedMean, expectedVariance, seed)
       }
+    })
+  })
+
+  describe('.marginal()', () => {
+    it('should throw a CompoundPoisson-specific error explaining the general case is unsupported', () => {
+      const cpp = new CompoundPoisson(new Normal(1, 1), 2, 1)
+      assert.throws(() => cpp.marginal(1), /CompoundPoisson\.marginal\(\): no closed form exists for an arbitrary jump distribution/)
+    })
+
+    it('should throw for t <= 0 even with a Gamma jumpDist', () => {
+      const cpp = new CompoundPoisson(new Gamma(2, 3), 2, 1)
+      assert.throws(() => cpp.marginal(0), /t must be > 0/)
+      assert.throws(() => cpp.marginal(-1), /t must be > 0/)
+    })
+
+    it('should return a Tweedie instance for a Gamma jumpDist, matching mean and variance', () => {
+      const alpha = 2
+      const beta = 3
+      const lambda = 2
+      const t = 1.5
+      const cpp = new CompoundPoisson(new Gamma(alpha, beta), lambda, 1)
+      const marginal = cpp.marginal(t)
+      assert.instanceOf(marginal, Tweedie)
+      assert.closeTo(marginal.mean(), cpp.mean(t), 1e-10)
+      assert.closeTo(marginal.variance(), cpp.variance(t), 1e-10)
+    })
+
+    it('should return a Tweedie marginal whose pdf/cdf match the exact Poisson-gamma mixture', () => {
+      // exact rational: P(Y=0) = P(N=0) = exp(-lambda*t) for the compound Poisson-gamma mixture,
+      // which is also Tweedie's own point-mass formula -- an independent closed-form check that
+      // does not rely on the marginal()/Tweedie parameter-mapping algebra under test.
+      const alpha = 2
+      const beta = 3
+      const lambda = 2
+      const t = 1.5
+      const cpp = new CompoundPoisson(new Gamma(alpha, beta), lambda, 1)
+      const marginal = cpp.marginal(t)
+      assert.closeTo(marginal.pdf(0), Math.exp(-lambda * t), 1e-10)
+      assert.closeTo(marginal.cdf(0), Math.exp(-lambda * t), 1e-10)
+
+      // Independent reference for an interior point (x = mu, the Tweedie mean), built directly
+      // from the compound Poisson-gamma series rather than the marginal()/Tweedie parameter
+      // mapping under test: X_t = sum_{i=1}^{N} J_i with N ~ Poisson(lambda*t) and
+      // J_i ~ Gamma(alpha, beta), so J_1 + ... + J_n ~ Gamma(n*alpha, beta) for n >= 1 (sum of
+      // n i.i.d. Gamma(alpha, beta) variates), giving
+      // pdf(x) = sum_{n=1}^{inf} Poisson(lambda*t).pdf(n) * Gamma(n*alpha, beta).pdf(x) and
+      // cdf(x) = exp(-lambda*t)*(x>=0) + sum_{n=1}^{inf} Poisson(lambda*t).pdf(n) * Gamma(n*alpha, beta).cdf(x).
+      // The series is truncated at N = 30, where the Poisson(3) tail 1 - cdf(30) is far below
+      // 1e-12, so truncation error is negligible next to the 1e-8 comparison tolerance.
+      const mu = marginal.mean()
+      const lambdaT = lambda * t
+      const poissonN = new Poisson(lambdaT)
+      const N = 30
+      let pdfRef = 0
+      let cdfRef = Math.exp(-lambdaT) * (mu >= 0 ? 1 : 0)
+      for (let n = 1; n <= N; n++) {
+        const weight = poissonN.pdf(n)
+        const gammaN = new Gamma(n * alpha, beta)
+        pdfRef += weight * gammaN.pdf(mu)
+        cdfRef += weight * gammaN.cdf(mu)
+      }
+      assert.closeTo(marginal.pdf(mu), pdfRef, 1e-8)
+      assert.closeTo(marginal.cdf(mu), cdfRef, 1e-8)
     })
   })
 })
