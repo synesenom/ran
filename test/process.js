@@ -1740,6 +1740,13 @@ describe('process.AR1', () => {
     it('should throw when path is not an array', () => {
       assert.throws(() => AR1.fit(null), /at least 4 states/)
     })
+
+    it('should throw when a perfectly collinear path drives sigma to 0', () => {
+      // A perfectly linear path drives the OLS residuals to exactly 0, so sigma2 = 0
+      // and the AR1 constructor's Process.validate('sigma > 0') rejects it, unlike
+      // OrnsteinUhlenbeck.fit() which has its own slope-range check for the analogous case.
+      assert.throws(() => AR1.fit([0, 1, 2, 3, 4]), /sigma > 0/)
+    })
   })
 })
 
