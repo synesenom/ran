@@ -1,4 +1,5 @@
 import normal from '../dist/_normal'
+import Normal from '../dist/normal'
 import Process from './_process'
 
 /**
@@ -77,5 +78,17 @@ export default class AR1 extends Process {
       return Math.pow(phi, absLag) * sigma * sigma * minTime
     }
     return Math.pow(phi, absLag) * sigma * sigma * (1 - Math.pow(phi2, minTime)) / (1 - phi2)
+  }
+
+  /** @inheritdoc */
+  marginal (t) {
+    if (t <= 0) {
+      throw Error('AR1.marginal(): t must be > 0')
+    }
+    const v = this.variance(t)
+    if (v <= 0) {
+      throw Error('AR1.marginal(): variance is not positive at t')
+    }
+    return new Normal(0, Math.sqrt(v))
   }
 }

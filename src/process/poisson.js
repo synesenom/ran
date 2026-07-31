@@ -1,4 +1,5 @@
 import poisson from '../dist/_poisson'
+import PoissonDistribution from '../dist/poisson'
 import logGamma from '../special/log-gamma'
 import Process from './_process'
 
@@ -60,5 +61,13 @@ export default class Poisson extends Process {
   covariogram (s, t) {
     if (s < 0 || t < 0) return NaN
     return this.p.lambda * Math.min(s, t)
+  }
+
+  /** @inheritdoc */
+  marginal (t) {
+    if (t <= 0) {
+      throw Error('Poisson.marginal(): t must be > 0')
+    }
+    return new PoissonDistribution(this.p.lambda * t)
   }
 }

@@ -80,16 +80,16 @@ function _cvmStatistic (values, cdf) {
  * @param {number[]} values Array of values to perform the test for.
  * @param {Function} cdf Cumulative distribution function to test against.
  * @param {number} [alpha = 0.05] Confidence level.
- * @returns {{stat: number, pValue: number, passed: boolean}} Object containing the test statistic
- * (T = n omega^2), the asymptotic goodness-of-fit p-value, and whether the sample passed the null
- * hypothesis that it is drawn from the tested distribution.
+ * @returns {{stat: number, passed: boolean, pValue: number}} Object containing the test statistic
+ * (T = n omega^2), whether the sample passed the null hypothesis that it is drawn from the tested
+ * distribution, and the asymptotic goodness-of-fit p-value.
  * @throws {Error} If values is empty.
  * @example
  *
  * let normal = new ran.dist.Normal(0, 1)
  *
  * ran.test.cramerVonMises(normal.sample(100), x => normal.cdf(x))
- * // => { stat: 0.043, pValue: 0.802, passed: true }
+ * // => { stat: 0.043, passed: true, pValue: 0.802 }
  */
 export default function (values, cdf, alpha = 0.05) {
   if (values.length === 0) {
@@ -103,7 +103,7 @@ export default function (values, cdf, alpha = 0.05) {
   // {stat, passed} shape the other src/test/* functions use, not _tests.js's {statistics, ...}
   return {
     stat,
-    pValue,
-    passed: pValue >= alpha
+    passed: pValue >= alpha,
+    pValue
   }
 }
