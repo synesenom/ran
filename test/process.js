@@ -1460,6 +1460,10 @@ describe('process.BrownianBridge', () => {
       assert.throws(() => BrownianBridge.fit([0, 0], 1, 1), /at least 2/)
     })
 
+    it('should throw when path is not an array', () => {
+      assert.throws(() => BrownianBridge.fit(null, 10, 1), /exactly T\/dt \+ 1 states/)
+    })
+
     it('should throw when path length does not match T/dt + 1', () => {
       assert.throws(() => BrownianBridge.fit([0, 1, 0], 4, 1), /exactly T\/dt \+ 1 states/)
     })
@@ -1723,6 +1727,10 @@ describe('process.AR1', () => {
 
     it('should throw when path has fewer than 4 states', () => {
       assert.throws(() => AR1.fit([0, 1, 2]), /at least 4 states/)
+    })
+
+    it('should throw when path is not an array', () => {
+      assert.throws(() => AR1.fit(null), /at least 4 states/)
     })
   })
 })
@@ -3002,6 +3010,10 @@ describe('process.RandomWalk', () => {
 
     it('should throw when path has fewer than 2 states', () => {
       assert.throws(() => RandomWalk.fit([0]), /at least 2 states/)
+    })
+
+    it('should throw when path is not an array', () => {
+      assert.throws(() => RandomWalk.fit(undefined), /at least 2 states/)
     })
 
     it('should throw when a step is not +1 or -1', () => {
