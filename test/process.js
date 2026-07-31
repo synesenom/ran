@@ -1896,6 +1896,14 @@ describe('process.Poisson', () => {
       assert.throws(() => ProcessPoisson.fit([0], 1), /at least 2 states/)
     })
 
+    it('should throw on dt = 0', () => {
+      assert.throws(() => ProcessPoisson.fit([0, 1, 2], 0), /Invalid parameters/)
+    })
+
+    it('should throw on dt < 0', () => {
+      assert.throws(() => ProcessPoisson.fit([0, 1, 2], -1), /Invalid parameters/)
+    })
+
     it('should throw when the path decreases', () => {
       assert.throws(() => ProcessPoisson.fit([0, 1, 2, 1], 1), /non-decreasing/)
     })
@@ -1934,6 +1942,20 @@ describe('process.PoissonProcess (deprecated alias)', () => {
     assert(pp instanceof ProcessPoisson)
     assert.strictEqual(warnings.length, 1)
     assert.match(warnings[0], /ran\.process\.PoissonProcess is deprecated and will be removed in v1\.33\.0; use ran\.process\.Poisson instead\./)
+  })
+
+  it('should have .fit() return a PoissonProcess instance, not a plain Poisson', () => {
+    const originalWarn = console.warn
+    console.warn = () => {}
+    let pp
+    try {
+      pp = new PoissonProcess(2, 1)
+      pp.seed(1)
+      const fitted = PoissonProcess.fit(pp.path(5000))
+      assert.instanceOf(fitted, PoissonProcess)
+    } finally {
+      console.warn = originalWarn
+    }
   })
 })
 
@@ -2223,6 +2245,14 @@ describe('process.CompoundPoisson', () => {
       assert.throws(() => CompoundPoisson.fit([0], 1, Normal), /at least 2 states/)
     })
 
+    it('should throw on dt = 0', () => {
+      assert.throws(() => CompoundPoisson.fit([0, 1, 2], 0, Normal), /Invalid parameters/)
+    })
+
+    it('should throw on dt < 0', () => {
+      assert.throws(() => CompoundPoisson.fit([0, 1, 2], -1, Normal), /Invalid parameters/)
+    })
+
     it('should throw when jumpDistConstructor has no static fit()', () => {
       assert.throws(() => CompoundPoisson.fit([0, 1, 2], 1, {}), /static fit\(\) method/)
     })
@@ -2264,6 +2294,20 @@ describe('process.CompoundPoissonProcess (deprecated alias)', () => {
     assert(cpp instanceof CompoundPoisson)
     assert.strictEqual(warnings.length, 1)
     assert.match(warnings[0], /ran\.process\.CompoundPoissonProcess is deprecated and will be removed in v1\.33\.0; use ran\.process\.CompoundPoisson instead\./)
+  })
+
+  it('should have .fit() return a CompoundPoissonProcess instance, not a plain CompoundPoisson', () => {
+    const originalWarn = console.warn
+    console.warn = () => {}
+    let cpp
+    try {
+      cpp = new CompoundPoissonProcess(new Normal(2, 0.5), 2, 1)
+      cpp.seed(1)
+      const fitted = CompoundPoissonProcess.fit(cpp.path(5000), 1, Normal)
+      assert.instanceOf(fitted, CompoundPoissonProcess)
+    } finally {
+      console.warn = originalWarn
+    }
   })
 })
 

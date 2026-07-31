@@ -3,24 +3,6 @@ import Gamma from '../dist/gamma'
 import Tweedie from '../dist/tweedie'
 import Process from './_process'
 
-function recoverJumps (path) {
-  const jumps = []
-  for (let i = 1; i < path.length; i++) {
-    const d = path[i] - path[i - 1]
-    if (d !== 0) jumps.push(d)
-  }
-  return jumps
-}
-
-function validateFitArgs (path, jumpDistConstructor) {
-  if (!Array.isArray(path) || path.length < 2) {
-    throw Error('CompoundPoisson.fit(): path must contain at least 2 states')
-  }
-  if (jumpDistConstructor == null || typeof jumpDistConstructor.fit !== 'function') {
-    throw Error('CompoundPoisson.fit(): jumpDistConstructor must be a ran.dist Distribution class with a static fit() method')
-  }
-}
-
 /**
  * Compound Poisson process: cumulative random-magnitude jumps arriving at a Poisson rate.
  *
@@ -163,12 +145,23 @@ export default class CompoundPoisson extends Process {
    */
   static fit (path, dt = 1, jumpDistConstructor) {
     Process.validate({ dt }, ['dt > 0'])
-    validateFitArgs(path, jumpDistConstructor)
-    const jumps = recoverJumps(path)
+    if (!Array.isArray(path) || path.length < 2) {
+      throw Error('CompoundPoisson.fit(): path must contain at least 2 states')
+    }
+    if (jumpDistConstructor == null || typeof jumpDistConstructor.fit !== 'function') {
+      throw Error('CompoundPoisson.fit(): jumpDistConstructor must be a ran.dist Distribution class with a static fit() method')
+    }
+    const n = path.length - 1
+    const jumps = []
+    for (let i = 0; i < n; i++) {
+      const d = path[i + 1] - path[i]
+      if (d !== 0) jumps.push(d)
+    }
     if (jumps.length === 0) {
       throw Error('CompoundPoisson.fit(): path contains no non-zero increments to recover jump sizes from')
     }
-    const lambda = jumps.length / ((path.length - 1) * dt)
-    return new CompoundPoisson(jumpDistConstructor.fit(jumps), lambda, dt)
+    const lambda = jumps.length / (n * dt)
+    const Cls = this
+    return new Cls(jumpDistConstructor.fit(jumps), lambda, dt)
   }
 }
