@@ -1,4 +1,5 @@
 import logGamma from '../special/log-gamma'
+import ShiftedBinomial from '../dist/_shifted-binomial'
 import Process from './_process'
 
 /**
@@ -59,5 +60,13 @@ export default class RandomWalk extends Process {
   covariogram (s, t) {
     if (s < 0 || t < 0) return NaN
     return 4 * this.p.p * (1 - this.p.p) * Math.min(s, t)
+  }
+
+  /** @inheritdoc */
+  marginal (t) {
+    if (t < 0 || !Number.isInteger(t)) {
+      throw Error('RandomWalk.marginal(): t must be a non-negative integer')
+    }
+    return new ShiftedBinomial(t, this.p.p)
   }
 }

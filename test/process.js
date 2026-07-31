@@ -15,7 +15,9 @@ import CompoundPoissonProcess from '../src/process/compound-poisson-process'
 import ProcessPoisson from '../src/process/poisson'
 import PoissonProcess from '../src/process/poisson-process'
 import RandomWalk from '../src/process/random-walk'
+import ShiftedBinomial from '../src/dist/_shifted-binomial'
 import { Normal, LogNormal, Gamma, Poisson } from '../src/dist'
+import { chiTest } from './test-utils'
 
 // Fixed seeds replace ksTest/chiTest significance-level checks: a random seed can produce
 // a false positive/negative at the chosen critical value on some runs, while a fixed seed
@@ -1625,6 +1627,40 @@ describe('process.AR1', () => {
       assert(lateMSV > earlyMSV * 100)
     })
   })
+
+  describe('.marginal()', () => {
+    it('should return a Normal instance with variance matching variance(t)', () => {
+      const ar1 = new AR1(0.5, 2)
+      const marginal = ar1.marginal(2)
+      assert.instanceOf(marginal, Normal)
+      assert.strictEqual(marginal.mean(), 0)
+      assert.closeTo(marginal.variance(), ar1.variance(2), 1e-10)
+    })
+
+    it('should have pdf matching process.pdf(x, t)', () => {
+      const ar1 = new AR1(0.5, 1)
+      const marginal = ar1.marginal(2)
+      assert.closeTo(marginal.pdf(0), ar1.pdf(0, 2), 1e-10)
+      // non-zero x exercises the z = x/s scaling term, which pdf(0) alone cannot catch
+      assert.closeTo(marginal.pdf(1), ar1.pdf(1, 2), 1e-10)
+    })
+
+    it('should invert cdf via quantile', () => {
+      const ar1 = new AR1(0.5, 1)
+      const marginal = ar1.marginal(2)
+      assert.closeTo(marginal.q(marginal.cdf(1)), 1, 1e-10)
+    })
+
+    it('should throw for t = 0', () => {
+      const ar1 = new AR1(0.5, 1)
+      assert.throws(() => ar1.marginal(0), /t must be > 0/)
+    })
+
+    it('should throw for t < 0', () => {
+      const ar1 = new AR1(0.5, 1)
+      assert.throws(() => ar1.marginal(-1), /t must be > 0/)
+    })
+  })
 })
 
 describe('process.Poisson', () => {
@@ -1796,6 +1832,38 @@ describe('process.Poisson', () => {
     it('should return NaN for t < 0', () => {
       const pp = new ProcessPoisson(1, 1)
       assert(Number.isNaN(pp.covariogram(2, -1)))
+    })
+  })
+
+  describe('.marginal()', () => {
+    it('should return a Poisson instance with mean matching mean(t)', () => {
+      const pp = new ProcessPoisson(2, 0.5)
+      const marginal = pp.marginal(3)
+      assert.instanceOf(marginal, Poisson)
+      assert.closeTo(marginal.mean(), pp.mean(3), 1e-10)
+      assert.closeTo(marginal.variance(), pp.variance(3), 1e-10)
+    })
+
+    it('should have pdf matching process.pdf(x, t)', () => {
+      const pp = new ProcessPoisson(2, 0.5)
+      const marginal = pp.marginal(3)
+      assert.closeTo(marginal.pdf(2), pp.pdf(2, 3), 1e-10)
+    })
+
+    it('should invert cdf via quantile', () => {
+      const pp = new ProcessPoisson(2, 0.5)
+      const marginal = pp.marginal(3)
+      assert.closeTo(marginal.q(marginal.cdf(2)), 2, 1e-10)
+    })
+
+    it('should throw for t = 0', () => {
+      const pp = new ProcessPoisson(2, 0.5)
+      assert.throws(() => pp.marginal(0), /t must be > 0/)
+    })
+
+    it('should throw for t < 0', () => {
+      const pp = new ProcessPoisson(2, 0.5)
+      assert.throws(() => pp.marginal(-1), /t must be > 0/)
     })
   })
 })
@@ -2646,6 +2714,146 @@ describe('process.RandomWalk', () => {
         rw.seed(seed)
         assertSampleMoments(sampleSteps(rw, n), 2 * p - 1, 4 * p * (1 - p), seed)
       }
+    })
+  })
+
+  describe('.marginal()', () => {
+    it('should have mean and variance matching mean(t) and variance(t)', () => {
+      const rw = new RandomWalk(0.6)
+      const marginal = rw.marginal(5)
+      assert.closeTo(marginal.mean(), rw.mean(5), 1e-10)
+      assert.closeTo(marginal.variance(), rw.variance(5), 1e-10)
+    })
+
+    it('should have pdf matching process.pdf(x, t) for on-parity x', () => {
+      const rw = new RandomWalk(0.6)
+      const marginal = rw.marginal(5)
+      assert.closeTo(marginal.pdf(3), rw.pdf(3, 5), 1e-10)
+      assert.closeTo(marginal.pdf(-1), rw.pdf(-1, 5), 1e-10)
+    })
+
+    it('should return 0 for off-parity x, matching process.pdf(x, t)', () => {
+      const rw = new RandomWalk(0.6)
+      const marginal = rw.marginal(4)
+      assert.strictEqual(marginal.pdf(1), rw.pdf(1, 4))
+      assert.strictEqual(marginal.pdf(1), 0)
+    })
+
+    it('should return 0 outside the support', () => {
+      const rw = new RandomWalk(0.6)
+      const marginal = rw.marginal(4)
+      assert.strictEqual(marginal.pdf(6), 0)
+      assert.strictEqual(marginal.pdf(-6), 0)
+    })
+
+    it('should return a nonzero pdf at the exact support boundary', () => {
+      const p = 0.6
+      const n = 4
+      const rw = new RandomWalk(p)
+      const marginal = rw.marginal(n)
+      // exact rational: pdf(n) is the all-+1-steps walk, probability p^n
+      assert.closeTo(marginal.pdf(n), Math.pow(p, n), 1e-10)
+      // exact rational: pdf(-n) is the all--1-steps walk, probability (1-p)^n
+      assert.closeTo(marginal.pdf(-n), Math.pow(1 - p, n), 1e-10)
+    })
+
+    it('should invert cdf via quantile', () => {
+      const rw = new RandomWalk(0.6)
+      const marginal = rw.marginal(5)
+      assert.closeTo(marginal.q(marginal.cdf(1)), 1, 1e-10)
+      assert.closeTo(marginal.q(marginal.cdf(-3)), -3, 1e-10)
+    })
+
+    it('should sample within the support', () => {
+      const rw = new RandomWalk(0.6)
+      const marginal = rw.marginal(5)
+      marginal.seed(42)
+      for (const x of marginal.sample(50)) {
+        assert(x >= -5 && x <= 5, `x=${x} out of [-5, 5]`)
+        assert.strictEqual((5 + x) % 2, 0, `x=${x} has wrong parity`)
+      }
+    })
+
+    it('should sample values matching the marginal pmf shape (chi-square test)', () => {
+      // Bounds/parity checks above pass for any generator that merely stays inside
+      // [-n, n] with the right parity -- a flipped p (this.r.next() < this.p.p
+      // inverted) or a flipped step count (n - 2*heads instead of 2*heads - n) would
+      // still satisfy them undetected. A chi-square goodness-of-fit test against
+      // the ShiftedBinomial pmf catches a biased/inverted generator that those
+      // checks cannot.
+      const rw = new RandomWalk(0.6)
+      const marginal = rw.marginal(5)
+      marginal.seed(7)
+      const sample = marginal.sample(3000)
+      assert(chiTest(sample, x => marginal.pdf(x), 1))
+    })
+
+    it('should not throw at t = 0 and represent a point mass at 0', () => {
+      const rw = new RandomWalk(0.5)
+      const marginal = rw.marginal(0)
+      assert.strictEqual(marginal.pdf(0), 1)
+      assert.strictEqual(marginal.pdf(1), 0)
+    })
+
+    it('should throw for t < 0', () => {
+      const rw = new RandomWalk(0.5)
+      assert.throws(() => rw.marginal(-1), /non-negative integer/)
+    })
+
+    it('should throw for non-integer t', () => {
+      const rw = new RandomWalk(0.5)
+      assert.throws(() => rw.marginal(1.5), /non-negative integer/)
+    })
+
+    it('should support fitting the returned ShiftedBinomial instance to sampled data', () => {
+      const rw = new RandomWalk(0.7)
+      const marginal = rw.marginal(20)
+      marginal.seed(42)
+      const fitted = ShiftedBinomial.fit(marginal.sample(2000))
+      assert.instanceOf(fitted, ShiftedBinomial)
+      assert.strictEqual(fitted.p.n, 20)
+      assert.closeTo(fitted.p.p, 0.7, 0.05)
+    })
+
+    // ShiftedBinomial is private (decisions/0045) and only ever surfaces as the return value
+    // of RandomWalk.marginal(t), so these are its sole regression check for the six generic
+    // Distribution methods it inherits without overriding (hazard/survival/lnL/aic/bic/test) --
+    // a future change to the base class or to _cdf could silently break any of them otherwise.
+    it('should have survival(x) matching 1 - cdf(x)', () => {
+      const rw = new RandomWalk(0.6)
+      const marginal = rw.marginal(5)
+      assert.closeTo(marginal.survival(1), 1 - marginal.cdf(1), 1e-10)
+    })
+
+    it('should have hazard(x) matching pdf(x) / survival(x)', () => {
+      const rw = new RandomWalk(0.6)
+      const marginal = rw.marginal(5)
+      assert.closeTo(marginal.hazard(1), marginal.pdf(1) / marginal.survival(1), 1e-10)
+    })
+
+    it('should return a finite log-likelihood for a valid support sample', () => {
+      const rw = new RandomWalk(0.6)
+      const marginal = rw.marginal(5)
+      assert.isTrue(Number.isFinite(marginal.lnL([-3, -1, 1, 3, 5])))
+    })
+
+    it('should return finite aic/bic for a sampled data set', () => {
+      const rw = new RandomWalk(0.6)
+      const marginal = rw.marginal(5)
+      marginal.seed(1)
+      const sample = marginal.sample(50)
+      assert.isTrue(Number.isFinite(marginal.aic(sample)))
+      assert.isTrue(Number.isFinite(marginal.bic(sample)))
+    })
+
+    it('should return the discrete chi-square test result shape for a sampled data set', () => {
+      const rw = new RandomWalk(0.6)
+      const marginal = rw.marginal(5)
+      marginal.seed(7)
+      const result = marginal.test(marginal.sample(3000))
+      assert.isTrue(result.passed)
+      assert.isNumber(result.statistics)
+      assert.isNumber(result.pValue)
     })
   })
 })
