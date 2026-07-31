@@ -1,6 +1,7 @@
 import normal from '../dist/_normal'
 import Normal from '../dist/normal'
 import Process from './_process'
+import ols from './_ols'
 
 /**
  * First-order autoregressive (AR(1)) process, the discrete-time analogue of the
@@ -90,5 +91,35 @@ export default class AR1 extends Process {
       throw Error('AR1.marginal(): variance is not positive at t')
     }
     return new Normal(0, Math.sqrt(v))
+  }
+
+  /**
+   * Estimates phi and sigma from an observed path via OLS regression of X_{n+1} on X_n, reusing
+   * the same ols() helper as OrnsteinUhlenbeck.fit(). The true transition has no intercept
+   * (_next() is phi*X_n + sigma*Z), but fitting through the shared intercept-plus-slope form
+   * still recovers phi consistently since the true intercept is exactly 0; only the slope is
+   * kept and the intercept is otherwise discarded, apart from computing residuals for sigma.
+   *
+   * @method fit
+   * @memberof ran.process.AR1
+   * @param {Array} path Array of observed states (as returned by path()).
+   * @returns {AR1} A new instance with estimated phi and sigma.
+   * @throws {Error} If path has fewer than 4 states.
+   */
+  static fit (path) {
+    if (!Array.isArray(path) || path.length < 4) {
+      throw Error('AR1.fit(): path must contain at least 4 states')
+    }
+    const n = path.length - 1
+    const xs = path.slice(0, n)
+    const ys = path.slice(1)
+    const { slope: phi, intercept: a } = ols(xs, ys)
+    let ss = 0
+    for (let i = 0; i < n; i++) {
+      const e = ys[i] - a - phi * xs[i]
+      ss += e * e
+    }
+    const sigma2 = ss / (n - 2)
+    return new AR1(phi, Math.sqrt(sigma2))
   }
 }
