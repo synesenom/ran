@@ -1,6 +1,10 @@
 # Node
 /node_modules
 
+# Python (scripts/precision-refs-*.py)
+__pycache__/
+*.pyc
+
 # Generated output
 /.nyc_output
 /coverage
