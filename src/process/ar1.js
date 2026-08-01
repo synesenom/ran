@@ -60,6 +60,7 @@ export default class AR1 extends Process {
     }
     // -expm1(t*log(phi2)) avoids catastrophic cancellation in 1-phi2^t when
     // phi2 is close to 1 and t is small, where Math.pow(phi2, t) rounds to 1
+    // See solutions/correctness/2026-08-01-1500-ar1-variance-cancellation-and-reformulation-boundary.md
     return sigma * sigma * (-Math.expm1(t * Math.log(phi2))) / (1 - phi2)
   }
 
