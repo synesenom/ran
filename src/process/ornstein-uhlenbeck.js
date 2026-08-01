@@ -35,16 +35,36 @@ export default class OrnsteinUhlenbeck extends Process {
     this.x = 0
     this.x0 = 0
     const decay = Math.exp(-theta * dt)
-    this.c = {
-      decay,
-      noise: sigma * Math.sqrt((1 - decay * decay) / (2 * theta))
-    }
+    const noise = sigma * Math.sqrt((1 - decay * decay) / (2 * theta))
+    this.c = { decay, noise, logNoise: Math.log(noise) }
   }
 
   _next () {
     const { mu } = this.p
     const { decay, noise } = this.c
     return this.x * decay + mu * (1 - decay) + noise * normal(this.r)
+  }
+
+  /**
+   * The one-step transition X_{i+1} | X_i is Normal(X_i*decay + mu*(1-decay), noise^2), the
+   * same law _next() draws from. decay/noise are the one-step (dt) constants precomputed in
+   * this.c — distinct from mean(t)/variance(t)'s elapsed-time decay exp(-theta*t) for
+   * arbitrary t.
+   *
+   * @method _transitionLnPdf
+   * @memberof ran.process.OrnsteinUhlenbeck
+   * @param {number} xPrev State at the start of the step.
+   * @param {number} xNext State at the end of the step.
+   * @returns {number} Log-density of the transition xPrev -> xNext.
+   * @protected
+   * @ignore
+   */
+  _transitionLnPdf (xPrev, xNext) {
+    const { mu } = this.p
+    const { decay, noise, logNoise } = this.c
+    const m = xPrev * decay + mu * (1 - decay)
+    const z = (xNext - m) / noise
+    return -0.5 * z * z - logNoise - 0.5 * Math.log(2 * Math.PI)
   }
 
   /** @inheritdoc */

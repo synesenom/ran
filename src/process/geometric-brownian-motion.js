@@ -33,14 +33,42 @@ export default class GeometricBrownianMotion extends Process {
     this.p = { mu, sigma, dt }
     this.x = 1
     this.x0 = 1
+    const noise = sigma * Math.sqrt(dt)
     this.c = {
       drift: (mu - 0.5 * sigma * sigma) * dt,
-      noise: sigma * Math.sqrt(dt)
+      noise,
+      logNoise: Math.log(noise)
     }
   }
 
   _next () {
     return this.x * Math.exp(this.c.drift + this.c.noise * normal(this.r))
+  }
+
+  /**
+   * log(X_{i+1}/X_i) | X_i is Normal(drift, noise^2), the same law _next() draws from; the
+   * transition density in X_{i+1} itself picks up a 1/X_{i+1} Jacobian term. Mirrors pdf(x,t)'s
+   * x <= 0 => 0 convention: the log-density of an impossible (non-positive) state is -Infinity,
+   * not a thrown error (decisions/0015-return-value-and-error-conventions.md).
+   *
+   * @method _transitionLnPdf
+   * @memberof ran.process.GeometricBrownianMotion
+   * @param {number} xPrev State at the start of the step.
+   * @param {number} xNext State at the end of the step.
+   * @returns {number} Log-density of the transition xPrev -> xNext, or -Infinity if xPrev <= 0 or xNext <= 0.
+   * @protected
+   * @ignore
+   */
+  _transitionLnPdf (xPrev, xNext) {
+    // Both endpoints must be guarded: xPrev <= 0 alone previously slipped through as
+    // Math.log(negative) = NaN instead of -Infinity for an impossible path.
+    // solutions/correctness/2026-08-01-1414-gbm-transition-density-asymmetric-domain-guard.md
+    if (xPrev <= 0 || xNext <= 0) {
+      return -Infinity
+    }
+    const { drift, noise, logNoise } = this.c
+    const z = (Math.log(xNext / xPrev) - drift) / noise
+    return -0.5 * z * z - logNoise - 0.5 * Math.log(2 * Math.PI) - Math.log(xNext)
   }
 
   /** @inheritdoc */

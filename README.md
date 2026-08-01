@@ -223,6 +223,7 @@ bm.mean(t)            // theoretical mean at time t
 bm.variance(t)        // theoretical variance at time t
 bm.covariogram(s, t)  // theoretical covariance Cov(X(s), X(t))
 bm.marginal(2)        // Distribution instance representing the marginal at time t
+bm.lnL(path)          // transition log-likelihood of an observed path under this process
 bm.seed(42)           // seed the PRNG for reproducible paths; returns the instance
 ```
 

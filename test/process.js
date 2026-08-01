@@ -69,6 +69,35 @@ function sampleResetSteps (proc, n) {
   return samples
 }
 
+// Counts Math.log() invocations during fn(), then restores the original — used to verify a
+// precomputed log constant (e.g. this.c.logNoise) isn't being recomputed on every call in a
+// process's _transitionLnPdf hot path.
+function countLogCalls (fn) {
+  const originalLog = Math.log
+  let calls = 0
+  Math.log = (x) => {
+    calls++
+    return originalLog(x)
+  }
+  try {
+    fn()
+  } finally {
+    Math.log = originalLog
+  }
+  return calls
+}
+
+// Asserts the mean per-step transition log-density of a Gaussian-transition process (BM, OU)
+// matches its known theoretical expectation within a CLT tolerance. Each step's residual
+// z = (x_{i+1}-mean)/scale is exactly N(0,1) by construction (_next() draws it directly), so
+// E[-0.5*z^2] = -0.5 exactly and Var(z^2) = 2, giving Var(mean of n such terms) = 1/(2n).
+function assertMeanPerStepLnLMatchesGaussianTransition (proc, path, scale) {
+  const n = path.length - 1
+  const expectedMean = -0.5 - Math.log(scale) - 0.5 * Math.log(2 * Math.PI)
+  const tol = K_SIGMA * Math.sqrt(1 / (2 * n))
+  assert.closeTo(proc.lnL(path) / n, expectedMean, tol)
+}
+
 // Deprecated-alias tests construct through a console.warn-emitting constructor; both silencing
 // it and capturing its message need the same save/restore-on-throw bracketing around the call.
 function withSuppressedWarnings (fn) {
@@ -211,6 +240,23 @@ describe('process', () => {
       it('should throw when not implemented', () => {
         const p = new BareProcess()
         assert.throws(() => p.marginal(1), 'Process.marginal() is not implemented')
+      })
+    })
+
+    describe('.lnL()', () => {
+      it('should throw when the transition density is not implemented', () => {
+        const p = new BareProcess()
+        assert.throws(() => p.lnL([0, 1]), 'Process._transitionLnPdf() is not implemented')
+      })
+
+      it('should throw when path has fewer than 2 states', () => {
+        const p = new BareProcess()
+        assert.throws(() => p.lnL([0]), /at least 2 states/)
+      })
+
+      it('should throw when path is not an array', () => {
+        const p = new BareProcess()
+        assert.throws(() => p.lnL(null), /at least 2 states/)
       })
     })
 
@@ -544,6 +590,36 @@ describe('process.BrownianMotion', () => {
     })
   })
 
+  describe('.lnL()', () => {
+    it('should match the transition log-likelihood of a fixed path', () => {
+      const bm = new BrownianMotion(0.3, 1.2, 0.5)
+      const path = [0, 0.4, 1.1, 0.7]
+      // mpmath mp.dps=50: sum of Normal(x_i + mu*dt, sigma^2*dt).logpdf(x_{i+1}) over the 3 steps
+      // → -2.7276011658226308065169617691597986337297768997831
+      assert.closeTo(bm.lnL(path), -2.7276011658226307, 1e-9)
+    })
+
+    it('should have a mean per-step log-density matching the known transition law (CLT tolerance)', () => {
+      const mu = 0.1
+      const sigma = 1
+      const dt = 1
+      const n = 2000
+      const bm = new BrownianMotion(mu, sigma, dt)
+      bm.seed(42)
+      const path = bm.path(n)
+      assertMeanPerStepLnLMatchesGaussianTransition(bm, path, sigma * Math.sqrt(dt))
+    })
+
+    it('should not recompute log(sigmaDt) per step (this.c.logSigmaDt is precomputed at construction)', () => {
+      const bm = new BrownianMotion(0.3, 1.2, 0.5)
+      const path = [0, 0.4, 1.1, 0.7, 0.2, 0.9, 0.5, 1.3, 0.8, 0.6]
+      const steps = path.length - 1
+      // Only the 2π normalization term is logged per step once sigmaDt's log is cached in
+      // this.c.logSigmaDt; a Math.log(sigmaDt) recomputation per step would double this count.
+      assert.strictEqual(countLogCalls(() => bm.lnL(path)), steps)
+    })
+  })
+
   describe('.fit()', () => {
     it('should recover mu and sigma from a long simulated path across seeds', () => {
       const mu = 0.3
@@ -817,6 +893,55 @@ describe('process.GeometricBrownianMotion', () => {
     })
   })
 
+  describe('.lnL()', () => {
+    it('should match the transition log-likelihood of a fixed path', () => {
+      const gbm = new GeometricBrownianMotion(0.1, 0.25, 0.5)
+      const path = [1.0, 1.2, 0.9, 1.5]
+      // mpmath mp.dps=50: sum of [Normal(drift, noise^2).logpdf(log(x_{i+1}/x_i)) - log(x_{i+1})]
+      // over the 3 steps, where drift = (mu-0.5*sigma^2)*dt, noise^2 = sigma^2*dt (the log-normal
+      // transition density's 1/x Jacobian) → -3.6824641101851229894621067377482732895915091716478
+      assert.closeTo(gbm.lnL(path), -3.682464110185123, 1e-9)
+    })
+
+    it('should return -Infinity, not throw, when the path visits a non-positive state', () => {
+      const gbm = new GeometricBrownianMotion(0.1, 0.25, 0.5)
+      assert.strictEqual(gbm.lnL([1, -1]), -Infinity)
+    })
+
+    it('should return -Infinity, not NaN, when the non-positive state is not the last one', () => {
+      const gbm = new GeometricBrownianMotion(0.1, 0.25, 0.5)
+      assert.strictEqual(gbm.lnL([1, -1, 2]), -Infinity)
+    })
+
+    it('should match the known transition law plus the observed path Jacobian (CLT tolerance)', () => {
+      const mu = 0.05
+      const sigma = 0.2
+      const dt = 1
+      const n = 2000
+      const gbm = new GeometricBrownianMotion(mu, sigma, dt)
+      gbm.seed(42)
+      const path = gbm.path(n)
+      const noise = sigma * Math.sqrt(dt)
+      // Each step's residual z = (log(x_{i+1}/x_i)-drift)/noise is exactly N(0,1) by construction,
+      // so E[-0.5*z^2] = -0.5 exactly (Var(z^2) = 2). The -log(x_{i+1}) Jacobian term is not part
+      // of that randomness — it's summed directly from the actually observed path values.
+      let logJacobianSum = 0
+      for (let i = 0; i < n; i++) logJacobianSum += Math.log(path[i + 1])
+      const expectedTotal = n * (-0.5 - Math.log(noise) - 0.5 * Math.log(2 * Math.PI)) - logJacobianSum
+      const tol = K_SIGMA * Math.sqrt(n / 2)
+      assert.closeTo(gbm.lnL(path), expectedTotal, tol)
+    })
+
+    it('should not recompute log(noise) per step (this.c.logNoise is precomputed at construction)', () => {
+      const gbm = new GeometricBrownianMotion(0.1, 0.25, 0.5)
+      const path = [1.0, 1.2, 0.9, 1.5, 1.1, 1.3, 0.95, 1.4, 1.05, 1.25]
+      const steps = path.length - 1
+      // Each step already logs log(xNext/xPrev), log(2π), and log(xNext) (the Jacobian term);
+      // a Math.log(noise) recomputation per step would push this to 4 calls/step instead of 3.
+      assert.strictEqual(countLogCalls(() => gbm.lnL(path)), 3 * steps)
+    })
+  })
+
   describe('.fit()', () => {
     it('should recover mu and sigma from a long simulated path across seeds', () => {
       const mu = 0.05
@@ -1056,6 +1181,41 @@ describe('process.OrnsteinUhlenbeck', () => {
     it('should throw for t < 0', () => {
       const ou = new OrnsteinUhlenbeck(1, 0, 1, 1)
       assert.throws(() => ou.marginal(-1), /t must be > 0/)
+    })
+  })
+
+  describe('.lnL()', () => {
+    it('should match the transition log-likelihood of a fixed path', () => {
+      const ou = new OrnsteinUhlenbeck(0.8, 0.5, 0.6, 0.25)
+      const path = [1.0, 0.9, 0.6, 0.8]
+      // mpmath mp.dps=50: sum of Normal(x_i*decay + mu*(1-decay), noise^2).logpdf(x_{i+1}) over
+      // the 3 steps, where decay = exp(-theta*dt), noise^2 = sigma^2*(1-decay^2)/(2*theta) —
+      // the ONE-STEP transition constants, distinct from mean(t)/variance(t)'s elapsed-time
+      // decay exp(-theta*t) for arbitrary t → 0.47497249518150224285604569178811850409220342308943
+      assert.closeTo(ou.lnL(path), 0.47497249518150225, 1e-9)
+    })
+
+    it('should have a mean per-step log-density matching the known transition law (CLT tolerance)', () => {
+      const theta = 0.5
+      const mu = 3
+      const sigma = 2
+      const dt = 0.1
+      const n = 2000
+      const ou = new OrnsteinUhlenbeck(theta, mu, sigma, dt)
+      ou.seed(42)
+      const path = ou.path(n)
+      const decay = Math.exp(-theta * dt)
+      const noise = sigma * Math.sqrt((1 - decay * decay) / (2 * theta))
+      assertMeanPerStepLnLMatchesGaussianTransition(ou, path, noise)
+    })
+
+    it('should not recompute log(noise) per step (this.c.logNoise is precomputed at construction)', () => {
+      const ou = new OrnsteinUhlenbeck(0.8, 0.5, 0.6, 0.25)
+      const path = [1.0, 0.9, 0.6, 0.8, 0.7, 0.95, 0.65, 0.85, 0.75, 0.9]
+      const steps = path.length - 1
+      // Only the 2π normalization term is logged per step once noise's log is cached in
+      // this.c.logNoise; a Math.log(noise) recomputation per step would double this count.
+      assert.strictEqual(countLogCalls(() => ou.lnL(path)), steps)
     })
   })
 

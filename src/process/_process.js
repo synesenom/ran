@@ -1,5 +1,6 @@
 import Xoshiro128p from '../core/xoshiro'
 import validateParams from '../utils/validate-params'
+import neumaier from '../algorithms/neumaier'
 
 /**
  * The stochastic process generator base class, all process generators extend this class. The methods listed here
@@ -130,6 +131,33 @@ export default class Process {
   }
 
   /**
+   * Returns the log-likelihood of an observed discrete-time path under this process's
+   * one-step transition density, i.e. the sum over consecutive pairs of
+   * log(f(x_{i+1} | x_i)), where f is the transition density implemented by
+   * _transitionLnPdf(). This treats path as one dependent, Markov-correlated trajectory,
+   * not a set of independent draws from the marginal distribution — the two are different
+   * objects (decisions/0046-process-lnl-transition-likelihood.md) and only the transition
+   * form is the correct likelihood for a single realized path.
+   *
+   * @method lnL
+   * @memberof ran.process.Process
+   * @param {Array} path Array of observed states (e.g. as returned by path()), spaced dt apart.
+   * @returns {number} The transition log-likelihood of the path.
+   * @throws {Error} If path has fewer than 2 states, or if the subclass has no closed-form
+   * transition density.
+   */
+  lnL (path) {
+    if (!Array.isArray(path) || path.length < 2) {
+      throw Error('Process.lnL(): path must contain at least 2 states')
+    }
+    const terms = []
+    for (let i = 0; i < path.length - 1; i++) {
+      terms.push(this._transitionLnPdf(path[i], path[i + 1]))
+    }
+    return neumaier(terms)
+  }
+
+  /**
    * Advances the process by one step, updates the current state, and returns the new state.
    *
    * @method next
@@ -246,5 +274,21 @@ export default class Process {
    */
   _next () {
     throw Error('Process._next() is not implemented')
+  }
+
+  /**
+   * Returns the log-density of the one-step transition from xPrev to xNext. Must be
+   * implemented by subclasses with a closed-form transition density.
+   *
+   * @method _transitionLnPdf
+   * @memberof ran.process.Process
+   * @param {number} xPrev State at the start of the step.
+   * @param {number} xNext State at the end of the step.
+   * @returns {number} Log-density of the transition xPrev -> xNext.
+   * @protected
+   * @ignore
+   */
+  _transitionLnPdf (xPrev, xNext) { // eslint-disable-line no-unused-vars
+    throw Error('Process._transitionLnPdf() is not implemented')
   }
 }

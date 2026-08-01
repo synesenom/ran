@@ -33,11 +33,33 @@ export default class BrownianMotion extends Process {
     this.p = { mu, sigma, dt }
     this.x = 0
     this.x0 = 0
-    this.c = { sqrtDt: Math.sqrt(dt) }
+    this.c = {
+      sqrtDt: Math.sqrt(dt),
+      sigmaDt: sigma * Math.sqrt(dt),
+      logSigmaDt: Math.log(sigma * Math.sqrt(dt))
+    }
   }
 
   _next () {
     return this.x + this.p.mu * this.p.dt + this.p.sigma * this.c.sqrtDt * normal(this.r)
+  }
+
+  /**
+   * The one-step transition X_{i+1} | X_i is Normal(X_i + mu*dt, sigma^2*dt), the same law
+   * _next() draws from.
+   *
+   * @method _transitionLnPdf
+   * @memberof ran.process.BrownianMotion
+   * @param {number} xPrev State at the start of the step.
+   * @param {number} xNext State at the end of the step.
+   * @returns {number} Log-density of the transition xPrev -> xNext.
+   * @protected
+   * @ignore
+   */
+  _transitionLnPdf (xPrev, xNext) {
+    const { sigmaDt, logSigmaDt } = this.c
+    const z = (xNext - xPrev - this.p.mu * this.p.dt) / sigmaDt
+    return -0.5 * z * z - logSigmaDt - 0.5 * Math.log(2 * Math.PI)
   }
 
   /** @inheritdoc */
