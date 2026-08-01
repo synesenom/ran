@@ -69,6 +69,30 @@ function sampleResetSteps (proc, n) {
   return samples
 }
 
+// Deprecated-alias tests construct through a console.warn-emitting constructor; both silencing
+// it and capturing its message need the same save/restore-on-throw bracketing around the call.
+function withSuppressedWarnings (fn) {
+  const originalWarn = console.warn
+  console.warn = () => {}
+  try {
+    return fn()
+  } finally {
+    console.warn = originalWarn
+  }
+}
+
+function captureWarnings (fn) {
+  const warnings = []
+  const originalWarn = console.warn
+  console.warn = msg => warnings.push(msg)
+  try {
+    fn()
+  } finally {
+    console.warn = originalWarn
+  }
+  return warnings
+}
+
 describe('process._Process', () => {
   describe('.validate()', () => {
     it('should throw on undefined parameter', () => {
@@ -1973,36 +1997,77 @@ describe('process.Poisson', () => {
       assert.throws(() => pp.marginal(-1), /t must be > 0/)
     })
   })
+
+  describe('.fit()', () => {
+    it('should recover lambda from a long simulated path across seeds', () => {
+      const lambda = 3
+      const dt = 0.5
+      const n = 20000
+      // fit() is the exact MLE: the total count over n*dt observed time is itself exactly
+      // Poisson(n*dt*lambda) (sum of n i.i.d. Poisson(lambda*dt) increments), so
+      // Var(lambdaHat) = Var(totalCount)/(n*dt)^2 = lambda/(n*dt).
+      const tol = K_SIGMA * Math.sqrt(lambda / (n * dt))
+      for (const seed of MOMENT_SEEDS) {
+        const pp = new ProcessPoisson(lambda, dt)
+        pp.seed(seed)
+        const fitted = ProcessPoisson.fit(pp.path(n), dt)
+        assert.instanceOf(fitted, ProcessPoisson)
+        assert.closeTo(fitted.p.lambda, lambda, tol, `seed ${seed}: lambda`)
+      }
+    })
+
+    it('should default dt to 1', () => {
+      const pp = new ProcessPoisson(2, 1)
+      pp.seed(1)
+      const fitted = ProcessPoisson.fit(pp.path(20000))
+      assert.strictEqual(fitted.p.dt, 1)
+    })
+
+    it('should throw when path has fewer than 2 states', () => {
+      assert.throws(() => ProcessPoisson.fit([0], 1), /at least 2 states/)
+    })
+
+    it('should throw on dt = 0', () => {
+      assert.throws(() => ProcessPoisson.fit([0, 1, 2], 0), /Invalid parameters/)
+    })
+
+    it('should throw on dt < 0', () => {
+      assert.throws(() => ProcessPoisson.fit([0, 1, 2], -1), /Invalid parameters/)
+    })
+
+    it('should throw when the path decreases', () => {
+      assert.throws(() => ProcessPoisson.fit([0, 1, 2, 1], 1), /non-decreasing/)
+    })
+
+    it('should throw when no arrivals are observed', () => {
+      assert.throws(() => ProcessPoisson.fit([0, 0, 0], 1), /lambda is not positive/)
+    })
+  })
 })
 
 describe('process.PoissonProcess (deprecated alias)', () => {
   it('should be an instance of Poisson and behave identically', () => {
-    const originalWarn = console.warn
-    console.warn = () => {}
-    let pp
-    try {
-      pp = new PoissonProcess(2, 0.5)
-    } finally {
-      console.warn = originalWarn
-    }
+    const pp = withSuppressedWarnings(() => new PoissonProcess(2, 0.5))
     assert(pp instanceof ProcessPoisson)
     assert.strictEqual(pp.mean(3), new ProcessPoisson(2, 0.5).mean(3))
     assert.strictEqual(pp.pdf(1, 3), new ProcessPoisson(2, 0.5).pdf(1, 3))
   })
 
   it('should emit a deprecation warning naming the replacement', () => {
-    const originalWarn = console.warn
-    const warnings = []
-    console.warn = msg => warnings.push(msg)
     let pp
-    try {
-      pp = new PoissonProcess(2, 0.5)
-    } finally {
-      console.warn = originalWarn
-    }
+    const warnings = captureWarnings(() => { pp = new PoissonProcess(2, 0.5) })
     assert(pp instanceof ProcessPoisson)
     assert.strictEqual(warnings.length, 1)
     assert.match(warnings[0], /ran\.process\.PoissonProcess is deprecated and will be removed in v1\.33\.0; use ran\.process\.Poisson instead\./)
+  })
+
+  it('should have .fit() return a PoissonProcess instance, not a plain Poisson', () => {
+    const fitted = withSuppressedWarnings(() => {
+      const pp = new PoissonProcess(2, 1)
+      pp.seed(1)
+      return PoissonProcess.fit(pp.path(5000))
+    })
+    assert.instanceOf(fitted, PoissonProcess)
   })
 })
 
@@ -2250,35 +2315,92 @@ describe('process.CompoundPoisson', () => {
       assert.closeTo(marginal.cdf(mu), cdfRef, 1e-8)
     })
   })
+
+  describe('.fit()', () => {
+    it('should recover lambda and the jump distribution from a long simulated path across seeds', () => {
+      const muJ = 2
+      const sigmaJ = 0.5
+      const lambda = 0.5
+      const dt = 0.02
+      const n = 200000
+      // fit() treats every non-zero increment as exactly one jump, since individual arrival
+      // counts within a dt interval are not observable from the cumulative path alone. This is
+      // exact only when at most one jump ever lands in the same interval; at lambda*dt = 0.01
+      // the probability of a merged 2+-jump interval is negligible (~5e-5), so the systematic
+      // bias this approximation introduces is far below the sampling noise below.
+      const p = 1 - Math.exp(-lambda * dt)
+      const m = n * p // expected number of detected jumps
+      const tolLambda = K_SIGMA * Math.sqrt(lambda / (n * dt))
+      const tolMuJ = K_SIGMA * sigmaJ / Math.sqrt(m)
+      const tolSigmaJ = K_SIGMA * sigmaJ / Math.sqrt(2 * (m - 1))
+      for (const seed of MOMENT_SEEDS) {
+        const cpp = new CompoundPoisson(new Normal(muJ, sigmaJ), lambda, dt)
+        cpp.seed(seed)
+        const fitted = CompoundPoisson.fit(cpp.path(n), dt, Normal)
+        assert.instanceOf(fitted, CompoundPoisson)
+        assert.closeTo(fitted.p.lambda, lambda, tolLambda, `seed ${seed}: lambda`)
+        assert.instanceOf(fitted.p.jumpDist, Normal)
+        const { mu: fittedMuJ, sigma: fittedSigmaJ } = fitted.p.jumpDist.params()
+        assert.closeTo(fittedMuJ, muJ, tolMuJ, `seed ${seed}: muJ`)
+        assert.closeTo(fittedSigmaJ, sigmaJ, tolSigmaJ, `seed ${seed}: sigmaJ`)
+      }
+    })
+
+    it('should default dt to 1', () => {
+      const cpp = new CompoundPoisson(new Normal(0, 1), 2, 1)
+      cpp.seed(1)
+      const fitted = CompoundPoisson.fit(cpp.path(20000), undefined, Normal)
+      assert.strictEqual(fitted.p.dt, 1)
+    })
+
+    it('should throw when path has fewer than 2 states', () => {
+      assert.throws(() => CompoundPoisson.fit([0], 1, Normal), /at least 2 states/)
+    })
+
+    it('should throw on dt = 0', () => {
+      assert.throws(() => CompoundPoisson.fit([0, 1, 2], 0, Normal), /Invalid parameters/)
+    })
+
+    it('should throw on dt < 0', () => {
+      assert.throws(() => CompoundPoisson.fit([0, 1, 2], -1, Normal), /Invalid parameters/)
+    })
+
+    it('should throw when jumpDistConstructor has no static fit()', () => {
+      assert.throws(() => CompoundPoisson.fit([0, 1, 2], 1, {}), /static fit\(\) method/)
+    })
+
+    it('should throw when jumpDistConstructor is missing', () => {
+      assert.throws(() => CompoundPoisson.fit([0, 1, 2], 1), /static fit\(\) method/)
+    })
+
+    it('should throw when the path has no non-zero increments', () => {
+      assert.throws(() => CompoundPoisson.fit([0, 0, 0], 1, Normal), /no non-zero increments/)
+    })
+  })
 })
 
 describe('process.CompoundPoissonProcess (deprecated alias)', () => {
   it('should be an instance of CompoundPoisson and behave identically', () => {
-    const originalWarn = console.warn
-    console.warn = () => {}
-    let cpp
-    try {
-      cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
-    } finally {
-      console.warn = originalWarn
-    }
+    const cpp = withSuppressedWarnings(() => new CompoundPoissonProcess(new Normal(1, 1), 2, 1))
     assert(cpp instanceof CompoundPoisson)
     assert.strictEqual(cpp.mean(3), new CompoundPoisson(new Normal(1, 1), 2, 1).mean(3))
   })
 
   it('should emit a deprecation warning naming the replacement', () => {
-    const originalWarn = console.warn
-    const warnings = []
-    console.warn = msg => warnings.push(msg)
     let cpp
-    try {
-      cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1)
-    } finally {
-      console.warn = originalWarn
-    }
+    const warnings = captureWarnings(() => { cpp = new CompoundPoissonProcess(new Normal(1, 1), 2, 1) })
     assert(cpp instanceof CompoundPoisson)
     assert.strictEqual(warnings.length, 1)
     assert.match(warnings[0], /ran\.process\.CompoundPoissonProcess is deprecated and will be removed in v1\.33\.0; use ran\.process\.CompoundPoisson instead\./)
+  })
+
+  it('should have .fit() return a CompoundPoissonProcess instance, not a plain CompoundPoisson', () => {
+    const fitted = withSuppressedWarnings(() => {
+      const cpp = new CompoundPoissonProcess(new Normal(2, 0.5), 2, 1)
+      cpp.seed(1)
+      return CompoundPoissonProcess.fit(cpp.path(5000), 1, Normal)
+    })
+    assert.instanceOf(fitted, CompoundPoissonProcess)
   })
 })
 

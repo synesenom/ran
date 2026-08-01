@@ -3,6 +3,25 @@ import Gamma from '../dist/gamma'
 import Tweedie from '../dist/tweedie'
 import Process from './_process'
 
+// Broken out of fit() to keep it under CodeScene's cyclomatic-complexity gate.
+function recoverJumps (path) {
+  const jumps = []
+  for (let i = 1; i < path.length; i++) {
+    const d = path[i] - path[i - 1]
+    if (d !== 0) jumps.push(d)
+  }
+  return jumps
+}
+
+function validateFitArgs (path, jumpDistConstructor) {
+  if (!Array.isArray(path) || path.length < 2) {
+    throw Error('CompoundPoisson.fit(): path must contain at least 2 states')
+  }
+  if (jumpDistConstructor == null || typeof jumpDistConstructor.fit !== 'function') {
+    throw Error('CompoundPoisson.fit(): jumpDistConstructor must be a ran.dist Distribution class with a static fit() method')
+  }
+}
+
 /**
  * Compound Poisson process: cumulative random-magnitude jumps arriving at a Poisson rate.
  *
@@ -121,5 +140,37 @@ export default class CompoundPoisson extends Process {
     const p = (alpha + 2) / (alpha + 1)
     const phi = (alpha + 1) / (beta * Math.pow(mu, 1 / (alpha + 1)))
     return new Tweedie(mu, phi, p)
+  }
+
+  /**
+   * Estimates lambda and the jump distribution's parameters from an observed path. Individual
+   * arrival counts within a single dt interval are not observable from the cumulative path —
+   * only the net increment is — so this estimator treats every non-zero increment as exactly
+   * one jump, the same simplification standard for compound Poisson estimation when lambda*dt
+   * is small enough that multi-jump intervals are rare. Under that reading, lambda reduces to
+   * the same count/time MLE as Poisson.fit() (the number of non-zero increments divided by the
+   * total observed time), and the non-zero increments themselves are the recovered jump sizes,
+   * handed to jumpDistConstructor's own static fit().
+   *
+   * @method fit
+   * @memberof ran.process.CompoundPoisson
+   * @param {Array} path Array of observed states (as returned by path()).
+   * @param {number} [dt=1] Time step between consecutive path observations (must be > 0).
+   * @param {Function} [jumpDistConstructor] A `ran.dist` Distribution class with a static `fit()` method, used to fit the recovered jump sizes. Required at runtime (throws if omitted); optional here only so the generated TypeScript signature stays assignable to `Process.fit`'s `(path, dt?)`.
+   * @returns {CompoundPoisson} A new instance with estimated lambda and a fitted jumpDist.
+   * @throws {Error} If path has fewer than 2 states, if dt is not > 0, if jumpDistConstructor
+   * does not expose a static fit() method, or if the path contains no non-zero increments to
+   * recover jump sizes from.
+   */
+  static fit (path, dt = 1, jumpDistConstructor) {
+    Process.validate({ dt }, ['dt > 0'])
+    validateFitArgs(path, jumpDistConstructor)
+    const jumps = recoverJumps(path)
+    if (jumps.length === 0) {
+      throw Error('CompoundPoisson.fit(): path contains no non-zero increments to recover jump sizes from')
+    }
+    const lambda = jumps.length / ((path.length - 1) * dt)
+    const Cls = this
+    return new Cls(jumpDistConstructor.fit(jumps), lambda, dt)
   }
 }
