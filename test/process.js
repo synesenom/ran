@@ -24,6 +24,16 @@ import { chiTest } from './test-utils'
 // deterministically reproduces the same sample every run.
 const MOMENT_SEEDS = [0, 42, 12345]
 
+// The scipy/`Python3 math` reference values asserted at 1e-10 in the .pdf() and .marginal()
+// blocks below are deliberately KEPT rather than superseded by test/precision-process.js
+// (issue #1223), which now gates the same densities at 1e-14 against mpmath mp.dps=50
+// references over a systematic 3-parameter-sets x 3-times x 5-interior-points grid.
+// They are not redundant: each block also pins contract behavior the precision gate does
+// not probe — NaN for t <= 0, exact 0 outside the support, Infinity at the Brownian
+// bridge's collapsed endpoints, and symmetry about the mean — and the inline scipy
+// derivations document the closed form at the point of use. Treat precision-process.js,
+// not these, as the authority on how many digits a process density is required to match.
+
 // Sample mean/variance are compared against an exact closed-form derived independently from
 // each process's SDE/update rule — never against the process's own mean()/variance() methods,
 // which would make the test a tautology against the code under test (decisions: never write
