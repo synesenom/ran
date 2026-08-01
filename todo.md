@@ -11,7 +11,7 @@
 
 The functions in `src/special/` are the numerical foundation for almost every distribution CDF, quantile, and likelihood. Known gaps:
 
-- **`bessel.js`** — large-order and large-argument Bessel functions (used by Rice, Noncentral distributions) rely on asymptotic expansions whose accuracy degrades near the transition region. Quantified by the threshold-focused precision gate in `test/precision-special.js` (issue #1140): `besselK`/`besselKnu`'s series/asymptotic crossover at `x=6` is accurate to only ~1e-7 for `x` just past the crossover (vs. the library's usual ~1e-13), improving to ~1e-10 by `x=10` — the residual gap is tracked for follow-up, not yet fixed.
+- **`bessel.js`** — large-order and large-argument Bessel functions (used by Rice, Noncentral distributions) rely on asymptotic expansions whose accuracy degrades near the transition region. Quantified by the threshold-focused precision gate in `test/precision-special.js` (issue #1140): `besselK`/`besselKnu`'s series/asymptotic crossover at `x=6` is accurate to only ~1e-7 for `x` just past the crossover (vs. the library's usual ~1e-13), improving to ~1e-10 by `x=10` — the residual gap is tracked for follow-up, not yet fixed. #1264 uses this known gap as its own calibration check: a differential-testing harness that reports clean results here is broken, not reassuring.
 
 **Goal:** every special function should be accurate to within a few ULP for all representable inputs, as documented in accuracy tables (see publication-grade section below).
 
@@ -21,9 +21,38 @@ The functions in `src/special/` are the numerical foundation for almost every di
 
 Moving the library from *auditable* to *publication-grade* requires systematic reference-value coverage and documented accuracy bounds.
 
-### Not Yet Filed
+### Filed — the accuracy-auditing programme (milestone v1.33.0)
 
-- **Documented accuracy bounds** — for each special function and distribution CDF, state clearly: "accurate to X ULP for |x| ≤ Y" so users can reason about numerical error in downstream computations.
+- **Documented accuracy bounds** — now #1266. Generates `docs/accuracy.md` with measured max/median ULP per function and distribution, the input domain actually swept, and full provenance. Distributions not yet measured appear as explicit "not yet measured" rows.
+- Harness core #1264 · distribution sweeps #1265 · quantile #1269 · special functions #1271 · processes #1272 · survival/hazard tail #1275 · moments #1277 · lnPdf/lnL #1278
+- Scheduled CI #1267 (weekly) · README accuracy contract #1268
+- Hypothesis-test gate #1270 · MCMC diagnostics #1279 · cross-distribution identities #1283
+- Stochastic validation: Geweke kernel tests #1273 · PRNG battery #1274 · distribution samplers #1282
+- Rollout tracking: distribution families #1280 · remaining samplers #1281
+- One production change: `_survival` hook #1276
+
+### Next Steps — revisit ONCE the harness is proven useful
+
+Do **not** file these yet. Each needs the measurement it depends on to exist first, otherwise the scope is guesswork.
+
+**1. Defect-fix rollouts.** Named as out-of-scope inside the measurement issues that will quantify them. File each the week its measurement lands:
+
+| Rollout | Waits on | Why |
+| --- | --- | --- |
+| Per-distribution `_survival` overrides (#1276 enables) | #1275 | Tells us which ~40 distributions actually lose digits, and where |
+| `_lnPdf` hook + per-distribution overrides | #1278 | Tells us which distributions hit `-Infinity` prematurely |
+| Numerically stable central-moment fallback | #1277 | Quantifies the raw-moment cancellation before redesigning it |
+
+**2. Not filed anywhere — genuine gaps.**
+
+- **Performance regression suite.** There is currently *no* benchmark infrastructure in the repo — no `benchmark/`, no `npm run bench`. This matters specifically because of the accuracy work: a closed-form `_survival`, a stable moment formulation, and a tighter Bessel crossover each trade speed for accuracy, and today there is no way to measure by how much. Capture a baseline **before** accuracy fixes start moving the numbers. Same infrastructure shape as the accuracy harness — out-of-band, scheduled, tracked over time, published alongside `docs/accuracy.md`. Biggest gap once v1.33.0 lands.
+- **ULP ceiling ratchet.** #1267 sets each ceiling at its currently-measured value with a link to the tracking issue. If nothing tightens them after fixes land, those ceilings become permanent permission for the bad behaviour — the mechanism built to expose defects turns into the one that hides them. Needs an explicit policy: fixing a defect closes with a ceiling reduction in the same PR.
+- **Staleness check on `docs/accuracy.md`.** Regenerate in CI and fail if the committed copy is out of date. A drifted accuracy table is worse than no table.
+- **Comparative benchmark + paper.** With measured accuracy *and* measured speed, "ranjs vs jstat vs simple-statistics vs @stdlib" becomes evidence rather than assertion, and a JOSS/SoftwareX submission becomes writable. This is the step that converts the work into adoption.
+
+**3. Already tracked — do not re-file.** Tier A/B family sweeps and Tier C property tests (#1280), remaining eight samplers (#1281), asymptotic limiting cases (#1283 follow-up), `src/special/` cluster splits (#1271).
+
+**Sequencing note.** #1264 blocks five other issues directly; nothing meaningful ships until it lands. The constraint on v1.33.0 is dependency depth, not issue count — v1.31.0 shipped 26 issues, so 20 is well within the batched release model's demonstrated capacity.
 
 ---
 
