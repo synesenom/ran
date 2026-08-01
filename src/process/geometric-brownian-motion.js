@@ -43,6 +43,29 @@ export default class GeometricBrownianMotion extends Process {
     return this.x * Math.exp(this.c.drift + this.c.noise * normal(this.r))
   }
 
+  /**
+   * log(X_{i+1}/X_i) | X_i is Normal(drift, noise^2), the same law _next() draws from; the
+   * transition density in X_{i+1} itself picks up a 1/X_{i+1} Jacobian term. Mirrors pdf(x,t)'s
+   * x <= 0 => 0 convention: the log-density of an impossible (non-positive) state is -Infinity,
+   * not a thrown error (decisions/0015-return-value-and-error-conventions.md).
+   *
+   * @method _transitionLnPdf
+   * @memberof ran.process.GeometricBrownianMotion
+   * @param {number} xPrev State at the start of the step.
+   * @param {number} xNext State at the end of the step.
+   * @returns {number} Log-density of the transition xPrev -> xNext, or -Infinity if xNext <= 0.
+   * @protected
+   * @ignore
+   */
+  _transitionLnPdf (xPrev, xNext) {
+    if (xNext <= 0) {
+      return -Infinity
+    }
+    const { drift, noise } = this.c
+    const z = (Math.log(xNext / xPrev) - drift) / noise
+    return -0.5 * z * z - Math.log(noise) - 0.5 * Math.log(2 * Math.PI) - Math.log(xNext)
+  }
+
   /** @inheritdoc */
   mean (t) {
     if (t < 0) return NaN
