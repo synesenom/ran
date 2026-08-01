@@ -102,6 +102,44 @@ The input is still rejected with an `Error`; only the message changes.
 `pdf()`'s parallel `if (v <= 0) return NaN` guard was left in place — it predates #1156, uses a
 different return channel (`NaN`, not `throw`), and changing it is explicitly out of scope for #1244.
 
+### The bug the sweep turned up on the way
+
+Establishing that #1243's fix had killed the guard's last trigger meant re-reading `variance()`'s
+neighbours, which surfaced that `covariogram(s, t)` — three methods up in the same file — still
+carried an independent copy of the *same* cancellation-prone expression:
+
+```js
+return Math.pow(phi, absLag) * sigma * sigma * (1 - Math.pow(phi2, minTime)) / (1 - phi2)
+```
+
+#1243 fixed `variance()` and never touched it. Because `Cov(X_t, X_t) = Var(X_t)` by definition,
+the two methods contradicted each other outright in the near-unit-root regime: at
+`phi2 = 1 - 2e-14`, `covariogram(1e-6, 1e-6)` returned exactly `0` while `variance(1e-6)` returned
+the correct `~1e-6`, and `covariogram(0.01, 0.01)` was off by 11%. This was invisible to the test
+suite because the existing `covariogram(t, t) === variance(t)` test used `phi = 0.5, t = 2`, far
+outside the failing window — and `covariogram()`'s unit-root branch (`ar1.js:85`) was the file's
+only uncovered line.
+
+The same `-Math.expm1(minTime * Math.log(phi2))` reformulation was applied, plus the
+`minTime === 0` fast path `variance()` already had at `t === 0`. That guard is not optional here:
+`min(s, t) === 0` is an *ordinary* call (`covariogram(0, 5)`), not an exotic one, and without it
+`0 * Math.log(phi2)` yields `NaN` whenever `phi2` underflows or overflows — precisely the boundary
+regression the #1243 solution doc warned every future `expm1` rewrite to check for. Writing that
+check as a red test first also exposed that the *pre-existing* code already returned `NaN` for
+`covariogram(0, 3)` at `phi = 1e200` (`phi2` overflows to `Infinity`, and `Infinity * -0` is
+`NaN`), a defect the reformulation would otherwise have silently inherited.
+
+**The accuracy trade-off, stated plainly.** `-expm1(n·log(x))` amplifies `log`'s rounding error by
+a factor of `n`, so the reformulation is *not* a free win everywhere. For a strongly explosive
+process at large `min(s, t)` it is measurably worse than `Math.pow`: at `phi = 1.5, s = t = 200`,
+relative error against an mpmath `mp.dps=60` reference moves from `3.4e-17` (old) to `9.6e-15`
+(new). Over a 3800-point comparison in the well-conditioned regime, 3490 results were bit-identical
+and the 1310 that differed were all within `1.9e-14`. Losing ~2 digits on a value that is already
+`~1e70` and diverging, in exchange for eliminating a 100% error near the unit root, is the right
+trade — and `variance()` has been making exactly this trade since #1243. A hybrid that switches on
+`|minTime · log(phi2)|` would beat both, but it would have to be applied to `variance()` too, and
+having the two methods on *different* formulations is what caused this bug in the first place.
+
 ## Prevention Strategy
 
 **A guard that fires only because of a bug elsewhere is not a guard — it is a symptom.** The
@@ -119,6 +157,16 @@ degenerate parameter.
 Duplicating that check upstream buys nothing (the constructor still validates) and costs
 consistency: it makes one process look like it knows about a failure mode the others don't,
 prompting exactly the kind of "is this load-bearing?" investigation that produced this document.
+
+**A formula duplicated across sibling methods will be fixed in only one of them.** `variance()`
+and `covariogram()` each held their own copy of the same geometric-series expression, so #1243's
+cancellation fix landed in one and silently left the other broken — for a month, in a file that
+had just been through a full review cycle. The structural tell was available for free: `Cov(t, t)`
+must equal `Var(t)`, an identity the codebase already asserted for six other processes, but AR1's
+version of that test used parameters (`phi = 0.5, t = 2`) nowhere near the regime the sibling fix
+was about. **When fixing a numerical expression, grep the file for other instances of its shape
+before closing the issue**, and when an identity ties two methods together, test it at the
+parameters that are actually hard rather than at the convenient ones.
 
 **Reachability claims about floating-point guards need a sweep, not an argument.** The structural
 sign analysis above is sound but, on its own, would have missed the underflow-to-zero cases

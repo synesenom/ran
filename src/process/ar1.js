@@ -78,13 +78,23 @@ export default class AR1 extends Process {
   covariogram (s, t) {
     if (s < 0 || t < 0) return NaN
     const { phi, sigma } = this.p
-    const phi2 = phi * phi
     const absLag = Math.abs(t - s)
     const minTime = Math.min(s, t)
+    // X_0 = 0 deterministically, so its covariance with any state is 0 independently of
+    // phi/sigma; short-circuiting here also avoids 0 * Math.log(phi2) producing NaN when
+    // phi2 underflows to 0 or overflows to Infinity, mirroring variance()'s t === 0 path
+    if (minTime === 0) return 0
+    const phi2 = phi * phi
+    // For |phi| = 1 the geometric-series formula has a 0/0 indeterminate form; the limit is
+    // the random-walk covariance sigma^2*min(s,t)
     if (Math.abs(phi2 - 1) < 1e-14) {
       return Math.pow(phi, absLag) * sigma * sigma * minTime
     }
-    return Math.pow(phi, absLag) * sigma * sigma * (1 - Math.pow(phi2, minTime)) / (1 - phi2)
+    // -expm1(minTime*log(phi2)) avoids catastrophic cancellation in 1-phi2^minTime when phi2
+    // is close to 1 and minTime is small, where Math.pow(phi2, minTime) rounds to 1 -- the same
+    // reformulation variance() applies to its own copy of this geometric series
+    // See solutions/correctness/2026-08-01-1500-ar1-variance-cancellation-and-reformulation-boundary.md
+    return Math.pow(phi, absLag) * sigma * sigma * (-Math.expm1(minTime * Math.log(phi2))) / (1 - phi2)
   }
 
   /** @inheritdoc */

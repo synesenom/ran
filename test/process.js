@@ -1632,6 +1632,65 @@ describe('process.AR1', () => {
       const ar1 = new AR1(0.5, 1)
       assert(Number.isNaN(ar1.covariogram(2, -1)))
     })
+
+    // Cov(X_t, X_t) = Var(X_t) by definition, so this identity must hold in the same
+    // near-unit-root regime #1243 fixed in variance(); covariogram() carried the same
+    // cancellation-prone 1 - Math.pow(phi2, minTime) expression and collapsed to exactly 0.
+    it('should equal variance at s = t for near-unit-root phi and small fractional t', () => {
+      for (const [phi, sigma] of [[Math.sqrt(1 - 2e-14), 1], [Math.sqrt(1 - 5e-13), 1.5]]) {
+        const ar1 = new AR1(phi, sigma)
+        for (const t of [1e-6, 1e-4, 0.002, 0.01, 0.1]) {
+          const v = ar1.variance(t)
+          assert(v > 0, `variance(${t}) must stay positive for phi = ${phi}`)
+          assert.closeTo(ar1.covariogram(t, t) / v, 1, 1e-12,
+            `covariogram(${t}, ${t}) must match variance(${t}) for phi = ${phi}`)
+        }
+      }
+    })
+
+    // mpmath mp.dps=50, evaluating the untransformed phi^|t-s| * sigma^2 * (1-phi2^min(s,t))/(1-phi2)
+    // against the exact double phi (0x3fefffffffffffa6 = Math.sqrt(1-2e-14),
+    // 0x3feffffffffff734 = Math.sqrt(1-5e-13)) -- not the expm1 form the fix uses.
+    it('should match high-precision references for near-unit-root phi', () => {
+      const phiA = Math.sqrt(1 - 2e-14)
+      const phiB = Math.sqrt(1 - 5e-13)
+      // Each literal is the nearest double to the mpmath value shown after it.
+      const cases = [
+        // phi, sigma, s, t, reference                    mpmath mp.dps=50 value
+        [phiA, 1, 1e-6, 1e-6, 0.00000100000000000001], //  1.0000000000000099467e-6
+        [phiA, 1, 1e-6, 3e-6, 0.00000100000000000001], //  1.0000000000000099467e-6
+        [phiA, 2, 0.01, 0.03, 0.04000000000000039], //     0.040000000000000388523
+        [phiB, 1.5, 1e-4, 1e-4, 0.00022500000000005626], // 0.00022500000000005626016
+        [phiB, 1, 0.002, 0.005, 0.0020000000000004975] //  0.0020000000000004975859
+      ]
+      for (const [phi, sigma, s, t, expected] of cases) {
+        const actual = new AR1(phi, sigma).covariogram(s, t)
+        assert.closeTo(actual / expected, 1, 1e-12,
+          `covariogram(${s}, ${t}) for phi = ${phi}, sigma = ${sigma}`)
+      }
+    })
+
+    // Math.pow(phi2, 0) === 1 for every phi2 per the ECMAScript spec, so the pre-expm1
+    // formula was accidentally well-defined at min(s, t) = 0; t * Math.log(phi2) is not
+    // (0 * -Infinity = NaN when phi2 underflows to 0). X_0 = 0 deterministically, so the
+    // covariance with it is exactly 0 for every phi -- including phi = 0 and huge phi.
+    it('should return 0 when either time is 0, for every phi', () => {
+      for (const phi of [0, 1e-200, 0.5, 1, 1.5, 1e200, -0.5, -1]) {
+        const ar1 = new AR1(phi, 1)
+        assert.strictEqual(ar1.covariogram(0, 0), 0, `covariogram(0, 0) for phi = ${phi}`)
+        assert.strictEqual(ar1.covariogram(0, 3), 0, `covariogram(0, 3) for phi = ${phi}`)
+        assert.strictEqual(ar1.covariogram(3, 0), 0, `covariogram(3, 0) for phi = ${phi}`)
+      }
+    })
+
+    // The |phi2 - 1| < 1e-14 unit-root branch was the file's only uncovered line; at
+    // phi = 1 the geometric series degenerates to the random-walk covariance sigma^2*min(s,t).
+    it('should reduce to the random-walk covariance at the unit root', () => {
+      const ar1 = new AR1(1, 2)
+      // exact rational: phi = 1 => Cov(X_s, X_t) = sigma^2 * min(s, t) = 4 * 3 = 12
+      assert.closeTo(ar1.covariogram(3, 7), 12, 1e-10)
+      assert.closeTo(ar1.covariogram(7, 3), 12, 1e-10)
+    })
   })
 
   describe('.reset()', () => {
