@@ -92,11 +92,7 @@ export default class AR1 extends Process {
     if (t <= 0) {
       throw Error('AR1.marginal(): t must be > 0')
     }
-    const v = this.variance(t)
-    if (v <= 0) {
-      throw Error('AR1.marginal(): variance is not positive at t')
-    }
-    return new Normal(0, Math.sqrt(v))
+    return new Normal(this.mean(t), Math.sqrt(this.variance(t)))
   }
 
   /**

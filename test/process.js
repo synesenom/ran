@@ -1710,6 +1710,33 @@ describe('process.AR1', () => {
       const ar1 = new AR1(0.5, 1)
       assert.throws(() => ar1.marginal(-1), /t must be > 0/)
     })
+
+    // A 29700-point sweep of variance(t) over phi (including a dense grid straddling the
+    // 1e-14 reformulation boundary), sigma and t found no strictly negative value for any
+    // t > 0 -- the non-stationary |phi| >= 1 branch diverges to +Infinity but never flips
+    // sign. See solutions/correctness/2026-08-01-1600-ar1-marginal-variance-guard-reachability.md
+    it('should return a positive-variance Normal on the non-stationary branch', () => {
+      for (const phi of [1, -1, 1.5, -1.5, 1 + 1e-14, 1 - 1e-14]) {
+        const ar1 = new AR1(phi, 1)
+        const marginal = ar1.marginal(3)
+        assert.instanceOf(marginal, Normal)
+        assert(ar1.variance(3) > 0, `variance must stay positive for phi = ${phi}`)
+        assert.closeTo(marginal.variance(), ar1.variance(3), 1e-10)
+      }
+    })
+
+    // v <= 0 is reachable only by floating-point underflow (t below ~1e-322, or sigma below
+    // ~1.6e-161 so that sigma^2 underflows). marginal() no longer guards this itself; the
+    // degenerate scale must still be rejected, now by Normal's own sigma > 0 validation.
+    it('should throw via Normal validation when variance underflows to zero', () => {
+      const ar1 = new AR1(0.9, 1)
+      assert.strictEqual(ar1.variance(Number.MIN_VALUE), 0)
+      assert.throws(() => ar1.marginal(Number.MIN_VALUE), /Invalid parameters/)
+
+      const tiny = new AR1(0.9, 1e-200)
+      assert.strictEqual(tiny.variance(1), 0)
+      assert.throws(() => tiny.marginal(1), /Invalid parameters/)
+    })
   })
 
   describe('.fit()', () => {
