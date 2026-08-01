@@ -3662,7 +3662,7 @@ const REFS = [
       { x: 370.0, pdf: 0.00545397490426548, cdf: 0.9082983274736768 }
     ]
   },
-  // NoncentralChi2[270, 64]: cdf routes through marcumQ's transition band at exactly its mu=135 dispatch boundary (mu=k/2=135), where the section 4.2 large-mu uniform asymptotic expansion takes over. That expansion is truncated at (J=9, K=4), a depth chosen offline so worst-case relative error at this very boundary is <=1e-11 (see solutions/special-functions/2026-05-21-1604-marcum-large-mu-asymptotic.md); its residual is largest here and at the band's lower edge, measuring 1.5e-12 at x=296. cdfTol: 3e-12 gates that documented truncation floor -- it is a deliberate design depth, not a defect -- while tol stays at 2e-14 for pdf, which does not go through marcumQ at all and measures ~6e-15
+  // NoncentralChi2[270, 64]: cdf routes through marcumQ's transition band at exactly its mu=135 dispatch boundary (mu=k/2=135), where the section 4.2 large-mu uniform asymptotic expansion takes over. That expansion is truncated at (J=9, K=4), a depth chosen offline so worst-case relative error at this very boundary is <=1e-11 (see solutions/special-functions/2026-05-21-1604-marcum-large-mu-asymptotic.md); its residual is largest here and at the band's lower edge, measuring 1.5e-12 at x=296. cdfTol: 3e-12 gates that documented truncation floor -- it is a deliberate design depth, not a defect -- while tol stays at 2e-14 for pdf, which does not go through marcumQ at all and measures ~6e-15. The ~2x margin is measured, not assumed: cdfTol: 1.6e-12 (1.04x over the isolated value) also passes the full parallel suite, so unlike the _N_MARCUM groups this one shows no JIT-order inflation
   {
     name: 'NoncentralChi2',
     params: [270, 64],

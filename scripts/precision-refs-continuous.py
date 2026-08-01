@@ -2285,7 +2285,10 @@ _N_MARCUM_LARGEMU = ('cdf routes through marcumQ\'s transition band at exactly i
                      'its residual is largest here and at the band\'s lower edge, measuring 1.5e-12 '
                      'at x=296. cdfTol: 3e-12 gates that documented truncation floor -- it is a '
                      'deliberate design depth, not a defect -- while tol stays at 2e-14 for pdf, '
-                     'which does not go through marcumQ at all and measures ~6e-15')
+                     'which does not go through marcumQ at all and measures ~6e-15. The ~2x margin '
+                     'is measured, not assumed: cdfTol: 1.6e-12 (1.04x over the isolated value) '
+                     'also passes the full parallel suite, so unlike the _N_MARCUM groups this one '
+                     'shows no JIT-order inflation')
 _N_F11_BOUNDARY = (_N_NCT + '; additionally, x sits near f11\'s |z|=50 dispatch threshold '
                    '(issue #1189); qtol: 1e-10 was measured to fail (~1.14e-10 error at '
                    'x=1.1), qtol: 5e-10 passes with margin -- gate empirically at 5e-10. '
