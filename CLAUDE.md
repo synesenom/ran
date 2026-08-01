@@ -101,6 +101,54 @@ npm test                                # all tests pass, coverage thresholds me
 node scripts/check-subpath-exports.js  # package.json subpath in sync
 ```
 
+## Adding a New Process or MCMC Sampler
+
+`src/process/` and `src/mc/` deliberately do **not** follow the distribution completeness rule. A `Distribution` subclass must implement the full public API; a `Process` implements only what it has a closed form for and inherits a throwing hook for everything else. Partial rollout is the intended design (`decisions/0040-process-marginal-distribution-instance.md`, `decisions/0044-process-fit-static-factory.md`, `decisions/0046-process-lnl-transition-likelihood.md`) — do not bolt a numerical fallback onto a hook to make it "work" for a process whose law has no closed form.
+
+### Process implementation checklist
+
+| Method | Required | Rule |
+| --- | --- | --- |
+| `_next()` | **Always** | One-step update rule. The only unconditionally required hook — `next()`, `path()`, and `ensemble()` all run through it. |
+| `mean(t)`, `variance(t)`, `covariogram(s, t)` | When a closed form exists | Throw-by-default on the base class. Override with the formula derived from the SDE / update rule. |
+| `pdf(x, t)` | When the time-`t` marginal has a closed-form density | Throw-by-default. `CompoundPoisson` deliberately omits it and exposes only `marginal(t)`. |
+| `marginal(t)` | When the marginal is a known `ran.dist` law | ADR-0040. Return a `Distribution` instance so `quantile()`/`hazard()`/`survival()`/`test()` come free rather than duplicating that machinery. `throw` — not `NaN` — for a `t` where the marginal is not a genuine continuous distribution (`t <= 0` everywhere; additionally `t >= T` for `BrownianBridge`). |
+| `static fit(path, dt)` | When a closed-form estimator exists | ADR-0044. **Opt-in, unlike `Distribution._fitInit`** — there is no numerical optimizer to seed, so a process with no closed-form estimator correctly keeps the throwing default. Name the estimator honestly in the JSDoc and CHANGELOG (`CoxIngersollRoss`'s is Conditional Least Squares, *not* MLE). |
+| `_transitionLnPdf(xPrev, xNext)` | When the one-step transition density is closed form | ADR-0046. `lnL(path)` is implemented once on the base class over this hook — override `_transitionLnPdf`, never `lnL` itself. |
+
+**The contrast with `_fitInit` is the point.** `_fitInit` is mandatory for every `Distribution` because the base class has a numerical optimizer that is broken without it. `Process` has no such machinery behind `marginal()`, `static fit()`, or `_transitionLnPdf()`, so those stay throw-by-default hooks and a subclass that cannot implement one leaves it alone. Half of the current processes implement none of the three.
+
+### Process test checklist
+
+| Item | File | What to add |
+| --- | --- | --- |
+| Reference values | `test/process-cases.js` | Entry with `name`, `ctor`, and `refs`. Each ref carries `should` (prose completing the mocha title), `params` (a **thunk** returning constructor arguments, so no instance — and no PRNG — is built at import), `method`, `args`, optional `chain`/`chainArgs` (for `marginal(t).pdf(x)`), `expected`, `tol`, and `source`. `source` is passed as the assertion message, so provenance shows up in failure output instead of only in a comment a reader has to find. Consumed by a plain inline `forEach` at the end of `test/process.js` — there is no `dist-runner.js`-style shared runner, and at 9 processes there should not be one. |
+| Precision gate | `test/precision-process.js` | Generated — see below. |
+| Behavioural tests | `test/process.js` | Contract behaviour the precision gate does not probe: `NaN` for `t <= 0`, exact `0` outside the support, `Infinity` at a collapsed endpoint, symmetry about the mean. Sampled moments go through `assertSampleMoments` at the fixed `MOMENT_SEEDS = [0, 42, 12345]`, compared against a closed form derived independently from the SDE with a CLT-derived `K_SIGMA = 8` tolerance — never against the process's own `mean()`/`variance()`, which would be a tautology. |
+| Subpath export | `package.json` `exports` field | `"./process/<name>": { "import": "./dist/process/<name>.esm.js" }` in alphabetical order. Verified by `node scripts/check-subpath-exports.js`, which covers `process` and `mc` as well as `dist`. |
+| Named export | `src/process/index.js` | Add the export line |
+| CHANGELOG entry | `CHANGELOG.md` `## [Unreleased]` section | Mandatory — a new process is user-visible |
+
+### Process precision gate
+
+The `src/process/` analogue of the distribution precision gates, and held to the same standard:
+
+- **The generator is the source of truth.** Add the marginal law to `scripts/precision-refs-process.py` and run `python3 scripts/precision-refs-process.py` to regenerate `test/precision-process.js` wholesale. Never hand-edit the generated file. A full run takes ~7 minutes (CompoundPoisson's Tweedie bisection dominates); `--render` re-emits from the `/tmp/precision-process-cache.json` cache without recomputing, which is enough for a tolerance or template edit.
+- **Grid**: 3 parameter sets × 3 times × 5 interior points, computed with **mpmath at `mp.dps = 50`** and rounded to float64. Probes are `F_t^-1(p)` for `p ∈ {0.1, 0.3, 0.53, 0.72, 0.9}` — off-centre by design, so a symmetric process's median never becomes the probe. A discrete process is probed at the integer `k`-values those levels select.
+- **Tolerance is `1e-14` relative error.** A group may set a looser `pdfTol`/`cdfTol` (they default to the group's `tol`) only with a comment naming the measured worst case and the numerical reason — `RandomWalk` at 3e-14 for log-gamma ULP amplification, `CompoundPoisson`'s pdf at 6e-14 for the Dunn & Smyth infinite series — and never looser than 1e-12.
+- **Every reference gates three independent code paths**: `pdf(x, t)`, `marginal(t).pdf(x)`, and `marginal(t).cdf(x)`. `marginal()` re-derives the law's parameters separately from `pdf()`, so checking it only against `pdf()` would let a shared parameterization slip cancel out. A group with `procPdf: false` has no `pdf(x, t)` of its own and runs only the latter two.
+- **Reference math must be independent of ranjs.** The generator re-derives each marginal from the process's own SDE / update rule and self-checks those derivations against externally sourced values before emitting a single literal. Never read a reference off the JavaScript implementation.
+- Increment the process count in README.md's numerical precision section.
+
+### MCMC test rigor
+
+`src/mc/` has no precision gate: a sampler's output is stochastic, so there is nothing to pin at 1e-14. Two conventions carry the rigor instead.
+
+- **Deterministic exact-reference tests for integrators and diagnostics.** Any `src/mc/` component that is a *pure function* of its inputs — the leapfrog integrator in `hmc.js`/`nuts.js`, `gelmanRubin` — must have a hand-derived exact-reference test alongside its statistical tests: fixed inputs, the closed-form result asserted to `1e-12`–`1e-14`, and the full rational derivation spelled out in the comment (`._leapfrog() deterministic single-step correctness` in `test/mc/hmc.js`, `hand-computed reference` in `test/mc/gelman-rubin.js`). Statistical tests cannot substitute: a KS test on a well-scaled target passes even when the integrator dots raw momentum instead of metric-scaled velocity, the blind spot ADR-0034 names explicitly. **Pick inputs that break degeneracy** — the leapfrog tests use a non-identity metric (`variance = 4`) precisely because under an identity metric the wrong formula produces the right numbers.
+- **Fixed seed sweeps for every statistical assertion.** `ksTest` at α = 0.01 has an inherent ~1% false-positive rate per unseeded call. Every distributional / margin-recovery KS assertion sweeps the pre-verified `SEEDS = [0, 42, 12345]` exported from `test/mc/_helpers.js` (Gibbs uses `[0, 7, 42]`, for the reason given at that block), so a real regression must reproducibly break at least one of three independent trajectories. Never hand-pick a single seed because it happened to pass.
+
+A new sampler needs the same `package.json` subpath export (`"./mc/<name>"`), `src/mc/index.js` export, and CHANGELOG entry as a new process.
+
 ## Return Value and Error Conventions
 
 Every public function and method signals "no ordinary result" through exactly one of four channels. Pick the channel by **what kind of situation occurred**, not by convenience. See `decisions/0015-return-value-and-error-conventions.md`.
