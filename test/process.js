@@ -365,6 +365,18 @@ describe('process', () => {
         assert.strictEqual(p.seed(0), p)
       })
     })
+
+    describe('.params()', () => {
+      it('should return the parameter object', () => {
+        const bm = new BrownianMotion(0.5, 1, 2)
+        assert.deepEqual(bm.params(), { mu: 0.5, sigma: 1, dt: 2 })
+      })
+
+      it('should return an empty object for a process with no parameters', () => {
+        const p = new StubProcess()
+        assert.deepEqual(p.params(), {})
+      })
+    })
   })
 })
 

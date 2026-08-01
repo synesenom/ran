@@ -33,6 +33,17 @@ export default class Process {
   }
 
   /**
+   * Returns the parameters of the process.
+   *
+   * @method params
+   * @memberof ran.process.Process
+   * @returns {Object} The parameters of the process.
+   */
+  params () {
+    return this.p
+  }
+
+  /**
    * Seeds the internal PRNG for reproducible paths.
    *
    * @method seed
