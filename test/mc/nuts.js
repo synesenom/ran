@@ -208,6 +208,40 @@ describe('mc.NUTS', () => {
     })
   })
 
+  describe('._leapfrog() deterministic single-step correctness', () => {
+    // Standard Normal target (U(x) = x^2/2, gradLnp(x) = -x) with a non-identity diagonal
+    // metric (variance = 4, so M^-1 = 4, not the identity): with an identity metric, a
+    // regression that dots raw momentum instead of the metric-scaled velocity would produce
+    // the same numbers, defeating the point of this test. See decisions/0034-nuts-euclidean-
+    // metric-adaptation.md, which names exactly that regression as a blind spot statistical
+    // KS-based sampler tests cannot catch on well-scaled targets.
+    const metricVariance4 = { internal: { metric: { type: 'diag', variance: [4] } } }
+
+    it('should match a hand-derived single leapfrog step and return the metric-scaled velocity', () => {
+      const nuts = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: metricVariance4 })
+      const { x, r, vel } = nuts._leapfrog([1], [1], 0.1)
+      // exact rational: rHalf = 1 - 0.5*0.1*1 = 19/20; vMid = 4*19/20 = 19/5;
+      // x1 = 1 + 0.1*19/5 = 69/50 = 1.38; r1 = 19/20 - 0.5*0.1*(69/50) = 881/1000 = 0.881;
+      // vel = 4*r1 = 3524/1000 = 3.524
+      assert.closeTo(x[0], 1.38, 1e-12)
+      assert.closeTo(r[0], 0.881, 1e-12)
+      assert.closeTo(vel[0], 3.524, 1e-12)
+    })
+
+    it('should chain two leapfrog steps correctly when fed its own output', () => {
+      const nuts = new NUTS({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1 }, initialState: metricVariance4 })
+      const step1 = nuts._leapfrog([1], [1], 0.1)
+      const step2 = nuts._leapfrog(step1.x, step1.r, 0.1)
+      // exact rational, continuing from the single-step case above (x1=1.38, r1=0.881):
+      // rHalf2 = 0.881 - 0.5*0.1*1.38 = 0.812; vMid2 = 4*0.812 = 3.248;
+      // x2 = 1.38 + 0.1*3.248 = 1.7048; r2 = 0.812 - 0.5*0.1*1.7048 = 0.72676;
+      // vel2 = 4*r2 = 2.90704
+      assert.closeTo(step2.x[0], 1.7048, 1e-12)
+      assert.closeTo(step2.r[0], 0.72676, 1e-12)
+      assert.closeTo(step2.vel[0], 2.90704, 1e-12)
+    })
+  })
+
   describe('._iter() rejection', () => {
     it('should return accepted: false and leave position unchanged when the target is degenerate', () => {
       // logDensity = -Infinity everywhere: every leapfrog point fails the slice/divergence
