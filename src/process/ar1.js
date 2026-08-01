@@ -49,13 +49,19 @@ export default class AR1 extends Process {
   /** @inheritdoc */
   variance (t) {
     if (t < 0) return NaN
+    // X_0 = 0 deterministically, independent of phi/sigma; short-circuiting here also avoids
+    // 0 * Math.log(phi2) producing NaN when phi2 underflows to 0 or overflows to Infinity
+    if (t === 0) return 0
     const { phi, sigma } = this.p
     const phi2 = phi * phi
     // For |phi| = 1 the geometric-series formula has a 0/0 indeterminate form; the limit is sigma^2*t
     if (Math.abs(phi2 - 1) < 1e-14) {
       return sigma * sigma * t
     }
-    return sigma * sigma * (1 - Math.pow(phi2, t)) / (1 - phi2)
+    // -expm1(t*log(phi2)) avoids catastrophic cancellation in 1-phi2^t when
+    // phi2 is close to 1 and t is small, where Math.pow(phi2, t) rounds to 1
+    // See solutions/correctness/2026-08-01-1500-ar1-variance-cancellation-and-reformulation-boundary.md
+    return sigma * sigma * (-Math.expm1(t * Math.log(phi2))) / (1 - phi2)
   }
 
   /** @inheritdoc */
