@@ -53,12 +53,12 @@ export default class GeometricBrownianMotion extends Process {
    * @memberof ran.process.GeometricBrownianMotion
    * @param {number} xPrev State at the start of the step.
    * @param {number} xNext State at the end of the step.
-   * @returns {number} Log-density of the transition xPrev -> xNext, or -Infinity if xNext <= 0.
+   * @returns {number} Log-density of the transition xPrev -> xNext, or -Infinity if xPrev <= 0 or xNext <= 0.
    * @protected
    * @ignore
    */
   _transitionLnPdf (xPrev, xNext) {
-    if (xNext <= 0) {
+    if (xPrev <= 0 || xNext <= 0) {
       return -Infinity
     }
     const { drift, noise } = this.c
