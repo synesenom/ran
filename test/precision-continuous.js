@@ -3648,6 +3648,35 @@ const REFS = [
       { x: 18.10561103111283, pdf: 0.021009219798146437, cdf: 0.9 }
     ]
   },
+  // NoncentralChi2[268, 64]: cdf routes through marcumQ's transition band just BELOW its mu=135 dispatch (mu=k/2=134), i.e. the three-term backward recurrence seeded by quadrature; the seed rounding plus ~2.9x per-step amplification caps relative accuracy near 1e-13 (measured 1.8e-13 worst case, cdf)
+  {
+    name: 'NoncentralChi2',
+    params: [268, 64],
+    tol: 5e-13,
+    qtol: 1e-13,
+    points: [
+      { x: 294.0, pdf: 0.005952122912964873, cdf: 0.0843879090000445 },
+      { x: 318.0, pdf: 0.013008725950881145, cdf: 0.31675969481511274 },
+      { x: 332.0, pdf: 0.014166345070040358, cdf: 0.5109799633846088 },
+      { x: 348.0, pdf: 0.01156900078501306, cdf: 0.7214810604091354 },
+      { x: 370.0, pdf: 0.00545397490426548, cdf: 0.9082983274736768 }
+    ]
+  },
+  // NoncentralChi2[270, 64]: cdf routes through marcumQ's transition band at exactly its mu=135 dispatch boundary (mu=k/2=135), where the section 4.2 large-mu uniform asymptotic expansion takes over. That expansion is truncated at (J=9, K=4), a depth chosen offline so worst-case relative error at this very boundary is <=1e-11 (see solutions/special-functions/2026-05-21-1604-marcum-large-mu-asymptotic.md); its residual is largest here and at the band's lower edge, measuring 1.5e-12 at x=296. cdfTol: 3e-12 gates that documented truncation floor -- it is a deliberate design depth, not a defect -- while tol stays at 2e-14 for pdf, which does not go through marcumQ at all and measures ~6e-15
+  {
+    name: 'NoncentralChi2',
+    params: [270, 64],
+    tol: 2e-14,
+    cdfTol: 3e-12,
+    qtol: 5e-13,
+    points: [
+      { x: 296.0, pdf: 0.00596508999736947, cdf: 0.08497276631340263 },
+      { x: 320.0, pdf: 0.012981438567986288, cdf: 0.3171941263917573 },
+      { x: 334.0, pdf: 0.014130778926027578, cdf: 0.5109446590674036 },
+      { x: 350.0, pdf: 0.011551687199136544, cdf: 0.7209949670711155 },
+      { x: 372.0, pdf: 0.005464859998802471, cdf: 0.9077850100564715 }
+    ]
+  },
   {
     name: 'NoncentralF',
     params: [5, 5, 2],

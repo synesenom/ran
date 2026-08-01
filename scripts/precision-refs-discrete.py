@@ -281,8 +281,22 @@ SPEC = [
     # the existing [5,5] set (which sits exactly at the threshold, Taylor side) --
     # twoSqrtProd = 2*sqrt(30) ~ 10.95 lands in the _besselIBackward n=0 warm-up gap
     # (issue #1185, previously withheld here during #1143's boundary-grid work).
+    # [175, 40] straddles marcumQ's transition-band mu=135 dispatch (src/special/marcum-q.js,
+    # _transitionBand: three-term recurrence below 135, section 4.2 large-mu uniform asymptotic
+    # expansion at/above it) -- issue #1190, continuation of #1143. Skellam is the only
+    # marcumQ-family distribution whose marcum order is the EVALUATION POINT rather than a
+    # parameter (_cdf(k>0) = marcumQ(k+1, mu2, mu1)), so one param set crosses the threshold
+    # inside its own k grid: k=128,131 -> recurrence, k=134,137,142 -> large-mu. It is also the
+    # only one reaching the band through marcumQ (upper tail) instead of marcumP. The other three
+    # dispatch preconditions are all satisfied here: x=mu2=40 clears the x<30 series branch, and
+    # mu^2=18225 is not < 2*xi=334.7 so the section 4.1 large-xi asymptotic does not claim it;
+    # y=mu1=175 sits inside x+mu +/- sqrt(4x+2mu) at every k, exactly on the transition line at
+    # k=134. mu2=40 is deliberately kept small: the recurrence branch loses up to 8 significant
+    # digits once the marcum x grows past a few hundred (issue #1286), so no large-x set is
+    # included here -- see the same note in scripts/precision-refs-continuous.py.
     ('Skellam', [([5, 5], [-7, -3, 0, 3, 7]), ([1, 4], [-8, -4, -2, 0, 2]),
-                 ([3, 6], [-6, -2, 1, 4, 8]), ([6, 5], [-6, -2, 0, 3, 8])], 1e-14),
+                 ([3, 6], [-6, -2, 1, 4, 8]), ([6, 5], [-6, -2, 0, 3, 8]),
+                 ([175, 40], [128, 131, 134, 137, 142])], 1e-14),
     ('Soliton', [([10], [1, 2, 3, 5, 10]), ([3], [1, 2, 3]),
                  ([20], [1, 2, 5, 10, 20])], 1e-14),
     ('YuleSimon', [([3], [1, 2, 3, 6, 10]), ([2.5], [1, 2, 3, 5, 8]),
@@ -302,6 +316,10 @@ _LGAMMA = 'pmf is a ratio of log-gamma/log-factorial terms; the last 1-2 ULPs ar
 _TAIL = 'log-factorial pmf plus tail cdf summation accumulates a few ULPs beyond 1e-14'
 _BESSEL = 'pmf evaluates a modified Bessel function I_k; its series rounding limits precision to ~1e-13'
 _ARITH = 'log-factorial table differences for large k accumulate ~1 ULP per lookup; arithmetic floor is ~2e-14 even with exact table entries'
+_MARCUM_MU135 = ('cdf routes through marcumQ\'s transition band on both sides of its mu=135 dispatch; '
+                 'the section 4.2 large-mu asymptotic expansion is truncated at (J=9, K=4), whose residual '
+                 'is largest at its own routing boundary (measured 3.8e-13 worst case here, cdf; pmf reaches '
+                 '1.8e-14) -- see solutions/special-functions/2026-05-21-1604-marcum-large-mu-asymptotic.md')
 TOL_OVERRIDE = {
     ('BetaBinomial', '[40, 3, 5]'): (2e-14, _ARITH),
     ('Binomial', '[25, 0.5]'): (1e-12, _TAIL),
@@ -314,6 +332,7 @@ TOL_OVERRIDE = {
     ('Poisson', '[50]'): (1e-12, _TAIL),
     ('Skellam', '[5, 5]'): (1e-12, _BESSEL),
     ('Skellam', '[6, 5]'): (2e-14, _BESSEL),
+    ('Skellam', '[175, 40]'): (1e-12, _MARCUM_MU135),
     ('YuleSimon', '[1.5]'): (3e-14, _LGAMMA),
 }
 

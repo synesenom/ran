@@ -891,6 +891,19 @@ const REFS = [
       { k: 8, pmf: 0.012990717721077547, cdf: 0.9872758092961071, qp: 0.9807804504355684 }
     ]
   },
+  // Skellam[175, 40]: cdf routes through marcumQ's transition band on both sides of its mu=135 dispatch; the section 4.2 large-mu asymptotic expansion is truncated at (J=9, K=4), whose residual is largest at its own routing boundary (measured 3.8e-13 worst case here, cdf; pmf reaches 1.8e-14) -- see solutions/special-functions/2026-05-21-1604-marcum-large-mu-asymptotic.md
+  {
+    name: 'Skellam',
+    params: [175, 40],
+    tol: 1e-12,
+    points: [
+      { k: 128, pmf: 0.024511783632926516, cdf: 0.3307871876100343, qp: 0.31853129579357103 },
+      { k: 131, pmf: 0.02636875991395252, cdf: 0.4082473933007551, qp: 0.3950630133437788 },
+      { k: 134, pmf: 0.027189518831582014, cdf: 0.4892412259481792, qp: 0.4756464665323882 },
+      { k: 137, pmf: 0.026882597519567942, cdf: 0.5704469974359843, qp: 0.5570056986762003 },
+      { k: 142, pmf: 0.0240519810886082, cdf: 0.6974171973507691, qp: 0.685391206806465 }
+    ]
+  },
   {
     name: 'Soliton',
     params: [10],

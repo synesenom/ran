@@ -1549,6 +1549,33 @@ P_GRID = [mpf('0.1'), mpf('0.3'), mpf('0.53'), mpf('0.72'), mpf('0.9')]
 # exp(-b/(a+b)) confined to the open interval (-1/e, 0) for every a,b>0 -- it can never reach the z>=1
 # threshold for any valid parameters, so this crossover is provably unreachable via this
 # distribution's _q(p) and is omitted rather than faked with an unreachable-in-practice set.
+#
+# NoncentralChi2 gets two sets straddling marcumQ's transition-band mu=135 dispatch
+# (src/special/marcum-q.js, _transitionBand: three-term backward recurrence below 135, section 4.2
+# large-mu uniform asymptotic expansion at/above it) -- issue #1190, continuation of #1143. This is
+# a DIFFERENT threshold from the x<30 series/asymptotic dispatch #1143's first PR covered, and it
+# had zero boundary-adjacent coverage. mu=k/2 for this distribution, so [268, 64] gives mu=134 and
+# [270, 64] gives mu=135 -- the tightest even-k straddle available. x-values are pinned in
+# NONCENTRAL_CHI2_XVALS (see the reasoning there and in MANUAL_XVALS, added by #1178).
+#
+# Of the four marcumQ-family distributions, only three can reach this threshold at all: Rice's _cdf
+# is marcumP(1, ...), so its mu is structurally pinned at 1 for every (nu, sigma) and no set can be
+# constructed. NoncentralChi reaches it via marcumP(k/2, lambda^2/2, x^2/2) -- the identical
+# internal regime as NoncentralChi2, differing only in squaring the distribution-level arguments --
+# so it is omitted as redundant rather than given two more groups for no new branch coverage.
+# Skellam covers the same threshold from the other side, through marcumQ (upper tail) rather than
+# marcumP, and is the only family member whose marcum order is the evaluation point rather than a
+# parameter, so one param set straddles inside its own k grid -- see scripts/precision-refs-discrete.py.
+#
+# NO large-x set is included, and that omission is deliberate. Probing the recurrence branch across
+# the band showed it silently loses up to eight significant digits once the marcum x grows past a
+# few hundred (worst measured 6.9e-05 relative at x=2000), because _fc's modified-Lentz continued
+# fraction needs ~192 iterations at those arguments but is capped at MAX_ITER=100 and returns the
+# unconverged value with no signal. That produces a six-orders-of-magnitude accuracy discontinuity
+# across mu=135 at x=1000 (2.55e-09 at mu=134 vs 2.02e-15 at mu=135, since _largeMu does not call
+# _fc). Filed as issue #1286 rather than papered over with a loosened tolerance here, following the
+# same precedent as #1179 (_zetaxy) and #1185 (_besselIBackward); the withheld set should be added
+# once #1286 lands, as #1185's were.
 PARAM_SETS = {
     'Alpha': [[2, 2], [0.5, 0.5], [3, 1]],
     'Anglit': [[0, 2], [3, 0.5], [-1, 4]],
@@ -1670,7 +1697,11 @@ PARAM_SETS = {
     # [2, 8]: besselI(0, sqrt(lambda*x)) argument spans into (10, 14], straddling
     # _besselIBackward's n=0 warm-up margin gap (issue #1185; previously withheld here
     # during #1143's boundary-grid work, see the comment above PARAM_SETS).
-    'NoncentralChi2': [[11, 2], [5, 3], [2, 1], [5, 58], [5, 62], [5, 0.5], [2, 8]],
+    # [268, 64] / [270, 64]: straddle marcumQ's transition-band mu=135 dispatch -- k=268 gives
+    # mu=k/2=134 (three-term recurrence), k=270 gives mu=135 (section 4.2 large-mu asymptotic
+    # expansion). See the mu=135 paragraph in the comment above PARAM_SETS (issue #1190).
+    'NoncentralChi2': [[11, 2], [5, 3], [2, 1], [5, 58], [5, 62], [5, 0.5], [2, 8],
+                       [268, 64], [270, 64]],
     # [6, 8, 4]: x straddles the underlying NoncentralBeta._cdf's regularizedBetaIncomplete
     # direct/complementary dispatch, here at internal beta-argument
     # z=d1*x/(d1*x+d2)=(iAlpha0+1)/(iAlpha0+beta+2)=6/11, where iAlpha0=alpha+round(lambda/2)=5
@@ -1855,6 +1886,22 @@ NONCENTRAL_F_XVALS = {
     (6, 8, 4): [mpf('1.5652173913043472'), mpf('1.596484218937275'), mpf('1.5999999999999996'),
                 mpf('1.6035242290748895'), mpf('1.6356275303643726')],
 }
+# marcumQ transition-band mu=135 dispatch (issue #1190). _cdf is marcumP(k/2, lambda/2, x/2), so
+# mu=k/2 and the marcum arguments are x_m=lambda/2=32, y=x/2. P_GRID's probability-driven inversion
+# cannot place y inside the band y = x_m + mu +/- sqrt(4*x_m + 2*mu), so these are pinned instead.
+# lambda=64 puts x_m=32 clearly above marcumQ's x<30 series threshold (deliberately NOT at 30,
+# which is #1143's already-covered boundary) and far below the x >~ 300 region where the recurrence
+# branch degrades (issue #1286). Band for mu=135 is y in (147.05, 186.95), i.e. x in (294.1, 373.9);
+# for mu=134, x in (292.2, 371.8). Both k are even so _pdf takes the same besselI path in both
+# groups and cannot confound the cdf comparison.
+# The [270, 64] grid additionally spans both sign branches of _largeMu's expansion
+# (qPrimary = zeta < 0 <=> y > x_m + mu = 167): x=296,320 are P-primary, x=334 sits exactly on the
+# transition line (zeta=0, eta=0, erfc(0)=1), and x=350,372 are Q-primary -- so the odd-j sign flip
+# between Eq. 75 and Eq. 79 in _expansionSum is covered.
+NONCENTRAL_CHI2_XVALS = {
+    (268, 64): [mpf('294'), mpf('318'), mpf('332'), mpf('348'), mpf('370')],
+    (270, 64): [mpf('296'), mpf('320'), mpf('334'), mpf('350'), mpf('372')],
+}
 
 # Quadrature-based CDFs (Davis, noncentral-t, SkewNormal, VonMises): inverting by bisection
 # would re-run the integral 70x per point, so we probe at fixed interior values instead.
@@ -1934,6 +1981,7 @@ MANUAL_XVALS = {
     'F': F_XVALS,
     'NoncentralBeta': NONCENTRAL_BETA_XVALS,
     'NoncentralF': NONCENTRAL_F_XVALS,
+    'NoncentralChi2': NONCENTRAL_CHI2_XVALS,
 }
 
 # Far-tail x-values for Normal and LogNormal (issue #808): x = mu - k*sigma at k=5,7.
@@ -2156,6 +2204,9 @@ PDFCDF_TOL = {
     ('NoncentralChi', '[5, 7.5]'): '5e-13',
     ('NoncentralChi2', '[5, 58]'): '5e-13',
     ('NoncentralChi2', '[5, 62]'): '5e-13',
+    ('NoncentralChi2', '[268, 64]'): '5e-13',
+    # [270, 64] is a pdf-only gate: its cdf floor is an order of magnitude looser (CDF_TOL below).
+    ('NoncentralChi2', '[270, 64]'): '2e-14',
     ('R', '[0.5]'): '1e-13',
     ('VonMises', '[0, 11]'): '1e-13',
 }
@@ -2165,6 +2216,7 @@ PDFCDF_TOL = {
 # which stays pdf-facing) when present here; every other group keeps the single shared `tol`.
 CDF_TOL = {
     ('DoublyNoncentralT', '[5, 2, 120]'): '1e-7',
+    ('NoncentralChi2', '[270, 64]'): '3e-12',
 }
 # Per-(name, json-params) quantile round-trip tolerance (default 1e-14; per-group empirical:
 # closed-form/Halley quantiles stay at 1e-14, root-finding/approximate ones are looser).
@@ -2178,6 +2230,8 @@ Q_TOL = {
     ('NoncentralChi2', '[2, 1]'): '1e-13',
     ('NoncentralChi2', '[5, 58]'): '5e-13',
     ('NoncentralChi2', '[5, 62]'): '5e-13',
+    ('NoncentralChi2', '[268, 64]'): '1e-13',
+    ('NoncentralChi2', '[270, 64]'): '5e-13',
     ('NoncentralChi', '[5, 7.5]'): '5e-13',
     ('Rice', '[7, 1]'): '5e-13',
     ('DoublyNoncentralT', '[5, 1, 2]'): '1e-12',
@@ -2219,6 +2273,19 @@ _N_HALLEY = 'q() is a Cornish-Fisher/Halley approximation; the cdf-round-trip lo
 _N_MARCUM = ('x sits near marcumQ\'s series/asymptotic dispatch threshold (x=30); pdf/cdf/quantile '
              'measured up to ~1.2e-13 in JIT-order-dependent full-suite runs (V8 rounding differs '
              'from an isolated run) -- gate at 5e-13')
+_N_MARCUM_RECURRENCE = ('cdf routes through marcumQ\'s transition band just BELOW its mu=135 '
+                        'dispatch (mu=k/2=134), i.e. the three-term backward recurrence seeded by '
+                        'quadrature; the seed rounding plus ~2.9x per-step amplification caps '
+                        'relative accuracy near 1e-13 (measured 1.8e-13 worst case, cdf)')
+_N_MARCUM_LARGEMU = ('cdf routes through marcumQ\'s transition band at exactly its mu=135 dispatch '
+                     'boundary (mu=k/2=135), where the section 4.2 large-mu uniform asymptotic '
+                     'expansion takes over. That expansion is truncated at (J=9, K=4), a depth '
+                     'chosen offline so worst-case relative error at this very boundary is <=1e-11 '
+                     '(see solutions/special-functions/2026-05-21-1604-marcum-large-mu-asymptotic.md); '
+                     'its residual is largest here and at the band\'s lower edge, measuring 1.5e-12 '
+                     'at x=296. cdfTol: 3e-12 gates that documented truncation floor -- it is a '
+                     'deliberate design depth, not a defect -- while tol stays at 2e-14 for pdf, '
+                     'which does not go through marcumQ at all and measures ~6e-15')
 _N_F11_BOUNDARY = (_N_NCT + '; additionally, x sits near f11\'s |z|=50 dispatch threshold '
                    '(issue #1189); qtol: 1e-10 was measured to fail (~1.14e-10 error at '
                    'x=1.1), qtol: 5e-10 passes with margin -- gate empirically at 5e-10. '
@@ -2272,6 +2339,8 @@ NOTES = {
     ('NoncentralChi', '[5, 7.5]'): _N_MARCUM,
     ('NoncentralChi2', '[5, 58]'): _N_MARCUM,
     ('NoncentralChi2', '[5, 62]'): _N_MARCUM,
+    ('NoncentralChi2', '[268, 64]'): _N_MARCUM_RECURRENCE,
+    ('NoncentralChi2', '[270, 64]'): _N_MARCUM_LARGEMU,
     ('R', '[0.5]'): _N_SERIES,
     ('R', '[2]'): _N_SERIES,
     ('BaldingNichols', '[0.1, 0.1]'): _N_ROOT,
