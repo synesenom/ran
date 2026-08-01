@@ -69,6 +69,35 @@ function sampleResetSteps (proc, n) {
   return samples
 }
 
+// Counts Math.log() invocations during fn(), then restores the original — used to verify a
+// precomputed log constant (e.g. this.c.logNoise) isn't being recomputed on every call in a
+// process's _transitionLnPdf hot path.
+function countLogCalls (fn) {
+  const originalLog = Math.log
+  let calls = 0
+  Math.log = (x) => {
+    calls++
+    return originalLog(x)
+  }
+  try {
+    fn()
+  } finally {
+    Math.log = originalLog
+  }
+  return calls
+}
+
+// Asserts the mean per-step transition log-density of a Gaussian-transition process (BM, OU)
+// matches its known theoretical expectation within a CLT tolerance. Each step's residual
+// z = (x_{i+1}-mean)/scale is exactly N(0,1) by construction (_next() draws it directly), so
+// E[-0.5*z^2] = -0.5 exactly and Var(z^2) = 2, giving Var(mean of n such terms) = 1/(2n).
+function assertMeanPerStepLnLMatchesGaussianTransition (proc, path, scale) {
+  const n = path.length - 1
+  const expectedMean = -0.5 - Math.log(scale) - 0.5 * Math.log(2 * Math.PI)
+  const tol = K_SIGMA * Math.sqrt(1 / (2 * n))
+  assert.closeTo(proc.lnL(path) / n, expectedMean, tol)
+}
+
 // Deprecated-alias tests construct through a console.warn-emitting constructor; both silencing
 // it and capturing its message need the same save/restore-on-throw bracketing around the call.
 function withSuppressedWarnings (fn) {
@@ -566,33 +595,16 @@ describe('process.BrownianMotion', () => {
       const bm = new BrownianMotion(mu, sigma, dt)
       bm.seed(42)
       const path = bm.path(n)
-      const sigmaDt = sigma * Math.sqrt(dt)
-      // Each step's residual z = (x_{i+1}-x_i-mu*dt)/sigmaDt is exactly N(0,1) by construction
-      // (_next() draws it directly), so E[-0.5*z^2] = -0.5 exactly and Var(z^2) = 2, giving
-      // Var(mean of n such terms) = 2/(4n) = 1/(2n) for the per-step log-density's CLT tolerance.
-      const expectedMean = -0.5 - Math.log(sigmaDt) - 0.5 * Math.log(2 * Math.PI)
-      const tol = K_SIGMA * Math.sqrt(1 / (2 * n))
-      assert.closeTo(bm.lnL(path) / n, expectedMean, tol)
+      assertMeanPerStepLnLMatchesGaussianTransition(bm, path, sigma * Math.sqrt(dt))
     })
 
     it('should not recompute log(sigmaDt) per step (this.c.logSigmaDt is precomputed at construction)', () => {
       const bm = new BrownianMotion(0.3, 1.2, 0.5)
       const path = [0, 0.4, 1.1, 0.7, 0.2, 0.9, 0.5, 1.3, 0.8, 0.6]
       const steps = path.length - 1
-      const originalLog = Math.log
-      let calls = 0
-      Math.log = (x) => {
-        calls++
-        return originalLog(x)
-      }
-      try {
-        bm.lnL(path)
-      } finally {
-        Math.log = originalLog
-      }
       // Only the 2π normalization term is logged per step once sigmaDt's log is cached in
       // this.c.logSigmaDt; a Math.log(sigmaDt) recomputation per step would double this count.
-      assert.strictEqual(calls, steps)
+      assert.strictEqual(countLogCalls(() => bm.lnL(path)), steps)
     })
   })
 
@@ -912,20 +924,9 @@ describe('process.GeometricBrownianMotion', () => {
       const gbm = new GeometricBrownianMotion(0.1, 0.25, 0.5)
       const path = [1.0, 1.2, 0.9, 1.5, 1.1, 1.3, 0.95, 1.4, 1.05, 1.25]
       const steps = path.length - 1
-      const originalLog = Math.log
-      let calls = 0
-      Math.log = (x) => {
-        calls++
-        return originalLog(x)
-      }
-      try {
-        gbm.lnL(path)
-      } finally {
-        Math.log = originalLog
-      }
       // Each step already logs log(xNext/xPrev), log(2π), and log(xNext) (the Jacobian term);
       // a Math.log(noise) recomputation per step would push this to 4 calls/step instead of 3.
-      assert.strictEqual(calls, 3 * steps)
+      assert.strictEqual(countLogCalls(() => gbm.lnL(path)), 3 * steps)
     })
   })
 
@@ -1193,32 +1194,16 @@ describe('process.OrnsteinUhlenbeck', () => {
       const path = ou.path(n)
       const decay = Math.exp(-theta * dt)
       const noise = sigma * Math.sqrt((1 - decay * decay) / (2 * theta))
-      // Each step's residual z = (x_{i+1}-m)/noise is exactly N(0,1) by construction (_next()
-      // draws it directly), so E[-0.5*z^2] = -0.5 exactly and Var(z^2) = 2, giving Var(mean of n
-      // such terms) = 2/(4n) = 1/(2n) for the per-step log-density's CLT tolerance.
-      const expectedMean = -0.5 - Math.log(noise) - 0.5 * Math.log(2 * Math.PI)
-      const tol = K_SIGMA * Math.sqrt(1 / (2 * n))
-      assert.closeTo(ou.lnL(path) / n, expectedMean, tol)
+      assertMeanPerStepLnLMatchesGaussianTransition(ou, path, noise)
     })
 
     it('should not recompute log(noise) per step (this.c.logNoise is precomputed at construction)', () => {
       const ou = new OrnsteinUhlenbeck(0.8, 0.5, 0.6, 0.25)
       const path = [1.0, 0.9, 0.6, 0.8, 0.7, 0.95, 0.65, 0.85, 0.75, 0.9]
       const steps = path.length - 1
-      const originalLog = Math.log
-      let calls = 0
-      Math.log = (x) => {
-        calls++
-        return originalLog(x)
-      }
-      try {
-        ou.lnL(path)
-      } finally {
-        Math.log = originalLog
-      }
       // Only the 2π normalization term is logged per step once noise's log is cached in
       // this.c.logNoise; a Math.log(noise) recomputation per step would double this count.
-      assert.strictEqual(calls, steps)
+      assert.strictEqual(countLogCalls(() => ou.lnL(path)), steps)
     })
   })
 
