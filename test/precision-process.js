@@ -5,6 +5,7 @@
 import { assert } from 'chai'
 import { describe, it, before } from 'mocha'
 import * as proc from '../src/process'
+import { Gamma } from '../src/dist'
 
 // Stochastic-process precision gate (issue #1223).
 //
@@ -29,9 +30,15 @@ import * as proc from '../src/process'
 //                   test/process.js does) would let a shared parameterization slip cancel out
 //   marginal cdf  : proc.marginal(t).cdf(x), which had no external reference at any tolerance
 //
+// A group carrying `procPdf: false` has no pdf(x, t) of its own (CompoundPoisson exposes only
+// marginal(t)), so only the latter two run for it.
+//
 // Reference math is INDEPENDENT of the ranjs implementation -- every marginal law is
 // re-derived from the process's SDE in the generator, which self-checks against the scipy
-// values already vetted in test/process.js before emitting these literals.
+// values already vetted in test/process.js before emitting these literals. CompoundPoisson's
+// reference in particular is summed directly as a Poisson-weighted mixture of Gammas, never
+// through the compound-Poisson -> Tweedie parameter mapping that marginal() applies, so it
+// gates that mapping as well as Tweedie's own series.
 //
 // Densities are evaluated from each process's fixed initial state x0 (0 everywhere except
 // GeometricBrownianMotion's 1), which has no public setter.
@@ -437,19 +444,19 @@ const REFS = [
     params: [2, 1],
     tol: 1e-14,
     points: [
-      { t: 0.5, x: 0.0, pdf: 0.36787944117144233, cdf: 0.36787944117144233 },
-      { t: 0.5, x: 1.0, pdf: 0.36787944117144233, cdf: 0.7357588823428847 },
-      { t: 0.5, x: 2.0, pdf: 0.18393972058572117, cdf: 0.9196986029286058 },
-      { t: 1, x: 0.0, pdf: 0.1353352832366127, cdf: 0.1353352832366127 },
-      { t: 1, x: 1.0, pdf: 0.2706705664732254, cdf: 0.40600584970983805 },
-      { t: 1, x: 2.0, pdf: 0.2706705664732254, cdf: 0.6766764161830635 },
-      { t: 1, x: 3.0, pdf: 0.18044704431548358, cdf: 0.857123460498547 },
-      { t: 1, x: 4.0, pdf: 0.09022352215774179, cdf: 0.9473469826562888 },
-      { t: 3, x: 3.0, pdf: 0.08923507835998891, cdf: 0.15120388277664787 },
-      { t: 3, x: 5.0, pdf: 0.16062314104798003, cdf: 0.44567964136461125 },
-      { t: 3, x: 6.0, pdf: 0.16062314104798003, cdf: 0.6063027824125913 },
-      { t: 3, x: 7.0, pdf: 0.13767697804112575, cdf: 0.743979760453717 },
-      { t: 3, x: 9.0, pdf: 0.06883848902056287, cdf: 0.9160759830051242 }
+      { t: 0.5, x: 0, pdf: 0.36787944117144233, cdf: 0.36787944117144233 },
+      { t: 0.5, x: 1, pdf: 0.36787944117144233, cdf: 0.7357588823428847 },
+      { t: 0.5, x: 2, pdf: 0.18393972058572117, cdf: 0.9196986029286058 },
+      { t: 1, x: 0, pdf: 0.1353352832366127, cdf: 0.1353352832366127 },
+      { t: 1, x: 1, pdf: 0.2706705664732254, cdf: 0.40600584970983805 },
+      { t: 1, x: 2, pdf: 0.2706705664732254, cdf: 0.6766764161830635 },
+      { t: 1, x: 3, pdf: 0.18044704431548358, cdf: 0.857123460498547 },
+      { t: 1, x: 4, pdf: 0.09022352215774179, cdf: 0.9473469826562888 },
+      { t: 3, x: 3, pdf: 0.08923507835998891, cdf: 0.15120388277664787 },
+      { t: 3, x: 5, pdf: 0.16062314104798003, cdf: 0.44567964136461125 },
+      { t: 3, x: 6, pdf: 0.16062314104798003, cdf: 0.6063027824125913 },
+      { t: 3, x: 7, pdf: 0.13767697804112575, cdf: 0.743979760453717 },
+      { t: 3, x: 9, pdf: 0.06883848902056287, cdf: 0.9160759830051242 }
     ]
   },
   {
@@ -457,17 +464,17 @@ const REFS = [
     params: [0.5, 1],
     tol: 1e-14,
     points: [
-      { t: 1, x: 0.0, pdf: 0.6065306597126334, cdf: 0.6065306597126334 },
-      { t: 1, x: 1.0, pdf: 0.3032653298563167, cdf: 0.9097959895689501 },
-      { t: 3, x: 0.0, pdf: 0.22313016014842982, cdf: 0.22313016014842982 },
-      { t: 3, x: 1.0, pdf: 0.33469524022264474, cdf: 0.5578254003710745 },
-      { t: 3, x: 2.0, pdf: 0.2510214301669836, cdf: 0.8088468305380582 },
-      { t: 3, x: 3.0, pdf: 0.1255107150834918, cdf: 0.9343575456215499 },
-      { t: 10, x: 2.0, pdf: 0.08422433748856833, cdf: 0.12465201948308115 },
-      { t: 10, x: 4.0, pdf: 0.1754673697678507, cdf: 0.4404932850652124 },
-      { t: 10, x: 5.0, pdf: 0.1754673697678507, cdf: 0.6159606548330632 },
-      { t: 10, x: 6.0, pdf: 0.1462228081398756, cdf: 0.7621834629729387 },
-      { t: 10, x: 8.0, pdf: 0.06527803934815875, cdf: 0.9319063652781514 }
+      { t: 1, x: 0, pdf: 0.6065306597126334, cdf: 0.6065306597126334 },
+      { t: 1, x: 1, pdf: 0.3032653298563167, cdf: 0.9097959895689501 },
+      { t: 3, x: 0, pdf: 0.22313016014842982, cdf: 0.22313016014842982 },
+      { t: 3, x: 1, pdf: 0.33469524022264474, cdf: 0.5578254003710745 },
+      { t: 3, x: 2, pdf: 0.2510214301669836, cdf: 0.8088468305380582 },
+      { t: 3, x: 3, pdf: 0.1255107150834918, cdf: 0.9343575456215499 },
+      { t: 10, x: 2, pdf: 0.08422433748856833, cdf: 0.12465201948308115 },
+      { t: 10, x: 4, pdf: 0.1754673697678507, cdf: 0.4404932850652124 },
+      { t: 10, x: 5, pdf: 0.1754673697678507, cdf: 0.6159606548330632 },
+      { t: 10, x: 6, pdf: 0.1462228081398756, cdf: 0.7621834629729387 },
+      { t: 10, x: 8, pdf: 0.06527803934815875, cdf: 0.9319063652781514 }
     ]
   },
   {
@@ -475,46 +482,194 @@ const REFS = [
     params: [3, 1],
     tol: 1e-14,
     points: [
-      { t: 0.5, x: 0.0, pdf: 0.22313016014842982, cdf: 0.22313016014842982 },
-      { t: 0.5, x: 1.0, pdf: 0.33469524022264474, cdf: 0.5578254003710745 },
-      { t: 0.5, x: 2.0, pdf: 0.2510214301669836, cdf: 0.8088468305380582 },
-      { t: 0.5, x: 3.0, pdf: 0.1255107150834918, cdf: 0.9343575456215499 },
-      { t: 2, x: 3.0, pdf: 0.08923507835998891, cdf: 0.15120388277664787 },
-      { t: 2, x: 5.0, pdf: 0.16062314104798003, cdf: 0.44567964136461125 },
-      { t: 2, x: 6.0, pdf: 0.16062314104798003, cdf: 0.6063027824125913 },
-      { t: 2, x: 7.0, pdf: 0.13767697804112575, cdf: 0.743979760453717 },
-      { t: 2, x: 9.0, pdf: 0.06883848902056287, cdf: 0.9160759830051242 },
-      { t: 5, x: 10.0, pdf: 0.04861075082960532, cdf: 0.11846441152901509 },
-      { t: 5, x: 13.0, pdf: 0.09560680888689857, cdf: 0.36321784227947546 },
-      { t: 5, x: 15.0, pdf: 0.10243586666453419, cdf: 0.5680895756085438 },
-      { t: 5, x: 17.0, pdf: 0.08473555146882424, cdf: 0.7488587520753689 },
-      { t: 5, x: 20.0, pdf: 0.04181030500106459, cdf: 0.9170290899685398 }
+      { t: 0.5, x: 0, pdf: 0.22313016014842982, cdf: 0.22313016014842982 },
+      { t: 0.5, x: 1, pdf: 0.33469524022264474, cdf: 0.5578254003710745 },
+      { t: 0.5, x: 2, pdf: 0.2510214301669836, cdf: 0.8088468305380582 },
+      { t: 0.5, x: 3, pdf: 0.1255107150834918, cdf: 0.9343575456215499 },
+      { t: 2, x: 3, pdf: 0.08923507835998891, cdf: 0.15120388277664787 },
+      { t: 2, x: 5, pdf: 0.16062314104798003, cdf: 0.44567964136461125 },
+      { t: 2, x: 6, pdf: 0.16062314104798003, cdf: 0.6063027824125913 },
+      { t: 2, x: 7, pdf: 0.13767697804112575, cdf: 0.743979760453717 },
+      { t: 2, x: 9, pdf: 0.06883848902056287, cdf: 0.9160759830051242 },
+      { t: 5, x: 10, pdf: 0.04861075082960532, cdf: 0.11846441152901509 },
+      { t: 5, x: 13, pdf: 0.09560680888689857, cdf: 0.36321784227947546 },
+      { t: 5, x: 15, pdf: 0.10243586666453419, cdf: 0.5680895756085438 },
+      { t: 5, x: 17, pdf: 0.08473555146882424, cdf: 0.7488587520753689 },
+      { t: 5, x: 20, pdf: 0.04181030500106459, cdf: 0.9170290899685398 }
+    ]
+  },
+  {
+    name: 'RandomWalk',
+    params: [0.5],
+    tol: 1e-14,
+    points: [
+      { t: 4, x: -2, pdf: 0.25, cdf: 0.3125 },
+      { t: 4, x: 0, pdf: 0.375, cdf: 0.6875 },
+      { t: 4, x: 2, pdf: 0.25, cdf: 0.9375 },
+      { t: 10, x: -4, pdf: 0.1171875, cdf: 0.171875 },
+      { t: 10, x: -2, pdf: 0.205078125, cdf: 0.376953125 },
+      { t: 10, x: 0, pdf: 0.24609375, cdf: 0.623046875 },
+      { t: 10, x: 2, pdf: 0.205078125, cdf: 0.828125 },
+      { t: 10, x: 4, pdf: 0.1171875, cdf: 0.9453125 },
+      { t: 25, x: -7, pdf: 0.06088539958000183, cdf: 0.11476147174835205 },
+      { t: 25, x: -3, pdf: 0.13284087181091309, cdf: 0.34501898288726807 },
+      { t: 25, x: 1, pdf: 0.15498101711273193, cdf: 0.6549810171127319 },
+      { t: 25, x: 3, pdf: 0.13284087181091309, cdf: 0.787821888923645 },
+      { t: 25, x: 7, pdf: 0.06088539958000183, cdf: 0.9461239278316498 }
+    ]
+  },
+  // RandomWalk[0.3]: pmf is exp() of a three-term log-gamma difference; each logGamma loses ~1 ULP and exponentiating amplifies the absolute log error. Measured worst case at t=30: pdf 1.8e-14, cdf 9.9e-15
+  {
+    name: 'RandomWalk',
+    params: [0.3],
+    tol: 1e-14,
+    pdfTol: 3e-14,
+    cdfTol: 2e-14,
+    points: [
+      { t: 5, x: -5, pdf: 0.16807000000000002, cdf: 0.16807000000000002 },
+      { t: 5, x: -3, pdf: 0.36015, cdf: 0.52822 },
+      { t: 5, x: -1, pdf: 0.3087, cdf: 0.83692 },
+      { t: 5, x: 1, pdf: 0.1323, cdf: 0.96922 },
+      { t: 12, x: -8, pdf: 0.167790297906, cdf: 0.25281534785500004 },
+      { t: 12, x: -6, pdf: 0.23970042558000001, cdf: 0.492515773435 },
+      { t: 12, x: -4, pdf: 0.23113969609499999, cdf: 0.72365546953 },
+      { t: 12, x: 0, pdf: 0.07924789580399999, cdf: 0.961399156942 },
+      { t: 30, x: -18, pdf: 0.08292823018832397, cdf: 0.15952298219587474 },
+      { t: 30, x: -14, pdf: 0.15014119809606175, cdf: 0.4315179062829431 },
+      { t: 30, x: -12, pdf: 0.15729077895777896, cdf: 0.588808685240722 },
+      { t: 30, x: -10, pdf: 0.14156170106200106, cdf: 0.7303703863027231 },
+      { t: 30, x: -6, pdf: 0.07485173432777421, cdf: 0.9155299396398489 }
+    ]
+  },
+  {
+    name: 'RandomWalk',
+    params: [0.7],
+    tol: 1e-14,
+    points: [
+      { t: 3, x: -1, pdf: 0.18900000000000006, cdf: 0.21600000000000005 },
+      { t: 3, x: 1, pdf: 0.441, cdf: 0.657 },
+      { t: 3, x: 3, pdf: 0.3429999999999999, cdf: 1.0 },
+      { t: 8, x: 0, pdf: 0.13613670000000005, cdf: 0.1941043500000001 },
+      { t: 8, x: 2, pdf: 0.25412184000000004, cdf: 0.44822619000000014 },
+      { t: 8, x: 4, pdf: 0.29647547999999996, cdf: 0.7447016700000001 },
+      { t: 8, x: 6, pdf: 0.19765031999999993, cdf: 0.94235199 },
+      { t: 20, x: 2, pdf: 0.06536956554563497, cdf: 0.1133314628769785 },
+      { t: 20, x: 6, pdf: 0.16426198521723653, cdf: 0.3919901877990762 },
+      { t: 20, x: 8, pdf: 0.19163898275344257, cdf: 0.5836291705525188 },
+      { t: 20, x: 10, pdf: 0.1788630505698797, cdf: 0.7624922211223985 },
+      { t: 20, x: 14, pdf: 0.07160367220526227, cdf: 0.9645168677015313 }
+    ]
+  },
+  // CompoundPoisson[2, 1, 3, 1]: marginal() is a Tweedie whose density is the Dunn & Smyth infinite series, summed in log-space over hundreds of exp()-of-log-gamma terms. Measured worst case: pdf 4.2e-14; the cdf series converges far better (4.0e-15) and stays gated at 1e-14
+  {
+    name: 'CompoundPoisson',
+    jump: [2, 1],
+    params: [3, 1],
+    procPdf: false,
+    tol: 1e-14,
+    pdfTol: 6e-14,
+    points: [
+      { t: 1, x: 1.0899066949468177, pdf: 0.07197959001345065, cdf: 0.09999999999999999 },
+      { t: 1, x: 3.3072182201754425, pdf: 0.10038742438881998, cdf: 0.3 },
+      { t: 1, x: 5.632800423551623, pdf: 0.09281248272103781, cdf: 0.5299999999999999 },
+      { t: 1, x: 7.979607473100772, pdf: 0.06789596605027384, cdf: 0.72 },
+      { t: 1, x: 11.759353253757778, pdf: 0.02996375668337912, cdf: 0.9 },
+      { t: 2, x: 4.819232973411168, pdf: 0.04206284306677116, cdf: 0.1 },
+      { t: 2, x: 8.387101139701286, pdf: 0.06631913389918642, cdf: 0.29999999999999993 },
+      { t: 2, x: 11.776356375818207, pdf: 0.06567866194422874, cdf: 0.5299999999999999 },
+      { t: 2, x: 15.021934947631994, pdf: 0.05002246493794239, cdf: 0.72 },
+      { t: 2, x: 20.041656684501437, pdf: 0.022983764316337946, cdf: 0.8999999999999999 },
+      { t: 4, x: 13.610950338973272, pdf: 0.026200004234309685, cdf: 0.09999999999999998 },
+      { t: 4, x: 19.081081749193803, pdf: 0.04489036198139421, cdf: 0.29999999999999993 },
+      { t: 4, x: 23.968990699569293, pdf: 0.04650644213063796, cdf: 0.5299999999999999 },
+      { t: 4, x: 28.481921494759888, pdf: 0.036482845076588964, cdf: 0.7200000000000001 },
+      { t: 4, x: 35.248366377465025, pdf: 0.01730931124058719, cdf: 0.9 }
+    ]
+  },
+  // CompoundPoisson[1.5, 2, 4, 1]: marginal() is a Tweedie whose density is the Dunn & Smyth infinite series, summed in log-space over hundreds of exp()-of-log-gamma terms. Measured worst case: pdf 4.2e-14; the cdf series converges far better (4.0e-15) and stays gated at 1e-14
+  {
+    name: 'CompoundPoisson',
+    jump: [1.5, 2],
+    params: [4, 1],
+    procPdf: false,
+    tol: 1e-14,
+    pdfTol: 6e-14,
+    points: [
+      { t: 1, x: 0.7576358182589706, pdf: 0.1565629939000956, cdf: 0.1 },
+      { t: 1, x: 1.7852542595614822, pdf: 0.2186705671580159, cdf: 0.3 },
+      { t: 1, x: 2.8466305151943936, pdf: 0.2041922480985698, cdf: 0.53 },
+      { t: 1, x: 3.9110195974713844, pdf: 0.1499446649234515, cdf: 0.72 },
+      { t: 1, x: 5.62029624350069, pdf: 0.06631304932643013, cdf: 0.9 },
+      { t: 2, x: 2.7149989076824785, pdf: 0.0901792645066021, cdf: 0.09999999999999999 },
+      { t: 2, x: 4.362787399163663, pdf: 0.14461613708371304, cdf: 0.3 },
+      { t: 2, x: 5.911192330995503, pdf: 0.14419098737716862, cdf: 0.5299999999999999 },
+      { t: 2, x: 7.38681629732012, pdf: 0.11018989130007827, cdf: 0.72 },
+      { t: 2, x: 9.662241035651066, pdf: 0.050760090927791865, cdf: 0.9 },
+      { t: 5, x: 9.661411696651502, pdf: 0.04934382881319026, cdf: 0.10000000000000002 },
+      { t: 5, x: 12.525109353537596, pdf: 0.08677855555571838, cdf: 0.3 },
+      { t: 5, x: 15.03354986256901, pdf: 0.09126613188884053, cdf: 0.53 },
+      { t: 5, x: 17.321077549115806, pdf: 0.07232321739986074, cdf: 0.72 },
+      { t: 5, x: 20.714410445234797, pdf: 0.03469632118246069, cdf: 0.9 }
+    ]
+  },
+  // CompoundPoisson[3, 0.5, 2, 1]: marginal() is a Tweedie whose density is the Dunn & Smyth infinite series, summed in log-space over hundreds of exp()-of-log-gamma terms. Measured worst case: pdf 4.2e-14; the cdf series converges far better (4.0e-15) and stays gated at 1e-14
+  {
+    name: 'CompoundPoisson',
+    jump: [3, 0.5],
+    params: [2, 1],
+    procPdf: false,
+    tol: 1e-14,
+    pdfTol: 6e-14,
+    points: [
+      { t: 2, x: 7.487928680080209, pdf: 0.019033074423928174, cdf: 0.1 },
+      { t: 2, x: 15.539286073504528, pdf: 0.02898991346293961, cdf: 0.3 },
+      { t: 2, x: 23.35005594100462, pdf: 0.028335205665329214, cdf: 0.5299999999999999 },
+      { t: 2, x: 30.900403497005133, pdf: 0.021437856179641297, cdf: 0.72 },
+      { t: 2, x: 42.649038919276336, pdf: 0.009796645982307327, cdf: 0.9 },
+      { t: 4, x: 24.089387927206808, pdf: 0.011634620465134703, cdf: 0.10000000000000002 },
+      { t: 4, x: 36.534268877017446, pdf: 0.01957311605473238, cdf: 0.30000000000000004 },
+      { t: 4, x: 47.79896449837853, pdf: 0.020097326238701713, cdf: 0.53 },
+      { t: 4, x: 58.27157381459665, pdf: 0.015682768811606334, cdf: 0.72 },
+      { t: 4, x: 74.05536404192462, pdf: 0.0074034404778792525, cdf: 0.9 },
+      { t: 8, x: 61.64947519091169, pdf: 0.007538364244133703, cdf: 0.1 },
+      { t: 8, x: 80.27590554615496, pdf: 0.013421651725580061, cdf: 0.3 },
+      { t: 8, x: 96.41849712455793, pdf: 0.014245762478150303, cdf: 0.5300000000000001 },
+      { t: 8, x: 111.01890283318293, pdf: 0.011372198057163352, cdf: 0.72 },
+      { t: 8, x: 132.49435309284803, pdf: 0.005507853687808512, cdf: 0.9 }
     ]
   }
 ]
 
 describe('stochastic-process precision gate', () => {
-  REFS.forEach(({ name, params, tol, points }) => {
+  // pdfTol/cdfTol default to the group's shared tol, so the vast majority of groups (which hit
+  // the same float64 floor on both) are unaffected; only a group whose two floors genuinely
+  // diverge -- CompoundPoisson, whose Tweedie density series is an order of magnitude noisier
+  // than its cdf series -- sets them explicitly.
+  REFS.forEach(({ name, params, jump, procPdf = true, tol, pdfTol = tol, cdfTol = tol, points }) => {
     describe(`${name}(${JSON.stringify(params)})`, () => {
       // Construct in a before() hook so a constructor regression surfaces as a failing
       // hook rather than silently skipping every assertion in this group.
       let p
-      before(() => { p = new proc[name](...params) })
+      // CompoundPoisson takes its jump distribution as a Distribution instance rather than
+      // as numbers, so its group carries the jump Gamma's (shape, rate) separately.
+      before(() => { p = jump ? new proc[name](new Gamma(...jump), ...params) : new proc[name](...params) })
       // One test per code path (not per point): the message pinpoints the failing (x, t),
       // while pdf/marginal stay isolated so a regression in one does not mask the others.
-      it(`pdf(x, t) to ${tol} relative error`, () => {
+      if (procPdf) {
+        it(`pdf(x, t) to ${pdfTol} relative error`, () => {
+          points.forEach(({ t, x, pdf }) => {
+            assert.approximately(p.pdf(x, t) / pdf, 1, pdfTol, `pdf at x=${x}, t=${t}`)
+          })
+        })
+      }
+      it(`marginal(t).pdf(x) to ${pdfTol} relative error`, () => {
         points.forEach(({ t, x, pdf }) => {
-          assert.approximately(p.pdf(x, t) / pdf, 1, tol, `pdf at x=${x}, t=${t}`)
+          assert.approximately(p.marginal(t).pdf(x) / pdf, 1, pdfTol, `marginal pdf at x=${x}, t=${t}`)
         })
       })
-      it(`marginal(t).pdf(x) to ${tol} relative error`, () => {
-        points.forEach(({ t, x, pdf }) => {
-          assert.approximately(p.marginal(t).pdf(x) / pdf, 1, tol, `marginal pdf at x=${x}, t=${t}`)
-        })
-      })
-      it(`marginal(t).cdf(x) to ${tol} relative error`, () => {
+      it(`marginal(t).cdf(x) to ${cdfTol} relative error`, () => {
         points.forEach(({ t, x, cdf }) => {
-          assert.approximately(p.marginal(t).cdf(x) / cdf, 1, tol, `marginal cdf at x=${x}, t=${t}`)
+          assert.approximately(p.marginal(t).cdf(x) / cdf, 1, cdfTol, `marginal cdf at x=${x}, t=${t}`)
         })
       })
     })

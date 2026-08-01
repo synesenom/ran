@@ -21,11 +21,20 @@ already vetted in test/process.js and aborts on any mismatch, guarding against a
 parameterization slip silently baking a wrong convention into every emitted literal.
 
 Requires: pip install mpmath
-Usage:    python3 scripts/precision-refs-process.py   # rewrites test/precision-process.js
+Usage:    python3 scripts/precision-refs-process.py            # recompute everything (~7 min)
+          python3 scripts/precision-refs-process.py --render   # re-emit from cache, no recompute
+
+CompoundPoisson dominates the runtime: locating each probe means bisecting a CDF that is
+itself a Poisson-weighted sum of ~100 regularized incomplete gammas at mp.dps = 50. Every run
+caches its computed points to /tmp/precision-process-cache.json, and --render rebuilds the
+test file from that cache alone -- enough for a tolerance or template edit, which is the
+common reason to re-run this. Points absent from the cache are always recomputed.
 """
 import json
+import os
 import sys
-from mpmath import mp, mpf, exp, expm1, log, sqrt, pi, erfc, power, factorial, loggamma, gammainc
+from mpmath import (mp, mpf, exp, expm1, log, sqrt, pi, erfc, power, factorial,
+                    binomial, loggamma, gammainc, quad)
 
 mp.dps = 50
 
@@ -117,6 +126,71 @@ def pois_q(p, lam):
     return k
 
 
+def binom_pmf(k, n, pp):
+    if k < 0 or k > n:
+        return mpf(0)
+    return binomial(n, k) * power(pp, k) * power(1 - pp, n - k)
+
+
+def binom_cdf(k, n, pp):
+    return sum((binom_pmf(j, n, pp) for j in range(0, int(k) + 1)), mpf(0))
+
+
+def binom_q(p, n, pp):
+    k = 0
+    while binom_cdf(k, n, pp) < p:
+        k += 1
+    return k
+
+
+# Compound Poisson-Gamma total S = sum_{i=1}^N J_i with N ~ Poisson(lam), J_i ~ Gamma(a, rate b).
+# Conditional on N = n >= 1 the sum of n independent Gamma(a, b) is exactly Gamma(n*a, b), so the
+# law is a point mass exp(-lam) at 0 plus a Poisson-weighted mixture of Gammas. Summing that
+# mixture directly is what makes this an INDEPENDENT reference: it never touches the
+# compound-Poisson -> Tweedie(mu, phi, p) parameter mapping that CompoundPoisson.marginal()
+# applies, so agreement checks the mapping and Tweedie's own series at the same time.
+# All terms are positive for a > 0, so the sums carry no cancellation.
+
+def _cpg_terms(lam, a, b, y, term_fn):
+    total = mpf(0)
+    n = 1
+    while True:
+        term = pois_pmf(n, lam) * term_fn(n)
+        total += term
+        # Terms peak near n = lam; only start testing for convergence past the peak, or the
+        # first few (still-growing) terms would trip the threshold immediately.
+        if n > lam + 5 and term < total * mpf('1e-55'):
+            break
+        n += 1
+        if n > 100000:
+            break
+    return total
+
+
+def cpg_pdf(y, lam, a, b):
+    y = mpf(y)
+    if y <= 0:
+        return mpf(0)
+    return _cpg_terms(lam, a, b, y, lambda n: exp(
+        n * a * log(b) + (n * a - 1) * log(y) - b * y - loggamma(n * a)))
+
+
+def cpg_cdf(y, lam, a, b):
+    y = mpf(y)
+    if y < 0:
+        return mpf(0)
+    # The exp(-lam) atom at 0 is part of the CDF everywhere on y >= 0.
+    return exp(-lam) + _cpg_terms(lam, a, b, y,
+                                  lambda n: gammainc(n * a, 0, b * y, regularized=True))
+
+
+def cpg_q(p, lam, a, b):
+    # Every probe level used here exceeds the atom exp(-lam), so the quantile lies strictly
+    # inside the continuous part and the bracket may start just above 0.
+    mean = lam * a / b
+    return bisect(lambda z: cpg_cdf(z, lam, a, b), mpf(0), 60 * mean + 60, p)
+
+
 def bisect(cdf, lo, hi, p):
     # 300 halvings of an O(1)-wide bracket lands ~1e-90, well inside mp.dps = 50's working
     # precision, so the returned x is exact to every digit the emitted float64 can hold.
@@ -165,6 +239,16 @@ def bisect(cdf, lo, hi, p):
 #   AR1                    X_n = phi X_{n-1} + sigma Z, X_0 = 0 => X_n = sigma * sum_{j<n} phi^j Z_{n-j},
 #                          so X_n ~ N(0, sigma^2 * sum_{j=0}^{n-1} phi^{2j}) = N(0, sigma^2 (1-phi^{2n})/(1-phi^2)).
 #                          t is a step count, hence integer-valued.
+#
+#   RandomWalk             X_n = X_{n-1} +- 1 with P(+1) = p, X_0 = 0. If K of the n steps are +1
+#                          then X_n = K - (n - K) = 2K - n with K ~ Binomial(n, p), so X_n is that
+#                          binomial pushed forward through x = 2k - n: supported on the |x| <= n
+#                          integers sharing n's parity, with pmf C(n, (n+x)/2) p^{(n+x)/2} (1-p)^{(n-x)/2}.
+#
+#   CompoundPoisson        X_t = sum_{i=1}^{N} J_i with N ~ Poisson(lambda*t) and Gamma(a, rate b)
+#                          jumps. Conditional on N = n >= 1 the sum is exactly Gamma(n*a, b), so
+#                          X_t is a point mass exp(-lambda*t) at 0 plus a Poisson-weighted mixture
+#                          of Gammas -- see _cpg_terms above.
 
 
 def marginal(name, params, t):
@@ -195,40 +279,52 @@ def marginal(name, params, t):
         phi, sigma = mpf(params[0]), mpf(params[1])
         phi2 = phi * phi
         return ('normal', mpf(0), sigma * sqrt(-expm1(t * log(phi2)) / (1 - phi2)))
+    if name == 'RandomWalk':
+        return ('shiftedbinom', int(t), mpf(params[0]))
+    if name == 'CompoundPoisson':
+        # params is (jump-Gamma shape, jump-Gamma rate, lambda, dt) -- the jump distribution's
+        # own parameters are flattened in so a spec entry stays a plain list of numbers.
+        a, b, lam = mpf(params[0]), mpf(params[1]), mpf(params[2])
+        return ('cpg', lam * t, a, b)
     raise ValueError(f'no marginal defined for {name}')
 
 
+LAWS = {
+    #  kind          pdf/pmf     cdf         quantile
+    'normal': (norm_pdf, norm_cdf, norm_q),
+    'lognormal': (lognorm_pdf, lognorm_cdf, lognorm_q),
+    'gamma': (gamma_pdf, gamma_cdf, gamma_q),
+    'poisson': (pois_pmf, pois_cdf, pois_q),
+    'shiftedbinom': (None, None, None),   # filled below: needs the 2k-n reparameterization
+    'cpg': (cpg_pdf, cpg_cdf, cpg_q),
+}
+
+# RandomWalk's marginal is Binomial(n, p) pushed through x = 2k - n, so its three functions
+# are the binomial's evaluated at k = (n + x)/2 (and inverted back through x = 2k - n).
+LAWS['shiftedbinom'] = (
+    lambda x, n, pp: binom_pmf((n + int(x)) // 2, n, pp) if (n + int(x)) % 2 == 0 else mpf(0),
+    lambda x, n, pp: binom_cdf((n + int(x)) // 2, n, pp),
+    lambda p, n, pp: 2 * binom_q(p, n, pp) - n,
+)
+
+# Discrete laws are probed at lattice points rather than at an inverted continuous quantile,
+# so duplicate probes must be collapsed when several p-levels select the same point.
+DISCRETE = ('poisson', 'shiftedbinom')
+
+# Processes that expose only marginal(t), with no pdf(x, t) of their own.
+NO_PROCESS_PDF = ('CompoundPoisson',)
+
+
 def law_pdf(law, x):
-    kind = law[0]
-    if kind == 'normal':
-        return norm_pdf(x, law[1], law[2])
-    if kind == 'lognormal':
-        return lognorm_pdf(x, law[1], law[2])
-    if kind == 'gamma':
-        return gamma_pdf(x, law[1], law[2])
-    return pois_pmf(x, law[1])
+    return LAWS[law[0]][0](x, *law[1:])
 
 
 def law_cdf(law, x):
-    kind = law[0]
-    if kind == 'normal':
-        return norm_cdf(x, law[1], law[2])
-    if kind == 'lognormal':
-        return lognorm_cdf(x, law[1], law[2])
-    if kind == 'gamma':
-        return gamma_cdf(x, law[1], law[2])
-    return pois_cdf(x, law[1])
+    return LAWS[law[0]][1](x, *law[1:])
 
 
 def law_q(law, p):
-    kind = law[0]
-    if kind == 'normal':
-        return norm_q(p, law[1], law[2])
-    if kind == 'lognormal':
-        return lognorm_q(p, law[1], law[2])
-    if kind == 'gamma':
-        return gamma_q(p, law[1], law[2])
-    return pois_q(p, law[1])
+    return LAWS[law[0]][2](p, *law[1:])
 
 
 # --- self-check against the scipy values already vetted in test/process.js -----------------
@@ -259,7 +355,37 @@ CHECKS = [
     ('CoxIngersollRoss', [2, 3, 1, 0.1], 0.5, 0.5, 0.002130824749883),
     ('CoxIngersollRoss', [2, 3, 1, 0.1], 0.5, 2.0, 0.674442782399143),
     ('CoxIngersollRoss', [2, 3, 1, 0.1], 1, 1.5, 0.201734321913609),
+    # Exact rationals quoted in test/process.js's RandomWalk .pdf() block, e.g.
+    # C(4,2)*0.5^4 = 6/16 and C(5,4)*0.7^4*0.3 = 5*0.2401*0.3.
+    ('RandomWalk', [0.5], 4, 0, 0.375),
+    ('RandomWalk', [0.5], 4, 2, 0.25),
+    ('RandomWalk', [0.6], 3, 1, 0.432),
+    ('RandomWalk', [0.7], 5, 3, 0.36015),
 ]
+
+
+def check_cpg(params, t):
+    # CompoundPoisson has no single vetted pdf literal in test/process.js to anchor against,
+    # so the mixture is instead pinned by three properties that jointly determine all three of
+    # (lambda*t, a, b) and are independent of both ranjs and the Tweedie parameter mapping:
+    #   * the atom at 0 is exactly P(N=0) = exp(-lambda*t)   -- vetted in test/process.js
+    #   * the law normalizes to 1                            -- Poisson weights sum correctly
+    #   * E[X_t] = lambda*t*E[J] = lambda*t*a/b (Wald)       -- vetted in test/process.js
+    law = marginal('CompoundPoisson', params, t)
+    lam, a, b = law[1], law[2], law[3]
+    failures = []
+    atom = law_cdf(law, 0)
+    if abs(atom - exp(-lam)) > mpf('1e-40'):
+        failures.append(f'atom {atom} != exp(-lambda*t) {exp(-lam)}')
+    # 200 means is far enough into the tail that the survival function is below 1e-40 for
+    # every shape used here.
+    total = law_cdf(law, 200 * lam * a / b)
+    if abs(total - 1) > mpf('1e-30'):
+        failures.append(f'cdf(inf) {total} != 1')
+    mean = quad(lambda y: y * law_pdf(law, y), [0, lam * a / b, 200 * lam * a / b])
+    if abs(mean / (lam * a / b) - 1) > mpf('1e-20'):
+        failures.append(f'mean {mean} != lambda*t*a/b {lam * a / b}')
+    return failures
 
 
 def self_check():
@@ -274,9 +400,21 @@ def self_check():
             bad = True
             print(f'SELF-CHECK FAIL {name}{params} pdf({x}, {t}) got {float(got)!r} '
                   f'want {expected!r} rel {rel:.2e}', file=sys.stderr)
+    n_cpg = 0
+    for name, sets, _ in SPEC:
+        if name != 'CompoundPoisson':
+            continue
+        for params, times in sets:
+            for t in times:
+                n_cpg += 1
+                for msg in check_cpg(params, t):
+                    bad = True
+                    print(f'SELF-CHECK FAIL CompoundPoisson{params} t={t}: {msg}', file=sys.stderr)
     if bad:
         sys.exit('Aborting: parameterization mismatch with test/process.js.')
-    print(f'self-check: all {len(CHECKS)} parameterizations match test/process.js', file=sys.stderr)
+    print(f'self-check: {len(CHECKS)} parameterizations match test/process.js, '
+          f'{n_cpg} compound Poisson-gamma mixtures normalize and match Wald\'s mean',
+          file=sys.stderr)
 
 
 # --- test specification: (name, [ (params, [times]) x3 ], tol) -----------------------------
@@ -310,12 +448,38 @@ SPEC = [
     ('Poisson', [([2, 1], [0.5, 1, 3]),
                  ([0.5, 1], [1, 3, 10]),
                  ([3, 1], [0.5, 2, 5])], 1e-14),
+    # t is a step count, so the times are integers and the probes land on the |x| <= t
+    # integers sharing t's parity.
+    ('RandomWalk', [([0.5], [4, 10, 25]),
+                    ([0.3], [5, 12, 30]),
+                    ([0.7], [3, 8, 20])], 1e-14),
+    # params are (jump-Gamma shape, jump-Gamma rate, lambda, dt). Every (params, t) pair keeps
+    # lambda*t >= 3, so the atom exp(-lambda*t) at 0 stays below 0.05 and all five probe levels
+    # (the lowest is 0.1) land strictly inside the continuous part of the mixture.
+    ('CompoundPoisson', [([2, 1, 3, 1], [1, 2, 4]),
+                         ([1.5, 2, 4, 1], [1, 2, 5]),
+                         ([3, 0.5, 2, 1], [2, 4, 8])], 1e-14),
 ]
 
-# Per-(name, params) tolerance overrides discovered empirically. Each carries a named
-# mechanism -- never a blanket loosening -- and is capped at 1e-12, matching the
-# distribution gates' convention.
+# Per-(name, params) tolerance overrides discovered empirically, as (pdfTol, cdfTol, note);
+# either may be None to keep the group's base tol. Each carries a named mechanism -- never a
+# blanket loosening -- and every value is pinned just above its MEASURED worst case rather
+# than at the 1e-12 cap, so a real regression still fails.
+#
+# pdf and cdf are loosened separately because their floors genuinely diverge here: the
+# compound Poisson-gamma cdf stays at ~4e-15 while its pdf reaches 4.2e-14, and collapsing
+# both into one loose bound would let a cdf regression hide behind the pdf's floor.
+_LGAMMA = ('pmf is exp() of a three-term log-gamma difference; each logGamma loses ~1 ULP and '
+           'exponentiating amplifies the absolute log error. Measured worst case at t=30: '
+           'pdf 1.8e-14, cdf 9.9e-15')
+_SERIES = ('marginal() is a Tweedie whose density is the Dunn & Smyth infinite series, summed '
+           'in log-space over hundreds of exp()-of-log-gamma terms. Measured worst case: pdf '
+           '4.2e-14; the cdf series converges far better (4.0e-15) and stays gated at 1e-14')
 TOL_OVERRIDE = {
+    ('RandomWalk', '[0.3]'): (3e-14, 2e-14, _LGAMMA),
+    ('CompoundPoisson', '[2, 1, 3, 1]'): (6e-14, None, _SERIES),
+    ('CompoundPoisson', '[1.5, 2, 4, 1]'): (6e-14, None, _SERIES),
+    ('CompoundPoisson', '[3, 0.5, 2, 1]'): (6e-14, None, _SERIES),
 }
 
 
@@ -331,38 +495,70 @@ def points_for(name, params, t):
     seen = set()
     for p in PLEVELS:
         x = law_q(law, p)
-        # The Poisson process is discrete: distinct p-levels can select the same k when
-        # lambda*t is small, so collapse duplicates rather than asserting the same point twice.
-        if law[0] == 'poisson':
+        # Poisson and RandomWalk are discrete: distinct p-levels can select the same lattice
+        # point when the spread is small, so collapse duplicates rather than asserting twice.
+        if law[0] in DISCRETE:
             if x in seen:
                 continue
             seen.add(x)
-            xs = x
+            # Lattice points are exact integers, so no float round-trip is needed and they are
+            # rendered as integers (matching the discrete distribution gate) rather than "7.0".
+            xs, lattice = x, True
         else:
             # Round-trip through float64 first: the test calls pdf() with the emitted literal,
             # so the reference must be the density at that double, not at the exact quantile.
             # mpf(float(...)) converts the double exactly; mpf(repr(...)) would instead parse
             # the printed decimal at 50 digits, landing up to half an ULP away from it.
-            xs = mpf(float(x))
-        out.append(f'{{ t: {json.dumps(t)}, x: {num(xs)}, '
-                   f'pdf: {num(law_pdf(law, xs))}, cdf: {num(law_cdf(law, xs))} }}')
+            xs, lattice = mpf(float(x)), False
+        # Cached as plain numbers, never as the rendered line: Python's float repr round-trips
+        # exactly through JSON, so a formatting or tolerance change re-renders from cache
+        # instead of re-paying the CompoundPoisson bisection.
+        out.append({'t': t, 'x': float(xs), 'lattice': lattice,
+                    'pdf': float(law_pdf(law, xs)), 'cdf': float(law_cdf(law, xs))})
     return out
 
 
-def build_groups():
+def render_point(pt):
+    x = int(pt['x']) if pt['lattice'] else num(pt['x'])
+    return (f'{{ t: {json.dumps(pt["t"])}, x: {x}, '
+            f'pdf: {num(pt["pdf"])}, cdf: {num(pt["cdf"])} }}')
+
+
+CACHE = '/tmp/precision-process-cache.json'
+
+
+def build_groups(cache):
     groups = []
     for name, sets, tol in SPEC:
         for params, times in sets:
-            override = TOL_OVERRIDE.get((name, json.dumps(params)))
-            t_, note = override if override else (tol, None)
+            pdf_tol, cdf_tol, note = TOL_OVERRIDE.get((name, json.dumps(params)),
+                                                      (None, None, None))
             pts = []
             for t in times:
-                pts.extend(points_for(name, params, t))
+                key = f'{name}|{json.dumps(params)}|{json.dumps(t)}'
+                if key not in cache:
+                    cache[key] = points_for(name, params, t)
+                pts.extend(render_point(pt) for pt in cache[key])
             comment = f'  // {name}{json.dumps(params)}: {note}\n' if note else ''
             body = ',\n      '.join(pts)
+            # CompoundPoisson's first constructor argument is a Distribution instance, not a
+            # number, so its spec params carry the jump Gamma's (shape, rate) up front and the
+            # emitted group splits them out for the test to rebuild.
+            if name == 'CompoundPoisson':
+                head = (f"    jump: {json.dumps(params[:2])},\n"
+                        f"    params: {json.dumps(params[2:])},\n")
+            else:
+                head = f'    params: {json.dumps(params)},\n'
+            # Emitted only when false, so the field stays absent for the seven processes that
+            # do implement pdf(x, t) and the generated file does not carry a redundant `true`.
+            no_pdf = '    procPdf: false,\n' if name in NO_PROCESS_PDF else ''
+            # pdfTol/cdfTol default to the group's tol in the test, so they are emitted only
+            # for the handful of groups whose two floors genuinely diverge.
+            extra = ''.join(f'    {k}: {v:g},\n'
+                            for k, v in (('pdfTol', pdf_tol), ('cdfTol', cdf_tol)) if v)
             groups.append(
-                f"{comment}  {{\n    name: '{name}',\n    params: {json.dumps(params)},\n"
-                f"    tol: {t_:g},\n    points: [\n      {body}\n    ]\n  }}")
+                f"{comment}  {{\n    name: '{name}',\n{head}{no_pdf}"
+                f"    tol: {tol:g},\n{extra}    points: [\n      {body}\n    ]\n  }}")
     return groups
 
 
@@ -373,6 +569,7 @@ TEMPLATE = '''/* eslint-disable no-loss-of-precision */
 import {{ assert }} from 'chai'
 import {{ describe, it, before }} from 'mocha'
 import * as proc from '../src/process'
+import {{ Gamma }} from '../src/dist'
 
 // Stochastic-process precision gate (issue #1223).
 //
@@ -397,36 +594,50 @@ import * as proc from '../src/process'
 //                   test/process.js does) would let a shared parameterization slip cancel out
 //   marginal cdf  : proc.marginal(t).cdf(x), which had no external reference at any tolerance
 //
+// A group carrying `procPdf: false` has no pdf(x, t) of its own (CompoundPoisson exposes only
+// marginal(t)), so only the latter two run for it.
+//
 // Reference math is INDEPENDENT of the ranjs implementation -- every marginal law is
 // re-derived from the process's SDE in the generator, which self-checks against the scipy
-// values already vetted in test/process.js before emitting these literals.
+// values already vetted in test/process.js before emitting these literals. CompoundPoisson's
+// reference in particular is summed directly as a Poisson-weighted mixture of Gammas, never
+// through the compound-Poisson -> Tweedie parameter mapping that marginal() applies, so it
+// gates that mapping as well as Tweedie's own series.
 //
 // Densities are evaluated from each process's fixed initial state x0 (0 everywhere except
 // GeometricBrownianMotion's 1), which has no public setter.
 const REFS = {data}
 
 describe('stochastic-process precision gate', () => {{
-  REFS.forEach(({{ name, params, tol, points }}) => {{
+  // pdfTol/cdfTol default to the group's shared tol, so the vast majority of groups (which hit
+  // the same float64 floor on both) are unaffected; only a group whose two floors genuinely
+  // diverge -- CompoundPoisson, whose Tweedie density series is an order of magnitude noisier
+  // than its cdf series -- sets them explicitly.
+  REFS.forEach(({{ name, params, jump, procPdf = true, tol, pdfTol = tol, cdfTol = tol, points }}) => {{
     describe(`${{name}}(${{JSON.stringify(params)}})`, () => {{
       // Construct in a before() hook so a constructor regression surfaces as a failing
       // hook rather than silently skipping every assertion in this group.
       let p
-      before(() => {{ p = new proc[name](...params) }})
+      // CompoundPoisson takes its jump distribution as a Distribution instance rather than
+      // as numbers, so its group carries the jump Gamma's (shape, rate) separately.
+      before(() => {{ p = jump ? new proc[name](new Gamma(...jump), ...params) : new proc[name](...params) }})
       // One test per code path (not per point): the message pinpoints the failing (x, t),
       // while pdf/marginal stay isolated so a regression in one does not mask the others.
-      it(`pdf(x, t) to ${{tol}} relative error`, () => {{
+      if (procPdf) {{
+        it(`pdf(x, t) to ${{pdfTol}} relative error`, () => {{
+          points.forEach(({{ t, x, pdf }}) => {{
+            assert.approximately(p.pdf(x, t) / pdf, 1, pdfTol, `pdf at x=${{x}}, t=${{t}}`)
+          }})
+        }})
+      }}
+      it(`marginal(t).pdf(x) to ${{pdfTol}} relative error`, () => {{
         points.forEach(({{ t, x, pdf }}) => {{
-          assert.approximately(p.pdf(x, t) / pdf, 1, tol, `pdf at x=${{x}}, t=${{t}}`)
+          assert.approximately(p.marginal(t).pdf(x) / pdf, 1, pdfTol, `marginal pdf at x=${{x}}, t=${{t}}`)
         }})
       }})
-      it(`marginal(t).pdf(x) to ${{tol}} relative error`, () => {{
-        points.forEach(({{ t, x, pdf }}) => {{
-          assert.approximately(p.marginal(t).pdf(x) / pdf, 1, tol, `marginal pdf at x=${{x}}, t=${{t}}`)
-        }})
-      }})
-      it(`marginal(t).cdf(x) to ${{tol}} relative error`, () => {{
+      it(`marginal(t).cdf(x) to ${{cdfTol}} relative error`, () => {{
         points.forEach(({{ t, x, cdf }}) => {{
-          assert.approximately(p.marginal(t).cdf(x) / cdf, 1, tol, `marginal cdf at x=${{x}}, t=${{t}}`)
+          assert.approximately(p.marginal(t).cdf(x) / cdf, 1, cdfTol, `marginal cdf at x=${{x}}, t=${{t}}`)
         }})
       }})
     }})
@@ -436,8 +647,20 @@ describe('stochastic-process precision gate', () => {{
 
 
 if __name__ == '__main__':
-    self_check()
-    groups = build_groups()
+    render_only = '--render' in sys.argv
+    cache = {}
+    if render_only:
+        if not os.path.exists(CACHE):
+            sys.exit(f'--render needs {CACHE}; run without it once to populate the cache.')
+        with open(CACHE) as fh:
+            cache = json.load(fh)
+    else:
+        # The self-check re-derives every law from scratch, so it is the recompute path's
+        # guard; --render trusts the cache the earlier full run already validated.
+        self_check()
+    groups = build_groups(cache)
+    with open(CACHE, 'w') as fh:
+        json.dump(cache, fh)
     with open('test/precision-process.js', 'w') as fh:
         fh.write(TEMPLATE.format(data='[\n' + ',\n'.join(groups) + '\n]'))
     print(f'wrote test/precision-process.js with {len(groups)} groups', file=sys.stderr)
