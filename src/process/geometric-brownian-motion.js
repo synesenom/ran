@@ -60,6 +60,9 @@ export default class GeometricBrownianMotion extends Process {
    * @ignore
    */
   _transitionLnPdf (xPrev, xNext) {
+    // Both endpoints must be guarded: xPrev <= 0 alone previously slipped through as
+    // Math.log(negative) = NaN instead of -Infinity for an impossible path.
+    // solutions/correctness/2026-08-01-1414-gbm-transition-density-asymmetric-domain-guard.md
     if (xPrev <= 0 || xNext <= 0) {
       return -Infinity
     }
