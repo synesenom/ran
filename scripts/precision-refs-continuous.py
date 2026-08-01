@@ -1733,6 +1733,14 @@ PARAM_SETS = {
 # 1/pdf(x) -- collapses fast away from the peak at this theta; x=1.8's pdf ~2e-11 amplifies the
 # ~1e-13-relative mpmath-vs-ranjs cdf gap into a ~1e-5 quantile round-trip error, swamping any
 # meaningful qtol. This range keeps that amplification within a documentable qtol below.
+#
+# WARNING (issue #1200): every param tuple added to DoublyNoncentralT's PARAM_SETS entry must
+# have a matching entry below -- xvalues()'s MANUAL_XVALS guard (see #1178) silently falls
+# through to the slow standard P_GRID/invcdf() bisection path instead of raising if a tuple is
+# missing here. The same hazard is far more expensive for DoublyNoncentralBeta, whose
+# dncbeta_cdf alone can take up to ~44 minutes per call at large lambda, with one param set's
+# calls totaling ~65 minutes (see DNCBETA_XVALS and issue #1149) -- keep every fully-manual dict
+# in this file complete for its PARAM_SETS entry.
 DNCT_XVALS = {
     (5, 1, 2): [mpf('-2'), mpf('-0.5'), mpf('1'), mpf('2.5'), mpf('4')],
     (5, 0, 2): [mpf('-3'), mpf('-1.2'), mpf('0.7'), mpf('2'), mpf('3.5')],
@@ -1760,6 +1768,17 @@ DNCT_XVALS = {
     (5, 2, 120): [mpf('-0.1'), mpf('-0.2'), mpf('-0.3'), mpf('-0.5'), mpf('-0.7')],
 }
 
+# WARNING (issue #1200): every param tuple added to DoublyNoncentralBeta's PARAM_SETS entry
+# must have a matching entry in DNCBETA_XVALS below, and likewise for DoublyNoncentralF /
+# DNCF_XVALS -- xvalues()'s "name in MANUAL_XVALS and tuple(p) in MANUAL_XVALS[name]" guard
+# (added in #1178 to let a few distributions mix P_GRID-driven and manually-pinned param sets)
+# silently falls through to the slow standard P_GRID/invcdf() bisection path if a tuple is
+# missing here, no error is raised. This is not hypothetical: dncbeta_cdf alone can take up to
+# ~44 minutes per call at large lambda, with the full set of calls for one param set totaling
+# ~65 minutes (see the (2, 2, 1200, 1200) case below and issue #1149) -- a PARAM_SETS entry
+# added without a matching DNCBETA_XVALS entry would silently trigger that ~65-minute --emit
+# run instead of failing fast.
+#
 # Doubly-noncentral Beta/F CDFs are double Poisson sums: too slow to invert by bisection,
 # so we probe at fixed interior values (strictly inside the support, 0 < cdf < 1).
 # (2, 2, 1200, 1200) (issue #1086) additionally avoids x close to 0/1: at this lambda scale the
@@ -1787,6 +1806,9 @@ DNCBETA_XVALS = {
     (3, 4, 2, 2): [mpf('0.2'), mpf('0.35'), mpf('0.5'), mpf('0.65'), mpf('0.8')],
     (2, 2, 1200, 1200): [mpf('0.3'), mpf('0.5')],
 }
+# WARNING (issue #1200): same fallthrough hazard as DNCBETA_XVALS above applies here -- every
+# param tuple added to DoublyNoncentralF's PARAM_SETS entry needs a matching entry below, or
+# xvalues() silently falls through to slow P_GRID bisection instead of raising.
 DNCF_XVALS = {
     (5, 5, 2, 2): [mpf('0.5'), mpf('1'), mpf('1.5'), mpf('2.5'), mpf('4')],
     (5, 5, 1, 2): [mpf('0.5'), mpf('1'), mpf('1.5'), mpf('2.5'), mpf('4')],
@@ -1836,11 +1858,23 @@ NONCENTRAL_F_XVALS = {
 
 # Quadrature-based CDFs (Davis, noncentral-t, SkewNormal, VonMises): inverting by bisection
 # would re-run the integral 70x per point, so we probe at fixed interior values instead.
+#
+# WARNING (issue #1200): NCT_XVALS, SKEWNORMAL_XVALS and VONMISES_XVALS below are fully-manual
+# like DNCT_XVALS/DNCBETA_XVALS/DNCF_XVALS above -- every param tuple added to NoncentralT's,
+# SkewNormal's or VonMises's PARAM_SETS entry must have a matching entry in its dict here, or
+# xvalues()'s MANUAL_XVALS guard (#1178) silently falls through to slow P_GRID bisection instead
+# of raising. The worst case of this hazard is DoublyNoncentralBeta, whose dncbeta_cdf alone can
+# take up to ~44 minutes per call at large lambda, with one param set's calls totaling ~65
+# minutes (see DNCBETA_XVALS and issue #1149) -- a missing entry for any of these fully-manual
+# distributions risks the same kind of silent, expensive --emit run.
 NCT_XVALS = {
     (5, 1): [mpf('-1'), mpf('0.5'), mpf('1.5'), mpf('2.8'), mpf('4.5')],
     (5, 0): [mpf('-2.5'), mpf('-1'), mpf('0.3'), mpf('1.5'), mpf('3')],
     (8, 2): [mpf('0.5'), mpf('1.5'), mpf('2.5'), mpf('3.5'), mpf('5')],
 }
+# WARNING (issue #1200): see the fallthrough-hazard note above NCT_XVALS -- every param tuple
+# added to SkewNormal's PARAM_SETS entry needs a matching entry below, or xvalues() silently
+# falls through to slow P_GRID bisection instead of raising.
 SKEWNORMAL_XVALS = {
     (0, 2, 2): [mpf('-1'), mpf('0.5'), mpf('2'), mpf('4'), mpf('6')],
     (0, 2, -2): [mpf('-6'), mpf('-4'), mpf('-2'), mpf('-0.5'), mpf('1')],
@@ -1852,6 +1886,9 @@ SKEWNORMAL_XVALS = {
     # (h = x/omega = x here) from both sides, with 0.67 landing exactly on the cut value.
     (0, 1, 2): [mpf('0.3'), mpf('0.66'), mpf('0.67'), mpf('0.68'), mpf('1.5')],
 }
+# WARNING (issue #1200): see the fallthrough-hazard note above NCT_XVALS -- every param tuple
+# added to VonMises's PARAM_SETS entry needs a matching entry below, or xvalues() silently
+# falls through to slow P_GRID bisection instead of raising.
 VONMISES_XVALS = {
     (0, 2): [mpf('-2'), mpf('-0.8'), mpf('0.4'), mpf('1.2'), mpf('2.5')],
     (0, 0.5): [mpf('-2.5'), mpf('-1'), mpf('0.4'), mpf('1.4'), mpf('2.5')],
@@ -1870,6 +1907,20 @@ VONMISES_XVALS = {
 }
 # Davis is inverted by bisection like the rest (its quadrature CDF is slow but tolerable for
 # one distribution) so its probes span the full support {0.1..0.9} rather than fixed points.
+#
+# WARNING (issue #1200): xvalues() below indexes this assembly dict with
+# "name in MANUAL_XVALS and tuple(p) in MANUAL_XVALS[name]" (guard added in #1178 so a few
+# distributions -- Levy, InverseGaussian, Beta, F, NoncentralBeta, NoncentralF -- can mix
+# standard P_GRID-driven param sets with one manually-pinned boundary-crossover set in the same
+# PARAM_SETS entry). For the six *fully*-manual entries here (DoublyNoncentralT, DoublyNoncentralBeta,
+# DoublyNoncentralF, NoncentralT, SkewNormal, VonMises), every param tuple in that distribution's
+# PARAM_SETS entry must still be present in its dict above -- the guard does not raise on a
+# missing tuple, it silently falls through to the slow standard P_GRID/invcdf() bisection path.
+# The concrete hazard: DoublyNoncentralBeta's dncbeta_cdf alone can take up to ~44 minutes per
+# call at large lambda, with one param set's full set of calls totaling ~65 minutes (see
+# DNCBETA_XVALS's (2, 2, 1200, 1200) case and issue #1149) -- adding a PARAM_SETS entry for it
+# (or for any of the other five) without a matching entry in its manual dict would silently
+# trigger that ~65-minute --emit run instead of failing fast.
 MANUAL_XVALS = {
     'DoublyNoncentralT': DNCT_XVALS,
     'DoublyNoncentralBeta': DNCBETA_XVALS,
