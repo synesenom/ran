@@ -35,10 +35,8 @@ export default class OrnsteinUhlenbeck extends Process {
     this.x = 0
     this.x0 = 0
     const decay = Math.exp(-theta * dt)
-    this.c = {
-      decay,
-      noise: sigma * Math.sqrt((1 - decay * decay) / (2 * theta))
-    }
+    const noise = sigma * Math.sqrt((1 - decay * decay) / (2 * theta))
+    this.c = { decay, noise, logNoise: Math.log(noise) }
   }
 
   _next () {
@@ -63,10 +61,10 @@ export default class OrnsteinUhlenbeck extends Process {
    */
   _transitionLnPdf (xPrev, xNext) {
     const { mu } = this.p
-    const { decay, noise } = this.c
+    const { decay, noise, logNoise } = this.c
     const m = xPrev * decay + mu * (1 - decay)
     const z = (xNext - m) / noise
-    return -0.5 * z * z - Math.log(noise) - 0.5 * Math.log(2 * Math.PI)
+    return -0.5 * z * z - logNoise - 0.5 * Math.log(2 * Math.PI)
   }
 
   /** @inheritdoc */

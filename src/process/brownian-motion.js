@@ -33,7 +33,11 @@ export default class BrownianMotion extends Process {
     this.p = { mu, sigma, dt }
     this.x = 0
     this.x0 = 0
-    this.c = { sqrtDt: Math.sqrt(dt) }
+    this.c = {
+      sqrtDt: Math.sqrt(dt),
+      sigmaDt: sigma * Math.sqrt(dt),
+      logSigmaDt: Math.log(sigma * Math.sqrt(dt))
+    }
   }
 
   _next () {
@@ -53,9 +57,9 @@ export default class BrownianMotion extends Process {
    * @ignore
    */
   _transitionLnPdf (xPrev, xNext) {
-    const sigmaDt = this.p.sigma * this.c.sqrtDt
+    const { sigmaDt, logSigmaDt } = this.c
     const z = (xNext - xPrev - this.p.mu * this.p.dt) / sigmaDt
-    return -0.5 * z * z - Math.log(sigmaDt) - 0.5 * Math.log(2 * Math.PI)
+    return -0.5 * z * z - logSigmaDt - 0.5 * Math.log(2 * Math.PI)
   }
 
   /** @inheritdoc */

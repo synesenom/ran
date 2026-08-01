@@ -33,9 +33,11 @@ export default class GeometricBrownianMotion extends Process {
     this.p = { mu, sigma, dt }
     this.x = 1
     this.x0 = 1
+    const noise = sigma * Math.sqrt(dt)
     this.c = {
       drift: (mu - 0.5 * sigma * sigma) * dt,
-      noise: sigma * Math.sqrt(dt)
+      noise,
+      logNoise: Math.log(noise)
     }
   }
 
@@ -61,9 +63,9 @@ export default class GeometricBrownianMotion extends Process {
     if (xPrev <= 0 || xNext <= 0) {
       return -Infinity
     }
-    const { drift, noise } = this.c
+    const { drift, noise, logNoise } = this.c
     const z = (Math.log(xNext / xPrev) - drift) / noise
-    return -0.5 * z * z - Math.log(noise) - 0.5 * Math.log(2 * Math.PI) - Math.log(xNext)
+    return -0.5 * z * z - logNoise - 0.5 * Math.log(2 * Math.PI) - Math.log(xNext)
   }
 
   /** @inheritdoc */
