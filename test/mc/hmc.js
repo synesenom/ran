@@ -235,6 +235,35 @@ describe('mc.HMC', () => {
     })
   })
 
+  describe('._leapfrog() deterministic single-step correctness', () => {
+    // Standard Normal target (U(x) = x^2/2, gradLnp(x) = -x) with a non-identity diagonal
+    // metric (variance = 4, so M^-1 = 4, not the identity): with an identity metric, a
+    // regression that dots raw momentum instead of the metric-scaled velocity would produce
+    // the same numbers, defeating the point of this test. See decisions/0034-nuts-euclidean-
+    // metric-adaptation.md, which names exactly that regression as a blind spot statistical
+    // KS-based sampler tests cannot catch on well-scaled targets.
+    const metricVariance4 = { internal: { metric: { type: 'diag', variance: [4] } } }
+
+    it('should match a hand-derived single leapfrog step (x0=1, r0=1, eps=0.1, variance=4)', () => {
+      const hmc = new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1, pathLength: 1 }, initialState: metricVariance4 })
+      const { x, r } = hmc._leapfrog([1], [1], 0.1)
+      // exact rational: rHalf = 1 - 0.5*0.1*1 = 19/20; vMid = 4*19/20 = 19/5;
+      // x1 = 1 + 0.1*19/5 = 69/50 = 1.38; r1 = 19/20 - 0.5*0.1*(69/50) = 881/1000 = 0.881
+      assert.closeTo(x[0], 1.38, 1e-12)
+      assert.closeTo(r[0], 0.881, 1e-12)
+    })
+
+    it('should chain two leapfrog steps correctly (pathLength=2)', () => {
+      const hmc = new HMC({ logDensity: logDensity1D, gradLogDensity: gradLogDensity1D, config: { dim: 1, pathLength: 2 }, initialState: metricVariance4 })
+      const { x, r } = hmc._leapfrog([1], [1], 0.1)
+      // exact rational, continuing from the single-step case above (x1=1.38, r1=0.881):
+      // rHalf2 = 0.881 - 0.5*0.1*1.38 = 0.812; vMid2 = 4*0.812 = 3.248;
+      // x2 = 1.38 + 0.1*3.248 = 1.7048; r2 = 0.812 - 0.5*0.1*1.7048 = 0.72676
+      assert.closeTo(x[0], 1.7048, 1e-12)
+      assert.closeTo(r[0], 0.72676, 1e-12)
+    })
+  })
+
   describe('gradLogDensity array-reuse contract', () => {
     it('should pass the same array object to gradLogDensity on every leapfrog step of one .iterate() call, mutated in place', () => {
       // Pins #948's array-reuse optimization (issue #996) as observed through the public
