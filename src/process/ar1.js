@@ -49,6 +49,9 @@ export default class AR1 extends Process {
   /** @inheritdoc */
   variance (t) {
     if (t < 0) return NaN
+    // X_0 = 0 deterministically, independent of phi/sigma; short-circuiting here also avoids
+    // 0 * Math.log(phi2) producing NaN when phi2 underflows to 0 or overflows to Infinity
+    if (t === 0) return 0
     const { phi, sigma } = this.p
     const phi2 = phi * phi
     // For |phi| = 1 the geometric-series formula has a 0/0 indeterminate form; the limit is sigma^2*t

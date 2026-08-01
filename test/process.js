@@ -1579,6 +1579,11 @@ describe('process.AR1', () => {
       assert.strictEqual(ar1.variance(0), 0)
     })
 
+    it('should return 0 at t = 0 for phi = 0 (phi2 = 0 would otherwise hit 0*log(0) = NaN)', () => {
+      const ar1 = new AR1(0, 1)
+      assert.strictEqual(ar1.variance(0), 0)
+    })
+
     it('should return sigma^2 at t = 1', () => {
       const ar1 = new AR1(0.5, 2)
       // exact rational: Var(X_1) = sigma^2 = 4
@@ -1614,7 +1619,8 @@ describe('process.AR1', () => {
       // phi2 = 1 - 2e-14 lies just outside the 1e-14 special-case band; at
       // t = 1e-6, 1 - phi2^t previously rounded to exactly 0 (100% error)
       const ar1 = new AR1(Math.sqrt(1 - 2e-14), 1)
-      // derived from -expm1(t*log(phi2))/(1-phi2), computed independently of ar1.js: 1.00000000000001e-6
+      // mpmath mp.dps=50, untransformed sigma^2*(1-phi2^t)/(1-phi2) with the actual double
+      // phi2 = 0.99999999999998 (immune to cancellation at 50 digits): 1.0000000000000099999900...e-6
       assert.closeTo(ar1.variance(1e-6), 1.00000000000001e-6, 1e-15)
       assert.isAbove(ar1.variance(1e-6), 0)
     })
@@ -1623,14 +1629,16 @@ describe('process.AR1', () => {
       // phi2 = 1 - 1e-13; at t = 0.01 the old formula returned 0.009977827050997782
       // (0.22% error) instead of the true value
       const ar1 = new AR1(Math.sqrt(1 - 1e-13), 1)
-      // derived from -expm1(t*log(phi2))/(1-phi2), computed independently of ar1.js: 0.010000000000000495
+      // mpmath mp.dps=50, untransformed sigma^2*(1-phi2^t)/(1-phi2) with the actual double
+      // phi2 = 0.9999999999998999: 0.0100000000000004954950000000329...
       assert.closeTo(ar1.variance(0.01), 0.010000000000000495, 1e-12)
     })
 
     it('should remain accurate for near-unit-root phi at integer t (regression guard)', () => {
       const ar1 = new AR1(Math.sqrt(1 - 1e-13), 1)
-      // derived from -expm1(t*log(phi2))/(1-phi2), computed independently of ar1.js: 9.999999999995493
-      assert.closeTo(ar1.variance(10), 9.999999999995493, 1e-8)
+      // mpmath mp.dps=50, untransformed sigma^2*(1-phi2^t)/(1-phi2) with the actual double
+      // phi2 = 0.9999999999998999: 9.9999999999954955000000012024...
+      assert.closeTo(ar1.variance(10), 9.999999999995495, 1e-12)
     })
   })
 
