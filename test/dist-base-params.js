@@ -12,6 +12,18 @@ describe('dist', () => {
         assert.strictEqual(p.sigma, 3)
       })
 
+      it('Distribution.params() returns a shallow copy, not the live this.p reference', () => {
+        const d = new dist.Normal(2, 3)
+        assert.notStrictEqual(d.params(), d.p)
+      })
+
+      it('mutating the object returned by Distribution.params() does not corrupt the instance', () => {
+        const d = new dist.Normal(2, 3)
+        const p = d.params()
+        p.mu = 999
+        assert.strictEqual(d.params().mu, 2)
+      })
+
       it('Categorical.params() returns { weights } only', () => {
         const d = new dist.Categorical([0.3, 0.7], 0)
         const p = d.params()

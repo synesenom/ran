@@ -67,7 +67,11 @@ class Distribution {
    * and whether it is closed, respectively. When <code>value</code> is (+/-)Infinity, <code>closed</code> is always false.
    */
   support () {
-    return this.s
+    // Copy the boundary objects too, not just the array — a shallow array spread alone would
+    // still let callers mutate this.s[i] in place.
+    // decisions/0047-params-shallow-copy.md — shallow copy prevents callers mutating internal
+    // state through the returned object.
+    return this.s.map(b => ({ ...b }))
   }
 
   /**
@@ -83,7 +87,11 @@ class Distribution {
     // via Object.assign(this.p, {...}) instead of replacing it will leak the parent's keys here.
     // See decisions/0018-continuous-subclass-natural-params.md and
     // solutions/distribution/2026-07-21-1252-reparametrizing-subclass-this-p-merge-vs-replace.md
-    return this.p
+    //
+    // Shallow copy so callers can't mutate internal state through the returned object.
+    // decisions/0047-params-shallow-copy.md — shallow copy prevents callers mutating internal
+    // state through the returned object.
+    return { ...this.p }
   }
 
   /**
