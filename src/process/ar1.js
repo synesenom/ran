@@ -55,7 +55,9 @@ export default class AR1 extends Process {
     if (Math.abs(phi2 - 1) < 1e-14) {
       return sigma * sigma * t
     }
-    return sigma * sigma * (1 - Math.pow(phi2, t)) / (1 - phi2)
+    // -expm1(t*log(phi2)) avoids catastrophic cancellation in 1-phi2^t when
+    // phi2 is close to 1 and t is small, where Math.pow(phi2, t) rounds to 1
+    return sigma * sigma * (-Math.expm1(t * Math.log(phi2))) / (1 - phi2)
   }
 
   /** @inheritdoc */
