@@ -18,6 +18,7 @@ import RandomWalk from '../src/process/random-walk'
 import ShiftedBinomial from '../src/dist/_shifted-binomial'
 import { Normal, LogNormal, Gamma, Poisson, Tweedie } from '../src/dist'
 import { chiTest } from './test-utils'
+import processCases from './process-cases'
 
 // Fixed seeds replace ksTest/chiTest significance-level checks: a random seed can produce
 // a false positive/negative at the chosen critical value on some runs, while a fixed seed
@@ -470,12 +471,6 @@ describe('process.BrownianMotion', () => {
   })
 
   describe('.mean()', () => {
-    it('should return mu*t for zero initial state', () => {
-      const bm = new BrownianMotion(0.5, 1, 1)
-      // exact rational: mu*t = 0.5*2 = 1
-      assert.closeTo(bm.mean(2), 1.0, 1e-10)
-    })
-
     it('should return 0 for zero drift at any t', () => {
       const bm = new BrownianMotion(0, 1, 1)
       assert.strictEqual(bm.mean(3), 0)
@@ -494,12 +489,6 @@ describe('process.BrownianMotion', () => {
   })
 
   describe('.variance()', () => {
-    it('should return sigma^2 * t', () => {
-      const bm = new BrownianMotion(0, 2, 1)
-      // exact rational: sigma^2*t = 2^2*3 = 12
-      assert.closeTo(bm.variance(3), 12, 1e-10)
-    })
-
     it('should return 0 at t=0', () => {
       const bm = new BrownianMotion(0, 1, 1)
       assert.strictEqual(bm.variance(0), 0)
@@ -521,32 +510,9 @@ describe('process.BrownianMotion', () => {
       const bm = new BrownianMotion(0, 1, 1)
       assert(Number.isNaN(bm.pdf(0, -1)))
     })
-
-    it('should return Normal(0,1) density at x=0, t=1 for mu=0, sigma=1', () => {
-      const bm = new BrownianMotion(0, 1, 1)
-      // scipy: stats.norm.pdf(0, loc=0, scale=1) = 0.3989422804014327
-      assert.closeTo(bm.pdf(0, 1), 0.3989422804014327, 1e-10)
-    })
-
-    it('should return Normal(mu*t, sigma^2*t) density for general parameters', () => {
-      const bm = new BrownianMotion(0.5, 2, 1)
-      // scipy: stats.norm.pdf(1, loc=0.5*2, scale=sqrt(4*2)) = 0.1410473958869391
-      assert.closeTo(bm.pdf(1, 2), 0.1410473958869391, 1e-10)
-    })
-
-    it('should match Normal distribution with correct parameters', () => {
-      const bm = new BrownianMotion(-0.2, 1.5, 1)
-      // scipy: stats.norm.pdf(0, loc=-0.2*3, scale=sqrt(1.5^2*3)) = 0.1495123243667221
-      assert.closeTo(bm.pdf(0, 3), 0.1495123243667221, 1e-10)
-    })
   })
 
   describe('.covariogram()', () => {
-    it('should return sigma^2 * min(s, t)', () => {
-      const bm = new BrownianMotion(0, 2, 1)
-      assert.closeTo(bm.covariogram(2, 3), 4 * 2, 1e-10)
-    })
-
     it('should be symmetric', () => {
       const bm = new BrownianMotion(0, 2, 1)
       assert.closeTo(bm.covariogram(1, 4), bm.covariogram(4, 1), 1e-10)
@@ -601,14 +567,6 @@ describe('process.BrownianMotion', () => {
   })
 
   describe('.lnL()', () => {
-    it('should match the transition log-likelihood of a fixed path', () => {
-      const bm = new BrownianMotion(0.3, 1.2, 0.5)
-      const path = [0, 0.4, 1.1, 0.7]
-      // mpmath mp.dps=50: sum of Normal(x_i + mu*dt, sigma^2*dt).logpdf(x_{i+1}) over the 3 steps
-      // → -2.7276011658226308065169617691597986337297768997831
-      assert.closeTo(bm.lnL(path), -2.7276011658226307, 1e-9)
-    })
-
     it('should have a mean per-step log-density matching the known transition law (CLT tolerance)', () => {
       const mu = 0.1
       const sigma = 1
@@ -766,12 +724,6 @@ describe('process.GeometricBrownianMotion', () => {
       assert.strictEqual(gbm.mean(0), 1)
     })
 
-    it('should return exp(mu*t)', () => {
-      const gbm = new GeometricBrownianMotion(0.1, 0.2, 1)
-      // mpmath mp.dps=50: exp(0.1*3) = exp(0.3) → 1.3498588075760032
-      assert.closeTo(gbm.mean(3), 1.3498588075760032, 1e-10)
-    })
-
     it('should return NaN for t < 0', () => {
       const gbm = new GeometricBrownianMotion(0, 1, 1)
       assert(Number.isNaN(gbm.mean(-1)))
@@ -789,12 +741,6 @@ describe('process.GeometricBrownianMotion', () => {
     it('should return 0 at t=0', () => {
       const gbm = new GeometricBrownianMotion(0.1, 0.2, 1)
       assert.strictEqual(gbm.variance(0), 0)
-    })
-
-    it('should return exp(2*mu*t)*(exp(sigma^2*t)-1)', () => {
-      const gbm = new GeometricBrownianMotion(0.05, 0.3, 1)
-      // mpmath mp.dps=50: exp(0.1)*(exp(0.09)-1) → 0.10407867958160391
-      assert.closeTo(gbm.variance(1), 0.10407867958160391, 1e-10)
     })
 
     it('should return NaN for t < 0', () => {
@@ -823,33 +769,9 @@ describe('process.GeometricBrownianMotion', () => {
       const gbm = new GeometricBrownianMotion(0, 1, 1)
       assert.strictEqual(gbm.pdf(-1, 1), 0)
     })
-
-    it('should return log-normal density for mu=0.1, sigma=0.3, t=1, x=1', () => {
-      const gbm = new GeometricBrownianMotion(0.1, 0.3, 1)
-      // scipy: stats.lognorm.pdf(1, s=0.3*sqrt(1), scale=exp(log(1)+(0.1-0.09/2)*1)) = 1.3076461848524421
-      assert.closeTo(gbm.pdf(1.0, 1), 1.3076461848524421, 1e-10)
-    })
-
-    it('should return log-normal density for mu=0.05, sigma=0.2, t=2, x=1.5', () => {
-      const gbm = new GeometricBrownianMotion(0.05, 0.2, 1)
-      // scipy: stats.lognorm.pdf(1.5, s=0.2*sqrt(2), scale=exp((0.05-0.02)*2)) = 0.4459926977250626
-      assert.closeTo(gbm.pdf(1.5, 2), 0.4459926977250626, 1e-10)
-    })
-
-    it('should return log-normal density for mu=0, sigma=0.5, t=0.5, x=0.8', () => {
-      const gbm = new GeometricBrownianMotion(0, 0.5, 1)
-      // scipy: stats.lognorm.pdf(0.8, s=0.5*sqrt(0.5), scale=exp(-0.0625*0.5)) = 1.2721398281078873
-      assert.closeTo(gbm.pdf(0.8, 0.5), 1.2721398281078873, 1e-10)
-    })
   })
 
   describe('.covariogram()', () => {
-    it('should return exp(mu*(s+t)) * (exp(sigma^2*min(s,t)) - 1)', () => {
-      const gbm = new GeometricBrownianMotion(0.05, 0.2, 1)
-      // scipy: exp(0.05*(1+3)) * (exp(0.2**2*min(1,3)) - 1) → 0.049846392161234841
-      assert.closeTo(gbm.covariogram(1, 3), 0.049846392161234841, 1e-10)
-    })
-
     it('should be symmetric', () => {
       const gbm = new GeometricBrownianMotion(0.05, 0.2, 1)
       assert.closeTo(gbm.covariogram(1, 4), gbm.covariogram(4, 1), 1e-10)
@@ -904,15 +826,6 @@ describe('process.GeometricBrownianMotion', () => {
   })
 
   describe('.lnL()', () => {
-    it('should match the transition log-likelihood of a fixed path', () => {
-      const gbm = new GeometricBrownianMotion(0.1, 0.25, 0.5)
-      const path = [1.0, 1.2, 0.9, 1.5]
-      // mpmath mp.dps=50: sum of [Normal(drift, noise^2).logpdf(log(x_{i+1}/x_i)) - log(x_{i+1})]
-      // over the 3 steps, where drift = (mu-0.5*sigma^2)*dt, noise^2 = sigma^2*dt (the log-normal
-      // transition density's 1/x Jacobian) → -3.6824641101851229894621067377482732895915091716478
-      assert.closeTo(gbm.lnL(path), -3.682464110185123, 1e-9)
-    })
-
     it('should return -Infinity, not throw, when the path visits a non-positive state', () => {
       const gbm = new GeometricBrownianMotion(0.1, 0.25, 0.5)
       assert.strictEqual(gbm.lnL([1, -1]), -Infinity)
@@ -1050,20 +963,9 @@ describe('process.OrnsteinUhlenbeck', () => {
   })
 
   describe('.mean()', () => {
-    it('should return mu*(1 - exp(-theta*t)) for zero initial state', () => {
-      const ou = new OrnsteinUhlenbeck(2, 3, 1, 0.1)
-      // mpmath mp.dps=50: 3*(1-exp(-2)) → 2.593994150290162
-      assert.closeTo(ou.mean(1), 2.593994150290162, 1e-10)
-    })
-
     it('should return 0 at t=0', () => {
       const ou = new OrnsteinUhlenbeck(1, 5, 1, 0.1)
       assert.strictEqual(ou.mean(0), 0)
-    })
-
-    it('should approach mu as t -> infinity', () => {
-      const ou = new OrnsteinUhlenbeck(1, 4, 1, 0.1)
-      assert.closeTo(ou.mean(1000), 4, 1e-6)
     })
 
     it('should return NaN for t < 0', () => {
@@ -1080,22 +982,9 @@ describe('process.OrnsteinUhlenbeck', () => {
   })
 
   describe('.variance()', () => {
-    it('should return sigma^2*(1-exp(-2*theta*t))/(2*theta)', () => {
-      const ou = new OrnsteinUhlenbeck(2, 0, 0.5, 0.1)
-      // mpmath mp.dps=50: sigma^2*(1-exp(-2*theta*t))/(2*theta) = 0.25*(1-exp(-4))/4 → 0.06135527256945411
-      assert.closeTo(ou.variance(1), 0.06135527256945411, 1e-10)
-    })
-
     it('should return 0 at t=0', () => {
       const ou = new OrnsteinUhlenbeck(1, 0, 1, 1)
       assert.strictEqual(ou.variance(0), 0)
-    })
-
-    it('should approach stationary variance sigma^2/(2*theta) as t -> infinity', () => {
-      const theta = 2; const sigma = 0.5
-      const ou = new OrnsteinUhlenbeck(theta, 0, sigma, 0.1)
-      // exact rational: sigma^2/(2*theta) = 0.25/4 = 0.0625
-      assert.closeTo(ou.variance(1000), 0.0625, 1e-6)
     })
 
     it('should return NaN for t < 0', () => {
@@ -1114,33 +1003,9 @@ describe('process.OrnsteinUhlenbeck', () => {
       const ou = new OrnsteinUhlenbeck(1, 0, 1, 1)
       assert(Number.isNaN(ou.pdf(0, -1)))
     })
-
-    it('should return Normal(mean(t), variance(t)) density for theta=1 mu=2 sigma=1 t=1 x=1', () => {
-      const ou = new OrnsteinUhlenbeck(1, 2, 1, 0.1)
-      // scipy: mu=2*(1-exp(-1)), var=(1-exp(-2))/2; stats.norm.pdf(1, mu, sqrt(var)) = 0.5596687594392821
-      assert.closeTo(ou.pdf(1, 1), 0.5596687594392821, 1e-10)
-    })
-
-    it('should return correct density for theta=2 mu=0 sigma=0.5 t=0.5 x=0', () => {
-      const ou = new OrnsteinUhlenbeck(2, 0, 0.5, 0.1)
-      // scipy: mu=0, var=0.25*(1-exp(-2))/4; stats.norm.pdf(0, 0, sqrt(var)) = 1.7161142135258760
-      assert.closeTo(ou.pdf(0, 0.5), 1.7161142135258760, 1e-10)
-    })
-
-    it('should return correct density for theta=0.5 mu=3 sigma=2 t=2 x=2', () => {
-      const ou = new OrnsteinUhlenbeck(0.5, 3, 2, 0.1)
-      // scipy: mu=3*(1-exp(-1)), var=4*(1-exp(-2))/1; stats.norm.pdf(2, mu, sqrt(var)) = 0.2141814469689605
-      assert.closeTo(ou.pdf(2, 2), 0.2141814469689605, 1e-10)
-    })
   })
 
   describe('.covariogram()', () => {
-    it('should return (sigma^2/2theta)*(exp(-theta*|t-s|) - exp(-theta*(t+s)))', () => {
-      const ou = new OrnsteinUhlenbeck(2, 0, 0.5, 0.1)
-      // scipy: (0.5**2/(2*2)) * (exp(-2*abs(3-1)) - exp(-2*(3+1))) → 0.0011237610163019791
-      assert.closeTo(ou.covariogram(1, 3), 0.0011237610163019791, 1e-10)
-    })
-
     it('should be symmetric', () => {
       const ou = new OrnsteinUhlenbeck(2, 0, 0.5, 0.1)
       assert.closeTo(ou.covariogram(1, 3), ou.covariogram(3, 1), 1e-10)
@@ -1195,16 +1060,6 @@ describe('process.OrnsteinUhlenbeck', () => {
   })
 
   describe('.lnL()', () => {
-    it('should match the transition log-likelihood of a fixed path', () => {
-      const ou = new OrnsteinUhlenbeck(0.8, 0.5, 0.6, 0.25)
-      const path = [1.0, 0.9, 0.6, 0.8]
-      // mpmath mp.dps=50: sum of Normal(x_i*decay + mu*(1-decay), noise^2).logpdf(x_{i+1}) over
-      // the 3 steps, where decay = exp(-theta*dt), noise^2 = sigma^2*(1-decay^2)/(2*theta) —
-      // the ONE-STEP transition constants, distinct from mean(t)/variance(t)'s elapsed-time
-      // decay exp(-theta*t) for arbitrary t → 0.47497249518150224285604569178811850409220342308943
-      assert.closeTo(ou.lnL(path), 0.47497249518150225, 1e-9)
-    })
-
     it('should have a mean per-step log-density matching the known transition law (CLT tolerance)', () => {
       const theta = 0.5
       const mu = 3
@@ -1449,14 +1304,6 @@ describe('process.BrownianBridge', () => {
   })
 
   describe('.variance()', () => {
-    it('should return sigma^2 * t * (T-t) / T for 0 < t < T', () => {
-      const sigma = 2
-      const T = 1
-      const bb = new BrownianBridge(sigma, T, 0.1)
-      // exact rational: sigma^2*t*(T-t)/T = 4*0.5*0.5/1 = 1
-      assert.closeTo(bb.variance(0.5), 1, 1e-10)
-    })
-
     it('should return 0 at t=0', () => {
       const bb = new BrownianBridge(1, 1, 0.1)
       assert.strictEqual(bb.variance(0), 0)
@@ -1479,13 +1326,6 @@ describe('process.BrownianBridge', () => {
   })
 
   describe('.covariogram()', () => {
-    it('should return sigma^2 * min(s,t) * (T - max(s,t)) / T for 0 <= s <= t <= T', () => {
-      const sigma = 2; const T = 1
-      const bb = new BrownianBridge(sigma, T, 0.1)
-      // exact rational: sigma^2*s*(T-t)/T = 4*0.25*0.5/1 = 0.5
-      assert.closeTo(bb.covariogram(0.25, 0.5), 0.5, 1e-10)
-    })
-
     it('should be symmetric', () => {
       const bb = new BrownianBridge(1, 2, 0.1)
       assert.closeTo(bb.covariogram(0.5, 1.5), bb.covariogram(1.5, 0.5), 1e-10)
@@ -1559,27 +1399,9 @@ describe('process.BrownianBridge', () => {
       assert.strictEqual(bb.pdf(1, 3), 0)
     })
 
-    it('should return Normal(0, sigma^2*t*(T-t)/T) density at x=0 for sigma=1, T=2, t=1', () => {
-      const bb = new BrownianBridge(1, 2, 0.1)
-      // scipy: stats.norm.pdf(0, 0, sqrt(1*1*1/2)) = 0.5641895835477563
-      assert.closeTo(bb.pdf(0, 1), 0.5641895835477563, 1e-10)
-    })
-
-    it('should return correct density at x=1 for sigma=1, T=2, t=1', () => {
-      const bb = new BrownianBridge(1, 2, 0.1)
-      // scipy: stats.norm.pdf(1, 0, sqrt(0.5)) = 0.20755374871029736
-      assert.closeTo(bb.pdf(1, 1), 0.20755374871029736, 1e-10)
-    })
-
     it('should be symmetric around 0 (pdf(-x, t) = pdf(x, t))', () => {
       const bb = new BrownianBridge(1, 2, 0.1)
       assert.closeTo(bb.pdf(-1, 1), bb.pdf(1, 1), 1e-10)
-    })
-
-    it('should return correct density at x=0 for sigma=2, T=4, t=2', () => {
-      const bb = new BrownianBridge(2, 4, 0.1)
-      // scipy: stats.norm.pdf(0, 0, sqrt(4*2*2/4)) = stats.norm.pdf(0, 0, 2) = 0.19947114020071635
-      assert.closeTo(bb.pdf(0, 2), 0.19947114020071635, 1e-10)
     })
   })
 
@@ -1754,24 +1576,6 @@ describe('process.AR1', () => {
       assert.strictEqual(ar1.variance(0), 0)
     })
 
-    it('should return sigma^2 at t = 1', () => {
-      const ar1 = new AR1(0.5, 2)
-      // exact rational: Var(X_1) = sigma^2 = 4
-      assert.closeTo(ar1.variance(1), 4, 1e-10)
-    })
-
-    it('should return sigma^2*(1+phi^2) at t = 2', () => {
-      const ar1 = new AR1(0.5, 2)
-      // exact rational: Var(X_2) = sigma^2*(1 + phi^2) = 4*(1+0.25) = 5
-      assert.closeTo(ar1.variance(2), 5, 1e-10)
-    })
-
-    it('should approach stationary variance sigma^2/(1-phi^2) as t -> infinity', () => {
-      const ar1 = new AR1(0.5, 1)
-      // exact rational: sigma^2/(1-phi^2) = 1/(1-0.25) = 4/3
-      assert.closeTo(ar1.variance(1000), 4 / 3, 1e-6)
-    })
-
     it('should return NaN for t < 0', () => {
       const ar1 = new AR1(0.5, 1)
       assert(Number.isNaN(ar1.variance(-1)))
@@ -1779,8 +1583,6 @@ describe('process.AR1', () => {
 
     it('should grow monotonically for |phi| > 1', () => {
       const ar1 = new AR1(1.5, 1)
-      // exact rational: Var(X_3) = sigma^2*(1 + phi^2 + phi^4) = 1 + 2.25 + 5.0625 = 8.3125
-      assert.closeTo(ar1.variance(3), 8.3125, 1e-10)
       assert(ar1.variance(10) > ar1.variance(5))
       assert(ar1.variance(20) > ar1.variance(10))
     })
@@ -1789,26 +1591,7 @@ describe('process.AR1', () => {
       // phi2 = 1 - 2e-14 lies just outside the 1e-14 special-case band; at
       // t = 1e-6, 1 - phi2^t previously rounded to exactly 0 (100% error)
       const ar1 = new AR1(Math.sqrt(1 - 2e-14), 1)
-      // mpmath mp.dps=50, untransformed sigma^2*(1-phi2^t)/(1-phi2) with the actual double
-      // phi2 = 0.99999999999998 (immune to cancellation at 50 digits): 1.0000000000000099999900...e-6
-      assert.closeTo(ar1.variance(1e-6), 1.00000000000001e-6, 1e-15)
       assert.isAbove(ar1.variance(1e-6), 0)
-    })
-
-    it('should stay accurate for near-unit-root phi and moderate fractional t', () => {
-      // phi2 = 1 - 1e-13; at t = 0.01 the old formula returned 0.009977827050997782
-      // (0.22% error) instead of the true value
-      const ar1 = new AR1(Math.sqrt(1 - 1e-13), 1)
-      // mpmath mp.dps=50, untransformed sigma^2*(1-phi2^t)/(1-phi2) with the actual double
-      // phi2 = 0.9999999999998999: 0.0100000000000004954950000000329...
-      assert.closeTo(ar1.variance(0.01), 0.010000000000000495, 1e-12)
-    })
-
-    it('should remain accurate for near-unit-root phi at integer t (regression guard)', () => {
-      const ar1 = new AR1(Math.sqrt(1 - 1e-13), 1)
-      // mpmath mp.dps=50, untransformed sigma^2*(1-phi2^t)/(1-phi2) with the actual double
-      // phi2 = 0.9999999999998999: 9.9999999999954955000000012024...
-      assert.closeTo(ar1.variance(10), 9.999999999995495, 1e-12)
     })
   })
 
@@ -1823,22 +1606,8 @@ describe('process.AR1', () => {
       assert(Number.isNaN(ar1.pdf(0, -1)))
     })
 
-    it('should return Normal(0, sigma^2) density at t = 1', () => {
-      const ar1 = new AR1(0.5, 1)
-      // scipy: stats.norm.pdf(0, 0, 1) = 0.3989422804014327
-      assert.closeTo(ar1.pdf(0, 1), 0.3989422804014327, 1e-10)
-    })
-
-    it('should return Normal(0, sigma^2*(1+phi^2)) density at t = 2', () => {
-      const ar1 = new AR1(0.5, 1)
-      // scipy: stats.norm.pdf(0, 0, sqrt(1.25)) = 0.3568248232305543
-      assert.closeTo(ar1.pdf(0, 2), 0.3568248232305543, 1e-10)
-    })
-
     it('should be symmetric around 0', () => {
       const ar1 = new AR1(0.5, 1)
-      // scipy: stats.norm.pdf(1, 0, sqrt(1.3125)) = 0.2379112029210874
-      assert.closeTo(ar1.pdf(1, 3), 0.2379112029210874, 1e-10)
       assert.closeTo(ar1.pdf(-1, 3), ar1.pdf(1, 3), 1e-10)
     })
   })
@@ -1851,21 +1620,7 @@ describe('process.AR1', () => {
 
     it('should be symmetric: covariogram(s, t) = covariogram(t, s)', () => {
       const ar1 = new AR1(0.5, 1)
-      // exact rational: Cov(X_2, X_3) = phi * Var(X_2) = 0.5 * (1 + 0.25) = 0.625
-      assert.closeTo(ar1.covariogram(2, 3), 0.625, 1e-10)
       assert.closeTo(ar1.covariogram(2, 3), ar1.covariogram(3, 2), 1e-10)
-    })
-
-    it('should return phi * Var(X_1) for s=1, t=2', () => {
-      const ar1 = new AR1(0.5, 1)
-      // exact rational: Cov(X_1, X_2) = phi^1 * Var(X_1) = 0.5 * 1 = 0.5
-      assert.closeTo(ar1.covariogram(1, 2), 0.5, 1e-10)
-    })
-
-    it('should return phi^2 * Var(X_1) for s=1, t=3', () => {
-      const ar1 = new AR1(0.5, 1)
-      // exact rational: Cov(X_1, X_3) = phi^2 * Var(X_1) = 0.25 * 1 = 0.25
-      assert.closeTo(ar1.covariogram(1, 3), 0.25, 1e-10)
     })
 
     it('should return NaN for s < 0', () => {
@@ -2072,12 +1827,6 @@ describe('process.Poisson', () => {
   })
 
   describe('.mean()', () => {
-    it('should return lambda*t', () => {
-      const pp = new ProcessPoisson(2, 0.5)
-      // exact rational: lambda*t = 2*3 = 6
-      assert.closeTo(pp.mean(3), 6, 1e-10)
-    })
-
     it('should return 0 at t=0', () => {
       const pp = new ProcessPoisson(2, 0.5)
       assert.strictEqual(pp.mean(0), 0)
@@ -2090,12 +1839,6 @@ describe('process.Poisson', () => {
   })
 
   describe('.variance()', () => {
-    it('should return lambda*t', () => {
-      const pp = new ProcessPoisson(2, 0.5)
-      // exact rational: lambda*t = 2*3 = 6
-      assert.closeTo(pp.variance(3), 6, 1e-10)
-    })
-
     it('should return 0 at t=0', () => {
       const pp = new ProcessPoisson(2, 0.5)
       assert.strictEqual(pp.variance(0), 0)
@@ -2132,32 +1875,9 @@ describe('process.Poisson', () => {
       const pp = new ProcessPoisson(1, 1)
       assert.strictEqual(pp.pdf(1, 0), 0)
     })
-
-    it('should return Poisson(lambda*t) PMF for lambda=2 t=1 x=2', () => {
-      const pp = new ProcessPoisson(2, 1)
-      // scipy: stats.poisson.pmf(2, 2) = 0.2706705664732255
-      assert.closeTo(pp.pdf(2, 1), 0.2706705664732255, 1e-10)
-    })
-
-    it('should return Poisson(lambda*t) PMF for lambda=0.5 t=3 x=1', () => {
-      const pp = new ProcessPoisson(0.5, 1)
-      // scipy: stats.poisson.pmf(1, 1.5) = 0.3346952402226447
-      assert.closeTo(pp.pdf(1, 3), 0.3346952402226447, 1e-10)
-    })
-
-    it('should return Poisson(lambda*t) PMF for lambda=3 t=2 x=5', () => {
-      const pp = new ProcessPoisson(3, 1)
-      // scipy: stats.poisson.pmf(5, 6) = 0.1606231410479798
-      assert.closeTo(pp.pdf(5, 2), 0.1606231410479798, 1e-10)
-    })
   })
 
   describe('.covariogram()', () => {
-    it('should return lambda * min(s, t)', () => {
-      const pp = new ProcessPoisson(3, 0.5)
-      assert.closeTo(pp.covariogram(2, 5), 3 * 2, 1e-10)
-    })
-
     it('should be symmetric', () => {
       const pp = new ProcessPoisson(3, 0.5)
       assert.closeTo(pp.covariogram(2, 5), pp.covariogram(5, 2), 1e-10)
@@ -2349,12 +2069,6 @@ describe('process.CompoundPoisson', () => {
   })
 
   describe('.mean()', () => {
-    it('should return lambda*t*E[J]', () => {
-      const cpp = new CompoundPoisson(new Normal(2, 1), 3, 1)
-      // exact rational: lambda*t*mu = 3*5*2 = 30
-      assert.closeTo(cpp.mean(5), 30, 1e-10)
-    })
-
     it('should return 0 at t=0', () => {
       const cpp = new CompoundPoisson(new Normal(2, 1), 3, 1)
       assert.strictEqual(cpp.mean(0), 0)
@@ -2367,12 +2081,6 @@ describe('process.CompoundPoisson', () => {
   })
 
   describe('.variance()', () => {
-    it('should return lambda*t*E[J^2]', () => {
-      const cpp = new CompoundPoisson(new Normal(2, 1), 3, 1)
-      // exact rational: lambda*t*(sigma^2 + mu^2) = 3*4*(1+4) = 60
-      assert.closeTo(cpp.variance(4), 60, 1e-10)
-    })
-
     it('should return 0 at t=0', () => {
       const cpp = new CompoundPoisson(new Normal(1, 1), 2, 1)
       assert.strictEqual(cpp.variance(0), 0)
@@ -2385,12 +2093,6 @@ describe('process.CompoundPoisson', () => {
   })
 
   describe('.covariogram()', () => {
-    it('should return lambda*E[J^2]*min(s,t)', () => {
-      const cpp = new CompoundPoisson(new Normal(2, 1), 3, 1)
-      // exact rational: lambda*E[J^2]*min(s,t) = 3*(1+4)*2 = 30
-      assert.closeTo(cpp.covariogram(2, 5), 30, 1e-10)
-    })
-
     it('should be symmetric', () => {
       const cpp = new CompoundPoisson(new Normal(2, 1), 3, 1)
       assert.closeTo(cpp.covariogram(2, 5), cpp.covariogram(5, 2), 1e-10)
@@ -2671,20 +2373,9 @@ describe('process.CoxIngersollRoss', () => {
   })
 
   describe('.mean()', () => {
-    it('should return theta*(1-exp(-kappa*t)) for zero initial state', () => {
-      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
-      // mpmath mp.dps=50: 3*(1-exp(-2)) → 2.59399415029016
-      assert.closeTo(cir.mean(1), 2.59399415029016, 1e-10)
-    })
-
     it('should return 0 at t=0', () => {
       const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
       assert.strictEqual(cir.mean(0), 0)
-    })
-
-    it('should approach theta as t -> infinity', () => {
-      const cir = new CoxIngersollRoss(1, 4, 1, 0.1)
-      assert.closeTo(cir.mean(1000), 4, 1e-6)
     })
 
     it('should return NaN for t < 0', () => {
@@ -2701,22 +2392,9 @@ describe('process.CoxIngersollRoss', () => {
   })
 
   describe('.variance()', () => {
-    it('should return theta*sigma^2/(2*kappa)*(1-exp(-kappa*t))^2 for zero initial state', () => {
-      const cir = new CoxIngersollRoss(2, 3, 0.5, 0.1)
-      // mpmath mp.dps=50: 3*(0.25/(2*2))*(1-exp(-2))^2 → 0.14018345107791
-      assert.closeTo(cir.variance(1), 0.14018345107791, 1e-10)
-    })
-
     it('should return 0 at t=0', () => {
       const cir = new CoxIngersollRoss(1, 1, 1, 1)
       assert.strictEqual(cir.variance(0), 0)
-    })
-
-    it('should approach stationary variance theta*sigma^2/(2*kappa) as t -> infinity', () => {
-      const kappa = 2; const theta = 3; const sigma = 0.5
-      const cir = new CoxIngersollRoss(kappa, theta, sigma, 0.1)
-      // exact rational: theta*sigma^2/(2*kappa) = 3*0.25/4 = 0.1875
-      assert.closeTo(cir.variance(1000), 0.1875, 1e-6)
     })
 
     it('should return NaN for t < 0', () => {
@@ -2786,24 +2464,6 @@ describe('process.CoxIngersollRoss', () => {
       assert.strictEqual(cir.pdf(0, 0.5), 0)
     })
 
-    it('should return Gamma density for x=0.5, kappa=2, theta=3, sigma=1, t=0.5', () => {
-      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
-      // alpha=12, scale=0.5/2*(1-exp(-1)); Python3 math: gamma_pdf = 0.002130824749883
-      assert.closeTo(cir.pdf(0.5, 0.5), 0.002130824749883, 1e-10)
-    })
-
-    it('should return Gamma density for x=2.0, kappa=2, theta=3, sigma=1, t=0.5', () => {
-      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
-      // alpha=12, scale=0.5/2*(1-exp(-1)); Python3 math: gamma_pdf = 0.674442782399143
-      assert.closeTo(cir.pdf(2.0, 0.5), 0.674442782399143, 1e-10)
-    })
-
-    it('should return Gamma density for x=1.5, kappa=2, theta=3, sigma=1, t=1', () => {
-      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
-      // alpha=12, scale=0.5/2*(1-exp(-2)); Python3 math: gamma_pdf = 0.201734321913609
-      assert.closeTo(cir.pdf(1.5, 1), 0.201734321913609, 1e-10)
-    })
-
     it('should be stable after advancing the simulation', () => {
       const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
       const before = cir.pdf(1.0, 0.5)
@@ -2830,20 +2490,10 @@ describe('process.CoxIngersollRoss', () => {
 
     it('should equal variance at s = t', () => {
       const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
-      // Python3 math: cov(2,2) = variance(2) = 0.722778138637826
+      // mpmath mp.dps=50: theta*sigma^2/(2*kappa)*(1-exp(-kappa*t))^2 at t=2 ->
+      // 0.72277813863782561343853900993447378244661507377008. Documentation only — the assertion
+      // below is the structural cov(t,t) = variance(t) identity, not a reference-value check.
       assert.closeTo(cir.covariogram(2, 2), cir.variance(2), 1e-10)
-    })
-
-    it('should return correct value for s=1, t=3, kappa=2, theta=3, sigma=1', () => {
-      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
-      // theta*sigma2OverKappa/2*(1-exp(-2))^2*exp(-4); Python3 math: 0.010270197872478
-      assert.closeTo(cir.covariogram(1, 3), 0.010270197872478, 1e-10)
-    })
-
-    it('should return correct value for s=0.5, t=2, kappa=2, theta=3, sigma=1', () => {
-      const cir = new CoxIngersollRoss(2, 3, 1, 0.1)
-      // Python3 math: 0.014920303192111
-      assert.closeTo(cir.covariogram(0.5, 2), 0.014920303192111, 1e-10)
     })
 
     it('should return 0 at s=0 or t=0', () => {
@@ -3037,21 +2687,9 @@ describe('process.RandomWalk', () => {
   })
 
   describe('.mean()', () => {
-    it('should return t*(2p-1) for biased walk', () => {
-      const rw = new RandomWalk(0.7)
-      // exact rational: t*(2p-1) = 5*(2*0.7-1) = 5*0.4 = 2
-      assert.closeTo(rw.mean(5), 2, 1e-10)
-    })
-
     it('should return 0 for symmetric walk (p=0.5)', () => {
       const rw = new RandomWalk(0.5)
       assert.strictEqual(rw.mean(10), 0)
-    })
-
-    it('should return negative mean for p < 0.5', () => {
-      const rw = new RandomWalk(0.3)
-      // exact rational: t*(2p-1) = 4*(0.6-1) = 4*(-0.4) = -1.6
-      assert.closeTo(rw.mean(4), -1.6, 1e-10)
     })
 
     it('should return 0 at t = 0', () => {
@@ -3066,18 +2704,6 @@ describe('process.RandomWalk', () => {
   })
 
   describe('.variance()', () => {
-    it('should return 4p(1-p)*t for symmetric walk', () => {
-      const rw = new RandomWalk(0.5)
-      // exact rational: 4*0.5*0.5*10 = 10
-      assert.closeTo(rw.variance(10), 10, 1e-10)
-    })
-
-    it('should return 4p(1-p)*t for biased walk', () => {
-      const rw = new RandomWalk(0.7)
-      // exact rational: 4*0.7*0.3*5 = 4.2
-      assert.closeTo(rw.variance(5), 4.2, 1e-10)
-    })
-
     it('should be reduced by bias (p != 0.5 has less variance than p = 0.5)', () => {
       const sym = new RandomWalk(0.5)
       const biased = new RandomWalk(0.3)
@@ -3132,30 +2758,6 @@ describe('process.RandomWalk', () => {
       assert.strictEqual(rw.pdf(1, 0), 0)
     })
 
-    it('should return exact binomial PMF for p=0.5, t=4, x=0', () => {
-      const rw = new RandomWalk(0.5)
-      // exact rational: C(4,2)*0.5^4 = 6/16 = 0.375
-      assert.closeTo(rw.pdf(0, 4), 0.375, 1e-10)
-    })
-
-    it('should return exact binomial PMF for p=0.5, t=4, x=2', () => {
-      const rw = new RandomWalk(0.5)
-      // exact rational: C(4,3)*0.5^4 = 4/16 = 0.25
-      assert.closeTo(rw.pdf(2, 4), 0.25, 1e-10)
-    })
-
-    it('should return exact binomial PMF for p=0.6, t=3, x=1', () => {
-      const rw = new RandomWalk(0.6)
-      // exact rational: C(3,2)*0.6^2*0.4 = 3*0.36*0.4 = 0.432
-      assert.closeTo(rw.pdf(1, 3), 0.432, 1e-10)
-    })
-
-    it('should return exact binomial PMF for p=0.7, t=5, x=3', () => {
-      const rw = new RandomWalk(0.7)
-      // exact rational: C(5,4)*0.7^4*0.3 = 5*0.2401*0.3 = 0.36015
-      assert.closeTo(rw.pdf(3, 5), 0.36015, 1e-10)
-    })
-
     it('should sum to 1 over all reachable states at t=6', () => {
       const rw = new RandomWalk(0.4)
       let total = 0
@@ -3166,18 +2768,6 @@ describe('process.RandomWalk', () => {
   })
 
   describe('.covariogram()', () => {
-    it('should return 4p(1-p)*min(s,t) for symmetric walk', () => {
-      const rw = new RandomWalk(0.5)
-      // exact rational: 4*0.5*0.5*min(3,5) = 3
-      assert.closeTo(rw.covariogram(3, 5), 3, 1e-10)
-    })
-
-    it('should return 4p(1-p)*min(s,t) for biased walk', () => {
-      const rw = new RandomWalk(0.7)
-      // exact rational: 4*0.7*0.3*min(2,4) = 4*0.21*2 = 1.68
-      assert.closeTo(rw.covariogram(2, 4), 1.68, 1e-10)
-    })
-
     it('should be symmetric', () => {
       const rw = new RandomWalk(0.7)
       assert.closeTo(rw.covariogram(2, 4), rw.covariogram(4, 2), 1e-10)
@@ -3249,17 +2839,6 @@ describe('process.RandomWalk', () => {
       const marginal = rw.marginal(4)
       assert.strictEqual(marginal.pdf(6), 0)
       assert.strictEqual(marginal.pdf(-6), 0)
-    })
-
-    it('should return a nonzero pdf at the exact support boundary', () => {
-      const p = 0.6
-      const n = 4
-      const rw = new RandomWalk(p)
-      const marginal = rw.marginal(n)
-      // exact rational: pdf(n) is the all-+1-steps walk, probability p^n
-      assert.closeTo(marginal.pdf(n), Math.pow(p, n), 1e-10)
-      // exact rational: pdf(-n) is the all--1-steps walk, probability (1-p)^n
-      assert.closeTo(marginal.pdf(-n), Math.pow(1 - p, n), 1e-10)
     })
 
     it('should invert cdf via quantile', () => {
@@ -3403,7 +2982,30 @@ describe('process.RandomWalk', () => {
     it('should succeed at 3 states (the minimum length where p_hat can land strictly inside (0,1))', () => {
       const fitted = RandomWalk.fit([0, 1, 0])
       assert.instanceOf(fitted, RandomWalk)
+      // exact rational: p_hat is the fraction of +1 steps, and [0, 1, 0] has increments
+      // [+1, -1], so p_hat = 1/2. Stays inline rather than moving to process-cases.js because
+      // fit() is a static factory, not an instance method the case file's shape can express.
       assert.strictEqual(fitted.p.p, 0.5)
+    })
+  })
+})
+
+// Externally-sourced reference values for the analytical methods, defined in ./process-cases.js.
+// Consumed by a plain inline loop rather than a shared runner module — see that file's header for
+// why a dist-runner.js-style abstraction is not proportionate at this scale (#1221).
+describe('process reference values', () => {
+  processCases.forEach(({ name, ctor: Ctor, refs }) => {
+    describe(name, () => {
+      refs.forEach(({ should, params, method, args, chain, chainArgs, expected, tol, source }) => {
+        // The method name is part of the title because `should` alone is not unique: Poisson's
+        // mean(t) and variance(t) are both "return lambda*t", and the per-method describe() blocks
+        // that used to disambiguate them are gone.
+        it(`${method}() should ${should}`, () => {
+          const proc = new Ctor(...params())
+          const value = proc[method](...args)
+          assert.closeTo(chain ? value[chain](...chainArgs) : value, expected, tol, source)
+        })
+      })
     })
   })
 })
