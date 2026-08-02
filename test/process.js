@@ -433,6 +433,18 @@ describe('process', () => {
         const p = new StubProcess()
         assert.deepEqual(p.params(), {})
       })
+
+      it('should return a shallow copy, not the live this.p reference', () => {
+        const bm = new BrownianMotion(0.5, 1, 2)
+        assert.notStrictEqual(bm.params(), bm.p)
+      })
+
+      it('mutating the returned object should not corrupt the instance', () => {
+        const bm = new BrownianMotion(0.5, 1, 2)
+        const p = bm.params()
+        p.mu = 999
+        assert.strictEqual(bm.params().mu, 0.5)
+      })
     })
   })
 })
