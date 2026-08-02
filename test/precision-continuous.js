@@ -3490,7 +3490,7 @@ const REFS = [
       { x: 18.10561103111283, pdf: 0.021009219798146437, cdf: 0.9 }
     ]
   },
-  // NoncentralChi2[268, 64]: cdf routes through marcumQ's transition band just BELOW its mu=135 dispatch (mu=k/2=134), i.e. the three-term backward recurrence seeded by quadrature; the seed rounding plus ~2.9x per-step amplification caps relative accuracy near 1e-13 (measured 1.8e-13 worst case, cdf); qtol loosened to 5e-13 for the same JIT-order-dependent quantile round-trip flake as NoncentralChi2([5,58]/[5,62]/[270,64]) and NoncentralChi([5,7.5])
+  // NoncentralChi2[268, 64]: cdf routes through marcumQ's transition band just BELOW its mu=135 dispatch (mu=k/2=134), i.e. the three-term backward recurrence seeded by quadrature; the seed rounding plus ~2.9x per-step amplification caps relative accuracy near 1e-13 (measured 1.8e-13 worst case, cdf). The q(cdf(x)) round-trip at x=370 inherits that same floor plus the quantile solver's own rounding and, like the [5,58]/[5,62] groups above, measured over 1e-13 in JIT-order-dependent full-suite runs (two separate full-suite CI runs measured 1.075e-13 and 1.663e-13; both pass in isolation) -- gate at 5e-13 (issue #1304)
   {
     name: 'NoncentralChi2',
     params: [268, 64],
@@ -3517,6 +3517,21 @@ const REFS = [
       { x: 334.0, pdf: 0.014130778926027578, cdf: 0.5109446590674036 },
       { x: 350.0, pdf: 0.011551687199136544, cdf: 0.7209949670711155 },
       { x: 372.0, pdf: 0.005464859998802471, cdf: 0.9077850100564715 }
+    ]
+  },
+  // NoncentralChi2[76, 692]: cdf routes through marcumQ's transition band well below its mu=135 dispatch (mu=k/2=38), at a large enough xi=sqrt(lambda*x)~694-706 that _fc's modified-Lentz continued fraction previously truncated at the shared MAX_ITER=100 before converging (needing 125-131 iterations here) -- issue #1286, the large-x coverage withheld by #1190/#1143 until that fix landed. Now that _fc uses a regime-aware iteration budget, its own contribution is negligible; the residual gated here is the pre-existing seed/amplification floor _N_MARCUM_RECURRENCE already documents for this same branch, measured at ~9e-14 (pdf) / ~6e-13 (cdf) worst case across this group. x is capped at 735 (not the transition band's own upper edge, 844) because NoncentralChi2._pdf independently overflows to Infinity for x >~ 738 at this lambda (besselI's argument sqrt(lambda*x) crosses double's overflow threshold ~715-720) -- a separate, already-filed defect, not something this fix touches
+  {
+    name: 'NoncentralChi2',
+    params: [76, 692],
+    tol: 2e-13,
+    cdfTol: 2e-12,
+    qtol: 5e-14,
+    points: [
+      { x: 695.0, pdf: 0.003052252346980512, cdf: 0.08578179150721879 },
+      { x: 705.0, pdf: 0.0038767830940074255, cdf: 0.120376095803807 },
+      { x: 715.0, pdf: 0.004735923249978553, cdf: 0.16343437892045032 },
+      { x: 725.0, pdf: 0.005569105438381142, cdf: 0.2150088062475515 },
+      { x: 735.0, pdf: 0.006309086940633841, cdf: 0.2745055502135625 }
     ]
   },
   {

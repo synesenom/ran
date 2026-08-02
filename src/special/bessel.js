@@ -142,7 +142,7 @@ export function besselI (n, x) {
 // cancellation grows as 2ε/(x²/3). Using Taylor series for |x| < 1 keeps the
 // relative error below 2ε everywhere in that range; the series converges with
 // ratio x²/(2(k+1)(2n+2k+3)) per step, which is at most 1/10 per step at x=1.
-// decisions/0013-besselISpherical-small-x-taylor.md
+// solutions/special-functions/2026-05-28-0000-besselISpherical-small-x-taylor.md
 const _BESSEL_I_SPH_THRESHOLD = 1
 
 // Taylor series Σ_{k=0}^∞ x^{n+2k} / (2^k k! (2n+2k+1)!!) for i_n(x), n >= 1.

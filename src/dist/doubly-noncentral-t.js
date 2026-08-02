@@ -129,6 +129,36 @@ export default class DoublyNoncentralT extends Distribution {
   }
 
   /**
+   * Difference NoncentralT.fnm(nuHi, mu, xHi) - NoncentralT.fnm(nuLo, mu, xLo), falling back to
+   * a NoncentralT.snm (direct survival) difference when the result cannot be trusted. Checking
+   * how close the raw fnm values are to 0/1 is not the right signal on its own -- that is driven
+   * almost entirely by mu (via fnm's leading Phi(-delta) term) and fires even for small, fully
+   * accurate nu where fnm has no precision problem at all. The actual failure mode (issue #1250)
+   * only occurs once nu grows large enough that fnm's own regularizedBetaIncomplete-derived
+   * series carries a real (~1e-13 relative) precision floor -- so the fallback is gated on nu
+   * magnitude first, and only then on the raw difference being small enough that this floor
+   * could dominate it. Thresholds empirically verified during planning to fully resolve the
+   * reported saturation with zero regression to every other precision-gate group, while keeping
+   * the ordinary (small-nu) case's fallback rate low enough to not regress fit()-style repeated
+   * evaluation -- see solutions/correctness/2026-08-01-2030-noncentral-t-fnm-snm-boundary-saturation.md
+   *
+   * @method _fnmDiff
+   * @memberof ran.dist.DoublyNoncentralT
+   * @param {number} mu Non-centrality parameter shared by both calls.
+   * @param {Object} hi Minuend fnm call, as { nu, x }.
+   * @param {Object} lo Subtrahend fnm call, as { nu, x }.
+   * @returns {number} The CDF difference.
+   * @private
+   */
+  _fnmDiff (mu, hi, lo) {
+    const diff = NoncentralT.fnm(hi.nu, mu, hi.x) - NoncentralT.fnm(lo.nu, mu, lo.x)
+    if (lo.nu >= 30 && Math.abs(diff) < 1e-9) {
+      return NoncentralT.snm(lo.nu, mu, lo.x) - NoncentralT.snm(hi.nu, mu, hi.x)
+    }
+    return diff
+  }
+
+  /**
    * Probability density for the x*mu < 0 branch via a Poisson(theta/2) mixture of noncentral-t
    * densities -- the term-by-term derivative of _cdf's mixture formula below. Every term is a
    * Poisson weight times a difference of two NoncentralT.fnm (CDF) values, never an
@@ -150,14 +180,14 @@ export default class DoublyNoncentralT extends Distribution {
     return recursiveSum({
       p: this.c.expHalfTheta,
       nu0: this.p.nu,
-      f: NoncentralT.fnm(this.p.nu + 2, mu, y * sHi0) - NoncentralT.fnm(this.p.nu, mu, y)
+      f: this._fnmDiff(mu, { nu: this.p.nu + 2, x: y * sHi0 }, { nu: this.p.nu, x: y })
     }, (t, i) => {
       const i2 = 2 * i
       t.p *= this.p.theta / i2
       t.nu0 = this.p.nu + i2
       const sLo = Math.sqrt(1 + i2 / this.p.nu)
       const sHi = Math.sqrt(1 + (i2 + 2) / this.p.nu)
-      t.f = NoncentralT.fnm(t.nu0 + 2, mu, y * sHi) - NoncentralT.fnm(t.nu0, mu, y * sLo)
+      t.f = this._fnmDiff(mu, { nu: t.nu0 + 2, x: y * sHi }, { nu: t.nu0, x: y * sLo })
       return t
     }, t => t.p * t.nu0 * t.f, undefined, { useFloor: false }) / y
   }
@@ -264,26 +294,66 @@ export default class DoublyNoncentralT extends Distribution {
     return Math.abs(z)
   }
 
+  /**
+   * Single term of _cdf's Poisson mixture: NoncentralT.fnm(nu0, mu, x) directly for the x >= 0
+   * branch (the returned CDF value IS that sum, so no boundary saturation issue arises). For
+   * x < 0 the returned value is 1 minus that sum -- accumulating fnm terms and subtracting once
+   * at the end throws away all residual precision the moment the sum itself rounds to exactly
+   * 1.0 (the same fnm saturation _fnmDiff guards against above), so this instead accumulates the
+   * complement termwise. Since the Poisson weights sum to 1, 1 - sum(w_i . fnm_i) =
+   * sum(w_i . (1 - fnm_i)) = sum(w_i . snm_i).
+   *
+   * Gating the expensive snm call on nu0 >= 30 alone is not enough: unlike _fnmDiff's per-call
+   * difference, this term is evaluated once per Poisson-mixture index, and nu0 = nu + 2i grows
+   * without bound as the series index i advances, so nu0 crosses 30 on nearly every significant
+   * term whenever theta is large -- confirmed to regress test/precision-continuous.js's
+   * DoublyNoncentralT([5,2,120]) quantile round-trip from sub-second to a 120s mocha timeout.
+   * The raw complement's own magnitude must also indicate genuine precision risk (mirroring
+   * _fnmDiff's second-stage check, reusing the same 1e-9 threshold) before paying for snm.
+   * See solutions/correctness/2026-08-01-2030-noncentral-t-fnm-snm-boundary-saturation.md
+   *
+   * @method _cdfTerm
+   * @memberof ran.dist.DoublyNoncentralT
+   * @param {boolean} complement Whether the x < 0 branch's complement term is needed.
+   * @param {number} mu Non-centrality parameter for the fnm/snm call.
+   * @param {number} nu0 Degrees of freedom for this Poisson-mixture term.
+   * @param {number} x Value to evaluate at.
+   * @returns {number} The term's fnm value, or its complement when `complement` is true.
+   * @private
+   */
+  _cdfTerm (complement, mu, nu0, x) {
+    const raw = NoncentralT.fnm(nu0, mu, x)
+    if (!complement) {
+      return raw
+    }
+    const rawComplement = 1 - raw
+    return (nu0 >= 30 && rawComplement < 1e-9) ? NoncentralT.snm(nu0, mu, x) : rawComplement
+  }
+
   _cdf (x) {
-    // Sum of the product of Poisson weights and single non-central t CDF
+    // Sum of the product of Poisson weights and single non-central t CDF (or its complement for
+    // x < 0, see _cdfTerm above).
     // Source: https://www.wiley.com/en-us/Intermediate+Probability%3A+A+Computational+Approach-p-9780470026373
 
     const y = Math.abs(x)
     const mu = x < 0 ? -this.p.mu : this.p.mu
+    const complement = x < 0
     // useFloor: false -- for large theta, the leading term (expHalfTheta = exp(-theta/2)) can
     // itself underflow below EPS well before the Poisson(theta/2) weight's true peak, which
     // falsely satisfies recursiveSum's default absolute-floor convergence check after 1 term.
     // See solutions/correctness/2026-07-28-1024-doubly-noncentral-t-cdf-recursivesum-absolute-floor-truncation.md
-    const z = recursiveSum({
+    const s = recursiveSum({
       p: this.c.expHalfTheta,
-      f: NoncentralT.fnm(this.p.nu, mu, y)
+      nu0: this.p.nu,
+      f: this._cdfTerm(complement, mu, this.p.nu, y)
     }, (t, i) => {
       const i2 = 2 * i
       t.p *= this.p.theta / i2
-      t.f = NoncentralT.fnm(this.p.nu + i2, mu, y * Math.sqrt(1 + i2 / this.p.nu))
+      t.nu0 = this.p.nu + i2
+      t.f = this._cdfTerm(complement, mu, t.nu0, y * Math.sqrt(1 + i2 / this.p.nu))
       return t
     }, t => t.p * t.f, undefined, { useFloor: false })
-    return clamp(x < 0 ? 1 - z : z)
+    return clamp(s)
   }
 
   _qInitialGuess () {

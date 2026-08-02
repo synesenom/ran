@@ -453,6 +453,17 @@ function _pqTrap (mu, x, y) {
     : { q: 1 + pq, p: -pq }
 }
 
+// Signals _fc's non-convergence to the caller instead of letting it return silently, matching
+// the "throw on exceeded iteration budget" convention in src/algorithms/rejection.js. Extracted
+// to its own function so this check's branch doesn't count against _fc's own complexity (see
+// solutions/tooling/2026-07-16-1601-codescene-nested-closure-complexity-attribution.md for the
+// same "extract to keep a hot numeric function's own score low" pattern in this codebase).
+function _assertFcConverged (delta, nu, z, maxIter) {
+  if (Math.abs(delta - 1) > EPS) {
+    throw Error(`_fc: continued fraction failed to converge for nu=${nu}, z=${z} after ${maxIter} iterations`)
+  }
+}
+
 /**
  * Computes the ratio I_nu(z) / I_{nu-1}(z) of modified Bessel functions of the
  * first kind via a continued fraction (modified Lentz). Valid for fractional
@@ -463,9 +474,17 @@ function _pqTrap (mu, x, y) {
  * @param {number} nu Order of the Bessel function in the numerator.
  * @param {number} z Argument.
  * @return {number} The ratio I_nu(z) / I_{nu-1}(z).
+ * @throws {Error} If the continued fraction fails to converge within its regime-aware budget.
  * @private
  */
 function _fc (nu, z) {
+  // Required depth grows with z, not nu: empirically ~6.2*sqrt(z) steps in the nu << z
+  // regime (the slowest case -- larger nu converges faster), so the shared MAX_ITER=100
+  // silently truncated once z exceeded ~250, losing up to 8 digits with no signal (#1286).
+  // 7*sqrt(z) + 20 keeps a comfortable margin over that measured worst case.
+  // See solutions/special-functions/2026-08-02-1200-marcum-fc-slow-convergence.md
+  const maxIter = Math.max(MAX_ITER, Math.ceil(7 * Math.sqrt(z)) + 20)
+
   let m = 0
   let b = 2 * nu / z
   let f = DELTA
@@ -482,7 +501,9 @@ function _fc (nu, z) {
     f *= delta
     m++
     b = 2 * (nu + m) / z
-  } while (Math.abs(delta - 1) > EPS && m < MAX_ITER)
+  } while (Math.abs(delta - 1) > EPS && m < maxIter)
+
+  _assertFcConverged(delta, nu, z, maxIter)
   return f
 }
 
