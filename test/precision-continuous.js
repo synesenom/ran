@@ -3628,8 +3628,11 @@ const REFS = [
   },
   // NoncentralChi[201, 44.7]: odd-k counterpart of the set above, exercising
   // besselISphericalExpScaled's Wronskian branch (order=floor((k-3)/2)=99) instead of
-  // besselIExpScaled (#1292). Same lambda*x range and measured tolerance floor as [200, 44.7],
-  // including the same JIT-order-dependent qtol margin
+  // besselIExpScaled (#1292). Same lambda*x range as [200, 44.7], and qtol shares the same
+  // 2e-12 JIT-order-dependent margin, but cdfTol is looser here (4e-12 vs 1.2e-12): the
+  // odd-k Wronskian branch (besselISphericalExpScaled, order 99) accumulates more error in
+  // _cdf's marcumP computation at this parameter regime than the even-k besselIExpScaled
+  // branch does, so the two groups' cdf floors do not match
   {
     name: 'NoncentralChi',
     params: [201, 44.7],
@@ -3810,15 +3813,17 @@ const REFS = [
   // second, previously-unreachable defect in _hi's continued fraction: its shared MAX_ITER=100
   // budget silently under-converged past x~250 (mirroring _fc's own #1286 fix), which this same
   // PR corrects with a regime-aware iteration budget. pdf/cdf measured up to ~1.5e-13/3.6e-12;
-  // qtol: 5e-13 covers the quantile round-trip's own JIT-order-dependent floor (measured 4.6e-13
-  // in the full parallel suite at x=2280, vs ~1.6e-13 in isolation -- the same full-suite-vs-
-  // isolated inflation the _N_MARCUM groups elsewhere in this file already document)
+  // qtol: 1e-12 covers the quantile round-trip's own JIT-order-dependent floor (measured up to
+  // 5.14e-13 at x=2280 even in an isolated single-file run, and 4.6e-13 in the full parallel
+  // suite -- the round-trip's sensitivity here varies run-to-run, the same kind of JIT-order
+  // inflation the _N_MARCUM groups elsewhere in this file document, just not confined to
+  // full-suite runs alone for this particular group)
   {
     name: 'NoncentralChi2',
     params: [201, 2000],
     tol: 2e-13,
     cdfTol: 4e-12,
-    qtol: 5e-13,
+    qtol: 1e-12,
     points: [
       { x: 2050.0, pdf: 0.0011257318549007952, cdf: 0.04779427124879617 },
       { x: 2120.0, pdf: 0.003008702930788397, cdf: 0.18905430772078793 },

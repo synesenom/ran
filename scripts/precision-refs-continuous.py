@@ -2321,7 +2321,7 @@ Q_TOL = {
     ('NoncentralChi2', '[270, 64]'): '5e-13',
     ('NoncentralChi2', '[76, 692]'): '5e-14',
     ('NoncentralChi2', '[100, 900]'): '5e-13',
-    ('NoncentralChi2', '[201, 2000]'): '5e-13',
+    ('NoncentralChi2', '[201, 2000]'): '1e-12',
     ('NoncentralChi', '[5, 7.5]'): '5e-13',
     ('NoncentralChi', '[200, 44.7]'): '2e-12',
     ('NoncentralChi', '[201, 44.7]'): '2e-12',
