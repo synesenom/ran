@@ -193,6 +193,42 @@ describe('special', () => {
         }
       }
     })
+
+    it('should return accurate large-argument values', () => {
+      // i_n(x) = sqrt(pi/(2x)) * I_{n+1/2}(x); mpmath mp.dps=50:
+      // i_3(50) = 4.5930269336647156e+19, i_3(100) = 1.2654109836313822e+41
+      // i_7(50) = 2.947924492475899e+19, i_7(100) = 1.0145184556029379e+41
+      assert(equal(special.besselISpherical(3, 50), 4.5930269336647156e+19, 10))
+      assert(equal(special.besselISpherical(3, 100), 1.2654109836313822e+41, 10))
+      assert(equal(special.besselISpherical(7, 50), 2.947924492475899e+19, 10))
+      assert(equal(special.besselISpherical(7, 100), 1.0145184556029379e+41, 10))
+    })
+
+    it('should return accurate values past _hi\'s pre-#1311 fixed MAX_ITER=100 budget (#1311)', () => {
+      // 7*sqrt(x)+20 only exceeds MAX_ITER=100 once x > ~131 (e.g. it's still only 90 at
+      // x=100), so x=300 and x=500 are chosen to land past that crossover -- and past the
+      // x~250 point where the pre-#1311 fixed budget silently under-converged (CHANGELOG) --
+      // unlike x=50/100 above, which pass under the old, un-widened budget too.
+      // i_n(x) = sqrt(pi/(2x)) * I_{n+1/2}(x); mpmath mp.dps=50, rounded to float64:
+      // i_3(300) = 3.1731675432386596e+127, i_3(500) = 1.3868331583406083e+214
+      // i_7(300) = 2.9484482410057756e+127, i_7(500) = 1.3270783008491142e+214
+      assert(equal(special.besselISpherical(3, 300), 3.1731675432386596e+127, 10))
+      assert(equal(special.besselISpherical(3, 500), 1.3868331583406083e+214, 10))
+      assert(equal(special.besselISpherical(7, 300), 2.9484482410057756e+127, 10))
+      assert(equal(special.besselISpherical(7, 500), 1.3270783008491142e+214, 10))
+    })
+
+    // _assertHiConverged's throw was probed empirically across n in [1, 1e6] and x in
+    // [1e-10, 709] (the exp(x) overflow ceiling for the unscaled function) through both
+    // besselISpherical and besselISphericalExpScaled -- including large n relative to x, per
+    // the "depth grows with x, not n" claim in _hi's comment -- and never fired: 7*sqrt(x)+20
+    // keeps a comfortable margin over actual convergence depth throughout the whole domain
+    // besselISpherical's Wronskian branch is reached from. (Negative x also reaches the throw,
+    // but only via Math.sqrt(x) itself evaluating to NaN inside the maxIter formula -- a
+    // pre-existing gap in the n>=2 branch's missing sign handling, not a genuine non-convergence,
+    // so it isn't a legitimate case to pin here.) The check remains defensive: it guards the
+    // 7*sqrt(x)+20 margin against being falsified by a future change, not a path this test
+    // suite can currently force through valid input.
   })
 
   describe('.besselInu()', () => {
