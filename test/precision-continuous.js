@@ -3396,6 +3396,48 @@ const REFS = [
       { x: 4.902833491920993, pdf: 0.17783957858132568, cdf: 0.9 }
     ]
   },
+  // NoncentralChi[200, 44.7]: even k, matches issue #1292's reproduction case. lambda*x spans
+  // ~1936-2190, previously overflowing besselI's argument sqrt(lambda*x) (~715-720 ceiling) to
+  // NaN via 0*Infinity before that fix. pdf/cdf measured up to ~1.7e-13/1.1e-12 here (cdf routes
+  // through marcumP, unaffected by this fix, at its own pre-existing accumulation floor). qtol
+  // loosened to 2e-12 for the quantile round-trip's own JIT-order-dependent floor (measured
+  // 4.24e-13 at x=48 in one full-suite run vs ~3.3e-13 in isolation -- the same full-suite-vs-
+  // isolated inflation the _N_MARCUM groups elsewhere in this file already document)
+  {
+    name: 'NoncentralChi',
+    params: [200, 44.7],
+    tol: 2e-13,
+    cdfTol: 1.2e-12,
+    qtol: 2e-12,
+    points: [
+      { x: 44.0, pdf: 0.005374510258741022, cdf: 0.0016221497797649725 },
+      { x: 45.6, pdf: 0.1746929025054838, cdf: 0.09616619594393434 },
+      { x: 47.0, pdf: 0.4048448876559293, cdf: 0.5515863487621192 },
+      { x: 48.0, pdf: 0.2099582470948561, cdf: 0.8754839792510203 },
+      { x: 49.0, pdf: 0.038287961800390694, cdf: 0.985188613172376 }
+    ]
+  },
+  // NoncentralChi[201, 44.7]: odd-k counterpart of the set above, exercising
+  // besselISphericalExpScaled's Wronskian branch (order=floor((k-3)/2)=99) instead of
+  // besselIExpScaled (#1292). Same lambda*x range as [200, 44.7], and qtol shares the same
+  // 2e-12 JIT-order-dependent margin, but cdfTol is looser here (4e-12 vs 1.2e-12): the
+  // odd-k Wronskian branch (besselISphericalExpScaled, order 99) accumulates more error in
+  // _cdf's marcumP computation at this parameter regime than the even-k besselIExpScaled
+  // branch does, so the two groups' cdf floors do not match
+  {
+    name: 'NoncentralChi',
+    params: [201, 44.7],
+    tol: 2e-13,
+    cdfTol: 4e-12,
+    qtol: 2e-12,
+    points: [
+      { x: 44.0, pdf: 0.005199427253274105, cdf: 0.0015640456034947078 },
+      { x: 45.6, pdf: 0.17219960808181167, cdf: 0.09429167173066742 },
+      { x: 47.0, pdf: 0.4054401984173935, cdf: 0.5472701143997126 },
+      { x: 48.0, pdf: 0.21259662121226633, cdf: 0.8732556678326875 },
+      { x: 49.0, pdf: 0.03918934115245673, cdf: 0.9847840808259776 }
+    ]
+  },
   {
     name: 'NoncentralChi2',
     params: [11, 2],
@@ -3519,7 +3561,7 @@ const REFS = [
       { x: 372.0, pdf: 0.005464859998802471, cdf: 0.9077850100564715 }
     ]
   },
-  // NoncentralChi2[76, 692]: cdf routes through marcumQ's transition band well below its mu=135 dispatch (mu=k/2=38), at a large enough xi=sqrt(lambda*x)~694-706 that _fc's modified-Lentz continued fraction previously truncated at the shared MAX_ITER=100 before converging (needing 125-131 iterations here) -- issue #1286, the large-x coverage withheld by #1190/#1143 until that fix landed. Now that _fc uses a regime-aware iteration budget, its own contribution is negligible; the residual gated here is the pre-existing seed/amplification floor _N_MARCUM_RECURRENCE already documents for this same branch, measured at ~9e-14 (pdf) / ~6e-13 (cdf) worst case across this group. x is capped at 735 (not the transition band's own upper edge, 844) because NoncentralChi2._pdf independently overflows to Infinity for x >~ 738 at this lambda (besselI's argument sqrt(lambda*x) crosses double's overflow threshold ~715-720) -- a separate, already-filed defect, not something this fix touches
+  // NoncentralChi2[76, 692]: cdf routes through marcumQ's transition band well below its mu=135 dispatch (mu=k/2=38), at a large enough xi=sqrt(lambda*x)~694-706 that _fc's modified-Lentz continued fraction previously truncated at the shared MAX_ITER=100 before converging (needing 125-131 iterations here) -- issue #1286, the large-x coverage withheld by #1190/#1143 until that fix landed. Now that _fc uses a regime-aware iteration budget, its own contribution is negligible; the residual gated here is the pre-existing seed/amplification floor _N_MARCUM_RECURRENCE already documents for this same branch, measured at ~9e-14 (pdf) / ~6e-13 (cdf) worst case across this group. x was capped at 735 (not the transition band's own upper edge, 844) because NoncentralChi2._pdf independently overflowed to Infinity for x >~ 738 at this lambda (besselI's argument sqrt(lambda*x) crossing double's overflow threshold ~715-720) -- fixed by #1292 (see the [100, 900]/[201, 2000] sets below, added once that fix landed), so the cap here is now historical rather than a live constraint
   {
     name: 'NoncentralChi2',
     params: [76, 692],
@@ -3532,6 +3574,53 @@ const REFS = [
       { x: 715.0, pdf: 0.004735923249978553, cdf: 0.16343437892045032 },
       { x: 725.0, pdf: 0.005569105438381142, cdf: 0.2150088062475515 },
       { x: 735.0, pdf: 0.006309086940633841, cdf: 0.2745055502135625 }
+    ]
+  },
+  // NoncentralChi2[100, 900]: even k, matches issue #1292's own reproduction case
+  // (NoncentralChi2(100, 900).pdf(1000)). sqrt(lambda*x) spans ~874-1018, previously overflowing
+  // besselI's argument (~715-720 ceiling) to NaN via 0*Infinity before that fix folded the
+  // exponent into the log-space prefactor via besselIExpScaled. cdf is unaffected (routes
+  // through marcumP, not besselI) at its own pre-existing accumulation floor. qtol loosened to
+  // 5e-13 for the quantile round-trip's own JIT-order-dependent floor (measured 1.22e-13 at
+  // x=1050 in one full-suite run vs ~7.5e-14 in isolation -- the same full-suite-vs-isolated
+  // inflation the _N_MARCUM groups elsewhere in this file already document)
+  {
+    name: 'NoncentralChi2',
+    params: [100, 900],
+    tol: 1e-13,
+    cdfTol: 1e-12,
+    qtol: 5e-13,
+    points: [
+      { x: 850.0, pdf: 0.0002947351268161503, cdf: 0.005882110735183924 },
+      { x: 950.0, pdf: 0.004802456611964301, cdf: 0.21019969029100083 },
+      { x: 1000.0, pdf: 0.006469318325358244, cdf: 0.5063589811559768 },
+      { x: 1050.0, pdf: 0.004520147497197753, cdf: 0.7929308286273808 },
+      { x: 1150.0, pdf: 0.0003708094835340591, cdf: 0.9908866907296281 }
+    ]
+  },
+  // NoncentralChi2[201, 2000]: odd-k counterpart of the set above, exercising
+  // besselISphericalExpScaled's Wronskian branch (order=floor((k-3)/2)=99) instead of
+  // besselIExpScaled (#1292). Reaching this branch at sqrt(lambda*x)~2025-2168 also exposed a
+  // second, previously-unreachable defect in _hi's continued fraction: its shared MAX_ITER=100
+  // budget silently under-converged past x~250 (mirroring _fc's own #1286 fix), which this same
+  // PR corrects with a regime-aware iteration budget. pdf/cdf measured up to ~1.5e-13/3.6e-12;
+  // qtol: 1e-12 covers the quantile round-trip's own JIT-order-dependent floor (measured up to
+  // 5.14e-13 at x=2280 even in an isolated single-file run, and 4.6e-13 in the full parallel
+  // suite -- the round-trip's sensitivity here varies run-to-run, the same kind of JIT-order
+  // inflation the _N_MARCUM groups elsewhere in this file document, just not confined to
+  // full-suite runs alone for this particular group)
+  {
+    name: 'NoncentralChi2',
+    params: [201, 2000],
+    tol: 2e-13,
+    cdfTol: 4e-12,
+    qtol: 1e-12,
+    points: [
+      { x: 2050.0, pdf: 0.0011257318549007952, cdf: 0.04779427124879617 },
+      { x: 2120.0, pdf: 0.003008702930788397, cdf: 0.18905430772078793 },
+      { x: 2200.0, pdf: 0.004352840845622773, cdf: 0.4999308879500546 },
+      { x: 2280.0, pdf: 0.0029405437990041353, cdf: 0.8063901791434827 },
+      { x: 2350.0, pdf: 0.0011536606007215983, cdf: 0.9461556328891716 }
     ]
   },
   {

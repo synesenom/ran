@@ -1,4 +1,4 @@
-import { besselI, besselISpherical, marcumP, logGamma } from '../special'
+import { besselIExpScaled, besselISphericalExpScaled, marcumP, logGamma } from '../special'
 import noncentralChi2 from './_noncentral-chi2'
 import Distribution from './_distribution'
 
@@ -102,8 +102,13 @@ export default class NoncentralChi2 extends Distribution {
         // k = 2, x -> 0, by differentiating F(x)
         return 0.5 * Math.exp(-0.5 * this.p.lambda)
       } else {
-        return 0.5 * Math.exp(-0.5 * (x + this.p.lambda) + (this.p.k / 4 - 0.5) * Math.log(x / this.p.lambda)) * besselI(Math.round(this.p.k / 2) - 1, Math.sqrt(this.p.lambda * x))
-        // return 0.5 * Math.exp(-0.5 * (x + this.p.lambda)) * Math.pow(x / this.p.lambda, this.p.k / 4 - 0.5) * besselI(Math.abs(Math.floor(this.p.k / 2) - 1), Math.sqrt(this.p.lambda * x))
+        const z = Math.sqrt(this.p.lambda * x)
+        // besselI(n, z) ~ e^z/sqrt(2*pi*z) overflows once z gtrsim 710 while exp(-0.5*(x+lambda))
+        // underflows to 0 in the same regime, so their product is 0*Infinity = NaN even though
+        // the true density is representable: -0.5*(x+lambda)+z = -0.5*(sqrt(x)-sqrt(lambda))^2 <= 0
+        // always (AM-GM), so folding z into the log-space prefactor and pairing it with
+        // besselIExpScaled's exp(-z)*I_n(z) keeps the combined exponent finite (#1292).
+        return 0.5 * Math.exp(-0.5 * (x + this.p.lambda) + z + (this.p.k / 4 - 0.5) * Math.log(x / this.p.lambda)) * besselIExpScaled(Math.round(this.p.k / 2) - 1, z)
       }
     } else {
       // k is odd
@@ -111,7 +116,10 @@ export default class NoncentralChi2 extends Distribution {
         // k = 1, x -> 0, by differentiating F(x)
         return 0.5 * Math.exp(-0.5 * this.p.lambda) * Math.sqrt(2 / Math.PI)
       } else {
-        return 0.5 * Math.exp(-0.5 * (x + this.p.lambda)) * Math.pow(x / this.p.lambda, this.p.k / 4 - 0.5) * besselISpherical(Math.floor((this.p.k - 3) / 2), Math.sqrt(this.p.lambda * x)) * Math.sqrt(2 * Math.sqrt(x * this.p.lambda) / Math.PI)
+        const z = Math.sqrt(this.p.lambda * x)
+        // Same overflow/underflow cancellation as the even-k branch above, using the
+        // exp(-z)-scaled spherical Bessel factor (#1292).
+        return 0.5 * Math.exp(-0.5 * (x + this.p.lambda) + z) * Math.pow(x / this.p.lambda, this.p.k / 4 - 0.5) * besselISphericalExpScaled(Math.floor((this.p.k - 3) / 2), z) * Math.sqrt(2 * z / Math.PI)
       }
     }
   }
