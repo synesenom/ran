@@ -166,7 +166,18 @@ def support_lo(name, p):
     if name == 'DiscreteLaplace':
         return int(p[1]) - 200
     if name == 'Skellam':
-        return -200
+        m1, m2 = mpf(p[0]), mpf(p[1])
+        # -200 was plenty for every set with mu1+mu2 <= 500 (up to ~90 sigma of margin below
+        # the existing [175, 40] set); the large-mu sets added for issue #1309 need the bound to
+        # scale with std = sqrt(mu1+mu2), or -200 would truncate real mass at only a few sigma.
+        # 30 sigma is a large-deviation-principle-safe margin: Skellam's tail (dominated by one
+        # Poisson leg) decays at least as fast as Gaussian, so residual mass there is below
+        # 1e-190 -- far under mp.dps=50 -- and is unreachable through the existing 5 small-mu sets.
+        if m1 + m2 <= 500:
+            return -200
+        mean = m1 - m2
+        std = (m1 + m2) ** mpf('0.5')
+        return int(mp.floor(mean - 30 * std))
     return 0
 
 
@@ -296,7 +307,16 @@ SPEC = [
     # included here -- see the same note in scripts/precision-refs-continuous.py.
     ('Skellam', [([5, 5], [-7, -3, 0, 3, 7]), ([1, 4], [-8, -4, -2, 0, 2]),
                  ([3, 6], [-6, -2, 1, 4, 8]), ([6, 5], [-6, -2, 0, 3, 8]),
-                 ([175, 40], [128, 131, 134, 137, 142])], 1e-14),
+                 ([175, 40], [128, 131, 134, 137, 142]),
+                 # Large-mu sets for issue #1309: mu1+mu2 crosses both the exp(-mu1-mu2)
+                 # underflow threshold (~745) and the besselI(k, twoSqrtProd) overflow
+                 # threshold (~709-720, since twoSqrtProd = 2*sqrt(mu1*mu2) <= mu1+mu2).
+                 # [360, 360] (twoSqrtProd=720 > 709, expNeg=exp(-720) still nonzero) hit the
+                 # bare besselI-overflow-to-Infinity failure; [400, 400] (both thresholds
+                 # crossed) hit the 0*Infinity = NaN failure; [2000, 2000] extends into the
+                 # "thousands" range named in the acceptance criteria.
+                 ([360, 360], [-25, -8, 0, 5, 25]), ([400, 400], [-28, -9, 0, 9, 28]),
+                 ([2000, 2000], [-60, -20, 0, 20, 60])], 1e-14),
     ('Soliton', [([10], [1, 2, 3, 5, 10]), ([3], [1, 2, 3]),
                  ([20], [1, 2, 5, 10, 20])], 1e-14),
     ('YuleSimon', [([3], [1, 2, 3, 6, 10]), ([2.5], [1, 2, 3, 5, 8]),
