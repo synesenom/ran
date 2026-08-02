@@ -96,6 +96,7 @@ export default class VonMises extends Distribution {
     // right branch's "1 - " subtracts a value that is at most 0.5, never close to 1.
     // The clamp below is defense-in-depth against a stray few-ULP excursion outside
     // [0, 1] from tanhSinh's own quadrature error, matching noncentral-t.js's _cdf.
+    // See solutions/correctness/2026-08-02-2202-vonmises-cdf-deep-tail-cancellation.md
     const dx = x - this.p.mu
     if (dx <= 0) {
       return Math.min(Math.max(tanhSinh(t => this._pdf(t), this.s[0].value, x), 0), 1)
