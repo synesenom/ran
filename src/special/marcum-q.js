@@ -483,6 +483,9 @@ function _fc (nu, z) {
   // silently truncated once z exceeded ~250, losing up to 8 digits with no signal (#1286).
   // 7*sqrt(z) + 20 keeps a comfortable margin over that measured worst case.
   // See solutions/special-functions/2026-08-02-1200-marcum-fc-slow-convergence.md
+  // No fixed upper ceiling is imposed on top of this (#1311): an extreme z growing the budget
+  // without bound is an accepted trade-off, made safe by _assertFcConverged below throwing
+  // instead of the loop silently truncating -- mirrored by bessel.js's _hi/_assertHiConverged.
   const maxIter = Math.max(MAX_ITER, Math.ceil(7 * Math.sqrt(z)) + 20)
 
   let m = 0

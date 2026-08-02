@@ -57,6 +57,16 @@ function _kn (n, x) {
   ]
 }
 
+// Signals _hi's non-convergence to the caller instead of letting it return silently, matching
+// the "throw on exceeded iteration budget" convention in src/algorithms/rejection.js and
+// mirroring marcum-q.js's _assertFcConverged, which checks the same continued-fraction
+// convergence shape (#1311).
+function _assertHiConverged (ratio, n, x, maxIter) {
+  if (Math.abs(ratio) > EPS) {
+    throw Error(`_hi: continued fraction failed to converge for n=${n}, x=${x} after ${maxIter} iterations`)
+  }
+}
+
 /**
  * Computes the ratio of two modified Bessel functions (same for spherical).
  *
@@ -65,6 +75,7 @@ function _kn (n, x) {
  * @param {number} n Order of the Bessel function in the numerator.
  * @param {number} x Value to evaluate the function at.
  * @return {number} The function value.
+ * @throws {Error} If the continued fraction fails to converge within its regime-aware budget.
  * @private
  */
 function _hi (n, x) {
@@ -75,19 +86,25 @@ function _hi (n, x) {
   // unreachable through besselISpherical's public callers because the unscaled result overflows
   // to Infinity before x gets this large -- besselISphericalExpScaled (#1292) is what first makes
   // this depth reachable. 7*sqrt(x) + 20 keeps a comfortable margin over the measured worst case.
+  // No fixed upper ceiling is imposed on top of this (#1311): runaway growth for an extreme x is
+  // bounded by the convergence check below throwing rather than by capping the budget outright,
+  // matching _fc's same "grows with sqrt(argument), no upper bound" accepted trade-off.
   const maxIter = Math.max(MAX_ITER, Math.ceil(7 * Math.sqrt(x)) + 20)
   let d = x / (n + n + 1)
   let del = d
   let h = del
   let b = (n + n + 3) / x
+  let ratio = del / h
   for (let i = 1; i < maxIter; i++) {
     d = 1 / (b + d)
     del = (b * d - 1) * del
     h += del
     b += 2 / x
 
-    if (Math.abs(del / h) < EPS) { break }
+    ratio = del / h
+    if (Math.abs(ratio) < EPS) { break }
   }
+  _assertHiConverged(ratio, n, x, maxIter)
   return h
 }
 
