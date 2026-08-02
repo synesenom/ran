@@ -91,14 +91,16 @@ export default class VonMises extends Distribution {
     // double precision's ~1e-16 floor deep in the tail, producing non-monotonic noise
     // (#1320). Splitting at dx = 0 and using pdf(mu+t) = pdf(mu-t) symmetry keeps every
     // integration interval on the side away from the density's peak at mu (monotone,
-    // smooth integrand -- tanhSinh's easiest case) and never subtracts two comparable
+    // smooth integrand -- tanhSinh's easiest case) and avoids subtracting two comparable
     // O(1) quantities: the left branch returns the tail integral directly, and the
     // right branch's "1 - " subtracts a value that is at most 0.5, never close to 1.
+    // The clamp below is defense-in-depth against a stray few-ULP excursion outside
+    // [0, 1] from tanhSinh's own quadrature error, matching noncentral-t.js's _cdf.
     const dx = x - this.p.mu
     if (dx <= 0) {
-      return tanhSinh(t => this._pdf(t), this.s[0].value, x)
+      return Math.min(Math.max(tanhSinh(t => this._pdf(t), this.s[0].value, x), 0), 1)
     }
-    return 1 - tanhSinh(t => this._pdf(t), x, this.s[1].value)
+    return Math.min(Math.max(1 - tanhSinh(t => this._pdf(t), x, this.s[1].value), 0), 1)
   }
 
   // ─── PROTECTED STATIC ───

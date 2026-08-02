@@ -476,7 +476,14 @@ describe('dist', () => {
         { kappa: 730, x: -0.355, cdf: 7.167516869528729e-22 },
         { kappa: 900, x: -0.3, cdf: 1.5510116968880855e-19 },
         { kappa: 1000, x: -0.2, cdf: 1.3663888873225035e-10 },
-        { kappa: 2000, x: -0.15, cdf: 1.0314781639989326e-11 }
+        { kappa: 2000, x: -0.15, cdf: 1.0314781639989326e-11 },
+        // exact rational: cdf(x) = 1 - cdf(-x) for mu=0 (pdf(t) = pdf(-t) by symmetry),
+        // so these positive-x entries reuse the mpmath negative-x references above rather
+        // than requiring an independent mpmath computation -- they exercise the dx > 0
+        // ("1 - tanhSinh(...)") branch of VonMises._cdf, which the negative-x-only refs above
+        // never reach.
+        { kappa: 730, x: 0.357, cdf: 1 - 4.2863928168446845e-22 },
+        { kappa: 730, x: 0.355, cdf: 1 - 7.167516869528729e-22 }
       ]
       for (const { kappa, x, cdf } of refs) {
         const d = new dist.VonMises(0, kappa)
