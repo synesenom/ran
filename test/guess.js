@@ -144,7 +144,20 @@ describe('guess', () => {
   })
 
   it('should use the default candidate pool (all distributions) when candidates is omitted', function () {
-    this.timeout(60000)
+    // Timeout raised from 60000 to 120000 (matching .mocharc.yml's own global default, which
+    // most other tests already implicitly rely on): isolated/uncontended runs measure ~46-50s,
+    // leaving under 1.2x margin against the previous 60000 cap even without full-suite CPU
+    // contention -- and under the full `npm test --parallel` run this test actually timed out
+    // at 60000, the same isolated-looks-fine-but-contention-doesn't pattern already documented
+    // for DoublyNoncentralF's fit() regression test (test/dist-base-fit-1.js). Driven by two
+    // independently-shipped correctness fixes landing together: #1298 added a second
+    // `phi`-equality trustworthiness check to DoublyNoncentralT._fnmDiff/_cdfTerm that fires more
+    // often during .fit() exploration than the original magnitude-only gate alone did, and #1302
+    // (merged in the same window) added an analogous NoncentralT._fnmDiff fallback that pays the
+    // same class of cost -- each individually stayed within the previous budget in isolation, but
+    // together exceeded it under contention. See CHANGELOG.md's #1298 entry and
+    // solutions/correctness/2026-08-02-2100-noncentral-t-fnm-dual-saturation-mechanism.md.
+    this.timeout(120000)
     const data = new dist.Normal(5, 2).seed(42).sample(500)
     const result = guess(data)
     const excluded = ['guess']
@@ -178,7 +191,11 @@ describe('guess', () => {
 
   FORMERLY_EXCLUDED.forEach(({ name, instance, alternative, unfilteredPool }) => {
     it(`should include ${name} in the default pool for data it fits well`, function () {
-      this.timeout(60000)
+      // Raised 60000 -> 120000 alongside the identical-cause timeout above (only VonMises's own
+      // `unfilteredPool: true` branch actually pays the full default-pool guess() cost this
+      // margin is sized for; Rice/NoncentralChi2/NoncentralChi/Skellam finish in under a second
+      // regardless and are unaffected).
+      this.timeout(120000)
       const data = instance.seed(5).sample(500)
       if (unfilteredPool) {
         const withoutOverride = guess(data)
