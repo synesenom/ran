@@ -3728,6 +3728,21 @@ const REFS = [
       { x: 372.0, pdf: 0.005464859998802471, cdf: 0.9077850100564715 }
     ]
   },
+  // NoncentralChi2[76, 692]: cdf routes through marcumQ's transition band well below its mu=135 dispatch (mu=k/2=38), at a large enough xi=sqrt(lambda*x)~694-706 that _fc's modified-Lentz continued fraction previously truncated at the shared MAX_ITER=100 before converging (needing 125-131 iterations here) -- issue #1286, the large-x coverage withheld by #1190/#1143 until that fix landed. Now that _fc uses a regime-aware iteration budget, its own contribution is negligible; the residual gated here is the pre-existing seed/amplification floor _N_MARCUM_RECURRENCE already documents for this same branch, measured at ~9e-14 (pdf) / ~6e-13 (cdf) worst case across this group. x is capped at 735 (not the transition band's own upper edge, 844) because NoncentralChi2._pdf independently overflows to Infinity for x >~ 738 at this lambda (besselI's argument sqrt(lambda*x) crosses double's overflow threshold ~715-720) -- a separate, already-filed defect, not something this fix touches
+  {
+    name: 'NoncentralChi2',
+    params: [76, 692],
+    tol: 2e-13,
+    cdfTol: 2e-12,
+    qtol: 5e-14,
+    points: [
+      { x: 695.0, pdf: 0.003052252346980512, cdf: 0.08578179150721879 },
+      { x: 705.0, pdf: 0.0038767830940074255, cdf: 0.120376095803807 },
+      { x: 715.0, pdf: 0.004735923249978553, cdf: 0.16343437892045032 },
+      { x: 725.0, pdf: 0.005569105438381142, cdf: 0.2150088062475515 },
+      { x: 735.0, pdf: 0.006309086940633841, cdf: 0.2745055502135625 }
+    ]
+  },
   {
     name: 'NoncentralF',
     params: [5, 5, 2],
