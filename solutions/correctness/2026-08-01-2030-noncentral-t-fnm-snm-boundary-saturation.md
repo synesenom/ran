@@ -198,10 +198,28 @@ combination currently exercised by any precision-gate group or the new `nu >= 30
   The 5-argument signature was caught by the mandatory post-edit CodeScene check before it shipped,
   not discovered later; grouping related scalars into a `{ nu, x }` pair object was a two-line fix.
 
+## Addendum: the "fully resolve... zero regression" claim narrowed (#1298)
+
+The Prevention Strategy above validated the `nu0 >= 30 && |raw value| < 1e-9` gate against *this
+issue's own reported case* (`x = -0.7`) and the full test suite as it stood then. Issue #1298 found
+that claim was accurate for that specific case but incomplete as a *general* statement about
+`fnm`-saturation trustworthiness: at shallower `x` (`-0.1`, `-0.2`), a raw `fnm` value can become
+untrustworthy a second, structurally independent way this gate cannot see — an operand that has
+*resolved off* `phi` (so the magnitude gate correctly leaves it alone) but never separated from
+`phi` in the first place is a different failure mode than a value that separated and then re-
+saturated toward the opposite boundary, and the two require independent checks. `_fnmDiff`/`_cdfTerm`
+now OR a direct `phi`-equality check alongside this gate, which is retained unchanged (this doc's own
+reported case, `x = -0.7`, still passes against it). See
+`solutions/correctness/2026-08-02-2100-noncentral-t-fnm-dual-saturation-mechanism.md` for the full
+mechanism and the regression this doc's own gate-replacement risk (a naively "more precise" check
+turning out not to be a superset of the one it replaces) actually caused mid-implementation.
+
 ## Related Solutions
 
 - `solutions/correctness/2026-07-31-1300-doubly-noncentral-t-pdf-cancellation-x-mu-negative.md` —
   the #1235 fix whose "Residual Limitation" section is this issue's origin.
+- `solutions/correctness/2026-08-02-2100-noncentral-t-fnm-dual-saturation-mechanism.md` (#1298) —
+  closes two further blind spots in this doc's `_fnmDiff`/`_cdfTerm` gate; see the Addendum above.
 - `solutions/special-functions/2026-05-18-1212-noncentral-chi2-cdf-complementary-marcum-q.md` (#245)
   — the direct precedent for this fix's shape (`marcumQ`/`marcumP`): a special function's hidden
   `1 - tiny` branch, fixed by exposing a genuine complementary computation the call site switches to.
