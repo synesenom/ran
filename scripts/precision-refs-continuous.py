@@ -13,8 +13,13 @@ exact Poisson/chi-squared mixture / high-precision quadrature), matching the sam
 block re-derives the scipy refVals already vetted in that file and aborts on any mismatch.
 
 Requires: pip install mpmath
-Usage:    python3 scripts/precision-refs-continuous.py                        # rewrites the test file
-          python3 scripts/precision-refs-continuous.py --check                # self-check only
+Usage:    python3 scripts/precision-refs-continuous.py                        # self-check only, writes nothing
+          python3 scripts/precision-refs-continuous.py --check                # self-check only, writes nothing
+              # (identical to the bare form above -- any first argument other than --emit/--render
+              # falls through to the same self_check() dispatch, per __main__ below. --emit is
+              # required to actually regenerate test/precision-continuous.js -- see
+              # solutions/tooling/2026-08-02-1830-precision-refs-bare-invocation-runs-self-check-not-emit.md)
+          python3 scripts/precision-refs-continuous.py --emit                 # rewrites the test file
           python3 scripts/precision-refs-continuous.py --emit --only Name1,Name2
               # recompute only the named distributions, reusing the previous run's cached
               # points (/tmp/precision-continuous-cache.json) for everything else -- avoids
@@ -1765,7 +1770,7 @@ PARAM_SETS = {
     'Uniform': [[5, 25], [0, 1], [-2, 2]],
     'UniformProduct': [[6], [2], [4]],
     'UniformRatio': [[]],
-    'VonMises': [[0, 2], [0, 0.5], [0, 1], [0, 11], [1.5, 2]],
+    'VonMises': [[0, 2], [0, 0.5], [0, 1], [0, 11], [1.5, 2], [0, 1000], [0, 2000], [0.7, 1500]],
     'Weibull': [[2, 2], [0.5, 0.5], [1, 3]],
     'Wigner': [[2], [0.5], [1]],
     'WrappedCauchy': [[0, 0.3], [1.0, 0.7], [-2.0, 0.05]],
@@ -2007,6 +2012,17 @@ VONMISES_XVALS = {
     # mu=1.5 exercises the location-shift parameterization added alongside kappa; the same
     # kappa=2 x-values above, translated by mu, since f(x; mu, kappa) = f(x-mu; 0, kappa).
     (1.5, 2): [mpf('-0.5'), mpf('0.7'), mpf('1.9'), mpf('2.7'), mpf('4')],
+    # Issue #1308: kappa well past the exp(kappa*cos(x-mu))/besseli(0,kappa) double-precision
+    # overflow ceiling (~710-720), where both the naive numerator and besselI(0,kappa) individually
+    # overflow to Infinity. Probes stay within a few concentration widths (~1/sqrt(kappa)) of mu so
+    # pdf/cdf remain in a numerically interesting range instead of collapsing to exact 0/1 -- unlike
+    # dist-base-special-cases.js's regression test, this file only ever checks these fixed points
+    # (never a full-support sweep), so the deep-tail cdf cancellation floor documented there does
+    # not affect this group.
+    (0, 1000): [mpf('-0.08'), mpf('-0.03'), mpf('0.0'), mpf('0.03'), mpf('0.08')],
+    (0, 2000): [mpf('-0.05'), mpf('-0.02'), mpf('0.0'), mpf('0.02'), mpf('0.05')],
+    # mu=0.7 exercises the overflow fix together with a non-zero location shift.
+    (0.7, 1500): [mpf('0.64'), mpf('0.68'), mpf('0.7'), mpf('0.72'), mpf('0.76')],
 }
 # Davis is inverted by bisection like the rest (its quadrature CDF is slow but tolerable for
 # one distribution) so its probes span the full support {0.1..0.9} rather than fixed points.
@@ -2296,6 +2312,12 @@ PDFCDF_TOL = {
     ('NoncentralChi', '[201, 44.7]'): '2e-13',
     ('R', '[0.5]'): '1e-13',
     ('VonMises', '[0, 11]'): '1e-13',
+    # besselIExpScaled's Miller-recurrence rescaling (#1308) accumulates a few extra ULPs beyond
+    # the default 1e-14 at these kappa: measured worst case pdf 5.4e-14 at [0, 1000], 7.2e-14 at
+    # [0, 2000], 3.3e-14 at [0.7, 1500].
+    ('VonMises', '[0, 1000]'): '1e-13',
+    ('VonMises', '[0, 2000]'): '1e-13',
+    ('VonMises', '[0.7, 1500]'): '1e-13',
 }
 # Per-(name, json-params) cdf-only tolerance override, for the rare group where pdf and cdf
 # hit genuinely different floors and sharing PDFCDF_TOL's single value would either loosen
@@ -2351,6 +2373,9 @@ Q_TOL = {
     ('R', '[2]'): '1e-12',
     ('Tweedie', '[5, 0.5, 1.02]'): '4e-14',
     ('Tweedie', '[5, 0.5, 1.98]'): '1e-13',
+    # Same besselIExpScaled ULP accumulation as PDFCDF_TOL above propagates through q()'s
+    # root-finder; measured worst case 1.1e-14 at [0, 1000].
+    ('VonMises', '[0, 1000]'): '1e-13',
     ('SkewNormal', '[1, 1, 3]'): '1e-13',
     ('StudentT', '[2]'): '1e-12',
     ('StudentT', '[5]'): '1e-12',
