@@ -51,7 +51,7 @@ describe('fit() precision and robustness gate', () => {
       const data = [0.7, 1.3, 2.1, 0.9, 3.4, 1.1, 0.5, 2.8]
       // Reference computed independently of fit()'s n/Σx ordering.
       const reference = 1 / (data.reduce((s, x) => s + x, 0) / data.length)
-      const fitted = dist.Exponential.fit(data).p.lambda
+      const fitted = dist.Exponential.fit(data).params().lambda
       assert.approximately(fitted / reference, 1, 1e-14)
     })
 

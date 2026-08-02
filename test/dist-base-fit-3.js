@@ -213,10 +213,10 @@ describe('dist', () => {
         const data = new dist.TruncatedNormal(2, 1, 0, 4).seed(42).sample(300)
         const result = dist.TruncatedNormal.fit(data)
         assert(result instanceof dist.TruncatedNormal)
-        assert(Math.abs(result.p.mu - 2) < 0.4)
-        assert(Math.abs(result.p.sigma - 1) < 0.4)
-        assert(result.p.a < 0.5)
-        assert(result.p.b > 3.5)
+        assert(Math.abs(result.params().mu - 2) < 0.4)
+        assert(Math.abs(result.params().sigma - 1) < 0.4)
+        assert(result.params().a < 0.5)
+        assert(result.params().b > 3.5)
       })
 
       it('TruncatedExponential._fitInit should set a=min, b=max, lambda from MOM', () => {
@@ -239,9 +239,9 @@ describe('dist', () => {
         const data = new dist.TruncatedExponential(1, 0, 5).seed(42).sample(300)
         const result = dist.TruncatedExponential.fit(data)
         assert(result instanceof dist.TruncatedExponential)
-        assert(result.p.lambda > 0)
-        assert(result.p.a >= 0)
-        assert(result.p.b > result.p.a)
+        assert(result.params().lambda > 0)
+        assert(result.params().a >= 0)
+        assert(result.params().b > result.params().a)
         assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
       })
 

@@ -67,7 +67,7 @@ describe('dist', () => {
         const data = new dist.F(10, 20).seed(42).sample(200)
         const result = dist.F.fit(data)
         assert(result instanceof dist.F)
-        assert(result.p.d1 > 0 && result.p.d2 > 0)
+        assert(result.params().d1 > 0 && result.params().d2 > 0)
         assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
       })
 
@@ -77,7 +77,7 @@ describe('dist', () => {
         const result = dist.F.fit(data)
         assert(result instanceof dist.F)
         // Profile MLE has strictly higher lnL than the moment-seed answer
-        assert(new dist.F(result.p.d1, result.p.d2).lnL(data) > new dist.F(4, 14).lnL(data))
+        assert(new dist.F(result.params().d1, result.params().d2).lnL(data) > new dist.F(4, 14).lnL(data))
       })
 
       it('FisherZ._fitPenalty should return 0', () => {
@@ -88,7 +88,7 @@ describe('dist', () => {
         const data = new dist.FisherZ(10, 20).seed(42).sample(200)
         const result = dist.FisherZ.fit(data)
         assert(result instanceof dist.FisherZ)
-        assert(result.p.d1 > 0 && result.p.d2 > 0)
+        assert(result.params().d1 > 0 && result.params().d2 > 0)
         assert(Number.isFinite(result.pdf(0)) && result.pdf(0) > 0)
       })
 
@@ -119,7 +119,7 @@ describe('dist', () => {
         const result = dist.Degenerate.fit([5, 5, 5])
         assert(result instanceof dist.Degenerate)
         // constant data ⇒ exact point-mass location, no MLE drift
-        assert(Math.abs(result.p.x0 - 5) < 1e-9)
+        assert(Math.abs(result.params().x0 - 5) < 1e-9)
       })
 
       it('Soliton._fitInit should lower-bound N by the largest observation', () => {
@@ -169,29 +169,29 @@ describe('dist', () => {
         const data = new dist.BoundedPareto(2, 20, 3).seed(42).sample(200)
         const result = dist.BoundedPareto.fit(data)
         assert(result instanceof dist.BoundedPareto)
-        assert(Math.abs(result.p.L - 2) < 0.5)
+        assert(Math.abs(result.params().L - 2) < 0.5)
         // MLE for H converges to max(data) since likelihood decreases for any H > max(data)
-        assert(result.p.H >= Math.max(...data))
-        assert(Math.abs(result.p.alpha - 3) < 0.8)
+        assert(result.params().H >= Math.max(...data))
+        assert(Math.abs(result.params().alpha - 3) < 0.8)
       })
 
       it('Champernowne.fit should recover alpha and x0 and return a valid lambda', () => {
         const data = new dist.Champernowne(1, 0, 2).seed(42).sample(200)
         const result = dist.Champernowne.fit(data)
         assert(result instanceof dist.Champernowne)
-        assert(Math.abs(result.p.alpha - 1) < 0.4)
+        assert(Math.abs(result.params().alpha - 1) < 0.4)
         // lambda is poorly identified near 0 from n=200; check valid range instead
-        assert(result.p.lambda >= 0 && result.p.lambda < 1)
-        assert(Math.abs(result.p.x0 - 2) < 0.5)
+        assert(result.params().lambda >= 0 && result.params().lambda < 1)
+        assert(Math.abs(result.params().x0 - 2) < 0.5)
       })
 
       it('ExponentiallyModifiedGaussian.fit should recover mu, sigma, and lambda close to planted values', () => {
         const data = new dist.ExponentiallyModifiedGaussian(1, 2, 0.5).seed(42).sample(500)
         const result = dist.ExponentiallyModifiedGaussian.fit(data)
         assert(result instanceof dist.ExponentiallyModifiedGaussian)
-        assert(Math.abs(result.p.mu - 1) < 1.5)
-        assert(Math.abs(result.p.sigma - 2) < 1)
-        assert(Math.abs(result.p.lambda - 0.5) < 0.4)
+        assert(Math.abs(result.params().mu - 1) < 1.5)
+        assert(Math.abs(result.params().sigma - 2) < 1)
+        assert(Math.abs(result.params().lambda - 0.5) < 0.4)
       })
 
       it('ExponentiallyModifiedGaussian._fitInit should return the 1e-6-clamped params for constant data', () => {
@@ -237,16 +237,16 @@ describe('dist', () => {
         const data = new dist.NoncentralT(5, 1).seed(42).sample(300)
         const result = dist.NoncentralT.fit(data)
         assert(result instanceof dist.NoncentralT)
-        assert(Math.abs(result.p.nu - 5) <= 1)
-        assert(Math.abs(result.p.mu - 1) < 0.3)
+        assert(Math.abs(result.params().nu - 5) <= 1)
+        assert(Math.abs(result.params().mu - 1) < 0.3)
       })
 
       it('DoublyNoncentralChi2.fit should recover total df and noncentrality close to planted values', () => {
         const data = new dist.DoublyNoncentralChi2(2, 3, 1, 2).seed(42).sample(500)
         const result = dist.DoublyNoncentralChi2.fit(data)
         assert(result instanceof dist.DoublyNoncentralChi2)
-        assert(Math.abs((result.p.k1 + result.p.k2) - 5) <= 2)
-        assert(Math.abs((result.p.lambda1 + result.p.lambda2) - 3) <= 2)
+        assert(Math.abs((result.params().k1 + result.params().k2) - 5) <= 2)
+        assert(Math.abs((result.params().lambda1 + result.params().lambda2) - 3) <= 2)
       })
 
       it('DoublyNoncentralChi2.fit should enforce k1>=1 and k2>=1 when collapsed fit returns k=1', () => {
@@ -254,8 +254,8 @@ describe('dist', () => {
         const data = new dist.NoncentralChi2(1, 0).seed(42).sample(500)
         const result = dist.DoublyNoncentralChi2.fit(data)
         assert(result instanceof dist.DoublyNoncentralChi2)
-        assert(result.p.k1 >= 1)
-        assert(result.p.k2 >= 1)
+        assert(result.params().k1 >= 1)
+        assert(result.params().k2 >= 1)
       })
 
       it('DoublyNoncentralT moments should be identical across independent instances', () => {
@@ -277,8 +277,8 @@ describe('dist', () => {
         // exercises the closed-form moment formulas the fit is meant to recover.
         assert(Math.abs(result.mean() - 5) < 1)
         assert(Math.abs(result.variance() - 1 * Math.pow(5, 1.5)) < 3)
-        assert(result.p.p > 1 && result.p.p < 2)
-        assert(Math.abs(result.p.p - 1.5) < 0.3)
+        assert(result.params().p > 1 && result.params().p < 2)
+        assert(Math.abs(result.params().p - 1.5) < 0.3)
         assert(Number.isFinite(result.pdf(1)) && result.pdf(1) > 0)
       })
 
