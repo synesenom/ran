@@ -226,7 +226,8 @@ describe('dist', () => {
         // Component label-switching makes (weight, rate) pairs non-identifiable; use the mixture
         // mean E[X] = Σ w_i / λ_i — a sufficient statistic invariant under that permutation.
         const sampleMean = data.reduce((s, x) => s + x, 0) / data.length
-        const fittedMean = result.params().weights.reduce((s, w, i) => s + w / result.params().rates[i], 0)
+        const { weights, rates } = result.params()
+        const fittedMean = weights.reduce((s, w, i) => s + w / rates[i], 0)
         assert(Math.abs(fittedMean - sampleMean) < 0.2)
       })
 
