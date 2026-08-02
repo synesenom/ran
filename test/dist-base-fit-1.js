@@ -82,7 +82,7 @@ describe('dist', () => {
         assert(pdfCalls > data.length, `fit() made only ${pdfCalls} _pdf calls, expected the optimizer to run`)
         assert(pdfCalls < 200000, `fit() made ${pdfCalls} _pdf calls, expected well under 200000`)
         assert(result instanceof dist.DoublyNoncentralF)
-        assert(Number.isFinite(result.p.d1) && Number.isFinite(result.p.d2))
+        assert(Number.isFinite(result.params().d1) && Number.isFinite(result.params().d2))
         // Confirms the bounded search still improves on the initial guess rather than merely
         // terminating early with an unoptimized fit.
         const init = new dist.DoublyNoncentralF(...dist.DoublyNoncentralF._fitInit(data))
@@ -142,7 +142,7 @@ describe('dist', () => {
       it('Pareto.fit should recover xmin close to min(data)', () => {
         const data = [1.5, 2.0, 3.1, 1.8, 2.5]
         const result = dist.Pareto.fit(data)
-        assert(Math.abs(result.p.xmin - 1.5) < 1e-3)
+        assert(Math.abs(result.params().xmin - 1.5) < 1e-3)
       })
 
       it('Pareto.fit should recover alpha close to closed-form MLE', () => {
@@ -150,7 +150,7 @@ describe('dist', () => {
         const xmin = Math.min(...data)
         const alphaExpected = data.length / data.reduce((s, x) => s + Math.log(x / xmin), 0)
         const result = dist.Pareto.fit(data)
-        assert(Math.abs(result.p.alpha - alphaExpected) < 0.05)
+        assert(Math.abs(result.params().alpha - alphaExpected) < 0.05)
       })
 
       it('InvalidDiscrete.fit should return an InvalidDiscrete instance', () => {
@@ -226,7 +226,8 @@ describe('dist', () => {
         // Component label-switching makes (weight, rate) pairs non-identifiable; use the mixture
         // mean E[X] = Σ w_i / λ_i — a sufficient statistic invariant under that permutation.
         const sampleMean = data.reduce((s, x) => s + x, 0) / data.length
-        const fittedMean = result.p.weights.reduce((s, w, i) => s + w / result.p.rates[i], 0)
+        const { weights, rates } = result.params()
+        const fittedMean = weights.reduce((s, w, i) => s + w / rates[i], 0)
         assert(Math.abs(fittedMean - sampleMean) < 0.2)
       })
 
@@ -245,22 +246,22 @@ describe('dist', () => {
         const data = new dist.BorelTanner(0.5, 3).seed(42).sample(200)
         const result = dist.BorelTanner.fit(data)
         assert(result instanceof dist.BorelTanner)
-        assert(result.p.mu >= 0 && result.p.mu < 1 && result.p.n > 0)
-        assert(Number.isFinite(result.pdf(result.p.n)) && result.pdf(result.p.n) > 0)
+        assert(result.params().mu >= 0 && result.params().mu < 1 && result.params().n > 0)
+        assert(Number.isFinite(result.pdf(result.params().n)) && result.pdf(result.params().n) > 0)
       })
 
       it('Borel._fitInit degenerate: constant data (mean = 1) clamps mu to 0', () => {
         // mean > 1 branch false: data all equal 1 → mean = 1 → mu = 0
         const result = dist.Borel.fit([1, 1, 1, 1, 1])
         assert(result instanceof dist.Borel)
-        assert(result.p.mu === 0)
+        assert(result.params().mu === 0)
       })
 
       it('BorelTanner._fitInit degenerate: mean ≤ n clamps mu to 0', () => {
         // mean > n branch false: all values equal n (= minimum) → mean = n → mu = 0
         const result = dist.BorelTanner.fit([3, 3, 3, 3, 3])
         assert(result instanceof dist.BorelTanner)
-        assert(result.p.mu === 0 && result.p.n === 3)
+        assert(result.params().mu === 0 && result.params().n === 3)
       })
 
       it('PolyaAeppli._fitInit fallback: variance ≤ mean seeds theta=0.5', () => {
@@ -274,7 +275,7 @@ describe('dist', () => {
         const data = new dist.Erlang(3, 1).seed(20).sample(200)
         const result = dist.Erlang.fit(data)
         assert(result instanceof dist.Erlang)
-        assert.strictEqual(result.p.k, 3)
+        assert.strictEqual(result.params().k, 3)
       })
 
       it('Beta.fit should not converge to near-singular alpha or beta', () => {
@@ -284,16 +285,16 @@ describe('dist', () => {
         const data = new dist.Beta(0.5, 0.5).seed(42).sample(200)
         const result = dist.Beta.fit(data)
         assert(result instanceof dist.Beta)
-        assert(result.p.alpha > 0.3 && result.p.alpha < 1.5, `alpha ${result.p.alpha} out of expected range`)
-        assert(result.p.beta > 0.3 && result.p.beta < 1.5, `beta ${result.p.beta} out of expected range`)
+        assert(result.params().alpha > 0.3 && result.params().alpha < 1.5, `alpha ${result.params().alpha} out of expected range`)
+        assert(result.params().beta > 0.3 && result.params().beta < 1.5, `beta ${result.params().beta} out of expected range`)
       })
 
       it('BetaPrime.fit should not converge to near-singular alpha or beta', () => {
         const data = new dist.BetaPrime(1.5, 2.0).seed(42).sample(200)
         const result = dist.BetaPrime.fit(data)
         assert(result instanceof dist.BetaPrime)
-        assert(result.p.alpha > 0.5 && result.p.alpha < 8, `alpha ${result.p.alpha} out of expected range`)
-        assert(result.p.beta > 0.5 && result.p.beta < 8, `beta ${result.p.beta} out of expected range`)
+        assert(result.params().alpha > 0.5 && result.params().alpha < 8, `alpha ${result.params().alpha} out of expected range`)
+        assert(result.params().beta > 0.5 && result.params().beta < 8, `beta ${result.params().beta} out of expected range`)
       })
 
       it('PERT._fitPenalty should return 0', () => {
@@ -306,11 +307,11 @@ describe('dist', () => {
         assert(result instanceof dist.BetaRectangular)
         // alpha/beta > 0.5 ensures the optimizer did not converge to the near-singularity at 0.
         // Without the _fitPenalty log-barrier the optimizer can return alpha/beta < 0.01.
-        assert(result.p.alpha > 0.5 && result.p.alpha < 10, `alpha ${result.p.alpha} out of range`)
-        assert(result.p.beta > 0.5 && result.p.beta < 10, `beta ${result.p.beta} out of range`)
-        assert(result.p.theta > 0.1 && result.p.theta <= 1)
-        assert(Math.abs(result.p.a - 0) < 0.3)
-        assert(Math.abs(result.p.b - 4) < 0.3)
+        assert(result.params().alpha > 0.5 && result.params().alpha < 10, `alpha ${result.params().alpha} out of range`)
+        assert(result.params().beta > 0.5 && result.params().beta < 10, `beta ${result.params().beta} out of range`)
+        assert(result.params().theta > 0.1 && result.params().theta <= 1)
+        assert(Math.abs(result.params().a - 0) < 0.3)
+        assert(Math.abs(result.params().b - 4) < 0.3)
       })
 
       it('BetaRectangular.k should reflect its 5 free parameters, not the 2 inherited from Beta', () => {
@@ -334,8 +335,8 @@ describe('dist', () => {
         const data = new dist.BetaRectangular(0.8, 0.8, 0.6, 0, 10).seed(7).sample(300)
         const result = dist.BetaRectangular.fit(data)
         assert(result instanceof dist.BetaRectangular)
-        assert(result.p.alpha > 0.3, `alpha ${result.p.alpha} is near-singular`)
-        assert(result.p.beta > 0.3, `beta ${result.p.beta} is near-singular`)
+        assert(result.params().alpha > 0.3, `alpha ${result.params().alpha} is near-singular`)
+        assert(result.params().beta > 0.3, `beta ${result.params().beta} is near-singular`)
       })
 
       it('Weibull._fitInit should handle constant data', () => {
