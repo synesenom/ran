@@ -1567,15 +1567,26 @@ P_GRID = [mpf('0.1'), mpf('0.3'), mpf('0.53'), mpf('0.72'), mpf('0.9')]
 # marcumP, and is the only family member whose marcum order is the evaluation point rather than a
 # parameter, so one param set straddles inside its own k grid -- see scripts/precision-refs-discrete.py.
 #
-# NO large-x set is included, and that omission is deliberate. Probing the recurrence branch across
-# the band showed it silently loses up to eight significant digits once the marcum x grows past a
-# few hundred (worst measured 6.9e-05 relative at x=2000), because _fc's modified-Lentz continued
-# fraction needs ~192 iterations at those arguments but is capped at MAX_ITER=100 and returns the
-# unconverged value with no signal. That produces a six-orders-of-magnitude accuracy discontinuity
-# across mu=135 at x=1000 (2.55e-09 at mu=134 vs 2.02e-15 at mu=135, since _largeMu does not call
-# _fc). Filed as issue #1286 rather than papered over with a loosened tolerance here, following the
-# same precedent as #1179 (_zetaxy) and #1185 (_besselIBackward); the withheld set should be added
-# once #1286 lands, as #1185's were.
+# A large-x set was originally withheld here. Probing the recurrence branch across the band
+# showed it silently lost up to eight significant digits once the marcum x grew past a few
+# hundred (worst measured 6.9e-05 relative at x=2000), because _fc's modified-Lentz continued
+# fraction needed ~192 iterations at those arguments but was capped at MAX_ITER=100 and returned
+# the unconverged value with no signal. That produced a six-orders-of-magnitude accuracy
+# discontinuity across mu=135 at x=1000 (2.55e-09 at mu=134 vs 2.02e-15 at mu=135, since _largeMu
+# does not call _fc). Filed as issue #1286 rather than papered over with a loosened tolerance
+# here, following the same precedent as #1179 (_zetaxy) and #1185 (_besselIBackward).
+#
+# [76, 692] is the withheld set, added now that #1286 landed a regime-aware iteration budget for
+# _fc, following the same precedent as #1185's own withheld sets. mu=38 (not the reproduction
+# issue's mu=100) is deliberate: NoncentralChi2._pdf independently overflows to Infinity once
+# besselI's argument sqrt(lambda*x) crosses ~715-720 (a separate, already-filed defect out of
+# #1286's scope), and at mu=100 every marcum-x large enough to exercise _fc's old bug also pushes
+# sqrt(lambda*x) past that overflow floor -- there is no window satisfying both simultaneously at
+# that mu. mu=38 is the smallest order for which marcumQ's own dispatch (mu^2 >= 2*xi) still
+# routes through _transitionBand's recurrence rather than the large-xi asymptotic expansion at
+# xi close to the overflow ceiling, which maximizes how large a _fc depth this set can exercise
+# (125-131 iterations, vs. the old 100 cap) while keeping pdf finite at every probed x. See
+# NONCENTRAL_CHI2_XVALS for the exact x-values and their derivation.
 PARAM_SETS = {
     'Alpha': [[2, 2], [0.5, 0.5], [3, 1]],
     'Anglit': [[0, 2], [3, 0.5], [-1, 4]],
@@ -1700,8 +1711,10 @@ PARAM_SETS = {
     # [268, 64] / [270, 64]: straddle marcumQ's transition-band mu=135 dispatch -- k=268 gives
     # mu=k/2=134 (three-term recurrence), k=270 gives mu=135 (section 4.2 large-mu asymptotic
     # expansion). See the mu=135 paragraph in the comment above PARAM_SETS (issue #1190).
+    # [76, 692]: the large-x recurrence set withheld by #1190/#1143 until #1286 fixed _fc's
+    # under-convergence. See the "large-x recurrence regime" paragraph above PARAM_SETS.
     'NoncentralChi2': [[11, 2], [5, 3], [2, 1], [5, 58], [5, 62], [5, 0.5], [2, 8],
-                       [268, 64], [270, 64]],
+                       [268, 64], [270, 64], [76, 692]],
     # [6, 8, 4]: x straddles the underlying NoncentralBeta._cdf's regularizedBetaIncomplete
     # direct/complementary dispatch, here at internal beta-argument
     # z=d1*x/(d1*x+d2)=(iAlpha0+1)/(iAlpha0+beta+2)=6/11, where iAlpha0=alpha+round(lambda/2)=5
@@ -1901,6 +1914,20 @@ NONCENTRAL_F_XVALS = {
 NONCENTRAL_CHI2_XVALS = {
     (268, 64): [mpf('294'), mpf('318'), mpf('332'), mpf('348'), mpf('370')],
     (270, 64): [mpf('296'), mpf('320'), mpf('334'), mpf('350'), mpf('372')],
+    # (76, 692) (issue #1286): the large-x recurrence set withheld until _fc's under-convergence
+    # was fixed. mu=k/2=38, x_m=lambda/2=346; the transition band is y in (345.8, 422.2), i.e.
+    # x in (691.6, 844.4). x is capped at 735 (well short of the band's own upper edge) because
+    # NoncentralChi2._pdf independently overflows to Infinity for x >~ 738 at this lambda
+    # (besselI(37, sqrt(lambda*x)) overflows once sqrt(lambda*x) exceeds ~715-720) -- a separate,
+    # already-filed defect (see the marcumQ severity table in #1286's issue body), not something
+    # this set should paper over by avoiding it silently without comment. x=695 is the closest
+    # sample to the band's lower edge that still routes through _recurrence (not the plain
+    # quadrature _pqTrap) with a non-trivial fc() depth; x in {695, 705, 715, 725, 735} keeps
+    # every sample strictly inside the finite-pdf sub-window (691.6, 738) while still calling
+    # _fc(nu=42, z~694-706) at 125-131 continued-fraction iterations, comfortably past the old
+    # MAX_ITER=100 cap this issue fixed (confirmed via an instrumented run: pre-fix and post-fix
+    # cdf values differ starting at the 12th-13th significant digit at every point here).
+    (76, 692): [mpf('695'), mpf('705'), mpf('715'), mpf('725'), mpf('735')],
 }
 
 # Quadrature-based CDFs (Davis, noncentral-t, SkewNormal, VonMises): inverting by bisection
@@ -2224,6 +2251,8 @@ PDFCDF_TOL = {
     ('NoncentralChi2', '[268, 64]'): '5e-13',
     # [270, 64] is a pdf-only gate: its cdf floor is an order of magnitude looser (CDF_TOL below).
     ('NoncentralChi2', '[270, 64]'): '2e-14',
+    # [76, 692] is a pdf-only gate: its cdf floor is an order of magnitude looser (CDF_TOL below).
+    ('NoncentralChi2', '[76, 692]'): '2e-13',
     ('R', '[0.5]'): '1e-13',
     ('VonMises', '[0, 11]'): '1e-13',
 }
@@ -2234,6 +2263,7 @@ PDFCDF_TOL = {
 CDF_TOL = {
     ('DoublyNoncentralT', '[5, 2, 120]'): '1e-7',
     ('NoncentralChi2', '[270, 64]'): '3e-12',
+    ('NoncentralChi2', '[76, 692]'): '2e-12',
 }
 # Per-(name, json-params) quantile round-trip tolerance (default 1e-14; per-group empirical:
 # closed-form/Halley quantiles stay at 1e-14, root-finding/approximate ones are looser).
@@ -2249,6 +2279,7 @@ Q_TOL = {
     ('NoncentralChi2', '[5, 62]'): '5e-13',
     ('NoncentralChi2', '[268, 64]'): '1e-13',
     ('NoncentralChi2', '[270, 64]'): '5e-13',
+    ('NoncentralChi2', '[76, 692]'): '5e-14',
     ('NoncentralChi', '[5, 7.5]'): '5e-13',
     ('Rice', '[7, 1]'): '5e-13',
     ('DoublyNoncentralT', '[5, 1, 2]'): '1e-12',
@@ -2306,6 +2337,19 @@ _N_MARCUM_LARGEMU = ('cdf routes through marcumQ\'s transition band at exactly i
                      'is measured, not assumed: cdfTol: 1.6e-12 (1.04x over the isolated value) '
                      'also passes the full parallel suite, so unlike the _N_MARCUM groups this one '
                      'shows no JIT-order inflation')
+_N_MARCUM_RECURRENCE_LARGEX = ('cdf routes through marcumQ\'s transition band well below its mu=135 '
+                     'dispatch (mu=k/2=38), at a large enough xi=sqrt(lambda*x)~694-706 that _fc\'s '
+                     'modified-Lentz continued fraction previously truncated at the shared MAX_ITER=100 '
+                     'before converging (needing 125-131 iterations here) -- issue #1286, the large-x '
+                     'coverage withheld by #1190/#1143 until that fix landed. Now that _fc uses a '
+                     'regime-aware iteration budget, its own contribution is negligible; the residual '
+                     'gated here is the pre-existing seed/amplification floor _N_MARCUM_RECURRENCE '
+                     'already documents for this same branch, measured at ~9e-14 (pdf) / ~6e-13 (cdf) '
+                     'worst case across this group. x is capped at 735 (not the transition band\'s own '
+                     'upper edge, 844) because NoncentralChi2._pdf independently overflows to Infinity '
+                     'for x >~ 738 at this lambda (besselI\'s argument sqrt(lambda*x) crosses double\'s '
+                     'overflow threshold ~715-720) -- a separate, already-filed defect, not something '
+                     'this fix touches')
 _N_F11_BOUNDARY = (_N_NCT + '; additionally, x sits near f11\'s |z|=50 dispatch threshold '
                    '(issue #1189); qtol: 1e-10 was measured to fail (~1.14e-10 error at '
                    'x=1.1), qtol: 5e-10 passes with margin -- gate empirically at 5e-10. '
@@ -2374,6 +2418,7 @@ NOTES = {
     ('NoncentralChi2', '[5, 62]'): _N_MARCUM,
     ('NoncentralChi2', '[268, 64]'): _N_MARCUM_RECURRENCE,
     ('NoncentralChi2', '[270, 64]'): _N_MARCUM_LARGEMU,
+    ('NoncentralChi2', '[76, 692]'): _N_MARCUM_RECURRENCE_LARGEX,
     ('R', '[0.5]'): _N_SERIES,
     ('R', '[2]'): _N_SERIES,
     ('BaldingNichols', '[0.1, 0.1]'): _N_ROOT,
@@ -2468,17 +2513,26 @@ def existing_groups(path):
     if not m:
         return []
     start = m.end() - 1
+    # Brace-depth scanning below must ignore literal '{'/'}' characters that appear inside a
+    # `//`-only comment line (e.g. a comment referencing a JS snippet like `{ useFloor: false }`,
+    # or set notation like `{1, 2}`) -- otherwise a balanced brace pair INSIDE a comment is
+    # misread as a whole group span, corrupting every span after it. scan_src blanks out
+    # comment-only lines (preserving length and newlines, so span indices still index into the
+    # real `src` below) so the structural scan only ever sees actual object-literal syntax.
+    scan_src = ''.join(
+        ' ' * len(ln) if ln.strip().startswith('//') else ln
+        for ln in src.splitlines(keepends=True))
     depth = 0
     spans = []
     span_start = None
     for i in range(start, len(src)):
-        if src[i] == '[' or src[i] == '{':
-            if src[i] == '{' and depth == 1:
+        if scan_src[i] == '[' or scan_src[i] == '{':
+            if scan_src[i] == '{' and depth == 1:
                 span_start = i
             depth += 1
-        elif src[i] == ']' or src[i] == '}':
+        elif scan_src[i] == ']' or scan_src[i] == '}':
             depth -= 1
-            if src[i] == '}' and depth == 1:
+            if scan_src[i] == '}' and depth == 1:
                 spans.append((span_start, i + 1))
             if depth == 0:
                 break
