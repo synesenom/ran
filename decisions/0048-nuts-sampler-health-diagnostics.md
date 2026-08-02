@@ -1,4 +1,4 @@
-# ADR-0035: NUTS Sampler-Health Diagnostics — `_iter` Fields and NUTS-Local Accumulators
+# ADR-0048: NUTS Sampler-Health Diagnostics — `_iter` Fields and NUTS-Local Accumulators
 
 **Date**: 2026-07-19
 **Status**: Accepted
