@@ -61,8 +61,8 @@ describe('fit() precision and robustness gate', () => {
       const muRef = data.reduce((s, x) => s + x, 0) / n
       const sigmaRef = Math.sqrt(data.reduce((s, x) => s + (x - muRef) ** 2, 0) / n)
       const fitted = dist.Normal.fit(data)
-      assert.approximately(fitted.p.mu / muRef, 1, 1e-14)
-      assert.approximately(fitted.p.sigma / sigmaRef, 1, 1e-14)
+      assert.approximately(fitted.params().mu / muRef, 1, 1e-14)
+      assert.approximately(fitted.params().sigma / sigmaRef, 1, 1e-14)
     })
 
     it('Pareto recovers x̂min = min and α̂ = n/Σln(x/xmin) to 1e-14 relative error', () => {
@@ -70,15 +70,15 @@ describe('fit() precision and robustness gate', () => {
       const xmin = Math.min(...data)
       const alphaRef = data.length / data.reduce((s, x) => s + Math.log(x / xmin), 0)
       const fitted = dist.Pareto.fit(data)
-      assert.strictEqual(fitted.p.xmin, xmin)
-      assert.approximately(fitted.p.alpha / alphaRef, 1, 1e-14)
+      assert.strictEqual(fitted.params().xmin, xmin)
+      assert.approximately(fitted.params().alpha / alphaRef, 1, 1e-14)
     })
 
     it('Uniform recovers the exact [min, max] support (not a padded interval)', () => {
       const data = [2.3, 5.1, 1.7, 4.4, 3.0]
       const fitted = dist.Uniform.fit(data)
-      assert.strictEqual(fitted.p.xmin, Math.min(...data))
-      assert.strictEqual(fitted.p.xmax, Math.max(...data))
+      assert.strictEqual(fitted.params().xmin, Math.min(...data))
+      assert.strictEqual(fitted.params().xmax, Math.max(...data))
     })
 
     it('InverseGaussian recovers the exact MLE λ̂ = n/Σ(1/xᵢ − 1/x̄) to 1e-14 relative error', () => {
@@ -87,8 +87,8 @@ describe('fit() precision and robustness gate', () => {
       const mean = data.reduce((s, x) => s + x, 0) / n
       const lambdaRef = n / data.reduce((s, x) => s + (1 / x - 1 / mean), 0)
       const fitted = dist.InverseGaussian.fit(data)
-      assert.approximately(fitted.p.mu / mean, 1, 1e-14)
-      assert.approximately(fitted.p.lambda / lambdaRef, 1, 1e-14)
+      assert.approximately(fitted.params().mu / mean, 1, 1e-14)
+      assert.approximately(fitted.params().lambda / lambdaRef, 1, 1e-14)
     })
   })
 
@@ -115,8 +115,8 @@ describe('fit() precision and robustness gate', () => {
       const trueModel = new dist.Bates(4, 1, 5).seed(20260601)
       const data = trueModel.sample(300)
       const fitted = dist.Bates.fit(data)
-      assert.isTrue(fitted.p.a < fitted.p.b)
-      assert.isTrue(Number.isInteger(fitted.p.n) && fitted.p.n >= 1)
+      assert.isTrue(fitted.params().a < fitted.params().b)
+      assert.isTrue(Number.isInteger(fitted.params().n) && fitted.params().n >= 1)
       const fittedLnL = fitted.lnL(data)
       assert.isTrue(Number.isFinite(fittedLnL))
       assert.isAtLeast(fittedLnL, trueModel.lnL(data) - 1e-6 * (Math.abs(trueModel.lnL(data)) + 1))
@@ -129,8 +129,8 @@ describe('fit() precision and robustness gate', () => {
       assert.isTrue(Number.isFinite(L0))
       // A genuine optimum: no small coordinate perturbation increases the log-likelihood.
       for (const [da, db] of [[1e-3, 0], [-1e-3, 0], [0, 1e-3], [0, -1e-3]]) {
-        const a = fitted.p.alpha * (1 + da)
-        const b = fitted.p.beta * (1 + db)
+        const a = fitted.params().alpha * (1 + da)
+        const b = fitted.params().beta * (1 + db)
         assert.isAtMost(new dist.Gamma(a, b).lnL(data), L0 + 1e-9)
       }
     })

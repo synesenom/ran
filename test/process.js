@@ -615,8 +615,8 @@ describe('process.BrownianMotion', () => {
         bm.seed(seed)
         const fitted = BrownianMotion.fit(bm.path(n), dt)
         assert.instanceOf(fitted, BrownianMotion)
-        assert.closeTo(fitted.p.mu, mu, tolMu, `seed ${seed}`)
-        assert.closeTo(fitted.p.sigma, sigma, tolSigma, `seed ${seed}`)
+        assert.closeTo(fitted.params().mu, mu, tolMu, `seed ${seed}`)
+        assert.closeTo(fitted.params().sigma, sigma, tolSigma, `seed ${seed}`)
       }
     })
 
@@ -624,7 +624,7 @@ describe('process.BrownianMotion', () => {
       const bm = new BrownianMotion(0.1, 1, 1)
       bm.seed(1)
       const fitted = BrownianMotion.fit(bm.path(5000))
-      assert.strictEqual(fitted.p.dt, 1)
+      assert.strictEqual(fitted.params().dt, 1)
     })
 
     it('should throw when path has fewer than 3 states', () => {
@@ -893,8 +893,8 @@ describe('process.GeometricBrownianMotion', () => {
         gbm.seed(seed)
         const fitted = GeometricBrownianMotion.fit(gbm.path(n), dt)
         assert.instanceOf(fitted, GeometricBrownianMotion)
-        assert.closeTo(fitted.p.sigma, sigma, tolSigma, `seed ${seed}`)
-        assert.closeTo(fitted.p.mu, mu, tolMu, `seed ${seed}`)
+        assert.closeTo(fitted.params().sigma, sigma, tolSigma, `seed ${seed}`)
+        assert.closeTo(fitted.params().mu, mu, tolMu, `seed ${seed}`)
       }
     })
 
@@ -902,7 +902,7 @@ describe('process.GeometricBrownianMotion', () => {
       const gbm = new GeometricBrownianMotion(0.05, 0.2, 1)
       gbm.seed(1)
       const fitted = GeometricBrownianMotion.fit(gbm.path(5000))
-      assert.strictEqual(fitted.p.dt, 1)
+      assert.strictEqual(fitted.params().dt, 1)
     })
 
     it('should throw when path has fewer than 3 states', () => {
@@ -1135,9 +1135,9 @@ describe('process.OrnsteinUhlenbeck', () => {
         ou.seed(seed)
         const fitted = OrnsteinUhlenbeck.fit(ou.path(n), dt)
         assert.instanceOf(fitted, OrnsteinUhlenbeck)
-        assert.closeTo(fitted.p.theta, theta, tolTheta, `seed ${seed}: theta`)
-        assert.closeTo(fitted.p.mu, mu, tolMu, `seed ${seed}: mu`)
-        assert.closeTo(fitted.p.sigma, sigma, tolSigma, `seed ${seed}: sigma`)
+        assert.closeTo(fitted.params().theta, theta, tolTheta, `seed ${seed}: theta`)
+        assert.closeTo(fitted.params().mu, mu, tolMu, `seed ${seed}: mu`)
+        assert.closeTo(fitted.params().sigma, sigma, tolSigma, `seed ${seed}: sigma`)
       }
     })
 
@@ -1145,7 +1145,7 @@ describe('process.OrnsteinUhlenbeck', () => {
       const ou = new OrnsteinUhlenbeck(0.5, 1, 1, 1)
       ou.seed(1)
       const fitted = OrnsteinUhlenbeck.fit(ou.path(20000))
-      assert.strictEqual(fitted.p.dt, 1)
+      assert.strictEqual(fitted.params().dt, 1)
     })
 
     it('should throw when path has fewer than 4 states', () => {
@@ -1485,7 +1485,7 @@ describe('process.BrownianBridge', () => {
         bb.seed(seed)
         const fitted = BrownianBridge.fit(bb.path(N), T, dt)
         assert.instanceOf(fitted, BrownianBridge)
-        assert.closeTo(fitted.p.sigma, sigma, tolSigma, `seed ${seed}`)
+        assert.closeTo(fitted.params().sigma, sigma, tolSigma, `seed ${seed}`)
       }
     })
 
@@ -1493,7 +1493,7 @@ describe('process.BrownianBridge', () => {
       const bb = new BrownianBridge(1, 10, 0.1)
       bb.seed(1)
       const fitted = BrownianBridge.fit(bb.path(100), 10)
-      assert.strictEqual(fitted.p.dt, 0.1)
+      assert.strictEqual(fitted.params().dt, 0.1)
     })
 
     it('should throw when T is not > 0', () => {
@@ -1516,7 +1516,7 @@ describe('process.BrownianBridge', () => {
       bb.seed(1)
       const fitted = BrownianBridge.fit(bb.path(2), T, dt)
       assert.instanceOf(fitted, BrownianBridge)
-      assert.isAbove(fitted.p.sigma, 0)
+      assert.isAbove(fitted.params().sigma, 0)
     })
 
     it('should throw when path is not an array', () => {
@@ -1829,8 +1829,8 @@ describe('process.AR1', () => {
         ar1.seed(seed)
         const fitted = AR1.fit(ar1.path(n))
         assert.instanceOf(fitted, AR1)
-        assert.closeTo(fitted.p.phi, phi, tolPhi, `seed ${seed}: phi`)
-        assert.closeTo(fitted.p.sigma, sigma, tolSigma, `seed ${seed}: sigma`)
+        assert.closeTo(fitted.params().phi, phi, tolPhi, `seed ${seed}: phi`)
+        assert.closeTo(fitted.params().sigma, sigma, tolSigma, `seed ${seed}: sigma`)
       }
     })
 
@@ -1847,8 +1847,8 @@ describe('process.AR1', () => {
       // residuals are not all 0 and sigma2 = ss/(n-2) is strictly positive.
       const fitted = AR1.fit([0, 1, 2, 2])
       assert.instanceOf(fitted, AR1)
-      assert.isTrue(Number.isFinite(fitted.p.phi))
-      assert.isAbove(fitted.p.sigma, 0)
+      assert.isTrue(Number.isFinite(fitted.params().phi))
+      assert.isAbove(fitted.params().sigma, 0)
     })
 
     it('should throw when a perfectly collinear path drives sigma to 0', () => {
@@ -2043,7 +2043,7 @@ describe('process.Poisson', () => {
         pp.seed(seed)
         const fitted = ProcessPoisson.fit(pp.path(n), dt)
         assert.instanceOf(fitted, ProcessPoisson)
-        assert.closeTo(fitted.p.lambda, lambda, tol, `seed ${seed}: lambda`)
+        assert.closeTo(fitted.params().lambda, lambda, tol, `seed ${seed}: lambda`)
       }
     })
 
@@ -2051,7 +2051,7 @@ describe('process.Poisson', () => {
       const pp = new ProcessPoisson(2, 1)
       pp.seed(1)
       const fitted = ProcessPoisson.fit(pp.path(20000))
-      assert.strictEqual(fitted.p.dt, 1)
+      assert.strictEqual(fitted.params().dt, 1)
     })
 
     it('should throw when path has fewer than 2 states', () => {
@@ -2348,9 +2348,9 @@ describe('process.CompoundPoisson', () => {
         cpp.seed(seed)
         const fitted = CompoundPoisson.fit(cpp.path(n), dt, Normal)
         assert.instanceOf(fitted, CompoundPoisson)
-        assert.closeTo(fitted.p.lambda, lambda, tolLambda, `seed ${seed}: lambda`)
-        assert.instanceOf(fitted.p.jumpDist, Normal)
-        const { mu: fittedMuJ, sigma: fittedSigmaJ } = fitted.p.jumpDist.params()
+        assert.closeTo(fitted.params().lambda, lambda, tolLambda, `seed ${seed}: lambda`)
+        assert.instanceOf(fitted.params().jumpDist, Normal)
+        const { mu: fittedMuJ, sigma: fittedSigmaJ } = fitted.params().jumpDist.params()
         assert.closeTo(fittedMuJ, muJ, tolMuJ, `seed ${seed}: muJ`)
         assert.closeTo(fittedSigmaJ, sigmaJ, tolSigmaJ, `seed ${seed}: sigmaJ`)
       }
@@ -2360,7 +2360,7 @@ describe('process.CompoundPoisson', () => {
       const cpp = new CompoundPoisson(new Normal(0, 1), 2, 1)
       cpp.seed(1)
       const fitted = CompoundPoisson.fit(cpp.path(20000), undefined, Normal)
-      assert.strictEqual(fitted.p.dt, 1)
+      assert.strictEqual(fitted.params().dt, 1)
     })
 
     it('should throw when path has fewer than 2 states', () => {
@@ -2701,9 +2701,9 @@ describe('process.CoxIngersollRoss', () => {
         cir.seed(seed)
         const fitted = CoxIngersollRoss.fit(cir.path(n), dt)
         assert.instanceOf(fitted, CoxIngersollRoss)
-        assert.closeTo(fitted.p.kappa, kappa, tolKappa, `seed ${seed}: kappa`)
-        assert.closeTo(fitted.p.theta, theta, tolTheta, `seed ${seed}: theta`)
-        assert.closeTo(fitted.p.sigma, sigma, tolSigma, `seed ${seed}: sigma`)
+        assert.closeTo(fitted.params().kappa, kappa, tolKappa, `seed ${seed}: kappa`)
+        assert.closeTo(fitted.params().theta, theta, tolTheta, `seed ${seed}: theta`)
+        assert.closeTo(fitted.params().sigma, sigma, tolSigma, `seed ${seed}: sigma`)
       }
     })
 
@@ -2711,7 +2711,7 @@ describe('process.CoxIngersollRoss', () => {
       const cir = new CoxIngersollRoss(2, 3, 1, 0.01)
       cir.seed(1)
       const fitted = CoxIngersollRoss.fit(cir.path(20000))
-      assert.strictEqual(fitted.p.dt, 1)
+      assert.strictEqual(fitted.params().dt, 1)
     })
 
     it('should throw when path has fewer than 4 states', () => {
@@ -2990,8 +2990,8 @@ describe('process.RandomWalk', () => {
       marginal.seed(42)
       const fitted = ShiftedBinomial.fit(marginal.sample(2000))
       assert.instanceOf(fitted, ShiftedBinomial)
-      assert.strictEqual(fitted.p.n, 20)
-      assert.closeTo(fitted.p.p, 0.7, 0.05)
+      assert.strictEqual(fitted.params().n, 20)
+      assert.closeTo(fitted.params().p, 0.7, 0.05)
     })
 
     // ShiftedBinomial is private (decisions/0045) and only ever surfaces as the return value
@@ -3048,7 +3048,7 @@ describe('process.RandomWalk', () => {
         rw.seed(seed)
         const fitted = RandomWalk.fit(rw.path(n))
         assert.instanceOf(fitted, RandomWalk)
-        assert.closeTo(fitted.p.p, p, tolP, `seed ${seed}`)
+        assert.closeTo(fitted.params().p, p, tolP, `seed ${seed}`)
       }
     })
 
@@ -3078,9 +3078,12 @@ describe('process.RandomWalk', () => {
       const fitted = RandomWalk.fit([0, 1, 0])
       assert.instanceOf(fitted, RandomWalk)
       // exact rational: p_hat is the fraction of +1 steps, and [0, 1, 0] has increments
-      // [+1, -1], so p_hat = 1/2. Stays inline rather than moving to process-cases.js because
-      // fit() is a static factory, not an instance method the case file's shape can express.
-      assert.strictEqual(fitted.p.p, 0.5)
+      // [+1, -1], so p_hat = 1/2 → mean(t) = t*(2*0.5-1) = 0 for any t, and
+      // variance(1) = 4*0.5*(1-0.5)*1 = 1. Stays inline rather than moving to process-cases.js
+      // because fit() is a static factory, not an instance method the case file's shape can
+      // express.
+      assert.strictEqual(fitted.mean(4), 0)
+      assert.strictEqual(fitted.variance(1), 1)
     })
   })
 })
