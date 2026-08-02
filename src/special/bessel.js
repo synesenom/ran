@@ -24,6 +24,21 @@ function _I0 (x) {
   return z
 }
 
+// Upward recurrence for the modified spherical Bessel function of the second kind, without
+// the exp(-x)/x normalization -- kept separate so besselISphericalExpScaled (#1292) can reuse
+// the raw recurrence values without ever forming the exp(-x) factor that _kn applies below.
+function _knRaw (n, x) {
+  let k1 = 1 + 1 / x
+  let k2 = 1
+  let k
+  for (let i = 2; i <= n; i++) {
+    k = (i + i - 1) * k1 / x + k2
+    k2 = k1
+    k1 = k
+  }
+  return [k, k2]
+}
+
 /**
  * Computes the modified spherical Bessel function of the second kind.
  *
@@ -35,15 +50,7 @@ function _I0 (x) {
  * @private
  */
 function _kn (n, x) {
-  // Upwards recurrence relation
-  let k1 = 1 + 1 / x
-  let k2 = 1
-  let k
-  for (let i = 2; i <= n; i++) {
-    k = (i + i - 1) * k1 / x + k2
-    k2 = k1
-    k1 = k
-  }
+  const [k, k2] = _knRaw(n, x)
   return [
     Math.exp(-x) * k / x,
     Math.exp(-x) * k2 / x
@@ -62,11 +69,18 @@ function _kn (n, x) {
  */
 function _hi (n, x) {
   // Continued fraction (from Numerical methods for special functions)
+  // Required depth grows with x, not n (empirically ~6*sqrt(x) steps, mirroring _fc's own
+  // slow-convergence fix in marcum-q.js #1286): the shared MAX_ITER=100 silently truncated
+  // once x exceeded ~250, losing up to 3 significant digits with no signal. This was previously
+  // unreachable through besselISpherical's public callers because the unscaled result overflows
+  // to Infinity before x gets this large -- besselISphericalExpScaled (#1292) is what first makes
+  // this depth reachable. 7*sqrt(x) + 20 keeps a comfortable margin over the measured worst case.
+  const maxIter = Math.max(MAX_ITER, Math.ceil(7 * Math.sqrt(x)) + 20)
   let d = x / (n + n + 1)
   let del = d
   let h = del
   let b = (n + n + 3) / x
-  for (let i = 1; i < MAX_ITER; i++) {
+  for (let i = 1; i < maxIter; i++) {
     d = 1 / (b + d)
     del = (b * d - 1) * del
     h += del
@@ -82,7 +96,9 @@ function _hi (n, x) {
 // log-space to avoid exp(x) overflow for x > ~710. Overflow guard rescales
 // all four accumulators uniformly, preserving the ratio f_n/S.
 // See solutions/special-functions/2026-06-01-1330-bessel-i-miller-normalization-max-iter-truncation.md
-function _besselIBackward (n, x) {
+// scaled=true returns exp(-x)*I_n(x) directly: y/sum is already exp(-x)*I_n(x) before the
+// final `* exp(x)` step below re-inflates it, so skipping that step is exact and free (#1292).
+function _besselIBackward (n, x, scaled) {
   const tox = 2 / x
   const overflow = 1 / EPS
   let bi = 1
@@ -110,7 +126,7 @@ function _besselIBackward (n, x) {
   }
   sum += bi
   if (n === 0) y = bi
-  return y * Math.exp(x - Math.log(sum))
+  return scaled ? y / sum : y * Math.exp(x - Math.log(sum))
 }
 
 /**
@@ -135,6 +151,32 @@ export function besselI (n, x) {
   }
   const y = _besselIBackward(n, Math.abs(x))
   // Odd-order modified Bessel functions are odd: I_n(-x) = -I_n(x) for odd n.
+  return x < 0 && n % 2 === 1 ? -y : y
+}
+
+/**
+ * Computes exp(-|x|) * I_n(x): the exponentially scaled modified Bessel function of the
+ * first kind. I_n(x) itself overflows Number.MAX_VALUE once |x| exceeds ~710, but a caller
+ * whose own prefactor decays like exp(-|x|) can multiply this scaled value back in and
+ * recombine the exponents before either factor is materialized (#1292).
+ *
+ * @method besselIExpScaled
+ * @memberof ran.special
+ * @param {number} n Order of the Bessel function. Must be an integer.
+ * @param {number} x Value to evaluate the function at.
+ * @return {number} exp(-|x|) times the modified Bessel function of the first kind.
+ * @private
+ */
+export function besselIExpScaled (n, x) {
+  if (n === 0) {
+    const ax = Math.abs(x)
+    // _I0's Taylor series never overflows for |x| <= 10, so exp(-x) can be applied afterwards.
+    return ax <= 10 ? _I0(x) * Math.exp(-ax) : _besselIBackward(0, ax, true)
+  }
+  if (x === 0) {
+    return 0
+  }
+  const y = _besselIBackward(n, Math.abs(x), true)
   return x < 0 && n % 2 === 1 ? -y : y
 }
 
@@ -193,6 +235,54 @@ export function besselISpherical (n, x) {
         return (n + n + 3) * besselISpherical(n + 1, x) / x + besselISpherical(n + 2, x)
       }
   }
+}
+
+/**
+ * Computes exp(-x) * i_n(x): the exponentially scaled modified spherical Bessel function of
+ * the first kind, for x >= 0 -- the only domain the noncentral-chi distributions' sqrt(lambda*x)
+ * argument ever produces. i_n(x) itself overflows once x exceeds ~710; this stays
+ * representable so a caller whose own prefactor decays like exp(-x) can recombine the
+ * exponents before either factor is materialized (#1292).
+ *
+ * @method besselISphericalExpScaled
+ * @memberof ran.special
+ * @param {number} n Order of the spherical Bessel function. Must be an integer.
+ * @param {number} x Non-negative value to evaluate the function at.
+ * @returns {number} exp(-x) times the modified spherical Bessel function of the first kind.
+ * @private
+ */
+export function besselISphericalExpScaled (n, x) {
+  switch (n) {
+    case 0:
+      return x === 0 ? 1 : (1 - Math.exp(-2 * x)) / (2 * x)
+    case 1:
+      if (Math.abs(x) < _BESSEL_I_SPH_THRESHOLD) {
+        return _besselISphericalTaylor(1, x) * Math.exp(-x)
+      }
+      // cosh(x)*exp(-x) = (1+e^-2x)/2 and sinh(x)*exp(-x) = (1-e^-2x)/2 are both bounded,
+      // unlike cosh(x)/sinh(x) themselves which overflow for the x this branch is reached at.
+      return (1 + Math.exp(-2 * x)) / (2 * x) - (1 - Math.exp(-2 * x)) / (2 * x * x)
+    default:
+      if (n < 0) {
+        // Backward recurrence for negative orders (same recurrence as besselISpherical: linear,
+        // so it holds unchanged for the exp(-x)-scaled quantities substituted throughout).
+        return (n + n + 3) * besselISphericalExpScaled(n + 1, x) / x + besselISphericalExpScaled(n + 2, x)
+      }
+      if (Math.abs(x) < _BESSEL_I_SPH_THRESHOLD) {
+        return _besselISphericalTaylor(n, x) * Math.exp(-x)
+      }
+      // Same Wronskian as besselISpherical, built from _knRaw's un-normalized values so the
+      // exp(-x) that _kn would otherwise apply -- and this function would have to invert
+      // straight back out via the 1/(...) -- never has to be materialized.
+      return _besselISphericalExpScaledWronskian(n, x)
+  }
+}
+
+// Extracted from besselISphericalExpScaled's default branch to keep that function's own
+// nesting shallow (CodeScene Bumpy Road) -- the n>0, |x|>=threshold Wronskian case.
+function _besselISphericalExpScaledWronskian (n, x) {
+  const [k, k2] = _knRaw(n + 1, x)
+  return 1 / (x * (_hi(n + 1, x) * k2 + k))
 }
 
 // Crossover from series to asymptotic expansion for K_0 and K_1.

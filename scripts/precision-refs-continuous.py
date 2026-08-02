@@ -1702,7 +1702,10 @@ PARAM_SETS = {
     # [2, 3.5]: besselI(0, lambda*x) argument spans into (10, 14], straddling
     # _besselIBackward's n=0 warm-up margin gap (issue #1185; previously withheld here
     # during #1143's boundary-grid work, see the comment above PARAM_SETS).
-    'NoncentralChi': [[5, 2], [2, 0.5], [3, 1], [5, 7.5], [5, 0.5], [2, 3.5]],
+    # [200, 44.7]/[201, 44.7]: matches issue #1292's own reproduction case (even/odd k pair),
+    # straddling besselI/besselISphericalExpScaled's newly-fixed large-argument regime -- see the
+    # comment above PARAM_SETS's NoncentralChi2 entry for the full defect history.
+    'NoncentralChi': [[5, 2], [2, 0.5], [3, 1], [5, 7.5], [5, 0.5], [2, 3.5], [200, 44.7], [201, 44.7]],
     # [5, 0.5]: besselISpherical(1, sqrt(lambda*x)) argument spans ~0.94-2.25, straddling
     # the |x|=1 Taylor/closed-form dispatch (order = floor((k-3)/2) = 1 at the lowest odd k>=5).
     # [2, 8]: besselI(0, sqrt(lambda*x)) argument spans into (10, 14], straddling
@@ -1713,8 +1716,15 @@ PARAM_SETS = {
     # expansion). See the mu=135 paragraph in the comment above PARAM_SETS (issue #1190).
     # [76, 692]: the large-x recurrence set withheld by #1190/#1143 until #1286 fixed _fc's
     # under-convergence. See the "large-x recurrence regime" paragraph above PARAM_SETS.
+    # [100, 900]/[201, 2000] (issue #1292): besselI/besselISpherical's argument sqrt(lambda*x)
+    # exceeds their ~715-720 overflow ceiling ([76, 692] above was deliberately capped short of
+    # this), previously producing NaN via 0*Infinity in _pdf's log-space-prefactor times
+    # linear-space-Bessel-factor combination. [100, 900] (even k) exercises besselIExpScaled;
+    # [201, 2000] (odd k) exercises besselISphericalExpScaled -- the two exponentially-scaled
+    # Bessel accessors this fix adds -- and also exposed a second, independent under-convergence
+    # defect in _hi's continued fraction at this argument scale (see the NOTES entries below).
     'NoncentralChi2': [[11, 2], [5, 3], [2, 1], [5, 58], [5, 62], [5, 0.5], [2, 8],
-                       [268, 64], [270, 64], [76, 692]],
+                       [268, 64], [270, 64], [76, 692], [100, 900], [201, 2000]],
     # [6, 8, 4]: x straddles the underlying NoncentralBeta._cdf's regularizedBetaIncomplete
     # direct/complementary dispatch, here at internal beta-argument
     # z=d1*x/(d1*x+d2)=(iAlpha0+1)/(iAlpha0+beta+2)=6/11, where iAlpha0=alpha+round(lambda/2)=5
@@ -1933,6 +1943,20 @@ NONCENTRAL_CHI2_XVALS = {
     # MAX_ITER=100 cap this issue fixed (confirmed via an instrumented run: pre-fix and post-fix
     # cdf values differ starting at the 12th-13th significant digit at every point here).
     (76, 692): [mpf('695'), mpf('705'), mpf('715'), mpf('725'), mpf('735')],
+    # (100, 900)/(201, 2000) (issue #1292): manually pinned (rather than P_GRID-inverted) near
+    # each group's mean (k+lambda) for simplicity, spanning sqrt(lambda*x) ~874-1018 / ~2025-2168
+    # -- both comfortably past the ~715-720 overflow ceiling this issue fixes.
+    (100, 900): [mpf('850'), mpf('950'), mpf('1000'), mpf('1050'), mpf('1150')],
+    (201, 2000): [mpf('2050'), mpf('2120'), mpf('2200'), mpf('2280'), mpf('2350')],
+}
+# NoncentralChi manual x-values (issue #1292): NoncentralChi has no manual dict prior to this --
+# every other param set uses the standard P_GRID/invcdf() bisection below -- but ncx2_cdf's
+# Poisson-mixture sum needs ~lambda2/2=999 terms per call at lambda=44.7, and invcdf()'s 70-step
+# bisection would re-run that full sum 70x per probe; pinned values sidestep the cost the same way
+# NONCENTRAL_CHI2_XVALS already does for its own large-lambda sets.
+NONCENTRAL_CHI_XVALS = {
+    (200, 44.7): [mpf('44'), mpf('45.6'), mpf('47'), mpf('48'), mpf('49')],
+    (201, 44.7): [mpf('44'), mpf('45.6'), mpf('47'), mpf('48'), mpf('49')],
 }
 
 # Quadrature-based CDFs (Davis, noncentral-t, SkewNormal, VonMises): inverting by bisection
@@ -2014,6 +2038,7 @@ MANUAL_XVALS = {
     'NoncentralBeta': NONCENTRAL_BETA_XVALS,
     'NoncentralF': NONCENTRAL_F_XVALS,
     'NoncentralChi2': NONCENTRAL_CHI2_XVALS,
+    'NoncentralChi': NONCENTRAL_CHI_XVALS,
 }
 
 # Far-tail x-values for Normal and LogNormal (issue #808): x = mu - k*sigma at k=5,7.
@@ -2258,6 +2283,12 @@ PDFCDF_TOL = {
     ('NoncentralChi2', '[270, 64]'): '2e-14',
     # [76, 692] is a pdf-only gate: its cdf floor is an order of magnitude looser (CDF_TOL below).
     ('NoncentralChi2', '[76, 692]'): '2e-13',
+    # [100, 900]/[201, 44.7] are pdf-only gates: their cdf floor is an order of magnitude looser
+    # (CDF_TOL below).
+    ('NoncentralChi2', '[100, 900]'): '1e-13',
+    ('NoncentralChi2', '[201, 2000]'): '2e-13',
+    ('NoncentralChi', '[200, 44.7]'): '2e-13',
+    ('NoncentralChi', '[201, 44.7]'): '2e-13',
     ('R', '[0.5]'): '1e-13',
     ('VonMises', '[0, 11]'): '1e-13',
 }
@@ -2269,6 +2300,10 @@ CDF_TOL = {
     ('DoublyNoncentralT', '[5, 2, 120]'): '1e-7',
     ('NoncentralChi2', '[270, 64]'): '3e-12',
     ('NoncentralChi2', '[76, 692]'): '2e-12',
+    ('NoncentralChi2', '[100, 900]'): '1e-12',
+    ('NoncentralChi2', '[201, 2000]'): '4e-12',
+    ('NoncentralChi', '[200, 44.7]'): '1.2e-12',
+    ('NoncentralChi', '[201, 44.7]'): '4e-12',
 }
 # Per-(name, json-params) quantile round-trip tolerance (default 1e-14; per-group empirical:
 # closed-form/Halley quantiles stay at 1e-14, root-finding/approximate ones are looser).
@@ -2285,7 +2320,11 @@ Q_TOL = {
     ('NoncentralChi2', '[268, 64]'): '1e-13',
     ('NoncentralChi2', '[270, 64]'): '5e-13',
     ('NoncentralChi2', '[76, 692]'): '5e-14',
+    ('NoncentralChi2', '[100, 900]'): '5e-13',
+    ('NoncentralChi2', '[201, 2000]'): '5e-13',
     ('NoncentralChi', '[5, 7.5]'): '5e-13',
+    ('NoncentralChi', '[200, 44.7]'): '2e-12',
+    ('NoncentralChi', '[201, 44.7]'): '2e-12',
     ('Rice', '[7, 1]'): '5e-13',
     ('DoublyNoncentralT', '[5, 1, 2]'): '1e-12',
     ('DoublyNoncentralT', '[6, 2, 1]'): '1e-12',
@@ -2350,11 +2389,29 @@ _N_MARCUM_RECURRENCE_LARGEX = ('cdf routes through marcumQ\'s transition band we
                      'regime-aware iteration budget, its own contribution is negligible; the residual '
                      'gated here is the pre-existing seed/amplification floor _N_MARCUM_RECURRENCE '
                      'already documents for this same branch, measured at ~9e-14 (pdf) / ~6e-13 (cdf) '
-                     'worst case across this group. x is capped at 735 (not the transition band\'s own '
-                     'upper edge, 844) because NoncentralChi2._pdf independently overflows to Infinity '
-                     'for x >~ 738 at this lambda (besselI\'s argument sqrt(lambda*x) crosses double\'s '
-                     'overflow threshold ~715-720) -- a separate, already-filed defect, not something '
-                     'this fix touches')
+                     'worst case across this group. x was capped at 735 (not the transition band\'s own '
+                     'upper edge, 844) because NoncentralChi2._pdf independently overflowed to Infinity '
+                     'for x >~ 738 at this lambda (besselI\'s argument sqrt(lambda*x) crossing double\'s '
+                     'overflow threshold ~715-720) -- fixed by #1292 (see the [100, 900]/[201, 2000] sets '
+                     'below, added once that fix landed), so the cap here is now historical rather than '
+                     'a live constraint')
+_N_1292_JIT_QTOL = ('qtol is loosened beyond the default to absorb JIT-order-dependent full-suite '
+                    'variance in the quantile round-trip (isolated-run error measured roughly 2-3x '
+                    'tighter) -- the same full-suite-vs-isolated inflation the _N_MARCUM groups '
+                    'elsewhere in this file already document; see test/precision-continuous.js\'s '
+                    'own comment for this group\'s exact measured worst case')
+_N_1292_EVEN = ('even k, matches issue #1292\'s own reproduction case (NoncentralChi2(100, 900).pdf(1000) '
+                '/ NoncentralChi(200, 44.7).pdf(45.6)). lambda*x (or sqrt(lambda*x) for NoncentralChi2) '
+                'previously overflowed besselI\'s argument (~715-720 ceiling) to NaN via 0*Infinity before '
+                'that fix folded the exponent into the log-space prefactor via besselIExpScaled. cdf is '
+                'unaffected (routes through marcumP, not besselI) at its own pre-existing accumulation '
+                'floor. ' + _N_1292_JIT_QTOL)
+_N_1292_ODD = ('odd-k counterpart of the matching even-k set above, exercising besselISphericalExpScaled\'s '
+               'Wronskian branch (order=floor((k-3)/2)=99) instead of besselIExpScaled (#1292). Reaching '
+               'this branch at these large arguments also exposed a second, previously-unreachable defect '
+               'in _hi\'s continued fraction: its shared MAX_ITER=100 budget silently under-converged past '
+               'x~250 (mirroring _fc\'s own #1286 fix), which this same PR corrects with a regime-aware '
+               'iteration budget. ' + _N_1292_JIT_QTOL)
 _N_F11_BOUNDARY = (_N_NCT + '; additionally, x sits near f11\'s |z|=50 dispatch threshold '
                    '(issue #1189); qtol: 1e-10 was measured to fail (~1.14e-10 error at '
                    'x=1.1), qtol: 5e-10 passes with margin -- gate empirically at 5e-10. '
@@ -2424,6 +2481,10 @@ NOTES = {
     ('NoncentralChi2', '[268, 64]'): _N_MARCUM_RECURRENCE,
     ('NoncentralChi2', '[270, 64]'): _N_MARCUM_LARGEMU,
     ('NoncentralChi2', '[76, 692]'): _N_MARCUM_RECURRENCE_LARGEX,
+    ('NoncentralChi2', '[100, 900]'): _N_1292_EVEN,
+    ('NoncentralChi2', '[201, 2000]'): _N_1292_ODD,
+    ('NoncentralChi', '[200, 44.7]'): _N_1292_EVEN,
+    ('NoncentralChi', '[201, 44.7]'): _N_1292_ODD,
     ('R', '[0.5]'): _N_SERIES,
     ('R', '[2]'): _N_SERIES,
     ('BaldingNichols', '[0.1, 0.1]'): _N_ROOT,

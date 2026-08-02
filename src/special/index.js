@@ -5,7 +5,7 @@
  * @memberof ran
  * @private
  */
-export { besselI, besselInu, besselISpherical, besselK, besselKnu } from './bessel'
+export { besselI, besselIExpScaled, besselInu, besselISpherical, besselISphericalExpScaled, besselK, besselKnu } from './bessel'
 export { default as beta } from './beta'
 export { betaIncomplete, regularizedBetaIncomplete } from './beta-incomplete'
 export { default as digamma } from './digamma'

@@ -1,4 +1,4 @@
-import { marcumP, besselI, besselISpherical, f11, logGamma } from '../special'
+import { marcumP, besselIExpScaled, besselISphericalExpScaled, f11, logGamma } from '../special'
 import noncentralChi2 from './_noncentral-chi2'
 import Distribution from './_distribution'
 import NoncentralChi2 from './noncentral-chi2'
@@ -108,10 +108,14 @@ export default class NoncentralChi extends NoncentralChi2 {
     }
     const x2 = x * x
     const lambda2 = this.c.lambda2
+    const z = Math.sqrt(lambda2 * x2)
     if (this.c.kIsEven) {
-      return x * Math.exp(-0.5 * (x2 + lambda2) + (this.p.k / 4 - 0.5) * Math.log(x2 / lambda2)) * besselI(Math.round(this.p.k / 2) - 1, Math.sqrt(lambda2 * x2))
+      // Same overflow/underflow cancellation as NoncentralChi2._pdf (#1292): folding z into the
+      // log-space prefactor and pairing it with besselIExpScaled's exp(-z)*I_n(z) keeps the
+      // combined exponent -0.5*(x2+lambda2)+z = -0.5*(sqrt(x2)-sqrt(lambda2))^2 <= 0 finite.
+      return x * Math.exp(-0.5 * (x2 + lambda2) + z + (this.p.k / 4 - 0.5) * Math.log(x2 / lambda2)) * besselIExpScaled(Math.round(this.p.k / 2) - 1, z)
     } else {
-      return x * Math.exp(-0.5 * (x2 + lambda2)) * Math.pow(x2 / lambda2, this.p.k / 4 - 0.5) * besselISpherical(Math.floor((this.p.k - 3) / 2), Math.sqrt(lambda2 * x2)) * Math.sqrt(2 * Math.sqrt(x2 * lambda2) / Math.PI)
+      return x * Math.exp(-0.5 * (x2 + lambda2) + z) * Math.pow(x2 / lambda2, this.p.k / 4 - 0.5) * besselISphericalExpScaled(Math.floor((this.p.k - 3) / 2), z) * Math.sqrt(2 * z / Math.PI)
     }
   }
 
