@@ -1,4 +1,4 @@
-import { besselI, marcumQ } from '../special'
+import { besselIExpScaled, marcumQ } from '../special'
 import poisson from './_poisson'
 import Distribution from './_distribution'
 
@@ -38,10 +38,15 @@ export default class Skellam extends Distribution {
     }]
 
     // Speed-up constants
+    const twoSqrtProd = 2 * Math.sqrt(mu1 * mu2)
     this.c = {
-      expNeg: Math.exp(-mu1 - mu2),
+      // exp(-mu1-mu2+twoSqrtProd) = exp(-(sqrt(mu1)-sqrt(mu2))^2) is always in (0, 1], so it
+      // never underflows the way exp(-mu1-mu2) alone does once mu1+mu2 grows large; folding
+      // the Bessel argument's exponent in here lets besselIExpScaled cancel it before either
+      // factor overflows/underflows on its own (same fix shape as #1292).
+      expNegScaled: Math.exp(-mu1 - mu2 + twoSqrtProd),
       sqrtRatio: Math.sqrt(mu1 / mu2),
-      twoSqrtProd: 2 * Math.sqrt(mu1 * mu2),
+      twoSqrtProd,
       cdfAtZero: marcumQ(1, mu2, mu1)
     }
   }
@@ -59,7 +64,7 @@ export default class Skellam extends Distribution {
   }
 
   _pdf (x) {
-    return this.c.expNeg * Math.pow(this.c.sqrtRatio, x) * besselI(Math.abs(x), this.c.twoSqrtProd)
+    return this.c.expNegScaled * Math.pow(this.c.sqrtRatio, x) * besselIExpScaled(Math.abs(x), this.c.twoSqrtProd)
   }
 
   _cdf (x) {

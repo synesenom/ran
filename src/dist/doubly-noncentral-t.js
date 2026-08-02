@@ -2,7 +2,7 @@ import clamp from '../utils/clamp'
 import Distribution from './_distribution'
 import noncentralChi2 from './_noncentral-chi2'
 import normal from './_normal'
-import { f11, gamma, logGamma } from '../special'
+import { erf, f11, gamma, logGamma } from '../special'
 import { recursiveSum } from '../algorithms'
 import NoncentralT from './noncentral-t'
 
@@ -130,17 +130,35 @@ export default class DoublyNoncentralT extends Distribution {
 
   /**
    * Difference NoncentralT.fnm(nuHi, mu, xHi) - NoncentralT.fnm(nuLo, mu, xLo), falling back to
-   * a NoncentralT.snm (direct survival) difference when the result cannot be trusted. Checking
-   * how close the raw fnm values are to 0/1 is not the right signal on its own -- that is driven
-   * almost entirely by mu (via fnm's leading Phi(-delta) term) and fires even for small, fully
-   * accurate nu where fnm has no precision problem at all. The actual failure mode (issue #1250)
-   * only occurs once nu grows large enough that fnm's own regularizedBetaIncomplete-derived
-   * series carries a real (~1e-13 relative) precision floor -- so the fallback is gated on nu
-   * magnitude first, and only then on the raw difference being small enough that this floor
-   * could dominate it. Thresholds empirically verified during planning to fully resolve the
-   * reported saturation with zero regression to every other precision-gate group, while keeping
-   * the ordinary (small-nu) case's fallback rate low enough to not regress fit()-style repeated
-   * evaluation -- see solutions/correctness/2026-08-01-2030-noncentral-t-fnm-snm-boundary-saturation.md
+   * a NoncentralT.snm (direct survival) difference when either raw fnm call cannot be trusted.
+   * fnm's `z / 2 + phi` addition (noncentral-t.js:149, phi = 0.5*(1+erf(-mu/sqrt2)), valid here
+   * without a `-delta/sqrt2` distinction since both `hi.x`/`lo.x` are always >= 0 at this call
+   * site, collapsing fnm's own `delta = x<0?-mu:mu` to `delta = mu`) can lose precision two
+   * distinct ways, and both must be checked -- neither implies the other:
+   *   (1) the nu-dependent correction z/2 is too small to separate from phi at all, so fnm
+   *       returns phi bit-for-bit (or near-bit-for-bit) unchanged -- caught by comparing each
+   *       raw value directly against phi. This needs no nu-magnitude pre-filter: it only fires
+   *       when z/2 is genuinely unresolved, which requires y = x^2/(nu+x^2) small enough that the
+   *       AS243 series' incomplete-beta terms are themselves negligible, not the O(1)-scale case
+   *       .fit()'s optimizer exploration evaluates against sampled data.
+   *   (2) z/2 DID resolve (the raw value has moved measurably off phi) but is itself so close to
+   *       the opposite boundary (0 or 1) that the double holding it can no longer represent the
+   *       gap -- the original #1250 deep-tail case (DoublyNoncentralT(5,5,120) at x=-0.7), where
+   *       phi is far from 1 but successive nu0's fnm values climb toward exactly 1.0 as nu grows.
+   *       A phi-comparison alone does NOT catch this (the value is deliberately far from phi by
+   *       design -- that is what "resolved" means), so the original nu-gated
+   *       `lo.nu >= 30 && |diff| < 1e-9` difference-magnitude check is kept for this case
+   *       specifically: nu0 >= 30 excludes the small-nu .fit()-exploration regime this threshold
+   *       was originally tuned against (see the #1250 solution doc), and |diff| < 1e-9 catches
+   *       the difference collapsing as nu0 approaches the region where individual fnm calls
+   *       saturate to literal 1.0.
+   * Checking (1) closes a blind spot the difference-only gate had (issue #1298): a single
+   * "knife-edge" nu0 per x where one of the two fnm calls has resolved and the other hasn't
+   * produces a raw difference dominated by the still-stuck operand's own error against phi, which
+   * is WRONG but not small (~1e-7, evading the 1e-9 magnitude check on its own).
+   * See solutions/correctness/2026-08-01-2030-noncentral-t-fnm-snm-boundary-saturation.md (the
+   * predecessor fix (2) preserves) and
+   * solutions/correctness/2026-08-02-2100-noncentral-t-fnm-dual-saturation-mechanism.md (the origin of (1))
    *
    * @method _fnmDiff
    * @memberof ran.dist.DoublyNoncentralT
@@ -151,8 +169,13 @@ export default class DoublyNoncentralT extends Distribution {
    * @private
    */
   _fnmDiff (mu, hi, lo) {
-    const diff = NoncentralT.fnm(hi.nu, mu, hi.x) - NoncentralT.fnm(lo.nu, mu, lo.x)
-    if (lo.nu >= 30 && Math.abs(diff) < 1e-9) {
+    const phi = 0.5 * (1 + erf(-mu / Math.SQRT2))
+    const a = NoncentralT.fnm(hi.nu, mu, hi.x)
+    const b = NoncentralT.fnm(lo.nu, mu, lo.x)
+    const diff = a - b
+    const stuckAtPhi = Math.abs(a - phi) < 1e-12 || Math.abs(b - phi) < 1e-12
+    const nearOppositeBoundary = lo.nu >= 30 && Math.abs(diff) < 1e-9
+    if (stuckAtPhi || nearOppositeBoundary) {
       return NoncentralT.snm(lo.nu, mu, lo.x) - NoncentralT.snm(hi.nu, mu, hi.x)
     }
     return diff
@@ -303,14 +326,23 @@ export default class DoublyNoncentralT extends Distribution {
    * complement termwise. Since the Poisson weights sum to 1, 1 - sum(w_i . fnm_i) =
    * sum(w_i . (1 - fnm_i)) = sum(w_i . snm_i).
    *
-   * Gating the expensive snm call on nu0 >= 30 alone is not enough: unlike _fnmDiff's per-call
-   * difference, this term is evaluated once per Poisson-mixture index, and nu0 = nu + 2i grows
-   * without bound as the series index i advances, so nu0 crosses 30 on nearly every significant
-   * term whenever theta is large -- confirmed to regress test/precision-continuous.js's
-   * DoublyNoncentralT([5,2,120]) quantile round-trip from sub-second to a 120s mocha timeout.
-   * The raw complement's own magnitude must also indicate genuine precision risk (mirroring
-   * _fnmDiff's second-stage check, reusing the same 1e-9 threshold) before paying for snm.
-   * See solutions/correctness/2026-08-01-2030-noncentral-t-fnm-snm-boundary-saturation.md
+   * The complement branch's fallback is gated the same union of two conditions as _fnmDiff's
+   * (issue #1298), since a single raw fnm(nu0, mu, x) call can be untrustworthy the same two
+   * distinct ways a difference of two calls can be:
+   *   (1) raw is stuck at phi = 0.5*(1+erf(-mu/sqrt2)) (`-mu/sqrt2`, not `-delta/sqrt2`, because
+   *       x is always >= 0 at this call site, collapsing fnm's own `delta = x<0?-mu:mu` to
+   *       `delta = mu`) -- the original `nu0 >= 30 && rawComplement < 1e-9` magnitude gate could
+   *       never catch this: an entire low-nu0 saturated range can have its raw complement pinned
+   *       at exactly `1-phi` (the mu=5, x=-0.1 case measured ~2.87e-7, comfortably above the
+   *       `< 1e-9` threshold on every term, leaving cdf(-0.1) ~14.5x wrong), which a phi-equality
+   *       check catches regardless of nu0 since it tests the actual failure condition directly.
+   *   (2) raw has resolved off phi but is itself so close to 1 that the double holding it can no
+   *       longer represent the true gap -- the original #1250 deep-tail case. A phi-comparison
+   *       does not catch this (the value is deliberately far from phi), so the original
+   *       `nu0 >= 30 && rawComplement < 1e-9` check is kept for this case specifically.
+   * See solutions/correctness/2026-08-01-2030-noncentral-t-fnm-snm-boundary-saturation.md (the
+   * predecessor fix (2) preserves) and
+   * solutions/correctness/2026-08-02-2100-noncentral-t-fnm-dual-saturation-mechanism.md (the origin of (1))
    *
    * @method _cdfTerm
    * @memberof ran.dist.DoublyNoncentralT
@@ -326,8 +358,11 @@ export default class DoublyNoncentralT extends Distribution {
     if (!complement) {
       return raw
     }
+    const phi = 0.5 * (1 + erf(-mu / Math.SQRT2))
     const rawComplement = 1 - raw
-    return (nu0 >= 30 && rawComplement < 1e-9) ? NoncentralT.snm(nu0, mu, x) : rawComplement
+    const stuckAtPhi = Math.abs(raw - phi) < 1e-12
+    const nearOppositeBoundary = nu0 >= 30 && rawComplement < 1e-9
+    return (stuckAtPhi || nearOppositeBoundary) ? NoncentralT.snm(nu0, mu, x) : rawComplement
   }
 
   _cdf (x) {

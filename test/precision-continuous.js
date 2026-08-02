@@ -5058,17 +5058,11 @@ const REFS = [
   // Poisson(60)-significant nu0~105-145 range at mu=5 (issue #1250, NOT fixed by this group).
   // Candidate points were measured empirically (not assumed) against this file's own precedent
   // before being included or excluded:
-  //   x=-0.1, -0.2, -0.25: EXCLUDED -- pdf(x) is not merely imprecise but wrong by 6-18 orders
-  //     of magnitude (e.g. x=-0.1: ranjs 1.04e-25 vs mpmath-reference 5.46e-7). Root cause:
-  //     _pdfPoissonMixture's per-term NoncentralT.fnm(nu0+2, ...) - NoncentralT.fnm(nu0, ...)
-  //     difference is bit-for-bit 0 across the ENTIRE Poisson-significant nu0 range at these x,
-  //     not just the narrow band #1250 currently describes -- both fnm calls collapse onto the
-  //     same phi = 0.5*(1+erf(-mu/sqrt2)) plateau (phi depends only on mu, not nu0, and mu=5
-  //     pushes it to ~0.99999996) well before their nu0-dependent correction terms separate.
-  //     This is the same fnm-near-boundary precision floor as #1250, just manifesting far more
-  //     broadly than that issue's own text anticipates; flagged separately via bug triage rather
-  //     than gated here (a gate that always fails, or one loose enough to accept 10^18 relative
-  //     error, serves no regression-detection purpose).
+  //   x=-0.1, -0.2, -0.25: now covered by the DoublyNoncentralT([5, 5, 120]) group directly below
+  //     this one (issue #1298, a follow-up to #1250 fixing two further NoncentralT.fnm-saturation
+  //     blind spots the #1250 fix's own nu0/magnitude-based gate missed). Kept as a separate group
+  //     rather than folded in here because the achieved precision at these three points is far
+  //     tighter than this group's loose tol/cdfTol/qtol floor -- see that group's own comment.
   //   x=-0.45, -0.5, -0.7: EXCLUDED -- pdf/cdf errors climb into the 1e-3 to 1.5 range as x
   //     moves deeper into the tail (x=-0.7 reproduces the #1235 solution doc's already-documented
   //     ~1.7x pdf floor), and x=-0.7's quantile round-trip returns exactly NaN (d.q(cdf) with
@@ -5096,6 +5090,43 @@ const REFS = [
       { x: -0.3, pdf: 1.8266462385869508e-9, cdf: 6.076899024084247e-11 },
       { x: -0.35, pdf: 4.075330583218124e-10, cdf: 1.3380441248733746e-11 },
       { x: -0.4, pdf: 8.905303105662145e-11, cdf: 2.8946422024934806e-12 }
+    ]
+  },
+  // DoublyNoncentralT[5, 5, 120] shallow negative-x probes (issue #1298): a third, hand-maintained
+  // group at the same (nu, mu, theta) as the two groups above, covering x=-0.1, -0.2, -0.25 --
+  // previously EXCLUDED from the group above (see its own comment) because pdf/cdf here were wrong
+  // by up to 18 orders of magnitude. Root cause: two distinct blind spots in the nu0/magnitude-based
+  // fallback gates #1250 introduced (_fnmDiff, _cdfTerm in doubly-noncentral-t.js), both now closed
+  // by testing NoncentralT.fnm's raw output against phi directly rather than inferring
+  // trustworthiness from a difference's or complement's magnitude:
+  //   _fnmDiff: a single "knife-edge" nu0 per x, where one of the two fnm() calls being differenced
+  //     has resolved (escaped the phi plateau) and the other hasn't, produces a raw difference that
+  //     is WRONG but not small (~1e-7, evading a `< 1e-9` magnitude gate) -- entirely responsible
+  //     for pdf(-0.2)'s previous ~2e-3 relative error.
+  //   _cdfTerm: an entire low-nu0 saturated range returns a raw complement pinned at exactly
+  //     `1-phi` (~2.87e-7 for mu=5), which is also not `< 1e-9` -- entirely responsible for
+  //     cdf(-0.1)'s previous ~14.5x relative error. This one was not anticipated by #1298's own
+  //     text (which assumed cdf was unaffected, having only measured cdf(-0.2)) but shares the
+  //     exact same root mechanism and fix shape, so it is fixed in the same change.
+  // tol/cdfTol/qtol below are measured directly against these points' own mpmath (mp.dps=50)
+  // references (via scripts/precision-refs-continuous.py's dnct_pdf/dnct_cdf, independent of
+  // ranjs), not inherited from the neighbouring loose-tolerance group above: worst-case measured
+  // relative error is pdf 8.75e-14 (x=-0.1), cdf 3.80e-8 (x=-0.2), q(cdf_ref) round-trip 6.51e-9
+  // (x=-0.2, the round-trip's own error is dominated by cdf's floor propagated through 1/pdf, not
+  // an independent root-finding error) -- tol/cdfTol/qtol keep a ~8-11x margin over each.
+  // See thoughts/research/2026-08-02-1830-noncentral-t-fnm-precision-floor-1298.md and
+  // solutions/correctness/2026-08-01-2030-noncentral-t-fnm-snm-boundary-saturation.md (the #1250
+  // predecessor fix this one closes the remaining gaps in).
+  {
+    name: 'DoublyNoncentralT',
+    params: [5, 5, 120],
+    tol: 1e-12,
+    cdfTol: 3e-7,
+    qtol: 5e-8,
+    points: [
+      { x: -0.1, pdf: 5.458993467063247e-7, cdf: 1.979956710573498e-8 },
+      { x: -0.2, pdf: 3.38426357995474e-8, cdf: 1.1673854345068218e-9 },
+      { x: -0.25, pdf: 7.981673175433948e-9, cdf: 2.6993017489437185e-10 }
     ]
   },
   // DoublyNoncentralT[5, 2, 120] (issue #1235): covers the x*mu<0 branch of _pdf (the
