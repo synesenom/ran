@@ -64,6 +64,25 @@ describe('dist', () => {
       })
     })
 
+    describe('.support()', () => {
+      it('returns a copy, not the live this.s reference', () => {
+        const d = new dist.Normal(0, 1)
+        assert.notStrictEqual(d.support(), d.s)
+      })
+
+      it('mutating a boundary object in the returned array does not corrupt the instance', () => {
+        const d = new dist.Normal(0, 1)
+        const s = d.support()
+        s[0].value = 999
+        s[0].closed = true
+        assert.notStrictEqual(d.support()[0].value, 999)
+        assert.strictEqual(d.support()[0].closed, false)
+        // pdf() must still reflect the original (-Infinity, Infinity) support, unaffected by the mutation
+        // closed-form: 1/sqrt(2*pi)*exp(-x^2/2) at x=-5
+        assert.closeTo(d.pdf(-5), 1.4867195147342977e-6, 1e-12)
+      })
+    })
+
     describe('.load()', () => {
       it('should throw when state.constants is missing a key the current class expects', () => {
         const state = new dist.Chi2(3).save()

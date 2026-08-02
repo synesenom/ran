@@ -1213,6 +1213,57 @@ const REFS = [
       { x: 2.2, pdf: 0.0001166815151832735, cdf: 0.9999900880337178 }
     ]
   },
+  // DoublyNoncentralT[5, 5, 120] negative-x probes (issue #1252): a second, hand-maintained
+  // group sharing name+params with the group directly above -- same structural pattern as the
+  // Normal/LogNormal far-tail groups (issue #808, see NORMAL_FAR_TAIL_XVALS in
+  // scripts/precision-refs-continuous.py), required because DNCT_XVALS there holds one x-list
+  // per (nu, mu, theta) tuple and (5, 5, 120) is already claimed by the positive-x group above.
+  // This gates the x*mu<0 branch (issue #1235) at mu=5, theta=120 -- the exact parameter regime
+  // the #1235 bug report was originally filed against -- which the sibling [5, 2, 120] group
+  // deliberately avoids (see its own comment below) because NoncentralT.fnm saturates near the
+  // Poisson(60)-significant nu0~105-145 range at mu=5 (issue #1250, NOT fixed by this group).
+  // Candidate points were measured empirically (not assumed) against this file's own precedent
+  // before being included or excluded:
+  //   x=-0.1, -0.2, -0.25: EXCLUDED -- pdf(x) is not merely imprecise but wrong by 6-18 orders
+  //     of magnitude (e.g. x=-0.1: ranjs 1.04e-25 vs mpmath-reference 5.46e-7). Root cause:
+  //     _pdfPoissonMixture's per-term NoncentralT.fnm(nu0+2, ...) - NoncentralT.fnm(nu0, ...)
+  //     difference is bit-for-bit 0 across the ENTIRE Poisson-significant nu0 range at these x,
+  //     not just the narrow band #1250 currently describes -- both fnm calls collapse onto the
+  //     same phi = 0.5*(1+erf(-mu/sqrt2)) plateau (phi depends only on mu, not nu0, and mu=5
+  //     pushes it to ~0.99999996) well before their nu0-dependent correction terms separate.
+  //     This is the same fnm-near-boundary precision floor as #1250, just manifesting far more
+  //     broadly than that issue's own text anticipates; flagged separately via bug triage rather
+  //     than gated here (a gate that always fails, or one loose enough to accept 10^18 relative
+  //     error, serves no regression-detection purpose).
+  //   x=-0.45, -0.5, -0.7: EXCLUDED -- pdf/cdf errors climb into the 1e-3 to 1.5 range as x
+  //     moves deeper into the tail (x=-0.7 reproduces the #1235 solution doc's already-documented
+  //     ~1.7x pdf floor), and x=-0.7's quantile round-trip returns exactly NaN (d.q(cdf) with
+  //     cdf=2.62e-16), which no qtol value could pass. See the #1235 solution doc's "Residual
+  //     Limitation" section for the full accounting of this regime; #1250 is the tracked fix.
+  //   x=-0.3, -0.35, -0.4: INCLUDED -- pdf/cdf/quantile-round-trip errors here (worst case at
+  //     x=-0.4: pdf 8.9e-6, cdf 1.3e-4, q round-trip 1.2e-5) are far tighter than the excluded
+  //     points, still far looser than this file's existing DoublyNoncentralT tolerances (loosest
+  //     precedent elsewhere in this file: tol 1e-8, cdfTol 1e-7, qtol 1e-8), so tol/cdfTol/qtol
+  //     below are a genuinely new (documented) loose-tolerance floor for this file -- but with
+  //     5-9x measured margin at every point, meaningfully tighter than "tests almost nothing"
+  //     (a regression back toward the pre-#1235 ~130x-475x cancellation bug fails this by orders
+  //     of magnitude). Reference pdf/cdf via mpmath mp.dps=50 (dnct_pdf/dnct_cdf in
+  //     scripts/precision-refs-continuous.py), independent of ranjs's own implementation.
+  // See solutions/testing/2026-08-01-2037-dnct-mu5-negx-precision-gate-conditioning-inversion.md
+  // for why the included/excluded points above invert the "closer to the mode is better-
+  // conditioned" intuition.
+  {
+    name: 'DoublyNoncentralT',
+    params: [5, 5, 120],
+    tol: 5e-5,
+    cdfTol: 1e-3,
+    qtol: 1e-4,
+    points: [
+      { x: -0.3, pdf: 1.8266462385869508e-9, cdf: 6.076899024084247e-11 },
+      { x: -0.35, pdf: 4.075330583218124e-10, cdf: 1.3380441248733746e-11 },
+      { x: -0.4, pdf: 8.905303105662145e-11, cdf: 2.8946422024934806e-12 }
+    ]
+  },
   // DoublyNoncentralT[5, 2, 120] (issue #1235): covers the x*mu<0 branch of _pdf (the
   // wynnEpsilon-based alternating series, previously up to ~130x relative pdf error at x=-1.0),
   // now a cancellation-free Poisson(theta/2)-mixture-of-noncentral-t sum -- see

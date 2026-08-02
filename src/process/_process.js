@@ -41,7 +41,10 @@ export default class Process {
    * @returns {Object} The parameters of the process.
    */
   params () {
-    return this.p
+    // Shallow copy so callers can't mutate internal state through the returned object.
+    // decisions/0047-params-shallow-copy.md — shallow copy prevents callers mutating internal
+    // state through the returned object.
+    return { ...this.p }
   }
 
   /**
