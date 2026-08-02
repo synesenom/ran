@@ -188,6 +188,34 @@ class NoncentralT extends Distribution {
     return Math.min(Math.max(tanhSinh(integrand, lo, hi), 0), 1)
   }
 
+  /**
+   * Difference NoncentralT.fnm(hi.nu, mu, hi.x) - NoncentralT.fnm(lo.nu, mu, lo.x), falling back
+   * to a NoncentralT.snm (direct survival) difference when the result cannot be trusted. This is
+   * the same fnm boundary-saturation failure #1250 fixed for
+   * DoublyNoncentralT._pdfPoissonMixture's identical fnm-difference pattern, confirmed (#1302) to
+   * also occur directly on _pdf's own difference below: at nu=30, mu=5, x=40, both fnm calls
+   * saturate to exactly 1, silently zeroing the density against an mpmath (mp.dps=50) reference of
+   * ~1.54e-18. Thresholds reused verbatim from DoublyNoncentralT._fnmDiff, not re-derived -- #1250
+   * validated them against the full npm test suite, including the fit()-exploration performance
+   * trap a naive boundary-proximity check falls into.
+   * See solutions/correctness/2026-08-01-2030-noncentral-t-fnm-snm-boundary-saturation.md
+   *
+   * @method _fnmDiff
+   * @memberof ran.dist.NoncentralT
+   * @param {Object} hi Minuend fnm call, as { nu, x }.
+   * @param {Object} lo Subtrahend fnm call, as { nu, x }.
+   * @returns {number} The CDF difference.
+   * @private
+   */
+  _fnmDiff (hi, lo) {
+    const { mu } = this.p
+    const diff = NoncentralT.fnm(hi.nu, mu, hi.x) - NoncentralT.fnm(lo.nu, mu, lo.x)
+    if (lo.nu >= 30 && Math.abs(diff) < 1e-9) {
+      return NoncentralT.snm(lo.nu, mu, lo.x) - NoncentralT.snm(hi.nu, mu, hi.x)
+    }
+    return diff
+  }
+
   // Raw moment E[T^j] = (nu/2)^(j/2) · Γ((nu-j)/2)/Γ(nu/2) · e for nu > j, where e = E[(Z+mu)^j]
   // factors out since T = (Z+mu)/sqrt(chi2_nu/nu) with independent numerator and denominator
   _rawMoment (j, e) {
@@ -265,7 +293,8 @@ class NoncentralT extends Distribution {
     if (Math.abs(x) < Number.EPSILON) {
       return this.c.pdfAt0
     } else {
-      return Math.max(0, this.p.nu * (NoncentralT.fnm(this.p.nu + 2, this.p.mu, x * this.c.nuScale) - NoncentralT.fnm(this.p.nu, this.p.mu, x)) / x)
+      const diff = this._fnmDiff({ nu: this.p.nu + 2, x: x * this.c.nuScale }, { nu: this.p.nu, x })
+      return Math.max(0, this.p.nu * diff / x)
     }
   }
 
