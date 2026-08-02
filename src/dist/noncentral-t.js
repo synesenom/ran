@@ -1,5 +1,6 @@
 import recursiveSum from '../algorithms/recursive-sum'
-import { erf, regularizedBetaIncomplete, logGamma } from '../special'
+import tanhSinh from '../algorithms/tanh-sinh'
+import { erf, erfc, regularizedBetaIncomplete, logGamma } from '../special'
 import chi2 from './_chi2'
 import normal from './_normal'
 import Distribution from './_distribution'
@@ -147,6 +148,44 @@ class NoncentralT extends Distribution {
 
     z = z / 2 + phi
     return Math.min(Math.max(x >= 0 ? z : 1 - z, 0), 1)
+  }
+
+  /**
+   * Survival function 1 - fnm(nu, mu, x), computed directly via tanh-sinh quadrature over the
+   * mixture representation T = (Z+mu)/sqrt(V/nu) rather than as a subtraction from fnm's own
+   * result. fnm computes the CDF forward and rounds to exactly 1 (or 0) whenever the true
+   * survival is closer to the boundary than a double can distinguish from 1 -- no reformulation
+   * of fnm itself can fix that (the gap becomes literally unrepresentable), so callers needing
+   * the tail (e.g. DoublyNoncentralT._pdfPoissonMixture's per-term CDF difference) must call
+   * this method directly instead of differencing two near-1 fnm values.
+   * See solutions/correctness/2026-08-01-2030-noncentral-t-fnm-snm-boundary-saturation.md
+   *
+   * @method snm
+   * @memberof ran.dist.NoncentralT
+   * @param {number} nu Degrees of freedom.
+   * @param {number} mu Non-centrality parameter.
+   * @param {number} x Value to evaluate the survival function at.
+   * @returns {number} The survival probability P(T > x).
+   * @static
+   * @ignore
+   */
+  static snm (nu, mu, x) {
+    // No sign-flip branching on x/mu is needed here (unlike fnm's AS243 series): the integrand
+    // is valid directly for any real x, mu.
+    const logNorm = -(nu / 2) * Math.log(2) - logGamma(nu / 2)
+    const integrand = v => {
+      if (v <= 0) return 0
+      const logPdf = (nu / 2 - 1) * Math.log(v) - v / 2 + logNorm
+      return 0.5 * erfc((x * Math.sqrt(v / nu) - mu) / Math.SQRT2) * Math.exp(logPdf)
+    }
+    // Chi2(nu) has mean nu and variance 2nu; 12 standard deviations comfortably covers the mass
+    // tanh-sinh needs to resolve for nu large enough to matter here (nu ~ 100+, the regime
+    // fnm's saturation actually occurs in). Not verified accurate for very small nu -- out of
+    // scope, see the solution doc above.
+    const sd = Math.sqrt(2 * nu)
+    const lo = Math.max(0, nu - 12 * sd)
+    const hi = nu + 12 * sd
+    return Math.min(Math.max(tanhSinh(integrand, lo, hi), 0), 1)
   }
 
   // Raw moment E[T^j] = (nu/2)^(j/2) · Γ((nu-j)/2)/Γ(nu/2) · e for nu > j, where e = E[(Z+mu)^j]

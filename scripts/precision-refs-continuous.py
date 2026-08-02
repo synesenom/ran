@@ -1797,6 +1797,11 @@ DNCT_XVALS = {
     # point further into the tail while still landing well inside the quantile round-trip's
     # sensitivity range (unlike (5, 0, 120) above, this group's mu != 0 so it does not need the
     # same tight peak-adjacent x-range).
+    # x=-0.7 (issue #1250's own reported point) is deliberately NOT added here: _cdf's own
+    # saturation there (see CDF_TOL comment removed -- _cdf is out of scope for #1250) makes
+    # q(cdf(-0.7)) return NaN on both the unfixed and #1250-fixed code (cdf is untouched), so it
+    # cannot join this group's shared pdf/cdf/quantile points array. Covered instead by a
+    # hand-written pdf-only assertion in test/precision-continuous.js (see #1250).
     (5, 5, 120): [mpf('0.7'), mpf('1.0'), mpf('1.3'), mpf('1.8'), mpf('2.2')],
     # (5, 2, 120) (issue #1235): covers the x*mu<0 branch of _pdf (the wynnEpsilon-based
     # alternating series, replaced by a cancellation-free Poisson-mixture sum -- see

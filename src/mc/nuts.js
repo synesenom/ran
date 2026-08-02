@@ -47,7 +47,7 @@ const DELTA_MAX = 1000
  * report the per-sampling-phase totals (reset like [ar]{@link ran.mc.MCMC#ar}). A well-behaved run
  * reports both counts as 0; nonzero divergences flag a step size that is too large or a target too
  * extreme, nonzero max-depth hits a step size that is too small. See
- * decisions/0035-nuts-sampler-health-diagnostics.md.
+ * decisions/0048-nuts-sampler-health-diagnostics.md.
  *
  * @class NUTS
  * @memberof ran.mc
@@ -168,7 +168,7 @@ export default class NUTS extends MCMC {
    * @memberof ran.mc.NUTS
    * @returns {number} Count of divergent transitions since the last reset.
    */
-  // decisions/0035-nuts-sampler-health-diagnostics.md — divergences surfaced as a per-phase count
+  // decisions/0048-nuts-sampler-health-diagnostics.md — divergences surfaced as a per-phase count
   divergenceCount () {
     return this._divergenceCount
   }
@@ -184,7 +184,7 @@ export default class NUTS extends MCMC {
    * @memberof ran.mc.NUTS
    * @returns {number} Count of max-tree-depth-saturated transitions since the last reset.
    */
-  // decisions/0035-nuts-sampler-health-diagnostics.md — max-depth saturation surfaced as a per-phase count
+  // decisions/0048-nuts-sampler-health-diagnostics.md — max-depth saturation surfaced as a per-phase count
   maxDepthCount () {
     return this._maxDepthCount
   }
@@ -268,7 +268,7 @@ export default class NUTS extends MCMC {
   // ride the ADR-0023 lifecycle (reset at construction and sample() start, never between/within
   // warm-up) — first subclass to override this hook. Reads no NUTS-specific field, so it is safe under
   // the base constructor's virtual-dispatch call before this subclass's constructor body runs.
-  // decisions/0035-nuts-sampler-health-diagnostics.md, decisions/0023-mcmc-accumulator-mechanics.md
+  // decisions/0048-nuts-sampler-health-diagnostics.md, decisions/0023-mcmc-accumulator-mechanics.md
   _initAccumulators () {
     super._initAccumulators()
     this._divergenceCount = 0
@@ -377,7 +377,7 @@ export default class NUTS extends MCMC {
     // At a leaf there is no U-turn check, so sPrime === 0 here is *exclusively* the energy-divergence
     // guard — the sole origin of the divergent diagnostic threaded up the tree. Higher in the tree
     // sPrime also absorbs U-turn stops, so divergence must be carried in its own flag rather than
-    // re-derived from sPrime. See decisions/0035-nuts-sampler-health-diagnostics.md and
+    // re-derived from sPrime. See decisions/0048-nuts-sampler-health-diagnostics.md and
     // solutions/correctness/2026-07-19-1456-nuts-diagnostics-overloaded-sprime-signal.md.
     const withinEnergyBound = ctx.logU < DELTA_MAX + h
     return {

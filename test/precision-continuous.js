@@ -3699,12 +3699,12 @@ const REFS = [
       { x: 18.10561103111283, pdf: 0.021009219798146437, cdf: 0.9 }
     ]
   },
-  // NoncentralChi2[268, 64]: cdf routes through marcumQ's transition band just BELOW its mu=135 dispatch (mu=k/2=134), i.e. the three-term backward recurrence seeded by quadrature; the seed rounding plus ~2.9x per-step amplification caps relative accuracy near 1e-13 (measured 1.8e-13 worst case, cdf)
+  // NoncentralChi2[268, 64]: cdf routes through marcumQ's transition band just BELOW its mu=135 dispatch (mu=k/2=134), i.e. the three-term backward recurrence seeded by quadrature; the seed rounding plus ~2.9x per-step amplification caps relative accuracy near 1e-13 (measured 1.8e-13 worst case, cdf). The q(cdf(x)) round-trip at x=370 inherits that same floor plus the quantile solver's own rounding and, like the [5,58]/[5,62] groups above, measured over 1e-13 in JIT-order-dependent full-suite runs (two separate full-suite CI runs measured 1.075e-13 and 1.663e-13; both pass in isolation) -- gate at 5e-13 (issue #1304)
   {
     name: 'NoncentralChi2',
     params: [268, 64],
     tol: 5e-13,
-    qtol: 1e-13,
+    qtol: 5e-13,
     points: [
       { x: 294.0, pdf: 0.005952122912964873, cdf: 0.0843879090000445 },
       { x: 318.0, pdf: 0.013008725950881145, cdf: 0.31675969481511274 },
