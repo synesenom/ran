@@ -274,6 +274,14 @@ class NoncentralT extends Distribution {
     return NoncentralT.fnm(this.p.nu, this.p.mu, x)
   }
 
+  static _fitInit (data) {
+    // Central T variance ν/(ν-2) → ν=2Var/(Var-1); central T has mean 0 so excess is μ_init
+    const n = data.length
+    const mean = data.reduce((s, x) => s + x, 0) / n
+    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
+    return [variance > 1 ? Math.max(3, Math.round(2 * variance / (variance - 1))) : 3, mean]
+  }
+
   /**
    * Difference NoncentralT.fnm(hi.nu, mu, hi.x) - NoncentralT.fnm(lo.nu, mu, lo.x), falling back
    * to a NoncentralT.snm (direct survival) difference when the result cannot be trusted. This is
@@ -300,14 +308,6 @@ class NoncentralT extends Distribution {
       return NoncentralT.snm(lo.nu, mu, lo.x) - NoncentralT.snm(hi.nu, mu, hi.x)
     }
     return diff
-  }
-
-  static _fitInit (data) {
-    // Central T variance ν/(ν-2) → ν=2Var/(Var-1); central T has mean 0 so excess is μ_init
-    const n = data.length
-    const mean = data.reduce((s, x) => s + x, 0) / n
-    const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
-    return [variance > 1 ? Math.max(3, Math.round(2 * variance / (variance - 1))) : 3, mean]
   }
 }
 
