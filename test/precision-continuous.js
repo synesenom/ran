@@ -395,8 +395,7 @@ const REFS = [
       { x: 0.596179727848044, pdf: 0.9924215278592065, cdf: 0.9 }
     ]
   },
-  // Beta[4, 3]: x straddles regularizedBetaIncomplete's direct/complementary continued-fraction
-  // dispatch at x=(alpha+1)/(alpha+beta+2)=5/9 (issue #1178)
+  // Beta[4, 3]: x straddles regularizedBetaIncomplete's direct/complementary continued-fraction dispatch at x=(alpha+1)/(alpha+beta+2)=5/9 (issue #1178)
   {
     name: 'Beta',
     params: [4, 3],
@@ -1011,35 +1010,6 @@ const REFS = [
     ]
   },
   {
-    // Large-lambda regression (#1086): the outer Poisson-mixing series' summand peak shifts
-    // away from (r0, s0) as x moves from 0.5 (e.g. ~146 steps at x=0.3 for r0=s0=600), which a
-    // MAX_ITER=100 window previously missed entirely, producing pdf/cdf wrong by up to ~10
-    // orders of magnitude. tol/qtol are looser than this file's usual 1e-14: the fix's widened
-    // MAX_SERIES_ITER-bounded series still carries more residual truncation error at this scale
-    // than the typical small-lambda case (measured ~5e-12 relative error against the mpmath
-    // reference below). qtol is tighter than tol despite root-finding running on top of an
-    // already-imprecise cdf(): at this x, pdf is steep enough (~1e-21 changing by orders of
-    // magnitude per 0.1 in x) that a 1e-11 relative error in the cdf target translates to a much
-    // smaller relative error in the x the root-finder converges to (empirically ~2e-14, not a
-    // typo). No x > 0.5 point here: at this lambda, cdf(0.7) underflows to exactly 1.0 in float64
-    // (1 - cdf(0.3) is below double precision relative to 1), which would make q(cdf(0.7)) trivially
-    // return the support boundary and silently break the quantile round-trip check rather than
-    // testing anything at x=0.7 — the x>0.5 pdf/cdf code path is instead exercised directly by
-    // test/dist-base-special-cases.js's "pdf/cdf should be symmetric around 0.5" checks.
-    name: 'DoublyNoncentralBeta',
-    params: [2, 2, 1200, 1200],
-    tol: 1e-11,
-    qtol: 1e-13,
-    points: [
-      // mpmath mp.dps=50: dncbeta_pdf(2,2,1200,1200,0.3) -> 3.0316372765797769783596369206865530229083184183873e-21,
-      //                    dncbeta_cdf(2,2,1200,1200,0.3) -> 5.7096647377955332145923607223757816671099888691186e-24
-      { x: 0.3, pdf: 3.031637276579777e-21, cdf: 5.709664737795533e-24 },
-      // mpmath mp.dps=50: dncbeta_pdf(2,2,1200,1200,0.5) -> 19.580739300640188123670649665079314539696410511919,
-      //                    dncbeta_cdf(2,2,1200,1200,0.5) -> 0.4999999999999999999999999999999999999999999999881
-      { x: 0.5, pdf: 19.58073930064019, cdf: 0.5 }
-    ]
-  },
-  {
     name: 'DoublyNoncentralChi2',
     params: [3, 4, 2, 3],
     tol: 1e-14,
@@ -1158,143 +1128,6 @@ const REFS = [
       { x: 2.0, pdf: 0.3471532794569248, cdf: 0.5224064915912554 },
       { x: 3.5, pdf: 0.12110847916092012, cdf: 0.869370920569746 },
       { x: 5.0, pdf: 0.02904800414951377, cdf: 0.9663690203336275 }
-    ]
-  },
-  // DoublyNoncentralT[5, 0, 120] (issue #1189, continuation of #1143): mu=0 keeps _pdf on its
-  // single-f11-call fast path (src/dist/doubly-noncentral-t.js); z = theta/(2*(1+x^2/nu))
-  // crosses f11's |z|=50 dispatch threshold (src/special/hypergeometric.js) exactly at x=1.
-  // theta=120 is load-bearing for a second, independent reason: it is the only DoublyNoncentralT
-  // group in this file with theta large enough that exp(-theta/2) < Number.EPSILON, making it the
-  // sole regression coverage for the { useFloor: false } fix to _cdf's recursiveSum call (see
-  // src/dist/doubly-noncentral-t.js) -- every other group above uses theta in {1, 2}.
-  // qtol: 5e-10 is an empirical gate, not derived from the tol: 1e-13 cdf bound: qtol: 1e-10
-  // was measured to fail (q(cdf(1.1)) landed ~1.14e-10 off), while qtol: 5e-10 passed stably
-  // across repeated runs, so 5e-10 keeps margin over the measured error for other environments.
-  // The x-range is kept close to x=1 (rather than ranging further into the tail) for a separate
-  // reason: pdf(x) is the quantile round-trip's local sensitivity 1/pdf(x), and it collapses
-  // fast away from the peak at this theta -- x=1.3/x=1.8 were tried and measured at ~2.07e-9
-  // and ~1.24e-5 respectively, which is why the range was narrowed to {0.5, 0.8, 1.0, 1.1, 1.2}.
-  {
-    name: 'DoublyNoncentralT',
-    params: [5, 0, 120],
-    tol: 1e-13,
-    qtol: 5e-10,
-    points: [
-      { x: 0.5, pdf: 0.09627499415782743, cdf: 0.9924736051384567 },
-      { x: 0.8, pdf: 0.0014424026321766222, cdf: 0.9999133734927208 },
-      { x: 1.0, pdf: 4.780728694511164e-05, cdf: 0.9999973597532423 },
-      { x: 1.1, pdf: 7.819580843074595e-06, cdf: 0.9999995775740489 },
-      { x: 1.2, pdf: 1.2272297432244359e-06, cdf: 0.999999934444974 }
-    ]
-  },
-  // DoublyNoncentralT[5, 5, 120] (issue #1207): non-zero mu combined with theta=120 drives _pdf's
-  // general (mu != 0) branch's peak index j0 into the 17-30+ range, the regime where the ₁F₁
-  // three-term contiguous recurrence (formerly _f11Forward/_f11Backward) was numerically unstable
-  // in both directions -- see solutions/correctness/2026-07-30-1600-doubly-noncentral-t-pdf-f11-recurrence-instability.md.
-  // Every other DoublyNoncentralT group above either uses mu=0 (fast path, bypasses the general
-  // branch entirely) or a small theta that never pushes j0 past ~5-10, where the old recurrence
-  // happened to still be accurate enough to pass -- this is the only group that exercises the
-  // previously-broken regime. Reference pdf/cdf via mpmath mp.dps=50, independent Poisson(theta/2)
-  // mixture of singly-noncentral-t formula (scripts/precision-refs-continuous.py's dnct_pdf/dnct_cdf),
-  // not derived from ranjs's own ₁F₁-series _pdf.
-  // qtol: 1e-12 was measured to fail (q(cdf(2.2)) landed ~2.6e-12 off), while qtol: 1e-11 passed
-  // stably across repeated runs, so 1e-11 keeps margin over the measured error for other
-  // environments (same empirical-gate approach as the [5, 0, 120] group's qtol above).
-  {
-    name: 'DoublyNoncentralT',
-    params: [5, 5, 120],
-    tol: 1e-11,
-    qtol: 1e-11,
-    points: [
-      { x: 0.7, pdf: 0.692770087981292, cdf: 0.07412974139872573 },
-      { x: 1.0, pdf: 1.8170631884809803, cdf: 0.49279888377770137 },
-      { x: 1.3, pdf: 0.718181855844681, cdf: 0.8992518892279195 },
-      { x: 1.8, pdf: 0.010558777834557508, cdf: 0.9990304544278005 },
-      { x: 2.2, pdf: 0.0001166815151832735, cdf: 0.9999900880337178 }
-    ]
-  },
-  // DoublyNoncentralT[5, 5, 120] negative-x probes (issue #1252): a second, hand-maintained
-  // group sharing name+params with the group directly above -- same structural pattern as the
-  // Normal/LogNormal far-tail groups (issue #808, see NORMAL_FAR_TAIL_XVALS in
-  // scripts/precision-refs-continuous.py), required because DNCT_XVALS there holds one x-list
-  // per (nu, mu, theta) tuple and (5, 5, 120) is already claimed by the positive-x group above.
-  // This gates the x*mu<0 branch (issue #1235) at mu=5, theta=120 -- the exact parameter regime
-  // the #1235 bug report was originally filed against -- which the sibling [5, 2, 120] group
-  // deliberately avoids (see its own comment below) because NoncentralT.fnm saturates near the
-  // Poisson(60)-significant nu0~105-145 range at mu=5 (issue #1250, NOT fixed by this group).
-  // Candidate points were measured empirically (not assumed) against this file's own precedent
-  // before being included or excluded:
-  //   x=-0.1, -0.2, -0.25: EXCLUDED -- pdf(x) is not merely imprecise but wrong by 6-18 orders
-  //     of magnitude (e.g. x=-0.1: ranjs 1.04e-25 vs mpmath-reference 5.46e-7). Root cause:
-  //     _pdfPoissonMixture's per-term NoncentralT.fnm(nu0+2, ...) - NoncentralT.fnm(nu0, ...)
-  //     difference is bit-for-bit 0 across the ENTIRE Poisson-significant nu0 range at these x,
-  //     not just the narrow band #1250 currently describes -- both fnm calls collapse onto the
-  //     same phi = 0.5*(1+erf(-mu/sqrt2)) plateau (phi depends only on mu, not nu0, and mu=5
-  //     pushes it to ~0.99999996) well before their nu0-dependent correction terms separate.
-  //     This is the same fnm-near-boundary precision floor as #1250, just manifesting far more
-  //     broadly than that issue's own text anticipates; flagged separately via bug triage rather
-  //     than gated here (a gate that always fails, or one loose enough to accept 10^18 relative
-  //     error, serves no regression-detection purpose).
-  //   x=-0.45, -0.5, -0.7: EXCLUDED -- pdf/cdf errors climb into the 1e-3 to 1.5 range as x
-  //     moves deeper into the tail (x=-0.7 reproduces the #1235 solution doc's already-documented
-  //     ~1.7x pdf floor), and x=-0.7's quantile round-trip returns exactly NaN (d.q(cdf) with
-  //     cdf=2.62e-16), which no qtol value could pass. See the #1235 solution doc's "Residual
-  //     Limitation" section for the full accounting of this regime; #1250 is the tracked fix.
-  //   x=-0.3, -0.35, -0.4: INCLUDED -- pdf/cdf/quantile-round-trip errors here (worst case at
-  //     x=-0.4: pdf 8.9e-6, cdf 1.3e-4, q round-trip 1.2e-5) are far tighter than the excluded
-  //     points, still far looser than this file's existing DoublyNoncentralT tolerances (loosest
-  //     precedent elsewhere in this file: tol 1e-8, cdfTol 1e-7, qtol 1e-8), so tol/cdfTol/qtol
-  //     below are a genuinely new (documented) loose-tolerance floor for this file -- but with
-  //     5-9x measured margin at every point, meaningfully tighter than "tests almost nothing"
-  //     (a regression back toward the pre-#1235 ~130x-475x cancellation bug fails this by orders
-  //     of magnitude). Reference pdf/cdf via mpmath mp.dps=50 (dnct_pdf/dnct_cdf in
-  //     scripts/precision-refs-continuous.py), independent of ranjs's own implementation.
-  // See solutions/testing/2026-08-01-2037-dnct-mu5-negx-precision-gate-conditioning-inversion.md
-  // for why the included/excluded points above invert the "closer to the mode is better-
-  // conditioned" intuition.
-  {
-    name: 'DoublyNoncentralT',
-    params: [5, 5, 120],
-    tol: 5e-5,
-    cdfTol: 1e-3,
-    qtol: 1e-4,
-    points: [
-      { x: -0.3, pdf: 1.8266462385869508e-9, cdf: 6.076899024084247e-11 },
-      { x: -0.35, pdf: 4.075330583218124e-10, cdf: 1.3380441248733746e-11 },
-      { x: -0.4, pdf: 8.905303105662145e-11, cdf: 2.8946422024934806e-12 }
-    ]
-  },
-  // DoublyNoncentralT[5, 2, 120] (issue #1235): covers the x*mu<0 branch of _pdf (the
-  // wynnEpsilon-based alternating series, previously up to ~130x relative pdf error at x=-1.0),
-  // now a cancellation-free Poisson(theta/2)-mixture-of-noncentral-t sum -- see
-  // solutions/correctness/2026-07-31-1300-doubly-noncentral-t-pdf-cancellation-x-mu-negative.md.
-  // mu=2 (not the issue's own mu=5) is deliberate: at mu=5 with this same theta=120, the fix's
-  // own NoncentralT.fnm(nu0, mu, z) building block saturates to exactly 1.0 near the Poisson(60)
-  // peak (nu0 ~ 105-145) -- a separate, deeper double-precision floor inside NoncentralT.fnm
-  // itself (out of scope here; the true tail probability being represented is far below
-  // Number.EPSILON there). mu=2 keeps that saturation out of the Poisson weight's significant
-  // region, so pdf here measures ~1e-13 to 7e-10 relative error at every point (worst case at
-  // x=-0.5). tol is gated to that actual pdf accuracy (3e-9, ~4x margin over the measured
-  // 6.96e-10 worst case) rather than the group-wide 1e-7 this group previously shared between
-  // pdf and cdf -- that shared value masked the fix's true precision behind cdf's floor (below).
-  // cdfTol: 1e-7 stays loose because the group-level floor for cdf comes from the UNCHANGED
-  // _cdf, not from this fix's pdf: _cdf's own relative error at x=-0.7 measured ~2.1e-8
-  // (unrelated pre-existing accumulated-rounding behavior, same class as the _N_NCT groups
-  // elsewhere in this file; out of scope for issue #1235). qtol: 1e-8 keeps ~8x margin over
-  // the measured q(cdf(x)) round-trip error, which inherits cdf's floor and measures up to
-  // ~1.3e-9 at x=-0.7.
-  {
-    name: 'DoublyNoncentralT',
-    params: [5, 2, 120],
-    tol: 3e-9,
-    cdfTol: 1e-7,
-    qtol: 1e-8,
-    points: [
-      { x: -0.1, pdf: 0.08731113573386305, cdf: 0.0062876468126633715 },
-      { x: -0.2, pdf: 0.02249929148445704, cdf: 0.001420945339993741 },
-      { x: -0.3, pdf: 0.0046920072911948996, cdf: 0.0002665259567531051 },
-      { x: -0.5, pdf: 0.00011926259655702153, cdf: 5.832913967064171e-6 },
-      { x: -0.7, pdf: 1.7852739570545148e-6, cdf: 8.034659857942625e-8 }
     ]
   },
   {
@@ -1427,10 +1260,8 @@ const REFS = [
       { x: 2.7918740866932765, pdf: 0.09737981280965449, cdf: 0.9 }
     ]
   },
+  // ExponentiallyModifiedGaussian[1, 0.3, 5]: params chosen so the 0.9-quantile point crosses mu + lambda*sigma^2 = 1.45, the _erfcTerm branch boundary -- unlike a wider-spread stress case, this exercises both the erfcx(arg>0) and naive-erfc(arg<=0) branches at 1e-14 tolerance
   {
-    // params chosen so the 0.9-quantile point crosses mu + lambda*sigma^2 = 1.45, the
-    // _erfcTerm branch boundary -- unlike a wider-spread stress case, this exercises both
-    // the erfcx(arg>0) and naive-erfc(arg<=0) branches at 1e-14 tolerance
     name: 'ExponentiallyModifiedGaussian',
     params: [1, 0.3, 5],
     tol: 1e-14,
@@ -1534,8 +1365,7 @@ const REFS = [
       { x: 3.919875603731213, pdf: 0.04036748484151186, cdf: 0.9 }
     ]
   },
-  // F[6, 8]: internal beta-argument z=d1*x/(d1*x+d2) straddles regularizedBetaIncomplete's
-  // direct/complementary continued-fraction dispatch at z=(alpha+1)/(alpha+beta+2)=4/9 (issue #1178)
+  // F[6, 8]: internal beta-argument z=d1*x/(d1*x+d2) straddles regularizedBetaIncomplete's direct/complementary continued-fraction dispatch at z=(alpha+1)/(alpha+beta+2)=4/9 (issue #1178)
   {
     name: 'F',
     params: [6, 8],
@@ -2397,8 +2227,7 @@ const REFS = [
       { x: 7.265187538585993, pdf: 0.017726594661409047, cdf: 0.9 }
     ]
   },
-  // InverseGaussian[2, 3]: x straddles _cdf's erfc(-a) series/continued-fraction dispatch at
-  // -a=1 (issue #1178)
+  // InverseGaussian[2, 3]: x straddles _cdf's erfc(-a) series/continued-fraction dispatch at -a=1 (issue #1178)
   {
     name: 'InverseGaussian',
     params: [2, 3],
@@ -2702,8 +2531,7 @@ const REFS = [
       { x: 62.32811767701674, pdf: 0.0007853916387698619, cdf: 0.9 }
     ]
   },
-  // Levy[2, 3]: x straddles _cdf's erfc series/continued-fraction dispatch at
-  // z=sqrt(0.5*c/(x-mu))=1 (issue #1178)
+  // Levy[2, 3]: x straddles _cdf's erfc series/continued-fraction dispatch at z=sqrt(0.5*c/(x-mu))=1 (issue #1178)
   {
     name: 'Levy',
     params: [2, 3],
@@ -2962,41 +2790,6 @@ const REFS = [
       { x: 0.3966384423165018, pdf: 1.0029632102791057, cdf: 0.53 },
       { x: 0.6589164781970405, pdf: 0.5108740729275832, cdf: 0.72 },
       { x: 1.3251843284113063, pdf: 0.1324331477288767, cdf: 0.9 }
-    ]
-  },
-  // Far-tail probes for LogNormal (issue #808): erfc path eliminates cancellation, so
-  // 1e-14 tolerance is achievable at p≈1.35e-3 (−3σ), p≈2.87e-7 (−5σ), p≈1.28e-12 (−7σ).
-  {
-    name: 'LogNormal',
-    params: [0, 2],
-    tol: 1e-14,
-    qtol: 1e-14,
-    points: [
-      { x: 0.002478752176666358, pdf: 0.8939676288854222, cdf: 0.001349898031630095 },
-      { x: 4.5399929762484854e-05, pdf: 0.016373588268883323, cdf: 2.866515718791939e-07 },
-      { x: 8.315287191035679e-07, pdf: 5.49272694887334e-06, cdf: 1.279812543885835e-12 }
-    ]
-  },
-  {
-    name: 'LogNormal',
-    params: [1, 0.5],
-    tol: 1e-14,
-    qtol: 1e-14,
-    points: [
-      { x: 0.6065306597126334, pdf: 0.01461376549056155, cdf: 0.001349898031630095 },
-      { x: 0.22313016014842982, pdf: 1.3326029199686027e-05, cdf: 2.866515718791939e-07 },
-      { x: 0.0820849986238988, pdf: 2.2256735241523284e-10, cdf: 1.279812543885835e-12 }
-    ]
-  },
-  {
-    name: 'LogNormal',
-    params: [-1, 1],
-    tol: 1e-14,
-    qtol: 1e-14,
-    points: [
-      { x: 0.01831563888873418, pdf: 0.2419707245191433, cdf: 0.001349898031630095 },
-      { x: 0.0024787521766663585, pdf: 0.0005997854600913624, cdf: 2.866515718791939e-07 },
-      { x: 0.00033546262790251185, pdf: 2.723021776070751e-08, cdf: 1.279812543885835e-12 }
     ]
   },
   {
@@ -3508,9 +3301,7 @@ const REFS = [
       { x: 0.912096673134829, pdf: 1.9038127634365016, cdf: 0.9 }
     ]
   },
-  // NoncentralBeta[2, 3, 4]: x straddles regularizedBetaIncomplete(iAlpha0, beta, x)'s direct/
-  // complementary continued-fraction dispatch at x=(iAlpha0+1)/(iAlpha0+beta+2)=5/9, where
-  // iAlpha0=alpha+round(lambda/2)=4 (issue #1178)
+  // NoncentralBeta[2, 3, 4]: x straddles regularizedBetaIncomplete(iAlpha0, beta, x)'s direct/complementary continued-fraction dispatch at x=(iAlpha0+1)/(iAlpha0+beta+2)=5/9, where iAlpha0=alpha+round(lambda/2)=4 (issue #1178)
   {
     name: 'NoncentralBeta',
     params: [2, 3, 4],
@@ -3872,9 +3663,7 @@ const REFS = [
       { x: 5.465891080861805, pdf: 0.0344547085561269, cdf: 0.9 }
     ]
   },
-  // NoncentralF[6, 8, 4]: internal beta-argument z=d1*x/(d1*x+d2) straddles the underlying
-  // NoncentralBeta dispatch at z=(iAlpha0+1)/(iAlpha0+beta+2)=6/11, where
-  // iAlpha0=alpha+round(lambda/2)=5 (issue #1178)
+  // NoncentralF[6, 8, 4]: internal beta-argument z=d1*x/(d1*x+d2) straddles the underlying NoncentralBeta dispatch at z=(iAlpha0+1)/(iAlpha0+beta+2)=6/11, where iAlpha0=alpha+round(lambda/2)=5 (issue #1178)
   {
     name: 'NoncentralF',
     params: [6, 8, 4],
@@ -3967,41 +3756,6 @@ const REFS = [
       { x: -0.9247301379001702, pdf: 0.3978137654258625, cdf: 0.53 },
       { x: -0.4171584927287838, pdf: 0.3366233449356212, cdf: 0.72 },
       { x: 0.2815515655446005, pdf: 0.17549833193248682, cdf: 0.9 }
-    ]
-  },
-  // Far-tail probes for Normal (issue #808): erfc path eliminates cancellation, so
-  // 1e-14 tolerance is achievable at p≈1.35e-3 (−3σ), p≈2.87e-7 (−5σ), p≈1.28e-12 (−7σ).
-  {
-    name: 'Normal',
-    params: [0, 2],
-    tol: 1e-14,
-    qtol: 1e-14,
-    points: [
-      { x: -6.0, pdf: 0.002215924205969004, cdf: 0.001349898031630095 },
-      { x: -10.0, pdf: 7.433597573671488e-07, cdf: 2.866515718791939e-07 },
-      { x: -14.0, pdf: 4.567360204182297e-12, cdf: 1.279812543885835e-12 }
-    ]
-  },
-  {
-    name: 'Normal',
-    params: [3, 0.5],
-    tol: 1e-14,
-    qtol: 1e-14,
-    points: [
-      { x: 1.5, pdf: 0.008863696823876015, cdf: 0.001349898031630095 },
-      { x: 0.5, pdf: 2.9734390294685954e-06, cdf: 2.866515718791939e-07 },
-      { x: -0.5, pdf: 1.8269440816729187e-11, cdf: 1.279812543885835e-12 }
-    ]
-  },
-  {
-    name: 'Normal',
-    params: [-1, 1],
-    tol: 1e-14,
-    qtol: 1e-14,
-    points: [
-      { x: -4.0, pdf: 0.004431848411938008, cdf: 0.001349898031630095 },
-      { x: -6.0, pdf: 1.4867195147342977e-06, cdf: 2.866515718791939e-07 },
-      { x: -8.0, pdf: 9.134720408364594e-12, cdf: 1.279812543885835e-12 }
     ]
   },
   {
@@ -4505,9 +4259,7 @@ const REFS = [
       { x: 3.0, pdf: 0.10798193291984247, cdf: 0.9544997361087307 }
     ]
   },
-  // SkewNormal[0, 1, 1] and SkewNormal[0, 1, 2] straddle owenT's own |a|=1 and |h|=0.67
-  // dispatch boundaries (src/special/owen-t.js:303-311, issue #1186); both matched mpmath
-  // to ~1e-16 relative error, so the default tol/qtol apply.
+  // SkewNormal[0, 1, 1]: straddles owenT's own |a|=1 dispatch boundary (SkewNormal[0, 1, 2] straddles its |h|=0.67 boundary) (src/special/owen-t.js:303-311, issue #1186); both matched mpmath to ~1e-16 relative error, so the default tol/qtol apply
   {
     name: 'SkewNormal',
     params: [0, 1, 1],
@@ -4705,45 +4457,6 @@ const REFS = [
       { x: 0.060928057033468395, pdf: 0.4847679857416329, cdf: 0.53 },
       { x: 0.5033370452904234, pdf: 0.37416573867739417, cdf: 0.72 },
       { x: 1.105572809000084, pdf: 0.22360679774997896, cdf: 0.9 }
-    ]
-  },
-  {
-    name: 'TruncatedExponential',
-    params: [1, 0, 3],
-    tol: 1e-14,
-    qtol: 1e-14,
-    points: [
-      { x: 0.09984386391614918, pdf: 0.952395696491256, cdf: 0.1 },
-      { x: 0.3355620822229121, pdf: 0.7523956964912559, cdf: 0.3 },
-      { x: 0.7003991199535634, pdf: 0.522395696491256, cdf: 0.53 },
-      { x: 1.152498343804564, pdf: 0.332395696491256, cdf: 0.72 },
-      { x: 1.9323440553173516, pdf: 0.15239569649125592, cdf: 0.9 }
-    ]
-  },
-  {
-    name: 'TruncatedExponential',
-    params: [2, 1, 4],
-    tol: 1e-14,
-    qtol: 1e-14,
-    points: [
-      { x: 1.052542568334791, pdf: 1.8049698233136893, cdf: 0.1 },
-      { x: 1.1778065927212007, pdf: 1.4049698233136891, cdf: 0.3 },
-      { x: 1.3761156474642777, pdf: 0.9449698233136892, cdf: 0.53 },
-      { x: 1.6333059846276181, pdf: 0.5649698233136893, cdf: 0.72 },
-      { x: 2.140260761977984, pdf: 0.20496982331368913, cdf: 0.9 }
-    ]
-  },
-  {
-    name: 'TruncatedExponential',
-    params: [0.5, 0, 10],
-    tol: 1e-14,
-    qtol: 1e-14,
-    points: [
-      { x: 0.20922426997367125, pdf: 0.4533918274531521, cdf: 0.1 },
-      { x: 0.7075828274795053, pdf: 0.3533918274531521, cdf: 0.3 },
-      { x: 1.4949063881708025, pdf: 0.2383918274531521, cdf: 0.53 },
-      { x: 2.5115758251827334, pdf: 0.14339182745315213, cdf: 0.72 },
-      { x: 4.487422315132828, pdf: 0.0533918274531521, cdf: 0.9 }
     ]
   },
   {
@@ -5182,10 +4895,8 @@ const REFS = [
       { x: 2.055728467012632, pdf: 0.10574006126383884, cdf: 0.9 }
     ]
   },
+  // WrappedCauchy[1.0, 0.7]: qtol loosened to 1e-13: the p=0.1 quantile lands at x~=0.0049 for this parameter set, and the atan2-based cdf / atan-based quantile round-trip differs by ~1 ULP in absolute terms -- ~6e-14 relative error once amplified by x being this close to zero
   {
-    // qtol loosened to 1e-13: the p=0.1 quantile lands at x~=0.0049 for this parameter set,
-    // and the atan2-based cdf / atan-based quantile round-trip differs by ~1 ULP in absolute
-    // terms -- ~6e-14 relative error once amplified by x being this close to zero
     name: 'WrappedCauchy',
     params: [1.0, 0.7],
     tol: 1e-14,
@@ -5198,9 +4909,8 @@ const REFS = [
       { x: 1.9950924049455565, pdf: 0.11152586279755822, cdf: 0.9 }
     ]
   },
+  // WrappedCauchy[-2.0, 0.05]: support is the mu-centred window [mu-pi, mu+pi] (matching scipy's vonmises(loc=mu) convention), so these x-values fall outside the canonical [-pi,pi] range -- expected here
   {
-    // support is the mu-centred window [mu-pi, mu+pi] (matching scipy's vonmises(loc=mu)
-    // convention), so these x-values fall outside the canonical [-pi,pi] range -- expected here
     name: 'WrappedCauchy',
     params: [-2.0, 0.05],
     tol: 1e-14,
@@ -5211,6 +4921,281 @@ const REFS = [
       { x: -1.8293648705060335, pdf: 0.17562548130184155, cdf: 0.53 },
       { x: -0.714939493375574, pdf: 0.1629424528276317, cdf: 0.72 },
       { x: 0.4520368680964579, pdf: 0.14704453642066465, cdf: 0.9 }
+    ]
+  },
+  {
+    // Large-lambda regression (#1086): the outer Poisson-mixing series' summand peak shifts
+    // away from (r0, s0) as x moves from 0.5 (e.g. ~146 steps at x=0.3 for r0=s0=600), which a
+    // MAX_ITER=100 window previously missed entirely, producing pdf/cdf wrong by up to ~10
+    // orders of magnitude. tol/qtol are looser than this file's usual 1e-14: the fix's widened
+    // MAX_SERIES_ITER-bounded series still carries more residual truncation error at this scale
+    // than the typical small-lambda case (measured ~5e-12 relative error against the mpmath
+    // reference below). qtol is tighter than tol despite root-finding running on top of an
+    // already-imprecise cdf(): at this x, pdf is steep enough (~1e-21 changing by orders of
+    // magnitude per 0.1 in x) that a 1e-11 relative error in the cdf target translates to a much
+    // smaller relative error in the x the root-finder converges to (empirically ~2e-14, not a
+    // typo). No x > 0.5 point here: at this lambda, cdf(0.7) underflows to exactly 1.0 in float64
+    // (1 - cdf(0.3) is below double precision relative to 1), which would make q(cdf(0.7)) trivially
+    // return the support boundary and silently break the quantile round-trip check rather than
+    // testing anything at x=0.7 — the x>0.5 pdf/cdf code path is instead exercised directly by
+    // test/dist-base-special-cases.js's "pdf/cdf should be symmetric around 0.5" checks.
+    name: 'DoublyNoncentralBeta',
+    params: [2, 2, 1200, 1200],
+    tol: 1e-11,
+    qtol: 1e-13,
+    points: [
+      // mpmath mp.dps=50: dncbeta_pdf(2,2,1200,1200,0.3) -> 3.0316372765797769783596369206865530229083184183873e-21,
+      //                    dncbeta_cdf(2,2,1200,1200,0.3) -> 5.7096647377955332145923607223757816671099888691186e-24
+      { x: 0.3, pdf: 3.031637276579777e-21, cdf: 5.709664737795533e-24 },
+      // mpmath mp.dps=50: dncbeta_pdf(2,2,1200,1200,0.5) -> 19.580739300640188123670649665079314539696410511919,
+      //                    dncbeta_cdf(2,2,1200,1200,0.5) -> 0.4999999999999999999999999999999999999999999999881
+      { x: 0.5, pdf: 19.58073930064019, cdf: 0.5 }
+    ]
+  },
+  // DoublyNoncentralT[5, 0, 120] (issue #1189, continuation of #1143): mu=0 keeps _pdf on its
+  // single-f11-call fast path (src/dist/doubly-noncentral-t.js); z = theta/(2*(1+x^2/nu))
+  // crosses f11's |z|=50 dispatch threshold (src/special/hypergeometric.js) exactly at x=1.
+  // theta=120 is load-bearing for a second, independent reason: it is the only DoublyNoncentralT
+  // group in this file with theta large enough that exp(-theta/2) < Number.EPSILON, making it the
+  // sole regression coverage for the { useFloor: false } fix to _cdf's recursiveSum call (see
+  // src/dist/doubly-noncentral-t.js) -- every other group above uses theta in {1, 2}.
+  // qtol: 5e-10 is an empirical gate, not derived from the tol: 1e-13 cdf bound: qtol: 1e-10
+  // was measured to fail (q(cdf(1.1)) landed ~1.14e-10 off), while qtol: 5e-10 passed stably
+  // across repeated runs, so 5e-10 keeps margin over the measured error for other environments.
+  // The x-range is kept close to x=1 (rather than ranging further into the tail) for a separate
+  // reason: pdf(x) is the quantile round-trip's local sensitivity 1/pdf(x), and it collapses
+  // fast away from the peak at this theta -- x=1.3/x=1.8 were tried and measured at ~2.07e-9
+  // and ~1.24e-5 respectively, which is why the range was narrowed to {0.5, 0.8, 1.0, 1.1, 1.2}.
+  {
+    name: 'DoublyNoncentralT',
+    params: [5, 0, 120],
+    tol: 1e-13,
+    qtol: 5e-10,
+    points: [
+      { x: 0.5, pdf: 0.09627499415782743, cdf: 0.9924736051384567 },
+      { x: 0.8, pdf: 0.0014424026321766222, cdf: 0.9999133734927208 },
+      { x: 1.0, pdf: 4.780728694511164e-05, cdf: 0.9999973597532423 },
+      { x: 1.1, pdf: 7.819580843074595e-06, cdf: 0.9999995775740489 },
+      { x: 1.2, pdf: 1.2272297432244359e-06, cdf: 0.999999934444974 }
+    ]
+  },
+  // DoublyNoncentralT[5, 5, 120] (issue #1207): non-zero mu combined with theta=120 drives _pdf's
+  // general (mu != 0) branch's peak index j0 into the 17-30+ range, the regime where the ₁F₁
+  // three-term contiguous recurrence (formerly _f11Forward/_f11Backward) was numerically unstable
+  // in both directions -- see solutions/correctness/2026-07-30-1600-doubly-noncentral-t-pdf-f11-recurrence-instability.md.
+  // Every other DoublyNoncentralT group above either uses mu=0 (fast path, bypasses the general
+  // branch entirely) or a small theta that never pushes j0 past ~5-10, where the old recurrence
+  // happened to still be accurate enough to pass -- this is the only group that exercises the
+  // previously-broken regime. Reference pdf/cdf via mpmath mp.dps=50, independent Poisson(theta/2)
+  // mixture of singly-noncentral-t formula (scripts/precision-refs-continuous.py's dnct_pdf/dnct_cdf),
+  // not derived from ranjs's own ₁F₁-series _pdf.
+  // qtol: 1e-12 was measured to fail (q(cdf(2.2)) landed ~2.6e-12 off), while qtol: 1e-11 passed
+  // stably across repeated runs, so 1e-11 keeps margin over the measured error for other
+  // environments (same empirical-gate approach as the [5, 0, 120] group's qtol above).
+  {
+    name: 'DoublyNoncentralT',
+    params: [5, 5, 120],
+    tol: 1e-11,
+    qtol: 1e-11,
+    points: [
+      { x: 0.7, pdf: 0.692770087981292, cdf: 0.07412974139872573 },
+      { x: 1.0, pdf: 1.8170631884809803, cdf: 0.49279888377770137 },
+      { x: 1.3, pdf: 0.718181855844681, cdf: 0.8992518892279195 },
+      { x: 1.8, pdf: 0.010558777834557508, cdf: 0.9990304544278005 },
+      { x: 2.2, pdf: 0.0001166815151832735, cdf: 0.9999900880337178 }
+    ]
+  },
+  // DoublyNoncentralT[5, 5, 120] negative-x probes (issue #1252): a second, hand-maintained
+  // group sharing name+params with the group directly above -- same structural pattern as the
+  // Normal/LogNormal far-tail groups (issue #808, see NORMAL_FAR_TAIL_XVALS in
+  // scripts/precision-refs-continuous.py), required because DNCT_XVALS there holds one x-list
+  // per (nu, mu, theta) tuple and (5, 5, 120) is already claimed by the positive-x group above.
+  // This gates the x*mu<0 branch (issue #1235) at mu=5, theta=120 -- the exact parameter regime
+  // the #1235 bug report was originally filed against -- which the sibling [5, 2, 120] group
+  // deliberately avoids (see its own comment below) because NoncentralT.fnm saturates near the
+  // Poisson(60)-significant nu0~105-145 range at mu=5 (issue #1250, NOT fixed by this group).
+  // Candidate points were measured empirically (not assumed) against this file's own precedent
+  // before being included or excluded:
+  //   x=-0.1, -0.2, -0.25: EXCLUDED -- pdf(x) is not merely imprecise but wrong by 6-18 orders
+  //     of magnitude (e.g. x=-0.1: ranjs 1.04e-25 vs mpmath-reference 5.46e-7). Root cause:
+  //     _pdfPoissonMixture's per-term NoncentralT.fnm(nu0+2, ...) - NoncentralT.fnm(nu0, ...)
+  //     difference is bit-for-bit 0 across the ENTIRE Poisson-significant nu0 range at these x,
+  //     not just the narrow band #1250 currently describes -- both fnm calls collapse onto the
+  //     same phi = 0.5*(1+erf(-mu/sqrt2)) plateau (phi depends only on mu, not nu0, and mu=5
+  //     pushes it to ~0.99999996) well before their nu0-dependent correction terms separate.
+  //     This is the same fnm-near-boundary precision floor as #1250, just manifesting far more
+  //     broadly than that issue's own text anticipates; flagged separately via bug triage rather
+  //     than gated here (a gate that always fails, or one loose enough to accept 10^18 relative
+  //     error, serves no regression-detection purpose).
+  //   x=-0.45, -0.5, -0.7: EXCLUDED -- pdf/cdf errors climb into the 1e-3 to 1.5 range as x
+  //     moves deeper into the tail (x=-0.7 reproduces the #1235 solution doc's already-documented
+  //     ~1.7x pdf floor), and x=-0.7's quantile round-trip returns exactly NaN (d.q(cdf) with
+  //     cdf=2.62e-16), which no qtol value could pass. See the #1235 solution doc's "Residual
+  //     Limitation" section for the full accounting of this regime; #1250 is the tracked fix.
+  //   x=-0.3, -0.35, -0.4: INCLUDED -- pdf/cdf/quantile-round-trip errors here (worst case at
+  //     x=-0.4: pdf 8.9e-6, cdf 1.3e-4, q round-trip 1.2e-5) are far tighter than the excluded
+  //     points, still far looser than this file's existing DoublyNoncentralT tolerances (loosest
+  //     precedent elsewhere in this file: tol 1e-8, cdfTol 1e-7, qtol 1e-8), so tol/cdfTol/qtol
+  //     below are a genuinely new (documented) loose-tolerance floor for this file -- but with
+  //     5-9x measured margin at every point, meaningfully tighter than "tests almost nothing"
+  //     (a regression back toward the pre-#1235 ~130x-475x cancellation bug fails this by orders
+  //     of magnitude). Reference pdf/cdf via mpmath mp.dps=50 (dnct_pdf/dnct_cdf in
+  //     scripts/precision-refs-continuous.py), independent of ranjs's own implementation.
+  // See solutions/testing/2026-08-01-2037-dnct-mu5-negx-precision-gate-conditioning-inversion.md
+  // for why the included/excluded points above invert the "closer to the mode is better-
+  // conditioned" intuition.
+  {
+    name: 'DoublyNoncentralT',
+    params: [5, 5, 120],
+    tol: 5e-5,
+    cdfTol: 1e-3,
+    qtol: 1e-4,
+    points: [
+      { x: -0.3, pdf: 1.8266462385869508e-9, cdf: 6.076899024084247e-11 },
+      { x: -0.35, pdf: 4.075330583218124e-10, cdf: 1.3380441248733746e-11 },
+      { x: -0.4, pdf: 8.905303105662145e-11, cdf: 2.8946422024934806e-12 }
+    ]
+  },
+  // DoublyNoncentralT[5, 2, 120] (issue #1235): covers the x*mu<0 branch of _pdf (the
+  // wynnEpsilon-based alternating series, previously up to ~130x relative pdf error at x=-1.0),
+  // now a cancellation-free Poisson(theta/2)-mixture-of-noncentral-t sum -- see
+  // solutions/correctness/2026-07-31-1300-doubly-noncentral-t-pdf-cancellation-x-mu-negative.md.
+  // mu=2 (not the issue's own mu=5) is deliberate: at mu=5 with this same theta=120, the fix's
+  // own NoncentralT.fnm(nu0, mu, z) building block saturates to exactly 1.0 near the Poisson(60)
+  // peak (nu0 ~ 105-145) -- a separate, deeper double-precision floor inside NoncentralT.fnm
+  // itself (out of scope here; the true tail probability being represented is far below
+  // Number.EPSILON there). mu=2 keeps that saturation out of the Poisson weight's significant
+  // region, so pdf here measures ~1e-13 to 7e-10 relative error at every point (worst case at
+  // x=-0.5). tol is gated to that actual pdf accuracy (3e-9, ~4x margin over the measured
+  // 6.96e-10 worst case) rather than the group-wide 1e-7 this group previously shared between
+  // pdf and cdf -- that shared value masked the fix's true precision behind cdf's floor (below).
+  // cdfTol: 1e-7 stays loose because the group-level floor for cdf comes from the UNCHANGED
+  // _cdf, not from this fix's pdf: _cdf's own relative error at x=-0.7 measured ~2.1e-8
+  // (unrelated pre-existing accumulated-rounding behavior, same class as the _N_NCT groups
+  // elsewhere in this file; out of scope for issue #1235). qtol: 1e-8 keeps ~8x margin over
+  // the measured q(cdf(x)) round-trip error, which inherits cdf's floor and measures up to
+  // ~1.3e-9 at x=-0.7.
+  {
+    name: 'DoublyNoncentralT',
+    params: [5, 2, 120],
+    tol: 3e-9,
+    cdfTol: 1e-7,
+    qtol: 1e-8,
+    points: [
+      { x: -0.1, pdf: 0.08731113573386305, cdf: 0.0062876468126633715 },
+      { x: -0.2, pdf: 0.02249929148445704, cdf: 0.001420945339993741 },
+      { x: -0.3, pdf: 0.0046920072911948996, cdf: 0.0002665259567531051 },
+      { x: -0.5, pdf: 0.00011926259655702153, cdf: 5.832913967064171e-6 },
+      { x: -0.7, pdf: 1.7852739570545148e-6, cdf: 8.034659857942625e-8 }
+    ]
+  },
+  // Far-tail probes for LogNormal (issue #808): erfc path eliminates cancellation, so
+  // 1e-14 tolerance is achievable at p≈1.35e-3 (−3σ), p≈2.87e-7 (−5σ), p≈1.28e-12 (−7σ).
+  {
+    name: 'LogNormal',
+    params: [0, 2],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: 0.002478752176666358, pdf: 0.8939676288854222, cdf: 0.001349898031630095 },
+      { x: 4.5399929762484854e-05, pdf: 0.016373588268883323, cdf: 2.866515718791939e-07 },
+      { x: 8.315287191035679e-07, pdf: 5.49272694887334e-06, cdf: 1.279812543885835e-12 }
+    ]
+  },
+  {
+    name: 'LogNormal',
+    params: [1, 0.5],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: 0.6065306597126334, pdf: 0.01461376549056155, cdf: 0.001349898031630095 },
+      { x: 0.22313016014842982, pdf: 1.3326029199686027e-05, cdf: 2.866515718791939e-07 },
+      { x: 0.0820849986238988, pdf: 2.2256735241523284e-10, cdf: 1.279812543885835e-12 }
+    ]
+  },
+  {
+    name: 'LogNormal',
+    params: [-1, 1],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: 0.01831563888873418, pdf: 0.2419707245191433, cdf: 0.001349898031630095 },
+      { x: 0.0024787521766663585, pdf: 0.0005997854600913624, cdf: 2.866515718791939e-07 },
+      { x: 0.00033546262790251185, pdf: 2.723021776070751e-08, cdf: 1.279812543885835e-12 }
+    ]
+  },
+  // Far-tail probes for Normal (issue #808): erfc path eliminates cancellation, so
+  // 1e-14 tolerance is achievable at p≈1.35e-3 (−3σ), p≈2.87e-7 (−5σ), p≈1.28e-12 (−7σ).
+  {
+    name: 'Normal',
+    params: [0, 2],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: -6.0, pdf: 0.002215924205969004, cdf: 0.001349898031630095 },
+      { x: -10.0, pdf: 7.433597573671488e-07, cdf: 2.866515718791939e-07 },
+      { x: -14.0, pdf: 4.567360204182297e-12, cdf: 1.279812543885835e-12 }
+    ]
+  },
+  {
+    name: 'Normal',
+    params: [3, 0.5],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: 1.5, pdf: 0.008863696823876015, cdf: 0.001349898031630095 },
+      { x: 0.5, pdf: 2.9734390294685954e-06, cdf: 2.866515718791939e-07 },
+      { x: -0.5, pdf: 1.8269440816729187e-11, cdf: 1.279812543885835e-12 }
+    ]
+  },
+  {
+    name: 'Normal',
+    params: [-1, 1],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: -4.0, pdf: 0.004431848411938008, cdf: 0.001349898031630095 },
+      { x: -6.0, pdf: 1.4867195147342977e-06, cdf: 2.866515718791939e-07 },
+      { x: -8.0, pdf: 9.134720408364594e-12, cdf: 1.279812543885835e-12 }
+    ]
+  },
+  {
+    name: 'TruncatedExponential',
+    params: [1, 0, 3],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: 0.09984386391614918, pdf: 0.952395696491256, cdf: 0.1 },
+      { x: 0.3355620822229121, pdf: 0.7523956964912559, cdf: 0.3 },
+      { x: 0.7003991199535634, pdf: 0.522395696491256, cdf: 0.53 },
+      { x: 1.152498343804564, pdf: 0.332395696491256, cdf: 0.72 },
+      { x: 1.9323440553173516, pdf: 0.15239569649125592, cdf: 0.9 }
+    ]
+  },
+  {
+    name: 'TruncatedExponential',
+    params: [2, 1, 4],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: 1.052542568334791, pdf: 1.8049698233136893, cdf: 0.1 },
+      { x: 1.1778065927212007, pdf: 1.4049698233136891, cdf: 0.3 },
+      { x: 1.3761156474642777, pdf: 0.9449698233136892, cdf: 0.53 },
+      { x: 1.6333059846276181, pdf: 0.5649698233136893, cdf: 0.72 },
+      { x: 2.140260761977984, pdf: 0.20496982331368913, cdf: 0.9 }
+    ]
+  },
+  {
+    name: 'TruncatedExponential',
+    params: [0.5, 0, 10],
+    tol: 1e-14,
+    qtol: 1e-14,
+    points: [
+      { x: 0.20922426997367125, pdf: 0.4533918274531521, cdf: 0.1 },
+      { x: 0.7075828274795053, pdf: 0.3533918274531521, cdf: 0.3 },
+      { x: 1.4949063881708025, pdf: 0.2383918274531521, cdf: 0.53 },
+      { x: 2.5115758251827334, pdf: 0.14339182745315213, cdf: 0.72 },
+      { x: 4.487422315132828, pdf: 0.0533918274531521, cdf: 0.9 }
     ]
   }
 ]

@@ -2268,9 +2268,14 @@ PDFCDF_TOL = {
     ('DoublyNoncentralT', '[5, 0, 2]'): '1e-13',
     ('DoublyNoncentralT', '[5, 1, 2]'): '1e-12',
     ('DoublyNoncentralT', '[6, 2, 1]'): '1e-12',
+    # These three (and DoublyNoncentralBeta[2,2,1200,1200] below) are documentation only --
+    # PRESERVE_VERBATIM controls their actual tol/qtol/cdfTol/comment output (see PRESERVE_VERBATIM
+    # for why), but the correct measured values are recorded here too so this table stays an
+    # accurate reference for every group regardless of which mechanism emits it.
     ('DoublyNoncentralT', '[5, 0, 120]'): '1e-13',
     ('DoublyNoncentralT', '[5, 5, 120]'): '1e-11',
     ('DoublyNoncentralT', '[5, 2, 120]'): '3e-9',
+    ('DoublyNoncentralBeta', '[2, 2, 1200, 1200]'): '1e-11',
     ('SkewNormal', '[1, 1, 3]'): '1e-12',
     ('Rice', '[0.5, 2]'): '1e-13',
     ('Rice', '[7, 1]'): '5e-13',
@@ -2317,7 +2322,7 @@ Q_TOL = {
     ('NoncentralChi2', '[2, 1]'): '1e-13',
     ('NoncentralChi2', '[5, 58]'): '5e-13',
     ('NoncentralChi2', '[5, 62]'): '5e-13',
-    ('NoncentralChi2', '[268, 64]'): '1e-13',
+    ('NoncentralChi2', '[268, 64]'): '5e-13',
     ('NoncentralChi2', '[270, 64]'): '5e-13',
     ('NoncentralChi2', '[76, 692]'): '5e-14',
     ('NoncentralChi2', '[100, 900]'): '5e-13',
@@ -2328,9 +2333,12 @@ Q_TOL = {
     ('Rice', '[7, 1]'): '5e-13',
     ('DoublyNoncentralT', '[5, 1, 2]'): '1e-12',
     ('DoublyNoncentralT', '[6, 2, 1]'): '1e-12',
+    # Documentation only, per the PDFCDF_TOL comment above -- PRESERVE_VERBATIM controls output.
     ('DoublyNoncentralT', '[5, 0, 120]'): '5e-10',
     ('DoublyNoncentralT', '[5, 5, 120]'): '1e-11',
     ('DoublyNoncentralT', '[5, 2, 120]'): '1e-8',
+    ('DoublyNoncentralBeta', '[2, 2, 1200, 1200]'): '1e-13',
+    ('WrappedCauchy', '[1.0, 0.7]'): '1e-13',
     ('FisherZ', '[1, 1]'): '4e-14',
     ('FisherZ', '[5, 5]'): '1e-12',
     ('FisherZ', '[8, 4]'): '1e-12',
@@ -2368,7 +2376,12 @@ _N_MARCUM = ('x sits near marcumQ\'s series/asymptotic dispatch threshold (x=30)
 _N_MARCUM_RECURRENCE = ('cdf routes through marcumQ\'s transition band just BELOW its mu=135 '
                         'dispatch (mu=k/2=134), i.e. the three-term backward recurrence seeded by '
                         'quadrature; the seed rounding plus ~2.9x per-step amplification caps '
-                        'relative accuracy near 1e-13 (measured 1.8e-13 worst case, cdf)')
+                        'relative accuracy near 1e-13 (measured 1.8e-13 worst case, cdf). The '
+                        'q(cdf(x)) round-trip at x=370 inherits that same floor plus the quantile '
+                        'solver\'s own rounding and, like the [5,58]/[5,62] groups above, measured '
+                        'over 1e-13 in JIT-order-dependent full-suite runs (two separate full-suite '
+                        'CI runs measured 1.075e-13 and 1.663e-13; both pass in isolation) -- gate '
+                        'at 5e-13 (issue #1304)')
 _N_MARCUM_LARGEMU = ('cdf routes through marcumQ\'s transition band at exactly its mu=135 dispatch '
                      'boundary (mu=k/2=135), where the section 4.2 large-mu uniform asymptotic '
                      'expansion takes over. That expansion is truncated at (J=9, K=4), a depth '
@@ -2381,6 +2394,13 @@ _N_MARCUM_LARGEMU = ('cdf routes through marcumQ\'s transition band at exactly i
                      'is measured, not assumed: cdfTol: 1.6e-12 (1.04x over the isolated value) '
                      'also passes the full parallel suite, so unlike the _N_MARCUM groups this one '
                      'shows no JIT-order inflation')
+# DoublyNoncentralT[5, 0, 120]/[5, 2, 120]/[5, 5, 120] each carry a much longer, hand-expanded
+# investigation writeup in test/precision-continuous.js than a one-line NOTES entry can hold
+# without becoming an unreadable wall of text -- see PRESERVE_VERBATIM below, which preserves
+# those comments (and the DoublyNoncentralBeta[2,2,1200,1200] comment) verbatim instead. The
+# three constants that used to back those three NOTES entries (_N_F11_BOUNDARY,
+# _N_F11_RECURRENCE, _N_PDF_CANCELLATION) were deleted for the same reason: PRESERVE_VERBATIM
+# reads the on-disk comment directly and never consults NOTES for these keys.
 _N_MARCUM_RECURRENCE_LARGEX = ('cdf routes through marcumQ\'s transition band well below its mu=135 '
                      'dispatch (mu=k/2=38), at a large enough xi=sqrt(lambda*x)~694-706 that _fc\'s '
                      'modified-Lentz continued fraction previously truncated at the shared MAX_ITER=100 '
@@ -2412,30 +2432,6 @@ _N_1292_ODD = ('odd-k counterpart of the matching even-k set above, exercising b
                'in _hi\'s continued fraction: its shared MAX_ITER=100 budget silently under-converged past '
                'x~250 (mirroring _fc\'s own #1286 fix), which this same PR corrects with a regime-aware '
                'iteration budget. ' + _N_1292_JIT_QTOL)
-_N_F11_BOUNDARY = (_N_NCT + '; additionally, x sits near f11\'s |z|=50 dispatch threshold '
-                   '(issue #1189); qtol: 1e-10 was measured to fail (~1.14e-10 error at '
-                   'x=1.1), qtol: 5e-10 passes with margin -- gate empirically at 5e-10. '
-                   'The x-range itself is kept narrow (0.5-1.2) because pdf(x), the quantile '
-                   'round-trip\'s local sensitivity 1/pdf(x), collapses fast away from the peak '
-                   'at this theta. theta=120 is also the only DoublyNoncentralT group here with '
-                   'theta large enough that exp(-theta/2) < Number.EPSILON, making it the sole '
-                   'regression coverage for the { useFloor: false } fix to _cdf\'s recursiveSum '
-                   'call in src/dist/doubly-noncentral-t.js')
-_N_F11_RECURRENCE = ('non-zero mu combined with theta=120 drives _pdf\'s general (mu != 0) '
-                     'branch\'s peak index j0 into the 17-30+ range, the regime where the '
-                     '₁F₁ three-term contiguous recurrence (formerly '
-                     '_f11Forward/_f11Backward) was numerically unstable in both directions '
-                     '(issue #1207) -- see solutions/correctness/2026-07-30-1600-doubly-noncentral-t-pdf-f11-recurrence-instability.md')
-_N_PDF_CANCELLATION = ('x*mu<0 branch of _pdf (issue #1235): replaced the wynnEpsilon-based '
-                       'alternating j-series (previously up to ~130x relative pdf error at '
-                       'x=-1.0) with the cancellation-free Poisson(theta/2)-mixture-of-noncentral-t '
-                       'formula _cdf already uses -- see '
-                       'solutions/correctness/2026-07-31-1300-doubly-noncentral-t-pdf-cancellation-x-mu-negative.md. '
-                       'tol: 3e-9 gates pdf to its own measured accuracy (~7e-10 worst case, at '
-                       'x=-0.5); cdfTol: 1e-7 stays loose separately because the UNCHANGED _cdf '
-                       'has its own, unrelated floor -- ~2.1e-8 relative at x=-0.7 -- that this '
-                       'fix does not touch; qtol: 1e-8 covers the round-trip, which inherits '
-                       'cdf\'s floor (~1.3e-9 measured at x=-0.7)')
 # Not wired into NOTES/PDFCDF_TOL below -- this constant documents the hand-maintained
 # DoublyNoncentralT[5, 5, 120] negative-x group (see DNCT_NEGX_XVALS above), whose comment in
 # test/precision-continuous.js is the actual source of truth (render() never touches that group).
@@ -2468,9 +2464,7 @@ NOTES = {
     ('DoublyNoncentralT', '[5, 0, 2]'): _N_NCT,
     ('DoublyNoncentralT', '[5, 1, 2]'): _N_NCT,
     ('DoublyNoncentralT', '[6, 2, 1]'): _N_NCT,
-    ('DoublyNoncentralT', '[5, 0, 120]'): _N_F11_BOUNDARY,
-    ('DoublyNoncentralT', '[5, 5, 120]'): _N_F11_RECURRENCE,
-    ('DoublyNoncentralT', '[5, 2, 120]'): _N_PDF_CANCELLATION,
+    # [5, 0, 120] / [5, 5, 120] / [5, 2, 120] intentionally absent here -- see PRESERVE_VERBATIM.
     ('SkewNormal', '[1, 1, 3]'): 'cdf uses Owen T and q() root-finds on it; both lose a few ULPs beyond 1e-14',
     ('Rice', '[0.5, 2]'): _N_SERIES,
     ('Rice', '[3.16, 1]'): _N_SERIES,
@@ -2507,6 +2501,30 @@ NOTES = {
     ('UniformProduct', '[4]'): 'q() has no closed form (numerical root-finding); round-trip measured at 1.4e-13 in JIT-order-dependent full-suite runs — gate at 5e-13 (#759)',
     ('UniformProduct', '[6]'): _N_ROOT,
     ('VonMises', '[0, 11]'): 'series/transform accumulates a few ULPs beyond 1e-14; q() has no closed form (numerical root-finding), which loosens the round-trip further',
+    ('Beta', '[4, 3]'): "x straddles regularizedBetaIncomplete's direct/complementary continued-fraction dispatch at x=(alpha+1)/(alpha+beta+2)=5/9 (issue #1178)",
+    ('F', '[6, 8]'): "internal beta-argument z=d1*x/(d1*x+d2) straddles regularizedBetaIncomplete's direct/complementary continued-fraction dispatch at z=(alpha+1)/(alpha+beta+2)=4/9 (issue #1178)",
+    ('InverseGaussian', '[2, 3]'): "x straddles _cdf's erfc(-a) series/continued-fraction dispatch at -a=1 (issue #1178)",
+    ('Levy', '[2, 3]'): "x straddles _cdf's erfc series/continued-fraction dispatch at z=sqrt(0.5*c/(x-mu))=1 (issue #1178)",
+    ('NoncentralBeta', '[2, 3, 4]'): "x straddles regularizedBetaIncomplete(iAlpha0, beta, x)'s direct/complementary continued-fraction dispatch at x=(iAlpha0+1)/(iAlpha0+beta+2)=5/9, where iAlpha0=alpha+round(lambda/2)=4 (issue #1178)",
+    ('NoncentralF', '[6, 8, 4]'): 'internal beta-argument z=d1*x/(d1*x+d2) straddles the underlying NoncentralBeta dispatch at z=(iAlpha0+1)/(iAlpha0+beta+2)=6/11, where iAlpha0=alpha+round(lambda/2)=5 (issue #1178)',
+    ('SkewNormal', '[0, 1, 1]'): "straddles owenT's own |a|=1 dispatch boundary (SkewNormal[0, 1, 2] straddles its |h|=0.67 boundary) (src/special/owen-t.js:303-311, issue #1186); both matched mpmath to ~1e-16 relative error, so the default tol/qtol apply",
+    ('ExponentiallyModifiedGaussian', '[1, 0.3, 5]'): 'params chosen so the 0.9-quantile point crosses mu + lambda*sigma^2 = 1.45, the _erfcTerm branch boundary -- unlike a wider-spread stress case, this exercises both the erfcx(arg>0) and naive-erfc(arg<=0) branches at 1e-14 tolerance',
+    ('WrappedCauchy', '[-2.0, 0.05]'): "support is the mu-centred window [mu-pi, mu+pi] (matching scipy's vonmises(loc=mu) convention), so these x-values fall outside the canonical [-pi,pi] range -- expected here",
+    ('WrappedCauchy', '[1.0, 0.7]'): 'qtol loosened to 1e-13: the p=0.1 quantile lands at x~=0.0049 for this parameter set, and the atan2-based cdf / atan-based quantile round-trip differs by ~1 ULP in absolute terms -- ~6e-14 relative error once amplified by x being this close to zero',
+}
+# Keys whose on-disk comment in test/precision-continuous.js is too long (multi-paragraph
+# empirical writeups) or too structurally different (per-point provenance comments inside
+# points:) for the single-line-above-`{` NOTES convention to reproduce without becoming either
+# an unreadable wall of text or losing content entirely. render() skips fresh emission for these
+# keys (see the `if key in PRESERVE_VERBATIM: continue` below) so their exact on-disk text --
+# comment, tol, qtol, cdfTol and all -- is preserved verbatim on every regeneration via the same
+# occurrence-counting mechanism that already preserves TruncatedExponential and the Normal/
+# LogNormal far-tail groups (issue #1287).
+PRESERVE_VERBATIM = {
+    ('DoublyNoncentralBeta', '[2, 2, 1200, 1200]'),
+    ('DoublyNoncentralT', '[5, 0, 120]'),
+    ('DoublyNoncentralT', '[5, 2, 120]'),
+    ('DoublyNoncentralT', '[5, 5, 120]'),
 }
 
 
@@ -2523,6 +2541,13 @@ def compute_cache(only=None):
     # lists of dicts for e.g. Hyperexponential -- unhashable, so params can never be a dict key);
     # a name/set-count mismatch against the live PARAM_SETS (e.g. a param set was added since the
     # cache was built) falls back to recomputing that distribution rather than reusing stale data.
+    # This produces exactly one cache entry per PARAM_SETS (name, params) pair, in PARAM_SETS's own
+    # order -- render()'s preserve-vs-fresh logic depends on that one-entry-per-key structure. A
+    # hand-built cache for verification purposes (e.g. seeded from the checked-in output instead of
+    # recomputing via mpmath) must mirror it, not just dump every on-disk REFS group 1:1, or
+    # duplicate-key hand-maintained groups get double-counted and JSON serialization can silently
+    # collapse float literals like `1.0` to `1`. See
+    # solutions/testing/2026-08-02-1213-naive-cache-seed-false-positive-round-trip-corruption.md
     prev_by_name = {}
     if only:
         if os.path.exists(CACHE):
@@ -2579,26 +2604,25 @@ def existing_groups(path):
     if not m:
         return []
     start = m.end() - 1
-    # Brace-depth scanning below must ignore literal '{'/'}' characters that appear inside a
-    # `//`-only comment line (e.g. a comment referencing a JS snippet like `{ useFloor: false }`,
-    # or set notation like `{1, 2}`) -- otherwise a balanced brace pair INSIDE a comment is
-    # misread as a whole group span, corrupting every span after it. scan_src blanks out
-    # comment-only lines (preserving length and newlines, so span indices still index into the
-    # real `src` below) so the structural scan only ever sees actual object-literal syntax.
-    scan_src = ''.join(
-        ' ' * len(ln) if ln.strip().startswith('//') else ln
-        for ln in src.splitlines(keepends=True))
+    # Justification comments (e.g. DoublyNoncentralT[5, 0, 120]'s reference to
+    # `{ useFloor: false }`, or set notation like `{1, 2}`) can contain literal brace
+    # characters; scanning `src` itself would desync the depth counter on them, misreading a
+    # balanced brace pair INSIDE a comment as a whole group span and corrupting every span
+    # after it. `masked` blanks `//`-to-end-of-line text while preserving every character's
+    # index (and all newlines), so span boundaries found in `masked` line up exactly with the
+    # real text extracted from `src` below.
+    masked = re.sub(r'//[^\n]*', lambda cm: ' ' * len(cm.group(0)), src)
     depth = 0
     spans = []
     span_start = None
     for i in range(start, len(src)):
-        if scan_src[i] == '[' or scan_src[i] == '{':
-            if scan_src[i] == '{' and depth == 1:
+        if masked[i] == '[' or masked[i] == '{':
+            if masked[i] == '{' and depth == 1:
                 span_start = i
             depth += 1
-        elif scan_src[i] == ']' or scan_src[i] == '}':
+        elif masked[i] == ']' or masked[i] == '}':
             depth -= 1
-            if scan_src[i] == '}' and depth == 1:
+            if masked[i] == '}' and depth == 1:
                 spans.append((span_start, i + 1))
             if depth == 0:
                 break
@@ -2610,7 +2634,14 @@ def existing_groups(path):
         gap = src[prev_end:span_start]
         comment_lines = [ln for ln in gap.splitlines() if ln.strip().startswith('//')]
         comment = ('\n'.join(comment_lines) + '\n') if comment_lines else ''
-        text = comment + src[span_start:span_end]
+        # span_start points at the `{` itself, not its line's leading indent (which the
+        # comment-capture above intentionally skips too, since it only keeps `//` lines) --
+        # without re-adding it here, every preserved group's `{` loses the 2-space indent
+        # every freshly-generated group gets from render()'s f-string below, and the loss is
+        # normally masked by `npm run standard --fix` silently re-indenting it after any
+        # regeneration, hiding a real byte-identical-output gap. See
+        # solutions/tooling/2026-08-02-1214-preserved-group-indent-loss-masked-by-standard-fix.md
+        text = comment + '  ' + src[span_start:span_end]
         gm = re.search(r"name:\s*'([^']+)',\s*params:\s*([\s\S]*?),\n\s*tol:", text)
         if gm:
             key = (gm.group(1), re.sub(r'\s+', ' ', gm.group(2).strip()))
@@ -2636,6 +2667,13 @@ def render(cache, allow_prune=False):
         name, p = g['name'], g['params']
         jp = js_params(p)
         key = (name, jp)
+        if key in PRESERVE_VERBATIM:
+            # Skip fresh emission entirely (not just tolerance/comment lookup) so this key
+            # never enters new_keys -- the preserve walk below then treats every one of its
+            # on-disk occurrences as unreproduced-by-cache surplus, same as a group with no
+            # PARAM_SETS entry at all, and carries its exact text (comment, tol, qtol, cdfTol)
+            # forward unchanged.
+            continue
         # existing_groups() reads the on-disk JS literal (unquoted keys, e.g.
         # Hyperexponential's [[{ weight: 1, ... }]]), which json.dumps-based jp can never
         # match for nested-object params -- js_lit(p) is what actually gets written to disk.
@@ -2721,7 +2759,12 @@ describe('continuous-distribution precision gate', () => {{
   beforeEach(() => {{ _rng = Math.random; Math.random = () => 0.5 }})
   afterEach(() => {{ Math.random = _rng }})
 
-  REFS.forEach(({{ name, params, tol, qtol, points }}) => {{
+  // pdfTol/cdfTol default to the group's shared tol so the vast majority of groups (which
+  // hit the same double-precision floor for both methods) are unaffected; only a group whose
+  // pdf and cdf floors genuinely diverge (e.g. DoublyNoncentralT[5, 2, 120], issue #1235 --
+  // pdf is gated tight while cdf keeps a pre-existing, out-of-scope looser floor) needs to
+  // set them explicitly.
+  REFS.forEach(({{ name, params, tol, qtol, pdfTol = tol, cdfTol = tol, points }}) => {{
     describe(`${{name}}(${{JSON.stringify(params)}})`, () => {{
       // Construct in a before() hook so a constructor regression surfaces as a failing
       // hook rather than silently skipping every assertion in this group.
@@ -2729,20 +2772,20 @@ describe('continuous-distribution precision gate', () => {{
       before(() => {{ d = new dist[name](...params) }})
       // One test per method (not per point): the message pinpoints the failing x, while
       // pdf/cdf/quantile stay isolated so a regression in one does not mask the others.
-      it(`pdf to ${{tol}} relative error`, () => {{
+      it(`pdf to ${{pdfTol}} relative error`, () => {{
         points.forEach(({{ x, pdf }}) => {{
           // Guard the relative form against an exact-zero reference (pdf can vanish at an
           // interior point, e.g. UQuadratic at its centre).
           if (pdf === 0) assert.strictEqual(d.pdf(x), 0, `pdf at x=${{x}}`)
-          else assert.approximately(d.pdf(x) / pdf, 1, tol, `pdf at x=${{x}}`)
+          else assert.approximately(d.pdf(x) / pdf, 1, pdfTol, `pdf at x=${{x}}`)
         }})
       }})
-      it(`cdf to ${{tol}} relative error`, () => {{
+      it(`cdf to ${{cdfTol}} relative error`, () => {{
         points.forEach(({{ x, cdf }}) => {{
           // Guard the relative form against an exact-zero reference (defensive: all current
           // probes have cdf >= 0.1, but a future grid change could include a near-zero p).
           if (cdf === 0) assert.strictEqual(d.cdf(x), 0, `cdf at x=${{x}}`)
-          else assert.approximately(d.cdf(x) / cdf, 1, tol, `cdf at x=${{x}}`)
+          else assert.approximately(d.cdf(x) / cdf, 1, cdfTol, `cdf at x=${{x}}`)
         }})
       }})
       it(`quantile round-trips q(cdf(x)) = x to ${{qtol}}`, () => {{
