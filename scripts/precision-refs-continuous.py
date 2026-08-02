@@ -13,8 +13,13 @@ exact Poisson/chi-squared mixture / high-precision quadrature), matching the sam
 block re-derives the scipy refVals already vetted in that file and aborts on any mismatch.
 
 Requires: pip install mpmath
-Usage:    python3 scripts/precision-refs-continuous.py                        # rewrites the test file
-          python3 scripts/precision-refs-continuous.py --check                # self-check only
+Usage:    python3 scripts/precision-refs-continuous.py                        # self-check only, writes nothing
+          python3 scripts/precision-refs-continuous.py --check                # self-check only, writes nothing
+              # (identical to the bare form above -- any first argument other than --emit/--render
+              # falls through to the same self_check() dispatch, per __main__ below. --emit is
+              # required to actually regenerate test/precision-continuous.js -- see
+              # solutions/tooling/2026-08-02-1830-precision-refs-bare-invocation-runs-self-check-not-emit.md)
+          python3 scripts/precision-refs-continuous.py --emit                 # rewrites the test file
           python3 scripts/precision-refs-continuous.py --emit --only Name1,Name2
               # recompute only the named distributions, reusing the previous run's cached
               # points (/tmp/precision-continuous-cache.json) for everything else -- avoids
