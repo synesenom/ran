@@ -415,6 +415,46 @@ describe('dist', () => {
     })
   })
 
+  // Regression #1308: exp(kappa*cos(x-mu)) and besselI(0,kappa) both independently overflow to
+  // Infinity for kappa gtrsim 710-720, giving Infinity/Infinity = NaN in _pdf and in every term of
+  // _cdf's series. Checked directly here (bypassing dist-runner.js's full per-case suite, which
+  // includes a full-support cdfMonotonicity/qGalois sweep) because that generic sweep reaches deep
+  // into the tail (many hundred std devs out at this kappa), where cdf's own
+  // 0.5*(1+dx/pi) + sum/pi decomposition cancels two O(1) terms down to a value far below double
+  // precision's ~1e-16 floor -- a separate, pre-existing numerical characteristic of that formula,
+  // not something this issue's besselI -> besselIExpScaled substitution fixes or is required to fix.
+  describe('VonMises pdf/cdf overflow at large kappa (issue #1308)', () => {
+    // mpmath mp.dps=50: exp(kappa*cos(x-mu))/(2*pi*besseli(0,kappa)), quad(pdf, mu-pi, x)
+    it('pdf/cdf should return finite, correctly-valued results past the ~710-720 overflow ceiling', () => {
+      assert.approximately(new dist.VonMises(0, 720).pdf(0), 10.70288510336534, 1e-12)
+      assert.approximately(new dist.VonMises(0, 800).pdf(0), 11.282027613043011, 1e-12)
+      assert.approximately(new dist.VonMises(0, 800).pdf(0.001), 11.27751570481559, 1e-12)
+      assert.approximately(new dist.VonMises(0, 800).cdf(0), 0.5, 1e-12)
+      assert.approximately(new dist.VonMises(0, 800).cdf(0.001), 0.511280523523265, 1e-12)
+      assert.approximately(new dist.VonMises(0, 800).cdf(0.5), 1.0, 1e-12)
+      assert.approximately(new dist.VonMises(0, 1000).pdf(0), 12.614084961627448, 1e-12)
+      assert.approximately(new dist.VonMises(0, 1000).cdf(0.03), 0.8285699111859811, 1e-12)
+      assert.approximately(new dist.VonMises(0, 2000).pdf(0), 17.840125839903298, 1e-12)
+      assert.approximately(new dist.VonMises(0, 2000).cdf(0.02), 0.814434375264046, 1e-12)
+    })
+
+    it('cdf should stay within [0, 1] deep in the tail despite the 0.5+g(dx) cancellation floor', () => {
+      const d = new dist.VonMises(0, 800)
+      for (const x of [-3, -2.7, -1, -0.5, -0.2, -0.1, 0.1, 0.5, 1, 2.7, 3]) {
+        const c = d.cdf(x)
+        assert.isAtLeast(c, 0, `cdf(${x}) = ${c}`)
+        assert.isAtMost(c, 1, `cdf(${x}) = ${c}`)
+      }
+    })
+
+    // Root-finding at a moderate (non-deep-tail) point still recovers x correctly post-fix.
+    it('q(cdf(x)) should round-trip at kappa = 800 for a moderate x', () => {
+      const d = new dist.VonMises(0, 800)
+      const x = -0.1
+      assert.approximately(d.q(d.cdf(x)), x, 1e-6)
+    })
+  })
+
   // The single-argument new VonMises(kappa) form (implicitly mu = 0) is deprecated in favor of
   // new VonMises(mu, kappa), but must keep working identically until its removal in v1.33.0.
   // The "warns exactly once" assertion depends on this being the SOLE legacy single-argument
