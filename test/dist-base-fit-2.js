@@ -77,7 +77,8 @@ describe('dist', () => {
         const result = dist.F.fit(data)
         assert(result instanceof dist.F)
         // Profile MLE has strictly higher lnL than the moment-seed answer
-        assert(new dist.F(result.params().d1, result.params().d2).lnL(data) > new dist.F(4, 14).lnL(data))
+        const { d1, d2 } = result.params()
+        assert(new dist.F(d1, d2).lnL(data) > new dist.F(4, 14).lnL(data))
       })
 
       it('FisherZ._fitPenalty should return 0', () => {
