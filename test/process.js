@@ -2311,19 +2311,16 @@ describe('process.CompoundPoisson', () => {
       // pdf(x) = sum_{n=1}^{inf} Poisson(lambda*t).pdf(n) * Gamma(n*alpha, beta).pdf(x) and
       // cdf(x) = exp(-lambda*t)*(x>=0) + sum_{n=1}^{inf} Poisson(lambda*t).pdf(n) * Gamma(n*alpha, beta).cdf(x).
       // The series is truncated at N = 30, where the Poisson(3) tail 1 - cdf(30) is far below
-      // 1e-12, so truncation error is negligible next to the 1e-8 comparison tolerance.
-      const mu = marginal.mean()
-      const lambdaT = lambda * t
-      const poissonN = new Poisson(lambdaT)
-      const N = 30
-      let pdfRef = 0
-      let cdfRef = Math.exp(-lambdaT) * (mu >= 0 ? 1 : 0)
-      for (let n = 1; n <= N; n++) {
-        const weight = poissonN.pdf(n)
-        const gammaN = new Gamma(n * alpha, beta)
-        pdfRef += weight * gammaN.pdf(mu)
-        cdfRef += weight * gammaN.cdf(mu)
-      }
+      // 1e-12, so truncation error is negligible next to the comparison tolerance.
+      // mu = lambda*t*alpha/beta = 2*1.5*2/3 (exact rational) = 2.
+      const mu = 2
+      // mpmath mp.dps=50: sum_{n=1}^{30} Poisson(3).pmf(n) * Gamma(2n, scale=1/3).pdf(2), with
+      // Gamma.pdf/cdf and Poisson.pmf reimplemented from scratch via mpmath's own
+      // exp/log/loggamma/gammainc -> 0.26858960310934577112955117114307537913148585514259
+      const pdfRef = 0.26858960310934576
+      // mpmath mp.dps=50: exp(-3) + sum_{n=1}^{30} Poisson(3).pmf(n) * Gamma(2n, scale=1/3).cdf(2)
+      // -> 0.56348946343750803140234169015766437926068330168143
+      const cdfRef = 0.563489463437508
       assert.closeTo(marginal.pdf(mu), pdfRef, 1e-8)
       assert.closeTo(marginal.cdf(mu), cdfRef, 1e-8)
     })
