@@ -60,7 +60,8 @@ function _kn (n, x) {
 // Signals _hi's non-convergence to the caller instead of letting it return silently, matching
 // the "throw on exceeded iteration budget" convention in src/algorithms/rejection.js and
 // mirroring marcum-q.js's _assertFcConverged, which checks the same continued-fraction
-// convergence shape (#1311).
+// convergence shape (#1311). See decisions/0049-continued-fraction-convergence-throw.md for
+// why this throws rather than returning NaN.
 function _assertHiConverged (ratio, n, x, maxIter) {
   if (Math.abs(ratio) > EPS) {
     throw Error(`_hi: continued fraction failed to converge for n=${n}, x=${x} after ${maxIter} iterations`)
@@ -248,6 +249,8 @@ function _besselISphericalPositiveOrder (n, x) {
  * @param {number} n Order of the spherical Bessel function. Must be an integer.
  * @param {number} x Value to evaluate the function at.
  * @returns {number} The modified spherical Bessel function of the first kind.
+ * @throws {Error} If n > 1 and the underlying continued fraction (_hi) fails to converge
+ * within its regime-aware iteration budget.
  * @private
  */
 export function besselISpherical (n, x) {
@@ -279,6 +282,8 @@ export function besselISpherical (n, x) {
  * @param {number} n Order of the spherical Bessel function. Must be an integer.
  * @param {number} x Non-negative value to evaluate the function at.
  * @returns {number} exp(-x) times the modified spherical Bessel function of the first kind.
+ * @throws {Error} If n >= 2 and |x| >= 1 and the underlying continued fraction (_hi) fails to
+ * converge within its regime-aware iteration budget.
  * @private
  */
 export function besselISphericalExpScaled (n, x) {
