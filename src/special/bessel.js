@@ -220,6 +220,25 @@ function _besselISphericalTaylor (n, x) {
   return sum
 }
 
+// Extracted from besselISpherical's default branch to keep that function's own cyclomatic
+// complexity down (CodeScene Complex Method) -- the n>0 case (Taylor series, negative-x
+// parity, Wronskian).
+function _besselISphericalPositiveOrder (n, x) {
+  if (Math.abs(x) < _BESSEL_I_SPH_THRESHOLD) {
+    return _besselISphericalTaylor(n, x)
+  }
+  // i_n(x) is entire with only x^(n+2k) terms in its series, so it has definite
+  // parity (-1)^n; _hi's continued fraction assumes x > 0 (its iteration budget
+  // takes Math.sqrt(x)), so negative x is mapped to positive via this identity
+  // rather than passed through unabsed (#1324).
+  if (x < 0) {
+    return (n % 2 === 0 ? 1 : -1) * besselISpherical(n, -x)
+  }
+  // Use Wronskian with single run k-calculation
+  const k = _kn(n + 1, x)
+  return 1 / (x * x * (_hi(n + 1, x) * k[1] + k[0]))
+}
+
 /**
  * Computes the modified spherical Bessel function of the first kind. Only integer order is supported.
  * Source: http://cpc.cs.qub.ac.uk/summaries/ADGM_v1_0.html (Numerical methods for special functions).
@@ -241,16 +260,10 @@ export function besselISpherical (n, x) {
         : (Math.cosh(x) - Math.sinh(x) / x) / x
     default:
       if (n > 0) {
-        if (Math.abs(x) < _BESSEL_I_SPH_THRESHOLD) {
-          return _besselISphericalTaylor(n, x)
-        }
-        // Use Wronskian with single run k-calculation
-        const k = _kn(n + 1, x)
-        return 1 / (x * x * (_hi(n + 1, x) * k[1] + k[0]))
-      } else {
-        // Backward recurrence for negative orders
-        return (n + n + 3) * besselISpherical(n + 1, x) / x + besselISpherical(n + 2, x)
+        return _besselISphericalPositiveOrder(n, x)
       }
+      // Backward recurrence for negative orders
+      return (n + n + 3) * besselISpherical(n + 1, x) / x + besselISpherical(n + 2, x)
   }
 }
 
