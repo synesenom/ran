@@ -215,8 +215,9 @@ class Distribution {
    * @memberof ran.dist.Distribution
    * @param {number} x Value to evaluate distribution at.
    * @returns {number} The probability density or probability mass.
-   * @throws {Error} Currently reachable only via NoncentralChi/NoncentralChi2 when k is odd: if
-   * the internal Bessel continued fraction fails to converge for an extreme argument. See
+   * @throws {Error} Currently reachable only via NoncentralChi/NoncentralChi2 when k is odd and
+   * k >= 7 (odd k of 1, 3, or 5 map to a Bessel order that never reaches the continued fraction):
+   * if the internal Bessel continued fraction fails to converge for an extreme argument. See
    * decisions/0049-continued-fraction-convergence-throw.md. Propagates through any method that
    * calls pdf(), i.e. hazard(), lnPdf(), lnL(), aic(), and bic().
    * @example
