@@ -272,7 +272,17 @@ class NoncentralT extends Distribution {
     // See _pdfDirect's JSDoc for why this pair of conditions (not just the nu>=30 one) is needed.
     const phi = 0.5 * (1 + erf(-mu / Math.SQRT2))
     const stuckAtPhi = Math.abs(a - phi) < 1e-12 || Math.abs(b - phi) < 1e-12
-    const nearOppositeBoundary = nu >= 30 && Math.abs(a - b) < 1e-9
+    // fnm's own absolute noise floor (for mu=0, from regularizedBetaIncomplete at large nu/2; for
+    // mu!=0, from the AS243 recursive sum) grows roughly linearly with nu, while the fast path's
+    // nu/x prefactor amplifies that noise by the same factor -- so a flat |a-b| threshold that was
+    // safe at the nu=30 regime #1250/#1318 tuned stops catching large-nu cases where |a-b| is
+    // amplified-noise-corrupted but still far above 1e-9 (#1325: NoncentralT(10000,0).pdf(0.5) lost
+    // ~8 significant digits at |a-b|=1.76e-5). The nu-scaled threshold targets an amplified-noise-
+    // to-candidate-value ratio of ~1e-10 (two orders of magnitude below this method's ~1e-13 target,
+    // to margin the noise model's imprecision at very large nu) -- empirically validated across nu
+    // from 30 to 100000.
+    // See solutions/correctness/2026-08-03-1336-noncentral-t-large-nu-pdf-precision-fix.md
+    const nearOppositeBoundary = nu >= 30 && Math.abs(a - b) < nu * Number.EPSILON * 1e10
     if (stuckAtPhi || nearOppositeBoundary) {
       return NoncentralT._pdfDirect(nu, mu, x)
     }
@@ -289,6 +299,33 @@ class NoncentralT extends Distribution {
     const mean = data.reduce((s, x) => s + x, 0) / n
     const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
     return [variance > 1 ? Math.max(3, Math.round(2 * variance / (variance - 1))) : 3, mean]
+  }
+
+  /**
+   * A bounded Powell search budget, mirroring DoublyNoncentralBeta's own `_powellOptions()`
+   * (#1063) rather than the base class's unbounded `{ tol: 1e-8, maxIter: 200 }` default. Data
+   * that isn't genuinely noncentral-t-shaped (e.g. bounded/circular data with no good t fit) has
+   * no interior optimum in nu -- the log-likelihood keeps improving as nu grows, so an unbounded
+   * search chases it into the thousands-to-tens-of-thousands range. Since #1325's nu-scaled
+   * nearOppositeBoundary gate (see _pdf) correctly routes _pdf through the ~80x-more-expensive
+   * _pdfDirect once nu is that large, an unbounded search on such data multiplies that per-call
+   * cost by hundreds of thousands of likelihood evaluations (measured: NoncentralT.fit() on
+   * VonMises(0,2)-sampled data took >150s and never finished). `tol=1e-3` (looser than the
+   * default 1e-8, tighter than DoublyNoncentralBeta's 1e-2, which was measured to under-recover
+   * nu on this file's own dist-base-fit-2.js NoncentralT(5,1) regression test) cuts the same
+   * pathological fit to ~9s while reproducing the well-matched-data fit's converged (nu, mu) to
+   * within floating-point noise (measured bit-for-bit identical nu, mu differing only in the 6th
+   * decimal) -- confirming the bound is not starving genuine convergence, only the runaway case.
+   * See solutions/correctness/2026-08-03-1336-noncentral-t-large-nu-pdf-precision-fix.md
+   *
+   * @method _powellOptions
+   * @memberof ran.dist.NoncentralT
+   * @returns {Object} The bounded Powell search options.
+   * @protected
+   * @ignore
+   */
+  static _powellOptions () {
+    return { tol: 1e-3, maxIter: 15 }
   }
 
   /**
