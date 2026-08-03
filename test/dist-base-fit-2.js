@@ -242,6 +242,65 @@ describe('dist', () => {
         assert(Math.abs(result.params().mu - 1) < 0.3)
       })
 
+      it('NoncentralT.fit should complete quickly on data shaped like the reported regression (#1325)', function () {
+        this.timeout(60000)
+        // Exact reproduction of the case that motivated NoncentralT._powellOptions()
+        // (src/dist/noncentral-t.js): VonMises(0, 2)-sampled data is bounded/circular, not
+        // t-shaped, so the log-likelihood has no interior optimum in nu -- it keeps improving
+        // as nu grows, which in turn routes _pdf through the ~80x-more-expensive _pdfDirect
+        // path (the nu-scaled nearOppositeBoundary gate added in #1325). An unbounded Powell
+        // search chases this ridge past 150s without finishing; the bounded budget caps it.
+        // Asserting on the _pdfDirect call count (not wall-clock time) is the deterministic,
+        // load-independent regression guard, matching this file's own DoublyNoncentralF
+        // pdfCalls guard above. An isolated run measured 21551 calls and ~12s; the ceiling
+        // below sits at ~1.9x that count, comfortably above measured noise while still well
+        // under the unbounded-search blowup this guards against.
+        const data = new dist.VonMises(0, 2).seed(5).sample(500)
+
+        let pdfDirectCalls = 0
+        const origPdfDirect = dist.NoncentralT._pdfDirect
+        dist.NoncentralT._pdfDirect = function (nu, mu, x) {
+          pdfDirectCalls++
+          return origPdfDirect.call(this, nu, mu, x)
+        }
+        let result
+        try {
+          result = dist.NoncentralT.fit(data)
+        } finally {
+          dist.NoncentralT._pdfDirect = origPdfDirect
+        }
+
+        // Lower bound guards against a future regression where fit() short-circuits without
+        // actually running Powell (which would trivially satisfy an upper-bound-only assertion).
+        assert(pdfDirectCalls > 0, `fit() made only ${pdfDirectCalls} _pdfDirect calls, expected the optimizer to run`)
+        assert(pdfDirectCalls < 40000, `fit() made ${pdfDirectCalls} _pdfDirect calls, expected well under 40000`)
+        assert(result instanceof dist.NoncentralT)
+      })
+
+      it('NoncentralT.fit should show no quality loss from the bounded Powell search budget on well-matched data (#1325)', () => {
+        // Locks in the invariant documented in the _powellOptions() JSDoc
+        // (src/dist/noncentral-t.js): on well-matched data (genuinely NoncentralT-shaped, unlike
+        // the VonMises regression case above), the bounded budget (tol=1e-3, maxIter=15) reaches
+        // essentially the same optimum as an unbounded search. Reproduces the same data as this
+        // file's 'NoncentralT.fit should recover nu and mu close to planted values' test above,
+        // comparing the shipped bounded fit's log-likelihood against a relaxed fit using the base
+        // class's own unbounded default (tol=1e-8, maxIter=200). An isolated run measured the two
+        // lnL values differing by ~2.5e-11 (floating-point noise, not a real quality gap);
+        // tolerance (1e-6) sits well above that measured noise while remaining tight enough to
+        // catch a real regression that would starve the bounded search on data it should fit well.
+        const data = new dist.NoncentralT(5, 1).seed(42).sample(300)
+        const bounded = dist.NoncentralT.fit(data)
+        const origOptions = dist.NoncentralT._powellOptions
+        dist.NoncentralT._powellOptions = () => ({ tol: 1e-8, maxIter: 200 })
+        let relaxed
+        try {
+          relaxed = dist.NoncentralT.fit(data)
+        } finally {
+          dist.NoncentralT._powellOptions = origOptions
+        }
+        assert(Math.abs(bounded.lnL(data) - relaxed.lnL(data)) < 1e-6)
+      })
+
       it('DoublyNoncentralChi2.fit should recover total df and noncentrality close to planted values', () => {
         const data = new dist.DoublyNoncentralChi2(2, 3, 1, 2).seed(42).sample(500)
         const result = dist.DoublyNoncentralChi2.fit(data)

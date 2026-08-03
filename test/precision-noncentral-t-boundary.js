@@ -29,7 +29,7 @@ import * as dist from '../src/dist'
 // pdf/cdf rather than folding it into the existing [5, 5, 120] precision-gate group, since that
 // group is regenerated wholesale by scripts/precision-refs-continuous.py and this point's own
 // tolerances (see below) were derived by hand, not by that script.
-describe('NoncentralT/DoublyNoncentralT near-CDF-boundary precision (#1250, #1302, #1318)', () => {
+describe('NoncentralT/DoublyNoncentralT near-CDF-boundary precision (#1250, #1302, #1318, #1325)', () => {
   it('NoncentralT.fnm saturates to exactly 1 at the reported regime (documents the unfixable-in-fnm-itself IEEE754 floor)', () => {
     // nu0 = nu + 2i for i in the Poisson(60) weight's significant range (~50-70) that
     // DoublyNoncentralT(5, 5, 120)._pdfPoissonMixture evaluates at x = -0.7; the true survival
@@ -172,5 +172,98 @@ describe('NoncentralT/DoublyNoncentralT near-CDF-boundary precision (#1250, #130
     const d = new dist.DoublyNoncentralT(5, 1, 2)
     assert.approximately(d.pdf(-2.0) / pdfRef, 1, 1e-12)
     assert.approximately(d.cdf(-2.0) / cdfRef, 1, 1e-12)
+  })
+
+  it('NoncentralT(10000, 0).pdf(0.5) matches mpmath (issue #1325: nearOppositeBoundary\'s flat 1e-9 threshold missed the nu-amplified noise floor at large nu)', () => {
+    // fnm's own absolute noise floor (here, from regularizedBetaIncomplete at a=nu/2=5000) grows
+    // roughly linearly with nu, while the fast path's nu/x prefactor amplifies that noise by the
+    // same factor -- so the pre-fix flat `|a-b| < 1e-9` threshold never fired here even though
+    // |a-b| = 1.76e-5 was already amplified-noise-corrupted. Pre-fix this returned
+    // 0.3520526413036684, ~9.5e-8 relative error (the issue's own reported number).
+    // mpmath mp.dps=50 reference (independently re-derived via nu*(nct_cdf(nu+2,...)-nct_cdf(nu,...))/x
+    // at mp.workdps(35), the same nct_pdf/nct_cdf formula as scripts/precision-refs-continuous.py,
+    // not read off ranjs): nct_pdf(10000, 0, 0.5) -> 0.35205267468981716
+    const ref = 0.35205267468981716
+    const d = new dist.NoncentralT(10000, 0)
+    assert.approximately(d.pdf(0.5) / ref, 1, 1e-12)
+  })
+
+  it('NoncentralT(10000, 1).pdf(0.5) matches mpmath (issue #1325: mu != 0 large-nu case)', () => {
+    // mpmath mp.dps=50 reference (same independent nct_pdf/nct_cdf formula as above):
+    // nct_pdf(10000, 1, 0.5) -> 0.35205707532532715
+    const ref = 0.35205707532532715
+    const d = new dist.NoncentralT(10000, 1)
+    assert.approximately(d.pdf(0.5) / ref, 1, 1e-12)
+  })
+
+  it('NoncentralT(10000, 0).pdf(0.01) matches mpmath (issue #1325: small-x large-nu case, |a-b| already far below the pre-fix "safe" 1e-9 floor)', () => {
+    // Pre-fix, |a-b| = 3.99e-7 at this point -- already below what the old flat threshold's
+    // intuition would call "safe", yet still 400x above the literal 1e-9 cutoff, so the gate never
+    // fired and the fast path returned a value with ~5.5e-5 relative error.
+    // mpmath mp.dps=50 reference (same independent nct_pdf/nct_cdf formula as above):
+    // nct_pdf(10000, 0, 0.01) -> 0.39891235885795423
+    const ref = 0.39891235885795423
+    const d = new dist.NoncentralT(10000, 0)
+    assert.approximately(d.pdf(0.01) / ref, 1, 1e-11)
+  })
+
+  it('NoncentralT(30000, 0).pdf(1.0) matches mpmath (issue #1325: a second, higher-nu large-nu case)', () => {
+    // mpmath mp.dps=50 reference (same independent nct_pdf/nct_cdf formula as above):
+    // nct_pdf(30000, 0, 1.0) -> 0.2419666917297459
+    const ref = 0.2419666917297459
+    const d = new dist.NoncentralT(30000, 0)
+    assert.approximately(d.pdf(1.0) / ref, 1, 1e-10)
+  })
+
+  it('NoncentralT(100, 1).pdf(0.5) pins the _pdfDirect-fallback gate OFF for a moderate-nu case (issue #1325: no regression in the nu in [30, 300] regime #1318 validated)', () => {
+    // At nu=100, |a-b| ~= 1.76e-3, far above the new nu-scaled threshold (nu * EPSILON * 1e10 ~=
+    // 2.22e-4 at nu=100), so the fast path must still be taken -- confirming the nu-scaling does
+    // not widen the fallback's reach into the already-accurate moderate-nu regime.
+    // mpmath mp.dps=50 reference (same independent nct_pdf/nct_cdf formula as above):
+    // nct_pdf(100, 1, 0.5) -> 0.3512411049965726
+    const ref = 0.3512411049965726
+    const originalPdfDirect = dist.NoncentralT._pdfDirect
+    dist.NoncentralT._pdfDirect = () => {
+      throw new Error('NoncentralT._pdfDirect fallback fired for a moderate-nu parameter set that should stay on the fast path')
+    }
+    try {
+      const d = new dist.NoncentralT(100, 1)
+      assert.approximately(d.pdf(0.5) / ref, 1, 1e-12)
+    } finally {
+      dist.NoncentralT._pdfDirect = originalPdfDirect
+    }
+  })
+
+  it('NoncentralT(340, 0).pdf(1.0) proves the fallback fires just inside the nu-scaled threshold and matches mpmath there (issue #1325: closes the untested crossover between the nu=100 comfortably-below and nu=10000+ comfortably-above cases above)', () => {
+    // Neither extreme above can catch an under-scaled threshold typo (e.g. `1e10` -> `1e9`, or the
+    // `nu *` factor dropped entirely): nu=100's |a-b| stays ~7.9x its threshold even after a 10x
+    // shrink, and nu=10000/30000's |a-b| stays ~1000x below its threshold even after the same 10x
+    // shrink -- both keep taking the same code path regardless, so a formula bug that only
+    // under-scales the threshold slips through undetected. This point sits right at the boundary
+    // instead: at (nu, x) = (340, 1.0), |a-b| = 7.106332968150886e-4 against threshold
+    // nu*EPSILON*1e10 = 7.549516567451064e-4 (ratio ~0.941, gate ON by a margin measured, not
+    // assumed). A `1e9` typo shrinks the threshold 10x to ~7.5e-5, pushing the ratio to ~9.4 and
+    // flipping the gate OFF at this exact point; dropping the `nu *` factor shrinks it far more
+    // (to EPSILON*1e10 ~= 2.22e-6, ratio ~320), also flipping OFF. Either bug is caught two ways
+    // below: directly (fallbackFired goes false) and indirectly (the fast path's own accuracy here,
+    // measured at ~2.15e-11 relative error, fails the tight tolerance).
+    // mpmath mp.dps=50 reference (same independent nct_pdf/nct_cdf formula as the other #1325 cases
+    // above, mp.workdps(35) for the CDF quadrature, not read off ranjs):
+    // nct_pdf(340, 0, 1.0) -> 0.24161532091192695
+    // Measured relative error of the correct (fallback) path is ~9.0e-14; 1e-12 keeps an ~11x margin.
+    const ref = 0.24161532091192695
+    const originalPdfDirect = dist.NoncentralT._pdfDirect
+    let fallbackFired = false
+    dist.NoncentralT._pdfDirect = (...args) => {
+      fallbackFired = true
+      return originalPdfDirect(...args)
+    }
+    try {
+      const d = new dist.NoncentralT(340, 0)
+      assert.approximately(d.pdf(1.0) / ref, 1, 1e-12)
+      assert.isTrue(fallbackFired, 'expected the nu-scaled nearOppositeBoundary gate to fire just inside its threshold at (nu, x) = (340, 1.0)')
+    } finally {
+      dist.NoncentralT._pdfDirect = originalPdfDirect
+    }
   })
 })
