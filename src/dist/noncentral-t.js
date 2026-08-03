@@ -264,10 +264,19 @@ class NoncentralT extends Distribution {
   _pdf (x) {
     if (Math.abs(x) < Number.EPSILON) {
       return this.c.pdfAt0
-    } else {
-      const diff = this._fnmDiff({ nu: this.p.nu + 2, x: x * this.c.nuScale }, { nu: this.p.nu, x })
-      return Math.max(0, this.p.nu * diff / x)
     }
+
+    const { nu, mu } = this.p
+    const a = NoncentralT.fnm(nu + 2, mu, x * this.c.nuScale)
+    const b = NoncentralT.fnm(nu, mu, x)
+    // See _pdfDirect's JSDoc for why this pair of conditions (not just the nu>=30 one) is needed.
+    const phi = 0.5 * (1 + erf(-mu / Math.SQRT2))
+    const stuckAtPhi = Math.abs(a - phi) < 1e-12 || Math.abs(b - phi) < 1e-12
+    const nearOppositeBoundary = nu >= 30 && Math.abs(a - b) < 1e-9
+    if (stuckAtPhi || nearOppositeBoundary) {
+      return NoncentralT._pdfDirect(nu, mu, x)
+    }
+    return Math.max(0, nu * (a - b) / x)
   }
 
   _cdf (x) {
@@ -283,31 +292,50 @@ class NoncentralT extends Distribution {
   }
 
   /**
-   * Difference NoncentralT.fnm(hi.nu, mu, hi.x) - NoncentralT.fnm(lo.nu, mu, lo.x), falling back
-   * to a NoncentralT.snm (direct survival) difference when the result cannot be trusted. This is
-   * the same fnm boundary-saturation failure #1250 fixed for
-   * DoublyNoncentralT._pdfPoissonMixture's identical fnm-difference pattern, confirmed (#1302) to
-   * also occur directly on _pdf's own difference above: at nu=30, mu=5, x=40, both fnm calls
-   * saturate to exactly 1, silently zeroing the density against an mpmath (mp.dps=50) reference of
-   * ~1.54e-18. Thresholds reused verbatim from DoublyNoncentralT._fnmDiff, not re-derived -- #1250
-   * validated them against the full npm test suite, including the fit()-exploration performance
-   * trap a naive boundary-proximity check falls into.
-   * See solutions/correctness/2026-08-01-2030-noncentral-t-fnm-snm-boundary-saturation.md
+   * Density via direct quadrature of the class's own defining formula (see the class-level JSDoc
+   * above), used by _pdf whenever its fast fnm-difference identity cannot be trusted. Unlike that
+   * identity -- which differences two O(1)-magnitude CDF values and loses all precision if they
+   * saturate to the same float (#1250, #1302, #1318) -- this integrand (a Gaussian bump times a
+   * y^nu power-law weight) is a single positive quantity with no cancellation anywhere in its
+   * evaluation, so it stays accurate at every (nu, mu, x) tested, including the low-nu (as low as
+   * 1) regime where NoncentralT._pdf's own call site operates and NoncentralT.snm's tanh-sinh
+   * domain (tuned only for nu>=30, per its own JSDoc) is not reliable.
+   * Integration domain: centered on the integrand's analytic saddle point (maximizing
+   * nu*ln(y) - 0.5*(y-a)^2 in log-space gives y^2 - a*y - nu = 0, positive root), with a width
+   * derived from the local curvature there, rather than a fixed additive margin -- a fixed margin
+   * under-resolves the peak once nu is large enough to push its intrinsic width well below that
+   * margin (confirmed: an earlier [0, a+40] prototype was ~1e-7 relative error at nu=10000, vs
+   * ~1e-13 for this saddle-point-centered domain, cross-checked against the closed-form central-t
+   * density for mu=0 across nu from 1 to 10000).
+   * See solutions/correctness/2026-08-02-2040-noncentral-t-fnmdiff-saturation-fix.md
    *
-   * @method _fnmDiff
+   * @method _pdfDirect
    * @memberof ran.dist.NoncentralT
-   * @param {Object} hi Minuend fnm call, as { nu, x }.
-   * @param {Object} lo Subtrahend fnm call, as { nu, x }.
-   * @returns {number} The CDF difference.
-   * @private
+   * @param {number} nu Degrees of freedom.
+   * @param {number} mu Non-centrality parameter.
+   * @param {number} x Value to evaluate the density at.
+   * @returns {number} The probability density.
+   * @static
+   * @ignore
    */
-  _fnmDiff (hi, lo) {
-    const { mu } = this.p
-    const diff = NoncentralT.fnm(hi.nu, mu, hi.x) - NoncentralT.fnm(lo.nu, mu, lo.x)
-    if (lo.nu >= 30 && Math.abs(diff) < 1e-9) {
-      return NoncentralT.snm(lo.nu, mu, lo.x) - NoncentralT.snm(hi.nu, mu, hi.x)
-    }
-    return diff
+  static _pdfDirect (nu, mu, x) {
+    const a = mu * x / Math.sqrt(x * x + nu)
+    const logC = (nu / 2) * Math.log(nu) - nu * mu * mu / (2 * (x * x + nu)) -
+      0.5 * Math.log(Math.PI) - logGamma(nu / 2) - ((nu - 1) / 2) * Math.log(2) -
+      ((nu + 1) / 2) * Math.log(x * x + nu)
+    const integrand = y => y <= 0 ? 0 : Math.exp(nu * Math.log(y) - 0.5 * (y - a) * (y - a) + logC)
+    // The sum here cancels for |a| large and negative, but that regime is unreachable in
+    // representable pdf() output: the same -0.5*a^2-scale term that would make yStar's error
+    // matter has already underflowed the density itself to exactly 0 well before cancellation
+    // becomes numerically significant (measured: the critical |mu| where _pdfDirect's own return
+    // value underflows stays under ~40 across nu from 1 to 1e7, three-plus orders of magnitude
+    // short of where this sum's cancellation error exceeds quadrature noise).
+    const yStar = (a + Math.sqrt(a * a + 4 * nu)) / 2
+    const width = 20 / Math.sqrt(nu / (yStar * yStar) + 1)
+    // Defensive, not corrective: the integrand is provably non-negative and tanhSinh sums only
+    // non-negative weight*value terms, so this cannot currently go negative -- kept for symmetry
+    // with _pdf's fast-path clamp and as a guard against a future integrand/algorithm change.
+    return Math.max(0, tanhSinh(integrand, Math.max(0, yStar - width), yStar + width))
   }
 }
 

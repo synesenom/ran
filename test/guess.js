@@ -153,10 +153,13 @@ describe('guess', () => {
     // independently-shipped correctness fixes landing together: #1298 added a second
     // `phi`-equality trustworthiness check to DoublyNoncentralT._fnmDiff/_cdfTerm that fires more
     // often during .fit() exploration than the original magnitude-only gate alone did, and #1302
-    // (merged in the same window) added an analogous NoncentralT._fnmDiff fallback that pays the
+    // (merged in the same window) added an analogous NoncentralT saturation-fallback that pays the
     // same class of cost -- each individually stayed within the previous budget in isolation, but
     // together exceeded it under contention. See CHANGELOG.md's #1298 entry and
     // solutions/correctness/2026-08-02-2100-noncentral-t-fnm-dual-saturation-mechanism.md.
+    // #1318 later corrected NoncentralT's own gate (a second blind spot below #1302's nu>=30 floor)
+    // and replaced its fallback with a direct-quadrature helper (NoncentralT._pdfDirect); measured
+    // unchanged timing (~24-26s) post-#1318, so the 120000 budget set here still applies.
     this.timeout(120000)
     const data = new dist.Normal(5, 2).seed(42).sample(500)
     const result = guess(data)
