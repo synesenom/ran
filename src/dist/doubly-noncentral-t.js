@@ -160,6 +160,21 @@ export default class DoublyNoncentralT extends Distribution {
    * predecessor fix (2) preserves) and
    * solutions/correctness/2026-08-02-2100-noncentral-t-fnm-dual-saturation-mechanism.md (the origin of (1))
    *
+   * Issue #1317 investigated whether the (1) phi-check above could gain a nu-magnitude
+   * pre-filter, mirroring (2)'s `nu0 >= 30` gate, to cut the runtime this check added to
+   * test/guess.js's default-pool .fit() sweep (~23-24s pre-#1298 to ~48-52s after). Direct
+   * instrumentation of that exact sweep found the small-y regime this check targets -- assumed
+   * above to be "not the O(1)-scale case .fit()'s optimizer exploration evaluates" -- is in fact
+   * hit constantly: (1) alone fires on ~65% of all _fnmDiff calls, and of the fires (2) does not
+   * also catch, 99.96% change the returned difference by more than 1e-12 (one measured case:
+   * 5.31e-5 corrected to 3.82e-6, at hi.nu=14, lo.nu=12, x=~0.04-0.045) -- i.e. almost every fire
+   * is load-bearing, not defensive. 99.98% of those fires have nu0 < 30, the same low-nu regime
+   * `.fit()`'s optimizer explores most (`_fitInit` seeds nu as low as 3) and the regime #1298's
+   * own reported case (nu=5) sits in -- so any nu-magnitude gate narrow enough to reduce the fire
+   * rate would exclude cases already proven necessary, reopening #1298. No pre-filter was added;
+   * the ~48-52s runtime is the accepted steady-state cost of this correctness fix.
+   * See solutions/performance/2026-08-02-2148-doubly-noncentral-t-phi-check-not-optimizable.md
+   *
    * @method _fnmDiff
    * @memberof ran.dist.DoublyNoncentralT
    * @param {number} mu Non-centrality parameter shared by both calls.
@@ -343,6 +358,12 @@ export default class DoublyNoncentralT extends Distribution {
    * See solutions/correctness/2026-08-01-2030-noncentral-t-fnm-snm-boundary-saturation.md (the
    * predecessor fix (2) preserves) and
    * solutions/correctness/2026-08-02-2100-noncentral-t-fnm-dual-saturation-mechanism.md (the origin of (1))
+   *
+   * Issue #1317 measured this helper's own (1) fire rate during test/guess.js's default-pool
+   * .fit() sweep at ~0.8% (12 of 1500 calls) -- negligible next to _fnmDiff's ~65% above, so
+   * _cdfTerm is not a meaningful contributor to the post-#1298 runtime increase. See _fnmDiff's
+   * comment for the full firing-rate/necessity analysis and why no nu-magnitude pre-filter was
+   * added to either helper's (1) check.
    *
    * @method _cdfTerm
    * @memberof ran.dist.DoublyNoncentralT
