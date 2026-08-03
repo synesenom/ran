@@ -1,4 +1,4 @@
-import { besselI } from '../special'
+import { besselIExpScaled } from '../special'
 import Distribution from './_distribution'
 import { EPS, MAX_ITER, MAX_SERIES_ITER } from '../core/constants'
 
@@ -50,7 +50,7 @@ export default class VonMises extends Distribution {
 
     // Speed-up constants
     this.c = {
-      besselI0Kappa: besselI(0, kappaValue),
+      besselI0ExpScaled: besselIExpScaled(0, kappaValue),
       ratioUnifScale: kappaValue > 1.3 ? 1 / Math.sqrt(kappaValue) : Math.PI * Math.exp(-kappaValue)
     }
   }
@@ -77,7 +77,11 @@ export default class VonMises extends Distribution {
   }
 
   _pdf (x) {
-    return Math.exp(this.p.kappa * Math.cos(x - this.p.mu)) / (2 * Math.PI * this.c.besselI0Kappa)
+    // exp(kappa*cos(x-mu)) and I_0(kappa) both independently overflow past kappa ~ 710-720,
+    // giving Infinity/Infinity. Subtracting 1 inside the exponent (cos(x-mu)-1 <= 0 always)
+    // and dividing by the exp(-kappa)-scaled Bessel value keeps the combined exponent bounded
+    // while leaving the mathematical ratio unchanged (issue #1308, same technique as #1292).
+    return Math.exp(this.p.kappa * (Math.cos(x - this.p.mu) - 1)) / (2 * Math.PI * this.c.besselI0ExpScaled)
   }
 
   _cdf (x) {
@@ -86,23 +90,32 @@ export default class VonMises extends Distribution {
     //
     // Convergence cannot be checked on the raw term besselI(i, kappa) * sin(i*(x-mu)) / i: at
     // x - mu = k*pi/4, sin(4(x-mu)) (and sin(8(x-mu)), ...) vanishes to machine-epsilon by pure
-    // floating-point coincidence, independent of how far besselI(i, kappa)/besselI0Kappa has
-    // actually decayed. For kappa gtrsim 6-9 that ratio is still large at i=4, so a check on the
+    // floating-point coincidence, independent of how far besselIExpScaled(i, kappa)/besselI0ExpScaled
+    // has actually decayed. For kappa gtrsim 6-9 that ratio is still large at i=4, so a check on the
     // raw oscillating term declares convergence ~10+ orders too early. |sin| <= 1 bounds the term
-    // by its envelope besselI(i, kappa) / (besselI0Kappa * i), so checking convergence on the
-    // envelope instead is both immune to the spurious sin zero and never terminates later than the
-    // true term would require.
+    // by its envelope besselIExpScaled(i, kappa) / (besselI0ExpScaled * i), so checking convergence
+    // on the envelope instead is both immune to the spurious sin zero and never terminates later
+    // than the true term would require.
     // See solutions/correctness/2026-07-26-1339-vonmises-cdf-oscillating-term-premature-convergence.md
+    //
+    // The raw (unscaled) besselI(i, kappa) and its i=0 counterpart both independently overflow
+    // past kappa ~ 710-720, giving Infinity/Infinity in every term; besselIExpScaled's shared
+    // exp(-kappa) factor cancels between numerator and denominator, leaving the envelope's value
+    // (and hence this convergence check) unchanged while keeping every quantity finite (#1308).
     const dx = x - this.p.mu
     let sum = 0
     for (let i = 1; i < MAX_SERIES_ITER; i++) {
-      const envelope = besselI(i, this.p.kappa) / (this.c.besselI0Kappa * i)
+      const envelope = besselIExpScaled(i, this.p.kappa) / (this.c.besselI0ExpScaled * i)
       sum += envelope * Math.sin(i * dx)
       if (envelope < EPS * Math.max(Math.abs(sum), 1)) {
         break
       }
     }
-    return 0.5 * (1 + dx / Math.PI) + sum / Math.PI
+    // Deep in the tail (large kappa, |dx| close to pi), 0.5*(1+dx/pi) and sum/pi are both O(1)
+    // and nearly cancel to a true result many orders of magnitude smaller than either term --
+    // floating-point rounding on that cancellation can push the result a few ULPs outside
+    // [0, 1]. Symmetric guard with Math.min(1, ...), same pattern as noncentral-beta.js:279.
+    return Math.max(0, Math.min(1, 0.5 * (1 + dx / Math.PI) + sum / Math.PI))
   }
 
   // ─── PROTECTED STATIC ───
