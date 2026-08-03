@@ -3,6 +3,7 @@ import { before, describe, it } from 'mocha'
 import { float } from '../src/core'
 import * as dist from '../src/dist'
 import PreComputed from '../src/dist/_pre-computed'
+import { Tests } from './test-utils'
 
 describe('dist', () => {
   describe('PreComputed', () => {
@@ -419,10 +420,9 @@ describe('dist', () => {
   // Infinity for kappa gtrsim 710-720, giving Infinity/Infinity = NaN in _pdf and in every term of
   // _cdf's series. Checked directly here (bypassing dist-runner.js's full per-case suite, which
   // includes a full-support cdfMonotonicity/qGalois sweep) because that generic sweep reaches deep
-  // into the tail (many hundred std devs out at this kappa), where cdf's own
-  // 0.5*(1+dx/pi) + sum/pi decomposition cancels two O(1) terms down to a value far below double
-  // precision's ~1e-16 floor -- a separate, pre-existing numerical characteristic of that formula,
-  // not something this issue's besselI -> besselIExpScaled substitution fixes or is required to fix.
+  // into the tail (many hundred std devs out at this kappa). #1308 left the tail's own cancellation
+  // floor unfixed (deep-tail cdf noise, not just the overflow) -- see the '#1320' describe block
+  // below, which closes that gap.
   describe('VonMises pdf/cdf overflow at large kappa (issue #1308)', () => {
     // mpmath mp.dps=50: exp(kappa*cos(x-mu))/(2*pi*besseli(0,kappa)), quad(pdf, mu-pi, x)
     it('pdf/cdf should return finite, correctly-valued results past the ~710-720 overflow ceiling', () => {
@@ -452,6 +452,44 @@ describe('dist', () => {
       const d = new dist.VonMises(0, 800)
       const x = -0.1
       assert.approximately(d.q(d.cdf(x)), x, 1e-6)
+    })
+  })
+
+  // Regression #1320: #1308's clamp kept cdf() within [0, 1] but did not fix the underlying
+  // cancellation -- 0.5*(1+dx/pi) and sum/pi are both O(1) and nearly cancel once the true
+  // tail probability drops below double precision's ~1e-16 absolute floor, producing
+  // non-monotonic noise (e.g. cdf(-0.357) > cdf(-0.355) at kappa=730, even though -0.355 is
+  // the larger x). Fixed by replacing the Fourier series with direct tanhSinh quadrature of
+  // the already cancellation-free _pdf, which is monotonic by construction (integrating a
+  // non-negative function is monotonic in its upper limit).
+  describe('VonMises cdf deep-tail cancellation (issue #1320)', () => {
+    it('cdf should be monotonic non-decreasing across the full support for kappa well past the cancellation threshold', () => {
+      for (const kappa of [730, 740, 750, 760, 780, 800, 900, 1000, 2000]) {
+        Tests.cdfMonotonicity(new dist.VonMises(0, kappa))
+      }
+    })
+
+    it('deep-tail cdf values should be meaningfully accurate, not just clamped to [0, 1]', () => {
+      // mpmath mp.dps=50: exp(kappa*cos(x))/(2*pi*besseli(0,kappa)), quad(pdf, [-pi, x])
+      const refs = [
+        { kappa: 730, x: -0.357, cdf: 4.2863928168446845e-22 },
+        { kappa: 730, x: -0.355, cdf: 7.167516869528729e-22 },
+        { kappa: 900, x: -0.3, cdf: 1.5510116968880855e-19 },
+        { kappa: 1000, x: -0.2, cdf: 1.3663888873225035e-10 },
+        { kappa: 2000, x: -0.15, cdf: 1.0314781639989326e-11 },
+        // exact rational: cdf(x) = 1 - cdf(-x) for mu=0 (pdf(t) = pdf(-t) by symmetry),
+        // so these positive-x entries reuse the mpmath negative-x references above rather
+        // than requiring an independent mpmath computation -- they exercise the dx > 0
+        // ("1 - tanhSinh(...)") branch of VonMises._cdf, which the negative-x-only refs above
+        // never reach.
+        { kappa: 730, x: 0.357, cdf: 1 - 4.2863928168446845e-22 },
+        { kappa: 730, x: 0.355, cdf: 1 - 7.167516869528729e-22 }
+      ]
+      for (const { kappa, x, cdf } of refs) {
+        const d = new dist.VonMises(0, kappa)
+        const c = d.cdf(x)
+        assert.approximately(c / cdf, 1, 1e-10, `kappa=${kappa}, x=${x}: cdf=${c}, expected ${cdf}`)
+      }
     })
   })
 

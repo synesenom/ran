@@ -1,6 +1,7 @@
 import { besselIExpScaled } from '../special'
 import Distribution from './_distribution'
-import { EPS, MAX_ITER, MAX_SERIES_ITER } from '../core/constants'
+import { MAX_ITER } from '../core/constants'
+import tanhSinh from '../algorithms/tanh-sinh'
 
 let warnedLegacyConstructor = false
 
@@ -85,37 +86,22 @@ export default class VonMises extends Distribution {
   }
 
   _cdf (x) {
-    // F(x) is computed according to the sum in https://docs.scipy.org/doc/scipy/reference/tutorial/stats/continuous_vonmises.html,
-    // shifted by mu since the series itself is only valid for the mu = 0, [-pi, pi] parameterization.
-    //
-    // Convergence cannot be checked on the raw term besselI(i, kappa) * sin(i*(x-mu)) / i: at
-    // x - mu = k*pi/4, sin(4(x-mu)) (and sin(8(x-mu)), ...) vanishes to machine-epsilon by pure
-    // floating-point coincidence, independent of how far besselIExpScaled(i, kappa)/besselI0ExpScaled
-    // has actually decayed. For kappa gtrsim 6-9 that ratio is still large at i=4, so a check on the
-    // raw oscillating term declares convergence ~10+ orders too early. |sin| <= 1 bounds the term
-    // by its envelope besselIExpScaled(i, kappa) / (besselI0ExpScaled * i), so checking convergence
-    // on the envelope instead is both immune to the spurious sin zero and never terminates later
-    // than the true term would require.
-    // See solutions/correctness/2026-07-26-1339-vonmises-cdf-oscillating-term-premature-convergence.md
-    //
-    // The raw (unscaled) besselI(i, kappa) and its i=0 counterpart both independently overflow
-    // past kappa ~ 710-720, giving Infinity/Infinity in every term; besselIExpScaled's shared
-    // exp(-kappa) factor cancels between numerator and denominator, leaving the envelope's value
-    // (and hence this convergence check) unchanged while keeping every quantity finite (#1308).
+    // Direct quadrature of the already cancellation-free _pdf (#1308) replaces the
+    // Fourier series 0.5*(1+dx/pi) + sum/pi, whose two O(1) terms cancelled below
+    // double precision's ~1e-16 floor deep in the tail, producing non-monotonic noise
+    // (#1320). Splitting at dx = 0 and using pdf(mu+t) = pdf(mu-t) symmetry keeps every
+    // integration interval on the side away from the density's peak at mu (monotone,
+    // smooth integrand -- tanhSinh's easiest case) and avoids subtracting two comparable
+    // O(1) quantities: the left branch returns the tail integral directly, and the
+    // right branch's "1 - " subtracts a value that is at most 0.5, never close to 1.
+    // The clamp below is defense-in-depth against a stray few-ULP excursion outside
+    // [0, 1] from tanhSinh's own quadrature error, matching noncentral-t.js's _cdf.
+    // See solutions/correctness/2026-08-02-2202-vonmises-cdf-deep-tail-cancellation.md
     const dx = x - this.p.mu
-    let sum = 0
-    for (let i = 1; i < MAX_SERIES_ITER; i++) {
-      const envelope = besselIExpScaled(i, this.p.kappa) / (this.c.besselI0ExpScaled * i)
-      sum += envelope * Math.sin(i * dx)
-      if (envelope < EPS * Math.max(Math.abs(sum), 1)) {
-        break
-      }
+    if (dx <= 0) {
+      return Math.min(Math.max(tanhSinh(t => this._pdf(t), this.s[0].value, x), 0), 1)
     }
-    // Deep in the tail (large kappa, |dx| close to pi), 0.5*(1+dx/pi) and sum/pi are both O(1)
-    // and nearly cancel to a true result many orders of magnitude smaller than either term --
-    // floating-point rounding on that cancellation can push the result a few ULPs outside
-    // [0, 1]. Symmetric guard with Math.min(1, ...), same pattern as noncentral-beta.js:279.
-    return Math.max(0, Math.min(1, 0.5 * (1 + dx / Math.PI) + sum / Math.PI))
+    return Math.min(Math.max(1 - tanhSinh(t => this._pdf(t), x, this.s[1].value), 0), 1)
   }
 
   // ─── PROTECTED STATIC ───
