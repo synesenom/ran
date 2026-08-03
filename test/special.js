@@ -223,12 +223,42 @@ describe('special', () => {
     // besselISpherical and besselISphericalExpScaled -- including large n relative to x, per
     // the "depth grows with x, not n" claim in _hi's comment -- and never fired: 7*sqrt(x)+20
     // keeps a comfortable margin over actual convergence depth throughout the whole domain
-    // besselISpherical's Wronskian branch is reached from. (Negative x also reaches the throw,
-    // but only via Math.sqrt(x) itself evaluating to NaN inside the maxIter formula -- a
-    // pre-existing gap in the n>=2 branch's missing sign handling, not a genuine non-convergence,
-    // so it isn't a legitimate case to pin here.) The check remains defensive: it guards the
-    // 7*sqrt(x)+20 margin against being falsified by a future change, not a path this test
-    // suite can currently force through valid input.
+    // besselISpherical's Wronskian branch is reached from. The check remains defensive: it
+    // guards the 7*sqrt(x)+20 margin against being falsified by a future change, not a path
+    // this test suite can currently force through valid input.
+
+    it('should satisfy the parity identity i_n(-x) = (-1)^n * i_n(x) for n > 1 (#1324)', () => {
+      // i_n(x) is an entire function of x -- its Taylor series has only x^(n+2k) terms --
+      // so it has definite parity (-1)^n. In the Taylor branch (|x| < 1), negative x is
+      // computed through the *same* series (no separate code path), so cross-checking it
+      // against the positive-x call is a genuine consistency test, not a tautology.
+      for (const n of [2, 3, 5, 7]) {
+        for (const x of [0.1, 0.5]) {
+          assert(equal(special.besselISpherical(n, -x), (n % 2 === 0 ? 1 : -1) * special.besselISpherical(n, x)))
+        }
+      }
+      // mpmath mp.dps=50: i_n(x) = sqrt(pi/(2x)) * I_{n+1/2}(x); i_2(0.5) = 0.01696636036086198
+      assert(equal(special.besselISpherical(2, -0.5), 0.01696636036086198))
+
+      // The Wronskian/_hi branch (|x| >= 1) is where #1324's bug actually lived: _hi(n, x)
+      // computed Math.sqrt(x) directly on the unmapped negative x, turning its iteration
+      // budget into NaN. besselISpherical(n, -x) maps internally to (-1)^n * besselISpherical(n, x),
+      // so asserting against that same formula would be tautological -- it would pass even if
+      // the underlying _hi/_kn computation were wrong. These are independently sourced from
+      // mpmath mp.dps=50 via i_n(x) = sqrt(pi/(2x)) * I_{n+1/2}(x), never derived from ranjs:
+      // i_2(2) = 0.3518560885534178, i_3(2) = 0.09474252219651647, i_7(2) = 7.097944523040642e-05
+      // i_2(9) = 316.7872223410896, i_5(9) = 81.7183759470097
+      assert(equal(special.besselISpherical(2, -2), 0.3518560885534178))
+      assert(equal(special.besselISpherical(3, -2), -0.09474252219651647))
+      assert(equal(special.besselISpherical(7, -2), -7.097944523040642e-05))
+      assert(equal(special.besselISpherical(2, -9), 316.7872223410896))
+      assert(equal(special.besselISpherical(5, -9), -81.7183759470097))
+      // mpmath mp.dps=50, negated per the parity identity (n odd, matching the "should return
+      // accurate large-argument values" test's i_3(50)/i_7(50) above): i_3(50) = 4.5930269336647156e+19
+      // -> i_3(-50) = -4.5930269336647156e+19; i_7(50) = 2.947924492475899e+19 -> i_7(-50) = -2.947924492475899e+19
+      assert(equal(special.besselISpherical(3, -50), -4.5930269336647156e+19, 10))
+      assert(equal(special.besselISpherical(7, -50), -2.947924492475899e+19, 10))
+    })
   })
 
   describe('.besselInu()', () => {

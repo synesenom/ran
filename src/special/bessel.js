@@ -244,6 +244,13 @@ export function besselISpherical (n, x) {
         if (Math.abs(x) < _BESSEL_I_SPH_THRESHOLD) {
           return _besselISphericalTaylor(n, x)
         }
+        // i_n(x) is entire with only x^(n+2k) terms in its series, so it has definite
+        // parity (-1)^n; _hi's continued fraction assumes x > 0 (its iteration budget
+        // takes Math.sqrt(x)), so negative x is mapped to positive via this identity
+        // rather than passed through unabsed (#1324).
+        if (x < 0) {
+          return (n % 2 === 0 ? 1 : -1) * besselISpherical(n, -x)
+        }
         // Use Wronskian with single run k-calculation
         const k = _kn(n + 1, x)
         return 1 / (x * x * (_hi(n + 1, x) * k[1] + k[0]))
