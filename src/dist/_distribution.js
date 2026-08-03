@@ -215,6 +215,10 @@ class Distribution {
    * @memberof ran.dist.Distribution
    * @param {number} x Value to evaluate distribution at.
    * @returns {number} The probability density or probability mass.
+   * @throws {Error} Currently reachable only via NoncentralChi/NoncentralChi2 when k is odd: if
+   * the internal Bessel continued fraction fails to converge for an extreme argument. See
+   * decisions/0049-continued-fraction-convergence-throw.md. Propagates through any method that
+   * calls pdf(), i.e. hazard(), lnPdf(), lnL(), aic(), and bic().
    * @example
    *
    * let pareto = new ran.dist.Pareto(1, 2)
