@@ -5138,10 +5138,15 @@ const REFS = [
   // peak (nu0 ~ 105-145) -- a separate, deeper double-precision floor inside NoncentralT.fnm
   // itself (out of scope here; the true tail probability being represented is far below
   // Number.EPSILON there). mu=2 keeps that saturation out of the Poisson weight's significant
-  // region, so pdf here measures ~1e-13 to 7e-10 relative error at every point (worst case at
-  // x=-0.5). tol is gated to that actual pdf accuracy (3e-9, ~4x margin over the measured
-  // 6.96e-10 worst case) rather than the group-wide 1e-7 this group previously shared between
-  // pdf and cdf -- that shared value masked the fix's true precision behind cdf's floor (below).
+  // region.
+  // tol tightened from 3e-9 to 2e-12 by issue #1332: this group's Poisson-mixture terms reach
+  // nu0 up to ~145, well past _fnmDiff's nu0>=30 saturation-gate guard, so tightening that gate's
+  // magnitude threshold from a flat 1e-9 to nu-scaled (nu0 * Number.EPSILON * 1e10, mirroring
+  // issue #1325's identical NoncentralT._pdf fix) closes a real gap here -- pdf now measures
+  // ~2e-15 to 2.2e-13 relative error at every point (worst case at x=-0.1), a ~3200x tightening
+  // from the pre-#1332 3e-9 gate's own worst-measured case (6.96e-10 at x=-0.5). 2e-12 keeps a
+  // ~9x margin over the new worst case. See
+  // solutions/correctness/2026-08-04-0823-doubly-noncentral-t-nu-scaled-fnmdiff-gate-fix.md.
   // cdfTol: 1e-7 stays loose because the group-level floor for cdf comes from the UNCHANGED
   // _cdf, not from this fix's pdf: _cdf's own relative error at x=-0.7 measured ~2.1e-8
   // (unrelated pre-existing accumulated-rounding behavior, same class as the _N_NCT groups
@@ -5151,7 +5156,7 @@ const REFS = [
   {
     name: 'DoublyNoncentralT',
     params: [5, 2, 120],
-    tol: 3e-9,
+    tol: 2e-12,
     cdfTol: 1e-7,
     qtol: 1e-8,
     points: [

@@ -295,6 +295,75 @@ describe('dist', () => {
         assert(result instanceof dist.WrappedCauchy)
         assert(fitCoversMedian(result, data))
       })
+
+      it('DoublyNoncentralT.fit should complete quickly on data shaped like the reported regression (issue #1332)', function () {
+        this.timeout(240000)
+        // Issue #1332's nu-scaled _fnmDiff gate (src/dist/doubly-noncentral-t.js) fires far more
+        // often than the flat 1e-9 threshold it replaced, routing many more Poisson-mixture terms
+        // through the pricier NoncentralT.snm-difference fallback during an unbounded Powell
+        // search on data that isn't genuinely DoublyNoncentralT-shaped -- the same VonMises(0,2)
+        // reproduction case #1325 used for the structurally identical NoncentralT regression.
+        // Unlike this file's NoncentralT._pdfDirect call-count guard, _fnmDiff's fallback goes
+        // through NoncentralT.snm -- an @ignore'd, low-level internal (src/dist/noncentral-t.js)
+        // far more likely to be refactored (batched, cached, replaced) without changing fit()'s
+        // observable behavior, so a call-count assertion there would be coupled to an
+        // implementation detail rather than the regression itself. A wall-clock ceiling is the
+        // more direct proxy for "did the bounded search actually bound the runtime". Measured on
+        // this suite's own hardware: the shipped bounded _powellOptions() budget takes ~28s per
+        // run (three repeated runs: 28231ms/28112ms/28037ms), while reverting to an unbounded
+        // search takes ~126s -- an ~4.5x regression. The 60s ceiling below sits at ~2x the
+        // bounded measurement (headroom for CI variance, matching this file's own ~2x call-count
+        // margin convention) while remaining well under half of the unbounded-search blowup this
+        // guards against; three repeats and taking the fastest reduce single-run CI noise.
+        const data = new dist.VonMises(0, 2).seed(5).sample(500)
+        const runs = 3
+        const ceilingMs = 60000
+        let result
+        let fastestMs = Infinity
+        for (let i = 0; i < runs; i++) {
+          const start = Date.now()
+          result = dist.DoublyNoncentralT.fit(data)
+          fastestMs = Math.min(fastestMs, Date.now() - start)
+        }
+
+        assert(fastestMs < ceilingMs, `fastest of ${runs} fit() runs took ${fastestMs}ms, expected well under ${ceilingMs}ms`)
+        assert(result instanceof dist.DoublyNoncentralT)
+      })
+
+      it('DoublyNoncentralT.fit should not show intolerable quality loss from the bounded Powell search budget on well-matched data (issue #1332)', function () {
+        // Locks in the invariant documented in the _powellOptions() JSDoc
+        // (src/dist/doubly-noncentral-t.js): on well-matched data (genuinely
+        // DoublyNoncentralT-shaped, unlike the VonMises regression case above), the bounded budget
+        // (tol=1e-2, maxIter=15) stays close to the optimum an unbounded search reaches. Unlike
+        // NoncentralT's analogous test, this class's likelihood carries a mild nu/theta ridge even
+        // on well-matched data (both are jointly, not individually, identified from a finite
+        // sample), so the two searches do not converge to bit-identical results -- measured lnL
+        // differences across seeds 1, 7, 42, 99 ranged ~0.005-0.61 (out of an lnL magnitude
+        // ~400-450); tolerance (2) sits comfortably above that measured range while remaining tight
+        // enough to catch a real regression that starves the bounded search on data it should fit
+        // well (e.g. a future maxIter cut deep enough to leave the search far from any local
+        // optimum, which would separately also fail this file's mu-recovery fit test). Swept over
+        // all 4 seeds the tolerance was calibrated against, not just one, so a regression confined
+        // to a single seed's search trajectory can't hide behind the others' margin. Measured
+        // ~322s for all 4 seeds' bounded+relaxed pairs under this suite's own CI load (some seeds'
+        // unbounded/relaxed search converges far slower than seed=42's ~2-3s isolated measurement
+        // suggested) -- timeout kept at ~3x that measurement for headroom against further variance.
+        this.timeout(900000)
+        const seeds = [1, 7, 42, 99]
+        seeds.forEach(seed => {
+          const data = new dist.DoublyNoncentralT(5, 1, 2).seed(seed).sample(300)
+          const bounded = dist.DoublyNoncentralT.fit(data)
+          const origOptions = dist.DoublyNoncentralT._powellOptions
+          dist.DoublyNoncentralT._powellOptions = () => ({ tol: 1e-8, maxIter: 200 })
+          let relaxed
+          try {
+            relaxed = dist.DoublyNoncentralT.fit(data)
+          } finally {
+            dist.DoublyNoncentralT._powellOptions = origOptions
+          }
+          assert(Math.abs(bounded.lnL(data) - relaxed.lnL(data)) < 2, `seed ${seed}`)
+        })
+      })
     })
   })
 })
