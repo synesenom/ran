@@ -334,17 +334,34 @@ describe('dist', () => {
         // Locks in the invariant documented in the _powellOptions() JSDoc
         // (src/dist/doubly-noncentral-t.js): on well-matched data (genuinely
         // DoublyNoncentralT-shaped, unlike the VonMises regression case above), the bounded budget
-        // (tol=1e-2, maxIter=15) stays close to the optimum an unbounded search reaches. Unlike
-        // NoncentralT's analogous test, this class's likelihood carries a mild nu/theta ridge even
-        // on well-matched data (both are jointly, not individually, identified from a finite
-        // sample), so the two searches do not converge to bit-identical results -- measured lnL
-        // differences across seeds 1, 7, 42, 99 ranged ~0.005-0.61 (out of an lnL magnitude
-        // ~400-450); tolerance (2) sits comfortably above that measured range while remaining tight
-        // enough to catch a real regression that starves the bounded search on data it should fit
-        // well (e.g. a future maxIter cut deep enough to leave the search far from any local
-        // optimum, which would separately also fail this file's mu-recovery fit test). Swept over
-        // all 4 seeds the tolerance was calibrated against, not just one, so a regression confined
-        // to a single seed's search trajectory can't hide behind the others' margin. Measured
+        // (tol=1e-2, maxIter=15) stays close to the optimum an unbounded search reaches.
+        //
+        // Issue #1336 investigated *why* the two searches don't converge to bit-identical results
+        // here, unlike NoncentralT's analogous test -- profile-likelihood sweeps (fixing nu,
+        // re-optimizing mu/theta to full precision) confirm a genuine (nu, theta) ridge exists on
+        // well-matched data, but it is sample-dependent (seed 99's profile is sharply peaked with no
+        // ridge at all; seed 7's is nearly flat from nu=9 to nu=50) and does NOT explain the measured
+        // gap sizes below -- the ranking is inverted: seed 7 has the flattest ridge yet the smallest
+        // gap (0.0047), while seed 99 has no ridge yet the largest gap (0.609). The actual driver is
+        // powell.js's fractional convergence test (line 281: 2*|fStart-fret| <= tol*(|fStart|+|fret|)),
+        // whose permitted absolute slack scales with the objective's magnitude -- i.e. with n, since
+        // the objective is -lnL(data). Confirmed directly: repeating this comparison at n=1000/3000
+        // (vs. this test's n=300) measures gaps of ~1.4/~3.1, already exceeding this test's entire
+        // n=300 seed range. See
+        // thoughts/research/2026-08-04-1631-doubly-noncentral-t-fit-convergence-ridge.md for the
+        // full investigation and
+        // solutions/testing/2026-08-04-1631-doubly-noncentral-t-fit-convergence-ridge.md for its
+        // findings and the follow-up issues (#1338: n-aware convergence criterion for powell.js,
+        // shared by every _powellOptions()-bounded distribution, not just this one; #1339:
+        // theta=0 boundary convergence behavior for seed 7's ridge).
+        //
+        // Measured lnL differences across seeds 1, 7, 42, 99 at this test's n=300 ranged ~0.005-0.61
+        // (out of an lnL magnitude ~400-450); tolerance (2) sits comfortably above that measured range
+        // while remaining tight enough to catch a real regression that starves the bounded search on
+        // data it should fit well (e.g. a future maxIter cut deep enough to leave the search far from
+        // any local optimum, which would separately also fail this file's mu-recovery fit test).
+        // Swept over all 4 seeds the tolerance was calibrated against, not just one, so a regression
+        // confined to a single seed's search trajectory can't hide behind the others' margin. Measured
         // ~322s for all 4 seeds' bounded+relaxed pairs under this suite's own CI load (some seeds'
         // unbounded/relaxed search converges far slower than seed=42's ~2-3s isolated measurement
         // suggested) -- timeout kept at ~3x that measurement for headroom against further variance.
