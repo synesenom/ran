@@ -149,9 +149,26 @@ export default class DoublyNoncentralT extends Distribution {
    *       design -- that is what "resolved" means), so the original nu-gated
    *       `lo.nu >= 30 && |diff| < 1e-9` difference-magnitude check is kept for this case
    *       specifically: nu0 >= 30 excludes the small-nu .fit()-exploration regime this threshold
-   *       was originally tuned against (see the #1250 solution doc), and |diff| < 1e-9 catches
-   *       the difference collapsing as nu0 approaches the region where individual fnm calls
-   *       saturate to literal 1.0.
+   *       was originally tuned against (see the #1250 solution doc), and |diff| < lo.nu *
+   *       Number.EPSILON * 1e10 catches the difference collapsing as nu0 approaches the region
+   *       where individual fnm calls saturate to literal 1.0.
+   * The magnitude threshold is nu-scaled (issue #1332, porting #1325's identical
+   * NoncentralT._pdf fix): fnm's own absolute noise floor grows roughly linearly with nu, and
+   * _pdfPoissonMixture multiplies this difference by nu0 (the same amplification structure as
+   * NoncentralT._pdf's nu*(a-b)/x), so a flat 1e-9 threshold stopped catching amplified-noise
+   * differences once nu0 grew large enough. Confirmed empirically at moderate nu0 (~30-125,
+   * reachable by this file's own existing precision-gate tests, e.g. DoublyNoncentralT(5, 2,
+   * 120)): the scaled threshold closes a real gap, tightening pdf(x=-0.7)'s relative error from
+   * ~1.7e-9 to ~7.3e-15. At nu0 >= ~10000 (unreachable via .fit() or any realistic parameter
+   * set) it only partially helps -- _fnmDiff's fallback is NoncentralT.snm(lo) - NoncentralT.snm
+   * (hi), itself a difference of two ~1e-11-accurate quadratures, so once the true difference
+   * shrinks to a comparable magnitude that fallback re-encounters a smaller-scale version of the
+   * same cancellation problem one level down; unlike NoncentralT._pdf's #1325 fallback
+   * (_pdfDirect, a single cancellation-free density quadrature), there is no direct-quadrature
+   * replacement available for a CDF *difference*. See
+   * thoughts/research/2026-08-04-0811-doubly-noncentral-t-nu-scaled-saturation-gate.md and
+   * solutions/correctness/2026-08-04-0823-doubly-noncentral-t-nu-scaled-fnmdiff-gate-fix.md for
+   * the full investigation, measurements, and the documented residual limit at extreme nu0.
    * Checking (1) closes a blind spot the difference-only gate had (issue #1298): a single
    * "knife-edge" nu0 per x where one of the two fnm calls has resolved and the other hasn't
    * produces a raw difference dominated by the still-stuck operand's own error against phi, which
@@ -189,7 +206,7 @@ export default class DoublyNoncentralT extends Distribution {
     const b = NoncentralT.fnm(lo.nu, mu, lo.x)
     const diff = a - b
     const stuckAtPhi = Math.abs(a - phi) < 1e-12 || Math.abs(b - phi) < 1e-12
-    const nearOppositeBoundary = lo.nu >= 30 && Math.abs(diff) < 1e-9
+    const nearOppositeBoundary = lo.nu >= 30 && Math.abs(diff) < lo.nu * Number.EPSILON * 1e10
     if (stuckAtPhi || nearOppositeBoundary) {
       return NoncentralT.snm(lo.nu, mu, lo.x) - NoncentralT.snm(hi.nu, mu, hi.x)
     }
@@ -424,5 +441,34 @@ export default class DoublyNoncentralT extends Distribution {
     const mean = data.reduce((s, x) => s + x, 0) / n
     const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / n || 1
     return [variance > 1 ? Math.max(3, Math.round(2 * variance / (variance - 1))) : 3, mean, 1]
+  }
+
+  /**
+   * Bounds fit()'s Powell search budget, mirroring NoncentralT's/DoublyNoncentralBeta's own
+   * `_powellOptions()` (#1063, #1325) rather than the base class's unbounded `{ tol: 1e-8,
+   * maxIter: 200 }` default. Issue #1332's nu-scaled `_fnmDiff` gate (see above) fires far more
+   * often than the flat `1e-9` threshold it replaced -- not only at extreme nu, but across the
+   * entire nu0 >= 30 range whenever a Poisson-mixture term's raw difference falls under the wider
+   * scaled threshold -- so a single `.pdf()`/`.cdf()` call under a large-theta trial parameter
+   * (summing many Poisson-mixture terms) can now route many of them through the pricier
+   * `NoncentralT.snm`-difference fallback. On data that isn't genuinely DoublyNoncentralT-shaped
+   * (e.g. VonMises(0,2)-sampled data, the same reproduction case #1325 used), an unbounded search
+   * pays this added per-call cost across hundreds of thousands of likelihood evaluations:
+   * measured, `DoublyNoncentralT.fit()` on that data went from ~6s pre-#1332 to ~68s post-#1332
+   * with an unbounded search, an ~11x regression invisible to any test that only exercises the
+   * reported correctness fix's own reproduction case. `tol=1e-2, maxIter=15` (DoublyNoncentralBeta's
+   * own values, not NoncentralT's tighter `1e-3` -- this class has one more free parameter and a
+   * similarly ridge-shaped likelihood on mismatched data) bounds the same case back to ~18s alone,
+   * ~34s inside `guess()`'s full default-pool sweep (matching that sweep's own pre-existing
+   * ~24-34s baseline for this exact VonMises reproduction case), while reproducing well-matched-data
+   * fits within ordinary finite-sample noise.
+   * See solutions/correctness/2026-08-04-0823-doubly-noncentral-t-nu-scaled-fnmdiff-gate-fix.md
+   *
+   * @method _powellOptions
+   * @memberof ran.dist.DoublyNoncentralT
+   * @returns {Object} The bounded Powell search options.
+   */
+  static _powellOptions () {
+    return { tol: 1e-2, maxIter: 15 }
   }
 }
