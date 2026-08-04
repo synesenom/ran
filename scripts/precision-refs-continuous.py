@@ -2290,7 +2290,9 @@ PDFCDF_TOL = {
     # accurate reference for every group regardless of which mechanism emits it.
     ('DoublyNoncentralT', '[5, 0, 120]'): '1e-13',
     ('DoublyNoncentralT', '[5, 5, 120]'): '1e-11',
-    ('DoublyNoncentralT', '[5, 2, 120]'): '3e-9',
+    # Tightened from 3e-9 by issue #1332 (nu-scaled _fnmDiff saturation-gate threshold) --
+    # see test/precision-continuous.js's own comment for this group for the measured before/after.
+    ('DoublyNoncentralT', '[5, 2, 120]'): '2e-12',
     ('DoublyNoncentralBeta', '[2, 2, 1200, 1200]'): '1e-11',
     ('SkewNormal', '[1, 1, 3]'): '1e-12',
     ('Rice', '[0.5, 2]'): '1e-13',

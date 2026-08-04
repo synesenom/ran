@@ -266,4 +266,41 @@ describe('NoncentralT/DoublyNoncentralT near-CDF-boundary precision (#1250, #130
       dist.NoncentralT._pdfDirect = originalPdfDirect
     }
   })
+
+  it('DoublyNoncentralT(50000, 0.01, 0.1).pdf(-0.5) improves under the nu-scaled _fnmDiff gate, but is not made fully precise (issue #1332)', () => {
+    // #1325 fixed NoncentralT._pdf's structurally identical nu*(a-b)/x amplification by porting a
+    // nu-scaled threshold (nu * Number.EPSILON * 1e10) into its nearOppositeBoundary gate and
+    // falling back to _pdfDirect, a single cancellation-free density quadrature. #1332 investigated
+    // whether DoublyNoncentralT._pdfPoissonMixture's structurally analogous per-term amplification
+    // (each Poisson-mixture term is `nu0 * _fnmDiff(...)`, where nu0 grows exactly like
+    // NoncentralT._pdf's own nu) needed the same fix, and confirmed it does: pre-fix, this exact
+    // point returns 0.3502907215041454, a ~3.15e-6 relative error against the mpmath reference below.
+    //
+    // Porting the identical threshold formula into _fnmDiff's own nearOppositeBoundary gate (using
+    // lo.nu, this call site's per-term degrees-of-freedom analogue of NoncentralT._pdf's single nu)
+    // measurably improves this case (~5x tighter, to ~6.0e-7) but does NOT close the gap the way
+    // #1325's fix did for NoncentralT._pdf. The reason is structural, not a tuning shortfall:
+    // _fnmDiff's fallback is NoncentralT.snm(lo.nu, ...) - NoncentralT.snm(hi.nu, ...), a DIFFERENCE
+    // of two independently-quadratured survival values, unlike _pdfDirect's single, subtraction-free
+    // density quadrature. Each snm call is itself accurate to ~1e-11 absolute error, which stays
+    // negligible while the true difference is large but becomes a real relative error once nu0 grows
+    // large enough that the true difference itself shrinks to a comparable ~1e-6-to-1e-5 magnitude --
+    // exactly the regime this gate now routes into. See
+    // thoughts/research/2026-08-04-0811-doubly-noncentral-t-nu-scaled-saturation-gate.md for the full
+    // investigation and solutions/correctness/2026-08-04-*-doubly-noncentral-t-nu-scaled-fnmdiff-gate-fix.md
+    // for the fix and its documented residual limit.
+    //
+    // This pin is deliberately NOT a full-precision assertion (unlike every other case in this file)
+    // -- it exists to catch a regression of the *partial* improvement the fix actually delivers, not
+    // to claim correctness at this nu scale. tol=2e-6 fails against the pre-fix flat-1e-9 gate
+    // (measured ~3.15e-6) and passes against the nu-scaled gate (measured ~6.0e-7, ~3.3x margin --
+    // widened from an initial 1e-6/~1.7x margin, which left too little headroom against
+    // cross-platform/engine floating-point variation in the underlying tanh-sinh quadrature).
+    // mpmath mp.dps=50 reference (independently re-derived as the Poisson(theta/2) mixture of
+    // nct_pdf, matching scripts/precision-refs-continuous.py's dnct_pdf, not read off ranjs):
+    // dnct_pdf(50000, 0.01, 0.1, -0.5) -> 0.350289617506882645
+    const ref = 3.50289617506882645e-01
+    const d = new dist.DoublyNoncentralT(50000, 0.01, 0.1)
+    assert.approximately(d.pdf(-0.5) / ref, 1, 2e-6)
+  })
 })
