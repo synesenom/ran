@@ -355,15 +355,19 @@ describe('dist', () => {
         // shared by every _powellOptions()-bounded distribution, not just this one; #1339:
         // theta=0 boundary convergence behavior for seed 7's ridge).
         //
-        // Issue #1338 followed up on #1338's own scope: a prototype absolute-cap term
+        // Issue #1338 followed up on #1336's own scope: a prototype absolute-cap term
         // (min(tol*(|fStart|+|fret|), capAbs)) on a scratch copy of powell.js -- never applied to
         // the shipped algorithm -- measured with capAbs=2 on this class's own (5,1,2) seed=42 data:
         // gap closes from ~1.41 to ~0.0003 at n=1000 and from ~3.08 to ~0.018 at n=3000, while
         // leaving n=100/300 (where the untreated gap is already small) essentially unchanged. The
         // same capAbs=2 measured against this file's own VonMises(0,2) mismatched-data wall-clock
-        // ceiling test above showed no measurable change (~17s either way, both well under the 60s
-        // ceiling). See solutions/testing/2026-08-05-1736-powell-fractional-convergence-n-scaling.md
-        // and the filed follow-up implementation issue for the full cross-distribution measurement.
+        // ceiling test above showed no measurable change (~17.3s vs ~17.2s fastest-of-3, both
+        // measured by an isolated single-process scratch harness outside this suite's own
+        // parallel-worker CI load -- not directly comparable in absolute magnitude to the ~28s this
+        // file's own comment above measured under that load, but the relative delta between capped
+        // and uncapped is what the regression check needs, and both stay far under the 60s ceiling).
+        // See solutions/testing/2026-08-05-1736-powell-fractional-convergence-n-scaling.md and the
+        // filed follow-up implementation issue for the full cross-distribution measurement.
         //
         // Measured lnL differences across seeds 1, 7, 42, 99 at this test's n=300 ranged ~0.005-0.61
         // (out of an lnL magnitude ~400-450); tolerance (2) sits comfortably above that measured range

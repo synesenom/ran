@@ -104,6 +104,18 @@ No ceiling is regressed. `DoublyNoncentralBeta` has no dedicated wall-clock repr
 the current suite (only the maxIter-coupling quality test) — this gap is noted, not newly
 benchmarked, per the plan's explicit scope limit.
 
+Two absolute figures above are not directly comparable to numbers already on record elsewhere in
+the suite, and are called out here rather than left as an unexplained discrepancy: (1) the
+`DoublyNoncentralT` wall-clock figures were measured by an isolated single-process scratch harness,
+outside this suite's own parallel-worker CI load — `test/dist-base-fit-3.js`'s own comment measured
+~28s for the identical shipped-bounded scenario *under* that load; only the relative delta between
+capped and uncapped (both measured under the same isolated conditions here) is what the regression
+check needs. (2) The `DoublyNoncentralF` no-cap call count (134500) is higher than the ~113500-call
+baseline `test/dist-base-fit-1.js`'s own comment records for this same scenario — plausibly drift
+from precision fixes landed since that baseline was measured (e.g. the rounding fix referenced in
+`DoublyNoncentralF.fit()`'s own JSDoc), not a discrepancy introduced by this measurement — but is
+noted rather than presented as a clean before/after pair with an unrelated historical figure.
+
 **A more aggressive `capAbs=0.5` was tried first** (it closes the small-n gaps that `capAbs=2`
 leaves untouched) but was rejected: it measured 229500 `_pdf` calls on `DoublyNoncentralF`'s Rice
 regression case, exceeding the existing 200000-call ceiling. `capAbs=2` is the largest cap value
