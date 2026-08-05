@@ -108,6 +108,17 @@ describe('dist', () => {
         // bit-identical, diff = 0) but well below the 16-32% relative divergence the investigation
         // measured once maxIter genuinely starves the line search, leaving margin against
         // platform-dependent floating-point summation order without weakening the regression guard.
+        //
+        // Note this test only isolates the maxIter-coupling effect (tol=1e-2 fixed on both sides).
+        // Issue #1338 separately measured this class's bounded-vs-*fully unbounded*
+        // (tol=1e-8, maxIter=200) gap on the same distribution/seed (2,3,1,1)/42 -- resampled at
+        // n=100/300/1000/3000, not this test's own n=500 fixture: gap measured
+        // 0.100/0.216/0.111/0.206 -- non-trivial but not cleanly growing with n the way
+        // DoublyNoncentralT's/DoublyNoncentralF's gaps do, and only partially closed (not
+        // eliminated) by a prototype capAbs=2 absolute-cap term, consistent with part of this
+        // class's gap being a genuine shape/noncentrality ridge (#1063) rather than purely a
+        // convergence-tolerance artifact. See
+        // solutions/testing/2026-08-05-1736-powell-fractional-convergence-n-scaling.md.
         const data = new dist.DoublyNoncentralBeta(2, 3, 1, 1).seed(42).sample(500)
         const bounded = dist.DoublyNoncentralBeta.fit(data)
         const origOptions = dist.DoublyNoncentralBeta._powellOptions
@@ -126,6 +137,23 @@ describe('dist', () => {
         // family. DoublyNoncentralF._powellOptions() resolves to the inherited
         // DoublyNoncentralBeta static method (src/dist/doubly-noncentral-f.js does not override
         // it), so overriding it here also governs this fit() call.
+        //
+        // Note DoublyNoncentralF.fit() overrides fit() itself with a custom ridge-penalized
+        // objective (unlike DoublyNoncentralBeta/NoncentralT/DoublyNoncentralT, which all use the
+        // base Distribution.fit()) -- issue #1338's measurement harness had to mirror that custom
+        // objective specifically to get faithful numbers. Its bounded-vs-fully-unbounded gap on the
+        // same distribution/seed (3,8,1,1)/42 -- resampled at n=100/300/1000/3000, not this test's
+        // own n=400 fixture -- measured 0.744/0.327/3.512/2.480: clearly non-trivial and, unlike
+        // DoublyNoncentralBeta above, closed to near-zero (0.078/0.327/0.002/0.045) by a prototype
+        // capAbs=2 absolute-cap term. Checked against this file's own Rice(5,1) wall-clock ceiling
+        // test above: an isolated re-run of that exact scenario (uncapped) measured 134500 _pdf
+        // calls -- higher than that test's own ~113500-call baseline above, plausibly reflecting
+        // drift from precision fixes landed since that baseline was recorded (e.g. the rounding fix
+        // referenced in this class's fit() JSDoc), not a discrepancy in this measurement -- and
+        // capAbs=2 raised that to 157500, still under the 200000 ceiling. capAbs=0.5 was tried
+        // first and measured 229500 calls, which DOES regress that ceiling, ruling it out as the
+        // calibrated value. See
+        // solutions/testing/2026-08-05-1736-powell-fractional-convergence-n-scaling.md.
         const data = new dist.DoublyNoncentralF(3, 8, 1, 1).seed(42).sample(400)
         const bounded = dist.DoublyNoncentralF.fit(data)
         const origOptions = dist.DoublyNoncentralBeta._powellOptions

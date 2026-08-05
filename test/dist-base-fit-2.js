@@ -288,6 +288,11 @@ describe('dist', () => {
         // lnL values differing by ~2.5e-11 (floating-point noise, not a real quality gap);
         // tolerance (1e-6) sits well above that measured noise while remaining tight enough to
         // catch a real regression that would starve the bounded search on data it should fit well.
+        // Issue #1338 confirmed this near-bit-identical gap holds at n=100/1000/3000 too (~1.6e-11
+        // to ~9e-13, no growth with n), unlike NoncentralT's ridge-carrying relatives -- consistent
+        // with this class's only 2 free parameters (no third parameter for the optimizer to trade
+        // against, hence no ridge for a marginally-converged point to hide in; see
+        // solutions/testing/2026-08-05-1736-powell-fractional-convergence-n-scaling.md).
         const data = new dist.NoncentralT(5, 1).seed(42).sample(300)
         const bounded = dist.NoncentralT.fit(data)
         const origOptions = dist.NoncentralT._powellOptions
