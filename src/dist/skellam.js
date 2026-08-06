@@ -46,6 +46,7 @@ export default class Skellam extends Distribution {
       // besselIExpScaled(...) as three separately-materialized factors -- avoids the
       // independent overflow/underflow each factor hits for highly asymmetric mu1/mu2, even
       // though their true product stays representable (#1321).
+      // See solutions/distribution/2026-08-06-1520-skellam-pdf-log-space-cancellation-fix.md
       negSumPlusZ: -mu1 - mu2 + twoSqrtProd,
       logRatio: Math.log(mu1 / mu2),
       twoSqrtProd,
