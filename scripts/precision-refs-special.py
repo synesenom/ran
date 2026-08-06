@@ -38,7 +38,7 @@ import os
 import subprocess
 import sys
 
-from mpmath import mp, mpf, pi, sqrt, exp, besseli, besselk
+from mpmath import mp, mpf, pi, sqrt, exp, log, besseli, besselk
 from mpmath import digamma as mp_digamma
 
 mp.dps = 50
@@ -124,6 +124,13 @@ def besselISphericalExpScaled_ref(n, x):
     return besselISpherical_ref(n, x) * exp(-x)
 
 
+def logBesselIExpScaled_ref(n, x):
+    # log(exp(-x) * I_n(x)) = log(besseli(n, x)) - x (#1321), built from the same direct
+    # besseli() call as besselIExpScaled_ref -- independent of bessel.js's own
+    # besselIExpScaled-then-log/series-fallback dispatch.
+    return log(besseli(n, x)) - abs(x)
+
+
 def besselInu_ref(nu, x):
     return besseli(nu, x)
 
@@ -145,6 +152,7 @@ REF_FN = {
     'besselISpherical': besselISpherical_ref,
     'besselIExpScaled': besselIExpScaled_ref,
     'besselISphericalExpScaled': besselISphericalExpScaled_ref,
+    'logBesselIExpScaled': logBesselIExpScaled_ref,
     'besselInu': besselInu_ref,
     'besselK': besselK_ref,
     'besselKnu': besselKnu_ref,
@@ -202,6 +210,28 @@ def _besselIExpScaled_grid(add):
     for n in [1, 3, 5]:
         for x in [-0.5, -5, -50, -500]:
             add('besselIExpScaled', (n, x), f'besselIExpScaled n={n}: odd-order sign flip at negative x')
+
+
+def _logBesselIExpScaled_grid(add):
+    # Issue #1321: besselIExpScaled(n, x) underflows to exactly 0 once the Bessel order n is
+    # large relative to x, even though log(exp(-x)*I_n(x)) stays a normal finite number.
+    # logBesselIExpScaled fills that gap. First re-probe besselIExpScaled's own n=10 crossover
+    # region (a subset of its grid above) to confirm the new function's direct-delegation
+    # branch (log(besselIExpScaled(n,x))) stays consistent with the existing function. Then
+    # add a large-order cluster, including the exact (n, twoSqrtProd) pairs Skellam(1000,1),
+    # Skellam(2000,1), and Skellam(5000,1) produce at the issue's reported repro points
+    # (999, 990, 1999, 4999) -- the regime where besselIExpScaled itself returns exactly 0.
+    for x in [0.5, 1, 5, 9.9, 10, 10.1, 14, 20, 50, 100, 500, 1000]:
+        add('logBesselIExpScaled', (10, x), 'logBesselIExpScaled n=10: direct-delegation regime, cross-checks besselIExpScaled n=10 crossover')
+    # x=0 boundary.
+    add('logBesselIExpScaled', (0, 0), 'logBesselIExpScaled n=0, x=0: returns exactly 0 (log(1))')
+    for n in [1, 2, 3, 5]:
+        add('logBesselIExpScaled', (n, 0), f'logBesselIExpScaled n={n}, x=0: -Infinity (log of exact 0)')
+    # Large-order/small-argument regime: n >> x, where besselIExpScaled underflows to 0.
+    for n, x in [(100, 20), (200, 30), (500, 44.72135954999579), (999, 63.245553203367585),
+                 (990, 63.245553203367585), (1999, 89.44271909999159),
+                 (2999, 109.5445115010332), (4999, 141.4213562373095)]:
+        add('logBesselIExpScaled', (n, x), f'logBesselIExpScaled n={n}: large-order/small-argument regime, besselIExpScaled underflows to exactly 0')
 
 
 def _besselISphericalExpScaled_grid(add):
@@ -310,6 +340,7 @@ def grid():
     _besselI_grid(add)
     _besselISpherical_grid(add)
     _besselIExpScaled_grid(add)
+    _logBesselIExpScaled_grid(add)
     _besselISphericalExpScaled_grid(add)
     _besselInu_grid(add)
     _besselK_grid(add)

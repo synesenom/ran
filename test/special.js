@@ -349,6 +349,53 @@ describe('special', () => {
     })
   })
 
+  // Issue #1321: besselIExpScaled(n, x) itself underflows to exactly 0 once the Bessel order n
+  // is large relative to the argument x (e.g. n=999, x~63.25), because the true scaled value is
+  // genuinely non-representable as a double there -- yet its logarithm is a normal finite
+  // number. logBesselIExpScaled fills that gap: log(exp(-x) * I_n(x)), computed directly in
+  // log-space so callers (Skellam._pdf) can combine it with other log-scale terms before a
+  // single final exponentiation.
+  describe('.logBesselIExpScaled()', () => {
+    it('should return 0 at n=0, x=0', () => {
+      assert(special.logBesselIExpScaled(0, 0) === 0)
+    })
+
+    it('should return -Infinity at x=0 for n >= 1', () => {
+      for (const n of [1, 2, 3, 5]) {
+        assert(special.logBesselIExpScaled(n, 0) === -Infinity)
+      }
+    })
+
+    it('should agree with log(besselIExpScaled(n, x)) in the direct-delegation regime', () => {
+      // mpmath mp.dps=50: log(besseli(n, mpf(x))) - x
+      assert(equal(special.logBesselIExpScaled(0, 0.5), -0.4384502808145187, 12))
+      assert(equal(special.logBesselIExpScaled(1, 0.5), -1.8552054470253345, 12))
+      assert(equal(special.logBesselIExpScaled(5, 5), -4.230829927801479, 12))
+      assert(equal(special.logBesselIExpScaled(10, 100), -3.722366634346062, 12))
+      // Sanity: this regime is the one where besselIExpScaled already returns a nonzero value.
+      assert(special.besselIExpScaled(10, 100) > 0)
+    })
+
+    it('should return a finite value in the large-order/small-argument regime where besselIExpScaled underflows to exactly 0', () => {
+      // twoSqrtProd for Skellam(1000,1)/(2000,1)/(5000,1) -- the exact (n, x) pairs issue #1321
+      // reports as NaN. Confirms the underflow precondition, then checks the finite log value.
+      const z1 = 2 * Math.sqrt(1000)
+      const z2 = 2 * Math.sqrt(2000)
+      const z3 = 2 * Math.sqrt(5000)
+      assert.strictEqual(special.besselIExpScaled(999, z1), 0)
+      assert.strictEqual(special.besselIExpScaled(990, z1), 0)
+      assert.strictEqual(special.besselIExpScaled(1999, z2), 0)
+      assert.strictEqual(special.besselIExpScaled(4999, z3), 0)
+
+      // mpmath mp.dps=50: log(besseli(n, mpf(x))) - x
+      assert(equal(special.logBesselIExpScaled(999, z1), -2517.0427133980397, 12))
+      assert(equal(special.logBesselIExpScaled(990, z1), -2485.9938897835273, 12))
+      assert(equal(special.logBesselIExpScaled(1999, z2), -5690.264408550746, 12))
+      assert(equal(special.logBesselIExpScaled(4999, z3), -16434.323389931138, 12))
+      assert(equal(special.logBesselIExpScaled(100, 20), -152.4955121081758, 12))
+    })
+  })
+
   // Issue #1310: besselISphericalExpScaled (added by #1292) had the same coverage gap as
   // besselIExpScaled above -- only reachable indirectly through NoncentralChi/NoncentralChi2.
   describe('.besselISphericalExpScaled()', () => {

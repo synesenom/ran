@@ -10,6 +10,7 @@ const FN = {
   besselISpherical: special.besselISpherical,
   besselIExpScaled: special.besselIExpScaled,
   besselISphericalExpScaled: special.besselISphericalExpScaled,
+  logBesselIExpScaled: special.logBesselIExpScaled,
   besselInu: special.besselInu,
   besselK: special.besselK,
   besselKnu: special.besselKnu,

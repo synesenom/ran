@@ -1,5 +1,6 @@
 import { EPS, MAX_ITER, MAX_SERIES_ITER } from '../core/constants'
 import gamma from './gamma'
+import logGamma from './log-gamma'
 import recursiveSum from '../algorithms/recursive-sum'
 
 /**
@@ -196,6 +197,49 @@ export function besselIExpScaled (n, x) {
   }
   const y = _besselIBackward(n, Math.abs(x), true)
   return x < 0 && n % 2 === 1 ? -y : y
+}
+
+// Forward recurrence for the I_n(x) Taylor series (DLMF 10.25.2), normalized by its own
+// leading term: r_0=1, r_k = r_{k-1} * (x^2/4) / (k*(n+k)). Each r_k stays O(1) relative to
+// r_0 by construction (unlike the raw series terms, which individually overflow/underflow for
+// large n), so summing in plain linear space is safe -- only the leading term needs log-space
+// handling. Used by logBesselIExpScaled when besselIExpScaled(n, x) itself underflows to
+// exactly 0 because n is large relative to x (#1321): that regime's true value is
+// representable in log-space even though the plain scaled value is not.
+function _logBesselISeries (n, x) {
+  const x2 = x * x / 4
+  let term = 1
+  let sum = 1
+  for (let k = 1; k < MAX_SERIES_ITER; k++) {
+    term *= x2 / (k * (n + k))
+    sum += term
+    if (term < EPS * sum) break
+  }
+  return n * Math.log(x / 2) - logGamma(n + 1) - x + Math.log(sum)
+}
+
+/**
+ * Computes log(exp(-x) * I_n(x)): the log-domain analogue of besselIExpScaled, for x >= 0.
+ * exp(-x) * I_n(x) itself can be genuinely non-representable as a double when the order n is
+ * large relative to x (#1321) -- e.g. n=999, x~63.25 evaluates to ~1e-1092, far below
+ * Number.MIN_VALUE -- even though its logarithm is a normal finite number. Delegates to
+ * besselIExpScaled and takes its log whenever that stays representable (bit-for-bit
+ * consistent with the existing function's own precision in the common case); falls back to a
+ * direct log-space series evaluation only when besselIExpScaled underflows to exactly 0.
+ *
+ * @method logBesselIExpScaled
+ * @memberof ran.special
+ * @param {number} n Order of the Bessel function. Must be a non-negative integer.
+ * @param {number} x Non-negative value to evaluate the function at.
+ * @return {number} log(exp(-x) * I_n(x)).
+ * @private
+ */
+export function logBesselIExpScaled (n, x) {
+  if (x === 0) {
+    return n === 0 ? 0 : -Infinity
+  }
+  const direct = besselIExpScaled(n, x)
+  return direct > 0 ? Math.log(direct) : _logBesselISeries(n, x)
 }
 
 // Relative error of the n=1 closed-form (cosh(x)-sinh(x)/x)/x from catastrophic
