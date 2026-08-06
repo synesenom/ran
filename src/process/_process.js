@@ -1,6 +1,7 @@
 import Xoshiro128p from '../core/xoshiro'
 import validateParams from '../utils/validate-params'
 import neumaier from '../algorithms/neumaier'
+import Distribution from '../dist/_distribution'
 
 /**
  * The stochastic process generator base class, all process generators extend this class. The methods listed here
@@ -35,13 +36,15 @@ export default class Process {
 
   /**
    * Returns the parameters of the process. Array-valued parameter fields are deep-copied, so
-   * mutating a returned array does not affect the live instance; non-array object-valued fields
-   * (e.g. CompoundPoisson's jumpDist, a nested Distribution instance) remain shared by reference.
+   * mutating a returned array does not affect the live instance. Distribution-instance-valued
+   * fields (e.g. CompoundPoisson's jumpDist) are cloned via copy(), so mutating the returned
+   * instance (including calling .seed() or .sample() on it) does not affect the live process's
+   * own sample stream.
    *
    * @method params
    * @memberof ran.process.Process
-   * @returns {Object} The parameters of the process. Array-valued fields are deep-copied and safe
-   * to mutate; non-array object-valued fields are shared by reference.
+   * @returns {Object} The parameters of the process. Array-valued and Distribution-instance-valued
+   * fields are deep-copied/cloned and safe to mutate.
    */
   params () {
     // Shallow copy so callers can't mutate internal state through the returned object.
@@ -49,14 +52,23 @@ export default class Process {
     // state through the returned object.
     //
     // Array-valued fields need one more level: the shallow copy above still shares the array
-    // reference. Non-array objects (e.g. CompoundPoisson's jumpDist, a Distribution instance) are
-    // deliberately left by reference — decisions/0047-params-shallow-copy.md's Decision section
-    // scopes that out.
+    // reference.
     // decisions/0050-params-array-field-deep-copy.md
+    //
+    // Distribution-instance-valued fields (e.g. CompoundPoisson's jumpDist) also need cloning,
+    // not just copying: unlike a plain data object, a live Distribution instance exposes mutating
+    // methods (.seed(), .sample()) that read/write its own PRNG stream. CompoundPoisson._next()
+    // samples from jumpDist directly every step with no per-step reseed, so a shared reference let
+    // an external params().jumpDist.seed(...) silently desync the process's own reproducible
+    // stream — this superseded ADR-0047's original carve-out, which assumed jumpDist's state was
+    // effectively private.
+    // decisions/0051-params-distribution-instance-field-clone.md
     const p = { ...this.p }
     for (const key of Object.keys(p)) {
       if (Array.isArray(p[key])) {
         p[key] = [...p[key]]
+      } else if (p[key] instanceof Distribution) {
+        p[key] = p[key].copy()
       }
     }
     return p

@@ -2258,6 +2258,28 @@ describe('process.CompoundPoisson', () => {
     })
   })
 
+  describe('.params()', () => {
+    it('returns a jumpDist that is not the same reference as the live instance\'s', () => {
+      const cpp = new CompoundPoisson(new Gamma(2, 1), 3, 1)
+      assert.notStrictEqual(cpp.params().jumpDist, cpp.p.jumpDist)
+    })
+
+    it('seeding params().jumpDist does not desync the live process\'s future path', () => {
+      // Reproduces the aliasing bug: _next() samples from this.p.jumpDist directly every step
+      // with no per-step reseed (unlike CompoundPoisson.prototype.seed(), which only reseeds
+      // jumpDist once), so a live reference let an external .seed() call on the "snapshot"
+      // silently desync the process's own reproducible stream.
+      const cpp1 = new CompoundPoisson(new Gamma(2, 1), 3, 1).seed(42)
+      const path1 = cpp1.path(20)
+
+      const cpp2 = new CompoundPoisson(new Gamma(2, 1), 3, 1).seed(42)
+      cpp2.params().jumpDist.seed(999)
+      const path2 = cpp2.path(20)
+
+      assert.deepEqual(path1, path2)
+    })
+  })
+
   describe('.reset()', () => {
     it('should restore initial state to 0', () => {
       const cpp = new CompoundPoisson(new Normal(0, 1), 2, 1)
