@@ -34,17 +34,32 @@ export default class Process {
   }
 
   /**
-   * Returns the parameters of the process.
+   * Returns the parameters of the process. Array-valued parameter fields are deep-copied, so
+   * mutating a returned array does not affect the live instance; non-array object-valued fields
+   * (e.g. CompoundPoisson's jumpDist, a nested Distribution instance) remain shared by reference.
    *
    * @method params
    * @memberof ran.process.Process
-   * @returns {Object} The parameters of the process.
+   * @returns {Object} The parameters of the process. Array-valued fields are deep-copied and safe
+   * to mutate; non-array object-valued fields are shared by reference.
    */
   params () {
     // Shallow copy so callers can't mutate internal state through the returned object.
     // decisions/0047-params-shallow-copy.md — shallow copy prevents callers mutating internal
     // state through the returned object.
-    return { ...this.p }
+    //
+    // Array-valued fields need one more level: the shallow copy above still shares the array
+    // reference. Non-array objects (e.g. CompoundPoisson's jumpDist, a Distribution instance) are
+    // deliberately left by reference — decisions/0047-params-shallow-copy.md's Decision section
+    // scopes that out.
+    // decisions/0050-params-array-field-deep-copy.md
+    const p = { ...this.p }
+    for (const key of Object.keys(p)) {
+      if (Array.isArray(p[key])) {
+        p[key] = [...p[key]]
+      }
+    }
+    return p
   }
 
   /**
