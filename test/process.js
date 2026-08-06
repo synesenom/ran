@@ -210,6 +210,19 @@ class BareProcess extends Process {
   }
 }
 
+class ArrayParamProcess extends Process {
+  constructor (weights) {
+    super()
+    this.p = { weights }
+    this.x = 0
+    this.x0 = 0
+  }
+
+  _next () {
+    return this.x + 1
+  }
+}
+
 describe('process', () => {
   describe('Process', () => {
     describe('._next()', () => {
@@ -444,6 +457,13 @@ describe('process', () => {
         const p = bm.params()
         p.mu = 999
         assert.strictEqual(bm.params().mu, 0.5)
+      })
+
+      it('mutating an array-valued field of the returned object should not corrupt the instance', () => {
+        const ap = new ArrayParamProcess([1, 2, 3])
+        const p = ap.params()
+        p.weights[0] = 999
+        assert.deepEqual(ap.params().weights, [1, 2, 3])
       })
     })
   })
@@ -2235,6 +2255,28 @@ describe('process.CompoundPoisson', () => {
     it('should return this for chaining', () => {
       const cpp = new CompoundPoisson(new Normal(1, 1), 2, 1)
       assert.strictEqual(cpp.seed(0), cpp)
+    })
+  })
+
+  describe('.params()', () => {
+    it('returns a jumpDist that is not the same reference as the live instance\'s', () => {
+      const cpp = new CompoundPoisson(new Gamma(2, 1), 3, 1)
+      assert.notStrictEqual(cpp.params().jumpDist, cpp.p.jumpDist)
+    })
+
+    it('seeding params().jumpDist does not desync the live process\'s future path', () => {
+      // Reproduces the aliasing bug: _next() samples from this.p.jumpDist directly every step
+      // with no per-step reseed (unlike CompoundPoisson.prototype.seed(), which only reseeds
+      // jumpDist once), so a live reference let an external .seed() call on the "snapshot"
+      // silently desync the process's own reproducible stream.
+      const cpp1 = new CompoundPoisson(new Gamma(2, 1), 3, 1).seed(42)
+      const path1 = cpp1.path(20)
+
+      const cpp2 = new CompoundPoisson(new Gamma(2, 1), 3, 1).seed(42)
+      cpp2.params().jumpDist.seed(999)
+      const path2 = cpp2.path(20)
+
+      assert.deepEqual(path1, path2)
     })
   })
 

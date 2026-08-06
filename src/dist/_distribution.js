@@ -76,11 +76,16 @@ class Distribution {
 
   /**
    * Returns the natural (user-facing) parameters of the distribution.
-   * Internal lookup state is not included.
+   * Internal lookup state is not included. Array-valued parameter fields (e.g.
+   * Hyperexponential's weights/rates, Categorical's weights) are deep-copied, so mutating a
+   * returned array does not affect the live instance; a nested Distribution-instance-valued field
+   * (none exists on any shipped distribution today, but the base class handles it generically for
+   * future subclasses) is cloned via save()/load() rather than shared by reference.
    *
    * @method params
    * @memberof ran.dist.Distribution
-   * @returns {Object} The natural parameters of the distribution.
+   * @returns {Object} The natural parameters of the distribution. Array-valued and
+   * Distribution-instance-valued fields are deep-copied/cloned and safe to mutate.
    */
   params () {
     // Trusts this.p to already hold only natural params — a reparametrizing subclass that merges
@@ -91,7 +96,28 @@ class Distribution {
     // Shallow copy so callers can't mutate internal state through the returned object.
     // decisions/0047-params-shallow-copy.md — shallow copy prevents callers mutating internal
     // state through the returned object.
-    return { ...this.p }
+    //
+    // Array-valued fields (e.g. Hyperexponential's weights/rates, Categorical's weights) need one
+    // more level: the shallow copy above still shares the array reference, so
+    // dist.params().weights[0] = 0 would reach this.p.weights.
+    // decisions/0050-params-array-field-deep-copy.md
+    //
+    // A nested Distribution instance (no shipped distribution has one, but ran.process.CompoundPoisson's
+    // jumpDist is the process-side analogue) is cloned via copy() rather than left by reference:
+    // unlike a plain data object it exposes mutating instance methods (.seed(), .sample()), so a
+    // shared reference would let a caller silently desync the field's own PRNG stream out from
+    // under the live instance — the exact bug this generic branch, mirrored in
+    // Process.prototype.params(), closes.
+    // decisions/0051-params-distribution-instance-field-clone.md
+    const p = { ...this.p }
+    for (const key of Object.keys(p)) {
+      if (Array.isArray(p[key])) {
+        p[key] = [...p[key]]
+      } else if (p[key] instanceof Distribution) {
+        p[key] = p[key].copy()
+      }
+    }
+    return p
   }
 
   /**
@@ -169,6 +195,26 @@ class Distribution {
       constants: this.c,
       support: this.s
     }
+  }
+
+  /**
+   * Returns a fully independent copy of the distribution, including its current PRNG state.
+   * Equivalent to <code>this.constructor.load(this.save())</code>, provided as a named
+   * convenience since cloning a Distribution instance (rather than just its parameters) needs
+   * this exact round trip to work generically across every subclass's constructor shape.
+   *
+   * @method copy
+   * @memberof ran.dist.Distribution
+   * @returns {Distribution} A new instance with identical parameters, constants, and PRNG state.
+   * @example
+   *
+   * let pareto1 = new ran.dist.Pareto(1, 2).seed('test')
+   * let pareto2 = pareto1.copy()
+   * pareto2.seed('other')
+   * // pareto1's own PRNG state is unaffected
+   */
+  copy () {
+    return this.constructor.load(this.save())
   }
 
   /**

@@ -32,6 +32,31 @@ describe('dist', () => {
         assert.strictEqual(p.min, undefined)
       })
 
+      it('mutating Categorical.params().weights does not leak into a subsequent .params() call', () => {
+        const d = new dist.Categorical([0.3, 0.7], 0)
+        const p = d.params()
+        p.weights[0] = 999
+        assert.deepEqual(d.params().weights, [0.3, 0.7])
+      })
+
+      it('mutating the array passed into the Categorical constructor does not affect params() afterward', () => {
+        const weights = [0.3, 0.7]
+        const d = new dist.Categorical(weights, 0)
+        weights[0] = 999
+        assert.deepEqual(d.params().weights, [0.3, 0.7])
+      })
+
+      it('mutating Hyperexponential.params().weights/.rates does not corrupt the instance', () => {
+        const d = new dist.Hyperexponential([{ weight: 0.4, rate: 1 }, { weight: 0.6, rate: 2 }])
+        const pdfBefore = d.pdf(1)
+        const p = d.params()
+        p.weights[0] = 999
+        p.rates[0] = 999
+        assert.deepEqual(d.params().weights, [0.4, 0.6])
+        assert.deepEqual(d.params().rates, [1, 2])
+        assert.strictEqual(d.pdf(1), pdfBefore)
+      })
+
       it('Bernoulli.params() returns { p }', () => {
         const d = new dist.Bernoulli(0.7)
         assert.deepEqual(d.params(), { p: 0.7 })

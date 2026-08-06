@@ -161,6 +161,51 @@ describe('dist', () => {
       })
     })
 
+    describe('.copy()', () => {
+      it('should return a distinct instance, not the same reference', () => {
+        const original = new dist.Normal(2, 3).seed(42)
+        const copy = original.copy()
+        assert.notStrictEqual(copy, original)
+      })
+
+      it('should return an instance with identical parameters', () => {
+        const original = new dist.Normal(2, 3).seed(42)
+        const copy = original.copy()
+        assert.deepEqual(copy.params(), original.params())
+      })
+
+      it('should carry over the PRNG state, so an un-advanced copy reproduces the original\'s next samples', () => {
+        const original = new dist.Normal(2, 3).seed(42)
+        const expected = original.sample(3)
+
+        const seeded = new dist.Normal(2, 3).seed(42)
+        const copy = seeded.copy()
+        assert.deepEqual(copy.sample(3), expected)
+      })
+
+      it('advancing the copy\'s PRNG should not affect the original\'s future samples', () => {
+        const original = new dist.Normal(2, 3).seed(42)
+        const copy = original.copy()
+
+        copy.sample(5)
+        const originalNext = original.sample(3)
+
+        const reference = new dist.Normal(2, 3).seed(42)
+        assert.deepEqual(reference.sample(3), originalNext)
+      })
+
+      it('calling .seed() on the copy should not affect the original\'s future samples', () => {
+        const original = new dist.Normal(2, 3).seed(42)
+        const copy = original.copy()
+
+        copy.seed(999)
+        const originalNext = original.sample(3)
+
+        const reference = new dist.Normal(2, 3).seed(42)
+        assert.deepEqual(reference.sample(3), originalNext)
+      })
+    })
+
     describe('._qEstimateRoot()', () => {
       it('returns boundary value for open point-mass support [5, 5]', () => {
         // CDF jumps 0 → 1 at the open boundary; expansion steps above 5, creating a sign change,
