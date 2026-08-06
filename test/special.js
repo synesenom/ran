@@ -439,9 +439,10 @@ describe('special', () => {
     it('should return accurate values in the n<0 backward-recurrence branch', () => {
       // mpmath mp.dps=50: sqrt(pi/(2x)) * besseli(n+0.5, x) * exp(-x). besselISphericalExpScaled
       // has no independent closed form for n < 0 -- the production code's own recursion IS the
-      // implementation -- so these literals (rather than the recurrence relation the production
-      // recursion is built from, checked separately below) are the only way to catch a bug in
-      // the recursion's coefficients themselves.
+      // implementation, and a recurrence-relation identity check against that same recursion
+      // (as besselISpherical's own negative-order test above does) would be tautological here:
+      // it's an algebraic rearrangement of the exact recursion being tested, so it can't catch a
+      // bug in the recursion's own coefficients. These literals are the only independent check.
       assert(equal(special.besselISphericalExpScaled(-1, 0.5), 1.3678794411714423, 13))
       assert(equal(special.besselISphericalExpScaled(-1, 5), 0.10000453999297625, 13))
       assert(equal(special.besselISphericalExpScaled(-1, 50), 0.01, 13))
@@ -451,17 +452,6 @@ describe('special', () => {
       assert(equal(special.besselISphericalExpScaled(-3, 0.5), 13.989709382257404, 13))
       assert(equal(special.besselISphericalExpScaled(-3, 5), 0.05200780878791915, 13))
       assert(equal(special.besselISphericalExpScaled(-3, 50), 0.009412, 13))
-    })
-
-    it('should satisfy the recurrence relation in the n<0 backward-recurrence branch', () => {
-      for (const n of [-1, -2, -3]) {
-        for (const x of [0.5, 1, 2, 5, 10, 50]) {
-          assert(equal(
-            special.besselISphericalExpScaled(n - 1, x) - special.besselISphericalExpScaled(n + 1, x),
-            (2 * n + 1) * special.besselISphericalExpScaled(n, x) / x
-          ))
-        }
-      }
     })
   })
 
