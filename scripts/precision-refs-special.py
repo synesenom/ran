@@ -2,8 +2,8 @@
 Reference value generation for test/precision-special.js (issue #1140).
 
 All reference values are mpmath (mp.dps = 50) evaluations of besselI, besselISpherical,
-besselInu, besselK, besselKnu, and digamma, rounded to the nearest float64
-(shortest round-tripping decimal) and emitted as JS literals.
+besselIExpScaled, besselISphericalExpScaled, besselInu, besselK, besselKnu, and digamma,
+rounded to the nearest float64 (shortest round-tripping decimal) and emitted as JS literals.
 
 Unlike scripts/precision-refs-continuous.py / -discrete.py, there is no existing
 independently-vetted reference file (analogous to test/dist-cases-*.js) to self-check the
@@ -38,7 +38,7 @@ import os
 import subprocess
 import sys
 
-from mpmath import mp, mpf, pi, sqrt, besseli, besselk
+from mpmath import mp, mpf, pi, sqrt, exp, besseli, besselk
 from mpmath import digamma as mp_digamma
 
 mp.dps = 50
@@ -103,6 +103,27 @@ def besselISpherical_ref(n, x):
     return sqrt(pi / (2 * x)) * besseli(n + mpf('0.5'), x)
 
 
+def besselIExpScaled_ref(n, x):
+    # exp(-|x|) * I_n(x) (#1292): built from the same direct besseli() call as besselI_ref,
+    # scaled by the definitional exp(-|x|) factor -- independent of _besselIBackward's
+    # scaled=true Miller-recurrence formula in bessel.js.
+    return besseli(n, x) * exp(-abs(x))
+
+
+def besselISphericalExpScaled_ref(n, x):
+    # exp(-x) * i_n(x) (#1292), built on besselISpherical_ref's own independent identity
+    # (i_n(x) = sqrt(pi/(2x)) * I_{n+1/2}(x)) rather than bessel.js's Taylor/Wronskian formulas.
+    # For n < 0, x == 0: this mirrors besselISpherical_ref's own always-+Infinity guard above,
+    # which is itself only exactly correct for n=-1 (i_n(0+) actually alternates sign with n,
+    # e.g. i_-2(0+) -> -Infinity) -- pre-existing, unexercised by either grid (n=-2/-3 at x=0
+    # is never probed), and out of scope for #1310's test-only remit to fix here.
+    if x == 0:
+        if n == 0:
+            return mpf(1)
+        return mpf(0) if n > 0 else mpf('inf')
+    return besselISpherical_ref(n, x) * exp(-x)
+
+
 def besselInu_ref(nu, x):
     return besseli(nu, x)
 
@@ -122,6 +143,8 @@ def digamma_ref(z):
 REF_FN = {
     'besselI': besselI_ref,
     'besselISpherical': besselISpherical_ref,
+    'besselIExpScaled': besselIExpScaled_ref,
+    'besselISphericalExpScaled': besselISphericalExpScaled_ref,
     'besselInu': besselInu_ref,
     'besselK': besselK_ref,
     'besselKnu': besselKnu_ref,
@@ -157,6 +180,50 @@ def _besselISpherical_grid(add):
     # x=0 boundary for a representative negative order: i_n(0) diverges to +Infinity for n<0,
     # unlike the n>=0 cases (0 or 1) -- exercises the fixed x==0 guard in besselISpherical_ref.
     add('besselISpherical', (-1, 0), 'besselISpherical n=-1: x=0 boundary (negative order diverges)')
+
+
+def _besselIExpScaled_grid(add):
+    # Issue #1310: besselIExpScaled had zero dedicated coverage -- reachable before only through
+    # NoncentralChi2/NoncentralChi pdf at a handful of large-lambda*x points. Mirrors besselI's
+    # own grid (same n=0 |x|=10 _I0/_besselIBackward crossover, same per-n j_max crossover
+    # region, same odd-order sign-flip check) plus the x=0 boundary and large-x points past
+    # besselI's own ~710 overflow ceiling, since staying representable there is this scaled
+    # function's whole reason for existing (#1292).
+    for x in [0.001, 0.5, 1, 5, 9.9, 9.99, 10, 10.01, 10.1, 12, 14, 20, 50, 100, 200, 500, 700, 1000]:
+        add('besselIExpScaled', (0, x),
+            'besselIExpScaled n=0: _I0/_besselIBackward crossover at x=10, scaled stays finite past besselI overflow ceiling ~710')
+    for n in [1, 2, 3, 5, 10]:
+        for x in [0.5, 1, 5, 9.9, 10, 10.1, 14, 20, 50, 100, 500, 1000]:
+            add('besselIExpScaled', (n, x), f'besselIExpScaled n={n}: _besselIBackward scaled j_max(n,x) crossover region')
+    # x=0 boundary for n != 0 (bessel.js's dedicated x===0 guard, ahead of _besselIBackward).
+    for n in [1, 2, 3, 5]:
+        add('besselIExpScaled', (n, 0), f'besselIExpScaled n={n}: x=0 boundary returns exactly 0')
+    # Sign symmetry for odd n at negative x (bessel.js's x < 0 && n % 2 === 1 branch).
+    for n in [1, 3, 5]:
+        for x in [-0.5, -5, -50, -500]:
+            add('besselIExpScaled', (n, x), f'besselIExpScaled n={n}: odd-order sign flip at negative x')
+
+
+def _besselISphericalExpScaled_grid(add):
+    # Issue #1310: besselISphericalExpScaled had zero dedicated coverage. Covers the n=0/n=1
+    # closed-form branches (including their own x=0 sub-guards), the |x|=1 Taylor/closed-form
+    # (n=1) and Taylor/Wronskian (n>=2) crossover mirroring besselISpherical_grid's own
+    # threshold cluster, and the n<0 backward-recurrence branch.
+    add('besselISphericalExpScaled', (0, 0), 'besselISphericalExpScaled n=0: x=0 boundary returns exactly 1')
+    for x in [0.001, 0.5, 1, 5, 10, 50, 100, 500, 700]:
+        add('besselISphericalExpScaled', (0, x), 'besselISphericalExpScaled n=0: closed-form (1-e^-2x)/(2x) branch')
+    add('besselISphericalExpScaled', (1, 0), 'besselISphericalExpScaled n=1: x=0 boundary (Taylor series collapses to 0)')
+    for x in [0.001, 0.5, 0.9, 0.99, 1, 1.01, 1.1, 2, 5, 50, 700]:
+        add('besselISphericalExpScaled', (1, x), 'besselISphericalExpScaled n=1: Taylor/closed-form |x|=1 crossover')
+    for n in [2, 3, 5]:
+        add('besselISphericalExpScaled', (n, 0), f'besselISphericalExpScaled n={n}: x=0 boundary (Taylor series collapses to 0)')
+        for x in [0.001, 0.5, 0.9, 0.99, 1, 1.01, 1.1, 2, 5, 10, 50, 700]:
+            add('besselISphericalExpScaled', (n, x), f'besselISphericalExpScaled n={n}: Taylor/Wronskian |x|=1 crossover')
+    # Negative order: backward recurrence (bessel.js's n < 0 branch, linear in the ExpScaled
+    # quantities the same way besselISpherical's own recurrence is).
+    for n in [-1, -2, -3]:
+        for x in [0.5, 1, 2, 5, 10, 50]:
+            add('besselISphericalExpScaled', (n, x), f'besselISphericalExpScaled n={n}: negative-order backward recurrence')
 
 
 def _besselInu_grid(add):
@@ -242,6 +309,8 @@ def grid():
 
     _besselI_grid(add)
     _besselISpherical_grid(add)
+    _besselIExpScaled_grid(add)
+    _besselISphericalExpScaled_grid(add)
     _besselInu_grid(add)
     _besselK_grid(add)
     _besselKnu_grid(add)
@@ -389,8 +458,13 @@ def render(points, refs):
         if withheld_reason(fn, args):
             continue
         args_js = '[' + ', '.join(num(a) for a in args) + ']'
+        # json.dumps produces a valid, properly-escaped JS string literal (double-quoted),
+        # mirroring how tol!r above already avoids the equivalent hand-quoting problem for
+        # tol -- a raw apostrophe in `note` (e.g. "besselI's ~710 overflow ceiling") would
+        # otherwise break out of a hand-wrapped single-quoted literal.
         lines.append(
-            f"  {{ fn: '{fn}', args: {args_js}, ref: {num(ref)}, tol: {tol!r}, note: '{note}' }},"
+            f"  {{ fn: {json.dumps(fn)}, args: {args_js}, ref: {num(ref)}, tol: {tol!r}, "
+            f"note: {json.dumps(note)} }},"
         )
     content = TEMPLATE.format(entries='\n'.join(lines))
     with open(OUTPUT_PATH, 'w') as f:

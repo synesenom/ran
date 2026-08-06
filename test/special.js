@@ -261,6 +261,210 @@ describe('special', () => {
     })
   })
 
+  // Issue #1310: besselIExpScaled (added by #1292) was previously only reachable indirectly
+  // through NoncentralChi2/NoncentralChi pdf evaluation at a handful of large-lambda*x points,
+  // leaving its own branch structure (n=0 small-x/large-x split, x=0, negative-x sign flip)
+  // without any dedicated coverage.
+  describe('.besselIExpScaled()', () => {
+    it('should return exactly 0 at x=0 for n >= 1', () => {
+      for (const n of [1, 2, 3, 5]) {
+        assert(special.besselIExpScaled(n, 0) === 0)
+      }
+    })
+
+    it('should return 1 at n=0, x=0', () => {
+      // _I0(0) * exp(-0) = 1 * 1 = 1
+      assert(special.besselIExpScaled(0, 0) === 1)
+    })
+
+    it('should return accurate values in the n=0 small-x _I0 branch (|x| <= 10)', () => {
+      // mpmath mp.dps=50: besseli(0, mpf(x)) * exp(-mpf(x)). Deliberately not checked via
+      // besselI(0, x) * Math.exp(-x): both besselI and besselIExpScaled call the exact same
+      // _I0(x) helper in this branch, so that identity would hold even if _I0 itself were wrong.
+      assert(equal(special.besselIExpScaled(0, 0.001), 0.9990007495835156, 13))
+      assert(equal(special.besselIExpScaled(0, 0.5), 0.6450352704491501, 13))
+      assert(equal(special.besselIExpScaled(0, 1), 0.46575960759364043, 13))
+      assert(equal(special.besselIExpScaled(0, 5), 0.18354081260932836, 13))
+      assert(equal(special.besselIExpScaled(0, 9.9), 0.1284955220071385, 13))
+      assert(equal(special.besselIExpScaled(0, 10), 0.1278333371634286, 13))
+    })
+
+    it('should return accurate values in the n=0 large-x _besselIBackward branch (|x| > 10)', () => {
+      // mpmath mp.dps=50: besseli(0, mpf(x)) * exp(-mpf(x)). Not checked via besselI(0, x) *
+      // Math.exp(-x): both share _besselIBackward's Miller-recurrence loop, differing only in
+      // the final scaled ? y/sum : y*exp(x-log(sum)) line, so a bug in the shared loop would
+      // still satisfy that identity.
+      assert(equal(special.besselIExpScaled(0, 10.1), 0.12718130354436347, 13))
+      assert(equal(special.besselIExpScaled(0, 14), 0.10761525167069509, 13))
+      assert(equal(special.besselIExpScaled(0, 50), 0.05656162664745419, 13))
+      assert(equal(special.besselIExpScaled(0, 200), 0.028227159949111916, 13))
+      assert(equal(special.besselIExpScaled(0, 700), 0.015081295651531358, 13))
+    })
+
+    it('should be continuous across the |x|=10 n=0 routing boundary', () => {
+      // mpmath mp.dps=50: besseli(0, mpf(x)) * exp(-mpf(x))
+      assert(equal(special.besselIExpScaled(0, 9.9), 0.1284955220071385, 13))
+      assert(equal(special.besselIExpScaled(0, 10), 0.1278333371634286, 13))
+      assert(equal(special.besselIExpScaled(0, 10.1), 0.12718130354436347, 13))
+    })
+
+    it('should return accurate values for n != 0 across the _besselIBackward crossover', () => {
+      // mpmath mp.dps=50: besseli(n, mpf(x)) * exp(-mpf(x)). Not checked via besselI(n, x) *
+      // Math.exp(-x): both share the same _besselIBackward Miller-recurrence loop for any given
+      // (n, x), so that identity cannot catch a bug in the shared loop itself (only in the
+      // scaled=true/false post-processing, which is a single line).
+      assert(equal(special.besselIExpScaled(1, 0.5), 0.1564208031848717, 13))
+      assert(equal(special.besselIExpScaled(1, 9.9), 0.12182203639796144, 13))
+      assert(equal(special.besselIExpScaled(1, 10.1), 0.12071085823848707, 13))
+      assert(equal(special.besselIExpScaled(1, 100), 0.03974415302513025, 13))
+      assert(equal(special.besselIExpScaled(1, 500), 0.017827851852898056, 13))
+      assert(equal(special.besselIExpScaled(2, 0.5), 0.01935205770966328, 13))
+      assert(equal(special.besselIExpScaled(2, 9.9), 0.10388500960350994, 13))
+      assert(equal(special.besselIExpScaled(2, 10.1), 0.1032781632991185, 13))
+      assert(equal(special.besselIExpScaled(5, 0.5), 4.987605521470164e-06, 13))
+      assert(equal(special.besselIExpScaled(5, 9.9), 0.03500619134149665, 13))
+      assert(equal(special.besselIExpScaled(5, 10.1), 0.03555744332660292, 13))
+      assert(equal(special.besselIExpScaled(10, 0.5), 1.6030859629529217e-13, 10))
+      assert(equal(special.besselIExpScaled(10, 9.9), 0.0009555334260008234, 13))
+      assert(equal(special.besselIExpScaled(10, 10.1), 0.0010330372238920365, 13))
+      assert(equal(special.besselIExpScaled(10, 500), 0.016145898955259176, 13))
+    })
+
+    it('should stay finite well past besselI\'s own ~709 overflow ceiling', () => {
+      // besselI(0, 1000) overflows to Infinity; the whole reason besselIExpScaled exists (#1292)
+      // is to stay representable here. mpmath mp.dps=50: besseli(n, mpf(x)) * exp(-mpf(x))
+      assert.strictEqual(special.besselI(0, 1000), Infinity)
+      assert(equal(special.besselIExpScaled(0, 1000), 0.012617240455891257, 13))
+      assert(equal(special.besselIExpScaled(3, 1000), 0.01256056218254712, 13))
+      assert(equal(special.besselIExpScaled(0, 5000), 0.005642036898744589, 13))
+      assert(equal(special.besselIExpScaled(3, 5000), 0.0056369608425911434, 13))
+    })
+
+    it('should satisfy sign symmetry for odd n at negative x', () => {
+      for (const n of [1, 3, 5]) {
+        for (const x of [0.1, 1, 5, 9.9, 10, 10.1, 50, 500]) {
+          assert(equal(special.besselIExpScaled(n, -x), -special.besselIExpScaled(n, x)))
+        }
+      }
+    })
+  })
+
+  // Issue #1310: besselISphericalExpScaled (added by #1292) had the same coverage gap as
+  // besselIExpScaled above -- only reachable indirectly through NoncentralChi/NoncentralChi2.
+  describe('.besselISphericalExpScaled()', () => {
+    it('should return 1 at n=0, x=0', () => {
+      assert(special.besselISphericalExpScaled(0, 0) === 1)
+    })
+
+    it('should return exactly 0 at x=0 for n >= 1', () => {
+      for (const n of [1, 2, 3, 5]) {
+        assert(special.besselISphericalExpScaled(n, 0) === 0)
+      }
+    })
+
+    it('should equal exp(-x) * besselISpherical(n, x) in the n=0 closed-form branch', () => {
+      // (1 - exp(-2x)) / (2x) == exp(-x) * sinh(x) / x, checked against the unscaled function's
+      // own independent code path.
+      for (const x of [0.001, 0.5, 1, 5, 10, 50, 100, 500]) {
+        assert(equal(special.besselISphericalExpScaled(0, x), special.besselISpherical(0, x) * Math.exp(-x)))
+      }
+    })
+
+    it('should equal exp(-x) * besselISpherical(n, x) in the n=1 closed-form branch (|x| >= 1)', () => {
+      // Legitimate cross-check: for |x| >= 1, besselISpherical(1, x) uses (cosh(x)-sinh(x)/x)/x
+      // while besselISphericalExpScaled(1, x) uses the algebraically-equivalent but separately
+      // coded (1+e^-2x)/(2x) - (1-e^-2x)/(2x^2) -- these are genuinely independent formulas,
+      // unlike the |x| < 1 Taylor branch below (which shares _besselISphericalTaylor exactly).
+      for (const x of [1, 1.01, 1.1, 2, 5, 50, 500]) {
+        assert(equal(special.besselISphericalExpScaled(1, x), special.besselISpherical(1, x) * Math.exp(-x)))
+      }
+    })
+
+    it('should return accurate small-x Taylor values for n=1 (|x| < 1)', () => {
+      // mpmath mp.dps=50: sqrt(pi/(2x)) * besseli(1.5, x) * exp(-x). Not checked via
+      // besselISpherical(1, x) * Math.exp(-x): both share the exact same
+      // _besselISphericalTaylor(1, x) helper call in this branch.
+      assert(equal(special.besselISphericalExpScaled(1, 1e-6), 3.3333300000019996e-07, 10))
+      assert(equal(special.besselISphericalExpScaled(1, 1e-3), 0.00033300019991114283, 10))
+      assert(equal(special.besselISphericalExpScaled(1, 0.1), 0.03019141928900223, 10))
+      assert(equal(special.besselISphericalExpScaled(1, 0.5), 0.10363832351432696, 10))
+      assert(equal(special.besselISphericalExpScaled(1, 0.9), 0.13214067137099655, 10))
+      assert(equal(special.besselISphericalExpScaled(1, 0.99), 0.13506671882903618, 10))
+    })
+
+    it('should be continuous across the n=1 |x|=1 Taylor/closed-form crossover', () => {
+      // mpmath mp.dps=50: sqrt(pi/(2x)) * besseli(1.5, x) * exp(-x)
+      assert(equal(special.besselISphericalExpScaled(1, 0.99), 0.13506671882903618, 13))
+      assert(equal(special.besselISphericalExpScaled(1, 1), 0.1353352832366127, 13))
+      assert(equal(special.besselISphericalExpScaled(1, 1.01), 0.13559331673906708, 13))
+    })
+
+    it('should return accurate values in the n>=2 small-x Taylor branch (|x| < 1)', () => {
+      // mpmath mp.dps=50: sqrt(pi/(2x)) * besseli(n+0.5, x) * exp(-x). Not checked via
+      // besselISpherical(n, x) * Math.exp(-x): both share the exact same
+      // _besselISphericalTaylor(n, x) helper call in this branch.
+      assert(equal(special.besselISphericalExpScaled(2, 0.001), 6.660003807937037e-08, 10))
+      assert(equal(special.besselISphericalExpScaled(2, 0.5), 0.01029061774259589, 10))
+      assert(equal(special.besselISphericalExpScaled(2, 0.99), 0.026025479653984947, 10))
+      assert(equal(special.besselISphericalExpScaled(3, 0.001), 9.514291003175277e-12, 10))
+      assert(equal(special.besselISphericalExpScaled(3, 0.5), 0.0007321460883680679, 10))
+      assert(equal(special.besselISphericalExpScaled(5, 0.001), 9.610394788422048e-20, 10))
+      assert(equal(special.besselISphericalExpScaled(5, 0.5), 1.8409903951734993e-06, 10))
+    })
+
+    it('should return accurate values in the n>=2 Wronskian branch (|x| >= 1)', () => {
+      // mpmath mp.dps=50: sqrt(pi/(2x)) * besseli(n+0.5, x) * exp(-x). Not checked via
+      // besselISpherical(n, x) * Math.exp(-x): both derive from the same _hi(n+1, x) and
+      // _knRaw(n+1, x) calls, differing only in whether the exp(-x)/x normalization _kn applies
+      // is included -- a bug in the shared _hi/_knRaw recurrences would still satisfy that
+      // identity.
+      assert(equal(special.besselISphericalExpScaled(2, 1.01), 0.026626056675978112, 10))
+      assert(equal(special.besselISphericalExpScaled(2, 2), 0.04761854340290348, 10))
+      assert(equal(special.besselISphericalExpScaled(2, 10), 0.036499999862933286, 10))
+      assert(equal(special.besselISphericalExpScaled(2, 500), 0.000994012, 13))
+      assert(equal(special.besselISphericalExpScaled(3, 1.01), 0.0037811549767991933, 10))
+      assert(equal(special.besselISphericalExpScaled(3, 10), 0.026750000181896806, 10))
+      assert(equal(special.besselISphericalExpScaled(3, 500), 0.00098805988, 13))
+      assert(equal(special.besselISphericalExpScaled(5, 1.01), 3.829481966569938e-05, 10))
+      assert(equal(special.besselISphericalExpScaled(5, 10), 0.01075250041985184, 10))
+      assert(equal(special.besselISphericalExpScaled(5, 500), 0.00097041665508976, 13))
+    })
+
+    it('should stay finite well past besselISpherical\'s own overflow ceiling', () => {
+      // mpmath mp.dps=50: sqrt(pi/(2x)) * besseli(3.5, x) * exp(-x)
+      assert(equal(special.besselISphericalExpScaled(3, 700), 0.0007081850999583507, 12))
+      assert(equal(special.besselISphericalExpScaled(3, 5000), 9.9880059988e-05, 12))
+    })
+
+    it('should return accurate values in the n<0 backward-recurrence branch', () => {
+      // mpmath mp.dps=50: sqrt(pi/(2x)) * besseli(n+0.5, x) * exp(-x). besselISphericalExpScaled
+      // has no independent closed form for n < 0 -- the production code's own recursion IS the
+      // implementation -- so these literals (rather than the recurrence relation the production
+      // recursion is built from, checked separately below) are the only way to catch a bug in
+      // the recursion's coefficients themselves.
+      assert(equal(special.besselISphericalExpScaled(-1, 0.5), 1.3678794411714423, 13))
+      assert(equal(special.besselISphericalExpScaled(-1, 5), 0.10000453999297625, 13))
+      assert(equal(special.besselISphericalExpScaled(-1, 50), 0.01, 13))
+      assert(equal(special.besselISphericalExpScaled(-2, 0.5), -2.103638323514327, 13))
+      assert(equal(special.besselISphericalExpScaled(-2, 5), 0.0799945520084285, 13))
+      assert(equal(special.besselISphericalExpScaled(-2, 50), 0.0098, 13))
+      assert(equal(special.besselISphericalExpScaled(-3, 0.5), 13.989709382257404, 13))
+      assert(equal(special.besselISphericalExpScaled(-3, 5), 0.05200780878791915, 13))
+      assert(equal(special.besselISphericalExpScaled(-3, 50), 0.009412, 13))
+    })
+
+    it('should satisfy the recurrence relation in the n<0 backward-recurrence branch', () => {
+      for (const n of [-1, -2, -3]) {
+        for (const x of [0.5, 1, 2, 5, 10, 50]) {
+          assert(equal(
+            special.besselISphericalExpScaled(n - 1, x) - special.besselISphericalExpScaled(n + 1, x),
+            (2 * n + 1) * special.besselISphericalExpScaled(n, x) / x
+          ))
+        }
+      }
+    })
+  })
+
   describe('.besselInu()', () => {
     it('should return accurate small-x values (regression)', () => {
       // These values must not change — they confirm the Taylor series is undisturbed at small x.

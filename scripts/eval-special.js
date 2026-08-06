@@ -8,6 +8,8 @@ const special = require('../src/special/index.js')
 const FN = {
   besselI: special.besselI,
   besselISpherical: special.besselISpherical,
+  besselIExpScaled: special.besselIExpScaled,
+  besselISphericalExpScaled: special.besselISphericalExpScaled,
   besselInu: special.besselInu,
   besselK: special.besselK,
   besselKnu: special.besselKnu,
