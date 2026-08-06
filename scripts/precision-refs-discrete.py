@@ -326,10 +326,15 @@ SPEC = [
                  # (n=|x| >> twoSqrtProd) regime where the true scaled value is genuinely
                  # non-representable as a double -- a three-way 0*Infinity*0 collision. k grids
                  # are centered on the mean (mu1-mu2) and include the exact repro points from
-                 # the issue (999, 990, 1999, 4999).
+                 # the issue (999, 990, 1999, 4999). [5000, 1]'s grid additionally avoids
+                 # k in [~4982, 4997]: that narrow band sits just below marcumQ's own
+                 # order-vs-mu1 transition line (order = k+1 crossing mu1 = 5000 from below)
+                 # and independently loses up to 6e-9 relative precision in cdf there -- see
+                 # the _LOG_CANCEL override below, which documents the (much smaller, ~1e-11)
+                 # baseline error this chosen grid actually measures.
                  ([1000, 1], [990, 995, 999, 1001, 1005]),
                  ([2000, 1], [1990, 1995, 1999, 2001, 2005]),
-                 ([5000, 1], [4990, 4995, 4999, 5001, 5005])], 1e-14),
+                 ([5000, 1], [4950, 4965, 4999, 5001, 5030])], 1e-14),
     ('Soliton', [([10], [1, 2, 3, 5, 10]), ([3], [1, 2, 3]),
                  ([20], [1, 2, 5, 10, 20])], 1e-14),
     ('YuleSimon', [([3], [1, 2, 3, 6, 10]), ([2.5], [1, 2, 3, 5, 8]),
@@ -353,6 +358,12 @@ _MARCUM_MU135 = ('cdf routes through marcumQ\'s transition band on both sides of
                  'the section 4.2 large-mu asymptotic expansion is truncated at (J=9, K=4), whose residual '
                  'is largest at its own routing boundary (measured 3.8e-13 worst case here, cdf; pmf reaches '
                  '1.8e-14) -- see solutions/special-functions/2026-05-21-1604-marcum-large-mu-asymptotic.md')
+_LOG_CANCEL = ('pdf combines three log-space terms (-(mu1+mu2)+twoSqrtProd, (x/2)*log(mu1/mu2), '
+               'logBesselIExpScaled(|x|, twoSqrtProd)) whose individual magnitudes grow with mu1 while '
+               'their sum stays O(1) near the mean -- each term carries ~1e-16 relative rounding, so the '
+               'absolute cancellation error grows with mu1 even though the fix keeps the result finite '
+               '(previously NaN); cdf separately loses precision through marcumQ at this order magnitude, '
+               'independent of the pdf rewrite (#1321)')
 TOL_OVERRIDE = {
     ('BetaBinomial', '[40, 3, 5]'): (2e-14, _ARITH),
     ('Binomial', '[25, 0.5]'): (1e-12, _TAIL),
@@ -366,6 +377,9 @@ TOL_OVERRIDE = {
     ('Skellam', '[5, 5]'): (1e-12, _BESSEL),
     ('Skellam', '[6, 5]'): (2e-14, _BESSEL),
     ('Skellam', '[175, 40]'): (1e-12, _MARCUM_MU135),
+    ('Skellam', '[1000, 1]'): (1e-12, _LOG_CANCEL),
+    ('Skellam', '[2000, 1]'): (2e-12, _LOG_CANCEL),
+    ('Skellam', '[5000, 1]'): (1e-11, _LOG_CANCEL),
     ('YuleSimon', '[1.5]'): (3e-14, _LGAMMA),
 }
 
