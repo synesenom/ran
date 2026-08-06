@@ -1413,6 +1413,47 @@ export default [{
       { x: 4.0, pmf: 0.0005964244158913836, cdf: 0.9998749984566343 },
       { x: 6.0, pmf: 1.6262119293014646e-05, cdf: 0.9999975357636712 }
     ]
+  }, {
+    // Issue #1321: highly asymmetric mu1/mu2 with x near the mean (mu1-mu2). Previously
+    // returned NaN: expNegScaled underflowed to 0, Math.pow(sqrtRatio, x) overflowed to
+    // Infinity, and besselIExpScaled(|x|, twoSqrtProd) also underflowed to 0 -- a three-way
+    // 0 * Infinity * 0 collision even though the true pmf is a normal, representable number.
+    name: 'highly asymmetric large mu (mu1=1000, mu2=1)',
+    params: () => [1000, 1],
+    // mpmath mp.dps=50: exp(-mu1-mu2) * (mu1/mu2)^(x/2) * besseli(abs(x), 2*sqrt(mu1*mu2));
+    // cdf: direct summation from floor(mean - 30*std) = 49
+    refVals: [
+      { x: 990, pmf: 0.012161579910886742, cdf: 0.39597669111052747 },
+      { x: 995, pmf: 0.012532834242807307, cdf: 0.45801813013800957 },
+      { x: 999, pmf: 0.012608320282218996, cdf: 0.5084009781741283 },
+      { x: 1001, pmf: 0.012570645893955686, cdf: 0.533567373704409 },
+      { x: 1005, pmf: 0.012347196190119526, cdf: 0.5833520856091031 }
+    ]
+  }, {
+    // Issue #1321, same asymmetric-large-mu regime, larger mu1 -- Bessel order n=|x| up to 1999.
+    name: 'highly asymmetric large mu (mu1=2000, mu2=1)',
+    params: () => [2000, 1],
+    // mpmath mp.dps=50, same formulas as above; cdf lo = floor(mean - 30*std) = 657
+    refVals: [
+      { x: 1990, pmf: 0.008758769025926538, cdf: 0.4260545846179326 },
+      { x: 1995, pmf: 0.00889129662559755, cdf: 0.4702894798981756 },
+      { x: 1999, pmf: 0.00891802170941422, cdf: 0.5059437307091016 },
+      { x: 2001, pmf: 0.008904671366437938, cdf: 0.5237619714492705 },
+      { x: 2005, pmf: 0.00882503184992339, cdf: 0.559203445146446 }
+    ]
+  }, {
+    // Issue #1321, same asymmetric-large-mu regime, largest mu1 named in the issue's
+    // acceptance criteria -- Bessel order n=|x| up to 4999.
+    name: 'highly asymmetric large mu (mu1=5000, mu2=1)',
+    params: () => [5000, 1],
+    // mpmath mp.dps=50, same formulas as above; cdf lo = floor(mean - 30*std) = 2877
+    refVals: [
+      { x: 4990, pmf: 0.005600750064781822, cdf: 0.45308389462886095 },
+      { x: 4995, pmf: 0.00563447136363433, cdf: 0.48119997722925745 },
+      { x: 4999, pmf: 0.005641237915780288, cdf: 0.5037604159027224 },
+      { x: 5001, pmf: 0.005637855878210379, cdf: 0.5150383821255374 },
+      { x: 5005, pmf: 0.005617610674374981, cdf: 0.5375447923689822 }
+    ]
   }],
   // scipy.stats.skellam(mu1=5, mu2=5)
   refVals: [

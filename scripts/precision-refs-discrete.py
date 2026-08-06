@@ -316,7 +316,20 @@ SPEC = [
                  # crossed) hit the 0*Infinity = NaN failure; [2000, 2000] extends into the
                  # "thousands" range named in the acceptance criteria.
                  ([360, 360], [-25, -8, 0, 5, 25]), ([400, 400], [-28, -9, 0, 9, 28]),
-                 ([2000, 2000], [-60, -20, 0, 20, 60])], 1e-14),
+                 ([2000, 2000], [-60, -20, 0, 20, 60]),
+                 # Highly asymmetric large-mu sets for issue #1321: unlike #1309's SYMMETRIC
+                 # large-mu sets above (sqrtRatio=1, so Math.pow(sqrtRatio, x) is inert), these
+                 # cross a DIFFERENT threshold -- expNegScaled = exp(-(sqrt(mu1)-sqrt(mu2))^2)
+                 # underflows to 0 once the sqrt-split grows large even though mu1+mu2 itself
+                 # is unremarkable, AND Math.pow(sqrtRatio, x) independently overflows to
+                 # Infinity, AND besselIExpScaled(|x|, twoSqrtProd) is in the large-order
+                 # (n=|x| >> twoSqrtProd) regime where the true scaled value is genuinely
+                 # non-representable as a double -- a three-way 0*Infinity*0 collision. k grids
+                 # are centered on the mean (mu1-mu2) and include the exact repro points from
+                 # the issue (999, 990, 1999, 4999).
+                 ([1000, 1], [990, 995, 999, 1001, 1005]),
+                 ([2000, 1], [1990, 1995, 1999, 2001, 2005]),
+                 ([5000, 1], [4990, 4995, 4999, 5001, 5005])], 1e-14),
     ('Soliton', [([10], [1, 2, 3, 5, 10]), ([3], [1, 2, 3]),
                  ([20], [1, 2, 5, 10, 20])], 1e-14),
     ('YuleSimon', [([3], [1, 2, 3, 6, 10]), ([2.5], [1, 2, 3, 5, 8]),
