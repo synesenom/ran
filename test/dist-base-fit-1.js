@@ -62,6 +62,12 @@ describe('dist', () => {
         // guess.js's own #1063-driven timeouts for the identical underlying latency. The pdfCalls
         // bounds above remain the deterministic guard against the original runaway-Powell-search
         // regression — this timeout only bounds wall-clock, not correctness.
+        // Re-measured after #1342 shipped Distribution.fit()'s capAbs=2 default: unaffected at
+        // exactly 134500 calls (the pre-#1342 baseline recorded below), because
+        // DoublyNoncentralF.fit() overrides fit() itself with a custom ridge-penalized objective
+        // (see below) that calls powell() directly rather than through the base class's fit(),
+        // so it never receives the injected default. Out of this issue's scope per its own
+        // "Out of Scope" section.
         const data = new dist.Rice(5, 1).seed(5).sample(500)
 
         let pdfCalls = 0
@@ -119,6 +125,11 @@ describe('dist', () => {
         // class's gap being a genuine shape/noncentrality ridge (#1063) rather than purely a
         // convergence-tolerance artifact. See
         // solutions/testing/2026-08-05-1736-powell-fractional-convergence-n-scaling.md.
+        // #1342 shipped capAbs=2 as Distribution.fit()'s real default; DoublyNoncentralBeta uses
+        // the base class's fit() (unlike DoublyNoncentralF), so it receives it. Re-measured on
+        // this test's own n=500 fixture (not the #1338 sweep's n=100/300/1000/3000 points above):
+        // bounded-vs-fully-unbounded gap is 0.0369 under the real implementation, consistent with
+        // partial (not complete) closure.
         const data = new dist.DoublyNoncentralBeta(2, 3, 1, 1).seed(42).sample(500)
         const bounded = dist.DoublyNoncentralBeta.fit(data)
         const origOptions = dist.DoublyNoncentralBeta._powellOptions
@@ -154,6 +165,14 @@ describe('dist', () => {
         // first and measured 229500 calls, which DOES regress that ceiling, ruling it out as the
         // calibrated value. See
         // solutions/testing/2026-08-05-1736-powell-fractional-convergence-n-scaling.md.
+        //
+        // Those capAbs figures are from #1338's scratch prototype, which manually applied capAbs
+        // to a mirrored copy of this class's custom objective. #1342 shipped capAbs=2 only as
+        // Distribution.fit()'s default (src/dist/_distribution.js) -- DoublyNoncentralF.fit()'s
+        // own override above never calls the base class's fit(), so it does not receive it; this
+        // class's gap and call counts are unaffected by the real implementation (confirmed: still
+        // 134500 calls on the Rice(5,1) case above). Extending the cap to this class's own fit()
+        // override was explicitly out of #1342's scope.
         const data = new dist.DoublyNoncentralF(3, 8, 1, 1).seed(42).sample(400)
         const bounded = dist.DoublyNoncentralF.fit(data)
         const origOptions = dist.DoublyNoncentralBeta._powellOptions

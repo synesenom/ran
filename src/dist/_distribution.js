@@ -781,7 +781,13 @@ class Distribution {
         return Infinity
       }
     }
-    const best = powell(objective, Distribution._feasibleStart(objective, x0), Cls._powellOptions())
+    // capAbs=2 (Wilks'/LRT-derived: the lnL gap at a confidence-region edge is ~chi2_p/2, an
+    // O(1) quantity independent of n) caps the fractional convergence test's tolerated absolute
+    // lnL gap, which otherwise grows with n since the objective is -lnL(data). Merged before
+    // Cls._powellOptions() so a subclass override's own capAbs (if any) takes precedence.
+    // See solutions/testing/2026-08-05-1736-powell-fractional-convergence-n-scaling.md.
+    const powellOptions = { capAbs: 2, ...Cls._powellOptions() }
+    const best = powell(objective, Distribution._feasibleStart(objective, x0), powellOptions)
     return new Cls(...best)
   }
 

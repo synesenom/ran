@@ -252,11 +252,16 @@ function _directionSweep (f, dirs, initial, opts) {
  * @param {Object} [opts] Options.
  * @param {number} [opts.tol=1e-8] Fractional tolerance on the objective value for convergence.
  * @param {number} [opts.maxIter=200] Maximum number of outer iterations.
+ * @param {number} [opts.capAbs=Infinity] Absolute ceiling on the convergence threshold. The
+ * fractional test's tolerated absolute gap (`tol * (|fStart| + |fret|)`) grows with the
+ * objective's magnitude, so on an objective that scales with sample size `n` (e.g. -lnL(data))
+ * the tolerated gap grows with `n` too; capping it keeps convergence n-aware. Defaults to
+ * `Infinity` so every existing caller is unaffected.
  * @returns {number[]} Parameter vector at the approximate minimum.
  * @private
  */
 export default function powell (f, x0, opts = {}) {
-  const { tol = 1e-8, maxIter = 200 } = opts
+  const { tol = 1e-8, maxIter = 200, capAbs = Infinity } = opts
   const n = x0.length
   let p = x0.slice()
 
@@ -277,8 +282,9 @@ export default function powell (f, x0, opts = {}) {
     fret = sweep.fret
     const { biggestDrop, iBig } = sweep
 
-    // Convergence: relative decrease in the objective value falls below tolerance.
-    if (2 * Math.abs(fStart - fret) <= tol * (Math.abs(fStart) + Math.abs(fret)) + TINY) {
+    // Convergence: relative decrease in the objective value falls below tolerance, capped at
+    // capAbs so the tolerated absolute gap stops growing once the objective scales with n.
+    if (2 * Math.abs(fStart - fret) <= Math.min(tol * (Math.abs(fStart) + Math.abs(fret)), capAbs) + TINY) {
       break
     }
 
