@@ -355,6 +355,17 @@ describe('dist', () => {
         // shared by every _powellOptions()-bounded distribution, not just this one; #1339:
         // theta=0 boundary convergence behavior for seed 7's ridge).
         //
+        // Issue #1339 confirmed seed 7's theta=0 corner (nu>=25) is a genuine KKT-satisfying
+        // constrained optimum -- lnL decreases monotonically moving theta off 0 at those nu, and a
+        // full-precision Powell search converges onto theta~1e-9 from 7 different starting points
+        // with bit-identical lnL, so it is not premature convergence or clamping. The pattern is
+        // not seed-7-specific (seed 99 hits the same theta=0 boundary via an independent, steeper
+        // mechanism), but .fit()'s actual joint 3-parameter search never approaches that region for
+        // any seed here -- it correctly settles on a much smaller, truly optimal nu (16-17 for seed
+        // 7, 5-6 for seed 99) with interior theta, reproducing this test's own measured gaps
+        // exactly. No optimizer correctness issue was found. See
+        // solutions/testing/2026-08-06-2109-doubly-noncentral-t-theta-boundary-convergence.md
+        //
         // Issue #1338 followed up on #1336's own scope: a prototype absolute-cap term
         // (min(tol*(|fStart|+|fret|), capAbs)) on a scratch copy of powell.js -- never applied to
         // the shipped algorithm -- measured with capAbs=2 on this class's own (5,1,2) seed=42 data:
