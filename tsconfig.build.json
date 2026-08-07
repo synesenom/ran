@@ -5,11 +5,10 @@
     "emitDeclarationOnly": true,
     "rootDir": "src",
     "outDir": "dist",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "module": "commonjs",
     "target": "ES2017",
-    "strict": false,
-    "ignoreDeprecations": "6.0"
+    "strict": false
   },
   "include": ["src/**/*.js"],
   "exclude": [
