@@ -254,7 +254,10 @@ describe('dist', () => {
         // load-independent regression guard, matching this file's own DoublyNoncentralF
         // pdfCalls guard above. An isolated run measured 21551 calls and ~12s; the ceiling
         // below sits at ~1.9x that count, comfortably above measured noise while still well
-        // under the unbounded-search blowup this guards against.
+        // under the unbounded-search blowup this guards against. Re-measured after #1342 shipped
+        // Distribution.fit()'s capAbs=2 default: still 21551 calls, an exact no-op -- matching
+        // #1338's own finding that NoncentralT's 2-parameter (nu, mu) bounded-vs-unbounded gap is
+        // already ~1e-11 to 1e-13 at every n, leaving nothing for capAbs to close.
         const data = new dist.VonMises(0, 2).seed(5).sample(500)
 
         let pdfDirectCalls = 0

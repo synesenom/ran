@@ -197,6 +197,34 @@ describe('algorithms', () => {
       assert(Array.isArray(result))
       assert(result.length === 1)
     })
+
+    it('capAbs should tighten convergence independent of tol/maxIter', () => {
+      // A general (non-axis-aligned) 2D quadratic: min at (2/11, 5/22). Coefficients scaled
+      // up so the first coordinate-direction sweep's raw drop (~94) exceeds capAbs, letting
+      // capAbs=2 force a further sweep regardless of tol/maxIter.
+      const quadratic = offset => ([x, y]) =>
+        300 * x * x + 500 * y * y + 400 * x * y - 200 * x - 300 * y + offset
+      const xTrue = 2 / 11
+      const yTrue = (1 - 3 * xTrue) / 2
+      const tol = 1e-2
+      const maxIter = 200
+
+      // A large additive offset leaves the true minimiser unchanged but inflates the
+      // fractional threshold tol*(|fStart|+|fret|), so the uncapped search declares
+      // convergence right after the first coordinate sweep: minimising over x with y
+      // fixed at 0 gives x=200/(2*300)=1/3 (exact rational), then minimising over y
+      // with x=1/3 fixed gives 1000y=500/3, y=1/6 (exact rational) -- the deterministic
+      // stopping point of the uncapped search, well short of the true minimum.
+      const offset = 1e6
+      const uncapped = algorithms.powell(quadratic(offset), [0, 0], { tol, maxIter })
+      assert(Math.abs(uncapped[0] - 1 / 3) < 1e-6)
+      assert(Math.abs(uncapped[1] - 1 / 6) < 1e-6)
+
+      // The same tol/maxIter budget, but capAbs bounds the tolerated absolute gap so the
+      // search keeps iterating past the first sweep and reaches the true minimum.
+      const capped = algorithms.powell(quadratic(offset), [0, 0], { tol, maxIter, capAbs: 2 })
+      assert(Math.hypot(capped[0] - xTrue, capped[1] - yTrue) < 1e-6)
+    })
   })
 
   describe('.tanhSinh()', () => {
