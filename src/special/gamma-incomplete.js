@@ -1,5 +1,12 @@
 import { MAX_ITER, EPS, DELTA } from '../core/constants'
 import logGamma from './log-gamma'
+import { bd0, stirlerr } from './_deviance'
+
+// See solutions/special-functions/2026-08-08-2059-gamma-incomplete-gui-cancellation-and-small-s-convergence.md
+
+// EPS is a fixed constant, so this is the same value on every call; precomputed once
+// rather than recomputing Math.log(1/EPS) inside _gli/_gui's hot maxIter formula.
+const LOG_INV_EPS = Math.log(1 / EPS)
 
 /**
  * Computes the regularized lower incomplete gamma function.
@@ -22,7 +29,7 @@ function _gli (s, x) {
     let f = y
     // Near x ≈ s the series converges slowly: O(sqrt(s·log(1/ε))) terms needed.
     // The fixed MAX_ITER=100 is insufficient for s ≳ ~120 with x near s.
-    const maxIter = Math.max(MAX_ITER, Math.ceil(Math.sqrt(2 * (s + 1) * Math.log(1 / EPS))))
+    const maxIter = Math.max(MAX_ITER, Math.ceil(Math.sqrt(2 * (s + 1) * LOG_INV_EPS)))
     for (let i = 0; i < maxIter; i++) {
       si++
       y *= x / si
@@ -31,7 +38,23 @@ function _gli (s, x) {
         break
       }
     }
-    return f * Math.exp(-x + s * Math.log(x) - logGamma(s))
+    // sqrt(s/(2*pi))*exp(-bd0(s,x)-stirlerr(s)) replaces exp(-x+s*log(x)-logGamma(s)):
+    // the latter cancels three O(s)-magnitude terms down to an O(1) result once s and x
+    // are both large, losing ~s*EPS of absolute precision in the exponent regardless of
+    // how exactly each term is computed (#1348). The Loader (2000) decomposition keeps
+    // every term O(1) or O(log s), so no such cancellation occurs at any magnitude.
+    return f * Math.sqrt(s / (2 * Math.PI)) * Math.exp(-bd0(s, x) - stirlerr(s))
+  }
+}
+
+// Signals _gui's non-convergence to the caller instead of letting it return silently,
+// mirroring _fc's _assertFcConverged in marcum-q.js (ADR-0049, decisions/0049-continued-
+// fraction-convergence-throw.md): a continued fraction has no bounded-error guarantee
+// tying an unconverged iterate to the true value, so the exhausted-budget case must
+// throw rather than silently hand back a truncated result.
+function _assertGuiConverged (y, s, x, maxIter) {
+  if (Math.abs(y - 1) > EPS) {
+    throw Error(`_gui: continued fraction failed to converge for s=${s}, x=${x} after ${maxIter} iterations`)
   }
 }
 
@@ -43,6 +66,7 @@ function _gli (s, x) {
  * @param {number} s Exponent of the integrand.
  * @param {number} x Lower boundary of the integration.
  * @return {number} The regularized upper incomplete gamma function.
+ * @throws {Error} If the continued fraction fails to converge within its regime-aware budget.
  * @private
  */
 function _gui (s, x) {
@@ -56,7 +80,16 @@ function _gui (s, x) {
 
   let fi
   let y
-  for (let i = 1; i < MAX_ITER; i++) {
+  // Near x ≈ s the continued fraction converges slowly; the fixed MAX_ITER=100 silently
+  // truncated there (#1348), the same failure class #1286 fixed in _fc. Two regimes both
+  // need more than 100 steps: large s (measured ~150-160 iterations at s~5000, x~5000,
+  // covered by _gli's sqrt(s)-scaling formula), and s near zero (measured up to ~99
+  // iterations at the x=s+1 boundary regardless of how small s is -- the sqrt(s) formula
+  // alone would give ~9 there, far short -- so the floor is raised from MAX_ITER=100 to
+  // 200, empirically confirmed >=2x the worst-case measured need across a sweep of s from
+  // 1e-20 to 20000 and x/(s+1) from 1+1e-5 to 3).
+  const maxIter = Math.max(200, Math.ceil(Math.sqrt(2 * (s + 1) * LOG_INV_EPS)))
+  for (let i = 1; i < maxIter; i++) {
     fi = i * (s - i)
     b += 2
     d = fi * d + b
@@ -70,7 +103,9 @@ function _gui (s, x) {
       break
     }
   }
-  return f * Math.exp(-x + s * Math.log(x) - logGamma(s))
+  _assertGuiConverged(y, s, x, maxIter)
+  // See _gli's matching comment above for why this replaces exp(-x+s*log(x)-logGamma(s)).
+  return f * Math.sqrt(s / (2 * Math.PI)) * Math.exp(-bd0(s, x) - stirlerr(s))
 }
 
 /**
