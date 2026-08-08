@@ -95,6 +95,56 @@ describe('dist', () => {
         assert(result.lnL(data) >= init.lnL(data), 'fit() result should not be worse than the initial guess')
       })
 
+      it('DoublyNoncentralBeta.fit should complete quickly on family-mismatched data, tested directly against the class (#1343)', () => {
+        // #1063's own reproduction (Rice(5, 1)-sampled data) cannot be reused verbatim here: it is
+        // unbounded on (0, Infinity), entirely outside DoublyNoncentralBeta's (0, 1) support, so
+        // _fitInit's moment-matched guess for it is itself out of the parameter domain and every
+        // point Powell could try has -Infinity log-likelihood — fit() throws a validation error
+        // immediately rather than running slowly. DoublyNoncentralF.fit() avoids this because it
+        // never evaluates DoublyNoncentralBeta's lnL against the raw F-domain data directly: its
+        // objective calls _fPdf(beta, d1, d2, x), which applies the same x / (d2/d1 + x) F-to-Beta
+        // domain map used by DoublyNoncentralF's own _cdf (see doubly-noncentral-f.js) before ever
+        // touching the beta instance. Applying that identical, already-shipped transform here — at
+        // the d1 = d2 = 3 DoublyNoncentralF._fitInit itself estimates for this data, giving the
+        // simplified map x / (x + 1) — produces genuinely mismatched-shape data that lives inside
+        // DoublyNoncentralBeta's actual support, making this a faithful, non-arbitrary analogue of
+        // #1063's case for direct DoublyNoncentralBeta.fit() calls (never routed through
+        // DoublyNoncentralF), rather than an unrelated new reproduction.
+        const riceData = new dist.Rice(5, 1).seed(5).sample(500)
+        const data = riceData.map(x => x / (x + 1))
+
+        let pdfCalls = 0
+        const origPdf = dist.DoublyNoncentralBeta.prototype._pdf
+        dist.DoublyNoncentralBeta.prototype._pdf = function (x) {
+          pdfCalls++
+          return origPdf.call(this, x)
+        }
+        let result
+        try {
+          result = dist.DoublyNoncentralBeta.fit(data)
+        } finally {
+          dist.DoublyNoncentralBeta.prototype._pdf = origPdf
+        }
+
+        // An isolated run measured exactly 20500 _pdf calls (deterministic across repeats — no
+        // randomness reaches Powell's search here beyond the seeded sample itself). 50000 leaves
+        // ~2.4x headroom, matching this file's own convention for the sibling DoublyNoncentralF
+        // ceiling above.
+        // Lower bound guards against a future regression where fit() short-circuits without
+        // actually running Powell (which would trivially satisfy an upper-bound-only assertion).
+        // 5000 is an order-of-magnitude-appropriate floor relative to the measured 20500 -- a
+        // tighter guard than data.length (500), which only catches literally zero optimizer
+        // iterations rather than a search that collapses to a small fraction of its real work.
+        assert(pdfCalls > 5000, `fit() made only ${pdfCalls} _pdf calls, expected at least 5000`)
+        assert(pdfCalls < 50000, `fit() made ${pdfCalls} _pdf calls, expected well under 50000`)
+        assert(result instanceof dist.DoublyNoncentralBeta)
+        assert(Number.isFinite(result.params().alpha) && Number.isFinite(result.params().beta))
+        // Confirms the bounded search still improves on the initial guess rather than merely
+        // terminating early with an unoptimized fit.
+        const init = new dist.DoublyNoncentralBeta(...dist.DoublyNoncentralBeta._fitInit(data))
+        assert(result.lnL(data) >= init.lnL(data), 'fit() result should not be worse than the initial guess')
+      })
+
       it('DoublyNoncentralBeta.fit should show no quality loss from the coupled Powell maxIter budget on well-matched data (#1078 Concern 3)', () => {
         // Locks in the invariant verified in
         // solutions/performance/2026-07-22-1600-doubly-noncentral-fit-inner-line-search-budget.md
