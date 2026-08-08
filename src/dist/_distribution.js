@@ -300,6 +300,15 @@ class Distribution {
    * @memberof ran.dist.Distribution
    * @param {number} x Value to evaluate CDF at.
    * @returns {number} The cumulative distribution value.
+   * @throws {Error} Reachable via any distribution whose `_cdf` calls
+   * `gammaLowerIncomplete`/`gammaUpperIncomplete` (directly, or through `marcumP`/`marcumQ`) --
+   * `Gamma`, `Chi2`, `Poisson`, `Erlang`, `Nakagami`, `Tweedie`, `Moyal`, `MaxwellBoltzmann`,
+   * `InverseGamma`, `InverseChi2`, `GeneralizedGamma`, `GeneralizedNormal`,
+   * `HalfGeneralizedNormal`, `Chi`, `Davis`, `DoubleGamma`, `LogGamma`, `UniformProduct`,
+   * `BenktanderII`, `Rice`, `NoncentralChi`, `NoncentralChi2`, and `Skellam` -- if the internal
+   * upper-incomplete-gamma continued fraction fails to converge for an extreme argument. See
+   * decisions/0049-continued-fraction-convergence-throw.md. Propagates through any method that
+   * calls cdf(), i.e. survival(), quantile(), and test().
    * @example
    *
    * let pareto = new ran.dist.Pareto(1, 2)

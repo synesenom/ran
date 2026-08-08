@@ -994,6 +994,16 @@ describe('special', () => {
       assert(equal(special.gammaUpperIncomplete(1000, 1000.0), 0.4957947558197845))
     })
 
+    // mpmath mp.dps=50: mp.gammainc(s, x, mp.inf, regularized=True). CF branch (x >= s+1)
+    // with s and x both large and close together -- the near-diagonal regime where _gui's
+    // MAX_ITER=100 cap silently truncated before convergence and its shared prefactor with
+    // _gli cancelled two ~4e4-magnitude terms down to an O(1) result (#1348).
+    it('should match mpmath reference values in the near-diagonal large-s CF branch', () => {
+      assert(equal(special.gammaUpperIncomplete(4989, 5000), 0.436307027364574, 13))
+      assert(equal(special.gammaUpperIncomplete(4995, 5000), 0.46993291332034903, 13))
+      assert(equal(special.gammaUpperIncomplete(4998, 5000), 0.48683689071721553, 13))
+    })
+
     it('P + Q should equal 1 for all algorithm regions', () => {
       const pairs = [
         [5, 0.5], [10, 1.0], [50, 5.0],

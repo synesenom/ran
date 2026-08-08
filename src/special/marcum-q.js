@@ -4,6 +4,7 @@ import tanhSinh from '../algorithms/tanh-sinh'
 import logGamma from './log-gamma'
 import { erfc } from './error'
 import { gammaLowerIncomplete, gammaUpperIncomplete } from './gamma-incomplete'
+import { log1pmx } from './_deviance'
 
 // The §4.2 large-mu expansion needs ~50 f_{jk} coefficients to reach 1e-10 at
 // mu = 135; the paper prints only 10 (Eq. 90). The block below is machine-
@@ -326,34 +327,6 @@ function _asymptoticLargeXi (mu, x, y) {
   return { p, q: 1 - p }
 }
 
-/**
- * Computes log(1 + u) - u without the cancellation that the direct
- * subtraction suffers for small u.
- *
- * @method _log1pmx
- * @memberof ran.special
- * @param {number} u Argument.
- * @return {number} log(1 + u) - u.
- * @private
- */
-function _log1pmx (u) {
-  if (u === 0) {
-    return 0
-  }
-  if (Math.abs(u) > 0.5) {
-    return Math.log1p(u) - u
-  }
-  let p = u
-  let sum = 0
-  for (let k = 2; k < MAX_ITER; k++) {
-    p *= u
-    const d = (k % 2 === 0 ? -1 : 1) * p / k
-    sum += d
-    if (Math.abs(d) < Math.abs(sum) * EPS) { break }
-  }
-  return sum
-}
-
 // See solutions/special-functions/2026-07-28-0833-marcum-q-zetaxy-small-y-cancellation.md
 /**
  * Computes the saddle-point variable zeta of the quadrature representation,
@@ -389,7 +362,7 @@ function _zetaxy (xs, ys) {
     halfZetaSq = eps * (eps - 2) / d1 + Math.log1p(2 * eps / d2)
   } else {
     const d2 = w + 2 * ys - 1
-    halfZetaSq = eps * eps / d1 + 2 * eps * eps / (d1 * d2) + _log1pmx(2 * eps / d2)
+    halfZetaSq = eps * eps / d1 + 2 * eps * eps / (d1 * d2) + log1pmx(2 * eps / d2)
   }
   return Math.sign(eps) * Math.sqrt(2 * Math.max(halfZetaSq, 0))
 }
