@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.32.0] - 2026-08-09
+
 ### Added
 
 - `ran.dist.Distribution.prototype.copy()`: returns a fully independent copy of a distribution instance, including its current PRNG state — a thin named wrapper around the existing `this.constructor.load(this.save())` round-trip, added so cloning a `Distribution` instance doesn't require knowing that trick. Used internally by `params()`'s new Distribution-instance-valued-field cloning (see `### Fixed`), and useful standalone — e.g. running two MCMC chains seeded from the same fitted distribution without them sharing PRNG state. See [ADR-0051](decisions/0051-params-distribution-instance-field-clone.md).
