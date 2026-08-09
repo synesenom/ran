@@ -161,6 +161,7 @@ export default class CompoundPoisson extends Process {
    * @throws {Error} If path has fewer than 2 states, if dt is not > 0, if jumpDistConstructor
    * does not expose a static fit() method, or if the path contains no non-zero increments to
    * recover jump sizes from.
+   * @ignore
    */
   static fit (path, dt = 1, jumpDistConstructor) {
     Process.validate({ dt }, ['dt > 0'])

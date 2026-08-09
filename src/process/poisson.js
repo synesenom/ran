@@ -93,6 +93,7 @@ export default class Poisson extends Process {
    * @returns {Poisson} A new instance with estimated lambda.
    * @throws {Error} If path has fewer than 2 states, if dt is not > 0, if the path
    * decreases anywhere, or if the estimated lambda is not positive (no arrivals observed).
+   * @ignore
    */
   static fit (path, dt = 1) {
     Process.validate({ dt }, ['dt > 0'])

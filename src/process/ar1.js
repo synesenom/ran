@@ -117,6 +117,7 @@ export default class AR1 extends Process {
    * @param {Array} path Array of observed states (as returned by path()).
    * @returns {AR1} A new instance with estimated phi and sigma.
    * @throws {Error} If path has fewer than 4 states.
+   * @ignore
    */
   static fit (path) {
     if (!Array.isArray(path) || path.length < 4) {

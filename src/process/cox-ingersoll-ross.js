@@ -137,6 +137,7 @@ export default class CoxIngersollRoss extends Process {
    * @returns {CoxIngersollRoss} A new instance with estimated kappa, theta, and sigma.
    * @throws {Error} If path has fewer than 4 states, if dt is not > 0, if the estimated
    * AR(1) slope falls outside (0,1), or if the estimated sigma^2 is not positive.
+   * @ignore
    */
   static fit (path, dt = 1) {
     Process.validate({ dt }, ['dt > 0'])
