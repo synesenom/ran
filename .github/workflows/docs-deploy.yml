@@ -13,6 +13,11 @@ on:
   push:
     branches: [main]
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Redeploy a specific released version, e.g. 1.32.0 (recovery path for a failed tag-push deploy; leave blank to redeploy /unreleased/ from the dispatched ref instead)'
+        required: false
 
 permissions:
   contents: write
@@ -32,8 +37,18 @@ jobs:
 
       - name: Determine channel
         id: channel
+        env:
+          DISPATCH_VERSION: ${{ inputs.version }}
         run: |
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+          if [[ -n "$DISPATCH_VERSION" ]]; then
+            # Manual recovery path: redeploy an already-tagged release without
+            # re-pushing the tag (tags are immutable and shouldn't be moved
+            # just to re-run a deploy that failed after the build step, e.g.
+            # the '.git' worktree wipe fixed alongside this input).
+            echo "target=v${DISPATCH_VERSION}" >> "$GITHUB_OUTPUT"
+            echo "version=${DISPATCH_VERSION}" >> "$GITHUB_OUTPUT"
+            echo "is_release=true" >> "$GITHUB_OUTPUT"
+          elif [[ "$GITHUB_REF" == refs/tags/v* ]]; then
             V="${GITHUB_REF#refs/tags/v}"
             echo "target=v${V}" >> "$GITHUB_OUTPUT"
             echo "version=${V}" >> "$GITHUB_OUTPUT"
@@ -88,7 +103,11 @@ jobs:
 
           if [ "$IS_RELEASE" = "true" ]; then
             # '/' always mirrors the latest tagged release, never tip-of-main.
-            find "$SITE" -mindepth 1 -maxdepth 1 ! -name "$TARGET" ! -name 'unreleased' ! -name 'v*' -exec rm -rf {} +
+            # '.git' must stay excluded: it doesn't match 'v*' (it starts with
+            # a dot), so without this guard the worktree's own git metadata
+            # gets wiped and every command from here on fails with "fatal:
+            # not a git repository".
+            find "$SITE" -mindepth 1 -maxdepth 1 ! -name "$TARGET" ! -name 'unreleased' ! -name 'v*' ! -name '.git' -exec rm -rf {} +
             cp -r "$DEST"/. "$SITE/"
           fi
 

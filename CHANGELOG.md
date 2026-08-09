@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `.github/workflows/docs-deploy.yml`: the release-channel cleanup step (`find "$SITE" ... ! -name 'v*' -exec rm -rf {} +`) deleted the gh-pages worktree's own `.git` metadata file on every tagged release, since `.git` starts with a dot and matches none of the exclusion patterns — every subsequent git command then failed with `fatal: not a git repository`, silently leaving the published docs site (and its `/` root, which is supposed to mirror the latest tagged release) stuck on the previous version. Added `! -name '.git'` to the exclusion list, and added a `workflow_dispatch` `version` input as a recovery path to manually redeploy an already-tagged release without moving the (immutable) release tag.
+
 ## [1.32.0] - 2026-08-09
 
 ### Added
