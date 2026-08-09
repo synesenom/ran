@@ -8,7 +8,7 @@ import Normal from './normal'
  * $f(x; \xi, \omega, \alpha) = \frac{2}{\omega} \phi\bigg(\frac{x - \xi}{\omega}\bigg) \Phi\bigg(\alpha \frac{x - \xi}{\omega}\bigg),$
  *
  * where $\xi, \alpha \in \mathbb{R}$, $\omega > 0$ and $\phi(x)$, $\Phi(x)$ denote the probability density and
- * cumulative distribution functions of the standard [normal distribution]{@link #dist.Normal}.
+ * cumulative distribution functions of the standard [normal distribution]{@link #dist-Normal}.
  * Support: $x \in \mathbb{R}$.
  *
  * @class SkewNormal

@@ -9,7 +9,7 @@ import rBeta from './_beta'
  * $f(x; \alpha, \beta) = \frac{x^{\alpha - 1} (1 - x)^{\beta - 1}}{\mathrm{B}(\alpha, \beta)},$
  *
  * where $\alpha = \frac{1 - F}{F} p$, $\beta = \frac{1 - F}{F} (1 - p)$ and $F, p \in (0, 1)$.
- * Support: $x \in (0, 1)$. It is simply a re-parametrization of the [beta distribution]{@link #dist.Beta}.
+ * Support: $x \in (0, 1)$. It is simply a re-parametrization of the [beta distribution]{@link #dist-Beta}.
  *
  * @class BaldingNichols
  * @memberof ran.dist
