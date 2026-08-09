@@ -326,15 +326,18 @@ SPEC = [
                  # (n=|x| >> twoSqrtProd) regime where the true scaled value is genuinely
                  # non-representable as a double -- a three-way 0*Infinity*0 collision. k grids
                  # are centered on the mean (mu1-mu2) and include the exact repro points from
-                 # the issue (999, 990, 1999, 4999). [5000, 1]'s grid additionally avoids
-                 # k in [~4982, 4997]: that narrow band sits just below marcumQ's own
-                 # order-vs-mu1 transition line (order = k+1 crossing mu1 = 5000 from below)
-                 # and independently loses up to 6e-9 relative precision in cdf there -- see
-                 # the _LOG_CANCEL override below, which documents the (much smaller, ~1e-11)
-                 # baseline error this chosen grid actually measures.
+                 # the issue (999, 990, 1999, 4999). [5000, 1]'s grid includes k=4990 and
+                 # k=4995, inside the [~4988, 4997] band that issue #1348 traced to
+                 # gammaUpperIncomplete's _gui: a fixed MAX_ITER=100 continued-fraction cap
+                 # (truncating before the ~150-160 iterations this near-diagonal s~5000, x=5000
+                 # regime needs) plus a shared _gli/_gui prefactor cancelling three
+                 # O(4e4)-magnitude terms down to an O(1) result -- previously up to 6e-9
+                 # relative cdf error, withheld from this grid until fixed. See the _LOG_CANCEL
+                 # override below for the residual (pdf-only, post-fix) precision floor this
+                 # grid now measures.
                  ([1000, 1], [990, 995, 999, 1001, 1005]),
                  ([2000, 1], [1990, 1995, 1999, 2001, 2005]),
-                 ([5000, 1], [4950, 4965, 4999, 5001, 5030])], 1e-14),
+                 ([5000, 1], [4950, 4990, 4995, 4999, 5001, 5030])], 1e-14),
     ('Soliton', [([10], [1, 2, 3, 5, 10]), ([3], [1, 2, 3]),
                  ([20], [1, 2, 5, 10, 20])], 1e-14),
     ('YuleSimon', [([3], [1, 2, 3, 6, 10]), ([2.5], [1, 2, 3, 5, 8]),
@@ -362,8 +365,13 @@ _LOG_CANCEL = ('pdf combines three log-space terms (-(mu1+mu2)+twoSqrtProd, (x/2
                'logBesselIExpScaled(|x|, twoSqrtProd)) whose individual magnitudes grow with mu1 while '
                'their sum stays O(1) near the mean -- each term carries ~1e-16 relative rounding, so the '
                'absolute cancellation error grows with mu1 even though the fix keeps the result finite '
-               '(previously NaN); cdf separately loses precision through marcumQ at this order magnitude, '
-               'independent of the pdf rewrite (#1321)')
+               '(previously NaN, #1321; measured worst case here ~9e-12 at [5000,1], pdf). cdf used to '
+               'separately lose up to 6e-9 relative precision near k=mu1 through gammaUpperIncomplete\'s '
+               '_gui (a fixed MAX_ITER=100 continued-fraction cap plus a shared _gli/_gui prefactor '
+               'cancelling three O(mu1)-magnitude terms down to an O(1) result) -- fixed in #1348 via a '
+               'regime-aware iteration budget and a Loader/stirlerr saddle-point reformulation '
+               '(src/special/_deviance.js); cdf\'s own residual is now ~1e-12 or tighter everywhere in '
+               'this grid, so the pdf mechanism above, not cdf, sets this group\'s tolerance floor')
 TOL_OVERRIDE = {
     ('BetaBinomial', '[40, 3, 5]'): (2e-14, _ARITH),
     ('Binomial', '[25, 0.5]'): (1e-12, _TAIL),
