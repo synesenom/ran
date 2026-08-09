@@ -13,7 +13,8 @@ runs entirely out-of-band from `npm test`: it needs a Python+mpmath environment 
 takes minutes, neither of which belongs in the fast, always-green unit-test gate. It
 is a non-blocking diagnostic/audit layer -- the committed test/precision-*.js files
 remain the sole CI-enforced correctness contract. See
-decisions/0052-differential-testing-harness-live-mpmath-out-of-band.md.
+decisions/0052-differential-testing-harness-live-mpmath-out-of-band.md -- differential-testing
+harness evaluates mpmath live and runs out-of-band from npm test.
 
 This script is deliberately fully standalone (does not import from
 precision-refs-special.py) -- that file's hyphenated name isn't a valid Python module
@@ -80,12 +81,16 @@ def _monotonic_bits(x):
     # IEEE 754 float64 is sign-magnitude, not two's complement: the raw unsigned
     # bit pattern is NOT monotonically ordered across the zero crossing (e.g. -1.0's
     # bits are numerically larger than 1.0's). Remapping negative values via
-    # 2**64 - bits restores a monotonic integer ordering, the standard trick for
+    # 2**63 - bits mirrors the negative range back around 2**63 (rather than folding
+    # it into the top of the unsigned range via 2**64 - bits, which would collide two
+    # equal-magnitude opposite-sign values onto the same monotonic value and make
+    # ulp_diff silently return 0 for a sign mismatch) -- the standard trick for
     # computing ULP distance as a simple integer subtraction. Subnormals need no
     # special case -- IEEE 754 defines their bit pattern to continue the same
-    # ordering right through zero.
+    # ordering right through zero. See
+    # solutions/testing/2026-08-09-1444-ulp-diff-sign-remap-same-sign-blind-self-check.md
     bits, = struct.unpack('>Q', struct.pack('>d', x))
-    return bits if bits < 2**63 else 2**64 - bits
+    return bits if bits < 2**63 else 2**63 - bits
 
 
 def _self_check():
@@ -97,7 +102,12 @@ def _self_check():
     assert ulp_diff(0.0, -0.0) == 0, 'signed zeros should be 0 ULP apart'
     assert 0 < ulp_diff(-1e-300, 1e-300) < float('inf'), \
         'zero-crossing pair should be a large but finite ULP distance'
-    assert 0 < ulp_diff(5e-324, 1e-323) < 10, 'adjacent subnormals should be a few ULP apart'
+    assert ulp_diff(5e-324, 1e-323) == 1, 'adjacent subnormals should be 1 ULP apart'
+    assert ulp_diff(-5e-324, 5e-324) == 2, \
+        'adjacent subnormals straddling zero should be 2 ULP apart'
+    dbl_max = 1.7976931348623157e+308
+    assert ulp_diff(dbl_max, math.nextafter(dbl_max, 0)) == 1, \
+        'adjacent normals near DBL_MAX should be 1 ULP apart'
     assert ulp_diff(float('inf'), float('inf')) == 0, 'equal infinities should be 0 ULP apart'
     assert ulp_diff(float('inf'), float('-inf')) == float('inf'), \
         'opposite-signed infinities should diverge'
@@ -106,13 +116,17 @@ def _self_check():
     assert ulp_diff(float('nan'), float('nan')) == 0, 'NaN vs NaN should be treated as equal'
     assert ulp_diff(float('nan'), 1.0) == float('inf'), \
         'NaN vs finite should diverge'
-    # Negative-value pair: specifically catches a sign-remapping bug in _monotonic_bits,
-    # which would otherwise silently corrupt every negative-argument ULP measurement
-    # without ever crashing.
     assert ulp_diff(-1.0, -1.0) == 0, 'identical negative values should be 0 ULP apart'
     neg_one_down = math.nextafter(-1.0, -2.0)
     assert ulp_diff(-1.0, neg_one_down) == 1, \
         'adjacent negative normals should be 1 ULP apart'
+    # Same-magnitude, opposite-sign pair: same-sign adjacency (above) can't catch a
+    # wrong sign-remapping constant in _monotonic_bits, since a wrong-but-consistent
+    # constant cancels out in the subtraction for two values on the same side of zero.
+    # This is the case that actually exercises it -- it must be a large, easily
+    # distinguishable distance, never 0.
+    assert ulp_diff(2.0, -2.0) > 2**62, \
+        'same-magnitude opposite-sign values must not collide to a small ULP distance'
 
 
 # ─── REFERENCE FORMULAS ───
