@@ -128,6 +128,23 @@ Verify the file parses correctly (no duplicate headings, no orphaned bullets).
 
 ---
 
+### 6a. Draft the release summary
+
+Write a 2-5 sentence plain-prose paragraph (no markdown headers) covering the
+release's user-facing highlights: new distributions/features, notable
+behavior or API changes (call out anything mid-deprecation-cycle), and the
+general shape of the fix batch. Base it on the `## [VERSION]` section just
+written in step 6 — this is a compressed read of that section, not new
+research.
+
+This text is **not** written into `CHANGELOG.md`. It is passed as the
+`summary` input when triggering the release workflow (step 10), which
+prepends it above the CHANGELOG notes in the GitHub release — so every
+release carries a human-readable overview instead of a raw bullet dump, with
+no manual copy-paste step after the fact.
+
+---
+
 ### 7. Commit release branch
 
 Commit the step 5 + step 6 edits as a single commit `Release v{VERSION}` on
@@ -166,14 +183,15 @@ Once the PR is merged (the bumped `package.json` and consolidated `CHANGELOG.md`
 are now on `main`), trigger the workflow:
 
 - `mcp__github__actions_run_trigger` — `workflow_id` `release.yml`, `ref`
-  `main`, `inputs: { version: "VERSION" }`.
+  `main`, `inputs: { version: "VERSION", summary: "SUMMARY" }` (`SUMMARY` from
+  step 6a).
 
 The workflow then, on the runner, does everything MCP cannot:
 
 - creates and pushes the `v{VERSION}` tag,
 - runs lint/typecheck/tests and `npm publish --provenance`,
-- cuts the GitHub release with the consolidated `## [VERSION]` notes from
-  `CHANGELOG.md`,
+- cuts the GitHub release with `SUMMARY` prepended above the consolidated
+  `## [VERSION]` notes from `CHANGELOG.md`,
 - rotates the milestone (creates `v{NEXT_VERSION}`, moves open issues, closes
   `v{VERSION}`).
 
@@ -204,6 +222,12 @@ Milestone: v{VERSION} closed, v{NEXT_VERSION} created (by the workflow)
 - **Consolidate the changelog in the skill, not the workflow** — the semantic
   merge of grouped bullets is judgement the workflow cannot do; it only reads
   the finished `## [VERSION]` section.
+- **Always draft and pass a `summary`** (step 6a) — the workflow still
+  publishes without one (silently falling back to the raw CHANGELOG notes
+  alone), but every release should carry a human-readable overview, not just
+  a bullet dump. Writing it is judgement the workflow can't do either, same
+  reasoning as changelog consolidation — draft it in the skill, never leave
+  it for a human to paste in after the fact.
 - **Milestone rotation is best-effort** — the workflow warns and continues if
   the milestone is missing.
 - **No interactive prompts mid-pipeline** — if anything is ambiguous, abort
