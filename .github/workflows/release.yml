@@ -1,9 +1,10 @@
 name: Release
 
 # Dispatch-driven release. The /release skill merges the version-bump PR via
-# GitHub MCP, then triggers this workflow with the target version. The runner
-# creates the v* tag, publishes to npm, cuts the GitHub release, and rotates the
-# milestone — everything the MCP-only skill cannot do itself.
+# GitHub MCP, then triggers this workflow with the target version (and a
+# skill-drafted release summary). The runner creates the v* tag, publishes to
+# npm, cuts the GitHub release, and rotates the milestone — everything the
+# MCP-only skill cannot do itself.
 #
 # Why a PAT: github-actions[bot] cannot be added to the v* tag-protection
 # ruleset's bypass list, so the built-in GITHUB_TOKEN cannot create the tag. A
@@ -21,6 +22,9 @@ on:
       version:
         description: 'Version to release, e.g. 1.31.0 (must already be committed to main)'
         required: true
+      summary:
+        description: 'Optional 1-paragraph release summary, prepended above the CHANGELOG notes'
+        required: false
 
 # id-token: write is required for npm provenance attestation generation.
 # issues: write is required for milestone rotation.
@@ -93,18 +97,29 @@ jobs:
 
       # Notes come from the already-consolidated ## [version] CHANGELOG section
       # (the skill does the semantic consolidation before merging), not
-      # --generate-notes. Idempotent: skip if the release already exists so a
-      # re-run never fails on the last step.
+      # --generate-notes, optionally prefixed by the skill-drafted `summary`
+      # input (the skill writes this while it has full release context; the
+      # workflow never generates prose itself — no LLM call or new secret
+      # here). SUMMARY is passed via env, not templated into the script
+      # directly, so free-form text can't break out of the shell command.
+      # Idempotent: skip if the release already exists so a re-run never
+      # fails on the last step.
       - name: Create GitHub release with consolidated notes
         env:
           GH_TOKEN: ${{ github.token }}
+          SUMMARY: ${{ inputs.summary }}
         run: |
           V="v${{ steps.ver.outputs.version }}"
-          NOTES=$(awk -v hdr="## [${{ steps.ver.outputs.version }}]" '
+          CHANGELOG_NOTES=$(awk -v hdr="## [${{ steps.ver.outputs.version }}]" '
             index($0, hdr) == 1 { f = 1; next }
             f && /^## \[/ { exit }
             f { print }
           ' CHANGELOG.md)
+          if [ -n "$SUMMARY" ]; then
+            NOTES=$(printf '%s\n\n%s' "$SUMMARY" "$CHANGELOG_NOTES")
+          else
+            NOTES="$CHANGELOG_NOTES"
+          fi
           if gh release view "$V" >/dev/null 2>&1; then
             echo "Release $V already exists — leaving its notes unchanged."
           else
