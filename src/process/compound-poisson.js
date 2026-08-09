@@ -125,6 +125,7 @@ export default class CompoundPoisson extends Process {
    * @param {number} t Time.
    * @returns {import('../dist/_distribution').default} A `Tweedie` instance when `jumpDist` is `Gamma`.
    * @throws {Error} If `t <= 0`, or if `jumpDist` is not a `ran.dist.Gamma` instance.
+   * @ignore
    */
   marginal (t) {
     if (t <= 0) {
