@@ -20,11 +20,31 @@ npm run jsdoclint
 
 # Run tests (Mocha + coverage thresholds)
 npm test
-# IMPORTANT: always run npm test directly — never pipe it through grep or other
-# commands. The mocha output prints "N passing" even when nyc's coverage
-# thresholds are breached; the failure is only visible in the exit code and the
-# "ERROR: Coverage for X does not meet global threshold" lines that a grep pipe
-# will swallow. Thresholds: branches 90%, lines 98%, functions 100%, statements 98%.
+# IMPORTANT: never pipe `npm test` directly through grep, head, or tail — the
+# mocha output prints "N passing" even when nyc's coverage thresholds are
+# breached; the failure is only visible in the exit code and the
+# "ERROR: Coverage for X does not meet global threshold" lines that a live
+# filter pipe will swallow. Thresholds: branches 90%, lines 98%, functions
+# 100%, statements 98%.
+#
+# IMPORTANT: always redirect the full, unfiltered output to a log file in the
+# SAME command that runs the suite, then read that file as many times and in
+# as many ways as needed. Never re-run the suite just to see a different slice
+# of output you didn't capture the first time — the suite is slow and a
+# second run wastes time for output you could have gotten from the first:
+npm test > /tmp/ranjs-test.log 2>&1; echo "exit: $?"; tail -n 80 /tmp/ranjs-test.log
+# The tail surfaces the coverage summary and any threshold errors — the part
+# most often needed first. Do NOT read the whole log file into context — a
+# full run can be thousands of lines and dumping all of it wastes tokens just
+# like a re-run wastes time. Query the saved log selectively instead:
+#   - `grep -c "passing\|failing"` or `grep -n "AssertionError"` for counts
+#   - `grep -n -B2 -A20 "<test name>"` to pull one failure's stack trace
+#   - Read with offset/limit around a line number grep already found
+# Only re-invoke `npm test` if the source changed since the log was captured
+# — never just to get a different slice of output you didn't pull the first
+# time. The exit code alone tells you pass/fail; a non-zero exit with
+# "N passing" in the tail means a coverage threshold was breached, not a test
+# failure — grep the log for "ERROR: Coverage" to see which one.
 
 # Build minified bundle
 npm run build
