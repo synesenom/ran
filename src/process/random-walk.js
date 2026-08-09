@@ -104,6 +104,7 @@ export default class RandomWalk extends Process {
    * @returns {RandomWalk} A new instance with estimated p.
    * @throws {Error} If path has fewer than 2 states, if any step is not +1 or -1, or if the
    * estimated p falls outside (0,1) (path contains only up-steps or only down-steps).
+   * @ignore
    */
   static fit (path) {
     if (!Array.isArray(path) || path.length < 2) {

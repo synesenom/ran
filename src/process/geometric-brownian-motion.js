@@ -125,6 +125,7 @@ export default class GeometricBrownianMotion extends Process {
    * @param {number} [dt=1] Time step between consecutive path observations (must be > 0).
    * @returns {GeometricBrownianMotion} A new instance with estimated mu and sigma.
    * @throws {Error} If path has fewer than 3 states, contains a non-positive state, or if dt is not > 0.
+   * @ignore
    */
   static fit (path, dt = 1) {
     Process.validate({ dt }, ['dt > 0'])

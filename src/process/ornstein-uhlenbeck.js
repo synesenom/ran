@@ -116,6 +116,7 @@ export default class OrnsteinUhlenbeck extends Process {
    * @returns {OrnsteinUhlenbeck} A new instance with estimated theta, mu, and sigma.
    * @throws {Error} If path has fewer than 4 states, if dt is not > 0, or if the estimated
    * AR(1) slope falls outside (0,1) (too short or too noisy a path to recover mean reversion).
+   * @ignore
    */
   static fit (path, dt = 1) {
     Process.validate({ dt }, ['dt > 0'])

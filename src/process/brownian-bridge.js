@@ -129,6 +129,7 @@ export default class BrownianBridge extends Process {
    * @returns {BrownianBridge} A new instance with estimated sigma.
    * @throws {Error} If T or dt is not > 0, if T/dt is not at least 2, or if path does not
    * contain exactly T/dt + 1 states.
+   * @ignore
    */
   static fit (path, T, dt = 0.1) {
     Process.validate({ T, dt }, ['T > 0', 'dt > 0'])
