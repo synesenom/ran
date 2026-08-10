@@ -12,13 +12,15 @@ When the user invokes `/review`:
 
 ### 1. Gather Context
 
-Run these commands in parallel:
+First sync the fresh upstream ref without touching the local `main` branch: `git fetch origin main`.
+
+Then run these commands in parallel:
 
 - `git branch --show-current` — get current branch name
-- `git diff main...HEAD` — full diff of all changes
+- `git diff origin/main...HEAD` — full diff of all changes
 - `git diff` — any unstaged changes
 - `git diff --staged` — any staged changes
-- `git log main..HEAD --oneline` — list of commits on this branch
+- `git log origin/main..HEAD --oneline` — list of commits on this branch
 
 If the branch is `main`, stop: "You're on main. Switch to a feature branch first."
 If there are no changes, stop: "Nothing to review — no changes found."
@@ -44,7 +46,7 @@ Compare the diff against the plan and check:
 
 Save the diff to a temporary file:
 ```bash
-mkdir -p .claude/tmp && git diff main...HEAD > .claude/tmp/review-diff-$(git branch --show-current).patch
+mkdir -p .claude/tmp && git diff origin/main...HEAD > .claude/tmp/review-diff-$(git branch --show-current).patch
 ```
 
 Then launch all eight **in a single parallel call**, telling each to read `.claude/tmp/review-diff-<branch-name>.patch`:

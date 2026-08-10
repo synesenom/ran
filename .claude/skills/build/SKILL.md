@@ -129,7 +129,7 @@ If you genuinely noticed nothing, pass an empty list — the agent will skim the
 
 **Step 4.5b — Invoke `ops-triage`.**
 
-Spawn the `ops-triage` agent with `branch`, `session_kind: "build"`, `target_issue`, `observations`, and `diff_path` (the patch file from `.claude/tmp/`, if Stage 5 hasn't created it yet, build one with `git diff origin/main...HEAD > .claude/tmp/triage-diff-<branch>.patch`).
+Spawn the `ops-triage` agent with `branch`, `session_kind: "build"`, `target_issue`, `observations`, and `diff_path` (the patch file from `.claude/tmp/`, if Stage 5 hasn't created it yet, build one with `git fetch origin main && git diff origin/main...HEAD > .claude/tmp/triage-diff-<branch>.patch` — a freshly-fetched `origin/main` avoids a stale local `main` ref).
 
 The agent returns three buckets: `definite`, `ambiguous`, `not_a_bug`.
 

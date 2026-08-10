@@ -55,7 +55,7 @@ If tests fail, debug and fix. If the fix grows too complex, stop and suggest `/b
 
 Compile observations noticed during steps 3–4 (pre-existing NaN at a boundary, a flaky test, a docstring that contradicts the code, etc.) into a structured list. Each entry needs `summary`, `stage`, `evidence`, and your tentative `orchestrator_call`.
 
-Spawn the `ops-triage` agent with `branch`, `session_kind: "fix"`, `target_issue`, the `observations` list, and a `diff_path` (write `git diff main...HEAD` to `.claude/tmp/triage-diff-<branch>.patch` if not already done).
+Spawn the `ops-triage` agent with `branch`, `session_kind: "fix"`, `target_issue`, the `observations` list, and a `diff_path` (run `git fetch origin main && git diff origin/main...HEAD > .claude/tmp/triage-diff-<branch>.patch` if not already done — diffing against a freshly-fetched `origin/main` avoids a stale local `main` ref when the session started already checked out on the feature branch).
 
 Act on the result:
 - **`definite` with `route: "fix"`** (trivial/moderate): spawn the `ops-fix` agent with `summary`, `difficulty`, `fix_context`, and `branch`, one bug at a time (sequentially — they share the working tree). On `status: "fixed"`, count as "fixed inline". On `status: "escalated"`, fall back to `ops-issue` using the entry's drafted `title`/`priority`/`extra_labels` and a body built from `summary` + the escalation reason.
@@ -70,7 +70,7 @@ Report: `> "Triage: <N> fixed inline, <M> filed (<URLs>), <K> skipped, <L> not a
 Check if any `.js` files were modified:
 
 ```bash
-git diff main --name-only | grep '\.js$'
+git fetch origin main && git diff origin/main --name-only | grep '\.js$'
 ```
 
 **If `.js` files were modified**: invoke `/review` via the Skill tool. If P1/P2 findings, auto-fix, re-run tests, and re-review once. If still P1/P2 after retry, STOP and report.
