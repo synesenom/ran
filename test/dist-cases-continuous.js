@@ -1118,7 +1118,10 @@ export default [{
     params: () => [0.5, 2],
     symmetry: 0,
     // mpmath dps=60: alpha=0.5, beta=2; symmetric gamma; pdf=gammapdf(|x|;alpha,beta)/2, cdf=(1±gammacdf(|x|;alpha,beta))/2
+    // Regression for issue #1363: alpha < 1 diverges as x -> 0 (Math.pow(0, alpha-1) = Infinity);
+    // x=0 is exact rational since gammaLowerIncomplete(alpha, 0) = 0 regardless of alpha.
     refVals: [
+      { x: 0, pdf: Infinity, cdf: 0.5 },
       { x: -3.0, pdf: 0.00057092958335171, cdf: 0.00026600275256962483 },
       { x: -1.0, pdf: 0.05399096651318805, cdf: 0.02275013194817921 },
       { x: -0.5, pdf: 0.20755374871029736, cdf: 0.07864960352514257 },
@@ -1873,6 +1876,29 @@ export default [{
       { x: 2.0, pdf: 0.10377687435514868, cdf: 0.8427007929497149 },
       { x: 5.0, pdf: 0.014644982561926487, cdf: 0.9746526813225317 },
       { x: 10.0, pdf: 0.0008500366602520342, cdf: 0.9984345977419975 }
+    ]
+  }, {
+    // Regression for issue #1363: large alpha made Math.pow(x, alpha-1) overflow to
+    // Infinity while the exp() norm factor underflowed towards 0, so 0*Infinity = NaN.
+    name: 'large alpha (single-exp log-space formula)',
+    params: () => [96.46855902788498, 0.019635541583732544],
+    // mpmath dps=50: alpha=96.46855902788498, beta=0.019635541583732544
+    // pdf=beta^alpha*x^(alpha-1)*exp(-beta*x)/Gamma(alpha), cdf=gammainc(alpha,0,beta*x,regularized=True)
+    refVals: [
+      { x: 50, pdf: 1.4514341081018398e-152, cdf: 7.599373754687041e-153 },
+      { x: 4510.465051819288, pdf: 0.000616209760719677, cdf: 0.21372800364250641 },
+      { x: 4862.028308247826, pdf: 0.0008010205861034465, cdf: 0.4728163663472635 },
+      { x: 15000, pdf: 1.449652914550727e-43, cdf: 1 }
+    ]
+  }, {
+    // Regression for issue #1363: alpha === 1 makes the (alpha - 1) * Math.log(x) term
+    // 0 * -Infinity at the closed x = 0 boundary unless handled explicitly.
+    name: 'alpha = 1 at the closed x = 0 boundary',
+    params: () => [1, 3],
+    // exact: pdf(0)=beta, cdf(0)=0; mpmath dps=50: pdf(1)=beta*exp(-beta), cdf(1)=gammainc(1,0,beta,regularized=True)
+    refVals: [
+      { x: 0, pdf: 3, cdf: 0 },
+      { x: 1, pdf: 0.14936120510359183, cdf: 0.950212931632136 }
     ]
   }],
   testSeeds: [0, 5, 12345], // seed 42 shifts PRNG alignment after Ziggurat replacement
@@ -3305,7 +3331,10 @@ export default [{
     name: 'small shape/rate, unit mu',
     params: () => [0.5, 0.5, 1],
     // mpmath: Gamma(alpha,beta) on Y=log(x-mu+1); pdf=Gamma_pdf(Y)/(x-mu+1), cdf=Preg(alpha,beta*Y)  (alpha=0.5,beta=0.5,mu=1)
+    // Regression for issue #1363: at the closed boundary x=mu, Y=log(1)=0 and alpha<1 diverges
+    // (Math.pow(0, alpha-1) = Infinity); exact rational since gammaLowerIncomplete(alpha, 0) = 0.
     refVals: [
+      { x: 1, pdf: Infinity, cdf: 0 },
       { x: 1.1, pdf: 1.1200860635896024, cdf: 0.24246810972680696 },
       { x: 1.3, pdf: 0.5254636723759907, cdf: 0.3914994935833475 },
       { x: 2.0, pdf: 0.16941518790077625, cdf: 0.5949040335669752 },

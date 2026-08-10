@@ -51,7 +51,21 @@ export default class Gamma extends Distribution {
   }
 
   _pdf (x) {
-    return Math.exp(this.c.logNorm - this.p.beta * x) * Math.pow(x, this.p.alpha - 1)
+    // x === 0 needs an explicit branch: the general log-space formula below computes
+    // (alpha - 1) * Math.log(x), and Math.log(0) is -Infinity, so alpha === 1 would hit
+    // 0 * -Infinity = NaN instead of the correct limit. The x^(alpha-1) limit at x = 0
+    // also depends on alpha's relation to 1 (matching Math.pow(0, alpha - 1) semantics),
+    // so all three cases are handled here rather than only the NaN-triggering one —
+    // subclasses such as DoubleGamma/LogGamma call this directly at x = 0 for alpha < 1,
+    // bypassing the base class's support-boundary filtering that Gamma itself relies on.
+    if (x === 0) {
+      if (this.p.alpha < 1) return Infinity
+      if (this.p.alpha === 1) return Math.exp(this.c.logNorm)
+      return 0
+    }
+    // Accumulating the full exponent before a single Math.exp() call avoids the
+    // Math.pow(x, alpha - 1) overflow (0 * Infinity = NaN) that large alpha triggered.
+    return Math.exp(this.c.logNorm - this.p.beta * x + (this.p.alpha - 1) * Math.log(x))
   }
 
   _cdf (x) {
