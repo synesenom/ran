@@ -309,12 +309,17 @@ def build_report(sweep_results, spec, seed):
                         else (finite[0] if finite else None)),
             'ulp_ceiling': ceiling,
             'ceiling_exceeded': ceiling is not None and max_ulp not in (None, float('inf')) and max_ulp > ceiling,
+            # Read straight from DIST_SPEC (the same dict generate_points() draws from) plus
+            # the shared p-range x is derived from, so the reported domain can never drift
+            # from what was actually sampled -- #1266 requires "the input domain actually
+            # swept ... must reflect what was measured".
+            'domain': {'params': spec[name]['params'], 'x_via_quantile_of_p': [P_LO, P_HI]},
             'worst_case': None if worst is None else {
                 'dist': worst[1], 'params': worst[2], 'x': worst[3],
                 'mpmath_ref': worst[4], 'ranjs_value': worst[5],
             },
         }
-    return {'seed': seed, 'mpmath_version': mpmath.__version__, 'entries': entries}
+    return {'seed': seed, 'mpmath_version': mpmath.__version__, 'mp_dps': mp.dps, 'entries': entries}
 
 def _sanitize_for_json(value):  # json.dump has no Infinity/NaN literal -- tag them as strings.
     if isinstance(value, float):
