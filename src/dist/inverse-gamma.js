@@ -37,7 +37,9 @@ export default class InverseGamma extends Gamma {
   }
 
   _pdf (x) {
-    return super._pdf(1 / x) / (x * x)
+    // Direct log-space form (rather than super._pdf(1 / x) / (x * x)) avoids the x*x
+    // overflow to Infinity that silently zeroed the density for extreme x
+    return Math.exp(this.c.logNorm - (this.p.alpha + 1) * Math.log(x) - this.p.beta / x)
   }
 
   _cdf (x) {

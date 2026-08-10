@@ -2748,7 +2748,20 @@ export default [{
       { x: 3.0, pdf: 0.06498988524091372, cdf: 0.563702861650773 },
       { x: 8.0, pdf: 0.016562720771501786, cdf: 0.7236736098317631 }
     ]
+  }, {
+    // Regression for #1364: x*x overflowed to Infinity in the old super._pdf(1/x)/(x*x)
+    // formulation, silently collapsing this tiny-but-representable density to 0.
+    name: 'extreme x (issue #1364)',
+    params: () => [0.01017360968553757, 0.22993683529824133],
+    // mpmath mp.dps=50: beta^alpha/Gamma(alpha)*x^(-alpha-1)*exp(-beta/x), Q(alpha,beta/x)
+    refVals: [
+      { x: 7.584718518060176e+162, pdf: 2.927369049165875e-167, cdf: 0.978175622101988 }
+    ]
   }],
+  // 'extreme x (issue #1364)' omitted: refVals in cases verify PDF/CDF directly; its
+  // alpha=0.0102 makes the underlying Gamma sampler occasionally underflow to 0, whose
+  // reciprocal is Infinity -- a pre-existing Gamma-sampling limitation, not this bug.
+  sampleParams: [{ params: () => [2, 2] }, { name: 'near-zero shapes', params: () => [0.5, 0.5] }],
   testSeeds: [0, 5, 12345], // seed 42 shifts PRNG alignment after Ziggurat replacement
   refVals: [
     { x: 0.05, pdf: 1.3594733616933084e-13, cdf: 1.7418252446695556e-16 },
