@@ -77,6 +77,16 @@ _N_KNU_NEAR_INTEGER = ('nu is close enough to an integer that sin(pi*nu) in the 
 _TOL_KASYMP_X10 = 1e-9
 _TOL_KNUASYMP_X10 = 1e-9
 
+# Issue #1361 sweep (nu in [3,10], x in [6,15]): same _KAsymptotic optimal-truncation mechanism
+# as _N_KASYMP_NEAR/_TOL_KNUASYMP_X10 above, re-measured at larger nu now that the order-
+# reduction fix routes it through the same base-order asymptotic evaluation. Measured via
+# --check against the actual sweep grid below: worst rel error 6.19e-8 at nu=8.25, x=6.01 (x in
+# {6.01,7.18,9.0} tier) and 1.11e-12 at nu=7.0, x=12.5 (x in {10,12.5} tier uses the tighter of
+# _TOL_KNUASYMP_X10 at x=10 and this at x=12.5); x=15 already converges within the 1e-13
+# default and needs no override.
+_TOL_KNU_1361_NEAR = 2e-7
+_TOL_KNU_1361_X12_5 = 2e-12
+
 # besselInu(nu, x) for very negative fractional nu at x approaching the documented ~710 series
 # boundary used to return Infinity (Math.pow(x/2, nu)'s tiny prefactor times an internally-
 # overflowing recursiveSum) where the true value is a large but finite number (~1e302-1e306).
@@ -313,6 +323,27 @@ def _besselKnu_grid(add):
             add('besselKnu', (n + 1e-7, x),
                 f'besselKnu nu~{n}: just outside the 1e-8 near-integer snap threshold',
                 tol=1e-6)
+    # Issue #1361: nu comparable in magnitude to x, just past the x=6 crossover, where the old
+    # unconditional dispatch to _KAsymptotic(nu, x) (ignoring nu entirely) returned up to ~77%
+    # relative error. Sweeps nu in [3,10] crossed with x in [6,15] per the issue's acceptance
+    # criteria, including the exact reported point (nu=4.82, x=7.18). x values just past the
+    # crossover carry _KAsymptotic's own (pre-existing, not fix-specific) optimal-truncation
+    # tolerance, same mechanism/bucket as _N_KNU_CONNECTION/_TOL_KNUASYMP_X10 above.
+    # nu=3.5 (not 3.3) avoids exact (fn, args) duplicates with the existing nu=3.3 x=6.01/x=10
+    # points in the loop above.
+    for nu in [3.5, 4.82, 5.5, 7.0, 8.25, 10.0, -4.82, -7.0]:
+        for x in [6.01, 7.18, 9.0]:
+            add('besselKnu', (nu, x),
+                f'besselKnu nu={nu}: issue #1361 sweep, just past x=6 crossover, order comparable to x',
+                tol=_TOL_KNU_1361_NEAR)
+        add('besselKnu', (nu, 10.0),
+            f'besselKnu nu={nu}: issue #1361 sweep, x=10, order comparable to x',
+            tol=_TOL_KNUASYMP_X10)
+        add('besselKnu', (nu, 12.5),
+            f'besselKnu nu={nu}: issue #1361 sweep, x=12.5, order comparable to x',
+            tol=_TOL_KNU_1361_X12_5)
+        add('besselKnu', (nu, 15.0),
+            f'besselKnu nu={nu}: issue #1361 sweep, x=15, order comparable to x')
 
 
 def _digamma_grid(add):
