@@ -103,4 +103,8 @@ function main () {
   }
 }
 
-main()
+if (require.main === module) {
+  main()
+}
+
+module.exports = { specialOffenders, distOffenders, renderSummary, fmtArgs }
