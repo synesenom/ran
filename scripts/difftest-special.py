@@ -344,6 +344,10 @@ def build_report(sweep_results, spec, seed):
             'p99_ulp': p99_ulp,
             'ulp_ceiling': ceiling,
             'ceiling_exceeded': max_ulp is not None and max_ulp != float('inf') and max_ulp > ceiling,
+            # Read straight from SWEEP_SPEC (the same dict generate_points() draws from), so
+            # the reported domain can never drift from what was actually sampled -- #1266
+            # requires "the input domain actually swept ... must reflect what was measured".
+            'domain': spec[fn]['args'],
             'worst_case': None if worst is None else {
                 'args': worst[1],
                 'mpmath_ref': worst[2],
@@ -353,6 +357,7 @@ def build_report(sweep_results, spec, seed):
     return {
         'seed': seed,
         'mpmath_version': mpmath.__version__,
+        'mp_dps': mp.dps,
         'functions': functions,
     }
 
