@@ -25,24 +25,24 @@ or hidden.
 | Special functions (`npm run accuracy:special`) | 1.4.1 | 50 | 42 | 60000 |
 | Distribution pdf/cdf (`npm run accuracy:dist`) | 1.4.1 | 50 | 42 | 120000 |
 
-ranjs version measured: `1.32.0` (commit `01c3615`).
+ranjs version measured: `1.32.0` (commit `029f996`).
 
 ## Special Functions
 
 | Function | Domain swept | Samples | Max ULP | Median ULP | Status |
 | --- | --- | --- | --- | --- | --- |
-| `besselI` | n ∈ [0, 10] (int); x ∈ [0.001, 500] (log-uniform) | 10000 | 256 | 5 | OK (ceiling 1024) |
+| `besselI` | n ∈ [0, 10] (int); x ∈ [0.001, 500] (log-uniform) | 10000 | 256 | 5 | ✅ OK (ceiling 1024) |
 | `besselIExpScaled` | — | — | — | — | not yet measured |
-| `besselInu` | nu ∈ [-5, 5]; x ∈ [0.001, 700] (log-uniform) | 10000 | 654 | 5 | OK (ceiling 2048) |
-| `besselISpherical` | n ∈ [-3, 5] (int); x ∈ [0.001, 50] (log-uniform) | 10000 | 843 | 1 | OK (ceiling 2048) |
+| `besselInu` | nu ∈ [-5, 5]; x ∈ [0.001, 700] (log-uniform) | 10000 | 654 | 5 | ✅ OK (ceiling 2048) |
+| `besselISpherical` | n ∈ [-3, 5] (int); x ∈ [0.001, 50] (log-uniform) | 10000 | 843 | 1 | ✅ OK (ceiling 2048) |
 | `besselISphericalExpScaled` | — | — | — | — | not yet measured |
-| `besselK` | n ∈ [0, 5] (int); x ∈ [0.001, 100] (log-uniform) | 10000 | 3783188365 | 1 | ⚠️ known accuracy gap — tracked: [#1140](https://github.com/synesenom/ran/issues/1140) |
-| `besselKnu` | nu ∈ [-5, 5]; x ∈ [0.001, 100] (log-uniform) | 10000 | 11056954420732522 | 5 | ⚠️ known accuracy gap — tracked: [#1140](https://github.com/synesenom/ran/issues/1140) |
+| `besselK` | n ∈ [0, 5] (int); x ∈ [0.001, 100] (log-uniform) | 10000 | 3783188365 | 1 | 🔗 known accuracy gap — tracked: [#1140](https://github.com/synesenom/ran/issues/1140) |
+| `besselKnu` | nu ∈ [-5, 5]; x ∈ [0.001, 100] (log-uniform) | 10000 | 11056954420732522 | 5 | 🔗 known accuracy gap — tracked: [#1140](https://github.com/synesenom/ran/issues/1140) |
 | `logBesselIExpScaled` | — | — | — | — | not yet measured |
 | `beta` | — | — | — | — | not yet measured |
 | `betaIncomplete` | — | — | — | — | not yet measured |
 | `regularizedBetaIncomplete` | — | — | — | — | not yet measured |
-| `digamma` | z ∈ [0.001, 500] (log-uniform) | 10000 | 2095 | 1 | OK (ceiling 8192) |
+| `digamma` | z ∈ [0.001, 500] (log-uniform) | 10000 | 2095 | 1 | ✅ OK (ceiling 8192) |
 | `e1` | — | — | — | — | not yet measured |
 | `erf` | — | — | — | — | not yet measured |
 | `erfc` | — | — | — | — | not yet measured |
@@ -80,8 +80,8 @@ ranjs version measured: `1.32.0` (commit `01c3615`).
 | `Benini.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `BenktanderII.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `Bernoulli.pdf/pmf, cdf` | — | — | — | — | not yet measured |
-| `Beta.pdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 1709 | 14 | OK (ceiling 4096) |
-| `Beta.cdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 31044 | 10 | OK (ceiling 100000) |
+| `Beta.pdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 1709 | 14 | ✅ OK (ceiling 4096) |
+| `Beta.cdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 31044 | 10 | ✅ OK (ceiling 100000) |
 | `BetaBinomial.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `BetaGeometric.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `BetaNegativeBinomial.pdf/pmf, cdf` | — | — | — | — | not yet measured |
@@ -98,8 +98,8 @@ ranjs version measured: `1.32.0` (commit `01c3615`).
 | `Champernowne.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `Cauchy.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `Chi.pdf/pmf, cdf` | — | — | — | — | not yet measured |
-| `Chi2.pdf` | k ∈ [1, 200] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 1424 | 8 | OK (ceiling 4096) |
-| `Chi2.cdf` | k ∈ [1, 200] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 50 | 2 | OK (ceiling 256) |
+| `Chi2.pdf` | k ∈ [1, 200] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 1424 | 8 | ✅ OK (ceiling 4096) |
+| `Chi2.cdf` | k ∈ [1, 200] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 50 | 2 | ✅ OK (ceiling 256) |
 | `ConwayMaxwellPoisson.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `Dagum.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `Davis.pdf/pmf, cdf` | — | — | — | — | not yet measured |
@@ -119,13 +119,13 @@ ranjs version measured: `1.32.0` (commit `01c3615`).
 | `ExponentialLogarithmic.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `ExponentiallyModifiedGaussian.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `ExponentiatedWeibull.pdf/pmf, cdf` | — | — | — | — | not yet measured |
-| `F.pdf` | d1 ∈ [1, 200] (log-uniform); d2 ∈ [1, 200] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 479662 | 29 | OK (ceiling 1500000) |
-| `F.cdf` | d1 ∈ [1, 200] (log-uniform); d2 ∈ [1, 200] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 32148 | 20 | OK (ceiling 100000) |
+| `F.pdf` | d1 ∈ [1, 200] (log-uniform); d2 ∈ [1, 200] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 479662 | 29 | ✅ OK (ceiling 1500000) |
+| `F.cdf` | d1 ∈ [1, 200] (log-uniform); d2 ∈ [1, 200] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 32148 | 20 | ✅ OK (ceiling 100000) |
 | `FlorySchulz.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `Frechet.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `FisherZ.pdf/pmf, cdf` | — | — | — | — | not yet measured |
-| `Gamma.pdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | ∞ | 6 | ⚠️ 31 divergence(s) (NaN/mismatch vs. mpmath); ⚠️ known accuracy gap — tracked: [#1363](https://github.com/synesenom/ran/issues/1363) |
-| `Gamma.cdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 83 | 3 | OK (ceiling 256) |
+| `Gamma.pdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | ∞ | 6 | ❌ 31 divergence(s) (NaN/mismatch vs. mpmath); 🔗 known accuracy gap — tracked: [#1363](https://github.com/synesenom/ran/issues/1363) |
+| `Gamma.cdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 83 | 3 | ✅ OK (ceiling 256) |
 | `GammaGompertz.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `GeneralizedExponential.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `GeneralizedExtremeValue.pdf/pmf, cdf` | — | — | — | — | not yet measured |
@@ -147,8 +147,8 @@ ranjs version measured: `1.32.0` (commit `01c3615`).
 | `Hyperexponential.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `Hypergeometric.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `InverseChi2.pdf/pmf, cdf` | — | — | — | — | not yet measured |
-| `InverseGamma.pdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | ∞ | 6 | ⚠️ 21 divergence(s) (NaN/mismatch vs. mpmath); ⚠️ known accuracy gap — tracked: [#1364](https://github.com/synesenom/ran/issues/1364) |
-| `InverseGamma.cdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 2672 | 2 | OK (ceiling 8192) |
+| `InverseGamma.pdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | ∞ | 6 | ❌ 21 divergence(s) (NaN/mismatch vs. mpmath); 🔗 known accuracy gap — tracked: [#1364](https://github.com/synesenom/ran/issues/1364) |
+| `InverseGamma.cdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 2672 | 2 | ✅ OK (ceiling 8192) |
 | `InverseGaussian.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `InvertedWeibull.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `IrwinHall.pdf/pmf, cdf` | — | — | — | — | not yet measured |
@@ -203,8 +203,8 @@ ranjs version measured: `1.32.0` (commit `01c3615`).
 | `SkewNormal.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `Slash.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `Soliton.pdf/pmf, cdf` | — | — | — | — | not yet measured |
-| `StudentT.pdf` | nu ∈ [0.1, 200] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 1083 | 8 | OK (ceiling 4096) |
-| `StudentT.cdf` | nu ∈ [0.1, 200] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 43248 | 4 | OK (ceiling 150000) |
+| `StudentT.pdf` | nu ∈ [0.1, 200] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 1083 | 8 | ✅ OK (ceiling 4096) |
+| `StudentT.cdf` | nu ∈ [0.1, 200] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 43248 | 4 | ✅ OK (ceiling 150000) |
 | `StudentZ.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `Trapezoidal.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `Triangular.pdf/pmf, cdf` | — | — | — | — | not yet measured |
