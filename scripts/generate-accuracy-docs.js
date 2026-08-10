@@ -106,13 +106,31 @@ function fmtDistDomain (domain) {
   return `${params}; x = q(p), p ∈ [${pLo}, ${pHi}]`
 }
 
+// Composes every applicable flag rather than the first-match-wins a plain if/else chain
+// would give -- a known-issue link must never hide a newly-appeared divergence or thrown
+// error on the same entry, and a thrown error (the harness eval crashed outright) is a
+// distinct failure mode from a divergence (a value came back, it just disagreed with
+// mpmath) or a plain ceiling breach, so all three must be able to show simultaneously.
+// Each flag gets an emoji chosen for what it means, not an arbitrary severity color, so
+// the failure mode reads at a glance without parsing the text: 💥 the eval itself crashed;
+// ❌ a value came back but it's NaN/nonsensical against mpmath; ⚠️ a real, finite value
+// that's merely worse than its calibrated ceiling; 🔗 a pointer to an already-tracked,
+// non-new problem. Still ordered by severity in the array push order below.
 function statusFor (key, data) {
-  if (KNOWN_ISSUES[key]) {
-    return `⚠️ known accuracy gap — tracked: [#${KNOWN_ISSUES[key]}](https://github.com/synesenom/ran/issues/${KNOWN_ISSUES[key]})`
+  const flags = []
+  if (data.errors > 0) {
+    flags.push(`💥 ${data.errors} thrown error(s) on valid input (harness eval failed)`)
   }
-  if (data.ceiling_exceeded) return `⚠️ CEILING EXCEEDED (ceiling ${data.ulp_ceiling})`
-  if (data.divergences > 0) return `⚠️ ${data.divergences} divergence(s) (NaN/mismatch vs. mpmath)`
-  return `OK (ceiling ${data.ulp_ceiling})`
+  if (data.divergences > 0) {
+    flags.push(`❌ ${data.divergences} divergence(s) (NaN/mismatch vs. mpmath)`)
+  }
+  if (data.ceiling_exceeded) {
+    flags.push(`⚠️ CEILING EXCEEDED (ceiling ${data.ulp_ceiling})`)
+  }
+  if (KNOWN_ISSUES[key]) {
+    flags.push(`🔗 known accuracy gap — tracked: [#${KNOWN_ISSUES[key]}](https://github.com/synesenom/ran/issues/${KNOWN_ISSUES[key]})`)
+  }
+  return flags.length > 0 ? flags.join('; ') : `✅ OK (ceiling ${data.ulp_ceiling})`
 }
 
 function measuredRow (key, label, domainText, data) {
