@@ -39,9 +39,15 @@ const DIST_REPORT_PATH = flagValue('--dist', '/tmp/difftest-dist-report.json')
 // scheduled job permanently red; they still get collected as offenders (see
 // collectOffenders) and listed in the summary table so a reviewer never has to guess why
 // a row disappeared.
+//
+// `reasons` scopes the suppression to the specific failure reason(s) that were originally
+// accepted for that entry (issue #1372) -- not to the entry name as a whole. If Gamma.pdf
+// later develops a brand-new failure reason (e.g. eval errors), that reason is not in this
+// list and therefore still fails the gate even though the key itself is partially
+// allowlisted. Values match the reason keys produced by offenderReasons().
 const KNOWN_ISSUES = {
-  'Gamma.pdf': 1363,
-  'InverseGamma.pdf': 1364
+  'Gamma.pdf': { issue: 1363, reasons: ['divergences'] },
+  'InverseGamma.pdf': { issue: 1364, reasons: ['divergences'] }
 }
 
 function readReport (filePath) {
@@ -68,16 +74,20 @@ function fmtArgs (argSpecs, values) {
 // are checked ahead of ceiling_exceeded because they are the more severe failure modes
 // (issue #1369): a thrown eval or a NaN/Infinity mismatch against a finite mpmath
 // reference, versus a merely elevated-but-finite ULP distance.
+//
+// Each reason carries a `key` alongside its display `text` -- KNOWN_ISSUES allowlists by
+// this key (issue #1372) so a per-reason gate-failure check is possible instead of an
+// entry-wide one.
 function offenderReasons (data) {
   const reasons = []
   if (data.errors > 0) {
-    reasons.push(`💥 ${data.errors} eval error(s)`)
+    reasons.push({ key: 'errors', text: `💥 ${data.errors} eval error(s)` })
   }
   if (data.divergences > 0) {
-    reasons.push(`❌ ${data.divergences} divergence(s) (NaN/Infinity vs. finite mpmath reference)`)
+    reasons.push({ key: 'divergences', text: `❌ ${data.divergences} divergence(s) (NaN/Infinity vs. finite mpmath reference)` })
   }
   if (data.ceiling_exceeded) {
-    reasons.push(`⚠️ ceiling exceeded (max ULP ${fmtValue(data.max_ulp)} > ${fmtValue(data.ulp_ceiling)})`)
+    reasons.push({ key: 'ceiling', text: `⚠️ ceiling exceeded (max ULP ${fmtValue(data.max_ulp)} > ${fmtValue(data.ulp_ceiling)})` })
   }
   return reasons
 }
@@ -85,26 +95,37 @@ function offenderReasons (data) {
 // Both report shapes reduce to the same offender record; only reproducer formatting
 // differs (special: flat arg list; dist: params list plus the sampled x), so the
 // filter/map skeleton is factored out once instead of duplicated per report shape.
+//
+// `reasons`/`reasonKeys` stay parallel arrays (rather than keeping the {key, text} pairs
+// together) so existing consumers of `.reasons` -- a plain array of display strings --
+// are unaffected by the #1372 per-reason allowlisting; `allowlistedReasonKeys` is the
+// subset of `reasonKeys` this entry has tracked-issue coverage for, used by isGateFailure
+// and renderSummary to tell a suppressed reason from a newly-appeared one on the same key.
 function collectOffenders (entries, source, reproducerOf) {
   return Object.entries(entries)
     .map(([key, data]) => ({ key, data, reasons: offenderReasons(data) }))
     .filter(({ reasons }) => reasons.length > 0)
-    .map(({ key, data, reasons }) => ({
-      source,
-      entry: key,
-      maxUlp: data.max_ulp,
-      ceiling: data.ulp_ceiling,
-      reasons,
-      knownIssue: KNOWN_ISSUES[key] || null,
-      reproducer: `${reproducerOf(data)} → ranjs=${fmtValue(data.worst_case.ranjs_value)}, mpmath=${fmtValue(data.worst_case.mpmath_ref)}`
-    }))
+    .map(({ key, data, reasons }) => {
+      const allowlist = KNOWN_ISSUES[key] || null
+      return {
+        source,
+        entry: key,
+        maxUlp: data.max_ulp,
+        ceiling: data.ulp_ceiling,
+        reasons: reasons.map(r => r.text),
+        reasonKeys: reasons.map(r => r.key),
+        allowlistedReasonKeys: allowlist ? allowlist.reasons : [],
+        knownIssue: allowlist ? allowlist.issue : null,
+        reproducer: `${reproducerOf(data)} → ranjs=${fmtValue(data.worst_case.ranjs_value)}, mpmath=${fmtValue(data.worst_case.mpmath_ref)}`
+      }
+    })
 }
 
-// A known, allowlisted divergence/error source (KNOWN_ISSUES) never fails the job on its
-// own -- it still surfaces in the summary table (collectOffenders doesn't drop it), just
-// not as a reason to turn the scheduled job red.
+// A reason is suppressed only if its own key is in the entry's allowlisted reasons
+// (issue #1372) -- an entry allowlisted for e.g. divergences still fails the gate if it
+// develops an unrelated, non-allowlisted reason (e.g. eval errors) on the same key.
 function isGateFailure (offender) {
-  return offender.knownIssue === null
+  return offender.reasonKeys.some(key => !offender.allowlistedReasonKeys.includes(key))
 }
 
 function specialOffenders (report) {
@@ -133,8 +154,15 @@ function renderSummary (offenders) {
       '| Source | Entry | Max ULP | Ceiling | Reason | Reproducer |',
       '| --- | --- | --- | --- | --- | --- |',
       ...offenders.map(o => {
-        const reason = o.reasons.join('; ') +
-          (o.knownIssue ? ` (🔗 allowlisted — tracked: [#${o.knownIssue}](https://github.com/synesenom/ran/issues/${o.knownIssue}))` : '')
+        // Annotated per reason, not per entry (issue #1372) -- a mixed entry (one
+        // allowlisted reason, one newly-appeared one) must show the two differently
+        // rather than either hiding the new failure or over-suppressing it in the table.
+        const reason = o.reasons.map((text, i) => {
+          const allowlistedReason = o.allowlistedReasonKeys.includes(o.reasonKeys[i])
+          return allowlistedReason
+            ? `${text} (🔗 allowlisted — tracked: [#${o.knownIssue}](https://github.com/synesenom/ran/issues/${o.knownIssue}))`
+            : text
+        }).join('; ')
         return `| ${o.source} | \`${o.entry}\` | ${fmtValue(o.maxUlp)} | ${fmtValue(o.ceiling)} | ${reason} | ${o.reproducer} |`
       })
     )
