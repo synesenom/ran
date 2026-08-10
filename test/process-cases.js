@@ -13,14 +13,15 @@ import { Normal } from '../src/dist'
 //
 // WHY THERE IS NO SHARED RUNNER MODULE HERE: test/dist-runner.js exists because four shard files
 // (dist-shard-0.js .. dist-shard-3.js) each consume it to spread 145+ distributions across
-// mocha --parallel workers. There is one process test file, no sharding need at 9 processes, and
-// so a registerProcessRefTests() module would be an abstraction boundary with exactly one caller.
-// Every other structured case file in test/ — precision-continuous.js, precision-discrete.js,
-// precision-special.js, precision-summary-stats.js — instead pairs a plain array with an inline
-// forEach consumer, and that is the precedent followed here. The data lives in its own file only
-// because test/process.js is already ~3400 lines of behavioural tests; the precision-*.js files can
-// embed their arrays because the array IS their whole purpose. Reconsider a runner only if a second
-// consumer (e.g. process shard files, or a process precision gate) ever actually appears.
+// mocha --parallel workers. test/process/ has one file per process (test/process/reference-values.js
+// consumes this file), no sharding need at 9 processes, and so a registerProcessRefTests() module
+// would be an abstraction boundary with exactly one caller. Every other structured case file in
+// test/ — precision-continuous.js, precision-discrete.js, precision-special.js,
+// precision-summary-stats.js — instead pairs a plain array with an inline forEach consumer, and
+// that is the precedent followed here. The data lives in its own file so the per-process files
+// under test/process/ stay focused on behavioural tests; the precision-*.js files can embed their
+// arrays because the array IS their whole purpose. Reconsider a runner only if a second consumer
+// (e.g. process shard files, or a process precision gate) ever actually appears.
 //
 // Entry shape:
 //   should      prose completing "should ..." — the mocha test title, carried over verbatim from
