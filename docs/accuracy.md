@@ -25,7 +25,7 @@ or hidden.
 | Special functions (`npm run accuracy:special`) | 1.4.1 | 50 | 42 | 60000 |
 | Distribution pdf/cdf (`npm run accuracy:dist`) | 1.4.1 | 50 | 42 | 120000 |
 
-ranjs version measured: `1.32.0` (commit `7de92d9`).
+ranjs version measured: `1.32.0` (commit `01c3615`).
 
 ## Special Functions
 
@@ -124,7 +124,7 @@ ranjs version measured: `1.32.0` (commit `7de92d9`).
 | `FlorySchulz.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `Frechet.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `FisherZ.pdf/pmf, cdf` | — | — | — | — | not yet measured |
-| `Gamma.pdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | ∞ | 6 | ⚠️ known accuracy gap — tracked: [#1363](https://github.com/synesenom/ran/issues/1363) |
+| `Gamma.pdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | ∞ | 6 | ⚠️ 31 divergence(s) (NaN/mismatch vs. mpmath); ⚠️ known accuracy gap — tracked: [#1363](https://github.com/synesenom/ran/issues/1363) |
 | `Gamma.cdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 83 | 3 | OK (ceiling 256) |
 | `GammaGompertz.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `GeneralizedExponential.pdf/pmf, cdf` | — | — | — | — | not yet measured |
@@ -147,7 +147,7 @@ ranjs version measured: `1.32.0` (commit `7de92d9`).
 | `Hyperexponential.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `Hypergeometric.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `InverseChi2.pdf/pmf, cdf` | — | — | — | — | not yet measured |
-| `InverseGamma.pdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | ∞ | 6 | ⚠️ known accuracy gap — tracked: [#1364](https://github.com/synesenom/ran/issues/1364) |
+| `InverseGamma.pdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | ∞ | 6 | ⚠️ 21 divergence(s) (NaN/mismatch vs. mpmath); ⚠️ known accuracy gap — tracked: [#1364](https://github.com/synesenom/ran/issues/1364) |
 | `InverseGamma.cdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 2672 | 2 | OK (ceiling 8192) |
 | `InverseGaussian.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `InvertedWeibull.pdf/pmf, cdf` | — | — | — | — | not yet measured |
