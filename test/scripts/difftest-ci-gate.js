@@ -177,6 +177,14 @@ const DIST_REPORT = {
   }
 }
 
+// Regression fixture for #1372: Gamma.pdf is allowlisted (#1363) for divergences only --
+// this variant also carries eval errors, a brand-new failure reason on the same key that
+// must still fail the gate even though the key itself is partially allowlisted.
+const GAMMA_PDF_NEW_REGRESSION = {
+  ...DIST_REPORT.entries['Gamma.pdf'],
+  errors: 3
+}
+
 // Shared by the specialOffenders()/distOffenders() "correct fields" tests below -- both
 // exercise the same offender-record shape through different producer functions, and
 // CodeScene flagged the un-factored pair as duplication (PR #1373 review).
@@ -288,6 +296,16 @@ describe('scripts/difftest-ci-gate', () => {
       const [offender] = distOffenders({ entries: { 'Gamma.pdf': DIST_REPORT.entries['Gamma.pdf'] } })
       assert.isFalse(isGateFailure(offender))
     })
+
+    it('should treat an allowlisted entry as a gate failure once it develops a new, non-allowlisted reason', () => {
+      const [offender] = distOffenders({ entries: { 'Gamma.pdf': GAMMA_PDF_NEW_REGRESSION } })
+      // Gamma.pdf's divergences stay allowlisted (#1363); its new eval errors are not, so
+      // the entry as a whole must still fail the gate.
+      assert.isTrue(isGateFailure(offender))
+      assert.strictEqual(offender.knownIssue, 1363)
+      assert.match(offender.reasons.join(';'), /divergence/)
+      assert.match(offender.reasons.join(';'), /eval error/)
+    })
   })
 
   describe('.renderSummary()', () => {
@@ -325,6 +343,25 @@ describe('scripts/difftest-ci-gate', () => {
       const gammaLowerRow = summary.split('\n').find(line => line.includes('`gammaLower`'))
       assert.match(besselInuRow, /ceiling exceeded/i)
       assert.match(gammaLowerRow, /divergence/i)
+    })
+
+    it('should mark only the allowlisted reason, not the whole row, for a mixed known/new-failure entry', () => {
+      const offenders = distOffenders({ entries: { 'Gamma.pdf': GAMMA_PDF_NEW_REGRESSION } })
+      const summary = renderSummary(offenders)
+      const row = summary.split('\n').find(line => line.includes('`Gamma.pdf`'))
+      // Reason cell is the 5th `|`-delimited column; split into its individual `; `
+      // reasons so each one's annotation is checked independently, instead of a single
+      // regex over the whole row where a later reason's "allowlisted" text could
+      // false-positive-match an earlier, unrelated reason.
+      const reasonCell = row.split('|')[5]
+      const [errorReason, divergenceReason] = reasonCell.split(';').map(s => s.trim())
+      assert.match(errorReason, /eval error/i)
+      assert.notMatch(errorReason, /allowlisted/i)
+      assert.match(divergenceReason, /divergence/i)
+      assert.match(divergenceReason, /allowlisted.*#1363/i)
+      // The row still counts toward the gate-failure total since the entry as a whole
+      // did not stay fully suppressed.
+      assert.include(summary, '❌ 1 entry')
     })
   })
 })
