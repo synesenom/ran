@@ -15,6 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `ran.special.besselKnu(nu, x)`: silently returned up to ~77% relative error for orders `nu`
+  whose magnitude was comparable to `x`, just past the `x=6` series/asymptotic crossover (e.g.
+  `nu=4.82, x=7.18` returned `≈0.000358` vs. the correct `≈0.00154`), with no error, warning, or
+  `NaN` to signal the defect. The unconditional dispatch to `_KAsymptotic(nu, x)` (the DLMF
+  §10.40.2 large-`x` asymptotic expansion) for `x > 6` ignored how `nu` compared to `x`; its
+  "optimal truncation" only bounds error correctly when the expansion's first correction term
+  `(4ν²−1)/(8x)` is already small, which fails once `nu` is comparable to `x`. Fixed by reducing
+  the order to `mu = |nu| - round(|nu|) ∈ [−0.5, 0.5]` (where the existing connection formula
+  and `_KAsymptotic` both stay accurate at any `x`) and reaching the target order via the same
+  upward recurrence (DLMF §10.29.1) `besselK` already uses for integer order — no new algorithm
+  was needed. Verified against mpmath (`mp.dps=50`) across `nu ∈ [3,10]`, `x ∈ [6,15]` (#1361).
 - `src/dist/gamma.js`: `Gamma.pdf(x)` returned `NaN` for large `alpha` (e.g. `alpha≈96.5`), since the density was computed as two separate factors — `Math.exp(logNorm - beta*x) * Math.pow(x, alpha-1)` — and for large `alpha`/`x` the `Math.pow` term overflowed to `Infinity` while the `Math.exp` term underflowed towards `0`, giving `0 * Infinity = NaN`. `_pdf(x)` now accumulates the full exponent (`logNorm - beta*x + (alpha-1)*Math.log(x)`) before a single `Math.exp()` call, with an explicit `x === 0` branch to avoid a new `0 * -Infinity` NaN the log-space rewrite would otherwise introduce when `alpha === 1` at the closed boundary (#1363).
 - `.github/workflows/docs-deploy.yml`: the release-channel cleanup step (`find "$SITE" ... ! -name 'v*' -exec rm -rf {} +`) deleted the gh-pages worktree's own `.git` metadata file on every tagged release, since `.git` starts with a dot and matches none of the exclusion patterns — every subsequent git command then failed with `fatal: not a git repository`, silently leaving the published docs site (and its `/` root, which is supposed to mirror the latest tagged release) stuck on the previous version. Added `! -name '.git'` to the exclusion list, and added a `workflow_dispatch` `version` input as a recovery path to manually redeploy an already-tagged release without moving the (immutable) release tag.
 - `scripts/generate-accuracy-docs.js`: `extractDistributionNames()`/`extractSpecialFunctionNames()` had no sanity check on the export-line regex used to build `docs/accuracy.md`'s coverage registry, so a future change to `src/dist/index.js`/`src/special/index.js`'s export syntax could silently break the match and render the table missing rows for real distributions/functions with no error anywhere in CI. Both functions now throw if a known canary name (`Gamma`, `digamma`) is absent from the extracted list, failing loud instead of silently under-reporting coverage.

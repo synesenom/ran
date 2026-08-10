@@ -675,6 +675,46 @@ describe('special', () => {
         assert.strictEqual(special.besselKnu(-3, x), special.besselK(3, x))
       }
     })
+
+    it('should match mpmath at the exact issue #1361 point (nu comparable to x, just past the x=6 crossover)', () => {
+      // mpmath mp.dps=50: besselk(4.82, 7.18) -> 0.001539804158137713
+      // Previously returned ~0.000358 (the bare _KAsymptotic leading term, ~77% relative error)
+      // because the unconditional x>6 dispatch to _KAsymptotic ignored how nu compared to x.
+      // x=7.18 is just past the crossover, where _KAsymptotic's own optimal-truncation error
+      // (not machine precision) is the limiting factor -- measured ~4.6e-9 relative error here,
+      // the same mechanism precision-refs-special.py's "just past x=6 crossover" tolerance
+      // bucket already documents for besselK/besselKnu (tol=2e-6 there); precision=8 gives
+      // >2x headroom over the measured value.
+      assert(equal(special.besselKnu(4.82, 7.18), 0.001539804158137713, 8))
+    })
+
+    it('should match mpmath for an order requiring multiple order-reduction recurrence steps, on both sides of the x=6 crossover', () => {
+      // mpmath mp.dps=50: besselk(7.5, 5.0) -> 0.39645666605558294 (x<=6 connection-formula base)
+      // mpmath mp.dps=50: besselk(7.5, 10.0) -> 0.00023814095655825686 (x>6 asymptotic base)
+      // nu=7.5 reduces to mu=-0.5, n=8: 7 upward-recurrence steps from the base pair. Default
+      // precision=10 (1e-10) holds comfortably here: measured relative error is ~1.06e-11 at
+      // x=5.0 (float rounding through the recurrence) and exactly 0 at x=10.0 -- nu=7.5 is
+      // half-integer, so both the connection formula and _KAsymptotic terminate exactly.
+      assert(equal(special.besselKnu(7.5, 5.0), 0.39645666605558294))
+      assert(equal(special.besselKnu(7.5, 10.0), 0.00023814095655825686))
+    })
+
+    it('should be even in nu (K_{-nu} = K_nu) for a fractional order in the fixed regime', () => {
+      // The order-reduction fix reduces on Math.abs(nu); this exercises that reduction still
+      // produces the correct value (not just internal self-consistency) for negative nu.
+      // mpmath mp.dps=50: besselk(-7.5, 10.0) -> 0.00023814095655825686 (same as +7.5)
+      assert(equal(special.besselKnu(-7.5, 10.0), 0.00023814095655825686))
+      assert.strictEqual(special.besselKnu(-7.5, 10.0), special.besselKnu(7.5, 10.0))
+    })
+
+    it('should throw for non-finite nu instead of looping forever', () => {
+      // Math.round(Math.abs(nu)) would be Infinity for nu = +-Infinity, making
+      // _besselKnuReduced's upward-recurrence loop (bound by that value) run forever instead
+      // of terminating after a bounded number of steps.
+      for (const nu of [Infinity, -Infinity, NaN]) {
+        assert.throws(() => special.besselKnu(nu, 5))
+      }
+    })
   })
 
   describe('.beta()', () => {
