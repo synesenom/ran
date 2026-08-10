@@ -177,6 +177,17 @@ const DIST_REPORT = {
   }
 }
 
+// Shared by the specialOffenders()/distOffenders() "correct fields" tests below -- both
+// exercise the same offender-record shape through different producer functions, and
+// CodeScene flagged the un-factored pair as duplication (PR #1373 review).
+function assertOffenderFields (offender, expected) {
+  assert.strictEqual(offender.source, expected.source)
+  assert.strictEqual(offender.entry, expected.entry)
+  assert.strictEqual(offender.maxUlp, expected.maxUlp)
+  assert.strictEqual(offender.ceiling, expected.ceiling)
+  assert.isNull(offender.knownIssue)
+}
+
 describe('scripts/difftest-ci-gate', () => {
   describe('.fmtArgs()', () => {
     it('should pair each spec name with its value by index, not by name lookup', () => {
@@ -194,12 +205,7 @@ describe('scripts/difftest-ci-gate', () => {
     it('should collect the correct fields for an entry with ceiling_exceeded: true', () => {
       const offenders = specialOffenders({ functions: { besselInu: SPECIAL_REPORT.functions.besselInu } })
       assert.strictEqual(offenders.length, 1)
-      const offender = offenders[0]
-      assert.strictEqual(offender.source, 'special')
-      assert.strictEqual(offender.entry, 'besselInu')
-      assert.strictEqual(offender.maxUlp, 5000)
-      assert.strictEqual(offender.ceiling, 1024)
-      assert.isNull(offender.knownIssue)
+      assertOffenderFields(offenders[0], { source: 'special', entry: 'besselInu', maxUlp: 5000, ceiling: 1024 })
     })
 
     it('should collect an entry with divergences > 0 and ceiling_exceeded: false', () => {
@@ -228,12 +234,7 @@ describe('scripts/difftest-ci-gate', () => {
     it('should collect the correct fields for an entry with ceiling_exceeded: true', () => {
       const offenders = distOffenders({ entries: { 'F.pdf': DIST_REPORT.entries['F.pdf'] } })
       assert.strictEqual(offenders.length, 1)
-      const offender = offenders[0]
-      assert.strictEqual(offender.source, 'dist')
-      assert.strictEqual(offender.entry, 'F.pdf')
-      assert.strictEqual(offender.maxUlp, 2000000)
-      assert.strictEqual(offender.ceiling, 1500000)
-      assert.isNull(offender.knownIssue)
+      assertOffenderFields(offenders[0], { source: 'dist', entry: 'F.pdf', maxUlp: 2000000, ceiling: 1500000 })
     })
 
     it('should collect an entry with errors > 0 and ceiling_exceeded: false, divergences: 0', () => {
