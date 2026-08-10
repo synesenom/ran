@@ -484,32 +484,72 @@ export function besselK (n, x) {
   return k1
 }
 
+// Direct (non-recursive) base-order K_mu(x): the connection formula (DLMF §10.27.4) for
+// x <= _X_K_SERIES, or the DLMF §10.40.2 asymptotic expansion for x > _X_K_SERIES -- the same
+// split besselKnu used to apply at the FULL order nu (issue #1361's bug: _KAsymptotic's first
+// correction term (4ν²−1)/(8x) is large whenever ν is comparable to x, so "optimal truncation"
+// degenerated to returning the bare leading term). Both formulas stay accurate for any x once
+// restricted to |mu| <= 1.5: the asymptotic side's first correction term is at most
+// (4*1.5²-1)/(8*_X_K_SERIES) = 8/48 ≈ 0.167 at the crossover x=_X_K_SERIES (its worst case,
+// since the ratio shrinks as x grows), and terminates exactly at mu=0.5. Never called with mu
+// near an integer -- callers guarantee that.
+// See solutions/special-functions/2026-08-10-1903-besselKnu-order-reduction-crossover-fix.md
+function _besselKnuBase (mu, x) {
+  if (x > _X_K_SERIES) {
+    return _KAsymptotic(mu, x)
+  }
+  return (Math.PI / 2) * (besselInu(-mu, x) - besselInu(mu, x)) / Math.sin(Math.PI * mu)
+}
+
+// Order reduction (mu = |nu| - round(|nu|) in [-0.5, 0.5]) + the same upward recurrence
+// besselK already uses for integer order (DLMF §10.29.1, unconditionally stable upward for K
+// since K is the minimal/recessive solution as order grows) reaches any real order from a base
+// pair where _besselKnuBase stays accurate at any x -- fixing #1361 without a new algorithm.
+// K_{-ν} = K_ν (DLMF 10.27.3), so reducing on Math.abs(nu) covers negative nu too.
+function _besselKnuReduced (nu, x) {
+  const absNu = Math.abs(nu)
+  const n = Math.round(absNu)
+  const mu = absNu - n
+  let k0 = _besselKnuBase(mu, x)
+  if (n === 0) { return k0 }
+  let k1 = _besselKnuBase(mu + 1, x)
+  for (let i = 1; i < n; i++) {
+    const k = (2 * (mu + i) / x) * k1 + k0
+    k0 = k1
+    k1 = k
+  }
+  return k1
+}
+
 /**
  * Computes the modified Bessel function of the second kind for real order.
- * Uses the connection formula K_ν(x) = (π/2)·(I_{-ν}(x) − I_ν(x))/sin(νπ) (DLMF 10.27.4).
- * Dispatches to `besselK` for near-integer ν to avoid the 0/0 indeterminate form.
+ * Reduces the order to mu = |nu| - round(|nu|) in [-0.5, 0.5] (a range where the connection
+ * formula K_ν(x) = (π/2)·(I_{-ν}(x) − I_ν(x))/sin(νπ) (DLMF 10.27.4) and the DLMF §10.40.2
+ * asymptotic expansion both stay accurate for any x), then reaches the target order via the
+ * same upward recurrence (DLMF §10.29.1) `besselK` uses for integer order. Dispatches to
+ * `besselK` for near-integer ν to avoid the 0/0 indeterminate form.
  *
  * @method besselKnu
  * @memberof ran.special
  * @param {number} nu Order of the Bessel function. Should be fractional.
  * @param {number} x Value to evaluate the function at.
  * @returns {number} The modified Bessel function of the second kind.
+ * @throws {Error} If nu is not finite -- Math.round(Math.abs(nu)) would be Infinity, making
+ * _besselKnuReduced's upward-recurrence loop run forever instead of the bounded number of
+ * steps every finite order needs.
  * @private
  */
 export function besselKnu (nu, x) {
   if (x === 0) return Infinity
+  if (!isFinite(nu)) {
+    throw Error(`besselKnu: nu must be finite, got ${nu}`)
+  }
   // Near-integer ν: connection formula becomes 0/0; dispatch to integer path.
   // Use Math.abs so negative integers forward the correct non-negative order to besselK.
   if (Math.abs(nu - Math.round(nu)) < 1e-8) {
     return besselK(Math.abs(Math.round(nu)), x)
   }
-  // Large x: connection formula loses ~2x/ln(10) digits from catastrophic cancellation
-  // between I_{-ν}(x) and I_ν(x) (both O(exp(x)) while K_ν is O(exp(-x))).
-  // Asymptotic expansion avoids this and terminates exactly for half-integer ν.
-  if (x > _X_K_SERIES) {
-    return _KAsymptotic(nu, x)
-  }
-  return (Math.PI / 2) * (besselInu(-nu, x) - besselInu(nu, x)) / Math.sin(Math.PI * nu)
+  return _besselKnuReduced(nu, x)
 }
 
 /**
