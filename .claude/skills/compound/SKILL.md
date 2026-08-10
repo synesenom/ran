@@ -12,9 +12,9 @@ When the user invokes `/compound` or `/compound <description>`:
 
 ### 1. Gather Context
 
-If a description is provided, use it as context. Otherwise:
-- `git diff main...HEAD`
-- `git log main..HEAD --oneline`
+If a description is provided, use it as context. Otherwise, first sync the fresh upstream ref without touching the local `main` branch: `git fetch origin main`. Then:
+- `git diff origin/main...HEAD`
+- `git log origin/main..HEAD --oneline`
 - Spawn the **discovery-thoughts** agent to find the related plan/research
 
 ### 2. Check for Existing Solutions

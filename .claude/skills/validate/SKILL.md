@@ -29,9 +29,11 @@ Parse the issue body for acceptance criteria (checkboxes, "Acceptance Criteria" 
 
 ### 3. Gather Implementation Context
 
-Run in parallel:
-- `git diff main...HEAD` — full diff
-- `git log main..HEAD --oneline` — commits
+First sync the fresh upstream ref without touching the local `main` branch: `git fetch origin main`.
+
+Then run these in parallel:
+- `git diff origin/main...HEAD` — full diff
+- `git log origin/main..HEAD --oneline` — commits
 
 Also spawn the **discovery-thoughts** agent to find any related plan or research.
 

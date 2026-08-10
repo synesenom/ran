@@ -63,7 +63,7 @@ e. **If tests fail**: debug directly — no recovery agents needed for a small f
 
 Compile observations noticed during step 4 (a flaky test, a pre-existing NaN at a boundary, a contradicting docstring, etc.) into a structured list with `summary`, `stage`, `evidence`, and your tentative `orchestrator_call`.
 
-Spawn the `ops-triage` agent with `branch`, `session_kind: "hotfix"`, `target_issue`, the `observations` list, and a `diff_path` (write `git diff main...HEAD` to `.claude/tmp/triage-diff-<branch>.patch` first).
+Spawn the `ops-triage` agent with `branch`, `session_kind: "hotfix"`, `target_issue`, the `observations` list, and a `diff_path` (run `git fetch origin main && git diff origin/main...HEAD > .claude/tmp/triage-diff-<branch>.patch` first — diffing against a freshly-fetched `origin/main` avoids a stale local `main` ref when the session started already checked out on the feature branch, so step 2 never touched local `main`).
 
 Act on the result:
 - **`definite` with `route: "fix"`** (trivial/moderate): spawn the `ops-fix` agent with `summary`, `difficulty`, `fix_context`, and `branch`, one bug at a time (sequentially — they share the working tree). On `status: "fixed"`, count as "fixed inline". On `status: "escalated"`, fall back to `ops-issue` using the entry's drafted `title`/`priority`/`extra_labels` and a body built from `summary` + the escalation reason.

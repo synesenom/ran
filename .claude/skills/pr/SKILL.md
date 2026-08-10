@@ -12,14 +12,16 @@ When the user invokes `/pr`:
 
 ### 1. Gather Context
 
-Run in parallel:
-- `git branch --show-current`
-- `git log main..HEAD --oneline`
-- `git diff main...HEAD`
-- `git status`
-- `git log main..HEAD --format="%s%n%n%b"`
+First sync the fresh upstream ref without touching the local `main` branch: `git fetch origin main`.
 
-If the branch is `main`, stop. If no commits ahead of main, stop. If there are uncommitted changes, invoke `/commit` first.
+Then run in parallel:
+- `git branch --show-current`
+- `git log origin/main..HEAD --oneline`
+- `git diff origin/main...HEAD`
+- `git status`
+- `git log origin/main..HEAD --format="%s%n%n%b"`
+
+If the branch is `main`, stop. If no commits ahead of `origin/main`, stop. If there are uncommitted changes, invoke `/commit` first.
 
 ### 2. Pre-flight CI checks
 
@@ -40,7 +42,7 @@ Report format on failure:
 Get the list of `.js` files changed in this branch:
 
 ```bash
-git diff main...HEAD --name-only | grep '\.js$'
+git diff origin/main...HEAD --name-only | grep '\.js$'
 ```
 
 For each changed `.js` file, call the CodeScene `code_health_score` tool. If any file scores **below 10.0**:
@@ -78,7 +80,7 @@ If the merge **fails with conflicts**:
 Search in this order, stopping at the first match:
 
 1. **Branch name** — patterns: `^(\d+)-`, `^claude/build-(\d+)-`, `^claude/(\d+)-`
-2. **Commit messages** — `git log main..HEAD --format=%B | grep -oE '#[0-9]+'`
+2. **Commit messages** — `git log origin/main..HEAD --format=%B | grep -oE '#[0-9]+'`
 3. **Plan frontmatter** — look for `github_issue: <number>`
 
 If no issue detected, skip the closing keyword. Do not invent one.
@@ -112,7 +114,7 @@ Categorize every change:
 
 Check for ADR references in the diff and commits:
 ```bash
-git diff main...HEAD --name-only | grep decisions/
+git diff origin/main...HEAD --name-only | grep decisions/
 ```
 
 If non-trivial changes exist but no ADRs are found, add a warning block:
