@@ -1,0 +1,59 @@
+name: Differential Testing
+
+# Runs the differential-testing harness (#1264/#1265) on a schedule, separately from
+# ci.yml. ci.yml gates every push/PR and must stay fast; this harness needs a Python +
+# mpmath environment and sweeps far denser grids than test/precision-*.js, taking
+# substantially longer. The committed-literal precision gates remain the sole
+# CI-blocking correctness contract -- this is a non-blocking, deeper audit layer that
+# runs out-of-band (decisions/0052-differential-testing-harness-live-mpmath-out-of-band.md).
+#
+# On failure this job does NOT auto-file or update a tracking issue: a failing scheduled
+# run plus the uploaded JSON report artifact is a sufficient signal, and an issue
+# auto-filed per run would duplicate every week on top of what stale.yml already manages.
+# A maintainer reading the red run and job summary reproducer files (or updates) the
+# tracking issue by hand.
+on:
+  schedule:
+    # Weekly is sufficient -- accuracy does not drift daily, and a nightly job nobody
+    # reads is noise. Off the top of the hour to avoid the scheduled-workflow thundering
+    # herd GitHub warns about.
+    - cron: '17 3 * * 1'
+  workflow_dispatch: {}
+
+jobs:
+  difftest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - run: npm ci
+
+      - run: pip install -r scripts/requirements.txt
+
+      - name: Run special-function sweep
+        run: npm run accuracy:special
+
+      - name: Run distribution sweep
+        run: npm run accuracy:dist
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: difftest-reports
+          path: |
+            /tmp/difftest-special-report.json
+            /tmp/difftest-dist-report.json
+          if-no-files-found: warn
+
+      - name: Check ULP ceilings
+        run: npm run difftest:ci-gate

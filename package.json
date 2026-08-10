@@ -567,6 +567,7 @@
     "accuracy:dist": "python3 scripts/difftest-dist.py --out /tmp/difftest-dist-report.json",
     "accuracy:docs": "node scripts/generate-accuracy-docs.js --special /tmp/difftest-special-report.json --dist /tmp/difftest-dist-report.json --out docs/accuracy.md",
     "accuracy": "npm run accuracy:special && npm run accuracy:dist && npm run accuracy:docs",
+    "difftest:ci-gate": "node scripts/difftest-ci-gate.js --special /tmp/difftest-special-report.json --dist /tmp/difftest-dist-report.json",
     "prepublishOnly": "npm run build",
     "coverage": "cross-env NODE_ENV=test nyc --reporter=html _mocha --require @babel/register"
   },
