@@ -51,6 +51,45 @@ class NoncentralT extends Distribution {
   }
 
   /**
+   * Precomputes the AS243 series constants (Lenth's algorithm) that seed both the forward and
+   * backward summations in fnm: the p/q leading terms, the incomplete-beta anchors, and the
+   * regularized-incomplete-beta values at the central index k0 = floor(mu2). Split out of fnm
+   * purely to keep fnm itself under the single-function length CodeScene flags -- no behavior
+   * change, every value here is used exactly as it was inlined before.
+   *
+   * @method _fnmSeriesInit
+   * @memberof ran.dist.NoncentralT
+   * @param {number} nu Degrees of freedom.
+   * @param {number} delta Sign-adjusted non-centrality parameter (see fnm).
+   * @param {number} x Value the distribution function is evaluated at.
+   * @returns {Object} The series constants consumed by fnm's forward/backward summations.
+   * @static
+   * @ignore
+   */
+  static _fnmSeriesInit (nu, delta, x) {
+    const y = x * x / (nu + x * x)
+    const mu2 = delta * delta / 2
+    const nu2 = nu / 2
+    const k0 = Math.floor(mu2)
+    const gnu = logGamma(nu2)
+    const gk1 = logGamma(k0 + 1)
+    const gk15 = logGamma(k0 + 1.5)
+    const ly = Math.log(y)
+    const p0 = Math.exp(-mu2 - logGamma(k0 + 1) + k0 * Math.log(mu2))
+    const q0 = delta * Math.exp(-mu2 - logGamma(k0 + 1.5) + k0 * Math.log(mu2)) / Math.SQRT2
+    const ap = k0 + 0.5
+    const aq = k0 + 1
+    const apb = ap + nu2
+    const aqb = aq + nu2
+    const bl1y = nu2 * Math.log(1 - y)
+    const gp0 = Math.exp(logGamma(k0 + nu2 + 0.5) - gnu - gk15 + ap * ly + bl1y)
+    const gq0 = Math.exp(logGamma(k0 + nu2) - gnu - gk1 + (aq - 1) * ly + bl1y)
+    const ip0 = regularizedBetaIncomplete(ap, nu2, y)
+    const iq0 = regularizedBetaIncomplete(aq, nu2, y)
+    return { y, mu2, k0, p0, q0, ap, aq, apb, aqb, gp0, gq0, ip0, iq0 }
+  }
+
+  /**
    * Calculates the cumulative distribution function for a specific pairs of parameters and value.
    * Source: http://www.ucs.louisiana.edu/~kxk4695/CSDA-03.pdf
    *
@@ -80,25 +119,7 @@ class NoncentralT extends Distribution {
     }
 
     // Initialize iterators
-    const y = x * x / (nu + x * x)
-    const mu2 = delta * delta / 2
-    const nu2 = nu / 2
-    const k0 = Math.floor(mu2)
-    const gnu = logGamma(nu2)
-    const gk1 = logGamma(k0 + 1)
-    const gk15 = logGamma(k0 + 1.5)
-    const ly = Math.log(y)
-    const p0 = Math.exp(-mu2 - logGamma(k0 + 1) + k0 * Math.log(mu2))
-    const q0 = delta * Math.exp(-mu2 - logGamma(k0 + 1.5) + k0 * Math.log(mu2)) / Math.SQRT2
-    const ap = k0 + 0.5
-    const aq = k0 + 1
-    const apb = ap + nu2
-    const aqb = aq + nu2
-    const bl1y = nu2 * Math.log(1 - y)
-    const gp0 = Math.exp(logGamma(k0 + nu2 + 0.5) - gnu - gk15 + ap * ly + bl1y)
-    const gq0 = Math.exp(logGamma(k0 + nu2) - gnu - gk1 + (aq - 1) * ly + bl1y)
-    const ip0 = regularizedBetaIncomplete(ap, nu2, y)
-    const iq0 = regularizedBetaIncomplete(aq, nu2, y)
+    const { y, mu2, k0, p0, q0, ap, aq, apb, aqb, gp0, gq0, ip0, iq0 } = NoncentralT._fnmSeriesInit(nu, delta, x)
 
     // Forward summation
     const gq = gq0 * y * (aqb - 1) / aq

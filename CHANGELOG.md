@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code Health of `src/dist/irwin-hall.js` improved from 9.38 to 10.0: `_pdf`/`_cdf` had a duplicated alternating-sign, log-domain term array construction and sort-then-Neumaier-sum, now extracted into a shared `_alternatingLogSum(y, power)` helper (`power = n - 1` for the pdf series, `power = n` for the cdf series). No behavior change — same series, same values.
 - Code Health of `src/dist/doubly-noncentral-t.js` improved from 9.43 to 10.0: `_findStartIndex`'s two nested loops (Fibonacci bracket search, then bisection) split into `_bracketMaximum`/`_narrowBracket` helpers, each taking the bracket as a single `{ j1, j2, f1, f2 }` object rather than four separate arguments; `_pdf`'s `x*mu >= 0` forward/backward series computation extracted into `_pdfSameSignSeries(x)`. No behavior change — same algorithm, same values.
 - Code Health of `src/dist/davis.js` improved from 9.38 to 10.0: `mean()`/`variance()`/`skewness()`/`kurtosis()` each recomputed the same raw-moment expression (`b^k * Γ(n-k) * ζ(n-k) / (Γ(n)·ζ(n))`), now extracted into a shared `_rawMoments(maxOrder)` helper. No behavior change — same formulas, same values.
+- Code Health of `src/dist/noncentral-t.js` improved from 9.58 to 10.0: `fnm`'s AS243 series-constant setup (75-line method, over the 70-line "Large Method" threshold) extracted into a new `_fnmSeriesInit(nu, delta, x)` helper, leaving the forward/backward summations untouched. No behavior change — same series, same values.
 
 ### Fixed
 
