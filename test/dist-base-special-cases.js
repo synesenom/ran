@@ -4,6 +4,7 @@ import { float } from '../src/core'
 import * as dist from '../src/dist'
 import PreComputed from '../src/dist/_pre-computed'
 import { Tests } from './test-utils'
+import { SEEDS } from './mc/_helpers'
 
 describe('dist', () => {
   describe('PreComputed', () => {
@@ -579,6 +580,68 @@ describe('dist', () => {
           assert(Number.isFinite(x) && x > previous, `lambda=${lambda}: q(${p})=${x}`)
           previous = x
         }
+      }
+    })
+  })
+
+  describe('Gamma/InverseGamma small-shape sampling (issue #1379)', () => {
+    // #1364 worked example: alpha this small drives _gamma.js's a<1 boost branch's
+    // Math.pow(u, 1/a) to underflow to exact 0.0 for a measurable fraction of draws --
+    // outside Gamma's open (0, Infinity) support, and fatal for InverseGamma's reciprocal.
+    const alpha = 0.01017360968553757
+    const beta = 0.22993683529824133
+    const sampleSize = 10000
+
+    it('Gamma.sample() should never return exactly 0', () => {
+      for (const s of SEEDS) {
+        const g = new dist.Gamma(alpha, 1)
+        g.seed(s)
+        const sample = g.sample(sampleSize)
+        sample.forEach(d => assert(Number.isFinite(d) && d > 0, `seed ${s}: x = ${d}`))
+      }
+    })
+
+    it('InverseGamma.sample() should never return Infinity', () => {
+      for (const s of SEEDS) {
+        const ig = new dist.InverseGamma(alpha, beta)
+        ig.seed(s)
+        const sample = ig.sample(sampleSize)
+        sample.forEach(d => assert(Number.isFinite(d) && d > 0, `seed ${s}: x = ${d}`))
+      }
+    })
+
+    it('BetaPrime.sample() should never return Infinity', () => {
+      // beta this small drives the denominator gamma draw through the same a<1 boost
+      // branch as the InverseGamma case above, risking a subnormal denominator and
+      // x / y overflowing to Infinity
+      //
+      // GoF coverage deliberately excluded at this shape (not added to sampleParams in
+      // dist-cases-continuous.js): beta<1 gives BetaPrime(2, beta) an infinite mean, so
+      // the sampled tail routinely reaches x > 1e15, where _cdf's x/(1+x) transform
+      // saturates to exactly 1.0 in float64 (1/(1+x) < machine epsilon). At seed 0, ~70%
+      // of a 10000-draw sample lands in that saturated region, deterministically blowing
+      // up the Anderson-Darling statistic (p ~ 6e-8) at every one of the fixed testSeeds
+      // -- a precision ceiling of the transform-based CDF at extreme tail x, not a sampler
+      // defect. Same category of exclusion as noncentral-beta's alpha=0.1, documented in
+      // solutions/testing/2026-05-23-0548-noncentral-beta-alpha-lt1-ad-noise-refvals-verification.md.
+      for (const s of SEEDS) {
+        const bp = new dist.BetaPrime(2, alpha)
+        bp.seed(s)
+        const sample = bp.sample(sampleSize)
+        sample.forEach(d => assert(Number.isFinite(d) && d > 0, `seed ${s}: x = ${d}`))
+      }
+    })
+
+    it('StudentT.sample() should never return Infinity', () => {
+      // nu this small makes nu/2 drive the denominator gamma draw through the same
+      // a<1 boost branch, risking a subnormal denominator and the sqrt argument
+      // overflowing to Infinity
+      const nu = 0.02
+      for (const s of SEEDS) {
+        const t = new dist.StudentT(nu)
+        t.seed(s)
+        const sample = t.sample(sampleSize)
+        sample.forEach(d => assert(Number.isFinite(d), `seed ${s}: x = ${d}`))
       }
     })
   })

@@ -98,8 +98,16 @@ export default class StudentT extends Distribution {
   }
 
   _generator () {
-    // Direct sampling using gamma variates
-    return sign(this.r) * Math.sqrt(this.c.nu * gamma(this.r, 0.5) / gamma(this.r, this.c.nu / 2))
+    // Direct sampling using gamma variates. When nu < 2, the denominator gamma draw
+    // (shape nu/2 < 1) is drawn via _gamma.js's small-shape boost branch, which can
+    // still return a subnormal nonzero value close to Number.MIN_VALUE even after the
+    // #1379 zero-rejection fix; dividing by it overflows the ratio (and hence sqrt) to
+    // Infinity, outside StudentT's real-valued support. Resample until finite. (issue #1379)
+    let result
+    do {
+      result = sign(this.r) * Math.sqrt(this.c.nu * gamma(this.r, 0.5) / gamma(this.r, this.c.nu / 2))
+    } while (!Number.isFinite(result))
+    return result
   }
 
   _pdf (x) {
