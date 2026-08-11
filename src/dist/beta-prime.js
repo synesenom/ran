@@ -1,3 +1,4 @@
+import { MAX_ITER } from '../core/constants'
 import gamma from './_gamma'
 import Beta from './beta'
 
@@ -48,14 +49,22 @@ export default class BetaPrime extends Beta {
     // _gamma.js's small-shape boost branch, which can still return a subnormal
     // nonzero value close to Number.MIN_VALUE even after the #1379 zero-rejection
     // fix; dividing by it overflows x / y to Infinity, outside BetaPrime's open
-    // (0, Infinity) support. Resample until the ratio is representable. (issue #1379)
-    let result
-    do {
+    // (0, Infinity) support. Resample until the ratio is representable. Below
+    // _gamma.js's BOOST_UNDERFLOW_THRESHOLD, y is provably exactly 0 on every attempt
+    // (decisions/0054-boosted-gamma-analytic-underflow-boundary-return.md), so x / y
+    // provably always overflows unless x is simultaneously 0 too (giving the finite,
+    // correctly-rounded 0/0 -> handled below); MAX_ITER-capped, Number.MAX_VALUE -- the
+    // correctly-saturated boundary of the true (unrepresentably large) variate -- is
+    // returned instead of looping forever. (issues #1379, #1384)
+    for (let iter = 0; iter < MAX_ITER; iter++) {
       const x = gamma(this.r, this.p.alpha, 1)
       const y = gamma(this.r, this.p.beta, 1)
-      result = x / y
-    } while (!Number.isFinite(result))
-    return result
+      const result = x / y
+      if (Number.isFinite(result)) {
+        return result
+      }
+    }
+    return Number.MAX_VALUE
   }
 
   _pdf (x) {

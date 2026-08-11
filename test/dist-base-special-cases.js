@@ -645,4 +645,71 @@ describe('dist', () => {
       }
     })
   })
+
+  // #1384: below a*~3.13e-13 (derived from the xoshiro128+ PRNG's 2^32-valued output space and
+  // float64's underflow boundary -- see decisions/0054-boosted-gamma-analytic-underflow-boundary-return.md),
+  // EVERY possible PRNG draw underflows boostedGamma's boost factor to exactly 0.0, so the #1379
+  // "while (result === 0)" rejection loop has zero acceptance probability and never terminates.
+  // Unlike the alpha=0.01 case above (where 0 is a genuine defect to reject-and-redraw), at
+  // alpha=1e-15 the true Gamma variate is, with overwhelming probability, below Number.MIN_VALUE,
+  // so 0 IS the correctly-rounded answer -- these assertions check termination and finiteness,
+  // not non-zero-ness. A hang here fails the whole suite via mocha's timeout, which is the
+  // meaningful signal (a hardcoded expected-value assertion would be tautological at this scale).
+  describe('Gamma/InverseGamma/BetaPrime/StudentT true-infinite-loop shape (issue #1384)', () => {
+    const tiny = 1e-15
+
+    it('Gamma.sample() should terminate and stay finite for alpha=1e-15', () => {
+      for (const s of SEEDS) {
+        const g = new dist.Gamma(tiny, 1)
+        g.seed(s)
+        const sample = g.sample(10)
+        sample.forEach(d => assert(Number.isFinite(d) && d >= 0, `seed ${s}: x = ${d}`))
+      }
+    })
+
+    it('InverseGamma.sample() should terminate and stay finite for alpha=1e-15', () => {
+      for (const s of SEEDS) {
+        const ig = new dist.InverseGamma(tiny, 1)
+        ig.seed(s)
+        const sample = ig.sample(10)
+        sample.forEach(d => assert(Number.isFinite(d) && d > 0, `seed ${s}: x = ${d}`))
+      }
+    })
+
+    it('BetaPrime.sample() should terminate and stay finite when alpha=1e-15 (tiny numerator)', () => {
+      for (const s of SEEDS) {
+        const bp = new dist.BetaPrime(tiny, 1)
+        bp.seed(s)
+        const sample = bp.sample(10)
+        sample.forEach(d => assert(Number.isFinite(d) && d >= 0, `seed ${s}: x = ${d}`))
+      }
+    })
+
+    it('BetaPrime.sample() should terminate and stay finite when beta=1e-15 (tiny denominator)', () => {
+      for (const s of SEEDS) {
+        const bp = new dist.BetaPrime(1, tiny)
+        bp.seed(s)
+        const sample = bp.sample(10)
+        sample.forEach(d => assert(Number.isFinite(d) && d > 0, `seed ${s}: x = ${d}`))
+      }
+    })
+
+    it('StudentT.sample() should terminate and stay finite for nu=1e-15', () => {
+      for (const s of SEEDS) {
+        const t = new dist.StudentT(tiny)
+        t.seed(s)
+        const sample = t.sample(10)
+        sample.forEach(d => assert(Number.isFinite(d), `seed ${s}: x = ${d}`))
+      }
+    })
+
+    // Boundary sanity check: the analytic short-circuit threshold must not swallow the
+    // already-verified alpha=0.01 regime above into a degenerate all-zero/all-identical output.
+    it('Gamma.sample() should remain non-degenerate at the already-verified alpha=0.01 boundary', () => {
+      const g = new dist.Gamma(0.01017360968553757, 1)
+      g.seed(0)
+      const sample = g.sample(20)
+      assert.isAbove(new Set(sample).size, 1, `sample = ${sample}`)
+    })
+  })
 })

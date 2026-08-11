@@ -102,12 +102,20 @@ export default class StudentT extends Distribution {
     // (shape nu/2 < 1) is drawn via _gamma.js's small-shape boost branch, which can
     // still return a subnormal nonzero value close to Number.MIN_VALUE even after the
     // #1379 zero-rejection fix; dividing by it overflows the ratio (and hence sqrt) to
-    // Infinity, outside StudentT's real-valued support. Resample until finite. (issue #1379)
-    let result
-    do {
-      result = sign(this.r) * Math.sqrt(this.c.nu * gamma(this.r, 0.5) / gamma(this.r, this.c.nu / 2))
-    } while (!Number.isFinite(result))
-    return result
+    // Infinity, outside StudentT's real-valued support. Resample until finite. Below
+    // _gamma.js's BOOST_UNDERFLOW_THRESHOLD (i.e. nu below roughly twice that), the
+    // denominator draw is provably exactly 0 on every attempt
+    // (decisions/0054-boosted-gamma-analytic-underflow-boundary-return.md), so the ratio
+    // provably always overflows; MAX_ITER-capped, sign(this.r) * Number.MAX_VALUE -- the
+    // correctly-saturated boundary of the true (unrepresentably large) variate -- is
+    // returned instead of looping forever. (issues #1379, #1384)
+    for (let iter = 0; iter < MAX_ITER; iter++) {
+      const result = sign(this.r) * Math.sqrt(this.c.nu * gamma(this.r, 0.5) / gamma(this.r, this.c.nu / 2))
+      if (Number.isFinite(result)) {
+        return result
+      }
+    }
+    return sign(this.r) * Number.MAX_VALUE
   }
 
   _pdf (x) {
