@@ -2758,10 +2758,13 @@ export default [{
       { x: 7.584718518060176e+162, pdf: 2.927369049165875e-167, cdf: 0.978175622101988 }
     ]
   }],
-  // 'extreme x (issue #1364)' omitted: refVals in cases verify PDF/CDF directly; its
-  // alpha=0.0102 makes the underlying Gamma sampler occasionally underflow to 0, whose
-  // reciprocal is Infinity -- a pre-existing Gamma-sampling limitation, not this bug.
-  sampleParams: [{ params: () => [2, 2] }, { name: 'near-zero shapes', params: () => [0.5, 0.5] }],
+  // 'extreme x (issue #1364)' params restored to sampleParams now that issue #1379 fixed
+  // the underlying Gamma-sampler underflow and InverseGamma's reciprocal-overflow exposure.
+  sampleParams: [
+    { params: () => [2, 2] },
+    { name: 'near-zero shapes', params: () => [0.5, 0.5] },
+    { name: 'extreme small alpha (issue #1364, #1379)', params: () => [0.01017360968553757, 0.22993683529824133] }
+  ],
   testSeeds: [0, 5, 12345], // seed 42 shifts PRNG alignment after Ziggurat replacement
   refVals: [
     { x: 0.05, pdf: 1.3594733616933084e-13, cdf: 1.7418252446695556e-16 },

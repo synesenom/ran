@@ -1,6 +1,30 @@
 import normal from './_normal'
 
 /**
+ * Generates a gamma random variate for shape a < 1 via the boost identity
+ * X·U^(1/a) ~ Gamma(a) for X ~ Gamma(a+1). For tiny a, 1/a is huge and
+ * Math.pow(u, 1/a) underflows to exact 0.0 for a measurable fraction of draws
+ * u -- outside Gamma's open (0, Infinity) support. Reject and redraw from the
+ * full (X, u) joint, same as the Marsaglia-Tsang loop in gamma() below.
+ * (issue #1379)
+ *
+ * @method boostedGamma
+ * @memberof ran.dist
+ * @param {ran.core.Xoshiro128p} r Random generator.
+ * @param {number} a Shape parameter, must be less than 1.
+ * @param {number} b Rate parameter.
+ * @returns {number} Random variate.
+ * @ignore
+ */
+function boostedGamma (r, a, b) {
+  let result
+  do {
+    result = gamma(r, a + 1, b) * Math.pow(r.next(), 1 / a)
+  } while (result === 0)
+  return result
+}
+
+/**
  * Generates a gamma random variate with the rate parametrization.
  *
  * @method gamma
@@ -35,6 +59,6 @@ export default function gamma (r, a, b = 1) {
       }
     }
   } else {
-    return gamma(r, a + 1, b) * Math.pow(r.next(), 1 / a)
+    return boostedGamma(r, a, b)
   }
 }

@@ -4,6 +4,7 @@ import { float } from '../src/core'
 import * as dist from '../src/dist'
 import PreComputed from '../src/dist/_pre-computed'
 import { Tests } from './test-utils'
+import { SEEDS } from './mc/_helpers'
 
 describe('dist', () => {
   describe('PreComputed', () => {
@@ -579,6 +580,33 @@ describe('dist', () => {
           assert(Number.isFinite(x) && x > previous, `lambda=${lambda}: q(${p})=${x}`)
           previous = x
         }
+      }
+    })
+  })
+
+  describe('Gamma/InverseGamma small-shape sampling (issue #1379)', () => {
+    // #1364 worked example: alpha this small drives _gamma.js's a<1 boost branch's
+    // Math.pow(u, 1/a) to underflow to exact 0.0 for a measurable fraction of draws --
+    // outside Gamma's open (0, Infinity) support, and fatal for InverseGamma's reciprocal.
+    const alpha = 0.01017360968553757
+    const beta = 0.22993683529824133
+    const sampleSize = 10000
+
+    it('Gamma.sample() should never return exactly 0', () => {
+      for (const s of SEEDS) {
+        const g = new dist.Gamma(alpha, 1)
+        g.seed(s)
+        const sample = g.sample(sampleSize)
+        sample.forEach(d => assert(Number.isFinite(d) && d > 0, `seed ${s}: x = ${d}`))
+      }
+    })
+
+    it('InverseGamma.sample() should never return Infinity', () => {
+      for (const s of SEEDS) {
+        const ig = new dist.InverseGamma(alpha, beta)
+        ig.seed(s)
+        const sample = ig.sample(sampleSize)
+        sample.forEach(d => assert(Number.isFinite(d), `seed ${s}: x = ${d}`))
       }
     })
   })

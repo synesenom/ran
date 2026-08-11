@@ -32,8 +32,15 @@ export default class InverseGamma extends Gamma {
   }
 
   _generator () {
-    // Direct sampling by transforming gamma variate
-    return 1 / super._generator()
+    // Direct sampling by transforming gamma variate. A subnormal (but nonzero) gamma draw
+    // below 1/Number.MAX_VALUE is still a valid member of Gamma's open support, yet its
+    // reciprocal overflows to Infinity -- outside InverseGamma's own open (0, Infinity)
+    // support. Resample until the reciprocal is representable. (issue #1379)
+    let x
+    do {
+      x = 1 / super._generator()
+    } while (!Number.isFinite(x))
+    return x
   }
 
   _pdf (x) {
