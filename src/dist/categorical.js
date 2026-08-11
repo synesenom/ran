@@ -134,15 +134,7 @@ export default class Categorical extends Distribution {
    * @returns {number} The skewness of the distribution.
    */
   skewness () {
-    const { min, n } = this.c
-    let m1 = 0; let m2 = 0; let m3 = 0
-    for (let i = 0; i < n; i++) {
-      const x = min + i
-      const p = this.pdfTable[i]
-      m1 += x * p
-      m2 += x * x * p
-      m3 += x * x * x * p
-    }
+    const [m1, m2, m3] = this._rawMoments(3)
     const v = m2 - m1 * m1
     if (!(v > 0)) return NaN
     return (m3 - 3 * m1 * m2 + 2 * m1 * m1 * m1) / Math.pow(v, 1.5)
@@ -152,19 +144,32 @@ export default class Categorical extends Distribution {
    * @returns {number} The excess kurtosis of the distribution.
    */
   kurtosis () {
-    const { min, n } = this.c
-    let m1 = 0; let m2 = 0; let m3 = 0; let m4 = 0
-    for (let i = 0; i < n; i++) {
-      const x = min + i
-      const p = this.pdfTable[i]
-      m1 += x * p
-      m2 += x * x * p
-      m3 += x * x * x * p
-      m4 += x * x * x * x * p
-    }
+    const [m1, m2, m3, m4] = this._rawMoments(4)
     const v = m2 - m1 * m1
     if (!(v > 0)) return NaN
     return (m4 - 4 * m1 * m3 + 6 * m1 * m1 * m2 - 3 * m1 * m1 * m1 * m1) / (v * v) - 3
+  }
+
+  /**
+   * Computes the raw moments E[X], E[X^2], ..., E[X^order] in a single pass over the pmf table.
+   *
+   * @param {number} order Highest moment order to compute.
+   * @returns {number[]} Raw moments, indexed 0..order-1 for orders 1..order.
+   * @private
+   */
+  _rawMoments (order) {
+    const { min, n } = this.c
+    const m = new Array(order).fill(0)
+    for (let i = 0; i < n; i++) {
+      const x = min + i
+      const p = this.pdfTable[i]
+      let xk = 1
+      for (let k = 0; k < order; k++) {
+        xk *= x
+        m[k] += xk * p
+      }
+    }
+    return m
   }
 
   /** @inheritdoc */
