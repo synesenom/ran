@@ -141,13 +141,27 @@ function _t1 (h, a, m) {
   return z
 }
 
+// Shared setup for T2/T3, which differ only in the sign of `aa` and the recurrence for `ph`
+function _t2t3Setup (h, a, ah) {
+  const hh = h * h
+  return {
+    hh,
+    y: 1 / hh,
+    vi: PI2_SQRT_INV * a * Math.exp(-0.5 * ah * ah),
+    ph: _phi(ah) / h
+  }
+}
+
+function _t2t3Result (hh, z) {
+  return PI2_SQRT_INV * Math.exp(-0.5 * hh) * z
+}
+
 // T2
 function _t2 (h, a, ah, m) {
-  const hh = h * h
+  const { hh, y, vi: vi0, ph: ph0 } = _t2t3Setup(h, a, ah)
   const aa = -a * a
-  let vi = PI2_SQRT_INV * a * Math.exp(-0.5 * ah * ah)
-  let ph = _phi(ah) / h
-  const y = 1 / hh
+  let vi = vi0
+  let ph = ph0
   let z = 0
 
   const iMax = m + m + 1
@@ -157,16 +171,15 @@ function _t2 (h, a, ah, m) {
     ph = y * (vi - i * ph)
     vi *= aa
   }
-  return PI2_SQRT_INV * Math.exp(-0.5 * hh) * z
+  return _t2t3Result(hh, z)
 }
 
 // T3
 function _t3 (h, a, ah, m) {
-  const hh = h * h
+  const { hh, y, vi: vi0, ph: ph0 } = _t2t3Setup(h, a, ah)
   const aa = a * a
-  let vi = PI2_SQRT_INV * a * Math.exp(-0.5 * ah * ah)
-  let ph = _phi(ah) / h
-  const y = 1 / hh
+  let vi = vi0
+  let ph = ph0
   let z = 0
 
   for (let i = 1, ii = 1; i <= m; i++, ii += 2) {
@@ -176,7 +189,7 @@ function _t3 (h, a, ah, m) {
     ph = y * (ii * ph - vi)
     vi *= aa
   }
-  return PI2_SQRT_INV * Math.exp(-0.5 * hh) * z
+  return _t2t3Result(hh, z)
 }
 
 // T4
@@ -227,33 +240,20 @@ function _t6 (h, a) {
 }
 
 function _t (h, a, ah) {
-  const row = findSectorRow(a)
-  const col = findSectorColumn(h)
+  const row = findSector(a, A_RANGES)
+  const col = findSector(h, H_RANGES)
   const code = getCode(row, col)
-  const order = getOrder(code)
-  return runAlgorithm(code, order, h, a, ah)
+  return runAlgorithm(code, h, a, ah)
 }
 
-function findSectorRow (a) {
-  let row = 7
-  for (let i = 0; i < 7; i++) {
-    if (a <= A_RANGES[i]) {
-      row = i
-      break
+// Index of the first range boundary the value does not exceed, or ranges.length if none does
+function findSector (value, ranges) {
+  for (let i = 0; i < ranges.length; i++) {
+    if (value <= ranges[i]) {
+      return i
     }
   }
-  return row
-}
-
-function findSectorColumn (h) {
-  let col = 14
-  for (let i = 0; i < 14; i++) {
-    if (h <= H_RANGES[i]) {
-      col = i
-      break
-    }
-  }
-  return col
+  return ranges.length
 }
 
 function getCode (row, col) {
@@ -264,7 +264,8 @@ function getOrder (code) {
   return ORDERS[code]
 }
 
-function runAlgorithm (code, order, h, a, ah) {
+function runAlgorithm (code, h, a, ah) {
+  const order = getOrder(code)
   switch (METHODS[code]) {
     case 2:
       return _t2.call(this, h, a, ah, order)
