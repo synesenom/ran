@@ -66,20 +66,19 @@ export default class Davis extends Distribution {
    * @returns {number} The mean of the distribution.
    */
   mean () {
-    const { mu, b, n } = this.p
+    const { mu, n } = this.p
     if (n <= 2) return Infinity
-    return mu + b * gammaFn(n - 1) * riemannZeta(n - 1) / (this.c.gammaN * this.c.zetaN)
+    const [m1] = this._rawMoments(1)
+    return mu + m1
   }
 
   /**
    * @returns {number} The variance of the distribution.
    */
   variance () {
-    const { b, n } = this.p
+    const { n } = this.p
     if (n <= 3) return Infinity
-    const norm = this.c.gammaN * this.c.zetaN
-    const m1 = b * gammaFn(n - 1) * riemannZeta(n - 1) / norm
-    const m2 = b * b * gammaFn(n - 2) * riemannZeta(n - 2) / norm
+    const [m1, m2] = this._rawMoments(2)
     return m2 - m1 * m1
   }
 
@@ -87,12 +86,9 @@ export default class Davis extends Distribution {
    * @returns {number} The skewness of the distribution.
    */
   skewness () {
-    const { b, n } = this.p
+    const { n } = this.p
     if (n <= 4) return Infinity
-    const norm = this.c.gammaN * this.c.zetaN
-    const m1 = b * gammaFn(n - 1) * riemannZeta(n - 1) / norm
-    const m2 = b * b * gammaFn(n - 2) * riemannZeta(n - 2) / norm
-    const m3 = b ** 3 * gammaFn(n - 3) * riemannZeta(n - 3) / norm
+    const [m1, m2, m3] = this._rawMoments(3)
     const v = m2 - m1 * m1
     return (m3 - 3 * m1 * m2 + 2 * m1 ** 3) / Math.pow(v, 1.5)
   }
@@ -101,13 +97,9 @@ export default class Davis extends Distribution {
    * @returns {number} The excess kurtosis of the distribution.
    */
   kurtosis () {
-    const { b, n } = this.p
+    const { n } = this.p
     if (n <= 5) return Infinity
-    const norm = this.c.gammaN * this.c.zetaN
-    const m1 = b * gammaFn(n - 1) * riemannZeta(n - 1) / norm
-    const m2 = b * b * gammaFn(n - 2) * riemannZeta(n - 2) / norm
-    const m3 = b ** 3 * gammaFn(n - 3) * riemannZeta(n - 3) / norm
-    const m4 = b ** 4 * gammaFn(n - 4) * riemannZeta(n - 4) / norm
+    const [m1, m2, m3, m4] = this._rawMoments(4)
     const v = m2 - m1 * m1
     return (m4 - 4 * m1 * m3 + 6 * m1 ** 2 * m2 - 3 * m1 ** 4) / (v * v) - 3
   }
@@ -167,5 +159,21 @@ export default class Davis extends Distribution {
       if (Math.abs(term) < Math.abs(integral) * EPS) break
     }
     return 1 - integral / (this.c.gammaN * this.c.zetaN)
+  }
+
+  /**
+   * Raw moments E[(X-mu)^1..maxOrder], shared by mean(), variance(), skewness(), and kurtosis().
+   * @param {number} maxOrder Highest moment order to compute.
+   * @returns {Array<number>} The raw moments, indexed from order 1 at index 0.
+   * @private
+   */
+  _rawMoments (maxOrder) {
+    const { b, n } = this.p
+    const norm = this.c.gammaN * this.c.zetaN
+    const moments = []
+    for (let order = 1; order <= maxOrder; order++) {
+      moments.push(Math.pow(b, order) * gammaFn(n - order) * riemannZeta(n - order) / norm)
+    }
+    return moments
   }
 }
