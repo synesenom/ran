@@ -7,10 +7,18 @@ import normal from './_normal'
 // See decisions/0054-boosted-gamma-analytic-underflow-boundary-return.md
 export const BOOST_UNDERFLOW_THRESHOLD = Math.log1p(-1 / 4294967296) / Math.log(Number.MIN_VALUE)
 
-// Generous cap for a >= BOOST_UNDERFLOW_THRESHOLD, where the loop has a genuine (if very
-// small, near the threshold) positive acceptance probability and terminates almost surely,
-// but the #1379 reviewer's own estimate put worst-case iterations near ~13.4M for shapes
-// just above the practically-verified boundary -- sized with comfortable margin above that.
+// Generous cap for a >= BOOST_UNDERFLOW_THRESHOLD, where the loop has a genuine positive
+// acceptance probability and terminates almost surely, but the #1379 reviewer's own estimate
+// put worst-case iterations near ~13.4M for shapes around 1e-10 -- sized with comfortable
+// margin above that. Acceptance probability keeps falling as a approaches
+// BOOST_UNDERFLOW_THRESHOLD from above, so there is a narrow gap zone (roughly a* to ~1e-9,
+// well below any parameter value this codebase tests or documents as supported) where even
+// this cap is exhausted more often than not and the loop below falls through to 0 -- not because
+// it is analytically proven impossible there (only true below BOOST_UNDERFLOW_THRESHOLD itself),
+// but because the true acceptance probability is low enough that 2e7 draws rarely find one. This
+// is an accepted, documented approximation in that narrow gap: still bounded termination (this
+// issue's actual requirement) at the cost of an occasional false 0 for a handful of orders of
+// magnitude in shape that no caller in this codebase exercises.
 const BOOST_MAX_ITER = 2e7
 
 /**

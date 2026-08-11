@@ -3,6 +3,7 @@ import { before, describe, it } from 'mocha'
 import { float } from '../src/core'
 import * as dist from '../src/dist'
 import PreComputed from '../src/dist/_pre-computed'
+import { BOOST_UNDERFLOW_THRESHOLD } from '../src/dist/_gamma'
 import { Tests } from './test-utils'
 import { SEEDS } from './mc/_helpers'
 
@@ -651,56 +652,81 @@ describe('dist', () => {
   // EVERY possible PRNG draw underflows boostedGamma's boost factor to exactly 0.0, so the #1379
   // "while (result === 0)" rejection loop has zero acceptance probability and never terminates.
   // Unlike the alpha=0.01 case above (where 0 is a genuine defect to reject-and-redraw), at
-  // alpha=1e-15 the true Gamma variate is, with overwhelming probability, below Number.MIN_VALUE,
-  // so 0 IS the correctly-rounded answer -- these assertions check termination and finiteness,
-  // not non-zero-ness. A hang here fails the whole suite via mocha's timeout, which is the
-  // meaningful signal (a hardcoded expected-value assertion would be tautological at this scale).
-  describe('Gamma/InverseGamma/BetaPrime/StudentT true-infinite-loop shape (issue #1384)', () => {
+  // alpha=1e-15 the true variate is, with overwhelming probability, below Number.MIN_VALUE (for
+  // Gamma itself) or beyond Number.MAX_VALUE (for its reciprocal/ratio composers), so these are
+  // the correctly-rounded IEEE-754 answers, pinned exactly per decisions/0054-...md rather than
+  // merely checked for finiteness -- a finiteness-only check wouldn't catch a regression that
+  // corrupted the boundary value itself (a broken sign, or a fallback that silently reverts to
+  // Number.MAX_VALUE). A hang here also fails the whole suite via mocha's timeout.
+  describe('Gamma/InverseGamma/BetaPrime/StudentT/Beta true-infinite-loop shape (issue #1384)', () => {
     const tiny = 1e-15
 
-    it('Gamma.sample() should terminate and stay finite for alpha=1e-15', () => {
+    it('Gamma.sample() should terminate at exactly 0 for alpha=1e-15', () => {
       for (const s of SEEDS) {
         const g = new dist.Gamma(tiny, 1)
         g.seed(s)
-        const sample = g.sample(10)
-        sample.forEach(d => assert(Number.isFinite(d) && d >= 0, `seed ${s}: x = ${d}`))
+        g.sample(10).forEach(d => assert.strictEqual(d, 0, `seed ${s}: x = ${d}`))
       }
     })
 
-    it('InverseGamma.sample() should terminate and stay finite for alpha=1e-15', () => {
+    it('InverseGamma.sample() should terminate at exactly Infinity for alpha=1e-15', () => {
       for (const s of SEEDS) {
         const ig = new dist.InverseGamma(tiny, 1)
         ig.seed(s)
-        const sample = ig.sample(10)
-        sample.forEach(d => assert(Number.isFinite(d) && d > 0, `seed ${s}: x = ${d}`))
+        ig.sample(10).forEach(d => assert.strictEqual(d, Infinity, `seed ${s}: x = ${d}`))
       }
     })
 
-    it('BetaPrime.sample() should terminate and stay finite when alpha=1e-15 (tiny numerator)', () => {
+    it('BetaPrime.sample() should terminate at exactly 0 when alpha=1e-15 (tiny numerator)', () => {
       for (const s of SEEDS) {
         const bp = new dist.BetaPrime(tiny, 1)
         bp.seed(s)
-        const sample = bp.sample(10)
-        sample.forEach(d => assert(Number.isFinite(d) && d >= 0, `seed ${s}: x = ${d}`))
+        bp.sample(10).forEach(d => assert.strictEqual(d, 0, `seed ${s}: x = ${d}`))
       }
     })
 
-    it('BetaPrime.sample() should terminate and stay finite when beta=1e-15 (tiny denominator)', () => {
+    it('BetaPrime.sample() should terminate at exactly Infinity when beta=1e-15 (tiny denominator)', () => {
       for (const s of SEEDS) {
         const bp = new dist.BetaPrime(1, tiny)
         bp.seed(s)
-        const sample = bp.sample(10)
-        sample.forEach(d => assert(Number.isFinite(d) && d > 0, `seed ${s}: x = ${d}`))
+        bp.sample(10).forEach(d => assert.strictEqual(d, Infinity, `seed ${s}: x = ${d}`))
       }
     })
 
-    it('StudentT.sample() should terminate and stay finite for nu=1e-15', () => {
+    // Both shapes below the threshold: x / y is 0 / 0 (NaN) on every attempt, not a provable
+    // one-directional overflow -- the direction is resolved by shape comparison (issue #1386's
+    // root cause, fixed alongside #1384 since it shares the exact same underflow mechanism).
+    it('BetaPrime.sample() should resolve the double-underflow direction by shape comparison, not a fixed sentinel', () => {
+      new dist.BetaPrime(tiny, tiny * 10).seed(0).sample(10).forEach(d => assert.strictEqual(d, 0))
+      new dist.BetaPrime(tiny * 10, tiny).seed(0).sample(10).forEach(d => assert.strictEqual(d, Infinity))
+
+      const equalShapes = new dist.BetaPrime(tiny, tiny).seed(0).sample(30)
+      equalShapes.forEach(d => assert(d === 0 || d === Infinity, `x = ${d}`))
+      assert(equalShapes.some(d => d === 0), 'equal tiny shapes never landed on the 0 boundary')
+      assert(equalShapes.some(d => d === Infinity), 'equal tiny shapes never landed on the Infinity boundary')
+    })
+
+    it('StudentT.sample() should terminate at exactly +/-Infinity for nu=1e-15', () => {
       for (const s of SEEDS) {
         const t = new dist.StudentT(tiny)
         t.seed(s)
-        const sample = t.sample(10)
-        sample.forEach(d => assert(Number.isFinite(d), `seed ${s}: x = ${d}`))
+        t.sample(10).forEach(d => assert.strictEqual(Math.abs(d), Infinity, `seed ${s}: x = ${d}`))
       }
+    })
+
+    // src/dist/_beta.js had no rejection guard at all before this fix -- Beta(1e-15, 1e-15)
+    // silently returned NaN on every draw (a regression #1384's boostedGamma short-circuit would
+    // otherwise have introduced, caught during /review before this shipped).
+    it('Beta.sample() should resolve the double-underflow direction by shape comparison, not NaN', () => {
+      new dist.Beta(tiny, 1).seed(0).sample(10).forEach(d => assert.strictEqual(d, 0))
+      new dist.Beta(1, tiny).seed(0).sample(10).forEach(d => assert.strictEqual(d, 1))
+      new dist.Beta(tiny, tiny * 10).seed(0).sample(10).forEach(d => assert.strictEqual(d, 0))
+      new dist.Beta(tiny * 10, tiny).seed(0).sample(10).forEach(d => assert.strictEqual(d, 1))
+
+      const equalShapes = new dist.Beta(tiny, tiny).seed(0).sample(30)
+      equalShapes.forEach(d => assert(d === 0 || d === 1, `x = ${d}`))
+      assert(equalShapes.some(d => d === 0), 'equal tiny shapes never landed on the 0 boundary')
+      assert(equalShapes.some(d => d === 1), 'equal tiny shapes never landed on the 1 boundary')
     })
 
     // Boundary sanity check: the analytic short-circuit threshold must not swallow the
@@ -710,6 +736,22 @@ describe('dist', () => {
       g.seed(0)
       const sample = g.sample(20)
       assert.isAbove(new Set(sample).size, 1, `sample = ${sample}`)
+    })
+
+    // Threshold-crossing sanity check: catches an off-by-orders-of-magnitude error in
+    // BOOST_UNDERFLOW_THRESHOLD's derivation that neither the alpha=1e-15 nor the alpha=0.01 test
+    // could -- both are many orders of magnitude away from the actual analytic boundary. Note the
+    // "just above" probe uses 10000x the threshold, not 2x: boostedGamma's own BOOST_MAX_ITER cap
+    // needs the acceptance probability well clear of the threshold to reliably succeed within
+    // budget (near the threshold itself, expected iterations run into the billions -- see the
+    // BOOST_MAX_ITER comment in _gamma.js -- so a "just above threshold" probe would still be
+    // deterministically 0 far more often than not, the same gap-zone behavior flagged in review).
+    it('Gamma.sample() should be exactly 0 just below, and reliably nonzero just above (at 10000x), BOOST_UNDERFLOW_THRESHOLD', () => {
+      const justBelow = new dist.Gamma(BOOST_UNDERFLOW_THRESHOLD * 0.5, 1).seed(0).sample(10)
+      justBelow.forEach(d => assert.strictEqual(d, 0))
+
+      const justAbove = new dist.Gamma(BOOST_UNDERFLOW_THRESHOLD * 10000, 1).seed(0).sample(50)
+      assert(justAbove.some(d => d !== 0), 'no nonzero sample at 10000x the threshold across 50 draws')
     })
   })
 })
