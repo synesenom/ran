@@ -31,12 +31,10 @@ const OUT_PATH = flagValue('--out', path.join(root, 'docs/accuracy.md'))
 
 // Known, tracked accuracy defects the sweeps surface. Named explicitly so the table can
 // never round a bad measured value away into a bare "OK" -- #1266's design constraint.
-const KNOWN_ISSUES = {
-  besselK: 1140,
-  besselKnu: 1140,
-  'Gamma.pdf': 1363,
-  'InverseGamma.pdf': 1364
-}
+// besselK/besselKnu (#1140), Gamma.pdf (#1363), and InverseGamma.pdf (#1364) were
+// previously tracked here too; all underlying issues are now resolved and a fresh
+// differential-testing sweep confirmed all are clean, so their entries were removed.
+const KNOWN_ISSUES = {}
 
 function readReport (filePath) {
   if (!fs.existsSync(filePath)) return null
