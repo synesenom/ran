@@ -606,7 +606,7 @@ describe('dist', () => {
         const ig = new dist.InverseGamma(alpha, beta)
         ig.seed(s)
         const sample = ig.sample(sampleSize)
-        sample.forEach(d => assert(Number.isFinite(d), `seed ${s}: x = ${d}`))
+        sample.forEach(d => assert(Number.isFinite(d) && d > 0, `seed ${s}: x = ${d}`))
       }
     })
 
@@ -618,7 +618,7 @@ describe('dist', () => {
         const bp = new dist.BetaPrime(2, alpha)
         bp.seed(s)
         const sample = bp.sample(sampleSize)
-        sample.forEach(d => assert(Number.isFinite(d), `seed ${s}: x = ${d}`))
+        sample.forEach(d => assert(Number.isFinite(d) && d > 0, `seed ${s}: x = ${d}`))
       }
     })
 
