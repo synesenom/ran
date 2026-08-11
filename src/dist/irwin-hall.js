@@ -105,38 +105,36 @@ export default class IrwinHall extends Distribution {
   _pdf (x) {
     // Use symmetry property for large x values
     const y = x < this.p.n / 2 ? x : this.p.n - x
-    const { logGammaTerms } = this.c
-
-    // Compute terms
-    const terms = Array.from({ length: Math.floor(y) + 1 }, (d, k) => {
-      const z = (this.p.n - 1) * Math.log(y - k) - logGammaTerms[k]
-
-      return k % 2 === 0 ? Math.exp(z) : -Math.exp(z)
-    })
-
-    // Sort terms
-    terms.sort((a, b) => a - b)
-
-    // Calculate sum
-    return this.p.n * neumaier(terms)
+    return this.p.n * this._alternatingLogSum(y, this.p.n - 1)
   }
 
   _cdf (x) {
     // Use symmetry property for large x values
     const y = x < this.p.n / 2 ? x : this.p.n - x
+    const sum = this._alternatingLogSum(y, this.p.n)
+    return x < this.p.n / 2 ? sum : 1 - sum
+  }
+
+  /**
+   * Computes the compensated alternating sum $\sum_{k = 0}^{\lfloor y\rfloor} (-1)^k \exp(power \cdot \ln(y - k) - logGammaTerms[k])$
+   * shared by the pdf (power = n - 1) and cdf (power = n) series.
+   *
+   * @param {number} y Symmetry-reduced argument.
+   * @param {number} power Exponent applied to (y - k) in the log domain.
+   * @returns {number} The Neumaier-compensated sum.
+   * @private
+   */
+  _alternatingLogSum (y, power) {
     const { logGammaTerms } = this.c
 
     // Compute terms
     const terms = Array.from({ length: Math.floor(y) + 1 }, (d, k) => {
-      const z = this.p.n * Math.log(y - k) - logGammaTerms[k]
+      const z = power * Math.log(y - k) - logGammaTerms[k]
 
       return k % 2 === 0 ? Math.exp(z) : -Math.exp(z)
     })
 
-    // Sort terms
-    const sum = neumaier(terms.sort((a, b) => a - b))
-
-    // Calculate sum
-    return x < this.p.n / 2 ? sum : 1 - sum
+    // Sort terms to reduce cancellation error before compensated summation
+    return neumaier(terms.sort((a, b) => a - b))
   }
 }
