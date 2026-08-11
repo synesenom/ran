@@ -25,7 +25,7 @@ or hidden.
 | Special functions (`npm run accuracy:special`) | 1.4.1 | 50 | 42 | 60000 |
 | Distribution pdf/cdf (`npm run accuracy:dist`) | 1.4.1 | 50 | 42 | 120000 |
 
-ranjs version measured: `1.32.0` (commit `029f996`).
+ranjs version measured: `1.32.0` (commit `fbbc64d`).
 
 ## Special Functions
 
@@ -36,8 +36,8 @@ ranjs version measured: `1.32.0` (commit `029f996`).
 | `besselInu` | nu ∈ [-5, 5]; x ∈ [0.001, 700] (log-uniform) | 10000 | 654 | 5 | ✅ OK (ceiling 2048) |
 | `besselISpherical` | n ∈ [-3, 5] (int); x ∈ [0.001, 50] (log-uniform) | 10000 | 843 | 1 | ✅ OK (ceiling 2048) |
 | `besselISphericalExpScaled` | — | — | — | — | not yet measured |
-| `besselK` | n ∈ [0, 5] (int); x ∈ [0.001, 100] (log-uniform) | 10000 | 3783188365 | 1 | 🔗 known accuracy gap — tracked: [#1140](https://github.com/synesenom/ran/issues/1140) |
-| `besselKnu` | nu ∈ [-5, 5]; x ∈ [0.001, 100] (log-uniform) | 10000 | 11056954420732522 | 5 | 🔗 known accuracy gap — tracked: [#1140](https://github.com/synesenom/ran/issues/1140) |
+| `besselK` | n ∈ [0, 5] (int); x ∈ [0.001, 100] (log-uniform) | 10000 | 3783188365 | 1 | ✅ OK (ceiling 20000000000) |
+| `besselKnu` | nu ∈ [-5, 5]; x ∈ [0.001, 100] (log-uniform) | 10000 | 3857443965 | 3 | ✅ OK (ceiling 60000000000000000) |
 | `logBesselIExpScaled` | — | — | — | — | not yet measured |
 | `beta` | — | — | — | — | not yet measured |
 | `betaIncomplete` | — | — | — | — | not yet measured |
@@ -124,7 +124,7 @@ ranjs version measured: `1.32.0` (commit `029f996`).
 | `FlorySchulz.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `Frechet.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `FisherZ.pdf/pmf, cdf` | — | — | — | — | not yet measured |
-| `Gamma.pdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | ∞ | 6 | ❌ 31 divergence(s) (NaN/mismatch vs. mpmath); 🔗 known accuracy gap — tracked: [#1363](https://github.com/synesenom/ran/issues/1363) |
+| `Gamma.pdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 2338 | 7 | ✅ OK (ceiling 4096) |
 | `Gamma.cdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 83 | 3 | ✅ OK (ceiling 256) |
 | `GammaGompertz.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `GeneralizedExponential.pdf/pmf, cdf` | — | — | — | — | not yet measured |
@@ -147,7 +147,7 @@ ranjs version measured: `1.32.0` (commit `029f996`).
 | `Hyperexponential.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `Hypergeometric.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `InverseChi2.pdf/pmf, cdf` | — | — | — | — | not yet measured |
-| `InverseGamma.pdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | ∞ | 6 | ❌ 21 divergence(s) (NaN/mismatch vs. mpmath); 🔗 known accuracy gap — tracked: [#1364](https://github.com/synesenom/ran/issues/1364) |
+| `InverseGamma.pdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 1484 | 9 | ✅ OK (ceiling 5000000000000000000) |
 | `InverseGamma.cdf` | alpha ∈ [0.01, 100] (log-uniform); beta ∈ [0.01, 100] (log-uniform); x = q(p), p ∈ [0.001, 0.999] | 10000 | 2672 | 2 | ✅ OK (ceiling 8192) |
 | `InverseGaussian.pdf/pmf, cdf` | — | — | — | — | not yet measured |
 | `InvertedWeibull.pdf/pmf, cdf` | — | — | — | — | not yet measured |
