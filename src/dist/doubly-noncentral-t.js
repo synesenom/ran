@@ -52,48 +52,60 @@ export default class DoublyNoncentralT extends Distribution {
   }
 
   /**
-   * Finds the index corresponding to the largest term in a series.
+   * Finds a bracket [j1, j2] containing the index of the largest term, doubling the bracket via
+   * a Fibonacci-like advance until the term value stops growing.
    *
-   * @method startIndex
+   * @method _bracketMaximum
    * @memberof ran.dist.DoublyNoncentralT
    * @param {Function} term Function that accepts an index and returns the term value.
-   * @returns {number} The index of the largest term.
+   * @returns {Object} The bracket boundaries and their term values, as { j1, j2, f1, f2 }.
    * @private
    */
-  _findStartIndex (term) {
-    // Find bracket that contains the maximum value.
+  _bracketMaximum (term) {
     let j1 = 1
     let f1 = term(j1)
     let j2 = 2
     let f2 = term(j2)
-    let j = 3
-    let f = term(j)
     while (f2 >= f1) {
       // Calculate new value: advance index according to a Fibonacci series.
-      j = j1 + j2
-      f = term(j)
+      const j = j1 + j2
+      const f = term(j)
 
-      // Keep advancing the index if new value is larger.
-      if (f >= f2) {
-        j1 = j2
-        j2 = j
-        f1 = f2
-        f2 = f
-      } else {
+      // Stop advancing once the new value is no longer larger.
+      if (f < f2) {
         break
       }
+      j1 = j2
+      j2 = j
+      f1 = f2
+      f2 = f
     }
 
-    // Narrow bracket to find the exact index.
+    return { j1, j2, f1, f2 }
+  }
+
+  /**
+   * Bisects a bracket found by _bracketMaximum down to the exact index of the largest term.
+   *
+   * @method _narrowBracket
+   * @memberof ran.dist.DoublyNoncentralT
+   * @param {Function} term Function that accepts an index and returns the term value.
+   * @param {Object} bracket The bracket boundaries and their term values, as { j1, j2, f1, f2 }.
+   * @returns {number} The index of the largest term.
+   * @private
+   */
+  _narrowBracket (term, bracket) {
+    let { j1, j2, f1, f2 } = bracket
+    let j = j1
     while (j1 !== j2) {
       // Add bisection point.
       j = Math.floor((j1 + j2) / 2)
-      f = term(j)
 
-      // Check if current boundary is small enough.
+      // Stop once the current boundary is small enough.
       if (j === j1 || j === j2) {
         break
       }
+      const f = term(j)
 
       // Update the right index.
       if (f1 > f2) {
@@ -106,6 +118,19 @@ export default class DoublyNoncentralT extends Distribution {
     }
 
     return j
+  }
+
+  /**
+   * Finds the index corresponding to the largest term in a series.
+   *
+   * @method startIndex
+   * @memberof ran.dist.DoublyNoncentralT
+   * @param {Function} term Function that accepts an index and returns the term value.
+   * @returns {number} The index of the largest term.
+   * @private
+   */
+  _findStartIndex (term) {
+    return this._narrowBracket(term, this._bracketMaximum(term))
   }
 
   /**
@@ -269,6 +294,27 @@ export default class DoublyNoncentralT extends Distribution {
       return Math.exp(this.c.logScale) * gamma(kj0) * f11(kj0, this.p.nu / 2, this.p.theta / (2 * tk)) / Math.pow(tk, kj0)
     }
 
+    const z = x * this.p.mu >= 0 ? this._pdfSameSignSeries(x) : this._pdfPoissonMixture(x)
+    return Math.abs(z)
+  }
+
+  /**
+   * Probability density for the x*mu >= 0 branch, evaluated as a bidirectional series expansion
+   * around the index with the largest term (see _findStartIndex), advancing forward and backward
+   * from there via recursiveSum.
+   *
+   * ₁F₁ is evaluated directly (f11()) at every series index below rather than advanced via a
+   * three-term contiguous recurrence in its first argument: that recurrence is numerically
+   * unstable in both directions once kj grows large relative to nu/2 (see
+   * solutions/correctness/2026-07-30-1600-doubly-noncentral-t-pdf-f11-recurrence-instability.md).
+   *
+   * @method _pdfSameSignSeries
+   * @memberof ran.dist.DoublyNoncentralT
+   * @param {number} x Value to evaluate density at.
+   * @returns {number} The signed sum whose absolute value is the density.
+   * @private
+   */
+  _pdfSameSignSeries (x) {
     // Some pre-computed constants
     const nu2 = this.p.nu / 2
     const tk = 1 + x * x / this.p.nu
@@ -281,72 +327,63 @@ export default class DoublyNoncentralT extends Distribution {
     // Find index with highest amplitude
     const j0 = this._findStartIndex(j => this._logA(x, j))
 
-    // ₁F₁ is evaluated directly (f11()) at every series index below rather than advanced via a
-    // three-term contiguous recurrence in its first argument: that recurrence is numerically
-    // unstable in both directions once kj grows large relative to nu/2 (see
-    // solutions/correctness/2026-07-30-1600-doubly-noncentral-t-pdf-f11-recurrence-instability.md).
-    let z = 0
-    if (x * this.p.mu >= 0) {
-      // Init terms
-      let kj0 = (this.p.nu + j0 + 1) / 2
-      let gp = Math.exp(this.c.logScale + j0 * lntmuk - logGamma(j0 + 1) - kj0 * lntk)
-      let gk0 = gamma(kj0)
+    // Init terms
+    let kj0 = (this.p.nu + j0 + 1) / 2
+    let gp = Math.exp(this.c.logScale + j0 * lntmuk - logGamma(j0 + 1) - kj0 * lntk)
+    let gk0 = gamma(kj0)
 
-      // Forward
-      z = recursiveSum({
-        gp,
+    // Forward
+    let z = recursiveSum({
+      gp,
+      gk: [
+        gk0,
+        gamma(kj0 - 0.5)
+      ],
+      g: gp * gk0,
+      f: f11(kj0, nu2, thetatk)
+    }, (t, i) => {
+      const j = j0 + i
+      const j2 = i % 2
+      const kj = (this.p.nu + j + 1) / 2
+      t.gp *= tmuk / (j * srtk)
+      t.gk[j2] *= kj - 1
+      t.g = t.gp * t.gk[j2]
+      t.f = f11(kj, nu2, thetatk)
+      return t
+    }, t => t.g * t.f)
+
+    // Backward
+    if (j0 > 0) {
+      kj0 -= 0.5
+      gp *= j0 * srtk / tmuk
+      gk0 = gamma(kj0)
+      z += recursiveSum({
+        gp: gp,
         gk: [
           gk0,
-          gamma(kj0 - 0.5)
+          gamma(kj0 + 0.5)
         ],
         g: gp * gk0,
         f: f11(kj0, nu2, thetatk)
       }, (t, i) => {
-        const j = j0 + i
-        const j2 = i % 2
-        const kj = (this.p.nu + j + 1) / 2
-        t.gp *= tmuk / (j * srtk)
-        t.gk[j2] *= kj - 1
-        t.g = t.gp * t.gk[j2]
-        t.f = f11(kj, nu2, thetatk)
+        const j = j0 - i
+        if (j > 0) {
+          const j2 = i % 2
+          const kj = (this.p.nu + j) / 2
+
+          t.gp /= tmuk / (j * srtk)
+          t.gk[j2] /= kj
+          t.g = t.gp * t.gk[j2]
+          t.f = f11(kj, nu2, thetatk)
+        } else {
+          t.g = 0
+          t.f = 0
+        }
         return t
       }, t => t.g * t.f)
-
-      // Backward
-      if (j0 > 0) {
-        kj0 -= 0.5
-        gp *= j0 * srtk / tmuk
-        gk0 = gamma(kj0)
-        z += recursiveSum({
-          gp: gp,
-          gk: [
-            gk0,
-            gamma(kj0 + 0.5)
-          ],
-          g: gp * gk0,
-          f: f11(kj0, nu2, thetatk)
-        }, (t, i) => {
-          const j = j0 - i
-          if (j > 0) {
-            const j2 = i % 2
-            const kj = (this.p.nu + j) / 2
-
-            t.gp /= tmuk / (j * srtk)
-            t.gk[j2] /= kj
-            t.g = t.gp * t.gk[j2]
-            t.f = f11(kj, nu2, thetatk)
-          } else {
-            t.g = 0
-            t.f = 0
-          }
-          return t
-        }, t => t.g * t.f)
-      }
-    } else {
-      z = this._pdfPoissonMixture(x)
     }
 
-    return Math.abs(z)
+    return z
   }
 
   /**
