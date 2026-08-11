@@ -614,6 +614,16 @@ describe('dist', () => {
       // beta this small drives the denominator gamma draw through the same a<1 boost
       // branch as the InverseGamma case above, risking a subnormal denominator and
       // x / y overflowing to Infinity
+      //
+      // GoF coverage deliberately excluded at this shape (not added to sampleParams in
+      // dist-cases-continuous.js): beta<1 gives BetaPrime(2, beta) an infinite mean, so
+      // the sampled tail routinely reaches x > 1e15, where _cdf's x/(1+x) transform
+      // saturates to exactly 1.0 in float64 (1/(1+x) < machine epsilon). At seed 0, ~70%
+      // of a 10000-draw sample lands in that saturated region, deterministically blowing
+      // up the Anderson-Darling statistic (p ~ 6e-8) at every one of the fixed testSeeds
+      // -- a precision ceiling of the transform-based CDF at extreme tail x, not a sampler
+      // defect. Same category of exclusion as noncentral-beta's alpha=0.1, documented in
+      // solutions/testing/2026-05-23-0548-noncentral-beta-alpha-lt1-ad-noise-refvals-verification.md.
       for (const s of SEEDS) {
         const bp = new dist.BetaPrime(2, alpha)
         bp.seed(s)

@@ -5362,6 +5362,12 @@ export default [{
       { p: 0.975, x: 2.5705818366147395 }
     ]
   }],
+  // nu this small drives the denominator gamma draw through the a<1 boost branch (issue #1379)
+  sampleParams: [
+    { params: () => [2] },
+    { name: 'near-zero nu (heavy tail)', params: () => [0.5] },
+    { name: 'extreme small nu (issue #1379)', params: () => [0.02] }
+  ],
   refVals: [
     { x: -6, pdf: 0.004268984766599014, cdf: 0.013335736607712385 },
     { x: -4, pdf: 0.013094570021973102, cdf: 0.02859547920896832 },
