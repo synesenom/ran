@@ -488,22 +488,9 @@ export default class DoublyNoncentralBeta extends Distribution {
    */
   _pdfRelocated (x, rStar, sStar) {
     const log1mx = Math.log(1 - x)
-    let z = 0
-    for (let kr = 0; kr < RELOCATE_MAX_ITER; kr++) {
-      const dz = this._pdfTermSumOverS(rStar + kr, sStar, x, log1mx)
-      z += dz
-      if (Math.abs(dz / z) < EPS) {
-        break
-      }
-    }
-    for (let r = rStar - 1; r >= Math.max(0, rStar - RELOCATE_MAX_ITER); r--) {
-      const dz = this._pdfTermSumOverS(r, sStar, x, log1mx)
-      z += dz
-      if (Math.abs(dz / z) < EPS) {
-        break
-      }
-    }
-    return z
+    const z = DoublyNoncentralBeta._walkSum(0, RELOCATE_MAX_ITER, i => this._pdfTermSumOverS(rStar + i, sStar, x, log1mx))
+    const backCount = rStar - Math.max(0, rStar - RELOCATE_MAX_ITER)
+    return DoublyNoncentralBeta._walkSum(z, backCount, i => this._pdfTermSumOverS(rStar - 1 - i, sStar, x, log1mx))
   }
 
   /**
@@ -535,34 +522,27 @@ export default class DoublyNoncentralBeta extends Distribution {
     const logPr = DoublyNoncentralBeta._logPoissonWeight(r, l1)
     const logYr = (alpha + r - 1) * Math.log(x)
     const logB0 = logBeta(alpha + r, beta + sCenter)
+    const logPs0 = DoublyNoncentralBeta._logPoissonWeight(sCenter, l2)
 
-    let z = 0
     let logB = logB0
-    let logPs = DoublyNoncentralBeta._logPoissonWeight(sCenter, l2)
-    for (let ks = 0; ks < RELOCATE_MAX_ITER; ks++) {
-      const s = sCenter + ks
+    let logPs = logPs0
+    const z = DoublyNoncentralBeta._walkSum(0, RELOCATE_MAX_ITER, i => {
+      const s = sCenter + i
       const dz = Math.exp(logPr + logPs + logYr + (beta + s - 1) * log1mx - logB)
-      z += dz
-      if (Math.abs(dz / z) < EPS) {
-        break
-      }
       logB += Math.log(beta + s) - Math.log(ab + r + s)
       logPs += Math.log(l2) - Math.log(s + 1)
-    }
+      return dz
+    })
 
     logB = logB0
-    logPs = DoublyNoncentralBeta._logPoissonWeight(sCenter, l2)
-    for (let s = sCenter - 1; s >= Math.max(0, sCenter - RELOCATE_MAX_ITER); s--) {
+    logPs = logPs0
+    const backCount = sCenter - Math.max(0, sCenter - RELOCATE_MAX_ITER)
+    return DoublyNoncentralBeta._walkSum(z, backCount, i => {
+      const s = sCenter - 1 - i
       logB += Math.log(ab + r + s) - Math.log(beta + s)
       logPs += Math.log(s + 1) - Math.log(l2)
-      const dz = Math.exp(logPr + logPs + logYr + (beta + s - 1) * log1mx - logB)
-      z += dz
-      if (Math.abs(dz / z) < EPS) {
-        break
-      }
-    }
-
-    return z
+      return Math.exp(logPr + logPs + logYr + (beta + s - 1) * log1mx - logB)
+    })
   }
 
   /**
@@ -579,22 +559,9 @@ export default class DoublyNoncentralBeta extends Distribution {
    * @private
    */
   _cdfRelocated (x, rStar, sStar) {
-    let z = 0
-    for (let kr = 0; kr < RELOCATE_MAX_ITER; kr++) {
-      const dz = this._cdfTermSumOverS(rStar + kr, sStar, x)
-      z += dz
-      if (Math.abs(dz / z) < EPS) {
-        break
-      }
-    }
-    for (let r = rStar - 1; r >= Math.max(0, rStar - RELOCATE_MAX_ITER); r--) {
-      const dz = this._cdfTermSumOverS(r, sStar, x)
-      z += dz
-      if (Math.abs(dz / z) < EPS) {
-        break
-      }
-    }
-    return z
+    const z = DoublyNoncentralBeta._walkSum(0, RELOCATE_MAX_ITER, i => this._cdfTermSumOverS(rStar + i, sStar, x))
+    const backCount = rStar - Math.max(0, rStar - RELOCATE_MAX_ITER)
+    return DoublyNoncentralBeta._walkSum(z, backCount, i => this._cdfTermSumOverS(rStar - 1 - i, sStar, x))
   }
 
   /**
@@ -618,17 +585,35 @@ export default class DoublyNoncentralBeta extends Distribution {
     const { alpha, beta } = this.p
     const { l1, l2 } = this.c
     const logPr = DoublyNoncentralBeta._logPoissonWeight(r, l1)
-    let z = 0
-    for (let ks = 0; ks < RELOCATE_MAX_ITER; ks++) {
-      const s = sCenter + ks
-      const dz = Math.exp(logPr + DoublyNoncentralBeta._logPoissonWeight(s, l2)) * regularizedBetaIncomplete(alpha + r, beta + s, x)
-      z += dz
-      if (Math.abs(dz / z) < EPS) {
-        break
-      }
-    }
-    for (let s = sCenter - 1; s >= Math.max(0, sCenter - RELOCATE_MAX_ITER); s--) {
-      const dz = Math.exp(logPr + DoublyNoncentralBeta._logPoissonWeight(s, l2)) * regularizedBetaIncomplete(alpha + r, beta + s, x)
+    const term = s => Math.exp(logPr + DoublyNoncentralBeta._logPoissonWeight(s, l2)) * regularizedBetaIncomplete(alpha + r, beta + s, x)
+
+    const z = DoublyNoncentralBeta._walkSum(0, RELOCATE_MAX_ITER, i => term(sCenter + i))
+    const backCount = sCenter - Math.max(0, sCenter - RELOCATE_MAX_ITER)
+    return DoublyNoncentralBeta._walkSum(z, backCount, i => term(sCenter - 1 - i))
+  }
+
+  // ─── PRIVATE STATIC ───────────────────────────────────────────────────────
+
+  /**
+   * Shared forward/backward convergent-series accumulator for _pdfRelocated/_cdfRelocated and
+   * their per-r inner s-sums (_pdfTermSumOverS/_cdfTermSumOverS): each of those walks a fixed
+   * number of steps from a center, adding each step's term to a running total and stopping early
+   * once a step's own contribution is negligible relative to that running total. Factored out
+   * once both the forward and backward half of a walk had to share the exact same accumulation
+   * order (the backward half's convergence check compares against the combined forward+backward
+   * total, not a fresh partial sum of its own, so it must continue the same `z`, not start one).
+   *
+   * @method _walkSum
+   * @memberof ran.dist.DoublyNoncentralBeta
+   * @param {number} z Running total to continue accumulating into.
+   * @param {number} count Number of steps to walk.
+   * @param {Function} term Maps a step index (0-based from the walk's start) to that step's dz.
+   * @returns {number} The accumulated total after this walk.
+   * @private
+   */
+  static _walkSum (z, count, term) {
+    for (let i = 0; i < count; i++) {
+      const dz = term(i)
       z += dz
       if (Math.abs(dz / z) < EPS) {
         break
@@ -636,8 +621,6 @@ export default class DoublyNoncentralBeta extends Distribution {
     }
     return z
   }
-
-  // ─── PRIVATE STATIC ───────────────────────────────────────────────────────
 
   /**
    * Poisson-weight speed-up constants pr0/ps0, deferring exp(-l1-l2) to a single outerScale
