@@ -1,4 +1,5 @@
 import { gammaUpperIncomplete, gammaLowerIncompleteInv } from '../special'
+import { MAX_ITER } from '../core/constants'
 import Gamma from './gamma'
 
 /**
@@ -35,12 +36,24 @@ export default class InverseGamma extends Gamma {
     // Direct sampling by transforming gamma variate. A subnormal (but nonzero) gamma draw
     // below 1/Number.MAX_VALUE is still a valid member of Gamma's open support, yet its
     // reciprocal overflows to Infinity -- outside InverseGamma's own open (0, Infinity)
-    // support. Resample until the reciprocal is representable. (issue #1379)
-    let x
-    do {
-      x = 1 / super._generator()
-    } while (!Number.isFinite(x))
-    return x
+    // support. Resample until the reciprocal is representable. Below _gamma.js's
+    // BOOST_UNDERFLOW_THRESHOLD, the underlying gamma draw is provably exactly 0 on every
+    // attempt (decisions/0054-boosted-gamma-analytic-underflow-boundary-return.md), so
+    // 1/x provably overflows on every attempt -- the true variate is not merely beyond
+    // Number.MAX_VALUE but astronomically so, and Infinity is IEEE-754's own
+    // correctly-rounded representation of a value that far out of range (per CLAUDE.md's
+    // return-value table: a valid query whose answer diverges), not Number.MAX_VALUE,
+    // which would understate it by hundreds of orders of magnitude. MAX_ITER-capped, that
+    // is returned instead of looping forever. Worst case this compounds with _gamma.js's own
+    // BOOST_MAX_ITER-bounded retry inside super._generator() (see the gap-zone note there),
+    // but stays bounded either way -- this issue's actual requirement. (issues #1379, #1384)
+    for (let iter = 0; iter < MAX_ITER; iter++) {
+      const x = 1 / super._generator()
+      if (Number.isFinite(x)) {
+        return x
+      }
+    }
+    return Infinity
   }
 
   _pdf (x) {

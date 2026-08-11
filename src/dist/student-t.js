@@ -102,12 +102,26 @@ export default class StudentT extends Distribution {
     // (shape nu/2 < 1) is drawn via _gamma.js's small-shape boost branch, which can
     // still return a subnormal nonzero value close to Number.MIN_VALUE even after the
     // #1379 zero-rejection fix; dividing by it overflows the ratio (and hence sqrt) to
-    // Infinity, outside StudentT's real-valued support. Resample until finite. (issue #1379)
-    let result
-    do {
-      result = sign(this.r) * Math.sqrt(this.c.nu * gamma(this.r, 0.5) / gamma(this.r, this.c.nu / 2))
-    } while (!Number.isFinite(result))
-    return result
+    // Infinity, outside StudentT's real-valued support. Resample until finite. Below
+    // _gamma.js's BOOST_UNDERFLOW_THRESHOLD (i.e. nu below roughly twice that), the
+    // denominator draw is provably exactly 0 on every attempt
+    // (decisions/0054-boosted-gamma-analytic-underflow-boundary-return.md); the numerator
+    // shape is fixed at 0.5, always above the threshold, so only the denominator can
+    // underflow -- the ratio provably always overflows. The true variate is not merely
+    // beyond Number.MAX_VALUE but astronomically so, and Infinity is IEEE-754's own
+    // correctly-rounded representation of a value that far out of range (per CLAUDE.md's
+    // return-value table: a valid query whose answer diverges), not Number.MAX_VALUE,
+    // which would understate it by hundreds of orders of magnitude. MAX_ITER-capped, that
+    // is returned instead of looping forever. Worst case this compounds with _gamma.js's own
+    // BOOST_MAX_ITER-bounded retry inside the denominator gamma() call (see the gap-zone note
+    // there), but stays bounded either way -- this issue's actual requirement. (issues #1379, #1384)
+    for (let iter = 0; iter < MAX_ITER; iter++) {
+      const result = sign(this.r) * Math.sqrt(this.c.nu * gamma(this.r, 0.5) / gamma(this.r, this.c.nu / 2))
+      if (Number.isFinite(result)) {
+        return result
+      }
+    }
+    return sign(this.r) * Infinity
   }
 
   _pdf (x) {

@@ -11,6 +11,18 @@ import { logGamma } from '../special'
  * @ignore
  */
 export default function (r, lambda) {
+  // Reachable when a Beta-mixture caller's Beta draw provably underflows to exactly 0
+  // (decisions/0054-boosted-gamma-analytic-underflow-boundary-return.md), driving a Gamma
+  // rate to 0 and its mean (this function's lambda) to Infinity. The large-lambda branch
+  // below divides by sqrt(lambda), silently producing NaN for lambda=Infinity and falling
+  // off the end of the loop with no return -- an explicitly forbidden undefined sentinel.
+  // The correctly-rounded answer for a Poisson process with infinite mean is Infinity
+  // itself. (issue #1384)
+  // See solutions/algorithm/2026-08-11-1830-boostedgamma-infinite-loop-and-downstream-boundary-cascade.md
+  if (lambda === Infinity) {
+    return Infinity
+  }
+
   if (lambda < 30) {
     // Small lambda, Knuth's method
     const l = Math.exp(-lambda)

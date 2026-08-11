@@ -59,6 +59,16 @@ export default class BetaGeometric extends Distribution {
 
   _generator () {
     const p = rBeta(this.r, this.p.alpha, this.p.beta)
+    // p=0 is reachable when alpha provably underflows (decisions/0054-boosted-gamma-analytic-
+    // underflow-boundary-return.md): the true success probability is infinitesimal, so the
+    // true k diverges to Infinity, but Math.log(1 - 0) computes exact +0, losing the sign
+    // information that it should be approached from below -- (negative) / (+0) rounds to
+    // -Infinity in IEEE-754, the opposite of the correct answer and outside this
+    // distribution's declared {1, 2, 3, ...} support. Short-circuited directly rather than
+    // trusting the general formula at this one input. (issue #1384)
+    if (p === 0) {
+      return Infinity
+    }
     return Math.floor(Math.log(1 - this.r.next()) / Math.log(1 - p)) + 1
   }
 }

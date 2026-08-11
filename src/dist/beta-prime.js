@@ -1,4 +1,5 @@
-import gamma from './_gamma'
+import { MAX_ITER } from '../core/constants'
+import gamma, { BOOST_UNDERFLOW_THRESHOLD } from './_gamma'
 import Beta from './beta'
 
 /**
@@ -49,13 +50,41 @@ export default class BetaPrime extends Beta {
     // nonzero value close to Number.MIN_VALUE even after the #1379 zero-rejection
     // fix; dividing by it overflows x / y to Infinity, outside BetaPrime's open
     // (0, Infinity) support. Resample until the ratio is representable. (issue #1379)
-    let result
-    do {
+    //
+    // When alpha and beta are BOTH below _gamma.js's BOOST_UNDERFLOW_THRESHOLD, x and y
+    // are provably exactly 0 on every attempt (decisions/0054-...), so x / y is 0 / 0 ->
+    // NaN on every attempt, not a representable overflow the loop below could ever
+    // resolve -- no amount of resampling helps. ln(x/y) ~ E_y/beta - E_x/alpha (same
+    // small-shape tail asymptotic as the ADR), so the smaller shape parameter's draw
+    // dominates the race to vanish, pulling the ratio toward the *opposite* boundary:
+    // alpha < beta pulls x closer to 0 (x/y -> 0), alpha > beta pulls y closer to 0
+    // (x/y -> Infinity), and alpha === beta is a symmetric coin flip. Resolved directly,
+    // without entering the loop, since retrying a deterministic 0/0 cannot help.
+    if (this.p.alpha < BOOST_UNDERFLOW_THRESHOLD && this.p.beta < BOOST_UNDERFLOW_THRESHOLD) {
+      if (this.p.alpha < this.p.beta) return 0
+      if (this.p.alpha > this.p.beta) return Infinity
+      return this.r.next() < 0.5 ? 0 : Infinity
+    }
+
+    // Only reachable here when at most one of alpha/beta is below the threshold, so any
+    // exhaustion is beta's y provably underflowing to exactly 0 with x representable --
+    // x / y provably overflows on every attempt. The true ratio is not merely beyond
+    // Number.MAX_VALUE but astronomically so, and Infinity is IEEE-754's own
+    // correctly-rounded representation of a value that far out of range (per CLAUDE.md's
+    // return-value table: a valid query whose answer diverges), not Number.MAX_VALUE,
+    // which would understate it by hundreds of orders of magnitude. MAX_ITER-capped, that
+    // is returned instead of looping forever. Worst case this compounds with _gamma.js's own
+    // BOOST_MAX_ITER-bounded retry inside each gamma() call (see the gap-zone note there), but
+    // stays bounded either way -- this issue's actual requirement. (issues #1379, #1384, #1386)
+    for (let iter = 0; iter < MAX_ITER; iter++) {
       const x = gamma(this.r, this.p.alpha, 1)
       const y = gamma(this.r, this.p.beta, 1)
-      result = x / y
-    } while (!Number.isFinite(result))
-    return result
+      const result = x / y
+      if (Number.isFinite(result)) {
+        return result
+      }
+    }
+    return Infinity
   }
 
   _pdf (x) {
