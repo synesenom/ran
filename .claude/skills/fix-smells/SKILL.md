@@ -102,11 +102,20 @@ npm test
 
 **If tests fail**: use `git status` / `git diff` to identify all applied fixes (including any created, split, merged, or deleted files), then bisect manually — revert the most recent fix (and any files it introduced) and re-run `npm test` until the suite is green. Mark reverted fixes as `SKIPPED (test regression)`.
 
-### 6. Final Measurement
+### 6. Test-File Verification (only when the target — or a created/split/merged file — is itself under `test/`)
+
+`npm test` passing is not sufficient evidence that a refactor of shared test infrastructure preserved behavior: the suite can stay green while an assertion has quietly become powerless (a dropped `assert`, a `continue`→`return` conversion that returns before the check runs, a comparison degenerated into a tautology). See "Verifying refactors of shared test infrastructure" in CLAUDE.md's Testing Conventions for the full rationale. Run both of the following before step 7, for every independent code path the fixes touched (e.g. a discrete branch and a continuous branch of the same helper count as two paths):
+
+- **Golden-master diff**: `git show <parent-commit>:<path>` the pre-refactor version of the file into a throwaway location, run the same exported entry points from both versions against a few representative real inputs (chosen to hit each branch touched), wrap their collaborators in a spy that logs every call/argument, and assert the logs are identical between old and new.
+- **Mutation test**: temporarily inject a real, plausible bug into the production code the helper is meant to catch, rerun the affected slice of the suite, confirm it fails through the refactored helper specifically, then revert the injected bug and confirm a clean `git diff`.
+
+Both harnesses are throwaway — write them in the scratchpad or as a temporary file, and delete/revert before step 7. If either check surfaces a divergence, treat it as a test regression: fix or revert per step 5's bisection process before proceeding.
+
+### 7. Final Measurement
 
 Call `mcp__codescene__code_health_score` and `mcp__codescene__code_health_review` one final time on the original target file **and on every file created, split into, or merged as part of the fixes**, to confirm the achieved score(s) and any remaining smells.
 
-### 7. Report
+### 8. Report
 
 > **Code Health: `<file>`**
 >
@@ -123,6 +132,9 @@ Call `mcp__codescene__code_health_score` and `mcp__codescene__code_health_review
 > Remaining smells: <0 / list if any>
 >
 > Tests: All passing
+>
+> Test-file verification: <"N/A — no test/ files touched" / "golden-master diff + mutation test on <N> code paths, no divergences">
+
 
 ## Rules
 
@@ -136,10 +148,13 @@ Call `mcp__codescene__code_health_score` and `mcp__codescene__code_health_review
 - Follow the project's file naming conventions (kebab-case, `_` prefix for module-private files) for any new file
 - Run `npm run standard` after each fix — catch style regressions immediately, including stale imports in files outside the target
 - Update `CHANGELOG.md` under `## [Unreleased] → ### Changed` with a one-liner if the final score improved (e.g., "Code Health of `src/foo.js` improved from 7.4 → 9.1"), naming any file split/merge involved
+- When the target (or a file split/merged as part of the fixes) is under `test/`, run the golden-master diff **and** mutation test from step 6 before reporting completion — a green `npm test` alone does not prove a refactored assertion can still fail
 
 ### DO NOT:
 - Change observable behavior — no renamed public APIs, no altered return values, no changed parameter signatures, even when a fix spans multiple files
 - Inline tests, docs, or comments as part of the smell fix (those are separate concerns)
 - Touch files outside the smell's actual footprint — multi-file changes are allowed only when the smell itself spans files (a God File split, a cross-file duplication merge, updating call sites for a moved helper), never as a general excuse to refactor unrelated files
 - Skip the final `npm test` run
+- Skip the step 6 golden-master/mutation verification when the target is a test file — trust a green `npm test` alone
 - Report a smell as fixed without confirming the score did not regress on every file involved
+- Commit or leave behind the throwaway golden-master/mutation-test harness files — they are diagnostic scaffolding, not part of the deliverable
