@@ -108,20 +108,28 @@ function getParamList (dist) {
     .join(', ')
 }
 
+function runXDiscrete (dist, range, unitTest) {
+  for (let i = range[0]; i < range[1]; i++) {
+    unitTest(dist, Math.floor(i))
+  }
+}
+
+function runXContinuous (dist, range, unitTest) {
+  const dx = (range[1] - range[0]) / RANGE_STEPS
+  for (let i = 0; i < RANGE_STEPS; i++) {
+    unitTest(dist, range[0] + i * dx + (i * GOLDEN) % 1)
+  }
+}
+
 function runX (dist, unitTest) {
   // Init test variables
   const range = getTestRange(dist)
 
   // Run test
   if (dist.type() === 'discrete') {
-    for (let i = range[0]; i < range[1]; i++) {
-      unitTest(dist, Math.floor(i))
-    }
+    runXDiscrete(dist, range, unitTest)
   } else {
-    const dx = (range[1] - range[0]) / RANGE_STEPS
-    for (let i = 0; i < RANGE_STEPS; i++) {
-      unitTest(dist, range[0] + i * dx + (i * GOLDEN) % 1)
-    }
+    runXContinuous(dist, range, unitTest)
   }
 }
 
@@ -144,16 +152,40 @@ export function ksTest (values, model) {
   return D <= 1.628 / Math.sqrt(values.length)
 }
 
-export function chiTest (values, model, c) {
-  // Calculate distribution first
+function frequencyMap (values) {
   const p = new Map()
   for (let i = 0; i < values.length; i++) {
-    if (!p.has(values[i])) {
-      p.set(values[i], 1)
-    } else {
-      p.set(values[i], p.get(values[i]) + 1)
-    }
+    p.set(values[i], (p.get(values[i]) || 0) + 1)
   }
+  return p
+}
+
+// Groups sorted frequencies into classes of at least 10 expected counts (Cochran's rule)
+// and accumulates the chi-square statistic across them.
+function binChiSquare (dist, model, n) {
+  let chi2 = 0
+  let bin = 0
+  let pBin = 0
+  let k = 0
+  dist.forEach(d => {
+    // Add frequency to current bin
+    bin += model(parseInt(d.x)) * n
+    pBin += d.p
+
+    // If bin count is above 10, consider this a class and clear bin
+    if (bin > 10) {
+      chi2 += Math.pow(pBin - bin, 2) / bin
+      bin = 0
+      pBin = 0
+      k++
+    }
+  })
+  return { chi2, k }
+}
+
+export function chiTest (values, model, c) {
+  // Calculate distribution first
+  const p = frequencyMap(values)
 
   // Create sorted frequencies
   const dist = Array.from(p)
@@ -161,32 +193,11 @@ export function chiTest (values, model, c) {
     .sort((a, b) => a.x - b.x)
 
   // Calculate chi-square
-  let chi2 = 0
-  let bin = 0
-  let pBin = 0
-  let k = 0
-  dist.forEach(d => {
-    // Add frequency to current bin
-    bin += model(parseInt(d.x)) * values.length
-    pBin += d.p
-
-    // If bin count is above 10, consider this a class and clear bin
-    if (bin > 10) {
-      chi2 += Math.pow(pBin - bin, 2) / bin
-      // console.log(pBin, bin, Math.pow(pBin - bin, 2) / bin)
-      bin = 0
-      pBin = 0
-      k++
-    }
-  })
+  const { chi2, k } = binChiSquare(dist, model, values.length)
 
   // Find critical value
   const df = Math.max(1, k - c - 1)
   const crit = df <= 250 ? CHI_TABLE_LOW[df] : CHI_TABLE_HIGH[Math.ceil(df / 50)]
-  // console.log(chi2, crit)
-  if (chi2 > crit) {
-    // console.log(chi2, crit)
-  }
 
   // Check if distribution is degenerate
   if (p.size === 1) {
@@ -261,6 +272,65 @@ export function checkRefVals (dist, refVals) {
   }
 }
 
+// Discrete distribution: PMF(k) = CDF(k) - CDF(k - 1).
+function cdf2pdfDiscrete (dist, range) {
+  for (let i = range[0]; i < range[1]; i++) {
+    const x = Math.floor(i)
+    const p = dist.pdf(x)
+    const cdf1 = dist.cdf(x)
+    const cdf0 = dist.cdf(x - 1)
+    const df = cdf1 - cdf0
+    assert(almostEqual(p, df, FD_FLOOR), `pdf(${x}) = ${p} != ${df} = ${cdf1} - ${cdf0}. delta = ${(p - df).toPrecision(3)}`)
+  }
+}
+
+// Continuous distribution: PDF(x) = d CDF(x) / dx, checked at a single point.
+function cdf2pdfContinuousAt (dist, x, supp) {
+  // Perform test only within the support boundaries.
+  if (x < supp[0].value + 2 * H || x > supp[1].value - 2 * H) {
+    return
+  }
+
+  // If PDF(x) is below precision, don't perform the test.
+  const p = dist.pdf(x)
+  if (p < Number.EPSILON) {
+    return
+  }
+
+  // Compare CDF and PDF.
+  // Two coarse estimates should agree for smooth functions; a large
+  // disagreement means the stencil is crossing a kink in the PDF
+  // (e.g. DoubleGamma at x=0, Triangular/Trapezoidal at x=c), making
+  // the derivative unreliable regardless of step size.
+  const q1 = (dist.cdf(x + H) - dist.cdf(x - H)) / (2 * H)
+  const q2 = (dist.cdf(x + H / 2) - dist.cdf(x - H / 2)) / H
+  if (Math.abs(q1 - q2) > 1e-3) {
+    return
+  }
+  const [df, dfErr] = differentiate(t => dist.cdf(t), x, H)
+  // Skip when CDF is saturated at 0 or 1 — derivative rounds to exactly 0
+  if (Math.abs(df) < FD_FLOOR) {
+    return
+  }
+  // Skip when Ridders' Richardson table did not converge — the stencil is crossing
+  // a kink in the PDF (e.g. Laplace at mu, DoubleGamma at 0) that prevents reliable
+  // finite-difference differentiation even when the coarse kink guard above passes
+  // See solutions/testing/2026-05-16-ridders-error-estimate-kink-detection.md
+  if (dfErr > Math.max(FD_FLOOR, Math.abs(df) * 1e-7)) {
+    return
+  }
+  assert(almostEqual(p, df, Math.max(FD_FLOOR, p * 1e-6)), `pdf(${x.toPrecision(3)}; ${getParamList(dist)}) = ${p} != ${df} = d/dx cdf(${x.toPrecision(3)}). delta = ${(p - df).toPrecision(3)}`)
+}
+
+function cdf2pdfContinuous (dist, range) {
+  const supp = dist.support()
+  const dx = (range[1] - range[0]) / RANGE_STEPS
+  for (let i = 0; i < RANGE_STEPS; i++) {
+    const x = range[0] + i * dx + (i * GOLDEN) % 1
+    cdf2pdfContinuousAt(dist, x, supp)
+  }
+}
+
 export const Tests = {
   pdfRange (dist) {
     // Run through x values and assert PDF(x) >= 0.
@@ -297,56 +367,9 @@ export const Tests = {
 
     // Run test
     if (dist.type() === 'discrete') {
-      // Discrete distribution: PMF(k) = CDF(k) - CDF(k - 1).
-      for (let i = range[0]; i < range[1]; i++) {
-        const x = Math.floor(i)
-        const p = dist.pdf(x)
-        const cdf1 = dist.cdf(x)
-        const cdf0 = dist.cdf(x - 1)
-        const df = cdf1 - cdf0
-        assert(almostEqual(p, df, FD_FLOOR), `pdf(${x}) = ${p} != ${df} = ${cdf1} - ${cdf0}. delta = ${(p - df).toPrecision(3)}`)
-      }
+      cdf2pdfDiscrete(dist, range)
     } else {
-      // Continuous distribution: PDF(x) = d CDF(x) / dx
-      const supp = dist.support()
-      const dx = (range[1] - range[0]) / RANGE_STEPS
-      for (let i = 0; i < RANGE_STEPS; i++) {
-        // Perform test only within the support boundaries.
-        const x = range[0] + i * dx + (i * GOLDEN) % 1
-        if (x < supp[0].value + 2 * H || x > supp[1].value - 2 * H) {
-          continue
-        }
-
-        // If PDF(x) is below precision, don't perform the test.
-        const p = dist.pdf(x)
-        if (p < Number.EPSILON) {
-          continue
-        }
-
-        // Compare CDF and PDF.
-        // Two coarse estimates should agree for smooth functions; a large
-        // disagreement means the stencil is crossing a kink in the PDF
-        // (e.g. DoubleGamma at x=0, Triangular/Trapezoidal at x=c), making
-        // the derivative unreliable regardless of step size.
-        const q1 = (dist.cdf(x + H) - dist.cdf(x - H)) / (2 * H)
-        const q2 = (dist.cdf(x + H / 2) - dist.cdf(x - H / 2)) / H
-        if (Math.abs(q1 - q2) > 1e-3) {
-          continue
-        }
-        const [df, dfErr] = differentiate(t => dist.cdf(t), x, H)
-        // Skip when CDF is saturated at 0 or 1 — derivative rounds to exactly 0
-        if (Math.abs(df) < FD_FLOOR) {
-          continue
-        }
-        // Skip when Ridders' Richardson table did not converge — the stencil is crossing
-        // a kink in the PDF (e.g. Laplace at mu, DoubleGamma at 0) that prevents reliable
-        // finite-difference differentiation even when the coarse kink guard above passes
-        // See solutions/testing/2026-05-16-ridders-error-estimate-kink-detection.md
-        if (dfErr > Math.max(FD_FLOOR, Math.abs(df) * 1e-7)) {
-          continue
-        }
-        assert(almostEqual(p, df, Math.max(FD_FLOOR, p * 1e-6)), `pdf(${x.toPrecision(3)}; ${getParamList(dist)}) = ${p} != ${df} = d/dx cdf(${x.toPrecision(3)}). delta = ${(p - df).toPrecision(3)}`)
-      }
+      cdf2pdfContinuous(dist, range)
     }
   },
 
