@@ -7,6 +7,7 @@ import normal from './_normal'
  * u -- outside Gamma's open (0, Infinity) support. Reject and redraw from the
  * full (X, u) joint, same as the Marsaglia-Tsang loop in gamma() below.
  * (issue #1379)
+ * See solutions/distribution/2026-08-11-1014-gamma-boost-branch-underflow-and-subnormal-reciprocal.md
  *
  * @method boostedGamma
  * @memberof ran.dist
