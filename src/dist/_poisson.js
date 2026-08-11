@@ -18,6 +18,7 @@ export default function (r, lambda) {
   // off the end of the loop with no return -- an explicitly forbidden undefined sentinel.
   // The correctly-rounded answer for a Poisson process with infinite mean is Infinity
   // itself. (issue #1384)
+  // See solutions/algorithm/2026-08-11-1830-boostedgamma-infinite-loop-and-downstream-boundary-cascade.md
   if (lambda === Infinity) {
     return Infinity
   }

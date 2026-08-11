@@ -34,7 +34,8 @@ const BOOST_MAX_ITER = 2e7
  * analogous MAX_ITER-bounded loop, though this bound is sized specifically for this
  * algorithm's own worst case rather than the shared, much smaller generic MAX_ITER.
  * (issues #1379, #1384)
- * See solutions/distribution/2026-08-11-1014-gamma-boost-branch-underflow-and-subnormal-reciprocal.md
+ * See solutions/algorithm/2026-08-11-1830-boostedgamma-infinite-loop-and-downstream-boundary-cascade.md
+ * (supersedes solutions/distribution/2026-08-11-1014-gamma-boost-branch-underflow-and-subnormal-reciprocal.md)
  * decisions/0054-boosted-gamma-analytic-underflow-boundary-return.md -- why returning the
  * analytic boundary value is preferred over ADR-0049's default throw-on-exhausted-budget.
  *

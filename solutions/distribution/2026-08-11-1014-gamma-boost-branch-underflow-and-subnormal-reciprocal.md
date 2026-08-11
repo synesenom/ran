@@ -2,7 +2,8 @@
 date: 2026-08-11T10:14:31Z
 category: "distribution"
 problem: "InverseGamma/Gamma sample() emitted 0/Infinity for tiny shape parameters"
-status: complete
+status: superseded
+superseded_by: "solutions/algorithm/2026-08-11-1830-boostedgamma-infinite-loop-and-downstream-boundary-cascade.md"
 related_issue: "#1379"
 related_plan: "thoughts/plans/2026-08-11-0845-issue-1379-gamma-small-shape-underflow.md"
 tags: [gamma-sampler, boost-branch, underflow, subnormal, reciprocal-overflow, rejection-sampling, inverse-gamma, beta-prime, student-t, tdd]
