@@ -44,11 +44,18 @@ export default class BetaPrime extends Beta {
   }
 
   _generator () {
-    // Direct sampling from gamma (ignoring super)
-    const x = gamma(this.r, this.p.alpha, 1)
-
-    const y = gamma(this.r, this.p.beta, 1)
-    return x / y
+    // Direct sampling from gamma (ignoring super). When beta < 1, y is drawn via
+    // _gamma.js's small-shape boost branch, which can still return a subnormal
+    // nonzero value close to Number.MIN_VALUE even after the #1379 zero-rejection
+    // fix; dividing by it overflows x / y to Infinity, outside BetaPrime's open
+    // (0, Infinity) support. Resample until the ratio is representable. (issue #1379)
+    let result
+    do {
+      const x = gamma(this.r, this.p.alpha, 1)
+      const y = gamma(this.r, this.p.beta, 1)
+      result = x / y
+    } while (!Number.isFinite(result))
+    return result
   }
 
   _pdf (x) {

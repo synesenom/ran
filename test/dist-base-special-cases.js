@@ -609,5 +609,30 @@ describe('dist', () => {
         sample.forEach(d => assert(Number.isFinite(d), `seed ${s}: x = ${d}`))
       }
     })
+
+    it('BetaPrime.sample() should never return Infinity', () => {
+      // beta this small drives the denominator gamma draw through the same a<1 boost
+      // branch as the InverseGamma case above, risking a subnormal denominator and
+      // x / y overflowing to Infinity
+      for (const s of SEEDS) {
+        const bp = new dist.BetaPrime(2, alpha)
+        bp.seed(s)
+        const sample = bp.sample(sampleSize)
+        sample.forEach(d => assert(Number.isFinite(d), `seed ${s}: x = ${d}`))
+      }
+    })
+
+    it('StudentT.sample() should never return Infinity', () => {
+      // nu this small makes nu/2 drive the denominator gamma draw through the same
+      // a<1 boost branch, risking a subnormal denominator and the sqrt argument
+      // overflowing to Infinity
+      const nu = 0.02
+      for (const s of SEEDS) {
+        const t = new dist.StudentT(nu)
+        t.seed(s)
+        const sample = t.sample(sampleSize)
+        sample.forEach(d => assert(Number.isFinite(d), `seed ${s}: x = ${d}`))
+      }
+    })
   })
 })
