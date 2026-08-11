@@ -4,17 +4,17 @@
  *
  * scripts/difftest-special.py and scripts/difftest-dist.py never exit non-zero on their
  * own -- `npm run difftest:*` doubles as a plain local diagnostic run, and it should not
- * fail the shell just because an already-tracked, already-calibrated defect (e.g.
- * besselK's #1140 crossover) has an elevated ceiling. Failing the job on a ceiling breach
- * is a CI-only concern, so it lives here instead of in the harness scripts themselves.
+ * fail the shell just because an already-tracked, already-calibrated defect has an
+ * elevated ceiling. Failing the job on a ceiling breach is a CI-only concern, so it lives
+ * here instead of in the harness scripts themselves.
  *
  * Reads the two JSON reports the harness scripts already produce, fails (non-zero exit)
  * if any function/distribution exceeds its declared ulp_ceiling, throws a divergence
  * (max_ulp === Infinity is deliberately excluded from ceiling_exceeded -- see
  * ulp_diff's docstring -- so a NaN/Infinity mismatch against a finite mpmath reference
  * would otherwise stay invisible to this gate), or throws an outright eval error
- * (#1369) -- except for the KNOWN_ISSUES allowlist below, which keeps two already-
- * tracked divergence sources from turning the scheduled job permanently red. Writes a
+ * (#1369) -- except for the KNOWN_ISSUES allowlist below, which keeps already-tracked
+ * divergence sources from turning the scheduled job permanently red. Writes a
  * Markdown summary naming the exact reproducer for every offender -- function/
  * distribution, parameter tuple, evaluation point, ranjs value, mpmath value, ULP
  * distance -- per #1267's "a red X with no reproducer is most of the cost of the
@@ -35,20 +35,19 @@ const DIST_REPORT_PATH = flagValue('--dist', '/tmp/difftest-dist-report.json')
 
 // Known, tracked divergence sources -- mirrors generate-accuracy-docs.js's own
 // KNOWN_ISSUES map. Unlike that map (a docs page, informational only), this one actually
-// suppresses the gate's exit code so these two already-accepted defects don't turn the
-// scheduled job permanently red; they still get collected as offenders (see
+// suppresses the gate's exit code so an already-accepted defect doesn't turn the
+// scheduled job permanently red; entries here still get collected as offenders (see
 // collectOffenders) and listed in the summary table so a reviewer never has to guess why
-// a row disappeared.
+// a row disappeared. `InverseGamma.pdf` (#1364), `Gamma.pdf` (#1363), and besselK/
+// besselKnu's #1140 crossover were previously tracked here too; all underlying issues are
+// now resolved and a fresh differential-testing sweep confirmed all are clean, so their
+// entries were removed. Empty until a new, genuinely tracked divergence source appears.
 //
-// `reasons` scopes the suppression to the specific failure reason(s) that were originally
-// accepted for that entry (issue #1372) -- not to the entry name as a whole. If Gamma.pdf
-// later develops a brand-new failure reason (e.g. eval errors), that reason is not in this
-// list and therefore still fails the gate even though the key itself is partially
-// allowlisted. Values match the reason keys produced by offenderReasons().
-const KNOWN_ISSUES = {
-  'Gamma.pdf': { issue: 1363, reasons: ['divergences'] },
-  'InverseGamma.pdf': { issue: 1364, reasons: ['divergences'] }
-}
+// `reasons` (when an entry exists) scopes the suppression to the specific failure
+// reason(s) that were originally accepted for that entry (issue #1372) -- not to the
+// entry name as a whole, so a newly-appeared, non-allowlisted reason on the same key
+// still fails the gate. Values match the reason keys produced by offenderReasons().
+const KNOWN_ISSUES = {}
 
 function readReport (filePath) {
   if (!fs.existsSync(filePath)) {
@@ -101,12 +100,12 @@ function offenderReasons (data) {
 // are unaffected by the #1372 per-reason allowlisting; `allowlistedReasonKeys` is the
 // subset of `reasonKeys` this entry has tracked-issue coverage for, used by isGateFailure
 // and renderSummary to tell a suppressed reason from a newly-appeared one on the same key.
-function collectOffenders (entries, source, reproducerOf) {
+function collectOffenders (entries, source, reproducerOf, knownIssues = KNOWN_ISSUES) {
   return Object.entries(entries)
     .map(([key, data]) => ({ key, data, reasons: offenderReasons(data) }))
     .filter(({ reasons }) => reasons.length > 0)
     .map(({ key, data, reasons }) => {
-      const allowlist = KNOWN_ISSUES[key] || null
+      const allowlist = knownIssues[key] || null
       return {
         source,
         entry: key,
@@ -190,4 +189,4 @@ if (require.main === module) {
   main()
 }
 
-module.exports = { specialOffenders, distOffenders, renderSummary, fmtArgs, isGateFailure }
+module.exports = { specialOffenders, distOffenders, renderSummary, fmtArgs, isGateFailure, collectOffenders }

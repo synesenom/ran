@@ -1,6 +1,6 @@
 const { assert } = require('chai')
 const { describe, it } = require('mocha')
-const { specialOffenders, distOffenders, renderSummary, fmtArgs, isGateFailure } = require('../../scripts/difftest-ci-gate')
+const { specialOffenders, distOffenders, renderSummary, fmtArgs, isGateFailure, collectOffenders } = require('../../scripts/difftest-ci-gate')
 
 // Fixtures are shaped exactly like scripts/difftest-special.py's build_report() output
 // (functions keyed by name, each entry's domain a positional list of {name, ...} specs,
@@ -70,8 +70,14 @@ const DIST_REPORT = {
   mpmath_version: '1.3.0',
   mp_dps: 50,
   entries: {
-    // Known, tracked divergence source (#1363) -- must still be collected as an offender
-    // (so a reviewer sees it in the table) but must not fail the gate on its own.
+    // Divergence-only entry with ceiling_exceeded: false -- the dist-source counterpart to
+    // gammaLower above, exercising the same #1369 "a finite max_ulp must still surface as
+    // an offender even when the ceiling check alone says fine" path. Not allowlisted:
+    // Gamma.pdf's own KNOWN_ISSUES entry (#1363) was removed once the underlying issue
+    // closed (besselK/besselKnu's #1140 entry was removed at the same time), so this
+    // doubles as a non-allowlisted example too -- knownIssue must resolve to null here,
+    // same as the other non-allowlisted entries below (Weibull.cdf, F.pdf, Beta.pdf,
+    // Normal.pdf).
     'Gamma.pdf': {
       n: 10000,
       errors: 0,
@@ -86,23 +92,6 @@ const DIST_REPORT = {
         x_via_quantile_of_p: [0.001, 0.999]
       },
       worst_case: { dist: 'Gamma', params: [1.2, 3.4], x: 5.6, mpmath_ref: 0.001, ranjs_value: NaN }
-    },
-    // Known, tracked divergence source (#1364) -- mirrors Gamma.pdf's fixture so a
-    // typo'd key or wrong issue number in KNOWN_ISSUES would be caught the same way.
-    'InverseGamma.pdf': {
-      n: 10000,
-      errors: 0,
-      divergences: 2,
-      max_ulp: 9,
-      median_ulp: 1,
-      p99_ulp: 7,
-      ulp_ceiling: 4096,
-      ceiling_exceeded: false,
-      domain: {
-        params: [{ name: 'alpha', lo: 0.01, hi: 100 }, { name: 'beta', lo: 0.01, hi: 100 }],
-        x_via_quantile_of_p: [0.001, 0.999]
-      },
-      worst_case: { dist: 'InverseGamma', params: [1.2, 3.4], x: 5.6, mpmath_ref: 0.002, ranjs_value: NaN }
     },
     // Multi-param domain with a non-trivial name/value pairing (d1 before d2) so an
     // index-pairing regression in fmtArgs would produce a reproducer that swaps them.
@@ -157,8 +146,8 @@ const DIST_REPORT = {
       worst_case: { dist: 'Beta', params: [2.1, 3.7], x: 0.4, mpmath_ref: NaN, ranjs_value: NaN }
     },
     // Fully clean entry (no ceiling breach, no divergence, no error) for the "not an
-    // offender at all" cases -- Gamma.pdf no longer serves that role now that it carries
-    // a known divergence.
+    // offender at all" cases -- Gamma.pdf above doesn't serve that role since it carries
+    // a divergence.
     'Normal.pdf': {
       n: 10000,
       errors: 0,
@@ -177,12 +166,34 @@ const DIST_REPORT = {
   }
 }
 
-// Regression fixture for #1372: Gamma.pdf is allowlisted (#1363) for divergences only --
-// this variant also carries eval errors, a brand-new failure reason on the same key that
-// must still fail the gate even though the key itself is partially allowlisted.
-const GAMMA_PDF_NEW_REGRESSION = {
-  ...DIST_REPORT.entries['Gamma.pdf'],
-  errors: 3
+// Regression fixtures for #1372's per-reason allowlist suppression -- hand-built offender
+// records (the shape collectOffenders() produces internally), constructed directly rather
+// than routed through distOffenders()/production KNOWN_ISSUES. isGateFailure() and
+// renderSummary() only ever read an offender's own reasonKeys/allowlistedReasonKeys/
+// knownIssue fields and never consult KNOWN_ISSUES themselves, so this is the correct
+// level to exercise the suppression logic at -- independent of whatever production's
+// KNOWN_ISSUES map currently contains (currently empty: every previously-tracked entry's
+// underlying issue has closed). Gamma.pdf's own entry was removed once #1363 closed;
+// reusing its shape here as a synthetic "as if allowlisted" example keeps this regression
+// test working without depending on any real tracked entry existing.
+const ALLOWLISTED_DIVERGENCE_OFFENDER = {
+  source: 'dist',
+  entry: 'Gamma.pdf',
+  maxUlp: 10,
+  ceiling: 4096,
+  reasons: ['❌ 4 divergence(s) (NaN/Infinity vs. finite mpmath reference)'],
+  reasonKeys: ['divergences'],
+  allowlistedReasonKeys: ['divergences'],
+  knownIssue: 1363,
+  reproducer: 'alpha=1.2, beta=3.4, x=5.6 → ranjs=NaN, mpmath=0.001'
+}
+
+// Same key, but with a brand-new eval-error reason on top of the allowlisted divergence --
+// must still fail the gate even though the key is partially allowlisted (#1372).
+const PARTIALLY_ALLOWLISTED_OFFENDER = {
+  ...ALLOWLISTED_DIVERGENCE_OFFENDER,
+  reasons: ['💥 3 eval error(s)', ...ALLOWLISTED_DIVERGENCE_OFFENDER.reasons],
+  reasonKeys: ['errors', 'divergences']
 }
 
 // Shared by the specialOffenders()/distOffenders() "correct fields" tests below -- both
@@ -252,18 +263,14 @@ describe('scripts/difftest-ci-gate', () => {
       assert.isNull(offenders[0].knownIssue)
     })
 
-    it('should collect a known-issue divergence entry and tag it with its tracking issue', () => {
+    it('should collect a divergence entry with no known-issue allowlist match', () => {
+      // Gamma.pdf's own KNOWN_ISSUES entry was removed (#1363 closed), so a real
+      // divergence source still resolves knownIssue to null -- the dist-source
+      // counterpart to the special-source gammaLower case above.
       const offenders = distOffenders({ entries: { 'Gamma.pdf': DIST_REPORT.entries['Gamma.pdf'] } })
       assert.strictEqual(offenders.length, 1)
       assert.match(offenders[0].reasons.join(';'), /4 divergence/)
-      assert.strictEqual(offenders[0].knownIssue, 1363)
-    })
-
-    it('should collect the InverseGamma.pdf known-issue divergence entry and tag it with its tracking issue', () => {
-      const offenders = distOffenders({ entries: { 'InverseGamma.pdf': DIST_REPORT.entries['InverseGamma.pdf'] } })
-      assert.strictEqual(offenders.length, 1)
-      assert.match(offenders[0].reasons.join(';'), /2 divergence/)
-      assert.strictEqual(offenders[0].knownIssue, 1364)
+      assert.isNull(offenders[0].knownIssue)
     })
 
     it('should compose both reasons for an entry with errors > 0 and divergences > 0 at once', () => {
@@ -286,25 +293,55 @@ describe('scripts/difftest-ci-gate', () => {
     })
   })
 
+  describe('.collectOffenders()', () => {
+    // Production KNOWN_ISSUES is currently {} (every previously-tracked entry's underlying
+    // issue has closed), so specialOffenders()/distOffenders() never drive the
+    // `knownIssues[key] || null` lookup and allowlist.reasons/allowlist.issue extraction
+    // through their truthy branch -- a regression there (e.g. reading `.reasonKeys`
+    // instead of `.reasons`) would go undetected until a real KNOWN_ISSUES entry exists
+    // again. Calling collectOffenders() directly with a synthetic, non-empty knownIssues
+    // map keeps that lookup covered independent of what production's map currently holds.
+    it('should populate allowlistedReasonKeys and knownIssue from a matching knownIssues entry', () => {
+      const knownIssues = { 'Gamma.pdf': { issue: 1234, reasons: ['divergences'] } }
+      const [offender] = collectOffenders(
+        { 'Gamma.pdf': DIST_REPORT.entries['Gamma.pdf'] },
+        'dist',
+        data => `${fmtArgs(data.domain.params, data.worst_case.params)}, x=${data.worst_case.x}`,
+        knownIssues
+      )
+      assert.strictEqual(offender.knownIssue, 1234)
+      assert.deepEqual(offender.allowlistedReasonKeys, ['divergences'])
+    })
+
+    it('should resolve allowlistedReasonKeys to [] and knownIssue to null when the key has no knownIssues entry', () => {
+      const [offender] = collectOffenders(
+        { 'Gamma.pdf': DIST_REPORT.entries['Gamma.pdf'] },
+        'dist',
+        data => `${fmtArgs(data.domain.params, data.worst_case.params)}, x=${data.worst_case.x}`,
+        { 'SomeOther.pdf': { issue: 9999, reasons: ['divergences'] } }
+      )
+      assert.isNull(offender.knownIssue)
+      assert.deepEqual(offender.allowlistedReasonKeys, [])
+    })
+  })
+
   describe('.isGateFailure()', () => {
     it('should treat an unknown offender as a gate failure', () => {
       const [offender] = distOffenders({ entries: { 'F.pdf': DIST_REPORT.entries['F.pdf'] } })
       assert.isTrue(isGateFailure(offender))
     })
 
-    it('should not treat an allowlisted known-issue offender as a gate failure', () => {
-      const [offender] = distOffenders({ entries: { 'Gamma.pdf': DIST_REPORT.entries['Gamma.pdf'] } })
-      assert.isFalse(isGateFailure(offender))
+    it('should not treat a fully allowlisted offender as a gate failure', () => {
+      assert.isFalse(isGateFailure(ALLOWLISTED_DIVERGENCE_OFFENDER))
     })
 
     it('should treat an allowlisted entry as a gate failure once it develops a new, non-allowlisted reason', () => {
-      const [offender] = distOffenders({ entries: { 'Gamma.pdf': GAMMA_PDF_NEW_REGRESSION } })
-      // Gamma.pdf's divergences stay allowlisted (#1363); its new eval errors are not, so
-      // the entry as a whole must still fail the gate.
-      assert.isTrue(isGateFailure(offender))
-      assert.strictEqual(offender.knownIssue, 1363)
-      assert.match(offender.reasons.join(';'), /divergence/)
-      assert.match(offender.reasons.join(';'), /eval error/)
+      // The divergence reason stays allowlisted (#1363); the new eval-error reason is not,
+      // so the entry as a whole must still fail the gate (#1372).
+      assert.isTrue(isGateFailure(PARTIALLY_ALLOWLISTED_OFFENDER))
+      assert.strictEqual(PARTIALLY_ALLOWLISTED_OFFENDER.knownIssue, 1363)
+      assert.match(PARTIALLY_ALLOWLISTED_OFFENDER.reasons.join(';'), /divergence/)
+      assert.match(PARTIALLY_ALLOWLISTED_OFFENDER.reasons.join(';'), /eval error/)
     })
   })
 
@@ -318,19 +355,24 @@ describe('scripts/difftest-ci-gate', () => {
     it('should report a failing status counting only non-allowlisted offenders', () => {
       const offenders = [...specialOffenders(SPECIAL_REPORT), ...distOffenders(DIST_REPORT)]
       const summary = renderSummary(offenders)
-      // besselInu, gammaLower, F.pdf, Weibull.cdf, Beta.pdf fail the gate; Gamma.pdf is
-      // allowlisted.
-      assert.include(summary, '❌ 5 entries')
+      // besselInu, gammaLower, F.pdf, Weibull.cdf, Beta.pdf, and Gamma.pdf all fail the
+      // gate -- production KNOWN_ISSUES is empty (every previously-tracked entry's
+      // underlying issue has closed), so nothing in these fixtures is allowlisted.
+      assert.include(summary, '❌ 6 entries')
       assert.include(summary, '`besselInu`')
       assert.include(summary, '`gammaLower`')
       assert.include(summary, '`F.pdf`')
       assert.include(summary, '`Weibull.cdf`')
       assert.include(summary, '`Beta.pdf`')
+      assert.include(summary, '`Gamma.pdf`')
     })
 
-    it('should still list an allowlisted known-issue offender in the table, marked as such', () => {
-      const offenders = distOffenders(DIST_REPORT)
-      const summary = renderSummary(offenders)
+    it('should list an allowlisted known-issue offender in the table, marked as such', () => {
+      // Uses the hand-built fixture rather than a real allowlisted entry, since
+      // production KNOWN_ISSUES no longer carries a Gamma.pdf entry to route through
+      // distOffenders() -- this exercises renderSummary()'s annotation rendering
+      // directly against an offender record shaped as if it were allowlisted.
+      const summary = renderSummary([ALLOWLISTED_DIVERGENCE_OFFENDER])
       assert.include(summary, '`Gamma.pdf`')
       assert.include(summary, '#1363')
       assert.match(summary, /allowlisted/i)
@@ -346,8 +388,7 @@ describe('scripts/difftest-ci-gate', () => {
     })
 
     it('should mark only the allowlisted reason, not the whole row, for a mixed known/new-failure entry', () => {
-      const offenders = distOffenders({ entries: { 'Gamma.pdf': GAMMA_PDF_NEW_REGRESSION } })
-      const summary = renderSummary(offenders)
+      const summary = renderSummary([PARTIALLY_ALLOWLISTED_OFFENDER])
       const row = summary.split('\n').find(line => line.includes('`Gamma.pdf`'))
       // Reason cell is the 5th `|`-delimited column; split into its individual `; `
       // reasons so each one's annotation is checked independently, instead of a single
