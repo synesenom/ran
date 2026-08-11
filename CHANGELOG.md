@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Code Health of `test/process.js` improved from 9.09 to 10.0 by splitting it into a `test/process/` directory, one file per process (mirroring the existing `test/mc/` per-sampler layout), plus a shared `_helpers.js` and a `reference-values.js` consuming `test/process-cases.js`. No behavior change — same test cases, same assertions.
+- Code Health of `test/special.js` improved from 9.09 to 10.0 by splitting it into a `test/special/` directory, one file per `src/special/` module (mirroring the existing `test/mc/`/`test/process/` per-module layout; `hurwitz-zeta.js`/`riemann-zeta.js` share a single `zeta.js` test file since one existing test asserts an identity across both), and extracting a `checkReferenceValues` helper in `error.js` to eliminate duplication between the `erf`/`erfc` reference-value tests. No behavior change — same test cases, same assertions.
 
 ### Fixed
 
