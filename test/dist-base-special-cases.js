@@ -700,10 +700,15 @@ describe('dist', () => {
       new dist.BetaPrime(tiny, tiny * 10).seed(0).sample(10).forEach(d => assert.strictEqual(d, 0))
       new dist.BetaPrime(tiny * 10, tiny).seed(0).sample(10).forEach(d => assert.strictEqual(d, Infinity))
 
-      const equalShapes = new dist.BetaPrime(tiny, tiny).seed(0).sample(30)
-      equalShapes.forEach(d => assert(d === 0 || d === Infinity, `x = ${d}`))
-      assert(equalShapes.some(d => d === 0), 'equal tiny shapes never landed on the 0 boundary')
-      assert(equalShapes.some(d => d === Infinity), 'equal tiny shapes never landed on the Infinity boundary')
+      // Equal shapes: a symmetric coin flip, not a deterministic boundary -- swept across the
+      // project's fixed SEEDS rather than a single hand-picked seed (CLAUDE.md: "Never
+      // hand-pick a single seed because it happened to pass").
+      for (const s of SEEDS) {
+        const equalShapes = new dist.BetaPrime(tiny, tiny).seed(s).sample(30)
+        equalShapes.forEach(d => assert(d === 0 || d === Infinity, `seed ${s}: x = ${d}`))
+        assert(equalShapes.some(d => d === 0), `seed ${s}: equal tiny shapes never landed on the 0 boundary`)
+        assert(equalShapes.some(d => d === Infinity), `seed ${s}: equal tiny shapes never landed on the Infinity boundary`)
+      }
     })
 
     it('StudentT.sample() should terminate at exactly +/-Infinity for nu=1e-15', () => {
@@ -723,10 +728,39 @@ describe('dist', () => {
       new dist.Beta(tiny, tiny * 10).seed(0).sample(10).forEach(d => assert.strictEqual(d, 0))
       new dist.Beta(tiny * 10, tiny).seed(0).sample(10).forEach(d => assert.strictEqual(d, 1))
 
-      const equalShapes = new dist.Beta(tiny, tiny).seed(0).sample(30)
-      equalShapes.forEach(d => assert(d === 0 || d === 1, `x = ${d}`))
-      assert(equalShapes.some(d => d === 0), 'equal tiny shapes never landed on the 0 boundary')
-      assert(equalShapes.some(d => d === 1), 'equal tiny shapes never landed on the 1 boundary')
+      // Equal shapes: a symmetric coin flip, not a deterministic boundary -- swept across the
+      // project's fixed SEEDS rather than a single hand-picked seed.
+      for (const s of SEEDS) {
+        const equalShapes = new dist.Beta(tiny, tiny).seed(s).sample(30)
+        equalShapes.forEach(d => assert(d === 0 || d === 1, `seed ${s}: x = ${d}`))
+        assert(equalShapes.some(d => d === 0), `seed ${s}: equal tiny shapes never landed on the 0 boundary`)
+        assert(equalShapes.some(d => d === 1), `seed ${s}: equal tiny shapes never landed on the 1 boundary`)
+      }
+    })
+
+    // Cascading regression caught during /review: BetaGeometric and BetaNegativeBinomial both
+    // compose _beta.js's output as an intermediate step, and a Beta draw provably underflowing
+    // to exactly 0 (decisions/0054-...) sent both distributions down a path they weren't
+    // guarded for -- BetaGeometric's inverse-CDF formula divided by Math.log(1) = +0, giving
+    // -Infinity (a sign flip from the true +Infinity, and outside its {1,2,3,...} support);
+    // BetaNegativeBinomial's Gamma-Poisson mixture drove poisson()'s lambda to Infinity, which
+    // fell off the end of its large-lambda loop and returned undefined (an explicitly forbidden
+    // sentinel per this project's return-value conventions). Both now resolve to the correctly-
+    // rounded Infinity instead.
+    it('BetaGeometric.sample() should terminate at exactly Infinity when alpha=1e-15, not -Infinity', () => {
+      for (const s of SEEDS) {
+        const bg = new dist.BetaGeometric(tiny, 5)
+        bg.seed(s)
+        bg.sample(10).forEach(d => assert.strictEqual(d, Infinity, `seed ${s}: x = ${d}`))
+      }
+    })
+
+    it('BetaNegativeBinomial.sample() should terminate at exactly Infinity when alpha=1e-15, not undefined', () => {
+      for (const s of SEEDS) {
+        const bnb = new dist.BetaNegativeBinomial(3, tiny, 3)
+        bnb.seed(s)
+        bnb.sample(10).forEach(d => assert.strictEqual(d, Infinity, `seed ${s}: x = ${d}`))
+      }
     })
 
     // Boundary sanity check: the analytic short-circuit threshold must not swallow the

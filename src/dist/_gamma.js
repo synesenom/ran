@@ -4,7 +4,8 @@ import normal from './_normal'
 // the boost factor exp(ln(u)/a) to exact 0.0 in float64 -- derived from the largest u the
 // PRNG can produce below 1 (u_max = 1 - 2^-32) and float64's underflow boundary
 // (Number.MIN_VALUE): the threshold solves ln(u_max)/a = ln(Number.MIN_VALUE).
-// See decisions/0054-boosted-gamma-analytic-underflow-boundary-return.md
+// decisions/0054-boosted-gamma-analytic-underflow-boundary-return.md -- the analytic threshold
+// this ADR's boundary-return exception is keyed on.
 export const BOOST_UNDERFLOW_THRESHOLD = Math.log1p(-1 / 4294967296) / Math.log(Number.MIN_VALUE)
 
 // Generous cap for a >= BOOST_UNDERFLOW_THRESHOLD, where the loop has a genuine positive
@@ -34,7 +35,8 @@ const BOOST_MAX_ITER = 2e7
  * algorithm's own worst case rather than the shared, much smaller generic MAX_ITER.
  * (issues #1379, #1384)
  * See solutions/distribution/2026-08-11-1014-gamma-boost-branch-underflow-and-subnormal-reciprocal.md
- * See decisions/0054-boosted-gamma-analytic-underflow-boundary-return.md
+ * decisions/0054-boosted-gamma-analytic-underflow-boundary-return.md -- why returning the
+ * analytic boundary value is preferred over ADR-0049's default throw-on-exhausted-budget.
  *
  * @method boostedGamma
  * @memberof ran.dist
