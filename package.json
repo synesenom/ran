@@ -586,9 +586,9 @@
     "chai": "^6.2.2",
     "cross-env": "^10.1.0",
     "documentation": "^14.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-standard": "^16.0.3",
-    "eslint-plugin-jsdoc": "^50.8.0",
+    "eslint": "^10.8.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-jsdoc": "^63.3.3",
     "highlight.js": "^11.11.1",
     "istanbul": "^0.4.5",
     "lodash.flattendeep": "^4.4.0",
@@ -600,7 +600,7 @@
     "rollup": "^4.62.3",
     "sass": "^1.102.0",
     "seedrandom": "^3.0.5",
-    "standard": "^16.0.4",
+    "standard": "^17.1.2",
     "typescript": "^7.0.2"
   },
   "overrides": {
