@@ -589,7 +589,7 @@
     "eslint": "^7.32.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-jsdoc": "^50.8.0",
-    "highlight.js": "^11.11.1",
+    "highlight.js": "^11.12.0",
     "istanbul": "^0.4.5",
     "lodash.flattendeep": "^4.4.0",
     "mathjax-node-page": "^3.2.0",
