@@ -44,7 +44,11 @@ function _gamma (z) {
       x += c / (z + i + 1)
     })
     const t = z + l - 0.5
-    y = SQRT_PI2 * Math.pow(t, (z + 0.5)) * Math.exp(-t) * x
+    // Combine pow(t, z+0.5) and exp(-t) in log space: evaluated separately, the pow()
+    // factor overflows to Infinity ~30 orders of magnitude before Gamma(z) itself does,
+    // since exp(-t) would have brought the product back down to a finite value. Same
+    // technique already used in log-gamma.js's Lanczos tail.
+    y = SQRT_PI2 * Math.exp((z + 0.5) * Math.log(t) - t) * x
   }
   return y
 }
