@@ -33,5 +33,29 @@ describe('special.beta', () => {
       const v = special.beta(31, 31)
       assert(Math.abs(v - 1.3861667124709484e-19) < 1e-30)
     })
+
+    it('should return negative values when Gamma-function sign composition demands it', () => {
+      // B(x,y) = Gamma(x)Gamma(y)/Gamma(x+y) is negative whenever an odd number
+      // of the three Gamma factors are negative (Gamma(z) < 0 on alternating
+      // intervals between its poles at the non-positive integers for z < 0).
+      // logGamma() intentionally returns ln|Gamma(z)|, so exponentiating a sum
+      // of logGamma() calls can never reproduce that sign on its own.
+
+      // mpmath mp.dps=50: x=-0.5, y=-0.4 -> Gamma(x)<0, Gamma(y)<0, Gamma(x+y)<0 (odd count negative)
+      // beta(-0.5, -0.4) = -1.2485258633178250820366128993190870970770195996918 -> -1.2485258633178251 (float64)
+      assert(equal(special.beta(-0.5, -0.4), -1.2485258633178251))
+
+      // mpmath mp.dps=50: x=-0.5, y=3.2 -> Gamma(x)<0, Gamma(y)>0, Gamma(x+y)>0 (odd count negative)
+      // beta(-0.5, 3.2) = -5.5627711756595414868182762437757763287249208213728 -> -5.562771175659542 (float64)
+      assert(equal(special.beta(-0.5, 3.2), -5.562771175659542))
+
+      // mpmath mp.dps=50: x=-1.5, y=-0.3 -> Gamma(x)>0, Gamma(y)<0, Gamma(x+y)>0 (odd count negative)
+      // beta(-1.5, -0.3) = -3.2074183377160688798909279511573481663316185940018 -> -3.207418337716069 (float64)
+      assert(equal(special.beta(-1.5, -0.3), -3.207418337716069))
+
+      // mpmath mp.dps=50: x=-3.5, y=2.2 -> Gamma(x)>0, Gamma(y)>0, Gamma(x+y)>0 (even count negative)
+      // beta(-3.5, 2.2) = 0.089408903986964266806315567263596114083506000110791 -> 0.08940890398696427 (float64)
+      assert(equal(special.beta(-3.5, 2.2), 0.08940890398696427))
+    })
   })
 })
