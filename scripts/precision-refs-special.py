@@ -226,12 +226,12 @@ def gammaUpperIncomplete_ref(s, x):
 
 def gammaLowerIncompleteInv_ref(a, p):
     # No single mpmath one-liner inverts gammainc. Root-find independently of ranjs's own
-    # Wilson-Hilferty-seeded Halley refinement (gamma-incomplete.js:158-189) via plain
+    # Wilson-Hilferty-seeded Halley refinement (gamma-incomplete.js:158-189) via
     # bisection: gammainc(a,0,x,regularized=True) is strictly monotonic increasing in x,
     # so bisection alone -- no Newton/derivative step, which can overshoot into the x<0
     # region where mpmath's own gammainc recurses without bound (confirmed: a Newton
     # hybrid attempt here crashed with RecursionError inside mpmath's gammainc) -- is
-    # both simple and unconditionally convergent.
+    # unconditionally convergent.
     if p <= 0:
         return mpf(0)
     if p >= 1:
@@ -246,19 +246,24 @@ def gammaLowerIncompleteInv_ref(a, p):
         lo /= 10
     while f(hi) < 0:
         hi *= 10
-    # Bisection converges linearly (1 bit/step); a wide initial bracket (e.g. the root
-    # many orders of magnitude below hi, from an extreme small p) needs several hundred
-    # steps to reach mp.dps=50 precision -- cheap relative to the alternative (a
-    # derivative-based method that can overshoot into gammainc's unstable x<0 region).
-    for _ in range(800):
-        mid = (lo + hi) / 2
-        if mid == lo or mid == hi:
+    # Bisect on log(x), not x itself: for small a, gammainc's leading term ~x^a/(a*Gamma(a))
+    # is an extremely flat function of x (exponent a<<1), so the true root can sit many
+    # hundreds of orders of magnitude below hi (confirmed via difftest-special.py's random
+    # sweep: a=0.0115, p=0.0017 has a root near 4.8e-241 while hi starts near 10). Plain
+    # bisection on x converges 1 bit/step of the *absolute* [lo,hi] range and needs a step
+    # count proportional to that magnitude gap -- an 800-step linear-x attempt here landed
+    # ~1.8x off the true root, nowhere near mp.dps=50 precision. Bisecting on log(x)
+    # converges in a magnitude-independent step count instead.
+    log_lo, log_hi = mp.log(lo), mp.log(hi)
+    for _ in range(300):
+        log_mid = (log_lo + log_hi) / 2
+        if log_mid == log_lo or log_mid == log_hi:
             break
-        if f(mid) < 0:
-            lo = mid
+        if f(exp(log_mid)) < 0:
+            log_lo = log_mid
         else:
-            hi = mid
-    return (lo + hi) / 2
+            log_hi = log_mid
+    return exp((log_lo + log_hi) / 2)
 
 
 def beta_ref(x, y):

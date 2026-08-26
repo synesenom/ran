@@ -199,9 +199,11 @@ def gammaUpperIncomplete_ref(s, x):
 
 def gammaLowerIncompleteInv_ref(a, p):
     # See precision-refs-special.py's gammaLowerIncompleteInv_ref for the full rationale
-    # (plain bisection -- a Newton/derivative step can overshoot into gammainc's unstable
-    # x<0 region and crash with RecursionError) -- duplicated here rather than imported,
-    # per this file's own no-cross-script-import convention.
+    # (bisection on log(x), not x itself -- a Newton/derivative step can overshoot into
+    # gammainc's unstable x<0 region and crash with RecursionError, and plain bisection on
+    # x converges far too slowly when the root sits many orders of magnitude below hi, as
+    # this file's own random sweep over small a first exposed) -- duplicated here rather
+    # than imported, per this file's own no-cross-script-import convention.
     if p <= 0:
         return mpf(0)
     if p >= 1:
@@ -216,15 +218,16 @@ def gammaLowerIncompleteInv_ref(a, p):
         lo /= 10
     while f(hi) < 0:
         hi *= 10
-    for _ in range(800):
-        mid = (lo + hi) / 2
-        if mid == lo or mid == hi:
+    log_lo, log_hi = mp.log(lo), mp.log(hi)
+    for _ in range(300):
+        log_mid = (log_lo + log_hi) / 2
+        if log_mid == log_lo or log_mid == log_hi:
             break
-        if f(mid) < 0:
-            lo = mid
+        if f(mp.exp(log_mid)) < 0:
+            log_lo = log_mid
         else:
-            hi = mid
-    return (lo + hi) / 2
+            log_hi = log_mid
+    return mp.exp((log_lo + log_hi) / 2)
 
 
 def beta_ref(x, y):
