@@ -358,7 +358,7 @@ export default class DoublyNoncentralT extends Distribution {
       gp *= j0 * srtk / tmuk
       gk0 = gamma(kj0)
       z += recursiveSum({
-        gp: gp,
+        gp,
         gk: [
           gk0,
           gamma(kj0 + 0.5)

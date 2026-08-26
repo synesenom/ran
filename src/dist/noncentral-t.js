@@ -128,7 +128,7 @@ class NoncentralT extends Distribution {
       gp: gp0 * y * apb / (ap + 1),
       ip: ip0 - gp0,
       q: q0 * mu2 / (k0 + 1.5),
-      gq: gq,
+      gq,
       iq: iq0 - gq
     }, (t, i) => {
       const j = i + 1
