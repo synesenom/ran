@@ -357,14 +357,27 @@ SWEEP_SPEC = {
         'ulp_ceiling': 8192,  # measured max 2095 ULP (z=1.465)
     },
     # ─── Issue #1271, gamma/beta cluster ───
+    # Calibrated from the 2026-08-26 n=10000/function run (seed=42, mpmath 1.4.1) at
+    # roughly >=4x headroom over that run's measured max_ulp -- never a blind number
+    # (CLAUDE.md), mirroring the besselI/besselK-style calibration comments above.
     'gamma': {
         # Straddles the documented z=0.5 reflection/Lanczos crossover; a random float
         # sweep essentially never lands on an exact non-positive-integer pole.
+        #
+        # gamma() has a genuine premature-overflow bug: it returns Infinity starting
+        # around z~=142-143, well below the true float64 overflow boundary (~z=171-172) --
+        # confirmed independently (gamma(150) is mathematically ~3.8e260, comfortably
+        # representable, but ranjs's Lanczos implementation already overflows there). This
+        # sweep's domain deliberately still spans z up to 170 so the harness's own
+        # `divergences` counter (not `ulp_ceiling`, which excludes non-finite entries by
+        # design) keeps reporting this gap -- flagged for separate bug-fix triage, not
+        # fixed here per issue #1271's own scope. ulp_ceiling below is calibrated from the
+        # finite-only points only (max 811 ULP at z=141.698, right at the overflow edge).
         'args': [
             {'name': 'z', 'kind': 'float', 'lo': -20, 'hi': 170, 'log_uniform': False},
         ],
         'n': 10000,
-        'ulp_ceiling': 1_000_000,  # placeholder pending calibration run
+        'ulp_ceiling': 4000,  # measured finite-only max 811 ULP (z=141.698)
     },
     'logGamma': {
         # Straddles the LOG_FACTORIAL integer-table boundary (z<=171) and the z=0.5
@@ -374,7 +387,7 @@ SWEEP_SPEC = {
             {'name': 'z', 'kind': 'float', 'lo': -500, 'hi': 1000, 'log_uniform': False},
         ],
         'n': 10000,
-        'ulp_ceiling': 1_000_000,  # placeholder pending calibration run
+        'ulp_ceiling': 1500,  # measured max 356 ULP
     },
     'gammaLowerIncomplete': {
         # Straddles the top-level x<s+1 series/CF crossover and the _deviance.js
@@ -385,7 +398,7 @@ SWEEP_SPEC = {
             {'name': 'x', 'kind': 'float', 'lo': 1e-3, 'hi': 250, 'log_uniform': True},
         ],
         'n': 10000,
-        'ulp_ceiling': 1_000_000,  # placeholder pending calibration run
+        'ulp_ceiling': 5000,  # measured max 1220 ULP
     },
     'gammaUpperIncomplete': {
         # Same domain/crossover as gammaLowerIncomplete, reached via the complementary
@@ -395,7 +408,7 @@ SWEEP_SPEC = {
             {'name': 'x', 'kind': 'float', 'lo': 1e-3, 'hi': 250, 'log_uniform': True},
         ],
         'n': 10000,
-        'ulp_ceiling': 1_000_000,  # placeholder pending calibration run
+        'ulp_ceiling': 17000,  # measured max 4167 ULP
     },
     'gammaLowerIncompleteInv': {
         # Straddles the a>=1 Wilson-Hilferty-seeded vs a<1 series-inversion-seeded
@@ -406,7 +419,7 @@ SWEEP_SPEC = {
             {'name': 'p', 'kind': 'float', 'lo': 1e-3, 'hi': 0.999, 'log_uniform': False},
         ],
         'n': 10000,
-        'ulp_ceiling': 1_000_000,  # placeholder pending calibration run
+        'ulp_ceiling': 7000,  # measured max 1711 ULP
     },
     'beta': {
         # Continuous (x,y) interior coverage; the integer min(x,y)<=30 exact-recurrence
@@ -417,7 +430,7 @@ SWEEP_SPEC = {
             {'name': 'y', 'kind': 'float', 'lo': 1e-3, 'hi': 200, 'log_uniform': True},
         ],
         'n': 10000,
-        'ulp_ceiling': 1_000_000,  # placeholder pending calibration run
+        'ulp_ceiling': 15000,  # measured max 3752 ULP
     },
     'logBeta': {
         # Wider magnitude range than beta() itself, straddling logGamma's inherited
@@ -427,7 +440,7 @@ SWEEP_SPEC = {
             {'name': 'y', 'kind': 'float', 'lo': 1e-3, 'hi': 1000, 'log_uniform': True},
         ],
         'n': 10000,
-        'ulp_ceiling': 1_000_000,  # placeholder pending calibration run
+        'ulp_ceiling': 2_000_000,  # measured max 510484 ULP (x=0.213, y=838.9)
     },
     'betaIncomplete': {
         # x spans the full (0,1) domain (plain uniform, not log-uniform, so both the
@@ -440,7 +453,7 @@ SWEEP_SPEC = {
             {'name': 'x', 'kind': 'float', 'lo': 1e-3, 'hi': 0.999, 'log_uniform': False},
         ],
         'n': 10000,
-        'ulp_ceiling': 1_000_000,  # placeholder pending calibration run
+        'ulp_ceiling': 135000,  # measured max 33259 ULP (a=190.6, b=0.12, x=0.9957)
     },
     'regularizedBetaIncomplete': {
         # Same domain as betaIncomplete, reached via the normalized I_x(a,b) dispatch.
@@ -450,7 +463,7 @@ SWEEP_SPEC = {
             {'name': 'x', 'kind': 'float', 'lo': 1e-3, 'hi': 0.999, 'log_uniform': False},
         ],
         'n': 10000,
-        'ulp_ceiling': 1_000_000,  # placeholder pending calibration run
+        'ulp_ceiling': 90000,  # measured max 22210 ULP (a=150.2, b=0.244, x=0.9919)
     },
     'logBinomial': {
         # k allowed to exceed n (uniform, not tied to n) to exercise logGamma's inherited
@@ -461,7 +474,7 @@ SWEEP_SPEC = {
             {'name': 'k', 'kind': 'float', 'lo': -0.5, 'hi': 1000, 'log_uniform': False},
         ],
         'n': 10000,
-        'ulp_ceiling': 1_000_000,  # placeholder pending calibration run
+        'ulp_ceiling': 105000,  # measured max 25771 ULP (n=2.67, k=869.67)
     },
 }
 
