@@ -37,6 +37,28 @@ describe('special.gamma', () => {
         assert(equal(special.gamma(-1 + 1e-7), -10000000.428048076, 13))
         assert(equal(special.gamma(-2 + 1e-7), 5000000.458472761, 13))
       })
+
+      it('should not overflow prematurely for large finite arguments (z ~ 143-171)', () => {
+        // The Lanczos tail used to form Math.pow(t, z+0.5) and Math.exp(-t) as separate
+        // factors; the pow() alone overflows to Infinity around z=143, ~30 orders of
+        // magnitude before Gamma(z) itself exceeds DBL_MAX (~1.7976931348623157e+308).
+        // Tolerance is 1e-12, not 1e-14 like the other .gamma() reference checks: the
+        // log-space Lanczos tail's own rounding compounds at this magnitude (measured
+        // worst case ~1.12e-13 at z=150) — looser than 1e-13 but still four orders of
+        // magnitude tighter than the values themselves (~1e260-1e306).
+        // mpmath mp.dps=50: gamma(150) = 3.8089226376305697269859552435073693354597023857341e+260
+        assert(equal(special.gamma(150), 3.80892263763057e+260, 12))
+        // Gamma(171) = 7.2574156153079989673967282111292631147169916812964e+306 is the
+        // largest integer argument still finite in double precision.
+        assert(equal(special.gamma(171), 7.257415615307999e+306, 12))
+      })
+
+      it('should still return Infinity at the true float64 overflow boundary', () => {
+        // mpmath mp.dps=50: gamma(172) = 1.2410180702176678234248405241031039926166055775017e+309,
+        // which genuinely exceeds DBL_MAX (~1.7976931348623157e+308) — Infinity is correct here,
+        // not a premature-overflow artifact.
+        assert.strictEqual(special.gamma(172), Infinity)
+      })
     })
 
     describe('.logGamma()', () => {

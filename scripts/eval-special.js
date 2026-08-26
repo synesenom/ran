@@ -14,7 +14,17 @@ const FN = {
   besselInu: special.besselInu,
   besselK: special.besselK,
   besselKnu: special.besselKnu,
-  digamma: special.digamma
+  digamma: special.digamma,
+  gamma: special.gamma,
+  logGamma: special.logGamma,
+  gammaLowerIncomplete: special.gammaLowerIncomplete,
+  gammaUpperIncomplete: special.gammaUpperIncomplete,
+  gammaLowerIncompleteInv: special.gammaLowerIncompleteInv,
+  beta: special.beta,
+  logBeta: special.logBeta,
+  betaIncomplete: special.betaIncomplete,
+  regularizedBetaIncomplete: special.regularizedBetaIncomplete,
+  logBinomial: special.logBinomial
 }
 
 // JSON has no Infinity/NaN literal (JSON.stringify silently emits `null` for both), so encode

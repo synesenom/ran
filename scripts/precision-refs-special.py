@@ -40,6 +40,8 @@ import sys
 
 from mpmath import mp, mpf, pi, sqrt, exp, log, besseli, besselk
 from mpmath import digamma as mp_digamma
+from mpmath import gamma as mp_gamma, beta as mp_beta, gammainc, betainc
+from mpmath import binomial as mp_binomial, inf
 
 mp.dps = 50
 
@@ -87,6 +89,24 @@ _TOL_KNUASYMP_X10 = 1e-9
 _TOL_KNU_1361_NEAR = 2e-7
 _TOL_KNU_1361_X12_5 = 2e-12
 
+# Issue #1271 gamma/beta cluster: beta(x,y)'s logGamma-fallback path (Math.exp(logGamma(x)
+# +logGamma(y)-logGamma(x+y))) subtracts three O(log(large)) magnitude terms down to a much
+# smaller result when x and y differ by orders of magnitude -- measured via --check: rel error
+# 1.82e-13 at beta(10.5, 200.2). >2x headroom over the measured value.
+_TOL_BETA_WIDE_MAGNITUDE = 4e-13
+# logBeta(x,y) = logGamma(x)+logGamma(y)-logGamma(x+y): same three-term-subtraction mechanism
+# as _TOL_BETA_WIDE_MAGNITUDE, here reached via a negative non-integer argument's reflection
+# formula rather than a wide-magnitude split. Measured: rel error 1.49e-13 at
+# logBeta(0.4, -0.3).
+_TOL_LOGBETA_REFLECTION = 3e-13
+# betaIncomplete/regularizedBetaIncomplete's backward branch (B(a,b)-B(b,a,1-x) or
+# 1-I_{1-x}(b,a)) subtracts two comparable-magnitude terms when a>>b and x is very close to 1
+# -- the same cancellation mechanism issue #675's fix already documented (see
+# solutions/special-functions/2026-06-04-1805-betaIncomplete-backward-branch-complement-
+# constant.md), re-measured here at more extreme parameters. Measured via --check: worst rel
+# error 1.21e-12 at (a,b,x)=(100,0.01,0.9999); >2x headroom over the measured value.
+_TOL_BETAINCOMPLETE_BACKWARD_CANCELLATION = 3e-12
+
 # besselInu(nu, x) for very negative fractional nu at x approaching the documented ~710 series
 # boundary used to return Infinity (Math.pow(x/2, nu)'s tiny prefactor times an internally-
 # overflowing recursiveSum) where the true value is a large but finite number (~1e302-1e306).
@@ -94,7 +114,21 @@ _TOL_KNU_1361_X12_5 = 2e-12
 # remain withheld. This dict is kept (empty) as the reusable mechanism for any future
 # accuracy-cliff bug of this shape, the same way VonMises[11]'s refVals were withheld pending
 # issue #1185 -- see the WITHHELD report printed by --check/--emit.
+#
+# beta(-0.5, 2) and beta(2, -0.5): ranjs's beta.js falls back to
+# Math.exp(logGamma(x)+logGamma(y)-logGamma(x+y)) for non-integer/non-fast-path arguments.
+# logGamma always represents log|Gamma(z)| (real-valued by construction, per its own
+# reflection-formula comment), so exponentiating a sum of logGamma calls can only ever
+# produce a non-negative number -- it structurally cannot reproduce a negative Beta
+# function value. The true B(-0.5,2) = Gamma(-0.5)*Gamma(2)/Gamma(1.5) = -4 (Gamma(-0.5) =
+# -2*sqrt(pi) is negative), confirmed independently via mpmath's own beta(); ranjs returns
+# +4 instead, i.e. the correct magnitude with the wrong sign. This is a genuine production
+# bug (not a grid-design issue) discovered by this PR's new coverage -- out of scope to fix
+# here per issue #1271's own "fixing accuracy defects... file those separately", flagged for
+# the build's bug-triage stage instead.
 WITHHELD = {
+    ('beta', (-0.5, 2)): 'sign lost by the exp(logGamma-sum) fallback for negative non-integer args -- see comment above WITHHELD',
+    ('beta', (2, -0.5)): 'sign lost by the exp(logGamma-sum) fallback for negative non-integer args -- see comment above WITHHELD',
 }
 
 
@@ -157,6 +191,115 @@ def digamma_ref(z):
     return mp_digamma(z)
 
 
+def gamma_ref(z):
+    # mpmath's gamma() raises ValueError at a pole instead of returning Infinity --
+    # translate to match ranjs's own non-positive-integer pole guard (gamma.js:27-29).
+    if z <= 0 and z == int(z):
+        return mpf('inf')
+    return mp_gamma(z)
+
+
+def logGamma_ref(z):
+    # log(abs(gamma(z))) uses mpmath's own gamma() black box, independent of ranjs's own
+    # Lanczos/reflection-formula/LOG_FACTORIAL-table decomposition in log-gamma.js. Same
+    # pole translation as gamma_ref above (log-gamma.js:56-60).
+    if z <= 0 and z == int(z):
+        return mpf('inf')
+    return log(abs(mp_gamma(z)))
+
+
+def gammaLowerIncomplete_ref(s, x):
+    # Regularized lower incomplete gamma P(s,x) -- confirmed by reading
+    # src/special/gamma-incomplete.js:121-123 (JSDoc: "regularized lower incomplete
+    # gamma function"). x<0 matches _gli's own explicit guard (gamma-incomplete.js:22) --
+    # mpmath's gammainc has no such guard and computes something else entirely for a
+    # negative upper bound, so translate explicitly.
+    if x < 0:
+        return mpf(0)
+    return gammainc(s, 0, x, regularized=True)
+
+
+def gammaUpperIncomplete_ref(s, x):
+    # Regularized upper incomplete gamma Q(s,x) -- gamma-incomplete.js:135-137.
+    return gammainc(s, x, inf, regularized=True)
+
+
+def gammaLowerIncompleteInv_ref(a, p):
+    # No single mpmath one-liner inverts gammainc. Root-find independently of ranjs's own
+    # Wilson-Hilferty-seeded Halley refinement (gamma-incomplete.js:158-189) via
+    # bisection: gammainc(a,0,x,regularized=True) is strictly monotonic increasing in x,
+    # so bisection alone -- no Newton/derivative step, which can overshoot into the x<0
+    # region where mpmath's own gammainc recurses without bound (confirmed: a Newton
+    # hybrid attempt here crashed with RecursionError inside mpmath's gammainc) -- is
+    # unconditionally convergent.
+    if p <= 0:
+        return mpf(0)
+    if p >= 1:
+        return mpf('inf')
+
+    def f(x):
+        return gammainc(a, 0, x, regularized=True) - p
+
+    lo = mpf(a) / 1000 if a > 1000 else mpf('1e-10')
+    hi = mpf(a) * 10 + 10
+    while f(lo) > 0:
+        lo /= 10
+    while f(hi) < 0:
+        hi *= 10
+    # Bisect on log(x), not x itself: for small a, gammainc's leading term ~x^a/(a*Gamma(a))
+    # is an extremely flat function of x (exponent a<<1), so the true root can sit many
+    # hundreds of orders of magnitude below hi (confirmed via difftest-special.py's random
+    # sweep: a=0.0115, p=0.0017 has a root near 4.8e-241 while hi starts near 10). Plain
+    # bisection on x converges 1 bit/step of the *absolute* [lo,hi] range and needs a step
+    # count proportional to that magnitude gap -- an 800-step linear-x attempt here landed
+    # ~1.8x off the true root, nowhere near mp.dps=50 precision. Bisecting on log(x)
+    # converges in a magnitude-independent step count instead.
+    log_lo, log_hi = mp.log(lo), mp.log(hi)
+    for _ in range(300):
+        log_mid = (log_lo + log_hi) / 2
+        if log_mid == log_lo or log_mid == log_hi:
+            break
+        if f(exp(log_mid)) < 0:
+            log_lo = log_mid
+        else:
+            log_hi = log_mid
+    return exp((log_lo + log_hi) / 2)
+
+
+def beta_ref(x, y):
+    return mp_beta(x, y)
+
+
+def logBeta_ref(x, y):
+    # mpmath's own beta() black box, independent of ranjs's logGamma(x)+logGamma(y)
+    # -logGamma(x+y) decomposition.
+    return log(abs(mp_beta(x, y)))
+
+
+def betaIncomplete_ref(a, b, x):
+    # Unnormalized -- confirmed by beta-incomplete.js:53-63 (comment: "B(a,b) != 1 for
+    # unnormalized form"). a=0 (with x>0) is a genuine pole of the unnormalized integral
+    # (the integrand t^(a-1) diverges at t=0 when a=0), matching ranjs's own
+    # betaIncomplete(0,b,x)=Infinity (reached via its `a !== 0` dispatch guard forcing the
+    # backward branch, whose Math.exp(logGamma(0)+...)=Infinity pole propagates through).
+    # mpmath's own betainc() divides by a internally and raises ZeroDivisionError instead
+    # of returning Infinity there, so translate that case explicitly.
+    if a == 0 and 0 < x < 1:
+        return mpf('inf')
+    return betainc(a, b, 0, x, regularized=False)
+
+
+def regularizedBetaIncomplete_ref(a, b, x):
+    # Normalized I_x(a,b) -- confirmed by beta-incomplete.js:77-84.
+    return betainc(a, b, 0, x, regularized=True)
+
+
+def logBinomial_ref(n, k):
+    # mpmath's own binomial() black box, independent of ranjs's logGamma(n+1)
+    # -logGamma(k+1)-logGamma(n-k+1) decomposition.
+    return log(abs(mp_binomial(n, k)))
+
+
 REF_FN = {
     'besselI': besselI_ref,
     'besselISpherical': besselISpherical_ref,
@@ -167,6 +310,16 @@ REF_FN = {
     'besselK': besselK_ref,
     'besselKnu': besselKnu_ref,
     'digamma': digamma_ref,
+    'gamma': gamma_ref,
+    'logGamma': logGamma_ref,
+    'gammaLowerIncomplete': gammaLowerIncomplete_ref,
+    'gammaUpperIncomplete': gammaUpperIncomplete_ref,
+    'gammaLowerIncompleteInv': gammaLowerIncompleteInv_ref,
+    'beta': beta_ref,
+    'logBeta': logBeta_ref,
+    'betaIncomplete': betaIncomplete_ref,
+    'regularizedBetaIncomplete': regularizedBetaIncomplete_ref,
+    'logBinomial': logBinomial_ref,
 }
 
 
@@ -358,6 +511,151 @@ def _digamma_grid(add):
         add('digamma', (z,), 'digamma: near-pole reflection-formula precision')
 
 
+def _gamma_grid(add):
+    # z<=0 integer poles (gamma.js:27-29).
+    for z in [0, -1, -2, -5]:
+        add('gamma', (z,), 'gamma z<=0 integer: pole, diverges to +Infinity')
+    # z<0.5 reflection/Lanczos crossover (gamma.js:32).
+    for z in [0.001, 0.1, 0.3, 0.49, 0.5, 0.51, 0.7, 1, 2, 5, 10, 50, 100]:
+        add('gamma', (z,), 'gamma: z<0.5 reflection/Lanczos crossover')
+    # Negative non-integer / half-integer reflection-formula cancellation.
+    for z in [-0.5, -1.5, -2.5, -9.5, -20.3]:
+        add('gamma', (z,), 'gamma: negative non-integer reflection-formula cancellation')
+
+
+def _logGamma_grid(add):
+    # z<=0 integer poles (log-gamma.js:56-60).
+    for z in [0, -1, -2]:
+        add('logGamma', (z,), 'logGamma z<=0 integer: pole, diverges to +Infinity')
+    # Negative non-integer reflection formula, mirroring the existing digamma grid's
+    # negative-z points.
+    for z in [-0.5, -1.5, -2.5, -9.5, -100.5]:
+        add('logGamma', (z,), 'logGamma: negative non-integer reflection formula')
+    # LOG_FACTORIAL integer-table boundary z<=171 (log-gamma.js:68, table lines 7-30).
+    for z in [169, 170, 171, 172, 173]:
+        add('logGamma', (z,), 'logGamma: LOG_FACTORIAL table boundary at z=171')
+    # z<0.5 reflection/Lanczos crossover (log-gamma.js:72).
+    for z in [0.001, 0.1, 0.3, 0.49, 0.5, 0.51, 0.7]:
+        add('logGamma', (z,), 'logGamma: z<0.5 reflection/Lanczos crossover')
+    # Large non-integer z past the table, exercising Lanczos directly.
+    for z in [171.5, 200.7, 500.3, 1000.9]:
+        add('logGamma', (z,), 'logGamma: large non-integer z, Lanczos beyond table range')
+
+
+def _gammaIncomplete_shared_grid(add, fn):
+    # Top-level x<s+1 series/CF crossover (gamma-incomplete.js:122,136) for several s.
+    for s in [0.5, 1, 5, 15, 100]:
+        for x in [max(1e-6, s - 1), s - 0.01, s, s + 0.99, s + 1, s + 1.01, s + 2]:
+            add(fn, (s, x), f'{fn} s={s}: top-level x<s+1 series/CF crossover')
+    # _deviance.stirlerr s=15 boundary (_deviance.js:52), probed away from the x<s+1 line.
+    for s in [14, 14.9, 15, 15.1, 16]:
+        add(fn, (s, s * 2), f'{fn} s={s}: _deviance.stirlerr s=15 boundary')
+    # _deviance.bd0 t=x/s in {0.5,2} boundary (_deviance.js:78), s fixed away from its own
+    # stirlerr boundary.
+    for t in [0.49, 0.5, 0.51, 1.99, 2, 2.01]:
+        add(fn, (20, 20 * t), f'{fn} s=20: _deviance.bd0 t=x/s={t} boundary')
+    # Near-diagonal large-s region from issue #1348's own regression grid.
+    for s in [4989, 4995, 4998]:
+        add(fn, (s, 5000), f'{fn} s={s}: #1348 near-diagonal large-s CF convergence regime')
+    # Small s near x=s+1 (the #1348 slow-convergence regime at the opposite extreme).
+    for s in [1e-5, 1e-3, 0.01]:
+        add(fn, (s, s + 1 + 1e-6), f'{fn} s={s}: small-s near x=s+1 boundary')
+
+
+def _gammaLowerIncomplete_grid(add):
+    _gammaIncomplete_shared_grid(add, 'gammaLowerIncomplete')
+    # x<0 -> 0 boundary (_gli's own guard, gamma-incomplete.js:22).
+    add('gammaLowerIncomplete', (2, -5), 'gammaLowerIncomplete: x<0 boundary returns exactly 0')
+
+
+def _gammaUpperIncomplete_grid(add):
+    _gammaIncomplete_shared_grid(add, 'gammaUpperIncomplete')
+
+
+def _gammaLowerIncompleteInv_grid(add):
+    # p<=0 -> 0, p>=1 -> Infinity (gamma-incomplete.js:152-153).
+    add('gammaLowerIncompleteInv', (2, 0), 'gammaLowerIncompleteInv: p<=0 boundary returns exactly 0')
+    add('gammaLowerIncompleteInv', (2, 1), 'gammaLowerIncompleteInv: p>=1 boundary returns +Infinity')
+    # a>=1 W-H-seeded vs a<1 series-inversion-seeded crossover (gamma-incomplete.js:158).
+    for a in [0.5, 0.9, 1, 1.1, 1.5, 5]:
+        for p in [0.1, 0.5, 0.9]:
+            add('gammaLowerIncompleteInv', (a, p),
+                f'gammaLowerIncompleteInv a={a}: a>=1/a<1 initial-guess seed crossover')
+    # Extreme small p exercising the relative floor (gamma-incomplete.js:189).
+    for a in [0.5, 2, 10]:
+        for p in [1e-10, 1e-30]:
+            add('gammaLowerIncompleteInv', (a, p),
+                f'gammaLowerIncompleteInv a={a}: extreme small p, relative-floor path')
+
+
+def _beta_grid(add):
+    # Integer fast-path boundary min(x,y)<=30 (beta.js:21,25).
+    for m in [1, 2, 15, 29, 30, 31, 32, 50]:
+        add('beta', (m, 40), f'beta m={m}: integer min(x,y)<=30 exact-recurrence boundary')
+    # Non-integer args, logGamma fallback path.
+    for x, y in [(0.5, 0.5), (2.3, 5.7), (100.4, 0.001)]:
+        add('beta', (x, y), 'beta: non-integer argument, logGamma fallback path')
+    # Widely-separated magnitude (x, y): three-term logGamma subtraction cancellation.
+    add('beta', (10.5, 200.2), 'beta: non-integer argument, logGamma fallback path, wide x/y magnitude split',
+        tol=_TOL_BETA_WIDE_MAGNITUDE)
+    # Non-positive args, falling through to logGamma's own pole/reflection behavior.
+    for x, y in [(-0.5, 2), (2, -0.5), (-1.5, -2.5)]:
+        add('beta', (x, y), 'beta: non-positive argument, inherits logGamma pole/reflection behavior')
+
+
+def _logBeta_grid(add):
+    # Inherits logGamma's thresholds threefold -- probe (x,y) pairs where x, y, or x+y
+    # cross the integer-table (z<=171) or z<0.5 reflection boundaries.
+    for x, y in [(0.3, 0.3), (0.49, 5), (170, 1), (171, 1), (172, 1), (85.5, 85.5),
+                 (-0.5, -1.5)]:
+        add('logBeta', (x, y), 'logBeta: inherited logGamma threshold (table/reflection) via x, y, or x+y')
+    # Negative non-integer argument: reflection-formula three-term-subtraction cancellation.
+    add('logBeta', (0.4, -0.3), 'logBeta: inherited logGamma negative-argument reflection formula',
+        tol=_TOL_LOGBETA_REFLECTION)
+
+
+def _betaIncomplete_shared_grid(add, fn):
+    # x in {0,1} boundary (beta-incomplete.js:54/78-80).
+    for a, b in [(2, 3), (0.5, 0.5)]:
+        add(fn, (a, b, 0), f'{fn} a={a},b={b}: x=0 boundary')
+        add(fn, (a, b, 1), f'{fn} a={a},b={b}: x=1 boundary')
+    # Parameter-dependent forward/backward crossover x<(a+1)/(a+b+2) (lines 61,81).
+    for a, b in [(2, 3), (0.5, 5), (10, 0.2), (50, 50)]:
+        xc = (a + 1) / (a + b + 2)
+        for x in [xc - 0.01, xc - 1e-6, xc, xc + 1e-6, xc + 0.01]:
+            if 0 < x < 1:
+                add(fn, (a, b, x),
+                    f'{fn} a={a},b={b}: x=(a+1)/(a+b+2) forward/backward crossover')
+    # Backward-branch cancellation region (large a, small b, x near 1), mirrors issue #675.
+    for a, b, x in [(100, 0.01, 0.9999), (50, 0.05, 0.999)]:
+        add(fn, (a, b, x), f'{fn}: backward-branch cancellation region (large a, small b, x near 1)',
+            tol=_TOL_BETAINCOMPLETE_BACKWARD_CANCELLATION)
+
+
+def _betaIncomplete_grid(add):
+    _betaIncomplete_shared_grid(add, 'betaIncomplete')
+    # a===0 / b===0 special-case branch selection (beta-incomplete.js:61), unique to the
+    # unnormalized betaIncomplete (regularizedBetaIncomplete has no such carve-out).
+    for a, b, x in [(0, 3, 0.3), (2, 0, 0.7), (0, 0.001, 0.5)]:
+        add('betaIncomplete', (a, b, x), 'betaIncomplete: a=0/b=0 special-case branch selection')
+
+
+def _regularizedBetaIncomplete_grid(add):
+    _betaIncomplete_shared_grid(add, 'regularizedBetaIncomplete')
+
+
+def _logBinomial_grid(add):
+    # k near n: n-k+1 near logGamma's z<0.5 threshold.
+    for n, k in [(10, 9.4), (10, 9.5), (10, 9.6), (100, 99.5), (5, 4.5)]:
+        add('logBinomial', (n, k), 'logBinomial: k near n, n-k+1 near logGamma z<0.5 threshold')
+    # k near 0: k+1 near logGamma's z<0.5 threshold.
+    for n, k in [(10, -0.4), (10, -0.5), (10, -0.6), (50, -0.5)]:
+        add('logBinomial', (n, k), 'logBinomial: k near 0, k+1 near logGamma z<0.5 threshold')
+    # Large n,k, straddling the logGamma 171 integer-table boundary.
+    for n, k in [(170, 85), (171, 85), (172, 86), (300, 150)]:
+        add('logBinomial', (n, k), 'logBinomial: large n,k around the logGamma 171 table boundary')
+
+
 def grid():
     """Threshold-focused (fn, args, note, tol) tuples. See the module docstring for the
     rationale; each cluster's comment names the exact dispatch threshold in src/special/ it
@@ -377,6 +675,16 @@ def grid():
     _besselK_grid(add)
     _besselKnu_grid(add)
     _digamma_grid(add)
+    _gamma_grid(add)
+    _logGamma_grid(add)
+    _gammaLowerIncomplete_grid(add)
+    _gammaUpperIncomplete_grid(add)
+    _gammaLowerIncompleteInv_grid(add)
+    _beta_grid(add)
+    _logBeta_grid(add)
+    _betaIncomplete_grid(add)
+    _regularizedBetaIncomplete_grid(add)
+    _logBinomial_grid(add)
 
     return points
 

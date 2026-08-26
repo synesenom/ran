@@ -38,6 +38,8 @@ import sys
 import mpmath
 from mpmath import mp, besseli, besselk
 from mpmath import digamma as mp_digamma
+from mpmath import gamma as mp_gamma, beta as mp_beta, gammainc, betainc
+from mpmath import binomial as mp_binomial, inf, mpf, log
 
 mp.dps = 50
 
@@ -166,6 +168,95 @@ def digamma_ref(z):
     return mp_digamma(z)
 
 
+def gamma_ref(z):
+    # mpmath's gamma() raises ValueError at a pole instead of returning Infinity --
+    # translate to match ranjs's own non-positive-integer pole guard (gamma.js:27-29).
+    # A random float sweep essentially never lands on an exact integer, but the guard is
+    # kept for parity with precision-refs-special.py's own gamma_ref.
+    if z <= 0 and z == int(z):
+        return mpf('inf')
+    return mp_gamma(z)
+
+
+def logGamma_ref(z):
+    if z <= 0 and z == int(z):
+        return mpf('inf')
+    return log(abs(mp_gamma(z)))
+
+
+def gammaLowerIncomplete_ref(s, x):
+    # See precision-refs-special.py's gammaLowerIncomplete_ref: x<0 matches _gli's own
+    # explicit guard, kept in sync even though this file's SWEEP_SPEC domain for x is
+    # positive-only.
+    if x < 0:
+        return mpf(0)
+    return gammainc(s, 0, x, regularized=True)
+
+
+def gammaUpperIncomplete_ref(s, x):
+    return gammainc(s, x, inf, regularized=True)
+
+
+def gammaLowerIncompleteInv_ref(a, p):
+    # See precision-refs-special.py's gammaLowerIncompleteInv_ref for the full rationale
+    # (bisection on log(x), not x itself -- a Newton/derivative step can overshoot into
+    # gammainc's unstable x<0 region and crash with RecursionError, and plain bisection on
+    # x converges far too slowly when the root sits many orders of magnitude below hi, as
+    # this file's own random sweep over small a first exposed) -- duplicated here rather
+    # than imported, per this file's own no-cross-script-import convention.
+    if p <= 0:
+        return mpf(0)
+    if p >= 1:
+        return mpf('inf')
+
+    def f(x):
+        return gammainc(a, 0, x, regularized=True) - p
+
+    lo = mpf(a) / 1000 if a > 1000 else mpf('1e-10')
+    hi = mpf(a) * 10 + 10
+    while f(lo) > 0:
+        lo /= 10
+    while f(hi) < 0:
+        hi *= 10
+    log_lo, log_hi = mp.log(lo), mp.log(hi)
+    for _ in range(300):
+        log_mid = (log_lo + log_hi) / 2
+        if log_mid == log_lo or log_mid == log_hi:
+            break
+        if f(mp.exp(log_mid)) < 0:
+            log_lo = log_mid
+        else:
+            log_hi = log_mid
+    return mp.exp((log_lo + log_hi) / 2)
+
+
+def beta_ref(x, y):
+    return mp_beta(x, y)
+
+
+def logBeta_ref(x, y):
+    return log(abs(mp_beta(x, y)))
+
+
+def betaIncomplete_ref(a, b, x):
+    # See precision-refs-special.py's betaIncomplete_ref: a=0 (x>0) is a genuine pole of
+    # the unnormalized integral, and mpmath's betainc() divides by a and raises
+    # ZeroDivisionError there instead of returning Infinity -- translate explicitly, kept
+    # in sync even though this file's continuous random sweep essentially never samples
+    # exactly a=0.
+    if a == 0 and 0 < x < 1:
+        return mpf('inf')
+    return betainc(a, b, 0, x, regularized=False)
+
+
+def regularizedBetaIncomplete_ref(a, b, x):
+    return betainc(a, b, 0, x, regularized=True)
+
+
+def logBinomial_ref(n, k):
+    return log(abs(mp_binomial(n, k)))
+
+
 REF_FN = {
     'besselI': besselI_ref,
     'besselISpherical': besselISpherical_ref,
@@ -173,6 +264,16 @@ REF_FN = {
     'besselK': besselK_ref,
     'besselKnu': besselKnu_ref,
     'digamma': digamma_ref,
+    'gamma': gamma_ref,
+    'logGamma': logGamma_ref,
+    'gammaLowerIncomplete': gammaLowerIncomplete_ref,
+    'gammaUpperIncomplete': gammaUpperIncomplete_ref,
+    'gammaLowerIncompleteInv': gammaLowerIncompleteInv_ref,
+    'beta': beta_ref,
+    'logBeta': logBeta_ref,
+    'betaIncomplete': betaIncomplete_ref,
+    'regularizedBetaIncomplete': regularizedBetaIncomplete_ref,
+    'logBinomial': logBinomial_ref,
 }
 
 
@@ -254,6 +355,126 @@ SWEEP_SPEC = {
         ],
         'n': 10000,
         'ulp_ceiling': 8192,  # measured max 2095 ULP (z=1.465)
+    },
+    # ─── Issue #1271, gamma/beta cluster ───
+    # Calibrated from the 2026-08-26 n=10000/function run (seed=42, mpmath 1.4.1) at
+    # roughly >=4x headroom over that run's measured max_ulp -- never a blind number
+    # (CLAUDE.md), mirroring the besselI/besselK-style calibration comments above.
+    'gamma': {
+        # Straddles the documented z=0.5 reflection/Lanczos crossover; a random float
+        # sweep essentially never lands on an exact non-positive-integer pole.
+        #
+        # gamma() has a genuine premature-overflow bug: it returns Infinity starting
+        # around z~=142-143, well below the true float64 overflow boundary (~z=171-172) --
+        # confirmed independently (gamma(150) is mathematically ~3.8e260, comfortably
+        # representable, but ranjs's Lanczos implementation already overflows there). This
+        # sweep's domain deliberately still spans z up to 170 so the harness's own
+        # `divergences` counter (not `ulp_ceiling`, which excludes non-finite entries by
+        # design) keeps reporting this gap -- flagged for separate bug-fix triage, not
+        # fixed here per issue #1271's own scope. ulp_ceiling below is calibrated from the
+        # finite-only points only (max 811 ULP at z=141.698, right at the overflow edge).
+        'args': [
+            {'name': 'z', 'kind': 'float', 'lo': -20, 'hi': 170, 'log_uniform': False},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 4000,  # measured finite-only max 811 ULP (z=141.698)
+    },
+    'logGamma': {
+        # Straddles the LOG_FACTORIAL integer-table boundary (z<=171) and the z=0.5
+        # reflection crossover across a much wider magnitude range than gamma() itself,
+        # since logGamma doesn't overflow anywhere near as quickly.
+        'args': [
+            {'name': 'z', 'kind': 'float', 'lo': -500, 'hi': 1000, 'log_uniform': False},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 1500,  # measured max 356 ULP
+    },
+    'gammaLowerIncomplete': {
+        # Straddles the top-level x<s+1 series/CF crossover and the _deviance.js
+        # stirlerr(s=15)/bd0(t=x/s in {0.5,2}) thresholds across a broad (s,x) domain;
+        # the #1348 near-diagonal large-s extreme is left to the fixed precision gate.
+        'args': [
+            {'name': 's', 'kind': 'float', 'lo': 1e-2, 'hi': 200, 'log_uniform': True},
+            {'name': 'x', 'kind': 'float', 'lo': 1e-3, 'hi': 250, 'log_uniform': True},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 5000,  # measured max 1220 ULP
+    },
+    'gammaUpperIncomplete': {
+        # Same domain/crossover as gammaLowerIncomplete, reached via the complementary
+        # 1-_gli / _gui dispatch.
+        'args': [
+            {'name': 's', 'kind': 'float', 'lo': 1e-2, 'hi': 200, 'log_uniform': True},
+            {'name': 'x', 'kind': 'float', 'lo': 1e-3, 'hi': 250, 'log_uniform': True},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 17000,  # measured max 4167 ULP
+    },
+    'gammaLowerIncompleteInv': {
+        # Straddles the a>=1 Wilson-Hilferty-seeded vs a<1 series-inversion-seeded
+        # crossover; p kept away from the exact {0,1} boundaries (asserted directly, not
+        # swept) since those are already exact-return fast paths, not iterative ones.
+        'args': [
+            {'name': 'a', 'kind': 'float', 'lo': 1e-2, 'hi': 500, 'log_uniform': True},
+            {'name': 'p', 'kind': 'float', 'lo': 1e-3, 'hi': 0.999, 'log_uniform': False},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 7000,  # measured max 1711 ULP
+    },
+    'beta': {
+        # Continuous (x,y) interior coverage; the integer min(x,y)<=30 exact-recurrence
+        # fast path is exercised by the fixed precision gate instead, since a continuous
+        # random sweep essentially never lands on exact integers.
+        'args': [
+            {'name': 'x', 'kind': 'float', 'lo': 1e-3, 'hi': 200, 'log_uniform': True},
+            {'name': 'y', 'kind': 'float', 'lo': 1e-3, 'hi': 200, 'log_uniform': True},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 15000,  # measured max 3752 ULP
+    },
+    'logBeta': {
+        # Wider magnitude range than beta() itself, straddling logGamma's inherited
+        # thresholds via x, y, or x+y.
+        'args': [
+            {'name': 'x', 'kind': 'float', 'lo': 1e-3, 'hi': 1000, 'log_uniform': True},
+            {'name': 'y', 'kind': 'float', 'lo': 1e-3, 'hi': 1000, 'log_uniform': True},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 2_000_000,  # measured max 510484 ULP (x=0.213, y=838.9)
+    },
+    'betaIncomplete': {
+        # x spans the full (0,1) domain (plain uniform, not log-uniform, so both the
+        # near-0 and near-1 cancellation-prone regions get comparable density); a,b span
+        # several orders of magnitude to straddle the parameter-dependent forward/
+        # backward x<(a+1)/(a+b+2) crossover broadly.
+        'args': [
+            {'name': 'a', 'kind': 'float', 'lo': 1e-2, 'hi': 200, 'log_uniform': True},
+            {'name': 'b', 'kind': 'float', 'lo': 1e-2, 'hi': 200, 'log_uniform': True},
+            {'name': 'x', 'kind': 'float', 'lo': 1e-3, 'hi': 0.999, 'log_uniform': False},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 135000,  # measured max 33259 ULP (a=190.6, b=0.12, x=0.9957)
+    },
+    'regularizedBetaIncomplete': {
+        # Same domain as betaIncomplete, reached via the normalized I_x(a,b) dispatch.
+        'args': [
+            {'name': 'a', 'kind': 'float', 'lo': 1e-2, 'hi': 200, 'log_uniform': True},
+            {'name': 'b', 'kind': 'float', 'lo': 1e-2, 'hi': 200, 'log_uniform': True},
+            {'name': 'x', 'kind': 'float', 'lo': 1e-3, 'hi': 0.999, 'log_uniform': False},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 90000,  # measured max 22210 ULP (a=150.2, b=0.244, x=0.9919)
+    },
+    'logBinomial': {
+        # k allowed to exceed n (uniform, not tied to n) to exercise logGamma's inherited
+        # reflection formula via n-k+1 going non-positive, in addition to the ordinary
+        # 0<=k<=n regime.
+        'args': [
+            {'name': 'n', 'kind': 'float', 'lo': 1, 'hi': 1000, 'log_uniform': True},
+            {'name': 'k', 'kind': 'float', 'lo': -0.5, 'hi': 1000, 'log_uniform': False},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 105000,  # measured max 25771 ULP (n=2.67, k=869.67)
     },
 }
 
