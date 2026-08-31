@@ -151,6 +151,20 @@ describe('special.hypergeometric', () => {
         assert.strictEqual(special.f11(0, -3, 5), 1)
       })
 
+      it('does not fire when a equals b (also excluded, but the true value is still not computed)', () => {
+        // A second review-caught issue: a===b, both non-positive integers, is also excluded
+        // from the pole guard (a>=b, not a>b) -- but unlike the a>b case above, this is NOT a
+        // well-defined polynomial. (a)_k and (b)_k hit zero at the SAME index, a genuine 0/0
+        // Pochhammer-ratio indeterminate form _f11TaylorSeries's recurrence cannot resolve; it
+        // silently corrupts to NaN there (this is what falling through to it now produces,
+        // pinned below), a pre-existing gap this guard does not attempt to fix. Excluding a===b
+        // from the guard still matters: it stops the guard from *asserting* a provably wrong
+        // +Infinity for this case (mpmath mp.dps=50: hyp1f1(-1,-1,5)=6, not a pole, and not
+        // e^z either -- see test/precision-special.js's own WITHHELD entry for this exact
+        // point). See issue #1423 for the general class of f11 degenerate-parameter defects.
+        assert(Number.isNaN(special.f11(-1, -1, 5)))
+      })
+
       it('does not fire for a negative non-integer b', () => {
         // Number.isInteger(b) must gate the guard -- a non-integer negative b is not a pole and
         // must fall through to the ordinary series evaluation.

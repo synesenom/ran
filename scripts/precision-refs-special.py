@@ -200,6 +200,7 @@ WITHHELD = {
     ('beta', (-0.5, 2)): 'sign lost by the exp(logGamma-sum) fallback for negative non-integer args -- see comment above WITHHELD',
     ('beta', (2, -0.5)): 'sign lost by the exp(logGamma-sum) fallback for negative non-integer args -- see comment above WITHHELD',
     ('riemannZeta', (-15,)): 'Wynn-epsilon extrapolation of the negative-s general branch becomes flatly wrong (not just imprecise) well past the _TOL_RIEMANNZETA_NEGATIVE_S range -- see comment above WITHHELD',
+    ('f11', (-1, -1, 5)): 'a==b non-positive integer is a genuine 0/0 Pochhammer-ratio indeterminate form _f11TaylorSeries cannot resolve (corrupts to NaN, per its own pole guard\'s comment in hypergeometric.js); mpmath\'s hyp1f1 resolves it to a finite limit (6, not e^z) ranjs cannot currently compute -- issue #1423 tracks the general class of f11 degenerate-parameter defects',
 }
 
 
@@ -460,19 +461,23 @@ def e1_ref(z):
 def f11_ref(a, b, z):
     # mpmath's own black-box hyp1f1(), independent of hypergeometric.js's own Taylor-series /
     # truncate-at-minimum-term-asymptotic-series dispatch (hypergeometric.js:67-71). Mirrors
-    # f11()'s own branch order: |a|<EPSILON is an exact-1 special case checked first
-    # (hypergeometric.js:63-65); b a non-positive integer is a genuine pole (mpmath itself
-    # raises ZeroDivisionError there, "pole in hypergeometric series") UNLESS a is also a
-    # non-positive integer with a > b, where the numerator's own Pochhammer symbol reaches zero
-    # strictly before the denominator's does, terminating the series as a well-defined
-    # polynomial that mpmath's hyp1f1 evaluates correctly (e.g. hyp1f1(-1,-2,3) == 2.5, not a
-    # pole) -- mirrors the identical exception in f11()'s own guard, added by this same issue
-    # after a review-caught regression (an earlier, overbroad version of this guard returned
-    # Infinity for exactly this case). Translate the genuine-pole case to +Infinity, matching
-    # this codebase's own pole convention (gamma_ref, riemannZeta_ref above).
+    # f11()'s own branch order and its own guard exactly (see the JS source's own comment for
+    # the full rationale, including two review-caught regressions in earlier, overbroad
+    # versions of this guard): |a|<EPSILON is an exact-1 special case checked first; b a
+    # non-positive integer is a genuine pole (mpmath itself raises ZeroDivisionError there)
+    # UNLESS a is also a non-positive integer with a >= b -- for a > b strictly, the numerator's
+    # own Pochhammer symbol terminates the series before the pole (mpmath: hyp1f1(-1,-2,3) ==
+    # 2.5); for a == b, the guard condition is also false here, so this falls through to
+    # mpmath's own hyp1f1, which (unlike ranjs's _f11TaylorSeries) robustly resolves the a==b
+    # 0/0 Pochhammer-ratio indeterminate form to its correct finite limit (mpmath:
+    # hyp1f1(-1,-1,5) == 6, NOT +Infinity and NOT e^z). ranjs's own f11() cannot compute this --
+    # its guard deliberately excludes a==b too, but only to avoid *asserting* the wrong
+    # +Infinity, falling through instead to _f11TaylorSeries's pre-existing 0/0-corrupted NaN
+    # (see the JS source's own comment; WITHHELD below documents the resulting real mismatch;
+    # #1423 tracks the general class of f11 degenerate-parameter defects, not fixed here).
     if abs(a) < 2.220446049250313e-16:
         return mpf(1)
-    if b <= 0 and b == int(b) and not (a == int(a) and a <= 0 and a > b):
+    if b <= 0 and b == int(b) and not (a == int(a) and a <= 0 and a >= b):
         return mpf('inf')
     return hyp1f1(a, b, z)
 
@@ -1086,6 +1091,10 @@ def _f11_grid(add):
     # overbroad version of the guard above (it returned Infinity for these too).
     for a, b, z in [(-1, -2, 3), (-2, -3, 1), (-3, -5, 2), (-1, -5, 4)]:
         add('f11', (a, b, z), 'f11 a,b both non-positive integer with a>b: numerator terminates the series before the b-pole')
+    # a==b, both non-positive integer: WITHHELD -- see the WITHHELD dict's own comment. ranjs's
+    # guard deliberately falls through to _f11TaylorSeries's own pre-existing 0/0 NaN rather
+    # than asserting the equally-wrong +Infinity a second review pass also caught here.
+    add('f11', (-1, -1, 5), 'f11 a==b non-positive integer: 0/0 indeterminate form, WITHHELD (see WITHHELD dict)')
     # a=0 takes priority over the b<=0 pole guard (hypergeometric.js's own branch order checks
     # |a|<EPSILON first) -- exercises the precedence between the two special-case branches.
     add('f11', (0, -3, 5), 'f11 a=0, b<=0 integer: a=0 branch wins (exact-1), never reaches the pole guard')

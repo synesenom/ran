@@ -65,16 +65,24 @@ export function f11 (a, b, z) {
   }
 
   // b a non-positive integer is a genuine pole of 1F1 (the (b)_k Pochhammer denominator hits
-  // zero mid-recurrence) UNLESS a is also a non-positive integer with a > b: then the numerator
-  // (a)_k reaches its own zero strictly before the denominator does, terminating the series as
-  // a well-defined polynomial (e.g. f11(-1,-2,z) = 1 + z/2, never reaching the b=-2 pole at
-  // k=3) -- without this exception, the guard below would wrongly return Infinity for a value
-  // _f11TaylorSeries already computes correctly on its own. Where the guard does fire, +Infinity
-  // matches this codebase's existing pole convention (gamma.js, logGamma.js, riemannZeta.js,
-  // hurwitzZeta.js all diverge to +Infinity at their own poles); without it, the division by
-  // zero mid-recurrence produced an inconsistently-signed Infinity/-Infinity depending on b's
-  // parity instead.
-  if (b <= 0 && Number.isInteger(b) && !(Number.isInteger(a) && a <= 0 && a > b)) {
+  // zero mid-recurrence) UNLESS a is also a non-positive integer with a >= b: then the
+  // numerator (a)_k reaches its own zero no later than the denominator's, so the pole is never
+  // actually reached -- for a > b strictly, the series terminates as a well-defined polynomial
+  // before the b-pole (e.g. f11(-1,-2,z) = 1 + z/2, never reaching the b=-2 pole at k=3); for
+  // a === b, (a)_k and (b)_k hit zero at the SAME index, a genuine 0/0 indeterminate form that
+  // _f11TaylorSeries's recurrence cannot resolve (it silently corrupts to NaN there, a
+  // pre-existing gap this guard does not attempt to fix -- see #1423, filed for the general
+  // class of f11 degenerate-parameter defects). Excluding a===b from this guard at least avoids
+  // *asserting* a provably wrong +Infinity for it (mpmath: f11(-1,-1,5) is a finite 6, not a
+  // pole) in favor of the honest "no answer" signal NaN already carries by this codebase's own
+  // convention, even though the true finite value isn't computed either way.
+  //
+  // Where the guard does fire (the genuine a<b pole case), +Infinity matches this codebase's
+  // existing pole convention (gamma.js, logGamma.js, riemannZeta.js, hurwitzZeta.js all diverge
+  // to +Infinity at their own poles); without any guard at all, the division by zero mid-
+  // recurrence produced an inconsistently-signed Infinity/-Infinity depending on b's parity
+  // instead.
+  if (b <= 0 && Number.isInteger(b) && !(Number.isInteger(a) && a <= 0 && a >= b)) {
     return Infinity
   }
 

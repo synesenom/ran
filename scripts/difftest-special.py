@@ -317,12 +317,12 @@ def e1_ref(z):
 
 
 def f11_ref(a, b, z):
-    # See precision-refs-special.py's f11_ref for the full rationale (the a>b non-positive
-    # integer exception, a review-caught regression in the guard both this function and
+    # See precision-refs-special.py's f11_ref for the full rationale (the a>=b non-positive
+    # integer exception, two review-caught regressions in the guard both this function and
     # f11() itself mirror).
     if abs(a) < 2.220446049250313e-16:
         return mpf(1)
-    if b <= 0 and b == int(b) and not (a == int(a) and a <= 0 and a > b):
+    if b <= 0 and b == int(b) and not (a == int(a) and a <= 0 and a >= b):
         return mpf('inf')
     return hyp1f1(a, b, z)
 
