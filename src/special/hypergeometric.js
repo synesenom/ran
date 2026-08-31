@@ -58,6 +58,22 @@ function _f11AsymptoticSeries (a, b, z) {
   }, t => t.c)
 } */
 
+// a a non-positive integer with a >= b means the numerator (a)_k reaches its own zero no later
+// than the (b)_k denominator's: for a > b strictly, the series terminates as a well-defined
+// polynomial before ever reaching the pole; for a === b, both Pochhammer symbols hit zero at
+// the SAME index, a genuine 0/0 indeterminate form _f11TaylorSeries's recurrence cannot
+// resolve. Either way, the b<=0 pole guard below must not fire here.
+//
+// @method _numeratorReachesZeroFirst
+// @memberof ran.special
+// @param {number} a First parameter.
+// @param {number} b Second parameter.
+// @returns {boolean} Whether a is a non-positive integer with a >= b.
+// @private
+function _numeratorReachesZeroFirst (a, b) {
+  return Number.isInteger(a) && a <= 0 && a >= b
+}
+
 export function f11 (a, b, z) {
   // Special cases
   if (Math.abs(a) < Number.EPSILON) {
@@ -69,25 +85,20 @@ export function f11 (a, b, z) {
   // it to zero first.
   //
   // b a non-positive integer is a genuine pole of 1F1 (the (b)_k Pochhammer denominator hits
-  // zero mid-recurrence) UNLESS a is also a non-positive integer with a >= b: then the
-  // numerator (a)_k reaches its own zero no later than the denominator's, so the pole is never
-  // actually reached -- for a > b strictly, the series terminates as a well-defined polynomial
-  // before the b-pole (e.g. f11(-1,-2,z) = 1 + z/2, never reaching the b=-2 pole at k=3); for
-  // a === b, (a)_k and (b)_k hit zero at the SAME index, a genuine 0/0 indeterminate form that
-  // _f11TaylorSeries's recurrence cannot resolve (it silently corrupts to NaN there, a
-  // pre-existing gap this guard does not attempt to fix -- see #1424, filed specifically for
-  // this a===b indeterminate-form defect (distinct from #1423, which tracks a different f11
-  // defect in the asymptotic branch). Excluding a===b from this guard at least avoids
-  // *asserting* a provably wrong +Infinity for it (mpmath: f11(-1,-1,5) is a finite 6, not a
-  // pole) in favor of the honest "no answer" signal NaN already carries by this codebase's own
-  // convention, even though the true finite value isn't computed either way.
+  // zero mid-recurrence) UNLESS _numeratorReachesZeroFirst(a, b) -- see that helper's own
+  // comment for the a>b/a===b distinction; for a===b specifically, excluding it from this guard
+  // at least avoids *asserting* a provably wrong +Infinity (mpmath: f11(-1,-1,5) is a finite 6,
+  // not a pole, and not e^z either -- see #1424, filed specifically for this a===b
+  // indeterminate-form defect, distinct from #1423, a different f11 defect in the asymptotic
+  // branch) in favor of the honest "no answer" signal NaN already carries by this codebase's
+  // own convention, even though the true finite value isn't computed either way.
   //
   // Where the guard does fire (the genuine a<b pole case), +Infinity matches this codebase's
   // existing pole convention (gamma.js, logGamma.js, riemannZeta.js, hurwitzZeta.js all diverge
   // to +Infinity at their own poles); without any guard at all, the division by zero mid-
   // recurrence produced an inconsistently-signed Infinity/-Infinity depending on b's parity
   // instead.
-  if (b <= 0 && Number.isInteger(b) && !(Number.isInteger(a) && a <= 0 && a >= b)) {
+  if (b <= 0 && Number.isInteger(b) && !_numeratorReachesZeroFirst(a, b)) {
     return Infinity
   }
 
