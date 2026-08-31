@@ -42,6 +42,7 @@ from mpmath import mp, mpf, pi, sqrt, exp, log, besseli, besselk
 from mpmath import digamma as mp_digamma
 from mpmath import gamma as mp_gamma, beta as mp_beta, gammainc, betainc
 from mpmath import binomial as mp_binomial, inf
+from mpmath import zeta, polylog, stirling2
 
 mp.dps = 50
 
@@ -126,9 +127,76 @@ _TOL_BETAINCOMPLETE_BACKWARD_CANCELLATION = 3e-12
 # bug (not a grid-design issue) discovered by this PR's new coverage -- out of scope to fix
 # here per issue #1271's own "fixing accuracy defects... file those separately", flagged for
 # the build's bug-triage stage instead.
+# Issue #1414 zeta/polylog cluster: stirlingSecond's recurrence sums only non-negative terms (no
+# cancellation), so float64 rounding beyond the 2^53 exact-integer boundary stays a benign
+# nearest-representable-value rounding on both sides of the comparison, not an accuracy cliff
+# (measured: rel error ~5.5e-17 at stirlingSecond(25,12), already beyond 2^53) -- no tolerance
+# override needed for that reason. hurwitzZeta needed no override either.
+
+# riemannZeta's 5-term Laurent expansion (riemann-zeta.js:32-34) has residual truncation error
+# that grows as d=s-1 approaches the band's own right edge (0.1001) -- measured via --check: rel
+# error 4.22e-12 at s=1.0999 (d=0.0999). >2x headroom over the measured value.
+_TOL_RIEMANNZETA_LAURENT_EDGE = 1e-11
+# riemannZeta's general branch (Wynn-epsilon-accelerated alternating series, riemann-zeta.js:36)
+# sums terms (k+1)^(-s) that grow polynomially in k for negative s -- the more negative s is, the
+# faster that growth and the more the epsilon-table's extrapolation accuracy degrades. Measured
+# via --check across s in {-3,-5}: worst rel error 2.82e-10 at s=-5. >3x headroom over the
+# measured value. (This degradation becomes a genuine, unbounded-magnitude defect well past this
+# range -- see the riemannZeta WITHHELD entry below, not a tolerance-calibration matter. It is
+# also broader than these two integer probes alone suggest: scripts/difftest-special.py's own
+# riemannZeta SWEEP_SPEC found a non-integer s=-4.448 with rel error ~2.17e-7, ~1000x worse than
+# this bucket's own s=-5 integer probe, same mechanism -- see that file's comment.)
+_TOL_RIEMANNZETA_NEGATIVE_S = 1e-9
+
+# generalizedHarmonic's n>=10, m!=1 branch computes riemannZeta(m)-hurwitzZeta(m,n+1)
+# (generalized-harmonic.js:31); for m just inside riemannZeta's own Laurent band (near but not
+# at m=1), this subtracts two comparable-magnitude, individually near-pole values. Measured via
+# --check: worst rel error 2.59e-13 at (n,m)=(10,1.05). >2x headroom over the measured value.
+_TOL_GENHARMONIC_ZETA_CANCELLATION = 6e-13
+
+# polylogarithm's general Wynn-epsilon series (polylogarithm.js:19-23, used for n!=1; n=1 has
+# its own closed-form early return, polylogarithm.js:16-18, issue #1414) converges more slowly as
+# n decreases (fewer powers of k damping the k^(-n) factor) and as |z| approaches the unit-radius
+# convergence boundary. At n=2, one order closer to n=1, the degradation is bad enough that even
+# the interior sweep's z=0.9 point (not just the near-1 cluster) breaches the 1e-13 default;
+# measured via --check: worst rel error 1.54e-13 at z=0.9. >2x headroom over the measured value.
+_TOL_POLYLOG_N2_INTERIOR = 4e-13
+# measured via --check across z in {0.99,0.999}: worst rel error 2.87e-4 at z=0.999. >2x
+# headroom over the measured value.
+_TOL_POLYLOG_N2_NEAR_1 = 7e-4
+# At n=3 this stays a modest, well-understood degradation; measured via
+# --check across z in {0.99,0.999}: worst rel error 1.31e-6 at z=0.999. >2x headroom over the
+# measured value. (n=3's own interior z=0.9 point stays within the 1e-13 default, unlike n=2's.)
+_TOL_POLYLOG_N3_NEAR_1 = 3e-6
+# n=4 converges faster than n=3 (one more power of k damping k^(-n)), but its interior z=0.9
+# point still marginally breaches the 1e-13 default; measured via --check: worst rel error
+# 4.55e-13 at z=0.9. >2x headroom over the measured value.
+_TOL_POLYLOG_N4_INTERIOR = 1e-12
+# measured via --check across z in {0.99,0.999}: worst rel error 1.98e-9 at z=0.999. >2x
+# headroom over the measured value.
+_TOL_POLYLOG_N4_NEAR_1 = 5e-9
+# n=5 converges faster still, but its interior z=0.9 point still marginally breaches the 1e-13
+# default; measured via --check: worst rel error 1.34e-13 at z=0.9. >2x headroom over the
+# measured value.
+_TOL_POLYLOG_N5_INTERIOR = 3e-13
+# measured via --check across z in {0.99,0.999}: worst rel error 9.51e-11 at z=0.999. >2x
+# headroom over the measured value.
+_TOL_POLYLOG_N5_NEAR_1 = 2.5e-10
+
+# riemannZeta(s) for s well past the negative-s degradation range above becomes flatly wrong, not
+# merely imprecise: e.g. s=-15's true value (a nontrivial zeta value, ~0.4433) is off by nearly an
+# order of magnitude (ranjs returns ~3.87), and by s=-20 (a trivial zero, true value exactly 0)
+# ranjs returns ~267.6. The general branch's Wynn-epsilon extrapolation of the alternating series
+# Σ(-1)^k(k+1)^(-s), whose terms grow as (k+1)^|s| for negative s, is not designed to remain
+# accurate once that growth rate gets large enough -- a genuine algorithmic limitation, not a
+# grid-design/tolerance-calibration issue. Out of scope to fix here per issue #1414's own
+# "fixing accuracy defects... file those separately" scope note (inherited from #1271); flagged
+# for the build's bug-triage stage instead.
+#
 WITHHELD = {
     ('beta', (-0.5, 2)): 'sign lost by the exp(logGamma-sum) fallback for negative non-integer args -- see comment above WITHHELD',
     ('beta', (2, -0.5)): 'sign lost by the exp(logGamma-sum) fallback for negative non-integer args -- see comment above WITHHELD',
+    ('riemannZeta', (-15,)): 'Wynn-epsilon extrapolation of the negative-s general branch becomes flatly wrong (not just imprecise) well past the _TOL_RIEMANNZETA_NEGATIVE_S range -- see comment above WITHHELD',
 }
 
 
@@ -300,6 +368,50 @@ def logBinomial_ref(n, k):
     return log(abs(mp_binomial(n, k)))
 
 
+def riemannZeta_ref(s):
+    # mpmath's own zeta() black box, independent of ranjs's Laurent-expansion/Wynn-epsilon-
+    # accelerated-series dispatch (riemann-zeta.js:28-38). mpmath raises ValueError at the s=1
+    # pole rather than returning Infinity; translate to match ranjs's own 1/d-division behavior
+    # there (riemann-zeta.js:33, ADR-0015).
+    if s == 1:
+        return mpf('inf')
+    return zeta(s)
+
+
+def hurwitzZeta_ref(s, a):
+    # mpmath's own two-argument zeta(s, a) black box, independent of ranjs's Bernoulli partial-
+    # sum series (hurwitz-zeta.js:15-46). mpmath's own pole behavior at s=1 is inconsistent
+    # across `a` (raises ValueError when a=1, returns `inf` directly when a=2) since a=1 hits an
+    # internal riemannZeta fast path -- guard explicitly so every `a` matches ranjs's own
+    # blanket `Math.abs(s-1) < EPS -> Infinity` guard (hurwitz-zeta.js:17-19).
+    if s == 1:
+        return mpf('inf')
+    return zeta(s, a)
+
+
+def generalizedHarmonic_ref(n, m):
+    # Direct sum at mp.dps=50, independent of ranjs's own neumaier-compensated-sum /
+    # zeta-difference / digamma-identity dispatch (generalized-harmonic.js:19-32). n=0 is the
+    # empty sum (0), matching Python's own range(1, 1) producing no terms.
+    return mpf(sum(mpf(k) ** (-mpf(m)) for k in range(1, int(n) + 1)))
+
+
+def polylogarithm_ref(n, z):
+    # mpmath's own polylog() black box, independent of ranjs's implementation (n=1 closed form
+    # or Wynn-epsilon-accelerated series for n!=1, polylogarithm.js:13-24).
+    return polylog(n, z)
+
+
+def stirlingSecond_ref(n, k):
+    # mpmath's own stirling2(exact=True) black box (exact big-integer arithmetic), independent
+    # of ranjs's own memoized k*S(n-1,k)+S(n-1,k-1) recurrence (stirling.js:15). Domain guard
+    # mirrors stirling.js's own isInvalidInput (stirling.js:20-22) -- this is guarding the
+    # function's documented domain, not sharing its recurrence formula.
+    if n < 0 or k < 0 or k > n:
+        return mpf(0)
+    return mpf(stirling2(int(n), int(k), exact=True))
+
+
 REF_FN = {
     'besselI': besselI_ref,
     'besselISpherical': besselISpherical_ref,
@@ -320,6 +432,11 @@ REF_FN = {
     'betaIncomplete': betaIncomplete_ref,
     'regularizedBetaIncomplete': regularizedBetaIncomplete_ref,
     'logBinomial': logBinomial_ref,
+    'riemannZeta': riemannZeta_ref,
+    'hurwitzZeta': hurwitzZeta_ref,
+    'generalizedHarmonic': generalizedHarmonic_ref,
+    'polylogarithm': polylogarithm_ref,
+    'stirlingSecond': stirlingSecond_ref,
 }
 
 
@@ -656,6 +773,134 @@ def _logBinomial_grid(add):
         add('logBinomial', (n, k), 'logBinomial: large n,k around the logGamma 171 table boundary')
 
 
+def _riemannZeta_grid(add):
+    # Laurent-expansion band d=s-1 in (-0.01, 0.1001) around the s=1 pole (riemann-zeta.js:32)
+    # vs the Wynn-epsilon-accelerated alternating series elsewhere (riemann-zeta.js:36-37). At
+    # d=0 the Laurent branch's own 1/d term diverges to +Infinity -- no separate pole guard.
+    add('riemannZeta', (1,), 'riemannZeta s=1: pole, diverges to +Infinity via the Laurent branch\'s 1/d term')
+    for d in [-0.011, -0.01, -0.0099, -0.005, 0.1001, 0.1002]:
+        s = 1 + d
+        add('riemannZeta', (s,), f'riemannZeta s={s}: Laurent-band/general-branch crossover at d=s-1 in (-0.01,0.1001), d={d}')
+    add('riemannZeta', (1.0999,), 'riemannZeta s=1.0999: Laurent-band right-edge truncation error (d=0.0999, just inside the 0.1001 boundary)',
+        tol=_TOL_RIEMANNZETA_LAURENT_EDGE)
+    for s in [0.9, 0.5, 0, -1]:
+        add('riemannZeta', (s,), f'riemannZeta s={s}: general Wynn-epsilon branch, s well below the Laurent band')
+    for s in [-3, -5]:
+        add('riemannZeta', (s,), f'riemannZeta s={s}: general Wynn-epsilon branch, negative-s extrapolation-accuracy degradation',
+            tol=_TOL_RIEMANNZETA_NEGATIVE_S)
+    add('riemannZeta', (-15,), 'riemannZeta s=-15: negative-s Wynn-epsilon extrapolation becomes flatly wrong -- see WITHHELD')
+    for s in [1.2, 1.5, 2, 3, 5, 10, 50, 100]:
+        add('riemannZeta', (s,), f'riemannZeta s={s}: general Wynn-epsilon branch, s well above the Laurent band')
+
+
+def _hurwitzZeta_grid(add):
+    # EPS-tight pole guard at s=1 (hurwitz-zeta.js:17-19) vs the continuously-ramping Bernoulli
+    # partial-sum term count n=max(50,min(100,ceil(1/(s-1)))) elsewhere (line 24): n saturates at
+    # 100 for s-1<=0.01 and floors at 50 for s-1>=0.02, ramping between those boundaries.
+    add('hurwitzZeta', (1, 2), 'hurwitzZeta s=1: EPS pole guard, diverges to +Infinity')
+    for d in [0.005, 0.0099, 0.01, 0.0101, 0.015, 0.0199, 0.02, 0.0201, 0.03]:
+        s = 1 + d
+        for a in [1, 2]:
+            add('hurwitzZeta', (s, a), f'hurwitzZeta s={s},a={a}: term-count ramp n=max(50,min(100,ceil(1/(s-1)))) boundary, d={d}')
+    # Confirm the ramp's validity doesn't secretly depend on `a` (cf. besselKnu's own
+    # order-reduction crossover lesson: a threshold measured at one fixed second parameter can
+    # silently be wrong for others) by re-probing the two boundary d values at very different a.
+    for a in [0.5, 5, 20]:
+        for d in [0.01, 0.02]:
+            add('hurwitzZeta', (1 + d, a), f'hurwitzZeta s={1 + d},a={a}: term-count ramp boundary, confirms a-independence')
+    for s in [1.1, 1.5, 2, 5, 20]:
+        for a in [1, 3]:
+            add('hurwitzZeta', (s, a), f'hurwitzZeta s={s},a={a}: interior, term count floored at n=50')
+
+
+def _generalizedHarmonic_grid(add):
+    # n<10: direct neumaier-compensated-sum branch (generalized-harmonic.js:20-27).
+    for n in [0, 1, 3, 5, 9]:
+        for m in [0.5, 1, 2, 5]:
+            add('generalizedHarmonic', (n, m), f'generalizedHarmonic n={n},m={m}: direct compensated-sum branch (n<10)')
+    # n>=10, m===1: exact digamma identity H_n = gamma + psi(n+1) (line 30), avoiding the
+    # zeta(1)-hurwitzZeta(1,.) = Infinity-Infinity = NaN the general branch would hit.
+    for n in [10, 15, 50, 100]:
+        add('generalizedHarmonic', (n, 1), f'generalizedHarmonic n={n},m=1: digamma-identity branch, avoids Infinity-Infinity')
+    # n>=10, m!=1: riemannZeta(m)-hurwitzZeta(m,n+1) zeta-difference branch (line 31), interior m.
+    for n in [10, 20, 50, 100]:
+        for m in [0.5, 2, 3, 5]:
+            add('generalizedHarmonic', (n, m), f'generalizedHarmonic n={n},m={m}: zeta-difference branch (n>=10), interior m')
+    # Compound-threshold cluster: m near 1 (excluding the exact m===1 digamma branch) lands
+    # inside riemannZeta's own Laurent band (riemann-zeta.js:32, d=m-1 in (-0.01,0.1001)), where
+    # riemannZeta(m)-hurwitzZeta(m,n+1) subtracts two comparable-magnitude, individually
+    # near-pole values -- a cancellation mechanism unique to this composition, unreachable by
+    # either standalone function's own grid (mirrors _besselKnu_grid's connection-formula
+    # cancellation cluster above for the same reason).
+    for n in [10, 50]:
+        for m in [0.995, 1.005, 1.05]:
+            add('generalizedHarmonic', (n, m), f'generalizedHarmonic n={n},m={m}: compound riemannZeta/hurwitzZeta near-pole cancellation',
+                tol=_TOL_GENHARMONIC_ZETA_CANCELLATION)
+
+
+def _polylogarithm_grid(add):
+    # n!=1 has no internal dispatch branch -- a single unconditional Wynn-epsilon series
+    # (polylogarithm.js:19-23) -- so the only quality axis for those orders is convergence
+    # degradation as |z|->1. Documented domain is |z|<1 (polylogarithm.js:9), so negative z
+    # (alternating-sign cancellation inside Wynn-epsilon, a qualitatively different regime from
+    # positive z's monotone convergence) is genuinely supported behavior, not scope creep, even
+    # though the only current caller (ExponentialLogarithmic) only ever passes positive z.
+    # n=1 (Li_1(z)=-ln(1-z)) is an explicit closed-form early return (polylogarithm.js:16-18,
+    # issue #1414), not the general Wynn-epsilon series, so it stays exact -- including at
+    # z=0.99/0.999 -- and needs no tolerance override anywhere in this grid.
+    for z in [0.01, 0.5, 0.9, 0.99, 0.999, -0.5, -0.99]:
+        add('polylogarithm', (1, z), f'polylogarithm n=1: closed form -ln(1-z), z={z}')
+    # n=2: same convergence-degradation mechanism as n=3, one order closer to the n=1 accuracy
+    # bug (issue #1414) -- the only untested order this close to that regime, so it gets its own
+    # named tolerances (both interior and near-1) rather than reusing n=3's constant.
+    for z in [0.01, 0.5, 0.9, -0.5, -0.99]:
+        add('polylogarithm', (2, z), f'polylogarithm n=2: Wynn-epsilon convergence gradient, z={z}',
+            tol=_TOL_POLYLOG_N2_INTERIOR)
+    for z in [0.99, 0.999]:
+        add('polylogarithm', (2, z), f'polylogarithm n=2: convergence-quality degradation near z=1, z={z}',
+            tol=_TOL_POLYLOG_N2_NEAR_1)
+    # n=3: same convergence-degradation mechanism, much milder -- named tolerance covers it.
+    for z in [0.01, 0.5, 0.9, -0.5, -0.99]:
+        add('polylogarithm', (3, z), f'polylogarithm n=3: Wynn-epsilon convergence gradient, z={z}')
+    for z in [0.99, 0.999]:
+        add('polylogarithm', (3, z), f'polylogarithm n=3: convergence-quality degradation near z=1, z={z}',
+            tol=_TOL_POLYLOG_N3_NEAR_1)
+    # n=4: converges faster than n=3 (one more power of k damping k^(-n)), but its interior
+    # z=0.9 point still marginally breaches the 1e-13 default -- named tolerance covers it.
+    for z in [0.01, 0.5, 0.9, -0.5, -0.99]:
+        add('polylogarithm', (4, z), f'polylogarithm n=4: Wynn-epsilon convergence gradient, z={z}',
+            tol=_TOL_POLYLOG_N4_INTERIOR)
+    for z in [0.99, 0.999]:
+        add('polylogarithm', (4, z), f'polylogarithm n=4: convergence-quality degradation near z=1, z={z}',
+            tol=_TOL_POLYLOG_N4_NEAR_1)
+    # n=5: converges faster still, but its interior z=0.9 point still marginally breaches the
+    # 1e-13 default -- named tolerance covers it.
+    for z in [0.01, 0.5, 0.9, -0.5, -0.99]:
+        add('polylogarithm', (5, z), f'polylogarithm n=5: Wynn-epsilon convergence gradient, z={z}',
+            tol=_TOL_POLYLOG_N5_INTERIOR)
+    for z in [0.99, 0.999]:
+        add('polylogarithm', (5, z), f'polylogarithm n=5: convergence-quality degradation near z=1, z={z}',
+            tol=_TOL_POLYLOG_N5_NEAR_1)
+    # n=8: higher order converges comfortably within the 1e-13 default even at z=0.999.
+    for z in [0.01, 0.5, 0.9, 0.99, 0.999, -0.5, -0.99]:
+        add('polylogarithm', (8, z), f'polylogarithm n=8: Wynn-epsilon convergence gradient, z={z}')
+
+
+def _stirlingSecond_grid(add):
+    # Pure memoized combinatorial recurrence (stirling.js:15) -- no numerical-method threshold,
+    # only the domain guard n<0||k<0||k>n->0 and the n=0,k=0 base case (stirling.js:3,20-22).
+    # Points beyond the 2^53 float64-safe-integer boundary are included deliberately: the
+    # recurrence sums only non-negative terms (no cancellation), so both ranjs's own float64
+    # accumulation and this reference's float64-cast-of-the-exact-integer round to the same
+    # nearest representable value -- confirmed no tolerance override is needed even there (see
+    # the module-level comment above WITHHELD).
+    add('stirlingSecond', (0, 0), 'stirlingSecond n=0,k=0: base case, exactly 1')
+    for n, k in [(1, 0), (0, 1), (5, 0), (5, 6), (-1, 2), (5, -1)]:
+        add('stirlingSecond', (n, k), f'stirlingSecond n={n},k={k}: domain guard (n<0||k<0||k>n), exactly 0')
+    for n, k in [(1, 1), (5, 1), (5, 3), (5, 5), (10, 1), (10, 5), (10, 10), (20, 10), (25, 12), (30, 15)]:
+        add('stirlingSecond', (n, k), f'stirlingSecond n={n},k={k}: interior recurrence')
+
+
 def grid():
     """Threshold-focused (fn, args, note, tol) tuples. See the module docstring for the
     rationale; each cluster's comment names the exact dispatch threshold in src/special/ it
@@ -685,6 +930,11 @@ def grid():
     _betaIncomplete_grid(add)
     _regularizedBetaIncomplete_grid(add)
     _logBinomial_grid(add)
+    _riemannZeta_grid(add)
+    _hurwitzZeta_grid(add)
+    _generalizedHarmonic_grid(add)
+    _polylogarithm_grid(add)
+    _stirlingSecond_grid(add)
 
     return points
 

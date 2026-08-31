@@ -11,6 +11,12 @@ import wynnEpsilon from '../algorithms/wynn-epsilon'
  * @private
  */
 export default function polylogarithm (n, z) {
+  // Li_1(z) = -ln(1-z) exactly; the general Wynn-epsilon series loses significant
+  // accuracy near z=1 for n=1 (1/k per-term decay, the slowest of any order) -- issue #1414.
+  // See solutions/testing/2026-08-31-0800-polylogarithm-grid-missing-real-caller-orders.md
+  if (n === 1) {
+    return -Math.log(1 - z)
+  }
   let zk = 1
   return wynnEpsilon(k => {
     zk *= z
