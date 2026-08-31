@@ -64,6 +64,10 @@ export function f11 (a, b, z) {
     return 1
   }
 
+  // See solutions/correctness/2026-08-31-1721-f11-pole-guard-competing-pochhammer-zeros.md --
+  // a pole guard on b alone is incomplete whenever a competing numerator zero-crossing can beat
+  // it to zero first.
+  //
   // b a non-positive integer is a genuine pole of 1F1 (the (b)_k Pochhammer denominator hits
   // zero mid-recurrence) UNLESS a is also a non-positive integer with a >= b: then the
   // numerator (a)_k reaches its own zero no later than the denominator's, so the pole is never
