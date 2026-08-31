@@ -200,7 +200,7 @@ WITHHELD = {
     ('beta', (-0.5, 2)): 'sign lost by the exp(logGamma-sum) fallback for negative non-integer args -- see comment above WITHHELD',
     ('beta', (2, -0.5)): 'sign lost by the exp(logGamma-sum) fallback for negative non-integer args -- see comment above WITHHELD',
     ('riemannZeta', (-15,)): 'Wynn-epsilon extrapolation of the negative-s general branch becomes flatly wrong (not just imprecise) well past the _TOL_RIEMANNZETA_NEGATIVE_S range -- see comment above WITHHELD',
-    ('f11', (-1, -1, 5)): 'a==b non-positive integer is a genuine 0/0 Pochhammer-ratio indeterminate form _f11TaylorSeries cannot resolve (corrupts to NaN, per its own pole guard\'s comment in hypergeometric.js); mpmath\'s hyp1f1 resolves it to a finite limit (6, not e^z) ranjs cannot currently compute -- issue #1423 tracks the general class of f11 degenerate-parameter defects',
+    ('f11', (-1, -1, 5)): 'a==b non-positive integer is a genuine 0/0 Pochhammer-ratio indeterminate form _f11TaylorSeries cannot resolve (corrupts to NaN, per its own pole guard\'s comment in hypergeometric.js); mpmath\'s hyp1f1 resolves it to a finite limit (6, not e^z) ranjs cannot currently compute -- issue #1424 tracks this a===b indeterminate-form defect specifically (distinct from #1423, a different f11 defect in the asymptotic branch)',
 }
 
 
@@ -474,7 +474,8 @@ def f11_ref(a, b, z):
     # its guard deliberately excludes a==b too, but only to avoid *asserting* the wrong
     # +Infinity, falling through instead to _f11TaylorSeries's pre-existing 0/0-corrupted NaN
     # (see the JS source's own comment; WITHHELD below documents the resulting real mismatch;
-    # #1423 tracks the general class of f11 degenerate-parameter defects, not fixed here).
+    # #1424 tracks this a===b indeterminate-form defect specifically, not fixed here -- distinct
+    # from #1423, a different f11 defect in the asymptotic branch).
     if abs(a) < 2.220446049250313e-16:
         return mpf(1)
     if b <= 0 and b == int(b) and not (a == int(a) and a <= 0 and a >= b):
@@ -1085,6 +1086,11 @@ def _f11_grid(add):
     # new coverage (hypergeometric.js).
     for b in [0, -1, -2, -5]:
         add('f11', (1, b, 3), 'f11 b<=0 integer: pole, diverges to +Infinity (guard added by #1415)')
+    # a also a non-positive integer but a<b (|a|>|b|): the denominator's own zero at k=|b|+1
+    # still comes first, so this is a genuine pole too, distinct from the a>b/a==b exceptions
+    # below -- confirmed via mpmath's own ZeroDivisionError there.
+    for a, b, z in [(-3, -1, 5), (-5, -2, 3)]:
+        add('f11', (a, b, z), 'f11 a,b both non-positive integer with a<b: denominator still hits its own pole first')
     # a also a non-positive integer with a>b: the numerator's own Pochhammer symbol reaches zero
     # before the denominator's does, so the series terminates as a well-defined polynomial
     # rather than hitting the pole -- the exact regression a review pass caught in an earlier,

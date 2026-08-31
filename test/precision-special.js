@@ -1272,6 +1272,8 @@ const REFS = [
   { fn: 'f11', args: [1.0, -1.0, 3.0], ref: Infinity, tol: 1e-13, note: 'f11 b<=0 integer: pole, diverges to +Infinity (guard added by #1415)' },
   { fn: 'f11', args: [1.0, -2.0, 3.0], ref: Infinity, tol: 1e-13, note: 'f11 b<=0 integer: pole, diverges to +Infinity (guard added by #1415)' },
   { fn: 'f11', args: [1.0, -5.0, 3.0], ref: Infinity, tol: 1e-13, note: 'f11 b<=0 integer: pole, diverges to +Infinity (guard added by #1415)' },
+  { fn: 'f11', args: [-3.0, -1.0, 5.0], ref: Infinity, tol: 1e-13, note: 'f11 a,b both non-positive integer with a<b: denominator still hits its own pole first' },
+  { fn: 'f11', args: [-5.0, -2.0, 3.0], ref: Infinity, tol: 1e-13, note: 'f11 a,b both non-positive integer with a<b: denominator still hits its own pole first' },
   { fn: 'f11', args: [-1.0, -2.0, 3.0], ref: 2.5, tol: 1e-13, note: 'f11 a,b both non-positive integer with a>b: numerator terminates the series before the b-pole' },
   { fn: 'f11', args: [-2.0, -3.0, 1.0], ref: 1.8333333333333333, tol: 1e-13, note: 'f11 a,b both non-positive integer with a>b: numerator terminates the series before the b-pole' },
   { fn: 'f11', args: [-3.0, -5.0, 2.0], ref: 2.933333333333333, tol: 1e-13, note: 'f11 a,b both non-positive integer with a>b: numerator terminates the series before the b-pole' },

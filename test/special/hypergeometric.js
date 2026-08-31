@@ -136,6 +136,14 @@ describe('special.hypergeometric', () => {
         }
       })
 
+      it('still fires when a is also a non-positive integer but a < b (denominator hits its zero first)', () => {
+        // Unlike the a>b case below, here the (b)_k denominator's zero at k=|b|+1 comes before
+        // the (a)_k numerator's own zero at k=|a|+1 (|a|>|b|), so the pole is genuinely reached
+        // -- confirmed against mpmath, which itself raises ZeroDivisionError ("pole in
+        // hypergeometric series") for hyp1f1(-3,-1,5) rather than returning a finite value.
+        assert.strictEqual(special.f11(-3, -1, 5), Infinity)
+      })
+
       it('does not fire when a is also a non-positive integer with a > b (numerator terminates the series first)', () => {
         // A review-caught regression: an earlier, overbroad version of the pole guard above
         // returned Infinity here too, even though (a)_k reaches zero at k=|a|+1, strictly
@@ -161,7 +169,10 @@ describe('special.hypergeometric', () => {
         // from the guard still matters: it stops the guard from *asserting* a provably wrong
         // +Infinity for this case (mpmath mp.dps=50: hyp1f1(-1,-1,5)=6, not a pole, and not
         // e^z either -- see test/precision-special.js's own WITHHELD entry for this exact
-        // point). See issue #1423 for the general class of f11 degenerate-parameter defects.
+        // point). See issue #1424, filed specifically for this a===b defect (distinct from
+        // #1423, a different f11 defect in the asymptotic branch) -- if #1424 is ever fixed,
+        // this assertion and the WITHHELD entry above both need updating to the true finite
+        // value instead of NaN.
         assert(Number.isNaN(special.f11(-1, -1, 5)))
       })
 

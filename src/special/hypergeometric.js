@@ -71,8 +71,9 @@ export function f11 (a, b, z) {
   // before the b-pole (e.g. f11(-1,-2,z) = 1 + z/2, never reaching the b=-2 pole at k=3); for
   // a === b, (a)_k and (b)_k hit zero at the SAME index, a genuine 0/0 indeterminate form that
   // _f11TaylorSeries's recurrence cannot resolve (it silently corrupts to NaN there, a
-  // pre-existing gap this guard does not attempt to fix -- see #1423, filed for the general
-  // class of f11 degenerate-parameter defects). Excluding a===b from this guard at least avoids
+  // pre-existing gap this guard does not attempt to fix -- see #1424, filed specifically for
+  // this a===b indeterminate-form defect (distinct from #1423, which tracks a different f11
+  // defect in the asymptotic branch). Excluding a===b from this guard at least avoids
   // *asserting* a provably wrong +Infinity for it (mpmath: f11(-1,-1,5) is a finite 6, not a
   // pole) in favor of the honest "no answer" signal NaN already carries by this codebase's own
   // convention, even though the true finite value isn't computed either way.
