@@ -58,10 +58,56 @@ function _f11AsymptoticSeries (a, b, z) {
   }, t => t.c)
 } */
 
+// Whether b is a non-positive integer, i.e. a candidate Pochhammer-denominator pole.
+function _isNonPositiveInteger (b) {
+  return b <= 0 && Number.isInteger(b)
+}
+
+// a a non-positive integer with a >= b means the numerator (a)_k reaches its own zero no later
+// than the (b)_k denominator's: for a > b strictly, the series terminates as a well-defined
+// polynomial before ever reaching the pole; for a === b, both Pochhammer symbols hit zero at
+// the SAME index, a genuine 0/0 indeterminate form _f11TaylorSeries's recurrence cannot
+// resolve. Either way, the true b-pole is never actually reached.
+function _numeratorReachesZeroFirst (a, b) {
+  return Number.isInteger(a) && a <= 0 && a >= b
+}
+
+// See solutions/correctness/2026-08-31-1721-f11-pole-guard-competing-pochhammer-zeros.md --
+// a pole guard on b alone is incomplete whenever a competing numerator zero-crossing can beat
+// it to zero first.
+//
+// b a non-positive integer is a genuine pole of 1F1 (the (b)_k Pochhammer denominator hits
+// zero mid-recurrence) UNLESS _numeratorReachesZeroFirst(a, b) -- see that helper's own
+// comment for the a>b/a===b distinction; for a===b specifically, excluding it from the pole
+// guard at least avoids *asserting* a provably wrong +Infinity (mpmath: f11(-1,-1,5) is a
+// finite 6, not a pole, and not e^z either -- see #1424, filed specifically for this a===b
+// indeterminate-form defect, distinct from #1423, a different f11 defect in the asymptotic
+// branch) in favor of the honest "no answer" signal NaN already carries by this codebase's own
+// convention, even though the true finite value isn't computed either way.
+//
+// Where this fires (the genuine a<b pole case), +Infinity matches this codebase's existing
+// pole convention (gamma.js, logGamma.js, riemannZeta.js, hurwitzZeta.js all diverge to
+// +Infinity at their own poles); without any guard at all, the division by zero mid-recurrence
+// produced an inconsistently-signed Infinity/-Infinity depending on b's parity instead.
+//
+// @method _isF11Pole
+// @memberof ran.special
+// @param {number} a First parameter.
+// @param {number} b Second parameter.
+// @returns {boolean} Whether f11(a, b, z) diverges to +Infinity for every z.
+// @private
+function _isF11Pole (a, b) {
+  return _isNonPositiveInteger(b) && !_numeratorReachesZeroFirst(a, b)
+}
+
 export function f11 (a, b, z) {
   // Special cases
   if (Math.abs(a) < Number.EPSILON) {
     return 1
+  }
+
+  if (_isF11Pole(a, b)) {
+    return Infinity
   }
 
   if (Math.abs(z) < 50) {

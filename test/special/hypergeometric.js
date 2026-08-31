@@ -123,5 +123,65 @@ describe('special.hypergeometric', () => {
         assert(equal(special.f11(1, 2, 100), (Math.exp(100) - 1) / 100))
       })
     })
+
+    describe('b <= 0 integer (pole)', () => {
+      it('diverges to +Infinity, not an arbitrarily-signed Infinity, for b = 0, -1, -2', () => {
+        // (b)_k Pochhammer denominator hits zero mid-recurrence at a non-positive integer b;
+        // without an explicit guard this used to fall through to an unguarded division by zero
+        // producing a sign that depended on b's parity (+Infinity at b=0, -Infinity at b=-1,
+        // +Infinity at b=-2) rather than this codebase's established pole convention (gamma.js,
+        // logGamma.js, riemannZeta.js, hurwitzZeta.js all diverge to +Infinity at their poles).
+        for (const b of [0, -1, -2, -5]) {
+          assert.strictEqual(special.f11(1, b, 3), Infinity)
+        }
+      })
+
+      it('still fires when a is also a non-positive integer but a < b (denominator hits its zero first)', () => {
+        // Unlike the a>b case below, here the (b)_k denominator's zero at k=|b|+1 comes before
+        // the (a)_k numerator's own zero at k=|a|+1 (|a|>|b|), so the pole is genuinely reached
+        // -- confirmed against mpmath, which itself raises ZeroDivisionError ("pole in
+        // hypergeometric series") for hyp1f1(-3,-1,5) rather than returning a finite value.
+        assert.strictEqual(special.f11(-3, -1, 5), Infinity)
+      })
+
+      it('does not fire when a is also a non-positive integer with a > b (numerator terminates the series first)', () => {
+        // A review-caught regression: an earlier, overbroad version of the pole guard above
+        // returned Infinity here too, even though (a)_k reaches zero at k=|a|+1, strictly
+        // before the (b)_k denominator's own zero at k=|b|+1 -- the series is a well-defined
+        // polynomial (mpmath mp.dps=50: hyp1f1(-1,-2,3)=2.5, hyp1f1(-2,-3,1)=11/6 exactly).
+        assert(equal(special.f11(-1, -2, 3), 2.5))
+        assert(equal(special.f11(-2, -3, 1), 11 / 6))
+      })
+
+      it('a = 0 takes priority over the b <= 0 pole guard', () => {
+        // hypergeometric.js checks |a|<EPSILON before the pole guard -- f11(0, b, z) is exactly
+        // 1 regardless of b, including a non-positive integer b that would otherwise be a pole.
+        assert.strictEqual(special.f11(0, -3, 5), 1)
+      })
+
+      it('does not fire when a equals b (also excluded, but the true value is still not computed)', () => {
+        // A second review-caught issue: a===b, both non-positive integers, is also excluded
+        // from the pole guard (a>=b, not a>b) -- but unlike the a>b case above, this is NOT a
+        // well-defined polynomial. (a)_k and (b)_k hit zero at the SAME index, a genuine 0/0
+        // Pochhammer-ratio indeterminate form _f11TaylorSeries's recurrence cannot resolve; it
+        // silently corrupts to NaN there (this is what falling through to it now produces,
+        // pinned below), a pre-existing gap this guard does not attempt to fix. Excluding a===b
+        // from the guard still matters: it stops the guard from *asserting* a provably wrong
+        // +Infinity for this case (mpmath mp.dps=50: hyp1f1(-1,-1,5)=6, not a pole, and not
+        // e^z either -- see test/precision-special.js's own WITHHELD entry for this exact
+        // point). See issue #1424, filed specifically for this a===b defect (distinct from
+        // #1423, a different f11 defect in the asymptotic branch) -- if #1424 is ever fixed,
+        // this assertion and the WITHHELD entry above both need updating to the true finite
+        // value instead of NaN.
+        assert(Number.isNaN(special.f11(-1, -1, 5)))
+      })
+
+      it('does not fire for a negative non-integer b', () => {
+        // Number.isInteger(b) must gate the guard -- a non-integer negative b is not a pole and
+        // must fall through to the ordinary series evaluation.
+        // mpmath mp.dps=50: hyp1f1(1, -2.5, 3) -> -887.4329677664421...
+        assert(equal(special.f11(1, -2.5, 3), -887.4329677664421))
+      })
+    })
   })
 })

@@ -6,6 +6,15 @@ require('@babel/register').default()
 const special = require('../src/special/index.js')
 
 const FN = {
+  erf: special.erf,
+  erfc: special.erfc,
+  erfcx: special.erfcx,
+  erfinv: special.erfinv,
+  e1: special.e1,
+  f11: special.f11,
+  lambertW0: special.lambertW0,
+  lambertW1m: special.lambertW1m,
+  owenT: special.owenT,
   besselI: special.besselI,
   besselISpherical: special.besselISpherical,
   besselIExpScaled: special.besselIExpScaled,

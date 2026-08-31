@@ -47,7 +47,17 @@ const DIST_REPORT_PATH = flagValue('--dist', '/tmp/difftest-dist-report.json')
 // reason(s) that were originally accepted for that entry (issue #1372) -- not to the
 // entry name as a whole, so a newly-appeared, non-allowlisted reason on the same key
 // still fails the gate. Values match the reason keys produced by offenderReasons().
-const KNOWN_ISSUES = {}
+//
+// `f11` (#1423): ran.special.f11's asymptotic branch (|z|>=50) silently drops the sign of
+// Gamma(a) for negative non-integer a -- the same exp(logGamma-sum)-loses-sign mechanism
+// beta.js's own _gammaSign fix (#1416) already corrected in a sibling function, but not
+// here. Surfaced by the #1415 remainder-cluster sweep; only the `divergences` reason is
+// allowlisted (this entry's own SWEEP_SPEC ulp_ceiling is calibrated with headroom over
+// the measured finite-only max, so a ceiling breach on this key would still be a new,
+// non-allowlisted failure).
+const KNOWN_ISSUES = {
+  f11: { issue: 1423, reasons: ['divergences'] }
+}
 
 function readReport (filePath) {
   if (!fs.existsSync(filePath)) {
