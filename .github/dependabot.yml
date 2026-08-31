@@ -36,3 +36,12 @@ updates:
           - "mathjax-node-page"
           - "pug"
           - "sass"
+    ignore:
+      # standard@17.1.2 (latest) pulls in eslint-config-standard@17.1.0, whose
+      # peerDependency is "eslint": "^8.0.1" — it has not been updated for
+      # ESLint 9/10's flat-config transition. A major bump of eslint alone
+      # breaks `npm ci` with an ERESOLVE conflict (see PR #1417). Remove this
+      # once `standard`/`eslint-config-standard` support ESLint 9+, or once
+      # the project migrates off `standard`.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
