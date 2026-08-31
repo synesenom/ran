@@ -24,7 +24,12 @@ const FN = {
   logBeta: special.logBeta,
   betaIncomplete: special.betaIncomplete,
   regularizedBetaIncomplete: special.regularizedBetaIncomplete,
-  logBinomial: special.logBinomial
+  logBinomial: special.logBinomial,
+  riemannZeta: special.riemannZeta,
+  hurwitzZeta: special.hurwitzZeta,
+  generalizedHarmonic: special.generalizedHarmonic,
+  polylogarithm: special.polylogarithm,
+  stirlingSecond: special.stirlingSecond
 }
 
 // JSON has no Infinity/NaN literal (JSON.stringify silently emits `null` for both), so encode

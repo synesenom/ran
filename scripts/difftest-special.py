@@ -40,6 +40,7 @@ from mpmath import mp, besseli, besselk
 from mpmath import digamma as mp_digamma
 from mpmath import gamma as mp_gamma, beta as mp_beta, gammainc, betainc
 from mpmath import binomial as mp_binomial, inf, mpf, log
+from mpmath import zeta, polylog, stirling2
 
 mp.dps = 50
 
@@ -257,6 +258,36 @@ def logBinomial_ref(n, k):
     return log(abs(mp_binomial(n, k)))
 
 
+def riemannZeta_ref(s):
+    # See precision-refs-special.py's riemannZeta_ref for the full rationale (mpmath raises at
+    # the s=1 pole instead of returning Infinity).
+    if s == 1:
+        return mpf('inf')
+    return zeta(s)
+
+
+def hurwitzZeta_ref(s, a):
+    # See precision-refs-special.py's hurwitzZeta_ref: mpmath's own pole behavior at s=1 is
+    # inconsistent across `a`, so guard explicitly rather than rely on it.
+    if s == 1:
+        return mpf('inf')
+    return zeta(s, a)
+
+
+def generalizedHarmonic_ref(n, m):
+    return mpf(sum(mpf(k) ** (-mpf(m)) for k in range(1, int(n) + 1)))
+
+
+def polylogarithm_ref(n, z):
+    return polylog(n, z)
+
+
+def stirlingSecond_ref(n, k):
+    if n < 0 or k < 0 or k > n:
+        return mpf(0)
+    return mpf(stirling2(int(n), int(k), exact=True))
+
+
 REF_FN = {
     'besselI': besselI_ref,
     'besselISpherical': besselISpherical_ref,
@@ -274,6 +305,11 @@ REF_FN = {
     'betaIncomplete': betaIncomplete_ref,
     'regularizedBetaIncomplete': regularizedBetaIncomplete_ref,
     'logBinomial': logBinomial_ref,
+    'riemannZeta': riemannZeta_ref,
+    'hurwitzZeta': hurwitzZeta_ref,
+    'generalizedHarmonic': generalizedHarmonic_ref,
+    'polylogarithm': polylogarithm_ref,
+    'stirlingSecond': stirlingSecond_ref,
 }
 
 
@@ -475,6 +511,89 @@ SWEEP_SPEC = {
         ],
         'n': 10000,
         'ulp_ceiling': 105000,  # measured max 25771 ULP (n=2.67, k=869.67)
+    },
+    # ─── Issue #1414, zeta/polylog cluster ───
+    # Calibrated from the 2026-08-31 n=10000/function run (seed=42, mpmath 1.4.1) at roughly
+    # >=2x headroom over that run's measured max_ulp for the two ceilings tied to riemannZeta's
+    # known negative-s degradation (kept elevated per the besselK/besselKnu precedent above --
+    # a known, already-documented gap must stay visible, not be tightened away), and >=3x
+    # headroom elsewhere -- never a blind number (CLAUDE.md).
+    'riemannZeta': {
+        # Real callers (davis.js, half-logistic.js, moyal.js, zeta.js) only ever pass s>=1 (often
+        # exactly 3, or s-{1,2,3,4} for a Zeta-distribution shape parameter s>=0), so most density
+        # goes there; a moderate negative tail is included too, matching the fixed grid's own
+        # -5 lower bound (precision-refs-special.py's _TOL_RIEMANNZETA_NEGATIVE_S bucket) rather
+        # than the deeply-negative region where riemannZeta's Wynn-epsilon extrapolation becomes
+        # flatly wrong (see that file's WITHHELD entry) -- deliberately excluded here so this
+        # ceiling stays a meaningful signal instead of drowning in an already-documented gap.
+        #
+        # This sweep found the degradation is broader than the fixed grid's two integer probes
+        # (s=-3,-5) suggested: the worst point in-domain is s=-4.448 (non-integer), rel error
+        # ~2.17e-7 -- about 3 orders of magnitude worse than the fixed grid's own s=-5 integer
+        # probe (2.82e-10). Same root-cause mechanism (Wynn-epsilon extrapolation of terms
+        # growing as (k+1)^|s|), just more pronounced off the integer values the fixed grid
+        # happened to sample -- confirms this is a real, somewhat broader gap than initially
+        # characterized, not a new distinct defect. Still out of scope to fix here.
+        'args': [
+            {'name': 's', 'kind': 'float', 'lo': -5, 'hi': 100, 'log_uniform': False},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 3_000_000_000,  # measured max 1436388112 ULP (s=-4.448387035092476)
+    },
+    'hurwitzZeta': {
+        # s spans the term-count-ramp threshold region (fixed grid: d=s-1 in [0.01,0.02]) plus
+        # broad interior coverage; a spans the shift parameter's own realistic range (real
+        # callers pass d1/2, d2/2, or a shape parameter c, all positive).
+        'args': [
+            {'name': 's', 'kind': 'float', 'lo': 0.001, 'hi': 50, 'log_uniform': False},
+            {'name': 'a', 'kind': 'float', 'lo': 1e-3, 'hi': 100, 'log_uniform': True},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 300000,  # measured max 86741 ULP (s=24.6887381156395, a=98.67266454918233)
+    },
+    'generalizedHarmonic': {
+        # n spans both the n<10 direct-sum branch and the n>=10 zeta-difference branch; m spans
+        # negative-to-positive (zipf.js's Hill-estimator-fitted s can be small, so s-{1,2,3,4}
+        # dips m negative for the moment precomputation), including m near 1 where
+        # generalized-harmonic.js:31's riemannZeta(m)-hurwitzZeta(m,n+1) subtraction is most
+        # cancellation-prone.
+        #
+        # The measured worst case (n=12, m=-3.993) is the same riemannZeta negative-non-integer-s
+        # degradation documented in the riemannZeta entry above, propagated through this
+        # function's own zeta-difference branch -- not a distinct defect.
+        'args': [
+            {'name': 'n', 'kind': 'int', 'lo': 0, 'hi': 200},
+            {'name': 'm', 'kind': 'float', 'lo': -4, 'hi': 10, 'log_uniform': False},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 3_000_000,  # measured max 1119289 ULP (n=12, m=-3.9933204025533464)
+    },
+    'polylogarithm': {
+        # n spans the real callers' fixed 2..5 range plus n=1 (now a closed-form early return,
+        # issue #1414) and a couple of higher orders; z spans the full documented |z|<1 domain
+        # including negative z, not just the (0,1) real callers happen to use.
+        #
+        # The measured worst case (n=2, z=0.998) is the general Wynn-epsilon series' ordinary
+        # convergence-quality degradation near z=1 -- the same mechanism precision-refs-
+        # special.py's _TOL_POLYLOG_N3_NEAR_1 documents for n=3, just at n=2 (n=1's own much
+        # more severe instance of this mechanism is fixed by the closed form above).
+        'args': [
+            {'name': 'n', 'kind': 'int', 'lo': 1, 'hi': 10},
+            {'name': 'z', 'kind': 'float', 'lo': -0.999, 'hi': 0.999, 'log_uniform': False},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 5_000_000_000_000,  # measured max 1318156825328 ULP (n=2, z=0.998404998864931)
+    },
+    'stirlingSecond': {
+        # n, k independently ranged (not tied k<=n) so both the interior recurrence and the
+        # k>n/n<0/k<0 domain-guard branch get exercised, mirroring logBinomial's own
+        # independently-ranged (n,k) design above.
+        'args': [
+            {'name': 'n', 'kind': 'int', 'lo': 0, 'hi': 40},
+            {'name': 'k', 'kind': 'int', 'lo': 0, 'hi': 40},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 20,  # measured max 3 ULP (n=38, k=14) -- float64 rounding beyond 2^53, benign (no cancellation)
     },
 }
 
