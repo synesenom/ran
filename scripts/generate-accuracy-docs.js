@@ -34,7 +34,8 @@ const OUT_PATH = flagValue('--out', path.join(root, 'docs/accuracy.md'))
 // besselK/besselKnu (#1140), Gamma.pdf (#1363), and InverseGamma.pdf (#1364) were
 // previously tracked here too; all underlying issues are now resolved and a fresh
 // differential-testing sweep confirmed all are clean, so their entries were removed.
-const KNOWN_ISSUES = {}
+// `f11` (#1423): see the identical comment in scripts/difftest-ci-gate.js.
+const KNOWN_ISSUES = { f11: 1423 }
 
 function readReport (filePath) {
   if (!fs.existsSync(filePath)) return null
