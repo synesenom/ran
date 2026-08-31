@@ -106,16 +106,25 @@ _TOL_CVM_SERIES_TRUNCATION = 1e-7
 # on here.
 _TOL_AD_ERRFIX_DIVERGENCE = 1e-4
 
-# kolmogorovSmirnov: confirmed by direct isolation (evaluate ran.dist.Kolmogorov().survival(z) in
-# Node at the EXACT same z = sqrt(ne)*D that R's own ks.test(..., exact=FALSE) computes -- the D
-# statistic itself and the sqrt(ne) scaling both already match R to float64 noise, so the ~1e-4
-# relative gap is entirely inside ran.dist.Kolmogorov's own cdf/survival computation, not
-# kolmogorovSmirnov's formula). This is a distribution-level (`src/dist/kolmogorov.js`) precision
-# question, not a src/test/ hypothesis-test one -- test/precision-continuous.js already gates
-# Kolmogorov's cdf/pdf at 5 curated points (all passing at 1e-14), so this gap is confined to
-# z-values its curated probes don't happen to hit. Flagged for Bug Triage; not fixed here (out of
-# this issue's scope, and out of src/test/'s module boundary).
-_TOL_KOLMOGOROV_DIST_PRECISION = 1e-4
+# See solutions/testing/2026-08-31-2014-kolmogorov-r-pkstwo-asymptotic-limit.md
+# kolmogorovSmirnov: the ~1e-4 relative gap was isolated (issue #1412) by evaluating
+# ran.dist.Kolmogorov().survival(z) in Node at the EXACT same z = sqrt(ne)*D that R's own
+# ks.test(..., exact=FALSE) computes -- the D statistic itself and the sqrt(ne) scaling both
+# already match R to float64 noise, so the gap is entirely inside the asymptotic Kolmogorov CDF
+# evaluation itself. Root cause (issue #1412, confirmed by an independent mpmath mp.dps=50
+# ground-truth computation of the same theta-series at z=0.98552065998180416, pinned as a
+# regression point in test/precision-continuous.js): R is the imprecise side, not ranjs. mpmath
+# gives 0.28584535144550154703679675822; ran.dist.Kolmogorov().survival(z) matches it to 1.85e-16
+# relative error (float64 noise); R's ks.test p-value (0.28587293091131405) is off by 9.65e-5.
+# R's asymptotic path (ks.test.R -> pkstwo(sqrt(n)*STATISTIC) -> .Call(C_pKS2, p, tol=1e-6) ->
+# ks.c's K2l()) evaluates the identical series Sum_{k=-inf}^{inf} (-1)^k exp(-2 k^2 x^2), but
+# terminates its loop once the ABSOLUTE change between successive partial sums drops below the
+# hardcoded default tol=1e-6 -- six orders of magnitude looser, and differently scaled, than
+# ran.dist.Kolmogorov's Number.EPSILON-RELATIVE termination in src/dist/kolmogorov.js. No defect
+# exists in src/dist/kolmogorov.js; this tolerance accommodates R's own asymptotic approximation
+# limit, which this generator has no way to tighten (Rscript's ks.test() does not expose pkstwo's
+# tol argument).
+_TOL_R_PKSTWO_ASYMPTOTIC_LIMIT = 1e-4
 
 
 # ─── R invocation ───
@@ -525,7 +534,7 @@ def _kolmogorov_smirnov_case(x, y, note):
     stat, p = kolmogorov_smirnov_ref(x, y)
     return _case(
         'kolmogorovSmirnov', [x, y], stat, p, p >= ALPHA, note, DEFAULT_TOL,
-        pvalue_tol=_TOL_KOLMOGOROV_DIST_PRECISION,
+        pvalue_tol=_TOL_R_PKSTWO_ASYMPTOTIC_LIMIT,
     )
 
 
