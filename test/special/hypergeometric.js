@@ -123,5 +123,18 @@ describe('special.hypergeometric', () => {
         assert(equal(special.f11(1, 2, 100), (Math.exp(100) - 1) / 100))
       })
     })
+
+    describe('b <= 0 integer (pole)', () => {
+      it('diverges to +Infinity, not an arbitrarily-signed Infinity, for b = 0, -1, -2', () => {
+        // (b)_k Pochhammer denominator hits zero mid-recurrence at a non-positive integer b;
+        // without an explicit guard this used to fall through to an unguarded division by zero
+        // producing a sign that depended on b's parity (+Infinity at b=0, -Infinity at b=-1,
+        // +Infinity at b=-2) rather than this codebase's established pole convention (gamma.js,
+        // logGamma.js, riemannZeta.js, hurwitzZeta.js all diverge to +Infinity at their poles).
+        for (const b of [0, -1, -2, -5]) {
+          assert.strictEqual(special.f11(1, b, 3), Infinity)
+        }
+      })
+    })
   })
 })

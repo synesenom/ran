@@ -41,6 +41,8 @@ from mpmath import digamma as mp_digamma
 from mpmath import gamma as mp_gamma, beta as mp_beta, gammainc, betainc
 from mpmath import binomial as mp_binomial, inf, mpf, log
 from mpmath import zeta, polylog, stirling2
+from mpmath import erf as mp_erf, erfc as mp_erfc, erfinv as mp_erfinv
+from mpmath import expint, hyp1f1, lambertw, quad, pi, exp
 
 mp.dps = 50
 
@@ -288,6 +290,59 @@ def stirlingSecond_ref(n, k):
     return mpf(stirling2(int(n), int(k), exact=True))
 
 
+# ─── Issue #1415 remainder cluster ───
+# Duplicated from precision-refs-special.py rather than imported, per this file's own
+# no-cross-script-import convention (see module docstring).
+
+def erf_ref(x):
+    return mp_erf(x)
+
+
+def erfc_ref(x):
+    return mp_erfc(x)
+
+
+def erfcx_ref(x):
+    return exp(mpf(x) ** 2) * mp_erfc(x)
+
+
+def erfinv_ref(x):
+    return mp_erfinv(x)
+
+
+def e1_ref(z):
+    if z < 0:
+        return mpf('nan')
+    return expint(1, z)
+
+
+def f11_ref(a, b, z):
+    if abs(a) < 2.220446049250313e-16:
+        return mpf(1)
+    if b <= 0 and b == int(b):
+        return mpf('inf')
+    return hyp1f1(a, b, z)
+
+
+def lambertW0_ref(z):
+    if z < -exp(-1):
+        return mpf('nan')
+    return lambertw(z, k=0)
+
+
+def lambertW1m_ref(z):
+    if z < -exp(-1) or z >= 0:
+        return mpf('nan')
+    return lambertw(z, k=-1)
+
+
+def owenT_ref(h, a):
+    # See precision-refs-special.py's owenT_ref for the full rationale (no built-in Owen's T in
+    # mpmath; defining-integral evaluation via mpmath.quad, independent of owen-t.js's own
+    # 6-sub-algorithm lookup-table scheme).
+    return quad(lambda x: exp(-h * h * (1 + x * x) / 2) / (1 + x * x), [0, a]) / (2 * pi)
+
+
 REF_FN = {
     'besselI': besselI_ref,
     'besselISpherical': besselISpherical_ref,
@@ -310,6 +365,15 @@ REF_FN = {
     'generalizedHarmonic': generalizedHarmonic_ref,
     'polylogarithm': polylogarithm_ref,
     'stirlingSecond': stirlingSecond_ref,
+    'erf': erf_ref,
+    'erfc': erfc_ref,
+    'erfcx': erfcx_ref,
+    'erfinv': erfinv_ref,
+    'e1': e1_ref,
+    'f11': f11_ref,
+    'lambertW0': lambertW0_ref,
+    'lambertW1m': lambertW1m_ref,
+    'owenT': owenT_ref,
 }
 
 
@@ -594,6 +658,120 @@ SWEEP_SPEC = {
         ],
         'n': 10000,
         'ulp_ceiling': 20,  # measured max 3 ULP (n=38, k=14) -- float64 rounding beyond 2^53, benign (no cancellation)
+    },
+    # ─── Issue #1415, remainder cluster ───
+    # Calibrated from the 2026-08-31 n=10000/function run (n=3000 for owenT, see its own entry
+    # below) at roughly >=2x headroom over that run's measured max_ulp -- never a blind number
+    # (CLAUDE.md), mirroring the calibration convention of every SWEEP_SPEC entry above.
+    'erf': {
+        # Straddles the x=2 series/CF crossover (error.js:67); negative x exercises the
+        # sign-flip branch (error.js:66).
+        'args': [
+            {'name': 'x', 'kind': 'float', 'lo': -10, 'hi': 10, 'log_uniform': False},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 40,  # measured max 10 ULP (x=-1.94983890426062)
+    },
+    'erfc': {
+        # Straddles the x=1 series/CF crossover (distinct from erf's own x=2, error.js:85-86)
+        # and the x=26.6 hard underflow-to-0 floor (error.js:81). The ceiling stays elevated on
+        # purpose to keep visible the same intentional-early-floor gap
+        # precision-refs-special.py's own _erf_grid deliberately does not probe with an exact
+        # tolerance (the true value in (26.6, ~27.3) is still a representable float64 subnormal
+        # but ranjs already floors to exactly 0 there) -- this is a documented approximation,
+        # not a defect, but a random sweep over this domain will occasionally land in that band.
+        'args': [
+            {'name': 'x', 'kind': 'float', 'lo': -5, 'hi': 30, 'log_uniform': False},
+        ],
+        'n': 10000,
+        # measured max 213580794524112 ULP (x=26.60058330468647, mpmath ref 1.055e-309, ranjs
+        # 0) -- squarely the intentional early-floor band described above, not a new defect;
+        # elevated ceiling keeps it visible rather than tightened away, mirroring besselK's own
+        # deliberately-elevated ceiling for its known x=6 crossover.
+        'ulp_ceiling': 500_000_000_000_000,
+    },
+    'erfcx': {
+        # Straddles x<=0 direct / x<=1 series / x>1 CF (error.js:101-103).
+        'args': [
+            {'name': 'x', 'kind': 'float', 'lo': -5, 'hi': 50, 'log_uniform': False},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 40,  # measured max 19 ULP (x=2.316457919903513)
+    },
+    'erfinv': {
+        # Straddles the |x|=0.5 three-way residual-cancellation crossover (error.js:131); domain
+        # kept strictly inside (-1,1) since the true inverse diverges at the endpoints.
+        'args': [
+            {'name': 'x', 'kind': 'float', 'lo': -0.999999, 'hi': 0.999999, 'log_uniform': False},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 30,  # measured max 11 ULP (x=0.8203261748040177)
+    },
+    'e1': {
+        # Straddles the z=1 series/CF crossover (e1.js:15). Positive domain only for this pass,
+        # mirroring digamma's own initial-pass rationale above -- z<0 is ranjs's own explicit
+        # NaN domain guard (e1.js:13), not a numerical-accuracy question a ULP sweep answers.
+        'args': [
+            {'name': 'z', 'kind': 'float', 'lo': 1e-3, 'hi': 500, 'log_uniform': True},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 70,  # measured max 28 ULP (z=1.0366598319363416)
+    },
+    'f11': {
+        # Straddles the |z|=50 Taylor/asymptotic crossover (hypergeometric.js:67) broadly across
+        # (a,b); b spans negative-to-positive but a continuous random draw essentially never
+        # lands exactly on a non-positive integer, so the pole branch (guarded by this same
+        # issue's own new f11() fix) is exercised only by the fixed grid's dedicated points, not
+        # this sweep.
+        'args': [
+            {'name': 'a', 'kind': 'float', 'lo': -10, 'hi': 10, 'log_uniform': False},
+            {'name': 'b', 'kind': 'float', 'lo': -10, 'hi': 10, 'log_uniform': False},
+            {'name': 'z', 'kind': 'float', 'lo': 1e-3, 'hi': 200, 'log_uniform': True},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 4_000_000,  # measured max ~1.1e6 ULP, cancellation-heavy region near b close to a negative integer
+    },
+    'lambertW0': {
+        # Straddles the z=-1/e domain boundary and the z=1 initial-guess-seed crossover
+        # (lambert-w.js:62); lower bound kept 0.001 above the true -1/e to avoid the
+        # ULP-ambiguous exact-boundary comparison the committed grid's own comment documents.
+        'args': [
+            {'name': 'z', 'kind': 'float', 'lo': -0.3678, 'hi': 100, 'log_uniform': False},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 20,  # measured max 3 ULP (z=-0.3637447336180677)
+    },
+    'lambertW1m': {
+        # Straddles the z=-1/e domain boundary and the z=-0.1 initial-guess-seed crossover
+        # (lambert-w.js:35); bounds kept strictly inside (-1/e, 0), same ULP-ambiguity rationale
+        # as lambertW0 above.
+        'args': [
+            {'name': 'z', 'kind': 'float', 'lo': -0.3678, 'hi': -1e-6, 'log_uniform': False},
+        ],
+        'n': 10000,
+        'ulp_ceiling': 40,  # measured max 18 ULP (z=-0.36771495838561274)
+    },
+    'owenT': {
+        # Straddles the A_RANGES/H_RANGES sector-table boundaries (owen-t.js:10-34) and the
+        # top-level |a|<=1/|h|<=0.67(cut) dispatch (owen-t.js:304-311) via broad (h,a) coverage,
+        # including negative a (sign-flip branch). n reduced to 3000 (vs. the 10000 convention
+        # everywhere else in this file) because owenT_ref's mpmath.quad reference costs orders
+        # of magnitude more per point than every other entry's direct closed-form mpmath call --
+        # this is a non-blocking, out-of-band diagnostic (ADR-0052), so the reduced density does
+        # not weaken any CI-enforced contract.
+        #
+        # Worst case (h=3.768546158138297, a=1.0042052854298618, ~178.6M ULP, rel error
+        # ~2.7e-6) sits just past the |a|<=1/|a|>1 top-level dispatch boundary
+        # (owen-t.js:304-311) -- a genuine, mild accuracy dip right at that crossover, the same
+        # shape of gap besselK's own x=6 crossover documents elsewhere in this file. Left
+        # unfixed per this issue's own "fixing accuracy defects... file those separately" scope;
+        # ceiling calibrated with headroom over the measured value rather than tightened away.
+        'args': [
+            {'name': 'h', 'kind': 'float', 'lo': 1e-3, 'hi': 10, 'log_uniform': True},
+            {'name': 'a', 'kind': 'float', 'lo': -5, 'hi': 5, 'log_uniform': False},
+        ],
+        'n': 3000,
+        'ulp_ceiling': 500_000_000,
     },
 }
 

@@ -64,6 +64,15 @@ export function f11 (a, b, z) {
     return 1
   }
 
+  // b a non-positive integer is a genuine pole of 1F1 (the (b)_k Pochhammer denominator hits
+  // zero mid-recurrence): without this guard, _f11TaylorSeries's division by zero produces an
+  // inconsistently-signed Infinity/-Infinity depending on b's parity rather than a well-defined
+  // value. +Infinity matches this codebase's existing pole convention (gamma.js, logGamma.js,
+  // riemannZeta.js, hurwitzZeta.js all diverge to +Infinity at their own poles).
+  if (b <= 0 && Number.isInteger(b)) {
+    return Infinity
+  }
+
   if (Math.abs(z) < 50) {
     return _f11TaylorSeries(a, b, z)
   } else {

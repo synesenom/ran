@@ -34,6 +34,7 @@ Usage: python3 scripts/precision-refs-special.py --check   # report mismatches o
        python3 scripts/precision-refs-special.py --emit    # write test/precision-special.js
 """
 import json
+import math
 import os
 import subprocess
 import sys
@@ -43,6 +44,8 @@ from mpmath import digamma as mp_digamma
 from mpmath import gamma as mp_gamma, beta as mp_beta, gammainc, betainc
 from mpmath import binomial as mp_binomial, inf
 from mpmath import zeta, polylog, stirling2
+from mpmath import erf as mp_erf, erfc as mp_erfc, erfinv as mp_erfinv
+from mpmath import expint, hyp1f1, lambertw, quad
 
 mp.dps = 50
 
@@ -412,6 +415,97 @@ def stirlingSecond_ref(n, k):
     return mpf(stirling2(int(n), int(k), exact=True))
 
 
+# ─── Issue #1415 remainder cluster ───
+
+def erf_ref(x):
+    # mpmath's own black-box erf(), independent of error.js:65-69's Maclaurin-series/Laplace-CF
+    # dispatch.
+    return mp_erf(x)
+
+
+def erfc_ref(x):
+    # mpmath's own black-box erfc(), independent of error.js:80-87's own series/CF dispatch --
+    # whose x<=1/x>1 crossover is deliberately different from erf's own x<=2 crossover, to avoid
+    # 1-erf(x) cancellation near x=1 (see
+    # solutions/special-functions/2026-05-17-1540-erfc-crossover-cancellation.md).
+    return mp_erfc(x)
+
+
+def erfcx_ref(x):
+    # exp(x^2)*erfc(x) computed directly from mpmath's own black-box erfc(), independent of
+    # error.js:100-104's own CF-without-the-exp(-x^2)-factor formula. That formula exists purely
+    # to dodge float64 overflow in exp(x^2) for large x -- irrelevant at mp.dps=50's arbitrary
+    # exponent range, so the direct definitional composition is safe everywhere.
+    return exp(mpf(x) ** 2) * mp_erfc(x)
+
+
+def erfinv_ref(x):
+    # mpmath's own black-box erfinv(), independent of error.js:115-135's polynomial-seeded
+    # Newton refinement (whose three-way residual split at |x|=0.5 exists purely to avoid
+    # cancellation in the *iterative* refinement, not a property of the true inverse function).
+    return mp_erfinv(x)
+
+
+def e1_ref(z):
+    # mpmath's own black-box expint(1, z) == E_1(z) by definition, independent of e1.js's own
+    # A&S 5.1.11 series / 5.1.22 continued-fraction dispatch (e1.js:15-46). mpmath returns a
+    # complex value for z<0 (E_1 has a branch cut along the negative real axis) rather than
+    # ranjs's own explicit NaN there (e1.js:13) -- translate explicitly. z==0 already returns a
+    # real +inf directly from mpmath, no translation needed.
+    if z < 0:
+        return mpf('nan')
+    return expint(1, z)
+
+
+def f11_ref(a, b, z):
+    # mpmath's own black-box hyp1f1(), independent of hypergeometric.js's own Taylor-series /
+    # truncate-at-minimum-term-asymptotic-series dispatch (hypergeometric.js:67-71). Mirrors
+    # f11()'s own branch order: |a|<EPSILON is an exact-1 special case checked first
+    # (hypergeometric.js:63-65); b a non-positive integer is a genuine pole (mpmath itself
+    # raises ZeroDivisionError there, "pole in hypergeometric series") -- translate to
+    # +Infinity, matching this codebase's own pole convention (gamma_ref, riemannZeta_ref above)
+    # and the guard added to f11() itself by this same issue's own new coverage.
+    if abs(a) < 2.220446049250313e-16:
+        return mpf(1)
+    if b <= 0 and b == int(b):
+        return mpf('inf')
+    return hyp1f1(a, b, z)
+
+
+def lambertW0_ref(z):
+    # mpmath's own black-box lambertw(z, k=0) (principal branch), independent of
+    # lambert-w.js:58-63's own Halley-refined initial-guess dispatch. mpmath returns a complex
+    # value for z<-1/e rather than ranjs's own explicit NaN there -- translate explicitly.
+    if z < -exp(-1):
+        return mpf('nan')
+    return lambertw(z, k=0)
+
+
+def lambertW1m_ref(z):
+    # mpmath's own black-box lambertw(z, k=-1) (branch -1), independent of
+    # lambert-w.js:30-45's own Halley-refined initial-guess dispatch. ranjs restricts the domain
+    # to [-1/e, 0) (lambert-w.js:31); mpmath's own branch -1 is real there but complex outside
+    # it, so translate outside that domain to match.
+    if z < -exp(-1) or z >= 0:
+        return mpf('nan')
+    return lambertw(z, k=-1)
+
+
+def owenT_ref(h, a):
+    # No built-in Owen's T in mpmath. Independent evaluation via the function's own defining
+    # integral (Owen, 1956): T(h,a) = (1/2pi) * integral_0^a exp(-h^2*(1+x^2)/2)/(1+x^2) dx, via
+    # mpmath.quad at mp.dps=50 -- independent of owen-t.js's own 6-sub-algorithm lookup-table
+    # numerical scheme (owen-t.js:10-56, translated from the Patefield & Tandy JSS algorithm),
+    # even though both ultimately compute the same integral: this is the same "definition, not
+    # algorithm" independence bar gammaLowerIncomplete_ref/betaIncomplete_ref already apply
+    # (mpmath's own gammainc/betainc black boxes rather than ranjs's own series). mpmath.quad
+    # handles a negative integration bound (a<0) correctly via signed-interval integration
+    # (verified empirically: quad(f,[0,-0.5]) == -quad(f,[0,0.5]) to full mp.dps=50 precision),
+    # matching owen-t.js's own a<0 -> -owenT(h,-a) identity (owen-t.js:314), so no separate
+    # sign-flip branch is needed here.
+    return quad(lambda x: exp(-h * h * (1 + x * x) / 2) / (1 + x * x), [0, a]) / (2 * pi)
+
+
 REF_FN = {
     'besselI': besselI_ref,
     'besselISpherical': besselISpherical_ref,
@@ -437,6 +531,15 @@ REF_FN = {
     'generalizedHarmonic': generalizedHarmonic_ref,
     'polylogarithm': polylogarithm_ref,
     'stirlingSecond': stirlingSecond_ref,
+    'erf': erf_ref,
+    'erfc': erfc_ref,
+    'erfcx': erfcx_ref,
+    'erfinv': erfinv_ref,
+    'e1': e1_ref,
+    'f11': f11_ref,
+    'lambertW0': lambertW0_ref,
+    'lambertW1m': lambertW1m_ref,
+    'owenT': owenT_ref,
 }
 
 
@@ -901,6 +1004,138 @@ def _stirlingSecond_grid(add):
         add('stirlingSecond', (n, k), f'stirlingSecond n={n},k={k}: interior recurrence')
 
 
+def _erf_grid(add):
+    # x=2 series/CF crossover (error.js:67).
+    for x in [0, 0.001, 0.5, 1, 1.9, 1.99, 2, 2.01, 2.1, 5, 10, 20, 26]:
+        add('erf', (x,), 'erf: x<=2 series/x>2 CF crossover')
+    # Sign-flip branch (error.js:66).
+    for x in [-0.001, -0.5, -1, -2, -5]:
+        add('erf', (x,), 'erf: x<0 sign-flip branch')
+
+
+def _erfc_grid(add):
+    # x=1 series/CF crossover (error.js:85-86, deliberately different from erf's own x=2), and
+    # the x=26.6 hard-underflow-to-0 floor (error.js:81).
+    for x in [0, 0.001, 0.5, 0.9, 0.99, 1, 1.01, 1.1, 2, 5, 10, 20]:
+        add('erfc', (x,), 'erfc: x<=1 series/x>1 CF crossover (distinct from erf\'s own x=2)')
+    # Points strictly past x=26.6 are deliberately not probed in the (26.6, ~27.3] sliver where
+    # the true value is still a representable float64 subnormal (e.g. ~6.4e-310 at x=26.61) but
+    # ranjs's own hard floor already returns exactly 0 -- an intentional, documented
+    # approximation (error.js:81), not an accuracy defect; x=30 is included since by then the
+    # true value has itself underflowed past the smallest representable subnormal and rounds to
+    # 0 on both sides, so it stays a meaningful boundary check.
+    for x in [26, 26.5, 26.59, 26.6, 30]:
+        add('erfc', (x,), 'erfc: x=26.6 hard underflow-to-0 floor')
+    for x in [-0.001, -0.5, -1, -2, -5]:
+        add('erfc', (x,), 'erfc: x<0 branch (1+erf(-x))')
+
+
+def _erfcx_grid(add):
+    # x<=0 direct branch and x=1 series/CF crossover (error.js:101-103).
+    for x in [-5, -1, -0.5, 0, 0.001, 0.5, 0.9, 0.99, 1, 1.01, 1.1, 2]:
+        add('erfcx', (x,), 'erfcx: x<=0 direct / x<=1 series / x>1 CF crossover')
+    # Large x: erfcx stays finite (~1/(x*sqrt(pi))) unlike erfc, which underflows past x=26.6 --
+    # the function's whole reason for existing.
+    for x in [10, 26.6, 50, 100, 1000]:
+        add('erfcx', (x,), 'erfcx: large x, stays finite past erfc\'s own underflow floor')
+
+
+def _erfinv_grid(add):
+    # |x|=0.5 three-way residual-cancellation-avoidance crossover (error.js:131).
+    for x in [-0.999, -0.9, -0.51, -0.5, -0.49, -0.1, 0, 0.1, 0.49, 0.5, 0.51, 0.9, 0.999]:
+        add('erfinv', (x,), 'erfinv: |x|=0.5 three-way residual-cancellation crossover')
+
+
+def _e1_grid(add):
+    # z=1 series/CF crossover (e1.js:15).
+    for z in [0.001, 0.5, 0.9, 0.99, 1, 1.01, 1.1, 2, 5, 10, 50, 100, 500]:
+        add('e1', (z,), 'e1: z<=1 A&S 5.1.11 series / z>1 A&S 5.1.22 CF crossover')
+    # Explicit boundary branches (e1.js:13): z=0 -> +Infinity, z<0 -> NaN.
+    add('e1', (0,), 'e1 z=0: explicit +Infinity boundary')
+    for z in [-0.5, -5]:
+        add('e1', (z,), 'e1 z<0: explicit NaN domain guard')
+
+
+def _f11_grid(add):
+    # |a|<EPSILON exact-1 special case (hypergeometric.js:63-65).
+    for b in [0.5, 1, 2, 5]:
+        for z in [0, 1, 10, 40, 60, 100]:
+            add('f11', (0, b, z), 'f11 a=0: exact-1 special case')
+    # |z|=50 Taylor/asymptotic crossover (hypergeometric.js:67), several (a,b) pairs.
+    for a, b in [(0.5, 1), (1, 2), (2, 1), (3, 7)]:
+        for z in [49, 49.9, 50, 50.1, 51]:
+            add('f11', (a, b, z), f'f11 a={a},b={b}: |z|=50 Taylor/asymptotic crossover')
+    # Inner |(b-a)(1-a)|<=z truncate-at-minimum-term vs direct-sum threshold inside the
+    # asymptotic branch (hypergeometric.js:28), straddled via z for a fixed (a,b).
+    for a, b in [(2, 1), (5, 3)]:
+        thr = abs((b - a) * (1 - a))
+        for z in sorted({max(51.0, thr - 5), max(51.0, thr - 0.5), max(51.0, thr), thr + 0.5, thr + 5}):
+            add('f11', (a, b, z), f'f11 a={a},b={b}: inner asymptotic-branch truncate-at-minimum-term threshold')
+    # b<=0 integer pole: diverges to +Infinity via the guard added to f11() by this issue's own
+    # new coverage (hypergeometric.js).
+    for b in [0, -1, -2, -5]:
+        add('f11', (1, b, 3), 'f11 b<=0 integer: pole, diverges to +Infinity (guard added by #1415)')
+    # Real-caller regime: NoncentralChi/DoublyNoncentralT call f11((k+j)/2, k/2, h) and
+    # f11(kj, nu/2, theta/(2*tk)) -- positive, often half-integer a,b with a moderate positive z.
+    for a, b, z in [(0.5, 0.5, 1), (1.5, 1, 5), (3.5, 2.5, 10), (10.5, 5, 20)]:
+        add('f11', (a, b, z), 'f11: real-caller regime (NoncentralChi/DoublyNoncentralT half-integer a,b)')
+    # Large |a| relative to b -- solutions/correctness/2026-07-30-1600-doubly-noncentral-t-pdf-
+    # f11-recurrence-instability.md found instability in a *different* code path (a contiguous
+    # recurrence approximating f11), which confirms this parameter regime is worth probing
+    # directly against f11() itself even though this gate exercises a different code path.
+    for a, b, z in [(60, 5, 120), (100, 3, 50)]:
+        add('f11', (a, b, z), 'f11: large a relative to b, per doubly-noncentral-t f11 recurrence-instability solution doc')
+
+
+def _lambertW0_grid(add):
+    # z=-1/e domain boundary and z=1 initial-guess-seed crossover (lambert-w.js:62).
+    # The exact boundary z=-1/e is deliberately not probed: JS's Math.exp(-1) (ranjs's own
+    # guard, lambert-w.js:59) and mpmath's exp(-1) are independent float64/arbitrary-precision
+    # approximations of an irrational number that can disagree by a single ULP, making "exactly
+    # at the boundary" an ill-defined, coin-flip test -- probe with enough margin (0.001) to
+    # stay unambiguous instead.
+    neg_inv_e = -1 / math.e
+    for z in [neg_inv_e - 0.001, neg_inv_e + 0.001, -0.3, -0.1, 0, 0.5, 0.9, 0.99,
+              1, 1.01, 1.1, 2, 10, 100, 1000]:
+        add('lambertW0', (z,), 'lambertW0: z=-1/e domain boundary, z=1 initial-guess-seed crossover')
+
+
+def _lambertW1m_grid(add):
+    # z=-1/e domain boundary and z=-0.1 initial-guess-seed crossover (lambert-w.js:35).
+    # Exact boundary z=-1/e deliberately not probed -- see the identical note in
+    # _lambertW0_grid above (JS's vs mpmath's independent exp(-1) approximations can disagree
+    # by a ULP).
+    neg_inv_e = -1 / math.e
+    for z in [neg_inv_e - 0.001, neg_inv_e + 1e-6, -0.3, -0.11, -0.1, -0.09, -0.01,
+              -0.001, -1e-6]:
+        add('lambertW1m', (z,), 'lambertW1m: z=-1/e domain boundary, z=-0.1 initial-guess-seed crossover')
+    # Outside the [-1/e, 0) domain.
+    for z in [0, 0.5]:
+        add('lambertW1m', (z,), 'lambertW1m: z>=0 outside domain, explicit NaN')
+
+
+def _owenT_grid(add):
+    # A_RANGES/H_RANGES sector-table boundaries (owen-t.js:10-34) -- every boundary value,
+    # mirroring the coordinates test/special/owen-t.js's own hand-picked coverage already probes
+    # (not its literal reference values, per issue #1415's own warning to independently derive
+    # every mpmath reference).
+    a_boundaries = [0.025, 0.09, 0.15, 0.36, 0.5, 0.9, 0.99999]
+    h_boundaries = [0.02, 0.06, 0.09, 0.125, 0.26, 0.4, 0.6, 1.6, 1.7, 2.33, 2.4, 3.36, 3.4, 4.8]
+    for a in a_boundaries:
+        add('owenT', (0.5, a), f'owenT a={a}: A_RANGES sector boundary (h=0.5 fixed)')
+    for h in h_boundaries:
+        add('owenT', (h, 0.5), f'owenT h={h}: H_RANGES sector boundary (a=0.5 fixed)')
+    # Top-level dispatch boundaries (owen-t.js:304-311): |a|<=1 direct vs |a|>1 reflection, and
+    # within the |a|>1 branch, |h|<=0.67 (cut) vs the complementary-normal reflection.
+    for h, a in [(1, 0.99), (1, 1), (1, 1.01), (1, 2), (1, 5)]:
+        add('owenT', (h, a), 'owenT: |a|<=1/|a|>1 top-level dispatch boundary')
+    for h, a in [(0.6, 2), (0.67, 2), (0.68, 2), (1, 2), (2, 2)]:
+        add('owenT', (h, a), 'owenT: |a|>1 branch, |h|<=0.67 cut vs complementary-normal reflection')
+    # a<0 sign-flip (owen-t.js:314), and the SkewNormal real-caller shape (both signs of a).
+    for h, a in [(0.5, -0.5), (1, -2), (2, -0.25)]:
+        add('owenT', (h, a), 'owenT: a<0 sign-flip, mirrors SkewNormal real-caller shape')
+
+
 def grid():
     """Threshold-focused (fn, args, note, tol) tuples. See the module docstring for the
     rationale; each cluster's comment names the exact dispatch threshold in src/special/ it
@@ -935,6 +1170,15 @@ def grid():
     _generalizedHarmonic_grid(add)
     _polylogarithm_grid(add)
     _stirlingSecond_grid(add)
+    _erf_grid(add)
+    _erfc_grid(add)
+    _erfcx_grid(add)
+    _erfinv_grid(add)
+    _e1_grid(add)
+    _f11_grid(add)
+    _lambertW0_grid(add)
+    _lambertW1m_grid(add)
+    _owenT_grid(add)
 
     return points
 
