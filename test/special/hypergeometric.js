@@ -135,6 +135,28 @@ describe('special.hypergeometric', () => {
           assert.strictEqual(special.f11(1, b, 3), Infinity)
         }
       })
+
+      it('does not fire when a is also a non-positive integer with a > b (numerator terminates the series first)', () => {
+        // A review-caught regression: an earlier, overbroad version of the pole guard above
+        // returned Infinity here too, even though (a)_k reaches zero at k=|a|+1, strictly
+        // before the (b)_k denominator's own zero at k=|b|+1 -- the series is a well-defined
+        // polynomial (mpmath mp.dps=50: hyp1f1(-1,-2,3)=2.5, hyp1f1(-2,-3,1)=11/6 exactly).
+        assert(equal(special.f11(-1, -2, 3), 2.5))
+        assert(equal(special.f11(-2, -3, 1), 11 / 6))
+      })
+
+      it('a = 0 takes priority over the b <= 0 pole guard', () => {
+        // hypergeometric.js checks |a|<EPSILON before the pole guard -- f11(0, b, z) is exactly
+        // 1 regardless of b, including a non-positive integer b that would otherwise be a pole.
+        assert.strictEqual(special.f11(0, -3, 5), 1)
+      })
+
+      it('does not fire for a negative non-integer b', () => {
+        // Number.isInteger(b) must gate the guard -- a non-integer negative b is not a pole and
+        // must fall through to the ordinary series evaluation.
+        // mpmath mp.dps=50: hyp1f1(1, -2.5, 3) -> -887.4329677664421...
+        assert(equal(special.f11(1, -2.5, 3), -887.4329677664421))
+      })
     })
   })
 })

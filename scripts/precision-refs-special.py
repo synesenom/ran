@@ -462,12 +462,17 @@ def f11_ref(a, b, z):
     # truncate-at-minimum-term-asymptotic-series dispatch (hypergeometric.js:67-71). Mirrors
     # f11()'s own branch order: |a|<EPSILON is an exact-1 special case checked first
     # (hypergeometric.js:63-65); b a non-positive integer is a genuine pole (mpmath itself
-    # raises ZeroDivisionError there, "pole in hypergeometric series") -- translate to
-    # +Infinity, matching this codebase's own pole convention (gamma_ref, riemannZeta_ref above)
-    # and the guard added to f11() itself by this same issue's own new coverage.
+    # raises ZeroDivisionError there, "pole in hypergeometric series") UNLESS a is also a
+    # non-positive integer with a > b, where the numerator's own Pochhammer symbol reaches zero
+    # strictly before the denominator's does, terminating the series as a well-defined
+    # polynomial that mpmath's hyp1f1 evaluates correctly (e.g. hyp1f1(-1,-2,3) == 2.5, not a
+    # pole) -- mirrors the identical exception in f11()'s own guard, added by this same issue
+    # after a review-caught regression (an earlier, overbroad version of this guard returned
+    # Infinity for exactly this case). Translate the genuine-pole case to +Infinity, matching
+    # this codebase's own pole convention (gamma_ref, riemannZeta_ref above).
     if abs(a) < 2.220446049250313e-16:
         return mpf(1)
-    if b <= 0 and b == int(b):
+    if b <= 0 and b == int(b) and not (a == int(a) and a <= 0 and a > b):
         return mpf('inf')
     return hyp1f1(a, b, z)
 
@@ -1075,6 +1080,18 @@ def _f11_grid(add):
     # new coverage (hypergeometric.js).
     for b in [0, -1, -2, -5]:
         add('f11', (1, b, 3), 'f11 b<=0 integer: pole, diverges to +Infinity (guard added by #1415)')
+    # a also a non-positive integer with a>b: the numerator's own Pochhammer symbol reaches zero
+    # before the denominator's does, so the series terminates as a well-defined polynomial
+    # rather than hitting the pole -- the exact regression a review pass caught in an earlier,
+    # overbroad version of the guard above (it returned Infinity for these too).
+    for a, b, z in [(-1, -2, 3), (-2, -3, 1), (-3, -5, 2), (-1, -5, 4)]:
+        add('f11', (a, b, z), 'f11 a,b both non-positive integer with a>b: numerator terminates the series before the b-pole')
+    # a=0 takes priority over the b<=0 pole guard (hypergeometric.js's own branch order checks
+    # |a|<EPSILON first) -- exercises the precedence between the two special-case branches.
+    add('f11', (0, -3, 5), 'f11 a=0, b<=0 integer: a=0 branch wins (exact-1), never reaches the pole guard')
+    # Negative non-integer b: the pole guard's own Number.isInteger(b) check must not fire here.
+    for a, b, z in [(1, -2.5, 3), (2, -0.5, 10)]:
+        add('f11', (a, b, z), 'f11 b<0 non-integer: pole guard must not fire (Number.isInteger(b) is false)')
     # Real-caller regime: NoncentralChi/DoublyNoncentralT call f11((k+j)/2, k/2, h) and
     # f11(kj, nu/2, theta/(2*tk)) -- positive, often half-integer a,b with a moderate positive z.
     for a, b, z in [(0.5, 0.5, 1), (1.5, 1, 5), (3.5, 2.5, 10), (10.5, 5, 20)]:

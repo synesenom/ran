@@ -65,11 +65,16 @@ export function f11 (a, b, z) {
   }
 
   // b a non-positive integer is a genuine pole of 1F1 (the (b)_k Pochhammer denominator hits
-  // zero mid-recurrence): without this guard, _f11TaylorSeries's division by zero produces an
-  // inconsistently-signed Infinity/-Infinity depending on b's parity rather than a well-defined
-  // value. +Infinity matches this codebase's existing pole convention (gamma.js, logGamma.js,
-  // riemannZeta.js, hurwitzZeta.js all diverge to +Infinity at their own poles).
-  if (b <= 0 && Number.isInteger(b)) {
+  // zero mid-recurrence) UNLESS a is also a non-positive integer with a > b: then the numerator
+  // (a)_k reaches its own zero strictly before the denominator does, terminating the series as
+  // a well-defined polynomial (e.g. f11(-1,-2,z) = 1 + z/2, never reaching the b=-2 pole at
+  // k=3) -- without this exception, the guard below would wrongly return Infinity for a value
+  // _f11TaylorSeries already computes correctly on its own. Where the guard does fire, +Infinity
+  // matches this codebase's existing pole convention (gamma.js, logGamma.js, riemannZeta.js,
+  // hurwitzZeta.js all diverge to +Infinity at their own poles); without it, the division by
+  // zero mid-recurrence produced an inconsistently-signed Infinity/-Infinity depending on b's
+  // parity instead.
+  if (b <= 0 && Number.isInteger(b) && !(Number.isInteger(a) && a <= 0 && a > b)) {
     return Infinity
   }
 
