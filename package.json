@@ -574,10 +574,10 @@
     "coverage": "cross-env NODE_ENV=test nyc --reporter=html _mocha --require @babel/register"
   },
   "devDependencies": {
-    "@babel/core": "^8.0.1",
+    "@babel/core": "^8.0.5",
     "@babel/polyfill": "^7.12.1",
-    "@babel/preset-env": "^8.0.2",
-    "@babel/register": "^8.0.1",
+    "@babel/preset-env": "^8.0.5",
+    "@babel/register": "^8.0.5",
     "@codescene/codehealth-mcp": "^1.4.7",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^1.0.0",
